@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.domain.model.MushafScript
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazDivider
@@ -195,6 +196,48 @@ fun QuranSettingsScreen(
                             },
                             selected = selectedFont.id,
                             onSelected = { viewModel.onEvent(SettingsEvent.SetArabicFont(it)) }
+                        )
+                    }
+
+                    NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
+
+                    // Mushaf script / layout selector — chooses which edition the Mushaf (page)
+                    // reader renders: the default Uthmani/Madani 604-page layout, or the
+                    // line-accurate 16-line IndoPak 548-page layout (issue #270). The choice
+                    // persists via PreferencesDataStore.quranMushafScript and the reader picks
+                    // its renderer + page count from it live.
+                    Column(
+                        modifier = Modifier.padding(
+                            start = 16.dp,
+                            end = 16.dp,
+                            top = 12.dp,
+                            bottom = 14.dp
+                        )
+                    ) {
+                        val mushafScriptLabels = mapOf(
+                            MushafScript.MADANI to stringResource(R.string.mushaf_script_madani),
+                            MushafScript.INDOPAK_16 to stringResource(R.string.mushaf_script_indopak16)
+                        )
+                        NimazDropdownField(
+                            label = stringResource(R.string.mushaf_layout),
+                            items = MushafScript.entries.map { script ->
+                                NimazDropdownItem(
+                                    value = script.name,
+                                    label = mushafScriptLabels[script] ?: script.name,
+                                )
+                            },
+                            selected = quranState.mushafScript.name,
+                            onSelected = {
+                                viewModel.onEvent(
+                                    SettingsEvent.SetMushafScript(MushafScript.fromName(it))
+                                )
+                            }
+                        )
+                        Spacer(modifier = Modifier.height(6.dp))
+                        Text(
+                            text = stringResource(R.string.mushaf_layout_subtitle),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }

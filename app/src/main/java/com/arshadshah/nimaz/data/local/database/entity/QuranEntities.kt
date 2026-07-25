@@ -56,6 +56,8 @@ data class AyahEntity(
     val textArabic: String,
     @ColumnInfo(name = "text_uthmani")
     val textUthmani: String, // Uthmani script
+    @ColumnInfo(name = "text_indopak")
+    val textIndopak: String? = null, // Full IndoPak-script ayah text (16-line Mushaf); null until seeded
     val juz: Int,
     val hizb: Int,
     val page: Int,
@@ -119,6 +121,44 @@ data class SurahInfoEntity(
     @PrimaryKey val surahNumber: Int,
     val description: String,
     val themes: String // comma-separated
+)
+
+/**
+ * One line-segment of the 16-line IndoPak Mushaf layout (548 pages, ≤16 lines each).
+ *
+ * The layout is stored as line *segments* rather than one row per word: each row is a
+ * contiguous run of one ayah's words that falls on a single printed line. This mirrors
+ * the 1/7 source data (`mushaf_layout_indopak16.json`) 1:1 and keeps the table compact
+ * (~13,970 rows). The actual glyph text is not duplicated here — it is reconstructed by
+ * slicing [AyahEntity.textIndopak] (split on space) with the inclusive
+ * [firstWordPosition]..[lastWordPosition] range, which is verified lossless against the
+ * source (`' '.join(words) == text_indopak`, no intra-word spaces).
+ *
+ * Rendering (5/7) and the domain/data layer (4/7) group these rows by (page, line) and
+ * resolve each ayah segment's words on the fly.
+ *
+ * `line_type` is one of `ayah`, `surah_header`, or `basmalah`. Header and basmalah lines
+ * carry only [surahId] for context; their [ayahId] and word positions are null.
+ */
+@Entity(
+    tableName = "mushaf_layout_indopak16",
+    indices = [Index(value = ["page", "line"])]
+)
+data class MushafLayoutIndopak16Entity(
+    @PrimaryKey(autoGenerate = true)
+    val id: Long = 0,
+    val page: Int, // 1-548
+    val line: Int, // 1-16
+    @ColumnInfo(name = "line_type")
+    val lineType: String, // "ayah" | "surah_header" | "basmalah"
+    @ColumnInfo(name = "surah_id")
+    val surahId: Int, // 1-114
+    @ColumnInfo(name = "ayah_id")
+    val ayahId: Int?, // Global ayah id (1-6236); joins AyahEntity.id. Null for header/basmalah.
+    @ColumnInfo(name = "first_word_position")
+    val firstWordPosition: Int?, // 1-based index into the ayah's words; null for header/basmalah
+    @ColumnInfo(name = "last_word_position")
+    val lastWordPosition: Int? // inclusive; null for header/basmalah
 )
 
 @Entity(tableName = "reading_progress")

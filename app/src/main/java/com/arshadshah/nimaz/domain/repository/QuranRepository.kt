@@ -1,6 +1,7 @@
 package com.arshadshah.nimaz.domain.repository
 
 import com.arshadshah.nimaz.domain.model.Ayah
+import com.arshadshah.nimaz.domain.model.MushafPageLayout
 import com.arshadshah.nimaz.domain.model.PageAyahRange
 import com.arshadshah.nimaz.domain.model.QuranBookmark
 import com.arshadshah.nimaz.domain.model.QuranFavorite
@@ -27,6 +28,13 @@ interface QuranRepository {
     fun getAyahsByPage(pageNumber: Int, translatorId: String? = null): Flow<List<Ayah>>
     fun getSajdaAyahs(): Flow<List<Ayah>>
     suspend fun getPageAyahRanges(): List<PageAyahRange>
+
+    /**
+     * The line-accurate 16-line IndoPak layout of [page] (1-548), grouped by printed line.
+     * Returns an empty [MushafPageLayout] for pages with no layout data. Triggers the
+     * one-time IndoPak seeding on first use.
+     */
+    suspend fun getMushafPageLayout(page: Int): MushafPageLayout
 
     // Surah with Ayahs
     fun getSurahWithAyahs(surahNumber: Int, translatorId: String?): Flow<SurahWithAyahs?>

@@ -892,6 +892,10 @@
     <string name="arabic_font_size">Taille de police arabe</string>
     <string name="arabic_font_size_value">%1$dpx</string>
     <string name="arabic_font">Police arabe</string>
+    <string name="mushaf_layout">Script du Mushaf</string>
+    <string name="mushaf_layout_subtitle">Mise en page utilisée par le lecteur du Mushaf (page)</string>
+    <string name="mushaf_script_madani">Uthmani (Madani, 604 pages)</string>
+    <string name="mushaf_script_indopak16">IndoPak 16 lignes (548 pages)</string>
     <string name="display_options">Options d\'affichage</string>
     <string name="show_transliteration">Afficher la translittération</string>
     <string name="show_transliteration_subtitle">Prononciation en lettres latines</string>

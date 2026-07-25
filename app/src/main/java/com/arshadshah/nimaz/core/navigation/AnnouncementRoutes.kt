@@ -1,5 +1,7 @@
 package com.arshadshah.nimaz.core.navigation
 
+import com.arshadshah.nimaz.domain.model.MushafScript
+
 /**
  * Maps an announcement payload `route` key to an in-app Route, or null if
  * unknown. Allowlist only — keys sent from the Firebase console never carry
@@ -81,8 +83,11 @@ private fun parameterisedAnnouncementRoute(key: String): Route? {
         s.size == 4 && s[0] == "quran" && s[1] == "surah" && s[3] == "info" ->
             int(2, 1..114)?.let { Route.SurahInfo(it) }
 
+        // Validate against the largest edition (604) so a page deep-link resolves regardless
+        // of the user's active Mushaf script; the reader clamps to the active edition's page
+        // count (548 for IndoPak-16) once the preference is read. See MushafScript / #270.
         s.size == 3 && s[0] == "quran" && s[1] == "page" ->
-            int(2, 1..604)?.let { Route.QuranPage(it) }
+            int(2, 1..MushafScript.MAX_TOTAL_PAGES)?.let { Route.QuranPage(it) }
 
         s.size == 3 && s[0] == "quran" && s[1] == "juz" ->
             int(2, 1..30)?.let { Route.QuranJuz(it) }

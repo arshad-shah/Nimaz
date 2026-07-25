@@ -12,6 +12,7 @@ import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.arshadshah.nimaz.domain.model.MushafScript
 import com.arshadshah.nimaz.domain.model.UserPreferences
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import kotlinx.coroutines.flow.Flow
@@ -94,6 +95,7 @@ class PreferencesDataStore @Inject constructor(
 
         // Qaida content (data-driven; bumped when qaida_content.json changes)
         val QAIDA_CONTENT_VERSION = intPreferencesKey("qaida_content_version")
+        val INDOPAK_CONTENT_VERSION = intPreferencesKey("indopak_content_version")
 
         // Prayer Settings
         val CALCULATION_METHOD = stringPreferencesKey("calculation_method")
@@ -145,6 +147,11 @@ class PreferencesDataStore @Inject constructor(
         val SHOW_TRANSLITERATION = booleanPreferencesKey("show_transliteration")
         val SELECTED_RECITER_ID = stringPreferencesKey("selected_reciter_id")
         val QURAN_ARABIC_FONT = stringPreferencesKey("quran_arabic_font")
+
+        // Which Mushaf edition/layout the page reader renders; stored as the MushafScript
+        // enum name. "MADANI" (Uthmani, 604 pages) is the default; "INDOPAK_16" selects the
+        // line-accurate 16-line IndoPak view (548 pages). See MushafScript / issue #270.
+        val QURAN_MUSHAF_SCRIPT = stringPreferencesKey("quran_mushaf_script")
         val QURAN_ARABIC_FONT_SIZE = floatPreferencesKey("quran_arabic_font_size")
         val QURAN_TRANSLATION_FONT_SIZE = floatPreferencesKey("quran_translation_font_size")
         val CONTINUOUS_READING = booleanPreferencesKey("continuous_reading")
@@ -342,6 +349,13 @@ class PreferencesDataStore @Inject constructor(
 
     override suspend fun setQaidaContentVersion(version: Int) =
         put(PreferencesKeys.QAIDA_CONTENT_VERSION, version)
+
+    // IndoPak 16-line Quran content version (0 = never seeded)
+    override val indopakContentVersion: Flow<Int> =
+        preference(PreferencesKeys.INDOPAK_CONTENT_VERSION, 0)
+
+    override suspend fun setIndopakContentVersion(version: Int) =
+        put(PreferencesKeys.INDOPAK_CONTENT_VERSION, version)
 
     override val arabicFontSize: Flow<String> =
         preference(PreferencesKeys.ARABIC_FONT_SIZE, "medium")
@@ -570,6 +584,14 @@ class PreferencesDataStore @Inject constructor(
 
     override suspend fun setQuranArabicFont(fontId: String) =
         put(PreferencesKeys.QURAN_ARABIC_FONT, fontId)
+
+    // Default matches MushafScript.DEFAULT (MADANI). Stored as a raw enum-name string so the
+    // data layer maps via MushafScript at the domain boundary; presentation reads the enum.
+    override val quranMushafScript: Flow<String> =
+        preference(PreferencesKeys.QURAN_MUSHAF_SCRIPT, MushafScript.DEFAULT.name)
+
+    override suspend fun setQuranMushafScript(script: String) =
+        put(PreferencesKeys.QURAN_MUSHAF_SCRIPT, script)
 
     override val quranArabicFontSize: Flow<Float> =
         preference(PreferencesKeys.QURAN_ARABIC_FONT_SIZE, 28f)

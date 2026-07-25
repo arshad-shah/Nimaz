@@ -17,6 +17,10 @@ import com.arshadshah.nimaz.data.local.qaida.AndroidQaidaAssetReader
 import com.arshadshah.nimaz.data.local.qaida.DataStoreQaidaContentVersionStore
 import com.arshadshah.nimaz.data.local.qaida.QaidaAssetReader
 import com.arshadshah.nimaz.data.local.qaida.QaidaContentVersionStore
+import com.arshadshah.nimaz.data.local.quran.AndroidQuranAssetReader
+import com.arshadshah.nimaz.data.local.quran.DataStoreIndopakContentVersionStore
+import com.arshadshah.nimaz.data.local.quran.IndopakContentVersionStore
+import com.arshadshah.nimaz.data.local.quran.QuranAssetReader
 import com.arshadshah.nimaz.data.repository.AsmaUlHusnaRepositoryImpl
 import com.arshadshah.nimaz.data.repository.AsmaUnNabiRepositoryImpl
 import com.arshadshah.nimaz.data.repository.DuaRepositoryImpl
@@ -125,6 +129,7 @@ import com.arshadshah.nimaz.domain.usecase.GetLessonProgressUseCase
 import com.arshadshah.nimaz.domain.usecase.GetLongestStreakUseCase
 import com.arshadshah.nimaz.domain.usecase.GetMakeupFastCountForDateUseCase
 import com.arshadshah.nimaz.domain.usecase.GetMissedPrayersRequiringQadaUseCase
+import com.arshadshah.nimaz.domain.usecase.GetMushafPageLayoutUseCase
 import com.arshadshah.nimaz.domain.usecase.GetNextUnreadPositionUseCase
 import com.arshadshah.nimaz.domain.usecase.GetNotesForAyahUseCase
 import com.arshadshah.nimaz.domain.usecase.GetPageAyahRangesUseCase
@@ -362,6 +367,18 @@ abstract class RepositoryModule {
 
     @Binds
     @Singleton
+    abstract fun bindIndopakContentVersionStore(
+        impl: DataStoreIndopakContentVersionStore
+    ): IndopakContentVersionStore
+
+    @Binds
+    @Singleton
+    abstract fun bindQuranAssetReader(
+        impl: AndroidQuranAssetReader
+    ): QuranAssetReader
+
+    @Binds
+    @Singleton
     abstract fun bindHadithBackfillVersionStore(
         impl: DataStoreHadithBackfillVersionStore
     ): HadithBackfillVersionStore
@@ -431,6 +448,7 @@ object UseCaseModule {
             incrementAyahsRead = IncrementAyahsReadUseCase(repository),
             getSurahInfo = GetSurahInfoUseCase(repository),
             getPageAyahRanges = GetPageAyahRangesUseCase(repository),
+            getMushafPageLayout = GetMushafPageLayoutUseCase(repository),
             getVerseOfTheDay = GetVerseOfTheDayUseCase(repository)
         )
     }

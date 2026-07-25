@@ -60,6 +60,8 @@ interface SettingsRepository {
     suspend fun setDuaContentVersion(version: Int)
     val qaidaContentVersion: Flow<Int>
     suspend fun setQaidaContentVersion(version: Int)
+    val indopakContentVersion: Flow<Int>
+    suspend fun setIndopakContentVersion(version: Int)
     val arabicFontSize: Flow<String>
     suspend fun setArabicFontSize(size: String)
     val calculationMethod: Flow<String>
@@ -127,6 +129,11 @@ interface SettingsRepository {
     suspend fun setSelectedReciterId(reciterId: String?)
     val quranArabicFont: Flow<String>
     suspend fun setQuranArabicFont(fontId: String)
+
+    /** The Mushaf edition/layout for the page reader, as a [com.arshadshah.nimaz.domain.model.MushafScript]
+     *  name ("MADANI" = default Uthmani/604; "INDOPAK_16" = 16-line IndoPak/548). */
+    val quranMushafScript: Flow<String>
+    suspend fun setQuranMushafScript(script: String)
     val quranArabicFontSize: Flow<Float>
     suspend fun setQuranArabicFontSize(size: Float)
     val quranTranslationFontSize: Flow<Float>

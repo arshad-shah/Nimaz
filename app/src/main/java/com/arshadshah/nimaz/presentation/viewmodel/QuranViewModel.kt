@@ -14,6 +14,8 @@ import com.arshadshah.nimaz.domain.model.Ayah
 import com.arshadshah.nimaz.domain.model.Khatam
 import com.arshadshah.nimaz.domain.model.KhatamDetailSnapshot
 import com.arshadshah.nimaz.domain.model.KhatamInsights
+import com.arshadshah.nimaz.domain.model.MushafPageLayout
+import com.arshadshah.nimaz.domain.model.MushafScript
 import com.arshadshah.nimaz.domain.model.PageAyahRange
 import com.arshadshah.nimaz.domain.model.QuranBookmark
 import com.arshadshah.nimaz.domain.model.QuranFavorite
@@ -83,6 +85,9 @@ data class QuranHomeUiState(
     val completedKhatamCount: Int = 0,
     val pageAyahRanges: List<PageAyahRange> = emptyList(),
     val verseOfTheDay: Ayah? = null,
+    // The active Mushaf edition, so the Page tab's jump-to-page validates against the right
+    // page count (604 Uthmani vs 548 IndoPak-16, #270).
+    val mushafScript: MushafScript = MushafScript.DEFAULT,
     val isLoading: Boolean = true,
     val error: String? = null
 )
@@ -108,8 +113,27 @@ data class QuranReaderUiState(
     val pageCache: Map<Int, List<Ayah>> = emptyMap(),
     val showTajweed: Boolean = false,
     val activeKhatamId: Long? = null,
-    val khatamReadAyahIds: Set<Int> = emptySet()
-)
+    val khatamReadAyahIds: Set<Int> = emptySet(),
+    // Line-accurate 16-line IndoPak layout for the most-recently requested page, loaded on
+    // demand when the 16-line Mushaf view is active (4/7). Null until requested / for pages
+    // without layout.
+    val mushafPageLayout: MushafPageLayout? = null,
+    // Per-page cache of line-accurate layouts (5/7). The reader pager keeps several pages
+    // resident at once, so — mirroring [pageCache] — each visible page's layout is cached by
+    // page number rather than a single field.
+    val mushafPageLayoutCache: Map<Int, MushafPageLayout> = emptyMap(),
+    // The Mushaf edition the reader renders, driven by the persisted settings toggle (6/7,
+    // #270). MADANI (default) keeps the Uthmani/604 page; INDOPAK_16 switches to the
+    // line-accurate 16-line IndoPak layout (548 pages). Page counts / pager bounds read
+    // [MushafScript.totalPages] off this so a script switch reflows the pager correctly.
+    val mushafScript: MushafScript = MushafScript.DEFAULT
+) {
+    /** Whether to render the line-accurate 16-line IndoPak layout instead of the Uthmani page. */
+    val use16LineLayout: Boolean get() = mushafScript == MushafScript.INDOPAK_16
+
+    /** Number of pages in the active edition — the pager/nav bounds source of truth. */
+    val totalPages: Int get() = mushafScript.totalPages
+}
 
 data class QuranSearchUiState(
     val query: String = "",
@@ -126,6 +150,9 @@ sealed interface QuranEvent {
     data class LoadSurah(val surahNumber: Int) : QuranEvent
     data class LoadJuz(val juzNumber: Int) : QuranEvent
     data class LoadPage(val pageNumber: Int) : QuranEvent
+
+    /** Load the line-accurate 16-line IndoPak layout for a page (used by the 16-line view). */
+    data class LoadMushafPageLayout(val pageNumber: Int) : QuranEvent
     data class Search(val query: String) : QuranEvent
     data class SetTopTab(val index: Int) : QuranEvent
     data class SetTab(val index: Int) : QuranEvent
@@ -253,6 +280,7 @@ class QuranViewModel @Inject constructor(
             is QuranEvent.LoadSurah -> loadSurah(event.surahNumber)
             is QuranEvent.LoadJuz -> loadJuz(event.juzNumber)
             is QuranEvent.LoadPage -> loadPage(event.pageNumber)
+            is QuranEvent.LoadMushafPageLayout -> loadMushafPageLayout(event.pageNumber)
             is QuranEvent.Search -> search(event.query)
             is QuranEvent.SetTopTab -> _homeState.update { it.copy(topTab = event.index) }
             is QuranEvent.SetTab -> _homeState.update { it.copy(selectedTab = event.index) }
@@ -336,10 +364,12 @@ class QuranViewModel @Inject constructor(
             combine(
                 displayFlow,
                 behaviorFlow,
-                settingsRepository.showTajweed
-            ) { display, behavior, showTajweed ->
-                Triple(display, behavior, showTajweed)
-            }.collect { (display, behavior, showTajweed) ->
+                settingsRepository.showTajweed,
+                settingsRepository.quranMushafScript
+            ) { display, behavior, showTajweed, mushafScript ->
+                QuranReaderSettings(display, behavior, showTajweed, MushafScript.fromName(mushafScript))
+            }.collect { settings ->
+                val (display, behavior, showTajweed, mushafScript) = settings
                 audioManager.setReciter(behavior.reciterId)
                 // Push continuous-reading reactively so toggling the setting while
                 // in the reader takes effect immediately, not on next play-start.
@@ -354,9 +384,11 @@ class QuranViewModel @Inject constructor(
                         fontSize = behavior.translationFontSize,
                         continuousReading = behavior.continuousReading,
                         keepScreenOn = behavior.keepScreenOn,
-                        showTajweed = showTajweed
+                        showTajweed = showTajweed,
+                        mushafScript = mushafScript
                     )
                 }
+                _homeState.update { it.copy(mushafScript = mushafScript) }
             }
         }
     }
@@ -374,6 +406,15 @@ class QuranViewModel @Inject constructor(
         val continuousReading: Boolean,
         val keepScreenOn: Boolean,
         val reciterId: String?
+    )
+
+    /** Aggregate of the reader settings observed in [observeQuranSettings]; combine() tops out
+     *  at five sources, so the display/behavior sub-groups are folded together here. */
+    private data class QuranReaderSettings(
+        val display: QuranDisplaySettings,
+        val behavior: QuranBehaviorSettings,
+        val showTajweed: Boolean,
+        val mushafScript: MushafScript
     )
 
     fun refreshSettings() {
@@ -604,6 +645,25 @@ class QuranViewModel @Inject constructor(
                         )
                     }
                 }
+        }
+    }
+
+    /**
+     * Loads the line-accurate 16-line IndoPak layout for [pageNumber] into the reader state.
+     * First invocation triggers the one-time IndoPak seeding inside the repository, so this
+     * only runs when the 16-line view is actually used — not on every Quran page open.
+     */
+    private fun loadMushafPageLayout(pageNumber: Int) {
+        // Already cached (e.g. a neighbouring pager page pre-loaded it) — nothing to do.
+        if (_readerState.value.mushafPageLayoutCache.containsKey(pageNumber)) return
+        viewModelScope.launch {
+            val layout = quranUseCases.getMushafPageLayout(pageNumber)
+            _readerState.update {
+                it.copy(
+                    mushafPageLayout = layout,
+                    mushafPageLayoutCache = it.mushafPageLayoutCache + (pageNumber to layout)
+                )
+            }
         }
     }
 

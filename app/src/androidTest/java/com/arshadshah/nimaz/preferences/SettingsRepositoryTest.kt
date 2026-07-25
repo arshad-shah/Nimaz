@@ -73,6 +73,18 @@ class SettingsRepositoryTest {
     }
 
     @Test
+    fun quranMushafScript_defaultsToMadaniAndRoundTrips() = runTest {
+        // Off by default: the 16-line IndoPak view must be opt-in (#270).
+        assertThat(settings.quranMushafScript.first()).isEqualTo("MADANI")
+
+        settings.setQuranMushafScript("INDOPAK_16")
+        assertThat(settings.quranMushafScript.first()).isEqualTo("INDOPAK_16")
+
+        settings.setQuranMushafScript("MADANI")
+        assertThat(settings.quranMushafScript.first()).isEqualTo("MADANI")
+    }
+
+    @Test
     fun exportThenImport_preservesValues() = runTest {
         settings.setThemeMode("dark")
         settings.setCalculationMethod("Egypt")
