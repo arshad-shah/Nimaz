@@ -14,6 +14,7 @@ import com.arshadshah.nimaz.domain.model.AsrCalculation
 import com.arshadshah.nimaz.domain.model.CalculationMethod
 import com.arshadshah.nimaz.domain.model.HighLatitudeRule
 import com.arshadshah.nimaz.domain.model.PrayerType
+import com.arshadshah.nimaz.domain.model.WorshipReminderType
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.first
@@ -40,11 +41,18 @@ class PrayerNotificationScheduler @Inject constructor(
     private val notificationManager =
         context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
+    // Pure, stateless — no DI needed. Computes the next occurrence of each worship reminder.
+    private val worshipCalculator = WorshipReminderCalculator()
+
     companion object {
         const val CHANNEL_ID_PRAYER = "prayer_notifications"
         const val CHANNEL_ID_ADHAN = "adhan_notifications"
         const val CHANNEL_ID_DAILY_SUMMARY = "daily_summary_notifications"
         const val CHANNEL_ID_KHATAM = "khatam_notifications"
+
+        // Extended worship reminders (Tahajjud, Suhoor, Iftar, …) — a gentle DEFAULT-importance
+        // nudge like the khatam channel, never an alarm. See spec §2 (epic #300).
+        const val CHANNEL_ID_WORSHIP = "worship_reminders"
 
         // Silent (no-vibration) siblings — Android ignores enableVibration() changes
         // after a channel exists, so the vibration preference is honoured by posting
@@ -68,6 +76,15 @@ class PrayerNotificationScheduler @Inject constructor(
         private const val DAILY_SUMMARY_REQUEST_CODE = 8889
         private const val FRIDAY_REMINDER_REQUEST_CODE = 8890
         private const val KHATAM_REMINDER_REQUEST_CODE = 8891
+
+        const val ACTION_WORSHIP_REMINDER = "com.arshadshah.nimaz.WORSHIP_REMINDER"
+        const val EXTRA_WORSHIP_TYPE = "worship_type"
+        const val EXTRA_WORSHIP_SUBKEY = "worship_subkey"
+        const val EXTRA_WORSHIP_EVENT_TIME = "worship_event_time"
+
+        // One request code per worship reminder type, well clear of the prayer (1000+),
+        // pre-reminder (2000+) and single-purpose codes (8889-8891, 9999) above.
+        private const val WORSHIP_REQUEST_CODE_BASE = 9000
 
         const val ACTION_MIDNIGHT_RESCHEDULE = "com.arshadshah.nimaz.MIDNIGHT_RESCHEDULE"
         private const val MIDNIGHT_REQUEST_CODE = 9999
@@ -152,12 +169,24 @@ class PrayerNotificationScheduler @Inject constructor(
             enableLights(true)
         }
 
+        // Extended worship reminders — a gentle nudge, DEFAULT importance like khatam.
+        val worshipChannel = NotificationChannel(
+            CHANNEL_ID_WORSHIP,
+            context.getString(R.string.worship_channel_name),
+            NotificationManager.IMPORTANCE_DEFAULT
+        ).apply {
+            description = context.getString(R.string.worship_channel_description)
+            enableVibration(true)
+            enableLights(true)
+        }
+
         notificationManager.createNotificationChannels(
             listOf(
                 prayerChannel,
                 adhanChannel,
                 dailySummaryChannel,
                 khatamChannel,
+                worshipChannel,
                 prayerChannelSilent,
                 adhanChannelSilent
             )
@@ -264,6 +293,17 @@ class PrayerNotificationScheduler @Inject constructor(
         // Schedule (or cancel) the daily khatam reading reminder. Must live here so the
         // midnight reschedule chain and the boot path re-arm this one-shot every day.
         scheduleKhatamReminder()
+
+        // Schedule (or cancel) the extended worship reminders. Same rationale — armed here so
+        // the midnight chain + boot path re-arm each one-shot daily. See spec §2 (epic #300).
+        scheduleWorshipReminders(
+            latitude = latitude,
+            longitude = longitude,
+            calculationMethod = calculationMethod,
+            asrCalculation = asrCalculation,
+            highLatitudeRule = highLatitudeRule,
+            adjustments = adjustments
+        )
 
         PerfMonitor.stop(
             perfTrace,
@@ -445,6 +485,118 @@ class PrayerNotificationScheduler @Inject constructor(
         }
     }
 
+    /**
+     * Schedule (or cancel) every enabled extended worship reminder. Cancels all first, then re-arms
+     * the next upcoming occurrence of each enabled type via [WorshipReminderCalculator]. Preferences
+     * are read here (blocking, off-main-thread) so callers of [scheduleTodaysPrayerNotifications]
+     * don't need to know about worship reminders — mirrors [scheduleKhatamReminder].
+     */
+    private fun scheduleWorshipReminders(
+        latitude: Double,
+        longitude: Double,
+        calculationMethod: CalculationMethod,
+        asrCalculation: AsrCalculation,
+        highLatitudeRule: HighLatitudeRule?,
+        adjustments: Map<PrayerType, Int>
+    ) {
+        WorshipReminderType.entries.forEach { cancelWorshipReminder(it) }
+        if (latitude == 0.0 && longitude == 0.0) return
+
+        // One blocking read of all worship prefs + the Hijri offset.
+        val hijriOffset: Int
+        val enabledMap: Map<WorshipReminderType, Boolean>
+        val offsetMap: Map<WorshipReminderType, Int>
+        runBlocking {
+            hijriOffset = settingsRepository.hijriDayOffset.first()
+            enabledMap = WorshipReminderType.entries.associateWith {
+                settingsRepository.worshipReminderEnabled(it.key).first()
+            }
+            offsetMap = WorshipReminderType.entries.associateWith {
+                settingsRepository.worshipReminderOffset(it.key, it.defaultOffsetMinutes).first()
+            }
+        }
+        if (enabledMap.values.none { it }) return
+
+        val zone = ZoneId.systemDefault()
+        fun instantToLocal(instant: kotlin.time.Instant): LocalDateTime =
+            java.time.Instant.ofEpochMilli(instant.toEpochMilliseconds()).atZone(zone).toLocalDateTime()
+
+        val timesFor: (LocalDate) -> DayWorshipTimes? = { date ->
+            val byType = prayerTimeCalculator.getPrayerTimes(
+                latitude, longitude, date, calculationMethod, asrCalculation, highLatitudeRule, adjustments
+            ).associate { it.type to instantToLocal(it.time) }
+            val sunnah = prayerTimeCalculator.getSunnahTimes(
+                latitude, longitude, date, calculationMethod, asrCalculation, highLatitudeRule
+            )
+            val fajr = byType[PrayerType.FAJR]
+            val sunrise = byType[PrayerType.SUNRISE]
+            val dhuhr = byType[PrayerType.DHUHR]
+            val asr = byType[PrayerType.ASR]
+            val maghrib = byType[PrayerType.MAGHRIB]
+            val isha = byType[PrayerType.ISHA]
+            if (fajr != null && sunrise != null && dhuhr != null && asr != null && maghrib != null && isha != null) {
+                DayWorshipTimes(
+                    fajr = fajr, sunrise = sunrise, dhuhr = dhuhr, asr = asr, maghrib = maghrib,
+                    isha = isha, lastThirdOfNight = instantToLocal(sunnah.lastThirdOfTheNight)
+                )
+            } else null
+        }
+
+        val hijriFor: (LocalDate) -> HijriDayInfo = { date ->
+            val h = HijriDateCalculator.toHijri(date.plusDays(hijriOffset.toLong()))
+            HijriDayInfo(month = h.month, day = h.day)
+        }
+
+        val now = LocalDateTime.now()
+        WorshipReminderType.entries.forEach { type ->
+            if (enabledMap[type] != true) return@forEach
+            val occ = worshipCalculator.nextOccurrence(
+                type = type,
+                now = now,
+                offsetMinutes = offsetMap[type] ?: type.defaultOffsetMinutes,
+                timesFor = timesFor,
+                hijriFor = hijriFor
+            ) ?: return@forEach
+            armWorshipReminder(type, occ.triggerAt, occ.eventAt, occ.subKey)
+        }
+    }
+
+    private fun armWorshipReminder(
+        type: WorshipReminderType,
+        triggerAt: LocalDateTime,
+        eventAt: LocalDateTime,
+        subKey: String?
+    ) {
+        val intent = Intent(context, BootReceiver::class.java).apply {
+            action = ACTION_WORSHIP_REMINDER
+            putExtra(EXTRA_WORSHIP_TYPE, type.name)
+            putExtra(EXTRA_WORSHIP_SUBKEY, subKey)
+            putExtra(EXTRA_WORSHIP_EVENT_TIME, eventAt.toString())
+        }
+        val pendingIntent = PendingIntent.getBroadcast(
+            context,
+            WORSHIP_REQUEST_CODE_BASE + type.ordinal,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        val triggerMillis = triggerAt.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerMillis, pendingIntent)
+    }
+
+    private fun cancelWorshipReminder(type: WorshipReminderType) {
+        val intent = Intent(context, BootReceiver::class.java).apply { action = ACTION_WORSHIP_REMINDER }
+        val pendingIntent = PendingIntent.getBroadcast(
+            context,
+            WORSHIP_REQUEST_CODE_BASE + type.ordinal,
+            intent,
+            PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE
+        )
+        pendingIntent?.let {
+            alarmManager.cancel(it)
+            it.cancel()
+        }
+    }
+
     private fun cancelFridayReminder() {
         val intent = Intent(context, BootReceiver::class.java).apply {
             action = ACTION_FRIDAY_REMINDER
@@ -609,6 +761,7 @@ class PrayerNotificationScheduler @Inject constructor(
         cancelMidnightReschedule()
         cancelFridayReminder()
         cancelKhatamReminder()
+        WorshipReminderType.entries.forEach { cancelWorshipReminder(it) }
     }
 
     /**

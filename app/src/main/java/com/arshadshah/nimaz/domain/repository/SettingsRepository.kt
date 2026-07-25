@@ -119,6 +119,15 @@ interface SettingsRepository {
     /** Time of day for the khatam reminder, stored as "HH:mm". */
     val khatamReminderTime: Flow<String>
     suspend fun setKhatamReminderTime(time: String)
+
+    // Extended worship reminders (Tahajjud, Witr, Suhoor, Iftar, …), keyed by
+    // WorshipReminderType.key. One uniform surface for all 11 reminders. Default off.
+    fun worshipReminderEnabled(key: String): Flow<Boolean>
+    suspend fun setWorshipReminderEnabled(key: String, enabled: Boolean)
+
+    /** Editable offset (minutes) for reminders that lead/lag their anchor prayer. */
+    fun worshipReminderOffset(key: String, default: Int): Flow<Int>
+    suspend fun setWorshipReminderOffset(key: String, minutes: Int)
     val quranTranslatorId: Flow<String>
     suspend fun setQuranTranslatorId(translatorId: String)
     val showTranslation: Flow<Boolean>

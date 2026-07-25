@@ -552,6 +552,21 @@ class PreferencesDataStore @Inject constructor(
     override suspend fun setKhatamReminderTime(time: String) =
         put(PreferencesKeys.KHATAM_REMINDER_TIME, time)
 
+    // Extended worship reminders (Tahajjud, Suhoor, Iftar, …). Dynamic keys keyed by
+    // WorshipReminderType.key so all 11 reminders share one uniform surface — no per-type
+    // boilerplate. Default off; offsets default per type. See spec §2/§8 (epic #300).
+    override fun worshipReminderEnabled(key: String): Flow<Boolean> =
+        preference(booleanPreferencesKey("worship_${key}_enabled"), false)
+
+    override suspend fun setWorshipReminderEnabled(key: String, enabled: Boolean) =
+        put(booleanPreferencesKey("worship_${key}_enabled"), enabled)
+
+    override fun worshipReminderOffset(key: String, default: Int): Flow<Int> =
+        preference(intPreferencesKey("worship_${key}_offset"), default)
+
+    override suspend fun setWorshipReminderOffset(key: String, minutes: Int) =
+        put(intPreferencesKey("worship_${key}_offset"), minutes)
+
     // Quran Settings
     override val quranTranslatorId: Flow<String> =
         preference(PreferencesKeys.QURAN_TRANSLATOR_ID, "sahih_international")
