@@ -157,7 +157,10 @@ This one is **pervasive and lower priority** — listed so it's tracked, not bec
   inject `SettingsRepository`; bound via `@Binds` in `RepositoryModule`. Data-layer consumers
   (seeders, sync, workers, `AppInitializer`, `BootReceiver`) keep the concrete class.
   - [ ] **Minor leftover:** `settings/WidgetsScreen.kt` still *instantiates* `PreferencesDataStore(context)`
-    inline (line ~793) instead of going through DI/a ViewModel — convert when that screen is next touched.
+    inline instead of going through DI/a ViewModel — convert when that screen is next touched.
+    Partially mitigated: the read is now a one-off (`loadPreviewLocation`) rather than being repeated
+    inside the preview's 1-second refresh loop, which was constructing the class and re-reading the
+    DataStore file every second. The per-tick `buildWidgetPreviewData` is now pure.
 - [ ] **Audio managers expose data-layer `AudioState`.** `QuranViewModel` /
   `QaidaReaderViewModel` surface `audioManager.state` (a `data.audio` type) to the UI. This is an
   **accepted pattern** for playback features (see `ARCHITECTURE.md` §9). If desired, mirror the
