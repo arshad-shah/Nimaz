@@ -124,6 +124,10 @@ object TajweedParser {
             TajweedColors.HamzaWaslLight, TajweedColors.HamzaWaslDark),
         TajweedRuleInfo("wq", "Waqf sign", "A stop mark: guidance on whether to pause here.",
             TajweedColors.WaqfLight, TajweedColors.WaqfDark),
+        TajweedRuleInfo("tk", "Tafkhim", "Heavy: the letter (raa / lam of Allah) is pronounced full.",
+            TajweedColors.TafkhimLight, TajweedColors.TafkhimDark),
+        TajweedRuleInfo("tq", "Tarqiq", "Light: the letter (raa / lam of Allah) is pronounced thin.",
+            TajweedColors.TarqiqLight, TajweedColors.TarqiqDark),
     )
 
     /** Lookup of a v3 rule by its code. */

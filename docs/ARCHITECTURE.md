@@ -461,7 +461,8 @@ typed route object.
   | Silent | `#64748B` | 4.56:1 | `#94A3B8` | 6.82:1 |
   | Hamza al-Wasl | `#475569` | 7.26:1 | `#CBD5E1` | 11.78:1 |
   | Waqf sign | `#57534E` | 7.31:1 | `#A8A29E` | 6.93:1 |
-  Because all 22 colours must sit in a dark band to clear 4.5:1 against a near-white background,
+  | Tafkhim | `#2E7D32` | 4.91:1 | `#22C55E` | 7.68:1 |
+  | Tarqiq | `#9333EA` | 5.16:1 | `#C084FC` | 6.62:1 |  Because all 24 colours must sit in a dark band to clear 4.5:1 against a near-white background,
   same-hue **near-neighbours** (the six madd rules; the five idgham rules) have low pairwise
   contrast (~1.0:1) — they are told apart by position, the in-app legend, and (future work in
   #294) an optional decoration channel / colour-blind-safe mode rather than by hue alone.

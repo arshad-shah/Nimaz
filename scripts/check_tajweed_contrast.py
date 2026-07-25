@@ -57,6 +57,8 @@ RULES = [
     ("Silent", "Silent"),
     ("Hamza al-Wasl", "HamzaWasl"),
     ("Waqf sign", "Waqf"),
+    ("Tafkhim", "Tafkhim"),
+    ("Tarqiq", "Tarqiq"),
 ]
 
 # Same-hue families whose members must stay tellable apart.

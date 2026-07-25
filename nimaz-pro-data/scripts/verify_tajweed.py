@@ -63,7 +63,7 @@ from preparse_tajweed import (  # noqa: E402
 V3_CODES = {
     "g", "if", "is", "dg", "dn", "ds", "dj", "dk", "qs", "qk",
     "mn", "mf", "mt", "ma", "ml", "my", "l", "ls", "sl", "hw",
-    "wq", "dm",
+    "wq", "dm", "tk", "tq",
 }
 # Deprecated codes that must NOT appear in freshly generated data.
 LEGACY_CODES = {"mo", "mp", "q", "i", "d", "m", "s"}

@@ -200,6 +200,8 @@ object NimazColors {
         val IdghamMutaqaribayLight = P.Orange800  // was Orange600 (3.41:1)
         val IdghamMutamathilaynLight = P.Amber900  // dm — derived (#291)
         val WaqfLight = P.Stone600                 // wq — stop signs (#291)
+        val TafkhimLight = P.GreenDeep             // tk — heavy (raa/lam, #291)
+        val TarqiqLight = P.Purple600              // tq — light (raa/lam, #291)
         // Qalqalah — blue family, kubra deeper than sughra
         val QalqalahSughraLight = P.Blue600
         val QalqalahKubraLight = P.Blue700
@@ -227,6 +229,8 @@ object NimazColors {
         val IdghamMutaqaribayDark = P.Orange300
         val IdghamMutamathilaynDark = P.Amber200   // dm
         val WaqfDark = P.Stone400                  // wq
+        val TafkhimDark = P.Green500               // tk
+        val TarqiqDark = P.Purple400               // tq
         val QalqalahSughraDark = P.Blue400
         val QalqalahKubraDark = P.Blue300
         val MaddNormalDark = P.Rose400         // mn

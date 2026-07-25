@@ -526,29 +526,36 @@ _SUN_LETTERS = set('تثدذرزسشصضطظلن')
 _ALEF_WASLA = 'ٱ'
 
 
-def apply_derived_rules(segments, canonical_text):
+def apply_derived_rules(segments, canonical_text, tafkhim=True):
     """
-    Overlay the **unambiguous** derived rules (issue #291) that neither shipped
-    source marks. Operates on aligned segments (whose text equals
-    ``canonical_text``); only sets a rule on a character that is currently plain
-    (``r is None``), or splits an existing ``ma`` ('Aarid) run into ``ml`` (Lin)
-    — it never overrides a source rule, and never changes the text, so the #290
-    round-trip is preserved.
+    Overlay the derived rules (issue #291) that neither shipped source marks.
+    Operates on aligned segments (whose text equals ``canonical_text``); only
+    sets a rule on a character that is currently plain (``r is None``), or splits
+    an existing ``ma`` ('Aarid) run into ``ml`` (Lin) — it never overrides a
+    source rule, and never changes the text, so the #290 round-trip is preserved.
 
-    Applied rules (all deterministic and validated in test_tajweed_rules.py):
+    Always applied (deterministic, validated in test_tajweed_rules.py):
 
     * **Madd Lin** (``ml``) — an 'Aarid run whose elongated letter is a layn
       letter (و/ي sakin after fatha at a stop) is Lin, not 'Aarid.
     * **Waqf signs** (``wq``) — the 7 stop signs, previously unstyled.
     * **Idgham Mutamathilayn** (``dm``) — identical adjacent letters, first sakin.
-    * **Hamzat al-Wasl** (``hw``) and **Lam Shamsiyyah** (``ls``) — derived where
-      the source left them unmarked (this also backfills the 63 fully-unannotated
-      ayahs, #298).
+    * **Hamzat al-Wasl** (``hw``) — derived where the source left it unmarked
+      (also backfills 5 of the 63 fully-unannotated ayahs, #298).
 
-    The context-sensitive rules (raa/lam tafkhim-tarqiq, isti'la) live in
-    ``tajweed_rules.py`` but are **not** applied here — colouring them is a
-    product + scholarly-review decision (they would colour a large fraction of
-    all letters).
+    When ``tafkhim`` is true (default), also the **heavy/light** rules, which are
+    deterministic (position + vowel — no pause dependence, unlike madd) and
+    validated against authoritative examples (see test_tajweed_rules.py):
+
+    * **Tafkhim** (``tk``) / **Tarqiq** (``tq``) — for Raa (``raa_rule``) and the
+      Lam of the Name (``lam_of_name_rule``).
+
+    NB: Madd Tabee'i is NOT derived for the unannotated ayahs — the aarid/tabee'i
+    distinction needs pause-point awareness that only cpfair's trained model (or
+    a scholar) has, and cpfair itself has the same 63-ayah gap (verified by
+    running its engine). Isti'la (always-heavy) is available as
+    ``tajweed_rules.is_istila`` but not auto-applied (it would colour the 7
+    isti'la letters everywhere).
     """
     import tajweed_rules as TR  # lazy import (tajweed_rules imports this module)
 
@@ -595,6 +602,19 @@ def apply_derived_rules(segments, canonical_text):
     # (e.g. the verb ٱلْتَقَى), so it over-fires badly. The source already marks
     # Lam Shamsiyyah for annotated ayahs; deriving it for the unannotated ones
     # (#298) needs the reviewed engine.
+
+    # Tafkhim (tk) / Tarqiq (tq): heavy vs light — deterministic (position +
+    # vowel). Applied to plain Raa and the plain Lam of the Name.
+    if tafkhim:
+        for k, ch in enumerate(chars):
+            if rules[k] is not None:
+                continue
+            if ch == 'ر':
+                rules[k] = TR.raa_rule(canonical_text, k)  # 'tk' or 'tq'
+            elif ch == 'ل':
+                lam = TR.lam_of_name_rule(canonical_text, k)
+                if lam:
+                    rules[k] = lam
 
     merged = []
     for ch, r in zip(chars, rules):

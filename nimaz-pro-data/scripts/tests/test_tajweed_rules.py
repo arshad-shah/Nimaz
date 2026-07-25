@@ -60,6 +60,15 @@ class TestRaa(unittest.TestCase):
     def test_not_a_raa(self):
         self.assertIsNone(R.raa_rule("بِسْم", 0))
 
+    def test_authoritative_examples(self):
+        # From standard tajweed references (Czerepinski; kalimah-center raa rules).
+        cases = [("رَبِّ", "tk"), ("رِزْقًا", "tq"), ("مَرْيَمَ", "tk"),
+                 ("فِرْعَوْنَ", "tq"), ("قِرْطَاسٍ", "tk"), ("ٱرْجِعِى", "tk"),
+                 ("ٱلْخَيْرِ", "tq"), ("بِرَبِّ", "tk"), ("نَّارِ", "tq")]
+        for word, expected in cases:
+            w = normalise_uthmani(word)
+            self.assertEqual(R.raa_rule(w, w.index("ر")), expected, word)
+
 
 class TestLamOfTheName(unittest.TestCase):
     """Uses the real normalised text so the شّ/vowel ordering matches the data."""

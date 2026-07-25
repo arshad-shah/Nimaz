@@ -226,24 +226,32 @@ wrong teaches incorrect recitation). Status:
 | Madd al-Lin (`ml`) | derived (و/ي sakinah after fatha before a stop) | ✅ **wired** — `apply_derived_rules` splits it out of `ma` |
 | Waqf / stop signs (`wq`) | present-but-unstyled | ✅ **wired** — `apply_derived_rules` styles all 7 signs (`classify_waqf`) |
 | Idgham Mutamathilayn (`dm`) | derived (identical adjacent letters, first sakin) | ✅ **wired** — `apply_derived_rules` (`idgham_mutamathilayn`) |
-| Hamzat al-Wasl backfill (`hw`) | deterministic (the ٱ character) | ✅ **wired** — fills unmarked ٱ (also backfills 5 of the 63, #298) |
+| Hamzat al-Wasl backfill (`hw`) | deterministic (the ٱ character) | ✅ **wired** — fills unmarked ٱ |
 | Qalqalah Sughra/Kubra | derived (positional) | ✅ **wired** — `split_qalqalah`, word-final → kubra (simplified) |
-| Tafkhim/Tarqiq of Raa (ر) | derived (position + vowel) | engine implemented + tested (`raa_rule`); **not wired** — needs review + it colours every raa |
-| Tafkhim/Tarqiq of Lam in لفظ الجلالة | derived | engine implemented + tested (`lam_of_name_rule`); **not wired** (ٱللَّه form; `لله` is a known gap) |
-| Isti'la letters (خ ص ض غ ط ق ظ) always heavy | deterministic | engine implemented (`is_istila`); **not wired** — would colour a huge fraction of letters (product choice) |
-| Idgham Mutamathilayn / Madd Tabee'i for the 63 | — | Madd Tabee'i backfill (#298) **not derived** — too error-prone vs cpfair; needs review |
+| Tafkhim/Tarqiq of Raa (`tk`/`tq`) | derived (position + vowel) | ✅ **wired** — `raa_rule`; validated 18/18 against authoritative examples (10,842 tk) |
+| Tafkhim/Tarqiq of Lam in لفظ الجلالة | derived | ✅ **wired** — `lam_of_name_rule` (ٱللَّه form; `لله` is a known gap) |
+| Isti'la letters (خ ص ض غ ط ق ظ) always heavy | deterministic | engine implemented (`is_istila`); **not wired** (`apply_derived_rules` would colour a huge fraction of letters — pass `tafkhim=False`/extend to change) |
+| Madd Tabee'i for the remaining 22 unannotated | derived | **not derived** — see below |
 | Sakt · Imalah 11:41 · Ishmam 12:11 · Tasheel 41:44 · Naql 49:11 | enumerated | recorded in `tajweed_special_rules.json`; not wired |
 
-**`apply_derived_rules`** (in `preparse_tajweed.py`) overlays the **unambiguous**
-derived rules — Madd Lin, waqf, idgham mutamathilayn, hamzat-wasl backfill — onto
-the aligned segments in the shipped pipeline (only setting rules on *plain*
+**`apply_derived_rules`** (in `preparse_tajweed.py`) overlays the derived rules
+onto the aligned segments in the shipped pipeline (only setting rules on *plain*
 characters, so it never overrides a source rule, and text is unchanged, so the
-#290 round-trip holds). The **context-sensitive** rules (raa/lam tafkhim-tarqiq,
-isti'la) live in `scripts/tajweed_rules.py` (tested, `test_tajweed_rules.py`) but
-are **deliberately not applied**: they encode fiqh-of-recitation decisions that
-must be **reviewed against a printed tajweed mushaf**, and *which* to enable (e.g.
-isti'la would colour a huge fraction of letters) is a product decision. The
-enumerated facts are in **`json/tajweed_special_rules.json`**. Notable reconciliation recorded there: the **7 occurrences
+#290 round-trip holds): Madd Lin, waqf styling, Idgham Mutamathilayn, Hamzat-Wasl
+backfill, and — with `tafkhim=True` (default) — **Tafkhim/Tarqiq** for Raa and
+the Lam of the Name (deterministic position+vowel rules, no pause dependence,
+validated in `test_tajweed_rules.py`). These fill **41 of the original 63**
+unannotated ayahs (#298: 63 → 22).
+
+**Madd Tabee'i is *not* derived** for the remaining 22. This is a deliberate,
+evidence-based limit: the aarid/tabee'i distinction depends on pause points that
+only cpfair's trained model or a scholar can resolve, and **cpfair itself has the
+same gap** — running its engine (`cpfair/quran-tajweed`) on our text confirms it
+produces zero annotations for these ayahs, and a hand deriver validated against
+cpfair's `madd_2` could not exceed ~50% recall / ~38% precision. No public
+dataset (cpfair or its derivatives) covers them; they need manual scholarly
+annotation. **Isti'la** and the enumerated special pronunciations remain in the
+engine / `json/tajweed_special_rules.json`, unwired, for the same review reason. Notable reconciliation recorded there: the **7 occurrences
 of U+06DC** in `text_arabic` are 4 canonical Hafs sakt (18:1, 36:52, 75:27, 83:14)
 + 1 additional sakt (69:28, مَالِيَهْ→هَلَكَ) + 2 non-sakt uses of the same sign as
 the *small-seen-over-ṣād* alternate-reading marker (2:245, 7:69) — answering the

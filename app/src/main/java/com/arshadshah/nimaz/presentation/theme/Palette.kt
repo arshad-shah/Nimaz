@@ -129,6 +129,7 @@ object NimazPalette {
     val Violet400 = Color(0xFFA78BFA)
     val Violet500 = Color(0xFF8B5CF6)
     val Violet600 = Color(0xFF7C3AED)
+    val Purple400 = Color(0xFFC084FC)
     val Purple500 = Color(0xFFA855F7)
     val Purple600 = Color(0xFF9333EA)
     val DeepPurple = Color(0xFF7C4DFF)   // tertiary
