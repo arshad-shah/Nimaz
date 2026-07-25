@@ -70,7 +70,9 @@ object NimazPalette {
     val Amber500 = Color(0xFFF59E0B)
     val Amber600 = Color(0xFFD97706)
     val Amber700 = Color(0xFFB45309)
+    val Amber200 = Color(0xFFFDE68A)
     val Amber800 = Color(0xFF92400E)
+    val Amber900 = Color(0xFF78350F)
     val AmberDeep = Color(0xFFFFA000)    // secondary-dark (Material)
     val AmberSoft = Color(0xFFFFECB3)    // secondary-container (Material)
     val MatAmber = Color(0xFFFFC107)     // Material amber — bookmarks/milestones/pending
@@ -81,14 +83,17 @@ object NimazPalette {
     val Emerald300 = Color(0xFF34D399)
     val Emerald500 = Color(0xFF10B981)
     val Emerald600 = Color(0xFF059669)
+    val Emerald700 = Color(0xFF047857)
     val MatGreen = Color(0xFF4CAF50)     // Material green — prayed/fasted/complete/cash
     val LightGreen = Color(0xFF8BC34A)   // Material light green — hadith "hasan" grade
     val GreenDeep = Color(0xFF2E7D32)    // Material green 800 — jumuah accent
 
     // ── Red ───────────────────────────────────────────────────────────────────
+    val Red300 = Color(0xFFFCA5A5)
     val Red400 = Color(0xFFF87171)
     val Red500 = Color(0xFFEF4444)
     val Red600 = Color(0xFFDC2626)
+    val Red700 = Color(0xFFB91C1C)
     val MatRed = Color(0xFFF44336)       // Material red — missed
     val ErrorRed = Color(0xFFB00020)
     val ErrorPink = Color(0xFFCF6679)    // dark-theme error
@@ -101,13 +106,16 @@ object NimazPalette {
     val Orange500 = Color(0xFFF97316)
     val Orange600 = Color(0xFFEA580C)
     val Orange700 = Color(0xFFC2410C)
+    val Orange800 = Color(0xFF9A3412)
     val MatOrange = Color(0xFFFF9800)    // Material orange — makeup/late
     val MatOrange400 = Color(0xFFFFA726) // partial completion
 
     // ── Blue / Sky ────────────────────────────────────────────────────────────
+    val Blue300 = Color(0xFF93C5FD)
     val Blue400 = Color(0xFF60A5FA)
     val Blue500 = Color(0xFF3B82F6)
     val Blue600 = Color(0xFF2563EB)
+    val Blue700 = Color(0xFF1D4ED8)
     val BlueSoft = Color(0xFF5B8DEF)     // info-soft
     val Sky500 = Color(0xFF0EA5E9)
     val MatBlue = Color(0xFF2196F3)      // Material blue — jamaah/investment
@@ -121,6 +129,7 @@ object NimazPalette {
     val Violet400 = Color(0xFFA78BFA)
     val Violet500 = Color(0xFF8B5CF6)
     val Violet600 = Color(0xFF7C3AED)
+    val Purple400 = Color(0xFFC084FC)
     val Purple500 = Color(0xFFA855F7)
     val Purple600 = Color(0xFF9333EA)
     val DeepPurple = Color(0xFF7C4DFF)   // tertiary
@@ -129,13 +138,16 @@ object NimazPalette {
     val MatPurple = Color(0xFF9C27B0)    // Material purple — ramadan/qada
 
     // ── Pink / Rose ───────────────────────────────────────────────────────────
+    val Pink300 = Color(0xFFF9A8D4)
     val Pink400 = Color(0xFFF472B6)
     val Pink500 = Color(0xFFEC4899)
     val Pink600 = Color(0xFFDB2777)
+    val Pink700 = Color(0xFFBE185D)
     val Rose300 = Color(0xFFFDA4AF)
     val Rose400 = Color(0xFFFB7185)
     val Rose600 = Color(0xFFE11D48)
     val Rose800 = Color(0xFF9F1239)
+    val Fuchsia700 = Color(0xFFA21CAF)
 
     // ── Cyan ──────────────────────────────────────────────────────────────────
     val Cyan400 = Color(0xFF22D3EE)
@@ -150,6 +162,7 @@ object NimazPalette {
     val Slate300 = Color(0xFFCBD5E1)
     val Slate400 = Color(0xFF94A3B8)
     val Slate500 = Color(0xFF64748B)
+    val Slate600 = Color(0xFF475569)
 
     // ── Onboarding illustration backdrop (deep teal) ──────────────────────────
     val OnboardingBgTop = Color(0xFF061A1C)

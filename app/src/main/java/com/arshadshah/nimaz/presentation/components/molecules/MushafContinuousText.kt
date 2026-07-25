@@ -31,8 +31,10 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.core.util.TajweedParser
 import com.arshadshah.nimaz.domain.model.Ayah
+import com.arshadshah.nimaz.presentation.components.atoms.BISMILLAH_TEXT
 import com.arshadshah.nimaz.presentation.components.atoms.appendAyahEndMarker
 import com.arshadshah.nimaz.presentation.components.atoms.getDisplayArabicText
+import com.arshadshah.nimaz.presentation.components.atoms.hasLeadingBismillah
 import com.arshadshah.nimaz.presentation.theme.AmiriFontFamily
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
@@ -69,7 +71,9 @@ fun MushafContinuousText(
     highlightColor: Color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 1f),
     selectedColor: Color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.6f),
     textColor: Color = MaterialTheme.colorScheme.onBackground,
-    showTajweed: Boolean = false
+    showTajweed: Boolean = false,
+    tajweedUnderline: Boolean = false,
+    onRuleTap: (String) -> Unit = {}
 ) {
     val isDarkTheme = isSystemInDarkTheme()
 
@@ -77,20 +81,42 @@ fun MushafContinuousText(
     val markerBracketColor = NimazColors.Gold500
     val markerNumberColor = MaterialTheme.colorScheme.primary
 
+    // Parse tajweed once per ayah, keyed only on what the parse depends on
+    // (text, theme, default colour) — NOT on highlight/selection. Highlight and
+    // selection changes then rebuild only the cheap assembly below, without
+    // re-parsing the whole page's JSON (#293).
+    val tajweedByAyahId: Map<Int, AnnotatedString> = remember(
+        ayahs, showTajweed, isDarkTheme, textColor, tajweedUnderline
+    ) {
+        if (!showTajweed) {
+            emptyMap()
+        } else {
+            ayahs.mapNotNull { ayah ->
+                ayah.textTajweed?.let { tajweed ->
+                    ayah.id to TajweedParser.parse(
+                        tajweedText = tajweed,
+                        isDarkTheme = isDarkTheme,
+                        defaultColor = textColor,
+                        stripPrefix = if (ayah.hasLeadingBismillah) BISMILLAH_TEXT else null,
+                        annotateRules = true,  // enable tap-to-explain (#294)
+                        underlineRules = tajweedUnderline  // colour-blind mode (#294)
+                    )
+                }
+            }.toMap()
+        }
+    }
+
     val annotatedText = remember(
-        ayahs, highlightedAyahId, selectedAyahId,
-        highlightColor, selectedColor, textColor, showTajweed, isDarkTheme,
-        markerBracketColor, markerNumberColor
+        ayahs, tajweedByAyahId, highlightedAyahId, selectedAyahId,
+        highlightColor, selectedColor, markerBracketColor, markerNumberColor
     ) {
         buildMushafAnnotatedString(
             ayahs = ayahs,
+            tajweedByAyahId = tajweedByAyahId,
             highlightedAyahId = highlightedAyahId,
             selectedAyahId = selectedAyahId,
             highlightColor = highlightColor,
             selectedColor = selectedColor,
-            textColor = textColor,
-            showTajweed = showTajweed,
-            isDarkTheme = isDarkTheme,
             markerBracketColor = markerBracketColor,
             markerNumberColor = markerNumberColor
         )
@@ -117,6 +143,15 @@ fun MushafContinuousText(
                         detectTapGestures { position ->
                             val layout = textLayoutResult ?: return@detectTapGestures
                             val offset = layout.getOffsetForPosition(position)
+                            // A tap on a coloured tajweed span explains the rule;
+                            // taps elsewhere fall through to ayah selection (#294).
+                            val ruleTag = annotatedText.getStringAnnotations(
+                                tag = TajweedParser.RULE_TAG, start = offset, end = offset
+                            ).firstOrNull()
+                            if (ruleTag != null) {
+                                onRuleTap(ruleTag.item)
+                                return@detectTapGestures
+                            }
                             annotatedText.getStringAnnotations(
                                 tag = AYAH_TAG, start = offset, end = offset
                             ).firstOrNull()?.let { annotation ->
@@ -169,7 +204,9 @@ fun MushafContinuousText(
     highlightColor: Color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 1f),
     selectedColor: Color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.6f),
     textColor: Color = MaterialTheme.colorScheme.onBackground,
-    showTajweed: Boolean = false
+    showTajweed: Boolean = false,
+    tajweedUnderline: Boolean = false,
+    onRuleTap: (String) -> Unit = {}
 ) {
     MushafContinuousText(
         ayahs = ayahs,
@@ -184,7 +221,9 @@ fun MushafContinuousText(
         highlightColor = highlightColor,
         selectedColor = selectedColor,
         textColor = textColor,
-        showTajweed = showTajweed
+        showTajweed = showTajweed,
+        tajweedUnderline = tajweedUnderline,
+        onRuleTap = onRuleTap
     )
 }
 
@@ -192,13 +231,11 @@ private const val AYAH_TAG = "AYAH"
 
 private fun buildMushafAnnotatedString(
     ayahs: List<Ayah>,
+    tajweedByAyahId: Map<Int, AnnotatedString>,
     highlightedAyahId: Int?,
     selectedAyahId: Int?,
     highlightColor: Color,
     selectedColor: Color,
-    textColor: Color,
-    showTajweed: Boolean = false,
-    isDarkTheme: Boolean = false,
     markerBracketColor: Color,
     markerNumberColor: Color
 ): AnnotatedString {
@@ -206,19 +243,11 @@ private fun buildMushafAnnotatedString(
         ayahs.forEachIndexed { index, ayah ->
             val start = length
 
-            if (showTajweed && ayah.textTajweed != null) {
-                val tajweedAnnotated = TajweedParser.parse(
-                    tajweedText = ayah.textTajweed,
-                    isDarkTheme = isDarkTheme,
-                    defaultColor = textColor
-                )
-                val displayTajweed =
-                    if (ayah.ayahNumber == 1 && ayah.surahNumber != 1 && ayah.surahNumber != 9) {
-                        tajweedAnnotated
-                    } else {
-                        tajweedAnnotated
-                    }
-                append(displayTajweed)
+            // Pre-parsed tajweed (already bismillah-stripped) if available for
+            // this ayah, else the plain bismillah-stripped Arabic text.
+            val tajweed = tajweedByAyahId[ayah.id]
+            if (tajweed != null) {
+                append(tajweed)
             } else {
                 append(ayah.getDisplayArabicText())
             }

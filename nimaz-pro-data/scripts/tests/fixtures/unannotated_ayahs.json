@@ -1,0 +1,28 @@
+{
+  "_comment": "Ayahs that render with NO colour after the full pipeline (incl. #291 overlay: hamzat-wasl, tafkhim/tarqiq). These are CORRECT, not a gap: their only tajweed features are ones the KFGQPC colouring convention (shared by quran.com, alquran.cloud, and cpfair) deliberately leaves uncoloured — (a) natural madd written with a plain full alif ا, (b) word-final / ayah-final (stop) madd, and (c) izhar (noon-sakin/tanwin before a throat letter). Proof that this is the convention, not a defect: in the shipped corpus `mn` is painted on a word-MEDIAL dagger-alif 7135x but on a plain full-alif 0/6236x and on a word-FINAL dagger-alif 0/6236x. Colouring these 22 would make them INCONSISTENT with the other 6214 ayahs. Verified against 4 sources (quran.com uthmani_tajweed, alquran.cloud quran-tajweed, cpfair precomputed + cpfair's engine run live) — all four annotate none of them. See docs/nimaz-pro-data-guide.md. Allow-list may only SHRINK.",
+  "count": 22,
+  "ayahs": [
+    "18:85",
+    "20:1",
+    "47:5",
+    "51:9",
+    "53:2",
+    "53:36",
+    "69:23",
+    "70:10",
+    "70:18",
+    "74:13",
+    "75:31",
+    "75:34",
+    "77:12",
+    "78:9",
+    "79:21",
+    "80:1",
+    "80:7",
+    "80:9",
+    "80:18",
+    "84:4",
+    "86:16",
+    "88:5"
+  ]
+}

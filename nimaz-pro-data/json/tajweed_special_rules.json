@@ -1,0 +1,42 @@
+{
+  "_comment": "Enumerated, FIXED tajweed rules in the Hafs 'an 'Asim reading that no shipped dataset (tajweed.json / tajweed_cpfair.json) marks (issue #291). These are citable facts of the reading, not derived heuristics, so they are recorded here for a future reviewed implementation. NOTE: this file is a documented REFERENCE — it is NOT yet wired into generate_database.py. Per #291 the derived recitation rules require scholarly review against a printed tajweed mushaf before shipping.",
+  "reading": "Hafs 'an 'Asim",
+  "sakt": {
+    "_comment": "السكت — a brief pause without breath. The source text marks these with U+06DC (ARABIC SMALL HIGH SEEN). Reconciliation of the 7 U+06DC occurrences in text_arabic (the audit asked where the 'extra 3' came from):",
+    "obligatory_hafs_sakt": [
+      {"ayah": "18:1", "context": "عِوَجَا ۜ قَيِّمًا", "reason": "sakt on the alif of عِوَجَا before قَيِّمًا"},
+      {"ayah": "36:52", "context": "مَرْقَدِنَا ۜ هَٰذَا", "reason": "sakt on the alif of مَرْقَدِنَا"},
+      {"ayah": "75:27", "context": "مَنْ ۜ رَاقٍ", "reason": "sakt on the noon of مَنْ (prevents idgham into رَاقٍ)"},
+      {"ayah": "83:14", "context": "بَلْ ۜ رَانَ", "reason": "sakt on the lam of بَلْ (prevents idgham into رَانَ)"}
+    ],
+    "additional_sakt": [
+      {"ayah": "69:28", "context": "مَالِيَهْ ۜ هَلَكَ", "reason": "sakt on the ه of مَالِيَهْ before هَلَكَ — prevents idgham of the two hā's. Commonly listed as the 5th Hafs sakt; the '4 places' count omits it."}
+    ],
+    "not_sakt_same_sign": [
+      {"ayah": "2:245", "context": "وَيَبْصُۜطُ", "reason": "U+06DC here is the small seen written OVER the ṣād — an alternate-reading marker (yabsuṭu read with ص in Hafs, the س noted), NOT a sakt."},
+      {"ayah": "7:69", "context": "بَصْۜطَةً", "reason": "same small-seen-over-ṣād alternate-reading marker, not a sakt."}
+    ]
+  },
+  "special_pronunciations": [
+    {"rule": "imalah", "ayah": "11:41", "word": "مَجْر۪ىٰهَا", "reason": "the rā is pronounced with imālah (tilting toward kasra/yā); marked in the text with U+06EA on the rā."},
+    {"rule": "ishmam", "ayah": "12:11", "word": "تَأْمَ۫نَّا", "reason": "ishmām — lip-rounding on the (assimilated) noon; marked with U+06EB."},
+    {"rule": "tasheel", "ayah": "41:44", "word": "ءَا۬عْجَمِىٌّ", "reason": "tasheel — the second hamza is 'eased' between hamza and alif; marked with U+06EC."},
+    {"rule": "naql", "ayah": "49:11", "word": "بِئْسَ ٱلِٱسْمُ", "reason": "naql — the hamza's vowel is transferred onto the preceding lām (al-ism → alism)."}
+  ],
+  "istila_letters": {
+    "_comment": "Isti'lā (elevated) letters are always pronounced heavy (tafkhīm): خ ص ض غ ط ق ظ. Deterministic — no context needed.",
+    "letters": ["خ", "ص", "ض", "غ", "ط", "ق", "ظ"]
+  },
+  "waqf_signs": {
+    "_comment": "Stop signs present in text_arabic but currently unstyled (occurrence counts verified against text_arabic).",
+    "signs": [
+      {"cp": "U+06DA", "sign": "ۚ", "name": "jīm — permissible stop (waqf jaa'iz)", "occurrences": 1972},
+      {"cp": "U+06D6", "sign": "ۖ", "name": "ṣad-lam-yā — continuing is preferable (al-waṣl awlā)", "occurrences": 1682},
+      {"cp": "U+06D7", "sign": "ۗ", "name": "qaf-lam-yā — stopping is preferable (al-waqf awlā)", "occurrences": 603},
+      {"cp": "U+06D9", "sign": "ۙ", "name": "lām-alif — do not stop (lā waqf)", "occurrences": 68},
+      {"cp": "U+06D8", "sign": "ۘ", "name": "mīm — obligatory stop (waqf lāzim)", "occurrences": 22},
+      {"cp": "U+06DB", "sign": "ۛ", "name": "three dots — embracing stop (mu'ānaqah): stop at one of the pair, not both", "occurrences": 12},
+      {"cp": "U+06DC", "sign": "ۜ", "name": "sīn — sakt (see the sakt table above)", "occurrences": 7}
+    ]
+  }
+}

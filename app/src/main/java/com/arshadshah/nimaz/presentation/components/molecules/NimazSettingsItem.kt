@@ -15,6 +15,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
@@ -41,9 +42,11 @@ fun NimazSettingsItem(
     onCheckedChange: ((Boolean) -> Unit)? = null,
     onClick: (() -> Unit)? = null,
     showArrow: Boolean = false,
+    enabled: Boolean = true,
     trailingContent: (@Composable () -> Unit)? = null
 ) {
     val clickModifier = when {
+        !enabled -> Modifier
         onClick != null -> Modifier.clickable(onClick = onClick)
         checked != null && onCheckedChange != null -> Modifier.clickable { onCheckedChange(!checked) }
         else -> Modifier
@@ -52,6 +55,7 @@ fun NimazSettingsItem(
     Row(
         modifier = modifier
             .fillMaxWidth()
+            .alpha(if (enabled) 1f else 0.5f)
             .then(clickModifier)
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically

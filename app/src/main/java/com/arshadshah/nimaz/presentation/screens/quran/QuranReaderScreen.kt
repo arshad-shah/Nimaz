@@ -834,6 +834,7 @@ fun QuranReaderScreen(
                             isKhatamRead = ayah.id in state.khatamReadAyahIds,
                             isKhatamMode = state.activeKhatamId != null,
                             showTajweed = state.showTajweed,
+                            tajweedUnderline = state.tajweedUnderline,
                             onBookmarkClick = {
                                 viewModel.onEvent(
                                     QuranEvent.ToggleBookmark(
@@ -957,6 +958,7 @@ private fun ReaderMushafPage(
             highlightedAyahId = highlightedAyahId,
             favoriteAyahIds = favoriteAyahIds,
             showTajweed = state.showTajweed,
+            tajweedUnderline = state.tajweedUnderline,
             showTranslation = state.showTranslation,
             showTransliteration = state.showTransliteration,
             onBookmarkClick = { ayah ->

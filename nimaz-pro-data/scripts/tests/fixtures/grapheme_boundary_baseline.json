@@ -1,0 +1,5 @@
+{
+  "_comment": "Grapheme-cluster boundary metric baseline (issue #299). A tajweed rule span may begin on a combining mark that phonetically belongs to the rule (e.g. the kasra of a kasra->ya madd in 1:1) — see the DECIDED semantics in preparse_tajweed.align_segments_to_canonical and docs/nimaz-pro-data-guide.md. These counts are a tracked metric: the guard test fails if they INCREASE, so a future change can't silently split more clusters. Golden-IMAGE verification (mark placement on device with the shipping font) is the remaining, device-only part of #299.",
+  "combining_start_spans": 20155,
+  "cluster_split_boundaries": 38763
+}

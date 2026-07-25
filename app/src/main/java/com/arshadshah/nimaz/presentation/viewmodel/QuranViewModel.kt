@@ -112,6 +112,7 @@ data class QuranReaderUiState(
     val favoriteAyahIds: Set<Int> = emptySet(),
     val pageCache: Map<Int, List<Ayah>> = emptyMap(),
     val showTajweed: Boolean = false,
+    val tajweedUnderline: Boolean = false,
     val activeKhatamId: Long? = null,
     val khatamReadAyahIds: Set<Int> = emptySet(),
     // Line-accurate 16-line IndoPak layout for the most-recently requested page, loaded on
@@ -365,11 +366,13 @@ class QuranViewModel @Inject constructor(
                 displayFlow,
                 behaviorFlow,
                 settingsRepository.showTajweed,
+                settingsRepository.tajweedUnderline,
                 settingsRepository.quranMushafScript
-            ) { display, behavior, showTajweed, mushafScript ->
-                QuranReaderSettings(display, behavior, showTajweed, MushafScript.fromName(mushafScript))
+            ) { display, behavior, showTajweed, tajweedUnderline, mushafScript ->
+                QuranReaderSettings(display, behavior, showTajweed, tajweedUnderline,
+                    MushafScript.fromName(mushafScript))
             }.collect { settings ->
-                val (display, behavior, showTajweed, mushafScript) = settings
+                val (display, behavior, showTajweed, tajweedUnderline, mushafScript) = settings
                 audioManager.setReciter(behavior.reciterId)
                 // Push continuous-reading reactively so toggling the setting while
                 // in the reader takes effect immediately, not on next play-start.
@@ -385,6 +388,7 @@ class QuranViewModel @Inject constructor(
                         continuousReading = behavior.continuousReading,
                         keepScreenOn = behavior.keepScreenOn,
                         showTajweed = showTajweed,
+                        tajweedUnderline = tajweedUnderline,
                         mushafScript = mushafScript
                     )
                 }
@@ -414,6 +418,7 @@ class QuranViewModel @Inject constructor(
         val display: QuranDisplaySettings,
         val behavior: QuranBehaviorSettings,
         val showTajweed: Boolean,
+        val tajweedUnderline: Boolean,
         val mushafScript: MushafScript
     )
 

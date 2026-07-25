@@ -58,13 +58,21 @@ fun annotatedAyahEndMarker(
 }
 
 /**
- * Strips the leading bismillah from the first ayah of a surah, except where the
- * bismillah is genuinely part of the text:
+ * True when this ayah carries a leading bismillah that the reader draws as a
+ * separate header and so must strip from the verse body. That is ayah 1 of every
+ * surah except:
  * - Surah 1 (Al-Fatiha) — the bismillah IS ayah 1.
  * - Surah 9 (At-Tawbah) — has no bismillah.
  */
+val Ayah.hasLeadingBismillah: Boolean
+    get() = numberInSurah == 1 && surahNumber != 1 && surahNumber != 9
+
+/**
+ * Strips the leading bismillah from the first ayah of a surah (see
+ * [hasLeadingBismillah]), because the reader draws a separate bismillah header.
+ */
 fun Ayah.getDisplayArabicText(): String {
-    return if (numberInSurah == 1 && surahNumber != 1 && surahNumber != 9) {
+    return if (hasLeadingBismillah) {
         textArabic
             .removePrefix("$BISMILLAH_TEXT ")
             .removePrefix(BISMILLAH_TEXT)

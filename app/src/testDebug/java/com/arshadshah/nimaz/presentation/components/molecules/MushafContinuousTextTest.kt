@@ -189,4 +189,28 @@ class MushafContinuousTextTest {
 
         composeRule.onRoot().assertExists()
     }
+
+    @Test
+    fun `tajweed-on surah opening strips bismillah in the tajweed path`() {
+        // The bug: with tajweed on, the bismillah was rendered twice on
+        // surah-opening ayahs. Since #290 strip(text_tajweed) == text_arabic,
+        // so the bismillah appears verbatim at the head of the tajweed JSON.
+        val bismillah = "بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ"
+        val tajweedJson = "[{\"t\":\"$bismillah الٓمٓ\",\"r\":null}]"
+        val surah2 = listOf(
+            ayah(id = 11, surahNumber = 2, ayahNumber = 1,
+                textArabic = "$bismillah الٓمٓ", textTajweed = tajweedJson)
+        )
+        composeRule.setThemedContent {
+            Box(modifier = Modifier.fillMaxWidth()) {
+                MushafContinuousText(
+                    ayahs = surah2,
+                    onAyahClick = { _: Ayah, _: Float -> },
+                    showTajweed = true
+                )
+            }
+        }
+
+        composeRule.onRoot().assertExists()
+    }
 }

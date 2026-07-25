@@ -63,4 +63,20 @@ class QuranTextFormatTest {
         val a = ayah(surahNumber = 2, ayahNumber = 5, textArabic = text)
         assertThat(a.getDisplayArabicText()).isEqualTo(text)
     }
+
+    @Test
+    fun `hasLeadingBismillah is true for a normal surah opening`() {
+        assertThat(ayah(2, 1, "x").hasLeadingBismillah).isTrue()
+    }
+
+    @Test
+    fun `hasLeadingBismillah is false for Al-Fatiha and At-Tawbah openings`() {
+        assertThat(ayah(1, 1, "x").hasLeadingBismillah).isFalse()
+        assertThat(ayah(9, 1, "x").hasLeadingBismillah).isFalse()
+    }
+
+    @Test
+    fun `hasLeadingBismillah is false for non-first ayahs`() {
+        assertThat(ayah(2, 5, "x").hasLeadingBismillah).isFalse()
+    }
 }

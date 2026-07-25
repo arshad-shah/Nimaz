@@ -105,9 +105,20 @@ def verify_database():
 
     conn.close()
 
+    # Tajweed data verification (issue #292).
+    print("\n" + "=" * 60)
+    print("Tajweed Verification")
+    print("=" * 60)
+    from verify_tajweed import verify_db
+    report = verify_db(DB_FILE)
+    report.print_summary()
+
     print("\n" + "=" * 60)
     print("Verification Complete")
     print("=" * 60)
+
+    if not report.ok():
+        raise SystemExit("Tajweed verification failed — see failures above.")
 
 if __name__ == "__main__":
     verify_database()

@@ -28,6 +28,9 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -56,6 +59,7 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownItem
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
 import com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsItem
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
+import com.arshadshah.nimaz.presentation.components.organisms.TajweedLegendSheet
 import com.arshadshah.nimaz.presentation.theme.QuranArabicFont
 import com.arshadshah.nimaz.presentation.viewmodel.SettingsEvent
 import com.arshadshah.nimaz.presentation.viewmodel.SettingsViewModel
@@ -69,6 +73,7 @@ fun QuranSettingsScreen(
 ) {
     val quranState by viewModel.quranState.collectAsState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+    var showTajweedLegend by remember { mutableStateOf(false) }
 
     // === ADDING NEW TRANSLATIONS ===
     // To add a new translation:
@@ -277,11 +282,40 @@ fun QuranSettingsScreen(
                         onCheckedChange = { viewModel.onEvent(SettingsEvent.SetKeepScreenOn(!quranState.keepScreenOn)) }
                     )
                     NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                    // Tajweed colours are only available for the Madani (Uthmani)
+                    // script — the 16-line IndoPak layout has no per-letter spans
+                    // (see MushafLineLayout). Disable the toggle with a reason
+                    // rather than let it silently do nothing (#293).
+                    val tajweedAvailable = quranState.mushafScript == MushafScript.MADANI
                     NimazSettingsItem(
                         title = stringResource(R.string.show_tajweed_colors),
-                        subtitle = stringResource(R.string.show_tajweed_colors_subtitle),
+                        subtitle = if (tajweedAvailable) {
+                            stringResource(R.string.show_tajweed_colors_subtitle)
+                        } else {
+                            stringResource(R.string.show_tajweed_colors_unavailable)
+                        },
                         checked = quranState.showTajweed,
+                        enabled = tajweedAvailable,
                         onCheckedChange = { viewModel.onEvent(SettingsEvent.SetShowTajweed(!quranState.showTajweed)) }
+                    )
+                    NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                    // Colour-blind-friendly mode: underline rule spans so they are
+                    // marked by a non-hue channel too (#294).
+                    NimazSettingsItem(
+                        title = stringResource(R.string.tajweed_underline),
+                        subtitle = stringResource(R.string.tajweed_underline_subtitle),
+                        checked = quranState.tajweedUnderline,
+                        enabled = tajweedAvailable && quranState.showTajweed,
+                        onCheckedChange = { viewModel.onEvent(SettingsEvent.SetTajweedUnderline(!quranState.tajweedUnderline)) }
+                    )
+                    NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                    // Colour legend — reachable regardless of script so users can
+                    // learn what the colours mean (#294).
+                    NimazSettingsItem(
+                        title = stringResource(R.string.tajweed_colour_guide),
+                        subtitle = stringResource(R.string.tajweed_colour_guide_subtitle),
+                        showArrow = true,
+                        onClick = { showTajweedLegend = true }
                     )
                 }
             }
@@ -358,6 +392,10 @@ fun QuranSettingsScreen(
                 Spacer(modifier = Modifier.height(16.dp))
             }
         }
+    }
+
+    if (showTajweedLegend) {
+        TajweedLegendSheet(onDismiss = { showTajweedLegend = false })
     }
 }
 

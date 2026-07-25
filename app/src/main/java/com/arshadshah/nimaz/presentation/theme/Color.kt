@@ -188,24 +188,35 @@ object NimazColors {
     // Each rule has a light and a dark (OLED-brighter) tone; pairs are consumed
     // by TajweedParser.
     object TajweedColors {
-        // ── Light theme ──
-        val GhunnahLight = P.Emerald600
-        val IkhfaLight = P.Teal600
+        // ── Light theme ── all ≥ 4.5:1 vs the reader background (#FAFAFA);
+        // verified by scripts/check_tajweed_contrast.py.
+        val GhunnahLight = P.Emerald700        // was Emerald600 (3.61:1)
+        val IkhfaLight = P.Teal700             // was Teal600 (3.59:1)
         val IkhfaShafawiLight = P.Cyan700
-        val IdghamGhunnahLight = P.Amber600
-        val IdghamNoGhunnahLight = P.Amber800
+        val IdghamGhunnahLight = P.Amber800    // was Amber600 (3.05:1)
+        val IdghamNoGhunnahLight = P.Brown700  // freed Amber800 for IdghamGhunnah
         val IdghamShafawiLight = P.Amber700
         val IdghamMutajanisaynLight = P.Orange700
-        val IdghamMutaqaribayLight = P.Orange600
-        val QalqalahLight = P.Blue600
-        val MaddNormalLight = P.Rose600
-        val MaddPermissibleLight = P.Pink600
-        val MaddObligatoryLight = P.Red600
-        val MaddNecessaryLight = P.Rose800
+        val IdghamMutaqaribayLight = P.Orange800  // was Orange600 (3.41:1)
+        val IdghamMutamathilaynLight = P.Amber900  // dm — derived (#291)
+        val WaqfLight = P.Stone600                 // wq — stop signs (#291)
+        val TafkhimLight = P.GreenDeep             // tk — heavy (raa/lam, #291)
+        val TarqiqLight = P.Purple600              // tq — light (raa/lam, #291)
+        // Qalqalah — blue family, kubra deeper than sughra
+        val QalqalahSughraLight = P.Blue600
+        val QalqalahKubraLight = P.Blue700
+        // Madd — one warm hue family (rose→red→pink), distinct lightness so the
+        // six sub-rules read as related. See TajweedParser KDoc for beat counts.
+        val MaddNormalLight = P.Rose600        // mn — natural, 2
+        val MaddMunfasilLight = P.Pink700      // mf — jaiz munfasil (was Pink600 4.40:1)
+        val MaddMuttasilLight = P.Red600       // mt — wajib muttasil, 4/5
+        val MaddAaridLight = P.Rose800         // ma — 'aarid lis-sukun, 2/4/6
+        val MaddLinLight = P.Fuchsia700        // ml — lin (freed Pink700 for munfasil)
+        val MaddNecessaryLight = P.Red700      // my — lazim, 6
         val IqlabLight = P.Violet600
         val LamShamsiyyahLight = P.Indigo600
         val SilentLight = P.Slate500
-        val HamzaWaslLight = P.Slate400
+        val HamzaWaslLight = P.Slate600        // was Slate400 (2.46:1) — 22% of all spans
 
         // ── Dark theme (brighter for OLED readability) ──
         val GhunnahDark = P.Emerald300
@@ -216,11 +227,18 @@ object NimazColors {
         val IdghamShafawiDark = P.Amber300
         val IdghamMutajanisaynDark = P.Orange400
         val IdghamMutaqaribayDark = P.Orange300
-        val QalqalahDark = P.Blue400
-        val MaddNormalDark = P.Rose400
-        val MaddPermissibleDark = P.Pink400
-        val MaddObligatoryDark = P.Red400
-        val MaddNecessaryDark = P.Rose300
+        val IdghamMutamathilaynDark = P.Amber200   // dm
+        val WaqfDark = P.Stone400                  // wq
+        val TafkhimDark = P.Green500               // tk
+        val TarqiqDark = P.Purple400               // tq
+        val QalqalahSughraDark = P.Blue400
+        val QalqalahKubraDark = P.Blue300
+        val MaddNormalDark = P.Rose400         // mn
+        val MaddMunfasilDark = P.Pink400       // mf
+        val MaddMuttasilDark = P.Red400        // mt
+        val MaddAaridDark = P.Rose300          // ma
+        val MaddLinDark = P.Pink300            // ml
+        val MaddNecessaryDark = P.Red300       // my
         val IqlabDark = P.Violet400
         val LamShamsiyyahDark = P.Indigo400
         val SilentDark = P.Slate400

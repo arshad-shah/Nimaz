@@ -92,6 +92,193 @@ nimaz-pro-data/
 **Sajda Verses** (mark `sajda: true`):
 - 7:206, 13:15, 16:50, 17:109, 19:58, 22:18, 22:77, 25:60, 27:26, 32:15, 38:24, 41:38, 53:62, 84:21, 96:19
 
+## Tajweed colouring pipeline (`text_tajweed`, issues #288 + #290 + #289 of epic #287)
+
+The `ayahs.text_tajweed` column holds a compact JSON array of segments
+(`[{"t": "…", "r": "code"}]`, `r = null` for plain text) that the Android
+renderer colours per rule. It is produced at DB-build time by
+`scripts/generate_database.py`, which calls
+`preparse_tajweed.preparse_single(raw, key="surah:ayah")` on the quran.com
+markup in `json/tajweed.json`.
+
+> **Source datasets & licences:** `json/tajweed.json` (quran.com `uthmani_tajweed`
+> API — rule span boundaries) and `json/tajweed_cpfair.json` (cpfair
+> `quran-tajweed` — the independent second source used for the madd
+> classification). Provenance and licensing are recorded in
+> **[`json/LICENSES_TAJWEED.md`](../nimaz-pro-data/json/LICENSES_TAJWEED.md)**.
+
+**Pre-parser (`scripts/preparse_tajweed.py`).** The markup contains
+arbitrarily **nested** `<tajweed>` tags (33 in the current source, e.g. `2:190`
+has a `slnt` span inside a `madda_obligatory` span). The parser is a
+**stack-based tokenizer**, not a regex:
+
+- The **innermost** rule wins for the characters it covers; the enclosing rule
+  is kept for the rest. `2:190` → `ُوٓ` = `mt`, `اْ` = `sl`, `‌ۚ` = `mt`.
+- **Invariant:** concatenating every segment's `t` reconstructs the source text
+  exactly (tags + verse markers removed) — no character is ever dropped.
+  Because of nesting, per-*segment* code counts do not equal raw *tag* counts.
+- Unknown class, stray/unbalanced tag, or unclosed tag → **`ValueError`**
+  (fail loud), so corrupt source can never silently ship the wrong colours.
+- **`SOURCE_FIXUPS`** (keyed by `surah:ayah`) patches ayahs malformed at
+  source *before* tokenizing — currently only `32:3`, whose opening
+  `madda_normal` tag was corrupted to a stray `>`. Keying by fragment means a
+  corrected upstream re-fetch simply no-ops.
+
+**Orthography normalisation (issue #290).** The quran.com tajweed markup and
+the app's canonical `ayahs.text_arabic` are two *different* Uthmani
+transcriptions of the same verse — stripping the tags leaves them disagreeing on
+**87% of ayahs** (tatweel carriers for the dagger alef, ZWNJ, pause-mark
+encodings U+06DF/06E2/06ED, tanween forms, alef variants). If they disagree,
+toggling "Show Tajweed Colors" changes the **glyphs** on screen — word widths,
+line breaks — not just their colour, and no single string can back search,
+bookmarks and audio highlighting.
+
+`text_arabic` is treated as the **single canonical text** (it is what the app
+already renders everywhere else). The coloured segments are **re-derived over
+it** rather than shipped in the quran.com encoding:
+
+1. `normalise_uthmani(text)` strips the BOM / zero-width marks and trims — light
+   by design, so it never alters the glyphs the app already renders.
+2. `align_segments_to_canonical(segments, canonical)` runs a character-level
+   diff (`difflib`) of the stripped tajweed text against the canonical text and
+   transfers each rule label across: *equal* runs copy per-char; *replace* runs
+   take the region's last non-null rule (the rule usually sits on a re-encoded
+   mark, e.g. a small-yeh madd); *insert* runs (canonical-only combining marks)
+   inherit the preceding rule; *delete* runs (tatweel/ZWNJ, or a small-waw madd
+   with no canonical glyph) drop out.
+
+Because the segments are rebuilt from `text_arabic`'s **own** characters, the
+invariant `strip(text_tajweed) == normalise_uthmani(text_arabic)` holds
+**byte-for-byte for all 6 236 ayahs** by construction. `generate_database.py`
+passes `canonical_text=text_arabic` into `preparse_single`, and also stores the
+**normalised** `text_arabic` (BOM removed). Verify with:
+
+```bash
+python3 nimaz-pro-data/scripts/verify_tajweed_orthography.py   # exits non-zero on drift
+```
+
+**Validation harness (issue #292).** `scripts/verify_tajweed.py` is the full gate.
+In **pipeline mode** (default) it runs the pre-parser + taxonomy split + alignment
+over the JSON sources in memory (no Git-LFS DB needed — CI-friendly) and asserts:
+coverage (every ayah has spans, except the pinned #298 allow-list), well-formedness
+(no leaked `<`/`>`/`tajweed`), the #290 round-trip, the v3 code whitelist (no legacy
+`mo`/`mp`/`q`), character-coverage conservation, cross-source **drift** vs cpfair
+(signed per-category deltas checked against `tests/fixtures/cpfair_drift_allowlist.json`
+— this is drift detection, *not* independent validation: the two datasets share the
+identical 63-ayah gap), and a pinned golden-ayah fixture. In **db mode**
+(`--db out.db`) it verifies a generated `nimaz_prepopulated.db`. It is invoked as a
+fail-the-build post-step by both `generate_database.py` and `verify_database.py`, and
+by the `tajweed_data_checks.yml` CI workflow on PRs touching `nimaz-pro-data/**`.
+
+> **DB regeneration note.** These pipeline changes only affect the shipped DB
+> when `nimaz_prepopulated.db` is regenerated; the `text_arabic` column changes
+> (BOM removed on 1:1) so a regeneration is required for the fix to reach the
+> app, and — like all prepackaged-DB edits — it does **not** reach existing
+> installs on update (see `docs/SUBSYSTEMS.md` §5/§7; a runtime seeding path, if
+> needed, would be decided with the renderer work in #293).
+
+**Rule taxonomy — v3 codes (issue #289).** The quran.com classes mis-name the
+madd rules: `madda_obligatory` merges two *different* rules, and
+`madda_permissible` is actually Madd 'Aarid. Cross-validated against the
+independent `json/tajweed_cpfair.json` dataset, the pipeline emits a corrected
+**v3 code set**. The munfasil/muttasil split is applied at the **source-tag**
+level (`reclassify_madd_obligatory`) using cpfair's per-ayah reading order — the
+i-th `madda_obligatory` tag is rewritten to `madd_munfasil`/`madd_muttasil` per
+cpfair; the counts agree for 6 227/6 236 ayahs, and the 9 that disagree keep the
+conservative obligatory (`mt`) default. Qalqalah is split positionally
+(`split_qalqalah`): word-final → Kubra (`qk`), medial → Sughra (`qs`).
+
+| code | rule | counts | was |
+|---|---|---|---|
+| `mn` | Madd Tabee'i (natural) | 2 | `mn` |
+| `mf` | Madd Jaiz **Munfasil** | 2/4/5 | part of `mo` |
+| `mt` | Madd Wajib **Muttasil** | 4/5 | part of `mo` |
+| `ma` | Madd **'Aarid** lis-Sukun | 2/4/6 | `mp` (mis-named) |
+| `ml` | Madd **Lin** | 2/4/6 | — (code defined; populated in #291) |
+| `my` | Madd Lazim (necessary) | 6 | `my` |
+| `qs` / `qk` | Qalqalah Sughra / Kubra | — | `q` |
+
+Beat counts follow the **Hafs 'an 'Asim** reading (ref: Kareema Czerepinski,
+*Tajweed Rules of the Qur'an*). The canonical rule names, one-line explanations
+and colours are the single source of truth in `TajweedParser.rules`
+(`core/util/TajweedParser.kt`); legacy `mo`/`mp`/`q` and the v1 single-letter
+codes still parse (mapped to `mt`/`ma`/`qs`) so an older prepackaged DB never
+crashes. Colours live in `NimazColors.TajweedColors` — the six madd sub-rules
+share one warm hue family (rose→red→pink) with distinct lightness.
+
+`scripts/preparse_tajweed.py` can also be run standalone to regenerate the
+`json/tajweed_parsed.json` reference artifact (not consumed by the build —
+`generate_database.py` parses inline); run standalone it loads `ayahs.json` +
+`tajweed_cpfair.json` and applies the same normalisation and taxonomy split so
+the artifact matches the DB. Tests live in
+`scripts/tests/test_preparse_tajweed.py` (`python3 -m unittest`), covering the
+nested/malformed/unknown/whitespace cases, the normalisation/alignment helpers,
+the munfasil/muttasil + qalqalah split, and the whole-corpus invariants.
+
+**Rules not yet implemented (issue #291).** A printed colour-coded mushaf shows
+rules that *neither* shipped dataset marks. They are **not** in the pipeline yet
+because the derived ones encode fiqh-of-recitation decisions that **require
+scholarly review against a printed tajweed mushaf before shipping** (getting them
+wrong teaches incorrect recitation). Status:
+
+| Rule | Kind | Status |
+|---|---|---|
+| Madd al-Lin (`ml`) | derived (و/ي sakinah after fatha before a stop) | ✅ **wired** — `apply_derived_rules` splits it out of `ma` |
+| Waqf / stop signs (`wq`) | present-but-unstyled | ✅ **wired** — `apply_derived_rules` styles all 7 signs (`classify_waqf`) |
+| Idgham Mutamathilayn (`dm`) | derived (identical adjacent letters, first sakin) | ✅ **wired** — `apply_derived_rules` (`idgham_mutamathilayn`) |
+| Hamzat al-Wasl backfill (`hw`) | deterministic (the ٱ character) | ✅ **wired** — fills unmarked ٱ |
+| Qalqalah Sughra/Kubra | derived (positional) | ✅ **wired** — `split_qalqalah`, word-final → kubra (simplified) |
+| Tafkhim/Tarqiq of Raa (`tk`/`tq`) | derived (position + vowel) | ✅ **wired** — `raa_rule`; validated 18/18 against authoritative examples (10,842 tk) |
+| Tafkhim/Tarqiq of Lam in لفظ الجلالة | derived | ✅ **wired** — `lam_of_name_rule` (ٱللَّه form; `لله` is a known gap) |
+| Isti'la letters (خ ص ض غ ط ق ظ) always heavy | deterministic | engine implemented (`is_istila`); **not wired** (`apply_derived_rules` would colour a huge fraction of letters — pass `tafkhim=False`/extend to change) |
+| Madd Tabee'i for the remaining 22 unannotated | n/a | **correctly uncoloured by convention** — see below |
+| Sakt · Imalah 11:41 · Ishmam 12:11 · Tasheel 41:44 · Naql 49:11 | enumerated | recorded in `tajweed_special_rules.json`; not wired |
+
+**`apply_derived_rules`** (in `preparse_tajweed.py`) overlays the derived rules
+onto the aligned segments in the shipped pipeline (only setting rules on *plain*
+characters, so it never overrides a source rule, and text is unchanged, so the
+#290 round-trip holds): Madd Lin, waqf styling, Idgham Mutamathilayn, Hamzat-Wasl
+backfill, and — with `tafkhim=True` (default) — **Tafkhim/Tarqiq** for Raa and
+the Lam of the Name (deterministic position+vowel rules, no pause dependence,
+validated in `test_tajweed_rules.py`). These fill **41 of the original 63**
+unannotated ayahs (#298: 63 → 22).
+
+**The remaining 22 ayahs are correctly uncoloured — this is not a data gap.**
+Investigation (2026-07) established that their *only* tajweed features are ones
+the KFGQPC colouring convention — shared by **every** source we checked
+(quran.com `uthmani_tajweed`, alquran.cloud `quran-tajweed`, and cpfair) —
+deliberately leaves uncoloured:
+
+1. **Natural madd written with a plain full alif** (e.g. 47:5 `بَالَهُمْ`, `يَهْدِيهِمْ`).
+   The convention only colours madd tabee'i when it is written with a *dagger
+   alif* (ٰ), *small waw/ya* (ۥ ۦ) or a *maddah* sign (ٓ) — never a plain ا.
+2. **Word-final / ayah-final (stop) madd** (e.g. 80:1 `تَوَلَّىٰٓ`, 75:34 `أَوْلَىٰ`).
+3. **Izhar** — noon-sakin / tanwin before a throat letter (e.g. 51:9 `عَنْهُ`,
+   `مَنْ أُفِكَ`; 88:5 `مِنْ عَيْنٍ`), which is never coloured.
+
+This is proven *from the shipped corpus itself*: `mn` (Madd Tabee'i) is painted
+on a word-**medial** dagger-alif **7 135** times but on a plain full-alif
+**0 / 6 236** times and on a word-**final** dagger-alif **0 / 6 236** times
+(guarded by `test_madd_tabeei_convention_is_consistent`). Colouring the 22 would
+therefore make them *inconsistent* with the other 6 214 ayahs. All four sources
+independently annotate none of them — verified by fetching alquran.cloud live and
+by running cpfair's own engine (`tajweed_classifier.py`) over our text
+(0 annotations for all 22); cpfair's `madd_2` rule tree explicitly gates on
+`is_dagger_alif`/`is_small_waw`/`has_maddah` and labels dagger-alif that
+`is_final` as *not* madd — the same convention. The allow-list
+(`fixtures/unannotated_ayahs.json`) simply records these as expected-empty.
+**Isti'la** and the enumerated special pronunciations remain in the
+engine / `json/tajweed_special_rules.json`, unwired, for the same review reason. Notable reconciliation recorded there: the **7 occurrences
+of U+06DC** in `text_arabic` are 4 canonical Hafs sakt (18:1, 36:52, 75:27, 83:14)
++ 1 additional sakt (69:28, مَالِيَهْ→هَلَكَ) + 2 non-sakt uses of the same sign as
+the *small-seen-over-ṣād* alternate-reading marker (2:245, 7:69) — answering the
+"where do the extra 3 come from" question.
+
+> Epic #287 sub-issues: the extended rules above (#291), the in-app legend +
+> accessibility UI (#294), the unannotated-ayah audit (#298 — resolved: 63 → 22
+> convention-correct empties, see above), and the grapheme-boundary decision
+> (#299). The in-app legend consumes `TajweedParser.rules` directly.
+
 ## translations.json Format
 
 ```json
