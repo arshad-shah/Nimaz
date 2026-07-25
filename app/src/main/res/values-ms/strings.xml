@@ -854,6 +854,10 @@
     <string name="arabic_font_size">Saiz Fon Arab</string>
     <string name="arabic_font_size_value">%1$dpx</string>
     <string name="arabic_font">Fon Arab</string>
+    <string name="mushaf_layout">Skrip Mushaf</string>
+    <string name="mushaf_layout_subtitle">Susun atur halaman yang digunakan oleh pembaca Mushaf (halaman)</string>
+    <string name="mushaf_script_madani">Uthmani (Madani, 604 halaman)</string>
+    <string name="mushaf_script_indopak16">IndoPak 16-baris (548 halaman)</string>
     <string name="display_options">Pilihan Paparan</string>
     <string name="show_transliteration">Tunjukkan Transliterasi</string>
     <string name="show_transliteration_subtitle">Sebutan dalam huruf Rumi</string>

@@ -54,12 +54,26 @@ class QuranIndopakSeeder @Inject constructor(
 ) {
     private val mutex = Mutex()
 
-    suspend fun seedIfNeeded() = mutex.withLock {
-        val stored = versionStore.get()
-        val populated = dao.countMushafLayoutIndopak16() > 0
-        if (populated && stored >= INDOPAK_CONTENT_VERSION) return@withLock
-        seed()
-        versionStore.set(INDOPAK_CONTENT_VERSION)
+    // Set once this process has confirmed the data is current, so every later page fetch
+    // (getMushafPageLayout runs this on each call) short-circuits instead of retaking the
+    // mutex for a DB count + DataStore read every time (#280 review).
+    @Volatile
+    private var seeded = false
+
+    suspend fun seedIfNeeded() {
+        if (seeded) return
+        mutex.withLock {
+            if (seeded) return@withLock
+            val stored = versionStore.get()
+            val populated = dao.countMushafLayoutIndopak16() > 0
+            if (populated && stored >= INDOPAK_CONTENT_VERSION) {
+                seeded = true
+                return@withLock
+            }
+            seed()
+            versionStore.set(INDOPAK_CONTENT_VERSION)
+            seeded = true
+        }
     }
 
     private suspend fun seed() {

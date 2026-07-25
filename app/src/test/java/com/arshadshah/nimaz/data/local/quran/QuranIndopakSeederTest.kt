@@ -96,4 +96,21 @@ class QuranIndopakSeederTest {
         seeder(dao, storedVersion = QuranIndopakSeeder.INDOPAK_CONTENT_VERSION).seedIfNeeded()
         coVerify(exactly = 1) { dao.replaceMushafIndopak16(any(), any()) }
     }
+
+    @Test
+    fun secondCallSkipsTheDbCheckEntirely_onceConfirmedCurrent() = runTest {
+        // getMushafPageLayout calls seedIfNeeded() on every page fetch (#280 review) — once a
+        // process has confirmed the data is current, later calls must not retake the mutex for
+        // another countMushafLayoutIndopak16()/version read.
+        val dao = mockk<QuranDao>(relaxed = true)
+        coEvery { dao.countMushafLayoutIndopak16() } returns 3
+        val instance = seeder(dao, storedVersion = QuranIndopakSeeder.INDOPAK_CONTENT_VERSION)
+
+        instance.seedIfNeeded()
+        instance.seedIfNeeded()
+        instance.seedIfNeeded()
+
+        coVerify(exactly = 1) { dao.countMushafLayoutIndopak16() }
+        coVerify(exactly = 0) { dao.replaceMushafIndopak16(any(), any()) }
+    }
 }

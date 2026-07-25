@@ -66,6 +66,8 @@ import com.arshadshah.nimaz.presentation.components.molecules.AudioBottomBar
 import com.arshadshah.nimaz.presentation.components.molecules.MushafPageBar
 import com.arshadshah.nimaz.presentation.components.molecules.SurahHeaderCartouche
 import com.arshadshah.nimaz.domain.model.Ayah
+import com.arshadshah.nimaz.domain.model.MushafLineType
+import com.arshadshah.nimaz.domain.model.MushafPageLayout
 import com.arshadshah.nimaz.domain.model.Surah
 import com.arshadshah.nimaz.presentation.components.organisms.AyahItem
 import com.arshadshah.nimaz.presentation.components.organisms.MushafLinePage
@@ -229,6 +231,13 @@ fun QuranReaderScreen(
     val displayAyahs = when (state.readingMode) {
         ReadingMode.SURAH -> state.surahWithAyahs?.ayahs ?: emptyList()
         ReadingMode.JUZ, ReadingMode.PAGE -> state.ayahs
+    }
+
+    // Full-ayah lookup (by global id) used to resolve translation/copy/share content for a
+    // 16-line word/page — best-effort from the Madani page cache; 6/7 makes the ayah source
+    // fully script-aware.
+    val ayahById = remember(state.pageCache) {
+        state.pageCache.values.flatten().associateBy { it.id }
     }
 
     val headerTitle = when (state.readingMode) {
@@ -404,14 +413,24 @@ fun QuranReaderScreen(
             )
         },
         bottomBar = {
-            // In page mode, use current page's ayahs for audio playback
+            // In page mode, use current page's ayahs for audio playback. In 16-line mode the
+            // pager index is an IndoPak page number (1-548) — an unrelated scheme from the
+            // Madani-keyed pageCache (populated via QuranEvent.LoadPage) — so it must be
+            // resolved from the IndoPak layout cache instead, or the bar shows/plays the wrong
+            // ayah (#280 review).
             val currentPageAyahsForAudio = if (pagerState != null) {
                 val currentQuranPageForAudio = if (isDualPageMode) {
                     pagerState.settledPage * 2 + 1 // right page of current spread
                 } else {
                     pagerState.settledPage + 1
                 }
-                state.pageCache[currentQuranPageForAudio] ?: displayAyahs
+                if (state.use16LineLayout) {
+                    state.mushafPageLayoutCache[currentQuranPageForAudio]
+                        ?.let { buildOrderedPageAyahsFromLayout(it, ayahById) }
+                        ?: displayAyahs
+                } else {
+                    state.pageCache[currentQuranPageForAudio] ?: displayAyahs
+                }
             } else {
                 displayAyahs
             }
@@ -539,13 +558,6 @@ fun QuranReaderScreen(
             } else if (pagerState != null && (state.readingMode == ReadingMode.PAGE || usePageView)) {
                 // Page mode with HorizontalPager (RTL so swipe-left = next page)
                 val surahMap = surahByNumber
-
-                // Full-ayah lookup (by global id) used only by the 16-line renderer to resolve
-                // translation/copy/share content for a tapped word. Best-effort from the
-                // Madani page cache; 6/7 makes the ayah source fully script-aware.
-                val ayahById = remember(state.pageCache) {
-                    state.pageCache.values.flatten().associateBy { it.id }
-                }
 
                 // Current Quran page numbers (1-based)
                 val currentRightPage = if (isDualPageMode) {
@@ -936,4 +948,42 @@ private fun ReaderMushafPage(
             modifier = modifier,
         )
     }
+}
+
+/**
+ * Reconstructs the ordered list of distinct ayahs printed on a 16-line Mushaf [layout] page,
+ * preferring full ayah content from [ayahById] (the Madani-keyed page cache) and falling back
+ * to a minimal layout-derived [Ayah] when the id isn't cached yet — mirrors the per-tap
+ * reconstruction [com.arshadshah.nimaz.presentation.components.organisms.MushafLinePage] does,
+ * so the audio bottom bar reads the same IndoPak page it renders instead of the unrelated
+ * Madani page at the same page number (#280 review).
+ */
+internal fun buildOrderedPageAyahsFromLayout(
+    layout: MushafPageLayout,
+    ayahById: Map<Int, Ayah>
+): List<Ayah> {
+    val result = mutableListOf<Ayah>()
+    val seen = mutableSetOf<Int>()
+    for (line in layout.lines) {
+        if (line.type != MushafLineType.AYAH) continue
+        for (word in line.words) {
+            if (!seen.add(word.ayahId)) continue
+            result.add(
+                ayahById[word.ayahId] ?: Ayah(
+                    id = word.ayahId,
+                    surahNumber = line.surahId,
+                    ayahNumber = word.ayahNumber,
+                    textArabic = "",
+                    textSimple = "",
+                    juzNumber = 0,
+                    hizbNumber = 0,
+                    rubNumber = 0,
+                    pageNumber = layout.page,
+                    sajdaType = null,
+                    sajdaNumber = null,
+                )
+            )
+        }
+    }
+    return result
 }

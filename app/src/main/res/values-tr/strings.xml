@@ -876,6 +876,10 @@
     <string name="arabic_font_size">Arapça Yazı Boyutu</string>
     <string name="arabic_font_size_value">%1$dpx</string>
     <string name="arabic_font">Arapça Yazı Tipi</string>
+    <string name="mushaf_layout">Mushaf Yazısı</string>
+    <string name="mushaf_layout_subtitle">Mushaf (sayfa) okuyucusu tarafından kullanılan sayfa düzeni</string>
+    <string name="mushaf_script_madani">Osmanlı (Medeni, 604 sayfa)</string>
+    <string name="mushaf_script_indopak16">IndoPak 16 satır (548 sayfa)</string>
     <string name="display_options">Görüntüleme Seçenekleri</string>
     <string name="show_transliteration">Transliterasyonu Göster</string>
     <string name="show_transliteration_subtitle">Latin harfleriyle okunuş</string>
