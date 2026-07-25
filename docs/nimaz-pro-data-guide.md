@@ -215,10 +215,37 @@ the artifact matches the DB. Tests live in
 nested/malformed/unknown/whitespace cases, the normalisation/alignment helpers,
 the munfasil/muttasil + qalqalah split, and the whole-corpus invariants.
 
-> Still open in sibling sub-issues of epic #287: Madd Lin population + the other
-> extended rules (#291), the renderer fixes (#293), the in-app legend +
-> accessibility (#294), and full CI validation (#292). The in-app legend will
-> consume `TajweedParser.rules` directly.
+**Rules not yet implemented (issue #291).** A printed colour-coded mushaf shows
+rules that *neither* shipped dataset marks. They are **not** in the pipeline yet
+because the derived ones encode fiqh-of-recitation decisions that **require
+scholarly review against a printed tajweed mushaf before shipping** (getting them
+wrong teaches incorrect recitation). Status:
+
+| Rule | Kind | Status |
+|---|---|---|
+| Tafkhim/Tarqiq of Raa (ر) | derived (position + vowel) | **not implemented** — needs review |
+| Tafkhim/Tarqiq of Lam in لفظ الجلالة | derived | **not implemented** — needs review |
+| Isti'la letters (خ ص ض غ ط ق ظ) always heavy | deterministic | recorded in `tajweed_special_rules.json` (not wired) |
+| Madd al-Lin (`ml`) | derived (و/ي sakinah after fatha before a stop) | code/colour defined (#289); **population needs review** |
+| Sakt (السكت) | enumerated | recorded + reconciled (see below); not wired |
+| Idgham Mutamathilayn | derived | **not implemented** |
+| Imalah 11:41 · Ishmam 12:11 · Tasheel 41:44 · Naql 49:11 | enumerated | recorded in `tajweed_special_rules.json`; not wired |
+| Qalqalah Sughra/Kubra | derived (positional) | **implemented** — `split_qalqalah`, word-final → kubra (a simplified heuristic; a waqf-mark-aware version is future) |
+| Waqf / stop signs (7 signs) | present-but-unstyled | classified in `tajweed_special_rules.json`; styling not wired |
+
+The enumerated, citable facts (fixed in Hafs) are recorded in
+**`json/tajweed_special_rules.json`** as a reference for a future *reviewed*
+implementation — that file is deliberately **not** consumed by
+`generate_database.py`. Notable reconciliation recorded there: the **7 occurrences
+of U+06DC** in `text_arabic` are 4 canonical Hafs sakt (18:1, 36:52, 75:27, 83:14)
++ 1 additional sakt (69:28, مَالِيَهْ→هَلَكَ) + 2 non-sakt uses of the same sign as
+the *small-seen-over-ṣād* alternate-reading marker (2:245, 7:69) — answering the
+"where do the extra 3 come from" question.
+
+> Still open in sibling sub-issues of epic #287: the extended rules above
+> (#291, with mandatory scholarly review), the in-app legend + accessibility UI
+> half (#294), the 63 fully-unannotated ayahs (#298), and the grapheme-boundary
+> decision (#299). The in-app legend will consume `TajweedParser.rules` directly.
 
 ## translations.json Format
 
