@@ -57,6 +57,9 @@ class NextWorshipResolver @Inject constructor(
         val offsets = enabledTypes.associateWith {
             settingsRepository.worshipReminderOffset(it.key, it.defaultOffsetMinutes).first()
         }
+        val witrBeforeFajr = settingsRepository.worshipReminderMode(
+            WorshipReminderType.WITR.key, WorshipReminderCalculator.WITR_MODE_AFTER_ISHA
+        ).first() == WorshipReminderCalculator.WITR_MODE_BEFORE_FAJR
 
         val zone = ZoneId.systemDefault()
         fun toLocal(instant: kotlin.time.Instant): LocalDateTime =
@@ -83,7 +86,10 @@ class NextWorshipResolver @Inject constructor(
             .mapNotNull { type ->
                 // Bound the search: anything "near" (≤ nearWindowHours) resolves within ~2 days,
                 // so the frequently-ticking Home path never scans the full 40-day horizon.
-                calculator.nextOccurrence(type, now, offsets.getValue(type), timesFor, hijriFor, maxSearchDays = 2)
+                calculator.nextOccurrence(
+                    type, now, offsets.getValue(type), timesFor, hijriFor,
+                    maxSearchDays = 2, witrBeforeFajr = witrBeforeFajr
+                )
             }
             .filter { Duration.between(now, it.eventAt) <= Duration.ofHours(nearWindowHours) }
             .minByOrNull { it.triggerAt }

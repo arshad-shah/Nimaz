@@ -48,7 +48,9 @@ class WorshipReminderCalculator {
         offsetMinutes: Int,
         timesFor: (LocalDate) -> DayWorshipTimes?,
         hijriFor: (LocalDate) -> HijriDayInfo?,
-        maxSearchDays: Long = forwardSearchDays
+        maxSearchDays: Long = forwardSearchDays,
+        /** Witr only: fire before Fajr (Fajr − offset) instead of after Isha (Isha + offset). */
+        witrBeforeFajr: Boolean = false
     ): WorshipReminderOccurrence? {
         val startDay = now.toLocalDate().minusDays(1)
         var day = startDay
@@ -56,7 +58,7 @@ class WorshipReminderCalculator {
         var best: WorshipReminderOccurrence? = null
 
         while (day.isBefore(end)) {
-            val occ = triggerForDay(type, day, offsetMinutes, timesFor, hijriFor)
+            val occ = triggerForDay(type, day, offsetMinutes, timesFor, hijriFor, witrBeforeFajr)
             if (occ != null && occ.triggerAt.isAfter(now)) {
                 if (best == null || occ.triggerAt.isBefore(best.triggerAt)) best = occ
                 // Daily reminders resolve on the first future day found; keep scanning only for
@@ -85,7 +87,8 @@ class WorshipReminderCalculator {
         day: LocalDate,
         offsetMinutes: Int,
         timesFor: (LocalDate) -> DayWorshipTimes?,
-        hijriFor: (LocalDate) -> HijriDayInfo?
+        hijriFor: (LocalDate) -> HijriDayInfo?,
+        witrBeforeFajr: Boolean = false
     ): WorshipReminderOccurrence? {
         val t = timesFor(day) ?: return null
         val hijri = hijriFor(day)
@@ -97,10 +100,11 @@ class WorshipReminderCalculator {
             WorshipReminderType.TAHAJJUD ->
                 occ(t.lastThirdOfNight, t.lastThirdOfNight)
 
-            // Foundation default: after Isha (mode/before-Fajr variant is issue A2). eventAt is the
-            // next Fajr so the card can show "Fajr in …".
+            // Two modes (#309): after Isha (default) → Isha + offset; or before Fajr → Fajr − offset.
+            // eventAt is the next Fajr either way so the card can show "Fajr in …".
             WorshipReminderType.WITR ->
-                occ(t.isha.plusMinutes(offsetMinutes.toLong()), t.fajr)
+                if (witrBeforeFajr) occ(t.fajr.minusMinutes(offsetMinutes.toLong()), t.fajr)
+                else occ(t.isha.plusMinutes(offsetMinutes.toLong()), t.fajr)
 
             WorshipReminderType.SUHOOR -> {
                 if (hijri?.isRamadan != true) return null
@@ -161,5 +165,9 @@ class WorshipReminderCalculator {
     companion object {
         /** Odd nights of the last ten of Ramadan on which Laylatul Qadr is sought. */
         val ODD_LAST_TEN = setOf(21, 23, 25, 27, 29)
+
+        /** Witr timing modes (pref value for `worshipReminderMode("witr", …)`). */
+        const val WITR_MODE_AFTER_ISHA = "after_isha"
+        const val WITR_MODE_BEFORE_FAJR = "before_fajr"
     }
 }

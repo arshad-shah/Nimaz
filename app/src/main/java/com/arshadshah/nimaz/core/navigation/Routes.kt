@@ -163,6 +163,19 @@ sealed interface Route {
     @Serializable
     data object SettingsWorshipReminders : Route
 
+    // Notification hub subscreens (#301).
+    @Serializable
+    data object SettingsNotificationsPrayers : Route
+
+    @Serializable
+    data object SettingsNotificationsWeekly : Route
+
+    @Serializable
+    data object SettingsNotificationsSound : Route
+
+    @Serializable
+    data object SettingsNotificationsTroubleshooting : Route
+
     @Serializable
     data object SettingsAppearance : Route
 

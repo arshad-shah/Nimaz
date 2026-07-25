@@ -193,7 +193,11 @@ prayers). The pure `WorshipReminderCalculator` (`core/util/`, JVM-tested) comput
 the DEFAULT-importance `worship_reminders` channel (`CHANNEL_ID_WORSHIP`) via
 `BootReceiver.handleWorshipReminder` (re-checks the per-type pref + re-applies the saved locale),
 with copy from `WorshipReminderContent`. Prefs are generic dynamic keys
-(`worship_<key>_enabled` / `_offset`) on `SettingsRepository`/`PreferencesDataStore`. Settings live
+(`worship_<key>_enabled` / `_offset` / `_mode`) on `SettingsRepository`/`PreferencesDataStore`. The
+notification settings screen is now a **hub** (`NotificationSettingsScreen`, #301) linking to focused
+subscreens — `PrayerNotificationsScreen`, `WorshipRemindersScreen`, `NotificationWeeklyScreen`,
+`NotificationSoundScreen`, `NotificationTroubleshootingScreen` (all new `Route`s), each rendering a
+slice of the shared `SettingsViewModel` state. Settings live
 on the dedicated `WorshipRemindersScreen` (`Route.SettingsWorshipReminders`), and the Home
 "Next Worship" card (`WorshipEventCard`, fed by `NextWorshipResolver`) surfaces the nearest enabled
 one. Ramadan-category reminders are Ramadan-gated and their settings group auto-hides outside

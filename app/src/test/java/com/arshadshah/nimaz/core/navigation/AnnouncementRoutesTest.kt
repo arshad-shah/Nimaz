@@ -19,6 +19,11 @@ class AnnouncementRoutesTest {
         // … and the new worship-reminders subscreen keys resolve.
         assertThat(announcementRoute("settings/notifications/worship")).isEqualTo(Route.SettingsWorshipReminders)
         assertThat(announcementRoute("settings/worship")).isEqualTo(Route.SettingsWorshipReminders)
+        // Notification hub subscreens (#301).
+        assertThat(announcementRoute("settings/notifications/prayers")).isEqualTo(Route.SettingsNotificationsPrayers)
+        assertThat(announcementRoute("settings/notifications/weekly")).isEqualTo(Route.SettingsNotificationsWeekly)
+        assertThat(announcementRoute("settings/notifications/sound")).isEqualTo(Route.SettingsNotificationsSound)
+        assertThat(announcementRoute("settings/notifications/troubleshooting")).isEqualTo(Route.SettingsNotificationsTroubleshooting)
     }
 
     @Test

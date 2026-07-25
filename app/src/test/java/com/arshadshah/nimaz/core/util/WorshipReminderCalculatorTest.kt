@@ -64,6 +64,27 @@ class WorshipReminderCalculatorTest {
         assertThat(occ.triggerAt).isEqualTo(LocalDate.of(2026, 3, 12).atTime(2, 40))
     }
 
+    // ── Witr: after-Isha (default) vs before-Fajr mode (#309) ────────────
+
+    @Test
+    fun `witr default mode fires after isha`() {
+        val now = LocalDate.of(2026, 3, 10).atTime(19, 0)
+        val occ = next(WorshipReminderType.WITR, now, offset = 30)!!
+        // Isha 20:00 + 30m = 20:30 the same evening.
+        assertThat(occ.triggerAt).isEqualTo(LocalDate.of(2026, 3, 10).atTime(20, 30))
+    }
+
+    @Test
+    fun `witr before-fajr mode fires fajr minus offset`() {
+        val now = LocalDate.of(2026, 3, 10).atTime(21, 0)
+        val occ = calc.nextOccurrence(
+            WorshipReminderType.WITR, now, 30, ::timesForDay,
+            hijriFor = ::nonRamadan, witrBeforeFajr = true
+        )!!
+        // Next Fajr 05:00 − 30m = 04:30 tomorrow morning.
+        assertThat(occ.triggerAt).isEqualTo(LocalDate.of(2026, 3, 11).atTime(4, 30))
+    }
+
     // ── Offsets: Suhoor (before Fajr), Iftar (at Maghrib), Taraweeh (after Isha) ──
 
     @Test

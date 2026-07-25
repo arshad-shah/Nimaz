@@ -120,6 +120,8 @@ data class NotificationSettingsUiState(
     // Extended worship reminders, keyed by WorshipReminderType.key.
     val worshipReminders: Map<String, Boolean> = emptyMap(),
     val worshipOffsets: Map<String, Int> = emptyMap(),
+    // Per-reminder mode (currently only Witr: "after_isha" | "before_fajr").
+    val worshipModes: Map<String, String> = emptyMap(),
 )
 
 /**
@@ -232,6 +234,7 @@ sealed interface SettingsEvent {
     /** Extended worship reminders, keyed by WorshipReminderType.key. */
     data class SetWorshipReminderEnabled(val key: String, val enabled: Boolean) : SettingsEvent
     data class SetWorshipReminderOffset(val key: String, val minutes: Int) : SettingsEvent
+    data class SetWorshipReminderMode(val key: String, val mode: String) : SettingsEvent
     data object PreviewAdhanSound : SettingsEvent
     data object StopAdhanPreview : SettingsEvent
 
@@ -673,6 +676,16 @@ class SettingsViewModel @Inject constructor(
                 }
             }
 
+            is SettingsEvent.SetWorshipReminderMode -> {
+                _notificationState.update {
+                    it.copy(worshipModes = it.worshipModes + (event.key to event.mode))
+                }
+                viewModelScope.launch {
+                    settingsRepository.setWorshipReminderMode(event.key, event.mode)
+                    rescheduleNotifications()
+                }
+            }
+
             is SettingsEvent.SetAdhanSound -> {
                 _notificationState.update { it.copy(selectedAdhanSound = event.sound) }
                 viewModelScope.launch {
@@ -999,6 +1012,13 @@ class SettingsViewModel @Inject constructor(
                 .associate { it.key to settingsRepository.worshipReminderEnabled(it.key).first() }
             val worshipOffsets = com.arshadshah.nimaz.domain.model.WorshipReminderType.entries
                 .associate { it.key to settingsRepository.worshipReminderOffset(it.key, it.defaultOffsetMinutes).first() }
+            val witrModeDefault = com.arshadshah.nimaz.core.util.WorshipReminderCalculator.WITR_MODE_AFTER_ISHA
+            val worshipModes = mapOf(
+                com.arshadshah.nimaz.domain.model.WorshipReminderType.WITR.key to
+                        settingsRepository.worshipReminderMode(
+                            com.arshadshah.nimaz.domain.model.WorshipReminderType.WITR.key, witrModeDefault
+                        ).first()
+            )
 
             _notificationState.update {
                 it.copy(
@@ -1026,7 +1046,8 @@ class SettingsViewModel @Inject constructor(
                     maghribNotification = maghribNotif,
                     ishaNotification = ishaNotif,
                     worshipReminders = worshipEnabled,
-                    worshipOffsets = worshipOffsets
+                    worshipOffsets = worshipOffsets,
+                    worshipModes = worshipModes
                 )
             }
 

@@ -44,6 +44,8 @@ private class FakeSettings(private val offset: Int) : SettingsRepository {
     override suspend fun setWorshipReminderEnabled(key: String, enabled: Boolean) {}
     override fun worshipReminderOffset(key: String, default: Int): Flow<Int> = flowOf(default)
     override suspend fun setWorshipReminderOffset(key: String, minutes: Int) {}
+    override fun worshipReminderMode(key: String, default: String): Flow<String> = flowOf(default)
+    override suspend fun setWorshipReminderMode(key: String, mode: String) {}
     override suspend fun clearAllData() {}
     override val onboardingCompleted: Flow<Boolean> = flowOf(true)
     override suspend fun setOnboardingCompleted(completed: Boolean) {}

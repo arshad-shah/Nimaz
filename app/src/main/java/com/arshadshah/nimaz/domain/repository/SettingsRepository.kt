@@ -128,6 +128,10 @@ interface SettingsRepository {
     /** Editable offset (minutes) for reminders that lead/lag their anchor prayer. */
     fun worshipReminderOffset(key: String, default: Int): Flow<Int>
     suspend fun setWorshipReminderOffset(key: String, minutes: Int)
+
+    /** Optional per-reminder mode string (e.g. Witr: "after_isha" | "before_fajr"). */
+    fun worshipReminderMode(key: String, default: String): Flow<String>
+    suspend fun setWorshipReminderMode(key: String, mode: String)
     val quranTranslatorId: Flow<String>
     suspend fun setQuranTranslatorId(translatorId: String)
     val showTranslation: Flow<Boolean>

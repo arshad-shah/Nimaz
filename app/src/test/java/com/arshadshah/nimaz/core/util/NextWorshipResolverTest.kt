@@ -38,6 +38,7 @@ class NextWorshipResolverTest {
         every { settings.ishaAdjustment } returns flowOf(0)
         every { settings.worshipReminderEnabled(any()) } returns flowOf(false)
         every { settings.worshipReminderOffset(any(), any()) } answers { flowOf(secondArg()) }
+        every { settings.worshipReminderMode(any(), any()) } answers { flowOf(secondArg()) }
         resolver = NextWorshipResolver(PrayerTimeCalculator(), settings)
     }
 

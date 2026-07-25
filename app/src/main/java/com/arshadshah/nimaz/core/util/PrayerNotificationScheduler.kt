@@ -506,6 +506,7 @@ class PrayerNotificationScheduler @Inject constructor(
         val hijriOffset: Int
         val enabledMap: Map<WorshipReminderType, Boolean>
         val offsetMap: Map<WorshipReminderType, Int>
+        val witrBeforeFajr: Boolean
         runBlocking {
             hijriOffset = settingsRepository.hijriDayOffset.first()
             enabledMap = WorshipReminderType.entries.associateWith {
@@ -514,6 +515,9 @@ class PrayerNotificationScheduler @Inject constructor(
             offsetMap = WorshipReminderType.entries.associateWith {
                 settingsRepository.worshipReminderOffset(it.key, it.defaultOffsetMinutes).first()
             }
+            witrBeforeFajr = settingsRepository.worshipReminderMode(
+                WorshipReminderType.WITR.key, WorshipReminderCalculator.WITR_MODE_AFTER_ISHA
+            ).first() == WorshipReminderCalculator.WITR_MODE_BEFORE_FAJR
         }
         if (enabledMap.values.none { it }) return
 
@@ -555,7 +559,8 @@ class PrayerNotificationScheduler @Inject constructor(
                 now = now,
                 offsetMinutes = offsetMap[type] ?: type.defaultOffsetMinutes,
                 timesFor = timesFor,
-                hijriFor = hijriFor
+                hijriFor = hijriFor,
+                witrBeforeFajr = witrBeforeFajr
             ) ?: return@forEach
             armWorshipReminder(type, occ.triggerAt, occ.eventAt, occ.subKey)
         }

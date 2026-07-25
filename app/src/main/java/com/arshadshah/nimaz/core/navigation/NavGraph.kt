@@ -98,6 +98,10 @@ import com.arshadshah.nimaz.presentation.screens.settings.AppearanceSettingsScre
 import com.arshadshah.nimaz.presentation.screens.settings.LanguageScreen
 import com.arshadshah.nimaz.presentation.screens.settings.LocationScreen
 import com.arshadshah.nimaz.presentation.screens.settings.NotificationSettingsScreen
+import com.arshadshah.nimaz.presentation.screens.settings.NotificationSoundScreen
+import com.arshadshah.nimaz.presentation.screens.settings.NotificationTroubleshootingScreen
+import com.arshadshah.nimaz.presentation.screens.settings.NotificationWeeklyScreen
+import com.arshadshah.nimaz.presentation.screens.settings.PrayerNotificationsScreen
 import com.arshadshah.nimaz.presentation.screens.settings.WorshipRemindersScreen
 import com.arshadshah.nimaz.presentation.screens.settings.PrayerSettingsScreen
 import com.arshadshah.nimaz.presentation.screens.settings.QuranSettingsScreen
@@ -813,14 +817,28 @@ fun NavGraph(
             taggedComposable<Route.SettingsNotifications>(ScreenTags.SettingsNotifications) {
                 NotificationSettingsScreen(
                     onNavigateBack = { navController.popBackStack() },
-                    onNavigateToWorshipReminders = { navController.navigate(Route.SettingsWorshipReminders) }
+                    onNavigateToPrayers = { navController.navigate(Route.SettingsNotificationsPrayers) },
+                    onNavigateToWorshipReminders = { navController.navigate(Route.SettingsWorshipReminders) },
+                    onNavigateToWeekly = { navController.navigate(Route.SettingsNotificationsWeekly) },
+                    onNavigateToSound = { navController.navigate(Route.SettingsNotificationsSound) },
+                    onNavigateToTroubleshooting = { navController.navigate(Route.SettingsNotificationsTroubleshooting) },
                 )
             }
 
             composable<Route.SettingsWorshipReminders> {
-                WorshipRemindersScreen(
-                    onNavigateBack = { navController.popBackStack() }
-                )
+                WorshipRemindersScreen(onNavigateBack = { navController.popBackStack() })
+            }
+            composable<Route.SettingsNotificationsPrayers> {
+                PrayerNotificationsScreen(onNavigateBack = { navController.popBackStack() })
+            }
+            composable<Route.SettingsNotificationsWeekly> {
+                NotificationWeeklyScreen(onNavigateBack = { navController.popBackStack() })
+            }
+            composable<Route.SettingsNotificationsSound> {
+                NotificationSoundScreen(onNavigateBack = { navController.popBackStack() })
+            }
+            composable<Route.SettingsNotificationsTroubleshooting> {
+                NotificationTroubleshootingScreen(onNavigateBack = { navController.popBackStack() })
             }
 
             taggedComposable<Route.SettingsAppearance>(ScreenTags.SettingsAppearance) {

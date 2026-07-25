@@ -567,6 +567,12 @@ class PreferencesDataStore @Inject constructor(
     override suspend fun setWorshipReminderOffset(key: String, minutes: Int) =
         put(intPreferencesKey("worship_${key}_offset"), minutes)
 
+    override fun worshipReminderMode(key: String, default: String): Flow<String> =
+        preference(stringPreferencesKey("worship_${key}_mode"), default)
+
+    override suspend fun setWorshipReminderMode(key: String, mode: String) =
+        put(stringPreferencesKey("worship_${key}_mode"), mode)
+
     // Quran Settings
     override val quranTranslatorId: Flow<String> =
         preference(PreferencesKeys.QURAN_TRANSLATOR_ID, "sahih_international")

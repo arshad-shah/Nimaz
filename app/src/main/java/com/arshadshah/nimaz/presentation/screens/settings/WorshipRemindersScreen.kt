@@ -78,33 +78,34 @@ fun WorshipRemindersScreen(
                 )
             }
 
+            val onToggle: (String, Boolean) -> Unit =
+                { key, enabled -> viewModel.onEvent(SettingsEvent.SetWorshipReminderEnabled(key, enabled)) }
+            val onOffset: (String, Int) -> Unit =
+                { key, min -> viewModel.onEvent(SettingsEvent.SetWorshipReminderOffset(key, min)) }
+            val onMode: (String, String) -> Unit =
+                { key, mode -> viewModel.onEvent(SettingsEvent.SetWorshipReminderMode(key, mode)) }
+
             worshipSection(
                 titleRes = R.string.worship_settings_section_night,
                 types = WorshipReminderType.entries.filter { it.category == WorshipReminderCategory.NIGHT },
-                state = state,
-                minutesFormat = minutesFormat,
-                onToggle = { key, enabled -> viewModel.onEvent(SettingsEvent.SetWorshipReminderEnabled(key, enabled)) },
-                onOffset = { key, min -> viewModel.onEvent(SettingsEvent.SetWorshipReminderOffset(key, min)) },
+                state = state, minutesFormat = minutesFormat,
+                onToggle = onToggle, onOffset = onOffset, onMode = onMode,
             )
 
             if (isRamadan) {
                 worshipSection(
                     titleRes = R.string.worship_settings_section_ramadan,
                     types = WorshipReminderType.entries.filter { it.category == WorshipReminderCategory.RAMADAN },
-                    state = state,
-                    minutesFormat = minutesFormat,
-                    onToggle = { key, enabled -> viewModel.onEvent(SettingsEvent.SetWorshipReminderEnabled(key, enabled)) },
-                    onOffset = { key, min -> viewModel.onEvent(SettingsEvent.SetWorshipReminderOffset(key, min)) },
+                    state = state, minutesFormat = minutesFormat,
+                    onToggle = onToggle, onOffset = onOffset, onMode = onMode,
                 )
             }
 
             worshipSection(
                 titleRes = R.string.worship_settings_section_fasting,
                 types = WorshipReminderType.entries.filter { it.category == WorshipReminderCategory.FASTING_DHIKR },
-                state = state,
-                minutesFormat = minutesFormat,
-                onToggle = { key, enabled -> viewModel.onEvent(SettingsEvent.SetWorshipReminderEnabled(key, enabled)) },
-                onOffset = { key, min -> viewModel.onEvent(SettingsEvent.SetWorshipReminderOffset(key, min)) },
+                state = state, minutesFormat = minutesFormat,
+                onToggle = onToggle, onOffset = onOffset, onMode = onMode,
             )
 
             item { Spacer(Modifier.height(16.dp)) }
@@ -119,6 +120,7 @@ private fun androidx.compose.foundation.lazy.LazyListScope.worshipSection(
     minutesFormat: String,
     onToggle: (String, Boolean) -> Unit,
     onOffset: (String, Int) -> Unit,
+    onMode: (String, String) -> Unit,
 ) {
     if (types.isEmpty()) return
     item(key = "header_$titleRes") { NimazSectionHeader(title = stringResource(titleRes)) }
@@ -132,6 +134,29 @@ private fun androidx.compose.foundation.lazy.LazyListScope.worshipSection(
                     checked = enabled,
                     onCheckedChange = { onToggle(type.key, it) }
                 )
+                // Witr timing mode (after Isha ↔ before Fajr) — tap to switch. #309.
+                if (enabled && type == WorshipReminderType.WITR) {
+                    val mode = state.worshipModes[type.key]
+                        ?: com.arshadshah.nimaz.core.util.WorshipReminderCalculator.WITR_MODE_AFTER_ISHA
+                    val beforeFajr =
+                        mode == com.arshadshah.nimaz.core.util.WorshipReminderCalculator.WITR_MODE_BEFORE_FAJR
+                    NimazSettingsItem(
+                        title = stringResource(R.string.worship_witr_mode_title),
+                        subtitle = stringResource(
+                            if (beforeFajr) R.string.worship_witr_mode_before_fajr
+                            else R.string.worship_witr_mode_after_isha
+                        ),
+                        onClick = {
+                            onMode(
+                                type.key,
+                                if (beforeFajr) com.arshadshah.nimaz.core.util.WorshipReminderCalculator.WITR_MODE_AFTER_ISHA
+                                else com.arshadshah.nimaz.core.util.WorshipReminderCalculator.WITR_MODE_BEFORE_FAJR
+                            )
+                        },
+                        showArrow = true,
+                        modifier = Modifier.padding(horizontal = 16.dp)
+                    )
+                }
                 if (enabled && type.hasOffset) {
                     val current = state.worshipOffsets[type.key] ?: type.defaultOffsetMinutes
                     NimazNumberStepper(

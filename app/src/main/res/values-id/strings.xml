@@ -1498,4 +1498,15 @@
     <string name="worship_when_mon_thu">Malam sebelum Senin &amp; Kamis</string>
     <string name="worship_when_white_days">Tanggal 13–15 bulan Hijriah</string>
     <string name="worship_when_arafah_ashura">Sehari sebelumnya</string>
+    <string name="worship_witr_mode_title">Waktu Witir</string>
+    <string name="worship_witr_mode_after_isha">Setelah Isya</string>
+    <string name="worship_witr_mode_before_fajr">Sebelum Subuh</string>
+    <string name="notif_hub_prayers_title">Notifikasi salat</string>
+    <string name="notif_hub_prayers_subtitle">5 salat harian · pra-azan · matahari terbit</string>
+    <string name="notif_hub_weekly_title">Mingguan &amp; bacaan</string>
+    <string name="notif_hub_weekly_subtitle">Jumat · pengingat Khatam</string>
+    <string name="notif_hub_sound_title">Suara &amp; pengiriman</string>
+    <string name="notif_hub_sound_subtitle">Azan · muazin · getaran · Jangan Ganggu</string>
+    <string name="notif_hub_troubleshooting_title">Pemecahan masalah</string>
+    <string name="notif_hub_troubleshooting_subtitle">Uji · atur ulang · pengoptimalan baterai</string>
 </resources>
