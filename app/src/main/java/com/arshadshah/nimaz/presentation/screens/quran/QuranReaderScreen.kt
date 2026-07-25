@@ -21,10 +21,11 @@ import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.ViewList
 import androidx.compose.material.icons.filled.AutoStories
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -64,6 +65,8 @@ import com.arshadshah.nimaz.presentation.components.atoms.PageSurahSeparator
 import com.arshadshah.nimaz.presentation.components.atoms.rememberNimazPagerState
 import com.arshadshah.nimaz.presentation.components.molecules.AudioBottomBar
 import com.arshadshah.nimaz.presentation.components.molecules.MushafPageBar
+import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownMenu
+import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownRow
 import com.arshadshah.nimaz.presentation.components.molecules.SurahHeaderCartouche
 import com.arshadshah.nimaz.domain.model.Ayah
 import com.arshadshah.nimaz.domain.model.MushafLineType
@@ -387,20 +390,50 @@ fun QuranReaderScreen(
                             )
                         }
                     }
-                    if (usePageView || state.readingMode == ReadingMode.SURAH || state.readingMode == ReadingMode.JUZ) {
-                        IconButton(onClick = { usePageView = !usePageView }) {
-                            NimazIcon(
-                                imageVector = if (usePageView) Icons.AutoMirrored.Filled.ViewList else Icons.Default.AutoStories,
-                                contentDescription = if (usePageView) stringResource(R.string.cd_switch_to_list_view) else stringResource(
-                                    R.string.cd_switch_to_page_view
-                                )
+                    // Reader controls collapsed into one overflow menu so the bar stays
+                    // minimal and nothing floats over the Arabic text. The view toggle is
+                    // only offered where switching is meaningful (dedicated page mode has
+                    // nothing to toggle to).
+                    var menuExpanded by remember { mutableStateOf(false) }
+                    val canToggleView = usePageView ||
+                        state.readingMode == ReadingMode.SURAH ||
+                        state.readingMode == ReadingMode.JUZ
+
+                    IconButton(onClick = { menuExpanded = true }) {
+                        NimazIcon(
+                            imageVector = Icons.Default.MoreVert,
+                            contentDescription = stringResource(R.string.cd_more_options)
+                        )
+                    }
+                    NimazDropdownMenu(
+                        expanded = menuExpanded,
+                        onDismissRequest = { menuExpanded = false },
+                    ) {
+                        if (canToggleView) {
+                            NimazDropdownRow(
+                                text = if (usePageView) {
+                                    stringResource(R.string.cd_switch_to_list_view)
+                                } else {
+                                    stringResource(R.string.cd_switch_to_page_view)
+                                },
+                                leadingIcon = if (usePageView) {
+                                    Icons.AutoMirrored.Filled.ViewList
+                                } else {
+                                    Icons.Default.AutoStories
+                                },
+                                onClick = {
+                                    usePageView = !usePageView
+                                    menuExpanded = false
+                                },
                             )
                         }
-                    }
-                    IconButton(onClick = onNavigateToQuranSettings) {
-                        NimazIcon(
-                            imageVector = Icons.Default.Settings,
-                            contentDescription = stringResource(R.string.cd_settings)
+                        NimazDropdownRow(
+                            text = stringResource(R.string.cd_settings),
+                            leadingIcon = Icons.Default.Settings,
+                            onClick = {
+                                menuExpanded = false
+                                onNavigateToQuranSettings()
+                            },
                         )
                     }
                 },
@@ -496,8 +529,10 @@ fun QuranReaderScreen(
         floatingActionButton = {
             // Khatam bulk-completion action. Floated (rather than an item pinned to
             // the top of the list) so it stays reachable on long surahs without
-            // scrolling back up — issue #260. Only meaningful in the surah list view;
-            // page view drives khatam per page from MushafPageBar.
+            // scrolling back up — issue #260. Icon-only so it stays compact and never
+            // spans the content the way the old extended (labelled) FAB did — the label
+            // is carried by the icon's contentDescription instead. Only meaningful in the
+            // surah list view; page view drives khatam per page from MushafPageBar.
             val khatamSurah = state.surahWithAyahs
             if (
                 state.activeKhatamId != null &&
@@ -512,31 +547,27 @@ fun QuranReaderScreen(
                     surahAyahIds.all { it in state.khatamReadAyahIds }
 
                 when {
-                    !allRead -> ExtendedFloatingActionButton(
+                    !allRead -> FloatingActionButton(
                         onClick = {
                             viewModel.onEvent(
                                 QuranEvent.MarkSurahAsReadForKhatam(khatamSurah.surah.number)
                             )
                         },
-                        icon = {
-                            NimazIcon(
-                                imageVector = Icons.Filled.CheckCircle,
-                                contentDescription = null,
-                            )
-                        },
-                        text = { Text(stringResource(R.string.quran_mark_all_read)) },
-                    )
+                    ) {
+                        NimazIcon(
+                            imageVector = Icons.Filled.CheckCircle,
+                            contentDescription = stringResource(R.string.quran_mark_all_read),
+                        )
+                    }
 
-                    khatamSurah.surah.number < 114 -> ExtendedFloatingActionButton(
+                    khatamSurah.surah.number < 114 -> FloatingActionButton(
                         onClick = { onNavigateToNextSurah(khatamSurah.surah.number + 1) },
-                        icon = {
-                            NimazIcon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                                contentDescription = null,
-                            )
-                        },
-                        text = { Text(stringResource(R.string.quran_continue_next_surah)) },
-                    )
+                    ) {
+                        NimazIcon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                            contentDescription = stringResource(R.string.quran_continue_next_surah),
+                        )
+                    }
                 }
             }
         },
