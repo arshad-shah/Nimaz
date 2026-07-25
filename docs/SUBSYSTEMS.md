@@ -266,6 +266,12 @@ idempotently, so fresh installs and upgraders converge on the same content.
 | Hadith | `data/local/hadith/HadithBackfillSeeder.kt` | `hadith/hadith_fills.json` | keyed UPDATE backfill |
 | IndoPak 16-line | `data/local/quran/QuranIndopakSeeder.kt` | `quran/ayahs_indopak.json` + `quran/mushaf_layout_indopak16.json` | `text_indopak` UPDATE + `mushaf_layout_indopak16` replace |
 
+> **IndoPak font (issue #267, 3/7).** The seeded `text_indopak` embeds per-ayah number ornaments as
+> Private Use Area glyphs (U+F500…U+F6FF) that only render in the matching face. That face is bundled
+> at `app/src/main/res/font/indopak_nastaleeq.ttf` (*AlQuran IndoPak by QuranWBW* v2.100) and exposed
+> as `QuranArabicFont.INDOPAK` in `presentation/theme/Type.kt`. Licence/attribution + release sign-off
+> flag: `docs/FONT_LICENSES.md`.
+
 **Content-version pattern.** The version is stored in **DataStore** (not a file, not a table):
 `PreferencesKeys.{DUA,HELP,QAIDA}_CONTENT_VERSION`, `HADITH_BACKFILL_VERSION` and `INDOPAK_CONTENT_VERSION` (default `0` = never seeded). Each JSON root carries a `contentVersion: Int` field (the IndoPak assets are plain arrays, so `QuranIndopakSeeder` uses an in-code `INDOPAK_CONTENT_VERSION` constant instead). `seedIfNeeded()`:
 1. parse the JSON asset;

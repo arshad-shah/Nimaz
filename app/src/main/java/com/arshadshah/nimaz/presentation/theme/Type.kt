@@ -38,6 +38,17 @@ val ScheherazadeFontFamily = FontFamily(
     Font(R.font.scheherazade_new_bold, weight = FontWeight.Bold)
 )
 
+// IndoPak Nastaʿlīq for the 16-line IndoPak Mushaf (issue #267, part of #263).
+// "AlQuran IndoPak by QuranWBW" — the exact companion font for the QUL IndoPak
+// text/layout bundled in assets/quran/ (ayahs_indopak.json). Besides full IndoPak
+// letterform + diacritic coverage, it carries the per-ayah number ornaments in its
+// Private Use Area (U+F500…U+F6FF) that the source text embeds at every ayah end —
+// no other Arabic font renders those. Ships unmodified (its terms forbid editing),
+// single Regular weight only. Attribution/licence: docs/FONT_LICENSES.md.
+val IndoPakFontFamily = FontFamily(
+    Font(R.font.indopak_nastaleeq, weight = FontWeight.Normal)
+)
+
 /**
  * Selectable Arabic fonts for Quran text.
  *
@@ -53,7 +64,8 @@ enum class QuranArabicFont(
     val fontFamily: FontFamily
 ) {
     AMIRI("amiri", "Amiri", AmiriFontFamily),
-    SCHEHERAZADE("scheherazade", "Scheherazade New", ScheherazadeFontFamily);
+    SCHEHERAZADE("scheherazade", "Scheherazade New", ScheherazadeFontFamily),
+    INDOPAK("indopak", "IndoPak (Nastaʿlīq)", IndoPakFontFamily);
 
     companion object {
         val DEFAULT = AMIRI

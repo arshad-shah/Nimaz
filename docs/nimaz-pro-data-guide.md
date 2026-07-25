@@ -161,10 +161,14 @@ with the layout's word positions, and `text_indopak == " ".join(words)`:
   }
 ]
 ```
-The final `words[]` entry of most ayahs is QUL's end-of-ayah marker glyph; it — like the IndoPak
-diacritics — renders fully only with a matching IndoPak font (font sourcing is a later #263
-sub-task). Any detached waqf mark that the source renders as a spaced fragment is re-attached to
-its word so positions stay 1:1 with the layout.
+The final `words[]` entry of most ayahs is QUL's end-of-ayah marker glyph (a Private Use Area
+codepoint, U+F500…U+F6FF); it — like the IndoPak diacritics — renders fully only with the matching
+IndoPak font. That font is now bundled (sub-task 3/7, issue #267):
+`app/src/main/res/font/indopak_nastaleeq.ttf` = *AlQuran IndoPak by QuranWBW* v2.100, the QUL
+companion face, verified to cover all 346 PUA marker codepoints used here plus full IndoPak
+letterforms; wired into the font picker as `QuranArabicFont.INDOPAK` (`presentation/theme/Type.kt`),
+licence/attribution in `docs/FONT_LICENSES.md`. Any detached waqf mark that the source renders as a
+spaced fragment is re-attached to its word so positions stay 1:1 with the layout.
 
 `nimaz-pro-data/json/mushaf_layout_indopak16.json` — one row per line-segment (a line may hold one
 or more ayahs/partial ayahs, a surah header, or a basmalah):
