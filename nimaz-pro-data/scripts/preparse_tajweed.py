@@ -7,8 +7,12 @@ To: [{"t": "text", "r": "g"}]
 
 This eliminates runtime regex parsing in the Android app.
 
-V2 rule codes — each tajweed sub-type gets its own code so the app can
-assign distinct colors matching a standard colour-coded mushaf.
+V3 rule codes — each tajweed sub-type gets its own code so the app can
+assign distinct colors matching a standard colour-coded mushaf. V3 (issue
+#289) corrects the madd taxonomy: `madda_obligatory` is split into Madd Jaiz
+Munfasil (`mf`) and Madd Wajib Muttasil (`mt`), `madda_permissible` is
+re-labelled Madd 'Aarid lis-Sukun (`ma`), and qalqalah is split into
+sughra/kubra (`qs`/`qk`). See the RULE_CODES map below.
 
 Nested tags
 -----------
@@ -26,8 +30,9 @@ This module uses a **stack-based tokenizer** instead. Semantics:
 
 * the **innermost** rule wins for the characters it covers, and the outer
   rule is kept for the remaining characters. For ``2:190`` above that yields
-  three segments — ``ُوٓ`` = ``mo``, ``اْ`` = ``sl``, ``‌ۚ`` = ``mo`` — rather
-  than one mislabelled ``ُوٓاْ‌ۚ`` = ``mo`` span with leaked markup.
+  three segments — ``ُوٓ`` = ``mt``, ``اْ`` = ``sl``, ``‌ۚ`` = ``mt`` (the
+  ``madda_obligatory`` code; see the V3 taxonomy below) — rather than one
+  mislabelled span with leaked markup.
 
 Because of this, per-*segment* code counts do not equal raw *tag* counts for
 overlapping tags (an outer tag split by an inner produces 2+ segments; an
@@ -39,18 +44,35 @@ text exactly (tags and verse markers removed), so no character is ever lost.
 import difflib
 import json
 import re
+import unicodedata
 from pathlib import Path
 
-# ── V2 Rule Code Map ──────────────────────────────────────────────────
-# Every class from the Quran.com uthmani_tajweed API is mapped to a
-# unique short code.  This lets the Android renderer show a different
-# colour for each tajweed sub-rule, matching printed tajweed mushafs.
+# ── V3 Rule Code Map ──────────────────────────────────────────────────
+# Every class from the Quran.com uthmani_tajweed API is mapped to a short
+# code.  This lets the Android renderer show a different colour for each
+# tajweed sub-rule, matching printed tajweed mushafs.
 #
-# Classes present in tajweed.json (18):
-#   end, ghunnah, ham_wasl, idgham_ghunnah, idgham_mutajanisayn,
-#   idgham_mutaqaribayn, idgham_shafawi, idgham_wo_ghunnah, ikhafa,
-#   ikhafa_shafawi, iqlab, laam_shamsiyah, madda_necessary, madda_normal,
-#   madda_obligatory, madda_permissible, qalaqah, slnt
+# V3 (issue #289) corrects the madd taxonomy. The quran.com source merges two
+# distinct rules under `madda_obligatory` and mis-labels `madda_permissible`;
+# cross-validated against the independent `tajweed_cpfair.json` dataset the
+# real split is:
+#
+#   quran.com `madda_obligatory` (5166)  =  Madd Jaiz Munfasil   (`mf`, 2/4/5)
+#                                         +  Madd Wajib Muttasil  (`mt`, 4/5)
+#   quran.com `madda_permissible`(4543)  =  Madd 'Aarid lis-Sukun (`ma`, 2/4/6)
+#
+# The munfasil/muttasil split is applied at the *source-tag* level in
+# reclassify_madd_obligatory() using cpfair's per-ayah ordering (see below);
+# `madd_munfasil` / `madd_muttasil` are therefore synthetic classes injected
+# before tokenizing.  Qalqalah is split into sughra/kubra positionally by
+# split_qalqalah().  Beat counts follow the Hafs 'an 'Asim reading (ref:
+# Kareema Czerepinski, *Tajweed Rules of the Qur'an*, Parts I–III).
+#
+# Base classes present in tajweed.json (18): end, ghunnah, ham_wasl,
+#   idgham_ghunnah, idgham_mutajanisayn, idgham_mutaqaribayn, idgham_shafawi,
+#   idgham_wo_ghunnah, ikhafa, ikhafa_shafawi, iqlab, laam_shamsiyah,
+#   madda_necessary, madda_normal, madda_obligatory, madda_permissible,
+#   qalaqah, slnt
 RULE_CODES = {
     # ── Ghunnah (nasalisation, 2 beats) ──
     'ghunnah': 'g',
@@ -81,24 +103,34 @@ RULE_CODES = {
     # ── Idgham Mutaqaribayn (merging of close-articulation letters) ──
     'idgham_mutaqaribayn': 'dk',
 
-    # ── Qalqalah (echoing / bouncing) ──
+    # ── Qalqalah (echoing / bouncing) ── split into sughra/kubra by
+    #    split_qalqalah(); 'q' is the intermediate/legacy code.
     'qalqalah': 'q',
     'qalaqah': 'q',
 
-    # ── Madd Normal / Tabee'i (natural elongation, 2 beats) ──
+    # ── Madd Tabee'i / Normal (natural elongation, 2 beats) ──
     'madd': 'mn',
     'madd_normal': 'mn',
     'madda_normal': 'mn',
 
-    # ── Madd Jaiz Munfasil (permissible elongation, 2-4-5 beats) ──
-    'madd_permissible': 'mp',
-    'madda_permissible': 'mp',
+    # ── Madd 'Aarid lis-Sukun (2/4/6 beats) — what `madda_permissible`
+    #    actually marks (cpfair `madd_246`), NOT munfasil. ──
+    'madd_permissible': 'ma',
+    'madda_permissible': 'ma',
+    'madd_246': 'ma',
 
-    # ── Madd Wajib Muttasil (obligatory elongation, 4-5 beats) ──
-    'madd_obligatory': 'mo',
-    'madda_obligatory': 'mo',
+    # ── Madd Jaiz Munfasil (permissible, 2/4/5 beats) — synthetic class,
+    #    split out of `madda_obligatory` by reclassify_madd_obligatory(). ──
+    'madd_munfasil': 'mf',
 
-    # ── Madd Lazim (necessary elongation, 6 beats) ──
+    # ── Madd Wajib Muttasil (obligatory, 4/5 beats) — the true meaning of
+    #    `madda_obligatory`; unsplit/fallback `madda_obligatory` also maps
+    #    here (conservative obligatory default). ──
+    'madd_muttasil': 'mt',
+    'madd_obligatory': 'mt',
+    'madda_obligatory': 'mt',
+
+    # ── Madd Lazim / Necessary (6 beats) ──
     'madd_necessary': 'my',
     'madda_necessary': 'my',
 
@@ -128,6 +160,16 @@ TAG_CLOSE = '</tajweed>'
 # Pattern to match span end markers (verse numbers)
 END_SPAN_PATTERN = re.compile(r'<span\s+class=end>.*?</span>')
 
+# Matches a `madda_obligatory` opening tag, capturing the surrounding markup so
+# only the class name is rewritten (issue #289 munfasil/muttasil split).
+MADD_OBLIGATORY_TAG = re.compile(
+    r'(<tajweed\s+class=(["\']?))madda_obligatory(\2\s*>)'
+)
+
+# Qalqalah letters (qutb jadd — ق ط ب ج د). Used to split qalqalah into
+# sughra (medial) vs kubra (word-final) positionally.
+QALQALAH_LETTERS = set('قطبجد')
+
 # ── Source fix-ups ────────────────────────────────────────────────────
 # The upstream quran.com source has a small number of ayahs that are
 # malformed at source (broken/absent markup). Each entry is a list of
@@ -155,7 +197,97 @@ def apply_source_fixups(key, html_text):
     return html_text
 
 
-def preparse_tajweed(html_text, key=None):
+def cpfair_madd_sequence(cpfair_entry):
+    """Ordered munfasil/muttasil rules for an ayah's cpfair entry, in text order.
+
+    ``cpfair_entry`` is one record of ``tajweed_cpfair.json``
+    (``{"surah", "ayah", "annotations": [{"start", "end", "rule"}]}``). Returns
+    the ``madd_munfasil`` / ``madd_muttasil`` rules sorted by start offset — the
+    reading-order sequence the ``madda_obligatory`` tags are matched against.
+    """
+    if not cpfair_entry:
+        return []
+    return [
+        a['rule']
+        for a in sorted(cpfair_entry['annotations'], key=lambda a: a['start'])
+        if a['rule'] in ('madd_munfasil', 'madd_muttasil')
+    ]
+
+
+def reclassify_madd_obligatory(html_text, cpfair_entry):
+    """
+    Split the quran.com ``madda_obligatory`` tags into Madd Jaiz Munfasil and
+    Madd Wajib Muttasil (issue #289), rewriting the class name *at source* so
+    the tokenizer handles nesting naturally.
+
+    quran.com merges both rules under one class; the independent cpfair dataset
+    distinguishes them. Per-ayah the two sources agree on the total count for
+    6 227/6 236 ayahs; where the i-th ``madda_obligatory`` tag (in text order)
+    lines up with cpfair's i-th munfasil/muttasil annotation, the class is
+    rewritten to the synthetic ``madd_munfasil`` / ``madd_muttasil`` (→ ``mf`` /
+    ``mt``). When the counts disagree (9 ayahs) the tags are left as
+    ``madda_obligatory`` — which maps to ``mt`` (the conservative obligatory
+    default), so nothing regresses.
+    """
+    seq = cpfair_madd_sequence(cpfair_entry)
+    if not seq:
+        return html_text
+    if len(MADD_OBLIGATORY_TAG.findall(html_text)) != len(seq):
+        return html_text  # count mismatch → leave as madda_obligatory (→ mt)
+
+    rules = iter(seq)
+
+    def _rewrite(match):
+        rule = next(rules)
+        synthetic = 'madd_munfasil' if rule == 'madd_munfasil' else 'madd_muttasil'
+        return match.group(1) + synthetic + match.group(3)
+
+    return MADD_OBLIGATORY_TAG.sub(_rewrite, html_text)
+
+
+def _is_combining(ch):
+    """True for a non-spacing / combining mark (Unicode category starting 'M')."""
+    return unicodedata.category(ch).startswith('M')
+
+
+def split_qalqalah(segments):
+    """
+    Split qalqalah (``q``) segments into Sughra (``qs``) and Kubra (``qk``).
+
+    Qalqalah Kubra ("greater") applies when the qalqalah letter is **word-final**
+    (stopped on); Sughra ("lesser") applies mid-word. This is derived positionally
+    from the surrounding text: a ``q`` segment is Kubra when the next base letter
+    (skipping combining marks) is a word boundary or the ayah end, else Sughra.
+
+    This is the standard simplified pedagogy; a fuller treatment keyed to actual
+    waqf/stop marks is left to the extended-rules pass (#291).
+    """
+    full = ''.join(seg['t'] for seg in segments)
+    starts = []
+    pos = 0
+    for seg in segments:
+        starts.append(pos)
+        pos += len(seg['t'])
+
+    for i, seg in enumerate(segments):
+        if seg['r'] != 'q':
+            continue
+        j = starts[i] + len(seg['t'])
+        next_base = None
+        while j < len(full):
+            ch = full[j]
+            if ch == ' ' or ch == '‌':  # space or ZWNJ → word boundary
+                next_base = ' '
+                break
+            if not _is_combining(ch):
+                next_base = ch
+                break
+            j += 1
+        seg['r'] = 'qk' if next_base in (None, ' ') else 'qs'
+    return segments
+
+
+def preparse_tajweed(html_text, key=None, cpfair_entry=None):
     """
     Convert HTML tajweed text to simplified JSON segments.
 
@@ -167,6 +299,9 @@ def preparse_tajweed(html_text, key=None):
         html_text: Text with <tajweed class="rule">text</tajweed> markup.
         key: Optional "surah:ayah" key used to (a) apply SOURCE_FIXUPS and
              (b) produce actionable error messages.
+        cpfair_entry: Optional cpfair record for this ayah. When given, the
+             ``madda_obligatory`` tags are split into munfasil/muttasil before
+             tokenizing (issue #289).
 
     Returns:
         List of segments: [{"t": "text", "r": "code"}, ...]
@@ -184,6 +319,9 @@ def preparse_tajweed(html_text, key=None):
 
     if key is not None:
         html_text = apply_source_fixups(key, html_text)
+
+    if cpfair_entry is not None:
+        html_text = reclassify_madd_obligatory(html_text, cpfair_entry)
 
     # Remove end span markers (verse numbers) - they're not needed in the parsed format.
     # Strip once at the boundary; internal whitespace (word spacing) is preserved.
@@ -237,6 +375,9 @@ def preparse_tajweed(html_text, key=None):
 
     if stack:
         raise ValueError(f"Unclosed tajweed tag(s) {stack}{where}: {html_text!r}")
+
+    # Split qalqalah into sughra/kubra positionally (issue #289).
+    split_qalqalah(segments)
 
     return segments
 
@@ -333,7 +474,14 @@ def align_segments_to_canonical(segments, canonical_text):
     return merged
 
 
-def preparse_tajweed_file(input_path, output_path=None, ayahs_path=None):
+def load_cpfair(cpfair_path):
+    """Load ``tajweed_cpfair.json`` into a ``{"surah:ayah": entry}`` lookup."""
+    with open(cpfair_path, 'r', encoding='utf-8') as f:
+        return {f"{e['surah']}:{e['ayah']}": e for e in json.load(f)}
+
+
+def preparse_tajweed_file(input_path, output_path=None, ayahs_path=None,
+                          cpfair_path=None):
     """
     Pre-parse an entire tajweed.json file.
 
@@ -344,6 +492,8 @@ def preparse_tajweed_file(input_path, output_path=None, ayahs_path=None):
             segments are re-derived over the normalised canonical
             ``text_arabic`` (issue #290) so the reference artifact matches the
             shipped DB (``strip(text_tajweed) == normalise_uthmani(text_arabic)``).
+        cpfair_path: Optional path to tajweed_cpfair.json. When given, the madd
+            taxonomy is split into munfasil/muttasil (issue #289).
     """
     input_path = Path(input_path)
     if output_path is None:
@@ -362,10 +512,16 @@ def preparse_tajweed_file(input_path, output_path=None, ayahs_path=None):
                 canonical_by_key[f"{a['surah_id']}:{a['number_in_surah']}"] = a['text_arabic']
         print(f"Loaded {len(canonical_by_key)} canonical ayah texts from {ayahs_path}")
 
+    cpfair_by_key = {}
+    if cpfair_path is not None:
+        cpfair_by_key = load_cpfair(cpfair_path)
+        print(f"Loaded {len(cpfair_by_key)} cpfair entries from {cpfair_path}")
+
     print(f"Pre-parsing {len(tajweed_data)} entries...")
     parsed_data = {}
     for key, html_text in tajweed_data.items():
-        segments = preparse_tajweed(html_text, key=key)
+        segments = preparse_tajweed(html_text, key=key,
+                                    cpfair_entry=cpfair_by_key.get(key))
         canonical = canonical_by_key.get(key)
         if canonical is not None:
             segments = align_segments_to_canonical(segments, normalise_uthmani(canonical))
@@ -380,7 +536,7 @@ def preparse_tajweed_file(input_path, output_path=None, ayahs_path=None):
     return parsed_data
 
 
-def preparse_single(html_text, key=None, canonical_text=None):
+def preparse_single(html_text, key=None, canonical_text=None, cpfair_entry=None):
     """
     Pre-parse a single HTML tajweed string and return JSON string.
     Used by generate_database.py for inline conversion.
@@ -388,12 +544,15 @@ def preparse_single(html_text, key=None, canonical_text=None):
     Pass ``key`` ("surah:ayah") so SOURCE_FIXUPS are applied on the actual
     shipped-DB generation path.
 
+    Pass ``cpfair_entry`` (the ayah's ``tajweed_cpfair.json`` record) to split
+    the madd taxonomy into munfasil/muttasil (issue #289).
+
     Pass ``canonical_text`` (the ayah's ``text_arabic``) to re-derive the
     coloured segments over the normalised canonical text (issue #290), so the
     stored segments round-trip to ``normalise_uthmani(text_arabic)`` exactly.
     When omitted, the raw tag-parsed segments are returned unchanged.
     """
-    segments = preparse_tajweed(html_text, key=key)
+    segments = preparse_tajweed(html_text, key=key, cpfair_entry=cpfair_entry)
     if canonical_text is not None:
         segments = align_segments_to_canonical(segments, normalise_uthmani(canonical_text))
     return json.dumps(segments, ensure_ascii=False)
@@ -405,11 +564,13 @@ if __name__ == "__main__":
     json_dir = Path(__file__).parent.parent / "json"
     tajweed_path = json_dir / "tajweed.json"
     ayahs_path = json_dir / "ayahs.json"
+    cpfair_path = json_dir / "tajweed_cpfair.json"
 
     if tajweed_path.exists():
         preparse_tajweed_file(
             tajweed_path,
             ayahs_path=ayahs_path if ayahs_path.exists() else None,
+            cpfair_path=cpfair_path if cpfair_path.exists() else None,
         )
     else:
         print(f"Error: {tajweed_path} not found")

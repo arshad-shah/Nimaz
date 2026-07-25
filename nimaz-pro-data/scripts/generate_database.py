@@ -7,7 +7,7 @@ Converts JSON files to pre-populated Room database
 import sqlite3
 import json
 from pathlib import Path
-from preparse_tajweed import preparse_single, normalise_uthmani
+from preparse_tajweed import preparse_single, normalise_uthmani, load_cpfair
 
 JSON_DIR = Path(__file__).parent.parent / "json"
 OUTPUT_DB = Path(__file__).parent.parent / "output" / "nimaz_prepopulated.db"
@@ -725,6 +725,14 @@ def populate_database(conn):
     else:
         print("Warning: No tajweed data found")
 
+    # cpfair dataset drives the madd munfasil/muttasil split (issue #289).
+    cpfair_path = JSON_DIR / "tajweed_cpfair.json"
+    cpfair_by_key = load_cpfair(cpfair_path) if cpfair_path.exists() else {}
+    if cpfair_by_key:
+        print(f"Loaded cpfair madd data for {len(cpfair_by_key)} ayahs")
+    else:
+        print("Warning: No cpfair data found — madd will not be split")
+
     # Ayahs (with transliteration and tajweed)
     ayahs = load_json('ayahs.json')
     for a in ayahs:
@@ -740,10 +748,16 @@ def populate_database(conn):
         raw_tajweed = tajweed_data.get(tajweed_key) if tajweed_data else None
         # Pre-parse HTML tajweed to JSON format for efficient rendering.
         # Pass the key so SOURCE_FIXUPS (e.g. the malformed 32:3 source) apply,
-        # and the canonical text so the coloured segments are re-derived over
+        # the cpfair entry so madd is split into munfasil/muttasil (#289), and
+        # the canonical text so the coloured segments are re-derived over
         # text_arabic — guaranteeing strip(text_tajweed) == text_arabic (#290).
         text_tajweed = (
-            preparse_single(raw_tajweed, key=tajweed_key, canonical_text=text_arabic)
+            preparse_single(
+                raw_tajweed,
+                key=tajweed_key,
+                canonical_text=text_arabic,
+                cpfair_entry=cpfair_by_key.get(tajweed_key),
+            )
             if raw_tajweed else None
         )
 

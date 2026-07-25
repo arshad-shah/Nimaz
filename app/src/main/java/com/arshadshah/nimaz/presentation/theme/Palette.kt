@@ -86,9 +86,11 @@ object NimazPalette {
     val GreenDeep = Color(0xFF2E7D32)    // Material green 800 — jumuah accent
 
     // ── Red ───────────────────────────────────────────────────────────────────
+    val Red300 = Color(0xFFFCA5A5)
     val Red400 = Color(0xFFF87171)
     val Red500 = Color(0xFFEF4444)
     val Red600 = Color(0xFFDC2626)
+    val Red700 = Color(0xFFB91C1C)
     val MatRed = Color(0xFFF44336)       // Material red — missed
     val ErrorRed = Color(0xFFB00020)
     val ErrorPink = Color(0xFFCF6679)    // dark-theme error
@@ -105,9 +107,11 @@ object NimazPalette {
     val MatOrange400 = Color(0xFFFFA726) // partial completion
 
     // ── Blue / Sky ────────────────────────────────────────────────────────────
+    val Blue300 = Color(0xFF93C5FD)
     val Blue400 = Color(0xFF60A5FA)
     val Blue500 = Color(0xFF3B82F6)
     val Blue600 = Color(0xFF2563EB)
+    val Blue700 = Color(0xFF1D4ED8)
     val BlueSoft = Color(0xFF5B8DEF)     // info-soft
     val Sky500 = Color(0xFF0EA5E9)
     val MatBlue = Color(0xFF2196F3)      // Material blue — jamaah/investment
@@ -129,9 +133,11 @@ object NimazPalette {
     val MatPurple = Color(0xFF9C27B0)    // Material purple — ramadan/qada
 
     // ── Pink / Rose ───────────────────────────────────────────────────────────
+    val Pink300 = Color(0xFFF9A8D4)
     val Pink400 = Color(0xFFF472B6)
     val Pink500 = Color(0xFFEC4899)
     val Pink600 = Color(0xFFDB2777)
+    val Pink700 = Color(0xFFBE185D)
     val Rose300 = Color(0xFFFDA4AF)
     val Rose400 = Color(0xFFFB7185)
     val Rose600 = Color(0xFFE11D48)

@@ -28,8 +28,11 @@ from preparse_tajweed import (  # noqa: E402
     END_SPAN_PATTERN,
     align_segments_to_canonical,
     apply_source_fixups,
+    cpfair_madd_sequence,
     normalise_uthmani,
     preparse_tajweed,
+    reclassify_madd_obligatory,
+    split_qalqalah,
 )
 
 
@@ -97,6 +100,7 @@ class TestWhitespace(unittest.TestCase):
 class TestNestedTags(unittest.TestCase):
     def test_innermost_wins_outer_keeps_rest(self):
         # The 2:190 shape: madda_obligatory wrapping a nested slnt.
+        # Without a cpfair entry, madda_obligatory maps to "mt" (v3 fallback).
         result = preparse_tajweed(
             "a<tajweed class=madda_obligatory>b"
             "<tajweed class=slnt>c</tajweed>d</tajweed>e"
@@ -105,9 +109,9 @@ class TestNestedTags(unittest.TestCase):
             result,
             [
                 {"t": "a", "r": None},
-                {"t": "b", "r": "mo"},   # outer, before inner
+                {"t": "b", "r": "mt"},   # outer, before inner
                 {"t": "c", "r": "sl"},   # inner wins
-                {"t": "d", "r": "mo"},   # outer, after inner
+                {"t": "d", "r": "mt"},   # outer, after inner
                 {"t": "e", "r": None},
             ],
         )
@@ -291,6 +295,102 @@ class TestFullSourceOrthography(unittest.TestCase):
             if any(ch in canonical for ch in ("﻿", "​", "‌", "‍")):
                 offenders.append(f"{a['surah_id']}:{a['number_in_surah']}")
         self.assertEqual(offenders, [])
+
+
+class TestMaddTaxonomy(unittest.TestCase):
+    """Munfasil / muttasil split via cpfair (issue #289)."""
+
+    def _entry(self, *rules):
+        # build a cpfair-like entry with annotations in the given order
+        return {"annotations": [
+            {"start": i, "end": i + 1, "rule": r} for i, r in enumerate(rules)
+        ]}
+
+    def test_cpfair_sequence_sorted_and_filtered(self):
+        entry = {"annotations": [
+            {"start": 5, "end": 6, "rule": "madd_muttasil"},
+            {"start": 1, "end": 2, "rule": "madd_2"},          # ignored
+            {"start": 3, "end": 4, "rule": "madd_munfasil"},
+        ]}
+        self.assertEqual(
+            cpfair_madd_sequence(entry),
+            ["madd_munfasil", "madd_muttasil"],  # by start offset
+        )
+
+    def test_reclassify_splits_in_order(self):
+        html = ("a<tajweed class=madda_obligatory>x</tajweed>"
+                "b<tajweed class=madda_obligatory>y</tajweed>")
+        out = reclassify_madd_obligatory(html, self._entry("madd_munfasil", "madd_muttasil"))
+        self.assertIn("class=madd_munfasil>x", out)
+        self.assertIn("class=madd_muttasil>y", out)
+
+    def test_reclassify_count_mismatch_left_untouched(self):
+        html = "<tajweed class=madda_obligatory>x</tajweed>"
+        out = reclassify_madd_obligatory(html, self._entry("madd_munfasil", "madd_muttasil"))
+        self.assertEqual(out, html)  # 1 tag vs 2 annotations → no change
+
+    def test_madd_codes_map_to_v3(self):
+        self.assertEqual(RULE_CODES["madd_munfasil"], "mf")
+        self.assertEqual(RULE_CODES["madd_muttasil"], "mt")
+        self.assertEqual(RULE_CODES["madda_obligatory"], "mt")  # fallback → obligatory
+        self.assertEqual(RULE_CODES["madda_permissible"], "ma")  # 'Aarid, not munfasil
+
+    def test_end_to_end_split(self):
+        html = ("وَتَعْتَد<tajweed class=madda_obligatory>ُوٓاْ</tajweed> "
+                "<tajweed class=madda_obligatory>َآ</tajweed>ءَ")
+        segs = preparse_tajweed(html, key="x", cpfair_entry=self._entry("madd_munfasil", "madd_muttasil"))
+        codes = {s["r"] for s in segs}
+        self.assertIn("mf", codes)
+        self.assertIn("mt", codes)
+        self.assertNotIn("mo", codes)
+
+
+class TestQalqalahSplit(unittest.TestCase):
+    def test_word_final_is_kubra(self):
+        segs = [{"t": "قَ", "r": None}, {"t": "دْ", "r": "q"}]  # ends the string
+        split_qalqalah(segs)
+        self.assertEqual(segs[-1]["r"], "qk")
+
+    def test_medial_is_sughra(self):
+        segs = [{"t": "يَ", "r": None}, {"t": "قْ", "r": "q"}, {"t": "طَعُ", "r": None}]
+        split_qalqalah(segs)
+        self.assertEqual(segs[1]["r"], "qs")
+
+    def test_before_space_is_kubra(self):
+        segs = [{"t": "قَ", "r": None}, {"t": "دْ", "r": "q"}, {"t": " غَيْر", "r": None}]
+        split_qalqalah(segs)
+        self.assertEqual(segs[1]["r"], "qk")
+
+
+class TestFullSourceTaxonomy(unittest.TestCase):
+    """Whole-corpus #289 guarantees over the shipped data."""
+
+    @classmethod
+    def setUpClass(cls):
+        with open(JSON_DIR / "tajweed.json", encoding="utf-8") as fh:
+            cls.taj = json.load(fh)
+        with open(JSON_DIR / "tajweed_cpfair.json", encoding="utf-8") as fh:
+            cls.cpfair = {f"{e['surah']}:{e['ayah']}": e for e in json.load(fh)}
+
+    def _all_segments(self):
+        for key, html in self.taj.items():
+            yield key, preparse_tajweed(html, key=key, cpfair_entry=self.cpfair.get(key))
+
+    def test_no_legacy_madd_or_qalqalah_codes_remain(self):
+        import collections
+        counts = collections.Counter()
+        for _, segs in self._all_segments():
+            for s in segs:
+                if s["r"]:
+                    counts[s["r"]] += 1
+        for legacy in ("mo", "mp", "q"):
+            self.assertEqual(counts[legacy], 0, f"{legacy} should be fully split in v3")
+        # the split actually produced the new codes
+        self.assertGreater(counts["mf"], 3000)   # munfasil
+        self.assertGreater(counts["mt"], 1900)    # muttasil
+        self.assertGreater(counts["ma"], 4000)    # 'aarid
+        self.assertGreater(counts["qk"], 0)       # qalqalah kubra
+        self.assertGreater(counts["qs"], 0)       # qalqalah sughra
 
 
 if __name__ == "__main__":

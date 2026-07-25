@@ -19,80 +19,137 @@ import kotlinx.serialization.json.Json
  * - "t" = text content
  * - "r" = rule code or null for plain text
  *
- * V2 rule codes (each sub-type is distinct):
+ * ## V3 rule codes (issue #289)
  *
- *  Code  | Rule                           | Colour family
- * -------|--------------------------------|---------------
- *  "g"   | Ghunnah (nasalisation)         | Green
- *  "if"  | Ikhfa (concealment)            | Teal
- *  "is"  | Ikhfa Shafawi (labial hiding)  | Cyan
- *  "dg"  | Idgham with Ghunnah            | Amber
- *  "dn"  | Idgham without Ghunnah         | Brown
- *  "ds"  | Idgham Shafawi                 | Amber variant
- *  "dj"  | Idgham Mutajanisayn            | Orange
- *  "dk"  | Idgham Mutaqaribayn            | Orange variant
- *  "q"   | Qalqalah (echoing)             | Blue
- *  "mn"  | Madd Normal (2 beats)          | Rose
- *  "mp"  | Madd Permissible (2-4-5 beats) | Pink
- *  "mo"  | Madd Obligatory (4-5 beats)    | Red
- *  "my"  | Madd Necessary (6 beats)       | Dark Rose
- *  "l"   | Iqlab (conversion)             | Violet
- *  "ls"  | Lam Shamsiyyah                 | Indigo
- *  "sl"  | Silent letters                 | Slate
- *  "hw"  | Hamza Al-Wasl                  | Light Slate
+ * V3 corrects the madd taxonomy: the quran.com source merged Madd Jaiz Munfasil
+ * and Madd Wajib Muttasil under one class and mis-labelled Madd 'Aarid. The
+ * split is derived by cross-validating with the independent cpfair dataset (see
+ * `preparse_tajweed.py`). Beat ("count") values follow the **Hafs 'an 'Asim**
+ * reading; reference: Kareema Czerepinski, *Tajweed Rules of the Qur'an*
+ * (Parts I–III), and al-Jazari's *al-Muqaddimah al-Jazariyyah*.
  *
- * Legacy single-letter codes (v1) are still accepted for backwards compatibility.
+ *  Code  | Rule                          | Counts | Colour family
+ * -------|-------------------------------|--------|---------------
+ *  "g"   | Ghunnah                       | 2      | Green
+ *  "if"  | Ikhfa                         | —      | Teal
+ *  "is"  | Ikhfa Shafawi                 | —      | Cyan
+ *  "dg"  | Idgham with Ghunnah           | —      | Amber
+ *  "dn"  | Idgham without Ghunnah        | —      | Brown
+ *  "ds"  | Idgham Shafawi                | —      | Amber variant
+ *  "dj"  | Idgham Mutajanisayn           | —      | Orange
+ *  "dk"  | Idgham Mutaqaribayn           | —      | Orange variant
+ *  "qs"  | Qalqalah Sughra (medial)      | —      | Blue
+ *  "qk"  | Qalqalah Kubra (stopped)      | —      | Deep Blue
+ *  "mn"  | Madd Tabee'i (natural)        | 2      | Rose
+ *  "mf"  | Madd Jaiz Munfasil            | 2/4/5  | Pink       (was "mo")
+ *  "mt"  | Madd Wajib Muttasil           | 4/5    | Red        (true "mo")
+ *  "ma"  | Madd 'Aarid lis-Sukun         | 2/4/6  | Deep Rose  (was "mp")
+ *  "ml"  | Madd Lin                      | 2/4/6  | Deep Pink  (populated in #291)
+ *  "my"  | Madd Lazim (necessary)        | 6      | Deep Red
+ *  "l"   | Iqlab                         | —      | Violet
+ *  "ls"  | Lam Shamsiyyah                | —      | Indigo
+ *  "sl"  | Silent letters                | —      | Slate
+ *  "hw"  | Hamza al-Wasl                 | —      | Light Slate
+ *
+ * ### Deprecated codes (still parsed for older databases)
+ * - v2: `"mo"` → `"mt"`, `"mp"` → `"ma"`, `"q"` → `"qs"`
+ * - v1: `"i"` → `"if"`, `"d"` → `"dg"`, `"m"` → `"mn"`, `"s"` → `"sl"`
  */
 object TajweedParser {
 
     private val json = Json { ignoreUnknownKeys = true }
 
     /**
-     * Map of rule codes to their light/dark colour pairs.
-     * Includes both v2 granular codes and v1 legacy codes.
+     * Canonical description of one tajweed rule — the single source of truth for
+     * the code, its display name, a one-line explanation and its light/dark
+     * colours. Consumed by [ruleColors] and by the in-app legend (#294).
      */
-    private val ruleColors: Map<String, Pair<Color, Color>> = mapOf(
-        // ── V2 granular codes ──
+    data class TajweedRuleInfo(
+        val code: String,
+        val displayName: String,
+        val explanation: String,
+        val light: Color,
+        val dark: Color,
+    ) {
+        fun color(isDarkTheme: Boolean): Color = if (isDarkTheme) dark else light
+    }
 
-        // Ghunnah
-        "g" to Pair(TajweedColors.GhunnahLight, TajweedColors.GhunnahDark),
-
-        // Ikhfa
-        "if" to Pair(TajweedColors.IkhfaLight, TajweedColors.IkhfaDark),
-        "is" to Pair(TajweedColors.IkhfaShafawiLight, TajweedColors.IkhfaShafawiDark),
-
-        // Idgham
-        "dg" to Pair(TajweedColors.IdghamGhunnahLight, TajweedColors.IdghamGhunnahDark),
-        "dn" to Pair(TajweedColors.IdghamNoGhunnahLight, TajweedColors.IdghamNoGhunnahDark),
-        "ds" to Pair(TajweedColors.IdghamShafawiLight, TajweedColors.IdghamShafawiDark),
-        "dj" to Pair(TajweedColors.IdghamMutajanisaynLight, TajweedColors.IdghamMutajanisaynDark),
-        "dk" to Pair(TajweedColors.IdghamMutaqaribayLight, TajweedColors.IdghamMutaqaribayDark),
-
-        // Qalqalah
-        "q" to Pair(TajweedColors.QalqalahLight, TajweedColors.QalqalahDark),
-
-        // Madd (each sub-type distinct)
-        "mn" to Pair(TajweedColors.MaddNormalLight, TajweedColors.MaddNormalDark),
-        "mp" to Pair(TajweedColors.MaddPermissibleLight, TajweedColors.MaddPermissibleDark),
-        "mo" to Pair(TajweedColors.MaddObligatoryLight, TajweedColors.MaddObligatoryDark),
-        "my" to Pair(TajweedColors.MaddNecessaryLight, TajweedColors.MaddNecessaryDark),
-
-        // Iqlab
-        "l" to Pair(TajweedColors.IqlabLight, TajweedColors.IqlabDark),
-
-        // Lam Shamsiyyah
-        "ls" to Pair(TajweedColors.LamShamsiyyahLight, TajweedColors.LamShamsiyyahDark),
-
-        // Silent / Hamza Wasl
-        "sl" to Pair(TajweedColors.SilentLight, TajweedColors.SilentDark),
-        "hw" to Pair(TajweedColors.HamzaWaslLight, TajweedColors.HamzaWaslDark),
-
-        // ── V1 legacy codes (backwards compatibility with old databases) ──
-        "i" to Pair(TajweedColors.IkhfaLight, TajweedColors.IkhfaDark),
-        "d" to Pair(TajweedColors.IdghamGhunnahLight, TajweedColors.IdghamGhunnahDark),
-        "m" to Pair(TajweedColors.MaddNormalLight, TajweedColors.MaddNormalDark),
-        "s" to Pair(TajweedColors.SilentLight, TajweedColors.SilentDark),
+    /**
+     * The v3 rule set, in a sensible legend order (nasal/idgham rules, qalqalah,
+     * the madd family, then the remaining letter rules).
+     */
+    val rules: List<TajweedRuleInfo> = listOf(
+        TajweedRuleInfo("g", "Ghunnah", "Nasal sound held for 2 counts.",
+            TajweedColors.GhunnahLight, TajweedColors.GhunnahDark),
+        TajweedRuleInfo("if", "Ikhfa", "Noon sakinah / tanwin hidden with a light nasal sound.",
+            TajweedColors.IkhfaLight, TajweedColors.IkhfaDark),
+        TajweedRuleInfo("is", "Ikhfa Shafawi", "Meem sakinah hidden with ghunnah before ba.",
+            TajweedColors.IkhfaShafawiLight, TajweedColors.IkhfaShafawiDark),
+        TajweedRuleInfo("dg", "Idgham with Ghunnah", "Noon sakinah / tanwin merged with nasalisation.",
+            TajweedColors.IdghamGhunnahLight, TajweedColors.IdghamGhunnahDark),
+        TajweedRuleInfo("dn", "Idgham without Ghunnah", "Noon sakinah / tanwin merged without nasalisation.",
+            TajweedColors.IdghamNoGhunnahLight, TajweedColors.IdghamNoGhunnahDark),
+        TajweedRuleInfo("ds", "Idgham Shafawi", "Meem sakinah merged into a following meem.",
+            TajweedColors.IdghamShafawiLight, TajweedColors.IdghamShafawiDark),
+        TajweedRuleInfo("dj", "Idgham Mutajanisayn", "Two letters of the same articulation point merged.",
+            TajweedColors.IdghamMutajanisaynLight, TajweedColors.IdghamMutajanisaynDark),
+        TajweedRuleInfo("dk", "Idgham Mutaqaribayn", "Two letters of close articulation points merged.",
+            TajweedColors.IdghamMutaqaribayLight, TajweedColors.IdghamMutaqaribayDark),
+        TajweedRuleInfo("qs", "Qalqalah Sughra", "Light echo on a qalqalah letter in the middle of a word.",
+            TajweedColors.QalqalahSughraLight, TajweedColors.QalqalahSughraDark),
+        TajweedRuleInfo("qk", "Qalqalah Kubra", "Stronger echo on a qalqalah letter stopped upon.",
+            TajweedColors.QalqalahKubraLight, TajweedColors.QalqalahKubraDark),
+        TajweedRuleInfo("mn", "Madd Tabee'i", "Natural elongation of 2 counts.",
+            TajweedColors.MaddNormalLight, TajweedColors.MaddNormalDark),
+        TajweedRuleInfo("mf", "Madd Jaiz Munfasil", "Elongation across a word break — 2, 4 or 5 counts.",
+            TajweedColors.MaddMunfasilLight, TajweedColors.MaddMunfasilDark),
+        TajweedRuleInfo("mt", "Madd Wajib Muttasil", "Elongation before a hamza in the same word — 4 or 5 counts.",
+            TajweedColors.MaddMuttasilLight, TajweedColors.MaddMuttasilDark),
+        TajweedRuleInfo("ma", "Madd 'Aarid lis-Sukun", "Elongation before a stop — 2, 4 or 6 counts.",
+            TajweedColors.MaddAaridLight, TajweedColors.MaddAaridDark),
+        TajweedRuleInfo("ml", "Madd Lin", "Elongation of a layn letter (و/ي) before a stop — 2, 4 or 6 counts.",
+            TajweedColors.MaddLinLight, TajweedColors.MaddLinDark),
+        TajweedRuleInfo("my", "Madd Lazim", "Obligatory elongation of 6 counts.",
+            TajweedColors.MaddNecessaryLight, TajweedColors.MaddNecessaryDark),
+        TajweedRuleInfo("l", "Iqlab", "Noon sakinah / tanwin turned into a meem before ba.",
+            TajweedColors.IqlabLight, TajweedColors.IqlabDark),
+        TajweedRuleInfo("ls", "Lam Shamsiyyah", "The lam of 'al-' assimilated into a sun letter.",
+            TajweedColors.LamShamsiyyahLight, TajweedColors.LamShamsiyyahDark),
+        TajweedRuleInfo("sl", "Silent", "A letter written but not pronounced.",
+            TajweedColors.SilentLight, TajweedColors.SilentDark),
+        TajweedRuleInfo("hw", "Hamza al-Wasl", "Connecting hamza, dropped when continuing from before.",
+            TajweedColors.HamzaWaslLight, TajweedColors.HamzaWaslDark),
     )
+
+    /** Lookup of a v3 rule by its code. */
+    val ruleInfo: Map<String, TajweedRuleInfo> = rules.associateBy { it.code }
+
+    /**
+     * Deprecated code → current code, kept so an older prepackaged DB still
+     * renders (no crash, sensible colour). v2 `mo`/`mp`/`q` and v1 single-letter
+     * codes map onto their v3 equivalents.
+     */
+    private val legacyAliases: Map<String, String> = mapOf(
+        // v2 → v3
+        "mo" to "mt",
+        "mp" to "ma",
+        "q" to "qs",
+        // v1 → v3
+        "i" to "if",
+        "d" to "dg",
+        "m" to "mn",
+        "s" to "sl",
+    )
+
+    /**
+     * Map of rule codes to their light/dark colour pairs — v3 codes plus the
+     * deprecated v1/v2 aliases.
+     */
+    private val ruleColors: Map<String, Pair<Color, Color>> =
+        rules.associate { it.code to Pair(it.light, it.dark) } +
+            legacyAliases.mapNotNull { (old, current) ->
+                ruleInfo[current]?.let { old to Pair(it.light, it.dark) }
+            }
 
     /**
      * Parse pre-parsed tajweed JSON and return an AnnotatedString with colored spans.

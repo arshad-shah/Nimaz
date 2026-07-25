@@ -92,7 +92,7 @@ nimaz-pro-data/
 **Sajda Verses** (mark `sajda: true`):
 - 7:206, 13:15, 16:50, 17:109, 19:58, 22:18, 22:77, 25:60, 27:26, 32:15, 38:24, 41:38, 53:62, 84:21, 96:19
 
-## Tajweed colouring pipeline (`text_tajweed`, issues #288 + #290 of epic #287)
+## Tajweed colouring pipeline (`text_tajweed`, issues #288 + #290 + #289 of epic #287)
 
 The `ayahs.text_tajweed` column holds a compact JSON array of segments
 (`[{"t": "…", "r": "code"}]`, `r = null` for plain text) that the Android
@@ -107,7 +107,7 @@ has a `slnt` span inside a `madda_obligatory` span). The parser is a
 **stack-based tokenizer**, not a regex:
 
 - The **innermost** rule wins for the characters it covers; the enclosing rule
-  is kept for the rest. `2:190` → `ُوٓ` = `mo`, `اْ` = `sl`, `‌ۚ` = `mo`.
+  is kept for the rest. `2:190` → `ُوٓ` = `mt`, `اْ` = `sl`, `‌ۚ` = `mt`.
 - **Invariant:** concatenating every segment's `t` reconstructs the source text
   exactly (tags + verse markers removed) — no character is ever dropped.
   Because of nesting, per-*segment* code counts do not equal raw *tag* counts.
@@ -158,20 +158,48 @@ python3 nimaz-pro-data/scripts/verify_tajweed_orthography.py   # exits non-zero 
 > installs on update (see `docs/SUBSYSTEMS.md` §5/§7; a runtime seeding path, if
 > needed, would be decided with the renderer work in #293).
 
+**Rule taxonomy — v3 codes (issue #289).** The quran.com classes mis-name the
+madd rules: `madda_obligatory` merges two *different* rules, and
+`madda_permissible` is actually Madd 'Aarid. Cross-validated against the
+independent `json/tajweed_cpfair.json` dataset, the pipeline emits a corrected
+**v3 code set**. The munfasil/muttasil split is applied at the **source-tag**
+level (`reclassify_madd_obligatory`) using cpfair's per-ayah reading order — the
+i-th `madda_obligatory` tag is rewritten to `madd_munfasil`/`madd_muttasil` per
+cpfair; the counts agree for 6 227/6 236 ayahs, and the 9 that disagree keep the
+conservative obligatory (`mt`) default. Qalqalah is split positionally
+(`split_qalqalah`): word-final → Kubra (`qk`), medial → Sughra (`qs`).
+
+| code | rule | counts | was |
+|---|---|---|---|
+| `mn` | Madd Tabee'i (natural) | 2 | `mn` |
+| `mf` | Madd Jaiz **Munfasil** | 2/4/5 | part of `mo` |
+| `mt` | Madd Wajib **Muttasil** | 4/5 | part of `mo` |
+| `ma` | Madd **'Aarid** lis-Sukun | 2/4/6 | `mp` (mis-named) |
+| `ml` | Madd **Lin** | 2/4/6 | — (code defined; populated in #291) |
+| `my` | Madd Lazim (necessary) | 6 | `my` |
+| `qs` / `qk` | Qalqalah Sughra / Kubra | — | `q` |
+
+Beat counts follow the **Hafs 'an 'Asim** reading (ref: Kareema Czerepinski,
+*Tajweed Rules of the Qur'an*). The canonical rule names, one-line explanations
+and colours are the single source of truth in `TajweedParser.rules`
+(`core/util/TajweedParser.kt`); legacy `mo`/`mp`/`q` and the v1 single-letter
+codes still parse (mapped to `mt`/`ma`/`qs`) so an older prepackaged DB never
+crashes. Colours live in `NimazColors.TajweedColors` — the six madd sub-rules
+share one warm hue family (rose→red→pink) with distinct lightness.
+
 `scripts/preparse_tajweed.py` can also be run standalone to regenerate the
 `json/tajweed_parsed.json` reference artifact (not consumed by the build —
-`generate_database.py` parses inline); run standalone it loads `ayahs.json` and
-applies the same normalisation so the artifact matches the DB. Tests live in
+`generate_database.py` parses inline); run standalone it loads `ayahs.json` +
+`tajweed_cpfair.json` and applies the same normalisation and taxonomy split so
+the artifact matches the DB. Tests live in
 `scripts/tests/test_preparse_tajweed.py` (`python3 -m unittest`), covering the
 nested/malformed/unknown/whitespace cases, the normalisation/alignment helpers,
-and the whole-corpus round-trip invariants.
+the munfasil/muttasil + qalqalah split, and the whole-corpus invariants.
 
-> The rule taxonomy (Madd Munfasil/Muttasil/'Aarid split), extended rules, the
-> renderer, the in-app legend, and full CI validation are handled in the sibling
-> sub-issues #289 and #291–#295 of the tajweed overhaul epic (#287). Aligning
-> the independent `tajweed_cpfair.json` dataset (which indexes a *different*
-> ayah segmentation — e.g. `2:1` "الم" has cpfair offsets up to 44) belongs with
-> #289, where that dataset is actually consumed for the taxonomy split.
+> Still open in sibling sub-issues of epic #287: Madd Lin population + the other
+> extended rules (#291), the renderer fixes (#293), the in-app legend +
+> accessibility (#294), and full CI validation (#292). The in-app legend will
+> consume `TajweedParser.rules` directly.
 
 ## translations.json Format
 
