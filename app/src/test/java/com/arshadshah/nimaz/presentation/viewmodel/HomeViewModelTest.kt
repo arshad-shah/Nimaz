@@ -21,15 +21,16 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.hours
@@ -162,9 +163,28 @@ class HomeViewModelTest {
         )
     }
 
+    /**
+     * Runs [body] against the shared test scheduler.
+     *
+     * Deliberately **not** `runTest`: `HomeViewModel` keeps two endless
+     * `while (isActive) { delay(...) }` loops alive in `viewModelScope`, and
+     * `runTest` drains its scheduler to idle when the body returns — which with an
+     * endless delay loop means advancing virtual time forever, hanging the suite.
+     * Here time is advanced only in bounded steps, and the collector scope is
+     * cancelled explicitly.
+     */
+    private fun withScheduler(body: (TestCoroutineScheduler, CoroutineScope) -> Unit) {
+        val scope = CoroutineScope(testDispatcher)
+        try {
+            body(testDispatcher.scheduler, scope)
+        } finally {
+            scope.cancel()
+        }
+    }
+
     @Test
     fun `refreshing over loaded data never re-emits the loading state`() =
-        runTest(testDispatcher.scheduler) {
+        withScheduler { scheduler, scope ->
             // Regression test for the home screen flashing a full-screen spinner
             // once a second. calculatePrayerTimes() set isLoading = true on every
             // call, including the per-second countdown refresh. That was invisible
@@ -183,29 +203,26 @@ class HomeViewModelTest {
 
             val viewModel = createViewModel()
             val seen = mutableListOf<Boolean>()
-            val job = launch(testDispatcher) {
-                viewModel.state.collect { seen += it.isLoading }
-            }
+            scope.launch { viewModel.state.collect { seen += it.isLoading } }
 
             // First load: a spinner here is legitimate — there is nothing to show.
             viewModel.onEvent(HomeEvent.RefreshPrayerTimes)
-            advanceTimeBy(1_000)
+            scheduler.advanceTimeBy(1_000)
             assertThat(viewModel.state.value.prayerTimes).isNotEmpty()
 
             // Everything from here on is a refresh over data already on screen.
             seen.clear()
             repeat(5) {
                 viewModel.onEvent(HomeEvent.RefreshPrayerTimes)
-                advanceTimeBy(1_000)
+                scheduler.advanceTimeBy(1_000)
             }
 
             assertThat(seen).doesNotContain(true)
-            job.cancel()
         }
 
     @Test
     fun `countdown ticks do not re-resolve the worship card every second`() =
-        runTest(testDispatcher.scheduler) {
+        withScheduler { scheduler, _ ->
             // The worship card's countdown renders in whole minutes, but resolving
             // it costs ~30 sequential DataStore reads. Ticking the countdown must
             // not drag that resolution along with it once a second.
@@ -216,11 +233,11 @@ class HomeViewModelTest {
 
             val viewModel = createViewModel()
             viewModel.onEvent(HomeEvent.RefreshPrayerTimes)
-            advanceTimeBy(1_000)
+            scheduler.advanceTimeBy(1_000)
             clearMocks(nextWorshipResolver, answers = false)
 
             // Thirty seconds of countdown ticks, well inside the 60s worship loop.
-            advanceTimeBy(30_000)
+            scheduler.advanceTimeBy(30_000)
 
             coVerify(exactly = 0) { nextWorshipResolver.nearest(any()) }
         }

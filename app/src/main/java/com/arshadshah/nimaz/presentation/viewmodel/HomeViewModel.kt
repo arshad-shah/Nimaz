@@ -827,15 +827,18 @@ class HomeViewModel @Inject constructor(
      * ([worshipStale]). In between, only the countdown string is reformatted.
      */
     private suspend fun refreshWorshipCard() {
-        val now = LocalDateTime.now()
-        val cached = worshipOccurrence
-        if (worshipStale || cached == null || !cached.eventAt.isAfter(now)) {
-            worshipOccurrence = runCatching { nextWorshipResolver.nearest(now) }
-                .onFailure { CrashReporter.recordException(it) }
-                .getOrNull()
-            worshipStale = false
-        }
-        val card = worshipOccurrence?.let { renderWorshipCard(it, now) }
+        // Guarded end-to-end: this runs from a bare viewModelScope loop, so an
+        // escaping exception would reach the uncaught handler and crash the app.
+        // The card is optional — on failure we simply show nothing.
+        val card = runCatching {
+            val now = LocalDateTime.now()
+            val cached = worshipOccurrence
+            if (worshipStale || cached == null || !cached.eventAt.isAfter(now)) {
+                worshipOccurrence = nextWorshipResolver.nearest(now)
+                worshipStale = false
+            }
+            worshipOccurrence?.let { renderWorshipCard(it, now) }
+        }.onFailure { CrashReporter.recordException(it) }.getOrNull()
         _state.update { it.copy(worshipCard = card) }
     }
 
