@@ -107,10 +107,20 @@ fun WidgetsScreen(
     // State for dynamic widget preview data
     var previewData by remember { mutableStateOf(WidgetPreviewData()) }
 
-    // Load real prayer times data
+    // The location behind the preview is read once. It cannot change while this
+    // screen is open, and re-reading it on every countdown tick meant constructing
+    // a PreferencesDataStore and doing file I/O once a second.
+    var previewLocation by remember { mutableStateOf<PreviewLocation?>(null) }
     LaunchedEffect(Unit) {
+        previewLocation = loadPreviewLocation(context)
+    }
+
+    // Only the countdown moves per second; it is derived in memory from the
+    // location above, with no I/O on the tick.
+    LaunchedEffect(previewLocation) {
+        val location = previewLocation ?: return@LaunchedEffect
         while (true) {
-            previewData = loadWidgetPreviewData(context)
+            previewData = buildWidgetPreviewData(context, location)
             delay(1000) // Update every second for countdown
         }
     }
@@ -887,16 +897,40 @@ private fun HowToAddCard(modifier: Modifier = Modifier) {
     }
 }
 
-private suspend fun loadWidgetPreviewData(context: android.content.Context): WidgetPreviewData {
-    return try {
-        val prefs = PreferencesDataStore(context)
-        val userPrefs = prefs.userPreferences.first()
+/** The stored location the widget preview is rendered for. Read once per screen. */
+private data class PreviewLocation(
+    val latitude: Double,
+    val longitude: Double,
+    val name: String,
+)
 
-        val latitude = userPrefs.latitude.takeIf { it != 0.0 } ?: 53.3498
-        val longitude = userPrefs.longitude.takeIf { it != 0.0 } ?: -6.2603
-        val locationName =
-            userPrefs.locationName.takeIf { it.isNotBlank() }?.split(",")?.firstOrNull()?.trim()
-                ?: "Dublin"
+/** One-off DataStore read of the location backing the widget previews. */
+private suspend fun loadPreviewLocation(context: android.content.Context): PreviewLocation {
+    return try {
+        val userPrefs = PreferencesDataStore(context).userPreferences.first()
+        PreviewLocation(
+            latitude = userPrefs.latitude.takeIf { it != 0.0 } ?: 53.3498,
+            longitude = userPrefs.longitude.takeIf { it != 0.0 } ?: -6.2603,
+            name = userPrefs.locationName.takeIf { it.isNotBlank() }
+                ?.split(",")?.firstOrNull()?.trim() ?: "Dublin",
+        )
+    } catch (_: Exception) {
+        PreviewLocation(53.3498, -6.2603, "Dublin")
+    }
+}
+
+/**
+ * Build the widget preview for "now". Pure and non-suspending: it runs once a
+ * second to advance the countdown, so it must not touch DataStore.
+ */
+private fun buildWidgetPreviewData(
+    context: android.content.Context,
+    location: PreviewLocation,
+): WidgetPreviewData {
+    return try {
+        val latitude = location.latitude
+        val longitude = location.longitude
+        val locationName = location.name
 
         val calculator = PrayerTimeCalculator()
         val prayerTimes = calculator.getPrayerTimes(latitude, longitude)

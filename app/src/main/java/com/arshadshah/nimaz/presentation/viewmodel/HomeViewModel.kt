@@ -22,7 +22,6 @@ import com.arshadshah.nimaz.core.util.WorshipReminderContent
 import com.arshadshah.nimaz.core.util.formatClockTime
 import com.arshadshah.nimaz.domain.model.WorshipReminderType
 import com.arshadshah.nimaz.presentation.components.organisms.WorshipCardUi
-import kotlinx.coroutines.flow.first
 import com.arshadshah.nimaz.core.util.toUtcMidnightMillis
 import com.arshadshah.nimaz.domain.model.Announcement
 import com.arshadshah.nimaz.domain.model.AnnouncementAction
@@ -35,7 +34,9 @@ import com.arshadshah.nimaz.domain.model.HighLatitudeRule
 import com.arshadshah.nimaz.domain.model.HomeEventCard
 import com.arshadshah.nimaz.domain.model.PrayerName
 import com.arshadshah.nimaz.domain.model.PrayerStatus
+import com.arshadshah.nimaz.domain.model.PrayerTime
 import com.arshadshah.nimaz.domain.model.PrayerType
+import com.arshadshah.nimaz.domain.model.WorshipReminderOccurrence
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.usecase.AnnouncementUseCases
 import com.arshadshah.nimaz.domain.usecase.DuaUseCases
@@ -67,6 +68,7 @@ import java.time.LocalTime
 import javax.inject.Inject
 import kotlin.time.Clock
 import kotlin.time.Duration
+import kotlin.time.Instant
 
 data class HomeUiState(
     val currentDate: LocalDate = LocalDate.now(),
@@ -232,6 +234,7 @@ class HomeViewModel @Inject constructor(
         loadDailyDua()
         observeCelebrationCards()
         startTimeUpdates()
+        startWorshipUpdates()
     }
 
     /** Local calendar occasions merged with any pushed CELEBRATION announcement. */
@@ -557,191 +560,77 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    // ── Cached heavy results ────────────────────────────────────────────────
+    // Today's prayer instants and tomorrow's Fajr, plus the date they were
+    // computed for. Recomputed only when their inputs change (location,
+    // calculation settings, time format, date roll-over) — never on a countdown
+    // tick, which re-derives everything below from these cached values.
+    private var dayTimes: List<PrayerTime> = emptyList()
+    private var dayTimesDate: LocalDate? = null
+    private var tomorrowFajr: Instant? = null
+
+    // Nearest upcoming worship reminder. Resolving one costs ~30 sequential
+    // DataStore reads, but `eventAt` is a fixed instant and the card's countdown
+    // renders in whole minutes — so we resolve rarely and reformat in between.
+    private var worshipOccurrence: WorshipReminderOccurrence? = null
+    private var worshipStale: Boolean = true
+
+    /**
+     * Full recompute of the day's prayer instants — the *expensive* path, running
+     * the astronomical calculation for today and tomorrow. Called only when its
+     * inputs actually change: location, calculation settings, time format, or the
+     * date rolling over. The per-second countdown goes through [renderTick]
+     * instead, which never calls this.
+     */
     private fun calculatePrayerTimes() {
         val latitude = _state.value.latitude.takeIf { it != 0.0 } ?: DEFAULT_LATITUDE
         val longitude = _state.value.longitude.takeIf { it != 0.0 } ?: DEFAULT_LONGITUDE
 
         viewModelScope.launch {
             try {
-                _state.update { it.copy(isLoading = true) }
+                // `isLoading` means "nothing to show yet", not "busy". Only the
+                // genuine first load may show the full-screen spinner; a refresh
+                // over existing data updates in place. Setting it on every refresh
+                // is what made the screen flash a spinner once a second, since any
+                // suspension before it is cleared makes the `true` observable.
+                if (dayTimes.isEmpty()) {
+                    _state.update { it.copy(isLoading = true) }
+                }
 
+                val today = LocalDate.now()
                 val prayerTimes = prayerTimeCalculator.getPrayerTimes(
                     latitude = latitude,
                     longitude = longitude,
+                    date = today,
                     calculationMethod = cachedCalcMethod,
                     asrCalculation = cachedAsrCalc,
                     highLatitudeRule = cachedHighLatRule,
                     adjustments = cachedAdjustments
                 )
-                val currentTime = Clock.System.now()
-                val timeZone = TimeZone.currentSystemDefault()
-                val localTime = currentTime.toLocalDateTime(timeZone)
+                // Tomorrow's Fajr, for the after-Isha wrap. Computed here rather
+                // than lazily in the tick so the hot path stays branch-free.
+                tomorrowFajr = prayerTimeCalculator.getPrayerTimes(
+                    latitude = latitude,
+                    longitude = longitude,
+                    date = today.plusDays(1),
+                    calculationMethod = cachedCalcMethod,
+                    asrCalculation = cachedAsrCalc,
+                    highLatitudeRule = cachedHighLatRule,
+                    adjustments = cachedAdjustments
+                ).find { it.type == PrayerType.FAJR }?.time
+                dayTimes = prayerTimes
+                dayTimesDate = today
 
-                val prayerTimeDisplays = prayerTimes.map { prayerTime ->
-                    val prayerLocalTime = prayerTime.time.toLocalDateTime(timeZone)
-                    val isPassed = prayerLocalTime.time < localTime.time
+                // Location/calculation settings feed the worship reminders too.
+                worshipStale = true
 
-                    PrayerTimeDisplay(
-                        type = prayerTime.type,
-                        name = prayerTime.type.displayName,
-                        time = formatTime(prayerLocalTime.hour, prayerLocalTime.minute),
-                        isPassed = isPassed,
-                        isCurrent = false,
-                        isNext = false
-                    )
-                }
+                renderTick()
+                // No suspension between renderTick()'s emission and this one, so
+                // StateFlow conflates them into a single update.
+                _state.update { it.copy(isLoading = false, error = null) }
 
-                // Find current and next prayer
-                val sortedPrayers = prayerTimeDisplays.sortedBy {
-                    prayerTimes.find { pt -> pt.type == it.type }?.time
-                }
-
-                val nextPrayerIndex = sortedPrayers.indexOfFirst { !it.isPassed }
-                val currentPrayerIndex =
-                    if (nextPrayerIndex > 0) nextPrayerIndex - 1 else sortedPrayers.lastIndex
-
-                val updatedDisplays = sortedPrayers.mapIndexed { index, display ->
-                    display.copy(
-                        isCurrent = index == currentPrayerIndex,
-                        isNext = index == nextPrayerIndex
-                    )
-                }
-
-                val nextPrayer: PrayerType?
-                val timeUntilNext: String
-
-                if (nextPrayerIndex >= 0) {
-                    // There's a future prayer today
-                    nextPrayer = sortedPrayers[nextPrayerIndex].type
-                    val nextPrayerTime = prayerTimes.find { it.type == nextPrayer }?.time
-                    timeUntilNext = if (nextPrayerTime != null) {
-                        val diff: Duration = nextPrayerTime - currentTime
-                        val totalSeconds = diff.inWholeSeconds
-                        val hours = totalSeconds / 3600
-                        val minutes = (totalSeconds % 3600) / 60
-                        val seconds = totalSeconds % 60
-                        when {
-                            hours > 0 -> "${hours}h ${minutes}m ${seconds}s"
-                            minutes > 0 -> "${minutes}m ${seconds}s"
-                            else -> "${seconds}s"
-                        }
-                    } else ""
-                } else {
-                    // All prayers passed — wrap to tomorrow's Fajr
-                    nextPrayer = PrayerType.FAJR
-                    val tomorrowDate = LocalDate.now().plusDays(1)
-                    val tomorrowPrayers = prayerTimeCalculator.getPrayerTimes(
-                        latitude = latitude,
-                        longitude = longitude,
-                        date = tomorrowDate,
-                        calculationMethod = cachedCalcMethod,
-                        asrCalculation = cachedAsrCalc,
-                        highLatitudeRule = cachedHighLatRule,
-                        adjustments = cachedAdjustments
-                    )
-                    val tomorrowFajr = tomorrowPrayers.find { it.type == PrayerType.FAJR }?.time
-                    timeUntilNext = if (tomorrowFajr != null) {
-                        val diff: Duration = tomorrowFajr - currentTime
-                        val totalSeconds = diff.inWholeSeconds
-                        val hours = totalSeconds / 3600
-                        val minutes = (totalSeconds % 3600) / 60
-                        val seconds = totalSeconds % 60
-                        when {
-                            hours > 0 -> "${hours}h ${minutes}m ${seconds}s"
-                            minutes > 0 -> "${minutes}m ${seconds}s"
-                            else -> "${seconds}s"
-                        }
-                    } else ""
-                }
-
-                // Where "now" sits along the Fajr→Isha timeline (0f at Fajr, 1f
-                // at Isha), interpolated within the current interval. Drives the
-                // progress card's fill independently of which prayers are prayed.
-                val timelineProgress: Float = run {
-                    val order = listOf(
-                        PrayerType.FAJR, PrayerType.DHUHR, PrayerType.ASR,
-                        PrayerType.MAGHRIB, PrayerType.ISHA
-                    )
-                    val ts = order.mapNotNull { type ->
-                        prayerTimes.find { it.type == type }?.time
-                    }
-                    when {
-                        ts.size < 2 -> 0f
-                        currentTime <= ts.first() -> 0f
-                        currentTime >= ts.last() -> 1f
-                        else -> {
-                            var result = 1f
-                            for (k in 0 until ts.size - 1) {
-                                if (currentTime >= ts[k] && currentTime < ts[k + 1]) {
-                                    val frac = (currentTime - ts[k]).inWholeSeconds.toFloat() /
-                                            (ts[k + 1] - ts[k]).inWholeSeconds.toFloat()
-                                    result = ((k + frac) / (ts.size - 1)).coerceIn(0f, 1f)
-                                    break
-                                }
-                            }
-                            result
-                        }
-                    }
-                }
-
-                // Sunrise/sunset as day-fractions for the living sky's sun arc.
-                val sunriseFraction = prayerTimes.find { it.type == PrayerType.SUNRISE }?.time
-                    ?.toLocalDateTime(timeZone)
-                    ?.let { (it.hour * 60 + it.minute) / 1440f } ?: 0.27f
-                val sunsetFraction = prayerTimes.find { it.type == PrayerType.MAGHRIB }?.time
-                    ?.toLocalDateTime(timeZone)
-                    ?.let { (it.hour * 60 + it.minute) / 1440f } ?: 0.80f
-
-                // Apply prayer records to displays
-                val records = _prayerRecords.value
-                val displaysWithStatus = updatedDisplays.map { display ->
-                    val prayerName = PrayerName.valueOf(display.type.name)
-                    val status = records[prayerName] ?: PrayerStatus.NOT_PRAYED
-                    display.copy(prayerStatus = status)
-                }
-
-                // Friday / Jumu'ah detection
-                val today = LocalDate.now()
-                val isFriday = today.dayOfWeek == DayOfWeek.FRIDAY
-                val dhuhrDisplay = displaysWithStatus.find { it.type == PrayerType.DHUHR }
-                val dhuhrInstant = prayerTimes.find { it.type == PrayerType.DHUHR }?.time
-
-                val jumuahTime = if (isFriday) dhuhrDisplay?.time ?: "" else ""
-                val isJumuahPassed = if (isFriday) dhuhrDisplay?.isPassed == true else false
-                val timeUntilJumuah = if (isFriday && !isJumuahPassed && dhuhrInstant != null) {
-                    val diff: Duration = dhuhrInstant - currentTime
-                    val totalSeconds = diff.inWholeSeconds
-                    val hours = totalSeconds / 3600
-                    val minutes = (totalSeconds % 3600) / 60
-                    val seconds = totalSeconds % 60
-                    when {
-                        hours > 0 -> "${hours}h ${minutes}m ${seconds}s"
-                        minutes > 0 -> "${minutes}m ${seconds}s"
-                        else -> "${seconds}s"
-                    }
-                } else ""
-
-                val worshipCard = runCatching { buildWorshipCard(LocalDateTime.now()) }.getOrNull()
-
-                _state.update {
-                    it.copy(
-                        prayerTimes = displaysWithStatus,
-                        prayerTimelineProgress = timelineProgress,
-                        sunriseFraction = sunriseFraction,
-                        sunsetFraction = sunsetFraction,
-                        currentPrayer = if (currentPrayerIndex >= 0) sortedPrayers[currentPrayerIndex].type else null,
-                        nextPrayer = nextPrayer,
-                        timeUntilNextPrayer = timeUntilNext,
-                        hijriDate = calculateHijriDate(),
-                        isFriday = isFriday,
-                        jumuahTime = jumuahTime,
-                        timeUntilJumuah = timeUntilJumuah,
-                        isJumuahPassed = isJumuahPassed,
-                        worshipCard = worshipCard,
-                        isLoading = false,
-                        error = null
-                    )
-                }
+                // Suspends (DataStore), but only after isLoading is already false.
+                refreshWorshipCard()
             } catch (e: Exception) {
                 CrashReporter.recordException(e)
                 AppAnalytics.logError("home", "calculate_prayer_times", e.message)
@@ -750,13 +639,204 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Re-derive everything that moves with the clock — countdowns, which prayer is
+     * current/next, timeline progress — from the already-computed [dayTimes].
+     *
+     * Deliberately non-suspending and free of I/O: this runs once a second, and a
+     * suspension point here would let any transient state set by its caller become
+     * observable to the UI.
+     */
+    private fun renderTick() {
+        val prayerTimes = dayTimes
+        if (prayerTimes.isEmpty()) return
+
+        val currentTime = Clock.System.now()
+        val timeZone = TimeZone.currentSystemDefault()
+        val localTime = currentTime.toLocalDateTime(timeZone)
+
+        val prayerTimeDisplays = prayerTimes.map { prayerTime ->
+            val prayerLocalTime = prayerTime.time.toLocalDateTime(timeZone)
+            PrayerTimeDisplay(
+                type = prayerTime.type,
+                name = prayerTime.type.displayName,
+                time = formatTime(prayerLocalTime.hour, prayerLocalTime.minute),
+                isPassed = prayerLocalTime.time < localTime.time,
+                isCurrent = false,
+                isNext = false
+            )
+        }
+
+        // Find current and next prayer
+        val sortedPrayers = prayerTimeDisplays.sortedBy {
+            prayerTimes.find { pt -> pt.type == it.type }?.time
+        }
+
+        val nextPrayerIndex = sortedPrayers.indexOfFirst { !it.isPassed }
+        val currentPrayerIndex =
+            if (nextPrayerIndex > 0) nextPrayerIndex - 1 else sortedPrayers.lastIndex
+
+        val updatedDisplays = sortedPrayers.mapIndexed { index, display ->
+            display.copy(
+                isCurrent = index == currentPrayerIndex,
+                isNext = index == nextPrayerIndex
+            )
+        }
+
+        // Either the next prayer today, or — once Isha has passed — a wrap to
+        // tomorrow's Fajr, precomputed by calculatePrayerTimes so this stays pure.
+        val nextPrayer: PrayerType
+        val nextPrayerInstant: Instant?
+        if (nextPrayerIndex >= 0) {
+            nextPrayer = sortedPrayers[nextPrayerIndex].type
+            nextPrayerInstant = prayerTimes.find { it.type == nextPrayer }?.time
+        } else {
+            nextPrayer = PrayerType.FAJR
+            nextPrayerInstant = tomorrowFajr
+        }
+        val timeUntilNext = nextPrayerInstant?.let { formatCountdown(it - currentTime) } ?: ""
+
+        // Where "now" sits along the Fajr→Isha timeline (0f at Fajr, 1f
+        // at Isha), interpolated within the current interval. Drives the
+        // progress card's fill independently of which prayers are prayed.
+        val timelineProgress: Float = run {
+            val order = listOf(
+                PrayerType.FAJR, PrayerType.DHUHR, PrayerType.ASR,
+                PrayerType.MAGHRIB, PrayerType.ISHA
+            )
+            val ts = order.mapNotNull { type ->
+                prayerTimes.find { it.type == type }?.time
+            }
+            when {
+                ts.size < 2 -> 0f
+                currentTime <= ts.first() -> 0f
+                currentTime >= ts.last() -> 1f
+                else -> {
+                    var result = 1f
+                    for (k in 0 until ts.size - 1) {
+                        if (currentTime >= ts[k] && currentTime < ts[k + 1]) {
+                            val frac = (currentTime - ts[k]).inWholeSeconds.toFloat() /
+                                    (ts[k + 1] - ts[k]).inWholeSeconds.toFloat()
+                            result = ((k + frac) / (ts.size - 1)).coerceIn(0f, 1f)
+                            break
+                        }
+                    }
+                    result
+                }
+            }
+        }
+
+        // Sunrise/sunset as day-fractions for the living sky's sun arc.
+        val sunriseFraction = prayerTimes.find { it.type == PrayerType.SUNRISE }?.time
+            ?.toLocalDateTime(timeZone)
+            ?.let { (it.hour * 60 + it.minute) / 1440f } ?: 0.27f
+        val sunsetFraction = prayerTimes.find { it.type == PrayerType.MAGHRIB }?.time
+            ?.toLocalDateTime(timeZone)
+            ?.let { (it.hour * 60 + it.minute) / 1440f } ?: 0.80f
+
+        // Apply prayer records to displays
+        val records = _prayerRecords.value
+        val displaysWithStatus = updatedDisplays.map { display ->
+            val prayerName = PrayerName.valueOf(display.type.name)
+            val status = records[prayerName] ?: PrayerStatus.NOT_PRAYED
+            display.copy(prayerStatus = status)
+        }
+
+        // Friday / Jumu'ah detection
+        val today = LocalDate.now()
+        val isFriday = today.dayOfWeek == DayOfWeek.FRIDAY
+        val dhuhrDisplay = displaysWithStatus.find { it.type == PrayerType.DHUHR }
+        val dhuhrInstant = prayerTimes.find { it.type == PrayerType.DHUHR }?.time
+
+        val jumuahTime = if (isFriday) dhuhrDisplay?.time ?: "" else ""
+        val isJumuahPassed = if (isFriday) dhuhrDisplay?.isPassed == true else false
+        val timeUntilJumuah = if (isFriday && !isJumuahPassed && dhuhrInstant != null) {
+            formatCountdown(dhuhrInstant - currentTime)
+        } else ""
+
+        _state.update {
+            it.copy(
+                prayerTimes = displaysWithStatus,
+                prayerTimelineProgress = timelineProgress,
+                sunriseFraction = sunriseFraction,
+                sunsetFraction = sunsetFraction,
+                currentPrayer = if (currentPrayerIndex >= 0) sortedPrayers[currentPrayerIndex].type else null,
+                nextPrayer = nextPrayer,
+                timeUntilNextPrayer = timeUntilNext,
+                hijriDate = calculateHijriDate(),
+                isFriday = isFriday,
+                jumuahTime = jumuahTime,
+                timeUntilJumuah = timeUntilJumuah,
+                isJumuahPassed = isJumuahPassed,
+            )
+        }
+    }
+
+    /**
+     * "1h 4m 22s" / "4m 22s" / "22s" — the countdown format shared by the next
+     * prayer and Jumu'ah. Clamped at zero so an instant that has just elapsed
+     * between the `isPassed` check and here never renders as a negative time.
+     */
+    private fun formatCountdown(remaining: Duration): String {
+        val totalSeconds = remaining.inWholeSeconds.coerceAtLeast(0)
+        val hours = totalSeconds / 3600
+        val minutes = (totalSeconds % 3600) / 60
+        val seconds = totalSeconds % 60
+        return when {
+            hours > 0 -> "${hours}h ${minutes}m ${seconds}s"
+            minutes > 0 -> "${minutes}m ${seconds}s"
+            else -> "${seconds}s"
+        }
+    }
+
     private fun startTimeUpdates() {
         viewModelScope.launch {
             while (isActive) {
                 delay(1_000) // Update every second for smooth countdown
-                calculatePrayerTimes()
+                // The tick is pure: it re-derives the countdown from instants that
+                // are already in memory. The expensive recompute runs only when the
+                // date rolls over past midnight.
+                if (dayTimes.isNotEmpty() && dayTimesDate != LocalDate.now()) {
+                    calculatePrayerTimes()
+                } else {
+                    renderTick()
+                }
             }
         }
+    }
+
+    /**
+     * The "Next Worship" card refreshes on its own, much slower loop. Its countdown
+     * renders in whole minutes ([renderWorshipCard]), so a 1-second cadence would
+     * produce an identical string 59 times out of 60 — at ~30 DataStore reads each.
+     */
+    private fun startWorshipUpdates() {
+        viewModelScope.launch {
+            while (isActive) {
+                refreshWorshipCard()
+                delay(60_000)
+            }
+        }
+    }
+
+    /**
+     * Resolve + render the "Next Worship" card. [NextWorshipResolver.nearest] reads
+     * every worship preference plus location and calculation settings — ~30
+     * sequential DataStore reads — so the resolved occurrence is cached and
+     * re-resolved only when it is missing, has elapsed, or its settings changed
+     * ([worshipStale]). In between, only the countdown string is reformatted.
+     */
+    private suspend fun refreshWorshipCard() {
+        val now = LocalDateTime.now()
+        val cached = worshipOccurrence
+        if (worshipStale || cached == null || !cached.eventAt.isAfter(now)) {
+            worshipOccurrence = runCatching { nextWorshipResolver.nearest(now) }
+                .onFailure { CrashReporter.recordException(it) }
+                .getOrNull()
+            worshipStale = false
+        }
+        val card = worshipOccurrence?.let { renderWorshipCard(it, now) }
+        _state.update { it.copy(worshipCard = card) }
     }
 
     private var use24HourFormat: Boolean = false
@@ -779,15 +859,16 @@ class HomeViewModel @Inject constructor(
     }
 
     /**
-     * Resolve the nearest upcoming enabled worship reminder into ready-to-render card data, or
-     * null when none is enabled/near. Countdown is to the event instant ([eventAt]); the time
-     * label is shown only where it adds meaning (Tahajjud's "Begins").
+     * Render an already-resolved worship occurrence into card data. Countdown is to the event
+     * instant ([WorshipReminderOccurrence.eventAt]); the time label is shown only where it adds
+     * meaning (Tahajjud's "Begins").
+     *
+     * Pure and non-suspending — resolution and settings reads happen in [refreshWorshipCard], so
+     * re-rendering the countdown costs nothing.
      */
-    private suspend fun buildWorshipCard(now: LocalDateTime): WorshipCardUi? {
-        val occ = nextWorshipResolver.nearest(now) ?: return null
-        val use24 = settingsRepository.use24HourFormat.first()
+    private fun renderWorshipCard(occ: WorshipReminderOccurrence, now: LocalDateTime): WorshipCardUi {
         val et = occ.eventAt.toLocalTime()
-        val eventTime = formatClockTime(et.hour, et.minute, use24)
+        val eventTime = formatClockTime(et.hour, et.minute, use24HourFormat)
         val secs = java.time.Duration.between(now, occ.eventAt).seconds.coerceAtLeast(0)
         val hours = secs / 3600
         val minutes = (secs % 3600) / 60

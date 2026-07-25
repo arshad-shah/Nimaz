@@ -203,6 +203,15 @@ on the dedicated `WorshipRemindersScreen` (`Route.SettingsWorshipReminders`), an
 one. Ramadan-category reminders are Ramadan-gated and their settings group auto-hides outside
 Ramadan.
 
+> **Home refresh cadence.** `NextWorshipResolver.nearest()` reads every worship pref plus location
+> and calculation settings — ~30 sequential DataStore reads per call — so it must never sit on a
+> per-second path. `HomeViewModel` caches the resolved `WorshipReminderOccurrence` and re-resolves
+> it only when it is missing, has elapsed, or its settings changed; the card itself refreshes on a
+> 60s loop (`startWorshipUpdates`), which matches its whole-minute countdown. The 1s prayer
+> countdown (`renderTick`) is pure and I/O-free, deriving everything from prayer instants cached by
+> `calculatePrayerTimes`. Keep it that way: a suspension point in the tick makes any transient
+> state set around it — notably `isLoading` — observable to the UI on every tick.
+
 **Wiring.** `PrayerNotificationScheduler` is constructor-injected (`@Singleton @Inject`, deps: `PrayerTimeCalculator`, `SettingsRepository`). Called by `AppInitializer` on startup and by `SettingsViewModel.rescheduleNotifications()` when prayer/notification settings change. Permissions in `AndroidManifest.xml`: `POST_NOTIFICATIONS`, `SCHEDULE_EXACT_ALARM`, `USE_EXACT_ALARM`, `RECEIVE_BOOT_COMPLETED`, `WAKE_LOCK`, `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS`.
 
 **Gotchas.**
