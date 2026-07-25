@@ -7,6 +7,7 @@ import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
 import com.arshadshah.nimaz.data.local.database.entity.AyahEntity
+import com.arshadshah.nimaz.data.local.database.entity.MushafLayoutIndopak16Entity
 import com.arshadshah.nimaz.data.local.database.entity.QuranBookmarkEntity
 import com.arshadshah.nimaz.data.local.database.entity.QuranFavoriteEntity
 import com.arshadshah.nimaz.data.local.database.entity.ReadingProgressEntity
@@ -67,6 +68,38 @@ interface QuranDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAyahs(ayahs: List<AyahEntity>)
+
+    // IndoPak 16-line Mushaf layout (sub-task 2/7). The content is shipped as
+    // bundled JSON assets and seeded at runtime by QuranIndopakSeeder — the
+    // prepackaged DB is not regenerated. The richer per-page domain queries
+    // (getMushafLayoutByPage) belong to the 4/7 data layer; these methods only
+    // cover seeding + idempotency.
+    @Query("SELECT COUNT(*) FROM mushaf_layout_indopak16")
+    suspend fun countMushafLayoutIndopak16(): Int
+
+    @Query("UPDATE ayahs SET text_indopak = :text WHERE id = :ayahId")
+    suspend fun updateAyahIndopakText(ayahId: Int, text: String)
+
+    @Query("DELETE FROM mushaf_layout_indopak16")
+    suspend fun deleteAllMushafLayoutIndopak16()
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertMushafLayoutIndopak16(rows: List<MushafLayoutIndopak16Entity>)
+
+    /**
+     * Atomically (re)seed the IndoPak 16-line data: clear the layout table, write the
+     * per-ayah [ayahIndopakTexts] (keyed by global ayah id) onto the existing `ayahs`
+     * rows, then insert the [layout] segments. Idempotent — safe to re-run.
+     */
+    @Transaction
+    suspend fun replaceMushafIndopak16(
+        ayahIndopakTexts: Map<Int, String>,
+        layout: List<MushafLayoutIndopak16Entity>
+    ) {
+        deleteAllMushafLayoutIndopak16()
+        ayahIndopakTexts.forEach { (ayahId, text) -> updateAyahIndopakText(ayahId, text) }
+        insertMushafLayoutIndopak16(layout)
+    }
 
     // Translation operations
     @Query("SELECT * FROM translations WHERE ayah_id = :ayahId AND translator_id = :translatorId")

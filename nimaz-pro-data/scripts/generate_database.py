@@ -48,6 +48,7 @@ def create_tables(conn):
             sajda_type TEXT,
             transliteration TEXT,
             text_tajweed TEXT,
+            text_indopak TEXT,
             FOREIGN KEY (surah_id) REFERENCES surahs(id) ON DELETE CASCADE
         )
     ''')
@@ -622,6 +623,23 @@ def create_tables(conn):
     cursor.execute('CREATE INDEX IF NOT EXISTS index_qaida_cells_lesson_id ON qaida_cells(lesson_id)')
     cursor.execute('CREATE INDEX IF NOT EXISTS index_qaida_cells_letter_id ON qaida_cells(letter_id)')
 
+    # 16-line IndoPak Mushaf layout (sub-task 2/7 of #263). The line-accurate
+    # 548-page layout is stored as line segments; per-ayah IndoPak text lives on
+    # ayahs.text_indopak (added above). See populate_indopak_16line().
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS mushaf_layout_indopak16 (
+            id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+            page INTEGER NOT NULL,
+            line INTEGER NOT NULL,
+            line_type TEXT NOT NULL,
+            surah_id INTEGER NOT NULL,
+            ayah_id INTEGER,
+            first_word_position INTEGER,
+            last_word_position INTEGER
+        )
+    ''')
+    cursor.execute('CREATE INDEX IF NOT EXISTS index_mushaf_layout_indopak16_page_line ON mushaf_layout_indopak16(page, line)')
+
     # Create indices
     cursor.execute('CREATE INDEX IF NOT EXISTS index_ayahs_surah_id ON ayahs(surah_id)')
     cursor.execute('CREATE INDEX IF NOT EXISTS index_ayahs_juz ON ayahs(juz)')
@@ -641,6 +659,42 @@ def load_json(filename):
         with open(filepath, 'r', encoding='utf-8') as f:
             return json.load(f)
     return []
+
+def populate_indopak_16line(cursor):
+    """Populate the 16-line IndoPak Mushaf data (sub-task 2/7 of #263).
+
+    Fills ayahs.text_indopak (keyed by the global ayah id 1-6236) from
+    ayahs_indopak.json and the mushaf_layout_indopak16 table from
+    mushaf_layout_indopak16.json. Both files are the validated 1/7 output.
+
+    NOTE: the shipped prepackaged DB is stamped at user_version = 12 and is NOT
+    regenerated for this feature — on device, MIGRATION_17_18 creates the empty
+    column/table and QuranIndopakSeeder fills them from the bundled JSON assets
+    (which keeps the ~147 MB Git-LFS asset from growing). This function only
+    matters when the prepackaged DB is regenerated from scratch, so it degrades
+    gracefully when the IndoPak JSON files are absent.
+    """
+    ayahs_indopak = load_json('ayahs_indopak.json')
+    if not ayahs_indopak:
+        print("Warning: ayahs_indopak.json not found — skipping 16-line IndoPak data")
+        return
+
+    for a in ayahs_indopak:
+        cursor.execute(
+            'UPDATE ayahs SET text_indopak = ? WHERE id = ?',
+            (a['text_indopak'], a['ayah_id'])
+        )
+    print(f"Set text_indopak on {len(ayahs_indopak)} ayahs")
+
+    layout = load_json('mushaf_layout_indopak16.json')
+    for row in layout:
+        cursor.execute('''
+            INSERT INTO mushaf_layout_indopak16
+                (page, line, line_type, surah_id, ayah_id, first_word_position, last_word_position)
+            VALUES (?,?,?,?,?,?,?)
+        ''', (row['page_number'], row['line_number'], row['line_type'], row['surah_id'],
+              row.get('ayah_id'), row.get('first_word_position'), row.get('last_word_position')))
+    print(f"Inserted {len(layout)} mushaf_layout_indopak16 line-segments")
 
 def populate_database(conn):
     """Populate database from JSON files"""
@@ -691,6 +745,9 @@ def populate_database(conn):
               a['page'], 1 if a.get('sajda') else 0, a.get('sajda_type'),
               transliteration, text_tajweed))
     print(f"Inserted {len(ayahs)} ayahs")
+
+    # 16-line IndoPak Mushaf data (sub-task 2/7 of #263)
+    populate_indopak_16line(cursor)
 
     # Surah Info
     surah_info = load_json('surah_info.json')

@@ -76,4 +76,33 @@ class MigrationTest {
         cursor.close()
         assertThat(columns).contains("narrator_chain")
     }
+
+    @Test
+    fun migrate17To18_addsIndopakColumnAndLayoutTable() {
+        helper.createDatabase(dbName, 17).close()
+        val db = helper.runMigrationsAndValidate(
+            dbName, 18, true, NimazDatabase.MIGRATION_17_18
+        )
+
+        // ayahs gained the nullable text_indopak column
+        val ayahCols = db.query("PRAGMA table_info(`ayahs`)").let { c ->
+            val nameIndex = c.getColumnIndex("name")
+            generateSequence { if (c.moveToNext()) c.getString(nameIndex) else null }.toList().also { c.close() }
+        }
+        assertThat(ayahCols).contains("text_indopak")
+
+        // the mushaf_layout_indopak16 table exists
+        val tableCursor = db.query(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name='mushaf_layout_indopak16'"
+        )
+        assertThat(tableCursor.count).isEqualTo(1)
+        tableCursor.close()
+
+        // and it is indexed on (page, line)
+        val indexCursor = db.query(
+            "SELECT name FROM sqlite_master WHERE type='index' AND name='index_mushaf_layout_indopak16_page_line'"
+        )
+        assertThat(indexCursor.count).isEqualTo(1)
+        indexCursor.close()
+    }
 }

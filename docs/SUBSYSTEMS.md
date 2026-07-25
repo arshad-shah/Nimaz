@@ -193,14 +193,16 @@ to Play Core's on-demand language download.
 
 ## 5. Database & migrations
 
-`data/local/database/NimazDatabase.kt` — a single Room `@Database` (`version = 17`), provided
+`data/local/database/NimazDatabase.kt` — a single Room `@Database` (`version = 18`), provided
 in `core/di/DatabaseModule.kt`.
 
 **Prepopulated DB.** The app ships a prebuilt DB in `app/src/main/assets/database/nimaz_prepopulated.db`, wired via `.createFromAsset("database/nimaz_prepopulated.db", NimazDatabase.PREPACKAGED_CALLBACK)`. **Room copies this asset only on a fresh install** — it is *not* re-copied on app update. That single fact drives both the migration discipline here and the entire content-seeding subsystem (§7).
 
 **`PREPACKAGED_CALLBACK`** repairs the shipped asset right after copy and before Room validates its schema (the bundled asset was stamped at `user_version 12` while still missing the `updatedAt` columns and shipping tafseer indices under the wrong names). The same idempotent repair is also exposed as `MIGRATION_12_13`, because devices already sitting at v12 never re-run the copy callback.
 
-**Migration chain** (registered in `DatabaseModule.provideNimazDatabase`): `MIGRATION_7_8` (khatam) → `8_9` (asma/prophets) → `9_10` (a *missing* migration restored after the original release bumped the version without registering it) → `10_11` (`updatedAt` columns) → `11_12` (surah start_page fix) → `12_13` (legacy asset repair) → `13_14` (Help tables) → `14_15` (Qaida tables) → `15_16` (tasbih `category`) → `16_17` (hadith `narrator_chain`).
+**Migration chain** (registered in `DatabaseModule.provideNimazDatabase`): `MIGRATION_7_8` (khatam) → `8_9` (asma/prophets) → `9_10` (a *missing* migration restored after the original release bumped the version without registering it) → `10_11` (`updatedAt` columns) → `11_12` (surah start_page fix) → `12_13` (legacy asset repair) → `13_14` (Help tables) → `14_15` (Qaida tables) → `15_16` (tasbih `category`) → `16_17` (hadith `narrator_chain`) → `17_18` (16-line IndoPak: `ayahs.text_indopak` column + `mushaf_layout_indopak16` table).
+
+**16-line IndoPak layout (`v18`, sub-task 2/7 of #263).** `MIGRATION_17_18` adds the nullable `ayahs.text_indopak` column and creates the `mushaf_layout_indopak16` table (columns `page`, `line`, `line_type` ∈ {`ayah`, `surah_header`, `basmalah`}, `surah_id`, `ayah_id` = global 1–6236 or null, `first_word_position`/`last_word_position`; indexed on `(page, line)`). The table stores the layout as **line segments** (one row per contiguous run of an ayah's words on a printed line, ~13,970 rows), not one row per word — the glyph text is reconstructed by slicing `text_indopak` (split on space) with the stored positions. The migration only creates the empty column/table (for both fresh installs and upgraders); the data is **not** baked into the prepackaged DB — it is shipped as bundled JSON assets and seeded at runtime (§7). This was a deliberate call: regenerating the ~147 MB Git-LFS DB asset would bloat it by tens of MB *and* never reach existing installs, whereas the JSON assets add only ~0.75 MB compressed to the APK. See `docs/ARCHITECTURE.md` §9.
 
 **Rules / patterns.**
 - **A schema change requires a migration.** Bump `@Database(version = …)` and add a `MIGRATION_x_y`. Room runs migrations **even after `createFromAsset`**, so every migration must work for both fresh installs (asset already has newer tables → `CREATE TABLE IF NOT EXISTS` is a no-op) and upgraders (tables created empty / columns added).
@@ -254,7 +256,7 @@ migrations only create empty tables. So new *bundled content* shipped in an upda
 reach existing users. **Seeders** read a versioned JSON asset at runtime and upsert content
 idempotently, so fresh installs and upgraders converge on the same content.
 
-**Four content types use seeders:**
+**Five content types use seeders:**
 
 | Content | Seeder | JSON asset | Pattern |
 |---|---|---|---|
@@ -262,16 +264,17 @@ idempotently, so fresh installs and upgraders converge on the same content.
 | Help | `data/local/help/HelpContentSeeder.kt` | `help/help.json` | full content replace |
 | Qaida | `data/local/qaida/QaidaContentSeeder.kt` | `qaida/qaida_content.json` | full content replace |
 | Hadith | `data/local/hadith/HadithBackfillSeeder.kt` | `hadith/hadith_fills.json` | keyed UPDATE backfill |
+| IndoPak 16-line | `data/local/quran/QuranIndopakSeeder.kt` | `quran/ayahs_indopak.json` + `quran/mushaf_layout_indopak16.json` | `text_indopak` UPDATE + `mushaf_layout_indopak16` replace |
 
 **Content-version pattern.** The version is stored in **DataStore** (not a file, not a table):
-`PreferencesKeys.{DUA,HELP,QAIDA}_CONTENT_VERSION` and `HADITH_BACKFILL_VERSION` (default `0` = never seeded). Each JSON root carries a `contentVersion: Int` field. `seedIfNeeded()`:
+`PreferencesKeys.{DUA,HELP,QAIDA}_CONTENT_VERSION`, `HADITH_BACKFILL_VERSION` and `INDOPAK_CONTENT_VERSION` (default `0` = never seeded). Each JSON root carries a `contentVersion: Int` field (the IndoPak assets are plain arrays, so `QuranIndopakSeeder` uses an in-code `INDOPAK_CONTENT_VERSION` constant instead). `seedIfNeeded()`:
 1. parse the JSON asset;
 2. if the table is already populated **and** stored version ≥ JSON `contentVersion` → skip;
 3. otherwise seed and write the new stored version.
 
 Content seeders do an **atomic full-content replace** (`dao.replaceAllContent(...)` / clear-then-insert), touching only content tables — user data (bookmarks/progress) lives in separate tables with no FK into content, so it survives a re-seed. The Hadith backfill is different: the JSON `id` is the stable PK of the `hadiths` row, so each fix is a keyed UPDATE (`backfillHadith`/`updateNarratorChain`); it also has a fast-path gap detector (`emptyArabicCount()`). All seeders serialize concurrent calls with a `Mutex`.
 
-**Where seeding is triggered — lazy "seed-then-read," NOT `AppInitializer`.** Three are triggered inside repositories at first content access (`DuaRepositoryImpl`/`HelpRepositoryImpl` use a `seededFlow { seeder.seedIfNeeded(); emitAll(...) }` wrapper; `HadithRepositoryImpl` calls `backfillSeeder.seedIfNeeded()` at the top of each suspend read). **Qaida is the exception** — seeded in `QaidaReaderViewModel.init`.
+**Where seeding is triggered — lazy "seed-then-read," NOT `AppInitializer`.** Three are triggered inside repositories at first content access (`DuaRepositoryImpl`/`HelpRepositoryImpl` use a `seededFlow { seeder.seedIfNeeded(); emitAll(...) }` wrapper; `HadithRepositoryImpl` calls `backfillSeeder.seedIfNeeded()` at the top of each suspend read). **Qaida is the exception** — seeded in `QaidaReaderViewModel.init`. **IndoPak 16-line** follows the Qaida model: `QuranIndopakSeeder` is fully DI-wired and unit-tested, but its trigger lands with the consuming layer (the 16-line reader's data layer / settings toggle, sub-tasks 4/7 & 6/7 of #263) so the ~20k-row seed only runs the first time the IndoPak view is actually used, not on every user's first Quran open.
 
 **Wiring.** The `XxxAssetReader` and `XxxVersionStore` interfaces (which exist to make seeders testable without Android/DataStore) are bound in `core/di/RepositoryModule.kt` via `@Binds` (→ `AndroidXxxAssetReader` / `DataStoreXxxVersionStore`); the seeder classes are `@Singleton @Inject`.
 

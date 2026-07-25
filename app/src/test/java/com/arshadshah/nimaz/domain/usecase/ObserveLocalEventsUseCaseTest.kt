@@ -87,6 +87,8 @@ private class FakeSettings(private val offset: Int) : SettingsRepository {
     override suspend fun setDuaContentVersion(version: Int) {}
     override val qaidaContentVersion: Flow<Int> = flowOf(0)
     override suspend fun setQaidaContentVersion(version: Int) {}
+    override val indopakContentVersion: Flow<Int> = flowOf(0)
+    override suspend fun setIndopakContentVersion(version: Int) {}
     override val arabicFontSize: Flow<String> = flowOf("MEDIUM")
     override suspend fun setArabicFontSize(size: String) {}
     override val calculationMethod: Flow<String> = flowOf("MWL")

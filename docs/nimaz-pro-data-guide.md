@@ -119,7 +119,7 @@ nimaz-pro-data/
 > The one item that remains a **human decision** is the licensing sign-off for *shipping* the bulk
 > data in a release build — see the ⚠️ note in `nimaz-pro-data/json/LICENSES_INDOPAK.md` (the
 > parent issue's own estimate — "3–5 days, dominated by data validation + license verification" —
-> always assumed a human in that loop). DB/schema wiring is the next sub-task (2/7).
+> always assumed a human in that loop). **DB/schema wiring is done in sub-task 2/7 — see below.**
 
 **Why existing `ayahs.json` isn't enough.** `ayahs.json` / `AyahEntity` (`text_arabic` /
 `text_uthmani`, `page`) is keyed to the **604-page Madani Mushaf** in Uthmani script. A
@@ -197,6 +197,35 @@ bismillah QUL folds into the name banner gets a basmalah synthesised onto its he
 
 Re-generate/validate any time with `python3 nimaz-pro-data/scripts/download_indopak_mushaf_data.py`
 (pages cache under `$INDOPAK_CACHE_DIR`, default `/tmp/indopak_pages`).
+
+### DB schema, migration & distribution (sub-task 2/7 of #263)
+
+**Schema (`NIMAZ_DATABASE_VERSION = 18`).** `MIGRATION_17_18` (in `NimazDatabase.kt`):
+- adds a nullable **`ayahs.text_indopak`** column (full IndoPak text per ayah, keyed by the global
+  `AyahEntity.id` 1–6236); and
+- creates **`mushaf_layout_indopak16`** — one row per line-segment, mirroring
+  `mushaf_layout_indopak16.json` 1:1 (`id` autoincrement PK, `page`, `line`, `line_type`,
+  `surah_id`, `ayah_id` = global id or null, `first_word_position`, `last_word_position`), indexed
+  on `(page, line)`.
+
+The glyph text is **not** duplicated into the layout table — the rendering/data layer (4/7)
+reconstructs each line's words by slicing `text_indopak.split(' ')` with the stored inclusive
+positions. This is lossless: the 1/7 data guarantees `text_indopak == " ".join(words)` with no
+intra-word spaces, and every ayah's line-segments exactly cover `1..len(words)`.
+
+**Distribution — seeded assets, NOT a regenerated prepackaged DB.** The prepackaged
+`assets/database/nimaz_prepopulated.db` (~147 MB, Git LFS) is copied by `createFromAsset` **only on
+a fresh install**, so baking the IndoPak data into it would never reach existing installs *and*
+would grow the LFS blob by tens of MB. Instead the two JSON files are shipped verbatim as bundled
+Android assets (`app/src/main/assets/quran/ayahs_indopak.json` +
+`mushaf_layout_indopak16.json`, **~0.75 MB compressed in the APK**) and populated at runtime by
+`QuranIndopakSeeder` (idempotent, version-gated on `PreferencesKeys.INDOPAK_CONTENT_VERSION`),
+exactly as Dua/Help/Qaida content is seeded. Fresh installs and upgraders both converge on the same
+data. See `docs/SUBSYSTEMS.md` §5/§7 and `docs/ARCHITECTURE.md` §9.
+
+**`generate_database.py` is kept schema-complete** (`populate_indopak_16line()` ingests the two JSON
+files into `text_indopak` + `mushaf_layout_indopak16`) so a from-scratch DB regeneration stays
+consistent with the Room schema — but the shipped LFS asset is intentionally left untouched by 2/7.
 
 ---
 
