@@ -89,9 +89,9 @@ class MushafPageTest {
             )
         }
 
-        // SurahHeaderCartouche renders the English name and ayah count
+        // SurahHeaderCartouche renders the English name and revelation badge
         composeRule.onNodeWithText("Al-Fatihah").assertExists()
-        composeRule.onNodeWithText("7 Ayahs").assertExists()
+        composeRule.onNodeWithText("Meccan").assertExists()
     }
 
     @Test
