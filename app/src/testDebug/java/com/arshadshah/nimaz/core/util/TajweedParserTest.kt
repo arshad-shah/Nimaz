@@ -55,4 +55,88 @@ class TajweedParserTest {
         val result = TajweedParser.parse("not json", isDarkTheme = false)
         assertThat(result.text).isEqualTo("not json")
     }
+
+    @Test
+    fun `parse preserves the full text across mixed segments`() {
+        val json = """[{"t":"بِ","r":"g"},{"t":"سْمِ","r":null},{"t":"ي","r":"mn"}]"""
+        assertThat(TajweedParser.parse(json, isDarkTheme = false).text).isEqualTo("بِسْمِي")
+    }
+
+    @Test
+    fun `parse applies a span style for a known v3 code`() {
+        val json = """[{"t":"ن","r":"g"}]"""
+        val result = TajweedParser.parse(json, isDarkTheme = false)
+        // exactly one coloured span covering the whole segment
+        assertThat(result.spanStyles).hasSize(1)
+        assertThat(result.spanStyles[0].start).isEqualTo(0)
+        assertThat(result.spanStyles[0].end).isEqualTo(1)
+    }
+
+    @Test
+    fun `parse light and dark colours differ for a rule`() {
+        val json = """[{"t":"ن","r":"g"}]"""
+        val light = TajweedParser.parse(json, isDarkTheme = false).spanStyles[0].item.color
+        val dark = TajweedParser.parse(json, isDarkTheme = true).spanStyles[0].item.color
+        assertThat(light).isNotEqualTo(dark)
+    }
+
+    @Test
+    fun `parse accepts legacy v2 and v1 codes without crashing`() {
+        // mo→mt, mp→ma, q→qs (v2) and i→if, d→dg, m→mn, s→sl (v1) all resolve.
+        val json = """[{"t":"a","r":"mo"},{"t":"b","r":"mp"},{"t":"c","r":"q"},
+            {"t":"d","r":"i"},{"t":"e","r":"d"},{"t":"f","r":"m"},{"t":"g","r":"s"}]"""
+        val result = TajweedParser.parse(json, isDarkTheme = false)
+        assertThat(result.text).isEqualTo("abcdefg")
+        assertThat(result.spanStyles).hasSize(7)  // every legacy code coloured
+    }
+
+    @Test
+    fun `parse leaves an unknown code uncoloured but keeps the text`() {
+        val json = """[{"t":"xyz","r":"totally_unknown"}]"""
+        val result = TajweedParser.parse(json, isDarkTheme = false)
+        assertThat(result.text).isEqualTo("xyz")
+        assertThat(result.spanStyles).isEmpty()  // no colour, text preserved
+    }
+
+    @Test
+    fun `parse handles empty list and null-rule single segment`() {
+        assertThat(TajweedParser.parse("[]", isDarkTheme = false).text).isEqualTo("")
+        val single = TajweedParser.parse("""[{"t":"نص","r":null}]""", isDarkTheme = false)
+        assertThat(single.text).isEqualTo("نص")
+        assertThat(single.spanStyles).isEmpty()
+    }
+
+    @Test
+    fun `stripTags returns the concatenated text`() {
+        val json = """[{"t":"بِ","r":"g"},{"t":"سْمِ","r":null}]"""
+        assertThat(TajweedParser.stripTags(json)).isEqualTo("بِسْمِ")
+    }
+
+    @Test
+    fun `stripTags falls back for malformed json`() {
+        assertThat(TajweedParser.stripTags("""[{"t":"abc"}""")).isEqualTo("abc")
+    }
+
+    @Test
+    fun `hasTajweedMarkup detects the pre-parsed json format`() {
+        assertThat(TajweedParser.hasTajweedMarkup("""[{"t":"a","r":"g"}]""")).isTrue()
+        assertThat(TajweedParser.hasTajweedMarkup("just arabic")).isFalse()
+        // a plain ayah that merely starts with '[' is not tajweed markup
+        assertThat(TajweedParser.hasTajweedMarkup("[not tajweed]")).isFalse()
+    }
+
+    @Test
+    fun `every v3 rule code resolves to a colour`() {
+        val codes = listOf("g", "if", "is", "dg", "dn", "ds", "dj", "dk",
+            "qs", "qk", "mn", "mf", "mt", "ma", "ml", "my", "l", "ls", "sl", "hw")
+        for (code in codes) {
+            val json = """[{"t":"x","r":"$code"}]"""
+            val result = TajweedParser.parse(json, isDarkTheme = false)
+            assertThat(result.spanStyles).hasSize(1)
+        }
+        // and each code has legend info
+        for (code in codes) {
+            assertThat(TajweedParser.ruleInfo[code]).isNotNull()
+        }
+    }
 }

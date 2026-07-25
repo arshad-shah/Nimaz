@@ -101,6 +101,12 @@ renderer colours per rule. It is produced at DB-build time by
 `preparse_tajweed.preparse_single(raw, key="surah:ayah")` on the quran.com
 markup in `json/tajweed.json`.
 
+> **Source datasets & licences:** `json/tajweed.json` (quran.com `uthmani_tajweed`
+> API — rule span boundaries) and `json/tajweed_cpfair.json` (cpfair
+> `quran-tajweed` — the independent second source used for the madd
+> classification). Provenance and licensing are recorded in
+> **[`json/LICENSES_TAJWEED.md`](../nimaz-pro-data/json/LICENSES_TAJWEED.md)**.
+
 **Pre-parser (`scripts/preparse_tajweed.py`).** The markup contains
 arbitrarily **nested** `<tajweed>` tags (33 in the current source, e.g. `2:190`
 has a `slnt` span inside a `madda_obligatory` span). The parser is a
