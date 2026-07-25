@@ -1,5 +1,5 @@
 {
-  "contentVersion": 7,
+  "contentVersion": 8,
   "topics": [
     {
       "id": "getting_started", "order": 0, "icon": "rocket_launch", "color": "sky",
@@ -1903,6 +1903,58 @@
                 "de": "Wählen Sie Hell, Dunkel oder System."
               }
             }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "worship_reminders", "order": 20, "icon": "dark_mode", "color": "purple",
+      "title": {
+        "en": "Worship reminders", "tr": "İbadet hatırlatıcıları", "id": "Pengingat ibadah",
+        "ms": "Peringatan ibadah", "fr": "Rappels d'adoration", "de": "Andachtserinnerungen"
+      },
+      "subtitle": {
+        "en": "Tahajjud, Suhoor, Iftar, adhkar and more", "tr": "Teheccüd, Sahur, İftar, zikir ve daha fazlası",
+        "id": "Tahajud, Sahur, Buka, zikir, dan lainnya", "ms": "Tahajud, Sahur, Berbuka, zikir dan lain-lain",
+        "fr": "Tahajjud, Suhoor, Iftar, adhkar et plus", "de": "Tahajjud, Suhoor, Iftar, Adhkar und mehr"
+      },
+      "items": [
+        { "id": "wr_q_what", "type": "question", "order": 1,
+          "question": {
+            "en": "What are worship reminders?", "tr": "İbadet hatırlatıcıları nedir?",
+            "id": "Apa itu pengingat ibadah?", "ms": "Apakah peringatan ibadah?",
+            "fr": "Que sont les rappels d'adoration ?", "de": "Was sind Andachtserinnerungen?"
+          },
+          "answer": {
+            "en": "Optional reminders for Sunnah worship and fasting — Tahajjud, Witr, Suhoor, Iftar, Taraweeh, Laylatul Qadr, morning and evening adhkar, and Sunnah fasting days. They are notification-only nudges (no adhan) and are all off by default; Ramadan reminders appear only during Ramadan.",
+            "tr": "Sünnet ibadet ve oruç için isteğe bağlı hatırlatıcılar — Teheccüd, Vitir, Sahur, İftar, Teravih, Kadir Gecesi, sabah ve akşam zikirleri ve sünnet oruç günleri. Yalnızca bildirimdir (ezan yok) ve varsayılan olarak kapalıdır; Ramazan hatırlatıcıları yalnızca Ramazan'da görünür.",
+            "id": "Pengingat opsional untuk ibadah dan puasa sunnah — Tahajud, Witir, Sahur, Buka, Tarawih, Lailatul Qadar, zikir pagi dan petang, serta hari puasa sunnah. Hanya berupa notifikasi (tanpa azan) dan nonaktif secara bawaan; pengingat Ramadan hanya muncul saat Ramadan.",
+            "ms": "Peringatan pilihan untuk ibadah dan puasa sunat — Tahajud, Witir, Sahur, Berbuka, Terawih, Lailatulqadar, zikir pagi dan petang, serta hari puasa sunat. Hanya pemberitahuan (tiada azan) dan dimatikan secara lalai; peringatan Ramadan hanya muncul semasa Ramadan.",
+            "fr": "Rappels facultatifs pour l'adoration et le jeûne surérogatoires — Tahajjud, Witr, Suhoor, Iftar, Tarawih, Laylat al-Qadr, adhkar du matin et du soir, et jours de jeûne surérogatoire. Ce sont de simples notifications (pas d'adhan), désactivées par défaut ; les rappels du Ramadan n'apparaissent que pendant le Ramadan.",
+            "de": "Optionale Erinnerungen für Sunnah-Andacht und -Fasten — Tahajjud, Witr, Suhoor, Iftar, Taraweeh, Laylatul Qadr, Morgen- und Abend-Adhkar sowie Sunnah-Fastentage. Es sind reine Benachrichtigungen (kein Adhan) und standardmäßig aus; Ramadan-Erinnerungen erscheinen nur im Ramadan."
+          } },
+        { "id": "wr_g_enable", "type": "guide", "order": 2, "icon": "notifications_active", "estimatedMinutes": 1,
+          "title": {
+            "en": "Turn on a worship reminder", "tr": "Bir ibadet hatırlatıcısını aç",
+            "id": "Aktifkan pengingat ibadah", "ms": "Hidupkan peringatan ibadah",
+            "fr": "Activer un rappel d'adoration", "de": "Eine Andachtserinnerung einschalten"
+          },
+          "steps": [
+            { "id": "wr_g_enable_s1", "order": 1, "deeplink": "worship_reminders",
+              "pathLabels": ["More", "Settings", "Notifications", "Worship reminders"],
+              "title": {
+                "en": "Open Worship reminders", "tr": "İbadet hatırlatıcılarını aç",
+                "id": "Buka Pengingat ibadah", "ms": "Buka Peringatan ibadah",
+                "fr": "Ouvrir Rappels d'adoration", "de": "Andachtserinnerungen öffnen"
+              },
+              "body": {
+                "en": "Go to More → Settings → Notifications → Worship reminders, then toggle on the ones you want. Some let you adjust how many minutes before the time they fire.",
+                "tr": "More → Ayarlar → Bildirimler → İbadet hatırlatıcıları'na gidin ve istediklerinizi açın. Bazıları, vaktinden kaç dakika önce çalacağını ayarlamanıza olanak tanır.",
+                "id": "Buka More → Pengaturan → Notifikasi → Pengingat ibadah, lalu aktifkan yang Anda inginkan. Beberapa memungkinkan Anda mengatur berapa menit sebelum waktunya.",
+                "ms": "Pergi ke More → Tetapan → Pemberitahuan → Peringatan ibadah, kemudian hidupkan yang anda mahu. Sesetengahnya membenarkan anda melaraskan berapa minit sebelum waktunya.",
+                "fr": "Allez dans More → Paramètres → Notifications → Rappels d'adoration, puis activez ceux que vous voulez. Certains permettent d'ajuster de combien de minutes avant l'heure ils se déclenchent.",
+                "de": "Gehe zu More → Einstellungen → Benachrichtigungen → Andachtserinnerungen und schalte die gewünschten ein. Bei einigen kannst du einstellen, wie viele Minuten vorher sie ausgelöst werden."
+              } }
           ]
         }
       ]
