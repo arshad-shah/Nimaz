@@ -180,7 +180,30 @@ fall back to English. Disabling the split ships all locales in the base APK. Thi
 on a locally built APK, only on an Play-installed build, so **do not re-enable it** without moving
 to Play Core's on-demand language download.
 
-**Wiring.** `PrayerNotificationScheduler` is constructor-injected (`@Singleton @Inject`, deps: `PrayerTimeCalculator`). Called by `AppInitializer` on startup and by `SettingsViewModel.rescheduleNotifications()` when prayer/notification settings change. Permissions in `AndroidManifest.xml`: `POST_NOTIFICATIONS`, `SCHEDULE_EXACT_ALARM`, `USE_EXACT_ALARM`, `RECEIVE_BOOT_COMPLETED`, `WAKE_LOCK`, `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS`.
+**Extended worship reminders (epic #300).** Optional, **off-by-default** Sunnah/fasting nudges —
+Tahajjud, Witr, Suhoor, Iftar, Taraweeh, Laylatul Qadr, morning/evening adhkar, Mon/Thu &
+White-Days & Arafah/Ashura fasting. Data-driven off the `WorshipReminderType` enum
+(`domain/model/WorshipReminder.kt`) — **not** added to `PrayerType` (derived times, not fard
+prayers). The pure `WorshipReminderCalculator` (`core/util/`, JVM-tested) computes each type's
+**next** occurrence from prayer times + adhan2 `SunnahTimes` (exposed via
+`PrayerTimeCalculator.getSunnahTimes`) + the Hijri calendar; `PrayerNotificationScheduler`
+`scheduleWorshipReminders(...)` loops all enabled types and arms one alarm each
+(`ACTION_WORSHIP_REMINDER`, request-code block **9000+ordinal**), **inside
+`scheduleTodaysPrayerNotifications`** so the midnight/boot chain re-arms them daily. They post on
+the DEFAULT-importance `worship_reminders` channel (`CHANNEL_ID_WORSHIP`) via
+`BootReceiver.handleWorshipReminder` (re-checks the per-type pref + re-applies the saved locale),
+with copy from `WorshipReminderContent`. Prefs are generic dynamic keys
+(`worship_<key>_enabled` / `_offset` / `_mode`) on `SettingsRepository`/`PreferencesDataStore`. The
+notification settings screen is now a **hub** (`NotificationSettingsScreen`, #301) linking to focused
+subscreens — `PrayerNotificationsScreen`, `WorshipRemindersScreen`, `NotificationWeeklyScreen`,
+`NotificationSoundScreen`, `NotificationTroubleshootingScreen` (all new `Route`s), each rendering a
+slice of the shared `SettingsViewModel` state. Settings live
+on the dedicated `WorshipRemindersScreen` (`Route.SettingsWorshipReminders`), and the Home
+"Next Worship" card (`WorshipEventCard`, fed by `NextWorshipResolver`) surfaces the nearest enabled
+one. Ramadan-category reminders are Ramadan-gated and their settings group auto-hides outside
+Ramadan.
+
+**Wiring.** `PrayerNotificationScheduler` is constructor-injected (`@Singleton @Inject`, deps: `PrayerTimeCalculator`, `SettingsRepository`). Called by `AppInitializer` on startup and by `SettingsViewModel.rescheduleNotifications()` when prayer/notification settings change. Permissions in `AndroidManifest.xml`: `POST_NOTIFICATIONS`, `SCHEDULE_EXACT_ALARM`, `USE_EXACT_ALARM`, `RECEIVE_BOOT_COMPLETED`, `WAKE_LOCK`, `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS`.
 
 **Gotchas.**
 - Uses `USE_EXACT_ALARM` (auto-granted, alarm-clock class app) and does **not** check `canScheduleExactAlarms()` or catch `SecurityException`.

@@ -1,0 +1,101 @@
+<style>
+  .grid{display:flex;flex-direction:column;gap:16px;}
+  .cat{color:#7fd1b0;font-size:12px;letter-spacing:.12em;text-transform:uppercase;font-weight:800;margin:18px 0 2px;border-bottom:1px solid rgba(127,209,176,.18);padding-bottom:6px;}
+  .pair{display:flex;gap:16px;flex-wrap:wrap;align-items:stretch;}
+  .pair>.left{flex:0 0 300px;} .pair>.right{flex:1;min-width:280px;}
+  .wcard{border-radius:18px;padding:14px 16px;position:relative;overflow:hidden;background:linear-gradient(135deg,#123029,#0d211d);border:1px solid rgba(180,220,200,.10);height:100%;box-sizing:border-box;}
+  .wcard .ornament{position:absolute;right:-8px;top:-12px;font-size:70px;opacity:.06;}
+  .row{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+  .head{display:flex;align-items:center;gap:10px;}
+  .icon{width:32px;height:32px;border-radius:10px;background:rgba(127,209,176,.14);display:flex;align-items:center;justify-content:center;font-size:16px;}
+  .eyebrow{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:#7fd1b0;font-weight:700;}
+  .arabic{font-size:18px;color:#e9f5ef;margin:2px 0;direction:rtl;}
+  .body{font-size:11.5px;color:#9db8ac;line-height:1.35;margin-top:3px;}
+  .time{font-size:16px;font-weight:800;color:#f2e6c9;} .timelabel{font-size:9px;color:#9db8ac;text-transform:uppercase;letter-spacing:.08em;}
+  .hl{display:flex;align-items:center;justify-content:space-between;margin-top:10px;padding-top:9px;border-top:1px solid rgba(180,220,200,.10);}
+  .hl .lbl{font-size:11px;color:#9db8ac;} .hl .cd{font-size:14px;font-weight:800;color:#7fd1b0;}
+  .notif{background:#16211d;border:1px solid rgba(180,220,200,.10);border-radius:12px;padding:12px 14px;height:100%;box-sizing:border-box;}
+  .nt{color:#e9f5ef;font-size:13.5px;font-weight:700;}
+  .nb{color:#b7ccc2;font-size:12px;margin-top:4px;line-height:1.4;}
+  .meta{color:#7a938a;font-size:10.5px;margin-top:8px;font-style:italic;}
+  .k{color:#7fd1b0;font-weight:700;}
+</style>
+
+<h2>Card prototype (Direction A) + notification copy — full set</h2>
+<p class="subtitle">The <span class="k">left</span> mini-card is the locked Home card per event; the <span class="k">right</span> is the notification title/body. All draft copy — final wording will be string resources (× 6 locales). Scroll through; tell me any wording to change.</p>
+
+<div class="grid">
+
+<div class="cat">A · Night worship</div>
+<div class="pair">
+  <div class="left"><div class="wcard"><div class="ornament">☾</div>
+    <div class="row"><div class="head"><div class="icon">🌙</div><div><div class="eyebrow">Tahajjud · Last third</div><div class="arabic">تَهَجُّد</div></div></div><div style="text-align:right"><div class="time">2:48 AM</div><div class="timelabel">Begins</div></div></div>
+    <div class="hl"><span class="lbl">Begins in</span><span class="cd">4h 12m</span></div></div></div>
+  <div class="right"><div class="notif"><div class="nt">Tahajjud — the last third of the night</div><div class="nb">A blessed time for duʿāʾ has begun. "Our Lord descends to the lowest heaven and says: Who is calling upon Me, that I may answer him?"</div><div class="meta">Trigger: SunnahTimes.lastThirdOfTheNight · channel: worship (default)</div></div></div>
+</div>
+<div class="pair">
+  <div class="left"><div class="wcard"><div class="ornament">🕯️</div>
+    <div class="row"><div class="head"><div class="icon">🕯️</div><div><div class="eyebrow">Witr</div><div class="arabic">وِتْر</div></div></div><div style="text-align:right"><div class="time">Before Fajr</div></div></div>
+    <div class="hl"><span class="lbl">Fajr in</span><span class="cd">1h 30m</span></div></div></div>
+  <div class="right"><div class="notif"><div class="nt">Have you prayed Witr?</div><div class="nb">Seal your night with the Witr prayer before Fajr. "Make Witr the last of your prayers at night."</div><div class="meta">Trigger: after Isha (delay) OR Fajr − 90m · user picks which</div></div></div>
+</div>
+
+<div class="cat">C · Ramadan (auto-gated to Ramadan)</div>
+<div class="pair">
+  <div class="left"><div class="wcard"><div class="ornament">🌅</div>
+    <div class="row"><div class="head"><div class="icon">🌅</div><div><div class="eyebrow">Suhoor ends</div><div class="arabic">سُحُور</div></div></div><div style="text-align:right"><div class="time">4:52 AM</div><div class="timelabel">Fajr</div></div></div>
+    <div class="hl"><span class="lbl">Ends in</span><span class="cd">30m</span></div></div></div>
+  <div class="right"><div class="notif"><div class="nt">Suhoor ends soon</div><div class="nb">About 30 minutes until Fajr. Finish your suhoor and make your intention to fast. "Take suhoor, for in it there is blessing."</div><div class="meta">Trigger: Fajr − N min (default 30) · Ramadan only</div></div></div>
+</div>
+<div class="pair">
+  <div class="left"><div class="wcard"><div class="ornament">🍽️</div>
+    <div class="row"><div class="head"><div class="icon">🍽️</div><div><div class="eyebrow">Iftar</div><div class="arabic">إفْطار</div></div></div><div style="text-align:right"><div class="time">6:41 PM</div><div class="timelabel">Maghrib</div></div></div>
+    <div class="hl"><span class="lbl">Iftar in</span><span class="cd">22m</span></div></div></div>
+  <div class="right"><div class="notif"><div class="nt">Time to break your fast 🌙</div><div class="nb">Maghrib has entered. "The fasting person has two joys: when he breaks his fast, and when he meets his Lord."</div><div class="meta">Trigger: at Maghrib (or −N min) · Ramadan only</div></div></div>
+</div>
+<div class="pair">
+  <div class="left"><div class="wcard"><div class="ornament">🕌</div>
+    <div class="row"><div class="head"><div class="icon">🕌</div><div><div class="eyebrow">Taraweeh</div><div class="arabic">تَراويح</div></div></div><div style="text-align:right"><div class="time">8:15 PM</div></div></div>
+    <div class="hl"><span class="lbl">After</span><span class="cd">Isha</span></div></div></div>
+  <div class="right"><div class="notif"><div class="nt">Taraweeh tonight</div><div class="nb">Isha is complete — stand for the night prayer. "Whoever prays during the nights of Ramadan with faith… his past sins are forgiven."</div><div class="meta">Trigger: Isha + N min (default 15) · Ramadan only</div></div></div>
+</div>
+<div class="pair">
+  <div class="left"><div class="wcard"><div class="ornament">✨</div>
+    <div class="row"><div class="head"><div class="icon">✨</div><div><div class="eyebrow">Laylatul Qadr</div><div class="arabic">لَيْلَة القَدْر</div></div></div><div style="text-align:right"><div class="time">Odd night</div></div></div>
+    <div class="hl"><span class="lbl">Last ten</span><span class="cd">Night 27</span></div></div></div>
+  <div class="right"><div class="notif"><div class="nt">Seek Laylatul Qadr tonight</div><div class="nb">An odd night of the last ten. "The Night of Decree is better than a thousand months." Increase in prayer, Qur'an and duʿāʾ.</div><div class="meta">Trigger: 21/23/25/27/29 Ramadan, after Isha · Ramadan only</div></div></div>
+</div>
+
+<div class="cat">D · Fasting & Dhikr (Hijri-driven)</div>
+<div class="pair">
+  <div class="left"><div class="wcard"><div class="ornament">📿</div>
+    <div class="row"><div class="head"><div class="icon">📿</div><div><div class="eyebrow">Morning adhkar</div><div class="arabic">أذكار الصباح</div></div></div><div style="text-align:right"><div class="time">After Fajr</div></div></div>
+    <div class="hl"><span class="lbl">Evening set</span><span class="cd">After Asr</span></div></div></div>
+  <div class="right"><div class="notif"><div class="nt">Morning remembrance</div><div class="nb">Begin your day in the remembrance of Allah. A few minutes of adhkar to guard your day.</div><div class="meta">Trigger: Fajr + N min (morning) / Asr + N min (evening) · two toggles</div></div></div>
+</div>
+<div class="pair">
+  <div class="left"><div class="wcard"><div class="ornament">🌗</div>
+    <div class="row"><div class="head"><div class="icon">🌗</div><div><div class="eyebrow">Sunnah fast</div><div class="arabic">صِيام الاثنين</div></div></div><div style="text-align:right"><div class="time">Tomorrow</div><div class="timelabel">Monday</div></div></div>
+    <div class="hl"><span class="lbl">Suhoor</span><span class="cd">Mon 4:52 AM</span></div></div></div>
+  <div class="right"><div class="notif"><div class="nt">Fasting tomorrow? It's Monday</div><div class="nb">Monday is a Sunnah day to fast. "Deeds are presented on Monday and Thursday, and I love that my deeds be presented while I am fasting."</div><div class="meta">Trigger: Sun/Wed evening (night before Mon/Thu)</div></div></div>
+</div>
+<div class="pair">
+  <div class="left"><div class="wcard"><div class="ornament">🤍</div>
+    <div class="row"><div class="head"><div class="icon">🤍</div><div><div class="eyebrow">White Days</div><div class="arabic">أيّام البِيض</div></div></div><div style="text-align:right"><div class="time">13–15</div><div class="timelabel">Hijri</div></div></div>
+    <div class="hl"><span class="lbl">Begin</span><span class="cd">Tomorrow</span></div></div></div>
+  <div class="right"><div class="notif"><div class="nt">The White Days begin tomorrow</div><div class="nb">Fast the 13th, 14th and 15th — the bright days of the Hijri month. "Fasting three days of each month is like fasting for a lifetime."</div><div class="meta">Trigger: eve of 13th Hijri · via HijriDateCalculator</div></div></div>
+</div>
+<div class="pair">
+  <div class="left"><div class="wcard"><div class="ornament">📅</div>
+    <div class="row"><div class="head"><div class="icon">📅</div><div><div class="eyebrow">Day of Arafah</div><div class="arabic">يوم عَرَفة</div></div></div><div style="text-align:right"><div class="time">Tomorrow</div><div class="timelabel">9 Dhul-Hijjah</div></div></div>
+    <div class="hl"><span class="lbl">Fast</span><span class="cd">Recommended</span></div></div></div>
+  <div class="right"><div class="notif"><div class="nt">Day of Arafah tomorrow</div><div class="nb">Fasting Arafah is highly rewarded. "It expiates the sins of the past year and the coming year." (Also covers Ashura.)</div><div class="meta">Trigger: eve of 9 Dhul-Hijjah / 10 Muharram · via Islamic events</div></div></div>
+</div>
+
+</div>
+
+<h3 style="margin-top:20px;">Copy approval</h3>
+<div class="options">
+  <div class="option" data-choice="copy_ok" onclick="toggleSelect(this)"><div class="letter">✓</div><div class="content"><h3>Copy is good — use as the spec</h3><p>Bake these titles/bodies into the issues as the string-resource drafts.</p></div></div>
+  <div class="option" data-choice="copy_tweak" onclick="toggleSelect(this)"><div class="letter">✎</div><div class="content"><h3>I'll suggest wording changes</h3><p>Tell me which lines in the terminal; I'll revise before filing.</p></div></div>
+</div>

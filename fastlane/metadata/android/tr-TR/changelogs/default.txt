@@ -1,7 +1,7 @@
-3.0.56 sonrası yenilikler:
+Yenilikler:
 
-• İslami arka plan desenleri artık uygulamanın her yerinde — Görünüm'de beş stilden birini ya da Yok'u seçin.
-• Yenilenen tasarım: yüzen başlık çubukları ve açık/koyu temada daha net ayrılan kartlar.
-• Kur'an: yeniden düzenlenen ana sayfa, yenilenen sure bilgisi ve artık açık temaya da uyan okuyucu.
-• Yeniden tasarlanan Zekât özeti ve daha zengin Hatim widget'ı.
-• Düzeltmeler: okuma ilerlemesi artık %0'da takılmıyor ve takvim ayları doğru çeviriyor.
+• YENİ: İsteğe bağlı ibadet hatırlatıcıları — Teheccüd, Sahur & İftar, Teravih, Kadir Gecesi, sabah & akşam zikirleri ve sünnet oruç günleri. Yalnızca istediklerinizi açın.
+• Ana ekranda "Sıradaki İbadet" kartı yaklaşanı gösterir.
+• Bildirim ayarları net bölümlere yeniden düzenlendi.
+• Kur'an: ana ekranda önerilen kartlar.
+• İyileştirmeler ve hata düzeltmeleri.

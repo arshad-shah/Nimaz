@@ -310,6 +310,10 @@ private fun HomeCompactContent(
         }
 
         val eventCards = buildList {
+            // "Next Worship" card leads when an extended reminder is enabled and near.
+            state.worshipCard?.let { w ->
+                add(EventCardUi(occasion = EventOccasion.GENERIC, eyebrow = w.name, body = w.body, worship = w))
+            }
             if (state.isFriday) {
                 // Jumu'ah routes to JumuahCard, which sources its own strings; eyebrow/headline/body here are unused.
                 add(
@@ -460,6 +464,9 @@ private fun HomeTabletContent(
         }
 
         val tabletEventCards = buildList {
+            state.worshipCard?.let { w ->
+                add(EventCardUi(occasion = EventOccasion.GENERIC, eyebrow = w.name, body = w.body, worship = w))
+            }
             if (state.isFriday) {
                 // Jumu'ah routes to JumuahCard, which sources its own strings; eyebrow/headline/body here are unused.
                 add(

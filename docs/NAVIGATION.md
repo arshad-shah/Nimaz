@@ -101,7 +101,9 @@ The announcement system (`core/navigation/AnnouncementRoutes.kt`) resolves featu
 `fasting/stats`, `prayer/monthly`, `zakat/history`, `tasbih/presets`, `tasbih/stats`,
 `tasbih/history`, `hadith/search`, `hadith/bookmarks`, `dua/favorites`, `dua/search`,
 `settings/appearance`, `settings/location`, `settings/language`, `settings/prayer-calculation`,
-`settings/widgets`, `settings/sync`, `qaida/letters`.
+`settings/widgets`, `settings/sync`, `qaida/letters`,
+`settings/notifications/worship` (and alias `settings/worship`) → the worship-reminders subscreen,
+and the notification hub subscreens `settings/notifications/{prayers,weekly,sound,troubleshooting}` (#301).
 
 **Parameterised grammar** (pattern-matched after static allowlist):
 | Key pattern | Route | Range/format |
@@ -250,7 +252,12 @@ the list.
 |-------|------|--------|
 | `Settings` | — | SettingsScreen |
 | `SettingsPrayerCalculation` | — | PrayerCalculationSettingsScreen |
-| `SettingsNotifications` | — | NotificationSettingsScreen |
+| `SettingsNotifications` | — | NotificationSettingsScreen (hub → subscreens; #301) |
+| `SettingsNotificationsPrayers` | — | PrayerNotificationsScreen (5 prayers · pre-adhan · sunrise; #301) |
+| `SettingsWorshipReminders` | — | WorshipRemindersScreen (extended worship reminders: Tahajjud, Suhoor, Iftar, adhkar …; #300) |
+| `SettingsNotificationsWeekly` | — | NotificationWeeklyScreen (Jumu'ah · Khatam; #301) |
+| `SettingsNotificationsSound` | — | NotificationSoundScreen (adhan · muezzin · vibration · DND; #301) |
+| `SettingsNotificationsTroubleshooting` | — | NotificationTroubleshootingScreen (test · reset · battery; #301) |
 | `SettingsAppearance` | — | AppearanceSettingsScreen |
 | `SettingsLanguage` | — | LanguageSettingsScreen |
 | `SettingsLocation` | — | LocationSettingsScreen |

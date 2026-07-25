@@ -4,6 +4,7 @@ package com.arshadshah.nimaz.core.navigation
 fun helpDeepLinkRoute(key: String?): Route? = when (key) {
     "prayer_settings" -> Route.SettingsPrayerCalculation
     "notifications" -> Route.SettingsNotifications
+    "worship_reminders" -> Route.SettingsWorshipReminders
     "location" -> Route.SettingsLocation
     "qibla" -> Route.Qibla
     "quran_settings" -> Route.SettingsQuran

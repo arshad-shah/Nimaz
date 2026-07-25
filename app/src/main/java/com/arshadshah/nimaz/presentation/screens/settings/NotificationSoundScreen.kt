@@ -1,0 +1,175 @@
+package com.arshadshah.nimaz.presentation.screens.settings
+
+import android.widget.Toast
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.data.audio.DownloadState
+import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
+import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
+import com.arshadshah.nimaz.presentation.components.atoms.NimazSwitch
+import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
+import com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsItem
+import com.arshadshah.nimaz.presentation.components.molecules.VoiceOptionCard
+import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
+import com.arshadshah.nimaz.presentation.viewmodel.SettingsEvent
+import com.arshadshah.nimaz.presentation.viewmodel.SettingsViewModel
+
+/**
+ * Sound & delivery subscreen (#301): the global adhan toggle, muezzin (voice) selection with
+ * preview/download, vibration, and the Do Not Disturb honour toggle.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun NotificationSoundScreen(
+    onNavigateBack: () -> Unit,
+    viewModel: SettingsViewModel = hiltViewModel()
+) {
+    val context = LocalContext.current
+    val notificationState by viewModel.notificationState.collectAsState()
+    val downloadState by viewModel.adhanAudioManager.downloadState.collectAsState()
+    val isPlaying by viewModel.adhanAudioManager.isPlaying.collectAsState()
+    val currentlyPlaying by viewModel.adhanAudioManager.currentlyPlaying.collectAsState()
+    val adhanPreviewError by viewModel.adhanPreviewError.collectAsState()
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+
+    LaunchedEffect(adhanPreviewError) {
+        adhanPreviewError?.let { error ->
+            Toast.makeText(context, error, Toast.LENGTH_LONG).show()
+            viewModel.clearAdhanPreviewError()
+        }
+    }
+
+    val adhanSounds = com.arshadshah.nimaz.data.audio.AdhanSound.entries
+    val selectedAdhanName = notificationState.selectedAdhanSound
+
+    NimazScreenScaffold(
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        topBar = {
+            NimazBackTopAppBar(
+                title = stringResource(R.string.notif_hub_sound_title),
+                onBackClick = onNavigateBack,
+                scrollBehavior = scrollBehavior
+            )
+        }
+    ) { padding ->
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .testTag(com.arshadshah.nimaz.core.navigation.ScreenTags.NotificationsList)
+                .padding(padding)
+                .padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            item { Spacer(Modifier.height(4.dp)) }
+
+            item {
+                NimazSectionHeader(title = stringResource(R.string.notification_settings_adhan_section))
+            }
+            item {
+                NimazMenuGroup {
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = stringResource(R.string.notification_settings_enable_adhan),
+                                style = MaterialTheme.typography.bodyLarge,
+                                fontWeight = FontWeight.Medium,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = stringResource(R.string.notification_settings_enable_adhan_subtitle),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        NimazSwitch(
+                            checked = notificationState.adhanEnabled,
+                            onCheckedChange = {
+                                viewModel.onEvent(SettingsEvent.SetAdhanEnabled(!notificationState.adhanEnabled))
+                            }
+                        )
+                    }
+                }
+            }
+
+            if (notificationState.adhanEnabled) {
+                item {
+                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        adhanSounds.forEach { sound ->
+                            val soundDownloadState = downloadState[sound]
+                            val isThisPlaying = isPlaying && currentlyPlaying == sound
+                            val isDownloaded = viewModel.adhanAudioManager.isDownloaded(sound, false)
+                            VoiceOptionCard(
+                                name = sound.displayName,
+                                primaryTag = sound.origin,
+                                isSelected = sound.name == selectedAdhanName,
+                                isPlaying = isThisPlaying,
+                                isDownloading = soundDownloadState is DownloadState.Downloading,
+                                isDownloaded = isDownloaded,
+                                previewContentDescription = stringResource(R.string.notification_settings_preview),
+                                onClick = { viewModel.onEvent(SettingsEvent.SetAdhanSound(sound.name)) },
+                                onPreviewClick = {
+                                    if (isThisPlaying) {
+                                        viewModel.onEvent(SettingsEvent.StopAdhanPreview)
+                                    } else {
+                                        viewModel.onEvent(SettingsEvent.SetAdhanSound(sound.name))
+                                        viewModel.onEvent(SettingsEvent.PreviewAdhanSound)
+                                    }
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+
+            item {
+                NimazMenuGroup {
+                    NimazSettingsItem(
+                        title = stringResource(R.string.notification_settings_vibration),
+                        subtitle = stringResource(R.string.notification_settings_vibration_subtitle),
+                        checked = notificationState.vibrationEnabled,
+                        onCheckedChange = {
+                            viewModel.onEvent(SettingsEvent.SetVibrationEnabled(!notificationState.vibrationEnabled))
+                        }
+                    )
+                    NimazSettingsItem(
+                        title = stringResource(R.string.notification_settings_dnd),
+                        subtitle = stringResource(R.string.notification_settings_dnd_subtitle),
+                        checked = notificationState.respectDnd,
+                        onCheckedChange = {
+                            viewModel.onEvent(SettingsEvent.SetRespectDnd(!notificationState.respectDnd))
+                        }
+                    )
+                }
+            }
+            item { Spacer(Modifier.height(16.dp)) }
+        }
+    }
+}

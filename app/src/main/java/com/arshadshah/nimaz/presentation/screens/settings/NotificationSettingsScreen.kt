@@ -1,12 +1,6 @@
 package com.arshadshah.nimaz.presentation.screens.settings
 
-import android.content.Intent
-import android.os.PowerManager
-import android.provider.Settings
-import android.widget.Toast
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -14,142 +8,55 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.VolumeOff
-import androidx.compose.material.icons.automirrored.filled.VolumeUp
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.navigation.ScreenTags
-import com.arshadshah.nimaz.data.audio.DownloadState
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBanner
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBannerVariant
-import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
-import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
-import com.arshadshah.nimaz.presentation.components.atoms.NimazDivider
-import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
-import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
-import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
-import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSwitch
-import com.arshadshah.nimaz.presentation.components.atoms.NimazTime
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
-import com.arshadshah.nimaz.presentation.components.molecules.NimazNumberStepper
-import com.arshadshah.nimaz.presentation.components.molecules.NimazNumberStepperVariant
 import com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsItem
-import com.arshadshah.nimaz.presentation.components.molecules.NimazTimePickerDialog
-import com.arshadshah.nimaz.presentation.components.molecules.VoiceOptionCard
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
-import com.arshadshah.nimaz.presentation.theme.NimazColors
-import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.viewmodel.SettingsEvent
 import com.arshadshah.nimaz.presentation.viewmodel.SettingsViewModel
 
-// Prayer accent colors matching the HTML prototype
-private val FajrColor = NimazColors.PrayerColors.Fajr
-private val DhuhrColor = NimazColors.Gold500
-private val AsrColor = NimazColors.PrayerColors.Asr
-private val MaghribColor = NimazColors.PrayerColors.Maghrib
-private val IshaColor = NimazColors.PrayerColors.Isha
-
-private data class PrayerNotificationData(
-    val name: String,
-    val key: String,
-    val accentColor: Color,
-    val isEnabled: Boolean,
-    val isSoundOn: Boolean,
-    val isSunrise: Boolean = false // Sunrise only gets beep, no sound toggle
-)
-
+/**
+ * Notifications hub (#301): a master switch plus links into focused subscreens (Prayer, Worship
+ * reminders, Weekly & reading, Sound & delivery, Troubleshooting). All state lives in the shared
+ * [SettingsViewModel]; each subscreen renders a slice of it. Replaced the previous single long
+ * scroll with no behaviour change.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NotificationSettingsScreen(
     onNavigateBack: () -> Unit,
+    onNavigateToPrayers: () -> Unit = {},
+    onNavigateToWorshipReminders: () -> Unit = {},
+    onNavigateToWeekly: () -> Unit = {},
+    onNavigateToSound: () -> Unit = {},
+    onNavigateToTroubleshooting: () -> Unit = {},
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
-    val context = LocalContext.current
     val notificationState by viewModel.notificationState.collectAsState()
-    var showKhatamTimePicker by remember { mutableStateOf(false) }
-    val downloadState by viewModel.adhanAudioManager.downloadState.collectAsState()
-    val isPlaying by viewModel.adhanAudioManager.isPlaying.collectAsState()
-    val currentlyPlaying by viewModel.adhanAudioManager.currentlyPlaying.collectAsState()
-    val adhanPreviewError by viewModel.adhanPreviewError.collectAsState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
-    // Resolved in composable scope: the steppers' formatValue callback is not
-    // composable, so it cannot call stringResource itself.
-    val minutesValueFormat = stringResource(R.string.notification_settings_minutes_value)
-
-    LaunchedEffect(adhanPreviewError) {
-        adhanPreviewError?.let { error ->
-            Toast.makeText(context, error, Toast.LENGTH_LONG).show()
-            viewModel.clearAdhanPreviewError()
-        }
-    }
-
-    // Individual prayer settings with per-prayer adhan toggles
-    val prayers = listOf(
-        PrayerNotificationData(
-            stringResource(R.string.prayer_fajr), "fajr", FajrColor,
-            notificationState.fajrNotification,
-            notificationState.adhanEnabled && notificationState.fajrAdhanEnabled
-        ),
-        PrayerNotificationData(
-            stringResource(R.string.prayer_dhuhr), "dhuhr", DhuhrColor,
-            notificationState.dhuhrNotification,
-            notificationState.adhanEnabled && notificationState.dhuhrAdhanEnabled
-        ),
-        PrayerNotificationData(
-            stringResource(R.string.prayer_asr), "asr", AsrColor,
-            notificationState.asrNotification,
-            notificationState.adhanEnabled && notificationState.asrAdhanEnabled
-        ),
-        PrayerNotificationData(
-            stringResource(R.string.prayer_maghrib), "maghrib", MaghribColor,
-            notificationState.maghribNotification,
-            notificationState.adhanEnabled && notificationState.maghribAdhanEnabled
-        ),
-        PrayerNotificationData(
-            stringResource(R.string.prayer_isha), "isha", IshaColor,
-            notificationState.ishaNotification,
-            notificationState.adhanEnabled && notificationState.ishaAdhanEnabled
-        )
-    )
-
-    val adhanSounds = com.arshadshah.nimaz.data.audio.AdhanSound.entries
-    val selectedAdhanName = notificationState.selectedAdhanSound
 
     NimazScreenScaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -171,13 +78,11 @@ fun NotificationSettingsScreen(
         ) {
             item { Spacer(modifier = Modifier.height(4.dp)) }
 
-            // Global Toggle
+            // Master toggle
             item {
                 NimazMenuGroup {
                     Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
+                        modifier = Modifier.fillMaxWidth().padding(16.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Column(modifier = Modifier.weight(1f)) {
@@ -203,373 +108,45 @@ fun NotificationSettingsScreen(
                 }
             }
 
-            // Prayer Notifications Section
             if (notificationState.notificationsEnabled) {
                 item {
-                    NimazSectionHeader(title = stringResource(R.string.notification_settings_prayer_section))
+                    NimazMenuGroup {
+                        NimazSettingsItem(
+                            title = stringResource(R.string.notif_hub_prayers_title),
+                            subtitle = stringResource(R.string.notif_hub_prayers_subtitle),
+                            onClick = onNavigateToPrayers,
+                            showArrow = true
+                        )
+                        NimazSettingsItem(
+                            title = stringResource(R.string.worship_settings_title),
+                            subtitle = stringResource(R.string.worship_settings_subtitle),
+                            onClick = onNavigateToWorshipReminders,
+                            showArrow = true
+                        )
+                        NimazSettingsItem(
+                            title = stringResource(R.string.notif_hub_weekly_title),
+                            subtitle = stringResource(R.string.notif_hub_weekly_subtitle),
+                            onClick = onNavigateToWeekly,
+                            showArrow = true
+                        )
+                    }
                 }
-
                 item {
                     NimazMenuGroup {
-                        prayers.forEachIndexed { index, prayer ->
-                            PrayerNotificationRow(
-                                prayer = prayer,
-                                onToggle = {
-                                    viewModel.onEvent(
-                                        SettingsEvent.SetPrayerNotification(
-                                            prayer.key,
-                                            !prayer.isEnabled
-                                        )
-                                    )
-                                },
-                                onSoundToggle = {
-                                    // Toggle individual prayer's adhan setting
-                                    val currentState = when (prayer.key) {
-                                        "fajr" -> notificationState.fajrAdhanEnabled
-                                        "dhuhr" -> notificationState.dhuhrAdhanEnabled
-                                        "asr" -> notificationState.asrAdhanEnabled
-                                        "maghrib" -> notificationState.maghribAdhanEnabled
-                                        "isha" -> notificationState.ishaAdhanEnabled
-                                        else -> true
-                                    }
-                                    viewModel.onEvent(
-                                        SettingsEvent.SetPrayerAdhanEnabled(
-                                            prayer.key,
-                                            !currentState
-                                        )
-                                    )
-                                },
-                                globalAdhanEnabled = notificationState.adhanEnabled
-                            )
-                            if (index < prayers.lastIndex) {
-                                NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
-                            }
-                        }
-                    }
-                }
-
-                // Adhan Sound Section
-                item {
-                    NimazSectionHeader(title = stringResource(R.string.notification_settings_adhan_section))
-                }
-
-                // Global Adhan Toggle
-                item {
-                    NimazMenuGroup {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = stringResource(R.string.notification_settings_enable_adhan),
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    fontWeight = FontWeight.Medium,
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                                Text(
-                                    text = stringResource(R.string.notification_settings_enable_adhan_subtitle),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                            NimazSwitch(
-                                checked = notificationState.adhanEnabled,
-                                onCheckedChange = {
-                                    viewModel.onEvent(SettingsEvent.SetAdhanEnabled(!notificationState.adhanEnabled))
-                                }
-                            )
-                        }
-                    }
-                }
-
-                // Muezzin Selection (only show if adhan is enabled)
-                if (notificationState.adhanEnabled) {
-                    item {
-                        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                            adhanSounds.forEach { sound ->
-                                val soundDownloadState = downloadState[sound]
-                                val isThisPlaying = isPlaying && currentlyPlaying == sound
-                                val isDownloaded =
-                                    viewModel.adhanAudioManager.isDownloaded(sound, false)
-
-                                VoiceOptionCard(
-                                    name = sound.displayName,
-                                    primaryTag = sound.origin,
-                                    isSelected = sound.name == selectedAdhanName,
-                                    isPlaying = isThisPlaying,
-                                    isDownloading = soundDownloadState is DownloadState.Downloading,
-                                    isDownloaded = isDownloaded,
-                                    previewContentDescription = stringResource(R.string.notification_settings_preview),
-                                    onClick = {
-                                        viewModel.onEvent(SettingsEvent.SetAdhanSound(sound.name))
-                                    },
-                                    onPreviewClick = {
-                                        if (isThisPlaying) {
-                                            viewModel.onEvent(SettingsEvent.StopAdhanPreview)
-                                        } else {
-                                            viewModel.onEvent(SettingsEvent.SetAdhanSound(sound.name))
-                                            viewModel.onEvent(SettingsEvent.PreviewAdhanSound)
-                                        }
-                                    }
-                                )
-                            }
-                        }
-                    }
-                } // End of if (notificationState.adhanEnabled)
-
-                // Additional Alerts Section
-                item {
-                    NimazSectionHeader(title = stringResource(R.string.notification_settings_additional_section))
-                }
-
-                item {
-                    NimazMenuGroup {
-                        // Pre-Adhan Reminder
                         NimazSettingsItem(
-                            title = stringResource(R.string.notification_settings_pre_adhan),
-                            subtitle = pluralStringResource(
-                                R.plurals.notification_settings_pre_adhan_subtitle,
-                                notificationState.reminderMinutes,
-                                notificationState.reminderMinutes
-                            ),
-                            checked = notificationState.showReminderBefore,
-                            onCheckedChange = {
-                                viewModel.onEvent(SettingsEvent.SetShowReminderBefore(!notificationState.showReminderBefore))
-                            }
+                            title = stringResource(R.string.notif_hub_sound_title),
+                            subtitle = stringResource(R.string.notif_hub_sound_subtitle),
+                            onClick = onNavigateToSound,
+                            showArrow = true
                         )
-                        // Editable lead time — revealed when the reminder is on.
-                        if (notificationState.showReminderBefore) {
-                            NimazNumberStepper(
-                                value = notificationState.reminderMinutes,
-                                onValueChange = {
-                                    viewModel.onEvent(SettingsEvent.SetReminderMinutes(it))
-                                },
-                                variant = NimazNumberStepperVariant.INLINE,
-                                label = stringResource(R.string.notification_settings_lead_time),
-                                formatValue = { min ->
-                                    minutesValueFormat.format(min)
-                                },
-                                minValue = 5,
-                                maxValue = 60,
-                                step = 5,
-                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
-                            )
-                        }
-                        NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
-
-                        // Sunrise Alert
                         NimazSettingsItem(
-                            title = stringResource(R.string.notification_settings_sunrise),
-                            subtitle = stringResource(R.string.notification_settings_sunrise_subtitle),
-                            checked = notificationState.sunriseNotification,
-                            onCheckedChange = {
-                                viewModel.onEvent(
-                                    SettingsEvent.SetPrayerNotification(
-                                        "sunrise",
-                                        !notificationState.sunriseNotification
-                                    )
-                                )
-                            }
-                        )
-                        NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
-
-                        // Friday (Jummah) Reminder — weekly, before Dhuhr on Friday
-                        NimazSettingsItem(
-                            title = stringResource(R.string.notification_settings_friday_reminder),
-                            subtitle = stringResource(R.string.notification_settings_friday_subtitle),
-                            checked = notificationState.fridayReminderEnabled,
-                            onCheckedChange = {
-                                viewModel.onEvent(SettingsEvent.SetFridayReminderEnabled(!notificationState.fridayReminderEnabled))
-                            }
-                        )
-                        if (notificationState.fridayReminderEnabled) {
-                            NimazNumberStepper(
-                                value = notificationState.fridayReminderMinutes,
-                                onValueChange = {
-                                    viewModel.onEvent(SettingsEvent.SetFridayReminderMinutes(it))
-                                },
-                                variant = NimazNumberStepperVariant.INLINE,
-                                label = stringResource(R.string.notification_settings_lead_time),
-                                formatValue = { min ->
-                                    minutesValueFormat.format(min)
-                                },
-                                minValue = 15,
-                                maxValue = 120,
-                                step = 15,
-                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
-                            )
-                        }
-                        NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
-
-                        // Khatam daily reminder — only fires when a khatam is active
-                        NimazSettingsItem(
-                            title = stringResource(R.string.notification_settings_khatam_reminder),
-                            subtitle = stringResource(R.string.notification_settings_khatam_subtitle),
-                            checked = notificationState.khatamReminderEnabled,
-                            onCheckedChange = {
-                                viewModel.onEvent(
-                                    SettingsEvent.SetKhatamReminderEnabled(!notificationState.khatamReminderEnabled)
-                                )
-                            }
-                        )
-                        if (notificationState.khatamReminderEnabled) {
-                            NimazSettingsItem(
-                                title = stringResource(R.string.notification_settings_reminder_time),
-                                subtitle = notificationState.khatamReminderTime,
-                                onClick = { showKhatamTimePicker = true },
-                                showArrow = true,
-                                modifier = Modifier.padding(horizontal = 16.dp)
-                            )
-                        }
-                        NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
-
-                        // Vibration
-                        NimazSettingsItem(
-                            title = stringResource(R.string.notification_settings_vibration),
-                            subtitle = stringResource(R.string.notification_settings_vibration_subtitle),
-                            checked = notificationState.vibrationEnabled,
-                            onCheckedChange = {
-                                viewModel.onEvent(SettingsEvent.SetVibrationEnabled(!notificationState.vibrationEnabled))
-                            }
-                        )
-                        NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
-
-                        // Honor Do Not Disturb
-                        NimazSettingsItem(
-                            title = stringResource(R.string.notification_settings_dnd),
-                            subtitle = stringResource(R.string.notification_settings_dnd_subtitle),
-                            checked = notificationState.respectDnd,
-                            onCheckedChange = {
-                                viewModel.onEvent(SettingsEvent.SetRespectDnd(!notificationState.respectDnd))
-                            }
+                            title = stringResource(R.string.notif_hub_troubleshooting_title),
+                            subtitle = stringResource(R.string.notif_hub_troubleshooting_subtitle),
+                            onClick = onNavigateToTroubleshooting,
+                            showArrow = true
                         )
                     }
                 }
-
-                // Troubleshooting Section
-                item {
-                    NimazSectionHeader(title = stringResource(R.string.notification_settings_troubleshooting_section))
-                }
-
-                item {
-                    val testSentMsg = stringResource(R.string.notification_settings_test_sent)
-                    val testAllSentMsg =
-                        stringResource(R.string.notification_settings_test_all_sent)
-                    val resetSuccessMsg =
-                        stringResource(R.string.notification_settings_reset_success)
-                    NimazMenuGroup {
-                        Column(
-                            modifier = Modifier.padding(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            NimazButton(
-                                text = stringResource(R.string.notification_settings_test),
-                                onClick = {
-                                    viewModel.onEvent(SettingsEvent.TestNotification)
-                                    Toast.makeText(context, testSentMsg, Toast.LENGTH_SHORT).show()
-                                },
-                                variant = NimazButtonVariant.FILLED,
-                                leadingIcon = Icons.Default.Notifications,
-                                fullWidth = true
-                            )
-
-                            NimazButton(
-                                text = stringResource(R.string.notification_settings_test_all),
-                                onClick = {
-                                    viewModel.onEvent(SettingsEvent.TestAllNotifications)
-                                    Toast.makeText(context, testAllSentMsg, Toast.LENGTH_SHORT)
-                                        .show()
-                                },
-                                variant = NimazButtonVariant.TONAL,
-                                leadingIcon = Icons.Default.Notifications,
-                                fullWidth = true
-                            )
-
-                            NimazButton(
-                                text = stringResource(R.string.notification_settings_reset),
-                                onClick = {
-                                    viewModel.onEvent(SettingsEvent.ResetNotifications)
-                                    Toast.makeText(context, resetSuccessMsg, Toast.LENGTH_SHORT)
-                                        .show()
-                                },
-                                variant = NimazButtonVariant.OUTLINED,
-                                leadingIcon = Icons.Default.Refresh,
-                                fullWidth = true
-                            )
-                        }
-                    }
-                }
-
-                // Battery Optimization Section
-                item {
-                    NimazSectionHeader(title = stringResource(R.string.notification_settings_battery_section))
-                }
-
-                item {
-                    val powerManager =
-                        context.getSystemService(android.content.Context.POWER_SERVICE) as PowerManager
-                    val isExempted =
-                        powerManager.isIgnoringBatteryOptimizations(context.packageName)
-
-                    NimazMenuGroup {
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Text(
-                                        text = stringResource(R.string.notification_settings_battery_title),
-                                        style = MaterialTheme.typography.bodyLarge,
-                                        fontWeight = FontWeight.Medium,
-                                        color = MaterialTheme.colorScheme.onSurface
-                                    )
-                                    Spacer(modifier = Modifier.height(4.dp))
-                                    Text(
-                                        text = if (isExempted) stringResource(R.string.notification_settings_battery_disabled) else stringResource(
-                                            R.string.notification_settings_battery_enabled
-                                        ),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = if (isExempted) MaterialTheme.colorScheme.primary
-                                        else NimazColors.Warning
-                                    )
-                                }
-                                if (isExempted) {
-                                    NimazIcon(
-                                        imageVector = Icons.Default.Check,
-                                        contentDescription = stringResource(R.string.notification_settings_battery_exempted),
-                                        variant = NimazIconVariant.PRIMARY,
-                                        size = NimazIconSize.LARGE
-                                    )
-                                }
-                            }
-                            if (!isExempted) {
-                                Spacer(modifier = Modifier.height(12.dp))
-                                Text(
-                                    text = stringResource(R.string.notification_settings_battery_explanation),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                                Spacer(modifier = Modifier.height(12.dp))
-                                NimazButton(
-                                    text = stringResource(R.string.notification_settings_disable_battery),
-                                    onClick = {
-                                        val intent =
-                                            Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
-                                        context.startActivity(intent)
-                                    },
-                                    variant = NimazButtonVariant.FILLED,
-                                    fullWidth = true
-                                )
-                            }
-                        }
-                    }
-                }
-
-                // Info Banner
                 item {
                     NimazBanner(
                         message = stringResource(R.string.notification_settings_info_banner),
@@ -580,158 +157,7 @@ fun NotificationSettingsScreen(
                     )
                 }
             }
-
             item { Spacer(modifier = Modifier.height(16.dp)) }
         }
     }
-
-    if (showKhatamTimePicker) {
-        KhatamReminderTimePicker(
-            initialTime = notificationState.khatamReminderTime,
-            onConfirm = { time ->
-                viewModel.onEvent(SettingsEvent.SetKhatamReminderTime(time))
-                showKhatamTimePicker = false
-            },
-            onDismiss = { showKhatamTimePicker = false },
-        )
-    }
-}
-
-@Composable
-private fun PrayerNotificationRow(
-    prayer: PrayerNotificationData,
-    onToggle: () -> Unit,
-    onSoundToggle: () -> Unit,
-    globalAdhanEnabled: Boolean
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        // Color accent bar
-        Box(
-            modifier = Modifier
-                .width(4.dp)
-                .height(40.dp)
-                .clip(RoundedCornerShape(2.dp))
-                .background(prayer.accentColor)
-        )
-
-        Spacer(modifier = Modifier.width(15.dp))
-
-        // Prayer info
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = prayer.name,
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Text(
-                text = stringResource(R.string.notification_settings_prayer_notification),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-
-        // Sound button - only show if global adhan is enabled
-        IconButton(
-            onClick = onSoundToggle,
-            enabled = globalAdhanEnabled, // Disable if global adhan is off
-            modifier = Modifier.size(36.dp),
-            colors = IconButtonDefaults.iconButtonColors(
-                containerColor = if (globalAdhanEnabled)
-                    MaterialTheme.colorScheme.surfaceContainerHighest
-                else
-                    MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.5f)
-            )
-        ) {
-            NimazIcon(
-                imageVector = if (prayer.isSoundOn) Icons.AutoMirrored.Filled.VolumeUp
-                else Icons.AutoMirrored.Filled.VolumeOff,
-                contentDescription = if (prayer.isSoundOn) stringResource(R.string.notification_settings_sound_on) else stringResource(
-                    R.string.notification_settings_sound_off
-                ),
-                tint = when {
-                    !globalAdhanEnabled -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-                    prayer.isSoundOn -> MaterialTheme.colorScheme.primary
-                    else -> MaterialTheme.colorScheme.onSurfaceVariant
-                },
-                iconSize = 18.dp
-            )
-        }
-
-        Spacer(modifier = Modifier.width(15.dp))
-
-        // Toggle
-        NimazSwitch(
-            checked = prayer.isEnabled,
-            onCheckedChange = { onToggle() }
-        )
-    }
-}
-
-
-// Previews
-
-@Preview(showBackground = true, widthDp = 400, name = "Prayer Notification Row - Enabled")
-@Composable
-private fun PrayerNotificationRowEnabledPreview() {
-    NimazTheme {
-        PrayerNotificationRow(
-            prayer = PrayerNotificationData(
-                name = "Fajr",
-                key = "fajr",
-                accentColor = NimazColors.InfoSoft,
-                isEnabled = true,
-                isSoundOn = true
-            ),
-            onToggle = {},
-            onSoundToggle = {},
-            globalAdhanEnabled = true
-        )
-    }
-}
-
-@Preview(showBackground = true, widthDp = 400, name = "Prayer Notification Row - Disabled")
-@Composable
-private fun PrayerNotificationRowDisabledPreview() {
-    NimazTheme {
-        PrayerNotificationRow(
-            prayer = PrayerNotificationData(
-                name = "Dhuhr",
-                key = "dhuhr",
-                accentColor = NimazColors.Gold400,
-                isEnabled = false,
-                isSoundOn = false
-            ),
-            onToggle = {},
-            onSoundToggle = {},
-            globalAdhanEnabled = true
-        )
-    }
-}
-
-/**
- * The Khatam reminder time picker.
- *
- * Uses the app's own [NimazTimePickerDialog] rather than Material3's `TimePicker`, whose
- * clock dial brings a different visual language to a settings screen built from Nimaz
- * components. Stores 24-hour "HH:mm" regardless of the device's display format so the
- * scheduler can parse it without knowing the locale.
- */
-@Composable
-private fun KhatamReminderTimePicker(
-    initialTime: String,
-    onConfirm: (String) -> Unit,
-    onDismiss: () -> Unit,
-) {
-    NimazTimePickerDialog(
-        initialTime = NimazTime.parse(initialTime),
-        onConfirm = { onConfirm(it.toStorageString()) },
-        onDismiss = onDismiss,
-        title = stringResource(R.string.notification_settings_reminder_time),
-    )
 }

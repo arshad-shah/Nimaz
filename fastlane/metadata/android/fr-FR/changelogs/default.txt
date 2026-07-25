@@ -1,7 +1,7 @@
-Nouveautés depuis la 3.0.56 :
+Nouveautés :
 
-• Les motifs islamiques en arrière-plan s'affichent partout — cinq styles au choix, ou Aucun, dans Apparence.
-• Un design rafraîchi : barres de titre flottantes et cartes mieux distinguées, en clair et en sombre.
-• Coran : accueil réorganisé, infos de sourate redessinées et un lecteur adapté au mode clair.
-• Résumé de la Zakat redessiné et widget Khatam enrichi.
-• Corrections : la progression de lecture ne reste plus à 0 % et le calendrier change bien de mois.
+• NOUVEAU : rappels d'adoration optionnels — Tahajjud, Suhoor & Iftar, Tarawih, Laylat al-Qadr, adhkar du matin & soir, et jours de jeûne surérogatoire. Activez ceux que vous voulez.
+• Une carte « Prochaine adoration » sur l'accueil.
+• Paramètres de notification réorganisés en sections claires.
+• Coran : cartes recommandées sur l'accueil.
+• Peaufinage et corrections.

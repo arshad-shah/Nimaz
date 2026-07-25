@@ -66,6 +66,11 @@ class SettingsBehaviorTest : BaseAppTest() {
         scrollListToAndTap(ScreenTags.SettingsList, Selectors.str(Selectors.Settings.notifications))
         assertScreen(ScreenTags.SettingsNotifications)
 
+        // Vibration now lives in the Sound & delivery subscreen (notifications hub, #301).
+        scrollListToAndTap(
+            ScreenTags.NotificationsList,
+            Selectors.str(R.string.notif_hub_sound_title),
+        )
         val before = runBlocking { settings.notificationVibration.first() }
         scrollListToAndTap(
             ScreenTags.NotificationsList,
