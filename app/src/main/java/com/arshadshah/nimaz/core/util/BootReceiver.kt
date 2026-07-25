@@ -82,6 +82,10 @@ class BootReceiver : BroadcastReceiver() {
             PrayerNotificationScheduler.ACTION_KHATAM_REMINDER -> {
                 handleKhatamReminder(context)
             }
+
+            PrayerNotificationScheduler.ACTION_WORSHIP_REMINDER -> {
+                handleWorshipReminder(context, intent)
+            }
         }
     }
 
@@ -747,6 +751,73 @@ class BootReceiver : BroadcastReceiver() {
                 e.printStackTrace()
                 CrashReporter.recordException(e)
                 AppAnalytics.logError("khatam_reminder", e.javaClass.simpleName, e.message)
+            }
+        }
+    }
+
+    /**
+     * Post an extended worship reminder (Tahajjud, Suhoor, Iftar, adhkar, …). Re-checks the
+     * per-type preference at fire time, re-applies the saved locale (so a cold-process alarm
+     * formats in the user's language), and posts a gentle nudge on the worship channel.
+     */
+    private fun handleWorshipReminder(context: Context, intent: Intent) {
+        val typeName = intent.getStringExtra(PrayerNotificationScheduler.EXTRA_WORSHIP_TYPE) ?: return
+        val subKey = intent.getStringExtra(PrayerNotificationScheduler.EXTRA_WORSHIP_SUBKEY)
+        val type = runCatching {
+            com.arshadshah.nimaz.domain.model.WorshipReminderType.valueOf(typeName)
+        }.getOrNull() ?: return
+
+        scope.launch {
+            try {
+                val langCode = preferencesDataStore.appLanguage.first()
+                if (langCode.isNotEmpty()) LocaleHelper.setLocale(context, langCode)
+
+                val prefs = preferencesDataStore.userPreferences.first()
+                if (!prefs.prayerNotificationsEnabled) return@launch
+                if (!preferencesDataStore.worshipReminderEnabled(type.key).first()) return@launch
+
+                val title = WorshipReminderContent.title(context, type, subKey)
+                val body = WorshipReminderContent.body(context, type, subKey)
+                val vibrationEnabled = preferencesDataStore.notificationVibration.first()
+
+                val mainIntent =
+                    context.packageManager.getLaunchIntentForPackage(context.packageName)
+                val openPendingIntent = mainIntent?.let {
+                    PendingIntent.getActivity(
+                        context,
+                        ("worship_" + type.key).hashCode(),
+                        it,
+                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                    )
+                }
+
+                val notification = NotificationCompat.Builder(
+                    context,
+                    PrayerNotificationScheduler.CHANNEL_ID_WORSHIP
+                )
+                    .setSmallIcon(R.drawable.ic_stat_nimaz)
+                    .setContentTitle(title)
+                    .setContentText(body)
+                    .setStyle(
+                        NotificationCompat.BigTextStyle().bigText(body).setBigContentTitle(title)
+                    )
+                    .setAutoCancel(true)
+                    .setContentIntent(openPendingIntent)
+                    .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                    .setCategory(NotificationCompat.CATEGORY_REMINDER)
+                    .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                    .setColor(0xFF0D9488.toInt())
+                    .apply { if (!vibrationEnabled) setVibrate(longArrayOf(0L)) }
+                    .build()
+
+                val notificationManager =
+                    context.getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
+                notificationManager.notify(("worship_" + type.key).hashCode(), notification)
+                AppAnalytics.logFeatureUsed("worship_reminder", type.key)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                CrashReporter.recordException(e)
+                AppAnalytics.logError("worship_reminder", e.javaClass.simpleName, e.message)
             }
         }
     }

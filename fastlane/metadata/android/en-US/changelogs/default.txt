@@ -1,7 +1,7 @@
-What's new since 3.0.56:
+What's new:
 
-• Islamic background patterns now show across the app — pick from five styles, or None, in Appearance.
-• A refreshed look throughout: floating top bars and clearer card separation in both light and dark.
-• Qur'an: reorganised home, redesigned surah info, and a reader that now suits light mode.
-• Redesigned Zakat summary and a richer Khatam widget.
-• Fixes: reading progress no longer stuck at 0%, and the calendar now pages months correctly.
+• NEW: Optional worship reminders — Tahajjud, Suhoor & Iftar, Taraweeh, Laylatul Qadr, morning & evening adhkar, and Sunnah fasting days. Turn on just the ones you want.
+• A "Next Worship" card on Home shows what's coming up next.
+• Notification settings reorganised into clear sections.
+• Qur'an: editorial recommended cards on the home screen.
+• More polish, smoother loading, and fixes throughout.

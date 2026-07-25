@@ -11,6 +11,7 @@ class HelpDeepLinkTest {
         assertThat(helpDeepLinkRoute("location")).isEqualTo(Route.SettingsLocation)
         assertThat(helpDeepLinkRoute("qibla")).isEqualTo(Route.Qibla)
         assertThat(helpDeepLinkRoute("quran_settings")).isEqualTo(Route.SettingsQuran)
+        assertThat(helpDeepLinkRoute("worship_reminders")).isEqualTo(Route.SettingsWorshipReminders)
     }
 
     @Test

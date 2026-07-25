@@ -1,0 +1,161 @@
+<style>
+  .wrap{display:flex;gap:16px;flex-wrap:wrap;}
+  .col{flex:1;min-width:320px;max-width:360px;}
+  .phone{background:#0f1512;border-radius:20px;padding:12px;}
+  .rt{color:#5c7268;font-size:10px;font-family:monospace;padding:2px 6px 8px;}
+  .scr-title{color:#e9f5ef;font-size:15px;font-weight:700;padding:2px 6px 12px;}
+  .grp{background:#16211d;border-radius:14px;overflow:hidden;margin-bottom:12px;border:1px solid rgba(180,220,200,.08);}
+  .item{display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid rgba(180,220,200,.06);}
+  .item:last-child{border-bottom:0;}
+  .ic{width:28px;height:28px;border-radius:9px;background:rgba(127,209,176,.14);display:flex;align-items:center;justify-content:center;font-size:14px;flex:0 0 auto;}
+  .g{flex:1;} .t{color:#e9f5ef;font-size:13px;font-weight:600;} .s{color:#8fa89c;font-size:10.5px;margin-top:1px;}
+  .chev{color:#5c7268;font-size:16px;}
+  .sw{width:32px;height:19px;border-radius:11px;background:#2f8f6d;position:relative;flex:0 0 auto;}
+  .sw::after{content:"";position:absolute;right:2px;top:2px;width:15px;height:15px;border-radius:8px;background:#eafff5;}
+  .sw.off{background:#33413b;} .sw.off::after{left:2px;right:auto;}
+  .sechead{color:#7fd1b0;font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;padding:4px 8px 8px;}
+  .newbadge{background:#7fd1b0;color:#0c1a15;font-size:8px;font-weight:800;padding:1px 5px;border-radius:5px;margin-left:6px;vertical-align:middle;}
+  .stepper{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:rgba(127,209,176,.06);}
+  .stepper .lb{color:#b7ccc2;font-size:11px;} .stepper .ct{display:flex;align-items:center;gap:10px;}
+  .stepper .b{width:24px;height:24px;border-radius:7px;background:#22332d;color:#7fd1b0;display:flex;align-items:center;justify-content:center;font-weight:800;}
+  .stepper .v{color:#f2e6c9;font-size:12px;font-weight:700;min-width:44px;text-align:center;}
+  .voice{display:flex;align-items:center;gap:10px;padding:11px 14px;border-bottom:1px solid rgba(180,220,200,.06);}
+  .voice .rad{width:16px;height:16px;border-radius:8px;border:2px solid #7fd1b0;flex:0 0 auto;} .voice.sel .rad{background:#7fd1b0;box-shadow:inset 0 0 0 3px #16211d;}
+  .voice .play{margin-left:auto;color:#7fd1b0;font-size:15px;}
+  .btn{display:block;text-align:center;padding:11px;border-radius:11px;font-size:12.5px;font-weight:700;margin:8px 12px;}
+  .btn.fill{background:#2f8f6d;color:#eafff5;} .btn.tonal{background:#22332d;color:#7fd1b0;} .btn.out{border:1px solid #33413b;color:#b7ccc2;}
+  .banner{margin:0 12px 10px;padding:11px 13px;border-radius:11px;font-size:11px;line-height:1.4;}
+  .banner.warn{background:rgba(230,180,90,.10);border:1px solid rgba(230,180,90,.25);color:#e6c07a;}
+  .banner.info{background:rgba(127,209,176,.08);border:1px solid rgba(127,209,176,.18);color:#9db8ac;}
+</style>
+
+<h2>Notifications — main hub + all 5 subscreens</h2>
+<p class="subtitle">Full IA. Route names shown in mono under each title are the new <code>@Serializable Route</code>s to add. This is the spec the issues embed.</p>
+
+<div class="wrap">
+
+  <!-- HUB -->
+  <div class="col"><div class="phone">
+    <div class="scr-title">← Notifications</div><div class="rt">Route.SettingsNotifications (hub)</div>
+    <div class="grp"><div class="item"><div class="ic">🔔</div><div class="g"><div class="t">All notifications</div><div class="s">Master switch</div></div><div class="sw"></div></div></div>
+    <div class="grp">
+      <div class="item"><div class="ic">🕌</div><div class="g"><div class="t">Prayer notifications</div><div class="s">5 daily prayers · pre-adhan · sunrise</div></div><div class="chev">›</div></div>
+      <div class="item"><div class="ic">🌙</div><div class="g"><div class="t">Worship reminders <span class="newbadge">NEW</span></div><div class="s">Tahajjud, Suhoor, Iftar, adhkar & more</div></div><div class="chev">›</div></div>
+      <div class="item"><div class="ic">📖</div><div class="g"><div class="t">Weekly & reading</div><div class="s">Jumu'ah · Khatam · daily summary</div></div><div class="chev">›</div></div>
+    </div>
+    <div class="grp">
+      <div class="item"><div class="ic">🔊</div><div class="g"><div class="t">Sound & delivery</div><div class="s">Adhan · muezzin · vibration · DND</div></div><div class="chev">›</div></div>
+      <div class="item"><div class="ic">🔧</div><div class="g"><div class="t">Troubleshooting</div><div class="s">Test · reset · battery</div></div><div class="chev">›</div></div>
+    </div>
+    <div class="banner info">Subscreens are hidden while the master switch is off (matches today's behaviour).</div>
+  </div></div>
+
+  <!-- ① PRAYER -->
+  <div class="col"><div class="phone">
+    <div class="scr-title">← Prayer notifications</div><div class="rt">Route.SettingsNotificationsPrayers</div>
+    <div class="sechead">Daily prayers</div>
+    <div class="grp">
+      <div class="item"><div class="ic" style="background:rgba(120,160,230,.18)">🌅</div><div class="g"><div class="t">Fajr</div><div class="s">Notify · adhan on</div></div><div class="play" style="color:#7fd1b0">🔊</div><div class="sw" style="margin-left:10px"></div></div>
+      <div class="item"><div class="ic" style="background:rgba(230,200,110,.18)">☀️</div><div class="g"><div class="t">Dhuhr</div><div class="s">Notify · adhan on</div></div><div class="play" style="color:#7fd1b0">🔊</div><div class="sw" style="margin-left:10px"></div></div>
+      <div class="item"><div class="ic" style="background:rgba(230,170,110,.18)">🌇</div><div class="g"><div class="t">Asr</div><div class="s">Notify · adhan off</div></div><div class="play" style="color:#5c7268">🔇</div><div class="sw" style="margin-left:10px"></div></div>
+      <div class="item"><div class="ic" style="background:rgba(210,130,110,.18)">🌆</div><div class="g"><div class="t">Maghrib</div><div class="s">Notify · adhan on</div></div><div class="play" style="color:#7fd1b0">🔊</div><div class="sw" style="margin-left:10px"></div></div>
+      <div class="item"><div class="ic" style="background:rgba(130,120,200,.18)">🌙</div><div class="g"><div class="t">Isha</div><div class="s">Notify · adhan on</div></div><div class="play" style="color:#7fd1b0">🔊</div><div class="sw" style="margin-left:10px"></div></div>
+    </div>
+    <div class="sechead">Extras</div>
+    <div class="grp">
+      <div class="item"><div class="ic">⏰</div><div class="g"><div class="t">Pre-adhan reminder</div><div class="s">A nudge before each prayer</div></div><div class="sw"></div></div>
+      <div class="stepper"><span class="lb">Lead time</span><div class="ct"><span class="b">−</span><span class="v">15 min</span><span class="b">+</span></div></div>
+      <div class="item"><div class="ic">🌄</div><div class="g"><div class="t">Sunrise alert</div><div class="s">Ishraq / end of Fajr window</div></div><div class="sw off"></div></div>
+    </div>
+  </div></div>
+
+  <!-- ② WORSHIP -->
+  <div class="col"><div class="phone">
+    <div class="scr-title">← Worship reminders <span class="newbadge">NEW</span></div><div class="rt">Route.SettingsWorshipReminders</div>
+    <div class="sechead">Night worship</div>
+    <div class="grp">
+      <div class="item"><div class="ic">🌙</div><div class="g"><div class="t">Tahajjud / Qiyam</div><div class="s">Start of the last third of the night</div></div><div class="sw"></div></div>
+      <div class="item"><div class="ic">🕯️</div><div class="g"><div class="t">Witr</div><div class="s">After Isha · or before Fajr</div></div><div class="sw off"></div></div>
+    </div>
+    <div class="sechead">Ramadan <span style="color:#8fa89c;text-transform:none;letter-spacing:0;">· auto-hidden outside Ramadan</span></div>
+    <div class="grp">
+      <div class="item"><div class="ic">🌅</div><div class="g"><div class="t">Suhoor end</div><div class="s">30 min before Fajr</div></div><div class="sw"></div></div>
+      <div class="item"><div class="ic">🍽️</div><div class="g"><div class="t">Iftar</div><div class="s">At Maghrib</div></div><div class="sw"></div></div>
+      <div class="item"><div class="ic">🕌</div><div class="g"><div class="t">Taraweeh</div><div class="s">After Isha</div></div><div class="sw off"></div></div>
+      <div class="item"><div class="ic">✨</div><div class="g"><div class="t">Laylatul Qadr</div><div class="s">Odd nights of the last ten</div></div><div class="sw off"></div></div>
+    </div>
+    <div class="sechead">Fasting & Dhikr</div>
+    <div class="grp">
+      <div class="item"><div class="ic">📿</div><div class="g"><div class="t">Morning adhkar</div><div class="s">After Fajr</div></div><div class="sw off"></div></div>
+      <div class="item"><div class="ic">📿</div><div class="g"><div class="t">Evening adhkar</div><div class="s">After Asr</div></div><div class="sw off"></div></div>
+      <div class="item"><div class="ic">🌗</div><div class="g"><div class="t">Mon & Thu fasting</div><div class="s">Night-before reminder</div></div><div class="sw off"></div></div>
+      <div class="item"><div class="ic">🤍</div><div class="g"><div class="t">White Days</div><div class="s">13th–15th Hijri</div></div><div class="sw off"></div></div>
+      <div class="item"><div class="ic">📅</div><div class="g"><div class="t">Arafah & Ashura</div><div class="s">Day before</div></div><div class="sw off"></div></div>
+    </div>
+  </div></div>
+
+  <!-- ③ WEEKLY & READING -->
+  <div class="col"><div class="phone">
+    <div class="scr-title">← Weekly & reading</div><div class="rt">Route.SettingsNotificationsWeekly</div>
+    <div class="sechead">Friday</div>
+    <div class="grp">
+      <div class="item"><div class="ic">🕌</div><div class="g"><div class="t">Jumu'ah reminder</div><div class="s">Before Dhuhr on Friday</div></div><div class="sw"></div></div>
+      <div class="stepper"><span class="lb">Lead time</span><div class="ct"><span class="b">−</span><span class="v">60 min</span><span class="b">+</span></div></div>
+    </div>
+    <div class="sechead">Qur'an reading</div>
+    <div class="grp">
+      <div class="item"><div class="ic">📖</div><div class="g"><div class="t">Khatam reminder</div><div class="s">Only while a khatam is active</div></div><div class="sw"></div></div>
+      <div class="item"><div class="ic">🕕</div><div class="g"><div class="t">Reminder time</div><div class="s">06:00</div></div><div class="chev">›</div></div>
+    </div>
+    <div class="sechead">Summary</div>
+    <div class="grp">
+      <div class="item"><div class="ic">📊</div><div class="g"><div class="t">Daily prayer summary</div><div class="s">Nightly recap at 11:00 PM</div></div><div class="sw"></div></div>
+    </div>
+  </div></div>
+
+  <!-- ④ SOUND & DELIVERY -->
+  <div class="col"><div class="phone">
+    <div class="scr-title">← Sound & delivery</div><div class="rt">Route.SettingsNotificationsSound</div>
+    <div class="sechead">Adhan</div>
+    <div class="grp">
+      <div class="item"><div class="ic">📢</div><div class="g"><div class="t">Play adhan on prayer times</div><div class="s">Global · per-prayer toggles under Prayer</div></div><div class="sw"></div></div>
+    </div>
+    <div class="sechead">Muezzin voice</div>
+    <div class="grp">
+      <div class="voice sel"><div class="rad"></div><div class="g"><div class="t">Mishary Rashid</div><div class="s">Madinah</div></div><span class="play">▶</span></div>
+      <div class="voice"><div class="rad"></div><div class="g"><div class="t">Abdul Basit</div><div class="s">Egypt</div></div><span class="play">▶</span></div>
+      <div class="voice"><div class="rad"></div><div class="g"><div class="t">Makkah</div><div class="s">Al-Haram</div></div><span class="play">▶</span></div>
+      <div class="voice"><div class="rad"></div><div class="g"><div class="t">Simple beep</div><div class="s">Short tone</div></div><span class="play">▶</span></div>
+    </div>
+    <div class="sechead">Delivery</div>
+    <div class="grp">
+      <div class="item"><div class="ic">📳</div><div class="g"><div class="t">Vibration</div><div class="s">Vibrate with notifications</div></div><div class="sw"></div></div>
+      <div class="item"><div class="ic">🌜</div><div class="g"><div class="t">Honour Do Not Disturb</div><div class="s">Silence adhan audio during DND</div></div><div class="sw off"></div></div>
+    </div>
+  </div></div>
+
+  <!-- ⑤ TROUBLESHOOTING -->
+  <div class="col"><div class="phone">
+    <div class="scr-title">← Troubleshooting</div><div class="rt">Route.SettingsNotificationsTroubleshooting</div>
+    <div class="sechead">Test</div>
+    <div class="grp" style="padding:4px 0;">
+      <a class="btn fill">🔔  Send test notification</a>
+      <a class="btn tonal">🔔  Test all prayers</a>
+      <a class="btn out">↻  Reset notifications</a>
+    </div>
+    <div class="sechead">Battery</div>
+    <div class="grp" style="padding-bottom:6px;">
+      <div class="item"><div class="ic">🔋</div><div class="g"><div class="t">Battery optimization</div><div class="s" style="color:#e6c07a">Enabled — may delay alarms</div></div></div>
+      <div class="banner warn" style="margin-top:2px;">Exact-time alarms need battery optimization disabled for this app.</div>
+      <a class="btn fill">Disable battery optimization</a>
+    </div>
+    <div class="banner info">Battery + exact-alarm state read live from the OS, same as today.</div>
+  </div></div>
+
+</div>
+
+<h3 style="margin-top:18px;">Approve the full settings IA?</h3>
+<div class="options">
+  <div class="option" data-choice="all_ok" onclick="toggleSelect(this)"><div class="letter">✓</div><div class="content"><h3>Yes — file the issues to this</h3><p>Hub + 5 subscreens exactly as shown becomes the spec.</p></div></div>
+  <div class="option" data-choice="all_tweak" onclick="toggleSelect(this)"><div class="letter">✎</div><div class="content"><h3>Adjust something first</h3><p>Tell me which screen/row to move or rename.</p></div></div>
+</div>

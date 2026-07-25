@@ -21,7 +21,14 @@ import kotlin.time.Instant
 import com.batoulapps.adhan2.CalculationMethod as AdhanMethod
 import com.batoulapps.adhan2.HighLatitudeRule as AdhanHighLatitudeRule
 import com.batoulapps.adhan2.PrayerTimes as AdhanPrayerTimes
+import com.batoulapps.adhan2.SunnahTimes as AdhanSunnahTimes
 import kotlinx.datetime.toLocalDateTime as toKotlinLocalDateTime
+
+/** Sunnah night instants (adhan2), UTC [Instant]s in the same units as [PrayerTime.time]. */
+data class SunnahTimeInstants(
+    val middleOfTheNight: Instant,
+    val lastThirdOfTheNight: Instant
+)
 
 @Singleton
 class PrayerTimeCalculator @Inject constructor() {
@@ -79,6 +86,53 @@ class PrayerTimeCalculator @Inject constructor() {
             PrayerTime(PrayerType.MAGHRIB, adjustTime(adhanTimes.maghrib, PrayerType.MAGHRIB)),
             PrayerTime(PrayerType.ISHA, adjustTime(adhanTimes.isha, PrayerType.ISHA))
         )
+    }
+
+    /**
+     * The Sunnah night times for [date] (adhan2 `SunnahTimes`): the middle of the night and the
+     * start of the last third, computed from this day's Maghrib to the next day's Fajr — so both
+     * land in the early hours of the *following* morning. Drives the Tahajjud/Qiyam reminder.
+     */
+    fun getSunnahTimes(
+        latitude: Double,
+        longitude: Double,
+        date: LocalDate = LocalDate.now(),
+        calculationMethod: CalculationMethod = CalculationMethod.MUSLIM_WORLD_LEAGUE,
+        asrCalculation: AsrCalculation = AsrCalculation.STANDARD,
+        highLatitudeRule: HighLatitudeRule? = null
+    ): SunnahTimeInstants {
+        val coordinates = Coordinates(latitude, longitude)
+        val dateComponents = DateComponents(date.year, date.monthValue, date.dayOfMonth)
+        val parameters = buildParameters(calculationMethod, asrCalculation, highLatitudeRule)
+        val sunnah = AdhanSunnahTimes(AdhanPrayerTimes(coordinates, dateComponents, parameters))
+        return SunnahTimeInstants(
+            middleOfTheNight = sunnah.middleOfTheNight,
+            lastThirdOfTheNight = sunnah.lastThirdOfTheNight
+        )
+    }
+
+    /** Shared adhan2 [CalculationParameters] builder (method + madhab + optional high-lat rule). */
+    private fun buildParameters(
+        calculationMethod: CalculationMethod,
+        asrCalculation: AsrCalculation,
+        highLatitudeRule: HighLatitudeRule?
+    ): CalculationParameters {
+        var parameters = adhanMethodFor(calculationMethod).parameters.copy(
+            madhab = when (asrCalculation) {
+                AsrCalculation.STANDARD -> Madhab.SHAFI
+                AsrCalculation.HANAFI -> Madhab.HANAFI
+            }
+        )
+        highLatitudeRule?.let { rule ->
+            parameters = parameters.copy(
+                highLatitudeRule = when (rule) {
+                    HighLatitudeRule.MIDDLE_OF_THE_NIGHT -> AdhanHighLatitudeRule.MIDDLE_OF_THE_NIGHT
+                    HighLatitudeRule.SEVENTH_OF_THE_NIGHT -> AdhanHighLatitudeRule.SEVENTH_OF_THE_NIGHT
+                    HighLatitudeRule.TWILIGHT_ANGLE -> AdhanHighLatitudeRule.TWILIGHT_ANGLE
+                }
+            )
+        }
+        return parameters
     }
 
     fun calculatePrayerTimes(

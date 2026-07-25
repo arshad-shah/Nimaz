@@ -421,6 +421,104 @@
     <string name="notif_khatam_channel_name">Khatam reminders</string>
     <string name="notif_khatam_channel_description">Daily nudges to keep your Quran completion on pace</string>
     <string name="notif_khatam_title">Time for today\'s reading</string>
+
+    <!-- ══ Extended worship reminders (epic #300) — channel, names, notification copy ══ -->
+    <string name="worship_channel_name">Worship Reminders</string>
+    <string name="worship_channel_description">Gentle reminders for Sunnah worship and fasting (Tahajjud, Suhoor, Iftar, adhkar and more)</string>
+
+    <!-- Names (card eyebrow) + Arabic -->
+    <string name="worship_tahajjud_name">Tahajjud</string>
+    <string name="worship_tahajjud_arabic">تَهَجُّد</string>
+    <string name="worship_witr_name">Witr</string>
+    <string name="worship_witr_arabic">وِتْر</string>
+    <string name="worship_suhoor_name">Suhoor</string>
+    <string name="worship_suhoor_arabic">سُحُور</string>
+    <string name="worship_iftar_name">Iftar</string>
+    <string name="worship_iftar_arabic">إفْطار</string>
+    <string name="worship_taraweeh_name">Taraweeh</string>
+    <string name="worship_taraweeh_arabic">تَراويح</string>
+    <string name="worship_laylatul_qadr_name">Laylatul Qadr</string>
+    <string name="worship_laylatul_qadr_arabic">لَيْلَة القَدْر</string>
+    <string name="worship_adhkar_morning_name">Morning Adhkar</string>
+    <string name="worship_adhkar_morning_arabic">أذكار الصباح</string>
+    <string name="worship_adhkar_evening_name">Evening Adhkar</string>
+    <string name="worship_adhkar_evening_arabic">أذكار المساء</string>
+    <string name="worship_mon_thu_name">Sunnah Fast</string>
+    <string name="worship_mon_thu_arabic">صِيام</string>
+    <string name="worship_white_days_name">White Days</string>
+    <string name="worship_white_days_arabic">أيّام البِيض</string>
+    <string name="worship_arafah_ashura_name">Arafah &amp; Ashura</string>
+    <string name="worship_arafah_ashura_arabic">عَرَفة وعاشوراء</string>
+
+    <!-- Notification title/body (authentic hadith/ayah paraphrases) -->
+    <string name="worship_tahajjud_title">Tahajjud — the last third of the night</string>
+    <string name="worship_tahajjud_body">A blessed time for du\'a has begun. \"Our Lord descends to the lowest heaven and says: Who is calling upon Me, that I may answer him?\"</string>
+    <string name="worship_witr_title">Have you prayed Witr?</string>
+    <string name="worship_witr_body">Seal your night with the Witr prayer before Fajr. \"Make Witr the last of your prayers at night.\"</string>
+    <string name="worship_suhoor_title">Suhoor ends soon</string>
+    <string name="worship_suhoor_body">Fajr is approaching. Finish your suhoor and make your intention to fast. \"Take suhoor, for in it there is blessing.\"</string>
+    <string name="worship_iftar_title">Time to break your fast</string>
+    <string name="worship_iftar_body">Maghrib has entered. \"The fasting person has two joys: when he breaks his fast, and when he meets his Lord.\"</string>
+    <string name="worship_taraweeh_title">Taraweeh tonight</string>
+    <string name="worship_taraweeh_body">Isha is complete — stand for the night prayer. \"Whoever prays during the nights of Ramadan with faith and seeking reward, his past sins are forgiven.\"</string>
+    <string name="worship_laylatul_qadr_title">Seek Laylatul Qadr tonight</string>
+    <string name="worship_laylatul_qadr_body">An odd night of the last ten. \"The Night of Decree is better than a thousand months.\" Increase in prayer, Qur\'an and du\'a.</string>
+    <string name="worship_adhkar_morning_title">Morning remembrance</string>
+    <string name="worship_adhkar_morning_body">Begin your day in the remembrance of Allah. A few minutes of adhkar to guard your day.</string>
+    <string name="worship_adhkar_evening_title">Evening remembrance</string>
+    <string name="worship_adhkar_evening_body">Fortify your evening with the adhkar.</string>
+    <string name="worship_mon_thu_title_monday">Fasting tomorrow? It\'s Monday</string>
+    <string name="worship_mon_thu_title_thursday">Fasting tomorrow? It\'s Thursday</string>
+    <string name="worship_mon_thu_body">A Sunnah day to fast. \"Deeds are presented to Allah on Monday and Thursday, and I love that my deeds be presented while I am fasting.\"</string>
+    <string name="worship_white_days_title">The White Days begin tomorrow</string>
+    <string name="worship_white_days_body">Fast the 13th, 14th and 15th — the bright days of the Hijri month. \"Fasting three days of each month is like fasting for a lifetime.\"</string>
+    <string name="worship_arafah_title">Day of Arafah tomorrow</string>
+    <string name="worship_arafah_body">Fasting Arafah is highly rewarded. \"It expiates the sins of the past year and the coming year.\"</string>
+    <string name="worship_ashura_title">Day of Ashura tomorrow</string>
+    <string name="worship_ashura_body">Fasting Ashura expiates the sins of the previous year. Consider also fasting the 9th (Tasu\'a).</string>
+
+    <!-- Worship reminders settings subscreen -->
+    <string name="worship_settings_title">Worship reminders</string>
+    <string name="worship_settings_subtitle">Tahajjud, Suhoor, Iftar, adhkar &amp; more</string>
+    <string name="worship_settings_section_night">Night worship</string>
+    <string name="worship_settings_section_ramadan">Ramadan</string>
+    <string name="worship_settings_section_ramadan_note">Shown during Ramadan</string>
+    <string name="worship_settings_section_fasting">Fasting &amp; Dhikr</string>
+    <string name="worship_settings_timing">Timing</string>
+    <string name="worship_settings_minutes">%d min</string>
+    <string name="worship_settings_intro">Optional Sunnah reminders. All off by default. Notifications only — no adhan.</string>
+    <string name="worship_when_tahajjud">Start of the last third of the night</string>
+    <string name="worship_when_witr">After Isha</string>
+    <string name="worship_when_suhoor">Before Fajr</string>
+    <string name="worship_when_iftar">At Maghrib</string>
+    <string name="worship_when_taraweeh">After Isha</string>
+    <string name="worship_when_laylatul_qadr">Odd nights of the last ten</string>
+    <string name="worship_when_adhkar_morning">After Fajr</string>
+    <string name="worship_when_adhkar_evening">After Asr</string>
+    <string name="worship_when_mon_thu">Night before Monday &amp; Thursday</string>
+    <string name="worship_when_white_days">13th–15th of the Hijri month</string>
+    <string name="worship_when_arafah_ashura">The day before</string>
+    <string name="worship_witr_mode_title">Witr timing</string>
+    <string name="worship_witr_mode_after_isha">After Isha</string>
+    <string name="worship_witr_mode_before_fajr">Before Fajr</string>
+
+    <!-- Notification settings hub (#301) -->
+    <string name="notif_hub_prayers_title">Prayer notifications</string>
+    <string name="notif_hub_prayers_subtitle">5 daily prayers · pre-adhan · sunrise</string>
+    <string name="notif_hub_weekly_title">Weekly &amp; reading</string>
+    <string name="notif_hub_weekly_subtitle">Jumu\'ah · Khatam reminder</string>
+    <string name="notif_hub_sound_title">Sound &amp; delivery</string>
+    <string name="notif_hub_sound_subtitle">Adhan · muezzin · vibration · Do Not Disturb</string>
+    <string name="notif_hub_troubleshooting_title">Troubleshooting</string>
+    <string name="notif_hub_troubleshooting_subtitle">Test · reset · battery optimization</string>
+
+    <!-- Home "Next Worship" card labels -->
+    <string name="worship_card_begins">Begins</string>
+    <string name="worship_card_begins_in">Begins in</string>
+    <string name="worship_card_at">At</string>
+    <string name="worship_card_in">In</string>
+    <string name="worship_card_tonight">Tonight</string>
+    <string name="worship_card_tomorrow">Tomorrow</string>
     <plurals name="notif_khatam_body_on_track">
         <item quantity="one">%1$s · you\'re on pace. %2$d ayah to keep it going.</item>
         <item quantity="other">%1$s · you\'re on pace. %2$d ayahs to keep it going.</item>

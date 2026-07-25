@@ -1,7 +1,7 @@
-Neu seit 3.0.56:
+Neu:
 
-• Islamische Hintergrundmuster erscheinen jetzt überall — fünf Stile oder „Keine“ unter Darstellung.
-• Aufgefrischtes Design: schwebende Titelleisten und klarer abgegrenzte Karten in Hell und Dunkel.
-• Koran: neu geordnete Startseite, überarbeitete Sure-Infos und ein Reader, der nun auch hell passt.
-• Neu gestaltete Zakat-Übersicht und ein reichhaltigeres Khatam-Widget.
-• Fehlerbehebungen: Lesefortschritt bleibt nicht mehr bei 0 %, der Kalender blättert Monate korrekt.
+• NEU: Optionale Andachtserinnerungen — Tahajjud, Suhoor & Iftar, Taraweeh, Laylatul Qadr, Morgen- & Abend-Adhkar und Sunnah-Fastentage. Nur die gewünschten aktivieren.
+• Eine „Nächste Andacht“-Karte auf der Startseite zeigt, was ansteht.
+• Benachrichtigungen in klare Bereiche gegliedert.
+• Qur'an: redaktionelle Empfehlungskarten auf der Startseite.
+• Mehr Feinschliff und Fehlerbehebungen.

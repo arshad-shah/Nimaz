@@ -85,6 +85,7 @@ class HomeViewModelTest {
             settingsRepository = settingsRepository,
             announcementUseCases = announcementUseCases,
             observeEventCards = buildObserveEventCardsUseCase(announcementUseCases),
+            nextWorshipResolver = mockk(relaxed = true),
         )
     }
 
