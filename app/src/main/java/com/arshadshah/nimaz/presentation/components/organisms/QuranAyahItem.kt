@@ -3,6 +3,7 @@ package com.arshadshah.nimaz.presentation.components.organisms
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -32,14 +33,18 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
@@ -224,6 +229,7 @@ internal fun AyahItem(
                     isDarkTheme = isDarkTheme,
                     defaultColor = textColor,
                     stripPrefix = if (ayah.hasLeadingBismillah) BISMILLAH_TEXT else null,
+                    annotateRules = true,  // enable tap-to-explain (#294)
                     underlineRules = tajweedUnderline
                 )
                 // Append the coloured end marker to the tajweed text
@@ -233,9 +239,24 @@ internal fun AyahItem(
                     appendAyahEndMarker(ayah.numberInSurah, markerBracketColor, markerNumberColor)
                 }
             }
+            // Tap a coloured tajweed word to explain its rule (#294) — mirrors the
+            // continuous mushaf page, so the verse-list reader is no longer dead.
+            var tappedRuleCode by remember { mutableStateOf<String?>(null) }
+            var textLayoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
             BasicText(
                 text = tajweedAnnotated,
-                modifier = Modifier.fillMaxWidth(),
+                onTextLayout = { result -> textLayoutResult = result },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .pointerInput(tajweedAnnotated) {
+                        detectTapGestures { position ->
+                            val layout = textLayoutResult ?: return@detectTapGestures
+                            val offset = layout.getOffsetForPosition(position)
+                            tajweedAnnotated.getStringAnnotations(
+                                tag = TajweedParser.RULE_TAG, start = offset, end = offset
+                            ).firstOrNull()?.let { tappedRuleCode = it.item }
+                        }
+                    },
                 style = TextStyle(
                     fontFamily = arabicFontFamily,
                     fontSize = arabicFontSize.sp,
@@ -244,6 +265,9 @@ internal fun AyahItem(
                     color = textColor
                 )
             )
+            tappedRuleCode?.let { code ->
+                TajweedRuleSheet(ruleCode = code, onDismiss = { tappedRuleCode = null })
+            }
         } else {
             QuranVerseText(
                 arabicText = displayText,
