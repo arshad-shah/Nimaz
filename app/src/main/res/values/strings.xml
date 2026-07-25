@@ -1002,6 +1002,10 @@
     <string name="arabic_font_size">Arabic Font Size</string>
     <string name="arabic_font_size_value">%1$dpx</string>
     <string name="arabic_font">Arabic Font</string>
+    <string name="mushaf_layout">Mushaf Script</string>
+    <string name="mushaf_layout_subtitle">Page layout used by the Mushaf (page) reader</string>
+    <string name="mushaf_script_madani">Uthmani (Madani, 604 pages)</string>
+    <string name="mushaf_script_indopak16">IndoPak 16-line (548 pages)</string>
     <string name="display_options">Display Options</string>
     <string name="show_transliteration">Show Transliteration</string>
     <string name="show_transliteration_subtitle">Roman letters pronunciation</string>

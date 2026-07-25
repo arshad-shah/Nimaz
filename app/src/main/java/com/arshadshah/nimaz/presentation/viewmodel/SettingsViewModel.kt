@@ -14,6 +14,7 @@ import com.arshadshah.nimaz.data.local.database.NimazDatabase
 import com.arshadshah.nimaz.domain.model.AsrCalculation
 import com.arshadshah.nimaz.domain.model.CalculationMethod
 import com.arshadshah.nimaz.domain.model.Location
+import com.arshadshah.nimaz.domain.model.MushafScript
 import com.arshadshah.nimaz.domain.model.PrayerType
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.usecase.PrayerUseCases
@@ -145,7 +146,9 @@ data class QuranSettingsUiState(
     val continuousReading: Boolean = true,
     val keepScreenOn: Boolean = true,
     val selectedReciterId: String? = null,
-    val showTajweed: Boolean = false
+    val showTajweed: Boolean = false,
+    /** The Mushaf edition/layout for the page reader (default Uthmani/604 vs 16-line IndoPak/548). */
+    val mushafScript: MushafScript = MushafScript.DEFAULT
 )
 
 data class DuaSettingsUiState(
@@ -236,6 +239,7 @@ sealed interface SettingsEvent {
     data class SetKeepScreenOn(val enabled: Boolean) : SettingsEvent
     data class SetReciter(val reciterId: String?) : SettingsEvent
     data class SetShowTajweed(val enabled: Boolean) : SettingsEvent
+    data class SetMushafScript(val script: MushafScript) : SettingsEvent
 
     // Dua
     data class SetDuaArabicFont(val fontId: String) : SettingsEvent
@@ -732,6 +736,11 @@ class SettingsViewModel @Inject constructor(
                 viewModelScope.launch { settingsRepository.setShowTajweed(event.enabled) }
             }
 
+            is SettingsEvent.SetMushafScript -> {
+                _quranState.update { it.copy(mushafScript = event.script) }
+                viewModelScope.launch { settingsRepository.setQuranMushafScript(event.script.name) }
+            }
+
             // Dua
             is SettingsEvent.SetDuaArabicFont -> {
                 _duaState.update { it.copy(selectedArabicFontId = event.fontId) }
@@ -997,6 +1006,7 @@ class SettingsViewModel @Inject constructor(
             val keepScreenOn = settingsRepository.keepScreenOn.first()
             val reciterId = settingsRepository.selectedReciterId.first()
             val showTajweed = settingsRepository.showTajweed.first()
+            val mushafScript = MushafScript.fromName(settingsRepository.quranMushafScript.first())
 
             _quranState.update {
                 it.copy(
@@ -1009,7 +1019,8 @@ class SettingsViewModel @Inject constructor(
                     continuousReading = continuousReading,
                     keepScreenOn = keepScreenOn,
                     selectedReciterId = reciterId,
-                    showTajweed = showTajweed
+                    showTajweed = showTajweed,
+                    mushafScript = mushafScript
                 )
             }
 
