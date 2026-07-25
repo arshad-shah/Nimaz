@@ -1,6 +1,7 @@
 package com.arshadshah.nimaz.domain.usecase
 
 import com.arshadshah.nimaz.domain.model.Ayah
+import com.arshadshah.nimaz.domain.model.MushafPageLayout
 import com.arshadshah.nimaz.domain.model.PageAyahRange
 import com.arshadshah.nimaz.domain.model.QuranBookmark
 import com.arshadshah.nimaz.domain.model.QuranFavorite
@@ -181,6 +182,17 @@ class GetPageAyahRangesUseCase @Inject constructor(
 }
 
 /**
+ * Returns the line-accurate 16-line IndoPak layout of a page (4/7) for the renderer (5/7):
+ * its ordered printed lines with typed segments (ayah / surah-header / basmalah).
+ */
+class GetMushafPageLayoutUseCase @Inject constructor(
+    private val repository: QuranRepository
+) {
+    suspend operator fun invoke(page: Int): MushafPageLayout =
+        repository.getMushafPageLayout(page)
+}
+
+/**
  * Returns a deterministic "verse of the day" for a given day. The same day always
  * resolves to the same ayah for every user (no randomness/persistence required),
  * and the selected ayah carries its translation for the requested translator.
@@ -245,5 +257,6 @@ data class QuranUseCases(
     val incrementAyahsRead: IncrementAyahsReadUseCase,
     val getSurahInfo: GetSurahInfoUseCase,
     val getPageAyahRanges: GetPageAyahRangesUseCase,
+    val getMushafPageLayout: GetMushafPageLayoutUseCase,
     val getVerseOfTheDay: GetVerseOfTheDayUseCase
 )

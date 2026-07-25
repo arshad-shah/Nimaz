@@ -90,8 +90,12 @@ data class ReadingProgress(
  */
 object ReadingProgressCalculator {
 
-    /** Total pages in the standard Madani mushaf, used for the no-surah fallback. */
-    const val TOTAL_QURAN_PAGES = 604
+    /**
+     * Total pages in the standard Madani mushaf, used for the no-surah fallback. Kept in
+     * sync with (and single-sourced from) [MushafScript.MADANI] so the 16-line IndoPak
+     * edition's 548-page count lives in one place — see [MushafScript.INDOPAK_16].
+     */
+    val TOTAL_QURAN_PAGES: Int = MushafScript.MADANI.totalPages
 
     /**
      * Fraction (0f..1f) of the way through a surah, given the last-read ayah number and

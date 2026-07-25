@@ -8,7 +8,9 @@ import com.arshadshah.nimaz.data.local.database.entity.QuranBookmarkEntity
 import com.arshadshah.nimaz.data.local.database.entity.QuranFavoriteEntity
 import com.arshadshah.nimaz.data.local.database.entity.ReadingProgressEntity
 import com.arshadshah.nimaz.data.local.database.entity.SurahEntity
+import com.arshadshah.nimaz.data.local.quran.QuranIndopakSeeder
 import com.arshadshah.nimaz.domain.model.Ayah
+import com.arshadshah.nimaz.domain.model.MushafPageLayout
 import com.arshadshah.nimaz.domain.model.PageAyahRange
 import com.arshadshah.nimaz.domain.model.QuranBookmark
 import com.arshadshah.nimaz.domain.model.QuranFavorite
@@ -33,7 +35,8 @@ import javax.inject.Singleton
 
 @Singleton
 class QuranRepositoryImpl @Inject constructor(
-    private val quranDao: QuranDao
+    private val quranDao: QuranDao,
+    private val indopakSeeder: QuranIndopakSeeder
 ) : QuranRepository {
 
     override fun getAllSurahs(): Flow<List<Surah>> {
@@ -124,6 +127,13 @@ class QuranRepositoryImpl @Inject constructor(
 
     override suspend fun getPageAyahRanges(): List<PageAyahRange> {
         return quranDao.getPageAyahRanges().map { it.toDomain() }
+    }
+
+    override suspend fun getMushafPageLayout(page: Int): MushafPageLayout {
+        // First use of the 16-line view seeds the IndoPak text + layout (idempotent,
+        // version-gated); the ~20k-row seed therefore never runs on a normal Quran open.
+        indopakSeeder.seedIfNeeded()
+        return MushafLayoutMapper.toPageLayout(page, quranDao.getMushafLayoutByPage(page))
     }
 
     override fun getSurahWithAyahs(surahNumber: Int, translatorId: String?): Flow<SurahWithAyahs?> {

@@ -23,6 +23,26 @@ data class PageAyahRangeRow(
     val ayahCount: Int
 )
 
+/**
+ * One line-segment of the 16-line IndoPak layout for a page, joined with the segment's ayah
+ * so the data layer can reconstruct glyph words without a second query. Column names are
+ * aliased in [QuranDao.getMushafLayoutByPage] to match these field names.
+ *
+ * [textIndopak] / [ayahNumberInSurah] are null for surah-header and basmalah rows (their
+ * [ayahId] is null, so the LEFT JOIN contributes no ayah).
+ */
+data class MushafLayoutLineRow(
+    val page: Int,
+    val line: Int,
+    val lineType: String, // "ayah" | "surah_header" | "basmalah"
+    val surahId: Int,
+    val ayahId: Int?,
+    val firstWordPosition: Int?,
+    val lastWordPosition: Int?,
+    val textIndopak: String?,
+    val ayahNumberInSurah: Int?
+)
+
 @Dao
 interface QuranDao {
     // Surah operations
@@ -71,9 +91,9 @@ interface QuranDao {
 
     // IndoPak 16-line Mushaf layout (sub-task 2/7). The content is shipped as
     // bundled JSON assets and seeded at runtime by QuranIndopakSeeder — the
-    // prepackaged DB is not regenerated. The richer per-page domain queries
-    // (getMushafLayoutByPage) belong to the 4/7 data layer; these methods only
-    // cover seeding + idempotency.
+    // prepackaged DB is not regenerated. These methods cover seeding + idempotency;
+    // the per-page read query for the renderer (getMushafLayoutByPage, sub-task 4/7)
+    // is defined further below.
     @Query("SELECT COUNT(*) FROM mushaf_layout_indopak16")
     suspend fun countMushafLayoutIndopak16(): Int
 
@@ -85,6 +105,28 @@ interface QuranDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertMushafLayoutIndopak16(rows: List<MushafLayoutIndopak16Entity>)
+
+    /**
+     * All line-segments of a 16-line IndoPak page (4/7), ordered top-to-bottom and, within a
+     * line, in reading order (insertion `id` preserves the source order). Each segment is
+     * LEFT-JOINed to its ayah so `text_indopak` + `number_in_surah` come back in one round
+     * trip; header/basmalah rows have a null `ayah_id` and contribute no ayah columns. The
+     * data layer groups these by line into a MushafPageLayout.
+     */
+    @Query(
+        """
+        SELECT m.page AS page, m.line AS line, m.line_type AS lineType,
+               m.surah_id AS surahId, m.ayah_id AS ayahId,
+               m.first_word_position AS firstWordPosition,
+               m.last_word_position AS lastWordPosition,
+               a.text_indopak AS textIndopak, a.number_in_surah AS ayahNumberInSurah
+        FROM mushaf_layout_indopak16 m
+        LEFT JOIN ayahs a ON a.id = m.ayah_id
+        WHERE m.page = :page
+        ORDER BY m.line ASC, m.id ASC
+        """
+    )
+    suspend fun getMushafLayoutByPage(page: Int): List<MushafLayoutLineRow>
 
     /**
      * Atomically (re)seed the IndoPak 16-line data: clear the layout table, write the
