@@ -331,14 +331,13 @@ fun QuranSettingsScreen(
                             Text(
                                 text = quranState.selectedReciterId?.let { id ->
                                     when (id) {
-                                        "alafasy" -> "Mishary Rashid Alafasy"
                                         "sudais" -> "Abdul Rahman Al-Sudais"
                                         "ghamdi" -> "Saad Al-Ghamdi"
                                         "muaiqly" -> "Maher Al-Muaiqly"
                                         "abdulbasit" -> "Abdul Basit Abdul Samad"
                                         else -> id
                                     }
-                                } ?: "Mishary Rashid Alafasy",
+                                } ?: "Abdul Rahman Al-Sudais",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )

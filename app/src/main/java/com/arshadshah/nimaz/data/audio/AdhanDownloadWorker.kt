@@ -41,7 +41,7 @@ class AdhanDownloadWorker @AssistedInject constructor(
 
             val sound = inputData.getString(KEY_ADHAN_SOUND)
                 ?.let { AdhanSound.fromName(it) }
-                ?: AdhanSound.MISHARY
+                ?: AdhanSound.ABDUL_BASIT
 
             // Download both variants; failures are tolerated per-variant so a
             // single bad URL doesn't abort the whole job.

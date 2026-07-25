@@ -40,7 +40,7 @@ data class AudioState(
     val position: Long = 0L,
     val currentTitle: String = "",
     val currentSubtitle: String? = null,
-    val reciterName: String = "Mishary Rashid Alafasy",
+    val reciterName: String = "Abdul Rahman Al-Sudais",
     val isActive: Boolean = false,
     val error: String? = null,
     // Playlist progress for surah-level tracking
@@ -70,8 +70,8 @@ class QuranAudioManager @Inject constructor(
     val audioState: StateFlow<AudioState> = _audioState.asStateFlow()
 
     // Reciter CDN ID and bitrate - dynamically set from preferences
-    private var reciterCdnId = "ar.alafasy" // Default: Mishary Rashid Alafasy
-    private var reciterBitrate = 128 // Default bitrate
+    private var reciterCdnId = "ar.abdurrahmaansudais" // Default: Abdul Rahman Al-Sudais
+    private var reciterBitrate = 64 // Default bitrate
 
     // Sequential playback state
     private var ayahPlaylist: List<AyahAudioItem> = emptyList()
@@ -158,8 +158,6 @@ class QuranAudioManager @Inject constructor(
         // CDN identifiers and bitrates from https://api.alquran.cloud/v1/edition?format=audio&type=versebyverse
         // Pair: (cdnId, bitrate) - some reciters only have 64kbps, others have 128kbps
         val RECITER_CDN_MAP = mapOf(
-            "alafasy" to Pair("ar.alafasy", 128),
-            "mishary" to Pair("ar.alafasy", 128),
             "sudais" to Pair("ar.abdurrahmaansudais", 64),
             "abdulbasit" to Pair("ar.abdulsamad", 64),
             "muaiqly" to Pair("ar.mahermuaiqly", 128),
@@ -177,7 +175,7 @@ class QuranAudioManager @Inject constructor(
     }
 
     fun setReciter(reciterId: String?) {
-        val (cdnId, bitrate) = RECITER_CDN_MAP[reciterId] ?: Pair("ar.alafasy", 128)
+        val (cdnId, bitrate) = RECITER_CDN_MAP[reciterId] ?: Pair("ar.abdurrahmaansudais", 64)
         reciterCdnId = cdnId
         reciterBitrate = bitrate
         _audioState.update {
@@ -187,7 +185,6 @@ class QuranAudioManager @Inject constructor(
 
     private fun getReciterDisplayName(reciterId: String?): String {
         return when (reciterId) {
-            "alafasy", "mishary" -> "Mishary Rashid Alafasy"
             "sudais" -> "Abdul Rahman Al-Sudais"
             "abdulbasit" -> "Abdul Basit Abdul Samad"
             "muaiqly", "maher" -> "Maher Al-Muaiqly"
@@ -200,7 +197,7 @@ class QuranAudioManager @Inject constructor(
             "jibreel" -> "Muhammad Jibreel"
             "shaatree" -> "Abu Bakr Al-Shaatree"
             "basfar" -> "Abdullah Basfar"
-            else -> "Mishary Rashid Alafasy"
+            else -> "Abdul Rahman Al-Sudais"
         }
     }
 

@@ -12,16 +12,6 @@ enum class AdhanSound(
     val downloadUrl: String,
     val fajrDownloadUrl: String
 ) {
-    MISHARY(
-        displayName = "Mishary Rashid Alafasy",
-        origin = "Kuwait",
-        fileName = "adhan_mishary.mp3",
-        fajrFileName = "adhan_mishary_fajr.mp3",
-        // Source: Assabile.com - Regular adhan (Kuwait)
-        downloadUrl = "https://media.assabile.com/assabile/adhan_3435370/b45e93f1efb3.mp3",
-        // Source: Assabile.com - Fajr adhan (Kuwait)
-        fajrDownloadUrl = "https://media.assabile.com/assabile/adhan_3435370/ddb21f7363eb.mp3"
-    ),
     ABDUL_BASIT(
         displayName = "Abdul Basit Abdul Samad",
         origin = "Egypt",
@@ -66,7 +56,7 @@ enum class AdhanSound(
 
     companion object {
         fun fromName(name: String): AdhanSound {
-            return entries.find { it.name == name } ?: MISHARY
+            return entries.find { it.name == name } ?: ABDUL_BASIT
         }
     }
 }

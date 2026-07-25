@@ -285,7 +285,7 @@ private fun PreviewButton(
     }
 }
 
-/** First letters of up to two leading words, e.g. "Mishary Rashid …" → "MR". */
+/** First letters of up to two leading words, e.g. "Abdul Rahman …" → "AR". */
 fun voiceInitials(name: String): String {
     val words = name
         .split(' ', '-', '—', '(', ')', '–')
@@ -309,9 +309,9 @@ private fun VoiceOptionCardShowcase() {
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         VoiceOptionCard(
-            name = "Mishary Rashid Alafasy",
+            name = "Abdul Rahman Al-Sudais",
             primaryTag = "Murattal",
-            secondaryTag = "Kuwait",
+            secondaryTag = "Saudi Arabia",
             isSelected = true,
             isPlaying = false,
             onClick = {}, onPreviewClick = {},

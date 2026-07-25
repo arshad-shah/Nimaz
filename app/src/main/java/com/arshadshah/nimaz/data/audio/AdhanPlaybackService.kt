@@ -119,7 +119,7 @@ class AdhanPlaybackService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.action) {
             ACTION_PLAY -> {
-                val soundName = intent.getStringExtra(EXTRA_ADHAN_SOUND) ?: AdhanSound.MISHARY.name
+                val soundName = intent.getStringExtra(EXTRA_ADHAN_SOUND) ?: AdhanSound.ABDUL_BASIT.name
                 val isFajr = intent.getBooleanExtra(EXTRA_IS_FAJR, false)
                 val prayerName = intent.getStringExtra(EXTRA_PRAYER_NAME) ?: "Prayer"
 
