@@ -1,0 +1,185 @@
+name: Internal Testing Build (branch)
+
+# Ship an arbitrary branch to the Play **internal** track so a change can be tested on a real
+# device before it is merged.
+#
+# Why this exists separately from deploy.yml: that workflow is deliberately `push: [dev]` only,
+# because it also tags and publishes a GitHub release. This lane does the build + internal-track
+# upload and nothing else — no tag, no GitHub release, no store-listing changes.
+#
+# ── Two triggers, and why both ────────────────────────────────────────────────
+#
+# 1. `workflow_dispatch` — pick any branch from the Actions tab ("Run workflow" → Use workflow
+#    from: <branch>). GitHub only offers this button once the workflow file exists on the
+#    **default branch (dev)**, so it becomes available after this PR merges.
+#
+# 2. `push` with a `[deploy]` marker — works immediately on a feature branch, because a push
+#    event runs the workflow file from the ref that was pushed. This is what to use to test an
+#    unmerged PR:
+#
+#        git commit --allow-empty -m "chore: internal build [deploy]" && git push
+#
+# ── Version codes ─────────────────────────────────────────────────────────────
+#
+# fastlane bumps versionCode/versionName in app/build.gradle.kts, and this workflow commits that
+# bump back to the branch it built. That matters: the Play internal track shares one versionCode
+# namespace with production, so a branch build consumes the next code. Committing the bump to the
+# branch means merging the PR carries it to dev, and dev's next deploy bumps from there instead of
+# trying to reuse a code the store has already seen ("Version code N has already been used").
+
+on:
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: "What is being tested (shown in the run summary)"
+        required: false
+        default: "Manual internal build"
+  push:
+    branches:
+      - 'claude/**'
+      - 'feature/**'
+      - 'fix/**'
+
+# One internal upload at a time — two concurrent runs would race for the next versionCode.
+concurrency:
+  group: internal-testing-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  internal:
+    runs-on: ubuntu-latest
+    # workflow_dispatch always runs. A push only runs when it explicitly opts in with [deploy],
+    # so ordinary commits on a feature branch never burn a Play version code. [skip ci] (used by
+    # the bump commit below) is always excluded, so this cannot re-trigger itself.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (contains(github.event.head_commit.message, '[deploy]') &&
+       !contains(github.event.head_commit.message, '[skip ci]'))
+    permissions:
+      contents: write
+    steps:
+      - name: Generate GitHub App token
+        id: app-token
+        continue-on-error: true
+        uses: actions/create-github-app-token@v3
+        with:
+          app-id: ${{ secrets.BUMP_APP_ID }}
+          private-key: ${{ secrets.BUMP_APP_PRIVATE_KEY }}
+
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.ref_name }}
+          token: ${{ steps.app-token.outputs.token || github.token }}
+          lfs: true
+
+      - name: Checkout LFS objects
+        run: git lfs checkout
+
+      - name: Setup Git identity
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          slug='${{ steps.app-token.outputs.app-slug }}'
+          if [ -n "$slug" ]; then
+            uid="$(gh api "/users/${slug}[bot]" --jq .id)"
+            git config --global user.name "${slug}[bot]"
+            git config --global user.email "${uid}+${slug}[bot]@users.noreply.github.com"
+          else
+            git config --global user.name "CI-Bot"
+            git config --global user.email "CI@bot.com"
+          fi
+
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Set up ruby env
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.3
+          bundler-cache: true
+
+      - name: Set execution flag for gradlew
+        run: chmod +x gradlew
+
+      - name: Decode Firebase Config
+        uses: timheuer/base64-to-file@v1
+        id: firebase_config
+        with:
+          fileName: "google-services.json"
+          encodedString: ${{ secrets.FIREBASE_CONFIG }}
+
+      - name: Move Firebase Config
+        run: mv ${{ steps.firebase_config.outputs.filePath }} app/google-services.json
+
+      - name: Decode Service Account Key JSON File
+        uses: timheuer/base64-to-file@v1
+        id: service_account_json_file
+        with:
+          fileName: "serviceAccount.json"
+          encodedString: ${{ secrets.PLAY_STORE_CONFIG_JSON }}
+
+      - name: Decode Keystore File
+        uses: timheuer/base64-to-file@v1
+        id: android_keystore
+        with:
+          fileName: "android_keystore.keystore"
+          encodedString: ${{ secrets.KEYSTORE_FILE }}
+
+      # Same lane dev uses: build a signed APK + AAB, upload the AAB to the internal track.
+      # Store listing / metadata is untouched (upload_to_play_store only sends the binary).
+      - name: Build & upload to the internal track
+        run: bundle exec fastlane android deploy_internal
+        env:
+          KEYSTORE_FILE: ${{ steps.android_keystore.outputs.filePath }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS}}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          ANDROID_JSON_KEY_FILE: ${{ steps.service_account_json_file.outputs.filePath }}
+
+      # The signed APK is attached to the run so the exact build can also be sideloaded, which is
+      # the fastest path onto a device that is not on the internal-tester list.
+      - name: Upload signed artifacts
+        uses: actions/upload-artifact@v4.6.0
+        with:
+          name: internal-build-${{ github.run_number }}
+          path: |
+            app/build/outputs/bundle/release
+            app/build/outputs/apk/release
+          if-no-files-found: warn
+
+      # Keep the committed versionCode in step with what the store has now seen — see the header.
+      - name: Commit and push version bump
+        run: |
+          git add app/build.gradle.kts
+          if git diff --cached --quiet; then
+            echo "No version change to commit; skipping."
+            exit 0
+          fi
+          git commit -m "chore(release): bump version for internal build [skip ci]"
+          for attempt in 1 2 3; do
+            if git push origin "HEAD:${{ github.ref_name }}"; then
+              exit 0
+            fi
+            echo "Push rejected (attempt $attempt); rebasing on ${{ github.ref_name }} and retrying."
+            git pull --rebase --autostash origin "${{ github.ref_name }}"
+          done
+          git push origin "HEAD:${{ github.ref_name }}"
+
+      - name: Summary
+        run: |
+          name="$(grep -oP 'versionName\s*=\s*"\K[^"]+' app/build.gradle.kts)"
+          code="$(grep -oP 'versionCode\s*=\s*\K\d+' app/build.gradle.kts)"
+          {
+            echo "### Internal build uploaded"
+            echo ""
+            echo "- **Branch:** \`${{ github.ref_name }}\`"
+            echo "- **Version:** \`$name\` (versionCode \`$code\`)"
+            echo "- **Track:** internal"
+            echo "- **Reason:** ${{ github.event.inputs.reason || 'push with [deploy] marker' }}"
+            echo ""
+            echo "Play Console → Testing → Internal testing. Allow a few minutes for processing."
+          } >> "$GITHUB_STEP_SUMMARY"

@@ -222,27 +222,32 @@ Ramadan.
 > (`mutableMapOf<LocalDate, DayWorshipTimes?>`) since each night type now also asks for the next day's
 > Fajr. Covered by `WorshipDayWalkTest` (a zone-independent hour-by-hour walk of a synthetic day).
 
-> **Home refresh cadence.** `NextWorshipResolver.nearest()` reads every worship pref plus location
-> and calculation settings — ~30 sequential DataStore reads per call — so it must never sit on a
-> per-second path. `HomeViewModel` caches the resolved `WorshipReminderOccurrence` and re-resolves
-> it only when it is missing, has elapsed (**now: past its window, not merely its `eventAt`**), or
-> its settings changed; `renderWorshipCard` maps the occurrence to a `WorshipCardUi` of **instants**
-> and the card derives its own countdown/proximity/12-24h formatting at the leaf via the shared
-> ticker (`ProvideNimazClock`/`rememberNow`), so it no longer depends on a per-minute string render.
-> A 60s `startWorshipUpdates` loop still re-checks whether the cached occurrence needs re-resolving.
-> The 1s prayer countdown (`renderTick`) is pure and I/O-free, deriving everything from prayer
-> instants cached by `calculatePrayerTimes`, and now also publishes `nextPrayerAt: Instant?` so the
-> boxed `CountdownTimer(target: Instant?)` ticks itself at the leaf. Keep the tick pure: a suspension
-> point in it makes any transient state set around it — notably `isLoading` — observable on every
-> tick.
+> **Home refresh cadence — time is derived, not pushed.** ViewModels publish *facts* (prayer
+> `Instant`s); everything clock-derived is computed in the composable from one shared ticker.
 >
-> The app-wide clock (`presentation/components/atoms/NimazClock.kt`) is one lifecycle-aware,
-> wall-clock-aligned ticker installed by `MainActivity` inside `NimazTheme`. `rememberNow(resolution)`
-> reads it truncated to the caller's resolution (a minute-counting card invalidates once a minute,
-> not 60×). It replaced the `HomeHero` 30s clock loop and the `WidgetsScreen` 1s preview loop; the
-> remaining `HomeViewModel`/`PrayerTimesViewModel` tick loops and the four `use24HourFormat` VM
-> mirrors are the next migration step (they need the coordinated `HomeUiState`→instants +
-> leaf-derived `isPassed` change and on-device QA).
+> `presentation/components/atoms/NimazClock.kt` installs that ticker (`ProvideNimazClock` in
+> `MainActivity`, inside `NimazTheme`). `rememberNow(resolution)` reads it truncated to the caller's
+> resolution, so a card counting whole minutes invalidates once a minute rather than 60×.
+> `rememberCountdownTo` escalates to seconds only in the final quarter-hour.
+>
+> Removed by this migration: `HomeViewModel.startTimeUpdates()` (1s) and `startWorshipUpdates()`
+> (60s), `PrayerTimesViewModel.applyTick()` (1s), the `HomeHero` 30s clock loop, the `WidgetsScreen`
+> 1s preview loop, and all four `private var use24HourFormat` mirrors plus their `observeTimeFormat()`
+> collectors (Home, PrayerTimes, MonthlyPrayerTimes, Fasting). Times format at the leaf from
+> `LocalUse24HourFormat` (`clockTimeText`/`NimazClockText`), so the 12/24-hour toggle is a pure
+> recomposition instead of two astronomical passes.
+>
+> `PrayerTimeDisplay` carries `timeAt: Instant`; `List<PrayerTimeDisplay>.withClockState(now)`
+> re-derives `isPassed`/`isCurrent`/`isNext`, and `core/util/PrayerClock.kt` holds the pure
+> `nextPrayerIndexAt` / `currentPrayerIndexAt` / `prayerTimelineProgressAt`. This also fixed a real
+> bug: the old derivation compared `LocalTime` (dropping the date), so after Isha no row highlighted
+> and before Fajr today's Isha rendered as "current".
+>
+> Two things still need a schedule rather than a tick. **Date rollover** is watched by `HomeScreen`
+> off the ticker's local date (which also covers timezone and manual time changes) and fires
+> `HomeEvent.RefreshPrayerTimes`. **The worship card** re-resolves on an event-driven sleep until the
+> current occurrence's window closes — one wake per transition instead of 1,440 polls a day, each
+> costing ~30 DataStore reads — guarded end-to-end so nothing escapes to the uncaught handler.
 
 **Wiring.** `PrayerNotificationScheduler` is constructor-injected (`@Singleton @Inject`, deps: `PrayerTimeCalculator`, `SettingsRepository`). Called by `AppInitializer` on startup and by `SettingsViewModel.rescheduleNotifications()` when prayer/notification settings change. Permissions in `AndroidManifest.xml`: `POST_NOTIFICATIONS`, `SCHEDULE_EXACT_ALARM`, `USE_EXACT_ALARM`, `RECEIVE_BOOT_COMPLETED`, `WAKE_LOCK`, `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS`.
 
