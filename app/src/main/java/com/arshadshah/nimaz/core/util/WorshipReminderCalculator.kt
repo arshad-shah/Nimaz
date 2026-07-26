@@ -63,7 +63,20 @@ class WorshipReminderCalculator {
         hijriFor: (LocalDate) -> HijriDayInfo?,
         maxSearchDays: Long = forwardSearchDays,
         /** Witr only: fire before Fajr (Fajr − offset) instead of after Isha (Isha + offset). */
-        witrBeforeFajr: Boolean = false
+        witrBeforeFajr: Boolean = false,
+        /**
+         * Scheduler-only gate. When true, only occurrences whose [WorshipReminderOccurrence.triggerAt]
+         * is strictly in the future are accepted — a currently-*active* occurrence (event begun,
+         * window still open, trigger already passed) is skipped and the scan rolls forward to the
+         * next future trigger.
+         *
+         * This is what the alarm scheduler must use. Arming `setExactAndAllowWhileIdle` at a past
+         * instant makes Android fire it *immediately*, so accepting an active-but-past occurrence
+         * (the default, which the Home card wants) re-posts the notification on every reschedule —
+         * i.e. every time the app is opened during the event's window. The Home card resolver keeps
+         * the default so a "happening now" card stays visible.
+         */
+        requireFutureTrigger: Boolean = false
     ): WorshipReminderOccurrence? {
         val startDay = now.toLocalDate().minusDays(1)
         var day = startDay
@@ -80,12 +93,20 @@ class WorshipReminderCalculator {
             // card for the rest of the day. The backward scan already starts at
             // `now.minusDays(1)`, so today's (or last night's) live occurrence is
             // visited — only the acceptance test rejected it.
-            if (occ != null && occ.isLiveAt(now)) {
-                if (best == null || occ.triggerAt.isBefore(best.triggerAt)) best = occ
-                // Daily reminders resolve on the first future day found; keep scanning only for
-                // the sparse eve-of ones where an earlier day might still yield a later-in-window
-                // hit already covered above. Break once we have the earliest daily hit.
-                if (!isEveOf(type)) break
+            //
+            // The scheduler ([requireFutureTrigger]) instead demands a strictly-future
+            // trigger so it never arms a past alarm (which fires immediately, re-posting
+            // the notification on every app-open during the active window).
+            if (occ != null) {
+                val accepted =
+                    if (requireFutureTrigger) occ.triggerAt.isAfter(now) else occ.isLiveAt(now)
+                if (accepted) {
+                    if (best == null || occ.triggerAt.isBefore(best.triggerAt)) best = occ
+                    // Daily reminders resolve on the first future day found; keep scanning only for
+                    // the sparse eve-of ones where an earlier day might still yield a later-in-window
+                    // hit already covered above. Break once we have the earliest daily hit.
+                    if (!isEveOf(type)) break
+                }
             }
             day = day.plusDays(1)
         }

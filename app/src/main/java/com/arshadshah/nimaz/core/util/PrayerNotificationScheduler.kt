@@ -560,7 +560,12 @@ class PrayerNotificationScheduler @Inject constructor(
                 offsetMinutes = offsetMap[type] ?: type.defaultOffsetMinutes,
                 timesFor = timesFor,
                 hijriFor = hijriFor,
-                witrBeforeFajr = witrBeforeFajr
+                witrBeforeFajr = witrBeforeFajr,
+                // Only arm a strictly-future trigger. An already-active occurrence has
+                // already fired; arming it again at a past instant would make Android
+                // deliver it immediately, re-posting the notification on every app-open
+                // (or reschedule) for the whole window. Roll forward to the next one.
+                requireFutureTrigger = true
             ) ?: return@forEach
             armWorshipReminder(type, occ.triggerAt, occ.eventAt, occ.subKey)
         }
