@@ -54,15 +54,12 @@ fun EventsCarousel(
         val e = events[pageIndex]
         val worship = e.worship
         if (worship != null) {
+            // The card derives its own countdown/proximity from the instants in `worship`
+            // via the shared ticker — no pre-formatted strings, no per-minute VM refresh.
+            // onAction is not yet wired to navigation (tracked as follow-up), so the CTA
+            // stays hidden until a handler is threaded through.
             WorshipEventCard(
-                type = worship.type,
-                name = worship.name,
-                arabic = worship.arabic,
-                body = worship.body,
-                eventTime = worship.eventTime,
-                timeLabel = worship.timeLabel,
-                countdown = worship.countdown,
-                countdownLabel = worship.countdownLabel,
+                card = worship,
                 fillHeight = true,
             )
         } else if (e.occasion == EventOccasion.JUMUAH) {

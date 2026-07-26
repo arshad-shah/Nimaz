@@ -65,6 +65,7 @@ import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
+import java.time.ZoneId
 import javax.inject.Inject
 import kotlin.time.Clock
 import kotlin.time.Duration
@@ -833,11 +834,16 @@ class HomeViewModel @Inject constructor(
         val card = runCatching {
             val now = LocalDateTime.now()
             val cached = worshipOccurrence
-            if (worshipStale || cached == null || !cached.eventAt.isAfter(now)) {
+            // An occurrence stays valid until its window closes (or its event, if it has no
+            // window) — not merely until its event begins. Re-resolving on `eventAt` alone would
+            // drop an active occurrence the instant its event started, reintroducing the very
+            // gap the window model fixed.
+            val liveUntil = cached?.let { it.windowEnd ?: it.eventAt }
+            if (worshipStale || liveUntil == null || !now.isBefore(liveUntil)) {
                 worshipOccurrence = nextWorshipResolver.nearest(now)
                 worshipStale = false
             }
-            worshipOccurrence?.let { renderWorshipCard(it, now) }
+            worshipOccurrence?.let { renderWorshipCard(it) }
         }.onFailure { CrashReporter.recordException(it) }.getOrNull()
         _state.update { it.copy(worshipCard = card) }
     }
@@ -862,31 +868,25 @@ class HomeViewModel @Inject constructor(
     }
 
     /**
-     * Render an already-resolved worship occurrence into card data. Countdown is to the event
-     * instant ([WorshipReminderOccurrence.eventAt]); the time label is shown only where it adds
-     * meaning (Tahajjud's "Begins").
-     *
-     * Pure and non-suspending — resolution and settings reads happen in [refreshWorshipCard], so
-     * re-rendering the countdown costs nothing.
+     * Map an already-resolved worship occurrence into card data. The card carries **instants**
+     * ([WorshipReminderOccurrence.eventAt]/`windowStart`/`windowEnd`) and derives its own
+     * countdown, proximity and 12/24-hour formatting at the leaf via the shared ticker — so this
+     * is a pure, allocation-light mapping, not a per-minute string render. This is the one place
+     * the occurrence's wall-clock `LocalDateTime`s convert to instants (system zone).
      */
-    private fun renderWorshipCard(occ: WorshipReminderOccurrence, now: LocalDateTime): WorshipCardUi {
-        val et = occ.eventAt.toLocalTime()
-        val eventTime = formatClockTime(et.hour, et.minute, use24HourFormat)
-        val secs = java.time.Duration.between(now, occ.eventAt).seconds.coerceAtLeast(0)
-        val hours = secs / 3600
-        val minutes = (secs % 3600) / 60
-        val countdown = if (hours > 0) "${hours}h ${minutes}m" else "${minutes}m"
-        val timeLabel = if (occ.type == WorshipReminderType.TAHAJJUD)
-            context.getString(R.string.worship_card_begins) else ""
+    private fun renderWorshipCard(occ: WorshipReminderOccurrence): WorshipCardUi {
+        val zone = ZoneId.systemDefault()
+        fun toInstant(ldt: LocalDateTime): Instant =
+            Instant.fromEpochMilliseconds(ldt.atZone(zone).toInstant().toEpochMilli())
         return WorshipCardUi(
             type = occ.type,
             name = WorshipReminderContent.name(context, occ.type),
             arabic = WorshipReminderContent.arabic(context, occ.type),
             body = WorshipReminderContent.body(context, occ.type, occ.subKey),
-            eventTime = eventTime,
-            timeLabel = timeLabel,
-            countdown = countdown,
-            countdownLabel = context.getString(R.string.worship_card_in)
+            eventAt = toInstant(occ.eventAt),
+            windowStart = occ.windowStart?.let(::toInstant),
+            windowEnd = occ.windowEnd?.let(::toInstant),
+            subKey = occ.subKey,
         )
     }
 }

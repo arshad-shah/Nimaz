@@ -6,50 +6,39 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.time.Clock
+import kotlin.time.Duration.Companion.hours
 
+/**
+ * The card now receives **instants** and derives its own time/countdown/proximity at the leaf, so
+ * the exact rendered clock time and countdown text are wall-clock dependent and no longer asserted
+ * here. We pin the stable content (name/arabic/body) and that every reminder type renders without
+ * crashing; the selection/window behaviour is covered purely by [com.arshadshah.nimaz.core.util]
+ * tests.
+ */
 @RunWith(RobolectricTestRunner::class)
 class WorshipEventCardTest {
 
     @get:Rule
     val composeRule = createComponentComposeRule()
 
-    @Test
-    fun `renders name, arabic, body, event time and countdown`() {
-        composeRule.setThemedContent {
-            WorshipEventCard(
-                type = WorshipReminderType.TAHAJJUD,
-                name = "Tahajjud",
-                arabic = "تَهَجُّد",
-                body = "A blessed time for du'a has begun.",
-                eventTime = "2:48 AM",
-                timeLabel = "Begins",
-                countdown = "4h 12m",
-                countdownLabel = "Begins in",
-            )
-        }
-        composeRule.onNodeWithText("Tahajjud").assertExists()
-        composeRule.onNodeWithText("A blessed time for du'a has begun.").assertExists()
-        composeRule.onNodeWithText("2:48 AM").assertExists()
-        composeRule.onNodeWithText("4h 12m").assertExists()
-        composeRule.onNodeWithText("Begins in").assertExists()
-    }
+    private fun cardFor(type: WorshipReminderType, name: String) = WorshipCardUi(
+        type = type,
+        name = name,
+        arabic = "تَهَجُّد",
+        body = "A blessed time for du'a.",
+        // Comfortably in the future so proximity is not PASSED and the card renders.
+        eventAt = Clock.System.now() + 4.hours,
+        windowEnd = Clock.System.now() + 8.hours,
+    )
 
     @Test
-    fun `hides trailing time and countdown when empty`() {
+    fun `renders name, arabic and body`() {
         composeRule.setThemedContent {
-            WorshipEventCard(
-                type = WorshipReminderType.IFTAR,
-                name = "Iftar",
-                arabic = "إفْطار",
-                body = "Break your fast.",
-                eventTime = "",
-                timeLabel = "",
-                countdown = "",
-                countdownLabel = "",
-            )
+            WorshipEventCard(card = cardFor(WorshipReminderType.TAHAJJUD, "Tahajjud"))
         }
-        composeRule.onNodeWithText("Iftar").assertExists()
-        composeRule.onNodeWithText("Break your fast.").assertExists()
+        composeRule.onNodeWithText("Tahajjud").assertExists()
+        composeRule.onNodeWithText("A blessed time for du'a.").assertExists()
     }
 
     @Test
@@ -57,16 +46,7 @@ class WorshipEventCardTest {
         composeRule.setThemedContent {
             androidx.compose.foundation.layout.Column {
                 WorshipReminderType.entries.forEach { type ->
-                    WorshipEventCard(
-                        type = type,
-                        name = type.key,
-                        arabic = "نص",
-                        body = "body",
-                        eventTime = "1:00 AM",
-                        timeLabel = "",
-                        countdown = "1h",
-                        countdownLabel = "In",
-                    )
+                    WorshipEventCard(card = cardFor(type, type.key))
                 }
             }
         }
