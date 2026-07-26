@@ -66,6 +66,12 @@ flowchart LR
         FastingHome --> FastingTracker & FastingStats
     end
 
+    %% Home "Next Worship" card — every reminder type is tappable and routes by type.
+    Home -->|worship card| NightWorship & DuaCategory & FastingTracker
+    subgraph NW["Night worship"]
+        NightWorship --> QuranReader & DuaCategory & HadithReader
+    end
+
     subgraph T["Tasbih screens"]
         TasbihHub --> TasbihCounter & TasbihPresets & TasbihStats & TasbihHistory & TasbihAddPreset
     end
@@ -194,6 +200,20 @@ All routes live in `core/navigation/Routes.kt` and are wired in `core/navigation
 | `FastingHome` | — | FastTrackerScreen |
 | `FastingTracker` | — | FastTrackerScreen |
 | `FastingStats` | — | (fasting stats) |
+
+### Night worship
+| Route | Args | Screen |
+|-------|------|--------|
+| `NightWorship` | — | NightWorshipScreen |
+
+> **Reached only from the Home worship card** (Tahajjud / Witr), not from a menu. The other nine
+> reminder types route to screens that already existed — see the table in
+> `core/navigation/WorshipDestinations.kt`, which is the single source of truth for the mapping and
+> is asserted exhaustively by `WorshipDestinationsTest`.
+>
+> The hub itself deep-links onward to `QuranReader(67)` (Al-Mulk), `DuaCategory(35)` (Witr & night
+> prayer duas) and `HadithReader` (Bukhari 1145). It holds an **in-memory** rakah tally only:
+> nothing is persisted, so there is no new entity, DAO or migration.
 
 > **Makeup fasts is a tab inside `FastTrackerScreen`** (driven by `FastingEvent.LoadMakeupFasts`),
 > not a standalone route. There is intentionally **no** `Route.MakeupFasts`.

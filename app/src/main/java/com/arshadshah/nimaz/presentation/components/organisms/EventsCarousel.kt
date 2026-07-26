@@ -10,6 +10,7 @@ import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Instant
+import com.arshadshah.nimaz.domain.model.WorshipReminderType
 
 /**
  * A single event card's display data. Jumu'ah carries the three jumuah_* fields and
@@ -44,6 +45,11 @@ fun EventsCarousel(
     modifier: Modifier = Modifier,
     pageHeight: Dp = EventCardPageHeight,
     horizontalPadding: Dp = 20.dp,
+    /**
+     * Tapping the "Next Worship" card. Null leaves it inert — which is what shipped, and why the
+     * card looked like decoration: it counted down at you and then did nothing.
+     */
+    onWorshipClick: ((WorshipReminderType) -> Unit)? = null,
 ) {
     if (events.isEmpty()) return
     NimazCarousel(
@@ -58,11 +64,10 @@ fun EventsCarousel(
         if (worship != null) {
             // The card derives its own countdown/proximity from the instants in `worship`
             // via the shared ticker — no pre-formatted strings, no per-minute VM refresh.
-            // onAction is not yet wired to navigation (tracked as follow-up), so the CTA
-            // stays hidden until a handler is threaded through.
             WorshipEventCard(
                 card = worship,
                 fillHeight = true,
+                onAction = onWorshipClick,
             )
         } else if (e.occasion == EventOccasion.JUMUAH) {
             JumuahCard(

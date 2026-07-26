@@ -79,6 +79,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.rememberNow
 import com.arshadshah.nimaz.presentation.viewmodel.PrayerTimeDisplay
 import com.arshadshah.nimaz.presentation.viewmodel.withClockState
 import kotlin.time.Instant
+import com.arshadshah.nimaz.domain.model.WorshipReminderType
 
 /**
  * The clock-derived slice of Home. The ViewModel publishes prayer *instants*; this turns them into
@@ -126,6 +127,8 @@ fun HomeScreen(
     onNavigateToPrayerTimes: () -> Unit = {},
     onOpenHadith: (hadithId: String) -> Unit = {},
     onOpenAnnouncementRoute: (String) -> Unit = {},
+    /** Tapping the "Next Worship" card; NavGraph maps the type to a destination. */
+    onOpenWorship: (WorshipReminderType) -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
@@ -232,6 +235,7 @@ fun HomeScreen(
                             onNavigateToPrayerTimes = onNavigateToPrayerTimes,
                             onOpenHadith = onOpenHadith,
                             onOpenAnnouncementRoute = onOpenAnnouncementRoute,
+                            onOpenWorship = onOpenWorship,
                             onTogglePrayer = { viewModel.onEvent(HomeEvent.TogglePrayerStatus(it)) },
                             notificationPermissionLauncher = notificationPermissionLauncher,
                             locationPermissionLauncher = locationPermissionLauncher,
@@ -263,6 +267,7 @@ fun HomeScreen(
                         onNavigateToPrayerTimes = onNavigateToPrayerTimes,
                         onOpenHadith = onOpenHadith,
                         onOpenAnnouncementRoute = onOpenAnnouncementRoute,
+                        onOpenWorship = onOpenWorship,
                         onTogglePrayer = { viewModel.onEvent(HomeEvent.TogglePrayerStatus(it)) },
                         notificationPermissionLauncher = notificationPermissionLauncher,
                         locationPermissionLauncher = locationPermissionLauncher,
@@ -291,6 +296,7 @@ private fun HomeCompactContent(
     onNavigateToPrayerTimes: () -> Unit,
     onOpenHadith: (hadithId: String) -> Unit,
     onOpenAnnouncementRoute: (String) -> Unit,
+    onOpenWorship: (WorshipReminderType) -> Unit,
     onTogglePrayer: (PrayerType) -> Unit,
     notificationPermissionLauncher: androidx.activity.result.ActivityResultLauncher<String>,
     locationPermissionLauncher: androidx.activity.result.ActivityResultLauncher<Array<String>>,
@@ -394,7 +400,7 @@ private fun HomeCompactContent(
         }
         if (eventCards.isNotEmpty()) {
             item(key = "events") {
-                EventsCarousel(events = eventCards)
+                EventsCarousel(events = eventCards, onWorshipClick = onOpenWorship)
             }
             item(key = "events_spacer") {
                 Spacer(Modifier.height(16.dp))
@@ -456,6 +462,7 @@ private fun HomeTabletContent(
     onNavigateToPrayerTimes: () -> Unit,
     onOpenHadith: (hadithId: String) -> Unit,
     onOpenAnnouncementRoute: (String) -> Unit,
+    onOpenWorship: (WorshipReminderType) -> Unit,
     onTogglePrayer: (PrayerType) -> Unit,
     notificationPermissionLauncher: androidx.activity.result.ActivityResultLauncher<String>,
     locationPermissionLauncher: androidx.activity.result.ActivityResultLauncher<Array<String>>,
@@ -545,6 +552,7 @@ private fun HomeTabletContent(
             EventsCarousel(
                 events = tabletEventCards,
                 modifier = Modifier.padding(top = 8.dp),
+                onWorshipClick = onOpenWorship,
             )
         }
 

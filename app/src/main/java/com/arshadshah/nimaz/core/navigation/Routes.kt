@@ -102,6 +102,16 @@ sealed interface Route {
     @Serializable
     data object FastingStats : Route
 
+    /**
+     * Night worship (Tahajjud / Witr) — the destination for those two Home worship cards.
+     *
+     * Exists because those reminders had nowhere useful to go: the app can tell you the last
+     * third of the night has begun, but had no screen answering "what now". Everything else a
+     * worship card links to (dua categories, the fast tracker) already existed.
+     */
+    @Serializable
+    data object NightWorship : Route
+
     // Tasbih screens
     @Serializable
     data object TasbihHome : Route

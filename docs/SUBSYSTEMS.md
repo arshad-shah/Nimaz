@@ -263,6 +263,16 @@ Ramadan.
 > bug: the old derivation compared `LocalTime` (dropping the date), so after Isha no row highlighted
 > and before Fajr today's Isha rendered as "current".
 >
+> **The worship card is a destination, not decoration.** It shipped inert — `WorshipEventCard`
+> accepted an `onAction` that Home never passed, so the card counted down and then did nothing.
+> The whole card surface is now the tap target (no CTA button: the carousel page is a fixed 170dp
+> and a button would cost scarce height), with `onClickLabel` carrying the per-type action wording
+> for screen readers. `core/navigation/WorshipDestinations.kt` maps type → route as a **pure
+> function**, so every row is asserted in a JVM test rather than only through the UI; a new
+> reminder type is a compile error rather than a silently inert card. Nine of the eleven types land
+> on screens that already existed (dua categories, the fast tracker); Tahajjud and Witr open
+> `Route.NightWorship`, built because those two had nowhere useful to go.
+>
 > Two things still need a schedule rather than a tick. **Date rollover** is watched by `HomeScreen`
 > off the ticker's local date (which also covers timezone and manual time changes) and fires
 > `HomeEvent.RefreshPrayerTimes`. **The worship card** re-resolves on an event-driven sleep until the

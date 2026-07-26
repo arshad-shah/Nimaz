@@ -33,6 +33,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.testTag
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.util.formatClockTime
 import com.arshadshah.nimaz.domain.model.PrayerType
@@ -210,13 +211,17 @@ fun HomeHero(
                     }
                 }
                 if (nextPrayerAt != null) {
-                    // Ticks itself off the shared clock — seconds only in the final approach.
+                    // Ticks itself off the shared clock, once a second, however far out the next
+                    // prayer is — it shows seconds, so it must tick in seconds. The testTag lets
+                    // an instrumented test assert on a real device that this actually advances;
+                    // that it silently stopped is the bug this whole area exists to prevent.
                     NimazCountdownText(
                         target = nextPrayerAt,
                         style = MaterialTheme.typography.headlineSmall.copy(
                             fontWeight = FontWeight.ExtraBold
                         ),
                         color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.testTag(HomeCountdownTestTag),
                     )
                 }
             }
@@ -250,3 +255,6 @@ private fun HomeHero_Preview() {
             )
     }
 }
+
+/** Test tag for the hero's next-prayer countdown, asserted by the live-countdown instrumentation test. */
+const val HomeCountdownTestTag = "home_next_prayer_countdown"

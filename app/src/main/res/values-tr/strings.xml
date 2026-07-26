@@ -1614,4 +1614,24 @@
     <string name="notif_hub_sound_subtitle">Ezan · müezzin · titreşim · Rahatsız Etmeyin</string>
     <string name="notif_hub_troubleshooting_title">Sorun giderme</string>
     <string name="notif_hub_troubleshooting_subtitle">Test · sıfırla · pil optimizasyonu</string>
+
+    <!-- Gece ibadeti merkezi (Teheccud / Vitir hedefi) -->
+    <string name="night_worship_title">Gece İbadeti</string>
+    <string name="night_worship_last_third">Gecenin son üçte biri</string>
+    <string name="night_worship_open_now">Şu anda açık</string>
+    <string name="night_worship_opens_in">Başlamasına</string>
+    <string name="night_worship_closed">Bu gecenin vakti geçti</string>
+    <string name="night_worship_times_unavailable">Vakitleri görmek için konumunuzu ayarlayın</string>
+    <string name="night_worship_rakah_title">Kılınan rekât</string>
+    <string name="night_worship_rakah_body">Gece namazı ikişer rekât kılınır</string>
+    <string name="night_worship_add_pair">+2 rekât</string>
+    <string name="night_worship_reset">Sıfırla</string>
+    <string name="night_worship_witr_title">Vitir</string>
+    <string name="night_worship_witr_body">Bir veya üç rekât, en son kılınır</string>
+    <string name="night_worship_recite_title">Mülk Suresi\'ni oku</string>
+    <string name="night_worship_recite_body">Okuyanına şefaat eden otuz âyet</string>
+    <string name="night_worship_duas_title">Gece namazı duaları</string>
+    <string name="night_worship_duas_body">Kunut ve gece duaları</string>
+    <string name="night_worship_why_title">Neden gece namazı</string>
+    <string name="night_worship_why_body">&quot;Rabbimiz dünya semasına iner…&quot;</string>
 </resources>

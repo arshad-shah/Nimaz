@@ -4,6 +4,7 @@ import android.content.res.Configuration
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -32,6 +33,8 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -175,6 +178,18 @@ fun WorshipEventCard(
         label = "worship_progress",
     )
 
+    // The whole card is the tap target rather than a CTA button. The card lives in a
+    // fixed-height carousel page, so a button would eat scarce vertical space for an
+    // affordance the entire surface can carry — and a reminder you can't act on reads as
+    // decoration. `onClickLabel` reuses the per-type action wording ("Read adhkar", "Open
+    // fast tracker") so screen readers announce the destination instead of just "button".
+    val clickLabel = actionLabelFor(card.type)
+    val decorated = if (progress != null) {
+        modifier.drawBehind { drawProgressArc(animatedProgress, v.accent) }
+    } else {
+        modifier
+    }
+
     EventCard(
         accent = accent,
         containerAccent = v.accent,
@@ -184,10 +199,12 @@ fun WorshipEventCard(
         arabic = card.arabic,
         body = card.body,
         fillHeight = fillHeight,
-        modifier = if (progress != null) {
-            modifier.drawBehind { drawProgressArc(animatedProgress, v.accent) }
+        modifier = if (onAction != null) {
+            decorated
+                .testTag(WorshipCardTestTag)
+                .clickable(onClickLabel = clickLabel, role = Role.Button) { onAction(card.type) }
         } else {
-            modifier
+            decorated
         },
         trailing = {
             Column(horizontalAlignment = Alignment.End) {
@@ -231,13 +248,12 @@ fun WorshipEventCard(
                 }
             }
         },
-        primaryAction = onAction?.let { handler ->
-            actionLabelFor(card.type)?.let { label ->
-                EventAction(label = label) { handler(card.type) }
-            }
-        },
+        // No primaryAction: the surface itself is the affordance (see `clickable` above).
     )
 }
+
+/** Test tag for the tappable worship card, used by the instrumented navigation tests. */
+const val WorshipCardTestTag = "worship_card"
 
 /**
  * The arc around the card showing where "now" sits between [WorshipCardUi.windowStart]
