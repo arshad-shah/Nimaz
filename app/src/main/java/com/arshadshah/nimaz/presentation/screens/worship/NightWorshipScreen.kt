@@ -44,6 +44,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.TickResolution
 import com.arshadshah.nimaz.presentation.components.atoms.rememberNow
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.viewmodel.NightWorshipEvent
+import com.arshadshah.nimaz.presentation.viewmodel.NightWorshipUiState
 import com.arshadshah.nimaz.presentation.viewmodel.NightWorshipViewModel
 import kotlin.time.Instant
 
@@ -71,7 +72,6 @@ import kotlin.time.Instant
  * before the window (count down to it), inside it (count down to Fajr), and after Fajr (say so
  * plainly rather than showing a stale or negative countdown).
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NightWorshipScreen(
     onNavigateBack: () -> Unit,
@@ -81,7 +81,33 @@ fun NightWorshipScreen(
     viewModel: NightWorshipViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    NightWorshipContent(
+        state = state,
+        onEvent = viewModel::onEvent,
+        onNavigateBack = onNavigateBack,
+        onOpenSurah = onOpenSurah,
+        onOpenDuaCategory = onOpenDuaCategory,
+        onOpenHadith = onOpenHadith,
+    )
+}
 
+/**
+ * The hub's UI, split from its ViewModel so every state it can be in is renderable in a test.
+ *
+ * That split is the difference between covering this screen and not: the window has three distinct
+ * states (before, open, closed) that depend on the time of day, and a test that has to wait for
+ * 2am to exercise "open" is a test nobody runs. Here they are just data.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun NightWorshipContent(
+    state: NightWorshipUiState,
+    onEvent: (NightWorshipEvent) -> Unit,
+    onNavigateBack: () -> Unit,
+    onOpenSurah: (Int) -> Unit,
+    onOpenDuaCategory: (String) -> Unit,
+    onOpenHadith: (String) -> Unit,
+) {
     NimazScreenScaffold(
         topBar = {
             NimazBackTopAppBar(
@@ -104,14 +130,15 @@ fun NightWorshipScreen(
 
             RakahCounterCard(
                 count = state.rakahCount,
-                onAddPair = { viewModel.onEvent(NightWorshipEvent.AddRakahPair) },
-                onReset = { viewModel.onEvent(NightWorshipEvent.ResetRakahs) },
+                onAddPair = { onEvent(NightWorshipEvent.AddRakahPair) },
+                onReset = { onEvent(NightWorshipEvent.ResetRakahs) },
             )
 
             NightWorshipRow(
                 icon = Icons.Filled.Bedtime,
                 title = stringResource(R.string.night_worship_witr_title),
                 body = stringResource(R.string.night_worship_witr_body),
+                testTag = NightWorshipWitrRowTestTag,
                 onClick = { onOpenDuaCategory(DUA_CATEGORY_WITR_AND_NIGHT_PRAYER) },
             )
 
@@ -119,6 +146,7 @@ fun NightWorshipScreen(
                 icon = Icons.Filled.MenuBook,
                 title = stringResource(R.string.night_worship_recite_title),
                 body = stringResource(R.string.night_worship_recite_body),
+                testTag = NightWorshipReciteRowTestTag,
                 onClick = { onOpenSurah(SURAH_AL_MULK) },
             )
 
@@ -126,6 +154,7 @@ fun NightWorshipScreen(
                 icon = Icons.Filled.SelfImprovement,
                 title = stringResource(R.string.night_worship_duas_title),
                 body = stringResource(R.string.night_worship_duas_body),
+                testTag = NightWorshipDuasRowTestTag,
                 onClick = { onOpenDuaCategory(DUA_CATEGORY_WITR_AND_NIGHT_PRAYER) },
             )
 
@@ -133,6 +162,7 @@ fun NightWorshipScreen(
                 icon = Icons.Filled.NightsStay,
                 title = stringResource(R.string.night_worship_why_title),
                 body = stringResource(R.string.night_worship_why_body),
+                testTag = NightWorshipWhyRowTestTag,
                 onClick = { onOpenHadith(HADITH_ID_LAST_THIRD_DESCENT) },
             )
 
@@ -310,11 +340,13 @@ private fun NightWorshipRow(
     icon: ImageVector,
     title: String,
     body: String,
+    testTag: String,
     onClick: () -> Unit,
 ) {
     NimazCard(
         modifier = Modifier
             .fillMaxWidth()
+            .testTag(testTag)
             .clickable(onClick = onClick),
         style = NimazCardStyle.FILLED,
         shape = RoundedCornerShape(16.dp),
@@ -365,3 +397,10 @@ const val NightWorshipWindowTestTag = "night_worship_window"
 const val NightWorshipCounterTestTag = "night_worship_counter"
 const val NightWorshipCountTestTag = "night_worship_count"
 const val NightWorshipAddRakahTestTag = "night_worship_add_rakah"
+
+// Row tags: the click action sits on the card, not on the title Text, so tests target the row
+// itself rather than reaching for a clickable ancestor of a text node.
+const val NightWorshipWitrRowTestTag = "night_worship_row_witr"
+const val NightWorshipReciteRowTestTag = "night_worship_row_recite"
+const val NightWorshipDuasRowTestTag = "night_worship_row_duas"
+const val NightWorshipWhyRowTestTag = "night_worship_row_why"

@@ -1,117 +1,153 @@
 package com.arshadshah.nimaz.behavior
 
-import androidx.compose.ui.semantics.SemanticsProperties
-import androidx.compose.ui.test.ExperimentalTestApi
-import androidx.compose.ui.test.SemanticsNodeInteraction
-import androidx.compose.ui.test.hasTestTag
-import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.waitUntilAtLeastOneExists
+import android.content.Intent
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.arshadshah.nimaz.presentation.components.organisms.HomeCountdownTestTag
-import com.arshadshah.nimaz.support.BaseAppTest
+import androidx.test.platform.app.InstrumentationRegistry
+import androidx.test.uiautomator.By
+import androidx.test.uiautomator.UiDevice
+import androidx.test.uiautomator.Until
+import com.arshadshah.nimaz.domain.repository.SettingsRepository
+import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
+import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertNotEquals
-import org.junit.Assert.assertTrue
+import org.junit.Assert.assertNotNull
+import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.util.regex.Pattern
+import javax.inject.Inject
 
 /**
  * The regression test for the bug that shipped: **timers stopped updating in real time.**
  *
- * ## Why this needs to be an instrumented test
+ * ## Why this test deliberately avoids `ComposeTestRule`
  *
- * Nothing in the JVM suite could have caught it. Every Robolectric component test pins
- * `mainClock.autoAdvance = false` and asserts the *first frame*, so a countdown that renders once
- * and then freezes passes them all. The failure only exists against a real frame clock, a real
- * lifecycle and real elapsed time — which is exactly what an instrumented test has.
+ * The obvious version of this test — drive the app with a Compose rule, read the countdown, sleep,
+ * read again — **cannot work, and silently reports the app as broken.** A Compose test rule puts
+ * the composition's frame clock under test control. The shared ticker still fires and still writes
+ * new state, but no frame is ever produced, so nothing recomposes and the semantics tree the test
+ * reads never changes. `Thread.sleep` advances wall time; it does not advance the harness's frame
+ * clock. The first version of this test failed for exactly that reason while the app itself was
+ * ticking correctly — verified by watching the same build on the same emulator by hand.
  *
- * ## What it actually asserts
+ * So this drives the app through **UI Automator**, which reads the real rendered window and has no
+ * control over Compose's clock whatsoever. That is the only way to assert "the UI actually changes
+ * as real seconds pass", which is precisely the property that broke.
  *
- * Read the Home hero's next-prayer countdown, let real seconds pass, read it again, and require
- * that the text changed. No mocking, no virtual clock: if the shared ticker stops, or a countdown
- * that displays seconds is wired to a minute-resolution tick (the actual defect — the seconds digit
- * sat still for 60s and then jumped), this fails.
+ * ## Why the JVM suite can never cover this
  *
- * The countdown shows seconds whatever the distance to the next prayer, so this holds at any time
- * of day. That property is the fix, and this is the test that pins it.
+ * Every Robolectric component test pins `mainClock.autoAdvance = false` and asserts the first
+ * frame. A countdown that renders once and then freezes forever passes all of them. This failure
+ * class only exists against a real frame clock, a real lifecycle and real elapsed time.
  */
 @HiltAndroidTest
 @RunWith(AndroidJUnit4::class)
-class LiveCountdownTest : BaseAppTest() {
+class LiveCountdownTest {
 
-    override suspend fun seedState() {
-        super.seedState()
-        // A fixed mid-latitude location so prayer times always resolve. Without a location the
-        // hero has no next-prayer instant and renders no countdown at all.
-        settings.updateLocation(LONDON_LAT, LONDON_LON, "London")
+    @get:Rule
+    val hiltRule = HiltAndroidRule(this)
+
+    @Inject
+    lateinit var settings: SettingsRepository
+
+    private val device: UiDevice =
+        UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
+
+    @Before
+    fun setUp() {
+        hiltRule.inject()
+        runBlocking {
+            // Straight to Home, with a fixed mid-latitude location so prayer times always resolve.
+            // Without a location the hero has no next-prayer instant and renders no countdown.
+            settings.setOnboardingCompleted(true)
+            settings.updateLocation(LONDON_LAT, LONDON_LON, "London")
+        }
     }
 
     @Test
     fun homeNextPrayerCountdownAdvancesInRealTime() {
         launchApp()
-        waitForCountdown()
 
-        val first = countdownText()
-        assertTrue("Countdown rendered empty", first.isNotBlank())
+        val first = awaitCountdownText()
+        assertNotNull("No countdown rendered on Home", first)
 
-        // Real elapsed time — the whole point. Two-plus seconds so a 1 Hz ticker must move even if
-        // the first read landed just before a boundary.
-        Thread.sleep(2_500)
-        compose.waitForIdle()
+        // Real elapsed time — the whole point of this test.
+        Thread.sleep(3_000)
 
         val second = countdownText()
         assertNotEquals(
-            "Home countdown did not advance in 2.5s of real time (was '$first', still '$second'). " +
-                "The shared ticker has stopped, or this countdown shows seconds while ticking " +
-                "at minute resolution.",
+            "Home countdown did not advance in 3s of real time (was '$first', still '$second'). " +
+                "Either the shared ticker has stopped, or this countdown displays seconds while " +
+                "ticking at minute resolution — the defect that shipped.",
             first,
             second,
         )
     }
 
     /**
-     * And it must keep ticking after the app has been backgrounded and resumed — the ticker is
-     * lifecycle-scoped (`repeatOnLifecycle(STARTED)`), so a broken restart would leave every
-     * countdown in the app frozen on return, which looks identical to the original bug.
+     * The ticker is lifecycle-scoped (`repeatOnLifecycle(STARTED)`), so it is suspended whenever the
+     * app is backgrounded. If it failed to restart on resume, every countdown in the app would be
+     * frozen on return — indistinguishable, to a user, from the original bug.
      */
     @Test
-    fun countdownResumesTickingAfterBackgrounding() {
-        val scenario = launchApp()
-        waitForCountdown()
+    fun countdownKeepsTickingAfterBackgroundingAndResuming() {
+        launchApp()
+        awaitCountdownText()
 
-        scenario.moveToState(androidx.lifecycle.Lifecycle.State.CREATED)
-        Thread.sleep(500)
-        scenario.moveToState(androidx.lifecycle.Lifecycle.State.RESUMED)
-        compose.waitForIdle()
-        waitForCountdown()
+        device.pressHome()
+        device.wait(Until.gone(By.text(COUNTDOWN_PATTERN)), 3_000)
+        Thread.sleep(1_000)
 
-        val afterResume = countdownText()
-        Thread.sleep(2_500)
-        compose.waitForIdle()
+        launchApp()
+        val afterResume = awaitCountdownText()
+        assertNotNull("Countdown missing after returning to the app", afterResume)
+
+        Thread.sleep(3_000)
 
         assertNotEquals(
-            "Countdown froze after backgrounding and resuming (stuck at '$afterResume')",
+            "Countdown froze after backgrounding and resuming (stuck at '$afterResume'). " +
+                "repeatOnLifecycle did not restart the ticker.",
             afterResume,
             countdownText(),
         )
     }
 
-    @OptIn(ExperimentalTestApi::class)
-    private fun waitForCountdown() {
-        compose.waitUntilAtLeastOneExists(hasTestTag(HomeCountdownTestTag), 10_000)
+    private fun launchApp() {
+        val context = ApplicationProvider.getApplicationContext<android.content.Context>()
+        val intent = context.packageManager
+            .getLaunchIntentForPackage(context.packageName)
+            ?.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        context.startActivity(intent)
+        device.wait(Until.hasObject(By.pkg(context.packageName).depth(0)), LAUNCH_TIMEOUT_MS)
     }
 
-    /** The countdown's rendered text, read straight out of the semantics tree. */
-    private fun countdownText(): String =
-        compose.onNodeWithTag(HomeCountdownTestTag, useUnmergedTree = true).textValue()
+    /** Wait for the countdown to appear, then return its text. */
+    private fun awaitCountdownText(): String? {
+        device.wait(Until.hasObject(By.text(COUNTDOWN_PATTERN)), LAUNCH_TIMEOUT_MS)
+        return countdownText()
+    }
 
-    private fun SemanticsNodeInteraction.textValue(): String =
-        fetchSemanticsNode()
-            .config[SemanticsProperties.Text]
-            .joinToString("") { it.text }
+    /**
+     * The hero's countdown, read straight off the rendered window.
+     *
+     * Matched by shape ("1 h 13 m 30 s") rather than by testTag: UI Automator cannot see Compose
+     * test tags unless the app opts into `testTagsAsResourceId`, and making a production semantics
+     * change purely to satisfy a test is the wrong trade. The pattern is the countdown_hms string
+     * resource's shape, so a format change fails this loudly rather than silently.
+     */
+    private fun countdownText(): String? =
+        device.findObject(By.text(COUNTDOWN_PATTERN))?.text
 
     private companion object {
         const val LONDON_LAT = 51.5074
         const val LONDON_LON = -0.1278
+        const val LAUNCH_TIMEOUT_MS = 20_000L
+
+        /** Matches `countdown_hms` / `countdown_ms`: "1 h 13 m 30 s" or "13 m 30 s". */
+        val COUNTDOWN_PATTERN: Pattern =
+            Pattern.compile("""(\d+\s*h\s*)?\d+\s*m\s*\d+\s*s""")
     }
 }

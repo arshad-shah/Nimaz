@@ -277,6 +277,10 @@ dependencies {
     // Instrumented Testing
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    // UI Automator drives the app from *outside* Compose's test harness. Required for the
+    // live-countdown tests: a ComposeTestRule puts the frame clock under test control, so a test
+    // that sleeps in real time never sees the UI redraw. See LiveCountdownTest.
+    androidTestImplementation(libs.androidx.uiautomator)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.mockk.android)
