@@ -22,7 +22,7 @@ class TodayCarouselTest {
     ) = PrayerTimeDisplay(
         type = type,
         name = type.displayName,
-        time = "12:00 PM",
+        timeAt = testInstant(12, 0),
         isPassed = false,
         isCurrent = false,
         isNext = false,
@@ -92,3 +92,10 @@ class TodayCarouselTest {
             .inOrder()
     }
 }
+
+/** A fixed wall-clock instant today, so tests read like a real day. */
+private fun testInstant(hour: Int, minute: Int): kotlin.time.Instant =
+    kotlin.time.Instant.fromEpochMilliseconds(
+        java.time.LocalDate.now().atTime(hour, minute)
+            .atZone(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli()
+    )

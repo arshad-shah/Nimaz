@@ -19,6 +19,8 @@ import com.arshadshah.nimaz.core.util.MILLIS_PER_DAY
 import com.arshadshah.nimaz.core.util.NextWorshipResolver
 import com.arshadshah.nimaz.core.util.PrayerTimeCalculator
 import com.arshadshah.nimaz.core.util.WorshipReminderContent
+import com.arshadshah.nimaz.core.util.currentPrayerIndexAt
+import com.arshadshah.nimaz.core.util.nextPrayerIndexAt
 import com.arshadshah.nimaz.core.util.formatClockTime
 import com.arshadshah.nimaz.domain.model.WorshipReminderType
 import com.arshadshah.nimaz.presentation.components.organisms.WorshipCardUi
@@ -48,6 +50,7 @@ import com.arshadshah.nimaz.widget.prayertracker.PrayerTrackerWorker
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -75,14 +78,10 @@ data class HomeUiState(
     val currentDate: LocalDate = LocalDate.now(),
     val hijriDate: String = "",
     val prayerTimes: List<PrayerTimeDisplay> = emptyList(),
-    val currentPrayer: PrayerType? = null,
-    val nextPrayer: PrayerType? = null,
-    val timeUntilNextPrayer: String = "",
-    // The exact instant of the next prayer (or tomorrow's Fajr after Isha). The boxed
-    // countdown derives its own ticking digits from this at the leaf, so it no longer
-    // depends on the per-second [timeUntilNextPrayer] string (which stays for the
-    // plain-text labels until they too move to leaf rendering).
-    val nextPrayerAt: Instant? = null,
+    // Tomorrow's Fajr, so the UI can wrap the "next prayer" countdown past Isha without the
+    // ViewModel having to know what time it is. Which prayer is next — and the countdown to it —
+    // is derived at the leaf from [prayerTimes] + this, via `withClockState`/`nextPrayerAt`.
+    val tomorrowFajrAt: Instant? = null,
     val locationName: String = "Location not set",
     val latitude: Double = 0.0,
     val longitude: Double = 0.0,
@@ -91,18 +90,16 @@ data class HomeUiState(
     val dailyHadithReference: String? = null,
     val dailyHadithId: String? = null,
     val dailyHadithGrade: String? = null,
-    // 0f→1f position of "now" along the Fajr→Isha timeline (drives the progress
-    // card's fill); recomputed each tick so it advances with the clock.
-    val prayerTimelineProgress: Float = 0f,
     // Today's sunrise/sunset as fractions of the day — anchor the living sky's
-    // sun arc to the real sun instead of fixed clock times.
+    // sun arc to the real sun instead of fixed clock times. These vary with the
+    // day's prayer times, not with "now", so they stay pushed state.
     val sunriseFraction: Float = 0.27f,
     val sunsetFraction: Float = 0.80f,
     val dailyDua: DailyDua? = null,
     val isFriday: Boolean = false,
-    val jumuahTime: String = "",
-    val timeUntilJumuah: String = "",
-    val isJumuahPassed: Boolean = false,
+    // Today's Dhuhr when it is Friday, else null. "Has it passed" and the countdown to it are
+    // derived at the leaf, so no per-second string lives here.
+    val jumuahAt: Instant? = null,
     val isLoading: Boolean = true,
     val error: String? = null,
     // Permission states
@@ -130,15 +127,46 @@ data class DailyDua(
     val categoryIcon: String,
 )
 
+/**
+ * One prayer row. Carries the prayer's **instant**, not a formatted string: the clock time is
+ * rendered at the leaf so it honours `LocalUse24HourFormat` in the same frame the toggle flips,
+ * and [isPassed]/[isCurrent]/[isNext] are re-derived at the leaf from the shared ticker via
+ * [withClockState] rather than pushed once a second by a ViewModel loop.
+ *
+ * The three booleans default to `false`: a ViewModel publishes the facts (type, instant, status)
+ * and the UI decides what they mean *now*.
+ */
 data class PrayerTimeDisplay(
     val type: PrayerType,
     val name: String,
-    val time: String,
-    val isPassed: Boolean,
-    val isCurrent: Boolean,
-    val isNext: Boolean,
+    val timeAt: Instant,
+    val isPassed: Boolean = false,
+    val isCurrent: Boolean = false,
+    val isNext: Boolean = false,
     val prayerStatus: PrayerStatus = PrayerStatus.NOT_PRAYED
 )
+
+/**
+ * Re-derive the clock-dependent flags for [now]. Pure and cheap — call it from a composable that
+ * reads `rememberNow()` so the list re-derives at the caller's tick resolution.
+ *
+ * Comparison is by instant, which fixes the long-standing bug where after Isha nothing highlighted
+ * and before Fajr today's Isha rendered as "current" (see `core/util/PrayerClock.kt`).
+ */
+fun List<PrayerTimeDisplay>.withClockState(now: Instant): List<PrayerTimeDisplay> {
+    if (isEmpty()) return this
+    val sorted = sortedBy { it.timeAt }
+    val instants = sorted.map { it.timeAt }
+    val nextIndex = nextPrayerIndexAt(instants, now)
+    val currentIndex = currentPrayerIndexAt(instants, now)
+    return sorted.mapIndexed { index, display ->
+        display.copy(
+            isPassed = display.timeAt <= now,
+            isCurrent = index == currentIndex,
+            isNext = index == nextIndex
+        )
+    }
+}
 
 /**
  * The FCM engagement banner's slice of Home state. [announcement] is null when
@@ -232,15 +260,16 @@ class HomeViewModel @Inject constructor(
 
     init {
         checkPermissions()
+        // observeLocation() also observes the calculation settings and adjustments, and triggers
+        // the recompute itself — so there is no separate time-format observer any more: the
+        // 12/24-hour preference is read at the leaf and never invalidates prayer instants.
         observeLocation()
-        observeTimeFormat()
         loadPrayerRecords()
         observeFastingStatus()
         loadDailyHadith()
         loadDailyDua()
         observeCelebrationCards()
-        startTimeUpdates()
-        startWorshipUpdates()
+        scheduleWorshipRefresh()
     }
 
     /** Local calendar occasions merged with any pushed CELEBRATION announcement. */
@@ -546,6 +575,17 @@ class HomeViewModel @Inject constructor(
     }
 
     companion object {
+        /**
+         * How long to wait before re-checking the worship card when there is nothing to surface
+         * (or the occurrence has no window). Long enough that it is not polling, short enough that
+         * enabling a reminder in settings shows up without a restart. A settings change cancels
+         * the wait immediately via [scheduleWorshipRefresh]'s cancel-and-replace.
+         */
+        private const val FALLBACK_WORSHIP_RECHECK_MS = 15 * 60 * 1000L
+
+        /** Floor on the sleep, so a just-expired occurrence cannot spin the loop. */
+        private const val MIN_WORSHIP_RECHECK_MS = 1_000L
+
         // Default location: Dublin, Ireland (as shown in prototype)
         private const val DEFAULT_LATITUDE = 53.3498
         private const val DEFAULT_LONGITUDE = -6.2603
@@ -584,9 +624,10 @@ class HomeViewModel @Inject constructor(
     /**
      * Full recompute of the day's prayer instants — the *expensive* path, running
      * the astronomical calculation for today and tomorrow. Called only when its
-     * inputs actually change: location, calculation settings, time format, or the
-     * date rolling over. The per-second countdown goes through [renderTick]
-     * instead, which never calls this.
+     * inputs actually change: location, calculation settings, or the date rolling over. Nothing
+     * clock-derived lives here — [publishPrayerDisplays] emits only facts, and the UI derives
+     * countdowns/next-prayer from them at the leaf. The 12/24-hour toggle no longer reaches this
+     * path at all.
      */
     private fun calculatePrayerTimes() {
         val latitude = _state.value.latitude.takeIf { it != 0.0 } ?: DEFAULT_LATITUDE
@@ -630,13 +671,15 @@ class HomeViewModel @Inject constructor(
                 // Location/calculation settings feed the worship reminders too.
                 worshipStale = true
 
-                renderTick()
-                // No suspension between renderTick()'s emission and this one, so
+                publishPrayerDisplays()
+                // No suspension between publishPrayerDisplays()'s emission and this one, so
                 // StateFlow conflates them into a single update.
                 _state.update { it.copy(isLoading = false, error = null) }
 
-                // Suspends (DataStore), but only after isLoading is already false.
-                refreshWorshipCard()
+                // Suspends (DataStore), but only after isLoading is already false. Re-arm rather
+                // than calling refreshWorshipCard() directly: the settings that just changed also
+                // move the occurrence's expiry, so the pending sleep must be replaced too.
+                scheduleWorshipRefresh()
             } catch (e: Exception) {
                 CrashReporter.recordException(e)
                 AppAnalytics.logError("home", "calculate_prayer_times", e.message)
@@ -646,93 +689,36 @@ class HomeViewModel @Inject constructor(
     }
 
     /**
-     * Re-derive everything that moves with the clock — countdowns, which prayer is
-     * current/next, timeline progress — from the already-computed [dayTimes].
+     * Publish the day's prayer facts — instants, records, sunrise/sunset fractions, the Hijri date
+     * and Friday's Dhuhr. Deliberately **free of "now"**: nothing here depends on what time it is,
+     * so it runs when its *inputs* change (location, calculation settings, records, date rollover)
+     * rather than once a second.
      *
-     * Deliberately non-suspending and free of I/O: this runs once a second, and a
-     * suspension point here would let any transient state set by its caller become
-     * observable to the UI.
+     * Everything that does move with the clock — which prayer is next/current/passed, every
+     * countdown, the timeline fill — is derived at the leaf from these instants plus the shared
+     * ticker (`rememberNow`). See [withClockState].
      */
-    private fun renderTick() {
+    private fun publishPrayerDisplays() {
         val prayerTimes = dayTimes
         if (prayerTimes.isEmpty()) return
 
-        val currentTime = Clock.System.now()
         val timeZone = TimeZone.currentSystemDefault()
-        val localTime = currentTime.toLocalDateTime(timeZone)
+        val records = _prayerRecords.value
 
-        val prayerTimeDisplays = prayerTimes.map { prayerTime ->
-            val prayerLocalTime = prayerTime.time.toLocalDateTime(timeZone)
-            PrayerTimeDisplay(
-                type = prayerTime.type,
-                name = prayerTime.type.displayName,
-                time = formatTime(prayerLocalTime.hour, prayerLocalTime.minute),
-                isPassed = prayerLocalTime.time < localTime.time,
-                isCurrent = false,
-                isNext = false
-            )
-        }
-
-        // Find current and next prayer
-        val sortedPrayers = prayerTimeDisplays.sortedBy {
-            prayerTimes.find { pt -> pt.type == it.type }?.time
-        }
-
-        val nextPrayerIndex = sortedPrayers.indexOfFirst { !it.isPassed }
-        val currentPrayerIndex =
-            if (nextPrayerIndex > 0) nextPrayerIndex - 1 else sortedPrayers.lastIndex
-
-        val updatedDisplays = sortedPrayers.mapIndexed { index, display ->
-            display.copy(
-                isCurrent = index == currentPrayerIndex,
-                isNext = index == nextPrayerIndex
-            )
-        }
-
-        // Either the next prayer today, or — once Isha has passed — a wrap to
-        // tomorrow's Fajr, precomputed by calculatePrayerTimes so this stays pure.
-        val nextPrayer: PrayerType
-        val nextPrayerInstant: Instant?
-        if (nextPrayerIndex >= 0) {
-            nextPrayer = sortedPrayers[nextPrayerIndex].type
-            nextPrayerInstant = prayerTimes.find { it.type == nextPrayer }?.time
-        } else {
-            nextPrayer = PrayerType.FAJR
-            nextPrayerInstant = tomorrowFajr
-        }
-        val timeUntilNext = nextPrayerInstant?.let { formatCountdown(it - currentTime) } ?: ""
-
-        // Where "now" sits along the Fajr→Isha timeline (0f at Fajr, 1f
-        // at Isha), interpolated within the current interval. Drives the
-        // progress card's fill independently of which prayers are prayed.
-        val timelineProgress: Float = run {
-            val order = listOf(
-                PrayerType.FAJR, PrayerType.DHUHR, PrayerType.ASR,
-                PrayerType.MAGHRIB, PrayerType.ISHA
-            )
-            val ts = order.mapNotNull { type ->
-                prayerTimes.find { it.type == type }?.time
+        val displays = prayerTimes
+            .sortedBy { it.time }
+            .map { prayerTime ->
+                val prayerName = PrayerName.valueOf(prayerTime.type.name)
+                PrayerTimeDisplay(
+                    type = prayerTime.type,
+                    name = prayerTime.type.displayName,
+                    timeAt = prayerTime.time,
+                    prayerStatus = records[prayerName] ?: PrayerStatus.NOT_PRAYED
+                )
             }
-            when {
-                ts.size < 2 -> 0f
-                currentTime <= ts.first() -> 0f
-                currentTime >= ts.last() -> 1f
-                else -> {
-                    var result = 1f
-                    for (k in 0 until ts.size - 1) {
-                        if (currentTime >= ts[k] && currentTime < ts[k + 1]) {
-                            val frac = (currentTime - ts[k]).inWholeSeconds.toFloat() /
-                                    (ts[k + 1] - ts[k]).inWholeSeconds.toFloat()
-                            result = ((k + frac) / (ts.size - 1)).coerceIn(0f, 1f)
-                            break
-                        }
-                    }
-                    result
-                }
-            }
-        }
 
-        // Sunrise/sunset as day-fractions for the living sky's sun arc.
+        // Sunrise/sunset as day-fractions for the living sky's sun arc. These follow the day's
+        // prayer times, not the clock, so they stay pushed state.
         val sunriseFraction = prayerTimes.find { it.type == PrayerType.SUNRISE }?.time
             ?.toLocalDateTime(timeZone)
             ?.let { (it.hour * 60 + it.minute) / 1440f } ?: 0.27f
@@ -740,88 +726,59 @@ class HomeViewModel @Inject constructor(
             ?.toLocalDateTime(timeZone)
             ?.let { (it.hour * 60 + it.minute) / 1440f } ?: 0.80f
 
-        // Apply prayer records to displays
-        val records = _prayerRecords.value
-        val displaysWithStatus = updatedDisplays.map { display ->
-            val prayerName = PrayerName.valueOf(display.type.name)
-            val status = records[prayerName] ?: PrayerStatus.NOT_PRAYED
-            display.copy(prayerStatus = status)
-        }
-
-        // Friday / Jumu'ah detection
-        val today = LocalDate.now()
-        val isFriday = today.dayOfWeek == DayOfWeek.FRIDAY
-        val dhuhrDisplay = displaysWithStatus.find { it.type == PrayerType.DHUHR }
+        val isFriday = LocalDate.now().dayOfWeek == DayOfWeek.FRIDAY
         val dhuhrInstant = prayerTimes.find { it.type == PrayerType.DHUHR }?.time
-
-        val jumuahTime = if (isFriday) dhuhrDisplay?.time ?: "" else ""
-        val isJumuahPassed = if (isFriday) dhuhrDisplay?.isPassed == true else false
-        val timeUntilJumuah = if (isFriday && !isJumuahPassed && dhuhrInstant != null) {
-            formatCountdown(dhuhrInstant - currentTime)
-        } else ""
 
         _state.update {
             it.copy(
-                prayerTimes = displaysWithStatus,
-                prayerTimelineProgress = timelineProgress,
+                prayerTimes = displays,
+                tomorrowFajrAt = tomorrowFajr,
                 sunriseFraction = sunriseFraction,
                 sunsetFraction = sunsetFraction,
-                currentPrayer = if (currentPrayerIndex >= 0) sortedPrayers[currentPrayerIndex].type else null,
-                nextPrayer = nextPrayer,
-                timeUntilNextPrayer = timeUntilNext,
-                nextPrayerAt = nextPrayerInstant,
                 hijriDate = calculateHijriDate(),
                 isFriday = isFriday,
-                jumuahTime = jumuahTime,
-                timeUntilJumuah = timeUntilJumuah,
-                isJumuahPassed = isJumuahPassed,
+                jumuahAt = if (isFriday) dhuhrInstant else null,
             )
         }
     }
 
     /**
-     * "1h 4m 22s" / "4m 22s" / "22s" — the countdown format shared by the next
-     * prayer and Jumu'ah. Clamped at zero so an instant that has just elapsed
-     * between the `isPassed` check and here never renders as a negative time.
+     * Re-resolve the "Next Worship" card exactly when it can change, instead of polling.
+     *
+     * [NextWorshipResolver.nearest] costs ~30 sequential DataStore reads, so the old 60s loop paid
+     * that 1,440 times a day to notice a handful of transitions. Here the card is resolved once,
+     * then a single job sleeps until the current occurrence's window closes (or a short fallback
+     * when there is nothing to show) and resolves again. Cancel-and-replace via [worshipJob] means
+     * a settings change supersedes an in-flight wait rather than racing it.
      */
-    private fun formatCountdown(remaining: Duration): String {
-        val totalSeconds = remaining.inWholeSeconds.coerceAtLeast(0)
-        val hours = totalSeconds / 3600
-        val minutes = (totalSeconds % 3600) / 60
-        val seconds = totalSeconds % 60
-        return when {
-            hours > 0 -> "${hours}h ${minutes}m ${seconds}s"
-            minutes > 0 -> "${minutes}m ${seconds}s"
-            else -> "${seconds}s"
-        }
-    }
+    private var worshipJob: Job? = null
 
-    private fun startTimeUpdates() {
-        viewModelScope.launch {
-            while (isActive) {
-                delay(1_000) // Update every second for smooth countdown
-                // The tick is pure: it re-derives the countdown from instants that
-                // are already in memory. The expensive recompute runs only when the
-                // date rolls over past midnight.
-                if (dayTimes.isNotEmpty() && dayTimesDate != LocalDate.now()) {
-                    calculatePrayerTimes()
-                } else {
-                    renderTick()
-                }
-            }
-        }
-    }
-
-    /**
-     * The "Next Worship" card refreshes on its own, much slower loop. Its countdown
-     * renders in whole minutes ([renderWorshipCard]), so a 1-second cadence would
-     * produce an identical string 59 times out of 60 — at ~30 DataStore reads each.
-     */
-    private fun startWorshipUpdates() {
-        viewModelScope.launch {
-            while (isActive) {
-                refreshWorshipCard()
-                delay(60_000)
+    private fun scheduleWorshipRefresh() {
+        worshipJob?.cancel()
+        worshipJob = viewModelScope.launch {
+            // Not a tick loop: exactly one wake per transition. `delay` is cancellable, so
+            // cancelling the job (or the scope) exits here without an isActive guard.
+            while (true) {
+                // Guarded end-to-end, including the sleep arithmetic. This runs from a bare
+                // viewModelScope coroutine, so anything escaping here reaches the uncaught
+                // handler and crashes the app — the card is optional, so on failure we show
+                // nothing and retry on the slow fallback instead.
+                val millis = runCatching {
+                    refreshWorshipCard()
+                    val expiry = worshipOccurrence?.let { it.windowEnd ?: it.eventAt }
+                    // Sleep until the surfaced occurrence stops being current. With nothing to
+                    // show, fall back to a slow re-check so a newly-enabled reminder still
+                    // appears without a restart.
+                    if (expiry == null) {
+                        FALLBACK_WORSHIP_RECHECK_MS
+                    } else {
+                        java.time.Duration.between(LocalDateTime.now(), expiry)
+                            .toMillis()
+                            .coerceIn(MIN_WORSHIP_RECHECK_MS, FALLBACK_WORSHIP_RECHECK_MS)
+                    }
+                }.onFailure { CrashReporter.recordException(it) }
+                    .getOrDefault(FALLBACK_WORSHIP_RECHECK_MS)
+                delay(millis)
             }
         }
     }
@@ -854,19 +811,9 @@ class HomeViewModel @Inject constructor(
         _state.update { it.copy(worshipCard = card) }
     }
 
-    private var use24HourFormat: Boolean = false
-
-    private fun observeTimeFormat() {
-        viewModelScope.launch {
-            settingsRepository.use24HourFormat.collect { enabled ->
-                use24HourFormat = enabled
-                calculatePrayerTimes() // Recalculate to reformat times
-            }
-        }
-    }
-
-    private fun formatTime(hour: Int, minute: Int): String =
-        formatClockTime(hour, minute, use24HourFormat)
+    // No `use24HourFormat` mirror here on purpose. The theme already publishes
+    // `LocalUse24HourFormat`, and prayer/worship times are formatted at the leaf from it, so
+    // toggling the preference is a pure recomposition instead of a full astronomical recompute.
 
     private fun calculateHijriDate(): String {
         val hijriDate = HijriDateCalculator.today()

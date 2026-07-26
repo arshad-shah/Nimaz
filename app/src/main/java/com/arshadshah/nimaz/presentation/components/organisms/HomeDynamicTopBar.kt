@@ -43,6 +43,13 @@ import com.arshadshah.nimaz.presentation.components.atoms.getPrayerColor
 import com.arshadshah.nimaz.presentation.components.atoms.rememberGlassBackdrop
 import com.arshadshah.nimaz.presentation.theme.MiscArtColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
+import androidx.compose.runtime.getValue
+import com.arshadshah.nimaz.presentation.components.atoms.clockTimeText
+import com.arshadshah.nimaz.presentation.components.atoms.countdownText
+import com.arshadshah.nimaz.presentation.components.atoms.rememberCountdownTo
+import kotlin.time.Clock
+import kotlin.time.Duration.Companion.hours
+import kotlin.time.Instant
 
 /**
  * Home top bar that overlays the living-sky hero and morphs with scroll.
@@ -67,8 +74,7 @@ fun HomeDynamicTopBar(
     transitionProgress: Float,
     locationName: String,
     nextPrayer: PrayerType?,
-    nextPrayerTime: String,
-    timeUntilNextPrayer: String,
+    nextPrayerAt: Instant?,
     onSettingsClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -138,8 +144,7 @@ fun HomeDynamicTopBar(
                 ) {
                     CompactPrayerTitle(
                         nextPrayer = nextPrayer,
-                        nextPrayerTime = nextPrayerTime,
-                        timeUntilNextPrayer = timeUntilNextPrayer,
+                        nextPrayerAt = nextPrayerAt,
                     )
                 }
             }
@@ -168,8 +173,7 @@ private fun SettingsButton(progress: Float, onClick: () -> Unit) {
 @Composable
 private fun CompactPrayerTitle(
     nextPrayer: PrayerType?,
-    nextPrayerTime: String,
-    timeUntilNextPrayer: String,
+    nextPrayerAt: Instant?,
 ) {
     val color = getPrayerColor(nextPrayer)
     Column {
@@ -182,21 +186,29 @@ private fun CompactPrayerTitle(
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurface
             )
-            if (nextPrayerTime.isNotEmpty()) {
+            if (nextPrayerAt != null) {
                 Text(
-                    text = "  ·  $nextPrayerTime",
+                    text = "  ·  ${clockTimeText(nextPrayerAt)}",
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
-        Text(
-            text = stringResource(R.string.home_next_prayer_in_format, timeUntilNextPrayer),
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.primary,
-            fontWeight = FontWeight.Medium,
-            modifier = Modifier.padding(start = 18.dp)
-        )
+        if (nextPrayerAt != null) {
+            // Whole minutes: this line sits in a collapsing top bar, so a 1 Hz invalidation
+            // would recompose the bar for a digit nobody is watching that closely.
+            val parts by rememberCountdownTo(nextPrayerAt)
+            Text(
+                text = stringResource(
+                    R.string.home_next_prayer_in_format,
+                    countdownText(parts, showSeconds = false)
+                ),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.Medium,
+                modifier = Modifier.padding(start = 18.dp)
+            )
+        }
     }
 }
 
@@ -225,9 +237,8 @@ private fun TopBar_AtRest_Preview() {
                 transitionProgress = 0f,
                 locationName = "Dublin, Ireland",
                 nextPrayer = PrayerType.ASR,
-                nextPrayerTime = "4:30 PM",
-                timeUntilNextPrayer = "2h 15m",
-                onSettingsClick = {}
+                nextPrayerAt = Clock.System.now() + 2.hours,
+                                onSettingsClick = {}
             )
         }
     }
@@ -241,9 +252,8 @@ private fun TopBar_FullyCompact_Preview() {
             transitionProgress = 1f,
             locationName = "Dublin, Ireland",
             nextPrayer = PrayerType.ASR,
-            nextPrayerTime = "4:30 PM",
-            timeUntilNextPrayer = "2h 15m",
-            onSettingsClick = {},
+            nextPrayerAt = Clock.System.now() + 2.hours,
+                        onSettingsClick = {},
         )
     }
 }
@@ -262,9 +272,8 @@ private fun TopBar_TransitionSnapshots_Preview() {
                         transitionProgress = p,
                         locationName = "Dublin, Ireland",
                         nextPrayer = PrayerType.ASR,
-                        nextPrayerTime = "4:30 PM",
-                        timeUntilNextPrayer = "2h 15m",
-                        onSettingsClick = {},
+                        nextPrayerAt = Clock.System.now() + 2.hours,
+                                                onSettingsClick = {},
                     )
                 }
             }
@@ -280,9 +289,8 @@ private fun TopBar_LongLocation_Preview() {
             transitionProgress = 0f,
             locationName = "Kingstown upon Hull, East Riding of Yorkshire",
             nextPrayer = PrayerType.DHUHR,
-            nextPrayerTime = "1:15 PM",
-            timeUntilNextPrayer = "5h 14m",
-            onSettingsClick = {},
+            nextPrayerAt = Clock.System.now() + 2.hours,
+                        onSettingsClick = {},
         )
     }
 }

@@ -38,6 +38,12 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.viewmodel.PrayerTimeDisplay
+import kotlin.time.Instant
+import androidx.compose.runtime.getValue
+import com.arshadshah.nimaz.core.util.prayerTimelineProgressAt
+import com.arshadshah.nimaz.presentation.components.atoms.TickResolution
+import com.arshadshah.nimaz.presentation.components.atoms.clockTimeText
+import com.arshadshah.nimaz.presentation.components.atoms.rememberNow
 
 /**
  * "Today's Progress" card, drawn as a timeline stepper: a track runs through
@@ -54,9 +60,21 @@ import com.arshadshah.nimaz.presentation.viewmodel.PrayerTimeDisplay
 fun TodaysProgressCard(
     prayerTimes: List<PrayerTimeDisplay>,
     modifier: Modifier = Modifier,
-    timelineProgress: Float = 0f,
     fillHeight: Boolean = false,
 ) {
+    // Derived here from the prayer instants + the shared ticker rather than pushed as state:
+    // whole minutes is ample for a progress fill, and it keeps the ViewModel free of "now".
+    val now by rememberNow(TickResolution.MINUTES)
+    val timelineProgress = run {
+        val order = listOf(
+            PrayerType.FAJR, PrayerType.DHUHR, PrayerType.ASR,
+            PrayerType.MAGHRIB, PrayerType.ISHA
+        )
+        prayerTimelineProgressAt(
+            order.mapNotNull { type -> prayerTimes.firstOrNull { it.type == type }?.timeAt },
+            now
+        )
+    }
     val mainPrayers = prayerTimes.filter {
         it.type in listOf(
             PrayerType.FAJR, PrayerType.DHUHR, PrayerType.ASR,
@@ -164,7 +182,7 @@ private fun PrayerTimeline(
                 TimelineNode(
                     modifier = Modifier.weight(1f),
                     label = prayer.name.take(5),
-                    time = prayer.time,
+                    time = clockTimeText(prayer.timeAt),
                     isPrayed = prayer.prayerStatus == PrayerStatus.PRAYED,
                     isCurrent = prayer.isCurrent,
                 )
@@ -255,7 +273,7 @@ private val samplePrayerTimes = listOf(
     PrayerTimeDisplay(
         PrayerType.FAJR,
         "Fajr",
-        "5:23 AM",
+        previewInstant(5, 23),
         isPassed = true,
         isCurrent = false,
         isNext = false,
@@ -264,7 +282,7 @@ private val samplePrayerTimes = listOf(
     PrayerTimeDisplay(
         PrayerType.SUNRISE,
         "Sunrise",
-        "6:45 AM",
+        previewInstant(6, 45),
         isPassed = true,
         isCurrent = false,
         isNext = false
@@ -272,7 +290,7 @@ private val samplePrayerTimes = listOf(
     PrayerTimeDisplay(
         PrayerType.DHUHR,
         "Dhuhr",
-        "1:15 PM",
+        previewInstant(13, 15),
         isPassed = true,
         isCurrent = false,
         isNext = false,
@@ -281,7 +299,7 @@ private val samplePrayerTimes = listOf(
     PrayerTimeDisplay(
         PrayerType.ASR,
         "Asr",
-        "4:30 PM",
+        previewInstant(16, 30),
         isPassed = true,
         isCurrent = false,
         isNext = false,
@@ -290,7 +308,7 @@ private val samplePrayerTimes = listOf(
     PrayerTimeDisplay(
         PrayerType.MAGHRIB,
         "Maghrib",
-        "6:12 PM",
+        previewInstant(18, 12),
         isPassed = false,
         isCurrent = true,
         isNext = true
@@ -298,7 +316,7 @@ private val samplePrayerTimes = listOf(
     PrayerTimeDisplay(
         PrayerType.ISHA,
         "Isha",
-        "7:45 PM",
+        previewInstant(19, 45),
         isPassed = false,
         isCurrent = false,
         isNext = false
@@ -311,7 +329,6 @@ private fun TodaysProgressCard_Preview() {
     NimazTheme {
         TodaysProgressCard(
             prayerTimes = samplePrayerTimes,
-            timelineProgress = 0.72f,
             modifier = Modifier.padding(16.dp)
         )
     }
@@ -323,9 +340,15 @@ private fun TodaysProgressCard_Carousel_Preview() {
     NimazTheme {
         TodaysProgressCard(
             prayerTimes = samplePrayerTimes,
-            timelineProgress = 0.72f,
             fillHeight = true,
             modifier = Modifier.padding(16.dp)
         )
     }
 }
+
+/** Fixed wall-clock instants for previews, so sample rows read like a real day. */
+private fun previewInstant(hour: Int, minute: Int): Instant =
+    Instant.fromEpochMilliseconds(
+        java.time.LocalDate.now().atTime(hour, minute)
+            .atZone(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli()
+    )

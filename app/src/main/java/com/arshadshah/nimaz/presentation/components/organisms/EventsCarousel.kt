@@ -7,6 +7,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
+import kotlin.time.Clock
+import kotlin.time.Duration.Companion.hours
+import kotlin.time.Instant
 
 /**
  * A single event card's display data. Jumu'ah carries the three jumuah_* fields and
@@ -19,9 +22,8 @@ data class EventCardUi(
     val arabic: String? = null,
     val primaryAction: EventAction? = null,
     val onDismiss: (() -> Unit)? = null,
-    val jumuahTime: String = "",
-    val timeUntilJumuah: String = "",
-    val isJumuahPassed: Boolean = false,
+    /** Today's Dhuhr on Fridays; the card derives "passed" and its countdown from it. */
+    val jumuahAt: Instant? = null,
     /** When set, this page renders the "Next Worship" card via [WorshipEventCard]. */
     val worship: WorshipCardUi? = null,
 )
@@ -64,9 +66,7 @@ fun EventsCarousel(
             )
         } else if (e.occasion == EventOccasion.JUMUAH) {
             JumuahCard(
-                jumuahTime = e.jumuahTime,
-                timeUntilJumuah = e.timeUntilJumuah,
-                isJumuahPassed = e.isJumuahPassed,
+                jumuahAt = e.jumuahAt,
                 fillHeight = true,
             )
         } else {
@@ -104,8 +104,7 @@ private fun EventsCarousel_Preview() {
                     occasion = EventOccasion.JUMUAH,
                     eyebrow = "Jumu'ah",
                     body = "\"The best day on which the sun rises is Friday.\"",
-                    jumuahTime = "1:30 PM",
-                    timeUntilJumuah = "3h 15m",
+                    jumuahAt = Clock.System.now() + 3.hours,
                 ),
             ),
             modifier = Modifier.padding(vertical = 8.dp),

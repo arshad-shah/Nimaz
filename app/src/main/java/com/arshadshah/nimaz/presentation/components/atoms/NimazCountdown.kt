@@ -125,6 +125,26 @@ fun NimazCountdownText(
  * recomposition: instant, free, and correct everywhere at once. The four VM
  * mirrors and `observeTimeFormat()` can then be deleted.
  */
+/**
+ * The wall-clock time of [instant] as a **string**, honouring the user's 12/24-hour preference.
+ *
+ * Same source of truth as [NimazClockText] — use this where the caller needs the text itself (a
+ * row that styles it, a content description) rather than a `Text`. Because it reads
+ * [LocalUse24HourFormat] at the leaf, toggling the preference is a pure recomposition; no
+ * ViewModel needs to mirror the boolean or re-run a calculation to reformat.
+ */
+@Composable
+fun clockTimeText(instant: Instant, zone: ZoneId = ZoneId.systemDefault()): String {
+    val use24Hour = LocalUse24HourFormat.current
+    val local = remember(instant, zone) {
+        LocalDateTime.ofInstant(
+            java.time.Instant.ofEpochMilli(instant.toEpochMilliseconds()),
+            zone,
+        )
+    }
+    return formatClockTime(local.hour, local.minute, use24Hour)
+}
+
 @Composable
 fun NimazClockText(
     instant: Instant,

@@ -54,6 +54,11 @@ import java.time.LocalTime
 import java.time.ZoneId
 import java.time.ZoneOffset
 import kotlin.time.Duration.Companion.milliseconds
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCountdownText
+import com.arshadshah.nimaz.presentation.components.atoms.clockTimeText
+import kotlin.time.Instant
+import kotlin.time.Clock
+import kotlin.time.Duration.Companion.hours
 
 /**
  * Home hero: a living-sky banner (current time + date) at the original hero
@@ -70,8 +75,7 @@ fun HomeHero(
     hijriDate: String,
     gregorianDate: String,
     nextPrayer: PrayerType?,
-    nextPrayerTime: String,
-    timeUntilNextPrayer: String,
+    nextPrayerAt: Instant?,
     modifier: Modifier = Modifier,
     sunriseFraction: Float = 0.27f,
     sunsetFraction: Float = 0.80f,
@@ -197,18 +201,24 @@ fun HomeHero(
 //                            modifier = Modifier.padding(start = 8.dp, bottom = 2.dp),
                         )
                     }
-                    Text(
-                        text = stringResource(R.string.at_time, nextPrayerTime),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    if (nextPrayerAt != null) {
+                        Text(
+                            text = stringResource(R.string.at_time, clockTimeText(nextPrayerAt)),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+                if (nextPrayerAt != null) {
+                    // Ticks itself off the shared clock — seconds only in the final approach.
+                    NimazCountdownText(
+                        target = nextPrayerAt,
+                        style = MaterialTheme.typography.headlineSmall.copy(
+                            fontWeight = FontWeight.ExtraBold
+                        ),
+                        color = MaterialTheme.colorScheme.primary,
                     )
                 }
-                Text(
-                    text = timeUntilNextPrayer,
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.ExtraBold,
-                    color = MaterialTheme.colorScheme.primary,
-                )
             }
         }
     }
@@ -235,8 +245,7 @@ private fun HomeHero_Preview() {
             hijriDate = "7 Rajab 1446",
             gregorianDate = "Friday, January 31, 2026",
             nextPrayer = PrayerType.MAGHRIB,
-            nextPrayerTime = "4:30 PM",
-            timeUntilNextPrayer = "1h 12m",
+            nextPrayerAt = Clock.System.now() + 1.hours,
 
             )
     }

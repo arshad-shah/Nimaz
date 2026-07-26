@@ -89,6 +89,9 @@ import com.arshadshah.nimaz.presentation.viewmodel.MonthlyPrayerTimesViewModel
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.TextStyle
+import com.arshadshah.nimaz.presentation.components.atoms.clockTimeText
+import com.arshadshah.nimaz.core.util.formatClockTime
+import com.arshadshah.nimaz.presentation.theme.LocalUse24HourFormat
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -98,6 +101,8 @@ fun MonthlyPrayerTimesScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val context = LocalContext.current
+    // Captured from the composition so the (non-composable) PDF export can honour the preference.
+    val use24HourForExport = LocalUse24HourFormat.current
     var exportMenuExpanded by remember { mutableStateOf(false) }
     val canExport = !state.isLoading && state.dayPrayerTimes.isNotEmpty()
 
@@ -108,7 +113,8 @@ fun MonthlyPrayerTimesScreen(
             val pdfRows = rows.map {
                 PrayerTimesPdfExporter.Row(
                     it.date,
-                    listOf(it.fajr, it.sunrise, it.dhuhr, it.asr, it.maghrib, it.isha),
+                    listOf(it.fajr, it.sunrise, it.dhuhr, it.asr, it.maghrib, it.isha)
+                        .map { t -> t?.let { i -> exportClock(i, use24HourForExport) } ?: "--:--" },
                     fastMinutes = it.fastMinutes,
                 )
             }
@@ -343,32 +349,32 @@ private fun DayPrayerCard(
     val prayers = listOf(
         PrayerTimeEntry(
             stringResource(R.string.prayer_fajr),
-            dayTimes.fajr,
+            dayTimes.fajr?.let { clockTimeText(it) } ?: "--:--",
             NimazColors.PrayerColors.Fajr
         ),
         PrayerTimeEntry(
             stringResource(R.string.prayer_sunrise),
-            dayTimes.sunrise,
+            dayTimes.sunrise?.let { clockTimeText(it) } ?: "--:--",
             NimazColors.PrayerColors.Sunrise
         ),
         PrayerTimeEntry(
             stringResource(R.string.prayer_dhuhr),
-            dayTimes.dhuhr,
+            dayTimes.dhuhr?.let { clockTimeText(it) } ?: "--:--",
             NimazColors.PrayerColors.Dhuhr
         ),
         PrayerTimeEntry(
             stringResource(R.string.prayer_asr),
-            dayTimes.asr,
+            dayTimes.asr?.let { clockTimeText(it) } ?: "--:--",
             NimazColors.PrayerColors.Asr
         ),
         PrayerTimeEntry(
             stringResource(R.string.prayer_maghrib),
-            dayTimes.maghrib,
+            dayTimes.maghrib?.let { clockTimeText(it) } ?: "--:--",
             NimazColors.PrayerColors.Maghrib
         ),
         PrayerTimeEntry(
             stringResource(R.string.prayer_isha),
-            dayTimes.isha,
+            dayTimes.isha?.let { clockTimeText(it) } ?: "--:--",
             NimazColors.PrayerColors.Isha
         )
     )
@@ -697,22 +703,22 @@ private fun PrayerTimeItem(
 
 private val sampleDayPrayerTimes = DayPrayerTimes(
     date = LocalDate.of(2026, 1, 15),
-    fajr = "5:45 AM",
-    sunrise = "7:12 AM",
-    dhuhr = "12:30 PM",
-    asr = "3:15 PM",
-    maghrib = "5:48 PM",
-    isha = "7:18 PM"
+    fajr = previewInstant(5, 45),
+    sunrise = previewInstant(7, 12),
+    dhuhr = previewInstant(12, 30),
+    asr = previewInstant(15, 15),
+    maghrib = previewInstant(17, 48),
+    isha = previewInstant(19, 18)
 )
 
 private val sampleTodayPrayerTimes = DayPrayerTimes(
     date = LocalDate.now(),
-    fajr = "5:42 AM",
-    sunrise = "7:10 AM",
-    dhuhr = "12:28 PM",
-    asr = "3:12 PM",
-    maghrib = "5:45 PM",
-    isha = "7:15 PM"
+    fajr = previewInstant(5, 42),
+    sunrise = previewInstant(7, 10),
+    dhuhr = previewInstant(12, 28),
+    asr = previewInstant(15, 12),
+    maghrib = previewInstant(17, 45),
+    isha = previewInstant(19, 15)
 )
 
 @Preview(showBackground = true, name = "Month Navigation Header")
@@ -781,3 +787,20 @@ private fun DayPrayerCardTodayExpandedPreview() {
         )
     }
 }
+
+/**
+ * The PDF export runs outside composition, so it cannot read `LocalUse24HourFormat`; the caller
+ * captures the flag and formats with it here.
+ */
+private fun exportClock(instant: kotlin.time.Instant, use24Hour: Boolean): String {
+    val local = java.time.Instant.ofEpochMilli(instant.toEpochMilliseconds())
+        .atZone(java.time.ZoneId.systemDefault()).toLocalDateTime()
+    return formatClockTime(local.hour, local.minute, use24Hour)
+}
+
+/** Fixed wall-clock instants for previews. */
+private fun previewInstant(hour: Int, minute: Int): kotlin.time.Instant =
+    kotlin.time.Instant.fromEpochMilliseconds(
+        java.time.LocalDate.now().atTime(hour, minute)
+            .atZone(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli()
+    )

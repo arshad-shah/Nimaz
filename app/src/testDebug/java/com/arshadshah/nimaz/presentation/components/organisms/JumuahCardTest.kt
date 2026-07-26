@@ -5,6 +5,8 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.time.Clock
+import kotlin.time.Duration.Companion.hours
 
 @RunWith(RobolectricTestRunner::class)
 class JumuahCardTest {
@@ -16,14 +18,13 @@ class JumuahCardTest {
     fun `renders the jumuah header and khutbah time`() {
         composeRule.setThemedContent {
             JumuahCard(
-                jumuahTime = "1:30 PM",
-                timeUntilJumuah = "3h 15m",
-                isJumuahPassed = false
+                jumuahAt = testInstant(13, 30),
             )
         }
 
         // R.string.jumuah_mubarak == "Jumu'ah Mubarak"
         composeRule.onNodeWithText("Jumu'ah Mubarak").assertExists()
+        // Time is formatted at the leaf (12h default in tests).
         composeRule.onNodeWithText("1:30 PM").assertExists()
         // R.string.khutbah_time == "Khutbah time"
         composeRule.onNodeWithText("Khutbah time").assertExists()
@@ -33,15 +34,13 @@ class JumuahCardTest {
     fun `upcoming jumuah shows the countdown row`() {
         composeRule.setThemedContent {
             JumuahCard(
-                jumuahTime = "1:30 PM",
-                timeUntilJumuah = "3h 15m",
-                isJumuahPassed = false
+                jumuahAt = Clock.System.now() + 3.hours,
             )
         }
 
         // R.string.time_until_jumuah == "Time until Jumu'ah"
         composeRule.onNodeWithText("Time until Jumu'ah").assertExists()
-        composeRule.onNodeWithText("3h 15m").assertExists()
+        // The countdown ticks off the real clock; assert the row, not the digits.
         // The passed acknowledgement should not appear.
         composeRule.onNodeWithText("Jumu'ah prayer time has passed").assertDoesNotExist()
     }
@@ -50,9 +49,7 @@ class JumuahCardTest {
     fun `passed jumuah shows the passed acknowledgement`() {
         composeRule.setThemedContent {
             JumuahCard(
-                jumuahTime = "1:30 PM",
-                timeUntilJumuah = "",
-                isJumuahPassed = true
+                jumuahAt = Clock.System.now() - 1.hours,
             )
         }
 
@@ -66,9 +63,7 @@ class JumuahCardTest {
     fun `empty jumuah time hides the time column`() {
         composeRule.setThemedContent {
             JumuahCard(
-                jumuahTime = "",
-                timeUntilJumuah = "3h 15m",
-                isJumuahPassed = false
+                jumuahAt = null,
             )
         }
 
@@ -82,9 +77,7 @@ class JumuahCardTest {
     fun `renders the hadith quote`() {
         composeRule.setThemedContent {
             JumuahCard(
-                jumuahTime = "1:30 PM",
-                timeUntilJumuah = "3h 15m",
-                isJumuahPassed = false
+                jumuahAt = Clock.System.now() + 3.hours,
             )
         }
 
@@ -96,3 +89,10 @@ class JumuahCardTest {
         ).assertExists()
     }
 }
+
+/** A fixed wall-clock instant today, so tests read like a real day. */
+private fun testInstant(hour: Int, minute: Int): kotlin.time.Instant =
+    kotlin.time.Instant.fromEpochMilliseconds(
+        java.time.LocalDate.now().atTime(hour, minute)
+            .atZone(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli()
+    )

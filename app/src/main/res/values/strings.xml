@@ -533,6 +533,7 @@
     <string name="countdown_hm">%1$d h %2$d m</string>
     <string name="countdown_m">%1$d m</string>
     <string name="countdown_now">Now</string>
+    <string name="prayer_sky_status_format">%1$s in %2$s</string>
     <plurals name="notif_khatam_body_on_track">
         <item quantity="one">%1$s · you\'re on pace. %2$d ayah to keep it going.</item>
         <item quantity="other">%1$s · you\'re on pace. %2$d ayahs to keep it going.</item>

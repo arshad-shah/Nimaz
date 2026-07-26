@@ -48,18 +48,15 @@ data class PrayerTimesUiState(
     val selectedDate: LocalDate = LocalDate.now(),
     val isToday: Boolean = true,
     val prayers: List<PrayerTimeDisplay> = emptyList(),
-    val timeUntilNext: String = "",
-    val nextPrayerName: String = "",
+    /** Tomorrow's Fajr, so the UI can wrap the countdown once today's Isha has passed. */
+    val tomorrowFajrAt: kotlin.time.Instant? = null,
     // Living-sky inputs
-    val timeOfDay: Float = 0.5f,        // minute-quantised fraction of the day
     val moonFraction: Float = 0.5f,     // moon phase for the selected date
     val sunriseFraction: Float = 0.27f, // sunrise as a fraction of the day (sun arc)
     val sunsetFraction: Float = 0.80f,  // sunset (Maghrib) as a fraction of the day
-    val skyTimeLabel: String = "",
-    val skyStatusLabel: String = "",
-    // Day-info card
-    val sunrise: String = "",
-    val sunset: String = "",
+    // Day-info card — instants, formatted at the leaf so the 12/24h toggle is a recomposition
+    val sunriseAt: kotlin.time.Instant? = null,
+    val sunsetAt: kotlin.time.Instant? = null,
     val daylight: String = "",
     val methodLabel: String = "",
     // +1 when moving to a later day, -1 to an earlier day (drives slide direction)
@@ -102,8 +99,6 @@ class PrayerTimesViewModel @Inject constructor(
 
     init {
         observeSettings()
-        observeTimeFormat()
-        startTicker()
     }
 
     fun onEvent(event: PrayerTimesEvent) {
@@ -226,18 +221,6 @@ class PrayerTimesViewModel @Inject constructor(
         val byType = dayTimes.associate { it.type to it.time }
         val sunriseInstant = byType[PrayerType.SUNRISE]
         val maghribInstant = byType[PrayerType.MAGHRIB]
-        val sunriseStr = sunriseInstant?.let {
-            formatClock12(
-                it.toLocalDateTime(tz).hour,
-                it.toLocalDateTime(tz).minute
-            )
-        } ?: "--:--"
-        val sunsetStr = maghribInstant?.let {
-            formatClock12(
-                it.toLocalDateTime(tz).hour,
-                it.toLocalDateTime(tz).minute
-            )
-        } ?: "--:--"
         val daylightStr = if (sunriseInstant != null && maghribInstant != null) {
             val mins = (maghribInstant - sunriseInstant).inWholeMinutes
             "${mins / 60}h ${mins % 60}m"
@@ -256,8 +239,8 @@ class PrayerTimesViewModel @Inject constructor(
 
         _state.update {
             it.copy(
-                sunrise = sunriseStr,
-                sunset = sunsetStr,
+                sunriseAt = sunriseInstant,
+                sunsetAt = maghribInstant,
                 daylight = daylightStr,
                 methodLabel = "${calcMethod.shortName()} · ${asrCalc.shortName()}",
                 moonFraction = moon,
@@ -267,7 +250,7 @@ class PrayerTimesViewModel @Inject constructor(
         }
 
         observeStatuses(date)
-        applyTick()
+        publishDisplays()
     }
 
     private fun observeStatuses(date: LocalDate) {
@@ -276,91 +259,48 @@ class PrayerTimesViewModel @Inject constructor(
         statusJob = viewModelScope.launch {
             prayerUseCases.getPrayerRecordsForDate(dateKey).collect { records ->
                 statuses = records.associate { it.prayerName to it.status }
-                applyTick()
+                publishDisplays()
             }
         }
     }
 
-    /** Rebuild the display list + countdown + sky labels against the clock. */
-    private fun applyTick() {
+    /**
+     * Publish the day's prayer facts. **Free of "now"** — which prayer is next/current/passed, the
+     * countdown and the sky labels are all derived at the leaf from these instants plus the shared
+     * ticker, so this runs on input changes rather than once a second.
+     */
+    private fun publishDisplays() {
         if (dayTimes.isEmpty()) return
         val date = _state.value.selectedDate
         val today = LocalDate.now()
         val isToday = date == today
-        val zone = ZoneId.systemDefault()
-        val now = LocalDateTime.now()
-        val nowTime = now.toLocalTime()
-        val nowMillis = Instant.now().toEpochMilli()
 
-        var displays = dayTimes.map { pt ->
-            val local =
-                Instant.ofEpochMilli(pt.time.toEpochMilliseconds()).atZone(zone).toLocalDateTime()
-            val isPassed = isToday && local.toLocalTime().isBefore(nowTime)
-            PrayerTimeDisplay(
-                type = pt.type,
-                name = pt.type.displayName,
-                time = formatClock12(local.hour, local.minute),
-                isPassed = isPassed,
-                isCurrent = false,
-                isNext = false,
-                prayerStatus = statuses[PrayerName.valueOf(pt.type.name)]
-                    ?: PrayerStatus.NOT_PRAYED,
-            )
-        }
-
-        var nextName = ""
-        var countdown = ""
-        if (isToday) {
-            val nextIndex = displays.indexOfFirst { !it.isPassed }
-            val currentIndex = if (nextIndex > 0) nextIndex - 1 else displays.lastIndex
-            displays = displays.mapIndexed { i, d ->
-                d.copy(isCurrent = i == currentIndex, isNext = i == nextIndex)
-            }
-            if (nextIndex >= 0) {
-                nextName = displays[nextIndex].type.displayName
-                val nextInstant = dayTimes.firstOrNull { it.type == displays[nextIndex].type }?.time
-                if (nextInstant != null) countdown =
-                    formatCountdown((nextInstant.toEpochMilliseconds() - nowMillis) / 1000)
-            } else {
-                // All of today's prayers have passed — count down to tomorrow's Fajr.
-                nextName = PrayerType.FAJR.displayName
-                val tomorrow = prayerTimeCalculator.getPrayerTimes(
-                    latitude = latitude, longitude = longitude, date = today.plusDays(1),
-                    calculationMethod = calcMethod, asrCalculation = asrCalc,
-                    highLatitudeRule = highLatRule, adjustments = adjustments,
+        val displays = dayTimes
+            .sortedBy { it.time }
+            .map { pt ->
+                PrayerTimeDisplay(
+                    type = pt.type,
+                    name = pt.type.displayName,
+                    timeAt = pt.time,
+                    prayerStatus = statuses[PrayerName.valueOf(pt.type.name)]
+                        ?: PrayerStatus.NOT_PRAYED,
                 )
-                val fajr = tomorrow.firstOrNull { it.type == PrayerType.FAJR }?.time
-                if (fajr != null) countdown =
-                    formatCountdown((fajr.toEpochMilliseconds() - nowMillis) / 1000)
             }
-        }
 
-        // Sky reflects "now" (quantised to the minute so the baked scene only
-        // rebuilds once a minute, not every countdown tick).
-        val minuteOfDay = now.hour * 60 + now.minute
-        val timeOfDay = minuteOfDay / 1440f
-
-        val skyTimeLabel = if (isToday) {
-            formatClock12(now.hour, now.minute)
-        } else {
-            date.format(DATE_FMT)
-        }
-        val skyStatusLabel = if (isToday) {
-            if (countdown.isNotEmpty()) "$nextName in $countdown" else nextName
-        } else {
-            val rel = daysFromToday(date, today)
-            "$rel · ${_state.value.sunrise} — ${_state.value.sunset}"
-        }
+        // Only today can wrap past Isha, and only today needs tomorrow's Fajr.
+        val tomorrowFajr = if (isToday) {
+            prayerTimeCalculator.getPrayerTimes(
+                latitude = latitude, longitude = longitude, date = today.plusDays(1),
+                calculationMethod = calcMethod, asrCalculation = asrCalc,
+                highLatitudeRule = highLatRule, adjustments = adjustments,
+            ).firstOrNull { it.type == PrayerType.FAJR }?.time
+        } else null
 
         _state.update {
             it.copy(
                 isToday = isToday,
                 prayers = displays,
-                nextPrayerName = nextName,
-                timeUntilNext = countdown,
-                timeOfDay = timeOfDay,
-                skyTimeLabel = skyTimeLabel,
-                skyStatusLabel = skyStatusLabel,
+                tomorrowFajrAt = tomorrowFajr,
             )
         }
     }
@@ -382,29 +322,8 @@ class PrayerTimesViewModel @Inject constructor(
         }
     }
 
-    private fun startTicker() {
-        viewModelScope.launch {
-            while (isActive) {
-                applyTick()
-                kotlinx.coroutines.delay(1_000)
-            }
-        }
-    }
-
-    // ── formatting helpers ──────────────────────────────────────────────
-    private var use24HourFormat: Boolean = false
-
-    private fun observeTimeFormat() {
-        viewModelScope.launch {
-            settingsRepository.use24HourFormat.collect { enabled ->
-                use24HourFormat = enabled
-                recomputeDay() // re-format the day's times in the new clock style
-            }
-        }
-    }
-
-    private fun formatClock12(hour: Int, minute: Int): String =
-        formatClockTime(hour, minute, use24HourFormat)
+    // No `use24HourFormat` mirror: times are formatted at the leaf from LocalUse24HourFormat, so
+    // toggling the preference no longer forces a full day recompute.
 
     private fun formatCountdown(totalSeconds: Long): String {
         val s = if (totalSeconds < 0) 0 else totalSeconds

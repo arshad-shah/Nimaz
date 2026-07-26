@@ -71,6 +71,44 @@ import com.arshadshah.nimaz.presentation.viewmodel.AnnouncementUiState
 import com.arshadshah.nimaz.presentation.viewmodel.HomeEvent
 import com.arshadshah.nimaz.presentation.viewmodel.HomeUiState
 import com.arshadshah.nimaz.presentation.viewmodel.HomeViewModel
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.LaunchedEffect
+import com.arshadshah.nimaz.presentation.components.atoms.TickResolution
+import com.arshadshah.nimaz.presentation.components.atoms.rememberNow
+import com.arshadshah.nimaz.presentation.viewmodel.PrayerTimeDisplay
+import com.arshadshah.nimaz.presentation.viewmodel.withClockState
+import kotlin.time.Instant
+
+/**
+ * The clock-derived slice of Home. The ViewModel publishes prayer *instants*; this turns them into
+ * "which one is next / current / passed" and the instant to count down to, re-deriving on the
+ * shared ticker.
+ *
+ * Minute resolution on purpose: these flags only change on minute boundaries, so reading seconds
+ * here would recompose the whole screen 60× more often for no visible difference. The countdowns
+ * themselves escalate to seconds inside the leaf components that show them.
+ */
+private data class HomeClock(
+    val prayers: List<PrayerTimeDisplay>,
+    val nextPrayer: PrayerType?,
+    val nextPrayerAt: Instant?,
+)
+
+@Composable
+private fun rememberHomeClock(state: HomeUiState): HomeClock {
+    val now by rememberNow(TickResolution.MINUTES)
+    return remember(state.prayerTimes, state.tomorrowFajrAt, now) {
+        val prayers = state.prayerTimes.withClockState(now)
+        val next = prayers.firstOrNull { it.isNext }
+        HomeClock(
+            prayers = prayers,
+            // After Isha there is no "next" today, so wrap to tomorrow's Fajr.
+            nextPrayer = next?.type ?: PrayerType.FAJR,
+            nextPrayerAt = next?.timeAt ?: state.tomorrowFajrAt,
+        )
+    }
+}
 
 @Composable
 fun HomeScreen(
@@ -100,6 +138,7 @@ fun HomeScreen(
     val onAnnouncementDismiss: () -> Unit = {
         viewModel.onEvent(HomeEvent.DismissAnnouncement)
     }
+    val homeClock = rememberHomeClock(state)
     val updateManager = LocalInAppUpdateManager.current
     val updateState = updateManager?.updateState?.collectAsState()?.value ?: UpdateState.Idle
 
@@ -114,6 +153,21 @@ fun HomeScreen(
     val batteryOptimizationLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
     ) { viewModel.onEvent(HomeEvent.RefreshPermissions) }
+
+    // Date rollover: with the per-second ViewModel loop gone, nothing else notices midnight.
+    // The ticker reads the system clock, so this also covers timezone and manual time changes.
+    val nowForDate by rememberNow(TickResolution.MINUTES)
+    val today = remember(nowForDate) {
+        java.time.Instant.ofEpochMilli(nowForDate.toEpochMilliseconds())
+            .atZone(java.time.ZoneId.systemDefault()).toLocalDate()
+    }
+    var lastSeenDate by remember { mutableStateOf(today) }
+    LaunchedEffect(today) {
+        if (today != lastSeenDate) {
+            lastSeenDate = today
+            viewModel.onEvent(HomeEvent.RefreshPrayerTimes)
+        }
+    }
 
     val windowSizeClass = currentWindowSizeClass()
 
@@ -140,8 +194,6 @@ fun HomeScreen(
             }
         }
     }
-
-    val nextPrayerTimeText = state.prayerTimes.find { it.type == state.nextPrayer }?.time ?: ""
 
     // Draw edge-to-edge: the compact hero's living sky extends behind the
     // status bar and the dynamic top bar is an overlay (below) that manages its
@@ -189,9 +241,8 @@ fun HomeScreen(
                         HomeDynamicTopBar(
                             transitionProgress = topBarProgress,
                             locationName = state.locationName,
-                            nextPrayer = state.nextPrayer,
-                            nextPrayerTime = nextPrayerTimeText,
-                            timeUntilNextPrayer = state.timeUntilNextPrayer,
+                            nextPrayer = homeClock.nextPrayer,
+                            nextPrayerAt = homeClock.nextPrayerAt,
                             onSettingsClick = onNavigateToSettings,
                             modifier = Modifier.align(Alignment.TopCenter),
                         )
@@ -249,7 +300,7 @@ private fun HomeCompactContent(
     val gregorianDate = remember {
         java.time.LocalDate.now().format(FULL_DATE_FORMATTER)
     }
-    val nextPrayerTime = state.prayerTimes.find { it.type == state.nextPrayer }?.time ?: ""
+    val homeClock = rememberHomeClock(state)
     val jumuahMubarak = stringResource(R.string.jumuah_mubarak)
     val jumuahHadithQuote = stringResource(R.string.jumuah_hadith_quote)
 
@@ -274,9 +325,8 @@ private fun HomeCompactContent(
             HomeHero(
                 hijriDate = state.hijriDate,
                 gregorianDate = gregorianDate,
-                nextPrayer = state.nextPrayer,
-                nextPrayerTime = nextPrayerTime,
-                timeUntilNextPrayer = state.timeUntilNextPrayer,
+                nextPrayer = homeClock.nextPrayer,
+                nextPrayerAt = homeClock.nextPrayerAt,
                 sunriseFraction = state.sunriseFraction,
                 sunsetFraction = state.sunsetFraction,
             )
@@ -321,9 +371,7 @@ private fun HomeCompactContent(
                         occasion = EventOccasion.JUMUAH,
                         eyebrow = jumuahMubarak,
                         body = jumuahHadithQuote,
-                        jumuahTime = state.jumuahTime,
-                        timeUntilJumuah = state.timeUntilJumuah,
-                        isJumuahPassed = state.isJumuahPassed,
+                        jumuahAt = state.jumuahAt,
                     )
                 )
             }
@@ -358,14 +406,13 @@ private fun HomeCompactContent(
         item(key = "today_section") {
             Spacer(modifier = Modifier.height(8.dp))
             TodayCarousel(
-                prayerTimes = state.prayerTimes,
+                prayerTimes = homeClock.prayers,
                 fastingToday = state.fastingToday,
                 dailyHadith = state.dailyHadith,
                 dailyHadithReference = state.dailyHadithReference,
                 dailyHadithGrade = state.dailyHadithGrade,
                 dailyDua = state.dailyDua,
                 onHadithClick = state.dailyHadithId?.let { id -> { onOpenHadith(id) } },
-                prayerTimelineProgress = state.prayerTimelineProgress,
             )
         }
 
@@ -381,10 +428,10 @@ private fun HomeCompactContent(
             )
         }
 
-        items(state.prayerTimes) { prayer ->
+        items(homeClock.prayers) { prayer ->
             PrayerTimeCard(
                 prayer = prayer,
-                isActive = prayer.type == state.nextPrayer,
+                isActive = prayer.isNext,
                 onClick = { onNavigateToPrayerTracker() },
                 onToggle = { onTogglePrayer(prayer.type) },
                 modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp)
@@ -418,7 +465,7 @@ private fun HomeTabletContent(
     val gregorianDate = remember {
         java.time.LocalDate.now().format(FULL_DATE_FORMATTER)
     }
-    val nextPrayerTime = state.prayerTimes.find { it.type == state.nextPrayer }?.time ?: ""
+    val homeClock = rememberHomeClock(state)
 
     val banners = buildHomeBannerItems(
         state = state,
@@ -439,11 +486,9 @@ private fun HomeTabletContent(
             locationName = state.locationName,
             hijriDate = state.hijriDate,
             gregorianDate = gregorianDate,
-            nextPrayer = state.nextPrayer,
-            nextPrayerTime = nextPrayerTime,
-            timeUntilNextPrayer = state.timeUntilNextPrayer,
+            nextPrayer = homeClock.nextPrayer,
+            nextPrayerAt = homeClock.nextPrayerAt,
             onSettingsClick = onNavigateToSettings,
-            nextPrayerAt = state.nextPrayerAt,
         )
 
         // FCM engagement announcement — same banner as the compact layout.
@@ -475,9 +520,7 @@ private fun HomeTabletContent(
                         occasion = EventOccasion.JUMUAH,
                         eyebrow = stringResource(R.string.jumuah_mubarak),
                         body = stringResource(R.string.jumuah_hadith_quote),
-                        jumuahTime = state.jumuahTime,
-                        timeUntilJumuah = state.timeUntilJumuah,
-                        isJumuahPassed = state.isJumuahPassed,
+                        jumuahAt = state.jumuahAt,
                     )
                 )
             }
@@ -528,10 +571,10 @@ private fun HomeTabletContent(
                     )
                 }
 
-                items(state.prayerTimes) { prayer ->
+                items(homeClock.prayers) { prayer ->
                     PrayerTimeCard(
                         prayer = prayer,
-                        isActive = prayer.type == state.nextPrayer,
+                        isActive = prayer.isNext,
                         onClick = { onNavigateToPrayerTracker() },
                         onToggle = { onTogglePrayer(prayer.type) },
                         modifier = Modifier.padding(horizontal = 4.dp, vertical = 4.dp)
@@ -548,8 +591,7 @@ private fun HomeTabletContent(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 TodaysProgressCard(
-                    prayerTimes = state.prayerTimes,
-                    timelineProgress = state.prayerTimelineProgress,
+                    prayerTimes = homeClock.prayers,
                     modifier = Modifier.padding(horizontal = 4.dp)
                 )
 

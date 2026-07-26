@@ -45,6 +45,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.getArabicPrayerName
 import com.arshadshah.nimaz.presentation.components.molecules.CountdownTimer
 import com.arshadshah.nimaz.presentation.theme.LocalUseHijriPrimary
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
+import com.arshadshah.nimaz.presentation.components.atoms.clockTimeText
 
 /**
  * Full-width home header used by the tablet (non-compact) layout. Contains
@@ -58,11 +59,9 @@ fun HomeHeader(
     hijriDate: String,
     gregorianDate: String,
     nextPrayer: PrayerType?,
-    nextPrayerTime: String,
-    timeUntilNextPrayer: String,
+    nextPrayerAt: Instant?,
     onSettingsClick: () -> Unit,
     modifier: Modifier = Modifier,
-    nextPrayerAt: Instant? = null,
 ) {
     Box(
         modifier = modifier
@@ -163,11 +162,13 @@ fun HomeHeader(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                Text(
-                    text = stringResource(R.string.at_time, nextPrayerTime),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.secondary
-                )
+                if (nextPrayerAt != null) {
+                    Text(
+                        text = stringResource(R.string.at_time, clockTimeText(nextPrayerAt)),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.secondary
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(30.dp))
@@ -212,10 +213,8 @@ private fun HomeHeader_Preview() {
             hijriDate = "7 Rajab 1446",
             gregorianDate = "Friday, January 31, 2026",
             nextPrayer = PrayerType.ASR,
-            nextPrayerTime = "4:30 PM",
-            timeUntilNextPrayer = "2h 15m 30s",
-            onSettingsClick = {},
             nextPrayerAt = Clock.System.now() + 2.hours + 15.minutes,
+            onSettingsClick = {},
         )
     }
 }
