@@ -92,11 +92,23 @@ private val LocalNowSource = compositionLocalOf<State<Instant>?> { null }
 @Composable
 fun ProvideNimazClock(
     resolution: TickResolution = TickResolution.SECONDS,
+    timeSource: () -> Instant = SystemTimeSource,
     content: @Composable () -> Unit,
 ) {
-    val source = rememberTickingInstant(resolution)
+    val source = rememberTickingInstant(resolution, timeSource)
     CompositionLocalProvider(LocalNowSource provides source, content = content)
 }
+
+/**
+ * The real clock. Named rather than inlined as a lambda so it is a stable value: passing
+ * `{ Clock.System.now() }` as a default would allocate a new lambda on every recomposition and
+ * re-key [rememberTickingInstant], restarting the ticker each time.
+ *
+ * Tests substitute their own source to drive time deterministically — see `NimazClockTest`. Without
+ * that seam nothing can assert the app's timers ever advance, which is how a frozen ticker shipped
+ * unnoticed.
+ */
+val SystemTimeSource: () -> Instant = { Clock.System.now() }
 
 /**
  * The current instant, updating at [resolution].
@@ -120,6 +132,18 @@ fun rememberNow(resolution: TickResolution = TickResolution.SECONDS): State<Inst
  *
  * This is the ergonomic default for cards — a smooth final approach without
  * paying for 1 Hz recomposition all day.
+ *
+ * ## Match [fineGrainedWithin] to what you actually render
+ *
+ * The tick resolution and the *displayed* resolution are two different things, and letting them
+ * disagree is what made the Home hero's countdown look frozen: it rendered a seconds digit while
+ * this function, with the default 15-minute threshold, only re-derived once a minute. The seconds
+ * sat still for 60 s and then jumped — and any unrelated recomposition (navigating back to the
+ * screen) made it look like the value only updated when you moved around the app.
+ *
+ * So: **if the caller shows seconds, it must pass [Duration.INFINITE]** to tick every second at any
+ * distance. [NimazCountdownText] derives this from its own `showSeconds` flag so call sites cannot
+ * get it wrong; hand-rolled callers must keep the two in step themselves.
  */
 @Composable
 fun rememberCountdownTo(
@@ -144,12 +168,15 @@ fun rememberCountdownTo(
  * while the lifecycle is at least STARTED.
  */
 @Composable
-private fun rememberTickingInstant(resolution: TickResolution): State<Instant> {
+private fun rememberTickingInstant(
+    resolution: TickResolution,
+    timeSource: () -> Instant = SystemTimeSource,
+): State<Instant> {
     val lifecycleOwner = LocalLifecycleOwner.current
-    return produceState(Clock.System.now(), resolution, lifecycleOwner) {
+    return produceState(timeSource(), resolution, lifecycleOwner, timeSource) {
         lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
             while (true) {
-                val now = Clock.System.now()
+                val now = timeSource()
                 value = now
                 // Sleep to the next boundary rather than a fixed interval, so
                 // the tick never drifts off the system clock.

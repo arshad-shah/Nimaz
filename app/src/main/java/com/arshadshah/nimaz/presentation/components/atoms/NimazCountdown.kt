@@ -13,7 +13,9 @@ import androidx.compose.ui.text.TextStyle
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.util.CountdownParts
 import com.arshadshah.nimaz.core.util.CountdownUnit
+import com.arshadshah.nimaz.core.util.EventProximity
 import com.arshadshah.nimaz.core.util.formatClockTime
+import kotlin.time.Duration
 import com.arshadshah.nimaz.presentation.theme.LocalUse24HourFormat
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -79,8 +81,16 @@ fun countdownText(parts: CountdownParts, showSeconds: Boolean = true): String = 
  * A live countdown to [target]. Ticks itself — the caller passes an instant and
  * nothing else, so no ViewModel needs to hold a formatted string or run a loop.
  *
- * Resolution is automatic: whole minutes until the last quarter-hour, then
- * seconds. So this is cheap to leave on screen all day.
+ * ## Tick resolution follows [showSeconds]
+ *
+ * The two must agree, and deriving one from the other is the only way to guarantee it. Ticking
+ * every minute while rendering a seconds digit is not a cheaper countdown — it is a **visibly
+ * broken** one: the seconds freeze for a minute and then jump 60 at once, which reads as "the timer
+ * stopped" and appears to fix itself whenever something else recomposes the screen. That was the
+ * Home hero's bug.
+ *
+ * So a seconds-showing countdown ticks at 1 Hz however far out the target is (the cost is one
+ * `Text` re-measuring per second), and a minute-granularity countdown invalidates once a minute.
  */
 @Composable
 fun NimazCountdownText(
@@ -91,7 +101,11 @@ fun NimazCountdownText(
     showSeconds: Boolean = true,
     textAlign: TextAlign? = null,
 ) {
-    val parts by rememberCountdownTo(target)
+    val parts by rememberCountdownTo(
+        target = target,
+        // Showing seconds means needing seconds — at every distance, not just the last quarter-hour.
+        fineGrainedWithin = if (showSeconds) Duration.INFINITE else EventProximity.IMMINENT_THRESHOLD,
+    )
     Text(
         text = countdownText(parts, showSeconds = showSeconds),
         style = style,

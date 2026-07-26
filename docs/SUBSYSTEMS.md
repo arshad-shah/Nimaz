@@ -228,7 +228,27 @@ Ramadan.
 > `presentation/components/atoms/NimazClock.kt` installs that ticker (`ProvideNimazClock` in
 > `MainActivity`, inside `NimazTheme`). `rememberNow(resolution)` reads it truncated to the caller's
 > resolution, so a card counting whole minutes invalidates once a minute rather than 60×.
-> `rememberCountdownTo` escalates to seconds only in the final quarter-hour.
+> `rememberCountdownTo` escalates to seconds only within `fineGrainedWithin` (default: the final
+> quarter-hour).
+>
+> **Tick resolution must follow the *displayed* resolution.** These are two separate knobs and
+> letting them disagree renders a digit the ticker never updates: the Home hero and `JumuahCard`
+> showed seconds while ticking once a minute, so their seconds froze for 60 s and jumped — and
+> because any unrelated recomposition refreshed them, the timers looked like they only moved when
+> you navigated around the app. `NimazCountdownText` now derives `fineGrainedWithin` from its own
+> `showSeconds` flag (`Duration.INFINITE` when true), so a seconds-showing countdown ticks at 1 Hz
+> at any distance and a minute-granularity one stays cheap. Hand-rolled `rememberCountdownTo`
+> callers must keep the two in step themselves.
+>
+> **The ticker is testable.** `ProvideNimazClock(timeSource = …)` takes the clock as a parameter
+> (default `SystemTimeSource`), because with `Clock.System.now()` hardcoded nothing could assert
+> that a timer ever advances — which is how a frozen countdown shipped unnoticed past a component
+> suite that pins `mainClock.autoAdvance = false` and only ever checks the first frame.
+> `NimazClockTest` drives a substituted source and covers: a countdown advancing with no external
+> recomposition, seconds ticking hours from the target, minute-resolution readers *not* recomposing
+> within a minute, one shared instant across consumers, and the no-provider fallback. Note the
+> harness detail: under a manual clock you must `advanceTimeByFrame()` after `advanceTimeBy(…)`,
+> since the `delay` resuming and writing state does not itself draw the frame that renders it.
 >
 > Removed by this migration: `HomeViewModel.startTimeUpdates()` (1s) and `startWorshipUpdates()`
 > (60s), `PrayerTimesViewModel.applyTick()` (1s), the `HomeHero` 30s clock loop, the `WidgetsScreen`
