@@ -65,17 +65,24 @@ class NextWorshipResolver @Inject constructor(
         fun toLocal(instant: kotlin.time.Instant): LocalDateTime =
             java.time.Instant.ofEpochMilli(instant.toEpochMilliseconds()).atZone(zone).toLocalDateTime()
 
+        // Memoised per call: each night-worship branch now asks for the *next* day's Fajr too
+        // (to close its window), so an un-memoised lambda would recompute a day's astronomical
+        // pass several times over a single `nearest()`. One map, one pass per date.
+        val timesCache = mutableMapOf<LocalDate, DayWorshipTimes?>()
         val timesFor: (LocalDate) -> DayWorshipTimes? = { date ->
-            val byType = prayerTimeCalculator.getPrayerTimes(
-                latitude, longitude, date, method, asr, highLat, adjustments
-            ).associate { it.type to toLocal(it.time) }
-            val sunnah = prayerTimeCalculator.getSunnahTimes(latitude, longitude, date, method, asr, highLat)
-            val f = byType[PrayerType.FAJR]; val sr = byType[PrayerType.SUNRISE]
-            val d = byType[PrayerType.DHUHR]; val a = byType[PrayerType.ASR]
-            val m = byType[PrayerType.MAGHRIB]; val i = byType[PrayerType.ISHA]
-            if (f != null && sr != null && d != null && a != null && m != null && i != null) {
-                DayWorshipTimes(f, sr, d, a, m, i, toLocal(sunnah.lastThirdOfTheNight))
-            } else null
+            timesCache.getOrPut(date) {
+                val byType = prayerTimeCalculator.getPrayerTimes(
+                    latitude, longitude, date, method, asr, highLat, adjustments
+                ).associate { it.type to toLocal(it.time) }
+                val sunnah =
+                    prayerTimeCalculator.getSunnahTimes(latitude, longitude, date, method, asr, highLat)
+                val f = byType[PrayerType.FAJR]; val sr = byType[PrayerType.SUNRISE]
+                val d = byType[PrayerType.DHUHR]; val a = byType[PrayerType.ASR]
+                val m = byType[PrayerType.MAGHRIB]; val i = byType[PrayerType.ISHA]
+                if (f != null && sr != null && d != null && a != null && m != null && i != null) {
+                    DayWorshipTimes(f, sr, d, a, m, i, toLocal(sunnah.lastThirdOfTheNight))
+                } else null
+            }
         }
         val hijriFor: (LocalDate) -> HijriDayInfo = { date ->
             val h = HijriDateCalculator.toHijri(date.plusDays(hijriOffset.toLong()))
@@ -91,7 +98,19 @@ class NextWorshipResolver @Inject constructor(
                     maxSearchDays = 2, witrBeforeFajr = witrBeforeFajr
                 )
             }
-            .filter { Duration.between(now, it.eventAt) <= Duration.ofHours(nearWindowHours) }
-            .minByOrNull { it.triggerAt }
+            .filter {
+                // An active occurrence is always relevant, even if its `eventAt` sits outside the
+                // near-window (a night window's Fajr close can be >14 h from a late-evening `now`).
+                it.isActiveAt(now) ||
+                    Duration.between(now, it.eventAt) <= Duration.ofHours(nearWindowHours)
+            }
+            .minWithOrNull(
+                compareBy(
+                    // An open window beats any countdown: at 07:00 "Morning Adhkar — now" must win
+                    // over "Evening Adhkar in 11h".
+                    { if (it.isActiveAt(now)) 0 else 1 },
+                    { it.triggerAt }
+                )
+            )
     }
 }

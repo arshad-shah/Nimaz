@@ -67,11 +67,20 @@ class NextWorshipResolverTest {
     }
 
     @Test
-    fun `filters out reminders beyond the near window`() = runBlocking {
-        // Enable only morning adhkar (fires after Fajr, ~05:30). At 06:00, the next one is
-        // ~tomorrow 05:30 → ~23.5h away → outside the 14h window → nothing surfaced.
+    fun `an open window is surfaced as active rather than treated as spent`() = runBlocking {
+        // Morning adhkar fires after Fajr (~05:30) and — with the window model — stays *active*
+        // until Dhuhr. At 06:00 its trigger has passed but the window is open, so it must be
+        // surfaced as the active occurrence. (Before the fix this returned null, and the resolver
+        // filled the slot with the opposite adhkar card for the rest of the day.)
         every { settings.worshipReminderEnabled(WorshipReminderType.ADHKAR_MORNING.key) } returns flowOf(true)
-        val occ = resolver.nearest(LocalDate.of(2026, 3, 10).atTime(6, 0))
-        assertThat(occ).isNull()
+        val now = LocalDate.of(2026, 3, 10).atTime(6, 0)
+        val occ = resolver.nearest(now)
+        assertThat(occ).isNotNull()
+        assertThat(occ!!.type).isEqualTo(WorshipReminderType.ADHKAR_MORNING)
+        assertThat(occ.isActiveAt(now)).isTrue()
     }
+
+    // Note: the zone-independent "window closes → correct filtering / no inversion" trajectory is
+    // covered exhaustively by WorshipDayWalkTest against a synthetic day. This integration test
+    // stays with the single instant it can assert robustly given its real Makkah times.
 }

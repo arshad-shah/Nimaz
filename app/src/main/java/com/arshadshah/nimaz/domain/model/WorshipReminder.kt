@@ -70,5 +70,29 @@ data class WorshipReminderOccurrence(
     val type: WorshipReminderType,
     val triggerAt: LocalDateTime,
     val eventAt: LocalDateTime,
-    val subKey: String? = null
-)
+    val subKey: String? = null,
+    /**
+     * Anchor the Home card's progress arc measures from — normally the previous
+     * prayer. Null hides the arc rather than inventing a span.
+     */
+    val windowStart: LocalDateTime? = null,
+    /**
+     * When the event's window closes. Between [eventAt] and this instant the
+     * occurrence is *active* — it must keep being surfaced (as "now", not a
+     * countdown) instead of being treated as spent. Null = instantaneous: the
+     * occurrence expires at [eventAt], the pre-fix behaviour.
+     *
+     * Absolute [LocalDateTime] deliberately, not an `activeWindow: Duration` —
+     * it is what the calculator naturally produces from `DayWorshipTimes`, and it
+     * avoids a subtraction that can drift across DST.
+     */
+    val windowEnd: LocalDateTime? = null
+) {
+    /** True while the event is happening: `eventAt <= now < windowEnd`. */
+    fun isActiveAt(now: LocalDateTime): Boolean =
+        windowEnd != null && !now.isBefore(eventAt) && now.isBefore(windowEnd)
+
+    /** Still relevant: either upcoming (its trigger is future) or currently active. */
+    fun isLiveAt(now: LocalDateTime): Boolean =
+        triggerAt.isAfter(now) || isActiveAt(now)
+}

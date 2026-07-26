@@ -203,6 +203,25 @@ on the dedicated `WorshipRemindersScreen` (`Route.SettingsWorshipReminders`), an
 one. Ramadan-category reminders are Ramadan-gated and their settings group auto-hides outside
 Ramadan.
 
+> **Occurrences are windows, not instants.** `WorshipReminderOccurrence` carries an optional
+> `[windowStart, windowEnd)` span; `isActiveAt(now)` is true while `eventAt ≤ now < windowEnd`, and
+> `isLiveAt(now)` means *upcoming or active*. This closed a shipped bug: with the old
+> `triggerAt.isAfter(now)` gate an occurrence became "spent" the instant its trigger passed, so its
+> next occurrence jumped ~24 h out and fell off the resolver's 14 h near-window — leaving the
+> **opposite** adhkar card on Home all day (and hiding Iftar at Maghrib, Tahajjud at the last third).
+> `nextOccurrence` now accepts an occurrence that `isLiveAt(now)`, and `NextWorshipResolver.nearest()`
+> keeps any *active* occurrence regardless of the near-window and ranks active above upcoming.
+> Windows come straight from `DayWorshipTimes`: night types (Tahajjud, Taraweeh, Laylatul Qadr,
+> eve-of fasts) close at the **next** day's Fajr (`timesFor(day.plusDays(1))?.fajr` — never
+> `t.lastThirdOfNight`, which would zero-length Tahajjud's window); Iftar spans Asr→Isha; Suhoor is a
+> hard stop at Fajr. **Adhkar close is a religious-content choice** — the accommodating view ships
+> (morning→Dhuhr, evening→Isha); the strict sunrise/Maghrib bounds are a natural future
+> `worshipReminderMode`. **Witr is deliberately left instantaneous**: its `eventAt` is the same
+> morning's Fajr (a pre-existing eventAt/triggerAt inconsistency scoped out of this fix), so a night
+> window would falsely mark a spent occurrence active. `timesFor` in `nearest()` is memoised per call
+> (`mutableMapOf<LocalDate, DayWorshipTimes?>`) since each night type now also asks for the next day's
+> Fajr. Covered by `WorshipDayWalkTest` (a zone-independent hour-by-hour walk of a synthetic day).
+
 > **Home refresh cadence.** `NextWorshipResolver.nearest()` reads every worship pref plus location
 > and calculation settings — ~30 sequential DataStore reads per call — so it must never sit on a
 > per-second path. `HomeViewModel` caches the resolved `WorshipReminderOccurrence` and re-resolves
