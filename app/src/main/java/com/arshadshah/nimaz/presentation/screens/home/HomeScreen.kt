@@ -419,8 +419,8 @@ private fun HomeCompactContent(
         item("prayer_times_header") {
             Spacer(modifier = Modifier.height(24.dp))
             PrayerTimesSectionHeader(
-                passedCount = state.prayerTimes.count { it.isPassed },
-                upcomingCount = state.prayerTimes.count { !it.isPassed },
+                passedCount = homeClock.prayers.count { it.isPassed },
+                upcomingCount = homeClock.prayers.count { !it.isPassed },
                 onSettingsClick = onNavigateToPrayerSettings,
                 modifier = Modifier
                     .padding(horizontal = 20.dp)
@@ -562,8 +562,8 @@ private fun HomeTabletContent(
             ) {
                 item("prayer_times_header") {
                     PrayerTimesSectionHeader(
-                        passedCount = state.prayerTimes.count { it.isPassed },
-                        upcomingCount = state.prayerTimes.count { !it.isPassed },
+                        passedCount = homeClock.prayers.count { it.isPassed },
+                        upcomingCount = homeClock.prayers.count { !it.isPassed },
                         onSettingsClick = onNavigateToPrayerSettings,
                         modifier = Modifier
                             .padding(horizontal = 4.dp, vertical = 8.dp)
