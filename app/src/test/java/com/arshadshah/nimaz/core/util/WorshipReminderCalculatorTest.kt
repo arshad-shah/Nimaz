@@ -185,6 +185,54 @@ class WorshipReminderCalculatorTest {
         assertThat(occ.triggerAt.toLocalDate()).isEqualTo(LocalDate.of(2026, 3, 8)) // eve of the 9th
     }
 
+    // ── requireFutureTrigger: the scheduler must never re-arm a past trigger ──
+
+    @Test
+    fun `requireFutureTrigger skips an active occurrence and rolls to the next future trigger`() {
+        // 03:00 is inside tonight's Tahajjud window (02:40 → Fajr 05:00). The Home card wants this
+        // active occurrence (default gate); the scheduler must NOT — arming its past 02:40 trigger
+        // would fire immediately. With requireFutureTrigger it rolls to tomorrow night's 02:40.
+        val now = LocalDate.of(2026, 3, 11).atTime(3, 0)
+
+        val forCard = calc.nextOccurrence(
+            WorshipReminderType.TAHAJJUD, now, 0, ::timesForDay, ::nonRamadan
+        )!!
+        assertThat(forCard.triggerAt).isEqualTo(LocalDate.of(2026, 3, 11).atTime(2, 40))
+        assertThat(forCard.isActiveAt(now)).isTrue()
+
+        val forScheduler = calc.nextOccurrence(
+            WorshipReminderType.TAHAJJUD, now, 0, ::timesForDay, ::nonRamadan,
+            requireFutureTrigger = true
+        )!!
+        assertThat(forScheduler.triggerAt).isEqualTo(LocalDate.of(2026, 3, 12).atTime(2, 40))
+        assertThat(forScheduler.triggerAt.isAfter(now)).isTrue()
+    }
+
+    @Test
+    fun `requireFutureTrigger rolls a fired-but-still-open adhkar to tomorrow`() {
+        // 06:00: morning adhkar (Fajr 05:00 + 30m = 05:30) already fired, but its window
+        // (Fajr → Dhuhr 12:30) is still open. The scheduler must arm tomorrow's 05:30, not
+        // re-fire today's past trigger.
+        val now = LocalDate.of(2026, 3, 10).atTime(6, 0)
+
+        val forScheduler = calc.nextOccurrence(
+            WorshipReminderType.ADHKAR_MORNING, now, 30, ::timesForDay, ::nonRamadan,
+            requireFutureTrigger = true
+        )!!
+        assertThat(forScheduler.triggerAt).isEqualTo(LocalDate.of(2026, 3, 11).atTime(5, 30))
+    }
+
+    @Test
+    fun `requireFutureTrigger keeps a genuinely upcoming trigger unchanged`() {
+        // Before the event, both gates agree — the scheduler still arms tonight's occurrence.
+        val now = LocalDate.of(2026, 3, 10).atTime(21, 0)
+        val occ = calc.nextOccurrence(
+            WorshipReminderType.TAHAJJUD, now, 0, ::timesForDay, ::nonRamadan,
+            requireFutureTrigger = true
+        )!!
+        assertThat(occ.triggerAt).isEqualTo(LocalDate.of(2026, 3, 11).atTime(2, 40))
+    }
+
     @Test
     fun `disabled or non-matching types return null`() {
         // A non-Ramadan day yields no Ramadan reminders.

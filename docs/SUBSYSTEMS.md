@@ -222,6 +222,16 @@ Ramadan.
 > (`mutableMapOf<LocalDate, DayWorshipTimes?>`) since each night type now also asks for the next day's
 > Fajr. Covered by `WorshipDayWalkTest` (a zone-independent hour-by-hour walk of a synthetic day).
 
+> **Scheduler must arm a *future* trigger only (`requireFutureTrigger`).** The `isLiveAt(now)`
+> acceptance above is what the Home card wants, but the *scheduler* shares the same `nextOccurrence`
+> — and `AlarmManager.setExactAndAllowWhileIdle` at a **past** instant fires *immediately*. So
+> accepting an already-*active* occurrence (trigger passed, window still open) made
+> `scheduleWorshipReminders` re-post the worship notification on **every** reschedule, i.e. every
+> time the app was opened during the event's window. `nextOccurrence(requireFutureTrigger = true)`
+> (passed only by the scheduler; the resolver keeps the default) demands `triggerAt.isAfter(now)`,
+> skipping an active occurrence and rolling forward to the next future trigger. Regression-covered in
+> `WorshipReminderCalculatorTest`.
+
 > **Home refresh cadence — time is derived, not pushed.** ViewModels publish *facts* (prayer
 > `Instant`s); everything clock-derived is computed in the composable from one shared ticker.
 >
