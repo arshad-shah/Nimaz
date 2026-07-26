@@ -21,6 +21,8 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import com.arshadshah.nimaz.presentation.components.atoms.TickResolution
+import com.arshadshah.nimaz.presentation.components.atoms.rememberNow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -49,6 +51,7 @@ import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import kotlinx.coroutines.delay
 import java.time.LocalDate
 import java.time.LocalTime
+import java.time.ZoneId
 import java.time.ZoneOffset
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -74,20 +77,18 @@ fun HomeHero(
     sunsetFraction: Float = 0.80f,
 ) {
     val use24Hour = LocalUse24HourFormat.current
-    var timeOfDay by remember { mutableFloatStateOf(minuteFractionNow()) }
-    var clock by remember(use24Hour) {
-        mutableStateOf(LocalTime.now().let { formatClockTime(it.hour, it.minute, use24Hour) })
+    // One shared minute-resolution read replaces the old private 30s loop, so the
+    // displayed minute now flips on the real minute boundary instead of up to half a
+    // minute late — and it costs nothing when the app is backgrounded.
+    val nowInstant by rememberNow(TickResolution.MINUTES)
+    val nowLocalTime = remember(nowInstant) {
+        java.time.Instant.ofEpochMilli(nowInstant.toEpochMilliseconds())
+            .atZone(ZoneId.systemDefault()).toLocalTime()
     }
+    val timeOfDay = (nowLocalTime.hour * 60 + nowLocalTime.minute) / 1440f
+    val clock = formatClockTime(nowLocalTime.hour, nowLocalTime.minute, use24Hour)
 
     val backdrop = rememberGlassBackdrop()
-    LaunchedEffect(use24Hour) {
-        while (true) {
-            val now = LocalTime.now()
-            timeOfDay = (now.hour * 60 + now.minute) / 1440f
-            clock = formatClockTime(now.hour, now.minute, use24Hour)
-            delay(30_000.milliseconds)
-        }
-    }
     val moonFraction = remember {
         MoonPhase.fractionForEpochMillis(
             LocalDate.now().atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()

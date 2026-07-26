@@ -442,7 +442,8 @@ private fun HomeTabletContent(
             nextPrayer = state.nextPrayer,
             nextPrayerTime = nextPrayerTime,
             timeUntilNextPrayer = state.timeUntilNextPrayer,
-            onSettingsClick = onNavigateToSettings
+            onSettingsClick = onNavigateToSettings,
+            nextPrayerAt = state.nextPrayerAt,
         )
 
         // FCM engagement announcement — same banner as the compact layout.

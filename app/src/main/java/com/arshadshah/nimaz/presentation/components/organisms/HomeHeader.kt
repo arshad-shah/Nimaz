@@ -32,6 +32,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.PrayerType
+import kotlin.time.Clock
+import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Instant
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
@@ -57,7 +61,8 @@ fun HomeHeader(
     nextPrayerTime: String,
     timeUntilNextPrayer: String,
     onSettingsClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    nextPrayerAt: Instant? = null,
 ) {
     Box(
         modifier = modifier
@@ -154,7 +159,7 @@ fun HomeHeader(
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                CountdownTimer(timeUntilNextPrayer = timeUntilNextPrayer)
+                CountdownTimer(target = nextPrayerAt)
 
                 Spacer(modifier = Modifier.height(12.dp))
 
@@ -209,7 +214,8 @@ private fun HomeHeader_Preview() {
             nextPrayer = PrayerType.ASR,
             nextPrayerTime = "4:30 PM",
             timeUntilNextPrayer = "2h 15m 30s",
-            onSettingsClick = {}
+            onSettingsClick = {},
+            nextPrayerAt = Clock.System.now() + 2.hours + 15.minutes,
         )
     }
 }

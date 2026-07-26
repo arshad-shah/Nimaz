@@ -78,6 +78,11 @@ data class HomeUiState(
     val currentPrayer: PrayerType? = null,
     val nextPrayer: PrayerType? = null,
     val timeUntilNextPrayer: String = "",
+    // The exact instant of the next prayer (or tomorrow's Fajr after Isha). The boxed
+    // countdown derives its own ticking digits from this at the leaf, so it no longer
+    // depends on the per-second [timeUntilNextPrayer] string (which stays for the
+    // plain-text labels until they too move to leaf rendering).
+    val nextPrayerAt: Instant? = null,
     val locationName: String = "Location not set",
     val latitude: Double = 0.0,
     val longitude: Double = 0.0,
@@ -764,6 +769,7 @@ class HomeViewModel @Inject constructor(
                 currentPrayer = if (currentPrayerIndex >= 0) sortedPrayers[currentPrayerIndex].type else null,
                 nextPrayer = nextPrayer,
                 timeUntilNextPrayer = timeUntilNext,
+                nextPrayerAt = nextPrayerInstant,
                 hijriDate = calculateHijriDate(),
                 isFriday = isFriday,
                 jumuahTime = jumuahTime,
