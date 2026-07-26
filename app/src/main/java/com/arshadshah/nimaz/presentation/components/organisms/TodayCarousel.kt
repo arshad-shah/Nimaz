@@ -18,6 +18,11 @@ import com.arshadshah.nimaz.presentation.components.molecules.HadithOfTheDayCard
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.viewmodel.DailyDua
 import com.arshadshah.nimaz.presentation.viewmodel.PrayerTimeDisplay
+import kotlin.time.Instant
+import androidx.compose.runtime.getValue
+import com.arshadshah.nimaz.core.util.prayerTimelineProgressAt
+import com.arshadshah.nimaz.presentation.components.atoms.TickResolution
+import com.arshadshah.nimaz.presentation.components.atoms.rememberNow
 
 /**
  * Identifiers for the carousel's pages. Adding a new page = adding a value
@@ -47,7 +52,6 @@ fun TodayCarousel(
     dailyHadithGrade: String? = null,
     dailyDua: DailyDua? = null,
     onHadithClick: (() -> Unit)? = null,
-    prayerTimelineProgress: Float = 0f,
     pageHeight: Dp = 160.dp,
     horizontalPadding: Dp = 20.dp,
 ) {
@@ -70,7 +74,6 @@ fun TodayCarousel(
         when (pages[pageIndex]) {
             TodayCarouselPage.PROGRESS -> TodaysProgressCard(
                 prayerTimes = prayerTimes,
-                timelineProgress = prayerTimelineProgress,
                 fillHeight = true,
             )
 
@@ -107,7 +110,7 @@ private val samplePrayerTimes = listOf(
     PrayerTimeDisplay(
         PrayerType.FAJR,
         "Fajr",
-        "5:23 AM",
+        previewInstant(5, 23),
         isPassed = true,
         isCurrent = false,
         isNext = false,
@@ -116,7 +119,7 @@ private val samplePrayerTimes = listOf(
     PrayerTimeDisplay(
         PrayerType.SUNRISE,
         "Sunrise",
-        "6:45 AM",
+        previewInstant(6, 45),
         isPassed = true,
         isCurrent = false,
         isNext = false
@@ -124,7 +127,7 @@ private val samplePrayerTimes = listOf(
     PrayerTimeDisplay(
         PrayerType.DHUHR,
         "Dhuhr",
-        "1:15 PM",
+        previewInstant(13, 15),
         isPassed = true,
         isCurrent = false,
         isNext = false,
@@ -133,7 +136,7 @@ private val samplePrayerTimes = listOf(
     PrayerTimeDisplay(
         PrayerType.ASR,
         "Asr",
-        "4:30 PM",
+        previewInstant(16, 30),
         isPassed = false,
         isCurrent = true,
         isNext = true
@@ -141,7 +144,7 @@ private val samplePrayerTimes = listOf(
     PrayerTimeDisplay(
         PrayerType.MAGHRIB,
         "Maghrib",
-        "6:12 PM",
+        previewInstant(18, 12),
         isPassed = false,
         isCurrent = false,
         isNext = false
@@ -149,7 +152,7 @@ private val samplePrayerTimes = listOf(
     PrayerTimeDisplay(
         PrayerType.ISHA,
         "Isha",
-        "7:45 PM",
+        previewInstant(19, 45),
         isPassed = false,
         isCurrent = false,
         isNext = false
@@ -168,7 +171,6 @@ private fun TodayCarousel_Full_Preview() {
                 prayerTimes = samplePrayerTimes,
                 fastingToday = true,
                 dailyHadith = SAMPLE_HADITH,
-                prayerTimelineProgress = 0.6f,
                 modifier = Modifier.padding(vertical = 16.dp)
             )
         }
@@ -189,3 +191,10 @@ private fun TodayCarousel_NoHadith_Preview() {
         }
     }
 }
+
+/** Fixed wall-clock instants for previews, so sample rows read like a real day. */
+private fun previewInstant(hour: Int, minute: Int): Instant =
+    Instant.fromEpochMilliseconds(
+        java.time.LocalDate.now().atTime(hour, minute)
+            .atZone(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli()
+    )

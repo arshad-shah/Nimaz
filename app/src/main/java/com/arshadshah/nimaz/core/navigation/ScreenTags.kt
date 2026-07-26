@@ -54,6 +54,7 @@ object ScreenTags {
     const val MonthlyPrayerTimes = "screen_monthly_prayer_times"
     const val FastingHome = "screen_fasting_home"
     const val FastingTracker = "screen_fasting_tracker"
+    const val NightWorship = "screen_night_worship"
     const val FastingStats = "screen_fasting_stats"
     const val TasbihHome = "screen_tasbih_home"
     const val TasbihCounterScreen = "screen_tasbih_counter"

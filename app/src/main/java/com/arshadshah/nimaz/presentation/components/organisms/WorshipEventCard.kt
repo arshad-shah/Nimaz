@@ -1,6 +1,10 @@
 package com.arshadshah.nimaz.presentation.components.organisms
 
 import android.content.res.Configuration
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,42 +21,84 @@ import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material.icons.filled.WbTwilight
 import androidx.compose.material.icons.outlined.Terrain
 import androidx.compose.material.icons.outlined.WaterDrop
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.util.EventProximity
+import com.arshadshah.nimaz.core.util.progressToward
+import com.arshadshah.nimaz.core.util.proximityOf
 import com.arshadshah.nimaz.domain.model.WorshipReminderType
+import com.arshadshah.nimaz.presentation.components.atoms.NimazClockText
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCountdownText
+import com.arshadshah.nimaz.presentation.components.atoms.TickResolution
+import com.arshadshah.nimaz.presentation.components.atoms.rememberNow
+import com.arshadshah.nimaz.presentation.theme.LocalAnimationsEnabled
 import com.arshadshah.nimaz.presentation.theme.NimazPalette
 import com.arshadshah.nimaz.presentation.theme.NimazPatternStyle
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.theme.ThemeMode
+import kotlin.time.Clock
+import kotlin.time.Duration.Companion.hours
+import kotlin.time.Instant
 
 /**
- * Pre-resolved display data for the Home "Next Worship" card. All strings are localized/formatted
- * by the caller (HomeViewModel) so the composable stays pure. Carried on [EventCardUi.worship].
+ * Display model for the Home "Next Worship" card.
+ *
+ * ## What changed
+ *
+ * The previous `WorshipCardUi` carried pre-formatted strings built in
+ * `HomeViewModel.renderWorshipCard()` with `context.getString`, refreshed by a
+ * 60 s loop. That is the root of the card feeling dead:
+ *
+ *  - the countdown was minute-resolution and refreshed once a minute, so it sat
+ *    at "0m" for up to sixty seconds and jumped in 60 s steps directly below a
+ *    prayer countdown ticking every second;
+ *  - after toggling the 12/24-hour preference the card's time stayed in the old
+ *    format until the next 60 s tick;
+ *  - nothing could animate or respond to how close the event was, because the
+ *    card only ever received a finished string.
+ *
+ * Now the card receives **instants** and derives everything itself.
+ *
+ * @param eventAt the instant the event happens (Maghrib for Iftar, the start of
+ *   the last third for Tahajjud, …).
+ * @param windowStart the anchor the progress arc measures from — normally the
+ *   previous prayer. Null hides the arc rather than inventing a span.
+ * @param windowEnd when the event's window closes; between [eventAt] and this the
+ *   card is [EventProximity.ACTIVE]. Null means it flips straight to passed.
  */
 data class WorshipCardUi(
     val type: WorshipReminderType,
     val name: String,
     val arabic: String,
     val body: String,
-    val eventTime: String,
-    val timeLabel: String,
-    val countdown: String,
-    val countdownLabel: String
+    val eventAt: Instant,
+    val windowStart: Instant? = null,
+    val windowEnd: Instant? = null,
+    val subKey: String? = null,
 )
 
 /** Per-type visual treatment for the worship card, mirroring [eventCardVisualsFor]. */
 private data class WorshipVisuals(
     val accent: Color,
     val icon: ImageVector,
-    val ornament: EventOrnament
+    val ornament: EventOrnament,
 )
 
 private fun worshipVisualsFor(type: WorshipReminderType): WorshipVisuals = when (type) {
@@ -81,86 +127,211 @@ private fun worshipVisualsFor(type: WorshipReminderType): WorshipVisuals = when 
 }
 
 /**
- * Home "Next Worship" card (Direction A). The single nearest upcoming *enabled* worship reminder,
- * built on [EventCard] so it shares the Jumu'ah card's anatomy: accented icon well, name eyebrow +
- * Arabic, one body line, a trailing event time, and a countdown highlight. All strings are
- * pre-resolved by the caller (localized), so this is a pure, preview-friendly composable.
+ * The worship card.
+ *
+ * Driven by [EventProximity] rather than a number alone, so it changes *weight*
+ * as the event approaches instead of only changing digits:
+ *
+ * | Proximity     | Treatment                                                  |
+ * |---------------|------------------------------------------------------------|
+ * | `DISTANT`     | Quiet. Hairline accent, time as a small trailing label.    |
+ * | `APPROACHING` | Countdown becomes the focal element; accent fill ramps in. |
+ * | `IMMINENT`    | Seconds appear; accent saturates; the arc completes.       |
+ * | `ACTIVE`      | Flips from a countdown to a "now" state with its action.    |
+ * | `PASSED`      | Renders nothing — the resolver should have moved on.        |
+ *
+ * All motion honours `LocalAnimationsEnabled`.
  */
 @Composable
 fun WorshipEventCard(
-    type: WorshipReminderType,
-    name: String,
-    arabic: String,
-    body: String,
-    eventTime: String,
-    timeLabel: String,
-    countdown: String,
-    countdownLabel: String,
+    card: WorshipCardUi,
     modifier: Modifier = Modifier,
+    onAction: ((WorshipReminderType) -> Unit)? = null,
     fillHeight: Boolean = false,
 ) {
-    val v = worshipVisualsFor(type)
+    val v = worshipVisualsFor(card.type)
+    val animationsEnabled = LocalAnimationsEnabled.current
+
+    // A minute-resolution read is enough to classify proximity; the countdown text
+    // below independently escalates itself to seconds when it needs to.
+    val now by rememberNow(TickResolution.MINUTES)
+    val proximity = proximityOf(card.eventAt, now, card.windowEnd)
+    if (proximity == EventProximity.PASSED) return
+
+    // Accent presence ramps with proximity — the glanceable signal.
+    val accentWeight = when (proximity) {
+        EventProximity.DISTANT -> 0.35f
+        EventProximity.APPROACHING -> 0.7f
+        EventProximity.IMMINENT, EventProximity.ACTIVE -> 1f
+        EventProximity.PASSED -> 0f
+    }
+    val accent by animateColorAsState(
+        targetValue = v.accent.copy(alpha = accentWeight),
+        animationSpec = tween(if (animationsEnabled) 600 else 0),
+        label = "worship_accent",
+    )
+
+    val progress = card.windowStart?.let { progressToward(card.eventAt, it, now) }
+    val animatedProgress by animateFloatAsState(
+        targetValue = progress ?: 0f,
+        animationSpec = tween(if (animationsEnabled) 600 else 0),
+        label = "worship_progress",
+    )
+
+    // The whole card is the tap target rather than a CTA button. The card lives in a
+    // fixed-height carousel page, so a button would eat scarce vertical space for an
+    // affordance the entire surface can carry — and a reminder you can't act on reads as
+    // decoration. `onClickLabel` reuses the per-type action wording ("Read adhkar", "Open
+    // fast tracker") so screen readers announce the destination instead of just "button".
+    val clickLabel = actionLabelFor(card.type)
+    val decorated = if (progress != null) {
+        modifier.drawBehind { drawProgressArc(animatedProgress, v.accent) }
+    } else {
+        modifier
+    }
+
     EventCard(
-        accent = v.accent,
+        accent = accent,
         containerAccent = v.accent,
         icon = v.icon,
         ornament = v.ornament,
-        eyebrow = name,
-        arabic = arabic,
-        body = body,
+        eyebrow = card.name,
+        arabic = card.arabic,
+        body = card.body,
         fillHeight = fillHeight,
-        trailing = if (eventTime.isNotEmpty()) {
-            {
-                Column(horizontalAlignment = Alignment.End) {
+        modifier = if (onAction != null) {
+            decorated
+                .testTag(WorshipCardTestTag)
+                .clickable(onClickLabel = clickLabel, role = Role.Button) { onAction(card.type) }
+        } else {
+            decorated
+        },
+        trailing = {
+            Column(horizontalAlignment = Alignment.End) {
+                NimazClockText(
+                    instant = card.eventAt,
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+                timeLabelFor(card.type)?.let { label ->
                     Text(
-                        text = eventTime,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                    if (timeLabel.isNotEmpty()) {
-                        Text(
-                            text = timeLabel,
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-            }
-        } else null,
-        highlight = if (countdown.isNotEmpty()) {
-            {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = countdownLabel,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Text(
-                        text = countdown,
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = v.accent
+                        text = label,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
             }
-        } else null,
-        modifier = modifier,
+        },
+        highlight = {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = stringResource(
+                        if (proximity == EventProximity.ACTIVE) R.string.worship_card_now
+                        else R.string.worship_card_in
+                    ),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                if (proximity != EventProximity.ACTIVE) {
+                    NimazCountdownText(
+                        target = card.eventAt,
+                        // Seconds only in the final approach — a card four hours out has no
+                        // business recomposing at 1 Hz.
+                        showSeconds = proximity == EventProximity.IMMINENT,
+                        style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                        color = v.accent,
+                    )
+                }
+            }
+        },
+        // No primaryAction: the surface itself is the affordance (see `clickable` above).
     )
 }
 
-// ── Previews (the "so I can see it" deliverable — one per representative type) ──
+/** Test tag for the tappable worship card, used by the instrumented navigation tests. */
+const val WorshipCardTestTag = "worship_card"
+
+/**
+ * The arc around the card showing where "now" sits between [WorshipCardUi.windowStart]
+ * and the event.
+ *
+ * ⚠️ The `inset`/`diameter` below hardcode where [EventCard] currently draws its icon
+ * well (12.dp padding, ~40.dp well). A padding change in [EventCard] silently misaligns
+ * this. Tracked as follow-up: give [EventCard] an optional icon-decoration slot so the
+ * arc is laid out *by* the well rather than guessed relative to the card.
+ */
+private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawProgressArc(
+    progress: Float,
+    accent: Color,
+) {
+    val stroke = 3.dp.toPx()
+    val diameter = 40.dp.toPx()
+    val inset = 12.dp.toPx()
+    val arcSize = Size(diameter, diameter)
+    drawArc(
+        color = accent.copy(alpha = 0.18f),
+        startAngle = -90f,
+        sweepAngle = 360f,
+        useCenter = false,
+        topLeft = Offset(inset, inset),
+        size = arcSize,
+        style = Stroke(width = stroke),
+    )
+    drawArc(
+        color = accent,
+        startAngle = -90f,
+        sweepAngle = 360f * progress.coerceIn(0f, 1f),
+        useCenter = false,
+        topLeft = Offset(inset, inset),
+        size = arcSize,
+        style = Stroke(width = stroke),
+    )
+}
+
+/**
+ * The obvious next step for each reminder — each is a screen that already exists.
+ */
+@Composable
+private fun actionLabelFor(type: WorshipReminderType): String? = when (type) {
+    WorshipReminderType.TAHAJJUD -> stringResource(R.string.worship_action_duas)
+    WorshipReminderType.WITR -> stringResource(R.string.worship_action_duas)
+    WorshipReminderType.SUHOOR -> stringResource(R.string.worship_action_fast_tracker)
+    WorshipReminderType.IFTAR -> stringResource(R.string.worship_action_iftar_dua)
+    WorshipReminderType.TARAWEEH -> stringResource(R.string.worship_action_quran)
+    WorshipReminderType.LAYLATUL_QADR -> stringResource(R.string.worship_action_duas)
+    WorshipReminderType.ADHKAR_MORNING,
+    WorshipReminderType.ADHKAR_EVENING -> stringResource(R.string.worship_action_adhkar)
+    WorshipReminderType.MONDAY_THURSDAY_FAST,
+    WorshipReminderType.WHITE_DAYS_FAST,
+    WorshipReminderType.ARAFAH_ASHURA_FAST -> stringResource(R.string.worship_action_fast_tracker)
+}
+
+/** Shown under the time, only where it adds meaning. */
+@Composable
+private fun timeLabelFor(type: WorshipReminderType): String? = when (type) {
+    WorshipReminderType.TAHAJJUD -> stringResource(R.string.worship_card_begins)
+    WorshipReminderType.IFTAR -> stringResource(R.string.prayer_maghrib)
+    WorshipReminderType.SUHOOR -> stringResource(R.string.prayer_fajr)
+    else -> null
+}
+
+// ── Previews ──
 
 @Composable
-private fun sample(type: WorshipReminderType, name: String, arabic: String, body: String) {
+private fun sample(type: WorshipReminderType, name: String, arabic: String, body: String, inHours: Long) {
+    val now = Clock.System.now()
     WorshipEventCard(
-        type = type, name = name, arabic = arabic, body = body,
-        eventTime = "2:48 AM", timeLabel = "Begins",
-        countdown = "4h 12m", countdownLabel = "Begins in",
+        card = WorshipCardUi(
+            type = type, name = name, arabic = arabic, body = body,
+            eventAt = now + inHours.hours,
+            windowStart = now - 1.hours,
+            windowEnd = now + (inHours + 4).hours,
+        ),
+        onAction = {},
     )
 }
 
@@ -168,57 +339,17 @@ private fun sample(type: WorshipReminderType, name: String, arabic: String, body
 @Composable
 private fun WorshipCard_Tahajjud_Light() {
     NimazTheme(themeMode = ThemeMode.LIGHT) {
-        sample(WorshipReminderType.TAHAJJUD, "Tahajjud", "تَهَجُّد", "A blessed time for du'a has begun.")
+        sample(WorshipReminderType.TAHAJJUD, "Tahajjud", "تَهَجُّد", "A blessed time for du'a.", inHours = 4)
     }
 }
 
 @Preview(
-    showBackground = true, widthDp = 400, name = "Tahajjud — dark",
+    showBackground = true, widthDp = 400, name = "Iftar — dark",
     uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL
 )
 @Composable
-private fun WorshipCard_Tahajjud_Dark() {
+private fun WorshipCard_Iftar_Dark() {
     NimazTheme(themeMode = ThemeMode.DARK) {
-        sample(WorshipReminderType.TAHAJJUD, "Tahajjud", "تَهَجُّد", "A blessed time for du'a has begun.")
-    }
-}
-
-@Preview(showBackground = true, widthDp = 400, name = "Iftar — light")
-@Composable
-private fun WorshipCard_Iftar_Light() {
-    NimazTheme(themeMode = ThemeMode.LIGHT) {
-        WorshipEventCard(
-            type = WorshipReminderType.IFTAR, name = "Iftar", arabic = "إفْطار",
-            body = "Maghrib has entered. Break your fast.",
-            eventTime = "6:41 PM", timeLabel = "Maghrib",
-            countdown = "22m", countdownLabel = "Iftar in",
-        )
-    }
-}
-
-@Preview(showBackground = true, widthDp = 400, fontScale = 2f, name = "Suhoor — 200% font")
-@Composable
-private fun WorshipCard_Suhoor_LargeFont() {
-    NimazTheme(themeMode = ThemeMode.LIGHT) {
-        WorshipEventCard(
-            type = WorshipReminderType.SUHOOR, name = "Suhoor", arabic = "سُحُور",
-            body = "Fajr is approaching. Finish your suhoor.",
-            eventTime = "4:52 AM", timeLabel = "Fajr",
-            countdown = "30m", countdownLabel = "Ends in",
-        )
-    }
-}
-
-@Preview(showBackground = true, widthDp = 400, name = "Laylatul Qadr — dark",
-    uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL)
-@Composable
-private fun WorshipCard_Qadr_Dark() {
-    NimazTheme(themeMode = ThemeMode.DARK) {
-        WorshipEventCard(
-            type = WorshipReminderType.LAYLATUL_QADR, name = "Laylatul Qadr", arabic = "لَيْلَة القَدْر",
-            body = "An odd night of the last ten. Seek the Night of Decree.",
-            eventTime = "Night 27", timeLabel = "Last ten",
-            countdown = "Tonight", countdownLabel = "Seek",
-        )
+        sample(WorshipReminderType.IFTAR, "Iftar", "إفْطار", "Maghrib has entered. Break your fast.", inHours = 1)
     }
 }

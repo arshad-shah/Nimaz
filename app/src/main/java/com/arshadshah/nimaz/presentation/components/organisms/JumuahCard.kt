@@ -19,6 +19,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
+import androidx.compose.runtime.getValue
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCountdownText
+import com.arshadshah.nimaz.presentation.components.atoms.TickResolution
+import com.arshadshah.nimaz.presentation.components.atoms.clockTimeText
+import com.arshadshah.nimaz.presentation.components.atoms.rememberNow
+import kotlin.time.Instant
+import kotlin.time.Clock
+import kotlin.time.Duration.Companion.hours
 
 /**
  * Friday-only Jumu'ah highlight, built on [EventCard]. English/Arabic name, khutbah
@@ -27,13 +35,15 @@ import com.arshadshah.nimaz.presentation.theme.NimazTheme
  */
 @Composable
 fun JumuahCard(
-    jumuahTime: String,
-    timeUntilJumuah: String,
-    isJumuahPassed: Boolean,
+    jumuahAt: Instant?,
     modifier: Modifier = Modifier,
     fillHeight: Boolean = false,
 ) {
     val v = eventCardVisualsFor(EventOccasion.JUMUAH)
+    // "Has the khutbah started" is a function of now, derived here off the shared ticker rather
+    // than pushed from the ViewModel once a second.
+    val now by rememberNow(TickResolution.MINUTES)
+    val isJumuahPassed = jumuahAt != null && now >= jumuahAt
     EventCard(
         accent = v.accent,
         containerAccent = v.containerAccent,
@@ -43,11 +53,11 @@ fun JumuahCard(
         arabic = stringResource(R.string.jumuah_arabic),
         body = stringResource(R.string.jumuah_hadith_quote),
         fillHeight = fillHeight,
-        trailing = if (jumuahTime.isNotEmpty()) {
+        trailing = if (jumuahAt != null) {
             {
                 Column(horizontalAlignment = Alignment.End) {
                     Text(
-                        text = jumuahTime,
+                        text = clockTimeText(jumuahAt),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface
@@ -74,7 +84,7 @@ fun JumuahCard(
                         textAlign = TextAlign.Center
                     )
                 }
-            } else if (timeUntilJumuah.isNotEmpty()) {
+            } else if (jumuahAt != null) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -85,10 +95,11 @@ fun JumuahCard(
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    Text(
-                        text = timeUntilJumuah,
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold,
+                    NimazCountdownText(
+                        target = jumuahAt,
+                        style = MaterialTheme.typography.headlineSmall.copy(
+                            fontWeight = FontWeight.Bold
+                        ),
                         color = v.accent
                     )
                 }
@@ -103,9 +114,7 @@ fun JumuahCard(
 private fun JumuahCard_Preview() {
     NimazTheme {
         JumuahCard(
-            jumuahTime = "1:30 PM",
-            timeUntilJumuah = "3h 15m",
-            isJumuahPassed = false,
+            jumuahAt = Clock.System.now() + 3.hours,
             modifier = Modifier.padding(16.dp)
         )
     }
@@ -116,9 +125,7 @@ private fun JumuahCard_Preview() {
 private fun JumuahCard_Passed_Preview() {
     NimazTheme {
         JumuahCard(
-            jumuahTime = "1:30 PM",
-            timeUntilJumuah = "",
-            isJumuahPassed = true,
+            jumuahAt = Clock.System.now() - 1.hours,
             modifier = Modifier.padding(16.dp)
         )
     }

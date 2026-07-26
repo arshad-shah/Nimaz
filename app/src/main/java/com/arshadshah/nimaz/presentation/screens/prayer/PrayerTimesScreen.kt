@@ -74,8 +74,75 @@ import com.arshadshah.nimaz.presentation.viewmodel.PrayerTimesViewModel
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
+import com.arshadshah.nimaz.presentation.components.atoms.TickResolution
+import com.arshadshah.nimaz.presentation.components.atoms.clockTimeText
+import com.arshadshah.nimaz.presentation.components.atoms.countdownText
+import com.arshadshah.nimaz.presentation.components.atoms.rememberCountdownTo
+import com.arshadshah.nimaz.presentation.components.atoms.rememberNow
+import com.arshadshah.nimaz.presentation.viewmodel.withClockState
+import com.arshadshah.nimaz.presentation.viewmodel.PrayerTimesUiState
 
 private val DATE_FMT: DateTimeFormatter = DateTimeFormatter.ofPattern("EEE, d MMMM")
+
+/**
+ * The clock-derived slice of the Prayer Times screen: live passed/current/next flags plus the sky
+ * hero's labels. The ViewModel publishes instants; "now" only enters here, off the shared ticker.
+ */
+/**
+ * Relative-day label for a non-today selection. Mirrors the wording the ViewModel used before the
+ * migration (still English-only — pre-existing, tracked separately from this change).
+ */
+private fun daysFromToday(date: java.time.LocalDate, today: java.time.LocalDate): String {
+    val diff = date.toEpochDay() - today.toEpochDay()
+    return when {
+        diff == 0L -> "Today"
+        diff == 1L -> "Tomorrow"
+        diff == -1L -> "Yesterday"
+        diff > 0 -> "in $diff days"
+        else -> "${-diff} days ago"
+    }
+}
+
+private data class PrayerSky(
+    val prayers: List<PrayerTimeDisplay>,
+    val timeOfDay: Float,
+    val timeLabel: String,
+    val statusLabel: String,
+)
+
+@Composable
+private fun rememberPrayerSky(state: PrayerTimesUiState, today: java.time.LocalDate): PrayerSky {
+    val now by rememberNow(TickResolution.MINUTES)
+    val prayers = remember(state.prayers, now) { state.prayers.withClockState(now) }
+    val next = prayers.firstOrNull { it.isNext }
+    val nextAt = if (state.isToday) next?.timeAt ?: state.tomorrowFajrAt else null
+    val nextName = if (state.isToday) {
+        (next?.type ?: PrayerType.FAJR).displayName
+    } else ""
+
+    val nowLocal = remember(now) {
+        java.time.Instant.ofEpochMilli(now.toEpochMilliseconds())
+            .atZone(java.time.ZoneId.systemDefault()).toLocalDateTime()
+    }
+    val timeOfDay = (nowLocal.hour * 60 + nowLocal.minute) / 1440f
+
+    val timeLabel = if (state.isToday) clockTimeText(now) else state.selectedDate.format(DATE_FMT)
+    val statusLabel = if (state.isToday && nextAt != null) {
+        val parts by rememberCountdownTo(nextAt)
+        stringResource(
+            R.string.prayer_sky_status_format,
+            nextName,
+            countdownText(parts, showSeconds = false),
+        )
+    } else if (state.isToday) {
+        nextName
+    } else {
+        "${daysFromToday(state.selectedDate, today)} · " +
+            "${state.sunriseAt?.let { clockTimeText(it) } ?: "--:--"} — " +
+            "${state.sunsetAt?.let { clockTimeText(it) } ?: "--:--"}"
+    }
+    return PrayerSky(prayers, timeOfDay, timeLabel, statusLabel)
+}
 
 /**
  * Dedicated Prayer Times screen: a day pager with a living-sky hero. The top
@@ -92,6 +159,7 @@ fun PrayerTimesScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val today = remember { LocalDate.now() }
+    val sky = rememberPrayerSky(state, today)
     var showMonthSheet by remember { mutableStateOf(false) }
 
     // Edge-to-edge: the living sky reaches the very top, behind the status bar,
@@ -109,9 +177,9 @@ fun PrayerTimesScreen(
         // "Today" shortcut when browsing.
         Box(modifier = Modifier.fillMaxWidth()) {
             PrayerSkyScene(
-                timeOfDay = state.timeOfDay,
-                timeLabel = state.skyTimeLabel,
-                statusLabel = state.skyStatusLabel,
+                timeOfDay = sky.timeOfDay,
+                timeLabel = sky.timeLabel,
+                statusLabel = sky.statusLabel,
                 moonFraction = state.moonFraction,
                 sunriseFraction = state.sunriseFraction,
                 sunsetFraction = state.sunsetFraction,
@@ -203,10 +271,10 @@ fun PrayerTimesScreen(
                 label = "day",
             ) { date ->
                 DayList(
-                    prayers = state.prayers,
+                    prayers = sky.prayers,
                     isFuture = date.isAfter(today),
-                    sunrise = state.sunrise,
-                    sunset = state.sunset,
+                    sunriseAt = state.sunriseAt,
+                    sunsetAt = state.sunsetAt,
                     daylight = state.daylight,
                     method = state.methodLabel,
                     onToggle = { viewModel.onEvent(PrayerTimesEvent.TogglePrayer(it)) },
@@ -313,8 +381,8 @@ private fun DayNavBar(
 private fun DayList(
     prayers: List<PrayerTimeDisplay>,
     isFuture: Boolean,
-    sunrise: String,
-    sunset: String,
+    sunriseAt: kotlin.time.Instant?,
+    sunsetAt: kotlin.time.Instant?,
     daylight: String,
     method: String,
     onToggle: (PrayerType) -> Unit,
@@ -334,7 +402,7 @@ private fun DayList(
             )
         }
         item {
-            DayInfoCard(sunrise = sunrise, sunset = sunset, daylight = daylight, method = method)
+            DayInfoCard(sunrise = sunriseAt?.let { clockTimeText(it) } ?: "--:--", sunset = sunsetAt?.let { clockTimeText(it) } ?: "--:--", daylight = daylight, method = method)
         }
     }
 }

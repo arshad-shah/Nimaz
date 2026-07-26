@@ -28,6 +28,7 @@ import com.arshadshah.nimaz.data.audio.QuranAudioService
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.usecase.AnnouncementUseCases
 import com.arshadshah.nimaz.presentation.components.atoms.NimazPatternBackground
+import com.arshadshah.nimaz.presentation.components.atoms.ProvideNimazClock
 import com.arshadshah.nimaz.presentation.theme.NimazPatternStyle
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.theme.ThemeMode
@@ -139,26 +140,31 @@ class MainActivity : ComponentActivity() {
                     patternStyle = patternStyle,
                     localeCode = localeCode
                 ) {
-                    // The app-wide decorative background. Replaces the plain
-                    // Surface: it paints the same background colour, then draws
-                    // the ornament behind the whole nav graph. Screens show it
-                    // through by using NimazScreenScaffold (whose container is
-                    // transparent) instead of a bare Scaffold.
-                    NimazPatternBackground(
-                        modifier = Modifier.fillMaxSize(),
-                    ) {
-                        NavGraph(
-                            pendingQuranSurah = pendingQuranSurah,
-                            onPendingQuranSurahConsumed = { pendingQuranSurah = null },
-                            pendingIslamicCalendar = pendingIslamicCalendar,
-                            onPendingIslamicCalendarConsumed = {
-                                pendingIslamicCalendar = false
-                            },
-                            pendingAnnouncementRoute = pendingAnnouncementRoute,
-                            onPendingAnnouncementRouteConsumed = {
-                                pendingAnnouncementRoute = null
-                            },
-                        )
+                    // One shared, lifecycle-aware ticker for the whole app — the single source
+                    // countdowns and clocks read via rememberNow, replacing the per-screen 1s/30s/60s
+                    // loops. Installed immediately inside the theme so every screen shares it.
+                    ProvideNimazClock {
+                        // The app-wide decorative background. Replaces the plain
+                        // Surface: it paints the same background colour, then draws
+                        // the ornament behind the whole nav graph. Screens show it
+                        // through by using NimazScreenScaffold (whose container is
+                        // transparent) instead of a bare Scaffold.
+                        NimazPatternBackground(
+                            modifier = Modifier.fillMaxSize(),
+                        ) {
+                            NavGraph(
+                                pendingQuranSurah = pendingQuranSurah,
+                                onPendingQuranSurahConsumed = { pendingQuranSurah = null },
+                                pendingIslamicCalendar = pendingIslamicCalendar,
+                                onPendingIslamicCalendarConsumed = {
+                                    pendingIslamicCalendar = false
+                                },
+                                pendingAnnouncementRoute = pendingAnnouncementRoute,
+                                onPendingAnnouncementRouteConsumed = {
+                                    pendingAnnouncementRoute = null
+                                },
+                            )
+                        }
                     }
                 }
             }

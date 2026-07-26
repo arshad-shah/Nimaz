@@ -519,6 +519,21 @@
     <string name="worship_card_in">In</string>
     <string name="worship_card_tonight">Tonight</string>
     <string name="worship_card_tomorrow">Tomorrow</string>
+    <string name="worship_card_now">Now</string>
+    <!-- Home "Next Worship" card CTAs (per reminder type) -->
+    <string name="worship_action_duas">Open du\'as</string>
+    <string name="worship_action_adhkar">Open adhkar</string>
+    <string name="worship_action_iftar_dua">Iftar du\'a</string>
+    <string name="worship_action_quran">Open Qur\'an</string>
+    <string name="worship_action_fast_tracker">Fast tracker</string>
+    <!-- Localized countdown units — translators may reorder or re-suffix per locale -->
+    <string name="countdown_hms">%1$d h %2$d m %3$d s</string>
+    <string name="countdown_ms">%1$d m %2$d s</string>
+    <string name="countdown_s">%1$d s</string>
+    <string name="countdown_hm">%1$d h %2$d m</string>
+    <string name="countdown_m">%1$d m</string>
+    <string name="countdown_now">Now</string>
+    <string name="prayer_sky_status_format">%1$s in %2$s</string>
     <plurals name="notif_khatam_body_on_track">
         <item quantity="one">%1$s · you\'re on pace. %2$d ayah to keep it going.</item>
         <item quantity="other">%1$s · you\'re on pace. %2$d ayahs to keep it going.</item>
@@ -1756,4 +1771,24 @@
     <string name="qaida_lesson">Lesson</string>
     <string name="ai_retry_minutes_format">%1$d min</string>
     <string name="ai_retry_hours_format">%1$d h</string>
+
+    <!-- Night worship hub (Tahajjud / Witr destination) -->
+    <string name="night_worship_title">Night Worship</string>
+    <string name="night_worship_last_third">Last third of the night</string>
+    <string name="night_worship_open_now">Open now</string>
+    <string name="night_worship_opens_in">Opens in</string>
+    <string name="night_worship_closed">Tonight\'s window has passed</string>
+    <string name="night_worship_times_unavailable">Set your location to see tonight\'s times</string>
+    <string name="night_worship_rakah_title">Rakahs prayed</string>
+    <string name="night_worship_rakah_body">Night prayer is offered two by two</string>
+    <string name="night_worship_add_pair">+2 rakah</string>
+    <string name="night_worship_reset">Reset</string>
+    <string name="night_worship_witr_title">Witr</string>
+    <string name="night_worship_witr_body">One or three rakah, prayed last</string>
+    <string name="night_worship_recite_title">Recite Surah Al-Mulk</string>
+    <string name="night_worship_recite_body">Thirty verses that intercede for their reader</string>
+    <string name="night_worship_duas_title">Night prayer du\'as</string>
+    <string name="night_worship_duas_body">Qunut and the supplications of the night</string>
+    <string name="night_worship_why_title">Why pray at night</string>
+    <string name="night_worship_why_body">&quot;Our Lord descends to the nearest heaven…&quot;</string>
 </resources>

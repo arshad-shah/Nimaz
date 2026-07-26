@@ -38,6 +38,8 @@ import com.arshadshah.nimaz.presentation.components.atoms.getPrayerColor
 import com.arshadshah.nimaz.presentation.components.atoms.getPrayerIcon
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.viewmodel.PrayerTimeDisplay
+import kotlin.time.Instant
+import com.arshadshah.nimaz.presentation.components.atoms.clockTimeText
 
 /**
  * A single prayer's row card: icon + name (English / Arabic) + time +
@@ -120,7 +122,7 @@ fun PrayerTimeCard(
 
                 // Prayer Time
                 Text(
-                    text = prayer.time,
+                    text = clockTimeText(prayer.timeAt),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = if (isActive) FontWeight.Bold else FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurface
@@ -146,23 +148,23 @@ fun PrayerTimeCard(
 }
 
 private val sampleAsr = PrayerTimeDisplay(
-    PrayerType.ASR, "Asr", "4:30 PM",
+    PrayerType.ASR, "Asr", previewInstant(16, 30),
     isPassed = false, isCurrent = true, isNext = true
 )
 
 private val sampleFajr = PrayerTimeDisplay(
-    PrayerType.FAJR, "Fajr", "5:23 AM",
+    PrayerType.FAJR, "Fajr", previewInstant(5, 23),
     isPassed = true, isCurrent = false, isNext = false,
     prayerStatus = PrayerStatus.PRAYED
 )
 
 private val sampleMaghrib = PrayerTimeDisplay(
-    PrayerType.MAGHRIB, "Maghrib", "6:12 PM",
+    PrayerType.MAGHRIB, "Maghrib", previewInstant(18, 12),
     isPassed = false, isCurrent = false, isNext = false
 )
 
 private val sampleSunrise = PrayerTimeDisplay(
-    PrayerType.SUNRISE, "Sunrise", "6:12 PM",
+    PrayerType.SUNRISE, "Sunrise", previewInstant(18, 12),
     isPassed = false, isCurrent = false, isNext = false
 )
 
@@ -223,5 +225,9 @@ private fun PrayerTimeCard_sunrise_Preview() {
     }
 }
 
-
-
+/** Fixed wall-clock instants for previews, so sample rows read like a real day. */
+private fun previewInstant(hour: Int, minute: Int): Instant =
+    Instant.fromEpochMilliseconds(
+        java.time.LocalDate.now().atTime(hour, minute)
+            .atZone(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli()
+    )

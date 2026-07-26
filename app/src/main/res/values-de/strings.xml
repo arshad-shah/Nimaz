@@ -1564,6 +1564,19 @@
     <string name="worship_card_in">In</string>
     <string name="worship_card_tonight">Heute Nacht</string>
     <string name="worship_card_tomorrow">Morgen</string>
+    <string name="worship_card_now">Jetzt</string>
+    <string name="worship_action_duas">Bittgebete öffnen</string>
+    <string name="worship_action_adhkar">Adhkar öffnen</string>
+    <string name="worship_action_iftar_dua">Iftar-Bittgebet</string>
+    <string name="worship_action_quran">Koran öffnen</string>
+    <string name="worship_action_fast_tracker">Fasten-Tracker</string>
+    <string name="countdown_hms">%1$d Std. %2$d Min. %3$d Sek.</string>
+    <string name="countdown_ms">%1$d Min. %2$d Sek.</string>
+    <string name="countdown_s">%1$d Sek.</string>
+    <string name="countdown_hm">%1$d Std. %2$d Min.</string>
+    <string name="countdown_m">%1$d Min.</string>
+    <string name="countdown_now">Jetzt</string>
+    <string name="prayer_sky_status_format">%1$s in %2$s</string>
     <string name="worship_settings_title">Andachtserinnerungen</string>
     <string name="worship_settings_subtitle">Tahajjud, Suhoor, Iftar, Adhkar &amp; mehr</string>
     <string name="worship_settings_section_night">Nachtandacht</string>
@@ -1595,4 +1608,24 @@
     <string name="notif_hub_sound_subtitle">Adhan · Muezzin · Vibration · Nicht stören</string>
     <string name="notif_hub_troubleshooting_title">Fehlerbehebung</string>
     <string name="notif_hub_troubleshooting_subtitle">Test · Zurücksetzen · Akku-Optimierung</string>
+
+    <!-- Nachtgebet-Zentrum (Ziel fuer Tahajjud / Witr) -->
+    <string name="night_worship_title">Nachtgebet</string>
+    <string name="night_worship_last_third">Letztes Drittel der Nacht</string>
+    <string name="night_worship_open_now">Jetzt geöffnet</string>
+    <string name="night_worship_opens_in">Beginnt in</string>
+    <string name="night_worship_closed">Das Zeitfenster heute Nacht ist vorbei</string>
+    <string name="night_worship_times_unavailable">Lege deinen Standort fest, um die Zeiten zu sehen</string>
+    <string name="night_worship_rakah_title">Gebetene Rakat</string>
+    <string name="night_worship_rakah_body">Das Nachtgebet wird paarweise verrichtet</string>
+    <string name="night_worship_add_pair">+2 Rakat</string>
+    <string name="night_worship_reset">Zurücksetzen</string>
+    <string name="night_worship_witr_title">Witr</string>
+    <string name="night_worship_witr_body">Ein oder drei Rakat, zuletzt gebetet</string>
+    <string name="night_worship_recite_title">Sure Al-Mulk lesen</string>
+    <string name="night_worship_recite_body">Dreißig Verse, die für ihren Leser Fürsprache einlegen</string>
+    <string name="night_worship_duas_title">Bittgebete des Nachtgebets</string>
+    <string name="night_worship_duas_body">Qunut und die Bittgebete der Nacht</string>
+    <string name="night_worship_why_title">Warum nachts beten</string>
+    <string name="night_worship_why_body">&quot;Unser Herr steigt zum untersten Himmel herab…&quot;</string>
 </resources>

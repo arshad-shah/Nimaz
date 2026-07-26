@@ -116,6 +116,7 @@ import com.arshadshah.nimaz.presentation.viewmodel.SearchFilter
 import com.google.android.play.core.review.ReviewManagerFactory
 import kotlinx.coroutines.launch
 import kotlin.system.exitProcess
+import com.arshadshah.nimaz.presentation.screens.worship.NightWorshipScreen
 
 @Composable
 fun NavGraph(
@@ -325,6 +326,9 @@ fun NavGraph(
                     onNavigateToPrayerSettings = { navController.navigate(Route.SettingsPrayerCalculation) },
                     onNavigateToPrayerTimes = { navController.navigate(Route.PrayerTimes) },
                     onOpenHadith = { hadithId -> navController.navigate(Route.HadithReader(hadithId)) },
+                    // Every worship card now leads somewhere; the mapping is a pure function so
+                    // it is asserted in a JVM test rather than only through the UI.
+                    onOpenWorship = { type -> navController.navigate(worshipCardDestination(type)) },
                     onOpenAnnouncementRoute = { key ->
                         if (key.startsWith("https://")) {
                             runCatching {
@@ -707,6 +711,15 @@ fun NavGraph(
                 FastTrackerScreen(
                     onNavigateBack = { navController.popBackStack() },
                     onNavigateToHistory = { navController.navigate(Route.FastingStats) }
+                )
+            }
+
+            taggedComposable<Route.NightWorship>(ScreenTags.NightWorship) {
+                NightWorshipScreen(
+                    onNavigateBack = { navController.popBackStack() },
+                    onOpenSurah = { surah: Int -> navController.navigate(Route.QuranReader(surah)) },
+                    onOpenDuaCategory = { id: String -> navController.navigate(Route.DuaCategory(id)) },
+                    onOpenHadith = { id: String -> navController.navigate(Route.HadithReader(id)) },
                 )
             }
 

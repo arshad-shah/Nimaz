@@ -1,5 +1,5 @@
 {
-  "contentVersion": 3,
+  "contentVersion": 4,
   "categories": [
     {
       "id": 1,
@@ -287,7 +287,7 @@
       "name_arabic": "الوتر وقيام الليل",
       "icon": "🌃",
       "display_order": 36,
-      "dua_count": 3
+      "dua_count": 5
     },
     {
       "id": 36,
@@ -4672,6 +4672,34 @@
       "repeat_count": 1,
       "audio_file": null,
       "display_order": 10
+    },
+    {
+      "category_id": 35,
+      "title_english": "Opening supplication for the night prayer",
+      "title_arabic": "دعاء الاستفتاح لقيام الليل",
+      "text_arabic": "اللَّهُمَّ لَكَ الْحَمْدُ أَنْتَ نُورُ السَّمَاوَاتِ وَالأَرْضِ وَمَنْ فِيهِنَّ، وَلَكَ الْحَمْدُ أَنْتَ قَيِّمُ السَّمَاوَاتِ وَالأَرْضِ وَمَنْ فِيهِنَّ",
+      "transliteration": "allahumma lakal-hamdu anta nurus-samawati wal-ardi wa man fihinn, wa lakal-hamdu anta qayyimus-samawati wal-ardi wa man fihinn",
+      "translation": "O Allah, to You be praise — You are the Light of the heavens and the earth and all within them. To You be praise — You are the Sustainer of the heavens and the earth and all within them.",
+      "source": "Sahih Muslim 1808",
+      "virtue": "Said by the Prophet (peace be upon him) when he rose during the night to pray.",
+      "repeat_count": 1,
+      "audio_file": null,
+      "id": 310,
+      "display_order": 4
+    },
+    {
+      "category_id": 35,
+      "title_english": "At the end of the Witr prayer",
+      "title_arabic": "دعاء آخر الوتر",
+      "text_arabic": "اللَّهُمَّ إِنِّي أَعُوذُ بِرِضَاكَ مِنْ سَخَطِكَ، وَبِمُعَافَاتِكَ مِنْ عُقُوبَتِكَ، وَأَعُوذُ بِكَ مِنْكَ، لاَ أُحْصِي ثَنَاءً عَلَيْكَ أَنْتَ كَمَا أَثْنَيْتَ عَلَى نَفْسِكَ",
+      "transliteration": "allahumma inni a'udhu bi ridaka min sakhatik, wa bi mu'afatika min 'uqubatik, wa a'udhu bika mink, la uhsi thana'an alayk, anta kama athnayta ala nafsik",
+      "translation": "O Allah, I seek refuge in Your pleasure from Your anger, and in Your pardon from Your punishment, and I seek refuge in You from You. I cannot enumerate Your praise; You are as You have praised Yourself.",
+      "source": "Sunan Abu Dawud 1427",
+      "virtue": "The Prophet (peace be upon him) would say this at the end of his Witr.",
+      "repeat_count": 1,
+      "audio_file": null,
+      "id": 311,
+      "display_order": 5
     }
   ]
 }

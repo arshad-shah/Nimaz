@@ -70,7 +70,9 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazPager
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
+import com.arshadshah.nimaz.presentation.components.atoms.TickResolution
 import com.arshadshah.nimaz.presentation.components.atoms.rememberNimazPagerState
+import com.arshadshah.nimaz.presentation.components.atoms.rememberNow
 import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
 import com.arshadshah.nimaz.presentation.components.molecules.NimazQadaPrayerItem
 import com.arshadshah.nimaz.presentation.components.molecules.calendar.CalendarDayState
@@ -85,6 +87,7 @@ import com.arshadshah.nimaz.presentation.viewmodel.PrayerTrackerViewModel
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.YearMonth
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -471,8 +474,18 @@ private fun SelectedDayDetail(
         it.status == PrayerStatus.PRAYED || it.status == PrayerStatus.LATE || it.status == PrayerStatus.QADA
     }
 
-    val now = LocalDateTime.now()
-    val today = LocalDate.now()
+    // Read the clock through the shared ticker rather than calling LocalDateTime.now() directly:
+    // a bare now() is not observable state, so the "passed / missed" flag below would only flip
+    // when something *else* happened to recompose this screen — sit on the tracker as a prayer
+    // time arrives and nothing would change. Minute resolution is the granularity of the decision.
+    val nowInstant by rememberNow(TickResolution.MINUTES)
+    val now = remember(nowInstant) {
+        LocalDateTime.ofInstant(
+            java.time.Instant.ofEpochMilli(nowInstant.toEpochMilliseconds()),
+            ZoneId.systemDefault(),
+        )
+    }
+    val today = now.toLocalDate()
     val isToday = selectedDate == today
     val isPastDate = selectedDate.isBefore(today)
 

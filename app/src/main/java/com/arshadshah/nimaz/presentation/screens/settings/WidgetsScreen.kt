@@ -29,6 +29,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import com.arshadshah.nimaz.presentation.components.atoms.TickResolution
+import com.arshadshah.nimaz.presentation.components.atoms.rememberNow
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -105,8 +107,6 @@ fun WidgetsScreen(
     val context = LocalContext.current
 
     // State for dynamic widget preview data
-    var previewData by remember { mutableStateOf(WidgetPreviewData()) }
-
     // The location behind the preview is read once. It cannot change while this
     // screen is open, and re-reading it on every countdown tick meant constructing
     // a PreferencesDataStore and doing file I/O once a second.
@@ -115,14 +115,12 @@ fun WidgetsScreen(
         previewLocation = loadPreviewLocation(context)
     }
 
-    // Only the countdown moves per second; it is derived in memory from the
-    // location above, with no I/O on the tick.
-    LaunchedEffect(previewLocation) {
-        val location = previewLocation ?: return@LaunchedEffect
-        while (true) {
-            previewData = buildWidgetPreviewData(context, location)
-            delay(1000) // Update every second for countdown
-        }
+    // Only the countdown moves per second; derive it from the one shared ticker
+    // instead of a private 1s loop. buildWidgetPreviewData is pure (no I/O), so it
+    // is safe to recompute on each second boundary.
+    val nowTick by rememberNow(TickResolution.SECONDS)
+    val previewData = remember(previewLocation, nowTick) {
+        previewLocation?.let { buildWidgetPreviewData(context, it) } ?: WidgetPreviewData()
     }
 
     NimazScreenScaffold(

@@ -58,10 +58,23 @@ class WorshipReminderCalculatorTest {
     }
 
     @Test
-    fun `tahajjud after the last third rolls to the following night`() {
+    fun `tahajjud during the last third is still tonight's occurrence, active`() {
+        // 03:00 is inside the last third (02:40 → Fajr 05:00): the window model keeps *this* night's
+        // occurrence live and active rather than jumping to the next night (which the pre-window gate
+        // did, hiding the card exactly when Tahajjud is happening).
         val now = LocalDate.of(2026, 3, 11).atTime(3, 0)
         val occ = next(WorshipReminderType.TAHAJJUD, now)!!
+        assertThat(occ.triggerAt).isEqualTo(LocalDate.of(2026, 3, 11).atTime(2, 40))
+        assertThat(occ.isActiveAt(now)).isTrue()
+    }
+
+    @Test
+    fun `tahajjud after the window closes rolls to the following night`() {
+        // 06:00 is past Fajr (05:00) — tonight's window has closed, so it rolls forward.
+        val now = LocalDate.of(2026, 3, 11).atTime(6, 0)
+        val occ = next(WorshipReminderType.TAHAJJUD, now)!!
         assertThat(occ.triggerAt).isEqualTo(LocalDate.of(2026, 3, 12).atTime(2, 40))
+        assertThat(occ.isActiveAt(now)).isFalse()
     }
 
     // ── Witr: after-Isha (default) vs before-Fajr mode (#309) ────────────

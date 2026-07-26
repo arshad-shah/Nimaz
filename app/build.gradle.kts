@@ -39,8 +39,8 @@ android {
         // Source of truth for the app version. CI bumps these at build time and
         // pushes the change back to dev (with a bypass GitHub App token) after a successful
         // deploy, so the committed baseline stays in sync for the next build.
-        versionCode = 368
-        versionName = "3.0.68"
+        versionCode = 371
+        versionName = "3.0.71"
 
         // Custom runner swaps in HiltTestApplication so instrumented tests run on
         // the full Hilt graph without NimazApp's Firebase / AppInitializer / device
@@ -277,6 +277,10 @@ dependencies {
     // Instrumented Testing
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    // UI Automator drives the app from *outside* Compose's test harness. Required for the
+    // live-countdown tests: a ComposeTestRule puts the frame clock under test control, so a test
+    // that sleeps in real time never sees the UI redraw. See LiveCountdownTest.
+    androidTestImplementation(libs.androidx.uiautomator)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.mockk.android)

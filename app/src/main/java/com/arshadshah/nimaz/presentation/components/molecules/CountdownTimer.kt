@@ -21,6 +21,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -31,33 +33,44 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.util.CountdownParts
+import com.arshadshah.nimaz.core.util.countdownTo
+import com.arshadshah.nimaz.presentation.components.atoms.TickResolution
+import com.arshadshah.nimaz.presentation.components.atoms.rememberNow
 import com.arshadshah.nimaz.presentation.theme.LocalAnimationsEnabled
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
+import kotlin.time.Clock
+import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.Instant
 
 /**
  * HH:MM:SS countdown timer rendered as three boxed digit groups separated by
- * colons. Parses the input format produced by the prayer-time view models
- * (e.g. "2h 34m" or "34m 12s"); missing units render as "00".
+ * colons. Counts down to [target] itself via the shared ticker — the caller
+ * passes an instant, so nothing upstream has to hold or reformat a string.
  *
- * The boxes pulse subtly when [LocalAnimationsEnabled] is true.
+ * This replaces the old string-parsing signature, which split on spaces and
+ * matched the literal Latin suffixes `h`/`m`/`s`; that broke the moment the
+ * countdown strings were localized or rendered with Arabic-Indic digits. The
+ * numbers now travel as numbers.
+ *
+ * The boxes pulse subtly when [LocalAnimationsEnabled] is true; when it is off
+ * they hold a plain `1f` rather than running an idle infinite tween that keeps
+ * the frame clock awake.
  */
 @Composable
 fun CountdownTimer(
-    timeUntilNextPrayer: String,
+    target: Instant?,
     modifier: Modifier = Modifier
 ) {
-    val parts = timeUntilNextPrayer.split(" ")
-    var hours = "00"
-    var minutes = "00"
-    var seconds = "00"
-
-    parts.forEach { part ->
-        when {
-            part.endsWith("h") -> hours = part.dropLast(1).padStart(2, '0')
-            part.endsWith("m") -> minutes = part.dropLast(1).padStart(2, '0')
-            part.endsWith("s") -> seconds = part.dropLast(1).padStart(2, '0')
-        }
+    val now by rememberNow(TickResolution.SECONDS)
+    val parts = remember(target, now) {
+        if (target == null) CountdownParts.ZERO else countdownTo(target, now)
     }
+    val hours = parts.hours.toString().padStart(2, '0')
+    val minutes = parts.minutes.toString().padStart(2, '0')
+    val seconds = parts.seconds.toString().padStart(2, '0')
 
     val animationsEnabled = LocalAnimationsEnabled.current
     val infiniteTransition = rememberInfiniteTransition(label = "countdown_pulse")
@@ -72,15 +85,7 @@ fun CountdownTimer(
             label = "alpha"
         )
     } else {
-        infiniteTransition.animateFloat(
-            initialValue = 1f,
-            targetValue = 1f,
-            animationSpec = infiniteRepeatable(
-                animation = tween(1, easing = LinearEasing),
-                repeatMode = RepeatMode.Restart
-            ),
-            label = "alpha_static"
-        )
+        remember { mutableStateOf(1f) }
     }
 
     Row(
@@ -149,7 +154,7 @@ private fun CountdownSeparator(modifier: Modifier = Modifier) {
 private fun CountdownTimer_Preview() {
     NimazTheme {
         CountdownTimer(
-            timeUntilNextPrayer = "2h 15m 30s",
+            target = Clock.System.now() + 2.hours + 15.minutes + 30.seconds,
             modifier = Modifier.padding(16.dp)
         )
     }
@@ -160,7 +165,7 @@ private fun CountdownTimer_Preview() {
 private fun CountdownTimer_Imminent_Preview() {
     NimazTheme {
         CountdownTimer(
-            timeUntilNextPrayer = "45s",
+            target = Clock.System.now() + 45.seconds,
             modifier = Modifier.padding(16.dp)
         )
     }

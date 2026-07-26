@@ -7,6 +7,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
+import kotlin.time.Clock
+import kotlin.time.Duration.Companion.hours
+import kotlin.time.Instant
+import com.arshadshah.nimaz.domain.model.WorshipReminderType
 
 /**
  * A single event card's display data. Jumu'ah carries the three jumuah_* fields and
@@ -19,9 +23,8 @@ data class EventCardUi(
     val arabic: String? = null,
     val primaryAction: EventAction? = null,
     val onDismiss: (() -> Unit)? = null,
-    val jumuahTime: String = "",
-    val timeUntilJumuah: String = "",
-    val isJumuahPassed: Boolean = false,
+    /** Today's Dhuhr on Fridays; the card derives "passed" and its countdown from it. */
+    val jumuahAt: Instant? = null,
     /** When set, this page renders the "Next Worship" card via [WorshipEventCard]. */
     val worship: WorshipCardUi? = null,
 )
@@ -42,6 +45,11 @@ fun EventsCarousel(
     modifier: Modifier = Modifier,
     pageHeight: Dp = EventCardPageHeight,
     horizontalPadding: Dp = 20.dp,
+    /**
+     * Tapping the "Next Worship" card. Null leaves it inert — which is what shipped, and why the
+     * card looked like decoration: it counted down at you and then did nothing.
+     */
+    onWorshipClick: ((WorshipReminderType) -> Unit)? = null,
 ) {
     if (events.isEmpty()) return
     NimazCarousel(
@@ -54,22 +62,16 @@ fun EventsCarousel(
         val e = events[pageIndex]
         val worship = e.worship
         if (worship != null) {
+            // The card derives its own countdown/proximity from the instants in `worship`
+            // via the shared ticker — no pre-formatted strings, no per-minute VM refresh.
             WorshipEventCard(
-                type = worship.type,
-                name = worship.name,
-                arabic = worship.arabic,
-                body = worship.body,
-                eventTime = worship.eventTime,
-                timeLabel = worship.timeLabel,
-                countdown = worship.countdown,
-                countdownLabel = worship.countdownLabel,
+                card = worship,
                 fillHeight = true,
+                onAction = onWorshipClick,
             )
         } else if (e.occasion == EventOccasion.JUMUAH) {
             JumuahCard(
-                jumuahTime = e.jumuahTime,
-                timeUntilJumuah = e.timeUntilJumuah,
-                isJumuahPassed = e.isJumuahPassed,
+                jumuahAt = e.jumuahAt,
                 fillHeight = true,
             )
         } else {
@@ -107,8 +109,7 @@ private fun EventsCarousel_Preview() {
                     occasion = EventOccasion.JUMUAH,
                     eyebrow = "Jumu'ah",
                     body = "\"The best day on which the sun rises is Friday.\"",
-                    jumuahTime = "1:30 PM",
-                    timeUntilJumuah = "3h 15m",
+                    jumuahAt = Clock.System.now() + 3.hours,
                 ),
             ),
             modifier = Modifier.padding(vertical = 8.dp),

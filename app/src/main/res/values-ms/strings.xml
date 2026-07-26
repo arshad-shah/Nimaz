@@ -1535,6 +1535,19 @@
     <string name="worship_card_in">Dalam</string>
     <string name="worship_card_tonight">Malam ini</string>
     <string name="worship_card_tomorrow">Esok</string>
+    <string name="worship_card_now">Sekarang</string>
+    <string name="worship_action_duas">Buka doa</string>
+    <string name="worship_action_adhkar">Buka zikir</string>
+    <string name="worship_action_iftar_dua">Doa iftar</string>
+    <string name="worship_action_quran">Buka al-Quran</string>
+    <string name="worship_action_fast_tracker">Penjejak puasa</string>
+    <string name="countdown_hms">%1$d j %2$d min %3$d saat</string>
+    <string name="countdown_ms">%1$d min %2$d saat</string>
+    <string name="countdown_s">%1$d saat</string>
+    <string name="countdown_hm">%1$d j %2$d min</string>
+    <string name="countdown_m">%1$d min</string>
+    <string name="countdown_now">Sekarang</string>
+    <string name="prayer_sky_status_format">%1$s dalam %2$s</string>
     <string name="worship_settings_title">Peringatan ibadah</string>
     <string name="worship_settings_subtitle">Tahajud, Sahur, Berbuka, zikir &amp; lain-lain</string>
     <string name="worship_settings_section_night">Ibadah malam</string>
@@ -1566,4 +1579,24 @@
     <string name="notif_hub_sound_subtitle">Azan · muazin · getaran · Jangan Ganggu</string>
     <string name="notif_hub_troubleshooting_title">Penyelesaian masalah</string>
     <string name="notif_hub_troubleshooting_subtitle">Uji · set semula · pengoptimuman bateri</string>
+
+    <!-- Pusat ibadah malam (destinasi Tahajud / Witir) -->
+    <string name="night_worship_title">Ibadah Malam</string>
+    <string name="night_worship_last_third">Sepertiga malam terakhir</string>
+    <string name="night_worship_open_now">Sedang berlangsung</string>
+    <string name="night_worship_opens_in">Bermula dalam</string>
+    <string name="night_worship_closed">Tempoh malam ini telah berlalu</string>
+    <string name="night_worship_times_unavailable">Tetapkan lokasi anda untuk melihat waktunya</string>
+    <string name="night_worship_rakah_title">Rakaat didirikan</string>
+    <string name="night_worship_rakah_body">Solat malam didirikan dua rakaat satu salam</string>
+    <string name="night_worship_add_pair">+2 rakaat</string>
+    <string name="night_worship_reset">Set semula</string>
+    <string name="night_worship_witr_title">Witir</string>
+    <string name="night_worship_witr_body">Satu atau tiga rakaat, didirikan terakhir</string>
+    <string name="night_worship_recite_title">Baca Surah Al-Mulk</string>
+    <string name="night_worship_recite_body">Tiga puluh ayat yang memberi syafaat kepada pembacanya</string>
+    <string name="night_worship_duas_title">Doa solat malam</string>
+    <string name="night_worship_duas_body">Qunut dan doa-doa malam</string>
+    <string name="night_worship_why_title">Mengapa solat malam</string>
+    <string name="night_worship_why_body">&quot;Tuhan kami turun ke langit dunia…&quot;</string>
 </resources>

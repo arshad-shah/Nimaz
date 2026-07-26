@@ -203,14 +203,81 @@ on the dedicated `WorshipRemindersScreen` (`Route.SettingsWorshipReminders`), an
 one. Ramadan-category reminders are Ramadan-gated and their settings group auto-hides outside
 Ramadan.
 
-> **Home refresh cadence.** `NextWorshipResolver.nearest()` reads every worship pref plus location
-> and calculation settings — ~30 sequential DataStore reads per call — so it must never sit on a
-> per-second path. `HomeViewModel` caches the resolved `WorshipReminderOccurrence` and re-resolves
-> it only when it is missing, has elapsed, or its settings changed; the card itself refreshes on a
-> 60s loop (`startWorshipUpdates`), which matches its whole-minute countdown. The 1s prayer
-> countdown (`renderTick`) is pure and I/O-free, deriving everything from prayer instants cached by
-> `calculatePrayerTimes`. Keep it that way: a suspension point in the tick makes any transient
-> state set around it — notably `isLoading` — observable to the UI on every tick.
+> **Occurrences are windows, not instants.** `WorshipReminderOccurrence` carries an optional
+> `[windowStart, windowEnd)` span; `isActiveAt(now)` is true while `eventAt ≤ now < windowEnd`, and
+> `isLiveAt(now)` means *upcoming or active*. This closed a shipped bug: with the old
+> `triggerAt.isAfter(now)` gate an occurrence became "spent" the instant its trigger passed, so its
+> next occurrence jumped ~24 h out and fell off the resolver's 14 h near-window — leaving the
+> **opposite** adhkar card on Home all day (and hiding Iftar at Maghrib, Tahajjud at the last third).
+> `nextOccurrence` now accepts an occurrence that `isLiveAt(now)`, and `NextWorshipResolver.nearest()`
+> keeps any *active* occurrence regardless of the near-window and ranks active above upcoming.
+> Windows come straight from `DayWorshipTimes`: night types (Tahajjud, Taraweeh, Laylatul Qadr,
+> eve-of fasts) close at the **next** day's Fajr (`timesFor(day.plusDays(1))?.fajr` — never
+> `t.lastThirdOfNight`, which would zero-length Tahajjud's window); Iftar spans Asr→Isha; Suhoor is a
+> hard stop at Fajr. **Adhkar close is a religious-content choice** — the accommodating view ships
+> (morning→Dhuhr, evening→Isha); the strict sunrise/Maghrib bounds are a natural future
+> `worshipReminderMode`. **Witr is deliberately left instantaneous**: its `eventAt` is the same
+> morning's Fajr (a pre-existing eventAt/triggerAt inconsistency scoped out of this fix), so a night
+> window would falsely mark a spent occurrence active. `timesFor` in `nearest()` is memoised per call
+> (`mutableMapOf<LocalDate, DayWorshipTimes?>`) since each night type now also asks for the next day's
+> Fajr. Covered by `WorshipDayWalkTest` (a zone-independent hour-by-hour walk of a synthetic day).
+
+> **Home refresh cadence — time is derived, not pushed.** ViewModels publish *facts* (prayer
+> `Instant`s); everything clock-derived is computed in the composable from one shared ticker.
+>
+> `presentation/components/atoms/NimazClock.kt` installs that ticker (`ProvideNimazClock` in
+> `MainActivity`, inside `NimazTheme`). `rememberNow(resolution)` reads it truncated to the caller's
+> resolution, so a card counting whole minutes invalidates once a minute rather than 60×.
+> `rememberCountdownTo` escalates to seconds only within `fineGrainedWithin` (default: the final
+> quarter-hour).
+>
+> **Tick resolution must follow the *displayed* resolution.** These are two separate knobs and
+> letting them disagree renders a digit the ticker never updates: the Home hero and `JumuahCard`
+> showed seconds while ticking once a minute, so their seconds froze for 60 s and jumped — and
+> because any unrelated recomposition refreshed them, the timers looked like they only moved when
+> you navigated around the app. `NimazCountdownText` now derives `fineGrainedWithin` from its own
+> `showSeconds` flag (`Duration.INFINITE` when true), so a seconds-showing countdown ticks at 1 Hz
+> at any distance and a minute-granularity one stays cheap. Hand-rolled `rememberCountdownTo`
+> callers must keep the two in step themselves.
+>
+> **The ticker is testable.** `ProvideNimazClock(timeSource = …)` takes the clock as a parameter
+> (default `SystemTimeSource`), because with `Clock.System.now()` hardcoded nothing could assert
+> that a timer ever advances — which is how a frozen countdown shipped unnoticed past a component
+> suite that pins `mainClock.autoAdvance = false` and only ever checks the first frame.
+> `NimazClockTest` drives a substituted source and covers: a countdown advancing with no external
+> recomposition, seconds ticking hours from the target, minute-resolution readers *not* recomposing
+> within a minute, one shared instant across consumers, and the no-provider fallback. Note the
+> harness detail: under a manual clock you must `advanceTimeByFrame()` after `advanceTimeBy(…)`,
+> since the `delay` resuming and writing state does not itself draw the frame that renders it.
+>
+> Removed by this migration: `HomeViewModel.startTimeUpdates()` (1s) and `startWorshipUpdates()`
+> (60s), `PrayerTimesViewModel.applyTick()` (1s), the `HomeHero` 30s clock loop, the `WidgetsScreen`
+> 1s preview loop, and all four `private var use24HourFormat` mirrors plus their `observeTimeFormat()`
+> collectors (Home, PrayerTimes, MonthlyPrayerTimes, Fasting). Times format at the leaf from
+> `LocalUse24HourFormat` (`clockTimeText`/`NimazClockText`), so the 12/24-hour toggle is a pure
+> recomposition instead of two astronomical passes.
+>
+> `PrayerTimeDisplay` carries `timeAt: Instant`; `List<PrayerTimeDisplay>.withClockState(now)`
+> re-derives `isPassed`/`isCurrent`/`isNext`, and `core/util/PrayerClock.kt` holds the pure
+> `nextPrayerIndexAt` / `currentPrayerIndexAt` / `prayerTimelineProgressAt`. This also fixed a real
+> bug: the old derivation compared `LocalTime` (dropping the date), so after Isha no row highlighted
+> and before Fajr today's Isha rendered as "current".
+>
+> **The worship card is a destination, not decoration.** It shipped inert — `WorshipEventCard`
+> accepted an `onAction` that Home never passed, so the card counted down and then did nothing.
+> The whole card surface is now the tap target (no CTA button: the carousel page is a fixed 170dp
+> and a button would cost scarce height), with `onClickLabel` carrying the per-type action wording
+> for screen readers. `core/navigation/WorshipDestinations.kt` maps type → route as a **pure
+> function**, so every row is asserted in a JVM test rather than only through the UI; a new
+> reminder type is a compile error rather than a silently inert card. Nine of the eleven types land
+> on screens that already existed (dua categories, the fast tracker); Tahajjud and Witr open
+> `Route.NightWorship`, built because those two had nowhere useful to go.
+>
+> Two things still need a schedule rather than a tick. **Date rollover** is watched by `HomeScreen`
+> off the ticker's local date (which also covers timezone and manual time changes) and fires
+> `HomeEvent.RefreshPrayerTimes`. **The worship card** re-resolves on an event-driven sleep until the
+> current occurrence's window closes — one wake per transition instead of 1,440 polls a day, each
+> costing ~30 DataStore reads — guarded end-to-end so nothing escapes to the uncaught handler.
 
 **Wiring.** `PrayerNotificationScheduler` is constructor-injected (`@Singleton @Inject`, deps: `PrayerTimeCalculator`, `SettingsRepository`). Called by `AppInitializer` on startup and by `SettingsViewModel.rescheduleNotifications()` when prayer/notification settings change. Permissions in `AndroidManifest.xml`: `POST_NOTIFICATIONS`, `SCHEDULE_EXACT_ALARM`, `USE_EXACT_ALARM`, `RECEIVE_BOOT_COMPLETED`, `WAKE_LOCK`, `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS`.
 

@@ -22,7 +22,7 @@ class PrayerTimeCardTest {
     private fun display(
         type: PrayerType = PrayerType.ASR,
         name: String = "Asr",
-        time: String = "4:30 PM",
+        timeAt: kotlin.time.Instant = testInstant(16, 30),
         isPassed: Boolean = false,
         isCurrent: Boolean = false,
         isNext: Boolean = false,
@@ -30,7 +30,7 @@ class PrayerTimeCardTest {
     ) = PrayerTimeDisplay(
         type = type,
         name = name,
-        time = time,
+        timeAt = timeAt,
         isPassed = isPassed,
         isCurrent = isCurrent,
         isNext = isNext,
@@ -41,7 +41,7 @@ class PrayerTimeCardTest {
     fun `renders prayer name and time`() {
         composeRule.setThemedContent {
             PrayerTimeCard(
-                prayer = display(name = "Asr", time = "4:30 PM"),
+                prayer = display(name = "Asr", timeAt = testInstant(16, 30)),
                 isActive = false,
                 onClick = {},
                 onToggle = {}
@@ -49,6 +49,7 @@ class PrayerTimeCardTest {
         }
 
         composeRule.onNodeWithText("Asr").assertExists()
+        // The card formats the instant at the leaf (12h default in tests).
         composeRule.onNodeWithText("4:30 PM").assertExists()
     }
 
@@ -66,6 +67,7 @@ class PrayerTimeCardTest {
         // The active card is conveyed by its container/accent (not a textual
         // pill); its name and time still render.
         composeRule.onNodeWithText("Asr").assertExists()
+        // The card formats the instant at the leaf (12h default in tests).
         composeRule.onNodeWithText("4:30 PM").assertExists()
     }
 
@@ -166,7 +168,7 @@ class PrayerTimeCardTest {
                 prayer = display(
                     type = PrayerType.SUNRISE,
                     name = "Sunrise",
-                    time = "6:45 AM"
+                    timeAt = testInstant(6, 45)
                 ),
                 isActive = false,
                 onClick = {},
@@ -178,3 +180,10 @@ class PrayerTimeCardTest {
         composeRule.onNodeWithContentDescription("Prayed").assertDoesNotExist()
     }
 }
+
+/** A fixed wall-clock instant today, so tests read like a real day. */
+private fun testInstant(hour: Int, minute: Int): kotlin.time.Instant =
+    kotlin.time.Instant.fromEpochMilliseconds(
+        java.time.LocalDate.now().atTime(hour, minute)
+            .atZone(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli()
+    )

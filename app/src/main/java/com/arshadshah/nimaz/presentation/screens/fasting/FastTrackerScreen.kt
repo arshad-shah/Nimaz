@@ -99,6 +99,11 @@ import java.time.YearMonth
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.temporal.TemporalAdjusters
+import com.arshadshah.nimaz.presentation.components.atoms.TickResolution
+import com.arshadshah.nimaz.presentation.components.atoms.clockTimeText
+import com.arshadshah.nimaz.presentation.components.atoms.countdownText
+import com.arshadshah.nimaz.presentation.components.atoms.rememberCountdownTo
+import com.arshadshah.nimaz.presentation.components.atoms.rememberNow
 
 // Color constants for makeup fasts
 private val OrangeAccent = NimazColors.PrayerColors.Asr
@@ -247,11 +252,8 @@ fun FastTrackerScreen(
                                 fastType = state.selectedFastType,
                                 selectedDate = state.selectedDate,
                                 ramadanDay = if (ramadanState.isRamadan) ramadanState.currentDay else null,
-                                suhoorTime = state.suhoorTime,
-                                iftarTime = state.iftarTime,
-                                timeUntilIftar = state.timeUntilIftar,
-                                timeUntilSuhoor = state.timeUntilSuhoor,
-                                isSuhoorTime = state.isSuhoorTime,
+                                suhoorAt = state.suhoorAt,
+                                iftarAt = state.iftarAt,
                                 onToggleFast = { viewModel.onEvent(FastingEvent.ToggleTodayFast) }
                             )
                         }
@@ -520,15 +522,18 @@ private fun TodayFastSection(
     fastType: FastType,
     selectedDate: LocalDate,
     ramadanDay: Int?,
-    suhoorTime: String,
-    iftarTime: String,
-    timeUntilIftar: String,
-    timeUntilSuhoor: String,
-    isSuhoorTime: Boolean,
+    suhoorAt: kotlin.time.Instant?,
+    iftarAt: kotlin.time.Instant?,
     onToggleFast: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val formatter = DateTimeFormatter.ofPattern("EEEE, MMMM d")
+    // "Are we still before Fajr" is a function of now — derived here off the shared ticker
+    // instead of being frozen into state when prayer times happened to load.
+    val now by rememberNow(TickResolution.MINUTES)
+    val isSuhoorTime = suhoorAt != null && now < suhoorAt
+    val suhoorTime = suhoorAt?.let { clockTimeText(it) } ?: "--:--"
+    val iftarTime = iftarAt?.let { clockTimeText(it) } ?: "--:--"
 
     Column(modifier = modifier) {
         Text(
@@ -646,9 +651,12 @@ private fun TodayFastSection(
                             )
                             Spacer(modifier = Modifier.height(5.dp))
                             Text(
-                                text = if (isSuhoorTime && timeUntilSuhoor.isNotEmpty()) timeUntilSuhoor else stringResource(
-                                    R.string.fasting_completed
-                                ),
+                                text = if (isSuhoorTime && suhoorAt != null) {
+                                    countdownText(
+                                        rememberCountdownTo(suhoorAt).value,
+                                        showSeconds = false,
+                                    )
+                                } else stringResource(R.string.fasting_completed),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -681,9 +689,14 @@ private fun TodayFastSection(
                             )
                             Spacer(modifier = Modifier.height(5.dp))
                             Text(
-                                text = if (!isSuhoorTime && timeUntilIftar.isNotEmpty()) timeUntilIftar else if (isSuhoorTime) stringResource(
-                                    R.string.fasting_waiting
-                                ) else stringResource(R.string.fasting_completed),
+                                text = if (isSuhoorTime) {
+                                    stringResource(R.string.fasting_waiting)
+                                } else if (iftarAt != null && now < iftarAt) {
+                                    countdownText(
+                                        rememberCountdownTo(iftarAt).value,
+                                        showSeconds = false,
+                                    )
+                                } else stringResource(R.string.fasting_completed),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )

@@ -21,6 +21,8 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import com.arshadshah.nimaz.presentation.components.atoms.TickResolution
+import com.arshadshah.nimaz.presentation.components.atoms.rememberNow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -31,6 +33,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.testTag
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.util.formatClockTime
 import com.arshadshah.nimaz.domain.model.PrayerType
@@ -49,8 +52,14 @@ import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import kotlinx.coroutines.delay
 import java.time.LocalDate
 import java.time.LocalTime
+import java.time.ZoneId
 import java.time.ZoneOffset
 import kotlin.time.Duration.Companion.milliseconds
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCountdownText
+import com.arshadshah.nimaz.presentation.components.atoms.clockTimeText
+import kotlin.time.Instant
+import kotlin.time.Clock
+import kotlin.time.Duration.Companion.hours
 
 /**
  * Home hero: a living-sky banner (current time + date) at the original hero
@@ -67,27 +76,24 @@ fun HomeHero(
     hijriDate: String,
     gregorianDate: String,
     nextPrayer: PrayerType?,
-    nextPrayerTime: String,
-    timeUntilNextPrayer: String,
+    nextPrayerAt: Instant?,
     modifier: Modifier = Modifier,
     sunriseFraction: Float = 0.27f,
     sunsetFraction: Float = 0.80f,
 ) {
     val use24Hour = LocalUse24HourFormat.current
-    var timeOfDay by remember { mutableFloatStateOf(minuteFractionNow()) }
-    var clock by remember(use24Hour) {
-        mutableStateOf(LocalTime.now().let { formatClockTime(it.hour, it.minute, use24Hour) })
+    // One shared minute-resolution read replaces the old private 30s loop, so the
+    // displayed minute now flips on the real minute boundary instead of up to half a
+    // minute late — and it costs nothing when the app is backgrounded.
+    val nowInstant by rememberNow(TickResolution.MINUTES)
+    val nowLocalTime = remember(nowInstant) {
+        java.time.Instant.ofEpochMilli(nowInstant.toEpochMilliseconds())
+            .atZone(ZoneId.systemDefault()).toLocalTime()
     }
+    val timeOfDay = (nowLocalTime.hour * 60 + nowLocalTime.minute) / 1440f
+    val clock = formatClockTime(nowLocalTime.hour, nowLocalTime.minute, use24Hour)
 
     val backdrop = rememberGlassBackdrop()
-    LaunchedEffect(use24Hour) {
-        while (true) {
-            val now = LocalTime.now()
-            timeOfDay = (now.hour * 60 + now.minute) / 1440f
-            clock = formatClockTime(now.hour, now.minute, use24Hour)
-            delay(30_000.milliseconds)
-        }
-    }
     val moonFraction = remember {
         MoonPhase.fractionForEpochMillis(
             LocalDate.now().atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
@@ -196,18 +202,28 @@ fun HomeHero(
 //                            modifier = Modifier.padding(start = 8.dp, bottom = 2.dp),
                         )
                     }
-                    Text(
-                        text = stringResource(R.string.at_time, nextPrayerTime),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    if (nextPrayerAt != null) {
+                        Text(
+                            text = stringResource(R.string.at_time, clockTimeText(nextPrayerAt)),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+                if (nextPrayerAt != null) {
+                    // Ticks itself off the shared clock, once a second, however far out the next
+                    // prayer is — it shows seconds, so it must tick in seconds. The testTag lets
+                    // an instrumented test assert on a real device that this actually advances;
+                    // that it silently stopped is the bug this whole area exists to prevent.
+                    NimazCountdownText(
+                        target = nextPrayerAt,
+                        style = MaterialTheme.typography.headlineSmall.copy(
+                            fontWeight = FontWeight.ExtraBold
+                        ),
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.testTag(HomeCountdownTestTag),
                     )
                 }
-                Text(
-                    text = timeUntilNextPrayer,
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.ExtraBold,
-                    color = MaterialTheme.colorScheme.primary,
-                )
             }
         }
     }
@@ -234,9 +250,11 @@ private fun HomeHero_Preview() {
             hijriDate = "7 Rajab 1446",
             gregorianDate = "Friday, January 31, 2026",
             nextPrayer = PrayerType.MAGHRIB,
-            nextPrayerTime = "4:30 PM",
-            timeUntilNextPrayer = "1h 12m",
+            nextPrayerAt = Clock.System.now() + 1.hours,
 
             )
     }
 }
+
+/** Test tag for the hero's next-prayer countdown, asserted by the live-countdown instrumentation test. */
+const val HomeCountdownTestTag = "home_next_prayer_countdown"

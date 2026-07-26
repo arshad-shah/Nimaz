@@ -23,14 +23,19 @@ import java.time.LocalDate
 import java.time.YearMonth
 import javax.inject.Inject
 
+/**
+ * One row of the month table. Times are **instants**; the clock format is applied at the leaf from
+ * `LocalUse24HourFormat`, so flipping the 12/24-hour toggle is a recomposition rather than a full
+ * month recompute.
+ */
 data class DayPrayerTimes(
     val date: LocalDate,
-    val fajr: String,
-    val sunrise: String,
-    val dhuhr: String,
-    val asr: String,
-    val maghrib: String,
-    val isha: String,
+    val fajr: kotlin.time.Instant?,
+    val sunrise: kotlin.time.Instant?,
+    val dhuhr: kotlin.time.Instant?,
+    val asr: kotlin.time.Instant?,
+    val maghrib: kotlin.time.Instant?,
+    val isha: kotlin.time.Instant?,
     /** Fasting length (Fajr → Maghrib) in minutes; null if unavailable. */
     val fastMinutes: Int? = null
 )
@@ -70,20 +75,10 @@ class MonthlyPrayerTimesViewModel @Inject constructor(
     private var highLatRule: HighLatitudeRule? = null
     private var adjustments = mapOf<PrayerType, Int>()
 
-    private var use24HourFormat: Boolean = false
+    // No `use24HourFormat` mirror: the month table formats its times at the leaf.
 
     init {
         observeSettings()
-        observeTimeFormat()
-    }
-
-    private fun observeTimeFormat() {
-        viewModelScope.launch {
-            settingsRepository.use24HourFormat.collect { enabled ->
-                use24HourFormat = enabled
-                calculateMonth() // re-format the month's times in the new clock style
-            }
-        }
     }
 
     fun onEvent(event: MonthlyPrayerTimesEvent) {
@@ -227,11 +222,7 @@ class MonthlyPrayerTimesViewModel @Inject constructor(
         )
         val timesMap = prayerTimes.associate { it.type to it.time }
         val tz = kotlinx.datetime.TimeZone.currentSystemDefault()
-        fun fmt(type: PrayerType): String {
-            val instant = timesMap[type] ?: return "--:--"
-            val local = instant.toLocalDateTime(tz)
-            return formatClockTime(local.hour, local.minute, use24HourFormat)
-        }
+        fun fmt(type: PrayerType): kotlin.time.Instant? = timesMap[type]
         // Fasting length (Fajr → Maghrib), computed from the raw times so it is
         // independent of the display clock format / locale.
         val fajrLocal = timesMap[PrayerType.FAJR]?.toLocalDateTime(tz)

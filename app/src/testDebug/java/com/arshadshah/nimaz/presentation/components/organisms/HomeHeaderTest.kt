@@ -21,8 +21,7 @@ class HomeHeaderTest {
                 hijriDate = "7 Rajab 1446",
                 gregorianDate = "Friday, January 31, 2026",
                 nextPrayer = PrayerType.ASR,
-                nextPrayerTime = "4:30 PM",
-                timeUntilNextPrayer = "2h 15m 30s",
+                nextPrayerAt = testInstant(16, 30),
                 onSettingsClick = {}
             )
         }
@@ -38,8 +37,7 @@ class HomeHeaderTest {
                 hijriDate = "7 Rajab 1446",
                 gregorianDate = "Friday, January 31, 2026",
                 nextPrayer = PrayerType.ASR,
-                nextPrayerTime = "4:30 PM",
-                timeUntilNextPrayer = "2h 15m 30s",
+                nextPrayerAt = testInstant(16, 30),
                 onSettingsClick = {}
             )
         }
@@ -58,8 +56,7 @@ class HomeHeaderTest {
                 hijriDate = "7 Rajab 1446",
                 gregorianDate = "Friday, January 31, 2026",
                 nextPrayer = PrayerType.ASR,
-                nextPrayerTime = "4:30 PM",
-                timeUntilNextPrayer = "2h 15m 30s",
+                nextPrayerAt = testInstant(16, 30),
                 onSettingsClick = {}
             )
         }
@@ -76,8 +73,7 @@ class HomeHeaderTest {
                 hijriDate = "7 Rajab 1446",
                 gregorianDate = "Friday, January 31, 2026",
                 nextPrayer = PrayerType.ASR,
-                nextPrayerTime = "4:30 PM",
-                timeUntilNextPrayer = "2h 15m 30s",
+                nextPrayerAt = testInstant(16, 30),
                 onSettingsClick = {}
             )
         }
@@ -94,8 +90,7 @@ class HomeHeaderTest {
                 hijriDate = "7 Rajab 1446",
                 gregorianDate = "Friday, January 31, 2026",
                 nextPrayer = PrayerType.ASR,
-                nextPrayerTime = "4:30 PM",
-                timeUntilNextPrayer = "2h 15m 30s",
+                nextPrayerAt = testInstant(16, 30),
                 onSettingsClick = {}
             )
         }
@@ -112,8 +107,7 @@ class HomeHeaderTest {
                 hijriDate = "7 Rajab 1446",
                 gregorianDate = "Friday, January 31, 2026",
                 nextPrayer = null,
-                nextPrayerTime = "4:30 PM",
-                timeUntilNextPrayer = "2h 15m 30s",
+                nextPrayerAt = testInstant(16, 30),
                 onSettingsClick = {}
             )
         }
@@ -122,3 +116,10 @@ class HomeHeaderTest {
         composeRule.onNodeWithText("—").assertExists()
     }
 }
+
+/** A fixed wall-clock instant today, so tests read like a real day. */
+private fun testInstant(hour: Int, minute: Int): kotlin.time.Instant =
+    kotlin.time.Instant.fromEpochMilliseconds(
+        java.time.LocalDate.now().atTime(hour, minute)
+            .atZone(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli()
+    )

@@ -1599,6 +1599,19 @@
     <string name="worship_card_in">Dans</string>
     <string name="worship_card_tonight">Ce soir</string>
     <string name="worship_card_tomorrow">Demain</string>
+    <string name="worship_card_now">Maintenant</string>
+    <string name="worship_action_duas">Ouvrir les invocations</string>
+    <string name="worship_action_adhkar">Ouvrir les adhkar</string>
+    <string name="worship_action_iftar_dua">Invocation de l\'iftar</string>
+    <string name="worship_action_quran">Ouvrir le Coran</string>
+    <string name="worship_action_fast_tracker">Suivi du jeûne</string>
+    <string name="countdown_hms">%1$d h %2$d min %3$d s</string>
+    <string name="countdown_ms">%1$d min %2$d s</string>
+    <string name="countdown_s">%1$d s</string>
+    <string name="countdown_hm">%1$d h %2$d min</string>
+    <string name="countdown_m">%1$d min</string>
+    <string name="countdown_now">Maintenant</string>
+    <string name="prayer_sky_status_format">%1$s dans %2$s</string>
     <string name="worship_settings_title">Rappels d\'adoration</string>
     <string name="worship_settings_subtitle">Tahajjud, Suhoor, Iftar, adhkar &amp; plus</string>
     <string name="worship_settings_section_night">Adoration nocturne</string>
@@ -1630,4 +1643,24 @@
     <string name="notif_hub_sound_subtitle">Adhan · muezzin · vibration · Ne pas déranger</string>
     <string name="notif_hub_troubleshooting_title">Dépannage</string>
     <string name="notif_hub_troubleshooting_subtitle">Test · réinitialiser · optimisation batterie</string>
+
+    <!-- Centre de priere nocturne (destination Tahajjud / Witr) -->
+    <string name="night_worship_title">Prière de nuit</string>
+    <string name="night_worship_last_third">Dernier tiers de la nuit</string>
+    <string name="night_worship_open_now">Ouvert maintenant</string>
+    <string name="night_worship_opens_in">Commence dans</string>
+    <string name="night_worship_closed">La fenêtre de cette nuit est passée</string>
+    <string name="night_worship_times_unavailable">Définissez votre position pour voir les horaires</string>
+    <string name="night_worship_rakah_title">Rakats accomplies</string>
+    <string name="night_worship_rakah_body">La prière de nuit se fait deux par deux</string>
+    <string name="night_worship_add_pair">+2 rakats</string>
+    <string name="night_worship_reset">Réinitialiser</string>
+    <string name="night_worship_witr_title">Witr</string>
+    <string name="night_worship_witr_body">Une ou trois rakats, accomplies en dernier</string>
+    <string name="night_worship_recite_title">Réciter la sourate Al-Mulk</string>
+    <string name="night_worship_recite_body">Trente versets qui intercèdent pour leur lecteur</string>
+    <string name="night_worship_duas_title">Invocations de la prière de nuit</string>
+    <string name="night_worship_duas_body">Le Qunut et les invocations de la nuit</string>
+    <string name="night_worship_why_title">Pourquoi prier la nuit</string>
+    <string name="night_worship_why_body">&quot;Notre Seigneur descend au ciel le plus proche…&quot;</string>
 </resources>

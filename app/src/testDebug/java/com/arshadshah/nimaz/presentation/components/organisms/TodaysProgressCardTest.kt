@@ -18,13 +18,13 @@ class TodaysProgressCardTest {
     private fun display(
         type: PrayerType,
         name: String,
-        time: String = "12:00 PM",
+        timeAt: kotlin.time.Instant = testInstant(12, 0),
         isCurrent: Boolean = false,
         status: PrayerStatus = PrayerStatus.NOT_PRAYED
     ) = PrayerTimeDisplay(
         type = type,
         name = name,
-        time = time,
+        timeAt = timeAt,
         isPassed = false,
         isCurrent = isCurrent,
         isNext = false,
@@ -108,3 +108,10 @@ class TodaysProgressCardTest {
         composeRule.onNodeWithText("1 of 5 prayers").assertExists()
     }
 }
+
+/** A fixed wall-clock instant today, so tests read like a real day. */
+private fun testInstant(hour: Int, minute: Int): kotlin.time.Instant =
+    kotlin.time.Instant.fromEpochMilliseconds(
+        java.time.LocalDate.now().atTime(hour, minute)
+            .atZone(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli()
+    )
