@@ -1,0 +1,80 @@
+{
+  "$comment": [
+    "The pipeline mirror of the app's Quran content registry.",
+    "",
+    "Every entry here must have a matching entry in QuranEditions (domain) and, where it has",
+    "a bundled asset, in QuranContentAssets (data) — see docs/quran/content-registry.md.",
+    "The `id` is the join key across all three and is persisted on user devices, so it is",
+    "permanent: rename `displayName`, never `id`.",
+    "",
+    "`contentVersion` gates re-seeding on upgrade. Bump it whenever the generated asset's",
+    "bytes change, or existing installs keep the old content forever.",
+    "",
+    "Fetch an edition with:  python3 scripts/fetch_edition.py <id>",
+    "Validate without writing (use this before committing to a new layout, see Q1 in the",
+    "content-registry spec):  python3 scripts/fetch_edition.py <id> --validate-only"
+  ],
+
+  "translations": [
+    {
+      "id": "sahih_international",
+      "displayName": "Sahih International",
+      "translatorName": "Sahih International",
+      "languageTag": "en",
+      "isRightToLeft": false,
+      "source": "alquran.cloud",
+      "edition": "en.sahih",
+      "contentVersion": 1,
+      "output": "translations.json",
+      "license": "LICENSES_TRANSLATIONS.md#sahih_international",
+      "$comment": [
+        "Ships inside the prepopulated DB rather than as a seeded asset, because it predates",
+        "the registry. It therefore has no QuranContentAssets binding; translations added",
+        "after the registry get one and are seeded like any other bundled content.",
+        "Fetched by scripts/download_and_generate.py (download_quran_data)."
+      ]
+    }
+  ],
+
+  "mushafLayouts": [
+    {
+      "id": "indopak16",
+      "displayName": "IndoPak — 16 line",
+      "source": "qul",
+      "resourceId": 11,
+      "resourceName": "Indopak 16 lines layout (Taj company)",
+      "resourceUrl": "https://qul.tarteel.ai/resources/mushaf-layout/11",
+      "expectedPages": 548,
+      "maxLines": 16,
+      "textSource": "INDOPAK",
+      "supportsTajweed": false,
+      "fontId": "indopak",
+      "contentVersion": 1,
+      "output": {
+        "layout": "mushaf_layout_indopak16.json",
+        "ayahText": "ayahs_indopak.json"
+      },
+      "license": "LICENSES_INDOPAK.md",
+      "fidelitySheet": "docs/quran/16-line-fidelity-sheet.md"
+    }
+  ],
+
+  "tafseers": [
+    {
+      "id": "ibn_kathir_en",
+      "displayName": "Ibn Kathir",
+      "authorName": "Ismāʿīl ibn Kathīr",
+      "languageTag": "en",
+      "output": "tafseer_ibn_kathir.json",
+      "$comment": "Ships inside the prepopulated DB; no seeded asset."
+    },
+    {
+      "id": "maariful_quran_en",
+      "displayName": "Ma'arif al-Qur'an",
+      "authorName": "Mufti Muhammad Shafi",
+      "languageTag": "en",
+      "output": "tafseer_maariful_quran.json",
+      "$comment": "Ships inside the prepopulated DB; no seeded asset."
+    }
+  ]
+}

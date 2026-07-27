@@ -279,6 +279,71 @@ the *small-seen-over-ṣād* alternate-reading marker (2:245, 7:69) — answerin
 > convention-correct empties, see above), and the grapheme-boundary decision
 > (#299). The in-app legend consumes `TajweedParser.rules` directly.
 
+## The edition manifest (`nimaz-pro-data/manifest.json`)
+
+`manifest.json` is the **pipeline mirror of the app's Quran content registry**. Every translation,
+mushaf layout and tafseer the app ships has an entry, and the `id` is the join key across three
+places that must agree:
+
+| Where | Holds |
+|---|---|
+| `nimaz-pro-data/manifest.json` | how to fetch it, and where its licence block lives |
+| `QuranEditions` (app, domain) | display metadata, page counts, capability flags |
+| `QuranContentAssets` (app, data) | bundled asset path + content version |
+
+`QuranEditionRegistryTest` fails the build if the two app-side halves disagree. The manifest is
+not compiled, so keeping it in step is on you — `docs/quran/content-registry.md` §2 is the
+checklist.
+
+**`id` is permanent.** It is persisted in user preferences and in DB rows (`translator_id`,
+`mushaf_layouts.layout_id`). Rename `displayName`; never rename `id`.
+
+**`contentVersion` gates re-seeding.** Bump it whenever a generated asset's bytes change, or
+existing installs keep the old content forever — the seeder skips when the stored version is
+already current.
+
+### `fetch_edition.py`
+
+```bash
+python3 nimaz-pro-data/scripts/fetch_edition.py --list                     # what's declared
+python3 nimaz-pro-data/scripts/fetch_edition.py indopak16                  # fetch, validate, write
+python3 nimaz-pro-data/scripts/fetch_edition.py indopak16 --validate-only  # fetch + validate only
+python3 nimaz-pro-data/scripts/fetch_edition.py indopak16 --pages 1 3      # dev: partial, no write
+```
+
+It reads the manifest entry, rebinds the edition-specific constants (resource URL, expected page
+count, max lines) and then drives `download_indopak_mushaf_data.py`'s **existing** builders and
+validators. That indirection is deliberate: the losslessness check
+(`' '.join(words) == text_<source>`), the page/line assertions and the 114-header / 112-basmalah
+invariants are the accumulated result of the #265 acceptance work, and a forked copy per edition
+is how a subtle regression gets in. One copy, parameterised.
+
+Translations and tafseers are listed in the manifest but are **not** fetched by this script — they
+ship inside the prepopulated DB and are produced by `download_and_generate.py`. The script says so
+and exits non-zero rather than silently doing nothing.
+
+### `--validate-only`: the gate before adopting a new layout
+
+A layout table stores only word-*position* ranges; the glyphs are reconstructed by slicing an ayah
+text column on spaces. That is valid **only** if the layout tokenises against the same text the app
+already ships. Run `--validate-only` against a candidate resource and read the *text/layout
+alignment* result before committing to the edition. If it fails, that layout needs its own ayah
+text column — a schema migration, and the one legitimate exception to "a new layout is data only".
+Report the result; do not silently add a column.
+
+### Licence registers
+
+- Mushaf layouts → [`nimaz-pro-data/json/LICENSES_INDOPAK.md`](../nimaz-pro-data/json/LICENSES_INDOPAK.md)
+- Translations → [`nimaz-pro-data/json/LICENSES_TRANSLATIONS.md`](../nimaz-pro-data/json/LICENSES_TRANSLATIONS.md)
+
+Both carry **open owner sign-off items** that an agent must not close: QUL/Tarteel bulk
+redistribution for the 16-line layout, and Saheeh International's licensing for the shipped
+English translation. Note the asymmetry that makes translations the riskier axis — the Qur'anic
+Arabic is public domain, but a translation is a copyrighted work, and an API serving the text
+says nothing about the right to bundle it.
+
+---
+
 ## translations.json Format
 
 ```json
@@ -390,8 +455,9 @@ header-and-basmalah pair sharing a `line_number` as two logical lines, not colla
 - [x] `nimaz-pro-data/json/LICENSES_INDOPAK.md` records the exact source, version/date, and license
   situation actually used, with the shipping sign-off flagged as the remaining human decision.
 
-Re-generate/validate any time with `python3 nimaz-pro-data/scripts/download_indopak_mushaf_data.py`
-(pages cache under `$INDOPAK_CACHE_DIR`, default `/tmp/indopak_pages`).
+Re-generate/validate any time with `python3 nimaz-pro-data/scripts/fetch_edition.py indopak16`
+(pages cache under `$INDOPAK_CACHE_DIR`, default `/tmp/indopak_pages`). See the manifest-driven
+pipeline section below.
 
 **Fidelity verification (sub-task 7/7 of #263, #271).** The shipped assets are now pinned by
 `MushafLayoutFidelityTest` (`app/src/test/.../data/local/quran/`), which reads
