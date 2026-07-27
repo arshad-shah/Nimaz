@@ -1611,6 +1611,7 @@
 
     <!-- Nachtgebet-Zentrum (Ziel fuer Tahajjud / Witr) -->
     <string name="night_worship_title">Nachtgebet</string>
+    <string name="night_worship_subtitle">Tahadschud, Witr und das letzte Drittel der Nacht</string>
     <string name="night_worship_last_third">Letztes Drittel der Nacht</string>
     <string name="night_worship_open_now">Jetzt geöffnet</string>
     <string name="night_worship_opens_in">Beginnt in</string>
