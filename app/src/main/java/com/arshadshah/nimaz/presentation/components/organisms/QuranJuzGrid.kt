@@ -23,7 +23,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.domain.model.KhatamConstants
 import com.arshadshah.nimaz.domain.model.MushafPagination
-import com.arshadshah.nimaz.domain.model.MushafScript
+import com.arshadshah.nimaz.domain.model.quran.catalogue.MushafLayoutEdition
+import com.arshadshah.nimaz.domain.model.quran.catalogue.QuranEditions
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
@@ -59,7 +60,7 @@ internal fun getJuzName(juz: Int): String = juzNames.getOrElse(juz - 1) { "" }
 @Composable
 internal fun JuzGrid(
     onNavigateToJuz: (Int) -> Unit,
-    pagination: MushafPagination = MushafPagination.fallback(MushafScript.DEFAULT),
+    pagination: MushafPagination = MushafPagination.fallback(QuranEditions.defaultLayout),
     khatamReadAyahIds: Set<Int> = emptySet(),
     isKhatamActive: Boolean = false,
     selectedJuzNumber: Int? = null,

@@ -1,5 +1,7 @@
 package com.arshadshah.nimaz.domain.model
 
+import com.arshadshah.nimaz.domain.model.quran.catalogue.QuranEditions
+
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 
@@ -59,7 +61,7 @@ class ReadingProgressCalculatorTest {
     @Test
     fun `page fallback follows the active edition's page count`() {
         // The 16-line IndoPak mushaf ends at 548, so its last page is 100%, not 91% (#325).
-        val indopak = MushafScript.INDOPAK_16.totalPages
+        val indopak = QuranEditions.layout("indopak16").totalPages
         assertThat(ReadingProgressCalculator.pageFraction(indopak, indopak)).isEqualTo(1f)
         assertThat(ReadingProgressCalculator.pageFraction(274, indopak))
             .isWithin(0.001f).of(0.5f)

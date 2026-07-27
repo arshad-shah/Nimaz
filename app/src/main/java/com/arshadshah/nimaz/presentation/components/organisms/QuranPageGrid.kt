@@ -30,7 +30,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.MushafPagination
-import com.arshadshah.nimaz.domain.model.MushafScript
+import com.arshadshah.nimaz.domain.model.quran.catalogue.MushafLayoutEdition
+import com.arshadshah.nimaz.domain.model.quran.catalogue.QuranEditions
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeEmphasis
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeShape
@@ -49,7 +50,7 @@ import com.arshadshah.nimaz.presentation.theme.ThemeMode
  */
 internal fun computeJuzHeaderIndices(
     surahStartPageMap: Map<Int, List<String>>,
-    pagination: MushafPagination = MushafPagination.fallback(MushafScript.DEFAULT)
+    pagination: MushafPagination = MushafPagination.fallback(QuranEditions.defaultLayout)
 ): Map<Int, Int> {
     val indices = mutableMapOf<Int, Int>()
     var itemIndex = 0
@@ -101,7 +102,7 @@ internal fun quranTileCardColors() = NimazCardDefaults.selectable(
 @OptIn(ExperimentalLayoutApi::class)
 internal fun LazyListScope.pageGridItems(
     onNavigateToPage: (Int) -> Unit,
-    pagination: MushafPagination = MushafPagination.fallback(MushafScript.DEFAULT),
+    pagination: MushafPagination = MushafPagination.fallback(QuranEditions.defaultLayout),
     khatamReadAyahIds: Set<Int> = emptySet(),
     isKhatamActive: Boolean = false,
     selectedPageNumber: Int? = null,

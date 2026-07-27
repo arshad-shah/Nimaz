@@ -2,7 +2,8 @@ package com.arshadshah.nimaz.domain.repository
 
 import com.arshadshah.nimaz.domain.model.Ayah
 import com.arshadshah.nimaz.domain.model.MushafPageLayout
-import com.arshadshah.nimaz.domain.model.MushafScript
+import com.arshadshah.nimaz.domain.model.quran.catalogue.MushafLayoutEdition
+import com.arshadshah.nimaz.domain.model.quran.catalogue.QuranEditions
 import com.arshadshah.nimaz.domain.model.PageAyahRange
 import com.arshadshah.nimaz.domain.model.QuranBookmark
 import com.arshadshah.nimaz.domain.model.QuranFavorite
@@ -35,13 +36,13 @@ interface QuranRepository {
     fun getAyahsByPage(
         pageNumber: Int,
         translatorId: String? = null,
-        script: MushafScript = MushafScript.DEFAULT
+        script: MushafLayoutEdition = QuranEditions.defaultLayout
     ): Flow<List<Ayah>>
 
     fun getSajdaAyahs(): Flow<List<Ayah>>
 
     /** [script]'s page→ayah mapping, ordered by page. Empty when the edition has no data. */
-    suspend fun getPageAyahRanges(script: MushafScript = MushafScript.DEFAULT): List<PageAyahRange>
+    suspend fun getPageAyahRanges(script: MushafLayoutEdition = QuranEditions.defaultLayout): List<PageAyahRange>
 
     /**
      * The line-accurate 16-line IndoPak layout of [page] (1-548), grouped by printed line.

@@ -3,7 +3,8 @@ package com.arshadshah.nimaz.domain.usecase
 import com.arshadshah.nimaz.domain.model.Ayah
 import com.arshadshah.nimaz.domain.model.MushafPageLayout
 import com.arshadshah.nimaz.domain.model.MushafPagination
-import com.arshadshah.nimaz.domain.model.MushafScript
+import com.arshadshah.nimaz.domain.model.quran.catalogue.MushafLayoutEdition
+import com.arshadshah.nimaz.domain.model.quran.catalogue.QuranEditions
 import com.arshadshah.nimaz.domain.model.PageAyahRange
 import com.arshadshah.nimaz.domain.model.QuranBookmark
 import com.arshadshah.nimaz.domain.model.QuranFavorite
@@ -56,7 +57,7 @@ class GetAyahsByPageUseCase @Inject constructor(
     operator fun invoke(
         pageNumber: Int,
         translatorId: String? = null,
-        script: MushafScript = MushafScript.DEFAULT
+        script: MushafLayoutEdition = QuranEditions.defaultLayout
     ): Flow<List<Ayah>> = repository.getAyahsByPage(pageNumber, translatorId, script)
 }
 
@@ -184,7 +185,7 @@ class GetPageAyahRangesUseCase @Inject constructor(
     private val repository: QuranRepository
 ) {
     suspend operator fun invoke(
-        script: MushafScript = MushafScript.DEFAULT
+        script: MushafLayoutEdition = QuranEditions.defaultLayout
     ): List<PageAyahRange> = repository.getPageAyahRanges(script)
 }
 
@@ -196,7 +197,7 @@ class GetPageAyahRangesUseCase @Inject constructor(
 class GetMushafPaginationUseCase @Inject constructor(
     private val repository: QuranRepository
 ) {
-    suspend operator fun invoke(script: MushafScript): MushafPagination =
+    suspend operator fun invoke(script: MushafLayoutEdition): MushafPagination =
         MushafPagination.from(script, repository.getPageAyahRanges(script))
 }
 

@@ -1,6 +1,7 @@
 package com.arshadshah.nimaz.core.navigation
 
-import com.arshadshah.nimaz.domain.model.MushafScript
+import com.arshadshah.nimaz.domain.model.quran.catalogue.MushafLayoutEdition
+import com.arshadshah.nimaz.domain.model.quran.catalogue.QuranEditions
 
 /**
  * Maps an announcement payload `route` key to an in-app Route, or null if
@@ -90,9 +91,9 @@ private fun parameterisedAnnouncementRoute(key: String): Route? {
 
         // Validate against the largest edition (604) so a page deep-link resolves regardless
         // of the user's active Mushaf script; the reader clamps to the active edition's page
-        // count (548 for IndoPak-16) once the preference is read. See MushafScript / #270.
+        // count (548 for IndoPak-16) once the preference is read. See QuranEditions / #270.
         s.size == 3 && s[0] == "quran" && s[1] == "page" ->
-            int(2, 1..MushafScript.MAX_TOTAL_PAGES)?.let { Route.QuranPage(it) }
+            int(2, 1..QuranEditions.maxTotalPages)?.let { Route.QuranPage(it) }
 
         s.size == 3 && s[0] == "quran" && s[1] == "juz" ->
             int(2, 1..30)?.let { Route.QuranJuz(it) }

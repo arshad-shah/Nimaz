@@ -1,5 +1,7 @@
 package com.arshadshah.nimaz.preferences
 
+import com.arshadshah.nimaz.domain.model.quran.catalogue.QuranEditions
+
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.google.common.truth.Truth.assertThat
@@ -74,14 +76,32 @@ class SettingsRepositoryTest {
 
     @Test
     fun quranMushafScript_defaultsToMadaniAndRoundTrips() = runTest {
-        // Off by default: the 16-line IndoPak view must be opt-in (#270).
-        assertThat(settings.quranMushafScript.first()).isEqualTo("MADANI")
+        // Off by default: a line-accurate view must be opt-in (#270). The default is now the
+        // catalogue id rather than the old MushafScript enum name.
+        assertThat(settings.quranMushafScript.first())
+            .isEqualTo(QuranEditions.defaultLayout.id)
 
+        settings.setQuranMushafScript("indopak16")
+        assertThat(settings.quranMushafScript.first()).isEqualTo("indopak16")
+
+        settings.setQuranMushafScript(QuranEditions.defaultLayout.id)
+        assertThat(settings.quranMushafScript.first())
+            .isEqualTo(QuranEditions.defaultLayout.id)
+    }
+
+    @Test
+    fun quranMushafScript_preRegistryEnumNamesAreStoredVerbatimAndStillResolve() = runTest {
+        // ADR-003: a value persisted before the content registry existed is resolved, never
+        // rewritten — so an upgrade must not reset the user's chosen edition. This is the
+        // real upgrade path for anyone who selected the 16-line view before this landed.
         settings.setQuranMushafScript("INDOPAK_16")
         assertThat(settings.quranMushafScript.first()).isEqualTo("INDOPAK_16")
+        assertThat(QuranEditions.layout(settings.quranMushafScript.first()).id)
+            .isEqualTo("indopak16")
 
         settings.setQuranMushafScript("MADANI")
-        assertThat(settings.quranMushafScript.first()).isEqualTo("MADANI")
+        assertThat(QuranEditions.layout(settings.quranMushafScript.first()).id)
+            .isEqualTo("madani")
     }
 
     @Test

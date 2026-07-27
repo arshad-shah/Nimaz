@@ -23,6 +23,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import com.arshadshah.nimaz.data.local.quran.QuranContentAssets
+import com.arshadshah.nimaz.domain.model.quran.catalogue.QuranEditions
 import java.io.File
 import java.net.URL
 import java.util.concurrent.ConcurrentHashMap
@@ -40,7 +42,7 @@ data class AudioState(
     val position: Long = 0L,
     val currentTitle: String = "",
     val currentSubtitle: String? = null,
-    val reciterName: String = "Mishary Rashid Alafasy",
+    val reciterName: String = QuranEditions.defaultReciter.displayName,
     val isActive: Boolean = false,
     val error: String? = null,
     // Playlist progress for surah-level tracking
@@ -70,8 +72,8 @@ class QuranAudioManager @Inject constructor(
     val audioState: StateFlow<AudioState> = _audioState.asStateFlow()
 
     // Reciter CDN ID and bitrate - dynamically set from preferences
-    private var reciterCdnId = "ar.alafasy" // Default: Mishary Rashid Alafasy
-    private var reciterBitrate = 128 // Default bitrate
+    private var reciterCdnId = QuranContentAssets.reciterAudioFor(null).cdnId
+    private var reciterBitrate = QuranContentAssets.reciterAudioFor(null).bitrate
 
     // Sequential playback state
     private var ayahPlaylist: List<AyahAudioItem> = emptyList()
@@ -154,53 +156,22 @@ class QuranAudioManager @Inject constructor(
         }
     }
 
-    companion object {
-        // CDN identifiers and bitrates from https://api.alquran.cloud/v1/edition?format=audio&type=versebyverse
-        // Pair: (cdnId, bitrate) - some reciters only have 64kbps, others have 128kbps
-        val RECITER_CDN_MAP = mapOf(
-            "alafasy" to Pair("ar.alafasy", 128),
-            "mishary" to Pair("ar.alafasy", 128),
-            "sudais" to Pair("ar.abdurrahmaansudais", 64),
-            "abdulbasit" to Pair("ar.abdulsamad", 64),
-            "muaiqly" to Pair("ar.mahermuaiqly", 128),
-            "maher" to Pair("ar.mahermuaiqly", 128),
-            "hussary" to Pair("ar.husary", 128),
-            "minshawi" to Pair("ar.minshawi", 128),
-            "ajamy" to Pair("ar.ahmedajamy", 128),
-            "shuraim" to Pair("ar.saoodshuraym", 64),
-            "hudhaify" to Pair("ar.hudhaify", 128),
-            "ayyoub" to Pair("ar.muhammadayyoub", 128),
-            "jibreel" to Pair("ar.muhammadjibreel", 128),
-            "shaatree" to Pair("ar.shaatree", 128),
-            "basfar" to Pair("ar.abdullahbasfar", 64)
-        )
-    }
-
+    /**
+     * Points the player at [reciterId]'s stream and updates the now-playing name.
+     *
+     * Both the CDN binding and the display name come from the content registry. They used to
+     * be maintained here as a `RECITER_CDN_MAP` plus a parallel display-name `when`, which had
+     * drifted from the picker's own list: five reciters were streamable but never offered, and
+     * Maher Al-Muaiqly's name was spelled differently depending on which copy rendered it.
+     * Unknown and legacy ids resolve through the catalogue rather than falling silently to a
+     * hardcoded default.
+     */
     fun setReciter(reciterId: String?) {
-        val (cdnId, bitrate) = RECITER_CDN_MAP[reciterId] ?: Pair("ar.alafasy", 128)
-        reciterCdnId = cdnId
-        reciterBitrate = bitrate
+        val audio = QuranContentAssets.reciterAudioFor(reciterId)
+        reciterCdnId = audio.cdnId
+        reciterBitrate = audio.bitrate
         _audioState.update {
-            it.copy(reciterName = getReciterDisplayName(reciterId))
-        }
-    }
-
-    private fun getReciterDisplayName(reciterId: String?): String {
-        return when (reciterId) {
-            "alafasy", "mishary" -> "Mishary Rashid Alafasy"
-            "sudais" -> "Abdul Rahman Al-Sudais"
-            "abdulbasit" -> "Abdul Basit Abdul Samad"
-            "muaiqly", "maher" -> "Maher Al-Muaiqly"
-            "hussary" -> "Mahmoud Khalil Al-Hussary"
-            "minshawi" -> "Muhammad Siddiq Al-Minshawi"
-            "ajamy" -> "Ahmed Al-Ajamy"
-            "shuraim" -> "Saud Al-Shuraim"
-            "hudhaify" -> "Ali Al-Hudhaify"
-            "ayyoub" -> "Muhammad Ayyoub"
-            "jibreel" -> "Muhammad Jibreel"
-            "shaatree" -> "Abu Bakr Al-Shaatree"
-            "basfar" -> "Abdullah Basfar"
-            else -> "Mishary Rashid Alafasy"
+            it.copy(reciterName = QuranEditions.reciter(reciterId).displayName)
         }
     }
 

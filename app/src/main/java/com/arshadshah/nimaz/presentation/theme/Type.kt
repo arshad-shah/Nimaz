@@ -7,6 +7,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.domain.model.quran.catalogue.QuranEditions
 
 // Font Families - Custom fonts
 // - Outfit (variable font) for headlines
@@ -50,26 +51,35 @@ val IndoPakFontFamily = FontFamily(
 )
 
 /**
- * Selectable Arabic fonts for Quran text.
+ * Binds each catalogue font id to the Compose [FontFamily] the renderer draws with.
  *
- * Single source of truth for the font picker: the [id] is what gets persisted
- * in DataStore, [displayName] is shown in the settings list, and [fontFamily]
- * is what the renderer actually draws with. To add another font, drop the
- * .ttf into res/font/, declare a FontFamily above, and add an entry here —
- * the settings screen, preview, and reader all derive from this enum.
+ * This is the presentation half of the content registry (ADR-002). The font's identity — its
+ * [id] and display name — lives in `QuranEditions.arabicFonts`; only the `FontFamily` lives
+ * here, because a `FontFamily` is a Compose type that domain must not import.
+ * `QuranEditionRegistryTest` fails the build if the two id sets ever diverge.
+ *
+ * To add a font: drop the .ttf into res/font/, declare a FontFamily above, add one entry to
+ * `QuranEditions.arabicFonts`, add the matching entry here, and record its licence in
+ * docs/FONT_LICENSES.md. The settings screen, preview and reader all derive from the
+ * catalogue.
  */
 enum class QuranArabicFont(
     val id: String,
-    val displayName: String,
     val fontFamily: FontFamily
 ) {
-    AMIRI("amiri", "Amiri", AmiriFontFamily),
-    SCHEHERAZADE("scheherazade", "Scheherazade New", ScheherazadeFontFamily),
-    INDOPAK("indopak", "IndoPak (Nastaʿlīq)", IndoPakFontFamily);
+    AMIRI("amiri", AmiriFontFamily),
+    SCHEHERAZADE("scheherazade", ScheherazadeFontFamily),
+    INDOPAK("indopak", IndoPakFontFamily);
+
+    /** Shown in the settings list; single-sourced from the catalogue. */
+    val displayName: String get() = QuranEditions.arabicFont(id).displayName
 
     companion object {
         val DEFAULT = AMIRI
-        fun fromId(id: String?): QuranArabicFont = entries.find { it.id == id } ?: DEFAULT
+
+        /** Resolves a persisted font id, falling back to [DEFAULT] for unknown values. */
+        fun fromId(id: String?): QuranArabicFont =
+            entries.find { it.id == QuranEditions.arabicFont(id).id } ?: DEFAULT
     }
 }
 

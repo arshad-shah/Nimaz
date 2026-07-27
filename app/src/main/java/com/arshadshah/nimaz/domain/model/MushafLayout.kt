@@ -1,11 +1,16 @@
 package com.arshadshah.nimaz.domain.model
 
 /**
- * The line-accurate layout of a single page of the 16-line IndoPak Mushaf (sub-task 4/7 of
- * #263). Unlike the ayah-keyed [PageAyahRange], this groups a page's content the way it is
+ * The line-accurate layout of a single page of a line-accurate Mushaf edition (sub-task 4/7
+ * of #263). Unlike the ayah-keyed [PageAyahRange], this groups a page's content the way it is
  * *printed*: one [MushafLine] per physical line, in order, so the renderer (5/7) can draw
  * ayah lines, surah-header cartouches and basmalah lines exactly where the printed Mushaf
- * breaks them — the property that makes a 16-line view usable for hifz.
+ * breaks them — the property that makes such a view usable for hifz.
+ *
+ * Nothing here is tied to a particular line count: the models describe whatever N lines the
+ * active edition prints, so a 15- or 14-line edition renders through the same path. Which
+ * edition a page belongs to is the caller's context — see
+ * [com.arshadshah.nimaz.domain.model.quran.catalogue.MushafLayoutEdition].
  */
 data class MushafPageLayout(
     val page: Int,
@@ -15,7 +20,7 @@ data class MushafPageLayout(
 }
 
 /**
- * One physical line of a 16-line Mushaf page.
+ * One physical line of a printed Mushaf page.
  *
  * - [type] == [MushafLineType.AYAH]: [words] holds the line's glyph words in reading order.
  *   A single printed line can span more than one ayah, so consecutive [words] may carry
@@ -58,27 +63,8 @@ enum class MushafLineType {
     }
 }
 
-/**
- * The Mushaf edition a page count belongs to. The classic Madani (Uthmani) mushaf
- * paginates to 604 pages; the 16-line IndoPak edition to 548. Callers that need "how many
- * pages does the Quran have" should ask the active [MushafScript] rather than hardcoding a
- * literal, so the total stays correct when the 16-line view is selected.
- */
-enum class MushafScript(val totalPages: Int) {
-    MADANI(604),
-    INDOPAK_16(548);
-
-    companion object {
-        val DEFAULT = MADANI
-
-        /** The largest page count across editions — the safe upper bound for a page number
-         *  whose target edition isn't known yet (e.g. a deep-link resolved before the user's
-         *  script preference is read). The reader clamps to the active edition afterwards. */
-        val MAX_TOTAL_PAGES: Int = entries.maxOf { it.totalPages }
-
-        /** Parse a stored enum name (see PreferencesDataStore.quranMushafScript), falling
-         *  back to [DEFAULT] for null / legacy / unknown values so the reader never breaks. */
-        fun fromName(name: String?): MushafScript =
-            entries.firstOrNull { it.name == name } ?: DEFAULT
-    }
-}
+// The Mushaf edition a page count belongs to used to be a `MushafScript` enum here, which
+// meant every new layout was a code change in the domain model. It now lives in the content
+// registry as `QuranEditions.mushafLayouts` — see
+// com.arshadshah.nimaz.domain.model.quran.catalogue.MushafLayoutEdition. Values persisted as
+// the old enum names (`MADANI`, `INDOPAK_16`) still resolve, via that edition's `legacyKeys`.

@@ -16,7 +16,8 @@ import com.arshadshah.nimaz.domain.model.KhatamDetailSnapshot
 import com.arshadshah.nimaz.domain.model.KhatamInsights
 import com.arshadshah.nimaz.domain.model.MushafPageLayout
 import com.arshadshah.nimaz.domain.model.MushafPagination
-import com.arshadshah.nimaz.domain.model.MushafScript
+import com.arshadshah.nimaz.domain.model.quran.catalogue.MushafLayoutEdition
+import com.arshadshah.nimaz.domain.model.quran.catalogue.QuranEditions
 import com.arshadshah.nimaz.domain.model.QuranBookmark
 import com.arshadshah.nimaz.domain.model.QuranFavorite
 import com.arshadshah.nimaz.domain.model.QuranSearchResult
@@ -87,13 +88,13 @@ data class QuranHomeUiState(
     val verseOfTheDay: Ayah? = null,
     // The active Mushaf edition, so the Page tab's jump-to-page validates against the right
     // page count (604 Uthmani vs 548 IndoPak-16, #270).
-    val mushafScript: MushafScript = MushafScript.DEFAULT,
+    val mushafScript: MushafLayoutEdition = QuranEditions.defaultLayout,
     /**
      * The active edition's page↔ayah mapping (#325). Drives the Page tab's tile count, its
      * juz sections, the surah→page badges and khatam page progress, so all of them reflow
      * when the Mushaf layout setting changes instead of staying pinned to the Madani 604.
      */
-    val pagination: MushafPagination = MushafPagination.fallback(MushafScript.DEFAULT),
+    val pagination: MushafPagination = MushafPagination.fallback(QuranEditions.defaultLayout),
     val isLoading: Boolean = true,
     val error: String? = null
 )
@@ -130,13 +131,17 @@ data class QuranReaderUiState(
     // page number rather than a single field.
     val mushafPageLayoutCache: Map<Int, MushafPageLayout> = emptyMap(),
     // The Mushaf edition the reader renders, driven by the persisted settings toggle (6/7,
-    // #270). MADANI (default) keeps the Uthmani/604 page; INDOPAK_16 switches to the
-    // line-accurate 16-line IndoPak layout (548 pages). Page counts / pager bounds read
-    // [MushafScript.totalPages] off this so a script switch reflows the pager correctly.
-    val mushafScript: MushafScript = MushafScript.DEFAULT
+    // #270). The default Madani edition keeps the flowed Uthmani/604 page; a line-accurate
+    // edition switches to its printed layout. Page counts / pager bounds read
+    // [MushafLayoutEdition.totalPages] off this so a switch reflows the pager correctly.
+    val mushafScript: MushafLayoutEdition = QuranEditions.defaultLayout
 ) {
-    /** Whether to render the line-accurate 16-line IndoPak layout instead of the Uthmani page. */
-    val use16LineLayout: Boolean get() = mushafScript == MushafScript.INDOPAK_16
+    /**
+     * Whether to render the active edition's line-accurate printed layout instead of the
+     * flowed Uthmani page. True for any edition with printed line data, not just the 16-line
+     * IndoPak one — the renderer draws whatever N lines the edition prints.
+     */
+    val useLineLayout: Boolean get() = mushafScript.hasLineLayout
 
     /** Number of pages in the active edition — the pager/nav bounds source of truth. */
     val totalPages: Int get() = mushafScript.totalPages
@@ -376,7 +381,7 @@ class QuranViewModel @Inject constructor(
                 settingsRepository.quranMushafScript
             ) { display, behavior, showTajweed, tajweedUnderline, mushafScript ->
                 QuranReaderSettings(display, behavior, showTajweed, tajweedUnderline,
-                    MushafScript.fromName(mushafScript))
+                    QuranEditions.layout(mushafScript))
             }.collect { settings ->
                 val (display, behavior, showTajweed, tajweedUnderline, mushafScript) = settings
                 audioManager.setReciter(behavior.reciterId)
@@ -433,7 +438,7 @@ class QuranViewModel @Inject constructor(
         val behavior: QuranBehaviorSettings,
         val showTajweed: Boolean,
         val tajweedUnderline: Boolean,
-        val mushafScript: MushafScript
+        val mushafScript: MushafLayoutEdition
     )
 
     fun refreshSettings() {
@@ -539,7 +544,7 @@ class QuranViewModel @Inject constructor(
     private fun observeMushafPagination() {
         viewModelScope.launch {
             settingsRepository.quranMushafScript
-                .map { MushafScript.fromName(it) }
+                .map { QuranEditions.layout(it) }
                 .distinctUntilChanged()
                 .collect { script ->
                     _homeState.update {

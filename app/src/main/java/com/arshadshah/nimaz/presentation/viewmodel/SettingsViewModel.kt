@@ -14,7 +14,8 @@ import com.arshadshah.nimaz.data.local.database.NimazDatabase
 import com.arshadshah.nimaz.domain.model.AsrCalculation
 import com.arshadshah.nimaz.domain.model.CalculationMethod
 import com.arshadshah.nimaz.domain.model.Location
-import com.arshadshah.nimaz.domain.model.MushafScript
+import com.arshadshah.nimaz.domain.model.quran.catalogue.MushafLayoutEdition
+import com.arshadshah.nimaz.domain.model.quran.catalogue.QuranEditions
 import com.arshadshah.nimaz.domain.model.PrayerType
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.usecase.PrayerUseCases
@@ -154,7 +155,7 @@ data class QuranSettingsUiState(
     val showTajweed: Boolean = false,
     val tajweedUnderline: Boolean = false,
     /** The Mushaf edition/layout for the page reader (default Uthmani/604 vs 16-line IndoPak/548). */
-    val mushafScript: MushafScript = MushafScript.DEFAULT
+    val mushafScript: MushafLayoutEdition = QuranEditions.defaultLayout
 )
 
 data class DuaSettingsUiState(
@@ -251,7 +252,7 @@ sealed interface SettingsEvent {
     data class SetReciter(val reciterId: String?) : SettingsEvent
     data class SetShowTajweed(val enabled: Boolean) : SettingsEvent
     data class SetTajweedUnderline(val enabled: Boolean) : SettingsEvent
-    data class SetMushafScript(val script: MushafScript) : SettingsEvent
+    data class SetMushafScript(val script: MushafLayoutEdition) : SettingsEvent
 
     // Dua
     data class SetDuaArabicFont(val fontId: String) : SettingsEvent
@@ -785,7 +786,9 @@ class SettingsViewModel @Inject constructor(
 
             is SettingsEvent.SetMushafScript -> {
                 _quranState.update { it.copy(mushafScript = event.script) }
-                viewModelScope.launch { settingsRepository.setQuranMushafScript(event.script.name) }
+                // Persist the catalogue id. Values written before the registry existed were
+                // the old enum names and still resolve through the edition's legacyKeys.
+                viewModelScope.launch { settingsRepository.setQuranMushafScript(event.script.id) }
             }
 
             // Dua
@@ -1070,7 +1073,7 @@ class SettingsViewModel @Inject constructor(
             val reciterId = settingsRepository.selectedReciterId.first()
             val showTajweed = settingsRepository.showTajweed.first()
             val tajweedUnderline = settingsRepository.tajweedUnderline.first()
-            val mushafScript = MushafScript.fromName(settingsRepository.quranMushafScript.first())
+            val mushafScript = QuranEditions.layout(settingsRepository.quranMushafScript.first())
 
             _quranState.update {
                 it.copy(

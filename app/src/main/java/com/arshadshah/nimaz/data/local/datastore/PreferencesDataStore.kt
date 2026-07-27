@@ -12,7 +12,8 @@ import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import com.arshadshah.nimaz.domain.model.MushafScript
+import com.arshadshah.nimaz.domain.model.quran.catalogue.MushafLayoutEdition
+import com.arshadshah.nimaz.domain.model.quran.catalogue.QuranEditions
 import com.arshadshah.nimaz.domain.model.UserPreferences
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import kotlinx.coroutines.flow.Flow
@@ -148,9 +149,9 @@ class PreferencesDataStore @Inject constructor(
         val SELECTED_RECITER_ID = stringPreferencesKey("selected_reciter_id")
         val QURAN_ARABIC_FONT = stringPreferencesKey("quran_arabic_font")
 
-        // Which Mushaf edition/layout the page reader renders; stored as the MushafScript
+        // Which Mushaf edition/layout the page reader renders; stored as the MushafLayoutEdition
         // enum name. "MADANI" (Uthmani, 604 pages) is the default; "INDOPAK_16" selects the
-        // line-accurate 16-line IndoPak view (548 pages). See MushafScript / issue #270.
+        // line-accurate 16-line IndoPak view (548 pages). See QuranEditions / issue #270.
         val QURAN_MUSHAF_SCRIPT = stringPreferencesKey("quran_mushaf_script")
         val QURAN_ARABIC_FONT_SIZE = floatPreferencesKey("quran_arabic_font_size")
         val QURAN_TRANSLATION_FONT_SIZE = floatPreferencesKey("quran_translation_font_size")
@@ -607,10 +608,12 @@ class PreferencesDataStore @Inject constructor(
     override suspend fun setQuranArabicFont(fontId: String) =
         put(PreferencesKeys.QURAN_ARABIC_FONT, fontId)
 
-    // Default matches MushafScript.DEFAULT (MADANI). Stored as a raw enum-name string so the
-    // data layer maps via MushafScript at the domain boundary; presentation reads the enum.
+    // Stored as a raw catalogue-id string that the domain boundary resolves via
+    // QuranEditions.layout(). Values written before the content registry existed were the
+    // MushafScript enum names (`MADANI`, `INDOPAK_16`) and still resolve, via the edition's
+    // legacyKeys — the stored value is resolved, never rewritten (ADR-003).
     override val quranMushafScript: Flow<String> =
-        preference(PreferencesKeys.QURAN_MUSHAF_SCRIPT, MushafScript.DEFAULT.name)
+        preference(PreferencesKeys.QURAN_MUSHAF_SCRIPT, QuranEditions.defaultLayout.id)
 
     override suspend fun setQuranMushafScript(script: String) =
         put(PreferencesKeys.QURAN_MUSHAF_SCRIPT, script)

@@ -1,5 +1,7 @@
 package com.arshadshah.nimaz.domain.model
 
+import com.arshadshah.nimaz.domain.model.quran.catalogue.QuranEditions
+
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 
@@ -33,11 +35,11 @@ class MushafPaginationTest {
     }
 
     private fun indopak(pageCount: Int = 548) =
-        MushafPagination.from(MushafScript.INDOPAK_16, evenRanges(pageCount))
+        MushafPagination.from(QuranEditions.layout("indopak16"), evenRanges(pageCount))
 
     @Test
     fun `total pages comes from the supplied ranges, not the script literal`() {
-        val pagination = MushafPagination.from(MushafScript.INDOPAK_16, evenRanges(548))
+        val pagination = MushafPagination.from(QuranEditions.layout("indopak16"), evenRanges(548))
 
         assertThat(pagination.totalPages).isEqualTo(548)
         assertThat(pagination.isDerived).isTrue()
@@ -115,7 +117,7 @@ class MushafPaginationTest {
 
     @Test
     fun `Madani fallback resolves juz by page from the printed table`() {
-        val pagination = MushafPagination.fallback(MushafScript.MADANI)
+        val pagination = MushafPagination.fallback(QuranEditions.defaultLayout)
 
         assertThat(pagination.juzForPage(1)).isEqualTo(1)
         assertThat(pagination.juzForPage(21)).isEqualTo(1)
@@ -125,7 +127,7 @@ class MushafPaginationTest {
 
     @Test
     fun `a coarser edition produces correspondingly fewer pages`() {
-        val pagination = MushafPagination.from(MushafScript.INDOPAK_16, evenRanges(300))
+        val pagination = MushafPagination.from(QuranEditions.layout("indopak16"), evenRanges(300))
 
         assertThat(pagination.totalPages).isEqualTo(300)
         assertThat(pagination.juzEndPage(30)).isEqualTo(300)
@@ -133,7 +135,7 @@ class MushafPaginationTest {
 
     @Test
     fun `Madani falls back to the printed juz page table before ranges load`() {
-        val pagination = MushafPagination.fallback(MushafScript.MADANI)
+        val pagination = MushafPagination.fallback(QuranEditions.defaultLayout)
 
         assertThat(pagination.isDerived).isFalse()
         // Still usable: the printed Madani juz start pages are real reference data.
@@ -147,7 +149,7 @@ class MushafPaginationTest {
 
     @Test
     fun `IndoPak without ranges reports itself as not ready instead of guessing`() {
-        val pagination = MushafPagination.fallback(MushafScript.INDOPAK_16)
+        val pagination = MushafPagination.fallback(QuranEditions.layout("indopak16"))
 
         assertThat(pagination.isDerived).isFalse()
         // The Madani juz table would be plain wrong here, so callers must wait.
@@ -160,7 +162,7 @@ class MushafPaginationTest {
     fun `unsorted or sparse input still yields a sane pagination`() {
         val shuffled = evenRanges(548).shuffled()
 
-        val pagination = MushafPagination.from(MushafScript.INDOPAK_16, shuffled)
+        val pagination = MushafPagination.from(QuranEditions.layout("indopak16"), shuffled)
 
         assertThat(pagination.totalPages).isEqualTo(548)
         assertThat(pagination.pageForAyah(1)).isEqualTo(1)

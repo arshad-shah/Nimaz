@@ -143,7 +143,7 @@ interface SettingsRepository {
     val quranArabicFont: Flow<String>
     suspend fun setQuranArabicFont(fontId: String)
 
-    /** The Mushaf edition/layout for the page reader, as a [com.arshadshah.nimaz.domain.model.MushafScript]
+    /** The Mushaf edition/layout for the page reader, as a [com.arshadshah.nimaz.domain.model.quran.catalogue.MushafLayoutEdition]
      *  name ("MADANI" = default Uthmani/604; "INDOPAK_16" = 16-line IndoPak/548). */
     val quranMushafScript: Flow<String>
     suspend fun setQuranMushafScript(script: String)

@@ -1,5 +1,7 @@
 package com.arshadshah.nimaz.domain.model
 
+import com.arshadshah.nimaz.domain.model.quran.catalogue.QuranEditions
+
 data class Surah(
     val number: Int,
     val nameArabic: String,
@@ -92,10 +94,11 @@ object ReadingProgressCalculator {
 
     /**
      * Total pages in the standard Madani mushaf, used for the no-surah fallback. Kept in
-     * sync with (and single-sourced from) [MushafScript.MADANI] so the 16-line IndoPak
-     * edition's 548-page count lives in one place — see [MushafScript.INDOPAK_16].
+     * sync with (and single-sourced from) the default layout in the content registry, so
+     * every edition's page count lives in one place — see
+     * [com.arshadshah.nimaz.domain.model.quran.catalogue.QuranEditions.mushafLayouts].
      */
-    val TOTAL_QURAN_PAGES: Int = MushafScript.MADANI.totalPages
+    val TOTAL_QURAN_PAGES: Int = QuranEditions.defaultLayout.totalPages
 
     /**
      * Fraction (0f..1f) of the way through a surah, given the last-read ayah number and

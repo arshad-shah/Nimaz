@@ -44,7 +44,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.domain.model.MushafScript
+import com.arshadshah.nimaz.domain.model.quran.catalogue.MushafLayoutEdition
+import com.arshadshah.nimaz.domain.model.quran.catalogue.QuranEditions
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazDivider
@@ -206,11 +207,11 @@ fun QuranSettingsScreen(
 
                     NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
 
-                    // Mushaf script / layout selector — chooses which edition the Mushaf (page)
-                    // reader renders: the default Uthmani/Madani 604-page layout, or the
-                    // line-accurate 16-line IndoPak 548-page layout (issue #270). The choice
-                    // persists via PreferencesDataStore.quranMushafScript and the reader picks
-                    // its renderer + page count from it live.
+                    // Mushaf layout selector — chooses which edition the Mushaf (page) reader
+                    // renders (issue #270). The options are derived from
+                    // QuranEditions.mushafLayouts, so shipping a new layout needs no edit
+                    // here. The choice persists via PreferencesDataStore.quranMushafScript
+                    // and the reader picks its renderer + page count from it live.
                     Column(
                         modifier = Modifier.padding(
                             start = 16.dp,
@@ -219,22 +220,18 @@ fun QuranSettingsScreen(
                             bottom = 14.dp
                         )
                     ) {
-                        val mushafScriptLabels = mapOf(
-                            MushafScript.MADANI to stringResource(R.string.mushaf_script_madani),
-                            MushafScript.INDOPAK_16 to stringResource(R.string.mushaf_script_indopak16)
-                        )
                         NimazDropdownField(
                             label = stringResource(R.string.mushaf_layout),
-                            items = MushafScript.entries.map { script ->
+                            items = QuranEditions.mushafLayouts.map { layout ->
                                 NimazDropdownItem(
-                                    value = script.name,
-                                    label = mushafScriptLabels[script] ?: script.name,
+                                    value = layout.id,
+                                    label = layout.displayName,
                                 )
                             },
-                            selected = quranState.mushafScript.name,
+                            selected = quranState.mushafScript.id,
                             onSelected = {
                                 viewModel.onEvent(
-                                    SettingsEvent.SetMushafScript(MushafScript.fromName(it))
+                                    SettingsEvent.SetMushafScript(QuranEditions.layout(it))
                                 )
                             }
                         )
@@ -282,11 +279,12 @@ fun QuranSettingsScreen(
                         onCheckedChange = { viewModel.onEvent(SettingsEvent.SetKeepScreenOn(!quranState.keepScreenOn)) }
                     )
                     NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
-                    // Tajweed colours are only available for the Madani (Uthmani)
-                    // script — the 16-line IndoPak layout has no per-letter spans
-                    // (see MushafLineLayout). Disable the toggle with a reason
-                    // rather than let it silently do nothing (#293).
-                    val tajweedAvailable = quranState.mushafScript == MushafScript.MADANI
+                    // Tajweed colours need per-letter spans, which only exist for the
+                    // Uthmani text — an IndoPak-sourced layout has none (see
+                    // MushafLineLayout). The edition declares this, so a new layout
+                    // needs no edit here. Disable the toggle with a reason rather than
+                    // let it silently do nothing (#293).
+                    val tajweedAvailable = quranState.mushafScript.supportsTajweed
                     NimazSettingsItem(
                         title = stringResource(R.string.show_tajweed_colors),
                         subtitle = if (tajweedAvailable) {

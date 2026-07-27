@@ -11,7 +11,8 @@ import com.arshadshah.nimaz.data.local.database.entity.SurahEntity
 import com.arshadshah.nimaz.data.local.quran.QuranIndopakSeeder
 import com.arshadshah.nimaz.domain.model.Ayah
 import com.arshadshah.nimaz.domain.model.MushafPageLayout
-import com.arshadshah.nimaz.domain.model.MushafScript
+import com.arshadshah.nimaz.domain.model.quran.catalogue.MushafLayoutEdition
+import com.arshadshah.nimaz.domain.model.quran.catalogue.QuranEditions
 import com.arshadshah.nimaz.domain.model.PageAyahRange
 import com.arshadshah.nimaz.domain.model.QuranBookmark
 import com.arshadshah.nimaz.domain.model.QuranFavorite
@@ -33,6 +34,7 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.sync.Mutex
+import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -107,15 +109,16 @@ class QuranRepositoryImpl @Inject constructor(
     override fun getAyahsByPage(
         pageNumber: Int,
         translatorId: String?,
-        script: MushafScript
+        script: MushafLayoutEdition
     ): Flow<List<Ayah>> {
-        val entityFlow = when (script) {
-            MushafScript.MADANI -> quranDao.getAyahsByPage(pageNumber)
-            // The 16-line edition does not paginate by `ayahs.page`, so resolve the page's
-            // span through its own layout table and fetch that id range (#325). Emits an
-            // empty page rather than the unrelated Madani page when the span is unknown.
-            MushafScript.INDOPAK_16 -> flow {
-                val range = indopak16Ranges().firstOrNull { it.page == pageNumber }
+        val entityFlow = if (!script.hasLineLayout) {
+            quranDao.getAyahsByPage(pageNumber)
+        } else {
+            // A line-accurate edition does not paginate by `ayahs.page`, so resolve the
+            // page's span through its own layout rows and fetch that id range (#325). Emits
+            // an empty page rather than the unrelated Madani page when the span is unknown.
+            flow {
+                val range = layoutRanges(script).firstOrNull { it.page == pageNumber }
                 if (range == null) {
                     emit(emptyList())
                 } else {
@@ -147,31 +150,32 @@ class QuranRepositoryImpl @Inject constructor(
         return quranDao.getSajdaAyahs().mapItems { it.toDomain() }
     }
 
-    override suspend fun getPageAyahRanges(script: MushafScript): List<PageAyahRange> =
-        when (script) {
-            MushafScript.MADANI -> quranDao.getPageAyahRanges().map { it.toDomain() }
-            MushafScript.INDOPAK_16 -> indopak16Ranges()
+    override suspend fun getPageAyahRanges(script: MushafLayoutEdition): List<PageAyahRange> =
+        if (script.hasLineLayout) {
+            layoutRanges(script)
+        } else {
+            quranDao.getPageAyahRanges().map { it.toDomain() }
         }
 
     /**
-     * The 16-line edition's page→ayah mapping, seeded on demand (the layout table is only
-     * populated once the IndoPak view is actually used) and memoised — it is 548 immutable
-     * rows that both the Page tab and every page fetch consult.
+     * A line-accurate edition's page→ayah mapping, seeded on demand (an edition's layout rows
+     * are only written once that edition is actually read) and memoised per edition — they
+     * are a few hundred immutable rows that both the Page tab and every page fetch consult.
      */
-    private suspend fun indopak16Ranges(): List<PageAyahRange> {
-        cachedIndopak16Ranges?.let { return it }
-        return indopak16RangesMutex.withLock {
-            cachedIndopak16Ranges?.let { return@withLock it }
+    private suspend fun layoutRanges(edition: MushafLayoutEdition): List<PageAyahRange> {
+        cachedLayoutRanges[edition.id]?.let { return it }
+        return layoutRangesMutex.withLock {
+            cachedLayoutRanges[edition.id]?.let { return@withLock it }
             indopakSeeder.seedIfNeeded()
             quranDao.getIndopak16PageAyahRanges()
                 .map { it.toDomain() }
-                .also { cachedIndopak16Ranges = it }
+                .also { cachedLayoutRanges[edition.id] = it }
         }
     }
 
-    @Volatile
-    private var cachedIndopak16Ranges: List<PageAyahRange>? = null
-    private val indopak16RangesMutex = Mutex()
+    // Keyed by edition id so switching layouts does not serve the previous edition's pages.
+    private val cachedLayoutRanges = ConcurrentHashMap<String, List<PageAyahRange>>()
+    private val layoutRangesMutex = Mutex()
 
     override suspend fun getMushafPageLayout(page: Int): MushafPageLayout {
         // First use of the 16-line view seeds the IndoPak text + layout (idempotent,

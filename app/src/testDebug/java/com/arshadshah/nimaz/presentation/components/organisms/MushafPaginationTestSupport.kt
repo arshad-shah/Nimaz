@@ -2,7 +2,8 @@ package com.arshadshah.nimaz.presentation.components.organisms
 
 import com.arshadshah.nimaz.domain.model.Khatam
 import com.arshadshah.nimaz.domain.model.MushafPagination
-import com.arshadshah.nimaz.domain.model.MushafScript
+import com.arshadshah.nimaz.domain.model.quran.catalogue.MushafLayoutEdition
+import com.arshadshah.nimaz.domain.model.quran.catalogue.QuranEditions
 import com.arshadshah.nimaz.domain.model.PageAyahRange
 
 /**
@@ -12,7 +13,7 @@ import com.arshadshah.nimaz.domain.model.PageAyahRange
  */
 internal fun paginationOf(
     pageCount: Int,
-    script: MushafScript = MushafScript.INDOPAK_16
+    script: MushafLayoutEdition = QuranEditions.layout("indopak16")
 ): MushafPagination {
     val total = Khatam.TOTAL_QURAN_AYAHS
     val ranges = (1..pageCount).map { page ->
