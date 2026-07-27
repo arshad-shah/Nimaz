@@ -70,6 +70,13 @@ touches** — this is not optional:
    screen; validate before wiring.)
 7. No hardcoded `Color(0xFF…)` in screens — use `MaterialTheme.colorScheme.*` / `NimazColors.*`
    and reuse `presentation/components` (atoms/molecules/organisms).
+8. **Interactive UI comes from the design system — never hand-rolled.** A button is `NimazButton`
+   (icon-only: `NimazIconButton`), **not** a `Text`/`Box`/`Surface` + `Modifier.clickable`. A
+   whole-card tap target is `NimazCard(onClick = …)` (or `NimazMenuItem` for list rows), **not** a
+   `Modifier.clickable` wrapped around the card — a wrapping `.clickable` paints a **sharp-cornered
+   ripple** that ignores the card radius. `.clickable` on *inner* elements (a `Text`, an icon, a
+   sub-row) is fine. For `EventCard`/`WorshipEventCard`, pass `onClick`/`onClickLabel`. See
+   `docs/ARCHITECTURE.md` §8 (the `NimazButton`/`NimazCard` bullets).
 
 ## Verify before finishing
 

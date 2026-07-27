@@ -90,7 +90,7 @@ flowchart LR
 
     More --> HadithHome & DuaHome & PrayerTimes & FastingHome & ZakatCalculator & IslamicCalendar
     More --> AsmaUlHusnaList & AsmaUnNabiList & ProphetsList & KhatamList & QaidaHome
-    More --> AllBookmarks & GlobalSearch & Settings
+    More --> AllBookmarks & GlobalSearch & Settings & NightWorship
     Qibla --> Qibla
 ```
 
@@ -206,7 +206,8 @@ All routes live in `core/navigation/Routes.kt` and are wired in `core/navigation
 |-------|------|--------|
 | `NightWorship` | — | NightWorshipScreen |
 
-> **Reached only from the Home worship card** (Tahajjud / Witr), not from a menu. The other nine
+> **Reached from the Home worship card** (Tahajjud / Witr) **and from More → Daily Practice →
+> Night Worship**, so the hub is usable outside the reminder window too. The other nine
 > reminder types route to screens that already existed — see the table in
 > `core/navigation/WorshipDestinations.kt`, which is the single source of truth for the mapping and
 > is asserted exhaustively by `WorshipDestinationsTest`.

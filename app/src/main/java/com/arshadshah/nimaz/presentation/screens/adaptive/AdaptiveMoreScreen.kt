@@ -102,6 +102,7 @@ fun AdaptiveMoreScreen(
                 navController.navigate(Route.TafseerChapters)
             },
             onNavigateToPrayerTracker = { navController.navigate(Route.PrayerTracker()) },
+            onNavigateToNightWorship = { navController.navigate(Route.NightWorship) },
             onNavigateToPrayerTimes = { navController.navigate(Route.PrayerTimes) },
             onNavigateToMonthlyPrayerTimes = { navController.navigate(Route.MonthlyPrayerTimes) },
             onNavigateToKhatam = { navController.navigate(Route.KhatamList) },
@@ -147,6 +148,7 @@ fun AdaptiveMoreScreen(
                             navController.navigate(Route.Tafseer(surahNumber = 1, ayahNumber = 1))
                         },
                         onNavigateToPrayerTracker = { navController.navigate(Route.PrayerTracker()) },
+                        onNavigateToNightWorship = { navController.navigate(Route.NightWorship) },
                         onNavigateToPrayerTimes = { navController.navigate(Route.PrayerTimes) },
                         onNavigateToMonthlyPrayerTimes = { navController.navigate(Route.MonthlyPrayerTimes) },
                         onNavigateToKhatam = { navController.navigate(Route.KhatamList) },
