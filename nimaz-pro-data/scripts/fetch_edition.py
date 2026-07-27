@@ -5,9 +5,11 @@ Nimaz — manifest-driven Quran edition fetcher.
 Reads `nimaz-pro-data/manifest.json` (the pipeline mirror of the app's content registry) and
 fetches, validates and writes one edition's data files by id:
 
-    python3 fetch_edition.py indopak16                  # fetch, validate, write
-    python3 fetch_edition.py indopak16 --validate-only  # fetch + validate, write nothing
+    python3 fetch_edition.py indopak16                  # a mushaf layout (from QUL)
+    python3 fetch_edition.py pickthall                  # a translation (from Tanzil)
+    python3 fetch_edition.py <id> --validate-only       # fetch + validate, write nothing
     python3 fetch_edition.py indopak16 --pages 1 3      # dev: fetch a few pages, no write
+    python3 fetch_edition.py --all-translations         # every manifest translation
     python3 fetch_edition.py --list                     # what the manifest declares
 
 ## Why this exists
@@ -33,9 +35,11 @@ one legitimate exception to "a new layout is data only". See docs/quran/content-
 
 import argparse
 import json
+import re
 import sys
+import urllib.request
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, List, Tuple
 
 BASE_DIR = Path(__file__).parent.parent
 MANIFEST_PATH = BASE_DIR / "manifest.json"
@@ -64,10 +68,178 @@ def list_editions(manifest: Dict[str, Any]) -> None:
             continue
         print(f"\n{axis}:")
         for e in entries:
-            fetchable = " (fetchable)" if axis == "mushafLayouts" else " (not fetchable here)"
-            print(f"  {e['id']:<24} {e.get('displayName', '')}{fetchable}")
+            can_fetch = axis == "mushafLayouts" or e.get("source") == "tanzil"
+            mark = " (fetchable)" if can_fetch else " (not fetchable here)"
+            lang = f"[{e.get('languageTag', '--')}] " if axis == "translations" else ""
+            print(f"  {e['id']:<24} {lang}{e.get('displayName', '')}{mark}")
     print()
 
+
+
+# ---------------------------------------------------------------------------
+# Translations (Tanzil)
+# ---------------------------------------------------------------------------
+
+TANZIL_TRANS_URL = "https://tanzil.net/trans/{edition}"
+
+EXPECTED_AYAHS = 6236
+EXPECTED_SURAHS = 114
+
+# `surah|ayah|text`, one per line. Tanzil appends a `#`-prefixed metadata footer.
+TANZIL_ROW = re.compile(r"^(\d+)\|(\d+)\|(.*)$")
+
+
+def load_ayah_key_map() -> Dict[Tuple[int, int], int]:
+    """(surah, ayah_in_surah) -> global ayah id, from the canonical ayahs.json."""
+    with open(BASE_DIR / "json" / "ayahs.json", encoding="utf-8") as f:
+        ayahs = json.load(f)
+    return {(a["surah_id"], a["number_in_surah"]): a["id"] for a in ayahs}
+
+
+def download_tanzil(edition: str) -> str:
+    url = TANZIL_TRANS_URL.format(edition=edition)
+    print(f"  GET {url}")
+    req = urllib.request.Request(url, headers={"User-Agent": "nimaz-data-pipeline"})
+    with urllib.request.urlopen(req, timeout=120) as resp:
+        return resp.read().decode("utf-8")
+
+
+def parse_tanzil_metadata(raw: str) -> Dict[str, str]:
+    """The `#`-prefixed footer carries Name/Translator/Language/Last Update/Source.
+
+    Captured because it is exactly what a licence block needs, and reading it off the file
+    beats retyping it from a web page into LICENSES_TRANSLATIONS.md.
+    """
+    meta: Dict[str, str] = {}
+    for line in raw.splitlines():
+        line = line.strip()
+        if not line.startswith("#"):
+            continue
+        body = line.lstrip("#").strip()
+        if ":" in body:
+            key, _, value = body.partition(":")
+            key, value = key.strip(), value.strip()
+            if key and value:
+                meta[key] = value
+    return meta
+
+
+def parse_tanzil(raw: str, key_map: Dict[Tuple[int, int], int]) -> List[Tuple[int, str]]:
+    """Returns [(global_ayah_id, text)], skipping the metadata footer."""
+    rows: List[Tuple[int, str]] = []
+    for line in raw.splitlines():
+        m = TANZIL_ROW.match(line.strip())
+        if not m:
+            continue  # blank line or `#` footer
+        surah, ayah, text = int(m.group(1)), int(m.group(2)), m.group(3).strip()
+        key = (surah, ayah)
+        if key not in key_map:
+            raise ValueError(f"{surah}:{ayah} is not a valid ayah reference")
+        rows.append((key_map[key], text))
+    return rows
+
+
+def validate_translation(rows: List[Tuple[int, str]]) -> List[str]:
+    """Every invariant that would otherwise surface as a blank or shifted verse in the app."""
+    errors: List[str] = []
+    ids = [i for i, _ in rows]
+
+    if len(rows) != EXPECTED_AYAHS:
+        errors.append(f"expected {EXPECTED_AYAHS} rows, got {len(rows)}")
+
+    unique = set(ids)
+    if len(unique) != len(ids):
+        dupes = sorted({i for i in ids if ids.count(i) > 1})[:5]
+        errors.append(f"duplicate ayah ids (e.g. {dupes})")
+
+    missing = set(range(1, EXPECTED_AYAHS + 1)) - unique
+    if missing:
+        errors.append(f"{len(missing)} ayah ids missing (e.g. {sorted(missing)[:5]})")
+
+    extra = unique - set(range(1, EXPECTED_AYAHS + 1))
+    if extra:
+        errors.append(f"ayah ids outside 1..{EXPECTED_AYAHS}: {sorted(extra)[:5]}")
+
+    # A blank verse renders as an empty translation card — silent, and easy to miss in review.
+    blank = [i for i, t in rows if not t.strip()]
+    if blank:
+        errors.append(f"{len(blank)} blank translations (e.g. ayah ids {blank[:5]})")
+
+    # The file must be in mushaf order: the seeder writes texts positionally by ayah id.
+    if ids != sorted(ids):
+        errors.append("rows are not in ascending ayah-id order")
+
+    return errors
+
+
+def fetch_translation(entry: Dict[str, Any], args: argparse.Namespace) -> int:
+    source = entry.get("source")
+    if source != "tanzil":
+        print(f"error: translation {entry['id']!r} has source {source!r}; only 'tanzil' is "
+              f"fetchable here.", file=sys.stderr)
+        if source == "alquran.cloud":
+            print("       It predates this pipeline and ships inside the prepopulated DB "
+                  "(scripts/download_and_generate.py).", file=sys.stderr)
+        return 2
+
+    print("=" * 68)
+    print(f"Fetching translation: {entry['id']} — {entry.get('displayName', '')}")
+    print(f"  tanzil edition: {entry['edition']}  language: {entry.get('languageTag')}"
+          f"{'  (RTL)' if entry.get('isRightToLeft') else ''}")
+    print("=" * 68)
+
+    raw = download_tanzil(entry["edition"])
+    meta = parse_tanzil_metadata(raw)
+    if meta:
+        print("  source metadata: " + ", ".join(f"{k}={v}" for k, v in meta.items()
+                                                if k in ("Name", "Translator", "Language",
+                                                         "Last Update")))
+
+    rows = parse_tanzil(raw, load_ayah_key_map())
+    print(f"  parsed: {len(rows)} verses")
+
+    errors = validate_translation(rows)
+    if errors:
+        print("\n[FAIL] translation validation:")
+        for e in errors[:10]:
+            print(f"  - {e}")
+        print("\nNot writing. A translation with a shifted or blank verse is worse than none.")
+        return 1
+    print("[OK]   translation validation")
+
+    if args.validate_only:
+        print("\n[OK] All checks passed. --validate-only: nothing written.")
+        return 0
+
+    # Compact positional form: index i holds ayah id i+1. Storing the ids explicitly would
+    # roughly double the asset for no information, and the validators above already guarantee
+    # the rows are complete, unique and in order.
+    payload = {
+        "contentVersion": entry["contentVersion"],
+        "translatorId": entry["id"],
+        "tanzilEdition": entry["edition"],
+        "sourceLastUpdate": meta.get("Last Update", ""),
+        "texts": [t for _, t in rows],
+    }
+
+    out_dir = BASE_DIR / "json" / "translations"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    out_path = out_dir / entry["output"]
+    with open(out_path, "w", encoding="utf-8") as f:
+        json.dump(payload, f, ensure_ascii=False, separators=(",", ":"))
+    size_mb = out_path.stat().st_size / 1_000_000
+    print(f"    Saved: translations/{entry['output']} ({len(rows)} verses, {size_mb:.2f} MB)")
+
+    print("\n[OK] Generated and validated.")
+    print(f"     Next: copy into app/src/main/assets/quran/translations/, add the entry to")
+    print(f"     QuranEditions.translations + QuranContentAssets.translations, and record the")
+    print(f"     licence in nimaz-pro-data/json/{entry['license'].split('#')[0]}.")
+    return 0
+
+
+# ---------------------------------------------------------------------------
+# Mushaf layouts (QUL)
+# ---------------------------------------------------------------------------
 
 def fetch_mushaf_layout(entry: Dict[str, Any], args: argparse.Namespace) -> int:
     """Fetch + validate (+ optionally write) one line-accurate layout."""
@@ -155,13 +327,36 @@ def main() -> int:
                         help="fetch and validate but write nothing")
     parser.add_argument("--pages", nargs=2, type=int, metavar=("START", "END"),
                         help="dev: fetch a page range only; implies no write")
+    parser.add_argument("--all-translations", action="store_true",
+                        help="fetch every fetchable translation in the manifest")
     args = parser.parse_args()
 
     manifest = load_manifest()
 
-    if args.list or not args.edition_id:
+    if args.list:
         list_editions(manifest)
-        return 0 if args.list else 2
+        return 0
+
+    if args.all_translations:
+        fetchable = [e for e in manifest.get("translations", []) if e.get("source") == "tanzil"]
+        if not fetchable:
+            print("error: no fetchable translations in the manifest", file=sys.stderr)
+            return 2
+        failures = []
+        for entry in fetchable:
+            if fetch_translation(entry, args) != 0:
+                failures.append(entry["id"])
+            print()
+        if failures:
+            print(f"[FAIL] {len(failures)} translation(s) failed: {', '.join(failures)}",
+                  file=sys.stderr)
+            return 1
+        print(f"[OK] {len(fetchable)} translations fetched and validated.")
+        return 0
+
+    if not args.edition_id:
+        list_editions(manifest)
+        return 2
 
     axis, entry = find_edition(manifest, args.edition_id)
     if entry is None:
@@ -171,10 +366,12 @@ def main() -> int:
 
     if axis == "mushafLayouts":
         return fetch_mushaf_layout(entry, args)
+    if axis == "translations":
+        return fetch_translation(entry, args)
 
-    # Translations and tafseers currently ship inside the prepopulated DB rather than as
-    # seeded assets, and are produced by download_and_generate.py. Say so plainly rather than
-    # pretending to fetch — a silent no-op here would look like success.
+    # Tafseers ship inside the prepopulated DB rather than as seeded assets, and are produced
+    # by download_and_generate.py. Say so plainly rather than pretending to fetch — a silent
+    # no-op here would look like success.
     print(f"error: {args.edition_id!r} is a {axis[:-1]}, which this script does not fetch.",
           file=sys.stderr)
     print(f"       It is produced by scripts/download_and_generate.py "

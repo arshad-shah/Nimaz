@@ -155,20 +155,20 @@ No asset, no seeder, no migration.
 | 2 | Seeder framework | **Done, in a corrected shape** — see §1.2. Dua/Help/Qaida subclass `AssetContentSeeder`; Hadith and the per-edition layout seeder deliberately stay out. |
 | 3 | Generic `mushaf_layouts` table | **Done.** `MIGRATION_18_19`, DAO parameterised on `layoutId`. |
 | 4 | Pickers derive | **Done.** No literal edition id or display name left in `presentation/` outside `@Preview` fixtures and the `QuranArabicFont` font binding. |
-| 5 | Multi-translation | **Plumbing done, no second edition shipped** — see below. |
+| 5 | Multi-translation | **Done.** Seven Tanzil translations ship (one per app UI language, plus Urdu), with `QuranTranslationSeeder` and `TranslationFidelityTest`. |
 | 6 | Pipeline manifest + fetcher + licence register | **Done.** |
 | 7 | Prove it by adding a 15-line layout | **Blocked** — see below. |
 
 ### What is deliberately not done
 
-**Phase 5 ships no second translation.** The RTL and per-translation-font path is complete and
-covered by `TranslationDirectionTest` against a synthetic RTL edition, and `TranslationSeeder`'s
-slot exists in `QuranContentAssets.translations`. What is missing is a translation to put in it,
-and that is a **licensing decision, not an engineering one**: a translation is a copyrighted work
-of its translator, and an API serving the text says nothing about the right to bundle it. Adding
-one without a cleared licence would be worse than not adding one. `LICENSES_TRANSLATIONS.md`
-records the open question — including for Saheeh International, which ships today with no
-established licence — and lists candidate editions with clearer rights positions.
+**The translations rest on Nimaz staying non-commercial.** Tanzil hosts these translations
+without relicensing them; its blanket term is non-commercial use only. That basis was confirmed by
+the owner (July 2026): the app is free, with no ads and no in-app purchases. If that ever changes,
+every Tanzil-sourced entry needs written permission from its translator or publisher first —
+Pickthall is the exception, being public domain by age. Tanzil also requires a link back from any
+app shipping three or more of its translations; Nimaz ships eight, and the About screen's *Quran
+Text* and *Translations* credits are both tappable links to tanzil.net. Full detail per edition in
+`nimaz-pro-data/json/LICENSES_TRANSLATIONS.md`.
 
 **Phase 7 is blocked on the two open questions the spec raised, and both need the owner:**
 
@@ -192,7 +192,7 @@ special-cased.
 ### Verification
 
 `./gradlew :app:compileDebugKotlin` (KSP validates Hilt + Room wiring) and
-`./gradlew :app:testDebugUnitTest` are green: **1,234 tests, 0 failures**.
+`./gradlew :app:testDebugUnitTest` are green: **1,242 tests, 0 failures**.
 
 The migration tests in `app/src/androidTest/` (`MigrationTest`, `MigrationChainTest`) **compile
 but have not been executed** — instrumented tests need a device or emulator, and this work was

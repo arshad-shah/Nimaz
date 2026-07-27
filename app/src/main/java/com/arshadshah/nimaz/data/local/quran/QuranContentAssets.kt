@@ -56,10 +56,21 @@ object QuranContentAssets {
         val ayahText: AssetBinding?
     )
 
-    /** Translations, keyed by translator id. */
+    /**
+     * Translations, keyed by translator id.
+     *
+     * `sahih_international` is deliberately absent: it ships inside the prepopulated DB rather
+     * than as a seeded asset, because it predates the registry. Its rows are already on every
+     * device, so giving it an asset would only duplicate them.
+     */
     val translations: Map<String, AssetBinding> = mapOf(
-        // Sahih International ships inside the prepopulated DB rather than as a seeded asset,
-        // so it has no binding yet. Editions added after the registry landed get one here.
+        "pickthall" to AssetBinding("quran/translations/pickthall.json", contentVersion = 1),
+        "jalandhry" to AssetBinding("quran/translations/jalandhry.json", contentVersion = 1),
+        "diyanet" to AssetBinding("quran/translations/diyanet.json", contentVersion = 1),
+        "indonesian" to AssetBinding("quran/translations/indonesian.json", contentVersion = 1),
+        "basmeih" to AssetBinding("quran/translations/basmeih.json", contentVersion = 1),
+        "hamidullah" to AssetBinding("quran/translations/hamidullah.json", contentVersion = 1),
+        "bubenheim" to AssetBinding("quran/translations/bubenheim.json", contentVersion = 1)
     )
 
     /**

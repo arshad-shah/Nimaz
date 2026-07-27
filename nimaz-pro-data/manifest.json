@@ -12,9 +12,14 @@
     "",
     "Fetch an edition with:  python3 scripts/fetch_edition.py <id>",
     "Validate without writing (use this before committing to a new layout, see Q1 in the",
-    "content-registry spec):  python3 scripts/fetch_edition.py <id> --validate-only"
+    "content-registry spec):  python3 scripts/fetch_edition.py <id> --validate-only",
+    "",
+    "Translations with source 'tanzil' are fetched from https://tanzil.net/trans/<edition>.",
+    "Tanzil hosts these translations; it does NOT relicense them. Its blanket term is",
+    "non-commercial use only, and Nimaz relies on that: the app is free, with no ads and no",
+    "in-app purchases. If that ever changes, every 'tanzil'-sourced entry here needs permission",
+    "from its translator or publisher first. See json/LICENSES_TRANSLATIONS.md."
   ],
-
   "translations": [
     {
       "id": "sahih_international",
@@ -33,9 +38,100 @@
         "after the registry get one and are seeded like any other bundled content.",
         "Fetched by scripts/download_and_generate.py (download_quran_data)."
       ]
+    },
+    {
+      "id": "pickthall",
+      "displayName": "Pickthall",
+      "translatorName": "Marmaduke Pickthall",
+      "languageTag": "en",
+      "isRightToLeft": false,
+      "source": "tanzil",
+      "edition": "en.pickthall",
+      "contentVersion": 1,
+      "output": "pickthall.json",
+      "license": "LICENSES_TRANSLATIONS.md#pickthall",
+      "$rights": "Public domain by age — Pickthall died 1936, so life+70 expired in 2007."
+    },
+    {
+      "id": "jalandhry",
+      "displayName": "جالندہری",
+      "translatorName": "Fateh Muhammad Jalandhry",
+      "languageTag": "ur",
+      "isRightToLeft": true,
+      "fontId": "indopak",
+      "source": "tanzil",
+      "edition": "ur.jalandhry",
+      "contentVersion": 1,
+      "output": "jalandhry.json",
+      "license": "LICENSES_TRANSLATIONS.md#jalandhry",
+      "$rights": "Tanzil non-commercial term. Jalandhry died 1954."
+    },
+    {
+      "id": "diyanet",
+      "displayName": "Diyanet İşleri",
+      "translatorName": "Diyanet İşleri Başkanlığı",
+      "languageTag": "tr",
+      "isRightToLeft": false,
+      "source": "tanzil",
+      "edition": "tr.diyanet",
+      "contentVersion": 1,
+      "output": "diyanet.json",
+      "license": "LICENSES_TRANSLATIONS.md#diyanet",
+      "$rights": "Tanzil non-commercial term. Turkish state religious authority."
+    },
+    {
+      "id": "indonesian",
+      "displayName": "Bahasa Indonesia",
+      "translatorName": "Kementerian Agama Republik Indonesia",
+      "languageTag": "id",
+      "isRightToLeft": false,
+      "source": "tanzil",
+      "edition": "id.indonesian",
+      "contentVersion": 1,
+      "output": "indonesian.json",
+      "license": "LICENSES_TRANSLATIONS.md#indonesian",
+      "$rights": "Tanzil non-commercial term. Indonesian Ministry of Religious Affairs."
+    },
+    {
+      "id": "basmeih",
+      "displayName": "Bahasa Melayu",
+      "translatorName": "Abdullah Muhammad Basmeih",
+      "languageTag": "ms",
+      "isRightToLeft": false,
+      "source": "tanzil",
+      "edition": "ms.basmeih",
+      "contentVersion": 1,
+      "output": "basmeih.json",
+      "license": "LICENSES_TRANSLATIONS.md#basmeih",
+      "$rights": "Tanzil non-commercial term."
+    },
+    {
+      "id": "hamidullah",
+      "displayName": "Hamidullah",
+      "translatorName": "Muhammad Hamidullah",
+      "languageTag": "fr",
+      "isRightToLeft": false,
+      "source": "tanzil",
+      "edition": "fr.hamidullah",
+      "contentVersion": 1,
+      "output": "hamidullah.json",
+      "license": "LICENSES_TRANSLATIONS.md#hamidullah",
+      "$rights": "Tanzil non-commercial term. Hamidullah died 2002."
+    },
+    {
+      "id": "bubenheim",
+      "displayName": "Bubenheim & Elyas",
+      "translatorName": "Frank Bubenheim and Nadeem Elyas",
+      "languageTag": "de",
+      "isRightToLeft": false,
+      "source": "tanzil",
+      "edition": "de.bubenheim",
+      "contentVersion": 1,
+      "output": "bubenheim.json",
+      "license": "LICENSES_TRANSLATIONS.md#bubenheim",
+      "$rights": "Tanzil non-commercial term."
     }
   ],
-
   "mushafLayouts": [
     {
       "id": "indopak16",
@@ -58,7 +154,6 @@
       "fidelitySheet": "docs/quran/16-line-fidelity-sheet.md"
     }
   ],
-
   "tafseers": [
     {
       "id": "ibn_kathir_en",

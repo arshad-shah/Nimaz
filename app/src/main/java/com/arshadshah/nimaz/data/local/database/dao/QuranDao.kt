@@ -196,6 +196,24 @@ interface QuranDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertTranslations(translations: List<TranslationEntity>)
 
+    /** Rows already present for one translation — the seeder's "is it populated" check. */
+    @Query("SELECT COUNT(*) FROM translations WHERE translator_id = :translatorId")
+    suspend fun countTranslations(translatorId: String): Int
+
+    @Query("DELETE FROM translations WHERE translator_id = :translatorId")
+    suspend fun deleteTranslations(translatorId: String)
+
+    /**
+     * Atomically (re)seed one translation. Only [translatorId]'s rows are cleared, so
+     * re-seeding one edition never disturbs another's — or the one that ships inside the
+     * prepopulated DB. Idempotent; safe to re-run.
+     */
+    @Transaction
+    suspend fun replaceTranslations(translatorId: String, rows: List<TranslationEntity>) {
+        deleteTranslations(translatorId)
+        insertTranslations(rows)
+    }
+
     @Query("SELECT * FROM translations WHERE text LIKE '%' || :query || '%' AND translator_id = :translatorId")
     fun searchTranslations(query: String, translatorId: String): Flow<List<TranslationEntity>>
 

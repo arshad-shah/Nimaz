@@ -27,12 +27,66 @@ package com.arshadshah.nimaz.domain.model.quran.catalogue
  */
 object QuranEditions {
 
+    /**
+     * Shipped translations, one per language the app's UI supports, plus Urdu.
+     *
+     * All but the first are sourced from Tanzil and bundled as seeded assets. Tanzil hosts
+     * these translations without relicensing them: its blanket term is **non-commercial use
+     * only**, which Nimaz relies on — the app is free, with no ads and no in-app purchases. If
+     * that ever changes, every Tanzil-sourced entry needs permission from its translator or
+     * publisher first. See `nimaz-pro-data/json/LICENSES_TRANSLATIONS.md`.
+     */
     val translations: List<TranslationEdition> = listOf(
         TranslationEdition(
             id = "sahih_international",
             displayName = "Sahih International",
             translatorName = "Sahih International",
             languageTag = "en"
+        ),
+        TranslationEdition(
+            id = "pickthall",
+            displayName = "Pickthall",
+            translatorName = "Marmaduke Pickthall",
+            languageTag = "en"
+        ),
+        TranslationEdition(
+            id = "jalandhry",
+            displayName = "جالندہری",
+            translatorName = "Fateh Muhammad Jalandhry",
+            languageTag = "ur",
+            isRightToLeft = true,
+            // Urdu is written in Nastaʿlīq; the body font has no coverage for it.
+            fontId = "indopak"
+        ),
+        TranslationEdition(
+            id = "diyanet",
+            displayName = "Diyanet İşleri",
+            translatorName = "Diyanet İşleri Başkanlığı",
+            languageTag = "tr"
+        ),
+        TranslationEdition(
+            id = "indonesian",
+            displayName = "Bahasa Indonesia",
+            translatorName = "Kementerian Agama Republik Indonesia",
+            languageTag = "id"
+        ),
+        TranslationEdition(
+            id = "basmeih",
+            displayName = "Bahasa Melayu",
+            translatorName = "Abdullah Muhammad Basmeih",
+            languageTag = "ms"
+        ),
+        TranslationEdition(
+            id = "hamidullah",
+            displayName = "Hamidullah",
+            translatorName = "Muhammad Hamidullah",
+            languageTag = "fr"
+        ),
+        TranslationEdition(
+            id = "bubenheim",
+            displayName = "Bubenheim & Elyas",
+            translatorName = "Frank Bubenheim and Nadeem Elyas",
+            languageTag = "de"
         )
     )
 

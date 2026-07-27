@@ -561,35 +561,61 @@ private fun DeveloperSocial(icon: ImageVector, onClick: () -> Unit) {
 @Composable
 private fun CreditsGrid(modifier: Modifier = Modifier) {
     val credits = listOf(
-        stringResource(R.string.credit_prayer_times) to stringResource(R.string.credit_aladhan),
-        stringResource(R.string.credit_quran_text) to stringResource(R.string.credit_tanzil),
-        // Derived from the content registry so a newly shipped translation credits its
-        // translator without an edit here (and cannot be silently left uncredited).
-        stringResource(R.string.credit_translations) to
-                QuranEditions.translations.joinToString { it.translatorName },
-        stringResource(R.string.credit_hadith_data) to stringResource(R.string.credit_sunnah),
-        stringResource(R.string.credit_recitations) to stringResource(R.string.credit_quran_com),
-        stringResource(R.string.credit_hijri_calendar) to stringResource(R.string.credit_islamic_finder)
+        Credit(stringResource(R.string.credit_prayer_times),
+            stringResource(R.string.credit_aladhan)),
+        // Tanzil is linked, not just named. Its terms require a link back from any app
+        // shipping three or more of its translations, so readers can reach the current
+        // versions — and the Arabic text's CC BY 3.0 licence asks for the same.
+        Credit(stringResource(R.string.credit_quran_text),
+            stringResource(R.string.credit_tanzil), TANZIL_URL),
+        Credit(stringResource(R.string.credit_translations),
+            stringResource(R.string.credit_tanzil), TANZIL_URL),
+        Credit(stringResource(R.string.credit_hadith_data),
+            stringResource(R.string.credit_sunnah)),
+        Credit(stringResource(R.string.credit_recitations),
+            stringResource(R.string.credit_quran_com)),
+        Credit(stringResource(R.string.credit_hijri_calendar),
+            stringResource(R.string.credit_islamic_finder))
     )
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(9.dp)) {
         credits.chunked(2).forEach { row ->
             Row(horizontalArrangement = Arrangement.spacedBy(9.dp)) {
-                row.forEach { (label, provider) ->
-                    CreditCell(label = label, provider = provider, modifier = Modifier.weight(1f))
+                row.forEach { credit ->
+                    CreditCell(credit = credit, modifier = Modifier.weight(1f))
                 }
                 if (row.size == 1) Spacer(Modifier.weight(1f))
             }
         }
+        // Every translator by name, derived from the content registry — a shipped translation
+        // cannot end up uncredited, and adding one needs no edit here. Too many names to fit
+        // in a card, hence the separate line.
+        Text(
+            text = QuranEditions.translations
+                .joinToString { "${it.translatorName} (${it.displayName})" },
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(top = 3.dp, start = 2.dp, end = 2.dp)
+        )
     }
 }
 
+/** A credit cell's contents; [url] makes the whole card a link. */
+private data class Credit(val label: String, val provider: String, val url: String? = null)
+
+private const val TANZIL_URL = "https://tanzil.net/trans/"
+
 @Composable
-private fun CreditCell(label: String, provider: String, modifier: Modifier = Modifier) {
+private fun CreditCell(credit: Credit, modifier: Modifier = Modifier) {
+    val (label, provider, url) = credit
+    val uriHandler = LocalUriHandler.current
+    // Whole-card tap target goes through NimazCard(onClick), not a wrapping Modifier.clickable
+    // — the latter paints a sharp-cornered ripple that ignores the card radius.
     NimazCard(
         modifier = modifier,
         style = NimazCardStyle.ELEVATED,
         shape = RoundedCornerShape(12.dp),
-        tone = NimazTone.NEUTRAL
+        tone = NimazTone.NEUTRAL,
+        onClick = url?.let { { uriHandler.openUri(it) } }
     ) {
         Column(
             modifier = Modifier

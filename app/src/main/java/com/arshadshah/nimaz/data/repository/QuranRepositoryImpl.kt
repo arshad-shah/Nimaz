@@ -9,6 +9,7 @@ import com.arshadshah.nimaz.data.local.database.entity.QuranFavoriteEntity
 import com.arshadshah.nimaz.data.local.database.entity.ReadingProgressEntity
 import com.arshadshah.nimaz.data.local.database.entity.SurahEntity
 import com.arshadshah.nimaz.data.local.quran.QuranLayoutSeeder
+import com.arshadshah.nimaz.data.local.quran.QuranTranslationSeeder
 import com.arshadshah.nimaz.domain.model.Ayah
 import com.arshadshah.nimaz.domain.model.MushafPageLayout
 import com.arshadshah.nimaz.domain.model.quran.catalogue.MushafLayoutEdition
@@ -42,8 +43,28 @@ import javax.inject.Singleton
 @Singleton
 class QuranRepositoryImpl @Inject constructor(
     private val quranDao: QuranDao,
-    private val layoutSeeder: QuranLayoutSeeder
+    private val layoutSeeder: QuranLayoutSeeder,
+    private val translationSeeder: QuranTranslationSeeder
 ) : QuranRepository {
+
+    /**
+     * Fetches one translation's texts for [ayahIds], seeding that edition on first use.
+     *
+     * Every read of translated ayahs goes through here, so the seeding trigger lives in one
+     * place rather than at each of the three call sites. Seeding is idempotent, version-gated
+     * and short-circuited per edition after the first confirmation, so the ~6.2k-row write
+     * runs once and later reads cost nothing extra. A translation with no bundled asset
+     * (`sahih_international`, which ships in the prepopulated DB) is a no-op.
+     */
+    private suspend fun translationsFor(
+        ayahIds: List<Int>,
+        translatorId: String
+    ): Map<Int, String> {
+        translationSeeder.seedIfNeeded(QuranEditions.translation(translatorId))
+        return quranDao.getTranslationsForAyahs(ayahIds, translatorId)
+            .first()
+            .associate { it.ayahId to it.text }
+    }
 
     override fun getAllSurahs(): Flow<List<Surah>> {
         return quranDao.getAllSurahs().mapItems { it.toDomain() }
@@ -89,10 +110,7 @@ class QuranRepositoryImpl @Inject constructor(
         return quranDao.getAyahsByJuz(juzNumber).map { entities ->
             // Fetch translations if translatorId is provided
             val translationMap = if (translatorId != null && entities.isNotEmpty()) {
-                val ayahIds = entities.map { it.id }
-                quranDao.getTranslationsForAyahs(ayahIds, translatorId)
-                    .first()
-                    .associate { it.ayahId to it.text }
+                translationsFor(entities.map { it.id }, translatorId)
             } else {
                 emptyMap()
             }
@@ -129,10 +147,7 @@ class QuranRepositoryImpl @Inject constructor(
         return entityFlow.map { entities ->
             // Fetch translations if translatorId is provided
             val translationMap = if (translatorId != null && entities.isNotEmpty()) {
-                val ayahIds = entities.map { it.id }
-                quranDao.getTranslationsForAyahs(ayahIds, translatorId)
-                    .first()
-                    .associate { it.ayahId to it.text }
+                translationsFor(entities.map { it.id }, translatorId)
             } else {
                 emptyMap()
             }
@@ -208,10 +223,7 @@ class QuranRepositoryImpl @Inject constructor(
 
                 // Fetch translations if translatorId is provided
                 val translationMap = if (translatorId != null && ayahEntities.isNotEmpty()) {
-                    val ayahIds = ayahEntities.map { it.id }
-                    quranDao.getTranslationsForAyahs(ayahIds, translatorId)
-                        .first()
-                        .associate { it.ayahId to it.text }
+                    translationsFor(ayahEntities.map { it.id }, translatorId)
                 } else {
                     emptyMap()
                 }
@@ -256,10 +268,15 @@ class QuranRepositoryImpl @Inject constructor(
     override fun getTranslationsForAyahs(
         ayahIds: List<Int>,
         translatorId: String
-    ): Flow<Map<Int, String>> {
-        return quranDao.getTranslationsForAyahs(ayahIds, translatorId).map { translations ->
-            translations.associate { it.ayahId to it.text }
-        }
+    ): Flow<Map<Int, String>> = flow {
+        // Seed before collecting: an edition whose rows have not been written yet would
+        // otherwise emit an empty map, which reads as "this ayah has no translation".
+        translationSeeder.seedIfNeeded(QuranEditions.translation(translatorId))
+        emitAll(
+            quranDao.getTranslationsForAyahs(ayahIds, translatorId).map { translations ->
+                translations.associate { it.ayahId to it.text }
+            }
+        )
     }
 
     override fun searchQuran(query: String, translatorId: String?): Flow<List<QuranSearchResult>> {
@@ -278,8 +295,11 @@ class QuranRepositoryImpl @Inject constructor(
                 )
             }
 
-            // If translatorId provided, also search translations
+            // If translatorId provided, also search translations. Seed first — searching an
+            // edition that has not been written yet would quietly return zero hits rather
+            // than an error, which looks like "the Quran does not contain that phrase".
             val translationResults = if (translatorId != null) {
+                translationSeeder.seedIfNeeded(QuranEditions.translation(translatorId))
                 quranDao.searchTranslations(query, translatorId).first().mapNotNull { translation ->
                     quranDao.getAyahById(translation.ayahId)?.let { ayah ->
                         QuranSearchResult(

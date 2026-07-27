@@ -427,6 +427,7 @@ idempotently, so fresh installs and upgraders converge on the same content.
 | Help | `data/local/help/HelpContentSeeder.kt` | `help/help.json` | full content replace (`AssetContentSeeder`) |
 | Qaida | `data/local/qaida/QaidaContentSeeder.kt` | `qaida/qaida_content.json` | full content replace (`AssetContentSeeder`) |
 | Hadith | `data/local/hadith/HadithBackfillSeeder.kt` | `hadith/hadith_fills.json` | keyed UPDATE backfill (**stands alone** — see below) |
+| Translations | `data/local/quran/QuranTranslationSeeder.kt` | per edition, from `QuranContentAssets.translations` (`quran/translations/<id>.json`) | per-translator `translations` replace |
 | Mushaf layouts | `data/local/quran/QuranLayoutSeeder.kt` | per edition, from `QuranContentAssets.mushafLayouts` (16-line IndoPak: `quran/ayahs_indopak.json` + `quran/mushaf_layout_indopak16.json`) | ayah-text UPDATE + per-edition `mushaf_layouts` replace |
 
 > **The layout seeder is edition-agnostic.** It takes a `MushafLayoutEdition` and looks its assets up
@@ -435,6 +436,22 @@ idempotently, so fresh installs and upgraders converge on the same content.
 > both scoped per edition (`mushaf_layout.<id>`), so seeding one layout cannot mark another current.
 > A flowed edition (Madani) has no layout rows and is never seeded. See
 > `docs/adr/ADR-001-generic-mushaf-layouts-table.md` and `docs/quran/content-registry.md`.
+
+**Translations are seeded per edition** from Tanzil-sourced assets. The asset is *positional* —
+index `i` holds global ayah id `i + 1`, all 6,236 in mushaf order — which keeps it to ~0.3 MB
+compressed but makes a truncated or reordered file catastrophic in a quiet way: every verse after
+the defect attaches to the wrong ayah, and the app cannot tell. The seeder therefore re-checks the
+row count and the declared `translatorId` on the way in, and `TranslationFidelityTest` validates
+the shipped bytes of every catalogue translation (count, blanks, declared id, content version,
+duplicate content, RTL font) so a bad asset fails CI rather than shipping.
+
+`sahih_international` has no asset: it ships inside the prepopulated DB and its rows are already
+on every device. `seedIfNeeded` is a no-op for any edition with no binding, so it stays untouched.
+
+Seeding is triggered from `QuranRepositoryImpl.translationsFor(...)`, which every translated-ayah
+read funnels through, plus the two other read paths (`getTranslationsForAyahs` and `searchQuran`'s
+translation branch) — those would otherwise return an empty result for a not-yet-seeded edition,
+which reads as "this ayah has no translation" rather than as an error.
 
 **The `AssetContentSeeder<T>` base class** (`data/local/seeding/`) owns the replace-shaped
 pattern: parse → compare versions → replace atomically → record the version, serialised by a
