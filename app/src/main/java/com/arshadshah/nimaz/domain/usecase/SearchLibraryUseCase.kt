@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.domain.usecase
 
+import com.arshadshah.nimaz.domain.model.quran.catalogue.QuranEditions
 import com.arshadshah.nimaz.domain.model.DuaSearchResult
 import com.arshadshah.nimaz.domain.model.HadithSearchResult
 import com.arshadshah.nimaz.domain.model.LibrarySearchResults
@@ -112,7 +113,8 @@ class SearchLibraryUseCase @Inject constructor(
     }
 
     companion object {
-        const val DEFAULT_TRANSLATOR = "sahih_international"
+        /** Single-sourced from the content registry so search follows the shipped default. */
+        val DEFAULT_TRANSLATOR: String = QuranEditions.defaultTranslation.id
 
         /** A whole-phrase hit outranks any combination of single-word hits. */
         private const val PHRASE_SCORE = 100

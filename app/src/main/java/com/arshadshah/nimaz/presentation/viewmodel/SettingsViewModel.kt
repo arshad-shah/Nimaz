@@ -143,8 +143,8 @@ data class NotificationSummary(
 }
 
 data class QuranSettingsUiState(
-    val selectedTranslatorId: String = "sahih_international",
-    val selectedArabicFontId: String = "amiri",
+    val selectedTranslatorId: String = QuranEditions.defaultTranslation.id,
+    val selectedArabicFontId: String = QuranEditions.defaultArabicFont.id,
     val showTranslation: Boolean = true,
     val showTransliteration: Boolean = false,
     val arabicFontSize: Float = 28f,
@@ -159,7 +159,7 @@ data class QuranSettingsUiState(
 )
 
 data class DuaSettingsUiState(
-    val selectedArabicFontId: String = "amiri",
+    val selectedArabicFontId: String = QuranEditions.defaultArabicFont.id,
     val arabicFontSize: Float = 28f,
     val translationFontSize: Float = 16f,
     val showArabic: Boolean = true,
@@ -168,7 +168,7 @@ data class DuaSettingsUiState(
 )
 
 data class HadithSettingsUiState(
-    val selectedArabicFontId: String = "amiri",
+    val selectedArabicFontId: String = QuranEditions.defaultArabicFont.id,
     val arabicFontSize: Float = 24f,
     val translationFontSize: Float = 16f,
     val showArabic: Boolean = true,

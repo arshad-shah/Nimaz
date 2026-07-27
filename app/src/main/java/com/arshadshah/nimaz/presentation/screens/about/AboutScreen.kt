@@ -55,6 +55,7 @@ import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.BuildConfig
 import com.arshadshah.nimaz.LocalInAppUpdateManager
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.domain.model.quran.catalogue.QuranEditions
 import com.arshadshah.nimaz.core.util.UpdateState
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeEmphasis
@@ -562,7 +563,10 @@ private fun CreditsGrid(modifier: Modifier = Modifier) {
     val credits = listOf(
         stringResource(R.string.credit_prayer_times) to stringResource(R.string.credit_aladhan),
         stringResource(R.string.credit_quran_text) to stringResource(R.string.credit_tanzil),
-        stringResource(R.string.credit_translations) to stringResource(R.string.credit_sahih_international),
+        // Derived from the content registry so a newly shipped translation credits its
+        // translator without an edit here (and cannot be silently left uncredited).
+        stringResource(R.string.credit_translations) to
+                QuranEditions.translations.joinToString { it.translatorName },
         stringResource(R.string.credit_hadith_data) to stringResource(R.string.credit_sunnah),
         stringResource(R.string.credit_recitations) to stringResource(R.string.credit_quran_com),
         stringResource(R.string.credit_hijri_calendar) to stringResource(R.string.credit_islamic_finder)

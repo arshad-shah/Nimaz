@@ -110,7 +110,7 @@ data class QuranReaderUiState(
     val error: String? = null,
     val showTranslation: Boolean = true,
     val showTransliteration: Boolean = false,
-    val selectedTranslatorId: String = "sahih_international",
+    val selectedTranslatorId: String = QuranEditions.defaultTranslation.id,
     val fontSize: Float = 16f,
     val arabicFontSize: Float = 28f,
     val arabicFontFamily: FontFamily = AmiriFontFamily,

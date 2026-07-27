@@ -223,12 +223,22 @@ class QuranRepositoryImpl @Inject constructor(
         }
     }
 
+    /**
+     * The translations actually present in the database, named from the content registry.
+     *
+     * The DB only knows translator *ids*, so this used to return `name = translatorId` and a
+     * language code guessed by splitting that id on `.` — which produced "sahih_international"
+     * as a display name and "sahih_international" as a language. The catalogue carries the
+     * real metadata; an id with no catalogue entry (seeded by an older build, since removed)
+     * still surfaces under its own id rather than disappearing.
+     */
     override suspend fun getAvailableTranslators(): List<Translator> {
         return quranDao.getAvailableTranslatorIds().map { translatorId ->
+            val edition = QuranEditions.translations.firstOrNull { it.id == translatorId }
             Translator(
                 id = translatorId,
-                name = translatorId, // Use id as name since we don't have name info
-                languageCode = translatorId.substringBefore(".")
+                name = edition?.displayName ?: translatorId,
+                languageCode = edition?.languageTag ?: translatorId.substringBefore(".")
             )
         }
     }

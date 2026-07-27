@@ -64,6 +64,7 @@ import com.arshadshah.nimaz.presentation.components.organisms.TajweedLegendSheet
 import com.arshadshah.nimaz.presentation.theme.QuranArabicFont
 import com.arshadshah.nimaz.presentation.viewmodel.SettingsEvent
 import com.arshadshah.nimaz.presentation.viewmodel.SettingsViewModel
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -77,31 +78,14 @@ fun QuranSettingsScreen(
     var showTajweedLegend by remember { mutableStateOf(false) }
 
     // === ADDING NEW TRANSLATIONS ===
-    // To add a new translation:
-    // 1. Ensure the translation data exists in the database (quran_translations table)
-    //    with the translator_id matching the value below
-    // 2. Add a new Pair to translationOptions: "Display Name" to "translator_id"
-    // 3. The QuranRepository.getSurahWithAyahs() will automatically load the selected
-    //    translator's text into Ayah.translation
-    //
-    // Available translator IDs in the Islamic Network API:
-    // "en.sahih" - Sahih International (English)
-    // "en.asad" - Muhammad Asad (English)
-    // "en.pickthall" - Pickthall (English)
-    // "en.yusufali" - Yusuf Ali (English)
-    // Add more from: https://api.alquran.cloud/v1/edition?format=text&type=translation
-    val translationOptions = listOf(
-        "Sahih International" to "sahih_international"
-    )
+    // The translation picker is driven entirely by QuranEditions.translations — the content
+    // registry is the single source of truth. To add one, see docs/quran/content-registry.md;
+    // nothing in this screen needs to change.
 
     // === ADDING NEW ARABIC FONTS ===
-    // The font picker is driven entirely by the QuranArabicFont enum in
-    // presentation/theme/Type.kt — it is the single source of truth. To add one:
-    // 1. Add the font file(s) (.ttf/.otf) to app/src/main/res/font/
-    // 2. In Type.kt, declare a FontFamily and add a QuranArabicFont entry
-    //    (id + displayName + fontFamily)
-    // That's it — this screen, the preview, and the reader all derive from the
-    // enum, and the selected id persists via PreferencesDataStore.quranArabicFont.
+    // The font picker derives from the content registry. To add one, see
+    // docs/quran/content-registry.md; nothing in this screen needs to change. The
+    // selected id persists via PreferencesDataStore.quranArabicFont.
 
     val selectedFont = QuranArabicFont.fromId(quranState.selectedArabicFontId)
 
@@ -324,15 +308,22 @@ fun QuranSettingsScreen(
             }
             item {
                 NimazMenuGroup {
-                    translationOptions.forEachIndexed { index, (displayName, value) ->
-                        val isSelected = quranState.selectedTranslatorId == value
+                    val selectedTranslation =
+                        QuranEditions.translation(quranState.selectedTranslatorId)
+                    QuranEditions.translations.forEachIndexed { index, translation ->
                         TranslationItem(
-                            name = displayName,
-                            language = stringResource(R.string.language_english),
-                            isSelected = isSelected,
-                            onClick = { viewModel.onEvent(SettingsEvent.SetTranslator(value)) }
+                            name = translation.displayName,
+                            // Derived from the edition's BCP-47 tag, so a non-English
+                            // translation labels itself correctly with no new string resource.
+                            language = Locale.forLanguageTag(translation.languageTag)
+                                .getDisplayLanguage(Locale.getDefault())
+                                .replaceFirstChar { it.uppercase(Locale.getDefault()) },
+                            isSelected = selectedTranslation.id == translation.id,
+                            onClick = {
+                                viewModel.onEvent(SettingsEvent.SetTranslator(translation.id))
+                            }
                         )
-                        if (index < translationOptions.lastIndex) {
+                        if (index < QuranEditions.translations.lastIndex) {
                             NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
                         }
                     }
@@ -360,17 +351,14 @@ fun QuranSettingsScreen(
                                 fontWeight = FontWeight.Medium,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
+                            // Resolved through the registry. This was a fourth hand-kept copy
+                            // of the reciter names, and the shortest: it covered five ids and
+                            // fell through to `else -> id`, so choosing e.g. Ali Al-Hudhaify
+                            // in the picker made this row read "hudhaify". It also named a
+                            // reciter ("ghamdi") that no other copy could select.
                             Text(
-                                text = quranState.selectedReciterId?.let { id ->
-                                    when (id) {
-                                        "alafasy" -> "Mishary Rashid Alafasy"
-                                        "sudais" -> "Abdul Rahman Al-Sudais"
-                                        "ghamdi" -> "Saad Al-Ghamdi"
-                                        "muaiqly" -> "Maher Al-Muaiqly"
-                                        "abdulbasit" -> "Abdul Basit Abdul Samad"
-                                        else -> id
-                                    }
-                                } ?: "Mishary Rashid Alafasy",
+                                text = QuranEditions.reciter(quranState.selectedReciterId)
+                                    .displayName,
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )

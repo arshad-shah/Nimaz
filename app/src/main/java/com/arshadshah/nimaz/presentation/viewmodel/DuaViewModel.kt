@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.presentation.viewmodel
 
+import com.arshadshah.nimaz.domain.model.quran.catalogue.QuranEditions
 import androidx.compose.ui.text.font.FontFamily
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -53,7 +54,7 @@ data class DuaReaderUiState(
     val fontSize: Float = 16f,
     val arabicFontSize: Float = 28f,
     val arabicFontFamily: FontFamily = AmiriFontFamily,
-    val selectedArabicFontId: String = "amiri"
+    val selectedArabicFontId: String = QuranEditions.defaultArabicFont.id
 )
 
 data class DuaSearchUiState(
