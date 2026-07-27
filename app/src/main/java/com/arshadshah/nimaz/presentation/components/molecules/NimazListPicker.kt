@@ -1,7 +1,6 @@
 package com.arshadshah.nimaz.presentation.components.molecules
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -237,9 +236,8 @@ private fun <T> PickerRow(
     // obvious at a glance.
     NimazCard(
         style = if (isSelected) NimazCardStyle.FILLED else NimazCardStyle.OUTLINED,
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick),
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(14.dp),
         selected = isSelected,
         elevation = 0.dp,

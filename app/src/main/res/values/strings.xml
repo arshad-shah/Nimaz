@@ -1774,6 +1774,7 @@
 
     <!-- Night worship hub (Tahajjud / Witr destination) -->
     <string name="night_worship_title">Night Worship</string>
+    <string name="night_worship_subtitle">Tahajjud, Witr and the last third of the night</string>
     <string name="night_worship_last_third">Last third of the night</string>
     <string name="night_worship_open_now">Open now</string>
     <string name="night_worship_opens_in">Opens in</string>

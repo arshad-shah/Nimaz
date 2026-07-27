@@ -1,7 +1,6 @@
 package com.arshadshah.nimaz.presentation.components.molecules
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -59,12 +58,13 @@ fun HadithOfTheDayCard(
     NimazCard(
         tone = NimazTone.NEUTRAL,
         style = NimazCardStyle.ELEVATED,
+        // Tapping opens this exact hadith in the reader (issue #161). Kept on the whole card so the
+        // large surface is the tap target, not a tiny link — routed through NimazCard's onClick so
+        // the ripple clips to the rounded corners rather than painting a sharp rectangle.
+        onClick = onClick,
         modifier = modifier
             .fillMaxWidth()
-            .then(if (fillHeight) Modifier.fillMaxHeight() else Modifier)
-            // Tapping opens this exact hadith in the reader (issue #161). Kept on
-            // the whole card so the large surface is the tap target, not a tiny link.
-            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
+            .then(if (fillHeight) Modifier.fillMaxHeight() else Modifier),
     ) {
         Column(
             modifier = Modifier

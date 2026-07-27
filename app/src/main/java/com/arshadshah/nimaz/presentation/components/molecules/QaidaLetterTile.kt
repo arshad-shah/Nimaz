@@ -1,6 +1,5 @@
 package com.arshadshah.nimaz.presentation.components.molecules
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -50,11 +49,11 @@ fun QaidaLetterTile(
         stringResource(R.string.qaida_a11y_letter_format, letter.nameTransliteration)
     }
     NimazCard(
+        onClick = { onClick(letter) },
         modifier = modifier
             .fillMaxWidth()
             .aspectRatio(1f)
-            .semantics { contentDescription = desc }
-            .clickable { onClick(letter) },
+            .semantics { contentDescription = desc },
         style = NimazCardStyle.ELEVATED,
         tone = NimazTone.NEUTRAL,
         shape = RoundedCornerShape(NimazCornerRadius.Large),

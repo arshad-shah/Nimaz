@@ -33,6 +33,12 @@ These are the rules most often broken. Keep this checklist in mind for every cha
 7. **No hardcoded colors/typography in screens.** Use `MaterialTheme.colorScheme.*` or
    `NimazColors.*`. Reuse `presentation/components` (atoms/molecules/organisms) instead of
    re-rolling generic UI. Icons are Material glyphs via `NimazIcon` — no emoji.
+   - **Buttons are `NimazButton` (`components/atoms/NimazButton.kt`), never a `Text`/`Box`/
+     `Surface` + `Modifier.clickable`.** Pick the emphasis with `variant` (`FILLED`/`TONAL`/
+     `OUTLINED`/`TEXT`/`DESTRUCTIVE`) and `size`; icon-only actions use `NimazIconButton`.
+   - **A whole card is made tappable with `NimazCard(onClick = …)`, never `Modifier.clickable`
+     wrapped around the card** — the latter paints a sharp-cornered ripple that ignores the card's
+     radius (see §8, the `NimazCard` bullet). `NimazMenuItem` is the ready-made clickable list row.
    > **Exception (Location screen only):** country flags on the Location screen
    > (`LocationScreen`, curated cities in `LocationCatalog.kt`) are rendered as emoji.
    > This is the single sanctioned emoji use in the app; no other emoji are permitted.
@@ -524,6 +530,13 @@ typed route object.
       bordered chevron, `primary` when enabled and dimmed to `outlineVariant` at range ends);
       `direction` is *visual* (which chevron is drawn, auto-mirrored) so RTL surfaces wire the
       left arrow to advance. Default `size` is 48dp; steppers use 44dp. (Issue #227.)
+    - a button is `NimazButton(text, onClick, variant = …, size = …, type = …)`
+      (`components/atoms/NimazButton.kt`), **not** a raw Material `Button`/`OutlinedButton`/
+      `TextButton` and **never** a `Text`/`Box`/`Surface` carrying a `Modifier.clickable`. `variant`
+      is the emphasis (`FILLED`/`TONAL`/`OUTLINED`/`TEXT`/`DESTRUCTIVE`), `size` is
+      `SMALL`/`MEDIUM`/`LARGE`, `type` is `STANDARD` or `PILL`; `leadingIcon`/`trailingIcon`,
+      `loading`, `fullWidth` and an `accent` escape-hatch (for Islamic feature-art colours the
+      Material scheme has no role for) round it out. Icon-only buttons are `NimazIconButton`.
     - a card is `NimazCard(style = NimazCardStyle.FILLED | ELEVATED | OUTLINED | GRADIENT, …)`
       (`components/atoms/NimazCard.kt`), **not** a raw Material 3 `Card`/`ElevatedCard`/
       `OutlinedCard`. It passes through `onClick`/`enabled`/`shape`/`colors`/`elevation`, so
@@ -532,6 +545,17 @@ typed route object.
       the card default stand, picking `tone`/`style` per the separation rule above. Note the
       `OUTLINED` branch renders an `OutlinedCard`, which has no elevation slot — it **silently
       ignores** the `elevation` parameter (see §9 Open).
+      - **A tappable card MUST pass its click through `NimazCard(onClick = …)`, never a
+        `Modifier.clickable(...)` on the card's outer modifier.** A `.clickable` wrapping a card
+        sits *outside* the Material surface, so its ripple/tap-highlight is painted on the
+        un-rounded rectangle and shows **sharp corners** instead of following the card's radius.
+        `NimazCard(onClick)` routes to Material's `Card(onClick=…)`/`ElevatedCard(onClick=…)`, which
+        clips the ripple to the shape and adds `Role.Button`. Reuse `NimazMenuItem` for list rows.
+        For the shared `EventCard`/`WorshipEventCard` organisms, pass `onClick`/`onClickLabel`
+        (they forward to `NimazCard.onClick`); do not re-add a `.clickable`. `.clickable` stays fine
+        on **inner** elements (a `Text`, an icon, a sub-row) — the rule is specifically about making
+        a *whole card* the tap target. (Reported as the "sharp tapped-highlight" bug on the Home
+        worship cards and the Night Worship hub rows.)
     - a minus/value/plus number control is `NimazNumberStepper(value, onValueChange, variant = …,
       size = …, type = …)` (`components/molecules/NimazNumberStepper.kt`), **not** a hand-rolled
       row of `IconButton`s around a `Text`. `variant` is the layout: `INLINE` (a `label` on the

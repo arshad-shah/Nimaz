@@ -1,6 +1,5 @@
 package com.arshadshah.nimaz.presentation.screens.worship
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -34,6 +33,9 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.navigation.DUA_CATEGORY_WITR_AND_NIGHT_PRAYER
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazClockText
@@ -311,23 +313,18 @@ private fun RakahCounterCard(count: Int, onAddPair: () -> Unit, onReset: () -> U
                     modifier = Modifier.testTag(NightWorshipCountTestTag),
                 )
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(
+                    NimazButton(
                         text = stringResource(R.string.night_worship_reset),
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier
-                            .clickable(onClick = onReset)
-                            .padding(horizontal = 12.dp, vertical = 10.dp),
+                        onClick = onReset,
+                        variant = NimazButtonVariant.TEXT,
+                        size = NimazButtonSize.SMALL,
                     )
-                    Text(
+                    NimazButton(
                         text = stringResource(R.string.night_worship_add_pair),
-                        style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier
-                            .testTag(NightWorshipAddRakahTestTag)
-                            .clickable(onClick = onAddPair)
-                            .padding(horizontal = 12.dp, vertical = 10.dp),
+                        onClick = onAddPair,
+                        variant = NimazButtonVariant.TONAL,
+                        size = NimazButtonSize.SMALL,
+                        modifier = Modifier.testTag(NightWorshipAddRakahTestTag),
                     )
                 }
             }
@@ -346,8 +343,8 @@ private fun NightWorshipRow(
     NimazCard(
         modifier = Modifier
             .fillMaxWidth()
-            .testTag(testTag)
-            .clickable(onClick = onClick),
+            .testTag(testTag),
+        onClick = onClick,
         style = NimazCardStyle.FILLED,
         shape = RoundedCornerShape(16.dp),
     ) {

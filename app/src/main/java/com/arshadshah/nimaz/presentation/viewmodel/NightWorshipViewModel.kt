@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import javax.inject.Inject
+import kotlin.time.Clock
 import kotlin.time.Instant
 
 /**
@@ -28,9 +29,10 @@ import kotlin.time.Instant
  * (`rememberNow`). This is the same rule the Home rework established — a ViewModel that pushes
  * elapsed time as state is what produced the frozen countdowns in the first place.
  *
- * @param lastThirdAt when the last third of the night begins (adhan2 `SunnahTimes`).
- * @param fajrAt tomorrow's Fajr — the instant the night window closes.
- * @param ishaAt tonight's Isha, the earliest sensible start for Witr.
+ * @param lastThirdAt when the last third of the *live* night begins (adhan2 `SunnahTimes`).
+ * @param fajrAt the Fajr that closes the live night — the morning after it began, which is *today's*
+ *   Fajr in the pre-dawn hours and *tomorrow's* once today's Fajr has passed.
+ * @param ishaAt the live night's Isha, the earliest sensible start for Witr.
  * @param rakahCount in-memory tally for the current visit. Not persisted: we have no data on how
  *   people actually use this yet, and inventing a "completed night" model before that would be
  *   guessing. If the count turns out to be worth keeping, that is an easy follow-up.
@@ -73,12 +75,23 @@ class NightWorshipViewModel @Inject constructor(
     }
 
     /**
-     * Resolve tonight's window.
+     * Resolve the night window that is *live right now*.
      *
-     * The last third and Isha come from *today*, but Fajr must come from **tomorrow**: after
-     * midnight the night in progress belongs to the previous calendar day, and taking today's Fajr
-     * would close the window at a time that has already passed and render the hub permanently
-     * "shut". [PrayerTimeCalculator] is Android-free and pure, so this is one astronomical pass.
+     * The last third of the night straddles midnight: [PrayerTimeCalculator.getSunnahTimes] for a
+     * given date measures from that date's Maghrib to the *next* morning's Fajr, so its last-third
+     * instant lands in the small hours of the following calendar day. That makes "which date owns
+     * the current night" depend on the time of day:
+     *
+     *  - **Before today's Fajr** you are still inside the night that began *yesterday*. Its last
+     *    third is happening *this* morning, and it closes at *today's* Fajr. Anchoring on `today`
+     *    here — as the original code did — pointed the whole card at *tomorrow* night, so at 12:47am
+     *    the open window read "opens in 23h". That was the reported time bug.
+     *  - **After today's Fajr** tonight's window is the next one: it begins this evening and its last
+     *    third lands tomorrow morning, closing at tomorrow's Fajr.
+     *
+     * So we pick the night's starting date from where `now` sits relative to today's Fajr, then read
+     * the last third from that date and the closing Fajr from the morning after it.
+     * [PrayerTimeCalculator] is Android-free and pure, so each date is one cheap astronomical pass.
      */
     private fun loadNightTimes() {
         viewModelScope.launch {
@@ -90,15 +103,23 @@ class NightWorshipViewModel @Inject constructor(
                 val highLat = HighLatitudeRule.fromString(settingsRepository.highLatitudeRule.first())
 
                 val today = LocalDate.now()
+                val now = Clock.System.now()
+
+                fun prayerOn(date: LocalDate, type: PrayerType): Instant? = prayerTimeCalculator
+                    .getPrayerTimes(latitude, longitude, date, method, asr, highLat)
+                    .find { it.type == type }?.time
+
+                val fajrToday = prayerOn(today, PrayerType.FAJR)
+                // Pre-dawn (before today's Fajr) → the live night began yesterday; otherwise it is
+                // tonight's, still to come. This is the fix for the after-midnight "opens in 23h" bug.
+                val nightStart = if (fajrToday != null && now < fajrToday) today.minusDays(1) else today
+
                 val sunnah = prayerTimeCalculator.getSunnahTimes(
-                    latitude, longitude, today, method, asr, highLat
+                    latitude, longitude, nightStart, method, asr, highLat
                 )
-                val isha = prayerTimeCalculator
-                    .getPrayerTimes(latitude, longitude, today, method, asr, highLat)
-                    .find { it.type == PrayerType.ISHA }?.time
-                val fajr = prayerTimeCalculator
-                    .getPrayerTimes(latitude, longitude, today.plusDays(1), method, asr, highLat)
-                    .find { it.type == PrayerType.FAJR }?.time
+                // Close the window at the Fajr that *ends* this night — the morning after it starts.
+                val fajr = if (nightStart == today) prayerOn(today.plusDays(1), PrayerType.FAJR) else fajrToday
+                val isha = prayerOn(nightStart, PrayerType.ISHA)
 
                 Triple(sunnah.lastThirdOfTheNight, fajr, isha)
             }.onSuccess { (lastThird, fajr, isha) ->

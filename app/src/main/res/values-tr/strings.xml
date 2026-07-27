@@ -1617,6 +1617,7 @@
 
     <!-- Gece ibadeti merkezi (Teheccud / Vitir hedefi) -->
     <string name="night_worship_title">Gece İbadeti</string>
+    <string name="night_worship_subtitle">Teheccüd, Vitir ve gecenin son üçte biri</string>
     <string name="night_worship_last_third">Gecenin son üçte biri</string>
     <string name="night_worship_open_now">Şu anda açık</string>
     <string name="night_worship_opens_in">Başlamasına</string>

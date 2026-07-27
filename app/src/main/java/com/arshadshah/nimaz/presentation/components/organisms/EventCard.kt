@@ -24,6 +24,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.semantics.onClick
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -62,6 +64,14 @@ data class EventAction(val label: String, val onClick: () -> Unit)
  * accented icon well, English + Arabic headline, an optional proof chip, and up
  * to two CTAs. Accent lives only in the well/chip/border/divider; body copy stays
  * neutral (contrast rule). Reuses existing atoms — no hand-rolled wells or dividers.
+ *
+ * @param onClick when the *whole card* is the tap target (rather than a [primaryAction]
+ *   button), pass it here. It routes through [NimazCard]'s own `onClick`, so the ripple is
+ *   clipped to the card's rounded shape. Do **not** add a `.clickable` to [modifier] for this
+ *   — a `.clickable` on a card's outer modifier paints its tap highlight on the un-rounded
+ *   rectangle, which is the sharp-cornered ripple bug this parameter exists to prevent.
+ * @param onClickLabel accessibility label for [onClick], announced by screen readers in place
+ *   of a bare "button" (e.g. "Read adhkar").
  */
 @Composable
 fun EventCard(
@@ -76,13 +86,25 @@ fun EventCard(
     highlight: (@Composable () -> Unit)? = null,
     ornament: EventOrnament = EventOrnament.None,
     primaryAction: EventAction? = null,
+    onClick: (() -> Unit)? = null,
+    onClickLabel: String? = null,
     onDismiss: (() -> Unit)? = null,
     fillHeight: Boolean = false,
 ) {
+    // Relabel the click action Material's Card(onClick) already installs, so screen readers
+    // announce the destination instead of just "button". Applied only when both are present.
+    val a11yModifier = if (onClick != null && onClickLabel != null) {
+        Modifier.semantics { onClick(label = onClickLabel, action = null) }
+    } else {
+        Modifier
+    }
     NimazCard(
         tone = NimazTone.NEUTRAL,
         style = NimazCardStyle.ELEVATED,
-        modifier = modifier.fillMaxWidth(),
+        onClick = onClick,
+        modifier = modifier
+            .fillMaxWidth()
+            .then(a11yModifier),
     ) {
         EventCardOrnamentScope(ornament) {
             Column(

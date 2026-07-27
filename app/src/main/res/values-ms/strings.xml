@@ -1582,6 +1582,7 @@
 
     <!-- Pusat ibadah malam (destinasi Tahajud / Witir) -->
     <string name="night_worship_title">Ibadah Malam</string>
+    <string name="night_worship_subtitle">Tahajud, Witir dan sepertiga malam terakhir</string>
     <string name="night_worship_last_third">Sepertiga malam terakhir</string>
     <string name="night_worship_open_now">Sedang berlangsung</string>
     <string name="night_worship_opens_in">Bermula dalam</string>

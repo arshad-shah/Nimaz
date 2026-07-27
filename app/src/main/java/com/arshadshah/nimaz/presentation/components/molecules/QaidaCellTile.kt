@@ -3,7 +3,6 @@ package com.arshadshah.nimaz.presentation.components.molecules
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -78,12 +77,12 @@ fun QaidaCellTile(
 
     Box(modifier = modifier) {
         NimazCard(
+            onClick = { onTap(cell) },
             modifier = Modifier
                 .defaultMinSize(minWidth = 72.dp, minHeight = 84.dp)
                 .semantics {
                     contentDescription = cellDescription
-                }
-                .clickable { onTap(cell) },
+                },
             selected = isPlaying,
             shape = RoundedCornerShape(NimazCornerRadius.Large),
             colors = NimazCardDefaults.selectable(

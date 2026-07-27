@@ -1646,6 +1646,7 @@
 
     <!-- Centre de priere nocturne (destination Tahajjud / Witr) -->
     <string name="night_worship_title">Prière de nuit</string>
+    <string name="night_worship_subtitle">Tahajjud, Witr et le dernier tiers de la nuit</string>
     <string name="night_worship_last_third">Dernier tiers de la nuit</string>
     <string name="night_worship_open_now">Ouvert maintenant</string>
     <string name="night_worship_opens_in">Commence dans</string>

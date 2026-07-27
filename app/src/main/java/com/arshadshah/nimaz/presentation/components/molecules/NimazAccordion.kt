@@ -2,7 +2,6 @@ package com.arshadshah.nimaz.presentation.components.molecules
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -68,9 +67,8 @@ fun NimazAccordion(
 
     NimazCard(
         style = NimazCardStyle.FILLED,
-        modifier = modifier
-            .fillMaxWidth()
-            .clickable { expanded = !expanded },
+        onClick = { expanded = !expanded },
+        modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
         elevation = 1.dp
     ) {

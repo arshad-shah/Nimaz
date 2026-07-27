@@ -12,6 +12,7 @@ import androidx.compose.material.icons.automirrored.filled.Help
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.Abc
 import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.Bedtime
 import androidx.compose.material.icons.filled.Calculate
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.CalendarViewMonth
@@ -61,6 +62,7 @@ fun MoreMenuScreen(
     onNavigateToDuas: () -> Unit,
     onNavigateToTafseer: () -> Unit,
     onNavigateToPrayerTracker: () -> Unit,
+    onNavigateToNightWorship: () -> Unit,
     onNavigateToPrayerTimes: () -> Unit,
     onNavigateToMonthlyPrayerTimes: () -> Unit,
     onNavigateToKhatam: () -> Unit,
@@ -116,6 +118,13 @@ fun MoreMenuScreen(
                         subtitle = stringResource(R.string.fasting_subtitle),
                         icon = Icons.Default.Fastfood,
                         onClick = onNavigateToFasting
+                    )
+                    NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
+                    NimazMenuItem(
+                        title = stringResource(R.string.night_worship_title),
+                        subtitle = stringResource(R.string.night_worship_subtitle),
+                        icon = Icons.Default.Bedtime,
+                        onClick = onNavigateToNightWorship
                     )
                     NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
                     NimazMenuItem(
