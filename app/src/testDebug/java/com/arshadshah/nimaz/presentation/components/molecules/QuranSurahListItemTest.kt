@@ -72,13 +72,14 @@ class QuranSurahListItemTest {
                 surah = surah(),
                 onClick = {},
                 startPage = 22,
-                endPage = 30
+                endPage = 30,
+                // Resolved by the caller from the active edition's pagination (#325).
+                juzNumber = 2
             )
         }
 
         // page_range_format: "p. %1$d–%2$d"
         composeRule.onNodeWithText("p. 22–30").assertExists()
-        // getJuzForPage(22) -> 2
         composeRule.onNodeWithText("Juz 2").assertExists()
     }
 

@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.presentation.components.organisms
 
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import com.google.common.truth.Truth.assertThat
@@ -76,18 +77,22 @@ class QuranJuzGridTest {
     }
 
     @Test
-    fun `getJuzForPage maps pages to the correct juz`() {
-        assertThat(getJuzForPage(1)).isEqualTo(1)
-        assertThat(getJuzForPage(21)).isEqualTo(1)
-        assertThat(getJuzForPage(22)).isEqualTo(2)
-        assertThat(getJuzForPage(604)).isEqualTo(30)
-    }
+    fun `page range badges follow the active edition`() {
+        // A 300-page edition: juz 2 can no longer start on the Madani page 22 (#325).
+        val pagination = paginationOf(300)
+        assertThat(pagination.juzStartPage(2)).isNotEqualTo(22)
 
-    @Test
-    fun `getJuzStartPage and getJuzEndPage return expected bounds`() {
-        assertThat(getJuzStartPage(1)).isEqualTo(1)
-        assertThat(getJuzEndPage(1)).isEqualTo(21)
-        assertThat(getJuzStartPage(2)).isEqualTo(22)
-        assertThat(getJuzEndPage(30)).isEqualTo(604)
+        composeRule.setThemedContent {
+            JuzGrid(onNavigateToJuz = {}, pagination = pagination)
+        }
+
+        // Page numbers repeat across the 30 cards (one juz's end page is often the next
+        // one's start), so match on "at least one node" rather than exactly one.
+        fun textCount(text: String) =
+            composeRule.onAllNodesWithText(text, substring = true).fetchSemanticsNodes().size
+
+        assertThat(textCount(pagination.juzStartPage(2).toString())).isAtLeast(1)
+        assertThat(textCount("300")).isAtLeast(1)   // juz 30 ends the mushaf
+        assertThat(textCount("604")).isEqualTo(0)   // …never the Madani total
     }
 }

@@ -77,8 +77,36 @@ interface QuranDao {
     @Query("SELECT * FROM ayahs WHERE page = :pageNumber ORDER BY id ASC")
     fun getAyahsByPage(pageNumber: Int): Flow<List<AyahEntity>>
 
+    /**
+     * Ayahs spanning a global id range, in mushaf order. Used to fetch the content of a page
+     * of an edition that does not paginate by the `ayahs.page` column — the 16-line IndoPak
+     * mushaf, whose pagination lives in [MushafLayoutIndopak16Entity] (#325).
+     */
+    @Query("SELECT * FROM ayahs WHERE id BETWEEN :minAyahId AND :maxAyahId ORDER BY id ASC")
+    fun getAyahsByIdRange(minAyahId: Int, maxAyahId: Int): Flow<List<AyahEntity>>
+
     @Query("SELECT page, MIN(id) AS minAyahId, MAX(id) AS maxAyahId, COUNT(id) AS ayahCount FROM ayahs GROUP BY page ORDER BY page ASC")
     suspend fun getPageAyahRanges(): List<PageAyahRangeRow>
+
+    /**
+     * The 16-line IndoPak edition's page→ayah mapping, the counterpart of
+     * [getPageAyahRanges] for the 548-page layout (#325). Header/basmalah rows carry a null
+     * `ayah_id` and are excluded; a page's ayahs are counted distinctly because one ayah can
+     * span several printed lines of the same page.
+     */
+    @Query(
+        """
+        SELECT page,
+               MIN(ayah_id) AS minAyahId,
+               MAX(ayah_id) AS maxAyahId,
+               COUNT(DISTINCT ayah_id) AS ayahCount
+        FROM mushaf_layout_indopak16
+        WHERE ayah_id IS NOT NULL
+        GROUP BY page
+        ORDER BY page ASC
+        """
+    )
+    suspend fun getIndopak16PageAyahRanges(): List<PageAyahRangeRow>
 
     @Query("SELECT * FROM ayahs WHERE sajda_type IS NOT NULL ORDER BY id ASC")
     fun getSajdaAyahs(): Flow<List<AyahEntity>>

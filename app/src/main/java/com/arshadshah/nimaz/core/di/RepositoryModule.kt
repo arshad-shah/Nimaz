@@ -132,6 +132,7 @@ import com.arshadshah.nimaz.domain.usecase.GetMissedPrayersRequiringQadaUseCase
 import com.arshadshah.nimaz.domain.usecase.GetMushafPageLayoutUseCase
 import com.arshadshah.nimaz.domain.usecase.GetNextUnreadPositionUseCase
 import com.arshadshah.nimaz.domain.usecase.GetNotesForAyahUseCase
+import com.arshadshah.nimaz.domain.usecase.GetMushafPaginationUseCase
 import com.arshadshah.nimaz.domain.usecase.GetPageAyahRangesUseCase
 import com.arshadshah.nimaz.domain.usecase.GetPendingMakeupFastsUseCase
 import com.arshadshah.nimaz.domain.usecase.GetPrayerRecordsForDateUseCase
@@ -448,6 +449,7 @@ object UseCaseModule {
             incrementAyahsRead = IncrementAyahsReadUseCase(repository),
             getSurahInfo = GetSurahInfoUseCase(repository),
             getPageAyahRanges = GetPageAyahRangesUseCase(repository),
+            getMushafPagination = GetMushafPaginationUseCase(repository),
             getMushafPageLayout = GetMushafPageLayoutUseCase(repository),
             getVerseOfTheDay = GetVerseOfTheDayUseCase(repository)
         )

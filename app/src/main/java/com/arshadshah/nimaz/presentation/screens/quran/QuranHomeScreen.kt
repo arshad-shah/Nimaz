@@ -301,7 +301,8 @@ private fun HomeTabContent(
                     pageNumber = progress.lastReadPage,
                     totalAyahsRead = progress.totalAyahsRead,
                     surahName = state.surahs.find { it.number == progress.lastSurah },
-                    onClick = { onNavigateToQuranAyah(progress.lastSurah, progress.lastAyah) }
+                    onClick = { onNavigateToQuranAyah(progress.lastSurah, progress.lastAyah) },
+                    totalPages = state.pagination.totalPages
                 )
             }
         } else {
@@ -477,18 +478,34 @@ private fun BrowseTabContent(
         ranges
     }
 
+    // Surah number -> the page it opens on, in the *active* edition. `surah.startPage` is
+    // the Madani column, so under the 16-line layout the page is resolved from the surah's
+    // first ayah through the active pagination instead (#325).
+    val surahStartPages = remember(state.surahs, state.pagination) {
+        state.surahs.associate { surah ->
+            val firstAyahId = surahAyahRanges[surah.number]?.first
+            val page = firstAyahId?.let { state.pagination.pageForAyah(it) } ?: surah.startPage
+            surah.number to page
+        }
+    }
+
     // Page number -> list of surah names that start on that page
-    val surahStartPageMap = remember(state.surahs) {
-        state.surahs.groupBy { it.startPage }
+    val surahStartPageMap = remember(surahStartPages, state.surahs) {
+        state.surahs.groupBy { surahStartPages[it.number] ?: it.startPage }
             .mapValues { (_, surahs) -> surahs.map { it.nameEnglish } }
     }
 
     // Surah number -> (startPage, endPage)
-    val surahPageRanges = remember(state.surahs) {
+    val surahPageRanges = remember(surahStartPages, state.surahs, state.pagination) {
         val sorted = state.surahs.sortedBy { it.number }
         sorted.mapIndexed { index, surah ->
-            val endPage = if (index < sorted.lastIndex) sorted[index + 1].startPage - 1 else 604
-            surah.number to (surah.startPage to endPage)
+            val startPage = surahStartPages[surah.number] ?: surah.startPage
+            val endPage = if (index < sorted.lastIndex) {
+                (surahStartPages[sorted[index + 1].number] ?: sorted[index + 1].startPage) - 1
+            } else {
+                state.pagination.totalPages
+            }
+            surah.number to (startPage to endPage.coerceAtLeast(startPage))
         }.toMap()
     }
 
@@ -571,8 +588,8 @@ private fun BrowseTabContent(
         val coroutineScope = rememberCoroutineScope()
 
         // Pre-compute juz header indices for the scrollbar
-        val juzHeaderIndices = remember(surahStartPageMap) {
-            computeJuzHeaderIndices(surahStartPageMap)
+        val juzHeaderIndices = remember(surahStartPageMap, state.pagination) {
+            computeJuzHeaderIndices(surahStartPageMap, state.pagination)
         }
 
         // Reverse lookup: item index → juz number (find which juz the first visible item belongs to)
@@ -625,7 +642,8 @@ private fun BrowseTabContent(
                                 isKhatamActive = isKhatamActive,
                                 isSelected = selectedSurahNumber == surah.number,
                                 startPage = startPage,
-                                endPage = endPage
+                                endPage = endPage,
+                                juzNumber = state.pagination.juzForPage(startPage)
                             )
                         }
                     }
@@ -634,6 +652,7 @@ private fun BrowseTabContent(
                         item(key = "juz_grid") {
                             JuzGrid(
                                 onNavigateToJuz = onNavigateToJuz,
+                                pagination = state.pagination,
                                 khatamReadAyahIds = khatamReadAyahIds,
                                 isKhatamActive = isKhatamActive,
                                 selectedJuzNumber = selectedJuzNumber
@@ -642,15 +661,30 @@ private fun BrowseTabContent(
                     }
 
                     2 -> {
-                        // Page grid items added directly to avoid nested LazyColumn
-                        pageGridItems(
-                            onNavigateToPage = onNavigateToPage,
-                            khatamReadAyahIds = khatamReadAyahIds,
-                            isKhatamActive = isKhatamActive,
-                            pageAyahRanges = state.pageAyahRanges,
-                            selectedPageNumber = selectedPageNumber,
-                            surahStartPageMap = surahStartPageMap
-                        )
+                        // Page grid items added directly to avoid nested LazyColumn.
+                        // A not-yet-ready pagination (a non-Madani edition whose page data
+                        // is still loading) would print wrong page numbers, so wait (#325).
+                        if (state.pagination.isReady) {
+                            pageGridItems(
+                                onNavigateToPage = onNavigateToPage,
+                                pagination = state.pagination,
+                                khatamReadAyahIds = khatamReadAyahIds,
+                                isKhatamActive = isKhatamActive,
+                                selectedPageNumber = selectedPageNumber,
+                                surahStartPageMap = surahStartPageMap
+                            )
+                        } else {
+                            item(key = "page_grid_loading") {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(32.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    CircularProgressIndicator()
+                                }
+                            }
+                        }
                     }
                 }
             }

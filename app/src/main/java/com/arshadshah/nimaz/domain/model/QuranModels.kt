@@ -109,9 +109,14 @@ object ReadingProgressCalculator {
     /**
      * Fallback used when the surah metadata has not loaded yet: position in the mushaf
      * by page number.
+     *
+     * [totalPages] is the *active* edition's page count — the 16-line IndoPak mushaf ends
+     * at 548, so pinning this to the Madani 604 under-reported progress there (#325).
      */
-    fun pageFraction(pageNumber: Int): Float =
-        (pageNumber.toFloat() / TOTAL_QURAN_PAGES).coerceIn(0f, 1f)
+    fun pageFraction(pageNumber: Int, totalPages: Int = TOTAL_QURAN_PAGES): Float {
+        if (totalPages <= 0) return 0f
+        return (pageNumber.toFloat() / totalPages).coerceIn(0f, 1f)
+    }
 
     /**
      * Whole-percent label for a fraction.

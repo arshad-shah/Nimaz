@@ -57,6 +57,18 @@ class ReadingProgressCalculatorTest {
     }
 
     @Test
+    fun `page fallback follows the active edition's page count`() {
+        // The 16-line IndoPak mushaf ends at 548, so its last page is 100%, not 91% (#325).
+        val indopak = MushafScript.INDOPAK_16.totalPages
+        assertThat(ReadingProgressCalculator.pageFraction(indopak, indopak)).isEqualTo(1f)
+        assertThat(ReadingProgressCalculator.pageFraction(274, indopak))
+            .isWithin(0.001f).of(0.5f)
+        // Degenerate page counts must not divide by zero.
+        assertThat(ReadingProgressCalculator.pageFraction(10, 0)).isEqualTo(0f)
+        assertThat(ReadingProgressCalculator.pageFraction(10, -1)).isEqualTo(0f)
+    }
+
+    @Test
     fun `percent clamps out-of-range fractions`() {
         assertThat(ReadingProgressCalculator.percent(-1f)).isEqualTo(0)
         assertThat(ReadingProgressCalculator.percent(2f)).isEqualTo(100)

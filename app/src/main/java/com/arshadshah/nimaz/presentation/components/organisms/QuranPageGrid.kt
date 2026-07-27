@@ -29,7 +29,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.domain.model.PageAyahRange
+import com.arshadshah.nimaz.domain.model.MushafPagination
+import com.arshadshah.nimaz.domain.model.MushafScript
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeEmphasis
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeShape
@@ -47,7 +48,8 @@ import com.arshadshah.nimaz.presentation.theme.ThemeMode
  * Must mirror the same grouping logic used in [pageGridItems].
  */
 internal fun computeJuzHeaderIndices(
-    surahStartPageMap: Map<Int, List<String>>
+    surahStartPageMap: Map<Int, List<String>>,
+    pagination: MushafPagination = MushafPagination.fallback(MushafScript.DEFAULT)
 ): Map<Int, Int> {
     val indices = mutableMapOf<Int, Int>()
     var itemIndex = 0
@@ -55,9 +57,7 @@ internal fun computeJuzHeaderIndices(
         indices[juz] = itemIndex
         itemIndex++ // juz header item
 
-        val startPage = getJuzStartPage(juz)
-        val endPage = getJuzEndPage(juz)
-        val pages = (startPage..endPage).toList()
+        val pages = pagination.juzPages(juz).toList()
         var i = 0
         while (i < pages.size) {
             if (surahStartPageMap[pages[i]] != null) {
@@ -90,29 +90,39 @@ internal fun quranTileCardColors() = NimazCardDefaults.selectable(
     activeBorderWidth = 2.dp
 )
 
+/**
+ * The Pages tab's grouped page list.
+ *
+ * @param pagination the active Mushaf edition's page mapping. Both the tiles rendered and
+ *   each juz section's span come from it, so selecting the 16-line IndoPak layout lists its
+ *   548 pages instead of the Madani 604 the juz table used to be hardcoded to, and the
+ *   khatam progress rings read the ayahs actually printed on each page (#325).
+ */
 @OptIn(ExperimentalLayoutApi::class)
 internal fun LazyListScope.pageGridItems(
     onNavigateToPage: (Int) -> Unit,
+    pagination: MushafPagination = MushafPagination.fallback(MushafScript.DEFAULT),
     khatamReadAyahIds: Set<Int> = emptySet(),
     isKhatamActive: Boolean = false,
-    pageAyahRanges: List<PageAyahRange> = emptyList(),
     selectedPageNumber: Int? = null,
     surahStartPageMap: Map<Int, List<String>> = emptyMap()
 ) {
     // Pre-compute page progress map
-    val pageProgressMap = if (isKhatamActive && pageAyahRanges.isNotEmpty()) {
-        pageAyahRanges.associate { range ->
-            val readCount = khatamReadAyahIds.count { it in range.minAyahId..range.maxAyahId }
-            range.page to (readCount to range.ayahCount)
-        }
+    val pageProgressMap = if (isKhatamActive) {
+        pagination.pages.mapNotNull { page ->
+            pagination.rangeFor(page)?.let { range ->
+                val readCount = khatamReadAyahIds.count { it in range.minAyahId..range.maxAyahId }
+                range.page to (readCount to range.ayahCount)
+            }
+        }.toMap()
     } else {
         emptyMap()
     }
 
     // Add items for each Juz section
     (1..30).forEach { juz ->
-        val startPage = getJuzStartPage(juz)
-        val endPage = getJuzEndPage(juz)
+        val startPage = pagination.juzStartPage(juz)
+        val endPage = pagination.juzEndPage(juz)
 
         // Juz header card with cutout page range badges
         item(key = "page_juz_header_$juz") {
