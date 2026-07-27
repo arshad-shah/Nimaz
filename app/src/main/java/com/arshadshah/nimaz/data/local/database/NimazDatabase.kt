@@ -795,6 +795,36 @@ abstract class NimazDatabase : RoomDatabase() {
                 db.execSQL("CREATE INDEX IF NOT EXISTS `index_khatam_daily_log_khatam_id` ON `khatam_daily_log` (`khatam_id`)")
             }
         }
+
+        /**
+         * Every migration, in one place — the single source of truth for the chain, in the
+         * same spirit as [NIMAZ_DATABASE_VERSION] for the version itself.
+         *
+         * `DatabaseModule` registers this on the real database and `MigrationChainTest`
+         * replays it from v7, so **adding a migration here is the only step required**.
+         * Both previously kept their own hand-maintained copies, which is precisely how a
+         * new migration ended up registered in production but missing from the chain test:
+         * the test failed with "A migration from 7 to 20 was required but not found" while
+         * the app itself was fine. One list means that can't happen again.
+         *
+         * Order is irrelevant — Room indexes migrations by their start/end versions — but it
+         * is kept ascending for readability.
+         */
+        val ALL_MIGRATIONS: Array<Migration> = arrayOf(
+            MIGRATION_7_8,
+            MIGRATION_8_9,
+            MIGRATION_9_10,
+            MIGRATION_10_11,
+            MIGRATION_11_12,
+            MIGRATION_12_13,
+            MIGRATION_13_14,
+            MIGRATION_14_15,
+            MIGRATION_15_16,
+            MIGRATION_16_17,
+            MIGRATION_17_18,
+            MIGRATION_18_19,
+            MIGRATION_19_20,
+        )
     }
 }
 

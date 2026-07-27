@@ -896,6 +896,9 @@
     <string name="mushaf_layout_subtitle">Mise en page utilisée par le lecteur du Mushaf (page)</string>
     <string name="mushaf_script_madani">Uthmani (Madani, 604 pages)</string>
     <string name="mushaf_script_indopak16">IndoPak 16 lignes (548 pages)</string>
+    <string name="mushaf_script_indopak15">IndoPak 15 lignes (610 pages)</string>
+    <string name="mushaf_script_indopak13">IndoPak 13 lignes (847 pages)</string>
+    <string name="translation_selected">Sélectionné</string>
     <string name="display_options">Options d\'affichage</string>
     <string name="show_transliteration">Afficher la translittération</string>
     <string name="show_transliteration_subtitle">Prononciation en lettres latines</string>

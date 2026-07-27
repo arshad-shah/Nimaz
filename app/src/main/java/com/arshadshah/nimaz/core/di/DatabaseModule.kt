@@ -41,21 +41,9 @@ object DatabaseModule {
             NimazDatabase.DATABASE_NAME
         )
             .createFromAsset("database/nimaz_prepopulated.db", NimazDatabase.PREPACKAGED_CALLBACK)
-            .addMigrations(
-                NimazDatabase.MIGRATION_7_8,
-                NimazDatabase.MIGRATION_8_9,
-                NimazDatabase.MIGRATION_9_10,
-                NimazDatabase.MIGRATION_10_11,
-                NimazDatabase.MIGRATION_11_12,
-                NimazDatabase.MIGRATION_12_13,
-                NimazDatabase.MIGRATION_13_14,
-                NimazDatabase.MIGRATION_14_15,
-                NimazDatabase.MIGRATION_15_16,
-                NimazDatabase.MIGRATION_16_17,
-                NimazDatabase.MIGRATION_17_18,
-                NimazDatabase.MIGRATION_18_19,
-                NimazDatabase.MIGRATION_19_20
-            )
+            // Single source of truth — see NimazDatabase.ALL_MIGRATIONS. Listing them here
+            // by hand is what let the chain test drift out of sync with production.
+            .addMigrations(*NimazDatabase.ALL_MIGRATIONS)
             .build()
     }
 

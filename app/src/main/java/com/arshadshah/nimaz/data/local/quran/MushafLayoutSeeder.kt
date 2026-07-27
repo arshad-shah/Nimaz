@@ -30,7 +30,7 @@ class AndroidQuranAssetReader @Inject constructor(
 /**
  * Populates a line-accurate Mushaf edition — its glyph text (`mushaf_ayah_texts`) and its
  * printed line breaks (`mushaf_layout_lines`) — from the bundled
- * bundled `assets/quran/mushaf/` assets.
+ * `assets/quran/mushaf/` assets.
  *
  * ## Why seed at runtime instead of shipping it in the prepackaged DB
  * The prepackaged DB (`assets/database/nimaz_prepopulated.db`) is a ~147 MB Git-LFS blob
