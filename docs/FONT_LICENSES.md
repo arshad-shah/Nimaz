@@ -19,8 +19,8 @@ sync when adding or removing a font (the font picker is driven by
 - **Family / version:** `AlQuran IndoPak by QuranWBW`, Version 2.100 (2022-11-26).
 - **Why this exact font:** it is the companion face for the QUL *"Indopak 16
   lines layout (Taj company)"* text/layout bundled in
-  `app/src/main/assets/quran/ayahs_indopak.json` +
-  `mushaf_layout_indopak16.json` (sourced in sub-task 1/7, issue #265). The
+  `app/src/main/assets/quran/mushaf/indopak_text.json` +
+  `indopak_16_layout.json` (sourced in sub-task 1/7, issue #265). The
   source text embeds each ayah's decorative numbered end-marker as **Private
   Use Area glyphs (U+F500…U+F6FF)**; verified that this font covers **all 346
   PUA codepoints (346/346)** used in the data plus the full IndoPak Arabic
@@ -66,7 +66,7 @@ Nimaz is a **free, non-commercial, open-source** app, i.e. exactly the
 Sadaqa-e-Jaria (charitable, not-for-sale) use this font was released for, and
 the font is bundled **unmodified**. However, the font's own terms ask for
 **written notice from QuranWBW.com before distribution**. As with the QUL
-IndoPak *data* (see `nimaz-pro-data/json/LICENSES_INDOPAK.md`), the final
+IndoPak *data* (see `nimaz-pro-data/json/LICENSES_MUSHAF_LAYOUTS.md`), the final
 go/no-go for a public release belongs to the project owner:
 
 - Before an app-store / F-Droid release that ships `indopak_nastaleeq.ttf`,

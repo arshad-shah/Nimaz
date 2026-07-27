@@ -49,6 +49,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -283,9 +284,15 @@ internal fun AyahItem(
             NimazCard(style = NimazCardStyle.OUTLINED, tone = NimazTone.NEUTRAL, elevation = 0.dp) {
                 Text(
                     text = ayah.translation,
+                    // The catalogue ships right-to-left translations (Urdu), so the paragraph
+                    // direction has to come from the text itself rather than from the app's
+                    // locale — otherwise Urdu renders left-aligned with its punctuation on the
+                    // wrong side. TextAlign.Start then follows the resolved direction.
                     style = MaterialTheme.typography.bodyMedium.copy(
                         fontSize = fontSize.sp,
-                        lineHeight = (fontSize * 1.5f).sp
+                        lineHeight = (fontSize * 1.5f).sp,
+                        textDirection = TextDirection.Content,
+                        textAlign = TextAlign.Start
                     ),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(12.dp)

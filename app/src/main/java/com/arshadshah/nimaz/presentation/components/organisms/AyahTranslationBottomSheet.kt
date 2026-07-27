@@ -16,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -109,7 +110,16 @@ fun AyahTranslationContent(
                 NimazSheetPreviewCard {
                     Text(
                         text = ayah.translation,
-                        style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 22.sp),
+                        // The catalogue ships right-to-left translations (Urdu), so the
+                        // paragraph direction has to come from the text itself rather than
+                        // from the app's locale — otherwise Urdu renders left-aligned with
+                        // its punctuation on the wrong side. TextAlign.Start then follows
+                        // the resolved direction.
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            lineHeight = 22.sp,
+                            textDirection = TextDirection.Content,
+                            textAlign = TextAlign.Start
+                        ),
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }

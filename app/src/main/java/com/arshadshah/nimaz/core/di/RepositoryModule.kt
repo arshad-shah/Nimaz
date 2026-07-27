@@ -18,8 +18,10 @@ import com.arshadshah.nimaz.data.local.qaida.DataStoreQaidaContentVersionStore
 import com.arshadshah.nimaz.data.local.qaida.QaidaAssetReader
 import com.arshadshah.nimaz.data.local.qaida.QaidaContentVersionStore
 import com.arshadshah.nimaz.data.local.quran.AndroidQuranAssetReader
-import com.arshadshah.nimaz.data.local.quran.DataStoreIndopakContentVersionStore
-import com.arshadshah.nimaz.data.local.quran.IndopakContentVersionStore
+import com.arshadshah.nimaz.data.local.quran.DataStoreMushafContentVersionStore
+import com.arshadshah.nimaz.data.local.quran.DataStoreTranslationContentVersionStore
+import com.arshadshah.nimaz.data.local.quran.MushafContentVersionStore
+import com.arshadshah.nimaz.data.local.quran.TranslationContentVersionStore
 import com.arshadshah.nimaz.data.local.quran.QuranAssetReader
 import com.arshadshah.nimaz.data.repository.AsmaUlHusnaRepositoryImpl
 import com.arshadshah.nimaz.data.repository.AsmaUnNabiRepositoryImpl
@@ -368,9 +370,15 @@ abstract class RepositoryModule {
 
     @Binds
     @Singleton
-    abstract fun bindIndopakContentVersionStore(
-        impl: DataStoreIndopakContentVersionStore
-    ): IndopakContentVersionStore
+    abstract fun bindMushafContentVersionStore(
+        impl: DataStoreMushafContentVersionStore
+    ): MushafContentVersionStore
+
+    @Binds
+    @Singleton
+    abstract fun bindTranslationContentVersionStore(
+        impl: DataStoreTranslationContentVersionStore
+    ): TranslationContentVersionStore
 
     @Binds
     @Singleton

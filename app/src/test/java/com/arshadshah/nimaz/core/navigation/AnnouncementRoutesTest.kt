@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.core.navigation
 
+import com.arshadshah.nimaz.domain.model.MushafScript
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 
@@ -120,8 +121,12 @@ class AnnouncementRoutesTest {
         assertThat(announcementRoute("quran/surah/114")).isEqualTo(Route.QuranReader(114))
         assertThat(announcementRoute("quran/surah/115")).isNull()
         assertThat(announcementRoute("quran/page/0")).isNull()
+        // Page links are bounded by the largest edition, not by Madani's 604 — the target
+        // edition isn't known at resolve time, and the reader clamps once it is.
         assertThat(announcementRoute("quran/page/604")).isEqualTo(Route.QuranPage(604))
-        assertThat(announcementRoute("quran/page/605")).isNull()
+        val maxPage = MushafScript.MAX_TOTAL_PAGES
+        assertThat(announcementRoute("quran/page/$maxPage")).isEqualTo(Route.QuranPage(maxPage))
+        assertThat(announcementRoute("quran/page/${maxPage + 1}")).isNull()
         assertThat(announcementRoute("quran/juz/31")).isNull()
         assertThat(announcementRoute("names/allah/99")).isEqualTo(Route.AsmaUlHusnaDetail(99))
         assertThat(announcementRoute("names/allah/100")).isNull()

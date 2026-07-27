@@ -201,14 +201,17 @@ class GetMushafPaginationUseCase @Inject constructor(
 }
 
 /**
- * Returns the line-accurate 16-line IndoPak layout of a page (4/7) for the renderer (5/7):
- * its ordered printed lines with typed segments (ayah / surah-header / basmalah).
+ * Returns a line-accurate edition's layout of a page (4/7) for the renderer (5/7): its
+ * ordered printed lines with typed segments (ayah / surah-header / basmalah). Empty for an
+ * ayah-flow edition, which has no stored layout.
  */
 class GetMushafPageLayoutUseCase @Inject constructor(
     private val repository: QuranRepository
 ) {
-    suspend operator fun invoke(page: Int): MushafPageLayout =
-        repository.getMushafPageLayout(page)
+    suspend operator fun invoke(
+        page: Int,
+        script: MushafScript = MushafScript.DEFAULT
+    ): MushafPageLayout = repository.getMushafPageLayout(page, script)
 }
 
 /**

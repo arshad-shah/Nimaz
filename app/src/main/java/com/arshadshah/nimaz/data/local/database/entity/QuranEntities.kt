@@ -56,8 +56,15 @@ data class AyahEntity(
     val textArabic: String,
     @ColumnInfo(name = "text_uthmani")
     val textUthmani: String, // Uthmani script
+    /**
+     * Superseded by [MushafAyahTextEntity], which holds one row per (text source, ayah) and
+     * so can carry more than one script. Kept as a column because dropping one in SQLite
+     * means rebuilding a 6,236-row table for no functional gain; the schema v20 migration
+     * nulls it out to reclaim the space. Nothing reads it — resolve glyph text through
+     * `mushaf_ayah_texts` instead.
+     */
     @ColumnInfo(name = "text_indopak")
-    val textIndopak: String? = null, // Full IndoPak-script ayah text (16-line Mushaf); null until seeded
+    val textIndopak: String? = null,
     val juz: Int,
     val hizb: Int,
     val page: Int,
@@ -79,7 +86,13 @@ data class AyahEntity(
             onDelete = ForeignKey.CASCADE
         )
     ],
-    indices = [Index(value = ["ayah_id"])]
+    indices = [
+        Index(value = ["ayah_id"]),
+        // One verse per (ayah, translator). The seeder replaces a translation by deleting
+        // then re-inserting, and `id` is auto-generated, so without this a bug in that path
+        // would silently double every verse and the reader would pick an arbitrary copy.
+        Index(value = ["ayah_id", "translator_id"], unique = true)
+    ]
 )
 data class TranslationEntity(
     @PrimaryKey(autoGenerate = true)
@@ -87,8 +100,13 @@ data class TranslationEntity(
     @ColumnInfo(name = "ayah_id")
     val ayahId: Int,
     val text: String,
+    /**
+     * Stable id of the translation, matching
+     * [com.arshadshah.nimaz.domain.model.QuranTranslation.id] — e.g. "sahih_international",
+     * "ur_maududi". Also what the user's `quran_translator_id` preference stores.
+     */
     @ColumnInfo(name = "translator_id")
-    val translatorId: String // e.g., "en.sahih", "en.pickthall"
+    val translatorId: String
 )
 
 @Entity(
@@ -124,31 +142,62 @@ data class SurahInfoEntity(
 )
 
 /**
- * One line-segment of the 16-line IndoPak Mushaf layout (548 pages, ≤16 lines each).
+ * The glyph text of one ayah in one *text source* — the script a printed edition sets its
+ * words in.
  *
- * The layout is stored as line *segments* rather than one row per word: each row is a
- * contiguous run of one ayah's words that falls on a single printed line. This mirrors
- * the 1/7 source data (`mushaf_layout_indopak16.json`) 1:1 and keeps the table compact
- * (~13,970 rows). The actual glyph text is not duplicated here — it is reconstructed by
- * slicing [AyahEntity.textIndopak] (split on space) with the inclusive
- * [firstWordPosition]..[lastWordPosition] range, which is verified lossless against the
- * source (`' '.join(words) == text_indopak`, no intra-word spaces).
+ * A text source is not the same thing as a layout: editions that set identical glyphs and
+ * segment them into identical words share one source and differ only in where their lines
+ * break. The 16-line (Taj) and 15-line (Qudratullah) IndoPak mushafs are verified to be
+ * exactly that case, so both read `INDOPAK`; the 13-line Taj print differs in the vowel
+ * marks of 28 ayahs and therefore carries its own `INDOPAK_13`. See
+ * [com.arshadshah.nimaz.domain.model.MushafScript.textSource].
  *
- * Rendering (5/7) and the domain/data layer (4/7) group these rows by (page, line) and
- * resolve each ayah segment's words on the fly.
+ * Word positions in [MushafLayoutLineEntity] index into `text.split(" ")`, which the
+ * generator verifies is lossless (`" ".join(words) == text`, no intra-word spaces).
+ */
+@Entity(
+    tableName = "mushaf_ayah_texts",
+    primaryKeys = ["text_source", "ayah_id"],
+    indices = [Index(value = ["ayah_id"])]
+)
+data class MushafAyahTextEntity(
+    @ColumnInfo(name = "text_source")
+    val textSource: String, // e.g. "INDOPAK", "INDOPAK_13"
+    @ColumnInfo(name = "ayah_id")
+    val ayahId: Int, // Global ayah id (1-6236); matches AyahEntity.id
+    val text: String
+)
+
+/**
+ * One line-segment of one line-accurate Mushaf layout.
+ *
+ * A layout is stored as line *segments* rather than one row per word: each row is a
+ * contiguous run of one ayah's words that falls on a single printed line. This mirrors the
+ * generated source data 1:1 and keeps the table compact (~14k rows per edition). The glyph
+ * text is not duplicated here — it is reconstructed by slicing the matching
+ * [MushafAyahTextEntity.text] with the inclusive
+ * [firstWordPosition]..[lastWordPosition] range.
+ *
+ * [script] names the edition ([com.arshadshah.nimaz.domain.model.MushafScript] entry name),
+ * which is what makes this table hold every line-accurate edition at once rather than one
+ * table per edition — adding an edition is data, not schema.
  *
  * `line_type` is one of `ayah`, `surah_header`, or `basmalah`. Header and basmalah lines
  * carry only [surahId] for context; their [ayahId] and word positions are null.
  */
 @Entity(
-    tableName = "mushaf_layout_indopak16",
-    indices = [Index(value = ["page", "line"])]
+    tableName = "mushaf_layout_lines",
+    indices = [
+        Index(value = ["script", "page", "line"]),
+        Index(value = ["script"])
+    ]
 )
-data class MushafLayoutIndopak16Entity(
+data class MushafLayoutLineEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
-    val page: Int, // 1-548
-    val line: Int, // 1-16
+    val script: String, // MushafScript enum name, e.g. "INDOPAK_16"
+    val page: Int,
+    val line: Int,
     @ColumnInfo(name = "line_type")
     val lineType: String, // "ayah" | "surah_header" | "basmalah"
     @ColumnInfo(name = "surah_id")

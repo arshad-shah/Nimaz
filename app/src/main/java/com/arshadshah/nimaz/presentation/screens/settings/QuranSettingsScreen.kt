@@ -45,6 +45,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.MushafScript
+import com.arshadshah.nimaz.domain.model.QuranTranslation
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazDivider
@@ -57,6 +58,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownField
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownItem
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
+import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuItem
 import com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsItem
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.TajweedLegendSheet
@@ -76,22 +78,14 @@ fun QuranSettingsScreen(
     var showTajweedLegend by remember { mutableStateOf(false) }
 
     // === ADDING NEW TRANSLATIONS ===
-    // To add a new translation:
-    // 1. Ensure the translation data exists in the database (quran_translations table)
-    //    with the translator_id matching the value below
-    // 2. Add a new Pair to translationOptions: "Display Name" to "translator_id"
-    // 3. The QuranRepository.getSurahWithAyahs() will automatically load the selected
-    //    translator's text into Ayah.translation
-    //
-    // Available translator IDs in the Islamic Network API:
-    // "en.sahih" - Sahih International (English)
-    // "en.asad" - Muhammad Asad (English)
-    // "en.pickthall" - Pickthall (English)
-    // "en.yusufali" - Yusuf Ali (English)
-    // Add more from: https://api.alquran.cloud/v1/edition?format=text&type=translation
-    val translationOptions = listOf(
-        "Sahih International" to "sahih_international"
-    )
+    // The translation picker is driven entirely by the QuranTranslation enum in
+    // domain/model/QuranTranslation.kt — it is the single source of truth, exactly as
+    // QuranArabicFont is for the font picker. To add one:
+    // 1. Add it to CATALOGUE in nimaz-pro-data/scripts/download_translations.py and run the
+    //    script, which writes assets/quran/translations/<id>.json
+    // 2. Add a matching entry to the QuranTranslation enum
+    // That's it — this screen lists it, and QuranTranslationSeeder seeds it into the
+    // `translations` table the first time it is selected.
 
     // === ADDING NEW ARABIC FONTS ===
     // The font picker is driven entirely by the QuranArabicFont enum in
@@ -207,10 +201,11 @@ fun QuranSettingsScreen(
                     NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
 
                     // Mushaf script / layout selector — chooses which edition the Mushaf (page)
-                    // reader renders: the default Uthmani/Madani 604-page layout, or the
-                    // line-accurate 16-line IndoPak 548-page layout (issue #270). The choice
-                    // persists via PreferencesDataStore.quranMushafScript and the reader picks
-                    // its renderer + page count from it live.
+                    // reader renders: the default ayah-flow Uthmani/Madani 604-page layout, or
+                    // one of the line-accurate IndoPak editions (issue #270). The list is
+                    // driven by the MushafScript catalogue; the choice persists via
+                    // PreferencesDataStore.quranMushafScript and the reader picks its renderer
+                    // + page count from it live.
                     Column(
                         modifier = Modifier.padding(
                             start = 16.dp,
@@ -221,7 +216,9 @@ fun QuranSettingsScreen(
                     ) {
                         val mushafScriptLabels = mapOf(
                             MushafScript.MADANI to stringResource(R.string.mushaf_script_madani),
-                            MushafScript.INDOPAK_16 to stringResource(R.string.mushaf_script_indopak16)
+                            MushafScript.INDOPAK_16 to stringResource(R.string.mushaf_script_indopak16),
+                            MushafScript.INDOPAK_15 to stringResource(R.string.mushaf_script_indopak15),
+                            MushafScript.INDOPAK_13 to stringResource(R.string.mushaf_script_indopak13)
                         )
                         NimazDropdownField(
                             label = stringResource(R.string.mushaf_layout),
@@ -324,18 +321,38 @@ fun QuranSettingsScreen(
             item {
                 NimazSectionHeader(title = stringResource(R.string.translation))
             }
-            item {
-                NimazMenuGroup {
-                    translationOptions.forEachIndexed { index, (displayName, value) ->
-                        val isSelected = quranState.selectedTranslatorId == value
-                        TranslationItem(
-                            name = displayName,
-                            language = stringResource(R.string.language_english),
-                            isSelected = isSelected,
-                            onClick = { viewModel.onEvent(SettingsEvent.SetTranslator(value)) }
-                        )
-                        if (index < translationOptions.lastIndex) {
-                            NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
+            // One group per language, so 15 translations stay scannable. Both the grouping
+            // and the rows come straight from the QuranTranslation catalogue.
+            QuranTranslation.byLanguage().forEach { (language, translations) ->
+                item(key = "translation-language-${language.code}") {
+                    Text(
+                        text = "${language.englishName} · ${language.nativeName}",
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(start = 4.dp, top = 4.dp, bottom = 4.dp)
+                    )
+                }
+                item(key = "translation-group-${language.code}") {
+                    NimazMenuGroup {
+                        translations.forEachIndexed { index, translation ->
+                            val isSelected = quranState.selectedTranslatorId == translation.id
+                            NimazMenuItem(
+                                title = translation.translator,
+                                subtitle = if (isSelected) {
+                                    stringResource(R.string.translation_selected)
+                                } else {
+                                    null
+                                },
+                                trailingIcon = if (isSelected) Icons.Default.Check else null,
+                                onClick = {
+                                    viewModel.onEvent(
+                                        SettingsEvent.SetTranslator(translation.id)
+                                    )
+                                }
+                            )
+                            if (index < translations.lastIndex) {
+                                NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                            }
                         }
                     }
                 }
@@ -500,73 +517,3 @@ private fun PreviewCard(
     }
 }
 
-@Composable
-private fun TranslationItem(
-    name: String,
-    language: String,
-    isSelected: Boolean,
-    onClick: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onClick() }
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        // Checkbox
-        Box(
-            modifier = Modifier
-                .size(22.dp)
-                .clip(RoundedCornerShape(6.dp))
-                .background(
-                    color = if (isSelected) MaterialTheme.colorScheme.primary
-                    else MaterialTheme.colorScheme.background,
-                    shape = RoundedCornerShape(6.dp)
-                )
-                .then(
-                    if (!isSelected) Modifier.background(
-                        color = MaterialTheme.colorScheme.background,
-                        shape = RoundedCornerShape(6.dp)
-                    ) else Modifier
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            if (!isSelected) {
-                Box(
-                    modifier = Modifier
-                        .size(22.dp)
-                        .clip(RoundedCornerShape(6.dp))
-                        .background(
-                            color = MaterialTheme.colorScheme.surfaceVariant,
-                            shape = RoundedCornerShape(6.dp)
-                        )
-                )
-            }
-            if (isSelected) {
-                NimazIcon(
-                    imageVector = Icons.Default.Check,
-                    contentDescription = null,
-                    variant = NimazIconVariant.ON_ACCENT,
-                    iconSize = 14.dp
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.width(15.dp))
-
-        Column {
-            Text(
-                text = name,
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Text(
-                text = language,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-    }
-}

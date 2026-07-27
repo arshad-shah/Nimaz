@@ -1,7 +1,7 @@
 # 16-Line IndoPak Mushaf — Fidelity Pass/Fail Sheet
 
-> Auto-derived from the shipped assets `assets/quran/mushaf_layout_indopak16.json`
-> and `assets/quran/ayahs_indopak.json` and pinned by
+> Auto-derived from the shipped assets `assets/quran/mushaf/indopak_16_layout.json`
+> and `assets/quran/mushaf/indopak_text.json` and pinned by
 > `MushafLayoutFidelityTest`. Regenerate after any asset change.
 
 ## Book-level invariants
@@ -62,7 +62,7 @@ distinct printed line numbers; `H`/`B` mark a surah header / basmalah on the pag
 ## Known limitations (not defects in this layer)
 
 - **Sajda (۩) and rukūʿ (۞) markers are not rendered.** The shipped IndoPak text
-  (`text_indopak`) and the layout table carry no sajda/rukūʿ glyphs or line types, so
+  (`mushaf_ayah_texts`) and the layout table carry no sajda/rukūʿ glyphs or line types, so
   the 16-line renderer shows the printed word glyphs faithfully but overlays no
   sajda/rukūʿ medallions. Sajda metadata still lives on the ayah entity
   (`sajda_type`) and is surfaced by the ayah-keyed reader. Adding markers to the

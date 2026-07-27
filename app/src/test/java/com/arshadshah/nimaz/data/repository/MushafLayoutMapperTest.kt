@@ -22,7 +22,7 @@ class MushafLayoutMapperTest {
         ayahNumber: Int,
         first: Int,
         last: Int,
-        textIndopak: String
+        text: String
     ) = MushafLayoutLineRow(
         page = page,
         line = line,
@@ -31,7 +31,7 @@ class MushafLayoutMapperTest {
         ayahId = ayahId,
         firstWordPosition = first,
         lastWordPosition = last,
-        textIndopak = textIndopak,
+        text = text,
         ayahNumberInSurah = ayahNumber
     )
 
@@ -44,7 +44,7 @@ class MushafLayoutMapperTest {
             ayahId = null,
             firstWordPosition = null,
             lastWordPosition = null,
-            textIndopak = null,
+            text = null,
             ayahNumberInSurah = null
         )
 
@@ -56,7 +56,7 @@ class MushafLayoutMapperTest {
             headerRow(page = 1, line = 2, type = "basmalah", surahId = 1),
             ayahRow(
                 page = 1, line = 3, ayahId = 2, ayahNumber = 2,
-                first = 1, last = 2, textIndopak = "الْحَمْدُ لِلّٰهِ"
+                first = 1, last = 2, text = "الْحَمْدُ لِلّٰهِ"
             )
         )
 
@@ -89,12 +89,12 @@ class MushafLayoutMapperTest {
             // tail of ayah 100: words 3..4 of a 5-word ayah
             ayahRow(
                 page = 50, line = 7, ayahId = 100, ayahNumber = 5,
-                first = 3, last = 4, textIndopak = "w1 w2 w3 w4 w5"
+                first = 3, last = 4, text = "w1 w2 w3 w4 w5"
             ),
             // head of ayah 101: words 1..2 of a 3-word ayah
             ayahRow(
                 page = 50, line = 7, ayahId = 101, ayahNumber = 6,
-                first = 1, last = 2, textIndopak = "x1 x2 x3"
+                first = 1, last = 2, text = "x1 x2 x3"
             )
         )
 
@@ -114,9 +114,9 @@ class MushafLayoutMapperTest {
     @Test
     fun `rows are grouped and ordered by line even when supplied out of order`() {
         val rows = listOf(
-            ayahRow(page = 5, line = 3, ayahId = 10, ayahNumber = 1, first = 1, last = 1, textIndopak = "a"),
-            ayahRow(page = 5, line = 1, ayahId = 8, ayahNumber = 1, first = 1, last = 1, textIndopak = "b"),
-            ayahRow(page = 5, line = 2, ayahId = 9, ayahNumber = 1, first = 1, last = 1, textIndopak = "c")
+            ayahRow(page = 5, line = 3, ayahId = 10, ayahNumber = 1, first = 1, last = 1, text = "a"),
+            ayahRow(page = 5, line = 1, ayahId = 8, ayahNumber = 1, first = 1, last = 1, text = "b"),
+            ayahRow(page = 5, line = 2, ayahId = 9, ayahNumber = 1, first = 1, last = 1, text = "c")
         )
 
         val layout = MushafLayoutMapper.toPageLayout(page = 5, rows = rows)
@@ -142,7 +142,7 @@ class MushafLayoutMapperTest {
             headerRow(page = 290, line = 1, type = "basmalah", surahId = 21),
             ayahRow(
                 page = 290, line = 3, ayahId = 2484, ayahNumber = 1,
-                first = 1, last = 2, textIndopak = "w1 w2"
+                first = 1, last = 2, text = "w1 w2"
             )
         )
 
@@ -168,8 +168,8 @@ class MushafLayoutMapperTest {
         // must stay total: structural rows come first, then the concatenated ayah line.
         val rows = listOf(
             headerRow(page = 7, line = 5, type = "surah_header", surahId = 3),
-            ayahRow(page = 7, line = 5, ayahId = 300, ayahNumber = 1, first = 1, last = 1, textIndopak = "a b"),
-            ayahRow(page = 7, line = 5, ayahId = 301, ayahNumber = 2, first = 1, last = 1, textIndopak = "c d")
+            ayahRow(page = 7, line = 5, ayahId = 300, ayahNumber = 1, first = 1, last = 1, text = "a b"),
+            ayahRow(page = 7, line = 5, ayahId = 301, ayahNumber = 2, first = 1, last = 1, text = "c d")
         )
 
         val layout = MushafLayoutMapper.toPageLayout(page = 7, rows = rows)

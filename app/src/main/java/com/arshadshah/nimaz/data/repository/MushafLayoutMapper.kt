@@ -12,8 +12,8 @@ import com.arshadshah.nimaz.domain.model.MushafWord
  * printed line structure of [MushafPageLayout] (sub-task 4/7 of #263).
  *
  * Each DB row is one *segment*: a contiguous run of one ayah's words on a single line,
- * stored (2/7) as an inclusive `first..last` position range into the ayah's space-split
- * `text_indopak`. A printed line may hold several such segments (e.g. the tail of one ayah
+ * stored as an inclusive `first..last` position range into the ayah's space-split glyph
+ * text. A printed line may hold several such segments (e.g. the tail of one ayah
  * and the head of the next), so ayah segments sharing a [MushafLayoutLineRow.line] are
  * concatenated in reading order into one [MushafLine].
  *
@@ -72,7 +72,7 @@ object MushafLayoutMapper {
     }
 
     /**
-     * Reconstructs a segment's glyph words by slicing the ayah's space-split `text_indopak`
+     * Reconstructs a segment's glyph words by slicing the ayah's space-split glyph text
      * with the inclusive [MushafLayoutLineRow.firstWordPosition]..[MushafLayoutLineRow.lastWordPosition]
      * range. Returns empty for header/basmalah rows (null ayah/positions/text).
      */
@@ -80,7 +80,7 @@ object MushafLayoutMapper {
         val ayah = ayahId ?: return emptyList()
         val from = firstWordPosition ?: return emptyList()
         val to = lastWordPosition ?: return emptyList()
-        val glyphWords = textIndopak?.split(" ") ?: return emptyList()
+        val glyphWords = text?.split(" ") ?: return emptyList()
         return (from..to).map { position ->
             MushafWord(
                 text = glyphWords.getOrNull(position - 1).orEmpty(),

@@ -129,14 +129,14 @@ data class QuranReaderUiState(
     // resident at once, so — mirroring [pageCache] — each visible page's layout is cached by
     // page number rather than a single field.
     val mushafPageLayoutCache: Map<Int, MushafPageLayout> = emptyMap(),
-    // The Mushaf edition the reader renders, driven by the persisted settings toggle (6/7,
-    // #270). MADANI (default) keeps the Uthmani/604 page; INDOPAK_16 switches to the
-    // line-accurate 16-line IndoPak layout (548 pages). Page counts / pager bounds read
+    // The Mushaf edition the reader renders, driven by the persisted settings picker (6/7,
+    // #270). MADANI (default) keeps the ayah-flow Uthmani/604 page; the IndoPak editions
+    // switch to their line-accurate layouts. Page counts / pager bounds read
     // [MushafScript.totalPages] off this so a script switch reflows the pager correctly.
     val mushafScript: MushafScript = MushafScript.DEFAULT
 ) {
-    /** Whether to render the line-accurate 16-line IndoPak layout instead of the Uthmani page. */
-    val use16LineLayout: Boolean get() = mushafScript == MushafScript.INDOPAK_16
+    /** Whether to render stored line-accurate pages instead of flowing ayahs into a page. */
+    val useLineAccurateLayout: Boolean get() = mushafScript.isLineAccurate
 
     /** Number of pages in the active edition — the pager/nav bounds source of truth. */
     val totalPages: Int get() = mushafScript.totalPages
@@ -691,15 +691,19 @@ class QuranViewModel @Inject constructor(
     }
 
     /**
-     * Loads the line-accurate 16-line IndoPak layout for [pageNumber] into the reader state.
-     * First invocation triggers the one-time IndoPak seeding inside the repository, so this
-     * only runs when the 16-line view is actually used — not on every Quran page open.
+     * Loads the active edition's line-accurate layout for [pageNumber] into the reader
+     * state. First invocation triggers that edition's one-time seeding inside the
+     * repository, so this only runs when a line-accurate view is actually used — not on
+     * every Quran page open.
      */
     private fun loadMushafPageLayout(pageNumber: Int) {
         // Already cached (e.g. a neighbouring pager page pre-loaded it) — nothing to do.
         if (_readerState.value.mushafPageLayoutCache.containsKey(pageNumber)) return
         viewModelScope.launch {
-            val layout = quranUseCases.getMushafPageLayout(pageNumber)
+            val layout = quranUseCases.getMushafPageLayout(
+                pageNumber,
+                _readerState.value.mushafScript
+            )
             _readerState.update {
                 it.copy(
                     mushafPageLayout = layout,

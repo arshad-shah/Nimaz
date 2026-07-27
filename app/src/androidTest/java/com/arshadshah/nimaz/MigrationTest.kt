@@ -105,4 +105,70 @@ class MigrationTest {
         assertThat(indexCursor.count).isEqualTo(1)
         indexCursor.close()
     }
+
+    /**
+     * The real upgrade path for the translation catalogue + generalised mushaf layouts: a
+     * device sitting on 18 runs both migrations in one go. `runMigrationsAndValidate` also
+     * checks the resulting schema against the exported v20 definition, which is what proves
+     * the hand-written SQL matches the Room entities exactly.
+     */
+    @Test
+    fun migrate18To20_dedupesTranslationsAndGeneralisesMushafTables() {
+        helper.createDatabase(dbName, 18).use { db ->
+            db.execSQL(
+                "INSERT INTO ayahs (id, surah_id, number_in_surah, number_global, text_arabic, " +
+                    "text_uthmani, text_indopak, juz, hizb, page, sajda, sajda_type, " +
+                    "transliteration, text_tajweed) VALUES " +
+                    "(1, 1, 1, 1, 'a', 'a', 'indopak text', 1, 1, 1, 0, NULL, NULL, NULL)"
+            )
+            // Two rows for the same (ayah, translator) — exactly what an un-scoped re-seed
+            // used to produce, and what the unique index must not allow to survive.
+            db.execSQL(
+                "INSERT INTO translations (ayah_id, text, translator_id) VALUES " +
+                    "(1, 'first', 'sahih_international'), " +
+                    "(1, 'duplicate', 'sahih_international'), " +
+                    "(1, 'other translation', 'en_pickthall')"
+            )
+        }
+
+        val db = helper.runMigrationsAndValidate(
+            dbName, 20, true,
+            NimazDatabase.MIGRATION_18_19,
+            NimazDatabase.MIGRATION_19_20
+        )
+
+        // The duplicate is gone and the surviving row is the earliest one, not an arbitrary pick.
+        db.query(
+            "SELECT text FROM translations WHERE ayah_id = 1 AND translator_id = 'sahih_international'"
+        ).use { c ->
+            assertThat(c.count).isEqualTo(1)
+            c.moveToFirst()
+            assertThat(c.getString(0)).isEqualTo("first")
+        }
+        // Other translators are untouched by the dedupe.
+        db.query("SELECT COUNT(*) FROM translations WHERE translator_id = 'en_pickthall'").use { c ->
+            c.moveToFirst()
+            assertThat(c.getInt(0)).isEqualTo(1)
+        }
+        // The unique index now makes a duplicate impossible rather than merely absent.
+        db.query(
+            "SELECT name FROM sqlite_master WHERE type='index' AND " +
+                "name='index_translations_ayah_id_translator_id'"
+        ).use { assertThat(it.count).isEqualTo(1) }
+
+        // Script-keyed mushaf tables replaced the bespoke 16-line one.
+        db.query(
+            "SELECT name FROM sqlite_master WHERE type='table' AND " +
+                "name IN ('mushaf_layout_lines','mushaf_ayah_texts')"
+        ).use { assertThat(it.count).isEqualTo(2) }
+        db.query(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name='mushaf_layout_indopak16'"
+        ).use { assertThat(it.count).isEqualTo(0) }
+
+        // The superseded column is emptied so its ~4 MB of glyphs are not left behind.
+        db.query("SELECT COUNT(*) FROM ayahs WHERE text_indopak IS NOT NULL").use { c ->
+            c.moveToFirst()
+            assertThat(c.getInt(0)).isEqualTo(0)
+        }
+    }
 }
