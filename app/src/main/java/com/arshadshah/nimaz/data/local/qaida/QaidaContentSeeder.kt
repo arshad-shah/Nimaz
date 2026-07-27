@@ -6,11 +6,9 @@ import com.arshadshah.nimaz.data.local.database.entity.QaidaCellEntity
 import com.arshadshah.nimaz.data.local.database.entity.QaidaLessonEntity
 import com.arshadshah.nimaz.data.local.database.entity.QaidaLetterEntity
 import com.arshadshah.nimaz.data.local.database.entity.QaidaLineEntity
-import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
+import com.arshadshah.nimaz.data.local.seeding.AssetContentSeeder
+import com.arshadshah.nimaz.data.local.seeding.ContentVersionStore
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -51,21 +49,23 @@ class AndroidQaidaAssetReader @Inject constructor(
 @Singleton
 class QaidaContentSeeder @Inject constructor(
     private val dao: QaidaDao,
-    private val versionStore: QaidaContentVersionStore,
+    override val versionStore: ContentVersionStore,
     private val assetReader: QaidaAssetReader
-) {
-    private val mutex = Mutex()
+) : AssetContentSeeder<QaidaJsonRoot>() {
 
-    suspend fun seedIfNeeded() = mutex.withLock {
-        val root = qaidaJson.decodeFromString(
-            QaidaJsonRoot.serializer(), assetReader.read("qaida/qaida_content.json")
-        )
-        val stored = versionStore.get()
-        val populated = dao.lessonCount() > 0
-        if (populated && stored >= root.contentVersion) return@withLock
-        seed(root)
-        versionStore.set(root.contentVersion)
-    }
+    override val contentKey = CONTENT_KEY
+    override val assetPath = ASSET_PATH
+
+    override fun readAsset(path: String): String = assetReader.read(path)
+
+    override fun parse(json: String): QaidaJsonRoot =
+        qaidaJson.decodeFromString(QaidaJsonRoot.serializer(), json)
+
+    override fun versionOf(parsed: QaidaJsonRoot): Int = parsed.contentVersion
+
+    override suspend fun isPopulated(): Boolean = dao.lessonCount() > 0
+
+    override suspend fun replace(parsed: QaidaJsonRoot) = seed(parsed)
 
     private suspend fun seed(root: QaidaJsonRoot) {
         val lessons = root.lessons.map {
@@ -129,18 +129,11 @@ class QaidaContentSeeder @Inject constructor(
         }
         dao.replaceAllContent(lessons, letters, lines, cells)
     }
-}
 
-/** Thin abstraction over the DataStore version key so the seeder is unit-testable. */
-interface QaidaContentVersionStore {
-    suspend fun get(): Int
-    suspend fun set(version: Int)
-}
+    companion object {
+        /** Unique [ContentVersionStore] key for this seeder's content. */
+        const val CONTENT_KEY = "qaida"
+        const val ASSET_PATH = "qaida/qaida_content.json"
+    }
 
-@Singleton
-class DataStoreQaidaContentVersionStore @Inject constructor(
-    private val prefs: PreferencesDataStore
-) : QaidaContentVersionStore {
-    override suspend fun get(): Int = prefs.qaidaContentVersion.first()
-    override suspend fun set(version: Int) = prefs.setQaidaContentVersion(version)
 }

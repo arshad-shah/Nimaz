@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.data.local.dua
 
+import com.arshadshah.nimaz.data.local.seeding.ContentVersionStore
 import com.arshadshah.nimaz.data.local.database.dao.DuaDao
 import com.arshadshah.nimaz.data.local.database.entity.DuaCategoryEntity
 import com.arshadshah.nimaz.data.local.database.entity.DuaEntity
@@ -31,10 +32,10 @@ class DuaContentSeederTest {
     """.trimIndent()
 
     private fun seeder(dao: DuaDao, storedVersion: Int): DuaContentSeeder {
-        val store = object : DuaContentVersionStore {
+        val store = object : ContentVersionStore {
             var v = storedVersion
-            override suspend fun get() = v
-            override suspend fun set(version: Int) { v = version }
+            override suspend fun get(key: String) = v
+            override suspend fun set(key: String, version: Int) { v = version }
         }
         val reader = object : DuaAssetReader {
             override fun read(path: String): String = json

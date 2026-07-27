@@ -3,10 +3,9 @@ package com.arshadshah.nimaz.data.local.quran
 import android.content.Context
 import com.arshadshah.nimaz.data.local.database.dao.QuranDao
 import com.arshadshah.nimaz.data.local.database.entity.MushafLayoutEntity
-import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
+import com.arshadshah.nimaz.data.local.seeding.ContentVersionStore
 import com.arshadshah.nimaz.domain.model.quran.catalogue.MushafLayoutEdition
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.builtins.ListSerializer
@@ -119,40 +118,5 @@ class QuranLayoutSeeder @Inject constructor(
     companion object {
         /** The [ContentVersionStore] key an edition's seeded content version is stored under. */
         fun contentKey(layoutId: String): String = "mushaf_layout.$layoutId"
-    }
-}
-
-/**
- * Keyed store of "which version of this bundled content has been seeded".
- *
- * Replaces the one-interface-per-seeder pattern (`IndopakContentVersionStore`,
- * `DuaContentVersionStore`, …) so a new content key needs no new type. Abstracted so seeders
- * stay unit-testable without Android.
- */
-interface ContentVersionStore {
-    suspend fun get(key: String): Int
-    suspend fun set(key: String, version: Int)
-}
-
-@Singleton
-class DataStoreContentVersionStore @Inject constructor(
-    private val prefs: PreferencesDataStore
-) : ContentVersionStore {
-
-    override suspend fun get(key: String): Int {
-        val stored = prefs.getContentVersion(key).first()
-        if (stored > 0) return stored
-        // Fall back to the pre-registry preference the first time a key is read. Without
-        // this, every existing install would re-seed ~14k layout rows on upgrade for no
-        // reason, because the new key starts at 0.
-        return LEGACY_KEYS[key]?.let { legacy -> legacy(prefs) } ?: 0
-    }
-
-    override suspend fun set(key: String, version: Int) = prefs.setContentVersion(key, version)
-
-    private companion object {
-        val LEGACY_KEYS: Map<String, suspend (PreferencesDataStore) -> Int> = mapOf(
-            QuranLayoutSeeder.contentKey("indopak16") to { p -> p.indopakContentVersion.first() }
-        )
     }
 }

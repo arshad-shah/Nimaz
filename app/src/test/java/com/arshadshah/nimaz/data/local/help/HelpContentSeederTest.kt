@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.data.local.help
 
+import com.arshadshah.nimaz.data.local.seeding.ContentVersionStore
 import com.arshadshah.nimaz.data.local.database.dao.HelpDao
 import com.arshadshah.nimaz.data.local.database.entity.HelpStringEntity
 import com.arshadshah.nimaz.data.local.database.entity.HelpTopicEntity
@@ -29,10 +30,10 @@ class HelpContentSeederTest {
     """.trimIndent()
 
     private fun seeder(dao: HelpDao, storedVersion: Int): HelpContentSeeder {
-        val store = object : HelpContentVersionStore {
+        val store = object : ContentVersionStore {
             var v = storedVersion
-            override suspend fun get() = v
-            override suspend fun set(version: Int) { v = version }
+            override suspend fun get(key: String) = v
+            override suspend fun set(key: String, version: Int) { v = version }
         }
         val reader = object : HelpAssetReader {
             override fun read(path: String): String = json

@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.data.local.qaida
 
+import com.arshadshah.nimaz.data.local.seeding.ContentVersionStore
 import com.arshadshah.nimaz.data.local.database.dao.QaidaDao
 import com.arshadshah.nimaz.data.local.database.entity.QaidaCellEntity
 import com.arshadshah.nimaz.data.local.database.entity.QaidaLessonEntity
@@ -41,10 +42,10 @@ class QaidaContentSeederTest {
     """.trimIndent()
 
     private fun seeder(dao: QaidaDao, storedVersion: Int): QaidaContentSeeder {
-        val store = object : QaidaContentVersionStore {
+        val store = object : ContentVersionStore {
             var v = storedVersion
-            override suspend fun get() = v
-            override suspend fun set(version: Int) { v = version }
+            override suspend fun get(key: String) = v
+            override suspend fun set(key: String, version: Int) { v = version }
         }
         val reader = object : QaidaAssetReader {
             override fun read(path: String): String = json

@@ -2,24 +2,18 @@ package com.arshadshah.nimaz.core.di
 
 import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
 import com.arshadshah.nimaz.data.local.dua.AndroidDuaAssetReader
-import com.arshadshah.nimaz.data.local.dua.DataStoreDuaContentVersionStore
 import com.arshadshah.nimaz.data.local.dua.DuaAssetReader
-import com.arshadshah.nimaz.data.local.dua.DuaContentVersionStore
 import com.arshadshah.nimaz.data.local.hadith.AndroidHadithAssetReader
 import com.arshadshah.nimaz.data.local.hadith.DataStoreHadithBackfillVersionStore
 import com.arshadshah.nimaz.data.local.hadith.HadithAssetReader
 import com.arshadshah.nimaz.data.local.hadith.HadithBackfillVersionStore
 import com.arshadshah.nimaz.data.local.help.AndroidHelpAssetReader
-import com.arshadshah.nimaz.data.local.help.DataStoreHelpContentVersionStore
 import com.arshadshah.nimaz.data.local.help.HelpAssetReader
-import com.arshadshah.nimaz.data.local.help.HelpContentVersionStore
 import com.arshadshah.nimaz.data.local.qaida.AndroidQaidaAssetReader
-import com.arshadshah.nimaz.data.local.qaida.DataStoreQaidaContentVersionStore
 import com.arshadshah.nimaz.data.local.qaida.QaidaAssetReader
-import com.arshadshah.nimaz.data.local.qaida.QaidaContentVersionStore
 import com.arshadshah.nimaz.data.local.quran.AndroidQuranAssetReader
-import com.arshadshah.nimaz.data.local.quran.DataStoreContentVersionStore
-import com.arshadshah.nimaz.data.local.quran.ContentVersionStore
+import com.arshadshah.nimaz.data.local.seeding.DataStoreContentVersionStore
+import com.arshadshah.nimaz.data.local.seeding.ContentVersionStore
 import com.arshadshah.nimaz.data.local.quran.QuranAssetReader
 import com.arshadshah.nimaz.data.repository.AsmaUlHusnaRepositoryImpl
 import com.arshadshah.nimaz.data.repository.AsmaUnNabiRepositoryImpl
@@ -332,33 +326,15 @@ abstract class RepositoryModule {
 
     @Binds
     @Singleton
-    abstract fun bindHelpContentVersionStore(
-        impl: DataStoreHelpContentVersionStore
-    ): HelpContentVersionStore
-
-    @Binds
-    @Singleton
     abstract fun bindHelpAssetReader(
         impl: AndroidHelpAssetReader
     ): HelpAssetReader
 
     @Binds
     @Singleton
-    abstract fun bindDuaContentVersionStore(
-        impl: DataStoreDuaContentVersionStore
-    ): DuaContentVersionStore
-
-    @Binds
-    @Singleton
     abstract fun bindDuaAssetReader(
         impl: AndroidDuaAssetReader
     ): DuaAssetReader
-
-    @Binds
-    @Singleton
-    abstract fun bindQaidaContentVersionStore(
-        impl: DataStoreQaidaContentVersionStore
-    ): QaidaContentVersionStore
 
     @Binds
     @Singleton

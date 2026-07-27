@@ -4,11 +4,9 @@ import android.content.Context
 import com.arshadshah.nimaz.data.local.database.dao.DuaDao
 import com.arshadshah.nimaz.data.local.database.entity.DuaCategoryEntity
 import com.arshadshah.nimaz.data.local.database.entity.DuaEntity
-import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
+import com.arshadshah.nimaz.data.local.seeding.AssetContentSeeder
+import com.arshadshah.nimaz.data.local.seeding.ContentVersionStore
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -47,21 +45,23 @@ class AndroidDuaAssetReader @Inject constructor(
 @Singleton
 class DuaContentSeeder @Inject constructor(
     private val dao: DuaDao,
-    private val versionStore: DuaContentVersionStore,
+    override val versionStore: ContentVersionStore,
     private val assetReader: DuaAssetReader
-) {
-    private val mutex = Mutex()
+) : AssetContentSeeder<DuaJsonRoot>() {
 
-    suspend fun seedIfNeeded() = mutex.withLock {
-        val root = duaJson.decodeFromString(
-            DuaJsonRoot.serializer(), assetReader.read("duas/duas.json")
-        )
-        val stored = versionStore.get()
-        val populated = dao.categoryCount() > 0
-        if (populated && stored >= root.contentVersion) return@withLock
-        seed(root)
-        versionStore.set(root.contentVersion)
-    }
+    override val contentKey = CONTENT_KEY
+    override val assetPath = ASSET_PATH
+
+    override fun readAsset(path: String): String = assetReader.read(path)
+
+    override fun parse(json: String): DuaJsonRoot =
+        duaJson.decodeFromString(DuaJsonRoot.serializer(), json)
+
+    override fun versionOf(parsed: DuaJsonRoot): Int = parsed.contentVersion
+
+    override suspend fun isPopulated(): Boolean = dao.categoryCount() > 0
+
+    override suspend fun replace(parsed: DuaJsonRoot) = seed(parsed)
 
     private suspend fun seed(root: DuaJsonRoot) {
         val categories = root.categories.map {
@@ -92,18 +92,11 @@ class DuaContentSeeder @Inject constructor(
         }
         dao.replaceAllContent(categories, duas)
     }
-}
 
-/** Thin abstraction over the DataStore version key so the seeder is unit-testable. */
-interface DuaContentVersionStore {
-    suspend fun get(): Int
-    suspend fun set(version: Int)
-}
+    companion object {
+        /** Unique [ContentVersionStore] key for this seeder's content. */
+        const val CONTENT_KEY = "dua"
+        const val ASSET_PATH = "duas/duas.json"
+    }
 
-@Singleton
-class DataStoreDuaContentVersionStore @Inject constructor(
-    private val prefs: PreferencesDataStore
-) : DuaContentVersionStore {
-    override suspend fun get(): Int = prefs.duaContentVersion.first()
-    override suspend fun set(version: Int) = prefs.setDuaContentVersion(version)
 }

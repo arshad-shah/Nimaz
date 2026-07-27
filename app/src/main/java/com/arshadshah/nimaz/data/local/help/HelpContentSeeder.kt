@@ -6,11 +6,9 @@ import com.arshadshah.nimaz.data.local.database.entity.HelpItemEntity
 import com.arshadshah.nimaz.data.local.database.entity.HelpStepEntity
 import com.arshadshah.nimaz.data.local.database.entity.HelpStringEntity
 import com.arshadshah.nimaz.data.local.database.entity.HelpTopicEntity
-import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
+import com.arshadshah.nimaz.data.local.seeding.AssetContentSeeder
+import com.arshadshah.nimaz.data.local.seeding.ContentVersionStore
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -38,21 +36,23 @@ class AndroidHelpAssetReader @Inject constructor(
 @Singleton
 class HelpContentSeeder @Inject constructor(
     private val dao: HelpDao,
-    private val versionStore: HelpContentVersionStore,
+    override val versionStore: ContentVersionStore,
     private val assetReader: HelpAssetReader
-) {
-    private val mutex = Mutex()
+) : AssetContentSeeder<HelpJsonRoot>() {
 
-    suspend fun seedIfNeeded() = mutex.withLock {
-        val root = helpJson.decodeFromString(
-            HelpJsonRoot.serializer(), assetReader.read("help/help.json")
-        )
-        val stored = versionStore.get()
-        val populated = dao.topicCount() > 0
-        if (populated && stored >= root.contentVersion) return@withLock
-        seed(root)
-        versionStore.set(root.contentVersion)
-    }
+    override val contentKey = CONTENT_KEY
+    override val assetPath = ASSET_PATH
+
+    override fun readAsset(path: String): String = assetReader.read(path)
+
+    override fun parse(json: String): HelpJsonRoot =
+        helpJson.decodeFromString(HelpJsonRoot.serializer(), json)
+
+    override fun versionOf(parsed: HelpJsonRoot): Int = parsed.contentVersion
+
+    override suspend fun isPopulated(): Boolean = dao.topicCount() > 0
+
+    override suspend fun replace(parsed: HelpJsonRoot) = seed(parsed)
 
     private suspend fun seed(root: HelpJsonRoot) {
         val topics = mutableListOf<HelpTopicEntity>()
@@ -102,18 +102,11 @@ class HelpContentSeeder @Inject constructor(
         dao.insertTopics(topics); dao.insertItems(items)
         dao.insertSteps(steps); dao.insertStrings(strings)
     }
-}
 
-/** Thin abstraction over the DataStore version key so the seeder is unit-testable. */
-interface HelpContentVersionStore {
-    suspend fun get(): Int
-    suspend fun set(version: Int)
-}
+    companion object {
+        /** Unique [ContentVersionStore] key for this seeder's content. */
+        const val CONTENT_KEY = "help"
+        const val ASSET_PATH = "help/help.json"
+    }
 
-@Singleton
-class DataStoreHelpContentVersionStore @Inject constructor(
-    private val prefs: PreferencesDataStore
-) : HelpContentVersionStore {
-    override suspend fun get(): Int = prefs.helpContentVersion.first()
-    override suspend fun set(version: Int) = prefs.setHelpContentVersion(version)
 }

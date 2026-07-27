@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.data.local.quran
 
 import com.arshadshah.nimaz.data.local.database.dao.QuranDao
 import com.arshadshah.nimaz.data.local.database.entity.MushafLayoutEntity
+import com.arshadshah.nimaz.data.local.seeding.ContentVersionStore
 import com.arshadshah.nimaz.domain.model.quran.catalogue.QuranEditions
 import com.google.common.truth.Truth.assertThat
 import io.mockk.coEvery

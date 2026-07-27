@@ -423,10 +423,10 @@ idempotently, so fresh installs and upgraders converge on the same content.
 
 | Content | Seeder | JSON asset | Pattern |
 |---|---|---|---|
-| Dua | `data/local/dua/DuaContentSeeder.kt` | `duas/duas.json` | full content replace |
-| Help | `data/local/help/HelpContentSeeder.kt` | `help/help.json` | full content replace |
-| Qaida | `data/local/qaida/QaidaContentSeeder.kt` | `qaida/qaida_content.json` | full content replace |
-| Hadith | `data/local/hadith/HadithBackfillSeeder.kt` | `hadith/hadith_fills.json` | keyed UPDATE backfill |
+| Dua | `data/local/dua/DuaContentSeeder.kt` | `duas/duas.json` | full content replace (`AssetContentSeeder`) |
+| Help | `data/local/help/HelpContentSeeder.kt` | `help/help.json` | full content replace (`AssetContentSeeder`) |
+| Qaida | `data/local/qaida/QaidaContentSeeder.kt` | `qaida/qaida_content.json` | full content replace (`AssetContentSeeder`) |
+| Hadith | `data/local/hadith/HadithBackfillSeeder.kt` | `hadith/hadith_fills.json` | keyed UPDATE backfill (**stands alone** — see below) |
 | Mushaf layouts | `data/local/quran/QuranLayoutSeeder.kt` | per edition, from `QuranContentAssets.mushafLayouts` (16-line IndoPak: `quran/ayahs_indopak.json` + `quran/mushaf_layout_indopak16.json`) | ayah-text UPDATE + per-edition `mushaf_layouts` replace |
 
 > **The layout seeder is edition-agnostic.** It takes a `MushafLayoutEdition` and looks its assets up
@@ -436,22 +436,41 @@ idempotently, so fresh installs and upgraders converge on the same content.
 > A flowed edition (Madani) has no layout rows and is never seeded. See
 > `docs/adr/ADR-001-generic-mushaf-layouts-table.md` and `docs/quran/content-registry.md`.
 
+**The `AssetContentSeeder<T>` base class** (`data/local/seeding/`) owns the replace-shaped
+pattern: parse → compare versions → replace atomically → record the version, serialised by a
+`Mutex` and short-circuited by a `@Volatile seeded` flag once the process has confirmed the
+content is current. Dua, Help and Qaida are subclasses; they supply `contentKey`, `assetPath`,
+`parse`, `versionOf`, `isPopulated` and `replace`, and nothing else.
+
+`versionOf(parsed)` is a **function of the parsed root**, not an abstract `val`, because those
+three assets are JSON objects carrying `contentVersion` — their version genuinely is not knowable
+without parsing first. A seeder whose asset has no version field returns a constant.
+
+Two seeders deliberately stay outside the base class:
+
+- **Hadith** is not replace-shaped. It applies keyed per-row repairs, never deletes, and gates on
+  the *presence of gaps* (`emptyArabicCount() > 0`) rather than the absence of rows. Forcing it
+  into `replace(parsed)` would change what it does.
+- **Mushaf layouts** are seeded *per edition*, so the populated check, the version key and the
+  "already confirmed" flag are all keyed by layout id rather than being per-seeder singletons.
+
 > **IndoPak font (issue #267, 3/7).** The seeded `text_indopak` embeds per-ayah number ornaments as
 > Private Use Area glyphs (U+F500…U+F6FF) that only render in the matching face. That face is bundled
 > at `app/src/main/res/font/indopak_nastaleeq.ttf` (*AlQuran IndoPak by QuranWBW* v2.100) and exposed
 > as `QuranArabicFont.INDOPAK` in `presentation/theme/Type.kt`. Licence/attribution + release sign-off
 > flag: `docs/FONT_LICENSES.md`.
 
-**Content-version pattern.** The version is stored in **DataStore** (not a file, not a table):
-`PreferencesKeys.{DUA,HELP,QAIDA}_CONTENT_VERSION` and `HADITH_BACKFILL_VERSION` (default `0` = never
-seeded). Each of those JSON roots carries a `contentVersion: Int` field.
+**Content-version pattern.** The version is stored in **DataStore** (not a file, not a table),
+through the keyed `ContentVersionStore` (`data/local/seeding/`): one int per content key,
+`content_version.<key>` — `dua`, `help`, `qaida`, `mushaf_layout.<layoutId>` — so shipping a new
+seeded asset needs no new preference key and no new interface. Hadith still uses its own
+`HADITH_BACKFILL_VERSION` key, since it stands outside the framework.
 
-Mushaf layouts use the **keyed** `ContentVersionStore` instead (`data/local/quran/QuranLayoutSeeder.kt`),
-which stores one DataStore int per content key — `content_version.mushaf_layout.<layoutId>` — so a new
-seeded asset needs no new preference key. The layout assets are plain JSON arrays with no version
-field, so the version comes from `QuranContentAssets` alongside the asset path. `DataStoreContentVersionStore`
-falls back to the pre-registry `indopak_content_version` preference the first time
-`mushaf_layout.indopak16` is read, so existing installs do **not** re-seed ~14k rows on upgrade.
+`DataStoreContentVersionStore` falls back **once, read-only** to the pre-registry preference each key
+replaced (`indopak_content_version`, `{dua,help,qaida}_content_version`). Without that, the keyed
+preference would start at 0 on every existing install and the first launch after the change would
+re-seed every bundled asset — ~14k layout rows plus all the Dua/Help/Qaida content — on devices that
+already hold exactly it. Pinned by `DataStoreContentVersionStoreTest`.
 
 `seedIfNeeded()`:
 1. parse the JSON asset;
