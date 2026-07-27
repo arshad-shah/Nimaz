@@ -70,6 +70,7 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownMenu
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownRow
 import com.arshadshah.nimaz.presentation.components.molecules.SurahHeaderCartouche
 import com.arshadshah.nimaz.domain.model.Ayah
+import com.arshadshah.nimaz.domain.model.quran.catalogue.QuranEditions
 import com.arshadshah.nimaz.domain.model.MushafLineType
 import com.arshadshah.nimaz.domain.model.MushafPageLayout
 import com.arshadshah.nimaz.domain.model.Surah
@@ -841,6 +842,8 @@ fun QuranReaderScreen(
                             arabicFontSize = state.arabicFontSize,
                             arabicFontFamily = state.arabicFontFamily,
                             fontSize = state.fontSize,
+                            translationEdition =
+                                QuranEditions.translation(state.selectedTranslatorId),
                             isHighlighted = isHighlighted,
                             isAudioPlaying = isAudioPlaying,
                             isFavorite = ayah.id in favoriteAyahIds,
@@ -932,6 +935,7 @@ private fun ReaderMushafPage(
         } else {
             MushafLinePage(
                 pageNumber = pageNumber,
+                translationEdition = QuranEditions.translation(state.selectedTranslatorId),
                 layout = layout,
                 surahMap = surahMap,
                 arabicFontSize = state.arabicFontSize,
@@ -969,6 +973,7 @@ private fun ReaderMushafPage(
     } else {
         MushafPage(
             pageNumber = pageNumber,
+            translationEdition = QuranEditions.translation(state.selectedTranslatorId),
             ayahs = ayahs,
             surahMap = surahMap,
             arabicFontSize = state.arabicFontSize,

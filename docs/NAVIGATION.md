@@ -116,7 +116,7 @@ and the notification hub subscreens `settings/notifications/{prayers,weekly,soun
 |---|---|---|
 | `quran/surah/{n}` | `QuranReader` | 1–114 (surah number) |
 | `quran/surah/{n}/ayah/{m}` | `QuranReader` | 1–114 surah; 1–286 ayah per surah |
-| `quran/page/{n}` | `QuranPage` | 1–`MushafScript.MAX_TOTAL_PAGES` (604; largest edition — the reader clamps to the active script's count, 548 for IndoPak-16) |
+| `quran/page/{n}` | `QuranPage` | 1–`QuranEditions.maxTotalPages` (604; largest edition — the reader clamps to the active edition's count, 548 for IndoPak-16) |
 | `quran/juz/{n}` | `QuranJuz` | 1–30 (juz/part number) |
 | `tafseer/{n}` | `Tafseer` | 1–114 (surah number) |
 | `dua/category/{slug}` | `DuaCategory` | category id (string) |

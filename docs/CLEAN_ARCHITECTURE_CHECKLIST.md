@@ -276,6 +276,38 @@ rg -n 'Card\(|Surface\(|Box\(.*\.background\(' app/src/main/java/com/arshadshah/
 
 ---
 
+## AP-9 · Domain content catalogues declared in screens
+
+**Rule:** the set of *content editions the app ships* is domain data. A screen may render it; it
+must not own it.
+
+**Why it hurts:** a catalogue in a screen has no single reader, so it gets copied to the next
+place that needs it, and the copies drift silently. Nothing type-checks "these two lists agree".
+
+- [x] ~~**Quran content axes hardcoded in `presentation/`.**~~ **Resolved.** The translation
+  picker held `listOf("Sahih International" to "sahih_international")`, `SelectReciterScreen`
+  declared `popularReciters`, and reciter metadata existed **four** times over — that list,
+  `QuranAudioManager.RECITER_CDN_MAP`, that class's `getReciterDisplayName`, and a fifth-of-the-way
+  `when` in `QuranSettingsScreen`. They had drifted: five reciters were streamable but unreachable,
+  the settings row printed raw ids like `"hudhaify"`, and one reciter's name rendered two ways.
+  Now `domain/model/quran/catalogue/QuranEditions` is the single source of truth; `data` holds the
+  asset/CDN bindings, `presentation` holds only `fontId → FontFamily`, and
+  `QuranEditionRegistryTest` fails the build if those id sets disagree (ADR-002).
+
+**Detector.** Any literal edition id or display name left in `presentation/` outside a `@Preview`
+fixture or the `QuranArabicFont` font binding:
+
+```bash
+grep -rn '"sahih_international"\|"indopak16"\|"mishary"\|Sahih International\|Alafasy' \
+  app/src/main/java/com/arshadshah/nimaz/presentation/
+```
+
+**Watch for the same shape elsewhere.** Any list that answers "which X does the app ship" belongs
+in `domain`: adhan sounds, tasbih presets, calculation methods, hadith collections. Before adding
+one to a screen, check whether a second consumer already exists.
+
+---
+
 ## Quick full re-scan
 
 ```bash

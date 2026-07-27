@@ -58,6 +58,10 @@ import com.arshadshah.nimaz.core.share.ContentShareManager
 import com.arshadshah.nimaz.core.share.Shareables
 import com.arshadshah.nimaz.core.util.TajweedParser
 import com.arshadshah.nimaz.domain.model.Ayah
+import com.arshadshah.nimaz.domain.model.quran.catalogue.QuranEditions
+import com.arshadshah.nimaz.domain.model.quran.catalogue.TranslationEdition
+import com.arshadshah.nimaz.presentation.theme.fontFamily
+import com.arshadshah.nimaz.presentation.theme.textDirection
 import com.arshadshah.nimaz.domain.model.SajdaType
 import com.arshadshah.nimaz.presentation.components.atoms.NimazActionPill
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
@@ -91,6 +95,8 @@ internal fun AyahItem(
     arabicFontSize: Float,
     arabicFontFamily: FontFamily = AmiriFontFamily,
     fontSize: Float,
+    /** The active translation edition — drives the translation's direction and font. */
+    translationEdition: TranslationEdition = QuranEditions.defaultTranslation,
     isHighlighted: Boolean = false,
     isAudioPlaying: Boolean = false,
     isFavorite: Boolean = false,
@@ -277,7 +283,9 @@ internal fun AyahItem(
             )
         }
 
-        // Translation
+        // Translation. Direction and font come from the edition, so an RTL translation
+        // (Urdu, Persian, Arabic) aligns and wraps from the right rather than sitting flush
+        // left in an LTR layout — TextAlign.Start resolves against textDirection.
         if (showTranslation && ayah.translation != null) {
             Spacer(modifier = Modifier.height(12.dp))
             NimazCard(style = NimazCardStyle.OUTLINED, tone = NimazTone.NEUTRAL, elevation = 0.dp) {
@@ -285,7 +293,9 @@ internal fun AyahItem(
                     text = ayah.translation,
                     style = MaterialTheme.typography.bodyMedium.copy(
                         fontSize = fontSize.sp,
-                        lineHeight = (fontSize * 1.5f).sp
+                        lineHeight = (fontSize * 1.5f).sp,
+                        fontFamily = translationEdition.fontFamily,
+                        textDirection = translationEdition.textDirection
                     ),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(12.dp)

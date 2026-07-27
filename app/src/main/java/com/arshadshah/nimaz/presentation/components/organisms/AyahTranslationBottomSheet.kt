@@ -21,6 +21,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.Ayah
+import com.arshadshah.nimaz.domain.model.quran.catalogue.QuranEditions
+import com.arshadshah.nimaz.domain.model.quran.catalogue.TranslationEdition
+import com.arshadshah.nimaz.presentation.theme.fontFamily
+import com.arshadshah.nimaz.presentation.theme.textDirection
 import com.arshadshah.nimaz.domain.model.SajdaType
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
@@ -47,6 +51,8 @@ import com.arshadshah.nimaz.presentation.theme.NimazTheme
 @Composable
 fun AyahTranslationBottomSheet(
     ayah: Ayah,
+    /** The active translation edition — drives the translation's direction and font. */
+    translationEdition: TranslationEdition = QuranEditions.defaultTranslation,
     onDismissRequest: () -> Unit,
     modifier: Modifier = Modifier,
     surahName: String? = null,
@@ -62,6 +68,7 @@ fun AyahTranslationBottomSheet(
     ) {
         AyahTranslationContent(
             ayah = ayah,
+            translationEdition = translationEdition,
             surahName = surahName,
             showTranslation = showTranslation,
             showTransliteration = showTransliteration
@@ -72,6 +79,8 @@ fun AyahTranslationBottomSheet(
 @Composable
 fun AyahTranslationContent(
     ayah: Ayah,
+    /** The active translation edition — drives the translation's direction and font. */
+    translationEdition: TranslationEdition = QuranEditions.defaultTranslation,
     modifier: Modifier = Modifier,
     surahName: String? = null,
     showTranslation: Boolean = true,
@@ -109,7 +118,11 @@ fun AyahTranslationContent(
                 NimazSheetPreviewCard {
                     Text(
                         text = ayah.translation,
-                        style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 22.sp),
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            lineHeight = 22.sp,
+                            fontFamily = translationEdition.fontFamily,
+                            textDirection = translationEdition.textDirection
+                        ),
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }

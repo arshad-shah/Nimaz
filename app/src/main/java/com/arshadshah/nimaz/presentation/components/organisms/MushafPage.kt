@@ -36,6 +36,8 @@ import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.share.ContentShareManager
 import com.arshadshah.nimaz.core.share.Shareables
 import com.arshadshah.nimaz.domain.model.Ayah
+import com.arshadshah.nimaz.domain.model.quran.catalogue.QuranEditions
+import com.arshadshah.nimaz.domain.model.quran.catalogue.TranslationEdition
 import com.arshadshah.nimaz.domain.model.Surah
 import com.arshadshah.nimaz.presentation.components.molecules.AyahTooltip
 import com.arshadshah.nimaz.presentation.components.molecules.MushafContinuousText
@@ -63,6 +65,8 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MushafPage(
+    /** The active translation edition — drives the translation's direction and font. */
+    translationEdition: TranslationEdition = QuranEditions.defaultTranslation,
     pageNumber: Int,
     ayahs: List<Ayah>,
     surahMap: Map<Int, Surah>,
@@ -253,6 +257,7 @@ fun MushafPage(
 
         AyahTranslationBottomSheet(
             ayah = ayah,
+            translationEdition = translationEdition,
             surahName = surah?.nameEnglish,
             showTranslation = showTranslation,
             showTransliteration = showTransliteration,

@@ -40,6 +40,10 @@ import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.share.ContentShareManager
 import com.arshadshah.nimaz.core.share.Shareables
 import com.arshadshah.nimaz.domain.model.Ayah
+import com.arshadshah.nimaz.domain.model.quran.catalogue.QuranEditions
+import com.arshadshah.nimaz.domain.model.quran.catalogue.TranslationEdition
+import com.arshadshah.nimaz.presentation.theme.fontFamily
+import com.arshadshah.nimaz.presentation.theme.textDirection
 import com.arshadshah.nimaz.domain.model.SajdaType
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
@@ -65,6 +69,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun AyahActionsBottomSheet(
     ayah: Ayah,
+    /** The active translation edition — drives the translation's direction and font. */
+    translationEdition: TranslationEdition = QuranEditions.defaultTranslation,
     onDismissRequest: () -> Unit,
     modifier: Modifier = Modifier,
     surahName: String? = null,
@@ -89,6 +95,7 @@ fun AyahActionsBottomSheet(
     ) {
         AyahActionsContent(
             ayah = ayah,
+            translationEdition = translationEdition,
             surahName = surahName,
             isBookmarked = isBookmarked,
             isFavorite = isFavorite,
@@ -112,6 +119,8 @@ fun AyahActionsBottomSheet(
 @Composable
 fun AyahActionsContent(
     ayah: Ayah,
+    /** The active translation edition — drives the translation's direction and font. */
+    translationEdition: TranslationEdition = QuranEditions.defaultTranslation,
     modifier: Modifier = Modifier,
     surahName: String? = null,
     isBookmarked: Boolean = ayah.isBookmarked,
@@ -159,7 +168,10 @@ fun AyahActionsContent(
                 NimazSheetPreviewCard {
                     Text(
                         text = ayah.translation,
-                        style = MaterialTheme.typography.bodyMedium,
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            fontFamily = translationEdition.fontFamily,
+                            textDirection = translationEdition.textDirection
+                        ),
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
