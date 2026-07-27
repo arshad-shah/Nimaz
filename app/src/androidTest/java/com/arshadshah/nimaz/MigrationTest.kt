@@ -105,4 +105,107 @@ class MigrationTest {
         assertThat(indexCursor.count).isEqualTo(1)
         indexCursor.close()
     }
+
+    /**
+     * ADR-001's migration is the one in this chain that moves *user-visible data* rather than
+     * just adding an empty table: an existing install already holds ~13,970 seeded IndoPak
+     * layout rows, and losing them empties the 16-line reader until the next re-seed. These
+     * three tests cover exactly the ways that can go wrong — rows dropped, rows duplicated by
+     * a re-run, and the old table left behind to drift.
+     */
+    @Test
+    fun migrate18To19_carriesLayoutRowsIntoTheGenericTable() {
+        val db18 = helper.createDatabase(dbName, 18)
+        db18.execSQL(
+            "INSERT INTO `mushaf_layout_indopak16` " +
+                "(page, line, line_type, surah_id, ayah_id, first_word_position, last_word_position) " +
+                "VALUES (1, 1, 'surah_header', 1, NULL, NULL, NULL), " +
+                "(1, 2, 'ayah', 1, 1, 1, 4), " +
+                "(2, 3, 'ayah', 2, 8, 2, 9)"
+        )
+        db18.close()
+
+        val db = helper.runMigrationsAndValidate(
+            dbName, 19, true, NimazDatabase.MIGRATION_18_19
+        )
+
+        // Every row survives, stamped with the edition it came from.
+        val rows = db.query(
+            "SELECT layout_id, page, line, line_type, surah_id, ayah_id, " +
+                "first_word_position, last_word_position FROM `mushaf_layouts` ORDER BY page, line"
+        )
+        assertThat(rows.count).isEqualTo(3)
+
+        rows.moveToFirst()
+        assertThat(rows.getString(0)).isEqualTo("indopak16")
+        assertThat(rows.getString(3)).isEqualTo("surah_header")
+        assertThat(rows.isNull(5)).isTrue()
+
+        rows.moveToNext()
+        assertThat(rows.getString(0)).isEqualTo("indopak16")
+        assertThat(rows.getInt(1)).isEqualTo(1)
+        assertThat(rows.getInt(2)).isEqualTo(2)
+        assertThat(rows.getInt(5)).isEqualTo(1)
+        assertThat(rows.getInt(6)).isEqualTo(1)
+        assertThat(rows.getInt(7)).isEqualTo(4)
+
+        rows.moveToNext()
+        assertThat(rows.getInt(1)).isEqualTo(2)
+        assertThat(rows.getInt(5)).isEqualTo(8)
+        rows.close()
+
+        // The per-edition table is gone, so nothing can read stale rows from it.
+        val oldTable = db.query(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name='mushaf_layout_indopak16'"
+        )
+        assertThat(oldTable.count).isEqualTo(0)
+        oldTable.close()
+
+        // Indexed with the discriminator leading — every read is scoped to one edition.
+        val index = db.query(
+            "SELECT name FROM sqlite_master WHERE type='index' " +
+                "AND name='index_mushaf_layouts_layout_id_page_line'"
+        )
+        assertThat(index.count).isEqualTo(1)
+        index.close()
+    }
+
+    @Test
+    fun migrate18To19_isIdempotentWhenRunTwice() {
+        val db18 = helper.createDatabase(dbName, 18)
+        db18.execSQL(
+            "INSERT INTO `mushaf_layout_indopak16` " +
+                "(page, line, line_type, surah_id, ayah_id, first_word_position, last_word_position) " +
+                "VALUES (1, 1, 'ayah', 1, 1, 1, 4)"
+        )
+        db18.close()
+
+        val db = helper.runMigrationsAndValidate(
+            dbName, 19, true, NimazDatabase.MIGRATION_18_19
+        )
+        // Re-running must not double the rows: Room re-runs a migration if an upgrade is
+        // interrupted, and a duplicated layout renders every word twice.
+        NimazDatabase.MIGRATION_18_19.migrate(db)
+
+        val count = db.query("SELECT COUNT(*) FROM `mushaf_layouts`")
+        count.moveToFirst()
+        assertThat(count.getInt(0)).isEqualTo(1)
+        count.close()
+    }
+
+    @Test
+    fun migrate18To19_createsAnEmptyTableWhenTheOldOneWasNeverSeeded() {
+        // A fresh install runs this straight after createFromAsset, whose ~147 MB prepackaged
+        // asset predates both tables — so the copy must be skipped, not fail.
+        helper.createDatabase(dbName, 18).close()
+
+        val db = helper.runMigrationsAndValidate(
+            dbName, 19, true, NimazDatabase.MIGRATION_18_19
+        )
+
+        val count = db.query("SELECT COUNT(*) FROM `mushaf_layouts`")
+        count.moveToFirst()
+        assertThat(count.getInt(0)).isEqualTo(0)
+        count.close()
+    }
 }

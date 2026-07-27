@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.domain.usecase
 
+import com.arshadshah.nimaz.domain.model.quran.catalogue.QuranEditions
 import com.arshadshah.nimaz.domain.model.MushafLine
 import com.arshadshah.nimaz.domain.model.MushafLineType
 import com.arshadshah.nimaz.domain.model.MushafPageLayout
@@ -20,11 +21,11 @@ class GetMushafPageLayoutUseCaseTest {
             page = 1,
             lines = listOf(MushafLine(page = 1, lineNumber = 1, type = MushafLineType.SURAH_HEADER, surahId = 1))
         )
-        coEvery { repository.getMushafPageLayout(1) } returns expected
+        coEvery { repository.getMushafPageLayout(1, QuranEditions.defaultLayout) } returns expected
 
         val result = GetMushafPageLayoutUseCase(repository)(1)
 
         assertThat(result).isEqualTo(expected)
-        coVerify(exactly = 1) { repository.getMushafPageLayout(1) }
+        coVerify(exactly = 1) { repository.getMushafPageLayout(1, QuranEditions.defaultLayout) }
     }
 }

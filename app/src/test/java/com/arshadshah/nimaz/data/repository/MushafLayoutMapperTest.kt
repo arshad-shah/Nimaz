@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.data.repository
 
+import com.arshadshah.nimaz.domain.model.quran.catalogue.AyahTextSource
 import com.arshadshah.nimaz.data.local.database.dao.MushafLayoutLineRow
 import com.arshadshah.nimaz.domain.model.MushafLineType
 import com.google.common.truth.Truth.assertThat
@@ -31,6 +32,7 @@ class MushafLayoutMapperTest {
         ayahId = ayahId,
         firstWordPosition = first,
         lastWordPosition = last,
+        textUthmani = null,
         textIndopak = textIndopak,
         ayahNumberInSurah = ayahNumber
     )
@@ -44,6 +46,7 @@ class MushafLayoutMapperTest {
             ayahId = null,
             firstWordPosition = null,
             lastWordPosition = null,
+            textUthmani = null,
             textIndopak = null,
             ayahNumberInSurah = null
         )
@@ -60,7 +63,7 @@ class MushafLayoutMapperTest {
             )
         )
 
-        val layout = MushafLayoutMapper.toPageLayout(page = 1, rows = rows)
+        val layout = MushafLayoutMapper.toPageLayout(page = 1, rows = rows, AyahTextSource.INDOPAK)
 
         assertThat(layout.page).isEqualTo(1)
         assertThat(layout.lines).hasSize(3)
@@ -98,7 +101,7 @@ class MushafLayoutMapperTest {
             )
         )
 
-        val layout = MushafLayoutMapper.toPageLayout(page = 50, rows = rows)
+        val layout = MushafLayoutMapper.toPageLayout(page = 50, rows = rows, AyahTextSource.INDOPAK)
 
         assertThat(layout.lines).hasSize(1)
         val line = layout.lines.single()
@@ -119,14 +122,14 @@ class MushafLayoutMapperTest {
             ayahRow(page = 5, line = 2, ayahId = 9, ayahNumber = 1, first = 1, last = 1, textIndopak = "c")
         )
 
-        val layout = MushafLayoutMapper.toPageLayout(page = 5, rows = rows)
+        val layout = MushafLayoutMapper.toPageLayout(page = 5, rows = rows, AyahTextSource.INDOPAK)
 
         assertThat(layout.lines.map { it.lineNumber }).containsExactly(1, 2, 3).inOrder()
     }
 
     @Test
     fun `empty page yields an empty layout`() {
-        val layout = MushafLayoutMapper.toPageLayout(page = 999, rows = emptyList())
+        val layout = MushafLayoutMapper.toPageLayout(page = 999, rows = emptyList(), AyahTextSource.INDOPAK)
         assertThat(layout.isEmpty).isTrue()
         assertThat(layout.lines).isEmpty()
     }
@@ -146,7 +149,7 @@ class MushafLayoutMapperTest {
             )
         )
 
-        val layout = MushafLayoutMapper.toPageLayout(page = 290, rows = rows)
+        val layout = MushafLayoutMapper.toPageLayout(page = 290, rows = rows, AyahTextSource.INDOPAK)
 
         assertThat(layout.lines.map { it.type }).containsExactly(
             MushafLineType.SURAH_HEADER,
@@ -172,7 +175,7 @@ class MushafLayoutMapperTest {
             ayahRow(page = 7, line = 5, ayahId = 301, ayahNumber = 2, first = 1, last = 1, textIndopak = "c d")
         )
 
-        val layout = MushafLayoutMapper.toPageLayout(page = 7, rows = rows)
+        val layout = MushafLayoutMapper.toPageLayout(page = 7, rows = rows, AyahTextSource.INDOPAK)
 
         assertThat(layout.lines).hasSize(2)
         assertThat(layout.lines[0].type).isEqualTo(MushafLineType.SURAH_HEADER)

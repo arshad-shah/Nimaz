@@ -5,6 +5,7 @@ import com.arshadshah.nimaz.domain.model.MushafLine
 import com.arshadshah.nimaz.domain.model.MushafLineType
 import com.arshadshah.nimaz.domain.model.MushafPageLayout
 import com.arshadshah.nimaz.domain.model.MushafWord
+import com.arshadshah.nimaz.domain.model.quran.catalogue.AyahTextSource
 
 /**
  * Groups the flat `(page, line)` segments returned by
@@ -13,7 +14,9 @@ import com.arshadshah.nimaz.domain.model.MushafWord
  *
  * Each DB row is one *segment*: a contiguous run of one ayah's words on a single line,
  * stored (2/7) as an inclusive `first..last` position range into the ayah's space-split
- * `text_indopak`. A printed line may hold several such segments (e.g. the tail of one ayah
+ * text. *Which* text is the edition's [AyahTextSource]: the ranges were tokenised against
+ * one specific column and are meaningless against the other, so the caller passes the active
+ * edition's source rather than the mapper assuming IndoPak. A printed line may hold several such segments (e.g. the tail of one ayah
  * and the head of the next), so ayah segments sharing a [MushafLayoutLineRow.line] are
  * concatenated in reading order into one [MushafLine].
  *
@@ -31,11 +34,15 @@ import com.arshadshah.nimaz.domain.model.MushafWord
  */
 object MushafLayoutMapper {
 
-    fun toPageLayout(page: Int, rows: List<MushafLayoutLineRow>): MushafPageLayout {
+    fun toPageLayout(
+        page: Int,
+        rows: List<MushafLayoutLineRow>,
+        textSource: AyahTextSource
+    ): MushafPageLayout {
         val lines = rows
             .groupBy { it.line }
             .toSortedMap()
-            .flatMap { (lineNumber, segments) -> segments.toLines(page, lineNumber) }
+            .flatMap { (lineNumber, segments) -> segments.toLines(page, lineNumber, textSource) }
         return MushafPageLayout(page = page, lines = lines)
     }
 
@@ -45,7 +52,11 @@ object MushafLayoutMapper {
      * on the line concatenates into a single trailing ayah line. A line never mixes ayah and
      * structural rows in the shipped data, but handling both keeps the mapper total.
      */
-    private fun List<MushafLayoutLineRow>.toLines(page: Int, lineNumber: Int): List<MushafLine> {
+    private fun List<MushafLayoutLineRow>.toLines(
+        page: Int,
+        lineNumber: Int,
+        textSource: AyahTextSource
+    ): List<MushafLine> {
         val structural = ArrayList<MushafLine>(size)
         val ayahSegments = ArrayList<MushafLayoutLineRow>(size)
         for (row in this) {
@@ -66,21 +77,26 @@ object MushafLayoutMapper {
             lineNumber = lineNumber,
             type = MushafLineType.AYAH,
             surahId = ayahSegments.first().surahId,
-            words = ayahSegments.flatMap { it.toWords() }
+            words = ayahSegments.flatMap { it.toWords(textSource) }
         )
         return structural + ayahLine
     }
 
     /**
-     * Reconstructs a segment's glyph words by slicing the ayah's space-split `text_indopak`
-     * with the inclusive [MushafLayoutLineRow.firstWordPosition]..[MushafLayoutLineRow.lastWordPosition]
-     * range. Returns empty for header/basmalah rows (null ayah/positions/text).
+     * Reconstructs a segment's glyph words by slicing the ayah's space-split text — the
+     * column named by [textSource] — with the inclusive
+     * [MushafLayoutLineRow.firstWordPosition]..[MushafLayoutLineRow.lastWordPosition] range.
+     * Returns empty for header/basmalah rows (null ayah/positions/text).
      */
-    private fun MushafLayoutLineRow.toWords(): List<MushafWord> {
+    private fun MushafLayoutLineRow.toWords(textSource: AyahTextSource): List<MushafWord> {
         val ayah = ayahId ?: return emptyList()
         val from = firstWordPosition ?: return emptyList()
         val to = lastWordPosition ?: return emptyList()
-        val glyphWords = textIndopak?.split(" ") ?: return emptyList()
+        val text = when (textSource) {
+            AyahTextSource.UTHMANI -> textUthmani
+            AyahTextSource.INDOPAK -> textIndopak
+        }
+        val glyphWords = text?.split(" ") ?: return emptyList()
         return (from..to).map { position ->
             MushafWord(
                 text = glyphWords.getOrNull(position - 1).orEmpty(),

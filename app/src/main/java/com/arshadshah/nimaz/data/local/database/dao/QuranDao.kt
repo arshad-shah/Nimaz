@@ -7,7 +7,7 @@ import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
 import com.arshadshah.nimaz.data.local.database.entity.AyahEntity
-import com.arshadshah.nimaz.data.local.database.entity.MushafLayoutIndopak16Entity
+import com.arshadshah.nimaz.data.local.database.entity.MushafLayoutEntity
 import com.arshadshah.nimaz.data.local.database.entity.QuranBookmarkEntity
 import com.arshadshah.nimaz.data.local.database.entity.QuranFavoriteEntity
 import com.arshadshah.nimaz.data.local.database.entity.ReadingProgressEntity
@@ -39,6 +39,10 @@ data class MushafLayoutLineRow(
     val ayahId: Int?,
     val firstWordPosition: Int?,
     val lastWordPosition: Int?,
+    // Both candidate ayah text columns come back; the mapper picks the one this layout's
+    // edition was tokenised against (its AyahTextSource). Room cannot parameterise a column
+    // name in @Query, so selecting both is how one query serves every edition.
+    val textUthmani: String?,
     val textIndopak: String?,
     val ayahNumberInSurah: Int?
 )
@@ -80,7 +84,7 @@ interface QuranDao {
     /**
      * Ayahs spanning a global id range, in mushaf order. Used to fetch the content of a page
      * of an edition that does not paginate by the `ayahs.page` column — the 16-line IndoPak
-     * mushaf, whose pagination lives in [MushafLayoutIndopak16Entity] (#325).
+     * mushaf, whose pagination lives in [MushafLayoutEntity] (#325).
      */
     @Query("SELECT * FROM ayahs WHERE id BETWEEN :minAyahId AND :maxAyahId ORDER BY id ASC")
     fun getAyahsByIdRange(minAyahId: Int, maxAyahId: Int): Flow<List<AyahEntity>>
@@ -89,10 +93,10 @@ interface QuranDao {
     suspend fun getPageAyahRanges(): List<PageAyahRangeRow>
 
     /**
-     * The 16-line IndoPak edition's page→ayah mapping, the counterpart of
-     * [getPageAyahRanges] for the 548-page layout (#325). Header/basmalah rows carry a null
-     * `ayah_id` and are excluded; a page's ayahs are counted distinctly because one ayah can
-     * span several printed lines of the same page.
+     * A line-accurate edition's page→ayah mapping, the counterpart of [getPageAyahRanges] for
+     * an edition that does not paginate by `ayahs.page` (#325). Header/basmalah rows carry a
+     * null `ayah_id` and are excluded; a page's ayahs are counted distinctly because one ayah
+     * can span several printed lines of the same page.
      */
     @Query(
         """
@@ -100,13 +104,13 @@ interface QuranDao {
                MIN(ayah_id) AS minAyahId,
                MAX(ayah_id) AS maxAyahId,
                COUNT(DISTINCT ayah_id) AS ayahCount
-        FROM mushaf_layout_indopak16
-        WHERE ayah_id IS NOT NULL
+        FROM mushaf_layouts
+        WHERE layout_id = :layoutId AND ayah_id IS NOT NULL
         GROUP BY page
         ORDER BY page ASC
         """
     )
-    suspend fun getIndopak16PageAyahRanges(): List<PageAyahRangeRow>
+    suspend fun getLayoutPageAyahRanges(layoutId: String): List<PageAyahRangeRow>
 
     @Query("SELECT * FROM ayahs WHERE sajda_type IS NOT NULL ORDER BY id ASC")
     fun getSajdaAyahs(): Flow<List<AyahEntity>>
@@ -117,29 +121,30 @@ interface QuranDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAyahs(ayahs: List<AyahEntity>)
 
-    // IndoPak 16-line Mushaf layout (sub-task 2/7). The content is shipped as
-    // bundled JSON assets and seeded at runtime by QuranIndopakSeeder — the
-    // prepackaged DB is not regenerated. These methods cover seeding + idempotency;
-    // the per-page read query for the renderer (getMushafLayoutByPage, sub-task 4/7)
-    // is defined further below.
-    @Query("SELECT COUNT(*) FROM mushaf_layout_indopak16")
-    suspend fun countMushafLayoutIndopak16(): Int
+    // Line-accurate Mushaf layouts. The content is shipped as bundled JSON assets and
+    // seeded at runtime by QuranLayoutSeeder — the prepackaged DB is not regenerated.
+    // Every method is scoped to one edition by `layout_id` (ADR-001), so adding a layout
+    // needs no new DAO method. These cover seeding + idempotency; the per-page read query
+    // for the renderer (getMushafLayoutByPage) is defined further below.
+    @Query("SELECT COUNT(*) FROM mushaf_layouts WHERE layout_id = :layoutId")
+    suspend fun countMushafLayout(layoutId: String): Int
 
     @Query("UPDATE ayahs SET text_indopak = :text WHERE id = :ayahId")
     suspend fun updateAyahIndopakText(ayahId: Int, text: String)
 
-    @Query("DELETE FROM mushaf_layout_indopak16")
-    suspend fun deleteAllMushafLayoutIndopak16()
+    @Query("DELETE FROM mushaf_layouts WHERE layout_id = :layoutId")
+    suspend fun deleteMushafLayout(layoutId: String)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertMushafLayoutIndopak16(rows: List<MushafLayoutIndopak16Entity>)
+    suspend fun insertMushafLayout(rows: List<MushafLayoutEntity>)
 
     /**
-     * All line-segments of a 16-line IndoPak page (4/7), ordered top-to-bottom and, within a
-     * line, in reading order (insertion `id` preserves the source order). Each segment is
-     * LEFT-JOINed to its ayah so `text_indopak` + `number_in_surah` come back in one round
-     * trip; header/basmalah rows have a null `ayah_id` and contribute no ayah columns. The
-     * data layer groups these by line into a MushafPageLayout.
+     * All line-segments of one page of [layoutId]'s edition, ordered top-to-bottom and,
+     * within a line, in reading order (insertion `id` preserves the source order). Each
+     * segment is LEFT-JOINed to its ayah so both candidate text columns + `number_in_surah`
+     * come back in one round trip; header/basmalah rows have a null `ayah_id` and contribute
+     * no ayah columns. The data layer groups these by line into a MushafPageLayout, slicing
+     * whichever text column the edition's `textSource` names.
      */
     @Query(
         """
@@ -147,28 +152,32 @@ interface QuranDao {
                m.surah_id AS surahId, m.ayah_id AS ayahId,
                m.first_word_position AS firstWordPosition,
                m.last_word_position AS lastWordPosition,
-               a.text_indopak AS textIndopak, a.number_in_surah AS ayahNumberInSurah
-        FROM mushaf_layout_indopak16 m
+               a.text_uthmani AS textUthmani, a.text_indopak AS textIndopak,
+               a.number_in_surah AS ayahNumberInSurah
+        FROM mushaf_layouts m
         LEFT JOIN ayahs a ON a.id = m.ayah_id
-        WHERE m.page = :page
+        WHERE m.layout_id = :layoutId AND m.page = :page
         ORDER BY m.line ASC, m.id ASC
         """
     )
-    suspend fun getMushafLayoutByPage(page: Int): List<MushafLayoutLineRow>
+    suspend fun getMushafLayoutByPage(layoutId: String, page: Int): List<MushafLayoutLineRow>
 
     /**
-     * Atomically (re)seed the IndoPak 16-line data: clear the layout table, write the
-     * per-ayah [ayahIndopakTexts] (keyed by global ayah id) onto the existing `ayahs`
-     * rows, then insert the [layout] segments. Idempotent — safe to re-run.
+     * Atomically (re)seed one edition's layout: clear that edition's rows, write any
+     * per-ayah [ayahIndopakTexts] (keyed by global ayah id) onto the existing `ayahs` rows,
+     * then insert the [layout] segments. Idempotent — safe to re-run.
+     *
+     * Only [layoutId]'s rows are cleared, so re-seeding one edition never disturbs another's.
      */
     @Transaction
-    suspend fun replaceMushafIndopak16(
+    suspend fun replaceMushafLayout(
+        layoutId: String,
         ayahIndopakTexts: Map<Int, String>,
-        layout: List<MushafLayoutIndopak16Entity>
+        layout: List<MushafLayoutEntity>
     ) {
-        deleteAllMushafLayoutIndopak16()
+        deleteMushafLayout(layoutId)
         ayahIndopakTexts.forEach { (ayahId, text) -> updateAyahIndopakText(ayahId, text) }
-        insertMushafLayoutIndopak16(layout)
+        insertMushafLayout(layout)
     }
 
     // Translation operations

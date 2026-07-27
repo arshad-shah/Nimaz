@@ -45,7 +45,7 @@ import com.arshadshah.nimaz.data.local.database.entity.KhatamDailyLogEntity
 import com.arshadshah.nimaz.data.local.database.entity.KhatamEntity
 import com.arshadshah.nimaz.data.local.database.entity.LocationEntity
 import com.arshadshah.nimaz.data.local.database.entity.MakeupFastEntity
-import com.arshadshah.nimaz.data.local.database.entity.MushafLayoutIndopak16Entity
+import com.arshadshah.nimaz.data.local.database.entity.MushafLayoutEntity
 import com.arshadshah.nimaz.data.local.database.entity.PrayerRecordEntity
 import com.arshadshah.nimaz.data.local.database.entity.ProphetBookmarkEntity
 import com.arshadshah.nimaz.data.local.database.entity.ProphetEntity
@@ -73,7 +73,7 @@ import com.arshadshah.nimaz.data.local.database.entity.ZakatHistoryEntity
  * migration) for any schema change — it drives both the Room `@Database(version = …)`
  * annotation below and `NimazDatabase.SCHEMA_VERSION` (used to tag crash reports).
  */
-const val NIMAZ_DATABASE_VERSION = 18
+const val NIMAZ_DATABASE_VERSION = 19
 
 @Database(
     entities = [
@@ -85,7 +85,7 @@ const val NIMAZ_DATABASE_VERSION = 18
         QuranFavoriteEntity::class,
         ReadingProgressEntity::class,
         SurahInfoEntity::class,
-        MushafLayoutIndopak16Entity::class,
+        MushafLayoutEntity::class,
         // Hadith
         HadithBookEntity::class,
         HadithEntity::class,
@@ -270,6 +270,61 @@ abstract class NimazDatabase : RoomDatabase() {
                 """.trimIndent()
                 )
                 db.execSQL("CREATE INDEX IF NOT EXISTS `index_mushaf_layout_indopak16_page_line` ON `mushaf_layout_indopak16` (`page`, `line`)")
+            }
+        }
+
+        // ADR-001: replace the per-edition `mushaf_layout_indopak16` table with one
+        // `mushaf_layouts` table carrying a `layout_id` discriminator, so a second
+        // line-accurate edition is data only — no entity, no DAO method, no migration.
+        //
+        // Existing rows are carried over as layout_id = 'indopak16' rather than re-seeded:
+        // the ~13,970 rows are already on the device, and dropping them would make the next
+        // Mushaf open re-parse 6.3 MB of JSON for no reason. The copy is guarded by a NOT
+        // EXISTS so re-running is a no-op, and every statement is idempotent so this is safe
+        // after createFromAsset on a fresh install (whose asset predates both tables).
+        val MIGRATION_18_19 = object : Migration(18, 19) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS `mushaf_layouts` (
+                        `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        `layout_id` TEXT NOT NULL,
+                        `page` INTEGER NOT NULL,
+                        `line` INTEGER NOT NULL,
+                        `line_type` TEXT NOT NULL,
+                        `surah_id` INTEGER NOT NULL,
+                        `ayah_id` INTEGER,
+                        `first_word_position` INTEGER,
+                        `last_word_position` INTEGER
+                    )
+                """.trimIndent()
+                )
+                db.execSQL(
+                    "CREATE INDEX IF NOT EXISTS `index_mushaf_layouts_layout_id_page_line` " +
+                            "ON `mushaf_layouts` (`layout_id`, `page`, `line`)"
+                )
+                // Only copy when the old table is actually present: a fresh install runs
+                // this migration straight after createFromAsset, where it never existed.
+                val hasOldTable = db.query(
+                    "SELECT name FROM sqlite_master WHERE type='table' " +
+                            "AND name='mushaf_layout_indopak16'"
+                ).use { it.count > 0 }
+                if (hasOldTable) {
+                    db.execSQL(
+                        """
+                        INSERT INTO `mushaf_layouts`
+                            (layout_id, page, line, line_type, surah_id,
+                             ayah_id, first_word_position, last_word_position)
+                        SELECT 'indopak16', page, line, line_type, surah_id,
+                               ayah_id, first_word_position, last_word_position
+                        FROM `mushaf_layout_indopak16`
+                        WHERE NOT EXISTS (
+                            SELECT 1 FROM `mushaf_layouts` WHERE layout_id = 'indopak16'
+                        )
+                    """.trimIndent()
+                    )
+                    db.execSQL("DROP TABLE IF EXISTS `mushaf_layout_indopak16`")
+                }
             }
         }
 

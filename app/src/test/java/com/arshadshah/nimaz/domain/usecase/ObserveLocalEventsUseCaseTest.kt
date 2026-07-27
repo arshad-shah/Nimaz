@@ -160,7 +160,9 @@ private class FakeSettings(private val offset: Int) : SettingsRepository {
     override suspend fun setSelectedReciterId(reciterId: String?) {}
     override val quranArabicFont: Flow<String> = flowOf("default")
     override suspend fun setQuranArabicFont(fontId: String) {}
-    override val quranMushafScript: Flow<String> = flowOf("MADANI")
+    override val quranMushafScript: Flow<String> = flowOf("madani")
+    override fun getContentVersion(key: String): Flow<Int> = flowOf(0)
+    override suspend fun setContentVersion(key: String, version: Int) {}
     override suspend fun setQuranMushafScript(script: String) {}
     override val quranArabicFontSize: Flow<Float> = flowOf(24f)
     override suspend fun setQuranArabicFontSize(size: Float) {}

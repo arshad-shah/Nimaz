@@ -60,6 +60,15 @@ interface SettingsRepository {
     suspend fun setDuaContentVersion(version: Int)
     val qaidaContentVersion: Flow<Int>
     suspend fun setQaidaContentVersion(version: Int)
+    /**
+     * The version of bundled content last seeded under [key] (0 = never seeded). Keyed
+     * rather than one property per content type, so a new seeded asset needs no new
+     * preference — see `ContentVersionStore`.
+     */
+    fun getContentVersion(key: String): Flow<Int>
+    suspend fun setContentVersion(key: String, version: Int)
+
+    /** Pre-registry key for the IndoPak layout. Read only as a fallback; never written. */
     val indopakContentVersion: Flow<Int>
     suspend fun setIndopakContentVersion(version: Int)
     val arabicFontSize: Flow<String>

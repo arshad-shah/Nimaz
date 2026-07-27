@@ -45,11 +45,11 @@ interface QuranRepository {
     suspend fun getPageAyahRanges(script: MushafLayoutEdition = QuranEditions.defaultLayout): List<PageAyahRange>
 
     /**
-     * The line-accurate 16-line IndoPak layout of [page] (1-548), grouped by printed line.
-     * Returns an empty [MushafPageLayout] for pages with no layout data. Triggers the
-     * one-time IndoPak seeding on first use.
+     * The line-accurate layout of [page] in [layout]'s edition, grouped by printed line.
+     * Returns an empty [MushafPageLayout] for a flowed edition or a page with no layout
+     * data. Triggers that edition's one-time seeding on first use.
      */
-    suspend fun getMushafPageLayout(page: Int): MushafPageLayout
+    suspend fun getMushafPageLayout(page: Int, layout: MushafLayoutEdition): MushafPageLayout
 
     // Surah with Ayahs
     fun getSurahWithAyahs(surahNumber: Int, translatorId: String?): Flow<SurahWithAyahs?>

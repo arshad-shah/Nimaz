@@ -124,31 +124,38 @@ data class SurahInfoEntity(
 )
 
 /**
- * One line-segment of the 16-line IndoPak Mushaf layout (548 pages, ≤16 lines each).
+ * One line-segment of a line-accurate Mushaf layout, for any edition.
  *
  * The layout is stored as line *segments* rather than one row per word: each row is a
- * contiguous run of one ayah's words that falls on a single printed line. This mirrors
- * the 1/7 source data (`mushaf_layout_indopak16.json`) 1:1 and keeps the table compact
- * (~13,970 rows). The actual glyph text is not duplicated here — it is reconstructed by
- * slicing [AyahEntity.textIndopak] (split on space) with the inclusive
+ * contiguous run of one ayah's words that falls on a single printed line. This mirrors the
+ * source data 1:1 and keeps the table compact (~13,970 rows for the 16-line IndoPak
+ * edition). The actual glyph text is not duplicated here — it is reconstructed by slicing
+ * the ayah text (split on space) with the inclusive
  * [firstWordPosition]..[lastWordPosition] range, which is verified lossless against the
- * source (`' '.join(words) == text_indopak`, no intra-word spaces).
+ * source (`' '.join(words) == text_<source>`, no intra-word spaces).
  *
- * Rendering (5/7) and the domain/data layer (4/7) group these rows by (page, line) and
- * resolve each ayah segment's words on the fly.
+ * [layoutId] is the discriminator: one row set per edition, all in this table. It matches a
+ * `QuranEditions.mushafLayouts` id, and *which ayah text column* the positions index into is
+ * that edition's `textSource` — the ranges are only valid against the exact text the layout
+ * was tokenised from. Before ADR-001 this was a table per edition
+ * (`mushaf_layout_indopak16`), which meant a new layout duplicated six DAO methods, a seeder
+ * and a migration; now a layout is data only.
  *
  * `line_type` is one of `ayah`, `surah_header`, or `basmalah`. Header and basmalah lines
  * carry only [surahId] for context; their [ayahId] and word positions are null.
  */
 @Entity(
-    tableName = "mushaf_layout_indopak16",
-    indices = [Index(value = ["page", "line"])]
+    tableName = "mushaf_layouts",
+    // The discriminator leads: every read is scoped to a single edition.
+    indices = [Index(value = ["layout_id", "page", "line"])]
 )
-data class MushafLayoutIndopak16Entity(
+data class MushafLayoutEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
-    val page: Int, // 1-548
-    val line: Int, // 1-16
+    @ColumnInfo(name = "layout_id")
+    val layoutId: String, // a QuranEditions.mushafLayouts id, e.g. "indopak16"
+    val page: Int,
+    val line: Int,
     @ColumnInfo(name = "line_type")
     val lineType: String, // "ayah" | "surah_header" | "basmalah"
     @ColumnInfo(name = "surah_id")

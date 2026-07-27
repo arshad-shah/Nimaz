@@ -696,15 +696,16 @@ class QuranViewModel @Inject constructor(
     }
 
     /**
-     * Loads the line-accurate 16-line IndoPak layout for [pageNumber] into the reader state.
-     * First invocation triggers the one-time IndoPak seeding inside the repository, so this
-     * only runs when the 16-line view is actually used — not on every Quran page open.
+     * Loads the active edition's line-accurate layout for [pageNumber] into the reader state.
+     * First invocation triggers that edition's one-time seeding inside the repository, so
+     * this only runs when a line-accurate view is actually used — not on every page open.
      */
     private fun loadMushafPageLayout(pageNumber: Int) {
         // Already cached (e.g. a neighbouring pager page pre-loaded it) — nothing to do.
         if (_readerState.value.mushafPageLayoutCache.containsKey(pageNumber)) return
+        val edition = _readerState.value.mushafScript
         viewModelScope.launch {
-            val layout = quranUseCases.getMushafPageLayout(pageNumber)
+            val layout = quranUseCases.getMushafPageLayout(pageNumber, edition)
             _readerState.update {
                 it.copy(
                     mushafPageLayout = layout,

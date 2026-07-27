@@ -8,7 +8,7 @@ import com.arshadshah.nimaz.data.local.database.entity.QuranBookmarkEntity
 import com.arshadshah.nimaz.data.local.database.entity.QuranFavoriteEntity
 import com.arshadshah.nimaz.data.local.database.entity.ReadingProgressEntity
 import com.arshadshah.nimaz.data.local.database.entity.SurahEntity
-import com.arshadshah.nimaz.data.local.quran.QuranIndopakSeeder
+import com.arshadshah.nimaz.data.local.quran.QuranLayoutSeeder
 import com.arshadshah.nimaz.domain.model.Ayah
 import com.arshadshah.nimaz.domain.model.MushafPageLayout
 import com.arshadshah.nimaz.domain.model.quran.catalogue.MushafLayoutEdition
@@ -42,7 +42,7 @@ import javax.inject.Singleton
 @Singleton
 class QuranRepositoryImpl @Inject constructor(
     private val quranDao: QuranDao,
-    private val indopakSeeder: QuranIndopakSeeder
+    private val layoutSeeder: QuranLayoutSeeder
 ) : QuranRepository {
 
     override fun getAllSurahs(): Flow<List<Surah>> {
@@ -166,8 +166,8 @@ class QuranRepositoryImpl @Inject constructor(
         cachedLayoutRanges[edition.id]?.let { return it }
         return layoutRangesMutex.withLock {
             cachedLayoutRanges[edition.id]?.let { return@withLock it }
-            indopakSeeder.seedIfNeeded()
-            quranDao.getIndopak16PageAyahRanges()
+            layoutSeeder.seedIfNeeded(edition)
+            quranDao.getLayoutPageAyahRanges(edition.id)
                 .map { it.toDomain() }
                 .also { cachedLayoutRanges[edition.id] = it }
         }
@@ -177,11 +177,21 @@ class QuranRepositoryImpl @Inject constructor(
     private val cachedLayoutRanges = ConcurrentHashMap<String, List<PageAyahRange>>()
     private val layoutRangesMutex = Mutex()
 
-    override suspend fun getMushafPageLayout(page: Int): MushafPageLayout {
-        // First use of the 16-line view seeds the IndoPak text + layout (idempotent,
-        // version-gated); the ~20k-row seed therefore never runs on a normal Quran open.
-        indopakSeeder.seedIfNeeded()
-        return MushafLayoutMapper.toPageLayout(page, quranDao.getMushafLayoutByPage(page))
+    override suspend fun getMushafPageLayout(
+        page: Int,
+        layout: MushafLayoutEdition
+    ): MushafPageLayout {
+        // First use of a line-accurate edition seeds its layout (and, where it needs one,
+        // its ayah text) — idempotent and version-gated, so the ~20k-row seed never runs on
+        // a normal Quran open. A flowed edition has no layout rows and returns empty.
+        if (!layout.hasLineLayout) return MushafPageLayout(page = page, lines = emptyList())
+        layoutSeeder.seedIfNeeded(layout)
+        return MushafLayoutMapper.toPageLayout(
+            page = page,
+            rows = quranDao.getMushafLayoutByPage(layout.id, page),
+            // The stored word positions index into exactly this column.
+            textSource = layout.textSource
+        )
     }
 
     override fun getSurahWithAyahs(surahNumber: Int, translatorId: String?): Flow<SurahWithAyahs?> {

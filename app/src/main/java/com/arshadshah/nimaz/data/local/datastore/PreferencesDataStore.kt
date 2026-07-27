@@ -352,7 +352,16 @@ class PreferencesDataStore @Inject constructor(
     override suspend fun setQaidaContentVersion(version: Int) =
         put(PreferencesKeys.QAIDA_CONTENT_VERSION, version)
 
-    // IndoPak 16-line Quran content version (0 = never seeded)
+    // Generic keyed content versions (0 = never seeded). One DataStore int per content key,
+    // created on demand, so shipping a new seeded asset needs no new preference key.
+    override fun getContentVersion(key: String): Flow<Int> =
+        preference(intPreferencesKey("content_version.$key"), 0)
+
+    override suspend fun setContentVersion(key: String, version: Int) =
+        put(intPreferencesKey("content_version.$key"), version)
+
+    // Pre-registry key for the IndoPak layout, kept so DataStoreContentVersionStore can fall
+    // back to it once and avoid a spurious re-seed on upgrade.
     override val indopakContentVersion: Flow<Int> =
         preference(PreferencesKeys.INDOPAK_CONTENT_VERSION, 0)
 

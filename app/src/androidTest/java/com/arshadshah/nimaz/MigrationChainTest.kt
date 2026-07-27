@@ -41,6 +41,7 @@ class MigrationChainTest {
         NimazDatabase.MIGRATION_15_16,
         NimazDatabase.MIGRATION_16_17,
         NimazDatabase.MIGRATION_17_18,
+        NimazDatabase.MIGRATION_18_19,
     )
 
     @Test
