@@ -69,26 +69,44 @@ fastlane/         CI and release lanes
 ## Prerequisites
 
 - JDK 21
-- Android SDK configured (compileSdk 36, minSdk 29)
+- Android SDK configured (compileSdk 37, targetSdk 36, minSdk 29)
+- Git LFS (the prepopulated database is a ~147 MB LFS blob)
 - Ruby + Bundler (for Fastlane commands)
+- Node 20+ (only for `worker/`)
+
+Check the whole toolchain in one shot:
+
+```bash
+./scripts/validate_environment.sh          # fast checks
+./scripts/validate_environment.sh --full   # also compiles Kotlin
+```
+
+It reads the expected versions out of the build files, so it stays in sync with
+the project, and exits non-zero if anything is missing.
 
 ## Getting Started
 
 From the repository root:
 
-1. Install Ruby gems:
+1. Fetch the LFS assets (a fresh clone gets a pointer stub, not the database):
+
+   ```bash
+   git lfs install && git lfs pull
+   ```
+
+2. Install Ruby gems:
 
    ```bash
    bundle install
    ```
 
-2. Run tests and lint (same lane used in CI):
+3. Run tests and lint (same lane used in CI):
 
    ```bash
    bundle exec fastlane android test
    ```
 
-3. Build debug APK:
+4. Build debug APK:
 
    ```bash
    ./gradlew assembleDebug

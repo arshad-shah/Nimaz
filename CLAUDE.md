@@ -85,8 +85,15 @@ touches** — this is not optional:
 ./gradlew :app:testDebugUnitTest
 ```
 
-Requires JDK 21 + Android SDK (compileSdk 36); set `sdk.dir` in `local.properties` or
+Requires JDK 21 + Android SDK (compileSdk 37); set `sdk.dir` in `local.properties` or
 `ANDROID_HOME`. Develop on a feature branch; do not push to `dev` without explicit approval.
+
+If a build fails for environment reasons rather than code reasons, run
+**`./scripts/validate_environment.sh`** first — it checks the JDK, SDK platform/build-tools/
+licenses, the Gradle wrapper, Ruby+Fastlane, Node, Python, and Git LFS, and tells you the exact
+command to fix whatever is missing. `--full` adds a real `:app:compileDebugKotlin`. Note the
+prepopulated database (`app/src/main/assets/database/nimaz_prepopulated.db`) is a ~147 MB Git LFS
+blob: a fresh clone without `git lfs pull` still compiles but crashes on first launch.
 
 ## Known deviations & cleanup backlog
 
