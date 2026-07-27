@@ -58,6 +58,8 @@ internal fun ContinueReadingCard(
     @Suppress("UNUSED_PARAMETER") totalAyahsRead: Int,
     surahName: Surah?,
     onClick: () -> Unit,
+    /** Page count of the active Mushaf edition — 604 Madani, 548 IndoPak-16 (#325). */
+    totalPages: Int = ReadingProgressCalculator.TOTAL_QURAN_PAGES,
     modifier: Modifier = Modifier
 ) {
     // The card labels itself with a surah name and "Verse N", so the bar shows progress
@@ -66,7 +68,7 @@ internal fun ContinueReadingCard(
     val progressFraction = if (surahName != null) {
         ReadingProgressCalculator.surahFraction(ayahNumber, surahName.ayahCount)
     } else {
-        ReadingProgressCalculator.pageFraction(pageNumber)
+        ReadingProgressCalculator.pageFraction(pageNumber, totalPages)
     }
     val progressPercent = ReadingProgressCalculator.percent(progressFraction)
     val shape = RoundedCornerShape(20.dp)

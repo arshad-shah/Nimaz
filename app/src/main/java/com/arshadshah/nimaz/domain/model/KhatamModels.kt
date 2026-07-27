@@ -266,40 +266,48 @@ object KhatamProgressCalculator {
 
 /**
  * Shared juz boundary constants. Ayah IDs are sequential 1-6236 across the entire Quran.
- * Each pair is (startAyahId, endAyahId) inclusive.
+ * Each pair is (startAyahId, endAyahId) inclusive, and the comment on each line names the
+ * classical surah:ayah the juz opens on — the reference the ids are derived from.
+ *
+ * These had drifted badly (#325): juz 7 was off by one and juz 15-30 were wrong by hundreds
+ * of ayahs — juz 30 claimed to start at 4090 (mid-Ya-Sin) instead of 5673 (An-Naba 78:1),
+ * i.e. a third of the Quran. The Juz tab's khatam rings read this table while the Khatam
+ * detail screen groups by the database's own `ayahs.juz` column, so the two disagreed.
+ * [com.arshadshah.nimaz.domain.model.KhatamJuzBoundariesTest] re-derives every boundary
+ * from the surah ayah counts so it cannot silently drift again.
  */
 object KhatamConstants {
     val JUZ_AYAH_RANGES: List<Pair<Int, Int>> = listOf(
-        1 to 148,      // Juz 1
-        149 to 259,     // Juz 2
-        260 to 385,     // Juz 3
-        386 to 516,     // Juz 4
-        517 to 640,     // Juz 5
-        641 to 751,     // Juz 6
-        752 to 899,     // Juz 7
-        900 to 1041,    // Juz 8
-        1042 to 1200,   // Juz 9
-        1201 to 1327,   // Juz 10
-        1328 to 1478,   // Juz 11
-        1479 to 1648,   // Juz 12
-        1649 to 1802,   // Juz 13
-        1803 to 1901,   // Juz 14
-        1902 to 2029,   // Juz 15
-        2030 to 2140,   // Juz 16
-        2141 to 2250,   // Juz 17
-        2251 to 2348,   // Juz 18
-        2349 to 2483,   // Juz 19
-        2484 to 2593,   // Juz 20
-        2594 to 2732,   // Juz 21
-        2733 to 2872,   // Juz 22
-        2873 to 3005,   // Juz 23
-        3006 to 3121,   // Juz 24
-        3122 to 3226,   // Juz 25
-        3227 to 3340,   // Juz 26
-        3341 to 3510,   // Juz 27
-        3511 to 3733,   // Juz 28
-        3734 to 4089,   // Juz 29
-        4090 to 6236    // Juz 30
+        1 to 148,       // Juz 1  — 1:1
+        149 to 259,     // Juz 2  — 2:142
+        260 to 385,     // Juz 3  — 2:253
+        386 to 516,     // Juz 4  — 3:93
+        517 to 640,     // Juz 5  — 4:24
+        641 to 750,     // Juz 6  — 4:148
+        751 to 899,     // Juz 7  — 5:82
+        900 to 1041,    // Juz 8  — 6:111
+        1042 to 1200,   // Juz 9  — 7:88
+        1201 to 1327,   // Juz 10 — 8:41
+        1328 to 1478,   // Juz 11 — 9:93
+        1479 to 1648,   // Juz 12 — 11:6
+        1649 to 1802,   // Juz 13 — 12:53
+        1803 to 2029,   // Juz 14 — 15:1
+        2030 to 2214,   // Juz 15 — 17:1
+        2215 to 2483,   // Juz 16 — 18:75
+        2484 to 2673,   // Juz 17 — 21:1
+        2674 to 2875,   // Juz 18 — 23:1
+        2876 to 3214,   // Juz 19 — 25:21
+        3215 to 3385,   // Juz 20 — 27:56
+        3386 to 3563,   // Juz 21 — 29:46
+        3564 to 3732,   // Juz 22 — 33:31
+        3733 to 4089,   // Juz 23 — 36:28
+        4090 to 4264,   // Juz 24 — 39:32
+        4265 to 4510,   // Juz 25 — 41:47
+        4511 to 4705,   // Juz 26 — 46:1
+        4706 to 5104,   // Juz 27 — 51:31
+        5105 to 5241,   // Juz 28 — 58:1
+        5242 to 5672,   // Juz 29 — 67:1
+        5673 to 6236    // Juz 30 — 78:1
     )
 
     /**

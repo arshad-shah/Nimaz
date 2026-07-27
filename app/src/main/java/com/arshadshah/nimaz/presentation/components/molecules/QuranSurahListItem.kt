@@ -50,18 +50,12 @@ import com.arshadshah.nimaz.presentation.theme.NimazTheme
 private val SurahNumberSlotWidth = 50.dp
 private val SurahNumberSlotSpacing = 12.dp
 
-private fun getJuzForPage(page: Int): Int {
-    val juzStartPages = listOf(
-        1, 22, 42, 62, 82, 102, 121, 142, 162, 182,
-        201, 222, 242, 262, 282, 302, 322, 342, 362, 382,
-        402, 422, 442, 462, 482, 502, 522, 542, 562, 582
-    )
-    for (i in juzStartPages.indices.reversed()) {
-        if (page >= juzStartPages[i]) return i + 1
-    }
-    return 1
-}
-
+/**
+ * @param startPage / [endPage] the surah's page span in the *active* Mushaf edition.
+ * @param juzNumber the juz the surah opens in. Resolved by the caller from the active
+ *   edition's pagination — this component used to carry its own copy of the Madani juz page
+ *   table, which produced the wrong juz once a non-Madani layout was selected (#325).
+ */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 internal fun SurahListItem(
@@ -75,6 +69,7 @@ internal fun SurahListItem(
     isSelected: Boolean = false,
     startPage: Int = 0,
     endPage: Int = 0,
+    juzNumber: Int = 1,
     modifier: Modifier = Modifier
 ) {
     val isComplete = isKhatamActive && khatamTotalAyahs > 0 && khatamReadCount == khatamTotalAyahs
@@ -202,7 +197,7 @@ internal fun SurahListItem(
                     NimazBadge(
                         text = stringResource(
                             R.string.quran_home_juz_indicator,
-                            getJuzForPage(startPage)
+                            juzNumber
                         ),
                         size = NimazBadgeSize.SMALL,
                         tone = NimazTone.NEUTRAL,

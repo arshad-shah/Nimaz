@@ -15,8 +15,8 @@ import com.arshadshah.nimaz.domain.model.Khatam
 import com.arshadshah.nimaz.domain.model.KhatamDetailSnapshot
 import com.arshadshah.nimaz.domain.model.KhatamInsights
 import com.arshadshah.nimaz.domain.model.MushafPageLayout
+import com.arshadshah.nimaz.domain.model.MushafPagination
 import com.arshadshah.nimaz.domain.model.MushafScript
-import com.arshadshah.nimaz.domain.model.PageAyahRange
 import com.arshadshah.nimaz.domain.model.QuranBookmark
 import com.arshadshah.nimaz.domain.model.QuranFavorite
 import com.arshadshah.nimaz.domain.model.QuranSearchResult
@@ -46,6 +46,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
@@ -83,11 +84,16 @@ data class QuranHomeUiState(
     val activeKhatamInsights: KhatamInsights? = null,
     val khatamReadAyahIds: Set<Int> = emptySet(),
     val completedKhatamCount: Int = 0,
-    val pageAyahRanges: List<PageAyahRange> = emptyList(),
     val verseOfTheDay: Ayah? = null,
     // The active Mushaf edition, so the Page tab's jump-to-page validates against the right
     // page count (604 Uthmani vs 548 IndoPak-16, #270).
     val mushafScript: MushafScript = MushafScript.DEFAULT,
+    /**
+     * The active edition's page↔ayah mapping (#325). Drives the Page tab's tile count, its
+     * juz sections, the surah→page badges and khatam page progress, so all of them reflow
+     * when the Mushaf layout setting changes instead of staying pinned to the Madani 604.
+     */
+    val pagination: MushafPagination = MushafPagination.fallback(MushafScript.DEFAULT),
     val isLoading: Boolean = true,
     val error: String? = null
 )
@@ -251,7 +257,7 @@ class QuranViewModel @Inject constructor(
         loadBookmarks()
         loadFavorites()
         loadFavoriteAyahIds()
-        loadPageAyahRanges()
+        observeMushafPagination()
         loadVerseOfTheDay()
         observeQuranSettings()
         setupDebouncedSearch()
@@ -378,7 +384,15 @@ class QuranViewModel @Inject constructor(
                 // in the reader takes effect immediately, not on next play-start.
                 audioManager.setContinuousPlayback(behavior.continuousReading)
                 _readerState.update {
+                    // A different edition repaginates the Quran, so page N no longer holds
+                    // the same ayahs — drop the per-page caches rather than render the
+                    // previous edition's content under the new page numbers (#325).
+                    val scriptChanged = it.mushafScript != mushafScript
                     it.copy(
+                        pageCache = if (scriptChanged) emptyMap() else it.pageCache,
+                        mushafPageLayoutCache =
+                            if (scriptChanged) emptyMap() else it.mushafPageLayoutCache,
+                        mushafPageLayout = if (scriptChanged) null else it.mushafPageLayout,
                         selectedTranslatorId = display.translatorId,
                         showTranslation = display.showTranslation,
                         showTransliteration = display.showTransliteration,
@@ -514,10 +528,26 @@ class QuranViewModel @Inject constructor(
         }
     }
 
-    private fun loadPageAyahRanges() {
+    /**
+     * Keeps the page↔ayah mapping in step with the Mushaf layout setting (#325).
+     *
+     * Switching editions repaginates the whole Quran, so this re-derives the mapping rather
+     * than leaving the Page tab and khatam page progress on the Madani 604. The fallback is
+     * published first so the default edition renders immediately while the real ranges load
+     * (for the 16-line edition that load also triggers its one-time seeding).
+     */
+    private fun observeMushafPagination() {
         viewModelScope.launch {
-            val ranges = quranUseCases.getPageAyahRanges()
-            _homeState.update { it.copy(pageAyahRanges = ranges) }
+            settingsRepository.quranMushafScript
+                .map { MushafScript.fromName(it) }
+                .distinctUntilChanged()
+                .collect { script ->
+                    _homeState.update {
+                        it.copy(pagination = MushafPagination.fallback(script))
+                    }
+                    val pagination = quranUseCases.getMushafPagination(script)
+                    _homeState.update { it.copy(pagination = pagination) }
+                }
         }
     }
 
@@ -639,7 +669,14 @@ class QuranViewModel @Inject constructor(
             )
         }
         viewModelScope.launch {
-            quranUseCases.getAyahsByPage(pageNumber, _readerState.value.selectedTranslatorId)
+            // Resolved through the active edition: in the 16-line view page N holds a
+            // different span of ayahs than Madani page N, and this cache feeds the page
+            // info bar, "mark page read" for khatam and the ayah-action lookups (#325).
+            quranUseCases.getAyahsByPage(
+                pageNumber = pageNumber,
+                translatorId = _readerState.value.selectedTranslatorId,
+                script = _readerState.value.mushafScript
+            )
                 .collect { ayahs ->
                     _readerState.update {
                         it.copy(

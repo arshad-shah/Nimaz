@@ -22,6 +22,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.domain.model.KhatamConstants
+import com.arshadshah.nimaz.domain.model.MushafPagination
+import com.arshadshah.nimaz.domain.model.MushafScript
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
@@ -36,13 +38,6 @@ import com.arshadshah.nimaz.presentation.components.atoms.ShamsaMedallion
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
-// Juz to page mapping (approximate start pages for each Juz)
-internal val juzStartPages = listOf(
-    1, 22, 42, 62, 82, 102, 121, 142, 162, 182,
-    201, 222, 242, 262, 282, 302, 322, 342, 362, 382,
-    402, 422, 442, 462, 482, 502, 522, 542, 562, 582
-)
-
 /** Traditional Juz names — the Arabic first-word(s) of each of the 30 juz. */
 internal val juzNames = listOf(
     "الم", "سَيَقُولُ", "تِلْكَ الرُّسُلُ", "لَنْ تَنَالُوا", "وَالْمُحْصَنَاتُ",
@@ -53,23 +48,18 @@ internal val juzNames = listOf(
     "حم", "قَالَ فَمَا خَطْبُكُمْ", "قَدْ سَمِعَ اللَّهُ", "تَبَارَكَ الَّذِي", "عَمَّ"
 )
 
-internal fun getJuzForPage(page: Int): Int {
-    for (i in juzStartPages.indices.reversed()) {
-        if (page >= juzStartPages[i]) return i + 1
-    }
-    return 1
-}
-
-internal fun getJuzStartPage(juz: Int): Int = juzStartPages.getOrElse(juz - 1) { 1 }
-
-internal fun getJuzEndPage(juz: Int): Int = if (juz < 30) juzStartPages[juz] - 1 else 604
-
 /** Name of a juz (Arabic first-word), 1-based. */
 internal fun getJuzName(juz: Int): String = juzNames.getOrElse(juz - 1) { "" }
 
+/**
+ * @param pagination the active edition's page mapping — the juz page badges follow it, so
+ *   they show IndoPak-16 page numbers when that layout is selected rather than the Madani
+ *   ones they were previously hardcoded to (#325).
+ */
 @Composable
 internal fun JuzGrid(
     onNavigateToJuz: (Int) -> Unit,
+    pagination: MushafPagination = MushafPagination.fallback(MushafScript.DEFAULT),
     khatamReadAyahIds: Set<Int> = emptySet(),
     isKhatamActive: Boolean = false,
     selectedJuzNumber: Int? = null,
@@ -138,8 +128,8 @@ internal fun JuzGrid(
                                 maxLines = 1
                             )
                             JuzRangeBadges(
-                                startPage = getJuzStartPage(juzNumber),
-                                endPage = getJuzEndPage(juzNumber)
+                                startPage = pagination.juzStartPage(juzNumber),
+                                endPage = pagination.juzEndPage(juzNumber)
                             )
                         }
                     }

@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.domain.repository
 
 import com.arshadshah.nimaz.domain.model.Ayah
 import com.arshadshah.nimaz.domain.model.MushafPageLayout
+import com.arshadshah.nimaz.domain.model.MushafScript
 import com.arshadshah.nimaz.domain.model.PageAyahRange
 import com.arshadshah.nimaz.domain.model.QuranBookmark
 import com.arshadshah.nimaz.domain.model.QuranFavorite
@@ -25,9 +26,22 @@ interface QuranRepository {
     fun getAyahsBySurah(surahNumber: Int): Flow<List<Ayah>>
     suspend fun getAyahById(ayahId: Int): Ayah?
     fun getAyahsByJuz(juzNumber: Int, translatorId: String? = null): Flow<List<Ayah>>
-    fun getAyahsByPage(pageNumber: Int, translatorId: String? = null): Flow<List<Ayah>>
+    /**
+     * The ayahs printed on [pageNumber] of [script]'s edition. Madani pages come from the
+     * `ayahs.page` column; 16-line IndoPak pages are resolved through that edition's own
+     * pagination, so the reader, the page info bar and khatam page marking all act on the
+     * ayahs actually on the rendered page (#325).
+     */
+    fun getAyahsByPage(
+        pageNumber: Int,
+        translatorId: String? = null,
+        script: MushafScript = MushafScript.DEFAULT
+    ): Flow<List<Ayah>>
+
     fun getSajdaAyahs(): Flow<List<Ayah>>
-    suspend fun getPageAyahRanges(): List<PageAyahRange>
+
+    /** [script]'s page→ayah mapping, ordered by page. Empty when the edition has no data. */
+    suspend fun getPageAyahRanges(script: MushafScript = MushafScript.DEFAULT): List<PageAyahRange>
 
     /**
      * The line-accurate 16-line IndoPak layout of [page] (1-548), grouped by printed line.
