@@ -147,7 +147,63 @@ No asset, no seeder, no migration.
 
 ---
 
-## 3. Ids are permanent
+## 3. Status
+
+| Phase | Deliverable | State |
+|---|---|---|
+| 1 | Catalogue types + asset binding + paired-ids test | **Done.** `MushafScript` deleted; legacy `MADANI`/`INDOPAK_16` resolve. |
+| 2 | Seeder framework | **Done, in a corrected shape** — see §1.2. Dua/Help/Qaida subclass `AssetContentSeeder`; Hadith and the per-edition layout seeder deliberately stay out. |
+| 3 | Generic `mushaf_layouts` table | **Done.** `MIGRATION_18_19`, DAO parameterised on `layoutId`. |
+| 4 | Pickers derive | **Done.** No literal edition id or display name left in `presentation/` outside `@Preview` fixtures and the `QuranArabicFont` font binding. |
+| 5 | Multi-translation | **Plumbing done, no second edition shipped** — see below. |
+| 6 | Pipeline manifest + fetcher + licence register | **Done.** |
+| 7 | Prove it by adding a 15-line layout | **Blocked** — see below. |
+
+### What is deliberately not done
+
+**Phase 5 ships no second translation.** The RTL and per-translation-font path is complete and
+covered by `TranslationDirectionTest` against a synthetic RTL edition, and `TranslationSeeder`'s
+slot exists in `QuranContentAssets.translations`. What is missing is a translation to put in it,
+and that is a **licensing decision, not an engineering one**: a translation is a copyrighted work
+of its translator, and an API serving the text says nothing about the right to bundle it. Adding
+one without a cleared licence would be worse than not adding one. `LICENSES_TRANSLATIONS.md`
+records the open question — including for Saheeh International, which ships today with no
+established licence — and lists candidate editions with clearer rights positions.
+
+**Phase 7 is blocked on the two open questions the spec raised, and both need the owner:**
+
+- **Q1 — does a 15-line layout share the IndoPak tokenisation?** Answerable now, mechanically:
+  `python3 nimaz-pro-data/scripts/fetch_edition.py <id> --validate-only` reports text/layout
+  alignment against the shipped `text_indopak`. It cannot be run yet because of Q2.
+- **Q2 — which 15-line standard, and which QUL resource id?** "15-line" names several different
+  printed editions. This is an owner call; guessing a resource id and shipping whatever it
+  returns would put the wrong mushaf in a hifz reader.
+- **Q3 — fonts.** Whether the bundled IndoPak Nastaʿlīq face covers the new layout's glyph set
+  (especially end-of-ayah markers) can only be checked against the actual candidate data.
+
+The generalisation Phase 7 was meant to prove is nonetheless in place and testable without the
+asset: `MushafLayoutFidelityTest` iterates `QuranEditions.mushafLayouts` and takes each edition's
+expected page and line counts from its catalogue entry, so a layout added as data alone is
+validated on arrival. When Q1/Q2 clear, adding it should touch only `manifest.json`,
+`QuranEditions.mushafLayouts`, `QuranContentAssets`, the asset, and a licence block — and if it
+turns out to need more, the generalisation is incomplete and should be fixed rather than
+special-cased.
+
+### Verification
+
+`./gradlew :app:compileDebugKotlin` (KSP validates Hilt + Room wiring) and
+`./gradlew :app:testDebugUnitTest` are green: **1,234 tests, 0 failures**.
+
+The migration tests in `app/src/androidTest/` (`MigrationTest`, `MigrationChainTest`) **compile
+but have not been executed** — instrumented tests need a device or emulator, and this work was
+done in an environment with neither. `MIGRATION_18_19`'s DDL was checked by hand against Room's
+generated `app/schemas/…/19.json` (identical column types and index name), which is what
+`runMigrationsAndValidate` compares, but the row-preservation, idempotency and fresh-install
+paths need a real run before release.
+
+---
+
+## 4. Ids are permanent
 
 Ids are persisted — in DataStore preferences and in `translations.translator_id` rows. Renaming one
 orphans user selections and seeded rows. To rename an edition, change its `displayName`; leave the
