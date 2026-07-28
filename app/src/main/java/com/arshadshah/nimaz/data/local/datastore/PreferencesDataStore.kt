@@ -84,6 +84,7 @@ class PreferencesDataStore @Inject constructor(
 
         // Help content (data-driven; bumped when help.json content changes)
         val HELP_CONTENT_VERSION = intPreferencesKey("help_content_version")
+        val CONTENT_PATCH_VERSION = intPreferencesKey("content_patch_version")
 
         // Dua content (data-driven; bumped when duas.json content changes)
         val DUA_CONTENT_VERSION = intPreferencesKey("dua_content_version")
@@ -285,6 +286,13 @@ class PreferencesDataStore @Inject constructor(
 
     override suspend fun setAppLanguage(language: String) =
         put(PreferencesKeys.APP_LANGUAGE, language)
+
+    // Last content patch applied (0 = none). See data/local/content/ContentPatchSeeder.
+    override val contentPatchVersion: Flow<Int> =
+        preference(PreferencesKeys.CONTENT_PATCH_VERSION, 0)
+
+    override suspend fun setContentPatchVersion(version: Int) =
+        put(PreferencesKeys.CONTENT_PATCH_VERSION, version)
 
     // Help content version (0 = never seeded)
     override val helpContentVersion: Flow<Int> = preference(PreferencesKeys.HELP_CONTENT_VERSION, 0)

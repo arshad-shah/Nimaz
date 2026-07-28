@@ -42,6 +42,10 @@ interface SettingsRepository {
     suspend fun setAppLanguage(language: String)
     val helpContentVersion: Flow<Int>
     suspend fun setHelpContentVersion(version: Int)
+
+    /** Last content patch applied. See data/local/content/ContentPatchSeeder. */
+    val contentPatchVersion: Flow<Int>
+    suspend fun setContentPatchVersion(version: Int)
     val hadithBackfillVersion: Flow<Int>
     suspend fun setHadithBackfillVersion(version: Int)
     val tasbihBeadMode: Flow<Boolean>

@@ -10,8 +10,11 @@ val quranTranslationJson: Json = Json {
 }
 
 /**
- * One bundled `assets/quran/translations/<id>.json`, as emitted by
- * `nimaz-pro-data/scripts/download_translations.py`.
+ * One bundled `assets/quran/translations/<id>.json`, as emitted by the importer in the
+ * arshad-shah/nimaz-data repository (`upstream/scripts/download_translations.py`).
+ *
+ * This asset is on the retirement path: the translations now live in the fetched artifact
+ * as `tr.*` collections. See docs/DATA_RETIREMENT.md, entry `quran-translation-seeder`.
  *
  * [texts] is a *positional* array, not a map: index `i` holds the translation of global ayah
  * id `i + 1`. That is safe because the app's ayah id space is the canonical 1..6236 mushaf

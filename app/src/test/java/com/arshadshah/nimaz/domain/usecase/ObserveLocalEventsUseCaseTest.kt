@@ -74,6 +74,8 @@ private class FakeSettings(private val offset: Int) : SettingsRepository {
     override val appLanguage: Flow<String> = flowOf("en")
     override suspend fun setAppLanguage(language: String) {}
     override val helpContentVersion: Flow<Int> = flowOf(0)
+    override val contentPatchVersion: Flow<Int> = flowOf(0)
+    override suspend fun setContentPatchVersion(version: Int) = Unit
     override suspend fun setHelpContentVersion(version: Int) {}
     override val hadithBackfillVersion: Flow<Int> = flowOf(0)
     override suspend fun setHadithBackfillVersion(version: Int) {}

@@ -136,9 +136,35 @@ android {
             // which the Compose UI tests for the atoms rely on.
             isIncludeAndroidResources = true
             isReturnDefaultValues = true
+
+            all {
+                // DeviceStateCorpusTest doubles as the corpus harness: given an output
+                // path it writes the migrated + fully seeded database for `nz vault seal`.
+                // Test JVMs are forked and inherit nothing, so the property has to be
+                // forwarded explicitly. Without a value it stays a plain assertion test.
+                it.systemProperty(
+                    "nimaz.corpus.out",
+                    providers.systemProperty("nimaz.corpus.out").getOrElse("")
+                )
+                it.testLogging { showStandardStreams = true }
+            }
         }
     }
 }
+
+// Content data is fetched from arshad-shah/nimaz-data and pinned by sha256 in
+// data.lock.json — see gradle/nimaz-data.gradle.kts for why it is no longer tracked here.
+apply(from = rootProject.file("gradle/nimaz-data.gradle.kts"))
+
+// AGP 9 refuses a Provider here, and the Variant API's addGeneratedSourceDirectory needs a
+// typed task class — which would mean a buildSrc module for one task. Register the directory
+// statically and hang the ordering off the asset merge instead: same guarantee, no new module.
+android.sourceSets.getByName("main").assets.srcDir(
+    layout.buildDirectory.dir("generated/nimazData/assets").get().asFile
+)
+
+tasks.matching { it.name.startsWith("merge") && it.name.endsWith("Assets") }
+    .configureEach { dependsOn("fetchNimazData") }
 
 kotlin {
     compilerOptions {

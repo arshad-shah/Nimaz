@@ -1,0 +1,27 @@
+{
+  "_comment": [
+    "Pins the content artifact this app is built against. Generated and updated by",
+    "`nz app sync` in the arshad-shah/nimaz-data repository; edit by hand only to roll back.",
+    "",
+    "The artifact is fetched and sha256-verified by the fetchNimazData Gradle task, then",
+    "wired in as a generated assets source root, so createFromAsset keeps working unchanged.",
+    "It is not committed here: LFS stores every version whole, so a one-row correction used",
+    "to cost another 140 MB object forever."
+  ],
+  "repo": "arshad-shah/nimaz-data",
+  "tag": "data-v2",
+  "schemaVersion": 20,
+  "artifact": {
+    "file": "nimaz-625212cd.db",
+    "assetPath": "database/nimaz_prepopulated.db",
+    "sha256": "625212cd89a61fa094bc521a0dbdf60fe6e1c14725dd6f6d6a41556d7aa20cb5",
+    "bytes": 178384896
+  },
+  "patch": {
+    "file": "content-patch.json.gz",
+    "assetPath": "database/content-patch.json",
+    "sha256": "470e90bb1902e987f942d258e5d3ca05684b56c141aaefe92a3ad61aa071c95b",
+    "version": 2,
+    "baseline": "sha256:9a9e29067562ce07140813f5a469ad5a433f104d1a7e142c559a22400c887a94"
+  }
+}

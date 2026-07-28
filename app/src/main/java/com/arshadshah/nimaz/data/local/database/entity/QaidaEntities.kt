@@ -12,7 +12,8 @@ import androidx.room.PrimaryKey
  * The content is hierarchical: [QaidaLessonEntity] → [QaidaLineEntity] →
  * [QaidaCellEntity], with [QaidaLetterEntity] acting as a flat reference table
  * linked from cells. The four content tables are seeded from the pre-packaged
- * database (filled by `nimaz-pro-data/scripts/generate_database.py`); the two
+ * database, which is compiled by the `nz` data console in the arshad-shah/nimaz-data
+ * repository and fetched at build time; the two
  * progress tables are user data, created empty and written at runtime.
  */
 
