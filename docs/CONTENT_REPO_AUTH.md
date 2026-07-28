@@ -102,3 +102,19 @@ nimaz-data: https://api.github.com/... returned 404.
 
 The credential works but cannot see the repo or the tag. Almost always the App is installed on
 the account but not on `nimaz-data` itself.
+
+```
+nimaz-data: https://api.github.com/... returned 403 — authenticated, but not permitted.
+```
+
+The token minted, so the App *is* installed on the repository — `create-github-app-token` fails
+outright when it is not. What is missing is the permission:
+
+1. <https://github.com/settings/apps> → your App → **Permissions & events**
+2. **Repository permissions → Contents → Read-only**
+3. Changing permissions raises a request the installation has to accept:
+   <https://github.com/settings/installations> → your App → **Review request** → Accept
+
+That second step is the one people miss. GitHub does not apply a permission change until the
+installation approves it, so the App page can show Contents: Read while the installation is still
+running on the old, narrower set.

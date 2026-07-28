@@ -67,10 +67,28 @@ fun githubApi(url: String, token: String): String {
     val conn = URI(url).toURL().openConnection() as HttpURLConnection
     conn.setRequestProperty("Authorization", "Bearer $token")
     conn.setRequestProperty("Accept", "application/vnd.github+json")
-    if (conn.responseCode == 404) {
-        throw GradleException(
-            "nimaz-data: $url returned 404. Either the tag does not exist, or the token " +
-                "cannot read the private repository."
+
+    // These three are the failures that actually happen, and each has a
+    // different fix. Letting them surface as a bare IOException — which is what
+    // used to happen for 403 — costs an afternoon.
+    when (conn.responseCode) {
+        404 -> throw GradleException(
+            "nimaz-data: $url returned 404.\n" +
+                "  The tag does not exist, or the credential cannot see the repository at all."
+        )
+        401 -> throw GradleException(
+            "nimaz-data: $url returned 401 — the credential was rejected.\n" +
+                "  A GitHub App installation token lasts an hour; a stale one looks like this."
+        )
+        403 -> throw GradleException(
+            "nimaz-data: $url returned 403 — authenticated, but not permitted.\n" +
+                "  The App is installed on the repository (otherwise the token would not\n" +
+                "  have minted), so this is almost always the permission set:\n" +
+                "    github.com/settings/apps -> your App -> Permissions & events\n" +
+                "    Repository permissions -> Contents -> Read-only\n" +
+                "  Changing permissions raises a request the installation must accept:\n" +
+                "    github.com/settings/installations -> Review request\n" +
+                "  See docs/CONTENT_REPO_AUTH.md."
         )
     }
     return conn.inputStream.bufferedReader().use { it.readText() }
