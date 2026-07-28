@@ -7,6 +7,11 @@ on:
 jobs:
   check:
     runs-on: ubuntu-latest
+    env:
+      # Credential for the private content repository the artifact is fetched from.
+      # See gradle/nimaz-data.gradle.kts and data.lock.json. Without it the build
+      # fails with an actionable message rather than a stack trace.
+      NIMAZ_DATA_TOKEN: ${{ secrets.NIMAZ_DATA_TOKEN }}
     steps:
       - uses: actions/checkout@v4
 

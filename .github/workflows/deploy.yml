@@ -12,6 +12,11 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      # Credential for the private content repository the artifact is fetched from.
+      # See gradle/nimaz-data.gradle.kts and data.lock.json. Without it the build
+      # fails with an actionable message rather than a stack trace.
+      NIMAZ_DATA_TOKEN: ${{ secrets.NIMAZ_DATA_TOKEN }}
     # Skip the automated version-bump commit so it never re-triggers a
     # build/deploy. That commit carries a [skip ci] marker in its message.
     if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}
