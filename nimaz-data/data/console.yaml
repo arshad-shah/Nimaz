@@ -73,9 +73,13 @@ keys:
   hadiths: [number_in_book]
   mushaf_layout_indopak16: [page, line]
 
+# Surrogate AUTOINCREMENT ids only. A column that carries meaning stays in the
+# collection even when it looks redundant: tafseer_texts.ayah_id duplicates
+# surah_number+ayah_number, but it is NOT NULL and it is the actual foreign key,
+# so dropping it would mean the sources could not rebuild the table.
 exclude_columns:
   translations: [id]
-  tafseer_texts: [id, ayah_id]
+  tafseer_texts: [id]
   mushaf_layout_indopak16: [id]
 
 # The actual scripture. Changing one of these takes an explicit declaration in

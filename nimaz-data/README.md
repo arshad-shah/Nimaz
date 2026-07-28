@@ -12,7 +12,8 @@ cannot tell the origin of.
 
 ## Status
 
-Working and under test (46 tests, `python3 -m pytest`):
+Working and under test — 46 unit tests, plus a full bootstrap run against the real
+146 MB corpus (24 collections, 60,922 content rows) that came back **byte-identical**:
 
 | | |
 |---|---|
@@ -21,7 +22,7 @@ Working and under test (46 tests, `python3 -m pytest`):
 | **§5 change funnel** | change dirs, `expect{}` enforcement, collateral detection, protected second lock, `fold` |
 | **§6 build** | all six stages, byte-reproducible artifact, corpus guard |
 | **§7 output** | `build.json` receipt, atomic promote, pointer rollback, retention |
-| **§8 rules** | registry, discovery from `data/rules/`, 14 rules shipped, GitHub annotations |
+| **§8 rules** | registry, discovery from `data/rules/`, 15 rules shipped, GitHub annotations |
 | **§9 agent** | all six tools as functions + `--json` CLI parity; MCP shell behind the `agent` extra |
 | **§10 UI** | **L0 tokens only.** L1–L4 not built — see [`nimaz_data/ui/README.md`](nimaz_data/ui/README.md) |
 | **§11 bootstrap** | `nz vault seal`, `nz init`, `nz build --against-vault`, genesis fingerprint |
@@ -29,6 +30,73 @@ Working and under test (46 tests, `python3 -m pytest`):
 | **§16 importers** | **not built.** `kind:` and structured provenance exist; `nz import` does not |
 
 Deviations from the document are listed at the end of this file.
+
+## The bootstrap, actually run
+
+Numbers below are from one real run against `nimaz-pro-data/output/nimaz_prepopulated.db`
+(sha256 `4e31ad37…`, 146,313,216 bytes, `user_version = 12`), not from the test
+fixture. Re-derive any of them with the commands in the next section.
+
+| | |
+|---|---|
+| vault sealed | 1.6 s |
+| `nz init` — 24 collections + 20 user tables (schema only) | 5.6 s → 125 MB NDJSON |
+| `nz build --against-vault` — 60,922 content rows | 15.3 s |
+| **round trip** | **38/38 tables byte-identical to the vault** |
+| three consecutive builds | all `sha256:aae5978d…`, `cmp`-identical |
+| full rule run | 12 rules, **1 blocking finding** |
+
+The round trip was re-checked by a script that does not import `nimaz_data` at
+all — plain `sqlite3` + `hashlib`, XOR of per-row digests so row order cannot
+mask a difference. The candidate's only structural difference from the vault is
+the `_manifest` table the build adds.
+
+**The one blocking finding was real.** `ayahs.text_arabic` and
+`ayahs.text_uthmani` both carry `U+FEFF` at index 0 of ayah 1:1 — a BOM inside
+the Bismillah. `generate_database.py` strips it from `text_arabic` via
+`normalise_uthmani` (#290) but never from `text_uthmani`, and the shipped asset
+predates that fix, so regenerating would not have caught it either.
+
+Fixing it exercised the strictest path in the system, because both columns are
+`protected`:
+
+```
+change declares neither          -> stage 3: "modifies protected fields without declaring them"
+change declares expect{} only    -> stage 3: same refusal
+change declares protected: [...] -> stage 3: "re-run with --confirm-protected"
+nz build --confirm-protected     -> green, 0 blocking
+```
+
+The promoted artifact then differs from the vault in **exactly one table, one
+row, two columns**; the other 60,921 rows are byte-identical.
+
+Two rules were wrong when real data hit them, and were corrected rather than
+suppressed: a single `text.no-control-chars` rule blocked on ZWJ inside
+`dua_categories.icon` (a legitimate `👨‍👩‍👧` emoji sequence) and on ZWNJ
+inside Arabic quoted in the tafseer (meaningful Urdu/Persian typography). It is
+now `text.no-bom` (blocking — a BOM, NUL or ZWSP is never legitimate inside a
+stored string) and `text.zero-width` (advisory — those characters carry meaning).
+
+### Why not commit the database (§12), measured
+
+42 commits, the same corpus, one row edited per commit:
+
+| | git history |
+|---|---|
+| `nimaz.db` committed, before `git gc` | **1,294 MB** |
+| `nimaz.db` committed, after `git gc` (76 s of CPU) | 47 MB |
+| NDJSON sources committed, after `git gc` | **22 MB** |
+
+Packed, git deltas SQLite better than §12 implies — but that is the number you
+get only after paying 76 seconds per repack, and **this repo stores the database
+through Git LFS, where no delta applies at all**: LFS keeps every version whole,
+so 42 versions is 42 × 140 MB of storage and bandwidth. The diff is the other
+half of it — the same edit reads as `1 insertion(+), 1 deletion(-)` in NDJSON and
+`Bin 146313216 -> 146313216 bytes` in SQLite. One of those is reviewable.
+
+`data/collections/` is **not committed** in this branch. The round trip proves it
+could be, but 125 MB of text in the Android repo is a call for a human to make —
+and §12's own answer is that the console eventually lives in its own repo.
 
 ## Install
 

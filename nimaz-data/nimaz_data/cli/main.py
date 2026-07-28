@@ -327,22 +327,41 @@ def _stage_note(stage) -> str:
 @app.command()
 def promote(
     root: Optional[Path] = ROOT_OPT,
-    candidate: Optional[Path] = typer.Option(None, "--candidate"),
+    candidate: Optional[Path] = typer.Option(
+        None,
+        "--candidate",
+        help="Promote a pre-built candidate. Rebuilds to derive the receipt.",
+    ),
+    confirm_protected: bool = typer.Option(False, "--confirm-protected"),
     json_out: bool = typer.Option(False, "--json"),
 ) -> None:
-    """Validate, then atomically swap the candidate into out/ (§7)."""
+    """Validate, then atomically swap the candidate into out/ (§7).
+
+    The build always runs, even when ``--candidate`` names a file: the receipt is
+    derived from the pipeline, and promoting an artifact whose receipt nobody
+    computed would put a file in ``out/`` that ``build.json`` does not describe.
+    ``--candidate`` then asserts the rebuild produced that exact artifact.
+    """
     project = _project(root)
     try:
-        if candidate is None:
-            result = run_build(project)
-            if not result.ok:
+        result = run_build(project, confirm_protected=confirm_protected)
+        if not result.ok:
+            raise NzError(
+                f"refusing to promote: build failed at `{result.failed_stage}`",
+                detail=result.error,
+            )
+        if candidate is not None:
+            from ..core.hash import sha256_file
+
+            asked = sha256_file(candidate)
+            if asked != result.artifact_hash:
                 raise NzError(
-                    f"refusing to promote: build failed at `{result.failed_stage}`",
-                    detail=result.error,
+                    "the named candidate is not what the sources build to",
+                    candidate=str(candidate),
+                    candidate_hash=asked,
+                    rebuilt_hash=result.artifact_hash,
                 )
-            candidate, receipt = result.candidate, result.receipt
-        else:
-            receipt = None
+        candidate, receipt = result.candidate, result.receipt
         promoted = do_promote(candidate, project.out_dir, receipt=receipt, retain=project.config.retain)
     except NzError as exc:
         _fail(exc, json_out)

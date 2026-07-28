@@ -91,18 +91,39 @@ def _insert_columns(
     spec: CollectionSpec,
     surrogate: str | None,
 ) -> list[str]:
-    present = set(dbx.column_names(conn, table))
-    cols = [c for c in spec.schema if c in present]
+    info = {c["name"]: c for c in dbx.columns(conn, table)}
+    cols = [c for c in spec.schema if c in info]
     for extra in (*spec.source.where.keys(), surrogate):
-        if extra and extra in present and extra not in cols:
+        if extra and extra in info and extra not in cols:
             cols.append(extra)
-    missing = [c for c in spec.schema if c not in present]
+
+    missing = [c for c in spec.schema if c not in info]
     if missing:
         raise BuildError(
             "collection declares columns the schema does not have",
             collection=spec.name,
             table=table,
             columns=missing,
+        )
+
+    # A NOT NULL column with no default that nobody supplies would fail as a raw
+    # IntegrityError halfway through an executemany. Say what is actually wrong:
+    # the column was excluded from the collection but the table still needs it.
+    unfilled = [
+        name
+        for name, col in info.items()
+        if name not in cols
+        and col["notnull"]
+        and col["dflt_value"] is None
+        and name != surrogate
+    ]
+    if unfilled:
+        raise BuildError(
+            "columns are NOT NULL but no collection supplies them — "
+            "remove them from exclude_columns in data/console.yaml",
+            collection=spec.name,
+            table=table,
+            columns=sorted(unfilled),
         )
     return cols
 
