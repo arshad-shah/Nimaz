@@ -152,6 +152,20 @@ android {
     }
 }
 
+// Content data is fetched from arshad-shah/nimaz-data and pinned by sha256 in
+// data.lock.json — see gradle/nimaz-data.gradle.kts for why it is no longer tracked here.
+apply(from = rootProject.file("gradle/nimaz-data.gradle.kts"))
+
+// AGP 9 refuses a Provider here, and the Variant API's addGeneratedSourceDirectory needs a
+// typed task class — which would mean a buildSrc module for one task. Register the directory
+// statically and hang the ordering off the asset merge instead: same guarantee, no new module.
+android.sourceSets.getByName("main").assets.srcDir(
+    layout.buildDirectory.dir("generated/nimazData/assets").get().asFile
+)
+
+tasks.matching { it.name.startsWith("merge") && it.name.endsWith("Assets") }
+    .configureEach { dependsOn("fetchNimazData") }
+
 kotlin {
     compilerOptions {
         // Opt in to applying annotations (e.g. Hilt's @ApplicationContext) to both

@@ -53,13 +53,20 @@ import java.security.MessageDigest
  * seeders, the real bundled assets. Whatever they do to the bytes, including anything
  * surprising, is what the vault gets sealed from.
  *
- * ## Two jobs
+ * ## What it asserts now
  *
- * As a **test** it asserts the invariants that must hold for the corpus to be shippable.
- * As a **harness**, given `-Dnimaz.corpus.out=<path>`, it writes the resulting database out
- * and prints its sha256, which is then `nz vault seal`-ed. Re-running it on a later release
- * answers the question nothing currently asks: does the console's corpus still equal real
- * device state?
+ * The bundled asset is no longer the v12 file — it is the fetched v20 artifact, which already
+ * contains everything the seeders used to add. So running the seeders over it must be a no-op,
+ * and the assertions below check exactly that: every content table non-empty, every user table
+ * empty, schema at [NIMAZ_DATABASE_VERSION].
+ *
+ * That makes this the **precondition for retiring a seeder**. Delete one whose content is not
+ * in the artifact and this fails naming the table that would have shipped empty; delete one
+ * whose content *is* in the artifact and it stays green. See `docs/retirement.yaml`.
+ *
+ * As a **harness**, given `-Dnimaz.corpus.out=<path>`, it also writes the resulting database
+ * out and prints its sha256, which is what `nz vault seal` consumes when the corpus needs
+ * re-baselining against real device state.
  */
 @RunWith(RobolectricTestRunner::class)
 class DeviceStateCorpusTest {

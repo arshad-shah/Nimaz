@@ -2,6 +2,10 @@ package com.arshadshah.nimaz.core.di
 
 import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
 import com.arshadshah.nimaz.data.local.dua.AndroidDuaAssetReader
+import com.arshadshah.nimaz.data.local.content.AndroidContentPatchAssetReader
+import com.arshadshah.nimaz.data.local.content.ContentPatchAssetReader
+import com.arshadshah.nimaz.data.local.content.ContentPatchVersionStore
+import com.arshadshah.nimaz.data.local.content.DataStoreContentPatchVersionStore
 import com.arshadshah.nimaz.data.local.dua.DataStoreDuaContentVersionStore
 import com.arshadshah.nimaz.data.local.dua.DuaAssetReader
 import com.arshadshah.nimaz.data.local.dua.DuaContentVersionStore
@@ -332,6 +336,21 @@ abstract class RepositoryModule {
     abstract fun bindProphetRepository(
         prophetRepositoryImpl: ProphetRepositoryImpl
     ): ProphetRepository
+
+    // The generic content patch — how a corpus correction reaches an install the
+    // artifact never touches. The per-feature seeders below retire into it; see
+    // docs/retirement.yaml for which release each one goes in.
+    @Binds
+    @Singleton
+    abstract fun bindContentPatchVersionStore(
+        impl: DataStoreContentPatchVersionStore
+    ): ContentPatchVersionStore
+
+    @Binds
+    @Singleton
+    abstract fun bindContentPatchAssetReader(
+        impl: AndroidContentPatchAssetReader
+    ): ContentPatchAssetReader
 
     @Binds
     @Singleton
