@@ -86,8 +86,8 @@ fun QuranSettingsScreen(
     // The translation picker is driven entirely by the QuranTranslation enum in
     // domain/model/QuranTranslation.kt — it is the single source of truth, exactly as
     // QuranArabicFont is for the font picker. To add one:
-    // 1. Add it to CATALOGUE in nimaz-pro-data/scripts/download_translations.py and run the
-    //    script, which writes assets/quran/translations/<id>.json
+    // 1. Add the edition in the arshad-shah/nimaz-data repository and run the importer,
+    //    which writes a tr.<id> collection into the artifact the app fetches
     // 2. Add a matching entry to the QuranTranslation enum
     // That's it — this screen lists it, and QuranTranslationSeeder seeds it into the
     // `translations` table the first time it is selected.

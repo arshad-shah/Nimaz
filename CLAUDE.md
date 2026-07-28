@@ -52,7 +52,9 @@ touches** — this is not optional:
   **`docs/ARCHITECTURE.md`** (and its §9 registry).
 - Fix or discover a clean-architecture anti-pattern → tick / add to
   **`docs/CLEAN_ARCHITECTURE_CHECKLIST.md`**.
-- Change the DB schema or shipped data → update **`docs/nimaz-pro-data-guide.md`**.
+- Change the DB schema → update **`docs/SUBSYSTEMS.md`**. Shipped **content** is no longer
+  in this repo: it lives in **arshad-shah/nimaz-data** and arrives as a fetched artifact.
+  Retiring the seeders that still carry it is tracked in **`docs/retirement.yaml`**.
 
 ## Non-negotiable rules
 

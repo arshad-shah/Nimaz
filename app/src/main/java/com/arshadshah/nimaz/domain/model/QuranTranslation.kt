@@ -32,11 +32,10 @@ enum class TranslationLanguage(
  * seeder and the reader all derive from this enum; nothing else enumerates translations.
  *
  * ## Adding one
- * 1. Add the id -> upstream edition mapping to `CATALOGUE` in
- *    `nimaz-pro-data/scripts/download_translations.py` and run it — it writes
- *    `app/src/main/assets/quran/translations/<id>.json`.
+ * 1. In the arshad-shah/nimaz-data repository, add the edition and run the importer.
+ *    It writes a `tr.<id>` collection, and `nz build` ships it in the artifact.
  * 2. Add an entry here with the same [id].
- * 3. Run `python3 download_translations.py --check`, which fails if the two catalogues drift.
+ * 3. Run `nz import --check` in that repository, which fails if the two catalogues drift.
  *
  * That is the whole change: the picker lists it, and
  * [com.arshadshah.nimaz.data.local.quran.QuranTranslationSeeder] seeds it into the

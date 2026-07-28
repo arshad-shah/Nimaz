@@ -62,7 +62,7 @@ app/
     presentation/  Compose screens, components, theme, viewmodels
     widget/        app widgets
 docs/             technical and planning documentation
-nimaz-pro-data/   scripts and data assets used for prepopulated database content
+                  (content data and the nz console live in arshad-shah/nimaz-data)
 fastlane/         CI and release lanes
 ```
 
@@ -116,12 +116,12 @@ From the repository root:
 
 ## Data and Assets
 
-- Prepopulated database asset:
-  - `app/src/main/assets/database/nimaz_prepopulated.db`
-- Data generation and sourcing scripts:
-  - `nimaz-pro-data/scripts/`
-- Data specification reference:
-  - `docs/nimaz-pro-data-guide.md`
+- Content data and the tooling that compiles it live in a separate private repository,
+  **arshad-shah/nimaz-data**. The prepopulated database is a build output fetched from a
+  release there and pinned by sha256 in `data.lock.json` — it is no longer tracked here.
+- How a content correction reaches devices that already have the app:
+  `docs/DATA_RETIREMENT.md`
+- Historical data specification reference: `docs/nimaz-pro-data-guide.md`
 
 ## CI
 

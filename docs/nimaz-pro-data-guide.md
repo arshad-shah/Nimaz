@@ -1,5 +1,15 @@
 # Nimaz - Data Sourcing & Integration Guide
 
+> **Historical.** The `nimaz-pro-data/` tree this guide describes now lives in the private
+> **arshad-shah/nimaz-data** repository under `upstream/`, and the pipeline it documents has been
+> replaced by the `nz` data console: content is compiled from NDJSON sources into a hash-pinned
+> artifact that this repo fetches at build time. Paths below are relative to that repository, not
+> this one. Kept because the licensing records, the acquisition provenance and the schema notes
+> are still the authority for where the corpus came from.
+>
+> Current: [`DATA_RETIREMENT.md`](DATA_RETIREMENT.md) ·
+> [`superpowers/specs/2026-07-28-nimaz-data-repo-extraction-design.md`](superpowers/specs/2026-07-28-nimaz-data-repo-extraction-design.md)
+
 > **Status:** the data *formats* below are still a useful reference, but the app now ships a
 > prebuilt database (`app/src/main/assets/database/nimaz_prepopulated.db`) and backfills newer
 > content at runtime via idempotent seeders. See the "Database & migrations" and "Content seeding
