@@ -497,10 +497,14 @@ private fun PreviewCard(
                             // text itself exactly as the reader does.
                             fontFamily = translationFontFamily,
                             textDirection = TextDirection.Content,
-                            textAlign = if (translationIsRtl) TextAlign.End else TextAlign.Start
+                            textAlign = if (translationIsRtl) TextAlign.End else TextAlign.Start,
+                            // Nastaliq's steep descenders clip badly at body leading. This
+                            // has to live in the style: a `lineHeight` argument on Text
+                            // overrides the style's, which is what previously forced every
+                            // translation — Urdu included — back to 22.sp.
+                            lineHeight = if (translationFontFamily != null) 34.sp else 22.sp
                         ),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        lineHeight = 22.sp,
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(12.dp)

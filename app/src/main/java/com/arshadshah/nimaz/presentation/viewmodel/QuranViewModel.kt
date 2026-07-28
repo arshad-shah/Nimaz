@@ -229,6 +229,28 @@ class QuranViewModel @Inject constructor(
     private var searchJob: Job? = null
 
     /**
+     * What the reader is currently showing. The ayah queries take the translator id as a
+     * *parameter*, captured when the flow is subscribed, so changing translation does not
+     * propagate to an already-running collector — without this the reader keeps rendering the
+     * previous translation until the user navigates away and back.
+     */
+    private sealed interface ReaderTarget {
+        data class Surah(val number: Int) : ReaderTarget
+        data class Juz(val number: Int) : ReaderTarget
+        data class Page(val number: Int) : ReaderTarget
+    }
+
+    private var readerTarget: ReaderTarget? = null
+
+    /**
+     * The in-flight content collector. Each load cancels the previous one: these collect
+     * Room flows, which never complete, so without cancelling, every surah the user opened
+     * would keep its collector alive and racing to write [_readerState] — visible as the
+     * previous surah's content flicking back over the new one.
+     */
+    private var contentJob: Job? = null
+
+    /**
      * Active khatam plus everything derived from it, as one stream shared by the reader
      * and home.
      *
@@ -379,6 +401,9 @@ class QuranViewModel @Inject constructor(
                     MushafScript.fromName(mushafScript))
             }.collect { settings ->
                 val (display, behavior, showTajweed, tajweedUnderline, mushafScript) = settings
+                // Captured before the state update below overwrites it.
+                val translationChanged =
+                    _readerState.value.selectedTranslatorId != display.translatorId
                 audioManager.setReciter(behavior.reciterId)
                 // Push continuous-reading reactively so toggling the setting while
                 // in the reader takes effect immediately, not on next play-start.
@@ -388,8 +413,15 @@ class QuranViewModel @Inject constructor(
                     // the same ayahs — drop the per-page caches rather than render the
                     // previous edition's content under the new page numbers (#325).
                     val scriptChanged = it.mushafScript != mushafScript
+                    // A different translation invalidates the cached ayahs too — they carry
+                    // the translation text they were fetched with. The layout cache is
+                    // script-only and survives.
                     it.copy(
-                        pageCache = if (scriptChanged) emptyMap() else it.pageCache,
+                        pageCache = if (scriptChanged || translationChanged) {
+                            emptyMap()
+                        } else {
+                            it.pageCache
+                        },
                         mushafPageLayoutCache =
                             if (scriptChanged) emptyMap() else it.mushafPageLayoutCache,
                         mushafPageLayout = if (scriptChanged) null else it.mushafPageLayout,
@@ -407,7 +439,30 @@ class QuranViewModel @Inject constructor(
                     )
                 }
                 _homeState.update { it.copy(mushafScript = mushafScript) }
+
+                if (translationChanged) {
+                    // The queries take the translator id as a parameter captured at
+                    // subscription, so an already-running collector keeps serving the old
+                    // translation. Re-issue the current load, and refresh the home verse of
+                    // the day, which is a one-shot read of the same preference.
+                    reloadReaderContent()
+                    loadVerseOfTheDay()
+                }
             }
+        }
+    }
+
+    /**
+     * Re-fetches whatever the reader is showing, after a settings change that invalidates its
+     * content. A no-op before the first load, so it is safe to call from the settings
+     * observer's very first emission.
+     */
+    private fun reloadReaderContent() {
+        when (val target = readerTarget) {
+            is ReaderTarget.Surah -> loadSurah(target.number)
+            is ReaderTarget.Juz -> loadJuz(target.number)
+            is ReaderTarget.Page -> loadPage(target.number)
+            null -> Unit
         }
     }
 
@@ -579,6 +634,7 @@ class QuranViewModel @Inject constructor(
     }
 
     private fun loadSurah(surahNumber: Int) {
+        readerTarget = ReaderTarget.Surah(surahNumber)
         _readerState.update {
             it.copy(
                 isLoading = true,
@@ -590,7 +646,8 @@ class QuranViewModel @Inject constructor(
                 subtitle = ""
             )
         }
-        viewModelScope.launch {
+        contentJob?.cancel()
+        contentJob = viewModelScope.launch {
             quranUseCases.getSurahWithAyahs(surahNumber, _readerState.value.selectedTranslatorId)
                 .collect { surahWithAyahs ->
                     _readerState.update {
@@ -615,6 +672,7 @@ class QuranViewModel @Inject constructor(
     }
 
     private fun loadJuz(juzNumber: Int) {
+        readerTarget = ReaderTarget.Juz(juzNumber)
         _readerState.update {
             it.copy(
                 isLoading = true,
@@ -626,7 +684,8 @@ class QuranViewModel @Inject constructor(
                 subtitle = ""
             )
         }
-        viewModelScope.launch {
+        contentJob?.cancel()
+        contentJob = viewModelScope.launch {
             quranUseCases.getAyahsByJuz(juzNumber, _readerState.value.selectedTranslatorId)
                 .collect { ayahs ->
                     _readerState.update {
@@ -642,6 +701,7 @@ class QuranViewModel @Inject constructor(
     }
 
     private fun loadPage(pageNumber: Int) {
+        readerTarget = ReaderTarget.Page(pageNumber)
         // Check cache first - no loading needed if already cached
         val cached = _readerState.value.pageCache[pageNumber]
         if (cached != null) {
@@ -668,7 +728,8 @@ class QuranViewModel @Inject constructor(
                 subtitle = ""
             )
         }
-        viewModelScope.launch {
+        contentJob?.cancel()
+        contentJob = viewModelScope.launch {
             // Resolved through the active edition: in the 16-line view page N holds a
             // different span of ayahs than Madani page N, and this cache feeds the page
             // info bar, "mark page read" for khatam and the ayah-action lookups (#325).
