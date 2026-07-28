@@ -45,7 +45,8 @@ import com.arshadshah.nimaz.data.local.database.entity.KhatamDailyLogEntity
 import com.arshadshah.nimaz.data.local.database.entity.KhatamEntity
 import com.arshadshah.nimaz.data.local.database.entity.LocationEntity
 import com.arshadshah.nimaz.data.local.database.entity.MakeupFastEntity
-import com.arshadshah.nimaz.data.local.database.entity.MushafLayoutIndopak16Entity
+import com.arshadshah.nimaz.data.local.database.entity.MushafAyahTextEntity
+import com.arshadshah.nimaz.data.local.database.entity.MushafLayoutLineEntity
 import com.arshadshah.nimaz.data.local.database.entity.PrayerRecordEntity
 import com.arshadshah.nimaz.data.local.database.entity.ProphetBookmarkEntity
 import com.arshadshah.nimaz.data.local.database.entity.ProphetEntity
@@ -73,7 +74,7 @@ import com.arshadshah.nimaz.data.local.database.entity.ZakatHistoryEntity
  * migration) for any schema change — it drives both the Room `@Database(version = …)`
  * annotation below and `NimazDatabase.SCHEMA_VERSION` (used to tag crash reports).
  */
-const val NIMAZ_DATABASE_VERSION = 18
+const val NIMAZ_DATABASE_VERSION = 20
 
 @Database(
     entities = [
@@ -85,7 +86,8 @@ const val NIMAZ_DATABASE_VERSION = 18
         QuranFavoriteEntity::class,
         ReadingProgressEntity::class,
         SurahInfoEntity::class,
-        MushafLayoutIndopak16Entity::class,
+        MushafAyahTextEntity::class,
+        MushafLayoutLineEntity::class,
         // Hadith
         HadithBookEntity::class,
         HadithEntity::class,
@@ -252,6 +254,83 @@ abstract class NimazDatabase : RoomDatabase() {
         // Dua/Help/Qaida content. This keeps the APK impact to a few MB of compressible
         // JSON instead of adding tens of MB to the LFS asset. Every statement is
         // idempotent so running it after createFromAsset (fresh install) is safe.
+        // Translations became a catalogue (15 shipped editions, seeded lazily per
+        // translation) rather than the single Saheeh International set the prepackaged DB
+        // carried. `translations.id` is auto-generated and there was no uniqueness
+        // constraint, so a re-seed that inserted without deleting first would silently
+        // double every verse. Collapse any existing duplicates — keeping the lowest id per
+        // (ayah, translator) — and add the unique index that makes the class of bug
+        // impossible from here on.
+        val MIGRATION_18_19 = object : Migration(18, 19) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                    DELETE FROM translations
+                    WHERE id NOT IN (
+                        SELECT MIN(id) FROM translations GROUP BY ayah_id, translator_id
+                    )
+                """.trimIndent()
+                )
+                db.execSQL(
+                    "CREATE UNIQUE INDEX IF NOT EXISTS " +
+                            "`index_translations_ayah_id_translator_id` " +
+                            "ON `translations` (`ayah_id`, `translator_id`)"
+                )
+            }
+        }
+
+        // Generalises the line-accurate mushaf storage so more than one edition can exist.
+        //
+        // Before: one bespoke table (`mushaf_layout_indopak16`) plus a single
+        // `ayahs.text_indopak` column — a shape that could only ever hold the 16-line
+        // IndoPak edition. After: `mushaf_layout_lines` keyed by script and
+        // `mushaf_ayah_texts` keyed by text source, so an edition is data rather than
+        // schema.
+        //
+        // Both tables are created empty and repopulated by MushafLayoutSeeder from the
+        // bundled assets (the version key is new, so every install re-seeds on first use of
+        // an edition). Nothing is lost: the dropped table held only derived content shipped
+        // in those same assets — no user data. `ayahs.text_indopak` is nulled rather than
+        // dropped, because dropping a column in SQLite means rebuilding a 6,236-row table
+        // for no functional gain; nulling reclaims the space and leaves the column inert.
+        // Every statement is idempotent so running it after createFromAsset is safe.
+        val MIGRATION_19_20 = object : Migration(19, 20) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS `mushaf_ayah_texts` (
+                        `text_source` TEXT NOT NULL,
+                        `ayah_id` INTEGER NOT NULL,
+                        `text` TEXT NOT NULL,
+                        PRIMARY KEY(`text_source`, `ayah_id`)
+                    )
+                """.trimIndent()
+                )
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_mushaf_ayah_texts_ayah_id` ON `mushaf_ayah_texts` (`ayah_id`)")
+
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS `mushaf_layout_lines` (
+                        `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        `script` TEXT NOT NULL,
+                        `page` INTEGER NOT NULL,
+                        `line` INTEGER NOT NULL,
+                        `line_type` TEXT NOT NULL,
+                        `surah_id` INTEGER NOT NULL,
+                        `ayah_id` INTEGER,
+                        `first_word_position` INTEGER,
+                        `last_word_position` INTEGER
+                    )
+                """.trimIndent()
+                )
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_mushaf_layout_lines_script_page_line` ON `mushaf_layout_lines` (`script`, `page`, `line`)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_mushaf_layout_lines_script` ON `mushaf_layout_lines` (`script`)")
+
+                db.execSQL("DROP TABLE IF EXISTS `mushaf_layout_indopak16`")
+                db.execSQL("UPDATE ayahs SET text_indopak = NULL WHERE text_indopak IS NOT NULL")
+            }
+        }
+
         val MIGRATION_17_18 = object : Migration(17, 18) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.addColumnIfMissing("ayahs", "text_indopak", "TEXT")
@@ -716,6 +795,36 @@ abstract class NimazDatabase : RoomDatabase() {
                 db.execSQL("CREATE INDEX IF NOT EXISTS `index_khatam_daily_log_khatam_id` ON `khatam_daily_log` (`khatam_id`)")
             }
         }
+
+        /**
+         * Every migration, in one place — the single source of truth for the chain, in the
+         * same spirit as [NIMAZ_DATABASE_VERSION] for the version itself.
+         *
+         * `DatabaseModule` registers this on the real database and `MigrationChainTest`
+         * replays it from v7, so **adding a migration here is the only step required**.
+         * Both previously kept their own hand-maintained copies, which is precisely how a
+         * new migration ended up registered in production but missing from the chain test:
+         * the test failed with "A migration from 7 to 20 was required but not found" while
+         * the app itself was fine. One list means that can't happen again.
+         *
+         * Order is irrelevant — Room indexes migrations by their start/end versions — but it
+         * is kept ascending for readability.
+         */
+        val ALL_MIGRATIONS: Array<Migration> = arrayOf(
+            MIGRATION_7_8,
+            MIGRATION_8_9,
+            MIGRATION_9_10,
+            MIGRATION_10_11,
+            MIGRATION_11_12,
+            MIGRATION_12_13,
+            MIGRATION_13_14,
+            MIGRATION_14_15,
+            MIGRATION_15_16,
+            MIGRATION_16_17,
+            MIGRATION_17_18,
+            MIGRATION_18_19,
+            MIGRATION_19_20,
+        )
     }
 }
 

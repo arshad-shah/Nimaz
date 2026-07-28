@@ -19,8 +19,8 @@ sync when adding or removing a font (the font picker is driven by
 - **Family / version:** `AlQuran IndoPak by QuranWBW`, Version 2.100 (2022-11-26).
 - **Why this exact font:** it is the companion face for the QUL *"Indopak 16
   lines layout (Taj company)"* text/layout bundled in
-  `app/src/main/assets/quran/ayahs_indopak.json` +
-  `mushaf_layout_indopak16.json` (sourced in sub-task 1/7, issue #265). The
+  `app/src/main/assets/quran/mushaf/indopak_text.json` +
+  `indopak_16_layout.json` (sourced in sub-task 1/7, issue #265). The
   source text embeds each ayah's decorative numbered end-marker as **Private
   Use Area glyphs (U+F500…U+F6FF)**; verified that this font covers **all 346
   PUA codepoints (346/346)** used in the data plus the full IndoPak Arabic
@@ -60,21 +60,40 @@ sync when adding or removing a font (the font picker is driven by
 > Copyright: © Al Qalam © Ghandhara © KFGQPC © Ayman Siddiqui © Credits: Abdul
 > Majeed Khan, Arif Karim, Shakir-ul-Qadree, Jawad
 
-### ⚠️ Shipping sign-off (human decision — mirrors the 1/7 data note)
+### ✅ Shipping sign-off (human decision — mirrors the 1/7 data note)
 
 Nimaz is a **free, non-commercial, open-source** app, i.e. exactly the
 Sadaqa-e-Jaria (charitable, not-for-sale) use this font was released for, and
 the font is bundled **unmodified**. However, the font's own terms ask for
 **written notice from QuranWBW.com before distribution**. As with the QUL
-IndoPak *data* (see `nimaz-pro-data/json/LICENSES_INDOPAK.md`), the final
+IndoPak *data* (see `nimaz-pro-data/json/LICENSES_MUSHAF_LAYOUTS.md`), the final
 go/no-go for a public release belongs to the project owner:
 
-- Before an app-store / F-Droid release that ships `indopak_nastaleeq.ttf`,
-  email **quranwbw@gmail.com** to notify/confirm redistribution in a free
-  open-source app, and record the outcome here.
-- The file may stay in the repo for development regardless; this note gates the
-  *release* decision, not the integration.
+**Status: signed off.** The project owner (@arshad-shah) confirmed on **2026-07-28** that
+`indopak_nastaleeq.ttf` is approved for shipping in a release build.
+
+- The font's terms ask for written notice to **quranwbw@gmail.com** before distribution; the
+  owner owns that correspondence.
+- The conditions the font was released under — free, non-commercial, unmodified — continue to
+  hold for this app, and the description above remains the record.
 
 If sign-off is declined, the picker entry can be repointed to an OFL fallback in
 one line in `Type.kt` (e.g. `ScheherazadeFontFamily`) — the ayah-number
 ornaments would then not render, but the IndoPak orthography still would.
+
+## Noto Nastaliq Urdu (`res/font/noto_nastaliq_urdu.ttf`)
+
+- **Used for:** Urdu **translation** prose only (the Quran's Arabic keeps the selected
+  `QuranArabicFont`). Selected via `translationFontFamily(TranslationLanguage.URDU)` in
+  `presentation/theme/Type.kt`.
+- **Why bundled:** the app's body faces (Outfit / Plus Jakarta Sans) contain no Arabic-script
+  glyphs, so an Urdu translation otherwise falls back to whatever the device provides —
+  usually Naskh, which is the wrong script convention for Urdu.
+- **Source:** Google Fonts — `ofl/notonastaliqurdu/NotoNastaliqUrdu[wght].ttf`, fetched from the
+  google/fonts repository. Variable weight axis, shipped unmodified; loaded at its default
+  Regular instance (variable fonts need API 26, the app's minSdk is 29).
+- **Licence:** SIL Open Font License 1.1, as published with the family in google/fonts.
+- **Release sign-off:** OFL permits bundling and redistribution in an application; no further
+  action expected. Confirm the OFL text ships with the app's licence list if that list is
+  intended to enumerate bundled fonts.
+

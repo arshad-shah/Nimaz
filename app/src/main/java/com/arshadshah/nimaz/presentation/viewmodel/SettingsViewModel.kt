@@ -18,6 +18,7 @@ import com.arshadshah.nimaz.domain.model.MushafScript
 import com.arshadshah.nimaz.domain.model.PrayerType
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.usecase.PrayerUseCases
+import com.arshadshah.nimaz.domain.usecase.QuranUseCases
 import com.arshadshah.nimaz.presentation.theme.NimazPatternStyle
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -26,7 +27,12 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -154,7 +160,14 @@ data class QuranSettingsUiState(
     val showTajweed: Boolean = false,
     val tajweedUnderline: Boolean = false,
     /** The Mushaf edition/layout for the page reader (default Uthmani/604 vs 16-line IndoPak/548). */
-    val mushafScript: MushafScript = MushafScript.DEFAULT
+    val mushafScript: MushafScript = MushafScript.DEFAULT,
+    /**
+     * The selected translation's actual text for the preview card's sample ayah, so the
+     * preview shows the chosen translation rather than a fixed English string. Null until
+     * the first load; the previous value is kept while a newly picked translation resolves
+     * (its first read seeds it), so the card never flashes empty.
+     */
+    val previewTranslation: String? = null
 )
 
 data class DuaSettingsUiState(
@@ -299,6 +312,7 @@ class SettingsViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val prayerUseCases: PrayerUseCases,
     private val settingsRepository: SettingsRepository,
+    private val quranUseCases: QuranUseCases,
     private val prayerNotificationScheduler: PrayerNotificationScheduler,
     val adhanAudioManager: AdhanAudioManager,
     private val database: NimazDatabase
@@ -373,6 +387,31 @@ class SettingsViewModel @Inject constructor(
     init {
         loadSettings()
         loadLocations()
+        observeQuranPreviewTranslation()
+    }
+
+    /**
+     * Keeps [QuranSettingsUiState.previewTranslation] in step with the selected translation
+     * so the settings preview card renders the real text of whatever the user just picked.
+     *
+     * Driven off the persisted preference rather than the picker callback, so it is correct
+     * however the value changed. `flatMapLatest` means rapidly switching translations never
+     * lets a slow earlier load overwrite a newer one — the first read of a translation also
+     * seeds its 6,236 rows, so an earlier one can genuinely still be in flight.
+     */
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    private fun observeQuranPreviewTranslation() {
+        settingsRepository.quranTranslatorId
+            .distinctUntilChanged()
+            .flatMapLatest { translatorId ->
+                flow { emit(quranUseCases.getAyahTranslation(PREVIEW_AYAH_ID, translatorId)) }
+            }
+            .onEach { text ->
+                // Keep the previous text on a null (missing/failed) result rather than
+                // blanking the card.
+                if (text != null) _quranState.update { it.copy(previewTranslation = text) }
+            }
+            .launchIn(viewModelScope)
     }
 
     fun onEvent(event: SettingsEvent) {
@@ -1312,5 +1351,14 @@ class SettingsViewModel @Inject constructor(
             _widgetState.update { WidgetSettingsUiState() }
             _shouldRestart.value = true
         }
+    }
+
+    private companion object {
+        /**
+         * Global ayah id of the verse the Quran settings preview card renders — Al-Fatihah
+         * 1:1, the Bismillah. Kept next to the loader so the preview's Arabic and its
+         * translation can never drift apart.
+         */
+        const val PREVIEW_AYAH_ID = 1
     }
 }

@@ -8,7 +8,8 @@ import com.arshadshah.nimaz.data.local.database.entity.QuranBookmarkEntity
 import com.arshadshah.nimaz.data.local.database.entity.QuranFavoriteEntity
 import com.arshadshah.nimaz.data.local.database.entity.ReadingProgressEntity
 import com.arshadshah.nimaz.data.local.database.entity.SurahEntity
-import com.arshadshah.nimaz.data.local.quran.QuranIndopakSeeder
+import com.arshadshah.nimaz.data.local.quran.MushafLayoutSeeder
+import com.arshadshah.nimaz.data.local.quran.QuranTranslationSeeder
 import com.arshadshah.nimaz.domain.model.Ayah
 import com.arshadshah.nimaz.domain.model.MushafPageLayout
 import com.arshadshah.nimaz.domain.model.MushafScript
@@ -16,6 +17,7 @@ import com.arshadshah.nimaz.domain.model.PageAyahRange
 import com.arshadshah.nimaz.domain.model.QuranBookmark
 import com.arshadshah.nimaz.domain.model.QuranFavorite
 import com.arshadshah.nimaz.domain.model.QuranSearchResult
+import com.arshadshah.nimaz.domain.model.QuranTranslation
 import com.arshadshah.nimaz.domain.model.ReadingProgress
 import com.arshadshah.nimaz.domain.model.RevelationType
 import com.arshadshah.nimaz.domain.model.SajdaType
@@ -33,6 +35,7 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.sync.Mutex
+import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -40,8 +43,23 @@ import javax.inject.Singleton
 @Singleton
 class QuranRepositoryImpl @Inject constructor(
     private val quranDao: QuranDao,
-    private val indopakSeeder: QuranIndopakSeeder
+    private val mushafSeeder: MushafLayoutSeeder,
+    private val translationSeeder: QuranTranslationSeeder
 ) : QuranRepository {
+
+    /**
+     * Resolves a translator id to its catalogue entry and makes sure its verses are seeded.
+     * Every read path that takes a `translatorId` goes through here, so selecting a
+     * translation for the first time populates it transparently — translations ship as
+     * bundled assets and are seeded lazily rather than all 15 up front. Returns null for a
+     * null id so "no translation" stays a cheap no-op.
+     */
+    private suspend fun seededTranslationId(translatorId: String?): String? {
+        if (translatorId == null) return null
+        val translation = QuranTranslation.fromId(translatorId)
+        translationSeeder.seedIfNeeded(translation)
+        return translation.id
+    }
 
     override fun getAllSurahs(): Flow<List<Surah>> {
         return quranDao.getAllSurahs().mapItems { it.toDomain() }
@@ -86,9 +104,10 @@ class QuranRepositoryImpl @Inject constructor(
     override fun getAyahsByJuz(juzNumber: Int, translatorId: String?): Flow<List<Ayah>> {
         return quranDao.getAyahsByJuz(juzNumber).map { entities ->
             // Fetch translations if translatorId is provided
-            val translationMap = if (translatorId != null && entities.isNotEmpty()) {
+            val translation = seededTranslationId(translatorId)
+            val translationMap = if (translation != null && entities.isNotEmpty()) {
                 val ayahIds = entities.map { it.id }
-                quranDao.getTranslationsForAyahs(ayahIds, translatorId)
+                quranDao.getTranslationsForAyahs(ayahIds, translation)
                     .first()
                     .associate { it.ayahId to it.text }
             } else {
@@ -109,13 +128,15 @@ class QuranRepositoryImpl @Inject constructor(
         translatorId: String?,
         script: MushafScript
     ): Flow<List<Ayah>> {
-        val entityFlow = when (script) {
-            MushafScript.MADANI -> quranDao.getAyahsByPage(pageNumber)
-            // The 16-line edition does not paginate by `ayahs.page`, so resolve the page's
-            // span through its own layout table and fetch that id range (#325). Emits an
-            // empty page rather than the unrelated Madani page when the span is unknown.
-            MushafScript.INDOPAK_16 -> flow {
-                val range = indopak16Ranges().firstOrNull { it.page == pageNumber }
+        val entityFlow = if (!script.isLineAccurate) {
+            quranDao.getAyahsByPage(pageNumber)
+        } else {
+            // A line-accurate edition does not paginate by `ayahs.page`, so resolve the
+            // page's span through its own layout table and fetch that id range (#325).
+            // Emits an empty page rather than the unrelated Madani page when the span is
+            // unknown.
+            flow {
+                val range = layoutRanges(script).firstOrNull { it.page == pageNumber }
                 if (range == null) {
                     emit(emptyList())
                 } else {
@@ -125,9 +146,10 @@ class QuranRepositoryImpl @Inject constructor(
         }
         return entityFlow.map { entities ->
             // Fetch translations if translatorId is provided
-            val translationMap = if (translatorId != null && entities.isNotEmpty()) {
+            val translation = seededTranslationId(translatorId)
+            val translationMap = if (translation != null && entities.isNotEmpty()) {
                 val ayahIds = entities.map { it.id }
-                quranDao.getTranslationsForAyahs(ayahIds, translatorId)
+                quranDao.getTranslationsForAyahs(ayahIds, translation)
                     .first()
                     .associate { it.ayahId to it.text }
             } else {
@@ -148,36 +170,40 @@ class QuranRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getPageAyahRanges(script: MushafScript): List<PageAyahRange> =
-        when (script) {
-            MushafScript.MADANI -> quranDao.getPageAyahRanges().map { it.toDomain() }
-            MushafScript.INDOPAK_16 -> indopak16Ranges()
+        if (script.isLineAccurate) {
+            layoutRanges(script)
+        } else {
+            quranDao.getPageAyahRanges().map { it.toDomain() }
         }
 
     /**
-     * The 16-line edition's page→ayah mapping, seeded on demand (the layout table is only
-     * populated once the IndoPak view is actually used) and memoised — it is 548 immutable
-     * rows that both the Page tab and every page fetch consult.
+     * A line-accurate edition's page→ayah mapping, seeded on demand (an edition's layout is
+     * only populated once it is actually used) and memoised per edition — each is several
+     * hundred immutable rows that both the Page tab and every page fetch consult.
      */
-    private suspend fun indopak16Ranges(): List<PageAyahRange> {
-        cachedIndopak16Ranges?.let { return it }
-        return indopak16RangesMutex.withLock {
-            cachedIndopak16Ranges?.let { return@withLock it }
-            indopakSeeder.seedIfNeeded()
-            quranDao.getIndopak16PageAyahRanges()
+    private suspend fun layoutRanges(script: MushafScript): List<PageAyahRange> {
+        cachedLayoutRanges[script]?.let { return it }
+        return layoutRangesMutex.withLock {
+            cachedLayoutRanges[script]?.let { return@withLock it }
+            mushafSeeder.seedIfNeeded(script)
+            quranDao.getLayoutPageAyahRanges(script.name)
                 .map { it.toDomain() }
-                .also { cachedIndopak16Ranges = it }
+                .also { cachedLayoutRanges[script] = it }
         }
     }
 
-    @Volatile
-    private var cachedIndopak16Ranges: List<PageAyahRange>? = null
-    private val indopak16RangesMutex = Mutex()
+    private val cachedLayoutRanges = ConcurrentHashMap<MushafScript, List<PageAyahRange>>()
+    private val layoutRangesMutex = Mutex()
 
-    override suspend fun getMushafPageLayout(page: Int): MushafPageLayout {
-        // First use of the 16-line view seeds the IndoPak text + layout (idempotent,
+    override suspend fun getMushafPageLayout(page: Int, script: MushafScript): MushafPageLayout {
+        val textSource = script.textSource ?: return MushafPageLayout(page, emptyList())
+        // First use of a line-accurate edition seeds its text + layout (idempotent,
         // version-gated); the ~20k-row seed therefore never runs on a normal Quran open.
-        indopakSeeder.seedIfNeeded()
-        return MushafLayoutMapper.toPageLayout(page, quranDao.getMushafLayoutByPage(page))
+        mushafSeeder.seedIfNeeded(script)
+        return MushafLayoutMapper.toPageLayout(
+            page,
+            quranDao.getMushafLayoutByPage(script.name, textSource, page)
+        )
     }
 
     override fun getSurahWithAyahs(surahNumber: Int, translatorId: String?): Flow<SurahWithAyahs?> {
@@ -193,9 +219,10 @@ class QuranRepositoryImpl @Inject constructor(
                 } ?: emptyList()
 
                 // Fetch translations if translatorId is provided
-                val translationMap = if (translatorId != null && ayahEntities.isNotEmpty()) {
+                val translation = seededTranslationId(translatorId)
+                val translationMap = if (translation != null && ayahEntities.isNotEmpty()) {
                     val ayahIds = ayahEntities.map { it.id }
-                    quranDao.getTranslationsForAyahs(ayahIds, translatorId)
+                    quranDao.getTranslationsForAyahs(ayahIds, translation)
                         .first()
                         .associate { it.ayahId to it.text }
                 } else {
@@ -219,23 +246,31 @@ class QuranRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getAvailableTranslators(): List<Translator> {
-        return quranDao.getAvailableTranslatorIds().map { translatorId ->
+    /**
+     * Driven by the [QuranTranslation] catalogue rather than by which translations happen to
+     * be in the DB: translations are seeded lazily, so a DISTINCT over `translations` would
+     * only ever list the ones already opened — and it had no display name or language to
+     * report either.
+     */
+    override suspend fun getAvailableTranslators(): List<Translator> =
+        QuranTranslation.entries.map { translation ->
             Translator(
-                id = translatorId,
-                name = translatorId, // Use id as name since we don't have name info
-                languageCode = translatorId.substringBefore(".")
+                id = translation.id,
+                name = translation.translator,
+                languageCode = translation.language.code
             )
         }
-    }
 
     override fun getTranslationsForAyahs(
         ayahIds: List<Int>,
         translatorId: String
-    ): Flow<Map<Int, String>> {
-        return quranDao.getTranslationsForAyahs(ayahIds, translatorId).map { translations ->
-            translations.associate { it.ayahId to it.text }
-        }
+    ): Flow<Map<Int, String>> = flow {
+        val translation = seededTranslationId(translatorId) ?: return@flow
+        emitAll(
+            quranDao.getTranslationsForAyahs(ayahIds, translation).map { translations ->
+                translations.associate { it.ayahId to it.text }
+            }
+        )
     }
 
     override fun searchQuran(query: String, translatorId: String?): Flow<List<QuranSearchResult>> {
@@ -255,8 +290,9 @@ class QuranRepositoryImpl @Inject constructor(
             }
 
             // If translatorId provided, also search translations
-            val translationResults = if (translatorId != null) {
-                quranDao.searchTranslations(query, translatorId).first().mapNotNull { translation ->
+            val translatorKey = seededTranslationId(translatorId)
+            val translationResults = if (translatorKey != null) {
+                quranDao.searchTranslations(query, translatorKey).first().mapNotNull { translation ->
                     quranDao.getAyahById(translation.ayahId)?.let { ayah ->
                         QuranSearchResult(
                             ayah = ayah.toDomain(),

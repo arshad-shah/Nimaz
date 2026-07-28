@@ -874,6 +874,8 @@
     <string name="mushaf_layout_subtitle">Seitenlayout des Mushaf-Lesers (Seitenansicht)</string>
     <string name="mushaf_script_madani">Uthmani (Madani, 604 Seiten)</string>
     <string name="mushaf_script_indopak16">IndoPak 16-zeilig (548 Seiten)</string>
+    <string name="mushaf_script_indopak15">IndoPak 15-zeilig (610 Seiten)</string>
+    <string name="mushaf_script_indopak13">IndoPak 13-zeilig (847 Seiten)</string>
     <string name="display_options">Anzeigeoptionen</string>
     <string name="show_transliteration">Transliteration anzeigen</string>
     <string name="show_transliteration_subtitle">Aussprache in lateinischen Buchstaben</string>
@@ -975,6 +977,9 @@
     <string name="select_reciter_title">Rezitator auswählen</string>
     <string name="select_reciter_search_hint">Rezitatoren suchen…</string>
     <string name="select_reciter_currently_selected">DERZEIT AUSGEWÄHLT</string>
+    <string name="select_translation_currently_selected">AKTUELL AUSGEWÄHLT</string>
+    <string name="select_translation_search_hint">Übersetzungen oder Sprachen suchen</string>
+    <string name="select_translation_all">Alle Übersetzungen</string>
     <string name="select_reciter_popular">BELIEBTE REZITATOREN</string>
     <string name="surah_info_about">Über diese Surah</string>
     <string name="surah_info_main_themes">Hauptthemen</string>

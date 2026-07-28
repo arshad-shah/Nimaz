@@ -7,6 +7,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.domain.model.TranslationLanguage
 
 // Font Families - Custom fonts
 // - Outfit (variable font) for headlines
@@ -48,6 +49,30 @@ val ScheherazadeFontFamily = FontFamily(
 val IndoPakFontFamily = FontFamily(
     Font(R.font.indopak_nastaleeq, weight = FontWeight.Normal)
 )
+
+// Noto Nastaliq Urdu for Urdu *translation* text. Urdu is conventionally set in
+// Nastaliq, and the app's Latin faces (Outfit/Plus Jakarta) carry no Arabic-script
+// glyphs at all, so an Urdu translation falls back to whatever the system happens to
+// have — usually a Naskh face, which reads to an Urdu speaker roughly the way blackletter
+// reads in English. The Quran's own Arabic keeps using the selected QuranArabicFont; this
+// face is only for translation prose. Variable weight axis (minSdk 29 > the API 26 needed
+// for variable fonts), loaded at its default Regular instance.
+val NotoNastaliqUrduFontFamily = FontFamily(
+    Font(R.font.noto_nastaliq_urdu, weight = FontWeight.Normal)
+)
+
+/**
+ * The face a translation's prose should be drawn in, or null to keep the default body
+ * font. Driven by the translation's [TranslationLanguage] rather than by the translation
+ * id, so a second Urdu translation needs no change here.
+ *
+ * Only Urdu is special-cased today: it is the one shipped language whose script the app's
+ * body fonts cannot render. Other RTL languages would slot in the same way.
+ */
+fun translationFontFamily(language: TranslationLanguage): FontFamily? = when (language) {
+    TranslationLanguage.URDU -> NotoNastaliqUrduFontFamily
+    else -> null
+}
 
 /**
  * Selectable Arabic fonts for Quran text.

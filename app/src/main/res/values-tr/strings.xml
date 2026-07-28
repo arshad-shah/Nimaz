@@ -880,6 +880,8 @@
     <string name="mushaf_layout_subtitle">Mushaf (sayfa) okuyucusu tarafından kullanılan sayfa düzeni</string>
     <string name="mushaf_script_madani">Osmanlı (Medeni, 604 sayfa)</string>
     <string name="mushaf_script_indopak16">IndoPak 16 satır (548 sayfa)</string>
+    <string name="mushaf_script_indopak15">IndoPak 15 satır (610 sayfa)</string>
+    <string name="mushaf_script_indopak13">IndoPak 13 satır (847 sayfa)</string>
     <string name="display_options">Görüntüleme Seçenekleri</string>
     <string name="show_transliteration">Transliterasyonu Göster</string>
     <string name="show_transliteration_subtitle">Latin harfleriyle okunuş</string>
@@ -981,6 +983,9 @@
     <string name="select_reciter_title">Okuyucu Seç</string>
     <string name="select_reciter_search_hint">Okuyucu ara…</string>
     <string name="select_reciter_currently_selected">ŞU AN SEÇİLİ</string>
+    <string name="select_translation_currently_selected">ŞU AN SEÇİLİ</string>
+    <string name="select_translation_search_hint">Çeviri veya dil ara</string>
+    <string name="select_translation_all">Tüm çeviriler</string>
     <string name="select_reciter_popular">POPÜLER OKUYUCULAR</string>
     <string name="surah_info_about">Bu Sure Hakkında</string>
     <string name="surah_info_main_themes">Ana Temalar</string>

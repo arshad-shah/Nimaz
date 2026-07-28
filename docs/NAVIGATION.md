@@ -30,7 +30,8 @@ flowchart LR
 
     subgraph Q["Quran"]
         QuranHub --> QuranReader & QuranPage & QuranJuz & QuranSearch & QuranBookmarks
-        QuranReader --> SurahInfo & Tafseer & SelectReciter
+        QuranReader --> SurahInfo & Tafseer
+        SettingsQuran --> SelectReciter & SelectTranslation
     end
 
     subgraph Names["Names & Prophets"]
@@ -116,7 +117,7 @@ and the notification hub subscreens `settings/notifications/{prayers,weekly,soun
 |---|---|---|
 | `quran/surah/{n}` | `QuranReader` | 1–114 (surah number) |
 | `quran/surah/{n}/ayah/{m}` | `QuranReader` | 1–114 surah; 1–286 ayah per surah |
-| `quran/page/{n}` | `QuranPage` | 1–`MushafScript.MAX_TOTAL_PAGES` (604; largest edition — the reader clamps to the active script's count, 548 for IndoPak-16) |
+| `quran/page/{n}` | `QuranPage` | 1–`MushafScript.MAX_TOTAL_PAGES` (847; largest edition — the reader clamps to the active script's count: 604 Madani, 548 IndoPak-16, 610 IndoPak-15, 847 IndoPak-13) |
 | `quran/juz/{n}` | `QuranJuz` | 1–30 (juz/part number) |
 | `tafseer/{n}` | `Tafseer` | 1–114 (surah number) |
 | `dua/category/{slug}` | `DuaCategory` | category id (string) |
@@ -141,7 +142,7 @@ semantic failure.
 ## Route reference
 
 All routes live in `core/navigation/Routes.kt` and are wired in `core/navigation/NavGraph.kt`
-(75 `composable<Route.X>` destinations). `data object` = no args; `data class` = typed args.
+(85 `composable<Route.X>` destinations). `data object` = no args; `data class` = typed args.
 
 ### Bottom navigation (`BottomNavDestination`)
 | Route | Screen |
@@ -163,6 +164,7 @@ All routes live in `core/navigation/Routes.kt` and are wired in `core/navigation
 | `SurahInfo` | `surahNumber: Int` | SurahInfoScreen |
 | `Tafseer` | `surahNumber: Int, ayahNumber: Int = 1` | TafseerScreen |
 | `SelectReciter` | — | SelectReciterScreen |
+| `SelectTranslation` | — | SelectTranslationScreen |
 
 ### Hadith
 | Route | Args | Screen |

@@ -27,10 +27,10 @@ interface QuranRepository {
     suspend fun getAyahById(ayahId: Int): Ayah?
     fun getAyahsByJuz(juzNumber: Int, translatorId: String? = null): Flow<List<Ayah>>
     /**
-     * The ayahs printed on [pageNumber] of [script]'s edition. Madani pages come from the
-     * `ayahs.page` column; 16-line IndoPak pages are resolved through that edition's own
-     * pagination, so the reader, the page info bar and khatam page marking all act on the
-     * ayahs actually on the rendered page (#325).
+     * The ayahs printed on [pageNumber] of [script]'s edition. Ayah-flow editions (Madani)
+     * come from the `ayahs.page` column; line-accurate editions are resolved through their
+     * own pagination, so the reader, the page info bar and khatam page marking all act on
+     * the ayahs actually on the rendered page (#325).
      */
     fun getAyahsByPage(
         pageNumber: Int,
@@ -44,16 +44,20 @@ interface QuranRepository {
     suspend fun getPageAyahRanges(script: MushafScript = MushafScript.DEFAULT): List<PageAyahRange>
 
     /**
-     * The line-accurate 16-line IndoPak layout of [page] (1-548), grouped by printed line.
-     * Returns an empty [MushafPageLayout] for pages with no layout data. Triggers the
-     * one-time IndoPak seeding on first use.
+     * [script]'s line-accurate layout of [page], grouped by printed line. Returns an empty
+     * [MushafPageLayout] for an ayah-flow edition or a page with no layout data. Triggers
+     * that edition's one-time seeding on first use.
      */
-    suspend fun getMushafPageLayout(page: Int): MushafPageLayout
+    suspend fun getMushafPageLayout(
+        page: Int,
+        script: MushafScript = MushafScript.DEFAULT
+    ): MushafPageLayout
 
     // Surah with Ayahs
     fun getSurahWithAyahs(surahNumber: Int, translatorId: String?): Flow<SurahWithAyahs?>
 
     // Translation operations
+    /** Every translation the app ships, in catalogue order. */
     suspend fun getAvailableTranslators(): List<Translator>
     fun getTranslationsForAyahs(ayahIds: List<Int>, translatorId: String): Flow<Map<Int, String>>
 

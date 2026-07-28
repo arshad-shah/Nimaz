@@ -73,6 +73,8 @@ import com.arshadshah.nimaz.domain.model.Ayah
 import com.arshadshah.nimaz.domain.model.MushafLineType
 import com.arshadshah.nimaz.domain.model.MushafPageLayout
 import com.arshadshah.nimaz.domain.model.Surah
+import com.arshadshah.nimaz.domain.model.QuranTranslation
+import com.arshadshah.nimaz.presentation.theme.translationFontFamily
 import com.arshadshah.nimaz.presentation.components.organisms.AyahItem
 import com.arshadshah.nimaz.presentation.components.organisms.MushafLinePage
 import com.arshadshah.nimaz.presentation.components.organisms.MushafPage
@@ -470,7 +472,7 @@ fun QuranReaderScreen(
                 } else {
                     pagerState.settledPage + 1
                 }
-                if (state.use16LineLayout) {
+                if (state.useLineAccurateLayout) {
                     state.mushafPageLayoutCache[currentQuranPageForAudio]
                         ?.let { buildOrderedPageAyahsFromLayout(it, ayahById) }
                         ?: displayAyahs
@@ -840,6 +842,9 @@ fun QuranReaderScreen(
                             showTransliteration = state.showTransliteration,
                             arabicFontSize = state.arabicFontSize,
                             arabicFontFamily = state.arabicFontFamily,
+                            translationFontFamily = translationFontFamily(
+                                QuranTranslation.fromId(state.selectedTranslatorId).language
+                            ),
                             fontSize = state.fontSize,
                             isHighlighted = isHighlighted,
                             isAudioPlaying = isAudioPlaying,
@@ -897,7 +902,7 @@ fun QuranReaderScreen(
 /**
  * Renders one Quran page inside the reader pager, choosing the renderer by the active Mushaf
  * script: the line-accurate 16-line IndoPak page ([MushafLinePage], 5/7 of #263) when
- * [QuranReaderUiState.use16LineLayout] is set, otherwise the default Uthmani page
+ * [QuranReaderUiState.useLineAccurateLayout] is set, otherwise the default Uthmani page
  * ([MushafPage]). Centralises the (identical) interaction wiring the single- and dual-page
  * call sites used to duplicate.
  *
@@ -918,7 +923,9 @@ private fun ReaderMushafPage(
     onNavigateToTafseer: (Int, Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    if (state.use16LineLayout) {
+    val translationFont =
+        translationFontFamily(QuranTranslation.fromId(state.selectedTranslatorId).language)
+    if (state.useLineAccurateLayout) {
         val layout = state.mushafPageLayoutCache[pageNumber]
         LaunchedEffect(pageNumber) {
             if (pageNumber !in state.mushafPageLayoutCache) {
@@ -933,6 +940,7 @@ private fun ReaderMushafPage(
             MushafLinePage(
                 pageNumber = pageNumber,
                 layout = layout,
+                translationFontFamily = translationFont,
                 surahMap = surahMap,
                 arabicFontSize = state.arabicFontSize,
                 highlightedAyahId = highlightedAyahId,
@@ -971,6 +979,7 @@ private fun ReaderMushafPage(
             pageNumber = pageNumber,
             ayahs = ayahs,
             surahMap = surahMap,
+            translationFontFamily = translationFont,
             arabicFontSize = state.arabicFontSize,
             arabicFontFamily = state.arabicFontFamily,
             highlightedAyahId = highlightedAyahId,

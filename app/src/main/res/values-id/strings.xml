@@ -857,6 +857,8 @@
     <string name="mushaf_layout_subtitle">Tata letak halaman yang digunakan oleh pembaca Mushaf (halaman)</string>
     <string name="mushaf_script_madani">Uthmani (Madani, 604 halaman)</string>
     <string name="mushaf_script_indopak16">IndoPak 16-baris (548 halaman)</string>
+    <string name="mushaf_script_indopak15">IndoPak 15-baris (610 halaman)</string>
+    <string name="mushaf_script_indopak13">IndoPak 13-baris (847 halaman)</string>
     <string name="display_options">Opsi Tampilan</string>
     <string name="show_transliteration">Tampilkan Transliterasi</string>
     <string name="show_transliteration_subtitle">Pelafalan dengan huruf Latin</string>
@@ -958,6 +960,9 @@
     <string name="select_reciter_title">Pilih Qari</string>
     <string name="select_reciter_search_hint">Cari qari…</string>
     <string name="select_reciter_currently_selected">SAAT INI DIPILIH</string>
+    <string name="select_translation_currently_selected">SAAT INI DIPILIH</string>
+    <string name="select_translation_search_hint">Cari terjemahan atau bahasa</string>
+    <string name="select_translation_all">Semua terjemahan</string>
     <string name="select_reciter_popular">QARI POPULER</string>
     <string name="surah_info_about">Tentang Surah Ini</string>
     <string name="surah_info_main_themes">Tema Utama</string>

@@ -150,6 +150,9 @@ fun AdaptiveSettingsScreen(
                                 onNavigateBack = { scope.launch { navigator.navigateBack() } },
                                 onNavigateToSelectReciter = {
                                     navController.navigate(Route.SelectReciter)
+                                },
+                                onNavigateToSelectTranslation = {
+                                    navController.navigate(Route.SelectTranslation)
                                 }
                             )
 

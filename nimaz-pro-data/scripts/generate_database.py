@@ -623,12 +623,24 @@ def create_tables(conn):
     cursor.execute('CREATE INDEX IF NOT EXISTS index_qaida_cells_lesson_id ON qaida_cells(lesson_id)')
     cursor.execute('CREATE INDEX IF NOT EXISTS index_qaida_cells_letter_id ON qaida_cells(letter_id)')
 
-    # 16-line IndoPak Mushaf layout (sub-task 2/7 of #263). The line-accurate
-    # 548-page layout is stored as line segments; per-ayah IndoPak text lives on
-    # ayahs.text_indopak (added above). See populate_indopak_16line().
+    # Line-accurate Mushaf editions (schema v20). Both tables are created EMPTY on
+    # purpose: every edition's glyph text and layout ships as a bundled JSON asset and
+    # is seeded at runtime by MushafLayoutSeeder, so baking them in here would grow the
+    # ~147 MB Git-LFS blob for data that already travels in the APK. They exist so a
+    # from-scratch regeneration still matches the Room schema.
     cursor.execute('''
-        CREATE TABLE IF NOT EXISTS mushaf_layout_indopak16 (
+        CREATE TABLE IF NOT EXISTS mushaf_ayah_texts (
+            text_source TEXT NOT NULL,
+            ayah_id INTEGER NOT NULL,
+            text TEXT NOT NULL,
+            PRIMARY KEY (text_source, ayah_id)
+        )
+    ''')
+    cursor.execute('CREATE INDEX IF NOT EXISTS index_mushaf_ayah_texts_ayah_id ON mushaf_ayah_texts(ayah_id)')
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS mushaf_layout_lines (
             id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+            script TEXT NOT NULL,
             page INTEGER NOT NULL,
             line INTEGER NOT NULL,
             line_type TEXT NOT NULL,
@@ -638,13 +650,17 @@ def create_tables(conn):
             last_word_position INTEGER
         )
     ''')
-    cursor.execute('CREATE INDEX IF NOT EXISTS index_mushaf_layout_indopak16_page_line ON mushaf_layout_indopak16(page, line)')
+    cursor.execute('CREATE INDEX IF NOT EXISTS index_mushaf_layout_lines_script_page_line ON mushaf_layout_lines(script, page, line)')
+    cursor.execute('CREATE INDEX IF NOT EXISTS index_mushaf_layout_lines_script ON mushaf_layout_lines(script)')
 
     # Create indices
     cursor.execute('CREATE INDEX IF NOT EXISTS index_ayahs_surah_id ON ayahs(surah_id)')
     cursor.execute('CREATE INDEX IF NOT EXISTS index_ayahs_juz ON ayahs(juz)')
     cursor.execute('CREATE INDEX IF NOT EXISTS index_ayahs_page ON ayahs(page)')
     cursor.execute('CREATE INDEX IF NOT EXISTS index_translations_ayah_id ON translations(ayah_id)')
+    # One verse per (ayah, translator) — schema v19. Guards the seeder's delete-then-insert
+    # replace, which would otherwise be able to double every verse.
+    cursor.execute('CREATE UNIQUE INDEX IF NOT EXISTS index_translations_ayah_id_translator_id ON translations(ayah_id, translator_id)')
     cursor.execute('CREATE INDEX IF NOT EXISTS index_hadiths_book_id ON hadiths(book_id)')
     cursor.execute('CREATE INDEX IF NOT EXISTS index_hadiths_chapter_id ON hadiths(chapter_id)')
     cursor.execute('CREATE INDEX IF NOT EXISTS index_duas_category_id ON duas(category_id)')
@@ -660,41 +676,15 @@ def load_json(filename):
             return json.load(f)
     return []
 
-def populate_indopak_16line(cursor):
-    """Populate the 16-line IndoPak Mushaf data (sub-task 2/7 of #263).
-
-    Fills ayahs.text_indopak (keyed by the global ayah id 1-6236) from
-    ayahs_indopak.json and the mushaf_layout_indopak16 table from
-    mushaf_layout_indopak16.json. Both files are the validated 1/7 output.
-
-    NOTE: the shipped prepackaged DB is stamped at user_version = 12 and is NOT
-    regenerated for this feature — on device, MIGRATION_17_18 creates the empty
-    column/table and QuranIndopakSeeder fills them from the bundled JSON assets
-    (which keeps the ~147 MB Git-LFS asset from growing). This function only
-    matters when the prepackaged DB is regenerated from scratch, so it degrades
-    gracefully when the IndoPak JSON files are absent.
-    """
-    ayahs_indopak = load_json('ayahs_indopak.json')
-    if not ayahs_indopak:
-        print("Warning: ayahs_indopak.json not found — skipping 16-line IndoPak data")
-        return
-
-    for a in ayahs_indopak:
-        cursor.execute(
-            'UPDATE ayahs SET text_indopak = ? WHERE id = ?',
-            (a['text_indopak'], a['ayah_id'])
-        )
-    print(f"Set text_indopak on {len(ayahs_indopak)} ayahs")
-
-    layout = load_json('mushaf_layout_indopak16.json')
-    for row in layout:
-        cursor.execute('''
-            INSERT INTO mushaf_layout_indopak16
-                (page, line, line_type, surah_id, ayah_id, first_word_position, last_word_position)
-            VALUES (?,?,?,?,?,?,?)
-        ''', (row['page_number'], row['line_number'], row['line_type'], row['surah_id'],
-              row.get('ayah_id'), row.get('first_word_position'), row.get('last_word_position')))
-    print(f"Inserted {len(layout)} mushaf_layout_indopak16 line-segments")
+# NOTE: there is deliberately no populate_* step for the line-accurate Mushaf editions
+# or for the Quran translation catalogue. Both ship as bundled JSON assets under
+# app/src/main/assets/quran/ and are seeded at runtime (MushafLayoutSeeder /
+# QuranTranslationSeeder) so that fresh installs and upgraders converge on the same
+# content without regenerating the ~147 MB Git-LFS prepackaged DB. The tables above are
+# created empty purely to keep a from-scratch regeneration schema-complete.
+#
+# The one translation the prepackaged DB historically carried (sahih_international) is
+# still populated by populate_database() from translations.json.
 
 def populate_database(conn):
     """Populate database from JSON files"""
@@ -770,7 +760,6 @@ def populate_database(conn):
     print(f"Inserted {len(ayahs)} ayahs")
 
     # 16-line IndoPak Mushaf data (sub-task 2/7 of #263)
-    populate_indopak_16line(cursor)
 
     # Surah Info
     surah_info = load_json('surah_info.json')

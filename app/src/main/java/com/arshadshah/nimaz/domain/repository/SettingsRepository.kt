@@ -60,8 +60,18 @@ interface SettingsRepository {
     suspend fun setDuaContentVersion(version: Int)
     val qaidaContentVersion: Flow<Int>
     suspend fun setQaidaContentVersion(version: Int)
-    val indopakContentVersion: Flow<Int>
-    suspend fun setIndopakContentVersion(version: Int)
+    /**
+     * Per-edition seeded content versions for the line-accurate mushaf layouts, as
+     * `"<MushafScript name>:<version>"` entries. One key covers every edition, so shipping a
+     * new one needs no preference change. Replaces the old single `indopak_content_version`
+     * int, which could only describe one edition.
+     */
+    val quranMushafVersions: Flow<Set<String>>
+    suspend fun setQuranMushafVersions(versions: Set<String>)
+
+    /** Per-translation seeded content versions, as `"<translation id>:<version>"` entries. */
+    val quranTranslationVersions: Flow<Set<String>>
+    suspend fun setQuranTranslationVersions(versions: Set<String>)
     val arabicFontSize: Flow<String>
     suspend fun setArabicFontSize(size: String)
     val calculationMethod: Flow<String>

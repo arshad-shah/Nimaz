@@ -18,8 +18,10 @@ import com.arshadshah.nimaz.data.local.qaida.DataStoreQaidaContentVersionStore
 import com.arshadshah.nimaz.data.local.qaida.QaidaAssetReader
 import com.arshadshah.nimaz.data.local.qaida.QaidaContentVersionStore
 import com.arshadshah.nimaz.data.local.quran.AndroidQuranAssetReader
-import com.arshadshah.nimaz.data.local.quran.DataStoreIndopakContentVersionStore
-import com.arshadshah.nimaz.data.local.quran.IndopakContentVersionStore
+import com.arshadshah.nimaz.data.local.quran.DataStoreMushafContentVersionStore
+import com.arshadshah.nimaz.data.local.quran.DataStoreTranslationContentVersionStore
+import com.arshadshah.nimaz.data.local.quran.MushafContentVersionStore
+import com.arshadshah.nimaz.data.local.quran.TranslationContentVersionStore
 import com.arshadshah.nimaz.data.local.quran.QuranAssetReader
 import com.arshadshah.nimaz.data.repository.AsmaUlHusnaRepositoryImpl
 import com.arshadshah.nimaz.data.repository.AsmaUnNabiRepositoryImpl
@@ -87,6 +89,7 @@ import com.arshadshah.nimaz.domain.usecase.GetAllProphetsUseCase
 import com.arshadshah.nimaz.domain.usecase.GetAsmaUlHusnaByIdUseCase
 import com.arshadshah.nimaz.domain.usecase.GetAsmaUnNabiByIdUseCase
 import com.arshadshah.nimaz.domain.usecase.GetAvailableTranslatorsUseCase
+import com.arshadshah.nimaz.domain.usecase.GetAyahTranslationUseCase
 import com.arshadshah.nimaz.domain.usecase.GetAyahByIdUseCase
 import com.arshadshah.nimaz.domain.usecase.GetAyahsByJuzUseCase
 import com.arshadshah.nimaz.domain.usecase.GetAyahsByPageUseCase
@@ -368,9 +371,15 @@ abstract class RepositoryModule {
 
     @Binds
     @Singleton
-    abstract fun bindIndopakContentVersionStore(
-        impl: DataStoreIndopakContentVersionStore
-    ): IndopakContentVersionStore
+    abstract fun bindMushafContentVersionStore(
+        impl: DataStoreMushafContentVersionStore
+    ): MushafContentVersionStore
+
+    @Binds
+    @Singleton
+    abstract fun bindTranslationContentVersionStore(
+        impl: DataStoreTranslationContentVersionStore
+    ): TranslationContentVersionStore
 
     @Binds
     @Singleton
@@ -424,6 +433,9 @@ object UseCaseModule {
     fun provideQuranUseCases(
         repository: QuranRepository
     ): QuranUseCases {
+        // Shared so the verse-of-the-day path and the settings preview resolve a single
+        // ayah's translation through the same seam.
+        val getAyahTranslation = GetAyahTranslationUseCase(repository)
         return QuranUseCases(
             getSurahList = GetSurahListUseCase(repository),
             getSurahByNumber = GetSurahByNumberUseCase(repository),
@@ -451,7 +463,8 @@ object UseCaseModule {
             getPageAyahRanges = GetPageAyahRangesUseCase(repository),
             getMushafPagination = GetMushafPaginationUseCase(repository),
             getMushafPageLayout = GetMushafPageLayoutUseCase(repository),
-            getVerseOfTheDay = GetVerseOfTheDayUseCase(repository)
+            getVerseOfTheDay = GetVerseOfTheDayUseCase(repository, getAyahTranslation),
+            getAyahTranslation = getAyahTranslation
         )
     }
 

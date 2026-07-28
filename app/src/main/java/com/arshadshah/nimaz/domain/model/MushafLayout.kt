@@ -59,14 +59,43 @@ enum class MushafLineType {
 }
 
 /**
- * The Mushaf edition a page count belongs to. The classic Madani (Uthmani) mushaf
- * paginates to 604 pages; the 16-line IndoPak edition to 548. Callers that need "how many
- * pages does the Quran have" should ask the active [MushafScript] rather than hardcoding a
- * literal, so the total stays correct when the 16-line view is selected.
+ * A Mushaf edition the reader can display — the single source of truth for everything that
+ * varies between editions. Callers that need "how many pages does the Quran have" or "is
+ * this edition line-accurate" ask the active [MushafScript] rather than testing for a
+ * specific entry, so adding an edition stays a one-entry change here plus its data assets.
+ *
+ * Two kinds of edition exist:
+ *
+ * - **Ayah-flow** ([linesPerPage] `== null`): pagination comes from the `ayahs.page` column
+ *   and the renderer flows ayahs into the page. [MADANI] is the classic 604-page Uthmani
+ *   mushaf and works this way.
+ * - **Line-accurate** ([linesPerPage] `!= null`): pagination and every line break come from
+ *   `mushaf_layout_lines`, so each printed line is reproduced exactly — the property that
+ *   makes an edition usable for hifz. Its glyph text comes from [textSource].
+ *
+ * @property totalPages pages in this edition's pagination.
+ * @property linesPerPage printed lines per page, or null when the edition is ayah-flow.
+ * @property textSource key into `mushaf_ayah_texts` for this edition's glyphs, or null when
+ *   the edition renders the `ayahs` table's own Uthmani text. Editions that set identical
+ *   glyphs share one source: [INDOPAK_16] and [INDOPAK_15] are verified identical, while
+ *   [INDOPAK_13] differs in the vowel marks of 28 ayahs and so carries its own.
  */
-enum class MushafScript(val totalPages: Int) {
-    MADANI(604),
-    INDOPAK_16(548);
+enum class MushafScript(
+    val totalPages: Int,
+    val linesPerPage: Int? = null,
+    val textSource: String? = null
+) {
+    MADANI(totalPages = 604),
+    INDOPAK_16(totalPages = 548, linesPerPage = 16, textSource = "INDOPAK"),
+    INDOPAK_15(totalPages = 610, linesPerPage = 15, textSource = "INDOPAK"),
+    INDOPAK_13(totalPages = 847, linesPerPage = 13, textSource = "INDOPAK_13");
+
+    /**
+     * True when every printed line of this edition is reproduced from stored layout data
+     * rather than flowed. Replaces the old "is this the 16-line edition" test, which stopped
+     * being equivalent the moment a second line-accurate edition existed.
+     */
+    val isLineAccurate: Boolean get() = linesPerPage != null
 
     companion object {
         val DEFAULT = MADANI

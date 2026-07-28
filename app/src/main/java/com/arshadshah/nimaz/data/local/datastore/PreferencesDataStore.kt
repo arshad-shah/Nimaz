@@ -95,7 +95,12 @@ class PreferencesDataStore @Inject constructor(
 
         // Qaida content (data-driven; bumped when qaida_content.json changes)
         val QAIDA_CONTENT_VERSION = intPreferencesKey("qaida_content_version")
-        val INDOPAK_CONTENT_VERSION = intPreferencesKey("indopak_content_version")
+
+        // Line-accurate mushaf editions and Quran translations are each seeded lazily, per
+        // item, so their versions are stored as "<key>:<version>" string sets rather than an
+        // int key per item — adding an edition or a translation touches no preference code.
+        val QURAN_MUSHAF_VERSIONS = stringSetPreferencesKey("quran_mushaf_versions")
+        val QURAN_TRANSLATION_VERSIONS = stringSetPreferencesKey("quran_translation_versions")
 
         // Prayer Settings
         val CALCULATION_METHOD = stringPreferencesKey("calculation_method")
@@ -351,12 +356,19 @@ class PreferencesDataStore @Inject constructor(
     override suspend fun setQaidaContentVersion(version: Int) =
         put(PreferencesKeys.QAIDA_CONTENT_VERSION, version)
 
-    // IndoPak 16-line Quran content version (0 = never seeded)
-    override val indopakContentVersion: Flow<Int> =
-        preference(PreferencesKeys.INDOPAK_CONTENT_VERSION, 0)
+    // Seeded content versions for the line-accurate mushaf editions and the Quran
+    // translations, as "<key>:<version>" entries (empty = nothing seeded yet).
+    override val quranMushafVersions: Flow<Set<String>> =
+        preference(PreferencesKeys.QURAN_MUSHAF_VERSIONS, emptySet())
 
-    override suspend fun setIndopakContentVersion(version: Int) =
-        put(PreferencesKeys.INDOPAK_CONTENT_VERSION, version)
+    override suspend fun setQuranMushafVersions(versions: Set<String>) =
+        put(PreferencesKeys.QURAN_MUSHAF_VERSIONS, versions)
+
+    override val quranTranslationVersions: Flow<Set<String>> =
+        preference(PreferencesKeys.QURAN_TRANSLATION_VERSIONS, emptySet())
+
+    override suspend fun setQuranTranslationVersions(versions: Set<String>) =
+        put(PreferencesKeys.QURAN_TRANSLATION_VERSIONS, versions)
 
     override val arabicFontSize: Flow<String> =
         preference(PreferencesKeys.ARABIC_FONT_SIZE, "medium")
