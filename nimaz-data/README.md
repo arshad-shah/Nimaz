@@ -13,7 +13,7 @@ cannot tell the origin of.
 ## Status
 
 Working and under test — 46 unit tests, plus a full bootstrap run against the real
-146 MB corpus (24 collections, 60,922 content rows) that came back **byte-identical**:
+147 MB shipped corpus (24 collections, 60,922 content rows) that came back **byte-identical**:
 
 | | |
 |---|---|
@@ -52,7 +52,7 @@ had no stage that would have said so.
 | `nz init` — 24 collections + 20 user tables (schema only) | 5.6 s → 125 MB NDJSON |
 | `nz build --against-vault` — 60,922 content rows | 15.3 s |
 | **round trip** | **24/24 collections, 38/38 tables byte-identical to the vault** |
-| three consecutive builds | all `sha256:aae5978d…`, `cmp`-identical |
+| three consecutive builds | byte-identical (`cmp`), same artifact hash each time |
 | full rule run | 13 rules, **1 blocking finding** |
 
 The round trip was re-checked by a script that does not import `nimaz_data` at
@@ -101,7 +101,7 @@ get only after paying 76 seconds per repack, and **this repo stores the database
 through Git LFS, where no delta applies at all**: LFS keeps every version whole,
 so 42 versions is 42 × 140 MB of storage and bandwidth. The diff is the other
 half of it — the same edit reads as `1 insertion(+), 1 deletion(-)` in NDJSON and
-`Bin 146313216 -> 146313216 bytes` in SQLite. One of those is reviewable.
+`Bin 147292160 -> 147292160 bytes` in SQLite. One of those is reviewable.
 
 `data/collections/` is **not committed** in this branch. The round trip proves it
 could be, but 125 MB of text in the Android repo is a call for a human to make —
@@ -120,7 +120,7 @@ and `typer`, and after `nz import` (when it exists) nothing touches the network.
 ## Bootstrap — §11, in order
 
 ```bash
-nz vault seal ../nimaz-pro-data/output/nimaz_prepopulated.db   # 1  archive + chmod 444 + hash
+nz vault seal ../app/src/main/assets/database/nimaz_prepopulated.db   # 1  archive + 444 + hash
 nz doctor                                                      #    confirm the vault is intact
 nz init                                                        # 2  vault -> schema.sql + collections + genesis
 nz build --against-vault                                       # 3  THE ROUND TRIP — must be lossless
