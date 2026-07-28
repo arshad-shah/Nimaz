@@ -39,8 +39,8 @@ android {
         // Source of truth for the app version. CI bumps these at build time and
         // pushes the change back to dev (with a bypass GitHub App token) after a successful
         // deploy, so the committed baseline stays in sync for the next build.
-        versionCode = 376
-        versionName = "3.0.76"
+        versionCode = 377
+        versionName = "3.0.77"
 
         // Custom runner swaps in HiltTestApplication so instrumented tests run on
         // the full Hilt graph without NimazApp's Firebase / AppInitializer / device
