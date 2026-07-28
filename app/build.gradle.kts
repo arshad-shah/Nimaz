@@ -136,6 +136,18 @@ android {
             // which the Compose UI tests for the atoms rely on.
             isIncludeAndroidResources = true
             isReturnDefaultValues = true
+
+            all {
+                // DeviceStateCorpusTest doubles as the corpus harness: given an output
+                // path it writes the migrated + fully seeded database for `nz vault seal`.
+                // Test JVMs are forked and inherit nothing, so the property has to be
+                // forwarded explicitly. Without a value it stays a plain assertion test.
+                it.systemProperty(
+                    "nimaz.corpus.out",
+                    providers.systemProperty("nimaz.corpus.out").getOrElse("")
+                )
+                it.testLogging { showStandardStreams = true }
+            }
         }
     }
 }
