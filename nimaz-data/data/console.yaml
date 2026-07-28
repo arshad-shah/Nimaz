@@ -1,0 +1,87 @@
+# Nimaz Data Console — the small amount of policy that is not a collection.
+#
+# Everything here is consumed by `nz init` when it decomposes the sealed vault
+# into collections, and by the build when it compiles them back. Adding a
+# collection should be a file under data/collections/, not an edit to this one;
+# this file exists for facts about the *schema*, which is shared.
+
+# The shipped database's Room schema version. Stamped onto the artifact so the
+# app's migration chain lines up with what it was handed.
+user_version: 12
+
+# Tables the app writes to at runtime. They are part of the schema and must
+# exist — empty — in the artifact, but they are not part of the corpus, so they
+# get no collection, no floor and no rows. Conflating the two is how a build
+# reports "losing" user data that was never supposed to be shipped.
+user_tables:
+  - reading_progress
+  - quran_bookmarks
+  - quran_favorites
+  - hadith_bookmarks
+  - dua_bookmarks
+  - dua_progress
+  - prayer_records
+  - fast_records
+  - makeup_fasts
+  - khatams
+  - khatam_ayahs
+  - khatam_daily_log
+  - tasbih_sessions
+  - zakat_history
+  - tafseer_highlights
+  - tafseer_notes
+  - locations
+  - asma_ul_husna_bookmarks
+  - asma_un_nabi_bookmarks
+  - prophet_bookmarks
+
+# One table, many independently versioned collections. This is what lets
+# tr.en.sahih and tr.bn move at their own pace, and what makes the sixteenth
+# translation a file rather than a schema change (§16).
+splits:
+  translations: translator_id
+  tafseer_texts: tafseer_id
+  hadiths: book_id
+
+naming:
+  ayahs: quran.uthmani
+  surahs: quran.surahs
+  surah_info: quran.surah-info
+  mushaf_layout_indopak16: mushaf.indopak16
+  islamic_events: events.islamic
+  tasbih_presets: tasbih.presets
+  asma_ul_husna: asma.ul-husna
+  asma_un_nabi: asma.un-nabi
+  hadith_books: hadith.books
+  dua_categories: dua.categories
+  duas: dua.collection
+  prophets: prophets
+  qaida_lessons: qaida.lessons
+  qaida_letters: qaida.letters
+  qaida_lines: qaida.lines
+  qaida_cells: qaida.cells
+  translations: "tr.{value}"
+  tafseer_texts: "tafseer.{value}"
+  hadiths: "hadith.book-{value}"
+
+# Natural keys, where the table's primary key is a surrogate that carries no
+# meaning. A surrogate id in the key would make the content hash depend on
+# insertion order, which is exactly what §6 removes.
+keys:
+  translations: [ayah_id]
+  tafseer_texts: [surah_number, ayah_number]
+  hadiths: [number_in_book]
+  mushaf_layout_indopak16: [page, line]
+
+exclude_columns:
+  translations: [id]
+  tafseer_texts: [id, ayah_id]
+  mushaf_layout_indopak16: [id]
+
+# The actual scripture. Changing one of these takes an explicit declaration in
+# the change plus --confirm-protected. The only second lock in the system (§4).
+protected:
+  ayahs: [text_uthmani, text_arabic]
+
+# Artifacts retained in out/ before the oldest are dropped.
+retain: 5

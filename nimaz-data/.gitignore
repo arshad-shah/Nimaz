@@ -1,0 +1,10 @@
+# §2 — the three databases. Exactly one of them is text, and none of them is git's.
+vault/
+.build/
+out/
+
+__pycache__/
+*.pyc
+.pytest_cache/
+*.egg-info/
+.venv/

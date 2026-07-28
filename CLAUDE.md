@@ -20,6 +20,10 @@ updated as part of your change** (see "Documentation is part of the work" below)
   search feature: the Cloudflare Worker (`worker/`), the `search-assist` capability contract,
   local proof resolution, the smart local search, settings/consent, cost model, and the manual
   setup runbook.
+- **[`docs/nimaz-data-console.md`](docs/nimaz-data-console.md)** — the `nz` data console
+  (`nimaz-data/`): the corpus vault, NDJSON sources, the change funnel, the six-stage build,
+  rules, the corpus guard and the agent surface. Read it before touching shipped content data
+  or `nimaz-pro-data/scripts/`.
 
 When adding a feature, copy an existing one that follows the patterns — good references:
 `AsmaUlHusna`, `Prophet`, `Khatam`, `Quran`.
@@ -33,6 +37,13 @@ When adding a feature, copy an existing one that follows the patterns — good r
 > ViewModels/screens, and `Route.SearchSettings`. One Worker call per question (only the question
 > text leaves the device); cited Quran and Hadith refs are resolved locally into proof cards. It
 > is **off by default**. See `docs/ai-ask-with-proof.md`.
+
+> **Data map:** shipped content data is being moved onto the **`nz` data console** in
+> **`nimaz-data/`** — a Python tool (`nimaz_data`) that compiles the corpus from NDJSON
+> sources into a hash-verified SQLite artifact, with every write going through a reviewable
+> change directory. It is validated by `.github/workflows/nimaz_data_checks.yml` and does not
+> touch the Android build yet: the app still ships `app/src/main/assets/database/` +
+> `nimaz-pro-data/scripts/`. See `docs/nimaz-data-console.md` and `nimaz-data/README.md`.
 
 > Naming: the app is **Nimaz** and the package is **`com.arshadshah.nimaz`**. The older
 > `docs/nimaz-pro-*.md` files are historical design/planning artifacts (they say "Nimaz Pro" /

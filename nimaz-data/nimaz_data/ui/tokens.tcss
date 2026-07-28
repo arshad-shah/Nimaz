@@ -1,0 +1,77 @@
+/* L0 — tokens (§10).
+ *
+ * Semantic, never literal. Nothing above this file names a hex value; a
+ * component that does is a bug. The browser prototype and the terminal app
+ * share these names, so a change here moves both.
+ *
+ * State colour has exactly one meaning everywhere:
+ *   teal      matches the manifest
+ *   gold      changed and not yet validated
+ *   mulberry  blocking
+ *   violet    never verified
+ * It is used for status only — never decoratively.
+ */
+
+$surface-0: #0d0f12;
+$surface-1: #14181d;
+$surface-2: #1c222a;
+
+$edge: #2b333d;
+$edge-soft: #202730;
+
+$ink: #e6ebf2;
+$ink-2: #a3aebd;
+$ink-3: #6b7684;
+
+$ok: #3fb8a6;
+$pend: #d8a542;
+$block: #b7548a;
+$unknown: #7d6cc4;
+
+/* 4px base. Nothing in a component sets a margin outside this scale. */
+$s1: 1;
+$s2: 2;
+$s3: 3;
+$s4: 4;
+$s5: 6;
+$s6: 8;
+$s7: 12;
+$s8: 16;
+
+$radius: 1;
+$border-width: 1;
+
+$motion-fast: 120ms;
+$motion-slow: 240ms;
+
+Screen {
+    background: $surface-0;
+    color: $ink;
+}
+
+.panel {
+    background: $surface-1;
+    border: round $edge;
+    padding: 0 1;
+}
+
+.panel-head {
+    color: $ink-2;
+    text-style: bold;
+}
+
+.rule {
+    color: $edge;
+}
+
+.text-label { color: $ink-3; }
+.text-body  { color: $ink; }
+.text-lead  { color: $ink-2; }
+.text-title { color: $ink; text-style: bold; }
+.text-data  { color: $ink; }
+.text-arabic { color: $ink; text-align: right; }
+
+.state-ok      { color: $ok; }
+.state-pend    { color: $pend; }
+.state-block   { color: $block; }
+.state-unknown { color: $unknown; }

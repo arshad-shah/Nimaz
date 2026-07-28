@@ -1,0 +1,124 @@
+name: Nimaz Data Console
+
+# The data pipeline in nimaz-data/. Scoped to that directory so it never runs
+# for Android-only changes and never interferes with the PR Checks / Deploy
+# lanes. See docs/nimaz-data-console.md §14.
+on:
+  push:
+    branches: [ dev ]
+    paths: [ 'nimaz-data/**', '.github/workflows/nimaz_data_checks.yml' ]
+  pull_request:
+    paths: [ 'nimaz-data/**', '.github/workflows/nimaz_data_checks.yml' ]
+
+defaults:
+  run:
+    working-directory: nimaz-data
+
+jobs:
+  # §14 pr.yml — the fast lane. Everything that does not need the real corpus.
+  checks:
+    name: Tests & dependency contract
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # §12 — the repo cannot quietly become expensive. Scoped to nimaz-data/,
+      # which is the tree that is supposed to stay text-only; the app's existing
+      # LFS assets are what this tool exists to retire, not what it polices.
+      - name: Nothing binary under nimaz-data/
+        working-directory: .
+        run: |
+          offenders=$(git ls-files 'nimaz-data/**' | grep -Ei '\.(db|sqlite3?|zip|tar|gz)$' || true)
+          large=$(git ls-files -z 'nimaz-data/**' \
+            | xargs -0 -I{} sh -c 'test -f "{}" && [ $(wc -c < "{}") -gt 5242880 ] && echo "{}"' || true)
+          if [ -n "$offenders$large" ]; then
+            echo "::error::binary or oversized files tracked under nimaz-data/:"
+            printf '%s\n' "$offenders" "$large"
+            exit 1
+          fi
+          echo "nimaz-data/ is text-only"
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: nimaz-data/pyproject.toml
+
+      - name: Install
+        run: pip install -e '.[dev]'
+
+      # The suite builds its own miniature corpus with the real schema shape, so
+      # the round-trip proof (§11.3), determinism (§6) and every gate in the
+      # change funnel (§5) are exercised without the 147 MB vault.
+      - name: Test
+        run: python -m pytest -q
+
+      - name: Dependency contract
+        run: nz deps check --json
+        continue-on-error: true   # no real collections in the tree yet
+
+  # §14 main.yml — the full lane. Activates once `nz init` has run against the
+  # real vault and data/collections/ carries actual sources.
+  corpus:
+    name: Full rebuild, twice
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: nimaz-data/pyproject.toml
+
+      - name: Install
+        run: pip install -e '.[dev]'
+
+      - name: Is there a corpus to build?
+        id: corpus
+        run: |
+          if compgen -G "data/collections/*/records.ndjson" > /dev/null; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+            echo "No sources yet — run the §11 bootstrap against the real DB." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Build
+        if: steps.corpus.outputs.present == 'true'
+        run: nz build --json > /tmp/first.json
+
+      # Reproducibility is itself an integrity check: a non-deterministic build
+      # means the artifact hash is not the identity you believe it is.
+      - name: Build again and compare hashes
+        if: steps.corpus.outputs.present == 'true'
+        run: |
+          nz build --json > /tmp/second.json
+          first=$(python -c "import json;print(json.load(open('/tmp/first.json'))['artifact'])")
+          second=$(python -c "import json;print(json.load(open('/tmp/second.json'))['artifact'])")
+          echo "first  $first"
+          echo "second $second"
+          test "$first" = "$second"
+
+      # §14 — the round trip re-run on every merge, so the §11.3 proof does not
+      # quietly stop being true.
+      - name: Round trip through NDJSON
+        if: steps.corpus.outputs.present == 'true'
+        run: |
+          candidate=$(python -c "import json;print(json.load(open('/tmp/first.json'))['candidate'])")
+          nz source export --from "$candidate" --json > /tmp/export.json
+          python - <<'PY'
+          import json, sys
+          reports = json.load(open('/tmp/export.json'))['collections']
+          drifted = [r['collection'] for r in reports if r['changed']]
+          if drifted:
+              sys.exit(f"sources are no longer a lossless re-encoding: {drifted}")
+          print(f"{len(reports)} collections round-tripped byte-identically")
+          PY
+
+      - name: Validate with inline annotations
+        if: steps.corpus.outputs.present == 'true'
+        run: nz validate --db out/current --annotate github
+        continue-on-error: true
