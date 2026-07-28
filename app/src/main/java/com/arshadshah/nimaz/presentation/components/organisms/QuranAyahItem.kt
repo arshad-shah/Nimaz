@@ -91,6 +91,10 @@ internal fun AyahItem(
     showTransliteration: Boolean = false,
     arabicFontSize: Float,
     arabicFontFamily: FontFamily = AmiriFontFamily,
+    /** Face for the translation prose; null keeps the default body font. Urdu needs its own
+     *  Nastaliq face because the body fonts carry no Arabic script — see
+     *  [com.arshadshah.nimaz.presentation.theme.translationFontFamily]. */
+    translationFontFamily: FontFamily? = null,
     fontSize: Float,
     isHighlighted: Boolean = false,
     isAudioPlaying: Boolean = false,
@@ -289,8 +293,15 @@ internal fun AyahItem(
                     // locale — otherwise Urdu renders left-aligned with its punctuation on the
                     // wrong side. TextAlign.Start then follows the resolved direction.
                     style = MaterialTheme.typography.bodyMedium.copy(
+                        fontFamily = translationFontFamily,
                         fontSize = fontSize.sp,
-                        lineHeight = (fontSize * 1.5f).sp,
+                        // Nastaliq's steep descenders need noticeably more leading than a
+                        // Latin face at the same size, or successive lines collide.
+                        lineHeight = if (translationFontFamily != null) {
+                            (fontSize * 2.1f).sp
+                        } else {
+                            (fontSize * 1.5f).sp
+                        },
                         textDirection = TextDirection.Content,
                         textAlign = TextAlign.Start
                     ),

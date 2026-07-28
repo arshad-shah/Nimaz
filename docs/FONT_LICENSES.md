@@ -78,3 +78,20 @@ go/no-go for a public release belongs to the project owner:
 If sign-off is declined, the picker entry can be repointed to an OFL fallback in
 one line in `Type.kt` (e.g. `ScheherazadeFontFamily`) — the ayah-number
 ornaments would then not render, but the IndoPak orthography still would.
+
+## Noto Nastaliq Urdu (`res/font/noto_nastaliq_urdu.ttf`)
+
+- **Used for:** Urdu **translation** prose only (the Quran's Arabic keeps the selected
+  `QuranArabicFont`). Selected via `translationFontFamily(TranslationLanguage.URDU)` in
+  `presentation/theme/Type.kt`.
+- **Why bundled:** the app's body faces (Outfit / Plus Jakarta Sans) contain no Arabic-script
+  glyphs, so an Urdu translation otherwise falls back to whatever the device provides —
+  usually Naskh, which is the wrong script convention for Urdu.
+- **Source:** Google Fonts — `ofl/notonastaliqurdu/NotoNastaliqUrdu[wght].ttf`, fetched from the
+  google/fonts repository. Variable weight axis, shipped unmodified; loaded at its default
+  Regular instance (variable fonts need API 26, the app's minSdk is 29).
+- **Licence:** SIL Open Font License 1.1, as published with the family in google/fonts.
+- **Release sign-off:** OFL permits bundling and redistribution in an application; no further
+  action expected. Confirm the OFL text ships with the app's licence list if that list is
+  intended to enumerate bundled fonts.
+

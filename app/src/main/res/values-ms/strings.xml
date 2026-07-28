@@ -961,6 +961,9 @@
     <string name="select_reciter_title">Pilih Pembaca</string>
     <string name="select_reciter_search_hint">Cari pembaca…</string>
     <string name="select_reciter_currently_selected">DIPILIH SEKARANG</string>
+    <string name="select_translation_currently_selected">SEDANG DIPILIH</string>
+    <string name="select_translation_search_hint">Cari terjemahan atau bahasa</string>
+    <string name="select_translation_all">Semua terjemahan</string>
     <string name="select_reciter_popular">PEMBACA POPULAR</string>
     <string name="surah_info_about">Tentang Surah Ini</string>
     <string name="surah_info_main_themes">Tema Utama</string>

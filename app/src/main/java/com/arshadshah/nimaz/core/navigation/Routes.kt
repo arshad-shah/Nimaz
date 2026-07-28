@@ -247,6 +247,10 @@ sealed interface Route {
     @Serializable
     data object SelectReciter : Route
 
+    // Select Quran translation
+    @Serializable
+    data object SelectTranslation : Route
+
     // Licenses
     @Serializable
     data object Licenses : Route

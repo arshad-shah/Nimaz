@@ -73,6 +73,8 @@ import com.arshadshah.nimaz.domain.model.Ayah
 import com.arshadshah.nimaz.domain.model.MushafLineType
 import com.arshadshah.nimaz.domain.model.MushafPageLayout
 import com.arshadshah.nimaz.domain.model.Surah
+import com.arshadshah.nimaz.domain.model.QuranTranslation
+import com.arshadshah.nimaz.presentation.theme.translationFontFamily
 import com.arshadshah.nimaz.presentation.components.organisms.AyahItem
 import com.arshadshah.nimaz.presentation.components.organisms.MushafLinePage
 import com.arshadshah.nimaz.presentation.components.organisms.MushafPage
@@ -840,6 +842,9 @@ fun QuranReaderScreen(
                             showTransliteration = state.showTransliteration,
                             arabicFontSize = state.arabicFontSize,
                             arabicFontFamily = state.arabicFontFamily,
+                            translationFontFamily = translationFontFamily(
+                                QuranTranslation.fromId(state.selectedTranslatorId).language
+                            ),
                             fontSize = state.fontSize,
                             isHighlighted = isHighlighted,
                             isAudioPlaying = isAudioPlaying,
@@ -918,6 +923,8 @@ private fun ReaderMushafPage(
     onNavigateToTafseer: (Int, Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val translationFont =
+        translationFontFamily(QuranTranslation.fromId(state.selectedTranslatorId).language)
     if (state.useLineAccurateLayout) {
         val layout = state.mushafPageLayoutCache[pageNumber]
         LaunchedEffect(pageNumber) {
@@ -933,6 +940,7 @@ private fun ReaderMushafPage(
             MushafLinePage(
                 pageNumber = pageNumber,
                 layout = layout,
+                translationFontFamily = translationFont,
                 surahMap = surahMap,
                 arabicFontSize = state.arabicFontSize,
                 highlightedAyahId = highlightedAyahId,
@@ -971,6 +979,7 @@ private fun ReaderMushafPage(
             pageNumber = pageNumber,
             ayahs = ayahs,
             surahMap = surahMap,
+            translationFontFamily = translationFont,
             arabicFontSize = state.arabicFontSize,
             arabicFontFamily = state.arabicFontFamily,
             highlightedAyahId = highlightedAyahId,

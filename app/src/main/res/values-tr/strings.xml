@@ -983,6 +983,9 @@
     <string name="select_reciter_title">Okuyucu Seç</string>
     <string name="select_reciter_search_hint">Okuyucu ara…</string>
     <string name="select_reciter_currently_selected">ŞU AN SEÇİLİ</string>
+    <string name="select_translation_currently_selected">ŞU AN SEÇİLİ</string>
+    <string name="select_translation_search_hint">Çeviri veya dil ara</string>
+    <string name="select_translation_all">Tüm çeviriler</string>
     <string name="select_reciter_popular">POPÜLER OKUYUCULAR</string>
     <string name="surah_info_about">Bu Sure Hakkında</string>
     <string name="surah_info_main_themes">Ana Temalar</string>

@@ -977,6 +977,9 @@
     <string name="select_reciter_title">Rezitator auswählen</string>
     <string name="select_reciter_search_hint">Rezitatoren suchen…</string>
     <string name="select_reciter_currently_selected">DERZEIT AUSGEWÄHLT</string>
+    <string name="select_translation_currently_selected">AKTUELL AUSGEWÄHLT</string>
+    <string name="select_translation_search_hint">Übersetzungen oder Sprachen suchen</string>
+    <string name="select_translation_all">Alle Übersetzungen</string>
     <string name="select_reciter_popular">BELIEBTE REZITATOREN</string>
     <string name="surah_info_about">Über diese Surah</string>
     <string name="surah_info_main_themes">Hauptthemen</string>

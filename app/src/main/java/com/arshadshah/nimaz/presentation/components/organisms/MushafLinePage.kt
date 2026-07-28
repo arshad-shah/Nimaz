@@ -76,6 +76,8 @@ fun MushafLinePage(
     favoriteAyahIds: Set<Int> = emptySet(),
     showTranslation: Boolean = true,
     showTransliteration: Boolean = false,
+    /** Face for translation prose in the ayah sheet; null keeps the body font. */
+    translationFontFamily: FontFamily? = null,
     ayahLookup: (Int) -> Ayah? = { null },
     onBookmarkClick: (Ayah) -> Unit = {},
     onFavoriteClick: (Ayah) -> Unit = {},
@@ -228,6 +230,7 @@ fun MushafLinePage(
         val surah = surahMap[ayah.surahNumber]
 
         AyahTranslationBottomSheet(
+            translationFontFamily = translationFontFamily,
             ayah = ayah,
             surahName = surah?.nameEnglish,
             showTranslation = showTranslation,

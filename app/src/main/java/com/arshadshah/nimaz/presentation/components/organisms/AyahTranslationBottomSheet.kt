@@ -15,6 +15,7 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.tooling.preview.Preview
@@ -53,6 +54,8 @@ fun AyahTranslationBottomSheet(
     surahName: String? = null,
     showTranslation: Boolean = true,
     showTransliteration: Boolean = false,
+    /** Face for the translation prose; null keeps the default body font (see AyahItem). */
+    translationFontFamily: FontFamily? = null,
     sheetState: SheetState = rememberModalBottomSheetState()
 ) {
     NimazBottomSheet(
@@ -65,7 +68,8 @@ fun AyahTranslationBottomSheet(
             ayah = ayah,
             surahName = surahName,
             showTranslation = showTranslation,
-            showTransliteration = showTransliteration
+            showTransliteration = showTransliteration,
+            translationFontFamily = translationFontFamily
         )
     }
 }
@@ -76,7 +80,9 @@ fun AyahTranslationContent(
     modifier: Modifier = Modifier,
     surahName: String? = null,
     showTranslation: Boolean = true,
-    showTransliteration: Boolean = false
+    showTransliteration: Boolean = false,
+    /** Face for the translation prose; null keeps the default body font (see AyahItem). */
+    translationFontFamily: FontFamily? = null
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
         NimazSheetHeader(
@@ -116,7 +122,9 @@ fun AyahTranslationContent(
                         // its punctuation on the wrong side. TextAlign.Start then follows
                         // the resolved direction.
                         style = MaterialTheme.typography.bodyMedium.copy(
-                            lineHeight = 22.sp,
+                            fontFamily = translationFontFamily,
+                            // Nastaliq needs more leading than a Latin face at the same size.
+                            lineHeight = if (translationFontFamily != null) 34.sp else 22.sp,
                             textDirection = TextDirection.Content,
                             textAlign = TextAlign.Start
                         ),

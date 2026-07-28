@@ -75,6 +75,7 @@ object ScreenTags {
     const val SettingsLocation = "screen_settings_location"
     const val SettingsQuran = "screen_settings_quran"
     const val SelectReciter = "screen_select_reciter"
+    const val SelectTranslation = "screen_select_translation"
     const val SettingsWidgets = "screen_settings_widgets"
     const val SettingsAbout = "screen_settings_about"
     const val Licenses = "screen_licenses"

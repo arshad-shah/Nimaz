@@ -90,6 +90,7 @@ import com.arshadshah.nimaz.presentation.screens.qaida.QaidaReaderScreen
 import com.arshadshah.nimaz.presentation.screens.qibla.QiblaScreen
 import com.arshadshah.nimaz.presentation.screens.quran.QuranReaderScreen
 import com.arshadshah.nimaz.presentation.screens.quran.SelectReciterScreen
+import com.arshadshah.nimaz.presentation.screens.quran.SelectTranslationScreen
 import com.arshadshah.nimaz.presentation.screens.quran.SurahInfoScreen
 import com.arshadshah.nimaz.presentation.screens.quran.TafseerChaptersScreen
 import com.arshadshah.nimaz.presentation.screens.quran.TafseerScreen
@@ -875,12 +876,21 @@ fun NavGraph(
             taggedComposable<Route.SettingsQuran>(ScreenTags.SettingsQuran) {
                 QuranSettingsScreen(
                     onNavigateBack = { navController.popBackStack() },
-                    onNavigateToSelectReciter = { navController.navigate(Route.SelectReciter) }
+                    onNavigateToSelectReciter = { navController.navigate(Route.SelectReciter) },
+                    onNavigateToSelectTranslation = {
+                        navController.navigate(Route.SelectTranslation)
+                    }
                 )
             }
 
             taggedComposable<Route.SelectReciter>(ScreenTags.SelectReciter) {
                 SelectReciterScreen(
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
+
+            taggedComposable<Route.SelectTranslation>(ScreenTags.SelectTranslation) {
+                SelectTranslationScreen(
                     onNavigateBack = { navController.popBackStack() }
                 )
             }

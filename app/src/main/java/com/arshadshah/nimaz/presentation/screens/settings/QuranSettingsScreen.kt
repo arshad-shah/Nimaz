@@ -47,6 +47,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.MushafScript
 import com.arshadshah.nimaz.domain.model.QuranTranslation
+import com.arshadshah.nimaz.presentation.components.atoms.BISMILLAH_TEXT
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazDivider
@@ -58,13 +59,12 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownField
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownItem
-import com.arshadshah.nimaz.presentation.components.molecules.NimazListPicker
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
-import com.arshadshah.nimaz.presentation.components.molecules.NimazPickerItem
 import com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsItem
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.TajweedLegendSheet
 import com.arshadshah.nimaz.presentation.theme.QuranArabicFont
+import com.arshadshah.nimaz.presentation.theme.translationFontFamily
 import com.arshadshah.nimaz.presentation.viewmodel.SettingsEvent
 import com.arshadshah.nimaz.presentation.viewmodel.SettingsViewModel
 
@@ -73,13 +73,13 @@ import com.arshadshah.nimaz.presentation.viewmodel.SettingsViewModel
 fun QuranSettingsScreen(
     onNavigateBack: () -> Unit,
     onNavigateToSelectReciter: () -> Unit = {},
+    onNavigateToSelectTranslation: () -> Unit = {},
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val quranState by viewModel.quranState.collectAsState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     var showTajweedLegend by remember { mutableStateOf(false) }
 
-    var showTranslationPicker by remember { mutableStateOf(false) }
     val selectedTranslation = QuranTranslation.fromId(quranState.selectedTranslatorId)
 
     // === ADDING NEW TRANSLATIONS ===
@@ -130,7 +130,8 @@ fun QuranSettingsScreen(
                     showTransliteration = quranState.showTransliteration,
                     showTranslation = quranState.showTranslation,
                     translationText = quranState.previewTranslation,
-                    translationIsRtl = selectedTranslation.isRtl
+                    translationIsRtl = selectedTranslation.isRtl,
+                    translationFontFamily = translationFontFamily(selectedTranslation.language)
                 )
             }
 
@@ -328,11 +329,10 @@ fun QuranSettingsScreen(
             item {
                 NimazSectionHeader(title = stringResource(R.string.translation))
             }
-            // One row that opens the shared picker sheet, rather than 15 rows inlined into a
-            // screen that already carries font, script, tajweed and audio sections.
-            // NimazListPicker gives search (auto-enabled past 8 items), the language grouping
-            // and scroll-to-selected for free — the same pattern PrayerSettingsScreen uses for
-            // calculation method.
+            // One row into a dedicated screen, in the shape of the reciter picker, rather
+            // than 15 rows inlined into a screen that already carries font, script, tajweed
+            // and audio sections. The screen has room for the live Bismillah preview that
+            // makes a translation judgeable by reading it.
             item {
                 NimazMenuGroup {
                     NimazSettingsItem(
@@ -340,7 +340,7 @@ fun QuranSettingsScreen(
                         subtitle = selectedTranslation.language.englishName,
                         value = selectedTranslation.translator,
                         icon = Icons.Default.Translate,
-                        onClick = { showTranslationPicker = true },
+                        onClick = onNavigateToSelectTranslation,
                         showArrow = true
                     )
                 }
@@ -399,25 +399,6 @@ fun QuranSettingsScreen(
         }
     }
 
-    if (showTranslationPicker) {
-        NimazListPicker(
-            title = stringResource(R.string.translation),
-            items = QuranTranslation.entries.map { translation ->
-                NimazPickerItem(
-                    value = translation,
-                    title = translation.translator,
-                    // Both names are in the search corpus, so "Urdu" and "اردو" both find it.
-                    description = "${translation.language.englishName} · " +
-                            translation.language.nativeName,
-                    group = translation.language.englishName
-                )
-            },
-            selected = selectedTranslation,
-            onSelected = { viewModel.onEvent(SettingsEvent.SetTranslator(it.id)) },
-            onDismiss = { showTranslationPicker = false }
-        )
-    }
-
     if (showTajweedLegend) {
         TajweedLegendSheet(onDismiss = { showTajweedLegend = false })
     }
@@ -430,7 +411,8 @@ private fun PreviewCard(
     showTransliteration: Boolean,
     showTranslation: Boolean,
     translationText: String?,
-    translationIsRtl: Boolean
+    translationIsRtl: Boolean,
+    translationFontFamily: FontFamily?
 ) {
     NimazMenuGroup {
         Column(modifier = Modifier.padding(20.dp)) {
@@ -468,7 +450,7 @@ private fun PreviewCard(
 
             // Arabic text - matching reader style
             Text(
-                text = "\u0628\u0650\u0633\u0652\u0645\u0650 \u0627\u0644\u0644\u064E\u0651\u0647\u0650 \u0627\u0644\u0631\u064E\u0651\u062D\u0652\u0645\u064E\u0670\u0646\u0650 \u0627\u0644\u0631\u064E\u0651\u062D\u0650\u064A\u0645\u0650",
+                text = BISMILLAH_TEXT,
                 style = MaterialTheme.typography.headlineLarge,
                 fontFamily = arabicFontFamily,
                 fontSize = arabicFontSize.sp,
@@ -510,8 +492,10 @@ private fun PreviewCard(
                         text = translationText
                             ?: stringResource(R.string.quran_settings_preview_translation),
                         style = MaterialTheme.typography.bodyMedium.copy(
-                            // Urdu ships in the catalogue, so the preview resolves direction
-                            // from the text itself exactly as the reader does.
+                            // Urdu is set in Nastaliq and the body fonts carry no Arabic
+                            // script, so it needs its own face; direction resolves from the
+                            // text itself exactly as the reader does.
+                            fontFamily = translationFontFamily,
                             textDirection = TextDirection.Content,
                             textAlign = if (translationIsRtl) TextAlign.End else TextAlign.Start
                         ),

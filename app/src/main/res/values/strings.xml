@@ -1228,6 +1228,9 @@
     <string name="select_reciter_title">Select Reciter</string>
     <string name="select_reciter_search_hint">Search reciters…</string>
     <string name="select_reciter_currently_selected">CURRENTLY SELECTED</string>
+    <string name="select_translation_currently_selected">CURRENTLY SELECTED</string>
+    <string name="select_translation_search_hint">Search translations or languages</string>
+    <string name="select_translation_all">All translations</string>
     <string name="select_reciter_popular">POPULAR RECITERS</string>
 
     <!-- Surah Info Screen -->
