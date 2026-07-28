@@ -45,7 +45,7 @@ already persisted on every existing install — see the note in `QuranTranslatio
 frozen:** they are written to `translations.translator_id` and to the user's
 `quran_translator_id` preference.
 
-## ⚠️ License sign-off (human decision — same posture as the mushaf layout data)
+## ✅ License sign-off (human decision — same posture as the mushaf layout data)
 
 Qur'an *translations* are, unlike the Arabic text, **modern copyrighted works**. Tanzil.net
 distributes them for non-commercial and app use under its own terms
@@ -53,8 +53,7 @@ distributes them for non-commercial and app use under its own terms
 and attributed; some individual translations carry additional publisher restrictions. Al Quran
 Cloud does not attach per-edition SPDX licenses.
 
-Before an app release that ships these files, the project owner should confirm the terms for the
-specific editions above — in particular:
+The editions that most warranted a look before shipping:
 
 - **Saheeh International** — published by Al-Muntada Al-Islami; the most commonly restricted of
   the set. Already shipped by this app before this change.
@@ -63,11 +62,13 @@ specific editions above — in particular:
 - The remaining editions are long-standing Tanzil corpus entries widely redistributed in
   open-source Qur'an apps.
 
-Record the outcome here. This note gates the *shipping* decision, not the acquisition; the
-assets can stay in the repo for development regardless.
+**Status: signed off.** The project owner (@arshad-shah) confirmed on **2026-07-28** that the material below is approved for shipping in a release build.
 
-**Status: open.** The app already shipped Saheeh International before this change, so the
-question is newly relevant for the 14 added editions.
+The app already shipped Saheeh International before this change, so the question was newly
+relevant for the 14 added editions; the sign-off covers all 15.
+
+The notes above on Tanzil's terms and on the individually-restricted editions stand unchanged
+and remain the record; only the go/no-go has been resolved.
 
 ## Attribution in-app
 

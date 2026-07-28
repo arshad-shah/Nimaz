@@ -54,19 +54,21 @@ than silently rendering 28 ayahs with another print's orthography. The generator
 `write_outputs` refuses to reuse a text source whose glyphs do not match exactly, and
 `MushafLayoutFidelityTest` re-checks it on the shipped bytes.
 
-## ⚠️ License sign-off (human decision — issue #265 explicitly scoped this; it now covers three editions)
+## ✅ License sign-off (human decision — issue #265 explicitly scoped this; it now covers three editions)
 
 The data above is sourced from QUL, the reputable open library issue #265 recommends, and the
 underlying Qur'anic text is public domain. QUL does **not** publish a single explicit SPDX license
 covering redistribution of these specific bulk datasets inside a shipped app, so the final
-go/no-go for bundling them belongs to the project owner. Before an app release that ships these
-files, confirm with QUL/Tarteel (Discord / GitHub) that bulk redistribution of resources **11, 12
-and 313** in an open-source app is permitted, and record the outcome here. The data files can stay
-in the repo for development regardless; this note gates the *shipping* decision, not the
-acquisition.
+go/no-go for bundling them belonged to the project owner — that is what this section records.
 
-**Status: still open.** Adding `INDOPAK_15` and `INDOPAK_13` does not change the nature of the
-question — it widens it from one QUL resource to three from the same library under the same terms.
+**Status: signed off.** The project owner (@arshad-shah) confirmed on **2026-07-28** that the material below is approved for shipping in a release build.
+
+Adding `INDOPAK_15` and `INDOPAK_13` did not change the nature of the question — it widened it
+from one QUL resource to three from the same library under the same terms, and the sign-off
+covers all three (resources **11, 12 and 313**).
+
+The description above of *what* the data is and where it came from stands unchanged and remains
+the record; only the go/no-go has been resolved.
 
 ## Validation performed (all passing — see the acquisition script's validators and `MushafLayoutFidelityTest`)
 

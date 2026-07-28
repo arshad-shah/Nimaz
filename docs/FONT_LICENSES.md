@@ -60,7 +60,7 @@ sync when adding or removing a font (the font picker is driven by
 > Copyright: © Al Qalam © Ghandhara © KFGQPC © Ayman Siddiqui © Credits: Abdul
 > Majeed Khan, Arif Karim, Shakir-ul-Qadree, Jawad
 
-### ⚠️ Shipping sign-off (human decision — mirrors the 1/7 data note)
+### ✅ Shipping sign-off (human decision — mirrors the 1/7 data note)
 
 Nimaz is a **free, non-commercial, open-source** app, i.e. exactly the
 Sadaqa-e-Jaria (charitable, not-for-sale) use this font was released for, and
@@ -69,11 +69,13 @@ the font is bundled **unmodified**. However, the font's own terms ask for
 IndoPak *data* (see `nimaz-pro-data/json/LICENSES_MUSHAF_LAYOUTS.md`), the final
 go/no-go for a public release belongs to the project owner:
 
-- Before an app-store / F-Droid release that ships `indopak_nastaleeq.ttf`,
-  email **quranwbw@gmail.com** to notify/confirm redistribution in a free
-  open-source app, and record the outcome here.
-- The file may stay in the repo for development regardless; this note gates the
-  *release* decision, not the integration.
+**Status: signed off.** The project owner (@arshad-shah) confirmed on **2026-07-28** that
+`indopak_nastaleeq.ttf` is approved for shipping in a release build.
+
+- The font's terms ask for written notice to **quranwbw@gmail.com** before distribution; the
+  owner owns that correspondence.
+- The conditions the font was released under — free, non-commercial, unmodified — continue to
+  hold for this app, and the description above remains the record.
 
 If sign-off is declined, the picker entry can be repointed to an OFL fallback in
 one line in `Type.kt` (e.g. `ScheherazadeFontFamily`) — the ayah-number

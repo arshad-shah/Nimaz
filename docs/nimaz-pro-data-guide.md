@@ -316,8 +316,8 @@ Sizes: ~750–950 KB for Latin-script languages, ~1.4–2.3 MB for Urdu/Bengali/
 The catalogue is mirrored in Kotlin as `domain/model/QuranTranslation.kt`; the ids are frozen (they
 are persisted as `translations.translator_id` and as the user's preference). Run
 `python3 download_translations.py --check` to re-validate the assets and fail on catalogue drift.
-Licensing — translations are modern copyrighted works, unlike the Arabic text — is recorded with a
-sign-off gate in `nimaz-pro-data/json/LICENSES_TRANSLATIONS.md`.
+Licensing — translations are modern copyrighted works, unlike the Arabic text — is recorded in
+`nimaz-pro-data/json/LICENSES_TRANSLATIONS.md`, **signed off for release on 2026-07-28**.
 
 ## Line-accurate Mushaf data (issue #265 — sub-task 1/7 of #263, since generalised)
 
@@ -341,11 +341,11 @@ sign-off gate in `nimaz-pro-data/json/LICENSES_TRANSLATIONS.md`.
 > edition costs only its layout; `INDOPAK_13` differs in the vowel marks of **28 ayahs** and
 > carries its own. The generator refuses to share a text source whose glyphs don't match exactly.
 >
-> The one item that remains a **human decision** is the licensing sign-off for *shipping* the bulk
-> data in a release build — see the ⚠️ note in `nimaz-pro-data/json/LICENSES_MUSHAF_LAYOUTS.md`
-> (the parent issue's own estimate — "3–5 days, dominated by data validation + license
-> verification" — always assumed a human in that loop). **DB/schema wiring is done in sub-task 2/7
-> — see below.**
+> The licensing sign-off for *shipping* the bulk data in a release build was the one item that
+> needed a human decision (the parent issue's own estimate — "3–5 days, dominated by data
+> validation + license verification" — always assumed a human in that loop). It was **granted on
+> 2026-07-28**; see `nimaz-pro-data/json/LICENSES_MUSHAF_LAYOUTS.md`. **DB/schema wiring is done in
+> sub-task 2/7 — see below.**
 
 **Why existing `ayahs.json` isn't enough.** `ayahs.json` / `AyahEntity` (`text_arabic` /
 `text_uthmani`, `page`) is keyed to the **604-page Madani Mushaf** in Uthmani script. A
@@ -371,8 +371,8 @@ edition's *typesetting*. What ships here is **QUL's own structured line-break da
 page/line positions), not a scan, image, or transcription of Taj Company's typeset artwork. "Taj
 company" names the 548-page 16-line *layout standard* the data follows — the edition ḥuffāẓ
 memorise from — which is exactly the "structured data, not scanned page images" path the issue
-points to. The final sign-off for *shipping* this in a release build is a documented human decision
-(see `LICENSES_MUSHAF_LAYOUTS.md`), and now covers QUL resources 11, 12 and 313.
+points to. The sign-off for *shipping* this in a release build is a documented human decision
+(see `LICENSES_MUSHAF_LAYOUTS.md`), granted 2026-07-28 and covering QUL resources 11, 12 and 313.
 
 **Target files & schema**, reconciled against the existing 6,236-ayah id space (`AyahEntity.id`):
 
@@ -427,7 +427,7 @@ header-and-basmalah pair sharing a `line_number` as two logical lines, not colla
 - [x] Every edition's layout covers all its pages, each within its line count; 114 surah headers,
   112 basmalah lines, and every ayah's word positions exactly covered by its line-segments.
 - [x] `nimaz-pro-data/json/LICENSES_MUSHAF_LAYOUTS.md` records the exact source, version/date, and license
-  situation actually used, with the shipping sign-off flagged as the remaining human decision.
+  situation actually used, with the shipping sign-off recorded as granted (2026-07-28).
 
 Re-generate/validate any time with `python3 nimaz-pro-data/scripts/download_indopak_mushaf_data.py`
 (pages cache under `$INDOPAK_CACHE_DIR`, default `/tmp/indopak_pages`).
