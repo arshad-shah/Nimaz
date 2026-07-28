@@ -1,0 +1,19 @@
+id: 20260728T1021_strip-leading-bom-from-al-fatiha-1-1
+title: strip leading BOM from al-fatiha 1:1
+author: agent:claude-opus-5
+origin: agent
+collections:
+  quran.uthmani:
+    bump: patch
+    expect:
+      rows_delta: 0
+      rows_after: 6236
+      keys_touched: 1
+    protected:
+    - text_arabic
+    - text_uthmani
+rationale: Found by the text.no-bom rule on the first full run against the real corpus. ayahs.text_arabic
+  and ayahs.text_uthmani both carry U+FEFF at index 0 for id=1 (the Bismillah of al-Fatiha). generate_database.py
+  strips it from text_arabic via normalise_uthmani (#290) but never from text_uthmani, and the shipped
+  asset predates that fix, so regenerating would not have caught it either. Both columns are protected,
+  so this needs --confirm-protected. Proposed for review, not applied.

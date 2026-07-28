@@ -1,0 +1,1 @@
+-- irreversible by design: re-inserting a BOM is never the right fix
