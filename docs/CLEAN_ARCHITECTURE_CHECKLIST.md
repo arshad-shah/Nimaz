@@ -197,6 +197,39 @@ rg -U --multiline-dotall -n '\.collect\s*\{(?:[^}]|
 ){0,400}?\.collect\s*\{'   app/src/main/java --glob '*ViewModel.kt'
 ```
 
+### AP-7.1b · Un-cancelled collectors that stack per navigation
+
+- [x] ~~**`QuranViewModel.loadSurah` / `loadJuz` / `loadPage`.**~~ **Resolved.** Each did a bare
+  `viewModelScope.launch { flow.collect { … } }` with no handle kept, so nothing was ever
+  cancelled. These collect Room flows, which never complete, so **every surah/juz/page the user
+  had opened kept a live collector for the lifetime of the ViewModel**, all writing the same
+  `_readerState`. Symptoms are timing-dependent and easy to misread: previous content flicking
+  back over the new, or a stale value winning a race after a settings change. Only `searchJob`
+  was being tracked and cancelled.
+
+  Fixed by giving the three loaders one shared `contentJob` that each cancels before launching.
+  A related fix landed with it: a translation change now re-issues the current load, because the
+  ayah queries take the translator id as a *parameter* captured at subscription — an already
+  running collector keeps serving the old translation forever.
+
+  Rule of thumb: a `launch { … .collect { … } }` in a ViewModel that can be triggered **more than
+  once for the same state** needs a `Job` you cancel, or `flatMapLatest` off the trigger.
+
+- [ ] **Same shape elsewhere — untriaged.** The detect command below flags `HadithViewModel`
+  (`searchHadiths` / `searchHadithsInBook`, re-launched per query with no cancellation, so
+  typing stacks a collector per keystroke and an earlier query can land last) and
+  `SyncViewModel`. Not touched here — the Quran fix was scoped to the reported bug — but they
+  are the same defect and worth the same treatment.
+
+Detect:
+
+```bash
+# ViewModel launches that collect without keeping a Job handle — each hit needs a human look
+rg -n -U --multiline-dotall \
+  'viewModelScope\.launch\s*\{(?:[^}]|\n){0,300}?\.collect\s*\{' \
+  app/src/main/java --glob '*ViewModel.kt' | grep -v 'Job = viewModelScope'
+```
+
 ### AP-7.2 · `Get*` and `Observe*` variants of the same read
 
 - [x] ~~**Khatam had both `GetActiveKhatamUseCase` and `ObserveActiveKhatamUseCase`**~~ (also
