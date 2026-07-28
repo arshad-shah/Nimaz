@@ -1121,7 +1121,6 @@
     <string name="mushaf_script_indopak16">IndoPak 16-line (548 pages)</string>
     <string name="mushaf_script_indopak15">IndoPak 15-line (610 pages)</string>
     <string name="mushaf_script_indopak13">IndoPak 13-line (847 pages)</string>
-    <string name="translation_selected">Selected</string>
     <string name="display_options">Display Options</string>
     <string name="show_transliteration">Show Transliteration</string>
     <string name="show_transliteration_subtitle">Roman letters pronunciation</string>

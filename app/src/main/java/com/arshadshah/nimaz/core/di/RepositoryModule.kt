@@ -89,6 +89,7 @@ import com.arshadshah.nimaz.domain.usecase.GetAllProphetsUseCase
 import com.arshadshah.nimaz.domain.usecase.GetAsmaUlHusnaByIdUseCase
 import com.arshadshah.nimaz.domain.usecase.GetAsmaUnNabiByIdUseCase
 import com.arshadshah.nimaz.domain.usecase.GetAvailableTranslatorsUseCase
+import com.arshadshah.nimaz.domain.usecase.GetAyahTranslationUseCase
 import com.arshadshah.nimaz.domain.usecase.GetAyahByIdUseCase
 import com.arshadshah.nimaz.domain.usecase.GetAyahsByJuzUseCase
 import com.arshadshah.nimaz.domain.usecase.GetAyahsByPageUseCase
@@ -432,6 +433,9 @@ object UseCaseModule {
     fun provideQuranUseCases(
         repository: QuranRepository
     ): QuranUseCases {
+        // Shared so the verse-of-the-day path and the settings preview resolve a single
+        // ayah's translation through the same seam.
+        val getAyahTranslation = GetAyahTranslationUseCase(repository)
         return QuranUseCases(
             getSurahList = GetSurahListUseCase(repository),
             getSurahByNumber = GetSurahByNumberUseCase(repository),
@@ -459,7 +463,8 @@ object UseCaseModule {
             getPageAyahRanges = GetPageAyahRangesUseCase(repository),
             getMushafPagination = GetMushafPaginationUseCase(repository),
             getMushafPageLayout = GetMushafPageLayoutUseCase(repository),
-            getVerseOfTheDay = GetVerseOfTheDayUseCase(repository)
+            getVerseOfTheDay = GetVerseOfTheDayUseCase(repository, getAyahTranslation),
+            getAyahTranslation = getAyahTranslation
         )
     }
 

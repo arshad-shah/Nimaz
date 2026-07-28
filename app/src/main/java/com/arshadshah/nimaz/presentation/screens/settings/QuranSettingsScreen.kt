@@ -18,7 +18,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
@@ -40,6 +40,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -57,8 +58,9 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownField
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownItem
+import com.arshadshah.nimaz.presentation.components.molecules.NimazListPicker
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
-import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuItem
+import com.arshadshah.nimaz.presentation.components.molecules.NimazPickerItem
 import com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsItem
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.TajweedLegendSheet
@@ -76,6 +78,9 @@ fun QuranSettingsScreen(
     val quranState by viewModel.quranState.collectAsState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     var showTajweedLegend by remember { mutableStateOf(false) }
+
+    var showTranslationPicker by remember { mutableStateOf(false) }
+    val selectedTranslation = QuranTranslation.fromId(quranState.selectedTranslatorId)
 
     // === ADDING NEW TRANSLATIONS ===
     // The translation picker is driven entirely by the QuranTranslation enum in
@@ -123,7 +128,9 @@ fun QuranSettingsScreen(
                     arabicFontSize = quranState.arabicFontSize,
                     arabicFontFamily = selectedFont.fontFamily,
                     showTransliteration = quranState.showTransliteration,
-                    showTranslation = quranState.showTranslation
+                    showTranslation = quranState.showTranslation,
+                    translationText = quranState.previewTranslation,
+                    translationIsRtl = selectedTranslation.isRtl
                 )
             }
 
@@ -321,40 +328,21 @@ fun QuranSettingsScreen(
             item {
                 NimazSectionHeader(title = stringResource(R.string.translation))
             }
-            // One group per language, so 15 translations stay scannable. Both the grouping
-            // and the rows come straight from the QuranTranslation catalogue.
-            QuranTranslation.byLanguage().forEach { (language, translations) ->
-                item(key = "translation-language-${language.code}") {
-                    Text(
-                        text = "${language.englishName} · ${language.nativeName}",
-                        style = MaterialTheme.typography.titleSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(start = 4.dp, top = 4.dp, bottom = 4.dp)
+            // One row that opens the shared picker sheet, rather than 15 rows inlined into a
+            // screen that already carries font, script, tajweed and audio sections.
+            // NimazListPicker gives search (auto-enabled past 8 items), the language grouping
+            // and scroll-to-selected for free — the same pattern PrayerSettingsScreen uses for
+            // calculation method.
+            item {
+                NimazMenuGroup {
+                    NimazSettingsItem(
+                        title = stringResource(R.string.translation),
+                        subtitle = selectedTranslation.language.englishName,
+                        value = selectedTranslation.translator,
+                        icon = Icons.Default.Translate,
+                        onClick = { showTranslationPicker = true },
+                        showArrow = true
                     )
-                }
-                item(key = "translation-group-${language.code}") {
-                    NimazMenuGroup {
-                        translations.forEachIndexed { index, translation ->
-                            val isSelected = quranState.selectedTranslatorId == translation.id
-                            NimazMenuItem(
-                                title = translation.translator,
-                                subtitle = if (isSelected) {
-                                    stringResource(R.string.translation_selected)
-                                } else {
-                                    null
-                                },
-                                trailingIcon = if (isSelected) Icons.Default.Check else null,
-                                onClick = {
-                                    viewModel.onEvent(
-                                        SettingsEvent.SetTranslator(translation.id)
-                                    )
-                                }
-                            )
-                            if (index < translations.lastIndex) {
-                                NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
-                            }
-                        }
-                    }
                 }
             }
 
@@ -411,6 +399,25 @@ fun QuranSettingsScreen(
         }
     }
 
+    if (showTranslationPicker) {
+        NimazListPicker(
+            title = stringResource(R.string.translation),
+            items = QuranTranslation.entries.map { translation ->
+                NimazPickerItem(
+                    value = translation,
+                    title = translation.translator,
+                    // Both names are in the search corpus, so "Urdu" and "اردو" both find it.
+                    description = "${translation.language.englishName} · " +
+                            translation.language.nativeName,
+                    group = translation.language.englishName
+                )
+            },
+            selected = selectedTranslation,
+            onSelected = { viewModel.onEvent(SettingsEvent.SetTranslator(it.id)) },
+            onDismiss = { showTranslationPicker = false }
+        )
+    }
+
     if (showTajweedLegend) {
         TajweedLegendSheet(onDismiss = { showTajweedLegend = false })
     }
@@ -421,7 +428,9 @@ private fun PreviewCard(
     arabicFontSize: Float,
     arabicFontFamily: FontFamily,
     showTransliteration: Boolean,
-    showTranslation: Boolean
+    showTranslation: Boolean,
+    translationText: String?,
+    translationIsRtl: Boolean
 ) {
     NimazMenuGroup {
         Column(modifier = Modifier.padding(20.dp)) {
@@ -495,11 +504,22 @@ private fun PreviewCard(
                     tone = NimazTone.NEUTRAL
                 ) {
                     Text(
-                        text = stringResource(R.string.quran_settings_preview_translation),
-                        style = MaterialTheme.typography.bodyMedium,
+                        // The real text of the selected translation, so switching in the
+                        // picker is visible here immediately. Falls back to the bundled
+                        // sample only before the first load resolves.
+                        text = translationText
+                            ?: stringResource(R.string.quran_settings_preview_translation),
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            // Urdu ships in the catalogue, so the preview resolves direction
+                            // from the text itself exactly as the reader does.
+                            textDirection = TextDirection.Content,
+                            textAlign = if (translationIsRtl) TextAlign.End else TextAlign.Start
+                        ),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         lineHeight = 22.sp,
-                        modifier = Modifier.padding(12.dp)
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(12.dp)
                     )
                 }
             }

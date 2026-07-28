@@ -215,22 +215,34 @@ class GetMushafPageLayoutUseCase @Inject constructor(
 }
 
 /**
+ * One ayah's text in one translation, or null when that ayah has no translation.
+ *
+ * Reading it also *seeds* that translation if it is not on the device yet (translations
+ * ship as assets and are populated on first use), so this doubles as the "make this
+ * translation available" call — which is what lets the Quran settings preview show a live
+ * sample of whichever translation the user just picked.
+ */
+class GetAyahTranslationUseCase @Inject constructor(
+    private val repository: QuranRepository
+) {
+    suspend operator fun invoke(ayahId: Int, translatorId: String): String? =
+        repository.getTranslationsForAyahs(listOf(ayahId), translatorId).first()[ayahId]
+}
+
+/**
  * Returns a deterministic "verse of the day" for a given day. The same day always
  * resolves to the same ayah for every user (no randomness/persistence required),
  * and the selected ayah carries its translation for the requested translator.
  */
 class GetVerseOfTheDayUseCase @Inject constructor(
-    private val repository: QuranRepository
+    private val repository: QuranRepository,
+    private val getAyahTranslation: GetAyahTranslationUseCase
 ) {
     suspend operator fun invoke(epochDay: Long, translatorId: String? = null): Ayah? {
         // Map the day onto a stable ayah id in 1..TOTAL_AYAHS (handles negative epochDay).
         val ayahId = (((epochDay % TOTAL_AYAHS) + TOTAL_AYAHS) % TOTAL_AYAHS).toInt() + 1
         val ayah = repository.getAyahById(ayahId) ?: return null
-        val translation = if (translatorId != null) {
-            repository.getTranslationsForAyahs(listOf(ayahId), translatorId).first()[ayahId]
-        } else {
-            null
-        }
+        val translation = translatorId?.let { getAyahTranslation(ayahId, it) }
         return if (translation != null) ayah.copy(translation = translation) else ayah
     }
 
@@ -281,5 +293,6 @@ data class QuranUseCases(
     val getPageAyahRanges: GetPageAyahRangesUseCase,
     val getMushafPagination: GetMushafPaginationUseCase,
     val getMushafPageLayout: GetMushafPageLayoutUseCase,
-    val getVerseOfTheDay: GetVerseOfTheDayUseCase
+    val getVerseOfTheDay: GetVerseOfTheDayUseCase,
+    val getAyahTranslation: GetAyahTranslationUseCase
 )

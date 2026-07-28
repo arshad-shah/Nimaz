@@ -859,7 +859,6 @@
     <string name="mushaf_script_indopak16">IndoPak 16-baris (548 halaman)</string>
     <string name="mushaf_script_indopak15">IndoPak 15-baris (610 halaman)</string>
     <string name="mushaf_script_indopak13">IndoPak 13-baris (847 halaman)</string>
-    <string name="translation_selected">Dipilih</string>
     <string name="display_options">Opsi Tampilan</string>
     <string name="show_transliteration">Tampilkan Transliterasi</string>
     <string name="show_transliteration_subtitle">Pelafalan dengan huruf Latin</string>
