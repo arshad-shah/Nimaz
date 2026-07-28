@@ -96,3 +96,23 @@ def translation_non_empty(ctx) -> Iterable[Failure]:
 
 def _collections_of_kind(ctx, kind: str) -> list[str]:
     return sorted(name for name, spec in ctx.specs.items() if spec.kind == kind)
+
+
+@rule(id="hadith.non-empty", scope="kind:hadith", severity="blocking")
+def hadith_non_empty(ctx) -> Iterable[Failure]:
+    """No blank hadith text.
+
+    Not hypothetical: nimaz-pro-data/output/nimaz_prepopulated.db carries 379
+    hadiths with empty text_arabic and text_english that the JSON sources do not
+    have. The shipped asset is intact, so the blanks were introduced somewhere
+    between the JSON and that file — and nothing in the old pipeline would have
+    told anyone before it reached a device.
+    """
+    for row in ctx.rows:
+        blanks = [
+            c
+            for c in ("text_arabic", "text_english")
+            if c in ctx.collection.schema and not str(row.get(c) or "").strip()
+        ]
+        if blanks:
+            yield Failure(key=ctx.key_of(row), detail=f"empty {', '.join(blanks)}")

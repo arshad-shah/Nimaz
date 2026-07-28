@@ -33,25 +33,34 @@ Deviations from the document are listed at the end of this file.
 
 ## The bootstrap, actually run
 
-Numbers below are from one real run against `nimaz-pro-data/output/nimaz_prepopulated.db`
-(sha256 `4e31ad37…`, 146,313,216 bytes, `user_version = 12`), not from the test
-fixture. Re-derive any of them with the commands in the next section.
+Numbers below are from a real run against the **shipped** asset,
+`app/src/main/assets/database/nimaz_prepopulated.db` (sha256 `6b57b4d4…`,
+147,292,160 bytes, `user_version = 12`), not from the test fixture.
+
+**Seal the shipped asset, not `nimaz-pro-data/output/`.** The two differ: the
+generator output carries **379 hadiths with empty `text_arabic`/`text_english`**
+that the JSON sources do not have and the shipped asset does not have. It is
+stale, damaged output, and shipping it would blank 379 hadiths on device. The
+`hadith.non-empty` rule now catches it — `nz validate --db
+nimaz-pro-data/output/nimaz_prepopulated.db --rule hadith.non-empty` reports all
+379. That is the whole argument for this tool in one example: the old pipeline
+had no stage that would have said so.
 
 | | |
 |---|---|
 | vault sealed | 1.6 s |
 | `nz init` — 24 collections + 20 user tables (schema only) | 5.6 s → 125 MB NDJSON |
 | `nz build --against-vault` — 60,922 content rows | 15.3 s |
-| **round trip** | **38/38 tables byte-identical to the vault** |
+| **round trip** | **24/24 collections, 38/38 tables byte-identical to the vault** |
 | three consecutive builds | all `sha256:aae5978d…`, `cmp`-identical |
-| full rule run | 12 rules, **1 blocking finding** |
+| full rule run | 13 rules, **1 blocking finding** |
 
 The round trip was re-checked by a script that does not import `nimaz_data` at
 all — plain `sqlite3` + `hashlib`, XOR of per-row digests so row order cannot
 mask a difference. The candidate's only structural difference from the vault is
 the `_manifest` table the build adds.
 
-**The one blocking finding was real.** `ayahs.text_arabic` and
+**The one blocking finding was real, and it is on devices.** `ayahs.text_arabic` and
 `ayahs.text_uthmani` both carry `U+FEFF` at index 0 of ayah 1:1 — a BOM inside
 the Bismillah. `generate_database.py` strips it from `text_arabic` via
 `normalise_uthmani` (#290) but never from `text_uthmani`, and the shipped asset
