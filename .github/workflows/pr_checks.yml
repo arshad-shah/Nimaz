@@ -49,6 +49,12 @@ jobs:
       - name: Set execution flag for gradlew
         run: chmod +x gradlew
 
+      # Cheap and first: the release version bump has no other coverage, and
+      # getting it wrong is only visible after a full release build has been
+      # spent and the Play upload is rejected as a duplicate version code.
+      - name: Check the release version bump
+        run: ruby fastlane/version_bump_spec.rb
+
       - name: Run Tests and Lint
         run: bundle exec fastlane android test
 

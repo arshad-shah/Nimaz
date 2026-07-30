@@ -35,30 +35,105 @@ platform :android do
     )
   end
 
+  # Highest versionCode Google Play has already seen, across every track.
+  #
+  # Play — not the checked-out tree — is the authority on what "already used"
+  # means, and the two disagree whenever a deploy is in flight: the bump lands
+  # on dev only *after* the upload succeeds, so a second deploy starting in that
+  # window checks out the pre-bump tree, picks the same code, and its upload is
+  # rejected with "Version code N has already been used" after a full 17-minute
+  # build. Asking Play closes that window no matter which tree is checked out.
+  #
+  # Returns nil when Play cannot be reached (no service-account key on a local
+  # run, say), so the caller falls back to the tree baseline.
+  def highest_play_version_code(package_name)
+    key = ENV["ANDROID_JSON_KEY_FILE"]
+    if key.nil? || key.empty?
+      UI.important("No ANDROID_JSON_KEY_FILE; using the checked-out tree as the version baseline.")
+      return nil
+    end
+
+    codes = %w[internal alpha beta production].flat_map do |track|
+      begin
+        Array(google_play_track_version_codes(
+          package_name: package_name,
+          track: track,
+          json_key: key
+        ))
+      rescue StandardError => e
+        # An empty or never-used track raises rather than returning []. That is
+        # not fatal: the other tracks still bound the baseline.
+        UI.important("Could not read the '#{track}' track (#{e.message}); ignoring it.")
+        []
+      end
+    end
+
+    highest = codes.compact.map(&:to_i).max
+    # A key was supplied but no track answered: the network or the credential is
+    # broken. Fail rather than fall back to the tree, because the tree is exactly
+    # what cannot be trusted here — guessing produces a duplicate code and the
+    # upload dies after the build instead of before it.
+    UI.user_error!("Have a Play credential but could not read a version code from any track; refusing to guess.") if highest.nil?
+    highest
+  end
+
+  # Highest released versionName, taken from the release tags. Same reasoning as
+  # above: tags are pushed for every published build, so they outlive a stale
+  # working tree and keep the name moving in lockstep with the code.
+  def highest_tagged_version_name
+    tags = `git tag --list 'v[0-9]*.[0-9]*.[0-9]*' --sort=-v:refname`.split("\n")
+    tags.map { |t| t.strip.delete_prefix("v") }.reject(&:empty?).max_by { |n| version_key(n) }
+  rescue StandardError => e
+    UI.important("Could not read release tags (#{e.message}); using the tree's versionName.")
+    nil
+  end
+
+  def version_key(name)
+    name.split(".").map(&:to_i)
+  end
+
   private_lane :fetch_and_increment_build_number do
     # Bump the version in build.gradle.kts for this build. We only edit the
     # working tree here; committing and pushing the bump back to dev is handled
     # by the deploy workflow after the build/upload succeeds (it pushes with a
     # GitHub App token that can bypass branch protection).
     #
+    # The baseline is the highest of what the tree says and what has actually
+    # been published, so the bump is monotonic even when the tree is behind.
+    #
     # The project uses the Kotlin DSL (build.gradle.kts), which the
     # android_versioning plugin does not support, hence the manual approach.
     gradle_file = File.expand_path("../app/build.gradle.kts", __dir__)
     contents = File.read(gradle_file)
 
-    current_code = contents[/versionCode\s*=\s*(\d+)/, 1]
-    UI.user_error!("Could not find versionCode in #{gradle_file}") if current_code.nil?
-    new_code = current_code.to_i + 1
-    contents = contents.sub(/versionCode\s*=\s*\d+/, "versionCode = #{new_code}")
+    tree_code = contents[/versionCode\s*=\s*(\d+)/, 1]
+    UI.user_error!("Could not find versionCode in #{gradle_file}") if tree_code.nil?
+    tree_name = contents[/versionName\s*=\s*"([^"]+)"/, 1]
+    UI.user_error!("Could not find versionName in #{gradle_file}") if tree_name.nil?
 
-    current_name = contents[/versionName\s*=\s*"([^"]+)"/, 1]
-    UI.user_error!("Could not find versionName in #{gradle_file}") if current_name.nil?
-    major, minor, patch = current_name.split(".").map(&:to_i)
+    package_name = contents[/applicationId\s*=\s*"([^"]+)"/, 1]
+    UI.user_error!("Could not find applicationId in #{gradle_file}") if package_name.nil?
+
+    play_code = highest_play_version_code(package_name)
+    baseline_code = [tree_code.to_i, play_code].compact.max
+    if play_code && play_code >= tree_code.to_i
+      UI.important("Play has versionCode #{play_code}; the tree says #{tree_code}. Using Play as the baseline.")
+    end
+    new_code = baseline_code + 1
+
+    tagged_name = highest_tagged_version_name
+    baseline_name = [tree_name, tagged_name].compact.max_by { |n| version_key(n) }
+    if tagged_name && (version_key(tagged_name) <=> version_key(tree_name)) == 1
+      UI.important("Tag v#{tagged_name} is ahead of the tree's #{tree_name}. Using the tag as the baseline.")
+    end
+    major, minor, patch = version_key(baseline_name)
     new_name = "#{major}.#{minor}.#{patch + 1}"
+
+    contents = contents.sub(/versionCode\s*=\s*\d+/, "versionCode = #{new_code}")
     contents = contents.sub(/versionName\s*=\s*"[^"]+"/, "versionName = \"#{new_name}\"")
 
     File.write(gradle_file, contents)
-    UI.success("Bumped versionCode #{current_code} -> #{new_code}, versionName #{current_name} -> #{new_name}")
+    UI.success("Bumped versionCode #{baseline_code} -> #{new_code}, versionName #{baseline_name} -> #{new_name}")
   end
 
   private_lane :build_and_sign_apk_or_aab do

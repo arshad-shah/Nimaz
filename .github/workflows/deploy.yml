@@ -9,6 +9,15 @@ on:
   push:
     branches: [ dev ]
 
+# Never run two deploys at once. Each one bumps the version, uploads, and only
+# then pushes the bump back to dev, so overlapping runs read the same baseline
+# and the later upload is rejected as a duplicate version code. Queue instead of
+# cancelling: a run that has already uploaded to Play still has to push its bump
+# and tag, and cancelling it there would leave dev behind what Play has.
+concurrency:
+  group: android-deploy
+  cancel-in-progress: false
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
