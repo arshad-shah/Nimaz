@@ -43,6 +43,21 @@ data class SurahEntity(
         Index(value = ["page"])
     ]
 )
+/**
+ * A verse's *place* in the mushaf. Not its text.
+ *
+ * Until schemaVersion 22 this row carried four renderings of the verse, a boolean and a
+ * nullable string for prostration, and a nullable transliteration — of which the two script
+ * columns were byte-identical in all 6,236 rows, `text_indopak` was NULL in all of them, and
+ * `sajda_type` was NULL in 6,221. A table where most columns are absent for most rows is a
+ * table modelling several things at once.
+ *
+ * Text now lives in [MushafAyahTextEntity], one row per (source, ayah), so a rendering is data
+ * rather than a column: `UTHMANI`, `SIMPLE`, `INDOPAK`, `INDOPAK_13`. Prostration lives in
+ * [SajdaEntity], fifteen rows instead of two columns on six thousand. `transliteration` and
+ * `text_tajweed` stay for now — the first has no second source to sit beside, and the second is
+ * JSON spans rather than a script, so filing it under a text *source* would conflate two things.
+ */
 data class AyahEntity(
     @PrimaryKey
     val id: Int, // Unique ayah id (1-6236)
@@ -52,25 +67,9 @@ data class AyahEntity(
     val numberInSurah: Int, // Ayah number within surah
     @ColumnInfo(name = "number_global")
     val numberGlobal: Int, // Global ayah number
-    @ColumnInfo(name = "text_arabic")
-    val textArabic: String,
-    @ColumnInfo(name = "text_uthmani")
-    val textUthmani: String, // Uthmani script
-    /**
-     * Superseded by [MushafAyahTextEntity], which holds one row per (text source, ayah) and
-     * so can carry more than one script. Kept as a column because dropping one in SQLite
-     * means rebuilding a 6,236-row table for no functional gain; the schema v20 migration
-     * nulls it out to reclaim the space. Nothing reads it — resolve glyph text through
-     * `mushaf_ayah_texts` instead.
-     */
-    @ColumnInfo(name = "text_indopak")
-    val textIndopak: String? = null,
     val juz: Int,
     val hizb: Int,
     val page: Int,
-    val sajda: Int, // 0 = no sajda, 1 = sajda
-    @ColumnInfo(name = "sajda_type")
-    val sajdaType: String?, // "obligatory", "recommended", or null
     val transliteration: String? = null,
     @ColumnInfo(name = "text_tajweed")
     val textTajweed: String? = null
@@ -221,4 +220,81 @@ data class ReadingProgressEntity(
     val totalAyahsRead: Int,
     val currentKhatmaCount: Int, // Number of complete Quran readings
     val updatedAt: Long = System.currentTimeMillis()
+)
+
+/**
+ * The divisions of the mushaf, as ranges rather than columns on every verse.
+ *
+ * `ayahs.juz`, `.hizb` and `.page` answer "which juz is this verse in" and no question a
+ * reader asks: where juz 18 begins, how many pages it runs, which ruku this is, what the next
+ * quarter is. Those needed a scan over 6,236 rows and a MIN/MAX, which is why nothing did them.
+ * Each of these tables answers them with one row. Ranges are inclusive global ayah ids and are
+ * asserted by the data console to tile 1..6236 exactly once.
+ *
+ * `rukus` and `manzils` are content the corpus never carried at all.
+ */
+@Entity(tableName = "juzs")
+data class JuzEntity(
+    @PrimaryKey val number: Int,
+    @ColumnInfo(name = "start_ayah_id") val startAyahId: Int,
+    @ColumnInfo(name = "end_ayah_id") val endAyahId: Int,
+)
+
+@Entity(tableName = "hizb_quarters", indices = [Index(value = ["juz_number"])])
+data class HizbQuarterEntity(
+    @PrimaryKey val number: Int,
+    @ColumnInfo(name = "juz_number") val juzNumber: Int,
+    @ColumnInfo(name = "start_ayah_id") val startAyahId: Int,
+    @ColumnInfo(name = "end_ayah_id") val endAyahId: Int,
+)
+
+@Entity(tableName = "manzils")
+data class ManzilEntity(
+    @PrimaryKey val number: Int,
+    @ColumnInfo(name = "start_ayah_id") val startAyahId: Int,
+    @ColumnInfo(name = "end_ayah_id") val endAyahId: Int,
+)
+
+@Entity(tableName = "rukus", indices = [Index(value = ["surah_id"])])
+data class RukuEntity(
+    @PrimaryKey val number: Int,
+    @ColumnInfo(name = "surah_id") val surahId: Int,
+    @ColumnInfo(name = "start_ayah_id") val startAyahId: Int,
+    @ColumnInfo(name = "end_ayah_id") val endAyahId: Int,
+)
+
+@Entity(tableName = "pages")
+data class PageEntity(
+    @PrimaryKey val number: Int,
+    @ColumnInfo(name = "start_ayah_id") val startAyahId: Int,
+    @ColumnInfo(name = "end_ayah_id") val endAyahId: Int,
+)
+
+/**
+ * A prostration verse. Fifteen rows, replacing `ayahs.sajda` and `ayahs.sajda_type`.
+ *
+ * `kind` is the corpus's classification. `upstreamKind` records where Tanzil's metadata
+ * disagrees — 7:206 and 84:21 (corpus obligatory, Tanzil recommended) and 41:38 (the reverse) —
+ * because obligation is a question of fiqh and discarding one of two answers would hide that
+ * the question is open. The reader shows `kind`.
+ */
+@Entity(tableName = "sajdas", indices = [Index(value = ["sequence"])])
+data class SajdaEntity(
+    @PrimaryKey @ColumnInfo(name = "ayah_id") val ayahId: Int,
+    val sequence: Int,
+    val kind: String,
+    @ColumnInfo(name = "upstream_kind") val upstreamKind: String? = null,
+)
+
+/** Per-surah spans and counts, so a surah header is one row instead of an aggregate query. */
+@Entity(tableName = "surah_structure")
+data class SurahStructureEntity(
+    @PrimaryKey @ColumnInfo(name = "surah_id") val surahId: Int,
+    @ColumnInfo(name = "ruku_count") val rukuCount: Int,
+    @ColumnInfo(name = "start_ayah_id") val startAyahId: Int,
+    @ColumnInfo(name = "end_ayah_id") val endAyahId: Int,
+    @ColumnInfo(name = "start_page") val startPage: Int,
+    @ColumnInfo(name = "end_page") val endPage: Int,
+    @ColumnInfo(name = "has_basmalah") val hasBasmalah: Int,
+    @ColumnInfo(name = "revelation_order") val revelationOrder: Int,
 )

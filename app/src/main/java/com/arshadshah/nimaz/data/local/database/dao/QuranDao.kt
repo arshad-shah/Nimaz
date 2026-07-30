@@ -1,12 +1,21 @@
 package com.arshadshah.nimaz.data.local.database.dao
 
+import androidx.room.ColumnInfo
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
+import androidx.room.Embedded
 import com.arshadshah.nimaz.data.local.database.entity.AyahEntity
+import com.arshadshah.nimaz.data.local.database.entity.HizbQuarterEntity
+import com.arshadshah.nimaz.data.local.database.entity.JuzEntity
+import com.arshadshah.nimaz.data.local.database.entity.ManzilEntity
+import com.arshadshah.nimaz.data.local.database.entity.PageEntity
+import com.arshadshah.nimaz.data.local.database.entity.RukuEntity
+import com.arshadshah.nimaz.data.local.database.entity.SajdaEntity
+import com.arshadshah.nimaz.data.local.database.entity.SurahStructureEntity
 import com.arshadshah.nimaz.data.local.database.entity.MushafAyahTextEntity
 import com.arshadshah.nimaz.data.local.database.entity.MushafLayoutLineEntity
 import com.arshadshah.nimaz.data.local.database.entity.QuranBookmarkEntity
@@ -109,11 +118,229 @@ interface QuranDao {
     )
     suspend fun getLayoutPageAyahRanges(script: String): List<PageAyahRangeRow>
 
-    @Query("SELECT * FROM ayahs WHERE sajda_type IS NOT NULL ORDER BY id ASC")
+    // The prostration verses, in mushaf order. `sajda`/`sajda_type` were columns on all 6,236
+    // rows to describe fifteen of them; since schemaVersion 22 they are the `sajdas` table.
+    @Query(
+        """
+        SELECT a.* FROM ayahs a
+        JOIN sajdas s ON s.ayah_id = a.id
+        ORDER BY s.sequence ASC
+        """
+    )
     fun getSajdaAyahs(): Flow<List<AyahEntity>>
 
-    @Query("SELECT * FROM ayahs WHERE text_uthmani LIKE '%' || :query || '%' OR text_arabic LIKE '%' || :query || '%'")
+    /** The fifteen prostrations with their classification, which the ayah row no longer carries. */
+    @Query("SELECT * FROM sajdas ORDER BY sequence ASC")
+    fun getSajdas(): Flow<List<SajdaEntity>>
+
+    @Query("SELECT * FROM sajdas WHERE ayah_id = :ayahId")
+    suspend fun getSajdaForAyah(ayahId: Int): SajdaEntity?
+
+    // Search every rendering rather than one column twice. The old query was
+    // `text_uthmani LIKE … OR text_arabic LIKE …` over two columns that held identical bytes,
+    // so it scanned the same 1.3 MB twice and could never match anything the other missed.
+    // Now a match in any script — Uthmani, plain, either IndoPak — finds the verse, and DISTINCT
+    // keeps a verse that matches in three of them from appearing three times.
+    @Query(
+        """
+        SELECT DISTINCT a.* FROM ayahs a
+        JOIN mushaf_ayah_texts t ON t.ayah_id = a.id
+        WHERE t.text LIKE '%' || :query || '%'
+        ORDER BY a.id ASC
+        """
+    )
     fun searchAyahs(query: String): Flow<List<AyahEntity>>
+
+
+    // --- verses with their text (schemaVersion 22) ----------------------------------------
+
+    @Query(
+        """
+        SELECT a.*,
+               u.text AS text_uthmani,
+               s.text AS text_simple,
+               sj.kind AS sajda_kind,
+               sj.sequence AS sajda_sequence,
+               hq.number AS rub_number
+        FROM ayahs a
+        LEFT JOIN mushaf_ayah_texts u ON u.ayah_id = a.id AND u.text_source = 'UTHMANI'
+        LEFT JOIN mushaf_ayah_texts s ON s.ayah_id = a.id AND s.text_source = 'SIMPLE'
+        LEFT JOIN sajdas sj ON sj.ayah_id = a.id
+        LEFT JOIN hizb_quarters hq ON a.id BETWEEN hq.start_ayah_id AND hq.end_ayah_id
+        WHERE a.surah_id = :surahId
+        ORDER BY a.number_in_surah ASC
+        """
+    )
+    fun getAyahsWithTextBySurah(surahId: Int): Flow<List<AyahWithText>>
+
+    @Query(
+        """
+        SELECT a.*,
+               u.text AS text_uthmani,
+               s.text AS text_simple,
+               sj.kind AS sajda_kind,
+               sj.sequence AS sajda_sequence,
+               hq.number AS rub_number
+        FROM ayahs a
+        LEFT JOIN mushaf_ayah_texts u ON u.ayah_id = a.id AND u.text_source = 'UTHMANI'
+        LEFT JOIN mushaf_ayah_texts s ON s.ayah_id = a.id AND s.text_source = 'SIMPLE'
+        LEFT JOIN sajdas sj ON sj.ayah_id = a.id
+        LEFT JOIN hizb_quarters hq ON a.id BETWEEN hq.start_ayah_id AND hq.end_ayah_id
+        WHERE a.id = :ayahId
+        """
+    )
+    suspend fun getAyahWithTextById(ayahId: Int): AyahWithText?
+
+    @Query(
+        """
+        SELECT a.*,
+               u.text AS text_uthmani,
+               s.text AS text_simple,
+               sj.kind AS sajda_kind,
+               sj.sequence AS sajda_sequence,
+               hq.number AS rub_number
+        FROM ayahs a
+        LEFT JOIN mushaf_ayah_texts u ON u.ayah_id = a.id AND u.text_source = 'UTHMANI'
+        LEFT JOIN mushaf_ayah_texts s ON s.ayah_id = a.id AND s.text_source = 'SIMPLE'
+        LEFT JOIN sajdas sj ON sj.ayah_id = a.id
+        LEFT JOIN hizb_quarters hq ON a.id BETWEEN hq.start_ayah_id AND hq.end_ayah_id
+        WHERE a.id BETWEEN :minAyahId AND :maxAyahId
+        ORDER BY a.id ASC
+        """
+    )
+    fun getAyahsWithTextByRange(minAyahId: Int, maxAyahId: Int): Flow<List<AyahWithText>>
+
+    @Query(
+        """
+        SELECT a.*,
+               u.text AS text_uthmani,
+               s.text AS text_simple,
+               sj.kind AS sajda_kind,
+               sj.sequence AS sajda_sequence,
+               hq.number AS rub_number
+        FROM ayahs a
+        LEFT JOIN mushaf_ayah_texts u ON u.ayah_id = a.id AND u.text_source = 'UTHMANI'
+        LEFT JOIN mushaf_ayah_texts s ON s.ayah_id = a.id AND s.text_source = 'SIMPLE'
+        LEFT JOIN sajdas sj ON sj.ayah_id = a.id
+        LEFT JOIN hizb_quarters hq ON a.id BETWEEN hq.start_ayah_id AND hq.end_ayah_id
+        WHERE sj.ayah_id IS NOT NULL
+        ORDER BY sj.sequence ASC
+        """
+    )
+    fun getSajdaAyahsWithText(): Flow<List<AyahWithText>>
+
+    @Query(
+        """
+        SELECT a.*,
+               u.text AS text_uthmani,
+               s.text AS text_simple,
+               sj.kind AS sajda_kind,
+               sj.sequence AS sajda_sequence,
+               hq.number AS rub_number
+        FROM ayahs a
+        LEFT JOIN mushaf_ayah_texts u ON u.ayah_id = a.id AND u.text_source = 'UTHMANI'
+        LEFT JOIN mushaf_ayah_texts s ON s.ayah_id = a.id AND s.text_source = 'SIMPLE'
+        LEFT JOIN sajdas sj ON sj.ayah_id = a.id
+        LEFT JOIN hizb_quarters hq ON a.id BETWEEN hq.start_ayah_id AND hq.end_ayah_id
+        WHERE a.id IN (
+            SELECT DISTINCT t.ayah_id FROM mushaf_ayah_texts t
+            WHERE t.text LIKE '%' || :query || '%'
+        )
+        ORDER BY a.id ASC
+        """
+    )
+    fun searchAyahsWithText(query: String): Flow<List<AyahWithText>>
+
+
+    @Query(
+        """
+        SELECT a.*,
+               u.text AS text_uthmani,
+               s.text AS text_simple,
+               sj.kind AS sajda_kind,
+               sj.sequence AS sajda_sequence,
+               hq.number AS rub_number
+        FROM ayahs a
+        LEFT JOIN mushaf_ayah_texts u ON u.ayah_id = a.id AND u.text_source = 'UTHMANI'
+        LEFT JOIN mushaf_ayah_texts s ON s.ayah_id = a.id AND s.text_source = 'SIMPLE'
+        LEFT JOIN sajdas sj ON sj.ayah_id = a.id
+        LEFT JOIN hizb_quarters hq ON a.id BETWEEN hq.start_ayah_id AND hq.end_ayah_id
+        WHERE a.page = :pageNumber
+        ORDER BY a.id ASC
+        """
+    )
+    fun getAyahsWithTextByPage(pageNumber: Int): Flow<List<AyahWithText>>
+
+    @Query(
+        """
+        SELECT a.*,
+               u.text AS text_uthmani,
+               s.text AS text_simple,
+               sj.kind AS sajda_kind,
+               sj.sequence AS sajda_sequence,
+               hq.number AS rub_number
+        FROM ayahs a
+        LEFT JOIN mushaf_ayah_texts u ON u.ayah_id = a.id AND u.text_source = 'UTHMANI'
+        LEFT JOIN mushaf_ayah_texts s ON s.ayah_id = a.id AND s.text_source = 'SIMPLE'
+        LEFT JOIN sajdas sj ON sj.ayah_id = a.id
+        LEFT JOIN hizb_quarters hq ON a.id BETWEEN hq.start_ayah_id AND hq.end_ayah_id
+        WHERE a.juz = :juzNumber
+        ORDER BY a.id ASC
+        """
+    )
+    fun getAyahsWithTextByJuz(juzNumber: Int): Flow<List<AyahWithText>>
+
+    // --- the divisions of the mushaf (schemaVersion 22) ----------------------------------
+    //
+    // Each of these was previously a scan over `ayahs` with a MIN/MAX, which is why none of
+    // them existed and there is no juz screen.
+
+    @Query("SELECT * FROM juzs ORDER BY number ASC")
+    fun getJuzs(): Flow<List<JuzEntity>>
+
+    @Query("SELECT * FROM juzs WHERE :ayahId BETWEEN start_ayah_id AND end_ayah_id")
+    suspend fun getJuzForAyah(ayahId: Int): JuzEntity?
+
+    @Query("SELECT * FROM hizb_quarters WHERE juz_number = :juz ORDER BY number ASC")
+    fun getHizbQuartersForJuz(juz: Int): Flow<List<HizbQuarterEntity>>
+
+    @Query("SELECT * FROM hizb_quarters WHERE :ayahId BETWEEN start_ayah_id AND end_ayah_id")
+    suspend fun getHizbQuarterForAyah(ayahId: Int): HizbQuarterEntity?
+
+    @Query("SELECT * FROM manzils ORDER BY number ASC")
+    fun getManzils(): Flow<List<ManzilEntity>>
+
+    @Query("SELECT * FROM rukus WHERE surah_id = :surahId ORDER BY number ASC")
+    fun getRukusForSurah(surahId: Int): Flow<List<RukuEntity>>
+
+    @Query("SELECT * FROM rukus WHERE :ayahId BETWEEN start_ayah_id AND end_ayah_id")
+    suspend fun getRukuForAyah(ayahId: Int): RukuEntity?
+
+    @Query("SELECT * FROM pages WHERE number = :page")
+    suspend fun getPageRange(page: Int): PageEntity?
+
+    @Query("SELECT * FROM surah_structure WHERE surah_id = :surahId")
+    suspend fun getSurahStructure(surahId: Int): SurahStructureEntity?
+
+    @Query("SELECT * FROM surah_structure ORDER BY surah_id ASC")
+    fun getAllSurahStructure(): Flow<List<SurahStructureEntity>>
+
+    // Seeding for the divisions that are not derivable from `ayahs` on an upgrading device:
+    // rukus, manzils and surah_structure have never been on a phone before.
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertRukus(rukus: List<RukuEntity>)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertManzils(manzils: List<ManzilEntity>)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertSurahStructure(rows: List<SurahStructureEntity>)
+
+    @Query("SELECT COUNT(*) FROM rukus")
+    suspend fun rukuCount(): Int
+
+    @Query("SELECT COUNT(*) FROM surah_structure")
+    suspend fun surahStructureCount(): Int
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAyahs(ayahs: List<AyahEntity>)
@@ -352,3 +579,24 @@ interface QuranDao {
     @Query("DELETE FROM reading_progress")
     suspend fun deleteAllReadingProgress()
 }
+
+/**
+ * A verse with everything the reader needs, resolved in one query.
+ *
+ * Since schemaVersion 22 a verse's text is not on its row: `mushaf_ayah_texts` holds one row per
+ * (source, ayah). Reading a page therefore means a join rather than a column, and doing it per
+ * verse would be 6,236 queries for a surah view. This is that join, once — both scripts, the
+ * prostration if there is one, and the quarter the verse falls in.
+ *
+ * `rub_number` is the interesting one: `Ayah.rubNumber` used to be hard-coded to `0` with the
+ * comment "Not available in database", because the quarter a verse belongs to could only be got
+ * by scanning. It is a column of `hizb_quarters` now.
+ */
+data class AyahWithText(
+    @Embedded val ayah: AyahEntity,
+    @ColumnInfo(name = "text_uthmani") val textUthmani: String?,
+    @ColumnInfo(name = "text_simple") val textSimple: String?,
+    @ColumnInfo(name = "sajda_kind") val sajdaKind: String?,
+    @ColumnInfo(name = "sajda_sequence") val sajdaSequence: Int?,
+    @ColumnInfo(name = "rub_number") val rubNumber: Int?,
+)

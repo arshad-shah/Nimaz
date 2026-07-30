@@ -3,6 +3,7 @@ package com.arshadshah.nimaz.data.repository
 import com.arshadshah.nimaz.core.util.mapItems
 import com.arshadshah.nimaz.data.local.database.dao.PageAyahRangeRow
 import com.arshadshah.nimaz.data.local.database.dao.QuranDao
+import com.arshadshah.nimaz.data.local.database.dao.AyahWithText
 import com.arshadshah.nimaz.data.local.database.entity.AyahEntity
 import com.arshadshah.nimaz.data.local.database.entity.QuranBookmarkEntity
 import com.arshadshah.nimaz.data.local.database.entity.QuranFavoriteEntity
@@ -90,7 +91,7 @@ class QuranRepositoryImpl @Inject constructor(
             surahId
         }.map { surahId ->
             if (surahId != null) {
-                quranDao.getAyahsBySurah(surahId).first().map { it.toDomain() }
+                quranDao.getAyahsWithTextBySurah(surahId).first().map { it.toDomain() }
             } else {
                 emptyList()
             }
@@ -98,15 +99,15 @@ class QuranRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getAyahById(ayahId: Int): Ayah? {
-        return quranDao.getAyahById(ayahId)?.toDomain()
+        return quranDao.getAyahWithTextById(ayahId)?.toDomain()
     }
 
     override fun getAyahsByJuz(juzNumber: Int, translatorId: String?): Flow<List<Ayah>> {
-        return quranDao.getAyahsByJuz(juzNumber).map { entities ->
+        return quranDao.getAyahsWithTextByJuz(juzNumber).map { entities ->
             // Fetch translations if translatorId is provided
             val translation = seededTranslationId(translatorId)
             val translationMap = if (translation != null && entities.isNotEmpty()) {
-                val ayahIds = entities.map { it.id }
+                val ayahIds = entities.map { it.ayah.id }
                 quranDao.getTranslationsForAyahs(ayahIds, translation)
                     .first()
                     .associate { it.ayahId to it.text }
@@ -116,8 +117,8 @@ class QuranRepositoryImpl @Inject constructor(
             // Fetch bookmark IDs to set isBookmarked correctly
             val bookmarkedIds = quranDao.getAllBookmarkIds().toSet()
             entities.map { entity ->
-                entity.toDomain(translationMap[entity.id]).copy(
-                    isBookmarked = entity.id in bookmarkedIds
+                entity.toDomain(translationMap[entity.ayah.id]).copy(
+                    isBookmarked = entity.ayah.id in bookmarkedIds
                 )
             }
         }
@@ -129,7 +130,7 @@ class QuranRepositoryImpl @Inject constructor(
         script: MushafScript
     ): Flow<List<Ayah>> {
         val entityFlow = if (!script.isLineAccurate) {
-            quranDao.getAyahsByPage(pageNumber)
+            quranDao.getAyahsWithTextByPage(pageNumber)
         } else {
             // A line-accurate edition does not paginate by `ayahs.page`, so resolve the
             // page's span through its own layout table and fetch that id range (#325).
@@ -140,7 +141,7 @@ class QuranRepositoryImpl @Inject constructor(
                 if (range == null) {
                     emit(emptyList())
                 } else {
-                    emitAll(quranDao.getAyahsByIdRange(range.minAyahId, range.maxAyahId))
+                    emitAll(quranDao.getAyahsWithTextByRange(range.minAyahId, range.maxAyahId))
                 }
             }
         }
@@ -148,7 +149,7 @@ class QuranRepositoryImpl @Inject constructor(
             // Fetch translations if translatorId is provided
             val translation = seededTranslationId(translatorId)
             val translationMap = if (translation != null && entities.isNotEmpty()) {
-                val ayahIds = entities.map { it.id }
+                val ayahIds = entities.map { it.ayah.id }
                 quranDao.getTranslationsForAyahs(ayahIds, translation)
                     .first()
                     .associate { it.ayahId to it.text }
@@ -158,15 +159,15 @@ class QuranRepositoryImpl @Inject constructor(
             // Fetch bookmark IDs to set isBookmarked correctly
             val bookmarkedIds = quranDao.getAllBookmarkIds().toSet()
             entities.map { entity ->
-                entity.toDomain(translationMap[entity.id]).copy(
-                    isBookmarked = entity.id in bookmarkedIds
+                entity.toDomain(translationMap[entity.ayah.id]).copy(
+                    isBookmarked = entity.ayah.id in bookmarkedIds
                 )
             }
         }
     }
 
     override fun getSajdaAyahs(): Flow<List<Ayah>> {
-        return quranDao.getSajdaAyahs().mapItems { it.toDomain() }
+        return quranDao.getSajdaAyahsWithText().mapItems { it.toDomain() }
     }
 
     override suspend fun getPageAyahRanges(script: MushafScript): List<PageAyahRange> =
@@ -215,13 +216,13 @@ class QuranRepositoryImpl @Inject constructor(
             if (surah != null) {
                 val surahEntity = quranDao.getSurahByNumber(surahNumber)
                 val ayahEntities = surahEntity?.let {
-                    quranDao.getAyahsBySurah(it.id).first()
+                    quranDao.getAyahsWithTextBySurah(it.id).first()
                 } ?: emptyList()
 
                 // Fetch translations if translatorId is provided
                 val translation = seededTranslationId(translatorId)
                 val translationMap = if (translation != null && ayahEntities.isNotEmpty()) {
-                    val ayahIds = ayahEntities.map { it.id }
+                    val ayahIds = ayahEntities.map { it.ayah.id }
                     quranDao.getTranslationsForAyahs(ayahIds, translation)
                         .first()
                         .associate { it.ayahId to it.text }
@@ -234,8 +235,8 @@ class QuranRepositoryImpl @Inject constructor(
 
                 // Map ayahs with translations and bookmark status
                 val ayahs = ayahEntities.map { ayah ->
-                    ayah.toDomain(translationMap[ayah.id]).copy(
-                        isBookmarked = ayah.id in bookmarkedIds
+                    ayah.toDomain(translationMap[ayah.ayah.id]).copy(
+                        isBookmarked = ayah.ayah.id in bookmarkedIds
                     )
                 }
 
@@ -280,11 +281,11 @@ class QuranRepositoryImpl @Inject constructor(
             val surahMap = surahs.associate { it.id to it.nameEnglish }
 
             // Search Arabic text
-            val arabicResults = quranDao.searchAyahs(query).first().map { ayah ->
+            val arabicResults = quranDao.searchAyahsWithText(query).first().map { ayah ->
                 QuranSearchResult(
                     ayah = ayah.toDomain(),
-                    surahName = surahMap[ayah.surahId] ?: "Surah ${ayah.surahId}",
-                    matchedText = ayah.textArabic,
+                    surahName = surahMap[ayah.ayah.surahId] ?: "Surah ${ayah.ayah.surahId}",
+                    matchedText = ayah.textUthmani.orEmpty(),
                     searchType = SearchType.ARABIC
                 )
             }
@@ -293,10 +294,10 @@ class QuranRepositoryImpl @Inject constructor(
             val translatorKey = seededTranslationId(translatorId)
             val translationResults = if (translatorKey != null) {
                 quranDao.searchTranslations(query, translatorKey).first().mapNotNull { translation ->
-                    quranDao.getAyahById(translation.ayahId)?.let { ayah ->
+                    quranDao.getAyahWithTextById(translation.ayahId)?.let { ayah ->
                         QuranSearchResult(
                             ayah = ayah.toDomain(),
-                            surahName = surahMap[ayah.surahId] ?: "Surah ${ayah.surahId}",
+                            surahName = surahMap[ayah.ayah.surahId] ?: "Surah ${ayah.ayah.surahId}",
                             matchedText = translation.text,
                             searchType = SearchType.TRANSLATION
                         )
@@ -422,22 +423,33 @@ class QuranRepositoryImpl @Inject constructor(
         )
     }
 
-    private fun AyahEntity.toDomain(translation: String? = null): Ayah {
+    /**
+     * A verse row plus the text and structure resolved beside it (schemaVersion 22).
+     *
+     * `textArabic` is the Uthmani rendering — the one that carries the mushaf pause marks — and
+     * `textSimple` is now a genuinely different string rather than the same bytes under a second
+     * name. Before this, `ayahs.text_arabic` and `.text_uthmani` were byte-identical in all 6,236
+     * rows, so a reader who chose the plain script got the Uthmani one and could not tell.
+     *
+     * `rubNumber` was hard-coded to `0` with the comment "Not available in database". It is the
+     * quarter from `hizb_quarters` now.
+     */
+    private fun AyahWithText.toDomain(translation: String? = null): Ayah {
         return Ayah(
-            id = id,
-            surahNumber = surahId,
-            ayahNumber = numberInSurah,
-            textArabic = textArabic,
-            textSimple = textUthmani,
-            juzNumber = juz,
-            hizbNumber = hizb,
-            rubNumber = 0, // Not available in database
-            pageNumber = page,
-            sajdaType = SajdaType.fromString(sajdaType),
-            sajdaNumber = if (sajda > 0) sajda else null,
+            id = ayah.id,
+            surahNumber = ayah.surahId,
+            ayahNumber = ayah.numberInSurah,
+            textArabic = textUthmani.orEmpty(),
+            textSimple = textSimple ?: textUthmani.orEmpty(),
+            juzNumber = ayah.juz,
+            hizbNumber = ayah.hizb,
+            rubNumber = rubNumber ?: 0,
+            pageNumber = ayah.page,
+            sajdaType = SajdaType.fromString(sajdaKind),
+            sajdaNumber = sajdaSequence,
             translation = translation,
-            transliteration = transliteration,
-            textTajweed = textTajweed
+            transliteration = ayah.transliteration,
+            textTajweed = ayah.textTajweed
         )
     }
 

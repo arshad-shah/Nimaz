@@ -3,6 +3,11 @@ package com.arshadshah.nimaz.support
 import com.arshadshah.nimaz.data.local.database.entity.AsmaUlHusnaBookmarkEntity
 import com.arshadshah.nimaz.data.local.database.entity.AsmaUnNabiBookmarkEntity
 import com.arshadshah.nimaz.data.local.database.entity.AyahEntity
+import com.arshadshah.nimaz.data.local.database.entity.HizbQuarterEntity
+import com.arshadshah.nimaz.data.local.database.entity.JuzEntity
+import com.arshadshah.nimaz.data.local.database.entity.MushafAyahTextEntity
+import com.arshadshah.nimaz.data.local.database.entity.RukuEntity
+import com.arshadshah.nimaz.data.local.database.entity.SajdaEntity
 import com.arshadshah.nimaz.data.local.database.entity.DuaBookmarkEntity
 import com.arshadshah.nimaz.data.local.database.entity.DuaCategoryEntity
 import com.arshadshah.nimaz.data.local.database.entity.DuaEntity
@@ -195,14 +200,35 @@ object TestData {
         surahId = surahId,
         numberInSurah = numberInSurah,
         numberGlobal = numberGlobal,
-        textArabic = "بِسْمِ اللَّهِ",
-        textUthmani = "بِسْمِ اللَّهِ",
         juz = juz,
         hizb = 1,
         page = page,
-        sajda = 0,
-        sajdaType = null,
     )
+
+    /**
+     * A verse's text, which since schemaVersion 22 is a row rather than a column on the verse.
+     * Default source is `UTHMANI`; pass `SIMPLE` for the plain script.
+     */
+    fun ayahText(ayahId: Int = 1, source: String = "UTHMANI", text: String = "بِسْمِ اللَّهِ") =
+        MushafAyahTextEntity(textSource = source, ayahId = ayahId, text = text)
+
+    fun sajda(ayahId: Int = 1160, sequence: Int = 1, kind: String = "obligatory") =
+        SajdaEntity(ayahId = ayahId, sequence = sequence, kind = kind, upstreamKind = null)
+
+    fun juz(number: Int = 1, startAyahId: Int = 1, endAyahId: Int = 148) =
+        JuzEntity(number = number, startAyahId = startAyahId, endAyahId = endAyahId)
+
+    fun hizbQuarter(number: Int = 1, juzNumber: Int = 1, startAyahId: Int = 1, endAyahId: Int = 37) =
+        HizbQuarterEntity(
+            number = number, juzNumber = juzNumber,
+            startAyahId = startAyahId, endAyahId = endAyahId,
+        )
+
+    fun ruku(number: Int = 1, surahId: Int = 1, startAyahId: Int = 1, endAyahId: Int = 7) =
+        RukuEntity(
+            number = number, surahId = surahId,
+            startAyahId = startAyahId, endAyahId = endAyahId,
+        )
 
     fun quranBookmark(ayahId: Int = 1, surahNumber: Int = 1, ayahNumber: Int = 1) =
         QuranBookmarkEntity(

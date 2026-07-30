@@ -97,6 +97,116 @@ class MigrationTest {
         ).inOrder()
     }
 
+
+    /**
+     * schemaVersion 22: `ayahs` stops carrying text and prostration, and both must survive the
+     * move. Everything the new tables need is already on the device — the Uthmani text is in the
+     * column being dropped, the sajdas are the fifteen marked rows, the juz/hizb/page divisions
+     * are the columns that described them per verse — which is the only reason this can be a
+     * migration rather than a reinstall. `MIGRATION_20_21` shipped without that property and
+     * would have emptied the Tafseer reader for every existing user.
+     */
+    @Test
+    fun migrate21To22_movesTextAndProstrationBeforeDroppingTheColumns() {
+        helper.createDatabase(dbName, 21).use { db ->
+            db.execSQL(
+                "INSERT INTO surahs (id, number, name_arabic, name_english, name_transliteration, " +
+                    "revelation_type, verses_count, order_revealed, start_page) " +
+                    "VALUES (7,7,'ا','Al-Araf','Al-Araf','Meccan',206,39,151)"
+            )
+            // A plain verse, and the prostration at 7:206 — obligatory in the corpus.
+            db.execSQL(
+                "INSERT INTO ayahs (id, surah_id, number_in_surah, number_global, text_arabic, " +
+                    "text_uthmani, juz, hizb, page, sajda, sajda_type, transliteration, text_tajweed) " +
+                    "VALUES (1000,7,100,1000,'arabic one','uthmani one',9,70,200,0,NULL,'translit','[]')"
+            )
+            db.execSQL(
+                "INSERT INTO ayahs (id, surah_id, number_in_surah, number_global, text_arabic, " +
+                    "text_uthmani, juz, hizb, page, sajda, sajda_type) " +
+                    "VALUES (1160,7,206,1160,'arabic sajda','uthmani sajda',9,71,206,1,'obligatory')"
+            )
+        }
+
+        val db = helper.runMigrationsAndValidate(
+            dbName, 22, true, NimazDatabase.MIGRATION_21_22
+        )
+
+        // The Uthmani text is a row now, and it is the same bytes.
+        db.query(
+            "SELECT text FROM mushaf_ayah_texts WHERE text_source = 'UTHMANI' AND ayah_id = 1000"
+        ).use { cursor ->
+            assertThat(cursor.moveToFirst()).isTrue()
+            assertThat(cursor.getString(0)).isEqualTo("uthmani one")
+        }
+
+        // The prostration is a row, with its classification and its place in the sequence.
+        db.query("SELECT ayah_id, sequence, kind FROM sajdas ORDER BY sequence").use { cursor ->
+            assertThat(cursor.moveToFirst()).isTrue()
+            assertThat(cursor.getInt(0)).isEqualTo(1160)
+            assertThat(cursor.getInt(1)).isEqualTo(1)
+            assertThat(cursor.getString(2)).isEqualTo("obligatory")
+            assertThat(cursor.count).isEqualTo(1)
+        }
+
+        // The divisions come from the columns that described them.
+        db.query("SELECT number, start_ayah_id, end_ayah_id FROM juzs").use { cursor ->
+            assertThat(cursor.moveToFirst()).isTrue()
+            assertThat(cursor.getInt(0)).isEqualTo(9)
+            assertThat(cursor.getInt(1)).isEqualTo(1000)
+            assertThat(cursor.getInt(2)).isEqualTo(1160)
+        }
+        db.query("SELECT COUNT(*) FROM pages").use { cursor ->
+            cursor.moveToFirst()
+            assertThat(cursor.getInt(0)).isEqualTo(2)   // pages 200 and 206
+        }
+        db.query("SELECT number, juz_number FROM hizb_quarters ORDER BY number").use { cursor ->
+            assertThat(cursor.moveToFirst()).isTrue()
+            assertThat(cursor.getInt(0)).isEqualTo(70)
+            assertThat(cursor.getInt(1)).isEqualTo(9)
+        }
+
+        // And only then are the columns gone — with what stays, staying.
+        val columns = mutableSetOf<String>()
+        db.query("PRAGMA table_info(`ayahs`)").use { cursor ->
+            val index = cursor.getColumnIndex("name")
+            while (cursor.moveToNext()) columns += cursor.getString(index)
+        }
+        assertThat(columns).containsNoneOf(
+            "text_arabic", "text_uthmani", "text_indopak", "sajda", "sajda_type"
+        )
+        assertThat(columns).containsAtLeast(
+            "id", "surah_id", "number_in_surah", "number_global", "juz", "hizb", "page",
+            "transliteration", "text_tajweed",
+        )
+
+        db.query("SELECT transliteration, text_tajweed FROM ayahs WHERE id = 1000").use { cursor ->
+            assertThat(cursor.moveToFirst()).isTrue()
+            assertThat(cursor.getString(0)).isEqualTo("translit")
+            assertThat(cursor.getString(1)).isEqualTo("[]")
+        }
+        db.query("SELECT COUNT(*) FROM ayahs").use { cursor ->
+            cursor.moveToFirst()
+            assertThat(cursor.getInt(0)).isEqualTo(2)
+        }
+    }
+
+    /** The fresh-install shape: the artifact already has the v22 layout, so the move is a no-op. */
+    @Test
+    fun migrate21To22_toleratesAnArtifactThatIsAlreadyReshaped() {
+        helper.createDatabase(dbName, 21).use { db ->
+            db.execSQL("INSERT INTO mushaf_ayah_texts (text_source, ayah_id, text) VALUES ('UTHMANI', 5, 'from the artifact')")
+        }
+
+        val db = helper.runMigrationsAndValidate(dbName, 22, true, NimazDatabase.MIGRATION_21_22)
+
+        // INSERT OR IGNORE, not REPLACE: a row that came from the artifact is not overwritten
+        // from a column that a fresh install's ayahs table does not even have.
+        db.query("SELECT text FROM mushaf_ayah_texts WHERE ayah_id = 5").use { cursor ->
+            assertThat(cursor.moveToFirst()).isTrue()
+            assertThat(cursor.getString(0)).isEqualTo("from the artifact")
+        }
+    }
+
     /**
      * The legacy-asset repair runs on every freshly copied artifact, before Room
      * validates it. It used to index `tafseer_texts` unconditionally, and
