@@ -5,6 +5,9 @@ import com.arshadshah.nimaz.data.local.database.dao.AsmaUlHusnaDao
 import com.arshadshah.nimaz.data.local.database.dao.AsmaUnNabiDao
 import com.arshadshah.nimaz.data.local.database.dao.DuaDao
 import com.arshadshah.nimaz.data.local.database.dao.FastingDao
+import com.arshadshah.nimaz.data.local.user.BookmarkDao
+import com.arshadshah.nimaz.data.local.user.BookmarkEntity
+import com.arshadshah.nimaz.data.local.user.BookmarkKind
 import com.arshadshah.nimaz.data.local.database.dao.HadithDao
 import com.arshadshah.nimaz.data.local.database.dao.KhatamDao
 import com.arshadshah.nimaz.data.local.database.dao.LocationDao
@@ -14,6 +17,8 @@ import com.arshadshah.nimaz.data.local.database.dao.QaidaDao
 import com.arshadshah.nimaz.data.local.database.dao.QuranDao
 import com.arshadshah.nimaz.data.local.database.dao.TafseerDao
 import com.arshadshah.nimaz.data.local.database.dao.TasbihDao
+import com.arshadshah.nimaz.data.local.user.TafseerUserDao
+import com.arshadshah.nimaz.data.local.user.TasbihSessionDao
 import com.arshadshah.nimaz.data.local.database.dao.ZakatDao
 import com.arshadshah.nimaz.data.local.database.entity.AsmaUlHusnaBookmarkEntity
 import com.arshadshah.nimaz.data.local.database.entity.AsmaUnNabiBookmarkEntity
@@ -49,13 +54,16 @@ class SyncDataImporter @Inject constructor(
     private val prayerDao: PrayerDao,
     private val fastingDao: FastingDao,
     private val tasbihDao: TasbihDao,
+    private val sessionDao: TasbihSessionDao,
     private val khatamDao: KhatamDao,
     private val tafseerDao: TafseerDao,
+    private val tafseerUserDao: TafseerUserDao,
     private val zakatDao: ZakatDao,
     private val asmaUlHusnaDao: AsmaUlHusnaDao,
     private val asmaUnNabiDao: AsmaUnNabiDao,
     private val prophetDao: ProphetDao,
     private val hadithDao: HadithDao,
+    private val bookmarkDao: BookmarkDao,
     private val duaDao: DuaDao,
     private val qaidaDao: QaidaDao,
     private val locationDao: LocationDao,
@@ -308,11 +316,11 @@ class SyncDataImporter @Inject constructor(
     }
 
     private suspend fun importTasbihSessions(incoming: List<SyncTasbihSession>) {
-        val existing = tasbihDao.getAllSessionsSync().associateBy { it.id }
+        val existing = sessionDao.getAllSessionsSync().associateBy { it.id }
         for (item in incoming) {
             val local = existing[item.id]
             if (local == null || item.updatedAt > local.updatedAt) {
-                tasbihDao.insertSession(
+                sessionDao.insertSession(
                     TasbihSessionEntity(
                         id = item.id,
                         presetId = item.presetId,
@@ -414,7 +422,7 @@ class SyncDataImporter @Inject constructor(
     // --- Tafseer ---
 
     private suspend fun importTafseerHighlights(incoming: List<SyncTafseerHighlight>) {
-        val existing = tafseerDao.getAllHighlightsSync().associateBy { it.id }
+        val existing = tafseerUserDao.getAllHighlightsSync().associateBy { it.id }
         val toInsert = mutableListOf<TafseerHighlightEntity>()
         for (item in incoming) {
             val local = existing[item.id]
@@ -434,11 +442,11 @@ class SyncDataImporter @Inject constructor(
                 )
             }
         }
-        if (toInsert.isNotEmpty()) tafseerDao.insertHighlights(toInsert)
+        if (toInsert.isNotEmpty()) tafseerUserDao.insertHighlights(toInsert)
     }
 
     private suspend fun importTafseerNotes(incoming: List<SyncTafseerNote>) {
-        val existing = tafseerDao.getAllNotesSync().associateBy { it.id }
+        val existing = tafseerUserDao.getAllNotesSync().associateBy { it.id }
         val toInsert = mutableListOf<TafseerNoteEntity>()
         for (item in incoming) {
             val local = existing[item.id]
@@ -455,7 +463,7 @@ class SyncDataImporter @Inject constructor(
                 )
             }
         }
-        if (toInsert.isNotEmpty()) tafseerDao.insertNotes(toInsert)
+        if (toInsert.isNotEmpty()) tafseerUserDao.insertNotes(toInsert)
     }
 
     // --- Zakat ---
@@ -537,18 +545,24 @@ class SyncDataImporter @Inject constructor(
     // --- Hadith & Dua ---
 
     private suspend fun importHadithBookmarks(incoming: List<SyncHadithBookmark>) {
-        val existing = hadithDao.getAllBookmarksSync().associateBy { it.hadithId }
+        val existing = bookmarkDao.all()
+            .filter { it.kind == BookmarkKind.HADITH }
+            .associateBy { it.targetId }
         for (item in incoming) {
             val local = existing[item.hadithId]
             if (local == null || item.updatedAt > local.updatedAt) {
-                hadithDao.insertBookmark(
-                    HadithBookmarkEntity(
-                        id = local?.id ?: 0,
-                        hadithId = item.hadithId,
-                        bookId = item.bookId,
-                        hadithNumber = item.hadithNumber,
+                bookmarkDao.upsert(
+                    BookmarkEntity(
+                        kind = BookmarkKind.HADITH,
+                        targetId = item.hadithId,
+                        bookmarked = true,
+                        // A mark that arrives from another device must not clear a favourite
+                        // this device set: the wire format has no field for it.
+                        favourite = local?.favourite ?: false,
                         note = item.note,
-                        color = item.color,
+                        colour = item.color,
+                        contextId = item.bookId,
+                        ordinal = item.hadithNumber,
                         createdAt = item.createdAt,
                         updatedAt = item.updatedAt
                     )

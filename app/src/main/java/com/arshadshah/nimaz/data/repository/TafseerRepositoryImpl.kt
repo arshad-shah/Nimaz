@@ -1,7 +1,11 @@
 package com.arshadshah.nimaz.data.repository
 
 import com.arshadshah.nimaz.core.util.mapItems
+import com.arshadshah.nimaz.data.local.database.dao.QuranDao
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.emitAll
 import com.arshadshah.nimaz.data.local.database.dao.TafseerDao
+import com.arshadshah.nimaz.data.local.user.TafseerUserDao
 import com.arshadshah.nimaz.data.local.database.entity.TafseerBlockEntity
 import com.arshadshah.nimaz.data.local.database.entity.TafseerHighlightEntity
 import com.arshadshah.nimaz.data.local.database.entity.TafseerNoteEntity
@@ -18,7 +22,11 @@ import javax.inject.Singleton
 
 @Singleton
 class TafseerRepositoryImpl @Inject constructor(
-    private val tafseerDao: TafseerDao
+    private val tafseerDao: TafseerDao,
+    /** Highlights and notes are the reader's, and live in the user's own database. */
+    private val tafseerUserDao: TafseerUserDao,
+    /** For resolving a surah:ayah span to the ids a highlight is keyed by. */
+    private val quranDao: QuranDao
 ) : TafseerRepository {
 
     override suspend fun getTafseerForAyah(
@@ -39,12 +47,22 @@ class TafseerRepositoryImpl @Inject constructor(
         ayahEnd: Int,
         tafseerId: String
     ): Flow<List<TafseerHighlight>> {
-        return tafseerDao.getHighlightsForRange(surahNumber, ayahStart, ayahEnd, tafseerId)
-            .mapItems { it.toDomain() }
+        // Two reads, because the verses and the highlights are in different databases now.
+        return flow {
+            val ayahIds = quranDao.getAyahIdsInRange(surahNumber, ayahStart, ayahEnd)
+            if (ayahIds.isEmpty()) {
+                emit(emptyList())
+            } else {
+                emitAll(
+                    tafseerUserDao.getHighlightsForRange(tafseerId, ayahIds)
+                        .mapItems { it.toDomain() }
+                )
+            }
+        }
     }
 
     override fun getAllHighlights(): Flow<List<TafseerHighlight>> {
-        return tafseerDao.getAllHighlights().mapItems { it.toDomain() }
+        return tafseerUserDao.getAllHighlights().mapItems { it.toDomain() }
     }
 
     override suspend fun addHighlight(
@@ -56,7 +74,7 @@ class TafseerRepositoryImpl @Inject constructor(
         note: String?
     ): Long {
         val now = System.currentTimeMillis()
-        return tafseerDao.insertHighlight(
+        return tafseerUserDao.insertHighlight(
             TafseerHighlightEntity(
                 ayahId = ayahId,
                 tafseerId = tafseerId,
@@ -71,7 +89,7 @@ class TafseerRepositoryImpl @Inject constructor(
     }
 
     override suspend fun updateHighlight(highlight: TafseerHighlight) {
-        tafseerDao.updateHighlight(
+        tafseerUserDao.updateHighlight(
             TafseerHighlightEntity(
                 id = highlight.id,
                 ayahId = highlight.ayahId,
@@ -87,7 +105,7 @@ class TafseerRepositoryImpl @Inject constructor(
     }
 
     override suspend fun deleteHighlight(highlightId: Long) {
-        tafseerDao.deleteHighlightById(highlightId)
+        tafseerUserDao.deleteHighlightById(highlightId)
     }
 
     override fun getNotesForRange(
@@ -96,13 +114,22 @@ class TafseerRepositoryImpl @Inject constructor(
         ayahEnd: Int,
         tafseerId: String
     ): Flow<List<TafseerNote>> {
-        return tafseerDao.getNotesForRange(surahNumber, ayahStart, ayahEnd, tafseerId)
-            .mapItems { it.toDomain() }
+        return flow {
+            val ayahIds = quranDao.getAyahIdsInRange(surahNumber, ayahStart, ayahEnd)
+            if (ayahIds.isEmpty()) {
+                emit(emptyList())
+            } else {
+                emitAll(
+                    tafseerUserDao.getNotesForRange(tafseerId, ayahIds)
+                        .mapItems { it.toDomain() }
+                )
+            }
+        }
     }
 
     override suspend fun addNote(ayahId: Int, tafseerId: String, text: String): Long {
         val now = System.currentTimeMillis()
-        return tafseerDao.insertNote(
+        return tafseerUserDao.insertNote(
             TafseerNoteEntity(
                 ayahId = ayahId,
                 tafseerId = tafseerId,
@@ -114,7 +141,7 @@ class TafseerRepositoryImpl @Inject constructor(
     }
 
     override suspend fun updateNote(note: TafseerNote) {
-        tafseerDao.updateNote(
+        tafseerUserDao.updateNote(
             TafseerNoteEntity(
                 id = note.id,
                 ayahId = note.ayahId,
@@ -127,12 +154,12 @@ class TafseerRepositoryImpl @Inject constructor(
     }
 
     override suspend fun deleteNote(noteId: Long) {
-        tafseerDao.deleteNoteById(noteId)
+        tafseerUserDao.deleteNoteById(noteId)
     }
 
     override suspend fun exportAnnotations(): String {
-        val highlights = tafseerDao.getAllHighlights().first()
-        val notes = tafseerDao.getAllNotes().first()
+        val highlights = tafseerUserDao.getAllHighlights().first()
+        val notes = tafseerUserDao.getAllNotes().first()
 
         val json = JSONObject()
 

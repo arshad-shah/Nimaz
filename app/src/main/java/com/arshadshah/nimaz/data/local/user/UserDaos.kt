@@ -26,6 +26,36 @@ interface BookmarkDao {
     @Query("SELECT * FROM bookmarks WHERE kind = :kind AND target_id = :targetId")
     suspend fun find(kind: String, targetId: Int): BookmarkEntity?
 
+    /** Marks within one context — a hadith book, a dua category, a surah. */
+    @Query(
+        """
+        SELECT * FROM bookmarks
+        WHERE kind = :kind AND context_id = :contextId AND bookmarked = 1
+        ORDER BY created_at DESC
+        """
+    )
+    fun inContext(kind: String, contextId: Int): Flow<List<BookmarkEntity>>
+
+    @Query(
+        """
+        SELECT EXISTS(
+            SELECT 1 FROM bookmarks
+            WHERE kind = :kind AND target_id = :targetId AND bookmarked = 1
+        )
+        """
+    )
+    fun observeIsBookmarked(kind: String, targetId: Int): Flow<Boolean>
+
+    @Query(
+        """
+        SELECT EXISTS(
+            SELECT 1 FROM bookmarks
+            WHERE kind = :kind AND target_id = :targetId AND favourite = 1
+        )
+        """
+    )
+    fun observeIsFavourite(kind: String, targetId: Int): Flow<Boolean>
+
     /** Ids only, for the "is this bookmarked" pass over a page of content. */
     @Query("SELECT target_id FROM bookmarks WHERE kind = :kind AND bookmarked = 1")
     suspend fun bookmarkedIds(kind: String): List<Int>

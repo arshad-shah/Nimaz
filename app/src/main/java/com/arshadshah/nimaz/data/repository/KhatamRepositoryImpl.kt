@@ -1,6 +1,8 @@
 package com.arshadshah.nimaz.data.repository
 
 import com.arshadshah.nimaz.core.util.mapItems
+import com.arshadshah.nimaz.data.local.database.dao.QuranDao
+import kotlinx.coroutines.flow.first
 import com.arshadshah.nimaz.data.local.database.dao.KhatamDao
 import com.arshadshah.nimaz.data.local.database.entity.KhatamDailyLogEntity
 import com.arshadshah.nimaz.data.local.database.entity.KhatamEntity
@@ -22,7 +24,9 @@ import javax.inject.Singleton
 
 @Singleton
 class KhatamRepositoryImpl @Inject constructor(
-    private val khatamDao: KhatamDao
+    private val khatamDao: KhatamDao,
+    /** The mushaf itself: verse locations, juz spans and totals. */
+    private val quranDao: QuranDao
 ) : KhatamRepository {
 
     override suspend fun createKhatam(khatam: Khatam): Long {
@@ -82,8 +86,13 @@ class KhatamRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getNextUnreadPosition(khatamId: Long): Pair<Int, Int>? {
-        val result = khatamDao.getNextUnreadAyah(khatamId) ?: return null
-        return Pair(result.surahId, result.numberInSurah)
+        // The first verse this khatam has not recorded. The read ids are the user's and the
+        // mushaf order is content, so neither side can answer it alone: take the ids, find
+        // the first gap, then ask the content database where that verse is.
+        val read = khatamDao.getReadAyahIds(khatamId).toHashSet()
+        val nextId = (1..TOTAL_AYAHS).firstOrNull { it !in read } ?: return null
+        val location = quranDao.getAyahLocation(nextId) ?: return null
+        return Pair(location.surahId, location.numberInSurah)
     }
 
     override suspend fun unmarkAyahRead(khatamId: Long, ayahId: Int) {
@@ -92,7 +101,7 @@ class KhatamRepositoryImpl @Inject constructor(
     }
 
     override suspend fun markSurahAsRead(khatamId: Long, surahNumber: Int) {
-        khatamDao.markSurahAsRead(khatamId, surahNumber)
+        khatamDao.markSurahAsRead(khatamId, quranDao.getAyahIdsForSurah(surahNumber))
     }
 
     /**
@@ -100,12 +109,21 @@ class KhatamRepositoryImpl @Inject constructor(
      * queries, so this is both live and cheaper than the one-shot version it replaces.
      */
     override fun observeJuzProgress(khatamId: Long): Flow<List<JuzProgressInfo>> {
-        return khatamDao.observeJuzProgress(khatamId).map { rows ->
-            rows.map {
+        // Per-juz totals are content; which of them were read is the user's. One read of
+        // each, joined here — the aggregate used to be a single LEFT JOIN across both.
+        return khatamDao.observeReadAyahIds(khatamId).map { readIds ->
+            val totals = quranDao.getJuzAyahTotals()
+            val juzOf = quranDao.getJuzs().first().associate { juz ->
+                juz.number to (juz.startAyahId..juz.endAyahId)
+            }
+            val readPerJuz = readIds.groupingBy { id ->
+                juzOf.entries.firstOrNull { id in it.value }?.key ?: 0
+            }.eachCount()
+            totals.map { total ->
                 JuzProgressInfo(
-                    juzNumber = it.juzNumber,
-                    totalAyahs = it.totalAyahs,
-                    readAyahs = it.readAyahs,
+                    juzNumber = total.juzNumber,
+                    totalAyahs = total.totalAyahs,
+                    readAyahs = readPerJuz[total.juzNumber] ?: 0,
                 )
             }
         }
@@ -218,3 +236,6 @@ class KhatamRepositoryImpl @Inject constructor(
         updatedAt = updatedAt
     )
 }
+
+/** The mushaf's verse count, which is not going to change. */
+private const val TOTAL_AYAHS = 6236

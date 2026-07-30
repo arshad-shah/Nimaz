@@ -11,11 +11,6 @@ import com.arshadshah.nimaz.data.local.database.entity.KhatamDailyLogEntity
 import com.arshadshah.nimaz.data.local.database.entity.KhatamEntity
 import kotlinx.coroutines.flow.Flow
 
-data class NextUnreadResult(
-    val surahId: Int,
-    val numberInSurah: Int,
-    val juz: Int
-)
 
 /** Room projection for per-juz progress; mapped to `JuzProgressInfo` in the repository. */
 data class JuzProgressRow(
@@ -119,25 +114,18 @@ interface KhatamDao {
         timestamp: Long = System.currentTimeMillis()
     )
 
-    @Query(
-        """
-        SELECT a.surah_id AS surahId, a.number_in_surah AS numberInSurah, a.juz AS juz FROM ayahs a
-        LEFT JOIN khatam_ayahs ka ON a.id = ka.ayah_id AND ka.khatam_id = :khatamId
-        WHERE ka.ayah_id IS NULL ORDER BY a.id ASC LIMIT 1
-    """
-    )
-    suspend fun getNextUnreadAyah(khatamId: Long): NextUnreadResult?
 
+    /**
+     * Marks a whole surah read. The ids come in rather than being looked up: the verses are
+     * content and this table is the user's, so the caller resolves the span.
+     */
     @Transaction
-    suspend fun markSurahAsRead(khatamId: Long, surahNumber: Int) {
-        val ayahIds = getAyahIdsForSurah(surahNumber)
+    suspend fun markSurahAsRead(khatamId: Long, ayahIds: List<Int>) {
         if (ayahIds.isNotEmpty()) {
             markAyahsRead(khatamId, ayahIds)
         }
     }
 
-    @Query("SELECT id FROM ayahs WHERE surah_id = :surahNumber ORDER BY id ASC")
-    suspend fun getAyahIdsForSurah(surahNumber: Int): List<Int>
 
     // ---- Juz/Surah progress ----
 
@@ -182,18 +170,6 @@ interface KhatamDao {
      * ayah-id ranges held in the domain layer, which duplicated knowledge the database
      * already has and could silently disagree with it.
      */
-    @Query(
-        """
-        SELECT a.juz AS juzNumber,
-               COUNT(a.id) AS totalAyahs,
-               SUM(CASE WHEN ka.ayah_id IS NULL THEN 0 ELSE 1 END) AS readAyahs
-        FROM ayahs a
-        LEFT JOIN khatam_ayahs ka ON a.id = ka.ayah_id AND ka.khatam_id = :khatamId
-        GROUP BY a.juz
-        ORDER BY a.juz ASC
-    """
-    )
-    fun observeJuzProgress(khatamId: Long): Flow<List<JuzProgressRow>>
 
     // ---- Lifetime stats ----
 
@@ -223,4 +199,27 @@ interface KhatamDao {
 
     @Query("SELECT * FROM khatam_daily_log WHERE khatam_id = :khatamId ORDER BY date DESC")
     suspend fun getDailyLogsSync(khatamId: Long): List<KhatamDailyLogEntity>
+
+    /**
+     * Every khatam this person has kept, and their logs.
+     *
+     * `khatam_ayahs` and `khatam_daily_log` cascade from `khatams`, so one delete is enough —
+     * but it is spelled out rather than relied upon, because a cascade that stops working is
+     * silent and this is the "delete all my data" path.
+     */
+    @Query("DELETE FROM khatam_ayahs")
+    suspend fun deleteAllKhatamAyahs()
+
+    @Query("DELETE FROM khatam_daily_log")
+    suspend fun deleteAllDailyLogs()
+
+    @Query("DELETE FROM khatams")
+    suspend fun deleteAllKhatams()
+
+    @Transaction
+    suspend fun deleteAllUserData() {
+        deleteAllKhatamAyahs()
+        deleteAllDailyLogs()
+        deleteAllKhatams()
+    }
 }

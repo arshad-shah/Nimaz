@@ -15,6 +15,11 @@ import com.arshadshah.nimaz.data.local.database.entity.TafseerHighlightEntity
 import com.arshadshah.nimaz.data.local.database.entity.TafseerNoteEntity
 import com.arshadshah.nimaz.data.local.database.entity.TasbihSessionEntity
 import com.arshadshah.nimaz.data.local.database.entity.ZakatHistoryEntity
+import com.arshadshah.nimaz.data.local.database.dao.FastingDao
+import com.arshadshah.nimaz.data.local.database.dao.KhatamDao
+import com.arshadshah.nimaz.data.local.database.dao.LocationDao
+import com.arshadshah.nimaz.data.local.database.dao.PrayerDao
+import com.arshadshah.nimaz.data.local.database.dao.ZakatDao
 
 const val NIMAZ_USER_DATABASE_VERSION = 1
 
@@ -44,6 +49,7 @@ const val NIMAZ_USER_DATABASE_VERSION = 1
     entities = [
         BookmarkEntity::class,
         ProgressEntity::class,
+        CustomTasbihPresetEntity::class,
         ReadingProgressEntity::class,
         PrayerRecordEntity::class,
         FastRecordEntity::class,
@@ -66,6 +72,26 @@ abstract class NimazUserDatabase : RoomDatabase() {
 
     abstract fun progressDao(): ProgressDao
 
+    abstract fun customPresetDao(): CustomPresetDao
+
+    abstract fun readingProgressDao(): ReadingProgressDao
+
+    abstract fun tasbihSessionDao(): TasbihSessionDao
+
+    abstract fun tafseerUserDao(): TafseerUserDao
+
+    // Wholly the user's: every method on these reads or writes only their own rows, so they
+    // move here as they are rather than being split.
+    abstract fun prayerDao(): PrayerDao
+
+    abstract fun fastingDao(): FastingDao
+
+    abstract fun locationDao(): LocationDao
+
+    abstract fun zakatDao(): ZakatDao
+
+    abstract fun khatamDao(): KhatamDao
+
     companion object {
         const val DATABASE_NAME = "nimaz_user_database"
 
@@ -73,10 +99,9 @@ abstract class NimazUserDatabase : RoomDatabase() {
          * Tables that carried user data in the content database, in the order they must be
          * read: parents before children, so a foreign key never fails mid-copy.
          *
-         * `tasbih_presets` is absent on purpose. It holds both the presets we ship and the
-         * ones a user creates, so it is the one table that is genuinely both content and
-         * user data, and splitting it needs a decision about what happens to a shipped
-         * preset a user has edited. It stays in the content database for now.
+         * `tasbih_presets` is read but not moved wholesale: only the rows with
+         * `is_custom = 1` are the user's, and they become `custom_tasbih_presets` here. The
+         * shipped defaults stay in the content database, read-only, where they belong.
          */
         val LEGACY_TABLES = listOf(
             "reading_progress",
@@ -101,6 +126,8 @@ abstract class NimazUserDatabase : RoomDatabase() {
             "prophet_bookmarks",
             "qaida_lesson_progress",
             "qaida_cell_progress",
+            // read for its `is_custom = 1` rows only
+            "tasbih_presets",
         )
     }
 }
@@ -138,6 +165,7 @@ object LegacyUserDataImport {
             try {
                 copied += bookmarks(db)
                 copied += progress(db)
+                copied += customPresets(db)
                 copied += straightCopies(db)
                 db.setTransactionSuccessful()
             } finally {
@@ -242,6 +270,25 @@ object LegacyUserDataImport {
         }
         return n
     }
+
+    /**
+     * The presets the user made, out of the table that shipped the defaults.
+     *
+     * `is_custom = 1` is the only thing that ever distinguished them. Taking them here is what
+     * lets "delete all my data" stop reaching into the content database: content is not user
+     * data, and a preset somebody wrote is not content.
+     */
+    private fun customPresets(db: SupportSQLiteDatabase): Int = exec(
+        db, "tasbih_presets",
+        """
+        INSERT OR IGNORE INTO custom_tasbih_presets
+            (id, name, arabic, transliteration, translation, target_count, display_order,
+             category, created_at, updated_at)
+        SELECT id, name, arabic, transliteration, translation, targetCount, displayOrder,
+               category, updatedAt, updatedAt
+        FROM legacy.tasbih_presets WHERE is_custom = 1
+        """.trimIndent(),
+    )
 
     /** Three progress tables into one. `reading_progress` copies across unchanged. */
     private fun progress(db: SupportSQLiteDatabase): Int {

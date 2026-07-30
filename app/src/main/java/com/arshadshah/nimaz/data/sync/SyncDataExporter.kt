@@ -4,6 +4,9 @@ import com.arshadshah.nimaz.data.local.database.dao.AsmaUlHusnaDao
 import com.arshadshah.nimaz.data.local.database.dao.AsmaUnNabiDao
 import com.arshadshah.nimaz.data.local.database.dao.DuaDao
 import com.arshadshah.nimaz.data.local.database.dao.FastingDao
+import com.arshadshah.nimaz.data.local.user.BookmarkDao
+import com.arshadshah.nimaz.data.local.user.BookmarkEntity
+import com.arshadshah.nimaz.data.local.user.BookmarkKind
 import com.arshadshah.nimaz.data.local.database.dao.HadithDao
 import com.arshadshah.nimaz.data.local.database.dao.KhatamDao
 import com.arshadshah.nimaz.data.local.database.dao.LocationDao
@@ -13,6 +16,8 @@ import com.arshadshah.nimaz.data.local.database.dao.QaidaDao
 import com.arshadshah.nimaz.data.local.database.dao.QuranDao
 import com.arshadshah.nimaz.data.local.database.dao.TafseerDao
 import com.arshadshah.nimaz.data.local.database.dao.TasbihDao
+import com.arshadshah.nimaz.data.local.user.TafseerUserDao
+import com.arshadshah.nimaz.data.local.user.TasbihSessionDao
 import com.arshadshah.nimaz.data.local.database.dao.ZakatDao
 import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
 import javax.inject.Inject
@@ -24,13 +29,16 @@ class SyncDataExporter @Inject constructor(
     private val prayerDao: PrayerDao,
     private val fastingDao: FastingDao,
     private val tasbihDao: TasbihDao,
+    private val sessionDao: TasbihSessionDao,
     private val khatamDao: KhatamDao,
     private val tafseerDao: TafseerDao,
+    private val tafseerUserDao: TafseerUserDao,
     private val zakatDao: ZakatDao,
     private val asmaUlHusnaDao: AsmaUlHusnaDao,
     private val asmaUnNabiDao: AsmaUnNabiDao,
     private val prophetDao: ProphetDao,
     private val hadithDao: HadithDao,
+    private val bookmarkDao: BookmarkDao,
     private val duaDao: DuaDao,
     private val qaidaDao: QaidaDao,
     private val locationDao: LocationDao,
@@ -132,7 +140,7 @@ class SyncDataExporter @Inject constructor(
                 it.updatedAt
             )
         }
-        val sessions = tasbihDao.getAllSessionsSync().map {
+        val sessions = sessionDao.getAllSessionsSync().map {
             SyncTasbihSession(
                 it.id,
                 it.presetId,
@@ -183,7 +191,7 @@ class SyncDataExporter @Inject constructor(
 
         // Tafseer & Zakat
         onProgress("Exporting tafseer & zakat data...")
-        val highlights = tafseerDao.getAllHighlightsSync().map {
+        val highlights = tafseerUserDao.getAllHighlightsSync().map {
             SyncTafseerHighlight(
                 it.id,
                 it.ayahId,
@@ -196,7 +204,7 @@ class SyncDataExporter @Inject constructor(
                 it.updatedAt
             )
         }
-        val notes = tafseerDao.getAllNotesSync().map {
+        val notes = tafseerUserDao.getAllNotesSync().map {
             SyncTafseerNote(it.id, it.ayahId, it.tafseerId, it.text, it.createdAt, it.updatedAt)
         }
         val zakatHistory = zakatDao.getAllHistorySync().map {
@@ -230,18 +238,23 @@ class SyncDataExporter @Inject constructor(
 
         // Hadith & Dua bookmarks
         onProgress("Exporting hadith & dua bookmarks...")
-        val hadithBookmarks = hadithDao.getAllBookmarksSync().map {
-            SyncHadithBookmark(
-                it.id,
-                it.hadithId,
-                it.bookId,
-                it.hadithNumber,
-                it.note,
-                it.color,
-                it.createdAt,
-                it.updatedAt
-            )
-        }
+        // The payload shape is unchanged on purpose: a phone on this version has to be able
+        // to sync with one that still has seven bookmark tables, so the wire format keeps the
+        // old field names and the consolidated row is mapped onto them.
+        val hadithBookmarks = bookmarkDao.all()
+            .filter { it.kind == BookmarkKind.HADITH }
+            .map {
+                SyncHadithBookmark(
+                    0,
+                    it.targetId,
+                    it.contextId ?: 0,
+                    it.ordinal ?: 0,
+                    it.note,
+                    it.colour,
+                    it.createdAt,
+                    it.updatedAt
+                )
+            }
         val duaBookmarks = duaDao.getAllBookmarksSync().map {
             SyncDuaBookmark(
                 it.id,
