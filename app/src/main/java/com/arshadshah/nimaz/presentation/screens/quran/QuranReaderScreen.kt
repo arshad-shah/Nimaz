@@ -672,20 +672,11 @@ fun QuranReaderScreen(
                                     val rightPageNum = pageIndex * 2 + 1
                                     val leftPageNum = (pageIndex * 2 + 2).coerceAtMost(totalPages)
 
+                                    // Fetching is ReaderMushafPage's job — it owns both
+                                    // renderers' caches and their loading states.
                                     val rightPageAyahs =
                                         state.pageCache[rightPageNum] ?: emptyList()
                                     val leftPageAyahs = state.pageCache[leftPageNum] ?: emptyList()
-
-                                    LaunchedEffect(rightPageNum) {
-                                        if (rightPageNum !in state.pageCache.keys) {
-                                            viewModel.onEvent(QuranEvent.LoadPage(rightPageNum))
-                                        }
-                                    }
-                                    LaunchedEffect(leftPageNum) {
-                                        if (leftPageNum !in state.pageCache.keys && leftPageNum != rightPageNum) {
-                                            viewModel.onEvent(QuranEvent.LoadPage(leftPageNum))
-                                        }
-                                    }
 
                                     Row(modifier = Modifier.fillMaxSize()) {
                                         // Left page (higher page number — displayed on the left in a physical Mushaf)
@@ -739,12 +730,6 @@ fun QuranReaderScreen(
                                         state.pageCache[pageNum] ?: displayAyahs.takeIf {
                                             displayAyahs.firstOrNull()?.page == pageNum
                                         } ?: emptyList()
-
-                                    LaunchedEffect(pageNum) {
-                                        if (pageNum !in state.pageCache.keys) {
-                                            viewModel.onEvent(QuranEvent.LoadPage(pageNum))
-                                        }
-                                    }
 
                                     ReaderMushafPage(
                                         pageNumber = pageNum,
@@ -906,8 +891,11 @@ fun QuranReaderScreen(
  * ([MushafPage]). Centralises the (identical) interaction wiring the single- and dual-page
  * call sites used to duplicate.
  *
- * In 16-line mode it lazily loads the page's [com.arshadshah.nimaz.domain.model.MushafPageLayout]
- * into the cache and shows a spinner until it arrives; [ayahById] supplies full-ayah content
+ * Either way it lazily fetches what it needs for [pageNumber] — the layout in line-accurate
+ * mode, the page's ayahs otherwise — and shows a spinner until that arrives, so a page whose
+ * content has not landed yet reads as *loading* rather than as a blank Mushaf frame. Both
+ * requests are prefetches: the reader's current page is designated by the pager's settle
+ * handler, not by a page merely being composed. [ayahById] supplies full-ayah content
  * (translation/copy/share) when available.
  */
 @Composable
@@ -927,7 +915,9 @@ private fun ReaderMushafPage(
         translationFontFamily(QuranTranslation.fromId(state.selectedTranslatorId).language)
     if (state.useLineAccurateLayout) {
         val layout = state.mushafPageLayoutCache[pageNumber]
-        LaunchedEffect(pageNumber) {
+        // Keyed on the script too: switching edition clears the cache, and without the key
+        // this effect would not re-fire for a page that is still composed.
+        LaunchedEffect(pageNumber, state.mushafScript) {
             if (pageNumber !in state.mushafPageLayoutCache) {
                 onEvent(QuranEvent.LoadMushafPageLayout(pageNumber))
             }
@@ -975,38 +965,59 @@ private fun ReaderMushafPage(
             )
         }
     } else {
-        MushafPage(
-            pageNumber = pageNumber,
-            ayahs = ayahs,
-            surahMap = surahMap,
-            translationFontFamily = translationFont,
-            arabicFontSize = state.arabicFontSize,
-            arabicFontFamily = state.arabicFontFamily,
-            highlightedAyahId = highlightedAyahId,
-            favoriteAyahIds = favoriteAyahIds,
-            showTajweed = state.showTajweed,
-            tajweedUnderline = state.tajweedUnderline,
-            showTranslation = state.showTranslation,
-            showTransliteration = state.showTransliteration,
-            onBookmarkClick = { ayah ->
-                onEvent(QuranEvent.ToggleBookmark(ayah.id, ayah.surahNumber, ayah.numberInSurah))
-            },
-            onFavoriteClick = { ayah ->
-                onEvent(QuranEvent.ToggleFavorite(ayah.id, ayah.surahNumber, ayah.numberInSurah))
-            },
-            onPlayClick = { ayah ->
-                onEvent(QuranEvent.PlayAyahAudio(ayah.id, ayah.surahNumber, ayah.numberInSurah))
-            },
-            onShareClick = { },
-            onCopyClick = { },
-            onTafseerClick = { ayah ->
-                onNavigateToTafseer(ayah.surahNumber, ayah.numberInSurah)
-            },
-            isKhatamActive = state.activeKhatamId != null,
-            khatamReadAyahIds = state.khatamReadAyahIds,
-            onKhatamToggle = { ayah -> onEvent(QuranEvent.ToggleKhatamAyah(ayah.id)) },
-            modifier = modifier,
-        )
+        // Same keys as the layout branch above: a script or translation change clears
+        // `pageCache`, and this page may still be composed when it does.
+        LaunchedEffect(pageNumber, state.mushafScript, state.selectedTranslatorId) {
+            if (pageNumber !in state.pageCache) {
+                onEvent(QuranEvent.PrefetchPage(pageNumber))
+            }
+        }
+        // Not fetched yet — distinct from a fetched page that happens to be empty, which
+        // still renders (as the framed, empty page it is).
+        if (pageNumber !in state.pageCache && ayahs.isEmpty()) {
+            Box(modifier = modifier, contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+            }
+        } else {
+            MushafPage(
+                pageNumber = pageNumber,
+                ayahs = ayahs,
+                surahMap = surahMap,
+                translationFontFamily = translationFont,
+                arabicFontSize = state.arabicFontSize,
+                arabicFontFamily = state.arabicFontFamily,
+                highlightedAyahId = highlightedAyahId,
+                favoriteAyahIds = favoriteAyahIds,
+                showTajweed = state.showTajweed,
+                tajweedUnderline = state.tajweedUnderline,
+                showTranslation = state.showTranslation,
+                showTransliteration = state.showTransliteration,
+                onBookmarkClick = { ayah ->
+                    onEvent(
+                        QuranEvent.ToggleBookmark(ayah.id, ayah.surahNumber, ayah.numberInSurah)
+                    )
+                },
+                onFavoriteClick = { ayah ->
+                    onEvent(
+                        QuranEvent.ToggleFavorite(ayah.id, ayah.surahNumber, ayah.numberInSurah)
+                    )
+                },
+                onPlayClick = { ayah ->
+                    onEvent(
+                        QuranEvent.PlayAyahAudio(ayah.id, ayah.surahNumber, ayah.numberInSurah)
+                    )
+                },
+                onShareClick = { },
+                onCopyClick = { },
+                onTafseerClick = { ayah ->
+                    onNavigateToTafseer(ayah.surahNumber, ayah.numberInSurah)
+                },
+                isKhatamActive = state.activeKhatamId != null,
+                khatamReadAyahIds = state.khatamReadAyahIds,
+                onKhatamToggle = { ayah -> onEvent(QuranEvent.ToggleKhatamAyah(ayah.id)) },
+                modifier = modifier,
+            )
+        }
     }
 }
 
