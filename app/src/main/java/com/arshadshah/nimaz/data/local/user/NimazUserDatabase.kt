@@ -277,6 +277,12 @@ object LegacyUserDataImport {
      * `is_custom = 1` is the only thing that ever distinguished them. Taking them here is what
      * lets "delete all my data" stop reaching into the content database: content is not user
      * data, and a preset somebody wrote is not content.
+     *
+     * The legacy columns are `target_count` and `display_order` — snake_case in the table,
+     * camelCase on the entity. Writing the entity's names here compiled fine and failed on a
+     * device with "no such column: targetCount", on *every app launch*, because this runs when
+     * the user database is first opened. The instrumented suite caught it; the unit test had
+     * built its own fixture and did not include this table, so it could not.
      */
     private fun customPresets(db: SupportSQLiteDatabase): Int = exec(
         db, "tasbih_presets",
@@ -284,7 +290,7 @@ object LegacyUserDataImport {
         INSERT OR IGNORE INTO custom_tasbih_presets
             (id, name, arabic, transliteration, translation, target_count, display_order,
              category, created_at, updated_at)
-        SELECT id, name, arabic, transliteration, translation, targetCount, displayOrder,
+        SELECT id, name, arabic, transliteration, translation, target_count, display_order,
                category, updatedAt, updatedAt
         FROM legacy.tasbih_presets WHERE is_custom = 1
         """.trimIndent(),

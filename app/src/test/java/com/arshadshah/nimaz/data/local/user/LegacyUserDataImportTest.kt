@@ -83,6 +83,14 @@ class LegacyUserDataImportTest {
                 "heard_count INTEGER NOT NULL, is_completed INTEGER NOT NULL, " +
                 "last_practiced_at INTEGER NOT NULL, PRIMARY KEY(lesson_id, cell_id))"
         )
+        // Exactly as the shipped schema spells them: snake_case in the table, camelCase on the
+        // entity. Getting this wrong compiled and then failed on every app launch.
+        helper.execSQL(
+            "CREATE TABLE tasbih_presets (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, " +
+                "arabic TEXT NOT NULL, transliteration TEXT NOT NULL, translation TEXT NOT NULL, " +
+                "target_count INTEGER NOT NULL, is_custom INTEGER NOT NULL, " +
+                "display_order INTEGER NOT NULL, updatedAt INTEGER NOT NULL DEFAULT 0, category TEXT)"
+        )
         helper.execSQL(
             "CREATE TABLE reading_progress (id INTEGER PRIMARY KEY, lastReadSurah INTEGER NOT NULL, " +
                 "lastReadAyah INTEGER NOT NULL, lastReadPage INTEGER NOT NULL, lastReadJuz INTEGER NOT NULL, " +
@@ -125,6 +133,17 @@ class LegacyUserDataImportTest {
         helper.execSQL(
             "INSERT INTO qaida_cell_progress (lesson_id, cell_id, heard_count, is_completed, last_practiced_at) " +
                 "VALUES (2, 44, 5, 1, 900)"
+        )
+        // One shipped preset and one the user wrote. Only the second is theirs.
+        helper.execSQL(
+            "INSERT INTO tasbih_presets (name, arabic, transliteration, translation, target_count, " +
+                "is_custom, display_order, updatedAt, category) " +
+                "VALUES ('SubhanAllah', 'س', 'SubhanAllah', 'Glory be to Allah', 33, 0, 1, 10, 'after_prayer')"
+        )
+        helper.execSQL(
+            "INSERT INTO tasbih_presets (name, arabic, transliteration, translation, target_count, " +
+                "is_custom, display_order, updatedAt, category) " +
+                "VALUES ('My dhikr', 'ذ', 'Dhikri', 'mine', 100, 1, 9, 20, NULL)"
         )
         helper.execSQL(
             "INSERT INTO reading_progress (id, lastReadSurah, lastReadAyah, lastReadPage, lastReadJuz, " +
@@ -263,5 +282,18 @@ class LegacyUserDataImportTest {
         )
         assertThat(LegacyUserDataImport.isNeeded(db.openHelper.writableDatabase, legacy.absolutePath))
             .isFalse()
+    }
+
+    @Test
+    fun `only the presets the user wrote come across`() = runTest {
+        import()
+
+        val presets = db.customPresetDao().all()
+        assertThat(presets).hasSize(1)
+        assertThat(presets.first().name).isEqualTo("My dhikr")
+        assertThat(presets.first().targetCount).isEqualTo(100)
+        assertThat(presets.first().displayOrder).isEqualTo(9)
+        // The shipped one stays in the content database, where it belongs.
+        assertThat(presets.map { it.name }).doesNotContain("SubhanAllah")
     }
 }
