@@ -163,8 +163,20 @@ android.sourceSets.getByName("main").assets.srcDir(
     layout.buildDirectory.dir("generated/nimazData/assets").get().asFile
 )
 
-tasks.matching { it.name.startsWith("merge") && it.name.endsWith("Assets") }
-    .configureEach { dependsOn("fetchNimazData") }
+// Everything that *reads* the generated assets directory has to be ordered after the
+// task that fills it, not just the asset merge. Lint builds a model of every source
+// set — assets included — so `generateReleaseLintVitalReportModel` consumes this
+// directory too, and Gradle fails the build outright rather than racing:
+//
+//   Task ':app:generateReleaseLintVitalReportModel' uses this output of task
+//   ':app:fetchNimazData' without declaring an explicit or implicit dependency.
+//
+// Only release hit it, because lint-vital runs for release and not for debug — so
+// every debug build and both PR check lanes were green while the deploy lane could
+// not build at all.
+tasks.matching {
+    (it.name.startsWith("merge") && it.name.endsWith("Assets")) || it.name.contains("Lint")
+}.configureEach { dependsOn("fetchNimazData") }
 
 kotlin {
     compilerOptions {
