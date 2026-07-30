@@ -25,6 +25,10 @@ data class TafseerUiState(
     val currentAyahIndex: Int = 0,
     val selectedSource: TafseerSource = TafseerSource.IBN_KATHIR,
     val currentTafseer: TafseerText? = null,
+    // Hoisted out of the reader composable so it survives an ayah-by-ayah swipe
+    // within the same commentary block: it only resets to 0 when the block
+    // itself changes, not on every ayah navigation.
+    val currentTafseerPage: Int = 0,
     val highlights: List<TafseerHighlight> = emptyList(),
     val notes: List<TafseerNote> = emptyList(),
     val surahName: String = "",
@@ -38,6 +42,7 @@ data class TafseerUiState(
 sealed interface TafseerEvent {
     data class LoadSurah(val surahNumber: Int, val ayahNumber: Int = 1) : TafseerEvent
     data class NavigateToAyah(val index: Int) : TafseerEvent
+    data class NavigateToTafseerPage(val page: Int) : TafseerEvent
     data class SwitchSource(val source: TafseerSource) : TafseerEvent
     data class AddHighlight(
         val startOffset: Int,
@@ -93,6 +98,9 @@ class TafseerViewModel @Inject constructor(
         when (event) {
             is TafseerEvent.LoadSurah -> loadSurah(event.surahNumber, event.ayahNumber)
             is TafseerEvent.NavigateToAyah -> onAyahChanged(event.index)
+            is TafseerEvent.NavigateToTafseerPage ->
+                _state.value = _state.value.copy(currentTafseerPage = event.page)
+
             is TafseerEvent.SwitchSource -> switchSource(event.source)
             is TafseerEvent.AddHighlight -> addHighlight(
                 event.startOffset,
@@ -158,28 +166,41 @@ class TafseerViewModel @Inject constructor(
         val tafseerId = currentState.selectedSource.id
 
         viewModelScope.launch {
-            val tafseer = tafseerUseCases.getTafseerForAyah(ayah.id, tafseerId)
+            val tafseer =
+                tafseerUseCases.getTafseerForAyah(ayah.surahNumber, ayah.ayahNumber, tafseerId)
             // Probe every source so the UI can suggest an alternate one when the
             // selected source has no content for this ayah (seed coverage is partial).
             val available = TafseerSource.entries.filter { source ->
-                tafseerUseCases.getTafseerForAyah(ayah.id, source.id)
+                tafseerUseCases.getTafseerForAyah(ayah.surahNumber, ayah.ayahNumber, source.id)
                     ?.text?.isNotBlank() == true
             }.toSet()
+            // Only reset the reading position when the block itself changed —
+            // swiping to the next ayah of the same block should hold position,
+            // not reopen the commentary from page 1.
+            val sameBlock = tafseer != null && tafseer.id == _state.value.currentTafseer?.id
             _state.value = _state.value.copy(
                 currentTafseer = tafseer,
+                currentTafseerPage = if (sameBlock) _state.value.currentTafseerPage else 0,
                 availableSources = available
             )
-        }
 
-        viewModelScope.launch {
-            tafseerUseCases.getHighlightsForAyah(ayah.id, tafseerId).collectLatest { highlights ->
-                _state.value = _state.value.copy(highlights = highlights)
-            }
-        }
-
-        viewModelScope.launch {
-            tafseerUseCases.getNotesForAyah(ayah.id, tafseerId).collectLatest { notes ->
-                _state.value = _state.value.copy(notes = notes)
+            if (tafseer != null) {
+                launch {
+                    tafseerUseCases.getHighlightsForRange(
+                        tafseer.surahNumber, tafseer.ayahStart, tafseer.ayahEnd, tafseerId
+                    ).collectLatest { highlights ->
+                        _state.value = _state.value.copy(highlights = highlights)
+                    }
+                }
+                launch {
+                    tafseerUseCases.getNotesForRange(
+                        tafseer.surahNumber, tafseer.ayahStart, tafseer.ayahEnd, tafseerId
+                    ).collectLatest { notes ->
+                        _state.value = _state.value.copy(notes = notes)
+                    }
+                }
+            } else {
+                _state.value = _state.value.copy(highlights = emptyList(), notes = emptyList())
             }
         }
     }

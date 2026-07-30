@@ -61,9 +61,9 @@ import com.arshadshah.nimaz.data.local.database.entity.QuranFavoriteEntity
 import com.arshadshah.nimaz.data.local.database.entity.ReadingProgressEntity
 import com.arshadshah.nimaz.data.local.database.entity.SurahEntity
 import com.arshadshah.nimaz.data.local.database.entity.SurahInfoEntity
+import com.arshadshah.nimaz.data.local.database.entity.TafseerBlockEntity
 import com.arshadshah.nimaz.data.local.database.entity.TafseerHighlightEntity
 import com.arshadshah.nimaz.data.local.database.entity.TafseerNoteEntity
-import com.arshadshah.nimaz.data.local.database.entity.TafseerTextEntity
 import com.arshadshah.nimaz.data.local.database.entity.TasbihPresetEntity
 import com.arshadshah.nimaz.data.local.database.entity.TasbihSessionEntity
 import com.arshadshah.nimaz.data.local.database.entity.TranslationEntity
@@ -74,7 +74,7 @@ import com.arshadshah.nimaz.data.local.database.entity.ZakatHistoryEntity
  * migration) for any schema change — it drives both the Room `@Database(version = …)`
  * annotation below and `NimazDatabase.SCHEMA_VERSION` (used to tag crash reports).
  */
-const val NIMAZ_DATABASE_VERSION = 20
+const val NIMAZ_DATABASE_VERSION = 21
 
 @Database(
     entities = [
@@ -107,7 +107,7 @@ const val NIMAZ_DATABASE_VERSION = 20
         // Zakat
         ZakatHistoryEntity::class,
         // Tafseer
-        TafseerTextEntity::class,
+        TafseerBlockEntity::class,
         TafseerHighlightEntity::class,
         TafseerNoteEntity::class,
         // Khatam
@@ -328,6 +328,41 @@ abstract class NimazDatabase : RoomDatabase() {
 
                 db.execSQL("DROP TABLE IF EXISTS `mushaf_layout_indopak16`")
                 db.execSQL("UPDATE ayahs SET text_indopak = NULL WHERE text_indopak IS NOT NULL")
+            }
+        }
+
+        // Tafseer is range-based, not ayah-based: a single commentary passage (e.g.
+        // Ibn Kathir on 43:81-89) used to be duplicated into `tafseer_texts` under
+        // every ayah id it covers — 4,340 redundant rows for ibn_kathir_en alone
+        // against the schemaVersion 21 artifact. `tafseer_blocks` stores the block
+        // once with its own range (`ayah_start`/`ayah_end`), so the reader can
+        // render "Commentary on 43:81-89" instead of showing the same text nine
+        // times with no indication it's one passage. Destructive for
+        // `tafseer_texts` — that's shipped content, not user data, and is replaced
+        // wholesale by the schemaVersion 21 artifact fetched via `data.lock.json`.
+        // `tafseer_highlights`/`tafseer_notes` (user data, keyed by `ayah_id`) are
+        // untouched: their `start_offset`/`end_offset` index into the commentary
+        // text, which is unchanged for the ayah they were made on.
+        val MIGRATION_20_21 = object : Migration(20, 21) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("DROP TABLE IF EXISTS `tafseer_texts`")
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS `tafseer_blocks` (
+                        `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        `tafseer_id` TEXT NOT NULL,
+                        `surah_number` INTEGER NOT NULL,
+                        `ayah_start` INTEGER NOT NULL,
+                        `ayah_end` INTEGER NOT NULL,
+                        `text` TEXT NOT NULL
+                    )
+                """.trimIndent()
+                )
+                db.execSQL(
+                    "CREATE INDEX IF NOT EXISTS " +
+                            "`index_tafseer_blocks_tafseer_id_surah_number_ayah_start_ayah_end` " +
+                            "ON `tafseer_blocks` (`tafseer_id`, `surah_number`, `ayah_start`, `ayah_end`)"
+                )
             }
         }
 
@@ -824,6 +859,7 @@ abstract class NimazDatabase : RoomDatabase() {
             MIGRATION_17_18,
             MIGRATION_18_19,
             MIGRATION_19_20,
+            MIGRATION_20_21,
         )
     }
 }

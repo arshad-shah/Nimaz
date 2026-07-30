@@ -1408,6 +1408,8 @@
     <string name="cd_mark_as_unread">Mark as unread</string>
 
     <!-- Tafseer page content -->
+    <string name="tafseer_commentary_range_single">Commentary on %1$d:%2$d</string>
+    <string name="tafseer_commentary_range_span">Commentary on %1$d:%2$d-%3$d</string>
     <string name="tafseer_highlight">Highlight</string>
     <string name="tafseer_highlight_notes">Highlight Notes</string>
     <string name="tafseer_no_notes">No notes yet. Long-press the commentary to highlight and add a note.</string>

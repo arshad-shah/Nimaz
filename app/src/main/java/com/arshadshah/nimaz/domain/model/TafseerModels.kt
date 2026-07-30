@@ -1,11 +1,16 @@
 package com.arshadshah.nimaz.domain.model
 
+/**
+ * A single commentary passage, covering the contiguous ayah range
+ * [ayahStart]..[ayahEnd] within [surahNumber] — a range of one when the source
+ * comments ayah-by-ayah, wider when it discusses several ayat as one block.
+ */
 data class TafseerText(
     val id: Long,
-    val ayahId: Int,
-    val surahNumber: Int,
-    val ayahNumber: Int,
     val tafseerId: String,
+    val surahNumber: Int,
+    val ayahStart: Int,
+    val ayahEnd: Int,
     val text: String
 )
 

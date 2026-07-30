@@ -7,11 +7,18 @@ import kotlinx.coroutines.flow.Flow
 
 interface TafseerRepository {
     // Tafseer text
-    suspend fun getTafseerForAyah(ayahId: Int, tafseerId: String): TafseerText?
+    suspend fun getTafseerForAyah(surahNumber: Int, ayahNumber: Int, tafseerId: String): TafseerText?
     fun getTafseerForSurah(surahNumber: Int, tafseerId: String): Flow<List<TafseerText>>
 
-    // Highlights
-    fun getHighlightsForAyah(ayahId: Int, tafseerId: String): Flow<List<TafseerHighlight>>
+    // Highlights — a block spans a range, so the reader asks for every highlight
+    // whose ayah falls inside that range, not just the current ayah's own.
+    fun getHighlightsForRange(
+        surahNumber: Int,
+        ayahStart: Int,
+        ayahEnd: Int,
+        tafseerId: String
+    ): Flow<List<TafseerHighlight>>
+
     fun getAllHighlights(): Flow<List<TafseerHighlight>>
     suspend fun addHighlight(
         ayahId: Int,
@@ -26,7 +33,13 @@ interface TafseerRepository {
     suspend fun deleteHighlight(highlightId: Long)
 
     // Notes
-    fun getNotesForAyah(ayahId: Int, tafseerId: String): Flow<List<TafseerNote>>
+    fun getNotesForRange(
+        surahNumber: Int,
+        ayahStart: Int,
+        ayahEnd: Int,
+        tafseerId: String
+    ): Flow<List<TafseerNote>>
+
     suspend fun addNote(ayahId: Int, tafseerId: String, text: String): Long
     suspend fun updateNote(note: TafseerNote)
     suspend fun deleteNote(noteId: Long)

@@ -22,6 +22,46 @@ class MigrationTest {
         FrameworkSQLiteOpenHelperFactory()
     )
 
+    /**
+     * Tafseer moves from one row per ayah (`tafseer_texts`) to one row per
+     * commentary block (`tafseer_blocks`, carrying its own `ayah_start`/`ayah_end`
+     * range) — see issue #329. The old table is dropped outright: it is shipped
+     * content, not user data, and is replaced wholesale by the schemaVersion 21
+     * artifact.
+     */
+    @Test
+    fun migrate20To21_replacesTafseerTextsWithBlocks() {
+        helper.createDatabase(dbName, 20).use { db ->
+            db.execSQL(
+                "INSERT INTO tafseer_texts (ayah_id, surah_number, ayah_number, tafseer_id, text) " +
+                    "VALUES (1, 1, 1, 'ibn_kathir_en', 'old per-ayah row')"
+            )
+        }
+
+        val db = helper.runMigrationsAndValidate(
+            dbName, 21, true, NimazDatabase.MIGRATION_20_21
+        )
+
+        val droppedCursor = db.query(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name='tafseer_texts'"
+        )
+        assertThat(droppedCursor.count).isEqualTo(0)
+        droppedCursor.close()
+
+        val createdCursor = db.query(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name='tafseer_blocks'"
+        )
+        assertThat(createdCursor.count).isEqualTo(1)
+        createdCursor.close()
+
+        val indexCursor = db.query(
+            "SELECT name FROM sqlite_master WHERE type='index' AND " +
+                "name='index_tafseer_blocks_tafseer_id_surah_number_ayah_start_ayah_end'"
+        )
+        assertThat(indexCursor.count).isEqualTo(1)
+        indexCursor.close()
+    }
+
     @Test
     fun migrate13To14_createsHelpTables() {
         helper.createDatabase(dbName, 13).close()

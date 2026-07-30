@@ -1112,6 +1112,8 @@
     <string name="sajdah">Secde</string>
     <string name="cd_mark_as_read">Okundu olarak işaretle</string>
     <string name="cd_mark_as_unread">Okunmadı olarak işaretle</string>
+    <string name="tafseer_commentary_range_single">%1$d:%2$d hakkında tefsir</string>
+    <string name="tafseer_commentary_range_span">%1$d:%2$d-%3$d hakkında tefsir</string>
     <string name="tafseer_highlight">Vurgula</string>
     <string name="tafseer_highlight_notes">Vurgu Notları</string>
     <string name="tafseer_no_notes">Henüz not yok. Vurgulamak ve not eklemek için yoruma basılı tutun.</string>

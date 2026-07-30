@@ -1088,6 +1088,8 @@
     <string name="sajdah">Sajdah</string>
     <string name="cd_mark_as_read">Tandakan sebagai dibaca</string>
     <string name="cd_mark_as_unread">Tandakan sebagai belum dibaca</string>
+    <string name="tafseer_commentary_range_single">Tafsir tentang %1$d:%2$d</string>
+    <string name="tafseer_commentary_range_span">Tafsir tentang %1$d:%2$d-%3$d</string>
     <string name="tafseer_highlight">Sorot</string>
     <string name="tafseer_highlight_notes">Nota Sorotan</string>
     <string name="tafseer_no_notes">Belum ada nota. Tekan lama ulasan untuk menyorot dan menambah nota.</string>

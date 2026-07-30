@@ -131,14 +131,14 @@ import com.arshadshah.nimaz.domain.usecase.GetHadithsByGradeUseCase
 import com.arshadshah.nimaz.domain.usecase.GetHelpGuideUseCase
 import com.arshadshah.nimaz.domain.usecase.GetHelpTopicDetailUseCase
 import com.arshadshah.nimaz.domain.usecase.GetHelpTopicsUseCase
-import com.arshadshah.nimaz.domain.usecase.GetHighlightsForAyahUseCase
+import com.arshadshah.nimaz.domain.usecase.GetHighlightsForRangeUseCase
 import com.arshadshah.nimaz.domain.usecase.GetLessonProgressUseCase
 import com.arshadshah.nimaz.domain.usecase.GetLongestStreakUseCase
 import com.arshadshah.nimaz.domain.usecase.GetMakeupFastCountForDateUseCase
 import com.arshadshah.nimaz.domain.usecase.GetMissedPrayersRequiringQadaUseCase
 import com.arshadshah.nimaz.domain.usecase.GetMushafPageLayoutUseCase
 import com.arshadshah.nimaz.domain.usecase.GetNextUnreadPositionUseCase
-import com.arshadshah.nimaz.domain.usecase.GetNotesForAyahUseCase
+import com.arshadshah.nimaz.domain.usecase.GetNotesForRangeUseCase
 import com.arshadshah.nimaz.domain.usecase.GetMushafPaginationUseCase
 import com.arshadshah.nimaz.domain.usecase.GetPageAyahRangesUseCase
 import com.arshadshah.nimaz.domain.usecase.GetPendingMakeupFastsUseCase
@@ -745,11 +745,11 @@ object UseCaseModule {
     ): TafseerUseCases {
         return TafseerUseCases(
             getTafseerForAyah = GetTafseerForAyahUseCase(repository),
-            getHighlightsForAyah = GetHighlightsForAyahUseCase(repository),
+            getHighlightsForRange = GetHighlightsForRangeUseCase(repository),
             addHighlight = AddHighlightUseCase(repository),
             updateHighlight = UpdateHighlightUseCase(repository),
             deleteHighlight = DeleteHighlightUseCase(repository),
-            getNotesForAyah = GetNotesForAyahUseCase(repository),
+            getNotesForRange = GetNotesForRangeUseCase(repository),
             addNote = AddNoteUseCase(repository),
             updateNote = UpdateNoteUseCase(repository),
             deleteNote = DeleteNoteUseCase(repository),

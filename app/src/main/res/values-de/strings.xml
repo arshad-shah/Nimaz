@@ -1106,6 +1106,8 @@
     <string name="sajdah">Sajdah</string>
     <string name="cd_mark_as_read">Als gelesen markieren</string>
     <string name="cd_mark_as_unread">Als ungelesen markieren</string>
+    <string name="tafseer_commentary_range_single">Kommentar zu %1$d:%2$d</string>
+    <string name="tafseer_commentary_range_span">Kommentar zu %1$d:%2$d-%3$d</string>
     <string name="tafseer_highlight">Hervorheben</string>
     <string name="tafseer_highlight_notes">Hervorhebungsnotizen</string>
     <string name="tafseer_no_notes">Noch keine Notizen. Tippen und halten Sie den Kommentar, um ihn hervorzuheben und eine Notiz hinzuzufügen.</string>
