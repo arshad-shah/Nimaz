@@ -155,7 +155,13 @@ abstract class NimazDatabase : RoomDatabase() {
          * both, or once the asset is finally regenerated — is always safe.
          */
         private fun repairLegacyAssetSchema(db: SupportSQLiteDatabase) {
-            UPDATED_AT_TABLES.forEach { table ->
+            // Every repair below is guarded on the table existing, because this runs against
+            // whatever shape the fetched artifact happens to have — and the artifact keeps
+            // getting smaller. Five of these `updatedAt` columns and both tafseer annotation
+            // tables belong to the user now (schemaVersion 23) and are not in the artifact at
+            // all, so an unguarded `ALTER TABLE` throws "no such table: quran_favorites"
+            // before Room has validated anything: a crash on first launch of a fresh install.
+            UPDATED_AT_TABLES.filter { db.hasTable(it) }.forEach { table ->
                 db.addColumnIfMissing(table, "updatedAt", "INTEGER NOT NULL DEFAULT 0")
             }
 
@@ -169,11 +175,19 @@ abstract class NimazDatabase : RoomDatabase() {
                 db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_tafseer_texts_ayah_id_tafseer_id` ON `tafseer_texts` (`ayah_id`, `tafseer_id`)")
             }
 
-            db.execSQL("DROP INDEX IF EXISTS `index_tafseer_highlights_ayah_tafseer`")
-            db.execSQL("CREATE INDEX IF NOT EXISTS `index_tafseer_highlights_ayah_id_tafseer_id` ON `tafseer_highlights` (`ayah_id`, `tafseer_id`)")
+            // The reader's own annotations moved to the user database at schemaVersion 23, so
+            // on a current artifact these tables are absent and there is nothing to repair.
+            // They are still guarded rather than deleted: this function's whole job is fixing
+            // up databases that arrived in an older shape.
+            if (db.hasTable("tafseer_highlights")) {
+                db.execSQL("DROP INDEX IF EXISTS `index_tafseer_highlights_ayah_tafseer`")
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_tafseer_highlights_ayah_id_tafseer_id` ON `tafseer_highlights` (`ayah_id`, `tafseer_id`)")
+            }
 
-            db.execSQL("DROP INDEX IF EXISTS `index_tafseer_notes_ayah_tafseer`")
-            db.execSQL("CREATE INDEX IF NOT EXISTS `index_tafseer_notes_ayah_id_tafseer_id` ON `tafseer_notes` (`ayah_id`, `tafseer_id`)")
+            if (db.hasTable("tafseer_notes")) {
+                db.execSQL("DROP INDEX IF EXISTS `index_tafseer_notes_ayah_tafseer`")
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_tafseer_notes_ayah_id_tafseer_id` ON `tafseer_notes` (`ayah_id`, `tafseer_id`)")
+            }
         }
 
         /**

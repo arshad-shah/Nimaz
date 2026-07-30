@@ -87,10 +87,13 @@ class DeviceStateCorpusTest {
                 assertThat("$table=$rows").isNotEqualTo("$table=0")
             }
 
-            // User tables must stay empty. They are part of the schema and none of the
-            // corpus; a single row here would ship one user's bookmarks to everybody.
+            // User tables must not be here at all. They used to be part of this schema and
+            // empty — the assertion was that no row leaked, because a single one would ship
+            // somebody's bookmarks to everybody. Since schemaVersion 23 the stronger statement
+            // holds: they are in the user's own database, so the corpus cannot carry a row of
+            // them even by accident.
             for (table in USER_TABLES) {
-                assertThat("$table=${rowCount(db, table)}").isEqualTo("$table=0")
+                assertThat("$table exists=${hasTable(db, table)}").isEqualTo("$table exists=false")
             }
 
             assertThat(userVersion(db)).isEqualTo(NIMAZ_DATABASE_VERSION)
@@ -176,6 +179,11 @@ class DeviceStateCorpusTest {
         counts.toSortedMap().forEach { (table, rows) -> println("  $table  $rows") }
     }
 
+    private fun hasTable(db: NimazDatabase, table: String): Boolean =
+        db.openHelper.readableDatabase
+            .query("SELECT 1 FROM sqlite_master WHERE type='table' AND name = ?", arrayOf(table))
+            .use { it.moveToFirst() }
+
     private fun rowCount(db: NimazDatabase, table: String): Int =
         db.openHelper.readableDatabase.query("SELECT COUNT(*) FROM `$table`").use {
             if (it.moveToFirst()) it.getInt(0) else 0
@@ -231,7 +239,11 @@ class DeviceStateCorpusTest {
             "qaida_lines",
         )
 
-        /** Written by the app at runtime. Part of the schema, none of the corpus. */
+        /**
+         * Written by the app at runtime, and since schemaVersion 23 not in this database at
+         * all — they live in `NimazUserDatabase`. Kept as a list because "absent" is the
+         * assertion now.
+         */
         val USER_TABLES = listOf(
             "quran_bookmarks", "quran_favorites", "reading_progress", "khatams",
             "khatam_ayahs", "khatam_daily_log", "prayer_records", "fast_records",
