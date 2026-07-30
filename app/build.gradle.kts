@@ -175,7 +175,12 @@ android.sourceSets.getByName("main").assets.srcDir(
 // every debug build and both PR check lanes were green while the deploy lane could
 // not build at all.
 tasks.matching {
-    (it.name.startsWith("merge") && it.name.endsWith("Assets")) || it.name.contains("Lint")
+    (it.name.startsWith("merge") && it.name.endsWith("Assets")) ||
+        // Case-insensitively: AGP names them both ways — `generateReleaseLintVitalReportModel`
+        // and `lintAnalyzeDebug` — and matching only the capitalised form fixed the release
+        // lane while leaving the debug one to fail on the next PR, which is exactly what
+        // happened.
+        it.name.contains("lint", ignoreCase = true)
 }.configureEach { dependsOn("fetchNimazData") }
 
 kotlin {
