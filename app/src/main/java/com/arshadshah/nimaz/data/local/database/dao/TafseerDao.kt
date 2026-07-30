@@ -7,27 +7,50 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
+import com.arshadshah.nimaz.data.local.database.entity.TafseerBlockEntity
 import com.arshadshah.nimaz.data.local.database.entity.TafseerHighlightEntity
 import com.arshadshah.nimaz.data.local.database.entity.TafseerNoteEntity
-import com.arshadshah.nimaz.data.local.database.entity.TafseerTextEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface TafseerDao {
 
-    // Tafseer text queries
-    @Query("SELECT * FROM tafseer_texts WHERE ayah_id = :ayahId AND tafseer_id = :tafseerId")
-    suspend fun getTafseerForAyah(ayahId: Int, tafseerId: String): TafseerTextEntity?
+    // Tafseer block queries — a block covers a contiguous ayah range, so the
+    // per-ayah lookup matches on containment rather than equality.
+    @Query(
+        "SELECT * FROM tafseer_blocks WHERE tafseer_id = :tafseerId AND surah_number = :surahNumber " +
+                "AND ayah_start <= :ayahNumber AND ayah_end >= :ayahNumber"
+    )
+    suspend fun getTafseerForAyah(surahNumber: Int, ayahNumber: Int, tafseerId: String): TafseerBlockEntity?
 
-    @Query("SELECT * FROM tafseer_texts WHERE surah_number = :surahNumber AND tafseer_id = :tafseerId ORDER BY ayah_number ASC")
-    fun getTafseerForSurah(surahNumber: Int, tafseerId: String): Flow<List<TafseerTextEntity>>
+    @Query("SELECT * FROM tafseer_blocks WHERE surah_number = :surahNumber AND tafseer_id = :tafseerId ORDER BY ayah_start ASC")
+    fun getTafseerForSurah(surahNumber: Int, tafseerId: String): Flow<List<TafseerBlockEntity>>
 
-    @Query("SELECT * FROM tafseer_texts WHERE text LIKE '%' || :query || '%' AND tafseer_id = :tafseerId")
-    fun searchTafseer(query: String, tafseerId: String): Flow<List<TafseerTextEntity>>
+    @Query("SELECT * FROM tafseer_blocks WHERE text LIKE '%' || :query || '%' AND tafseer_id = :tafseerId")
+    fun searchTafseer(query: String, tafseerId: String): Flow<List<TafseerBlockEntity>>
 
     // Highlight operations
     @Query("SELECT * FROM tafseer_highlights WHERE ayah_id = :ayahId AND tafseer_id = :tafseerId ORDER BY start_offset ASC")
     fun getHighlightsForAyah(ayahId: Int, tafseerId: String): Flow<List<TafseerHighlightEntity>>
+
+    // Highlights/notes are still keyed by the single ayah they were made on, but a
+    // block spans a range, so the reader needs every highlight/note whose ayah
+    // falls inside the currently-displayed block — not just the current ayah's own.
+    @Query(
+        """
+        SELECT h.* FROM tafseer_highlights h
+        INNER JOIN ayahs a ON a.id = h.ayah_id
+        WHERE h.tafseer_id = :tafseerId AND a.surah_id = :surahNumber
+          AND a.number_in_surah BETWEEN :ayahStart AND :ayahEnd
+        ORDER BY h.start_offset ASC
+        """
+    )
+    fun getHighlightsForRange(
+        surahNumber: Int,
+        ayahStart: Int,
+        ayahEnd: Int,
+        tafseerId: String
+    ): Flow<List<TafseerHighlightEntity>>
 
     @Query("SELECT * FROM tafseer_highlights ORDER BY created_at DESC")
     fun getAllHighlights(): Flow<List<TafseerHighlightEntity>>
@@ -47,6 +70,22 @@ interface TafseerDao {
     // Note operations
     @Query("SELECT * FROM tafseer_notes WHERE ayah_id = :ayahId AND tafseer_id = :tafseerId ORDER BY created_at DESC")
     fun getNotesForAyah(ayahId: Int, tafseerId: String): Flow<List<TafseerNoteEntity>>
+
+    @Query(
+        """
+        SELECT n.* FROM tafseer_notes n
+        INNER JOIN ayahs a ON a.id = n.ayah_id
+        WHERE n.tafseer_id = :tafseerId AND a.surah_id = :surahNumber
+          AND a.number_in_surah BETWEEN :ayahStart AND :ayahEnd
+        ORDER BY n.created_at DESC
+        """
+    )
+    fun getNotesForRange(
+        surahNumber: Int,
+        ayahStart: Int,
+        ayahEnd: Int,
+        tafseerId: String
+    ): Flow<List<TafseerNoteEntity>>
 
     @Query("SELECT * FROM tafseer_notes ORDER BY created_at DESC")
     fun getAllNotes(): Flow<List<TafseerNoteEntity>>

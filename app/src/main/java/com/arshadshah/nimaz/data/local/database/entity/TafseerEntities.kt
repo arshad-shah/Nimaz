@@ -2,37 +2,31 @@ package com.arshadshah.nimaz.data.local.database.entity
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
-import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
 
+/**
+ * A single commentary passage, covering a contiguous ayah range within one surah
+ * (e.g. Ibn Kathir discussing 43:81-89 as one block) rather than being repeated
+ * per ayah. See issue #329 / schemaVersion 21.
+ */
 @Entity(
-    tableName = "tafseer_texts",
-    foreignKeys = [
-        ForeignKey(
-            entity = AyahEntity::class,
-            parentColumns = ["id"],
-            childColumns = ["ayah_id"],
-            onDelete = ForeignKey.CASCADE
-        )
-    ],
+    tableName = "tafseer_blocks",
     indices = [
-        Index(value = ["ayah_id"]),
-        Index(value = ["tafseer_id"]),
-        Index(value = ["ayah_id", "tafseer_id"], unique = true)
+        Index(value = ["tafseer_id", "surah_number", "ayah_start", "ayah_end"])
     ]
 )
-data class TafseerTextEntity(
+data class TafseerBlockEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
-    @ColumnInfo(name = "ayah_id")
-    val ayahId: Int,
-    @ColumnInfo(name = "surah_number")
-    val surahNumber: Int,
-    @ColumnInfo(name = "ayah_number")
-    val ayahNumber: Int,
     @ColumnInfo(name = "tafseer_id")
     val tafseerId: String,
+    @ColumnInfo(name = "surah_number")
+    val surahNumber: Int,
+    @ColumnInfo(name = "ayah_start")
+    val ayahStart: Int,
+    @ColumnInfo(name = "ayah_end")
+    val ayahEnd: Int,
     val text: String
 )
 

@@ -175,6 +175,10 @@ fun TafseerPageContent(
     highlights: List<TafseerHighlight>,
     selectedSource: TafseerSource,
     availableSources: Set<TafseerSource>,
+    // Hoisted to the caller so it can survive an ayah-by-ayah swipe within the
+    // same commentary block instead of reopening the block from page 1.
+    currentContentPage: Int,
+    onContentPageChanged: (Int) -> Unit,
     onSourceSwitch: (TafseerSource) -> Unit,
     onHighlightCreated: (startOffset: Int, endOffset: Int, color: String, note: String?) -> Unit,
     onHighlightUpdated: (highlightId: Long, color: String, note: String?) -> Unit,
@@ -183,7 +187,6 @@ fun TafseerPageContent(
     modifier: Modifier = Modifier
 ) {
     var showNotesSheet by remember { mutableStateOf(false) }
-    var currentContentPage by remember { mutableIntStateOf(0) }
     var editorTarget by remember { mutableStateOf<EditorTarget?>(null) }
 
     // Live text selection (page-local to [currentContentPage]); -1 means none.
@@ -197,8 +200,9 @@ fun TafseerPageContent(
     }
     val totalContentPages = tafseerPages.size
     val tafseerFullText = tafseer?.text ?: ""
-
-    remember(tafseer?.id) { currentContentPage = 0; true }
+    // Guards a hoisted page index against a shorter page count after a source
+    // switch or a block change that hasn't propagated a reset yet.
+    val safeContentPage = currentContentPage.coerceIn(0, (totalContentPages - 1).coerceAtLeast(0))
 
     fun clearSelection() {
         selStart = -1
@@ -207,7 +211,7 @@ fun TafseerPageContent(
     }
 
     // Dismiss any in-progress selection when the page or ayah changes.
-    LaunchedEffect(currentContentPage, tafseer?.id) { clearSelection() }
+    LaunchedEffect(safeContentPage, tafseer?.id) { clearSelection() }
 
     val highlightsWithNotes =
         remember(highlights) { highlights.filter { !it.note.isNullOrBlank() } }
@@ -247,7 +251,7 @@ fun TafseerPageContent(
                 ) {
                     Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
                         // Arabic ayah text on first content page
-                        if (currentContentPage == 0) {
+                        if (safeContentPage == 0) {
                             ArabicText(
                                 text = ayah.textArabic,
                                 size = ArabicTextSize.LARGE,
@@ -274,10 +278,32 @@ fun TafseerPageContent(
                         }
 
                         // Tafseer text
-                        if (tafseerPages.isNotEmpty()) {
+                        if (tafseerPages.isNotEmpty() && tafseer != null) {
                             Spacer(modifier = Modifier.height(4.dp))
+                            // Says what it's showing: a block covers a contiguous ayah
+                            // range, not just the ayah currently on screen (#329).
+                            Text(
+                                text = if (tafseer.ayahStart == tafseer.ayahEnd) {
+                                    stringResource(
+                                        R.string.tafseer_commentary_range_single,
+                                        tafseer.surahNumber,
+                                        tafseer.ayahStart
+                                    )
+                                } else {
+                                    stringResource(
+                                        R.string.tafseer_commentary_range_span,
+                                        tafseer.surahNumber,
+                                        tafseer.ayahStart,
+                                        tafseer.ayahEnd
+                                    )
+                                },
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.padding(bottom = 6.dp)
+                            )
                             AnimatedContent(
-                                targetState = currentContentPage,
+                                targetState = safeContentPage,
                                 transitionSpec = {
                                     if (targetState > initialState) {
                                         androidx.compose.animation.slideInHorizontally { it } togetherWith
@@ -292,7 +318,7 @@ fun TafseerPageContent(
                                 val animPage =
                                     tafseerPages[pageIndex.coerceIn(0, tafseerPages.lastIndex)]
                                 val animHighlights = highlightsForPage(highlights, animPage)
-                                val isActivePage = pageIndex == currentContentPage
+                                val isActivePage = pageIndex == safeContentPage
 
                                 TafseerHighlightableText(
                                     text = animPage.text,
@@ -351,7 +377,7 @@ fun TafseerPageContent(
         ) {
             SelectionActionBar(
                 onAddHighlight = {
-                    val page = tafseerPages.getOrNull(currentContentPage)
+                    val page = tafseerPages.getOrNull(safeContentPage)
                     if (page != null) {
                         val localStart = selStart.coerceIn(0, page.text.length)
                         val localEnd = selEnd.coerceIn(localStart, page.text.length)
@@ -370,10 +396,12 @@ fun TafseerPageContent(
 
         // ── Bottom bar (page nav + actions) — matches the Dua/Hadith readers ──
         NimazReaderBottomBar(
-            currentPage = currentContentPage,
+            currentPage = safeContentPage,
             pageCount = totalContentPages,
-            onPrev = { if (currentContentPage > 0) currentContentPage-- },
-            onNext = { if (currentContentPage < totalContentPages - 1) currentContentPage++ },
+            onPrev = { if (safeContentPage > 0) onContentPageChanged(safeContentPage - 1) },
+            onNext = {
+                if (safeContentPage < totalContentPages - 1) onContentPageChanged(safeContentPage + 1)
+            },
             prevContentDescription = stringResource(R.string.cd_previous_page),
             nextContentDescription = stringResource(R.string.cd_next_page)
         ) {
@@ -825,9 +853,9 @@ private val previewAyah = Ayah(
 
 private val previewTafseer = TafseerText(
     id = 1L,
-    ayahId = 255,
     surahNumber = 2,
-    ayahNumber = 255,
+    ayahStart = 255,
+    ayahEnd = 255,
     tafseerId = "ibn_kathir_en",
     text = "This is Ayat al-Kursi, and great virtues have been narrated about it. " +
             "It contains the greatest name of Allah, by which when He is called, He " +
@@ -860,6 +888,8 @@ private fun TafseerPageContentShowcase() {
         highlights = previewHighlights,
         selectedSource = TafseerSource.IBN_KATHIR,
         availableSources = setOf(TafseerSource.IBN_KATHIR, TafseerSource.MAARIFUL_QURAN),
+        currentContentPage = 0,
+        onContentPageChanged = {},
         onSourceSwitch = {},
         onHighlightCreated = { _, _, _, _ -> },
         onHighlightUpdated = { _, _, _ -> },

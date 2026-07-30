@@ -2,9 +2,9 @@ package com.arshadshah.nimaz.data.repository
 
 import com.arshadshah.nimaz.core.util.mapItems
 import com.arshadshah.nimaz.data.local.database.dao.TafseerDao
+import com.arshadshah.nimaz.data.local.database.entity.TafseerBlockEntity
 import com.arshadshah.nimaz.data.local.database.entity.TafseerHighlightEntity
 import com.arshadshah.nimaz.data.local.database.entity.TafseerNoteEntity
-import com.arshadshah.nimaz.data.local.database.entity.TafseerTextEntity
 import com.arshadshah.nimaz.domain.model.TafseerHighlight
 import com.arshadshah.nimaz.domain.model.TafseerNote
 import com.arshadshah.nimaz.domain.model.TafseerText
@@ -21,19 +21,26 @@ class TafseerRepositoryImpl @Inject constructor(
     private val tafseerDao: TafseerDao
 ) : TafseerRepository {
 
-    override suspend fun getTafseerForAyah(ayahId: Int, tafseerId: String): TafseerText? {
-        return tafseerDao.getTafseerForAyah(ayahId, tafseerId)?.toDomain()
+    override suspend fun getTafseerForAyah(
+        surahNumber: Int,
+        ayahNumber: Int,
+        tafseerId: String
+    ): TafseerText? {
+        return tafseerDao.getTafseerForAyah(surahNumber, ayahNumber, tafseerId)?.toDomain()
     }
 
     override fun getTafseerForSurah(surahNumber: Int, tafseerId: String): Flow<List<TafseerText>> {
         return tafseerDao.getTafseerForSurah(surahNumber, tafseerId).mapItems { it.toDomain() }
     }
 
-    override fun getHighlightsForAyah(
-        ayahId: Int,
+    override fun getHighlightsForRange(
+        surahNumber: Int,
+        ayahStart: Int,
+        ayahEnd: Int,
         tafseerId: String
     ): Flow<List<TafseerHighlight>> {
-        return tafseerDao.getHighlightsForAyah(ayahId, tafseerId).mapItems { it.toDomain() }
+        return tafseerDao.getHighlightsForRange(surahNumber, ayahStart, ayahEnd, tafseerId)
+            .mapItems { it.toDomain() }
     }
 
     override fun getAllHighlights(): Flow<List<TafseerHighlight>> {
@@ -83,8 +90,14 @@ class TafseerRepositoryImpl @Inject constructor(
         tafseerDao.deleteHighlightById(highlightId)
     }
 
-    override fun getNotesForAyah(ayahId: Int, tafseerId: String): Flow<List<TafseerNote>> {
-        return tafseerDao.getNotesForAyah(ayahId, tafseerId).mapItems { it.toDomain() }
+    override fun getNotesForRange(
+        surahNumber: Int,
+        ayahStart: Int,
+        ayahEnd: Int,
+        tafseerId: String
+    ): Flow<List<TafseerNote>> {
+        return tafseerDao.getNotesForRange(surahNumber, ayahStart, ayahEnd, tafseerId)
+            .mapItems { it.toDomain() }
     }
 
     override suspend fun addNote(ayahId: Int, tafseerId: String, text: String): Long {
@@ -151,12 +164,12 @@ class TafseerRepositoryImpl @Inject constructor(
         return json.toString(2)
     }
 
-    private fun TafseerTextEntity.toDomain() = TafseerText(
+    private fun TafseerBlockEntity.toDomain() = TafseerText(
         id = id,
-        ayahId = ayahId,
-        surahNumber = surahNumber,
-        ayahNumber = ayahNumber,
         tafseerId = tafseerId,
+        surahNumber = surahNumber,
+        ayahStart = ayahStart,
+        ayahEnd = ayahEnd,
         text = text
     )
 

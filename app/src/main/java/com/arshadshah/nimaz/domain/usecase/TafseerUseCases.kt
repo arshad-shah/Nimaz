@@ -13,11 +13,11 @@ import javax.inject.Inject
 
 data class TafseerUseCases(
     val getTafseerForAyah: GetTafseerForAyahUseCase,
-    val getHighlightsForAyah: GetHighlightsForAyahUseCase,
+    val getHighlightsForRange: GetHighlightsForRangeUseCase,
     val addHighlight: AddHighlightUseCase,
     val updateHighlight: UpdateHighlightUseCase,
     val deleteHighlight: DeleteHighlightUseCase,
-    val getNotesForAyah: GetNotesForAyahUseCase,
+    val getNotesForRange: GetNotesForRangeUseCase,
     val addNote: AddNoteUseCase,
     val updateNote: UpdateNoteUseCase,
     val deleteNote: DeleteNoteUseCase,
@@ -56,13 +56,18 @@ class GetTafseerNotesUseCase @Inject constructor(
 }
 
 class GetTafseerForAyahUseCase @Inject constructor(private val repository: TafseerRepository) {
-    suspend operator fun invoke(ayahId: Int, tafseerId: String): TafseerText? =
-        repository.getTafseerForAyah(ayahId, tafseerId)
+    suspend operator fun invoke(surahNumber: Int, ayahNumber: Int, tafseerId: String): TafseerText? =
+        repository.getTafseerForAyah(surahNumber, ayahNumber, tafseerId)
 }
 
-class GetHighlightsForAyahUseCase @Inject constructor(private val repository: TafseerRepository) {
-    operator fun invoke(ayahId: Int, tafseerId: String): Flow<List<TafseerHighlight>> =
-        repository.getHighlightsForAyah(ayahId, tafseerId)
+class GetHighlightsForRangeUseCase @Inject constructor(private val repository: TafseerRepository) {
+    operator fun invoke(
+        surahNumber: Int,
+        ayahStart: Int,
+        ayahEnd: Int,
+        tafseerId: String
+    ): Flow<List<TafseerHighlight>> =
+        repository.getHighlightsForRange(surahNumber, ayahStart, ayahEnd, tafseerId)
 }
 
 class AddHighlightUseCase @Inject constructor(private val repository: TafseerRepository) {
@@ -84,9 +89,14 @@ class DeleteHighlightUseCase @Inject constructor(private val repository: Tafseer
     suspend operator fun invoke(highlightId: Long) = repository.deleteHighlight(highlightId)
 }
 
-class GetNotesForAyahUseCase @Inject constructor(private val repository: TafseerRepository) {
-    operator fun invoke(ayahId: Int, tafseerId: String): Flow<List<TafseerNote>> =
-        repository.getNotesForAyah(ayahId, tafseerId)
+class GetNotesForRangeUseCase @Inject constructor(private val repository: TafseerRepository) {
+    operator fun invoke(
+        surahNumber: Int,
+        ayahStart: Int,
+        ayahEnd: Int,
+        tafseerId: String
+    ): Flow<List<TafseerNote>> =
+        repository.getNotesForRange(surahNumber, ayahStart, ayahEnd, tafseerId)
 }
 
 class AddNoteUseCase @Inject constructor(private val repository: TafseerRepository) {

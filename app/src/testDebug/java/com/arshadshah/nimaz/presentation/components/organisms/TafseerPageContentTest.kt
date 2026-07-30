@@ -40,9 +40,9 @@ class TafseerPageContentTest {
 
     private fun tafseer(text: String) = TafseerText(
         id = 1L,
-        ayahId = 1,
         surahNumber = 1,
-        ayahNumber = 1,
+        ayahStart = 1,
+        ayahEnd = 1,
         tafseerId = TafseerSource.IBN_KATHIR.id,
         text = text
     )
@@ -63,6 +63,8 @@ class TafseerPageContentTest {
                     TafseerSource.IBN_KATHIR,
                     TafseerSource.MAARIFUL_QURAN
                 ),
+                currentContentPage = 0,
+                onContentPageChanged = {},
                 onSourceSwitch = {},
                 onHighlightCreated = { _, _, _, _ -> },
                 onHighlightDeleted = {},
@@ -84,6 +86,8 @@ class TafseerPageContentTest {
                 highlights = emptyList(),
                 selectedSource = TafseerSource.IBN_KATHIR,
                 availableSources = setOf(TafseerSource.IBN_KATHIR),
+                currentContentPage = 0,
+                onContentPageChanged = {},
                 onSourceSwitch = {},
                 onHighlightCreated = { _, _, _, _ -> },
                 onHighlightDeleted = {},
@@ -104,6 +108,8 @@ class TafseerPageContentTest {
                 highlights = emptyList(),
                 selectedSource = TafseerSource.IBN_KATHIR,
                 availableSources = setOf(TafseerSource.IBN_KATHIR),
+                currentContentPage = 0,
+                onContentPageChanged = {},
                 onSourceSwitch = {},
                 onHighlightCreated = { _, _, _, _ -> },
                 onHighlightDeleted = {},
@@ -124,6 +130,8 @@ class TafseerPageContentTest {
                 highlights = emptyList(),
                 selectedSource = TafseerSource.IBN_KATHIR,
                 availableSources = setOf(TafseerSource.IBN_KATHIR),
+                currentContentPage = 0,
+                onContentPageChanged = {},
                 onSourceSwitch = {},
                 onHighlightCreated = { _, _, _, _ -> },
                 onHighlightDeleted = {},
@@ -147,6 +155,8 @@ class TafseerPageContentTest {
                     TafseerSource.IBN_KATHIR,
                     TafseerSource.MAARIFUL_QURAN
                 ),
+                currentContentPage = 0,
+                onContentPageChanged = {},
                 onSourceSwitch = {},
                 onHighlightCreated = { _, _, _, _ -> },
                 onHighlightDeleted = {},
@@ -172,6 +182,8 @@ class TafseerPageContentTest {
                     TafseerSource.IBN_KATHIR,
                     TafseerSource.MAARIFUL_QURAN
                 ),
+                currentContentPage = 0,
+                onContentPageChanged = {},
                 onSourceSwitch = { switchedTo = it },
                 onHighlightCreated = { _, _, _, _ -> },
                 onHighlightDeleted = {},
@@ -205,6 +217,8 @@ class TafseerPageContentTest {
                 ),
                 selectedSource = TafseerSource.IBN_KATHIR,
                 availableSources = setOf(TafseerSource.IBN_KATHIR),
+                currentContentPage = 0,
+                onContentPageChanged = {},
                 onSourceSwitch = {},
                 onHighlightCreated = { _, _, _, _ -> },
                 onHighlightDeleted = {},

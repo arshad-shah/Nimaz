@@ -38,6 +38,46 @@ class UserDataDaoTest {
         assertThat(dao.getAllNotesSync()).isEmpty()
     }
 
+    /**
+     * A commentary block covers a contiguous ayah range (#329): a lookup for any
+     * ayah inside the range must resolve to the same block, and a highlight/note
+     * made on one ayah of that range must surface for the whole range — not just
+     * the exact ayah it was created on.
+     */
+    @Test
+    fun tafseer_blockRange_resolvesAndGathersHighlightsAcrossAyahs() = runTest {
+        val quranDao = dbRule.db.quranDao()
+        val dao = dbRule.db.tafseerDao()
+
+        // Ayahs 5, 6 and 7 of surah 1 — the block below covers all three.
+        quranDao.insertAyahs(
+            listOf(
+                TestData.ayah(id = 5, surahId = 1, numberInSurah = 5),
+                TestData.ayah(id = 6, surahId = 1, numberInSurah = 6),
+                TestData.ayah(id = 7, surahId = 1, numberInSurah = 7),
+            )
+        )
+        // No @Insert exists for tafseer_blocks (content arrives with the shipped
+        // artifact, never written by the app), so the fixture row goes in directly.
+        dbRule.db.openHelper.writableDatabase.execSQL(
+            "INSERT INTO tafseer_blocks (tafseer_id, surah_number, ayah_start, ayah_end, text) " +
+                "VALUES ('ibn-kathir', 1, 5, 7, 'commentary spanning three ayahs')"
+        )
+
+        assertThat(dao.getTafseerForAyah(1, 5, "ibn-kathir")?.text)
+            .isEqualTo("commentary spanning three ayahs")
+        assertThat(dao.getTafseerForAyah(1, 7, "ibn-kathir")?.text)
+            .isEqualTo("commentary spanning three ayahs")
+        assertThat(dao.getTafseerForAyah(1, 8, "ibn-kathir")).isNull()
+
+        // Highlight/note made on ayah 6 (the middle of the range, not its start).
+        dao.insertHighlight(TestData.tafseerHighlight(ayahId = 6, tafseerId = "ibn-kathir"))
+        dao.insertNote(TestData.tafseerNote(ayahId = 6, tafseerId = "ibn-kathir", text = "note"))
+
+        assertThat(dao.getHighlightsForRange(1, 5, 7, "ibn-kathir").first()).hasSize(1)
+        assertThat(dao.getNotesForRange(1, 5, 7, "ibn-kathir").first()).hasSize(1)
+    }
+
     @Test
     fun qaida_lessonProgress_upsertsAndReads() = runTest {
         val dao = dbRule.db.qaidaDao()

@@ -1130,6 +1130,8 @@
     <string name="sajdah">Sajdah</string>
     <string name="cd_mark_as_read">Marquer comme lu</string>
     <string name="cd_mark_as_unread">Marquer comme non lu</string>
+    <string name="tafseer_commentary_range_single">Commentaire sur %1$d:%2$d</string>
+    <string name="tafseer_commentary_range_span">Commentaire sur %1$d:%2$d-%3$d</string>
     <string name="tafseer_highlight">Surligner</string>
     <string name="tafseer_highlight_notes">Notes de surlignage</string>
     <string name="tafseer_no_notes">Aucune note pour le moment. Appuyez longuement sur le commentaire pour le surligner et ajouter une note.</string>

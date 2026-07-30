@@ -24,9 +24,9 @@ import com.arshadshah.nimaz.data.local.database.entity.QuranBookmarkEntity
 import com.arshadshah.nimaz.data.local.database.entity.QuranFavoriteEntity
 import com.arshadshah.nimaz.data.local.database.entity.ReadingProgressEntity
 import com.arshadshah.nimaz.data.local.database.entity.SurahEntity
+import com.arshadshah.nimaz.data.local.database.entity.TafseerBlockEntity
 import com.arshadshah.nimaz.data.local.database.entity.TafseerHighlightEntity
 import com.arshadshah.nimaz.data.local.database.entity.TafseerNoteEntity
-import com.arshadshah.nimaz.data.local.database.entity.TafseerTextEntity
 import com.arshadshah.nimaz.data.local.database.entity.TasbihPresetEntity
 import com.arshadshah.nimaz.data.local.database.entity.TasbihSessionEntity
 import com.arshadshah.nimaz.data.local.database.entity.ZakatHistoryEntity
@@ -330,12 +330,12 @@ object TestData {
     )
 
     // ── Tafseer ─────────────────────────────────────────────────────────────
-    fun tafseerText(ayahId: Int = 1, tafseerId: String = "ibn-kathir") =
-        TafseerTextEntity(
-            ayahId = ayahId,
-            surahNumber = 1,
-            ayahNumber = ayahId,
+    fun tafseerBlock(ayahStart: Int = 1, ayahEnd: Int = ayahStart, tafseerId: String = "ibn-kathir") =
+        TafseerBlockEntity(
             tafseerId = tafseerId,
+            surahNumber = 1,
+            ayahStart = ayahStart,
+            ayahEnd = ayahEnd,
             text = "Commentary text",
         )
 
