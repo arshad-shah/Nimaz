@@ -199,8 +199,15 @@ abstract class NimazDatabase : RoomDatabase() {
                 db.addColumnIfMissing(table, "updatedAt", "INTEGER NOT NULL DEFAULT 0")
             }
 
-            db.execSQL("DROP INDEX IF EXISTS `index_tafseer_texts_ayah_tafseer`")
-            db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_tafseer_texts_ayah_id_tafseer_id` ON `tafseer_texts` (`ayah_id`, `tafseer_id`)")
+            // Only for a database that still has the per-ayah table. Since
+            // schemaVersion 21 the artifact ships `tafseer_blocks` and no
+            // `tafseer_texts` at all, and `CREATE INDEX IF NOT EXISTS` does not
+            // guard against a missing *table* — it throws "no such table", which
+            // on this path is a crash on first launch of a fresh install.
+            if (db.hasTable("tafseer_texts")) {
+                db.execSQL("DROP INDEX IF EXISTS `index_tafseer_texts_ayah_tafseer`")
+                db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_tafseer_texts_ayah_id_tafseer_id` ON `tafseer_texts` (`ayah_id`, `tafseer_id`)")
+            }
 
             db.execSQL("DROP INDEX IF EXISTS `index_tafseer_highlights_ayah_tafseer`")
             db.execSQL("CREATE INDEX IF NOT EXISTS `index_tafseer_highlights_ayah_id_tafseer_id` ON `tafseer_highlights` (`ayah_id`, `tafseer_id`)")
@@ -333,19 +340,33 @@ abstract class NimazDatabase : RoomDatabase() {
 
         // Tafseer is range-based, not ayah-based: a single commentary passage (e.g.
         // Ibn Kathir on 43:81-89) used to be duplicated into `tafseer_texts` under
-        // every ayah id it covers — 4,340 redundant rows for ibn_kathir_en alone
-        // against the schemaVersion 21 artifact. `tafseer_blocks` stores the block
-        // once with its own range (`ayah_start`/`ayah_end`), so the reader can
-        // render "Commentary on 43:81-89" instead of showing the same text nine
-        // times with no indication it's one passage. Destructive for
-        // `tafseer_texts` — that's shipped content, not user data, and is replaced
-        // wholesale by the schemaVersion 21 artifact fetched via `data.lock.json`.
+        // every ayah id it covers — 4,340 redundant rows for ibn_kathir_en alone.
+        // `tafseer_blocks` stores the block once with its own range
+        // (`ayah_start`/`ayah_end`), so the reader can render "Commentary on
+        // 43:81-89" instead of showing the same text nine times with no indication
+        // it's one passage.
+        //
+        // The old rows are folded into the new table before being dropped, and
+        // that is not a nicety. `createFromAsset` copies the artifact **only on a
+        // fresh install**, so an upgrading device never receives the reshaped data;
+        // the only mechanism that reaches an existing install is a content patch,
+        // and a patch cannot express a table that did not exist in its baseline
+        // (`nz patch emit` refuses). Dropping `tafseer_texts` and creating an empty
+        // `tafseer_blocks` would therefore have emptied the Tafseer reader for
+        // every existing user until they reinstalled.
+        //
+        // Nothing has to be fetched to do it: the old table *is* the source. A
+        // block is a maximal run of consecutive ayahs in one surah sharing one
+        // commentary text, which is exactly how the importer derives blocks
+        // upstream. Run against the published data-v2 artifact, the fold below
+        // reproduces the artifact's own 1,896 + 3,037 blocks with zero rows
+        // differing in either direction.
+        //
         // `tafseer_highlights`/`tafseer_notes` (user data, keyed by `ayah_id`) are
         // untouched: their `start_offset`/`end_offset` index into the commentary
         // text, which is unchanged for the ayah they were made on.
         val MIGRATION_20_21 = object : Migration(20, 21) {
             override fun migrate(db: SupportSQLiteDatabase) {
-                db.execSQL("DROP TABLE IF EXISTS `tafseer_texts`")
                 db.execSQL(
                     """
                     CREATE TABLE IF NOT EXISTS `tafseer_blocks` (
@@ -363,6 +384,37 @@ abstract class NimazDatabase : RoomDatabase() {
                             "`index_tafseer_blocks_tafseer_id_surah_number_ayah_start_ayah_end` " +
                             "ON `tafseer_blocks` (`tafseer_id`, `surah_number`, `ayah_start`, `ayah_end`)"
                 )
+
+                // Belt and braces on the ordering: fold only into an empty table, so
+                // a database that somehow holds both shapes cannot end up with the
+                // same commentary twice.
+                if (db.hasTable("tafseer_texts") && db.isEmpty("tafseer_blocks")) {
+                    // Gaps-and-islands: subtracting a per-text row number from the
+                    // ayah number is constant exactly while ayahs are consecutive
+                    // *and* the text is unchanged, so it groups a run without
+                    // merging two separate runs that happen to share the same text
+                    // — or bridging a missing ayah. Window functions need SQLite
+                    // 3.25; minSdk 29 ships 3.28.
+                    db.execSQL(
+                        """
+                        INSERT INTO `tafseer_blocks`
+                            (`tafseer_id`, `surah_number`, `ayah_start`, `ayah_end`, `text`)
+                        SELECT tafseer_id, surah_number,
+                               MIN(ayah_number), MAX(ayah_number), text
+                        FROM (
+                            SELECT tafseer_id, surah_number, ayah_number, text,
+                                   ayah_number - ROW_NUMBER() OVER (
+                                       PARTITION BY tafseer_id, surah_number, text
+                                       ORDER BY ayah_number
+                                   ) AS run
+                            FROM `tafseer_texts`
+                        )
+                        GROUP BY tafseer_id, surah_number, text, run
+                        ORDER BY tafseer_id, surah_number, MIN(ayah_number)
+                    """.trimIndent()
+                    )
+                    db.execSQL("DROP TABLE `tafseer_texts`")
+                }
             }
         }
 
@@ -885,3 +937,20 @@ private fun SupportSQLiteDatabase.addColumnIfMissing(
         execSQL("ALTER TABLE `$table` ADD COLUMN $column $definition")
     }
 }
+
+/**
+ * Whether [table] exists in this database.
+ *
+ * `CREATE INDEX IF NOT EXISTS … ON missing_table` is not idempotent: the guard
+ * covers the index name, not the table, so the statement throws "no such table".
+ * Any repair that names a table which has since been dropped from the artifact
+ * has to ask first — see [NimazDatabase.PREPACKAGED_CALLBACK], which runs against
+ * whatever shape the fetched artifact happens to have.
+ */
+private fun SupportSQLiteDatabase.hasTable(table: String): Boolean =
+    query("SELECT 1 FROM sqlite_master WHERE type='table' AND name=?", arrayOf(table))
+        .use { it.moveToFirst() }
+
+/** Whether [table] holds no rows. Used to keep a data-carrying migration re-runnable. */
+private fun SupportSQLiteDatabase.isEmpty(table: String): Boolean =
+    query("SELECT 1 FROM `$table` LIMIT 1").use { !it.moveToFirst() }
