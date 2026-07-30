@@ -25,16 +25,39 @@ class MigrationTest {
     /**
      * Tafseer moves from one row per ayah (`tafseer_texts`) to one row per
      * commentary block (`tafseer_blocks`, carrying its own `ayah_start`/`ayah_end`
-     * range) — see issue #329. The old table is dropped outright: it is shipped
-     * content, not user data, and is replaced wholesale by the schemaVersion 21
-     * artifact.
+     * range) — see issue #329.
+     *
+     * The rows are **folded, not dropped**. `createFromAsset` re-copies the
+     * artifact only on a fresh install and a content patch cannot carry a table
+     * absent from its baseline, so an upgrading device has no other source for its
+     * commentary: emptying the table here would empty the reader for every
+     * existing user.
      */
     @Test
-    fun migrate20To21_replacesTafseerTextsWithBlocks() {
+    fun migrate20To21_foldsTafseerTextsIntoBlocks() {
         helper.createDatabase(dbName, 20).use { db ->
+            // 43:81-83 share one passage — one block covering the range.
+            (81..83).forEach { ayah ->
+                db.execSQL(
+                    "INSERT INTO tafseer_texts (ayah_id, surah_number, ayah_number, tafseer_id, text) " +
+                        "VALUES (${4300 + ayah}, 43, $ayah, 'ibn_kathir_en', 'on 81 through 83')"
+                )
+            }
+            // 43:84 is its own passage, so the run above has to end at 83.
             db.execSQL(
                 "INSERT INTO tafseer_texts (ayah_id, surah_number, ayah_number, tafseer_id, text) " +
-                    "VALUES (1, 1, 1, 'ibn_kathir_en', 'old per-ayah row')"
+                    "VALUES (4384, 43, 84, 'ibn_kathir_en', 'on 84 alone')"
+            )
+            // 43:86 repeats the *same* text as 81-83 after a gap at 85. Grouping by
+            // text alone would merge these into one impossible 81-86 block.
+            db.execSQL(
+                "INSERT INTO tafseer_texts (ayah_id, surah_number, ayah_number, tafseer_id, text) " +
+                    "VALUES (4386, 43, 86, 'ibn_kathir_en', 'on 81 through 83')"
+            )
+            // A second commentator on the same ayah stays a separate block.
+            db.execSQL(
+                "INSERT INTO tafseer_texts (ayah_id, surah_number, ayah_number, tafseer_id, text) " +
+                    "VALUES (4381, 43, 81, 'maariful_quran_en', 'maariful on 81')"
             )
         }
 
@@ -48,18 +71,89 @@ class MigrationTest {
         assertThat(droppedCursor.count).isEqualTo(0)
         droppedCursor.close()
 
-        val createdCursor = db.query(
-            "SELECT name FROM sqlite_master WHERE type='table' AND name='tafseer_blocks'"
-        )
-        assertThat(createdCursor.count).isEqualTo(1)
-        createdCursor.close()
-
         val indexCursor = db.query(
             "SELECT name FROM sqlite_master WHERE type='index' AND " +
                 "name='index_tafseer_blocks_tafseer_id_surah_number_ayah_start_ayah_end'"
         )
         assertThat(indexCursor.count).isEqualTo(1)
         indexCursor.close()
+
+        val blocks = mutableListOf<String>()
+        db.query(
+            "SELECT tafseer_id, surah_number, ayah_start, ayah_end, text FROM tafseer_blocks " +
+                "ORDER BY tafseer_id, surah_number, ayah_start"
+        ).use { cursor ->
+            while (cursor.moveToNext()) {
+                blocks += "${cursor.getString(0)} ${cursor.getInt(1)}:" +
+                    "${cursor.getInt(2)}-${cursor.getInt(3)} ${cursor.getString(4)}"
+            }
+        }
+
+        assertThat(blocks).containsExactly(
+            "ibn_kathir_en 43:81-83 on 81 through 83",
+            "ibn_kathir_en 43:84-84 on 84 alone",
+            "ibn_kathir_en 43:86-86 on 81 through 83",
+            "maariful_quran_en 43:81-81 maariful on 81",
+        ).inOrder()
+    }
+
+    /**
+     * The legacy-asset repair runs on every freshly copied artifact, before Room
+     * validates it. It used to index `tafseer_texts` unconditionally, and
+     * `CREATE INDEX IF NOT EXISTS` guards the index name, not the table — so
+     * against a schemaVersion 21 artifact, which has no such table, the first
+     * launch of a fresh install threw "no such table: tafseer_texts".
+     */
+    @Test
+    fun prepackagedRepair_survivesAnArtifactWithoutTafseerTexts() {
+        helper.createDatabase(dbName, 20).use { db ->
+            db.execSQL("DROP TABLE tafseer_texts")
+
+            NimazDatabase.PREPACKAGED_CALLBACK.onOpenPrepackagedDatabase(db)
+
+            // The repairs that *do* apply still happened.
+            db.query(
+                "SELECT name FROM sqlite_master WHERE type='index' AND " +
+                    "name='index_tafseer_highlights_ayah_id_tafseer_id'"
+            ).use { assertThat(it.count).isEqualTo(1) }
+        }
+    }
+
+    /**
+     * The fresh-install shape: the schemaVersion 21 artifact already carries
+     * `tafseer_blocks` and has no `tafseer_texts` at all. The migration must be a
+     * no-op there rather than throwing on a table that is not present.
+     */
+    @Test
+    fun migrate20To21_toleratesAnArtifactThatAlreadyHasBlocks() {
+        helper.createDatabase(dbName, 20).use { db ->
+            db.execSQL("DROP TABLE tafseer_texts")
+            db.execSQL(
+                """
+                CREATE TABLE IF NOT EXISTS `tafseer_blocks` (
+                    `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                    `tafseer_id` TEXT NOT NULL,
+                    `surah_number` INTEGER NOT NULL,
+                    `ayah_start` INTEGER NOT NULL,
+                    `ayah_end` INTEGER NOT NULL,
+                    `text` TEXT NOT NULL
+                )
+                """.trimIndent()
+            )
+            db.execSQL(
+                "INSERT INTO tafseer_blocks (tafseer_id, surah_number, ayah_start, ayah_end, text) " +
+                    "VALUES ('ibn_kathir_en', 43, 81, 89, 'already a block')"
+            )
+        }
+
+        val db = helper.runMigrationsAndValidate(
+            dbName, 21, true, NimazDatabase.MIGRATION_20_21
+        )
+
+        db.query("SELECT COUNT(*) FROM tafseer_blocks").use { cursor ->
+            cursor.moveToFirst()
+            assertThat(cursor.getInt(0)).isEqualTo(1)
+        }
     }
 
     @Test
