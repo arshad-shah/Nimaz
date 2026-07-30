@@ -2,15 +2,12 @@ package com.arshadshah.nimaz.core.di
 
 import android.content.Context
 import androidx.room.Room
-import androidx.room.RoomDatabase
-import androidx.sqlite.db.SupportSQLiteDatabase
 import com.arshadshah.nimaz.data.local.database.NimazDatabase
 import com.arshadshah.nimaz.data.local.user.CustomPresetDao
 import com.arshadshah.nimaz.data.local.user.ReadingProgressDao
 import com.arshadshah.nimaz.data.local.user.TafseerUserDao
 import com.arshadshah.nimaz.data.local.user.TasbihSessionDao
 import com.arshadshah.nimaz.data.local.user.BookmarkDao
-import com.arshadshah.nimaz.data.local.user.LegacyUserDataImport
 import com.arshadshah.nimaz.data.local.user.NimazUserDatabase
 import com.arshadshah.nimaz.data.local.user.ProgressDao
 import com.arshadshah.nimaz.data.local.database.dao.AsmaUlHusnaDao
@@ -75,23 +72,16 @@ object DatabaseModule {
     fun provideNimazUserDatabase(
         @ApplicationContext context: Context
     ): NimazUserDatabase {
-        val legacyPath = context.getDatabasePath(NimazDatabase.DATABASE_NAME).absolutePath
+        // No `addCallback`. Writing in `onOpen` looked right and failed on a device with
+        // "no such table: room_table_modification_log" on *every* launch: Room's invalidation
+        // tracker is set up after the callback returns, so an INSERT there fires triggers
+        // against a log table that does not exist yet. The copy runs from AppInitializer
+        // instead, once Room has finished opening. See [LegacyUserDataImport].
         return Room.databaseBuilder(
             context,
             NimazUserDatabase::class.java,
             NimazUserDatabase.DATABASE_NAME
-        )
-            .addCallback(object : RoomDatabase.Callback() {
-                override fun onOpen(db: SupportSQLiteDatabase) {
-                    // On open rather than onCreate: an install that was interrupted
-                    // mid-copy has a created-but-empty database, and onCreate would never
-                    // run again to finish the job.
-                    if (LegacyUserDataImport.isNeeded(db, legacyPath)) {
-                        LegacyUserDataImport.run(db, legacyPath)
-                    }
-                }
-            })
-            .build()
+        ).build()
     }
 
     @Provides
