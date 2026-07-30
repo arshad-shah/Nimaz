@@ -2,6 +2,8 @@ package com.arshadshah.nimaz.db
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.arshadshah.nimaz.support.NimazDbRule
+import com.arshadshah.nimaz.data.local.user.BookmarkKind
+import com.arshadshah.nimaz.data.local.user.ProgressKind
 import com.arshadshah.nimaz.support.TestData
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.first
@@ -24,7 +26,7 @@ class UserDataDaoTest {
 
     @Test
     fun tafseer_highlightsAndNotes_roundTrip() = runTest {
-        val dao = dbRule.db.tafseerDao()
+        val dao = dbRule.userDb.tafseerUserDao()
 
         dao.insertHighlight(TestData.tafseerHighlight(ayahId = 5))
         dao.insertNote(TestData.tafseerNote(ayahId = 5, text = "reflection"))
@@ -47,7 +49,8 @@ class UserDataDaoTest {
     @Test
     fun tafseer_blockRange_resolvesAndGathersHighlightsAcrossAyahs() = runTest {
         val quranDao = dbRule.db.quranDao()
-        val dao = dbRule.db.tafseerDao()
+        val content = dbRule.db.tafseerDao()
+        val dao = dbRule.userDb.tafseerUserDao()
 
         // The surah first: `ayahs.surah_id` is a foreign key onto `surahs`, so
         // inserting an ayah for a surah that is not there fails with
@@ -68,65 +71,82 @@ class UserDataDaoTest {
                 "VALUES ('ibn-kathir', 1, 5, 7, 'commentary spanning three ayahs')"
         )
 
-        assertThat(dao.getTafseerForAyah(1, 5, "ibn-kathir")?.text)
+        assertThat(content.getTafseerForAyah(1, 5, "ibn-kathir")?.text)
             .isEqualTo("commentary spanning three ayahs")
-        assertThat(dao.getTafseerForAyah(1, 7, "ibn-kathir")?.text)
+        assertThat(content.getTafseerForAyah(1, 7, "ibn-kathir")?.text)
             .isEqualTo("commentary spanning three ayahs")
-        assertThat(dao.getTafseerForAyah(1, 8, "ibn-kathir")).isNull()
+        assertThat(content.getTafseerForAyah(1, 8, "ibn-kathir")).isNull()
 
         // Highlight/note made on ayah 6 (the middle of the range, not its start).
         dao.insertHighlight(TestData.tafseerHighlight(ayahId = 6, tafseerId = "ibn-kathir"))
         dao.insertNote(TestData.tafseerNote(ayahId = 6, tafseerId = "ibn-kathir", text = "note"))
 
-        assertThat(dao.getHighlightsForRange(1, 5, 7, "ibn-kathir").first()).hasSize(1)
-        assertThat(dao.getNotesForRange(1, 5, 7, "ibn-kathir").first()).hasSize(1)
+        // Two databases: the span resolves against the verses, the marks against the user's
+        // rows. This is the cross-database read the old INNER JOIN used to do in one query.
+        val ayahIds = quranDao.getAyahIdsInRange(1, 5, 7)
+        assertThat(ayahIds).containsExactly(5, 6, 7).inOrder()
+        assertThat(dao.getHighlightsForRange("ibn-kathir", ayahIds).first()).hasSize(1)
+        assertThat(dao.getNotesForRange("ibn-kathir", ayahIds).first()).hasSize(1)
     }
 
     @Test
     fun qaida_lessonProgress_upsertsAndReads() = runTest {
-        val dao = dbRule.db.qaidaDao()
+        val dao = dbRule.userDb.progressDao()
 
-        dao.upsertLessonProgress(TestData.qaidaLessonProgress(lessonId = 1, stars = 1))
-        assertThat(dao.getLessonProgress(1)!!.stars).isEqualTo(1)
+        dao.upsert(TestData.lessonProgress(lessonId = 1, stars = 1))
+        assertThat(dao.find(ProgressKind.QAIDA_LESSON, 1)!!.score).isEqualTo(1)
 
-        // Upsert again with the same PK should replace, not duplicate.
-        dao.upsertLessonProgress(TestData.qaidaLessonProgress(lessonId = 1, stars = 3))
-        assertThat(dao.getLessonProgress(1)!!.stars).isEqualTo(3)
-        assertThat(dao.getAllProgress().first()).hasSize(1)
+        // Same key, so an upsert replaces rather than duplicating — (kind, target, date).
+        dao.upsert(TestData.lessonProgress(lessonId = 1, stars = 3))
+        assertThat(dao.find(ProgressKind.QAIDA_LESSON, 1)!!.score).isEqualTo(3)
+        assertThat(dao.ofKind(ProgressKind.QAIDA_LESSON).first()).hasSize(1)
     }
 
+    /**
+     * A lesson and one of its cells are two kinds in one table, and must not collide: they can
+     * share a target id and are told apart by `kind`, with the cell carrying its lesson in
+     * `context_id`.
+     */
     @Test
-    fun asmaUlHusna_bookmarkToggle() = runTest {
-        val dao = dbRule.db.asmaUlHusnaDao()
+    fun qaida_lessonAndCellProgress_coexist() = runTest {
+        val dao = dbRule.userDb.progressDao()
 
-        dao.toggleFavorite(7)
-        assertThat(dao.isBookmarked(7)).isTrue()
-        assertThat(dao.getAllBookmarks().first()).hasSize(1)
+        dao.upsert(TestData.lessonProgress(lessonId = 2, stars = 2))
+        dao.upsert(TestData.cellProgress(cellId = 2, lessonId = 2, heard = 4))
 
-        dao.toggleFavorite(7)
-        assertThat(dao.isBookmarked(7)).isFalse()
+        assertThat(dao.find(ProgressKind.QAIDA_LESSON, 2)!!.score).isEqualTo(2)
+        assertThat(dao.find(ProgressKind.QAIDA_CELL, 2)!!.completed).isEqualTo(4)
+        assertThat(dao.inContext(ProgressKind.QAIDA_CELL, 2).first()).hasSize(1)
     }
 
+    /**
+     * The names, the other names and the prophets were three bookmark tables with identical
+     * shapes. They are three `kind` values now, and the point of this test is that they stay
+     * separate: id 7 favourited as a name of Allah is not id 7 favourited as a prophet.
+     */
     @Test
-    fun asmaUnNabi_and_prophet_bookmarks() = runTest {
-        val nabi = dbRule.db.asmaUnNabiDao()
-        val prophet = dbRule.db.prophetDao()
+    fun nameAndProphetFavourites_areKeptApartByKind() = runTest {
+        val dao = dbRule.userDb.bookmarkDao()
 
-        nabi.insertBookmark(TestData.asmaNabiBookmark(nameId = 3))
-        prophet.insertBookmark(TestData.prophetBookmark(prophetId = 4))
+        dao.upsert(TestData.favourite(BookmarkKind.ASMA_UL_HUSNA, 7))
+        dao.upsert(TestData.favourite(BookmarkKind.PROPHET, 7))
+        dao.upsert(TestData.favourite(BookmarkKind.ASMA_UN_NABI, 3))
 
-        assertThat(nabi.isBookmarked(3)).isTrue()
-        assertThat(prophet.isBookmarked(4)).isTrue()
+        assertThat(dao.find(BookmarkKind.ASMA_UL_HUSNA, 7)!!.favourite).isTrue()
+        assertThat(dao.find(BookmarkKind.PROPHET, 7)!!.favourite).isTrue()
+        assertThat(dao.find(BookmarkKind.ASMA_UN_NABI, 7)).isNull()
+        assertThat(dao.favourites(BookmarkKind.ASMA_UL_HUSNA).first()).hasSize(1)
 
-        nabi.removeBookmark(3)
-        prophet.removeBookmark(4)
-        assertThat(nabi.getAllBookmarksSync()).isEmpty()
-        assertThat(prophet.getAllBookmarksSync()).isEmpty()
+        dao.delete(BookmarkKind.ASMA_UL_HUSNA, 7)
+        assertThat(dao.find(BookmarkKind.ASMA_UL_HUSNA, 7)).isNull()
+        // Deleting one kind leaves the other two alone.
+        assertThat(dao.find(BookmarkKind.PROPHET, 7)).isNotNull()
+        assertThat(dao.all()).hasSize(2)
     }
 
     @Test
     fun location_insertSetCurrentAndFavorite() = runTest {
-        val dao = dbRule.db.locationDao()
+        val dao = dbRule.userDb.locationDao()
 
         val makkah = dao.insertLocation(TestData.location(name = "Makkah", isCurrent = false))
         val madinah = dao.insertLocation(TestData.location(name = "Madinah", isCurrent = false))

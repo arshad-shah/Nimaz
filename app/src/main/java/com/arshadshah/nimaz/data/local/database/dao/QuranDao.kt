@@ -491,127 +491,24 @@ interface QuranDao {
     fun searchTranslations(query: String, translatorId: String): Flow<List<TranslationEntity>>
 
     // Bookmark operations
-    @Query("SELECT * FROM quran_bookmarks ORDER BY createdAt DESC")
-    fun getAllBookmarks(): Flow<List<QuranBookmarkEntity>>
 
-    @Query("SELECT ayahId FROM quran_bookmarks")
-    suspend fun getAllBookmarkIds(): List<Int>
 
-    @Query("SELECT * FROM quran_bookmarks WHERE ayahId = :ayahId LIMIT 1")
-    suspend fun getBookmarkByAyahId(ayahId: Int): QuranBookmarkEntity?
 
-    @Query("SELECT EXISTS(SELECT 1 FROM quran_bookmarks WHERE ayahId = :ayahId)")
-    fun isAyahBookmarked(ayahId: Int): Flow<Boolean>
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertBookmark(bookmark: QuranBookmarkEntity)
 
-    @Query("DELETE FROM quran_bookmarks WHERE ayahId = :ayahId")
-    suspend fun deleteBookmarkByAyahId(ayahId: Int)
 
-    @Update
-    suspend fun updateBookmark(bookmark: QuranBookmarkEntity)
 
-    // Reading progress operations
-    @Query("SELECT * FROM reading_progress WHERE id = 1")
-    fun getReadingProgress(): Flow<ReadingProgressEntity?>
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertReadingProgress(progress: ReadingProgressEntity)
 
-    @Query("UPDATE reading_progress SET lastReadSurah = :surah, lastReadAyah = :ayah, lastReadPage = :page, lastReadJuz = :juz, updatedAt = :timestamp WHERE id = 1")
-    suspend fun updateReadingPosition(
-        surah: Int,
-        ayah: Int,
-        page: Int,
-        juz: Int,
-        timestamp: Long = System.currentTimeMillis()
-    )
 
-    @Query("UPDATE reading_progress SET totalAyahsRead = totalAyahsRead + :count, updatedAt = :timestamp WHERE id = 1")
-    suspend fun incrementAyahsRead(count: Int, timestamp: Long = System.currentTimeMillis())
 
-    // Favorite operations
-    @Query("SELECT * FROM quran_favorites ORDER BY createdAt DESC")
-    fun getAllFavorites(): Flow<List<QuranFavoriteEntity>>
 
-    @Query("SELECT ayahId FROM quran_favorites")
-    fun getFavoriteAyahIds(): Flow<List<Int>>
 
-    @Query("SELECT EXISTS(SELECT 1 FROM quran_favorites WHERE ayahId = :ayahId)")
-    fun isAyahFavorite(ayahId: Int): Flow<Boolean>
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertFavorite(favorite: QuranFavoriteEntity)
 
-    @Query("DELETE FROM quran_favorites WHERE ayahId = :ayahId")
-    suspend fun deleteFavorite(ayahId: Int)
-
-    @Transaction
-    suspend fun toggleFavorite(ayahId: Int, surahNumber: Int, ayahNumber: Int) {
-        val exists = getFavoriteByAyahId(ayahId)
-        if (exists != null) {
-            deleteFavorite(ayahId)
-        } else {
-            insertFavorite(
-                QuranFavoriteEntity(
-                    ayahId = ayahId,
-                    surahNumber = surahNumber,
-                    ayahNumber = ayahNumber
-                )
-            )
-        }
-    }
-
-    @Query("SELECT * FROM quran_favorites WHERE ayahId = :ayahId LIMIT 1")
-    suspend fun getFavoriteByAyahId(ayahId: Int): QuranFavoriteEntity?
-
-    // Surah info operations
     @Query("SELECT * FROM surah_info WHERE surahNumber = :surahNumber")
     suspend fun getSurahInfo(surahNumber: Int): SurahInfoEntity?
 
-    @Transaction
-    suspend fun toggleBookmark(ayahId: Int, surahNumber: Int, ayahNumber: Int) {
-        val existing = getBookmarkByAyahId(ayahId)
-        if (existing != null) {
-            deleteBookmarkByAyahId(ayahId)
-        } else {
-            insertBookmark(
-                QuranBookmarkEntity(
-                    ayahId = ayahId,
-                    surahNumber = surahNumber,
-                    ayahNumber = ayahNumber,
-                    note = null,
-                    color = null
-                )
-            )
-        }
-    }
-
-    @Transaction
-    suspend fun deleteAllUserData() {
-        deleteAllBookmarks()
-        deleteAllFavorites()
-        deleteAllReadingProgress()
-    }
-
-    @Query("SELECT * FROM quran_bookmarks ORDER BY createdAt DESC")
-    suspend fun getAllBookmarksSync(): List<QuranBookmarkEntity>
-
-    @Query("SELECT * FROM quran_favorites ORDER BY createdAt DESC")
-    suspend fun getAllFavoritesSync(): List<QuranFavoriteEntity>
-
-    @Query("SELECT * FROM reading_progress WHERE id = 1")
-    suspend fun getReadingProgressSync(): ReadingProgressEntity?
-
-    @Query("DELETE FROM quran_bookmarks")
-    suspend fun deleteAllBookmarks()
-
-    @Query("DELETE FROM quran_favorites")
-    suspend fun deleteAllFavorites()
-
-    @Query("DELETE FROM reading_progress")
-    suspend fun deleteAllReadingProgress()
 }
 
 /**

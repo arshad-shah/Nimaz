@@ -5,6 +5,10 @@ import com.arshadshah.nimaz.data.local.database.dao.AsmaUlHusnaDao
 import com.arshadshah.nimaz.data.local.database.dao.AsmaUnNabiDao
 import com.arshadshah.nimaz.data.local.database.dao.DuaDao
 import com.arshadshah.nimaz.data.local.database.dao.FastingDao
+import com.arshadshah.nimaz.data.local.user.ProgressDao
+import com.arshadshah.nimaz.data.local.user.ProgressEntity
+import com.arshadshah.nimaz.data.local.user.ProgressKind
+import com.arshadshah.nimaz.data.local.user.ReadingProgressDao
 import com.arshadshah.nimaz.data.local.user.BookmarkDao
 import com.arshadshah.nimaz.data.local.user.BookmarkEntity
 import com.arshadshah.nimaz.data.local.user.BookmarkKind
@@ -20,23 +24,13 @@ import com.arshadshah.nimaz.data.local.database.dao.TasbihDao
 import com.arshadshah.nimaz.data.local.user.TafseerUserDao
 import com.arshadshah.nimaz.data.local.user.TasbihSessionDao
 import com.arshadshah.nimaz.data.local.database.dao.ZakatDao
-import com.arshadshah.nimaz.data.local.database.entity.AsmaUlHusnaBookmarkEntity
-import com.arshadshah.nimaz.data.local.database.entity.AsmaUnNabiBookmarkEntity
-import com.arshadshah.nimaz.data.local.database.entity.DuaBookmarkEntity
-import com.arshadshah.nimaz.data.local.database.entity.DuaProgressEntity
 import com.arshadshah.nimaz.data.local.database.entity.FastRecordEntity
-import com.arshadshah.nimaz.data.local.database.entity.HadithBookmarkEntity
 import com.arshadshah.nimaz.data.local.database.entity.KhatamAyahEntity
 import com.arshadshah.nimaz.data.local.database.entity.KhatamDailyLogEntity
 import com.arshadshah.nimaz.data.local.database.entity.KhatamEntity
 import com.arshadshah.nimaz.data.local.database.entity.LocationEntity
 import com.arshadshah.nimaz.data.local.database.entity.MakeupFastEntity
 import com.arshadshah.nimaz.data.local.database.entity.PrayerRecordEntity
-import com.arshadshah.nimaz.data.local.database.entity.ProphetBookmarkEntity
-import com.arshadshah.nimaz.data.local.database.entity.QaidaCellProgressEntity
-import com.arshadshah.nimaz.data.local.database.entity.QaidaLessonProgressEntity
-import com.arshadshah.nimaz.data.local.database.entity.QuranBookmarkEntity
-import com.arshadshah.nimaz.data.local.database.entity.QuranFavoriteEntity
 import com.arshadshah.nimaz.data.local.database.entity.ReadingProgressEntity
 import com.arshadshah.nimaz.data.local.database.entity.TafseerHighlightEntity
 import com.arshadshah.nimaz.data.local.database.entity.TafseerNoteEntity
@@ -64,6 +58,8 @@ class SyncDataImporter @Inject constructor(
     private val prophetDao: ProphetDao,
     private val hadithDao: HadithDao,
     private val bookmarkDao: BookmarkDao,
+    private val progressDao: ProgressDao,
+    private val readingProgressDao: ReadingProgressDao,
     private val duaDao: DuaDao,
     private val qaidaDao: QaidaDao,
     private val locationDao: LocationDao,
@@ -153,19 +149,30 @@ class SyncDataImporter @Inject constructor(
 
     // --- Quran ---
 
+    /**
+     * Incoming Quran bookmarks, merged onto the consolidated row.
+     *
+     * `favourite` is carried over from whatever is already here rather than defaulted: the
+     * payload has no field for it, so writing the row blind would silently un-favourite a
+     * verse this device had marked. Same reasoning in every kind below.
+     */
     private suspend fun importBookmarks(incoming: List<SyncBookmark>) {
-        val existing = quranDao.getAllBookmarksSync().associateBy { it.ayahId }
+        val existing = bookmarkDao.all()
+            .filter { it.kind == BookmarkKind.AYAH }
+            .associateBy { it.targetId }
         for (item in incoming) {
             val local = existing[item.ayahId]
             if (local == null || item.updatedAt > local.updatedAt) {
-                quranDao.insertBookmark(
-                    QuranBookmarkEntity(
-                        id = local?.id ?: 0,
-                        ayahId = item.ayahId,
-                        surahNumber = item.surahNumber,
-                        ayahNumber = item.ayahNumber,
+                bookmarkDao.upsert(
+                    BookmarkEntity(
+                        kind = BookmarkKind.AYAH,
+                        targetId = item.ayahId,
+                        bookmarked = true,
+                        favourite = local?.favourite ?: false,
                         note = item.note,
-                        color = item.color,
+                        colour = item.color,
+                        contextId = item.surahNumber,
+                        ordinal = item.ayahNumber,
                         createdAt = item.createdAt,
                         updatedAt = item.updatedAt
                     )
@@ -175,15 +182,24 @@ class SyncDataImporter @Inject constructor(
     }
 
     private suspend fun importFavorites(incoming: List<SyncFavorite>) {
-        val existing = quranDao.getAllFavoritesSync().associateBy { it.ayahId }
+        val existing = bookmarkDao.all()
+            .filter { it.kind == BookmarkKind.AYAH }
+            .associateBy { it.targetId }
         for (item in incoming) {
             val local = existing[item.ayahId]
             if (local == null || item.updatedAt > local.updatedAt) {
-                quranDao.insertFavorite(
-                    QuranFavoriteEntity(
-                        ayahId = item.ayahId,
-                        surahNumber = item.surahNumber,
-                        ayahNumber = item.ayahNumber,
+                bookmarkDao.upsert(
+                    BookmarkEntity(
+                        kind = BookmarkKind.AYAH,
+                        targetId = item.ayahId,
+                        // and here the other way round: a favourite arriving must not clear a
+                        // bookmark, or its note and colour with it.
+                        bookmarked = local?.bookmarked ?: false,
+                        favourite = true,
+                        note = local?.note,
+                        colour = local?.colour,
+                        contextId = item.surahNumber,
+                        ordinal = item.ayahNumber,
                         createdAt = item.createdAt,
                         updatedAt = item.updatedAt
                     )
@@ -194,9 +210,9 @@ class SyncDataImporter @Inject constructor(
 
     private suspend fun importReadingProgress(incoming: SyncReadingProgress?) {
         incoming ?: return
-        val local = quranDao.getReadingProgressSync()
+        val local = readingProgressDao.get()
         if (local == null || incoming.updatedAt > local.updatedAt) {
-            quranDao.insertReadingProgress(
+            readingProgressDao.upsert(
                 ReadingProgressEntity(
                     id = 1,
                     lastReadSurah = incoming.lastReadSurah,
@@ -498,14 +514,20 @@ class SyncDataImporter @Inject constructor(
     // --- Names & Prophets ---
 
     private suspend fun importAsmaUlHusnaBookmarks(incoming: List<SyncNameBookmark>) {
-        val existing = asmaUlHusnaDao.getAllBookmarksSync().map { it.nameId }.toSet()
+        val existing = bookmarkDao.all()
+            .filter { it.kind == BookmarkKind.ASMA_UL_HUSNA }
+            .map { it.targetId }
+            .toSet()
         for (item in incoming) {
             if (item.refId !in existing) {
-                asmaUlHusnaDao.insertBookmark(
-                    AsmaUlHusnaBookmarkEntity(
-                        nameId = item.refId,
-                        isFavorite = item.isFavorite,
-                        createdAt = item.createdAt
+                bookmarkDao.upsert(
+                    BookmarkEntity(
+                        kind = BookmarkKind.ASMA_UL_HUSNA,
+                        targetId = item.refId,
+                        bookmarked = true,
+                        favourite = item.isFavorite,
+                        createdAt = item.createdAt,
+                        updatedAt = item.createdAt
                     )
                 )
             }
@@ -513,14 +535,20 @@ class SyncDataImporter @Inject constructor(
     }
 
     private suspend fun importAsmaUnNabiBookmarks(incoming: List<SyncNameBookmark>) {
-        val existing = asmaUnNabiDao.getAllBookmarksSync().map { it.nameId }.toSet()
+        val existing = bookmarkDao.all()
+            .filter { it.kind == BookmarkKind.ASMA_UN_NABI }
+            .map { it.targetId }
+            .toSet()
         for (item in incoming) {
             if (item.refId !in existing) {
-                asmaUnNabiDao.insertBookmark(
-                    AsmaUnNabiBookmarkEntity(
-                        nameId = item.refId,
-                        isFavorite = item.isFavorite,
-                        createdAt = item.createdAt
+                bookmarkDao.upsert(
+                    BookmarkEntity(
+                        kind = BookmarkKind.ASMA_UN_NABI,
+                        targetId = item.refId,
+                        bookmarked = true,
+                        favourite = item.isFavorite,
+                        createdAt = item.createdAt,
+                        updatedAt = item.createdAt
                     )
                 )
             }
@@ -528,14 +556,20 @@ class SyncDataImporter @Inject constructor(
     }
 
     private suspend fun importProphetBookmarks(incoming: List<SyncNameBookmark>) {
-        val existing = prophetDao.getAllBookmarksSync().map { it.prophetId }.toSet()
+        val existing = bookmarkDao.all()
+            .filter { it.kind == BookmarkKind.PROPHET }
+            .map { it.targetId }
+            .toSet()
         for (item in incoming) {
             if (item.refId !in existing) {
-                prophetDao.insertBookmark(
-                    ProphetBookmarkEntity(
-                        prophetId = item.refId,
-                        isFavorite = item.isFavorite,
-                        createdAt = item.createdAt
+                bookmarkDao.upsert(
+                    BookmarkEntity(
+                        kind = BookmarkKind.PROPHET,
+                        targetId = item.refId,
+                        bookmarked = true,
+                        favourite = item.isFavorite,
+                        createdAt = item.createdAt,
+                        updatedAt = item.createdAt
                     )
                 )
             }
@@ -572,17 +606,20 @@ class SyncDataImporter @Inject constructor(
     }
 
     private suspend fun importDuaBookmarks(incoming: List<SyncDuaBookmark>) {
-        val existing = duaDao.getAllBookmarksSync().associateBy { it.duaId }
+        val existing = bookmarkDao.all()
+            .filter { it.kind == BookmarkKind.DUA }
+            .associateBy { it.targetId }
         for (item in incoming) {
             val local = existing[item.duaId]
             if (local == null || item.updatedAt > local.updatedAt) {
-                duaDao.insertBookmark(
-                    DuaBookmarkEntity(
-                        id = local?.id ?: 0,
-                        duaId = item.duaId,
-                        categoryId = item.categoryId,
+                bookmarkDao.upsert(
+                    BookmarkEntity(
+                        kind = BookmarkKind.DUA,
+                        targetId = item.duaId,
+                        bookmarked = true,
+                        favourite = item.isFavorite,
                         note = item.note,
-                        isFavorite = item.isFavorite,
+                        contextId = item.categoryId,
                         createdAt = item.createdAt,
                         updatedAt = item.updatedAt
                     )
@@ -592,21 +629,22 @@ class SyncDataImporter @Inject constructor(
     }
 
     private suspend fun importDuaProgress(incoming: List<SyncDuaProgress>) {
-        // dua_progress has no unique constraint on (duaId, date); merge on that
-        // pair so re-imports update the day's count rather than duplicating it.
-        val existing = duaDao.getAllProgressSync().associateBy { it.duaId to it.date }
+        val existing = progressDao.all()
+            .filter { it.kind == ProgressKind.DUA }
+            .associateBy { it.targetId to it.date }
         for (item in incoming) {
             val local = existing[item.duaId to item.date]
-            if (local == null || item.completedCount > local.completedCount) {
-                duaDao.insertProgress(
-                    DuaProgressEntity(
-                        id = local?.id ?: 0,
-                        duaId = item.duaId,
+            if (local == null || item.createdAt > local.updatedAt) {
+                progressDao.upsert(
+                    ProgressEntity(
+                        kind = ProgressKind.DUA,
+                        targetId = item.duaId,
                         date = item.date,
-                        completedCount = item.completedCount,
-                        targetCount = item.targetCount,
+                        completed = item.completedCount,
+                        total = item.targetCount,
                         isCompleted = item.isCompleted,
-                        createdAt = item.createdAt
+                        createdAt = item.createdAt,
+                        updatedAt = item.createdAt
                     )
                 )
             }
@@ -616,18 +654,23 @@ class SyncDataImporter @Inject constructor(
     // --- Qaida ---
 
     private suspend fun importQaidaLessonProgress(incoming: List<SyncQaidaLessonProgress>) {
-        val existing = qaidaDao.getAllLessonProgressSync().associateBy { it.lessonId }
+        val existing = progressDao.all()
+            .filter { it.kind == ProgressKind.QAIDA_LESSON }
+            .associateBy { it.targetId }
         for (item in incoming) {
             val local = existing[item.lessonId]
             if (local == null || item.updatedAt > local.updatedAt) {
-                qaidaDao.upsertLessonProgress(
-                    QaidaLessonProgressEntity(
-                        lessonId = item.lessonId,
-                        status = item.status,
-                        stars = item.stars,
-                        lastCellId = item.lastCellId,
-                        completedCells = item.completedCells,
-                        totalCells = item.totalCells,
+                progressDao.upsert(
+                    ProgressEntity(
+                        kind = ProgressKind.QAIDA_LESSON,
+                        targetId = item.lessonId,
+                        completed = item.completedCells,
+                        total = item.totalCells,
+                        isCompleted = item.status == "COMPLETED",
+                        state = item.status,
+                        score = item.stars,
+                        resumeId = item.lastCellId,
+                        createdAt = item.updatedAt,
                         updatedAt = item.updatedAt
                     )
                 )
@@ -636,18 +679,21 @@ class SyncDataImporter @Inject constructor(
     }
 
     private suspend fun importQaidaCellProgress(incoming: List<SyncQaidaCellProgress>) {
-        val existing = qaidaDao.getAllCellProgressSync()
-            .associateBy { it.lessonId to it.cellId }
+        val existing = progressDao.all()
+            .filter { it.kind == ProgressKind.QAIDA_CELL }
+            .associateBy { it.targetId }
         for (item in incoming) {
-            val local = existing[item.lessonId to item.cellId]
-            if (local == null || item.lastPracticedAt > local.lastPracticedAt) {
-                qaidaDao.upsertCellProgress(
-                    QaidaCellProgressEntity(
-                        lessonId = item.lessonId,
-                        cellId = item.cellId,
-                        heardCount = item.heardCount,
+            val local = existing[item.cellId]
+            if (local == null || item.lastPracticedAt > local.updatedAt) {
+                progressDao.upsert(
+                    ProgressEntity(
+                        kind = ProgressKind.QAIDA_CELL,
+                        targetId = item.cellId,
+                        contextId = item.lessonId,
+                        completed = item.heardCount,
                         isCompleted = item.isCompleted,
-                        lastPracticedAt = item.lastPracticedAt
+                        createdAt = item.lastPracticedAt,
+                        updatedAt = item.lastPracticedAt
                     )
                 )
             }

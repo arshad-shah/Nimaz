@@ -1,11 +1,7 @@
 package com.arshadshah.nimaz.data.local.database.dao
 
 import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import androidx.room.Transaction
-import com.arshadshah.nimaz.data.local.database.entity.ProphetBookmarkEntity
 import com.arshadshah.nimaz.data.local.database.entity.ProphetEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -20,30 +16,13 @@ interface ProphetDao {
     @Query("SELECT * FROM prophets WHERE name_english LIKE '%' || :query || '%' OR name_transliteration LIKE '%' || :query || '%' OR title_english LIKE '%' || :query || '%' ORDER BY display_order ASC")
     fun searchProphets(query: String): Flow<List<ProphetEntity>>
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertBookmark(bookmark: ProphetBookmarkEntity)
-
-    @Query("DELETE FROM prophet_bookmarks WHERE prophet_id = :prophetId")
-    suspend fun removeBookmark(prophetId: Int)
-
-    @Query("SELECT * FROM prophet_bookmarks")
-    fun getAllBookmarks(): Flow<List<ProphetBookmarkEntity>>
-
-    @Query("SELECT * FROM prophet_bookmarks")
-    suspend fun getAllBookmarksSync(): List<ProphetBookmarkEntity>
-
-    @Query("SELECT EXISTS(SELECT 1 FROM prophet_bookmarks WHERE prophet_id = :prophetId)")
-    suspend fun isBookmarked(prophetId: Int): Boolean
-
-    @Transaction
-    suspend fun toggleFavorite(prophetId: Int) {
-        if (isBookmarked(prophetId)) {
-            removeBookmark(prophetId)
-        } else {
-            insertBookmark(ProphetBookmarkEntity(prophetId = prophetId))
-        }
-    }
-
-    @Query("SELECT p.* FROM prophets p INNER JOIN prophet_bookmarks b ON p.id = b.prophet_id ORDER BY p.display_order ASC")
-    fun getFavoriteProphets(): Flow<List<ProphetEntity>>
+    /**
+     * The favourited entries, from ids the user's database supplied.
+     *
+     * This was `INNER JOIN prophet_bookmarks`, which cannot work now that a person's marks
+     * live in their own database: SQLite will not join across two, and Room could not verify
+     * it if it did. Two reads and an `IN` says the same thing honestly.
+     */
+    @Query("SELECT * FROM prophets WHERE id IN (:ids) ORDER BY display_order ASC")
+    fun getByIds(ids: List<Int>): Flow<List<ProphetEntity>>
 }

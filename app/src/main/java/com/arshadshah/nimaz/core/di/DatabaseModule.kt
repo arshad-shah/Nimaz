@@ -5,6 +5,10 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.arshadshah.nimaz.data.local.database.NimazDatabase
+import com.arshadshah.nimaz.data.local.user.CustomPresetDao
+import com.arshadshah.nimaz.data.local.user.ReadingProgressDao
+import com.arshadshah.nimaz.data.local.user.TafseerUserDao
+import com.arshadshah.nimaz.data.local.user.TasbihSessionDao
 import com.arshadshah.nimaz.data.local.user.BookmarkDao
 import com.arshadshah.nimaz.data.local.user.LegacyUserDataImport
 import com.arshadshah.nimaz.data.local.user.NimazUserDatabase
@@ -100,6 +104,26 @@ object DatabaseModule {
 
     @Provides
     @Singleton
+    fun provideReadingProgressDao(database: NimazUserDatabase): ReadingProgressDao =
+        database.readingProgressDao()
+
+    @Provides
+    @Singleton
+    fun provideCustomPresetDao(database: NimazUserDatabase): CustomPresetDao =
+        database.customPresetDao()
+
+    @Provides
+    @Singleton
+    fun provideTasbihSessionDao(database: NimazUserDatabase): TasbihSessionDao =
+        database.tasbihSessionDao()
+
+    @Provides
+    @Singleton
+    fun provideTafseerUserDao(database: NimazUserDatabase): TafseerUserDao =
+        database.tafseerUserDao()
+
+    @Provides
+    @Singleton
     fun provideQuranDao(database: NimazDatabase): QuranDao = database.quranDao()
 
     @Provides
@@ -112,11 +136,11 @@ object DatabaseModule {
 
     @Provides
     @Singleton
-    fun providePrayerDao(database: NimazDatabase): PrayerDao = database.prayerDao()
+    fun providePrayerDao(database: NimazUserDatabase): PrayerDao = database.prayerDao()
 
     @Provides
     @Singleton
-    fun provideFastingDao(database: NimazDatabase): FastingDao = database.fastingDao()
+    fun provideFastingDao(database: NimazUserDatabase): FastingDao = database.fastingDao()
 
     @Provides
     @Singleton
@@ -124,7 +148,7 @@ object DatabaseModule {
 
     @Provides
     @Singleton
-    fun provideLocationDao(database: NimazDatabase): LocationDao = database.locationDao()
+    fun provideLocationDao(database: NimazUserDatabase): LocationDao = database.locationDao()
 
     @Provides
     @Singleton
@@ -133,7 +157,7 @@ object DatabaseModule {
 
     @Provides
     @Singleton
-    fun provideZakatDao(database: NimazDatabase): ZakatDao = database.zakatDao()
+    fun provideZakatDao(database: NimazUserDatabase): ZakatDao = database.zakatDao()
 
     @Provides
     @Singleton
@@ -141,7 +165,7 @@ object DatabaseModule {
 
     @Provides
     @Singleton
-    fun provideKhatamDao(database: NimazDatabase): KhatamDao = database.khatamDao()
+    fun provideKhatamDao(database: NimazUserDatabase): KhatamDao = database.khatamDao()
 
     @Provides
     @Singleton

@@ -1,11 +1,16 @@
 package com.arshadshah.nimaz.data.repository
 
 import com.arshadshah.nimaz.core.util.mapItems
+import com.arshadshah.nimaz.data.local.user.BookmarkDao
+import com.arshadshah.nimaz.data.local.user.BookmarkEntity
+import com.arshadshah.nimaz.data.local.user.BookmarkKind
+import com.arshadshah.nimaz.data.local.user.ProgressDao
+import com.arshadshah.nimaz.data.local.user.ProgressEntity
+import com.arshadshah.nimaz.data.local.user.ProgressKind
+import kotlinx.coroutines.flow.map
 import com.arshadshah.nimaz.data.local.database.dao.DuaDao
-import com.arshadshah.nimaz.data.local.database.entity.DuaBookmarkEntity
 import com.arshadshah.nimaz.data.local.database.entity.DuaCategoryEntity
 import com.arshadshah.nimaz.data.local.database.entity.DuaEntity
-import com.arshadshah.nimaz.data.local.database.entity.DuaProgressEntity
 import com.arshadshah.nimaz.data.local.dua.DuaContentSeeder
 import com.arshadshah.nimaz.domain.model.Dua
 import com.arshadshah.nimaz.domain.model.DuaBookmark
@@ -25,6 +30,8 @@ import javax.inject.Singleton
 @Singleton
 class DuaRepositoryImpl @Inject constructor(
     private val duaDao: DuaDao,
+    private val bookmarkDao: BookmarkDao,
+    private val progressDao: ProgressDao,
     private val seeder: DuaContentSeeder
 ) : DuaRepository {
 
@@ -79,63 +86,87 @@ class DuaRepositoryImpl @Inject constructor(
         }
     }
 
+    // Marks and counts are the user's: `dua_bookmarks` and `dua_progress` are rows in the
+    // consolidated `bookmarks` and `progress` tables now, keyed by kind.
+
     override fun getAllBookmarks(): Flow<List<DuaBookmark>> {
-        return duaDao.getAllBookmarks().mapItems { it.toDomain() }
+        return bookmarkDao.bookmarks(BookmarkKind.DUA).mapItems { it.toDuaBookmark() }
     }
 
     override fun getFavoriteDuas(): Flow<List<DuaBookmark>> {
-        return duaDao.getFavoriteDuas().mapItems { it.toDomain() }
+        return bookmarkDao.favourites(BookmarkKind.DUA).mapItems { it.toDuaBookmark() }
     }
 
     override suspend fun getBookmarkByDuaId(duaId: String): DuaBookmark? {
-        return duaDao.getBookmarkByDuaId(duaId.toIntOrNull() ?: return null)?.toDomain()
+        return bookmarkDao.find(BookmarkKind.DUA, duaId.toIntOrNull() ?: return null)
+            ?.toDuaBookmark()
     }
 
     override fun isDuaBookmarked(duaId: String): Flow<Boolean> {
-        return duaDao.isDuaBookmarked(duaId.toIntOrNull() ?: 0)
+        return bookmarkDao.observeIsBookmarked(BookmarkKind.DUA, duaId.toIntOrNull() ?: 0)
     }
 
     override fun isDuaFavorite(duaId: String): Flow<Boolean> {
-        return duaDao.isDuaFavorite(duaId.toIntOrNull() ?: 0)
+        return bookmarkDao.observeIsFavourite(BookmarkKind.DUA, duaId.toIntOrNull() ?: 0)
     }
 
     override suspend fun toggleFavorite(duaId: String, categoryId: String) {
-        duaDao.toggleFavorite(
-            duaId.toIntOrNull() ?: return,
-            categoryId.toIntOrNull() ?: return
-        )
+        val target = duaId.toIntOrNull() ?: return
+        val existing = bookmarkDao.find(BookmarkKind.DUA, target)
+        val now = System.currentTimeMillis()
+        when {
+            existing == null -> bookmarkDao.upsert(
+                BookmarkEntity(
+                    kind = BookmarkKind.DUA,
+                    targetId = target,
+                    bookmarked = true,
+                    favourite = true,
+                    contextId = categoryId.toIntOrNull(),
+                    createdAt = now,
+                    updatedAt = now,
+                )
+            )
+            // A favourite that is also a plain bookmark keeps the bookmark.
+            existing.favourite && existing.bookmarked ->
+                bookmarkDao.clearFavourite(BookmarkKind.DUA, target, now)
+            existing.favourite -> bookmarkDao.delete(BookmarkKind.DUA, target)
+            else -> bookmarkDao.upsert(existing.copy(favourite = true, updatedAt = now))
+        }
     }
 
     override suspend fun insertBookmark(bookmark: DuaBookmark) {
-        duaDao.insertBookmark(bookmark.toEntity())
+        bookmarkDao.upsert(bookmark.toBookmarkEntity())
     }
 
     override suspend fun updateBookmark(bookmark: DuaBookmark) {
-        duaDao.updateBookmark(bookmark.toEntity())
+        bookmarkDao.upsert(bookmark.toBookmarkEntity())
     }
 
     override suspend fun deleteBookmark(duaId: String) {
-        duaDao.deleteBookmarkByDuaId(duaId.toIntOrNull() ?: return)
+        bookmarkDao.delete(BookmarkKind.DUA, duaId.toIntOrNull() ?: return)
     }
 
     override suspend fun getProgressForDuaOnDate(duaId: String, date: Long): DuaProgress? {
-        return duaDao.getProgressForDuaOnDate(duaId.toIntOrNull() ?: return null, date)?.toDomain()
+        return progressDao.find(ProgressKind.DUA, duaId.toIntOrNull() ?: return null, date)
+            ?.toDuaProgress()
     }
 
     override fun getProgressForDate(date: Long): Flow<List<DuaProgress>> {
-        return duaDao.getProgressForDate(date).mapItems { it.toDomain() }
+        return progressDao.onDate(ProgressKind.DUA, date).mapItems { it.toDuaProgress() }
     }
 
     override fun getProgressHistoryForDua(duaId: String): Flow<List<DuaProgress>> {
-        return duaDao.getProgressHistoryForDua(duaId.toIntOrNull() ?: 0).mapItems { it.toDomain() }
+        val target = duaId.toIntOrNull() ?: 0
+        return progressDao.ofKind(ProgressKind.DUA)
+            .map { rows -> rows.filter { it.targetId == target }.map { it.toDuaProgress() } }
     }
 
     override suspend fun incrementDuaProgress(duaId: String, date: Long, targetCount: Int) {
-        duaDao.incrementDuaProgress(duaId.toIntOrNull() ?: return, date, targetCount)
+        progressDao.increment(ProgressKind.DUA, duaId.toIntOrNull() ?: return, date, targetCount)
     }
 
     override suspend fun decrementDuaProgress(duaId: String, date: Long) {
-        duaDao.decrementDuaProgress(duaId.toIntOrNull() ?: return, date)
+        progressDao.decrement(ProgressKind.DUA, duaId.toIntOrNull() ?: return, date)
     }
 
     override suspend fun initializeDuaData() {
@@ -181,37 +212,38 @@ class DuaRepositoryImpl @Inject constructor(
         )
     }
 
-    private fun DuaBookmarkEntity.toDomain(): DuaBookmark {
+    private fun BookmarkEntity.toDuaBookmark(): DuaBookmark {
         return DuaBookmark(
-            id = id,
-            duaId = duaId.toString(),
-            categoryId = categoryId.toString(),
+            id = 0,
+            duaId = targetId.toString(),
+            categoryId = (contextId ?: 0).toString(),
             note = note,
-            isFavorite = isFavorite,
+            isFavorite = favourite,
             createdAt = createdAt,
             updatedAt = updatedAt
         )
     }
 
-    private fun DuaBookmark.toEntity(): DuaBookmarkEntity {
-        return DuaBookmarkEntity(
-            id = id,
-            duaId = duaId.toIntOrNull() ?: 0,
-            categoryId = categoryId.toIntOrNull() ?: 0,
+    private fun DuaBookmark.toBookmarkEntity(): BookmarkEntity {
+        return BookmarkEntity(
+            kind = BookmarkKind.DUA,
+            targetId = duaId.toIntOrNull() ?: 0,
+            bookmarked = true,
+            favourite = isFavorite,
             note = note,
-            isFavorite = isFavorite,
+            contextId = categoryId.toIntOrNull(),
             createdAt = createdAt,
             updatedAt = updatedAt
         )
     }
 
-    private fun DuaProgressEntity.toDomain(): DuaProgress {
+    private fun ProgressEntity.toDuaProgress(): DuaProgress {
         return DuaProgress(
-            id = id,
-            duaId = duaId.toString(),
+            id = 0,
+            duaId = targetId.toString(),
             date = date,
-            completedCount = completedCount,
-            targetCount = targetCount,
+            completedCount = completed,
+            targetCount = total ?: 0,
             isCompleted = isCompleted,
             createdAt = createdAt
         )

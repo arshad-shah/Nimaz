@@ -2,6 +2,9 @@ package com.arshadshah.nimaz.support
 
 import com.arshadshah.nimaz.data.local.database.entity.AsmaUlHusnaBookmarkEntity
 import com.arshadshah.nimaz.data.local.database.entity.AsmaUnNabiBookmarkEntity
+import com.arshadshah.nimaz.data.local.user.BookmarkEntity
+import com.arshadshah.nimaz.data.local.user.ProgressEntity
+import com.arshadshah.nimaz.data.local.user.ProgressKind
 import com.arshadshah.nimaz.data.local.database.entity.AyahEntity
 import com.arshadshah.nimaz.data.local.database.entity.HizbQuarterEntity
 import com.arshadshah.nimaz.data.local.database.entity.JuzEntity
@@ -438,5 +441,68 @@ object TestData {
         eventType = eventType,
         description = "First day of fasting",
         isHoliday = isHoliday,
+    )
+
+    // --- the consolidated user tables (schemaVersion 23) ---------------------------------
+
+    fun favourite(kind: String, targetId: Int, bookmarked: Boolean = false) = BookmarkEntity(
+        kind = kind,
+        targetId = targetId,
+        bookmarked = bookmarked,
+        favourite = true,
+        createdAt = 1_000,
+        updatedAt = 1_000,
+    )
+
+    fun bookmark(
+        kind: String,
+        targetId: Int,
+        contextId: Int? = null,
+        ordinal: Int? = null,
+        note: String? = null,
+    ) = BookmarkEntity(
+        kind = kind,
+        targetId = targetId,
+        bookmarked = true,
+        favourite = false,
+        note = note,
+        contextId = contextId,
+        ordinal = ordinal,
+        createdAt = 1_000,
+        updatedAt = 1_000,
+    )
+
+    fun lessonProgress(lessonId: Int, stars: Int, completed: Int = 1, total: Int = 10) =
+        ProgressEntity(
+            kind = ProgressKind.QAIDA_LESSON,
+            targetId = lessonId,
+            completed = completed,
+            total = total,
+            isCompleted = completed >= total,
+            state = if (completed >= total) "COMPLETED" else "IN_PROGRESS",
+            score = stars,
+            createdAt = 1_000,
+            updatedAt = 1_000,
+        )
+
+    fun cellProgress(cellId: Int, lessonId: Int, heard: Int) = ProgressEntity(
+        kind = ProgressKind.QAIDA_CELL,
+        targetId = cellId,
+        contextId = lessonId,
+        completed = heard,
+        isCompleted = heard > 0,
+        createdAt = 1_000,
+        updatedAt = 1_000,
+    )
+
+    fun duaProgress(duaId: Int, date: Long, done: Int, target: Int) = ProgressEntity(
+        kind = ProgressKind.DUA,
+        targetId = duaId,
+        date = date,
+        completed = done,
+        total = target,
+        isCompleted = done >= target,
+        createdAt = 1_000,
+        updatedAt = 1_000,
     )
 }

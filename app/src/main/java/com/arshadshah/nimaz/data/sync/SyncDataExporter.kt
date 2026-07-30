@@ -4,6 +4,9 @@ import com.arshadshah.nimaz.data.local.database.dao.AsmaUlHusnaDao
 import com.arshadshah.nimaz.data.local.database.dao.AsmaUnNabiDao
 import com.arshadshah.nimaz.data.local.database.dao.DuaDao
 import com.arshadshah.nimaz.data.local.database.dao.FastingDao
+import com.arshadshah.nimaz.data.local.user.ProgressDao
+import com.arshadshah.nimaz.data.local.user.ProgressKind
+import com.arshadshah.nimaz.data.local.user.ReadingProgressDao
 import com.arshadshah.nimaz.data.local.user.BookmarkDao
 import com.arshadshah.nimaz.data.local.user.BookmarkEntity
 import com.arshadshah.nimaz.data.local.user.BookmarkKind
@@ -39,6 +42,8 @@ class SyncDataExporter @Inject constructor(
     private val prophetDao: ProphetDao,
     private val hadithDao: HadithDao,
     private val bookmarkDao: BookmarkDao,
+    private val progressDao: ProgressDao,
+    private val readingProgressDao: ReadingProgressDao,
     private val duaDao: DuaDao,
     private val qaidaDao: QaidaDao,
     private val locationDao: LocationDao,
@@ -47,22 +52,27 @@ class SyncDataExporter @Inject constructor(
     suspend fun export(onProgress: suspend (String) -> Unit = {}): SyncPayload {
         // Quran
         onProgress("Exporting Quran data...")
-        val bookmarks = quranDao.getAllBookmarksSync().map {
+        // The wire format is unchanged on purpose — a phone on this version has to sync with
+        // one that still keeps seven bookmark tables — so the consolidated rows are read back
+        // out into the shapes the payload has always had. A verse that is both bookmarked and
+        // favourited appears in both lists, exactly as it did when it was a row in each table.
+        val marks = bookmarkDao.all()
+        val bookmarks = marks.filter { it.kind == BookmarkKind.AYAH && it.bookmarked }.map {
             SyncBookmark(
-                it.id,
-                it.ayahId,
-                it.surahNumber,
-                it.ayahNumber,
+                0,
+                it.targetId,
+                it.contextId ?: 0,
+                it.ordinal ?: 0,
                 it.note,
-                it.color,
+                it.colour,
                 it.createdAt,
                 it.updatedAt
             )
         }
-        val favorites = quranDao.getAllFavoritesSync().map {
-            SyncFavorite(it.ayahId, it.surahNumber, it.ayahNumber, it.createdAt, it.updatedAt)
+        val favorites = marks.filter { it.kind == BookmarkKind.AYAH && it.favourite }.map {
+            SyncFavorite(it.targetId, it.contextId ?: 0, it.ordinal ?: 0, it.createdAt, it.updatedAt)
         }
-        val progress = quranDao.getReadingProgressSync()?.let {
+        val progress = readingProgressDao.get()?.let {
             SyncReadingProgress(
                 it.lastReadSurah,
                 it.lastReadAyah,
@@ -226,14 +236,14 @@ class SyncDataExporter @Inject constructor(
 
         // Names & Prophets favorites
         onProgress("Exporting saved names & prophets...")
-        val asmaUlHusnaBookmarks = asmaUlHusnaDao.getAllBookmarksSync().map {
-            SyncNameBookmark(it.id, it.nameId, it.isFavorite, it.createdAt)
+        val asmaUlHusnaBookmarks = marks.filter { it.kind == BookmarkKind.ASMA_UL_HUSNA }.map {
+            SyncNameBookmark(0, it.targetId, it.favourite, it.createdAt)
         }
-        val asmaUnNabiBookmarks = asmaUnNabiDao.getAllBookmarksSync().map {
-            SyncNameBookmark(it.id, it.nameId, it.isFavorite, it.createdAt)
+        val asmaUnNabiBookmarks = marks.filter { it.kind == BookmarkKind.ASMA_UN_NABI }.map {
+            SyncNameBookmark(0, it.targetId, it.favourite, it.createdAt)
         }
-        val prophetBookmarks = prophetDao.getAllBookmarksSync().map {
-            SyncNameBookmark(it.id, it.prophetId, it.isFavorite, it.createdAt)
+        val prophetBookmarks = marks.filter { it.kind == BookmarkKind.PROPHET }.map {
+            SyncNameBookmark(0, it.targetId, it.favourite, it.createdAt)
         }
 
         // Hadith & Dua bookmarks
@@ -255,24 +265,25 @@ class SyncDataExporter @Inject constructor(
                     it.updatedAt
                 )
             }
-        val duaBookmarks = duaDao.getAllBookmarksSync().map {
+        val duaBookmarks = marks.filter { it.kind == BookmarkKind.DUA }.map {
             SyncDuaBookmark(
-                it.id,
-                it.duaId,
-                it.categoryId,
+                0,
+                it.targetId,
+                it.contextId ?: 0,
                 it.note,
-                it.isFavorite,
+                it.favourite,
                 it.createdAt,
                 it.updatedAt
             )
         }
-        val duaProgress = duaDao.getAllProgressSync().map {
+        val counts = progressDao.all()
+        val duaProgress = counts.filter { it.kind == ProgressKind.DUA }.map {
             SyncDuaProgress(
-                it.id,
-                it.duaId,
+                0,
+                it.targetId,
                 it.date,
-                it.completedCount,
-                it.targetCount,
+                it.completed,
+                it.total ?: 0,
                 it.isCompleted,
                 it.createdAt
             )
@@ -280,24 +291,24 @@ class SyncDataExporter @Inject constructor(
 
         // Qaida learning progress
         onProgress("Exporting Qaida progress...")
-        val qaidaLessonProgress = qaidaDao.getAllLessonProgressSync().map {
+        val qaidaLessonProgress = counts.filter { it.kind == ProgressKind.QAIDA_LESSON }.map {
             SyncQaidaLessonProgress(
-                it.lessonId,
-                it.status,
-                it.stars,
-                it.lastCellId,
-                it.completedCells,
-                it.totalCells,
+                it.targetId,
+                it.state.orEmpty(),
+                it.score ?: 0,
+                it.resumeId,
+                it.completed,
+                it.total ?: 0,
                 it.updatedAt
             )
         }
-        val qaidaCellProgress = qaidaDao.getAllCellProgressSync().map {
+        val qaidaCellProgress = counts.filter { it.kind == ProgressKind.QAIDA_CELL }.map {
             SyncQaidaCellProgress(
-                it.lessonId,
-                it.cellId,
-                it.heardCount,
+                it.contextId ?: 0,
+                it.targetId,
+                it.completed,
                 it.isCompleted,
-                it.lastPracticedAt
+                it.updatedAt
             )
         }
 

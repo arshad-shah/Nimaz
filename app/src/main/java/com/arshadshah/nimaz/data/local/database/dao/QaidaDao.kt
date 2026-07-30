@@ -6,9 +6,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import com.arshadshah.nimaz.data.local.database.entity.QaidaCellEntity
-import com.arshadshah.nimaz.data.local.database.entity.QaidaCellProgressEntity
 import com.arshadshah.nimaz.data.local.database.entity.QaidaLessonEntity
-import com.arshadshah.nimaz.data.local.database.entity.QaidaLessonProgressEntity
 import com.arshadshah.nimaz.data.local.database.entity.QaidaLessonWithContent
 import com.arshadshah.nimaz.data.local.database.entity.QaidaLetterEntity
 import com.arshadshah.nimaz.data.local.database.entity.QaidaLineEntity
@@ -112,49 +110,4 @@ interface QaidaDao {
     }
 
     // ── Lesson progress (user data) ───────────────────────────────────────
-    @Query("SELECT * FROM qaida_lesson_progress WHERE lesson_id = :lessonId")
-    suspend fun getLessonProgress(lessonId: Int): QaidaLessonProgressEntity?
-
-    @Query("SELECT * FROM qaida_lesson_progress WHERE lesson_id = :lessonId")
-    fun observeLessonProgress(lessonId: Int): Flow<QaidaLessonProgressEntity?>
-
-    @Query("SELECT * FROM qaida_lesson_progress ORDER BY lesson_id ASC")
-    fun getAllProgress(): Flow<List<QaidaLessonProgressEntity>>
-
-    @Query("SELECT * FROM qaida_lesson_progress")
-    suspend fun getAllLessonProgressSync(): List<QaidaLessonProgressEntity>
-
-    @Query("SELECT * FROM qaida_cell_progress")
-    suspend fun getAllCellProgressSync(): List<QaidaCellProgressEntity>
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun upsertLessonProgress(progress: QaidaLessonProgressEntity)
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun upsertLessonProgress(progress: List<QaidaLessonProgressEntity>)
-
-    @Query("DELETE FROM qaida_lesson_progress")
-    suspend fun deleteAllLessonProgress()
-
-    // ── Cell progress (optional fine-grained user data) ───────────────────
-    @Query("SELECT * FROM qaida_cell_progress WHERE lesson_id = :lessonId AND cell_id = :cellId")
-    suspend fun getCellProgress(lessonId: Int, cellId: Int): QaidaCellProgressEntity?
-
-    @Query("SELECT * FROM qaida_cell_progress WHERE lesson_id = :lessonId")
-    fun getCellProgressForLesson(lessonId: Int): Flow<List<QaidaCellProgressEntity>>
-
-    @Query("SELECT COUNT(*) FROM qaida_cell_progress WHERE lesson_id = :lessonId AND is_completed = 1")
-    suspend fun countCompletedCells(lessonId: Int): Int
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun upsertCellProgress(progress: QaidaCellProgressEntity)
-
-    @Query("DELETE FROM qaida_cell_progress")
-    suspend fun deleteAllCellProgress()
-
-    @Transaction
-    suspend fun deleteAllUserData() {
-        deleteAllLessonProgress()
-        deleteAllCellProgress()
-    }
 }

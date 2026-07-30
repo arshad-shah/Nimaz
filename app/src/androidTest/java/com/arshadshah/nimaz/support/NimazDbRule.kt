@@ -3,6 +3,7 @@ package com.arshadshah.nimaz.support
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import com.arshadshah.nimaz.data.local.database.NimazDatabase
+import com.arshadshah.nimaz.data.local.user.NimazUserDatabase
 import org.junit.rules.ExternalResource
 
 /**
@@ -23,24 +24,35 @@ import org.junit.rules.ExternalResource
  */
 class NimazDbRule : ExternalResource() {
 
+    /** The corpus: read-only in production, and shipped as an asset. */
     lateinit var db: NimazDatabase
         private set
 
+    /**
+     * The user's own database, since schemaVersion 23 a separate file.
+     *
+     * Both are stood up here because most DAO tests need one or the other and a few need both
+     * — a bookmark on a verse, say, whose ids come from the content side. Keeping them in one
+     * rule is what stops a test quietly asserting against the wrong one.
+     */
+    lateinit var userDb: NimazUserDatabase
+        private set
+
     override fun before() {
-        db = Room.inMemoryDatabaseBuilder(
-            ApplicationProvider.getApplicationContext(),
-            NimazDatabase::class.java,
-        )
+        val context = ApplicationProvider.getApplicationContext<android.content.Context>()
+        db = Room.inMemoryDatabaseBuilder(context, NimazDatabase::class.java)
             // Queries in these tests run on a background dispatcher via runTest's
             // coroutine, but allowing main-thread queries keeps simple assertions
             // ergonomic and never deadlocks an in-memory DB.
             .allowMainThreadQueries()
             .build()
+        userDb = Room.inMemoryDatabaseBuilder(context, NimazUserDatabase::class.java)
+            .allowMainThreadQueries()
+            .build()
     }
 
     override fun after() {
-        if (::db.isInitialized && db.isOpen) {
-            db.close()
-        }
+        if (::db.isInitialized && db.isOpen) db.close()
+        if (::userDb.isInitialized && userDb.isOpen) userDb.close()
     }
 }

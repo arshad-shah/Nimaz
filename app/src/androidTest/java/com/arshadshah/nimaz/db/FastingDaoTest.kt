@@ -16,7 +16,7 @@ class FastingDaoTest {
 
     @get:Rule
     val dbRule = NimazDbRule()
-    private val dao get() = dbRule.db.fastingDao()
+    private val dao get() = dbRule.userDb.fastingDao()
 
     @Test
     fun insertFastRecord_isReadBackByDate() = runTest {

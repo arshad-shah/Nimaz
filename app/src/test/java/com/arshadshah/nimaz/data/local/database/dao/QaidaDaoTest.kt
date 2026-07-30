@@ -2,11 +2,13 @@ package com.arshadshah.nimaz.data.local.database.dao
 
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
+import com.arshadshah.nimaz.data.local.user.NimazUserDatabase
+import com.arshadshah.nimaz.data.local.user.ProgressDao
+import com.arshadshah.nimaz.data.local.user.ProgressEntity
+import com.arshadshah.nimaz.data.local.user.ProgressKind
 import com.arshadshah.nimaz.data.local.database.NimazDatabase
 import com.arshadshah.nimaz.data.local.database.entity.QaidaCellEntity
-import com.arshadshah.nimaz.data.local.database.entity.QaidaCellProgressEntity
 import com.arshadshah.nimaz.data.local.database.entity.QaidaLessonEntity
-import com.arshadshah.nimaz.data.local.database.entity.QaidaLessonProgressEntity
 import com.arshadshah.nimaz.data.local.database.entity.QaidaLetterEntity
 import com.arshadshah.nimaz.data.local.database.entity.QaidaLineEntity
 import com.google.common.truth.Truth.assertThat
@@ -22,6 +24,8 @@ import org.robolectric.RobolectricTestRunner
 class QaidaDaoTest {
 
     private lateinit var db: NimazDatabase
+    private lateinit var userDb: NimazUserDatabase
+    private lateinit var progress: ProgressDao
     private lateinit var dao: QaidaDao
 
     @Before
@@ -31,11 +35,17 @@ class QaidaDaoTest {
             NimazDatabase::class.java
         ).allowMainThreadQueries().build()
         dao = db.qaidaDao()
+        userDb = Room.inMemoryDatabaseBuilder(
+            ApplicationProvider.getApplicationContext(),
+            NimazUserDatabase::class.java
+        ).allowMainThreadQueries().build()
+        progress = userDb.progressDao()
     }
 
     @After
     fun tearDown() {
         db.close()
+        userDb.close()
     }
 
     private fun lesson(id: Int, order: Int = id) = QaidaLessonEntity(
@@ -153,76 +163,87 @@ class QaidaDaoTest {
         assertThat(dao.getLetter(123)).isNull()
     }
 
+    /**
+     * A lesson's progress is a row in the user's `progress` table now, keyed by
+     * (kind, target, date) — so an upsert of the same lesson replaces rather than duplicating.
+     */
     @Test
-    fun upsertLessonProgress_insertsThenUpdates() = runTest {
-        val initial = QaidaLessonProgressEntity(
-            lessonId = 1,
-            status = "IN_PROGRESS",
-            stars = 0,
-            lastCellId = null,
-            completedCells = 2,
-            totalCells = 10,
-            updatedAt = 100L
+    fun lessonProgress_insertsThenUpdates() = runTest {
+        val initial = ProgressEntity(
+            kind = ProgressKind.QAIDA_LESSON,
+            targetId = 1,
+            completed = 2,
+            total = 10,
+            isCompleted = false,
+            state = "IN_PROGRESS",
+            score = 0,
+            createdAt = 100L,
+            updatedAt = 100L,
         )
-        dao.upsertLessonProgress(initial)
-        assertThat(dao.getLessonProgress(1)).isEqualTo(initial)
+        progress.upsert(initial)
+        assertThat(progress.find(ProgressKind.QAIDA_LESSON, 1)).isEqualTo(initial)
 
         val updated = initial.copy(
-            status = "COMPLETED",
-            stars = 3,
-            lastCellId = 1009,
-            completedCells = 10,
-            updatedAt = 200L
+            state = "COMPLETED",
+            score = 3,
+            resumeId = 1009,
+            completed = 10,
+            isCompleted = true,
+            updatedAt = 200L,
         )
-        dao.upsertLessonProgress(updated)
+        progress.upsert(updated)
 
-        val stored = dao.getLessonProgress(1)
-        assertThat(stored).isEqualTo(updated)
-        assertThat(dao.getAllProgress().first()).hasSize(1)
+        assertThat(progress.find(ProgressKind.QAIDA_LESSON, 1)).isEqualTo(updated)
+        assertThat(progress.ofKind(ProgressKind.QAIDA_LESSON).first()).hasSize(1)
     }
 
     @Test
-    fun upsertCellProgress_replacesOnCompositeKey() = runTest {
-        dao.upsertCellProgress(
-            QaidaCellProgressEntity(
-                lessonId = 1, cellId = 1001, heardCount = 1,
-                isCompleted = false, lastPracticedAt = 100L
+    fun cellProgress_replacesOnItsKey() = runTest {
+        progress.upsert(
+            ProgressEntity(
+                kind = ProgressKind.QAIDA_CELL, targetId = 1001, contextId = 1,
+                completed = 1, isCompleted = false, createdAt = 100L, updatedAt = 100L,
             )
         )
-        dao.upsertCellProgress(
-            QaidaCellProgressEntity(
-                lessonId = 1, cellId = 1001, heardCount = 3,
-                isCompleted = true, lastPracticedAt = 300L
+        progress.upsert(
+            ProgressEntity(
+                kind = ProgressKind.QAIDA_CELL, targetId = 1001, contextId = 1,
+                completed = 3, isCompleted = true, createdAt = 100L, updatedAt = 300L,
             )
         )
 
-        val progress = dao.getCellProgressForLesson(1).first()
-        assertThat(progress).hasSize(1)
-        assertThat(progress.first().heardCount).isEqualTo(3)
-        assertThat(progress.first().isCompleted).isTrue()
-        assertThat(dao.getCellProgress(1, 1001)?.heardCount).isEqualTo(3)
+        val rows = progress.inContext(ProgressKind.QAIDA_CELL, 1).first()
+        assertThat(rows).hasSize(1)
+        assertThat(rows.first().completed).isEqualTo(3)
+        assertThat(rows.first().isCompleted).isTrue()
     }
 
+    /**
+     * Clearing a learner's progress cannot reach the lessons: they are in the other database.
+     * Before the split this test had to assert that a `deleteAllUserData` on the same database
+     * had stopped at the right tables.
+     */
     @Test
-    fun deleteAllUserData_clearsProgressButKeepsContent() = runTest {
+    fun clearingProgress_keepsTheLessons() = runTest {
         dao.insertLessons(listOf(lesson(1)))
-        dao.upsertLessonProgress(
-            QaidaLessonProgressEntity(
-                lessonId = 1, status = "UNLOCKED", stars = 1, lastCellId = null,
-                completedCells = 0, totalCells = 5, updatedAt = 1L
+        progress.upsert(
+            ProgressEntity(
+                kind = ProgressKind.QAIDA_LESSON, targetId = 1, completed = 0, total = 5,
+                isCompleted = false, state = "UNLOCKED", score = 1,
+                createdAt = 1L, updatedAt = 1L,
             )
         )
-        dao.upsertCellProgress(
-            QaidaCellProgressEntity(
-                lessonId = 1, cellId = 1001, heardCount = 1,
-                isCompleted = false, lastPracticedAt = 1L
+        progress.upsert(
+            ProgressEntity(
+                kind = ProgressKind.QAIDA_CELL, targetId = 1001, contextId = 1,
+                completed = 1, isCompleted = false, createdAt = 1L, updatedAt = 1L,
             )
         )
 
-        dao.deleteAllUserData()
+        progress.deleteKind(ProgressKind.QAIDA_LESSON)
+        progress.deleteKind(ProgressKind.QAIDA_CELL)
 
-        assertThat(dao.getAllProgress().first()).isEmpty()
-        assertThat(dao.getCellProgressForLesson(1).first()).isEmpty()
+        assertThat(progress.all()).isEmpty()
         assertThat(dao.getAllLessons().first()).hasSize(1)
     }
 
