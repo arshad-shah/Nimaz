@@ -40,10 +40,17 @@ class MigrationChainTest {
         val dbName = "migration-chain-test"
         helper.createDatabase(dbName, 7).close()
 
+        // `validateDroppedTables = false`, deliberately. Every declared entity is still
+        // validated — columns, types, indices — but extra tables no longer fail the run,
+        // because since schemaVersion 23 there are supposed to be some: the twenty-two tables
+        // the user writes to moved to NimazUserDatabase and MIGRATION_22_23 leaves them where
+        // they are rather than dropping them. A bug in that copy is only survivable while the
+        // original rows are still on disk, so the tables outliving their declaration is the
+        // design, and this test asserts it below instead of failing on it.
         val db = helper.runMigrationsAndValidate(
             dbName,
             NimazDatabase.SCHEMA_VERSION,
-            true,
+            false,
             *NimazDatabase.ALL_MIGRATIONS,
         )
 
@@ -53,5 +60,13 @@ class MigrationChainTest {
         )
         assertThat(cursor.count).isEqualTo(1)
         cursor.close()
+
+        // The user's rows survive the chain. If this ever goes to 0, an upgrade has thrown
+        // away the only copy of somebody's bookmarks before UserDataMigrator could read it.
+        db.query(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name = 'quran_bookmarks'"
+        ).use { legacy ->
+            assertThat(legacy.count).isEqualTo(1)
+        }
     }
 }
