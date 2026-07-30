@@ -12,6 +12,7 @@ import com.arshadshah.nimaz.data.audio.AdhanDownloadService
 import com.arshadshah.nimaz.data.audio.AdhanSound
 import com.arshadshah.nimaz.data.local.content.ContentPatchResult
 import com.arshadshah.nimaz.data.local.content.ContentPatchSeeder
+import com.arshadshah.nimaz.data.local.user.UserDataMigrator
 import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
 import com.arshadshah.nimaz.domain.model.PrayerType
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -37,6 +38,7 @@ class AppInitializer @Inject constructor(
     private val adhanAudioManager: AdhanAudioManager,
     private val announcementBootstrap: AnnouncementBootstrap,
     private val contentPatchSeeder: ContentPatchSeeder,
+    private val userDataMigrator: UserDataMigrator,
 ) {
     private val _isReady = MutableStateFlow(false)
     val isReady: StateFlow<Boolean> = _isReady.asStateFlow()
@@ -60,12 +62,18 @@ class AppInitializer @Inject constructor(
                     // reaches. Version-gated, so the steady state is one DataStore
                     // read; a release with nothing to correct ships no patch at all.
                     val contentPatchTask = async { applyContentPatch() }
+                    // A person's data, out of the content database and into their own, once.
+                    // Awaited rather than fire-and-forget: the reader and the bookmark lists
+                    // read the user database as soon as the UI starts, and a half-copied
+                    // database on screen would look like data loss even though it is not.
+                    val userDataTask = async { userDataMigrator.migrateIfNeeded() }
 
                     localeTask.await()
                     notificationTask.await()
                     adhanTask.await()
                     announcementTask.await()
                     contentPatchTask.await()
+                    userDataTask.await()
                 }
             } catch (e: Exception) {
                 // Timeout or other failure — report it but proceed to UI anyway
