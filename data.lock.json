@@ -9,19 +9,19 @@
     "to cost another 140 MB object forever."
   ],
   "repo": "arshad-shah/nimaz-data",
-  "tag": "data-v2",
-  "schemaVersion": 20,
+  "tag": "data-v4",
+  "schemaVersion": 21,
   "artifact": {
-    "file": "nimaz-625212cd.db",
+    "file": "nimaz-34792432.db",
     "assetPath": "database/nimaz_prepopulated.db",
-    "sha256": "625212cd89a61fa094bc521a0dbdf60fe6e1c14725dd6f6d6a41556d7aa20cb5",
-    "bytes": 178384896
+    "sha256": "34792432b54678efc178b3bd61f8506b21b0c76ae6524eb8340bf997e77a0835",
+    "bytes": 133894144
   },
   "patch": {
     "file": "content-patch.json.gz",
     "assetPath": "database/content-patch.json",
-    "sha256": "470e90bb1902e987f942d258e5d3ca05684b56c141aaefe92a3ad61aa071c95b",
-    "version": 2,
+    "sha256": "f844558ab0e68f6bcc4f7d0bcb8521699af6618acb204f54ec77505db0c476b6",
+    "version": 4,
     "baseline": "sha256:9a9e29067562ce07140813f5a469ad5a433f104d1a7e142c559a22400c887a94"
   }
 }
