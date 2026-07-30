@@ -1,0 +1,115 @@
+package com.arshadshah.nimaz.data.local.user
+
+import androidx.room.Dao
+import androidx.room.Delete
+import androidx.room.Query
+import androidx.room.Upsert
+import kotlinx.coroutines.flow.Flow
+
+/**
+ * Bookmarks and favourites, for every kind of thing at once.
+ *
+ * The seven tables this replaces had seven DAOs' worth of near-identical methods —
+ * `getAllBookmarks`, `getBookmarkByAyahId`, `isBookmarked`, `toggleFavorite` repeated per
+ * kind, each with its own spelling. One table means one set, with `kind` as an argument
+ * where there used to be a copy of the method.
+ */
+@Dao
+interface BookmarkDao {
+
+    @Query("SELECT * FROM bookmarks WHERE kind = :kind AND bookmarked = 1 ORDER BY created_at DESC")
+    fun bookmarks(kind: String): Flow<List<BookmarkEntity>>
+
+    @Query("SELECT * FROM bookmarks WHERE kind = :kind AND favourite = 1 ORDER BY created_at DESC")
+    fun favourites(kind: String): Flow<List<BookmarkEntity>>
+
+    @Query("SELECT * FROM bookmarks WHERE kind = :kind AND target_id = :targetId")
+    suspend fun find(kind: String, targetId: Int): BookmarkEntity?
+
+    /** Ids only, for the "is this bookmarked" pass over a page of content. */
+    @Query("SELECT target_id FROM bookmarks WHERE kind = :kind AND bookmarked = 1")
+    suspend fun bookmarkedIds(kind: String): List<Int>
+
+    @Query("SELECT target_id FROM bookmarks WHERE kind = :kind AND favourite = 1")
+    suspend fun favouriteIds(kind: String): List<Int>
+
+    @Query("SELECT COUNT(*) FROM bookmarks WHERE kind = :kind AND bookmarked = 1")
+    fun bookmarkCount(kind: String): Flow<Int>
+
+    @Upsert
+    suspend fun upsert(bookmark: BookmarkEntity)
+
+    @Upsert
+    suspend fun upsertAll(bookmarks: List<BookmarkEntity>)
+
+    @Delete
+    suspend fun delete(bookmark: BookmarkEntity)
+
+    @Query("DELETE FROM bookmarks WHERE kind = :kind AND target_id = :targetId")
+    suspend fun delete(kind: String, targetId: Int)
+
+    /**
+     * Clears one flag and removes the row only when neither is left, so un-favouriting a
+     * verse you also bookmarked does not delete the bookmark. The old pair of tables got
+     * this right by accident, by being two tables; here it has to be said.
+     */
+    @Query(
+        """
+        UPDATE bookmarks SET favourite = 0, updated_at = :now
+        WHERE kind = :kind AND target_id = :targetId
+        """
+    )
+    suspend fun clearFavourite(kind: String, targetId: Int, now: Long)
+
+    @Query(
+        """
+        UPDATE bookmarks SET bookmarked = 0, updated_at = :now
+        WHERE kind = :kind AND target_id = :targetId
+        """
+    )
+    suspend fun clearBookmark(kind: String, targetId: Int, now: Long)
+
+    @Query("DELETE FROM bookmarks WHERE bookmarked = 0 AND favourite = 0")
+    suspend fun pruneEmpty()
+
+    @Query("SELECT * FROM bookmarks")
+    suspend fun all(): List<BookmarkEntity>
+
+    @Query("DELETE FROM bookmarks")
+    suspend fun clear()
+}
+
+/** Per-item progress: dua repetitions, qaida lessons and cells. */
+@Dao
+interface ProgressDao {
+
+    @Query("SELECT * FROM progress WHERE kind = :kind ORDER BY updated_at DESC")
+    fun ofKind(kind: String): Flow<List<ProgressEntity>>
+
+    @Query("SELECT * FROM progress WHERE kind = :kind AND target_id = :targetId AND date = :date")
+    suspend fun find(kind: String, targetId: Int, date: Long = 0): ProgressEntity?
+
+    @Query("SELECT * FROM progress WHERE kind = :kind AND context_id = :contextId")
+    fun inContext(kind: String, contextId: Int): Flow<List<ProgressEntity>>
+
+    @Query("SELECT * FROM progress WHERE kind = :kind AND date = :date ORDER BY target_id ASC")
+    fun onDate(kind: String, date: Long): Flow<List<ProgressEntity>>
+
+    @Query("SELECT COUNT(*) FROM progress WHERE kind = :kind AND is_completed = 1")
+    fun completedCount(kind: String): Flow<Int>
+
+    @Upsert
+    suspend fun upsert(progress: ProgressEntity)
+
+    @Upsert
+    suspend fun upsertAll(progress: List<ProgressEntity>)
+
+    @Query("DELETE FROM progress WHERE kind = :kind AND target_id = :targetId AND date = :date")
+    suspend fun delete(kind: String, targetId: Int, date: Long = 0)
+
+    @Query("SELECT * FROM progress")
+    suspend fun all(): List<ProgressEntity>
+
+    @Query("DELETE FROM progress")
+    suspend fun clear()
+}

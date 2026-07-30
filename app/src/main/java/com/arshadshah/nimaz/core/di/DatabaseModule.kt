@@ -2,7 +2,13 @@ package com.arshadshah.nimaz.core.di
 
 import android.content.Context
 import androidx.room.Room
+import androidx.room.RoomDatabase
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.arshadshah.nimaz.data.local.database.NimazDatabase
+import com.arshadshah.nimaz.data.local.user.BookmarkDao
+import com.arshadshah.nimaz.data.local.user.LegacyUserDataImport
+import com.arshadshah.nimaz.data.local.user.NimazUserDatabase
+import com.arshadshah.nimaz.data.local.user.ProgressDao
 import com.arshadshah.nimaz.data.local.database.dao.AsmaUlHusnaDao
 import com.arshadshah.nimaz.data.local.database.dao.AsmaUnNabiDao
 import com.arshadshah.nimaz.data.local.database.dao.DuaDao
@@ -46,6 +52,51 @@ object DatabaseModule {
             .addMigrations(*NimazDatabase.ALL_MIGRATIONS)
             .build()
     }
+
+    /**
+     * The user's own database, created by Room on the device.
+     *
+     * Separate from the content database on purpose: content arrives as a 128 MB asset and
+     * is replaced wholesale by every release, and until now it also *held* the user's data.
+     * The only thing that stopped a content release from taking someone's bookmarks with it
+     * was that `createFromAsset` happens not to re-copy on upgrade. Two files makes that
+     * structural.
+     *
+     * The first open copies anything an existing install already has out of the content
+     * database — see [LegacyUserDataImport]. The old rows are left where they are, so a bug
+     * in the copy is survivable.
+     */
+    @Provides
+    @Singleton
+    fun provideNimazUserDatabase(
+        @ApplicationContext context: Context
+    ): NimazUserDatabase {
+        val legacyPath = context.getDatabasePath(NimazDatabase.DATABASE_NAME).absolutePath
+        return Room.databaseBuilder(
+            context,
+            NimazUserDatabase::class.java,
+            NimazUserDatabase.DATABASE_NAME
+        )
+            .addCallback(object : RoomDatabase.Callback() {
+                override fun onOpen(db: SupportSQLiteDatabase) {
+                    // On open rather than onCreate: an install that was interrupted
+                    // mid-copy has a created-but-empty database, and onCreate would never
+                    // run again to finish the job.
+                    if (LegacyUserDataImport.isNeeded(db, legacyPath)) {
+                        LegacyUserDataImport.run(db, legacyPath)
+                    }
+                }
+            })
+            .build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideBookmarkDao(database: NimazUserDatabase): BookmarkDao = database.bookmarkDao()
+
+    @Provides
+    @Singleton
+    fun provideProgressDao(database: NimazUserDatabase): ProgressDao = database.progressDao()
 
     @Provides
     @Singleton
