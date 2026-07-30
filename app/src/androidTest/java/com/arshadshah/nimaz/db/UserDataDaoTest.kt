@@ -49,6 +49,10 @@ class UserDataDaoTest {
         val quranDao = dbRule.db.quranDao()
         val dao = dbRule.db.tafseerDao()
 
+        // The surah first: `ayahs.surah_id` is a foreign key onto `surahs`, so
+        // inserting an ayah for a surah that is not there fails with
+        // SQLITE_CONSTRAINT_FOREIGNKEY rather than with anything about this test.
+        quranDao.insertSurahs(listOf(TestData.surah(id = 1, versesCount = 7)))
         // Ayahs 5, 6 and 7 of surah 1 — the block below covers all three.
         quranDao.insertAyahs(
             listOf(
