@@ -215,6 +215,23 @@ rg -U --multiline-dotall -n '\.collect\s*\{(?:[^}]|
   Rule of thumb: a `launch { … .collect { … } }` in a ViewModel that can be triggered **more than
   once for the same state** needs a `Job` you cancel, or `flatMapLatest` off the trigger.
 
+  **Follow-up (resolved).** That one shared `contentJob` was right for surah and juz and wrong
+  for pages. Page mode is not single-target: the reader's pager keeps the settled page *and* its
+  neighbours composed, and all of them request content in the same frame, so each request
+  cancelled the one before it and only the last page requested in a frame ever reached
+  `pageCache`. The losers rendered as a blank Mushaf frame and stayed blank until they left and
+  re-entered composition. Only the ayah-flow editions (Madani) showed it — the line-accurate
+  IndoPak layouts render from `mushafPageLayoutCache`, loaded by `loadMushafPageLayout`, which
+  never shared a job. Fixed by giving page loads their own `pageJobs: Map<Int, Job>` (one
+  collector per page, deduped while in flight, cancelled wholesale when the pages stop being
+  valid), and by splitting `QuranEvent.PrefetchPage` off `LoadPage` so a composed-but-not-swiped-to
+  neighbour cannot retitle the reader or move the saved reading position.
+
+  Corollary to the rule of thumb: **cancellation scope must match the identity of the request.**
+  One handle per *screen* is only correct when the screen shows one thing at a time; a surface
+  that legitimately holds several live requests needs one handle each, keyed the way the
+  requests are.
+
 - [ ] **Same shape elsewhere — untriaged.** The detect command below flags `HadithViewModel`
   (`searchHadiths` / `searchHadithsInBook`, re-launched per query with no cancellation, so
   typing stacks a collector per keystroke and an earlier query can land last) and

@@ -53,6 +53,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.math.abs
 
 enum class ReadingMode { SURAH, JUZ, PAGE }
 
@@ -158,6 +159,14 @@ sealed interface QuranEvent {
     data class LoadJuz(val juzNumber: Int) : QuranEvent
     data class LoadPage(val pageNumber: Int) : QuranEvent
 
+    /**
+     * Fetch a page's ayahs into [QuranReaderUiState.pageCache] without making it the page the
+     * reader is *on*. The pager keeps neighbouring pages composed so a swipe lands on content
+     * that is already there; those neighbours must not retitle the reader or move the saved
+     * reading position, which is what [LoadPage] does.
+     */
+    data class PrefetchPage(val pageNumber: Int) : QuranEvent
+
     /** Load the line-accurate 16-line IndoPak layout for a page (used by the 16-line view). */
     data class LoadMushafPageLayout(val pageNumber: Int) : QuranEvent
     data class Search(val query: String) : QuranEvent
@@ -243,12 +252,32 @@ class QuranViewModel @Inject constructor(
     private var readerTarget: ReaderTarget? = null
 
     /**
-     * The in-flight content collector. Each load cancels the previous one: these collect
-     * Room flows, which never complete, so without cancelling, every surah the user opened
-     * would keep its collector alive and racing to write [_readerState] — visible as the
-     * previous surah's content flicking back over the new one.
+     * The in-flight collector for the *single-target* reading modes (surah, juz). Each load
+     * cancels the previous one: these collect Room flows, which never complete, so without
+     * cancelling, every surah the user opened would keep its collector alive and racing to
+     * write [_readerState] — visible as the previous surah's content flicking back over the
+     * new one.
+     *
+     * Page loads deliberately do **not** share this handle — see [pageJobs].
      */
     private var contentJob: Job? = null
+
+    /**
+     * In-flight page collectors, keyed by page number.
+     *
+     * Page mode is not single-target: the reader's pager keeps the settled page *and* its
+     * neighbours composed, and each of them asks for its own content in the same frame. When
+     * these shared [contentJob], every request cancelled the one before it, so only the last
+     * page requested in a frame ever reached [QuranReaderUiState.pageCache] — the losers
+     * rendered as an empty Mushaf frame and stayed blank until they left and re-entered
+     * composition. That only ever hit the ayah-flow editions (Madani); the line-accurate
+     * IndoPak layouts render from [loadMushafPageLayout], which never shared a job.
+     *
+     * One collector per page, cancelled wholesale by [cancelPageJobs] when the pages
+     * themselves stop being valid (a script or translation change) or when the reader leaves
+     * page mode.
+     */
+    private val pageJobs = mutableMapOf<Int, Job>()
 
     /**
      * Active khatam plus everything derived from it, as one stream shared by the reader
@@ -309,6 +338,7 @@ class QuranViewModel @Inject constructor(
             is QuranEvent.LoadSurah -> loadSurah(event.surahNumber)
             is QuranEvent.LoadJuz -> loadJuz(event.juzNumber)
             is QuranEvent.LoadPage -> loadPage(event.pageNumber)
+            is QuranEvent.PrefetchPage -> loadPage(event.pageNumber, makeActive = false)
             is QuranEvent.LoadMushafPageLayout -> loadMushafPageLayout(event.pageNumber)
             is QuranEvent.Search -> search(event.query)
             is QuranEvent.SetTopTab -> _homeState.update { it.copy(topTab = event.index) }
@@ -401,18 +431,19 @@ class QuranViewModel @Inject constructor(
                     MushafScript.fromName(mushafScript))
             }.collect { settings ->
                 val (display, behavior, showTajweed, tajweedUnderline, mushafScript) = settings
-                // Captured before the state update below overwrites it.
+                // Captured before the state update below overwrites them.
                 val translationChanged =
                     _readerState.value.selectedTranslatorId != display.translatorId
+                // A different edition repaginates the Quran, so page N no longer holds the
+                // same ayahs.
+                val scriptChanged = _readerState.value.mushafScript != mushafScript
                 audioManager.setReciter(behavior.reciterId)
                 // Push continuous-reading reactively so toggling the setting while
                 // in the reader takes effect immediately, not on next play-start.
                 audioManager.setContinuousPlayback(behavior.continuousReading)
                 _readerState.update {
-                    // A different edition repaginates the Quran, so page N no longer holds
-                    // the same ayahs — drop the per-page caches rather than render the
+                    // Drop the per-page caches on a script change rather than render the
                     // previous edition's content under the new page numbers (#325).
-                    val scriptChanged = it.mushafScript != mushafScript
                     // A different translation invalidates the cached ayahs too — they carry
                     // the translation text they were fetched with. The layout cache is
                     // script-only and survives.
@@ -440,12 +471,16 @@ class QuranViewModel @Inject constructor(
                 }
                 _homeState.update { it.copy(mushafScript = mushafScript) }
 
-                if (translationChanged) {
-                    // The queries take the translator id as a parameter captured at
+                if (translationChanged || scriptChanged) {
+                    // The queries take the translator id and script as parameters captured at
                     // subscription, so an already-running collector keeps serving the old
-                    // translation. Re-issue the current load, and refresh the home verse of
-                    // the day, which is a one-shot read of the same preference.
+                    // one — and it would re-populate the caches just cleared above. Drop
+                    // every page collector and re-issue the current load.
+                    cancelPageJobs()
                     reloadReaderContent()
+                }
+                if (translationChanged) {
+                    // The home verse of the day is a one-shot read of the same preference.
                     loadVerseOfTheDay()
                 }
             }
@@ -647,6 +682,7 @@ class QuranViewModel @Inject constructor(
             )
         }
         contentJob?.cancel()
+        cancelPageJobs()
         contentJob = viewModelScope.launch {
             quranUseCases.getSurahWithAyahs(surahNumber, _readerState.value.selectedTranslatorId)
                 .collect { surahWithAyahs ->
@@ -685,6 +721,7 @@ class QuranViewModel @Inject constructor(
             )
         }
         contentJob?.cancel()
+        cancelPageJobs()
         contentJob = viewModelScope.launch {
             quranUseCases.getAyahsByJuz(juzNumber, _readerState.value.selectedTranslatorId)
                 .collect { ayahs ->
@@ -700,36 +737,59 @@ class QuranViewModel @Inject constructor(
         }
     }
 
-    private fun loadPage(pageNumber: Int) {
-        readerTarget = ReaderTarget.Page(pageNumber)
+    /**
+     * Fetches [pageNumber] into the page cache, and — when [makeActive] — makes it the page
+     * the reader is on (title, `ayahs`, reading position, the target a settings change
+     * re-issues). Neighbouring pager pages prefetch with `makeActive = false` so a page the
+     * user has not swiped to yet cannot retitle the reader.
+     */
+    private fun loadPage(pageNumber: Int, makeActive: Boolean = true) {
+        if (makeActive) {
+            readerTarget = ReaderTarget.Page(pageNumber)
+            // Page mode is not surah/juz mode: stop the single-target collector rather than
+            // let it keep writing its ayahs over the reader state.
+            contentJob?.cancel()
+            contentJob = null
+            pruneDistantPageJobs(pageNumber)
+        }
+
         // Check cache first - no loading needed if already cached
         val cached = _readerState.value.pageCache[pageNumber]
         if (cached != null) {
-            _readerState.update {
-                it.copy(
-                    ayahs = cached,
-                    readingMode = ReadingMode.PAGE,
-                    title = context.getString(R.string.page_single_format, pageNumber),
-                    subtitle = "${cached.size} Ayahs",
-                    isLoading = false
-                )
+            if (makeActive) {
+                _readerState.update {
+                    it.copy(
+                        ayahs = cached,
+                        readingMode = ReadingMode.PAGE,
+                        title = context.getString(R.string.page_single_format, pageNumber),
+                        subtitle = "${cached.size} Ayahs",
+                        isLoading = false
+                    )
+                }
             }
             return
         }
 
-        // Load from database - DON'T clear ayahs to prevent flicker
-        _readerState.update {
-            it.copy(
-                error = null,
-                readingMode = ReadingMode.PAGE,
-                surahWithAyahs = null,
-                // Keep existing ayahs to prevent flicker during page transition
-                title = context.getString(R.string.page_single_format, pageNumber),
-                subtitle = ""
-            )
+        if (makeActive) {
+            // Load from database - DON'T clear ayahs to prevent flicker
+            _readerState.update {
+                it.copy(
+                    error = null,
+                    readingMode = ReadingMode.PAGE,
+                    surahWithAyahs = null,
+                    // Keep existing ayahs to prevent flicker during page transition
+                    title = context.getString(R.string.page_single_format, pageNumber),
+                    subtitle = ""
+                )
+            }
         }
-        contentJob?.cancel()
-        contentJob = viewModelScope.launch {
+
+        // One collector per page: a page already being fetched (typically requested a frame
+        // earlier as a neighbour's prefetch) needs no second subscription, and re-launching
+        // would throw away the emissions of the first.
+        if (pageJobs[pageNumber]?.isActive == true) return
+
+        pageJobs[pageNumber] = viewModelScope.launch {
             // Resolved through the active edition: in the 16-line view page N holds a
             // different span of ayahs than Madani page N, and this cache feeds the page
             // info bar, "mark page read" for khatam and the ayah-action lookups (#325).
@@ -739,15 +799,45 @@ class QuranViewModel @Inject constructor(
                 script = _readerState.value.mushafScript
             )
                 .collect { ayahs ->
+                    // Re-read at emission time: a prefetch started while the user was on this
+                    // page may only land after they have swiped on, and vice versa.
+                    val isActivePage =
+                        (readerTarget as? ReaderTarget.Page)?.number == pageNumber
                     _readerState.update {
                         it.copy(
-                            ayahs = ayahs,
+                            ayahs = if (isActivePage) ayahs else it.ayahs,
                             pageCache = it.pageCache + (pageNumber to ayahs),
-                            subtitle = "${ayahs.size} Ayahs",
-                            isLoading = false
+                            subtitle = if (isActivePage) "${ayahs.size} Ayahs" else it.subtitle,
+                            isLoading = if (isActivePage) false else it.isLoading
                         )
                     }
                 }
+        }
+    }
+
+    /**
+     * Drops every in-flight page collector. Room flows never complete, so a page fetched
+     * under the previous script/translation would otherwise stay subscribed and re-populate
+     * the cache the settings change just cleared.
+     */
+    private fun cancelPageJobs() {
+        pageJobs.values.forEach { it.cancel() }
+        pageJobs.clear()
+    }
+
+    /**
+     * Drops the collectors of pages the reader has left behind, keeping [pageJobs] bounded by
+     * [PAGE_JOB_WINDOW] rather than by how far the user has read. Cached content survives —
+     * only the live subscription goes.
+     */
+    private fun pruneDistantPageJobs(activePage: Int) {
+        val stale = pageJobs.entries.iterator()
+        while (stale.hasNext()) {
+            val (page, job) = stale.next()
+            if (!job.isActive || abs(page - activePage) > PAGE_JOB_WINDOW) {
+                job.cancel()
+                stale.remove()
+            }
         }
     }
 
@@ -1016,4 +1106,16 @@ class QuranViewModel @Inject constructor(
     // (QuranAudioService) owns the playback lifecycle. Releasing on every
     // NavBackStackEntry pop killed audio whenever the user navigated away
     // from the screen that started it.
+
+    private companion object {
+        /**
+         * How far from the page the reader is on a page collector is kept alive.
+         *
+         * The pager composes at most three pages either side of the current one (a dual-page
+         * spread plus the spreads on each side), so anything further is a page the user has
+         * swiped past. Their flows are Room flows and never complete, so without this a
+         * long reading session would leave one live subscription per page visited.
+         */
+        const val PAGE_JOB_WINDOW = 4
+    }
 }
