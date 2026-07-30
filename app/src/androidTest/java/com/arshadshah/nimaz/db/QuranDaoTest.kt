@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.db
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.arshadshah.nimaz.support.NimazDbRule
+import com.arshadshah.nimaz.data.local.user.BookmarkKind
 import com.arshadshah.nimaz.support.TestData
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.first
@@ -36,54 +37,75 @@ class QuranDaoTest {
         assertThat(dao.getAyahsByPage(1).first()).hasSize(3)
     }
 
+    /**
+     * A verse can be bookmarked *and* favourited. That was a row in each of two tables and is
+     * now two flags on one row, so the interesting case is that clearing one leaves the other —
+     * with its note and colour — alone.
+     */
     @Test
-    fun bookmark_toggleReflectsInIsBookmarkedFlow() = runTest {
-        seedFatihah()
-        assertThat(dao.isAyahBookmarked(2).first()).isFalse()
+    fun bookmarkAndFavourite_areFlagsOnOneRow() = runTest {
+        val marks = dbRule.userDb.bookmarkDao()
 
-        dao.toggleBookmark(ayahId = 2, surahNumber = 1, ayahNumber = 2)
-        assertThat(dao.isAyahBookmarked(2).first()).isTrue()
-        assertThat(dao.getAllBookmarks().first()).hasSize(1)
+        marks.upsert(TestData.bookmark(BookmarkKind.AYAH, 2, contextId = 1, ordinal = 2, note = "note"))
+        assertThat(marks.observeIsBookmarked(BookmarkKind.AYAH, 2).first()).isTrue()
+        assertThat(marks.observeIsFavourite(BookmarkKind.AYAH, 2).first()).isFalse()
 
-        dao.toggleBookmark(ayahId = 2, surahNumber = 1, ayahNumber = 2)
-        assertThat(dao.isAyahBookmarked(2).first()).isFalse()
+        // Favourite the same verse: one row, both flags.
+        marks.upsert(marks.find(BookmarkKind.AYAH, 2)!!.copy(favourite = true))
+        assertThat(marks.all()).hasSize(1)
+        assertThat(marks.bookmarks(BookmarkKind.AYAH).first()).hasSize(1)
+        assertThat(marks.favourites(BookmarkKind.AYAH).first()).hasSize(1)
+
+        // Clearing the favourite keeps the bookmark and its note.
+        marks.clearFavourite(BookmarkKind.AYAH, 2, now = 2_000)
+        val remaining = marks.find(BookmarkKind.AYAH, 2)!!
+        assertThat(remaining.bookmarked).isTrue()
+        assertThat(remaining.favourite).isFalse()
+        assertThat(remaining.note).isEqualTo("note")
     }
 
     @Test
-    fun favorite_toggleAddsAndRemoves() = runTest {
-        seedFatihah()
+    fun marksCarryTheSurahAndTheAyahNumber() = runTest {
+        val marks = dbRule.userDb.bookmarkDao()
+        marks.upsert(TestData.bookmark(BookmarkKind.AYAH, 262, contextId = 2, ordinal = 255))
 
-        dao.toggleFavorite(ayahId = 3, surahNumber = 1, ayahNumber = 3)
-        assertThat(dao.isAyahFavorite(3).first()).isTrue()
-        assertThat(dao.getFavoriteAyahIds().first()).contains(3)
-
-        dao.toggleFavorite(ayahId = 3, surahNumber = 1, ayahNumber = 3)
-        assertThat(dao.isAyahFavorite(3).first()).isFalse()
+        val row = marks.find(BookmarkKind.AYAH, 262)!!
+        // What `surahNumber` and `ayahNumber` used to be: a mark is renderable without the corpus.
+        assertThat(row.contextId).isEqualTo(2)
+        assertThat(row.ordinal).isEqualTo(255)
+        assertThat(marks.bookmarkedIds(BookmarkKind.AYAH)).containsExactly(262)
     }
 
     @Test
     fun readingProgress_isPersistedAndUpdated() = runTest {
-        dao.insertReadingProgress(TestData.readingProgress(lastReadSurah = 2, lastReadAyah = 5))
-        assertThat(dao.getReadingProgress().first()!!.lastReadSurah).isEqualTo(2)
+        val progress = dbRule.userDb.readingProgressDao()
 
-        dao.updateReadingPosition(surah = 18, ayah = 10, page = 295, juz = 15)
+        progress.upsert(TestData.readingProgress(lastReadSurah = 2, lastReadAyah = 5))
+        assertThat(progress.get()!!.lastReadSurah).isEqualTo(2)
 
-        val updated = dao.getReadingProgress().first()!!
+        progress.upsert(progress.get()!!.copy(lastReadSurah = 18, lastReadAyah = 10))
+
+        val updated = progress.observe().first()!!
         assertThat(updated.lastReadSurah).isEqualTo(18)
         assertThat(updated.lastReadAyah).isEqualTo(10)
     }
 
+    /**
+     * The whole point of the split: wiping the user's data cannot touch the corpus, because the
+     * corpus is in another file.
+     */
     @Test
-    fun deleteAllUserData_keepsContentButClearsBookmarksAndFavorites() = runTest {
+    fun clearingUserDataLeavesTheCorpusAlone() = runTest {
         seedFatihah()
-        dao.toggleBookmark(ayahId = 1, surahNumber = 1, ayahNumber = 1)
-        dao.toggleFavorite(ayahId = 1, surahNumber = 1, ayahNumber = 1)
+        val marks = dbRule.userDb.bookmarkDao()
+        marks.upsert(TestData.bookmark(BookmarkKind.AYAH, 1, contextId = 1, ordinal = 1))
+        marks.upsert(TestData.favourite(BookmarkKind.AYAH, 2))
 
-        dao.deleteAllUserData()
+        marks.clear()
+        dbRule.userDb.readingProgressDao().clear()
 
-        assertThat(dao.getAllBookmarks().first()).isEmpty()
-        assertThat(dao.getAllFavorites().first()).isEmpty()
-        // Scripture content must survive a user-data wipe.
+        assertThat(marks.all()).isEmpty()
         assertThat(dao.getAllSurahs().first()).hasSize(1)
+        assertThat(dao.getAyahsBySurah(1).first()).hasSize(3)
     }
 }

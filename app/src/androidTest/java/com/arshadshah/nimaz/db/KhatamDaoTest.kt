@@ -16,7 +16,7 @@ class KhatamDaoTest {
 
     @get:Rule
     val dbRule = NimazDbRule()
-    private val dao get() = dbRule.db.khatamDao()
+    private val dao get() = dbRule.userDb.khatamDao()
 
     @Test
     fun insertKhatam_isReadBackById() = runTest {

@@ -39,19 +39,21 @@ class TasbihDaoTest {
         assertThat(dao.getCustomPresets().first().map { it.name }).contains("My custom")
     }
 
+    private val sessions get() = dbRule.userDb.tasbihSessionDao()
+
     @Test
     fun session_completes_andCountsInRange() = runTest {
         val presetId = dao.insertPreset(TestData.tasbihPreset())
-        val sessionId = dao.insertSession(
+        val sessionId = sessions.insertSession(
             TestData.tasbihSession(presetId = presetId, currentCount = 33, targetCount = 33)
         )
 
-        dao.completeSession(sessionId, completedAt = TestData.DAY, duration = 60_000L)
+        sessions.completeSession(sessionId, completedAt = TestData.DAY, duration = 60_000L)
 
         val completedInRange =
-            dao.getCompletedSessionsInRange(TestData.DAY - 1, TestData.DAY + 1)
+            sessions.getCompletedSessionsInRange(TestData.DAY - 1, TestData.DAY + 1)
         assertThat(completedInRange).isEqualTo(1)
-        val total = dao.getTotalCountInRange(TestData.DAY - 1, TestData.DAY + 1)
+        val total = sessions.getTotalCountInRange(TestData.DAY - 1, TestData.DAY + 1)
         assertThat(total).isEqualTo(33)
     }
 
@@ -69,10 +71,11 @@ class TasbihDaoTest {
     @Test
     fun deleteAllUserData_clearsSessions() = runTest {
         val presetId = dao.insertPreset(TestData.tasbihPreset())
-        dao.insertSession(TestData.tasbihSession(presetId = presetId))
+        sessions.insertSession(TestData.tasbihSession(presetId = presetId))
 
-        dao.deleteAllUserData()
+        sessions.deleteAllSessions()
+        dao.deleteCustomUserPresets()
 
-        assertThat(dao.getAllSessionsSync()).isEmpty()
+        assertThat(sessions.getAllSessionsSync()).isEmpty()
     }
 }

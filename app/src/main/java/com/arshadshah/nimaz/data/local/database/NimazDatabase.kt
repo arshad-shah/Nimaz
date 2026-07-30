@@ -9,56 +9,33 @@ import com.arshadshah.nimaz.data.local.database.NimazDatabase.Companion.PREPACKA
 import com.arshadshah.nimaz.data.local.database.dao.AsmaUlHusnaDao
 import com.arshadshah.nimaz.data.local.database.dao.AsmaUnNabiDao
 import com.arshadshah.nimaz.data.local.database.dao.DuaDao
-import com.arshadshah.nimaz.data.local.database.dao.FastingDao
 import com.arshadshah.nimaz.data.local.database.dao.HadithDao
 import com.arshadshah.nimaz.data.local.database.dao.HelpDao
 import com.arshadshah.nimaz.data.local.database.dao.IslamicEventDao
-import com.arshadshah.nimaz.data.local.database.dao.KhatamDao
-import com.arshadshah.nimaz.data.local.database.dao.LocationDao
-import com.arshadshah.nimaz.data.local.database.dao.PrayerDao
 import com.arshadshah.nimaz.data.local.database.dao.ProphetDao
 import com.arshadshah.nimaz.data.local.database.dao.QaidaDao
 import com.arshadshah.nimaz.data.local.database.dao.QuranDao
 import com.arshadshah.nimaz.data.local.database.dao.TafseerDao
 import com.arshadshah.nimaz.data.local.database.dao.TasbihDao
-import com.arshadshah.nimaz.data.local.database.dao.ZakatDao
-import com.arshadshah.nimaz.data.local.database.entity.AsmaUlHusnaBookmarkEntity
 import com.arshadshah.nimaz.data.local.database.entity.AsmaUlHusnaEntity
-import com.arshadshah.nimaz.data.local.database.entity.AsmaUnNabiBookmarkEntity
 import com.arshadshah.nimaz.data.local.database.entity.AsmaUnNabiEntity
 import com.arshadshah.nimaz.data.local.database.entity.AyahEntity
-import com.arshadshah.nimaz.data.local.database.entity.DuaBookmarkEntity
 import com.arshadshah.nimaz.data.local.database.entity.DuaCategoryEntity
 import com.arshadshah.nimaz.data.local.database.entity.DuaEntity
-import com.arshadshah.nimaz.data.local.database.entity.DuaProgressEntity
-import com.arshadshah.nimaz.data.local.database.entity.FastRecordEntity
 import com.arshadshah.nimaz.data.local.database.entity.HadithBookEntity
-import com.arshadshah.nimaz.data.local.database.entity.HadithBookmarkEntity
 import com.arshadshah.nimaz.data.local.database.entity.HadithEntity
 import com.arshadshah.nimaz.data.local.database.entity.HelpItemEntity
 import com.arshadshah.nimaz.data.local.database.entity.HelpStepEntity
 import com.arshadshah.nimaz.data.local.database.entity.HelpStringEntity
 import com.arshadshah.nimaz.data.local.database.entity.HelpTopicEntity
 import com.arshadshah.nimaz.data.local.database.entity.IslamicEventEntity
-import com.arshadshah.nimaz.data.local.database.entity.KhatamAyahEntity
-import com.arshadshah.nimaz.data.local.database.entity.KhatamDailyLogEntity
-import com.arshadshah.nimaz.data.local.database.entity.KhatamEntity
-import com.arshadshah.nimaz.data.local.database.entity.LocationEntity
-import com.arshadshah.nimaz.data.local.database.entity.MakeupFastEntity
 import com.arshadshah.nimaz.data.local.database.entity.MushafAyahTextEntity
 import com.arshadshah.nimaz.data.local.database.entity.MushafLayoutLineEntity
-import com.arshadshah.nimaz.data.local.database.entity.PrayerRecordEntity
-import com.arshadshah.nimaz.data.local.database.entity.ProphetBookmarkEntity
 import com.arshadshah.nimaz.data.local.database.entity.ProphetEntity
 import com.arshadshah.nimaz.data.local.database.entity.QaidaCellEntity
-import com.arshadshah.nimaz.data.local.database.entity.QaidaCellProgressEntity
 import com.arshadshah.nimaz.data.local.database.entity.QaidaLessonEntity
-import com.arshadshah.nimaz.data.local.database.entity.QaidaLessonProgressEntity
 import com.arshadshah.nimaz.data.local.database.entity.QaidaLetterEntity
 import com.arshadshah.nimaz.data.local.database.entity.QaidaLineEntity
-import com.arshadshah.nimaz.data.local.database.entity.QuranBookmarkEntity
-import com.arshadshah.nimaz.data.local.database.entity.QuranFavoriteEntity
-import com.arshadshah.nimaz.data.local.database.entity.ReadingProgressEntity
 import com.arshadshah.nimaz.data.local.database.entity.SurahEntity
 import com.arshadshah.nimaz.data.local.database.entity.SurahInfoEntity
 import com.arshadshah.nimaz.data.local.database.entity.HizbQuarterEntity
@@ -69,19 +46,15 @@ import com.arshadshah.nimaz.data.local.database.entity.RukuEntity
 import com.arshadshah.nimaz.data.local.database.entity.SajdaEntity
 import com.arshadshah.nimaz.data.local.database.entity.SurahStructureEntity
 import com.arshadshah.nimaz.data.local.database.entity.TafseerBlockEntity
-import com.arshadshah.nimaz.data.local.database.entity.TafseerHighlightEntity
-import com.arshadshah.nimaz.data.local.database.entity.TafseerNoteEntity
 import com.arshadshah.nimaz.data.local.database.entity.TasbihPresetEntity
-import com.arshadshah.nimaz.data.local.database.entity.TasbihSessionEntity
 import com.arshadshah.nimaz.data.local.database.entity.TranslationEntity
-import com.arshadshah.nimaz.data.local.database.entity.ZakatHistoryEntity
 
 /**
  * Single source of truth for the database schema version. Bump this (and add a
  * migration) for any schema change — it drives both the Room `@Database(version = …)`
  * annotation below and `NimazDatabase.SCHEMA_VERSION` (used to tag crash reports).
  */
-const val NIMAZ_DATABASE_VERSION = 22
+const val NIMAZ_DATABASE_VERSION = 23
 
 @Database(
     entities = [
@@ -89,9 +62,6 @@ const val NIMAZ_DATABASE_VERSION = 22
         SurahEntity::class,
         AyahEntity::class,
         TranslationEntity::class,
-        QuranBookmarkEntity::class,
-        QuranFavoriteEntity::class,
-        ReadingProgressEntity::class,
         SurahInfoEntity::class,
         MushafAyahTextEntity::class,
         JuzEntity::class,
@@ -105,38 +75,22 @@ const val NIMAZ_DATABASE_VERSION = 22
         // Hadith
         HadithBookEntity::class,
         HadithEntity::class,
-        HadithBookmarkEntity::class,
         // Dua
         DuaCategoryEntity::class,
         DuaEntity::class,
-        DuaBookmarkEntity::class,
-        DuaProgressEntity::class,
         // Prayer & Fasting
-        PrayerRecordEntity::class,
-        FastRecordEntity::class,
-        MakeupFastEntity::class,
         // Tasbih
         TasbihPresetEntity::class,
-        TasbihSessionEntity::class,
         // Zakat
-        ZakatHistoryEntity::class,
         // Tafseer
         TafseerBlockEntity::class,
-        TafseerHighlightEntity::class,
-        TafseerNoteEntity::class,
         // Khatam
-        KhatamEntity::class,
-        KhatamAyahEntity::class,
-        KhatamDailyLogEntity::class,
         // Asma ul Husna
         AsmaUlHusnaEntity::class,
-        AsmaUlHusnaBookmarkEntity::class,
         // Asma un Nabi
         AsmaUnNabiEntity::class,
-        AsmaUnNabiBookmarkEntity::class,
         // Prophets
         ProphetEntity::class,
-        ProphetBookmarkEntity::class,
         // Help (data-driven, seeded at runtime from help.json)
         HelpTopicEntity::class,
         HelpItemEntity::class,
@@ -148,10 +102,7 @@ const val NIMAZ_DATABASE_VERSION = 22
         QaidaLetterEntity::class,
         QaidaLineEntity::class,
         QaidaCellEntity::class,
-        QaidaLessonProgressEntity::class,
-        QaidaCellProgressEntity::class,
         // Other
-        LocationEntity::class,
         IslamicEventEntity::class
     ],
     version = NIMAZ_DATABASE_VERSION,
@@ -161,14 +112,9 @@ abstract class NimazDatabase : RoomDatabase() {
     abstract fun quranDao(): QuranDao
     abstract fun hadithDao(): HadithDao
     abstract fun duaDao(): DuaDao
-    abstract fun prayerDao(): PrayerDao
-    abstract fun fastingDao(): FastingDao
     abstract fun tasbihDao(): TasbihDao
-    abstract fun locationDao(): LocationDao
     abstract fun islamicEventDao(): IslamicEventDao
-    abstract fun zakatDao(): ZakatDao
     abstract fun tafseerDao(): TafseerDao
-    abstract fun khatamDao(): KhatamDao
     abstract fun asmaUlHusnaDao(): AsmaUlHusnaDao
     abstract fun asmaUnNabiDao(): AsmaUnNabiDao
     abstract fun prophetDao(): ProphetDao
@@ -397,6 +343,19 @@ abstract class NimazDatabase : RoomDatabase() {
         // QuranStructureSeeder from the bundled seed on an upgrade. `text_arabic` was
         // byte-identical to `text_uthmani` in all 6,236 rows, so nothing is lost by dropping it;
         // `text_indopak` was NULL in all of them.
+        // schemaVersion 23 — the content database stops declaring the twenty-two tables the
+        // user writes to. They are in the user's own database now (NimazUserDatabase), copied
+        // across on its first open.
+        //
+        // Deliberately empty. The tables are **not dropped**: Room ignores tables it does not
+        // declare, so leaving them costs a few kilobytes on devices that already have them and
+        // keeps the original rows on disk while the copy is young. A bug in that copy has to be
+        // survivable, and it is only survivable while the source still exists. A later version
+        // can drop them once there is nothing left to recover.
+        val MIGRATION_22_23 = object : Migration(22, 23) {
+            override fun migrate(db: SupportSQLiteDatabase) = Unit
+        }
+
         val MIGRATION_21_22 = object : Migration(21, 22) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL(
@@ -1089,6 +1048,7 @@ abstract class NimazDatabase : RoomDatabase() {
             MIGRATION_19_20,
             MIGRATION_20_21,
             MIGRATION_21_22,
+            MIGRATION_22_23,
         )
     }
 }

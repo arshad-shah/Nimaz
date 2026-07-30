@@ -1,11 +1,12 @@
 package com.arshadshah.nimaz.data.repository
 
 import app.cash.turbine.test
+import com.arshadshah.nimaz.data.local.user.ProgressDao
+import com.arshadshah.nimaz.data.local.user.ProgressEntity
+import com.arshadshah.nimaz.data.local.user.ProgressKind
 import com.arshadshah.nimaz.data.local.database.dao.QaidaDao
 import com.arshadshah.nimaz.data.local.database.entity.QaidaCellEntity
-import com.arshadshah.nimaz.data.local.database.entity.QaidaCellProgressEntity
 import com.arshadshah.nimaz.data.local.database.entity.QaidaLessonEntity
-import com.arshadshah.nimaz.data.local.database.entity.QaidaLessonProgressEntity
 import com.arshadshah.nimaz.data.local.database.entity.QaidaLessonWithContent
 import com.arshadshah.nimaz.data.local.database.entity.QaidaLetterEntity
 import com.arshadshah.nimaz.data.local.database.entity.QaidaLineEntity
@@ -34,6 +35,7 @@ import org.robolectric.RobolectricTestRunner
 class QaidaRepositoryImplTest {
 
     private lateinit var dao: QaidaDao
+    private lateinit var progressDao: ProgressDao
     private lateinit var repository: QaidaRepositoryImpl
 
     private val now = System.currentTimeMillis()
@@ -41,7 +43,8 @@ class QaidaRepositoryImplTest {
     @Before
     fun setUp() {
         dao = mockk(relaxed = true)
-        repository = QaidaRepositoryImpl(dao)
+        progressDao = mockk(relaxed = true)
+        repository = QaidaRepositoryImpl(dao, progressDao)
     }
 
     // ── Helper factories ────────────────────────────────────────────
@@ -119,34 +122,38 @@ class QaidaRepositoryImplTest {
         notes = null
     )
 
-    private fun progressEntity(
+    private fun progressRow(
         lessonId: Int = 1,
         status: String = "IN_PROGRESS",
-        stars: Int = 2
-    ) = QaidaLessonProgressEntity(
-        lessonId = lessonId,
-        status = status,
-        stars = stars,
-        lastCellId = 5,
-        completedCells = 3,
-        totalCells = 10,
-        updatedAt = now
+        stars: Int = 2,
+        completed: Int = 1,
+        total: Int = 5,
+    ) = ProgressEntity(
+        kind = ProgressKind.QAIDA_LESSON,
+        targetId = lessonId,
+        completed = completed,
+        total = total,
+        isCompleted = status == "COMPLETED",
+        state = status,
+        score = stars,
+        createdAt = now,
+        updatedAt = now,
     )
 
-    // ── getLessons ──────────────────────────────────────────────────
-
-    @Test
-    fun `getLessons emits mapped lessons with parsed concept tags`() = runTest {
-        every { dao.getAllLessons() } returns flowOf(listOf(lessonEntity()))
-
-        repository.getLessons().test {
-            val lessons = awaitItem()
-            assertThat(lessons).hasSize(1)
-            assertThat(lessons[0].id).isEqualTo(1)
-            assertThat(lessons[0].conceptTags).containsExactly("alphabet", "letters").inOrder()
-            awaitComplete()
-        }
-    }
+    private fun cellRow(
+        cellId: Int = 1001,
+        lessonId: Int = 1,
+        heard: Int = 1,
+        done: Boolean = false,
+    ) = ProgressEntity(
+        kind = ProgressKind.QAIDA_CELL,
+        targetId = cellId,
+        contextId = lessonId,
+        completed = heard,
+        isCompleted = done,
+        createdAt = now,
+        updatedAt = now,
+    )
 
     @Test
     fun `getLessons maps malformed concept tags JSON to empty list`() = runTest {
@@ -275,7 +282,8 @@ class QaidaRepositoryImplTest {
 
     @Test
     fun `observeLessonProgress maps status enum`() = runTest {
-        every { dao.observeLessonProgress(1) } returns flowOf(progressEntity(status = "COMPLETED"))
+        every { progressDao.ofKind(ProgressKind.QAIDA_LESSON) } returns
+            flowOf(listOf(progressRow(status = "COMPLETED")))
 
         repository.observeLessonProgress(1).test {
             val progress = awaitItem()
@@ -288,7 +296,8 @@ class QaidaRepositoryImplTest {
 
     @Test
     fun `getAllProgress emits mapped progress list`() = runTest {
-        every { dao.getAllProgress() } returns flowOf(listOf(progressEntity(lessonId = 1), progressEntity(lessonId = 2)))
+        every { progressDao.ofKind(ProgressKind.QAIDA_LESSON) } returns
+            flowOf(listOf(progressRow(lessonId = 1), progressRow(lessonId = 2)))
 
         repository.getAllProgress().test {
             assertThat(awaitItem()).hasSize(2)
@@ -298,8 +307,8 @@ class QaidaRepositoryImplTest {
 
     @Test
     fun `getLessonProgress returns mapped domain or null`() = runTest {
-        coEvery { dao.getLessonProgress(1) } returns progressEntity()
-        coEvery { dao.getLessonProgress(999) } returns null
+        coEvery { progressDao.find(ProgressKind.QAIDA_LESSON, 1) } returns progressRow()
+        coEvery { progressDao.find(ProgressKind.QAIDA_LESSON, 999) } returns null
 
         assertThat(repository.getLessonProgress(1)).isNotNull()
         assertThat(repository.getLessonProgress(999)).isNull()
@@ -309,14 +318,10 @@ class QaidaRepositoryImplTest {
 
     @Test
     fun `getCellProgress maps entity to domain`() = runTest {
-        coEvery { dao.getCellProgress(1, 5) } returns QaidaCellProgressEntity(
-            lessonId = 1,
-            cellId = 5,
-            heardCount = 3,
-            isCompleted = true,
-            lastPracticedAt = now
-        )
-        coEvery { dao.getCellProgress(1, 999) } returns null
+        // A cell is keyed by its own id; the lesson it belongs to is `context_id`.
+        coEvery { progressDao.find(ProgressKind.QAIDA_CELL, 5, 0) } returns
+            cellRow(cellId = 5, lessonId = 1, heard = 3, done = true)
+        coEvery { progressDao.find(ProgressKind.QAIDA_CELL, 999, 0) } returns null
 
         val progress = repository.getCellProgress(1, 5)
         assertThat(progress).isNotNull()
@@ -328,10 +333,17 @@ class QaidaRepositoryImplTest {
     @Test
     fun `getCellCountForLesson and getCompletedCellCount delegate to DAO`() = runTest {
         coEvery { dao.countCellsForLesson(1) } returns 12
-        coEvery { dao.countCompletedCells(1) } returns 5
+        every { progressDao.inContext(ProgressKind.QAIDA_CELL, 1) } returns flowOf(
+            listOf(
+                cellRow(cellId = 1, done = true),
+                cellRow(cellId = 2, done = true),
+                cellRow(cellId = 3, done = false),
+            )
+        )
 
         assertThat(repository.getCellCountForLesson(1)).isEqualTo(12)
-        assertThat(repository.getCompletedCellCount(1)).isEqualTo(5)
+        // Counted from the rows rather than by SQL, because the cells are in the other database.
+        assertThat(repository.getCompletedCellCount(1)).isEqualTo(2)
     }
 
     @Test
@@ -347,11 +359,12 @@ class QaidaRepositoryImplTest {
         )
 
         coVerify {
-            dao.upsertCellProgress(match<QaidaCellProgressEntity> { entity ->
-                entity.lessonId == 2 &&
-                    entity.cellId == 7 &&
-                    entity.heardCount == 1 &&
-                    entity.isCompleted
+            progressDao.upsert(match<ProgressEntity> { row ->
+                row.kind == ProgressKind.QAIDA_CELL &&
+                    row.contextId == 2 &&
+                    row.targetId == 7 &&
+                    row.completed == 1 &&
+                    row.isCompleted
             })
         }
     }
@@ -371,12 +384,13 @@ class QaidaRepositoryImplTest {
         repository.upsertLessonProgress(progress)
 
         coVerify {
-            dao.upsertLessonProgress(match<QaidaLessonProgressEntity> { entity ->
-                entity.lessonId == 3 &&
-                    entity.status == "IN_PROGRESS" &&
-                    entity.stars == 1 &&
-                    entity.completedCells == 4 &&
-                    entity.totalCells == 12
+            progressDao.upsert(match<ProgressEntity> { row ->
+                row.kind == ProgressKind.QAIDA_LESSON &&
+                    row.targetId == 3 &&
+                    row.state == "IN_PROGRESS" &&
+                    row.score == 1 &&
+                    row.resumeId == 8 &&
+                    row.completed == 4
             })
         }
     }

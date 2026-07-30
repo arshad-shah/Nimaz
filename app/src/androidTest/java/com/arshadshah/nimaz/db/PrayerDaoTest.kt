@@ -19,7 +19,7 @@ class PrayerDaoTest {
 
     @get:Rule
     val dbRule = NimazDbRule()
-    private val dao get() = dbRule.db.prayerDao()
+    private val dao get() = dbRule.userDb.prayerDao()
 
     @Test
     fun insertedDailyPrayers_areReadBackForThatDate() = runTest {

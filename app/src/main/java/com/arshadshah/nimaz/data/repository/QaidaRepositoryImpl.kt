@@ -2,11 +2,13 @@ package com.arshadshah.nimaz.data.repository
 
 import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.core.util.mapItems
+import com.arshadshah.nimaz.data.local.user.ProgressDao
+import com.arshadshah.nimaz.data.local.user.ProgressEntity
+import com.arshadshah.nimaz.data.local.user.ProgressKind
+import kotlinx.coroutines.flow.first
 import com.arshadshah.nimaz.data.local.database.dao.QaidaDao
 import com.arshadshah.nimaz.data.local.database.entity.QaidaCellEntity
-import com.arshadshah.nimaz.data.local.database.entity.QaidaCellProgressEntity
 import com.arshadshah.nimaz.data.local.database.entity.QaidaLessonEntity
-import com.arshadshah.nimaz.data.local.database.entity.QaidaLessonProgressEntity
 import com.arshadshah.nimaz.data.local.database.entity.QaidaLessonWithContent
 import com.arshadshah.nimaz.data.local.database.entity.QaidaLetterEntity
 import com.arshadshah.nimaz.data.local.database.entity.QaidaLineEntity
@@ -31,7 +33,8 @@ import javax.inject.Singleton
 
 @Singleton
 class QaidaRepositoryImpl @Inject constructor(
-    private val qaidaDao: QaidaDao
+    private val qaidaDao: QaidaDao,
+    private val progressDao: ProgressDao
 ) : QaidaRepository {
 
     // ── Lessons ───────────────────────────────────────────────────────────
@@ -72,41 +75,45 @@ class QaidaRepositoryImpl @Inject constructor(
 
     // ── Lesson progress ─────────────────────────────────────────────────────
     override fun getAllProgress(): Flow<List<QaidaLessonProgress>> {
-        return qaidaDao.getAllProgress().mapItems { it.toDomain() }
+        return progressDao.ofKind(ProgressKind.QAIDA_LESSON).mapItems { it.toLessonProgress() }
     }
 
     override fun observeLessonProgress(lessonId: Int): Flow<QaidaLessonProgress?> {
-        return qaidaDao.observeLessonProgress(lessonId).map { it?.toDomain() }
+        return progressDao.ofKind(ProgressKind.QAIDA_LESSON)
+            .map { rows -> rows.firstOrNull { it.targetId == lessonId }?.toLessonProgress() }
     }
 
     override suspend fun getLessonProgress(lessonId: Int): QaidaLessonProgress? {
-        return qaidaDao.getLessonProgress(lessonId)?.toDomain()
+        return progressDao.find(ProgressKind.QAIDA_LESSON, lessonId)?.toLessonProgress()
     }
 
     override suspend fun upsertLessonProgress(progress: QaidaLessonProgress) {
-        qaidaDao.upsertLessonProgress(progress.toEntity())
+        progressDao.upsert(progress.toProgressEntity())
     }
 
     // ── Cell progress ───────────────────────────────────────────────────────
     override suspend fun getCellProgress(lessonId: Int, cellId: Int): QaidaCellProgress? {
-        return qaidaDao.getCellProgress(lessonId, cellId)?.toDomain()
+        return progressDao.find(ProgressKind.QAIDA_CELL, cellId)?.toCellProgress()
     }
 
     override fun observeCellProgressForLesson(lessonId: Int): Flow<List<QaidaCellProgress>> {
-        return qaidaDao.getCellProgressForLesson(lessonId)
-            .mapItems { it.toDomain() }
+        return progressDao.inContext(ProgressKind.QAIDA_CELL, lessonId)
+            .mapItems { it.toCellProgress() }
     }
 
     override suspend fun getCompletedCellCount(lessonId: Int): Int {
-        return qaidaDao.countCompletedCells(lessonId)
+        return progressDao.inContext(ProgressKind.QAIDA_CELL, lessonId).first()
+            .count { it.isCompleted }
     }
 
     override suspend fun upsertCellProgress(progress: QaidaCellProgress) {
-        qaidaDao.upsertCellProgress(progress.toEntity())
+        progressDao.upsert(progress.toProgressEntity())
     }
 
     override suspend fun resetProgress() {
-        qaidaDao.deleteAllUserData()
+        // Both kinds, and only the learner's rows — the lessons themselves are content.
+        progressDao.deleteKind(ProgressKind.QAIDA_LESSON)
+        progressDao.deleteKind(ProgressKind.QAIDA_CELL)
     }
 
     // ── Mapping ───────────────────────────────────────────────────────────
@@ -208,47 +215,56 @@ class QaidaRepositoryImpl @Inject constructor(
         )
     }
 
-    private fun QaidaLessonProgressEntity.toDomain(): QaidaLessonProgress {
+    // A lesson's progress and a cell's are two kinds of row in one table now. `state` carries
+    // the lesson's status, `score` its stars, `resume_id` its last cell; a cell's `context_id`
+    // is the lesson it belongs to. The domain types are unchanged.
+
+    private fun ProgressEntity.toLessonProgress(): QaidaLessonProgress {
         return QaidaLessonProgress(
-            lessonId = lessonId,
-            status = LessonStatus.fromString(status),
-            stars = stars,
-            lastCellId = lastCellId,
-            completedCells = completedCells,
-            totalCells = totalCells,
+            lessonId = targetId,
+            status = LessonStatus.fromString(state ?: ""),
+            stars = score ?: 0,
+            lastCellId = resumeId,
+            completedCells = completed,
+            totalCells = total ?: 0,
             updatedAt = updatedAt
         )
     }
 
-    private fun QaidaLessonProgress.toEntity(): QaidaLessonProgressEntity {
-        return QaidaLessonProgressEntity(
-            lessonId = lessonId,
-            status = status.name,
-            stars = stars,
-            lastCellId = lastCellId,
-            completedCells = completedCells,
-            totalCells = totalCells,
+    private fun QaidaLessonProgress.toProgressEntity(): ProgressEntity {
+        return ProgressEntity(
+            kind = ProgressKind.QAIDA_LESSON,
+            targetId = lessonId,
+            completed = completedCells,
+            total = totalCells,
+            isCompleted = status == LessonStatus.COMPLETED,
+            state = status.name,
+            score = stars,
+            resumeId = lastCellId,
+            createdAt = updatedAt,
             updatedAt = updatedAt
         )
     }
 
-    private fun QaidaCellProgressEntity.toDomain(): QaidaCellProgress {
+    private fun ProgressEntity.toCellProgress(): QaidaCellProgress {
         return QaidaCellProgress(
-            lessonId = lessonId,
-            cellId = cellId,
-            heardCount = heardCount,
+            lessonId = contextId ?: 0,
+            cellId = targetId,
+            heardCount = completed,
             isCompleted = isCompleted,
-            lastPracticedAt = lastPracticedAt
+            lastPracticedAt = updatedAt
         )
     }
 
-    private fun QaidaCellProgress.toEntity(): QaidaCellProgressEntity {
-        return QaidaCellProgressEntity(
-            lessonId = lessonId,
-            cellId = cellId,
-            heardCount = heardCount,
+    private fun QaidaCellProgress.toProgressEntity(): ProgressEntity {
+        return ProgressEntity(
+            kind = ProgressKind.QAIDA_CELL,
+            targetId = cellId,
+            contextId = lessonId,
+            completed = heardCount,
             isCompleted = isCompleted,
-            lastPracticedAt = lastPracticedAt
+            createdAt = lastPracticedAt,
+            updatedAt = lastPracticedAt
         )
     }
 

@@ -16,7 +16,7 @@ class ZakatDaoTest {
 
     @get:Rule
     val dbRule = NimazDbRule()
-    private val dao get() = dbRule.db.zakatDao()
+    private val dao get() = dbRule.userDb.zakatDao()
 
     @Test
     fun insertCalculation_appearsInHistory() = runTest {

@@ -2,6 +2,10 @@ package com.arshadshah.nimaz.data.repository
 
 import com.arshadshah.nimaz.core.util.mapItems
 import com.arshadshah.nimaz.data.local.database.dao.PageAyahRangeRow
+import com.arshadshah.nimaz.data.local.user.BookmarkDao
+import com.arshadshah.nimaz.data.local.user.BookmarkEntity
+import com.arshadshah.nimaz.data.local.user.BookmarkKind
+import com.arshadshah.nimaz.data.local.user.ReadingProgressDao
 import com.arshadshah.nimaz.data.local.database.dao.QuranDao
 import com.arshadshah.nimaz.data.local.database.dao.AyahWithText
 import com.arshadshah.nimaz.data.local.database.entity.AyahEntity
@@ -44,6 +48,8 @@ import javax.inject.Singleton
 @Singleton
 class QuranRepositoryImpl @Inject constructor(
     private val quranDao: QuranDao,
+    private val bookmarkDao: BookmarkDao,
+    private val readingProgressDao: ReadingProgressDao,
     private val mushafSeeder: MushafLayoutSeeder,
     private val translationSeeder: QuranTranslationSeeder
 ) : QuranRepository {
@@ -115,7 +121,7 @@ class QuranRepositoryImpl @Inject constructor(
                 emptyMap()
             }
             // Fetch bookmark IDs to set isBookmarked correctly
-            val bookmarkedIds = quranDao.getAllBookmarkIds().toSet()
+            val bookmarkedIds = bookmarkDao.bookmarkedIds(BookmarkKind.AYAH).toSet()
             entities.map { entity ->
                 entity.toDomain(translationMap[entity.ayah.id]).copy(
                     isBookmarked = entity.ayah.id in bookmarkedIds
@@ -157,7 +163,7 @@ class QuranRepositoryImpl @Inject constructor(
                 emptyMap()
             }
             // Fetch bookmark IDs to set isBookmarked correctly
-            val bookmarkedIds = quranDao.getAllBookmarkIds().toSet()
+            val bookmarkedIds = bookmarkDao.bookmarkedIds(BookmarkKind.AYAH).toSet()
             entities.map { entity ->
                 entity.toDomain(translationMap[entity.ayah.id]).copy(
                     isBookmarked = entity.ayah.id in bookmarkedIds
@@ -231,7 +237,7 @@ class QuranRepositoryImpl @Inject constructor(
                 }
 
                 // Fetch bookmark IDs to set isBookmarked correctly
-                val bookmarkedIds = quranDao.getAllBookmarkIds().toSet()
+                val bookmarkedIds = bookmarkDao.bookmarkedIds(BookmarkKind.AYAH).toSet()
 
                 // Map ayahs with translations and bookmark status
                 val ayahs = ayahEntities.map { ayah ->
@@ -309,20 +315,37 @@ class QuranRepositoryImpl @Inject constructor(
         }
     }
 
+    // Bookmarks, favourites and the reading position are the user's, and come from the user's
+    // database. A verse can be bookmarked *and* favourited: that was two tables and is now two
+    // flags on one row, which is why toggling one must not disturb the other.
+
     override fun getAllBookmarks(): Flow<List<QuranBookmark>> {
-        return quranDao.getAllBookmarks().mapItems { it.toDomain() }
+        return bookmarkDao.bookmarks(BookmarkKind.AYAH).mapItems { it.toQuranBookmark() }
     }
 
     override suspend fun getBookmarkByAyahId(ayahId: Int): QuranBookmark? {
-        return quranDao.getBookmarkByAyahId(ayahId)?.toDomain()
+        return bookmarkDao.find(BookmarkKind.AYAH, ayahId)
+            ?.takeIf { it.bookmarked }
+            ?.toQuranBookmark()
     }
 
     override fun isAyahBookmarked(ayahId: Int): Flow<Boolean> {
-        return quranDao.isAyahBookmarked(ayahId)
+        return bookmarkDao.observeIsBookmarked(BookmarkKind.AYAH, ayahId)
     }
 
     override suspend fun toggleBookmark(ayahId: Int, surahNumber: Int, ayahNumber: Int) {
-        quranDao.toggleBookmark(ayahId, surahNumber, ayahNumber)
+        val existing = bookmarkDao.find(BookmarkKind.AYAH, ayahId)
+        val now = System.currentTimeMillis()
+        when {
+            existing == null -> bookmarkDao.upsert(
+                mark(ayahId, surahNumber, ayahNumber, bookmarked = true, favourite = false, now = now)
+            )
+            // Clearing the flag rather than the row, so a favourite on the same verse survives.
+            existing.bookmarked && existing.favourite ->
+                bookmarkDao.clearBookmark(BookmarkKind.AYAH, ayahId, now)
+            existing.bookmarked -> bookmarkDao.delete(BookmarkKind.AYAH, ayahId)
+            else -> bookmarkDao.upsert(existing.copy(bookmarked = true, updatedAt = now))
+        }
     }
 
     override suspend fun addBookmark(
@@ -332,63 +355,103 @@ class QuranRepositoryImpl @Inject constructor(
         note: String?,
         color: String?
     ) {
-        quranDao.insertBookmark(
-            QuranBookmarkEntity(
-                ayahId = ayahId,
-                surahNumber = surahNumber,
-                ayahNumber = ayahNumber,
+        val existing = bookmarkDao.find(BookmarkKind.AYAH, ayahId)
+        val now = System.currentTimeMillis()
+        bookmarkDao.upsert(
+            mark(
+                ayahId, surahNumber, ayahNumber,
+                bookmarked = true,
+                favourite = existing?.favourite ?: false,
                 note = note,
-                color = color
+                colour = color,
+                createdAt = existing?.createdAt ?: now,
+                now = now,
             )
         )
     }
 
     override suspend fun updateBookmark(bookmark: QuranBookmark) {
-        quranDao.updateBookmark(bookmark.toEntity())
+        val existing = bookmarkDao.find(BookmarkKind.AYAH, bookmark.ayahId)
+        bookmarkDao.upsert(
+            mark(
+                bookmark.ayahId, bookmark.surahNumber, bookmark.ayahNumber,
+                bookmarked = true,
+                favourite = existing?.favourite ?: false,
+                note = bookmark.note,
+                colour = bookmark.color,
+                createdAt = bookmark.createdAt,
+                now = System.currentTimeMillis(),
+            )
+        )
     }
 
     override suspend fun deleteBookmark(ayahId: Int) {
-        quranDao.deleteBookmarkByAyahId(ayahId)
+        val existing = bookmarkDao.find(BookmarkKind.AYAH, ayahId) ?: return
+        if (existing.favourite) {
+            bookmarkDao.clearBookmark(BookmarkKind.AYAH, ayahId, System.currentTimeMillis())
+        } else {
+            bookmarkDao.delete(BookmarkKind.AYAH, ayahId)
+        }
     }
 
     override fun getAllFavorites(): Flow<List<QuranFavorite>> {
-        return quranDao.getAllFavorites().mapItems { it.toDomain() }
+        return bookmarkDao.favourites(BookmarkKind.AYAH).mapItems { it.toQuranFavorite() }
     }
 
     override fun getFavoriteAyahIds(): Flow<List<Int>> {
-        return quranDao.getFavoriteAyahIds()
+        return bookmarkDao.favourites(BookmarkKind.AYAH).map { rows -> rows.map { it.targetId } }
     }
 
     override suspend fun toggleFavorite(ayahId: Int, surahNumber: Int, ayahNumber: Int) {
-        quranDao.toggleFavorite(ayahId, surahNumber, ayahNumber)
+        val existing = bookmarkDao.find(BookmarkKind.AYAH, ayahId)
+        val now = System.currentTimeMillis()
+        when {
+            existing == null -> bookmarkDao.upsert(
+                mark(ayahId, surahNumber, ayahNumber, bookmarked = false, favourite = true, now = now)
+            )
+            existing.favourite && existing.bookmarked ->
+                bookmarkDao.clearFavourite(BookmarkKind.AYAH, ayahId, now)
+            existing.favourite -> bookmarkDao.delete(BookmarkKind.AYAH, ayahId)
+            else -> bookmarkDao.upsert(existing.copy(favourite = true, updatedAt = now))
+        }
     }
 
     override fun getReadingProgress(): Flow<ReadingProgress?> {
-        return quranDao.getReadingProgress().map { entity ->
-            entity?.toDomain()
-        }
+        return readingProgressDao.observe().map { entity -> entity?.toDomain() }
     }
 
     override suspend fun updateReadingPosition(surah: Int, ayah: Int, page: Int, juz: Int) {
-        val progress = quranDao.getReadingProgress().firstOrNull()
-        if (progress == null) {
-            quranDao.insertReadingProgress(
-                ReadingProgressEntity(
-                    lastReadSurah = surah,
-                    lastReadAyah = ayah,
-                    lastReadPage = page,
-                    lastReadJuz = juz,
-                    totalAyahsRead = 0,
-                    currentKhatmaCount = 0
-                )
+        val existing = readingProgressDao.get()
+        readingProgressDao.upsert(
+            ReadingProgressEntity(
+                id = 1,
+                lastReadSurah = surah,
+                lastReadAyah = ayah,
+                lastReadPage = page,
+                lastReadJuz = juz,
+                totalAyahsRead = existing?.totalAyahsRead ?: 0,
+                currentKhatmaCount = existing?.currentKhatmaCount ?: 0,
+                updatedAt = System.currentTimeMillis(),
             )
-        } else {
-            quranDao.updateReadingPosition(surah, ayah, page, juz)
-        }
+        )
     }
 
     override suspend fun incrementAyahsRead(count: Int) {
-        quranDao.incrementAyahsRead(count)
+        val existing = readingProgressDao.get() ?: ReadingProgressEntity(
+            id = 1,
+            lastReadSurah = 1,
+            lastReadAyah = 1,
+            lastReadPage = 1,
+            lastReadJuz = 1,
+            totalAyahsRead = 0,
+            currentKhatmaCount = 0,
+        )
+        readingProgressDao.upsert(
+            existing.copy(
+                totalAyahsRead = existing.totalAyahsRead + count,
+                updatedAt = System.currentTimeMillis(),
+            )
+        )
     }
 
     override suspend fun getSurahInfo(surahNumber: Int): SurahInfo? {
@@ -508,4 +571,46 @@ class QuranRepositoryImpl @Inject constructor(
             ayahCount = ayahCount
         )
     }
+
+    /** One consolidated row, built for a verse. */
+    private fun mark(
+        ayahId: Int,
+        surahNumber: Int,
+        ayahNumber: Int,
+        bookmarked: Boolean,
+        favourite: Boolean,
+        note: String? = null,
+        colour: String? = null,
+        createdAt: Long = System.currentTimeMillis(),
+        now: Long,
+    ) = BookmarkEntity(
+        kind = BookmarkKind.AYAH,
+        targetId = ayahId,
+        bookmarked = bookmarked,
+        favourite = favourite,
+        note = note,
+        colour = colour,
+        contextId = surahNumber,
+        ordinal = ayahNumber,
+        createdAt = createdAt,
+        updatedAt = now,
+    )
+
+    private fun BookmarkEntity.toQuranBookmark() = QuranBookmark(
+        id = 0,
+        ayahId = targetId,
+        surahNumber = contextId ?: 0,
+        ayahNumber = ordinal ?: 0,
+        note = note,
+        color = colour,
+        createdAt = createdAt,
+        updatedAt = updatedAt,
+    )
+
+    private fun BookmarkEntity.toQuranFavorite() = QuranFavorite(
+        ayahId = targetId,
+        surahNumber = contextId ?: 0,
+        ayahNumber = ordinal ?: 0,
+        createdAt = createdAt,
+    )
 }

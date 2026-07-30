@@ -2,6 +2,8 @@ package com.arshadshah.nimaz.db
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.arshadshah.nimaz.support.NimazDbRule
+import com.arshadshah.nimaz.data.local.user.BookmarkKind
+import com.arshadshah.nimaz.data.local.user.ProgressKind
 import com.arshadshah.nimaz.support.TestData
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.first
@@ -47,38 +49,71 @@ class DuaDaoTest {
     }
 
     @Test
-    fun toggleFavorite_reflectsInFavoritesAndFlag() = runTest {
+    fun favouriteDua_isARowInTheUsersDatabase() = runTest {
         seed()
+        val marks = dbRule.userDb.bookmarkDao()
 
-        dao.toggleFavorite(duaId = 1, categoryId = 1)
-        assertThat(dao.isDuaFavorite(1).first()).isTrue()
-        assertThat(dao.getFavoriteDuas().first()).hasSize(1)
+        marks.upsert(TestData.favourite(BookmarkKind.DUA, 1, bookmarked = true))
+        assertThat(marks.observeIsFavourite(BookmarkKind.DUA, 1).first()).isTrue()
+        assertThat(marks.favourites(BookmarkKind.DUA).first()).hasSize(1)
+        // The category the dua belongs to travels with the mark.
+        marks.upsert(TestData.bookmark(BookmarkKind.DUA, 2, contextId = 1))
+        assertThat(marks.inContext(BookmarkKind.DUA, 1).first().map { it.targetId })
+            .containsExactly(2)
 
-        dao.toggleFavorite(duaId = 1, categoryId = 1)
-        assertThat(dao.isDuaFavorite(1).first()).isFalse()
+        marks.delete(BookmarkKind.DUA, 1)
+        assertThat(marks.observeIsFavourite(BookmarkKind.DUA, 1).first()).isFalse()
     }
 
     @Test
     fun progress_incrementsTowardTarget() = runTest {
         seed()
+        val progress = dbRule.userDb.progressDao()
 
-        dao.incrementDuaProgress(duaId = 1, date = TestData.DAY, targetCount = 3)
-        dao.incrementDuaProgress(duaId = 1, date = TestData.DAY, targetCount = 3)
+        progress.increment(ProgressKind.DUA, targetId = 1, date = TestData.DAY, target = 3)
+        progress.increment(ProgressKind.DUA, targetId = 1, date = TestData.DAY, target = 3)
 
-        val progress = dao.getProgressForDuaOnDate(1, TestData.DAY)
-        assertThat(progress).isNotNull()
-        assertThat(progress!!.completedCount).isEqualTo(2)
+        val row = progress.find(ProgressKind.DUA, 1, TestData.DAY)
+        assertThat(row).isNotNull()
+        assertThat(row!!.completed).isEqualTo(2)
+        assertThat(row.total).isEqualTo(3)
+        assertThat(row.isCompleted).isFalse()
+
+        // The third reaches the target, and a fourth is still counted.
+        progress.increment(ProgressKind.DUA, targetId = 1, date = TestData.DAY, target = 3)
+        assertThat(progress.find(ProgressKind.DUA, 1, TestData.DAY)!!.isCompleted).isTrue()
+
+        progress.decrement(ProgressKind.DUA, targetId = 1, date = TestData.DAY)
+        assertThat(progress.find(ProgressKind.DUA, 1, TestData.DAY)!!.completed).isEqualTo(2)
+    }
+
+    /** Per-day, so yesterday's count is its own row and is not overwritten. */
+    @Test
+    fun progress_isKeptPerDay() = runTest {
+        seed()
+        val progress = dbRule.userDb.progressDao()
+
+        progress.increment(ProgressKind.DUA, targetId = 1, date = TestData.DAY, target = 3)
+        progress.increment(ProgressKind.DUA, targetId = 1, date = TestData.DAY + 86_400_000, target = 3)
+
+        assertThat(progress.ofKind(ProgressKind.DUA).first()).hasSize(2)
+        assertThat(progress.onDate(ProgressKind.DUA, TestData.DAY).first()).hasSize(1)
     }
 
     @Test
-    fun deleteAllUserData_clearsBookmarksAndProgress() = runTest {
+    fun clearingUserDataLeavesTheDuasAlone() = runTest {
         seed()
-        dao.toggleFavorite(duaId = 1, categoryId = 1)
-        dao.incrementDuaProgress(duaId = 1, date = TestData.DAY, targetCount = 3)
+        val marks = dbRule.userDb.bookmarkDao()
+        marks.upsert(TestData.favourite(BookmarkKind.DUA, 1))
+        dbRule.userDb.progressDao()
+            .increment(ProgressKind.DUA, targetId = 1, date = TestData.DAY, target = 3)
 
-        dao.deleteAllUserData()
+        marks.clear()
+        dbRule.userDb.progressDao().deleteKind(ProgressKind.DUA)
 
-        assertThat(dao.getAllBookmarksSync()).isEmpty()
-        assertThat(dao.getAllProgressSync()).isEmpty()
+        assertThat(marks.all()).isEmpty()
+        assertThat(dbRule.userDb.progressDao().all()).isEmpty()
+        // The content is in the other database and untouched.
+        assertThat(dao.getAllCategories().first()).isNotEmpty()
     }
 }

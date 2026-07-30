@@ -64,6 +64,9 @@ abstract class BaseAppTest {
     @Inject
     lateinit var tasbihDao: TasbihDao
 
+    @Inject
+    lateinit var tasbihSessionDao: com.arshadshah.nimaz.data.local.user.TasbihSessionDao
+
     /** The launched activity scenario; closed automatically after each test. */
     private var scenario: ActivityScenario<MainActivity>? = null
 
@@ -90,7 +93,7 @@ abstract class BaseAppTest {
      * in and a fresh-start assertion fails.
      */
     protected suspend fun clearTasbih() {
-        tasbihDao.deleteAllSessions()
+        tasbihSessionDao.deleteAllSessions()
     }
 
     /**

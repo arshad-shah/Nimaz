@@ -1,6 +1,7 @@
 package com.arshadshah.nimaz.data.local.user
 
 import androidx.room.Dao
+import androidx.room.Transaction
 import androidx.room.Delete
 import androidx.room.Query
 import androidx.room.Upsert
@@ -137,9 +138,57 @@ interface ProgressDao {
     @Query("DELETE FROM progress WHERE kind = :kind AND target_id = :targetId AND date = :date")
     suspend fun delete(kind: String, targetId: Int, date: Long = 0)
 
+    @Query("DELETE FROM progress WHERE kind = :kind")
+    suspend fun deleteKind(kind: String)
+
     @Query("SELECT * FROM progress")
     suspend fun all(): List<ProgressEntity>
 
     @Query("DELETE FROM progress")
     suspend fun clear()
+
+    /**
+     * A dua counted one more time today, creating the row if this is the first.
+     *
+     * `dua_progress` had a pair of these as `@Transaction` helpers on the content DAO, which
+     * is where they stopped making sense once the counting moved: they read and wrote the
+     * user's rows through a DAO bound to the content database.
+     */
+    @Transaction
+    suspend fun increment(kind: String, targetId: Int, date: Long, target: Int?) {
+        val now = System.currentTimeMillis()
+        val existing = find(kind, targetId, date)
+        val completed = (existing?.completed ?: 0) + 1
+        upsert(
+            ProgressEntity(
+                kind = kind,
+                targetId = targetId,
+                date = date,
+                contextId = existing?.contextId,
+                completed = completed,
+                total = target ?: existing?.total,
+                isCompleted = (target ?: existing?.total)?.let { completed >= it } ?: false,
+                state = existing?.state,
+                score = existing?.score,
+                resumeId = existing?.resumeId,
+                createdAt = existing?.createdAt ?: now,
+                updatedAt = now,
+            )
+        )
+    }
+
+    /** One fewer, never below zero, and the row is left in place at zero. */
+    @Transaction
+    suspend fun decrement(kind: String, targetId: Int, date: Long) {
+        val existing = find(kind, targetId, date) ?: return
+        if (existing.completed <= 0) return
+        val completed = existing.completed - 1
+        upsert(
+            existing.copy(
+                completed = completed,
+                isCompleted = existing.total?.let { completed >= it } ?: false,
+                updatedAt = System.currentTimeMillis(),
+            )
+        )
+    }
 }
