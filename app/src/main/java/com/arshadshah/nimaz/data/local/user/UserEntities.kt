@@ -111,3 +111,29 @@ data class ProgressEntity(
     @ColumnInfo(name = "created_at") val createdAt: Long,
     @ColumnInfo(name = "updated_at") val updatedAt: Long,
 )
+
+/**
+ * A counting preset the user made.
+ *
+ * `tasbih_presets` in the content database shipped the defaults *and* accepted the ones a
+ * person created, distinguished by an `is_custom` flag. That made it the one table that was
+ * both content and user data, and it made "delete all my data" reach into the content
+ * database to find rows that belonged to the user — which is exactly the confusion this
+ * split exists to end. Content is not user data: the defaults are shipped and read-only,
+ * and these are the user's, here, where nothing but the user writes.
+ *
+ * The shape mirrors the shipped preset so the repository can present one list.
+ */
+@Entity(tableName = "custom_tasbih_presets")
+data class CustomTasbihPresetEntity(
+    @androidx.room.PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val name: String,
+    val arabic: String,
+    val transliteration: String,
+    val translation: String,
+    @ColumnInfo(name = "target_count") val targetCount: Int,
+    @ColumnInfo(name = "display_order") val displayOrder: Int,
+    val category: String? = null,
+    @ColumnInfo(name = "created_at") val createdAt: Long,
+    @ColumnInfo(name = "updated_at") val updatedAt: Long,
+)

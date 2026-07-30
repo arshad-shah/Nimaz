@@ -1,9 +1,11 @@
 package com.arshadshah.nimaz.data.repository
 
 import com.arshadshah.nimaz.core.util.mapItems
+import com.arshadshah.nimaz.data.local.user.BookmarkDao
+import com.arshadshah.nimaz.data.local.user.BookmarkEntity
+import com.arshadshah.nimaz.data.local.user.BookmarkKind
 import com.arshadshah.nimaz.data.local.database.dao.HadithDao
 import com.arshadshah.nimaz.data.local.database.entity.HadithBookEntity
-import com.arshadshah.nimaz.data.local.database.entity.HadithBookmarkEntity
 import com.arshadshah.nimaz.data.local.database.entity.HadithEntity
 import com.arshadshah.nimaz.data.local.hadith.HadithBackfillSeeder
 import com.arshadshah.nimaz.domain.model.Hadith
@@ -24,6 +26,7 @@ import javax.inject.Singleton
 @Singleton
 class HadithRepositoryImpl @Inject constructor(
     private val hadithDao: HadithDao,
+    private val bookmarkDao: BookmarkDao,
     private val backfillSeeder: HadithBackfillSeeder
 ) : HadithRepository {
 
@@ -183,40 +186,61 @@ class HadithRepositoryImpl @Inject constructor(
         }
     }
 
+    // Bookmarks are the user's, so they come from the user's database — and from the one
+    // table that holds every kind of mark, with `kind` where there used to be a table.
+
     override fun getAllBookmarks(): Flow<List<HadithBookmark>> {
-        return hadithDao.getAllBookmarks().mapItems { it.toDomain() }
+        return bookmarkDao.bookmarks(BookmarkKind.HADITH).mapItems { it.toHadithBookmark() }
     }
 
     override fun getBookmarksByBook(bookId: String): Flow<List<HadithBookmark>> {
-        return hadithDao.getBookmarksByBook(bookId.toIntOrNull() ?: 0).mapItems { it.toDomain() }
+        return bookmarkDao.inContext(BookmarkKind.HADITH, bookId.toIntOrNull() ?: 0)
+            .mapItems { it.toHadithBookmark() }
     }
 
     override suspend fun getBookmarkByHadithId(hadithId: String): HadithBookmark? {
-        return hadithDao.getBookmarkByHadithId(hadithId.toIntOrNull() ?: return null)?.toDomain()
+        return bookmarkDao.find(BookmarkKind.HADITH, hadithId.toIntOrNull() ?: return null)
+            ?.toHadithBookmark()
     }
 
     override fun isHadithBookmarked(hadithId: String): Flow<Boolean> {
-        return hadithDao.isHadithBookmarked(hadithId.toIntOrNull() ?: 0)
+        return bookmarkDao.observeIsBookmarked(BookmarkKind.HADITH, hadithId.toIntOrNull() ?: 0)
     }
 
     override suspend fun toggleBookmark(hadithId: String, bookId: String, hadithNumber: Int) {
-        hadithDao.toggleBookmark(
-            hadithId.toIntOrNull() ?: return,
-            bookId.toIntOrNull() ?: return,
-            hadithNumber
-        )
+        val target = hadithId.toIntOrNull() ?: return
+        val existing = bookmarkDao.find(BookmarkKind.HADITH, target)
+        if (existing != null && existing.bookmarked) {
+            bookmarkDao.delete(BookmarkKind.HADITH, target)
+        } else {
+            val now = System.currentTimeMillis()
+            bookmarkDao.upsert(
+                BookmarkEntity(
+                    kind = BookmarkKind.HADITH,
+                    targetId = target,
+                    bookmarked = true,
+                    favourite = existing?.favourite ?: false,
+                    note = existing?.note,
+                    colour = existing?.colour,
+                    contextId = bookId.toIntOrNull(),
+                    ordinal = hadithNumber,
+                    createdAt = existing?.createdAt ?: now,
+                    updatedAt = now,
+                )
+            )
+        }
     }
 
     override suspend fun insertBookmark(bookmark: HadithBookmark) {
-        hadithDao.insertBookmark(bookmark.toEntity())
+        bookmarkDao.upsert(bookmark.toBookmarkEntity())
     }
 
     override suspend fun updateBookmark(bookmark: HadithBookmark) {
-        hadithDao.updateBookmark(bookmark.toEntity())
+        bookmarkDao.upsert(bookmark.toBookmarkEntity())
     }
 
     override suspend fun deleteBookmark(hadithId: String) {
-        hadithDao.deleteBookmarkByHadithId(hadithId.toIntOrNull() ?: return)
+        bookmarkDao.delete(BookmarkKind.HADITH, hadithId.toIntOrNull() ?: return)
     }
 
     override suspend fun initializeHadithData() {
@@ -262,27 +286,35 @@ class HadithRepositoryImpl @Inject constructor(
         )
     }
 
-    private fun HadithBookmarkEntity.toDomain(): HadithBookmark {
+    /**
+     * The consolidated row, read as a hadith bookmark.
+     *
+     * `context_id` is the book and `ordinal` the number within it — the same two facts the
+     * old table spelled `bookId` and `hadithNumber`. The domain type is unchanged, so nothing
+     * above this line knows the seven tables became one.
+     */
+    private fun BookmarkEntity.toHadithBookmark(): HadithBookmark {
         return HadithBookmark(
-            id = id,
-            hadithId = hadithId.toString(),
-            bookId = bookId.toString(),
-            hadithNumber = hadithNumber,
+            id = 0,
+            hadithId = targetId.toString(),
+            bookId = (contextId ?: 0).toString(),
+            hadithNumber = ordinal ?: 0,
             note = note,
-            color = color,
+            color = colour,
             createdAt = createdAt,
             updatedAt = updatedAt
         )
     }
 
-    private fun HadithBookmark.toEntity(): HadithBookmarkEntity {
-        return HadithBookmarkEntity(
-            id = id,
-            hadithId = hadithId.toIntOrNull() ?: 0,
-            bookId = bookId.toIntOrNull() ?: 0,
-            hadithNumber = hadithNumber,
+    private fun HadithBookmark.toBookmarkEntity(): BookmarkEntity {
+        return BookmarkEntity(
+            kind = BookmarkKind.HADITH,
+            targetId = hadithId.toIntOrNull() ?: 0,
+            bookmarked = true,
             note = note,
-            color = color,
+            colour = color,
+            contextId = bookId.toIntOrNull(),
+            ordinal = hadithNumber,
             createdAt = createdAt,
             updatedAt = updatedAt
         )

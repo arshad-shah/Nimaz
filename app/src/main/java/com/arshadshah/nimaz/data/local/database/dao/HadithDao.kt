@@ -7,7 +7,6 @@ import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
 import com.arshadshah.nimaz.data.local.database.entity.HadithBookEntity
-import com.arshadshah.nimaz.data.local.database.entity.HadithBookmarkEntity
 import com.arshadshah.nimaz.data.local.database.entity.HadithEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -97,48 +96,4 @@ interface HadithDao {
     suspend fun updateNarratorChain(id: Int, chain: String): Int
 
     // Bookmark operations
-    @Query("SELECT * FROM hadith_bookmarks ORDER BY createdAt DESC")
-    fun getAllBookmarks(): Flow<List<HadithBookmarkEntity>>
-
-    @Query("SELECT * FROM hadith_bookmarks")
-    suspend fun getAllBookmarksSync(): List<HadithBookmarkEntity>
-
-    @Query("SELECT * FROM hadith_bookmarks WHERE bookId = :bookId ORDER BY createdAt DESC")
-    fun getBookmarksByBook(bookId: Int): Flow<List<HadithBookmarkEntity>>
-
-    @Query("SELECT * FROM hadith_bookmarks WHERE hadithId = :hadithId LIMIT 1")
-    suspend fun getBookmarkByHadithId(hadithId: Int): HadithBookmarkEntity?
-
-    @Query("SELECT EXISTS(SELECT 1 FROM hadith_bookmarks WHERE hadithId = :hadithId)")
-    fun isHadithBookmarked(hadithId: Int): Flow<Boolean>
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertBookmark(bookmark: HadithBookmarkEntity)
-
-    @Query("DELETE FROM hadith_bookmarks WHERE hadithId = :hadithId")
-    suspend fun deleteBookmarkByHadithId(hadithId: Int)
-
-    @Update
-    suspend fun updateBookmark(bookmark: HadithBookmarkEntity)
-
-    @Transaction
-    suspend fun toggleBookmark(hadithId: Int, bookId: Int, hadithNumber: Int) {
-        val existing = getBookmarkByHadithId(hadithId)
-        if (existing != null) {
-            deleteBookmarkByHadithId(hadithId)
-        } else {
-            insertBookmark(
-                HadithBookmarkEntity(
-                    hadithId = hadithId,
-                    bookId = bookId,
-                    hadithNumber = hadithNumber,
-                    note = null,
-                    color = null
-                )
-            )
-        }
-    }
-
-    @Query("DELETE FROM hadith_bookmarks")
-    suspend fun deleteAllUserData()
 }

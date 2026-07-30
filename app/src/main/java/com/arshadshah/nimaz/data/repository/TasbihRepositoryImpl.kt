@@ -2,6 +2,9 @@ package com.arshadshah.nimaz.data.repository
 
 import com.arshadshah.nimaz.core.util.mapItems
 import com.arshadshah.nimaz.data.local.database.dao.TasbihDao
+import com.arshadshah.nimaz.data.local.user.PresetUsageStat
+import com.arshadshah.nimaz.data.local.user.PresetUsageWithSessions
+import com.arshadshah.nimaz.data.local.user.TasbihSessionDao
 import com.arshadshah.nimaz.data.local.database.entity.TasbihPresetEntity
 import com.arshadshah.nimaz.data.local.database.entity.TasbihSessionEntity
 import com.arshadshah.nimaz.domain.model.DefaultTasbihPresets
@@ -17,8 +20,16 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
+/**
+ * Presets come from the content database, sessions from the user's own.
+ *
+ * `tasbih_presets` holds both the presets we ship and the ones a person creates, which makes
+ * it the one table in the app that is genuinely both; the sessions have no such ambiguity and
+ * moved out wholesale. Composing the two here is the repository doing its job.
+ */
 class TasbihRepositoryImpl @Inject constructor(
-    private val tasbihDao: TasbihDao
+    private val tasbihDao: TasbihDao,
+    private val sessionDao: TasbihSessionDao,
 ) : TasbihRepository {
 
     override fun getAllPresets(): Flow<List<TasbihPreset>> {
@@ -55,50 +66,50 @@ class TasbihRepositoryImpl @Inject constructor(
     }
 
     override fun getSessionsForDate(date: Long): Flow<List<TasbihSession>> {
-        return tasbihDao.getSessionsForDate(date).mapItems { it.toDomain() }
+        return sessionDao.getSessionsForDate(date).mapItems { it.toDomain() }
     }
 
     override fun getSessionsInRange(startDate: Long, endDate: Long): Flow<List<TasbihSession>> {
-        return tasbihDao.getSessionsInRange(startDate, endDate).mapItems { it.toDomain() }
+        return sessionDao.getSessionsInRange(startDate, endDate).mapItems { it.toDomain() }
     }
 
     override fun getSessionsForPreset(presetId: Long): Flow<List<TasbihSession>> {
-        return tasbihDao.getSessionsForPreset(presetId).mapItems { it.toDomain() }
+        return sessionDao.getSessionsForPreset(presetId).mapItems { it.toDomain() }
     }
 
     override suspend fun getSessionById(id: Long): TasbihSession? {
-        return tasbihDao.getSessionById(id)?.toDomain()
+        return sessionDao.getSessionById(id)?.toDomain()
     }
 
     override suspend fun getActiveSession(): TasbihSession? {
-        return tasbihDao.getActiveSession()?.toDomain()
+        return sessionDao.getActiveSession()?.toDomain()
     }
 
     override suspend fun insertSession(session: TasbihSession): Long {
-        return tasbihDao.insertSession(session.toEntity())
+        return sessionDao.insertSession(session.toEntity())
     }
 
     override suspend fun updateSession(session: TasbihSession) {
-        tasbihDao.updateSession(session.toEntity())
+        sessionDao.updateSession(session.toEntity())
     }
 
     override suspend fun deleteSession(session: TasbihSession) {
-        tasbihDao.deleteSession(session.toEntity())
+        sessionDao.deleteSession(session.toEntity())
     }
 
     override suspend fun updateSessionCount(id: Long, count: Int, laps: Int) {
-        tasbihDao.updateSessionCount(id, count, laps)
+        sessionDao.updateSessionCount(id, count, laps)
     }
 
     override suspend fun completeSession(id: Long, completedAt: Long, duration: Long) {
-        tasbihDao.completeSession(id, completedAt, duration)
+        sessionDao.completeSession(id, completedAt, duration)
     }
 
     override suspend fun getTasbihStats(startDate: Long, endDate: Long): TasbihStats {
-        val totalCount = tasbihDao.getTotalCountInRange(startDate, endDate) ?: 0
-        val completedSessions = tasbihDao.getCompletedSessionsInRange(startDate, endDate)
-        val totalDuration = tasbihDao.getTotalDurationInRange(startDate, endDate) ?: 0L
-        val mostUsedPresets = tasbihDao.getMostUsedPresetsWithSessions(5).mapNotNull { stat ->
+        val totalCount = sessionDao.getTotalCountInRange(startDate, endDate) ?: 0
+        val completedSessions = sessionDao.getCompletedSessionsInRange(startDate, endDate)
+        val totalDuration = sessionDao.getTotalDurationInRange(startDate, endDate) ?: 0L
+        val mostUsedPresets = sessionDao.getMostUsedPresetsWithSessions(5).mapNotNull { stat ->
             val preset = tasbihDao.getPresetById(stat.presetId)
             preset?.let {
                 PresetUsage(
@@ -121,11 +132,11 @@ class TasbihRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getTotalCountInRange(startDate: Long, endDate: Long): Int {
-        return tasbihDao.getTotalCountInRange(startDate, endDate) ?: 0
+        return sessionDao.getTotalCountInRange(startDate, endDate) ?: 0
     }
 
     override suspend fun getCompletedSessionsInRange(startDate: Long, endDate: Long): Int {
-        return tasbihDao.getCompletedSessionsInRange(startDate, endDate)
+        return sessionDao.getCompletedSessionsInRange(startDate, endDate)
     }
 
     override suspend fun initializeDefaultPresets() {

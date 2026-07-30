@@ -11,6 +11,7 @@ import com.arshadshah.nimaz.data.audio.AdhanAudioManager
 import com.arshadshah.nimaz.data.audio.AdhanDownloadService
 import com.arshadshah.nimaz.data.audio.AdhanSound
 import com.arshadshah.nimaz.data.local.database.NimazDatabase
+import com.arshadshah.nimaz.data.local.user.NimazUserDatabase
 import com.arshadshah.nimaz.domain.model.AsrCalculation
 import com.arshadshah.nimaz.domain.model.CalculationMethod
 import com.arshadshah.nimaz.domain.model.Location
@@ -315,7 +316,8 @@ class SettingsViewModel @Inject constructor(
     private val quranUseCases: QuranUseCases,
     private val prayerNotificationScheduler: PrayerNotificationScheduler,
     val adhanAudioManager: AdhanAudioManager,
-    private val database: NimazDatabase
+    private val database: NimazDatabase,
+    private val userDatabase: NimazUserDatabase,
 ) : ViewModel() {
 
     private val _generalState = MutableStateFlow(GeneralSettingsUiState())
@@ -1328,16 +1330,24 @@ class SettingsViewModel @Inject constructor(
 
     private fun deleteAllData() {
         viewModelScope.launch {
-            // Clear all user data from DAOs
-            database.quranDao().deleteAllUserData()
-            database.hadithDao().deleteAllUserData()
-            database.duaDao().deleteAllUserData()
-            database.prayerDao().deleteAllUserData()
-            database.fastingDao().deleteAllUserData()
-            database.tasbihDao().deleteAllUserData()
-            database.zakatDao().deleteAllUserData()
-            database.locationDao().deleteAllUserData()
-            database.tafseerDao().deleteAllUserData()
+            // Everything the person made lives in the user database now, so "delete all my
+            // data" clears that one — and it is a much more honest operation for it: the
+            // content database is not touched at all, so there is no way for this to reach
+            // the corpus, and no way for it to miss a table by forgetting a DAO.
+            userDatabase.bookmarkDao().clear()
+            userDatabase.progressDao().clear()
+            userDatabase.prayerDao().deleteAllUserData()
+            userDatabase.fastingDao().deleteAllUserData()
+            userDatabase.zakatDao().deleteAllUserData()
+            userDatabase.locationDao().deleteAllUserData()
+            userDatabase.tasbihSessionDao().deleteAllSessions()
+            userDatabase.tafseerUserDao().deleteAllUserData()
+            userDatabase.readingProgressDao().clear()
+            userDatabase.khatamDao().deleteAllUserData()
+            userDatabase.customPresetDao().clear()
+
+            // The content database is deliberately not touched. Content is not user data: the
+            // corpus, and the presets we ship, are ours to replace and never theirs to lose.
 
             // Clear DataStore preferences
             settingsRepository.clearAllData()

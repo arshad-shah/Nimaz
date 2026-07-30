@@ -290,6 +290,40 @@ interface QuranDao {
     )
     fun getAyahsWithTextByJuz(juzNumber: Int): Flow<List<AyahWithText>>
 
+    /**
+     * The ids of a surah's verses within an ayah-number span.
+     *
+     * The bridge for anything the user's database keys by ayah id but selects by surah and
+     * ayah number — highlights and notes on a commentary block, for instance. Those queries
+     * used to `INNER JOIN ayahs`; the verses and the highlights are in different databases
+     * now, so the span is resolved here and the ids travel as a parameter.
+     */
+    @Query(
+        """
+        SELECT id FROM ayahs
+        WHERE surah_id = :surahNumber AND number_in_surah BETWEEN :ayahStart AND :ayahEnd
+        ORDER BY number_in_surah ASC
+        """
+    )
+    suspend fun getAyahIdsInRange(surahNumber: Int, ayahStart: Int, ayahEnd: Int): List<Int>
+
+    /** A surah's verse ids, in order. */
+    @Query("SELECT id FROM ayahs WHERE surah_id = :surahNumber ORDER BY id ASC")
+    suspend fun getAyahIdsForSurah(surahNumber: Int): List<Int>
+
+    /** Where a verse sits, for a khatam that knows only the id it has not read yet. */
+    @Query(
+        """
+        SELECT surah_id AS surahId, number_in_surah AS numberInSurah, juz AS juz
+        FROM ayahs WHERE id = :ayahId
+        """
+    )
+    suspend fun getAyahLocation(ayahId: Int): AyahLocation?
+
+    /** How many verses each juz holds. The other half of khatam progress. */
+    @Query("SELECT juz AS juzNumber, COUNT(*) AS totalAyahs FROM ayahs GROUP BY juz ORDER BY juz ASC")
+    suspend fun getJuzAyahTotals(): List<JuzAyahTotal>
+
     // --- the divisions of the mushaf (schemaVersion 22) ----------------------------------
     //
     // Each of these was previously a scan over `ayahs` with a MIN/MAX, which is why none of
@@ -599,4 +633,17 @@ data class AyahWithText(
     @ColumnInfo(name = "sajda_kind") val sajdaKind: String?,
     @ColumnInfo(name = "sajda_sequence") val sajdaSequence: Int?,
     @ColumnInfo(name = "rub_number") val rubNumber: Int?,
+)
+
+/** Where a verse sits in the mushaf. */
+data class AyahLocation(
+    val surahId: Int,
+    val numberInSurah: Int,
+    val juz: Int,
+)
+
+/** How many verses a juz holds. */
+data class JuzAyahTotal(
+    val juzNumber: Int,
+    val totalAyahs: Int,
 )

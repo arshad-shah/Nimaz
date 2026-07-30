@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "faf55a7832af2505422a1ec7e4fbb04f",
+    "identityHash": "e1d5df802dac215616583997c8ce3bdb",
     "entities": [
       {
         "tableName": "bookmarks",
@@ -197,6 +197,77 @@
             "createSql": "CREATE INDEX IF NOT EXISTS `index_progress_kind_context_id` ON `${TABLE_NAME}` (`kind`, `context_id`)"
           }
         ]
+      },
+      {
+        "tableName": "custom_tasbih_presets",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `arabic` TEXT NOT NULL, `transliteration` TEXT NOT NULL, `translation` TEXT NOT NULL, `target_count` INTEGER NOT NULL, `display_order` INTEGER NOT NULL, `category` TEXT, `created_at` INTEGER NOT NULL, `updated_at` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "arabic",
+            "columnName": "arabic",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "transliteration",
+            "columnName": "transliteration",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "translation",
+            "columnName": "translation",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "targetCount",
+            "columnName": "target_count",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "displayOrder",
+            "columnName": "display_order",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "category",
+            "columnName": "category",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "created_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "updatedAt",
+            "columnName": "updated_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        }
       },
       {
         "tableName": "reading_progress",
@@ -1231,7 +1302,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'faf55a7832af2505422a1ec7e4fbb04f')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'e1d5df802dac215616583997c8ce3bdb')"
     ]
   }
 }
