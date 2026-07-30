@@ -36,9 +36,11 @@ class ContentPatchSeederTest {
                 "revelation_type, verses_count, order_revealed, start_page) " +
                 "VALUES (1,1,'ا','A','A','Meccan',7,5,1)"
         )
+        // Since schemaVersion 22 a verse row is its place in the mushaf; its text is a row
+        // in mushaf_ayah_texts, which is also the table a patch now inserts into.
         exec(
-            "INSERT INTO ayahs (id, surah_id, number_in_surah, number_global, text_arabic, " +
-                "text_uthmani, juz, hizb, page, sajda) VALUES (1,1,1,1,'ا','ا',1,1,1,0)"
+            "INSERT INTO ayahs (id, surah_id, number_in_surah, number_global, juz, hizb, page) " +
+                "VALUES (1,1,1,1,1,1,1)"
         )
     }
 

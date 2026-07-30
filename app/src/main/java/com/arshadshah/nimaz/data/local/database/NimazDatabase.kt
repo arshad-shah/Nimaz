@@ -61,6 +61,13 @@ import com.arshadshah.nimaz.data.local.database.entity.QuranFavoriteEntity
 import com.arshadshah.nimaz.data.local.database.entity.ReadingProgressEntity
 import com.arshadshah.nimaz.data.local.database.entity.SurahEntity
 import com.arshadshah.nimaz.data.local.database.entity.SurahInfoEntity
+import com.arshadshah.nimaz.data.local.database.entity.HizbQuarterEntity
+import com.arshadshah.nimaz.data.local.database.entity.JuzEntity
+import com.arshadshah.nimaz.data.local.database.entity.ManzilEntity
+import com.arshadshah.nimaz.data.local.database.entity.PageEntity
+import com.arshadshah.nimaz.data.local.database.entity.RukuEntity
+import com.arshadshah.nimaz.data.local.database.entity.SajdaEntity
+import com.arshadshah.nimaz.data.local.database.entity.SurahStructureEntity
 import com.arshadshah.nimaz.data.local.database.entity.TafseerBlockEntity
 import com.arshadshah.nimaz.data.local.database.entity.TafseerHighlightEntity
 import com.arshadshah.nimaz.data.local.database.entity.TafseerNoteEntity
@@ -74,7 +81,7 @@ import com.arshadshah.nimaz.data.local.database.entity.ZakatHistoryEntity
  * migration) for any schema change — it drives both the Room `@Database(version = …)`
  * annotation below and `NimazDatabase.SCHEMA_VERSION` (used to tag crash reports).
  */
-const val NIMAZ_DATABASE_VERSION = 21
+const val NIMAZ_DATABASE_VERSION = 22
 
 @Database(
     entities = [
@@ -87,6 +94,13 @@ const val NIMAZ_DATABASE_VERSION = 21
         ReadingProgressEntity::class,
         SurahInfoEntity::class,
         MushafAyahTextEntity::class,
+        JuzEntity::class,
+        HizbQuarterEntity::class,
+        ManzilEntity::class,
+        RukuEntity::class,
+        PageEntity::class,
+        SajdaEntity::class,
+        SurahStructureEntity::class,
         MushafLayoutLineEntity::class,
         // Hadith
         HadithBookEntity::class,
@@ -365,6 +379,168 @@ abstract class NimazDatabase : RoomDatabase() {
         // `tafseer_highlights`/`tafseer_notes` (user data, keyed by `ayah_id`) are
         // untouched: their `start_offset`/`end_offset` index into the commentary
         // text, which is unchanged for the ayah they were made on.
+// schemaVersion 22 — a verse's row stops being four renderings, a boolean and a
+        // nullable string, and becomes its place in the mushaf.
+        //
+        // Everything moved here is *derivable on the device*, which is the only reason this can
+        // be a migration rather than a reinstall. `createFromAsset` re-copies the artifact only
+        // on a fresh install, and a content patch cannot create a table that its baseline never
+        // had, so anything not derivable would simply be absent for existing users — the trap
+        // MIGRATION_20_21 fell into with tafseer.
+        //
+        //   text_uthmani  -> mushaf_ayah_texts as source UTHMANI  (the row already holds it)
+        //   sajda columns -> sajdas                               (the 15 marked rows)
+        //   juz/hizb/page -> juzs, hizb_quarters, pages           (MIN/MAX over the columns)
+        //
+        // `rukus`, `manzils` and `surah_structure` are content that has never been on a device:
+        // they are created empty and filled from the artifact on a fresh install, or by
+        // QuranStructureSeeder from the bundled seed on an upgrade. `text_arabic` was
+        // byte-identical to `text_uthmani` in all 6,236 rows, so nothing is lost by dropping it;
+        // `text_indopak` was NULL in all of them.
+        val MIGRATION_21_22 = object : Migration(21, 22) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS `juzs` (
+                        `number` INTEGER NOT NULL, `start_ayah_id` INTEGER NOT NULL,
+                        `end_ayah_id` INTEGER NOT NULL, PRIMARY KEY(`number`))
+                    """.trimIndent()
+                )
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS `hizb_quarters` (
+                        `number` INTEGER NOT NULL, `juz_number` INTEGER NOT NULL,
+                        `start_ayah_id` INTEGER NOT NULL, `end_ayah_id` INTEGER NOT NULL,
+                        PRIMARY KEY(`number`))
+                    """.trimIndent()
+                )
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_hizb_quarters_juz_number` ON `hizb_quarters` (`juz_number`)")
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS `manzils` (
+                        `number` INTEGER NOT NULL, `start_ayah_id` INTEGER NOT NULL,
+                        `end_ayah_id` INTEGER NOT NULL, PRIMARY KEY(`number`))
+                    """.trimIndent()
+                )
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS `rukus` (
+                        `number` INTEGER NOT NULL, `surah_id` INTEGER NOT NULL,
+                        `start_ayah_id` INTEGER NOT NULL, `end_ayah_id` INTEGER NOT NULL,
+                        PRIMARY KEY(`number`))
+                    """.trimIndent()
+                )
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_rukus_surah_id` ON `rukus` (`surah_id`)")
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS `pages` (
+                        `number` INTEGER NOT NULL, `start_ayah_id` INTEGER NOT NULL,
+                        `end_ayah_id` INTEGER NOT NULL, PRIMARY KEY(`number`))
+                    """.trimIndent()
+                )
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS `sajdas` (
+                        `ayah_id` INTEGER NOT NULL, `sequence` INTEGER NOT NULL,
+                        `kind` TEXT NOT NULL, `upstream_kind` TEXT, PRIMARY KEY(`ayah_id`))
+                    """.trimIndent()
+                )
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_sajdas_sequence` ON `sajdas` (`sequence`)")
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS `surah_structure` (
+                        `surah_id` INTEGER NOT NULL, `ruku_count` INTEGER NOT NULL,
+                        `start_ayah_id` INTEGER NOT NULL, `end_ayah_id` INTEGER NOT NULL,
+                        `start_page` INTEGER NOT NULL, `end_page` INTEGER NOT NULL,
+                        `has_basmalah` INTEGER NOT NULL, `revelation_order` INTEGER NOT NULL,
+                        PRIMARY KEY(`surah_id`))
+                    """.trimIndent()
+                )
+
+                // The Uthmani text the row already carries becomes a text source. INSERT OR
+                // IGNORE, not REPLACE: a device that already has the artifact's UTHMANI rows
+                // must keep them rather than have them overwritten from a column.
+                if (db.hasColumn("ayahs", "text_uthmani")) {
+                    db.execSQL(
+                        """
+                        INSERT OR IGNORE INTO `mushaf_ayah_texts` (`text_source`, `ayah_id`, `text`)
+                        SELECT 'UTHMANI', `id`, `text_uthmani` FROM `ayahs`
+                        WHERE `text_uthmani` IS NOT NULL AND `text_uthmani` != ''
+                        """.trimIndent()
+                    )
+                }
+
+                if (db.hasColumn("ayahs", "sajda")) {
+                    db.execSQL(
+                        """
+                        INSERT OR IGNORE INTO `sajdas` (`ayah_id`, `sequence`, `kind`, `upstream_kind`)
+                        SELECT `id`,
+                               (SELECT COUNT(*) FROM `ayahs` b WHERE b.`sajda` <> 0 AND b.`id` <= a.`id`),
+                               COALESCE(`sajda_type`, 'recommended'),
+                               NULL
+                        FROM `ayahs` a WHERE a.`sajda` <> 0
+                        """.trimIndent()
+                    )
+                }
+
+                // The divisions, from the columns that already describe them per verse.
+                db.execSQL(
+                    """
+                    INSERT OR IGNORE INTO `juzs` (`number`, `start_ayah_id`, `end_ayah_id`)
+                    SELECT `juz`, MIN(`id`), MAX(`id`) FROM `ayahs` GROUP BY `juz`
+                    """.trimIndent()
+                )
+                db.execSQL(
+                    """
+                    INSERT OR IGNORE INTO `hizb_quarters` (`number`, `juz_number`, `start_ayah_id`, `end_ayah_id`)
+                    SELECT `hizb`, MIN(`juz`), MIN(`id`), MAX(`id`) FROM `ayahs` GROUP BY `hizb`
+                    """.trimIndent()
+                )
+                db.execSQL(
+                    """
+                    INSERT OR IGNORE INTO `pages` (`number`, `start_ayah_id`, `end_ayah_id`)
+                    SELECT `page`, MIN(`id`), MAX(`id`) FROM `ayahs` GROUP BY `page`
+                    """.trimIndent()
+                )
+
+                // Rebuild `ayahs` without the columns that moved. SQLite cannot drop a column
+                // in a table this old, so it is the documented twelve-step dance, minus the
+                // steps that do not apply.
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS `ayahs_new` (
+                        `id` INTEGER NOT NULL,
+                        `surah_id` INTEGER NOT NULL,
+                        `number_in_surah` INTEGER NOT NULL,
+                        `number_global` INTEGER NOT NULL,
+                        `juz` INTEGER NOT NULL,
+                        `hizb` INTEGER NOT NULL,
+                        `page` INTEGER NOT NULL,
+                        `transliteration` TEXT,
+                        `text_tajweed` TEXT,
+                        PRIMARY KEY(`id`),
+                        FOREIGN KEY(`surah_id`) REFERENCES `surahs`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE
+                    )
+                    """.trimIndent()
+                )
+                db.execSQL(
+                    """
+                    INSERT OR REPLACE INTO `ayahs_new`
+                        (`id`, `surah_id`, `number_in_surah`, `number_global`, `juz`, `hizb`,
+                         `page`, `transliteration`, `text_tajweed`)
+                    SELECT `id`, `surah_id`, `number_in_surah`, `number_global`, `juz`, `hizb`,
+                           `page`, `transliteration`, `text_tajweed`
+                    FROM `ayahs`
+                    """.trimIndent()
+                )
+                db.execSQL("DROP TABLE `ayahs`")
+                db.execSQL("ALTER TABLE `ayahs_new` RENAME TO `ayahs`")
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_ayahs_surah_id` ON `ayahs` (`surah_id`)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_ayahs_juz` ON `ayahs` (`juz`)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_ayahs_page` ON `ayahs` (`page`)")
+            }
+        }
+
         val MIGRATION_20_21 = object : Migration(20, 21) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL(
@@ -912,6 +1088,7 @@ abstract class NimazDatabase : RoomDatabase() {
             MIGRATION_18_19,
             MIGRATION_19_20,
             MIGRATION_20_21,
+            MIGRATION_21_22,
         )
     }
 }
@@ -950,6 +1127,20 @@ private fun SupportSQLiteDatabase.addColumnIfMissing(
 private fun SupportSQLiteDatabase.hasTable(table: String): Boolean =
     query("SELECT 1 FROM sqlite_master WHERE type='table' AND name=?", arrayOf(table))
         .use { it.moveToFirst() }
+
+/**
+ * Whether [table] has [column].
+ *
+ * A migration that moves a column's contents has to run against a database that may or may not
+ * still have it — a device upgrading through the chain, or one that arrived already reshaped in
+ * the artifact. Asking is what makes the move idempotent.
+ */
+private fun SupportSQLiteDatabase.hasColumn(table: String, column: String): Boolean =
+    query("PRAGMA table_info(`$table`)").use { cursor ->
+        val nameIndex = cursor.getColumnIndex("name")
+        generateSequence { if (cursor.moveToNext()) cursor.getString(nameIndex) else null }
+            .any { it == column }
+    }
 
 /** Whether [table] holds no rows. Used to keep a data-carrying migration re-runnable. */
 private fun SupportSQLiteDatabase.isEmpty(table: String): Boolean =
