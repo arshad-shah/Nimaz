@@ -3,6 +3,7 @@ import java.io.File
 import java.net.HttpURLConnection
 import java.net.URI
 import java.security.MessageDigest
+import java.util.zip.GZIPInputStream
 
 /**
  * Fetches the content artifact this app is built against, pinned by sha256 in data.lock.json.
@@ -129,13 +130,24 @@ tasks.register("fetchNimazData") {
                 }
                 @Suppress("UNCHECKED_CAST")
                 val assets = release!!["assets"] as List<Map<String, Any>>
-                val asset = assets.firstOrNull { it["name"] == name }
+
+                // Prefer the gzipped asset when the lockfile pins one: the artifact is
+                // 170 MB raw and about 5x smaller compressed, and every CI runner is a
+                // cold fetch by construction. Falls back to the raw `.db` for a tag
+                // published before releases carried one, so an old pin still builds.
+                @Suppress("UNCHECKED_CAST")
+                val gz = entry["compressed"] as? Map<*, *>
+                val wanted = (gz?.get("file") as? String) ?: name
+                val asset = assets.firstOrNull { it["name"] == wanted }
+                    ?: assets.firstOrNull { it["name"] == name }
                     ?: throw GradleException(
                         "nimaz-data: release $tag has no asset named $name. Present: " +
                             assets.joinToString { it["name"].toString() }
                     )
+                val fetchedName = asset["name"] as String
+                val compressed = fetchedName.endsWith(".gz")
 
-                logger.lifecycle("nimaz-data: fetching $name from $repo@$tag")
+                logger.lifecycle("nimaz-data: fetching $fetchedName from $repo@$tag")
                 cached.parentFile.mkdirs()
                 val conn = URI(asset["url"] as String).toURL()
                     .openConnection() as HttpURLConnection
@@ -144,7 +156,13 @@ tasks.register("fetchNimazData") {
                 conn.setRequestProperty("Accept", "application/octet-stream")
                 conn.instanceFollowRedirects = true
                 conn.inputStream.use { input ->
-                    cached.outputStream().use { input.copyTo(it) }
+                    // Decompressed on the way in, so what lands in the cache is always
+                    // the artifact itself and the sha256 below always means the same
+                    // thing. The lockfile pins the *decompressed* bytes — verifying the
+                    // wrapper instead would let a re-compression change what the pin
+                    // asserts without the hash moving.
+                    val source = if (compressed) GZIPInputStream(input, 1 shl 16) else input
+                    cached.outputStream().use { source.copyTo(it) }
                 }
 
                 val actual = sha256Of(cached)
@@ -152,6 +170,9 @@ tasks.register("fetchNimazData") {
                     cached.delete()
                     throw GradleException(
                         "nimaz-data: $name failed verification.\n" +
+                            "  fetched  $fetchedName" +
+                            (if (compressed) " (gzip, verified after decompressing)" else "") +
+                            "\n" +
                             "  expected sha256 $sha\n" +
                             "  actual   sha256 $actual\n" +
                             "The lockfile and the release disagree. Do not build from this."

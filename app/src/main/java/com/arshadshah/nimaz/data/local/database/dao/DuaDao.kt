@@ -42,6 +42,10 @@ interface DuaDao {
     @Query("SELECT * FROM duas WHERE title_english LIKE '%' || :query || '%' OR translation LIKE '%' || :query || '%' OR text_arabic LIKE '%' || :query || '%'")
     fun searchDuas(query: String): Flow<List<DuaEntity>>
 
+    /** The duas the shipped search index named (#330). See [DuaDao.searchDuas]. */
+    @Query("SELECT * FROM duas WHERE id IN (:ids) ORDER BY id ASC")
+    suspend fun getDuasByIds(ids: List<Int>): List<DuaEntity>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertDuas(duas: List<DuaEntity>)
 

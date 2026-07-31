@@ -14,6 +14,8 @@ import com.arshadshah.nimaz.data.local.database.entity.QuranFavoriteEntity
 import com.arshadshah.nimaz.data.local.database.entity.ReadingProgressEntity
 import com.arshadshah.nimaz.data.local.database.entity.SurahEntity
 import com.arshadshah.nimaz.data.local.quran.MushafLayoutSeeder
+import com.arshadshah.nimaz.data.local.search.ContentSearchIndex
+import com.arshadshah.nimaz.data.local.search.SearchKind
 import com.arshadshah.nimaz.data.local.quran.QuranTranslationSeeder
 import com.arshadshah.nimaz.domain.model.Ayah
 import com.arshadshah.nimaz.domain.model.MushafPageLayout
@@ -51,7 +53,8 @@ class QuranRepositoryImpl @Inject constructor(
     private val bookmarkDao: BookmarkDao,
     private val readingProgressDao: ReadingProgressDao,
     private val mushafSeeder: MushafLayoutSeeder,
-    private val translationSeeder: QuranTranslationSeeder
+    private val translationSeeder: QuranTranslationSeeder,
+    private val searchIndex: ContentSearchIndex
 ) : QuranRepository {
 
     /**
@@ -85,7 +88,18 @@ class QuranRepositoryImpl @Inject constructor(
     }
 
     override fun searchSurahs(query: String): Flow<List<Surah>> {
-        return quranDao.searchSurahs(query).mapItems { it.toDomain() }
+        // The index carries the Arabic name too, which the `LIKE` below never could reach:
+        // سورة الفاتحة is stored with its marks and nobody types them.
+        return flow {
+            if (searchIndex.isAvailable()) {
+                val numbers = searchIndex.refs(query, SearchKind.SURAH)
+                    .mapNotNull(String::toIntOrNull)
+                    .distinct()
+                emit(quranDao.getSurahsByNumbers(numbers).map { it.toDomain() })
+            } else {
+                emitAll(quranDao.searchSurahs(query).mapItems { it.toDomain() })
+            }
+        }
     }
 
     override fun getAyahsBySurah(surahNumber: Int): Flow<List<Ayah>> {
@@ -286,6 +300,11 @@ class QuranRepositoryImpl @Inject constructor(
             val surahs = quranDao.getAllSurahs().first()
             val surahMap = surahs.associate { it.id to it.nameEnglish }
 
+            if (searchIndex.isAvailable()) {
+                emit(searchQuranByIndex(query, translatorId, surahMap))
+                return@flow
+            }
+
             // Search Arabic text
             val arabicResults = quranDao.searchAyahsWithText(query).first().map { ayah ->
                 QuranSearchResult(
@@ -313,6 +332,54 @@ class QuranRepositoryImpl @Inject constructor(
 
             emit((arabicResults + translationResults).distinctBy { it.ayah.id })
         }
+    }
+
+    /**
+     * The same search, through the index the artifact ships (#330).
+     *
+     * The `LIKE` path above it is not dead code and not a fallback in the apologetic
+     * sense: `createFromAsset` copies the artifact once, on first install, so a phone
+     * that installed before the index shipped does not have one and never will without
+     * a reinstall. For those installs this is the search they already had. For everyone
+     * else, Arabic works for the first time — and both paths return the same shape, so
+     * nothing above the repository knows which one ran.
+     */
+    private suspend fun searchQuranByIndex(
+        query: String,
+        translatorId: String?,
+        surahMap: Map<Int, String>,
+    ): List<QuranSearchResult> {
+        val arabicIds = searchIndex.refs(query, SearchKind.QURAN).mapNotNull(String::toIntOrNull)
+        val arabicResults = quranDao.getAyahsWithTextByIds(arabicIds).map { ayah ->
+            QuranSearchResult(
+                ayah = ayah.toDomain(),
+                surahName = surahMap[ayah.ayah.surahId] ?: "Surah ${ayah.ayah.surahId}",
+                matchedText = ayah.textUthmani.orEmpty(),
+                searchType = SearchType.ARABIC
+            )
+        }
+
+        val translatorKey = seededTranslationId(translatorId)
+        val translationResults = if (translatorKey == null) emptyList() else {
+            // Narrowed by `source`, so a hit in the Bengali translation cannot surface
+            // for a reader who has Sahih International selected. All fifteen are indexed.
+            val ids = searchIndex
+                .refs(query, SearchKind.TRANSLATION, source = translatorKey)
+                .mapNotNull(String::toIntOrNull)
+            val ayahs = quranDao.getAyahsWithTextByIds(ids).associateBy { it.ayah.id }
+            quranDao.getTranslationsByAyahIds(ids, translatorKey).mapNotNull { translation ->
+                ayahs[translation.ayahId]?.let { ayah ->
+                    QuranSearchResult(
+                        ayah = ayah.toDomain(),
+                        surahName = surahMap[ayah.ayah.surahId] ?: "Surah ${ayah.ayah.surahId}",
+                        matchedText = translation.text,
+                        searchType = SearchType.TRANSLATION
+                    )
+                }
+            }
+        }
+
+        return (arabicResults + translationResults).distinctBy { it.ayah.id }
     }
 
     // Bookmarks, favourites and the reading position are the user's, and come from the user's

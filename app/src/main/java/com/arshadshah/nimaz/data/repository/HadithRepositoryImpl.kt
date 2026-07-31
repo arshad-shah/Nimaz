@@ -8,6 +8,8 @@ import com.arshadshah.nimaz.data.local.database.dao.HadithDao
 import com.arshadshah.nimaz.data.local.database.entity.HadithBookEntity
 import com.arshadshah.nimaz.data.local.database.entity.HadithEntity
 import com.arshadshah.nimaz.data.local.hadith.HadithBackfillSeeder
+import com.arshadshah.nimaz.data.local.search.ContentSearchIndex
+import com.arshadshah.nimaz.data.local.search.SearchKind
 import com.arshadshah.nimaz.domain.model.Hadith
 import com.arshadshah.nimaz.domain.model.HadithBook
 import com.arshadshah.nimaz.domain.model.HadithBookmark
@@ -17,7 +19,9 @@ import com.arshadshah.nimaz.domain.model.HadithSearchResult
 import com.arshadshah.nimaz.domain.repository.HadithRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import java.time.LocalDate
 import javax.inject.Inject
@@ -27,7 +31,8 @@ import javax.inject.Singleton
 class HadithRepositoryImpl @Inject constructor(
     private val hadithDao: HadithDao,
     private val bookmarkDao: BookmarkDao,
-    private val backfillSeeder: HadithBackfillSeeder
+    private val backfillSeeder: HadithBackfillSeeder,
+    private val searchIndex: ContentSearchIndex
 ) : HadithRepository {
 
     override suspend fun getHadithCount(): Int {
@@ -146,10 +151,27 @@ class HadithRepositoryImpl @Inject constructor(
         return hadithDao.getHadithsByGrade(gradeString).mapItems { it.toDomain() }
     }
 
+    /**
+     * The index first, the scan only where there is no index (#330).
+     *
+     * `text_arabic LIKE '%…%'` returned nothing for every Arabic query ever run against
+     * the matn — it is vocalised, and no keyboard produces the marks — while scanning
+     * 36 MB to fail. `createFromAsset` copies the artifact once, so installs made before
+     * the index shipped keep the scan; everyone else gets 34,532 hadith folded into an
+     * index that answers in under a millisecond.
+     */
     override fun searchHadiths(query: String): Flow<List<HadithSearchResult>> {
         return combine(
             hadithDao.getAllBooks(),
-            hadithDao.searchHadiths(query)
+            flow {
+                if (searchIndex.isAvailable()) {
+                    val ids = searchIndex.refs(query, SearchKind.HADITH)
+                        .mapNotNull(String::toIntOrNull)
+                    emit(hadithDao.getHadithsByIds(ids))
+                } else {
+                    emitAll(hadithDao.searchHadiths(query))
+                }
+            }
         ) { books, entities ->
             // Create a map from book id to book name for lookup
             val bookMap = books.associate { it.id to it.nameEnglish }

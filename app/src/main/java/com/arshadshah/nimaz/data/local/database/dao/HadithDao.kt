@@ -47,6 +47,16 @@ interface HadithDao {
     @Query("SELECT * FROM hadiths WHERE text_english LIKE '%' || :query || '%' OR text_arabic LIKE '%' || :query || '%'")
     fun searchHadiths(query: String): Flow<List<HadithEntity>>
 
+    /**
+     * The hadiths the shipped search index named (#330).
+     *
+     * `text_arabic LIKE '%…%'` above could never match a typed Arabic query — the matn
+     * is vocalised — and scanned 36 MB to fail. This is a primary-key lookup after a
+     * folded index has already done the matching.
+     */
+    @Query("SELECT * FROM hadiths WHERE id IN (:ids) ORDER BY book_id, number_in_book")
+    suspend fun getHadithsByIds(ids: List<Int>): List<HadithEntity>
+
     @Query("SELECT * FROM hadiths WHERE book_id = :bookId AND (text_english LIKE '%' || :query || '%' OR text_arabic LIKE '%' || :query || '%')")
     fun searchHadithsInBook(bookId: Int, query: String): Flow<List<HadithEntity>>
 

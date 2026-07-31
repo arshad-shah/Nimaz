@@ -68,6 +68,10 @@ interface QuranDao {
     @Query("SELECT * FROM surahs WHERE revelation_type = :type ORDER BY number ASC")
     fun getSurahsByRevelationType(type: String): Flow<List<SurahEntity>>
 
+    /** The surahs the shipped search index named, by number. See [getAyahsWithTextByIds]. */
+    @Query("SELECT * FROM surahs WHERE number IN (:numbers) ORDER BY number ASC")
+    suspend fun getSurahsByNumbers(numbers: List<Int>): List<SurahEntity>
+
     @Query("SELECT * FROM surahs WHERE name_english LIKE '%' || :query || '%' OR name_transliteration LIKE '%' || :query || '%'")
     fun searchSurahs(query: String): Flow<List<SurahEntity>>
 
@@ -250,6 +254,32 @@ interface QuranDao {
         """
     )
     fun searchAyahsWithText(query: String): Flow<List<AyahWithText>>
+
+    /**
+     * The verses the shipped search index named, fetched in one go (#330).
+     *
+     * The index answers with ayah ids and nothing else, so this is how a hit becomes a
+     * verse. It is a plain primary-key lookup — the searching already happened, against
+     * a folded index that a `LIKE` could not have replaced at any speed.
+     */
+    @Query(
+        """
+        SELECT a.*,
+               u.text AS text_uthmani,
+               s.text AS text_simple,
+               sj.kind AS sajda_kind,
+               sj.sequence AS sajda_sequence,
+               hq.number AS rub_number
+        FROM ayahs a
+        LEFT JOIN mushaf_ayah_texts u ON u.ayah_id = a.id AND u.text_source = 'UTHMANI'
+        LEFT JOIN mushaf_ayah_texts s ON s.ayah_id = a.id AND s.text_source = 'SIMPLE'
+        LEFT JOIN sajdas sj ON sj.ayah_id = a.id
+        LEFT JOIN hizb_quarters hq ON a.id BETWEEN hq.start_ayah_id AND hq.end_ayah_id
+        WHERE a.id IN (:ayahIds)
+        ORDER BY a.id ASC
+        """
+    )
+    suspend fun getAyahsWithTextByIds(ayahIds: List<Int>): List<AyahWithText>
 
 
     @Query(
@@ -489,6 +519,19 @@ interface QuranDao {
 
     @Query("SELECT * FROM translations WHERE text LIKE '%' || :query || '%' AND translator_id = :translatorId")
     fun searchTranslations(query: String, translatorId: String): Flow<List<TranslationEntity>>
+
+    /** The translations the shipped search index named. See [getAyahsWithTextByIds]. */
+    @Query(
+        """
+        SELECT * FROM translations
+        WHERE ayah_id IN (:ayahIds) AND translator_id = :translatorId
+        ORDER BY ayah_id ASC
+        """
+    )
+    suspend fun getTranslationsByAyahIds(
+        ayahIds: List<Int>,
+        translatorId: String
+    ): List<TranslationEntity>
 
     // Bookmark operations
 

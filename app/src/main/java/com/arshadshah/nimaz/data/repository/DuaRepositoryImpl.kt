@@ -19,6 +19,8 @@ import com.arshadshah.nimaz.domain.model.DuaOccasion
 import com.arshadshah.nimaz.domain.model.DuaProgress
 import com.arshadshah.nimaz.domain.model.DuaSearchResult
 import com.arshadshah.nimaz.domain.repository.DuaRepository
+import com.arshadshah.nimaz.data.local.search.ContentSearchIndex
+import com.arshadshah.nimaz.data.local.search.SearchKind
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emitAll
@@ -32,7 +34,8 @@ class DuaRepositoryImpl @Inject constructor(
     private val duaDao: DuaDao,
     private val bookmarkDao: BookmarkDao,
     private val progressDao: ProgressDao,
-    private val seeder: DuaContentSeeder
+    private val seeder: DuaContentSeeder,
+    private val searchIndex: ContentSearchIndex
 ) : DuaRepository {
 
     /** Seed (if the bundled content is new/missing) once, then emit DB-backed flows. */
@@ -68,10 +71,25 @@ class DuaRepositoryImpl @Inject constructor(
         duaDao.searchDuas(occasion.name.lowercase()).mapItems { it.toDomain() }
     }
 
+    /**
+     * The index first, the scan only where there is no index (#330).
+     *
+     * A dua carries `text_arabic` and a transliteration, and neither was reachable by
+     * `LIKE`: the Arabic is vocalised and the transliteration is full of macrons and
+     * dots. Both are folded into the shipped index.
+     */
     override fun searchDuas(query: String): Flow<List<DuaSearchResult>> = seededFlow {
         combine(
             duaDao.getAllCategories(),
-            duaDao.searchDuas(query)
+            flow {
+                if (searchIndex.isAvailable()) {
+                    val ids = searchIndex.refs(query, SearchKind.DUA)
+                        .mapNotNull(String::toIntOrNull)
+                    emit(duaDao.getDuasByIds(ids))
+                } else {
+                    emitAll(duaDao.searchDuas(query))
+                }
+            }
         ) { categories, entities ->
             // Create a map from category id to category name for lookup
             val categoryMap = categories.associate { it.id to it.nameEnglish }

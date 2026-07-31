@@ -371,6 +371,41 @@ The full per-page pass/fail sheet is generated at [`docs/quran/16-line-fidelity-
 
 **Ayah-number ornament (Uthmani/Madani path).** On the default (non-16-line) layouts the ayah number is *appended* by the renderer as an ornamental end-marker `﴿n﴾` (open bracket U+FD3F + Arabic-Indic digits + close bracket U+FD3E), built once in `presentation/components/atoms/QuranTextFormat.kt` (`appendAyahEndMarker`/`annotatedAyahEndMarker`) and reused by all three Madani render paths (`ArabicText.QuranVerseText`, the tajweed branch of `QuranAyahItem`, and `MushafContinuousText`). Those bracket glyphs exist only in the naskh faces (Amiri/Scheherazade); the IndoPak Nastaʿlīq font (`QuranArabicFont.INDOPAK`) has **no** glyphs for them — its own ayah numbers are Private-Use-Area ornaments baked into the IndoPak glyph text, which the Madani/Uthmani text never carries. So the marker span is **pinned to `AmiriFontFamily`** (the `markerFontFamily` default) instead of inheriting the selected verse font; without this pin, choosing the IndoPak font on the Madani layout dropped the marker to a missing glyph and the ayah number rendered as nothing. The 16-line renderer (`MushafLineLayout`) is unaffected — there the number is part of the word glyph text and `appendAyahEndMarker` is never called.
 
+**Full-text search, shipped inside the artifact (#330, `nimaz-data`#7).** Arabic search returned
+**zero results for every query**, always: `LIKE '%الله%'` matched nothing while الله is in 1,746
+verses. The stored text is fully vocalised (`ٱلرَّحْمَٰنِ` is twelve codepoints where a keyboard
+gives six) and the first letter of 77% of ayahs is U+0671 ALEF WASLA — a different *letter* from
+U+0627, so stripping marks was never enough on its own. Nothing looked broken, because an empty
+result list reads as "no results".
+
+The index is **compiled into the content artifact** by `nimaz-data`'s build, never on the device:
+
+- **Three tables, none of them Room entities.** `search_index` (contentless FTS4 over a folded
+  `body`), `search_docs(docid, kind, ref, source)` — the join key, which a contentless FTS table
+  cannot hold itself — and `search_meta`. `createFromAsset` passes tables Room does not declare
+  straight through, so they arrive already built, change **no identity hash** and need **no
+  migration**. That is what makes this affordable: the previous attempt built the index on-device
+  over 200,000 rows at first launch.
+- **FTS4, not FTS5.** FTS5 is an optional compile-time module AOSP has never enabled — `USING
+  fts5` fails with *"no such module: fts5"* on a stock device. `SqliteFtsSupportTest`
+  (instrumentation) records what each device actually supports; flipping the data repo's
+  `search.flavour` would need that evidence.
+- **One folding, two implementations.** `domain/search/ArabicSearchNormaliser` folds a typed
+  query; `nimaz_data/normalise/arabic.py` folded the indexed text. They must agree exactly or
+  every query matches nothing *and no test fails*, so both are held to the generated
+  `app/src/test/resources/search/fold-fixtures.json` (`nz search fixtures`, exported by `nz app
+  sync`). `search_meta.fold_version` is checked at runtime; a mismatch makes the app refuse the
+  index rather than under-match silently.
+- **Reading it.** `data/local/search/ContentSearchIndex` is the only reader, via `@RawQuery`. The
+  query shape matters: `WHERE d.docid IN (SELECT docid FROM search_index WHERE … MATCH ?)` takes
+  0.6 ms where the equivalent `JOIN` takes 595 ms, because the join lets SQLite drive from
+  `search_docs` and interrogate a contentless index one docid at a time.
+- **The `LIKE` queries stay, and are not dead code.** `createFromAsset` copies the artifact
+  **once**, so an install made before the index shipped has no index and cannot get one without a
+  reinstall. `QuranRepositoryImpl`, `HadithRepositoryImpl` and `DuaRepositoryImpl` ask
+  `searchIndex.isAvailable()` and fall back to exactly the search those installs already had.
+  `LocationDao`'s `LIKE` is untouched — a small user-facing table with no Arabic in it.
+
 **Rules / patterns.**
 - **A schema change requires a migration.** Bump `@Database(version = …)` and add a `MIGRATION_x_y`. Room runs migrations **even after `createFromAsset`**, so every migration must work for both fresh installs (asset already has newer tables → `CREATE TABLE IF NOT EXISTS` is a no-op) and upgraders (tables created empty / columns added).
 - **Migrations must be idempotent.** SQLite has no `ADD COLUMN IF NOT EXISTS`, so column adds go through the `SupportSQLiteDatabase.addColumnIfMissing(...)` helper at the bottom of the file; table creates use `CREATE TABLE IF NOT EXISTS`.
