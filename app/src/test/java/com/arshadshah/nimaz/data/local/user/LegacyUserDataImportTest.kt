@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
@@ -25,14 +26,21 @@ import java.io.File
 class LegacyUserDataImportTest {
 
     private lateinit var db: NimazUserDatabase
+    private lateinit var user: File
     private lateinit var legacy: File
 
     @Before
     fun setUp() {
         val context = ApplicationProvider.getApplicationContext<Context>()
-        db = Room.inMemoryDatabaseBuilder(context, NimazUserDatabase::class.java)
+        // On disk rather than in memory, because the copy runs on a connection of its own and
+        // attaches this file by path — it deliberately never borrows Room's. An in-memory
+        // database has no path to attach, and would not exercise the thing being tested.
+        user = File.createTempFile("nimaz-user", ".db").also { it.delete() }
+        db = Room.databaseBuilder(context, NimazUserDatabase::class.java, user.absolutePath)
             .allowMainThreadQueries()
             .build()
+        // Force the schema into existence: the copy writes into tables Room creates.
+        db.openHelper.writableDatabase
         legacy = File.createTempFile("legacy-content", ".db")
         buildLegacy(legacy)
     }
@@ -40,6 +48,7 @@ class LegacyUserDataImportTest {
     @After
     fun tearDown() {
         db.close()
+        user.delete()
         legacy.delete()
     }
 
@@ -90,6 +99,24 @@ class LegacyUserDataImportTest {
                 "arabic TEXT NOT NULL, transliteration TEXT NOT NULL, translation TEXT NOT NULL, " +
                 "target_count INTEGER NOT NULL, is_custom INTEGER NOT NULL, " +
                 "display_order INTEGER NOT NULL, updatedAt INTEGER NOT NULL DEFAULT 0, category TEXT)"
+        )
+        // A straight copy, and the one that carries a column the new database does not have.
+        // The column list for these is read back off the *new* schema rather than spelled out,
+        // so this is what pins that lookup — and that `legacyOnly` is left where it is.
+        helper.execSQL(
+            "CREATE TABLE locations (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, " +
+                "latitude REAL NOT NULL, longitude REAL NOT NULL, timezone TEXT NOT NULL, " +
+                "country TEXT, city TEXT, isCurrentLocation INTEGER NOT NULL, " +
+                "isFavorite INTEGER NOT NULL, calculationMethod TEXT, asrCalculation TEXT, " +
+                "highLatitudeRule TEXT, fajrAngle REAL, ishaAngle REAL, createdAt INTEGER NOT NULL, " +
+                "updatedAt INTEGER NOT NULL, legacyOnly TEXT)"
+        )
+        helper.execSQL(
+            "INSERT INTO locations (name, latitude, longitude, timezone, country, city, " +
+                "isCurrentLocation, isFavorite, calculationMethod, asrCalculation, highLatitudeRule, " +
+                "fajrAngle, ishaAngle, createdAt, updatedAt, legacyOnly) " +
+                "VALUES ('Dublin', 53.35, -6.26, 'Europe/Dublin', 'Ireland', 'Dublin', " +
+                "1, 0, 'MWL', 'standard', NULL, NULL, NULL, 1100, 1100, 'dropped')"
         )
         helper.execSQL(
             "CREATE TABLE reading_progress (id INTEGER PRIMARY KEY, lastReadSurah INTEGER NOT NULL, " +
@@ -153,7 +180,7 @@ class LegacyUserDataImportTest {
     }
 
     private fun import() =
-        LegacyUserDataImport.run(db.openHelper.writableDatabase, legacy.absolutePath)
+        LegacyUserDataImport.run(user.absolutePath, legacy.absolutePath)
 
     @Test
     fun `a verse that was bookmarked and favourited becomes one row with both flags`() = runTest {
@@ -237,6 +264,23 @@ class LegacyUserDataImportTest {
         }
     }
 
+    /**
+     * The straight copies name their columns off the *new* schema when the caller does not
+     * spell them out, which is what lets a legacy-only column stay behind instead of failing
+     * the insert. That lookup reads the user database across an attachment, so it is only
+     * right if it asks the right schema.
+     */
+    @Test
+    fun `a straight copy takes the columns the new database declares and no others`() = runTest {
+        import()
+
+        val saved = db.locationDao().getAllLocations().first()
+        assertThat(saved).hasSize(1)
+        assertThat(saved.single().name).isEqualTo("Dublin")
+        assertThat(saved.single().timezone).isEqualTo("Europe/Dublin")
+        assertThat(saved.single().isCurrentLocation).isTrue()
+    }
+
     @Test
     fun `running twice changes nothing`() = runTest {
         import()
@@ -260,17 +304,16 @@ class LegacyUserDataImportTest {
             helper.execSQL("INSERT INTO prophet_bookmarks (prophet_id, is_favorite, created_at) VALUES (1, 1, 5)")
         }
 
-        LegacyUserDataImport.run(db.openHelper.writableDatabase, sparse.absolutePath)
+        LegacyUserDataImport.run(user.absolutePath, sparse.absolutePath)
 
         assertThat(db.bookmarkDao().all()).hasSize(1)
         sparse.delete()
     }
 
     @Test
-    fun `an absent legacy file is not needed and not an error`() {
+    fun `an absent legacy file is not an error`() {
         val gone = File(legacy.parentFile, "does-not-exist.db")
-        assertThat(LegacyUserDataImport.isNeeded(db.openHelper.writableDatabase, gone.absolutePath))
-            .isFalse()
+        assertThat(LegacyUserDataImport.run(user.absolutePath, gone.absolutePath)).isEqualTo(0)
     }
 
     @Test
@@ -280,8 +323,37 @@ class LegacyUserDataImportTest {
                 kind = BookmarkKind.AYAH, targetId = 999, createdAt = 1, updatedAt = 1,
             )
         )
-        assertThat(LegacyUserDataImport.isNeeded(db.openHelper.writableDatabase, legacy.absolutePath))
-            .isFalse()
+
+        assertThat(import()).isEqualTo(0)
+
+        val kept = db.bookmarkDao().all()
+        assertThat(kept).hasSize(1)
+        assertThat(kept.single().targetId).isEqualTo(999)
+    }
+
+    /**
+     * The regression this whole shape exists for.
+     *
+     * The copy used to run on Room's own connection, and its `ATTACH` made the framework
+     * close that connection and open a new one — taking `room_table_modification_log` and
+     * every invalidation trigger with it, because Room creates both as `TEMP` and only when
+     * it opens a connection itself. The next Flow to start observing a table then died with
+     * "no such table: room_table_modification_log". Starting to observe *after* an import is
+     * exactly that path.
+     */
+    @Test
+    fun `the invalidation tracker still works after an import`() = runTest {
+        import()
+
+        // Starts tracking the table, which is what wrote to room_table_modification_log and
+        // threw. Collecting it at all is the assertion.
+        assertThat(db.bookmarkDao().bookmarks(BookmarkKind.AYAH).first()).isNotEmpty()
+
+        // And a write through Room still goes through, triggers and all.
+        db.bookmarkDao().upsert(
+            BookmarkEntity(kind = BookmarkKind.AYAH, targetId = 4242, createdAt = 1, updatedAt = 1)
+        )
+        assertThat(db.bookmarkDao().find(BookmarkKind.AYAH, 4242)).isNotNull()
     }
 
     @Test

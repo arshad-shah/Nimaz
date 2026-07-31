@@ -302,8 +302,40 @@ Ramadan.
 
 ## 5. Database & migrations
 
-`data/local/database/NimazDatabase.kt` — a single Room `@Database` (`version = 18`), provided
-in `core/di/DatabaseModule.kt`.
+Two Room `@Database`es, both provided in `core/di/DatabaseModule.kt`:
+
+- `data/local/database/NimazDatabase.kt` (`nimaz_database`, `NIMAZ_DATABASE_VERSION`) — shipped
+  content. Read-only in practice and disposable: it arrives as a fetched artifact (§7) and is
+  replaced wholesale by a release.
+- `data/local/user/NimazUserDatabase.kt` (`nimaz_user_database`, `NIMAZ_USER_DATABASE_VERSION`) —
+  everything the user made. Created by Room on the device, never shipped. Split out at content
+  `schemaVersion 23`; `MIGRATION_22_23` is deliberately empty, because the old tables are **left
+  in place** rather than dropped so the original rows stay recoverable.
+
+**Legacy user-data import.** `LegacyUserDataImport` copies an existing install's rows out of the
+content database into the user database the first time it is opened, driven by `UserDataMigrator`
+from `AppInitializer` (§9) and awaited before the splash screen lifts. It is one transaction of
+`INSERT OR IGNORE`s over two `ATTACH`ed files, so an interrupted copy leaves nothing half-written
+and a second attempt is a no-op.
+
+> **Never `ATTACH` on a connection Room owns.** This has now caused the same crash twice, by two
+> different routes, and both are worth knowing:
+>
+> 1. Writing from a Room `Callback.onOpen` fires invalidation triggers before Room has created
+>    `room_table_modification_log`. This is why `provideNimazUserDatabase` has no `addCallback`.
+> 2. `SQLiteDatabase.execSQL` inspects every statement, and on the first `ATTACH` a connection
+>    ever sees it clears `ENABLE_WRITE_AHEAD_LOGGING` and reconfigures the pool — which **closes
+>    the primary connection and opens a new one**. Room builds its whole tracker in that
+>    connection's temporary schema (`room_table_modification_log` is a `CREATE TEMP TABLE`, the
+>    per-table triggers are `CREATE TEMP TRIGGER`) and only does so when *it* opens a connection,
+>    so after the swap they are gone for the life of the process.
+>
+> Either way the next Flow to start observing a table dies in `syncTriggers` with
+> `no such table: room_table_modification_log`. The import therefore attaches **both** files to a
+> throwaway in-memory database it owns and closes: an in-memory `main` has no journal mode to be
+> taken out of and is capped at one connection anyway, so the reconfigure is a no-op and both
+> real files keep the journal mode Room gave them. The cost of the separate connection is that
+> Room does not observe the copy — hence the ordering guarantee above.
 
 **Prepopulated DB.** The app ships a prebuilt DB in `app/src/main/assets/database/nimaz_prepopulated.db`, wired via `.createFromAsset("database/nimaz_prepopulated.db", NimazDatabase.PREPACKAGED_CALLBACK)`. **Room copies this asset only on a fresh install** — it is *not* re-copied on app update. That single fact drives both the migration discipline here and the entire content-seeding subsystem (§7).
 
