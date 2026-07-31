@@ -1,8 +1,8 @@
 package com.arshadshah.nimaz.data.local.user
 
+import android.database.sqlite.SQLiteDatabase
 import androidx.room.Database
 import androidx.room.RoomDatabase
-import androidx.sqlite.db.SupportSQLiteDatabase
 import com.arshadshah.nimaz.data.local.database.entity.FastRecordEntity
 import com.arshadshah.nimaz.data.local.database.entity.KhatamAyahEntity
 import com.arshadshah.nimaz.data.local.database.entity.KhatamDailyLogEntity
@@ -137,53 +137,96 @@ abstract class NimazUserDatabase : RoomDatabase() {
  * opened, mapping the seven bookmark tables and three progress tables into the two that
  * replace them.
  *
- * Written as one transaction over an `ATTACH`ed legacy file rather than as a Kotlin loop,
- * so an interrupted copy leaves nothing half-written and a second attempt is a no-op:
- * every statement is `INSERT OR IGNORE` keyed on what the new tables key on.
+ * Written as one transaction over two `ATTACH`ed files rather than as a Kotlin loop, so an
+ * interrupted copy leaves nothing half-written and a second attempt is a no-op: every
+ * statement is `INSERT OR IGNORE` keyed on what the new tables key on.
  *
  * The legacy tables are never modified. Dropping them would be the tidy thing and the
  * wrong thing — a bug here must be survivable, and it is only survivable while the
  * original rows are still on disk.
+ *
+ * ## Why this opens a connection of its own
+ *
+ * Neither database is opened as `main`: both are attached to a throwaway in-memory database
+ * that this object owns and closes. That is not tidiness, it is the fix for a crash.
+ *
+ * `SQLiteDatabase.execSQL` inspects every statement, and on the first `ATTACH` a connection
+ * ever sees it clears `ENABLE_WRITE_AHEAD_LOGGING` and reconfigures the pool. Changing the
+ * open flags that way makes the framework **close the primary connection and open a new
+ * one**. Room keeps its entire invalidation tracker in that connection's temporary schema —
+ * `room_table_modification_log` is a `CREATE TEMP TABLE` and the per-table triggers are
+ * `CREATE TEMP TRIGGER` — and it only builds them when *it* opens a connection. After the
+ * swap they are gone for the life of the process, and the next Flow to start observing a
+ * table dies in `syncTriggers` with
+ *
+ *     android.database.sqlite.SQLiteException: no such table: room_table_modification_log,
+ *     while compiling: INSERT OR IGNORE INTO room_table_modification_log VALUES(4, 0)
+ *
+ * which is a crash on launch for anyone the copy runs for. So the `ATTACH` has to happen
+ * somewhere Room is not looking. An in-memory `main` is the one place that costs nothing:
+ * it has no journal mode to be taken out of and its pool is capped at a single connection
+ * either way, so the reconfigure is a no-op and both real files keep the journal mode Room
+ * gave them.
+ *
+ * The flip side is that Room does not see these writes — the triggers that would have
+ * noticed them belong to a different connection — so this must finish before anything
+ * starts observing. `AppInitializer` awaits it and the splash screen holds until it does.
  */
 object LegacyUserDataImport {
 
-    /** True when the legacy file exists and has at least one of the tables we read. */
-    fun isNeeded(db: SupportSQLiteDatabase, legacyPath: String): Boolean {
-        if (!java.io.File(legacyPath).exists()) return false
-        return db.query("SELECT COUNT(*) FROM bookmarks").use { cursor ->
-            cursor.moveToFirst() && cursor.getInt(0) == 0
-        } && db.query("SELECT COUNT(*) FROM reading_progress").use { cursor ->
-            cursor.moveToFirst() && cursor.getInt(0) == 0
+    /**
+     * Copies [legacyPath]'s user rows into [userPath], and returns how many statements
+     * moved anything.
+     *
+     * Both are file paths rather than an open database on purpose — see the note above on
+     * why this cannot borrow Room's connection. [userPath] must already hold the schema;
+     * Room creates it when it opens the database, which [UserDataMigrator] does first.
+     */
+    fun run(userPath: String, legacyPath: String): Int {
+        if (!java.io.File(legacyPath).exists()) return 0
+        val db = SQLiteDatabase.create(null)
+        return try {
+            db.execSQL("ATTACH DATABASE ? AS user", arrayOf<Any?>(userPath))
+            db.execSQL("ATTACH DATABASE ? AS legacy", arrayOf<Any?>(legacyPath))
+            if (isNeeded(db)) copy(db) else 0
+        } finally {
+            // Closing detaches both; the in-memory database itself never held anything.
+            db.close()
         }
     }
 
-    fun run(db: SupportSQLiteDatabase, legacyPath: String): Int {
-        db.execSQL("ATTACH DATABASE ? AS legacy", arrayOf(legacyPath))
+    /** Nothing to do once the user database has rows of its own. */
+    private fun isNeeded(db: SQLiteDatabase): Boolean =
+        isEmpty(db, "bookmarks") && isEmpty(db, "reading_progress")
+
+    private fun isEmpty(db: SQLiteDatabase, table: String): Boolean =
+        db.rawQuery("SELECT 1 FROM user.`$table` LIMIT 1", null).use { !it.moveToFirst() }
+
+    private fun copy(db: SQLiteDatabase): Int {
         var copied = 0
+        // Non-exclusive (`BEGIN IMMEDIATE`): both attached files are open in WAL on Room's own
+        // connections at this point, and an exclusive transaction would take locks that lock
+        // Room's readers out for the length of the copy.
+        db.beginTransactionNonExclusive()
         try {
-            db.beginTransaction()
-            try {
-                copied += bookmarks(db)
-                copied += progress(db)
-                copied += customPresets(db)
-                copied += straightCopies(db)
-                db.setTransactionSuccessful()
-            } finally {
-                db.endTransaction()
-            }
+            copied += bookmarks(db)
+            copied += progress(db)
+            copied += customPresets(db)
+            copied += straightCopies(db)
+            db.setTransactionSuccessful()
         } finally {
-            db.execSQL("DETACH DATABASE legacy")
+            db.endTransaction()
         }
         return copied
     }
 
-    private fun has(db: SupportSQLiteDatabase, table: String): Boolean =
-        db.query(
+    private fun has(db: SQLiteDatabase, table: String): Boolean =
+        db.rawQuery(
             "SELECT 1 FROM legacy.sqlite_master WHERE type='table' AND name=?",
             arrayOf(table),
         ).use { it.moveToFirst() }
 
-    private fun exec(db: SupportSQLiteDatabase, table: String, sql: String): Int {
+    private fun exec(db: SQLiteDatabase, table: String, sql: String): Int {
         if (!has(db, table)) return 0
         db.execSQL(sql)
         return 1
@@ -196,12 +239,12 @@ object LegacyUserDataImport {
      * as one row with both flags — hence the favourites pass is an `UPDATE` of anything the
      * bookmark pass already inserted, then an `INSERT` for the rest.
      */
-    private fun bookmarks(db: SupportSQLiteDatabase): Int {
+    private fun bookmarks(db: SQLiteDatabase): Int {
         var n = 0
         n += exec(
             db, "quran_bookmarks",
             """
-            INSERT OR IGNORE INTO bookmarks
+            INSERT OR IGNORE INTO user.bookmarks
                 (kind, target_id, bookmarked, favourite, note, colour, context_id, ordinal,
                  created_at, updated_at)
             SELECT '${BookmarkKind.AYAH}', ayahId, 1, 0, note, color, surahNumber, ayahNumber,
@@ -212,14 +255,14 @@ object LegacyUserDataImport {
         if (has(db, "quran_favorites")) {
             db.execSQL(
                 """
-                UPDATE bookmarks SET favourite = 1
+                UPDATE user.bookmarks SET favourite = 1
                 WHERE kind = '${BookmarkKind.AYAH}'
                   AND target_id IN (SELECT ayahId FROM legacy.quran_favorites)
                 """.trimIndent()
             )
             db.execSQL(
                 """
-                INSERT OR IGNORE INTO bookmarks
+                INSERT OR IGNORE INTO user.bookmarks
                     (kind, target_id, bookmarked, favourite, note, colour, context_id, ordinal,
                      created_at, updated_at)
                 SELECT '${BookmarkKind.AYAH}', ayahId, 0, 1, NULL, NULL, surahNumber, ayahNumber,
@@ -232,7 +275,7 @@ object LegacyUserDataImport {
         n += exec(
             db, "hadith_bookmarks",
             """
-            INSERT OR IGNORE INTO bookmarks
+            INSERT OR IGNORE INTO user.bookmarks
                 (kind, target_id, bookmarked, favourite, note, colour, context_id, ordinal,
                  created_at, updated_at)
             SELECT '${BookmarkKind.HADITH}', hadithId, 1, 0, note, color, bookId, hadithNumber,
@@ -243,7 +286,7 @@ object LegacyUserDataImport {
         n += exec(
             db, "dua_bookmarks",
             """
-            INSERT OR IGNORE INTO bookmarks
+            INSERT OR IGNORE INTO user.bookmarks
                 (kind, target_id, bookmarked, favourite, note, colour, context_id, ordinal,
                  created_at, updated_at)
             SELECT '${BookmarkKind.DUA}', duaId, 1, isFavorite, note, NULL, categoryId, NULL,
@@ -259,7 +302,7 @@ object LegacyUserDataImport {
             n += exec(
                 db, table,
                 """
-                INSERT OR IGNORE INTO bookmarks
+                INSERT OR IGNORE INTO user.bookmarks
                     (kind, target_id, bookmarked, favourite, note, colour, context_id, ordinal,
                      created_at, updated_at)
                 SELECT '$kind', $column, 1, is_favorite, NULL, NULL, NULL, NULL,
@@ -284,10 +327,10 @@ object LegacyUserDataImport {
      * the user database is first opened. The instrumented suite caught it; the unit test had
      * built its own fixture and did not include this table, so it could not.
      */
-    private fun customPresets(db: SupportSQLiteDatabase): Int = exec(
+    private fun customPresets(db: SQLiteDatabase): Int = exec(
         db, "tasbih_presets",
         """
-        INSERT OR IGNORE INTO custom_tasbih_presets
+        INSERT OR IGNORE INTO user.custom_tasbih_presets
             (id, name, arabic, transliteration, translation, target_count, display_order,
              category, created_at, updated_at)
         SELECT id, name, arabic, transliteration, translation, target_count, display_order,
@@ -297,12 +340,12 @@ object LegacyUserDataImport {
     )
 
     /** Three progress tables into one. `reading_progress` copies across unchanged. */
-    private fun progress(db: SupportSQLiteDatabase): Int {
+    private fun progress(db: SQLiteDatabase): Int {
         var n = 0
         n += exec(
             db, "dua_progress",
             """
-            INSERT OR IGNORE INTO progress
+            INSERT OR IGNORE INTO user.progress
                 (kind, target_id, date, context_id, completed, total, is_completed, state,
                  score, resume_id, created_at, updated_at)
             SELECT '${ProgressKind.DUA}', duaId, date, NULL, completedCount, targetCount,
@@ -313,7 +356,7 @@ object LegacyUserDataImport {
         n += exec(
             db, "qaida_lesson_progress",
             """
-            INSERT OR IGNORE INTO progress
+            INSERT OR IGNORE INTO user.progress
                 (kind, target_id, date, context_id, completed, total, is_completed, state,
                  score, resume_id, created_at, updated_at)
             SELECT '${ProgressKind.QAIDA_LESSON}', lesson_id, 0, NULL, completed_cells,
@@ -325,7 +368,7 @@ object LegacyUserDataImport {
         n += exec(
             db, "qaida_cell_progress",
             """
-            INSERT OR IGNORE INTO progress
+            INSERT OR IGNORE INTO user.progress
                 (kind, target_id, date, context_id, completed, total, is_completed, state,
                  score, resume_id, created_at, updated_at)
             SELECT '${ProgressKind.QAIDA_CELL}', cell_id, 0, lesson_id, heard_count, NULL,
@@ -341,7 +384,7 @@ object LegacyUserDataImport {
      * `SELECT *`: a `SELECT *` copy silently depends on column order matching, which is
      * exactly the kind of assumption that survives review and fails on one device.
      */
-    private fun straightCopies(db: SupportSQLiteDatabase): Int {
+    private fun straightCopies(db: SQLiteDatabase): Int {
         val copies = listOf(
             "reading_progress" to
                 "id, lastReadSurah, lastReadAyah, lastReadPage, lastReadJuz, totalAyahsRead, " +
@@ -363,15 +406,22 @@ object LegacyUserDataImport {
             if (!has(db, table)) continue
             val list = columns ?: columnsOf(db, table).joinToString(", ") { "`$it`" }
             if (list.isBlank()) continue
-            db.execSQL("INSERT OR IGNORE INTO `$table` ($list) SELECT $list FROM legacy.`$table`")
+            db.execSQL(
+                "INSERT OR IGNORE INTO user.`$table` ($list) SELECT $list FROM legacy.`$table`"
+            )
             n++
         }
         return n
     }
 
-    /** The columns the *new* database declares, so a legacy extra column is left behind. */
-    private fun columnsOf(db: SupportSQLiteDatabase, table: String): List<String> =
-        db.query("PRAGMA table_info(`$table`)").use { cursor ->
+    /**
+     * The columns the *new* database declares, so a legacy extra column is left behind.
+     *
+     * Also the guard for a table the new database does not have at all: `PRAGMA table_info`
+     * on a missing table returns no rows, which [straightCopies] reads as "skip".
+     */
+    private fun columnsOf(db: SQLiteDatabase, table: String): List<String> =
+        db.rawQuery("PRAGMA user.table_info(`$table`)", null).use { cursor ->
             val index = cursor.getColumnIndex("name")
             buildList { while (cursor.moveToNext()) add(cursor.getString(index)) }
         }

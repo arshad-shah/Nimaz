@@ -21,6 +21,12 @@ import javax.inject.Singleton
  * database. Idempotent, so running it on a launch where it has already happened costs two
  * counts; and it never throws — a person whose data cannot be copied should still get an app,
  * with the original rows still sitting untouched in the old file for a later attempt.
+ *
+ * What it does *not* do any more is hand Room's own connection to the copy. That looked like
+ * the frugal thing — the database is already open, why open another? — and it brought the same
+ * crash back through a different door, because the copy's `ATTACH` makes the framework swap
+ * the connection out from under Room and take the tracker's temporary tables with it. The
+ * copy owns its connection now; see [LegacyUserDataImport].
  */
 @Singleton
 class UserDataMigrator @Inject constructor(
@@ -32,9 +38,11 @@ class UserDataMigrator @Inject constructor(
         val legacy = File(context.getDatabasePath(NimazDatabase.DATABASE_NAME).absolutePath)
         if (!legacy.exists()) return 0
         return try {
-            val db = userDatabase.openHelper.writableDatabase
-            if (!LegacyUserDataImport.isNeeded(db, legacy.absolutePath)) 0
-            else LegacyUserDataImport.run(db, legacy.absolutePath)
+            // Touched only to make Room create and migrate the schema — the copy needs the
+            // tables to exist before it can write to them. Nothing is read or written here.
+            userDatabase.openHelper.writableDatabase
+            val user = context.getDatabasePath(NimazUserDatabase.DATABASE_NAME)
+            LegacyUserDataImport.run(user.absolutePath, legacy.absolutePath)
         } catch (e: Exception) {
             // Reported, not rethrown, and nothing is left half-written: the copy is one
             // transaction. The legacy rows are untouched either way.
