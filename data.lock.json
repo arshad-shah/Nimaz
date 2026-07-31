@@ -15,14 +15,14 @@
   "tag": "data-v7",
   "schemaVersion": 23,
   "artifact": {
-    "file": "nimaz-424570f7.db",
+    "file": "nimaz-d7af8364.db",
     "assetPath": "database/nimaz_prepopulated.db",
-    "sha256": "424570f7053505906ea2127b214839c23bb70ed4fd2e839509159b227b25facb",
+    "sha256": "d7af8364b095552b846c0d5d36832f6231fd8df5edcd147f3df83a019f196b37",
     "bytes": 176562176,
     "compressed": {
-      "file": "nimaz-424570f7.db.gz",
-      "sha256": "fc4af2aa6b88ee570a06574cf203ed1ad3c9380d066b8164faac20fe8215b0e8",
-      "bytes": 54318460
+      "file": "nimaz-d7af8364.db.gz",
+      "sha256": "0c84cf0096d6b48cffa8d699732d3f348df2ddf64166e0140a7e3db662b021fb",
+      "bytes": 54415049
     }
   }
 }
