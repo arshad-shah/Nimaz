@@ -245,11 +245,23 @@ private fun outlinedBorder(enabled: Boolean): BorderStroke {
     return BorderStroke(1.dp, if (enabled) color else color.copy(alpha = 0.12f))
 }
 
+/**
+ * Label style per [NimazButtonSize].
+ *
+ * Button labels live on the **label** scale (`Type.kt`: "For buttons, tabs, and small
+ * labels"), not the **title** scale used for card headings. Sizing them off `title*`
+ * made a [NimazButtonSize.LARGE] button render its label at `titleLarge` (22.sp) —
+ * heading-sized text inside a 56.dp button, which crowded the icon and truncated
+ * two-word labels ("Start Reading") on narrow screens.
+ *
+ * [NimazButtonSize.LARGE] keeps `titleMedium` (16.sp) so it still steps up visibly
+ * from the other two; that matches Material 3's own 56.dp button label size.
+ */
 @Composable
 private fun textStyleFor(size: NimazButtonSize): TextStyle = when (size) {
-    NimazButtonSize.SMALL -> MaterialTheme.typography.titleSmall
-    NimazButtonSize.MEDIUM -> MaterialTheme.typography.titleMedium
-    NimazButtonSize.LARGE -> MaterialTheme.typography.titleLarge
+    NimazButtonSize.SMALL -> MaterialTheme.typography.labelLarge
+    NimazButtonSize.MEDIUM -> MaterialTheme.typography.labelLarge
+    NimazButtonSize.LARGE -> MaterialTheme.typography.titleMedium
 }
 
 @Composable
