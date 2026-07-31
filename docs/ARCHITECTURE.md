@@ -537,6 +537,14 @@ typed route object.
       `SMALL`/`MEDIUM`/`LARGE`, `type` is `STANDARD` or `PILL`; `leadingIcon`/`trailingIcon`,
       `loading`, `fullWidth` and an `accent` escape-hatch (for Islamic feature-art colours the
       Material scheme has no role for) round it out. Icon-only buttons are `NimazIconButton`.
+      - **Label size comes from `size`, off the `label*` type scale — never `title*`.**
+        `SMALL`/`MEDIUM` render `labelLarge` (14.sp) and `LARGE` renders `titleMedium` (16.sp).
+        `Type.kt` designates `label*` as the button/tab scale and `title*` as the card-heading
+        scale; sizing labels off `title*` had `LARGE` drawing its text at `titleLarge` (22.sp) —
+        heading-sized text inside a 56.dp button, which crowded the leading icon and ellipsised
+        two-word labels ("Start Reading" on the Surah info screen) on narrow screens. `LARGE`
+        stays one step up at 16.sp, which is Material 3's own label size for a 56.dp button.
+        Call sites don't pass a style — pick the `size`.
     - a card is `NimazCard(style = NimazCardStyle.FILLED | ELEVATED | OUTLINED | GRADIENT, …)`
       (`components/atoms/NimazCard.kt`), **not** a raw Material 3 `Card`/`ElevatedCard`/
       `OutlinedCard`. It passes through `onClick`/`enabled`/`shape`/`colors`/`elevation`, so
