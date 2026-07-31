@@ -17,6 +17,7 @@ import com.arshadshah.nimaz.data.local.database.dao.QaidaDao
 import com.arshadshah.nimaz.data.local.database.dao.QuranDao
 import com.arshadshah.nimaz.data.local.database.dao.TafseerDao
 import com.arshadshah.nimaz.data.local.database.dao.TasbihDao
+import com.arshadshah.nimaz.data.local.search.SearchIndexDao
 import com.arshadshah.nimaz.data.local.database.entity.AsmaUlHusnaEntity
 import com.arshadshah.nimaz.data.local.database.entity.AsmaUnNabiEntity
 import com.arshadshah.nimaz.data.local.database.entity.AyahEntity
@@ -120,6 +121,15 @@ abstract class NimazDatabase : RoomDatabase() {
     abstract fun prophetDao(): ProphetDao
     abstract fun helpDao(): HelpDao
     abstract fun qaidaDao(): QaidaDao
+
+    /**
+     * The FTS index the artifact ships (#330). Every method on it is `@RawQuery`, because
+     * `search_index`, `search_docs` and `search_meta` are deliberately **not** entities:
+     * `createFromAsset` passes tables Room does not declare straight through, so the index
+     * arrives already built, changes no identity hash, and needs no migration. Declaring
+     * them would put building them back on the device, over 152,551 documents.
+     */
+    abstract fun searchIndexDao(): SearchIndexDao
 
     companion object {
         const val DATABASE_NAME = "nimaz_database"

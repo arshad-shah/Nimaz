@@ -11,9 +11,23 @@ import javax.inject.Inject
 
 /**
  * Smart local search over the whole content library (Quran ayat + surah names,
- * Hadith, Duas). The underlying DAO queries match a single contiguous substring
- * (`LIKE '%q%'`), which made multi-word queries like "patience during hardship"
- * return nothing. This use case fixes that:
+ * Hadith, Duas).
+ *
+ * The ranking here is unchanged by the search index (#330) and is what decides its
+ * query shape rather than the other way round: because a whole-phrase hit scores
+ * [PHRASE_SCORE] and each word scores 1, the two passes have to ask *different*
+ * questions of the index, so `ArabicSearchNormaliser.matchExpression` sends a
+ * multi-word query as an FTS phrase and a single word as a prefix term. OR-ing the
+ * phrase pass would hand every single-word hit the phrase score.
+ *
+ * What did change is what the repositories do underneath. They used to match a single
+ * contiguous substring (`LIKE '%q%'`) per term per source — twelve full scans over 36 MB
+ * of hadith and 21 MB of translations for a three-word query, and **zero rows for any
+ * Arabic query ever**, because the corpus is vocalised. Where the artifact carries the
+ * folded index they are index lookups instead; where it does not (an install older than
+ * the index) they are the same scans as before.
+ *
+ * The ranking itself:
  *
  *  - The full phrase is always searched (exact-substring hits rank highest).
  *  - Multi-word queries are additionally tokenized into significant words and

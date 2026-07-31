@@ -26,6 +26,7 @@ import com.arshadshah.nimaz.data.local.database.dao.QuranDao
 import com.arshadshah.nimaz.data.local.database.dao.TafseerDao
 import com.arshadshah.nimaz.data.local.database.dao.TasbihDao
 import com.arshadshah.nimaz.data.local.database.dao.ZakatDao
+import com.arshadshah.nimaz.data.local.search.SearchIndexDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -115,6 +116,14 @@ object DatabaseModule {
     @Provides
     @Singleton
     fun provideQuranDao(database: NimazDatabase): QuranDao = database.quranDao()
+
+    /**
+     * Reads the FTS index compiled into the content artifact (#330). Nothing here creates
+     * or populates it — see [SearchIndexDao] and `ContentSearchIndex` for why that matters.
+     */
+    @Provides
+    @Singleton
+    fun provideSearchIndexDao(database: NimazDatabase): SearchIndexDao = database.searchIndexDao()
 
     @Provides
     @Singleton
