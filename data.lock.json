@@ -6,15 +6,23 @@
     "The artifact is fetched and sha256-verified by the fetchNimazData Gradle task, then",
     "wired in as a generated assets source root, so createFromAsset keeps working unchanged.",
     "It is not committed here: LFS stores every version whole, so a one-row correction used",
-    "to cost another 140 MB object forever."
+    "to cost another 140 MB object forever.",
+    "",
+    "`artifact.compressed` names the gzipped asset the fetch prefers; `artifact.sha256`",
+    "stays the hash of the *decompressed* file, which is what gets verified."
   ],
   "repo": "arshad-shah/nimaz-data",
-  "tag": "data-v6",
+  "tag": "data-v7",
   "schemaVersion": 23,
   "artifact": {
-    "file": "nimaz-61472c26.db",
+    "file": "nimaz-424570f7.db",
     "assetPath": "database/nimaz_prepopulated.db",
-    "sha256": "61472c267b1d4699f75c598d7873270a1b330ddc5d31cd729edca203f17bd5f0",
-    "bytes": 133382144
+    "sha256": "424570f7053505906ea2127b214839c23bb70ed4fd2e839509159b227b25facb",
+    "bytes": 176562176,
+    "compressed": {
+      "file": "nimaz-424570f7.db.gz",
+      "sha256": "fc4af2aa6b88ee570a06574cf203ed1ad3c9380d066b8164faac20fe8215b0e8",
+      "bytes": 54318460
+    }
   }
 }
