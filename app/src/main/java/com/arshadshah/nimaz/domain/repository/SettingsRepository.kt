@@ -40,14 +40,10 @@ interface SettingsRepository {
     suspend fun setHijriDayOffset(days: Int)
     val appLanguage: Flow<String>
     suspend fun setAppLanguage(language: String)
-    val helpContentVersion: Flow<Int>
-    suspend fun setHelpContentVersion(version: Int)
 
     /** Last content patch applied. See data/local/content/ContentPatchSeeder. */
     val contentPatchVersion: Flow<Int>
     suspend fun setContentPatchVersion(version: Int)
-    val hadithBackfillVersion: Flow<Int>
-    suspend fun setHadithBackfillVersion(version: Int)
     val tasbihBeadMode: Flow<Boolean>
     suspend fun setTasbihBeadMode(enabled: Boolean)
     val tasbihBeadDesign: Flow<String>
@@ -60,22 +56,6 @@ interface SettingsRepository {
     suspend fun setTasbihFavorites(ids: Set<String>)
     val tasbihLeftHanded: Flow<Boolean>
     suspend fun setTasbihLeftHanded(enabled: Boolean)
-    val duaContentVersion: Flow<Int>
-    suspend fun setDuaContentVersion(version: Int)
-    val qaidaContentVersion: Flow<Int>
-    suspend fun setQaidaContentVersion(version: Int)
-    /**
-     * Per-edition seeded content versions for the line-accurate mushaf layouts, as
-     * `"<MushafScript name>:<version>"` entries. One key covers every edition, so shipping a
-     * new one needs no preference change. Replaces the old single `indopak_content_version`
-     * int, which could only describe one edition.
-     */
-    val quranMushafVersions: Flow<Set<String>>
-    suspend fun setQuranMushafVersions(versions: Set<String>)
-
-    /** Per-translation seeded content versions, as `"<translation id>:<version>"` entries. */
-    val quranTranslationVersions: Flow<Set<String>>
-    suspend fun setQuranTranslationVersions(versions: Set<String>)
     val arabicFontSize: Flow<String>
     suspend fun setArabicFontSize(size: String)
     val calculationMethod: Flow<String>

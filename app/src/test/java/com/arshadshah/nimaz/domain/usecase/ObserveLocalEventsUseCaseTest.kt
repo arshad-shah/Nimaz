@@ -73,12 +73,8 @@ private class FakeSettings(private val offset: Int) : SettingsRepository {
     override suspend fun setHijriDayOffset(days: Int) {}
     override val appLanguage: Flow<String> = flowOf("en")
     override suspend fun setAppLanguage(language: String) {}
-    override val helpContentVersion: Flow<Int> = flowOf(0)
     override val contentPatchVersion: Flow<Int> = flowOf(0)
     override suspend fun setContentPatchVersion(version: Int) = Unit
-    override suspend fun setHelpContentVersion(version: Int) {}
-    override val hadithBackfillVersion: Flow<Int> = flowOf(0)
-    override suspend fun setHadithBackfillVersion(version: Int) {}
     override val tasbihBeadMode: Flow<Boolean> = flowOf(false)
     override suspend fun setTasbihBeadMode(enabled: Boolean) {}
     override val tasbihBeadDesign: Flow<String> = flowOf("default")
@@ -91,14 +87,6 @@ private class FakeSettings(private val offset: Int) : SettingsRepository {
     override suspend fun setTasbihFavorites(ids: Set<String>) {}
     override val tasbihLeftHanded: Flow<Boolean> = flowOf(false)
     override suspend fun setTasbihLeftHanded(enabled: Boolean) {}
-    override val duaContentVersion: Flow<Int> = flowOf(0)
-    override suspend fun setDuaContentVersion(version: Int) {}
-    override val qaidaContentVersion: Flow<Int> = flowOf(0)
-    override suspend fun setQaidaContentVersion(version: Int) {}
-    override val quranMushafVersions: Flow<Set<String>> = flowOf(emptySet())
-    override suspend fun setQuranMushafVersions(versions: Set<String>) {}
-    override val quranTranslationVersions: Flow<Set<String>> = flowOf(emptySet())
-    override suspend fun setQuranTranslationVersions(versions: Set<String>) {}
     override val arabicFontSize: Flow<String> = flowOf("MEDIUM")
     override suspend fun setArabicFontSize(size: String) {}
     override val calculationMethod: Flow<String> = flowOf("MWL")

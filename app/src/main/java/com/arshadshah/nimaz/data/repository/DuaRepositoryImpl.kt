@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.map
 import com.arshadshah.nimaz.data.local.database.dao.DuaDao
 import com.arshadshah.nimaz.data.local.database.entity.DuaCategoryEntity
 import com.arshadshah.nimaz.data.local.database.entity.DuaEntity
-import com.arshadshah.nimaz.data.local.dua.DuaContentSeeder
 import com.arshadshah.nimaz.domain.model.Dua
 import com.arshadshah.nimaz.domain.model.DuaBookmark
 import com.arshadshah.nimaz.domain.model.DuaCategory
@@ -34,39 +33,42 @@ class DuaRepositoryImpl @Inject constructor(
     private val duaDao: DuaDao,
     private val bookmarkDao: BookmarkDao,
     private val progressDao: ProgressDao,
-    private val seeder: DuaContentSeeder,
     private val searchIndex: ContentSearchIndex
 ) : DuaRepository {
 
-    /** Seed (if the bundled content is new/missing) once, then emit DB-backed flows. */
-    private fun <T> seededFlow(block: () -> Flow<T>): Flow<T> =
-        flow { seeder.seedIfNeeded(); emitAll(block()) }
+    /**
+     * Builds the DB-backed flow at collection time rather than at call time.
+     *
+     * This used to seed the bundled dua content first; all 43 categories and 311 duas arrive
+     * in the artifact since `DuaContentSeeder` was retired at versionCode 385
+     * (`docs/retirement.yaml`). The deferral stays because callers hold these flows without
+     * collecting them.
+     */
+    private fun <T> deferredFlow(block: () -> Flow<T>): Flow<T> =
+        flow { emitAll(block()) }
 
-    override fun getAllCategories(): Flow<List<DuaCategory>> = seededFlow {
+    override fun getAllCategories(): Flow<List<DuaCategory>> = deferredFlow {
         duaDao.getAllCategories().mapItems { it.toDomain() }
     }
 
     override suspend fun getCategoryById(categoryId: String): DuaCategory? {
-        seeder.seedIfNeeded()
         return duaDao.getCategoryById(categoryId.toIntOrNull() ?: return null)?.toDomain()
     }
 
-    override fun getDuasByCategory(categoryId: String): Flow<List<Dua>> = seededFlow {
+    override fun getDuasByCategory(categoryId: String): Flow<List<Dua>> = deferredFlow {
         duaDao.getDuasByCategory(categoryId.toIntOrNull() ?: 0).mapItems { it.toDomain() }
     }
 
     override suspend fun getDuasByCategoryOnce(categoryId: String): List<Dua> {
-        seeder.seedIfNeeded()
         return duaDao.getDuasByCategoryOnce(categoryId.toIntOrNull() ?: return emptyList())
             .map { it.toDomain() }
     }
 
     override suspend fun getDuaById(duaId: String): Dua? {
-        seeder.seedIfNeeded()
         return duaDao.getDuaById(duaId.toIntOrNull() ?: return null)?.toDomain()
     }
 
-    override fun getDuasByOccasion(occasion: DuaOccasion): Flow<List<Dua>> = seededFlow {
+    override fun getDuasByOccasion(occasion: DuaOccasion): Flow<List<Dua>> = deferredFlow {
         // Since there's no occasion column in the database, return empty list
         duaDao.searchDuas(occasion.name.lowercase()).mapItems { it.toDomain() }
     }
@@ -78,7 +80,7 @@ class DuaRepositoryImpl @Inject constructor(
      * `LIKE`: the Arabic is vocalised and the transliteration is full of macrons and
      * dots. Both are folded into the shipped index.
      */
-    override fun searchDuas(query: String): Flow<List<DuaSearchResult>> = seededFlow {
+    override fun searchDuas(query: String): Flow<List<DuaSearchResult>> = deferredFlow {
         combine(
             duaDao.getAllCategories(),
             flow {
@@ -187,15 +189,7 @@ class DuaRepositoryImpl @Inject constructor(
         progressDao.decrement(ProgressKind.DUA, duaId.toIntOrNull() ?: return, date)
     }
 
-    override suspend fun initializeDuaData() {
-        // Content ships in the prepopulated DB for fresh installs and is
-        // (re)seeded from the bundled assets/duas/duas.json so existing users
-        // also receive newly added duas on update.
-        seeder.seedIfNeeded()
-    }
-
     override suspend fun isDataInitialized(): Boolean {
-        seeder.seedIfNeeded()
         return duaDao.getAllCategories().first().isNotEmpty()
     }
 

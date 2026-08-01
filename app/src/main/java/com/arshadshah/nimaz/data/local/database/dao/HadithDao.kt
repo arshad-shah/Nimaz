@@ -83,27 +83,5 @@ interface HadithDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertHadiths(hadiths: List<HadithEntity>)
 
-    // Backfill operations (HadithBackfillSeeder): fill chains of narration that
-    // shipped empty in the prepopulated DB. Keyed by the stable global `id`.
-    @Query("SELECT COUNT(*) FROM hadiths WHERE TRIM(text_arabic) = ''")
-    suspend fun emptyArabicCount(): Int
-
-    @Query(
-        "UPDATE hadiths SET text_arabic = :textArabic, text_english = :textEnglish, " +
-                "narrator = :narrator WHERE id = :id"
-    )
-    suspend fun backfillHadith(
-        id: Int,
-        textArabic: String,
-        textEnglish: String,
-        narrator: String
-    ): Int
-
-    // Stores an authentic, curated chain of narration (isnād) for a hadith,
-    // keyed by the stable global `id`. This is the only source of displayed
-    // chains — they are never inferred.
-    @Query("UPDATE hadiths SET narrator_chain = :chain WHERE id = :id")
-    suspend fun updateNarratorChain(id: Int, chain: String): Int
-
     // Bookmark operations
 }

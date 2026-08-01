@@ -13,10 +13,8 @@ import com.arshadshah.nimaz.data.local.database.entity.QuranBookmarkEntity
 import com.arshadshah.nimaz.data.local.database.entity.QuranFavoriteEntity
 import com.arshadshah.nimaz.data.local.database.entity.ReadingProgressEntity
 import com.arshadshah.nimaz.data.local.database.entity.SurahEntity
-import com.arshadshah.nimaz.data.local.quran.MushafLayoutSeeder
 import com.arshadshah.nimaz.data.local.search.ContentSearchIndex
 import com.arshadshah.nimaz.data.local.search.SearchKind
-import com.arshadshah.nimaz.data.local.quran.QuranTranslationSeeder
 import com.arshadshah.nimaz.domain.model.Ayah
 import com.arshadshah.nimaz.domain.model.MushafPageLayout
 import com.arshadshah.nimaz.domain.model.MushafScript
@@ -52,23 +50,22 @@ class QuranRepositoryImpl @Inject constructor(
     private val quranDao: QuranDao,
     private val bookmarkDao: BookmarkDao,
     private val readingProgressDao: ReadingProgressDao,
-    private val mushafSeeder: MushafLayoutSeeder,
-    private val translationSeeder: QuranTranslationSeeder,
     private val searchIndex: ContentSearchIndex
 ) : QuranRepository {
 
     /**
-     * Resolves a translator id to its catalogue entry and makes sure its verses are seeded.
-     * Every read path that takes a `translatorId` goes through here, so selecting a
-     * translation for the first time populates it transparently — translations ship as
-     * bundled assets and are seeded lazily rather than all 15 up front. Returns null for a
-     * null id so "no translation" stays a cheap no-op.
+     * Normalises a translator id against the catalogue. Every read path that takes a
+     * `translatorId` goes through here, so an id that is unknown — a stale preference, say —
+     * resolves to [QuranTranslation.DEFAULT] rather than querying for rows that cannot exist.
+     * Returns null for a null id so "no translation" stays a cheap no-op.
+     *
+     * All 15 translations arrive in the content artifact, so there is nothing to seed: this
+     * used to double as the lazy seeding hook until `QuranTranslationSeeder` was retired at
+     * versionCode 385 (`docs/retirement.yaml`).
      */
-    private suspend fun seededTranslationId(translatorId: String?): String? {
+    private fun translationId(translatorId: String?): String? {
         if (translatorId == null) return null
-        val translation = QuranTranslation.fromId(translatorId)
-        translationSeeder.seedIfNeeded(translation)
-        return translation.id
+        return QuranTranslation.fromId(translatorId).id
     }
 
     override fun getAllSurahs(): Flow<List<Surah>> {
@@ -125,7 +122,7 @@ class QuranRepositoryImpl @Inject constructor(
     override fun getAyahsByJuz(juzNumber: Int, translatorId: String?): Flow<List<Ayah>> {
         return quranDao.getAyahsWithTextByJuz(juzNumber).map { entities ->
             // Fetch translations if translatorId is provided
-            val translation = seededTranslationId(translatorId)
+            val translation = translationId(translatorId)
             val translationMap = if (translation != null && entities.isNotEmpty()) {
                 val ayahIds = entities.map { it.ayah.id }
                 quranDao.getTranslationsForAyahs(ayahIds, translation)
@@ -167,7 +164,7 @@ class QuranRepositoryImpl @Inject constructor(
         }
         return entityFlow.map { entities ->
             // Fetch translations if translatorId is provided
-            val translation = seededTranslationId(translatorId)
+            val translation = translationId(translatorId)
             val translationMap = if (translation != null && entities.isNotEmpty()) {
                 val ayahIds = entities.map { it.ayah.id }
                 quranDao.getTranslationsForAyahs(ayahIds, translation)
@@ -198,15 +195,13 @@ class QuranRepositoryImpl @Inject constructor(
         }
 
     /**
-     * A line-accurate edition's page→ayah mapping, seeded on demand (an edition's layout is
-     * only populated once it is actually used) and memoised per edition — each is several
+     * A line-accurate edition's page→ayah mapping, memoised per edition — each is several
      * hundred immutable rows that both the Page tab and every page fetch consult.
      */
     private suspend fun layoutRanges(script: MushafScript): List<PageAyahRange> {
         cachedLayoutRanges[script]?.let { return it }
         return layoutRangesMutex.withLock {
             cachedLayoutRanges[script]?.let { return@withLock it }
-            mushafSeeder.seedIfNeeded(script)
             quranDao.getLayoutPageAyahRanges(script.name)
                 .map { it.toDomain() }
                 .also { cachedLayoutRanges[script] = it }
@@ -218,9 +213,6 @@ class QuranRepositoryImpl @Inject constructor(
 
     override suspend fun getMushafPageLayout(page: Int, script: MushafScript): MushafPageLayout {
         val textSource = script.textSource ?: return MushafPageLayout(page, emptyList())
-        // First use of a line-accurate edition seeds its text + layout (idempotent,
-        // version-gated); the ~20k-row seed therefore never runs on a normal Quran open.
-        mushafSeeder.seedIfNeeded(script)
         return MushafLayoutMapper.toPageLayout(
             page,
             quranDao.getMushafLayoutByPage(script.name, textSource, page)
@@ -240,7 +232,7 @@ class QuranRepositoryImpl @Inject constructor(
                 } ?: emptyList()
 
                 // Fetch translations if translatorId is provided
-                val translation = seededTranslationId(translatorId)
+                val translation = translationId(translatorId)
                 val translationMap = if (translation != null && ayahEntities.isNotEmpty()) {
                     val ayahIds = ayahEntities.map { it.ayah.id }
                     quranDao.getTranslationsForAyahs(ayahIds, translation)
@@ -286,7 +278,7 @@ class QuranRepositoryImpl @Inject constructor(
         ayahIds: List<Int>,
         translatorId: String
     ): Flow<Map<Int, String>> = flow {
-        val translation = seededTranslationId(translatorId) ?: return@flow
+        val translation = translationId(translatorId) ?: return@flow
         emitAll(
             quranDao.getTranslationsForAyahs(ayahIds, translation).map { translations ->
                 translations.associate { it.ayahId to it.text }
@@ -316,7 +308,7 @@ class QuranRepositoryImpl @Inject constructor(
             }
 
             // If translatorId provided, also search translations
-            val translatorKey = seededTranslationId(translatorId)
+            val translatorKey = translationId(translatorId)
             val translationResults = if (translatorKey != null) {
                 quranDao.searchTranslations(query, translatorKey).first().mapNotNull { translation ->
                     quranDao.getAyahWithTextById(translation.ayahId)?.let { ayah ->
@@ -359,7 +351,7 @@ class QuranRepositoryImpl @Inject constructor(
             )
         }
 
-        val translatorKey = seededTranslationId(translatorId)
+        val translatorKey = translationId(translatorId)
         val translationResults = if (translatorKey == null) emptyList() else {
             // Narrowed by `source`, so a hit in the Bengali translation cannot surface
             // for a reader who has Sahih International selected. All fifteen are indexed.

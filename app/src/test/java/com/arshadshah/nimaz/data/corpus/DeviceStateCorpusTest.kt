@@ -5,23 +5,6 @@ import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import com.arshadshah.nimaz.data.local.database.NIMAZ_DATABASE_VERSION
 import com.arshadshah.nimaz.data.local.database.NimazDatabase
-import com.arshadshah.nimaz.data.local.dua.DuaAssetReader
-import com.arshadshah.nimaz.data.local.dua.DuaContentSeeder
-import com.arshadshah.nimaz.data.local.dua.DuaContentVersionStore
-import com.arshadshah.nimaz.data.local.hadith.HadithAssetReader
-import com.arshadshah.nimaz.data.local.hadith.HadithBackfillSeeder
-import com.arshadshah.nimaz.data.local.hadith.HadithBackfillVersionStore
-import com.arshadshah.nimaz.data.local.help.HelpAssetReader
-import com.arshadshah.nimaz.data.local.help.HelpContentSeeder
-import com.arshadshah.nimaz.data.local.help.HelpContentVersionStore
-import com.arshadshah.nimaz.data.local.qaida.QaidaAssetReader
-import com.arshadshah.nimaz.data.local.qaida.QaidaContentSeeder
-import com.arshadshah.nimaz.data.local.qaida.QaidaContentVersionStore
-import com.arshadshah.nimaz.data.local.quran.MushafContentVersionStore
-import com.arshadshah.nimaz.data.local.quran.MushafLayoutSeeder
-import com.arshadshah.nimaz.data.local.quran.QuranAssetReader
-import com.arshadshah.nimaz.data.local.quran.QuranTranslationSeeder
-import com.arshadshah.nimaz.data.local.quran.TranslationContentVersionStore
 import com.arshadshah.nimaz.domain.model.MushafScript
 import com.arshadshah.nimaz.domain.model.QuranTranslation
 import com.google.common.truth.Truth.assertThat
@@ -33,36 +16,37 @@ import java.io.File
 import java.security.MessageDigest
 
 /**
- * Manufactures the database a real device actually holds, and proves it is what the data
- * console's corpus claims.
+ * Proves the shipped artifact is the database a real device actually holds.
  *
  * ## Why this exists
  *
- * `assets/database/nimaz_prepopulated.db` is stamped `user_version = 12`. The app is at 20.
- * The eight migrations in between, plus six content seeders, are what turn the shipped asset
- * into the data a user sees — 15 translations, 4 Mushaf editions, 379 repaired hadiths, and
- * the Help, Dua and Qaida content, none of which are in the asset.
+ * This used to manufacture device state: the v12 asset, plus the migrations, plus six content
+ * seeders that between them carried 15 translations, 4 Mushaf editions, 379 repaired hadiths
+ * and the Help, Dua and Qaida content — about 31 MB the asset did not have. The seeders were
+ * the difference between what shipped and what a user saw, so the corpus could not be sealed
+ * without running them.
  *
- * The `nz` console compiles its corpus from NDJSON sources and its whole claim to authority is
- * that the corpus *is* what devices hold. Sealing the v12 asset alone would make that claim
- * false by about 31 MB. The alternative — reimplementing the migrations and seeders in Python
- * inside `nz` — would be a second implementation of exactly the thing whose fidelity is the
- * question, and it could drift silently while every hash check still passed.
+ * That difference is now zero. The artifact fetched from `arshad-shah/nimaz-data` carries all
+ * of it at [NIMAZ_DATABASE_VERSION], the seeders had become no-ops, and all six were retired at
+ * versionCode 385 (`docs/retirement.yaml`). So what this asserts has inverted: not "the seeders
+ * fill these tables" but **"nothing needs to fill them"**.
  *
- * So this runs the production code: the real [NimazDatabase.ALL_MIGRATIONS] objects, the real
- * seeders, the real bundled assets. Whatever they do to the bytes, including anything
- * surprising, is what the vault gets sealed from.
+ * That makes it the standing guard on the artifact itself. A content collection dropped
+ * upstream, a `data.lock.json` rolled back to a tag that predates a table, an importer that
+ * silently emitted zero rows — each one lands here as a named empty table rather than as an
+ * empty screen on a device.
  *
- * ## What it asserts now
+ * ## What it asserts
  *
- * The bundled asset is no longer the v12 file — it is the fetched v20 artifact, which already
- * contains everything the seeders used to add. So running the seeders over it must be a no-op,
- * and the assertions below check exactly that: every content table non-empty, every user table
- * empty, schema at [NIMAZ_DATABASE_VERSION].
- *
- * That makes this the **precondition for retiring a seeder**. Delete one whose content is not
- * in the artifact and this fails naming the table that would have shipped empty; delete one
- * whose content *is* in the artifact and it stays green. See `docs/retirement.yaml`.
+ * - every content table is non-empty, named individually so a failure says which one;
+ * - no hadith shipped with blank Arabic — the gap the retired `HadithBackfillSeeder` existed to
+ *   repair, asserted directly now that nothing repairs it at runtime;
+ * - each line-accurate edition's stored layout agrees with the [MushafScript] catalogue on
+ *   lines per page, which is the one invariant only the app can state (the data repo declares
+ *   its own mirror of these numbers, so a drift between the two is exactly what goes unnoticed);
+ * - no user table is present at all — since schemaVersion 23 they live in `NimazUserDatabase`,
+ *   so the corpus cannot carry a row of somebody's bookmarks even by accident;
+ * - the schema is at [NIMAZ_DATABASE_VERSION].
  *
  * As a **harness**, given `-Dnimaz.corpus.out=<path>`, it also writes the resulting database
  * out and prints its sha256, which is what `nz vault seal` consumes when the corpus needs
@@ -74,43 +58,57 @@ class DeviceStateCorpusTest {
     private val context: Context get() = ApplicationProvider.getApplicationContext()
 
     @Test
-    fun `device state is the asset plus every migration and every seeder`() = runTest {
-        val db = openMigratedFromAsset()
-        try {
-            seedEverything(db)
+    fun `device state is the artifact plus every migration, with nothing left to seed`() =
+        runTest {
+            val db = openMigratedFromAsset()
+            try {
+                // If any of these is empty the artifact would ship missing content, which is
+                // the failure this harness exists to make impossible.
+                val counts = contentRowCounts(db)
+                for ((table, rows) in counts) {
+                    assertThat("$table=$rows").isNotEqualTo("$table=0")
+                }
 
-            // The seeded tables are the point of the exercise: if any is empty, the corpus
-            // would ship missing content that devices have, which is the failure this whole
-            // harness exists to make impossible.
-            val counts = seededRowCounts(db)
-            for ((table, rows) in counts) {
-                assertThat("$table=$rows").isNotEqualTo("$table=0")
+                assertThat(scalar(db, "SELECT COUNT(*) FROM hadiths WHERE TRIM(text_arabic) = ''"))
+                    .isEqualTo(0)
+
+                assertThat(translatorIdsInArtifact(db))
+                    .containsExactlyElementsIn(QuranTranslation.entries.map { it.id })
+
+                for (script in MushafScript.entries.filter { it.isLineAccurate }) {
+                    val widest = scalar(
+                        db,
+                        "SELECT COALESCE(MAX(line), 0) FROM mushaf_layout_lines " +
+                            "WHERE script = '${script.name}'"
+                    )
+                    assertThat("${script.name} max line=$widest")
+                        .isEqualTo("${script.name} max line=${script.linesPerPage}")
+                }
+
+                // User tables must not be here at all. They used to be part of this schema and
+                // empty — the assertion was that no row leaked, because a single one would ship
+                // somebody's bookmarks to everybody. Since schemaVersion 23 the stronger
+                // statement holds: they are in the user's own database.
+                for (table in USER_TABLES) {
+                    assertThat("$table exists=${hasTable(db, table)}")
+                        .isEqualTo("$table exists=false")
+                }
+
+                assertThat(userVersion(db)).isEqualTo(NIMAZ_DATABASE_VERSION)
+
+                // Absent or blank means "just assert" — the harness role is opt-in, so the
+                // suite stays a fast regression check on CI and only writes 147 MB on demand.
+                System.getProperty(OUT_PROPERTY)
+                    ?.takeIf { it.isNotBlank() }
+                    ?.let { export(db, File(it), counts) }
+            } finally {
+                db.close()
             }
-
-            // User tables must not be here at all. They used to be part of this schema and
-            // empty — the assertion was that no row leaked, because a single one would ship
-            // somebody's bookmarks to everybody. Since schemaVersion 23 the stronger statement
-            // holds: they are in the user's own database, so the corpus cannot carry a row of
-            // them even by accident.
-            for (table in USER_TABLES) {
-                assertThat("$table exists=${hasTable(db, table)}").isEqualTo("$table exists=false")
-            }
-
-            assertThat(userVersion(db)).isEqualTo(NIMAZ_DATABASE_VERSION)
-
-            // Absent or blank means "just assert" — the harness role is opt-in, so the
-            // suite stays a fast regression check on CI and only writes 147 MB on demand.
-            System.getProperty(OUT_PROPERTY)
-                ?.takeIf { it.isNotBlank() }
-                ?.let { export(db, File(it), counts) }
-        } finally {
-            db.close()
         }
-    }
 
     /**
-     * Opens the shipped asset through Room exactly as the app does, so migrations 12 -> 20 run
-     * as production `Migration` objects rather than as a description of them.
+     * Opens the shipped artifact through Room exactly as the app does, so the migration chain
+     * runs as production `Migration` objects rather than as a description of them.
      */
     private fun openMigratedFromAsset(): NimazDatabase {
         val target = File(context.cacheDir, "device-state-corpus.db")
@@ -123,39 +121,21 @@ class DeviceStateCorpusTest {
             .also { it.openHelper.writableDatabase }
     }
 
-    /**
-     * Runs all six seeders to completion.
-     *
-     * Two of them are lazy in production — [MushafLayoutSeeder] seeds per script on first use
-     * and [QuranTranslationSeeder] per translation on first read — so a real device may hold
-     * only the subset the user has opened. The corpus has to contain all of it, so every
-     * enum entry is seeded here. That difference is exactly why existing installs cannot be
-     * assumed to be at full v20 content, and why the seeders survive one more release before
-     * being retired (see docs/DATA_RETIREMENT.md).
-     */
-    private suspend fun seedEverything(db: NimazDatabase) {
-        val assets = AssetReader(context)
+    private fun contentRowCounts(db: NimazDatabase): Map<String, Int> =
+        CONTENT_TABLES.associateWith { rowCount(db, it) }
 
-        HelpContentSeeder(db.helpDao(), MemoryVersion(), assets).seedIfNeeded()
-        DuaContentSeeder(db.duaDao(), MemoryVersion(), assets).seedIfNeeded()
-        QaidaContentSeeder(db.qaidaDao(), MemoryVersion(), assets).seedIfNeeded()
-        HadithBackfillSeeder(db.hadithDao(), MemoryVersion(), assets).seedIfNeeded()
-
-        val mushaf = MushafLayoutSeeder(db.quranDao(), MemoryKeyedVersion(), assets)
-        for (script in MushafScript.entries) mushaf.seedIfNeeded(script)
-
-        val translations = QuranTranslationSeeder(db.quranDao(), MemoryKeyedVersion(), assets)
-        for (translation in QuranTranslation.entries) translations.seedIfNeeded(translation)
-    }
-
-    private fun seededRowCounts(db: NimazDatabase): Map<String, Int> =
-        SEEDED_TABLES.associateWith { rowCount(db, it) }
+    private fun translatorIdsInArtifact(db: NimazDatabase): List<String> =
+        db.openHelper.readableDatabase
+            .query("SELECT DISTINCT translator_id FROM translations")
+            .use { cursor ->
+                buildList { while (cursor.moveToNext()) add(cursor.getString(0)) }
+            }
 
     /**
      * Writes the corpus out for `nz vault seal`.
      *
      * VACUUM first: the file is about to become the identity of every artifact built from it,
-     * and free-list state left over from seeding is noise that would differ run to run.
+     * and free-list state is noise that would differ run to run.
      */
     private fun export(db: NimazDatabase, out: File, counts: Map<String, Int>) {
         db.openHelper.writableDatabase.execSQL("VACUUM")
@@ -185,48 +165,28 @@ class DeviceStateCorpusTest {
             .use { it.moveToFirst() }
 
     private fun rowCount(db: NimazDatabase, table: String): Int =
-        db.openHelper.readableDatabase.query("SELECT COUNT(*) FROM `$table`").use {
+        scalar(db, "SELECT COUNT(*) FROM `$table`")
+
+    private fun scalar(db: NimazDatabase, sql: String): Int =
+        db.openHelper.readableDatabase.query(sql).use {
             if (it.moveToFirst()) it.getInt(0) else 0
         }
 
-    private fun userVersion(db: NimazDatabase): Int =
-        db.openHelper.readableDatabase.query("PRAGMA user_version").use {
-            if (it.moveToFirst()) it.getInt(0) else 0
-        }
-
-    private class AssetReader(private val context: Context) :
-        QuranAssetReader, HelpAssetReader, DuaAssetReader, QaidaAssetReader, HadithAssetReader {
-        override fun read(path: String): String =
-            context.assets.open(path).bufferedReader().use { it.readText() }
-    }
-
-    /** The seeders' version gates are irrelevant here — everything must run, every time. */
-    private class MemoryVersion :
-        HelpContentVersionStore, DuaContentVersionStore, QaidaContentVersionStore,
-        HadithBackfillVersionStore {
-        private var value = 0
-        override suspend fun get(): Int = value
-        override suspend fun set(version: Int) {
-            value = version
-        }
-    }
-
-    private class MemoryKeyedVersion : MushafContentVersionStore, TranslationContentVersionStore {
-        private val values = mutableMapOf<String, Int>()
-        override suspend fun get(script: String): Int = values[script] ?: 0
-        override suspend fun set(script: String, version: Int) {
-            values[script] = version
-        }
-    }
+    private fun userVersion(db: NimazDatabase): Int = scalar(db, "PRAGMA user_version")
 
     private companion object {
         const val OUT_PROPERTY = "nimaz.corpus.out"
 
-        /** Tables filled by a seeder rather than by the shipped asset. */
-        val SEEDED_TABLES = listOf(
+        /**
+         * Content tables that a seeder used to fill and the artifact now carries whole. Kept as
+         * an explicit list rather than derived from the schema so that a table dropped from the
+         * artifact fails here by name instead of quietly leaving the set.
+         */
+        val CONTENT_TABLES = listOf(
             "translations",
             "mushaf_layout_lines",
             "mushaf_ayah_texts",
+            "hadiths",
             "help_topic",
             "help_item",
             "help_step",

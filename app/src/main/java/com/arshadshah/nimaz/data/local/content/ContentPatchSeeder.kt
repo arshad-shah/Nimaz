@@ -24,8 +24,9 @@ import javax.inject.Singleton
  * install**. Correcting the artifact therefore reaches new installs and nobody else, which is
  * why every content fix in this app so far has needed its own bespoke seeder — one per table,
  * hand-written, with nothing checking that the fix matched what the artifact was supposed to
- * contain. [com.arshadshah.nimaz.data.local.hadith.HadithBackfillSeeder] is the previous
- * example, and it is the shape this generalises.
+ * contain. `HadithBackfillSeeder`, which carried 379 repaired hadiths until it was retired at
+ * versionCode 385 (`docs/retirement.yaml`), was the last such seeder and the shape this
+ * generalises.
  *
  * The patch is a build output, not hand-authored. `nz patch emit` diffs the published baseline
  * artifact against the current one; `nz patch verify` then applies the result to the baseline

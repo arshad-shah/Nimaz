@@ -6,7 +6,6 @@ import com.arshadshah.nimaz.data.local.database.entity.HelpItemEntity
 import com.arshadshah.nimaz.data.local.database.entity.HelpStepEntity
 import com.arshadshah.nimaz.data.local.database.entity.HelpStringEntity
 import com.arshadshah.nimaz.data.local.database.entity.HelpTopicEntity
-import com.arshadshah.nimaz.data.local.help.HelpContentSeeder
 import com.google.common.truth.Truth.assertThat
 import io.mockk.coEvery
 import io.mockk.every
@@ -19,15 +18,12 @@ import org.junit.Test
 class HelpRepositoryImplTest {
 
     private lateinit var dao: HelpDao
-    private lateinit var seeder: HelpContentSeeder
     private lateinit var repo: HelpRepositoryImpl
 
     @Before
     fun setUp() {
         dao = mockk(relaxed = true)
-        seeder = mockk(relaxed = true)
-        coEvery { seeder.seedIfNeeded() } returns Unit
-        repo = HelpRepositoryImpl(dao, seeder)
+        repo = HelpRepositoryImpl(dao)
     }
 
     @Test

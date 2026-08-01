@@ -1,32 +1,10 @@
 package com.arshadshah.nimaz.core.di
 
 import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
-import com.arshadshah.nimaz.data.local.dua.AndroidDuaAssetReader
 import com.arshadshah.nimaz.data.local.content.AndroidContentPatchAssetReader
 import com.arshadshah.nimaz.data.local.content.ContentPatchAssetReader
 import com.arshadshah.nimaz.data.local.content.ContentPatchVersionStore
 import com.arshadshah.nimaz.data.local.content.DataStoreContentPatchVersionStore
-import com.arshadshah.nimaz.data.local.dua.DataStoreDuaContentVersionStore
-import com.arshadshah.nimaz.data.local.dua.DuaAssetReader
-import com.arshadshah.nimaz.data.local.dua.DuaContentVersionStore
-import com.arshadshah.nimaz.data.local.hadith.AndroidHadithAssetReader
-import com.arshadshah.nimaz.data.local.hadith.DataStoreHadithBackfillVersionStore
-import com.arshadshah.nimaz.data.local.hadith.HadithAssetReader
-import com.arshadshah.nimaz.data.local.hadith.HadithBackfillVersionStore
-import com.arshadshah.nimaz.data.local.help.AndroidHelpAssetReader
-import com.arshadshah.nimaz.data.local.help.DataStoreHelpContentVersionStore
-import com.arshadshah.nimaz.data.local.help.HelpAssetReader
-import com.arshadshah.nimaz.data.local.help.HelpContentVersionStore
-import com.arshadshah.nimaz.data.local.qaida.AndroidQaidaAssetReader
-import com.arshadshah.nimaz.data.local.qaida.DataStoreQaidaContentVersionStore
-import com.arshadshah.nimaz.data.local.qaida.QaidaAssetReader
-import com.arshadshah.nimaz.data.local.qaida.QaidaContentVersionStore
-import com.arshadshah.nimaz.data.local.quran.AndroidQuranAssetReader
-import com.arshadshah.nimaz.data.local.quran.DataStoreMushafContentVersionStore
-import com.arshadshah.nimaz.data.local.quran.DataStoreTranslationContentVersionStore
-import com.arshadshah.nimaz.data.local.quran.MushafContentVersionStore
-import com.arshadshah.nimaz.data.local.quran.TranslationContentVersionStore
-import com.arshadshah.nimaz.data.local.quran.QuranAssetReader
 import com.arshadshah.nimaz.data.repository.AsmaUlHusnaRepositoryImpl
 import com.arshadshah.nimaz.data.repository.AsmaUnNabiRepositoryImpl
 import com.arshadshah.nimaz.data.repository.DuaRepositoryImpl
@@ -351,72 +329,6 @@ abstract class RepositoryModule {
     abstract fun bindContentPatchAssetReader(
         impl: AndroidContentPatchAssetReader
     ): ContentPatchAssetReader
-
-    @Binds
-    @Singleton
-    abstract fun bindHelpContentVersionStore(
-        impl: DataStoreHelpContentVersionStore
-    ): HelpContentVersionStore
-
-    @Binds
-    @Singleton
-    abstract fun bindHelpAssetReader(
-        impl: AndroidHelpAssetReader
-    ): HelpAssetReader
-
-    @Binds
-    @Singleton
-    abstract fun bindDuaContentVersionStore(
-        impl: DataStoreDuaContentVersionStore
-    ): DuaContentVersionStore
-
-    @Binds
-    @Singleton
-    abstract fun bindDuaAssetReader(
-        impl: AndroidDuaAssetReader
-    ): DuaAssetReader
-
-    @Binds
-    @Singleton
-    abstract fun bindQaidaContentVersionStore(
-        impl: DataStoreQaidaContentVersionStore
-    ): QaidaContentVersionStore
-
-    @Binds
-    @Singleton
-    abstract fun bindQaidaAssetReader(
-        impl: AndroidQaidaAssetReader
-    ): QaidaAssetReader
-
-    @Binds
-    @Singleton
-    abstract fun bindMushafContentVersionStore(
-        impl: DataStoreMushafContentVersionStore
-    ): MushafContentVersionStore
-
-    @Binds
-    @Singleton
-    abstract fun bindTranslationContentVersionStore(
-        impl: DataStoreTranslationContentVersionStore
-    ): TranslationContentVersionStore
-
-    @Binds
-    @Singleton
-    abstract fun bindQuranAssetReader(
-        impl: AndroidQuranAssetReader
-    ): QuranAssetReader
-
-    @Binds
-    @Singleton
-    abstract fun bindHadithBackfillVersionStore(
-        impl: DataStoreHadithBackfillVersionStore
-    ): HadithBackfillVersionStore
-
-    @Binds
-    @Singleton
-    abstract fun bindHadithAssetReader(
-        impl: AndroidHadithAssetReader
-    ): HadithAssetReader
 
     @Binds
     @Singleton

@@ -28,8 +28,8 @@ enum class TranslationLanguage(
 
 /**
  * Every Quran translation the app ships — the single source of truth, in the spirit of
- * [com.arshadshah.nimaz.presentation.theme.QuranArabicFont]. The settings picker, the
- * seeder and the reader all derive from this enum; nothing else enumerates translations.
+ * [com.arshadshah.nimaz.presentation.theme.QuranArabicFont]. The settings picker and the
+ * reader both derive from this enum; nothing else enumerates translations.
  *
  * ## Adding one
  * 1. In the arshad-shah/nimaz-data repository, add the edition and run the importer.
@@ -37,9 +37,9 @@ enum class TranslationLanguage(
  * 2. Add an entry here with the same [id].
  * 3. Run `nz import --check` in that repository, which fails if the two catalogues drift.
  *
- * That is the whole change: the picker lists it, and
- * [com.arshadshah.nimaz.data.local.quran.QuranTranslationSeeder] seeds it into the
- * `translations` table the first time it is selected.
+ * That is the whole change: the picker lists it, and its verses arrive in the
+ * `translations` table with the artifact — there is no app-side seeding step since
+ * `QuranTranslationSeeder` was retired at versionCode 385 (`docs/retirement.yaml`).
  *
  * ## Why [id] is load-bearing
  * [id] is written to `translations.translator_id` **and** persisted as the user's

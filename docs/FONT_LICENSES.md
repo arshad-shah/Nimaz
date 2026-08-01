@@ -66,7 +66,8 @@ Nimaz is a **free, non-commercial, open-source** app, i.e. exactly the
 Sadaqa-e-Jaria (charitable, not-for-sale) use this font was released for, and
 the font is bundled **unmodified**. However, the font's own terms ask for
 **written notice from QuranWBW.com before distribution**. As with the QUL
-IndoPak *data* (see `nimaz-pro-data/json/LICENSES_MUSHAF_LAYOUTS.md`), the final
+IndoPak *data* (see `upstream/json/LICENSES_MUSHAF_LAYOUTS.md` in
+arshad-shah/nimaz-data), the final
 go/no-go for a public release belongs to the project owner:
 
 **Status: signed off.** The project owner (@arshad-shah) confirmed on **2026-07-28** that
