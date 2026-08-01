@@ -29,7 +29,6 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -50,7 +49,8 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuItem
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazSearchBar
 import com.arshadshah.nimaz.presentation.theme.QuranArabicFont
-import com.arshadshah.nimaz.presentation.theme.translationFontFamily
+import com.arshadshah.nimaz.presentation.theme.asLanguageLabel
+import com.arshadshah.nimaz.presentation.theme.asTranslationText
 import com.arshadshah.nimaz.presentation.viewmodel.SettingsEvent
 import com.arshadshah.nimaz.presentation.viewmodel.SettingsViewModel
 
@@ -160,13 +160,33 @@ fun SelectTranslationScreen(
 
             grouped.forEach { (language, translations) ->
                 item(key = "lang-${language.code}") {
-                    Text(
-                        text = "${language.englishName} · ${language.nativeName}",
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(top = 6.dp, bottom = 2.dp)
-                    )
+                    // The endonym half of this header is written in its own script — "اردو"
+                    // in a Latin body font falls back to whatever Naskh face the system has.
+                    // Splitting it in two lets each half carry its own face rather than
+                    // relying on glyph fallback inside a single run.
+                    Row(
+                        modifier = Modifier.padding(top = 6.dp, bottom = 2.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = language.englishName,
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            text = " · ",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            text = language.nativeName,
+                            style = MaterialTheme.typography.labelMedium
+                                .asLanguageLabel(language),
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
                 item(key = "group-${language.code}") {
                     NimazMenuGroup {
@@ -174,7 +194,12 @@ fun SelectTranslationScreen(
                             NimazMenuItem(
                                 title = translation.translator,
                                 subtitle = language.nativeName,
+                                // The endonym again — Urdu needs Nastaliq and the extra
+                                // leading that comes with it, even at subtitle size.
+                                subtitleStyle = MaterialTheme.typography.bodySmall
+                                    .asLanguageLabel(language),
                                 trailingIcon = null,
+                                selected = translation == selected,
                                 onClick = {
                                     viewModel.onEvent(
                                         SettingsEvent.SetTranslator(translation.id)
@@ -224,12 +249,19 @@ private fun SelectedTranslationCard(
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
                     )
-                    Text(
-                        text = "${translation.language.englishName} · " +
-                                translation.language.nativeName,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = "${translation.language.englishName} · ",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            text = translation.language.nativeName,
+                            style = MaterialTheme.typography.bodySmall
+                                .asLanguageLabel(translation.language),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
                 NimazBadge(
                     text = stringResource(R.string.active),
@@ -259,16 +291,11 @@ private fun SelectedTranslationCard(
             Text(
                 text = previewTranslation
                     ?: stringResource(R.string.quran_settings_preview_translation),
-                style = MaterialTheme.typography.bodyMedium.copy(
-                    // Urdu is set in Nastaliq; the app's body fonts carry no Arabic script at
-                    // all, so without this the translation falls back to a system Naskh face.
-                    fontFamily = translationFontFamily(translation.language),
-                    // Direction resolves from the text itself, exactly as the reader does, so
-                    // Urdu lays out RTL whatever the app locale is.
-                    textDirection = TextDirection.Content,
-                    textAlign = if (translation.isRtl) TextAlign.End else TextAlign.Start,
-                    lineHeight = if (translation.isRtl) 34.sp else 22.sp
-                ),
+                // Face, direction and leading all resolve from the translation's language —
+                // the same helper the reader uses, so this preview cannot promise a rendering
+                // the reader then fails to deliver.
+                style = MaterialTheme.typography.bodyMedium
+                    .asTranslationText(translation.language),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.fillMaxWidth()
             )

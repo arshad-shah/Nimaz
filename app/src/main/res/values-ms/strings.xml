@@ -780,6 +780,7 @@
     <string name="cd_back">Kembali</string>
     <string name="cd_tafseer">Tafsir</string>
     <string name="cd_stop">Hentikan</string>
+    <string name="cd_selected">Dipilih</string>
     <string name="cd_settings">Tetapan</string>
     <string name="cd_previous_month">Bulan sebelumnya</string>
     <string name="cd_next_month">Bulan seterusnya</string>
@@ -861,6 +862,9 @@
     <string name="mushaf_script_indopak15">IndoPak 15-baris (610 halaman)</string>
     <string name="mushaf_script_indopak13">IndoPak 13-baris (847 halaman)</string>
     <string name="display_options">Pilihan Paparan</string>
+    <string name="reading_section">Bacaan</string>
+    <string name="settings_value_with_qualifier">%1$s · %2$s</string>
+    <string name="tajweed_section">Tajwid</string>
     <string name="show_transliteration">Tunjukkan Transliterasi</string>
     <string name="show_transliteration_subtitle">Sebutan dalam huruf Rumi</string>
     <string name="show_translation">Tunjukkan Terjemahan</string>
@@ -965,6 +969,8 @@
     <string name="select_translation_search_hint">Cari terjemahan atau bahasa</string>
     <string name="select_translation_all">Semua terjemahan</string>
     <string name="select_reciter_popular">PEMBACA POPULAR</string>
+    <string name="recitation_style_mujawwad">Mujawwad</string>
+    <string name="recitation_style_murattal">Murattal</string>
     <string name="surah_info_about">Tentang Surah Ini</string>
     <string name="surah_info_main_themes">Tema Utama</string>
     <string name="surah_info_description_fallback">Surah ini mengandungi petunjuk dan hikmah ilahi untuk orang yang beriman.</string>

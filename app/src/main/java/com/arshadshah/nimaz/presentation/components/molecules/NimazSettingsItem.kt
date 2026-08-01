@@ -19,6 +19,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
@@ -98,6 +99,23 @@ fun NimazSettingsItem(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
+        }
+
+        // `value` alone is the second line (above). When a caller supplies *both*, it means
+        // two different things — a description and the current setting — so the value moves
+        // to the trailing slot instead of being dropped on the floor, which is what
+        // `subtitle ?: value` used to do: the Quran settings translation row passed
+        // `value = translator` and only ever rendered the language.
+        if (subtitle != null && value != null) {
+            Spacer(modifier = Modifier.width(12.dp))
+            Text(
+                text = value,
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.primary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
         }
 
         when {

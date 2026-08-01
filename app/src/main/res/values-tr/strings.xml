@@ -802,6 +802,7 @@
     <string name="cd_back">Geri</string>
     <string name="cd_tafseer">Tefsir</string>
     <string name="cd_stop">Durdur</string>
+    <string name="cd_selected">Seçili</string>
     <string name="cd_settings">Ayarlar</string>
     <string name="cd_previous_month">Önceki ay</string>
     <string name="cd_next_month">Sonraki ay</string>
@@ -883,6 +884,9 @@
     <string name="mushaf_script_indopak15">IndoPak 15 satır (610 sayfa)</string>
     <string name="mushaf_script_indopak13">IndoPak 13 satır (847 sayfa)</string>
     <string name="display_options">Görüntüleme Seçenekleri</string>
+    <string name="reading_section">Okuma</string>
+    <string name="settings_value_with_qualifier">%1$s · %2$s</string>
+    <string name="tajweed_section">Tecvid</string>
     <string name="show_transliteration">Transliterasyonu Göster</string>
     <string name="show_transliteration_subtitle">Latin harfleriyle okunuş</string>
     <string name="show_translation">Çeviriyi Göster</string>
@@ -987,6 +991,8 @@
     <string name="select_translation_search_hint">Çeviri veya dil ara</string>
     <string name="select_translation_all">Tüm çeviriler</string>
     <string name="select_reciter_popular">POPÜLER OKUYUCULAR</string>
+    <string name="recitation_style_mujawwad">Mücevved</string>
+    <string name="recitation_style_murattal">Murattal</string>
     <string name="surah_info_about">Bu Sure Hakkında</string>
     <string name="surah_info_main_themes">Ana Temalar</string>
     <string name="surah_info_description_fallback">Bu sure, müminler için ilahi rehberlik ve hikmet içerir.</string>

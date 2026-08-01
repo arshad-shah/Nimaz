@@ -5,6 +5,9 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDirection
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.TranslationLanguage
@@ -72,6 +75,70 @@ val NotoNastaliqUrduFontFamily = FontFamily(
 fun translationFontFamily(language: TranslationLanguage): FontFamily? = when (language) {
     TranslationLanguage.URDU -> NotoNastaliqUrduFontFamily
     else -> null
+}
+
+/**
+ * Leading as a multiple of font size. Nastaliq's steep, deeply-descending baseline needs far
+ * more room than a Latin face at the same size or successive lines collide — this was
+ * previously written out as five different literal pairs (34/22, 2.1×/1.5×, …) at five call
+ * sites, which is how the reader and the settings preview came to disagree.
+ */
+private const val NASTALIQ_LEADING = 2.1f
+private const val LATIN_LEADING = 1.5f
+
+/**
+ * The typographic treatment a translation in [language] needs, applied to a base body style.
+ *
+ * Resolves three things that every translation render site got slightly wrong on its own:
+ * - **face** — Urdu is set in Nastaliq, and the app's Latin faces carry no Arabic-script glyphs
+ *   at all, so without this Urdu falls back to whatever Naskh face the system happens to have
+ *   (which reads to an Urdu speaker roughly the way blackletter reads in English);
+ * - **direction** — resolved from the *text*, not the app locale, so an RTL translation lays
+ *   out right-to-left whatever language the UI is in. `TextAlign.Start` then follows the
+ *   resolved direction, so there is no need to flip the alignment by hand;
+ * - **leading** — see [NASTALIQ_LEADING]. This has to live in the style: a `lineHeight`
+ *   argument on `Text` overrides the style's.
+ *
+ * @param fontSize overrides the base style's size (the reader drives it from a preference).
+ */
+fun TextStyle.asTranslationText(
+    language: TranslationLanguage,
+    fontSize: TextUnit = TextUnit.Unspecified
+): TextStyle {
+    val face = translationFontFamily(language)
+    val size = if (fontSize != TextUnit.Unspecified) fontSize else this.fontSize
+    val leading = if (face != null) NASTALIQ_LEADING else LATIN_LEADING
+    return copy(
+        fontFamily = face ?: fontFamily,
+        fontSize = size,
+        lineHeight = if (size != TextUnit.Unspecified) (size.value * leading).sp else lineHeight,
+        textDirection = TextDirection.Content,
+        textAlign = TextAlign.Start
+    )
+}
+
+/**
+ * The treatment a short *label naming* a language needs — its endonym, e.g. "اردو" in the
+ * translation picker.
+ *
+ * Same face resolution as [asTranslationText] (an endonym written in Urdu is Urdu text and
+ * belongs in Nastaliq), but it keeps the caller's alignment because these labels sit in
+ * LTR chrome — a row header, a list subtitle — rather than forming a paragraph of their own.
+ * The extra leading still applies: at label sizes Nastaliq clips its descenders against the
+ * default 16sp line box.
+ */
+fun TextStyle.asLanguageLabel(language: TranslationLanguage): TextStyle {
+    val face = translationFontFamily(language) ?: return this
+    val size = fontSize
+    return copy(
+        fontFamily = face,
+        lineHeight = if (size != TextUnit.Unspecified) {
+            (size.value * NASTALIQ_LEADING).sp
+        } else {
+            lineHeight
+        },
+        textDirection = TextDirection.Content
+    )
 }
 
 /**

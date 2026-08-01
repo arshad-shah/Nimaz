@@ -20,10 +20,12 @@ import com.arshadshah.nimaz.domain.model.MushafScript
 import com.arshadshah.nimaz.domain.model.QuranBookmark
 import com.arshadshah.nimaz.domain.model.QuranFavorite
 import com.arshadshah.nimaz.domain.model.QuranSearchResult
+import com.arshadshah.nimaz.domain.model.QuranTranslation
 import com.arshadshah.nimaz.domain.model.ReadingProgress
 import com.arshadshah.nimaz.domain.model.Surah
 import com.arshadshah.nimaz.domain.model.SurahInfo
 import com.arshadshah.nimaz.domain.model.SurahWithAyahs
+import com.arshadshah.nimaz.domain.model.TranslationLanguage
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.usecase.KhatamUseCases
 import com.arshadshah.nimaz.domain.usecase.QuranUseCases
@@ -138,6 +140,15 @@ data class QuranReaderUiState(
 ) {
     /** Whether to render stored line-accurate pages instead of flowing ayahs into a page. */
     val useLineAccurateLayout: Boolean get() = mushafScript.isLineAccurate
+
+    /**
+     * Language of the active translation — what its prose must be *drawn* in (face, direction
+     * and leading; see [com.arshadshah.nimaz.presentation.theme.asTranslationText]). Derived
+     * here rather than at each render site so the reader, the page view and the ayah sheet
+     * cannot drift apart on it.
+     */
+    val translationLanguage: TranslationLanguage
+        get() = QuranTranslation.fromId(selectedTranslatorId).language
 
     /** Number of pages in the active edition — the pager/nav bounds source of truth. */
     val totalPages: Int get() = mushafScript.totalPages

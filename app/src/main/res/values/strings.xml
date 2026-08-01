@@ -1070,6 +1070,7 @@
     <string name="cd_back">Back</string>
     <string name="cd_tafseer">Tafseer</string>
     <string name="cd_stop">Stop</string>
+    <string name="cd_selected">Selected</string>
     <string name="cd_settings">Settings</string>
     <string name="cd_previous_month">Previous month</string>
     <string name="cd_next_month">Next month</string>
@@ -1122,6 +1123,10 @@
     <string name="mushaf_script_indopak15">IndoPak 15-line (610 pages)</string>
     <string name="mushaf_script_indopak13">IndoPak 13-line (847 pages)</string>
     <string name="display_options">Display Options</string>
+    <!-- A settings row's current value followed by a qualifier, e.g. "Saheeh International · English". -->
+    <string name="settings_value_with_qualifier">%1$s · %2$s</string>
+    <string name="tajweed_section">Tajweed</string>
+    <string name="reading_section">Reading</string>
     <string name="show_transliteration">Show Transliteration</string>
     <string name="show_transliteration_subtitle">Roman letters pronunciation</string>
     <string name="show_translation">Show Translation</string>
@@ -1232,6 +1237,8 @@
     <string name="select_translation_search_hint">Search translations or languages</string>
     <string name="select_translation_all">All translations</string>
     <string name="select_reciter_popular">POPULAR RECITERS</string>
+    <string name="recitation_style_murattal">Murattal</string>
+    <string name="recitation_style_mujawwad">Mujawwad</string>
 
     <!-- Surah Info Screen -->
     <string name="surah_info_about">About This Surah</string>

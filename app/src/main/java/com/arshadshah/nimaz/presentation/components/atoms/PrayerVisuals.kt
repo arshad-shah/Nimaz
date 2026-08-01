@@ -105,9 +105,15 @@ private fun PrayerVisualsShowcase() {
                     text = prayer.displayName,
                     style = MaterialTheme.typography.bodyLarge
                 )
-                Text(
+                // Arabic must not be drawn in a body style: Outfit and Plus Jakarta carry no
+                // Arabic-script glyphs, so a plain Text falls back to whatever face the
+                // device happens to have. Every other site renders these names via ArabicText;
+                // this showcase was the one that didn't, so it misrepresented the mapping it
+                // exists to document.
+                ArabicText(
                     text = getArabicPrayerName(prayer),
-                    style = MaterialTheme.typography.bodyLarge
+                    size = ArabicTextSize.SMALL,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
             }
         }

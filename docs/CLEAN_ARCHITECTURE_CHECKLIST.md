@@ -232,11 +232,22 @@ rg -U --multiline-dotall -n '\.collect\s*\{(?:[^}]|
   that legitimately holds several live requests needs one handle each, keyed the way the
   requests are.
 
-- [ ] **Same shape elsewhere — untriaged.** The detect command below flags `HadithViewModel`
-  (`searchHadiths` / `searchHadithsInBook`, re-launched per query with no cancellation, so
-  typing stacks a collector per keystroke and an earlier query can land last) and
-  `SyncViewModel`. Not touched here — the Quran fix was scoped to the reported bug — but they
-  are the same defect and worth the same treatment.
+- [x] ~~**Same shape in `HadithViewModel`.**~~ **Resolved.** `search` / `searchInBook` were
+  re-launched per query with no handle, so typing stacked a collector per keystroke and an
+  earlier, slower query could land last and win. `loadBook` / `loadChapter` / `loadHadithById` /
+  `filterByGrade` had the same shape per navigation, all writing the same `_readerState`. Fixed
+  with three handles chosen by the **identity of the request** (the corollary from the Quran fix
+  above): `searchJob`, `chaptersJob`, `readerJob` — one each, because the hadith reader shows one
+  chapter at a time, unlike the Quran pager which legitimately holds several pages live. Clearing
+  the query now cancels too: without that, the last collector's next emission repopulated the
+  results the user had just cleared.
+- [ ] **`SyncViewModel` — untriaged.** Same detect command, same defect class; not touched here.
+- [ ] **`HadithViewModel.loadHadithByNumber` reads state it just asked for.** It calls
+  `loadChapter(...)` (which launches) and then immediately reads `_readerState.value.hadiths` to
+  find the index, so the list is still empty and the index is always 0. Latent rather than shipped:
+  `HadithEvent.LoadHadithByNumber` is never dispatched from any screen. Fix by awaiting the
+  chapter's first emission (or by folding the lookup into the loader) if that path is ever wired up
+  — and note the "lying signature" parallel with AP-7.3.
 
 Detect:
 

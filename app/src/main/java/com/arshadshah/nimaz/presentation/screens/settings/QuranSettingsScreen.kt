@@ -1,7 +1,6 @@
 package com.arshadshah.nimaz.presentation.screens.settings
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,17 +11,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Slider
-import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -40,20 +36,18 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.MushafScript
+import com.arshadshah.nimaz.domain.model.QuranReciter
 import com.arshadshah.nimaz.domain.model.QuranTranslation
+import com.arshadshah.nimaz.domain.model.TranslationLanguage
 import com.arshadshah.nimaz.presentation.components.atoms.BISMILLAH_TEXT
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazDivider
-import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
-import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
-import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
@@ -61,13 +55,50 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownField
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownItem
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
 import com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsItem
+import com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsSlider
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.TajweedLegendSheet
 import com.arshadshah.nimaz.presentation.theme.QuranArabicFont
-import com.arshadshah.nimaz.presentation.theme.translationFontFamily
+import com.arshadshah.nimaz.presentation.theme.asTranslationText
 import com.arshadshah.nimaz.presentation.viewmodel.SettingsEvent
 import com.arshadshah.nimaz.presentation.viewmodel.SettingsViewModel
 
+/**
+ * Quran reading preferences.
+ *
+ * ## Ordering
+ * The screen is ordered the way a reader actually thinks about the page, top to bottom:
+ *
+ * 1. **Preview** — the sample ayah, so every control below has something to change.
+ * 2. **Mushaf script** — the widest-reaching choice on the screen. It decides which edition
+ *    the reader renders, and it *gates* tajweed (only Madani carries per-letter spans), so it
+ *    has to be settled before the settings it constrains. It used to sit third inside "Arabic
+ *    Text", below the font controls it silently overrides.
+ * 3. **Arabic text** — face and size for the Arabic itself.
+ * 4. **Translation** — which translation, whether to show it, and how big. Previously
+ *    "show translation" lived under Display Options while the translation *picker* was two
+ *    sections further down, so the two halves of one decision were never on screen together.
+ * 5. **Tajweed** — its own section rather than three rows buried at the end of a
+ *    seven-toggle list, with the availability note attached to the section.
+ * 6. **Audio** — the reciter.
+ * 7. **Reading** — behaviour that is neither look nor content (continuous reading, screen on).
+ *
+ * ## Adding new translations
+ * The translation picker is driven entirely by the `QuranTranslation` enum in
+ * `domain/model/QuranTranslation.kt` — it is the single source of truth. To add one:
+ * 1. Add the edition in the arshad-shah/nimaz-data repository and run the importer, which
+ *    writes a `tr.<id>` collection into the artifact the app fetches.
+ * 2. Add a matching entry to the `QuranTranslation` enum.
+ *
+ * ## Adding new Arabic fonts
+ * Driven entirely by the `QuranArabicFont` enum in `presentation/theme/Type.kt`:
+ * 1. Add the font file(s) to `app/src/main/res/font/`.
+ * 2. Declare a `FontFamily` and add a `QuranArabicFont` entry (id + displayName + fontFamily).
+ *
+ * ## Adding new reciters
+ * Driven by the `QuranReciter` enum in `domain/model/QuranReciter.kt`, plus its CDN edition in
+ * `QuranAudioManager.RECITER_CDN_MAP`.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun QuranSettingsScreen(
@@ -81,27 +112,13 @@ fun QuranSettingsScreen(
     var showTajweedLegend by remember { mutableStateOf(false) }
 
     val selectedTranslation = QuranTranslation.fromId(quranState.selectedTranslatorId)
-
-    // === ADDING NEW TRANSLATIONS ===
-    // The translation picker is driven entirely by the QuranTranslation enum in
-    // domain/model/QuranTranslation.kt — it is the single source of truth, exactly as
-    // QuranArabicFont is for the font picker. To add one:
-    // 1. Add the edition in the arshad-shah/nimaz-data repository and run the importer,
-    //    which writes a tr.<id> collection into the artifact the app fetches
-    // 2. Add a matching entry to the QuranTranslation enum
-    // That's it — this screen lists it, and its verses arrive in the `translations` table
-    // with the artifact.
-
-    // === ADDING NEW ARABIC FONTS ===
-    // The font picker is driven entirely by the QuranArabicFont enum in
-    // presentation/theme/Type.kt — it is the single source of truth. To add one:
-    // 1. Add the font file(s) (.ttf/.otf) to app/src/main/res/font/
-    // 2. In Type.kt, declare a FontFamily and add a QuranArabicFont entry
-    //    (id + displayName + fontFamily)
-    // That's it — this screen, the preview, and the reader all derive from the
-    // enum, and the selected id persists via PreferencesDataStore.quranArabicFont.
-
     val selectedFont = QuranArabicFont.fromId(quranState.selectedArabicFontId)
+    val selectedReciter = QuranReciter.fromId(quranState.selectedReciterId)
+
+    // Tajweed colours are only available for the Madani (Uthmani) script — the IndoPak
+    // layouts have no per-letter spans (see MushafLineLayout). Disable the toggles with a
+    // reason rather than let them silently do nothing (#293).
+    val tajweedAvailable = quranState.mushafScript == MushafScript.MADANI
 
     NimazScreenScaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -122,7 +139,7 @@ fun QuranSettingsScreen(
         ) {
             item { Spacer(modifier = Modifier.height(4.dp)) }
 
-            // Preview Card
+            // ── 1. Live preview ──────────────────────────────────────────────────────────
             item {
                 PreviewCard(
                     arabicFontSize = quranState.arabicFontSize,
@@ -130,98 +147,21 @@ fun QuranSettingsScreen(
                     showTransliteration = quranState.showTransliteration,
                     showTranslation = quranState.showTranslation,
                     translationText = quranState.previewTranslation,
-                    translationIsRtl = selectedTranslation.isRtl,
-                    translationFontFamily = translationFontFamily(selectedTranslation.language)
+                    translationFontSize = quranState.translationFontSize,
+                    translationLanguage = selectedTranslation.language
                 )
             }
 
-            // Arabic Text Section
-            item {
-                NimazSectionHeader(title = stringResource(R.string.arabic_text))
-            }
+            // ── 2. Mushaf script — the choice the rest of the screen hangs off ───────────
+            item { NimazSectionHeader(title = stringResource(R.string.mushaf_layout)) }
             item {
                 NimazMenuGroup {
-                    // Arabic Font Size Slider
+                    // Chooses which edition the Mushaf (page) reader renders: the default
+                    // ayah-flow Uthmani/Madani 604-page layout, or one of the line-accurate
+                    // IndoPak editions (#270). Persists via
+                    // PreferencesDataStore.quranMushafScript; the reader picks its renderer
+                    // and page count from it live.
                     Column(modifier = Modifier.padding(16.dp)) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = stringResource(R.string.arabic_font_size),
-                                style = MaterialTheme.typography.bodyLarge,
-                                fontWeight = FontWeight.Medium,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                            Text(
-                                text = stringResource(
-                                    R.string.arabic_font_size_value,
-                                    quranState.arabicFontSize.toInt()
-                                ),
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.SemiBold,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                        }
-                        Spacer(modifier = Modifier.height(15.dp))
-                        Slider(
-                            value = quranState.arabicFontSize,
-                            onValueChange = { viewModel.onEvent(SettingsEvent.SetArabicFontSize(it)) },
-                            valueRange = 18f..42f,
-                            colors = SliderDefaults.colors(
-                                thumbColor = MaterialTheme.colorScheme.primary,
-                                activeTrackColor = MaterialTheme.colorScheme.primary,
-                                inactiveTrackColor = MaterialTheme.colorScheme.surfaceVariant
-                            )
-                        )
-                    }
-
-                    NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
-
-                    // Arabic Font selector — Nimaz anchored dropdown. The list of
-                    // options comes straight from QuranArabicFont.entries, so adding
-                    // a font (see comment above) automatically adds a menu item, each
-                    // rendered in its own typeface. The live preview lives in the
-                    // PREVIEW card at the top of the screen.
-                    Column(
-                        modifier = Modifier.padding(
-                            start = 16.dp,
-                            end = 16.dp,
-                            top = 12.dp,
-                            bottom = 14.dp
-                        )
-                    ) {
-                        NimazDropdownField(
-                            label = stringResource(R.string.arabic_font),
-                            items = QuranArabicFont.entries.map { font ->
-                                NimazDropdownItem(
-                                    value = font.id,
-                                    label = font.displayName,
-                                    textFontFamily = font.fontFamily,
-                                )
-                            },
-                            selected = selectedFont.id,
-                            onSelected = { viewModel.onEvent(SettingsEvent.SetArabicFont(it)) }
-                        )
-                    }
-
-                    NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
-
-                    // Mushaf script / layout selector — chooses which edition the Mushaf (page)
-                    // reader renders: the default ayah-flow Uthmani/Madani 604-page layout, or
-                    // one of the line-accurate IndoPak editions (issue #270). The list is
-                    // driven by the MushafScript catalogue; the choice persists via
-                    // PreferencesDataStore.quranMushafScript and the reader picks its renderer
-                    // + page count from it live.
-                    Column(
-                        modifier = Modifier.padding(
-                            start = 16.dp,
-                            end = 16.dp,
-                            top = 12.dp,
-                            bottom = 14.dp
-                        )
-                    ) {
                         val mushafScriptLabels = mapOf(
                             MushafScript.MADANI to stringResource(R.string.mushaf_script_madani),
                             MushafScript.INDOPAK_16 to stringResource(R.string.mushaf_script_indopak16),
@@ -253,45 +193,114 @@ fun QuranSettingsScreen(
                 }
             }
 
-            // Display Options Section
-            item {
-                NimazSectionHeader(title = stringResource(R.string.display_options))
-            }
+            // ── 3. Arabic text ──────────────────────────────────────────────────────────
+            item { NimazSectionHeader(title = stringResource(R.string.arabic_text)) }
             item {
                 NimazMenuGroup {
+                    // The options come straight from QuranArabicFont.entries, each rendered
+                    // in its own typeface. The live preview is the card at the top.
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        NimazDropdownField(
+                            label = stringResource(R.string.arabic_font),
+                            items = QuranArabicFont.entries.map { font ->
+                                NimazDropdownItem(
+                                    value = font.id,
+                                    label = font.displayName,
+                                    textFontFamily = font.fontFamily,
+                                )
+                            },
+                            selected = selectedFont.id,
+                            onSelected = { viewModel.onEvent(SettingsEvent.SetArabicFont(it)) }
+                        )
+                    }
+
+                    NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
+
+                    NimazSettingsSlider(
+                        title = stringResource(R.string.arabic_font_size),
+                        valueLabel = stringResource(
+                            R.string.arabic_font_size_value,
+                            quranState.arabicFontSize.toInt()
+                        ),
+                        value = quranState.arabicFontSize,
+                        onValueChange = { viewModel.onEvent(SettingsEvent.SetArabicFontSize(it)) },
+                        valueRange = 18f..42f,
+                        contentDescription = stringResource(R.string.arabic_font_size)
+                    )
+                }
+            }
+
+            // ── 4. Translation: which one, whether to show it, how big ──────────────────
+            item { NimazSectionHeader(title = stringResource(R.string.translation)) }
+            item {
+                NimazMenuGroup {
+                    // One row into a dedicated screen, in the shape of the reciter picker,
+                    // rather than 15 rows inlined here. That screen has room for the live
+                    // Bismillah preview that makes a translation judgeable by reading it.
+                    // Translator *and* language on one line. This row used to pass the
+                    // translator as `value` alongside a `subtitle`, and NimazSettingsItem
+                    // rendered `subtitle ?: value` — so it showed "English" and the
+                    // translator's name, the one thing the row exists to report, never
+                    // appeared at all.
                     NimazSettingsItem(
-                        title = stringResource(R.string.show_transliteration),
-                        subtitle = stringResource(R.string.show_transliteration_subtitle),
-                        checked = quranState.showTransliteration,
-                        onCheckedChange = { viewModel.onEvent(SettingsEvent.SetShowTransliteration(!quranState.showTransliteration)) }
+                        title = stringResource(R.string.translation),
+                        subtitle = stringResource(
+                            R.string.settings_value_with_qualifier,
+                            selectedTranslation.translator,
+                            selectedTranslation.language.englishName
+                        ),
+                        icon = Icons.Default.Translate,
+                        onClick = onNavigateToSelectTranslation,
+                        showArrow = true
                     )
                     NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
                     NimazSettingsItem(
                         title = stringResource(R.string.show_translation),
                         subtitle = stringResource(R.string.show_translation_subtitle),
                         checked = quranState.showTranslation,
-                        onCheckedChange = { viewModel.onEvent(SettingsEvent.SetShowTranslation(!quranState.showTranslation)) }
+                        onCheckedChange = {
+                            viewModel.onEvent(
+                                SettingsEvent.SetShowTranslation(!quranState.showTranslation)
+                            )
+                        }
+                    )
+                    NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                    // The Quran reader has always read this preference (QuranViewModel ->
+                    // AyahItem.fontSize) but no screen ever offered a control for it, unlike
+                    // the Dua and Hadith settings screens — so Quran translation size was
+                    // stuck at its 16sp default for everyone.
+                    NimazSettingsSlider(
+                        title = stringResource(R.string.translation_font_size),
+                        valueLabel = stringResource(
+                            R.string.arabic_font_size_value,
+                            quranState.translationFontSize.toInt()
+                        ),
+                        value = quranState.translationFontSize,
+                        onValueChange = {
+                            viewModel.onEvent(SettingsEvent.SetTranslationFontSize(it))
+                        },
+                        valueRange = 12f..28f,
+                        enabled = quranState.showTranslation,
+                        contentDescription = stringResource(R.string.translation_font_size)
                     )
                     NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
                     NimazSettingsItem(
-                        title = stringResource(R.string.continuous_reading),
-                        subtitle = stringResource(R.string.continuous_reading_subtitle),
-                        checked = quranState.continuousReading,
-                        onCheckedChange = { viewModel.onEvent(SettingsEvent.SetContinuousReading(!quranState.continuousReading)) }
+                        title = stringResource(R.string.show_transliteration),
+                        subtitle = stringResource(R.string.show_transliteration_subtitle),
+                        checked = quranState.showTransliteration,
+                        onCheckedChange = {
+                            viewModel.onEvent(
+                                SettingsEvent.SetShowTransliteration(!quranState.showTransliteration)
+                            )
+                        }
                     )
-                    NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
-                    NimazSettingsItem(
-                        title = stringResource(R.string.keep_screen_on),
-                        subtitle = stringResource(R.string.keep_screen_on_subtitle),
-                        checked = quranState.keepScreenOn,
-                        onCheckedChange = { viewModel.onEvent(SettingsEvent.SetKeepScreenOn(!quranState.keepScreenOn)) }
-                    )
-                    NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
-                    // Tajweed colours are only available for the Madani (Uthmani)
-                    // script — the 16-line IndoPak layout has no per-letter spans
-                    // (see MushafLineLayout). Disable the toggle with a reason
-                    // rather than let it silently do nothing (#293).
-                    val tajweedAvailable = quranState.mushafScript == MushafScript.MADANI
+                }
+            }
+
+            // ── 5. Tajweed ──────────────────────────────────────────────────────────────
+            item { NimazSectionHeader(title = stringResource(R.string.tajweed_section)) }
+            item {
+                NimazMenuGroup {
                     NimazSettingsItem(
                         title = stringResource(R.string.show_tajweed_colors),
                         subtitle = if (tajweedAvailable) {
@@ -301,21 +310,27 @@ fun QuranSettingsScreen(
                         },
                         checked = quranState.showTajweed,
                         enabled = tajweedAvailable,
-                        onCheckedChange = { viewModel.onEvent(SettingsEvent.SetShowTajweed(!quranState.showTajweed)) }
+                        onCheckedChange = {
+                            viewModel.onEvent(SettingsEvent.SetShowTajweed(!quranState.showTajweed))
+                        }
                     )
                     NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
-                    // Colour-blind-friendly mode: underline rule spans so they are
-                    // marked by a non-hue channel too (#294).
+                    // Colour-blind-friendly mode: underline rule spans so they are marked by
+                    // a non-hue channel too (#294).
                     NimazSettingsItem(
                         title = stringResource(R.string.tajweed_underline),
                         subtitle = stringResource(R.string.tajweed_underline_subtitle),
                         checked = quranState.tajweedUnderline,
                         enabled = tajweedAvailable && quranState.showTajweed,
-                        onCheckedChange = { viewModel.onEvent(SettingsEvent.SetTajweedUnderline(!quranState.tajweedUnderline)) }
+                        onCheckedChange = {
+                            viewModel.onEvent(
+                                SettingsEvent.SetTajweedUnderline(!quranState.tajweedUnderline)
+                            )
+                        }
                     )
                     NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
-                    // Colour legend — reachable regardless of script so users can
-                    // learn what the colours mean (#294).
+                    // Reachable regardless of script so users can learn what the colours
+                    // mean even on a layout that cannot show them (#294).
                     NimazSettingsItem(
                         title = stringResource(R.string.tajweed_colour_guide),
                         subtitle = stringResource(R.string.tajweed_colour_guide_subtitle),
@@ -325,77 +340,53 @@ fun QuranSettingsScreen(
                 }
             }
 
-            // Translation Section
-            item {
-                NimazSectionHeader(title = stringResource(R.string.translation))
-            }
-            // One row into a dedicated screen, in the shape of the reciter picker, rather
-            // than 15 rows inlined into a screen that already carries font, script, tajweed
-            // and audio sections. The screen has room for the live Bismillah preview that
-            // makes a translation judgeable by reading it.
+            // ── 6. Audio ────────────────────────────────────────────────────────────────
+            item { NimazSectionHeader(title = stringResource(R.string.audio)) }
             item {
                 NimazMenuGroup {
                     NimazSettingsItem(
-                        title = stringResource(R.string.translation),
-                        subtitle = selectedTranslation.language.englishName,
-                        value = selectedTranslation.translator,
-                        icon = Icons.Default.Translate,
-                        onClick = onNavigateToSelectTranslation,
+                        title = stringResource(R.string.reciter),
+                        subtitle = stringResource(
+                            R.string.settings_value_with_qualifier,
+                            selectedReciter.displayName,
+                            selectedReciter.country
+                        ),
+                        icon = Icons.Default.Mic,
+                        onClick = onNavigateToSelectReciter,
                         showArrow = true
                     )
                 }
             }
 
-            // Audio Section
-            item {
-                NimazSectionHeader(title = stringResource(R.string.audio))
-            }
+            // ── 7. Reading behaviour ────────────────────────────────────────────────────
+            item { NimazSectionHeader(title = stringResource(R.string.reading_section)) }
             item {
                 NimazMenuGroup {
-                    // Reciter
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { onNavigateToSelectReciter() }
-                            .padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = stringResource(R.string.reciter),
-                                style = MaterialTheme.typography.bodyLarge,
-                                fontWeight = FontWeight.Medium,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                            Text(
-                                text = quranState.selectedReciterId?.let { id ->
-                                    when (id) {
-                                        "alafasy" -> "Mishary Rashid Alafasy"
-                                        "sudais" -> "Abdul Rahman Al-Sudais"
-                                        "ghamdi" -> "Saad Al-Ghamdi"
-                                        "muaiqly" -> "Maher Al-Muaiqly"
-                                        "abdulbasit" -> "Abdul Basit Abdul Samad"
-                                        else -> id
-                                    }
-                                } ?: "Mishary Rashid Alafasy",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                    NimazSettingsItem(
+                        title = stringResource(R.string.continuous_reading),
+                        subtitle = stringResource(R.string.continuous_reading_subtitle),
+                        checked = quranState.continuousReading,
+                        onCheckedChange = {
+                            viewModel.onEvent(
+                                SettingsEvent.SetContinuousReading(!quranState.continuousReading)
                             )
                         }
-                        NimazIcon(
-                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                            contentDescription = null,
-                            variant = NimazIconVariant.MUTED,
-                            size = NimazIconSize.MEDIUM
-                        )
-                    }
-                    // Continuous reading also controls auto-play of next verse in audio mode
+                    )
+                    NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                    NimazSettingsItem(
+                        title = stringResource(R.string.keep_screen_on),
+                        subtitle = stringResource(R.string.keep_screen_on_subtitle),
+                        checked = quranState.keepScreenOn,
+                        onCheckedChange = {
+                            viewModel.onEvent(
+                                SettingsEvent.SetKeepScreenOn(!quranState.keepScreenOn)
+                            )
+                        }
+                    )
                 }
             }
 
-            item {
-                Spacer(modifier = Modifier.height(16.dp))
-            }
+            item { Spacer(modifier = Modifier.height(16.dp)) }
         }
     }
 
@@ -411,8 +402,8 @@ private fun PreviewCard(
     showTransliteration: Boolean,
     showTranslation: Boolean,
     translationText: String?,
-    translationIsRtl: Boolean,
-    translationFontFamily: FontFamily?
+    translationFontSize: Float,
+    translationLanguage: TranslationLanguage
 ) {
     NimazMenuGroup {
         Column(modifier = Modifier.padding(20.dp)) {
@@ -460,23 +451,6 @@ private fun PreviewCard(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            // Transliteration - styled like reader
-            if (showTransliteration) {
-                Spacer(modifier = Modifier.height(12.dp))
-                NimazCard(
-                    shape = RoundedCornerShape(10.dp),
-                    tone = NimazTone.SUCCESS
-                ) {
-                    Text(
-                        text = stringResource(R.string.quran_settings_preview_transliteration),
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontStyle = FontStyle.Italic,
-                        color = MaterialTheme.colorScheme.onTertiaryContainer,
-                        modifier = Modifier.padding(12.dp)
-                    )
-                }
-            }
-
             // Translation - styled like reader
             if (showTranslation) {
                 Spacer(modifier = Modifier.height(10.dp))
@@ -491,23 +465,32 @@ private fun PreviewCard(
                         // sample only before the first load resolves.
                         text = translationText
                             ?: stringResource(R.string.quran_settings_preview_translation),
-                        style = MaterialTheme.typography.bodyMedium.copy(
-                            // Urdu is set in Nastaliq and the body fonts carry no Arabic
-                            // script, so it needs its own face; direction resolves from the
-                            // text itself exactly as the reader does.
-                            fontFamily = translationFontFamily,
-                            textDirection = TextDirection.Content,
-                            textAlign = if (translationIsRtl) TextAlign.End else TextAlign.Start,
-                            // Nastaliq's steep descenders clip badly at body leading. This
-                            // has to live in the style: a `lineHeight` argument on Text
-                            // overrides the style's, which is what previously forced every
-                            // translation — Urdu included — back to 22.sp.
-                            lineHeight = if (translationFontFamily != null) 34.sp else 22.sp
-                        ),
+                        // Face, direction and leading all resolve from the translation's
+                        // language — the reader uses the same helper, so the preview cannot
+                        // promise a rendering the reader then fails to deliver.
+                        style = MaterialTheme.typography.bodyMedium
+                            .asTranslationText(translationLanguage, translationFontSize.sp),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(12.dp)
+                    )
+                }
+            }
+
+            // Transliteration - styled like reader
+            if (showTransliteration) {
+                Spacer(modifier = Modifier.height(10.dp))
+                NimazCard(
+                    shape = RoundedCornerShape(10.dp),
+                    tone = NimazTone.SUCCESS
+                ) {
+                    Text(
+                        text = stringResource(R.string.quran_settings_preview_transliteration),
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontStyle = FontStyle.Italic,
+                        color = MaterialTheme.colorScheme.onTertiaryContainer,
+                        modifier = Modifier.padding(12.dp)
                     )
                 }
             }
@@ -524,4 +507,3 @@ private fun PreviewCard(
         }
     }
 }
-

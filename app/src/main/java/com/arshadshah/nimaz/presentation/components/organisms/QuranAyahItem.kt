@@ -60,6 +60,8 @@ import com.arshadshah.nimaz.core.share.Shareables
 import com.arshadshah.nimaz.core.util.TajweedParser
 import com.arshadshah.nimaz.domain.model.Ayah
 import com.arshadshah.nimaz.domain.model.SajdaType
+import com.arshadshah.nimaz.domain.model.TranslationLanguage
+import com.arshadshah.nimaz.presentation.components.atoms.BISMILLAH_TEXT
 import com.arshadshah.nimaz.presentation.components.atoms.NimazActionPill
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeDefaults
@@ -73,7 +75,6 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazPillActionButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.atoms.QuranVerseText
-import com.arshadshah.nimaz.presentation.components.atoms.BISMILLAH_TEXT
 import com.arshadshah.nimaz.presentation.components.atoms.appendAyahEndMarker
 import com.arshadshah.nimaz.presentation.components.atoms.getDisplayArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.hasLeadingBismillah
@@ -82,6 +83,7 @@ import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazPalette
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.theme.ThemeMode
+import com.arshadshah.nimaz.presentation.theme.asTranslationText
 import kotlinx.coroutines.launch
 
 @Composable
@@ -91,10 +93,9 @@ internal fun AyahItem(
     showTransliteration: Boolean = false,
     arabicFontSize: Float,
     arabicFontFamily: FontFamily = AmiriFontFamily,
-    /** Face for the translation prose; null keeps the default body font. Urdu needs its own
-     *  Nastaliq face because the body fonts carry no Arabic script — see
-     *  [com.arshadshah.nimaz.presentation.theme.translationFontFamily]. */
-    translationFontFamily: FontFamily? = null,
+    /** Language of the translation prose, which decides the face, direction and leading it
+     *  is drawn with — see [com.arshadshah.nimaz.presentation.theme.asTranslationText]. */
+    translationLanguage: TranslationLanguage = TranslationLanguage.ENGLISH,
     fontSize: Float,
     isHighlighted: Boolean = false,
     isAudioPlaying: Boolean = false,
@@ -292,19 +293,8 @@ internal fun AyahItem(
                     // direction has to come from the text itself rather than from the app's
                     // locale — otherwise Urdu renders left-aligned with its punctuation on the
                     // wrong side. TextAlign.Start then follows the resolved direction.
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        fontFamily = translationFontFamily,
-                        fontSize = fontSize.sp,
-                        // Nastaliq's steep descenders need noticeably more leading than a
-                        // Latin face at the same size, or successive lines collide.
-                        lineHeight = if (translationFontFamily != null) {
-                            (fontSize * 2.1f).sp
-                        } else {
-                            (fontSize * 1.5f).sp
-                        },
-                        textDirection = TextDirection.Content,
-                        textAlign = TextAlign.Start
-                    ),
+                    style = MaterialTheme.typography.bodyMedium
+                        .asTranslationText(translationLanguage, fontSize.sp),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(12.dp)
                 )
