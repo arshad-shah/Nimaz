@@ -474,6 +474,24 @@ typed route object.
   same-hue **near-neighbours** (the six madd rules; the five idgham rules) have low pairwise
   contrast (~1.0:1) — they are told apart by position, the in-app legend, and (future work in
   #294) an optional decoration channel / colour-blind-safe mode rather than by hue alone.
+- **Arabic-script text never uses a body style.** `OutfitFontFamily` and
+  `PlusJakartaSansFontFamily` carry **no Arabic-script glyphs at all**, so a plain
+  `Text(arabicString, style = MaterialTheme.typography.bodyLarge)` silently falls back to whatever
+  face the device happens to have. Two rules:
+    - **Arabic content** (ayah, hadith, dua, surah/juz name, prayer name, Qaida letter) is
+      `ArabicText(...)` / `QuranVerseText` / `HadithArabicText` / `DuaArabicText`
+      (`components/atoms/ArabicText.kt`), which supply an Arabic face + RTL.
+    - **Translation prose** is styled through `TextStyle.asTranslationText(language, fontSize = …)`
+      and a short **endonym label** ("اردو") through `TextStyle.asLanguageLabel(language)`, both in
+      `theme/Type.kt`. These resolve three things together that call sites kept getting partly
+      right: the *face* (Urdu is set in Nastaliq — a system Naskh fallback reads to an Urdu speaker
+      roughly the way blackletter reads in English), the *direction* (`TextDirection.Content`, so an
+      RTL translation lays out RTL whatever the UI locale is, with `TextAlign.Start` then following
+      the resolved direction — no manual flip), and the *leading* (Nastaliq's steep descenders
+      collide at Latin leading; the multipliers live in `Type.kt`). This must live in the **style**:
+      a `lineHeight` argument on `Text` overrides the style's. The reader, the Mushaf pages, the
+      ayah sheet, the Quran-settings preview and the translation picker all route through the same
+      helper, so a preview cannot promise a rendering the reader then fails to deliver.
 - **Theme entry:** `NimazTheme { ... }` wraps the app in `MainActivity`; it supplies the
   Material 3 color scheme, `NimazTypography`, and shapes, and honors `ThemeMode`. It also
   provides the appearance CompositionLocals (`LocalIsDarkTheme`, `LocalHapticEnabled`,
@@ -602,6 +620,22 @@ typed route object.
       variant. **Not** for on/off toggles (use `NimazSwitch`) or genuine single-choice `RadioButton`
       pickers (those stay as-is). It centralised the prayer/fast trackers, the settings/Quran pickers
       and the dropdown/list selection check indicators.
+    - a **labelled slider inside a settings group** (title + live value + track) is
+      `NimazSettingsSlider(title, valueLabel, value, onValueChange, valueRange, …)`
+      (`components/molecules/NimazSettingsSlider.kt`), **not** a hand-built
+      `Column { Row { Text; Text }; Slider }`. That shape had been written out five times (Quran /
+      Dua / Hadith Arabic size, Dua / Hadith translation size), each carrying its own copy of the
+      `SliderDefaults.colors(…)` triple, and they had already drifted on padding. Pass
+      `contentDescription` — the title `Text` is a sibling node, not the slider's label, so without
+      it TalkBack announces only a bare percentage.
+    - a **picker row** — a list row that represents the currently-chosen value rather than a place
+      to navigate to — is `NimazMenuItem(…, selected = true)`. The `selected` flag fills the row
+      with the accent container, sets the title in the on-container colour, swaps the trailing
+      chevron for a check, and publishes `selected` to accessibility services. Without it a picker
+      list is visually identical to a navigation list: the row you are already on looks exactly like
+      the twelve you are not (this is what the translation picker shipped as). `subtitleStyle`
+      exists for the same rows, whose subtitle is often a **non-Latin endonym** — see the
+      typography bullet below.
     - an on/off toggle is `NimazSwitch(checked, onCheckedChange, variant = …)`
       (`components/atoms/NimazSwitch.kt`), **not** a raw Material 3 `Switch`. It wraps Material's
       `Switch` (keeping the drag gesture, `Role.Switch` semantics and thumb animation) and bakes in

@@ -798,6 +798,7 @@
     <string name="cd_back">Zurück</string>
     <string name="cd_tafseer">Tafseer</string>
     <string name="cd_stop">Stopp</string>
+    <string name="cd_selected">Ausgewählt</string>
     <string name="cd_settings">Einstellungen</string>
     <string name="cd_previous_month">Voriger Monat</string>
     <string name="cd_next_month">Nächster Monat</string>
@@ -877,6 +878,9 @@
     <string name="mushaf_script_indopak15">IndoPak 15-zeilig (610 Seiten)</string>
     <string name="mushaf_script_indopak13">IndoPak 13-zeilig (847 Seiten)</string>
     <string name="display_options">Anzeigeoptionen</string>
+    <string name="reading_section">Lesen</string>
+    <string name="settings_value_with_qualifier">%1$s · %2$s</string>
+    <string name="tajweed_section">Tadschwid</string>
     <string name="show_transliteration">Transliteration anzeigen</string>
     <string name="show_transliteration_subtitle">Aussprache in lateinischen Buchstaben</string>
     <string name="show_translation">Übersetzung anzeigen</string>
@@ -981,6 +985,8 @@
     <string name="select_translation_search_hint">Übersetzungen oder Sprachen suchen</string>
     <string name="select_translation_all">Alle Übersetzungen</string>
     <string name="select_reciter_popular">BELIEBTE REZITATOREN</string>
+    <string name="recitation_style_mujawwad">Mujawwad</string>
+    <string name="recitation_style_murattal">Murattal</string>
     <string name="surah_info_about">Über diese Surah</string>
     <string name="surah_info_main_themes">Hauptthemen</string>
     <string name="surah_info_description_fallback">Diese Surah enthält göttliche Führung und Weisheit für die Gläubigen.</string>

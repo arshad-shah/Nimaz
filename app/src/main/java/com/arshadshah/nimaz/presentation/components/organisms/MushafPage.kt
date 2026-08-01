@@ -37,6 +37,7 @@ import com.arshadshah.nimaz.core.share.ContentShareManager
 import com.arshadshah.nimaz.core.share.Shareables
 import com.arshadshah.nimaz.domain.model.Ayah
 import com.arshadshah.nimaz.domain.model.Surah
+import com.arshadshah.nimaz.domain.model.TranslationLanguage
 import com.arshadshah.nimaz.presentation.components.molecules.AyahTooltip
 import com.arshadshah.nimaz.presentation.components.molecules.MushafContinuousText
 import com.arshadshah.nimaz.presentation.components.molecules.QuranFrame
@@ -75,8 +76,8 @@ fun MushafPage(
     tajweedUnderline: Boolean = false,
     showTranslation: Boolean = true,
     showTransliteration: Boolean = false,
-    /** Face for translation prose in the ayah sheet; null keeps the body font. */
-    translationFontFamily: FontFamily? = null,
+    /** Language of the translation prose in the ayah sheet — decides face and leading. */
+    translationLanguage: TranslationLanguage = TranslationLanguage.ENGLISH,
     onBookmarkClick: (Ayah) -> Unit = {},
     onFavoriteClick: (Ayah) -> Unit = {},
     onPlayClick: (Ayah) -> Unit = {},
@@ -254,7 +255,7 @@ fun MushafPage(
         val surah = surahMap[ayah.surahNumber]
 
         AyahTranslationBottomSheet(
-            translationFontFamily = translationFontFamily,
+            translationLanguage = translationLanguage,
             ayah = ayah,
             surahName = surah?.nameEnglish,
             showTranslation = showTranslation,

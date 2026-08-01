@@ -10,6 +10,7 @@ import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import com.arshadshah.nimaz.core.monitoring.CrashReporter
+import com.arshadshah.nimaz.domain.model.QuranReciter
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -40,7 +41,7 @@ data class AudioState(
     val position: Long = 0L,
     val currentTitle: String = "",
     val currentSubtitle: String? = null,
-    val reciterName: String = "Mishary Rashid Alafasy",
+    val reciterName: String = QuranReciter.DEFAULT.displayName,
     val isActive: Boolean = false,
     val error: String? = null,
     // Playlist progress for surah-level tracking
@@ -70,8 +71,8 @@ class QuranAudioManager @Inject constructor(
     val audioState: StateFlow<AudioState> = _audioState.asStateFlow()
 
     // Reciter CDN ID and bitrate - dynamically set from preferences
-    private var reciterCdnId = "ar.alafasy" // Default: Mishary Rashid Alafasy
-    private var reciterBitrate = 128 // Default bitrate
+    private var reciterCdnId = DEFAULT_CDN.first
+    private var reciterBitrate = DEFAULT_CDN.second
 
     // Sequential playback state
     private var ayahPlaylist: List<AyahAudioItem> = emptyList()
@@ -156,51 +157,38 @@ class QuranAudioManager @Inject constructor(
 
     companion object {
         // CDN identifiers and bitrates from https://api.alquran.cloud/v1/edition?format=audio&type=versebyverse
-        // Pair: (cdnId, bitrate) - some reciters only have 64kbps, others have 128kbps
-        val RECITER_CDN_MAP = mapOf(
-            "alafasy" to Pair("ar.alafasy", 128),
-            "mishary" to Pair("ar.alafasy", 128),
-            "sudais" to Pair("ar.abdurrahmaansudais", 64),
-            "abdulbasit" to Pair("ar.abdulsamad", 64),
-            "muaiqly" to Pair("ar.mahermuaiqly", 128),
-            "maher" to Pair("ar.mahermuaiqly", 128),
-            "hussary" to Pair("ar.husary", 128),
-            "minshawi" to Pair("ar.minshawi", 128),
-            "ajamy" to Pair("ar.ahmedajamy", 128),
-            "shuraim" to Pair("ar.saoodshuraym", 64),
-            "hudhaify" to Pair("ar.hudhaify", 128),
-            "ayyoub" to Pair("ar.muhammadayyoub", 128),
-            "jibreel" to Pair("ar.muhammadjibreel", 128),
-            "shaatree" to Pair("ar.shaatree", 128),
-            "basfar" to Pair("ar.abdullahbasfar", 64)
+        // Pair: (cdnId, bitrate) - some reciters only have 64kbps, others have 128kbps.
+        //
+        // Keyed by the QuranReciter catalogue rather than by raw id strings: the *who* lives in
+        // the domain enum, and only the CDN wiring — which edition slug, at which bitrate — is a
+        // data-layer concern. An id the catalogue resolves but this map has no entry for falls
+        // back to the default edition rather than failing.
+        val RECITER_CDN_MAP: Map<QuranReciter, Pair<String, Int>> = mapOf(
+            QuranReciter.MISHARY to Pair("ar.alafasy", 128),
+            QuranReciter.SUDAIS to Pair("ar.abdurrahmaansudais", 64),
+            QuranReciter.ABDULBASIT to Pair("ar.abdulsamad", 64),
+            QuranReciter.MAHER to Pair("ar.mahermuaiqly", 128),
+            QuranReciter.HUSSARY to Pair("ar.husary", 128),
+            QuranReciter.MINSHAWI to Pair("ar.minshawi", 128),
+            QuranReciter.AJAMY to Pair("ar.ahmedajamy", 128),
+            QuranReciter.SHURAIM to Pair("ar.saoodshuraym", 64),
+            QuranReciter.HUDHAIFY to Pair("ar.hudhaify", 128),
+            QuranReciter.AYYOUB to Pair("ar.muhammadayyoub", 128),
+            QuranReciter.JIBREEL to Pair("ar.muhammadjibreel", 128),
+            QuranReciter.SHAATREE to Pair("ar.shaatree", 128),
+            QuranReciter.BASFAR to Pair("ar.abdullahbasfar", 64)
         )
+
+        private val DEFAULT_CDN = Pair("ar.alafasy", 128)
     }
 
     fun setReciter(reciterId: String?) {
-        val (cdnId, bitrate) = RECITER_CDN_MAP[reciterId] ?: Pair("ar.alafasy", 128)
+        val reciter = QuranReciter.fromId(reciterId)
+        val (cdnId, bitrate) = RECITER_CDN_MAP[reciter] ?: DEFAULT_CDN
         reciterCdnId = cdnId
         reciterBitrate = bitrate
         _audioState.update {
-            it.copy(reciterName = getReciterDisplayName(reciterId))
-        }
-    }
-
-    private fun getReciterDisplayName(reciterId: String?): String {
-        return when (reciterId) {
-            "alafasy", "mishary" -> "Mishary Rashid Alafasy"
-            "sudais" -> "Abdul Rahman Al-Sudais"
-            "abdulbasit" -> "Abdul Basit Abdul Samad"
-            "muaiqly", "maher" -> "Maher Al-Muaiqly"
-            "hussary" -> "Mahmoud Khalil Al-Hussary"
-            "minshawi" -> "Muhammad Siddiq Al-Minshawi"
-            "ajamy" -> "Ahmed Al-Ajamy"
-            "shuraim" -> "Saud Al-Shuraim"
-            "hudhaify" -> "Ali Al-Hudhaify"
-            "ayyoub" -> "Muhammad Ayyoub"
-            "jibreel" -> "Muhammad Jibreel"
-            "shaatree" -> "Abu Bakr Al-Shaatree"
-            "basfar" -> "Abdullah Basfar"
-            else -> "Mishary Rashid Alafasy"
+            it.copy(reciterName = reciter.displayName)
         }
     }
 

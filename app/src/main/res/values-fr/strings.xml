@@ -820,6 +820,7 @@
     <string name="cd_back">Retour</string>
     <string name="cd_tafseer">Tafseer</string>
     <string name="cd_stop">Arrêter</string>
+    <string name="cd_selected">Sélectionné</string>
     <string name="cd_settings">Paramètres</string>
     <string name="cd_previous_month">Mois précédent</string>
     <string name="cd_next_month">Mois suivant</string>
@@ -899,6 +900,9 @@
     <string name="mushaf_script_indopak15">IndoPak 15 lignes (610 pages)</string>
     <string name="mushaf_script_indopak13">IndoPak 13 lignes (847 pages)</string>
     <string name="display_options">Options d\'affichage</string>
+    <string name="reading_section">Lecture</string>
+    <string name="settings_value_with_qualifier">%1$s · %2$s</string>
+    <string name="tajweed_section">Tajweed</string>
     <string name="show_transliteration">Afficher la translittération</string>
     <string name="show_transliteration_subtitle">Prononciation en lettres latines</string>
     <string name="show_translation">Afficher la traduction</string>
@@ -1003,6 +1007,8 @@
     <string name="select_translation_search_hint">Rechercher une traduction ou une langue</string>
     <string name="select_translation_all">Toutes les traductions</string>
     <string name="select_reciter_popular">RÉCITATEURS POPULAIRES</string>
+    <string name="recitation_style_mujawwad">Mujawwad</string>
+    <string name="recitation_style_murattal">Murattal</string>
     <string name="surah_info_about">À propos de cette Surah</string>
     <string name="surah_info_main_themes">Thèmes principaux</string>
     <string name="surah_info_description_fallback">Cette sourate contient des conseils divins et de la sagesse pour les croyants.</string>

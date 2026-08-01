@@ -2,7 +2,6 @@ package com.arshadshah.nimaz.presentation.screens.dua
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,14 +11,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Slider
-import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
@@ -41,6 +37,7 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownField
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownItem
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
 import com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsItem
+import com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsSlider
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.QuranArabicFont
 import com.arshadshah.nimaz.presentation.viewmodel.SettingsEvent
@@ -97,46 +94,17 @@ fun DuaSettingsScreen(
             item { NimazSectionHeader(title = stringResource(R.string.arabic_text)) }
             item {
                 NimazMenuGroup {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = stringResource(R.string.arabic_font_size),
-                                style = MaterialTheme.typography.bodyLarge,
-                                fontWeight = FontWeight.Medium,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                            Text(
-                                text = stringResource(
-                                    R.string.arabic_font_size_value,
-                                    duaState.arabicFontSize.toInt()
-                                ),
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.SemiBold,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                        }
-                        Spacer(modifier = Modifier.height(15.dp))
-                        Slider(
-                            value = duaState.arabicFontSize,
-                            onValueChange = {
-                                viewModel.onEvent(
-                                    SettingsEvent.SetDuaArabicFontSize(
-                                        it
-                                    )
-                                )
-                            },
-                            valueRange = 18f..42f,
-                            colors = SliderDefaults.colors(
-                                thumbColor = MaterialTheme.colorScheme.primary,
-                                activeTrackColor = MaterialTheme.colorScheme.primary,
-                                inactiveTrackColor = MaterialTheme.colorScheme.surfaceVariant
-                            )
-                        )
-                    }
+                    NimazSettingsSlider(
+                        title = stringResource(R.string.arabic_font_size),
+                        valueLabel = stringResource(
+                            R.string.arabic_font_size_value,
+                            duaState.arabicFontSize.toInt()
+                        ),
+                        value = duaState.arabicFontSize,
+                        onValueChange = { viewModel.onEvent(SettingsEvent.SetDuaArabicFontSize(it)) },
+                        valueRange = 18f..42f,
+                        contentDescription = stringResource(R.string.arabic_font_size)
+                    )
 
                     NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
 
@@ -168,46 +136,17 @@ fun DuaSettingsScreen(
             item { NimazSectionHeader(title = stringResource(R.string.translation)) }
             item {
                 NimazMenuGroup {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = stringResource(R.string.translation_font_size),
-                                style = MaterialTheme.typography.bodyLarge,
-                                fontWeight = FontWeight.Medium,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                            Text(
-                                text = stringResource(
-                                    R.string.arabic_font_size_value,
-                                    duaState.translationFontSize.toInt()
-                                ),
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.SemiBold,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                        }
-                        Spacer(modifier = Modifier.height(15.dp))
-                        Slider(
-                            value = duaState.translationFontSize,
-                            onValueChange = {
-                                viewModel.onEvent(
-                                    SettingsEvent.SetDuaTranslationFontSize(
-                                        it
-                                    )
-                                )
-                            },
-                            valueRange = 12f..28f,
-                            colors = SliderDefaults.colors(
-                                thumbColor = MaterialTheme.colorScheme.primary,
-                                activeTrackColor = MaterialTheme.colorScheme.primary,
-                                inactiveTrackColor = MaterialTheme.colorScheme.surfaceVariant
-                            )
-                        )
-                    }
+                    NimazSettingsSlider(
+                        title = stringResource(R.string.translation_font_size),
+                        valueLabel = stringResource(
+                            R.string.arabic_font_size_value,
+                            duaState.translationFontSize.toInt()
+                        ),
+                        value = duaState.translationFontSize,
+                        onValueChange = { viewModel.onEvent(SettingsEvent.SetDuaTranslationFontSize(it)) },
+                        valueRange = 12f..28f,
+                        contentDescription = stringResource(R.string.translation_font_size)
+                    )
                 }
             }
 

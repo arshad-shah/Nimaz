@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.Ayah
 import com.arshadshah.nimaz.domain.model.SajdaType
+import com.arshadshah.nimaz.domain.model.TranslationLanguage
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.components.molecules.NimazBottomSheet
@@ -31,6 +32,7 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazSheetHeader
 import com.arshadshah.nimaz.presentation.components.molecules.NimazSheetPreviewCard
 import com.arshadshah.nimaz.presentation.components.molecules.NimazSheetSectionLabel
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
+import com.arshadshah.nimaz.presentation.theme.asTranslationText
 
 /**
  * Bottom sheet showing translation and transliteration for an ayah.
@@ -54,8 +56,8 @@ fun AyahTranslationBottomSheet(
     surahName: String? = null,
     showTranslation: Boolean = true,
     showTransliteration: Boolean = false,
-    /** Face for the translation prose; null keeps the default body font (see AyahItem). */
-    translationFontFamily: FontFamily? = null,
+    /** Language of the translation prose — decides face, direction and leading. */
+    translationLanguage: TranslationLanguage = TranslationLanguage.ENGLISH,
     sheetState: SheetState = rememberModalBottomSheetState()
 ) {
     NimazBottomSheet(
@@ -69,7 +71,7 @@ fun AyahTranslationBottomSheet(
             surahName = surahName,
             showTranslation = showTranslation,
             showTransliteration = showTransliteration,
-            translationFontFamily = translationFontFamily
+            translationLanguage = translationLanguage
         )
     }
 }
@@ -81,8 +83,8 @@ fun AyahTranslationContent(
     surahName: String? = null,
     showTranslation: Boolean = true,
     showTransliteration: Boolean = false,
-    /** Face for the translation prose; null keeps the default body font (see AyahItem). */
-    translationFontFamily: FontFamily? = null
+    /** Language of the translation prose — decides face, direction and leading. */
+    translationLanguage: TranslationLanguage = TranslationLanguage.ENGLISH
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
         NimazSheetHeader(
@@ -121,13 +123,8 @@ fun AyahTranslationContent(
                         // from the app's locale — otherwise Urdu renders left-aligned with
                         // its punctuation on the wrong side. TextAlign.Start then follows
                         // the resolved direction.
-                        style = MaterialTheme.typography.bodyMedium.copy(
-                            fontFamily = translationFontFamily,
-                            // Nastaliq needs more leading than a Latin face at the same size.
-                            lineHeight = if (translationFontFamily != null) 34.sp else 22.sp,
-                            textDirection = TextDirection.Content,
-                            textAlign = TextAlign.Start
-                        ),
+                        style = MaterialTheme.typography.bodyMedium
+                            .asTranslationText(translationLanguage),
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }

@@ -35,12 +35,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.domain.model.QuranReciter
+import com.arshadshah.nimaz.domain.model.RecitationStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeEmphasis
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
@@ -58,24 +59,13 @@ import com.arshadshah.nimaz.presentation.viewmodel.QuranViewModel
 import com.arshadshah.nimaz.presentation.viewmodel.SettingsEvent
 import com.arshadshah.nimaz.presentation.viewmodel.SettingsViewModel
 
-data class ReciterInfo(
-    val id: String,
-    val name: String,
-    val location: String,
-    val style: String
-)
-
-private val popularReciters = listOf(
-    ReciterInfo("mishary", "Mishary Rashid Alafasy", "Kuwait", "Murattal"),
-    ReciterInfo("sudais", "Abdul Rahman Al-Sudais", "Saudi Arabia", "Murattal"),
-    ReciterInfo("abdulbasit", "Abdul Basit Abdul Samad", "Egypt", "Mujawwad"),
-    ReciterInfo("maher", "Maher Al Muaiqly", "Saudi Arabia", "Murattal"),
-    ReciterInfo("minshawi", "Muhammad Siddiq Al-Minshawi", "Egypt", "Mujawwad"),
-    ReciterInfo("hussary", "Mahmoud Khalil Al-Hussary", "Egypt", "Murattal"),
-    ReciterInfo("ajamy", "Ahmed Al-Ajamy", "Saudi Arabia", "Murattal"),
-    ReciterInfo("shuraim", "Saud Al-Shuraim", "Saudi Arabia", "Murattal"),
-    ReciterInfo("shaatree", "Abu Bakr Al-Shaatree", "Saudi Arabia", "Murattal"),
-    ReciterInfo("hudhaify", "Ali Al-Hudhaify", "Saudi Arabia", "Murattal")
+/** Localised label for a reciter's [RecitationStyle]. */
+@Composable
+internal fun recitationStyleLabel(style: RecitationStyle): String = stringResource(
+    when (style) {
+        RecitationStyle.MURATTAL -> R.string.recitation_style_murattal
+        RecitationStyle.MUJAWWAD -> R.string.recitation_style_mujawwad
+    }
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -86,24 +76,16 @@ fun SelectReciterScreen(
     quranViewModel: QuranViewModel = hiltViewModel()
 ) {
     val quranState by viewModel.quranState.collectAsState()
-    val selectedReciterId = quranState.selectedReciterId ?: "mishary"
+    // Resolves aliases from older builds too, so a stored "alafasy" still highlights Mishary.
+    val currentReciter = QuranReciter.fromId(quranState.selectedReciterId)
     var searchQuery by remember { mutableStateOf("") }
-    LocalContext.current
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
     // Track audio state for preview feedback
     val audioState by quranViewModel.audioState.collectAsState()
     var previewingReciterId by remember { mutableStateOf<String?>(null) }
 
-    val filteredReciters = remember(searchQuery) {
-        if (searchQuery.isBlank()) popularReciters
-        else popularReciters.filter {
-            it.name.contains(searchQuery, ignoreCase = true) ||
-                    it.location.contains(searchQuery, ignoreCase = true)
-        }
-    }
-
-    val currentReciter = popularReciters.find { it.id == selectedReciterId } ?: popularReciters[0]
+    val filteredReciters = remember(searchQuery) { QuranReciter.search(searchQuery) }
 
     NimazScreenScaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -174,12 +156,12 @@ fun SelectReciterScreen(
 
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = currentReciter.name,
+                                text = currentReciter.displayName,
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.SemiBold
                             )
                             Text(
-                                text = currentReciter.location,
+                                text = currentReciter.country,
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -210,13 +192,13 @@ fun SelectReciterScreen(
                 items = filteredReciters,
                 key = { it.id }
             ) { reciter ->
-                val isSelected = reciter.id == selectedReciterId
+                val isSelected = reciter == currentReciter
                 val isThisPreviewing = previewingReciterId == reciter.id
 
                 VoiceOptionCard(
-                    name = reciter.name,
-                    primaryTag = reciter.style,
-                    secondaryTag = reciter.location,
+                    name = reciter.displayName,
+                    primaryTag = recitationStyleLabel(reciter.style),
+                    secondaryTag = reciter.country,
                     isSelected = isSelected,
                     isPlaying = isThisPreviewing && audioState.isPlaying,
                     isDownloading = isThisPreviewing && audioState.isDownloading,

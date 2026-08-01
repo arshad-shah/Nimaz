@@ -16,6 +16,7 @@ import com.arshadshah.nimaz.domain.usecase.HadithUseCases
 import com.arshadshah.nimaz.presentation.theme.AmiriFontFamily
 import com.arshadshah.nimaz.presentation.theme.QuranArabicFont
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -110,6 +111,17 @@ class HadithViewModel @Inject constructor(
     private val _bookmarksState = MutableStateFlow(HadithBookmarksUiState())
     val bookmarksState: StateFlow<HadithBookmarksUiState> = _bookmarksState.asStateFlow()
 
+    // Each of these collects a Room Flow, and a Room Flow never completes — so a bare
+    // `viewModelScope.launch { flow.collect { … } }` with no handle leaks a collector per
+    // invocation, all of them writing the same state for the lifetime of the ViewModel.
+    // Search re-runs per keystroke (so an earlier, slower query could land last and win),
+    // and the chapter/reader loaders re-run per navigation. One handle per *identity of the
+    // request*: the reader shows one chapter at a time, so one handle each is correct here.
+    // (AP-7.1b in docs/CLEAN_ARCHITECTURE_CHECKLIST.md — same defect as the Quran reader's.)
+    private var searchJob: Job? = null
+    private var chaptersJob: Job? = null
+    private var readerJob: Job? = null
+
     init {
         loadAllBooks()
         loadBookmarks()
@@ -161,6 +173,7 @@ class HadithViewModel @Inject constructor(
             is HadithEvent.SetArabicFontSize -> _readerState.update { it.copy(arabicFontSize = event.size) }
             HadithEvent.ToggleArabic -> _readerState.update { it.copy(showArabic = !it.showArabic) }
             HadithEvent.ClearSearch -> {
+                searchJob?.cancel()
                 _searchState.update { HadithSearchUiState() }
                 _chaptersState.update { it.copy(searchQuery = "", filteredChapters = it.chapters) }
             }
@@ -189,7 +202,8 @@ class HadithViewModel @Inject constructor(
 
     private fun loadBook(bookId: String) {
         _chaptersState.update { it.copy(isLoading = true, error = null) }
-        viewModelScope.launch {
+        chaptersJob?.cancel()
+        chaptersJob = viewModelScope.launch {
             try {
                 val book = hadithUseCases.getBookById(bookId)
                 _chaptersState.update { it.copy(book = book) }
@@ -213,7 +227,8 @@ class HadithViewModel @Inject constructor(
 
     private fun loadChapter(chapterId: String) {
         _readerState.update { it.copy(isLoading = true, error = null) }
-        viewModelScope.launch {
+        readerJob?.cancel()
+        readerJob = viewModelScope.launch {
             try {
                 val chapter = hadithUseCases.getChapterById(chapterId)
                 _readerState.update { it.copy(chapter = chapter) }
@@ -233,7 +248,8 @@ class HadithViewModel @Inject constructor(
 
     private fun loadHadithById(hadithId: String) {
         _readerState.update { it.copy(isLoading = true, error = null) }
-        viewModelScope.launch {
+        readerJob?.cancel()
+        readerJob = viewModelScope.launch {
             try {
                 val hadith = hadithUseCases.getHadithById(hadithId)
                 if (hadith != null) {
@@ -288,12 +304,16 @@ class HadithViewModel @Inject constructor(
 
     private fun search(query: String) {
         if (query.isBlank()) {
+            // Without this cancel, the collector for the last non-empty query is still live
+            // and its next emission repopulates the results the user just cleared.
+            searchJob?.cancel()
             _searchState.update { HadithSearchUiState() }
             return
         }
 
         _searchState.update { it.copy(query = query, isSearching = true) }
-        viewModelScope.launch {
+        searchJob?.cancel()
+        searchJob = viewModelScope.launch {
             hadithUseCases.searchHadiths(query).collect { results ->
                 _searchState.update { it.copy(results = results, isSearching = false) }
             }
@@ -302,12 +322,14 @@ class HadithViewModel @Inject constructor(
 
     private fun searchInBook(bookId: String, query: String) {
         if (query.isBlank()) {
+            searchJob?.cancel()
             _searchState.update { HadithSearchUiState() }
             return
         }
 
         _searchState.update { it.copy(query = query, selectedBookId = bookId, isSearching = true) }
-        viewModelScope.launch {
+        searchJob?.cancel()
+        searchJob = viewModelScope.launch {
             hadithUseCases.searchHadithsInBook(bookId, query).collect { results ->
                 _searchState.update { it.copy(results = results, isSearching = false) }
             }
@@ -329,7 +351,8 @@ class HadithViewModel @Inject constructor(
     }
 
     private fun filterByGrade(grade: HadithGrade) {
-        viewModelScope.launch {
+        readerJob?.cancel()
+        readerJob = viewModelScope.launch {
             hadithUseCases.getHadithsByGrade(grade).collect { hadiths ->
                 _readerState.update { it.copy(hadiths = hadiths) }
             }
