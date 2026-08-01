@@ -341,19 +341,19 @@ and a second attempt is a no-op.
 
 **`PREPACKAGED_CALLBACK`** repairs the shipped asset right after copy and before Room validates its schema (the bundled asset was stamped at `user_version 12` while still missing the `updatedAt` columns and shipping tafseer indices under the wrong names). The same idempotent repair is also exposed as `MIGRATION_12_13`, because devices already sitting at v12 never re-run the copy callback.
 
-**Tajweed data verification (issue #292).** The prepopulated DB's `ayahs.text_tajweed` column is built by `nimaz-pro-data/scripts/generate_database.py` from the tajweed pipeline (see `docs/nimaz-pro-data-guide.md`). Because the DB is Git-LFS-stored and can't be inspected from a plain checkout, `scripts/verify_tajweed.py` gates it: `generate_database.py` and `verify_database.py` both run it as a **fail-the-build post-step**, and `tajweed_data_checks.yml` runs the pure-data checks in-memory on PRs touching `nimaz-pro-data/**`. It asserts coverage, well-formedness (no leaked markup), the round-trip against `text_arabic`, the v3 code whitelist, character-coverage conservation, cross-source drift vs cpfair, and a golden-ayah fixture.
+**Tajweed data verification (issue #292).** The artifact's `ayahs.text_tajweed` column is built by the tajweed pipeline in **arshad-shah/nimaz-data** (`upstream/scripts/generate_database.py`), and verified there rather than here — `upstream/scripts/verify_tajweed.py` runs as a fail-the-build post-step, and the corpus rules engine (`data/rules/`) re-checks it on every `nz build`. The app-side `tajweed_data_checks.yml` was deleted at versionCode 385 (`docs/retirement.yaml`): it triggered on a `nimaz-pro-data/**` path that can no longer change in this repo. It asserts coverage, well-formedness (no leaked markup), the round-trip against `text_arabic`, the v3 code whitelist, character-coverage conservation, cross-source drift vs cpfair, and a golden-ayah fixture.
 
 **Migration chain** (registered in `DatabaseModule.provideNimazDatabase`): `MIGRATION_7_8` (khatam) → `8_9` (asma/prophets) → `9_10` (a *missing* migration restored after the original release bumped the version without registering it) → `10_11` (`updatedAt` columns) → `11_12` (surah start_page fix) → `12_13` (legacy asset repair) → `13_14` (Help tables) → `14_15` (Qaida tables) → `15_16` (tasbih `category`) → `16_17` (hadith `narrator_chain`) → `17_18` (16-line IndoPak: `ayahs.text_indopak` column + `mushaf_layout_indopak16` table) → `18_19` (translations: dedupe + unique index on `(ayah_id, translator_id)`) → `19_20` (generalised mushaf storage: `mushaf_ayah_texts` + `mushaf_layout_lines`, drops `mushaf_layout_indopak16`) → `20_21` (tafseer range blocks: drops `tafseer_texts`, creates `tafseer_blocks`).
 
 **Tafseer range blocks (`v21`, #329).** Tafseer is range-based, not ayah-based — a single commentary passage (e.g. Ibn Kathir discussing 43:81-89) is one block, not nine identical rows. `tafseer_texts` (one row per ayah, `ayah_id`/`surah_number`/`ayah_number`) is replaced by `tafseer_blocks` (`tafseer_id`, `surah_number`, `ayah_start`, `ayah_end`, `text`), indexed on `(tafseer_id, surah_number, ayah_start, ayah_end)`. `MIGRATION_20_21` drops the old table outright — it is shipped content, not user data, replaced wholesale by the schemaVersion 21 artifact (`nimaz-data` issue #1) — and creates the new one empty; the block rows arrive with that artifact. `TafseerDao.getTafseerForAyah(surahNumber, ayahNumber, tafseerId)` now matches by containment (`ayah_start <= ? AND ayah_end >= ?`) instead of equality. `tafseer_highlights`/`tafseer_notes` (user data) are untouched: they stay keyed by the single `ayah_id` they were made on — the offsets they store index into the block text, which is unchanged for that ayah — but the reader now gathers every highlight/note whose ayah falls inside the *displayed block's* range (`TafseerDao.getHighlightsForRange`/`getNotesForRange`, joined against `ayahs`) so an annotation shows whenever its block is on screen, not only on the exact ayah it was created on. `TafseerPageContent` renders a "Commentary on 43:81-89" header from the block's own range, and `TafseerViewModel` hoists the reader's content-page index into `TafseerUiState.currentTafseerPage` so swiping to the next ayah of the same block holds reading position instead of reopening the block from page 1.
 
-**16-line IndoPak layout (`v18`, sub-task 2/7 of #263).** `MIGRATION_17_18` adds the nullable `ayahs.text_indopak` column and creates the `mushaf_layout_indopak16` table (columns `page`, `line`, `line_type` ∈ {`ayah`, `surah_header`, `basmalah`}, `surah_id`, `ayah_id` = global 1–6236 or null, `first_word_position`/`last_word_position`; indexed on `(page, line)`). The table stores the layout as **line segments** (one row per contiguous run of an ayah's words on a printed line, ~13,970 rows), not one row per word — the glyph text is reconstructed by slicing `text_indopak` (split on space) with the stored positions. The migration only creates the empty column/table (for both fresh installs and upgraders); the data is **not** baked into the prepackaged DB — it is shipped as bundled JSON assets and seeded at runtime (§7). This was a deliberate call: regenerating the ~147 MB Git-LFS DB asset would bloat it by tens of MB *and* never reach existing installs, whereas the JSON assets add only ~0.75 MB compressed to the APK. See `docs/ARCHITECTURE.md` §9.
+**16-line IndoPak layout (`v18`, sub-task 2/7 of #263).** `MIGRATION_17_18` adds the nullable `ayahs.text_indopak` column and creates the `mushaf_layout_indopak16` table (columns `page`, `line`, `line_type` ∈ {`ayah`, `surah_header`, `basmalah`}, `surah_id`, `ayah_id` = global 1–6236 or null, `first_word_position`/`last_word_position`; indexed on `(page, line)`). The table stores the layout as **line segments** (one row per contiguous run of an ayah's words on a printed line, ~13,970 rows), not one row per word — the glyph text is reconstructed by slicing `text_indopak` (split on space) with the stored positions. The migration only creates the empty column/table (for both fresh installs and upgraders). At the time the data was **not** baked into the prepackaged DB — it shipped as bundled JSON and was seeded at runtime, because regenerating the then ~147 MB Git-LFS asset would have bloated it *and* never reached existing installs. That trade-off ended when the DB became a fetched artifact: the layouts ride in it, and the seeder retired at versionCode 385 (§7). See `docs/ARCHITECTURE.md` §9.
 
 **Generalised mushaf storage (`v20`).** `v18`'s shape could only ever hold one edition — the table name and the `ayahs.text_indopak` column both hardcoded the 16-line IndoPak. `MIGRATION_19_20` replaces it with two script-keyed tables so **an edition is data, not schema**:
 - `mushaf_ayah_texts(text_source, ayah_id, text)` — glyph text, PK `(text_source, ayah_id)`. A *text source* is the script an edition sets its words in, and editions that set identical glyphs **share** one: `INDOPAK_16` and `INDOPAK_15` are verified byte-identical across all 6,236 ayahs and both read `INDOPAK`, so the 15-line edition costs only its layout file. `INDOPAK_13` differs in the vowel marks of 28 ayahs and carries its own `INDOPAK_13`.
 - `mushaf_layout_lines(script, page, line, line_type, surah_id, ayah_id, first_word_position, last_word_position)` — the same line-segment encoding as before, now with a `script` column; indexed on `(script, page, line)` and `(script)`.
 
-The old table is dropped and `ayahs.text_indopak` is set to `NULL` (kept as an inert column — dropping one in SQLite means rebuilding a 6,236-row table for no functional gain). Nothing is lost: the dropped table held only derived content that ships in the assets, so `MushafLayoutSeeder` repopulates it on first use of an edition. `MigrationTest.migrate18To20_...` runs the real 18 → 20 path and validates the result against the exported v20 schema.
+The old table is dropped and `ayahs.text_indopak` is set to `NULL` (kept as an inert column — dropping one in SQLite means rebuilding a 6,236-row table for no functional gain). Nothing is lost: the dropped table held only derived content, which the artifact carries (it was repopulated by `MushafLayoutSeeder` from bundled assets until versionCode 385). `MigrationTest.migrate18To20_...` runs the real 18 → 20 path and validates the result against the exported v20 schema.
 
 **Translation uniqueness (`v19`).** `translations.id` is auto-generated and had no uniqueness constraint, so a re-seed that inserted without deleting first would silently double every verse and the reader would pick an arbitrary copy. `MIGRATION_18_19` collapses any existing duplicates (keeping the lowest `id` per `(ayah_id, translator_id)`) and adds the unique index that makes the class of bug impossible.
 
@@ -381,7 +381,7 @@ The reader pager (`QuranReaderScreen`) selects the renderer per page through the
 **Quran translations.** The app ships a catalogue of **15 translations across 11 languages**, defined once in `domain/model/QuranTranslation.kt` — the single source of truth, in the same spirit as `QuranArabicFont` for fonts. Each entry carries a frozen `id`, the translator's name and a `TranslationLanguage` (code, English + native name, `isRtl`).
 
 - **Storage.** `translations(ayah_id, text, translator_id)`, with a unique index on `(ayah_id, translator_id)` since `v19`.
-- **Delivery.** One compact JSON asset per translation at `quran/translations/<id>.json`, generated by `nimaz-pro-data/scripts/download_translations.py` from the Al Quran Cloud API. The asset is a **positional array** — index `i` is global ayah id `i + 1` — which is roughly a third smaller than an array of objects and is safe because the generator hard-fails unless the upstream edition aligns with `ayahs.json` verse for verse. ~18 MB raw, ~4 MB compressed for all 15.
+- **Delivery.** All 15 arrive in the content artifact as `tr.<id>` collections, 6,236 rows each, imported in **arshad-shah/nimaz-data** by `upstream/scripts/download_translations.py` from the Al Quran Cloud API; the importer hard-fails unless the upstream edition aligns with the corpus verse for verse, and each collection carries a `rows_min: 6236` floor. They used to ship as ~18 MB of bundled JSON seeded per translation on first read — that went with `QuranTranslationSeeder` at versionCode 385 (`docs/retirement.yaml`).
 - **Seeding.** Lazy and per translation (§7): a translation's 6,236 rows are written the first time it is *selected*, not all 15 up front.
 - **Selection.** `SettingsRepository.quranTranslatorId` (key `quran_translator_id`, default `sahih_international`). `QuranSettingsScreen` shows a single `NimazSettingsItem` row carrying the current translator; it navigates to **`Route.SelectTranslation`** → `SelectTranslationScreen`, built in the shape of `SelectReciterScreen` (search bar, "currently selected" hero card, grouped list). 15 translations across 11 languages therefore cost one row on the settings screen rather than ~23 inlined items, and the dedicated screen has room for the live preview below.
 - **Live preview.** Both the settings preview card and `SelectTranslationScreen`'s hero card render the *selected translation's actual text* for the same sample ayah (`SettingsViewModel.PREVIEW_AYAH_ID` = 1, the Bismillah, shared with the renderers via the `BISMILLAH_TEXT` constant). On the selection screen it updates as you tap down the list, so a translation can be judged by reading it rather than by its translator's name. `observeQuranPreviewTranslation()` watches the persisted preference and resolves it through `GetAyahTranslationUseCase`; `flatMapLatest` keeps a slow earlier load from overwriting a newer pick, which matters because the first read of a translation also seeds its 6,236 rows. A null result keeps the previous text rather than blanking the card.
@@ -488,46 +488,62 @@ It also stores the **content-version flags** that drive seeding — see §7.
 ## 7. Content seeding & versioning
 
 **Why this exists.** The prepopulated DB (§5) is **not re-copied on app update**, and schema
-migrations only create empty tables. So new *bundled content* shipped in an update would never
-reach existing users. **Seeders** read a versioned JSON asset at runtime and upsert content
-idempotently, so fresh installs and upgraders converge on the same content.
+migrations only create empty tables. So content that changes in an update would never reach
+existing users. There is now exactly **one** mechanism for that: `ContentPatchSeeder`.
 
-**Six content types use seeders:**
+> **The six per-feature content seeders are gone.** `DuaContentSeeder`, `HelpContentSeeder`,
+> `QaidaContentSeeder`, `HadithBackfillSeeder`, `MushafLayoutSeeder` and
+> `QuranTranslationSeeder` — with about 31 MB of bundled JSON assets — were retired at
+> **versionCode 385**. Each existed to carry content the prepopulated asset lacked; the fetched
+> artifact (§5) now carries all of it at `schemaVersion 23`, so they had become no-ops.
+> `app/src/main/assets/` is down to an empty `adhan/.gitkeep` as a result — no bundled content
+> assets remain. See
+> [`DATA_RETIREMENT.md`](DATA_RETIREMENT.md) and [`retirement.yaml`](retirement.yaml) for what
+> was checked before each deletion.
 
-| Content | Seeder | JSON asset | Pattern |
-|---|---|---|---|
-| Dua | `data/local/dua/DuaContentSeeder.kt` | `duas/duas.json` | full content replace |
-| Help | `data/local/help/HelpContentSeeder.kt` | `help/help.json` | full content replace |
-| Qaida | `data/local/qaida/QaidaContentSeeder.kt` | `qaida/qaida_content.json` | full content replace |
-| Hadith | `data/local/hadith/HadithBackfillSeeder.kt` | `hadith/hadith_fills.json` | keyed UPDATE backfill |
-| Mushaf editions | `data/local/quran/MushafLayoutSeeder.kt` | `quran/mushaf/<text_source>_text.json` + `quran/mushaf/<script>_layout.json` | per-edition replace, scoped by `script` + `text_source` |
-| Quran translations | `data/local/quran/QuranTranslationSeeder.kt` | `quran/translations/<id>.json` | per-translation replace, scoped by `translator_id` |
+**How content reaches a device now.**
 
-> **IndoPak font (issue #267, 3/7).** The seeded IndoPak glyph text embeds per-ayah number ornaments as
+| Path | Reaches | Mechanism |
+|---|---|---|
+| Fresh install | new users | `createFromAsset` copies the fetched, sha256-pinned artifact (§5) |
+| Update | existing installs | `ContentPatchSeeder` applies the cumulative patch shipped beside it |
+
+**`ContentPatchSeeder`** (`data/local/content/ContentPatchSeeder.kt`) is the generalisation of
+the six. The patch is a **build output, not hand-authored**: `nz patch emit` diffs the published
+baseline artifact against the current one, and `nz patch verify` applies the result to the
+baseline and asserts every collection's content hash equals the target's — so a patch that does
+not reconstruct the artifact cannot be published. Three properties make applying it safe:
+
+1. **It cannot touch user data.** Ops are only emitted for declared content collections;
+   `USER_TABLES` re-asserts that here rather than trusting it. Since `schemaVersion 23` user
+   tables are not in this database at all (§5) — they live in `NimazUserDatabase`.
+2. **It is cumulative from the baseline**, so which version a device upgrades from does not
+   matter. Every op is an idempotent keyed write.
+3. **It is version-gated** on `PreferencesKeys.CONTENT_PATCH_VERSION`, so the common case costs
+   one DataStore read. A missing asset is not an error — a release with nothing to correct
+   ships no patch.
+
+> **IndoPak font (issue #267, 3/7).** The IndoPak glyph text embeds per-ayah number ornaments as
 > Private Use Area glyphs (U+F500…U+F6FF) that only render in the matching face. That face is bundled
 > at `app/src/main/res/font/indopak_nastaleeq.ttf` (*AlQuran IndoPak by QuranWBW* v2.100) and exposed
 > as `QuranArabicFont.INDOPAK` in `presentation/theme/Type.kt`. Licence/attribution + release sign-off
 > flag: `docs/FONT_LICENSES.md`.
 
-**Content-version pattern.** The version is stored in **DataStore** (not a file, not a table):
-`PreferencesKeys.{DUA,HELP,QAIDA}_CONTENT_VERSION` and `HADITH_BACKFILL_VERSION` (default `0` = never seeded). Each JSON root carries a `contentVersion: Int` field. `seedIfNeeded()`:
-1. parse the JSON asset;
-2. if the table is already populated **and** stored version ≥ JSON `contentVersion` → skip;
-3. otherwise seed and write the new stored version.
-
-The two Quran seeders are **per-item** rather than one-version-per-content-type, because their catalogues are large and mostly unused by any one user (4 mushaf editions, 15 translations). Their versions live in a single DataStore **string set** each — `QURAN_MUSHAF_VERSIONS` and `QURAN_TRANSLATION_VERSIONS`, holding `"<key>:<version>"` entries — so adding an edition or a translation needs no new preference key. `MushafLayoutSeeder` uses an in-code `CONTENT_VERSION` constant (its assets are plain arrays); `QuranTranslationSeeder` reads `contentVersion` from the asset. Both key their "already populated" check on an exact row count, not `> 0`, so an interrupted seed repairs itself instead of leaving a partial Quran.
-
-Content seeders do an **atomic full-content replace** (`dao.replaceAllContent(...)` / clear-then-insert), touching only content tables — user data (bookmarks/progress) lives in separate tables with no FK into content, so it survives a re-seed. The Hadith backfill is different: the JSON `id` is the stable PK of the `hadiths` row, so each fix is a keyed UPDATE (`backfillHadith`/`updateNarratorChain`); it also has a fast-path gap detector (`emptyArabicCount()`). All seeders serialize concurrent calls with a `Mutex`.
-
-**Where seeding is triggered — lazy "seed-then-read," NOT `AppInitializer`.** Three are triggered inside repositories at first content access (`DuaRepositoryImpl`/`HelpRepositoryImpl` use a `seededFlow { seeder.seedIfNeeded(); emitAll(...) }` wrapper; `HadithRepositoryImpl` calls `backfillSeeder.seedIfNeeded()` at the top of each suspend read). **Qaida is the exception** — seeded in `QaidaReaderViewModel.init`. **Mushaf editions** follow the repository model: the trigger lives in `QuranRepositoryImpl.getMushafPageLayout(page, script)` and `layoutRanges(script)`, which call `mushafSeeder.seedIfNeeded(script)` before reading. **Translations** work the same way but on every translated read path — `getAyahsByPage`, `getAyahsByJuz`, `getSurahWithAyahs`, `getTranslationsForAyahs` and `searchQuran` all resolve their `translatorId` through `QuranRepositoryImpl.seededTranslationId(...)`, so selecting a translation for the first time populates it transparently. Both are reached on **every** page fetch (once per pager settle), so each seeder caches its "confirmed current" set in memory after the first check — later calls short-circuit before touching the mutex, the `COUNT(*)` query, or the DataStore version read (#280 review).
-
-**Wiring.** The `XxxAssetReader` and `XxxVersionStore` interfaces (which exist to make seeders testable without Android/DataStore) are bound in `core/di/RepositoryModule.kt` via `@Binds` (→ `AndroidXxxAssetReader` / `DataStoreXxxVersionStore`); the seeder classes are `@Singleton @Inject`.
+**Adding or correcting content** is now a change in **arshad-shah/nimaz-data**, not here: edit
+the collection, `nz build`, publish, then `nz app sync` updates `data.lock.json`. Nothing in
+this repo carries content any more, so there is no `contentVersion` to bump and no asset to
+regenerate. Adding a Quran translation additionally needs a matching `QuranTranslation` enum
+entry with the same id — `nz import --check` fails if the two catalogues drift.
 
 **Gotchas.**
-- **To ship new content to existing users you must bump `contentVersion` in the JSON asset.** Editing the prepopulated DB alone does nothing for upgraders; editing JSON without bumping the version does nothing once the table is populated.
-- Content seeders **fully replace** content tables — anything not in the JSON is wiped. Adding an FK from a user table into a content table would make re-seeding destructive.
-- Qaida seeds only when `QaidaReaderViewModel` is created, not on first repository access.
-- Qaida `conceptTags` are stored JSON-encoded-as-string to match the prepopulated-DB convention.
+- **Editing the artifact alone reaches fresh installs only.** Corrections that must reach
+  existing users have to ride the patch — that is the whole reason it exists.
+- Content tables carry no FK from user tables, and cannot: they are in a different database.
+- Qaida `conceptTags` are stored JSON-encoded-as-string, a convention inherited from the
+  prepopulated DB.
+- `DeviceStateCorpusTest` is the standing guard that the artifact actually carries everything
+  (§ "Verifying a retirement was safe" in `DATA_RETIREMENT.md`). It needs the fetched artifact,
+  so it needs a data-repo credential; `compileDebugKotlin` does not.
 
 ---
 

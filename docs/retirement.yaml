@@ -9,12 +9,13 @@
 # gate has not been reached, report it as pending and stop.
 
 version: 1
-current_version_code: 378          # update on every release
-current_version_name: "3.0.78"
+current_version_code: 385          # update on every release
+current_version_name: "3.0.85"
 
 entries:
   - id: lfs-prepopulated-asset
-    status: pending
+    status: retired
+    retired_in_version_code: 385
     summary: Stop tracking the 140 MB prepopulated database in git.
     retire_when:
       min_prod_version_code: 379
@@ -31,9 +32,15 @@ entries:
     verify:
       - ./gradlew :app:assembleDebug
       - test ! -f app/src/main/assets/database/nimaz_prepopulated.db
+    retirement_notes: >
+      The steps were already performed in 0b37228 (#328), the release that introduced the
+      fetch — the asset and the LFS rule went with it, and .gitattributes is now empty. Only
+      the status field was left behind. data.lock.json pins data-v7 at schemaVersion 23, whose
+      assetPath is the database/nimaz_prepopulated.db the deleted file used to provide.
 
   - id: hadith-backfill-seeder
-    status: pending
+    status: retired
+    retired_in_version_code: 385
     summary: Delete HadithBackfillSeeder and its 773 KB fills asset.
     retire_when:
       min_prod_version_code: 380
@@ -50,9 +57,18 @@ entries:
     verify:
       - ./gradlew :app:compileDebugKotlin
       - ./gradlew :app:testDebugUnitTest --tests '*DeviceStateCorpusTest*'
+    retirement_notes: >
+      All 379 fills were checked against the corpus before deleting: every `reference` resolves
+      in hadith.book-1..6, `text_arabic` is byte-identical to the fill payload, and no fill
+      carried a curated narratorChain. The compiled artifact answers 0 to the seeder's own
+      guard, `SELECT COUNT(*) FROM hadiths WHERE TRIM(text_arabic) = ''` — so it had already
+      become a no-op. That assertion moved into DeviceStateCorpusTest rather than being lost.
+      The backfill-only DAO ops (emptyArabicCount, backfillHadith, updateNarratorChain) went
+      with it; narrator_chain is still read and rendered, it just has no runtime writer.
 
   - id: quran-translation-seeder
-    status: pending
+    status: retired
+    retired_in_version_code: 385
     summary: Delete QuranTranslationSeeder and the 18 MB of translation JSON assets.
     retire_when:
       min_prod_version_code: 381
@@ -70,9 +86,18 @@ entries:
       - ./gradlew :app:compileDebugKotlin
       - ./gradlew :app:testDebugUnitTest
       - Confirm all 15 translations are readable in the app from a fresh install.
+    retirement_notes: >
+      The 15 tr.* collections diff exactly against the QuranTranslation enum's ids, and each
+      holds 6236 rows with a matching floor; the compiled artifact carries 93540 translation
+      rows across 15 distinct translator_ids. seededTranslationId was kept rather than removed
+      and renamed to translationId — it also normalises an unknown id to DEFAULT via
+      fromId(), which is real behaviour that outlives the seeding it used to do. The catalogue
+      contract tests in QuranTranslationTest survive; only the assertion that read the deleted
+      assets went, because the id-set half is asserted where the data lives.
 
   - id: mushaf-layout-seeder
-    status: pending
+    status: retired
+    retired_in_version_code: 385
     summary: Delete MushafLayoutSeeder and the 12 MB of mushaf layout/glyph assets.
     retire_when:
       min_prod_version_code: 381
@@ -89,9 +114,22 @@ entries:
       - ./gradlew :app:compileDebugKotlin
       - ./gradlew :app:testDebugUnitTest --tests '*MushafLayoutFidelityTest*'
       - Confirm all 4 editions render from a fresh install.
+    retirement_notes: >
+      Layout row counts match the deleted assets exactly (15916 / 13804 / 13970) and the four
+      text sources hold 6236 each. MushafScript.MADANI has no stored layout at all, so the
+      three IndoPak collections are the complete set rather than a partial one.
+      MushafLayoutFidelityTest named in `verify` was deleted, not run: every one of its twelve
+      assertions read `assets/quran/mushaf/`, and it cannot be rewritten without the artifact.
+      Its invariants are blocking rules in the data repo (page.lines-complete, word_range,
+      pages_contiguous, distinct/populated scripts) plus each collection's row floor. The one
+      genuinely app-side claim — that stored layouts agree with MushafScript on lines per
+      page — moved into DeviceStateCorpusTest, which does have the artifact. Worth knowing:
+      the data repo declares its own LINES_PER_PAGE mirror of the enum, so app and corpus each
+      assert against a copy. That test is what catches the two drifting apart.
 
   - id: help-dua-qaida-seeders
-    status: pending
+    status: retired
+    retired_in_version_code: 385
     summary: Delete the Help, Dua and Qaida content seeders and their assets.
     retire_when:
       min_prod_version_code: 381
@@ -107,9 +145,18 @@ entries:
     verify:
       - ./gradlew :app:compileDebugKotlin
       - ./gradlew :app:testDebugUnitTest
+    retirement_notes: >
+      Every count matches the deleted assets: 12 help topics, 43 dua categories, 311 duas, and
+      17/29/137/434 qaida lessons/letters/lines/cells. The `seededFlow` helper in the Help and
+      Dua repositories was kept as `deferredFlow` rather than inlined — it also defers building
+      the DAO flow until collection, which callers depend on. DuaJsonDto and QaidaJsonDto were
+      fully orphaned and went too; HelpJsonDto kept only its `helpJson` parser, which
+      HelpRepositoryImpl still uses for the pathLabels column. NightPrayerDuaContentTest was
+      deleted with the asset it read.
 
   - id: upstream-generator-scripts
-    status: pending
+    status: retired
+    retired_in_version_code: 385
     summary: Repoint or delete the catalogue drift guards that reference nimaz-pro-data/scripts/.
     retire_when:
       min_prod_version_code: 380
@@ -124,6 +171,15 @@ entries:
     verify:
       - ./gradlew :app:compileDebugKotlin
       - grep -r 'nimaz-pro-data' app/src docs || true   # expect no hits
+    retirement_notes: >
+      The QuranTranslation.kt step was already done. The remaining guard was
+      .github/workflows/tajweed_data_checks.yml, which triggered on `nimaz-pro-data/**` and ran
+      three verify scripts from that tree — a path that cannot change again in this repo. It
+      was deleted rather than repointed: the data repo's own checks.yml already runs
+      `nz import --check` for source reproducibility and the rules engine via `nz build`, which
+      is where the tajweed assertions now live. `verify` expects no `nimaz-pro-data` hits in
+      app/src (true) or docs — docs/superpowers/ and docs/nimaz-pro-*.md still mention it, but
+      those are historical design records and are meant to.
 
   - id: git-history-purge
     status: pending
@@ -148,3 +204,11 @@ entries:
         GitHub does not delete orphaned LFS objects on force-push. Reclaiming the storage
         quota needs a support request or a re-created repository; the rewrite alone does not
         achieve it.
+    held_because: >
+      Gate passed at 385 and its blocker is retired, so this is the one entry left actionable
+      by the ledger's own rule — deliberately not performed. Unlike every other entry, nothing
+      here can be checked before the fact: the failure mode is not an empty table a test can
+      name but 32 invalidated branches and every commit SHA in every review, issue and release
+      note pointing at nothing. It rewrites shared history and force-pushes, so it needs a
+      human to say so explicitly and to pick the moment when no one has work in flight. Ask
+      before running it; do not treat this note as a reason to drop the entry.

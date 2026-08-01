@@ -409,27 +409,9 @@ interface QuranDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAyahs(ayahs: List<AyahEntity>)
 
-    // Line-accurate Mushaf layouts. Every edition's glyph text and layout ships as bundled
-    // JSON assets and is seeded at runtime by MushafLayoutSeeder — the prepackaged DB is not
-    // regenerated. These methods cover seeding + idempotency; the per-page read query for the
-    // renderer (getMushafLayoutByPage) is defined further below.
-    @Query("SELECT COUNT(*) FROM mushaf_layout_lines WHERE script = :script")
-    suspend fun countLayoutLines(script: String): Int
-
-    @Query("SELECT COUNT(*) FROM mushaf_ayah_texts WHERE text_source = :textSource")
-    suspend fun countAyahTexts(textSource: String): Int
-
-    @Query("DELETE FROM mushaf_layout_lines WHERE script = :script")
-    suspend fun deleteLayoutLines(script: String)
-
-    @Query("DELETE FROM mushaf_ayah_texts WHERE text_source = :textSource")
-    suspend fun deleteAyahTexts(textSource: String)
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertLayoutLines(rows: List<MushafLayoutLineEntity>)
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAyahTexts(rows: List<MushafAyahTextEntity>)
+    // Line-accurate Mushaf layouts arrive whole in the content artifact; the write side of
+    // these tables went with MushafLayoutSeeder at versionCode 385 (docs/retirement.yaml).
+    // The per-page read query for the renderer (getMushafLayoutByPage) is defined below.
 
     /**
      * All line-segments of one page of a line-accurate edition, ordered top-to-bottom and,
@@ -459,25 +441,6 @@ interface QuranDao {
         page: Int
     ): List<MushafLayoutLineRow>
 
-    /**
-     * Atomically (re)seed one edition: replace that script's layout segments and its text
-     * source's glyphs. Both writes are scoped by key, so seeding one edition never disturbs
-     * another — and editions that share a text source simply rewrite identical rows.
-     * Idempotent, so re-running after a version bump is safe.
-     */
-    @Transaction
-    suspend fun replaceMushafLayout(
-        script: String,
-        textSource: String,
-        texts: List<MushafAyahTextEntity>,
-        layout: List<MushafLayoutLineEntity>
-    ) {
-        deleteLayoutLines(script)
-        deleteAyahTexts(textSource)
-        insertAyahTexts(texts)
-        insertLayoutLines(layout)
-    }
-
     // Translation operations
     @Query("SELECT * FROM translations WHERE ayah_id = :ayahId AND translator_id = :translatorId")
     suspend fun getTranslation(ayahId: Int, translatorId: String): TranslationEntity?
@@ -494,28 +457,8 @@ interface QuranDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertTranslations(translations: List<TranslationEntity>)
 
-    // Per-translation seeding (QuranTranslationSeeder). Translations ship as bundled JSON
-    // assets and are seeded lazily, one translator at a time, the first time that
-    // translation is selected — the prepackaged DB only ever carried one of them.
-    @Query("SELECT COUNT(*) FROM translations WHERE translator_id = :translatorId")
-    suspend fun countTranslationsFor(translatorId: String): Int
-
-    @Query("DELETE FROM translations WHERE translator_id = :translatorId")
-    suspend fun deleteTranslationsFor(translatorId: String)
-
-    /**
-     * Atomically replace exactly one translator's verses. Scoped to [translatorId], so
-     * seeding or re-seeding one translation never touches another — or any user data.
-     *
-     * The delete is what keeps this idempotent: `translations.id` is auto-generated, so
-     * re-inserting without it would append a second copy of all 6,236 rows rather than
-     * overwrite them.
-     */
-    @Transaction
-    suspend fun replaceTranslation(translatorId: String, rows: List<TranslationEntity>) {
-        deleteTranslationsFor(translatorId)
-        insertTranslations(rows)
-    }
+    // All 15 translations arrive in the content artifact; the per-translation write side went
+    // with QuranTranslationSeeder at versionCode 385 (docs/retirement.yaml).
 
     @Query("SELECT * FROM translations WHERE text LIKE '%' || :query || '%' AND translator_id = :translatorId")
     fun searchTranslations(query: String, translatorId: String): Flow<List<TranslationEntity>>

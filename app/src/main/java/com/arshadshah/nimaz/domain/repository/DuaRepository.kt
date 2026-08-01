@@ -41,6 +41,5 @@ interface DuaRepository {
     suspend fun decrementDuaProgress(duaId: String, date: Long)
 
     // Data initialization
-    suspend fun initializeDuaData()
     suspend fun isDataInitialized(): Boolean
 }

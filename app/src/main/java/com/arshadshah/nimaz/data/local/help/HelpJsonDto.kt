@@ -1,49 +1,17 @@
 package com.arshadshah.nimaz.data.local.help
 
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
+/**
+ * The lenient reader for the small amount of JSON stored *inside* help rows.
+ *
+ * This file used to also declare the shape of `assets/help/help.json` — the bundled asset
+ * `HelpContentSeeder` parsed. Both went at versionCode 385 (`docs/retirement.yaml`) when the
+ * artifact started carrying the help content whole. What survives is the parser itself, which
+ * [com.arshadshah.nimaz.data.repository.HelpRepositoryImpl] still needs for the `pathLabels`
+ * column: a JSON string array persisted in the database rather than modelled as a table.
+ */
 val helpJson: Json = Json {
     ignoreUnknownKeys = true
     isLenient = true
 }
-
-@Serializable
-data class HelpJsonRoot(
-    val contentVersion: Int = 1,
-    val topics: List<HelpTopicDto> = emptyList()
-)
-
-@Serializable
-data class HelpTopicDto(
-    val id: String,
-    val order: Int,
-    val icon: String,
-    val color: String,
-    val title: Map<String, String> = emptyMap(),
-    val subtitle: Map<String, String> = emptyMap(),
-    val items: List<HelpItemDto> = emptyList()
-)
-
-@Serializable
-data class HelpItemDto(
-    val id: String,
-    val type: String,                 // "question" | "guide"
-    val order: Int,
-    val icon: String? = null,
-    val estimatedMinutes: Int? = null,
-    val question: Map<String, String> = emptyMap(),
-    val answer: Map<String, String> = emptyMap(),
-    val title: Map<String, String> = emptyMap(),
-    val steps: List<HelpStepDto> = emptyList()
-)
-
-@Serializable
-data class HelpStepDto(
-    val id: String,
-    val order: Int,
-    val deeplink: String? = null,
-    val pathLabels: List<String> = emptyList(),
-    val title: Map<String, String> = emptyMap(),
-    val body: Map<String, String> = emptyMap()
-)

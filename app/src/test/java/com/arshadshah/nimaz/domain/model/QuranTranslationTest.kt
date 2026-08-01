@@ -1,35 +1,22 @@
 package com.arshadshah.nimaz.domain.model
 
-import com.arshadshah.nimaz.data.local.quran.QuranTranslationSeeder
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
-import java.io.File
 
 /**
  * Guards the translation catalogue's contract with the data that ships beside it.
  *
  * The ids here are written into `translations.translator_id` and into the user's
  * `quran_translator_id` preference, so they are effectively permanent — a rename strands
- * every user who had that translation selected. These tests make the catalogue, the shipped
- * assets and that stability requirement check each other.
+ * every user who had that translation selected.
+ *
+ * These ids are now also the split key for the `tr.<id>` collections in
+ * arshad-shah/nimaz-data, so a rename here silently stops matching the rows the artifact
+ * ships. That the 15 ids exist on both sides is asserted where the data lives (`nz import
+ * --check` plus each collection's row floor); what stays here is the half only the app can
+ * state — stability, uniqueness and the fallback behaviour.
  */
 class QuranTranslationTest {
-
-    @Test
-    fun `every catalogue entry has a bundled asset declaring its own id`() {
-        // Catches a catalogue entry added without running the generator, and an asset filed
-        // under the wrong id. The full parse/verse-count checks live in the seeder tests; this
-        // reads only the header so it stays cheap across all 15 assets.
-        QuranTranslation.entries.forEach { translation ->
-            val file = File("src/main/assets/${QuranTranslationSeeder.assetPath(translation)}")
-            assertThat(file.exists()).isTrue()
-            val header = CharArray(120).let { buf ->
-                val n = file.bufferedReader().use { it.read(buf) }
-                String(buf, 0, n.coerceAtLeast(0))
-            }
-            assertThat(header).contains("\"translationId\":\"${translation.id}\"")
-        }
-    }
 
     @Test
     fun `ids are unique and stable-looking`() {

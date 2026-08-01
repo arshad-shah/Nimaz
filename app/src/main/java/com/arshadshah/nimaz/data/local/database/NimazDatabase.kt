@@ -278,10 +278,10 @@ abstract class NimazDatabase : RoomDatabase() {
         // `mushaf_ayah_texts` keyed by text source, so an edition is data rather than
         // schema.
         //
-        // Both tables are created empty and repopulated by MushafLayoutSeeder from the
-        // bundled assets (the version key is new, so every install re-seeds on first use of
-        // an edition). Nothing is lost: the dropped table held only derived content shipped
-        // in those same assets — no user data. `ayahs.text_indopak` is nulled rather than
+        // Both tables are created empty and were repopulated by MushafLayoutSeeder from
+        // bundled assets until versionCode 385 (docs/retirement.yaml); the content artifact
+        // now carries them. Nothing is lost: the dropped table held only derived content —
+        // no user data. `ayahs.text_indopak` is nulled rather than
         // dropped, because dropping a column in SQLite means rebuilding a 6,236-row table
         // for no functional gain; nulling reclaims the space and leaves the column inert.
         // Every statement is idempotent so running it after createFromAsset is safe.
@@ -631,8 +631,9 @@ abstract class NimazDatabase : RoomDatabase() {
 
         // Adds the data-driven Help content tables. Room runs migrations even
         // after createFromAsset, so this creates the (empty) tables for both
-        // fresh installs and existing users; HelpContentSeeder fills them from
-        // the bundled help.json at runtime.
+        // fresh installs and existing users. HelpContentSeeder filled them from a
+        // bundled help.json until versionCode 385 (docs/retirement.yaml); the rows
+        // now arrive in the content artifact.
         val MIGRATION_13_14 = object : Migration(13, 14) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL(

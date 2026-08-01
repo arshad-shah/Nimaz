@@ -89,8 +89,8 @@ fun QuranSettingsScreen(
     // 1. Add the edition in the arshad-shah/nimaz-data repository and run the importer,
     //    which writes a tr.<id> collection into the artifact the app fetches
     // 2. Add a matching entry to the QuranTranslation enum
-    // That's it — this screen lists it, and QuranTranslationSeeder seeds it into the
-    // `translations` table the first time it is selected.
+    // That's it — this screen lists it, and its verses arrive in the `translations` table
+    // with the artifact.
 
     // === ADDING NEW ARABIC FONTS ===
     // The font picker is driven entirely by the QuranArabicFont enum in

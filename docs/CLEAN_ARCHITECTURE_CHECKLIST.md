@@ -93,9 +93,9 @@ god-object.
 
 - [x] ~~**Home "content of the day" rotation.**~~ **Resolved.** Extracted
   `GetDailyHadithUseCase` (Knuth-hash day scatter) and `GetDailyDuaUseCase` (time-of-day category
-  + day-of-year rotation, returning a `DailyDuaSelection` domain model). The seeders moved into
-  the repositories (seed-then-read), and the daily reads use seeded repository methods
-  (`getHadithCount`/`getHadithByOffset`, `getDuasByCategoryOnce`). Behaviour preserved (identical
+  + day-of-year rotation, returning a `DailyDuaSelection` domain model). The daily reads go
+  through repository methods (`getHadithCount`/`getHadithByOffset`, `getDuasByCategoryOnce`),
+  which used to seed-then-read until the content seeders retired at versionCode 385. Behaviour preserved (identical
   queries/selection math; field mappings verified); full unit suite green.
 - [ ] **General watch:** when a `private fun` in a ViewModel does multi-step computation over
   repository/use-case results (filtering, combining, ranking), consider whether it's a use case.

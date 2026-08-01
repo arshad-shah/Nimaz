@@ -3,7 +3,6 @@ package com.arshadshah.nimaz.data.repository
 import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.data.local.database.dao.HelpDao
 import com.arshadshah.nimaz.data.local.database.entity.HelpStringEntity
-import com.arshadshah.nimaz.data.local.help.HelpContentSeeder
 import com.arshadshah.nimaz.data.local.help.helpJson
 import com.arshadshah.nimaz.domain.model.HelpGuideDetail
 import com.arshadshah.nimaz.domain.model.HelpItem
@@ -30,8 +29,7 @@ private const val EN = "en"
 @OptIn(ExperimentalCoroutinesApi::class)
 @Singleton
 class HelpRepositoryImpl @Inject constructor(
-    private val dao: HelpDao,
-    private val seeder: HelpContentSeeder
+    private val dao: HelpDao
 ) : HelpRepository {
 
     /** Resolves a field for owner in [lang], falling back to English, then "". */
@@ -50,11 +48,17 @@ class HelpRepositoryImpl @Inject constructor(
             helpJson.decodeFromString(ListSerializer(String.serializer()), raw)
         }.onFailure { CrashReporter.recordException(it) }.getOrDefault(emptyList())
 
-    /** Seed once, then emit DB-backed flows. */
-    private fun <T> seededFlow(block: () -> Flow<T>): Flow<T> =
-        flow { seeder.seedIfNeeded(); emitAll(block()) }
+    /**
+     * Builds the DB-backed flow at collection time rather than at call time.
+     *
+     * This used to seed the bundled help content first; the content arrives in the artifact
+     * since `HelpContentSeeder` was retired at versionCode 385 (`docs/retirement.yaml`). The
+     * deferral stays because callers hold these flows without collecting them.
+     */
+    private fun <T> deferredFlow(block: () -> Flow<T>): Flow<T> =
+        flow { emitAll(block()) }
 
-    override fun getTopics(lang: String): Flow<List<HelpTopic>> = seededFlow {
+    override fun getTopics(lang: String): Flow<List<HelpTopic>> = deferredFlow {
         combine(dao.getTopics(), dao.getAllItems()) { topics, allItems -> topics to allItems }
             .flatMapLatest { (topics, allItems) ->
                 if (topics.isEmpty()) return@flatMapLatest flowOf(emptyList())
@@ -73,7 +77,7 @@ class HelpRepositoryImpl @Inject constructor(
     }
 
     override fun getTopicDetail(topicId: String, lang: String): Flow<HelpTopicDetail?> =
-        seededFlow {
+        deferredFlow {
             combine(
                 dao.getTopics(),
                 dao.getItemsForTopic(topicId),
@@ -109,7 +113,7 @@ class HelpRepositoryImpl @Inject constructor(
                 }
         }
 
-    override fun getGuide(guideId: String, lang: String): Flow<HelpGuideDetail?> = seededFlow {
+    override fun getGuide(guideId: String, lang: String): Flow<HelpGuideDetail?> = deferredFlow {
         combine(
             dao.getItem(guideId),
             dao.getStepsForItem(guideId),
@@ -136,8 +140,8 @@ class HelpRepositoryImpl @Inject constructor(
             }
     }
 
-    override fun search(query: String, lang: String): Flow<List<HelpSearchResult>> = seededFlow {
-        if (query.isBlank()) return@seededFlow flowOf(emptyList())
+    override fun search(query: String, lang: String): Flow<List<HelpSearchResult>> = deferredFlow {
+        if (query.isBlank()) return@deferredFlow flowOf(emptyList())
         combine(
             dao.searchStrings(lang, query),
             dao.searchStrings(EN, query),

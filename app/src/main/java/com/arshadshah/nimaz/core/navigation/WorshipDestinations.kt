@@ -25,8 +25,9 @@ import com.arshadshah.nimaz.domain.model.WorshipReminderType
  * |                               |                        | invisible ~11 months a year. Revisit with |
  * |                               |                        | real usage rather than guessing now.      |
  *
- * The category ids are the seeded ones in `assets/duas/duas.json` and are stable — the seeder keys
- * off them, so they cannot be renumbered without a content migration.
+ * The category ids are the ones in the `dua.categories` collection of the content artifact and
+ * are stable — these routes key off them, so they cannot be renumbered without a content
+ * migration.
  */
 fun worshipCardDestination(type: WorshipReminderType): Route = when (type) {
     WorshipReminderType.ADHKAR_MORNING -> Route.DuaCategory(DUA_CATEGORY_MORNING_ADHKAR)

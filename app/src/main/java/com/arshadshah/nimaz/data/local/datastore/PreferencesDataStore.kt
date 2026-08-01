@@ -83,25 +83,12 @@ class PreferencesDataStore @Inject constructor(
         val ARABIC_FONT_SIZE = stringPreferencesKey("arabic_font_size")
 
         // Help content (data-driven; bumped when help.json content changes)
-        val HELP_CONTENT_VERSION = intPreferencesKey("help_content_version")
         val CONTENT_PATCH_VERSION = intPreferencesKey("content_patch_version")
 
-        // Dua content (data-driven; bumped when duas.json content changes)
-        val DUA_CONTENT_VERSION = intPreferencesKey("dua_content_version")
-
-        // Hadith backfill (data-driven; bumped when hadith_fills.json changes).
-        // Fills in chains of narration (text_arabic/text_english) that shipped
-        // empty in the prepopulated DB, for users who already have the old data.
-        val HADITH_BACKFILL_VERSION = intPreferencesKey("hadith_backfill_version")
-
-        // Qaida content (data-driven; bumped when qaida_content.json changes)
-        val QAIDA_CONTENT_VERSION = intPreferencesKey("qaida_content_version")
 
         // Line-accurate mushaf editions and Quran translations are each seeded lazily, per
         // item, so their versions are stored as "<key>:<version>" string sets rather than an
         // int key per item — adding an edition or a translation touches no preference code.
-        val QURAN_MUSHAF_VERSIONS = stringSetPreferencesKey("quran_mushaf_versions")
-        val QURAN_TRANSLATION_VERSIONS = stringSetPreferencesKey("quran_translation_versions")
 
         // Prayer Settings
         val CALCULATION_METHOD = stringPreferencesKey("calculation_method")
@@ -294,19 +281,6 @@ class PreferencesDataStore @Inject constructor(
     override suspend fun setContentPatchVersion(version: Int) =
         put(PreferencesKeys.CONTENT_PATCH_VERSION, version)
 
-    // Help content version (0 = never seeded)
-    override val helpContentVersion: Flow<Int> = preference(PreferencesKeys.HELP_CONTENT_VERSION, 0)
-
-    override suspend fun setHelpContentVersion(version: Int) =
-        put(PreferencesKeys.HELP_CONTENT_VERSION, version)
-
-    // Hadith backfill version (0 = never applied)
-    override val hadithBackfillVersion: Flow<Int> =
-        preference(PreferencesKeys.HADITH_BACKFILL_VERSION, 0)
-
-    override suspend fun setHadithBackfillVersion(version: Int) =
-        put(PreferencesKeys.HADITH_BACKFILL_VERSION, version)
-
     // Tasbih counter style — true = bead strand, false = classic circle.
     override val tasbihBeadMode: Flow<Boolean> = preference(PreferencesKeys.TASBIH_BEAD_MODE, false)
 
@@ -352,32 +326,7 @@ class PreferencesDataStore @Inject constructor(
         put(PreferencesKeys.TASBIH_LEFT_HANDED, enabled)
 
     // Dua content version (0 = never seeded)
-    override val duaContentVersion: Flow<Int> = preference(PreferencesKeys.DUA_CONTENT_VERSION, 0)
-
-    override suspend fun setDuaContentVersion(version: Int) =
-        put(PreferencesKeys.DUA_CONTENT_VERSION, version)
-
     // Qaida content version (0 = never seeded)
-    override val qaidaContentVersion: Flow<Int> =
-        preference(PreferencesKeys.QAIDA_CONTENT_VERSION, 0)
-
-    override suspend fun setQaidaContentVersion(version: Int) =
-        put(PreferencesKeys.QAIDA_CONTENT_VERSION, version)
-
-    // Seeded content versions for the line-accurate mushaf editions and the Quran
-    // translations, as "<key>:<version>" entries (empty = nothing seeded yet).
-    override val quranMushafVersions: Flow<Set<String>> =
-        preference(PreferencesKeys.QURAN_MUSHAF_VERSIONS, emptySet())
-
-    override suspend fun setQuranMushafVersions(versions: Set<String>) =
-        put(PreferencesKeys.QURAN_MUSHAF_VERSIONS, versions)
-
-    override val quranTranslationVersions: Flow<Set<String>> =
-        preference(PreferencesKeys.QURAN_TRANSLATION_VERSIONS, emptySet())
-
-    override suspend fun setQuranTranslationVersions(versions: Set<String>) =
-        put(PreferencesKeys.QURAN_TRANSLATION_VERSIONS, versions)
-
     override val arabicFontSize: Flow<String> =
         preference(PreferencesKeys.ARABIC_FONT_SIZE, "medium")
 

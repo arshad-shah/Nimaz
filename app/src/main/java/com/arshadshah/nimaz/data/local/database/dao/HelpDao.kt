@@ -39,28 +39,4 @@ interface HelpDao {
     @Query("SELECT COUNT(*) FROM help_topic")
     suspend fun topicCount(): Int
 
-    // ---- seeding (suspend, used by HelpContentSeeder) ----
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertTopics(topics: List<HelpTopicEntity>)
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertItems(items: List<HelpItemEntity>)
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertSteps(steps: List<HelpStepEntity>)
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertStrings(strings: List<HelpStringEntity>)
-
-    @Query("DELETE FROM help_topic")
-    suspend fun clearTopics()
-
-    @Query("DELETE FROM help_item")
-    suspend fun clearItems()
-
-    @Query("DELETE FROM help_step")
-    suspend fun clearSteps()
-
-    @Query("DELETE FROM help_string")
-    suspend fun clearStrings()
 }

@@ -54,9 +54,9 @@ data class HadithEntity(
     val narrator: String,
     val grade: String,
     val reference: String,
-    // Authentic, curated chain of narration (isnād). Populated only from verified
-    // data (the prepopulated DB or hadith_fills.json); it is never inferred from
-    // the text. Null/blank means the reader hides the chain section.
+    // Authentic, curated chain of narration (isnād). Carried by the content artifact and
+    // never inferred from the text — the app has had no writer for this column since
+    // HadithBackfillSeeder retired at versionCode 385. Null/blank hides the chain section.
     @ColumnInfo(name = "narrator_chain")
     val narratorChain: String? = null
 )
