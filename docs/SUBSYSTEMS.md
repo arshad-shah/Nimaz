@@ -631,7 +631,39 @@ receives.
 
 **Transport.** `kotlinx.serialization` JSON, GZIP-compressed, over `Strategy.P2P_POINT_TO_POINT` (`SERVICE_ID = "com.arshadshah.nimaz.sync"`). Handshake: sender advertises, receiver discovers → auto `requestConnection` → user confirms via `authenticationDigits`. State is `StateFlow<ConnectionState>` (sealed). Payloads multiplex over one channel: a `0x1F` prefix (GZIP magic byte) distinguishes compressed **data** from `SyncSignal` JSON; **BYTES** is used when ≤ 31 KB, else a **FILE** payload (`cacheDir/sync_export.gz`). `SyncSignal` (sealed) carries control messages (`Ready`/`Cancel`/`ImportStarted`/`ImportProgress`/`ImportComplete`/`Ack`) so the sender mirrors the receiver's import progress.
 
-**Conflict handling.** `SyncDataImporter` does a per-table, keyed **last-write-wins** merge (compare `updatedAt`, preserve local row IDs); name/prophet favorites are insert-if-absent. Never a blind overwrite. `Json { ignoreUnknownKeys = true }` tolerates app-version skew.
+**Conflict handling.** `SyncDataImporter` does a per-table **last-write-wins** merge on `updatedAt`. `Json { ignoreUnknownKeys = true }` tolerates app-version skew.
+
+**Merge keys are natural, never the row id.** Every table below has an `autoGenerate` primary key, so two phones that have both been used each hold a row with id 1 — a collision is the ordinary case, not an edge case. Seven importers merged on that id, which silently **overwrote** an unrelated local record when the incoming one was newer, and silently **dropped** the incoming one when it was older. Each now matches on what actually identifies the record across devices, and anything genuinely new is inserted with `id = 0` so Room assigns a fresh local id rather than the sender's:
+
+| table | merge key |
+|---|---|
+| khatams | `createdAt` (when the user started it) |
+| khatam ayahs / daily logs | the parent's **remapped** local id — see below |
+| tafseer highlights | `(ayahId, tafseerId, startOffset, endOffset)` — the span highlighted |
+| tafseer notes | `(ayahId, tafseerId, createdAt)` |
+| zakat history | `calculatedAt` |
+| tasbih presets | `name` |
+| tasbih sessions | `startedAt` |
+| makeup fasts | `originalDate` (the missed day) |
+| prayer records | `(date, prayerName)` — was already correct |
+| fast records | `date` — was already correct |
+| locations | `(latitude, longitude)` — was already correct |
+
+`importKhatams` returns a **sender-id → local-id map**, and `importKhatamAyahs` /
+`importKhatamDailyLogs` take it: without the remap those children were written with the
+sender's `khatamId` verbatim, so another device's read ayahs attached to whichever local khatam
+held that id and inflated its progress. A child whose parent is not in the map is dropped.
+
+**Bookmarks and favourites are a union, not a race.** `bookmarks` holds one row per
+(kind, target) with **two** independent flags (`bookmarked`, `favourite`) and a single
+`updatedAt`. Gating the whole write on that one timestamp dropped whichever act happened
+earlier — favourite on Monday, bookmark on Tuesday, sync, and the favourite is gone. The
+payload carries no tombstones (it lists what the sender *has*), so a flag set on either side
+stays set; the timestamp decides only whose note and colour win. The three name catalogues
+(Asma ul Husna, Asma un Nabi, Prophets) share one `importNameBookmarks` helper and union the
+same way — `SyncNameBookmark` has no `updatedAt` at all, so a union is the only merge
+available. All of this is pinned by `SyncDataImporterBookmarkMergeTest` and
+`SyncDataImporterIdentityTest`.
 
 **Wiring.** No DI module — all three classes are `@Singleton @Inject constructor`; the Nearby client is `by lazy { Nearby.getConnectionsClient(context) }`. Reached from `SyncScreen.kt`.
 
