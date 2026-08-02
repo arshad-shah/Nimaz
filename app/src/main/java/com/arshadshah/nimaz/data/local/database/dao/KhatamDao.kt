@@ -152,6 +152,16 @@ interface KhatamDao {
     @Query("SELECT * FROM khatam_daily_log WHERE khatam_id = :khatamId AND date = :date")
     suspend fun getDailyLog(khatamId: Long, date: Long): KhatamDailyLogEntity?
 
+    /**
+     * When each ayah of this khatam was marked read.
+     *
+     * `khatam_daily_log` only ever holds rows someone wrote deliberately, and for most of this
+     * app's life nothing did — so the reading day is derived from these stamps instead, which
+     * every mark writes and which sync carries. Indexed on `read_at`.
+     */
+    @Query("SELECT read_at FROM khatam_ayahs WHERE khatam_id = :khatamId ORDER BY read_at")
+    fun observeReadTimestamps(khatamId: Long): Flow<List<Long>>
+
     // ---- Completion ----
 
     @Query("UPDATE khatams SET status = 'completed', completed_at = :timestamp, updated_at = :timestamp, is_active = 0 WHERE id = :khatamId")
@@ -189,6 +199,10 @@ interface KhatamDao {
     /** Every logged reading day across all khatams, for lifetime streak maths. */
     @Query("SELECT * FROM khatam_daily_log WHERE ayahs_read > 0 ORDER BY date DESC")
     fun observeAllDailyLogs(): Flow<List<KhatamDailyLogEntity>>
+
+    /** Every ayah-read stamp across every khatam ever, for the lifetime streak. */
+    @Query("SELECT read_at FROM khatam_ayahs ORDER BY read_at")
+    fun observeAllReadTimestamps(): Flow<List<Long>>
 
     // Sync export queries
     @Query("SELECT * FROM khatams ORDER BY updated_at DESC")

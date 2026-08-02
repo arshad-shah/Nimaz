@@ -401,6 +401,22 @@ The reader pager (`QuranReaderScreen`) selects the renderer per page through the
 
 **Juz ayah boundaries corrected (#325).** `KhatamConstants.JUZ_AYAH_RANGES` — the hand-maintained juz→global-ayah-id table the Juz tab's khatam rings read — had drifted: juz 7 was off by one and juz 15-30 were wrong by hundreds of ayahs (juz 30 started at 4090 rather than 5673 = An-Naba 78:1, claiming a third of the Quran). The Khatam detail screen was unaffected because `KhatamDao.observeJuzProgress` groups by the database's own `ayahs.juz` column, so the two surfaces disagreed. `KhatamJuzBoundariesTest` now re-derives every boundary from the 114 surah ayah counts and the classical juz start references, so the table cannot silently drift again.
 
+**Khatam streak derived from read stamps, not the daily-log table.** `khatam_daily_log` is
+written by exactly one function, `KhatamRepositoryImpl.logDailyProgress`, reached only through
+`LogDailyProgressUseCase` — whose sole reference in the whole codebase is its own DI
+construction in `RepositoryModule`. **Nothing ever called it**, so the table was empty on every
+install, `KhatamProgressCalculator.currentStreak/longestStreak` always ran on an empty list, and
+the "streak" stat on the Khatam detail screen and in `KhatamStats` was permanently 0. The data
+was on disk the whole time: `khatam_ayahs.read_at` is stamped on every mark, is indexed, and
+travels over sync as `SyncKhatamAyah.readAt` — but no query read the column.
+`KhatamProgressCalculator.dailyLogsFrom(readAt, syncedLogs)` (pure domain) now buckets those
+stamps by local start-of-day and unions them with whatever the table holds, taking `maxOf` per
+day so a day present in both sources is not double-counted. `KhatamDao.observeReadTimestamps` /
+`observeAllReadTimestamps` feed it from `observeDailyLogs` and `observeKhatamStats`. Deriving
+rather than back-filling means the streak works for reading already done, not just for reading
+done after the fix ships; the table is still read because a peer's daily-log rows can arrive
+over sync without its ayah rows. Pinned by `KhatamProgressCalculatorTest`.
+
 **Fidelity verification, tests & the basmalah fix (sub-task 7/7 of #263, #271).** The 7/7 pass validated the shipped layout line-for-line against the invariants any faithful 16-line IndoPak edition must satisfy and fixed one defect it surfaced:
 
 - **Defect fixed — dropped basmalah on shared header lines.** The renderer's contract is that the header cartouche is drawn with its bismillah *suppressed* and the basmalah is its own centred line. But **81 of the 112** basmalah-bearing surahs ship the `surah_header` and `basmalah` on the *same* `line_number` (QUL folds the bismillah band onto the name banner; the remaining 31 give it a dedicated line). The old `MushafLayoutMapper` grouped strictly by `line` and kept only the first row's type, so those 81 pages rendered **header-only — the basmalah vanished**. `MushafLayoutMapper.toPageLayout` now emits every structural row as its own `MushafLine` (header then basmalah), so all 112 basmalahs render regardless of how the source packs them onto a line.

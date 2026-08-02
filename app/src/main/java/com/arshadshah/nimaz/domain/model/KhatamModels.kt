@@ -205,6 +205,41 @@ object KhatamProgressCalculator {
         return streak
     }
 
+    /**
+     * A day-by-day reading log, derived from **when each ayah was marked read**.
+     *
+     * The `khatam_daily_log` table this used to come from is written by exactly one function,
+     * `logDailyProgress`, and nothing in the app ever calls it — its only reference is its own
+     * DI wiring. So the table was always empty, [currentStreak] and [longestStreak] always ran
+     * over an empty list, and the streak on the khatam detail screen read 0 for everyone.
+     *
+     * `khatam_ayahs.read_at` was being stamped on every mark the whole time, and travels over
+     * sync, so deriving from it makes the streak correct for history **already on disk**
+     * instead of only for reading done after a fix ships.
+     *
+     * @param readAt one timestamp per ayah marked read, in any order.
+     * @param syncedLogs rows that arrived in `khatam_daily_log` from a peer. A day present in
+     *   both takes the larger count rather than the sum: the two describe the same reading, and
+     *   a peer on an older build may have sent a day this device has no ayah rows for.
+     */
+    fun dailyLogsFrom(
+        readAt: List<Long>,
+        syncedLogs: List<DailyLogEntry> = emptyList()
+    ): List<DailyLogEntry> {
+        val derived = readAt.groupingBy { startOfDay(it) }.eachCount()
+        val synced = syncedLogs.groupBy { startOfDay(it.date) }
+            .mapValues { (_, entries) -> entries.sumOf { it.ayahsRead } }
+
+        return (derived.keys + synced.keys)
+            .sorted()
+            .map { day ->
+                DailyLogEntry(
+                    date = day,
+                    ayahsRead = maxOf(derived[day] ?: 0, synced[day] ?: 0)
+                )
+            }
+    }
+
     /** Longest run of consecutive logged days anywhere in the history. */
     fun longestStreak(logs: List<DailyLogEntry>): Int {
         val days = logs.filter { it.ayahsRead > 0 }

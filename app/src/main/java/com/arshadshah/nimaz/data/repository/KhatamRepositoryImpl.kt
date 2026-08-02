@@ -129,9 +129,25 @@ class KhatamRepositoryImpl @Inject constructor(
         }
     }
 
+    /**
+     * The reading days of this khatam, derived from when its ayahs were marked read and
+     * unioned with anything explicitly written to `khatam_daily_log`.
+     *
+     * The table alone is not enough: `logDailyProgress` is the only thing that writes it and
+     * nothing calls it, so for existing installs it is empty and the streak was always 0.
+     * `khatam_ayahs.read_at` has the same information and is already on disk, so the fix
+     * reaches history rather than only reading done after it ships. The table is still read
+     * because sync may carry rows from a peer whose ayah rows did not arrive.
+     */
     override fun observeDailyLogs(khatamId: Long): Flow<List<DailyLogEntry>> {
-        return khatamDao.observeDailyLogs(khatamId).map { list ->
-            list.map { DailyLogEntry(date = it.date, ayahsRead = it.ayahsRead) }
+        return combine(
+            khatamDao.observeReadTimestamps(khatamId),
+            khatamDao.observeDailyLogs(khatamId)
+        ) { readAt, logged ->
+            KhatamProgressCalculator.dailyLogsFrom(
+                readAt = readAt,
+                syncedLogs = logged.map { DailyLogEntry(date = it.date, ayahsRead = it.ayahsRead) }
+            )
         }
     }
 
@@ -189,9 +205,17 @@ class KhatamRepositoryImpl @Inject constructor(
             khatamDao.observeCompletedKhatamCount(),
             khatamDao.observeActiveKhatamCount(),
             khatamDao.observeTotalAyahsReadAllTime(),
-            khatamDao.observeAllDailyLogs()
-        ) { completed, active, totalAyahs, logEntities ->
-            val logs = logEntities.map { DailyLogEntry(date = it.date, ayahsRead = it.ayahsRead) }
+            khatamDao.observeAllDailyLogs(),
+            khatamDao.observeAllReadTimestamps()
+        ) { completed, active, totalAyahs, logEntities, readAt ->
+            // Same derivation as observeDailyLogs, across every khatam ever — the lifetime
+            // streak read the same empty table and was likewise always 0.
+            val logs = KhatamProgressCalculator.dailyLogsFrom(
+                readAt = readAt,
+                syncedLogs = logEntities.map {
+                    DailyLogEntry(date = it.date, ayahsRead = it.ayahsRead)
+                }
+            )
             KhatamStats(
                 totalKhatamsCompleted = completed,
                 totalKhatamsActive = active,
