@@ -31,11 +31,13 @@ import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import com.arshadshah.nimaz.MainActivity
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.domain.model.PrayerType
 import com.arshadshah.nimaz.widget.WidgetUpdateScheduler
 import com.arshadshah.nimaz.widget.core.WidgetCard
 import com.arshadshah.nimaz.widget.core.WidgetLoadingBox
 import com.arshadshah.nimaz.widget.core.WidgetMessageBox
 import com.arshadshah.nimaz.widget.core.nextPrayerIndex
+import com.arshadshah.nimaz.widget.core.prayerShortName
 
 class PrayerTimesWidget : GlanceAppWidget() {
 
@@ -102,13 +104,16 @@ private fun PrayerTimesSuccessContent(
     // Five (name, time, epochMillis) cells in chronological order. The "next" prayer and
     // its countdown are derived live from the wall clock at render time (the widget redraws
     // every minute), so the highlight never lags behind the refresh worker.
+    val context = LocalContext.current
     val cells = listOf(
-        Triple("Fajr", data.fajrTime, data.fajrEpochMillis),
-        Triple("Dhuhr", data.dhuhrTime, data.dhuhrEpochMillis),
-        Triple("Asr", data.asrTime, data.asrEpochMillis),
-        Triple("Maghrib", data.maghribTime, data.maghribEpochMillis),
-        Triple("Isha", data.ishaTime, data.ishaEpochMillis),
-    )
+        Triple(PrayerType.FAJR, data.fajrTime, data.fajrEpochMillis),
+        Triple(PrayerType.DHUHR, data.dhuhrTime, data.dhuhrEpochMillis),
+        Triple(PrayerType.ASR, data.asrTime, data.asrEpochMillis),
+        Triple(PrayerType.MAGHRIB, data.maghribTime, data.maghribEpochMillis),
+        Triple(PrayerType.ISHA, data.ishaTime, data.ishaEpochMillis),
+    ).map { (type, time, epoch) ->
+        Triple(context.prayerShortName(type.displayName), time, epoch)
+    }
     val nextIndex = nextPrayerIndex(cells.map { it.third }, System.currentTimeMillis())
 
     val nextCell = cells.getOrNull(nextIndex)
@@ -135,7 +140,7 @@ private fun PrayerTimesSuccessContent(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = data.locationName.ifEmpty { "Location" },
+                    text = data.locationName.ifEmpty { context.getString(R.string.widget_location) },
                     style = TextStyle(
                         color = textColor,
                         fontSize = 13.sp,

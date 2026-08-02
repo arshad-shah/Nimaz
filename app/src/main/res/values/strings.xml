@@ -1807,4 +1807,6 @@
     <string name="night_worship_duas_body">Qunut and the supplications of the night</string>
     <string name="night_worship_why_title">Why pray at night</string>
     <string name="night_worship_why_body">&quot;Our Lord descends to the nearest heaven…&quot;</string>
+    <string name="widget_location">Location</string>
+    <string name="widget_tomorrow">Tomorrow</string>
 </resources>

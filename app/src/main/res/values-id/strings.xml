@@ -1613,4 +1613,6 @@
     <string name="night_worship_duas_body">Qunut dan doa-doa malam</string>
     <string name="night_worship_why_title">Mengapa salat malam</string>
     <string name="night_worship_why_body">&quot;Rabb kami turun ke langit dunia…&quot;</string>
+    <string name="widget_location">Lokasi</string>
+    <string name="widget_tomorrow">Besok</string>
 </resources>
