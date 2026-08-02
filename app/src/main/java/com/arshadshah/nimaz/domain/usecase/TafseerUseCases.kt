@@ -21,7 +21,6 @@ data class TafseerUseCases(
     val addNote: AddNoteUseCase,
     val updateNote: UpdateNoteUseCase,
     val deleteNote: DeleteNoteUseCase,
-    val exportAnnotations: ExportAnnotationsUseCase,
     val getTafseerNotes: GetTafseerNotesUseCase
 )
 
@@ -110,8 +109,4 @@ class UpdateNoteUseCase @Inject constructor(private val repository: TafseerRepos
 
 class DeleteNoteUseCase @Inject constructor(private val repository: TafseerRepository) {
     suspend operator fun invoke(noteId: Long) = repository.deleteNote(noteId)
-}
-
-class ExportAnnotationsUseCase @Inject constructor(private val repository: TafseerRepository) {
-    suspend operator fun invoke(): String = repository.exportAnnotations()
 }

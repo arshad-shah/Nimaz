@@ -55,7 +55,6 @@ import com.arshadshah.nimaz.domain.usecase.DeleteLocationUseCase
 import com.arshadshah.nimaz.domain.usecase.DeleteNoteUseCase
 import com.arshadshah.nimaz.domain.usecase.DeleteQuranBookmarkUseCase
 import com.arshadshah.nimaz.domain.usecase.DuaUseCases
-import com.arshadshah.nimaz.domain.usecase.ExportAnnotationsUseCase
 import com.arshadshah.nimaz.domain.usecase.FastingUseCases
 import com.arshadshah.nimaz.domain.usecase.GetActiveSessionUseCase
 import com.arshadshah.nimaz.domain.usecase.GetAllAsmaUlHusnaUseCase
@@ -665,7 +664,6 @@ object UseCaseModule {
             addNote = AddNoteUseCase(repository),
             updateNote = UpdateNoteUseCase(repository),
             deleteNote = DeleteNoteUseCase(repository),
-            exportAnnotations = ExportAnnotationsUseCase(repository),
             getTafseerNotes = GetTafseerNotesUseCase(repository, quranRepository)
         )
     }

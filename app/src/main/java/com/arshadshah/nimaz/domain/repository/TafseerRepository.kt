@@ -45,5 +45,4 @@ interface TafseerRepository {
     suspend fun deleteNote(noteId: Long)
 
     // Export
-    suspend fun exportAnnotations(): String
 }

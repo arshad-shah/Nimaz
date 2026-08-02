@@ -134,17 +134,6 @@ object QiblaCalculator {
         }
     }
 
-    fun calculateQiblaAngle(compassHeading: Float, qiblaBearing: Double): Float {
-        // Calculate the angle to rotate the Qibla indicator
-        var angle = (qiblaBearing - compassHeading).toFloat()
-
-        // Normalize to 0-360
-        while (angle < 0) angle += 360f
-        while (angle >= 360) angle -= 360f
-
-        return angle
-    }
-
     fun getCardinalDirection(bearing: Double): String {
         return when {
             bearing >= 337.5 || bearing < 22.5 -> "N"
