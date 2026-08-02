@@ -486,7 +486,11 @@ Getters expose `Flow<…>` only (never `MutableStateFlow`/`LiveData`); writes ar
 
 **Aggregate.** `val userPreferences: Flow<UserPreferences>` maps a curated subset of keys into a top-level `data class UserPreferences(...)` for one-shot reads of the common cross-cutting settings (used by `SettingsViewModel`, `LocationViewModel`, `AppInitializer`, `BootReceiver`, `WidgetsScreen`).
 
-**Bulk ops.** `clearAllData()`, `exportAllPreferences(): Map<String,String>`, `importPreferences(map)` (type-infers values back to keys, skips `onboarding_completed`) — used by the sync subsystem (§10).
+**Bulk ops.** `clearAllData()`, `exportAllPreferences(): Map<String,String>`, `importPreferences(map)` — used by the sync subsystem (§10).
+
+**The wire loses the type, so the type is declared.** The export flattens every value with `toString()`, so the payload is `Map<String,String>`. The import used to *guess* the type back from the shape of the value and substrings of the key name; DataStore keys are typed and reading one at the wrong type throws, so the six keys the heuristic missed — `tasbih_preset_seed_version`, `content_patch_version`, `ai_consent_timestamp`, `tasbih_selected_preset`, `current_location_id` (Long guessed as Int) and `tasbih_favorites` — did not merely import wrong, they **crashed on next read after any sync**. `tasbih_preset_seed_version` is read with `.first()` in `TasbihViewModel`'s init and `current_location_id` resolves the active location for prayer times.
+
+`data/local/datastore/PreferenceCodec.kt` now holds the declared type of all 91 named keys plus three shape patterns for the runtime-composed `worship_<type>_{enabled,offset,mode}`. Sets are joined on the ASCII unit separator rather than `Set.toString()` (`[a, b]` cannot be split back safely), with the bracket form still accepted so payloads from older builds land. An unknown key from a newer sender is kept as a string rather than dropped. `onboarding_completed` is never imported. `PreferenceCodecTest` reads the key declarations straight out of `PreferencesDataStore.kt` and fails if the registry drifts from them, so a new preference cannot be added without registering its type.
 
 **Wiring.** Provided in `core/di/DataStoreModule.kt` via `@Provides @Singleton`. (Minor: it already has an `@Inject constructor(context)`, so the explicit provider is redundant with constructor injection.)
 
