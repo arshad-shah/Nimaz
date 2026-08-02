@@ -130,9 +130,14 @@ data class QuranReaderUiState(
     val mushafPageLayoutCache: Map<Int, MushafPageLayout> = emptyMap(),
     // The Mushaf edition the reader renders, driven by the persisted settings picker (6/7,
     // #270). MADANI (default) keeps the ayah-flow Uthmani/604 page; the IndoPak editions
-    // switch to their line-accurate layouts. Page counts / pager bounds read
-    // [MushafScript.totalPages] off this so a script switch reflows the pager correctly.
-    val mushafScript: MushafScript = MushafScript.DEFAULT
+    // switch to their line-accurate layouts.
+    val mushafScript: MushafScript = MushafScript.DEFAULT,
+    /**
+     * The active edition's page↔ayah mapping — the same object the Page tab reads, so the
+     * pager's bounds come from the edition's real page ranges rather than the count declared
+     * on the enum.
+     */
+    val pagination: MushafPagination = MushafPagination.fallback(MushafScript.DEFAULT)
 ) {
     /** Whether to render stored line-accurate pages instead of flowing ayahs into a page. */
     val useLineAccurateLayout: Boolean get() = mushafScript.isLineAccurate
@@ -147,7 +152,7 @@ data class QuranReaderUiState(
         get() = QuranTranslation.fromId(selectedTranslatorId).language
 
     /** Number of pages in the active edition — the pager/nav bounds source of truth. */
-    val totalPages: Int get() = mushafScript.totalPages
+    val totalPages: Int get() = pagination.totalPages
 }
 
 data class QuranSearchUiState(
@@ -638,11 +643,14 @@ class QuranViewModel @Inject constructor(
                 .map { MushafScript.fromName(it) }
                 .distinctUntilChanged()
                 .collect { script ->
-                    _homeState.update {
-                        it.copy(pagination = MushafPagination.fallback(script))
-                    }
+                    val fallback = MushafPagination.fallback(script)
+                    _homeState.update { it.copy(pagination = fallback) }
+                    _readerState.update { it.copy(pagination = fallback) }
                     val pagination = quranUseCases.getMushafPagination(script)
                     _homeState.update { it.copy(pagination = pagination) }
+                    // The reader's pager bounds read off this too, so it must not be left on
+                    // the declared count once the real ranges are in.
+                    _readerState.update { it.copy(pagination = pagination) }
                 }
         }
     }

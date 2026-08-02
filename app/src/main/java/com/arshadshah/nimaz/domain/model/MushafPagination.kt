@@ -41,6 +41,21 @@ class MushafPagination private constructor(
     /** Every page of this edition, 1-based. */
     val pages: IntRange get() = 1..totalPages
 
+    /** Whether [page] is a page of this edition. False for every page while not [isReady]. */
+    fun contains(page: Int): Boolean = isReady && page in pages
+
+    /**
+     * The page a "go to page" input names, or null when it is not a page of this edition.
+     *
+     * Parsing lives here so the bound cannot drift from the edition again: the jump-to-page
+     * field used to validate against [MushafScript.totalPages], the count *declared* on the
+     * enum, while the Page tab it sits above listed tiles from [totalPages], the count derived
+     * from this edition's real page ranges. Blank, non-numeric and overflowing input resolve to
+     * null alongside out-of-range pages, so the caller has one thing to check.
+     */
+    fun pageFromInput(input: String): Int? =
+        input.trim().toIntOrNull()?.takeIf { contains(it) }
+
     /** The ayah span printed on [page], or null when unknown. */
     fun rangeFor(page: Int): PageAyahRange? = rangesByPage[page]
 
