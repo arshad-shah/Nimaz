@@ -41,6 +41,17 @@ import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/**
+ * What makes a tafseer highlight *the same highlight* on two devices: the span it covers of a
+ * given commentary. The row id cannot — it is `autoGenerate`, so both phones hand out 1, 2, 3…
+ */
+private data class HighlightKey(
+    val ayahId: Int,
+    val tafseerId: String,
+    val startOffset: Int,
+    val endOffset: Int
+)
+
 @Singleton
 class SyncDataImporter @Inject constructor(
     private val database: NimazDatabase,
@@ -106,9 +117,11 @@ class SyncDataImporter @Inject constructor(
     }
 
     suspend fun importKhatamData(payload: SyncPayload) {
-        importKhatams(payload.khatams)
-        importKhatamAyahs(payload.khatamAyahs)
-        importKhatamDailyLogs(payload.khatamDailyLogs)
+        // The parents first: they hand back sender-id → local-id so the children attach to
+        // the right khatam rather than to whatever locally holds the sender's id.
+        val khatamIds = importKhatams(payload.khatams)
+        importKhatamAyahs(payload.khatamAyahs, khatamIds)
+        importKhatamDailyLogs(payload.khatamDailyLogs, khatamIds)
     }
 
     suspend fun importTafseerData(payload: SyncPayload) {
@@ -152,9 +165,21 @@ class SyncDataImporter @Inject constructor(
     /**
      * Incoming Quran bookmarks, merged onto the consolidated row.
      *
-     * `favourite` is carried over from whatever is already here rather than defaulted: the
-     * payload has no field for it, so writing the row blind would silently un-favourite a
-     * verse this device had marked. Same reasoning in every kind below.
+     * Bookmarking an ayah and favouriting it are two independent acts that share one row, and
+     * the row carries a single `updatedAt`. `favourite` is therefore carried over from whatever
+     * is already here rather than defaulted — the payload has no field for it, so writing the
+     * row blind would silently un-favourite a verse this device had marked. Same reasoning in
+     * every kind below.
+     *
+     * Gating the whole write on `item.updatedAt > local.updatedAt` therefore dropped whichever
+     * act happened *earlier*, though nothing about it conflicted: favourite on Monday, bookmark
+     * on Tuesday, sync — `importBookmarks` stamps the row Tuesday and `importFavorites` then
+     * sees a newer local row and skips, losing the favourite. The mirror case needs no ordering
+     * at all: an incoming bookmark older than a local favourite was simply discarded.
+     *
+     * The payload carries no tombstones — it lists what the sending device *has* — so the merge
+     * is additive. A flag set on either side stays set; the timestamp decides only whose note
+     * and colour win.
      */
     private suspend fun importBookmarks(incoming: List<SyncBookmark>) {
         val existing = bookmarkDao.all()
@@ -162,49 +187,48 @@ class SyncDataImporter @Inject constructor(
             .associateBy { it.targetId }
         for (item in incoming) {
             val local = existing[item.ayahId]
-            if (local == null || item.updatedAt > local.updatedAt) {
-                bookmarkDao.upsert(
-                    BookmarkEntity(
-                        kind = BookmarkKind.AYAH,
-                        targetId = item.ayahId,
-                        bookmarked = true,
-                        favourite = local?.favourite ?: false,
-                        note = item.note,
-                        colour = item.color,
-                        contextId = item.surahNumber,
-                        ordinal = item.ayahNumber,
-                        createdAt = item.createdAt,
-                        updatedAt = item.updatedAt
-                    )
+            val incomingIsNewer = local == null || item.updatedAt > local.updatedAt
+            bookmarkDao.upsert(
+                BookmarkEntity(
+                    kind = BookmarkKind.AYAH,
+                    targetId = item.ayahId,
+                    bookmarked = true,
+                    favourite = local?.favourite ?: false,
+                    // The note and colour belong to the bookmark, so they follow the timestamp.
+                    note = if (incomingIsNewer) item.note else local?.note,
+                    colour = if (incomingIsNewer) item.color else local?.colour,
+                    contextId = item.surahNumber,
+                    ordinal = item.ayahNumber,
+                    createdAt = minOf(item.createdAt, local?.createdAt ?: item.createdAt),
+                    updatedAt = maxOf(item.updatedAt, local?.updatedAt ?: item.updatedAt)
                 )
-            }
+            )
         }
     }
 
+    /** The favourite half of the merge described on [importBookmarks]. */
     private suspend fun importFavorites(incoming: List<SyncFavorite>) {
         val existing = bookmarkDao.all()
             .filter { it.kind == BookmarkKind.AYAH }
             .associateBy { it.targetId }
         for (item in incoming) {
             val local = existing[item.ayahId]
-            if (local == null || item.updatedAt > local.updatedAt) {
-                bookmarkDao.upsert(
-                    BookmarkEntity(
-                        kind = BookmarkKind.AYAH,
-                        targetId = item.ayahId,
-                        // and here the other way round: a favourite arriving must not clear a
-                        // bookmark, or its note and colour with it.
-                        bookmarked = local?.bookmarked ?: false,
-                        favourite = true,
-                        note = local?.note,
-                        colour = local?.colour,
-                        contextId = item.surahNumber,
-                        ordinal = item.ayahNumber,
-                        createdAt = item.createdAt,
-                        updatedAt = item.updatedAt
-                    )
+            bookmarkDao.upsert(
+                BookmarkEntity(
+                    kind = BookmarkKind.AYAH,
+                    targetId = item.ayahId,
+                    // A favourite arriving must not clear a bookmark, or its note and colour
+                    // with it — it carries neither of its own.
+                    bookmarked = local?.bookmarked ?: false,
+                    favourite = true,
+                    note = local?.note,
+                    colour = local?.colour,
+                    contextId = item.surahNumber,
+                    ordinal = item.ayahNumber,
+                    createdAt = minOf(item.createdAt, local?.createdAt ?: item.createdAt),
+                    updatedAt = maxOf(item.updatedAt, local?.updatedAt ?: item.updatedAt)
                 )
-            }
+            )
         }
     }
 
@@ -285,13 +309,13 @@ class SyncDataImporter @Inject constructor(
     }
 
     private suspend fun importMakeupFasts(incoming: List<SyncMakeupFast>) {
-        val existing = fastingDao.getAllMakeupFastsSync().associateBy { it.id }
+        val existing = fastingDao.getAllMakeupFastsSync().associateBy { it.originalDate }
         for (item in incoming) {
-            val local = existing[item.id]
+            val local = existing[item.originalDate]
             if (local == null || item.updatedAt > local.updatedAt) {
                 fastingDao.insertMakeupFast(
                     MakeupFastEntity(
-                        id = item.id,
+                        id = local?.id ?: 0,
                         originalDate = item.originalDate,
                         originalHijriDate = item.originalHijriDate,
                         reason = item.reason,
@@ -310,13 +334,13 @@ class SyncDataImporter @Inject constructor(
     // --- Tasbih ---
 
     private suspend fun importTasbihPresets(incoming: List<SyncTasbihPreset>) {
-        val existing = tasbihDao.getAllPresetsSync().associateBy { it.id }
+        val existing = tasbihDao.getAllPresetsSync().associateBy { it.name }
         for (item in incoming) {
-            val local = existing[item.id]
+            val local = existing[item.name]
             if (local == null || item.updatedAt > local.updatedAt) {
                 tasbihDao.insertPreset(
                     TasbihPresetEntity(
-                        id = item.id,
+                        id = local?.id ?: 0,
                         name = item.name,
                         arabic = item.arabic,
                         transliteration = item.transliteration,
@@ -332,13 +356,13 @@ class SyncDataImporter @Inject constructor(
     }
 
     private suspend fun importTasbihSessions(incoming: List<SyncTasbihSession>) {
-        val existing = sessionDao.getAllSessionsSync().associateBy { it.id }
+        val existing = sessionDao.getAllSessionsSync().associateBy { it.startedAt }
         for (item in incoming) {
-            val local = existing[item.id]
+            val local = existing[item.startedAt]
             if (local == null || item.updatedAt > local.updatedAt) {
                 sessionDao.insertSession(
                     TasbihSessionEntity(
-                        id = item.id,
+                        id = local?.id ?: 0,
                         presetId = item.presetId,
                         presetName = item.presetName,
                         date = item.date,
@@ -359,73 +383,89 @@ class SyncDataImporter @Inject constructor(
 
     // --- Khatam ---
 
-    private suspend fun importKhatams(incoming: List<SyncKhatam>) {
-        val existing = khatamDao.getAllKhatamsSync().associateBy { it.id }
+    /**
+     * Khatams, matched by **when the khatam was created**, not by row id.
+     *
+     * `KhatamEntity.id` is Room's `autoGenerate` key, so two phones that have both been used
+     * each hold a khatam with id 1. Merging on it meant an incoming khatam overwrote whatever
+     * unrelated khatam held the same local id — or, when the incoming one was older, was
+     * dropped so nothing arrived at all. `createdAt` is the instant the user started that
+     * khatam, which is stable across devices and unique in practice.
+     *
+     * Returns **sender id → local id**, because khatam ayahs and daily logs reference the
+     * parent and anything genuinely new is inserted under a fresh local id.
+     */
+    private suspend fun importKhatams(incoming: List<SyncKhatam>): Map<Long, Long> {
+        val existing = khatamDao.getAllKhatamsSync().associateBy { it.createdAt }
+        val localIdBySenderId = mutableMapOf<Long, Long>()
         for (item in incoming) {
-            val local = existing[item.id]
-            if (local == null || item.updatedAt > local.updatedAt) {
-                if (local != null) {
-                    khatamDao.updateKhatam(
-                        KhatamEntity(
-                            id = item.id,
-                            name = item.name,
-                            notes = item.notes,
-                            status = item.status,
-                            isActive = item.isActive,
-                            dailyTarget = item.dailyTarget,
-                            deadline = item.deadline,
-                            reminderEnabled = item.reminderEnabled,
-                            reminderTime = item.reminderTime,
-                            totalAyahsRead = item.totalAyahsRead,
-                            createdAt = item.createdAt,
-                            startedAt = item.startedAt,
-                            completedAt = item.completedAt,
-                            updatedAt = item.updatedAt
-                        )
-                    )
-                } else {
-                    khatamDao.insertKhatam(
-                        KhatamEntity(
-                            id = item.id,
-                            name = item.name,
-                            notes = item.notes,
-                            status = item.status,
-                            isActive = item.isActive,
-                            dailyTarget = item.dailyTarget,
-                            deadline = item.deadline,
-                            reminderEnabled = item.reminderEnabled,
-                            reminderTime = item.reminderTime,
-                            totalAyahsRead = item.totalAyahsRead,
-                            createdAt = item.createdAt,
-                            startedAt = item.startedAt,
-                            completedAt = item.completedAt,
-                            updatedAt = item.updatedAt
-                        )
-                    )
+            val local = existing[item.createdAt]
+            val entity = KhatamEntity(
+                // 0 lets Room assign; never reuse the sender's id, which may already belong
+                // to a different khatam here.
+                id = local?.id ?: 0,
+                name = item.name,
+                notes = item.notes,
+                status = item.status,
+                isActive = item.isActive,
+                dailyTarget = item.dailyTarget,
+                deadline = item.deadline,
+                reminderEnabled = item.reminderEnabled,
+                reminderTime = item.reminderTime,
+                totalAyahsRead = item.totalAyahsRead,
+                createdAt = item.createdAt,
+                startedAt = item.startedAt,
+                completedAt = item.completedAt,
+                updatedAt = item.updatedAt
+            )
+            localIdBySenderId[item.id] = when {
+                local == null -> khatamDao.insertKhatam(entity)
+                item.updatedAt > local.updatedAt -> {
+                    khatamDao.updateKhatam(entity)
+                    local.id
                 }
+                // Older than what is here: keep ours, but still map the id so this khatam's
+                // ayahs and logs land on the right parent.
+                else -> local.id
             }
         }
+        return localIdBySenderId
     }
 
-    private suspend fun importKhatamAyahs(incoming: List<SyncKhatamAyah>) {
-        val entities = incoming.map {
+    /**
+     * @param localIdBySenderId from [importKhatams]. Without it these rows carried the
+     *   *sender's* khatam id, so another device's read ayahs attached to whichever local
+     *   khatam happened to hold that id and inflated its progress. A row whose parent is not
+     *   in the map has no khatam to belong to and is dropped.
+     */
+    private suspend fun importKhatamAyahs(
+        incoming: List<SyncKhatamAyah>,
+        localIdBySenderId: Map<Long, Long>
+    ) {
+        val entities = incoming.mapNotNull { item ->
+            val khatamId = localIdBySenderId[item.khatamId] ?: return@mapNotNull null
             KhatamAyahEntity(
-                khatamId = it.khatamId,
-                ayahId = it.ayahId,
-                readAt = it.readAt,
-                updatedAt = it.updatedAt
+                khatamId = khatamId,
+                ayahId = item.ayahId,
+                readAt = item.readAt,
+                updatedAt = item.updatedAt
             )
         }
         if (entities.isNotEmpty()) khatamDao.insertAyahs(entities)
     }
 
-    private suspend fun importKhatamDailyLogs(incoming: List<SyncKhatamDailyLog>) {
+    /** @param localIdBySenderId see [importKhatamAyahs]. */
+    private suspend fun importKhatamDailyLogs(
+        incoming: List<SyncKhatamDailyLog>,
+        localIdBySenderId: Map<Long, Long>
+    ) {
         for (item in incoming) {
-            val local = khatamDao.getDailyLog(item.khatamId, item.date)
+            val khatamId = localIdBySenderId[item.khatamId] ?: continue
+            val local = khatamDao.getDailyLog(khatamId, item.date)
             if (local == null || item.updatedAt > local.updatedAt) {
                 khatamDao.upsertDailyLog(
                     KhatamDailyLogEntity(
-                        khatamId = item.khatamId,
+                        khatamId = khatamId,
                         date = item.date,
                         ayahsRead = item.ayahsRead,
                         updatedAt = item.updatedAt
@@ -438,14 +478,17 @@ class SyncDataImporter @Inject constructor(
     // --- Tafseer ---
 
     private suspend fun importTafseerHighlights(incoming: List<SyncTafseerHighlight>) {
-        val existing = tafseerUserDao.getAllHighlightsSync().associateBy { it.id }
+        val existing = tafseerUserDao.getAllHighlightsSync()
+            .associateBy { HighlightKey(it.ayahId, it.tafseerId, it.startOffset, it.endOffset) }
         val toInsert = mutableListOf<TafseerHighlightEntity>()
         for (item in incoming) {
-            val local = existing[item.id]
+            val local = existing[
+                HighlightKey(item.ayahId, item.tafseerId, item.startOffset, item.endOffset)
+            ]
             if (local == null || item.updatedAt > local.updatedAt) {
                 toInsert.add(
                     TafseerHighlightEntity(
-                        id = item.id,
+                        id = local?.id ?: 0,
                         ayahId = item.ayahId,
                         tafseerId = item.tafseerId,
                         startOffset = item.startOffset,
@@ -462,14 +505,15 @@ class SyncDataImporter @Inject constructor(
     }
 
     private suspend fun importTafseerNotes(incoming: List<SyncTafseerNote>) {
-        val existing = tafseerUserDao.getAllNotesSync().associateBy { it.id }
+        val existing = tafseerUserDao.getAllNotesSync()
+            .associateBy { Triple(it.ayahId, it.tafseerId, it.createdAt) }
         val toInsert = mutableListOf<TafseerNoteEntity>()
         for (item in incoming) {
-            val local = existing[item.id]
+            val local = existing[Triple(item.ayahId, item.tafseerId, item.createdAt)]
             if (local == null || item.updatedAt > local.updatedAt) {
                 toInsert.add(
                     TafseerNoteEntity(
-                        id = item.id,
+                        id = local?.id ?: 0,
                         ayahId = item.ayahId,
                         tafseerId = item.tafseerId,
                         text = item.text,
@@ -485,14 +529,14 @@ class SyncDataImporter @Inject constructor(
     // --- Zakat ---
 
     private suspend fun importZakatHistory(incoming: List<SyncZakatHistory>) {
-        val existing = zakatDao.getAllHistorySync().associateBy { it.id }
+        val existing = zakatDao.getAllHistorySync().associateBy { it.calculatedAt }
         val toInsert = mutableListOf<ZakatHistoryEntity>()
         for (item in incoming) {
-            val local = existing[item.id]
+            val local = existing[item.calculatedAt]
             if (local == null || item.updatedAt > local.updatedAt) {
                 toInsert.add(
                     ZakatHistoryEntity(
-                        id = item.id,
+                        id = local?.id ?: 0,
                         calculatedAt = item.calculatedAt,
                         totalAssets = item.totalAssets,
                         totalLiabilities = item.totalLiabilities,
@@ -513,68 +557,48 @@ class SyncDataImporter @Inject constructor(
 
     // --- Names & Prophets ---
 
-    private suspend fun importAsmaUlHusnaBookmarks(incoming: List<SyncNameBookmark>) {
+    /**
+     * Merge for the three name catalogues (Asma ul Husna, Asma un Nabi, Prophets), which share
+     * one shape: a mark that is always a bookmark, plus an independent favourite flag.
+     *
+     * This used to skip the row outright whenever the target already existed locally, so a name
+     * bookmarked on this device and favourited on the other stayed un-favourited — the incoming
+     * favourite had nowhere to land. [SyncNameBookmark] carries no `updatedAt`, so there is no
+     * timestamp to arbitrate with and the union is the only merge available: a flag set on
+     * either side stays set. That also means an incoming row can never *clear* a local
+     * favourite, which is the behaviour the ayah and hadith importers already had.
+     */
+    private suspend fun importNameBookmarks(incoming: List<SyncNameBookmark>, kind: String) {
         val existing = bookmarkDao.all()
-            .filter { it.kind == BookmarkKind.ASMA_UL_HUSNA }
-            .map { it.targetId }
-            .toSet()
+            .filter { it.kind == kind }
+            .associateBy { it.targetId }
         for (item in incoming) {
-            if (item.refId !in existing) {
-                bookmarkDao.upsert(
-                    BookmarkEntity(
-                        kind = BookmarkKind.ASMA_UL_HUSNA,
-                        targetId = item.refId,
-                        bookmarked = true,
-                        favourite = item.isFavorite,
-                        createdAt = item.createdAt,
-                        updatedAt = item.createdAt
-                    )
+            val local = existing[item.refId]
+            bookmarkDao.upsert(
+                BookmarkEntity(
+                    kind = kind,
+                    targetId = item.refId,
+                    bookmarked = true,
+                    favourite = (local?.favourite ?: false) || item.isFavorite,
+                    note = local?.note,
+                    colour = local?.colour,
+                    contextId = local?.contextId,
+                    ordinal = local?.ordinal,
+                    createdAt = minOf(item.createdAt, local?.createdAt ?: item.createdAt),
+                    updatedAt = maxOf(item.createdAt, local?.updatedAt ?: item.createdAt)
                 )
-            }
+            )
         }
     }
 
-    private suspend fun importAsmaUnNabiBookmarks(incoming: List<SyncNameBookmark>) {
-        val existing = bookmarkDao.all()
-            .filter { it.kind == BookmarkKind.ASMA_UN_NABI }
-            .map { it.targetId }
-            .toSet()
-        for (item in incoming) {
-            if (item.refId !in existing) {
-                bookmarkDao.upsert(
-                    BookmarkEntity(
-                        kind = BookmarkKind.ASMA_UN_NABI,
-                        targetId = item.refId,
-                        bookmarked = true,
-                        favourite = item.isFavorite,
-                        createdAt = item.createdAt,
-                        updatedAt = item.createdAt
-                    )
-                )
-            }
-        }
-    }
+    private suspend fun importAsmaUlHusnaBookmarks(incoming: List<SyncNameBookmark>) =
+        importNameBookmarks(incoming, BookmarkKind.ASMA_UL_HUSNA)
 
-    private suspend fun importProphetBookmarks(incoming: List<SyncNameBookmark>) {
-        val existing = bookmarkDao.all()
-            .filter { it.kind == BookmarkKind.PROPHET }
-            .map { it.targetId }
-            .toSet()
-        for (item in incoming) {
-            if (item.refId !in existing) {
-                bookmarkDao.upsert(
-                    BookmarkEntity(
-                        kind = BookmarkKind.PROPHET,
-                        targetId = item.refId,
-                        bookmarked = true,
-                        favourite = item.isFavorite,
-                        createdAt = item.createdAt,
-                        updatedAt = item.createdAt
-                    )
-                )
-            }
-        }
-    }
+    private suspend fun importAsmaUnNabiBookmarks(incoming: List<SyncNameBookmark>) =
+        importNameBookmarks(incoming, BookmarkKind.ASMA_UN_NABI)
+
+    private suspend fun importProphetBookmarks(incoming: List<SyncNameBookmark>) =
+        importNameBookmarks(incoming, BookmarkKind.PROPHET)
 
     // --- Hadith & Dua ---
 
