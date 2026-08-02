@@ -20,16 +20,15 @@ import com.arshadshah.nimaz.core.util.NextWorshipResolver
 import com.arshadshah.nimaz.core.util.PrayerTimeCalculator
 import com.arshadshah.nimaz.core.util.WorshipReminderContent
 import com.arshadshah.nimaz.core.util.currentPrayerIndexAt
-import com.arshadshah.nimaz.core.util.nextPrayerIndexAt
 import com.arshadshah.nimaz.core.util.formatClockTime
-import com.arshadshah.nimaz.domain.model.WorshipReminderType
-import com.arshadshah.nimaz.presentation.components.organisms.WorshipCardUi
+import com.arshadshah.nimaz.core.util.nextPrayerIndexAt
 import com.arshadshah.nimaz.core.util.toUtcMidnightMillis
 import com.arshadshah.nimaz.domain.model.Announcement
 import com.arshadshah.nimaz.domain.model.AnnouncementAction
+import com.arshadshah.nimaz.domain.model.AnnouncementType
 import com.arshadshah.nimaz.domain.model.AsrCalculation
 import com.arshadshah.nimaz.domain.model.CalculationMethod
-import com.arshadshah.nimaz.domain.model.AnnouncementType
+import com.arshadshah.nimaz.domain.model.FallbackLocation
 import com.arshadshah.nimaz.domain.model.FastStatus
 import com.arshadshah.nimaz.domain.model.HadithGrade
 import com.arshadshah.nimaz.domain.model.HighLatitudeRule
@@ -39,6 +38,8 @@ import com.arshadshah.nimaz.domain.model.PrayerStatus
 import com.arshadshah.nimaz.domain.model.PrayerTime
 import com.arshadshah.nimaz.domain.model.PrayerType
 import com.arshadshah.nimaz.domain.model.WorshipReminderOccurrence
+import com.arshadshah.nimaz.domain.model.WorshipReminderType
+import com.arshadshah.nimaz.domain.model.resolveLocation
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.usecase.AnnouncementUseCases
 import com.arshadshah.nimaz.domain.usecase.DuaUseCases
@@ -46,11 +47,21 @@ import com.arshadshah.nimaz.domain.usecase.FastingUseCases
 import com.arshadshah.nimaz.domain.usecase.HadithUseCases
 import com.arshadshah.nimaz.domain.usecase.ObserveEventCardsUseCase
 import com.arshadshah.nimaz.domain.usecase.PrayerUseCases
+import com.arshadshah.nimaz.presentation.components.organisms.WorshipCardUi
 import com.arshadshah.nimaz.widget.prayertracker.PrayerTrackerWorker
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.delay
+import java.time.DayOfWeek
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.ZoneId
+import javax.inject.Inject
+import kotlin.time.Clock
+import kotlin.time.Duration
+import kotlin.time.Instant
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -64,15 +75,6 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import java.time.DayOfWeek
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.LocalTime
-import java.time.ZoneId
-import javax.inject.Inject
-import kotlin.time.Clock
-import kotlin.time.Duration
-import kotlin.time.Instant
 
 data class HomeUiState(
     val currentDate: LocalDate = LocalDate.now(),
@@ -539,11 +541,11 @@ class HomeViewModel @Inject constructor(
                 val (lat, lng, name) = location
                 val (calcStr, asrStr, highStr) = calcSettings
 
-                val hasLocation = lat != 0.0 && lng != 0.0
-                val latitude = if (hasLocation) lat else DEFAULT_LATITUDE
-                val longitude = if (hasLocation) lng else DEFAULT_LONGITUDE
-                val locationName =
-                    if (hasLocation && name.isNotBlank()) name else DEFAULT_LOCATION_NAME
+                val resolved = resolveLocation(lat, lng, name)
+                val hasLocation = !resolved.isFallback
+                val latitude = resolved.latitude
+                val longitude = resolved.longitude
+                val locationName = resolved.name.ifBlank { FallbackLocation.NAME }
 
                 // Cache calculation settings
                 cachedCalcMethod = try {
@@ -587,9 +589,6 @@ class HomeViewModel @Inject constructor(
         private const val MIN_WORSHIP_RECHECK_MS = 1_000L
 
         // Default location: Dublin, Ireland (as shown in prototype)
-        private const val DEFAULT_LATITUDE = 53.3498
-        private const val DEFAULT_LONGITUDE = -6.2603
-        private const val DEFAULT_LOCATION_NAME = "Dublin, Ireland"
     }
 
     private fun updateLocation(latitude: Double, longitude: Double, name: String) {
@@ -630,8 +629,9 @@ class HomeViewModel @Inject constructor(
      * path at all.
      */
     private fun calculatePrayerTimes() {
-        val latitude = _state.value.latitude.takeIf { it != 0.0 } ?: DEFAULT_LATITUDE
-        val longitude = _state.value.longitude.takeIf { it != 0.0 } ?: DEFAULT_LONGITUDE
+        val resolved = resolveLocation(_state.value.latitude, _state.value.longitude)
+        val latitude = resolved.latitude
+        val longitude = resolved.longitude
 
         viewModelScope.launch {
             try {

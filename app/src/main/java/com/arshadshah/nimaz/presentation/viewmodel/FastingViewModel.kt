@@ -15,9 +15,14 @@ import com.arshadshah.nimaz.domain.model.FastType
 import com.arshadshah.nimaz.domain.model.FastingStats
 import com.arshadshah.nimaz.domain.model.MakeupFast
 import com.arshadshah.nimaz.domain.model.MakeupFastStatus
+import com.arshadshah.nimaz.domain.model.resolveLocation
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.usecase.FastingUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
+import java.time.Duration
+import java.time.LocalDate
+import java.time.LocalDateTime
+import javax.inject.Inject
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -27,10 +32,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import java.time.Duration
-import java.time.LocalDate
-import java.time.LocalDateTime
-import javax.inject.Inject
 
 data class FastingTrackerUiState(
     val selectedDate: LocalDate = LocalDate.now(),
@@ -158,8 +159,6 @@ class FastingViewModel @Inject constructor(
 
     companion object {
         // Default location: Dublin, Ireland (fallback)
-        private const val DEFAULT_LATITUDE = 53.3498
-        private const val DEFAULT_LONGITUDE = -6.2603
     }
 
     init {
@@ -179,9 +178,8 @@ class FastingViewModel @Inject constructor(
                 settingsRepository.use24HourFormat
             ) { lat, lng, h24 -> Triple(lat, lng, h24) }
                 .collect { (lat, lng, _) ->
-                    val latitude = if (lat != 0.0) lat else DEFAULT_LATITUDE
-                    val longitude = if (lng != 0.0) lng else DEFAULT_LONGITUDE
-                    loadPrayerTimes(latitude, longitude)
+                    val resolved = resolveLocation(lat, lng)
+                    loadPrayerTimes(resolved.latitude, resolved.longitude)
                 }
         }
     }

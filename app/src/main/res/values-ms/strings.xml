@@ -1013,6 +1013,7 @@
     <string name="location_recent">Terkini</string>
     <string name="location_detecting">Mengesan…</string>
     <string name="location_not_set">Belum ditetapkan</string>
+    <string name="location_using_default">Lokasi lalai</string>
     <string name="location_current">Semasa</string>
     <string name="completed">Selesai</string>
     <string name="jamaah">Jamaah</string>

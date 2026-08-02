@@ -1012,6 +1012,7 @@
     <string name="location_recent">Terbaru</string>
     <string name="location_detecting">Mendeteksi…</string>
     <string name="location_not_set">Belum diatur</string>
+    <string name="location_using_default">Lokasi bawaan</string>
     <string name="location_current">Saat Ini</string>
     <string name="completed">Selesai</string>
     <string name="jamaah">Jamaah</string>

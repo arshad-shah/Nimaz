@@ -20,17 +20,18 @@ import com.arshadshah.nimaz.domain.model.Location
 import com.arshadshah.nimaz.domain.model.QiblaCalculator
 import com.arshadshah.nimaz.domain.model.QiblaDirection
 import com.arshadshah.nimaz.domain.model.QiblaInfo
+import com.arshadshah.nimaz.domain.model.isLocationSet
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
+import kotlin.math.abs
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
-import kotlin.math.abs
 
 data class QiblaUiState(
     val qiblaDirection: QiblaDirection? = null,
@@ -258,7 +259,7 @@ class QiblaViewModel @Inject constructor(
             ) { lat, lng, name ->
                 Triple(lat, lng, name)
             }.collect { (lat, lng, name) ->
-                if (lat != 0.0 || lng != 0.0) {
+                if (isLocationSet(lat, lng)) {
                     setLocationFromCoords(lat, lng, name.ifEmpty { "Current Location" })
                 } else {
                     _qiblaState.update {

@@ -1299,6 +1299,7 @@
     <string name="location_region_all">All</string>
     <string name="location_detecting">Detecting…</string>
     <string name="location_not_set">Not set</string>
+    <string name="location_using_default">Default location</string>
     <string name="location_current">Current</string>
 
     <!-- Prayer stats chart -->

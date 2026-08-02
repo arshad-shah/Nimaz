@@ -15,10 +15,9 @@ import com.arshadshah.nimaz.domain.model.CalculationMethod
 import com.arshadshah.nimaz.domain.model.HighLatitudeRule
 import com.arshadshah.nimaz.domain.model.PrayerType
 import com.arshadshah.nimaz.domain.model.WorshipReminderType
+import com.arshadshah.nimaz.domain.model.isLocationSet
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.runBlocking
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -26,6 +25,8 @@ import java.time.LocalTime
 import java.time.ZoneId
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 
 /**
  * Scheduler for prayer time notifications.
@@ -221,7 +222,7 @@ class PrayerNotificationScheduler @Inject constructor(
             return
         }
 
-        if (latitude == 0.0 && longitude == 0.0) {
+        if (!isLocationSet(latitude, longitude)) {
             AppAnalytics.logNotificationsCancelled(reason = "no_location")
             return // No location set
         }
@@ -375,7 +376,7 @@ class PrayerNotificationScheduler @Inject constructor(
     ) {
         cancelFridayReminder()
         if (!enabled) return
-        if (latitude == 0.0 && longitude == 0.0) return
+        if (!isLocationSet(latitude, longitude)) return
 
         val now = LocalDateTime.now()
         val today = LocalDate.now()
@@ -500,7 +501,7 @@ class PrayerNotificationScheduler @Inject constructor(
         adjustments: Map<PrayerType, Int>
     ) {
         WorshipReminderType.entries.forEach { cancelWorshipReminder(it) }
-        if (latitude == 0.0 && longitude == 0.0) return
+        if (!isLocationSet(latitude, longitude)) return
 
         // One blocking read of all worship prefs + the Hijri offset.
         val hijriOffset: Int

@@ -9,17 +9,18 @@ import androidx.work.WorkerParameters
 import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.core.util.PrayerTimeCalculator
 import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
+import com.arshadshah.nimaz.domain.model.resolveLocation
 import com.arshadshah.nimaz.widget.core.WidgetWork
 import com.arshadshah.nimaz.widget.core.formatWidgetCountdown
 import com.arshadshah.nimaz.widget.core.formatWidgetTime
 import com.arshadshah.nimaz.widget.core.updateWidgetState
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
+import java.time.Duration
+import kotlin.time.Clock
 import kotlinx.coroutines.flow.first
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import java.time.Duration
-import kotlin.time.Clock
 
 @HiltWorker
 class NextPrayerWorker @AssistedInject constructor(
@@ -68,8 +69,12 @@ class NextPrayerWorker @AssistedInject constructor(
         }
 
         return try {
-            val latitude = preferencesDataStore.latitude.first().takeIf { it != 0.0 } ?: 53.3498
-            val longitude = preferencesDataStore.longitude.first().takeIf { it != 0.0 } ?: -6.2603
+            val resolved = resolveLocation(
+                preferencesDataStore.latitude.first(),
+                preferencesDataStore.longitude.first()
+            )
+            val latitude = resolved.latitude
+            val longitude = resolved.longitude
             val use24Hour = preferencesDataStore.use24HourFormat.first()
 
             val prayerTimes = prayerTimeCalculator.getPrayerTimes(latitude, longitude)
