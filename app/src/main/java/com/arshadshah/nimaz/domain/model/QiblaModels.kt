@@ -98,6 +98,42 @@ object QiblaCalculator {
         return calculateDistance(userLat, userLon) * 1000 // Return in meters
     }
 
+    /**
+     * The heading from **true** north that a [magneticAzimuth] corresponds to.
+     *
+     * [calculateBearing] measures the qibla from true north; `SensorManager.getOrientation`
+     * measures the phone from magnetic north. The two differ by the local magnetic
+     * [declination] — near zero across western Europe, but roughly -13° in New York, +15° in
+     * Seattle and Anchorage, +20° in Auckland and -25° in Cape Town. Comparing them directly is
+     * wrong by exactly that much.
+     *
+     * Declination comes from `android.hardware.GeomagneticField`, which needs a position and a
+     * date; it is passed in so this stays arithmetic that can be checked without a magnetometer.
+     */
+    fun trueAzimuth(magneticAzimuth: Float, declination: Float): Float =
+        ((magneticAzimuth + declination) % 360f + 360f) % 360f
+
+    /**
+     * How far, and which way, to turn to face the qibla: signed degrees in `(-180, 180]`,
+     * positive clockwise.
+     *
+     * [qiblaBearing] is from true north (as [calculateQiblaDirection] returns it) and
+     * [magneticAzimuth] is the raw compass reading, so [declination] reconciles them. Pass `0f`
+     * to compare against magnetic north instead.
+     */
+    fun rotationToQibla(
+        qiblaBearing: Float,
+        magneticAzimuth: Float,
+        declination: Float
+    ): Float {
+        val delta = (qiblaBearing - trueAzimuth(magneticAzimuth, declination)) % 360f
+        return when {
+            delta > 180f -> delta - 360f
+            delta <= -180f -> delta + 360f
+            else -> delta
+        }
+    }
+
     fun calculateQiblaAngle(compassHeading: Float, qiblaBearing: Double): Float {
         // Calculate the angle to rotate the Qibla indicator
         var angle = (qiblaBearing - compassHeading).toFloat()
