@@ -33,16 +33,17 @@ import com.arshadshah.nimaz.MainActivity
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.core.util.toUtcMidnightMillis
+import com.arshadshah.nimaz.domain.model.PrayerType
 import com.arshadshah.nimaz.widget.WidgetEntryPoint
 import com.arshadshah.nimaz.widget.core.WidgetCard
 import com.arshadshah.nimaz.widget.core.WidgetIcon
 import com.arshadshah.nimaz.widget.core.WidgetLoadingBox
 import com.arshadshah.nimaz.widget.core.WidgetMessageBox
 import dagger.hilt.android.EntryPointAccessors
+import java.time.LocalDate
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.time.LocalDate
 
 class PrayerTrackerWidget : GlanceAppWidget() {
 
@@ -151,15 +152,15 @@ private fun PrayerTrackerSuccessContent(
             Spacer(modifier = GlanceModifier.height(8.dp))
             Row(modifier = GlanceModifier.fillMaxWidth().defaultWeight()) {
                 val prayers = listOf(
-                    "Fajr" to data.fajr,
-                    "Dhuhr" to data.dhuhr,
-                    "Asr" to data.asr,
-                    "Maghrib" to data.maghrib,
-                    "Isha" to data.isha,
+                    PrayerType.FAJR to data.fajr,
+                    PrayerType.DHUHR to data.dhuhr,
+                    PrayerType.ASR to data.asr,
+                    PrayerType.MAGHRIB to data.maghrib,
+                    PrayerType.ISHA to data.isha,
                 )
-                prayers.forEach { (name, isPrayed) ->
+                prayers.forEach { (type, isPrayed) ->
                     PrayerCheckbox(
-                        prayerName = name,
+                        prayerName = type.displayName,
                         isPrayed = isPrayed,
                         context = context,
                         backgroundColor = backgroundColor,

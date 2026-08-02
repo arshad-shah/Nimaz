@@ -35,6 +35,7 @@ import com.arshadshah.nimaz.widget.core.WidgetLoadingBox
 import com.arshadshah.nimaz.widget.core.WidgetMessageBox
 import com.arshadshah.nimaz.widget.core.WidgetPill
 import com.arshadshah.nimaz.widget.core.prayerIconRes
+import com.arshadshah.nimaz.widget.core.prayerShortName
 
 class NextPrayerWidget : GlanceAppWidget() {
 
@@ -124,7 +125,7 @@ private fun NextPrayerSuccessContent(
             }
             Spacer(modifier = GlanceModifier.height(10.dp))
             Text(
-                text = data.prayerName.ifEmpty { "—" },
+                text = context.prayerShortName(data.prayerName).ifEmpty { "—" },
                 style = TextStyle(
                     color = primaryColor,
                     fontSize = 20.sp,
@@ -133,7 +134,13 @@ private fun NextPrayerSuccessContent(
             )
             Spacer(modifier = GlanceModifier.defaultWeight())
             Text(
-                text = data.prayerTime.ifEmpty { "—" },
+                // The worker stores a clock time, or nothing plus `isTomorrow` — resolving
+                // the word here means a language change lands on the next redraw rather than
+                // waiting up to 30 minutes for the worker.
+                text = when {
+                    data.isTomorrow -> context.getString(R.string.widget_tomorrow)
+                    else -> data.prayerTime.ifEmpty { "—" }
+                },
                 style = TextStyle(
                     color = textColor,
                     fontSize = 32.sp,

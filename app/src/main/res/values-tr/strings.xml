@@ -1649,4 +1649,6 @@
     <string name="night_worship_duas_body">Kunut ve gece duaları</string>
     <string name="night_worship_why_title">Neden gece namazı</string>
     <string name="night_worship_why_body">&quot;Rabbimiz dünya semasına iner…&quot;</string>
+    <string name="widget_location">Konum</string>
+    <string name="widget_tomorrow">Yarın</string>
 </resources>

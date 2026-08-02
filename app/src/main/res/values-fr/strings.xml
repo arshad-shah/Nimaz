@@ -1678,4 +1678,6 @@
     <string name="night_worship_duas_body">Le Qunut et les invocations de la nuit</string>
     <string name="night_worship_why_title">Pourquoi prier la nuit</string>
     <string name="night_worship_why_body">&quot;Notre Seigneur descend au ciel le plus proche…&quot;</string>
+    <string name="widget_location">Lieu</string>
+    <string name="widget_tomorrow">Demain</string>
 </resources>

@@ -9,6 +9,7 @@ import androidx.work.WorkerParameters
 import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.core.util.PrayerTimeCalculator
 import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
+import com.arshadshah.nimaz.domain.model.PrayerType
 import com.arshadshah.nimaz.domain.model.resolveLocation
 import com.arshadshah.nimaz.widget.core.WidgetWork
 import com.arshadshah.nimaz.widget.core.formatWidgetCountdown
@@ -115,8 +116,9 @@ class NextPrayerWorker @AssistedInject constructor(
                 if (tomorrowFajr != null) {
                     val epochMillis = tomorrowFajr.time.toEpochMilliseconds()
                     NextPrayerData(
-                        prayerName = "Fajr",
-                        prayerTime = "Tomorrow",
+                        prayerName = tomorrowFajr.type.displayName,
+                        prayerTime = "",
+                        isTomorrow = true,
                         countdown = formatWidgetCountdown(
                             (tomorrowFajr.time - currentTime).inWholeSeconds
                         ),
@@ -125,8 +127,9 @@ class NextPrayerWorker @AssistedInject constructor(
                     )
                 } else {
                     NextPrayerData(
-                        prayerName = "Fajr",
-                        prayerTime = "Tomorrow",
+                        prayerName = PrayerType.FAJR.displayName,
+                        prayerTime = "",
+                        isTomorrow = true,
                         countdown = "—",
                         isValid = true
                     )

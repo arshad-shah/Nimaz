@@ -50,6 +50,7 @@ import com.arshadshah.nimaz.core.util.HijriDateCalculator
 import com.arshadshah.nimaz.core.util.PrayerTimeCalculator
 import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
 import com.arshadshah.nimaz.domain.model.FallbackLocation
+import com.arshadshah.nimaz.widget.core.prayerShortName
 import com.arshadshah.nimaz.domain.model.resolveLocation
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
@@ -949,7 +950,7 @@ private fun buildWidgetPreviewData(
             if (name.lowercase() == "sunrise") return@mapNotNull null
 
             PrayerPreview(
-                name = getShortPrayerName(context, name),
+                name = context.prayerShortName(name),
                 time = formatWidgetTime(prayerLocalTime.hour, prayerLocalTime.minute),
                 isPassed = isPassed,
                 isNext = false
@@ -991,7 +992,7 @@ private fun buildWidgetPreviewData(
 
         // Mark next prayer in the list
         val prayersWithNext = prayers.map { prayer ->
-            prayer.copy(isNext = prayer.name == getShortPrayerName(context, nextPrayerName))
+            prayer.copy(isNext = prayer.name == context.prayerShortName(nextPrayerName))
         }
 
         // Get dates
@@ -1071,19 +1072,6 @@ private fun buildWidgetPreviewData(
             locationName = "Dublin"
         )
     }
-}
-
-private fun getShortPrayerName(context: android.content.Context, name: String): String {
-    val res = when (name.lowercase()) {
-        "fajr" -> R.string.widget_prayer_short_fajr
-        "sunrise" -> R.string.widget_prayer_short_sunrise
-        "dhuhr" -> R.string.widget_prayer_short_dhuhr
-        "asr" -> R.string.widget_prayer_short_asr
-        "maghrib" -> R.string.widget_prayer_short_maghrib
-        "isha" -> R.string.widget_prayer_short_isha
-        else -> return name.take(5)
-    }
-    return context.getString(res)
 }
 
 @Preview(showBackground = true, widthDp = 400, name = "Next Prayer Widget Preview")

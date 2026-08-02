@@ -1643,4 +1643,6 @@
     <string name="night_worship_duas_body">Qunut und die Bittgebete der Nacht</string>
     <string name="night_worship_why_title">Warum nachts beten</string>
     <string name="night_worship_why_body">&quot;Unser Herr steigt zum untersten Himmel herab…&quot;</string>
+    <string name="widget_location">Ort</string>
+    <string name="widget_tomorrow">Morgen</string>
 </resources>

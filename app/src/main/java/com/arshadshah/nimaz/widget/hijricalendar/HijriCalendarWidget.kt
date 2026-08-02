@@ -43,6 +43,7 @@ import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.widget.core.WidgetIcon
 import com.arshadshah.nimaz.widget.core.WidgetLoadingBox
 import com.arshadshah.nimaz.widget.core.WidgetMessageBox
+import com.arshadshah.nimaz.widget.core.weekdayInitials
 
 class HijriCalendarWidget : GlanceAppWidget() {
 
@@ -232,7 +233,7 @@ private fun WeekdayStrip(
     primaryColor: ColorProvider,
     textSecondary: ColorProvider,
 ) {
-    val labels = listOf("Su", "Mo", "Tu", "We", "Th", "Fr", "Sa")
+    val labels = weekdayInitials()
     Row(modifier = GlanceModifier.fillMaxWidth()) {
         labels.forEachIndexed { index, label ->
             val isFriday = index == 5

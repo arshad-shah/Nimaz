@@ -114,6 +114,18 @@ regression test (`WidgetGlyphGuardTest`) fails the build if any widget source
 reintroduces a forbidden glyph. Widgets with a static `previewLayout` (Khatam) keep
 a hand-authored XML mirror of the runtime layout in `res/layout/` for the picker.
 
+**Localization.** Prayer names and weekday captions come from resources, resolved **at render
+time** rather than baked into the persisted widget state — a language change then lands on the
+next redraw instead of waiting up to 30 minutes for the worker. `WidgetUi.prayerShortNameRes` /
+`Context.prayerShortName` map a name onto `widget_prayer_short_*` (returning null for anything
+that is not one of the five daily prayers or Sunrise, so an unknown string is shown raw rather
+than mislabelled as Dhuhr), and `weekdayInitials(locale)` derives the Hijri grid's Sunday-first
+column captions from CLDR. `NextPrayerData.prayerName` deliberately stays the **canonical
+English** name: it is the key both `prayerIconRes` and `prayerShortName` look up, so localizing
+it in the worker would break the icon. `NextPrayerData.isTomorrow` replaces the literal
+`"Tomorrow"` that used to be stored as display text. Guarded by `WidgetPrayerNameTest`, which
+scans `widget/` for English prayer/weekday literals outside comments.
+
 **Manifest/res.** Six `<receiver>`s + the non-exported `WidgetTickReceiver` in `AndroidManifest.xml`; provider-info XMLs in `res/xml/*_widget_info.xml`.
 
 **Gotchas.**
