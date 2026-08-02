@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.presentation.screens.prayer
 
+import com.arshadshah.nimaz.core.util.formatWeekdayDayMonth
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -80,9 +81,6 @@ import com.arshadshah.nimaz.presentation.viewmodel.PrayerTimesViewModel
 import com.arshadshah.nimaz.presentation.viewmodel.withClockState
 import java.time.LocalDate
 import java.time.YearMonth
-import java.time.format.DateTimeFormatter
-
-private val DATE_FMT: DateTimeFormatter = DateTimeFormatter.ofPattern("EEE, d MMMM")
 
 /**
  * The clock-derived slice of the Prayer Times screen: live passed/current/next flags plus the sky
@@ -126,7 +124,7 @@ private fun rememberPrayerSky(state: PrayerTimesUiState, today: java.time.LocalD
     }
     val timeOfDay = (nowLocal.hour * 60 + nowLocal.minute) / 1440f
 
-    val timeLabel = if (state.isToday) clockTimeText(now) else state.selectedDate.format(DATE_FMT)
+    val timeLabel = if (state.isToday) clockTimeText(now) else state.selectedDate.formatWeekdayDayMonth()
     val statusLabel = if (state.isToday && nextAt != null) {
         val parts by rememberCountdownTo(nextAt)
         stringResource(
@@ -352,7 +350,7 @@ private fun DayNavBar(
                 )
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = selectedDate.format(DATE_FMT),
+                        text = selectedDate.formatWeekdayDayMonth(),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface,

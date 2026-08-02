@@ -33,7 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.core.util.MONTH_YEAR_FORMATTER
+import com.arshadshah.nimaz.core.util.formatMonthYear
 import com.arshadshah.nimaz.domain.model.PrayerName
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
@@ -113,11 +113,10 @@ fun PrayerStatsScreen(
                     val yearLabel = stringResource(R.string.stats_this_year)
                     val allTimeLabel = stringResource(R.string.all_time)
                     val periodLabel = try {
-                        val formatter = MONTH_YEAR_FORMATTER
                         val startDate = Instant.ofEpochMilli(stats.startDate)
                             .atZone(ZoneId.systemDefault())
                             .toLocalDate()
-                        startDate.format(formatter)
+                        startDate.formatMonthYear()
                     } catch (_: Exception) {
                         when (state.period) {
                             StatsPeriod.WEEK -> weekLabel

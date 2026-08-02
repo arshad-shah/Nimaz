@@ -52,7 +52,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.core.util.FULL_DATE_FORMATTER
+import com.arshadshah.nimaz.core.util.formatFullDate
 import com.arshadshah.nimaz.core.util.formatClock
 import com.arshadshah.nimaz.core.util.toUtcMidnightMillis
 import com.arshadshah.nimaz.domain.model.PrayerName
@@ -468,7 +468,6 @@ private fun SelectedDayDetail(
     prayerTimes: com.arshadshah.nimaz.domain.model.PrayerTimes?,
     onTogglePrayer: (PrayerName, PrayerStatus) -> Unit
 ) {
-    val formatter = FULL_DATE_FORMATTER
     val prayers = PrayerName.entries.filter { it != PrayerName.SUNRISE }
     val prayedCount = prayerRecords.count {
         it.status == PrayerStatus.PRAYED || it.status == PrayerStatus.LATE || it.status == PrayerStatus.QADA
@@ -502,7 +501,7 @@ private fun SelectedDayDetail(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = selectedDate.format(formatter),
+                    text = selectedDate.formatFullDate(),
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.SemiBold
                 )

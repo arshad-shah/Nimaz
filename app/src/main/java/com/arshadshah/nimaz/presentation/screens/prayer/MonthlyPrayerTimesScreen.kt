@@ -58,7 +58,7 @@ import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.core.share.ContentShareManager
 import com.arshadshah.nimaz.core.util.HijriDateCalculator
-import com.arshadshah.nimaz.core.util.MONTH_YEAR_FORMATTER
+import com.arshadshah.nimaz.core.util.formatMonthYear
 import com.arshadshah.nimaz.core.util.PrayerTimesPdfExporter
 import com.arshadshah.nimaz.core.util.formatClockTime
 import com.arshadshah.nimaz.core.util.formatFastLength
@@ -153,7 +153,7 @@ fun MonthlyPrayerTimesScreen(
                     ) {
                         NimazDropdownRow(
                             text = stringResource(R.string.monthly_this_month),
-                            description = "${state.currentMonth.format(MONTH_YEAR_FORMATTER)} · ${
+                            description = "${state.currentMonth.formatMonthYear()} · ${
                                 pluralStringResource(
                                     R.plurals.days_count_format,
                                     state.dayPrayerTimes.size,
@@ -189,7 +189,7 @@ fun MonthlyPrayerTimesScreen(
         ) {
             // Pinned month-navigation header — stays put while the list scrolls.
             MonthNavigationHeader(
-                monthYear = state.currentMonth.format(MONTH_YEAR_FORMATTER),
+                monthYear = state.currentMonth.formatMonthYear(),
                 hijriLabel = hijriRangeLabel(state.currentMonth),
                 locationName = state.locationName,
                 isRamadan = state.ramadanHijriYear != null,
