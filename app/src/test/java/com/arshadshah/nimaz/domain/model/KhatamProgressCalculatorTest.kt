@@ -306,4 +306,90 @@ class KhatamProgressCalculatorTest {
         assertThat(covered).isEqualTo(Khatam.TOTAL_QURAN_AYAHS)
         assertThat(KhatamConstants.JUZ_AYAH_RANGES).hasSize(Khatam.TOTAL_JUZ)
     }
+
+    // ── Daily logs derived from read timestamps ─────────────────────────────────────────
+    //
+    // `khatam_daily_log` is written by exactly one function, `logDailyProgress`, and nothing
+    // in the app ever calls it — its only reference is its own DI wiring. So the table was
+    // always empty, `currentStreak` and `longestStreak` always computed from an empty list,
+    // and the "streak" stat on the khatam detail screen was permanently 0 for every user.
+    //
+    // The data was there the whole time: `khatam_ayahs.read_at` is stamped on every mark and
+    // travels over sync. Deriving the log from it makes the streak work for history already
+    // on disk, rather than only for reading done after a fix ships.
+
+    @Test
+    fun `reading on several days produces one log entry per day`() {
+        val logs = KhatamProgressCalculator.dailyLogsFrom(
+            readAt = listOf(now, now + 1000, now - day, now - 2 * day, now - 2 * day)
+        )
+
+        assertThat(logs).hasSize(3)
+        assertThat(logs.sumOf { it.ayahsRead }).isEqualTo(5)
+    }
+
+    @Test
+    fun `ayahs read at different times of the same day count as one day`() {
+        // Fajr and isha reading is one day's reading, not two. Anchored off the start of the
+        // day so the pair stays inside it whatever the JVM's timezone — `now` itself is late
+        // evening in UTC, and +8h there is genuinely the next day.
+        val morning = startOfDay(now) + TimeUnit.HOURS.toMillis(6)
+        val logs = KhatamProgressCalculator.dailyLogsFrom(
+            readAt = listOf(morning, morning + TimeUnit.HOURS.toMillis(14))
+        )
+
+        assertThat(logs).hasSize(1)
+        assertThat(logs.single().ayahsRead).isEqualTo(2)
+    }
+
+    @Test
+    fun `a derived log yields the streak the detail screen shows`() {
+        // Three consecutive days ending today.
+        val logs = KhatamProgressCalculator.dailyLogsFrom(
+            readAt = listOf(now, now - day, now - 2 * day)
+        )
+
+        assertThat(KhatamProgressCalculator.currentStreak(logs, now)).isEqualTo(3)
+        assertThat(KhatamProgressCalculator.longestStreak(logs)).isEqualTo(3)
+    }
+
+    @Test
+    fun `no reading at all is no logs, not a day with zero`() {
+        assertThat(KhatamProgressCalculator.dailyLogsFrom(readAt = emptyList())).isEmpty()
+    }
+
+    @Test
+    fun `logs synced from another device are kept alongside locally derived days`() {
+        // Read-ayah rows sync with their read_at, but a peer on an older build may also send
+        // rows in khatam_daily_log. Neither source is complete on its own.
+        val logs = KhatamProgressCalculator.dailyLogsFrom(
+            readAt = listOf(now),
+            syncedLogs = listOf(DailyLogEntry(date = now - 5 * day, ayahsRead = 12))
+        )
+
+        assertThat(logs).hasSize(2)
+        assertThat(logs.sumOf { it.ayahsRead }).isEqualTo(13)
+    }
+
+    @Test
+    fun `a day counted by both sources takes the larger count, not the sum`() {
+        // The same day arriving twice must not double — the synced row and the derived one
+        // describe the same reading.
+        val logs = KhatamProgressCalculator.dailyLogsFrom(
+            readAt = listOf(now, now + 1000, now + 2000),
+            syncedLogs = listOf(DailyLogEntry(date = now, ayahsRead = 10))
+        )
+
+        assertThat(logs).hasSize(1)
+        assertThat(logs.single().ayahsRead).isEqualTo(10)
+    }
+
+    @Test
+    fun `derived logs are ordered oldest first`() {
+        val logs = KhatamProgressCalculator.dailyLogsFrom(
+            readAt = listOf(now, now - 2 * day, now - day)
+        )
+
+        assertThat(logs.map { it.date }).isInOrder()
+    }
 }
