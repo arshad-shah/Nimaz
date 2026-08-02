@@ -90,19 +90,24 @@ enum class MetalType {
     SILVER
 }
 
-object ZakatConstants {
-    const val ZAKAT_RATE = 0.025 // 2.5%
-    const val GOLD_NISAB_GRAMS = 87.48
-    const val SILVER_NISAB_GRAMS = 612.36
-}
-
 data class ZakatHistory(
     val calculations: List<ZakatCalculation>,
     val totalZakatPaid: Double,
     val lastCalculationDate: Long?
 )
 
-// Calculator helper
+/**
+ * The one zakat calculation.
+ *
+ * It used to be two: this object, and an inline copy inside `ZakatViewModel`. Only the
+ * ViewModel's ran — and this one was wrong, because it took `assets.total`, which by design
+ * excludes gold and silver (the grams have to be priced first). A caller would have got a
+ * figure that ignored the user's precious metals entirely. A wrong calculator that nothing
+ * calls is still a trap: it type-checks, it reads as canonical, and it sits in the domain
+ * layer where the next person will reach for it.
+ *
+ * Metal prices are per gram and in the same currency as every other amount.
+ */
 object ZakatCalculator {
     const val ZAKAT_RATE = 0.025 // 2.5%
     const val GOLD_NISAB_GRAMS = 87.48
@@ -112,23 +117,32 @@ object ZakatCalculator {
         assets: ZakatAssets,
         liabilities: ZakatLiabilities,
         nisabType: NisabType,
-        metalPricePerGram: Double,
+        goldPricePerGram: Double,
+        silverPricePerGram: Double,
         currency: String
     ): ZakatCalculation {
+        val goldValue = assets.goldGrams * goldPricePerGram
+        val silverValue = assets.silverGrams * silverPricePerGram
+
+        // `assets.total` is the cash-like holdings only; the metals are priced here.
+        val totalAssets = assets.total + goldValue + silverValue
+        val totalLiabilities = liabilities.total
+
+        // Not clamped at zero: someone who owes more than they own should see that, not a
+        // break-even 0. It cannot make them liable — a negative net worth is below any
+        // positive threshold.
+        val netWorth = totalAssets - totalLiabilities
+
         val nisabValue = when (nisabType) {
-            NisabType.GOLD -> GOLD_NISAB_GRAMS * metalPricePerGram
-            NisabType.SILVER -> SILVER_NISAB_GRAMS * metalPricePerGram
+            NisabType.GOLD -> GOLD_NISAB_GRAMS * goldPricePerGram
+            NisabType.SILVER -> SILVER_NISAB_GRAMS * silverPricePerGram
         }
 
-        val totalAssets = assets.total
-        val totalLiabilities = liabilities.total
-        val netWorth = maxOf(0.0, totalAssets - totalLiabilities)
-        val isAboveNisab = netWorth >= nisabValue
-        val zakatDue = if (isAboveNisab) {
-            netWorth * ZAKAT_RATE
-        } else {
-            0.0
-        }
+        // A threshold priced at zero has not been *met*, it has failed to be established —
+        // and `netWorth >= 0.0` would otherwise make every user liable, including one who
+        // owns nothing.
+        val isAboveNisab = nisabValue > 0.0 && netWorth >= nisabValue
+        val zakatDue = if (isAboveNisab) netWorth * ZAKAT_RATE else 0.0
 
         return ZakatCalculation(
             calculatedAt = System.currentTimeMillis(),
@@ -140,6 +154,8 @@ object ZakatCalculator {
             isAboveNisab = isAboveNisab,
             zakatableAmount = netWorth,
             zakatDue = zakatDue,
+            goldValue = goldValue,
+            silverValue = silverValue,
             currency = currency,
             note = null
         )

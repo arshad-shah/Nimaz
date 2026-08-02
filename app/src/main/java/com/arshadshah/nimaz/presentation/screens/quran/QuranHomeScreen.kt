@@ -51,7 +51,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -73,6 +72,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.navigation.ScreenTags
 import com.arshadshah.nimaz.core.share.ContentShareManager
@@ -108,9 +108,9 @@ import com.arshadshah.nimaz.presentation.viewmodel.FavoriteAyahUi
 import com.arshadshah.nimaz.presentation.viewmodel.QuranEvent
 import com.arshadshah.nimaz.presentation.viewmodel.QuranHomeUiState
 import com.arshadshah.nimaz.presentation.viewmodel.QuranViewModel
-import kotlinx.coroutines.launch
 import java.time.DayOfWeek
 import java.time.LocalDate
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -131,8 +131,8 @@ fun QuranHomeScreen(
     selectedPageNumber: Int? = null,
     viewModel: QuranViewModel = hiltViewModel()
 ) {
-    val state by viewModel.homeState.collectAsState()
-    val bookmarksState by viewModel.bookmarksState.collectAsState()
+    val state by viewModel.homeState.collectAsStateWithLifecycle()
+    val bookmarksState by viewModel.bookmarksState.collectAsStateWithLifecycle()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val snackbarHostState = remember { SnackbarHostState() }
 

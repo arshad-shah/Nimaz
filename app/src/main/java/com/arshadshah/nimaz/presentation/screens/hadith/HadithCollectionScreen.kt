@@ -27,7 +27,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -44,6 +43,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.navigation.ScreenTags
 import com.arshadshah.nimaz.core.share.ContentShareManager
@@ -82,8 +82,8 @@ fun HadithCollectionScreen(
     onNavigateToSearch: () -> Unit,
     viewModel: HadithViewModel = hiltViewModel()
 ) {
-    val state by viewModel.collectionState.collectAsState()
-    val bookmarksState by viewModel.bookmarksState.collectAsState()
+    val state by viewModel.collectionState.collectAsStateWithLifecycle()
+    val bookmarksState by viewModel.bookmarksState.collectAsStateWithLifecycle()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val context = LocalContext.current
     val shareScope = rememberCoroutineScope()

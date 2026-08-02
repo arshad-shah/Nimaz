@@ -17,13 +17,13 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.InfoCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconButton
@@ -45,9 +45,9 @@ fun SurahInfoScreen(
     onStartReading: () -> Unit,
     viewModel: QuranViewModel = hiltViewModel()
 ) {
-    val homeState by viewModel.homeState.collectAsState()
-    val surahInfo by viewModel.surahInfo.collectAsState()
-    val audioState by viewModel.audioState.collectAsState()
+    val homeState by viewModel.homeState.collectAsStateWithLifecycle()
+    val surahInfo by viewModel.surahInfo.collectAsStateWithLifecycle()
+    val audioState by viewModel.audioState.collectAsStateWithLifecycle()
     val surah = homeState.surahs.find { it.number == surahNumber }
 
     LaunchedEffect(surahNumber) {

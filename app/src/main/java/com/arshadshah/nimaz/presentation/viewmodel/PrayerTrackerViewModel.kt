@@ -97,6 +97,12 @@ class PrayerTrackerViewModel @Inject constructor(
     private var currentLocation: Location? = null
     private var dateRecordsJob: kotlinx.coroutines.Job? = null
 
+    // The history range is re-requested every time the user changes period. Like
+    // `dateRecordsJob` above, this collects a Room flow that never completes, so without a
+    // handle each range left a collector alive on `_historyState` and an earlier range could
+    // redraw the chart under a later one. (AP-7.1b.)
+    private var historyJob: kotlinx.coroutines.Job? = null
+
     init {
         loadCurrentLocation()
         loadToday()
@@ -303,7 +309,8 @@ class PrayerTrackerViewModel @Inject constructor(
         val startEpoch = startDate.toUtcMidnightMillis()
         val endEpoch = endDate.plusDays(1).toUtcMidnightMillis()
 
-        viewModelScope.launch {
+        historyJob?.cancel()
+        historyJob = viewModelScope.launch {
             prayerUseCases.getPrayerRecordsInRange(startEpoch, endEpoch).collect { records ->
                 _historyState.update { it.copy(records = records, isLoading = false) }
             }

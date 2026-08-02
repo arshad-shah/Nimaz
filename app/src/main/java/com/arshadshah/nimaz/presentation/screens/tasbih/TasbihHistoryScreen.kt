@@ -26,7 +26,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,6 +40,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.TasbihSession
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
@@ -66,9 +66,9 @@ fun TasbihHistoryScreen(
     onNavigateBack: () -> Unit,
     viewModel: TasbihViewModel = hiltViewModel()
 ) {
-    val historyState by viewModel.historyState.collectAsState()
-    val statsState by viewModel.statsState.collectAsState()
-    val counterState by viewModel.counterState.collectAsState()
+    val historyState by viewModel.historyState.collectAsStateWithLifecycle()
+    val statsState by viewModel.statsState.collectAsStateWithLifecycle()
+    val counterState by viewModel.counterState.collectAsStateWithLifecycle()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
     var selectedTab by remember { mutableStateOf(HistoryTab.TODAY) }

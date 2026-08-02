@@ -241,7 +241,30 @@ rg -U --multiline-dotall -n '\.collect\s*\{(?:[^}]|
   chapter at a time, unlike the Quran pager which legitimately holds several pages live. Clearing
   the query now cancels too: without that, the last collector's next emission repopulated the
   results the user had just cleared.
-- [ ] **`SyncViewModel` — untriaged.** Same detect command, same defect class; not touched here.
+- [x] ~~**The rest of the ViewModel layer — untriaged.**~~ **Swept.** A script split every
+  ViewModel into top-level functions and flagged those that `collect` inside an un-assigned
+  `viewModelScope.launch`, then split the hits by whether the function takes a parameter (so it
+  is re-invoked per value) or not (so it is a one-shot lifetime observer started from `init`).
+  The parameterised ones were the bugs; all are now fixed and pinned by tests:
+  - `TafseerViewModel.loadTafseerForCurrentAyah` — the worst of them. It runs on **every ayah
+    swipe** and launched *two* collectors (highlights, notes) each time, so reading a surah left
+    a pair per ayah visited, and annotating any ayah woke all of them. Last writer won, so the
+    reader showed another ayah's highlights over the one being read. One `ayahAnnotationsJob`.
+    (`TafseerViewModelAnnotationScopeTest`)
+  - `DuaViewModel` — five: `loadCategory`, `loadDua`, `loadDuasByOccasion`, `search`,
+    `loadProgressForDate`. Handles are keyed by **surface**, not function: `loadCategory` and
+    `loadDuasByOccasion` both fill `_categoryState`, so they share one.
+    (`DuaViewModelLoadScopeTest`)
+  - `HelpViewModel.loadTopic` / `loadGuide` — these collect `language.flatMapLatest { … }`, and
+    `language` is a `StateFlow`, so the collector never completes however the inner repository
+    flow behaves. (`HelpViewModelLoadScopeTest`)
+  - `PrayerTrackerViewModel.loadHistory` — the one range loader without a handle, beside a
+    `loadForDate` that has always had `dateRecordsJob`. (`PrayerTrackerViewModelHistoryScopeTest`)
+  - `HadithViewModel` — `search` / `searchInBook` / `loadBook` / `loadChapter` /
+    `loadHadithById` / `filterByGrade` (fixed earlier, see above).
+- [x] ~~**`SyncViewModel` — untriaged.**~~ **Not a defect.** Its single `collect` is a lifetime
+  observer started once from `init`, which is exactly what the detect command cannot distinguish
+  and what the parameterised/not split above is for. Left as-is.
 - [ ] **`HadithViewModel.loadHadithByNumber` reads state it just asked for.** It calls
   `loadChapter(...)` (which launches) and then immediately reads `_readerState.value.hadiths` to
   find the index, so the list is still empty and the index is always 0. Latent rather than shipped:
@@ -334,6 +357,75 @@ rg -n 'Card\(|Surface\(|Box\(.*\.background\(' app/src/main/java/com/arshadshah/
 - [ ] **No visual verification of the tone migration.** The sweep is verified by
   `compileDebugKotlin` + unit tests only. Walk the migrated screens in light and dark (or render
   the `NimazCard`/`NimazBadge` `@Preview` showcases, which cover both themes) before release.
+
+---
+
+## AP-9 · Derived state stored instead of computed
+
+**Rule:** if a value is a pure function of other state (a filtered list, a resolved language, a
+total), expose it as a computed `val` **on the UI-state class** rather than storing a field that
+every mutation site has to remember to refresh.
+
+**Why it hurts:** stored derived state has to be recomputed at *every* site that touches an
+input. Miss one and the UI shows a filter that is on next to a list that ignores it — and
+because the two halves disagree silently, it reads as a rendering glitch rather than a bug.
+
+**Detect:**
+```bash
+# A `filtered*` field on a UI state — each one needs checking against every writer of its inputs
+rg -n 'val filtered[A-Za-z]*:' app/src/main/java --glob '*ViewModel.kt'
+```
+
+- [x] ~~**`TasbihPresetsUiState.filteredPresets`.**~~ **Resolved.** Recomputed by hand at three
+  sites; the two Room collectors in `loadPresets` rebuilt it as `defaults + customs` and never
+  consulted `selectedCategory`. Saving or deleting a custom dhikr while a category was selected
+  re-emitted the presets flow and silently reset the list to everything, with the category chip
+  still reading as selected. Now a computed property. (`TasbihViewModelPresetFilterTest`)
+- [x] ~~**`HadithChaptersUiState.filteredChapters`.**~~ **Resolved.** Same defect, second
+  feature: `loadBook`'s collector set `filteredChapters = chapters`, ignoring `searchQuery`, so
+  any write to the chapters table wiped the user's search while the field kept their text.
+  (`HadithViewModelChapterFilterTest`)
+- [ ] **Audited and correct — leave alone:** `SearchUiState.filteredResults`,
+  `BookmarksUiState.filteredBookmarks`, `DuaCollectionUiState.filteredCategories`,
+  `QuranHomeUiState.filteredSurahs`, and the `filteredNames`/`filteredProphets` trio all pass
+  the current filter inputs at every write site. They are still *stored*, so they carry the same
+  latent risk; convert opportunistically when one is next touched.
+
+---
+
+## AP-10 · Non-lifecycle-aware state collection
+
+**Rule:** composables collect ViewModel state with `collectAsStateWithLifecycle()`.
+
+**Why it hurts:** `collectAsState()` subscribes for the life of the composition, so a
+backgrounded screen keeps collecting, keeps waking Room, and keeps recomposing state nobody can
+see. It also defeats `SharingStarted.WhileSubscribed()` — the subscriber count never drops, so
+those upstreams never actually stop.
+
+- [x] ~~**87 call sites across 54 files** were on `collectAsState()`~~ against 11 files already
+  using the lifecycle-aware form — the same class of screen behaving differently depending on
+  which spelling its author copied. **Resolved.** Every ViewModel here exposes `StateFlow`, which
+  replays to a new collector, so nothing is missed across the pause. Guarded by
+  `StateCollectionGuardTest`, which also documents the one case the rule does *not* fit: a
+  replay-less `SharedFlow`/`Channel` of one-shot events, which needs `repeatOnLifecycle` and an
+  entry in that test's allowlist.
+
+---
+
+## AP-11 · Lazy list items without a stable key
+
+**Rule:** every `items(<collection>)` declares a `key`.
+
+**Why it hurts:** without one, Compose identifies a row by **position**. State remembered inside
+a row belongs to the slot rather than the item, so inserting or deleting above it hands that
+state to a different row; and every row after a change is treated as new, so the whole tail
+recomposes. On lists that rebuild per keystroke (search, locations) that is the difference
+between recomposing one row and all of them.
+
+- [x] ~~16 sites~~ — **Resolved**, guarded by `LazyListKeyGuardTest`. Two types gained a stable
+  identity rather than having one invented at the call site: `UnifiedSearchResult.key` (prefixed
+  per variant, because ayah 12 and dua "12" must not collide in a mixed list) and
+  `SearchLocation.key` (coordinates — the same city name recurs across countries).
 
 ---
 

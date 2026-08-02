@@ -36,7 +36,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -52,6 +51,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.PrayerType
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
@@ -64,23 +64,23 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
+import com.arshadshah.nimaz.presentation.components.atoms.TickResolution
+import com.arshadshah.nimaz.presentation.components.atoms.clockTimeText
+import com.arshadshah.nimaz.presentation.components.atoms.countdownText
+import com.arshadshah.nimaz.presentation.components.atoms.rememberCountdownTo
+import com.arshadshah.nimaz.presentation.components.atoms.rememberNow
 import com.arshadshah.nimaz.presentation.components.molecules.NimazBottomSheet
 import com.arshadshah.nimaz.presentation.components.molecules.PrayerTimeCard
 import com.arshadshah.nimaz.presentation.components.molecules.calendar.NimazCalendar
 import com.arshadshah.nimaz.presentation.components.organisms.PrayerSkyScene
 import com.arshadshah.nimaz.presentation.viewmodel.PrayerTimeDisplay
 import com.arshadshah.nimaz.presentation.viewmodel.PrayerTimesEvent
+import com.arshadshah.nimaz.presentation.viewmodel.PrayerTimesUiState
 import com.arshadshah.nimaz.presentation.viewmodel.PrayerTimesViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.withClockState
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
-import com.arshadshah.nimaz.presentation.components.atoms.TickResolution
-import com.arshadshah.nimaz.presentation.components.atoms.clockTimeText
-import com.arshadshah.nimaz.presentation.components.atoms.countdownText
-import com.arshadshah.nimaz.presentation.components.atoms.rememberCountdownTo
-import com.arshadshah.nimaz.presentation.components.atoms.rememberNow
-import com.arshadshah.nimaz.presentation.viewmodel.withClockState
-import com.arshadshah.nimaz.presentation.viewmodel.PrayerTimesUiState
 
 private val DATE_FMT: DateTimeFormatter = DateTimeFormatter.ofPattern("EEE, d MMMM")
 
@@ -157,7 +157,7 @@ fun PrayerTimesScreen(
     onNavigateToSettings: () -> Unit,
     viewModel: PrayerTimesViewModel = hiltViewModel(),
 ) {
-    val state by viewModel.state.collectAsState()
+    val state by viewModel.state.collectAsStateWithLifecycle()
     val today = remember { LocalDate.now() }
     val sky = rememberPrayerSky(state, today)
     var showMonthSheet by remember { mutableStateOf(false) }

@@ -35,11 +35,28 @@ data class HadithCollectionUiState(
 data class HadithChaptersUiState(
     val book: HadithBook? = null,
     val chapters: List<HadithChapter> = emptyList(),
-    val filteredChapters: List<HadithChapter> = emptyList(),
     val searchQuery: String = "",
     val isLoading: Boolean = true,
     val error: String? = null
-)
+) {
+    /**
+     * The chapters the list should show — **derived**, never stored.
+     *
+     * Stored, this had to be recomputed wherever an input changed, and `loadBook`'s Room
+     * collector rebuilt it as the whole `chapters` list without consulting [searchQuery]. Any
+     * write that re-emitted the chapters flow therefore wiped the user's search while the
+     * search field kept showing what they had typed.
+     */
+    val filteredChapters: List<HadithChapter>
+        get() = if (searchQuery.isBlank()) {
+            chapters
+        } else {
+            chapters.filter { chapter ->
+                chapter.nameEnglish.contains(searchQuery, ignoreCase = true) ||
+                        chapter.nameArabic.contains(searchQuery)
+            }
+        }
+}
 
 data class HadithReaderUiState(
     val chapter: HadithChapter? = null,
@@ -175,7 +192,7 @@ class HadithViewModel @Inject constructor(
             HadithEvent.ClearSearch -> {
                 searchJob?.cancel()
                 _searchState.update { HadithSearchUiState() }
-                _chaptersState.update { it.copy(searchQuery = "", filteredChapters = it.chapters) }
+                _chaptersState.update { it.copy(searchQuery = "") }
             }
 
             HadithEvent.LoadAllBooks -> loadAllBooks()
@@ -209,13 +226,7 @@ class HadithViewModel @Inject constructor(
                 _chaptersState.update { it.copy(book = book) }
 
                 hadithUseCases.getChaptersByBook(bookId).collect { chapters ->
-                    _chaptersState.update { state ->
-                        state.copy(
-                            chapters = chapters,
-                            filteredChapters = chapters,
-                            isLoading = false
-                        )
-                    }
+                    _chaptersState.update { it.copy(chapters = chapters, isLoading = false) }
                 }
             } catch (e: Exception) {
                 CrashReporter.recordException(e)
@@ -337,17 +348,8 @@ class HadithViewModel @Inject constructor(
     }
 
     private fun searchChapters(query: String) {
-        _chaptersState.update { state ->
-            val filtered = if (query.isBlank()) {
-                state.chapters
-            } else {
-                state.chapters.filter { chapter ->
-                    chapter.nameEnglish.contains(query, ignoreCase = true) ||
-                            chapter.nameArabic.contains(query)
-                }
-            }
-            state.copy(searchQuery = query, filteredChapters = filtered)
-        }
+        // Setting the input is the whole job — the list derives from it.
+        _chaptersState.update { it.copy(searchQuery = query) }
     }
 
     private fun filterByGrade(grade: HadithGrade) {

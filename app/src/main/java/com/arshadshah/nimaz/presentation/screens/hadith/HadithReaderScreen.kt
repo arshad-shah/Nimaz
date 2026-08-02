@@ -46,7 +46,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -68,6 +67,7 @@ import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.share.ContentShareManager
 import com.arshadshah.nimaz.core.share.Shareables
@@ -100,7 +100,7 @@ fun HadithReaderScreen(
     onNavigateToSettings: () -> Unit = {},
     viewModel: HadithViewModel = hiltViewModel()
 ) {
-    val state by viewModel.readerState.collectAsState()
+    val state by viewModel.readerState.collectAsStateWithLifecycle()
     val hadiths = state.hadiths
     val scope = rememberCoroutineScope()
 
@@ -440,7 +440,7 @@ private fun HadithReaderBottomBar(
     val clipboard = LocalClipboard.current
     val clipboardScope = rememberCoroutineScope()
     val bookmarkFlow = remember(hadith.id) { viewModel.isHadithBookmarked(hadith.id) }
-    val isBookmarked by bookmarkFlow.collectAsState(initial = hadith.isBookmarked)
+    val isBookmarked by bookmarkFlow.collectAsStateWithLifecycle(initialValue = hadith.isBookmarked)
 
     val copiedMsg = stringResource(R.string.hadith_copied)
     // Resolve the template in composable scope (stringResource can't be called from the

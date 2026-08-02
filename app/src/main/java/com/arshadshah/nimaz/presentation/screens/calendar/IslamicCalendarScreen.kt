@@ -18,7 +18,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -29,6 +28,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.util.HijriDateCalculator
 import com.arshadshah.nimaz.core.util.HijriDateCalculator.getHijriMonthName
@@ -57,8 +57,8 @@ fun IslamicCalendarScreen(
     onNavigateBack: () -> Unit,
     viewModel: CalendarViewModel = hiltViewModel()
 ) {
-    val state by viewModel.calendarState.collectAsState()
-    val eventsState by viewModel.eventsState.collectAsState()
+    val state by viewModel.calendarState.collectAsStateWithLifecycle()
+    val eventsState by viewModel.eventsState.collectAsStateWithLifecycle()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
     NimazScreenScaffold(
@@ -127,7 +127,7 @@ private fun CalendarCompactContent(
                     color = MaterialTheme.colorScheme.onBackground
                 )
             }
-            items(eventsState.eventsForSelectedDate) { event ->
+            items(eventsState.eventsForSelectedDate, key = { it.id }) { event ->
                 IslamicEventCard(event = event)
             }
         }
@@ -140,7 +140,7 @@ private fun CalendarCompactContent(
                     color = MaterialTheme.colorScheme.onBackground
                 )
             }
-            items(eventsState.upcomingEvents.take(5)) { event ->
+            items(eventsState.upcomingEvents.take(5), key = { it.id }) { event ->
                 IslamicEventCard(event = event)
             }
         }
@@ -182,7 +182,7 @@ private fun CalendarTabletContent(
                         color = MaterialTheme.colorScheme.onBackground
                     )
                 }
-                items(eventsState.eventsForSelectedDate) { event ->
+                items(eventsState.eventsForSelectedDate, key = { it.id }) { event ->
                     IslamicEventCard(event = event)
                 }
             }
@@ -196,7 +196,7 @@ private fun CalendarTabletContent(
                         color = MaterialTheme.colorScheme.onBackground
                     )
                 }
-                items(eventsState.upcomingEvents.take(5)) { event ->
+                items(eventsState.upcomingEvents.take(5), key = { it.id }) { event ->
                     IslamicEventCard(event = event)
                 }
             }

@@ -33,7 +33,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -48,6 +47,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.share.ContentShareManager
 import com.arshadshah.nimaz.core.share.Shareables
@@ -87,7 +87,7 @@ fun DuaReaderScreen(
     viewModel: DuaViewModel = hiltViewModel(),
     tasbihViewModel: TasbihViewModel = hiltViewModel()
 ) {
-    val state by viewModel.readerState.collectAsState()
+    val state by viewModel.readerState.collectAsStateWithLifecycle()
     val duas = state.duas
     val scope = rememberCoroutineScope()
 
@@ -366,7 +366,7 @@ private fun DuaReaderBottomBar(
     val context = LocalContext.current
     val shareScope = rememberCoroutineScope()
     val favoriteFlow = remember(dua.id) { viewModel.isDuaFavorite(dua.id) }
-    val isFavorite by favoriteFlow.collectAsState(initial = false)
+    val isFavorite by favoriteFlow.collectAsStateWithLifecycle(initialValue = false)
 
     val addedToTasbihMsg = stringResource(R.string.dua_reader_added_tasbih)
     val shareLabel = stringResource(R.string.dua_reader_share)

@@ -262,6 +262,48 @@ class XxxViewModel @Inject constructor(
 
 Screens collect with `collectAsStateWithLifecycle()` and call `viewModel.onEvent(...)`.
 
+#### Cancellation: one handle per identity of the request
+
+A `viewModelScope.launch { roomFlow.collect { … } }` **needs a `Job` you cancel** whenever the
+function can run more than once — per navigation, per keystroke, per swipe. A Room flow never
+completes, so an un-cancelled collector lives as long as the ViewModel, and Room re-emits to
+*every* live collector when the table changes: an earlier request can land after a later one and
+replace what is on screen.
+
+Scope the handle to the **identity of the request**, not to the function:
+
+| shape | handle |
+|---|---|
+| one thing on screen at a time (a chapter, an ayah, a query) | one `Job` per surface |
+| several legitimately live at once (the Quran pager's neighbouring pages) | a `Map<key, Job>` |
+| two functions writing the *same* state (`loadCategory` / `loadDuasByOccasion`) | they **share** one handle |
+| a lifetime observer started once from `init` | no handle needed |
+
+Clearing a query counts as a change of request: cancel there too, or the last collector's next
+emission repopulates the results the user just cleared. See AP-7.1b in
+[`CLEAN_ARCHITECTURE_CHECKLIST.md`](CLEAN_ARCHITECTURE_CHECKLIST.md).
+
+#### Derived state is computed on the UI-state class, never stored
+
+A filtered list, a resolved language, a total — anything that is a pure function of other state
+— is a computed `val` on the `XxxUiState`:
+
+```kotlin
+data class TasbihPresetsUiState(
+    val defaultPresets: List<TasbihPreset> = emptyList(),
+    val customPresets: List<TasbihPreset> = emptyList(),
+    val selectedCategory: TasbihCategory? = null,
+) {
+    val filteredPresets: List<TasbihPreset>
+        get() = (defaultPresets + customPresets)
+            .let { all -> selectedCategory?.let { c -> all.filter { it.category == c } } ?: all }
+}
+```
+
+Stored, it has to be refreshed at every site that touches an input, and the sites that forget do
+not fail loudly — they leave a filter that is on beside a list that ignores it. Both instances
+the sweep found (tasbih categories, hadith chapter search) were exactly that. See AP-9.
+
 ### 4.2 Domain — use cases
 
 Canonical reference: `domain/usecase/AsmaUlHusnaUseCases.kt`.

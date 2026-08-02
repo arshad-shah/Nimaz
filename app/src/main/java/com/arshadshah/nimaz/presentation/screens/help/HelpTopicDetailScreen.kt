@@ -108,7 +108,7 @@ fun HelpTopicDetailScreen(
 
                     if (detail.guides.isNotEmpty()) {
                         item { NimazSectionTitle(text = stringResource(R.string.help_step_by_step)) }
-                        items(detail.guides) { guide ->
+                        items(detail.guides, key = { it.id }) { guide ->
                             HelpGuideRow(
                                 guide = guide,
                                 tint = helpColor(detail.topic.colorKey),

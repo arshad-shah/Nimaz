@@ -29,7 +29,6 @@ import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -47,6 +46,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.util.HijriDateCalculator
 import com.arshadshah.nimaz.domain.model.FastRecord
@@ -81,6 +81,11 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazLegendItem
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
+import com.arshadshah.nimaz.presentation.components.atoms.TickResolution
+import com.arshadshah.nimaz.presentation.components.atoms.clockTimeText
+import com.arshadshah.nimaz.presentation.components.atoms.countdownText
+import com.arshadshah.nimaz.presentation.components.atoms.rememberCountdownTo
+import com.arshadshah.nimaz.presentation.components.atoms.rememberNow
 import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
 import com.arshadshah.nimaz.presentation.components.molecules.calendar.CalendarDayState
 import com.arshadshah.nimaz.presentation.components.molecules.calendar.CalendarLegendItem
@@ -99,11 +104,6 @@ import java.time.YearMonth
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.temporal.TemporalAdjusters
-import com.arshadshah.nimaz.presentation.components.atoms.TickResolution
-import com.arshadshah.nimaz.presentation.components.atoms.clockTimeText
-import com.arshadshah.nimaz.presentation.components.atoms.countdownText
-import com.arshadshah.nimaz.presentation.components.atoms.rememberCountdownTo
-import com.arshadshah.nimaz.presentation.components.atoms.rememberNow
 
 // Color constants for makeup fasts
 private val OrangeAccent = NimazColors.PrayerColors.Asr
@@ -117,11 +117,11 @@ fun FastTrackerScreen(
     onNavigateToHistory: () -> Unit,
     viewModel: FastingViewModel = hiltViewModel()
 ) {
-    val state by viewModel.trackerState.collectAsState()
-    val makeupState by viewModel.makeupState.collectAsState()
-    val ramadanState by viewModel.ramadanState.collectAsState()
-    val calendarState by viewModel.calendarState.collectAsState()
-    val sheetState by viewModel.sheetState.collectAsState()
+    val state by viewModel.trackerState.collectAsStateWithLifecycle()
+    val makeupState by viewModel.makeupState.collectAsStateWithLifecycle()
+    val ramadanState by viewModel.ramadanState.collectAsStateWithLifecycle()
+    val calendarState by viewModel.calendarState.collectAsStateWithLifecycle()
+    val sheetState by viewModel.sheetState.collectAsStateWithLifecycle()
 
     var selectedTab by remember { mutableIntStateOf(0) }
     val tabs = listOf(

@@ -26,7 +26,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,6 +38,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.QuranReciter
 import com.arshadshah.nimaz.domain.model.RecitationStyle
@@ -75,14 +75,14 @@ fun SelectReciterScreen(
     viewModel: SettingsViewModel = hiltViewModel(),
     quranViewModel: QuranViewModel = hiltViewModel()
 ) {
-    val quranState by viewModel.quranState.collectAsState()
+    val quranState by viewModel.quranState.collectAsStateWithLifecycle()
     // Resolves aliases from older builds too, so a stored "alafasy" still highlights Mishary.
     val currentReciter = QuranReciter.fromId(quranState.selectedReciterId)
     var searchQuery by remember { mutableStateOf("") }
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
     // Track audio state for preview feedback
-    val audioState by quranViewModel.audioState.collectAsState()
+    val audioState by quranViewModel.audioState.collectAsStateWithLifecycle()
     var previewingReciterId by remember { mutableStateOf<String?>(null) }
 
     val filteredReciters = remember(searchQuery) { QuranReciter.search(searchQuery) }

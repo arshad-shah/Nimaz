@@ -88,7 +88,7 @@ fun HelpScreen(
                         )
                     }
                 } else {
-                    items(state.results) { result ->
+                    items(state.results, key = { "${it.topicId}:${it.itemId}" }) { result ->
                         HelpResultRow(
                             result = result,
                             onClick = { onNavigateToTopic(result.topicId) })
@@ -101,7 +101,7 @@ fun HelpScreen(
                         modifier = Modifier.padding(top = 4.dp)
                     )
                 }
-                items(state.topics.chunked(2)) { row ->
+                items(state.topics.chunked(2), key = { row -> row.first().id }) { row ->
                     Row(horizontalArrangement = Arrangement.spacedBy(11.dp)) {
                         row.forEach { topic ->
                             HelpTopicTile(

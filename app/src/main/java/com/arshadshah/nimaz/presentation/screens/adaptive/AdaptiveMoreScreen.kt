@@ -9,7 +9,6 @@ import androidx.compose.material3.adaptive.navigation.NavigableListDetailPaneSca
 import androidx.compose.material3.adaptive.navigation.rememberListDetailPaneScaffoldNavigator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -19,6 +18,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.navigation.Route
@@ -43,7 +43,7 @@ fun AdaptiveMoreScreen(
     val windowSizeClass = currentWindowSizeClass()
     val context = LocalContext.current
     val settingsViewModel: SettingsViewModel = hiltViewModel()
-    val shouldRestart by settingsViewModel.shouldRestart.collectAsState()
+    val shouldRestart by settingsViewModel.shouldRestart.collectAsStateWithLifecycle()
 
     LaunchedEffect(shouldRestart) {
         if (shouldRestart) onRestartApp()

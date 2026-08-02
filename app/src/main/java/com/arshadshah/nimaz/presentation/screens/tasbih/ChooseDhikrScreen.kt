@@ -32,7 +32,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -45,6 +44,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.TasbihCategory
 import com.arshadshah.nimaz.domain.model.TasbihPreset
@@ -87,8 +87,8 @@ fun ChooseDhikrScreen(
     onNavigateToAddPreset: () -> Unit,
     viewModel: TasbihViewModel = hiltViewModel()
 ) {
-    val presetsState by viewModel.presetsState.collectAsState()
-    val counterState by viewModel.counterState.collectAsState()
+    val presetsState by viewModel.presetsState.collectAsStateWithLifecycle()
+    val counterState by viewModel.counterState.collectAsStateWithLifecycle()
 
     var query by remember { mutableStateOf("") }
     var tabIndex by remember { mutableIntStateOf(0) }

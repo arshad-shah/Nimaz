@@ -543,7 +543,7 @@ fun ExpandableSearchBar(
                         LazyRow(
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            items(suggestions) { suggestion ->
+                            items(suggestions, key = { it }) { suggestion ->
                                 NimazChip(
                                     text = suggestion,
                                     onClick = {

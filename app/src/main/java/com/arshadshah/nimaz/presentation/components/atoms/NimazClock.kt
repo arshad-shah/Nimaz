@@ -10,14 +10,15 @@ import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.arshadshah.nimaz.core.util.CountdownParts
 import com.arshadshah.nimaz.core.util.EventProximity
 import com.arshadshah.nimaz.core.util.countdownTo
-import kotlinx.coroutines.delay
 import kotlin.time.Clock
 import kotlin.time.Duration
 import kotlin.time.Instant
+import kotlinx.coroutines.delay
 
 /**
  * The app's single clock.
@@ -86,7 +87,7 @@ private val LocalNowSource = compositionLocalOf<State<Instant>?> { null }
  *
  * The ticker is suspended below `STARTED`, so a backgrounded app stops ticking
  * rather than churning state behind a screen nobody is looking at. Pair this
- * with migrating screens from `collectAsState()` to
+ * with migrating screens from `collectAsStateWithLifecycle()` to
  * `collectAsStateWithLifecycle()` — 84 call sites still use the former.
  */
 @Composable
