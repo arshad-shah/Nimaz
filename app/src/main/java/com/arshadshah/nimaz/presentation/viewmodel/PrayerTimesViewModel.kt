@@ -31,7 +31,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZoneOffset
-import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 import kotlin.math.abs
 
@@ -344,7 +343,4 @@ class PrayerTimesViewModel @Inject constructor(
     }
 
 
-    companion object {
-        private val DATE_FMT: DateTimeFormatter = DateTimeFormatter.ofPattern("EEE, d MMM")
-    }
 }

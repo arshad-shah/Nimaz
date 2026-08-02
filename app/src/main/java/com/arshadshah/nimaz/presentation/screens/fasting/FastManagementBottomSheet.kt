@@ -1,5 +1,7 @@
 package com.arshadshah.nimaz.presentation.screens.fasting
 
+import com.arshadshah.nimaz.core.util.formatFullDate
+import com.arshadshah.nimaz.core.util.formatMediumDate
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -45,7 +47,6 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownItem
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -74,11 +75,10 @@ fun FastManagementBottomSheet(
     var note by remember(date, existingRecord?.id) { mutableStateOf(initialNote) }
 
     val hijriDate = remember(date) { HijriDateCalculator.toHijri(date) }
-    val dateFormatter = remember { DateTimeFormatter.ofPattern("EEEE, d MMMM yyyy") }
 
     NimazBottomSheet(
         onDismissRequest = onDismiss,
-        title = date.format(dateFormatter),
+        title = date.formatFullDate(),
         subtitle = hijriDate.formatted(),
         footer = {
             Row(
@@ -242,7 +242,6 @@ fun MakeupFastEditBottomSheet(
     val hijriDate = remember(originalDate) {
         makeupFast.originalHijriDate ?: HijriDateCalculator.toHijri(originalDate).formatted()
     }
-    val dateFormatter = remember { DateTimeFormatter.ofPattern("d MMM yyyy") }
 
     NimazBottomSheet(
         onDismissRequest = onDismiss,
@@ -282,7 +281,7 @@ fun MakeupFastEditBottomSheet(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text(
-                text = originalDate.format(dateFormatter),
+                text = originalDate.formatMediumDate(),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

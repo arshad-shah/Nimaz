@@ -46,7 +46,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.LocalInAppUpdateManager
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.core.util.FULL_DATE_FORMATTER
+import com.arshadshah.nimaz.core.util.formatFullDate
 import com.arshadshah.nimaz.core.util.UpdateState
 import com.arshadshah.nimaz.domain.model.PrayerType
 import com.arshadshah.nimaz.domain.model.WorshipReminderType
@@ -304,7 +304,7 @@ private fun HomeCompactContent(
     viewModel: HomeViewModel,
 ) {
     val gregorianDate = remember {
-        java.time.LocalDate.now().format(FULL_DATE_FORMATTER)
+        java.time.LocalDate.now().formatFullDate()
     }
     val homeClock = rememberHomeClock(state)
     val jumuahMubarak = stringResource(R.string.jumuah_mubarak)
@@ -470,7 +470,7 @@ private fun HomeTabletContent(
     viewModel: HomeViewModel,
 ) {
     val gregorianDate = remember {
-        java.time.LocalDate.now().format(FULL_DATE_FORMATTER)
+        java.time.LocalDate.now().formatFullDate()
     }
     val homeClock = rememberHomeClock(state)
 

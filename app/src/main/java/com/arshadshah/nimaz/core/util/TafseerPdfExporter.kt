@@ -20,7 +20,6 @@ import com.arshadshah.nimaz.domain.model.TafseerHighlight
 import java.io.File
 import java.io.FileOutputStream
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 
 private val TEAL = 0xFF14B8A6.toInt()
 private val TEAL_DARK = 0xFF0F766E.toInt()
@@ -337,7 +336,7 @@ private class PageWriter(
             MARGIN, FOOTER_Y, PAGE_W - MARGIN, FOOTER_Y,
             Paint().apply { color = TEAL; strokeWidth = 1.2f }
         )
-        val date = LocalDate.now().format(DateTimeFormatter.ofPattern("d MMM yyyy"))
+        val date = LocalDate.now().formatMediumDate()
         val ft = Paint().apply {
             isAntiAlias = true; color = MUTED; typeface = body; textSize = 9f
         }

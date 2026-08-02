@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.presentation.components.molecules
 
+import com.arshadshah.nimaz.core.util.formatFullDate
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -37,7 +38,6 @@ import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.theme.color
 import java.time.Instant
 import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 
 @Composable
 fun NimazQadaPrayerItem(
@@ -46,12 +46,11 @@ fun NimazQadaPrayerItem(
     modifier: Modifier = Modifier,
     actionText: String = "Done"
 ) {
-    val dateFormatter = DateTimeFormatter.ofPattern("EEEE, MMM d, yyyy")
     val formattedDate = try {
         Instant.ofEpochMilli(prayer.date)
             .atZone(ZoneId.systemDefault())
             .toLocalDate()
-            .format(dateFormatter)
+            .formatFullDate()
     } catch (e: Exception) {
         stringResource(R.string.unknown_date)
     }

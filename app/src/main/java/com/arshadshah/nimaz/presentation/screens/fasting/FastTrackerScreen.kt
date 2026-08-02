@@ -1,5 +1,9 @@
 package com.arshadshah.nimaz.presentation.screens.fasting
 
+import com.arshadshah.nimaz.core.util.formatLongDate
+import com.arshadshah.nimaz.core.util.formatWeekdayDayMonth
+import com.arshadshah.nimaz.core.util.formatDayMonth
+import com.arshadshah.nimaz.core.util.formatMediumDate
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -102,7 +106,6 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 import java.time.temporal.TemporalAdjusters
 
 // Color constants for makeup fasts
@@ -396,7 +399,6 @@ private fun RamadanCountdownCard(
     // Get the target Ramadan year
     val targetYear = if (hijriToday.month >= 9) hijriToday.year + 1 else hijriToday.year
     val ramadanStart = HijriDateCalculator.getFirstDayOfRamadan(targetYear)
-    val dateFormatter = DateTimeFormatter.ofPattern("MMMM d, yyyy")
 
     GradientCard(
         modifier = modifier.fillMaxWidth(),
@@ -435,7 +437,7 @@ private fun RamadanCountdownCard(
             )
             Spacer(modifier = Modifier.height(12.dp))
             Text(
-                text = ramadanStart.format(dateFormatter),
+                text = ramadanStart.formatLongDate(),
                 style = MaterialTheme.typography.bodyMedium,
                 color = Color.White.copy(alpha = 0.8f)
             )
@@ -527,7 +529,6 @@ private fun TodayFastSection(
     onToggleFast: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val formatter = DateTimeFormatter.ofPattern("EEEE, MMMM d")
     // "Are we still before Fajr" is a function of now — derived here off the shared ticker
     // instead of being frozen into state when prayer times happened to load.
     val now by rememberNow(TickResolution.MINUTES)
@@ -558,7 +559,7 @@ private fun TodayFastSection(
                 ) {
                     Column {
                         Text(
-                            text = selectedDate.format(formatter),
+                            text = selectedDate.formatWeekdayDayMonth(),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.SemiBold,
                             color = MaterialTheme.colorScheme.onSurface
@@ -794,7 +795,6 @@ private fun RecommendedFastsSection(
     modifier: Modifier = Modifier
 ) {
     val today = LocalDate.now()
-    val dateFormatter = DateTimeFormatter.ofPattern("MMM d")
 
     val todayText = stringResource(R.string.fasting_today)
 
@@ -809,14 +809,14 @@ private fun RecommendedFastsSection(
     val nextMonday = today.with(TemporalAdjusters.nextOrSame(DayOfWeek.MONDAY))
     val mondayText = if (nextMonday == today) todayText else stringResource(
         R.string.fasting_next_format,
-        nextMonday.format(dateFormatter)
+        nextMonday.formatDayMonth()
     )
 
     // Calculate next Thursday
     val nextThursday = today.with(TemporalAdjusters.nextOrSame(DayOfWeek.THURSDAY))
     val thursdayText = if (nextThursday == today) todayText else stringResource(
         R.string.fasting_next_format,
-        nextThursday.format(dateFormatter)
+        nextThursday.formatDayMonth()
     )
 
     // Calculate Ayyam al-Beed status (13th, 14th, 15th of lunar month)
@@ -973,7 +973,7 @@ private fun RecommendedFastsSection(
                     daysUntil == 1 -> stringResource(R.string.fasting_tomorrow)
                     else -> stringResource(
                         R.string.fasting_next_format,
-                        fastDate.format(dateFormatter)
+                        fastDate.formatDayMonth()
                     )
                 }
                 RecommendedFastCard(
@@ -1250,11 +1250,10 @@ private fun MakeupPendingFastCard(
     onEdit: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val formatter = DateTimeFormatter.ofPattern("MMM d, yyyy")
     val missedDate = Instant.ofEpochMilli(makeupFast.originalDate)
         .atZone(ZoneId.systemDefault())
         .toLocalDate()
-        .format(formatter)
+        .formatMediumDate()
 
     val displayDate = makeupFast.originalHijriDate ?: missedDate
 
@@ -1369,17 +1368,16 @@ private fun MakeupCompletedFastItem(
     makeupFast: MakeupFast,
     modifier: Modifier = Modifier
 ) {
-    val formatter = DateTimeFormatter.ofPattern("MMM d, yyyy")
     val missedDate = Instant.ofEpochMilli(makeupFast.originalDate)
         .atZone(ZoneId.systemDefault())
         .toLocalDate()
-        .format(formatter)
+        .formatMediumDate()
 
     val completedDateText = makeupFast.completedDate?.let {
         val date = Instant.ofEpochMilli(it)
             .atZone(ZoneId.systemDefault())
             .toLocalDate()
-            .format(formatter)
+            .formatMediumDate()
         if (makeupFast.status == MakeupFastStatus.FIDYA_PAID)
             stringResource(R.string.fasting_fidya_paid_on, date)
         else
