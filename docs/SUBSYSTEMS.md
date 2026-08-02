@@ -411,6 +411,23 @@ The reader pager (`QuranReaderScreen`) selects the renderer per page through the
     The endonyms were the last Arabic-script text still drawn in a Latin body font.
 - **Adding one** is two steps — an entry in the Python `CATALOGUE` (then run the script) and a matching enum entry. `download_translations.py --check` fails the pair if they drift.
 
+**Go-to-page and the reader pager now read the derived count (#325 follow-up).** `MushafPagination`'s
+own KDoc names *the jump-to-page validation* and *the reader's pager bounds* as the two places
+`MushafScript` was consulted for a raw page count — and those were the two the pass missed. The
+Page tab's grid, juz sections and surah badges all read `state.pagination.totalPages` (derived
+from the edition's real page ranges) while the jump field validated against
+`state.mushafScript.totalPages` (the constant declared on the enum) and `QuranReaderUiState.totalPages`
+bounded the pager the same way. The two disagree whenever an edition's data paginates differently
+from its declaration, and always for a non-Madani edition before its ranges load — the window in
+which the grid shows a spinner while the field happily accepted page numbers. `MushafPagination`
+now owns `contains(page)` and `pageFromInput(text)` (trim → `toIntOrNull` → range check, so blank,
+non-numeric, overflowing and out-of-range input all resolve to null), `QuranReaderUiState` carries
+the same `pagination` object the home state does, and `totalPages` reads off it. The field also
+shows the valid range and disables its go button instead of silently ignoring a bad number — the
+old `if (page in 1..total) navigate(page)` did nothing at all outside the range, which is what made
+a stale bound invisible. Pinned by `MushafPageInputTest`, whose last case scans the sources so no
+consumer outside the domain layer can take a page bound from the enum constant again.
+
 **Juz ayah boundaries corrected (#325).** `KhatamConstants.JUZ_AYAH_RANGES` — the hand-maintained juz→global-ayah-id table the Juz tab's khatam rings read — had drifted: juz 7 was off by one and juz 15-30 were wrong by hundreds of ayahs (juz 30 started at 4090 rather than 5673 = An-Naba 78:1, claiming a third of the Quran). The Khatam detail screen was unaffected because `KhatamDao.observeJuzProgress` groups by the database's own `ayahs.juz` column, so the two surfaces disagreed. `KhatamJuzBoundariesTest` now re-derives every boundary from the 114 surah ayah counts and the classical juz start references, so the table cannot silently drift again.
 
 **Khatam streak derived from read stamps, not the daily-log table.** `khatam_daily_log` is

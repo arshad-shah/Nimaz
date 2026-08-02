@@ -531,6 +531,14 @@ private fun BrowseTabContent(
         // Sticky jump-to-page input for the Page tab
         if (state.selectedTab == 2) {
             var jumpToPage by remember { mutableStateOf("") }
+            // Bounded by the *active edition's* page ranges, not the count declared on the
+            // enum: the two disagree for an edition whose data paginates differently, and for
+            // any non-Madani edition the mapping is not ready until its ranges load — the
+            // window in which the grid below shows a spinner (#325).
+            val requestedPage = state.pagination.pageFromInput(jumpToPage)
+            val isOutOfRange = jumpToPage.isNotBlank() && requestedPage == null
+            val goToPage = { requestedPage?.let(onNavigateToPage); Unit }
+
             OutlinedTextField(
                 value = jumpToPage,
                 onValueChange = { newValue ->
@@ -541,29 +549,25 @@ private fun BrowseTabContent(
                 label = { Text(stringResource(R.string.quran_home_jump_to_page)) },
                 placeholder = { Text(stringResource(R.string.quran_home_enter_page_number)) },
                 singleLine = true,
+                isError = isOutOfRange,
+                // An out-of-range number used to do nothing at all — no error, no message —
+                // which is what made a stale bound invisible.
+                supportingText = {
+                    Text(
+                        stringResource(
+                            R.string.quran_home_page_range_format,
+                            1,
+                            state.pagination.totalPages
+                        )
+                    )
+                },
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Number,
                     imeAction = ImeAction.Go
                 ),
-                keyboardActions = KeyboardActions(
-                    onGo = {
-                        jumpToPage.toIntOrNull()?.let { page ->
-                            if (page in 1..state.mushafScript.totalPages) {
-                                onNavigateToPage(page)
-                            }
-                        }
-                    }
-                ),
+                keyboardActions = KeyboardActions(onGo = { goToPage() }),
                 trailingIcon = {
-                    IconButton(
-                        onClick = {
-                            jumpToPage.toIntOrNull()?.let { page ->
-                                if (page in 1..state.mushafScript.totalPages) {
-                                    onNavigateToPage(page)
-                                }
-                            }
-                        }
-                    ) {
+                    IconButton(onClick = goToPage, enabled = requestedPage != null) {
                         NimazIcon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                             contentDescription = stringResource(R.string.quran_home_go_to_page),
