@@ -734,41 +734,25 @@ class PreferencesDataStore @Inject constructor(
     override suspend fun exportAllPreferences(): Map<String, String> {
         val preferences = dataStore.data.first()
         return preferences.asMap().map { (key, value) ->
-            key.name to value.toString()
+            key.name to PreferenceCodec.encode(value)
         }.toMap()
     }
 
     // Import preferences from sync payload
+    /**
+     * Writes an exported preference map back, using each key's **declared** type.
+     *
+     * This used to infer the type from the shape of the value and substrings of the key name.
+     * DataStore keys are typed and reading one back at the wrong type throws, so the six keys
+     * the heuristic missed did not merely import wrong — they crashed on next read after any
+     * sync. See [PreferenceCodec] and `PreferenceCodecTest`.
+     */
     override suspend fun importPreferences(prefsMap: Map<String, String>) {
         dataStore.edit { preferences ->
             prefsMap.forEach { (key, value) ->
-                when {
-                    key == "onboarding_completed" -> return@forEach // Never overwrite onboarding
-                    // Boolean keys
-                    value == "true" || value == "false" -> {
-                        preferences[booleanPreferencesKey(key)] = value.toBoolean()
-                    }
-                    // Try numeric types
-                    value.toLongOrNull() != null && (key.contains("adjustment") || key.contains("minutes") || key.contains(
-                        "location_id"
-                    ) || key.contains("offset")) -> {
-                        preferences[intPreferencesKey(key)] = value.toInt()
-                    }
-
-                    value.toDoubleOrNull() != null && (key.contains("latitude") || key.contains("longitude") || key.contains(
-                        "font_size"
-                    )) -> {
-                        if (key.contains("font_size") && !key.contains("arabic_font_size_string")) {
-                            preferences[floatPreferencesKey(key)] = value.toFloat()
-                        } else {
-                            preferences[doublePreferencesKey(key)] = value.toDouble()
-                        }
-                    }
-                    // Default to string
-                    else -> {
-                        preferences[stringPreferencesKey(key)] = value
-                    }
-                }
+                val (typedKey, typedValue) = PreferenceCodec.decode(key, value) ?: return@forEach
+                @Suppress("UNCHECKED_CAST")
+                preferences[typedKey as Preferences.Key<Any>] = typedValue
             }
         }
     }
