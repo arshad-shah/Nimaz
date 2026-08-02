@@ -33,7 +33,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -53,6 +52,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.CrashReporter
@@ -60,6 +60,7 @@ import com.arshadshah.nimaz.core.share.ContentShareManager
 import com.arshadshah.nimaz.core.util.HijriDateCalculator
 import com.arshadshah.nimaz.core.util.MONTH_YEAR_FORMATTER
 import com.arshadshah.nimaz.core.util.PrayerTimesPdfExporter
+import com.arshadshah.nimaz.core.util.formatClockTime
 import com.arshadshah.nimaz.core.util.formatFastLength
 import com.arshadshah.nimaz.domain.model.IslamicEvent
 import com.arshadshah.nimaz.domain.model.IslamicEventType
@@ -77,9 +78,11 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazNavArrowButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
+import com.arshadshah.nimaz.presentation.components.atoms.clockTimeText
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownMenu
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownRow
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
+import com.arshadshah.nimaz.presentation.theme.LocalUse24HourFormat
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazCornerRadius
 import com.arshadshah.nimaz.presentation.theme.NimazSpacing
@@ -89,9 +92,6 @@ import com.arshadshah.nimaz.presentation.viewmodel.MonthlyPrayerTimesViewModel
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.TextStyle
-import com.arshadshah.nimaz.presentation.components.atoms.clockTimeText
-import com.arshadshah.nimaz.core.util.formatClockTime
-import com.arshadshah.nimaz.presentation.theme.LocalUse24HourFormat
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -99,7 +99,7 @@ fun MonthlyPrayerTimesScreen(
     onNavigateBack: () -> Unit,
     viewModel: MonthlyPrayerTimesViewModel = hiltViewModel()
 ) {
-    val state by viewModel.state.collectAsState()
+    val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
     // Captured from the composition so the (non-composable) PDF export can honour the preference.
     val use24HourForExport = LocalUse24HourFormat.current

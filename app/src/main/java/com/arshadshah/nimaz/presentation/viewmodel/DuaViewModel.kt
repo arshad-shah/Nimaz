@@ -17,6 +17,7 @@ import com.arshadshah.nimaz.domain.usecase.DuaUseCases
 import com.arshadshah.nimaz.presentation.theme.AmiriFontFamily
 import com.arshadshah.nimaz.presentation.theme.QuranArabicFont
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -117,6 +118,21 @@ class DuaViewModel @Inject constructor(
     private val _dailyProgressState = MutableStateFlow(DuaDailyProgressUiState())
     val dailyProgressState: StateFlow<DuaDailyProgressUiState> = _dailyProgressState.asStateFlow()
 
+    // These loaders all collect Room flows, which never complete, and each is re-invoked as
+    // the user navigates or types. Without a handle to cancel, every category opened, dua
+    // read and keystroke typed left a live collector writing the same state for the rest of
+    // the ViewModel's life — and Room re-emits to *all* of them on any table change, so an
+    // earlier one could land last and replace what is on screen.
+    //
+    // One handle per *surface*, not per function: `loadCategory` and `loadDuasByOccasion`
+    // both fill `_categoryState`, so they share `categoryJob` — an occasion list and a
+    // category list are the same surface and must not be live at once.
+    // (AP-7.1b in docs/CLEAN_ARCHITECTURE_CHECKLIST.md.)
+    private var categoryJob: Job? = null
+    private var readerJob: Job? = null
+    private var searchJob: Job? = null
+    private var progressJob: Job? = null
+
     init {
         loadAllCategories()
         loadFavorites()
@@ -148,6 +164,7 @@ class DuaViewModel @Inject constructor(
             DuaEvent.ToggleTranslation -> _readerState.update { it.copy(showTranslation = !it.showTranslation) }
             DuaEvent.ToggleCategoriesSort -> toggleCategoriesSort()
             DuaEvent.ClearSearch -> {
+                searchJob?.cancel()
                 _searchState.update { DuaSearchUiState() }
                 _collectionState.update {
                     it.copy(
@@ -226,7 +243,8 @@ class DuaViewModel @Inject constructor(
 
     private fun loadCategory(categoryId: String) {
         _categoryState.update { it.copy(isLoading = true, error = null) }
-        viewModelScope.launch {
+        categoryJob?.cancel()
+        categoryJob = viewModelScope.launch {
             try {
                 val category = duaUseCases.getCategoryById(categoryId)
                 _categoryState.update { it.copy(category = category) }
@@ -246,7 +264,8 @@ class DuaViewModel @Inject constructor(
 
     private fun loadDua(duaId: String) {
         _readerState.update { it.copy(isLoading = true, error = null) }
-        viewModelScope.launch {
+        readerJob?.cancel()
+        readerJob = viewModelScope.launch {
             try {
                 val dua = duaUseCases.getDuaById(duaId)
                 if (dua == null) {
@@ -310,7 +329,8 @@ class DuaViewModel @Inject constructor(
 
     private fun loadDuasByOccasion(occasion: DuaOccasion) {
         _categoryState.update { it.copy(isLoading = true, error = null) }
-        viewModelScope.launch {
+        categoryJob?.cancel()
+        categoryJob = viewModelScope.launch {
             duaUseCases.getDuasByOccasion(occasion).collect { duas ->
                 _categoryState.update {
                     it.copy(duas = duas, isLoading = false)
@@ -321,12 +341,16 @@ class DuaViewModel @Inject constructor(
 
     private fun search(query: String) {
         if (query.isBlank()) {
+            // The last non-empty query's collector is still live otherwise, and its next
+            // emission repopulates the results the user just cleared.
+            searchJob?.cancel()
             _searchState.update { DuaSearchUiState() }
             return
         }
 
         _searchState.update { it.copy(query = query, isSearching = true) }
-        viewModelScope.launch {
+        searchJob?.cancel()
+        searchJob = viewModelScope.launch {
             duaUseCases.searchDuas(query).collect { results ->
                 _searchState.update { it.copy(results = results, isSearching = false) }
             }
@@ -367,7 +391,8 @@ class DuaViewModel @Inject constructor(
 
     private fun loadProgressForDate(date: Long) {
         _dailyProgressState.update { it.copy(isLoading = true, date = date) }
-        viewModelScope.launch {
+        progressJob?.cancel()
+        progressJob = viewModelScope.launch {
             duaUseCases.getProgressForDate(date).collect { progressList ->
                 _dailyProgressState.update {
                     it.copy(progressList = progressList, isLoading = false)

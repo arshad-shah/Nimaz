@@ -156,49 +156,16 @@ class ZakatViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val state = _calculatorState.value
-                val goldValue = state.assets.goldGrams * state.goldPricePerGram
-                val silverValue = state.assets.silverGrams * state.silverPricePerGram
-
-                val totalAssets = state.assets.cashOnHand +
-                        state.assets.bankBalance +
-                        goldValue +
-                        silverValue +
-                        state.assets.investments +
-                        state.assets.businessInventory +
-                        state.assets.receivables +
-                        state.assets.rentalIncome +
-                        state.assets.otherAssets
-
-                val totalLiabilities = state.liabilities.debts +
-                        state.liabilities.loans +
-                        state.liabilities.billsDue +
-                        state.liabilities.otherLiabilities
-
-                val netWorth = totalAssets - totalLiabilities
-
-                val nisabValue = when (state.nisabType) {
-                    NisabType.GOLD -> ZakatCalculator.GOLD_NISAB_GRAMS * state.goldPricePerGram
-                    NisabType.SILVER -> ZakatCalculator.SILVER_NISAB_GRAMS * state.silverPricePerGram
-                }
-
-                val isAboveNisab = netWorth >= nisabValue
-                val zakatDue = if (isAboveNisab) {
-                    netWorth * ZakatCalculator.ZAKAT_RATE
-                } else {
-                    0.0
-                }
-
-                val calculation = ZakatCalculation(
-                    totalAssets = totalAssets,
-                    totalLiabilities = totalLiabilities,
-                    netWorth = netWorth,
+                // The calculation itself lives in the domain (ZakatCalculator), not here.
+                // It used to be written out inline in this ViewModel while a second, wrong
+                // copy sat unused in the domain — see ZakatCalculatorTest.
+                val calculation = ZakatCalculator.calculate(
+                    assets = state.assets,
+                    liabilities = state.liabilities,
                     nisabType = state.nisabType,
-                    nisabValue = nisabValue,
-                    isAboveNisab = isAboveNisab,
-                    zakatDue = zakatDue,
-                    goldValue = goldValue,
-                    silverValue = silverValue,
-                    calculatedAt = System.currentTimeMillis()
+                    goldPricePerGram = state.goldPricePerGram,
+                    silverPricePerGram = state.silverPricePerGram,
+                    currency = state.currency
                 )
 
                 _calculatorState.update {

@@ -11,6 +11,7 @@ import com.arshadshah.nimaz.domain.model.TafseerText
 import com.arshadshah.nimaz.domain.usecase.QuranUseCases
 import com.arshadshah.nimaz.domain.usecase.TafseerUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -75,6 +76,23 @@ class TafseerViewModel @Inject constructor(
 
     private val _state = MutableStateFlow(TafseerUiState())
     val state: StateFlow<TafseerUiState> = _state.asStateFlow()
+
+    /**
+     * The in-flight load for the ayah on screen — the tafseer text, the source probe, and the
+     * two Room flows carrying that block's highlights and notes.
+     *
+     * [loadTafseerForCurrentAyah] runs on every swipe and every source switch. Room flows never
+     * complete, so without a handle to cancel, each run left its annotation collectors alive:
+     * one pair per ayah visited, all writing the same `highlights`/`notes`. Room then re-emits
+     * to *every* live collector when the table changes, so annotating one ayah woke the
+     * collectors for all the others and the last to land won — the reader showed a different
+     * ayah's highlights over the one being read. Cancelling here also settles the source probe,
+     * which is two suspend reads per source and could otherwise land after the next ayah's.
+     *
+     * One handle is right because the reader shows one ayah at a time (contrast the Quran
+     * pager, which holds several pages live and needs one handle per page).
+     */
+    private var ayahAnnotationsJob: Job? = null
 
     fun onEvent(event: TafseerEvent) {
         when (event) {
@@ -165,7 +183,8 @@ class TafseerViewModel @Inject constructor(
         val ayah = ayahs[currentState.currentAyahIndex]
         val tafseerId = currentState.selectedSource.id
 
-        viewModelScope.launch {
+        ayahAnnotationsJob?.cancel()
+        ayahAnnotationsJob = viewModelScope.launch {
             val tafseer =
                 tafseerUseCases.getTafseerForAyah(ayah.surahNumber, ayah.ayahNumber, tafseerId)
             // Probe every source so the UI can suggest an alternate one when the

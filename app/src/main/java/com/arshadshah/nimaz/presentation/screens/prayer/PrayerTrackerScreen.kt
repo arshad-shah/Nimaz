@@ -34,7 +34,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -51,6 +50,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.util.FULL_DATE_FORMATTER
 import com.arshadshah.nimaz.core.util.formatClock
@@ -84,11 +84,11 @@ import com.arshadshah.nimaz.presentation.theme.LocalUse24HourFormat
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.viewmodel.PrayerTrackerEvent
 import com.arshadshah.nimaz.presentation.viewmodel.PrayerTrackerViewModel
-import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.ZoneId
 import java.time.YearMonth
+import java.time.ZoneId
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -170,9 +170,9 @@ fun PrayerTrackerScreen(
 
 @Composable
 private fun TrackerTabContent(viewModel: PrayerTrackerViewModel) {
-    val state by viewModel.trackerState.collectAsState()
-    val statsState by viewModel.statsState.collectAsState()
-    val historyState by viewModel.historyState.collectAsState()
+    val state by viewModel.trackerState.collectAsStateWithLifecycle()
+    val statsState by viewModel.statsState.collectAsStateWithLifecycle()
+    val historyState by viewModel.historyState.collectAsStateWithLifecycle()
 
     var displayedMonth by remember { mutableStateOf(YearMonth.from(state.selectedDate)) }
 
@@ -236,7 +236,7 @@ private fun TrackerTabContent(viewModel: PrayerTrackerViewModel) {
 
 @Composable
 private fun QadaTabContent(viewModel: PrayerTrackerViewModel) {
-    val qadaState by viewModel.qadaState.collectAsState()
+    val qadaState by viewModel.qadaState.collectAsStateWithLifecycle()
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),

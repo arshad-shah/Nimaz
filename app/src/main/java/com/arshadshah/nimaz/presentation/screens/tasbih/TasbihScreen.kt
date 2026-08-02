@@ -42,7 +42,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -66,6 +65,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.navigation.ScreenTags
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
@@ -96,8 +96,8 @@ fun TasbihScreen(
     onNavigateToSettings: () -> Unit = {},
     viewModel: TasbihViewModel = hiltViewModel()
 ) {
-    val counterState by viewModel.counterState.collectAsState()
-    val statsState by viewModel.statsState.collectAsState()
+    val counterState by viewModel.counterState.collectAsStateWithLifecycle()
+    val statsState by viewModel.statsState.collectAsStateWithLifecycle()
 
     var showDesignSheet by remember { mutableStateOf(false) }
     var showCurrentSheet by remember { mutableStateOf(false) }

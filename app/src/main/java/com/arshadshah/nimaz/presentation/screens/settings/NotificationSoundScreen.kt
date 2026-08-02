@@ -16,7 +16,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -27,6 +26,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.data.audio.DownloadState
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
@@ -50,11 +50,11 @@ fun NotificationSoundScreen(
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
-    val notificationState by viewModel.notificationState.collectAsState()
-    val downloadState by viewModel.adhanAudioManager.downloadState.collectAsState()
-    val isPlaying by viewModel.adhanAudioManager.isPlaying.collectAsState()
-    val currentlyPlaying by viewModel.adhanAudioManager.currentlyPlaying.collectAsState()
-    val adhanPreviewError by viewModel.adhanPreviewError.collectAsState()
+    val notificationState by viewModel.notificationState.collectAsStateWithLifecycle()
+    val downloadState by viewModel.adhanAudioManager.downloadState.collectAsStateWithLifecycle()
+    val isPlaying by viewModel.adhanAudioManager.isPlaying.collectAsStateWithLifecycle()
+    val currentlyPlaying by viewModel.adhanAudioManager.currentlyPlaying.collectAsStateWithLifecycle()
+    val adhanPreviewError by viewModel.adhanPreviewError.collectAsStateWithLifecycle()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
     LaunchedEffect(adhanPreviewError) {

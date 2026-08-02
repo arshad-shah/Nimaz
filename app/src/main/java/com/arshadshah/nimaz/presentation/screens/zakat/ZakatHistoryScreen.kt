@@ -25,7 +25,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,6 +35,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.util.formatCurrency
 import com.arshadshah.nimaz.domain.model.ZakatHistoryEntry
@@ -68,7 +68,7 @@ fun ZakatHistoryScreen(
     onNavigateToCalculator: () -> Unit,
     viewModel: ZakatViewModel = hiltViewModel()
 ) {
-    val historyState by viewModel.historyState.collectAsState()
+    val historyState by viewModel.historyState.collectAsStateWithLifecycle()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
     NimazScreenScaffold(

@@ -34,7 +34,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -49,6 +48,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
@@ -78,7 +78,7 @@ fun LocationScreen(
     onNavigateBack: () -> Unit,
     viewModel: LocationViewModel = hiltViewModel()
 ) {
-    val state by viewModel.state.collectAsState()
+    val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val focusManager = LocalFocusManager.current
     val context = LocalContext.current
@@ -149,7 +149,7 @@ fun LocationScreen(
                 item {
                     NimazSectionTitle(text = stringResource(R.string.location_search_results))
                 }
-                items(state.searchResults) { location ->
+                items(state.searchResults, key = { it.key }) { location ->
                     LocationListItem(
                         location = location,
                         isSelected = isLocationSelected(state.currentLocation, location),
@@ -189,7 +189,7 @@ fun LocationScreen(
                 item {
                     NimazSectionTitle(text = stringResource(R.string.location_recent))
                 }
-                items(state.recentLocations) { location ->
+                items(state.recentLocations, key = { it.key }) { location ->
                     LocationListItem(
                         location = location,
                         isSelected = isLocationSelected(state.currentLocation, location),

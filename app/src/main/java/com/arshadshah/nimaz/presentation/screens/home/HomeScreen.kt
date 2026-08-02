@@ -32,54 +32,54 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.LocalInAppUpdateManager
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.util.FULL_DATE_FORMATTER
 import com.arshadshah.nimaz.core.util.UpdateState
 import com.arshadshah.nimaz.domain.model.PrayerType
+import com.arshadshah.nimaz.domain.model.WorshipReminderType
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
+import com.arshadshah.nimaz.presentation.components.atoms.TickResolution
+import com.arshadshah.nimaz.presentation.components.atoms.rememberNow
 import com.arshadshah.nimaz.presentation.components.molecules.AnnouncementBanner
 import com.arshadshah.nimaz.presentation.components.molecules.PrayerTimeCard
 import com.arshadshah.nimaz.presentation.components.molecules.PrayerTimesSectionHeader
+import com.arshadshah.nimaz.presentation.components.organisms.EventAction
+import com.arshadshah.nimaz.presentation.components.organisms.EventCardUi
+import com.arshadshah.nimaz.presentation.components.organisms.EventOccasion
+import com.arshadshah.nimaz.presentation.components.organisms.EventsCarousel
 import com.arshadshah.nimaz.presentation.components.organisms.HomeBannerCarousel
 import com.arshadshah.nimaz.presentation.components.organisms.HomeBannerItem
 import com.arshadshah.nimaz.presentation.components.organisms.HomeBannerVariant
 import com.arshadshah.nimaz.presentation.components.organisms.HomeDynamicTopBar
 import com.arshadshah.nimaz.presentation.components.organisms.HomeHeader
 import com.arshadshah.nimaz.presentation.components.organisms.HomeHero
-import com.arshadshah.nimaz.presentation.components.organisms.EventAction
-import com.arshadshah.nimaz.presentation.components.organisms.EventCardUi
-import com.arshadshah.nimaz.presentation.components.organisms.EventOccasion
-import com.arshadshah.nimaz.presentation.components.organisms.EventsCarousel
-import com.arshadshah.nimaz.presentation.components.organisms.toOccasion
 import com.arshadshah.nimaz.presentation.components.organisms.TodayCarousel
 import com.arshadshah.nimaz.presentation.components.organisms.TodayInfoCards
 import com.arshadshah.nimaz.presentation.components.organisms.TodaysProgressCard
+import com.arshadshah.nimaz.presentation.components.organisms.toOccasion
 import com.arshadshah.nimaz.presentation.theme.currentWindowSizeClass
 import com.arshadshah.nimaz.presentation.theme.isCompact
 import com.arshadshah.nimaz.presentation.viewmodel.AnnouncementUiState
 import com.arshadshah.nimaz.presentation.viewmodel.HomeEvent
 import com.arshadshah.nimaz.presentation.viewmodel.HomeUiState
 import com.arshadshah.nimaz.presentation.viewmodel.HomeViewModel
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.LaunchedEffect
-import com.arshadshah.nimaz.presentation.components.atoms.TickResolution
-import com.arshadshah.nimaz.presentation.components.atoms.rememberNow
 import com.arshadshah.nimaz.presentation.viewmodel.PrayerTimeDisplay
 import com.arshadshah.nimaz.presentation.viewmodel.withClockState
 import kotlin.time.Instant
-import com.arshadshah.nimaz.domain.model.WorshipReminderType
 
 /**
  * The clock-derived slice of Home. The ViewModel publishes prayer *instants*; this turns them into
@@ -131,8 +131,8 @@ fun HomeScreen(
     onOpenWorship: (WorshipReminderType) -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel()
 ) {
-    val state by viewModel.state.collectAsState()
-    val announcementState by viewModel.announcement.collectAsState()
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    val announcementState by viewModel.announcement.collectAsStateWithLifecycle()
 
     val onAnnouncementCta: () -> Unit = {
         viewModel.onEvent(HomeEvent.AnnouncementCtaClicked)
@@ -143,7 +143,7 @@ fun HomeScreen(
     }
     val homeClock = rememberHomeClock(state)
     val updateManager = LocalInAppUpdateManager.current
-    val updateState = updateManager?.updateState?.collectAsState()?.value ?: UpdateState.Idle
+    val updateState = updateManager?.updateState?.collectAsStateWithLifecycle()?.value ?: UpdateState.Idle
 
     val locationPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions()
@@ -434,7 +434,7 @@ private fun HomeCompactContent(
             )
         }
 
-        items(homeClock.prayers) { prayer ->
+        items(homeClock.prayers, key = { it.type }) { prayer ->
             PrayerTimeCard(
                 prayer = prayer,
                 isActive = prayer.isNext,
@@ -579,7 +579,7 @@ private fun HomeTabletContent(
                     )
                 }
 
-                items(homeClock.prayers) { prayer ->
+                items(homeClock.prayers, key = { it.type }) { prayer ->
                     PrayerTimeCard(
                         prayer = prayer,
                         isActive = prayer.isNext,

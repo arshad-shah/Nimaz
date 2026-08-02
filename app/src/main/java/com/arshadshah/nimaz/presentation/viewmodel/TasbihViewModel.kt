@@ -35,11 +35,25 @@ data class TasbihPresetsUiState(
     val defaultPresets: List<TasbihPreset> = emptyList(),
     val customPresets: List<TasbihPreset> = emptyList(),
     val selectedCategory: TasbihCategory? = null,
-    val filteredPresets: List<TasbihPreset> = emptyList(),
     val favorites: Set<Long> = emptySet(),
     val isLoading: Boolean = true,
     val error: String? = null
-)
+) {
+    /**
+     * The presets the list should show — **derived**, never stored.
+     *
+     * This used to be a stored field recomputed by hand wherever an input changed, and the
+     * two Room collectors in `loadPresets` rebuilt it as `defaults + customs` without
+     * consulting [selectedCategory]. So saving or deleting a custom dhikr re-emitted the
+     * presets flow and silently dropped the active category filter, while the category chip
+     * carried on looking selected. Deriving it here means there is no site left to forget.
+     */
+    val filteredPresets: List<TasbihPreset>
+        get() {
+            val all = defaultPresets + customPresets
+            return if (selectedCategory == null) all else all.filter { it.category == selectedCategory }
+        }
+}
 
 /** How the counter is presented: the classic tap-circle or the tasbih beads. */
 enum class TasbihCounterStyle { CLASSIC, BEADS }
@@ -243,23 +257,12 @@ class TasbihViewModel @Inject constructor(
     private fun loadPresets() {
         viewModelScope.launch {
             tasbihUseCases.getDefaultPresets().collect { defaults ->
-                _presetsState.update {
-                    it.copy(
-                        defaultPresets = defaults,
-                        filteredPresets = defaults + it.customPresets
-                    )
-                }
+                _presetsState.update { it.copy(defaultPresets = defaults) }
             }
         }
         viewModelScope.launch {
             tasbihUseCases.getCustomPresets().collect { customs ->
-                _presetsState.update {
-                    it.copy(
-                        customPresets = customs,
-                        filteredPresets = it.defaultPresets + customs,
-                        isLoading = false
-                    )
-                }
+                _presetsState.update { it.copy(customPresets = customs, isLoading = false) }
             }
         }
     }
@@ -383,15 +386,8 @@ class TasbihViewModel @Inject constructor(
     }
 
     private fun filterByCategory(category: TasbihCategory?) {
-        _presetsState.update { state ->
-            val allPresets = state.defaultPresets + state.customPresets
-            val filtered = if (category == null) {
-                allPresets
-            } else {
-                allPresets.filter { it.category == category }
-            }
-            state.copy(selectedCategory = category, filteredPresets = filtered)
-        }
+        // Setting the input is the whole job — the list derives from it.
+        _presetsState.update { it.copy(selectedCategory = category) }
     }
 
     private fun createCustomPreset(preset: TasbihPreset) {
@@ -611,7 +607,11 @@ class TasbihViewModel @Inject constructor(
                     it.copy(
                         currentSession = session,
                         selectedPreset = preset,
-                        count = session.currentCount % session.targetCount,
+                        // targetCount comes off a stored row, and `%` by 0 throws. Every
+                        // writer coerces to >= 1 (see setTargetCount), but a legacy or
+                        // imported row need not have, and this runs at init — so a single
+                        // bad row would take the counter down on open rather than degrade.
+                        count = session.currentCount % session.targetCount.coerceAtLeast(1),
                         laps = session.totalLaps,
                         targetCount = session.targetCount,
                         isActive = true,

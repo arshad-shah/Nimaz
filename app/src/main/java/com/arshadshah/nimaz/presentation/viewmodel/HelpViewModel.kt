@@ -13,6 +13,7 @@ import com.arshadshah.nimaz.domain.usecase.HelpUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -74,6 +75,14 @@ class HelpViewModel @Inject constructor(
 
     private val _guideState = MutableStateFlow(HelpGuideUiState())
     val guideState: StateFlow<HelpGuideUiState> = _guideState.asStateFlow()
+
+    // Both loaders collect `language.flatMapLatest { … }`. `language` is a StateFlow, so the
+    // collector never completes on its own however the inner repository flow behaves — and
+    // neither was cancelled. Every help topic opened left a live collector on `_topicState`,
+    // so a re-emission for an earlier topic replaced the one being read.
+    // (AP-7.1b in docs/CLEAN_ARCHITECTURE_CHECKLIST.md.)
+    private var topicJob: Job? = null
+    private var guideJob: Job? = null
 
     init {
         // Topics re-resolve when the app language changes.
@@ -137,7 +146,8 @@ class HelpViewModel @Inject constructor(
 
     private fun loadTopic(topicId: String) {
         _topicState.update { it.copy(isLoading = true) }
-        viewModelScope.launch {
+        topicJob?.cancel()
+        topicJob = viewModelScope.launch {
             language.flatMapLatest { lang -> useCases.getTopicDetail(topicId, lang) }
                 .catch { e ->
                     CrashReporter.recordException(e)
@@ -157,7 +167,8 @@ class HelpViewModel @Inject constructor(
 
     private fun loadGuide(guideId: String) {
         _guideState.update { it.copy(isLoading = true) }
-        viewModelScope.launch {
+        guideJob?.cancel()
+        guideJob = viewModelScope.launch {
             language.flatMapLatest { lang -> useCases.getGuide(guideId, lang) }
                 .catch { e ->
                     CrashReporter.recordException(e)

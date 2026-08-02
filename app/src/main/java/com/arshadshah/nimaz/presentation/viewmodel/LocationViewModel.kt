@@ -66,7 +66,14 @@ data class SearchLocation(
     val longitude: Double,
     val region: CityRegion? = null,   // set for curated cities; null for Geocoder & recent results
     val flag: String? = null,         // country-flag emoji for curated cities; null otherwise
-)
+) {
+    /**
+     * Stable identity for a lazy-list `key`. Coordinates rather than the name: the same city
+     * name recurs across countries, and the Geocoder and the curated catalogue can both
+     * produce a row for one place with differently-cased names.
+     */
+    val key: String get() = "$latitude,$longitude"
+}
 
 sealed interface LocationEvent {
     data class UpdateSearchQuery(val query: String) : LocationEvent

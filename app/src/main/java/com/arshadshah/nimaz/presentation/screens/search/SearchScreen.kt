@@ -41,7 +41,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -58,6 +57,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.navigation.Route
 import com.arshadshah.nimaz.domain.model.CitationId
@@ -106,9 +106,9 @@ fun SearchScreen(
     viewModel: SearchViewModel = hiltViewModel(),
     askViewModel: AskViewModel = hiltViewModel(),
 ) {
-    val state by viewModel.searchState.collectAsState()
-    val statsState by viewModel.statsState.collectAsState()
-    val askState by askViewModel.uiState.collectAsState()
+    val state by viewModel.searchState.collectAsStateWithLifecycle()
+    val statsState by viewModel.statsState.collectAsStateWithLifecycle()
+    val askState by askViewModel.uiState.collectAsStateWithLifecycle()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
     // Scope the search (e.g. to duas) when launched from a section screen.
@@ -295,7 +295,7 @@ fun SearchScreen(
                         )
                     }
 
-                    items(related) { result ->
+                    items(related, key = { it.key }) { result ->
                         UnifiedResultCard(
                             result = result,
                             query = state.query,
@@ -361,7 +361,7 @@ fun SearchScreen(
                                 onAction = { viewModel.onEvent(SearchEvent.ClearRecentSearches) }
                             )
                         }
-                        items(mergedRecent) { recentSearch ->
+                        items(mergedRecent, key = { it }) { recentSearch ->
                             RecentSearchItem(
                                 query = recentSearch,
                                 onClick = {
@@ -407,7 +407,7 @@ fun SearchScreen(
                         }
                     }
 
-                    items(state.filteredResults) { result ->
+                    items(state.filteredResults, key = { it.key }) { result ->
                         UnifiedResultCard(
                             result = result,
                             query = state.query,

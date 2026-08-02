@@ -37,7 +37,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -58,7 +57,12 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.domain.model.Ayah
+import com.arshadshah.nimaz.domain.model.MushafLineType
+import com.arshadshah.nimaz.domain.model.MushafPageLayout
+import com.arshadshah.nimaz.domain.model.Surah
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazPager
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
@@ -69,10 +73,6 @@ import com.arshadshah.nimaz.presentation.components.molecules.MushafPageBar
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownMenu
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownRow
 import com.arshadshah.nimaz.presentation.components.molecules.SurahHeaderCartouche
-import com.arshadshah.nimaz.domain.model.Ayah
-import com.arshadshah.nimaz.domain.model.MushafLineType
-import com.arshadshah.nimaz.domain.model.MushafPageLayout
-import com.arshadshah.nimaz.domain.model.Surah
 import com.arshadshah.nimaz.presentation.components.organisms.AyahItem
 import com.arshadshah.nimaz.presentation.components.organisms.MushafLinePage
 import com.arshadshah.nimaz.presentation.components.organisms.MushafPage
@@ -98,9 +98,9 @@ fun QuranReaderScreen(
     viewModel: QuranViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
-    val state by viewModel.readerState.collectAsState()
-    val audioState by viewModel.audioState.collectAsState()
-    val homeState by viewModel.homeState.collectAsState()
+    val state by viewModel.readerState.collectAsStateWithLifecycle()
+    val audioState by viewModel.audioState.collectAsStateWithLifecycle()
+    val homeState by viewModel.homeState.collectAsStateWithLifecycle()
     val surahByNumber = remember(homeState.surahs) { homeState.surahs.associateBy { it.number } }
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
