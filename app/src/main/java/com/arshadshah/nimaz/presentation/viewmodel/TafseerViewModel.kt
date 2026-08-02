@@ -34,7 +34,6 @@ data class TafseerUiState(
     val notes: List<TafseerNote> = emptyList(),
     val surahName: String = "",
     val isLoading: Boolean = true,
-    val exportedText: String? = null,
     // Sources whose seed data actually has non-empty text for the current ayah.
     // Used to recommend an alternate source when the selected one has no content.
     val availableSources: Set<TafseerSource> = emptySet()
@@ -64,8 +63,6 @@ sealed interface TafseerEvent {
     data class AddNote(val text: String) : TafseerEvent
     data class UpdateNote(val note: TafseerNote) : TafseerEvent
     data class DeleteNote(val noteId: Long) : TafseerEvent
-    data object ExportAnnotations : TafseerEvent
-    data object ClearExport : TafseerEvent
 }
 
 @HiltViewModel
@@ -106,11 +103,6 @@ class TafseerViewModel @Inject constructor(
 
             is TafseerEvent.AddNote -> AppAnalytics.logFeatureUsed("tafseer", "add_note")
             is TafseerEvent.DeleteNote -> AppAnalytics.logFeatureUsed("tafseer", "delete_note")
-            is TafseerEvent.ExportAnnotations -> AppAnalytics.logFeatureUsed(
-                "tafseer",
-                "export_annotations"
-            )
-
             else -> {}
         }
         when (event) {
@@ -137,8 +129,6 @@ class TafseerViewModel @Inject constructor(
             is TafseerEvent.AddNote -> addNote(event.text)
             is TafseerEvent.UpdateNote -> updateNote(event.note)
             is TafseerEvent.DeleteNote -> deleteNote(event.noteId)
-            is TafseerEvent.ExportAnnotations -> exportAnnotations()
-            is TafseerEvent.ClearExport -> _state.value = _state.value.copy(exportedText = null)
         }
     }
 
@@ -288,10 +278,4 @@ class TafseerViewModel @Inject constructor(
         }
     }
 
-    private fun exportAnnotations() {
-        viewModelScope.launch {
-            val exported = tafseerUseCases.exportAnnotations()
-            _state.value = _state.value.copy(exportedText = exported)
-        }
-    }
 }

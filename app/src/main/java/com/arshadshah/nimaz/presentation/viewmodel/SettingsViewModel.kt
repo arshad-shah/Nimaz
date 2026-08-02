@@ -198,13 +198,6 @@ data class LocationSettingsUiState(
     val isLoading: Boolean = true
 )
 
-data class WidgetSettingsUiState(
-    val prayerTimesWidgetEnabled: Boolean = true,
-    val widgetTheme: AppTheme = AppTheme.SYSTEM,
-    val showNextPrayerCountdown: Boolean = true,
-    val widgetTransparency: Float = 1f
-)
-
 sealed interface SettingsEvent {
     // General
     data class SetTheme(val theme: AppTheme) : SettingsEvent
@@ -291,12 +284,6 @@ sealed interface SettingsEvent {
     data class ToggleLocationFavorite(val locationId: Long) : SettingsEvent
     data class SetAutoDetectLocation(val enabled: Boolean) : SettingsEvent
 
-    // Widget
-    data class SetPrayerTimesWidgetEnabled(val enabled: Boolean) : SettingsEvent
-    data class SetWidgetTheme(val theme: AppTheme) : SettingsEvent
-    data class SetShowNextPrayerCountdown(val enabled: Boolean) : SettingsEvent
-    data class SetWidgetTransparency(val transparency: Float) : SettingsEvent
-
     // Actions
     data object LoadSettings : SettingsEvent
     data object ResetToDefaults : SettingsEvent
@@ -340,9 +327,6 @@ class SettingsViewModel @Inject constructor(
 
     private val _locationState = MutableStateFlow(LocationSettingsUiState())
     val locationState: StateFlow<LocationSettingsUiState> = _locationState.asStateFlow()
-
-    private val _widgetState = MutableStateFlow(WidgetSettingsUiState())
-    val widgetState: StateFlow<WidgetSettingsUiState> = _widgetState.asStateFlow()
 
     private val _shouldRestart = MutableStateFlow(false)
     val shouldRestart: StateFlow<Boolean> = _shouldRestart.asStateFlow()
@@ -907,26 +891,6 @@ class SettingsViewModel @Inject constructor(
                 )
             }
 
-            // Widget
-            is SettingsEvent.SetPrayerTimesWidgetEnabled -> _widgetState.update {
-                it.copy(
-                    prayerTimesWidgetEnabled = event.enabled
-                )
-            }
-
-            is SettingsEvent.SetWidgetTheme -> _widgetState.update { it.copy(widgetTheme = event.theme) }
-            is SettingsEvent.SetShowNextPrayerCountdown -> _widgetState.update {
-                it.copy(
-                    showNextPrayerCountdown = event.enabled
-                )
-            }
-
-            is SettingsEvent.SetWidgetTransparency -> _widgetState.update {
-                it.copy(
-                    widgetTransparency = event.transparency
-                )
-            }
-
             // Actions
             SettingsEvent.LoadSettings -> loadSettings()
             SettingsEvent.ResetToDefaults -> resetToDefaults()
@@ -1311,7 +1275,6 @@ class SettingsViewModel @Inject constructor(
             _prayerState.update { PrayerSettingsUiState() }
             _notificationState.update { NotificationSettingsUiState() }
             _quranState.update { QuranSettingsUiState() }
-            _widgetState.update { WidgetSettingsUiState() }
             _shouldRestart.value = true
         }
     }
@@ -1358,7 +1321,6 @@ class SettingsViewModel @Inject constructor(
             _notificationState.update { NotificationSettingsUiState() }
             _quranState.update { QuranSettingsUiState() }
             _locationState.update { LocationSettingsUiState() }
-            _widgetState.update { WidgetSettingsUiState() }
             _shouldRestart.value = true
         }
     }

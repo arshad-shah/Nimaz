@@ -124,10 +124,6 @@ data class QuranReaderUiState(
     val tajweedUnderline: Boolean = false,
     val activeKhatamId: Long? = null,
     val khatamReadAyahIds: Set<Int> = emptySet(),
-    // Line-accurate 16-line IndoPak layout for the most-recently requested page, loaded on
-    // demand when the 16-line Mushaf view is active (4/7). Null until requested / for pages
-    // without layout.
-    val mushafPageLayout: MushafPageLayout? = null,
     // Per-page cache of line-accurate layouts (5/7). The reader pager keeps several pages
     // resident at once, so — mirroring [pageCache] — each visible page's layout is cached by
     // page number rather than a single field.
@@ -466,7 +462,6 @@ class QuranViewModel @Inject constructor(
                         },
                         mushafPageLayoutCache =
                             if (scriptChanged) emptyMap() else it.mushafPageLayoutCache,
-                        mushafPageLayout = if (scriptChanged) null else it.mushafPageLayout,
                         selectedTranslatorId = display.translatorId,
                         showTranslation = display.showTranslation,
                         showTransliteration = display.showTransliteration,
@@ -868,7 +863,6 @@ class QuranViewModel @Inject constructor(
             )
             _readerState.update {
                 it.copy(
-                    mushafPageLayout = layout,
                     mushafPageLayoutCache = it.mushafPageLayoutCache + (pageNumber to layout)
                 )
             }

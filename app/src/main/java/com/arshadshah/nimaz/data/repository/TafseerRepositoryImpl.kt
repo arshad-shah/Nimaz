@@ -157,40 +157,6 @@ class TafseerRepositoryImpl @Inject constructor(
         tafseerUserDao.deleteNoteById(noteId)
     }
 
-    override suspend fun exportAnnotations(): String {
-        val highlights = tafseerUserDao.getAllHighlights().first()
-        val notes = tafseerUserDao.getAllNotes().first()
-
-        val json = JSONObject()
-
-        val highlightsArray = JSONArray()
-        for (h in highlights) {
-            highlightsArray.put(JSONObject().apply {
-                put("ayah_id", h.ayahId)
-                put("tafseer_id", h.tafseerId)
-                put("start_offset", h.startOffset)
-                put("end_offset", h.endOffset)
-                put("color", h.color)
-                put("note", h.note ?: "")
-                put("created_at", h.createdAt)
-            })
-        }
-        json.put("highlights", highlightsArray)
-
-        val notesArray = JSONArray()
-        for (n in notes) {
-            notesArray.put(JSONObject().apply {
-                put("ayah_id", n.ayahId)
-                put("tafseer_id", n.tafseerId)
-                put("text", n.text)
-                put("created_at", n.createdAt)
-            })
-        }
-        json.put("notes", notesArray)
-
-        return json.toString(2)
-    }
-
     private fun TafseerBlockEntity.toDomain() = TafseerText(
         id = id,
         tafseerId = tafseerId,

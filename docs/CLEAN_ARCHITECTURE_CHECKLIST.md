@@ -429,6 +429,57 @@ between recomposing one row and all of them.
 
 ---
 
+## AP-12 · Shipped-but-unreachable state and settings
+
+**Rule:** a field on a `XxxUiState`, an event on a `XxxEvent`, or a use case must have a reader.
+If nothing consumes it, either wire it or delete it — do not leave it as an intention.
+
+**Why it hurts:** it reads as a working feature in review and in the diff, so the missing half
+never gets written. Three shipped defects had exactly this shape:
+
+- `KhatamRepositoryImpl.logDailyProgress` was the only writer of `khatam_daily_log` and nothing
+  called it, so the streak the detail screen renders was **0 for every user**.
+- `QiblaSettingsUiState.trueNorthMode` defaulted to `true` and was settable, but nothing read it
+  — the magnetic-declination correction it names was never applied, leaving the qibla needle off
+  by up to 25°.
+- `WidgetSettingsUiState` exposed a `StateFlow`, four events and four fields that no screen
+  collected or dispatched, and that no widget read.
+
+The first two were user-visible wrong values; the third was only weight. The pattern is the same,
+and the difference is invisible until someone looks.
+
+**Detect:**
+
+```bash
+cd app/src/main/java/com/arshadshah/nimaz
+# a UiState field whose name appears in no other file
+for n in $(grep -rhoP '(?<=    val )\w+(?=:)' presentation/viewmodel/*.kt | sort -u); do
+  [ "$(grep -rl "\b$n\b" --include=*.kt . | wc -l)" -le 1 ] && echo "unread: $n"
+done
+# a use case referenced only by its own DI construction
+for f in domain/usecase/*UseCase.kt; do
+  n=$(basename "$f" .kt)
+  [ "$(grep -rl "\b$n\b" --include=*.kt . | grep -vc -e "$f" -e core/di/)" -eq 0 ] && echo "only-DI: $n"
+done
+```
+
+Both are heuristics: a field read only inside its own ViewModel is legitimate (`SearchUiState`
+keeps per-type result lists to derive counts), and a use case invoked through a lambda in a DI
+module (`ObserveLocalEventsUseCase`) is a false positive. Read the hit before acting on it.
+
+- [x] `khatam_daily_log` streak — **Resolved**, derived from `khatam_ayahs.read_at`; pinned by
+  `KhatamProgressCalculatorTest`.
+- [x] `trueNorthMode` — **Resolved**, declination applied; pinned by `QiblaCalculatorTest`.
+- [x] `WidgetSettingsUiState` (state + flow + 4 events + handlers) — **Removed**.
+- [x] Tafseer text export (`ExportAnnotations`/`ClearExport`/`exportedText` →
+  `ExportAnnotationsUseCase` → `TafseerRepository.exportAnnotations`) — **Removed**; the live
+  path is `TafseerPdfExporter`, which the screen calls directly.
+- [x] `QuranReaderUiState.mushafPageLayout` — **Removed**, superseded by
+  `mushafPageLayoutCache`, which is what the reader actually reads.
+- [x] `QiblaCalculator.calculateQiblaAngle` — **Removed**, unused.
+
+---
+
 ## Quick full re-scan
 
 ```bash
