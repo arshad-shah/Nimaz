@@ -1035,6 +1035,7 @@
     <string name="location_recent">Son Kullanılan</string>
     <string name="location_detecting">Tespit ediliyor…</string>
     <string name="location_not_set">Ayarlanmadı</string>
+    <string name="location_using_default">Varsayılan konum</string>
     <string name="location_current">Mevcut</string>
     <string name="completed">Tamamlandı</string>
     <string name="jamaah">Cemaat</string>

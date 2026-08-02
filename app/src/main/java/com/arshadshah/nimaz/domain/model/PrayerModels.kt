@@ -100,6 +100,64 @@ enum class PrayerStatus {
     }
 }
 
+/**
+ * Where prayer times are computed for when the reader has not set a location.
+ *
+ * Onboarding can be skipped and the location permission can be denied, so this is reached in
+ * normal use. It is a *stand-in*, not a claim about where the reader is — [ResolvedLocation]
+ * carries `isFallback` so a surface can say so instead of asserting a city.
+ */
+object FallbackLocation {
+    const val LATITUDE = 53.3498
+    const val LONGITUDE = -6.2603
+    const val NAME = "Dublin, Ireland"
+}
+
+/**
+ * A position to compute with, and whether it is the reader's own or [FallbackLocation].
+ *
+ * [name] is empty when the position is real but unnamed — reverse geocoding can fail while the
+ * fix itself is good.
+ */
+data class ResolvedLocation(
+    val latitude: Double,
+    val longitude: Double,
+    val name: String,
+    val isFallback: Boolean
+)
+
+/**
+ * Whether these coordinates are a position the reader actually has.
+ *
+ * `(0, 0)` is Null Island, open water in the Gulf of Guinea, and is the sentinel the
+ * preferences store writes before anything is set — so it means "unset", but **only when both
+ * axes are zero**. Testing them separately, as five call sites used to, relocates anyone on the
+ * equator or the prime meridian onto one of Dublin's axes.
+ *
+ * Out-of-range and non-finite values count as unset too: a corrupt or wrongly-typed preference
+ * should not reach the prayer-time calculator as a real position.
+ */
+fun isLocationSet(latitude: Double, longitude: Double): Boolean =
+    latitude.isFinite() && longitude.isFinite() &&
+            latitude in -90.0..90.0 && longitude in -180.0..180.0 &&
+            !(latitude == 0.0 && longitude == 0.0)
+
+/** The coordinates to compute with: the reader's own, or [FallbackLocation] whole. */
+fun resolveLocation(
+    latitude: Double,
+    longitude: Double,
+    name: String = ""
+): ResolvedLocation = if (isLocationSet(latitude, longitude)) {
+    ResolvedLocation(latitude, longitude, name.trim(), isFallback = false)
+} else {
+    ResolvedLocation(
+        FallbackLocation.LATITUDE,
+        FallbackLocation.LONGITUDE,
+        FallbackLocation.NAME,
+        isFallback = true
+    )
+}
+
 data class Location(
     val id: Long,
     val name: String,

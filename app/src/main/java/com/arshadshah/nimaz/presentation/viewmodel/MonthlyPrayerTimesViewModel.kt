@@ -10,8 +10,12 @@ import com.arshadshah.nimaz.domain.model.AsrCalculation
 import com.arshadshah.nimaz.domain.model.CalculationMethod
 import com.arshadshah.nimaz.domain.model.HighLatitudeRule
 import com.arshadshah.nimaz.domain.model.PrayerType
+import com.arshadshah.nimaz.domain.model.resolveLocation
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import java.time.LocalDate
+import java.time.YearMonth
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,9 +23,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.toLocalDateTime
-import java.time.LocalDate
-import java.time.YearMonth
-import javax.inject.Inject
 
 /**
  * One row of the month table. Times are **instants**; the clock format is applied at the leaf from
@@ -150,8 +151,9 @@ class MonthlyPrayerTimesViewModel @Inject constructor(
                     val (lat, lng, name) = location
                     val (calcStr, asrStr, highStr) = calcSettings
 
-                    latitude = if (lat != 0.0) lat else 53.3498
-                    longitude = if (lng != 0.0) lng else -6.2603
+                    val resolved = resolveLocation(lat, lng, name)
+                    latitude = resolved.latitude
+                    longitude = resolved.longitude
                     calcMethod = try {
                         CalculationMethod.valueOf(calcStr)
                     } catch (_: Exception) {

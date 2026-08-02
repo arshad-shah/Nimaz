@@ -182,7 +182,13 @@ fun PrayerTimesScreen(
                 sunriseFraction = state.sunriseFraction,
                 sunsetFraction = state.sunsetFraction,
                 shape = RoundedCornerShape(bottomStart = 28.dp, bottomEnd = 28.dp),
-                locationName = state.locationName,
+                // Never assert a city the reader has not chosen: with no location set, the
+                // times below come from FallbackLocation, and the header says so.
+                locationName = if (state.isUsingFallbackLocation) {
+                    stringResource(R.string.location_using_default)
+                } else {
+                    state.locationName
+                },
                 onBack = onNavigateBack,
                 onSettings = onNavigateToSettings,
                 modifier = Modifier

@@ -1051,6 +1051,7 @@
     <string name="location_recent">Récent</string>
     <string name="location_detecting">Détection…</string>
     <string name="location_not_set">Non défini</string>
+    <string name="location_using_default">Lieu par défaut</string>
     <string name="location_current">Actuel</string>
     <string name="completed">Terminé</string>
     <string name="jamaah">Jamaah</string>

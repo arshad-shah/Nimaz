@@ -6,14 +6,15 @@ import com.arshadshah.nimaz.domain.model.HighLatitudeRule
 import com.arshadshah.nimaz.domain.model.PrayerType
 import com.arshadshah.nimaz.domain.model.WorshipReminderOccurrence
 import com.arshadshah.nimaz.domain.model.WorshipReminderType
+import com.arshadshah.nimaz.domain.model.isLocationSet
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
-import kotlinx.coroutines.flow.first
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.flow.first
 
 /**
  * Resolves the single **nearest upcoming enabled** worship reminder for the Home "Next Worship"
@@ -35,7 +36,7 @@ class NextWorshipResolver @Inject constructor(
     suspend fun nearest(now: LocalDateTime = LocalDateTime.now()): WorshipReminderOccurrence? {
         val latitude = settingsRepository.latitude.first()
         val longitude = settingsRepository.longitude.first()
-        if (latitude == 0.0 && longitude == 0.0) return null
+        if (!isLocationSet(latitude, longitude)) return null
 
         val enabledTypes = WorshipReminderType.entries.filter {
             settingsRepository.worshipReminderEnabled(it.key).first()

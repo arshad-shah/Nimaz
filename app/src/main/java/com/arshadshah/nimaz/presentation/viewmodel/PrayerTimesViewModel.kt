@@ -12,10 +12,19 @@ import com.arshadshah.nimaz.domain.model.PrayerName
 import com.arshadshah.nimaz.domain.model.PrayerStatus
 import com.arshadshah.nimaz.domain.model.PrayerTime
 import com.arshadshah.nimaz.domain.model.PrayerType
+import com.arshadshah.nimaz.domain.model.FallbackLocation
+import com.arshadshah.nimaz.domain.model.resolveLocation
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.usecase.PrayerUseCases
 import com.arshadshah.nimaz.presentation.components.organisms.MoonPhase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import java.time.Instant
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.ZoneOffset
+import javax.inject.Inject
+import kotlin.math.abs
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -26,13 +35,6 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import java.time.Instant
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.ZoneId
-import java.time.ZoneOffset
-import javax.inject.Inject
-import kotlin.math.abs
 
 /**
  * Drives the dedicated Prayer Times screen: a day pager over the prayer
@@ -44,6 +46,12 @@ import kotlin.math.abs
  */
 data class PrayerTimesUiState(
     val locationName: String = "Location not set",
+    /**
+     * True when [locationName] and the times below it come from [FallbackLocation] rather than
+     * anywhere the reader chose — onboarding can be skipped and the permission denied, so the
+     * header must not assert a city they have never been to.
+     */
+    val isUsingFallbackLocation: Boolean = false,
     val selectedDate: LocalDate = LocalDate.now(),
     val isToday: Boolean = true,
     val prayers: List<PrayerTimeDisplay> = emptyList(),
@@ -178,8 +186,9 @@ class PrayerTimesViewModel @Inject constructor(
                     val (lat, lng, name) = location
                     val (calcStr, asrStr, highStr) = calcSettings
 
-                    latitude = if (lat != 0.0) lat else 53.3498
-                    longitude = if (lng != 0.0) lng else -6.2603
+                    val resolved = resolveLocation(lat, lng, name)
+                    latitude = resolved.latitude
+                    longitude = resolved.longitude
                     calcMethod = try {
                         CalculationMethod.valueOf(calcStr)
                     } catch (_: Exception) {
@@ -195,7 +204,12 @@ class PrayerTimesViewModel @Inject constructor(
                     adjustments = adj
                     settingsReady = true
 
-                    _state.update { it.copy(locationName = if (name.isNotBlank()) name else "Dublin, Ireland") }
+                    _state.update {
+                        it.copy(
+                            locationName = resolved.name,
+                            isUsingFallbackLocation = resolved.isFallback
+                        )
+                    }
                     recomputeDay()
                 }
         }

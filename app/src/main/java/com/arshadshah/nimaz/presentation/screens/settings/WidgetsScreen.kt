@@ -29,8 +29,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import com.arshadshah.nimaz.presentation.components.atoms.TickResolution
-import com.arshadshah.nimaz.presentation.components.atoms.rememberNow
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -51,6 +49,8 @@ import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.util.HijriDateCalculator
 import com.arshadshah.nimaz.core.util.PrayerTimeCalculator
 import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
+import com.arshadshah.nimaz.domain.model.FallbackLocation
+import com.arshadshah.nimaz.domain.model.resolveLocation
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCheckbox
@@ -61,17 +61,19 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
+import com.arshadshah.nimaz.presentation.components.atoms.TickResolution
+import com.arshadshah.nimaz.presentation.components.atoms.rememberNow
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.viewmodel.SettingsViewModel
 import com.arshadshah.nimaz.widget.core.formatWidgetTime
+import java.time.LocalDate
+import kotlin.time.Clock
+import kotlin.time.Duration
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import java.time.LocalDate
-import kotlin.time.Clock
-import kotlin.time.Duration
 
 // Data classes for widget preview
 private data class WidgetPreviewData(
@@ -907,13 +909,13 @@ private suspend fun loadPreviewLocation(context: android.content.Context): Previ
     return try {
         val userPrefs = PreferencesDataStore(context).userPreferences.first()
         PreviewLocation(
-            latitude = userPrefs.latitude.takeIf { it != 0.0 } ?: 53.3498,
-            longitude = userPrefs.longitude.takeIf { it != 0.0 } ?: -6.2603,
+            latitude = resolveLocation(userPrefs.latitude, userPrefs.longitude).latitude,
+            longitude = resolveLocation(userPrefs.latitude, userPrefs.longitude).longitude,
             name = userPrefs.locationName.takeIf { it.isNotBlank() }
                 ?.split(",")?.firstOrNull()?.trim() ?: "Dublin",
         )
     } catch (_: Exception) {
-        PreviewLocation(53.3498, -6.2603, "Dublin")
+        PreviewLocation(FallbackLocation.LATITUDE, FallbackLocation.LONGITUDE, "Dublin")
     }
 }
 

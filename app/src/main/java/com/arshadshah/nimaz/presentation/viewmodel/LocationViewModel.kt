@@ -14,6 +14,7 @@ import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.domain.model.AsrCalculation
 import com.arshadshah.nimaz.domain.model.CalculationMethod
 import com.arshadshah.nimaz.domain.model.Location
+import com.arshadshah.nimaz.domain.model.isLocationSet
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.usecase.PrayerUseCases
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -22,6 +23,11 @@ import com.google.android.gms.location.Priority
 import com.google.android.gms.tasks.CancellationTokenSource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import java.util.Locale
+import java.util.TimeZone
+import javax.inject.Inject
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -31,11 +37,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
-import java.util.Locale
-import java.util.TimeZone
-import javax.inject.Inject
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
 
 data class LocationUiState(
     val searchQuery: String = "",
@@ -148,7 +149,7 @@ class LocationViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val prefs = settingsRepository.userPreferences.first()
-                if (prefs.latitude != 0.0 && prefs.longitude != 0.0) {
+                if (isLocationSet(prefs.latitude, prefs.longitude)) {
                     _state.update {
                         it.copy(
                             currentLocation = CurrentLocationState.Set(

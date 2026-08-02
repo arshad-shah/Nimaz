@@ -1029,6 +1029,7 @@
     <string name="location_recent">Kürzlich</string>
     <string name="location_detecting">Wird erkannt…</string>
     <string name="location_not_set">Nicht festgelegt</string>
+    <string name="location_using_default">Standardort</string>
     <string name="location_current">Aktuell</string>
     <string name="completed">Abgeschlossen</string>
     <string name="jamaah">Jamaah</string>
