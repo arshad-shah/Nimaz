@@ -10,6 +10,10 @@ import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.usecase.QuranUseCases
 import com.arshadshah.nimaz.domain.usecase.KhatamUseCases
 import com.google.common.truth.Truth.assertThat
+import io.mockk.coEvery
+import com.arshadshah.nimaz.domain.model.Khatam
+import com.arshadshah.nimaz.domain.model.MushafPagination
+import com.arshadshah.nimaz.domain.model.PageAyahRange
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
@@ -82,6 +86,24 @@ class QuranViewModelPageLoadTest {
         every { useCases.getAyahsByPage(any(), any(), any()) } answers {
             pageContent(firstArg())
         }
+
+        // Real paginations, not a relaxed mock: switching edition re-resolves the reader's
+        // *position* through these, so a mock returning 0 would hide what is under test.
+        coEvery { useCases.getMushafPagination(any()) } answers { paginationFor(firstArg()) }
+    }
+
+    /** [pages] equal pages spanning the whole Quran — enough to map a position across. */
+    private fun paginationFor(script: MushafScript): MushafPagination {
+        val pages = script.totalPages
+        val perPage = Khatam.TOTAL_QURAN_AYAHS / pages
+        return MushafPagination.from(
+            script,
+            (1..pages).map { page ->
+                val min = (page - 1) * perPage + 1
+                val max = if (page == pages) Khatam.TOTAL_QURAN_AYAHS else page * perPage
+                PageAyahRange(page, min, max, max - min + 1)
+            }
+        )
     }
 
     private val pageContent = mutableMapOf<Int, MutableStateFlow<List<Ayah>>>()
@@ -189,13 +211,18 @@ class QuranViewModelPageLoadTest {
             assertThat(viewModel.readerState.value.pageCache.keys).containsExactly(4, 5)
 
             // A different edition repaginates the Quran, so page N no longer holds the same
-            // ayahs: the stale neighbour must go, and the page the reader is on must come
-            // back rather than leave the reader on an empty page.
+            // ayahs: the stale neighbour must go, and the reader must come back on the page
+            // carrying the text they were on rather than on the same integer.
+            val madani = paginationFor(MushafScript.MADANI)
+            val indopak = paginationFor(MushafScript.INDOPAK_16)
+            val expected = indopak.pageMatching(4, madani)!!
+            assertThat(expected).isNotEqualTo(4)
+
             mushafScript.value = MushafScript.INDOPAK_16.name
             advanceUntilIdle()
 
             val state = viewModel.readerState.value
             assertThat(state.mushafScript).isEqualTo(MushafScript.INDOPAK_16)
-            assertThat(state.pageCache.keys).containsExactly(4)
+            assertThat(state.pageCache.keys).containsExactly(expected)
         }
 }

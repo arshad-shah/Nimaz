@@ -428,6 +428,22 @@ old `if (page in 1..total) navigate(page)` did nothing at all outside the range,
 a stale bound invisible. Pinned by `MushafPageInputTest`, whose last case scans the sources so no
 consumer outside the domain layer can take a page bound from the enum constant again.
 
+**Switching edition keeps the reader's place, not their page number (#325 follow-up).**
+`reloadReaderContent` re-issued `loadPage(target.number)` after a script change — the same
+integer against a repaginated Quran. Madani page 500 and 13-line IndoPak page 500 are hundreds of
+ayahs apart, and Madani page 600 does not exist in the 548-page edition at all, so changing the
+layout mid-read threw the reader onto unrelated text or onto a page that loads nothing and renders
+blank. `MushafPagination.pageMatching(page, other)` resolves the page to an ayah in the old
+edition and asks the new one which page carries it; surah and juz targets are still re-issued
+as-is, since those numbers mean the same thing in every edition. Both mappings are resolved
+inside `repaginate` rather than read off `QuranReaderUiState.pagination`: `observeMushafPagination`
+writes that same field from a **separate collector** on the same preference, and the two are not
+ordered against each other, so the "previous" mapping on state may already have been replaced —
+which silently turned the remap into a no-op the first time it was wired that way. The repository
+memoises a line-accurate edition's ranges, so resolving both is cheap. Pinned by
+`MushafPageRemapTest` (the landed page must actually carry the ayah the source page opened with,
+plus monotonicity across all 604 pages) and by `QuranViewModelPageLoadTest`.
+
 **Juz ayah boundaries corrected (#325).** `KhatamConstants.JUZ_AYAH_RANGES` — the hand-maintained juz→global-ayah-id table the Juz tab's khatam rings read — had drifted: juz 7 was off by one and juz 15-30 were wrong by hundreds of ayahs (juz 30 started at 4090 rather than 5673 = An-Naba 78:1, claiming a third of the Quran). The Khatam detail screen was unaffected because `KhatamDao.observeJuzProgress` groups by the database's own `ayahs.juz` column, so the two surfaces disagreed. `KhatamJuzBoundariesTest` now re-derives every boundary from the 114 surah ayah counts and the classical juz start references, so the table cannot silently drift again.
 
 **Khatam streak derived from read stamps, not the daily-log table.** `khatam_daily_log` is
