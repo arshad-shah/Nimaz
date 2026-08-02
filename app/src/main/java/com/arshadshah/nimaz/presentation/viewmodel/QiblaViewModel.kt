@@ -1,6 +1,7 @@
 package com.arshadshah.nimaz.presentation.viewmodel
 
 import android.content.Context
+import android.hardware.GeomagneticField
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
@@ -40,6 +41,13 @@ data class QiblaUiState(
     val needsCalibration: Boolean = false,
     val isFacingQibla: Boolean = false,
     val rotationToQibla: Float = 0f,
+    /**
+     * Local magnetic declination in degrees, east-positive, for the current location.
+     *
+     * The qibla bearing is measured from true north and the magnetometer from magnetic north;
+     * this is the difference between them. Zero until a location is known.
+     */
+    val magneticDeclination: Float = 0f,
     /** Cumulative unwrapped azimuth — use for smooth rotation animation */
     val animatedAzimuth: Float = 0f,
     val isLoading: Boolean = true,
@@ -264,10 +272,26 @@ class QiblaViewModel @Inject constructor(
         }
     }
 
+    /**
+     * The local magnetic declination, east-positive, from the World Magnetic Model Android
+     * ships. Altitude is passed as 0: the field varies by well under a tenth of a degree over
+     * any altitude a phone reaches, and the location source has no elevation.
+     */
+    private fun declinationAt(latitude: Double, longitude: Double): Float =
+        runCatching {
+            GeomagneticField(
+                latitude.toFloat(),
+                longitude.toFloat(),
+                0f,
+                System.currentTimeMillis()
+            ).declination
+        }.getOrDefault(0f)
+
     private fun setLocationFromCoords(latitude: Double, longitude: Double, locationName: String) {
         viewModelScope.launch {
             try {
                 val qiblaDirection = QiblaCalculator.calculateQiblaDirection(latitude, longitude)
+                val declination = declinationAt(latitude, longitude)
                 val qiblaInfo = QiblaInfo(
                     direction = qiblaDirection,
                     locationName = locationName,
@@ -279,6 +303,7 @@ class QiblaViewModel @Inject constructor(
                     it.copy(
                         qiblaDirection = qiblaDirection,
                         qiblaInfo = qiblaInfo,
+                        magneticDeclination = declination,
                         isLoading = false,
                         error = null
                     )
@@ -299,6 +324,7 @@ class QiblaViewModel @Inject constructor(
                 val qiblaDirection = QiblaCalculator.calculateQiblaDirection(
                     location.latitude, location.longitude
                 )
+                val declination = declinationAt(location.latitude, location.longitude)
                 val qiblaInfo = QiblaInfo(
                     direction = qiblaDirection,
                     locationName = location.name,
@@ -312,6 +338,7 @@ class QiblaViewModel @Inject constructor(
                     it.copy(
                         qiblaDirection = qiblaDirection,
                         qiblaInfo = qiblaInfo,
+                        magneticDeclination = declination,
                         isLoading = false,
                         error = null
                     )
@@ -332,8 +359,25 @@ class QiblaViewModel @Inject constructor(
     ) {
         val normalizedAzimuth = (azimuth + 360) % 360
 
+        // The magnetometer reads from magnetic north; the qibla bearing is from true north.
+        // Correcting here rather than only in `rotationToQibla` is what makes the *drawn*
+        // needle right: `QiblaCompassWidget` computes its screen angles straight off
+        // `animatedAzimuth` (`qiblaBearing - animatedAzimuth`, `-animatedAzimuth`), so an
+        // uncorrected azimuth points the qibla needle — and the "N" needle — at magnetic north.
+        // With `trueNorthMode` off the reading is left raw, which is what a paper compass held
+        // next to the phone would show.
+        val declination = if (_settingsState.value.trueNorthMode) {
+            _qiblaState.value.magneticDeclination
+        } else {
+            0f
+        }
+        val headingFromTrueNorth = QiblaCalculator.trueAzimuth(normalizedAzimuth, declination)
+        // The unwrap runs on deltas, so shifting the accumulated value by a constant keeps it
+        // continuous — no 360° snap is reintroduced.
+        val unwrappedFromTrueNorth = unwrappedAzimuth + declination
+
         val compassData = CompassData(
-            azimuth = normalizedAzimuth,
+            azimuth = headingFromTrueNorth,
             pitch = pitch,
             roll = roll,
             accuracy = _qiblaState.value.compassData.accuracy,
@@ -347,7 +391,7 @@ class QiblaViewModel @Inject constructor(
                 it.copy(
                     compassData = compassData,
                     isCompassReady = true,
-                    animatedAzimuth = unwrappedAzimuth
+                    animatedAzimuth = unwrappedFromTrueNorth
                 )
             }
             return
@@ -355,9 +399,8 @@ class QiblaViewModel @Inject constructor(
 
         val threshold = _settingsState.value.qiblaThreshold
         val qiblaBearing = qiblaDirection.bearing.toFloat()
-        var rotationToQibla = qiblaBearing - normalizedAzimuth
-        if (rotationToQibla > 180) rotationToQibla -= 360
-        if (rotationToQibla < -180) rotationToQibla += 360
+        val rotationToQibla =
+            QiblaCalculator.rotationToQibla(qiblaBearing, normalizedAzimuth, declination)
 
         val isFacingQibla = abs(rotationToQibla) <= threshold
 
@@ -372,7 +415,7 @@ class QiblaViewModel @Inject constructor(
                 rotationToQibla = rotationToQibla,
                 isFacingQibla = isFacingQibla,
                 isCompassReady = true,
-                animatedAzimuth = unwrappedAzimuth
+                animatedAzimuth = unwrappedFromTrueNorth
             )
         }
     }
