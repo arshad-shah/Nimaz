@@ -448,7 +448,8 @@ class QuranViewModel @Inject constructor(
                     _readerState.value.selectedTranslatorId != display.translatorId
                 // A different edition repaginates the Quran, so page N no longer holds the
                 // same ayahs.
-                val scriptChanged = _readerState.value.mushafScript != mushafScript
+                val previousScript = _readerState.value.mushafScript
+                val scriptChanged = previousScript != mushafScript
                 audioManager.setReciter(behavior.reciterId)
                 // Push continuous-reading reactively so toggling the setting while
                 // in the reader takes effect immediately, not on next play-start.
@@ -488,7 +489,14 @@ class QuranViewModel @Inject constructor(
                     // one — and it would re-populate the caches just cleared above. Drop
                     // every page collector and re-issue the current load.
                     cancelPageJobs()
-                    reloadReaderContent()
+                    // A script change repaginates the whole Quran, so a page target has to be
+                    // re-resolved rather than re-issued. Done here rather than in
+                    // `observeMushafPagination` so one collector owns the reload — the two
+                    // observe the same preference independently and are not ordered against
+                    // each other, so splitting it would race `cancelPageJobs` above.
+                    reloadReaderContent(
+                        repaginateFrom = previousScript.takeIf { scriptChanged }
+                    )
                 }
                 if (translationChanged) {
                     // The home verse of the day is a one-shot read of the same preference.
@@ -502,14 +510,43 @@ class QuranViewModel @Inject constructor(
      * Re-fetches whatever the reader is showing, after a settings change that invalidates its
      * content. A no-op before the first load, so it is safe to call from the settings
      * observer's very first emission.
+     *
+     * Surah and juz numbers mean the same thing in every edition, so they are re-issued as-is.
+     * A **page** number does not: page 500 of the 604-page Madani mushaf and page 500 of the
+     * 847-page 13-line IndoPak are hundreds of ayahs apart, and Madani page 600 does not exist
+     * in the 548-page edition at all — re-issuing the raw number threw the reader onto
+     * unrelated text, or onto a page that loads nothing and renders blank. Pass
+     * [repaginateFrom] (the edition in force *before* the change) to carry the position across
+     * instead of the integer.
      */
-    private fun reloadReaderContent() {
+    private suspend fun reloadReaderContent(repaginateFrom: MushafScript? = null) {
         when (val target = readerTarget) {
             is ReaderTarget.Surah -> loadSurah(target.number)
             is ReaderTarget.Juz -> loadJuz(target.number)
-            is ReaderTarget.Page -> loadPage(target.number)
+            is ReaderTarget.Page -> loadPage(repaginate(target.number, repaginateFrom))
             null -> Unit
         }
+    }
+
+    /**
+     * [page], expressed in the edition now active.
+     *
+     * Falls back to clamping when the position cannot be resolved — either edition may have no
+     * page ranges loaded — because landing near the right end of the book beats loading a page
+     * the edition does not have.
+     */
+    private suspend fun repaginate(page: Int, from: MushafScript?): Int {
+        val script = _readerState.value.mushafScript
+        if (from == null || from == script) return page
+        // Both mappings are resolved here rather than read off state. `observeMushafPagination`
+        // publishes into the same `pagination` field from its own collector, and the two
+        // observe the preference independently — so by the time this runs, the "previous"
+        // mapping on state may already have been replaced by the new one, which would make
+        // the remap a no-op. The repository memoises a line-accurate edition's ranges, so
+        // asking for them again is cheap.
+        val to = quranUseCases.getMushafPagination(script)
+        val resolved = to.pageMatching(page, quranUseCases.getMushafPagination(from)) ?: page
+        return resolved.coerceIn(1, to.totalPages.coerceAtLeast(1))
     }
 
     private data class QuranDisplaySettings(

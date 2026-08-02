@@ -59,6 +59,27 @@ class MushafPagination private constructor(
     /** The ayah span printed on [page], or null when unknown. */
     fun rangeFor(page: Int): PageAyahRange? = rangesByPage[page]
 
+    /**
+     * The page of *this* edition showing the text that [page] of [other] shows, or null when
+     * either edition cannot answer.
+     *
+     * A page number means nothing without its edition: Madani page 500 and 13-line IndoPak
+     * page 500 are hundreds of ayahs apart, and Madani page 600 does not exist in the
+     * 548-page edition at all. Re-issuing the raw number after a layout change — which is
+     * what the reader used to do — throws the reader to unrelated text or to a page that
+     * loads nothing. Resolving through the ayah keeps the position instead of the integer.
+     *
+     * Null when [other] has no range for [page], or when this edition's ranges have not
+     * loaded: a guess would be indistinguishable from an answer, and the caller can clamp.
+     */
+    fun pageMatching(page: Int, other: MushafPagination): Int? {
+        if (other.script == script && other.totalPages == totalPages) {
+            return page.takeIf { contains(it) }
+        }
+        val ayahId = other.rangeFor(page)?.minAyahId ?: return null
+        return pageForAyah(ayahId)
+    }
+
     /** The page [ayahId] is printed on, or null when unknown / out of range. */
     fun pageForAyah(ayahId: Int): Int? {
         if (orderedRanges.isEmpty()) return null
