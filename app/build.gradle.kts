@@ -62,6 +62,17 @@ android {
             "PLAY_INTEGRITY_CLOUD_PROJECT_NUMBER",
             "${playIntegrityProjectNumber}L"
         )
+
+        // The identity of the content artifact this APK was built against, so the app can tell
+        // at runtime whether the database on disk is the one it ships with. Read from the same
+        // data.lock.json the fetch task verifies against, so the two cannot disagree — see
+        // ContentArtifactInstaller.
+        @Suppress("UNCHECKED_CAST")
+        val contentArtifactSha = (
+            (groovy.json.JsonSlurper().parse(rootProject.file("data.lock.json"))
+                as Map<String, Any>)["artifact"] as Map<String, Any>
+            )["sha256"] as String
+        buildConfigField("String", "CONTENT_ARTIFACT_SHA256", "\"$contentArtifactSha\"")
     }
 
     // Ship the exported Room schemas as androidTest assets so MigrationTestHelper can
