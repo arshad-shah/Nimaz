@@ -298,3 +298,124 @@ data class SurahStructureEntity(
     @ColumnInfo(name = "has_basmalah") val hasBasmalah: Int,
     @ColumnInfo(name = "revelation_order") val revelationOrder: Int,
 )
+
+/**
+ * The long-form background to a surah — its name, when it was revealed, its theme and the
+ * subjects it moves through — split into the sections the source writes it in.
+ *
+ * This is deliberately *not* [SurahInfoEntity]. That row is one sentence and a comma-separated
+ * theme list, written for a list cell; this is several pages of prose per surah. Keeping them
+ * apart keeps the cheap query cheap: the surah list reads `surah_info` for 114 short rows and
+ * never touches the ~900 KB of overview text, which only the info screen opens.
+ *
+ * [summary] is the source's own one-paragraph opening, used where a card needs a lede.
+ */
+@Entity(tableName = "surah_overviews")
+data class SurahOverviewEntity(
+    @PrimaryKey @ColumnInfo(name = "surah_number") val surahNumber: Int,
+    val summary: String,
+)
+
+/**
+ * One `<h2>` section of a surah's overview, in the order the source prints them.
+ *
+ * The split happens at import (arshad-shah/nimaz-data), not here. The source writes the same
+ * section under thirty different headings — "Theme and Subject Matter", "Subject Matter and
+ * Theme", "Theme and Subject matter" — so the normalisation is data work, and doing it on the
+ * device would mean parsing 47 KB of HTML per surah on the way to a screen.
+ *
+ * [body] is the section's inner HTML, limited to the inline set the source uses
+ * (`p`, `em`, `strong`, `ol`, `li`, `a`, `h3`). [heading] is the source heading, verbatim;
+ * [group] is that heading folded onto one of a handful of stable buckets so the screen can
+ * order and icon sections without matching on prose.
+ */
+@Entity(tableName = "surah_overview_sections", primaryKeys = ["surah_number", "position"])
+data class SurahOverviewSectionEntity(
+    @ColumnInfo(name = "surah_number") val surahNumber: Int,
+    val position: Int,
+    val heading: String,
+    @ColumnInfo(name = "section_group") val group: String,
+    val body: String,
+)
+
+/**
+ * A run of consecutive ayahs that the mushaf's own thematic outline treats as one passage.
+ *
+ * 1,049 rows tiling all 114 surahs: every ayah but two (2:134 and 40:61, absent upstream) falls
+ * inside exactly one theme, so "what is this passage about" is a single lookup rather than a
+ * guess. The key is `(surah_number, ayah_from)` and the containment query
+ * (`ayah_from <= ? AND ayah_to >= ?`) rides its index, so no second index is declared —
+ * Room compares index *sets*, and an unused one here fails validation like a missing one.
+ *
+ * [keywords] are the source's stemmed tokens ("Stori", "Believ"). They are indexed for search
+ * and deliberately never rendered.
+ */
+@Entity(tableName = "ayah_themes", primaryKeys = ["surah_number", "ayah_from"])
+data class AyahThemeEntity(
+    @ColumnInfo(name = "surah_number") val surahNumber: Int,
+    @ColumnInfo(name = "ayah_from") val ayahFrom: Int,
+    @ColumnInfo(name = "ayah_to") val ayahTo: Int,
+    val theme: String,
+    val keywords: String,
+    @ColumnInfo(name = "ayah_count") val ayahCount: Int,
+)
+
+/**
+ * A subject the Qur'an speaks about, in three overlapping hierarchies.
+ *
+ * The source carries a topic under up to three parents and they are not the same tree:
+ *  - [parentId] — the subject *index*, the shape a printed concordance has ("Musa" > "parting
+ *    of the Red Sea"). 732 topics sit under one.
+ *  - [thematicParentId] — the thematic outline, rooted at Doctrine, Stories and The Unseen.
+ *  - [ontologyParentId] — the ontology, rooted at kinds of thing (Location, Living Creation,
+ *    Event, …).
+ *
+ * A topic can be in all three, or in none but the index. [isThematic] and [isOntology] mark
+ * membership so a browser can walk one tree without inferring it from null parents — a root of
+ * the thematic tree and a topic that is simply not in it both have a null thematic parent.
+ *
+ * [description] is HTML carrying `<topic data-id="N">` cross-links; resolving those into
+ * navigation is the renderer's job.
+ */
+@Entity(
+    tableName = "quran_topics",
+    indices = [
+        Index(value = ["parent_id"]),
+        Index(value = ["thematic_parent_id"]),
+        Index(value = ["ontology_parent_id"]),
+    ]
+)
+data class QuranTopicEntity(
+    @PrimaryKey @ColumnInfo(name = "topic_id") val topicId: Int,
+    val name: String,
+    @ColumnInfo(name = "arabic_name") val arabicName: String,
+    @ColumnInfo(name = "parent_id") val parentId: Int?,
+    @ColumnInfo(name = "thematic_parent_id") val thematicParentId: Int?,
+    @ColumnInfo(name = "ontology_parent_id") val ontologyParentId: Int?,
+    val description: String,
+    @ColumnInfo(name = "wiki_link") val wikiLink: String,
+    @ColumnInfo(name = "is_thematic") val isThematic: Int,
+    @ColumnInfo(name = "is_ontology") val isOntology: Int,
+    @ColumnInfo(name = "ayah_count") val ayahCount: Int,
+    @ColumnInfo(name = "related_topic_ids") val relatedTopicIds: String,
+)
+
+/**
+ * One verse cited under one topic — 30,687 rows over 2,330 topics.
+ *
+ * The global [ayahId] is the join key the rest of the Qur'an schema uses; `surah_number` and
+ * `ayah_number` ride along so a citation list can be labelled "2:255" without a join. The index
+ * on [ayahId] is what makes the reverse question — *which topics does this verse belong to* —
+ * a lookup rather than a scan of the whole table.
+ */
+@Entity(
+    tableName = "quran_topic_ayahs",
+    primaryKeys = ["topic_id", "ayah_id"],
+    indices = [Index(value = ["ayah_id"])]
+)
+data class QuranTopicAyahEntity(
+    @ColumnInfo(name = "topic_id") val topicId: Int,
+    @ColumnInfo(name = "ayah_id") val ayahId: Int,
+    @ColumnInfo(name = "surah_number") val surahNumber: Int,
+    @ColumnInfo(name = "ayah_number") val ayahNumber: Int,
+)

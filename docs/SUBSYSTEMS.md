@@ -355,7 +355,48 @@ and a second attempt is a no-op.
 
 **Tajweed data verification (issue #292).** The artifact's `ayahs.text_tajweed` column is built by the tajweed pipeline in **arshad-shah/nimaz-data** (`upstream/scripts/generate_database.py`), and verified there rather than here — `upstream/scripts/verify_tajweed.py` runs as a fail-the-build post-step, and the corpus rules engine (`data/rules/`) re-checks it on every `nz build`. The app-side `tajweed_data_checks.yml` was deleted at versionCode 385 (`docs/retirement.yaml`): it triggered on a `nimaz-pro-data/**` path that can no longer change in this repo. It asserts coverage, well-formedness (no leaked markup), the round-trip against `text_arabic`, the v3 code whitelist, character-coverage conservation, cross-source drift vs cpfair, and a golden-ayah fixture.
 
-**Migration chain** (registered in `DatabaseModule.provideNimazDatabase`): `MIGRATION_7_8` (khatam) → `8_9` (asma/prophets) → `9_10` (a *missing* migration restored after the original release bumped the version without registering it) → `10_11` (`updatedAt` columns) → `11_12` (surah start_page fix) → `12_13` (legacy asset repair) → `13_14` (Help tables) → `14_15` (Qaida tables) → `15_16` (tasbih `category`) → `16_17` (hadith `narrator_chain`) → `17_18` (16-line IndoPak: `ayahs.text_indopak` column + `mushaf_layout_indopak16` table) → `18_19` (translations: dedupe + unique index on `(ayah_id, translator_id)`) → `19_20` (generalised mushaf storage: `mushaf_ayah_texts` + `mushaf_layout_lines`, drops `mushaf_layout_indopak16`) → `20_21` (tafseer range blocks: drops `tafseer_texts`, creates `tafseer_blocks`).
+**Migration chain** (registered in `DatabaseModule.provideNimazDatabase`): `MIGRATION_7_8` (khatam) → `8_9` (asma/prophets) → `9_10` (a *missing* migration restored after the original release bumped the version without registering it) → `10_11` (`updatedAt` columns) → `11_12` (surah start_page fix) → `12_13` (legacy asset repair) → `13_14` (Help tables) → `14_15` (Qaida tables) → `15_16` (tasbih `category`) → `16_17` (hadith `narrator_chain`) → `17_18` (16-line IndoPak: `ayahs.text_indopak` column + `mushaf_layout_indopak16` table) → `18_19` (translations: dedupe + unique index on `(ayah_id, translator_id)`) → `19_20` (generalised mushaf storage: `mushaf_ayah_texts` + `mushaf_layout_lines`, drops `mushaf_layout_indopak16`) → `20_21` (tafseer range blocks: drops `tafseer_texts`, creates `tafseer_blocks`) → `21_22` (mushaf divisions as tables) → `22_23` (user data moves to `NimazUserDatabase`; deliberately empty) → `23_24` (the Qur'an's thematic layer: five content tables, created empty).
+
+**The Qur'an's thematic layer (`v24`).** Five content tables of *apparatus* — the kind of thing
+a printed mushaf carries in its margins and a reader app usually cannot answer at all:
+
+- `surah_overviews(surah_number, summary)` and
+  `surah_overview_sections(surah_number, position, heading, section_group, body)` — the long-form
+  background to each surah, split at the source's own `<h2>` boundaries **at import**, because the
+  source writes the same section under 65 different headings and folding those onto a handful of
+  `section_group` buckets is data work rather than something to redo on a device per screen.
+  Deliberately *not* `surah_info`, whose one-sentence `description` is first-party text written
+  for a list cell: the surah list reads 114 short rows and must never touch the ~900 KB of prose.
+- `ayah_themes(surah_number, ayah_from, ayah_to, theme, keywords, ayah_count)` — 1,049
+  non-overlapping passages tiling all 114 surahs, so "what is this passage about" is one lookup
+  wherever the reader happens to be. No second index: containment (`ayah_from <= ? AND ayah_to >= ?`)
+  rides the primary key, and Room compares index *sets*.
+- `quran_topics` and `quran_topic_ayahs(topic_id, ayah_id, surah_number, ayah_number)` — 2,512
+  subjects in **three** hierarchies that do not agree (the subject index, the thematic outline, the
+  ontology), and 30,687 citations. The citations are rows rather than the comma-separated string
+  upstream keeps them in, because the question the app asks most is the reverse one — *which topics
+  is this verse under* — which is an index lookup here and 2,512 `LIKE` scans there.
+
+`MIGRATION_23_24` creates all five **empty**: they are content, so the rows arrive the way every
+other content row does (§7). A device that upgrades before the schemaVersion 24 artifact lands
+therefore has the tables and no rows, and every read path treats that as "nothing to show" —
+`QuranRepository.hasThematicContent()` is what a screen asks before offering an entry point, and
+`DeviceStateCorpusTest.assertThematicLayerIsWholeOrAbsent` asserts the layer is whole *or* absent
+rather than requiring it, so the app's own PR is not red on a fact about another repository.
+
+**One HTML dialect.** `surah_overview_sections.body` and `quran_topics.description` carry markup,
+normalised at import onto four tags — `<p>`, `<strong>`, `<em>`, and `<a href="quran:2:153-251">` /
+`<a href="topic:61">`. A build rule (`thematic.sections-dialect`) refuses to ship a fifth, so
+`core/util/ThematicMarkup` is a 130-line scanner rather than an HTML parser, and the two link
+schemes address screens this app has: 446 cross-references the source writes as prose ("see
+2:153-251") are taps into the reader, and 509 `topic:` links are taps into the subject browser.
+
+**Where it surfaces.** The surah info screen grows a collapsible background (first section open —
+the longest runs to 47 KB of prose for one surah) and the surah's passage outline; the reader
+prints a passage heading where the outline starts a new subject (surah mode only — a juz spans a
+dozen surahs and would cost a query per surah per page turn); the Tafseer screen shows the verse's
+subjects as chips, capped at six; and `Route.QuranTopics` browses all three hierarchies. Two new
+search kinds — `theme` and `topic` — ride the shipped FTS index.
 
 **Tafseer range blocks (`v21`, #329).** Tafseer is range-based, not ayah-based — a single commentary passage (e.g. Ibn Kathir discussing 43:81-89) is one block, not nine identical rows. `tafseer_texts` (one row per ayah, `ayah_id`/`surah_number`/`ayah_number`) is replaced by `tafseer_blocks` (`tafseer_id`, `surah_number`, `ayah_start`, `ayah_end`, `text`), indexed on `(tafseer_id, surah_number, ayah_start, ayah_end)`. `MIGRATION_20_21` drops the old table outright — it is shipped content, not user data, replaced wholesale by the schemaVersion 21 artifact (`nimaz-data` issue #1) — and creates the new one empty; the block rows arrive with that artifact. `TafseerDao.getTafseerForAyah(surahNumber, ayahNumber, tafseerId)` now matches by containment (`ayah_start <= ? AND ayah_end >= ?`) instead of equality. `tafseer_highlights`/`tafseer_notes` (user data) are untouched: they stay keyed by the single `ayah_id` they were made on — the offsets they store index into the block text, which is unchanged for that ayah — but the reader now gathers every highlight/note whose ayah falls inside the *displayed block's* range (`TafseerDao.getHighlightsForRange`/`getNotesForRange`, joined against `ayahs`) so an annotation shows whenever its block is on screen, not only on the exact ayah it was created on. `TafseerPageContent` renders a "Commentary on 43:81-89" header from the block's own range, and `TafseerViewModel` hoists the reader's content-page index into `TafseerUiState.currentTafseerPage` so swiping to the next ayah of the same block holds reading position instead of reopening the block from page 1.
 

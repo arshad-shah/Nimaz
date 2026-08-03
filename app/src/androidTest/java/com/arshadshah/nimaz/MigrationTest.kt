@@ -190,6 +190,69 @@ class MigrationTest {
         }
     }
 
+    /**
+     * schemaVersion 24: the thematic layer's five tables are *created*, and nothing else.
+     *
+     * They hold content, so their rows arrive the way every other content row does — with the
+     * artifact on a fresh install, or on a patch. What this asserts is the shape a device is
+     * left in between the two: the tables exist, they are empty, and Room validates them
+     * against the exported v24 schema. Every read path in the app is built for exactly that
+     * state, so it has to be a state the migration actually produces.
+     */
+    @Test
+    fun migrate23To24_createsTheThematicTablesEmpty() {
+        helper.createDatabase(dbName, 23).close()
+
+        val db = helper.runMigrationsAndValidate(
+            dbName, 24, true, NimazDatabase.MIGRATION_23_24
+        )
+
+        listOf(
+            "surah_overviews",
+            "surah_overview_sections",
+            "ayah_themes",
+            "quran_topics",
+            "quran_topic_ayahs",
+        ).forEach { table ->
+            db.query("SELECT COUNT(*) FROM $table").use { cursor ->
+                assertThat(cursor.moveToFirst()).isTrue()
+                assertThat(cursor.getInt(0)).isEqualTo(0)
+            }
+        }
+    }
+
+    /**
+     * The fresh-install shape: the artifact already carries the thematic tables *and their
+     * rows*, and the migration still runs over them. Every statement is `IF NOT EXISTS`, so it
+     * has to be a no-op rather than a crash — and, more to the point, it must not take the rows
+     * away.
+     */
+    @Test
+    fun migrate23To24_toleratesAnArtifactThatAlreadyHasTheTables() {
+        helper.createDatabase(dbName, 23).use { db ->
+            db.execSQL(
+                "CREATE TABLE IF NOT EXISTS `ayah_themes` (`surah_number` INTEGER NOT NULL, " +
+                    "`ayah_from` INTEGER NOT NULL, `ayah_to` INTEGER NOT NULL, `theme` TEXT NOT NULL, " +
+                    "`keywords` TEXT NOT NULL, `ayah_count` INTEGER NOT NULL, " +
+                    "PRIMARY KEY(`surah_number`, `ayah_from`))"
+            )
+            db.execSQL(
+                "INSERT INTO ayah_themes (surah_number, ayah_from, ayah_to, theme, keywords, ayah_count) " +
+                    "VALUES (2, 8, 16, 'Hypocrites and the consequences of hypocrisy', '', 9)"
+            )
+        }
+
+        val db = helper.runMigrationsAndValidate(
+            dbName, 24, true, NimazDatabase.MIGRATION_23_24
+        )
+
+        db.query("SELECT theme FROM ayah_themes WHERE surah_number = 2 AND ayah_from = 8").use { cursor ->
+            assertThat(cursor.moveToFirst()).isTrue()
+            assertThat(cursor.getString(0))
+                .isEqualTo("Hypocrites and the consequences of hypocrisy")
+        }
+    }
+
     /** The fresh-install shape: the artifact already has the v22 layout, so the move is a no-op. */
     @Test
     fun migrate21To22_toleratesAnArtifactThatIsAlreadyReshaped() {

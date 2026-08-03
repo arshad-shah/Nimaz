@@ -30,7 +30,12 @@ flowchart LR
 
     subgraph Q["Quran"]
         QuranHub --> QuranReader & QuranPage & QuranJuz & QuranSearch & QuranBookmarks
+        QuranHub --> QuranTopics
         QuranReader --> SurahInfo & Tafseer
+        QuranTopics --> QuranTopicDetail
+        SurahInfo --> QuranTopicDetail
+        Tafseer --> QuranTopicDetail
+        QuranTopicDetail --> QuranTopicDetail
         SettingsQuran --> SelectReciter & SelectTranslation
     end
 
@@ -163,6 +168,8 @@ All routes live in `core/navigation/Routes.kt` and are wired in `core/navigation
 | `QuranBookmarks` | — | QuranBookmarksScreen |
 | `SurahInfo` | `surahNumber: Int` | SurahInfoScreen |
 | `Tafseer` | `surahNumber: Int, ayahNumber: Int = 1` | TafseerScreen |
+| `QuranTopics` | — | QuranTopicsScreen — the subject browser. **One route for the whole descent:** the ontology goes five levels deep and `QuranTopicsViewModel` holds the path, so browsing down and back is one back-stack entry, not five |
+| `QuranTopicDetail` | `topicId: Int, tree: String = "thematic"` | QuranTopicDetailScreen. `tree` is a `TopicTree.wire` value rather than the enum, because a route argument needs a `NavType`; an unrecognised value falls back to the thematic tree. Reachable from the browser, from a `topic:` link in a surah's background, from the Tafseer screen's topic chips, and **from itself** (a description's cross-links) |
 | `SelectReciter` | — | SelectReciterScreen |
 | `SelectTranslation` | — | SelectTranslationScreen |
 

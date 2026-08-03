@@ -23,7 +23,9 @@ import com.arshadshah.nimaz.domain.model.QuranSearchResult
 import com.arshadshah.nimaz.domain.model.QuranTranslation
 import com.arshadshah.nimaz.domain.model.ReadingProgress
 import com.arshadshah.nimaz.domain.model.Surah
+import com.arshadshah.nimaz.domain.model.AyahTheme
 import com.arshadshah.nimaz.domain.model.SurahInfo
+import com.arshadshah.nimaz.domain.model.SurahOverview
 import com.arshadshah.nimaz.domain.model.SurahWithAyahs
 import com.arshadshah.nimaz.domain.model.TranslationLanguage
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
@@ -71,6 +73,22 @@ data class FavoriteAyahUi(
     val arabicText: String?,
     val createdAt: Long,
 )
+
+/**
+ * The Qur'an's thematic layer for one surah: its long-form background and its passage outline.
+ *
+ * [isAvailable] separates "this install has no thematic content" from "this surah has none".
+ * Only the first is possible in practice — every surah has an overview and at least one passage
+ * — but an install that upgraded before the schemaVersion 24 artifact arrived has neither, and
+ * the screen says so instead of showing two empty sections.
+ */
+data class SurahThematicUiState(
+    val overview: SurahOverview? = null,
+    val passages: List<AyahTheme> = emptyList(),
+    val isLoading: Boolean = true,
+) {
+    val isAvailable: Boolean get() = overview != null || passages.isNotEmpty()
+}
 
 data class QuranHomeUiState(
     val surahs: List<Surah> = emptyList(),
@@ -137,10 +155,22 @@ data class QuranReaderUiState(
      * pager's bounds come from the edition's real page ranges rather than the count declared
      * on the enum.
      */
-    val pagination: MushafPagination = MushafPagination.fallback(MushafScript.DEFAULT)
+    val pagination: MushafPagination = MushafPagination.fallback(MushafScript.DEFAULT),
+    /**
+     * The passage outline of the surah being read (schemaVersion 24), used to print a heading
+     * where the mushaf's own outline starts a new subject. Empty in juz and page mode, and on
+     * an install whose artifact predates the thematic layer.
+     */
+    val passages: List<AyahTheme> = emptyList()
 ) {
     /** Whether to render stored line-accurate pages instead of flowing ayahs into a page. */
     val useLineAccurateLayout: Boolean get() = mushafScript.isLineAccurate
+
+    /**
+     * Passage headings by the verse number each one opens on, so the list can ask "does a
+     * passage start here" per row instead of scanning 282 ranges for every one of them.
+     */
+    val passageStarts: Map<Int, AyahTheme> by lazy { passages.associateBy { it.ayahFrom } }
 
     /**
      * Language of the active translation — what its prose must be *drawn* in (face, direction
@@ -243,7 +273,50 @@ class QuranViewModel @Inject constructor(
     private val _surahInfo = MutableStateFlow<SurahInfo?>(null)
     val surahInfo: StateFlow<SurahInfo?> = _surahInfo.asStateFlow()
 
+    /**
+     * The surah's long-form background and its passage outline (schemaVersion 24).
+     *
+     * Kept beside [surahInfo] rather than folded into it: they are different content with
+     * different provenance and different sizes — one row of one sentence against ~8 KB of prose
+     * per surah — and the surah *list* reads the first for 114 rows and must never touch the
+     * second.
+     */
+    private val _surahThematic = MutableStateFlow(SurahThematicUiState())
+    val surahThematic: StateFlow<SurahThematicUiState> = _surahThematic.asStateFlow()
+
     val audioState: StateFlow<AudioState> = audioManager.audioState
+
+    /**
+     * The passage outline for the surah the reader is on, so the verse list can print a heading
+     * where the mushaf's own outline starts a new subject.
+     *
+     * Surah mode only, and deliberately: a juz spans up to a dozen surahs and a page can span
+     * two, so covering them would mean a query per surah on every page turn to label a boundary
+     * that mode rarely crosses. Surah mode is where a reader is reading *through* something,
+     * which is the case a passage heading is for.
+     */
+    private fun loadReaderPassages(surahNumber: Int) {
+        passagesJob?.cancel()
+        passagesJob = viewModelScope.launch {
+            val passages = quranUseCases.getSurahThemes(surahNumber)
+            _readerState.update { state ->
+                // A slower load for a surah the reader has since left must not repaint headings
+                // over a different surah's verses.
+                if (readerTarget != ReaderTarget.Surah(surahNumber)) state
+                else state.copy(passages = passages)
+            }
+        }
+    }
+
+    private var passagesJob: Job? = null
+
+    /**
+     * One job for the info screen's thematic load, cancelled when a different surah asks.
+     *
+     * The screen is reachable from the surah list, from a deep link and from the reader, so two
+     * surahs can be requested in quick succession — without this, the slower of the two wins.
+     */
+    private var surahThematicJob: Job? = null
 
     // Debounced search support
     private val searchQueryFlow = MutableStateFlow("")
@@ -587,6 +660,28 @@ class QuranViewModel @Inject constructor(
         viewModelScope.launch {
             _surahInfo.value = quranUseCases.getSurahInfo(surahNumber)
         }
+        loadSurahThematic(surahNumber)
+    }
+
+    /**
+     * The background and passage outline, in one job.
+     *
+     * Both come from the same artifact and are shown on the same screen, so loading them
+     * separately would only buy two spinners that finish at the same time. A surah whose
+     * overview is absent is not an error — see [SurahThematicUiState.isAvailable].
+     */
+    private fun loadSurahThematic(surahNumber: Int) {
+        surahThematicJob?.cancel()
+        surahThematicJob = viewModelScope.launch {
+            _surahThematic.value = SurahThematicUiState(isLoading = true)
+            val overview = quranUseCases.getSurahOverview(surahNumber)
+            val themes = quranUseCases.getSurahThemes(surahNumber)
+            _surahThematic.value = SurahThematicUiState(
+                overview = overview,
+                passages = themes,
+                isLoading = false,
+            )
+        }
     }
 
     private fun playSurahFromInfo(surahNumber: Int) {
@@ -729,9 +824,11 @@ class QuranViewModel @Inject constructor(
                 surahWithAyahs = null,
                 ayahs = emptyList(),
                 title = "",
-                subtitle = ""
+                subtitle = "",
+                passages = emptyList()
             )
         }
+        loadReaderPassages(surahNumber)
         contentJob?.cancel()
         cancelPageJobs()
         contentJob = viewModelScope.launch {

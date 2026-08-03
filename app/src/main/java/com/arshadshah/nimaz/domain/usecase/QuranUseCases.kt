@@ -11,7 +11,12 @@ import com.arshadshah.nimaz.domain.model.QuranSearchResult
 import com.arshadshah.nimaz.domain.model.ReadingProgress
 import com.arshadshah.nimaz.domain.model.RevelationType
 import com.arshadshah.nimaz.domain.model.Surah
+import com.arshadshah.nimaz.domain.model.AyahTheme
+import com.arshadshah.nimaz.domain.model.QuranTopic
 import com.arshadshah.nimaz.domain.model.SurahInfo
+import com.arshadshah.nimaz.domain.model.SurahOverview
+import com.arshadshah.nimaz.domain.model.TopicDetail
+import com.arshadshah.nimaz.domain.model.TopicTree
 import com.arshadshah.nimaz.domain.model.SurahWithAyahs
 import com.arshadshah.nimaz.domain.model.Translator
 import com.arshadshah.nimaz.domain.repository.QuranRepository
@@ -180,6 +185,75 @@ class GetSurahInfoUseCase @Inject constructor(
     suspend operator fun invoke(surahNumber: Int): SurahInfo? = repository.getSurahInfo(surahNumber)
 }
 
+/**
+ * The thematic layer (schemaVersion 24). Every one of these returns nothing rather than
+ * failing on an install whose artifact predates it — see [HasThematicContentUseCase], which
+ * is what a screen asks before it offers an entry point into any of them.
+ */
+class GetSurahOverviewUseCase @Inject constructor(
+    private val repository: QuranRepository
+) {
+    suspend operator fun invoke(surahNumber: Int): SurahOverview? =
+        repository.getSurahOverview(surahNumber)
+}
+
+class GetSurahThemesUseCase @Inject constructor(
+    private val repository: QuranRepository
+) {
+    suspend operator fun invoke(surahNumber: Int): List<AyahTheme> =
+        repository.getThemesForSurah(surahNumber)
+}
+
+/** The passage a verse falls in — at most one, since the ranges never overlap. */
+class GetThemeForAyahUseCase @Inject constructor(
+    private val repository: QuranRepository
+) {
+    suspend operator fun invoke(surahNumber: Int, ayahNumber: Int): AyahTheme? =
+        repository.getThemeForAyah(surahNumber, ayahNumber)
+}
+
+class GetTopicTreeRootsUseCase @Inject constructor(
+    private val repository: QuranRepository
+) {
+    suspend operator fun invoke(tree: TopicTree): List<QuranTopic> =
+        repository.getTopicTreeRoots(tree)
+}
+
+class GetTopicDetailUseCase @Inject constructor(
+    private val repository: QuranRepository
+) {
+    suspend operator fun invoke(topicId: Int, tree: TopicTree): TopicDetail? =
+        repository.getTopicDetail(topicId, tree)
+}
+
+/** Which subjects cite this verse — busiest first. */
+class GetTopicsForAyahUseCase @Inject constructor(
+    private val repository: QuranRepository
+) {
+    suspend operator fun invoke(ayahId: Int): List<QuranTopic> =
+        repository.getTopicsForAyah(ayahId)
+}
+
+class SearchTopicsUseCase @Inject constructor(
+    private val repository: QuranRepository
+) {
+    suspend operator fun invoke(query: String, limit: Int = 60): List<QuranTopic> =
+        repository.searchTopics(query, limit)
+}
+
+/**
+ * Whether this install's artifact carries the thematic layer at all.
+ *
+ * `MIGRATION_23_24` creates the tables on every device; the rows only arrive with a
+ * schemaVersion 24 artifact. Screens ask this before showing an entry point, so an install
+ * in between shows one fewer affordance rather than an empty screen behind a promising tab.
+ */
+class HasThematicContentUseCase @Inject constructor(
+    private val repository: QuranRepository
+) {
+    suspend operator fun invoke(): Boolean = repository.hasThematicContent()
+}
+
 class GetPageAyahRangesUseCase @Inject constructor(
     private val repository: QuranRepository
 ) {
@@ -290,6 +364,14 @@ data class QuranUseCases(
     val updateReadingPosition: UpdateReadingPositionUseCase,
     val incrementAyahsRead: IncrementAyahsReadUseCase,
     val getSurahInfo: GetSurahInfoUseCase,
+    val getSurahOverview: GetSurahOverviewUseCase,
+    val getSurahThemes: GetSurahThemesUseCase,
+    val getThemeForAyah: GetThemeForAyahUseCase,
+    val getTopicTreeRoots: GetTopicTreeRootsUseCase,
+    val getTopicDetail: GetTopicDetailUseCase,
+    val getTopicsForAyah: GetTopicsForAyahUseCase,
+    val searchTopics: SearchTopicsUseCase,
+    val hasThematicContent: HasThematicContentUseCase,
     val getPageAyahRanges: GetPageAyahRangesUseCase,
     val getMushafPagination: GetMushafPaginationUseCase,
     val getMushafPageLayout: GetMushafPageLayoutUseCase,

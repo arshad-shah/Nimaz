@@ -1000,6 +1000,38 @@
     <string name="surah_info_theme_worship">İbadet</string>
     <string name="surah_info_theme_morality">Ahlak</string>
     <string name="surah_info_theme_remembrance">Zikir</string>
+    <!-- Sure Bilgisi ekranı — tematik katman (schemaVersion 24) -->
+    <string name="surah_info_background">Arka Plan</string>
+    <string name="surah_info_passages">Bölümler</string>
+    <string name="surah_info_passages_subtitle">Bu surede %1$d bölüm</string>
+    <string name="surah_info_section_name">Adı</string>
+    <string name="surah_info_section_revelation">İniş Dönemi</string>
+    <string name="surah_info_section_theme">Konu ve İçerik</string>
+    <string name="surah_info_section_background">Tarihsel Arka Plan</string>
+    <string name="surah_info_section_note">Not</string>
+    <string name="surah_info_passage_verses">%1$d ayet</string>
+    <string name="surah_info_passage_verse">1 ayet</string>
+
+    <!-- Kur\'an konuları -->
+    <string name="quran_topics_title">Konular</string>
+    <string name="quran_topics_subtitle">Kur\'an neden söz ediyor</string>
+    <string name="quran_topics_search_hint">Konu ara…</string>
+    <string name="quran_topics_tree_thematic">Temalar</string>
+    <string name="quran_topics_tree_ontology">Türler</string>
+    <string name="quran_topics_tree_index">Dizin</string>
+    <string name="quran_topics_verses">%1$d ayet</string>
+    <string name="quran_topics_verse">1 ayet</string>
+    <string name="quran_topics_no_results_title">Eşleşme yok</string>
+    <string name="quran_topics_no_results">“%1$s” ile eşleşen konu yok. Daha kısa bir sözcük deneyin — dizin sözcük parçalarını değil, tam sözcükleri eşleştirir.</string>
+    <string name="quran_topics_unavailable_title">Konular henüz burada değil</string>
+    <string name="quran_topics_unavailable">Bu kurulumun Kur\'an içeriği konu dizininden eski. Dizin bir sonraki içerik güncellemesiyle gelecek — yapmanız gereken bir şey yok.</string>
+    <string name="quran_topic_verses_section">Bu konudaki ayetler</string>
+    <string name="quran_topic_subtopics">Alt konular</string>
+    <string name="quran_topic_related">İlgili konular</string>
+    <string name="quran_topic_not_found">Bu konu dizinde yok.</string>
+    <string name="quran_topic_open_reader">Okuyucuda aç</string>
+    <string name="cd_topic_up">Bir üst düzeye</string>
+    <string name="quran_ayah_topics">Konular</string>
     <string name="cd_switch_to_list_view">Liste görünümüne geç</string>
     <string name="cd_switch_to_page_view">Sayfa görünümüne geç</string>
     <string name="quran_continue_next_surah">Sonraki sureye geç</string>

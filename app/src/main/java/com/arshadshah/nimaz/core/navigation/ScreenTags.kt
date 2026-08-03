@@ -30,6 +30,8 @@ object ScreenTags {
     const val TafseerChapters = "screen_tafseer_chapters"
     const val Tafseer = "screen_tafseer"
     const val SurahInfo = "screen_surah_info"
+    const val QuranTopics = "screen_quran_topics"
+    const val QuranTopicDetail = "screen_quran_topic_detail"
     const val QuranPage = "screen_quran_page"
     const val QuranJuz = "screen_quran_juz"
     const val QuranSearch = "screen_quran_search"

@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.domain.model.Ayah
+import com.arshadshah.nimaz.domain.model.QuranTopic
 import com.arshadshah.nimaz.domain.model.TafseerHighlight
 import com.arshadshah.nimaz.domain.model.TafseerNote
 import com.arshadshah.nimaz.domain.model.TafseerSource
@@ -36,7 +37,15 @@ data class TafseerUiState(
     val isLoading: Boolean = true,
     // Sources whose seed data actually has non-empty text for the current ayah.
     // Used to recommend an alternate source when the selected one has no content.
-    val availableSources: Set<TafseerSource> = emptySet()
+    val availableSources: Set<TafseerSource> = emptySet(),
+    /**
+     * The subjects the corpus files this verse under (schemaVersion 24) — busiest first.
+     *
+     * The commentary screen is where a reader is studying one verse, which is exactly where
+     * "what else does the Qur'an say about this" is the next question. Empty for a verse no
+     * topic cites, and on an install whose artifact predates the topic index.
+     */
+    val topics: List<QuranTopic> = emptyList()
 )
 
 sealed interface TafseerEvent {
@@ -190,7 +199,10 @@ class TafseerViewModel @Inject constructor(
             _state.value = _state.value.copy(
                 currentTafseer = tafseer,
                 currentTafseerPage = if (sameBlock) _state.value.currentTafseerPage else 0,
-                availableSources = available
+                availableSources = available,
+                // Keyed on the verse, not the block: a block can span nine verses and the
+                // subjects the corpus files 43:81 under are not the ones it files 43:89 under.
+                topics = quranUseCases.getTopicsForAyah(ayah.id)
             )
 
             if (tafseer != null) {
