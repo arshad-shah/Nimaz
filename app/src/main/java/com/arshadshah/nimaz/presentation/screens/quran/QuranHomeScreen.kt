@@ -30,6 +30,7 @@ import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
@@ -122,6 +123,7 @@ fun QuranHomeScreen(
     onNavigateToSettings: () -> Unit = {},
     onNavigateToSurahInfo: (Int) -> Unit = {},
     onNavigateToSearch: () -> Unit = {},
+    onNavigateToTopics: () -> Unit = {},
     onNavigateToQuranAyah: (Int, Int) -> Unit = { surah, ayah -> onNavigateToSurah(surah) },
     onNavigateToKhatam: () -> Unit = {},
     onNavigateToKhatamDetail: (Long) -> Unit = {},
@@ -163,6 +165,15 @@ fun QuranHomeScreen(
                 title = stringResource(R.string.quran_home_title),
                 scrollBehavior = scrollBehavior,
                 actions = {
+                    // Topics — the Qur'an's subject index (schemaVersion 24). It sits beside
+                    // search because it answers the same question from the other end: search
+                    // needs the words a verse uses, this needs only the subject.
+                    IconButton(onClick = onNavigateToTopics) {
+                        NimazIcon(
+                            imageVector = Icons.Default.Category,
+                            contentDescription = stringResource(R.string.quran_topics_title)
+                        )
+                    }
                     // Search icon
                     IconButton(onClick = onNavigateToSearch) {
                         NimazIcon(

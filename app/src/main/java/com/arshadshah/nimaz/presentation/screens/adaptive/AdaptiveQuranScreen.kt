@@ -34,6 +34,7 @@ import kotlinx.coroutines.launch
 fun AdaptiveQuranScreen(
     navController: NavController,
     onNavigateToSearch: () -> Unit,
+    onNavigateToTopics: () -> Unit,
     onNavigateToBookmarks: () -> Unit,
     onNavigateToSettings: () -> Unit,
     onNavigateToSurahInfo: (Int) -> Unit,
@@ -46,6 +47,7 @@ fun AdaptiveQuranScreen(
         // Phone: Unchanged behavior — delegate to QuranHomeScreen directly
         QuranHomeScreen(
             onNavigateToSearch = onNavigateToSearch,
+            onNavigateToTopics = onNavigateToTopics,
             onNavigateToSurah = { surahNumber ->
                 navController.navigate(Route.QuranReader(surahNumber))
             },
@@ -99,6 +101,7 @@ fun AdaptiveQuranScreen(
                 AnimatedPane {
                     QuranHomeScreen(
                         onNavigateToSearch = onNavigateToSearch,
+                        onNavigateToTopics = onNavigateToTopics,
                         onNavigateToSurah = { surahNumber ->
                             scope.launch {
                                 navigator.navigateTo(

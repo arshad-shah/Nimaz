@@ -91,6 +91,9 @@ import com.arshadshah.nimaz.presentation.screens.qibla.QiblaScreen
 import com.arshadshah.nimaz.presentation.screens.quran.QuranReaderScreen
 import com.arshadshah.nimaz.presentation.screens.quran.SelectReciterScreen
 import com.arshadshah.nimaz.presentation.screens.quran.SelectTranslationScreen
+import com.arshadshah.nimaz.domain.model.TopicTree
+import com.arshadshah.nimaz.presentation.screens.quran.QuranTopicDetailScreen
+import com.arshadshah.nimaz.presentation.screens.quran.QuranTopicsScreen
 import com.arshadshah.nimaz.presentation.screens.quran.SurahInfoScreen
 import com.arshadshah.nimaz.presentation.screens.quran.TafseerChaptersScreen
 import com.arshadshah.nimaz.presentation.screens.quran.TafseerScreen
@@ -348,6 +351,7 @@ fun NavGraph(
                 AdaptiveQuranScreen(
                     navController = navController,
                     onNavigateToSearch = { navController.navigate(Route.GlobalSearch) },
+                    onNavigateToTopics = { navController.navigate(Route.QuranTopics) },
                     onNavigateToBookmarks = { navController.navigate(Route.QuranBookmarks) },
                     onNavigateToSettings = { navController.navigate(Route.SettingsQuran) },
                     onNavigateToSurahInfo = { surahNumber ->
@@ -444,7 +448,10 @@ fun NavGraph(
                 TafseerScreen(
                     surahNumber = args.surahNumber,
                     ayahNumber = args.ayahNumber,
-                    onNavigateBack = { navController.popBackStack() }
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToTopic = { topicId ->
+                        navController.navigate(Route.QuranTopicDetail(topicId))
+                    }
                 )
             }
 
@@ -455,6 +462,36 @@ fun NavGraph(
                     onNavigateBack = { navController.popBackStack() },
                     onStartReading = {
                         navController.navigate(Route.QuranReader(args.surahNumber))
+                    },
+                    onOpenAyah = { surah, ayah ->
+                        navController.navigate(Route.QuranReader(surah, ayah))
+                    },
+                    onOpenTopic = { topicId ->
+                        navController.navigate(Route.QuranTopicDetail(topicId))
+                    }
+                )
+            }
+
+            taggedComposable<Route.QuranTopics>(ScreenTags.QuranTopics) {
+                QuranTopicsScreen(
+                    onNavigateBack = { navController.popBackStack() },
+                    onOpenTopic = { topicId, tree ->
+                        navController.navigate(Route.QuranTopicDetail(topicId, tree.wire))
+                    }
+                )
+            }
+
+            taggedComposable<Route.QuranTopicDetail>(ScreenTags.QuranTopicDetail) { backStackEntry ->
+                val args = backStackEntry.toRoute<Route.QuranTopicDetail>()
+                QuranTopicDetailScreen(
+                    topicId = args.topicId,
+                    tree = TopicTree.fromWire(args.tree),
+                    onNavigateBack = { navController.popBackStack() },
+                    onOpenAyah = { surah, ayah ->
+                        navController.navigate(Route.QuranReader(surah, ayah))
+                    },
+                    onOpenTopic = { topicId, tree ->
+                        navController.navigate(Route.QuranTopicDetail(topicId, tree.wire))
                     }
                 )
             }

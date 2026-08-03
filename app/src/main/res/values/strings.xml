@@ -1253,6 +1253,39 @@
     <string name="surah_info_theme_morality">Morality</string>
     <string name="surah_info_theme_remembrance">Remembrance</string>
 
+    <!-- Surah Info Screen — the thematic layer (schemaVersion 24) -->
+    <string name="surah_info_background">Background</string>
+    <string name="surah_info_passages">Passages</string>
+    <string name="surah_info_passages_subtitle">%1$d passages in this surah</string>
+    <string name="surah_info_section_name">Name</string>
+    <string name="surah_info_section_revelation">Period of Revelation</string>
+    <string name="surah_info_section_theme">Theme and Subject Matter</string>
+    <string name="surah_info_section_background">Historical Background</string>
+    <string name="surah_info_section_note">Note</string>
+    <string name="surah_info_passage_verses">%1$d verses</string>
+    <string name="surah_info_passage_verse">1 verse</string>
+
+    <!-- Quran topics -->
+    <string name="quran_topics_title">Topics</string>
+    <string name="quran_topics_subtitle">What the Qur\'an speaks about</string>
+    <string name="quran_topics_search_hint">Search subjects…</string>
+    <string name="quran_topics_tree_thematic">Themes</string>
+    <string name="quran_topics_tree_ontology">Kinds</string>
+    <string name="quran_topics_tree_index">Index</string>
+    <string name="quran_topics_verses">%1$d verses</string>
+    <string name="quran_topics_verse">1 verse</string>
+    <string name="quran_topics_no_results_title">Nothing matched</string>
+    <string name="quran_topics_no_results">No subject matches “%1$s”. Try a shorter word — the index matches whole words, not fragments.</string>
+    <string name="quran_topics_unavailable_title">Topics aren\'t here yet</string>
+    <string name="quran_topics_unavailable">This install\'s Qur\'an content predates the topic index. It arrives with the next content update — nothing to do.</string>
+    <string name="quran_topic_verses_section">Verses on this subject</string>
+    <string name="quran_topic_subtopics">Subtopics</string>
+    <string name="quran_topic_related">Related subjects</string>
+    <string name="quran_topic_not_found">This subject isn\'t in the index.</string>
+    <string name="quran_topic_open_reader">Open in reader</string>
+    <string name="cd_topic_up">Up one level</string>
+    <string name="quran_ayah_topics">Topics</string>
+
     <!-- Quran Reader Screen -->
     <string name="cd_switch_to_list_view">Switch to list view</string>
     <string name="cd_switch_to_page_view">Switch to page view</string>

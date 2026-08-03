@@ -21,6 +21,7 @@ import com.arshadshah.nimaz.data.local.search.SearchIndexDao
 import com.arshadshah.nimaz.data.local.database.entity.AsmaUlHusnaEntity
 import com.arshadshah.nimaz.data.local.database.entity.AsmaUnNabiEntity
 import com.arshadshah.nimaz.data.local.database.entity.AyahEntity
+import com.arshadshah.nimaz.data.local.database.entity.AyahThemeEntity
 import com.arshadshah.nimaz.data.local.database.entity.DuaCategoryEntity
 import com.arshadshah.nimaz.data.local.database.entity.DuaEntity
 import com.arshadshah.nimaz.data.local.database.entity.HadithBookEntity
@@ -37,8 +38,12 @@ import com.arshadshah.nimaz.data.local.database.entity.QaidaCellEntity
 import com.arshadshah.nimaz.data.local.database.entity.QaidaLessonEntity
 import com.arshadshah.nimaz.data.local.database.entity.QaidaLetterEntity
 import com.arshadshah.nimaz.data.local.database.entity.QaidaLineEntity
+import com.arshadshah.nimaz.data.local.database.entity.QuranTopicAyahEntity
+import com.arshadshah.nimaz.data.local.database.entity.QuranTopicEntity
 import com.arshadshah.nimaz.data.local.database.entity.SurahEntity
 import com.arshadshah.nimaz.data.local.database.entity.SurahInfoEntity
+import com.arshadshah.nimaz.data.local.database.entity.SurahOverviewEntity
+import com.arshadshah.nimaz.data.local.database.entity.SurahOverviewSectionEntity
 import com.arshadshah.nimaz.data.local.database.entity.HizbQuarterEntity
 import com.arshadshah.nimaz.data.local.database.entity.JuzEntity
 import com.arshadshah.nimaz.data.local.database.entity.ManzilEntity
@@ -55,7 +60,7 @@ import com.arshadshah.nimaz.data.local.database.entity.TranslationEntity
  * migration) for any schema change — it drives both the Room `@Database(version = …)`
  * annotation below and `NimazDatabase.SCHEMA_VERSION` (used to tag crash reports).
  */
-const val NIMAZ_DATABASE_VERSION = 23
+const val NIMAZ_DATABASE_VERSION = 24
 
 @Database(
     entities = [
@@ -73,6 +78,11 @@ const val NIMAZ_DATABASE_VERSION = 23
         SajdaEntity::class,
         SurahStructureEntity::class,
         MushafLayoutLineEntity::class,
+        SurahOverviewEntity::class,
+        SurahOverviewSectionEntity::class,
+        AyahThemeEntity::class,
+        QuranTopicEntity::class,
+        QuranTopicAyahEntity::class,
         // Hadith
         HadithBookEntity::class,
         HadithEntity::class,
@@ -378,6 +388,74 @@ abstract class NimazDatabase : RoomDatabase() {
         // can drop them once there is nothing left to recover.
         val MIGRATION_22_23 = object : Migration(22, 23) {
             override fun migrate(db: SupportSQLiteDatabase) = Unit
+        }
+
+        /**
+         * schemaVersion 24 — the Qur'an gains its thematic layer: the long-form background to
+         * each surah, the passages the mushaf's own outline divides it into, and the subject
+         * hierarchies that say which verses speak about what.
+         *
+         * All five tables are **content**, so this migration only creates them empty. The rows
+         * arrive the way every other content row does (§7): with the artifact on a fresh
+         * install, or via `ContentPatchSeeder` on an upgrade. A device that upgrades before the
+         * matching artifact ships therefore has the tables and no rows, and every read path is
+         * built to treat that as "nothing to show" rather than as an error.
+         *
+         * Every statement is `IF NOT EXISTS`, so running this against a database that already
+         * arrived with the tables — a fresh install off a schemaVersion 24 artifact — is a
+         * no-op rather than a crash.
+         */
+        val MIGRATION_23_24 = object : Migration(23, 24) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS `surah_overviews` (
+                        `surah_number` INTEGER NOT NULL, `summary` TEXT NOT NULL,
+                        PRIMARY KEY(`surah_number`))
+                    """.trimIndent()
+                )
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS `surah_overview_sections` (
+                        `surah_number` INTEGER NOT NULL, `position` INTEGER NOT NULL,
+                        `heading` TEXT NOT NULL, `section_group` TEXT NOT NULL, `body` TEXT NOT NULL,
+                        PRIMARY KEY(`surah_number`, `position`))
+                    """.trimIndent()
+                )
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS `ayah_themes` (
+                        `surah_number` INTEGER NOT NULL, `ayah_from` INTEGER NOT NULL,
+                        `ayah_to` INTEGER NOT NULL, `theme` TEXT NOT NULL,
+                        `keywords` TEXT NOT NULL, `ayah_count` INTEGER NOT NULL,
+                        PRIMARY KEY(`surah_number`, `ayah_from`))
+                    """.trimIndent()
+                )
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS `quran_topics` (
+                        `topic_id` INTEGER NOT NULL, `name` TEXT NOT NULL,
+                        `arabic_name` TEXT NOT NULL, `parent_id` INTEGER,
+                        `thematic_parent_id` INTEGER, `ontology_parent_id` INTEGER,
+                        `description` TEXT NOT NULL, `wiki_link` TEXT NOT NULL,
+                        `is_thematic` INTEGER NOT NULL, `is_ontology` INTEGER NOT NULL,
+                        `ayah_count` INTEGER NOT NULL, `related_topic_ids` TEXT NOT NULL,
+                        PRIMARY KEY(`topic_id`))
+                    """.trimIndent()
+                )
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_quran_topics_parent_id` ON `quran_topics` (`parent_id`)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_quran_topics_thematic_parent_id` ON `quran_topics` (`thematic_parent_id`)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_quran_topics_ontology_parent_id` ON `quran_topics` (`ontology_parent_id`)")
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS `quran_topic_ayahs` (
+                        `topic_id` INTEGER NOT NULL, `ayah_id` INTEGER NOT NULL,
+                        `surah_number` INTEGER NOT NULL, `ayah_number` INTEGER NOT NULL,
+                        PRIMARY KEY(`topic_id`, `ayah_id`))
+                    """.trimIndent()
+                )
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_quran_topic_ayahs_ayah_id` ON `quran_topic_ayahs` (`ayah_id`)")
+            }
         }
 
         val MIGRATION_21_22 = object : Migration(21, 22) {
@@ -1074,6 +1152,7 @@ abstract class NimazDatabase : RoomDatabase() {
             MIGRATION_20_21,
             MIGRATION_21_22,
             MIGRATION_22_23,
+            MIGRATION_23_24,
         )
     }
 }

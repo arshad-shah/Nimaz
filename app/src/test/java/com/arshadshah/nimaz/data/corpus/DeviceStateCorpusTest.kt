@@ -96,6 +96,8 @@ class DeviceStateCorpusTest {
 
                 assertThat(userVersion(db)).isEqualTo(NIMAZ_DATABASE_VERSION)
 
+                assertThematicLayerIsWholeOrAbsent(db)
+
                 // Absent or blank means "just assert" — the harness role is opt-in, so the
                 // suite stays a fast regression check on CI and only writes 147 MB on demand.
                 System.getProperty(OUT_PROPERTY)
@@ -119,6 +121,46 @@ class DeviceStateCorpusTest {
             .allowMainThreadQueries()
             .build()
             .also { it.openHelper.writableDatabase }
+    }
+
+    /**
+     * The thematic layer arrives whole or not at all.
+     *
+     * It cannot be in [CONTENT_TABLES]: `MIGRATION_23_24` creates its five tables on every
+     * device and the rows only arrive with a schemaVersion 24 artifact, so between the app
+     * bumping and the content release landing they are legitimately empty — and asserting
+     * non-empty would make the app's own PR red on a fact about a file in another repository.
+     *
+     * What is *not* legitimate is a partial one. The five tables are one release: a citation
+     * list with no topics to name, or an outline with no overviews beside it, is an artifact
+     * built from a half-imported corpus. So the assertion is conditional on the layer being
+     * present at all, and engages by itself the moment `data.lock.json` points at an artifact
+     * that carries it.
+     */
+    private fun assertThematicLayerIsWholeOrAbsent(db: NimazDatabase) {
+        val counts = THEMATIC_TABLES.associateWith { rowCount(db, it) }
+        if (counts.values.all { it == 0 }) return
+        for ((table, rows) in counts) {
+            assertThat("$table=$rows").isNotEqualTo("$table=0")
+        }
+        // Every verse a topic cites has to be a verse the corpus has, or the topic screen
+        // opens the reader on nothing.
+        assertThat(
+            scalar(
+                db,
+                "SELECT COUNT(*) FROM quran_topic_ayahs ta " +
+                    "LEFT JOIN ayahs a ON a.id = ta.ayah_id WHERE a.id IS NULL"
+            )
+        ).isEqualTo(0)
+        // And every overview section belongs to an overview.
+        assertThat(
+            scalar(
+                db,
+                "SELECT COUNT(*) FROM surah_overview_sections s " +
+                    "LEFT JOIN surah_overviews o ON o.surah_number = s.surah_number " +
+                    "WHERE o.surah_number IS NULL"
+            )
+        ).isEqualTo(0)
     }
 
     private fun contentRowCounts(db: NimazDatabase): Map<String, Int> =
@@ -197,6 +239,19 @@ class DeviceStateCorpusTest {
             "qaida_letters",
             "qaida_cells",
             "qaida_lines",
+        )
+
+        /**
+         * The Qur'an's thematic layer (schemaVersion 24) — apparatus, not scripture. Held apart
+         * from [CONTENT_TABLES] because "empty" is a valid state for it until the matching
+         * content release lands; see `assertThematicLayerIsWholeOrAbsent`.
+         */
+        val THEMATIC_TABLES = listOf(
+            "surah_overviews",
+            "surah_overview_sections",
+            "ayah_themes",
+            "quran_topics",
+            "quran_topic_ayahs",
         )
 
         /**

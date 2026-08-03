@@ -998,6 +998,38 @@
     <string name="surah_info_theme_worship">Anbetung</string>
     <string name="surah_info_theme_morality">Moral</string>
     <string name="surah_info_theme_remembrance">Gedenken</string>
+    <!-- Surah-Info-Bildschirm — die thematische Ebene (schemaVersion 24) -->
+    <string name="surah_info_background">Hintergrund</string>
+    <string name="surah_info_passages">Abschnitte</string>
+    <string name="surah_info_passages_subtitle">%1$d Abschnitte in dieser Surah</string>
+    <string name="surah_info_section_name">Name</string>
+    <string name="surah_info_section_revelation">Offenbarungszeit</string>
+    <string name="surah_info_section_theme">Thema und Inhalt</string>
+    <string name="surah_info_section_background">Historischer Hintergrund</string>
+    <string name="surah_info_section_note">Hinweis</string>
+    <string name="surah_info_passage_verses">%1$d Verse</string>
+    <string name="surah_info_passage_verse">1 Vers</string>
+
+    <!-- Quran-Themen -->
+    <string name="quran_topics_title">Themen</string>
+    <string name="quran_topics_subtitle">Wovon der Koran spricht</string>
+    <string name="quran_topics_search_hint">Themen suchen…</string>
+    <string name="quran_topics_tree_thematic">Themen</string>
+    <string name="quran_topics_tree_ontology">Arten</string>
+    <string name="quran_topics_tree_index">Register</string>
+    <string name="quran_topics_verses">%1$d Verse</string>
+    <string name="quran_topics_verse">1 Vers</string>
+    <string name="quran_topics_no_results_title">Keine Treffer</string>
+    <string name="quran_topics_no_results">Kein Thema passt zu „%1$s“. Versuchen Sie ein kürzeres Wort — das Register findet ganze Wörter, keine Wortteile.</string>
+    <string name="quran_topics_unavailable_title">Themen sind noch nicht verfügbar</string>
+    <string name="quran_topics_unavailable">Die Koran-Inhalte dieser Installation sind älter als das Themenregister. Es kommt mit der nächsten Inhaltsaktualisierung — Sie müssen nichts tun.</string>
+    <string name="quran_topic_verses_section">Verse zu diesem Thema</string>
+    <string name="quran_topic_subtopics">Unterthemen</string>
+    <string name="quran_topic_related">Verwandte Themen</string>
+    <string name="quran_topic_not_found">Dieses Thema steht nicht im Register.</string>
+    <string name="quran_topic_open_reader">Im Leser öffnen</string>
+    <string name="cd_topic_up">Eine Ebene höher</string>
+    <string name="quran_ayah_topics">Themen</string>
     <string name="cd_switch_to_list_view">Zur Listenansicht wechseln</string>
     <string name="cd_switch_to_page_view">Zur Seitenansicht wechseln</string>
     <string name="quran_continue_next_surah">Zur nächsten Surah fortfahren</string>
