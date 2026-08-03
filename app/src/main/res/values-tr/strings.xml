@@ -526,6 +526,10 @@
         <item quantity="one">%1$d Ayet</item>
         <item quantity="other">%1$d Ayet</item>
     </plurals>
+    <plurals name="quran_home_ruku_count">
+        <item quantity="one">%1$d Ruku</item>
+        <item quantity="other">%1$d Ruku</item>
+    </plurals>
     <string name="quran_home_surah_info">Sure Bilgisi</string>
     <string name="quran_home_verse_of_the_day">GÜNÜN AYETİ</string>
     <string name="quran_home_verse_reference">%1$s · %2$d:%3$d</string>
@@ -1461,6 +1465,7 @@
     <string name="hizb_quarter_format">¼ Hizb %1$d</string>
     <string name="hizb_half_format">½ Hizb %1$d</string>
     <string name="hizb_three_quarter_format">¾ Hizb %1$d</string>
+    <string name="ruku_format">Ruku %1$d</string>
     <string name="audio_percent_complete_format">%%%1$d tamamlandı</string>
     <string name="audio_now_playing">Şimdi Çalıyor</string>
     <string name="audio_paused">Duraklatıldı</string>
