@@ -384,9 +384,15 @@ private fun HomeTabContent(
             )
         }
 
-        // 3b. Browse by subject. Gated on the artifact actually carrying the thematic layer —
-        // an install between the migration and a schemaVersion 24 release has the tables and
-        // no rows, and a card promising 2,512 subjects would open onto an explanation.
+        // 3b. The way into the subject browser. Gated on the artifact actually carrying the
+        // thematic layer — an install between the migration and a schemaVersion 24 release has
+        // the tables and no rows, and a card promising 2,512 subjects would open onto an
+        // explanation.
+        //
+        // Deliberately not called "Browse by subject": this screen's tab row already has a tab
+        // called "Browse", and two different "Browse" affordances on one screen is a coin flip
+        // for the reader about which one lists surahs. (It was also a coin flip for
+        // `QuranOpenSurahTest`, whose `clickText` matches on substring.)
         if (state.hasThematicContent) {
             item(key = "browse_subjects") {
                 NimazMenuItem(

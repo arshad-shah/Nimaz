@@ -1019,7 +1019,7 @@
     <string name="cd_passage_open">%1$s okuyucuda açılsın</string>
 
     <!-- Kur\'an konuları -->
-    <string name="quran_home_browse_subjects">Konuya göre göz at</string>
+    <string name="quran_home_browse_subjects">Kur\'an\'daki konular</string>
     <string name="quran_home_browse_subjects_subtitle">Elle dizinlenmiş 2.512 konu</string>
     <string name="quran_topics_title">Konular</string>
     <string name="quran_topics_subtitle">Kur\'an neden söz ediyor</string>

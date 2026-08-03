@@ -1013,7 +1013,7 @@
     <string name="cd_passage_open">%1$s im Leser öffnen</string>
 
     <!-- Quran-Themen -->
-    <string name="quran_home_browse_subjects">Nach Thema stöbern</string>
+    <string name="quran_home_browse_subjects">Themen im Koran</string>
     <string name="quran_home_browse_subjects_subtitle">2.512 von Hand erfasste Themen</string>
     <string name="quran_topics_title">Themen</string>
     <string name="quran_topics_subtitle">Wovon der Koran spricht</string>

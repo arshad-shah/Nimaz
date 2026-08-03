@@ -997,7 +997,7 @@
     <string name="cd_passage_open">Buka %1$s dalam pembaca</string>
 
     <!-- Topik Al-Quran -->
-    <string name="quran_home_browse_subjects">Layari mengikut topik</string>
+    <string name="quran_home_browse_subjects">Topik dalam Al-Quran</string>
     <string name="quran_home_browse_subjects_subtitle">2,512 topik, diindeks secara manual</string>
     <string name="quran_topics_title">Topik</string>
     <string name="quran_topics_subtitle">Apa yang diperkatakan Al-Quran</string>
