@@ -12,17 +12,17 @@
     "stays the hash of the *decompressed* file, which is what gets verified."
   ],
   "repo": "arshad-shah/nimaz-data",
-  "tag": "data-v7",
-  "schemaVersion": 23,
+  "tag": "data-v8",
+  "schemaVersion": 24,
   "artifact": {
-    "file": "nimaz-d7af8364.db",
+    "file": "nimaz-7dc5ac01.db",
     "assetPath": "database/nimaz_prepopulated.db",
-    "sha256": "d7af8364b095552b846c0d5d36832f6231fd8df5edcd147f3df83a019f196b37",
-    "bytes": 176562176,
+    "sha256": "7dc5ac018b38c99425acb66847f2781456f8c93ed029510f6c13439d2eae438d",
+    "bytes": 180035584,
     "compressed": {
-      "file": "nimaz-d7af8364.db.gz",
-      "sha256": "0c84cf0096d6b48cffa8d699732d3f348df2ddf64166e0140a7e3db662b021fb",
-      "bytes": 54415049
+      "file": "nimaz-7dc5ac01.db.gz",
+      "sha256": "27b3ee8a2c24642f363bf28cc3cbd919a49e3ba703c7443f508b8bb7a0e5b157",
+      "bytes": 55734451
     }
   }
 }
