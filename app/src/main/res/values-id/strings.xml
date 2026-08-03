@@ -977,6 +977,38 @@
     <string name="surah_info_theme_worship">Ibadah</string>
     <string name="surah_info_theme_morality">Akhlak</string>
     <string name="surah_info_theme_remembrance">Zikir</string>
+    <!-- Layar Info Surah — lapisan tematik (schemaVersion 24) -->
+    <string name="surah_info_background">Latar Belakang</string>
+    <string name="surah_info_passages">Bagian</string>
+    <string name="surah_info_passages_subtitle">%1$d bagian dalam surah ini</string>
+    <string name="surah_info_section_name">Nama</string>
+    <string name="surah_info_section_revelation">Masa Pewahyuan</string>
+    <string name="surah_info_section_theme">Tema dan Pokok Bahasan</string>
+    <string name="surah_info_section_background">Latar Belakang Sejarah</string>
+    <string name="surah_info_section_note">Catatan</string>
+    <string name="surah_info_passage_verses">%1$d ayat</string>
+    <string name="surah_info_passage_verse">1 ayat</string>
+
+    <!-- Topik Al-Quran -->
+    <string name="quran_topics_title">Topik</string>
+    <string name="quran_topics_subtitle">Apa yang dibicarakan Al-Quran</string>
+    <string name="quran_topics_search_hint">Cari topik…</string>
+    <string name="quran_topics_tree_thematic">Tema</string>
+    <string name="quran_topics_tree_ontology">Jenis</string>
+    <string name="quran_topics_tree_index">Indeks</string>
+    <string name="quran_topics_verses">%1$d ayat</string>
+    <string name="quran_topics_verse">1 ayat</string>
+    <string name="quran_topics_no_results_title">Tidak ada yang cocok</string>
+    <string name="quran_topics_no_results">Tidak ada topik yang cocok dengan “%1$s”. Coba kata yang lebih pendek — indeks mencocokkan kata utuh, bukan potongan.</string>
+    <string name="quran_topics_unavailable_title">Topik belum tersedia</string>
+    <string name="quran_topics_unavailable">Konten Al-Quran pada pemasangan ini lebih lama daripada indeks topik. Indeks akan hadir pada pembaruan konten berikutnya — tidak ada yang perlu dilakukan.</string>
+    <string name="quran_topic_verses_section">Ayat tentang topik ini</string>
+    <string name="quran_topic_subtopics">Subtopik</string>
+    <string name="quran_topic_related">Topik terkait</string>
+    <string name="quran_topic_not_found">Topik ini tidak ada dalam indeks.</string>
+    <string name="quran_topic_open_reader">Buka di pembaca</string>
+    <string name="cd_topic_up">Naik satu tingkat</string>
+    <string name="quran_ayah_topics">Topik</string>
     <string name="cd_switch_to_list_view">Beralih ke tampilan daftar</string>
     <string name="cd_switch_to_page_view">Beralih ke tampilan halaman</string>
     <string name="quran_continue_next_surah">Lanjutkan ke surah berikutnya</string>

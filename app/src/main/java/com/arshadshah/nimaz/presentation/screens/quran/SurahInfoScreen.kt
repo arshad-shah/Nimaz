@@ -3,11 +3,11 @@ package com.arshadshah.nimaz.presentation.screens.quran
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.MenuBook
@@ -33,8 +33,8 @@ import com.arshadshah.nimaz.presentation.components.molecules.DetailCard
 import com.arshadshah.nimaz.presentation.components.molecules.SurahHeaderCartouche
 import com.arshadshah.nimaz.presentation.components.organisms.BottomActions
 import com.arshadshah.nimaz.presentation.components.organisms.NimazTopAppBar
-import com.arshadshah.nimaz.presentation.components.organisms.SurahBackgroundSections
-import com.arshadshah.nimaz.presentation.components.organisms.SurahPassageOutline
+import com.arshadshah.nimaz.presentation.components.organisms.surahBackgroundSections
+import com.arshadshah.nimaz.presentation.components.organisms.surahPassageOutline
 import com.arshadshah.nimaz.presentation.components.organisms.ThemesList
 import com.arshadshah.nimaz.presentation.viewmodel.QuranEvent
 import com.arshadshah.nimaz.presentation.viewmodel.QuranViewModel
@@ -103,84 +103,94 @@ fun SurahInfoScreen(
         }
     ) { paddingValues ->
         if (surah != null) {
-            Column(
+            // A LazyColumn, not a scrolling Column. Al-Baqarah's passage outline is 282 rows
+            // and its background is 47 KB of prose; a Column composes and measures every one of
+            // them to draw a first fold that is three stat cards.
+            LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(paddingValues)
-                    .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 20.dp, vertical = 20.dp),
+                    .padding(paddingValues),
+                contentPadding = PaddingValues(horizontal = 20.dp, vertical = 20.dp),
                 verticalArrangement = Arrangement.spacedBy(24.dp)
             ) {
                 // Surah identity — the same cartouche the reader and list use
-                SurahHeaderCartouche(
-                    surah = surah,
-                    showBismillah = false
-                )
+                item(key = "cartouche") {
+                    SurahHeaderCartouche(
+                        surah = surah,
+                        showBismillah = false
+                    )
+                }
 
                 // Stats row: Verses / Juz / Page
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    DetailCard(
-                        icon = Icons.Default.FormatListNumbered,
-                        label = stringResource(R.string.quran_verses_label),
-                        value = surah.ayahCount.toString(),
-                        modifier = Modifier.weight(1f)
-                    )
-                    DetailCard(
-                        icon = Icons.Default.Layers,
-                        label = stringResource(R.string.quran_juz_label),
-                        value = surah.juzStart.toString(),
-                        modifier = Modifier.weight(1f)
-                    )
-                    DetailCard(
-                        icon = Icons.AutoMirrored.Filled.MenuBook,
-                        label = stringResource(R.string.quran_page_label),
-                        value = surah.startPage.toString(),
-                        modifier = Modifier.weight(1f)
-                    )
+                item(key = "stats") {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        DetailCard(
+                            icon = Icons.Default.FormatListNumbered,
+                            label = stringResource(R.string.quran_verses_label),
+                            value = surah.ayahCount.toString(),
+                            modifier = Modifier.weight(1f)
+                        )
+                        DetailCard(
+                            icon = Icons.Default.Layers,
+                            label = stringResource(R.string.quran_juz_label),
+                            value = surah.juzStart.toString(),
+                            modifier = Modifier.weight(1f)
+                        )
+                        DetailCard(
+                            icon = Icons.AutoMirrored.Filled.MenuBook,
+                            label = stringResource(R.string.quran_page_label),
+                            value = surah.startPage.toString(),
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
                 }
 
                 // About This Surah
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    NimazSectionTitle(
-                        text = stringResource(R.string.surah_info_about),
-                        uppercase = false
-                    )
-                    InfoCard(
-                        text = surahInfo?.description
-                            ?: stringResource(R.string.surah_info_description_fallback)
-                    )
+                item(key = "about") {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        NimazSectionTitle(
+                            text = stringResource(R.string.surah_info_about),
+                            uppercase = false
+                        )
+                        InfoCard(
+                            text = surahInfo?.description
+                                ?: stringResource(R.string.surah_info_description_fallback)
+                        )
+                    }
                 }
 
                 // Main Themes
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    NimazSectionTitle(
-                        text = stringResource(R.string.surah_info_main_themes),
-                        uppercase = false
-                    )
-                    ThemesList(
-                        themes = surahInfo?.themes
-                            ?: listOf(
-                                stringResource(R.string.surah_info_theme_guidance),
-                                stringResource(R.string.surah_info_theme_worship),
-                                stringResource(R.string.surah_info_theme_morality),
-                                stringResource(R.string.surah_info_theme_remembrance)
-                            )
-                    )
+                item(key = "themes") {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        NimazSectionTitle(
+                            text = stringResource(R.string.surah_info_main_themes),
+                            uppercase = false
+                        )
+                        ThemesList(
+                            themes = surahInfo?.themes
+                                ?: listOf(
+                                    stringResource(R.string.surah_info_theme_guidance),
+                                    stringResource(R.string.surah_info_theme_worship),
+                                    stringResource(R.string.surah_info_theme_morality),
+                                    stringResource(R.string.surah_info_theme_remembrance)
+                                )
+                        )
+                    }
                 }
 
                 // The long-form background and the passage outline (schemaVersion 24). Both are
-                // absent on an install whose artifact predates them, and both simply do not
-                // render — there is no empty state, because the sections above already answer
+                // absent on an install whose artifact predates them, and both simply contribute
+                // no items — there is no empty state, because the sections above already answer
                 // the screen's question and a placeholder would only advertise a gap.
-                SurahBackgroundSections(
+                surahBackgroundSections(
                     overview = thematic.overview,
                     onOpenAyah = onOpenAyah,
                     onOpenTopic = onOpenTopic
                 )
 
-                SurahPassageOutline(
+                surahPassageOutline(
                     passages = thematic.passages,
                     onOpenAyah = { ayah -> onOpenAyah(surahNumber, ayah) }
                 )

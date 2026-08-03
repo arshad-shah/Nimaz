@@ -6,6 +6,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.Badge
@@ -38,47 +42,46 @@ import androidx.compose.ui.tooling.preview.Preview
 /**
  * A surah's long-form background, as the source's own sections.
  *
- * Collapsed by default, and that is not a stylistic choice: the longest of these runs to 47 KB
- * of prose for one surah, and rendering every section expanded would measure most of a book
- * chapter to draw a screen whose first fold is three stat cards. The first section opens so the
- * block never reads as inert.
+ * A `LazyListScope` extension rather than a composable, so the caller's list owns the scroll and
+ * each section composes when it scrolls into view. That matters twice over here: the longest
+ * background runs to 47 KB of prose for one surah, and it is followed by an outline of up to 282
+ * rows in the same list.
  *
- * The `quran:` links inside the prose are the reason this is worth building at all — the source
- * says "see 2:153-251" and here that is a tap into the reader, not a reference to copy out.
+ * Collapsed by default for the same reason, with the first section open so the block never reads
+ * as inert. The `quran:` links inside the prose are what make it worth building at all — the
+ * source says "see 2:153-251" and here that is a tap into the reader, not a reference to copy out.
  */
-@Composable
-fun SurahBackgroundSections(
+fun LazyListScope.surahBackgroundSections(
     overview: SurahOverview?,
     onOpenAyah: (surah: Int, ayah: Int) -> Unit,
     onOpenTopic: (topicId: Int) -> Unit,
-    modifier: Modifier = Modifier,
 ) {
     if (overview == null || overview.sections.isEmpty()) return
 
-    Column(
-        modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
+    item(key = "background-title") {
         NimazSectionTitle(
             text = stringResource(R.string.surah_info_background),
             uppercase = false,
         )
-        overview.sections.forEachIndexed { index, section ->
-            NimazAccordion(
-                title = section.heading.ifBlank { stringResource(section.group.labelRes) },
-                leadingIcon = section.group.icon,
-                initiallyExpanded = index == 0,
-            ) {
-                ThematicText(
-                    html = section.body,
-                    onLinkClick = { link ->
-                        when (link) {
-                            is ThematicLink.Verses -> onOpenAyah(link.surah, link.from ?: 1)
-                            is ThematicLink.Topic -> onOpenTopic(link.id)
-                        }
-                    },
-                )
-            }
+    }
+    itemsIndexed(
+        items = overview.sections,
+        key = { _, section -> "background-${section.position}" },
+    ) { index, section ->
+        NimazAccordion(
+            title = section.heading.ifBlank { stringResource(section.group.labelRes) },
+            leadingIcon = section.group.icon,
+            initiallyExpanded = index == 0,
+        ) {
+            ThematicText(
+                html = section.body,
+                onLinkClick = { link ->
+                    when (link) {
+                        is ThematicLink.Verses -> onOpenAyah(link.surah, link.from ?: 1)
+                        is ThematicLink.Topic -> onOpenTopic(link.id)
+                    }
+                },
+            )
         }
     }
 }
@@ -86,35 +89,36 @@ fun SurahBackgroundSections(
 /**
  * The surah's passage outline — the mushaf's own division of it into subjects.
  *
- * Al-Baqarah has 282 of these, so this is a plain `Column` inside the screen's scroll rather
- * than a nested `LazyColumn`: a lazy list inside a scrolling parent has unbounded height and
- * Compose throws on it. The rows are cheap (two `Text`s), and the screen already carries the
- * overview prose above them.
+ * Al-Baqarah has 282 of these. As items in the caller's list they compose as they scroll into
+ * view; as a `Column` they would all compose and measure to draw a screen whose first fold is
+ * three stat cards, and a nested `LazyColumn` is not the alternative — a lazy list inside a
+ * scrolling parent has unbounded height and Compose throws on it. Hence a `LazyListScope`
+ * extension: one list, lazily.
  */
-@Composable
-fun SurahPassageOutline(
+fun LazyListScope.surahPassageOutline(
     passages: List<AyahTheme>,
     onOpenAyah: (ayah: Int) -> Unit,
-    modifier: Modifier = Modifier,
 ) {
     if (passages.isEmpty()) return
 
-    Column(
-        modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        NimazSectionTitle(
-            text = stringResource(R.string.surah_info_passages),
-            uppercase = false,
-        )
-        Text(
-            text = stringResource(R.string.surah_info_passages_subtitle, passages.size),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        passages.forEach { passage ->
-            PassageRow(passage = passage, onClick = { onOpenAyah(passage.ayahFrom) })
+    item(key = "passages-title") {
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            NimazSectionTitle(
+                text = stringResource(R.string.surah_info_passages),
+                uppercase = false,
+            )
+            Text(
+                text = stringResource(R.string.surah_info_passages_subtitle, passages.size),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
+    }
+    items(
+        items = passages,
+        key = { passage -> "passage-${passage.ayahFrom}" },
+    ) { passage ->
+        PassageRow(passage = passage, onClick = { onOpenAyah(passage.ayahFrom) })
     }
 }
 
@@ -189,13 +193,15 @@ private val SurahOverviewGroup.labelRes: Int
 @Composable
 private fun SurahPassageOutlinePreview() {
     NimazTheme {
-        SurahPassageOutline(
-            passages = listOf(
-                AyahTheme(2, 1, 5, "The Qur'an is guidance for the God-fearing", 5),
-                AyahTheme(2, 8, 16, "Hypocrites and the consequences of hypocrisy", 9),
-            ),
-            onOpenAyah = {},
-        )
+        LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            surahPassageOutline(
+                passages = listOf(
+                    AyahTheme(2, 1, 5, "The Qur'an is guidance for the God-fearing", 5),
+                    AyahTheme(2, 8, 16, "Hypocrites and the consequences of hypocrisy", 9),
+                ),
+                onOpenAyah = {},
+            )
+        }
     }
 }
 

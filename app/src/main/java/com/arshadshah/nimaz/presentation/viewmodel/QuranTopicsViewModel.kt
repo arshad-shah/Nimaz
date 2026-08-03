@@ -65,6 +65,9 @@ data class TopicDetailState(
 )
 
 sealed interface QuranTopicsEvent {
+    /** The browser is on screen and wants its current level. Idempotent — safe to re-send. */
+    data object OpenBrowser : QuranTopicsEvent
+
     data class SelectTree(val tree: TopicTree) : QuranTopicsEvent
 
     /** Descend into a topic that has children. */
@@ -92,13 +95,24 @@ class QuranTopicsViewModel @Inject constructor(
 
     private val queries = MutableStateFlow("")
 
+    /**
+     * Only the query pipeline. The roots are *not* loaded here.
+     *
+     * Both screens resolve this ViewModel per back-stack entry, and topic detail is reachable
+     * from a topic description's cross-links — so a reader wandering five topics deep would
+     * fire five root queries for a list none of those screens shows. The browser asks for its
+     * own level with [QuranTopicsEvent.OpenBrowser].
+     */
     init {
         observeQueries()
-        loadRoots(TopicTree.THEMATIC)
     }
 
     fun onEvent(event: QuranTopicsEvent) {
         when (event) {
+            QuranTopicsEvent.OpenBrowser -> {
+                if (_browseState.value.topics.isEmpty()) loadRoots(_browseState.value.tree)
+            }
+
             is QuranTopicsEvent.SelectTree -> {
                 AppAnalytics.logFeatureUsed("quran_topics", "select_tree")
                 selectTree(event.tree)
