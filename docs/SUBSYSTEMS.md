@@ -350,7 +350,7 @@ and a second attempt is a no-op.
 > real files keep the journal mode Room gave them. The cost of the separate connection is that
 > Room does not observe the copy — hence the ordering guarantee above.
 
-**Prepopulated DB.** The app ships a prebuilt DB in `app/src/main/assets/database/nimaz_prepopulated.db`, wired via `.createFromAsset("database/nimaz_prepopulated.db", NimazDatabase.PREPACKAGED_CALLBACK)`. **Room copies this asset only on a fresh install** — it is *not* re-copied on app update. That single fact drives both the migration discipline here and the entire content-seeding subsystem (§7).
+**Prepopulated DB.** The app ships a prebuilt DB in `app/src/main/assets/database/nimaz_prepopulated.db`, wired via `.createFromAsset("database/nimaz_prepopulated.db", NimazDatabase.PREPACKAGED_CALLBACK)`. **Room copies this asset only when the database file is absent** — it is *not* re-copied on app update. That single fact drove both the migration discipline here and the entire content-seeding subsystem (§7). Since schemaVersion 24 it no longer decides whether a content release reaches an existing install: `ContentArtifactInstaller` (§7) deletes the stale database first when the APK ships a different artifact, so the copy happens after all. That is only safe because the content database stopped holding user data at schemaVersion 23.
 
 **`PREPACKAGED_CALLBACK`** repairs the shipped asset right after copy and before Room validates its schema (the bundled asset was stamped at `user_version 12` while still missing the `updatedAt` columns and shipping tafseer indices under the wrong names). The same idempotent repair is also exposed as `MIGRATION_12_13`, because devices already sitting at v12 never re-run the copy callback.
 
@@ -634,9 +634,10 @@ It also stores the **content-version flags** that drive seeding — see §7.
 
 ## 7. Content seeding & versioning
 
-**Why this exists.** The prepopulated DB (§5) is **not re-copied on app update**, and schema
-migrations only create empty tables. So content that changes in an update would never reach
-existing users. There is now exactly **one** mechanism for that: `ContentPatchSeeder`.
+**Why this exists.** `createFromAsset` copies the prepopulated DB (§5) **only when the file is
+absent**, and schema migrations only create empty tables. So without help, content that changes in
+a release would never reach anyone who already has the app. There is now exactly **one** mechanism
+for that: `ContentArtifactInstaller` replaces the database.
 
 > **The six per-feature content seeders are gone.** `DuaContentSeeder`, `HelpContentSeeder`,
 > `QaidaContentSeeder`, `HadithBackfillSeeder`, `MushafLayoutSeeder` and
@@ -653,22 +654,56 @@ existing users. There is now exactly **one** mechanism for that: `ContentPatchSe
 | Path | Reaches | Mechanism |
 |---|---|---|
 | Fresh install | new users | `createFromAsset` copies the fetched, sha256-pinned artifact (§5) |
-| Update | existing installs | `ContentPatchSeeder` applies the cumulative patch shipped beside it |
+| Update | existing installs | `ContentArtifactInstaller` replaces the database when the APK ships a different artifact, and `createFromAsset` copies the new one |
 
-**`ContentPatchSeeder`** (`data/local/content/ContentPatchSeeder.kt`) is the generalisation of
-the six. The patch is a **build output, not hand-authored**: `nz patch emit` diffs the published
-baseline artifact against the current one, and `nz patch verify` applies the result to the
-baseline and asserts every collection's content hash equals the target's — so a patch that does
-not reconstruct the artifact cannot be published. Three properties make applying it safe:
+**`ContentArtifactInstaller` is the primary path, and it is new.** For years the answer to "how
+does a content release reach someone who already has the app" was "it does not — `createFromAsset`
+only copies when the file is absent". That rule was load-bearing for exactly one reason: the
+content database also held the user's bookmarks, progress and khatams, so re-copying would have
+destroyed them. **At schemaVersion 23 that stopped being true** — all 22 user tables moved to
+`NimazUserDatabase`, which is what `provideNimazUserDatabase` means by *"Two files makes that
+structural."* The installer is the other half of that split: it compares
+`BuildConfig.CONTENT_ARTIFACT_SHA256` (read from `data.lock.json` at build time) against the
+artifact the on-disk database was created from, and deletes the file when they differ so Room
+copies the new one.
 
-1. **It cannot touch user data.** Ops are only emitted for declared content collections;
-   `USER_TABLES` re-asserts that here rather than trusting it. Since `schemaVersion 23` user
-   tables are not in this database at all (§5) — they live in `NimazUserDatabase`.
-2. **It is cumulative from the baseline**, so which version a device upgrades from does not
-   matter. Every op is an idempotent keyed write.
-3. **It is version-gated** on `PreferencesKeys.CONTENT_PATCH_VERSION`, so the common case costs
-   one DataStore read. A missing asset is not an error — a release with nothing to correct
-   ships no patch.
+It runs inside `DatabaseModule.provideNimazDatabase`, before Room opens the file — not from
+`AppInitializer`, because by the time an initializer runs Room may already hold the database open
+and deleting it underneath a live connection is a worse bug than the one being fixed.
+
+Three things make deleting it safe, and the third is the one that bites on a real device:
+
+1. The artifact carries no user tables — `artifact.content-only` fails the data build if one
+   reappears, and `DeviceStateCorpusTest` asserts each is absent.
+2. Nothing writes to this database at runtime; the `@Insert`/`DELETE FROM` methods still on its
+   DAOs are leftovers of the six retired seeders.
+3. **A device that upgraded from schemaVersion ≤22 still physically holds the old user tables in
+   this file**, kept so `LegacyUserDataImport` can copy them out. The installer refuses while any
+   of them still holds rows, and reports `DeferredForLegacyData`; `UserDataMigrator` runs on every
+   launch, so the copy completes during that session and the next launch replaces. One launch of
+   delay, against destroying the only copy of somebody's data. The check reads the *file*, not a
+   "migration done" flag, because what is in the file is what a delete would destroy.
+
+**What this retired.** `ContentPatchSeeder` existed because content had to reach existing installs
+*without* replacing the file, and it had a hard limit: `nz patch emit` cannot express a table the
+baseline lacks — it files those under `out_of_scope` and emits nothing. So a newly added table
+reached a fresh install and **nobody else**; the Qur'an's thematic layer (schemaVersion 24) was the
+first feature to hit it, and its five tables sat empty on every existing install.
+
+Replacing the file has no such limit, so the seeder was **deleted** at schemaVersion 24 along with
+its patch asset, its `content_patch_version` preference, its DI bindings and the `patch` entry in
+`data.lock.json`.
+
+**This costs no extra bandwidth, and saves a little.** The artifact is fetched at *build* time and
+registered as a generated assets source root, so every APK already carries the artifact its
+`data.lock.json` pins — the device downloads it as part of the app update either way. The patch was
+an *additional* ~2.7 MB asset on top of that, so dropping it makes the APK slightly smaller. What
+the replace costs is a one-time local copy of the artifact (~176 MB, disk to disk, no network) on
+the first launch after a content change — the same copy a fresh install has always paid.
+
+`nz patch emit` / `nz patch verify` remain in the data console and are now unused by the app. They
+are the fallback if a cheaper delivery path is ever needed again; nothing in this repository reads
+a patch.
 
 > **IndoPak font (issue #267, 3/7).** The IndoPak glyph text embeds per-ayah number ornaments as
 > Private Use Area glyphs (U+F500…U+F6FF) that only render in the matching face. That face is bundled
@@ -683,8 +718,13 @@ regenerate. Adding a Quran translation additionally needs a matching `QuranTrans
 entry with the same id — `nz import --check` fails if the two catalogues drift.
 
 **Gotchas.**
-- **Editing the artifact alone reaches fresh installs only.** Corrections that must reach
-  existing users have to ride the patch — that is the whole reason it exists.
+- **Editing the artifact alone no longer reaches fresh installs only** — that was true until
+  `ContentArtifactInstaller` shipped. A published artifact reaches everyone on their next app
+  update, provided `data.lock.json` is re-pinned to it (`nz app sync`). An artifact that is
+  published but not pinned reaches nobody: the APK still bundles and verifies the old one.
+- **The first launch after a content change copies ~176 MB** from the bundled asset. It is disk to
+  disk, not a download, but it is not free — which is why the installer compares hashes rather than
+  replacing unconditionally.
 - Content tables carry no FK from user tables, and cannot: they are in a different database.
 - Qaida `conceptTags` are stored JSON-encoded-as-string, a convention inherited from the
   prepopulated DB.

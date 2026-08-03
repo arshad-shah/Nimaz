@@ -54,10 +54,12 @@ touches** — this is not optional:
   **`docs/CLEAN_ARCHITECTURE_CHECKLIST.md`**.
 - Change the DB schema → update **`docs/SUBSYSTEMS.md`**. Shipped **content** is no longer
   in this repo: it lives in **arshad-shah/nimaz-data** and arrives as a fetched artifact.
-  The per-feature content seeders that used to carry it were all retired at versionCode 385 —
-  `ContentPatchSeeder` is now the only way a correction reaches an existing install. The
-  ledger is **`docs/retirement.yaml`** (one entry, `git-history-purge`, is still open and
-  needs explicit human sign-off — see `docs/DATA_RETIREMENT.md`).
+  The per-feature content seeders that used to carry it were all retired at versionCode 385, and
+  `ContentPatchSeeder` — their generic replacement — was retired in turn at schemaVersion 24.
+  A release now reaches existing installs by **replacing the content database**
+  (`ContentArtifactInstaller`), which is possible because that database stopped holding user data
+  at schemaVersion 23. The ledger is **`docs/retirement.yaml`** (one entry, `git-history-purge`,
+  is still open and needs explicit human sign-off — see `docs/DATA_RETIREMENT.md`).
 
 ## Non-negotiable rules
 

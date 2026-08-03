@@ -10,8 +10,6 @@ import com.arshadshah.nimaz.data.announcement.AnnouncementBootstrap
 import com.arshadshah.nimaz.data.audio.AdhanAudioManager
 import com.arshadshah.nimaz.data.audio.AdhanDownloadService
 import com.arshadshah.nimaz.data.audio.AdhanSound
-import com.arshadshah.nimaz.data.local.content.ContentPatchResult
-import com.arshadshah.nimaz.data.local.content.ContentPatchSeeder
 import com.arshadshah.nimaz.data.local.user.UserDataMigrator
 import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
 import com.arshadshah.nimaz.domain.model.PrayerType
@@ -37,7 +35,6 @@ class AppInitializer @Inject constructor(
     private val prayerNotificationScheduler: PrayerNotificationScheduler,
     private val adhanAudioManager: AdhanAudioManager,
     private val announcementBootstrap: AnnouncementBootstrap,
-    private val contentPatchSeeder: ContentPatchSeeder,
     private val userDataMigrator: UserDataMigrator,
 ) {
     private val _isReady = MutableStateFlow(false)
@@ -58,21 +55,19 @@ class AppInitializer @Inject constructor(
                     // FCM announcements: create the Updates channel + (re-)subscribe
                     // to the topic each launch. Internally guarded, never throws.
                     val announcementTask = async { announcementBootstrap.initialize() }
-                    // Corpus corrections for installs the prepackaged asset never
-                    // reaches. Version-gated, so the steady state is one DataStore
-                    // read; a release with nothing to correct ships no patch at all.
-                    val contentPatchTask = async { applyContentPatch() }
                     // A person's data, out of the content database and into their own, once.
-                    // Awaited rather than fire-and-forget: the reader and the bookmark lists
-                    // read the user database as soon as the UI starts, and a half-copied
-                    // database on screen would look like data loss even though it is not.
+                    // Awaited rather than fire-and-forget for two reasons: the reader and the
+                    // bookmark lists read the user database as soon as the UI starts, and a
+                    // half-copied database on screen would look like data loss even though it is
+                    // not — and until this reports success, ContentArtifactInstaller holds off
+                    // replacing the content database, because those legacy rows are still the
+                    // only copy.
                     val userDataTask = async { userDataMigrator.migrateIfNeeded() }
 
                     localeTask.await()
                     notificationTask.await()
                     adhanTask.await()
                     announcementTask.await()
-                    contentPatchTask.await()
                     userDataTask.await()
                 }
             } catch (e: Exception) {
@@ -99,46 +94,6 @@ class AppInitializer @Inject constructor(
                 AppAnalytics.logDiagnostics(context)
             }
         }
-    }
-
-    /**
-     * Applies any bundled corpus correction, and reports what happened.
-     *
-     * Never throws: a device that cannot apply a content fix should still start. A refusal is
-     * logged as an error rather than swallowed, because [ContentPatchResult.RefusedUserTable]
-     * means a published patch named a table the app owns, and that is a pipeline bug that
-     * should be visible rather than a device-local curiosity.
-     */
-    private suspend fun applyContentPatch() {
-        runCatching { contentPatchSeeder.seedIfNeeded() }
-            .onSuccess { result ->
-                when (result) {
-                    is ContentPatchResult.Applied ->
-                        AppAnalytics.logEvent(
-                            "content_patch_applied",
-                            "version" to result.version,
-                            "ops" to result.ops,
-                        )
-
-                    is ContentPatchResult.RefusedUserTable ->
-                        AppAnalytics.logError(
-                            domain = "content_patch",
-                            type = "refused_user_table",
-                            message = result.tables.joinToString(","),
-                        )
-
-                    is ContentPatchResult.Unsupported ->
-                        AppAnalytics.logError(
-                            domain = "content_patch",
-                            type = "unsupported_format",
-                            message = result.format.toString(),
-                        )
-
-                    ContentPatchResult.NoPatch,
-                    is ContentPatchResult.AlreadyApplied -> Unit
-                }
-            }
-            .onFailure { CrashReporter.recordException(it) }
     }
 
     private suspend fun applySavedLocale() {

@@ -41,9 +41,6 @@ interface SettingsRepository {
     val appLanguage: Flow<String>
     suspend fun setAppLanguage(language: String)
 
-    /** Last content patch applied. See data/local/content/ContentPatchSeeder. */
-    val contentPatchVersion: Flow<Int>
-    suspend fun setContentPatchVersion(version: Int)
     val tasbihBeadMode: Flow<Boolean>
     suspend fun setTasbihBeadMode(enabled: Boolean)
     val tasbihBeadDesign: Flow<String>
