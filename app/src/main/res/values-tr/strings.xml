@@ -993,13 +993,6 @@
     <string name="select_reciter_popular">POPÜLER OKUYUCULAR</string>
     <string name="recitation_style_mujawwad">Mücevved</string>
     <string name="recitation_style_murattal">Murattal</string>
-    <string name="surah_info_about">Bu Sure Hakkında</string>
-    <string name="surah_info_main_themes">Ana Temalar</string>
-    <string name="surah_info_description_fallback">Bu sure, müminler için ilahi rehberlik ve hikmet içerir.</string>
-    <string name="surah_info_theme_guidance">İlahi Rehberlik</string>
-    <string name="surah_info_theme_worship">İbadet</string>
-    <string name="surah_info_theme_morality">Ahlak</string>
-    <string name="surah_info_theme_remembrance">Zikir</string>
     <!-- Sure Bilgisi ekranı — tematik katman (schemaVersion 24) -->
     <string name="surah_info_background">Arka Plan</string>
     <string name="surah_info_passages">Bölümler</string>
@@ -1011,6 +1004,19 @@
     <string name="surah_info_section_note">Not</string>
     <string name="surah_info_passage_verses">%1$d ayet</string>
     <string name="surah_info_passage_verse">1 ayet</string>
+    <string name="surah_info_go_deeper">Daha derine in</string>
+    <string name="surah_info_read_more">Devamını oku</string>
+    <string name="surah_info_read_less">Daha az göster</string>
+    <string name="surah_info_background_subtitle">%1$d bölüm</string>
+    <string name="surah_info_passages_row_subtitle">%2$d ayet boyunca %1$d bölüm</string>
+    <string name="surah_info_subjects">Bu suredeki konular</string>
+    <string name="surah_info_subjects_subtitle">Kur\'an\'ın söz ettiklerine göz atın</string>
+    <string name="surah_info_section_other">Diğer</string>
+    <string name="surah_passages_filter_hint">Bölümleri filtrele</string>
+    <string name="surah_passages_reading">Okunuyor</string>
+    <string name="surah_passages_none_title">Eşleşme yok</string>
+    <string name="surah_passages_none">Hiçbir bölüm eşleşmiyor. Tümünü (%1$d) görmek için filtreyi temizleyin.</string>
+    <string name="cd_passage_open">%1$s okuyucuda açılsın</string>
 
     <!-- Kur\'an konuları -->
     <string name="quran_topics_title">Konular</string>

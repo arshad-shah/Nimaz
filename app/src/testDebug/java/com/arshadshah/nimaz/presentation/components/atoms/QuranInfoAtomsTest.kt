@@ -21,11 +21,4 @@ class QuranInfoAtomsTest {
         composeRule.onNodeWithText("Verses").assertExists()
     }
 
-    @Test
-    fun `info card renders text`() {
-        composeRule.setThemedContent {
-            InfoCard(text = "Al-Fatihah is the first chapter of the Quran.")
-        }
-        composeRule.onNodeWithText("Al-Fatihah is the first chapter of the Quran.").assertExists()
-    }
 }

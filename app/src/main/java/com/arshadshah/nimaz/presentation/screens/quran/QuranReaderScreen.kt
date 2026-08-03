@@ -18,10 +18,12 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.automirrored.filled.ViewList
 import androidx.compose.material.icons.filled.AutoStories
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.AccountTree
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.CircularProgressIndicator
@@ -94,6 +96,8 @@ fun QuranReaderScreen(
     onNavigateBack: () -> Unit,
     onNavigateToQuranSettings: () -> Unit = {},
     onNavigateToTafseer: (surahNumber: Int, ayahNumber: Int) -> Unit = { _, _ -> },
+    onNavigateToPassages: (surahNumber: Int, currentAyah: Int) -> Unit = { _, _ -> },
+    onNavigateToSubjects: () -> Unit = {},
     onNavigateToNextSurah: (Int) -> Unit = {},
     onPageModeChanged: (Boolean) -> Unit = {},
     viewModel: QuranViewModel = hiltViewModel()
@@ -432,6 +436,34 @@ fun QuranReaderScreen(
                                 },
                             )
                         }
+                        // The surah's table of contents, opened at the verse being read.
+                        // Reachable here and not only from surah info, because "what is this
+                        // passage about, and what comes next" is a question you have while
+                        // reading, not one you back out to an info screen to ask.
+                        if (state.passages.isNotEmpty()) {
+                            val readingSurah = state.surahWithAyahs?.surah?.number
+                            val readingAyah = state.surahWithAyahs?.ayahs
+                                ?.getOrNull((currentAyahIndex - 1).coerceAtLeast(0))
+                                ?.numberInSurah
+                            if (readingSurah != null) {
+                                NimazDropdownRow(
+                                    text = stringResource(R.string.surah_info_passages),
+                                    leadingIcon = Icons.AutoMirrored.Filled.List,
+                                    onClick = {
+                                        menuExpanded = false
+                                        onNavigateToPassages(readingSurah, readingAyah ?: 1)
+                                    },
+                                )
+                            }
+                        }
+                        NimazDropdownRow(
+                            text = stringResource(R.string.quran_topics_title),
+                            leadingIcon = Icons.Default.AccountTree,
+                            onClick = {
+                                menuExpanded = false
+                                onNavigateToSubjects()
+                            },
+                        )
                         if (state.showTajweed) {
                             NimazDropdownRow(
                                 text = stringResource(R.string.tajweed_colour_guide),

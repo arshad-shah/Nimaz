@@ -971,13 +971,6 @@
     <string name="select_reciter_popular">PEMBACA POPULAR</string>
     <string name="recitation_style_mujawwad">Mujawwad</string>
     <string name="recitation_style_murattal">Murattal</string>
-    <string name="surah_info_about">Tentang Surah Ini</string>
-    <string name="surah_info_main_themes">Tema Utama</string>
-    <string name="surah_info_description_fallback">Surah ini mengandungi petunjuk dan hikmah ilahi untuk orang yang beriman.</string>
-    <string name="surah_info_theme_guidance">Petunjuk Ilahi</string>
-    <string name="surah_info_theme_worship">Ibadah</string>
-    <string name="surah_info_theme_morality">Akhlak</string>
-    <string name="surah_info_theme_remembrance">Zikir</string>
     <!-- Skrin Maklumat Surah — lapisan tematik (schemaVersion 24) -->
     <string name="surah_info_background">Latar Belakang</string>
     <string name="surah_info_passages">Bahagian</string>
@@ -989,6 +982,19 @@
     <string name="surah_info_section_note">Nota</string>
     <string name="surah_info_passage_verses">%1$d ayat</string>
     <string name="surah_info_passage_verse">1 ayat</string>
+    <string name="surah_info_go_deeper">Ketahui lebih lanjut</string>
+    <string name="surah_info_read_more">Baca lagi</string>
+    <string name="surah_info_read_less">Tunjuk kurang</string>
+    <string name="surah_info_background_subtitle">%1$d bahagian</string>
+    <string name="surah_info_passages_row_subtitle">%1$d bahagian merangkumi %2$d ayat</string>
+    <string name="surah_info_subjects">Topik dalam surah ini</string>
+    <string name="surah_info_subjects_subtitle">Layari apa yang diperkatakan Al-Quran</string>
+    <string name="surah_info_section_other">Lain-lain</string>
+    <string name="surah_passages_filter_hint">Tapis bahagian</string>
+    <string name="surah_passages_reading">Sedang dibaca</string>
+    <string name="surah_passages_none_title">Tiada padanan</string>
+    <string name="surah_passages_none">Tiada bahagian yang sepadan. Kosongkan penapis untuk melihat kesemua %1$d.</string>
+    <string name="cd_passage_open">Buka %1$s dalam pembaca</string>
 
     <!-- Topik Al-Quran -->
     <string name="quran_topics_title">Topik</string>

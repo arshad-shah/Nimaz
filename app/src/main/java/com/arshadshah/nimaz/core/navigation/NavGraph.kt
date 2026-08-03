@@ -94,7 +94,9 @@ import com.arshadshah.nimaz.presentation.screens.quran.SelectTranslationScreen
 import com.arshadshah.nimaz.domain.model.TopicTree
 import com.arshadshah.nimaz.presentation.screens.quran.QuranTopicDetailScreen
 import com.arshadshah.nimaz.presentation.screens.quran.QuranTopicsScreen
+import com.arshadshah.nimaz.presentation.screens.quran.SurahBackgroundScreen
 import com.arshadshah.nimaz.presentation.screens.quran.SurahInfoScreen
+import com.arshadshah.nimaz.presentation.screens.quran.SurahPassagesScreen
 import com.arshadshah.nimaz.presentation.screens.quran.TafseerChaptersScreen
 import com.arshadshah.nimaz.presentation.screens.quran.TafseerScreen
 import com.arshadshah.nimaz.presentation.screens.search.SearchScreen
@@ -421,6 +423,10 @@ fun NavGraph(
                     onNavigateToTafseer = { surah, ayah ->
                         navController.navigate(Route.Tafseer(surah, ayah))
                     },
+                    onNavigateToPassages = { surah, ayah ->
+                        navController.navigate(Route.SurahPassages(surah, ayah))
+                    },
+                    onNavigateToSubjects = { navController.navigate(Route.QuranTopics) },
                     onNavigateToNextSurah = { nextSurah ->
                         navController.navigate(Route.QuranReader(nextSurah)) {
                             popUpTo<Route.QuranReader> { inclusive = true }
@@ -463,11 +469,38 @@ fun NavGraph(
                     onStartReading = {
                         navController.navigate(Route.QuranReader(args.surahNumber))
                     },
+                    onOpenBackground = {
+                        navController.navigate(Route.SurahBackground(args.surahNumber))
+                    },
+                    onOpenPassages = {
+                        navController.navigate(Route.SurahPassages(args.surahNumber))
+                    },
+                    onOpenSubjects = { navController.navigate(Route.QuranTopics) }
+                )
+            }
+
+            taggedComposable<Route.SurahBackground>(ScreenTags.SurahBackground) { backStackEntry ->
+                val args = backStackEntry.toRoute<Route.SurahBackground>()
+                SurahBackgroundScreen(
+                    surahNumber = args.surahNumber,
+                    onNavigateBack = { navController.popBackStack() },
                     onOpenAyah = { surah, ayah ->
                         navController.navigate(Route.QuranReader(surah, ayah))
                     },
                     onOpenTopic = { topicId ->
                         navController.navigate(Route.QuranTopicDetail(topicId))
+                    }
+                )
+            }
+
+            taggedComposable<Route.SurahPassages>(ScreenTags.SurahPassages) { backStackEntry ->
+                val args = backStackEntry.toRoute<Route.SurahPassages>()
+                SurahPassagesScreen(
+                    surahNumber = args.surahNumber,
+                    currentAyah = args.currentAyah,
+                    onNavigateBack = { navController.popBackStack() },
+                    onOpenAyah = { surah, ayah ->
+                        navController.navigate(Route.QuranReader(surah, ayah))
                     }
                 )
             }
@@ -504,7 +537,11 @@ fun NavGraph(
                     onNavigateToQuranSettings = { navController.navigate(Route.SettingsQuran) },
                     onNavigateToTafseer = { surah, ayah ->
                         navController.navigate(Route.Tafseer(surah, ayah))
-                    }
+                    },
+                    onNavigateToPassages = { surah, ayah ->
+                        navController.navigate(Route.SurahPassages(surah, ayah))
+                    },
+                    onNavigateToSubjects = { navController.navigate(Route.QuranTopics) }
                 )
             }
 
@@ -516,7 +553,11 @@ fun NavGraph(
                     onNavigateToQuranSettings = { navController.navigate(Route.SettingsQuran) },
                     onNavigateToTafseer = { surah, ayah ->
                         navController.navigate(Route.Tafseer(surah, ayah))
-                    }
+                    },
+                    onNavigateToPassages = { surah, ayah ->
+                        navController.navigate(Route.SurahPassages(surah, ayah))
+                    },
+                    onNavigateToSubjects = { navController.navigate(Route.QuranTopics) }
                 )
             }
 

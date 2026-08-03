@@ -987,13 +987,6 @@
     <string name="select_reciter_popular">BELIEBTE REZITATOREN</string>
     <string name="recitation_style_mujawwad">Mujawwad</string>
     <string name="recitation_style_murattal">Murattal</string>
-    <string name="surah_info_about">Über diese Surah</string>
-    <string name="surah_info_main_themes">Hauptthemen</string>
-    <string name="surah_info_description_fallback">Diese Surah enthält göttliche Führung und Weisheit für die Gläubigen.</string>
-    <string name="surah_info_theme_guidance">Göttliche Führung</string>
-    <string name="surah_info_theme_worship">Anbetung</string>
-    <string name="surah_info_theme_morality">Moral</string>
-    <string name="surah_info_theme_remembrance">Gedenken</string>
     <!-- Surah-Info-Bildschirm — die thematische Ebene (schemaVersion 24) -->
     <string name="surah_info_background">Hintergrund</string>
     <string name="surah_info_passages">Abschnitte</string>
@@ -1005,6 +998,19 @@
     <string name="surah_info_section_note">Hinweis</string>
     <string name="surah_info_passage_verses">%1$d Verse</string>
     <string name="surah_info_passage_verse">1 Vers</string>
+    <string name="surah_info_go_deeper">Mehr erfahren</string>
+    <string name="surah_info_read_more">Mehr lesen</string>
+    <string name="surah_info_read_less">Weniger anzeigen</string>
+    <string name="surah_info_background_subtitle">%1$d Abschnitte</string>
+    <string name="surah_info_passages_row_subtitle">%1$d Abschnitte über %2$d Verse</string>
+    <string name="surah_info_subjects">Themen in dieser Sure</string>
+    <string name="surah_info_subjects_subtitle">Durchsuchen, wovon der Koran spricht</string>
+    <string name="surah_info_section_other">Sonstiges</string>
+    <string name="surah_passages_filter_hint">Abschnitte filtern</string>
+    <string name="surah_passages_reading">Aktuell</string>
+    <string name="surah_passages_none_title">Nichts gefunden</string>
+    <string name="surah_passages_none">Kein Abschnitt passt dazu. Filter löschen, um alle %1$d zu sehen.</string>
+    <string name="cd_passage_open">%1$s im Leser öffnen</string>
 
     <!-- Quran-Themen -->
     <string name="quran_topics_title">Themen</string>
