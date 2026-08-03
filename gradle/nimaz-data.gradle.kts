@@ -107,10 +107,10 @@ tasks.register("fetchNimazData") {
         val lock = JsonSlurper().parse(lockFile) as Map<String, Any>
         val repo = lock["repo"] as String
         val tag = lock["tag"] as String
-        val entries = listOfNotNull(
-            lock["artifact"] as? Map<*, *>,
-            lock["patch"] as? Map<*, *>,
-        )
+        // The artifact, and only the artifact. `lock["patch"]` used to be fetched beside it for
+        // ContentPatchSeeder; the seeder is gone — a release now reaches existing installs by
+        // replacing the database (ContentArtifactInstaller), so there is no second asset.
+        val entries = listOfNotNull(lock["artifact"] as? Map<*, *>)
 
         var token: String? = null
         var release: Map<*, *>? = null

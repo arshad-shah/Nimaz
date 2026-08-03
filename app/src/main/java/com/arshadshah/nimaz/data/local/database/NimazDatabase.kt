@@ -397,9 +397,10 @@ abstract class NimazDatabase : RoomDatabase() {
          *
          * All five tables are **content**, so this migration only creates them empty. The rows
          * arrive the way every other content row does (§7): with the artifact on a fresh
-         * install, or via `ContentPatchSeeder` on an upgrade. A device that upgrades before the
-         * matching artifact ships therefore has the tables and no rows, and every read path is
-         * built to treat that as "nothing to show" rather than as an error.
+         * install, and by `ContentArtifactInstaller` replacing the database on an update — it
+         * compares the artifact this APK ships against the one on disk. A device that updates
+         * before the matching artifact ships therefore has the tables and no rows, and every
+         * read path is built to treat that as "nothing to show" rather than as an error.
          *
          * Every statement is `IF NOT EXISTS`, so running this against a database that already
          * arrived with the tables — a fresh install off a schemaVersion 24 artifact — is a

@@ -1,7 +1,11 @@
 package com.arshadshah.nimaz.core.di
 
 import android.content.Context
+import android.util.Log
 import androidx.room.Room
+import com.arshadshah.nimaz.data.local.content.ContentArtifactInstaller
+import com.arshadshah.nimaz.data.local.content.ContentArtifactStore
+import com.arshadshah.nimaz.data.local.content.SharedPreferencesContentArtifactStore
 import com.arshadshah.nimaz.data.local.database.NimazDatabase
 import com.arshadshah.nimaz.data.local.user.CustomPresetDao
 import com.arshadshah.nimaz.data.local.user.ReadingProgressDao
@@ -40,9 +44,32 @@ object DatabaseModule {
 
     @Provides
     @Singleton
-    fun provideNimazDatabase(
+    fun provideContentArtifactStore(
         @ApplicationContext context: Context
+    ): ContentArtifactStore = SharedPreferencesContentArtifactStore(context)
+
+    /**
+     * The content database — and, immediately before Room opens it, the point at which a new
+     * content release actually lands.
+     *
+     * `createFromAsset` copies only when the file is absent, so without the installer an update
+     * would keep whatever content the device already had: the artifact this APK ships would
+     * never be read, and a release would reach fresh installs only. [ContentArtifactInstaller]
+     * deletes the stale file first, which turns that copy back on.
+     *
+     * It has to happen *here* rather than in `AppInitializer`, because by the time an initializer
+     * runs Room may already hold the file open — and deleting a database out from under an open
+     * connection is a different and much worse bug than the one being fixed.
+     */
+    @Provides
+    @Singleton
+    fun provideNimazDatabase(
+        @ApplicationContext context: Context,
+        contentArtifactStore: ContentArtifactStore
     ): NimazDatabase {
+        val outcome = ContentArtifactInstaller(context, contentArtifactStore).installIfChanged()
+        Log.i("DatabaseModule", "content artifact: $outcome")
+
         return Room.databaseBuilder(
             context,
             NimazDatabase::class.java,
