@@ -647,7 +647,8 @@ private fun BrowseTabContent(
                                 isSelected = selectedSurahNumber == surah.number,
                                 startPage = startPage,
                                 endPage = endPage,
-                                juzNumber = state.pagination.juzForPage(startPage)
+                                juzNumber = state.pagination.juzForPage(startPage),
+                                rukuCount = state.rukuCounts[surah.number] ?: 0
                             )
                         }
                     }

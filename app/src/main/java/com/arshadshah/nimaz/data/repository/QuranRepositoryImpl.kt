@@ -522,6 +522,11 @@ class QuranRepositoryImpl @Inject constructor(
         }
     }
 
+    override fun getSurahRukuCounts(): Flow<Map<Int, Int>> =
+        quranDao.getAllSurahStructure().map { rows ->
+            rows.associate { it.surahId to it.rukuCount }
+        }
+
     override suspend fun initializeQuranData() {
         // Data is pre-populated in the database
     }
@@ -571,7 +576,12 @@ class QuranRepositoryImpl @Inject constructor(
             sajdaNumber = sajdaSequence,
             translation = translation,
             transliteration = ayah.transliteration,
-            textTajweed = ayah.textTajweed
+            textTajweed = ayah.textTajweed,
+            rukuNumber = rukuNumber,
+            // A division is *marked* on the verse that opens it, as in a printed Mushaf —
+            // not on every verse inside it.
+            isRukuStart = rukuStartAyahId != null && rukuStartAyahId == ayah.id,
+            isRubStart = rubStartAyahId != null && rubStartAyahId == ayah.id
         )
     }
 

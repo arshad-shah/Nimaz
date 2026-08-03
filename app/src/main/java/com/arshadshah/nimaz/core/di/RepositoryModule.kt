@@ -142,6 +142,7 @@ import com.arshadshah.nimaz.domain.usecase.GetSessionsInRangeUseCase
 import com.arshadshah.nimaz.domain.usecase.GetSurahByNumberUseCase
 import com.arshadshah.nimaz.domain.usecase.GetSurahInfoUseCase
 import com.arshadshah.nimaz.domain.usecase.GetSurahListUseCase
+import com.arshadshah.nimaz.domain.usecase.GetSurahRukuCountsUseCase
 import com.arshadshah.nimaz.domain.usecase.GetSurahWithAyahsUseCase
 import com.arshadshah.nimaz.domain.usecase.GetTafseerForAyahUseCase
 import com.arshadshah.nimaz.domain.usecase.GetTafseerNotesUseCase
@@ -394,7 +395,8 @@ object UseCaseModule {
             getMushafPagination = GetMushafPaginationUseCase(repository),
             getMushafPageLayout = GetMushafPageLayoutUseCase(repository),
             getVerseOfTheDay = GetVerseOfTheDayUseCase(repository, getAyahTranslation),
-            getAyahTranslation = getAyahTranslation
+            getAyahTranslation = getAyahTranslation,
+            getSurahRukuCounts = GetSurahRukuCountsUseCase(repository)
         )
     }
 

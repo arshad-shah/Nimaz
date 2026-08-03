@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.presentation.components.molecules
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -9,6 +10,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.material3.MaterialTheme
@@ -23,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
@@ -65,10 +69,24 @@ import com.arshadshah.nimaz.presentation.theme.ThemeMode
  *   the basmalah is its own line in the layout).
  * - [MushafLineType.BASMALAH] → the basmalah centred on its own line.
  *
- * Each ayah line auto-fits its font **down** (never above [arabicFontSize]) so a dense line
- * never overflows the page width — the fixed-fit half of the "fixed-fit vs. reflow" trade-off
- * called out in #269. A single printed line can span more than one ayah, so highlight and tap
- * are resolved **per word** via [MushafWord.ayahId].
+ * ## Sizing
+ * Every line on a page is drawn at **one** size, and the reader's Arabic-font-size preference
+ * genuinely moves it.
+ *
+ * Each line used to auto-fit its own font *down* from [arabicFontSize] until it fit the width.
+ * On a real page that meant two things: lines on the same page rendered at different sizes
+ * (a printed Mushaf has one), and — because the densest line never fits at 18sp, let alone at
+ * 42sp — every value of the preference collapsed onto the same width-determined size, so the
+ * slider did nothing at all on the IndoPak editions while working normally on Madani.
+ *
+ * Instead: [pageFitFontSize] measures the page's densest line once and derives the size at
+ * which it exactly fills the width. That is the page's size at the *default* preference
+ * ([REFERENCE_FONT_SIZE]), so the default rendering is unchanged; the preference then scales
+ * it proportionally. Below the default the page simply gets smaller. Above it the lines are
+ * wider than the viewport, and the page pans horizontally rather than silently shrinking back
+ * — line accuracy is the one thing this renderer exists to preserve, so it is never traded for
+ * fit. A single printed line can span more than one ayah, so highlight and tap are resolved
+ * **per word** via [MushafWord.ayahId].
  *
  * Tajweed colouring is intentionally not applied here: the layout carries only the IndoPak
  * glyph text (`text_indopak`), which has no per-letter tajweed spans — the tajweed path stays
@@ -94,57 +112,116 @@ fun MushafLineLayout(
 ) {
     // Last physical AYAH line on the page — never justified (it may be short).
     val lastAyahIndex = remember(lines) { lines.indexOfLast { it.type == MushafLineType.AYAH } }
+    val measurer = rememberTextMeasurer()
 
-    Column(
-        modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(2.dp),
-    ) {
-        lines.forEachIndexed { index, line ->
-            when (line.type) {
-                MushafLineType.SURAH_HEADER -> {
-                    val surah = surahMap[line.surahId]
-                    if (surah != null) {
-                        SurahHeaderCartouche(
-                            surah = surah,
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
-                            // Basmalah is a separate line in the 16-line layout.
-                            showBismillah = false,
+    BoxWithConstraints(modifier = modifier.fillMaxWidth()) {
+        // A page is always measured against a bounded width (its host scrolls vertically, not
+        // horizontally). Treat an unbounded one as "unknown" so nothing below tries to turn
+        // Constraints.Infinity into a Dp.
+        val viewportPx = if (constraints.hasBoundedWidth) constraints.maxWidth else 0
+
+        // The densest line's natural (space-separated) width at the reference size. Measured
+        // once per page: text width scales linearly with font size, so every size below is
+        // arithmetic on this one number rather than a measure-and-shrink loop per line.
+        val widestLinePx = remember(lines, arabicFontFamily, measurer) {
+            lines.asSequence()
+                .filter { it.type == MushafLineType.AYAH && it.words.isNotEmpty() }
+                .maxOfOrNull { line ->
+                    measurer.measure(
+                        AnnotatedString(line.words.joinToString(" ") { it.text }),
+                        style = TextStyle(
+                            fontFamily = arabicFontFamily,
+                            fontSize = REFERENCE_FONT_SIZE.sp,
+                        ),
+                    ).size.width
+                } ?: 0
+        }
+
+        val lineFontSize = pageFitFontSize(
+            requestedFontSize = arabicFontSize,
+            widestLinePx = widestLinePx,
+            viewportPx = viewportPx,
+        )
+        // What the page needs to be wide enough for at that size. Equal to the viewport
+        // whenever the preference is at or below the default, so nothing pans until the
+        // reader actually asks for text larger than the page can hold.
+        val contentWidthPx = if (widestLinePx <= 0 || viewportPx <= 0) {
+            viewportPx
+        } else {
+            maxOf(viewportPx, (widestLinePx * lineFontSize / REFERENCE_FONT_SIZE).toInt())
+        }
+        val panState = rememberScrollState()
+        val needsPan = contentWidthPx > viewportPx
+
+        Column(
+            modifier = Modifier
+                .then(if (needsPan) Modifier.horizontalScroll(panState) else Modifier)
+                .then(
+                    if (contentWidthPx > 0) {
+                        Modifier.width(with(LocalDensity.current) { contentWidthPx.toDp() })
+                    } else {
+                        Modifier.fillMaxWidth()
+                    }
+                ),
+            verticalArrangement = Arrangement.spacedBy(2.dp),
+        ) {
+            lines.forEachIndexed { index, line ->
+                when (line.type) {
+                    MushafLineType.SURAH_HEADER -> {
+                        val surah = surahMap[line.surahId]
+                        if (surah != null) {
+                            SurahHeaderCartouche(
+                                surah = surah,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
+                                // Basmalah is a separate line in the 16-line layout.
+                                showBismillah = false,
+                            )
+                        }
+                    }
+
+                    MushafLineType.BASMALAH -> {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 4.dp),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            ArabicText(
+                                text = BISMILLAH_TEXT,
+                                size = ArabicTextSize.MEDIUM,
+                                color = basmalahColor,
+                                // Scales with the rest of the page rather than staying at the
+                                // atom's fixed size while the ayah lines around it move.
+                                style = TextStyle(
+                                    fontFamily = arabicFontFamily,
+                                    fontSize = lineFontSize.sp,
+                                    lineHeight = (lineFontSize * 1.8f).sp,
+                                    textAlign = TextAlign.Center,
+                                    textDirection = TextDirection.Rtl,
+                                ),
+                            )
+                        }
+                    }
+
+                    MushafLineType.AYAH -> {
+                        // Justify every ayah line except the page's last ayah line and a
+                        // surah's last line (the one immediately before a header cartouche).
+                        val nextIsHeader =
+                            lines.getOrNull(index + 1)?.type == MushafLineType.SURAH_HEADER
+                        val justify = index != lastAyahIndex && !nextIsHeader
+                        MushafAyahLine(
+                            words = line.words,
+                            justify = justify,
+                            arabicFontSize = lineFontSize,
+                            arabicFontFamily = arabicFontFamily,
+                            textColor = textColor,
+                            highlightColor = highlightColor,
+                            selectedColor = selectedColor,
+                            highlightedAyahId = highlightedAyahId,
+                            selectedAyahId = selectedAyahId,
+                            onAyahClick = onAyahClick,
                         )
                     }
-                }
-
-                MushafLineType.BASMALAH -> {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 4.dp),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        ArabicText(
-                            text = BISMILLAH_TEXT,
-                            size = ArabicTextSize.MEDIUM,
-                            color = basmalahColor,
-                        )
-                    }
-                }
-
-                MushafLineType.AYAH -> {
-                    // Justify every ayah line except the page's last ayah line and a surah's
-                    // last line (the one immediately before a header cartouche).
-                    val nextIsHeader = lines.getOrNull(index + 1)?.type == MushafLineType.SURAH_HEADER
-                    val justify = index != lastAyahIndex && !nextIsHeader
-                    MushafAyahLine(
-                        words = line.words,
-                        justify = justify,
-                        arabicFontSize = arabicFontSize,
-                        arabicFontFamily = arabicFontFamily,
-                        textColor = textColor,
-                        highlightColor = highlightColor,
-                        selectedColor = selectedColor,
-                        highlightedAyahId = highlightedAyahId,
-                        selectedAyahId = selectedAyahId,
-                        onAyahClick = onAyahClick,
-                    )
                 }
             }
         }
@@ -152,8 +229,41 @@ fun MushafLineLayout(
 }
 
 /**
- * One justified (or naturally-spaced) row of ayah words, right-to-left, auto-fitted so the
- * widest natural rendering never exceeds the available width.
+ * The font size every line of a page is drawn at, in sp.
+ *
+ * [widestLinePx] is the page's densest line measured at [REFERENCE_FONT_SIZE], so
+ * `REFERENCE_FONT_SIZE * viewportPx / widestLinePx` is the size at which that line exactly
+ * fills the width — the largest size that keeps the whole page inside the viewport. That is
+ * what the page renders at when the reader leaves the Arabic font size at its default, and
+ * [requestedFontSize] scales it from there. A page whose densest line already fits at the
+ * reference size is not enlarged to fill the width: it is drawn at the requested size.
+ *
+ * Pure and Android-free so the relationship between preference and rendered size is testable.
+ */
+internal fun pageFitFontSize(
+    requestedFontSize: Float,
+    widestLinePx: Int,
+    viewportPx: Int,
+): Float {
+    if (widestLinePx <= 0 || viewportPx <= 0) return requestedFontSize
+    val fitAtReference =
+        (REFERENCE_FONT_SIZE * viewportPx / widestLinePx).coerceAtMost(REFERENCE_FONT_SIZE)
+    val scale = requestedFontSize / REFERENCE_FONT_SIZE
+    return (fitAtReference * scale).coerceAtLeast(MIN_FONT_SIZE)
+}
+
+/**
+ * The Arabic font size the page's fit is expressed relative to — the default of
+ * `QuranSettingsUiState.arabicFontSize`. Leaving the preference alone therefore reproduces the
+ * fit-to-width rendering exactly; moving it scales the page around that.
+ */
+private const val REFERENCE_FONT_SIZE = 28f
+
+/** Floor for [pageFitFontSize], so a very dense page stays legible on a narrow screen. */
+private const val MIN_FONT_SIZE = 10f
+
+/**
+ * One justified (or naturally-spaced) row of ayah words, right-to-left, at the page's size.
  */
 @Composable
 private fun MushafAyahLine(
@@ -170,68 +280,44 @@ private fun MushafAyahLine(
 ) {
     if (words.isEmpty()) return
 
-    val measurer = rememberTextMeasurer()
     // Window Y of this line's centre, captured on layout, reported on tap for tooltip anchoring.
     var lineCenterWindowY by remember { mutableFloatStateOf(0f) }
 
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-            val maxWidthPx = constraints.maxWidth
-            val naturalText = remember(words) { words.joinToString(" ") { it.text } }
-
-            // Shrink the font until the natural (space-separated) rendering fits the width.
-            // The justified layout drops the inter-word spaces into gaps, so a line that fits
-            // naturally always fits when justified.
-            val fitFontSize = remember(naturalText, maxWidthPx, arabicFontSize, arabicFontFamily) {
-                if (maxWidthPx <= 0) return@remember arabicFontSize
-                val minSize = (arabicFontSize * 0.55f).coerceAtLeast(12f)
-                var size = arabicFontSize
-                while (size > minSize) {
-                    val measured = measurer.measure(
-                        AnnotatedString(naturalText),
-                        style = TextStyle(fontFamily = arabicFontFamily, fontSize = size.sp),
-                    )
-                    if (measured.size.width <= maxWidthPx) break
-                    size -= 1f
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .onGloballyPositioned { coords ->
+                    lineCenterWindowY = coords.positionInWindow().y + coords.size.height / 2f
                 }
-                size
-            }
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .onGloballyPositioned { coords ->
-                        lineCenterWindowY = coords.positionInWindow().y + coords.size.height / 2f
-                    }
-                    .padding(vertical = 2.dp),
-                horizontalArrangement = if (justify && words.size > 1) {
-                    Arrangement.SpaceBetween
-                } else {
-                    Arrangement.Center
-                },
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                words.forEach { word ->
-                    val background = when (word.ayahId) {
-                        highlightedAyahId -> highlightColor
-                        selectedAyahId -> selectedColor
-                        else -> Color.Transparent
-                    }
-                    BasicText(
-                        text = word.text,
-                        style = TextStyle(
-                            fontFamily = arabicFontFamily,
-                            fontSize = fitFontSize.sp,
-                            color = textColor,
-                            textDirection = TextDirection.Rtl,
-                            textAlign = TextAlign.Center,
-                        ),
-                        modifier = Modifier
-                            .background(background, RoundedCornerShape(4.dp))
-                            .clickable { onAyahClick(word.ayahId, lineCenterWindowY) }
-                            .padding(horizontal = 1.dp, vertical = 2.dp),
-                    )
+                .padding(vertical = 2.dp),
+            horizontalArrangement = if (justify && words.size > 1) {
+                Arrangement.SpaceBetween
+            } else {
+                Arrangement.Center
+            },
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            words.forEach { word ->
+                val background = when (word.ayahId) {
+                    highlightedAyahId -> highlightColor
+                    selectedAyahId -> selectedColor
+                    else -> Color.Transparent
                 }
+                BasicText(
+                    text = word.text,
+                    style = TextStyle(
+                        fontFamily = arabicFontFamily,
+                        fontSize = arabicFontSize.sp,
+                        color = textColor,
+                        textDirection = TextDirection.Rtl,
+                        textAlign = TextAlign.Center,
+                    ),
+                    modifier = Modifier
+                        .background(background, RoundedCornerShape(4.dp))
+                        .clickable { onAyahClick(word.ayahId, lineCenterWindowY) }
+                        .padding(horizontal = 1.dp, vertical = 2.dp),
+                )
             }
         }
     }

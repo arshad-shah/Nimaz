@@ -342,12 +342,18 @@ internal fun AyahItem(
                     )
                 }
 
-                if (ayah.rubNumber > 0 && ayah.numberInSurah == 1 || (ayah.rubNumber > 0)) {
-                    val quarterLabel = when (ayah.rubNumber) {
-                        1 -> stringResource(R.string.hizb_format, ayah.hizbNumber)
-                        2 -> stringResource(R.string.hizb_quarter_format, ayah.hizbNumber)
-                        3 -> stringResource(R.string.hizb_half_format, ayah.hizbNumber)
-                        4 -> stringResource(R.string.hizb_three_quarter_format, ayah.hizbNumber)
+                // Hizb quarter — marked on the verse that *opens* the quarter, the way a
+                // printed Mushaf marks it. This used to render on every verse that merely fell
+                // inside a quarter, and read `rubNumber` (a counter over all 240 quarters in
+                // the book) as though it were the 1..4 position within a hizb — so the four
+                // quarters at the very start of the Quran got a label and the other 236 got
+                // an empty string, i.e. no marker at all.
+                if (ayah.isRubStart) {
+                    val quarterLabel = when (ayah.quarterInHizb) {
+                        1 -> stringResource(R.string.hizb_format, ayah.hizbOfQuarter)
+                        2 -> stringResource(R.string.hizb_quarter_format, ayah.hizbOfQuarter)
+                        3 -> stringResource(R.string.hizb_half_format, ayah.hizbOfQuarter)
+                        4 -> stringResource(R.string.hizb_three_quarter_format, ayah.hizbOfQuarter)
                         else -> ""
                     }
                     if (quarterLabel.isNotEmpty()) {
@@ -359,6 +365,19 @@ internal fun AyahItem(
                             size = NimazBadgeSize.SMALL
                         )
                     }
+                }
+
+                // Rukūʿ — the surah's own sections, from the `rukus` table. Same badge
+                // language as the hizb quarter beside it, and likewise only on the verse
+                // that opens the section.
+                if (ayah.isRukuStart && ayah.rukuNumber != null) {
+                    NimazBadge(
+                        text = stringResource(R.string.ruku_format, ayah.rukuNumber),
+                        tone = NimazTone.ACCENT,
+                        emphasis = NimazBadgeEmphasis.SOFT,
+                        shape = NimazBadgeShape.ROUNDED,
+                        size = NimazBadgeSize.SMALL
+                    )
                 }
             }
 
@@ -379,8 +398,9 @@ internal fun AyahItem(
 
 /**
  * Showcase of every [AyahItem] state: plain, active bookmark/favourite, audio
- * playing + highlighted, transliteration shown, a sajdah verse, a hizb-marker
- * verse, and khatam (read-tracking) mode. Rendered for both themes below.
+ * playing + highlighted, transliteration shown, a sajdah verse, a verse opening a
+ * hizb quarter, a verse opening a rukūʿ, and khatam (read-tracking) mode. Rendered
+ * for both themes below.
  */
 @Composable
 private fun AyahItemShowcase() {
@@ -394,6 +414,7 @@ private fun AyahItemShowcase() {
         rub: Int = 0,
         sajda: SajdaType? = null,
         transliteration: String? = null,
+        ruku: Int? = null,
     ) = Ayah(
         id = n,
         surahNumber = 1,
@@ -409,6 +430,9 @@ private fun AyahItemShowcase() {
         translation = "In the name of Allah, the Most Gracious, the Most Merciful.",
         isBookmarked = bookmarked,
         transliteration = transliteration,
+        rukuNumber = ruku,
+        isRukuStart = ruku != null,
+        isRubStart = rub > 0,
     )
 
     Column(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
@@ -466,7 +490,16 @@ private fun AyahItemShowcase() {
         HorizontalDivider()
         // 6. Hizb / quarter marker
         AyahItem(
-            ayah = ayah(6, hizb = 2, rub = 1),
+            ayah = ayah(6, hizb = 2, rub = 6),
+            showTranslation = true,
+            arabicFontSize = 28f,
+            fontSize = 16f,
+            onBookmarkClick = {},
+        )
+        HorizontalDivider()
+        // 6b. Rukūʿ marker, alongside a quarter marker on the same verse
+        AyahItem(
+            ayah = ayah(8, hizb = 2, rub = 5, ruku = 3),
             showTranslation = true,
             arabicFontSize = 28f,
             fontSize = 16f,
@@ -486,7 +519,7 @@ private fun AyahItemShowcase() {
     }
 }
 
-@Preview(name = "Ayah Item \u00B7 Light", showBackground = true, heightDp = 1400)
+@Preview(name = "Ayah Item \u00B7 Light", showBackground = true, heightDp = 1600)
 @Composable
 private fun AyahItemShowcaseLightPreview() {
     NimazTheme(themeMode = ThemeMode.LIGHT) {
@@ -494,7 +527,7 @@ private fun AyahItemShowcaseLightPreview() {
     }
 }
 
-@Preview(name = "Ayah Item \u00B7 Dark", showBackground = true, heightDp = 1400)
+@Preview(name = "Ayah Item \u00B7 Dark", showBackground = true, heightDp = 1600)
 @Composable
 private fun AyahItemShowcaseDarkPreview() {
     NimazTheme(themeMode = ThemeMode.DARK) {

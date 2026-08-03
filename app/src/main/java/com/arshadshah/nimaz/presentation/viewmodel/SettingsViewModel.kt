@@ -373,7 +373,77 @@ class SettingsViewModel @Inject constructor(
     init {
         loadSettings()
         loadLocations()
+        observeQuranSettings()
         observeQuranPreviewTranslation()
+    }
+
+    /**
+     * Keeps [quranState] collecting DataStore rather than holding the snapshot [loadSettings]
+     * read once at construction.
+     *
+     * `hiltViewModel()` scopes a ViewModel to the *nav back-stack entry*, so the Quran Settings
+     * screen and the reciter/translation pickers it opens each run their own [SettingsViewModel].
+     * The picker wrote the new reciter to DataStore and updated **its own** `_quranState`; the
+     * settings screen behind it kept the snapshot it took at construction, so coming back showed
+     * the old reciter (and the old translator) until the screen was destroyed and rebuilt.
+     *
+     * DataStore is a singleton, so collecting it here means every instance sees the same live
+     * value whichever screen changed it — the same fix [notificationSummary] applies to the
+     * notification rollup. The optimistic `_quranState.update` in [onEvent] stays: it paints the
+     * change on the frame of the tap, and this observer reconciles right behind it.
+     */
+    private fun observeQuranSettings() {
+        val content = combine(
+            settingsRepository.quranTranslatorId,
+            settingsRepository.quranArabicFont,
+            settingsRepository.selectedReciterId,
+            settingsRepository.quranMushafScript
+        ) { translatorId, arabicFontId, reciterId, script ->
+            QuranContentPrefs(translatorId, arabicFontId, reciterId, MushafScript.fromName(script))
+        }
+        val display = combine(
+            settingsRepository.showTranslation,
+            settingsRepository.showTransliteration,
+            settingsRepository.quranArabicFontSize,
+            settingsRepository.quranTranslationFontSize
+        ) { showTranslation, showTransliteration, arabicFontSize, translationFontSize ->
+            QuranDisplayPrefs(
+                showTranslation,
+                showTransliteration,
+                arabicFontSize,
+                translationFontSize
+            )
+        }
+        val behaviour = combine(
+            settingsRepository.continuousReading,
+            settingsRepository.keepScreenOn,
+            settingsRepository.showTajweed,
+            settingsRepository.tajweedUnderline
+        ) { continuousReading, keepScreenOn, showTajweed, tajweedUnderline ->
+            QuranBehaviourPrefs(continuousReading, keepScreenOn, showTajweed, tajweedUnderline)
+        }
+
+        combine(content, display, behaviour) { c, d, b -> Triple(c, d, b) }
+            .distinctUntilChanged()
+            .onEach { (c, d, b) ->
+                _quranState.update {
+                    it.copy(
+                        selectedTranslatorId = c.translatorId,
+                        selectedArabicFontId = c.arabicFontId,
+                        selectedReciterId = c.reciterId,
+                        mushafScript = c.mushafScript,
+                        showTranslation = d.showTranslation,
+                        showTransliteration = d.showTransliteration,
+                        arabicFontSize = d.arabicFontSize,
+                        translationFontSize = d.translationFontSize,
+                        continuousReading = b.continuousReading,
+                        keepScreenOn = b.keepScreenOn,
+                        showTajweed = b.showTajweed,
+                        tajweedUnderline = b.tajweedUnderline
+                    )
+                }
+            }
+            .launchIn(viewModelScope)
     }
 
     /**
@@ -1063,36 +1133,9 @@ class SettingsViewModel @Inject constructor(
                 )
             }
 
-            // Quran settings
-            val translatorId = settingsRepository.quranTranslatorId.first()
-            val arabicFontId = settingsRepository.quranArabicFont.first()
-            val showTranslation = settingsRepository.showTranslation.first()
-            val showTransliteration = settingsRepository.showTransliteration.first()
-            val arabicFontSize = settingsRepository.quranArabicFontSize.first()
-            val translationFontSize = settingsRepository.quranTranslationFontSize.first()
-            val continuousReading = settingsRepository.continuousReading.first()
-            val keepScreenOn = settingsRepository.keepScreenOn.first()
-            val reciterId = settingsRepository.selectedReciterId.first()
-            val showTajweed = settingsRepository.showTajweed.first()
-            val tajweedUnderline = settingsRepository.tajweedUnderline.first()
-            val mushafScript = MushafScript.fromName(settingsRepository.quranMushafScript.first())
-
-            _quranState.update {
-                it.copy(
-                    selectedTranslatorId = translatorId,
-                    selectedArabicFontId = arabicFontId,
-                    showTranslation = showTranslation,
-                    showTransliteration = showTransliteration,
-                    arabicFontSize = arabicFontSize,
-                    translationFontSize = translationFontSize,
-                    continuousReading = continuousReading,
-                    keepScreenOn = keepScreenOn,
-                    selectedReciterId = reciterId,
-                    showTajweed = showTajweed,
-                    tajweedUnderline = tajweedUnderline,
-                    mushafScript = mushafScript
-                )
-            }
+            // Quran settings are not read here: [observeQuranSettings] collects them for the
+            // lifetime of the ViewModel, so a change made on a picker screen (which runs its
+            // own instance) is visible on the settings screen behind it.
 
             // Dua settings
             _duaState.update {
@@ -1324,6 +1367,28 @@ class SettingsViewModel @Inject constructor(
             _shouldRestart.value = true
         }
     }
+
+    /** Grouping types for [observeQuranSettings] — `combine` takes at most five typed flows. */
+    private data class QuranContentPrefs(
+        val translatorId: String,
+        val arabicFontId: String,
+        val reciterId: String?,
+        val mushafScript: MushafScript
+    )
+
+    private data class QuranDisplayPrefs(
+        val showTranslation: Boolean,
+        val showTransliteration: Boolean,
+        val arabicFontSize: Float,
+        val translationFontSize: Float
+    )
+
+    private data class QuranBehaviourPrefs(
+        val continuousReading: Boolean,
+        val keepScreenOn: Boolean,
+        val showTajweed: Boolean,
+        val tajweedUnderline: Boolean
+    )
 
     private companion object {
         /**

@@ -251,6 +251,16 @@ class GetVerseOfTheDayUseCase @Inject constructor(
     }
 }
 
+/**
+ * How many rukūʿ each surah divides into, keyed by surah number — the structural fact the
+ * surah list shows beside its verse count and page span.
+ */
+class GetSurahRukuCountsUseCase @Inject constructor(
+    private val repository: QuranRepository
+) {
+    operator fun invoke(): Flow<Map<Int, Int>> = repository.getSurahRukuCounts()
+}
+
 class GetSurahByNumberUseCase @Inject constructor(
     private val repository: QuranRepository
 ) {
@@ -294,5 +304,6 @@ data class QuranUseCases(
     val getMushafPagination: GetMushafPaginationUseCase,
     val getMushafPageLayout: GetMushafPageLayoutUseCase,
     val getVerseOfTheDay: GetVerseOfTheDayUseCase,
-    val getAyahTranslation: GetAyahTranslationUseCase
+    val getAyahTranslation: GetAyahTranslationUseCase,
+    val getSurahRukuCounts: GetSurahRukuCountsUseCase
 )

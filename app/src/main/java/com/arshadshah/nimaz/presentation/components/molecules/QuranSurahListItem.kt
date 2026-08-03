@@ -55,6 +55,9 @@ private val SurahNumberSlotSpacing = 12.dp
  * @param juzNumber the juz the surah opens in. Resolved by the caller from the active
  *   edition's pagination — this component used to carry its own copy of the Madani juz page
  *   table, which produced the wrong juz once a non-Madani layout was selected (#325).
+ * @param rukuCount how many rukūʿ the surah divides into, from `surah_structure`. 0 means
+ *   "not known on this device" and the badge is omitted — the same rule the page-span badges
+ *   already follow.
  */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -70,6 +73,7 @@ internal fun SurahListItem(
     startPage: Int = 0,
     endPage: Int = 0,
     juzNumber: Int = 1,
+    rukuCount: Int = 0,
     modifier: Modifier = Modifier
 ) {
     val isComplete = isKhatamActive && khatamTotalAyahs > 0 && khatamReadCount == khatamTotalAyahs
@@ -204,6 +208,21 @@ internal fun SurahListItem(
                         emphasis = NimazBadgeEmphasis.OUTLINED
                     )
                 }
+                // Rukūʿ — the surah's own sections. Structural like the verse count beside
+                // it (and unlike the page span, independent of the Mushaf edition), so it
+                // reads in the same neutral outline.
+                if (rukuCount > 0) {
+                    NimazBadge(
+                        text = pluralStringResource(
+                            R.plurals.quran_home_ruku_count,
+                            rukuCount,
+                            rukuCount
+                        ),
+                        size = NimazBadgeSize.SMALL,
+                        tone = NimazTone.NEUTRAL,
+                        emphasis = NimazBadgeEmphasis.OUTLINED
+                    )
+                }
             }
 
             // Khatam progress bar (unchanged)
@@ -243,7 +262,8 @@ private fun SurahListItemPreview() {
             onClick = {},
             onInfoClick = {},
             startPage = 1,
-            endPage = 1
+            endPage = 1,
+            rukuCount = 1
         )
     }
 }
@@ -267,7 +287,8 @@ private fun SurahListItemLongNamePreview() {
             onClick = {},
             onInfoClick = {},
             startPage = 542,
-            endPage = 545
+            endPage = 545,
+            rukuCount = 3
         )
     }
 }

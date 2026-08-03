@@ -165,12 +165,19 @@ interface QuranDao {
                s.text AS text_simple,
                sj.kind AS sajda_kind,
                sj.sequence AS sajda_sequence,
-               hq.number AS rub_number
+               hq.number AS rub_number,
+               hq.start_ayah_id AS rub_start_ayah_id,
+               (r.number - rs.first_number + 1) AS ruku_number,
+               r.start_ayah_id AS ruku_start_ayah_id
         FROM ayahs a
         LEFT JOIN mushaf_ayah_texts u ON u.ayah_id = a.id AND u.text_source = 'UTHMANI'
         LEFT JOIN mushaf_ayah_texts s ON s.ayah_id = a.id AND s.text_source = 'SIMPLE'
         LEFT JOIN sajdas sj ON sj.ayah_id = a.id
         LEFT JOIN hizb_quarters hq ON a.id BETWEEN hq.start_ayah_id AND hq.end_ayah_id
+        LEFT JOIN rukus r ON a.id BETWEEN r.start_ayah_id AND r.end_ayah_id
+        LEFT JOIN (
+            SELECT surah_id, MIN(number) AS first_number FROM rukus GROUP BY surah_id
+        ) rs ON rs.surah_id = r.surah_id
         WHERE a.surah_id = :surahId
         ORDER BY a.number_in_surah ASC
         """
@@ -184,12 +191,19 @@ interface QuranDao {
                s.text AS text_simple,
                sj.kind AS sajda_kind,
                sj.sequence AS sajda_sequence,
-               hq.number AS rub_number
+               hq.number AS rub_number,
+               hq.start_ayah_id AS rub_start_ayah_id,
+               (r.number - rs.first_number + 1) AS ruku_number,
+               r.start_ayah_id AS ruku_start_ayah_id
         FROM ayahs a
         LEFT JOIN mushaf_ayah_texts u ON u.ayah_id = a.id AND u.text_source = 'UTHMANI'
         LEFT JOIN mushaf_ayah_texts s ON s.ayah_id = a.id AND s.text_source = 'SIMPLE'
         LEFT JOIN sajdas sj ON sj.ayah_id = a.id
         LEFT JOIN hizb_quarters hq ON a.id BETWEEN hq.start_ayah_id AND hq.end_ayah_id
+        LEFT JOIN rukus r ON a.id BETWEEN r.start_ayah_id AND r.end_ayah_id
+        LEFT JOIN (
+            SELECT surah_id, MIN(number) AS first_number FROM rukus GROUP BY surah_id
+        ) rs ON rs.surah_id = r.surah_id
         WHERE a.id = :ayahId
         """
     )
@@ -202,12 +216,19 @@ interface QuranDao {
                s.text AS text_simple,
                sj.kind AS sajda_kind,
                sj.sequence AS sajda_sequence,
-               hq.number AS rub_number
+               hq.number AS rub_number,
+               hq.start_ayah_id AS rub_start_ayah_id,
+               (r.number - rs.first_number + 1) AS ruku_number,
+               r.start_ayah_id AS ruku_start_ayah_id
         FROM ayahs a
         LEFT JOIN mushaf_ayah_texts u ON u.ayah_id = a.id AND u.text_source = 'UTHMANI'
         LEFT JOIN mushaf_ayah_texts s ON s.ayah_id = a.id AND s.text_source = 'SIMPLE'
         LEFT JOIN sajdas sj ON sj.ayah_id = a.id
         LEFT JOIN hizb_quarters hq ON a.id BETWEEN hq.start_ayah_id AND hq.end_ayah_id
+        LEFT JOIN rukus r ON a.id BETWEEN r.start_ayah_id AND r.end_ayah_id
+        LEFT JOIN (
+            SELECT surah_id, MIN(number) AS first_number FROM rukus GROUP BY surah_id
+        ) rs ON rs.surah_id = r.surah_id
         WHERE a.id BETWEEN :minAyahId AND :maxAyahId
         ORDER BY a.id ASC
         """
@@ -221,12 +242,19 @@ interface QuranDao {
                s.text AS text_simple,
                sj.kind AS sajda_kind,
                sj.sequence AS sajda_sequence,
-               hq.number AS rub_number
+               hq.number AS rub_number,
+               hq.start_ayah_id AS rub_start_ayah_id,
+               (r.number - rs.first_number + 1) AS ruku_number,
+               r.start_ayah_id AS ruku_start_ayah_id
         FROM ayahs a
         LEFT JOIN mushaf_ayah_texts u ON u.ayah_id = a.id AND u.text_source = 'UTHMANI'
         LEFT JOIN mushaf_ayah_texts s ON s.ayah_id = a.id AND s.text_source = 'SIMPLE'
         LEFT JOIN sajdas sj ON sj.ayah_id = a.id
         LEFT JOIN hizb_quarters hq ON a.id BETWEEN hq.start_ayah_id AND hq.end_ayah_id
+        LEFT JOIN rukus r ON a.id BETWEEN r.start_ayah_id AND r.end_ayah_id
+        LEFT JOIN (
+            SELECT surah_id, MIN(number) AS first_number FROM rukus GROUP BY surah_id
+        ) rs ON rs.surah_id = r.surah_id
         WHERE sj.ayah_id IS NOT NULL
         ORDER BY sj.sequence ASC
         """
@@ -240,12 +268,19 @@ interface QuranDao {
                s.text AS text_simple,
                sj.kind AS sajda_kind,
                sj.sequence AS sajda_sequence,
-               hq.number AS rub_number
+               hq.number AS rub_number,
+               hq.start_ayah_id AS rub_start_ayah_id,
+               (r.number - rs.first_number + 1) AS ruku_number,
+               r.start_ayah_id AS ruku_start_ayah_id
         FROM ayahs a
         LEFT JOIN mushaf_ayah_texts u ON u.ayah_id = a.id AND u.text_source = 'UTHMANI'
         LEFT JOIN mushaf_ayah_texts s ON s.ayah_id = a.id AND s.text_source = 'SIMPLE'
         LEFT JOIN sajdas sj ON sj.ayah_id = a.id
         LEFT JOIN hizb_quarters hq ON a.id BETWEEN hq.start_ayah_id AND hq.end_ayah_id
+        LEFT JOIN rukus r ON a.id BETWEEN r.start_ayah_id AND r.end_ayah_id
+        LEFT JOIN (
+            SELECT surah_id, MIN(number) AS first_number FROM rukus GROUP BY surah_id
+        ) rs ON rs.surah_id = r.surah_id
         WHERE a.id IN (
             SELECT DISTINCT t.ayah_id FROM mushaf_ayah_texts t
             WHERE t.text LIKE '%' || :query || '%'
@@ -269,12 +304,19 @@ interface QuranDao {
                s.text AS text_simple,
                sj.kind AS sajda_kind,
                sj.sequence AS sajda_sequence,
-               hq.number AS rub_number
+               hq.number AS rub_number,
+               hq.start_ayah_id AS rub_start_ayah_id,
+               (r.number - rs.first_number + 1) AS ruku_number,
+               r.start_ayah_id AS ruku_start_ayah_id
         FROM ayahs a
         LEFT JOIN mushaf_ayah_texts u ON u.ayah_id = a.id AND u.text_source = 'UTHMANI'
         LEFT JOIN mushaf_ayah_texts s ON s.ayah_id = a.id AND s.text_source = 'SIMPLE'
         LEFT JOIN sajdas sj ON sj.ayah_id = a.id
         LEFT JOIN hizb_quarters hq ON a.id BETWEEN hq.start_ayah_id AND hq.end_ayah_id
+        LEFT JOIN rukus r ON a.id BETWEEN r.start_ayah_id AND r.end_ayah_id
+        LEFT JOIN (
+            SELECT surah_id, MIN(number) AS first_number FROM rukus GROUP BY surah_id
+        ) rs ON rs.surah_id = r.surah_id
         WHERE a.id IN (:ayahIds)
         ORDER BY a.id ASC
         """
@@ -289,12 +331,19 @@ interface QuranDao {
                s.text AS text_simple,
                sj.kind AS sajda_kind,
                sj.sequence AS sajda_sequence,
-               hq.number AS rub_number
+               hq.number AS rub_number,
+               hq.start_ayah_id AS rub_start_ayah_id,
+               (r.number - rs.first_number + 1) AS ruku_number,
+               r.start_ayah_id AS ruku_start_ayah_id
         FROM ayahs a
         LEFT JOIN mushaf_ayah_texts u ON u.ayah_id = a.id AND u.text_source = 'UTHMANI'
         LEFT JOIN mushaf_ayah_texts s ON s.ayah_id = a.id AND s.text_source = 'SIMPLE'
         LEFT JOIN sajdas sj ON sj.ayah_id = a.id
         LEFT JOIN hizb_quarters hq ON a.id BETWEEN hq.start_ayah_id AND hq.end_ayah_id
+        LEFT JOIN rukus r ON a.id BETWEEN r.start_ayah_id AND r.end_ayah_id
+        LEFT JOIN (
+            SELECT surah_id, MIN(number) AS first_number FROM rukus GROUP BY surah_id
+        ) rs ON rs.surah_id = r.surah_id
         WHERE a.page = :pageNumber
         ORDER BY a.id ASC
         """
@@ -308,12 +357,19 @@ interface QuranDao {
                s.text AS text_simple,
                sj.kind AS sajda_kind,
                sj.sequence AS sajda_sequence,
-               hq.number AS rub_number
+               hq.number AS rub_number,
+               hq.start_ayah_id AS rub_start_ayah_id,
+               (r.number - rs.first_number + 1) AS ruku_number,
+               r.start_ayah_id AS ruku_start_ayah_id
         FROM ayahs a
         LEFT JOIN mushaf_ayah_texts u ON u.ayah_id = a.id AND u.text_source = 'UTHMANI'
         LEFT JOIN mushaf_ayah_texts s ON s.ayah_id = a.id AND s.text_source = 'SIMPLE'
         LEFT JOIN sajdas sj ON sj.ayah_id = a.id
         LEFT JOIN hizb_quarters hq ON a.id BETWEEN hq.start_ayah_id AND hq.end_ayah_id
+        LEFT JOIN rukus r ON a.id BETWEEN r.start_ayah_id AND r.end_ayah_id
+        LEFT JOIN (
+            SELECT surah_id, MIN(number) AS first_number FROM rukus GROUP BY surah_id
+        ) rs ON rs.surah_id = r.surah_id
         WHERE a.juz = :juzNumber
         ORDER BY a.id ASC
         """
@@ -508,6 +564,16 @@ interface QuranDao {
  * `rub_number` is the interesting one: `Ayah.rubNumber` used to be hard-coded to `0` with the
  * comment "Not available in database", because the quarter a verse belongs to could only be got
  * by scanning. It is a column of `hizb_quarters` now.
+ *
+ * The two `*_start_ayah_id` columns are what turn a division a verse merely *falls inside* into
+ * a division it *begins*: a printed Mushaf marks the opening verse of a quarter or a rukūʿ, not
+ * every verse in one. Comparing them to `ayahs.id` in the mapper costs nothing and is the only
+ * way the reader can tell the two apart.
+ *
+ * `ruku_number` is the rukūʿ's index **within its surah** — `rukus.number` is global (1..556),
+ * and no Mushaf has ever printed that. The derived `rs` table is 114 rows, one per surah.
+ * All of the rukūʿ columns are null on a device whose `rukus` table has not been filled yet, so
+ * the marker simply does not render rather than rendering wrongly.
  */
 data class AyahWithText(
     @Embedded val ayah: AyahEntity,
@@ -516,6 +582,9 @@ data class AyahWithText(
     @ColumnInfo(name = "sajda_kind") val sajdaKind: String?,
     @ColumnInfo(name = "sajda_sequence") val sajdaSequence: Int?,
     @ColumnInfo(name = "rub_number") val rubNumber: Int?,
+    @ColumnInfo(name = "rub_start_ayah_id") val rubStartAyahId: Int?,
+    @ColumnInfo(name = "ruku_number") val rukuNumber: Int?,
+    @ColumnInfo(name = "ruku_start_ayah_id") val rukuStartAyahId: Int?,
 )
 
 /** Where a verse sits in the mushaf. */
