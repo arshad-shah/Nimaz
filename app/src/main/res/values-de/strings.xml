@@ -1025,6 +1025,8 @@
     <string name="quran_topic_not_found">Dieses Thema steht nicht im Register.</string>
     <string name="quran_topic_open_reader">Im Leser öffnen</string>
     <string name="cd_topic_up">Eine Ebene höher</string>
+    <string name="cd_tree_expand">Anzeigen, was unter %1$s liegt</string>
+    <string name="cd_tree_collapse">Ausblenden, was unter %1$s liegt</string>
     <string name="quran_ayah_topics">Themen</string>
     <string name="cd_switch_to_list_view">Zur Listenansicht wechseln</string>
     <string name="cd_switch_to_page_view">Zur Seitenansicht wechseln</string>

@@ -569,6 +569,12 @@ class QuranRepositoryImpl @Inject constructor(
     override suspend fun getTopicTreeRoots(tree: TopicTree): List<QuranTopic> =
         quranDao.getRootTopics(tree.wire).map { it.toDomain() }
 
+    override suspend fun getTopicChildren(topicId: Int, tree: TopicTree): List<QuranTopic> =
+        quranDao.getChildTopics(tree.wire, topicId).map { it.toDomain() }
+
+    override suspend fun getBranchTopicIds(tree: TopicTree): Set<Int> =
+        quranDao.getBranchTopicIds(tree.wire).toSet()
+
     /**
      * A topic, its place in [tree], and everything reachable from it in one call.
      *

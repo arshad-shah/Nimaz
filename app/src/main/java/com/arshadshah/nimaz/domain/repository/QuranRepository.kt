@@ -107,6 +107,19 @@ interface QuranRepository {
     suspend fun getThemesForSurah(surahNumber: Int): List<AyahTheme>
     suspend fun getThemeForAyah(surahNumber: Int, ayahNumber: Int): AyahTheme?
     suspend fun getTopicTreeRoots(tree: TopicTree): List<QuranTopic>
+
+    /**
+     * One topic's children in [tree]. Empty for a leaf, which is most of the 2,512 topics.
+     *
+     * Separate from [getTopicDetail] because expanding a node needs the children and nothing
+     * else, and the detail resolves a breadcrumb, the related topics and every citation —
+     * 153 rows for "Allah" — to answer a question about one column.
+     */
+    suspend fun getTopicChildren(topicId: Int, tree: TopicTree): List<QuranTopic>
+
+    /** The ids in [tree] that have children, so a row knows whether it is a branch. */
+    suspend fun getBranchTopicIds(tree: TopicTree): Set<Int>
+
     suspend fun getTopicDetail(topicId: Int, tree: TopicTree): TopicDetail?
     suspend fun getTopicsForAyah(ayahId: Int): List<QuranTopic>
     suspend fun searchTopics(query: String, limit: Int = 60): List<QuranTopic>

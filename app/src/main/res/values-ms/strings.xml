@@ -1009,6 +1009,8 @@
     <string name="quran_topic_not_found">Topik ini tiada dalam indeks.</string>
     <string name="quran_topic_open_reader">Buka dalam pembaca</string>
     <string name="cd_topic_up">Naik satu peringkat</string>
+    <string name="cd_tree_expand">Tunjukkan kandungan %1$s</string>
+    <string name="cd_tree_collapse">Sembunyikan kandungan %1$s</string>
     <string name="quran_ayah_topics">Topik</string>
     <string name="cd_switch_to_list_view">Tukar ke paparan senarai</string>
     <string name="cd_switch_to_page_view">Tukar ke paparan halaman</string>

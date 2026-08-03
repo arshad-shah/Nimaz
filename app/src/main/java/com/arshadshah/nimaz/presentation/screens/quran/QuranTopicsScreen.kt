@@ -12,10 +12,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.filled.AccountTree
 import androidx.compose.material.icons.filled.Category
-import androidx.compose.material.icons.filled.ListAlt
 import androidx.compose.material.icons.filled.SearchOff
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -37,7 +34,7 @@ import com.arshadshah.nimaz.domain.model.TopicTree
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
-import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuItem
+import com.arshadshah.nimaz.presentation.components.molecules.NimazTreeRow
 import com.arshadshah.nimaz.presentation.components.organisms.NimazPillTabs
 import com.arshadshah.nimaz.presentation.components.organisms.NimazSearchBar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazTopAppBar
@@ -172,8 +169,7 @@ fun QuranTopicsScreen(
                     items(topics, key = { it.id }) { topic ->
                         TopicRow(
                             topic = topic,
-                            tree = state.tree,
-                            searching = state.searchQuery.isNotBlank(),
+                            isBranch = state.isBranch(topic),
                             onOpen = { onOpenTopic(topic.id, state.tree) },
                             onDescend = { viewModel.onEvent(QuranTopicsEvent.Descend(topic)) },
                         )
@@ -187,38 +183,25 @@ fun QuranTopicsScreen(
 /**
  * One subject in the list.
  *
- * Whether a tap descends or opens is decided by the *data*, not by a chevron the user has to
- * interpret: a topic with children is a level, a leaf is a destination. A search result always
- * opens, because a result is an answer and descending from it would discard the search.
+ * The row has two targets, and which one you hit decides what happens: the disclosure control
+ * walks into the subject's children, the label opens the subject itself. Deciding that from the
+ * *data* instead — descend if it has children, open if it doesn't — is what left most of the
+ * list dead, because most of 2,512 subjects are leaves and a leaf's tap went nowhere at all.
  */
 @Composable
 private fun TopicRow(
     topic: QuranTopic,
-    tree: TopicTree,
-    searching: Boolean,
+    isBranch: Boolean,
     onOpen: () -> Unit,
     onDescend: () -> Unit,
 ) {
-    val verses = if (topic.ayahCount == 1) {
-        stringResource(R.string.quran_topics_verse)
-    } else {
-        stringResource(R.string.quran_topics_verses, topic.ayahCount)
-    }
-    val subtitle = listOfNotNull(
-        topic.arabicName.takeIf { it.isNotBlank() },
-        verses.takeIf { topic.ayahCount > 0 },
-    ).joinToString(" · ")
-
-    NimazMenuItem(
-        title = topic.name,
-        subtitle = subtitle.ifBlank { null },
-        onClick = if (searching) onOpen else onDescend,
-        trailingIcon = Icons.AutoMirrored.Filled.ArrowForward,
-        icon = when (tree) {
-            TopicTree.THEMATIC -> Icons.Default.AccountTree
-            TopicTree.ONTOLOGY -> Icons.Default.Category
-            TopicTree.INDEX -> Icons.Default.ListAlt
-        },
+    NimazTreeRow(
+        label = topic.name,
+        secondaryLabel = topic.arabicName.takeIf { it.isNotBlank() },
+        badgeText = topic.ayahCount.takeIf { it > 0 }?.toString(),
+        expandable = isBranch,
+        onToggleExpanded = onDescend,
+        onClick = onOpen,
     )
 }
 

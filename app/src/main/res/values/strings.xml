@@ -1280,6 +1280,8 @@
     <string name="quran_topic_not_found">This subject isn\'t in the index.</string>
     <string name="quran_topic_open_reader">Open in reader</string>
     <string name="cd_topic_up">Up one level</string>
+    <string name="cd_tree_expand">Show what is under %1$s</string>
+    <string name="cd_tree_collapse">Hide what is under %1$s</string>
     <string name="quran_ayah_topics">Topics</string>
 
     <!-- Quran Reader Screen -->

@@ -39,6 +39,15 @@ data class TopicBrowseState(
     /** What the current level lists — roots, or the children of `path.last()`. */
     val topics: List<QuranTopic> = emptyList(),
 
+    /**
+     * Which ids in [tree] have children.
+     *
+     * A row has to know it is a branch *before* it is tapped, because that is what decides
+     * whether it gets a disclosure control at all — and a leaf that offers one is the dead tap
+     * this state exists to remove. Loaded once per tree.
+     */
+    val branchIds: Set<Int> = emptySet(),
+
     val searchQuery: String = "",
     val searchResults: List<QuranTopic> = emptyList(),
     val isSearching: Boolean = false,
@@ -57,6 +66,15 @@ data class TopicBrowseState(
     /** What the list should show: search results while a query is live, else the level. */
     val visibleTopics: List<QuranTopic>
         get() = if (searchQuery.isBlank()) topics else searchResults
+
+    /**
+     * Whether [topic] can be descended into.
+     *
+     * A search result never can — it is drawn flat, and descending from one would discard the
+     * search that produced it.
+     */
+    fun isBranch(topic: QuranTopic): Boolean =
+        searchQuery.isBlank() && topic.id in branchIds
 }
 
 data class TopicDetailState(
@@ -184,8 +202,15 @@ class QuranTopicsViewModel @Inject constructor(
         viewModelScope.launch {
             val available = quranUseCases.hasThematicContent()
             val roots = if (available) quranUseCases.getTopicTreeRoots(tree) else emptyList()
+            val branches =
+                if (available) quranUseCases.getTopicChildren.branchesIn(tree) else emptySet()
             _browseState.update {
-                it.copy(topics = roots, isLoading = false, isAvailable = available)
+                it.copy(
+                    topics = roots,
+                    branchIds = branches,
+                    isLoading = false,
+                    isAvailable = available,
+                )
             }
         }
     }
@@ -193,15 +218,15 @@ class QuranTopicsViewModel @Inject constructor(
     /**
      * Descend, but only where there is somewhere to go.
      *
-     * A topic's children are not known until they are fetched, so this loads first and pushes
-     * the path only when the level is non-empty — otherwise a leaf would push a level that
-     * renders as an empty list with a back button.
+     * [TopicBrowseState.branchIds] already says which topics have children, so the screen
+     * offers this on branches only — but the guard stays, because the *level* is not known
+     * until it is fetched and pushing an empty one would render as a list with a back button.
      */
     private fun descend(topic: QuranTopic) {
         viewModelScope.launch {
             _browseState.update { it.copy(isLoading = true) }
             val tree = _browseState.value.tree
-            val children = quranUseCases.getTopicDetail(topic.id, tree)?.children.orEmpty()
+            val children = quranUseCases.getTopicChildren(topic.id, tree)
             _browseState.update { state ->
                 if (children.isEmpty()) {
                     state.copy(isLoading = false)
@@ -225,7 +250,7 @@ class QuranTopicsViewModel @Inject constructor(
         _browseState.update { it.copy(path = path, isLoading = true) }
         viewModelScope.launch {
             val level = path.lastOrNull()
-                ?.let { quranUseCases.getTopicDetail(it.id, state.tree)?.children.orEmpty() }
+                ?.let { quranUseCases.getTopicChildren(it.id, state.tree) }
                 ?: quranUseCases.getTopicTreeRoots(state.tree)
             _browseState.update { it.copy(topics = level, isLoading = false) }
         }
