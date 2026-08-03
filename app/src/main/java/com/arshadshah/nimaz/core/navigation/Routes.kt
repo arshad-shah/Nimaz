@@ -243,6 +243,25 @@ sealed interface Route {
     @Serializable
     data class SurahInfo(val surahNumber: Int) : Route
 
+    /**
+     * The Qur'an's subject browser. One route for the whole descent, not one per level —
+     * the ontology goes five deep, and a route per level would mean five back-stack entries
+     * for one act of browsing. `QuranTopicsViewModel` holds the path.
+     */
+    @Serializable
+    data object QuranTopics : Route
+
+    /**
+     * One subject, with its citations.
+     *
+     * [tree] is a [com.arshadshah.nimaz.domain.model.TopicTree] `wire` value rather than the
+     * enum, because a route argument has to have a `NavType` and a String always does. It is
+     * only used to pick which hierarchy the breadcrumb and the child list are drawn from; an
+     * unrecognised value falls back to the thematic tree rather than failing to open.
+     */
+    @Serializable
+    data class QuranTopicDetail(val topicId: Int, val tree: String = "thematic") : Route
+
     // Select Reciter
     @Serializable
     data object SelectReciter : Route

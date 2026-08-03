@@ -141,6 +141,14 @@ import com.arshadshah.nimaz.domain.usecase.GetSessionsForDateUseCase
 import com.arshadshah.nimaz.domain.usecase.GetSessionsInRangeUseCase
 import com.arshadshah.nimaz.domain.usecase.GetSurahByNumberUseCase
 import com.arshadshah.nimaz.domain.usecase.GetSurahInfoUseCase
+import com.arshadshah.nimaz.domain.usecase.GetSurahOverviewUseCase
+import com.arshadshah.nimaz.domain.usecase.GetSurahThemesUseCase
+import com.arshadshah.nimaz.domain.usecase.GetThemeForAyahUseCase
+import com.arshadshah.nimaz.domain.usecase.GetTopicDetailUseCase
+import com.arshadshah.nimaz.domain.usecase.GetTopicTreeRootsUseCase
+import com.arshadshah.nimaz.domain.usecase.GetTopicsForAyahUseCase
+import com.arshadshah.nimaz.domain.usecase.HasThematicContentUseCase
+import com.arshadshah.nimaz.domain.usecase.SearchTopicsUseCase
 import com.arshadshah.nimaz.domain.usecase.GetSurahListUseCase
 import com.arshadshah.nimaz.domain.usecase.GetSurahWithAyahsUseCase
 import com.arshadshah.nimaz.domain.usecase.GetTafseerForAyahUseCase
@@ -390,6 +398,14 @@ object UseCaseModule {
             updateReadingPosition = UpdateReadingPositionUseCase(repository),
             incrementAyahsRead = IncrementAyahsReadUseCase(repository),
             getSurahInfo = GetSurahInfoUseCase(repository),
+            getSurahOverview = GetSurahOverviewUseCase(repository),
+            getSurahThemes = GetSurahThemesUseCase(repository),
+            getThemeForAyah = GetThemeForAyahUseCase(repository),
+            getTopicTreeRoots = GetTopicTreeRootsUseCase(repository),
+            getTopicDetail = GetTopicDetailUseCase(repository),
+            getTopicsForAyah = GetTopicsForAyahUseCase(repository),
+            searchTopics = SearchTopicsUseCase(repository),
+            hasThematicContent = HasThematicContentUseCase(repository),
             getPageAyahRanges = GetPageAyahRangesUseCase(repository),
             getMushafPagination = GetMushafPaginationUseCase(repository),
             getMushafPageLayout = GetMushafPageLayoutUseCase(repository),

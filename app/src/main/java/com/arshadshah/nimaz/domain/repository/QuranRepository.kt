@@ -1,17 +1,22 @@
 package com.arshadshah.nimaz.domain.repository
 
 import com.arshadshah.nimaz.domain.model.Ayah
+import com.arshadshah.nimaz.domain.model.AyahTheme
 import com.arshadshah.nimaz.domain.model.MushafPageLayout
 import com.arshadshah.nimaz.domain.model.MushafScript
 import com.arshadshah.nimaz.domain.model.PageAyahRange
 import com.arshadshah.nimaz.domain.model.QuranBookmark
 import com.arshadshah.nimaz.domain.model.QuranFavorite
 import com.arshadshah.nimaz.domain.model.QuranSearchResult
+import com.arshadshah.nimaz.domain.model.QuranTopic
 import com.arshadshah.nimaz.domain.model.ReadingProgress
 import com.arshadshah.nimaz.domain.model.RevelationType
 import com.arshadshah.nimaz.domain.model.Surah
 import com.arshadshah.nimaz.domain.model.SurahInfo
+import com.arshadshah.nimaz.domain.model.SurahOverview
 import com.arshadshah.nimaz.domain.model.SurahWithAyahs
+import com.arshadshah.nimaz.domain.model.TopicDetail
+import com.arshadshah.nimaz.domain.model.TopicTree
 import com.arshadshah.nimaz.domain.model.Translator
 import kotlinx.coroutines.flow.Flow
 
@@ -92,6 +97,22 @@ interface QuranRepository {
 
     // Surah info
     suspend fun getSurahInfo(surahNumber: Int): SurahInfo?
+
+    /**
+     * The thematic layer (schemaVersion 24). Every method here answers "nothing" rather than
+     * throwing on a device whose artifact predates it — the tables exist from the migration,
+     * the rows arrive with the artifact, and the gap between the two is a normal state.
+     */
+    suspend fun getSurahOverview(surahNumber: Int): SurahOverview?
+    suspend fun getThemesForSurah(surahNumber: Int): List<AyahTheme>
+    suspend fun getThemeForAyah(surahNumber: Int, ayahNumber: Int): AyahTheme?
+    suspend fun getTopicTreeRoots(tree: TopicTree): List<QuranTopic>
+    suspend fun getTopicDetail(topicId: Int, tree: TopicTree): TopicDetail?
+    suspend fun getTopicsForAyah(ayahId: Int): List<QuranTopic>
+    suspend fun searchTopics(query: String, limit: Int = 60): List<QuranTopic>
+
+    /** Whether this install's artifact actually carries the thematic layer at all. */
+    suspend fun hasThematicContent(): Boolean
 
     // Data initialization
     suspend fun initializeQuranData()

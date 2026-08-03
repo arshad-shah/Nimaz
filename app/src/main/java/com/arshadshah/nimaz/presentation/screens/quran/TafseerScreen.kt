@@ -48,6 +48,7 @@ fun TafseerScreen(
     surahNumber: Int,
     ayahNumber: Int = 1,
     onNavigateBack: () -> Unit,
+    onNavigateToTopic: (topicId: Int) -> Unit = {},
     viewModel: TafseerViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -191,7 +192,9 @@ fun TafseerScreen(
                         onHighlightDeleted = { id ->
                             viewModel.onEvent(TafseerEvent.DeleteHighlight(id))
                         },
-                        onShare = { shareTafseerPdf() }
+                        onShare = { shareTafseerPdf() },
+                        topics = if (isCurrentPage) state.topics else emptyList(),
+                        onTopicClick = onNavigateToTopic
                     )
                 }
             } else {

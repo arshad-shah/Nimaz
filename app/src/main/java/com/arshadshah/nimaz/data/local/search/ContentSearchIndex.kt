@@ -178,6 +178,13 @@ enum class SearchKind(val wire: String) {
     DUA("dua"),
     DUA_CATEGORY("dua-category"),
     TAFSEER("tafseer"),
+
+    /**
+     * The Qur'an's thematic layer (nimaz-data schemaVersion 24). A `theme` ref is
+     * `surah:ayah_from` — the passage's key — and a `topic` ref is the topic id.
+     */
+    THEME("theme"),
+    TOPIC("topic"),
     ASMA_UL_HUSNA("asma-ul-husna"),
     ASMA_UN_NABI("asma-un-nabi"),
     PROPHET("prophet"),

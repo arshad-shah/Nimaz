@@ -74,6 +74,7 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownMenu
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownRow
 import com.arshadshah.nimaz.presentation.components.molecules.SurahHeaderCartouche
 import com.arshadshah.nimaz.presentation.components.organisms.AyahItem
+import com.arshadshah.nimaz.presentation.components.organisms.PassageHeading
 import com.arshadshah.nimaz.presentation.components.organisms.MushafLinePage
 import com.arshadshah.nimaz.presentation.components.organisms.MushafPage
 import com.arshadshah.nimaz.presentation.components.organisms.TajweedLegendSheet
@@ -802,6 +803,13 @@ fun QuranReaderScreen(
                         items = displayAyahs,
                         key = { it.id }
                     ) { ayah ->
+                        // The mushaf's own outline starts a new subject here (schemaVersion 24).
+                        // Printed above the verse it opens on, so reading down the list reads as
+                        // passages rather than as 286 undifferentiated verses.
+                        state.passageStarts[ayah.numberInSurah]?.let { passage ->
+                            PassageHeading(passage = passage)
+                        }
+
                         if (state.readingMode == ReadingMode.JUZ && ayah.id in surahStartIds) {
                             val surah = surahByNumber[ayah.surahNumber]
                             PageSurahSeparator(

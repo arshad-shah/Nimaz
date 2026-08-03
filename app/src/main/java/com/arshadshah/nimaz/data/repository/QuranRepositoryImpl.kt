@@ -9,19 +9,23 @@ import com.arshadshah.nimaz.data.local.user.ReadingProgressDao
 import com.arshadshah.nimaz.data.local.database.dao.QuranDao
 import com.arshadshah.nimaz.data.local.database.dao.AyahWithText
 import com.arshadshah.nimaz.data.local.database.entity.AyahEntity
+import com.arshadshah.nimaz.data.local.database.entity.AyahThemeEntity
 import com.arshadshah.nimaz.data.local.database.entity.QuranBookmarkEntity
 import com.arshadshah.nimaz.data.local.database.entity.QuranFavoriteEntity
+import com.arshadshah.nimaz.data.local.database.entity.QuranTopicEntity
 import com.arshadshah.nimaz.data.local.database.entity.ReadingProgressEntity
 import com.arshadshah.nimaz.data.local.database.entity.SurahEntity
 import com.arshadshah.nimaz.data.local.search.ContentSearchIndex
 import com.arshadshah.nimaz.data.local.search.SearchKind
 import com.arshadshah.nimaz.domain.model.Ayah
+import com.arshadshah.nimaz.domain.model.AyahTheme
 import com.arshadshah.nimaz.domain.model.MushafPageLayout
 import com.arshadshah.nimaz.domain.model.MushafScript
 import com.arshadshah.nimaz.domain.model.PageAyahRange
 import com.arshadshah.nimaz.domain.model.QuranBookmark
 import com.arshadshah.nimaz.domain.model.QuranFavorite
 import com.arshadshah.nimaz.domain.model.QuranSearchResult
+import com.arshadshah.nimaz.domain.model.QuranTopic
 import com.arshadshah.nimaz.domain.model.QuranTranslation
 import com.arshadshah.nimaz.domain.model.ReadingProgress
 import com.arshadshah.nimaz.domain.model.RevelationType
@@ -29,7 +33,13 @@ import com.arshadshah.nimaz.domain.model.SajdaType
 import com.arshadshah.nimaz.domain.model.SearchType
 import com.arshadshah.nimaz.domain.model.Surah
 import com.arshadshah.nimaz.domain.model.SurahInfo
+import com.arshadshah.nimaz.domain.model.SurahOverview
+import com.arshadshah.nimaz.domain.model.SurahOverviewGroup
+import com.arshadshah.nimaz.domain.model.SurahOverviewSection
 import com.arshadshah.nimaz.domain.model.SurahWithAyahs
+import com.arshadshah.nimaz.domain.model.TopicCitation
+import com.arshadshah.nimaz.domain.model.TopicDetail
+import com.arshadshah.nimaz.domain.model.TopicTree
 import com.arshadshah.nimaz.domain.model.Translator
 import com.arshadshah.nimaz.domain.repository.QuranRepository
 import kotlinx.coroutines.flow.Flow
@@ -67,6 +77,16 @@ class QuranRepositoryImpl @Inject constructor(
         if (translatorId == null) return null
         return QuranTranslation.fromId(translatorId).id
     }
+
+    /**
+     * Whether this install's artifact carries the thematic layer, resolved once.
+     *
+     * It cannot change while the process lives: the content database is replaced wholesale by
+     * a release, never written to at runtime. Two `COUNT(*)`s on every screen that wants to
+     * know would be two queries to learn a constant.
+     */
+    @Volatile
+    private var thematicContent: Boolean? = null
 
     override fun getAllSurahs(): Flow<List<Surah>> {
         return quranDao.getAllSurahs().mapItems { it.toDomain() }
@@ -522,6 +542,108 @@ class QuranRepositoryImpl @Inject constructor(
         }
     }
 
+    // ---- The thematic layer (schemaVersion 24) ----
+
+    override suspend fun getSurahOverview(surahNumber: Int): SurahOverview? {
+        val overview = quranDao.getSurahOverview(surahNumber) ?: return null
+        return SurahOverview(
+            surahNumber = overview.surahNumber,
+            summary = overview.summary,
+            sections = quranDao.getSurahOverviewSections(surahNumber).map { section ->
+                SurahOverviewSection(
+                    position = section.position,
+                    heading = section.heading,
+                    group = SurahOverviewGroup.fromWire(section.group),
+                    body = section.body,
+                )
+            },
+        )
+    }
+
+    override suspend fun getThemesForSurah(surahNumber: Int): List<AyahTheme> =
+        quranDao.getThemesForSurah(surahNumber).map { it.toDomain() }
+
+    override suspend fun getThemeForAyah(surahNumber: Int, ayahNumber: Int): AyahTheme? =
+        quranDao.getThemeForAyah(surahNumber, ayahNumber)?.toDomain()
+
+    override suspend fun getTopicTreeRoots(tree: TopicTree): List<QuranTopic> =
+        quranDao.getRootTopics(tree.wire).map { it.toDomain() }
+
+    /**
+     * A topic, its place in [tree], and everything reachable from it in one call.
+     *
+     * The breadcrumb is walked upwards with a visited set. The corpus's parents are validated
+     * acyclic at import, so the guard is not for the data that ships — it is for the next
+     * corpus, and the cost of being wrong is a screen that hangs.
+     */
+    override suspend fun getTopicDetail(topicId: Int, tree: TopicTree): TopicDetail? {
+        val topic = quranDao.getTopic(topicId)?.toDomain() ?: return null
+
+        val breadcrumb = ArrayDeque<QuranTopic>()
+        val seen = mutableSetOf(topic.id)
+        var parentId = topic.parentIn(tree)
+        while (parentId != null && seen.add(parentId)) {
+            val parent = quranDao.getTopic(parentId)?.toDomain() ?: break
+            breadcrumb.addFirst(parent)
+            parentId = parent.parentIn(tree)
+        }
+
+        val related = topic.relatedTopicIds
+            .takeIf { it.isNotEmpty() }
+            ?.let { ids -> quranDao.getTopics(ids).map { it.toDomain() } }
+            .orEmpty()
+
+        return TopicDetail(
+            topic = topic,
+            tree = tree,
+            breadcrumb = breadcrumb.toList(),
+            children = quranDao.getChildTopics(tree.wire, topicId).map { it.toDomain() },
+            related = related,
+            citations = quranDao.getTopicAyahs(topicId).map {
+                TopicCitation(
+                    ayahId = it.ayahId,
+                    surahNumber = it.surahNumber,
+                    ayahNumber = it.ayahNumber,
+                )
+            },
+        )
+    }
+
+    override suspend fun getTopicsForAyah(ayahId: Int): List<QuranTopic> =
+        quranDao.getTopicsForAyah(ayahId).map { it.toDomain() }
+
+    /**
+     * Topic search, through the shipped FTS index where there is one.
+     *
+     * The index carries each topic's Arabic name and description as well as its name, folded,
+     * so "الله" and "resurrection" both reach rows the `LIKE` fallback cannot: the fallback
+     * matches the English name and nothing else. Index order is relevance order, and
+     * `getTopics` does not preserve it, so the ids are re-sorted back into it here.
+     */
+    override suspend fun searchTopics(query: String, limit: Int): List<QuranTopic> {
+        val trimmed = query.trim()
+        if (trimmed.isEmpty()) return emptyList()
+        if (!searchIndex.isAvailable()) {
+            return quranDao.searchTopicsByName(trimmed, limit).map { it.toDomain() }
+        }
+        val ids = searchIndex.refs(trimmed, SearchKind.TOPIC)
+            .mapNotNull(String::toIntOrNull)
+            .distinct()
+            .take(limit)
+        if (ids.isEmpty()) return emptyList()
+        val rank = ids.withIndex().associate { (index, id) -> id to index }
+        return quranDao.getTopics(ids)
+            .map { it.toDomain() }
+            .sortedBy { rank[it.id] ?: Int.MAX_VALUE }
+    }
+
+    override suspend fun hasThematicContent(): Boolean {
+        thematicContent?.let { return it }
+        val present = quranDao.countThemes() > 0 && quranDao.countTopics() > 0
+        thematicContent = present
+        return present
+    }
+
     override suspend fun initializeQuranData() {
         // Data is pre-populated in the database
     }
@@ -531,6 +653,34 @@ class QuranRepositoryImpl @Inject constructor(
     }
 
     // Extension functions for mapping
+    private fun AyahThemeEntity.toDomain(): AyahTheme = AyahTheme(
+        surahNumber = surahNumber,
+        ayahFrom = ayahFrom,
+        ayahTo = ayahTo,
+        theme = theme,
+        ayahCount = ayahCount,
+    )
+
+    /**
+     * `related_topic_ids` is a comma-separated list, which is the shape the corpus stores it
+     * in for the seventeen topics that have one. A table for seventeen rows would be a table
+     * nothing ever joins.
+     */
+    private fun QuranTopicEntity.toDomain(): QuranTopic = QuranTopic(
+        id = topicId,
+        name = name,
+        arabicName = arabicName,
+        description = description,
+        wikiLink = wikiLink,
+        ayahCount = ayahCount,
+        parentId = parentId,
+        thematicParentId = thematicParentId,
+        ontologyParentId = ontologyParentId,
+        isThematic = isThematic == 1,
+        isOntology = isOntology == 1,
+        relatedTopicIds = relatedTopicIds.split(',').mapNotNull { it.trim().toIntOrNull() },
+    )
+
     private fun SurahEntity.toDomain(): Surah {
         return Surah(
             number = number,

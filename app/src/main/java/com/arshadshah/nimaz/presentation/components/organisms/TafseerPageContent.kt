@@ -11,6 +11,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -56,6 +58,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.Ayah
+import com.arshadshah.nimaz.domain.model.QuranTopic
+import com.arshadshah.nimaz.presentation.components.atoms.NimazChip
+import com.arshadshah.nimaz.presentation.components.atoms.NimazChipVariant
 import com.arshadshah.nimaz.domain.model.TafseerHighlight
 import com.arshadshah.nimaz.domain.model.TafseerSource
 import com.arshadshah.nimaz.domain.model.TafseerText
@@ -184,6 +189,13 @@ fun TafseerPageContent(
     onHighlightUpdated: (highlightId: Long, color: String, note: String?) -> Unit,
     onHighlightDeleted: (highlightId: Long) -> Unit,
     onShare: () -> Unit,
+    /**
+     * The subjects the corpus files this verse under (schemaVersion 24). Shown as chips under
+     * the verse, on the first content page only — they belong to the *verse*, and a block can
+     * span nine of them.
+     */
+    topics: List<QuranTopic> = emptyList(),
+    onTopicClick: (topicId: Int) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     var showNotesSheet by remember { mutableStateOf(false) }
@@ -274,6 +286,14 @@ fun TafseerPageContent(
                                         .padding(vertical = 8.dp)
                                 )
                                 QuranOrnamentalDivider()
+                            }
+
+                            if (topics.isNotEmpty()) {
+                                AyahTopicChips(
+                                    topics = topics,
+                                    onTopicClick = onTopicClick,
+                                    modifier = Modifier.padding(bottom = 8.dp)
+                                )
                             }
                         }
 
@@ -913,3 +933,39 @@ private fun TafseerPageContentDarkPreview() {
         TafseerPageContentShowcase()
     }
 }
+
+/**
+ * The subjects a verse is filed under, as chips.
+ *
+ * Capped at six. "Allah" and "Quran" are cited by hundreds of verses each, so a busy verse can
+ * carry a dozen topics and the row would push the commentary itself off the first screen — the
+ * chips are a doorway out of this verse, not the reason to be on it. They are ordered by how
+ * many verses the subject covers, so the six shown are the substantial ones.
+ */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun AyahTopicChips(
+    topics: List<QuranTopic>,
+    onTopicClick: (topicId: Int) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(modifier = modifier.fillMaxWidth()) {
+        Text(
+            text = stringResource(R.string.quran_ayah_topics),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(bottom = 6.dp)
+        )
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            topics.take(MAX_AYAH_TOPICS).forEach { topic ->
+                NimazChip(
+                    text = topic.name,
+                    onClick = { onTopicClick(topic.id) },
+                    variant = NimazChipVariant.SUGGESTION
+                )
+            }
+        }
+    }
+}
+
+private const val MAX_AYAH_TOPICS = 6

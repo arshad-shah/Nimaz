@@ -9,6 +9,7 @@ import androidx.room.Transaction
 import androidx.room.Update
 import androidx.room.Embedded
 import com.arshadshah.nimaz.data.local.database.entity.AyahEntity
+import com.arshadshah.nimaz.data.local.database.entity.AyahThemeEntity
 import com.arshadshah.nimaz.data.local.database.entity.HizbQuarterEntity
 import com.arshadshah.nimaz.data.local.database.entity.JuzEntity
 import com.arshadshah.nimaz.data.local.database.entity.ManzilEntity
@@ -20,9 +21,13 @@ import com.arshadshah.nimaz.data.local.database.entity.MushafAyahTextEntity
 import com.arshadshah.nimaz.data.local.database.entity.MushafLayoutLineEntity
 import com.arshadshah.nimaz.data.local.database.entity.QuranBookmarkEntity
 import com.arshadshah.nimaz.data.local.database.entity.QuranFavoriteEntity
+import com.arshadshah.nimaz.data.local.database.entity.QuranTopicAyahEntity
+import com.arshadshah.nimaz.data.local.database.entity.QuranTopicEntity
 import com.arshadshah.nimaz.data.local.database.entity.ReadingProgressEntity
 import com.arshadshah.nimaz.data.local.database.entity.SurahEntity
 import com.arshadshah.nimaz.data.local.database.entity.SurahInfoEntity
+import com.arshadshah.nimaz.data.local.database.entity.SurahOverviewEntity
+import com.arshadshah.nimaz.data.local.database.entity.SurahOverviewSectionEntity
 import com.arshadshah.nimaz.data.local.database.entity.TranslationEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -494,6 +499,97 @@ interface QuranDao {
 
     @Query("SELECT * FROM surah_info WHERE surahNumber = :surahNumber")
     suspend fun getSurahInfo(surahNumber: Int): SurahInfoEntity?
+
+    // ---- Surah overview (long-form background) ----
+
+    @Query("SELECT * FROM surah_overviews WHERE surah_number = :surahNumber")
+    suspend fun getSurahOverview(surahNumber: Int): SurahOverviewEntity?
+
+    @Query(
+        "SELECT * FROM surah_overview_sections WHERE surah_number = :surahNumber " +
+            "ORDER BY position ASC"
+    )
+    suspend fun getSurahOverviewSections(surahNumber: Int): List<SurahOverviewSectionEntity>
+
+    // ---- Thematic passages ----
+
+    @Query(
+        "SELECT * FROM ayah_themes WHERE surah_number = :surahNumber " +
+            "ORDER BY ayah_from ASC"
+    )
+    suspend fun getThemesForSurah(surahNumber: Int): List<AyahThemeEntity>
+
+    /**
+     * The passage an ayah falls in. Containment rides the `(surah_number, ayah_from)` primary
+     * key, and the ranges never overlap, so at most one row can match — `LIMIT 1` states that
+     * rather than relying on it.
+     */
+    @Query(
+        "SELECT * FROM ayah_themes WHERE surah_number = :surahNumber " +
+            "AND ayah_from <= :ayahNumber AND ayah_to >= :ayahNumber LIMIT 1"
+    )
+    suspend fun getThemeForAyah(surahNumber: Int, ayahNumber: Int): AyahThemeEntity?
+
+    @Query("SELECT COUNT(*) FROM ayah_themes")
+    suspend fun countThemes(): Int
+
+    // ---- Topics ----
+
+    @Query("SELECT * FROM quran_topics WHERE topic_id = :topicId")
+    suspend fun getTopic(topicId: Int): QuranTopicEntity?
+
+    @Query("SELECT * FROM quran_topics WHERE topic_id IN (:topicIds)")
+    suspend fun getTopics(topicIds: List<Int>): List<QuranTopicEntity>
+
+    /**
+     * The roots of one of the three hierarchies. `parent` is the subject index (a root is a
+     * topic with no `parent_id`); `thematic` and `ontology` are the two curated trees, whose
+     * roots are members with a null parent of that kind — which is why membership is a column
+     * and not inferred from the parent being null.
+     */
+    @Query(
+        "SELECT * FROM quran_topics WHERE " +
+            "(:tree = 'thematic' AND is_thematic = 1 AND thematic_parent_id IS NULL) OR " +
+            "(:tree = 'ontology' AND is_ontology = 1 AND ontology_parent_id IS NULL) OR " +
+            "(:tree = 'index' AND parent_id IS NULL) " +
+            "ORDER BY ayah_count DESC, name ASC"
+    )
+    suspend fun getRootTopics(tree: String): List<QuranTopicEntity>
+
+    @Query(
+        "SELECT * FROM quran_topics WHERE " +
+            "(:tree = 'thematic' AND thematic_parent_id = :parentId) OR " +
+            "(:tree = 'ontology' AND ontology_parent_id = :parentId) OR " +
+            "(:tree = 'index' AND parent_id = :parentId) " +
+            "ORDER BY ayah_count DESC, name ASC"
+    )
+    suspend fun getChildTopics(tree: String, parentId: Int): List<QuranTopicEntity>
+
+    @Query(
+        "SELECT * FROM quran_topic_ayahs WHERE topic_id = :topicId " +
+            "ORDER BY ayah_id ASC"
+    )
+    suspend fun getTopicAyahs(topicId: Int): List<QuranTopicAyahEntity>
+
+    /**
+     * Every topic that cites this verse, busiest first. The index on `ayah_id` is what keeps
+     * this off a scan of all 30,687 citations.
+     */
+    @Query(
+        "SELECT t.* FROM quran_topics t " +
+            "JOIN quran_topic_ayahs ta ON ta.topic_id = t.topic_id " +
+            "WHERE ta.ayah_id = :ayahId ORDER BY t.ayah_count DESC, t.name ASC"
+    )
+    suspend fun getTopicsForAyah(ayahId: Int): List<QuranTopicEntity>
+
+    @Query(
+        "SELECT * FROM quran_topics WHERE name LIKE '%' || :query || '%' " +
+            "ORDER BY ayah_count DESC, name ASC LIMIT :limit"
+    )
+    suspend fun searchTopicsByName(query: String, limit: Int): List<QuranTopicEntity>
+
+    @Query("SELECT COUNT(*) FROM quran_topics")
+    suspend fun countTopics(): Int
 
 }
 

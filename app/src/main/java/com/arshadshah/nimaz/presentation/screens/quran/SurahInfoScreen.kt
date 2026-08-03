@@ -33,6 +33,8 @@ import com.arshadshah.nimaz.presentation.components.molecules.DetailCard
 import com.arshadshah.nimaz.presentation.components.molecules.SurahHeaderCartouche
 import com.arshadshah.nimaz.presentation.components.organisms.BottomActions
 import com.arshadshah.nimaz.presentation.components.organisms.NimazTopAppBar
+import com.arshadshah.nimaz.presentation.components.organisms.SurahBackgroundSections
+import com.arshadshah.nimaz.presentation.components.organisms.SurahPassageOutline
 import com.arshadshah.nimaz.presentation.components.organisms.ThemesList
 import com.arshadshah.nimaz.presentation.viewmodel.QuranEvent
 import com.arshadshah.nimaz.presentation.viewmodel.QuranViewModel
@@ -43,10 +45,13 @@ fun SurahInfoScreen(
     surahNumber: Int,
     onNavigateBack: () -> Unit,
     onStartReading: () -> Unit,
+    onOpenAyah: (surah: Int, ayah: Int) -> Unit = { _, _ -> },
+    onOpenTopic: (topicId: Int) -> Unit = {},
     viewModel: QuranViewModel = hiltViewModel()
 ) {
     val homeState by viewModel.homeState.collectAsStateWithLifecycle()
     val surahInfo by viewModel.surahInfo.collectAsStateWithLifecycle()
+    val thematic by viewModel.surahThematic.collectAsStateWithLifecycle()
     val audioState by viewModel.audioState.collectAsStateWithLifecycle()
     val surah = homeState.surahs.find { it.number == surahNumber }
 
@@ -164,6 +169,21 @@ fun SurahInfoScreen(
                             )
                     )
                 }
+
+                // The long-form background and the passage outline (schemaVersion 24). Both are
+                // absent on an install whose artifact predates them, and both simply do not
+                // render — there is no empty state, because the sections above already answer
+                // the screen's question and a placeholder would only advertise a gap.
+                SurahBackgroundSections(
+                    overview = thematic.overview,
+                    onOpenAyah = onOpenAyah,
+                    onOpenTopic = onOpenTopic
+                )
+
+                SurahPassageOutline(
+                    passages = thematic.passages,
+                    onOpenAyah = { ayah -> onOpenAyah(surahNumber, ayah) }
+                )
             }
         } else {
             // Loading or surah not found
