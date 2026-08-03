@@ -115,6 +115,12 @@ data class QuranHomeUiState(
      * when the Mushaf layout setting changes instead of staying pinned to the Madani 604.
      */
     val pagination: MushafPagination = MushafPagination.fallback(MushafScript.DEFAULT),
+    /**
+     * Whether this install's artifact carries the thematic layer, so the home screen offers a
+     * way into it only where there is something behind the offer. False between the migration
+     * that creates the tables and the schemaVersion 24 release that fills them.
+     */
+    val hasThematicContent: Boolean = false,
     val isLoading: Boolean = true,
     val error: String? = null
 )
@@ -746,6 +752,10 @@ class QuranViewModel @Inject constructor(
     }
 
     private fun loadSurahs() {
+        viewModelScope.launch {
+            val thematic = quranUseCases.hasThematicContent()
+            _homeState.update { it.copy(hasThematicContent = thematic) }
+        }
         viewModelScope.launch {
             quranUseCases.getSurahList()
                 .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())

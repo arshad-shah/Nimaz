@@ -1035,6 +1035,8 @@
     <string name="cd_passage_open">Ouvrir %1$s dans le lecteur</string>
 
     <!-- Thèmes du Coran -->
+    <string name="quran_home_browse_subjects">Parcourir par sujet</string>
+    <string name="quran_home_browse_subjects_subtitle">2 512 sujets, indexés à la main</string>
     <string name="quran_topics_title">Thèmes</string>
     <string name="quran_topics_subtitle">Ce dont parle le Coran</string>
     <string name="quran_topics_search_hint">Rechercher un sujet…</string>
@@ -1051,8 +1053,14 @@
     <string name="quran_topic_subtopics">Sous-thèmes</string>
     <string name="quran_topic_related">Sujets liés</string>
     <string name="quran_topic_not_found">Ce sujet ne figure pas dans l\'index.</string>
-    <string name="quran_topic_open_reader">Ouvrir dans le lecteur</string>
+    <string name="quran_topic_verses_across">%1$d dans %2$d sourates</string>
+    <string name="quran_topics_crumb_home">Tous les sujets</string>
+    <string name="quran_topics_scope_search">Recherche dans les trois hiérarchies</string>
+    <string name="quran_topics_scope_thematic">Un plan raisonné — doctrine, adoration, récits</string>
+    <string name="quran_topics_scope_ontology">Par type de chose — personnes, lieux, événements</string>
+    <string name="quran_topics_scope_index">La forme d\'un index imprimé</string>
     <string name="cd_topic_up">Remonter d\'un niveau</string>
+    <string name="cd_topic_focus">Commencer à %1$s</string>
     <string name="cd_tree_expand">Afficher ce qui se trouve sous %1$s</string>
     <string name="cd_tree_collapse">Masquer ce qui se trouve sous %1$s</string>
     <string name="quran_ayah_topics">Thèmes</string>

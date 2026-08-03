@@ -1013,6 +1013,8 @@
     <string name="cd_passage_open">%1$s im Leser öffnen</string>
 
     <!-- Quran-Themen -->
+    <string name="quran_home_browse_subjects">Nach Thema stöbern</string>
+    <string name="quran_home_browse_subjects_subtitle">2.512 von Hand erfasste Themen</string>
     <string name="quran_topics_title">Themen</string>
     <string name="quran_topics_subtitle">Wovon der Koran spricht</string>
     <string name="quran_topics_search_hint">Themen suchen…</string>
@@ -1029,8 +1031,14 @@
     <string name="quran_topic_subtopics">Unterthemen</string>
     <string name="quran_topic_related">Verwandte Themen</string>
     <string name="quran_topic_not_found">Dieses Thema steht nicht im Register.</string>
-    <string name="quran_topic_open_reader">Im Leser öffnen</string>
+    <string name="quran_topic_verses_across">%1$d in %2$d Suren</string>
+    <string name="quran_topics_crumb_home">Alle Themen</string>
+    <string name="quran_topics_scope_search">Durchsucht alle drei Gliederungen</string>
+    <string name="quran_topics_scope_thematic">Eine kuratierte Gliederung — Glaube, Gottesdienst, Geschichten</string>
+    <string name="quran_topics_scope_ontology">Nach Art der Sache — Personen, Orte, Ereignisse</string>
+    <string name="quran_topics_scope_index">Der Aufbau eines gedruckten Registers</string>
     <string name="cd_topic_up">Eine Ebene höher</string>
+    <string name="cd_topic_focus">Bei %1$s beginnen</string>
     <string name="cd_tree_expand">Anzeigen, was unter %1$s liegt</string>
     <string name="cd_tree_collapse">Ausblenden, was unter %1$s liegt</string>
     <string name="quran_ayah_topics">Themen</string>

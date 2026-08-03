@@ -4,8 +4,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.domain.model.QuranTopic
+import com.arshadshah.nimaz.domain.model.TopicCitation
 import com.arshadshah.nimaz.domain.model.TopicDetail
 import com.arshadshah.nimaz.domain.model.TopicTree
+import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.usecase.QuranUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
@@ -14,18 +16,28 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/** One visible row of the tree: a subject, and how far in it sits. */
+data class TopicRowItem(val topic: QuranTopic, val depth: Int)
+
 /**
  * Browsing and searching the Qur'an's subject hierarchies.
  *
- * The browser is a *stack*, not a screen per level. Walking from "Stories" to "Musa" to
- * "parting of the Red Sea" is three levels of the same list, and the ontology goes five deep —
- * a route per level would mean five back-stack entries for one act of browsing, and a tree
- * switch would strand the user halfway down a tree that no longer exists. [TopicBrowseState.path]
- * holds the descent, [QuranTopicsEvent.Ascend] pops it.
+ * The browser is **one tree that expands in place**, not a stack of levels. Descending used to
+ * replace the list with the children, so walking from "Stories" to "Musa" to "the parting of the
+ * sea" discarded every sibling on the way and left a breadcrumb that had truncated by level
+ * three of a hierarchy that goes five deep. Now a node's children insert beneath it and the
+ * context stays on screen.
+ *
+ * What replaces the descent stack is [TopicBrowseState.focus]: a *rebase*, taken deliberately
+ * from a row too deep to indent further, and shown as a bar of tappable crumbs. Still one route
+ * for the whole thing — the ontology is five levels and a route per level would mean five
+ * back-stack entries for one act of browsing, and a tree switch would strand the reader halfway
+ * down a tree that no longer exists.
  *
  * Search is a separate mode over the same list rather than a separate screen, because a query
  * that matches nothing should fall back to *where you were*, not to an empty screen.
@@ -33,11 +45,20 @@ import javax.inject.Inject
 data class TopicBrowseState(
     val tree: TopicTree = TopicTree.THEMATIC,
 
-    /** The descent from the tree's root. Empty means the roots are showing. */
-    val path: List<QuranTopic> = emptyList(),
+    /**
+     * The branch the tree is currently rooted at, from the hierarchy's own root down. Empty
+     * means the whole tree is showing. Only ever grown by an explicit "focus this branch".
+     */
+    val focus: List<QuranTopic> = emptyList(),
 
-    /** What the current level lists — roots, or the children of `path.last()`. */
-    val topics: List<QuranTopic> = emptyList(),
+    /** The top level of what is showing — the tree's roots, or [focus]'s last node's children. */
+    val level: List<QuranTopic> = emptyList(),
+
+    /** Which nodes are open. Kept when an ancestor closes, so reopening it restores the shape. */
+    val expanded: Set<Int> = emptySet(),
+
+    /** Children by parent id, loaded on first expand and kept for the session. */
+    val children: Map<Int, List<QuranTopic>> = emptyMap(),
 
     /**
      * Which ids in [tree] have children.
@@ -50,6 +71,10 @@ data class TopicBrowseState(
 
     val searchQuery: String = "",
     val searchResults: List<QuranTopic> = emptyList(),
+
+    /** Each result's ancestors, root-first, so a flat match is not a free-floating word. */
+    val searchPaths: Map<Int, List<QuranTopic>> = emptyMap(),
+
     val isSearching: Boolean = false,
     val isLoading: Boolean = true,
 
@@ -60,25 +85,79 @@ data class TopicBrowseState(
      */
     val isAvailable: Boolean = true,
 ) {
-    val current: QuranTopic? get() = path.lastOrNull()
-    val isBrowsingRoots: Boolean get() = path.isEmpty()
-
-    /** What the list should show: search results while a query is live, else the level. */
-    val visibleTopics: List<QuranTopic>
-        get() = if (searchQuery.isBlank()) topics else searchResults
+    val isSearchMode: Boolean get() = searchQuery.isNotBlank()
 
     /**
-     * Whether [topic] can be descended into.
+     * The tree, flattened to what is actually on screen.
      *
-     * A search result never can — it is drawn flat, and descending from one would discard the
-     * search that produced it.
+     * Recursion stops at [MAX_DEPTH] whatever the expanded set says: past four levels of indent
+     * a 390dp screen has no text column left, which is what "focus this branch" is for.
+     *
+     * `lazy` rather than a getter — the state is immutable, the list is read on every
+     * recomposition, and walking a few hundred nodes each time to draw ten rows is waste.
      */
-    fun isBranch(topic: QuranTopic): Boolean =
-        searchQuery.isBlank() && topic.id in branchIds
+    val rows: List<TopicRowItem> by lazy {
+        buildList {
+            fun walk(items: List<QuranTopic>, depth: Int) {
+                items.forEach { topic ->
+                    add(TopicRowItem(topic, depth))
+                    if (depth < MAX_DEPTH && topic.id in expanded) {
+                        walk(children[topic.id].orEmpty(), depth + 1)
+                    }
+                }
+            }
+            walk(level, 0)
+        }
+    }
+
+    /** Whether [topic] can be opened up. Never in search: a result is an answer, not a level. */
+    fun isBranch(topic: QuranTopic): Boolean = !isSearchMode && topic.id in branchIds
+
+    /**
+     * Whether a branch at [depth] is opened in place or taken as a new root.
+     *
+     * At the cap there is no room to indent again, so the row offers to rebase the tree on
+     * itself instead — which is the same act, just paid for with a crumb rather than 20dp.
+     */
+    fun isAtIndentCap(depth: Int): Boolean = depth >= MAX_DEPTH
+
+    /** Back has somewhere to go while anything is open or the tree is rooted somewhere. */
+    val canGoBack: Boolean get() = expanded.any { id -> rows.any { it.topic.id == id } } ||
+        focus.isNotEmpty()
+
+    private companion object {
+        const val MAX_DEPTH = 3
+    }
 }
+
+/** One surah's worth of a topic's citations, under the surah's own name. */
+data class CitationGroup(
+    val surahNumber: Int,
+    val surahName: String,
+    val citations: List<TopicCitation>,
+)
 
 data class TopicDetailState(
     val detail: TopicDetail? = null,
+
+    /**
+     * The citations, grouped by surah in the order the corpus gives them.
+     *
+     * Grouped and not re-sorted: the citations arrive ordered by ayah id, which is Qur'anic
+     * order, and re-sorting would be replacing the mushaf's sequence with one of our own.
+     */
+    val citationGroups: List<CitationGroup> = emptyList(),
+
+    /**
+     * The first line of each cited verse, by ayah id.
+     *
+     * The whole citation list used to read `2:153 — Open in reader`, 153 times, which is a row
+     * that tells you nothing and a subtitle that tells you less. Empty when the reader's chosen
+     * translation has no text for these verses; the rows then show the reference alone rather
+     * than a gap where a sentence should be.
+     */
+    val previews: Map<Int, String> = emptyMap(),
+
     val isLoading: Boolean = true,
 )
 
@@ -88,11 +167,27 @@ sealed interface QuranTopicsEvent {
 
     data class SelectTree(val tree: TopicTree) : QuranTopicsEvent
 
-    /** Descend into a topic that has children. */
-    data class Descend(val topic: QuranTopic) : QuranTopicsEvent
+    /** Open or close a node's children in place. */
+    data class Toggle(val topic: QuranTopic) : QuranTopicsEvent
 
-    /** Back up one level. Returns false-ish (a no-op) at the roots; the screen pops instead. */
-    data object Ascend : QuranTopicsEvent
+    /** Re-root the tree on [topic], pushing it onto the crumb bar. */
+    data class Focus(val topic: QuranTopic) : QuranTopicsEvent
+
+    /**
+     * Re-root at a crumb. [index] is a position in [TopicBrowseState.focus];
+     * [ROOT] goes back to the whole tree.
+     */
+    data class RebaseTo(val index: Int) : QuranTopicsEvent {
+        companion object {
+            const val ROOT = -1
+        }
+    }
+
+    /**
+     * What the system back gesture does: close the innermost open node, or — with nothing open
+     * — step back out of one focus. The screen pops only when neither is left.
+     */
+    data object Back : QuranTopicsEvent
 
     data class Search(val query: String) : QuranTopicsEvent
     data object ClearSearch : QuranTopicsEvent
@@ -102,7 +197,8 @@ sealed interface QuranTopicsEvent {
 
 @HiltViewModel
 class QuranTopicsViewModel @Inject constructor(
-    private val quranUseCases: QuranUseCases
+    private val quranUseCases: QuranUseCases,
+    private val settingsRepository: SettingsRepository,
 ) : ViewModel() {
 
     private val _browseState = MutableStateFlow(TopicBrowseState())
@@ -128,7 +224,7 @@ class QuranTopicsViewModel @Inject constructor(
     fun onEvent(event: QuranTopicsEvent) {
         when (event) {
             QuranTopicsEvent.OpenBrowser -> {
-                if (_browseState.value.topics.isEmpty()) loadRoots(_browseState.value.tree)
+                if (_browseState.value.level.isEmpty()) loadRoots(_browseState.value.tree)
             }
 
             is QuranTopicsEvent.SelectTree -> {
@@ -136,12 +232,16 @@ class QuranTopicsViewModel @Inject constructor(
                 selectTree(event.tree)
             }
 
-            is QuranTopicsEvent.Descend -> {
-                AppAnalytics.logFeatureUsed("quran_topics", "descend")
-                descend(event.topic)
+            is QuranTopicsEvent.Toggle -> toggle(event.topic)
+
+            is QuranTopicsEvent.Focus -> {
+                AppAnalytics.logFeatureUsed("quran_topics", "focus_branch")
+                focus(event.topic)
             }
 
-            QuranTopicsEvent.Ascend -> ascend()
+            is QuranTopicsEvent.RebaseTo -> rebaseTo(event.index)
+
+            QuranTopicsEvent.Back -> back()
 
             is QuranTopicsEvent.Search -> {
                 _browseState.update { it.copy(searchQuery = event.query) }
@@ -150,7 +250,12 @@ class QuranTopicsViewModel @Inject constructor(
 
             QuranTopicsEvent.ClearSearch -> {
                 _browseState.update {
-                    it.copy(searchQuery = "", searchResults = emptyList(), isSearching = false)
+                    it.copy(
+                        searchQuery = "",
+                        searchResults = emptyList(),
+                        searchPaths = emptyMap(),
+                        isSearching = false,
+                    )
                 }
                 queries.value = ""
             }
@@ -176,17 +281,27 @@ class QuranTopicsViewModel @Inject constructor(
                 .collect { query ->
                     if (query.isBlank()) {
                         _browseState.update {
-                            it.copy(searchResults = emptyList(), isSearching = false)
+                            it.copy(
+                                searchResults = emptyList(),
+                                searchPaths = emptyMap(),
+                                isSearching = false,
+                            )
                         }
                         return@collect
                     }
                     _browseState.update { it.copy(isSearching = true) }
+                    val tree = _browseState.value.tree
                     val results = quranUseCases.searchTopics(query)
+                    val paths = quranUseCases.searchTopics.pathsFor(results, tree)
                     _browseState.update { state ->
                         // The query may have been cleared while this was in flight; dropping the
                         // stale result is what keeps a cleared box from repopulating itself.
                         if (state.searchQuery.isBlank()) state
-                        else state.copy(searchResults = results, isSearching = false)
+                        else state.copy(
+                            searchResults = results,
+                            searchPaths = paths,
+                            isSearching = false,
+                        )
                     }
                 }
         }
@@ -194,7 +309,18 @@ class QuranTopicsViewModel @Inject constructor(
 
     private fun selectTree(tree: TopicTree) {
         if (tree == _browseState.value.tree) return
-        _browseState.update { it.copy(tree = tree, path = emptyList(), isLoading = true) }
+        // A different hierarchy is a different set of parents, so nothing carries over: not the
+        // focus, not what was open, and not the cached children keyed by a parent id that means
+        // something else here.
+        _browseState.update {
+            it.copy(
+                tree = tree,
+                focus = emptyList(),
+                expanded = emptySet(),
+                children = emptyMap(),
+                isLoading = true,
+            )
+        }
         loadRoots(tree)
     }
 
@@ -206,7 +332,7 @@ class QuranTopicsViewModel @Inject constructor(
                 if (available) quranUseCases.getTopicChildren.branchesIn(tree) else emptySet()
             _browseState.update {
                 it.copy(
-                    topics = roots,
+                    level = roots,
                     branchIds = branches,
                     isLoading = false,
                     isAvailable = available,
@@ -216,52 +342,166 @@ class QuranTopicsViewModel @Inject constructor(
     }
 
     /**
-     * Descend, but only where there is somewhere to go.
+     * Open or close a node.
      *
-     * [TopicBrowseState.branchIds] already says which topics have children, so the screen
-     * offers this on branches only — but the guard stays, because the *level* is not known
-     * until it is fetched and pushing an empty one would render as a list with a back button.
+     * Closing keeps the descendants' open state — reopening restores the shape the reader had
+     * rather than making them walk back down. Opening loads the children once; after that the
+     * map answers and there is no query at all.
      */
-    private fun descend(topic: QuranTopic) {
+    private fun toggle(topic: QuranTopic) {
+        val state = _browseState.value
+        if (topic.id in state.expanded) {
+            _browseState.update { it.copy(expanded = it.expanded - topic.id) }
+            return
+        }
+        if (state.children.containsKey(topic.id)) {
+            _browseState.update { it.copy(expanded = it.expanded + topic.id) }
+            return
+        }
         viewModelScope.launch {
-            _browseState.update { it.copy(isLoading = true) }
-            val tree = _browseState.value.tree
-            val children = quranUseCases.getTopicChildren(topic.id, tree)
-            _browseState.update { state ->
-                if (children.isEmpty()) {
-                    state.copy(isLoading = false)
-                } else {
-                    state.copy(
-                        path = state.path + topic,
-                        topics = children,
-                        isLoading = false,
-                        searchQuery = "",
-                        searchResults = emptyList(),
+            val loaded = quranUseCases.getTopicChildren(topic.id, state.tree)
+            _browseState.update {
+                // An empty result means the branch set and the corpus disagree. Cache it anyway
+                // so the row stops asking, and leave it closed rather than opening onto nothing.
+                it.copy(
+                    children = it.children + (topic.id to loaded),
+                    expanded = if (loaded.isEmpty()) it.expanded else it.expanded + topic.id,
+                )
+            }
+        }
+    }
+
+    /** Re-root on [topic], with everything between the current root and it becoming crumbs. */
+    private fun focus(topic: QuranTopic) {
+        val state = _browseState.value
+        val trail = state.focus + ancestorsWithin(state, topic) + topic
+        viewModelScope.launch {
+            val level = state.children[topic.id]
+                ?: quranUseCases.getTopicChildren(topic.id, state.tree)
+            _browseState.update {
+                it.copy(
+                    focus = trail,
+                    level = level,
+                    expanded = emptySet(),
+                    children = it.children + (topic.id to level),
+                    searchQuery = "",
+                    searchResults = emptyList(),
+                    searchPaths = emptyMap(),
+                )
+            }
+        }
+    }
+
+    private fun rebaseTo(index: Int) {
+        val state = _browseState.value
+        if (index >= state.focus.lastIndex) return
+        if (index < 0) {
+            _browseState.update {
+                it.copy(focus = emptyList(), expanded = emptySet(), isLoading = true)
+            }
+            loadRoots(state.tree)
+            return
+        }
+        val trail = state.focus.take(index + 1)
+        val target = trail.last()
+        viewModelScope.launch {
+            val level = state.children[target.id]
+                ?: quranUseCases.getTopicChildren(target.id, state.tree)
+            _browseState.update {
+                it.copy(focus = trail, level = level, expanded = emptySet())
+            }
+        }
+    }
+
+    /**
+     * Close the innermost open node, else step out of one focus.
+     *
+     * Innermost, not outermost: a reader who opened three levels expects back to undo the last
+     * of them, the way it undoes the last of anything else.
+     */
+    private fun back() {
+        val state = _browseState.value
+        val deepest = state.rows.lastOrNull { it.topic.id in state.expanded }
+        if (deepest != null) {
+            _browseState.update { it.copy(expanded = it.expanded - deepest.topic.id) }
+            return
+        }
+        if (state.focus.isNotEmpty()) rebaseTo(state.focus.lastIndex - 1)
+    }
+
+    /**
+     * [topic]'s ancestors inside what is currently on screen, root-first.
+     *
+     * Walked with the parent ids the model already carries rather than a query, against an
+     * index of the nodes this browser has loaded. The visited set is the same guard the
+     * repository's breadcrumb walk uses: the corpus's parents are not guaranteed acyclic.
+     */
+    private fun ancestorsWithin(state: TopicBrowseState, topic: QuranTopic): List<QuranTopic> {
+        val loaded = (state.level + state.children.values.flatten()).associateBy { it.id }
+        val trail = ArrayDeque<QuranTopic>()
+        val seen = mutableSetOf(topic.id)
+        var parentId = topic.parentIn(state.tree)
+        while (parentId != null && seen.add(parentId)) {
+            val parent = loaded[parentId] ?: break
+            trail.addFirst(parent)
+            parentId = parent.parentIn(state.tree)
+        }
+        return trail.toList()
+    }
+
+    /**
+     * A topic, its citations grouped under the surahs they fall in, and a line of each verse.
+     *
+     * The previews are one query for the whole list — `getTranslationsForAyahs` takes the ids
+     * as an `IN (…)` — so "Allah" costs two reads rather than 153. A translation the device
+     * does not have simply yields nothing, and the rows fall back to bare references.
+     */
+    private fun loadDetail(topicId: Int, tree: TopicTree) {
+        viewModelScope.launch {
+            _detailState.update { it.copy(isLoading = true) }
+            val detail = quranUseCases.getTopicDetail(topicId, tree)
+            if (detail == null) {
+                _detailState.value = TopicDetailState(isLoading = false)
+                return@launch
+            }
+
+            val names = quranUseCases.getSurahList().first().associate {
+                it.number to it.nameEnglish
+            }
+            val groups = detail.citations
+                .groupBy { it.surahNumber }
+                .map { (surah, citations) ->
+                    CitationGroup(
+                        surahNumber = surah,
+                        surahName = names[surah].orEmpty(),
+                        citations = citations,
                     )
+                }
+
+            _detailState.value = TopicDetailState(
+                detail = detail,
+                citationGroups = groups,
+                isLoading = false,
+            )
+
+            val previews = previewsFor(detail.citations.map { it.ayahId })
+            if (previews.isNotEmpty()) {
+                _detailState.update { state ->
+                    // The reader may have opened a different topic while this was in flight;
+                    // previews keyed to the previous one must not land on top of it.
+                    if (state.detail?.topic?.id != topicId) state
+                    else state.copy(previews = previews)
                 }
             }
         }
     }
 
-    private fun ascend() {
-        val state = _browseState.value
-        if (state.path.isEmpty()) return
-        val path = state.path.dropLast(1)
-        _browseState.update { it.copy(path = path, isLoading = true) }
-        viewModelScope.launch {
-            val level = path.lastOrNull()
-                ?.let { quranUseCases.getTopicChildren(it.id, state.tree) }
-                ?: quranUseCases.getTopicTreeRoots(state.tree)
-            _browseState.update { it.copy(topics = level, isLoading = false) }
-        }
-    }
-
-    private fun loadDetail(topicId: Int, tree: TopicTree) {
-        viewModelScope.launch {
-            _detailState.update { it.copy(isLoading = true) }
-            val detail = quranUseCases.getTopicDetail(topicId, tree)
-            _detailState.update { TopicDetailState(detail = detail, isLoading = false) }
-        }
+    private suspend fun previewsFor(ayahIds: List<Int>): Map<Int, String> {
+        if (ayahIds.isEmpty()) return emptyMap()
+        val translatorId = settingsRepository.quranTranslatorId.first()
+        return runCatching {
+            quranUseCases.getAyahTranslation.forAyahs(ayahIds, translatorId)
+        }.getOrDefault(emptyMap())
     }
 
     private companion object {
