@@ -26,11 +26,11 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.AccountTree
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
@@ -88,6 +88,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
+import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuItem
 import com.arshadshah.nimaz.presentation.components.molecules.BookmarkCard
 import com.arshadshah.nimaz.presentation.components.molecules.BookmarkListItem
 import com.arshadshah.nimaz.presentation.components.molecules.ContinueReadingCard
@@ -165,15 +166,10 @@ fun QuranHomeScreen(
                 title = stringResource(R.string.quran_home_title),
                 scrollBehavior = scrollBehavior,
                 actions = {
-                    // Topics — the Qur'an's subject index (schemaVersion 24). It sits beside
-                    // search because it answers the same question from the other end: search
-                    // needs the words a verse uses, this needs only the subject.
-                    IconButton(onClick = onNavigateToTopics) {
-                        NimazIcon(
-                            imageVector = Icons.Default.Category,
-                            contentDescription = stringResource(R.string.quran_topics_title)
-                        )
-                    }
+                    // Subjects used to sit here as a bare Category glyph. An icon is a fine
+                    // control for something a reader already knows exists; 2,512 subjects
+                    // indexed by hand is not that, and nothing on the screen said so. It is a
+                    // labelled card in the content now, where it can say what it is.
                     // Search icon
                     IconButton(onClick = onNavigateToSearch) {
                         NimazIcon(
@@ -252,6 +248,7 @@ fun QuranHomeScreen(
                         state = state,
                         bookmarks = bookmarksState.bookmarks,
                         onNavigateToSurah = onNavigateToSurah,
+                        onNavigateToTopics = onNavigateToTopics,
                         onNavigateToBookmarks = onNavigateToBookmarks,
                         onNavigateToQuranAyah = onNavigateToQuranAyah,
                         onNavigateToKhatam = onNavigateToKhatam,
@@ -287,6 +284,7 @@ private fun HomeTabContent(
     state: QuranHomeUiState,
     bookmarks: List<QuranBookmark>,
     onNavigateToSurah: (Int) -> Unit,
+    onNavigateToTopics: () -> Unit,
     onNavigateToBookmarks: () -> Unit,
     onNavigateToQuranAyah: (Int, Int) -> Unit = { surah, _ -> onNavigateToSurah(surah) },
     onNavigateToKhatam: () -> Unit = {},
@@ -384,6 +382,20 @@ private fun HomeTabContent(
                 isFriday = isFriday,
                 onSurahClick = onNavigateToSurah
             )
+        }
+
+        // 3b. Browse by subject. Gated on the artifact actually carrying the thematic layer —
+        // an install between the migration and a schemaVersion 24 release has the tables and
+        // no rows, and a card promising 2,512 subjects would open onto an explanation.
+        if (state.hasThematicContent) {
+            item(key = "browse_subjects") {
+                NimazMenuItem(
+                    title = stringResource(R.string.quran_home_browse_subjects),
+                    subtitle = stringResource(R.string.quran_home_browse_subjects_subtitle),
+                    icon = Icons.Default.AccountTree,
+                    onClick = onNavigateToTopics
+                )
+            }
         }
 
         // 4. Verse of the Day — a daily nudge, not the headline. Demoted below the

@@ -1019,6 +1019,8 @@
     <string name="cd_passage_open">%1$s okuyucuda açılsın</string>
 
     <!-- Kur\'an konuları -->
+    <string name="quran_home_browse_subjects">Konuya göre göz at</string>
+    <string name="quran_home_browse_subjects_subtitle">Elle dizinlenmiş 2.512 konu</string>
     <string name="quran_topics_title">Konular</string>
     <string name="quran_topics_subtitle">Kur\'an neden söz ediyor</string>
     <string name="quran_topics_search_hint">Konu ara…</string>
@@ -1035,8 +1037,14 @@
     <string name="quran_topic_subtopics">Alt konular</string>
     <string name="quran_topic_related">İlgili konular</string>
     <string name="quran_topic_not_found">Bu konu dizinde yok.</string>
-    <string name="quran_topic_open_reader">Okuyucuda aç</string>
+    <string name="quran_topic_verses_across">%2$d surede %1$d ayet</string>
+    <string name="quran_topics_crumb_home">Tüm konular</string>
+    <string name="quran_topics_scope_search">Üç dizinin tümünde aranıyor</string>
+    <string name="quran_topics_scope_thematic">Derlenmiş bir taslak — akide, ibadet, kıssalar</string>
+    <string name="quran_topics_scope_ontology">Türüne göre — kişiler, yerler, olaylar</string>
+    <string name="quran_topics_scope_index">Basılı bir dizinin biçimi</string>
     <string name="cd_topic_up">Bir üst düzeye</string>
+    <string name="cd_topic_focus">%1$s ile başla</string>
     <string name="cd_tree_expand">%1$s altındakileri göster</string>
     <string name="cd_tree_collapse">%1$s altındakileri gizle</string>
     <string name="quran_ayah_topics">Konular</string>

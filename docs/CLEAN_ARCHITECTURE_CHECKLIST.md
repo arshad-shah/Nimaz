@@ -477,6 +477,20 @@ module (`ObserveLocalEventsUseCase`) is a false positive. Read the hit before ac
 - [x] `QuranReaderUiState.mushafPageLayout` — **Removed**, superseded by
   `mushafPageLayoutCache`, which is what the reader actually reads.
 - [x] `QiblaCalculator.calculateQiblaAngle` — **Removed**, unused.
+- [ ] **`AyahActionsBottomSheet` — an unreachable *organism*, not just an unread field.** The
+  sheet, its `buildAyahActions` table and its Robolectric suite all exist and no screen composes
+  it: the reader's per-verse actions are an inline row inside `QuranAyahItem`, and the sheet a
+  verse actually opens is `AyahTranslationBottomSheet` (from `MushafLinePage`'s tooltip). The
+  detectors above are field- and use-case-shaped, so a whole composable slipped through both.
+  Either wire it into the reader or remove it — see `ARCHITECTURE.md` §9 row 14.
+  ```bash
+  # a screen-facing organism nothing outside its own file (or a test) composes
+  cd app/src/main/java/com/arshadshah/nimaz
+  for f in presentation/components/organisms/*.kt; do
+    n=$(basename "$f" .kt)
+    [ "$(grep -rl "\b$n(" --include=*.kt presentation/screens/ | wc -l)" -eq 0 ] && echo "uncomposed: $n"
+  done
+  ```
 
 ---
 

@@ -391,12 +391,38 @@ normalised at import onto four tags — `<p>`, `<strong>`, `<em>`, and `<a href=
 schemes address screens this app has: 446 cross-references the source writes as prose ("see
 2:153-251") are taps into the reader, and 509 `topic:` links are taps into the subject browser.
 
-**Where it surfaces.** The surah info screen grows a collapsible background (first section open —
-the longest runs to 47 KB of prose for one surah) and the surah's passage outline; the reader
-prints a passage heading where the outline starts a new subject (surah mode only — a juz spans a
-dozen surahs and would cost a query per surah per page turn); the Tafseer screen shows the verse's
-subjects as chips, capped at six; and `Route.QuranTopics` browses all three hierarchies. Two new
-search kinds — `theme` and `topic` — ride the shipped FTS index.
+**Where it surfaces.** Each of the three kinds of content has a screen the size of the content:
+
+- **Surah info** is a *hub*. It carries the cartouche, the numbers, `surah_overviews.summary` as
+  body prose, and a "Go deeper" group of three counted rows. It used to carry the background as
+  accordions and the outline as up to 282 rows in the same list, which made it a document rather
+  than an answer. Rows are drawn only where there is content behind them.
+- **`Route.SurahBackground`** reads `surah_overview_sections` continuously under a sticky index of
+  pills labelled from `section_group` — stable across all 114 surahs, which the source's own
+  `heading` is not. Each section keeps that heading as its title. The longest background runs to
+  47 KB of prose for one surah, which is the reason it is a destination.
+- **`Route.SurahPassages`** is the surah's table of contents over `ayah_themes`, filterable by
+  subject *and* by verse number. Opened from the reader it is passed the verse being read and
+  marks and scrolls to the passage containing it.
+- The **reader** prints a passage heading where the outline starts a new subject (surah mode only
+  — a juz spans a dozen surahs and would cost a query per surah per page turn), and its overflow
+  reaches both the passage outline and the subject browser.
+- **`Route.QuranTopics`** browses all three hierarchies as **one tree that opens in place**: a
+  node's children insert beneath it, the breadcrumb is a bar of tappable crumbs rather than a
+  truncating top-bar string, and past three levels of indent a row offers to re-root the tree on
+  itself. `getBranchTopicIds(tree)` is one query per tree telling every row whether it is a branch,
+  which is what lets a leaf carry no disclosure control and open on its label instead. Reachable
+  from a labelled card on the Qur'an home (gated on `hasThematicContent()`), the reader's overflow,
+  and surah info.
+- **`Route.QuranTopicDetail`** gives its four kinds of content four shapes: description as body
+  prose, subtopics as tree rows, related subjects as chips, and the citations grouped by surah
+  under sticky headers with a line of each verse — resolved for the whole list in one
+  `getTranslationsForAyahs` call, so a subject citing 153 verses costs two reads.
+- The **Tafseer** screen shows the verse's subjects as chips, capped at six.
+
+Two new search kinds — `theme` and `topic` — ride the shipped FTS index, and topic search results
+carry their ancestor path, resolved for the whole result set by
+`QuranRepository.getTopicBreadcrumbs` at one query per level of depth rather than one per result.
 
 **Tafseer range blocks (`v21`, #329).** Tafseer is range-based, not ayah-based — a single commentary passage (e.g. Ibn Kathir discussing 43:81-89) is one block, not nine identical rows. `tafseer_texts` (one row per ayah, `ayah_id`/`surah_number`/`ayah_number`) is replaced by `tafseer_blocks` (`tafseer_id`, `surah_number`, `ayah_start`, `ayah_end`, `text`), indexed on `(tafseer_id, surah_number, ayah_start, ayah_end)`. `MIGRATION_20_21` drops the old table outright — it is shipped content, not user data, replaced wholesale by the schemaVersion 21 artifact (`nimaz-data` issue #1) — and creates the new one empty; the block rows arrive with that artifact. `TafseerDao.getTafseerForAyah(surahNumber, ayahNumber, tafseerId)` now matches by containment (`ayah_start <= ? AND ayah_end >= ?`) instead of equality. `tafseer_highlights`/`tafseer_notes` (user data) are untouched: they stay keyed by the single `ayah_id` they were made on — the offsets they store index into the block text, which is unchanged for that ayah — but the reader now gathers every highlight/note whose ayah falls inside the *displayed block's* range (`TafseerDao.getHighlightsForRange`/`getNotesForRange`, joined against `ayahs`) so an annotation shows whenever its block is on screen, not only on the exact ayah it was created on. `TafseerPageContent` renders a "Commentary on 43:81-89" header from the block's own range, and `TafseerViewModel` hoists the reader's content-page index into `TafseerUiState.currentTafseerPage` so swiping to the next ayah of the same block holds reading position instead of reopening the block from page 1.
 

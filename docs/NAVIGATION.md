@@ -32,8 +32,10 @@ flowchart LR
         QuranHub --> QuranReader & QuranPage & QuranJuz & QuranSearch & QuranBookmarks
         QuranHub --> QuranTopics
         QuranReader --> SurahInfo & Tafseer
+        QuranReader --> SurahPassages & QuranTopics
+        SurahInfo --> SurahBackground & SurahPassages & QuranTopics
         QuranTopics --> QuranTopicDetail
-        SurahInfo --> QuranTopicDetail
+        SurahBackground --> QuranTopicDetail
         Tafseer --> QuranTopicDetail
         QuranTopicDetail --> QuranTopicDetail
         SettingsQuran --> SelectReciter & SelectTranslation
@@ -166,9 +168,11 @@ All routes live in `core/navigation/Routes.kt` and are wired in `core/navigation
 | `QuranJuz` | `juzNumber: Int` | QuranJuzScreen |
 | `QuranSearch` | — | QuranSearchScreen |
 | `QuranBookmarks` | — | QuranBookmarksScreen |
-| `SurahInfo` | `surahNumber: Int` | SurahInfoScreen |
+| `SurahInfo` | `surahNumber: Int` | SurahInfoScreen — a **hub**, not a document: identity, the numbers, `overview.summary`, and three counted ways into the long content |
+| `SurahBackground` | `surahNumber: Int` | SurahBackgroundScreen — the surah's long-form background, read continuously under a sticky index of `SurahOverviewGroup` pills. Its own destination because the longest is 47 KB of prose |
+| `SurahPassages` | `surahNumber: Int, currentAyah: Int? = null` | SurahPassagesScreen — the passage outline, up to 282 rows. `currentAyah` is supplied when it is opened **from the reader**, so the passage containing that verse is marked and scrolled to; null from surah info, where there is no such place to be |
 | `Tafseer` | `surahNumber: Int, ayahNumber: Int = 1` | TafseerScreen |
-| `QuranTopics` | — | QuranTopicsScreen — the subject browser. **One route for the whole descent:** the ontology goes five levels deep and `QuranTopicsViewModel` holds the path, so browsing down and back is one back-stack entry, not five |
+| `QuranTopics` | — | QuranTopicsScreen — the subject browser. **One route for the whole tree:** it expands in place and `QuranTopicsViewModel` holds the expanded set and the focus, so opening four levels and closing them again is one back-stack entry, not four. Reachable from the Qur'an home's browse card, the reader's overflow, and surah info |
 | `QuranTopicDetail` | `topicId: Int, tree: String = "thematic"` | QuranTopicDetailScreen. `tree` is a `TopicTree.wire` value rather than the enum, because a route argument needs a `NavType`; an unrecognised value falls back to the thematic tree. Reachable from the browser, from a `topic:` link in a surah's background, from the Tafseer screen's topic chips, and **from itself** (a description's cross-links) |
 | `SelectReciter` | — | SelectReciterScreen |
 | `SelectTranslation` | — | SelectTranslationScreen |

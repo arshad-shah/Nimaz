@@ -257,6 +257,19 @@ class SearchTopicsUseCase @Inject constructor(
 ) {
     suspend operator fun invoke(query: String, limit: Int = 60): List<QuranTopic> =
         repository.searchTopics(query, limit)
+
+    /**
+     * Where each result sits, so a flat list of matches is not a list of free-floating words.
+     *
+     * Resolved for the whole result set at once — see
+     * [QuranRepository.getTopicBreadcrumbs] — because sixty results at one breadcrumb each
+     * would be a query storm to draw a subline.
+     */
+    suspend fun pathsFor(
+        topics: List<QuranTopic>,
+        tree: TopicTree
+    ): Map<Int, List<QuranTopic>> =
+        repository.getTopicBreadcrumbs(topics.map { it.id }, tree)
 }
 
 /**
@@ -319,6 +332,16 @@ class GetAyahTranslationUseCase @Inject constructor(
 ) {
     suspend operator fun invoke(ayahId: Int, translatorId: String): String? =
         repository.getTranslationsForAyahs(listOf(ayahId), translatorId).first()[ayahId]
+
+    /**
+     * Many verses' text in one read, keyed by ayah id.
+     *
+     * The underlying query is a single `IN (…)`, which is what lets a topic showing 153
+     * citations preview all of them without a query per row.
+     */
+    suspend fun forAyahs(ayahIds: List<Int>, translatorId: String): Map<Int, String> =
+        if (ayahIds.isEmpty()) emptyMap()
+        else repository.getTranslationsForAyahs(ayahIds, translatorId).first()
 }
 
 /**

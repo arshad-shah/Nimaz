@@ -997,6 +997,8 @@
     <string name="cd_passage_open">Buka %1$s dalam pembaca</string>
 
     <!-- Topik Al-Quran -->
+    <string name="quran_home_browse_subjects">Layari mengikut topik</string>
+    <string name="quran_home_browse_subjects_subtitle">2,512 topik, diindeks secara manual</string>
     <string name="quran_topics_title">Topik</string>
     <string name="quran_topics_subtitle">Apa yang diperkatakan Al-Quran</string>
     <string name="quran_topics_search_hint">Cari topik…</string>
@@ -1013,8 +1015,14 @@
     <string name="quran_topic_subtopics">Subtopik</string>
     <string name="quran_topic_related">Topik berkaitan</string>
     <string name="quran_topic_not_found">Topik ini tiada dalam indeks.</string>
-    <string name="quran_topic_open_reader">Buka dalam pembaca</string>
+    <string name="quran_topic_verses_across">%1$d dalam %2$d surah</string>
+    <string name="quran_topics_crumb_home">Semua topik</string>
+    <string name="quran_topics_scope_search">Mencari dalam ketiga-tiga hierarki</string>
+    <string name="quran_topics_scope_thematic">Rangka pilihan — akidah, ibadah, kisah</string>
+    <string name="quran_topics_scope_ontology">Mengikut jenis — orang, tempat, peristiwa</string>
+    <string name="quran_topics_scope_index">Bentuk indeks buku bercetak</string>
     <string name="cd_topic_up">Naik satu peringkat</string>
+    <string name="cd_topic_focus">Mula dari %1$s</string>
     <string name="cd_tree_expand">Tunjukkan kandungan %1$s</string>
     <string name="cd_tree_collapse">Sembunyikan kandungan %1$s</string>
     <string name="quran_ayah_topics">Topik</string>
