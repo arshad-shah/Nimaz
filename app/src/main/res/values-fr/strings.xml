@@ -1047,6 +1047,8 @@
     <string name="quran_topic_not_found">Ce sujet ne figure pas dans l\'index.</string>
     <string name="quran_topic_open_reader">Ouvrir dans le lecteur</string>
     <string name="cd_topic_up">Remonter d\'un niveau</string>
+    <string name="cd_tree_expand">Afficher ce qui se trouve sous %1$s</string>
+    <string name="cd_tree_collapse">Masquer ce qui se trouve sous %1$s</string>
     <string name="quran_ayah_topics">Thèmes</string>
     <string name="cd_switch_to_list_view">Passer à la vue liste</string>
     <string name="cd_switch_to_page_view">Passer à la vue page</string>

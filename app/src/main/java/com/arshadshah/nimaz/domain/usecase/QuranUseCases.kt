@@ -219,6 +219,24 @@ class GetTopicTreeRootsUseCase @Inject constructor(
         repository.getTopicTreeRoots(tree)
 }
 
+/**
+ * What a tree row needs, and nothing more.
+ *
+ * Expanding a node wants its children; drawing a level wants to know which of its rows are
+ * branches. [GetTopicDetailUseCase] answers both as a side effect, but it also walks the
+ * breadcrumb, resolves the related topics and reads every citation — 153 of them for "Allah" —
+ * which is a lot of work to decide whether to draw a chevron.
+ */
+class GetTopicChildrenUseCase @Inject constructor(
+    private val repository: QuranRepository
+) {
+    suspend operator fun invoke(topicId: Int, tree: TopicTree): List<QuranTopic> =
+        repository.getTopicChildren(topicId, tree)
+
+    /** The ids in [tree] that have children. One query, good for the session. */
+    suspend fun branchesIn(tree: TopicTree): Set<Int> = repository.getBranchTopicIds(tree)
+}
+
 class GetTopicDetailUseCase @Inject constructor(
     private val repository: QuranRepository
 ) {
@@ -368,6 +386,7 @@ data class QuranUseCases(
     val getSurahThemes: GetSurahThemesUseCase,
     val getThemeForAyah: GetThemeForAyahUseCase,
     val getTopicTreeRoots: GetTopicTreeRootsUseCase,
+    val getTopicChildren: GetTopicChildrenUseCase,
     val getTopicDetail: GetTopicDetailUseCase,
     val getTopicsForAyah: GetTopicsForAyahUseCase,
     val searchTopics: SearchTopicsUseCase,

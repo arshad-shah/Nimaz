@@ -1031,6 +1031,8 @@
     <string name="quran_topic_not_found">Bu konu dizinde yok.</string>
     <string name="quran_topic_open_reader">Okuyucuda aç</string>
     <string name="cd_topic_up">Bir üst düzeye</string>
+    <string name="cd_tree_expand">%1$s altındakileri göster</string>
+    <string name="cd_tree_collapse">%1$s altındakileri gizle</string>
     <string name="quran_ayah_topics">Konular</string>
     <string name="cd_switch_to_list_view">Liste görünümüne geç</string>
     <string name="cd_switch_to_page_view">Sayfa görünümüne geç</string>

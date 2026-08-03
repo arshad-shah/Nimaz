@@ -140,6 +140,7 @@ import com.arshadshah.nimaz.domain.usecase.GetSurahInfoUseCase
 import com.arshadshah.nimaz.domain.usecase.GetSurahOverviewUseCase
 import com.arshadshah.nimaz.domain.usecase.GetSurahThemesUseCase
 import com.arshadshah.nimaz.domain.usecase.GetThemeForAyahUseCase
+import com.arshadshah.nimaz.domain.usecase.GetTopicChildrenUseCase
 import com.arshadshah.nimaz.domain.usecase.GetTopicDetailUseCase
 import com.arshadshah.nimaz.domain.usecase.GetTopicTreeRootsUseCase
 import com.arshadshah.nimaz.domain.usecase.GetTopicsForAyahUseCase
@@ -383,6 +384,7 @@ object UseCaseModule {
             getSurahThemes = GetSurahThemesUseCase(repository),
             getThemeForAyah = GetThemeForAyahUseCase(repository),
             getTopicTreeRoots = GetTopicTreeRootsUseCase(repository),
+            getTopicChildren = GetTopicChildrenUseCase(repository),
             getTopicDetail = GetTopicDetailUseCase(repository),
             getTopicsForAyah = GetTopicsForAyahUseCase(repository),
             searchTopics = SearchTopicsUseCase(repository),
