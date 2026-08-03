@@ -83,7 +83,6 @@ class PreferencesDataStore @Inject constructor(
         val ARABIC_FONT_SIZE = stringPreferencesKey("arabic_font_size")
 
         // Help content (data-driven; bumped when help.json content changes)
-        val CONTENT_PATCH_VERSION = intPreferencesKey("content_patch_version")
 
 
         // Line-accurate mushaf editions and Quran translations are each seeded lazily, per
@@ -273,13 +272,6 @@ class PreferencesDataStore @Inject constructor(
 
     override suspend fun setAppLanguage(language: String) =
         put(PreferencesKeys.APP_LANGUAGE, language)
-
-    // Last content patch applied (0 = none). See data/local/content/ContentPatchSeeder.
-    override val contentPatchVersion: Flow<Int> =
-        preference(PreferencesKeys.CONTENT_PATCH_VERSION, 0)
-
-    override suspend fun setContentPatchVersion(version: Int) =
-        put(PreferencesKeys.CONTENT_PATCH_VERSION, version)
 
     // Tasbih counter style — true = bead strand, false = classic circle.
     override val tasbihBeadMode: Flow<Boolean> = preference(PreferencesKeys.TASBIH_BEAD_MODE, false)

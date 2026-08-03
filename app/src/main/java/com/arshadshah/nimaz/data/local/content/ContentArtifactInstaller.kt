@@ -26,11 +26,13 @@ import java.io.File
  * [disposable][com.arshadshah.nimaz.data.local.database.NimazDatabase], and a release replaces
  * it wholesale, which is what `docs/SUBSYSTEMS.md` §5 has claimed all along.
  *
- * It also retires a whole class of problem. `ContentPatchSeeder` exists because content had to
- * reach existing installs *without* replacing the file, and it cannot carry a table the baseline
- * lacks at all (`nz patch emit` files those under `out_of_scope` and emits nothing). So before
- * this, a newly added table could reach a fresh install and no one else. Replacing the file has
- * no such limit: new tables, changed rows and dropped rows all arrive together, already built.
+ * It also **replaced** a whole class of problem rather than working around it. `ContentPatchSeeder`
+ * existed because content had to reach existing installs *without* replacing the file, and it
+ * could not carry a table the baseline lacked at all (`nz patch emit` filed those under
+ * `out_of_scope` and emitted nothing) — so a newly added table reached a fresh install and no one
+ * else. Replacing the file has no such limit: new tables, changed rows and dropped rows arrive
+ * together, already built and already verified by the data build. The seeder, its patch asset,
+ * its version preference and its DI wiring were deleted with this change.
  *
  * ## What makes it safe
  *
@@ -139,9 +141,9 @@ class ContentArtifactInstaller(
         ).use { db ->
             val present = db.rawQuery(
                 "SELECT name FROM sqlite_master WHERE type = 'table' AND name IN (${
-                    ContentPatchSeeder.USER_TABLES.joinToString(",") { "?" }
+                    USER_TABLES.joinToString(",") { "?" }
                 })",
-                ContentPatchSeeder.USER_TABLES.toTypedArray(),
+                USER_TABLES.toTypedArray(),
             ).use { cursor ->
                 buildList { while (cursor.moveToNext()) add(cursor.getString(0)) }
             }
@@ -175,5 +177,23 @@ class ContentArtifactInstaller(
 
     private companion object {
         const val TAG = "ContentArtifactInstaller"
+
+        /**
+         * Tables the app writes to at runtime. Mirrors `user_tables` in the data console's
+         * `console.yaml`.
+         *
+         * Since schemaVersion 23 these are not in the content database at all — they live in
+         * `NimazUserDatabase`, and `artifact.content-only` fails the data build if one reappears
+         * in the artifact. The list survives here for the one case where they *are* still on
+         * disk: an install that predates that split and has not yet had its rows copied out.
+         */
+        val USER_TABLES = setOf(
+            "reading_progress", "quran_bookmarks", "quran_favorites", "hadith_bookmarks",
+            "dua_bookmarks", "dua_progress", "prayer_records", "fast_records", "makeup_fasts",
+            "khatams", "khatam_ayahs", "khatam_daily_log", "tasbih_sessions", "zakat_history",
+            "tafseer_highlights", "tafseer_notes", "locations", "asma_ul_husna_bookmarks",
+            "asma_un_nabi_bookmarks", "prophet_bookmarks", "qaida_lesson_progress",
+            "qaida_cell_progress",
+        )
     }
 }

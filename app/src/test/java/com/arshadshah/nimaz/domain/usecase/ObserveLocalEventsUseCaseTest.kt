@@ -73,8 +73,6 @@ private class FakeSettings(private val offset: Int) : SettingsRepository {
     override suspend fun setHijriDayOffset(days: Int) {}
     override val appLanguage: Flow<String> = flowOf("en")
     override suspend fun setAppLanguage(language: String) {}
-    override val contentPatchVersion: Flow<Int> = flowOf(0)
-    override suspend fun setContentPatchVersion(version: Int) = Unit
     override val tasbihBeadMode: Flow<Boolean> = flowOf(false)
     override suspend fun setTasbihBeadMode(enabled: Boolean) {}
     override val tasbihBeadDesign: Flow<String> = flowOf("default")
