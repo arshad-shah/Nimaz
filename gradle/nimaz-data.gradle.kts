@@ -1,5 +1,6 @@
 import groovy.json.JsonSlurper
 import java.io.File
+import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URI
 import java.security.MessageDigest
@@ -64,7 +65,43 @@ fun resolveDataToken(): String {
     )
 }
 
-fun githubApi(url: String, token: String): String {
+/**
+ * Runs [block], retrying the failures that are GitHub having a moment rather than this build
+ * being wrong.
+ *
+ * Every fetch here is a cold one on CI, and a release asset that exists and a credential that
+ * works still produce the occasional `HTTP response code: 500` — twice on `dev`, each time
+ * reddening a deploy that had nothing wrong with it and each time green on a plain re-run. An
+ * `IOException` from `HttpURLConnection` covers that case (the 500 surfaces as one when the
+ * stream is opened) along with resets and read timeouts.
+ *
+ * Deliberately narrow: [GradleException] passes straight through, so the 401/403/404 diagnoses
+ * below — which are all *permanent* — still fail on the first attempt with their explanation
+ * intact. Retrying those would turn a clear message into a slow one.
+ */
+fun <T> retrying(what: String, block: () -> T): T {
+    var wait = 2_000L
+    var last: IOException? = null
+    repeat(4) { attempt ->
+        try {
+            return block()
+        } catch (e: IOException) {
+            last = e
+            if (attempt == 3) return@repeat
+            project.logger.lifecycle(
+                "nimaz-data: $what failed (${e.message}); retrying in ${wait / 1000}s"
+            )
+            Thread.sleep(wait)
+            wait *= 2
+        }
+    }
+    throw GradleException(
+        "nimaz-data: $what failed on all 4 attempts. Last error: ${last?.message}",
+        last,
+    )
+}
+
+fun githubApi(url: String, token: String): String = retrying("resolving $url") {
     val conn = URI(url).toURL().openConnection() as HttpURLConnection
     conn.setRequestProperty("Authorization", "Bearer $token")
     conn.setRequestProperty("Accept", "application/vnd.github+json")
@@ -92,7 +129,7 @@ fun githubApi(url: String, token: String): String {
                 "  See docs/CONTENT_REPO_AUTH.md."
         )
     }
-    return conn.inputStream.bufferedReader().use { it.readText() }
+    conn.inputStream.bufferedReader().use { it.readText() }
 }
 
 tasks.register("fetchNimazData") {
@@ -149,20 +186,27 @@ tasks.register("fetchNimazData") {
 
                 logger.lifecycle("nimaz-data: fetching $fetchedName from $repo@$tag")
                 cached.parentFile.mkdirs()
-                val conn = URI(asset["url"] as String).toURL()
-                    .openConnection() as HttpURLConnection
-                conn.setRequestProperty("Authorization", "Bearer ${token!!}")
-                // The API serves metadata for this URL unless octet-stream is asked for.
-                conn.setRequestProperty("Accept", "application/octet-stream")
-                conn.instanceFollowRedirects = true
-                conn.inputStream.use { input ->
-                    // Decompressed on the way in, so what lands in the cache is always
-                    // the artifact itself and the sha256 below always means the same
-                    // thing. The lockfile pins the *decompressed* bytes — verifying the
-                    // wrapper instead would let a re-compression change what the pin
-                    // asserts without the hash moving.
-                    val source = if (compressed) GZIPInputStream(input, 1 shl 16) else input
-                    cached.outputStream().use { source.copyTo(it) }
+                // Retried like the metadata call, and for a stronger reason: this is a 54 MB
+                // transfer, so it has far more time in which to be interrupted. Restarting from
+                // zero rather than resuming is the right trade for a file this size — a resumed
+                // download that silently misjoins is exactly the corruption the sha256 below is
+                // there to catch, and re-fetching costs a minute.
+                retrying("downloading $fetchedName") {
+                    val conn = URI(asset["url"] as String).toURL()
+                        .openConnection() as HttpURLConnection
+                    conn.setRequestProperty("Authorization", "Bearer ${token!!}")
+                    // The API serves metadata for this URL unless octet-stream is asked for.
+                    conn.setRequestProperty("Accept", "application/octet-stream")
+                    conn.instanceFollowRedirects = true
+                    conn.inputStream.use { input ->
+                        // Decompressed on the way in, so what lands in the cache is always
+                        // the artifact itself and the sha256 below always means the same
+                        // thing. The lockfile pins the *decompressed* bytes — verifying the
+                        // wrapper instead would let a re-compression change what the pin
+                        // asserts without the hash moving.
+                        val source = if (compressed) GZIPInputStream(input, 1 shl 16) else input
+                        cached.outputStream().use { source.copyTo(it) }
+                    }
                 }
 
                 val actual = sha256Of(cached)
