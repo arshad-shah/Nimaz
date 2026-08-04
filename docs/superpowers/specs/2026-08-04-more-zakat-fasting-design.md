@@ -9,6 +9,50 @@ restates what it contains; each should instead say what is true right now.
 
 ---
 
+## 0. Before starting work — do this first, every time
+
+This spec was written against `dev` at `88c517ac` on 2026-08-04. **Work is in flight on the
+ViewModel layer**, which is precisely what §2.1 builds on, so by the time this is picked up the
+ground may have moved. Treat every claim below as a claim to re-check, not a fact to build on.
+
+**1. Take the current `dev` before writing anything.**
+
+```bash
+git checkout feat/more-zakat-fasting
+git fetch origin
+git merge origin/dev          # or rebase, if the branch has no shared history yet
+./gradlew :app:compileDebugKotlin :app:testDebugUnitTest
+python3 scripts/check_docs.py
+```
+
+A conflict here is information, not an obstacle: it usually means the VM cleanup touched the
+thing this spec is about. Resolve it in favour of what is on `dev`, then continue to step 2.
+
+**2. Re-validate the spec against the merged tree.** Each of these is a claim this design
+rests on. Run the check; if the finding differs, **stop and report before writing code** —
+do not silently adapt.
+
+| Claim | Check | Expected on 2026-08-04 |
+|---|---|---|
+| `MoreMenuScreen` has no ViewModel | `grep -n "ViewModel" app/src/main/java/com/arshadshah/nimaz/presentation/screens/more/MoreMenuScreen.kt` | no match; subtitles are `stringResource` |
+| ViewModels inject `XxxUseCases`, not repositories | `docs/ARCHITECTURE.md` §9 + any new `*UseCases` bundle | still the rule (rule 2) |
+| Every subtitle source exists | the table in §2.1, one `grep` per row | all ✅ |
+| Zakat still hand-rolls its amount input | `grep -n "BasicTextField" .../ZakatCalculatorScreen.kt` | one match, ~line 677 |
+| `NimazAccordion` has `subtitle` + `trailing` | `grep -n "fun NimazAccordion" -A 12 .../NimazAccordion.kt` | both present (added in #351) |
+| Share goes through one catalogue | `grep -n "fun " .../core/share/Shareables.kt` | builders + `shareBranded`; still no `zakat(` |
+| `PreferenceCodec` guards new keys | `./gradlew :app:testDebugUnitTest --tests "*PreferenceCodecTest*"` | passes — and will fail until `more_pinned_shortcuts` is registered |
+
+**3. Re-validate the implementation plan.** The plan is written against this spec; if step 2
+found drift, the plan's affected steps are stale too. Fix the plan before the code, so the
+next session inherits something true.
+
+**4. Only then start.** If the VM cleanup introduced a better seam than this spec assumes —
+a shared subtitle pattern, a base ViewModel, a use-case bundle convention — **adopt it and
+amend this spec**, rather than building alongside it. A second pattern for the same job is
+worse than either pattern.
+
+---
+
 ## 1. What is being decided, and what was rejected
 
 Each of these was chosen against alternatives in the visual companion. Recording the losers
