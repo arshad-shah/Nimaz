@@ -7,8 +7,11 @@ import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import java.io.File
@@ -69,6 +72,19 @@ class QaidaAudioManager @Inject constructor(
     // the right currentKey when playing a whole line via playSequence().
     private var sequenceKeys: List<String> = emptyList()
 
+    private val _completions = MutableSharedFlow<String>(extraBufferCapacity = 32)
+
+    /**
+     * Keys whose clip **played to its end**, as it happens.
+     *
+     * `state.currentKey` cannot answer this: it goes null both when a clip finishes and when
+     * [stop] cuts it off, and the difference is the whole question when playback is what
+     * credits a learner's progress. Only a natural media-item transition
+     * (`MEDIA_ITEM_TRANSITION_REASON_AUTO`) and a natural `STATE_ENDED` emit here — a tap
+     * elsewhere, a lesson change or [stop] emit nothing.
+     */
+    val completions: SharedFlow<String> = _completions.asSharedFlow()
+
     @OptIn(UnstableApi::class)
     private fun getOrCreatePlayer(): ExoPlayer {
         return player ?: ExoPlayer.Builder(context).build().also { newPlayer ->
@@ -80,6 +96,10 @@ class QaidaAudioManager @Inject constructor(
                         Player.STATE_ENDED -> {
                             // Whole clip / sequence finished playing.
                             if (!newPlayer.hasNextMediaItem()) {
+                                // The last item ran to its end, so it is heard. Emitted before
+                                // clearing `currentKey`, which is the only place it is still
+                                // known.
+                                _state.value.currentKey?.let(_completions::tryEmit)
                                 _state.update {
                                     it.copy(currentKey = null, isPlaying = false, isLoading = false)
                                 }
@@ -107,6 +127,11 @@ class QaidaAudioManager @Inject constructor(
                 }
 
                 override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+                    // AUTO means the previous item reached its end rather than being replaced,
+                    // so that key — not this one — is what the learner just heard.
+                    if (reason == Player.MEDIA_ITEM_TRANSITION_REASON_AUTO) {
+                        _state.value.currentKey?.let(_completions::tryEmit)
+                    }
                     val key = mediaItem?.mediaId?.takeIf { it.isNotEmpty() }
                         ?: sequenceKeys.getOrNull(newPlayer.currentMediaItemIndex)
                     if (key != null) {

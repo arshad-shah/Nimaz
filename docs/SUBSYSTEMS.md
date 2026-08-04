@@ -183,7 +183,7 @@ Adhan, Qaida tap-to-hear) plus an Adhan **download** pipeline. They share no pla
 | `data/audio/AdhanPlaybackService.kt` | foreground `mediaPlayback` service; plays the adhan when a prayer fires (works app-closed) using `ExoPlayer` with `USAGE_ALARM` + wake lock + audio focus |
 | `data/audio/AdhanDownloadService.kt` | foreground `dataSync` service that downloads both adhan variants with a progress notification (channel `adhan_download_channel`, id 7777) |
 | `data/audio/AdhanDownloadWorker.kt` | `@HiltWorker` background fallback for the download (see §3) |
-| `data/audio/QaidaAudioManager.kt` | `@Singleton`; stripped-down `ExoPlayer` for single Qaida tokens — **no service/notification/MediaSession/CDN**; exposes `val state: StateFlow<QaidaAudioState>` |
+| `data/audio/QaidaAudioManager.kt` | `@Singleton`; stripped-down `ExoPlayer` for single Qaida tokens — **no service/notification/MediaSession/CDN**; exposes `val state: StateFlow<QaidaAudioState>` and `val completions: SharedFlow<String>` |
 | `data/audio/AdhanSound.kt` | enum of adhans (MISHARY, ABDUL_BASIT, MAKKAH, SIMPLE_BEEP) with per-variant file names + download URLs |
 
 **Wiring.** None of these have a DI module — the managers are `@Singleton @Inject constructor(@ApplicationContext …)` (Hilt provides them automatically) and the services are `@AndroidEntryPoint` field-injecting their manager. Services are declared in `AndroidManifest.xml` with `foregroundServiceType` `mediaPlayback`/`dataSync`; permissions `FOREGROUND_SERVICE`, `FOREGROUND_SERVICE_MEDIA_PLAYBACK`, `FOREGROUND_SERVICE_DATA_SYNC`.
@@ -191,6 +191,15 @@ Adhan, Qaida tap-to-hear) plus an Adhan **download** pipeline. They share no pla
 **Media3/ExoPlayer specifics (Quran).** Ayahs are downloaded first then added as a `List<MediaItem>` for gapless sequential playback. ExoPlayer reports `0` duration for unloaded items, so durations are pre-extracted with `MediaMetadataRetriever`; a `ForwardingPlayer` (`getPlayer()`) translates per-item ExoPlayer position/duration into **whole-surah** ("total playlist") coordinates so the lock-screen scrubber reflects the surah, not one ayah. Recitations stream from `cdn.islamic.network`, cached under `filesDir/quran_audio/`. **Who** the reciters are is the `QuranReciter` catalogue in `domain/model/QuranReciter.kt` (frozen `id` + `aliases` for ids older builds persisted, display name, country, `RecitationStyle`); only the CDN wiring — which edition slug at which bitrate — stays in the data layer, as `RECITER_CDN_MAP`, now keyed by the enum. Before that the catalogue existed three times over (a `popularReciters` list in `SelectReciterScreen`, the map plus a `getReciterDisplayName` `when` in `QuranAudioManager`, and a third `when` in `QuranSettingsScreen`) and they disagreed: the settings row matched on ids the picker never writes, so eight of the ten reciters left it showing a raw id ("hussary") instead of a name. Three reciters that had working CDN editions and display names but were missing from the picker's hardcoded list — Muhammad Ayyoub, Muhammad Jibreel, Abdullah Basfar — are selectable now that one list drives everything. Adhan files cache under `filesDir/adhan/`, Qaida clips fall back to the bundled asset `file:///android_asset/qaida/audio/{key}.mp3`.
 
 **How ViewModels consume it.** ViewModels inject the manager **directly** and re-expose its flow (e.g. `QuranViewModel.audioState = audioManager.audioState`; `QaidaReaderViewModel.audioState = audioManager.state`; `SettingsViewModel` injects `adhanAudioManager` for preview/download). They drive playback via `onEvent`. *Deviation:* this bypasses the "ViewModels inject `XxxUseCases`" rule (§ARCHITECTURE), and `QuranViewModel` even exposes the manager as a public field — a known clean-architecture deviation, not a pattern to copy.
+
+**Qaida progress is credited by playback, not by intent.** `QaidaAudioManager.completions` emits an
+`audio_key` only when its clip reached its **natural** end — a media-item transition with
+`MEDIA_ITEM_TRANSITION_REASON_AUTO`, or `STATE_ENDED` with nothing queued after it. `stop()`, a
+lesson change and a tap that replaces what is playing emit nothing. `state.currentKey` cannot answer
+this question: it goes null in every one of those cases, and the difference is the whole point when
+completion awards stars and unlocks the next lesson. `QaidaReaderViewModel` collects `completions`
+and calls `markCellHeard` from there; `playLine` starts playback and writes no progress at all.
+(Tapping a single cell still marks eagerly — one tap, one clip, one intent.)
 
 **Gotchas.**
 - Two player APIs: ExoPlayer everywhere **except** `AdhanAudioManager.preview()` (legacy `MediaPlayer`).

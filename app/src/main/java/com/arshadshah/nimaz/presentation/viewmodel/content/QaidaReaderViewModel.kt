@@ -100,6 +100,28 @@ class QaidaReaderViewModel @Inject constructor(
                 ?.firstNotNullOfOrNull { line -> line.cells.firstOrNull { it.audioKey == key } }
         }.stateIn(viewModelScope, sharing, null)
 
+    /**
+     * The open lesson's cells, flattened, kept current by [observeLoadedCells].
+     *
+     * A snapshot rather than a read of [lessonContent] at the moment a clip ends: that flow is
+     * `WhileSubscribed`, so it is cold whenever no screen is collecting it — and audio outlives
+     * the screen. Crediting progress must not depend on something being on screen.
+     */
+    private var loadedCells: List<QaidaCell> = emptyList()
+
+    init {
+        observeLoadedCells()
+        observeHeardCells()
+    }
+
+    private fun observeLoadedCells() {
+        viewModelScope.launch {
+            lessonContent.collect { content ->
+                loadedCells = content?.lines?.flatMap { it.cells }.orEmpty()
+            }
+        }
+    }
+
     fun onEvent(event: QaidaReaderEvent) {
         when (event) {
             is QaidaReaderEvent.SelectLesson -> {
@@ -152,13 +174,39 @@ class QaidaReaderViewModel @Inject constructor(
         }
     }
 
-    /** Play a whole line back-to-back, marking each of its cells heard. */
+    /**
+     * Play a whole line back-to-back. Each cell is credited as **its own clip finishes**, by
+     * [observeHeardCells] — not here.
+     *
+     * This used to write all of the line's marks immediately and unconditionally, decoupled
+     * from playback: `playSequence` is fire-and-forget and nothing observed it. So tapping
+     * "play line" on an eight-cell line and immediately opening another lesson (which calls
+     * `audioManager.stop()`) recorded **all eight cells as heard** — enough, under
+     * `QaidaProgressRules`, to complete the line, award its stars and unlock the next lesson,
+     * for content the learner heard half a second of. The gating the whole Qaida progression
+     * rests on was bypassable with one tap.
+     */
     private fun playLine(lineId: Int) {
         val line = lessonContent.value?.lines?.firstOrNull { it.line.id == lineId } ?: return
         if (line.cells.isEmpty()) return
         audioManager.playSequence(line.cells.map { it.audioKey })
+    }
+
+    /**
+     * Credits a cell once its clip has actually played to the end.
+     *
+     * Driven by [QaidaAudioManager.completions], which emits only on a natural end — never on
+     * [QaidaAudioManager.stop], a lesson change, or a tap that replaces what is playing.
+     *
+     * Keyed against the loaded lesson so a clip cannot credit a cell from a lesson the learner
+     * has left; the same resolution [playingCell] does for highlighting.
+     */
+    private fun observeHeardCells() {
         viewModelScope.launch {
-            line.cells.forEach { qaidaUseCases.markCellHeard(it.lessonId, it.id) }
+            audioManager.completions.collect { key ->
+                val cell = loadedCells.firstOrNull { it.audioKey == key } ?: return@collect
+                qaidaUseCases.markCellHeard(cell.lessonId, cell.id)
+            }
         }
     }
 
