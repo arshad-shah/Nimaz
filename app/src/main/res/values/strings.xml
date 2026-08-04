@@ -1244,28 +1244,36 @@
     <string name="recitation_style_murattal">Murattal</string>
     <string name="recitation_style_mujawwad">Mujawwad</string>
 
-    <!-- Surah Info Screen -->
-    <string name="surah_info_about">About This Surah</string>
-    <string name="surah_info_main_themes">Main Themes</string>
-    <string name="surah_info_description_fallback">This surah contains divine guidance and wisdom for believers.</string>
-    <string name="surah_info_theme_guidance">Divine Guidance</string>
-    <string name="surah_info_theme_worship">Worship</string>
-    <string name="surah_info_theme_morality">Morality</string>
-    <string name="surah_info_theme_remembrance">Remembrance</string>
-
     <!-- Surah Info Screen — the thematic layer (schemaVersion 24) -->
+    <string name="surah_info_go_deeper">Go deeper</string>
+    <string name="surah_info_read_more">Read more</string>
+    <string name="surah_info_read_less">Show less</string>
     <string name="surah_info_background">Background</string>
+    <string name="surah_info_background_subtitle">%1$d sections</string>
     <string name="surah_info_passages">Passages</string>
     <string name="surah_info_passages_subtitle">%1$d passages in this surah</string>
+    <string name="surah_info_passages_row_subtitle">%1$d passages across %2$d verses</string>
+    <string name="surah_info_subjects">Subjects in this surah</string>
+    <string name="surah_info_subjects_subtitle">Browse what the Qur\'an speaks about</string>
     <string name="surah_info_section_name">Name</string>
     <string name="surah_info_section_revelation">Period of Revelation</string>
     <string name="surah_info_section_theme">Theme and Subject Matter</string>
     <string name="surah_info_section_background">Historical Background</string>
     <string name="surah_info_section_note">Note</string>
+    <string name="surah_info_section_other">Other</string>
     <string name="surah_info_passage_verses">%1$d verses</string>
     <string name="surah_info_passage_verse">1 verse</string>
 
+    <!-- Surah passages screen -->
+    <string name="surah_passages_filter_hint">Filter passages</string>
+    <string name="surah_passages_reading">Reading</string>
+    <string name="surah_passages_none_title">Nothing matched</string>
+    <string name="surah_passages_none">No passage matches that. Clear the filter to see all %1$d.</string>
+    <string name="cd_passage_open">Open %1$s in the reader</string>
+
     <!-- Quran topics -->
+    <string name="quran_home_browse_subjects">Subjects in the Qur\'an</string>
+    <string name="quran_home_browse_subjects_subtitle">2,512 subjects, indexed by hand</string>
     <string name="quran_topics_title">Topics</string>
     <string name="quran_topics_subtitle">What the Qur\'an speaks about</string>
     <string name="quran_topics_search_hint">Search subjects…</string>
@@ -1282,8 +1290,16 @@
     <string name="quran_topic_subtopics">Subtopics</string>
     <string name="quran_topic_related">Related subjects</string>
     <string name="quran_topic_not_found">This subject isn\'t in the index.</string>
-    <string name="quran_topic_open_reader">Open in reader</string>
+    <string name="quran_topic_verses_across">%1$d across %2$d surahs</string>
+    <string name="quran_topics_crumb_home">All subjects</string>
+    <string name="quran_topics_scope_search">Searching all three hierarchies</string>
+    <string name="quran_topics_scope_thematic">A curated outline — doctrine, worship, stories</string>
+    <string name="quran_topics_scope_ontology">By kind of thing — people, places, events</string>
+    <string name="quran_topics_scope_index">The shape of a printed concordance</string>
     <string name="cd_topic_up">Up one level</string>
+    <string name="cd_topic_focus">Start from %1$s</string>
+    <string name="cd_tree_expand">Show what is under %1$s</string>
+    <string name="cd_tree_collapse">Hide what is under %1$s</string>
     <string name="quran_ayah_topics">Topics</string>
 
     <!-- Quran Reader Screen -->

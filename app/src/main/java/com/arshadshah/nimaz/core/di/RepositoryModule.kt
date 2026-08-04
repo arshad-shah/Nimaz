@@ -1,10 +1,6 @@
 package com.arshadshah.nimaz.core.di
 
 import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
-import com.arshadshah.nimaz.data.local.content.AndroidContentPatchAssetReader
-import com.arshadshah.nimaz.data.local.content.ContentPatchAssetReader
-import com.arshadshah.nimaz.data.local.content.ContentPatchVersionStore
-import com.arshadshah.nimaz.data.local.content.DataStoreContentPatchVersionStore
 import com.arshadshah.nimaz.data.repository.AsmaUlHusnaRepositoryImpl
 import com.arshadshah.nimaz.data.repository.AsmaUnNabiRepositoryImpl
 import com.arshadshah.nimaz.data.repository.DuaRepositoryImpl
@@ -144,6 +140,7 @@ import com.arshadshah.nimaz.domain.usecase.GetSurahInfoUseCase
 import com.arshadshah.nimaz.domain.usecase.GetSurahOverviewUseCase
 import com.arshadshah.nimaz.domain.usecase.GetSurahThemesUseCase
 import com.arshadshah.nimaz.domain.usecase.GetThemeForAyahUseCase
+import com.arshadshah.nimaz.domain.usecase.GetTopicChildrenUseCase
 import com.arshadshah.nimaz.domain.usecase.GetTopicDetailUseCase
 import com.arshadshah.nimaz.domain.usecase.GetTopicTreeRootsUseCase
 import com.arshadshah.nimaz.domain.usecase.GetTopicsForAyahUseCase
@@ -323,21 +320,6 @@ abstract class RepositoryModule {
         prophetRepositoryImpl: ProphetRepositoryImpl
     ): ProphetRepository
 
-    // The generic content patch — how a corpus correction reaches an install the
-    // artifact never touches. The per-feature seeders below retire into it; see
-    // docs/retirement.yaml for which release each one goes in.
-    @Binds
-    @Singleton
-    abstract fun bindContentPatchVersionStore(
-        impl: DataStoreContentPatchVersionStore
-    ): ContentPatchVersionStore
-
-    @Binds
-    @Singleton
-    abstract fun bindContentPatchAssetReader(
-        impl: AndroidContentPatchAssetReader
-    ): ContentPatchAssetReader
-
     @Binds
     @Singleton
     abstract fun bindHelpRepository(
@@ -403,6 +385,7 @@ object UseCaseModule {
             getSurahThemes = GetSurahThemesUseCase(repository),
             getThemeForAyah = GetThemeForAyahUseCase(repository),
             getTopicTreeRoots = GetTopicTreeRootsUseCase(repository),
+            getTopicChildren = GetTopicChildrenUseCase(repository),
             getTopicDetail = GetTopicDetailUseCase(repository),
             getTopicsForAyah = GetTopicsForAyahUseCase(repository),
             searchTopics = SearchTopicsUseCase(repository),

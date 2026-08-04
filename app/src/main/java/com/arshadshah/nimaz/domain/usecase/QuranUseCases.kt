@@ -219,6 +219,24 @@ class GetTopicTreeRootsUseCase @Inject constructor(
         repository.getTopicTreeRoots(tree)
 }
 
+/**
+ * What a tree row needs, and nothing more.
+ *
+ * Expanding a node wants its children; drawing a level wants to know which of its rows are
+ * branches. [GetTopicDetailUseCase] answers both as a side effect, but it also walks the
+ * breadcrumb, resolves the related topics and reads every citation — 153 of them for "Allah" —
+ * which is a lot of work to decide whether to draw a chevron.
+ */
+class GetTopicChildrenUseCase @Inject constructor(
+    private val repository: QuranRepository
+) {
+    suspend operator fun invoke(topicId: Int, tree: TopicTree): List<QuranTopic> =
+        repository.getTopicChildren(topicId, tree)
+
+    /** The ids in [tree] that have children. One query, good for the session. */
+    suspend fun branchesIn(tree: TopicTree): Set<Int> = repository.getBranchTopicIds(tree)
+}
+
 class GetTopicDetailUseCase @Inject constructor(
     private val repository: QuranRepository
 ) {
@@ -239,6 +257,19 @@ class SearchTopicsUseCase @Inject constructor(
 ) {
     suspend operator fun invoke(query: String, limit: Int = 60): List<QuranTopic> =
         repository.searchTopics(query, limit)
+
+    /**
+     * Where each result sits, so a flat list of matches is not a list of free-floating words.
+     *
+     * Resolved for the whole result set at once — see
+     * [QuranRepository.getTopicBreadcrumbs] — because sixty results at one breadcrumb each
+     * would be a query storm to draw a subline.
+     */
+    suspend fun pathsFor(
+        topics: List<QuranTopic>,
+        tree: TopicTree
+    ): Map<Int, List<QuranTopic>> =
+        repository.getTopicBreadcrumbs(topics.map { it.id }, tree)
 }
 
 /**
@@ -301,6 +332,16 @@ class GetAyahTranslationUseCase @Inject constructor(
 ) {
     suspend operator fun invoke(ayahId: Int, translatorId: String): String? =
         repository.getTranslationsForAyahs(listOf(ayahId), translatorId).first()[ayahId]
+
+    /**
+     * Many verses' text in one read, keyed by ayah id.
+     *
+     * The underlying query is a single `IN (…)`, which is what lets a topic showing 153
+     * citations preview all of them without a query per row.
+     */
+    suspend fun forAyahs(ayahIds: List<Int>, translatorId: String): Map<Int, String> =
+        if (ayahIds.isEmpty()) emptyMap()
+        else repository.getTranslationsForAyahs(ayahIds, translatorId).first()
 }
 
 /**
@@ -378,6 +419,7 @@ data class QuranUseCases(
     val getSurahThemes: GetSurahThemesUseCase,
     val getThemeForAyah: GetThemeForAyahUseCase,
     val getTopicTreeRoots: GetTopicTreeRootsUseCase,
+    val getTopicChildren: GetTopicChildrenUseCase,
     val getTopicDetail: GetTopicDetailUseCase,
     val getTopicsForAyah: GetTopicsForAyahUseCase,
     val searchTopics: SearchTopicsUseCase,

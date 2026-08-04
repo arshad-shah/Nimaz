@@ -244,6 +244,26 @@ sealed interface Route {
     data class SurahInfo(val surahNumber: Int) : Route
 
     /**
+     * A surah's long-form background — the source's own sections, read continuously.
+     *
+     * Its own destination rather than a block on [SurahInfo], because the longest of them is
+     * 47 KB of prose and burying that under an info screen's first fold made the info screen a
+     * document instead of an answer.
+     */
+    @Serializable
+    data class SurahBackground(val surahNumber: Int) : Route
+
+    /**
+     * A surah's passage outline — its table of contents.
+     *
+     * [currentAyah] is the verse the reader is on when this is opened *from the reader*, so the
+     * passage containing it can be marked and scrolled to. Null when it is opened from surah
+     * info, where there is no such place to be.
+     */
+    @Serializable
+    data class SurahPassages(val surahNumber: Int, val currentAyah: Int? = null) : Route
+
+    /**
      * The Qur'an's subject browser. One route for the whole descent, not one per level —
      * the ontology goes five deep, and a route per level would mean five back-stack entries
      * for one act of browsing. `QuranTopicsViewModel` holds the path.

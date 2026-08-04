@@ -13,6 +13,50 @@ current_version_code: 385          # update on every release
 current_version_name: "3.0.85"
 
 entries:
+  - id: content-patch-seeder
+    status: retired
+    retired_in_version_code: 389
+    summary: >
+      Delete ContentPatchSeeder, its patch asset, its version preference and its DI wiring.
+      ContentArtifactInstaller replaces the content database instead.
+    retire_when:
+      min_prod_version_code: 385
+      because: >
+        The seeder is retired the same release its replacement ships, not one later, because
+        the two do not overlap in what they can deliver — and the reason is the whole point.
+        `nz patch emit` cannot express a table absent from the baseline: it files those under
+        `out_of_scope` and emits nothing. So a newly added table reached fresh installs and
+        nobody else, which is exactly how the Qur'an's thematic layer (schemaVersion 24)
+        shipped with five empty tables on every existing device. Keeping the seeder for one
+        release of overlap would buy nothing a replaced database does not already do, and
+        would leave two delivery paths where one silently under-delivers.
+
+        Safe because the content database stopped holding user data at schemaVersion 23
+        (arshad-shah/Nimaz#334): `artifact.content-only` fails the data build if a user table
+        reappears, and DeviceStateCorpusTest asserts each is absent. A patch left unapplied on
+        a device is not a loss either — the replacement copies the whole artifact, which
+        contains every correction the patch would have carried.
+    blocked_by: []
+    steps:
+      - Delete data/local/content/ContentPatchSeeder.kt and its test.
+      - Move USER_TABLES to ContentArtifactInstaller, which still needs it for the legacy guard.
+      - Drop the applyContentPatch step from AppInitializer.
+      - Drop bindContentPatchVersionStore / bindContentPatchAssetReader from RepositoryModule.
+      - Remove contentPatchVersion from SettingsRepository and PreferencesDataStore, and the
+        CONTENT_PATCH_VERSION key.
+      - Stop fetching lock["patch"] in gradle/nimaz-data.gradle.kts.
+    verify:
+      - ./gradlew :app:compileDebugKotlin
+      - ./gradlew :app:testDebugUnitTest
+      - test -z "$(grep -rn 'ContentPatchSeeder' app/src/main)"
+    retirement_notes: >
+      `nz patch emit` / `nz patch verify` stay in arshad-shah/nimaz-data. Nothing in the app
+      reads a patch any more, but the emitter is the fallback if a delivery path that does not
+      rewrite the whole file is ever wanted again. Note this retirement costs no bandwidth: the
+      artifact is bundled into the APK at build time either way, so dropping the patch asset
+      makes the APK ~2.7 MB smaller. The cost is a one-time local copy (~176 MB, disk to disk)
+      on the first launch after a content change.
+
   - id: lfs-prepopulated-asset
     status: retired
     retired_in_version_code: 385

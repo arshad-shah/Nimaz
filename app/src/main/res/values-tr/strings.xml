@@ -997,13 +997,6 @@
     <string name="select_reciter_popular">POPÜLER OKUYUCULAR</string>
     <string name="recitation_style_mujawwad">Mücevved</string>
     <string name="recitation_style_murattal">Murattal</string>
-    <string name="surah_info_about">Bu Sure Hakkında</string>
-    <string name="surah_info_main_themes">Ana Temalar</string>
-    <string name="surah_info_description_fallback">Bu sure, müminler için ilahi rehberlik ve hikmet içerir.</string>
-    <string name="surah_info_theme_guidance">İlahi Rehberlik</string>
-    <string name="surah_info_theme_worship">İbadet</string>
-    <string name="surah_info_theme_morality">Ahlak</string>
-    <string name="surah_info_theme_remembrance">Zikir</string>
     <!-- Sure Bilgisi ekranı — tematik katman (schemaVersion 24) -->
     <string name="surah_info_background">Arka Plan</string>
     <string name="surah_info_passages">Bölümler</string>
@@ -1015,8 +1008,23 @@
     <string name="surah_info_section_note">Not</string>
     <string name="surah_info_passage_verses">%1$d ayet</string>
     <string name="surah_info_passage_verse">1 ayet</string>
+    <string name="surah_info_go_deeper">Daha derine in</string>
+    <string name="surah_info_read_more">Devamını oku</string>
+    <string name="surah_info_read_less">Daha az göster</string>
+    <string name="surah_info_background_subtitle">%1$d bölüm</string>
+    <string name="surah_info_passages_row_subtitle">%2$d ayet boyunca %1$d bölüm</string>
+    <string name="surah_info_subjects">Bu suredeki konular</string>
+    <string name="surah_info_subjects_subtitle">Kur\'an\'ın söz ettiklerine göz atın</string>
+    <string name="surah_info_section_other">Diğer</string>
+    <string name="surah_passages_filter_hint">Bölümleri filtrele</string>
+    <string name="surah_passages_reading">Okunuyor</string>
+    <string name="surah_passages_none_title">Eşleşme yok</string>
+    <string name="surah_passages_none">Hiçbir bölüm eşleşmiyor. Tümünü (%1$d) görmek için filtreyi temizleyin.</string>
+    <string name="cd_passage_open">%1$s okuyucuda açılsın</string>
 
     <!-- Kur\'an konuları -->
+    <string name="quran_home_browse_subjects">Kur\'an\'daki konular</string>
+    <string name="quran_home_browse_subjects_subtitle">Elle dizinlenmiş 2.512 konu</string>
     <string name="quran_topics_title">Konular</string>
     <string name="quran_topics_subtitle">Kur\'an neden söz ediyor</string>
     <string name="quran_topics_search_hint">Konu ara…</string>
@@ -1033,8 +1041,16 @@
     <string name="quran_topic_subtopics">Alt konular</string>
     <string name="quran_topic_related">İlgili konular</string>
     <string name="quran_topic_not_found">Bu konu dizinde yok.</string>
-    <string name="quran_topic_open_reader">Okuyucuda aç</string>
+    <string name="quran_topic_verses_across">%2$d surede %1$d ayet</string>
+    <string name="quran_topics_crumb_home">Tüm konular</string>
+    <string name="quran_topics_scope_search">Üç dizinin tümünde aranıyor</string>
+    <string name="quran_topics_scope_thematic">Derlenmiş bir taslak — akide, ibadet, kıssalar</string>
+    <string name="quran_topics_scope_ontology">Türüne göre — kişiler, yerler, olaylar</string>
+    <string name="quran_topics_scope_index">Basılı bir dizinin biçimi</string>
     <string name="cd_topic_up">Bir üst düzeye</string>
+    <string name="cd_topic_focus">%1$s ile başla</string>
+    <string name="cd_tree_expand">%1$s altındakileri göster</string>
+    <string name="cd_tree_collapse">%1$s altındakileri gizle</string>
     <string name="quran_ayah_topics">Konular</string>
     <string name="cd_switch_to_list_view">Liste görünümüne geç</string>
     <string name="cd_switch_to_page_view">Sayfa görünümüne geç</string>

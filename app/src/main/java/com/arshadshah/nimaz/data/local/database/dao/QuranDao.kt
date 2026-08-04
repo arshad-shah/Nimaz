@@ -621,6 +621,25 @@ interface QuranDao {
     )
     suspend fun getChildTopics(tree: String, parentId: Int): List<QuranTopicEntity>
 
+    /**
+     * Every topic in [tree] that has at least one child.
+     *
+     * A tree row has to know whether it is a branch or a leaf *before* it is tapped — that is
+     * what decides whether it gets a disclosure control — and asking per row would be 2,512
+     * queries to draw one list. This is one query per tree over an indexed column, and the
+     * answer is a few hundred ids that hold for the session.
+     */
+    @Query(
+        "SELECT DISTINCT parent FROM (" +
+            "SELECT thematic_parent_id AS parent FROM quran_topics WHERE :tree = 'thematic' " +
+            "UNION ALL " +
+            "SELECT ontology_parent_id AS parent FROM quran_topics WHERE :tree = 'ontology' " +
+            "UNION ALL " +
+            "SELECT parent_id AS parent FROM quran_topics WHERE :tree = 'index'" +
+            ") WHERE parent IS NOT NULL"
+    )
+    suspend fun getBranchTopicIds(tree: String): List<Int>
+
     @Query(
         "SELECT * FROM quran_topic_ayahs WHERE topic_id = :topicId " +
             "ORDER BY ayah_id ASC"

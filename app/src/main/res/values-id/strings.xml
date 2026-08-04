@@ -973,13 +973,6 @@
     <string name="select_reciter_popular">QARI POPULER</string>
     <string name="recitation_style_mujawwad">Mujawwad</string>
     <string name="recitation_style_murattal">Murattal</string>
-    <string name="surah_info_about">Tentang Surah Ini</string>
-    <string name="surah_info_main_themes">Tema Utama</string>
-    <string name="surah_info_description_fallback">Surah ini berisi petunjuk dan hikmah ilahi bagi orang-orang beriman.</string>
-    <string name="surah_info_theme_guidance">Petunjuk Ilahi</string>
-    <string name="surah_info_theme_worship">Ibadah</string>
-    <string name="surah_info_theme_morality">Akhlak</string>
-    <string name="surah_info_theme_remembrance">Zikir</string>
     <!-- Layar Info Surah — lapisan tematik (schemaVersion 24) -->
     <string name="surah_info_background">Latar Belakang</string>
     <string name="surah_info_passages">Bagian</string>
@@ -991,8 +984,23 @@
     <string name="surah_info_section_note">Catatan</string>
     <string name="surah_info_passage_verses">%1$d ayat</string>
     <string name="surah_info_passage_verse">1 ayat</string>
+    <string name="surah_info_go_deeper">Pelajari lebih lanjut</string>
+    <string name="surah_info_read_more">Baca selengkapnya</string>
+    <string name="surah_info_read_less">Tampilkan lebih sedikit</string>
+    <string name="surah_info_background_subtitle">%1$d bagian</string>
+    <string name="surah_info_passages_row_subtitle">%1$d bagian mencakup %2$d ayat</string>
+    <string name="surah_info_subjects">Topik dalam surah ini</string>
+    <string name="surah_info_subjects_subtitle">Jelajahi apa yang dibicarakan Al-Quran</string>
+    <string name="surah_info_section_other">Lainnya</string>
+    <string name="surah_passages_filter_hint">Saring bagian</string>
+    <string name="surah_passages_reading">Sedang dibaca</string>
+    <string name="surah_passages_none_title">Tidak ada yang cocok</string>
+    <string name="surah_passages_none">Tidak ada bagian yang cocok. Hapus filter untuk melihat semua %1$d.</string>
+    <string name="cd_passage_open">Buka %1$s di pembaca</string>
 
     <!-- Topik Al-Quran -->
+    <string name="quran_home_browse_subjects">Topik dalam Al-Quran</string>
+    <string name="quran_home_browse_subjects_subtitle">2.512 topik, diindeks secara manual</string>
     <string name="quran_topics_title">Topik</string>
     <string name="quran_topics_subtitle">Apa yang dibicarakan Al-Quran</string>
     <string name="quran_topics_search_hint">Cari topik…</string>
@@ -1009,8 +1017,16 @@
     <string name="quran_topic_subtopics">Subtopik</string>
     <string name="quran_topic_related">Topik terkait</string>
     <string name="quran_topic_not_found">Topik ini tidak ada dalam indeks.</string>
-    <string name="quran_topic_open_reader">Buka di pembaca</string>
+    <string name="quran_topic_verses_across">%1$d di %2$d surah</string>
+    <string name="quran_topics_crumb_home">Semua topik</string>
+    <string name="quran_topics_scope_search">Mencari di ketiga hierarki</string>
+    <string name="quran_topics_scope_thematic">Kerangka pilihan — akidah, ibadah, kisah</string>
+    <string name="quran_topics_scope_ontology">Menurut jenisnya — orang, tempat, peristiwa</string>
+    <string name="quran_topics_scope_index">Bentuk indeks buku cetak</string>
     <string name="cd_topic_up">Naik satu tingkat</string>
+    <string name="cd_topic_focus">Mulai dari %1$s</string>
+    <string name="cd_tree_expand">Tampilkan isi %1$s</string>
+    <string name="cd_tree_collapse">Sembunyikan isi %1$s</string>
     <string name="quran_ayah_topics">Topik</string>
     <string name="cd_switch_to_list_view">Beralih ke tampilan daftar</string>
     <string name="cd_switch_to_page_view">Beralih ke tampilan halaman</string>

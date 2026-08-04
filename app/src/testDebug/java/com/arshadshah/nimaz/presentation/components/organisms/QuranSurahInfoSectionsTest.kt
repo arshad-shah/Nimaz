@@ -14,28 +14,6 @@ class QuranSurahInfoSectionsTest {
     @get:Rule
     val composeRule = createComponentComposeRule()
 
-    // ── ThemesList ──────────────────────────────────────────────────────────
-
-    @Test
-    fun `ThemesList renders each theme chip`() {
-        composeRule.setThemedContent {
-            ThemesList(themes = listOf("Praise", "Guidance", "Mercy"))
-        }
-
-        composeRule.onNodeWithText("Praise").assertExists()
-        composeRule.onNodeWithText("Guidance").assertExists()
-        composeRule.onNodeWithText("Mercy").assertExists()
-    }
-
-    @Test
-    fun `ThemesList with empty list renders nothing`() {
-        composeRule.setThemedContent {
-            ThemesList(themes = emptyList())
-        }
-
-        composeRule.onNodeWithText("Praise").assertDoesNotExist()
-    }
-
     // ── BottomActions ───────────────────────────────────────────────────────
 
     private fun bottomActions(

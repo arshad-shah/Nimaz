@@ -39,8 +39,8 @@ android {
         // Source of truth for the app version. CI bumps these at build time and
         // pushes the change back to dev (with a bypass GitHub App token) after a successful
         // deploy, so the committed baseline stays in sync for the next build.
-        versionCode = 387
-        versionName = "3.0.87"
+        versionCode = 391
+        versionName = "3.0.91"
 
         // Custom runner swaps in HiltTestApplication so instrumented tests run on
         // the full Hilt graph without NimazApp's Firebase / AppInitializer / device
@@ -62,6 +62,17 @@ android {
             "PLAY_INTEGRITY_CLOUD_PROJECT_NUMBER",
             "${playIntegrityProjectNumber}L"
         )
+
+        // The identity of the content artifact this APK was built against, so the app can tell
+        // at runtime whether the database on disk is the one it ships with. Read from the same
+        // data.lock.json the fetch task verifies against, so the two cannot disagree — see
+        // ContentArtifactInstaller.
+        @Suppress("UNCHECKED_CAST")
+        val contentArtifactSha = (
+            (groovy.json.JsonSlurper().parse(rootProject.file("data.lock.json"))
+                as Map<String, Any>)["artifact"] as Map<String, Any>
+            )["sha256"] as String
+        buildConfigField("String", "CONTENT_ARTIFACT_SHA256", "\"$contentArtifactSha\"")
     }
 
     // Ship the exported Room schemas as androidTest assets so MigrationTestHelper can

@@ -1014,13 +1014,6 @@
     <string name="select_reciter_popular">RÉCITATEURS POPULAIRES</string>
     <string name="recitation_style_mujawwad">Mujawwad</string>
     <string name="recitation_style_murattal">Murattal</string>
-    <string name="surah_info_about">À propos de cette Surah</string>
-    <string name="surah_info_main_themes">Thèmes principaux</string>
-    <string name="surah_info_description_fallback">Cette sourate contient des conseils divins et de la sagesse pour les croyants.</string>
-    <string name="surah_info_theme_guidance">Guidance divine</string>
-    <string name="surah_info_theme_worship">Adoration</string>
-    <string name="surah_info_theme_morality">Moralité</string>
-    <string name="surah_info_theme_remembrance">Rappel</string>
     <!-- Écran d\'information sur la sourate — la couche thématique (schemaVersion 24) -->
     <string name="surah_info_background">Contexte</string>
     <string name="surah_info_passages">Passages</string>
@@ -1032,8 +1025,23 @@
     <string name="surah_info_section_note">Note</string>
     <string name="surah_info_passage_verses">%1$d versets</string>
     <string name="surah_info_passage_verse">1 verset</string>
+    <string name="surah_info_go_deeper">Aller plus loin</string>
+    <string name="surah_info_read_more">Lire la suite</string>
+    <string name="surah_info_read_less">Afficher moins</string>
+    <string name="surah_info_background_subtitle">%1$d sections</string>
+    <string name="surah_info_passages_row_subtitle">%1$d passages sur %2$d versets</string>
+    <string name="surah_info_subjects">Sujets de cette sourate</string>
+    <string name="surah_info_subjects_subtitle">Parcourir ce dont parle le Coran</string>
+    <string name="surah_info_section_other">Autre</string>
+    <string name="surah_passages_filter_hint">Filtrer les passages</string>
+    <string name="surah_passages_reading">En cours</string>
+    <string name="surah_passages_none_title">Aucun résultat</string>
+    <string name="surah_passages_none">Aucun passage ne correspond. Effacez le filtre pour voir les %1$d.</string>
+    <string name="cd_passage_open">Ouvrir %1$s dans le lecteur</string>
 
     <!-- Thèmes du Coran -->
+    <string name="quran_home_browse_subjects">Sujets du Coran</string>
+    <string name="quran_home_browse_subjects_subtitle">2 512 sujets, indexés à la main</string>
     <string name="quran_topics_title">Thèmes</string>
     <string name="quran_topics_subtitle">Ce dont parle le Coran</string>
     <string name="quran_topics_search_hint">Rechercher un sujet…</string>
@@ -1050,8 +1058,16 @@
     <string name="quran_topic_subtopics">Sous-thèmes</string>
     <string name="quran_topic_related">Sujets liés</string>
     <string name="quran_topic_not_found">Ce sujet ne figure pas dans l\'index.</string>
-    <string name="quran_topic_open_reader">Ouvrir dans le lecteur</string>
+    <string name="quran_topic_verses_across">%1$d dans %2$d sourates</string>
+    <string name="quran_topics_crumb_home">Tous les sujets</string>
+    <string name="quran_topics_scope_search">Recherche dans les trois hiérarchies</string>
+    <string name="quran_topics_scope_thematic">Un plan raisonné — doctrine, adoration, récits</string>
+    <string name="quran_topics_scope_ontology">Par type de chose — personnes, lieux, événements</string>
+    <string name="quran_topics_scope_index">La forme d\'un index imprimé</string>
     <string name="cd_topic_up">Remonter d\'un niveau</string>
+    <string name="cd_topic_focus">Commencer à %1$s</string>
+    <string name="cd_tree_expand">Afficher ce qui se trouve sous %1$s</string>
+    <string name="cd_tree_collapse">Masquer ce qui se trouve sous %1$s</string>
     <string name="quran_ayah_topics">Thèmes</string>
     <string name="cd_switch_to_list_view">Passer à la vue liste</string>
     <string name="cd_switch_to_page_view">Passer à la vue page</string>

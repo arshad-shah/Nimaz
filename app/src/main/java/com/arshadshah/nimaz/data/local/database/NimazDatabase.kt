@@ -373,8 +373,11 @@ abstract class NimazDatabase : RoomDatabase() {
         //   juz/hizb/page -> juzs, hizb_quarters, pages           (MIN/MAX over the columns)
         //
         // `rukus`, `manzils` and `surah_structure` are content that has never been on a device:
-        // they are created empty and filled from the artifact on a fresh install, or by
-        // QuranStructureSeeder from the bundled seed on an upgrade. `text_arabic` was
+        // they are created empty and filled from the artifact. The seeder this comment used to
+        // name as the upgrade path does not exist — nothing anywhere calls `insertRukus` or
+        // `insertSurahStructure` — so until ContentArtifactInstaller landed, an upgrading device
+        // kept all three empty for good. It replaces the file now, which is what makes the
+        // rukūʿ markers reachable on an install that predates them. `text_arabic` was
         // byte-identical to `text_uthmani` in all 6,236 rows, so nothing is lost by dropping it;
         // `text_indopak` was NULL in all of them.
         // schemaVersion 23 — the content database stops declaring the twenty-two tables the
@@ -397,9 +400,10 @@ abstract class NimazDatabase : RoomDatabase() {
          *
          * All five tables are **content**, so this migration only creates them empty. The rows
          * arrive the way every other content row does (§7): with the artifact on a fresh
-         * install, or via `ContentPatchSeeder` on an upgrade. A device that upgrades before the
-         * matching artifact ships therefore has the tables and no rows, and every read path is
-         * built to treat that as "nothing to show" rather than as an error.
+         * install, and by `ContentArtifactInstaller` replacing the database on an update — it
+         * compares the artifact this APK ships against the one on disk. A device that updates
+         * before the matching artifact ships therefore has the tables and no rows, and every
+         * read path is built to treat that as "nothing to show" rather than as an error.
          *
          * Every statement is `IF NOT EXISTS`, so running this against a database that already
          * arrived with the tables — a fresh install off a schemaVersion 24 artifact — is a

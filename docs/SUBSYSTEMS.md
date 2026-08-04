@@ -350,7 +350,7 @@ and a second attempt is a no-op.
 > real files keep the journal mode Room gave them. The cost of the separate connection is that
 > Room does not observe the copy — hence the ordering guarantee above.
 
-**Prepopulated DB.** The app ships a prebuilt DB in `app/src/main/assets/database/nimaz_prepopulated.db`, wired via `.createFromAsset("database/nimaz_prepopulated.db", NimazDatabase.PREPACKAGED_CALLBACK)`. **Room copies this asset only on a fresh install** — it is *not* re-copied on app update. That single fact drives both the migration discipline here and the entire content-seeding subsystem (§7).
+**Prepopulated DB.** The app ships a prebuilt DB in `app/src/main/assets/database/nimaz_prepopulated.db`, wired via `.createFromAsset("database/nimaz_prepopulated.db", NimazDatabase.PREPACKAGED_CALLBACK)`. **Room copies this asset only when the database file is absent** — it is *not* re-copied on app update. That single fact drove both the migration discipline here and the entire content-seeding subsystem (§7). Since schemaVersion 24 it no longer decides whether a content release reaches an existing install: `ContentArtifactInstaller` (§7) deletes the stale database first when the APK ships a different artifact, so the copy happens after all. That is only safe because the content database stopped holding user data at schemaVersion 23.
 
 **`PREPACKAGED_CALLBACK`** repairs the shipped asset right after copy and before Room validates its schema (the bundled asset was stamped at `user_version 12` while still missing the `updatedAt` columns and shipping tafseer indices under the wrong names). The same idempotent repair is also exposed as `MIGRATION_12_13`, because devices already sitting at v12 never re-run the copy callback.
 
@@ -392,12 +392,38 @@ normalised at import onto four tags — `<p>`, `<strong>`, `<em>`, and `<a href=
 schemes address screens this app has: 446 cross-references the source writes as prose ("see
 2:153-251") are taps into the reader, and 509 `topic:` links are taps into the subject browser.
 
-**Where it surfaces.** The surah info screen grows a collapsible background (first section open —
-the longest runs to 47 KB of prose for one surah) and the surah's passage outline; the reader
-prints a passage heading where the outline starts a new subject (surah mode only — a juz spans a
-dozen surahs and would cost a query per surah per page turn); the Tafseer screen shows the verse's
-subjects as chips, capped at six; and `Route.QuranTopics` browses all three hierarchies. Two new
-search kinds — `theme` and `topic` — ride the shipped FTS index.
+**Where it surfaces.** Each of the three kinds of content has a screen the size of the content:
+
+- **Surah info** is a *hub*. It carries the cartouche, the numbers, `surah_overviews.summary` as
+  body prose, and a "Go deeper" group of three counted rows. It used to carry the background as
+  accordions and the outline as up to 282 rows in the same list, which made it a document rather
+  than an answer. Rows are drawn only where there is content behind them.
+- **`Route.SurahBackground`** reads `surah_overview_sections` continuously under a sticky index of
+  pills labelled from `section_group` — stable across all 114 surahs, which the source's own
+  `heading` is not. Each section keeps that heading as its title. The longest background runs to
+  47 KB of prose for one surah, which is the reason it is a destination.
+- **`Route.SurahPassages`** is the surah's table of contents over `ayah_themes`, filterable by
+  subject *and* by verse number. Opened from the reader it is passed the verse being read and
+  marks and scrolls to the passage containing it.
+- The **reader** prints a passage heading where the outline starts a new subject (surah mode only
+  — a juz spans a dozen surahs and would cost a query per surah per page turn), and its overflow
+  reaches both the passage outline and the subject browser.
+- **`Route.QuranTopics`** browses all three hierarchies as **one tree that opens in place**: a
+  node's children insert beneath it, the breadcrumb is a bar of tappable crumbs rather than a
+  truncating top-bar string, and past three levels of indent a row offers to re-root the tree on
+  itself. `getBranchTopicIds(tree)` is one query per tree telling every row whether it is a branch,
+  which is what lets a leaf carry no disclosure control and open on its label instead. Reachable
+  from a labelled card on the Qur'an home (gated on `hasThematicContent()`), the reader's overflow,
+  and surah info.
+- **`Route.QuranTopicDetail`** gives its four kinds of content four shapes: description as body
+  prose, subtopics as tree rows, related subjects as chips, and the citations grouped by surah
+  under sticky headers with a line of each verse — resolved for the whole list in one
+  `getTranslationsForAyahs` call, so a subject citing 153 verses costs two reads.
+- The **Tafseer** screen shows the verse's subjects as chips, capped at six.
+
+Two new search kinds — `theme` and `topic` — ride the shipped FTS index, and topic search results
+carry their ancestor path, resolved for the whole result set by
+`QuranRepository.getTopicBreadcrumbs` at one query per level of depth rather than one per result.
 
 **Tafseer range blocks (`v21`, #329).** Tafseer is range-based, not ayah-based — a single commentary passage (e.g. Ibn Kathir discussing 43:81-89) is one block, not nine identical rows. `tafseer_texts` (one row per ayah, `ayah_id`/`surah_number`/`ayah_number`) is replaced by `tafseer_blocks` (`tafseer_id`, `surah_number`, `ayah_start`, `ayah_end`, `text`), indexed on `(tafseer_id, surah_number, ayah_start, ayah_end)`. `MIGRATION_20_21` drops the old table outright — it is shipped content, not user data, replaced wholesale by the schemaVersion 21 artifact (`nimaz-data` issue #1) — and creates the new one empty; the block rows arrive with that artifact. `TafseerDao.getTafseerForAyah(surahNumber, ayahNumber, tafseerId)` now matches by containment (`ayah_start <= ? AND ayah_end >= ?`) instead of equality. `tafseer_highlights`/`tafseer_notes` (user data) are untouched: they stay keyed by the single `ayah_id` they were made on — the offsets they store index into the block text, which is unchanged for that ayah — but the reader now gathers every highlight/note whose ayah falls inside the *displayed block's* range (`TafseerDao.getHighlightsForRange`/`getNotesForRange`, joined against `ayahs`) so an annotation shows whenever its block is on screen, not only on the exact ayah it was created on. `TafseerPageContent` renders a "Commentary on 43:81-89" header from the block's own range, and `TafseerViewModel` hoists the reader's content-page index into `TafseerUiState.currentTafseerPage` so swiping to the next ayah of the same block holds reading position instead of reopening the block from page 1.
 
@@ -416,7 +442,7 @@ The old table is dropped and `ayahs.text_indopak` is set to `NULL` (kept as an i
 - `hq.number AS rub_number` — the **global** quarter (1..240) the verse falls in, plus `hq.start_ayah_id`.
 - `r.start_ayah_id` and `(r.number - rs.first_number + 1) AS ruku_number` — the rukūʿ, numbered **within its surah** the way a printed Mushaf numbers them (`rukus.number` is global 1..556, which no Mushaf prints). `rs` is a 114-row derived table of each surah's first rukūʿ number.
 
-The two `*_start_ayah_id` columns are what let the reader tell a division a verse *falls inside* from one it *begins*, which is what a printed Mushaf marks. `QuranRepositoryImpl.AyahWithText.toDomain` compares them to `ayahs.id` and publishes `Ayah.rukuNumber`, `isRukuStart` and `isRubStart`; `Ayah.quarterInHizb` / `hizbOfQuarter` derive the 1..4 position and its hizb from `rubNumber`. `QuranAyahItem` renders both as `NimazBadge` markers in its indicators row — the hizb quarter in `SUCCESS`, the rukūʿ in `ACCENT` — only on the opening verse. Before this, the quarter badge rendered on *every* verse and matched `rubNumber` against 1..4 as though it were the position within a hizb, so the four quarters at the very start of the Quran produced a label and the other 236 produced an empty string, i.e. no marker anywhere else in the book. All of the rukūʿ columns are `LEFT JOIN`ed and null on a device whose `rukus`/`surah_structure` tables have not been filled yet, so the markers simply do not render rather than rendering wrongly. `surah_structure.ruku_count` surfaces through `QuranRepository.getSurahRukuCounts()` → `GetSurahRukuCountsUseCase` → `QuranHomeUiState.rukuCounts` as a badge on `SurahListItem`, beside the verse count and page span.
+The two `*_start_ayah_id` columns are what let the reader tell a division a verse *falls inside* from one it *begins*, which is what a printed Mushaf marks. `QuranRepositoryImpl.AyahWithText.toDomain` compares them to `ayahs.id` and publishes `Ayah.rukuNumber`, `isRukuStart` and `isRubStart`; `Ayah.quarterInHizb` / `hizbOfQuarter` derive the 1..4 position and its hizb from `rubNumber`. `QuranAyahItem` renders both as `NimazBadge` markers in its indicators row — the hizb quarter in `SUCCESS`, the rukūʿ in `ACCENT` — only on the opening verse. Before this, the quarter badge rendered on *every* verse and matched `rubNumber` against 1..4 as though it were the position within a hizb, so the four quarters at the very start of the Quran produced a label and the other 236 produced an empty string, i.e. no marker anywhere else in the book. All of the rukūʿ columns are `LEFT JOIN`ed and null on a device whose `rukus`/`surah_structure` tables have not been filled, so the markers simply do not render rather than rendering wrongly — and that is not a hypothetical state. `MIGRATION_21_22` creates those two tables (and `manzils`) empty, and nothing in the app has ever filled them: the `QuranStructureSeeder` its comment named as the upgrade path does not exist, and `QuranDao.insertRukus`/`insertSurahStructure` have no callers. Until `ContentArtifactInstaller` (§7) began replacing the content database on a release, they therefore reached fresh installs only and stayed empty for good on every upgrade. Replacing the file is what makes these markers reachable on an install that predates them. `surah_structure.ruku_count` surfaces through `QuranRepository.getSurahRukuCounts()` → `GetSurahRukuCountsUseCase` → `QuranHomeUiState.rukuCounts` as a badge on `SurahListItem`, beside the verse count and page span.
 
 **16-line IndoPak read path (sub-task 4/7 of #263).** The renderer needs a page grouped **by printed line**, not by ayah. `QuranDao.getMushafLayoutByPage(script, textSource, page)` LEFT-JOINs `mushaf_layout_lines` onto `mushaf_ayah_texts` (for the glyph text) and `ayahs` (for `number_in_surah`) and returns ordered `MushafLayoutLineRow` segments; `MushafLayoutMapper` (data layer, pure/Android-free) groups them by `line` and reconstructs each segment's glyph words by slicing that text with the stored `first/last_word_position`, yielding the domain model `MushafPageLayout(page, lines: List<MushafLine>)` where each `MushafLine` carries typed segments (`AYAH` words, or a word-less `SURAH_HEADER`/`BASMALAH` line + `surahId`). Ayah segments on one `line_number` concatenate into a single `AYAH` line, but each **structural** row (`SURAH_HEADER`/`BASMALAH`) maps 1:1 to its own `MushafLine` — even when the source data places a header and its basmalah on the *same* `line_number` (81 of the 112 basmalah-bearing surahs do; see the 7/7 verification note below). It surfaces through `QuranRepository.getMushafPageLayout` → `GetMushafPageLayoutUseCase` → `QuranViewModel` (`QuranEvent.LoadMushafPageLayout`, `QuranReaderUiState.mushafPageLayout` + the per-page `mushafPageLayoutCache`). Page-count totals are script-aware via `MushafScript` (`MADANI` = 604, `INDOPAK_16` = 548, `INDOPAK_15` = 610, `INDOPAK_13` = 847); `ReadingProgressCalculator.TOTAL_QURAN_PAGES` is single-sourced from `MushafScript.MADANI`.
 
@@ -634,9 +660,10 @@ It also stores the **content-version flags** that drive seeding — see §7.
 
 ## 7. Content seeding & versioning
 
-**Why this exists.** The prepopulated DB (§5) is **not re-copied on app update**, and schema
-migrations only create empty tables. So content that changes in an update would never reach
-existing users. There is now exactly **one** mechanism for that: `ContentPatchSeeder`.
+**Why this exists.** `createFromAsset` copies the prepopulated DB (§5) **only when the file is
+absent**, and schema migrations only create empty tables. So without help, content that changes in
+a release would never reach anyone who already has the app. There is now exactly **one** mechanism
+for that: `ContentArtifactInstaller` replaces the database.
 
 > **The six per-feature content seeders are gone.** `DuaContentSeeder`, `HelpContentSeeder`,
 > `QaidaContentSeeder`, `HadithBackfillSeeder`, `MushafLayoutSeeder` and
@@ -653,22 +680,56 @@ existing users. There is now exactly **one** mechanism for that: `ContentPatchSe
 | Path | Reaches | Mechanism |
 |---|---|---|
 | Fresh install | new users | `createFromAsset` copies the fetched, sha256-pinned artifact (§5) |
-| Update | existing installs | `ContentPatchSeeder` applies the cumulative patch shipped beside it |
+| Update | existing installs | `ContentArtifactInstaller` replaces the database when the APK ships a different artifact, and `createFromAsset` copies the new one |
 
-**`ContentPatchSeeder`** (`data/local/content/ContentPatchSeeder.kt`) is the generalisation of
-the six. The patch is a **build output, not hand-authored**: `nz patch emit` diffs the published
-baseline artifact against the current one, and `nz patch verify` applies the result to the
-baseline and asserts every collection's content hash equals the target's — so a patch that does
-not reconstruct the artifact cannot be published. Three properties make applying it safe:
+**`ContentArtifactInstaller` is the primary path, and it is new.** For years the answer to "how
+does a content release reach someone who already has the app" was "it does not — `createFromAsset`
+only copies when the file is absent". That rule was load-bearing for exactly one reason: the
+content database also held the user's bookmarks, progress and khatams, so re-copying would have
+destroyed them. **At schemaVersion 23 that stopped being true** — all 22 user tables moved to
+`NimazUserDatabase`, which is what `provideNimazUserDatabase` means by *"Two files makes that
+structural."* The installer is the other half of that split: it compares
+`BuildConfig.CONTENT_ARTIFACT_SHA256` (read from `data.lock.json` at build time) against the
+artifact the on-disk database was created from, and deletes the file when they differ so Room
+copies the new one.
 
-1. **It cannot touch user data.** Ops are only emitted for declared content collections;
-   `USER_TABLES` re-asserts that here rather than trusting it. Since `schemaVersion 23` user
-   tables are not in this database at all (§5) — they live in `NimazUserDatabase`.
-2. **It is cumulative from the baseline**, so which version a device upgrades from does not
-   matter. Every op is an idempotent keyed write.
-3. **It is version-gated** on `PreferencesKeys.CONTENT_PATCH_VERSION`, so the common case costs
-   one DataStore read. A missing asset is not an error — a release with nothing to correct
-   ships no patch.
+It runs inside `DatabaseModule.provideNimazDatabase`, before Room opens the file — not from
+`AppInitializer`, because by the time an initializer runs Room may already hold the database open
+and deleting it underneath a live connection is a worse bug than the one being fixed.
+
+Three things make deleting it safe, and the third is the one that bites on a real device:
+
+1. The artifact carries no user tables — `artifact.content-only` fails the data build if one
+   reappears, and `DeviceStateCorpusTest` asserts each is absent.
+2. Nothing writes to this database at runtime; the `@Insert`/`DELETE FROM` methods still on its
+   DAOs are leftovers of the six retired seeders.
+3. **A device that upgraded from schemaVersion ≤22 still physically holds the old user tables in
+   this file**, kept so `LegacyUserDataImport` can copy them out. The installer refuses while any
+   of them still holds rows, and reports `DeferredForLegacyData`; `UserDataMigrator` runs on every
+   launch, so the copy completes during that session and the next launch replaces. One launch of
+   delay, against destroying the only copy of somebody's data. The check reads the *file*, not a
+   "migration done" flag, because what is in the file is what a delete would destroy.
+
+**What this retired.** `ContentPatchSeeder` existed because content had to reach existing installs
+*without* replacing the file, and it had a hard limit: `nz patch emit` cannot express a table the
+baseline lacks — it files those under `out_of_scope` and emits nothing. So a newly added table
+reached a fresh install and **nobody else**; the Qur'an's thematic layer (schemaVersion 24) was the
+first feature to hit it, and its five tables sat empty on every existing install.
+
+Replacing the file has no such limit, so the seeder was **deleted** at schemaVersion 24 along with
+its patch asset, its `content_patch_version` preference, its DI bindings and the `patch` entry in
+`data.lock.json`.
+
+**This costs no extra bandwidth, and saves a little.** The artifact is fetched at *build* time and
+registered as a generated assets source root, so every APK already carries the artifact its
+`data.lock.json` pins — the device downloads it as part of the app update either way. The patch was
+an *additional* ~2.7 MB asset on top of that, so dropping it makes the APK slightly smaller. What
+the replace costs is a one-time local copy of the artifact (~176 MB, disk to disk, no network) on
+the first launch after a content change — the same copy a fresh install has always paid.
+
+`nz patch emit` / `nz patch verify` remain in the data console and are now unused by the app. They
+are the fallback if a cheaper delivery path is ever needed again; nothing in this repository reads
+a patch.
 
 > **IndoPak font (issue #267, 3/7).** The IndoPak glyph text embeds per-ayah number ornaments as
 > Private Use Area glyphs (U+F500…U+F6FF) that only render in the matching face. That face is bundled
@@ -683,8 +744,13 @@ regenerate. Adding a Quran translation additionally needs a matching `QuranTrans
 entry with the same id — `nz import --check` fails if the two catalogues drift.
 
 **Gotchas.**
-- **Editing the artifact alone reaches fresh installs only.** Corrections that must reach
-  existing users have to ride the patch — that is the whole reason it exists.
+- **Editing the artifact alone no longer reaches fresh installs only** — that was true until
+  `ContentArtifactInstaller` shipped. A published artifact reaches everyone on their next app
+  update, provided `data.lock.json` is re-pinned to it (`nz app sync`). An artifact that is
+  published but not pinned reaches nobody: the APK still bundles and verifies the old one.
+- **The first launch after a content change copies ~176 MB** from the bundled asset. It is disk to
+  disk, not a download, but it is not free — which is why the installer compares hashes rather than
+  replacing unconditionally.
 - Content tables carry no FK from user tables, and cannot: they are in a different database.
 - Qaida `conceptTags` are stored JSON-encoded-as-string, a convention inherited from the
   prepopulated DB.

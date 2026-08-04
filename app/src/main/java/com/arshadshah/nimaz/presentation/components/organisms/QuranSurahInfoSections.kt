@@ -4,8 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -22,37 +20,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
-import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeEmphasis
-import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.molecules.SurahAudioControlBar
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
-
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-internal fun ThemesList(
-    themes: List<String>,
-    modifier: Modifier = Modifier
-) {
-    FlowRow(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        themes.forEach { theme ->
-            NimazBadge(
-                text = theme,
-                size = NimazBadgeSize.MEDIUM,
-                tone = NimazTone.NEUTRAL,
-                emphasis = NimazBadgeEmphasis.SOFT
-            )
-        }
-    }
-}
 
 @Composable
 internal fun BottomActions(
@@ -129,16 +102,6 @@ internal fun BottomActions(
                 )
             }
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun ThemesListPreview() {
-    NimazTheme {
-        ThemesList(
-            themes = listOf("Praise", "Guidance", "Mercy", "Worship", "Supplication")
-        )
     }
 }
 

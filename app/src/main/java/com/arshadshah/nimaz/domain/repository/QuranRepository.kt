@@ -116,6 +116,36 @@ interface QuranRepository {
     suspend fun getThemesForSurah(surahNumber: Int): List<AyahTheme>
     suspend fun getThemeForAyah(surahNumber: Int, ayahNumber: Int): AyahTheme?
     suspend fun getTopicTreeRoots(tree: TopicTree): List<QuranTopic>
+
+    /**
+     * One topic's children in [tree]. Empty for a leaf, which is most of the 2,512 topics.
+     *
+     * Separate from [getTopicDetail] because expanding a node needs the children and nothing
+     * else, and the detail resolves a breadcrumb, the related topics and every citation —
+     * 153 rows for "Allah" — to answer a question about one column.
+     */
+    suspend fun getTopicChildren(topicId: Int, tree: TopicTree): List<QuranTopic>
+
+    /** The ids in [tree] that have children, so a row knows whether it is a branch. */
+    suspend fun getBranchTopicIds(tree: TopicTree): Set<Int>
+
+    /**
+     * Where each of [topicIds] sits, root-first and excluding the topic itself.
+     *
+     * For a *set* of topics at once, because the caller is a search result list: resolving one
+     * breadcrumb at a time would be a query per level per row. This walks all of them upwards
+     * together, one query per level of depth, so sixty results cost about five queries rather
+     * than two hundred.
+     *
+     * [tree] is the preferred hierarchy; a topic that is not in it is placed in whichever of
+     * the three it does belong to, since search spans all three and a result with no path at
+     * all is the thing the path is there to prevent.
+     */
+    suspend fun getTopicBreadcrumbs(
+        topicIds: List<Int>,
+        tree: TopicTree
+    ): Map<Int, List<QuranTopic>>
+
     suspend fun getTopicDetail(topicId: Int, tree: TopicTree): TopicDetail?
     suspend fun getTopicsForAyah(ayahId: Int): List<QuranTopic>
     suspend fun searchTopics(query: String, limit: Int = 60): List<QuranTopic>

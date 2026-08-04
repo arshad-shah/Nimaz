@@ -574,6 +574,50 @@ class QuranRepositoryImpl @Inject constructor(
     override suspend fun getTopicTreeRoots(tree: TopicTree): List<QuranTopic> =
         quranDao.getRootTopics(tree.wire).map { it.toDomain() }
 
+    override suspend fun getTopicChildren(topicId: Int, tree: TopicTree): List<QuranTopic> =
+        quranDao.getChildTopics(tree.wire, topicId).map { it.toDomain() }
+
+    override suspend fun getBranchTopicIds(tree: TopicTree): Set<Int> =
+        quranDao.getBranchTopicIds(tree.wire).toSet()
+
+    override suspend fun getTopicBreadcrumbs(
+        topicIds: List<Int>,
+        tree: TopicTree
+    ): Map<Int, List<QuranTopic>> {
+        if (topicIds.isEmpty()) return emptyMap()
+
+        val known = quranDao.getTopics(topicIds).associate { it.topicId to it.toDomain() }
+        // Whichever hierarchy actually places this topic. Search spans all three, so a result
+        // from the ontology must not come back pathless because the thematic tab was selected.
+        fun treeFor(topic: QuranTopic): TopicTree =
+            listOf(tree, TopicTree.THEMATIC, TopicTree.ONTOLOGY, TopicTree.INDEX)
+                .firstOrNull { topic.belongsTo(it) && topic.parentIn(it) != null }
+                ?: tree
+
+        val trails = topicIds.mapNotNull { id -> known[id]?.let { id to ArrayDeque<QuranTopic>() } }
+            .toMap()
+        // Each topic climbs one level per pass and the whole frontier is fetched together, so
+        // the cost is the depth of the deepest result, not the number of results. `seen` per
+        // trail keeps a cycle in the corpus's parents from looping forever, the same guard
+        // getTopicDetail uses.
+        var frontier = topicIds.mapNotNull { id -> known[id]?.let { id to it } }
+        val seen = frontier.associate { (id, _) -> id to mutableSetOf(id) }
+        repeat(MAX_BREADCRUMB_DEPTH) {
+            val wanted = frontier.mapNotNull { (_, topic) -> topic.parentIn(treeFor(topic)) }
+                .distinct()
+            if (wanted.isEmpty()) return@repeat
+            val parents = quranDao.getTopics(wanted).associate { it.topicId to it.toDomain() }
+            frontier = frontier.mapNotNull { (rootId, topic) ->
+                val parentId = topic.parentIn(treeFor(topic)) ?: return@mapNotNull null
+                if (seen.getValue(rootId).add(parentId).not()) return@mapNotNull null
+                val parent = parents[parentId] ?: return@mapNotNull null
+                trails.getValue(rootId).addFirst(parent)
+                rootId to parent
+            }
+        }
+        return trails.mapValues { (_, trail) -> trail.toList() }
+    }
+
     /**
      * A topic, its place in [tree], and everything reachable from it in one call.
      *
@@ -832,4 +876,9 @@ class QuranRepositoryImpl @Inject constructor(
         ayahNumber = ordinal ?: 0,
         createdAt = createdAt,
     )
+
+    private companion object {
+        /** The ontology is the deepest of the three at five levels; this is headroom on that. */
+        const val MAX_BREADCRUMB_DEPTH = 8
+    }
 }
