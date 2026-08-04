@@ -97,6 +97,7 @@ import com.arshadshah.nimaz.presentation.screens.quran.QuranTopicsScreen
 import com.arshadshah.nimaz.presentation.screens.quran.SurahBackgroundScreen
 import com.arshadshah.nimaz.presentation.screens.quran.SurahInfoScreen
 import com.arshadshah.nimaz.presentation.screens.quran.SurahPassagesScreen
+import com.arshadshah.nimaz.presentation.screens.quran.SurahSubjectsScreen
 import com.arshadshah.nimaz.presentation.screens.quran.TafseerChaptersScreen
 import com.arshadshah.nimaz.presentation.screens.quran.TafseerScreen
 import com.arshadshah.nimaz.presentation.screens.search.SearchScreen
@@ -426,7 +427,11 @@ fun NavGraph(
                     onNavigateToPassages = { surah, ayah ->
                         navController.navigate(Route.SurahPassages(surah, ayah))
                     },
-                    onNavigateToSubjects = { navController.navigate(Route.QuranTopics) },
+                    onNavigateToSubjects = { surah ->
+                        navController.navigate(
+                            if (surah != null) Route.SurahSubjects(surah) else Route.QuranTopics
+                        )
+                    },
                     onNavigateToNextSurah = { nextSurah ->
                         navController.navigate(Route.QuranReader(nextSurah)) {
                             popUpTo<Route.QuranReader> { inclusive = true }
@@ -475,7 +480,9 @@ fun NavGraph(
                     onOpenPassages = {
                         navController.navigate(Route.SurahPassages(args.surahNumber))
                     },
-                    onOpenSubjects = { navController.navigate(Route.QuranTopics) }
+                    onOpenSubjects = {
+                        navController.navigate(Route.SurahSubjects(args.surahNumber))
+                    }
                 )
             }
 
@@ -505,6 +512,20 @@ fun NavGraph(
                 )
             }
 
+            taggedComposable<Route.SurahSubjects>(ScreenTags.SurahSubjects) { backStackEntry ->
+                val args = backStackEntry.toRoute<Route.SurahSubjects>()
+                SurahSubjectsScreen(
+                    surahNumber = args.surahNumber,
+                    onNavigateBack = { navController.popBackStack() },
+                    onOpenTopic = { topicId, tree ->
+                        navController.navigate(
+                            Route.QuranTopicDetail(topicId, tree.wire, args.surahNumber)
+                        )
+                    },
+                    onBrowseAllSubjects = { navController.navigate(Route.QuranTopics) }
+                )
+            }
+
             taggedComposable<Route.QuranTopics>(ScreenTags.QuranTopics) {
                 QuranTopicsScreen(
                     onNavigateBack = { navController.popBackStack() },
@@ -519,12 +540,18 @@ fun NavGraph(
                 QuranTopicDetailScreen(
                     topicId = args.topicId,
                     tree = TopicTree.fromWire(args.tree),
+                    fromSurah = args.fromSurah,
                     onNavigateBack = { navController.popBackStack() },
                     onOpenAyah = { surah, ayah ->
                         navController.navigate(Route.QuranReader(surah, ayah))
                     },
+                    // The surah travels with every lateral move — a subtopic, a related
+                    // subject, a cross-link in the prose. Dropping it one hop in would put the
+                    // reader back where this whole change started, one screen later.
                     onOpenTopic = { topicId, tree ->
-                        navController.navigate(Route.QuranTopicDetail(topicId, tree.wire))
+                        navController.navigate(
+                            Route.QuranTopicDetail(topicId, tree.wire, args.fromSurah)
+                        )
                     }
                 )
             }
@@ -541,7 +568,11 @@ fun NavGraph(
                     onNavigateToPassages = { surah, ayah ->
                         navController.navigate(Route.SurahPassages(surah, ayah))
                     },
-                    onNavigateToSubjects = { navController.navigate(Route.QuranTopics) }
+                    onNavigateToSubjects = { surah ->
+                        navController.navigate(
+                            if (surah != null) Route.SurahSubjects(surah) else Route.QuranTopics
+                        )
+                    }
                 )
             }
 
@@ -557,7 +588,11 @@ fun NavGraph(
                     onNavigateToPassages = { surah, ayah ->
                         navController.navigate(Route.SurahPassages(surah, ayah))
                     },
-                    onNavigateToSubjects = { navController.navigate(Route.QuranTopics) }
+                    onNavigateToSubjects = { surah ->
+                        navController.navigate(
+                            if (surah != null) Route.SurahSubjects(surah) else Route.QuranTopics
+                        )
+                    }
                 )
             }
 

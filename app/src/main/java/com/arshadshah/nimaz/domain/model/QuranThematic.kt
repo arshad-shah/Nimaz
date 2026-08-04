@@ -128,7 +128,35 @@ data class QuranTopic(
         TopicTree.ONTOLOGY -> isOntology
         TopicTree.INDEX -> true
     }
+
+    /**
+     * The hierarchy to open this topic *in* when nothing else says which.
+     *
+     * A subject reached from a surah — or from a search, or a cross-link — arrives without a
+     * tree, and defaulting to [TopicTree.THEMATIC] for all of them is what produces a detail
+     * screen with no breadcrumb and no subtopics for the 1,817 subjects the thematic outline
+     * does not place. Preference order is the curated outline, then the ontology, then the
+     * index, which every topic belongs to.
+     */
+    val homeTree: TopicTree
+        get() = when {
+            isThematic -> TopicTree.THEMATIC
+            isOntology -> TopicTree.ONTOLOGY
+            else -> TopicTree.INDEX
+        }
 }
+
+/**
+ * A subject, and how much of one surah is cited under it.
+ *
+ * [versesInSurah] is the local weight and [QuranTopic.ayahCount] is the global one; a row that
+ * shows both is what separates "this surah is about this" from "this subject is everywhere and
+ * touches here once".
+ */
+data class SurahTopic(
+    val topic: QuranTopic,
+    val versesInSurah: Int,
+)
 
 /**
  * Which of the three hierarchies a topic browser is walking.

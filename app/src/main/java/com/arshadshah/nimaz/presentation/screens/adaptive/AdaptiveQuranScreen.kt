@@ -168,7 +168,15 @@ fun AdaptiveQuranScreen(
                             onNavigateToPassages = { surah, ayah ->
                                 navController.navigate(Route.SurahPassages(surah, ayah))
                             },
-                            onNavigateToSubjects = { navController.navigate(Route.QuranTopics) },
+                            onNavigateToSubjects = { surah ->
+                                navController.navigate(
+                                    if (surah != null) {
+                                        Route.SurahSubjects(surah)
+                                    } else {
+                                        Route.QuranTopics
+                                    }
+                                )
+                            },
                             onNavigateToNextSurah = { nextSurah ->
                                 scope.launch {
                                     navigator.navigateTo(

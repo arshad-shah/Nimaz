@@ -72,12 +72,13 @@ fun QuranTopicDetailScreen(
     onNavigateBack: () -> Unit,
     onOpenAyah: (surah: Int, ayah: Int) -> Unit,
     onOpenTopic: (topicId: Int, tree: TopicTree) -> Unit,
+    fromSurah: Int? = null,
     viewModel: QuranTopicsViewModel = hiltViewModel(),
 ) {
     val state by viewModel.detailState.collectAsStateWithLifecycle()
 
-    LaunchedEffect(topicId, tree) {
-        viewModel.onEvent(QuranTopicsEvent.LoadDetail(topicId, tree))
+    LaunchedEffect(topicId, tree, fromSurah) {
+        viewModel.onEvent(QuranTopicsEvent.LoadDetail(topicId, tree, fromSurah))
     }
 
     val detail = state.detail
@@ -138,11 +139,27 @@ fun QuranTopicDetailScreen(
                     contentPadding = PaddingValues(bottom = 32.dp),
                 ) {
                     item(key = "count") {
-                        Row(modifier = Modifier.padding(start = 20.dp, top = 16.dp)) {
+                        Row(
+                            modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 16.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
                             NimazBadge(
                                 text = topicVerseCountLabel(detail.topic),
                                 tone = NimazTone.ACCENT,
                             )
+                            // How much of this subject is in the surah the reader came from.
+                            // Beside the total rather than instead of it: the point of the pair
+                            // is the ratio — 12 of 153 is a passing mention, 12 of 14 is not.
+                            state.surahContext?.let { context ->
+                                NimazBadge(
+                                    text = stringResource(
+                                        R.string.quran_topic_in_surah,
+                                        context.verseCount,
+                                        context.surahName,
+                                    ),
+                                    tone = NimazTone.PROMINENT,
+                                )
+                            }
                         }
                     }
 
@@ -218,6 +235,7 @@ fun QuranTopicDetailScreen(
                                 CitationGroupHeader(
                                     surahName = group.surahName,
                                     verseCount = group.citations.size,
+                                    isFromSurah = group.isFromSurah,
                                 )
                             }
                             items(
@@ -246,15 +264,24 @@ fun QuranTopicDetailScreen(
  *
  * Sticky, and opaque rather than translucent: it sits over scrolling verse text, and a header
  * you can read the list through is a header that stops answering the question it is there for.
+ *
+ * [isFromSurah] marks the one group that was lifted out of Qur'anic order — the surah the
+ * reader arrived from. Lifting it silently would be the worse half of the change: a list that
+ * looks like it is in the mushaf's sequence and is not.
  */
 @Composable
-private fun CitationGroupHeader(surahName: String, verseCount: Int) {
+private fun CitationGroupHeader(
+    surahName: String,
+    verseCount: Int,
+    isFromSurah: Boolean = false,
+) {
     Surface(color = MaterialTheme.colorScheme.background) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(start = 20.dp, end = 20.dp, top = 10.dp, bottom = 6.dp),
             verticalAlignment = Alignment.Bottom,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Text(
                 text = surahName,
@@ -263,6 +290,12 @@ private fun CitationGroupHeader(surahName: String, verseCount: Int) {
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.weight(1f),
             )
+            if (isFromSurah) {
+                NimazBadge(
+                    text = stringResource(R.string.quran_topic_surah_you_came_from),
+                    tone = NimazTone.PROMINENT,
+                )
+            }
             Text(
                 text = if (verseCount == 1) {
                     stringResource(R.string.quran_topics_verse)

@@ -28,6 +28,7 @@ import com.arshadshah.nimaz.data.local.database.entity.SurahEntity
 import com.arshadshah.nimaz.data.local.database.entity.SurahInfoEntity
 import com.arshadshah.nimaz.data.local.database.entity.SurahOverviewEntity
 import com.arshadshah.nimaz.data.local.database.entity.SurahOverviewSectionEntity
+import com.arshadshah.nimaz.data.local.database.entity.TopicWithSurahCount
 import com.arshadshah.nimaz.data.local.database.entity.TranslationEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -656,6 +657,41 @@ interface QuranDao {
             "WHERE ta.ayah_id = :ayahId ORDER BY t.ayah_count DESC, t.name ASC"
     )
     suspend fun getTopicsForAyah(ayahId: Int): List<QuranTopicEntity>
+
+    /**
+     * Every subject this surah's verses are cited under, weightiest *here* first.
+     *
+     * `verses_here` counts only the citations that fall inside this surah, and it is what the
+     * list is ordered by: a reader on Al-Fatiha wants the seven verses' own subjects, not the
+     * busiest subjects in the Qur'an that happen to touch it once. Ties fall back to the
+     * global count, so between two subjects with one verse here the broader one leads.
+     *
+     * `surah_number` is not indexed — the table's index is on `ayah_id`, for the reverse
+     * question — so this walks 30,687 rows. Once per surah, off the main thread, against a
+     * table small enough that an index of its own would cost more in artifact size than it
+     * saves here.
+     */
+    @Query(
+        "SELECT t.*, COUNT(ta.ayah_id) AS verses_here FROM quran_topics t " +
+            "JOIN quran_topic_ayahs ta ON ta.topic_id = t.topic_id " +
+            "WHERE ta.surah_number = :surahNumber " +
+            "GROUP BY t.topic_id " +
+            "ORDER BY verses_here DESC, t.ayah_count DESC, t.name ASC"
+    )
+    suspend fun getTopicsForSurah(surahNumber: Int): List<TopicWithSurahCount>
+
+    /**
+     * How many subjects this surah touches.
+     *
+     * Asked by the surah-info screen, which needs the number to label a row and not the rows
+     * themselves — loading a few hundred topics to display one integer is the query this
+     * exists to avoid.
+     */
+    @Query(
+        "SELECT COUNT(DISTINCT topic_id) FROM quran_topic_ayahs " +
+            "WHERE surah_number = :surahNumber"
+    )
+    suspend fun countTopicsForSurah(surahNumber: Int): Int
 
     @Query(
         "SELECT * FROM quran_topics WHERE name LIKE '%' || :query || '%' " +

@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.domain.model.QuranTopic
+import com.arshadshah.nimaz.domain.model.SurahTopic
 import com.arshadshah.nimaz.domain.model.TopicCitation
 import com.arshadshah.nimaz.domain.model.TopicDetail
 import com.arshadshah.nimaz.domain.model.TopicTree
@@ -130,11 +131,71 @@ data class TopicBrowseState(
     }
 }
 
-/** One surah's worth of a topic's citations, under the surah's own name. */
+/**
+ * The subjects one surah speaks about.
+ *
+ * A flat, weighted list and not a tree: the three hierarchies place a subject relative to other
+ * subjects, which is a question about the index. "What is this surah about" is a question about
+ * these verses, and its answer is the subjects they are actually cited under, most-cited first.
+ *
+ * [query] filters what is already loaded rather than re-querying. The list is at most a few
+ * hundred rows and already in memory, so a debounce and an FTS walk would buy latency and a
+ * result set that no longer means "in this surah".
+ */
+data class SurahSubjectsState(
+    val surahNumber: Int = 0,
+    val surahName: String = "",
+    val subjects: List<SurahTopic> = emptyList(),
+    val query: String = "",
+
+    /**
+     * Whether this install's artifact carries the thematic layer at all.
+     *
+     * The same distinction [TopicBrowseState.isAvailable] draws, and for the same reason: an
+     * empty list means "your content predates the subject index" far more often than it means
+     * "this surah has no subjects", and those are two different sentences.
+     */
+    val isAvailable: Boolean = true,
+
+    val isLoading: Boolean = true,
+) {
+    val visible: List<SurahTopic> by lazy {
+        val needle = query.trim()
+        if (needle.isEmpty()) subjects
+        else subjects.filter {
+            it.topic.name.contains(needle, ignoreCase = true) ||
+                it.topic.arabicName.contains(needle)
+        }
+    }
+
+    /**
+     * How many subject-to-verse citations land in this surah.
+     *
+     * Citations and not distinct verses: a verse indexed under three subjects is three of
+     * these, and de-duplicating would need the ayah ids, which is the citation list this
+     * screen deliberately does not load.
+     */
+    val citations: Int by lazy { subjects.sumOf { it.versesInSurah } }
+}
+
+/**
+ * One surah's worth of a topic's citations, under the surah's own name.
+ *
+ * [isFromSurah] marks the group the reader arrived from, which is drawn first and named as
+ * theirs — see [TopicDetailState.surahContext].
+ */
 data class CitationGroup(
     val surahNumber: Int,
     val surahName: String,
     val citations: List<TopicCitation>,
+    val isFromSurah: Boolean = false,
+)
+
+/** The surah a subject was opened from, and how much of this subject sits in it. */
+data class TopicSurahContext(
+    val surahNumber: Int,
+    val surahName: String,
+    val verseCount: Int,
 )
 
 data class TopicDetailState(
@@ -157,6 +218,14 @@ data class TopicDetailState(
      * than a gap where a sentence should be.
      */
     val previews: Map<Int, String> = emptyMap(),
+
+    /**
+     * The surah this subject was opened from, when it was opened from one.
+     *
+     * Null everywhere else, and the screen then shows exactly what it showed before: the
+     * citations in Qur'anic order with no group singled out.
+     */
+    val surahContext: TopicSurahContext? = null,
 
     val isLoading: Boolean = true,
 )
@@ -192,7 +261,23 @@ sealed interface QuranTopicsEvent {
     data class Search(val query: String) : QuranTopicsEvent
     data object ClearSearch : QuranTopicsEvent
 
-    data class LoadDetail(val topicId: Int, val tree: TopicTree) : QuranTopicsEvent
+    /** The subjects one surah speaks about. Idempotent — safe to re-send for the same surah. */
+    data class LoadSurahSubjects(val surahNumber: Int) : QuranTopicsEvent
+
+    /** Filter the loaded surah subjects. In memory; no query is run. */
+    data class FilterSurahSubjects(val query: String) : QuranTopicsEvent
+
+    data object ClearSurahSubjectsFilter : QuranTopicsEvent
+
+    /**
+     * One subject's detail. [fromSurah] is the surah the reader came from, whose citations are
+     * pinned to the top — null when they came from somewhere with no surah in hand.
+     */
+    data class LoadDetail(
+        val topicId: Int,
+        val tree: TopicTree,
+        val fromSurah: Int? = null,
+    ) : QuranTopicsEvent
 }
 
 @HiltViewModel
@@ -206,6 +291,9 @@ class QuranTopicsViewModel @Inject constructor(
 
     private val _detailState = MutableStateFlow(TopicDetailState())
     val detailState: StateFlow<TopicDetailState> = _detailState.asStateFlow()
+
+    private val _surahSubjects = MutableStateFlow(SurahSubjectsState())
+    val surahSubjects: StateFlow<SurahSubjectsState> = _surahSubjects.asStateFlow()
 
     private val queries = MutableStateFlow("")
 
@@ -260,9 +348,22 @@ class QuranTopicsViewModel @Inject constructor(
                 queries.value = ""
             }
 
+            is QuranTopicsEvent.LoadSurahSubjects -> {
+                if (_surahSubjects.value.surahNumber != event.surahNumber) {
+                    AppAnalytics.logFeatureUsed("quran_topics", "open_surah_subjects")
+                    loadSurahSubjects(event.surahNumber)
+                }
+            }
+
+            is QuranTopicsEvent.FilterSurahSubjects ->
+                _surahSubjects.update { it.copy(query = event.query) }
+
+            QuranTopicsEvent.ClearSurahSubjectsFilter ->
+                _surahSubjects.update { it.copy(query = "") }
+
             is QuranTopicsEvent.LoadDetail -> {
                 AppAnalytics.logFeatureUsed("quran_topics", "open_detail")
-                loadDetail(event.topicId, event.tree)
+                loadDetail(event.topicId, event.tree, event.fromSurah)
             }
         }
     }
@@ -450,13 +551,53 @@ class QuranTopicsViewModel @Inject constructor(
     }
 
     /**
+     * The subjects one surah is cited under, and the surah's own name for the top bar.
+     *
+     * One query for the list; the name comes from the surah list, which the home screen has
+     * already warmed. A surah whose artifact predates the thematic layer simply has no rows,
+     * which the screen says in words rather than treating as a failure.
+     */
+    private fun loadSurahSubjects(surahNumber: Int) {
+        viewModelScope.launch {
+            _surahSubjects.value = SurahSubjectsState(
+                surahNumber = surahNumber,
+                isLoading = true,
+            )
+            val subjects = quranUseCases.getTopicsForSurah(surahNumber)
+            // Only asked when there is nothing to show, because that is the only time the
+            // answer changes what is said. It is a cached count either way.
+            val available = subjects.isNotEmpty() || quranUseCases.hasThematicContent()
+            val name = quranUseCases.getSurahList().first()
+                .firstOrNull { it.number == surahNumber }
+                ?.nameEnglish
+                .orEmpty()
+            _surahSubjects.update { state ->
+                // A second surah may have been asked for while this was in flight — the pane
+                // layouts can swap the detail surah without leaving the screen.
+                if (state.surahNumber != surahNumber) state
+                else state.copy(
+                    surahName = name,
+                    subjects = subjects,
+                    isAvailable = available,
+                    isLoading = false,
+                )
+            }
+        }
+    }
+
+    /**
      * A topic, its citations grouped under the surahs they fall in, and a line of each verse.
      *
      * The previews are one query for the whole list — `getTranslationsForAyahs` takes the ids
      * as an `IN (…)` — so "Allah" costs two reads rather than 153. A translation the device
      * does not have simply yields nothing, and the rows fall back to bare references.
+     *
+     * The groups stay in the corpus's order — which is Qur'anic order — with exactly one
+     * exception: the surah the reader came from is lifted to the front. Ordering by relevance
+     * would be replacing the mushaf's sequence with one of our own; lifting the surah they are
+     * holding is answering the question they opened the subject with.
      */
-    private fun loadDetail(topicId: Int, tree: TopicTree) {
+    private fun loadDetail(topicId: Int, tree: TopicTree, fromSurah: Int? = null) {
         viewModelScope.launch {
             _detailState.update { it.copy(isLoading = true) }
             val detail = quranUseCases.getTopicDetail(topicId, tree)
@@ -475,12 +616,23 @@ class QuranTopicsViewModel @Inject constructor(
                         surahNumber = surah,
                         surahName = names[surah].orEmpty(),
                         citations = citations,
+                        isFromSurah = surah == fromSurah,
                     )
                 }
+                .sortedByDescending { it.isFromSurah }
 
             _detailState.value = TopicDetailState(
                 detail = detail,
                 citationGroups = groups,
+                // Only where the subject actually reaches that surah. A context line reading
+                // "0 verses in Al-Fatiha" is a label for something that is not there.
+                surahContext = groups.firstOrNull { it.isFromSurah }?.let { group ->
+                    TopicSurahContext(
+                        surahNumber = group.surahNumber,
+                        surahName = group.surahName,
+                        verseCount = group.citations.size,
+                    )
+                },
                 isLoading = false,
             )
 
