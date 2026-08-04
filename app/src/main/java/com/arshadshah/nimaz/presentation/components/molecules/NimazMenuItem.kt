@@ -104,6 +104,8 @@ fun NimazMenuItem(
                     tint = if (selected) titleColor else iconTint,
                     size = NimazIconSize.LARGE
                 )
+
+                Nima
                 Spacer(modifier = Modifier.width(16.dp))
             }
 
