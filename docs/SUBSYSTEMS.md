@@ -149,6 +149,7 @@ is why vibration is modelled as a *pair* of channels rather than a per-notificat
 |---|---|---|---|---|
 | `prayer_notifications` | `CHANNEL_ID_PRAYER` | HIGH | `PrayerNotificationScheduler` | [§4](#4-prayer-time--adhan-notifications) |
 | `prayer_notifications_silent` | `CHANNEL_ID_PRAYER_SILENT` | HIGH, no vibration | `PrayerNotificationScheduler` | [§4](#4-prayer-time--adhan-notifications) |
+| `prayer_notifications_muted` | `CHANNEL_ID_PRAYER_MUTED` | LOW, no sound, no vibration | `PrayerNotificationScheduler` | [§4](#4-prayer-time--adhan-notifications) |
 | `adhan_notifications` | `CHANNEL_ID_ADHAN` | HIGH | `PrayerNotificationScheduler` | [§4](#4-prayer-time--adhan-notifications) |
 | `adhan_notifications_silent` | `CHANNEL_ID_ADHAN_SILENT` | HIGH, no vibration | `PrayerNotificationScheduler` | [§4](#4-prayer-time--adhan-notifications) |
 | `daily_summary_notifications` | `CHANNEL_ID_DAILY_SUMMARY` | DEFAULT | `PrayerNotificationScheduler` | [§4](#4-prayer-time--adhan-notifications) |
@@ -326,9 +327,14 @@ and re-scheduling on midnight rollover and boot.
 
 - **Vibration is a channel property.** Android ignores `enableVibration()` changes after a
   channel exists, so the `notificationVibration` preference is honoured by *posting on the
-  matching channel* via `channelForPrayer(vibrate)` / `channelForAdhan(vibrate)`, **not** by
-  per-notification `setVibrate` (kept only as the pre-O fallback). That is why the silent
+  matching channel* via `channelForPrayer(vibrate, muted)` / `channelForAdhan(vibrate)`, **not**
+  by per-notification `setVibrate` (kept only as the pre-O fallback). That is why the silent
   siblings exist at all.
+- **Silence is a third channel, not a flag.** The `*_SILENT` channels above are *no-vibration*
+  siblings — both are `IMPORTANCE_HIGH` and still carry the channel sound. A prayer set to the
+  `SILENT` alert style therefore posts on `prayer_notifications_muted` (`IMPORTANCE_LOW`,
+  `setSound(null, null)`), because importance cannot be lowered on an existing channel either.
+  `muted` wins over `vibrate` in `channelForPrayer`.
 - **The Khatam and worship channels take their name/description from string resources** rather
   than English literals, because they are the ones a user is most likely to meet in a
   non-English locale from a cold alarm process.
@@ -359,9 +365,54 @@ sequenceDiagram
     Note over BR,Sched: self-perpetuating daily chain —<br/>an alarm armed outside this call fires once and never again
 ```
 
-**Scheduling.** `scheduleTodaysPrayerNotifications(...)` cancels everything then re-arms enabled prayers, using `setExactAndAllowWhileIdle(RTC_WAKEUP, …)` with `PendingIntent.getBroadcast` targeting `BootReceiver` (explicit intent). Request codes: prayer `1000 + ordinal`, pre-reminder `2000 + ordinal`, midnight reschedule `9999` (00:01), daily summary `8889` (23:00), Friday reminder `8890`, Khatam reminder `8891`. Pre-reminders fire at `prayerTime − preReminderMinutes` (skipped for Sunrise); the lead time is **user-editable** (the pre-adhan stepper → `SetReminderMinutes`). The **Friday (Jummah) reminder** (`scheduleFridayReminder`, gated on `fridayReminderEnabled`) is a one-shot at the upcoming Friday's Dhuhr − `fridayReminderMinutes`, re-armed on every reschedule so it always targets the next Friday.
+**Scheduling.** `scheduleTodaysPrayerNotifications(...)` cancels everything then re-arms enabled prayers, using `setExactAndAllowWhileIdle(RTC_WAKEUP, …)` with `PendingIntent.getBroadcast` targeting `BootReceiver` (explicit intent). Request codes: prayer `1000 + ordinal`, pre-reminder `2000 + ordinal`, midnight reschedule `9999` (00:01), daily summary `8889` (23:00), Friday reminder `8890`, Khatam reminder `8891`. Pre-reminders fire at `prayerTime − preReminders[type]` (skipped for Sunrise) — see **per-prayer alert style and reminder** below. The **Friday (Jummah) reminder** (`scheduleFridayReminder`, gated on `fridayReminderEnabled`) is a one-shot at the upcoming Friday's Dhuhr − `fridayReminderMinutes`, re-armed on every reschedule so it always targets the next Friday.
 
-**Firing.** `BootReceiver.onReceive` dispatches on action: boot → reschedule; `ACTION_MIDNIGHT_RESCHEDULE` → mark missed prayers + reschedule (self-perpetuating daily chain); `ACTION_PRAYER_NOTIFICATION` → post notification &/or play adhan; `ACTION_DAILY_SUMMARY` → summary; `ACTION_FRIDAY_REMINDER` → post the Jummah reminder; `ACTION_KHATAM_REMINDER` → post the Khatam nudge. If adhan should play and the file exists, it calls `AdhanPlaybackService.playAdhan(...)` and the service's foreground notification **doubles as** the prayer notification (shared id `prayerName.hashCode()`); if the file is missing it triggers a download for next time and falls back to beep. **Do Not Disturb:** when `adhanRespectDnd` is on and the system is in a DND mode, `dndBlocksAdhan` gates only the **adhan audio** (`shouldPlayAdhan`/`shouldPlayBeep`) — the visual prayer notification is still posted, and the OS silences its channel sound under DND. The Friday reminder (no adhan audio) always posts and is likewise silenced by the OS under DND.
+**Firing.** `BootReceiver.onReceive` dispatches on action: boot → reschedule; `ACTION_MIDNIGHT_RESCHEDULE` → mark missed prayers + reschedule (self-perpetuating daily chain); `ACTION_PRAYER_NOTIFICATION` → post notification &/or play adhan; `ACTION_DAILY_SUMMARY` → summary; `ACTION_FRIDAY_REMINDER` → post the Jummah reminder; `ACTION_KHATAM_REMINDER` → post the Khatam nudge. If adhan should play and the file exists, it calls `AdhanPlaybackService.playAdhan(...)` and the service's foreground notification **doubles as** the prayer notification (shared id `prayerName.hashCode()`); if the file is missing it triggers a download for next time and falls back to beep. **Do Not Disturb:** when `adhanRespectDnd` is on and the system is in a DND mode, `dndBlocksAdhan` gates only the **adhan audio** (`shouldPlayAdhan`/`shouldPlayBeep`) — the visual prayer notification is still posted, and the OS silences its channel sound under DND. The `SILENT` alert style is different in kind: it is the user's own choice, so it silences the visual notification too. The Friday reminder (no adhan audio) always posts and is likewise silenced by the OS under DND.
+
+**Per-prayer alert style and reminder.** Each of the five prayers carries its own
+`PrayerAlertStyle` (`ADHAN` | `NOTIFICATION` | `SILENT`, `domain/model/PrayerAlertStyle.kt`) and
+its own reminder. Sunrise has neither — it is the end of Fajr's window, gets a beep, and never
+gets the adhan.
+
+The two are honoured at **different times**, which is the thing to keep straight:
+
+| Setting | Stored as | Read at | Consequence |
+|---|---|---|---|
+| Alert style | `<prayer>_alert_style` (String) | **fire time**, `BootReceiver.handlePrayerNotification` | changing it needs no rescheduling |
+| Reminder on/off | `<prayer>_reminder_enabled` (Boolean) | **schedule time** | changing it re-arms alarms |
+| Reminder lead time | `<prayer>_reminder_minutes` (Int) | **schedule time**, and rides on the alarm intent as `EXTRA_REMINDER_MINUTES` | the fired notification states the right number |
+
+`scheduleTodaysPrayerNotifications` takes `preReminders: Map<PrayerType, Int>` — a prayer absent
+from the map gets no reminder, which is how "off" is expressed rather than a zero offset. The
+three callers (`AppInitializer`, `BootReceiver`, `SettingsViewModel`) build it through
+`SettingsRepository.preReminderMinutesByPrayer()` (`core/util/PrayerNotificationPrefs.kt`) so they
+cannot drift. `PrayerAlertStyle.playsAdhan(globalAdhanEnabled, isSunrise)` and `.isMuted(isSunrise)`
+state the fire-time rules once: the global adhan switch stays a **master gate** over the per-prayer
+style, so turning the adhan off in Adhan & sound silences the call everywhere without rewriting
+five styles.
+
+Wall-clock arithmetic lives in `core/util/PrayerAlarmTimes.kt`, apart from the scheduler so it can
+be tested without an `AlarmManager`. A reminder before an early Fajr crosses back over midnight;
+a time inside a spring-forward gap resolves **forward** (an alarm slightly late beats one that
+never fires) and a time in an autumn overlap takes the **earlier** instant, so a reminder cannot
+land after the prayer it precedes.
+
+**Migration from the global settings.** These replaced one global adhan pair
+(`adhan_enabled` + `<prayer>_adhan_enabled`) and one global pre-adhan reminder
+(`show_reminder_before` + `notification_reminder_minutes`). `PrayerNotificationPrefsMigration`
+plans the split as a pure function; `PreferencesDataStore.migratePrayerNotificationPreferences()`
+applies it once, guarded by `notification_prefs_migration_version`, called from `AppInitializer`
+before anything reads the new keys. A prayer that was calling the adhan keeps calling it; the
+global lead time is copied onto all five; **nothing migrates to `SILENT`**, because the old model
+had no way to ask for silence. The legacy keys are left in place — read-only — so the migration
+has something to read on an install that has not run it yet.
+
+**Diagnostics.** `core/util/NotificationDiagnostics.read(context)` reports the three device
+prerequisites that can stop an alert arriving: the notification permission, exact-alarm
+permission (always true below API 31, where it does not exist) and battery-optimisation
+exemption. `hasProblem` drives the warning banner on the notifications hub and the badge on its
+Diagnostics row; the Diagnostics screen lists each check with its real state. Nothing that
+cannot be read from the OS is listed.
 
 **Khatam daily reminder.** `scheduleKhatamReminder()` is a one-shot at the user's stored
 `khatamReminderTime` ("HH:mm", default 06:00), gated on `khatamReminderEnabled`. Like every
@@ -870,7 +921,7 @@ the same trap applies the moment one is added.)
 
 **The wire loses the type, so the type is declared.** The export flattens every value with `toString()`, so the payload is `Map<String,String>`. The import used to *guess* the type back from the shape of the value and substrings of the key name; DataStore keys are typed and reading one at the wrong type throws, so the six keys the heuristic missed — `tasbih_preset_seed_version`, `content_patch_version`, `ai_consent_timestamp`, `tasbih_selected_preset`, `current_location_id` (Long guessed as Int) and `tasbih_favorites` — did not merely import wrong, they **crashed on next read after any sync**. `tasbih_preset_seed_version` is read with `.first()` in `TasbihViewModel`'s init and `current_location_id` resolves the active location for prayer times.
 
-`data/local/datastore/PreferenceCodec.kt` now holds the declared type of all 91 named keys plus three shape patterns for the runtime-composed `worship_<type>_{enabled,offset,mode}`. Sets are joined on the ASCII unit separator rather than `Set.toString()` (`[a, b]` cannot be split back safely), with the bracket form still accepted so payloads from older builds land. An unknown key from a newer sender is kept as a string rather than dropped. `onboarding_completed` is never imported. `PreferenceCodecTest` reads the key declarations straight out of `PreferencesDataStore.kt` and fails if the registry drifts from them, so a new preference cannot be added without registering its type.
+`data/local/datastore/PreferenceCodec.kt` now holds the declared type of every named key plus shape patterns for the runtime-composed ones — `worship_<type>_{enabled,offset,mode}` and the per-prayer `<prayer>_{alert_style,reminder_enabled,reminder_minutes}` ([§4](#4-prayer-time--adhan-notifications)). Sets are joined on the ASCII unit separator rather than `Set.toString()` (`[a, b]` cannot be split back safely), with the bracket form still accepted so payloads from older builds land. An unknown key from a newer sender is kept as a string rather than dropped. `onboarding_completed` is never imported. `PreferenceCodecTest` reads the key declarations straight out of `PreferencesDataStore.kt` and fails if the registry drifts from them, so a new preference cannot be added without registering its type.
 
 **Wiring.** Provided in `core/di/DataStoreModule.kt` via `@Provides @Singleton`. (Minor: it already has an `@Inject constructor(context)`, so the explicit provider is redundant with constructor injection.)
 

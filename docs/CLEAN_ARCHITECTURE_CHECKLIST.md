@@ -182,7 +182,7 @@ design-token / illustration files (see below).
 This one is **pervasive and lower priority** — listed so it's tracked, not because it's urgent.
 
 - [x] ~~**`PreferencesDataStore` injected directly** into many ViewModels.~~ **Resolved.**
-  Extracted a `domain/repository/SettingsRepository` interface (147 members); `PreferencesDataStore`
+  Extracted a `domain/repository/SettingsRepository` interface (180 members); `PreferencesDataStore`
   now implements it, and `UserPreferences` moved to `domain/model`. All 13 ViewModels + `MainActivity`
   inject `SettingsRepository`; bound via `@Binds` in `RepositoryModule`. Data-layer consumers
   (seeders, sync, workers, `AppInitializer`, `BootReceiver`) keep the concrete class.
