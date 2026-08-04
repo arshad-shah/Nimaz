@@ -1720,4 +1720,16 @@
     <string name="fasting_log_on_subtitle">Tercatat — ketuk untuk membatalkan</string>
     <string name="fasting_log_off_subtitle">Belum dicatat</string>
     <string name="fasting_log_managed_in_sheet">Dikelola di rincian hari ini</string>
+    <string name="bookmarks_search_placeholder">Cari markah</string>
+    <string name="bookmarks_sort">Urutkan</string>
+    <string name="bookmarks_sort_newest">Terbaru dulu</string>
+    <string name="bookmarks_sort_oldest">Terlama dulu</string>
+    <string name="bookmarks_sort_type">Menurut jenis</string>
+    <string name="bookmarks_sort_alphabetical">A–Z</string>
+    <string name="bookmarks_no_matches">Tidak ada hasil</string>
+    <string name="bookmarks_no_matches_hint">Coba pencarian lain, atau hapus filternya.</string>
+    <string name="bookmarks_clear_all">Hapus semua markah</string>
+    <string name="bookmarks_clear_all_title">Hapus semua markah?</string>
+    <string name="bookmarks_clear_all_confirm">Hapus semua</string>
+    <string name="bookmarks_clear_all_body">Ini menghapus semua %1$d markah — Al-Qur\'an, Hadis, dan Doa. Tindakan ini tidak dapat dibatalkan.</string>
 </resources>

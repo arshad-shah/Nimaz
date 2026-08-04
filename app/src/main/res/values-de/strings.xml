@@ -1751,4 +1751,16 @@
     <string name="fasting_log_on_subtitle">Erfasst — zum Rückgängigmachen tippen</string>
     <string name="fasting_log_off_subtitle">Noch nicht erfasst</string>
     <string name="fasting_log_managed_in_sheet">Wird in den Tagesdetails verwaltet</string>
+    <string name="bookmarks_search_placeholder">Lesezeichen durchsuchen</string>
+    <string name="bookmarks_sort">Sortieren</string>
+    <string name="bookmarks_sort_newest">Neueste zuerst</string>
+    <string name="bookmarks_sort_oldest">Älteste zuerst</string>
+    <string name="bookmarks_sort_type">Nach Typ</string>
+    <string name="bookmarks_sort_alphabetical">A–Z</string>
+    <string name="bookmarks_no_matches">Keine Treffer</string>
+    <string name="bookmarks_no_matches_hint">Versuchen Sie eine andere Suche oder entfernen Sie den Filter.</string>
+    <string name="bookmarks_clear_all">Alle Lesezeichen löschen</string>
+    <string name="bookmarks_clear_all_title">Alle Lesezeichen löschen?</string>
+    <string name="bookmarks_clear_all_confirm">Alle löschen</string>
+    <string name="bookmarks_clear_all_body">Damit werden alle %1$d Lesezeichen entfernt — Koran, Hadith und Bittgebete. Dies kann nicht rückgängig gemacht werden.</string>
 </resources>

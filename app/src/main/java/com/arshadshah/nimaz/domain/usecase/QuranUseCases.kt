@@ -47,6 +47,10 @@ class GetAyahByIdUseCase @Inject constructor(
     private val repository: QuranRepository
 ) {
     suspend operator fun invoke(ayahId: Int): Ayah? = repository.getAyahById(ayahId)
+
+    /** Batched lookup, keyed by ayah id, for callers enriching a whole list at once. */
+    suspend fun forIds(ayahIds: List<Int>): Map<Int, Ayah> =
+        repository.getAyahsByIds(ayahIds).associateBy { it.id }
 }
 
 class GetAyahsByJuzUseCase @Inject constructor(

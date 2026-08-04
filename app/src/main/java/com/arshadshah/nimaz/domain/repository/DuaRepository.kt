@@ -17,6 +17,9 @@ interface DuaRepository {
     fun getDuasByCategory(categoryId: String): Flow<List<Dua>>
     suspend fun getDuasByCategoryOnce(categoryId: String): List<Dua>
     suspend fun getDuaById(duaId: String): Dua?
+
+    /** Batched [getDuaById]; order is not guaranteed, look results up by id. */
+    suspend fun getDuasByIds(duaIds: List<String>): List<Dua>
     fun getDuasByOccasion(occasion: DuaOccasion): Flow<List<Dua>>
 
     // Search operations

@@ -40,6 +40,10 @@ class GetCategoryByIdUseCase @Inject constructor(private val repository: DuaRepo
 
 class GetDuaByIdUseCase @Inject constructor(private val repository: DuaRepository) {
     suspend operator fun invoke(duaId: String): Dua? = repository.getDuaById(duaId)
+
+    /** Batched lookup, keyed by dua id, for callers enriching a whole list at once. */
+    suspend fun forIds(duaIds: List<String>): Map<String, Dua> =
+        repository.getDuasByIds(duaIds).associateBy { it.id }
 }
 
 class GetDuasByCategoryUseCase @Inject constructor(private val repository: DuaRepository) {

@@ -184,9 +184,13 @@ class BookmarksViewModel @Inject constructor(
                     }
                 }
                 .collect { bookmarks ->
+                // One query for the whole list. This used to be a suspend call per row
+                // inside the collector, so N bookmarks meant N round-trips on every
+                // re-emission — and clearing them all re-emitted once per delete, making
+                // the wipe O(N^2).
+                val texts = quranUseCases.getAyahById.forIds(bookmarks.map { it.ayahId })
                 val mapped = bookmarks.map { bm ->
-                    bm.toUnified()
-                        .copy(arabicText = quranUseCases.getAyahById(bm.ayahId)?.textArabic)
+                    bm.toUnified().copy(arabicText = texts[bm.ayahId]?.textArabic)
                 }
                 _bookmarksState.update { state ->
                     val unified = state.allBookmarks.filter { it.type != BookmarkType.QURAN } +
@@ -220,9 +224,9 @@ class BookmarksViewModel @Inject constructor(
                     }
                 }
                 .collect { bookmarks ->
+                val texts = hadithUseCases.getHadithById.forIds(bookmarks.map { it.hadithId })
                 val mapped = bookmarks.map { bm ->
-                    bm.toUnified()
-                        .copy(arabicText = hadithUseCases.getHadithById(bm.hadithId)?.textArabic)
+                    bm.toUnified().copy(arabicText = texts[bm.hadithId]?.textArabic)
                 }
                 _bookmarksState.update { state ->
                     val unified = state.allBookmarks.filter { it.type != BookmarkType.HADITH } +
@@ -256,8 +260,9 @@ class BookmarksViewModel @Inject constructor(
                     }
                 }
                 .collect { bookmarks ->
+                val texts = duaUseCases.getDuaById.forIds(bookmarks.map { it.duaId })
                 val mapped = bookmarks.map { bm ->
-                    bm.toUnified().copy(arabicText = duaUseCases.getDuaById(bm.duaId)?.textArabic)
+                    bm.toUnified().copy(arabicText = texts[bm.duaId]?.textArabic)
                 }
                 _bookmarksState.update { state ->
                     val unified = state.allBookmarks.filter { it.type != BookmarkType.DUA } +

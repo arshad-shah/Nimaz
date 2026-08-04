@@ -136,6 +136,11 @@ class QuranRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun getAyahsByIds(ayahIds: List<Int>): List<Ayah> {
+        if (ayahIds.isEmpty()) return emptyList()
+        return quranDao.getAyahsWithTextByIds(ayahIds).map { it.toDomain() }
+    }
+
     override suspend fun getAyahById(ayahId: Int): Ayah? {
         return quranDao.getAyahWithTextById(ayahId)?.toDomain()
     }
