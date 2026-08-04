@@ -9,11 +9,9 @@ import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.core.monitoring.catchAndReport
 import com.arshadshah.nimaz.core.util.LocaleHelper
 import com.arshadshah.nimaz.core.util.PrayerNotificationScheduler
-import com.arshadshah.nimaz.core.util.preReminderMinutesByPrayer
 import com.arshadshah.nimaz.data.audio.AdhanAudioManager
 import com.arshadshah.nimaz.data.audio.AdhanDownloadService
 import com.arshadshah.nimaz.data.audio.AdhanSound
-import com.arshadshah.nimaz.data.local.database.NimazDatabase
 import com.arshadshah.nimaz.data.local.user.NimazUserDatabase
 import com.arshadshah.nimaz.domain.model.AsrCalculation
 import com.arshadshah.nimaz.domain.model.CalculationMethod
@@ -21,7 +19,6 @@ import com.arshadshah.nimaz.domain.model.Location
 import com.arshadshah.nimaz.domain.model.MushafScript
 import com.arshadshah.nimaz.domain.model.PrayerAlertStyle
 import com.arshadshah.nimaz.domain.model.PrayerTimes
-import com.arshadshah.nimaz.domain.model.PrayerType
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.usecase.notification.RescheduleNotificationsUseCase
 import com.arshadshah.nimaz.domain.usecase.PrayerUseCases
@@ -304,8 +301,6 @@ sealed interface SettingsEvent {
     // Actions
     data object LoadSettings : SettingsEvent
     data object ResetToDefaults : SettingsEvent
-    data object ExportSettings : SettingsEvent
-    data object ImportSettings : SettingsEvent
     data object TestNotification : SettingsEvent
     data object TestAllNotifications : SettingsEvent
     data object ResetNotifications : SettingsEvent
@@ -324,7 +319,6 @@ class SettingsViewModel @Inject constructor(
     // calls in this file are the analytics catalog's job (#355), not this layer's.
     private val telemetry: Telemetry,
     val adhanAudioManager: AdhanAudioManager,
-    private val database: NimazDatabase,
     private val userDatabase: NimazUserDatabase,
 ) : ViewModel() {
 
@@ -1049,8 +1043,6 @@ class SettingsViewModel @Inject constructor(
             // Actions
             SettingsEvent.LoadSettings -> loadSettings()
             SettingsEvent.ResetToDefaults -> resetToDefaults()
-            SettingsEvent.ExportSettings -> exportSettings()
-            SettingsEvent.ImportSettings -> importSettings()
             SettingsEvent.TestNotification -> {
                 // AppAnalytics.logTestNotification exists for exactly this and was never
                 // called, so "did the user try a test notification before reporting that
@@ -1350,18 +1342,6 @@ class SettingsViewModel @Inject constructor(
             _notificationState.update { NotificationSettingsUiState() }
             _quranState.update { QuranSettingsUiState() }
             _shouldRestart.value = true
-        }
-    }
-
-    private fun exportSettings() {
-        viewModelScope.launch {
-            // Implementation would export all settings to a shareable format
-        }
-    }
-
-    private fun importSettings() {
-        viewModelScope.launch {
-            // Implementation would import settings from a file
         }
     }
 

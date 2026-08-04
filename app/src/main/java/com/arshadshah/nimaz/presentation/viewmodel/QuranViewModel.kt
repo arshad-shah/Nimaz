@@ -677,15 +677,6 @@ class QuranViewModel @Inject constructor(
         val mushafScript: MushafScript
     )
 
-    fun refreshSettings() {
-        // Settings are now observed reactively; just reload current surah if needed
-        _readerState.value.surahWithAyahs?.let { current ->
-            if (_readerState.value.readingMode == ReadingMode.SURAH) {
-                loadSurah(current.surah.number)
-            }
-        }
-    }
-
     private fun loadSurahInfo(surahNumber: Int) {
         viewModelScope.launch {
             _surahInfo.value = quranUseCases.getSurahInfo(surahNumber)

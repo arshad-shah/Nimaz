@@ -54,7 +54,6 @@ data class SearchUiState(
     val duaResults: List<DuaSearchResult> = emptyList(),
     val surahResults: List<Surah> = emptyList(),
     val recentSearches: List<String> = emptyList(),
-    val suggestions: List<String> = emptyList(),
     val error: String? = null
 )
 

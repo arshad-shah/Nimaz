@@ -327,6 +327,19 @@ rg -n -U --multiline-dotall \
   app/src/main/java --glob '*ViewModel.kt' | grep -v 'Job = viewModelScope'
 ```
 
+### AP-7.6 · A search path nobody can reach
+
+- [x] ~~**Three `search*` use cases, three repository methods, three DAO queries.**~~ **Resolved by
+  deletion.** `ProphetUseCases.searchProphets` and the `searchNames` pair on `AsmaUlHusnaUseCases`
+  / `AsmaUnNabiUseCases` were declared, constructed by Hilt on every ViewModel creation, backed by
+  a repository method and an indexed DAO query — and invoked by nothing. All three ViewModels
+  filter in memory instead.
+
+  #357 poses the choice as *delete the SQL path or use it*, and calls the middle state — built,
+  reachable by nothing, tested by nothing — the worst option. Deleted, because the corpora are 99
+  names, 99 names and 25 prophets: an index earns nothing over a `contains()` sweep at that size,
+  and the in-memory filter is the one that actually ships.
+
 ### AP-7.5 · Two `when`s over one sealed hierarchy
 
 - [x] ~~**The dual-`when` `onEvent` shape, in 20 of 31 ViewModels.**~~ **Resolved.** An analytics
