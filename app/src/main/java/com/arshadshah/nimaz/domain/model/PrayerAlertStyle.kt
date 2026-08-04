@@ -20,6 +20,23 @@ enum class PrayerAlertStyle {
     /** A notification with no sound and no vibration; it appears and waits. */
     SILENT;
 
+    /**
+     * Whether this style should play the adhan for a given prayer.
+     *
+     * [globalAdhanEnabled] is the master switch on the Adhan & sound screen: it stays a gate
+     * over the per-prayer style, so turning the adhan off silences the call everywhere
+     * without rewriting five styles. Sunrise never gets the adhan — it has a beep instead.
+     */
+    fun playsAdhan(globalAdhanEnabled: Boolean, isSunrise: Boolean = false): Boolean =
+        this == ADHAN && globalAdhanEnabled && !isSunrise
+
+    /**
+     * Whether the notification should be posted silently. Unlike Do Not Disturb — which
+     * gates only the audio — this is the user's own choice, so it applies to the visual
+     * notification too. Sunrise is exempt: it has no style of its own.
+     */
+    fun isMuted(isSunrise: Boolean = false): Boolean = this == SILENT && !isSunrise
+
     companion object {
         /**
          * The prayers that carry an alert style and a reminder, lowercase, in the order they

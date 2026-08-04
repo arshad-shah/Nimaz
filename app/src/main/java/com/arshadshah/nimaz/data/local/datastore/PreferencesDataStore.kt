@@ -606,17 +606,34 @@ class PreferencesDataStore @Inject constructor(
         }
     }
 
-    private fun alertStyleKey(prayer: String) =
-        stringPreferencesKey("${prayer.lowercase()}_alert_style")
+    // Composed per prayer rather than declared five times each. The local is named `key`
+    // so the literal reads "${key}_…", which is the shape PreferenceCodecTest scans for.
+    private fun alertStyleKey(prayer: String): Preferences.Key<String> {
+        val key = prayer.lowercase()
+        return stringPreferencesKey("${key}_alert_style")
+    }
 
-    private fun reminderEnabledKey(prayer: String) =
-        booleanPreferencesKey("${prayer.lowercase()}_reminder_enabled")
+    private fun reminderEnabledKey(prayer: String): Preferences.Key<Boolean> {
+        val key = prayer.lowercase()
+        return booleanPreferencesKey("${key}_reminder_enabled")
+    }
 
-    private fun reminderMinutesKey(prayer: String) =
-        intPreferencesKey("${prayer.lowercase()}_reminder_minutes")
+    private fun reminderMinutesKey(prayer: String): Preferences.Key<Int> {
+        val key = prayer.lowercase()
+        return intPreferencesKey("${key}_reminder_minutes")
+    }
 
-    private fun legacyAdhanKey(prayer: String) =
-        booleanPreferencesKey("${prayer.lowercase()}_adhan_enabled")
+    // The legacy per-prayer adhan flags are a closed set of five that will never grow —
+    // they exist only for the migration to read — so they resolve to the declared keys
+    // rather than composing a name.
+    private fun legacyAdhanKey(prayer: String): Preferences.Key<Boolean> =
+        when (prayer.lowercase()) {
+            "fajr" -> PreferencesKeys.FAJR_ADHAN_ENABLED
+            "dhuhr" -> PreferencesKeys.DHUHR_ADHAN_ENABLED
+            "asr" -> PreferencesKeys.ASR_ADHAN_ENABLED
+            "maghrib" -> PreferencesKeys.MAGHRIB_ADHAN_ENABLED
+            else -> PreferencesKeys.ISHA_ADHAN_ENABLED
+        }
 
     // Quran Settings
     override val quranTranslatorId: Flow<String> =

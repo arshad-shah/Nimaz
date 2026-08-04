@@ -215,14 +215,11 @@ class BootReceiver : BroadcastReceiver() {
                 val alertStyle = preferencesDataStore.prayerAlertStyle(prayerType).first()
                 val selectedAdhan = preferencesDataStore.selectedAdhanSound.first()
 
-                // The per-prayer alert style decides what this prayer does; the global adhan
-                // switch stays a master gate over it, so turning the adhan off in Sound &
-                // delivery still silences the call everywhere without rewriting five styles.
-                val wantsAdhan =
-                    alertStyle == PrayerAlertStyle.ADHAN && globalAdhanEnabled && !isSunrise
-                // Silence is the user's own choice, so it applies to the visual notification
-                // too — unlike DND, which only gates the audio.
-                val muted = alertStyle == PrayerAlertStyle.SILENT && !isSunrise
+                // The per-prayer alert style decides what this prayer does. Both rules live
+                // on PrayerAlertStyle so the scheduler, this receiver and the tests read the
+                // same one rather than three copies that can drift apart.
+                val wantsAdhan = alertStyle.playsAdhan(globalAdhanEnabled, isSunrise)
+                val muted = alertStyle.isMuted(isSunrise)
 
                 // DND gates only the audio — the visual notification still shows.
                 val shouldPlayAdhan = wantsAdhan && !dndBlocksAdhan

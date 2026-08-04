@@ -132,7 +132,8 @@ internal object PreferenceCodec {
         "ai_consent_timestamp" to PrefType.LONG,
         "ai_history_enabled" to PrefType.BOOLEAN,
         "ai_ask_hint_dismissed" to PrefType.BOOLEAN,
-        "ai_question_history" to PrefType.STRING
+        "ai_question_history" to PrefType.STRING,
+        "notification_prefs_migration_version" to PrefType.INT
     )
 
     /**
@@ -140,12 +141,17 @@ internal object PreferenceCodec {
      *
      * `worship_<type>_enabled` and its siblings are built per `WorshipReminderType`, of which
      * there are a dozen and counting; matching the shape keeps this registry from having to
-     * track that enum.
+     * track that enum. The per-prayer alert style and reminder keys are composed the same way,
+     * one set per prayer.
      */
     private val PATTERNS: List<Pair<Regex, PrefType>> = listOf(
         Regex("^worship_[a-z_]+_enabled$") to PrefType.BOOLEAN,
         Regex("^worship_[a-z_]+_offset$") to PrefType.INT,
         Regex("^worship_[a-z_]+_mode$") to PrefType.STRING,
+        // Per-prayer alert style and reminder, one set per prayer.
+        Regex("^[a-z]+_alert_style$") to PrefType.STRING,
+        Regex("^[a-z]+_reminder_enabled$") to PrefType.BOOLEAN,
+        Regex("^[a-z]+_reminder_minutes$") to PrefType.INT,
     )
 
     /** The declared type of [key], by name or by shape, or null if this build does not know it. */

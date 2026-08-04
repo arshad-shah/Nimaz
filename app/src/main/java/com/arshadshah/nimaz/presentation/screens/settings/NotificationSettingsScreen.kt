@@ -201,13 +201,7 @@ private fun prayersSubtitle(
     reminderEnabled: Boolean,
     reminderMinutes: Int,
 ): String {
-    val styleLabel = stringResource(
-        when (style) {
-            PrayerAlertStyle.ADHAN -> R.string.notif_alert_style_adhan
-            PrayerAlertStyle.NOTIFICATION -> R.string.notif_alert_style_notification
-            PrayerAlertStyle.SILENT -> R.string.notif_alert_style_silent
-        }
-    )
+    val styleLabel = stringResource(NotificationHubSubtitles.alertStyle(style))
     if (!reminderEnabled) return styleLabel
     return stringResource(
         R.string.notif_prayer_summary,
@@ -221,23 +215,15 @@ private fun prayersSubtitle(
 }
 
 @Composable
-private fun soundSubtitle(state: NotificationSettingsUiState): String {
-    val voice = AdhanSound.fromName(state.selectedAdhanSound).displayName
-    return when {
-        state.respectDnd -> stringResource(R.string.notif_hub_sound_dnd, voice)
-        state.vibrationEnabled -> stringResource(R.string.notif_hub_sound_vibration, voice)
-        else -> stringResource(R.string.notif_hub_sound_plain, voice)
-    }
-}
+private fun soundSubtitle(state: NotificationSettingsUiState): String = stringResource(
+    NotificationHubSubtitles.sound(state.respectDnd, state.vibrationEnabled),
+    AdhanSound.fromName(state.selectedAdhanSound).displayName
+)
 
 @Composable
 private fun weeklySubtitle(state: NotificationSettingsUiState): String = stringResource(
-    when {
-        state.fridayReminderEnabled && state.khatamReminderEnabled ->
-            R.string.notif_hub_weekly_both
-
-        state.fridayReminderEnabled -> R.string.notif_hub_weekly_jumuah
-        state.khatamReminderEnabled -> R.string.notif_hub_weekly_khatam
-        else -> R.string.notif_hub_weekly_none
-    }
+    NotificationHubSubtitles.weekly(
+        jumuahEnabled = state.fridayReminderEnabled,
+        khatamEnabled = state.khatamReminderEnabled
+    )
 )
