@@ -218,10 +218,12 @@ fun PrayerSettingsScreen(
                     NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
                     NimazSettingsItem(
                         icon = Icons.Default.Schedule,
-                        title = stringResource(R.string.pre_adhan_reminder),
+                        // Reminders are per prayer now; this row reports Fajr's, the same
+                        // one the notifications hub shows.
+                        title = stringResource(R.string.prayer_settings_fajr_reminder),
                         value = if (notificationSummary.reminderEnabled) {
                             pluralStringResource(
-                                R.plurals.notification_settings_pre_adhan_subtitle,
+                                R.plurals.notif_reminder_minutes_before,
                                 notificationSummary.reminderMinutes,
                                 notificationSummary.reminderMinutes
                             )

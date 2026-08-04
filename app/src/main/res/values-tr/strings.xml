@@ -643,18 +643,9 @@
     <!-- Notification Settings Screen -->
     <string name="notification_settings_enable">Bildirimleri Etkinleştir</string>
     <string name="notification_settings_enable_subtitle">Namaz vakti uyarıları alın</string>
-    <string name="notification_settings_prayer_section">NAMAZ BİLDİRİMLERİ</string>
     <string name="notification_settings_adhan_section">EZAN SESİ</string>
     <string name="notification_settings_enable_adhan">Ezan Sesini Etkinleştir</string>
     <string name="notification_settings_enable_adhan_subtitle">Namaz vakitlerinde ezan çal</string>
-    <string name="notification_settings_additional_section">EK UYARILAR</string>
-    <string name="notification_settings_pre_adhan">Ezan Öncesi Hatırlatma</string>
-    <plurals name="notification_settings_pre_adhan_subtitle">
-        <item quantity="one">%1$d dakika önce</item>
-        <item quantity="other">%1$d dakika önce</item>
-    </plurals>
-    <string name="notification_settings_sunrise">Güneş Doğuşu Uyarısı</string>
-    <string name="notification_settings_sunrise_subtitle">Sabah namazı vaktinin sonu</string>
     <string name="notification_settings_friday_reminder">Cuma Namazı Hatırlatması</string>
     <string name="notification_settings_friday_subtitle">Cuma namazından 1 saat önce</string>
     <string name="notification_settings_vibration">Titreşim</string>
@@ -675,10 +666,6 @@
     <string name="notification_settings_battery_exempted">Muaf</string>
     <string name="notification_settings_battery_explanation">Pil optimizasyonu etkinleştirildiğinde, Android pil tasarrufu için namaz bildirimlerini geciktirebilir veya atlayabilir. Devre dışı bırakmak bildirimlerin zamanında ulaşmasını sağlar.</string>
     <string name="notification_settings_disable_battery">Pil Optimizasyonunu Devre Dışı Bırak</string>
-    <string name="notification_settings_info_banner">Doğru namaz uyarıları için cihaz ayarlarınızda bildirimleri etkinleştirdiğinizden ve pil optimizasyonunu devre dışı bıraktığınızdan emin olun.</string>
-    <string name="notification_settings_prayer_notification">Namaz bildirimi</string>
-    <string name="notification_settings_sound_on">Ses açık</string>
-    <string name="notification_settings_sound_off">Ses kapalı</string>
     <string name="notification_settings_preview">Önizleme</string>
 
     <!-- Onboarding -->
@@ -1202,7 +1189,6 @@
     <string name="twilight_angle">Şafak Açısı</string>
     <string name="manual_adjustments">Manuel Düzenlemeler (Dakika)</string>
     <string name="adhan_notifications">Ezan Bildirimleri</string>
-    <string name="pre_adhan_reminder">Ezan Öncesi Hatırlatma</string>
     <string name="asr_standard_desc">Gölge, nesnenin boyuna eşit</string>
     <string name="asr_hanafi_desc">Gölge, nesnenin boyunun iki katına eşit</string>
     <string name="high_lat_middle_desc">Geceyi gün batımından gün doğumuna kadar ikiye böl</string>
@@ -1689,14 +1675,9 @@
     <string name="worship_witr_mode_title">Vitir zamanı</string>
     <string name="worship_witr_mode_after_isha">Yatsıdan sonra</string>
     <string name="worship_witr_mode_before_fajr">Fecirden önce</string>
-    <string name="notif_hub_prayers_title">Namaz bildirimleri</string>
-    <string name="notif_hub_prayers_subtitle">5 vakit namaz · ezan öncesi · gün doğumu</string>
-    <string name="notif_hub_weekly_title">Haftalık &amp; okuma</string>
-    <string name="notif_hub_weekly_subtitle">Cuma · Hatim hatırlatıcısı</string>
-    <string name="notif_hub_sound_title">Ses &amp; teslimat</string>
-    <string name="notif_hub_sound_subtitle">Ezan · müezzin · titreşim · Rahatsız Etmeyin</string>
-    <string name="notif_hub_troubleshooting_title">Sorun giderme</string>
-    <string name="notif_hub_troubleshooting_subtitle">Test · sıfırla · pil optimizasyonu</string>
+    <string name="notif_hub_prayers_title">Namazlar</string>
+    <string name="notif_hub_weekly_title">Haftalık</string>
+    <string name="notif_hub_sound_title">Ezan &amp; ses</string>
 
     <!-- Gece ibadeti merkezi (Teheccud / Vitir hedefi) -->
     <string name="night_worship_title">Gece İbadeti</string>
@@ -1720,4 +1701,54 @@
     <string name="night_worship_why_body">&quot;Rabbimiz dünya semasına iner…&quot;</string>
     <string name="widget_location">Konum</string>
     <string name="widget_tomorrow">Yarın</string>
+
+    <!-- Notifications rework: per-prayer alert style, reminders, diagnostics -->
+    <string name="notif_hub_diagnostics_title">Tanılama</string>
+    <string name="notif_hub_diagnostics_subtitle">Bildirimleri engelleyebilecek şeyleri denetle</string>
+    <string name="notif_hub_count_of">%2$d içinden %1$d</string>
+    <string name="notif_hub_count_on">%1$d açık</string>
+    <string name="notif_hub_worship_subtitle">Teheccüd, Vitir, Sahur, İftar ve daha fazlası</string>
+    <string name="notif_hub_delivery_warning">Bu cihazda bildirimler zamanında ulaşmayabilir.</string>
+    <string name="notif_hub_weekly_both">Cuma ve hatim açık</string>
+    <string name="notif_hub_weekly_jumuah">Cuma açık · hatim kapalı</string>
+    <string name="notif_hub_weekly_khatam">Hatim açık · Cuma kapalı</string>
+    <string name="notif_hub_weekly_none">İkisi de kapalı</string>
+    <string name="notif_hub_sound_dnd">%1$s · Rahatsız Etmeyin dikkate alınır</string>
+    <string name="notif_hub_sound_vibration">%1$s · titreşim açık</string>
+    <string name="notif_hub_sound_plain">%1$s</string>
+    <string name="notif_prayers_section">Günlük namazlar</string>
+    <string name="notif_alert_style">Bildirim türü</string>
+    <string name="notif_alert_style_adhan">Ezan</string>
+    <string name="notif_alert_style_adhan_subtitle">Ezan sesli olarak okunur</string>
+    <string name="notif_alert_style_notification">Yalnızca bildirim</string>
+    <string name="notif_alert_style_notification_subtitle">Olağan bildirim sesi</string>
+    <string name="notif_alert_style_silent">Sessiz</string>
+    <string name="notif_alert_style_silent_subtitle">Görünür ve bekler — ses yok, titreşim yok</string>
+    <string name="notif_reminder_before">Önceden hatırlatma</string>
+    <string name="notif_reminder_none">Hatırlatma yok</string>
+    <string name="notif_prayer_summary">%1$s · %2$s</string>
+    <string name="notif_prayer_off">Kapalı</string>
+    <string name="notif_sunrise">Gün doğumu</string>
+    <string name="notif_sunrise_subtitle">Sabah vakti kapanırken kısa bir uyarı</string>
+    <string name="notif_sound_voice">Ezan sesi</string>
+    <string name="worship_settings_ramadan_notice">Ramazan hatırlatıcıları Ramazan başlayana kadar sessiz kalır. Şimdi ayarlayın, kendiliğinden başlarlar.</string>
+    <string name="notif_diag_status_section">Cihaz denetimleri</string>
+    <string name="notif_diag_permission">Bildirim izni</string>
+    <string name="notif_diag_granted">Verildi</string>
+    <string name="notif_diag_blocked">Engellendi</string>
+    <string name="notif_diag_exact_alarms">Tam zamanlı alarmlar</string>
+    <string name="notif_diag_allowed">İzin verildi</string>
+    <string name="notif_diag_not_allowed">İzin verilmedi</string>
+    <string name="notif_diag_battery">Pil optimizasyonu</string>
+    <string name="notif_diag_unrestricted">Kısıtlamasız</string>
+    <string name="notif_diag_restricted">Kısıtlı</string>
+    <string name="notif_diag_needs_attention">İlgilenilmeli</string>
+    <string name="notif_diag_reset_confirm_title">Bildirimler sıfırlansın mı?</string>
+    <string name="notif_diag_reset_confirm_body">Zamanlanmış her bildirim iptal edilip mevcut ayarlarınızdan yeniden kurulur. Ayarlarınız değişmez.</string>
+    <string name="notif_diag_reset_confirm_action">Sıfırla</string>
+    <string name="prayer_settings_fajr_reminder">Sabah hatırlatması</string>
+    <plurals name="notif_reminder_minutes_before">
+        <item quantity="one">%1$d dk önce</item>
+        <item quantity="other">%1$d dk önce</item>
+    </plurals>
 </resources>
