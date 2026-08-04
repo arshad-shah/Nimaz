@@ -103,15 +103,6 @@ class HadithViewModel @Inject constructor(
                 )
             }
 
-            is HadithEvent.Search -> {
-                telemetry.featureUsed(AppAnalytics.Feature.HADITH, "search")
-                search(event.query)
-            }
-            is HadithEvent.SearchInBook -> {
-                telemetry.featureUsed(AppAnalytics.Feature.HADITH, "search_in_book")
-                searchInBook(event.bookId, event.query)
-            }
-            is HadithEvent.SearchChapters -> searchChapters(event.query)
             is HadithEvent.FilterByGrade -> {
                 telemetry.featureUsed(AppAnalytics.Feature.HADITH, "filter_by_grade")
                 filterByGrade(event.grade)
@@ -269,45 +260,6 @@ class HadithViewModel @Inject constructor(
                 _readerState.update { it.copy(error = e.message, isLoading = false) }
             }
         }
-    }
-
-    private fun search(query: String) {
-        if (query.isBlank()) {
-            // Without this cancel, the collector for the last non-empty query is still live
-            // and its next emission repopulates the results the user just cleared.
-            searchJob?.cancel()
-            _searchState.update { HadithSearchUiState() }
-            return
-        }
-
-        _searchState.update { it.copy(query = query, isSearching = true) }
-        searchJob?.cancel()
-        searchJob = viewModelScope.launch {
-            hadithUseCases.searchHadiths(query).collect { results ->
-                _searchState.update { it.copy(results = results, isSearching = false) }
-            }
-        }
-    }
-
-    private fun searchInBook(bookId: String, query: String) {
-        if (query.isBlank()) {
-            searchJob?.cancel()
-            _searchState.update { HadithSearchUiState() }
-            return
-        }
-
-        _searchState.update { it.copy(query = query, selectedBookId = bookId, isSearching = true) }
-        searchJob?.cancel()
-        searchJob = viewModelScope.launch {
-            hadithUseCases.searchHadithsInBook(bookId, query).collect { results ->
-                _searchState.update { it.copy(results = results, isSearching = false) }
-            }
-        }
-    }
-
-    private fun searchChapters(query: String) {
-        // Setting the input is the whole job — the list derives from it.
-        _chaptersState.update { it.copy(searchQuery = query) }
     }
 
     /**

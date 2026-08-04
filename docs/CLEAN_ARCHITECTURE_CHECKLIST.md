@@ -340,6 +340,27 @@ rg -n -U --multiline-dotall \
   app/src/main/java --glob '*ViewModel.kt' | grep -v 'Job = viewModelScope'
 ```
 
+### AP-7.11 · Events nothing dispatches
+
+- [x] ~~**29 event branches that log and that no screen reaches.**~~ **21 deleted, 8 signed off to
+  be wired.** Found by `AnalyticsReachabilityTest`, which asks a question no ordinary test can —
+  *is there a producer for this branch anywhere in the UI?* — by scanning the source tree.
+
+  The nineteen deleted as **superseded** each had a wired sibling doing the same job: the fasting
+  transitions (`StartFast`/`CompleteFast`/`BreakFast`/`MissFast`/…) against the sheet's
+  `SaveFastForDate`, the tasbih session lifecycle against `Increment` managing it automatically,
+  `PrayerTrackerEvent.UpdatePrayerStatus` against `MarkPrayerPrayed`/`MarkPrayerMissed`, the Dua
+  and Hadith in-feature searches against the global `SearchViewModel`. Two more went with them by
+  decision rather than supersession.
+
+  **The tests went with the code.** Five tests and two whole files covered these branches — and a
+  test for a branch no user can reach asserts nothing about the product. `TasbihViewModelPresetFilterTest`
+  is the clearest case: #364 had already noticed it tested "a preset filter the screen does not
+  use".
+
+  The rule: **an event is not reachable because a test dispatches it.** A test is a second
+  producer, and it is the one that keeps dead branches looking alive.
+
 ### AP-7.10 · A cache marker recording the request instead of the result
 
 - [x] ~~**`SurahThematicViewModel.load`.**~~ **Resolved.** `loadedSurah` was assigned on *entry*,

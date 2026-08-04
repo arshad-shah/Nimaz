@@ -89,11 +89,6 @@ class DuaViewModel @Inject constructor(
                 telemetry.featureUsed(DOMAIN, "open_occasion")
                 loadDuasByOccasion(event.occasion)
             }
-            is DuaEvent.Search -> {
-                telemetry.featureUsed(DOMAIN, "search")
-                search(event.query)
-            }
-            is DuaEvent.SearchCategories -> searchCategories(event.query)
             is DuaEvent.ToggleFavorite -> {
                 telemetry.featureUsed(DOMAIN, "toggle_favorite")
                 toggleFavorite(event.duaId, event.categoryId)
@@ -296,42 +291,6 @@ class DuaViewModel @Inject constructor(
                     it.copy(duas = duas, isLoading = false)
                 }
             }
-        }
-    }
-
-    private fun search(query: String) {
-        if (query.isBlank()) {
-            // The last non-empty query's collector is still live otherwise, and its next
-            // emission repopulates the results the user just cleared.
-            searchJob?.cancel()
-            _searchState.update { DuaSearchUiState() }
-            return
-        }
-
-        _searchState.update { it.copy(query = query, isSearching = true) }
-        searchJob?.cancel()
-        searchJob = launchSafely(
-            telemetry,
-            DOMAIN,
-            "search",
-            onFailure = { _searchState.update { it.copy(isSearching = false) } }
-        ) {
-            duaUseCases.searchDuas(query).collect { results ->
-                _searchState.update { it.copy(results = results, isSearching = false) }
-            }
-        }
-    }
-
-    private fun searchCategories(query: String) {
-        _collectionState.update { state ->
-            state.copy(
-                searchQuery = query,
-                filteredCategories = filterAndSortCategories(
-                    state.categories,
-                    query,
-                    state.sortAlphabetical
-                )
-            )
         }
     }
 

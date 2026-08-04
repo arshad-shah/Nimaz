@@ -6,8 +6,6 @@ sealed interface DuaEvent {
     data class LoadCategory(val categoryId: String) : DuaEvent
     data class LoadDua(val duaId: String) : DuaEvent
     data class LoadDuasByOccasion(val occasion: DuaOccasion) : DuaEvent
-    data class Search(val query: String) : DuaEvent
-    data class SearchCategories(val query: String) : DuaEvent
     data class ToggleFavorite(val duaId: String, val categoryId: String) : DuaEvent
     data class SetFontSize(val size: Float) : DuaEvent
     data class SetArabicFontSize(val size: Float) : DuaEvent

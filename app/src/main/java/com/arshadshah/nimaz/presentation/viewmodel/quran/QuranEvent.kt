@@ -38,7 +38,6 @@ sealed interface QuranEvent {
     data object ClearSearch : QuranEvent
 
     // Audio events
-    data class PlaySurahAudio(val surahNumber: Int, val surahName: String) : QuranEvent
     data class PlayAyahAudio(val ayahGlobalId: Int, val surahNumber: Int, val ayahNumber: Int) :
         QuranEvent
 

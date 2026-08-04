@@ -7,9 +7,6 @@ sealed interface HadithEvent {
     data class LoadChapter(val chapterId: String) : HadithEvent
     data class LoadHadithById(val hadithId: String) : HadithEvent
     data class LoadHadithByNumber(val bookId: String, val hadithNumber: Int) : HadithEvent
-    data class Search(val query: String) : HadithEvent
-    data class SearchInBook(val bookId: String, val query: String) : HadithEvent
-    data class SearchChapters(val query: String) : HadithEvent
     data class FilterByGrade(val grade: HadithGrade) : HadithEvent
     data class ToggleBookmark(val hadithId: String, val bookId: String, val hadithNumber: Int) :
         HadithEvent

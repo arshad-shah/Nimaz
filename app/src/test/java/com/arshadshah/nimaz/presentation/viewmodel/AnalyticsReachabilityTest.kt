@@ -35,7 +35,9 @@ class AnalyticsReachabilityTest {
      * exactly what #357 tracks: whether "start a tasbih session" or "filter hadith by grade" is
      * a feature someone meant to ship or a leftover.
      *
-     * #359 names three of these. Scanning found **29**.
+     * #359 names three of these. Scanning found **29**. Twenty-one were deleted in the layer
+     * that introduced this list; the eight below are the ones signed off to be **wired** as
+     * features, and they leave when their UI lands.
      *
      * The list only ever shrinks. A new unreachable analytics branch fails this test on the PR
      * that introduces it, which is the whole point — all three of #359's findings survived
@@ -43,32 +45,11 @@ class AnalyticsReachabilityTest {
      */
     private val accepted = setOf(
         "DuaEvent.LoadDuasByOccasion",
-        "DuaEvent.Search",
-        "DuaEvent.SearchCategories",
-        "FastingEvent.AddMakeupFast",
-        "FastingEvent.BreakFast",
-        "FastingEvent.CompleteFast",
-        "FastingEvent.LogRecommendedFast",
-        "FastingEvent.MissFast",
-        "FastingEvent.StartFast",
         "HadithEvent.FilterByGrade",
-        "HadithEvent.Search",
-        "HadithEvent.SearchChapters",
-        "HadithEvent.SearchInBook",
-        "HomeEvent.UpdateLocation",
-        "PrayerTrackerEvent.UpdatePrayerStatus",
         "QaidaReaderEvent.PreviousLesson",
         "QaidaReaderEvent.Resume",
-        "QuranEvent.PlaySurahAudio",
-        "SettingsEvent.LoadSettings",
         "SettingsEvent.SetReminderMinutes",
         "SettingsEvent.SetShowReminderBefore",
-        "TasbihEvent.CompleteSession",
-        "TasbihEvent.FilterByCategory",
-        "TasbihEvent.PauseSession",
-        "TasbihEvent.ResumeSession",
-        "TasbihEvent.StartSession",
-        "TasbihEvent.ToggleAutoLap",
         "TasbihEvent.UpdateCustomPreset",
         "ZakatEvent.ToggleBreakdown",
     )

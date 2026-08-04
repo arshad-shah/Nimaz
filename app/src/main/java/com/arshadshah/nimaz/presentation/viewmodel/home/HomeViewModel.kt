@@ -311,15 +311,6 @@ class HomeViewModel @Inject constructor(
 
     fun onEvent(event: HomeEvent) {
         when (event) {
-            is HomeEvent.UpdateLocation -> {
-                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.HOME, "update_location")
-                updateLocation(
-                    event.latitude,
-                    event.longitude,
-                    event.name
-                )
-            }
-
             HomeEvent.RefreshPrayerTimes -> calculatePrayerTimes()
             HomeEvent.RefreshPermissions -> checkPermissions()
             // The log moved inside togglePrayerStatus, past its Sunrise guard. Logged here

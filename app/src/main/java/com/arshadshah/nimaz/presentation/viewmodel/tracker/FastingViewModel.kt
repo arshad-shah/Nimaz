@@ -121,28 +121,8 @@ class FastingViewModel @Inject constructor(
     fun onEvent(event: FastingEvent) {
         when (event) {
             is FastingEvent.SelectDate -> selectDate(event.date)
-            is FastingEvent.StartFast -> {
-                telemetry.fastTracked("start", event.fastType.name)
-                startFast(event.date, event.fastType)
-            }
-            is FastingEvent.CompleteFast -> {
-                telemetry.fastTracked("complete")
-                completeFast(event.date)
-            }
-            is FastingEvent.BreakFast -> {
-                telemetry.fastTracked("break")
-                breakFast(event.date)
-            }
-            is FastingEvent.MissFast -> {
-                telemetry.fastTracked("miss")
-                missFast(event.date, event.reason)
-            }
             is FastingEvent.SetFastType -> _trackerState.update { it.copy(selectedFastType = event.fastType) }
             is FastingEvent.SelectMonth -> selectMonth(event.month, event.year)
-            is FastingEvent.AddMakeupFast -> {
-                telemetry.featureUsed(DOMAIN, "add_makeup")
-                addMakeupFast(event.makeupFast)
-            }
             is FastingEvent.CompleteMakeupFast -> {
                 telemetry.featureUsed(DOMAIN, "complete_makeup")
                 // Status/type only — never the user's exemption reason or note text.
@@ -179,13 +159,6 @@ class FastingViewModel @Inject constructor(
                 deleteFastRecord(event.date)
             }
             is FastingEvent.UpdateMakeupFast -> updateMakeupFastRecord(event.makeupFast)
-            is FastingEvent.LogRecommendedFast -> {
-                telemetry.fastTracked(
-                    "recommended",
-                    event.fastType.name
-                )
-                startFast(event.date, event.fastType)
-            }
         }
     }
 
@@ -237,53 +210,11 @@ class FastingViewModel @Inject constructor(
         }
     }
 
-    private fun completeFast(date: LocalDate) {
-        val dateEpoch = date.toUtcMidnightMillis()
-
-        viewModelScope.launch {
-            fastingUseCases.updateFastStatus(dateEpoch, FastStatus.FASTED)
-            selectDate(date)
-            loadStats()
-        }
-    }
-
     private fun breakFast(date: LocalDate) {
         val dateEpoch = date.toUtcMidnightMillis()
 
         viewModelScope.launch {
             fastingUseCases.updateFastStatus(dateEpoch, FastStatus.NOT_FASTED)
-            selectDate(date)
-            loadStats()
-        }
-    }
-
-    private fun missFast(date: LocalDate, reason: String?) {
-        val dateEpoch = date.toUtcMidnightMillis()
-
-        viewModelScope.launch {
-            val existingRecord = fastingUseCases.getFastRecordForDate(dateEpoch)
-            if (existingRecord != null) {
-                fastingUseCases.updateFastStatus(dateEpoch, FastStatus.NOT_FASTED)
-            } else {
-                val now = System.currentTimeMillis()
-                val hijri = HijriDateCalculator.toHijri(date)
-                val record = FastRecord(
-                    id = 0,
-                    date = dateEpoch,
-                    hijriDate = hijri.formattedShort(),
-                    hijriMonth = hijri.month,
-                    hijriYear = hijri.year,
-                    fastType = FastType.RAMADAN,
-                    status = FastStatus.NOT_FASTED,
-                    exemptionReason = null,
-                    suhoorTime = null,
-                    iftarTime = null,
-                    note = reason,
-                    createdAt = now,
-                    updatedAt = now
-                )
-                fastingUseCases.insertFastRecord(record)
-            }
             selectDate(date)
             loadStats()
         }
@@ -413,13 +344,6 @@ class FastingViewModel @Inject constructor(
         viewModelScope.launch {
             val totalFidya = fastingUseCases.getTotalFidyaPaid()
             _makeupState.update { it.copy(totalFidyaPaid = totalFidya, isLoading = false) }
-        }
-    }
-
-    private fun addMakeupFast(makeupFast: MakeupFast) {
-        viewModelScope.launch {
-            fastingUseCases.insertMakeupFast(makeupFast)
-            loadMakeupFasts()
         }
     }
 

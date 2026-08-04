@@ -825,7 +825,6 @@ class SettingsViewModel @Inject constructor(
             }
 
             // Actions
-            SettingsEvent.LoadSettings -> loadSettings()
             SettingsEvent.ResetToDefaults -> resetToDefaults()
             SettingsEvent.TestNotification -> {
                 // AppAnalytics.logTestNotification exists for exactly this and was never

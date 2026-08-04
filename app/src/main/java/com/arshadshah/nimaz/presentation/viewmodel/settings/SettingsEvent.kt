@@ -100,7 +100,6 @@ sealed interface SettingsEvent {
     data class SetAutoDetectLocation(val enabled: Boolean) : SettingsEvent
 
     // Actions
-    data object LoadSettings : SettingsEvent
     data object ResetToDefaults : SettingsEvent
     data object TestNotification : SettingsEvent
     data object TestAllNotifications : SettingsEvent
