@@ -1010,13 +1010,27 @@
     <string name="surah_info_background_subtitle">%1$d bölüm</string>
     <string name="surah_info_passages_row_subtitle">%2$d ayet boyunca %1$d bölüm</string>
     <string name="surah_info_subjects">Bu suredeki konular</string>
-    <string name="surah_info_subjects_subtitle">Kur\'an\'ın söz ettiklerine göz atın</string>
+    <string name="surah_info_subjects_subtitle">%1$d konu, en çok atıf alan önce</string>
     <string name="surah_info_section_other">Diğer</string>
     <string name="surah_passages_filter_hint">Bölümleri filtrele</string>
     <string name="surah_passages_reading">Okunuyor</string>
     <string name="surah_passages_none_title">Eşleşme yok</string>
     <string name="surah_passages_none">Hiçbir bölüm eşleşmiyor. Tümünü (%1$d) görmek için filtreyi temizleyin.</string>
     <string name="cd_passage_open">%1$s okuyucuda açılsın</string>
+
+    <!-- Bir surenin konuları -->
+    <string name="surah_subjects_title">Konular</string>
+    <string name="surah_subjects_subtitle">Bu suredeki konular</string>
+    <string name="surah_subjects_filter_hint">Bu konuları süz…</string>
+    <string name="surah_subjects_count">%1$d konu</string>
+    <string name="surah_subjects_citations">%1$d atıf</string>
+    <string name="surah_subjects_only_here">Bu konudaki her ayet bu surede</string>
+    <string name="surah_subjects_elsewhere">Kur\'an\'ın başka yerlerinde %1$d ayet daha</string>
+    <string name="surah_subjects_no_match">Burada “%1$s” ile eşleşen konu yok. Tümünü (%2$d) görmek için filtreyi temizleyin.</string>
+    <string name="surah_subjects_none_title">Burada dizinlenmiş bir şey yok</string>
+    <string name="surah_subjects_none">Konu dizini bu surenin hiçbir ayetine atıfta bulunmuyor. Dizinin geri kalanı yerinde.</string>
+    <string name="surah_subjects_browse_all">Tüm konular</string>
+    <string name="surah_subjects_browse_all_subtitle">Tüm dizine, 114 surenin hepsine göz atın</string>
 
     <!-- Kur\'an konuları -->
     <string name="quran_home_browse_subjects">Kur\'an\'daki konular</string>
@@ -1038,6 +1052,8 @@
     <string name="quran_topic_related">İlgili konular</string>
     <string name="quran_topic_not_found">Bu konu dizinde yok.</string>
     <string name="quran_topic_verses_across">%2$d surede %1$d ayet</string>
+    <string name="quran_topic_surah_you_came_from">Bu sure</string>
+    <string name="quran_topic_in_surah">%2$s içinde %1$d</string>
     <string name="quran_topics_crumb_home">Tüm konular</string>
     <string name="quran_topics_scope_search">Üç dizinin tümünde aranıyor</string>
     <string name="quran_topics_scope_thematic">Derlenmiş bir taslak — akide, ibadet, kıssalar</string>
