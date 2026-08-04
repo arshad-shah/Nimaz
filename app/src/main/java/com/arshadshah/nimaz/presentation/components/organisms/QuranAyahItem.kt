@@ -382,10 +382,15 @@ internal fun AyahItem(
                 }
             }
 
-            Text(
+            // Where the verse sits in the book. A badge like the ones beside it, so the row
+            // reads as one system rather than badges plus a stray line of grey text — but
+            // MUTED, because this is a coordinate you look up, not a division you observe.
+            NimazBadge(
                 text = stringResource(R.string.juz_page_dot_format, ayah.juz, ayah.page),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                tone = NimazTone.MUTED,
+                emphasis = NimazBadgeEmphasis.SOFT,
+                shape = NimazBadgeShape.ROUNDED,
+                size = NimazBadgeSize.SMALL
             )
         }
 
