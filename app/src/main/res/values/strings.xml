@@ -502,15 +502,61 @@
     <string name="worship_witr_mode_after_isha">After Isha</string>
     <string name="worship_witr_mode_before_fajr">Before Fajr</string>
 
-    <!-- Notification settings hub (#301) -->
-    <string name="notif_hub_prayers_title">Prayer notifications</string>
-    <string name="notif_hub_prayers_subtitle">5 daily prayers · pre-adhan · sunrise</string>
-    <string name="notif_hub_weekly_title">Weekly &amp; reading</string>
-    <string name="notif_hub_weekly_subtitle">Jumu\'ah · Khatam reminder</string>
-    <string name="notif_hub_sound_title">Sound &amp; delivery</string>
-    <string name="notif_hub_sound_subtitle">Adhan · muezzin · vibration · Do Not Disturb</string>
-    <string name="notif_hub_troubleshooting_title">Troubleshooting</string>
-    <string name="notif_hub_troubleshooting_subtitle">Test · reset · battery optimization</string>
+    <!-- Notification settings hub (#301). Each row's subtitle reports the live setting
+         rather than describing what the screen contains. -->
+    <string name="notif_hub_prayers_title">Prayers</string>
+    <string name="notif_hub_weekly_title">Weekly</string>
+    <string name="notif_hub_sound_title">Adhan &amp; sound</string>
+    <string name="notif_hub_diagnostics_title">Diagnostics</string>
+    <string name="notif_hub_diagnostics_subtitle">Check what could stop alerts arriving</string>
+    <string name="notif_hub_count_of">%1$d of %2$d</string>
+    <string name="notif_hub_count_on">%1$d on</string>
+    <string name="notif_hub_worship_subtitle">Tahajjud, Witr, Suhoor, Iftar and more</string>
+    <string name="notif_hub_delivery_warning">Alerts may not arrive on time on this device.</string>
+    <string name="notif_hub_weekly_both">Jumu\'ah and khatam on</string>
+    <string name="notif_hub_weekly_jumuah">Jumu\'ah on · khatam off</string>
+    <string name="notif_hub_weekly_khatam">Khatam on · Jumu\'ah off</string>
+    <string name="notif_hub_weekly_none">Both off</string>
+    <string name="notif_hub_sound_dnd">%1$s · Do Not Disturb honoured</string>
+    <string name="notif_hub_sound_vibration">%1$s · vibration on</string>
+    <string name="notif_hub_sound_plain">%1$s</string>
+
+    <!-- Per-prayer alert style and reminder -->
+    <string name="notif_prayers_section">Daily prayers</string>
+    <string name="notif_alert_style">Alert style</string>
+    <string name="notif_alert_style_adhan">Adhan</string>
+    <string name="notif_alert_style_adhan_subtitle">The call to prayer plays aloud</string>
+    <string name="notif_alert_style_notification">Notification only</string>
+    <string name="notif_alert_style_notification_subtitle">The standard notification tone</string>
+    <string name="notif_alert_style_silent">Silent</string>
+    <string name="notif_alert_style_silent_subtitle">It appears and waits — no sound, no vibration</string>
+    <string name="notif_reminder_before">Reminder before</string>
+    <string name="notif_reminder_none">No reminder</string>
+    <plurals name="notif_reminder_minutes_before">
+        <item quantity="one">%1$d min before</item>
+        <item quantity="other">%1$d min before</item>
+    </plurals>
+    <!-- Header summary: the alert style, then how far ahead the reminder lands. -->
+    <string name="notif_prayer_summary">%1$s · %2$s</string>
+    <string name="notif_prayer_off">Off</string>
+    <string name="notif_sunrise">Sunrise</string>
+    <string name="notif_sunrise_subtitle">A beep when Fajr\'s window closes</string>
+
+    <!-- Diagnostics: every row states something read from the device. -->
+    <string name="notif_diag_status_section">Device checks</string>
+    <string name="notif_diag_permission">Notification permission</string>
+    <string name="notif_diag_granted">Granted</string>
+    <string name="notif_diag_blocked">Blocked</string>
+    <string name="notif_diag_exact_alarms">Exact alarms</string>
+    <string name="notif_diag_allowed">Allowed</string>
+    <string name="notif_diag_not_allowed">Not allowed</string>
+    <string name="notif_diag_battery">Battery optimisation</string>
+    <string name="notif_diag_unrestricted">Unrestricted</string>
+    <string name="notif_diag_restricted">Restricted</string>
+    <string name="notif_diag_needs_attention">Needs attention</string>
+    <string name="notif_diag_reset_confirm_title">Reset notifications?</string>
+    <string name="notif_diag_reset_confirm_body">Every scheduled alert is cancelled and rebuilt from your current settings. Your settings themselves are not changed.</string>
+    <string name="notif_diag_reset_confirm_action">Reset</string>
 
     <!-- Home "Next Worship" card labels -->
     <string name="worship_card_begins">Begins</string>

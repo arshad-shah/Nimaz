@@ -13,6 +13,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.arshadshah.nimaz.domain.model.MushafScript
+import com.arshadshah.nimaz.domain.model.PrayerAlertStyle
 import com.arshadshah.nimaz.domain.model.UserPreferences
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import kotlinx.coroutines.flow.Flow
@@ -132,6 +133,11 @@ class PreferencesDataStore @Inject constructor(
 
         // Note: Sunrise always uses beep only, no full adhan option
         val ADHAN_RESPECT_DND = booleanPreferencesKey("adhan_respect_dnd")
+
+        // Which split of the per-prayer alert style / reminder preferences this install has
+        // been through. See PrayerNotificationPrefsMigration.
+        val NOTIFICATION_PREFS_MIGRATION_VERSION =
+            intPreferencesKey("notification_prefs_migration_version")
 
         // Quran Settings
         val QURAN_TRANSLATOR_ID = stringPreferencesKey("quran_translator_id")
@@ -534,6 +540,83 @@ class PreferencesDataStore @Inject constructor(
 
     override suspend fun setWorshipReminderMode(key: String, mode: String) =
         put(stringPreferencesKey("worship_${key}_mode"), mode)
+
+    // Per-prayer alert style and reminder. Dynamic keys keyed by prayer name, in the same
+    // shape as the worship reminders above. These replace the global adhan on/off pair and
+    // the single pre-adhan reminder; existing installs are carried across by
+    // migratePrayerNotificationPreferences(). See PrayerNotificationPrefsMigration.
+    override fun prayerAlertStyle(prayer: String): Flow<PrayerAlertStyle> =
+        dataStore.data.map { prefs ->
+            PrayerAlertStyle.fromStorage(prefs[alertStyleKey(prayer)])
+        }
+
+    override suspend fun setPrayerAlertStyle(prayer: String, style: PrayerAlertStyle) =
+        put(alertStyleKey(prayer), style.name)
+
+    override fun prayerReminderEnabled(prayer: String): Flow<Boolean> =
+        preference(reminderEnabledKey(prayer), false)
+
+    override suspend fun setPrayerReminderEnabled(prayer: String, enabled: Boolean) =
+        put(reminderEnabledKey(prayer), enabled)
+
+    override fun prayerReminderMinutes(prayer: String): Flow<Int> =
+        preference(reminderMinutesKey(prayer), DEFAULT_REMINDER_MINUTES)
+
+    override suspend fun setPrayerReminderMinutes(prayer: String, minutes: Int) =
+        put(reminderMinutesKey(prayer), minutes)
+
+    /**
+     * Splits the old global adhan and pre-adhan preferences into the per-prayer ones, once.
+     *
+     * Guarded by a stored version so it cannot run twice and cannot reset a choice the user
+     * has since made. Called from `AppInitializer` before anything reads the new keys.
+     */
+    override suspend fun migratePrayerNotificationPreferences() {
+        val alreadyMigrated = dataStore.data
+            .map { it[PreferencesKeys.NOTIFICATION_PREFS_MIGRATION_VERSION] ?: 0 }
+            .first()
+        if (alreadyMigrated >= PrayerNotificationPrefsMigration.VERSION) return
+
+        val legacy = dataStore.data.map { prefs ->
+            LegacyPrayerNotificationPrefs(
+                adhanEnabled = prefs[PreferencesKeys.ADHAN_ENABLED] ?: false,
+                perPrayerAdhanEnabled = ALERT_STYLE_PRAYERS.associateWith { prayer ->
+                    prefs[legacyAdhanKey(prayer)] ?: true
+                },
+                showReminderBefore = prefs[PreferencesKeys.SHOW_REMINDER_BEFORE] ?: true,
+                reminderMinutes = prefs[PreferencesKeys.NOTIFICATION_REMINDER_MINUTES]
+                    ?: DEFAULT_REMINDER_MINUTES,
+            )
+        }.first()
+
+        val migrated = PrayerNotificationPrefsMigration.plan(legacy)
+
+        dataStore.edit { prefs ->
+            migrated.alertStyle.forEach { (prayer, style) ->
+                prefs[alertStyleKey(prayer)] = style.name
+            }
+            migrated.reminderEnabled.forEach { (prayer, enabled) ->
+                prefs[reminderEnabledKey(prayer)] = enabled
+            }
+            migrated.reminderMinutes.forEach { (prayer, minutes) ->
+                prefs[reminderMinutesKey(prayer)] = minutes
+            }
+            prefs[PreferencesKeys.NOTIFICATION_PREFS_MIGRATION_VERSION] =
+                PrayerNotificationPrefsMigration.VERSION
+        }
+    }
+
+    private fun alertStyleKey(prayer: String) =
+        stringPreferencesKey("${prayer.lowercase()}_alert_style")
+
+    private fun reminderEnabledKey(prayer: String) =
+        booleanPreferencesKey("${prayer.lowercase()}_reminder_enabled")
+
+    private fun reminderMinutesKey(prayer: String) =
+        intPreferencesKey("${prayer.lowercase()}_reminder_minutes")
+
+    private fun legacyAdhanKey(prayer: String) =
+        booleanPreferencesKey("${prayer.lowercase()}_adhan_enabled")
 
     // Quran Settings
     override val quranTranslatorId: Flow<String> =

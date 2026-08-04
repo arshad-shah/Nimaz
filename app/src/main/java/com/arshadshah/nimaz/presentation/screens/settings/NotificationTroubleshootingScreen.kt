@@ -1,52 +1,61 @@
 package com.arshadshah.nimaz.presentation.screens.settings
 
 import android.content.Intent
-import android.os.PowerManager
 import android.provider.Settings
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.BatteryAlert
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.util.NotificationDiagnostics
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
-import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
-import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
-import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
+import com.arshadshah.nimaz.presentation.components.molecules.NimazDialog
+import com.arshadshah.nimaz.presentation.components.molecules.NimazDialogCancelButton
+import com.arshadshah.nimaz.presentation.components.molecules.NimazDialogConfirmButton
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
+import com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsItem
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
-import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.viewmodel.SettingsEvent
 import com.arshadshah.nimaz.presentation.viewmodel.SettingsViewModel
 
 /**
- * Troubleshooting subscreen (#301): send test notifications, reset, and the battery-optimization
- * exemption prompt (read live from the OS, same as before).
+ * Diagnostics: what the OS is currently allowing, and the three actions that fix it.
+ *
+ * Every row states a value read from the device — a row that always said "OK" would send
+ * someone looking for the fault somewhere else. Anything the app cannot actually check is
+ * not listed at all.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -56,12 +65,19 @@ fun NotificationTroubleshootingScreen(
 ) {
     val context = LocalContext.current
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+    var confirmingReset by remember { mutableStateOf(false) }
+
+    // Re-read whenever the screen comes back: these are the settings the user leaves to
+    // change, so a stale value here is the one thing that would make the screen useless.
+    val lifecycleState by LocalLifecycleOwner.current.lifecycle.currentStateFlow
+        .collectAsStateWithLifecycle()
+    val diagnostics = remember(lifecycleState) { NotificationDiagnostics.read(context) }
 
     NimazScreenScaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             NimazBackTopAppBar(
-                title = stringResource(R.string.notif_hub_troubleshooting_title),
+                title = stringResource(R.string.notif_hub_diagnostics_title),
                 onBackClick = onNavigateBack,
                 scrollBehavior = scrollBehavior
             )
@@ -76,11 +92,53 @@ fun NotificationTroubleshootingScreen(
         ) {
             item { Spacer(Modifier.height(4.dp)) }
 
+            item { NimazSectionHeader(title = stringResource(R.string.notif_diag_status_section)) }
+            item {
+                NimazMenuGroup {
+                    DiagnosticRow(
+                        title = stringResource(R.string.notif_diag_permission),
+                        ok = diagnostics.notificationsPermitted,
+                        okLabel = stringResource(R.string.notif_diag_granted),
+                        problemLabel = stringResource(R.string.notif_diag_blocked),
+                        icon = Icons.Default.NotificationsActive,
+                        onFix = {
+                            context.startActivity(
+                                Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+                                    .putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                            )
+                        }
+                    )
+                    DiagnosticRow(
+                        title = stringResource(R.string.notif_diag_exact_alarms),
+                        ok = diagnostics.exactAlarmsAllowed,
+                        okLabel = stringResource(R.string.notif_diag_allowed),
+                        problemLabel = stringResource(R.string.notif_diag_not_allowed),
+                        icon = Icons.Default.Schedule,
+                        onFix = {
+                            context.startActivity(
+                                Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
+                            )
+                        }
+                    )
+                    DiagnosticRow(
+                        title = stringResource(R.string.notif_diag_battery),
+                        ok = diagnostics.batteryUnrestricted,
+                        okLabel = stringResource(R.string.notif_diag_unrestricted),
+                        problemLabel = stringResource(R.string.notif_diag_restricted),
+                        icon = Icons.Default.BatteryAlert,
+                        onFix = {
+                            context.startActivity(
+                                Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
+                            )
+                        }
+                    )
+                }
+            }
+
             item { NimazSectionHeader(title = stringResource(R.string.notification_settings_troubleshooting_section)) }
             item {
                 val testSentMsg = stringResource(R.string.notification_settings_test_sent)
                 val testAllSentMsg = stringResource(R.string.notification_settings_test_all_sent)
-                val resetSuccessMsg = stringResource(R.string.notification_settings_reset_success)
                 NimazMenuGroup {
                     Column(
                         modifier = Modifier.padding(16.dp),
@@ -108,10 +166,8 @@ fun NotificationTroubleshootingScreen(
                         )
                         NimazButton(
                             text = stringResource(R.string.notification_settings_reset),
-                            onClick = {
-                                viewModel.onEvent(SettingsEvent.ResetNotifications)
-                                Toast.makeText(context, resetSuccessMsg, Toast.LENGTH_SHORT).show()
-                            },
+                            // Reset cancels and rebuilds every alarm, so it asks first.
+                            onClick = { confirmingReset = true },
                             variant = NimazButtonVariant.OUTLINED,
                             leadingIcon = Icons.Default.Refresh,
                             fullWidth = true
@@ -120,61 +176,67 @@ fun NotificationTroubleshootingScreen(
                 }
             }
 
-            item { NimazSectionHeader(title = stringResource(R.string.notification_settings_battery_section)) }
             item {
-                val powerManager = context.getSystemService(android.content.Context.POWER_SERVICE) as PowerManager
-                val isExempted = powerManager.isIgnoringBatteryOptimizations(context.packageName)
-                NimazMenuGroup {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = stringResource(R.string.notification_settings_battery_title),
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    fontWeight = FontWeight.Medium,
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                                Spacer(modifier = Modifier.height(4.dp))
-                                Text(
-                                    text = if (isExempted) stringResource(R.string.notification_settings_battery_disabled)
-                                    else stringResource(R.string.notification_settings_battery_enabled),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = if (isExempted) MaterialTheme.colorScheme.primary else NimazColors.Warning
-                                )
-                            }
-                            if (isExempted) {
-                                NimazIcon(
-                                    imageVector = Icons.Default.Check,
-                                    contentDescription = stringResource(R.string.notification_settings_battery_exempted),
-                                    variant = NimazIconVariant.PRIMARY,
-                                    size = NimazIconSize.LARGE
-                                )
-                            }
-                        }
-                        if (!isExempted) {
-                            Spacer(modifier = Modifier.height(12.dp))
-                            Text(
-                                text = stringResource(R.string.notification_settings_battery_explanation),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            Spacer(modifier = Modifier.height(12.dp))
-                            NimazButton(
-                                text = stringResource(R.string.notification_settings_disable_battery),
-                                onClick = {
-                                    context.startActivity(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS))
-                                },
-                                variant = NimazButtonVariant.FILLED,
-                                fullWidth = true
-                            )
-                        }
-                    }
-                }
+                Text(
+                    text = stringResource(R.string.notification_settings_battery_explanation),
+                    style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
+                    color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
+
             item { Spacer(Modifier.height(16.dp)) }
         }
     }
+
+    if (confirmingReset) {
+        val resetSuccessMsg = stringResource(R.string.notification_settings_reset_success)
+        NimazDialog(
+            title = stringResource(R.string.notif_diag_reset_confirm_title),
+            subtitle = stringResource(R.string.notif_diag_reset_confirm_body),
+            onDismiss = { confirmingReset = false },
+            titleIcon = Icons.Default.Refresh,
+            actions = {
+                NimazDialogCancelButton(
+                    text = stringResource(R.string.cancel),
+                    onClick = { confirmingReset = false }
+                )
+                NimazDialogConfirmButton(
+                    text = stringResource(R.string.notif_diag_reset_confirm_action),
+                    onClick = {
+                        confirmingReset = false
+                        viewModel.onEvent(SettingsEvent.ResetNotifications)
+                        Toast.makeText(context, resetSuccessMsg, Toast.LENGTH_SHORT).show()
+                    }
+                )
+            }
+        )
+    }
+}
+
+/**
+ * One checked prerequisite. The badge carries the state so the row can be read at a glance,
+ * and tapping opens the system screen that changes it — but only when there is something
+ * to fix, because sending someone to a settings page that is already correct is noise.
+ */
+@Composable
+private fun DiagnosticRow(
+    title: String,
+    ok: Boolean,
+    okLabel: String,
+    problemLabel: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    onFix: () -> Unit,
+) {
+    NimazSettingsItem(
+        title = title,
+        icon = icon,
+        onClick = if (ok) null else onFix,
+        showArrow = !ok,
+        trailingContent = {
+            NimazBadge(
+                text = if (ok) okLabel else problemLabel,
+                tone = if (ok) NimazTone.SUCCESS else NimazTone.WARNING
+            )
+        }
+    )
 }

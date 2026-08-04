@@ -5,6 +5,8 @@ import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.core.monitoring.PerfMonitor
 import com.arshadshah.nimaz.core.util.LocaleHelper
+import com.arshadshah.nimaz.core.util.enabledPrayerTypes
+import com.arshadshah.nimaz.core.util.preReminderMinutesByPrayer
 import com.arshadshah.nimaz.core.util.PrayerNotificationScheduler
 import com.arshadshah.nimaz.data.announcement.AnnouncementBootstrap
 import com.arshadshah.nimaz.data.audio.AdhanAudioManager
@@ -12,7 +14,6 @@ import com.arshadshah.nimaz.data.audio.AdhanDownloadService
 import com.arshadshah.nimaz.data.audio.AdhanSound
 import com.arshadshah.nimaz.data.local.user.UserDataMigrator
 import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
-import com.arshadshah.nimaz.domain.model.PrayerType
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -113,6 +114,10 @@ class AppInitializer @Inject constructor(
 
     private suspend fun scheduleInitialNotifications() {
         try {
+            // Carry an existing install onto the per-prayer alert style and reminder before
+            // anything reads them. Runs at most once; a no-op on every start after that.
+            preferencesDataStore.migratePrayerNotificationPreferences()
+
             val prefs = preferencesDataStore.userPreferences.first()
             AppAnalytics.setUserProperty(
                 AppAnalytics.UserProperty.NOTIFICATIONS_ENABLED,
@@ -123,25 +128,12 @@ class AppInitializer @Inject constructor(
                 (prefs.latitude != 0.0 || prefs.longitude != 0.0).toString(),
             )
             if (prefs.latitude != 0.0 && prefs.longitude != 0.0) {
-                val enabledPrayers = buildSet {
-                    if (preferencesDataStore.fajrNotificationEnabled.first()) add(PrayerType.FAJR)
-                    if (preferencesDataStore.sunriseNotificationEnabled.first()) add(PrayerType.SUNRISE)
-                    if (preferencesDataStore.dhuhrNotificationEnabled.first()) add(PrayerType.DHUHR)
-                    if (preferencesDataStore.asrNotificationEnabled.first()) add(PrayerType.ASR)
-                    if (preferencesDataStore.maghribNotificationEnabled.first()) add(PrayerType.MAGHRIB)
-                    if (preferencesDataStore.ishaNotificationEnabled.first()) add(PrayerType.ISHA)
-                }
-
-                val preReminderEnabled = preferencesDataStore.showReminderBefore.first()
-                val preReminderMinutes = preferencesDataStore.notificationReminderMinutes.first()
-
                 prayerNotificationScheduler.scheduleTodaysPrayerNotifications(
                     latitude = prefs.latitude,
                     longitude = prefs.longitude,
                     notificationsEnabled = prefs.prayerNotificationsEnabled,
-                    enabledPrayers = enabledPrayers,
-                    preReminderEnabled = preReminderEnabled,
-                    preReminderMinutes = preReminderMinutes
+                    enabledPrayers = preferencesDataStore.enabledPrayerTypes(),
+                    preReminders = preferencesDataStore.preReminderMinutesByPrayer()
                 )
             }
         } catch (e: Exception) {

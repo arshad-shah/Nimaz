@@ -7,6 +7,7 @@ import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.core.util.LocaleHelper
 import com.arshadshah.nimaz.core.util.PrayerNotificationScheduler
+import com.arshadshah.nimaz.core.util.preReminderMinutesByPrayer
 import com.arshadshah.nimaz.data.audio.AdhanAudioManager
 import com.arshadshah.nimaz.data.audio.AdhanDownloadService
 import com.arshadshah.nimaz.data.audio.AdhanSound
@@ -16,6 +17,8 @@ import com.arshadshah.nimaz.domain.model.AsrCalculation
 import com.arshadshah.nimaz.domain.model.CalculationMethod
 import com.arshadshah.nimaz.domain.model.Location
 import com.arshadshah.nimaz.domain.model.MushafScript
+import com.arshadshah.nimaz.domain.model.PrayerAlertStyle
+import com.arshadshah.nimaz.domain.model.PrayerTimes
 import com.arshadshah.nimaz.domain.model.PrayerType
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.usecase.PrayerUseCases
@@ -33,11 +36,16 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 import javax.inject.Inject
+
+/** The prayer whose settings stand in for the set on summary rows. */
+private const val FAJR = "fajr"
 
 // Enums for settings options
 enum class AppTheme {
@@ -107,13 +115,11 @@ data class NotificationSettingsUiState(
     val maghribNotification: Boolean = true,
     val ishaNotification: Boolean = true,
     val adhanEnabled: Boolean = false,
-    // Per-prayer adhan settings
-    val fajrAdhanEnabled: Boolean = true,
-    val dhuhrAdhanEnabled: Boolean = true,
-    val asrAdhanEnabled: Boolean = true,
-    val maghribAdhanEnabled: Boolean = true,
-    val ishaAdhanEnabled: Boolean = true,
-    // Sunrise always uses beep only (no toggle needed)
+    // Per-prayer alert style and reminder, keyed by prayer name ("fajr" … "isha").
+    // Sunrise has neither: it is a plain alert with a beep and no pre-reminder.
+    val alertStyles: Map<String, PrayerAlertStyle> = emptyMap(),
+    val reminderEnabled: Map<String, Boolean> = emptyMap(),
+    val reminderOffsets: Map<String, Int> = emptyMap(),
     val vibrationEnabled: Boolean = true,
     val respectDnd: Boolean = true,
     val reminderMinutes: Int = 15,
@@ -139,8 +145,10 @@ data class NotificationSettingsUiState(
 data class NotificationSummary(
     val notificationsMasterEnabled: Boolean = true,
     val enabledPrayerCount: Int = TOTAL_PRAYER_COUNT,
+    /** Fajr's reminder — it stands for the set where one line has to speak for five. */
     val reminderEnabled: Boolean = true,
-    val reminderMinutes: Int = 15
+    val reminderMinutes: Int = PrayerAlertStyle.DEFAULT_REMINDER_MINUTES,
+    val fajrAlertStyle: PrayerAlertStyle = PrayerAlertStyle.NOTIFICATION
 ) {
     companion object {
         /** The five obligatory prayers the notification screen exposes toggles for. */
@@ -225,7 +233,13 @@ sealed interface SettingsEvent {
     data class SetNotificationsEnabled(val enabled: Boolean) : SettingsEvent
     data class SetPrayerNotification(val prayer: String, val enabled: Boolean) : SettingsEvent
     data class SetAdhanEnabled(val enabled: Boolean) : SettingsEvent
-    data class SetPrayerAdhanEnabled(val prayer: String, val enabled: Boolean) : SettingsEvent
+
+    /** How one prayer announces itself: the adhan, the standard tone, or nothing. */
+    data class SetPrayerAlertStyle(val prayer: String, val style: PrayerAlertStyle) : SettingsEvent
+
+    /** Whether one prayer gets a reminder ahead of its time, and how far ahead. */
+    data class SetPrayerReminderEnabled(val prayer: String, val enabled: Boolean) : SettingsEvent
+    data class SetPrayerReminderMinutes(val prayer: String, val minutes: Int) : SettingsEvent
     data class SetVibrationEnabled(val enabled: Boolean) : SettingsEvent
     data class SetRespectDnd(val enabled: Boolean) : SettingsEvent
     data class SetReminderMinutes(val minutes: Int) : SettingsEvent
@@ -351,20 +365,44 @@ class SettingsViewModel @Inject constructor(
             settingsRepository.ishaNotificationEnabled
         ) { flags -> flags.count { it } },
         settingsRepository.prayerNotificationsEnabled,
-        settingsRepository.notificationReminderMinutes,
-        settingsRepository.showReminderBefore
-    ) { enabledPrayerCount, masterEnabled, reminderMinutes, reminderEnabled ->
+        // Fajr stands for the set on the hub: it is the prayer people set most deliberately,
+        // and a row cannot show five different offsets in one line.
+        settingsRepository.prayerReminderEnabled(FAJR),
+        settingsRepository.prayerReminderMinutes(FAJR),
+        settingsRepository.prayerAlertStyle(FAJR)
+    ) { enabledPrayerCount, masterEnabled, reminderEnabled, reminderMinutes, alertStyle ->
         NotificationSummary(
             notificationsMasterEnabled = masterEnabled,
             enabledPrayerCount = enabledPrayerCount,
             reminderEnabled = reminderEnabled,
-            reminderMinutes = reminderMinutes
+            reminderMinutes = reminderMinutes,
+            fajrAlertStyle = alertStyle
         )
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
         initialValue = NotificationSummary()
     )
+
+    /**
+     * Today's prayer times for the current location, or null until a location is known.
+     *
+     * The prayer notification rows show each prayer's time in their header, so the setting
+     * reads against the thing it governs rather than as an abstraction.
+     */
+    val todayPrayerTimes: StateFlow<PrayerTimes?> = prayerUseCases.getCurrentLocation()
+        .map { location ->
+            location?.let {
+                runCatching {
+                    prayerUseCases.getPrayerTimesForDate(LocalDate.now(), it)
+                }.getOrNull()
+            }
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = null
+        )
 
     fun clearAdhanPreviewError() {
         _adhanPreviewError.value = null
@@ -510,9 +548,19 @@ class SettingsViewModel @Inject constructor(
                 event.enabled.toString()
             )
 
-            is SettingsEvent.SetPrayerAdhanEnabled -> AppAnalytics.logSettingChanged(
-                "adhan_${event.prayer.lowercase()}",
+            is SettingsEvent.SetPrayerAlertStyle -> AppAnalytics.logSettingChanged(
+                "alert_style_${event.prayer.lowercase()}",
+                event.style.name
+            )
+
+            is SettingsEvent.SetPrayerReminderEnabled -> AppAnalytics.logSettingChanged(
+                "reminder_enabled_${event.prayer.lowercase()}",
                 event.enabled.toString()
+            )
+
+            is SettingsEvent.SetPrayerReminderMinutes -> AppAnalytics.logSettingChanged(
+                "reminder_minutes_${event.prayer.lowercase()}",
+                event.minutes.toString()
             )
 
             is SettingsEvent.SetAdhanSound -> AppAnalytics.logSettingChanged(
@@ -683,10 +731,37 @@ class SettingsViewModel @Inject constructor(
                 }
             }
 
-            is SettingsEvent.SetPrayerAdhanEnabled -> {
-                updatePrayerAdhanEnabled(event.prayer, event.enabled)
+            is SettingsEvent.SetPrayerAlertStyle -> {
+                val prayer = event.prayer.lowercase()
+                _notificationState.update {
+                    it.copy(alertStyles = it.alertStyles + (prayer to event.style))
+                }
+                // The style is read at fire time, so there is nothing to reschedule.
                 viewModelScope.launch {
-                    settingsRepository.setPrayerAdhanEnabled(event.prayer, event.enabled)
+                    settingsRepository.setPrayerAlertStyle(prayer, event.style)
+                }
+            }
+
+            is SettingsEvent.SetPrayerReminderEnabled -> {
+                val prayer = event.prayer.lowercase()
+                _notificationState.update {
+                    it.copy(reminderEnabled = it.reminderEnabled + (prayer to event.enabled))
+                }
+                viewModelScope.launch {
+                    settingsRepository.setPrayerReminderEnabled(prayer, event.enabled)
+                    // The lead time is baked into the alarm, so this one does need rearming.
+                    rescheduleNotifications()
+                }
+            }
+
+            is SettingsEvent.SetPrayerReminderMinutes -> {
+                val prayer = event.prayer.lowercase()
+                _notificationState.update {
+                    it.copy(reminderOffsets = it.reminderOffsets + (prayer to event.minutes))
+                }
+                viewModelScope.launch {
+                    settingsRepository.setPrayerReminderMinutes(prayer, event.minutes)
+                    rescheduleNotifications()
                 }
             }
 
@@ -1082,12 +1157,14 @@ class SettingsViewModel @Inject constructor(
             val maghribNotif = settingsRepository.maghribNotificationEnabled.first()
             val ishaNotif = settingsRepository.ishaNotificationEnabled.first()
 
-            // Per-prayer adhan settings
-            val fajrAdhan = settingsRepository.fajrAdhanEnabled.first()
-            val dhuhrAdhan = settingsRepository.dhuhrAdhanEnabled.first()
-            val asrAdhan = settingsRepository.asrAdhanEnabled.first()
-            val maghribAdhan = settingsRepository.maghribAdhanEnabled.first()
-            val ishaAdhan = settingsRepository.ishaAdhanEnabled.first()
+            // Per-prayer alert style and reminder. The migration in AppInitializer has
+            // already carried an existing install onto these, so they are the truth here.
+            val alertStyles = PrayerAlertStyle.PRAYER_KEYS
+                .associateWith { settingsRepository.prayerAlertStyle(it).first() }
+            val reminderEnabled = PrayerAlertStyle.PRAYER_KEYS
+                .associateWith { settingsRepository.prayerReminderEnabled(it).first() }
+            val reminderOffsets = PrayerAlertStyle.PRAYER_KEYS
+                .associateWith { settingsRepository.prayerReminderMinutes(it).first() }
 
             // Extended worship reminders — enabled flags + offsets keyed by type.
             val worshipEnabled = com.arshadshah.nimaz.domain.model.WorshipReminderType.entries
@@ -1106,11 +1183,9 @@ class SettingsViewModel @Inject constructor(
                 it.copy(
                     notificationsEnabled = notifEnabled,
                     adhanEnabled = adhanEnabled,
-                    fajrAdhanEnabled = fajrAdhan,
-                    dhuhrAdhanEnabled = dhuhrAdhan,
-                    asrAdhanEnabled = asrAdhan,
-                    maghribAdhanEnabled = maghribAdhan,
-                    ishaAdhanEnabled = ishaAdhan,
+                    alertStyles = alertStyles,
+                    reminderEnabled = reminderEnabled,
+                    reminderOffsets = reminderOffsets,
                     vibrationEnabled = vibration,
                     reminderMinutes = reminderMin,
                     showReminderBefore = showReminder,
@@ -1234,8 +1309,7 @@ class SettingsViewModel @Inject constructor(
             longitude = lng,
             notificationsEnabled = notifState.notificationsEnabled,
             enabledPrayers = enabledPrayers,
-            preReminderEnabled = notifState.showReminderBefore,
-            preReminderMinutes = notifState.reminderMinutes,
+            preReminders = settingsRepository.preReminderMinutesByPrayer(),
             calculationMethod = calcMethod,
             asrCalculation = asrCalc,
             highLatitudeRule = highLatRule,
@@ -1268,19 +1342,6 @@ class SettingsViewModel @Inject constructor(
                 "asr" -> state.copy(asrNotification = enabled)
                 "maghrib" -> state.copy(maghribNotification = enabled)
                 "isha" -> state.copy(ishaNotification = enabled)
-                else -> state
-            }
-        }
-    }
-
-    private fun updatePrayerAdhanEnabled(prayer: String, enabled: Boolean) {
-        _notificationState.update { state ->
-            when (prayer.lowercase()) {
-                "fajr" -> state.copy(fajrAdhanEnabled = enabled)
-                "dhuhr" -> state.copy(dhuhrAdhanEnabled = enabled)
-                "asr" -> state.copy(asrAdhanEnabled = enabled)
-                "maghrib" -> state.copy(maghribAdhanEnabled = enabled)
-                "isha" -> state.copy(ishaAdhanEnabled = enabled)
                 else -> state
             }
         }
