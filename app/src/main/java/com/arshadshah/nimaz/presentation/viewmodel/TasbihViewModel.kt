@@ -1,16 +1,11 @@
 package com.arshadshah.nimaz.presentation.viewmodel
 
-import android.content.Context
-import android.media.AudioManager
-import android.media.ToneGenerator
-import android.os.Build
-import android.os.VibrationEffect
-import android.os.Vibrator
-import android.os.VibratorManager
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
-import com.arshadshah.nimaz.core.monitoring.CrashReporter
+import com.arshadshah.nimaz.core.feedback.CounterFeedback
+import com.arshadshah.nimaz.core.monitoring.Telemetry
+import com.arshadshah.nimaz.core.monitoring.catchAndReport
 import com.arshadshah.nimaz.core.util.toUtcMidnightMillis
 import com.arshadshah.nimaz.domain.model.TasbihCategory
 import com.arshadshah.nimaz.domain.model.TasbihPreset
@@ -19,7 +14,6 @@ import com.arshadshah.nimaz.domain.model.TasbihStats
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.usecase.TasbihUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -65,7 +59,6 @@ data class TasbihCounterUiState(
     val laps: Int = 0,
     val targetCount: Int = 33,
     val isActive: Boolean = false,
-    val elapsedTimeMs: Long = 0,
     val vibrationEnabled: Boolean = true,
     val soundEnabled: Boolean = false,
     val autoLap: Boolean = true,
@@ -119,22 +112,9 @@ sealed interface TasbihEvent {
 class TasbihViewModel @Inject constructor(
     private val tasbihUseCases: TasbihUseCases,
     private val preferences: SettingsRepository,
-    @ApplicationContext private val context: Context
+    private val feedback: CounterFeedback,
+    private val telemetry: Telemetry,
 ) : ViewModel() {
-
-    private val vibrator: Vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-        (context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager).defaultVibrator
-    } else {
-        @Suppress("DEPRECATION")
-        context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-    }
-
-    private var toneGenerator: ToneGenerator? = try {
-        ToneGenerator(AudioManager.STREAM_MUSIC, 50)  // 50% volume
-    } catch (e: Exception) {
-        CrashReporter.recordException(e)
-        null
-    }
 
     private val _presetsState = MutableStateFlow(TasbihPresetsUiState())
     val presetsState: StateFlow<TasbihPresetsUiState> = _presetsState.asStateFlow()
@@ -148,8 +128,32 @@ class TasbihViewModel @Inject constructor(
     private val _statsState = MutableStateFlow(TasbihStatsUiState())
     val statsState: StateFlow<TasbihStatsUiState> = _statsState.asStateFlow()
 
-    private var timerJob: Job? = null
     private var sessionStartTime: Long = 0
+
+    /**
+     * One handle per collector. `loadHistory()` is reachable from init, clearPreset,
+     * selectPreset, completeSession and an event, and each call used to launch two
+     * fresh Room collectors that were never cancelled. Four sessions in a sitting left
+     * ten live collectors writing the same state — each having captured its **own**
+     * `today`, so after midnight the oldest kept re-writing yesterday's sessions and
+     * whichever emitted last won. ARCHITECTURE.md §4.1: one handle per identity.
+     */
+    private var historyTodayJob: Job? = null
+    private var historyWeekJob: Job? = null
+    private var presetsDefaultJob: Job? = null
+    private var presetsCustomJob: Job? = null
+
+    /**
+     * Set synchronously before the session insert is launched.
+     *
+     * Two taps 20 ms apart both saw `currentSession == null` and both inserted a
+     * session; the second's update hard-set `count = 1`, so the user tapped twice and
+     * the counter read 1 — leaving an orphan row that inflated the totals.
+     */
+    private var startingSession = false
+
+    /** Taps that landed while the session insert was still in flight. */
+    private var pendingTaps = 0
 
     init {
         loadPresets()
@@ -255,15 +259,25 @@ class TasbihViewModel @Inject constructor(
     }
 
     private fun loadPresets() {
-        viewModelScope.launch {
-            tasbihUseCases.getDefaultPresets().collect { defaults ->
-                _presetsState.update { it.copy(defaultPresets = defaults) }
-            }
+        presetsDefaultJob?.cancel()
+        presetsDefaultJob = viewModelScope.launch {
+            tasbihUseCases.getDefaultPresets()
+                .catchAndReport(telemetry, DOMAIN, "load_presets") {
+                    _presetsState.update { s -> s.copy(isLoading = false) }
+                }
+                .collect { defaults ->
+                    _presetsState.update { it.copy(defaultPresets = defaults) }
+                }
         }
-        viewModelScope.launch {
-            tasbihUseCases.getCustomPresets().collect { customs ->
-                _presetsState.update { it.copy(customPresets = customs, isLoading = false) }
-            }
+        presetsCustomJob?.cancel()
+        presetsCustomJob = viewModelScope.launch {
+            tasbihUseCases.getCustomPresets()
+                .catchAndReport(telemetry, DOMAIN, "load_presets") {
+                    _presetsState.update { s -> s.copy(isLoading = false) }
+                }
+                .collect { customs ->
+                    _presetsState.update { it.copy(customPresets = customs, isLoading = false) }
+                }
         }
     }
 
@@ -273,7 +287,6 @@ class TasbihViewModel @Inject constructor(
             _counterState.value.count + (_counterState.value.laps * _counterState.value.targetCount)
 
         if (currentSession != null && currentCount > 0) {
-            timerJob?.cancel()
             val completedAt = System.currentTimeMillis()
             val duration = completedAt - currentSession.startedAt
 
@@ -292,7 +305,6 @@ class TasbihViewModel @Inject constructor(
                 laps = 0,
                 currentSession = null,
                 isActive = false,
-                elapsedTimeMs = 0
             )
         }
         viewModelScope.launch { preferences.setTasbihSelectedPresetId(-1L) }
@@ -360,7 +372,6 @@ class TasbihViewModel @Inject constructor(
 
         if (currentSession != null && currentCount > 0 && currentSession.presetId != preset.id) {
             // Complete the current session before switching
-            timerJob?.cancel()
             val completedAt = System.currentTimeMillis()
             val duration = completedAt - currentSession.startedAt
 
@@ -379,7 +390,6 @@ class TasbihViewModel @Inject constructor(
                 laps = 0,
                 currentSession = null,
                 isActive = false,
-                elapsedTimeMs = 0
             )
         }
         viewModelScope.launch { preferences.setTasbihSelectedPresetId(preset.id) }
@@ -409,13 +419,20 @@ class TasbihViewModel @Inject constructor(
     }
 
     private fun increment() {
-        // Trigger feedback immediately for responsive feel
-        triggerVibration()
-        playClickSound()
+        // Feedback first, so the tick stays in step with the finger.
+        val state = _counterState.value
+        feedback.tick(vibrate = state.vibrationEnabled, sound = state.soundEnabled)
 
-        // Auto-start a session if none exists
-        if (_counterState.value.currentSession == null) {
-            startSessionAndIncrement()
+        // Auto-start a session if none exists. The guard is checked and set in the same
+        // synchronous block, so a second tap during the insert is counted rather than
+        // starting a second session.
+        if (state.currentSession == null) {
+            if (startingSession) {
+                pendingTaps++
+            } else {
+                startingSession = true
+                startSessionAndIncrement()
+            }
             return
         }
 
@@ -460,7 +477,10 @@ class TasbihViewModel @Inject constructor(
             val session = TasbihSession(
                 id = 0,
                 presetId = preset?.id,
-                presetName = preset?.name ?: "Free Count",
+                // Null, not "Free Count": presetName is nullable all the way down and
+                // the history screen already renders a localized fallback. Storing the
+                // English string put untranslatable text in every user's database.
+                presetName = preset?.name,
                 date = getTodayEpoch(),
                 currentCount = 1,
                 targetCount = _counterState.value.targetCount,
@@ -474,30 +494,27 @@ class TasbihViewModel @Inject constructor(
             val sessionId = tasbihUseCases.insertSession(session)
             val insertedSession = tasbihUseCases.getSessionById(sessionId)
 
+            // Taps that arrived while the insert was in flight are added rather than
+            // discarded, so a fast double-tap reads 2 and not 1.
+            val startCount = 1 + pendingTaps
+            pendingTaps = 0
+            startingSession = false
+
             _counterState.update {
                 it.copy(
                     currentSession = insertedSession,
                     isActive = true,
-                    count = 1,
+                    count = startCount,
                     laps = 0,
-                    elapsedTimeMs = 0
                 )
+            }
+            insertedSession?.let {
+                tasbihUseCases.updateSessionCount(it.id, startCount, 0)
             }
 
             // Refresh stats to include the new session
             loadStats()
-            startTimer()
         }
-    }
-
-    private fun triggerVibration() {
-        if (!_counterState.value.vibrationEnabled) return
-        vibrator.vibrate(VibrationEffect.createOneShot(30, VibrationEffect.DEFAULT_AMPLITUDE))
-    }
-
-    private fun playClickSound() {
-        if (!_counterState.value.soundEnabled) return
-        toneGenerator?.startTone(ToneGenerator.TONE_PROP_BEEP, 50)  // 50ms beep
     }
 
     private fun reset() {
@@ -521,7 +538,10 @@ class TasbihViewModel @Inject constructor(
             val session = TasbihSession(
                 id = 0,
                 presetId = preset?.id,
-                presetName = preset?.name ?: "Free Count",
+                // Null, not "Free Count": presetName is nullable all the way down and
+                // the history screen already renders a localized fallback. Storing the
+                // English string put untranslatable text in every user's database.
+                presetName = preset?.name,
                 date = getTodayEpoch(),
                 currentCount = 0,
                 targetCount = _counterState.value.targetCount,
@@ -541,28 +561,23 @@ class TasbihViewModel @Inject constructor(
                     isActive = true,
                     count = 0,
                     laps = 0,
-                    elapsedTimeMs = 0
                 )
             }
 
             // Refresh stats to include the new session
             loadStats()
-            startTimer()
         }
     }
 
     private fun pauseSession() {
-        timerJob?.cancel()
         _counterState.update { it.copy(isActive = false) }
     }
 
     private fun resumeSession() {
         _counterState.update { it.copy(isActive = true) }
-        startTimer()
     }
 
     private fun completeSession() {
-        timerJob?.cancel()
 
         _counterState.value.currentSession?.let { session ->
             val completedAt = System.currentTimeMillis()
@@ -577,7 +592,6 @@ class TasbihViewModel @Inject constructor(
                         isActive = false,
                         count = 0,
                         laps = 0,
-                        elapsedTimeMs = 0
                     )
                 }
 
@@ -587,16 +601,6 @@ class TasbihViewModel @Inject constructor(
         }
     }
 
-    private fun startTimer() {
-        timerJob = viewModelScope.launch {
-            while (_counterState.value.isActive) {
-                delay(1000)
-                _counterState.update {
-                    it.copy(elapsedTimeMs = it.elapsedTimeMs + 1000)
-                }
-            }
-        }
-    }
 
     private fun checkForActiveSession() {
         viewModelScope.launch {
@@ -615,25 +619,30 @@ class TasbihViewModel @Inject constructor(
                         laps = session.totalLaps,
                         targetCount = session.targetCount,
                         isActive = true,
-                        elapsedTimeMs = System.currentTimeMillis() - session.startedAt
                     )
                 }
-                startTimer()
-            }
+                }
         }
     }
 
     private fun loadHistory() {
         val today = getTodayEpoch()
-        val weekAgo = today - (7 * 24 * 60 * 60 * 1000)
+        val weekAgo = today - MILLIS_PER_WEEK
 
-        viewModelScope.launch {
-            tasbihUseCases.getSessionsForDate(today).collect { todaySessions ->
-                _historyState.update { it.copy(todaySessions = todaySessions) }
-            }
+        historyTodayJob?.cancel()
+        historyTodayJob = viewModelScope.launch {
+            tasbihUseCases.getSessionsForDate(today)
+                .catchAndReport(telemetry, DOMAIN, "load_history")
+                .collect { todaySessions ->
+                    _historyState.update { it.copy(todaySessions = todaySessions) }
+                }
         }
-        viewModelScope.launch {
-            tasbihUseCases.getSessionsInRange(weekAgo, today + (24 * 60 * 60 * 1000))
+        historyWeekJob?.cancel()
+        historyWeekJob = viewModelScope.launch {
+            tasbihUseCases.getSessionsInRange(weekAgo, today + MILLIS_PER_DAY)
+                .catchAndReport(telemetry, DOMAIN, "load_history") {
+                    _historyState.update { s -> s.copy(isLoading = false) }
+                }
                 .collect { weekSessions ->
                     _historyState.update { it.copy(weekSessions = weekSessions, isLoading = false) }
                 }
@@ -678,13 +687,14 @@ class TasbihViewModel @Inject constructor(
     companion object {
         /** Bump when new default presets are added to DefaultTasbihPresets. */
         private const val LATEST_PRESET_SEED_VERSION = 1
+        private const val DOMAIN = "tasbih"
+        private const val MILLIS_PER_DAY = 24L * 60 * 60 * 1000
+        private const val MILLIS_PER_WEEK = 7 * MILLIS_PER_DAY
     }
 
     override fun onCleared() {
         super.onCleared()
-        timerJob?.cancel()
-        toneGenerator?.release()
-        toneGenerator = null
+        feedback.release()
         // Note: Active session is preserved in database and can be resumed when user returns
     }
 }
