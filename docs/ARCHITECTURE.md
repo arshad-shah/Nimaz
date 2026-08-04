@@ -639,6 +639,33 @@ Anything scoped to a day takes the date as a **parameter** rather than reading t
 inside itself — see `domain/usecase/calendar/`, where the grid builders take `today` — so the
 same call can be re-issued for the new day.
 
+#### A persisted preference is read from the repository, never off the UI state
+
+A `UiState` field that mirrors a preference is a **cache of it, not the value**. It holds a
+compiled-in default until the settings collector's first emission lands, and that emission is
+disk-bound — so on a cold open it generally arrives *after* the screen has already asked for
+content.
+
+`QuranViewModel` read `_readerState.value.selectedTranslatorId` as the argument to its surah,
+juz, page and search queries. Every user whose translation was not `sahih_international` — the
+default declared on the state class — got **English first**, then a second full-surah query when
+the real preference arrived. A flash and a wasted read on every reader open. Resolve it where it
+lives, inside the load:
+
+```kotlin
+private suspend fun translatorId(): String = settingsRepository.quranTranslatorId.first()
+```
+
+**And then guard the settings collector's first emission**, because it is hydration, not a
+change. Comparing it against the state's defaults reports a change that never happened, and the
+"invalidate and reload" branch that hangs off that comparison then re-issues a load which already
+used the right values. Worse for anything positional: a Mushaf edition change repaginates the
+Quran, so a phantom change repaginated a page number *from* an edition the reader was never on.
+
+The same reasoning rules out `stateIn(scope, Eagerly, <empty>)` on a flow that is only collected:
+the seed publishes an empty result — with `isLoading = false` — before the database has answered,
+which the screen renders as its empty state. Collect the flow.
+
 #### CPU-bound work goes on the injected `@DefaultDispatcher`
 
 `viewModelScope.launch` is `Dispatchers.Main`. `CalendarViewModel.navigateToYear` did ~365
