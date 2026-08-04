@@ -432,23 +432,20 @@ class HomeViewModel @Inject constructor(
 
     fun onEvent(event: HomeEvent) {
         when (event) {
-            is HomeEvent.UpdateLocation -> AppAnalytics.logFeatureUsed(AppAnalytics.Feature.HOME, "update_location")
-            is HomeEvent.TogglePrayerStatus -> AppAnalytics.logFeatureUsed(
-                AppAnalytics.Feature.HOME,
-                "toggle_prayer_status"
-            )
-
-            else -> {}
-        }
-        when (event) {
-            is HomeEvent.UpdateLocation -> updateLocation(
-                event.latitude,
-                event.longitude,
-                event.name
-            )
+            is HomeEvent.UpdateLocation -> {
+                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.HOME, "update_location")
+                updateLocation(
+                    event.latitude,
+                    event.longitude,
+                    event.name
+                )
+            }
 
             HomeEvent.RefreshPrayerTimes -> calculatePrayerTimes()
             HomeEvent.RefreshPermissions -> checkPermissions()
+            // The log moved inside togglePrayerStatus, past its Sunrise guard. Logged here
+            // it counted taps that toggled nothing: Sunrise is not a prayer and returns early,
+            // so the dashboard has been reporting toggles that never happened.
             is HomeEvent.TogglePrayerStatus -> togglePrayerStatus(event.prayerType)
             HomeEvent.DismissAnnouncement -> dismissAnnouncement()
             HomeEvent.AnnouncementCtaClicked -> logAnnouncementCta()
@@ -505,6 +502,8 @@ class HomeViewModel @Inject constructor(
     private fun togglePrayerStatus(prayerType: PrayerType) {
         // Sunrise is not a prayer - don't allow toggling
         if (prayerType == PrayerType.SUNRISE) return
+
+        AppAnalytics.logFeatureUsed(AppAnalytics.Feature.HOME, "toggle_prayer_status")
 
         viewModelScope.launch {
             val prayerName = PrayerName.valueOf(prayerType.name)

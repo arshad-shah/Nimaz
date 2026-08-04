@@ -148,42 +148,53 @@ class HadithViewModel @Inject constructor(
 
     fun onEvent(event: HadithEvent) {
         when (event) {
-            is HadithEvent.LoadBook -> AppAnalytics.logFeatureUsed(AppAnalytics.Feature.HADITH, "open_book")
-            is HadithEvent.LoadChapter -> AppAnalytics.logFeatureUsed(AppAnalytics.Feature.HADITH, "open_reader")
-            is HadithEvent.LoadHadithById -> AppAnalytics.logFeatureUsed(AppAnalytics.Feature.HADITH, "open_hadith")
-            is HadithEvent.LoadHadithByNumber -> AppAnalytics.logFeatureUsed(
-                AppAnalytics.Feature.HADITH,
-                "open_hadith"
-            )
+            is HadithEvent.LoadBook -> {
+                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.HADITH, "open_book")
+                loadBook(event.bookId)
+            }
+            is HadithEvent.LoadChapter -> {
+                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.HADITH, "open_reader")
+                loadChapter(event.chapterId)
+            }
+            is HadithEvent.LoadHadithById -> {
+                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.HADITH, "open_hadith")
+                loadHadithById(event.hadithId)
+            }
+            is HadithEvent.LoadHadithByNumber -> {
+                AppAnalytics.logFeatureUsed(
+                    AppAnalytics.Feature.HADITH,
+                    "open_hadith"
+                )
+                loadHadithByNumber(
+                    event.bookId,
+                    event.hadithNumber
+                )
+            }
 
-            is HadithEvent.Search -> AppAnalytics.logFeatureUsed(AppAnalytics.Feature.HADITH, "search")
-            is HadithEvent.SearchInBook -> AppAnalytics.logFeatureUsed(AppAnalytics.Feature.HADITH, "search_in_book")
-            is HadithEvent.FilterByGrade -> AppAnalytics.logFeatureUsed(AppAnalytics.Feature.HADITH, "filter_by_grade")
-            is HadithEvent.ToggleBookmark -> AppAnalytics.logFeatureUsed(
-                AppAnalytics.Feature.HADITH,
-                "toggle_bookmark"
-            )
-
-            else -> {}
-        }
-        when (event) {
-            is HadithEvent.LoadBook -> loadBook(event.bookId)
-            is HadithEvent.LoadChapter -> loadChapter(event.chapterId)
-            is HadithEvent.LoadHadithById -> loadHadithById(event.hadithId)
-            is HadithEvent.LoadHadithByNumber -> loadHadithByNumber(
-                event.bookId,
-                event.hadithNumber
-            )
-
-            is HadithEvent.Search -> search(event.query)
-            is HadithEvent.SearchInBook -> searchInBook(event.bookId, event.query)
+            is HadithEvent.Search -> {
+                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.HADITH, "search")
+                search(event.query)
+            }
+            is HadithEvent.SearchInBook -> {
+                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.HADITH, "search_in_book")
+                searchInBook(event.bookId, event.query)
+            }
             is HadithEvent.SearchChapters -> searchChapters(event.query)
-            is HadithEvent.FilterByGrade -> filterByGrade(event.grade)
-            is HadithEvent.ToggleBookmark -> toggleBookmark(
-                event.hadithId,
-                event.bookId,
-                event.hadithNumber
-            )
+            is HadithEvent.FilterByGrade -> {
+                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.HADITH, "filter_by_grade")
+                filterByGrade(event.grade)
+            }
+            is HadithEvent.ToggleBookmark -> {
+                AppAnalytics.logFeatureUsed(
+                    AppAnalytics.Feature.HADITH,
+                    "toggle_bookmark"
+                )
+                toggleBookmark(
+                    event.hadithId,
+                    event.bookId,
+                    event.hadithNumber
+                )
+            }
 
             is HadithEvent.NavigateToHadith -> _readerState.update { it.copy(currentHadithIndex = event.index) }
             is HadithEvent.SetFontSize -> _readerState.update { it.copy(fontSize = event.size) }

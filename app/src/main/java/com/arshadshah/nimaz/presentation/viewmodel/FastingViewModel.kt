@@ -230,39 +230,38 @@ class FastingViewModel @Inject constructor(
 
     fun onEvent(event: FastingEvent) {
         when (event) {
-            is FastingEvent.StartFast -> telemetry.fastTracked("start", event.fastType.name)
-            is FastingEvent.CompleteFast -> telemetry.fastTracked("complete")
-            is FastingEvent.BreakFast -> telemetry.fastTracked("break")
-            is FastingEvent.MissFast -> telemetry.fastTracked("miss")
-            is FastingEvent.LogRecommendedFast -> telemetry.fastTracked(
-                "recommended",
-                event.fastType.name
-            )
-
-            is FastingEvent.PayFidya -> telemetry.featureUsed(DOMAIN, "pay_fidya")
-            is FastingEvent.AddMakeupFast -> telemetry.featureUsed(DOMAIN, "add_makeup")
-            is FastingEvent.CompleteMakeupFast ->
-                telemetry.featureUsed(DOMAIN, "complete_makeup")
-            // Status/type only — never the user's exemption reason or note text.
-            is FastingEvent.SaveFastForDate -> telemetry.fastTracked(
-                "save_for_date",
-                event.fastType.name
-            )
-
-            is FastingEvent.DeleteFastRecord -> telemetry.fastTracked("delete")
-            else -> {}
-        }
-        when (event) {
             is FastingEvent.SelectDate -> selectDate(event.date)
-            is FastingEvent.StartFast -> startFast(event.date, event.fastType)
-            is FastingEvent.CompleteFast -> completeFast(event.date)
-            is FastingEvent.BreakFast -> breakFast(event.date)
-            is FastingEvent.MissFast -> missFast(event.date, event.reason)
+            is FastingEvent.StartFast -> {
+                telemetry.fastTracked("start", event.fastType.name)
+                startFast(event.date, event.fastType)
+            }
+            is FastingEvent.CompleteFast -> {
+                telemetry.fastTracked("complete")
+                completeFast(event.date)
+            }
+            is FastingEvent.BreakFast -> {
+                telemetry.fastTracked("break")
+                breakFast(event.date)
+            }
+            is FastingEvent.MissFast -> {
+                telemetry.fastTracked("miss")
+                missFast(event.date, event.reason)
+            }
             is FastingEvent.SetFastType -> _trackerState.update { it.copy(selectedFastType = event.fastType) }
             is FastingEvent.SelectMonth -> selectMonth(event.month, event.year)
-            is FastingEvent.AddMakeupFast -> addMakeupFast(event.makeupFast)
-            is FastingEvent.CompleteMakeupFast -> completeMakeupFast(event.makeupFastId)
-            is FastingEvent.PayFidya -> payFidya(event.makeupFastId, event.amount)
+            is FastingEvent.AddMakeupFast -> {
+                telemetry.featureUsed(DOMAIN, "add_makeup")
+                addMakeupFast(event.makeupFast)
+            }
+            is FastingEvent.CompleteMakeupFast -> {
+                telemetry.featureUsed(DOMAIN, "complete_makeup")
+                // Status/type only — never the user's exemption reason or note text.
+                completeMakeupFast(event.makeupFastId)
+            }
+            is FastingEvent.PayFidya -> {
+                telemetry.featureUsed(DOMAIN, "pay_fidya")
+                payFidya(event.makeupFastId, event.amount)
+            }
             is FastingEvent.SetStatsPeriod -> setStatsPeriod(event.period)
             FastingEvent.LoadToday -> loadToday()
             FastingEvent.LoadRamadan -> loadRamadan()
@@ -271,17 +270,32 @@ class FastingViewModel @Inject constructor(
             FastingEvent.ToggleTodayFast -> toggleTodayFast()
             is FastingEvent.OpenFastSheet -> openFastSheet(event.date)
             FastingEvent.DismissFastSheet -> _sheetState.update { it.copy(isVisible = false) }
-            is FastingEvent.SaveFastForDate -> saveFastForDate(
-                event.date,
-                event.status,
-                event.fastType,
-                event.exemptionReason,
-                event.note
-            )
+            is FastingEvent.SaveFastForDate -> {
+                telemetry.fastTracked(
+                    "save_for_date",
+                    event.fastType.name
+                )
+                saveFastForDate(
+                    event.date,
+                    event.status,
+                    event.fastType,
+                    event.exemptionReason,
+                    event.note
+                )
+            }
 
-            is FastingEvent.DeleteFastRecord -> deleteFastRecord(event.date)
+            is FastingEvent.DeleteFastRecord -> {
+                telemetry.fastTracked("delete")
+                deleteFastRecord(event.date)
+            }
             is FastingEvent.UpdateMakeupFast -> updateMakeupFastRecord(event.makeupFast)
-            is FastingEvent.LogRecommendedFast -> startFast(event.date, event.fastType)
+            is FastingEvent.LogRecommendedFast -> {
+                telemetry.fastTracked(
+                    "recommended",
+                    event.fastType.name
+                )
+                startFast(event.date, event.fastType)
+            }
         }
     }
 

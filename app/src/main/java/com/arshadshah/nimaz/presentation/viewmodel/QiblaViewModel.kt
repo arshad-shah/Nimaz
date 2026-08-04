@@ -203,15 +203,6 @@ class QiblaViewModel @Inject constructor(
 
     fun onEvent(event: QiblaEvent) {
         when (event) {
-            QiblaEvent.StartCompass -> AppAnalytics.logFeatureUsed(AppAnalytics.Feature.QIBLA, "start_compass")
-            is QiblaEvent.SetArMode -> AppAnalytics.logFeatureUsed(
-                AppAnalytics.Feature.QIBLA,
-                if (event.enabled) "ar_on" else "ar_off"
-            )
-
-            else -> {}
-        }
-        when (event) {
             is QiblaEvent.UpdateAccuracy -> updateAccuracy(event.accuracy)
             is QiblaEvent.SetLocation -> setLocation(event.location)
             is QiblaEvent.SetTrueNorthMode -> _settingsState.update { it.copy(trueNorthMode = event.enabled) }
@@ -231,12 +222,19 @@ class QiblaViewModel @Inject constructor(
             }
 
             QiblaEvent.StartCompass -> {
+                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.QIBLA, "start_compass")
                 resetSensorState()
                 registerSensors()
             }
 
             QiblaEvent.StopCompass -> unregisterSensors()
-            is QiblaEvent.SetArMode -> _qiblaState.update { it.copy(isArMode = event.enabled) }
+            is QiblaEvent.SetArMode -> {
+                AppAnalytics.logFeatureUsed(
+                    AppAnalytics.Feature.QIBLA,
+                    if (event.enabled) "ar_on" else "ar_off"
+                )
+                _qiblaState.update { it.copy(isArMode = event.enabled) }
+            }
         }
     }
 

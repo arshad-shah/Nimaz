@@ -144,46 +144,40 @@ class PrayerTrackerViewModel @Inject constructor(
 
     fun onEvent(event: PrayerTrackerEvent) {
         when (event) {
-            // One casing into Param.STATUS. Two of these passed lowercase literals while the
-            // third passed `PrayerStatus.name` (PRAYED/MISSED) into the *same* dimension, so
-            // one state arrived under four different values and no dashboard could count it.
-            is PrayerTrackerEvent.MarkPrayerPrayed ->
-                telemetry.prayerTracked(
-                    event.prayerName.name,
-                    PrayerStatus.PRAYED.name,
-                    event.isJamaah
-                )
-
-            is PrayerTrackerEvent.MarkPrayerMissed ->
-                telemetry.prayerTracked(event.prayerName.name, PrayerStatus.MISSED.name)
-
-            is PrayerTrackerEvent.UpdatePrayerStatus ->
-                telemetry.prayerTracked(
-                    event.prayerName.name,
-                    event.status.name,
-                    event.isJamaah
-                )
-
-            is PrayerTrackerEvent.MarkQadaCompleted ->
-                telemetry.featureUsed(DOMAIN, "qada_completed")
-
-            else -> {}
-        }
-        when (event) {
             is PrayerTrackerEvent.SelectDate -> selectDate(event.date)
-            is PrayerTrackerEvent.UpdatePrayerStatus -> updatePrayerStatus(
-                event.prayerName,
-                event.status,
-                event.isJamaah
-            )
+            is PrayerTrackerEvent.UpdatePrayerStatus -> {
+                telemetry.prayerTracked(
+                        event.prayerName.name,
+                        event.status.name,
+                        event.isJamaah
+                    )
+                updatePrayerStatus(
+                    event.prayerName,
+                    event.status,
+                    event.isJamaah
+                )
+            }
 
-            is PrayerTrackerEvent.MarkPrayerPrayed -> markPrayerPrayed(
-                event.prayerName,
-                event.isJamaah
-            )
+            is PrayerTrackerEvent.MarkPrayerPrayed -> {
+                telemetry.prayerTracked(
+                        event.prayerName.name,
+                        PrayerStatus.PRAYED.name,
+                        event.isJamaah
+                    )
+                markPrayerPrayed(
+                    event.prayerName,
+                    event.isJamaah
+                )
+            }
 
-            is PrayerTrackerEvent.MarkPrayerMissed -> markPrayerMissed(event.prayerName)
-            is PrayerTrackerEvent.MarkQadaCompleted -> markQadaCompleted(event.record)
+            is PrayerTrackerEvent.MarkPrayerMissed -> {
+                telemetry.prayerTracked(event.prayerName.name, PrayerStatus.MISSED.name)
+                markPrayerMissed(event.prayerName)
+            }
+            is PrayerTrackerEvent.MarkQadaCompleted -> {
+                telemetry.featureUsed(DOMAIN, "qada_completed")
+                markQadaCompleted(event.record)
+            }
             is PrayerTrackerEvent.SetStatsPeriod -> setStatsPeriod(event.period)
             is PrayerTrackerEvent.LoadHistory -> loadHistory(event.startDate, event.endDate)
             PrayerTrackerEvent.LoadToday -> loadToday()

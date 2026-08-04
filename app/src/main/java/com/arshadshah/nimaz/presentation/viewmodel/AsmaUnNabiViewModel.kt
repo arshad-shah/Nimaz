@@ -54,30 +54,32 @@ class AsmaUnNabiViewModel @Inject constructor(
 
     fun onEvent(event: AsmaUnNabiEvent) {
         when (event) {
-            is AsmaUnNabiEvent.LoadDetail -> AppAnalytics.logFeatureUsed(
-                AppAnalytics.Feature.ASMA_UN_NABI,
-                "open_detail"
-            )
-
-            is AsmaUnNabiEvent.ToggleFavorite -> AppAnalytics.logFeatureUsed(
-                AppAnalytics.Feature.ASMA_UN_NABI,
-                "toggle_favorite"
-            )
-
-            is AsmaUnNabiEvent.Search -> AppAnalytics.logFeatureUsed(AppAnalytics.Feature.ASMA_UN_NABI, "search")
-            AsmaUnNabiEvent.ToggleFavoritesFilter -> AppAnalytics.logFeatureUsed(
-                AppAnalytics.Feature.ASMA_UN_NABI,
-                "toggle_favorites_filter"
-            )
-
-            else -> {}
-        }
-        when (event) {
-            is AsmaUnNabiEvent.LoadDetail -> loadDetail(event.nameId)
-            is AsmaUnNabiEvent.ToggleFavorite -> toggleFavorite(event.nameId)
-            is AsmaUnNabiEvent.Search -> search(event.query)
+            is AsmaUnNabiEvent.LoadDetail -> {
+                AppAnalytics.logFeatureUsed(
+                    AppAnalytics.Feature.ASMA_UN_NABI,
+                    "open_detail"
+                )
+                loadDetail(event.nameId)
+            }
+            is AsmaUnNabiEvent.ToggleFavorite -> {
+                AppAnalytics.logFeatureUsed(
+                    AppAnalytics.Feature.ASMA_UN_NABI,
+                    "toggle_favorite"
+                )
+                toggleFavorite(event.nameId)
+            }
+            is AsmaUnNabiEvent.Search -> {
+                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.ASMA_UN_NABI, "search")
+                search(event.query)
+            }
             AsmaUnNabiEvent.ClearSearch -> clearSearch()
-            AsmaUnNabiEvent.ToggleFavoritesFilter -> toggleFavoritesFilter()
+            AsmaUnNabiEvent.ToggleFavoritesFilter -> {
+                AppAnalytics.logFeatureUsed(
+                    AppAnalytics.Feature.ASMA_UN_NABI,
+                    "toggle_favorites_filter"
+                )
+                toggleFavoritesFilter()
+            }
         }
     }
 

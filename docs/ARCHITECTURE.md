@@ -287,6 +287,42 @@ class XxxViewModel @Inject constructor(
 }
 ```
 
+#### One `when (event)` per `onEvent` — never two
+
+`onEvent` used to be written as **two** consecutive `when (event)` blocks over the same sealed
+hierarchy: the first logging analytics and ending in `else -> {}`, the second dispatching. The
+`else` means the compiler only checks exhaustiveness on the *behaviour* table, so **every event
+added afterwards ships with working behaviour and no telemetry, silently**. That was the measured
+state of 20 of 31 ViewModels — `SettingsViewModel`'s `else` dropped 63 of its 78 events, `Zakat`
+logged 3 of 24, `Tasbih` 5 of 23.
+
+Put the analytics call **inside the branch that owns it**, in one exhaustive table:
+
+```kotlin
+fun onEvent(event: XxxEvent) = when (event) {
+    is XxxEvent.Select -> {
+        telemetry.featureUsed(AppAnalytics.Feature.XXX, AppAnalytics.Action.OPEN_DETAIL)
+        select(event.id)
+    }
+    XxxEvent.Refresh -> refresh()          // deliberately not logged, and visibly so
+}
+```
+
+A new event then **fails to compile** until someone decides whether it is logged — which is the
+whole regression test, and cheaper than any runtime one. It also lets the log be conditional:
+`QuranTopicsViewModel` logs a load only when it actually loads, and `HomeViewModel` now logs a
+prayer toggle only past its Sunrise guard — before, it counted taps that toggled nothing.
+
+A branch that deliberately does nothing gets an explicit empty body with a comment, never an
+`else`.
+
+#### A read-only ViewModel may have no `onEvent`
+
+`TafseerChaptersViewModel` is `combine(...).launchIn` and nothing else — its screen has no
+intents to send. That is sanctioned for a genuinely read-only surface, and it is the reason the
+file has no analytics seam: there is no event to hang one on. If such a screen later gains a
+single tappable thing, it gains an `XxxEvent` at the same time rather than a bare public method.
+
 Screens collect with `collectAsStateWithLifecycle()` and call `viewModel.onEvent(...)`.
 
 #### Cancellation: one handle per identity of the request

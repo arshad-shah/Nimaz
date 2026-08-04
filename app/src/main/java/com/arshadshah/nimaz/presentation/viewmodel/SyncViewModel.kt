@@ -227,17 +227,20 @@ class SyncViewModel @Inject constructor(
 
     fun onEvent(event: SyncEvent) {
         when (event) {
-            is SyncEvent.StartSend -> AppAnalytics.logFeatureUsed(AppAnalytics.Feature.SYNC, "start_send")
-            is SyncEvent.StartReceive -> AppAnalytics.logFeatureUsed(AppAnalytics.Feature.SYNC, "start_receive")
-            is SyncEvent.Cancel -> AppAnalytics.logFeatureUsed(AppAnalytics.Feature.SYNC, "cancel")
-            else -> {}
-        }
-        when (event) {
-            is SyncEvent.StartSend -> startSend()
-            is SyncEvent.StartReceive -> startReceive()
+            is SyncEvent.StartSend -> {
+                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.SYNC, "start_send")
+                startSend()
+            }
+            is SyncEvent.StartReceive -> {
+                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.SYNC, "start_receive")
+                startReceive()
+            }
             is SyncEvent.AcceptConnection -> acceptConnection(event.endpointId)
             is SyncEvent.RejectConnection -> rejectConnection(event.endpointId)
-            is SyncEvent.Cancel -> cancel()
+            is SyncEvent.Cancel -> {
+                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.SYNC, "cancel")
+                cancel()
+            }
         }
     }
 
