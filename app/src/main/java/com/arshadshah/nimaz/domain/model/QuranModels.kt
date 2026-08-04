@@ -23,6 +23,7 @@ data class Ayah(
     val textSimple: String,
     val juzNumber: Int,
     val hizbNumber: Int,
+    /** Global hizb-quarter index (1..240) this verse falls in; 0 when unknown. */
     val rubNumber: Int,
     val pageNumber: Int,
     val sajdaType: SajdaType?,
@@ -30,12 +31,37 @@ data class Ayah(
     val translation: String? = null,
     val isBookmarked: Boolean = false,
     val transliteration: String? = null,
-    val textTajweed: String? = null
+    val textTajweed: String? = null,
+    /**
+     * The rukūʿ this verse falls in, numbered **within its surah** the way a printed Mushaf
+     * numbers them. Null when the `rukus` table has not been populated on this device.
+     */
+    val rukuNumber: Int? = null,
+    /** True when this verse *opens* its rukūʿ — where the marker belongs. */
+    val isRukuStart: Boolean = false,
+    /** True when this verse *opens* its hizb quarter — where the ۞ marker belongs. */
+    val isRubStart: Boolean = false
 ) {
     // Aliases for backwards compatibility
     val numberInSurah: Int get() = ayahNumber
     val page: Int get() = pageNumber
     val juz: Int get() = juzNumber
+
+    /**
+     * Which quarter of [hizbNumber] this verse is in, 1..4 — 1 being the hizb's own opening.
+     *
+     * [rubNumber] counts quarters across the whole Quran (1..240), so reading it as a 1..4
+     * quarter (which the reader did) labelled only the first four quarters in the book and
+     * silently dropped the marker on the other 236.
+     */
+    val quarterInHizb: Int get() = if (rubNumber <= 0) 0 else ((rubNumber - 1) % 4) + 1
+
+    /**
+     * The hizb (1..60) that [quarterInHizb] is a quarter of, derived from the same counter so
+     * the two can never disagree. Falls back to the verse's stored [hizbNumber] when no
+     * quarter is known.
+     */
+    val hizbOfQuarter: Int get() = if (rubNumber <= 0) hizbNumber else ((rubNumber - 1) / 4) + 1
 }
 
 data class SurahWithAyahs(

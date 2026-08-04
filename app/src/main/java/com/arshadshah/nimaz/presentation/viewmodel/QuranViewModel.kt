@@ -116,6 +116,12 @@ data class QuranHomeUiState(
      */
     val pagination: MushafPagination = MushafPagination.fallback(MushafScript.DEFAULT),
     /**
+     * Rukūʿ count per surah number, for the surah list's structure badges. Empty until the
+     * `surah_structure` rows are on the device; the badge is simply omitted for a surah that
+     * is missing rather than guessed at.
+     */
+    val rukuCounts: Map<Int, Int> = emptyMap(),
+    /**
      * Whether this install's artifact carries the thematic layer, so the home screen offers a
      * way into it only where there is something behind the offer. False between the migration
      * that creates the tables and the schemaVersion 24 release that fills them.
@@ -400,6 +406,7 @@ class QuranViewModel @Inject constructor(
         loadFavorites()
         loadFavoriteAyahIds()
         observeMushafPagination()
+        loadRukuCounts()
         loadVerseOfTheDay()
         observeQuranSettings()
         setupDebouncedSearch()
@@ -768,6 +775,18 @@ class QuranViewModel @Inject constructor(
                         )
                     }
                 }
+        }
+    }
+
+    /**
+     * Rukūʿ counts for the surah list's structure badges. Independent of the Mushaf edition —
+     * a surah's sections are a property of the surah, not of a pagination.
+     */
+    private fun loadRukuCounts() {
+        viewModelScope.launch {
+            quranUseCases.getSurahRukuCounts().collect { counts ->
+                _homeState.update { it.copy(rukuCounts = counts) }
+            }
         }
     }
 

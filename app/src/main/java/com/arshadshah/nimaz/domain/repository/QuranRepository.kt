@@ -99,6 +99,15 @@ interface QuranRepository {
     suspend fun getSurahInfo(surahNumber: Int): SurahInfo?
 
     /**
+     * How many rukūʿ each surah is divided into, keyed by surah number.
+     *
+     * From `surah_structure`, which answers it in one row per surah rather than a scan of
+     * `rukus`. Empty on a device whose structure table has not been filled yet, so callers
+     * must treat a missing surah as "unknown" and show nothing.
+     */
+    fun getSurahRukuCounts(): Flow<Map<Int, Int>>
+
+    /**
      * The thematic layer (schemaVersion 24). Every method here answers "nothing" rather than
      * throwing on a device whose artifact predates it — the tables exist from the migration,
      * the rows arrive with the artifact, and the gap between the two is a normal state.

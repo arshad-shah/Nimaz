@@ -373,8 +373,11 @@ abstract class NimazDatabase : RoomDatabase() {
         //   juz/hizb/page -> juzs, hizb_quarters, pages           (MIN/MAX over the columns)
         //
         // `rukus`, `manzils` and `surah_structure` are content that has never been on a device:
-        // they are created empty and filled from the artifact on a fresh install, or by
-        // QuranStructureSeeder from the bundled seed on an upgrade. `text_arabic` was
+        // they are created empty and filled from the artifact. The seeder this comment used to
+        // name as the upgrade path does not exist — nothing anywhere calls `insertRukus` or
+        // `insertSurahStructure` — so until ContentArtifactInstaller landed, an upgrading device
+        // kept all three empty for good. It replaces the file now, which is what makes the
+        // rukūʿ markers reachable on an install that predates them. `text_arabic` was
         // byte-identical to `text_uthmani` in all 6,236 rows, so nothing is lost by dropping it;
         // `text_indopak` was NULL in all of them.
         // schemaVersion 23 — the content database stops declaring the twenty-two tables the
