@@ -57,7 +57,35 @@ class AyahDivisionsTest {
     fun `division markers default to absent so an unseeded device shows none`() {
         val plain = ayah(rub = 0)
         assertThat(plain.isRubStart).isFalse()
-        assertThat(plain.isRukuStart).isFalse()
+        assertThat(plain.isRukuEnd).isFalse()
         assertThat(plain.rukuNumber).isNull()
+    }
+
+    @Test
+    fun `the ruku marker closes its section while the hizb marker opens its quarter`() {
+        // The two divisions use opposite conventions, which is the regression this guards:
+        // the ʿayn (ع) ends a rukūʿ in a printed Mushaf, the ۞ begins a hizb quarter. Reading
+        // both off a "start" flag put the rukūʿ marker one whole section too early.
+        val fatihaLastVerse = ayah(rub = 1).copy(
+            ayahNumber = 7,
+            rukuNumber = 1,
+            isRukuEnd = true,
+            isRubStart = false,
+        )
+        val fatihaFirstVerse = ayah(rub = 1).copy(
+            ayahNumber = 1,
+            rukuNumber = 1,
+            isRukuEnd = false,
+            isRubStart = true,
+        )
+
+        // Al-Fātiḥah is a single rukūʿ over all seven verses. Its ʿayn belongs on verse 7…
+        assertThat(fatihaLastVerse.isRukuEnd).isTrue()
+        // …and never on verse 1, which is where it used to render.
+        assertThat(fatihaFirstVerse.isRukuEnd).isFalse()
+        // The quarter marker is the other way round: 1:1 opens hizb 1.
+        assertThat(fatihaFirstVerse.isRubStart).isTrue()
+        assertThat(fatihaFirstVerse.quarterInHizb).isEqualTo(1)
+        assertThat(fatihaFirstVerse.hizbOfQuarter).isEqualTo(1)
     }
 }

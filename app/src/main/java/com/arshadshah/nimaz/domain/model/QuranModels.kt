@@ -37,8 +37,15 @@ data class Ayah(
      * numbers them. Null when the `rukus` table has not been populated on this device.
      */
     val rukuNumber: Int? = null,
-    /** True when this verse *opens* its rukūʿ — where the marker belongs. */
-    val isRukuStart: Boolean = false,
+    /**
+     * True when this verse *closes* its rukūʿ — which is where the ʿayn (ع) sits in a printed
+     * Mushaf. The marker ends the section rather than announcing it, so Al-Fātiḥah, a single
+     * rukūʿ over all seven verses, carries it on verse 7 and not on verse 1.
+     *
+     * This is the opposite convention to [isRubStart] below, and the two are genuinely
+     * different: the ۞ opens a quarter, the ع closes a section.
+     */
+    val isRukuEnd: Boolean = false,
     /** True when this verse *opens* its hizb quarter — where the ۞ marker belongs. */
     val isRubStart: Boolean = false
 ) {

@@ -174,7 +174,7 @@ interface QuranDao {
                hq.number AS rub_number,
                hq.start_ayah_id AS rub_start_ayah_id,
                (r.number - rs.first_number + 1) AS ruku_number,
-               r.start_ayah_id AS ruku_start_ayah_id
+               r.end_ayah_id AS ruku_end_ayah_id
         FROM ayahs a
         LEFT JOIN mushaf_ayah_texts u ON u.ayah_id = a.id AND u.text_source = 'UTHMANI'
         LEFT JOIN mushaf_ayah_texts s ON s.ayah_id = a.id AND s.text_source = 'SIMPLE'
@@ -200,7 +200,7 @@ interface QuranDao {
                hq.number AS rub_number,
                hq.start_ayah_id AS rub_start_ayah_id,
                (r.number - rs.first_number + 1) AS ruku_number,
-               r.start_ayah_id AS ruku_start_ayah_id
+               r.end_ayah_id AS ruku_end_ayah_id
         FROM ayahs a
         LEFT JOIN mushaf_ayah_texts u ON u.ayah_id = a.id AND u.text_source = 'UTHMANI'
         LEFT JOIN mushaf_ayah_texts s ON s.ayah_id = a.id AND s.text_source = 'SIMPLE'
@@ -225,7 +225,7 @@ interface QuranDao {
                hq.number AS rub_number,
                hq.start_ayah_id AS rub_start_ayah_id,
                (r.number - rs.first_number + 1) AS ruku_number,
-               r.start_ayah_id AS ruku_start_ayah_id
+               r.end_ayah_id AS ruku_end_ayah_id
         FROM ayahs a
         LEFT JOIN mushaf_ayah_texts u ON u.ayah_id = a.id AND u.text_source = 'UTHMANI'
         LEFT JOIN mushaf_ayah_texts s ON s.ayah_id = a.id AND s.text_source = 'SIMPLE'
@@ -251,7 +251,7 @@ interface QuranDao {
                hq.number AS rub_number,
                hq.start_ayah_id AS rub_start_ayah_id,
                (r.number - rs.first_number + 1) AS ruku_number,
-               r.start_ayah_id AS ruku_start_ayah_id
+               r.end_ayah_id AS ruku_end_ayah_id
         FROM ayahs a
         LEFT JOIN mushaf_ayah_texts u ON u.ayah_id = a.id AND u.text_source = 'UTHMANI'
         LEFT JOIN mushaf_ayah_texts s ON s.ayah_id = a.id AND s.text_source = 'SIMPLE'
@@ -277,7 +277,7 @@ interface QuranDao {
                hq.number AS rub_number,
                hq.start_ayah_id AS rub_start_ayah_id,
                (r.number - rs.first_number + 1) AS ruku_number,
-               r.start_ayah_id AS ruku_start_ayah_id
+               r.end_ayah_id AS ruku_end_ayah_id
         FROM ayahs a
         LEFT JOIN mushaf_ayah_texts u ON u.ayah_id = a.id AND u.text_source = 'UTHMANI'
         LEFT JOIN mushaf_ayah_texts s ON s.ayah_id = a.id AND s.text_source = 'SIMPLE'
@@ -313,7 +313,7 @@ interface QuranDao {
                hq.number AS rub_number,
                hq.start_ayah_id AS rub_start_ayah_id,
                (r.number - rs.first_number + 1) AS ruku_number,
-               r.start_ayah_id AS ruku_start_ayah_id
+               r.end_ayah_id AS ruku_end_ayah_id
         FROM ayahs a
         LEFT JOIN mushaf_ayah_texts u ON u.ayah_id = a.id AND u.text_source = 'UTHMANI'
         LEFT JOIN mushaf_ayah_texts s ON s.ayah_id = a.id AND s.text_source = 'SIMPLE'
@@ -340,7 +340,7 @@ interface QuranDao {
                hq.number AS rub_number,
                hq.start_ayah_id AS rub_start_ayah_id,
                (r.number - rs.first_number + 1) AS ruku_number,
-               r.start_ayah_id AS ruku_start_ayah_id
+               r.end_ayah_id AS ruku_end_ayah_id
         FROM ayahs a
         LEFT JOIN mushaf_ayah_texts u ON u.ayah_id = a.id AND u.text_source = 'UTHMANI'
         LEFT JOIN mushaf_ayah_texts s ON s.ayah_id = a.id AND s.text_source = 'SIMPLE'
@@ -366,7 +366,7 @@ interface QuranDao {
                hq.number AS rub_number,
                hq.start_ayah_id AS rub_start_ayah_id,
                (r.number - rs.first_number + 1) AS ruku_number,
-               r.start_ayah_id AS ruku_start_ayah_id
+               r.end_ayah_id AS ruku_end_ayah_id
         FROM ayahs a
         LEFT JOIN mushaf_ayah_texts u ON u.ayah_id = a.id AND u.text_source = 'UTHMANI'
         LEFT JOIN mushaf_ayah_texts s ON s.ayah_id = a.id AND s.text_source = 'SIMPLE'
@@ -735,7 +735,7 @@ data class AyahWithText(
     @ColumnInfo(name = "rub_number") val rubNumber: Int?,
     @ColumnInfo(name = "rub_start_ayah_id") val rubStartAyahId: Int?,
     @ColumnInfo(name = "ruku_number") val rukuNumber: Int?,
-    @ColumnInfo(name = "ruku_start_ayah_id") val rukuStartAyahId: Int?,
+    @ColumnInfo(name = "ruku_end_ayah_id") val rukuEndAyahId: Int?,
 )
 
 /** Where a verse sits in the mushaf. */

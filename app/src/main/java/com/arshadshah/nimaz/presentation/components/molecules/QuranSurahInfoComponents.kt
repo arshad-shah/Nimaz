@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.presentation.components.molecules
 
+import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -19,6 +20,8 @@ import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material.icons.filled.FormatListNumbered
+import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -39,43 +42,78 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
+/** One figure in [SurahMetaStrip]: what it is, and what it says. */
+internal data class SurahMetaStat(
+    val icon: ImageVector,
+    val label: String,
+    val value: String,
+)
+
 /**
- * Icon / label / value stat tile used by the surah info screen's stats row
- * (Verses, Juz, Page). Sits directly on the page background, so it is a
- * page-level card: [NimazCardStyle.ELEVATED] + [NimazTone.NEUTRAL].
+ * Where a surah sits in the Mushaf — its verse count, its juz and its opening page — as one
+ * quiet strip under the cartouche.
+ *
+ * These were three elevated cards, which gave three small numbers the same visual weight as
+ * the surah's name and the summary paragraph below it. They are reference figures you glance
+ * at, not the point of the screen, so they now read as a single line: value over label,
+ * divided rather than boxed, sharing one surface.
  */
 @Composable
-internal fun DetailCard(
-    icon: ImageVector,
-    label: String,
-    value: String,
-    modifier: Modifier = Modifier
+internal fun SurahMetaStrip(
+    stats: List<SurahMetaStat>,
+    modifier: Modifier = Modifier,
 ) {
     NimazCard(
-        modifier = modifier,
-        style = NimazCardStyle.ELEVATED,
-        tone = NimazTone.NEUTRAL
+        modifier = modifier.fillMaxWidth(),
+        style = NimazCardStyle.FILLED,
+        tone = NimazTone.NEUTRAL,
+        elevation = 0.dp
     ) {
-        Column(modifier = Modifier.padding(15.dp)) {
-            NimazIcon(
-                imageVector = icon,
-                contentDescription = null,
-                variant = NimazIconVariant.MUTED,
-                iconSize = 22.dp
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Spacer(modifier = Modifier.height(2.dp))
-            Text(
-                text = value,
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.onSurface
-            )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            stats.forEachIndexed { index, stat ->
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(horizontal = 8.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        NimazIcon(
+                            imageVector = stat.icon,
+                            contentDescription = null,
+                            variant = NimazIconVariant.MUTED,
+                            iconSize = 14.dp
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = stat.value,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                    Text(
+                        text = stat.label,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                if (index < stats.lastIndex) {
+                    // A hairline rather than a gap: it separates the figures without
+                    // making three boxes out of them again.
+                    Box(
+                        modifier = Modifier
+                            .height(28.dp)
+                            .width(1.dp)
+                            .background(MaterialTheme.colorScheme.outlineVariant)
+                    )
+                }
+            }
         }
     }
 }
@@ -231,15 +269,43 @@ internal fun SurahAudioControlBar(
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-private fun DetailCardPreview() {
-    NimazTheme {
-        DetailCard(
-            icon = Icons.AutoMirrored.Filled.MenuBook,
+private val metaStripSample
+    @Composable get() = listOf(
+        SurahMetaStat(
+            icon = Icons.Default.FormatListNumbered,
+            label = stringResource(R.string.quran_verses_label),
+            value = "286"
+        ),
+        SurahMetaStat(
+            icon = Icons.Default.Layers,
             label = stringResource(R.string.quran_juz_label),
             value = "1"
-        )
+        ),
+        SurahMetaStat(
+            icon = Icons.AutoMirrored.Filled.MenuBook,
+            label = stringResource(R.string.quran_page_label),
+            value = "2"
+        ),
+    )
+
+@Preview(showBackground = true, widthDp = 400, name = "Surah meta strip")
+@Composable
+private fun SurahMetaStripPreview() {
+    NimazTheme {
+        SurahMetaStrip(stats = metaStripSample, modifier = Modifier.padding(20.dp))
+    }
+}
+
+@Preview(
+    showBackground = true,
+    widthDp = 400,
+    name = "Surah meta strip (dark)",
+    uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL
+)
+@Composable
+private fun SurahMetaStripDarkPreview() {
+    NimazTheme {
+        SurahMetaStrip(stats = metaStripSample, modifier = Modifier.padding(20.dp))
     }
 }
 

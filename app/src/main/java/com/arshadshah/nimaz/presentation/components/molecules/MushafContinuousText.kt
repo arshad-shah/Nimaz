@@ -23,6 +23,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDirection
@@ -80,6 +81,9 @@ fun MushafContinuousText(
     // Ayah end-marker: gold brackets + teal number, matching the ornament language.
     val markerBracketColor = NimazColors.Gold500
     val markerNumberColor = MaterialTheme.colorScheme.primary
+    // The structural signs are apparatus, not scripture: gold like the verse brackets so
+    // they read as one system, but they must never compete with the text itself.
+    val divisionMarkerColor = NimazColors.Gold500
 
     // Parse tajweed once per ayah, keyed only on what the parse depends on
     // (text, theme, default colour) — NOT on highlight/selection. Highlight and
@@ -108,7 +112,8 @@ fun MushafContinuousText(
 
     val annotatedText = remember(
         ayahs, tajweedByAyahId, highlightedAyahId, selectedAyahId,
-        highlightColor, selectedColor, markerBracketColor, markerNumberColor
+        highlightColor, selectedColor, markerBracketColor, markerNumberColor,
+        divisionMarkerColor
     ) {
         buildMushafAnnotatedString(
             ayahs = ayahs,
@@ -118,7 +123,8 @@ fun MushafContinuousText(
             highlightColor = highlightColor,
             selectedColor = selectedColor,
             markerBracketColor = markerBracketColor,
-            markerNumberColor = markerNumberColor
+            markerNumberColor = markerNumberColor,
+            divisionMarkerColor = divisionMarkerColor
         )
     }
 
@@ -229,6 +235,23 @@ fun MushafContinuousText(
 
 private const val AYAH_TAG = "AYAH"
 
+/**
+ * The structural signs a printed Mushaf carries in and around the text.
+ *
+ * The page reader showed none of them: a reader following a hizb, looking for the end of a
+ * rukūʿ, or checking whether a verse takes a prostration had to leave the page to find out.
+ * They are the actual Unicode signs rather than drawn substitutes, so they inherit the
+ * Quran font and scale with it.
+ */
+private const val RUB_EL_HIZB = "۞"  // ۞ — opens a hizb quarter
+private const val SAJDA_SIGN = "۩"   // ۩ — a verse of prostration
+private const val RUKU_SIGN = "ع"    // ع — closes a rukūʿ
+
+/** Appends one structural sign, tinted so it reads as apparatus rather than as text. */
+private fun AnnotatedString.Builder.appendDivisionMarker(sign: String, color: Color) {
+    withStyle(SpanStyle(color = color)) { append(sign) }
+}
+
 private fun buildMushafAnnotatedString(
     ayahs: List<Ayah>,
     tajweedByAyahId: Map<Int, AnnotatedString>,
@@ -237,7 +260,8 @@ private fun buildMushafAnnotatedString(
     highlightColor: Color,
     selectedColor: Color,
     markerBracketColor: Color,
-    markerNumberColor: Color
+    markerNumberColor: Color,
+    divisionMarkerColor: Color
 ): AnnotatedString {
     return buildAnnotatedString {
         ayahs.forEachIndexed { index, ayah ->
@@ -245,6 +269,13 @@ private fun buildMushafAnnotatedString(
 
             // Pre-parsed tajweed (already bismillah-stripped) if available for
             // this ayah, else the plain bismillah-stripped Arabic text.
+            // ۞ opens a hizb quarter, so it sits before the verse's first word — the same
+            // place a printed Mushaf puts it.
+            if (ayah.isRubStart) {
+                appendDivisionMarker(RUB_EL_HIZB, divisionMarkerColor)
+                append(" ")
+            }
+
             val tajweed = tajweedByAyahId[ayah.id]
             if (tajweed != null) {
                 append(tajweed)
@@ -254,6 +285,17 @@ private fun buildMushafAnnotatedString(
 
             append(" ")
             appendAyahEndMarker(ayah.ayahNumber, markerBracketColor, markerNumberColor)
+
+            // ۩ marks a verse of prostration, and the ʿayn closes a rukūʿ — both belong
+            // after the verse rather than before it.
+            if (ayah.sajdaType != null) {
+                append(" ")
+                appendDivisionMarker(SAJDA_SIGN, divisionMarkerColor)
+            }
+            if (ayah.isRukuEnd) {
+                append(" ")
+                appendDivisionMarker(RUKU_SIGN, divisionMarkerColor)
+            }
 
             val end = length
 
