@@ -2,30 +2,35 @@ package com.arshadshah.nimaz.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.arshadshah.nimaz.core.monitoring.AppAnalytics
-import com.arshadshah.nimaz.core.monitoring.CrashReporter
+import com.arshadshah.nimaz.core.monitoring.Telemetry
+import com.arshadshah.nimaz.core.monitoring.catchAndReport
+import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.domain.model.NisabType
 import com.arshadshah.nimaz.domain.model.ZakatAssets
 import com.arshadshah.nimaz.domain.model.ZakatCalculation
 import com.arshadshah.nimaz.domain.model.ZakatCalculator
+import com.arshadshah.nimaz.domain.model.ZakatDefaults
 import com.arshadshah.nimaz.domain.model.ZakatHistoryEntry
 import com.arshadshah.nimaz.domain.model.ZakatLiabilities
+import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.usecase.ZakatUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class ZakatCalculatorUiState(
     val assets: ZakatAssets = ZakatAssets(),
     val liabilities: ZakatLiabilities = ZakatLiabilities(),
     val nisabType: NisabType = NisabType.GOLD,
-    val goldPricePerGram: Double = 65.0,
-    val silverPricePerGram: Double = 0.80,
-    val currency: String = "USD",
+    val goldPricePerGram: Double = ZakatDefaults.GOLD_PRICE_PER_GRAM,
+    val silverPricePerGram: Double = ZakatDefaults.SILVER_PRICE_PER_GRAM,
+    val currency: String = ZakatDefaults.CURRENCY,
     val calculation: ZakatCalculation? = null,
     val isCalculating: Boolean = false,
     val showBreakdown: Boolean = false,
@@ -67,7 +72,9 @@ sealed interface ZakatEvent {
 
 @HiltViewModel
 class ZakatViewModel @Inject constructor(
-    private val zakatUseCases: ZakatUseCases
+    private val zakatUseCases: ZakatUseCases,
+    private val settingsRepository: SettingsRepository,
+    private val telemetry: Telemetry,
 ) : ViewModel() {
 
     private val _calculatorState = MutableStateFlow(ZakatCalculatorUiState())
@@ -78,17 +85,41 @@ class ZakatViewModel @Inject constructor(
 
     init {
         loadHistory()
+        observeMetalPrices()
+    }
+
+    /**
+     * The metal prices and currency are persisted, not constants: [ZakatCalculator]
+     * derives the nisab threshold from the gold price as well as the metal valuation,
+     * so a stale price changes whether zakat is owed at all, not merely how much.
+     *
+     * Recalculates on every change so an edited price is reflected immediately.
+     */
+    private fun observeMetalPrices() {
+        combine(
+            settingsRepository.zakatGoldPricePerGram,
+            settingsRepository.zakatSilverPricePerGram,
+            settingsRepository.zakatCurrency,
+        ) { gold, silver, currency ->
+            Triple(gold, silver, currency)
+        }
+            .onEach { (gold, silver, currency) ->
+                _calculatorState.update {
+                    it.copy(
+                        goldPricePerGram = gold,
+                        silverPricePerGram = silver,
+                        currency = currency,
+                    )
+                }
+                recalculate()
+            }
+            .catchAndReport(telemetry, DOMAIN, "observe_prices")
+            .launchIn(viewModelScope)
     }
 
     fun onEvent(event: ZakatEvent) {
         // Log only the actions, never the monetary amounts (financial data stays
         // out of analytics).
-        when (event) {
-            ZakatEvent.Calculate -> AppAnalytics.logFeatureUsed("zakat", "calculate")
-            ZakatEvent.SaveCalculation -> AppAnalytics.logFeatureUsed("zakat", "save")
-            is ZakatEvent.MarkAsPaid -> AppAnalytics.logFeatureUsed("zakat", "mark_paid")
-            else -> {}
-        }
         when (event) {
             is ZakatEvent.UpdateCash -> updateAsset { it.copy(cashOnHand = event.amount) }
             is ZakatEvent.UpdateBankBalance -> updateAsset { it.copy(bankBalance = event.amount) }
@@ -108,22 +139,37 @@ class ZakatViewModel @Inject constructor(
                 recalculate()
             }
 
-            is ZakatEvent.UpdateGoldPrice -> {
-                _calculatorState.update { it.copy(goldPricePerGram = event.pricePerGram) }
-                recalculate()
+            // Persisted, not just held in state: these survived only until process death
+            // before, and the observer above feeds the new value back in.
+            is ZakatEvent.UpdateGoldPrice -> persist("gold_price") {
+                settingsRepository.setZakatGoldPricePerGram(event.pricePerGram)
             }
 
-            is ZakatEvent.UpdateSilverPrice -> {
-                _calculatorState.update { it.copy(silverPricePerGram = event.pricePerGram) }
-                recalculate()
+            is ZakatEvent.UpdateSilverPrice -> persist("silver_price") {
+                settingsRepository.setZakatSilverPricePerGram(event.pricePerGram)
             }
 
-            is ZakatEvent.SetCurrency -> _calculatorState.update { it.copy(currency = event.currency) }
-            ZakatEvent.Calculate -> calculate()
+            is ZakatEvent.SetCurrency -> persist("currency") {
+                settingsRepository.setZakatCurrency(event.currency)
+            }
+
+            ZakatEvent.Calculate -> {
+                telemetry.featureUsed(DOMAIN, "calculate")
+                calculate()
+            }
+
             ZakatEvent.ClearAll -> clearAll()
             ZakatEvent.ToggleBreakdown -> _calculatorState.update { it.copy(showBreakdown = !it.showBreakdown) }
-            ZakatEvent.SaveCalculation -> saveCalculation()
-            is ZakatEvent.MarkAsPaid -> markAsPaid(event.entryId)
+            ZakatEvent.SaveCalculation -> {
+                telemetry.featureUsed(DOMAIN, "save")
+                saveCalculation()
+            }
+
+            is ZakatEvent.MarkAsPaid -> {
+                telemetry.featureUsed(DOMAIN, "mark_paid")
+                markAsPaid(event.entryId)
+            }
+
             is ZakatEvent.DeleteCalculation -> deleteCalculation(event.entryId)
             ZakatEvent.LoadHistory -> loadHistory()
         }
@@ -143,17 +189,31 @@ class ZakatViewModel @Inject constructor(
         recalculate()
     }
 
+    /**
+     * Recalculates, or clears the result when the form is empty.
+     *
+     * Clearing matters: without it, emptying the last field left the *previous*
+     * calculation on screen, and the breakdown card renders whenever `calculation`
+     * is non-null — so the user saw a zakat figure over a blank form. The Zakat
+     * redesign pins that total to a sticky hero, which would have made it permanent.
+     */
     private fun recalculate() {
         val state = _calculatorState.value
         if (state.assets.hasAnyValue() || state.liabilities.hasAnyValue()) {
             calculate()
+        } else {
+            _calculatorState.update { it.copy(calculation = null, error = null) }
         }
+    }
+
+    private fun persist(type: String, write: suspend () -> Unit) {
+        launchSafely(telemetry, DOMAIN, type) { write() }
     }
 
     private fun calculate() {
         _calculatorState.update { it.copy(isCalculating = true, error = null) }
 
-        viewModelScope.launch {
+        run {
             try {
                 val state = _calculatorState.value
                 // The calculation itself lives in the domain (ZakatCalculator), not here.
@@ -172,8 +232,7 @@ class ZakatViewModel @Inject constructor(
                     it.copy(calculation = calculation, isCalculating = false)
                 }
             } catch (e: Exception) {
-                CrashReporter.recordException(e)
-                AppAnalytics.logError("zakat", "calculate", e.message)
+                telemetry.failure(DOMAIN, "calculate", e)
                 _calculatorState.update {
                     it.copy(error = e.message, isCalculating = false)
                 }
@@ -194,7 +253,7 @@ class ZakatViewModel @Inject constructor(
     private fun saveCalculation() {
         val calculation = _calculatorState.value.calculation ?: return
 
-        viewModelScope.launch {
+        launchSafely(telemetry, DOMAIN, "save") {
             val entry = ZakatHistoryEntry(
                 calculatedAt = calculation.calculatedAt,
                 totalAssets = calculation.totalAssets,
@@ -209,19 +268,19 @@ class ZakatViewModel @Inject constructor(
     }
 
     private fun markAsPaid(entryId: Long) {
-        viewModelScope.launch {
+        launchSafely(telemetry, DOMAIN, "mark_paid") {
             zakatUseCases.markAsPaid(entryId, System.currentTimeMillis())
         }
     }
 
     private fun deleteCalculation(entryId: Long) {
-        viewModelScope.launch {
+        launchSafely(telemetry, DOMAIN, "delete") {
             zakatUseCases.deleteCalculation(entryId)
         }
     }
 
     private fun loadHistory() {
-        viewModelScope.launch {
+        launchSafely(telemetry, DOMAIN, "load_history") {
             zakatUseCases.getAllHistory().collect { entries ->
                 val totalPaid = zakatUseCases.getTotalPaid()
                 _historyState.update {
@@ -233,6 +292,10 @@ class ZakatViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    private companion object {
+        const val DOMAIN = "zakat"
     }
 
     private fun ZakatAssets.hasAnyValue(): Boolean {

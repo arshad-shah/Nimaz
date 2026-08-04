@@ -159,7 +159,10 @@ private fun ZakatCompactContent(
                 selectedType = state.nisabType,
                 goldPrice = state.goldPricePerGram,
                 silverPrice = state.silverPricePerGram,
-                onTypeChange = { viewModel.onEvent(ZakatEvent.SetNisabType(it)) }
+                currency = state.currency,
+                onTypeChange = { viewModel.onEvent(ZakatEvent.SetNisabType(it)) },
+                onGoldPriceChange = { viewModel.onEvent(ZakatEvent.UpdateGoldPrice(it)) },
+                onSilverPriceChange = { viewModel.onEvent(ZakatEvent.UpdateSilverPrice(it)) }
             )
         }
         item {
@@ -241,7 +244,10 @@ private fun ZakatTabletContent(
             selectedType = state.nisabType,
             goldPrice = state.goldPricePerGram,
             silverPrice = state.silverPricePerGram,
-            onTypeChange = { viewModel.onEvent(ZakatEvent.SetNisabType(it)) }
+            currency = state.currency,
+            onTypeChange = { viewModel.onEvent(ZakatEvent.SetNisabType(it)) },
+            onGoldPriceChange = { viewModel.onEvent(ZakatEvent.UpdateGoldPrice(it)) },
+            onSilverPriceChange = { viewModel.onEvent(ZakatEvent.UpdateSilverPrice(it)) }
         )
 
         // Two columns: Assets left, Liabilities right
@@ -501,30 +507,113 @@ private fun NisabSelector(
     selectedType: NisabType,
     goldPrice: Double,
     silverPrice: Double,
+    currency: String,
     onTypeChange: (NisabType) -> Unit,
+    onGoldPriceChange: (Double) -> Unit,
+    onSilverPriceChange: (Double) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Row(
+    Column(
         modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(10.dp)
+        verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        NisabOptionCard(
-            label = stringResource(R.string.gold),
-            subtitle = stringResource(R.string.zakat_nisab_gold_subtitle, goldPrice.toInt()),
-            isSelected = selectedType == NisabType.GOLD,
-            accentColor = NimazColors.ZakatColors.Gold,
-            onClick = { onTypeChange(NisabType.GOLD) },
-            modifier = Modifier.weight(1f)
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            NisabOptionCard(
+                label = stringResource(R.string.gold),
+                // Formatted, not truncated: goldPrice.toInt() rendered the silver
+                // price of 0.80 as "0", and the hardcoded "$" ignored the currency.
+                subtitle = stringResource(
+                    R.string.zakat_nisab_gold_subtitle,
+                    formatCurrency(goldPrice, currency)
+                ),
+                isSelected = selectedType == NisabType.GOLD,
+                accentColor = NimazColors.ZakatColors.Gold,
+                onClick = { onTypeChange(NisabType.GOLD) },
+                modifier = Modifier.weight(1f)
+            )
 
-        NisabOptionCard(
-            label = stringResource(R.string.silver),
-            subtitle = stringResource(R.string.zakat_nisab_silver_subtitle, silverPrice.toString()),
-            isSelected = selectedType == NisabType.SILVER,
-            accentColor = NimazColors.ZakatColors.Silver,
-            onClick = { onTypeChange(NisabType.SILVER) },
-            modifier = Modifier.weight(1f)
+            NisabOptionCard(
+                label = stringResource(R.string.silver),
+                subtitle = stringResource(
+                    R.string.zakat_nisab_silver_subtitle,
+                    formatCurrency(silverPrice, currency)
+                ),
+                isSelected = selectedType == NisabType.SILVER,
+                accentColor = NimazColors.ZakatColors.Silver,
+                onClick = { onTypeChange(NisabType.SILVER) },
+                modifier = Modifier.weight(1f)
+            )
+        }
+
+        MetalPricesEditor(
+            goldPrice = goldPrice,
+            silverPrice = silverPrice,
+            onGoldPriceChange = onGoldPriceChange,
+            onSilverPriceChange = onSilverPriceChange
         )
+    }
+}
+
+/**
+ * The metal prices the nisab threshold is derived from, editable.
+ *
+ * These used to be constants no user could reach, so every zakat figure was wrong by
+ * however stale they were — and because the gold price sets the nisab threshold as
+ * well as the metal valuation, a stale price could change whether zakat was owed at
+ * all. The hint says they are estimates so a default is never mistaken for a rate.
+ */
+@Composable
+private fun MetalPricesEditor(
+    goldPrice: Double,
+    silverPrice: Double,
+    onGoldPriceChange: (Double) -> Unit,
+    onSilverPriceChange: (Double) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    NimazCard(
+        modifier = modifier.fillMaxWidth(),
+        style = NimazCardStyle.OUTLINED,
+        shape = NimazShapes.small
+    ) {
+        Column(
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(R.string.zakat_gold_price_label),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.weight(1f)
+                )
+                CompactAmountField(value = goldPrice, onValueChange = onGoldPriceChange)
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(R.string.zakat_silver_price_label),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.weight(1f)
+                )
+                CompactAmountField(value = silverPrice, onValueChange = onSilverPriceChange)
+            }
+
+            Text(
+                text = stringResource(R.string.zakat_metal_prices_hint),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
     }
 }
 

@@ -47,6 +47,12 @@ private class FakeSettings(private val offset: Int) : SettingsRepository {
     override suspend fun setWorshipReminderOffset(key: String, minutes: Int) {}
     override fun worshipReminderMode(key: String, default: String): Flow<String> = flowOf(default)
     override suspend fun setWorshipReminderMode(key: String, mode: String) {}
+    override val zakatGoldPricePerGram: Flow<Double> = flowOf(65.0)
+    override suspend fun setZakatGoldPricePerGram(pricePerGram: Double) {}
+    override val zakatSilverPricePerGram: Flow<Double> = flowOf(0.80)
+    override suspend fun setZakatSilverPricePerGram(pricePerGram: Double) {}
+    override val zakatCurrency: Flow<String> = flowOf("USD")
+    override suspend fun setZakatCurrency(currency: String) {}
     override suspend fun clearAllData() {}
     override val onboardingCompleted: Flow<Boolean> = flowOf(true)
     override suspend fun setOnboardingCompleted(completed: Boolean) {}

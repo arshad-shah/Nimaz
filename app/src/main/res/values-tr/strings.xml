@@ -1535,8 +1535,8 @@
     <string name="tafseer_no_commentary_anywhere">Bu Ayet için yüklü kaynakların hiçbirinde henüz tefsir bulunmuyor.</string>
     <string name="qibla_turn_right_hint">Kıble\'yi bulmak için\nsağa dönün</string>
     <string name="qibla_turn_left_hint">Kıble\'yi bulmak için\nsola dönün</string>
-    <string name="zakat_nisab_gold_subtitle">87,48 g @ $%1$d/g</string>
-    <string name="zakat_nisab_silver_subtitle">612,36 g @ $%1$s/g</string>
+    <string name="zakat_nisab_gold_subtitle">87,48 g @ %1$s/g</string>
+    <string name="zakat_nisab_silver_subtitle">612,36 g @ %1$s/g</string>
     <string name="yes">Evet</string>
     <string name="no">Hayır</string>
     <string name="fasting_event_ashura_name">Aşure Günü</string>
@@ -1751,4 +1751,7 @@
         <item quantity="one">%1$d dk önce</item>
         <item quantity="other">%1$d dk önce</item>
     </plurals>
+    <string name="zakat_gold_price_label">Gram başına altın fiyatı</string>
+    <string name="zakat_silver_price_label">Gram başına gümüş fiyatı</string>
+    <string name="zakat_metal_prices_hint">Tahmini değerler — yerel kurunuza göre ayarlayın. Nisap eşiği bunlardan hesaplanır.</string>
 </resources>
