@@ -593,7 +593,7 @@
     <plurals name="fasting_in_days_format">
         <item quantity="other">Dalam %1$d hari</item>
     </plurals>
-    <string name="fasting_log_today">Catat Puasa Hari Ini</string>
+    <string name="fasting_log_today">Catat puasa hari ini</string>
     <string name="fasting_no_makeup">Tidak Ada Puasa Qadha</string>
     <string name="fasting_all_up_to_date">Semua puasa Anda sudah terpenuhi!</string>
     <string name="fasting_fasts_to_makeup">Puasa yang Harus Diqadha</string>
@@ -1717,4 +1717,7 @@
     <string name="zakat_gold_price_label">Harga emas per gram</string>
     <string name="zakat_silver_price_label">Harga perak per gram</string>
     <string name="zakat_metal_prices_hint">Perkiraan — sesuaikan dengan harga setempat. Ambang nisab dihitung dari nilai ini.</string>
+    <string name="fasting_log_on_subtitle">Tercatat — ketuk untuk membatalkan</string>
+    <string name="fasting_log_off_subtitle">Belum dicatat</string>
+    <string name="fasting_log_managed_in_sheet">Dikelola di rincian hari ini</string>
 </resources>

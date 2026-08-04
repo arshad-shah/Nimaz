@@ -612,7 +612,7 @@
         <item quantity="one">%1$d gün sonra</item>
         <item quantity="other">%1$d gün sonra</item>
     </plurals>
-    <string name="fasting_log_today">Bugünün Orucunu Kaydet</string>
+    <string name="fasting_log_today">Bugünün orucunu kaydet</string>
     <string name="fasting_no_makeup">Kaza Orucu Yok</string>
     <string name="fasting_all_up_to_date">Tüm oruçlarınız güncel!</string>
     <string name="fasting_fasts_to_makeup">Kaza Edilecek Oruçlar</string>
@@ -1754,4 +1754,7 @@
     <string name="zakat_gold_price_label">Gram başına altın fiyatı</string>
     <string name="zakat_silver_price_label">Gram başına gümüş fiyatı</string>
     <string name="zakat_metal_prices_hint">Tahmini değerler — yerel kurunuza göre ayarlayın. Nisap eşiği bunlardan hesaplanır.</string>
+    <string name="fasting_log_on_subtitle">Kaydedildi — geri almak için dokunun</string>
+    <string name="fasting_log_off_subtitle">Henüz kaydedilmedi</string>
+    <string name="fasting_log_managed_in_sheet">Gün ayrıntılarında yönetilir</string>
 </resources>

@@ -1,5 +1,7 @@
 package com.arshadshah.nimaz.presentation.viewmodel
 
+import com.arshadshah.nimaz.core.monitoring.RecordingTelemetry
+
 import app.cash.turbine.test
 import com.arshadshah.nimaz.core.util.PrayerTimeCalculator
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
@@ -74,7 +76,12 @@ class FastingViewModelTest {
     }
 
     private fun createViewModel(): FastingViewModel {
-        return FastingViewModel(buildFastingUseCases(repository), prayerTimeCalculator, settingsRepository)
+        return FastingViewModel(
+            buildFastingUseCases(repository),
+            prayerTimeCalculator,
+            settingsRepository,
+            RecordingTelemetry(),
+        )
     }
 
     private fun dateToEpoch(date: LocalDate): Long {
