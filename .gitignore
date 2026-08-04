@@ -36,3 +36,6 @@ google-services.json
 
 # Playwright MCP screenshots / logs
 .playwright-mcp/
+
+# Node deps are only installed transiently for scripts/check_mermaid.mjs
+node_modules/

@@ -1,5 +1,16 @@
 # Ask with Proof — AI-assisted search with local proof
 
+> **Owns:** the opt-in AI search feature end to end — the Cloudflare Worker in `worker/`, the
+> `search-assist` capability contract, local proof resolution, the smart local search, the
+> settings/consent surface, the cost model, and the manual setup runbook.
+> **Update when:** you change the Worker, the capability contract or its schema, the proof
+> resolution, the consent/settings flow, the analytics, or the deployment/secret setup.
+> **Verified by:** review only — plus the Worker's own tests and `SearchLibraryUseCaseTest`.
+> `SUB-06` guards the `nimaz_ai_device` DataStore this feature owns.
+> **Related:** [`SUBSYSTEMS.md` §0.5](SUBSYSTEMS.md#05-datastore-files) for its DataStore,
+> [`NAVIGATION.md` §3.14](NAVIGATION.md#314-search-bookmarks--onboarding) for its routes,
+> [`DOCUMENTATION.md`](DOCUMENTATION.md) for the update contract.
+
 An **opt-in**, privacy-disclosed AI layer over Global Search. The user types
 into Global Search's **single search bar** — the same text drives both keyword
 search (as-you-type) and the AI ask (there is no separate "ask" field). While
@@ -49,6 +60,21 @@ explorable. When AI is **off**, only local keyword search runs (no network, no
 behaviour change). AI is **off by default** — a user who never opens Search
 Settings sees nothing leave their device.
 
+---
+
+## Contents
+
+1. [Architecture](#architecture)
+2. [Capability contract](#capability-contract)
+3. [Smart local search (`SearchLibraryUseCase`)](#smart-local-search-searchlibraryusecase)
+4. [Settings & consent behaviour](#settings--consent-behaviour)
+5. [Cost model](#cost-model)
+6. [Adding a new capability](#adding-a-new-capability)
+7. [Runbook — manual setup (one-time)](#runbook--manual-setup-one-time)
+8. [Testing](#testing)
+
+---
+
 ## Architecture
 
 ```mermaid
@@ -62,7 +88,7 @@ sequenceDiagram
 
     U->>App: Ask a question
     App->>W: POST /v1/invoke (search-assist) {question}
-    W->>W: Play Integrity (only guard; fail-open, blocks failed verdicts)
+    W->>W: Play Integrity — only guard, fail-open, blocks failed verdicts
     W->>GW: anthropic/v1/messages (cf-aig-authorization, forced submit_result tool)
     GW->>C: Unified Billing — Cloudflare-managed Anthropic credentials
     C-->>GW: tool_use JSON

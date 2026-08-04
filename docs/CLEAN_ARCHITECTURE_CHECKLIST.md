@@ -1,9 +1,19 @@
 # Clean Architecture — Anti-Pattern Checklist
 
+> **Owns:** the tick-box backlog of clean-architecture violations still present in the codebase,
+> each with a detection command that reproduces its count.
+> **Update when:** you fix an anti-pattern (tick the box, re-run its detection command), or find
+> a new one (add it with a detector).
+> **Verified by:** review only — no mechanical check. Each item carries **its own** detection
+> command; run it rather than trusting the recorded count.
+> **Related:** [`ARCHITECTURE.md`](ARCHITECTURE.md) for the canonical patterns and its §9
+> resolved/open registry, [`DOCUMENTATION.md`](DOCUMENTATION.md) for the update contract.
+
 > A **living, tick-box backlog** of clean-architecture violations to chip away at over time.
-> Pair it with [`ARCHITECTURE.md`](ARCHITECTURE.md) (the canonical patterns) and its §9 registry
-> (resolved vs open). Each item is small enough to land in its own PR. When you fix one, check
-> its box and, if it removes the last instance of an anti-pattern, note it in `ARCHITECTURE.md` §9.
+> Each item is small enough to land in its own PR. When you fix one, check its box and, if it
+> removes the last instance of an anti-pattern, note it in `ARCHITECTURE.md` §9.
+>
+> **Never copy an open item as a pattern to follow** — this list exists to be shrunk.
 
 **How to use this**
 1. Pick any unchecked box (they're independent — no required order).
@@ -13,6 +23,26 @@
 
 Counts below were captured during the architecture-consistency pass — treat them as a starting
 snapshot, not gospel. Re-run the detection commands to refresh.
+
+---
+
+## Contents
+
+| # | Anti-pattern | Detector |
+|---|---|---|
+| [AP-1](#ap-1--domain-depends-on-the-data-layer) | Domain depends on the data layer | scripted |
+| [AP-2](#ap-2--presentation-reaches-into-the-data-layer) | Presentation reaches into the data layer | scripted |
+| [AP-3](#ap-3--repositories-expose-room-entities-instead-of-domain-models) | Repositories expose Room entities instead of domain models | scripted |
+| [AP-4](#ap-4--business-logic-living-in-viewmodels) | Business logic living in ViewModels | scripted |
+| [AP-5](#ap-5--hardcoded-colors--dimensions-in-screens-theme-bypass) | Hardcoded colors / dimensions in screens | scripted |
+| [AP-6](#ap-6--data-layer-infrastructure-injected-straight-into-viewmodels) | Data-layer infrastructure injected straight into ViewModels | scripted |
+| [AP-7](#ap-7--general-watchlist-no-scripted-detector--review-during-prs) | General watchlist (nested collects, stacking collectors, Get/Observe twins, stubs) | review |
+| [AP-8](#ap-8--design-system-drift-hand-rolled-surfaces-bypassed-tones) | Design-system drift (hand-rolled surfaces, bypassed tones) | scripted |
+| [AP-9](#ap-9--derived-state-stored-instead-of-computed) | Derived state stored instead of computed | scripted |
+| [AP-10](#ap-10--non-lifecycle-aware-state-collection) | Non-lifecycle-aware state collection | scripted |
+| [AP-11](#ap-11--lazy-list-items-without-a-stable-key) | Lazy list items without a stable key | scripted |
+| [AP-12](#ap-12--shipped-but-unreachable-state-and-settings) | Shipped-but-unreachable state and settings | scripted |
+| — | [Quick full re-scan](#quick-full-re-scan) | all of the above |
 
 ---
 

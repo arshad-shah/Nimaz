@@ -1,4 +1,15 @@
-# Authenticating to the content repository
+# Nimaz — Authenticating to the content repository
+
+> **Owns:** how CI and local builds obtain a credential for the private `arshad-shah/nimaz-data`
+> repository — the GitHub App setup, how the workflows consume it, local usage, rotation, and
+> failure modes.
+> **Update when:** you change the credential mechanism, the App's permissions, the secret names,
+> or which workflows need it.
+> **Verified by:** review only — the build itself fails at `fetchNimazData` with a message naming
+> the three ways to supply a credential.
+> **Related:** [`SUBSYSTEMS.md` §7](SUBSYSTEMS.md#7-content-seeding--versioning) for what the
+> fetched artifact is and how it reaches a device,
+> [`DOCUMENTATION.md`](DOCUMENTATION.md) for the update contract.
 
 The prepackaged database is fetched from **[arshad-shah/nimaz-data](https://github.com/arshad-shah/nimaz-data)**,
 which is private. `fetchNimazData` (see `gradle/nimaz-data.gradle.kts`) needs a credential that

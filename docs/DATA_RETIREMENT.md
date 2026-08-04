@@ -1,4 +1,14 @@
-# Data retirement ledger
+# Nimaz — Data retirement ledger
+
+> **Owns:** the rules for retiring shipped data, seeders and migration paths — why each
+> retirement is gated on a *deployed* version code, and how to verify one was safe.
+> The ledger entries themselves live in [`retirement.yaml`](retirement.yaml).
+> **Update when:** you retire an entry (set `status`, record `retired_in_version_code`), add a
+> new retirement, or change what gates one.
+> **Verified by:** review only — each entry carries its own `verify` commands; run those.
+> **Related:** [`SUBSYSTEMS.md` §5/§7](SUBSYSTEMS.md#5-database--migrations) for the database and
+> content-delivery pipeline the retirements act on,
+> [`DOCUMENTATION.md`](DOCUMENTATION.md) for the update contract.
 
 **For agents:** when told *"version X is in prod"*, do exactly this:
 
@@ -16,6 +26,17 @@ safe and the reason that version is the threshold.
 One exception, marked in the entry itself: `git-history-purge` has passed its gate but is
 **held for explicit human sign-off**. It is the only entry whose damage cannot be checked for
 beforehand — see "The one that stays pending" below.
+
+---
+
+## Contents
+
+1. [Why retirement is gated on the *deployed* version](#why-retirement-is-gated-on-the-deployed-version)
+2. [Where this stands at 385](#where-this-stands-at-385)
+3. [The subtlety that set most of the gates](#the-subtlety-that-set-most-of-the-gates)
+4. [Entries](#entries)
+5. [The one that stays pending](#the-one-that-stays-pending)
+6. [Verifying a retirement was safe](#verifying-a-retirement-was-safe)
 
 ---
 
