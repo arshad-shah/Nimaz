@@ -7,6 +7,8 @@ import com.arshadshah.nimaz.domain.model.Surah
 import com.arshadshah.nimaz.domain.model.SurahOverview
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.usecase.QuranUseCases
+import com.arshadshah.nimaz.core.monitoring.Telemetry
+import com.arshadshah.nimaz.core.monitoring.launchSafely
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,7 +17,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
@@ -40,6 +41,8 @@ data class SurahBackgroundState(
      */
     val proseFontSize: Float = DEFAULT_PROSE_FONT_SIZE,
     val isLoading: Boolean = true,
+    /** Set when the background fails to load, so the screen can say so rather than look empty. */
+    val error: String? = null,
 )
 
 data class SurahPassagesState(
@@ -47,6 +50,8 @@ data class SurahPassagesState(
     val passages: List<AyahTheme> = emptyList(),
     val query: String = "",
     val isLoading: Boolean = true,
+    /** Set when the passages fail to load. */
+    val error: String? = null,
 ) {
     /**
      * The outline, narrowed by the filter.
@@ -82,6 +87,7 @@ sealed interface SurahThematicEvent {
 class SurahThematicViewModel @Inject constructor(
     private val quranUseCases: QuranUseCases,
     settingsRepository: SettingsRepository,
+    private val telemetry: Telemetry,
 ) : ViewModel() {
 
     private val _backgroundState = MutableStateFlow(SurahBackgroundState())
@@ -104,8 +110,11 @@ class SurahThematicViewModel @Inject constructor(
         when (event) {
             is SurahThematicEvent.Load -> load(event.surahNumber)
 
-            is SurahThematicEvent.Filter ->
+            is SurahThematicEvent.Filter -> {
                 _passagesState.update { it.copy(query = event.query) }
+                // Logged post-filter with the length only, never the query itself.
+                if (event.query.isNotBlank()) telemetry.search(DOMAIN, event.query.trim().length)
+            }
 
             SurahThematicEvent.ClearFilter ->
                 _passagesState.update { it.copy(query = "") }
@@ -116,9 +125,20 @@ class SurahThematicViewModel @Inject constructor(
         if (loadedSurah == surahNumber && loadJob?.isActive != true) return
         loadedSurah = surahNumber
         loadJob?.cancel()
-        loadJob = viewModelScope.launch {
-            _backgroundState.update { it.copy(isLoading = true) }
-            _passagesState.update { it.copy(isLoading = true) }
+        loadJob = launchSafely(
+            telemetry,
+            domain = DOMAIN,
+            type = "load",
+            onFailure = { throwable ->
+                // The surah was never actually loaded, so clear the marker: otherwise the
+                // guard above would short-circuit a later retry and strand the screen.
+                loadedSurah = null
+                _backgroundState.update { it.copy(isLoading = false, error = throwable.message) }
+                _passagesState.update { it.copy(isLoading = false, error = throwable.message) }
+            },
+        ) {
+            _backgroundState.update { it.copy(isLoading = true, error = null) }
+            _passagesState.update { it.copy(isLoading = true, error = null) }
 
             val surah = quranUseCases.getSurahByNumber(surahNumber)
             val overview = quranUseCases.getSurahOverview(surahNumber)
@@ -130,8 +150,10 @@ class SurahThematicViewModel @Inject constructor(
             _passagesState.update {
                 it.copy(surah = surah, passages = passages, isLoading = false)
             }
+            telemetry.featureUsed(DOMAIN, "open")
         }
     }
 }
 
 private const val DEFAULT_PROSE_FONT_SIZE = 16f
+private const val DOMAIN = "surah_thematic"
