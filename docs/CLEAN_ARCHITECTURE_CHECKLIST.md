@@ -340,6 +340,28 @@ rg -n -U --multiline-dotall \
   app/src/main/java --glob '*ViewModel.kt' | grep -v 'Job = viewModelScope'
 ```
 
+### AP-7.10 · A cache marker recording the request instead of the result
+
+- [x] ~~**`SurahThematicViewModel.load`.**~~ **Resolved.** `loadedSurah` was assigned on *entry*,
+  so it named a surah that might never arrive, and the guard that short-circuits on it could not
+  tell "already showing this" from "already asked for this". Split into `loadedSurah` (assigned
+  on success) and `loadingSurah` (assigned on entry, cleared on failure), which is what lets the
+  guard answer both questions correctly: re-sending `Load` for the surah in flight is a no-op,
+  and a load that never completed blocks nothing.
+
+  **Correction to #364 R12, which predicts a permanent strand from this.** That state is not
+  reachable in the shipped code: `loadJob?.cancel()` appears at exactly one site, inside
+  `load()`, on the line *after* the marker is reassigned — so a cancel is always followed by a
+  relaunch for the surah just recorded, and the two cannot diverge. The failure path did not
+  strand either, because `onFailure` already reset the marker. The real defect is the one the
+  issue lists second: a second `Load` for the surah already in flight fell through and re-ran
+  the whole three-call load, despite the event's KDoc calling it idempotent. Verified by test in
+  both directions. (`SurahThematicLoadGuardTest`)
+
+  The general rule is still worth having: **a marker used as a cache key must record what
+  completed, not what was attempted.** Getting that right removes a class of "why is this screen
+  stuck" bug rather than one instance of it.
+
 ### AP-7.9 · One handle for requests that are not alternatives
 
 - [x] ~~**`QuranTopicsViewModel.toggle` / `focus` / `rebaseTo`, and the catalogue detail load.**~~

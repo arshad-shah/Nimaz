@@ -14,6 +14,7 @@ import com.arshadshah.nimaz.domain.model.Ayah
 import com.arshadshah.nimaz.domain.model.Khatam
 import com.arshadshah.nimaz.domain.model.KhatamDetailSnapshot
 import com.arshadshah.nimaz.domain.model.KhatamInsights
+import com.arshadshah.nimaz.domain.model.KhatamStatus
 import com.arshadshah.nimaz.domain.model.MushafPageLayout
 import com.arshadshah.nimaz.domain.model.MushafPagination
 import com.arshadshah.nimaz.domain.model.MushafScript
@@ -97,17 +98,6 @@ class QuranViewModel @Inject constructor(
     private val _surahInfo = MutableStateFlow<SurahInfo?>(null)
     val surahInfo: StateFlow<SurahInfo?> = _surahInfo.asStateFlow()
 
-    /**
-     * The surah's long-form background and its passage outline (schemaVersion 24).
-     *
-     * Kept beside [surahInfo] rather than folded into it: they are different content with
-     * different provenance and different sizes — one row of one sentence against ~8 KB of prose
-     * per surah — and the surah *list* reads the first for 114 rows and must never touch the
-     * second.
-     */
-    private val _surahThematic = MutableStateFlow(SurahThematicUiState())
-    val surahThematic: StateFlow<SurahThematicUiState> = _surahThematic.asStateFlow()
-
     val audioState: StateFlow<AudioState> = audioManager.audioState
 
     /**
@@ -134,14 +124,6 @@ class QuranViewModel @Inject constructor(
 
     private var passagesJob: Job? = null
 
-    /**
-     * One job for the info screen's thematic load, cancelled when a different surah asks.
-     *
-     * The screen is reachable from the surah list, from a deep link and from the reader, so two
-     * surahs can be requested in quick succession — without this, the slower of the two wins.
-     */
-    private var surahThematicJob: Job? = null
-
     // Debounced search support
     private val searchQueryFlow = MutableStateFlow("")
     private var searchJob: Job? = null
@@ -159,6 +141,15 @@ class QuranViewModel @Inject constructor(
     }
 
     private var readerTarget: ReaderTarget? = null
+
+    /**
+     * Khatams this instance has already asked to complete.
+     *
+     * `activeKhatamStream` re-emits on any change to the khatam or its read ayahs, and the
+     * completion branch is evaluated on every one — so without this, an emission arriving
+     * before the completed flag comes back round called `completeKhatam` again.
+     */
+    private val completedKhatamIds = mutableSetOf<Long>()
 
     /**
      * The in-flight collector for the *single-target* reading modes (surah, juz). Each load
@@ -279,8 +270,15 @@ class QuranViewModel @Inject constructor(
             )
 
             QuranEvent.ToggleTranslation -> {
-                val newValue = !_readerState.value.showTranslation
-                _readerState.update { it.copy(showTranslation = newValue) }
+                // Flipped inside the update so the read and the write are one operation. Read
+                // first and `observeQuranSettings` — which writes the same field from its own
+                // coroutine — can land between them, and the toggle then writes a value derived
+                // from a state that no longer exists.
+                var newValue = false
+                _readerState.update {
+                    newValue = !it.showTranslation
+                    it.copy(showTranslation = newValue)
+                }
                 viewModelScope.launch { settingsRepository.setShowTranslation(newValue) }
             }
 
@@ -489,30 +487,6 @@ class QuranViewModel @Inject constructor(
     private fun loadSurahInfo(surahNumber: Int) {
         viewModelScope.launch {
             _surahInfo.value = quranUseCases.getSurahInfo(surahNumber)
-        }
-        loadSurahThematic(surahNumber)
-    }
-
-    /**
-     * The background and passage outline, in one job.
-     *
-     * Both come from the same artifact and are shown on the same screen, so loading them
-     * separately would only buy two spinners that finish at the same time. A surah whose
-     * overview is absent is not an error — see [SurahThematicUiState.isAvailable].
-     */
-    private fun loadSurahThematic(surahNumber: Int) {
-        surahThematicJob?.cancel()
-        surahThematicJob = viewModelScope.launch {
-            _surahThematic.value = SurahThematicUiState(isLoading = true)
-            val overview = quranUseCases.getSurahOverview(surahNumber)
-            val themes = quranUseCases.getSurahThemes(surahNumber)
-            val subjects = quranUseCases.getTopicsForSurah.count(surahNumber)
-            _surahThematic.value = SurahThematicUiState(
-                overview = overview,
-                passages = themes,
-                subjectCount = subjects,
-                isLoading = false,
-            )
         }
     }
 
@@ -1043,7 +1017,18 @@ class QuranViewModel @Inject constructor(
                     )
                 }
                 val khatam = snapshot?.khatam
-                if (khatam != null && snapshot.readAyahIds.size >= Khatam.TOTAL_QURAN_AYAHS) {
+                // `activeKhatamStream` re-emits on any row change in the khatam or its read
+                // ayahs, and this branch is reached on every one of them. Without a guard,
+                // completing a khatam that does not immediately leave "active" — or any
+                // unrelated re-emission afterwards — called `completeKhatam` again, and again.
+                // The id set is per-ViewModel and only grows, which is all that is needed:
+                // finishing is a one-way transition and a fresh instance re-reads the flag.
+                if (khatam != null &&
+                    khatam.status != KhatamStatus.COMPLETED &&
+                    khatam.id !in completedKhatamIds &&
+                    snapshot.readAyahIds.size >= Khatam.TOTAL_QURAN_AYAHS
+                ) {
+                    completedKhatamIds += khatam.id
                     khatamUseCases.completeKhatam(khatam.id)
                 }
             }

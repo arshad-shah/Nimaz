@@ -282,19 +282,49 @@ class KhatamViewModel @Inject constructor(
                 _formState.update { it.copy(isLoading = false) }
                 return@launch
             }
-            _formState.value = KhatamFormUiState(
-                mode = KhatamFormMode.Edit(khatamId),
-                name = khatam.name,
-                dailyTarget = khatam.dailyTarget,
-                preset = KhatamPacePreset.forTarget(khatam.dailyTarget),
-                notes = khatam.notes.orEmpty(),
-                deadline = khatam.deadline,
-                reminderEnabled = khatam.reminderEnabled,
-                reminderTime = khatam.reminderTime,
-                totalAyahsRead = khatam.totalAyahsRead,
-                isActiveKhatam = khatam.isActive,
-                isLoading = false
-            )
+            _formState.update { form ->
+                // A whole-object assign here threw away whatever the reader had typed while the
+                // first Room read was in flight: open Edit on a cold start, type "Ramadan 1447"
+                // into the name, and the load landing afterwards reverted it to the stored name.
+                //
+                // A field the reader has not touched is still at its blank default, so that is
+                // what decides. Untouched fields take the stored value; anything they have
+                // already changed is theirs and stays. The read-only facts below are not
+                // editable at all, so they always come from the record.
+                if ((form.mode as? KhatamFormMode.Edit)?.khatamId != khatamId) return@update form
+                val blank = KhatamFormUiState()
+                val dailyTarget =
+                    if (form.dailyTarget == blank.dailyTarget) khatam.dailyTarget
+                    else form.dailyTarget
+                form.copy(
+                    name = if (form.name == blank.name) khatam.name else form.name,
+                    dailyTarget = dailyTarget,
+                    preset = if (form.preset == blank.preset) {
+                        KhatamPacePreset.forTarget(khatam.dailyTarget)
+                    } else {
+                        form.preset
+                    },
+                    notes = if (form.notes == blank.notes) khatam.notes.orEmpty() else form.notes,
+                    deadline = if (form.deadline == blank.deadline) {
+                        khatam.deadline
+                    } else {
+                        form.deadline
+                    },
+                    reminderEnabled = if (form.reminderEnabled == blank.reminderEnabled) {
+                        khatam.reminderEnabled
+                    } else {
+                        form.reminderEnabled
+                    },
+                    reminderTime = if (form.reminderTime == blank.reminderTime) {
+                        khatam.reminderTime
+                    } else {
+                        form.reminderTime
+                    },
+                    totalAyahsRead = khatam.totalAyahsRead,
+                    isActiveKhatam = khatam.isActive,
+                    isLoading = false
+                )
+            }
         }
     }
 

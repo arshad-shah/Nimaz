@@ -62,3 +62,29 @@ data class SurahPassagesState(
 
 /** The reader's starting prose size; the state that defaults to it now owns it. */
 private const val DEFAULT_PROSE_FONT_SIZE = 16f
+
+/**
+ * The Qur'an's thematic layer for one surah: its long-form background and its passage outline.
+ *
+ * [isAvailable] separates "this install has no thematic content" from "this surah has none".
+ * Only the first is possible in practice — every surah has an overview and at least one passage
+ * — but an install that upgraded before the schemaVersion 24 artifact arrived has neither, and
+ * the screen says so instead of showing two empty sections.
+ */
+data class SurahThematicUiState(
+    val overview: SurahOverview? = null,
+    val passages: List<AyahTheme> = emptyList(),
+
+    /**
+     * How many subjects this surah's verses are cited under.
+     *
+     * A count and not the list: the info screen labels one row with it, and loading a few
+     * hundred topics to render a single integer is what the counting query exists to avoid.
+     */
+    val subjectCount: Int = 0,
+
+    val isLoading: Boolean = true,
+) {
+    val isAvailable: Boolean
+        get() = overview != null || passages.isNotEmpty() || subjectCount > 0
+}
