@@ -1763,4 +1763,7 @@
     <string name="bookmarks_clear_all_title">Alle Lesezeichen löschen?</string>
     <string name="bookmarks_clear_all_confirm">Alle löschen</string>
     <string name="bookmarks_clear_all_body">Damit werden alle %1$d Lesezeichen entfernt — Koran, Hadith und Bittgebete. Dies kann nicht rückgängig gemacht werden.</string>
+    <string name="ai_error_consent_title">Mit Beleg fragen ist aus</string>
+    <string name="ai_error_consent">Aktiviere es in den Sucheinstellungen, um eine Frage zu stellen. Die Stichwortsuche in Koran, Hadith und Bittgebeten funktioniert ohnehin offline.</string>
+    <string name="ai_consent_save_failed">Diese Einstellung konnte nicht gespeichert werden. Bitte versuche es erneut.</string>
 </resources>

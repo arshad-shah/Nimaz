@@ -106,5 +106,16 @@ sealed interface AiError {
     data object Network : AiError
     data class Invalid(val message: String) : AiError
     data object Unverified : AiError
+
+    /**
+     * The question was not sent because the user has not opted in.
+     *
+     * Consent used to be checked in one place — a visibility condition in `SearchScreen` —
+     * so nothing below the UI enforced it. `AskWithProofUseCase` now refuses first, and
+     * this is what it refuses with: a state the UI can explain rather than a generic
+     * failure the user would read as the feature being broken.
+     */
+    data object ConsentRequired : AiError
+
     data object Unknown : AiError
 }

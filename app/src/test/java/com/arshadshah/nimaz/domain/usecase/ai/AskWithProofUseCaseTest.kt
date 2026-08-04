@@ -15,6 +15,7 @@ import com.arshadshah.nimaz.domain.model.SearchAssist
 import com.arshadshah.nimaz.domain.model.Surah
 import com.arshadshah.nimaz.domain.model.SurahWithAyahs
 import com.arshadshah.nimaz.domain.repository.AiRepository
+import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.repository.AiRequestException
 import com.arshadshah.nimaz.domain.usecase.GetBookByIdUseCase
 import com.arshadshah.nimaz.domain.usecase.GetHadithByReferenceUseCase
@@ -38,6 +39,7 @@ class AskWithProofUseCaseTest {
     private val getHadithByReferenceUC = mockk<GetHadithByReferenceUseCase>()
     private val getBookByIdUC = mockk<GetBookByIdUseCase>()
     private val hadithUseCases = mockk<HadithUseCases>()
+    private val settingsRepository = mockk<SettingsRepository>(relaxed = true)
 
     private lateinit var useCase: AskWithProofUseCase
 
@@ -46,7 +48,9 @@ class AskWithProofUseCaseTest {
         every { quranUseCases.getSurahWithAyahs } returns getSurahWithAyahsUC
         every { hadithUseCases.getHadithByReference } returns getHadithByReferenceUC
         every { hadithUseCases.getBookById } returns getBookByIdUC
-        useCase = AskWithProofUseCase(aiRepository, quranUseCases, hadithUseCases)
+        // Consent is granted throughout: the refusal path is AskWithProofConsentTest.
+        every { settingsRepository.aiAskEnabled } returns flowOf(true)
+        useCase = AskWithProofUseCase(aiRepository, quranUseCases, hadithUseCases, settingsRepository)
     }
 
     @Test

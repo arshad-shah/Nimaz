@@ -2,7 +2,8 @@ package com.arshadshah.nimaz.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.arshadshah.nimaz.core.monitoring.AppAnalytics
+import com.arshadshah.nimaz.core.monitoring.Telemetry
+import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -11,7 +12,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
@@ -23,6 +23,11 @@ data class SearchSettingsUiState(
     /** Persisted recent questions — shown in the clear-history confirm dialog. */
     val savedQuestions: List<String> = emptyList(),
     val showConsentSheet: Boolean = false,
+    /**
+     * The consent write failed. The sheet stays up and says so, because the alternative —
+     * what shipped — is a switch the user just turned on quietly turning itself back off.
+     */
+    val consentFailed: Boolean = false,
 )
 
 sealed interface SearchSettingsEvent {
@@ -37,6 +42,7 @@ sealed interface SearchSettingsEvent {
 @HiltViewModel
 class SearchSettingsViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository,
+    private val telemetry: Telemetry,
 ) : ViewModel() {
 
     private val json = Json { ignoreUnknownKeys = true }
@@ -75,22 +81,22 @@ class SearchSettingsViewModel @Inject constructor(
             SearchSettingsEvent.ToggleAiRequested -> onToggleRequested()
             SearchSettingsEvent.ConsentAccepted -> onConsentAccepted()
             SearchSettingsEvent.ConsentDismissed ->
-                _uiState.update { it.copy(showConsentSheet = false) }
+                _uiState.update { it.copy(showConsentSheet = false, consentFailed = false) }
 
             is SearchSettingsEvent.SetHistoryEnabled ->
-                viewModelScope.launch {
+                launchSafely(telemetry, DOMAIN, "set_history") {
                     settingsRepository.setAiHistoryEnabled(event.enabled)
                     if (!event.enabled) settingsRepository.setAiQuestionHistory("")
-                    AppAnalytics.logFeatureUsed(
-                        "ai_ask",
-                        if (event.enabled) "history_on" else "history_off",
+                    telemetry.settingChanged(
+                        "ai_ask_history",
+                        if (event.enabled) "on" else "off",
                     )
                 }
 
             SearchSettingsEvent.ClearHistory ->
-                viewModelScope.launch {
+                launchSafely(telemetry, DOMAIN, "clear_history") {
                     settingsRepository.setAiQuestionHistory("")
-                    AppAnalytics.logFeatureUsed("ai_ask", "history_cleared")
+                    telemetry.featureUsed(DOMAIN, "history_cleared")
                 }
         }
     }
@@ -98,22 +104,40 @@ class SearchSettingsViewModel @Inject constructor(
     private fun onToggleRequested() {
         if (_uiState.value.aiEnabled) {
             // Turning OFF is instant — no consent required.
-            viewModelScope.launch {
+            launchSafely(telemetry, DOMAIN, "disable") {
                 settingsRepository.setAiAskEnabled(false)
-                AppAnalytics.logFeatureUsed("ai_ask", "disabled")
+                telemetry.settingChanged("ai_ask", "off")
             }
         } else {
             // Turning ON requires explicit consent first.
-            _uiState.update { it.copy(showConsentSheet = true) }
+            _uiState.update { it.copy(showConsentSheet = true, consentFailed = false) }
         }
     }
 
+    /**
+     * Closes the sheet **after** the writes commit, not before.
+     *
+     * The previous order closed it synchronously while the DataStore write was still
+     * queued in a `launch`. If that write failed, the user had consented, the sheet was
+     * gone, and the `combine` above re-emitted `aiEnabled = false` — a switch that flipped
+     * itself back with no explanation, on the one control that governs whether anything
+     * leaves the device.
+     */
     private fun onConsentAccepted() {
-        viewModelScope.launch {
+        launchSafely(
+            telemetry,
+            DOMAIN,
+            "consent",
+            onFailure = { _uiState.update { it.copy(consentFailed = true) } },
+        ) {
             settingsRepository.setAiAskEnabled(true)
             settingsRepository.setAiConsentTimestamp(System.currentTimeMillis())
-            AppAnalytics.logFeatureUsed("ai_ask", "enabled")
+            telemetry.settingChanged("ai_ask", "on")
+            _uiState.update { it.copy(showConsentSheet = false, consentFailed = false) }
         }
-        _uiState.update { it.copy(showConsentSheet = false) }
+    }
+
+    private companion object {
+        private const val DOMAIN = "ai_ask"
     }
 }

@@ -2,7 +2,8 @@ package com.arshadshah.nimaz.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.arshadshah.nimaz.core.monitoring.AppAnalytics
+import com.arshadshah.nimaz.core.monitoring.Telemetry
+import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.domain.model.AiError
 import com.arshadshah.nimaz.domain.model.AnswerConfidence
 import com.arshadshah.nimaz.domain.model.Proof
@@ -15,8 +16,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
@@ -60,6 +61,7 @@ sealed interface AskEvent {
 class AskViewModel @Inject constructor(
     private val askWithProof: AskWithProofUseCase,
     private val settingsRepository: SettingsRepository,
+    private val telemetry: Telemetry,
 ) : ViewModel() {
 
     private val json = Json { ignoreUnknownKeys = true }
@@ -67,29 +69,44 @@ class AskViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(AskUiState())
     val uiState: StateFlow<AskUiState> = _uiState.asStateFlow()
 
-    // Recent AI questions kept in memory for the session; also persisted only
-    // when history is enabled (mirrors SearchViewModel's recent-searches idiom).
-    private val recentQuestions = mutableListOf<String>()
-
     init {
+        // A pure transform: the previous version mutated a shared `mutableListOf` and
+        // called `_uiState.update` from inside `combine`, which is a side effect in a
+        // place that reads as a mapping — and that list was also mutated from `addRecent`
+        // on a different coroutine, with no synchronisation.
         combine(
             settingsRepository.aiAskEnabled,
             settingsRepository.aiAskHintDismissed,
             settingsRepository.aiHistoryEnabled,
             settingsRepository.aiQuestionHistory,
         ) { enabled, hintDismissed, historyEnabled, historyJson ->
-            if (historyEnabled && recentQuestions.isEmpty() && historyJson.isNotBlank()) {
-                recentQuestions.addAll(decodeHistory(historyJson))
+            // The stored history is the single source of truth, re-read on every change
+            // rather than loaded once "if the in-memory list happens to be empty". That
+            // condition is why switching "remember my questions" off left the questions
+            // it had already loaded on screen for the rest of the session.
+            Snapshot(
+                aiEnabled = enabled,
+                hintDismissed = hintDismissed,
+                recentQuestions = if (historyEnabled) decodeHistory(historyJson) else emptyList(),
+            )
+        }
+            .onEach { snapshot ->
+                _uiState.update {
+                    it.copy(
+                        aiEnabled = snapshot.aiEnabled,
+                        hintDismissed = snapshot.hintDismissed,
+                        recentQuestions = snapshot.recentQuestions,
+                    )
+                }
             }
-            _uiState.update {
-                it.copy(
-                    aiEnabled = enabled,
-                    hintDismissed = hintDismissed,
-                    recentQuestions = recentQuestions.toList(),
-                )
-            }
-        }.launchIn(viewModelScope)
+            .launchIn(viewModelScope)
     }
+
+    private data class Snapshot(
+        val aiEnabled: Boolean,
+        val hintDismissed: Boolean,
+        val recentQuestions: List<String>,
+    )
 
     fun onEvent(event: AskEvent) {
         when (event) {
@@ -108,7 +125,9 @@ class AskViewModel @Inject constructor(
                 }
 
             AskEvent.DismissHint ->
-                viewModelScope.launch { settingsRepository.setAiAskHintDismissed(true) }
+                launchSafely(telemetry, DOMAIN, "dismiss_hint") {
+                    settingsRepository.setAiAskHintDismissed(true)
+                }
         }
     }
 
@@ -116,15 +135,32 @@ class AskViewModel @Inject constructor(
         val question = rawQuestion.trim()
         if (question.length < MIN_QUESTION_LENGTH) return
 
-        AppAnalytics.logEvent(EVENT_SUBMITTED, null) // event name only — never the question text
+        // Every submit is one billed Worker invocation. Two guards, both checked
+        // synchronously before anything is launched:
+        //
+        //  - In flight already. Tapping "Ask" twice is the normal reaction to a slow
+        //    network, and the error card's retry button makes it one tap away. Without
+        //    this, that is two Worker calls for one question.
+        //  - Feature off. The use case refuses too — that is where the guarantee lives —
+        //    but returning here keeps the UI out of a Loading phase it would never leave
+        //    on its own.
+        if (_uiState.value.phase == AskPhase.Loading) return
+        if (!_uiState.value.aiEnabled) return
+
+        telemetry.featureUsed(DOMAIN, "submitted") // action only — never the question text
         // Reset the terms so a stale set can't drive the list if this ask fails;
         // only a fresh answer sets relatedTerms again.
         _uiState.update { it.copy(phase = AskPhase.Loading, relatedTerms = emptyList()) }
 
-        viewModelScope.launch {
+        launchSafely(
+            telemetry,
+            DOMAIN,
+            "ask",
+            onFailure = { _uiState.update { it.copy(phase = AskPhase.Error(AiError.Unknown)) } },
+        ) {
             when (val outcome = askWithProof(question)) {
                 is AskWithProofUseCase.Outcome.Answered -> {
-                    AppAnalytics.logEvent(EVENT_ANSWERED, null)
+                    telemetry.featureUsed(DOMAIN, "answered")
                     addRecent(question)
                     _uiState.update {
                         it.copy(
@@ -139,24 +175,21 @@ class AskViewModel @Inject constructor(
                 }
 
                 is AskWithProofUseCase.Outcome.Failed -> {
-                    AppAnalytics.logEvent(EVENT_ERROR_PREFIX + errorSlug(outcome.error), null)
+                    telemetry.error(DOMAIN, "ask_" + errorSlug(outcome.error))
                     _uiState.update { it.copy(phase = AskPhase.Error(outcome.error)) }
                 }
             }
         }
     }
 
-    private fun addRecent(question: String) {
-        recentQuestions.remove(question)
-        recentQuestions.add(0, question)
-        if (recentQuestions.size > MAX_RECENT) {
-            recentQuestions.removeAt(recentQuestions.lastIndex)
-        }
-        _uiState.update { it.copy(recentQuestions = recentQuestions.toList()) }
-        viewModelScope.launch {
-            if (settingsRepository.aiHistoryEnabled.first()) {
-                settingsRepository.setAiQuestionHistory(encodeHistory(recentQuestions))
-            }
+    private suspend fun addRecent(question: String) {
+        val updated = (listOf(question) + _uiState.value.recentQuestions.filterNot { it == question })
+            .take(MAX_RECENT)
+        _uiState.update { it.copy(recentQuestions = updated) }
+        // Persisting re-emits `aiQuestionHistory`, which flows back through the combine
+        // above — so the stored list stays the source of truth and the two cannot drift.
+        if (settingsRepository.aiHistoryEnabled.first()) {
+            settingsRepository.setAiQuestionHistory(encodeHistory(updated))
         }
     }
 
@@ -174,14 +207,13 @@ class AskViewModel @Inject constructor(
         AiError.Network -> "network"
         is AiError.Invalid -> "invalid"
         AiError.Unverified -> "unverified"
+        AiError.ConsentRequired -> "consent_required"
         AiError.Unknown -> "unknown"
     }
 
     companion object {
         const val MIN_QUESTION_LENGTH = 3
         private const val MAX_RECENT = 10
-        private const val EVENT_SUBMITTED = "ai_ask_submitted"
-        private const val EVENT_ANSWERED = "ai_ask_answered"
-        private const val EVENT_ERROR_PREFIX = "ai_ask_error_"
+        private const val DOMAIN = "ai_ask"
     }
 }

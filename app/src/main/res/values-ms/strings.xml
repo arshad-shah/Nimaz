@@ -1733,4 +1733,7 @@
     <string name="bookmarks_clear_all_title">Kosongkan semua penanda buku?</string>
     <string name="bookmarks_clear_all_confirm">Kosongkan semua</string>
     <string name="bookmarks_clear_all_body">Ini membuang kesemua %1$d penanda buku — Al-Quran, Hadis dan Doa. Ia tidak boleh dibatalkan.</string>
+    <string name="ai_error_consent_title">Tanya dengan Dalil dimatikan</string>
+    <string name="ai_error_consent">Hidupkan dalam tetapan carian untuk bertanya. Carian kata kunci dalam al-Quran, hadis dan doa tetap berfungsi di luar talian.</string>
+    <string name="ai_consent_save_failed">Tetapan itu tidak dapat disimpan. Sila cuba lagi.</string>
 </resources>

@@ -8,6 +8,7 @@ import com.arshadshah.nimaz.domain.model.HadithRef
 import com.arshadshah.nimaz.domain.model.Proof
 import com.arshadshah.nimaz.domain.repository.AiRepository
 import com.arshadshah.nimaz.domain.repository.AiRequestException
+import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.usecase.HadithUseCases
 import com.arshadshah.nimaz.domain.usecase.QuranUseCases
 import com.arshadshah.nimaz.domain.usecase.SearchLibraryUseCase
@@ -39,6 +40,7 @@ class AskWithProofUseCase @Inject constructor(
     private val aiRepository: AiRepository,
     private val quranUseCases: QuranUseCases,
     private val hadithUseCases: HadithUseCases,
+    private val settingsRepository: SettingsRepository,
 ) {
     sealed interface Outcome {
         data class Answered(
@@ -54,6 +56,13 @@ class AskWithProofUseCase @Inject constructor(
     }
 
     suspend operator fun invoke(question: String): Outcome {
+        // The consent gate lives here, below every caller, rather than in the one screen
+        // that happens to hide the entry point today. Nothing sends a question off the
+        // device without this check passing first.
+        if (!settingsRepository.aiAskEnabled.first()) {
+            return Outcome.Failed(AiError.ConsentRequired)
+        }
+
         val assist = aiRepository.assist(question).getOrElse { throwable ->
             val error = (throwable as? AiRequestException)?.error ?: AiError.Unknown
             return Outcome.Failed(error)
