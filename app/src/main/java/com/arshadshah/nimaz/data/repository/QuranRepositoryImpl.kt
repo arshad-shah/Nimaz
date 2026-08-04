@@ -36,6 +36,7 @@ import com.arshadshah.nimaz.domain.model.SurahInfo
 import com.arshadshah.nimaz.domain.model.SurahOverview
 import com.arshadshah.nimaz.domain.model.SurahOverviewGroup
 import com.arshadshah.nimaz.domain.model.SurahOverviewSection
+import com.arshadshah.nimaz.domain.model.SurahTopic
 import com.arshadshah.nimaz.domain.model.SurahWithAyahs
 import com.arshadshah.nimaz.domain.model.TopicCitation
 import com.arshadshah.nimaz.domain.model.TopicDetail
@@ -660,6 +661,14 @@ class QuranRepositoryImpl @Inject constructor(
 
     override suspend fun getTopicsForAyah(ayahId: Int): List<QuranTopic> =
         quranDao.getTopicsForAyah(ayahId).map { it.toDomain() }
+
+    override suspend fun getTopicsForSurah(surahNumber: Int): List<SurahTopic> =
+        quranDao.getTopicsForSurah(surahNumber).map {
+            SurahTopic(topic = it.topic.toDomain(), versesInSurah = it.versesHere)
+        }
+
+    override suspend fun countTopicsForSurah(surahNumber: Int): Int =
+        quranDao.countTopicsForSurah(surahNumber)
 
     /**
      * Topic search, through the shipped FTS index where there is one.

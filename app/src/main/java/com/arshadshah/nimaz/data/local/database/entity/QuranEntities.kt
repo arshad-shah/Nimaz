@@ -1,6 +1,7 @@
 package com.arshadshah.nimaz.data.local.database.entity
 
 import androidx.room.ColumnInfo
+import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
@@ -418,4 +419,16 @@ data class QuranTopicAyahEntity(
     @ColumnInfo(name = "ayah_id") val ayahId: Int,
     @ColumnInfo(name = "surah_number") val surahNumber: Int,
     @ColumnInfo(name = "ayah_number") val ayahNumber: Int,
+)
+
+/**
+ * A topic, with how many verses of *one particular surah* are cited under it.
+ *
+ * The count is the whole point of the projection. [QuranTopicEntity.ayahCount] is the subject's
+ * reach across the entire Qur'an, so ordering a surah's subjects by it would put "Allah" — 153
+ * verses, two of which are here — above the subject the surah is actually about.
+ */
+data class TopicWithSurahCount(
+    @Embedded val topic: QuranTopicEntity,
+    @ColumnInfo(name = "verses_here") val versesHere: Int,
 )

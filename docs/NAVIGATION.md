@@ -87,8 +87,9 @@ flowchart LR
     subgraph Q["Quran"]
         QuranHub[Quran] --> QuranReader & QuranPage & QuranJuz & QuranSearch & QuranBookmarks
         QuranHub --> QuranTopics & TafseerChapters
-        QuranReader --> SurahInfo & Tafseer & SurahPassages & QuranTopics
-        SurahInfo --> SurahBackground & SurahPassages & QuranTopics
+        QuranReader --> SurahInfo & Tafseer & SurahPassages & SurahSubjects
+        SurahInfo --> SurahBackground & SurahPassages & SurahSubjects
+        SurahSubjects --> QuranTopicDetail & QuranTopics
         TafseerChapters --> Tafseer
         QuranTopics --> QuranTopicDetail
         SurahBackground --> QuranTopicDetail
@@ -170,7 +171,7 @@ flowchart LR
 ## 3. Route reference
 
 All routes live in `core/navigation/Routes.kt` and are wired in `core/navigation/NavGraph.kt`
-(89 `composable<Route.X>` destinations). `data object` = no args; `data class` = typed args.
+(90 `composable<Route.X>` destinations). `data object` = no args; `data class` = typed args.
 Every route below also has a `ScreenTags` entry of the same name.
 
 ### 3.1 Bottom navigation (`BottomNavDestination`)
@@ -195,8 +196,9 @@ Every route below also has a `ScreenTags` entry of the same name.
 | `SurahPassages` | `surahNumber: Int, currentAyah: Int? = null` | SurahPassagesScreen — the passage outline, up to 282 rows. `currentAyah` is supplied when it is opened **from the reader**, so the passage containing that verse is marked and scrolled to; null from surah info, where there is no such place to be |
 | `TafseerChapters` | — | TafseerChaptersScreen — the surah picker that fronts the commentary; the `tafseer` announcement key and the `tafseer` help deep link both land here |
 | `Tafseer` | `surahNumber: Int, ayahNumber: Int = 1` | TafseerScreen |
-| `QuranTopics` | — | QuranTopicsScreen — the subject browser. **One route for the whole tree:** it expands in place and `QuranTopicsViewModel` holds the expanded set and the focus, so opening four levels and closing them again is one back-stack entry, not four. Reachable from the Qur'an home's browse card, the reader's overflow, and surah info |
-| `QuranTopicDetail` | `topicId: Int, tree: String = "thematic"` | QuranTopicDetailScreen. `tree` is a `TopicTree.wire` value rather than the enum, because a route argument needs a `NavType`; an unrecognised value falls back to the thematic tree. Reachable from the browser, from a `topic:` link in a surah's background, from the Tafseer screen's topic chips, and **from itself** (a description's cross-links) |
+| `SurahSubjects` | `surahNumber: Int` | SurahSubjectsScreen — **the surah-scoped subject list**, ordered by how many of *this* surah's verses each subject takes. Its own destination rather than `QuranTopics` with an argument, because it answers a different question: the browser walks a hierarchy from its roots, this is a flat list of what these verses are cited under. Reached from surah info's "Subjects in this surah" and from the reader's overflow whenever a surah is on screen — both of which used to open `QuranTopics` at the top of the thematic tree, the same twenty roots whichever surah you came from. Offers `QuranTopics` at the bottom for the general question |
+| `QuranTopics` | — | QuranTopicsScreen — the subject browser. **One route for the whole tree:** it expands in place and `QuranTopicsViewModel` holds the expanded set and the focus, so opening four levels and closing them again is one back-stack entry, not four. Reachable from the Qur'an home's browse card, from `SurahSubjects`, and from the reader's overflow in page/juz mode before a surah has resolved |
+| `QuranTopicDetail` | `topicId: Int, tree: String = "thematic", fromSurah: Int? = null` | QuranTopicDetailScreen. `tree` is a `TopicTree.wire` value rather than the enum, because a route argument needs a `NavType`; an unrecognised value falls back to the thematic tree. `fromSurah` is the surah the reader arrived from: it filters nothing, but that surah's citations are pinned to the top of the list and badged, and it **travels with every lateral move** — subtopic, related subject, `topic:` cross-link — so the surah is not dropped one hop in. Reachable from `SurahSubjects`, from the browser, from a `topic:` link in a surah's background, from the Tafseer screen's topic chips, and **from itself** |
 | `SelectReciter` | — | SelectReciterScreen |
 | `SelectTranslation` | — | SelectTranslationScreen |
 

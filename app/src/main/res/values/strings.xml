@@ -1254,7 +1254,7 @@
     <string name="surah_info_passages_subtitle">%1$d passages in this surah</string>
     <string name="surah_info_passages_row_subtitle">%1$d passages across %2$d verses</string>
     <string name="surah_info_subjects">Subjects in this surah</string>
-    <string name="surah_info_subjects_subtitle">Browse what the Qur\'an speaks about</string>
+    <string name="surah_info_subjects_subtitle">%1$d subjects, most-cited first</string>
     <string name="surah_info_section_name">Name</string>
     <string name="surah_info_section_revelation">Period of Revelation</string>
     <string name="surah_info_section_theme">Theme and Subject Matter</string>
@@ -1270,6 +1270,20 @@
     <string name="surah_passages_none_title">Nothing matched</string>
     <string name="surah_passages_none">No passage matches that. Clear the filter to see all %1$d.</string>
     <string name="cd_passage_open">Open %1$s in the reader</string>
+
+    <!-- Subjects in one surah -->
+    <string name="surah_subjects_title">Subjects</string>
+    <string name="surah_subjects_subtitle">Subjects in this surah</string>
+    <string name="surah_subjects_filter_hint">Filter these subjects…</string>
+    <string name="surah_subjects_count">%1$d subjects</string>
+    <string name="surah_subjects_citations">%1$d citations</string>
+    <string name="surah_subjects_only_here">Every verse on this subject is in this surah</string>
+    <string name="surah_subjects_elsewhere">%1$d more verses elsewhere in the Qur\'an</string>
+    <string name="surah_subjects_no_match">No subject here matches “%1$s”. Clear the filter to see all %2$d.</string>
+    <string name="surah_subjects_none_title">Nothing indexed here</string>
+    <string name="surah_subjects_none">The subject index doesn\'t cite any verse of this surah. The rest of the index is still there.</string>
+    <string name="surah_subjects_browse_all">All subjects</string>
+    <string name="surah_subjects_browse_all_subtitle">Browse the whole index, across all 114 surahs</string>
 
     <!-- Quran topics -->
     <string name="quran_home_browse_subjects">Subjects in the Qur\'an</string>
@@ -1291,6 +1305,8 @@
     <string name="quran_topic_related">Related subjects</string>
     <string name="quran_topic_not_found">This subject isn\'t in the index.</string>
     <string name="quran_topic_verses_across">%1$d across %2$d surahs</string>
+    <string name="quran_topic_in_surah">%1$d in %2$s</string>
+    <string name="quran_topic_surah_you_came_from">This surah</string>
     <string name="quran_topics_crumb_home">All subjects</string>
     <string name="quran_topics_scope_search">Searching all three hierarchies</string>
     <string name="quran_topics_scope_thematic">A curated outline — doctrine, worship, stories</string>

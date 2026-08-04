@@ -990,13 +990,27 @@
     <string name="surah_info_background_subtitle">%1$d bagian</string>
     <string name="surah_info_passages_row_subtitle">%1$d bagian mencakup %2$d ayat</string>
     <string name="surah_info_subjects">Topik dalam surah ini</string>
-    <string name="surah_info_subjects_subtitle">Jelajahi apa yang dibicarakan Al-Quran</string>
+    <string name="surah_info_subjects_subtitle">%1$d topik, paling banyak dirujuk lebih dahulu</string>
     <string name="surah_info_section_other">Lainnya</string>
     <string name="surah_passages_filter_hint">Saring bagian</string>
     <string name="surah_passages_reading">Sedang dibaca</string>
     <string name="surah_passages_none_title">Tidak ada yang cocok</string>
     <string name="surah_passages_none">Tidak ada bagian yang cocok. Hapus filter untuk melihat semua %1$d.</string>
     <string name="cd_passage_open">Buka %1$s di pembaca</string>
+
+    <!-- Topik dalam satu surah -->
+    <string name="surah_subjects_title">Topik</string>
+    <string name="surah_subjects_subtitle">Topik dalam surah ini</string>
+    <string name="surah_subjects_filter_hint">Saring topik ini…</string>
+    <string name="surah_subjects_count">%1$d topik</string>
+    <string name="surah_subjects_citations">%1$d rujukan</string>
+    <string name="surah_subjects_only_here">Setiap ayat tentang topik ini ada di surah ini</string>
+    <string name="surah_subjects_elsewhere">%1$d ayat lain di bagian lain Al-Quran</string>
+    <string name="surah_subjects_no_match">Tidak ada topik di sini yang cocok dengan “%1$s”. Hapus filter untuk melihat semua %2$d.</string>
+    <string name="surah_subjects_none_title">Tidak ada yang terindeks di sini</string>
+    <string name="surah_subjects_none">Indeks topik tidak merujuk satu pun ayat surah ini. Sisa indeksnya tetap ada.</string>
+    <string name="surah_subjects_browse_all">Semua topik</string>
+    <string name="surah_subjects_browse_all_subtitle">Jelajahi seluruh indeks, mencakup semua 114 surah</string>
 
     <!-- Topik Al-Quran -->
     <string name="quran_home_browse_subjects">Topik dalam Al-Quran</string>
@@ -1018,6 +1032,8 @@
     <string name="quran_topic_related">Topik terkait</string>
     <string name="quran_topic_not_found">Topik ini tidak ada dalam indeks.</string>
     <string name="quran_topic_verses_across">%1$d di %2$d surah</string>
+    <string name="quran_topic_surah_you_came_from">Surah ini</string>
+    <string name="quran_topic_in_surah">%1$d di %2$s</string>
     <string name="quran_topics_crumb_home">Semua topik</string>
     <string name="quran_topics_scope_search">Mencari di ketiga hierarki</string>
     <string name="quran_topics_scope_thematic">Kerangka pilihan — akidah, ibadah, kisah</string>

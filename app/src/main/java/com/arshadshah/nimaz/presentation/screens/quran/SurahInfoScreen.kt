@@ -188,7 +188,7 @@ fun SurahInfoScreen(
                         sectionCount = thematic.overview?.sections?.size ?: 0,
                         passageCount = thematic.passages.size,
                         ayahCount = surah.ayahCount,
-                        hasSubjects = thematic.isAvailable,
+                        subjectCount = thematic.subjectCount,
                         onOpenBackground = onOpenBackground,
                         onOpenPassages = onOpenPassages,
                         onOpenSubjects = onOpenSubjects
@@ -260,12 +260,12 @@ private fun GoDeeper(
     sectionCount: Int,
     passageCount: Int,
     ayahCount: Int,
-    hasSubjects: Boolean,
+    subjectCount: Int,
     onOpenBackground: () -> Unit,
     onOpenPassages: () -> Unit,
     onOpenSubjects: () -> Unit
 ) {
-    if (sectionCount == 0 && passageCount == 0 && !hasSubjects) return
+    if (sectionCount == 0 && passageCount == 0 && subjectCount == 0) return
 
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         NimazSectionHeader(title = stringResource(R.string.surah_info_go_deeper))
@@ -293,10 +293,16 @@ private fun GoDeeper(
                     onClick = onOpenPassages
                 )
             }
-            if (hasSubjects) {
+            // Counted like the other two, and for the same reason: the row used to promise
+            // "Browse what the Qur'an speaks about" and then open the global index at its
+            // roots, which is a row whose subtitle was true and whose destination was wrong.
+            if (subjectCount > 0) {
                 NimazMenuItem(
                     title = stringResource(R.string.surah_info_subjects),
-                    subtitle = stringResource(R.string.surah_info_subjects_subtitle),
+                    subtitle = stringResource(
+                        R.string.surah_info_subjects_subtitle,
+                        subjectCount
+                    ),
                     icon = Icons.Default.AccountTree,
                     onClick = onOpenSubjects
                 )

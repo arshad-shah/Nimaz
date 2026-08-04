@@ -570,7 +570,10 @@ a printed mushaf carries in its margins and a reader app usually cannot answer a
   subjects in **three** hierarchies that do not agree (the subject index, the thematic outline, the
   ontology), and 30,687 citations. The citations are rows rather than the comma-separated string
   upstream keeps them in, because the question the app asks most is the reverse one — *which topics
-  is this verse under* — which is an index lookup here and 2,512 `LIKE` scans there.
+  is this verse under* — which is an index lookup here and 2,512 `LIKE` scans there. `surah_number`
+  riding along answers the same question a surah at a time (`getTopicsForSurah`, grouped and
+  counted per topic); that one is unindexed and walks the 30,687 rows, which is once per surah off
+  the main thread and cheaper than an index would be in artifact bytes.
 
 `MIGRATION_23_24` creates all five **empty**: they are content, so the rows arrive the way every
 other content row does (§7). A device that upgrades before the schemaVersion 24 artifact lands
@@ -589,9 +592,11 @@ schemes address screens this app has: 446 cross-references the source writes as 
 **Where it surfaces.** Each of the three kinds of content has a screen the size of the content:
 
 - **Surah info** is a *hub*. It carries the cartouche, the numbers, `surah_overviews.summary` as
-  body prose, and a "Go deeper" group of three counted rows. It used to carry the background as
-  accordions and the outline as up to 282 rows in the same list, which made it a document rather
-  than an answer. Rows are drawn only where there is content behind them.
+  body prose, and a "Go deeper" group of three counted rows — sections, passages, and now subjects
+  (`countTopicsForSurah`, the one integer the row needs rather than the few hundred topics behind
+  it). It used to carry the background as accordions and the outline as up to 282 rows in the same
+  list, which made it a document rather than an answer. Rows are drawn only where there is content
+  behind them.
 - **`Route.SurahBackground`** reads `surah_overview_sections` continuously under a sticky index of
   pills labelled from `section_group` — stable across all 114 surahs, which the source's own
   `heading` is not. Each section keeps that heading as its title. The longest background runs to
@@ -601,18 +606,31 @@ schemes address screens this app has: 446 cross-references the source writes as 
   marks and scrolls to the passage containing it.
 - The **reader** prints a passage heading where the outline starts a new subject (surah mode only
   — a juz spans a dozen surahs and would cost a query per surah per page turn), and its overflow
-  reaches both the passage outline and the subject browser.
+  reaches both the passage outline and the subjects of the surah on screen.
+- **`Route.SurahSubjects`** is the **surah-scoped** answer: a flat list of the subjects this
+  surah's verses are actually cited under, ordered by `verses_here` so a surah leads with what it
+  is about rather than with whichever subject is busiest Qur'an-wide, and each row saying how far
+  the subject reaches past these verses. It exists because "Subjects in this surah" and the
+  reader's overflow both used to open `QuranTopics` at the roots of the thematic tree — the same
+  twenty nouns whichever surah you came from, with the surah dropped on the way. A row opens the
+  detail in `QuranTopic.homeTree`, the hierarchy that actually places that subject, since the
+  thematic outline carries only 695 of the 2,512. The whole index stays one tap away at the
+  bottom.
 - **`Route.QuranTopics`** browses all three hierarchies as **one tree that opens in place**: a
   node's children insert beneath it, the breadcrumb is a bar of tappable crumbs rather than a
   truncating top-bar string, and past three levels of indent a row offers to re-root the tree on
   itself. `getBranchTopicIds(tree)` is one query per tree telling every row whether it is a branch,
   which is what lets a leaf carry no disclosure control and open on its label instead. Reachable
-  from a labelled card on the Qur'an home (gated on `hasThematicContent()`), the reader's overflow,
-  and surah info.
+  from a labelled card on the Qur'an home (gated on `hasThematicContent()`), from `SurahSubjects`,
+  and from the reader's overflow in page/juz mode before a surah has resolved.
 - **`Route.QuranTopicDetail`** gives its four kinds of content four shapes: description as body
   prose, subtopics as tree rows, related subjects as chips, and the citations grouped by surah
   under sticky headers with a line of each verse — resolved for the whole list in one
-  `getTranslationsForAyahs` call, so a subject citing 153 verses costs two reads.
+  `getTranslationsForAyahs` call, so a subject citing 153 verses costs two reads. Its `fromSurah`
+  argument is the surah the reader arrived from: it filters nothing, but that surah's group is
+  lifted to the front of an otherwise Qur'anic ordering and badged as such, a badge beside the
+  verse count gives its share, and the argument rides every lateral move — subtopic, related
+  subject, `topic:` cross-link — so the context survives more than one hop.
 - The **Tafseer** screen shows the verse's subjects as chips, capped at six.
 
 Two new search kinds — `theme` and `topic` — ride the shipped FTS index, and topic search results

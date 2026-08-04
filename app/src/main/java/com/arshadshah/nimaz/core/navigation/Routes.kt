@@ -272,15 +272,36 @@ sealed interface Route {
     data object QuranTopics : Route
 
     /**
+     * The subjects one surah speaks about, weightiest here first.
+     *
+     * Its own destination rather than [QuranTopics] opened with an argument, because it is a
+     * different question. [QuranTopics] browses a hierarchy from its roots down; this is a flat
+     * list of what *these* verses are cited under, and it exists because "Subjects in this
+     * surah" used to open the global tree at the top — the same twenty roots whichever surah
+     * you came from, with nothing carrying the surah you were holding.
+     */
+    @Serializable
+    data class SurahSubjects(val surahNumber: Int) : Route
+
+    /**
      * One subject, with its citations.
      *
      * [tree] is a [com.arshadshah.nimaz.domain.model.TopicTree] `wire` value rather than the
      * enum, because a route argument has to have a `NavType` and a String always does. It is
      * only used to pick which hierarchy the breadcrumb and the child list are drawn from; an
      * unrecognised value falls back to the thematic tree rather than failing to open.
+     *
+     * [fromSurah] is the surah the reader arrived from, when they arrived from one. It does not
+     * filter anything — a subject's citations are the whole of it — but that surah's verses are
+     * pinned to the top of the list and named, so opening "Patience" from Al-Baqarah does not
+     * land on Al-Fatiha's citation with Al-Baqarah's forty somewhere below the fold.
      */
     @Serializable
-    data class QuranTopicDetail(val topicId: Int, val tree: String = "thematic") : Route
+    data class QuranTopicDetail(
+        val topicId: Int,
+        val tree: String = "thematic",
+        val fromSurah: Int? = null,
+    ) : Route
 
     // Select Reciter
     @Serializable
