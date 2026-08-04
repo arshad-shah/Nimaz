@@ -917,19 +917,29 @@ fun NavGraph(
                 )
             }
 
-            composable<Route.SettingsWorshipReminders> {
+            taggedComposable<Route.SettingsWorshipReminders>(
+                ScreenTags.SettingsWorshipReminders
+            ) {
                 WorshipRemindersScreen(onNavigateBack = { navController.popBackStack() })
             }
-            composable<Route.SettingsNotificationsPrayers> {
+            taggedComposable<Route.SettingsNotificationsPrayers>(
+                ScreenTags.SettingsNotificationsPrayers
+            ) {
                 PrayerNotificationsScreen(onNavigateBack = { navController.popBackStack() })
             }
-            composable<Route.SettingsNotificationsWeekly> {
+            taggedComposable<Route.SettingsNotificationsWeekly>(
+                ScreenTags.SettingsNotificationsWeekly
+            ) {
                 NotificationWeeklyScreen(onNavigateBack = { navController.popBackStack() })
             }
-            composable<Route.SettingsNotificationsSound> {
+            taggedComposable<Route.SettingsNotificationsSound>(
+                ScreenTags.SettingsNotificationsSound
+            ) {
                 NotificationSoundScreen(onNavigateBack = { navController.popBackStack() })
             }
-            composable<Route.SettingsNotificationsTroubleshooting> {
+            taggedComposable<Route.SettingsNotificationsTroubleshooting>(
+                ScreenTags.SettingsNotificationsTroubleshooting
+            ) {
                 NotificationTroubleshootingScreen(onNavigateBack = { navController.popBackStack() })
             }
 

@@ -6,14 +6,20 @@ DataStore, type-safe Navigation Compose.
 
 ## Read this first
 
-The `docs/` folder is the source of truth — read the relevant doc before working, and **keep it
-updated as part of your change** (see "Documentation is part of the work" below):
+The `docs/` folder is the source of truth. **[`docs/README.md`](docs/README.md) is the index** —
+it says which doc owns which area. **[`docs/DOCUMENTATION.md`](docs/DOCUMENTATION.md) is the
+contract** — it says what you must update, and it is enforced on every PR.
+
+Read the doc that owns the area before you change it, and update it **in the same commit**:
 
 - **[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)** — layer patterns, DI, navigation, theming,
   diagrams, the new-feature recipe, and the tech-debt registry (§9). The architectural source of truth.
-- **[`docs/NAVIGATION.md`](docs/NAVIGATION.md)** — the complete route graph + route table.
+- **[`docs/NAVIGATION.md`](docs/NAVIGATION.md)** — the route graph, the full route reference, the
+  announcement route grammar, and the help deep-link grammar.
 - **[`docs/SUBSYSTEMS.md`](docs/SUBSYSTEMS.md)** — audio, widgets, background work, notifications,
-  database/migrations, preferences, content seeding, prayer-time calc, sync, init/monitoring.
+  database/migrations, preferences, content delivery, prayer-time calc, sync, init/monitoring, and
+  FCM announcements. §0 is the inventory of every Service, Worker, widget, DataStore file and
+  notification channel the app ships.
 - **[`docs/CLEAN_ARCHITECTURE_CHECKLIST.md`](docs/CLEAN_ARCHITECTURE_CHECKLIST.md)** — tick-box
   anti-pattern backlog with detection commands.
 - **[`docs/ai-ask-with-proof.md`](docs/ai-ask-with-proof.md)** — the opt-in "Ask with Proof" AI
@@ -34,25 +40,55 @@ When adding a feature, copy an existing one that follows the patterns — good r
 > text leaves the device); cited Quran and Hadith refs are resolved locally into proof cards. It
 > is **off by default**. See `docs/ai-ask-with-proof.md`.
 
-> Naming: the app is **Nimaz** and the package is **`com.arshadshah.nimaz`**. The older
-> `docs/nimaz-pro-*.md` files are historical design/planning artifacts (they say "Nimaz Pro" /
-> `com.nimazpro.app`) — treat them as background, not current truth.
+> Naming: the app is **Nimaz** and the package is **`com.arshadshah.nimaz`**. The
+> `docs/archive/nimaz-pro-*.md` files are historical design/planning artifacts (they say
+> "Nimaz Pro" / `com.nimazpro.app`) — background only, never current truth. The same goes for
+> `docs/superpowers/{plans,specs}/`: dated per-change records, written once and never updated.
 
 ## Documentation is part of the work
 
-Docs only stay useful if they track reality. **In every change, update the docs your change
-touches** — this is not optional:
+**A change is not finished until the doc that owns the area is updated in the same commit.**
+Not a follow-up, not an issue — the same commit. The full ownership matrix, house style, diagram
+standard and check list live in **[`docs/DOCUMENTATION.md`](docs/DOCUMENTATION.md)**; read it
+once, then use the summary below.
 
-- Add/remove/rename a `Route` → update **`docs/NAVIGATION.md`** (route table *and*, if the
-  high-level map changes, the mermaid diagram; validate it).
-- Change a subsystem (audio, widgets, workers, notifications, DB schema/migrations, DataStore,
-  seeders, prayer-time calc, sync, init/monitoring) → update the relevant section of
-  **`docs/SUBSYSTEMS.md`**.
+**23 of these obligations are enforced mechanically.** Run this before you finish — it is
+seconds, needs no Android toolchain, and also runs on every PR
+(`.github/workflows/docs_check.yml`):
+
+```bash
+python3 scripts/check_docs.py           # all checks; --only NAV|SUB|DOC to narrow
+```
+
+It fails on: an undocumented `Route` *and* a documented route that no longer exists; a stale
+destination count; a destination wired without a `ScreenTags` tag; an undocumented announcement
+or help deep-link key (both directions); an undocumented Service, Worker, widget, notification
+channel or DataStore file; a schema version that disagrees with `NIMAZ_DATABASE_VERSION`; an
+undocumented FCM payload key, announcement type or celebration event; a doc missing its header
+block, its index entry or its contents list; and any broken link or anchor between docs.
+
+Diagrams are checked separately (needs Node, so it is its own step):
+`npm install --no-save mermaid jsdom && node scripts/check_mermaid.mjs`.
+
+The obligations, in short:
+
+- Add/remove/rename a `Route`, or wire a destination → **`docs/NAVIGATION.md`** §3 (and the §2
+  mermaid map if the high-level shape changed; validate it). Wire it with
+  `taggedComposable<Route.X>(ScreenTags.X)`, never a bare `composable`.
+- Add/change an announcement route key or a help deep-link key → **`docs/NAVIGATION.md`** §4/§5.
+- Add/rename a Service, Worker, widget, notification channel or DataStore file → the
+  **`docs/SUBSYSTEMS.md`** §0 inventory **and** the owning section.
+- Change a subsystem's behaviour (audio, widgets, workers, notifications, DB schema/migrations,
+  DataStore, content delivery, prayer-time calc, sync, init/monitoring, FCM) → the relevant
+  section of **`docs/SUBSYSTEMS.md`**.
 - Change a layer pattern, DI convention, or resolve/introduce a deviation → update
   **`docs/ARCHITECTURE.md`** (and its §9 registry).
 - Fix or discover a clean-architecture anti-pattern → tick / add to
   **`docs/CLEAN_ARCHITECTURE_CHECKLIST.md`**.
-- Change the DB schema → update **`docs/SUBSYSTEMS.md`**. Shipped **content** is no longer
+- Add a doc → give it the standard header block, add it to **`docs/README.md`** and to the
+  ownership matrix in **`docs/DOCUMENTATION.md`** §1.
+- Change the DB schema → update **`docs/SUBSYSTEMS.md`** (§5, including the schema-version
+  line). Shipped **content** is no longer
   in this repo: it lives in **arshad-shah/nimaz-data** and arrives as a fetched artifact.
   The per-feature content seeders that used to carry it were all retired at versionCode 385, and
   `ContentPatchSeeder` — their generic replacement — was retired in turn at schemaVersion 24.
@@ -72,9 +108,10 @@ touches** — this is not optional:
    `Model.toEntity()`).
 5. DI lives in `core/di`: `@Binds` for interface→impl, `@Provides` for `XxxUseCases`,
    `@Singleton` in `SingletonComponent`.
-6. Navigation is type-safe: add a `@Serializable` `Route` + `composable<Route.X>` in
-   `NavGraph`. (Not every `Route` is a screen — some features are tabs inside a parent
-   screen; validate before wiring.)
+6. Navigation is type-safe: add a `@Serializable` `Route`, a `ScreenTags` entry, and a
+   `taggedComposable<Route.X>(ScreenTags.X)` in `NavGraph` — never a bare `composable`, which
+   leaves the screen untestable. (Not every `Route` is a screen — some features are tabs inside
+   a parent screen; validate before wiring.)
 7. No hardcoded `Color(0xFF…)` in screens — use `MaterialTheme.colorScheme.*` / `NimazColors.*`
    and reuse `presentation/components` (atoms/molecules/organisms).
 8. **Interactive UI comes from the design system — never hand-rolled.** A button is `NimazButton`
@@ -90,6 +127,7 @@ touches** — this is not optional:
 ```bash
 ./gradlew :app:compileDebugKotlin     # runs KSP → validates Hilt + Room wiring
 ./gradlew :app:testDebugUnitTest
+python3 scripts/check_docs.py         # docs still describe the code (no toolchain needed)
 ```
 
 Requires JDK 21 + Android SDK (compileSdk 36); set `sdk.dir` in `local.properties` or

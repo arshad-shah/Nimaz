@@ -1,14 +1,41 @@
 # Nimaz — Architecture Guide
 
-> **Audience:** developers and AI agents working on this codebase.
-> **Purpose:** this is the *source of truth* for how Nimaz is structured. Follow the
-> canonical patterns described here so that new code stays consistent and the
-> architecture does not drift. When you add a feature, copy an existing feature that
-> follows these patterns (good references are called out below) — do **not** invent a
-> new shape.
+> **Owns:** how the app is *structured* — the layer patterns (`presentation → domain → data`),
+> MVVM/UDF conventions, DI, the navigation and theming patterns, the design system, the
+> new-feature recipe, and the tech-debt registry (§9).
+> **Update when:** you change or add a layer pattern, a DI convention, a navigation or theming
+> rule, a design-system component contract — or when you resolve or introduce a deviation (§9).
+> **Verified by:** review only — no mechanical check. The *consequences* of these patterns are
+> checked by `scripts/check_docs.py` (routes, subsystems) and by
+> [`CLEAN_ARCHITECTURE_CHECKLIST.md`](CLEAN_ARCHITECTURE_CHECKLIST.md)'s detection commands.
+> **Related:** [`NAVIGATION.md`](NAVIGATION.md) owns the route graph itself,
+> [`SUBSYSTEMS.md`](SUBSYSTEMS.md) owns the runtime machinery,
+> [`DOCUMENTATION.md`](DOCUMENTATION.md) owns the update contract.
+
+**This is the source of truth for how Nimaz is structured.** Follow the canonical patterns
+described here so new code stays consistent and the architecture does not drift. When you add a
+feature, copy an existing feature that follows these patterns (good references are called out
+below) — do **not** invent a new shape.
 
 App package root: `com.arshadshah.nimaz`
 Source root: `app/src/main/java/com/arshadshah/nimaz/`
+
+---
+
+## Contents
+
+0. [Golden rules (read first)](#0-golden-rules-read-first)
+1. [High-level architecture](#1-high-level-architecture)
+2. [Package structure](#2-package-structure)
+3. [Anatomy of a feature (vertical slice)](#3-anatomy-of-a-feature-vertical-slice)
+4. [Layer patterns & conventions](#4-layer-patterns--conventions)
+5. [Unidirectional data flow (end-to-end)](#5-unidirectional-data-flow-end-to-end)
+6. [Dependency injection (Hilt)](#6-dependency-injection-hilt)
+7. [Navigation](#7-navigation)
+8. [Theming & components](#8-theming--components)
+9. [Known deviations & tech-debt registry](#9-known-deviations--tech-debt-registry)
+10. [Recipe — add a new feature end-to-end](#10-recipe--add-a-new-feature-end-to-end)
+11. [Build & verify](#11-build--verify)
 
 ---
 

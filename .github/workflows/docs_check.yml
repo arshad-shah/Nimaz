@@ -1,0 +1,55 @@
+name: Documentation Check
+
+# Asserts that the docs in docs/ still describe the code — every Route in the
+# route table, every Worker/Service/widget/channel/DataStore in the subsystem
+# inventory, the schema version, both external route grammars, and the docs'
+# own house style. Pure Python, no Android toolchain, so it runs in seconds and
+# gives a doc-drift PR its own red X instead of hiding inside the build.
+#
+# See docs/DOCUMENTATION.md for what each check guards and how to add one.
+on:
+  push:
+    branches: [ dev ]
+    paths:
+      - 'docs/**'
+      - 'app/src/main/java/com/arshadshah/nimaz/core/navigation/**'
+      - 'app/src/main/java/com/arshadshah/nimaz/data/announcement/**'
+      - 'app/src/main/java/com/arshadshah/nimaz/data/local/**'
+      - 'app/src/main/java/com/arshadshah/nimaz/domain/model/Announcement.kt'
+      - 'app/src/main/java/com/arshadshah/nimaz/widget/**'
+      - 'scripts/check_docs.py'
+      - '.github/workflows/docs_check.yml'
+  pull_request:
+    paths:
+      - 'docs/**'
+      - 'app/src/main/java/com/arshadshah/nimaz/core/navigation/**'
+      - 'app/src/main/java/com/arshadshah/nimaz/data/announcement/**'
+      - 'app/src/main/java/com/arshadshah/nimaz/data/local/**'
+      - 'app/src/main/java/com/arshadshah/nimaz/domain/model/Announcement.kt'
+      - 'app/src/main/java/com/arshadshah/nimaz/widget/**'
+      - 'scripts/check_docs.py'
+      - '.github/workflows/docs_check.yml'
+
+jobs:
+  docs:
+    name: Docs match the code
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Check the docs for drift
+        run: python3 scripts/check_docs.py
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # Separate step, and after the drift check: an invalid diagram is a real
+      # defect (GitHub renders it as a raw error block) but it needs a toolchain,
+      # so the dependency-free check runs first and reports on its own.
+      - name: Validate the mermaid diagrams
+        run: |
+          npm install --no-save --no-fund --no-audit mermaid jsdom
+          node scripts/check_mermaid.mjs

@@ -1,4 +1,14 @@
-# Testing
+# Nimaz — Testing
+
+> **Owns:** the instrumented (`androidTest`) suite — how to run it, how it is wired into CI, its
+> module layout, what it covers, and its conventions.
+> **Update when:** you add or restructure an instrumented test module, change the emulator/CI
+> lane, or change a testing convention (screen tags, Hilt test rules, seeding).
+> **Verified by:** review only — no mechanical check. `NAV-04`/`NAV-05` in
+> `scripts/check_docs.py` guard the screen-tag contract these tests depend on.
+> **Related:** [`NAVIGATION.md` §1](NAVIGATION.md#1-how-navigation-works) for `ScreenTags`,
+> [`ARCHITECTURE.md`](ARCHITECTURE.md) for what the unit tests assert,
+> [`DOCUMENTATION.md`](DOCUMENTATION.md) for the update contract.
 
 Two on-device/JVM test surfaces exist:
 

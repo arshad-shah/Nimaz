@@ -101,6 +101,12 @@ object ScreenTags {
     const val AllBookmarks = "screen_all_bookmarks"
     const val GlobalSearch = "screen_global_search"
     const val SearchSettings = "screen_search_settings"
+    const val SettingsWorshipReminders = "screen_settings_worship_reminders"
+    const val SettingsNotificationsPrayers = "screen_settings_notifications_prayers"
+    const val SettingsNotificationsWeekly = "screen_settings_notifications_weekly"
+    const val SettingsNotificationsSound = "screen_settings_notifications_sound"
+    const val SettingsNotificationsTroubleshooting =
+        "screen_settings_notifications_troubleshooting"
 
     /** Scrollable lists on hub screens — let UI tests scroll to off-screen entries. */
     const val MoreList = "more_menu_list"

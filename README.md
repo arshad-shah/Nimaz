@@ -16,8 +16,11 @@ The app is built with modern Android tooling:
 
 Core content and functionality are designed to remain available without constant network access.
 
-> **Architecture:** see [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — the source of truth
-> for layering, patterns, DI, navigation, theming, diagrams, and the new-feature recipe.
+> **Documentation:** [`docs/README.md`](docs/README.md) is the index — it says which doc owns
+> which area and where to start. [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) is the source of
+> truth for layering, patterns, DI, navigation, theming, diagrams, and the new-feature recipe.
+> Before changing anything, read [`docs/DOCUMENTATION.md`](docs/DOCUMENTATION.md) — the contract
+> for keeping the docs true, enforced on every PR by `python3 scripts/check_docs.py`.
 > Agents should also read [`CLAUDE.md`](CLAUDE.md).
 
 ## Main Features
@@ -61,8 +64,9 @@ app/
     domain/        models, repository contracts, use cases
     presentation/  Compose screens, components, theme, viewmodels
     widget/        app widgets
-docs/             technical and planning documentation
+docs/             the source of truth — start at docs/README.md
                   (content data and the nz console live in arshad-shah/nimaz-data)
+scripts/          repo checks that need no Android toolchain (docs drift, contrast)
 fastlane/         CI and release lanes
 ```
 

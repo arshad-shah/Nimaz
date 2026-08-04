@@ -1,4 +1,12 @@
-# Bundled font licenses & attribution
+# Nimaz — Bundled font licenses & attribution
+
+> **Owns:** every `.ttf` shipped in `app/src/main/res/font/`, its licence, its attribution
+> requirements, and the human shipping sign-off where one was needed.
+> **Update when:** you add, replace or remove a bundled font, or its licence terms change.
+> **Verified by:** review only — and, for a font whose terms are not a standard OFL, an explicit
+> human sign-off recorded in this file.
+> **Related:** [`ARCHITECTURE.md` §8](ARCHITECTURE.md#8-theming--components) for the type system
+> the fonts plug into, [`DOCUMENTATION.md`](DOCUMENTATION.md) for the update contract.
 
 Every `.ttf` shipped in `app/src/main/res/font/` and its licence. Keep this in
 sync when adding or removing a font (the font picker is driven by

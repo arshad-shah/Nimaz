@@ -1,11 +1,17 @@
 # Nimaz — Subsystems Guide
 
-> **Audience:** developers and AI agents working on this codebase.
-> **Purpose:** documents the app's **cross-cutting subsystems** — the runtime machinery
-> (audio, widgets, background work, notifications, database, preferences, content
-> seeding, prayer-time calc, init/monitoring, sync) that the feature screens depend on.
-> For *how features are layered* (`presentation → domain → data`, MVVM/UDF, DI, navigation,
-> theming) read **[`ARCHITECTURE.md`](ARCHITECTURE.md)** first — this doc assumes it.
+> **Owns:** every cross-cutting runtime subsystem — audio, widgets, background work,
+> notifications and channels, the database and its migrations, preferences/DataStore, content
+> delivery, prayer-time calculation, init & monitoring, sync, sharing, and FCM announcements.
+> Also owns the **component inventory** in §0: every Service, Worker, widget, DataStore file and
+> notification channel the app ships.
+> **Update when:** you add/rename/remove a Service, Worker, widget, notification channel,
+> DataStore file, Room migration (and `NIMAZ_DATABASE_VERSION`), content-version key, sync
+> payload field, or FCM payload key — or change how any of those behave.
+> **Verified by:** `python3 scripts/check_docs.py --only SUB` (checks `SUB-01` … `SUB-09`).
+> **Related:** [`ARCHITECTURE.md`](ARCHITECTURE.md) for how features are *layered* (read it
+> first — this doc assumes it), [`NAVIGATION.md`](NAVIGATION.md) for the route graph,
+> [`DOCUMENTATION.md`](DOCUMENTATION.md) for the update contract.
 
 App package root: `com.arshadshah.nimaz`
 Source root: `app/src/main/java/com/arshadshah/nimaz/`
@@ -14,6 +20,7 @@ Source root: `app/src/main/java/com/arshadshah/nimaz/`
 
 ## Table of contents
 
+0. [Subsystem map & component inventory](#0-subsystem-map--component-inventory)
 1. [Audio playback](#1-audio-playback)
 2. [Glance widgets](#2-glance-widgets)
 3. [Background work (WorkManager)](#3-background-work-workmanager)
@@ -27,6 +34,134 @@ Source root: `app/src/main/java/com/arshadshah/nimaz/`
 11. [Content sharing](#11-content-sharing)
 12. [Engagement announcements (FCM)](#12-engagement-announcements-fcm)
 13. [Keeping this doc updated](#keeping-this-doc-updated)
+
+---
+
+## 0. Subsystem map & component inventory
+
+### 0.1 How the subsystems relate
+
+```mermaid
+flowchart TB
+    subgraph UI["presentation"]
+        Screens["Compose screens<br/>+ ViewModels"]
+    end
+    subgraph OS["Android / OS surfaces"]
+        Widgets["Glance widgets §2"]
+        Tray["Notifications §4 / §12"]
+        Media["Media notification §1"]
+    end
+    subgraph Sched["Scheduling"]
+        WM["WorkManager §3"]
+        AM["AlarmManager §4"]
+    end
+    subgraph Store["Storage"]
+        Room["Room · nimaz_database §5"]
+        DS["DataStore §6"]
+        Files["Downloaded audio<br/>+ content artifact §7"]
+    end
+    subgraph Compute["Pure computation"]
+        Calc["Prayer times §8"]
+        Worship["Worship occurrences §4"]
+    end
+    subgraph Net["Network (all optional)"]
+        FCM["FCM announcements §12"]
+        Content["Content artifact §7"]
+        AI["Ask-with-Proof Worker<br/>(see ai-ask-with-proof.md)"]
+    end
+
+    Screens --> Room & DS
+    Screens --> Calc
+    Screens -->|"playback intents"| Media
+    Init["AppInitializer §9"] --> DS & AM & FCM
+    WM --> Widgets
+    AM --> Tray
+    Calc --> AM
+    Calc --> Widgets
+    Worship --> AM
+    Room --> Widgets
+    DS --> Calc
+    FCM --> DS
+    Content --> Room
+    Sync["Sync §10"] --> Room & DS
+```
+
+Everything the app *needs* to work is inside `Storage` and `Pure computation`; every box under
+`Network` is optional and degrades to "nothing happens" when absent. That is the offline-first
+guarantee stated as a picture.
+
+### 0.2 Services
+
+Long-lived Android `Service`s. Adding one means a manifest entry, a notification channel, and a
+row here.
+
+| Service | Package | Kind | Section |
+|---|---|---|---|
+| `QuranAudioService` | `data/audio/` | foreground `mediaPlayback` — Quran recitation, owns the `MediaSession` | [§1](#1-audio-playback) |
+| `AdhanPlaybackService` | `data/audio/` | foreground `mediaPlayback` — adhan playback when a prayer fires | [§1](#1-audio-playback) |
+| `AdhanDownloadService` | `data/audio/` | foreground `dataSync` — adhan file download | [§1](#1-audio-playback), [§3](#3-background-work-workmanager) |
+| `NimazMessagingService` | `data/announcement/` | `FirebaseMessagingService` — the app's only one | [§12](#12-engagement-announcements-fcm) |
+
+### 0.3 Workers
+
+Every `@HiltWorker CoroutineWorker` in the app. All widget workers are enqueued through
+`widget/core/WidgetWork.kt`.
+
+| Worker | Package | Trigger | Section |
+|---|---|---|---|
+| `NextPrayerWorker` | `widget/nextprayer/` | periodic 15 min + widget `onEnabled` | [§2](#2-glance-widgets) |
+| `PrayerTimesWorker` | `widget/prayertimes/` | periodic 15 min + widget `onEnabled` | [§2](#2-glance-widgets) |
+| `PrayerTrackerWorker` | `widget/prayertracker/` | periodic 30 min + immediate on toggle | [§2](#2-glance-widgets) |
+| `HijriDateWorker` | `widget/hijridate/` | periodic 6 hr | [§2](#2-glance-widgets) |
+| `HijriCalendarWorker` | `widget/hijricalendar/` | periodic 6 hr | [§2](#2-glance-widgets) |
+| `KhatamWorker` | `widget/khatam/` | periodic 30 min | [§2](#2-glance-widgets) |
+| `AdhanDownloadWorker` | `data/audio/` | one-shot fallback when a foreground service can't start | [§3](#3-background-work-workmanager) |
+
+### 0.4 Widgets
+
+| Widget | Package | Refresh | State type |
+|---|---|---|---|
+| Next Prayer | `widget/nextprayer/` | Worker 15 min + AlarmManager 1 min tick | `NextPrayerWidgetState` |
+| Prayer Times | `widget/prayertimes/` | Worker 15 min + 1 min tick | `PrayerTimesWidgetState` |
+| Prayer Tracker | `widget/prayertracker/` | Worker 30 min + immediate on toggle | `PrayerTrackerWidgetState` |
+| Hijri Date | `widget/hijridate/` | Worker 6 hr | `HijriDateWidgetState` |
+| Hijri Calendar | `widget/hijricalendar/` | Worker 6 hr | `HijriCalendarWidgetState` |
+| Khatam | `widget/khatam/` | Worker 30 min | `KhatamWidgetState` |
+
+### 0.5 DataStore files
+
+Each is a separate file on disk; a new one is a new migration surface, so prefer adding keys to
+`nimaz_preferences` unless the slice is genuinely self-contained.
+
+| File name | Owner | Holds | Section |
+|---|---|---|---|
+| `nimaz_preferences` | `data/local/datastore/PreferencesDataStore.kt` | every user setting; the sync payload's `preferences` block | [§6](#6-preferences-datastore) |
+| `nimaz_announcements` | `data/local/datastore/AnnouncementLocalDataSource.kt` | the current announcement (JSON) + permanently dismissed ids | [§12](#12-engagement-announcements-fcm) |
+| `nimaz_ai_device` | `data/ai/DeviceIdProvider.kt` | the rotating pseudonymous device id sent with Ask-with-Proof calls | [`ai-ask-with-proof.md`](ai-ask-with-proof.md) |
+
+### 0.6 Notification channels
+
+Channels are created eagerly (`PrayerNotificationScheduler.init`, `AnnouncementBootstrap`, or the
+owning service's `onCreate`). **Android ignores property changes after a channel exists** — that
+is why vibration is modelled as a *pair* of channels rather than a per-notification flag.
+
+| Channel id | Constant | Importance | Created by | Section |
+|---|---|---|---|---|
+| `prayer_notifications` | `CHANNEL_ID_PRAYER` | HIGH | `PrayerNotificationScheduler` | [§4](#4-prayer-time--adhan-notifications) |
+| `prayer_notifications_silent` | `CHANNEL_ID_PRAYER_SILENT` | HIGH, no vibration | `PrayerNotificationScheduler` | [§4](#4-prayer-time--adhan-notifications) |
+| `adhan_notifications` | `CHANNEL_ID_ADHAN` | HIGH | `PrayerNotificationScheduler` | [§4](#4-prayer-time--adhan-notifications) |
+| `adhan_notifications_silent` | `CHANNEL_ID_ADHAN_SILENT` | HIGH, no vibration | `PrayerNotificationScheduler` | [§4](#4-prayer-time--adhan-notifications) |
+| `daily_summary_notifications` | `CHANNEL_ID_DAILY_SUMMARY` | DEFAULT | `PrayerNotificationScheduler` | [§4](#4-prayer-time--adhan-notifications) |
+| `khatam_notifications` | `CHANNEL_ID_KHATAM` | DEFAULT | `PrayerNotificationScheduler` | [§4](#4-prayer-time--adhan-notifications) |
+| `worship_reminders` | `CHANNEL_ID_WORSHIP` | DEFAULT | `PrayerNotificationScheduler` | [§4](#4-prayer-time--adhan-notifications) |
+| `adhan_playback_channel` | `AdhanPlaybackService.CHANNEL_ID` | LOW | `AdhanPlaybackService` | [§1](#1-audio-playback) |
+| `adhan_download_channel` | `AdhanDownloadService.CHANNEL_ID` | LOW | `AdhanDownloadService` | [§1](#1-audio-playback) |
+| `quran_audio_channel` | `QuranAudioService.CHANNEL_ID` | LOW | `QuranAudioService` | [§1](#1-audio-playback) |
+| `nimaz_announcements` | `AnnouncementBootstrap.CHANNEL_ID` | LOW | `AnnouncementBootstrap` | [§12](#12-engagement-announcements-fcm) |
+
+> `adhan_playback_channel` is created but the visible notification is posted on
+> `adhan_notifications` — see §4. It is kept because the foreground service must declare *some*
+> channel at start.
 
 ---
 
@@ -66,17 +201,29 @@ Adhan, Qaida tap-to-hear) plus an Adhan **download** pipeline. They share no pla
 
 ## 2. Glance widgets
 
-All in `widget/`. Six Jetpack **Glance** AppWidgets, each in its own subpackage, plus a
-shared `widget/core/` package and two top-level helpers.
+All in `widget/`. Six Jetpack **Glance** AppWidgets, each in its own subpackage, plus a shared
+`widget/core/` package and two top-level helpers (`widget/WidgetEntryPoint.kt`,
+`widget/WidgetUpdateScheduler.kt`). **The widget roster lives in [§0.4](#04-widgets)** — this
+section documents how they work, not which ones exist.
 
-| Widget | Package | Refresh | State type |
-|---|---|---|---|
-| Next Prayer | `widget/nextprayer/` | Worker 15 min + AlarmManager 1 min tick | `NextPrayerWidgetState` |
-| Prayer Times | `widget/prayertimes/` | Worker 15 min + 1 min tick | `PrayerTimesWidgetState` |
-| Prayer Tracker | `widget/prayertracker/` | Worker 30 min + immediate on toggle | `PrayerTrackerWidgetState` |
-| Hijri Date | `widget/hijridate/` | Worker 6 hr | `HijriDateWidgetState` |
-| Hijri Calendar | `widget/hijricalendar/` | Worker 6 hr | `HijriCalendarWidgetState` |
-| Khatam | `widget/khatam/` | Worker 30 min | `KhatamWidgetState` |
+```mermaid
+flowchart LR
+    subgraph Refresh["Three refresh layers"]
+        WM["WorkManager<br/>periodic 15/30 min / 6 hr"]
+        Tick["AlarmManager 1-min tick<br/>WidgetTickReceiver"]
+        Imm["Immediate enqueue<br/>(tracker toggle, HomeViewModel)"]
+    end
+    WM -->|"@HiltWorker doWork()"| Compute["compute fresh data"]
+    Imm --> Compute
+    Compute -->|"setWidgetState → Success/Error"| Store["JsonGlanceStateDefinition<br/>(one DataStore per widget)"]
+    Store --> Render["provideGlance → currentState&lt;T&gt;()"]
+    Tick -->|"updateAll() — recompose only"| Render
+    Render -->|"nextPrayerIndex(epochs, now)"| Live["live countdown / highlight<br/>derived at render time"]
+```
+
+The split matters: the **worker** stores absolute instants, the **tick** only recomposes, and the
+countdown/highlight is derived at render time — so the display tracks the wall clock even when
+Doze throttles the worker.
 
 Each widget = a `GlanceAppWidget` subclass (`provideGlance` → `provideContent { GlanceTheme { … } }`, reads `currentState<T>()`) + a `GlanceAppWidgetReceiver` (the manifest-registered `BroadcastReceiver`; `onEnabled` starts refresh, `onDisabled` cancels). State is a `@Serializable sealed interface` with `Loading`/`Success(data)`/`Error(message)`. Colors come from `res/color` via `ColorProvider(R.color.widget_*)` — no hardcoded colors.
 
@@ -143,9 +290,15 @@ scans `widget/` for English prayer/weekday literals outside comments.
 `@HiltWorker` be constructed with injected dependencies. Without this, worker injection fails
 at runtime.
 
-**Workers in the app:**
-- `widget/*/{NextPrayer,PrayerTimes,PrayerTracker,HijriDate,HijriCalendar}Worker.kt` — widget refresh (§2), all `@HiltWorker CoroutineWorker`, enqueued through `widget/core/WidgetWork.kt`.
-- `data/audio/AdhanDownloadWorker.kt` — `@HiltWorker CoroutineWorker`; the background fallback for adhan downloads when a foreground service can't be started (see below). `enqueue(...)` builds a `OneTimeWorkRequest` with a `CONNECTED` constraint, `ExistingWorkPolicy.KEEP`, unique name `adhan_download_work`, retrying up to 3 times.
+**The worker roster lives in [§0.3](#03-workers)** — six widget-refresh workers plus one
+download fallback. What is worth knowing beyond the list:
+
+- The six widget workers each return `Result.success()` early when no widget of their type is
+  placed, so an unused widget costs nothing. On failure they persist an `Error` state and
+  `Result.retry()` for the first 3 attempts.
+- `AdhanDownloadWorker` builds a `OneTimeWorkRequest` with a `CONNECTED` constraint,
+  `ExistingWorkPolicy.KEEP` and the unique name `adhan_download_work`, retrying up to 3 times. It
+  shares its download logic with `AdhanDownloadService` via `AdhanAudioManager`.
 
 **Foreground-service-from-background gotcha.** On Android 12+ starting a foreground service from the background throws `ForegroundServiceStartNotAllowedException`. `AdhanDownloadService.startServiceWithFallback` gates on `ActivityManager` process importance: start the foreground service only if the app is foregrounded, otherwise **degrade to `AdhanDownloadWorker`**. The two share the same `AdhanAudioManager` download logic.
 
@@ -167,7 +320,44 @@ and re-scheduling on midnight rollover and boot.
 - `core/util/NotificationContentHelper.kt` — pure title/message/summary text generator.
 - `data/audio/AdhanPlaybackService.kt` — plays the adhan and posts the merged prayer+adhan notification (§1).
 
-**Channels** (created in `PrayerNotificationScheduler.init`, API 26+): `CHANNEL_ID_PRAYER` = `prayer_notifications` (HIGH), `CHANNEL_ID_ADHAN` = `adhan_notifications` (HIGH), `CHANNEL_ID_DAILY_SUMMARY` = `daily_summary_notifications` (DEFAULT), `CHANNEL_ID_KHATAM` = `khatam_notifications` (DEFAULT — a nudge, not an alarm; it is also the only channel whose name/description come from string resources rather than English literals), plus no-vibration siblings `CHANNEL_ID_PRAYER_SILENT` / `CHANNEL_ID_ADHAN_SILENT`. **Vibration is a channel property** — Android ignores `enableVibration()` changes after a channel exists, so the `notificationVibration` preference is honoured by *posting on the matching channel* via `channelForPrayer(vibrate)` / `channelForAdhan(vibrate)`, **not** by per-notification `setVibrate` (that's kept only as the pre-O fallback). `AdhanPlaybackService` also creates `adhan_playback_channel` but **posts on `CHANNEL_ID_ADHAN`** — so the playback channel is effectively unused for the visible notification.
+**Channels.** The full roster — ids, constants, importance and creator — is in
+[§0.6](#06-notification-channels); seven of the eleven are created here in
+`PrayerNotificationScheduler.init` (API 26+). Two behaviours are worth stating in full:
+
+- **Vibration is a channel property.** Android ignores `enableVibration()` changes after a
+  channel exists, so the `notificationVibration` preference is honoured by *posting on the
+  matching channel* via `channelForPrayer(vibrate)` / `channelForAdhan(vibrate)`, **not** by
+  per-notification `setVibrate` (kept only as the pre-O fallback). That is why the silent
+  siblings exist at all.
+- **The Khatam and worship channels take their name/description from string resources** rather
+  than English literals, because they are the ones a user is most likely to meet in a
+  non-English locale from a cold alarm process.
+
+`AdhanPlaybackService` also creates `adhan_playback_channel` but **posts on `CHANNEL_ID_ADHAN`**,
+so the playback channel is effectively unused for the visible notification.
+
+```mermaid
+sequenceDiagram
+    participant Sched as PrayerNotificationScheduler
+    participant AM as AlarmManager
+    participant BR as BootReceiver
+    participant Svc as AdhanPlaybackService
+    participant User
+
+    Note over Sched: scheduleTodaysPrayerNotifications()<br/>cancels all, then re-arms
+    Sched->>AM: setExactAndAllowWhileIdle × (prayers, pre-reminders,<br/>midnight 9999, summary 8889, Friday 8890,<br/>Khatam 8891, worship 9000+ordinal)
+    AM-->>BR: ACTION_PRAYER_NOTIFICATION (at prayer time)
+    alt adhan enabled and file present and not DND-blocked
+        BR->>Svc: playAdhan(prayer)
+        Svc->>User: foreground notification **doubles as** the prayer notification<br/>(shared id prayerName.hashCode())
+    else file missing
+        BR->>BR: trigger download for next time, fall back to beep
+        BR->>User: prayer notification
+    end
+    AM-->>BR: ACTION_MIDNIGHT_RESCHEDULE (00:01)
+    BR->>Sched: mark missed prayers + reschedule
+    Note over BR,Sched: self-perpetuating daily chain —<br/>an alarm armed outside this call fires once and never again
+```
 
 **Scheduling.** `scheduleTodaysPrayerNotifications(...)` cancels everything then re-arms enabled prayers, using `setExactAndAllowWhileIdle(RTC_WAKEUP, …)` with `PendingIntent.getBroadcast` targeting `BootReceiver` (explicit intent). Request codes: prayer `1000 + ordinal`, pre-reminder `2000 + ordinal`, midnight reschedule `9999` (00:01), daily summary `8889` (23:00), Friday reminder `8890`, Khatam reminder `8891`. Pre-reminders fire at `prayerTime − preReminderMinutes` (skipped for Sunrise); the lead time is **user-editable** (the pre-adhan stepper → `SetReminderMinutes`). The **Friday (Jummah) reminder** (`scheduleFridayReminder`, gated on `fridayReminderEnabled`) is a one-shot at the upcoming Friday's Dhuhr − `fridayReminderMinutes`, re-armed on every reschedule so it always targets the next Friday.
 
@@ -314,6 +504,10 @@ Ramadan.
 ---
 
 ## 5. Database & migrations
+
+> **Current schema version:** `24` (`NIMAZ_DATABASE_VERSION` in
+> `data/local/database/NimazDatabase.kt`). Bumping it without updating this section fails
+> `SUB-01`. Every bump needs a `Migration` **and** a line in the migration history below.
 
 Two Room `@Database`es, both provided in `core/di/DatabaseModule.kt`:
 
@@ -600,8 +794,16 @@ place** whenever you add a migration — the two can no longer drift.
 
 ## 6. Preferences (DataStore)
 
+The app has **three** DataStore files, listed in [§0.5](#05-datastore-files). This section is
+about the main one; the other two are self-contained slices documented where they are used.
+
 `data/local/datastore/PreferencesDataStore.kt` — the app's **single central settings store**,
 backed by a Jetpack Preferences DataStore (`preferencesDataStore(name = "nimaz_preferences")`).
+
+> **Adding a fourth DataStore file is a decision, not a detail.** Each one is an independent
+> migration and export surface: the sync payload (§10) carries `nimaz_preferences` only, so a
+> setting that lives anywhere else silently does not sync. Add keys to `nimaz_preferences`
+> unless the slice is genuinely not user settings (as announcements and the AI device id are).
 
 **It implements the `domain/repository/SettingsRepository` interface.** Presentation code
 (ViewModels, `MainActivity`) injects **`SettingsRepository`**, not the concrete class (bound via
@@ -917,99 +1119,196 @@ composable coroutine scope.
 
 ## 12. Engagement announcements (FCM)
 
-**Pure FCM, no backend.** Announcements (feature nudges, changelog items, privacy/T&C notices)
-are sent from the **Firebase console Notifications composer** as notification+data messages,
-broadcast to topic **`announcements`**. No server, no Remote Config, no token storage. With no
-message ever sent there is zero behaviour change — the feature is inert by default.
+**Pure FCM, no backend.** Announcements (feature nudges, changelog items, privacy/T&C notices,
+celebration cards) are sent from the **Firebase console Notifications composer** as
+notification+data messages, broadcast to the topic **`announcements`**. No server, no Remote
+Config, no token storage. With no message ever sent there is zero behaviour change — the feature
+is inert by default.
 
-**Delivery model.**
-- **App foreground** → `NimazMessagingService.onMessageReceived` fires: custom data →
-  `AnnouncementPayloadMapper` → `Announcement` → persisted via `AnnouncementRepository`. **No
-  system notification is posted**; the Home screen observes the repository and renders a
-  dismissable `AnnouncementBanner`.
-- **App backgrounded/killed** → the **OS** posts the tray notification itself (composer
-  title/body) on the `nimaz_announcements` channel (manifest meta-data
-  `default_notification_channel_id` / `_icon` / `_color`); `onMessageReceived` is **not** called.
-  Tapping copies the custom data onto the launcher intent — `MainActivity.handleIntent` maps the
-  extras, persists the announcement (banner shows on Home) and deep-links to its `route` if valid.
-  *Accepted gap:* opening the app without tapping the notification shows no banner.
+### 12.1 Delivery model
 
-**Key files.**
-- `data/announcement/NimazMessagingService.kt` — the app's **only** `FirebaseMessagingService`
-  (`@AndroidEntryPoint`; parse-and-write only; `onNewToken` logs only).
-- `data/announcement/AnnouncementPayloadMapper.kt` — `Map<String,String>`/intent-extras →
-  `Announcement?`; null (never throws) on missing/blank required fields (`id`,`type`,`title`,`body`)
-  or any malformed optional (`min_version_code`, `max_version_code`, ISO-8601 `expires_at`,
-  `dismissable`).
-- `data/announcement/AnnouncementBootstrap.kt` — per-launch channel create + idempotent
-  `subscribeToTopic("announcements")`, called from `AppInitializer` (§9); no-ops when Firebase
-  isn't initialized (no `google-services.json`).
-- `data/local/datastore/AnnouncementLocalDataSource.kt` — own Preferences DataStore
-  (`nimaz_announcements`): JSON-serialized current announcement + `dismissed_announcement_ids`
-  string-set (dismissal is **permanent**; re-sending the same `id` never resurfaces).
-- `data/repository/AnnouncementRepositoryImpl.kt` → `domain/repository/AnnouncementRepository`.
-- `domain/model/Announcement.kt`, `domain/usecase/AnnouncementUseCases.kt` —
-  `ObserveActiveAnnouncementUseCase` gates on dismissed (repo) + expiry + `versionCode` window;
-  `ResolveAnnouncementRouteUseCase` classifies `route` into https-URL / allowlisted feature key / none.
-- `core/navigation/AnnouncementRoutes.kt` — `announcementRoute(key)` resolves feature keys via
-  **two tiers**: static allowlist (exact matches like `settings/appearance`, `tasbih/stats`)
-  checked first, then parameterised grammar (e.g. `quran/surah/{1-114}`, `tafseer/{n}`,
-  `prayer/tracker/{tab}`, `dua/category/{slug}`, …). Integer parameters are range-checked;
-  malformed/out-of-range keys resolve to `null` (CTA hidden). URLs (https://) open via
-  `ACTION_VIEW`. See [`NAVIGATION.md` announcement-route-grammar](NAVIGATION.md#announcement-route-grammar)
-  for the complete grammar table.
-- `core/di/AnnouncementModule.kt`; banner UI in
-  `presentation/components/molecules/AnnouncementBanner.kt`, state in `HomeViewModel.announcement`
-  (`StateFlow<AnnouncementUiState>`).
+```mermaid
+flowchart TD
+    Console["Firebase console composer<br/>notification + custom data<br/>topic: announcements"] --> App{"app state"}
 
-**Channel.** `nimaz_announcements` ("Updates & Announcements"), **IMPORTANCE_LOW** — visible,
-silent, and strictly separate from the prayer/adhan channels (§4), which are never touched.
+    App -->|foreground| Fg["NimazMessagingService.onMessageReceived"]
+    Fg --> Map["AnnouncementPayloadMapper.fromPayload"]
 
-**Payload contract** (console → Additional options → Custom data): required `id`, `type`
-(`feature|privacy|tos|changelog|celebration`), `title`, `body`; optional `cta_label`, `route` (allowlist key
-or `https://…`), `min_version_code`, `max_version_code`, `expires_at` (ISO-8601 UTC),
-`dismissable` (default `true`). Never use reserved keys (`from`, `message_type`, `google.*`,
-`gcm.*`). FCM is not E2E-encrypted — public content only.
+    App -->|"backgrounded / killed"| Bg["OS posts the tray notification itself<br/>channel nimaz_announcements<br/>(onMessageReceived is NOT called)"]
+    Bg -->|"user taps"| Intent["MainActivity.handleIntent"]
+    Intent --> MapI["AnnouncementPayloadMapper.fromIntentExtras"]
+    Bg -->|"user does not tap"| Gap["nothing shown — accepted gap"]
 
-**Celebration type (new).** When `type = celebration`, the following **8 optional payload keys** 
-are parsed and stored in the `Announcement` domain model + `AnnouncementEntity` (both via `AnnouncementPayloadMapper`):
-`event` (key matching `CelebrationEvent` enum, e.g. `eid_al_fitr`), `arabic` (event name Arabic), 
-`transliteration` (romanized name), `proof_ref` (Quranic/Hadith reference), `proof_text` (proof snippet), 
-`cta2_label` (secondary CTA text), `route2` (secondary navigation destination), `starts_at` (ISO-8601 or 
-Unix epoch ms; validates and gates display). All 8 keys are registered in `PAYLOAD_KEYS` alongside 
-the existing keys. Malformed `starts_at` rejects the entire payload (mapper returns `null`). Missing/blank 
-`event` is accepted (payload may be title/body only, no event type). Proof pairs (ref/text) drop both if 
-only one is present (all-or-nothing). Celebrations are **excluded from the banner** — they render as 
-`EventCard`s in Home's `EventsCarousel` instead, avoiding double-render against pushed announcements.
+    Map --> Store
+    MapI --> Store["AnnouncementRepository →<br/>DataStore nimaz_announcements"]
+    Store --> Gate["ObserveActiveAnnouncementUseCase<br/>dismissed? expired? not started? version window?"]
+    Gate -->|"type != celebration"| Banner["AnnouncementBanner on Home"]
+    Gate -->|"type == celebration"| Cards["ObserveEventCardsUseCase →<br/>EventsCarousel on Home"]
+```
 
-**Analytics.** `announcement_shown` / `announcement_cta_clicked` / `announcement_dismissed`
-(helpers in `AppAnalytics`), on top of FCM's own delivery/open reports. A new event
-`announcement_route_rejected` (params: `announcement_id`, `route`) is logged from `HomeViewModel`
-when a non-empty announcement route resolves to `null` (e.g. unparseable key or integer
-out of range); this tracks incomplete content or malformed payloads without coupling the domain
-use case to analytics.
+*Accepted gap:* when the app was backgrounded, opening it **without** tapping the notification
+shows no banner — the payload only reaches the app through the tap intent. The console can only
+send notification-bearing messages, so the foreground banner and the background tray are mutually
+exclusive surfaces per delivery.
 
-**Home event cards (local + pushed celebrations).** The Home screen's `EventsCarousel` displays celebration occasions from two sources, merged by `ObserveEventCardsUseCase`: 
-1. **Local events** — `ObserveLocalEventsUseCase` matches the static `IslamicEvents.events` calendar against today's Hijri date (via `HijriDateCalculator.today(hijriDayOffset)`) and emits `CelebrationEvent.toOccasion()` presentation models. 
-2. **Pushed celebrations** — FCM announcements with `type = celebration` are mapped to `EventOccasion` and merged by the use case; **pushed wins on same-event match** (by event key). 
-The merge caps at 2 total cards. Celebrations are rendered as cards only — they are **never included in the dismissable `AnnouncementBanner`** to avoid double-rendering the same occasion.
+### 12.2 Key files
 
-**Gotchas.**
-- The console can only send notification-bearing messages, so the foreground banner and the
-  background tray are mutually exclusive surfaces per delivery (see accepted gap above).
-- `POST_NOTIFICATIONS` denied → no tray in background; the banner still works for foreground
-  receipt and notification-tap entry is simply never exercised.
-- Old app versions ignore route keys they don't know — never serialize `Route` objects into
-  payloads; extend the allowlist instead.
+| File | Role |
+|---|---|
+| `data/announcement/NimazMessagingService.kt` | the app's **only** `FirebaseMessagingService` (`@AndroidEntryPoint`; parse-and-write only; `onNewToken` logs only) |
+| `data/announcement/AnnouncementPayloadMapper.kt` | `Map<String,String>` / intent extras → `Announcement?`; returns null, never throws |
+| `data/announcement/AnnouncementBootstrap.kt` | per-launch channel create + idempotent `subscribeToTopic("announcements")`, called from `AppInitializer` (§9); no-ops when Firebase isn't initialized (no `google-services.json`) |
+| `data/local/datastore/AnnouncementLocalDataSource.kt` | the `nimaz_announcements` DataStore, plus the `@Serializable AnnouncementEntity` JSON DTO it stores (a DataStore DTO — **not** a Room entity) and its `toDomain()`/`toEntity()` mapping |
+| `data/repository/AnnouncementRepositoryImpl.kt` | implements `domain/repository/AnnouncementRepository` |
+| `domain/model/Announcement.kt` | `Announcement`, `AnnouncementType`, `CelebrationEvent`, `AnnouncementAction`, and `isActiveFor()` |
+| `domain/usecase/AnnouncementUseCases.kt` | `ObserveActiveAnnouncementUseCase` (applies `isActiveFor` — start, expiry, version window; **dismissal is filtered one layer down**, by `AnnouncementRepositoryImpl`), `SetAnnouncementUseCase`, `DismissAnnouncementUseCase`, `ResolveAnnouncementRouteUseCase` |
+| `domain/usecase/ObserveEventCardsUseCase.kt` | merges local calendar occasions with a pushed celebration |
+| `core/navigation/AnnouncementRoutes.kt` | `announcementRoute(key)` — the route allowlist and grammar |
+| `core/di/AnnouncementModule.kt` | the DI wiring |
+| `presentation/components/molecules/AnnouncementBanner.kt` | the banner; state in `HomeViewModel.announcement` (`StateFlow<AnnouncementUiState>`) |
+
+### 12.3 Payload contract
+
+Console → *Additional options* → *Custom data*. Every key below is a string; the mapper's
+`PAYLOAD_KEYS` list is what gets copied off the tap intent, so **a key missing from that list is
+invisible in the background path** even if `fromPayload` would read it.
+
+| Key | Required | Format | On malformed |
+|---|---|---|---|
+| `id` | ✅ | non-blank; stable and unique | payload rejected |
+| `type` | ✅ | one of the types in §12.4 | payload rejected |
+| `title` | ✅ | non-blank | payload rejected |
+| `body` | ✅ | non-blank | payload rejected |
+| `cta_label` | — | button text; no CTA rendered when absent | blank → treated as absent |
+| `route` | — | an allowlisted key or `https://…` — see [`NAVIGATION.md` §4](NAVIGATION.md#4-announcement-route-grammar) | unresolvable → CTA hidden, announcement still shown |
+| `min_version_code` | — | integer; banner suppressed below it | payload rejected |
+| `max_version_code` | — | integer; banner suppressed above it | payload rejected |
+| `expires_at` | — | **ISO-8601 instant, UTC** (`2026-08-04T12:00:00Z`); suppressed once `now >= expires_at` | payload rejected |
+| `starts_at` | — | **ISO-8601 instant, UTC**; suppressed until `now >= starts_at`. *Only* ISO-8601 — an epoch-millis number is malformed | payload rejected |
+| `dismissable` | — | `true` / `false`, default `true` | payload rejected |
+| `event` | — | a celebration key from §12.5; only read when `type = celebration` | unknown/blank → `generic` |
+| `arabic` | — | the occasion's name in Arabic | blank → treated as absent |
+| `transliteration` | — | the romanized name | blank → treated as absent |
+| `proof_ref` | — | a Qur'an/Hadith reference | see the pairing rule below |
+| `proof_text` | — | the proof snippet | see the pairing rule below |
+| `cta2_label` | — | secondary CTA text | blank → treated as absent |
+| `route2` | — | secondary destination, same grammar as `route` | unresolvable → second CTA hidden |
+
+**Validation rules.**
+
+- **Malformed beats partial.** Any present-but-unparseable optional field (`min_version_code`,
+  `max_version_code`, `expires_at`, `starts_at`, `dismissable`) rejects the **entire** payload —
+  `fromPayload` returns null and nothing is stored. A bad console send is silently ignored rather
+  than half-applied.
+- **Proof is all-or-nothing.** `proof_ref` and `proof_text` are dropped together unless both are
+  present, so a card can never render a citation with no text or text with no citation.
+- **Never use reserved keys** — `from`, `message_type`, `google.*`, `gcm.*` are FCM's own.
+- **FCM is not end-to-end encrypted.** Public content only.
+
+### 12.4 Announcement types (`AnnouncementType`)
+
+The type selects the banner's icon and accent, and — for `celebration` — the surface entirely.
+
+| Key | Renders as |
+|---|---|
+| `feature` | banner — a feature nudge |
+| `privacy` | banner — a privacy notice |
+| `tos` | banner — a terms notice |
+| `changelog` | banner — a "what's new" item |
+| `celebration` | **not a banner** — an `EventCard` in Home's `EventsCarousel` (§12.6) |
+
+### 12.5 Celebration events (`CelebrationEvent`)
+
+Keys match the ids in the static `IslamicEvents.events` calendar, which is what lets a pushed
+celebration *merge with* rather than duplicate the locally-computed card.
+
+| Key | Occasion |
+|---|---|
+| `eid_al_fitr` | Eid al-Fitr |
+| `eid_al_adha` | Eid al-Adha |
+| `ramadan_start` | first of Ramadan |
+| `ramadan_end` | end of Ramadan |
+| `laylat_al_qadr` | Laylat al-Qadr |
+| `day_of_arafah` | Day of Arafah |
+| `ashura` | Ashura |
+| `mawlid` | Mawlid |
+| `islamic_new_year` | Hijri new year |
+| `jumuah` | Jumu'ah |
+| `generic` | fallback — also what an unknown or missing `event` key resolves to |
+
+### 12.6 Home surfaces — banner vs event cards
+
+A stored announcement reaches Home through **exactly one** of two paths, decided by `type`:
+
+- **Banner.** `HomeViewModel` filters `type == CELEBRATION` **out** of the banner stream, so
+  non-celebration announcements render as the dismissable `AnnouncementBanner`.
+- **Event cards.** `ObserveEventCardsUseCase` combines `ObserveLocalEventsUseCase` (the static
+  `IslamicEvents.events` calendar matched against today's Hijri date via
+  `HijriDateCalculator.today(hijriDayOffset)`) with any pushed celebration. On a **same-event
+  match** the pushed fields win field-by-field, with the local card filling only where the pushed
+  value is null or blank; otherwise both render. Pushed outranks local on a priority tie. The
+  merged list is **capped at 2 cards**.
+
+Splitting them this way is what stops the same occasion appearing twice — once as a banner and
+once as a card.
+
+### 12.7 Storage & dismissal
+
+`nimaz_announcements` (its own Preferences DataStore, see [§0.5](#05-datastore-files)) holds the
+JSON-serialized current announcement plus a `dismissed_announcement_ids` string set. **Dismissal
+is permanent**: re-sending the same `id` never resurfaces it. Only one announcement is retained —
+a newer send replaces the current one.
+
+### 12.8 Channel
+
+`nimaz_announcements` ("Updates & Announcements"), **IMPORTANCE_LOW** — visible, silent, and
+strictly separate from the prayer/adhan channels (§4), which are never touched. Wired as the
+default via the manifest meta-data `default_notification_channel_id` / `_icon` / `_color`.
+
+### 12.9 Analytics
+
+`announcement_shown` / `announcement_cta_clicked` / `announcement_dismissed` (helpers in
+`AppAnalytics`), on top of FCM's own delivery/open reports. `announcement_route_rejected`
+(params: `announcement_id`, `route`) is logged from `HomeViewModel` when a non-empty route
+resolves to null — an unparseable key or an out-of-range integer. That event is the drift alarm
+for this subsystem: a spike means a console typo or an allowlist that never shipped.
+
+### 12.10 Gotchas
+
+- `POST_NOTIFICATIONS` denied → no tray in the background; the banner still works for foreground
+  receipt and the notification-tap entry is simply never exercised.
+- Old app versions ignore route keys they don't know — **never serialize `Route` objects into
+  payloads**; extend the allowlist instead, and use `min_version_code` to gate a key that only
+  newer builds understand.
+- `khatam/{id}` route keys reference a **local** row id, so a broadcast using one resolves on
+  essentially no device but the author's. Prefer feature-level keys for broadcasts.
+- Adding a payload key means adding it to `PAYLOAD_KEYS` too, or the background tap path will
+  silently drop it.
+
 
 ---
 
 ## Keeping this doc updated
 
 This file is a **living map of the subsystems**, not a one-time snapshot. When you change a
-subsystem — add/rename a Worker or service, change a notification channel or alarm scheme, add
-a migration (and bump `NIMAZ_DATABASE_VERSION`), add a content seeder or content-version key, change a
-DataStore key surface, alter the sync payload/protocol, or swap a monitoring backend — **update
-the corresponding section here in the same change**, and add a row to the relevant table. Keep
-claims grounded in the code (read the file, cite the path in backticks). If a subsystem grows
-large enough to warrant its own doc, link it from here rather than letting this overview drift.
+subsystem — add/rename a Worker or Service, change a notification channel or alarm scheme, add a
+migration (and bump `NIMAZ_DATABASE_VERSION`), change the content-delivery pipeline or a
+content-version key, add a DataStore file or key surface, alter the sync payload/protocol, or
+swap a monitoring backend — **update the corresponding section here in the same change**, and add
+a row to the relevant [§0](#0-subsystem-map--component-inventory) inventory table.
+
+Nine of those obligations are **mechanically enforced**:
+
+```bash
+python3 scripts/check_docs.py --only SUB
+```
+
+`SUB-01` schema version · `SUB-02` Workers · `SUB-03` Services · `SUB-04` widgets ·
+`SUB-05` notification channels · `SUB-06` DataStore files · `SUB-07` FCM payload keys ·
+`SUB-08` announcement types · `SUB-09` celebration events.
+
+The rest is on you: keep claims grounded in the code (read the file, cite the path in backticks),
+and prefer one inventory table that several sections link to over the same table written twice.
+If a subsystem grows large enough to warrant its own doc, link it from here rather than letting
+this overview drift — and register the new doc in [`README.md`](README.md) and
+[`DOCUMENTATION.md`](DOCUMENTATION.md).
