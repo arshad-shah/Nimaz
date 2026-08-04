@@ -316,14 +316,14 @@ class QuranTopicsViewModel @Inject constructor(
             }
 
             is QuranTopicsEvent.SelectTree -> {
-                AppAnalytics.logFeatureUsed("quran_topics", "select_tree")
+                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.QURAN_TOPICS, "select_tree")
                 selectTree(event.tree)
             }
 
             is QuranTopicsEvent.Toggle -> toggle(event.topic)
 
             is QuranTopicsEvent.Focus -> {
-                AppAnalytics.logFeatureUsed("quran_topics", "focus_branch")
+                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.QURAN_TOPICS, "focus_branch")
                 focus(event.topic)
             }
 
@@ -350,7 +350,7 @@ class QuranTopicsViewModel @Inject constructor(
 
             is QuranTopicsEvent.LoadSurahSubjects -> {
                 if (_surahSubjects.value.surahNumber != event.surahNumber) {
-                    AppAnalytics.logFeatureUsed("quran_topics", "open_surah_subjects")
+                    AppAnalytics.logFeatureUsed(AppAnalytics.Feature.QURAN_TOPICS, "open_surah_subjects")
                     loadSurahSubjects(event.surahNumber)
                 }
             }
@@ -362,7 +362,7 @@ class QuranTopicsViewModel @Inject constructor(
                 _surahSubjects.update { it.copy(query = "") }
 
             is QuranTopicsEvent.LoadDetail -> {
-                AppAnalytics.logFeatureUsed("quran_topics", "open_detail")
+                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.QURAN_TOPICS, "open_detail")
                 loadDetail(event.topicId, event.tree, event.fromSurah)
             }
         }

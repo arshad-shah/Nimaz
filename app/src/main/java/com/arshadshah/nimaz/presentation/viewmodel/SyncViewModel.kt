@@ -227,9 +227,9 @@ class SyncViewModel @Inject constructor(
 
     fun onEvent(event: SyncEvent) {
         when (event) {
-            is SyncEvent.StartSend -> AppAnalytics.logFeatureUsed("sync", "start_send")
-            is SyncEvent.StartReceive -> AppAnalytics.logFeatureUsed("sync", "start_receive")
-            is SyncEvent.Cancel -> AppAnalytics.logFeatureUsed("sync", "cancel")
+            is SyncEvent.StartSend -> AppAnalytics.logFeatureUsed(AppAnalytics.Feature.SYNC, "start_send")
+            is SyncEvent.StartReceive -> AppAnalytics.logFeatureUsed(AppAnalytics.Feature.SYNC, "start_receive")
+            is SyncEvent.Cancel -> AppAnalytics.logFeatureUsed(AppAnalytics.Feature.SYNC, "cancel")
             else -> {}
         }
         when (event) {
@@ -303,7 +303,7 @@ class SyncViewModel @Inject constructor(
                     }
                 } catch (e: Exception) {
                     CrashReporter.recordException(e)
-                    AppAnalytics.logError("sync", "import", e.message)
+                    AppAnalytics.logError(AppAnalytics.Feature.SYNC, "import", e.message)
                     Log.e(TAG, "Import failed!", e)
                     addLogEntry("Import failed: ${e.message}")
                     _uiState.update { it.copy(error = "Import failed: ${e.message}") }
@@ -357,7 +357,7 @@ class SyncViewModel @Inject constructor(
                 Log.d(TAG, "sendData returned — transfer queued")
             } catch (e: Exception) {
                 CrashReporter.recordException(e)
-                AppAnalytics.logError("sync", "export", e.message)
+                AppAnalytics.logError(AppAnalytics.Feature.SYNC, "export", e.message)
                 Log.e(TAG, "Export/send failed!", e)
                 addLogEntry("Export failed: ${e.message}")
                 _uiState.update { it.copy(error = "Export failed: ${e.message}") }

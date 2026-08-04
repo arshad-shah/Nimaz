@@ -55,18 +55,18 @@ class AsmaUnNabiViewModel @Inject constructor(
     fun onEvent(event: AsmaUnNabiEvent) {
         when (event) {
             is AsmaUnNabiEvent.LoadDetail -> AppAnalytics.logFeatureUsed(
-                "asma_un_nabi",
+                AppAnalytics.Feature.ASMA_UN_NABI,
                 "open_detail"
             )
 
             is AsmaUnNabiEvent.ToggleFavorite -> AppAnalytics.logFeatureUsed(
-                "asma_un_nabi",
+                AppAnalytics.Feature.ASMA_UN_NABI,
                 "toggle_favorite"
             )
 
-            is AsmaUnNabiEvent.Search -> AppAnalytics.logFeatureUsed("asma_un_nabi", "search")
+            is AsmaUnNabiEvent.Search -> AppAnalytics.logFeatureUsed(AppAnalytics.Feature.ASMA_UN_NABI, "search")
             AsmaUnNabiEvent.ToggleFavoritesFilter -> AppAnalytics.logFeatureUsed(
-                "asma_un_nabi",
+                AppAnalytics.Feature.ASMA_UN_NABI,
                 "toggle_favorites_filter"
             )
 

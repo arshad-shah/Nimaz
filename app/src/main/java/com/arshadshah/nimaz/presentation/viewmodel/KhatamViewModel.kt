@@ -235,7 +235,7 @@ class KhatamViewModel @Inject constructor(
             KhatamEvent.SaveKhatam -> "save"
             else -> null
         }
-        action?.let { AppAnalytics.logFeatureUsed("khatam", it) }
+        action?.let { AppAnalytics.logFeatureUsed(AppAnalytics.Feature.KHATAM, it) }
     }
 
     private fun observeKhatams() {
@@ -446,7 +446,13 @@ class KhatamViewModel @Inject constructor(
             }.onSuccess {
                 _formState.update { it.copy(isSaving = false, saveComplete = true) }
             }.onFailure { error ->
-                AppAnalytics.logError("khatam_save", error.javaClass.simpleName, error.message)
+                // Was "khatam_save" — a second domain for one feature, which split its
+                // dashboards. The operation moves to the `type` where it belongs.
+                AppAnalytics.logError(
+                    AppAnalytics.Feature.KHATAM,
+                    "save",
+                    error.message
+                )
                 _formState.update {
                     it.copy(isSaving = false, errorRes = R.string.khatam_error_save_failed)
                 }

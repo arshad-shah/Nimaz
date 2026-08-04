@@ -1,6 +1,7 @@
 package com.arshadshah.nimaz.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
+import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.core.util.toUtcMidnightMillis
@@ -143,11 +144,18 @@ class PrayerTrackerViewModel @Inject constructor(
 
     fun onEvent(event: PrayerTrackerEvent) {
         when (event) {
+            // One casing into Param.STATUS. Two of these passed lowercase literals while the
+            // third passed `PrayerStatus.name` (PRAYED/MISSED) into the *same* dimension, so
+            // one state arrived under four different values and no dashboard could count it.
             is PrayerTrackerEvent.MarkPrayerPrayed ->
-                telemetry.prayerTracked(event.prayerName.name, "prayed", event.isJamaah)
+                telemetry.prayerTracked(
+                    event.prayerName.name,
+                    PrayerStatus.PRAYED.name,
+                    event.isJamaah
+                )
 
             is PrayerTrackerEvent.MarkPrayerMissed ->
-                telemetry.prayerTracked(event.prayerName.name, "missed")
+                telemetry.prayerTracked(event.prayerName.name, PrayerStatus.MISSED.name)
 
             is PrayerTrackerEvent.UpdatePrayerStatus ->
                 telemetry.prayerTracked(
@@ -396,6 +404,6 @@ class PrayerTrackerViewModel @Inject constructor(
     }
 
     private companion object {
-        private const val DOMAIN = "prayer_tracker"
+        private const val DOMAIN = AppAnalytics.Feature.PRAYER_TRACKER
     }
 }

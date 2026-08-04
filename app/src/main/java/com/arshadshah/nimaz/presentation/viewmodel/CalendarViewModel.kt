@@ -4,6 +4,7 @@ import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.di.DefaultDispatcher
+import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.core.monitoring.catchAndReport
 import com.arshadshah.nimaz.core.monitoring.launchSafely
@@ -355,7 +356,7 @@ class CalendarViewModel @Inject constructor(
     }
 
     private companion object {
-        private const val DOMAIN = "calendar"
+        private const val DOMAIN = AppAnalytics.Feature.CALENDAR
     }
 }
 

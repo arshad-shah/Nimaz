@@ -4,6 +4,7 @@ import androidx.annotation.StringRes
 import androidx.compose.ui.text.font.FontFamily
 import androidx.lifecycle.ViewModel
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.core.util.toUtcMidnightMillis
@@ -450,6 +451,6 @@ class DuaViewModel @Inject constructor(
     fun isDuaFavorite(duaId: String) = duaUseCases.isDuaFavorite(duaId)
 
     private companion object {
-        private const val DOMAIN = "dua"
+        private const val DOMAIN = AppAnalytics.Feature.DUA
     }
 }

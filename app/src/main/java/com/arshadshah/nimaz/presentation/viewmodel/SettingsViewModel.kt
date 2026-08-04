@@ -614,6 +614,12 @@ class SettingsViewModel @Inject constructor(
 
             is SettingsEvent.SetLanguage -> {
                 _generalState.update { it.copy(language = event.language) }
+                // AppAnalytics.UserProperty.APP_LANGUAGE has been declared and never set, so
+                // every segmentation by language has been empty since it was added.
+                AppAnalytics.setUserProperty(
+                    AppAnalytics.UserProperty.APP_LANGUAGE,
+                    event.language.code
+                )
                 viewModelScope.launch {
                     settingsRepository.setAppLanguage(event.language.code)
                     LocaleHelper.setLocale(context, event.language.code)
@@ -679,6 +685,10 @@ class SettingsViewModel @Inject constructor(
             // Prayer
             is SettingsEvent.SetCalculationMethod -> {
                 _prayerState.update { it.copy(calculationMethod = event.method) }
+                AppAnalytics.setUserProperty(
+                    AppAnalytics.UserProperty.CALC_METHOD,
+                    event.method.name
+                )
                 viewModelScope.launch {
                     settingsRepository.setCalculationMethod(event.method.name)
                     rescheduleNotifications()
@@ -722,6 +732,10 @@ class SettingsViewModel @Inject constructor(
             // Notifications
             is SettingsEvent.SetNotificationsEnabled -> {
                 _notificationState.update { it.copy(notificationsEnabled = event.enabled) }
+                AppAnalytics.setUserProperty(
+                    AppAnalytics.UserProperty.NOTIFICATIONS_ENABLED,
+                    event.enabled.toString()
+                )
                 viewModelScope.launch {
                     settingsRepository.setPrayerNotificationsEnabled(event.enabled)
                     rescheduleNotifications()
@@ -900,7 +914,7 @@ class SettingsViewModel @Inject constructor(
                         adhanAudioManager.preview(sound, false)
                     } catch (e: Exception) {
                         CrashReporter.recordException(e)
-                        AppAnalytics.logError("settings", "adhan_preview", e.message)
+                        AppAnalytics.logError(AppAnalytics.Feature.SETTINGS, "adhan_preview", e.message)
                         _adhanPreviewError.value = "Failed to play adhan preview: ${e.message}"
                     }
                 }
@@ -1055,10 +1069,15 @@ class SettingsViewModel @Inject constructor(
             SettingsEvent.ExportSettings -> exportSettings()
             SettingsEvent.ImportSettings -> importSettings()
             SettingsEvent.TestNotification -> {
+                // AppAnalytics.logTestNotification exists for exactly this and was never
+                // called, so "did the user try a test notification before reporting that
+                // notifications do not work" has been unanswerable.
+                AppAnalytics.logTestNotification(allPrayers = false)
                 prayerNotificationScheduler.sendTestNotification()
             }
 
             SettingsEvent.TestAllNotifications -> {
+                AppAnalytics.logTestNotification(allPrayers = true)
                 prayerNotificationScheduler.sendAllPrayerTestNotifications()
             }
 
@@ -1118,9 +1137,11 @@ class SettingsViewModel @Inject constructor(
                 CalculationMethod.MUSLIM_WORLD_LEAGUE
             }
             val asrStr = settingsRepository.asrCalculation.first()
-            val asrMethod = when (asrStr.lowercase()) {
-                "hanafi" -> AsrJuristicMethod.HANAFI
-                else -> AsrJuristicMethod.STANDARD
+            // Routed through the domain parser rather than a hand-written comparison, so a
+            // rename of AsrCalculation.HANAFI cannot compile and silently mean STANDARD.
+            val asrMethod = when (AsrCalculation.fromString(asrStr)) {
+                AsrCalculation.HANAFI -> AsrJuristicMethod.HANAFI
+                AsrCalculation.STANDARD -> AsrJuristicMethod.STANDARD
             }
             val highLatStr = settingsRepository.highLatitudeRule.first()
             val highLat = try {

@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.domain.model.AiError
@@ -214,6 +215,6 @@ class AskViewModel @Inject constructor(
     companion object {
         const val MIN_QUESTION_LENGTH = 3
         private const val MAX_RECENT = 10
-        private const val DOMAIN = "ai_ask"
+        private const val DOMAIN = AppAnalytics.Feature.AI_ASK
     }
 }

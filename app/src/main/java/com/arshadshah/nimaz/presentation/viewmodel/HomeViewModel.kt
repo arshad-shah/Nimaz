@@ -377,7 +377,7 @@ class HomeViewModel @Inject constructor(
                 }
             } catch (e: Exception) {
                 CrashReporter.recordException(e)
-                AppAnalytics.logError("home", "load_daily_hadith", e.message)
+                AppAnalytics.logError(AppAnalytics.Feature.HOME, "load_daily_hadith", e.message)
                 // No hadith data available
             }
         }
@@ -424,7 +424,7 @@ class HomeViewModel @Inject constructor(
                 }
             } catch (e: Exception) {
                 CrashReporter.recordException(e)
-                AppAnalytics.logError("home", "load_daily_dua", e.message)
+                AppAnalytics.logError(AppAnalytics.Feature.HOME, "load_daily_dua", e.message)
                 // No dua data available
             }
         }
@@ -432,9 +432,9 @@ class HomeViewModel @Inject constructor(
 
     fun onEvent(event: HomeEvent) {
         when (event) {
-            is HomeEvent.UpdateLocation -> AppAnalytics.logFeatureUsed("home", "update_location")
+            is HomeEvent.UpdateLocation -> AppAnalytics.logFeatureUsed(AppAnalytics.Feature.HOME, "update_location")
             is HomeEvent.TogglePrayerStatus -> AppAnalytics.logFeatureUsed(
-                "home",
+                AppAnalytics.Feature.HOME,
                 "toggle_prayer_status"
             )
 
@@ -600,20 +600,14 @@ class HomeViewModel @Inject constructor(
                 val locationName = resolved.name.ifBlank { FallbackLocation.NAME }
 
                 // Cache calculation settings
-                cachedCalcMethod = try {
-                    CalculationMethod.valueOf(calcStr)
-                } catch (_: Exception) {
-                    CalculationMethod.MUSLIM_WORLD_LEAGUE
-                }
-                cachedAsrCalc = when (asrStr.lowercase()) {
-                    "hanafi" -> AsrCalculation.HANAFI
-                    else -> AsrCalculation.STANDARD
-                }
-                cachedHighLatRule = try {
-                    HighLatitudeRule.valueOf(highStr)
-                } catch (_: Exception) {
-                    null
-                }
+                // The domain's own parsers, in place of `valueOf` in a swallowing `try` plus a
+                // hand-written "hanafi" comparison. `valueOf` throws on every persisted alias
+                // the app itself writes — "MWL", "ISNA", "MAKKAH" — and the catch then
+                // substituted Muslim World League, so a user on ISNA silently got MWL prayer
+                // times, forever, with no signal. `fromString` knows the aliases.
+                cachedCalcMethod = CalculationMethod.fromString(calcStr)
+                cachedAsrCalc = AsrCalculation.fromString(asrStr)
+                cachedHighLatRule = HighLatitudeRule.fromString(highStr)
                 cachedAdjustments = adjustments
 
                 _state.update {
@@ -734,7 +728,7 @@ class HomeViewModel @Inject constructor(
                 scheduleWorshipRefresh()
             } catch (e: Exception) {
                 CrashReporter.recordException(e)
-                AppAnalytics.logError("home", "calculate_prayer_times", e.message)
+                AppAnalytics.logError(AppAnalytics.Feature.HOME, "calculate_prayer_times", e.message)
                 _state.update { it.copy(isLoading = false, error = e.message) }
             }
         }

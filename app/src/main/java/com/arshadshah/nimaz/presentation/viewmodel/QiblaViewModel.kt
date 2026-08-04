@@ -203,9 +203,9 @@ class QiblaViewModel @Inject constructor(
 
     fun onEvent(event: QiblaEvent) {
         when (event) {
-            QiblaEvent.StartCompass -> AppAnalytics.logFeatureUsed("qibla", "start_compass")
+            QiblaEvent.StartCompass -> AppAnalytics.logFeatureUsed(AppAnalytics.Feature.QIBLA, "start_compass")
             is QiblaEvent.SetArMode -> AppAnalytics.logFeatureUsed(
-                "qibla",
+                AppAnalytics.Feature.QIBLA,
                 if (event.enabled) "ar_on" else "ar_off"
             )
 
@@ -311,7 +311,7 @@ class QiblaViewModel @Inject constructor(
                 }
             } catch (e: Exception) {
                 CrashReporter.recordException(e)
-                AppAnalytics.logError("qibla", "calculate_direction", e.message)
+                AppAnalytics.logError(AppAnalytics.Feature.QIBLA, "calculate_direction", e.message)
                 _qiblaState.update { it.copy(error = e.message, isLoading = false) }
             }
         }
@@ -346,7 +346,7 @@ class QiblaViewModel @Inject constructor(
                 }
             } catch (e: Exception) {
                 CrashReporter.recordException(e)
-                AppAnalytics.logError("qibla", "set_location", e.message)
+                AppAnalytics.logError(AppAnalytics.Feature.QIBLA, "set_location", e.message)
                 _qiblaState.update { it.copy(error = e.message, isLoading = false) }
             }
         }
