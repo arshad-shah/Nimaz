@@ -292,6 +292,22 @@ rg -U --multiline-dotall -n '\.collect\s*\{(?:[^}]|
     `loadForDate` that has always had `dateRecordsJob`. (`PrayerTrackerViewModelHistoryScopeTest`)
   - `HadithViewModel` — `search` / `searchInBook` / `loadBook` / `loadChapter` /
     `loadHadithById` / `filterByGrade` (fixed earlier, see above).
+- [x] ~~**`PrayerTrackerViewModel.loadStats` / `loadQadaPrayers` — the two the sweep's own
+  heuristic could not see.**~~ **Resolved.** The sweep above split hits by *"takes a parameter,
+  so it is re-invoked per value"* versus *"takes none, so it is a one-shot lifetime observer"*.
+  These two take no parameter and are re-invoked anyway: `loadStats` reads its input from
+  `_statsState.value.period` and runs from `init`, `SetStatsPeriod`, `LoadStats`,
+  `updatePrayerStatus` and `markQadaCompleted`; `loadQadaPrayers` from `init`,
+  `LoadQadaPrayers` and `markQadaCompleted`. Two completed qada prayers left **three** live
+  collectors on the missed-prayer list (asserted directly, via `subscriptionCount`), and a
+  period switch racing an in-flight stats read left week numbers under a MONTH chip.
+
+  **The heuristic to use instead: re-invocability is about the call graph, not the signature.**
+  A function whose input comes from `_state.value` is parameterised — the parameter is just
+  implicit — and a private loader called from a sibling handler is re-invoked even if no event
+  reaches it directly. Both handles are now cancel-and-replace, and the loaders are no longer
+  called imperatively after a write: the collector observes the same table, so Room re-emits.
+  (`PrayerTrackerStatsTest`)
 - [x] ~~**`SyncViewModel` — untriaged.**~~ **Not a defect.** Its single `collect` is a lifetime
   observer started once from `init`, which is exactly what the detect command cannot distinguish
   and what the parameterised/not split above is for. Left as-is.
