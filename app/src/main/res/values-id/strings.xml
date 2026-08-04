@@ -1735,4 +1735,8 @@
     <string name="ai_error_consent_title">Tanya dengan Dalil nonaktif</string>
     <string name="ai_error_consent">Aktifkan di pengaturan pencarian untuk mengajukan pertanyaan. Pencarian kata kunci di Al-Qur\'an, hadis, dan doa tetap berfungsi offline.</string>
     <string name="ai_consent_save_failed">Pengaturan itu tidak dapat disimpan. Silakan coba lagi.</string>
+    <string name="tafseer_notes">Catatan</string>
+    <string name="tafseer_note_add">Tambah catatan</string>
+    <string name="tafseer_note_hint">Renungan Anda tentang bagian ini</string>
+    <string name="tafseer_note_edit">Ubah</string>
 </resources>

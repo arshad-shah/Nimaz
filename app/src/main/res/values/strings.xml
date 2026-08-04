@@ -1937,4 +1937,8 @@
     <string name="ai_error_consent_title">Ask with Proof is off</string>
     <string name="ai_error_consent">Turn it on in Search settings to ask a question. Keyword search across the Qur\'an, Hadith and duas works offline either way.</string>
     <string name="ai_consent_save_failed">That setting couldn\'t be saved. Please try again.</string>
+    <string name="tafseer_notes">Notes</string>
+    <string name="tafseer_note_add">Add note</string>
+    <string name="tafseer_note_hint">Your reflection on this passage</string>
+    <string name="tafseer_note_edit">Edit</string>
 </resources>

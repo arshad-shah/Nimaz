@@ -3,6 +3,8 @@ package com.arshadshah.nimaz.presentation.viewmodel.quran
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
+import com.arshadshah.nimaz.core.monitoring.Telemetry
+import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.domain.model.Ayah
 import com.arshadshah.nimaz.domain.model.QuranTopic
 import com.arshadshah.nimaz.domain.model.TafseerHighlight
@@ -77,7 +79,8 @@ sealed interface TafseerEvent {
 @HiltViewModel
 class TafseerViewModel @Inject constructor(
     private val tafseerUseCases: TafseerUseCases,
-    private val quranUseCases: QuranUseCases
+    private val quranUseCases: QuranUseCases,
+    private val telemetry: Telemetry,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(TafseerUiState())
@@ -272,30 +275,46 @@ class TafseerViewModel @Inject constructor(
     }
 
     private fun addNote(text: String) {
-        val currentState = _state.value
-        val ayahs = currentState.ayahs
-        if (ayahs.isEmpty()) return
+        val body = text.trim()
+        // A blank note is a mis-tap, not a thought. Storing it puts an empty row in the
+        // reader and on the notes screen, with nothing to read and nothing to explain it.
+        if (body.isEmpty()) return
 
-        val ayah = ayahs[currentState.currentAyahIndex]
-        viewModelScope.launch {
+        val currentState = _state.value
+        // `getOrNull`, not `[…]`. This ran outside the coroutine, so an index that had not
+        // caught up with the ayah list — before the first load, or straight after switching
+        // to a shorter surah — threw IndexOutOfBoundsException out of `onEvent`, on the UI
+        // thread, from a tap. None of these three handlers has ever executed in production,
+        // which is why nothing found it.
+        val ayah = currentState.ayahs.getOrNull(currentState.currentAyahIndex) ?: return
+
+        launchSafely(telemetry, DOMAIN, "add_note") {
             tafseerUseCases.addNote(
                 ayahId = ayah.id,
                 tafseerId = currentState.selectedSource.id,
-                text = text
+                text = body
             )
         }
     }
 
     private fun updateNote(note: TafseerNote) {
-        viewModelScope.launch {
-            tafseerUseCases.updateNote(note)
+        val body = note.text.trim()
+        if (body.isEmpty()) return
+        launchSafely(telemetry, DOMAIN, "update_note") {
+            // The id carries through unchanged, so the DAO's @Update targets this row rather
+            // than the insert-a-second-copy that an id of 0 would have produced.
+            tafseerUseCases.updateNote(note.copy(text = body))
         }
     }
 
     private fun deleteNote(noteId: Long) {
-        viewModelScope.launch {
+        launchSafely(telemetry, DOMAIN, "delete_note") {
             tafseerUseCases.deleteNote(noteId)
         }
     }
 
+
+    private companion object {
+        private const val DOMAIN = AppAnalytics.Feature.TAFSEER
+    }
 }

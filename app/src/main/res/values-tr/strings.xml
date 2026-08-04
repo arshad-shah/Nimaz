@@ -1772,4 +1772,8 @@
     <string name="ai_error_consent_title">Delille Sor kapalı</string>
     <string name="ai_error_consent">Soru sormak için Arama ayarlarından açın. Kur\'an, hadis ve dualarda anahtar kelime araması her durumda çevrimdışı çalışır.</string>
     <string name="ai_consent_save_failed">Bu ayar kaydedilemedi. Lütfen tekrar deneyin.</string>
+    <string name="tafseer_notes">Notlar</string>
+    <string name="tafseer_note_add">Not ekle</string>
+    <string name="tafseer_note_hint">Bu bölüm hakkındaki düşünceniz</string>
+    <string name="tafseer_note_edit">Düzenle</string>
 </resources>

@@ -1736,4 +1736,8 @@
     <string name="ai_error_consent_title">Tanya dengan Dalil dimatikan</string>
     <string name="ai_error_consent">Hidupkan dalam tetapan carian untuk bertanya. Carian kata kunci dalam al-Quran, hadis dan doa tetap berfungsi di luar talian.</string>
     <string name="ai_consent_save_failed">Tetapan itu tidak dapat disimpan. Sila cuba lagi.</string>
+    <string name="tafseer_notes">Nota</string>
+    <string name="tafseer_note_add">Tambah nota</string>
+    <string name="tafseer_note_hint">Renungan anda tentang petikan ini</string>
+    <string name="tafseer_note_edit">Sunting</string>
 </resources>

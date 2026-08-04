@@ -41,6 +41,23 @@ import com.arshadshah.nimaz.presentation.viewmodel.quran.TafseerViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.material.icons.outlined.EditNote
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import com.arshadshah.nimaz.domain.model.TafseerNote
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
+import com.arshadshah.nimaz.presentation.components.molecules.NimazDialog
+import com.arshadshah.nimaz.presentation.components.molecules.NimazDialogCancelButton
+import androidx.compose.foundation.layout.fillMaxWidth
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -52,6 +69,7 @@ fun TafseerScreen(
     viewModel: TafseerViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    var showNotes by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
@@ -121,6 +139,18 @@ fun TafseerScreen(
                         NimazIcon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = stringResource(R.string.cd_back)
+                        )
+                    }
+                },
+                actions = {
+                    // The affordance that makes AddNote/UpdateNote/DeleteNote reachable at
+                    // all. The handlers and the Room collector behind them have been in the
+                    // ViewModel the whole time; nothing emitted the events, so the notes list
+                    // on TafseerChaptersScreen was permanently empty.
+                    IconButton(onClick = { showNotes = true }) {
+                        NimazIcon(
+                            imageVector = Icons.Outlined.EditNote,
+                            contentDescription = stringResource(R.string.tafseer_notes)
                         )
                     }
                 },
@@ -207,6 +237,100 @@ fun TafseerScreen(
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
+                }
+            }
+        }
+    }
+
+    if (showNotes) {
+        TafseerNotesDialog(
+            notes = state.notes,
+            onAdd = { viewModel.onEvent(TafseerEvent.AddNote(it)) },
+            onUpdate = { viewModel.onEvent(TafseerEvent.UpdateNote(it)) },
+            onDelete = { viewModel.onEvent(TafseerEvent.DeleteNote(it)) },
+            onDismiss = { showNotes = false },
+        )
+    }
+}
+
+/**
+ * The notes for the commentary block on screen: read them, write one, edit or delete one.
+ *
+ * `TafseerEvent.AddNote`, `UpdateNote` and `DeleteNote` had handlers, a use case, a repository
+ * method and a Room collector — and no producer, so none of them had ever run and the notes
+ * list on `TafseerChaptersScreen` was permanently empty. This is the missing producer.
+ */
+@Composable
+private fun TafseerNotesDialog(
+    notes: List<TafseerNote>,
+    onAdd: (String) -> Unit,
+    onUpdate: (TafseerNote) -> Unit,
+    onDelete: (Long) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    // Non-null while editing an existing note; null while composing a new one.
+    var editing by remember { mutableStateOf<TafseerNote?>(null) }
+    var draft by remember { mutableStateOf("") }
+
+    NimazDialog(
+        title = stringResource(R.string.tafseer_notes),
+        titleIcon = Icons.Outlined.EditNote,
+        onDismiss = onDismiss,
+        wrapContent = false,
+        actions = {
+            NimazDialogCancelButton(
+                text = stringResource(R.string.close),
+                onClick = onDismiss,
+            )
+            NimazButton(
+                text = stringResource(
+                    if (editing == null) R.string.tafseer_note_add else R.string.save
+                ),
+                onClick = {
+                    val current = editing
+                    if (current == null) onAdd(draft) else onUpdate(current.copy(text = draft))
+                    draft = ""
+                    editing = null
+                },
+                enabled = draft.isNotBlank(),
+                variant = NimazButtonVariant.FILLED,
+            )
+        },
+    ) {
+        OutlinedTextField(
+            value = draft,
+            onValueChange = { draft = it },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp),
+            label = { Text(stringResource(R.string.tafseer_note_hint)) },
+            minLines = 3,
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        notes.forEach { note ->
+            NimazCard(
+                style = NimazCardStyle.FILLED,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp, vertical = 4.dp),
+            ) {
+                Column(modifier = Modifier.padding(12.dp)) {
+                    Text(text = note.text, style = MaterialTheme.typography.bodyMedium)
+                    Row {
+                        TextButton(onClick = {
+                            editing = note
+                            draft = note.text
+                        }) { Text(stringResource(R.string.tafseer_note_edit)) }
+                        TextButton(onClick = {
+                            if (editing?.id == note.id) {
+                                editing = null
+                                draft = ""
+                            }
+                            onDelete(note.id)
+                        }) { Text(stringResource(R.string.delete)) }
+                    }
                 }
             }
         }
