@@ -68,7 +68,7 @@ class TafseerChaptersViewModelTest {
     }
 
     @Test
-    fun `a successful load clears loading and reports nothing`() = runTest {
+    fun `a successful load clears loading and reports no failure`() = runTest {
         val surahs = listOf(
             Surah(
                 number = 1,
@@ -90,6 +90,10 @@ class TafseerChaptersViewModelTest {
         assertThat(state.value.surahs).hasSize(1)
         assertThat(state.value.isLoading).isFalse()
         assertThat(state.value.error).isNull()
-        assertThat(telemetry.calls).isEmpty()
+        // No *failure* reported. There is now a usage signal, though: this screen logged
+        // nothing at all while every sibling reader logged an open, so its metric read zero.
+        assertThat(telemetry.errors).isEmpty()
+        assertThat(telemetry.exceptions).isEmpty()
+        assertThat(telemetry.featureUsages.map { it.action }).containsExactly("open")
     }
 }

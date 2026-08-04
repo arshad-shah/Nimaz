@@ -1,6 +1,7 @@
 package com.arshadshah.nimaz.presentation.viewmodel.worship
 
 import com.arshadshah.nimaz.core.util.PrayerTimeCalculator
+import com.arshadshah.nimaz.core.monitoring.RecordingTelemetry
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import io.mockk.every
 import io.mockk.mockk
@@ -63,7 +64,7 @@ class NightWorshipViewModelTest {
 
     @Test
     fun `publishes tonight's window with fajr after the last third`() = runTest(dispatcher) {
-        val viewModel = NightWorshipViewModel(calculator, settings)
+        val viewModel = NightWorshipViewModel(calculator, settings, RecordingTelemetry())
         dispatcher.scheduler.advanceUntilIdle()
 
         val state = viewModel.state.value
@@ -80,7 +81,7 @@ class NightWorshipViewModelTest {
 
     @Test
     fun `stops loading once the night times resolve`() = runTest(dispatcher) {
-        val viewModel = NightWorshipViewModel(calculator, settings)
+        val viewModel = NightWorshipViewModel(calculator, settings, RecordingTelemetry())
         dispatcher.scheduler.advanceUntilIdle()
 
         assertEquals(false, viewModel.state.value.isLoading)
@@ -89,7 +90,7 @@ class NightWorshipViewModelTest {
 
     @Test
     fun `rakah counter moves two at a time and resets`() = runTest(dispatcher) {
-        val viewModel = NightWorshipViewModel(calculator, settings)
+        val viewModel = NightWorshipViewModel(calculator, settings, RecordingTelemetry())
         dispatcher.scheduler.advanceUntilIdle()
 
         assertEquals(0, viewModel.state.value.rakahCount)

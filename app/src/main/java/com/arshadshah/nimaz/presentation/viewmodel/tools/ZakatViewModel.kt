@@ -107,12 +107,16 @@ class ZakatViewModel @Inject constructor(
                 settingsRepository.setZakatCurrency(event.currency)
             }
 
-            ZakatEvent.Calculate -> {
-                telemetry.featureUsed(DOMAIN, "calculate")
-                calculate()
-            }
+            // No producer: the screen recalculates through `recalculate()` on every amount
+            // entry, so this branch never runs. Its analytics used to live here, which is why
+            // the dashboard read "nobody calculates zakat" — false, and worse than silence.
+            // The signal now fires from `calculate()`, once per filled-in form.
+            ZakatEvent.Calculate -> calculate()
 
-            ZakatEvent.ClearAll -> clearAll()
+            ZakatEvent.ClearAll -> {
+                hasLoggedCalculation = false
+                clearAll()
+            }
             ZakatEvent.ToggleBreakdown -> _calculatorState.update { it.copy(showBreakdown = !it.showBreakdown) }
             ZakatEvent.SaveCalculation -> {
                 telemetry.featureUsed(DOMAIN, "save")
@@ -164,7 +168,20 @@ class ZakatViewModel @Inject constructor(
         launchSafely(telemetry, DOMAIN, type) { write() }
     }
 
+    /**
+     * Whether this form has already reported a calculation.
+     *
+     * `recalculate()` runs on every keystroke, so logging inside [calculate] unguarded would
+     * emit one event per digit typed. One event per filled-in form is what a funnel wants; the
+     * flag clears when the form does.
+     */
+    private var hasLoggedCalculation = false
+
     private fun calculate() {
+        if (!hasLoggedCalculation) {
+            hasLoggedCalculation = true
+            telemetry.featureUsed(DOMAIN, "calculate")
+        }
         _calculatorState.update { it.copy(isCalculating = true, error = null) }
 
         run {

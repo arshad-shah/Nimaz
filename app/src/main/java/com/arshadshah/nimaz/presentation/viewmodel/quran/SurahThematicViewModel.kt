@@ -79,8 +79,10 @@ class SurahThematicViewModel @Inject constructor(
                 if (event.query.isNotBlank()) telemetry.search(DOMAIN, event.query.trim().length)
             }
 
-            SurahThematicEvent.ClearFilter ->
+            SurahThematicEvent.ClearFilter -> {
+                telemetry.featureUsed(DOMAIN, "clear_filter")
                 _passagesState.update { it.copy(query = "") }
+            }
         }
     }
 
