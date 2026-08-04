@@ -1,7 +1,15 @@
 package com.arshadshah.nimaz.presentation.viewmodel
 
+import com.arshadshah.nimaz.core.monitoring.RecordingTelemetry
+import com.arshadshah.nimaz.core.time.FakeTodayProvider
 import com.arshadshah.nimaz.domain.model.IslamicEvent
 import com.arshadshah.nimaz.domain.usecase.IslamicEventUseCases
+import com.arshadshah.nimaz.domain.usecase.calendar.BuildCalendarMonthUseCase
+import com.arshadshah.nimaz.domain.usecase.calendar.BuildHijriMonthUseCase
+import com.arshadshah.nimaz.domain.usecase.calendar.CalendarUseCases
+import com.arshadshah.nimaz.domain.usecase.calendar.GetEventsForDateUseCase
+import com.arshadshah.nimaz.domain.usecase.calendar.GetEventsForMonthUseCase
+import com.arshadshah.nimaz.domain.usecase.calendar.GetUpcomingEventsUseCase
 import com.google.common.truth.Truth.assertThat
 import io.mockk.coEvery
 import io.mockk.mockk
@@ -39,7 +47,20 @@ class CalendarViewModelTest {
         Dispatchers.setMain(dispatcher)
         useCases = mockk(relaxed = true)
         coEvery { useCases.getAllEvents() } returns flowOf(emptyList<IslamicEvent>())
-        viewModel = CalendarViewModel(useCases)
+        val forDate = GetEventsForDateUseCase()
+        viewModel = CalendarViewModel(
+            useCases,
+            CalendarUseCases(
+                buildGregorianMonth = BuildCalendarMonthUseCase(forDate),
+                buildHijriMonth = BuildHijriMonthUseCase(forDate),
+                eventsForMonth = GetEventsForMonthUseCase(),
+                upcomingEvents = GetUpcomingEventsUseCase(),
+                eventsForDate = forDate,
+            ),
+            FakeTodayProvider(LocalDate.now()),
+            RecordingTelemetry(),
+            dispatcher,
+        )
     }
 
     @After

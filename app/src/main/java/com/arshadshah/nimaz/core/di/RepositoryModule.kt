@@ -60,6 +60,12 @@ import com.arshadshah.nimaz.domain.usecase.GetAllBooksUseCase
 import com.arshadshah.nimaz.domain.usecase.GetAllCategoriesUseCase
 import com.arshadshah.nimaz.domain.usecase.GetAllHistoryUseCase
 import com.arshadshah.nimaz.domain.usecase.GetAllIslamicEventsUseCase
+import com.arshadshah.nimaz.domain.usecase.calendar.BuildCalendarMonthUseCase
+import com.arshadshah.nimaz.domain.usecase.calendar.BuildHijriMonthUseCase
+import com.arshadshah.nimaz.domain.usecase.calendar.CalendarUseCases
+import com.arshadshah.nimaz.domain.usecase.calendar.GetEventsForDateUseCase
+import com.arshadshah.nimaz.domain.usecase.calendar.GetEventsForMonthUseCase
+import com.arshadshah.nimaz.domain.usecase.calendar.GetUpcomingEventsUseCase
 import com.arshadshah.nimaz.domain.usecase.GetAllLocationsUseCase
 import com.arshadshah.nimaz.domain.usecase.GetAllMakeupFastsUseCase
 import com.arshadshah.nimaz.domain.usecase.GetAllProphetsUseCase
@@ -678,6 +684,21 @@ object UseCaseModule {
     ): IslamicEventUseCases {
         return IslamicEventUseCases(
             getAllEvents = GetAllIslamicEventsUseCase(repository)
+        )
+    }
+
+    @Provides
+    @Singleton
+    fun provideCalendarUseCases(): CalendarUseCases {
+        // No repository: these are the calendar's arithmetic, taking the events and the
+        // date as parameters so they can be tested without a ViewModel or a clock.
+        val eventsForDate = GetEventsForDateUseCase()
+        return CalendarUseCases(
+            buildGregorianMonth = BuildCalendarMonthUseCase(eventsForDate),
+            buildHijriMonth = BuildHijriMonthUseCase(eventsForDate),
+            eventsForMonth = GetEventsForMonthUseCase(),
+            upcomingEvents = GetUpcomingEventsUseCase(),
+            eventsForDate = eventsForDate,
         )
     }
 }
