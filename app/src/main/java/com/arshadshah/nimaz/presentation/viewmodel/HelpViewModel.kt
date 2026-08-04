@@ -2,8 +2,8 @@ package com.arshadshah.nimaz.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.arshadshah.nimaz.core.monitoring.AppAnalytics
-import com.arshadshah.nimaz.core.monitoring.CrashReporter
+import com.arshadshah.nimaz.core.monitoring.Telemetry
+import com.arshadshah.nimaz.core.monitoring.catchAndReport
 import com.arshadshah.nimaz.domain.model.HelpGuideDetail
 import com.arshadshah.nimaz.domain.model.HelpSearchResult
 import com.arshadshah.nimaz.domain.model.HelpTopic
@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -59,7 +60,8 @@ sealed interface HelpEvent {
 @HiltViewModel
 class HelpViewModel @Inject constructor(
     private val useCases: HelpUseCases,
-    preferences: SettingsRepository
+    preferences: SettingsRepository,
+    private val telemetry: Telemetry,
 ) : ViewModel() {
 
     private val language: StateFlow<String> = preferences.appLanguage
@@ -87,38 +89,48 @@ class HelpViewModel @Inject constructor(
     init {
         // Topics re-resolve when the app language changes.
         viewModelScope.launch {
-            language.flatMapLatest { lang -> useCases.getTopics(lang) }
-                .catch { e ->
-                    CrashReporter.recordException(e)
-                    AppAnalytics.logError("help", "load_topics", e.message)
-                    _homeState.update { it.copy(isLoading = false, error = e.message) }
+            language
+                .flatMapLatest { lang ->
+                    // Guarded INSIDE flatMapLatest. Flow.catch completes the flow it is
+                    // applied to, so catching outside ended the whole chain on the first
+                    // transient failure and Help stayed empty for the ViewModel's life.
+                    // Here only the inner attempt ends; the language collector survives,
+                    // so a language change or a retry recovers.
+                    useCases.getTopics(lang)
+                        .catchAndReport(telemetry, DOMAIN, "load_topics") { throwable ->
+                            _homeState.update {
+                                it.copy(isLoading = false, error = throwable.message)
+                            }
+                        }
                 }
                 .collect { topics ->
                     _homeState.update {
-                        it.copy(
-                            topics = topics,
-                            isLoading = false
-                        )
+                        it.copy(topics = topics, isLoading = false, error = null)
                     }
                 }
         }
         // Search results, debounced.
         viewModelScope.launch {
-            combine(query.debounce(200), language) { q, lang -> q to lang }
+            combine(query.debounce(SEARCH_DEBOUNCE_MS), language) { q, lang -> q to lang }
                 .flatMapLatest { (q, lang) ->
-                    if (q.isBlank()) flowOf(emptyList()) else useCases.search(q, lang)
+                    if (q.isBlank()) {
+                        flowOf(q to emptyList())
+                    } else {
+                        // Logged here, post-debounce: HelpScreen wires Search to
+                        // onQueryChange, so logging in onEvent counted keystrokes.
+                        // Length only — the query itself never reaches analytics.
+                        telemetry.search(DOMAIN, q.trim().length)
+                        useCases.search(q, lang)
+                            .catchAndReport(telemetry, DOMAIN, "search") { emit(emptyList()) }
+                            .map { results -> q to results }
+                    }
                 }
-                .catch { e ->
-                    CrashReporter.recordException(e)
-                    AppAnalytics.logError("help", "search", e.message)
-                    /* keep last results on error */
-                }
-                .collect { results ->
+                .collect { (searchedQuery, results) ->
+                    // isSearching is derived from the query these results are FOR, not from
+                    // query.value at emission time — those are different flows and could
+                    // disagree, rendering results under an already-cleared search box.
                     _homeState.update {
-                        it.copy(
-                            results = results,
-                            isSearching = query.value.isNotBlank()
-                        )
+                        it.copy(results = results, isSearching = searchedQuery.isNotBlank())
                     }
                 }
         }
@@ -127,21 +139,25 @@ class HelpViewModel @Inject constructor(
     fun onEvent(event: HelpEvent) {
         when (event) {
             is HelpEvent.Search -> {
-                AppAnalytics.logFeatureUsed("help", "search")
                 query.value = event.query
                 _homeState.update { it.copy(query = event.query) }
             }
 
             is HelpEvent.LoadTopic -> {
-                AppAnalytics.logFeatureUsed("help", "open_topic")
+                telemetry.featureUsed(DOMAIN, "open_topic")
                 loadTopic(event.topicId)
             }
 
             is HelpEvent.LoadGuide -> {
-                AppAnalytics.logFeatureUsed("help", "open_guide")
+                telemetry.featureUsed(DOMAIN, "open_guide")
                 loadGuide(event.guideId)
             }
         }
+    }
+
+    private companion object {
+        const val DOMAIN = "help"
+        const val SEARCH_DEBOUNCE_MS = 200L
     }
 
     private fun loadTopic(topicId: String) {
@@ -149,10 +165,8 @@ class HelpViewModel @Inject constructor(
         topicJob?.cancel()
         topicJob = viewModelScope.launch {
             language.flatMapLatest { lang -> useCases.getTopicDetail(topicId, lang) }
-                .catch { e ->
-                    CrashReporter.recordException(e)
-                    AppAnalytics.logError("help", "load_topic", e.message)
-                    _topicState.update { it.copy(isLoading = false, error = e.message) }
+                .catchAndReport(telemetry, DOMAIN, "load_topic") { throwable ->
+                    _topicState.update { it.copy(isLoading = false, error = throwable.message) }
                 }
                 .collect { detail ->
                     _topicState.update {
@@ -170,10 +184,8 @@ class HelpViewModel @Inject constructor(
         guideJob?.cancel()
         guideJob = viewModelScope.launch {
             language.flatMapLatest { lang -> useCases.getGuide(guideId, lang) }
-                .catch { e ->
-                    CrashReporter.recordException(e)
-                    AppAnalytics.logError("help", "load_guide", e.message)
-                    _guideState.update { it.copy(isLoading = false, error = e.message) }
+                .catchAndReport(telemetry, DOMAIN, "load_guide") { throwable ->
+                    _guideState.update { it.copy(isLoading = false, error = throwable.message) }
                 }
                 .collect { guide ->
                     _guideState.update {
