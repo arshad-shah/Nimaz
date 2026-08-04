@@ -69,19 +69,14 @@ class QiblaViewModel @Inject constructor(
 
     private val sensorListener = object : SensorEventListener {
         override fun onSensorChanged(event: SensorEvent) {
-            val alpha = 0.97f
             when (event.sensor.type) {
                 Sensor.TYPE_ACCELEROMETER -> {
-                    gravity[0] = alpha * gravity[0] + (1 - alpha) * event.values[0]
-                    gravity[1] = alpha * gravity[1] + (1 - alpha) * event.values[1]
-                    gravity[2] = alpha * gravity[2] + (1 - alpha) * event.values[2]
+                    smoothInto(gravity, event.values, seed = !hasGravity)
                     hasGravity = true
                 }
 
                 Sensor.TYPE_MAGNETIC_FIELD -> {
-                    geomagnetic[0] = alpha * geomagnetic[0] + (1 - alpha) * event.values[0]
-                    geomagnetic[1] = alpha * geomagnetic[1] + (1 - alpha) * event.values[1]
-                    geomagnetic[2] = alpha * geomagnetic[2] + (1 - alpha) * event.values[2]
+                    smoothInto(geomagnetic, event.values, seed = !hasMagnetic)
                     hasMagnetic = true
                 }
             }
@@ -196,6 +191,10 @@ class QiblaViewModel @Inject constructor(
         hasMagnetic = false
         prevRawAzimuth = 0f
         cumulativeAzimuth = 0f
+        // Reset with the rest of the sensor state. Left set, the rising-edge test below never
+        // fired for a user who left the screen facing the qibla and came back still facing it —
+        // no confirmation haptic until they turned away and back again.
+        wasFacingQibla = false
         _qiblaState.update { it.copy(isCompassReady = false, animatedAzimuth = 0f) }
     }
 
@@ -383,5 +382,30 @@ class QiblaViewModel @Inject constructor(
 
     private fun triggerHaptic() {
         vibrator.vibrate(VibrationEffect.createOneShot(100, VibrationEffect.DEFAULT_AMPLITUDE))
+    }
+}
+
+/** Low-pass coefficient for the accelerometer and magnetometer vectors. */
+private const val SMOOTHING = 0.97f
+
+/**
+ * Low-pass filter, seeded from the first sample.
+ *
+ * The vectors start as all-zero and `resetSensorState()` re-zeroes them on every
+ * `StartCompass`, while `SMOOTHING` is 0.97 — so the first sample contributed **3%** of its
+ * value and the filtered vector needed ~100 samples to reach 95% of the truth. At
+ * `SENSOR_DELAY_GAME` (~20 ms) that is **about two seconds**, and `isCompassReady` is
+ * published on the *first* successful `getRotationMatrix`. So the screen said ready and the
+ * needle swept in from a meaningless heading — every time, because the screen's
+ * `DisposableEffect` stops and starts the compass on each entry.
+ *
+ * Seeding costs nothing: one sample is a worse estimate than a hundred, but it is an
+ * estimate *of the right thing*, which zero is not.
+ */
+internal fun smoothInto(filtered: FloatArray, sample: FloatArray, seed: Boolean) {
+    for (i in filtered.indices) {
+        filtered[i] =
+            if (seed) sample[i]
+            else SMOOTHING * filtered[i] + (1 - SMOOTHING) * sample[i]
     }
 }
