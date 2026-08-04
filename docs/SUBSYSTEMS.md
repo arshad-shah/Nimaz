@@ -1115,6 +1115,21 @@ formatted strings.
 over Google's **Nearby Connections** API. No server, no account: one device sends, the other
 receives.
 
+**Progress totals come from one source each, and logging carries no payload.**
+`SyncDataExporter.export` reports `(step, total, label)` with the total from
+`SyncDataExporter.STEP_COUNT`, which `SyncDataExporterStepsTest` pins by counting the real
+callbacks; the import side derives its total from the step list it iterates. Both used to be
+hand-maintained constants that had drifted — the send bar filled to 120% and rewound to 80%, and
+the receive caption read "Step 13 of 10".
+
+`SyncViewModel` is the only ViewModel using `android.util.Log`, and the app ships **no proguard
+rule stripping it**, so anything logged there reaches release logcat. Its verbose tracing is
+therefore behind a `BuildConfig.DEBUG` helper, and **payload content is never logged at all** —
+a call printing the first 200 characters of a decoded `SyncPayload` (bookmark ids, prayer
+records) was deleted rather than guarded. `NearbyConnectionsManager` is a `@Singleton`, so its
+two callbacks are nullable and cleared in `SyncViewModel.onCleared()`; leaving them set kept a
+destroyed ViewModel and its dead scope reachable for the life of the process.
+
 | File | Role |
 |---|---|
 | `data/sync/NearbyConnectionsManager.kt` | `@Singleton`; transport (advertise/discover/connect/payload) |
