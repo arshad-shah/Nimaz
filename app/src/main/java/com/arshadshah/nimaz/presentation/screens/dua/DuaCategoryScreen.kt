@@ -93,7 +93,7 @@ fun DuaCategoryScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = state.error ?: stringResource(R.string.error_generic),
+                    text = stringResource(state.error ?: R.string.error_generic),
                     color = MaterialTheme.colorScheme.error
                 )
             }

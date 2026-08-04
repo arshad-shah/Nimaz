@@ -1,10 +1,11 @@
 package com.arshadshah.nimaz.presentation.viewmodel
 
+import androidx.annotation.StringRes
 import androidx.compose.ui.text.font.FontFamily
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.arshadshah.nimaz.core.monitoring.AppAnalytics
-import com.arshadshah.nimaz.core.monitoring.CrashReporter
+import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.monitoring.Telemetry
+import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.core.util.toUtcMidnightMillis
 import com.arshadshah.nimaz.domain.model.Dua
 import com.arshadshah.nimaz.domain.model.DuaBookmark
@@ -23,7 +24,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import java.time.LocalDate
 import javax.inject.Inject
 
@@ -33,21 +33,29 @@ data class DuaCollectionUiState(
     val searchQuery: String = "",
     val sortAlphabetical: Boolean = false,
     val isLoading: Boolean = true,
-    val error: String? = null
+    /**
+     * What to tell the user, as a string resource the screen resolves in their language.
+     *
+     * Deliberately not the exception's `message`: this state used to carry `e.message`
+     * straight to a `Text`, so a content-database fault reached the user as
+     * `SQLiteException: no such table: duas`. The throwable still goes to the crash
+     * report, which is the only place its wording is any use.
+     */
+    @StringRes val error: Int? = null
 )
 
 data class DuaCategoryUiState(
     val category: DuaCategory? = null,
     val duas: List<Dua> = emptyList(),
     val isLoading: Boolean = true,
-    val error: String? = null
+    @StringRes val error: Int? = null
 )
 
 data class DuaReaderUiState(
     val duas: List<Dua> = emptyList(),
     val initialIndex: Int = 0,
     val isLoading: Boolean = true,
-    val error: String? = null,
+    @StringRes val error: Int? = null,
     val showArabic: Boolean = true,
     val showTransliteration: Boolean = true,
     val showTranslation: Boolean = true,
@@ -97,7 +105,8 @@ sealed interface DuaEvent {
 @HiltViewModel
 class DuaViewModel @Inject constructor(
     private val duaUseCases: DuaUseCases,
-    private val settingsRepository: SettingsRepository
+    private val settingsRepository: SettingsRepository,
+    private val telemetry: Telemetry
 ) : ViewModel() {
 
     private val _collectionState = MutableStateFlow(DuaCollectionUiState())
@@ -142,11 +151,11 @@ class DuaViewModel @Inject constructor(
 
     fun onEvent(event: DuaEvent) {
         when (event) {
-            is DuaEvent.LoadCategory -> AppAnalytics.logFeatureUsed("dua", "open_category")
-            is DuaEvent.LoadDua -> AppAnalytics.logFeatureUsed("dua", "open_reader")
-            is DuaEvent.LoadDuasByOccasion -> AppAnalytics.logFeatureUsed("dua", "open_occasion")
-            is DuaEvent.Search -> AppAnalytics.logFeatureUsed("dua", "search")
-            is DuaEvent.ToggleFavorite -> AppAnalytics.logFeatureUsed("dua", "toggle_favorite")
+            is DuaEvent.LoadCategory -> telemetry.featureUsed(DOMAIN, "open_category")
+            is DuaEvent.LoadDua -> telemetry.featureUsed(DOMAIN, "open_reader")
+            is DuaEvent.LoadDuasByOccasion -> telemetry.featureUsed(DOMAIN, "open_occasion")
+            is DuaEvent.Search -> telemetry.featureUsed(DOMAIN, "search")
+            is DuaEvent.ToggleFavorite -> telemetry.featureUsed(DOMAIN, "toggle_favorite")
             else -> {}
         }
         when (event) {
@@ -185,7 +194,12 @@ class DuaViewModel @Inject constructor(
     }
 
     private fun loadAllCategories() {
-        viewModelScope.launch {
+        launchSafely(
+            telemetry,
+            DOMAIN,
+            "load_categories",
+            onFailure = { _collectionState.update { it.copy(isLoading = false, error = R.string.error_generic) } }
+        ) {
             combine(
                 duaUseCases.getAllCategories(),
                 settingsRepository.duaCategoriesSortAlphabetical
@@ -208,8 +222,8 @@ class DuaViewModel @Inject constructor(
     }
 
     private fun toggleCategoriesSort() {
-        AppAnalytics.logFeatureUsed("dua", "toggle_category_sort")
-        viewModelScope.launch {
+        telemetry.featureUsed(DOMAIN, "toggle_category_sort")
+        launchSafely(telemetry, DOMAIN, "toggle_category_sort") {
             settingsRepository.setDuaCategoriesSortAlphabetical(
                 !_collectionState.value.sortAlphabetical
             )
@@ -244,20 +258,19 @@ class DuaViewModel @Inject constructor(
     private fun loadCategory(categoryId: String) {
         _categoryState.update { it.copy(isLoading = true, error = null) }
         categoryJob?.cancel()
-        categoryJob = viewModelScope.launch {
-            try {
-                val category = duaUseCases.getCategoryById(categoryId)
-                _categoryState.update { it.copy(category = category) }
+        categoryJob = launchSafely(
+            telemetry,
+            DOMAIN,
+            "load_category",
+            onFailure = { _categoryState.update { it.copy(isLoading = false, error = R.string.error_generic) } }
+        ) {
+            val category = duaUseCases.getCategoryById(categoryId)
+            _categoryState.update { it.copy(category = category) }
 
-                duaUseCases.getDuasByCategory(categoryId).collect { duas ->
-                    _categoryState.update {
-                        it.copy(duas = duas, isLoading = false)
-                    }
+            duaUseCases.getDuasByCategory(categoryId).collect { duas ->
+                _categoryState.update {
+                    it.copy(duas = duas, isLoading = false)
                 }
-            } catch (e: Exception) {
-                CrashReporter.recordException(e)
-                AppAnalytics.logError("dua", "load_category", e.message)
-                _categoryState.update { it.copy(error = e.message, isLoading = false) }
             }
         }
     }
@@ -265,27 +278,36 @@ class DuaViewModel @Inject constructor(
     private fun loadDua(duaId: String) {
         _readerState.update { it.copy(isLoading = true, error = null) }
         readerJob?.cancel()
-        readerJob = viewModelScope.launch {
-            try {
-                val dua = duaUseCases.getDuaById(duaId)
-                if (dua == null) {
-                    _readerState.update { it.copy(isLoading = false, error = "Dua not found") }
-                    return@launch
-                }
-                // Load the sibling duas in this collection so the reader can page
-                // through them with a HorizontalPager.
-                duaUseCases.getDuasByCategory(dua.categoryId).collect { categoryDuas ->
-                    val list = categoryDuas.ifEmpty { listOf(dua) }
-                    val index = list.indexOfFirst { it.id == duaId }.coerceAtLeast(0)
-                    _readerState.update {
-                        it.copy(duas = list, initialIndex = index, isLoading = false)
-                    }
-                }
-            } catch (e: Exception) {
-                CrashReporter.recordException(e)
-                AppAnalytics.logError("dua", "load_dua", e.message)
-                _readerState.update { it.copy(error = e.message, isLoading = false) }
+        readerJob = launchSafely(
+            telemetry,
+            DOMAIN,
+            "load_dua",
+            onFailure = { failReader(R.string.error_generic) }
+        ) {
+            val dua = duaUseCases.getDuaById(duaId)
+            if (dua == null) {
+                // Clearing the list matters as much as setting the message: leaving the
+                // previous dua's pages loaded meant a reader asked for a dua that does not
+                // exist kept paging through the one before it, while its state said "not
+                // found". The screen keys its not-found message off an empty list.
+                failReader(R.string.dua_reader_not_found)
+                return@launchSafely
             }
+            // Load the sibling duas in this collection so the reader can page
+            // through them with a HorizontalPager.
+            duaUseCases.getDuasByCategory(dua.categoryId).collect { categoryDuas ->
+                val list = categoryDuas.ifEmpty { listOf(dua) }
+                val index = list.indexOfFirst { it.id == duaId }.coerceAtLeast(0)
+                _readerState.update {
+                    it.copy(duas = list, initialIndex = index, isLoading = false)
+                }
+            }
+        }
+    }
+
+    private fun failReader(@StringRes error: Int) {
+        _readerState.update {
+            it.copy(duas = emptyList(), initialIndex = 0, isLoading = false, error = error)
         }
     }
 
@@ -295,7 +317,7 @@ class DuaViewModel @Inject constructor(
      * groups of three because [combine] only has typed overloads up to five flows.
      */
     private fun observeDuaSettings() {
-        viewModelScope.launch {
+        launchSafely(telemetry, DOMAIN, "observe_settings") {
             val displayFlow = combine(
                 settingsRepository.duaArabicFont,
                 settingsRepository.duaArabicFontSize,
@@ -330,7 +352,12 @@ class DuaViewModel @Inject constructor(
     private fun loadDuasByOccasion(occasion: DuaOccasion) {
         _categoryState.update { it.copy(isLoading = true, error = null) }
         categoryJob?.cancel()
-        categoryJob = viewModelScope.launch {
+        categoryJob = launchSafely(
+            telemetry,
+            DOMAIN,
+            "load_occasion",
+            onFailure = { _categoryState.update { it.copy(isLoading = false, error = R.string.error_generic) } }
+        ) {
             duaUseCases.getDuasByOccasion(occasion).collect { duas ->
                 _categoryState.update {
                     it.copy(duas = duas, isLoading = false)
@@ -350,7 +377,12 @@ class DuaViewModel @Inject constructor(
 
         _searchState.update { it.copy(query = query, isSearching = true) }
         searchJob?.cancel()
-        searchJob = viewModelScope.launch {
+        searchJob = launchSafely(
+            telemetry,
+            DOMAIN,
+            "search",
+            onFailure = { _searchState.update { it.copy(isSearching = false) } }
+        ) {
             duaUseCases.searchDuas(query).collect { results ->
                 _searchState.update { it.copy(results = results, isSearching = false) }
             }
@@ -371,13 +403,18 @@ class DuaViewModel @Inject constructor(
     }
 
     private fun toggleFavorite(duaId: String, categoryId: String) {
-        viewModelScope.launch {
+        launchSafely(telemetry, DOMAIN, "toggle_favorite") {
             duaUseCases.toggleFavorite(duaId, categoryId)
         }
     }
 
     private fun loadFavorites() {
-        viewModelScope.launch {
+        launchSafely(
+            telemetry,
+            DOMAIN,
+            "load_favorites",
+            onFailure = { _favoritesState.update { it.copy(isLoading = false) } }
+        ) {
             duaUseCases.getFavoriteDuas().collect { favorites ->
                 _favoritesState.update { it.copy(favorites = favorites, isLoading = false) }
             }
@@ -392,7 +429,12 @@ class DuaViewModel @Inject constructor(
     private fun loadProgressForDate(date: Long) {
         _dailyProgressState.update { it.copy(isLoading = true, date = date) }
         progressJob?.cancel()
-        progressJob = viewModelScope.launch {
+        progressJob = launchSafely(
+            telemetry,
+            DOMAIN,
+            "load_progress",
+            onFailure = { _dailyProgressState.update { it.copy(isLoading = false) } }
+        ) {
             duaUseCases.getProgressForDate(date).collect { progressList ->
                 _dailyProgressState.update {
                     it.copy(progressList = progressList, isLoading = false)
@@ -406,4 +448,8 @@ class DuaViewModel @Inject constructor(
     }
 
     fun isDuaFavorite(duaId: String) = duaUseCases.isDuaFavorite(duaId)
+
+    private companion object {
+        private const val DOMAIN = "dua"
+    }
 }
