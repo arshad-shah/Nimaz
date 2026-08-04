@@ -214,6 +214,8 @@ import com.arshadshah.nimaz.domain.usecase.SearchHelpUseCase
 import com.arshadshah.nimaz.domain.usecase.SearchQuranUseCase
 import com.arshadshah.nimaz.domain.usecase.SeedMissingDefaultsUseCase
 import com.arshadshah.nimaz.domain.usecase.SetActiveKhatamUseCase
+import com.arshadshah.nimaz.domain.usecase.GetRecentLocationsUseCase
+import com.arshadshah.nimaz.domain.usecase.SaveCurrentLocationUseCase
 import com.arshadshah.nimaz.domain.usecase.SetCurrentLocationUseCase
 import com.arshadshah.nimaz.domain.usecase.TafseerUseCases
 import com.arshadshah.nimaz.domain.usecase.TasbihUseCases
@@ -633,6 +635,8 @@ object UseCaseModule {
             insertLocation = InsertLocationUseCase(repository),
             deleteLocation = DeleteLocationUseCase(repository),
             setCurrentLocation = SetCurrentLocationUseCase(repository),
+            getRecentLocations = GetRecentLocationsUseCase(repository),
+            saveCurrentLocation = SaveCurrentLocationUseCase(repository),
             toggleFavorite = ToggleLocationFavoriteUseCase(repository)
         )
     }

@@ -74,6 +74,8 @@ fun buildPrayerUseCases(repository: PrayerRepository) = PrayerUseCases(
     insertLocation = InsertLocationUseCase(repository),
     deleteLocation = DeleteLocationUseCase(repository),
     setCurrentLocation = SetCurrentLocationUseCase(repository),
+    getRecentLocations = GetRecentLocationsUseCase(repository),
+    saveCurrentLocation = SaveCurrentLocationUseCase(repository),
     toggleFavorite = ToggleLocationFavoriteUseCase(repository)
 )
 
