@@ -6,6 +6,9 @@ import com.arshadshah.nimaz.domain.model.HomeEventCard
 import com.arshadshah.nimaz.presentation.components.organisms.WorshipCardUi
 import com.arshadshah.nimaz.core.time.TodayProvider
 import kotlin.time.Instant
+import com.arshadshah.nimaz.presentation.model.DailyDua
+import com.arshadshah.nimaz.presentation.model.PrayerTimeDisplay
+import com.arshadshah.nimaz.presentation.model.withClockState
 
 data class HomeUiState(
     // `currentDate` used to live here, set once at construction and read by no screen

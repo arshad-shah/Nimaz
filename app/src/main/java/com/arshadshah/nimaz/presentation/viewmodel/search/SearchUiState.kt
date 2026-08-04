@@ -4,6 +4,7 @@ import com.arshadshah.nimaz.domain.model.DuaSearchResult
 import com.arshadshah.nimaz.domain.model.HadithSearchResult
 import com.arshadshah.nimaz.domain.model.QuranSearchResult
 import com.arshadshah.nimaz.domain.model.Surah
+import com.arshadshah.nimaz.domain.model.UnifiedSearchResult
 
 data class SearchUiState(
     val query: String = "",

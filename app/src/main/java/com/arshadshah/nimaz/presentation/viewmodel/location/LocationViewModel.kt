@@ -37,22 +37,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
-
-data class SearchLocation(
-    val name: String,
-    val country: String,
-    val latitude: Double,
-    val longitude: Double,
-    val region: CityRegion? = null,   // set for curated cities; null for Geocoder & recent results
-    val flag: String? = null,         // country-flag emoji for curated cities; null otherwise
-) {
-    /**
-     * Stable identity for a lazy-list `key`. Coordinates rather than the name: the same city
-     * name recurs across countries, and the Geocoder and the curated catalogue can both
-     * produce a row for one place with differently-cased names.
-     */
-    val key: String get() = "$latitude,$longitude"
-}
+import com.arshadshah.nimaz.domain.model.SearchLocation
 
 @HiltViewModel
 class LocationViewModel @Inject constructor(

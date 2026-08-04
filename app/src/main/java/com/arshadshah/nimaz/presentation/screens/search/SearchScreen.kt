@@ -89,7 +89,7 @@ import com.arshadshah.nimaz.presentation.viewmodel.ai.AskViewModel
 import com.arshadshah.nimaz.presentation.viewmodel.search.SearchEvent
 import com.arshadshah.nimaz.presentation.viewmodel.search.SearchFilter
 import com.arshadshah.nimaz.presentation.viewmodel.search.SearchViewModel
-import com.arshadshah.nimaz.presentation.viewmodel.search.UnifiedSearchResult
+import com.arshadshah.nimaz.domain.model.UnifiedSearchResult
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable

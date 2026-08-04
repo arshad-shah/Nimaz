@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.presentation.viewmodel.location
 
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
+import com.arshadshah.nimaz.domain.model.CityRegion
 
 /**
  * Pure state-transition checks for the region filter. We assert the reducer contract via a

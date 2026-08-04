@@ -30,7 +30,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import com.arshadshah.nimaz.presentation.viewmodel.home.PrayerTimeDisplay
+import com.arshadshah.nimaz.presentation.model.PrayerTimeDisplay
 
 @HiltViewModel
 class PrayerTimesViewModel @Inject constructor(

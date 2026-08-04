@@ -69,10 +69,10 @@ import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazMenuAction
 import com.arshadshah.nimaz.presentation.components.organisms.NimazPillTabs
 import com.arshadshah.nimaz.presentation.components.organisms.SwipeableSavedCard
-import com.arshadshah.nimaz.presentation.viewmodel.quran.BookmarkType
+import com.arshadshah.nimaz.domain.model.BookmarkType
 import com.arshadshah.nimaz.presentation.viewmodel.quran.BookmarksEvent
 import com.arshadshah.nimaz.presentation.viewmodel.quran.BookmarksViewModel
-import com.arshadshah.nimaz.presentation.viewmodel.quran.UnifiedBookmark
+import com.arshadshah.nimaz.domain.model.UnifiedBookmark
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
