@@ -1031,13 +1031,27 @@
     <string name="surah_info_background_subtitle">%1$d sections</string>
     <string name="surah_info_passages_row_subtitle">%1$d passages sur %2$d versets</string>
     <string name="surah_info_subjects">Sujets de cette sourate</string>
-    <string name="surah_info_subjects_subtitle">Parcourir ce dont parle le Coran</string>
+    <string name="surah_info_subjects_subtitle">%1$d sujets, les plus cités d\'abord</string>
     <string name="surah_info_section_other">Autre</string>
     <string name="surah_passages_filter_hint">Filtrer les passages</string>
     <string name="surah_passages_reading">En cours</string>
     <string name="surah_passages_none_title">Aucun résultat</string>
     <string name="surah_passages_none">Aucun passage ne correspond. Effacez le filtre pour voir les %1$d.</string>
     <string name="cd_passage_open">Ouvrir %1$s dans le lecteur</string>
+
+    <!-- Sujets d\'une sourate -->
+    <string name="surah_subjects_title">Sujets</string>
+    <string name="surah_subjects_subtitle">Sujets de cette sourate</string>
+    <string name="surah_subjects_filter_hint">Filtrer ces sujets…</string>
+    <string name="surah_subjects_count">%1$d sujets</string>
+    <string name="surah_subjects_citations">%1$d références</string>
+    <string name="surah_subjects_only_here">Tous les versets sur ce sujet sont dans cette sourate</string>
+    <string name="surah_subjects_elsewhere">%1$d autres versets ailleurs dans le Coran</string>
+    <string name="surah_subjects_no_match">Aucun sujet ici ne correspond à «\u00A0%1$s\u00A0». Effacez le filtre pour voir les %2$d.</string>
+    <string name="surah_subjects_none_title">Rien d\'indexé ici</string>
+    <string name="surah_subjects_none">L\'index thématique ne cite aucun verset de cette sourate. Le reste de l\'index est toujours là.</string>
+    <string name="surah_subjects_browse_all">Tous les sujets</string>
+    <string name="surah_subjects_browse_all_subtitle">Parcourir tout l\'index, sur les 114 sourates</string>
 
     <!-- Thèmes du Coran -->
     <string name="quran_home_browse_subjects">Sujets du Coran</string>
@@ -1059,6 +1073,8 @@
     <string name="quran_topic_related">Sujets liés</string>
     <string name="quran_topic_not_found">Ce sujet ne figure pas dans l\'index.</string>
     <string name="quran_topic_verses_across">%1$d dans %2$d sourates</string>
+    <string name="quran_topic_surah_you_came_from">Cette sourate</string>
+    <string name="quran_topic_in_surah">%1$d dans %2$s</string>
     <string name="quran_topics_crumb_home">Tous les sujets</string>
     <string name="quran_topics_scope_search">Recherche dans les trois hiérarchies</string>
     <string name="quran_topics_scope_thematic">Un plan raisonné — doctrine, adoration, récits</string>
