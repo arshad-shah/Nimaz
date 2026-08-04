@@ -106,10 +106,10 @@ import com.arshadshah.nimaz.presentation.components.organisms.pageGridItems
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazPalette
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
-import com.arshadshah.nimaz.presentation.viewmodel.FavoriteAyahUi
-import com.arshadshah.nimaz.presentation.viewmodel.QuranEvent
-import com.arshadshah.nimaz.presentation.viewmodel.QuranHomeUiState
-import com.arshadshah.nimaz.presentation.viewmodel.QuranViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.quran.FavoriteAyahUi
+import com.arshadshah.nimaz.presentation.viewmodel.quran.QuranEvent
+import com.arshadshah.nimaz.presentation.viewmodel.quran.QuranHomeUiState
+import com.arshadshah.nimaz.presentation.viewmodel.quran.QuranViewModel
 import java.time.DayOfWeek
 import java.time.LocalDate
 import kotlinx.coroutines.launch

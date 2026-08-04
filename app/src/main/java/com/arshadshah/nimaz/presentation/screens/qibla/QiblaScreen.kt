@@ -45,8 +45,8 @@ import com.arshadshah.nimaz.presentation.components.molecules.qibla.QiblaCalibra
 import com.arshadshah.nimaz.presentation.components.organisms.qibla.ArQiblaView
 import com.arshadshah.nimaz.presentation.components.organisms.qibla.CompassQiblaView
 import com.arshadshah.nimaz.presentation.components.organisms.qibla.QiblaTopBar
-import com.arshadshah.nimaz.presentation.viewmodel.QiblaEvent
-import com.arshadshah.nimaz.presentation.viewmodel.QiblaViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.prayer.QiblaEvent
+import com.arshadshah.nimaz.presentation.viewmodel.prayer.QiblaViewModel
 
 /**
  * Qibla screen — screen-level logic only. It owns the compass lifecycle, the

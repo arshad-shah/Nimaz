@@ -118,8 +118,8 @@ import com.arshadshah.nimaz.presentation.screens.tasbih.TasbihScreen
 import com.arshadshah.nimaz.presentation.screens.zakat.ZakatCalculatorScreen
 import com.arshadshah.nimaz.presentation.screens.zakat.ZakatHistoryScreen
 import com.arshadshah.nimaz.presentation.theme.isTablet
-import com.arshadshah.nimaz.presentation.viewmodel.OnboardingViewModel
-import com.arshadshah.nimaz.presentation.viewmodel.SearchFilter
+import com.arshadshah.nimaz.presentation.viewmodel.onboarding.OnboardingViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.search.SearchFilter
 import com.google.android.play.core.review.ReviewManagerFactory
 import kotlinx.coroutines.launch
 import kotlin.system.exitProcess

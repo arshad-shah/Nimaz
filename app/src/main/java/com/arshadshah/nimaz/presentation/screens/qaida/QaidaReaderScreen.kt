@@ -29,8 +29,8 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.organisms.QaidaCelebrationOverlay
 import com.arshadshah.nimaz.presentation.components.organisms.QaidaLessonLines
-import com.arshadshah.nimaz.presentation.viewmodel.QaidaReaderEvent
-import com.arshadshah.nimaz.presentation.viewmodel.QaidaReaderViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.content.QaidaReaderEvent
+import com.arshadshah.nimaz.presentation.viewmodel.content.QaidaReaderViewModel
 
 /**
  * The lesson reader: tap-to-hear cell tiles laid out by line, a transliteration

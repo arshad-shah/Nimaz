@@ -38,11 +38,11 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazNumberStepper
 import com.arshadshah.nimaz.presentation.components.molecules.NimazPickerItem
 import com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsItem
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
-import com.arshadshah.nimaz.presentation.viewmodel.AsrJuristicMethod
-import com.arshadshah.nimaz.presentation.viewmodel.HighLatitudeRule
-import com.arshadshah.nimaz.presentation.viewmodel.NotificationSummary
-import com.arshadshah.nimaz.presentation.viewmodel.SettingsEvent
-import com.arshadshah.nimaz.presentation.viewmodel.SettingsViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.settings.AsrJuristicMethod
+import com.arshadshah.nimaz.domain.model.HighLatitudeRule
+import com.arshadshah.nimaz.presentation.viewmodel.settings.NotificationSummary
+import com.arshadshah.nimaz.presentation.viewmodel.settings.SettingsEvent
+import com.arshadshah.nimaz.presentation.viewmodel.settings.SettingsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -110,8 +110,8 @@ fun PrayerSettingsScreen(
                         icon = Icons.Default.WbSunny,
                         title = stringResource(R.string.high_latitude_method),
                         value = when (prayerState.highLatitudeRule) {
-                            HighLatitudeRule.MIDDLE_OF_NIGHT -> stringResource(R.string.middle_of_night)
-                            HighLatitudeRule.SEVENTH_OF_NIGHT -> stringResource(R.string.seventh_of_night)
+                            HighLatitudeRule.MIDDLE_OF_THE_NIGHT -> stringResource(R.string.middle_of_night)
+                            HighLatitudeRule.SEVENTH_OF_THE_NIGHT -> stringResource(R.string.seventh_of_night)
                             HighLatitudeRule.TWILIGHT_ANGLE -> stringResource(R.string.twilight_angle)
                         },
                         onClick = { showHighLatitudeDialog = true }
@@ -286,12 +286,12 @@ fun PrayerSettingsScreen(
             title = stringResource(R.string.high_latitude_method),
             items = listOf(
                 NimazPickerItem(
-                    value = HighLatitudeRule.MIDDLE_OF_NIGHT,
+                    value = HighLatitudeRule.MIDDLE_OF_THE_NIGHT,
                     title = stringResource(R.string.middle_of_night),
                     description = stringResource(R.string.high_lat_middle_desc),
                 ),
                 NimazPickerItem(
-                    value = HighLatitudeRule.SEVENTH_OF_NIGHT,
+                    value = HighLatitudeRule.SEVENTH_OF_THE_NIGHT,
                     title = stringResource(R.string.seventh_of_night),
                     description = stringResource(R.string.high_lat_seventh_desc),
                 ),

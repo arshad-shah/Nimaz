@@ -30,8 +30,8 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
 import com.arshadshah.nimaz.presentation.components.molecules.NimazRangeRow
 import com.arshadshah.nimaz.presentation.components.organisms.NimazSearchBar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazTopAppBar
-import com.arshadshah.nimaz.presentation.viewmodel.SurahThematicEvent
-import com.arshadshah.nimaz.presentation.viewmodel.SurahThematicViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.quran.SurahThematicEvent
+import com.arshadshah.nimaz.presentation.viewmodel.quran.SurahThematicViewModel
 
 /**
  * The surah's table of contents — the mushaf's own division of it into subjects.

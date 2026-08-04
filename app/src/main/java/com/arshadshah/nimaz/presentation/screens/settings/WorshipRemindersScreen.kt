@@ -37,8 +37,9 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazNumberStepper
 import com.arshadshah.nimaz.presentation.components.molecules.NimazNumberStepperVariant
 import com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsItem
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
-import com.arshadshah.nimaz.presentation.viewmodel.SettingsEvent
-import com.arshadshah.nimaz.presentation.viewmodel.SettingsViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.settings.SettingsEvent
+import com.arshadshah.nimaz.presentation.viewmodel.settings.SettingsViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.settings.NotificationSettingsUiState
 
 /**
  * Worship reminders subscreen (spec §3). Data-driven off [WorshipReminderType]: rows are generated
@@ -137,7 +138,7 @@ fun WorshipRemindersScreen(
 private fun androidx.compose.foundation.lazy.LazyListScope.worshipSection(
     titleRes: Int,
     types: List<WorshipReminderType>,
-    state: com.arshadshah.nimaz.presentation.viewmodel.NotificationSettingsUiState,
+    state: NotificationSettingsUiState,
     minutesFormat: String,
     onToggle: (String, Boolean) -> Unit,
     onOffset: (String, Int) -> Unit,

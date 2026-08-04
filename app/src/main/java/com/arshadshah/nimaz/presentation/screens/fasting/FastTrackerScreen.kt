@@ -100,14 +100,15 @@ import com.arshadshah.nimaz.presentation.components.organisms.NimazStatData
 import com.arshadshah.nimaz.presentation.components.organisms.NimazStatsGrid
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
-import com.arshadshah.nimaz.presentation.viewmodel.FastingEvent
-import com.arshadshah.nimaz.presentation.viewmodel.FastingViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.tracker.FastingEvent
+import com.arshadshah.nimaz.presentation.viewmodel.tracker.FastingViewModel
 import java.time.DayOfWeek
 import java.time.Instant
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.ZoneId
 import java.time.temporal.TemporalAdjusters
+import com.arshadshah.nimaz.presentation.viewmodel.tracker.MakeupFastsUiState
 
 // Color constants for makeup fasts
 private val OrangeAccent = NimazColors.PrayerColors.Asr
@@ -1143,7 +1144,7 @@ private fun LogFastButton(
 // Makeup Fasts Content Components
 @Composable
 private fun MakeupFastsContent(
-    makeupState: com.arshadshah.nimaz.presentation.viewmodel.MakeupFastsUiState,
+    makeupState: MakeupFastsUiState,
     onCompleteMakeupFast: (Long) -> Unit,
     onUpdateMakeupFast: (MakeupFast) -> Unit = {},
     onPayFidya: (Long, Double) -> Unit = { _, _ -> },

@@ -49,8 +49,8 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
-import com.arshadshah.nimaz.presentation.viewmodel.HadithEvent
-import com.arshadshah.nimaz.presentation.viewmodel.HadithViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.content.HadithEvent
+import com.arshadshah.nimaz.presentation.viewmodel.content.HadithViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

@@ -37,8 +37,8 @@ import com.arshadshah.nimaz.presentation.components.molecules.NameDetailSectionC
 import com.arshadshah.nimaz.presentation.components.molecules.NamesAccents
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.NimazSpacing
-import com.arshadshah.nimaz.presentation.viewmodel.AsmaUlHusnaEvent
-import com.arshadshah.nimaz.presentation.viewmodel.AsmaUlHusnaViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.content.AsmaUlHusnaEvent
+import com.arshadshah.nimaz.presentation.viewmodel.content.AsmaUlHusnaViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable

@@ -64,11 +64,11 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazTimePickerDia
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.NimazCornerRadius
 import com.arshadshah.nimaz.presentation.theme.NimazSpacing
-import com.arshadshah.nimaz.presentation.viewmodel.KhatamEvent
-import com.arshadshah.nimaz.presentation.viewmodel.KhatamFormMode
-import com.arshadshah.nimaz.presentation.viewmodel.KhatamFormUiState
-import com.arshadshah.nimaz.presentation.viewmodel.KhatamPacePreset
-import com.arshadshah.nimaz.presentation.viewmodel.KhatamViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.quran.KhatamEvent
+import com.arshadshah.nimaz.presentation.viewmodel.quran.KhatamFormMode
+import com.arshadshah.nimaz.presentation.viewmodel.quran.KhatamFormUiState
+import com.arshadshah.nimaz.presentation.viewmodel.quran.KhatamPacePreset
+import com.arshadshah.nimaz.presentation.viewmodel.quran.KhatamViewModel
 
 /**
  * One form, two modes.

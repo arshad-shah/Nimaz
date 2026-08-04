@@ -83,13 +83,13 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazSearchBar
-import com.arshadshah.nimaz.presentation.viewmodel.AskEvent
-import com.arshadshah.nimaz.presentation.viewmodel.AskPhase
-import com.arshadshah.nimaz.presentation.viewmodel.AskViewModel
-import com.arshadshah.nimaz.presentation.viewmodel.SearchEvent
-import com.arshadshah.nimaz.presentation.viewmodel.SearchFilter
-import com.arshadshah.nimaz.presentation.viewmodel.SearchViewModel
-import com.arshadshah.nimaz.presentation.viewmodel.UnifiedSearchResult
+import com.arshadshah.nimaz.presentation.viewmodel.ai.AskEvent
+import com.arshadshah.nimaz.presentation.viewmodel.ai.AskPhase
+import com.arshadshah.nimaz.presentation.viewmodel.ai.AskViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.search.SearchEvent
+import com.arshadshah.nimaz.presentation.viewmodel.search.SearchFilter
+import com.arshadshah.nimaz.presentation.viewmodel.search.SearchViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.search.UnifiedSearchResult
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable

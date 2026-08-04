@@ -56,8 +56,8 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
 import com.arshadshah.nimaz.presentation.components.molecules.ZakatSummaryHero
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.NimazColors
-import com.arshadshah.nimaz.presentation.viewmodel.ZakatEvent
-import com.arshadshah.nimaz.presentation.viewmodel.ZakatViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.tools.ZakatEvent
+import com.arshadshah.nimaz.presentation.viewmodel.tools.ZakatViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
 

@@ -47,8 +47,8 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
 import com.arshadshah.nimaz.presentation.components.molecules.NimazTreeRow
 import com.arshadshah.nimaz.presentation.components.molecules.ThematicText
 import com.arshadshah.nimaz.presentation.components.organisms.NimazTopAppBar
-import com.arshadshah.nimaz.presentation.viewmodel.QuranTopicsEvent
-import com.arshadshah.nimaz.presentation.viewmodel.QuranTopicsViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.quran.QuranTopicsEvent
+import com.arshadshah.nimaz.presentation.viewmodel.quran.QuranTopicsViewModel
 
 /**
  * One subject: what it is, where it sits, and every verse that speaks to it.

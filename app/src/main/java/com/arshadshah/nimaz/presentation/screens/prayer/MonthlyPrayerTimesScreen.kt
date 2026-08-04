@@ -86,9 +86,9 @@ import com.arshadshah.nimaz.presentation.theme.LocalUse24HourFormat
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazCornerRadius
 import com.arshadshah.nimaz.presentation.theme.NimazSpacing
-import com.arshadshah.nimaz.presentation.viewmodel.DayPrayerTimes
-import com.arshadshah.nimaz.presentation.viewmodel.MonthlyPrayerTimesEvent
-import com.arshadshah.nimaz.presentation.viewmodel.MonthlyPrayerTimesViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.prayer.DayPrayerTimes
+import com.arshadshah.nimaz.presentation.viewmodel.prayer.MonthlyPrayerTimesEvent
+import com.arshadshah.nimaz.presentation.viewmodel.prayer.MonthlyPrayerTimesViewModel
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.TextStyle

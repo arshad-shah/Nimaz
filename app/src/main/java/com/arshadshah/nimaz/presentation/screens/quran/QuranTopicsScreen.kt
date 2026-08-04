@@ -47,9 +47,9 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazTreeRow
 import com.arshadshah.nimaz.presentation.components.organisms.NimazPillTabs
 import com.arshadshah.nimaz.presentation.components.organisms.NimazSearchBar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazTopAppBar
-import com.arshadshah.nimaz.presentation.viewmodel.QuranTopicsEvent
-import com.arshadshah.nimaz.presentation.viewmodel.QuranTopicsViewModel
-import com.arshadshah.nimaz.presentation.viewmodel.TopicBrowseState
+import com.arshadshah.nimaz.presentation.viewmodel.quran.QuranTopicsEvent
+import com.arshadshah.nimaz.presentation.viewmodel.quran.QuranTopicsViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.quran.TopicBrowseState
 
 /**
  * Browsing the Qur'an's 2,512 subjects — three hierarchies, one screen.

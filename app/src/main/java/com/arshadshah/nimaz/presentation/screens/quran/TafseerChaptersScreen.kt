@@ -41,7 +41,7 @@ import com.arshadshah.nimaz.presentation.components.molecules.SurahListItem
 import com.arshadshah.nimaz.presentation.components.molecules.parseColor
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazPillTabs
-import com.arshadshah.nimaz.presentation.viewmodel.TafseerChaptersViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.quran.TafseerChaptersViewModel
 
 /**
  * Surah picker shown before the Tafseer reader when entered from the More menu —

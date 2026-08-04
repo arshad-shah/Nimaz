@@ -82,8 +82,8 @@ import com.arshadshah.nimaz.presentation.components.molecules.calendar.Selection
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.LocalUse24HourFormat
 import com.arshadshah.nimaz.presentation.theme.NimazColors
-import com.arshadshah.nimaz.presentation.viewmodel.PrayerTrackerEvent
-import com.arshadshah.nimaz.presentation.viewmodel.PrayerTrackerViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.tracker.PrayerTrackerEvent
+import com.arshadshah.nimaz.presentation.viewmodel.tracker.PrayerTrackerViewModel
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth

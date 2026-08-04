@@ -3,7 +3,7 @@ package com.arshadshah.nimaz.presentation.components.organisms
 import androidx.compose.ui.test.onNodeWithText
 import com.arshadshah.nimaz.domain.model.PrayerStatus
 import com.arshadshah.nimaz.domain.model.PrayerType
-import com.arshadshah.nimaz.presentation.viewmodel.PrayerTimeDisplay
+import com.arshadshah.nimaz.presentation.viewmodel.home.PrayerTimeDisplay
 import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
 import org.junit.Test

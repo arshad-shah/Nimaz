@@ -45,10 +45,11 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazPickerItem
 import com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsItem
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.NimazColors
-import com.arshadshah.nimaz.presentation.viewmodel.SettingsEvent
-import com.arshadshah.nimaz.presentation.viewmodel.SettingsViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.settings.SettingsEvent
+import com.arshadshah.nimaz.presentation.viewmodel.settings.SettingsViewModel
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import com.arshadshah.nimaz.presentation.viewmodel.settings.NotificationSettingsUiState
 
 /** The lead times the reminder picker offers. Null is "no reminder". */
 private val REMINDER_CHOICES = listOf(null, 5, 10, 15, 20, 30, 45, 60)
@@ -317,7 +318,7 @@ private fun alertStyleLabel(style: PrayerAlertStyle): Int = when (style) {
 }
 
 /** This prayer's lead time, or null when its reminder is off. */
-private fun com.arshadshah.nimaz.presentation.viewmodel.NotificationSettingsUiState
+private fun NotificationSettingsUiState
         .reminderMinutesFor(prayer: String): Int? =
     if (reminderEnabled[prayer] == true) {
         reminderOffsets[prayer] ?: PrayerAlertStyle.DEFAULT_REMINDER_MINUTES
@@ -327,7 +328,7 @@ private fun com.arshadshah.nimaz.presentation.viewmodel.NotificationSettingsUiSt
 
 @Composable
 private fun rememberPrayerRows(
-    state: com.arshadshah.nimaz.presentation.viewmodel.NotificationSettingsUiState,
+    state: NotificationSettingsUiState,
     times: PrayerTimes?,
 ): List<PrayerNotificationRowState> {
     val names = listOf(

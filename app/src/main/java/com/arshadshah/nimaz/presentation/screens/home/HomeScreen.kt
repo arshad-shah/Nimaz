@@ -73,12 +73,12 @@ import com.arshadshah.nimaz.presentation.components.organisms.TodaysProgressCard
 import com.arshadshah.nimaz.presentation.components.organisms.toOccasion
 import com.arshadshah.nimaz.presentation.theme.currentWindowSizeClass
 import com.arshadshah.nimaz.presentation.theme.isCompact
-import com.arshadshah.nimaz.presentation.viewmodel.AnnouncementUiState
-import com.arshadshah.nimaz.presentation.viewmodel.HomeEvent
-import com.arshadshah.nimaz.presentation.viewmodel.HomeUiState
-import com.arshadshah.nimaz.presentation.viewmodel.HomeViewModel
-import com.arshadshah.nimaz.presentation.viewmodel.PrayerTimeDisplay
-import com.arshadshah.nimaz.presentation.viewmodel.withClockState
+import com.arshadshah.nimaz.presentation.viewmodel.home.AnnouncementUiState
+import com.arshadshah.nimaz.presentation.viewmodel.home.HomeEvent
+import com.arshadshah.nimaz.presentation.viewmodel.home.HomeUiState
+import com.arshadshah.nimaz.presentation.viewmodel.home.HomeViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.home.PrayerTimeDisplay
+import com.arshadshah.nimaz.presentation.viewmodel.home.withClockState
 import kotlin.time.Instant
 
 /**
