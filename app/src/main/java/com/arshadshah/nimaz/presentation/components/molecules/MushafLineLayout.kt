@@ -109,6 +109,10 @@ fun MushafLineLayout(
     highlightColor: Color = MaterialTheme.colorScheme.primaryContainer,
     selectedColor: Color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.6f),
     basmalahColor: Color = QuranSurfaceColors.frameGold,
+    divisionMarkerColor: Color = QuranSurfaceColors.frameGold,
+    // Resolved by the host, which already holds the page's ayahs — this renderer has no
+    // database of its own, and must not acquire one to draw three signs.
+    divisionMarks: (ayahId: Int) -> MushafDivisionMarks = { MushafDivisionMarks.NONE },
 ) {
     // Last physical AYAH line on the page — never justified (it may be short).
     val lastAyahIndex = remember(lines) { lines.indexOfLast { it.type == MushafLineType.AYAH } }
@@ -219,6 +223,8 @@ fun MushafLineLayout(
                             selectedColor = selectedColor,
                             highlightedAyahId = highlightedAyahId,
                             selectedAyahId = selectedAyahId,
+                            divisionMarks = divisionMarks,
+                            divisionMarkerColor = divisionMarkerColor,
                             onAyahClick = onAyahClick,
                         )
                     }
@@ -262,6 +268,63 @@ private const val REFERENCE_FONT_SIZE = 28f
 /** Floor for [pageFitFontSize], so a very dense page stays legible on a narrow screen. */
 private const val MIN_FONT_SIZE = 10f
 
+/** The structural signs a printed Mushaf carries around the text. */
+private const val RUB_EL_HIZB = "۞"
+private const val SAJDA_SIGN = "۩"
+private const val RUKU_SIGN = "ع"
+
+/** Words are 1-based within their ayah, so this is the verse's opening word. */
+private const val FIRST_WORD = 1
+
+/**
+ * The end-of-verse glyphs the IndoPak text closes every ayah with — the small rounded zero,
+ * alone or with the ornament that follows a surah's final verse.
+ */
+internal val VERSE_END_GLYPHS = charArrayOf('۟', '۠')
+
+/** Whether this word carries the verse's end glyph, i.e. whether the ayah stops here. */
+internal fun String.endsOfVerse(): Boolean = any { it in VERSE_END_GLYPHS }
+
+/**
+ * Which structural signs a verse carries. Resolved once per page by the host rather than per
+ * word: a page is ~15 lines of ~8 words, and the lookup behind this reads the database.
+ */
+data class MushafDivisionMarks(
+    val opensQuarter: Boolean = false,
+    val closesRuku: Boolean = false,
+    val hasSajda: Boolean = false,
+) {
+    companion object {
+        val NONE = MushafDivisionMarks()
+    }
+}
+
+/**
+ * One structural sign set beside the text.
+ *
+ * Slightly smaller than the verse and in the ornament gold, because it is apparatus: it has
+ * to be findable at a glance without ever being mistaken for a word of the Qur'an.
+ */
+@Composable
+private fun MushafDivisionSign(
+    sign: String,
+    arabicFontSize: Float,
+    arabicFontFamily: FontFamily,
+    color: Color,
+) {
+    BasicText(
+        text = sign,
+        style = TextStyle(
+            fontFamily = arabicFontFamily,
+            fontSize = (arabicFontSize * 0.8f).sp,
+            color = color,
+            textDirection = TextDirection.Rtl,
+            textAlign = TextAlign.Center,
+        ),
+        modifier = Modifier.padding(horizontal = 2.dp),
+    )
+}
+
 /**
  * One justified (or naturally-spaced) row of ayah words, right-to-left, at the page's size.
  */
@@ -276,6 +339,8 @@ private fun MushafAyahLine(
     selectedColor: Color,
     highlightedAyahId: Int?,
     selectedAyahId: Int?,
+    divisionMarks: (Int) -> MushafDivisionMarks,
+    divisionMarkerColor: Color,
     onAyahClick: (ayahId: Int, tapWindowY: Float) -> Unit,
 ) {
     if (words.isEmpty()) return
@@ -304,6 +369,18 @@ private fun MushafAyahLine(
                     selectedAyahId -> selectedColor
                     else -> Color.Transparent
                 }
+                val marks = divisionMarks(word.ayahId)
+
+                // ۞ opens a hizb quarter, so it precedes the verse's first word.
+                if (marks.opensQuarter && word.position == FIRST_WORD) {
+                    MushafDivisionSign(
+                        sign = RUB_EL_HIZB,
+                        arabicFontSize = arabicFontSize,
+                        arabicFontFamily = arabicFontFamily,
+                        color = divisionMarkerColor,
+                    )
+                }
+
                 BasicText(
                     text = word.text,
                     style = TextStyle(
@@ -318,6 +395,29 @@ private fun MushafAyahLine(
                         .clickable { onAyahClick(word.ayahId, lineCenterWindowY) }
                         .padding(horizontal = 1.dp, vertical = 2.dp),
                 )
+
+                // ۩ and ع follow the verse they belong to. The verse's own end glyph is the
+                // reliable anchor: it is the last token of every ayah in the IndoPak text,
+                // so this needs no word counts and stays correct when an ayah runs across a
+                // page boundary — where "the last word on this page" would be wrong.
+                if (word.text.endsOfVerse()) {
+                    if (marks.hasSajda) {
+                        MushafDivisionSign(
+                            sign = SAJDA_SIGN,
+                            arabicFontSize = arabicFontSize,
+                            arabicFontFamily = arabicFontFamily,
+                            color = divisionMarkerColor,
+                        )
+                    }
+                    if (marks.closesRuku) {
+                        MushafDivisionSign(
+                            sign = RUKU_SIGN,
+                            arabicFontSize = arabicFontSize,
+                            arabicFontFamily = arabicFontFamily,
+                            color = divisionMarkerColor,
+                        )
+                    }
+                }
             }
         }
     }
