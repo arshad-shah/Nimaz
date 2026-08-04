@@ -15,7 +15,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Downloading
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Stop
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,13 +35,17 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.data.audio.AdhanSound
 import com.arshadshah.nimaz.data.audio.DownloadState
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconButton
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconButtonSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSwitch
+import com.arshadshah.nimaz.presentation.components.molecules.NimazListPicker
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
+import com.arshadshah.nimaz.presentation.components.molecules.NimazPickerItem
 import com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsItem
-import com.arshadshah.nimaz.presentation.components.molecules.VoiceOptionCard
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.viewmodel.SettingsEvent
 import com.arshadshah.nimaz.presentation.viewmodel.SettingsViewModel
@@ -64,8 +75,8 @@ fun NotificationSoundScreen(
         }
     }
 
-    val adhanSounds = com.arshadshah.nimaz.data.audio.AdhanSound.entries
     val selectedAdhanName = notificationState.selectedAdhanSound
+    var voicePickerOpen by remember { mutableStateOf(false) }
 
     NimazScreenScaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -121,30 +132,14 @@ fun NotificationSoundScreen(
 
             if (notificationState.adhanEnabled) {
                 item {
-                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                        adhanSounds.forEach { sound ->
-                            val soundDownloadState = downloadState[sound]
-                            val isThisPlaying = isPlaying && currentlyPlaying == sound
-                            val isDownloaded = viewModel.adhanAudioManager.isDownloaded(sound, false)
-                            VoiceOptionCard(
-                                name = sound.displayName,
-                                primaryTag = sound.origin,
-                                isSelected = sound.name == selectedAdhanName,
-                                isPlaying = isThisPlaying,
-                                isDownloading = soundDownloadState is DownloadState.Downloading,
-                                isDownloaded = isDownloaded,
-                                previewContentDescription = stringResource(R.string.notification_settings_preview),
-                                onClick = { viewModel.onEvent(SettingsEvent.SetAdhanSound(sound.name)) },
-                                onPreviewClick = {
-                                    if (isThisPlaying) {
-                                        viewModel.onEvent(SettingsEvent.StopAdhanPreview)
-                                    } else {
-                                        viewModel.onEvent(SettingsEvent.SetAdhanSound(sound.name))
-                                        viewModel.onEvent(SettingsEvent.PreviewAdhanSound)
-                                    }
-                                }
-                            )
-                        }
+                    NimazMenuGroup {
+                        NimazSettingsItem(
+                            title = stringResource(R.string.notif_sound_voice),
+                            subtitle = AdhanSound.fromName(selectedAdhanName).origin,
+                            value = AdhanSound.fromName(selectedAdhanName).displayName,
+                            onClick = { voicePickerOpen = true },
+                            showArrow = true
+                        )
                     }
                 }
             }
@@ -171,5 +166,54 @@ fun NotificationSoundScreen(
             }
             item { Spacer(Modifier.height(16.dp)) }
         }
+    }
+
+    if (voicePickerOpen) {
+        // Dismissal is funnelled through one lambda so the preview stops whichever way the
+        // sheet closes — Done, Cancel, a swipe down, or the back gesture.
+        val closePicker = {
+            viewModel.onEvent(SettingsEvent.StopAdhanPreview)
+            voicePickerOpen = false
+        }
+
+        NimazListPicker(
+            title = stringResource(R.string.notif_sound_voice),
+            items = AdhanSound.entries.map { sound ->
+                NimazPickerItem(
+                    value = sound.name,
+                    title = sound.displayName,
+                    description = sound.origin,
+                )
+            },
+            selected = selectedAdhanName,
+            onSelected = { viewModel.onEvent(SettingsEvent.SetAdhanSound(it)) },
+            onDismiss = closePicker,
+            // You audition several voices before settling on one, so the sheet stays open
+            // on selection rather than closing under the person listening.
+            autoDismiss = false,
+            trailingContent = { item ->
+                val sound = AdhanSound.fromName(item.value)
+                val isThisPlaying = isPlaying && currentlyPlaying == sound
+                val isDownloading = downloadState[sound] is DownloadState.Downloading
+                NimazIconButton(
+                    icon = when {
+                        isThisPlaying -> Icons.Default.Stop
+                        isDownloading -> Icons.Default.Downloading
+                        else -> Icons.Default.PlayArrow
+                    },
+                    contentDescription = stringResource(R.string.notification_settings_preview),
+                    enabled = !isDownloading,
+                    size = NimazIconButtonSize.SMALL,
+                    onClick = {
+                        if (isThisPlaying) {
+                            viewModel.onEvent(SettingsEvent.StopAdhanPreview)
+                        } else {
+                            viewModel.onEvent(SettingsEvent.SetAdhanSound(sound.name))
+                            viewModel.onEvent(SettingsEvent.PreviewAdhanSound)
+                        }
+                    }
+                )
+            }
+        )
     }
 }

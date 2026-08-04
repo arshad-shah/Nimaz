@@ -1,6 +1,10 @@
 package com.arshadshah.nimaz.presentation.screens.settings
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -26,6 +30,8 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazBannerVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazDivider
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
+import com.arshadshah.nimaz.presentation.components.atoms.NimazSwitch
+import com.arshadshah.nimaz.presentation.components.molecules.NimazAccordion
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
 import com.arshadshah.nimaz.presentation.components.molecules.NimazNumberStepper
 import com.arshadshah.nimaz.presentation.components.molecules.NimazNumberStepperVariant
@@ -36,8 +42,9 @@ import com.arshadshah.nimaz.presentation.viewmodel.SettingsViewModel
 
 /**
  * Worship reminders subscreen (spec §3). Data-driven off [WorshipReminderType]: rows are generated
- * per category (Night / Ramadan / Fasting & Dhikr). The Ramadan group auto-hides outside Ramadan.
- * Each row is a toggle; reminders with an editable offset reveal an inline stepper when enabled.
+ * per category (Night / Ramadan / Fasting & Dhikr). The Ramadan group is shown year-round under
+ * a notice saying it stays quiet until Ramadan, so it can be set up in advance. A reminder that
+ * can be timed is an accordion carrying its own offset; the rest are plain switch rows.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -48,7 +55,7 @@ fun WorshipRemindersScreen(
     val state by viewModel.notificationState.collectAsStateWithLifecycle()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val minutesFormat = stringResource(R.string.worship_settings_minutes)
-    // Ramadan visibility gate — hide the Ramadan group outside Ramadan.
+    // Drives the notice above the Ramadan group, not whether the group is shown.
     val isRamadan = remember { HijriDateCalculator.today().month == 9 }
 
     NimazScreenScaffold(
@@ -92,14 +99,28 @@ fun WorshipRemindersScreen(
                 onToggle = onToggle, onOffset = onOffset, onMode = onMode,
             )
 
-            if (isRamadan) {
-                worshipSection(
-                    titleRes = R.string.worship_settings_section_ramadan,
-                    types = WorshipReminderType.entries.filter { it.category == WorshipReminderCategory.RAMADAN },
-                    state = state, minutesFormat = minutesFormat,
-                    onToggle = onToggle, onOffset = onOffset, onMode = onMode,
-                )
+            // Ramadan reminders are shown year-round rather than hidden. Hiding them made
+            // the app look like it had lost a feature outside Ramadan, and left no way to
+            // set them up in advance. Nothing depends on their absence — the scheduler
+            // gates them on the Hijri date itself (WorshipReminderCalculator), so one set
+            // outside Ramadan simply arms nothing until Ramadan arrives.
+            if (!isRamadan) {
+                item(key = "ramadan_notice") {
+                    NimazBanner(
+                        message = stringResource(R.string.worship_settings_ramadan_notice),
+                        variant = NimazBannerVariant.INFO,
+                        icon = Icons.Default.Schedule,
+                        showBorder = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
             }
+            worshipSection(
+                titleRes = R.string.worship_settings_section_ramadan,
+                types = WorshipReminderType.entries.filter { it.category == WorshipReminderCategory.RAMADAN },
+                state = state, minutesFormat = minutesFormat,
+                onToggle = onToggle, onOffset = onOffset, onMode = onMode,
+            )
 
             worshipSection(
                 titleRes = R.string.worship_settings_section_fasting,
@@ -125,54 +146,82 @@ private fun androidx.compose.foundation.lazy.LazyListScope.worshipSection(
     if (types.isEmpty()) return
     item(key = "header_$titleRes") { NimazSectionHeader(title = stringResource(titleRes)) }
     item(key = "group_$titleRes") {
-        NimazMenuGroup {
-            types.forEachIndexed { index, type ->
+        // A reminder that can be timed carries its own accordion, so its offset sits inside
+        // the thing it belongs to rather than as a loose row beneath it. The rest stay plain
+        // switch rows in a single group.
+        val (adjustable, plain) = types.partition {
+            it.hasOffset || it == WorshipReminderType.WITR
+        }
+
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            if (plain.isNotEmpty()) {
+                NimazMenuGroup {
+                    plain.forEachIndexed { index, type ->
+                        NimazSettingsItem(
+                            title = stringResource(worshipNameRes(type)),
+                            subtitle = stringResource(worshipWhenRes(type)),
+                            checked = state.worshipReminders[type.key] ?: false,
+                            onCheckedChange = { onToggle(type.key, it) }
+                        )
+                        if (index < plain.lastIndex) {
+                            NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                        }
+                    }
+                }
+            }
+
+            adjustable.forEach { type ->
                 val enabled = state.worshipReminders[type.key] ?: false
-                NimazSettingsItem(
+                val offset = state.worshipOffsets[type.key] ?: type.defaultOffsetMinutes
+                val mode = state.worshipModes[type.key]
+                    ?: com.arshadshah.nimaz.core.util.WorshipReminderCalculator.WITR_MODE_AFTER_ISHA
+                val beforeFajr =
+                    mode == com.arshadshah.nimaz.core.util.WorshipReminderCalculator.WITR_MODE_BEFORE_FAJR
+
+                NimazAccordion(
                     title = stringResource(worshipNameRes(type)),
-                    subtitle = stringResource(worshipWhenRes(type)),
-                    checked = enabled,
-                    onCheckedChange = { onToggle(type.key, it) }
-                )
-                // Witr timing mode (after Isha ↔ before Fajr) — tap to switch. #309.
-                if (enabled && type == WorshipReminderType.WITR) {
-                    val mode = state.worshipModes[type.key]
-                        ?: com.arshadshah.nimaz.core.util.WorshipReminderCalculator.WITR_MODE_AFTER_ISHA
-                    val beforeFajr =
-                        mode == com.arshadshah.nimaz.core.util.WorshipReminderCalculator.WITR_MODE_BEFORE_FAJR
-                    NimazSettingsItem(
-                        title = stringResource(R.string.worship_witr_mode_title),
-                        subtitle = stringResource(
-                            if (beforeFajr) R.string.worship_witr_mode_before_fajr
-                            else R.string.worship_witr_mode_after_isha
-                        ),
-                        onClick = {
-                            onMode(
-                                type.key,
-                                if (beforeFajr) com.arshadshah.nimaz.core.util.WorshipReminderCalculator.WITR_MODE_AFTER_ISHA
-                                else com.arshadshah.nimaz.core.util.WorshipReminderCalculator.WITR_MODE_BEFORE_FAJR
-                            )
-                        },
-                        showArrow = true,
-                        modifier = Modifier.padding(horizontal = 16.dp)
-                    )
-                }
-                if (enabled && type.hasOffset) {
-                    val current = state.worshipOffsets[type.key] ?: type.defaultOffsetMinutes
-                    NimazNumberStepper(
-                        value = current,
-                        onValueChange = { onOffset(type.key, it) },
-                        variant = NimazNumberStepperVariant.INLINE,
-                        label = stringResource(R.string.worship_settings_timing),
-                        formatValue = { min -> minutesFormat.format(min) },
-                        minValue = 0,
-                        maxValue = 60,
-                        step = 5,
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
-                    )
-                }
-                if (index < types.lastIndex) {
-                    NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                    subtitle = if (enabled && type.hasOffset) {
+                        minutesFormat.format(offset)
+                    } else {
+                        stringResource(worshipWhenRes(type))
+                    },
+                    trailing = {
+                        NimazSwitch(checked = enabled, onCheckedChange = { onToggle(type.key, it) })
+                    }
+                ) {
+                    // Witr timing mode (after Isha ↔ before Fajr) — tap to switch. #309.
+                    if (type == WorshipReminderType.WITR) {
+                        NimazSettingsItem(
+                            title = stringResource(R.string.worship_witr_mode_title),
+                            subtitle = stringResource(
+                                if (beforeFajr) R.string.worship_witr_mode_before_fajr
+                                else R.string.worship_witr_mode_after_isha
+                            ),
+                            onClick = {
+                                onMode(
+                                    type.key,
+                                    if (beforeFajr) com.arshadshah.nimaz.core.util.WorshipReminderCalculator.WITR_MODE_AFTER_ISHA
+                                    else com.arshadshah.nimaz.core.util.WorshipReminderCalculator.WITR_MODE_BEFORE_FAJR
+                                )
+                            },
+                            showArrow = true,
+                            enabled = enabled
+                        )
+                    }
+                    if (type.hasOffset) {
+                        NimazNumberStepper(
+                            value = offset,
+                            onValueChange = { onOffset(type.key, it) },
+                            variant = NimazNumberStepperVariant.INLINE,
+                            label = stringResource(R.string.worship_settings_timing),
+                            formatValue = { min -> minutesFormat.format(min) },
+                            minValue = 0,
+                            maxValue = 60,
+                            step = 5,
+                            editable = enabled,
+                            modifier = Modifier.padding(vertical = 4.dp)
+                        )
+                    }
                 }
             }
         }

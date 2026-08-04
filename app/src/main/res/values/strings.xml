@@ -542,6 +542,9 @@
     <string name="notif_sunrise">Sunrise</string>
     <string name="notif_sunrise_subtitle">A beep when Fajr\'s window closes</string>
 
+    <string name="notif_sound_voice">Adhan voice</string>
+    <string name="worship_settings_ramadan_notice">Ramadan reminders stay quiet until Ramadan begins. Set them up now and they will start on their own.</string>
+
     <!-- Diagnostics: every row states something read from the device. -->
     <string name="notif_diag_status_section">Device checks</string>
     <string name="notif_diag_permission">Notification permission</string>
