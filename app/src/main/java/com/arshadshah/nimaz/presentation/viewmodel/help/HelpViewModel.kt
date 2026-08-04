@@ -29,33 +29,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-data class HelpHomeUiState(
-    val topics: List<HelpTopic> = emptyList(),
-    val query: String = "",
-    val results: List<HelpSearchResult> = emptyList(),
-    val isSearching: Boolean = false,
-    val isLoading: Boolean = true,
-    val error: String? = null
-)
-
-data class HelpTopicUiState(
-    val detail: HelpTopicDetail? = null,
-    val isLoading: Boolean = true,
-    val error: String? = null
-)
-
-data class HelpGuideUiState(
-    val guide: HelpGuideDetail? = null,
-    val isLoading: Boolean = true,
-    val error: String? = null
-)
-
-sealed interface HelpEvent {
-    data class Search(val query: String) : HelpEvent
-    data class LoadTopic(val topicId: String) : HelpEvent
-    data class LoadGuide(val guideId: String) : HelpEvent
-}
-
 @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
 @HiltViewModel
 class HelpViewModel @Inject constructor(

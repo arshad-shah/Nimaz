@@ -26,37 +26,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-data class KhatamListUiState(
-    val activeKhatam: Khatam? = null,
-    val activeInsights: KhatamInsights? = null,
-    val inProgressKhatams: List<Khatam> = emptyList(),
-    val completedKhatams: List<Khatam> = emptyList(),
-    val abandonedKhatams: List<Khatam> = emptyList(),
-    val stats: KhatamStats? = null,
-    val nextUnreadSurah: Int? = null,
-    val nextUnreadAyah: Int? = null,
-    val nextUnreadSurahName: String? = null,
-    val isLoading: Boolean = true
-) {
-    val hasAnyKhatam: Boolean
-        get() = inProgressKhatams.isNotEmpty() ||
-                completedKhatams.isNotEmpty() ||
-                abandonedKhatams.isNotEmpty()
-}
-
-data class KhatamDetailUiState(
-    val khatam: Khatam? = null,
-    val juzProgress: List<JuzProgressInfo> = emptyList(),
-    val dailyLogs: List<DailyLogEntry> = emptyList(),
-    val insights: KhatamInsights = KhatamInsights(),
-    val nextUnreadSurah: Int? = null,
-    val nextUnreadAyah: Int? = null,
-    val nextUnreadSurahName: String? = null,
-    val isLoading: Boolean = true,
-    /** True once the khatam is known to be gone, so the screen can pop instead of spinning. */
-    val notFound: Boolean = false
-)
-
 /** Whether the shared form is creating a new khatam or editing an existing one. */
 sealed interface KhatamFormMode {
     data object Create : KhatamFormMode
@@ -91,70 +60,6 @@ enum class KhatamPacePreset(val divisor: Int?) {
         fun forTarget(target: Int): KhatamPacePreset =
             entries.firstOrNull { it.targetAyahs() == target } ?: CUSTOM
     }
-}
-
-data class KhatamFormUiState(
-    val mode: KhatamFormMode = KhatamFormMode.Create,
-    val name: String = "",
-    val dailyTarget: Int = DEFAULT_DAILY_TARGET,
-    val preset: KhatamPacePreset = KhatamPacePreset.CUSTOM,
-    val notes: String = "",
-    val deadline: Long? = null,
-    val reminderEnabled: Boolean = false,
-    val reminderTime: String? = null,
-    /** Ayahs already read — shown on edit so the reader can see progress is untouched. */
-    val totalAyahsRead: Int = 0,
-    /** Drives whether the overflow menu offers "set as active". */
-    val isActiveKhatam: Boolean = false,
-    val isSaving: Boolean = false,
-    val isLoading: Boolean = false,
-    /**
-     * Validation failure as a resource id, not a resolved string: a ViewModel has no
-     * Compose context, and a string resolved here would not follow a locale change.
-     */
-    @StringRes val errorRes: Int? = null,
-    /** Set once the write has actually committed, so the screen navigates on success only. */
-    val saveComplete: Boolean = false
-) {
-    val isEdit: Boolean get() = mode is KhatamFormMode.Edit
-
-    /** Ayahs still to read — the whole Quran when creating. */
-    val remainingAyahs: Int
-        get() = (Khatam.TOTAL_QURAN_AYAHS - totalAyahsRead).coerceAtLeast(0)
-
-    /** Days to finish the remainder at the chosen target. */
-    val projectedDays: Int?
-        get() = if (dailyTarget > 0 && remainingAyahs > 0) {
-            Math.ceil(remainingAyahs.toDouble() / dailyTarget).toInt()
-        } else null
-
-    companion object {
-        const val DEFAULT_DAILY_TARGET = 20
-    }
-}
-
-sealed interface KhatamEvent {
-    // List
-    data class SetActiveKhatam(val khatamId: Long) : KhatamEvent
-    data class DeleteKhatam(val khatamId: Long) : KhatamEvent
-    data class AbandonKhatam(val khatamId: Long) : KhatamEvent
-    data class ReactivateKhatam(val khatamId: Long) : KhatamEvent
-
-    // Detail
-    data class LoadKhatamDetail(val khatamId: Long) : KhatamEvent
-
-    // Form (create + edit)
-    data class StartCreate(val unit: Unit = Unit) : KhatamEvent
-    data class StartEdit(val khatamId: Long) : KhatamEvent
-    data class UpdateName(val name: String) : KhatamEvent
-    data class UpdateDailyTarget(val target: Int) : KhatamEvent
-    data class SelectPreset(val preset: KhatamPacePreset) : KhatamEvent
-    data class UpdateNotes(val notes: String) : KhatamEvent
-    data class UpdateDeadline(val deadline: Long?) : KhatamEvent
-    data class UpdateReminderEnabled(val enabled: Boolean) : KhatamEvent
-    data class UpdateReminderTime(val time: String?) : KhatamEvent
-    data object SaveKhatam : KhatamEvent
-    data object ConsumeSaveComplete : KhatamEvent
 }
 
 @HiltViewModel

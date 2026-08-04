@@ -19,28 +19,6 @@ import kotlinx.serialization.json.Json
 import javax.inject.Inject
 import com.arshadshah.nimaz.presentation.viewmodel.ai.AskViewModel
 
-data class SearchSettingsUiState(
-    val aiEnabled: Boolean = false,
-    val historyEnabled: Boolean = false,
-    /** Persisted recent questions — shown in the clear-history confirm dialog. */
-    val savedQuestions: List<String> = emptyList(),
-    val showConsentSheet: Boolean = false,
-    /**
-     * The consent write failed. The sheet stays up and says so, because the alternative —
-     * what shipped — is a switch the user just turned on quietly turning itself back off.
-     */
-    val consentFailed: Boolean = false,
-)
-
-sealed interface SearchSettingsEvent {
-    /** Master toggle tapped. Enabling first opens the consent sheet. */
-    data object ToggleAiRequested : SearchSettingsEvent
-    data object ConsentAccepted : SearchSettingsEvent
-    data object ConsentDismissed : SearchSettingsEvent
-    data class SetHistoryEnabled(val enabled: Boolean) : SearchSettingsEvent
-    data object ClearHistory : SearchSettingsEvent
-}
-
 @HiltViewModel
 class SearchSettingsViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository,

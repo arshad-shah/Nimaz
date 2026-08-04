@@ -19,70 +19,6 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 
-/**
- * One surah's background and its passage outline — the two screens that carry the long stuff.
- *
- * Deliberately *not* [QuranViewModel]. That one loads the surah list, the bookmarks, the
- * favourites, the active khatam, the verse of the day and the audio session on construction,
- * which is the right shape for the Qur'an home and the reader and a lot to spin up to draw a
- * page of prose. These two screens want one surah, one query, and the size the reader sets
- * its translation in.
- */
-data class SurahBackgroundState(
-    val surah: Surah? = null,
-    val overview: SurahOverview? = null,
-
-    /**
-     * The size the reader draws its translation at.
-     *
-     * Reused rather than given a dial of its own: this is Qur'an-adjacent long-form prose, the
-     * same thing the reader's translation is, and two settings for one act of reading is one
-     * too many. The reader's Qur'an settings remain the single place it is changed.
-     */
-    val proseFontSize: Float = DEFAULT_PROSE_FONT_SIZE,
-    val isLoading: Boolean = true,
-    /** Set when the background fails to load, so the screen can say so rather than look empty. */
-    val error: String? = null,
-)
-
-data class SurahPassagesState(
-    val surah: Surah? = null,
-    val passages: List<AyahTheme> = emptyList(),
-    val query: String = "",
-    val isLoading: Boolean = true,
-    /** Set when the passages fail to load. */
-    val error: String? = null,
-) {
-    /**
-     * The outline, narrowed by the filter.
-     *
-     * A query matches the passage's subject, and — because this is a table of contents and the
-     * thing a reader most often has in hand is a verse number — a number that falls inside the
-     * passage's range. "153" finds "Patience and prayer" without the reader knowing that is
-     * where it starts.
-     */
-    val visiblePassages: List<AyahTheme>
-        get() {
-            val trimmed = query.trim()
-            if (trimmed.isEmpty()) return passages
-            val ayah = trimmed.toIntOrNull()
-            return passages.filter { passage ->
-                passage.theme.contains(trimmed, ignoreCase = true) ||
-                    (ayah != null && passage.contains(ayah))
-            }
-        }
-
-    val isFiltered: Boolean get() = query.isNotBlank()
-}
-
-sealed interface SurahThematicEvent {
-    /** Load a surah's background and outline. Idempotent — safe to re-send. */
-    data class Load(val surahNumber: Int) : SurahThematicEvent
-
-    data class Filter(val query: String) : SurahThematicEvent
-    data object ClearFilter : SurahThematicEvent
-}
-
 @HiltViewModel
 class SurahThematicViewModel @Inject constructor(
     private val quranUseCases: QuranUseCases,
@@ -155,5 +91,4 @@ class SurahThematicViewModel @Inject constructor(
     }
 }
 
-private const val DEFAULT_PROSE_FONT_SIZE = 16f
 private const val DOMAIN = "surah_thematic"

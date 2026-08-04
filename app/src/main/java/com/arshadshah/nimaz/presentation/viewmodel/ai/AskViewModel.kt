@@ -36,28 +36,6 @@ sealed interface AskPhase {
     data class Error(val error: AiError) : AskPhase
 }
 
-data class AskUiState(
-    val aiEnabled: Boolean = false,
-    val hintDismissed: Boolean = false,
-    val question: String = "",
-    val recentQuestions: List<String> = emptyList(),
-    val phase: AskPhase = AskPhase.Idle,
-    /**
-     * The AI's related search terms for the most recent answer. The Search
-     * screen drives its results list from these (same single call — no extra
-     * round-trip), so the list dynamically reflects what the AI judged relevant.
-     */
-    val relatedTerms: List<String> = emptyList(),
-)
-
-sealed interface AskEvent {
-    data class UpdateQuestion(val question: String) : AskEvent
-    data object Submit : AskEvent
-    data object Clear : AskEvent
-    data object DismissHint : AskEvent
-    data class SelectRecent(val question: String) : AskEvent
-}
-
 @HiltViewModel
 class AskViewModel @Inject constructor(
     private val askWithProof: AskWithProofUseCase,

@@ -64,45 +64,6 @@ enum class BookmarkSortOrder {
     DATE_NEWEST, DATE_OLDEST, TYPE, ALPHABETICAL
 }
 
-data class BookmarksUiState(
-    val allBookmarks: List<UnifiedBookmark> = emptyList(),
-    val filteredBookmarks: List<UnifiedBookmark> = emptyList(),
-    val quranBookmarks: List<QuranBookmark> = emptyList(),
-    val hadithBookmarks: List<HadithBookmark> = emptyList(),
-    val duaBookmarks: List<DuaBookmark> = emptyList(),
-    val selectedFilter: BookmarkType? = null,
-    val sortOrder: BookmarkSortOrder = BookmarkSortOrder.DATE_NEWEST,
-    val searchQuery: String = "",
-    val isLoading: Boolean = true,
-    val error: String? = null,
-    // Holds the most recently deleted bookmark so the UI can offer an Undo
-    // snackbar; cleared on undo, dismiss, or a subsequent delete.
-    val recentlyDeleted: UnifiedBookmark? = null
-)
-
-data class BookmarkStatsUiState(
-    val totalBookmarks: Int = 0,
-    val quranCount: Int = 0,
-    val hadithCount: Int = 0,
-    val duaCount: Int = 0
-)
-
-sealed interface BookmarksEvent {
-    data class SetFilter(val type: BookmarkType?) : BookmarksEvent
-
-    /** Delete any bookmark by its unified id (e.g. "quran_12"). Captures it for Undo. */
-    data class DeleteBookmark(val id: String) : BookmarksEvent
-    data object UndoDelete : BookmarksEvent
-    data object DismissUndo : BookmarksEvent
-
-    /** Set (or clear, with null) the note on any bookmark by its unified id. */
-    data class EditNote(val id: String, val note: String?) : BookmarksEvent
-
-    data class SetSearchQuery(val query: String) : BookmarksEvent
-    data class SetSortOrder(val order: BookmarkSortOrder) : BookmarksEvent
-    data object ClearAllBookmarks : BookmarksEvent
-}
-
 @HiltViewModel
 class BookmarksViewModel @Inject constructor(
     private val quranUseCases: QuranUseCases,

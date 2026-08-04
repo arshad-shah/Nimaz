@@ -23,59 +23,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-data class TafseerUiState(
-    val surahNumber: Int = 1,
-    val ayahs: List<Ayah> = emptyList(),
-    val currentAyahIndex: Int = 0,
-    val selectedSource: TafseerSource = TafseerSource.IBN_KATHIR,
-    val currentTafseer: TafseerText? = null,
-    // Hoisted out of the reader composable so it survives an ayah-by-ayah swipe
-    // within the same commentary block: it only resets to 0 when the block
-    // itself changes, not on every ayah navigation.
-    val currentTafseerPage: Int = 0,
-    val highlights: List<TafseerHighlight> = emptyList(),
-    val notes: List<TafseerNote> = emptyList(),
-    val surahName: String = "",
-    val isLoading: Boolean = true,
-    // Sources whose seed data actually has non-empty text for the current ayah.
-    // Used to recommend an alternate source when the selected one has no content.
-    val availableSources: Set<TafseerSource> = emptySet(),
-    /**
-     * The subjects the corpus files this verse under (schemaVersion 24) — busiest first.
-     *
-     * The commentary screen is where a reader is studying one verse, which is exactly where
-     * "what else does the Qur'an say about this" is the next question. Empty for a verse no
-     * topic cites, and on an install whose artifact predates the topic index.
-     */
-    val topics: List<QuranTopic> = emptyList()
-)
-
-sealed interface TafseerEvent {
-    data class LoadSurah(val surahNumber: Int, val ayahNumber: Int = 1) : TafseerEvent
-    data class NavigateToAyah(val index: Int) : TafseerEvent
-    data class NavigateToTafseerPage(val page: Int) : TafseerEvent
-    data class SwitchSource(val source: TafseerSource) : TafseerEvent
-    data class AddHighlight(
-        val startOffset: Int,
-        val endOffset: Int,
-        val color: String,
-        val note: String? = null
-    ) : TafseerEvent
-
-    data class DeleteHighlight(val highlightId: Long) : TafseerEvent
-
-    /** Update an existing highlight's colour and/or note in a single step. */
-    data class UpdateHighlight(
-        val highlightId: Long,
-        val color: String,
-        val note: String?
-    ) : TafseerEvent
-
-    data class AddNote(val text: String) : TafseerEvent
-    data class UpdateNote(val note: TafseerNote) : TafseerEvent
-    data class DeleteNote(val noteId: Long) : TafseerEvent
-}
-
 @HiltViewModel
 class TafseerViewModel @Inject constructor(
     private val tafseerUseCases: TafseerUseCases,
@@ -312,7 +259,6 @@ class TafseerViewModel @Inject constructor(
             tafseerUseCases.deleteNote(noteId)
         }
     }
-
 
     private companion object {
         private const val DOMAIN = AppAnalytics.Feature.TAFSEER

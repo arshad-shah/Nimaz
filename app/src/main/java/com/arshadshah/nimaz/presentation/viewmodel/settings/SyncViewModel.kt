@@ -41,27 +41,6 @@ data class SyncDataSummary(
 
 data class ActivityLogEntry(val label: String, val timestamp: Long = System.currentTimeMillis())
 
-data class SyncUiState(
-    val mode: SyncMode = SyncMode.NONE,
-    val connectionState: ConnectionState = ConnectionState.Idle,
-    val statusMessage: String = "",
-    val currentStep: String = "",
-    val stepsCompleted: Int = 0,
-    val totalSteps: Int = 0,
-    val transferProgress: Float = 0f,
-    val dataSummary: SyncDataSummary? = null,
-    val error: String? = null,
-    val activityLog: List<ActivityLogEntry> = emptyList(),
-)
-
-sealed interface SyncEvent {
-    data object StartSend : SyncEvent
-    data object StartReceive : SyncEvent
-    data class AcceptConnection(val endpointId: String) : SyncEvent
-    data class RejectConnection(val endpointId: String) : SyncEvent
-    data object Cancel : SyncEvent
-}
-
 @HiltViewModel
 class SyncViewModel @Inject constructor(
     private val connectionsManager: NearbyConnectionsManager,
