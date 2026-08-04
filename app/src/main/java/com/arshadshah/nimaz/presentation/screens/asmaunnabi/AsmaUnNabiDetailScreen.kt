@@ -27,7 +27,7 @@ import com.arshadshah.nimaz.presentation.components.molecules.NameDetailSectionC
 import com.arshadshah.nimaz.presentation.components.molecules.NamesAccents
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.NimazSpacing
-import com.arshadshah.nimaz.presentation.viewmodel.content.AsmaUnNabiEvent
+import com.arshadshah.nimaz.presentation.viewmodel.content.CatalogEvent
 import com.arshadshah.nimaz.presentation.viewmodel.content.AsmaUnNabiViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -38,7 +38,7 @@ fun AsmaUnNabiDetailScreen(
     viewModel: AsmaUnNabiViewModel = hiltViewModel()
 ) {
     LaunchedEffect(nameId) {
-        viewModel.onEvent(AsmaUnNabiEvent.LoadDetail(nameId))
+        viewModel.onEvent(CatalogEvent.LoadDetail(nameId))
     }
 
     val state by viewModel.detailState.collectAsStateWithLifecycle()
@@ -47,21 +47,21 @@ fun AsmaUnNabiDetailScreen(
     NimazScreenScaffold(
         topBar = {
             NimazBackTopAppBar(
-                title = state.name?.nameTransliteration ?: stringResource(R.string.name_detail),
+                title = state.item?.nameTransliteration ?: stringResource(R.string.name_detail),
                 onBackClick = onNavigateBack
             )
         },
         floatingActionButton = {
-            state.name?.let { name ->
+            state.item?.let { name ->
                 FavoriteFab(
                     isFavorite = name.isFavorite,
                     accent = accent,
-                    onClick = { viewModel.onEvent(AsmaUnNabiEvent.ToggleFavorite(name.id)) }
+                    onClick = { viewModel.onEvent(CatalogEvent.ToggleFavorite(name.id)) }
                 )
             }
         }
     ) { paddingValues ->
-        if (state.isLoading || state.name == null) {
+        if (state.isLoading || state.item == null) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -71,7 +71,7 @@ fun AsmaUnNabiDetailScreen(
                 CircularProgressIndicator()
             }
         } else {
-            val name = state.name!!
+            val name = state.item!!
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()

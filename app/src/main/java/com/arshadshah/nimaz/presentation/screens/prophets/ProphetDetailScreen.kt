@@ -44,7 +44,7 @@ import com.arshadshah.nimaz.presentation.components.molecules.NamesAccent
 import com.arshadshah.nimaz.presentation.components.molecules.NamesAccents
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.NimazSpacing
-import com.arshadshah.nimaz.presentation.viewmodel.content.ProphetEvent
+import com.arshadshah.nimaz.presentation.viewmodel.content.CatalogEvent
 import com.arshadshah.nimaz.presentation.viewmodel.content.ProphetViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -55,7 +55,7 @@ fun ProphetDetailScreen(
     viewModel: ProphetViewModel = hiltViewModel()
 ) {
     LaunchedEffect(prophetId) {
-        viewModel.onEvent(ProphetEvent.LoadDetail(prophetId))
+        viewModel.onEvent(CatalogEvent.LoadDetail(prophetId))
     }
 
     val state by viewModel.detailState.collectAsStateWithLifecycle()
@@ -64,24 +64,24 @@ fun ProphetDetailScreen(
     NimazScreenScaffold(
         topBar = {
             NimazBackTopAppBar(
-                title = state.prophet?.nameEnglish ?: stringResource(R.string.prophet_detail),
+                title = state.item?.nameEnglish ?: stringResource(R.string.prophet_detail),
                 onBackClick = onNavigateBack
             )
         },
         floatingActionButton = {
-            state.prophet?.let { prophet ->
+            state.item?.let { prophet ->
                 FavoriteFab(
                     isFavorite = prophet.isFavorite,
                     accent = accent,
-                    onClick = { viewModel.onEvent(ProphetEvent.ToggleFavorite(prophet.id)) }
+                    onClick = { viewModel.onEvent(CatalogEvent.ToggleFavorite(prophet.id)) }
                 )
             }
         }
     ) { paddingValues ->
-        if (state.isLoading || state.prophet == null) {
+        if (state.isLoading || state.item == null) {
             NimazLoadingState(modifier = Modifier.padding(paddingValues))
         } else {
-            val prophet = state.prophet!!
+            val prophet = state.item!!
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()

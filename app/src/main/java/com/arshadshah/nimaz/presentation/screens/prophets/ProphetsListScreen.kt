@@ -28,7 +28,7 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazSearchBar
 import com.arshadshah.nimaz.presentation.theme.NimazSpacing
-import com.arshadshah.nimaz.presentation.viewmodel.content.ProphetEvent
+import com.arshadshah.nimaz.presentation.viewmodel.content.CatalogEvent
 import com.arshadshah.nimaz.presentation.viewmodel.content.ProphetViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -56,20 +56,20 @@ fun ProphetsListScreen(
         ) {
             NimazSearchBar(
                 query = state.searchQuery,
-                onQueryChange = { viewModel.onEvent(ProphetEvent.Search(it)) },
+                onQueryChange = { viewModel.onEvent(CatalogEvent.Search(it)) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = NimazSpacing.Large, vertical = NimazSpacing.Small),
                 placeholder = stringResource(R.string.prophets_search_hint),
                 showClearButton = state.searchQuery.isNotEmpty(),
-                onClear = { viewModel.onEvent(ProphetEvent.ClearSearch) }
+                onClear = { viewModel.onEvent(CatalogEvent.ClearSearch) }
             )
 
             // Filter Chips
             NameFilterRow(
                 showFavoritesOnly = state.showFavoritesOnly,
-                onShowAll = { viewModel.onEvent(ProphetEvent.ToggleFavoritesFilter) },
-                onShowFavorites = { viewModel.onEvent(ProphetEvent.ToggleFavoritesFilter) },
+                onShowAll = { viewModel.onEvent(CatalogEvent.ToggleFavoritesFilter) },
+                onShowFavorites = { viewModel.onEvent(CatalogEvent.ToggleFavoritesFilter) },
                 accent = accent,
                 allLabel = stringResource(R.string.all),
                 favoritesLabel = stringResource(R.string.favorites),
@@ -82,7 +82,7 @@ fun ProphetsListScreen(
             if (state.isLoading) {
                 NimazLoadingState()
             } else {
-                val displayList = state.filteredProphets
+                val displayList = state.filteredItems
 
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
@@ -105,7 +105,7 @@ fun ProphetsListScreen(
                             accent = accent,
                             onClick = { onNavigateToDetail(prophet.id) },
                             onFavoriteClick = {
-                                viewModel.onEvent(ProphetEvent.ToggleFavorite(prophet.id))
+                                viewModel.onEvent(CatalogEvent.ToggleFavorite(prophet.id))
                             },
                             titleLabel = prophet.titleEnglish,
                             eraChip = prophet.era
