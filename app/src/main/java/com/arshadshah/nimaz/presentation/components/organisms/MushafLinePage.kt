@@ -37,6 +37,7 @@ import com.arshadshah.nimaz.domain.model.MushafPageLayout
 import com.arshadshah.nimaz.domain.model.Surah
 import com.arshadshah.nimaz.domain.model.TranslationLanguage
 import com.arshadshah.nimaz.presentation.components.molecules.AyahTooltip
+import com.arshadshah.nimaz.presentation.components.molecules.MushafDivisionMarks
 import com.arshadshah.nimaz.presentation.components.molecules.MushafLineLayout
 import com.arshadshah.nimaz.presentation.components.molecules.QuranFrame
 import com.arshadshah.nimaz.presentation.components.molecules.QuranFrameVariant
@@ -112,6 +113,28 @@ fun MushafLinePage(
     // Ayah for the tooltip even when the host supplies no full-content lookup.
     val ayahMeta = remember(layout) { buildAyahMeta(layout) }
 
+    // The page's structural signs, resolved once per page rather than per word. A page is
+    // ~15 lines of ~8 words, and ayahLookup reads the database; doing this inline in the
+    // renderer would turn one map build into a hundred lookups on every recomposition.
+    val divisionMarks: Map<Int, MushafDivisionMarks> = remember(layout, ayahLookup) {
+        layout.lines
+            .asSequence()
+            .flatMap { it.words.asSequence() }
+            .map { it.ayahId }
+            .distinct()
+            .mapNotNull { id ->
+                val ayah = ayahLookup(id) ?: return@mapNotNull null
+                val marks = MushafDivisionMarks(
+                    opensQuarter = ayah.isRubStart,
+                    closesRuku = ayah.isRukuEnd,
+                    hasSajda = ayah.sajdaType != null,
+                )
+                // Only verses that actually carry a sign are worth keeping.
+                if (marks == MushafDivisionMarks.NONE) null else id to marks
+            }
+            .toMap()
+    }
+
     fun resolveAyah(ayahId: Int): Ayah? {
         ayahLookup(ayahId)?.let { return it }
         val meta = ayahMeta[ayahId] ?: return null
@@ -158,6 +181,7 @@ fun MushafLinePage(
                     arabicFontFamily = arabicFontFamily,
                     highlightedAyahId = highlightedAyahId,
                     selectedAyahId = tooltipAyah?.id,
+                    divisionMarks = { divisionMarks[it] ?: MushafDivisionMarks.NONE },
                     onAyahClick = { ayahId, tapWindowY ->
                         resolveAyah(ayahId)?.let { ayah ->
                             bookmarkOverride = null

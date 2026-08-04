@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.domain.repository
 
+import com.arshadshah.nimaz.domain.model.PrayerAlertStyle
 import com.arshadshah.nimaz.domain.model.UserPreferences
 import kotlinx.coroutines.flow.Flow
 
@@ -98,6 +99,29 @@ interface SettingsRepository {
     suspend fun setNotificationReminderMinutes(minutes: Int)
     val showReminderBefore: Flow<Boolean>
     suspend fun setShowReminderBefore(enabled: Boolean)
+
+    // Per-prayer alert style and reminder, keyed by prayer name ("fajr", "dhuhr", "asr",
+    // "maghrib", "isha" — sunrise has neither). These supersede the global adhan pair and
+    // the single pre-adhan reminder above, which stay only so the one-time migration has
+    // something to read.
+
+    /** How a prayer announces itself: the adhan, the standard tone, or nothing. */
+    fun prayerAlertStyle(prayer: String): Flow<PrayerAlertStyle>
+    suspend fun setPrayerAlertStyle(prayer: String, style: PrayerAlertStyle)
+
+    /** Whether this prayer gets a reminder ahead of its time. */
+    fun prayerReminderEnabled(prayer: String): Flow<Boolean>
+    suspend fun setPrayerReminderEnabled(prayer: String, enabled: Boolean)
+
+    /** How many minutes before the prayer that reminder lands. */
+    fun prayerReminderMinutes(prayer: String): Flow<Int>
+    suspend fun setPrayerReminderMinutes(prayer: String, minutes: Int)
+
+    /**
+     * Carries an existing install from the global adhan/pre-adhan preferences onto the
+     * per-prayer ones above. Runs at most once; safe to call on every start.
+     */
+    suspend fun migratePrayerNotificationPreferences()
     val persistentNotification: Flow<Boolean>
     suspend fun setPersistentNotification(enabled: Boolean)
     val fridayReminderEnabled: Flow<Boolean>

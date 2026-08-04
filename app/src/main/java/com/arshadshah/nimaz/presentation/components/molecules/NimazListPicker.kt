@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.presentation.components.molecules
 
+import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,8 +20,10 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -51,6 +54,8 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazCheckboxSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCheckboxType
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCheckboxVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconButton
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconButtonSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.components.organisms.NimazSearchBar
@@ -92,6 +97,13 @@ data class NimazPickerItem<T>(
  * - The search stays pinned while the grouped list scrolls inside the sheet.
  * - On open the list scrolls to centre the currently-selected item so the
  *   user sees where they are.
+ * - [trailingContent]: optional per-row action rendered at the end of the row,
+ *   after the selection tick — an adhan preview button, for instance. It lives
+ *   on the picker rather than on [NimazPickerItem] deliberately: the item stays
+ *   pure data (so equality and the list keys are unaffected), and state that
+ *   changes while the sheet is open — which voice is currently playing — stays
+ *   with the caller. The row itself is the selection target, so the action
+ *   handles its own taps.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -108,6 +120,7 @@ fun <T> NimazListPicker(
     cancelText: String = stringResource(R.string.cancel),
     searchPlaceholder: String = stringResource(R.string.search),
     emptySearchText: String = stringResource(R.string.picker_no_matches),
+    trailingContent: (@Composable (NimazPickerItem<T>) -> Unit)? = null,
 ) {
     var query by remember { mutableStateOf("") }
 
@@ -198,7 +211,8 @@ fun <T> NimazListPicker(
                             onClick = {
                                 onSelected(item.value)
                                 if (autoDismiss) onDismiss()
-                            }
+                            },
+                            trailingContent = trailingContent
                         )
                     }
                 }
@@ -215,7 +229,8 @@ fun <T> NimazListPicker(
                                 onClick = {
                                     onSelected(item.value)
                                     if (autoDismiss) onDismiss()
-                                }
+                                },
+                                trailingContent = trailingContent
                             )
                         }
                     }
@@ -229,6 +244,7 @@ private fun <T> PickerRow(
     item: NimazPickerItem<T>,
     isSelected: Boolean,
     onClick: () -> Unit,
+    trailingContent: (@Composable (NimazPickerItem<T>) -> Unit)? = null,
 ) {
     // Rows sit on the sheet's own surface, so a flat container fill has almost
     // nothing to read against in light mode. Unselected rows are outlined; the
@@ -306,6 +322,11 @@ private fun <T> PickerRow(
                     size = NimazCheckboxSize.LARGE,
                     type = NimazCheckboxType.CIRCLE
                 )
+            }
+
+            if (trailingContent != null) {
+                Spacer(modifier = Modifier.width(4.dp))
+                trailingContent(item)
             }
         }
     }
@@ -486,6 +507,68 @@ private fun NimazListPicker_Grouped_Preview() {
         )
     }
 }
+
+// The adhan picker's configuration: an explicit Confirm (you audition several
+// voices before committing) and a per-row preview action.
+
+@Preview(showBackground = true, widthDp = 412, heightDp = 600, name = "5. Trailing action")
+@Composable
+private fun NimazListPicker_TrailingAction_Preview() {
+    NimazTheme {
+        NimazListPicker(
+            title = "Adhan voice",
+            items = adhanPreviewItems,
+            selected = "mishary",
+            onSelected = {},
+            onDismiss = {},
+            autoDismiss = false,
+            trailingContent = { item ->
+                NimazIconButton(
+                    icon = if (item.value == "mishary") Icons.Default.Stop else Icons.Default.PlayArrow,
+                    contentDescription = "Preview ${item.title}",
+                    onClick = {},
+                    size = NimazIconButtonSize.SMALL
+                )
+            }
+        )
+    }
+}
+
+@Preview(
+    showBackground = true,
+    widthDp = 412,
+    heightDp = 600,
+    name = "6. Trailing action (dark)",
+    uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL
+)
+@Composable
+private fun NimazListPicker_TrailingAction_Dark_Preview() {
+    NimazTheme {
+        NimazListPicker(
+            title = "Adhan voice",
+            items = adhanPreviewItems,
+            selected = "makkah",
+            onSelected = {},
+            onDismiss = {},
+            autoDismiss = false,
+            trailingContent = { item ->
+                NimazIconButton(
+                    icon = Icons.Default.PlayArrow,
+                    contentDescription = "Preview ${item.title}",
+                    onClick = {},
+                    size = NimazIconButtonSize.SMALL
+                )
+            }
+        )
+    }
+}
+
+private val adhanPreviewItems = listOf(
+    NimazPickerItem(value = "mishary", title = "Mishary Rashid", description = "Kuwait"),
+    NimazPickerItem(value = "makkah", title = "Makkah", description = "Masjid al-Haram"),
+    NimazPickerItem(value = "madinah", title = "Madinah", description = "Masjid an-Nabawi"),
+    NimazPickerItem(value = "aqsa", title = "Al-Aqsa", description = "Jerusalem"),
+)
 
 @Preview(showBackground = true, widthDp = 412, heightDp = 400, name = "4. Empty search result")
 @Composable

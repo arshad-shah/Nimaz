@@ -51,6 +51,9 @@ class PrayerNotificationSchedulerTest {
             PrayerNotificationScheduler.CHANNEL_ID_PRAYER,
             PrayerNotificationScheduler.CHANNEL_ID_ADHAN,
             PrayerNotificationScheduler.CHANNEL_ID_DAILY_SUMMARY,
+            // The silent alert style needs a channel of its own — the *_SILENT channels are
+            // no-vibration siblings that still carry a sound.
+            PrayerNotificationScheduler.CHANNEL_ID_PRAYER_MUTED,
         )
     }
 
@@ -61,8 +64,7 @@ class PrayerNotificationSchedulerTest {
             longitude = 39.8262,
             notificationsEnabled = true,
             enabledPrayers = PrayerType.entries.toSet(),
-            preReminderEnabled = true,
-            preReminderMinutes = 15,
+            preReminders = PrayerType.entries.associateWith { 15 },
         )
     }
 

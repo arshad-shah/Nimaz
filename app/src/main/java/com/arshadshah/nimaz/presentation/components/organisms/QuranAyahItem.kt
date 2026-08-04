@@ -368,9 +368,10 @@ internal fun AyahItem(
                 }
 
                 // Rukūʿ — the surah's own sections, from the `rukus` table. Same badge
-                // language as the hizb quarter beside it, and likewise only on the verse
-                // that opens the section.
-                if (ayah.isRukuStart && ayah.rukuNumber != null) {
+                // language as the hizb quarter beside it, but on the verse that *closes*
+                // the section: the ʿayn (ع) ends a rukūʿ in a printed Mushaf rather than
+                // announcing it. Al-Fātiḥah is one rukūʿ, so this shows on 1:7, not 1:1.
+                if (ayah.isRukuEnd && ayah.rukuNumber != null) {
                     NimazBadge(
                         text = stringResource(R.string.ruku_format, ayah.rukuNumber),
                         tone = NimazTone.ACCENT,
@@ -381,10 +382,15 @@ internal fun AyahItem(
                 }
             }
 
-            Text(
+            // Where the verse sits in the book. A badge like the ones beside it, so the row
+            // reads as one system rather than badges plus a stray line of grey text — but
+            // MUTED, because this is a coordinate you look up, not a division you observe.
+            NimazBadge(
                 text = stringResource(R.string.juz_page_dot_format, ayah.juz, ayah.page),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                tone = NimazTone.MUTED,
+                emphasis = NimazBadgeEmphasis.SOFT,
+                shape = NimazBadgeShape.ROUNDED,
+                size = NimazBadgeSize.SMALL
             )
         }
 
@@ -431,7 +437,7 @@ private fun AyahItemShowcase() {
         isBookmarked = bookmarked,
         transliteration = transliteration,
         rukuNumber = ruku,
-        isRukuStart = ruku != null,
+        isRukuEnd = ruku != null,
         isRubStart = rub > 0,
     )
 

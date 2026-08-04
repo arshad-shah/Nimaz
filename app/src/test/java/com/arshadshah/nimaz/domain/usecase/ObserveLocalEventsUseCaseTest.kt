@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.domain.usecase
 
 import com.arshadshah.nimaz.domain.model.CelebrationEvent
 import com.arshadshah.nimaz.domain.model.UserPreferences
+import com.arshadshah.nimaz.domain.model.PrayerAlertStyle
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.Flow
@@ -130,6 +131,17 @@ private class FakeSettings(private val offset: Int) : SettingsRepository {
     override suspend fun setNotificationReminderMinutes(minutes: Int) {}
     override val showReminderBefore: Flow<Boolean> = flowOf(true)
     override suspend fun setShowReminderBefore(enabled: Boolean) {}
+    override fun prayerAlertStyle(prayer: String): Flow<PrayerAlertStyle> =
+        flowOf(PrayerAlertStyle.NOTIFICATION)
+
+    override suspend fun setPrayerAlertStyle(prayer: String, style: PrayerAlertStyle) {}
+    override fun prayerReminderEnabled(prayer: String): Flow<Boolean> = flowOf(false)
+    override suspend fun setPrayerReminderEnabled(prayer: String, enabled: Boolean) {}
+    override fun prayerReminderMinutes(prayer: String): Flow<Int> =
+        flowOf(PrayerAlertStyle.DEFAULT_REMINDER_MINUTES)
+
+    override suspend fun setPrayerReminderMinutes(prayer: String, minutes: Int) {}
+    override suspend fun migratePrayerNotificationPreferences() {}
     override val persistentNotification: Flow<Boolean> = flowOf(false)
     override suspend fun setPersistentNotification(enabled: Boolean) {}
     override val fridayReminderEnabled: Flow<Boolean> = flowOf(false)

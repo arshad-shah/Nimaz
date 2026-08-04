@@ -623,29 +623,21 @@
     <!-- Notification Settings Screen -->
     <string name="notification_settings_enable">Aktifkan Notifikasi</string>
     <string name="notification_settings_enable_subtitle">Terima peringatan waktu shalat</string>
-    <string name="notification_settings_prayer_section">NOTIFIKASI SHALAT</string>
     <string name="notification_settings_adhan_section">SUARA ADZAN</string>
     <string name="notification_settings_enable_adhan">Aktifkan Suara Adzan</string>
     <string name="notification_settings_enable_adhan_subtitle">Putar adzan saat waktu shalat</string>
-    <string name="notification_settings_additional_section">PERINGATAN TAMBAHAN</string>
-    <string name="notification_settings_pre_adhan">Pengingat Pra-Adzan</string>
-    <plurals name="notification_settings_pre_adhan_subtitle">
-        <item quantity="other">%1$d menit sebelumnya</item>
-    </plurals>
-    <string name="notification_settings_sunrise">Peringatan Matahari Terbit</string>
-    <string name="notification_settings_sunrise_subtitle">Akhir waktu shalat Subuh</string>
     <string name="notification_settings_friday_reminder">Pengingat Shalat Jumat</string>
     <string name="notification_settings_friday_subtitle">1 jam sebelum Jumat</string>
     <string name="notification_settings_vibration">Getaran</string>
     <string name="notification_settings_vibration_subtitle">Bergetar dengan notifikasi</string>
     <string name="notification_settings_dnd">Hormati Jangan Ganggu</string>
     <string name="notification_settings_dnd_subtitle">Lewati adzan saat mode Jangan Ganggu aktif</string>
-    <string name="notification_settings_troubleshooting_section">PEMECAHAN MASALAH</string>
-    <string name="notification_settings_test">Tes Notifikasi</string>
+    <string name="notif_diag_actions_section">Periksa pengiriman</string>
+    <string name="notification_settings_test">Kirim notifikasi uji</string>
     <string name="notification_settings_test_sent">Notifikasi tes terkirim</string>
-    <string name="notification_settings_test_all">Tes Semua Shalat</string>
+    <string name="notification_settings_test_all">Uji kelima salat</string>
     <string name="notification_settings_test_all_sent">Menguji semua notifikasi shalat…</string>
-    <string name="notification_settings_reset">Reset Notifikasi</string>
+    <string name="notification_settings_reset">Atur ulang dan jadwalkan lagi</string>
     <string name="notification_settings_reset_success">Notifikasi berhasil direset</string>
     <string name="notification_settings_battery_section">OPTIMASI BATERAI</string>
     <string name="notification_settings_battery_title">Optimasi Baterai</string>
@@ -654,10 +646,6 @@
     <string name="notification_settings_battery_exempted">Dikecualikan</string>
     <string name="notification_settings_battery_explanation">Ketika optimasi baterai diaktifkan, Android dapat menunda atau melewatkan notifikasi shalat untuk menghemat baterai. Menonaktifkannya memastikan notifikasi tiba tepat waktu.</string>
     <string name="notification_settings_disable_battery">Nonaktifkan Optimasi Baterai</string>
-    <string name="notification_settings_info_banner">Pastikan untuk mengaktifkan notifikasi di pengaturan perangkat Anda dan menonaktifkan optimasi baterai untuk peringatan shalat yang akurat.</string>
-    <string name="notification_settings_prayer_notification">Notifikasi shalat</string>
-    <string name="notification_settings_sound_on">Suara aktif</string>
-    <string name="notification_settings_sound_off">Suara nonaktif</string>
     <string name="notification_settings_preview">Pratinjau</string>
 
     <!-- Onboarding -->
@@ -1176,7 +1164,6 @@
     <string name="twilight_angle">Sudut Senja</string>
     <string name="manual_adjustments">Penyesuaian Manual (Menit)</string>
     <string name="adhan_notifications">Notifikasi Adzan</string>
-    <string name="pre_adhan_reminder">Pengingat Pra-Adzan</string>
     <string name="asr_standard_desc">Bayangan sama dengan panjang objek</string>
     <string name="asr_hanafi_desc">Bayangan sama dengan dua kali panjang objek</string>
     <string name="high_lat_middle_desc">Bagi malam menjadi dua dari terbenam hingga terbit matahari</string>
@@ -1652,14 +1639,9 @@
     <string name="worship_witr_mode_title">Waktu Witir</string>
     <string name="worship_witr_mode_after_isha">Setelah Isya</string>
     <string name="worship_witr_mode_before_fajr">Sebelum Subuh</string>
-    <string name="notif_hub_prayers_title">Notifikasi salat</string>
-    <string name="notif_hub_prayers_subtitle">5 salat harian · pra-azan · matahari terbit</string>
-    <string name="notif_hub_weekly_title">Mingguan &amp; bacaan</string>
-    <string name="notif_hub_weekly_subtitle">Jumat · pengingat Khatam</string>
-    <string name="notif_hub_sound_title">Suara &amp; pengiriman</string>
-    <string name="notif_hub_sound_subtitle">Azan · muazin · getaran · Jangan Ganggu</string>
-    <string name="notif_hub_troubleshooting_title">Pemecahan masalah</string>
-    <string name="notif_hub_troubleshooting_subtitle">Uji · atur ulang · pengoptimalan baterai</string>
+    <string name="notif_hub_prayers_title">Salat</string>
+    <string name="notif_hub_weekly_title">Mingguan</string>
+    <string name="notif_hub_sound_title">Azan &amp; suara</string>
 
     <!-- Pusat ibadah malam (tujuan Tahajud / Witir) -->
     <string name="night_worship_title">Ibadah Malam</string>
@@ -1683,4 +1665,53 @@
     <string name="night_worship_why_body">&quot;Rabb kami turun ke langit dunia…&quot;</string>
     <string name="widget_location">Lokasi</string>
     <string name="widget_tomorrow">Besok</string>
+
+    <!-- Notifications rework: per-prayer alert style, reminders, diagnostics -->
+    <string name="notif_hub_diagnostics_title">Diagnostik</string>
+    <string name="notif_hub_diagnostics_subtitle">Periksa apa yang bisa menghambat notifikasi</string>
+    <string name="notif_hub_count_of">%1$d dari %2$d</string>
+    <string name="notif_hub_count_on">%1$d aktif</string>
+    <string name="notif_hub_worship_subtitle">Tahajud, Witir, Sahur, Buka dan lainnya</string>
+    <string name="notif_hub_delivery_warning">Notifikasi mungkin tidak tiba tepat waktu di perangkat ini.</string>
+    <string name="notif_hub_weekly_both">Jumat dan khatam aktif</string>
+    <string name="notif_hub_weekly_jumuah">Jumat aktif · khatam nonaktif</string>
+    <string name="notif_hub_weekly_khatam">Khatam aktif · Jumat nonaktif</string>
+    <string name="notif_hub_weekly_none">Keduanya nonaktif</string>
+    <string name="notif_hub_sound_dnd">%1$s · Jangan Ganggu dihormati</string>
+    <string name="notif_hub_sound_vibration">%1$s · getaran aktif</string>
+    <string name="notif_hub_sound_plain">%1$s</string>
+    <string name="notif_prayers_section">Salat harian</string>
+    <string name="notif_alert_style">Jenis peringatan</string>
+    <string name="notif_alert_style_adhan">Azan</string>
+    <string name="notif_alert_style_adhan_subtitle">Azan diputar dengan suara</string>
+    <string name="notif_alert_style_notification">Notifikasi saja</string>
+    <string name="notif_alert_style_notification_subtitle">Nada notifikasi biasa</string>
+    <string name="notif_alert_style_silent">Senyap</string>
+    <string name="notif_alert_style_silent_subtitle">Muncul dan menunggu — tanpa suara, tanpa getaran</string>
+    <string name="notif_reminder_before">Pengingat sebelum</string>
+    <string name="notif_reminder_none">Tanpa pengingat</string>
+    <string name="notif_prayer_summary">%1$s · %2$s</string>
+    <string name="notif_prayer_off">Nonaktif</string>
+    <string name="notif_sunrise">Matahari terbit</string>
+    <string name="notif_sunrise_subtitle">Bunyi singkat saat waktu Subuh berakhir</string>
+    <string name="notif_sound_voice">Suara azan</string>
+    <string name="worship_settings_ramadan_notice">Pengingat Ramadan tetap senyap sampai Ramadan tiba. Atur sekarang dan pengingat akan mulai sendiri.</string>
+    <string name="notif_diag_status_section">Pemeriksaan perangkat</string>
+    <string name="notif_diag_permission">Izin notifikasi</string>
+    <string name="notif_diag_granted">Diberikan</string>
+    <string name="notif_diag_blocked">Diblokir</string>
+    <string name="notif_diag_exact_alarms">Alarm presisi</string>
+    <string name="notif_diag_allowed">Diizinkan</string>
+    <string name="notif_diag_not_allowed">Tidak diizinkan</string>
+    <string name="notif_diag_battery">Pengoptimalan baterai</string>
+    <string name="notif_diag_unrestricted">Tanpa batas</string>
+    <string name="notif_diag_restricted">Dibatasi</string>
+    <string name="notif_diag_needs_attention">Perlu perhatian</string>
+    <string name="notif_diag_reset_confirm_title">Atur ulang semua notifikasi?</string>
+    <string name="notif_diag_reset_confirm_body">Setiap alarm terjadwal dibatalkan dan disusun ulang dari pengaturan Anda saat ini. Pilihan Anda tetap — hanya jadwalnya yang digambar ulang.</string>
+    <string name="notif_diag_reset_confirm_action">Atur ulang</string>
+    <string name="prayer_settings_fajr_reminder">Pengingat Subuh</string>
+    <plurals name="notif_reminder_minutes_before">
+        <item quantity="other">%1$d mnt sebelumnya</item>
+    </plurals>
 </resources>

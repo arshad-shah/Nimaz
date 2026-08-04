@@ -3,6 +3,7 @@ package com.arshadshah.nimaz.presentation.components.molecules
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -35,6 +36,8 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconWell
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconWellShape
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.theme.asLanguageLabel
 
@@ -49,6 +52,9 @@ import com.arshadshah.nimaz.presentation.theme.asLanguageLabel
  * @param subtitleStyle overrides the subtitle's style. Needed where the subtitle is not Latin
  *   text: an Urdu endonym set in the body font falls back to a system Naskh face (see
  *   [com.arshadshah.nimaz.presentation.theme.asLanguageLabel]).
+ * @param trailing optional content rendered before [trailingIcon] — a status [NimazBadge], for
+ *   instance, on a row whose state the reader needs at a glance. The row is the tap target, so
+ *   anything interactive placed here handles its own taps.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -60,6 +66,7 @@ fun NimazMenuItem(
     icon: ImageVector? = null,
     iconTint: Color = MaterialTheme.colorScheme.primary,
     trailingIcon: ImageVector? = Icons.AutoMirrored.Filled.ArrowForward,
+    trailing: (@Composable RowScope.() -> Unit)? = null,
     enabled: Boolean = true,
     selected: Boolean = false,
     subtitleStyle: TextStyle = MaterialTheme.typography.bodySmall
@@ -98,11 +105,11 @@ fun NimazMenuItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             if (icon != null) {
-                NimazIcon(
-                    imageVector = icon,
+
+                NimazIconWell(
+                     icon,
                     contentDescription = null,
-                    tint = if (selected) titleColor else iconTint,
-                    size = NimazIconSize.LARGE
+                    shape = NimazIconWellShape.ROUNDED
                 )
                 Spacer(modifier = Modifier.width(16.dp))
             }
@@ -121,6 +128,11 @@ fun NimazMenuItem(
                         color = subtitleColor
                     )
                 }
+            }
+
+            if (trailing != null) {
+                trailing()
+                Spacer(modifier = Modifier.width(8.dp))
             }
 
             when {

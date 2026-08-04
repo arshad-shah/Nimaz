@@ -39,7 +39,8 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
-import com.arshadshah.nimaz.presentation.components.molecules.DetailCard
+import com.arshadshah.nimaz.presentation.components.molecules.SurahMetaStat
+import com.arshadshah.nimaz.presentation.components.molecules.SurahMetaStrip
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuItem
 import com.arshadshah.nimaz.presentation.components.molecules.SurahHeaderCartouche
@@ -144,30 +145,27 @@ fun SurahInfoScreen(
                     )
                 }
 
-                // Stats row: Verses / Juz / Page
+                // Where the surah sits in the Mushaf, as one strip rather than three cards.
                 item(key = "stats") {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        DetailCard(
-                            icon = Icons.Default.FormatListNumbered,
-                            label = stringResource(R.string.quran_verses_label),
-                            value = surah.ayahCount.toString(),
-                            modifier = Modifier.weight(1f)
+                    SurahMetaStrip(
+                        stats = listOf(
+                            SurahMetaStat(
+                                icon = Icons.Default.FormatListNumbered,
+                                label = stringResource(R.string.quran_verses_label),
+                                value = surah.ayahCount.toString(),
+                            ),
+                            SurahMetaStat(
+                                icon = Icons.Default.Layers,
+                                label = stringResource(R.string.quran_juz_label),
+                                value = surah.juzStart.toString(),
+                            ),
+                            SurahMetaStat(
+                                icon = Icons.AutoMirrored.Filled.MenuBook,
+                                label = stringResource(R.string.quran_page_label),
+                                value = surah.startPage.toString(),
+                            ),
                         )
-                        DetailCard(
-                            icon = Icons.Default.Layers,
-                            label = stringResource(R.string.quran_juz_label),
-                            value = surah.juzStart.toString(),
-                            modifier = Modifier.weight(1f)
-                        )
-                        DetailCard(
-                            icon = Icons.AutoMirrored.Filled.MenuBook,
-                            label = stringResource(R.string.quran_page_label),
-                            value = surah.startPage.toString(),
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
+                    )
                 }
 
                 // What the surah is about, in the source's own words. The one field written

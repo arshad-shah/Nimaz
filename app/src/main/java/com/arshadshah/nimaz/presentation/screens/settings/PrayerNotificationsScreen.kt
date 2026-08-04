@@ -3,68 +3,81 @@ package com.arshadshah.nimaz.presentation.screens.settings
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.VolumeOff
-import androidx.compose.material.icons.automirrored.filled.VolumeUp
+import androidx.compose.material.icons.filled.Campaign
+import androidx.compose.material.icons.filled.NotificationsActive
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.presentation.components.atoms.NimazDivider
-import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.domain.model.PrayerAlertStyle
+import com.arshadshah.nimaz.domain.model.PrayerTimes
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSwitch
-import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
-import com.arshadshah.nimaz.presentation.components.molecules.NimazNumberStepper
-import com.arshadshah.nimaz.presentation.components.molecules.NimazNumberStepperVariant
+import com.arshadshah.nimaz.presentation.components.molecules.NimazAccordion
+import com.arshadshah.nimaz.presentation.components.molecules.NimazListPicker
+import com.arshadshah.nimaz.presentation.components.molecules.NimazPickerItem
 import com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsItem
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.NimazColors
-import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.viewmodel.SettingsEvent
 import com.arshadshah.nimaz.presentation.viewmodel.SettingsViewModel
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
-internal data class PrayerNotificationData(
-    val name: String,
+/** The lead times the reminder picker offers. Null is "no reminder". */
+private val REMINDER_CHOICES = listOf(null, 5, 10, 15, 20, 30, 45, 60)
+
+private val TIME_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm")
+
+/**
+ * One prayer's row, resolved from the shared notification state so the row renders from a
+ * single value rather than five parallel lookups.
+ */
+internal data class PrayerNotificationRowState(
     val key: String,
+    val name: String,
     val accentColor: Color,
+    val time: LocalDateTime?,
     val isEnabled: Boolean,
-    val isSoundOn: Boolean,
+    val alertStyle: PrayerAlertStyle,
+    val reminderMinutes: Int?,
 )
 
 /**
- * Prayer notifications subscreen (#301): per-prayer notification + adhan toggles, the pre-adhan
- * reminder with its lead-time stepper, and the sunrise alert. Renders slices of the shared
- * [SettingsViewModel] notification state.
+ * Prayer notifications: one accordion per prayer, each carrying its own alert style and its
+ * own reminder.
+ *
+ * Both used to be global — a single adhan on/off pair and one pre-adhan lead time for all
+ * five — which meant a person who wanted the adhan at Fajr and silence at Dhuhr could not
+ * have it. The header states what the prayer is set to without being opened, because the
+ * question this screen answers is usually "what happens at Asr?" rather than "what can I
+ * change?".
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -73,36 +86,14 @@ fun PrayerNotificationsScreen(
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val notificationState by viewModel.notificationState.collectAsStateWithLifecycle()
+    val prayerTimes by viewModel.todayPrayerTimes.collectAsStateWithLifecycle()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
-    val minutesValueFormat = stringResource(R.string.notification_settings_minutes_value)
 
-    val prayers = listOf(
-        PrayerNotificationData(
-            stringResource(R.string.prayer_fajr), "fajr", NimazColors.PrayerColors.Fajr,
-            notificationState.fajrNotification,
-            notificationState.adhanEnabled && notificationState.fajrAdhanEnabled
-        ),
-        PrayerNotificationData(
-            stringResource(R.string.prayer_dhuhr), "dhuhr", NimazColors.Gold500,
-            notificationState.dhuhrNotification,
-            notificationState.adhanEnabled && notificationState.dhuhrAdhanEnabled
-        ),
-        PrayerNotificationData(
-            stringResource(R.string.prayer_asr), "asr", NimazColors.PrayerColors.Asr,
-            notificationState.asrNotification,
-            notificationState.adhanEnabled && notificationState.asrAdhanEnabled
-        ),
-        PrayerNotificationData(
-            stringResource(R.string.prayer_maghrib), "maghrib", NimazColors.PrayerColors.Maghrib,
-            notificationState.maghribNotification,
-            notificationState.adhanEnabled && notificationState.maghribAdhanEnabled
-        ),
-        PrayerNotificationData(
-            stringResource(R.string.prayer_isha), "isha", NimazColors.PrayerColors.Isha,
-            notificationState.ishaNotification,
-            notificationState.adhanEnabled && notificationState.ishaAdhanEnabled
-        )
-    )
+    // Which sheet is open, if any. One nullable value rather than a boolean per prayer per
+    // setting — ten booleans that can contradict each other.
+    var openSheet by remember { mutableStateOf<PrayerSettingSheet?>(null) }
+
+    val rows = rememberPrayerRows(notificationState, prayerTimes)
 
     NimazScreenScaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -119,161 +110,260 @@ fun PrayerNotificationsScreen(
                 .fillMaxSize()
                 .padding(padding)
                 .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             item { Spacer(Modifier.height(4.dp)) }
-
             item {
-                NimazSectionHeader(title = stringResource(R.string.notification_settings_prayer_section))
-            }
-            item {
-                NimazMenuGroup {
-                    prayers.forEachIndexed { index, prayer ->
-                        PrayerNotificationRow(
-                            prayer = prayer,
-                            onToggle = {
-                                viewModel.onEvent(
-                                    SettingsEvent.SetPrayerNotification(prayer.key, !prayer.isEnabled)
-                                )
-                            },
-                            onSoundToggle = {
-                                val currentState = when (prayer.key) {
-                                    "fajr" -> notificationState.fajrAdhanEnabled
-                                    "dhuhr" -> notificationState.dhuhrAdhanEnabled
-                                    "asr" -> notificationState.asrAdhanEnabled
-                                    "maghrib" -> notificationState.maghribAdhanEnabled
-                                    "isha" -> notificationState.ishaAdhanEnabled
-                                    else -> true
-                                }
-                                viewModel.onEvent(
-                                    SettingsEvent.SetPrayerAdhanEnabled(prayer.key, !currentState)
-                                )
-                            },
-                            globalAdhanEnabled = notificationState.adhanEnabled
-                        )
-                        if (index < prayers.lastIndex) {
-                            NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
-                        }
-                    }
-                }
+                NimazSectionHeader(title = stringResource(R.string.notif_prayers_section))
             }
 
-            item {
-                NimazSectionHeader(title = stringResource(R.string.notification_settings_additional_section))
+            items(rows.size, key = { rows[it].key }) { index ->
+                val row = rows[index]
+                PrayerAccordion(
+                    row = row,
+                    sunriseEnabled = notificationState.sunriseNotification,
+                    onToggle = { enabled ->
+                        viewModel.onEvent(SettingsEvent.SetPrayerNotification(row.key, enabled))
+                    },
+                    onToggleSunrise = { enabled ->
+                        viewModel.onEvent(SettingsEvent.SetPrayerNotification("sunrise", enabled))
+                    },
+                    onOpenAlertStyle = { openSheet = PrayerSettingSheet.AlertStyle(row.key) },
+                    onOpenReminder = { openSheet = PrayerSettingSheet.Reminder(row.key) }
+                )
             }
-            item {
-                NimazMenuGroup {
-                    NimazSettingsItem(
-                        title = stringResource(R.string.notification_settings_pre_adhan),
-                        subtitle = pluralStringResource(
-                            R.plurals.notification_settings_pre_adhan_subtitle,
-                            notificationState.reminderMinutes,
-                            notificationState.reminderMinutes
-                        ),
-                        checked = notificationState.showReminderBefore,
-                        onCheckedChange = {
-                            viewModel.onEvent(SettingsEvent.SetShowReminderBefore(!notificationState.showReminderBefore))
-                        }
-                    )
-                    if (notificationState.showReminderBefore) {
-                        NimazNumberStepper(
-                            value = notificationState.reminderMinutes,
-                            onValueChange = { viewModel.onEvent(SettingsEvent.SetReminderMinutes(it)) },
-                            variant = NimazNumberStepperVariant.INLINE,
-                            label = stringResource(R.string.notification_settings_lead_time),
-                            formatValue = { min -> minutesValueFormat.format(min) },
-                            minValue = 5, maxValue = 60, step = 5,
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
-                        )
-                    }
-                    NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
-                    NimazSettingsItem(
-                        title = stringResource(R.string.notification_settings_sunrise),
-                        subtitle = stringResource(R.string.notification_settings_sunrise_subtitle),
-                        checked = notificationState.sunriseNotification,
-                        onCheckedChange = {
-                            viewModel.onEvent(
-                                SettingsEvent.SetPrayerNotification("sunrise", !notificationState.sunriseNotification)
-                            )
-                        }
-                    )
-                }
-            }
+
             item { Spacer(Modifier.height(16.dp)) }
         }
     }
-}
 
-@Composable
-internal fun PrayerNotificationRow(
-    prayer: PrayerNotificationData,
-    onToggle: () -> Unit,
-    onSoundToggle: () -> Unit,
-    globalAdhanEnabled: Boolean
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Box(
-            modifier = Modifier
-                .width(4.dp)
-                .height(40.dp)
-                .clip(RoundedCornerShape(2.dp))
-                .background(prayer.accentColor)
+    when (val sheet = openSheet) {
+        is PrayerSettingSheet.AlertStyle -> AlertStylePicker(
+            selected = notificationState.alertStyles[sheet.prayer] ?: PrayerAlertStyle.NOTIFICATION,
+            onSelected = { style ->
+                viewModel.onEvent(SettingsEvent.SetPrayerAlertStyle(sheet.prayer, style))
+            },
+            onDismiss = { openSheet = null }
         )
-        Spacer(modifier = Modifier.width(15.dp))
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = prayer.name,
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Text(
-                text = stringResource(R.string.notification_settings_prayer_notification),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-        IconButton(
-            onClick = onSoundToggle,
-            enabled = globalAdhanEnabled,
-            modifier = Modifier.size(36.dp),
-            colors = IconButtonDefaults.iconButtonColors(
-                containerColor = if (globalAdhanEnabled)
-                    MaterialTheme.colorScheme.surfaceContainerHighest
-                else
-                    MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.5f)
-            )
-        ) {
-            NimazIcon(
-                imageVector = if (prayer.isSoundOn) Icons.AutoMirrored.Filled.VolumeUp
-                else Icons.AutoMirrored.Filled.VolumeOff,
-                contentDescription = if (prayer.isSoundOn) stringResource(R.string.notification_settings_sound_on)
-                else stringResource(R.string.notification_settings_sound_off),
-                tint = when {
-                    !globalAdhanEnabled -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-                    prayer.isSoundOn -> MaterialTheme.colorScheme.primary
-                    else -> MaterialTheme.colorScheme.onSurfaceVariant
-                },
-                iconSize = 18.dp
-            )
-        }
-        Spacer(modifier = Modifier.width(15.dp))
-        NimazSwitch(checked = prayer.isEnabled, onCheckedChange = { onToggle() })
+
+        is PrayerSettingSheet.Reminder -> ReminderPicker(
+            selected = notificationState.reminderMinutesFor(sheet.prayer),
+            onSelected = { minutes ->
+                viewModel.onEvent(
+                    SettingsEvent.SetPrayerReminderEnabled(sheet.prayer, minutes != null)
+                )
+                if (minutes != null) {
+                    viewModel.onEvent(
+                        SettingsEvent.SetPrayerReminderMinutes(sheet.prayer, minutes)
+                    )
+                }
+            },
+            onDismiss = { openSheet = null }
+        )
+
+        null -> Unit
     }
 }
 
-@Preview(showBackground = true, widthDp = 400)
+/** Which picker sheet is open, and for which prayer. */
+private sealed interface PrayerSettingSheet {
+    data class AlertStyle(val prayer: String) : PrayerSettingSheet
+    data class Reminder(val prayer: String) : PrayerSettingSheet
+}
+
 @Composable
-private fun PrayerNotificationRow_Preview() {
-    NimazTheme {
-        PrayerNotificationRow(
-            prayer = PrayerNotificationData("Fajr", "fajr", NimazColors.InfoSoft, true, true),
-            onToggle = {}, onSoundToggle = {}, globalAdhanEnabled = true
+private fun PrayerAccordion(
+    row: PrayerNotificationRowState,
+    sunriseEnabled: Boolean,
+    onToggle: (Boolean) -> Unit,
+    onToggleSunrise: (Boolean) -> Unit,
+    onOpenAlertStyle: () -> Unit,
+    onOpenReminder: () -> Unit,
+) {
+    NimazAccordion(
+        title = row.name,
+        subtitle = prayerSummary(row),
+        trailing = {
+            // The accent bar and the time read as one unit: this prayer, at this hour.
+            Box(
+                modifier = Modifier
+                    .width(4.dp)
+                    .height(20.dp)
+                    .clip(RoundedCornerShape(2.dp))
+                    .background(row.accentColor)
+            )
+            Spacer(Modifier.width(8.dp))
+            if (row.time != null) {
+                Text(
+                    text = row.time.format(TIME_FORMAT),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(Modifier.width(12.dp))
+            }
+            NimazSwitch(checked = row.isEnabled, onCheckedChange = onToggle)
+        }
+    ) {
+        NimazSettingsItem(
+            title = stringResource(R.string.notif_alert_style),
+            value = stringResource(alertStyleLabel(row.alertStyle)),
+            onClick = onOpenAlertStyle,
+            showArrow = true,
+            enabled = row.isEnabled
+        )
+        NimazSettingsItem(
+            title = stringResource(R.string.notif_reminder_before),
+            value = reminderLabel(row.reminderMinutes),
+            onClick = onOpenReminder,
+            showArrow = true,
+            enabled = row.isEnabled
+        )
+        // Sunrise is not a prayer with an alert style of its own — it is the end of Fajr's
+        // window, so it belongs under Fajr rather than in a section of global leftovers.
+        if (row.key == "fajr") {
+            NimazSettingsItem(
+                title = stringResource(R.string.notif_sunrise),
+                subtitle = stringResource(R.string.notif_sunrise_subtitle),
+                checked = sunriseEnabled,
+                onCheckedChange = onToggleSunrise
+            )
+        }
+    }
+}
+
+@Composable
+private fun AlertStylePicker(
+    selected: PrayerAlertStyle,
+    onSelected: (PrayerAlertStyle) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val items = listOf(
+        NimazPickerItem(
+            value = PrayerAlertStyle.ADHAN,
+            title = stringResource(R.string.notif_alert_style_adhan),
+            description = stringResource(R.string.notif_alert_style_adhan_subtitle),
+            icon = Icons.Default.Campaign,
+        ),
+        NimazPickerItem(
+            value = PrayerAlertStyle.NOTIFICATION,
+            title = stringResource(R.string.notif_alert_style_notification),
+            description = stringResource(R.string.notif_alert_style_notification_subtitle),
+            icon = Icons.Default.NotificationsActive,
+        ),
+        NimazPickerItem(
+            value = PrayerAlertStyle.SILENT,
+            title = stringResource(R.string.notif_alert_style_silent),
+            description = stringResource(R.string.notif_alert_style_silent_subtitle),
+            icon = Icons.AutoMirrored.Filled.VolumeOff,
+        ),
+    )
+
+    NimazListPicker(
+        title = stringResource(R.string.notif_alert_style),
+        items = items,
+        selected = selected,
+        onSelected = onSelected,
+        onDismiss = onDismiss,
+    )
+}
+
+@Composable
+private fun ReminderPicker(
+    selected: Int?,
+    onSelected: (Int?) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val items = REMINDER_CHOICES.map { minutes ->
+        NimazPickerItem(
+            value = minutes ?: 0,
+            title = reminderLabel(minutes),
+            icon = if (minutes == null) null else Icons.Default.Schedule,
+        )
+    }
+
+    NimazListPicker(
+        title = stringResource(R.string.notif_reminder_before),
+        items = items,
+        selected = selected ?: 0,
+        onSelected = { onSelected(it.takeIf { value -> value != 0 }) },
+        onDismiss = onDismiss,
+        searchable = false,
+    )
+}
+
+/** The one-line summary in the header: what this prayer does, and how far ahead it warns. */
+@Composable
+private fun prayerSummary(row: PrayerNotificationRowState): String {
+    if (!row.isEnabled) return stringResource(R.string.notif_prayer_off)
+
+    val style = stringResource(alertStyleLabel(row.alertStyle))
+    val reminder = row.reminderMinutes ?: return style
+    return stringResource(
+        R.string.notif_prayer_summary,
+        style,
+        pluralStringResource(R.plurals.notif_reminder_minutes_before, reminder, reminder)
+    )
+}
+
+@Composable
+private fun reminderLabel(minutes: Int?): String =
+    if (minutes == null) stringResource(R.string.notif_reminder_none)
+    else pluralStringResource(R.plurals.notif_reminder_minutes_before, minutes, minutes)
+
+private fun alertStyleLabel(style: PrayerAlertStyle): Int = when (style) {
+    PrayerAlertStyle.ADHAN -> R.string.notif_alert_style_adhan
+    PrayerAlertStyle.NOTIFICATION -> R.string.notif_alert_style_notification
+    PrayerAlertStyle.SILENT -> R.string.notif_alert_style_silent
+}
+
+/** This prayer's lead time, or null when its reminder is off. */
+private fun com.arshadshah.nimaz.presentation.viewmodel.NotificationSettingsUiState
+        .reminderMinutesFor(prayer: String): Int? =
+    if (reminderEnabled[prayer] == true) {
+        reminderOffsets[prayer] ?: PrayerAlertStyle.DEFAULT_REMINDER_MINUTES
+    } else {
+        null
+    }
+
+@Composable
+private fun rememberPrayerRows(
+    state: com.arshadshah.nimaz.presentation.viewmodel.NotificationSettingsUiState,
+    times: PrayerTimes?,
+): List<PrayerNotificationRowState> {
+    val names = listOf(
+        stringResource(R.string.prayer_fajr),
+        stringResource(R.string.prayer_dhuhr),
+        stringResource(R.string.prayer_asr),
+        stringResource(R.string.prayer_maghrib),
+        stringResource(R.string.prayer_isha),
+    )
+    val enabled = listOf(
+        state.fajrNotification,
+        state.dhuhrNotification,
+        state.asrNotification,
+        state.maghribNotification,
+        state.ishaNotification,
+    )
+    val accents = listOf(
+        NimazColors.PrayerColors.Fajr,
+        NimazColors.Gold500,
+        NimazColors.PrayerColors.Asr,
+        NimazColors.PrayerColors.Maghrib,
+        NimazColors.PrayerColors.Isha,
+    )
+    val clockTimes = listOf(
+        times?.fajr, times?.dhuhr, times?.asr, times?.maghrib, times?.isha
+    )
+
+    return PrayerAlertStyle.PRAYER_KEYS.mapIndexed { index, key ->
+        PrayerNotificationRowState(
+            key = key,
+            name = names[index],
+            accentColor = accents[index],
+            time = clockTimes[index],
+            isEnabled = enabled[index],
+            alertStyle = state.alertStyles[key] ?: PrayerAlertStyle.NOTIFICATION,
+            reminderMinutes = state.reminderMinutesFor(key),
         )
     }
 }

@@ -14,6 +14,7 @@ import com.arshadshah.nimaz.data.audio.AdhanPlaybackService
 import com.arshadshah.nimaz.data.audio.AdhanSound
 import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
 import com.arshadshah.nimaz.domain.model.KhatamProgressCalculator
+import com.arshadshah.nimaz.domain.model.PrayerAlertStyle
 import com.arshadshah.nimaz.domain.model.PrayerName
 import com.arshadshah.nimaz.domain.model.PrayerStatus
 import com.arshadshah.nimaz.domain.repository.KhatamRepository
@@ -97,9 +98,8 @@ class BootReceiver : BroadcastReceiver() {
                 val latitude = prefs.latitude
                 val longitude = prefs.longitude
 
-                val enabledPrayers = buildEnabledPrayersSet()
-                val preReminderEnabled = preferencesDataStore.showReminderBefore.first()
-                val preReminderMinutes = preferencesDataStore.notificationReminderMinutes.first()
+                val enabledPrayers = preferencesDataStore.enabledPrayerTypes()
+                val preReminders = preferencesDataStore.preReminderMinutesByPrayer()
                 val fridayReminderEnabled = preferencesDataStore.fridayReminderEnabled.first()
                 val fridayReminderMinutes = preferencesDataStore.fridayReminderMinutes.first()
 
@@ -108,8 +108,7 @@ class BootReceiver : BroadcastReceiver() {
                     longitude = longitude,
                     notificationsEnabled = notificationsEnabled,
                     enabledPrayers = enabledPrayers,
-                    preReminderEnabled = preReminderEnabled,
-                    preReminderMinutes = preReminderMinutes,
+                    preReminders = preReminders,
                     fridayReminderEnabled = fridayReminderEnabled,
                     fridayReminderMinutes = fridayReminderMinutes
                 )
@@ -131,9 +130,8 @@ class BootReceiver : BroadcastReceiver() {
                 val latitude = prefs.latitude
                 val longitude = prefs.longitude
 
-                val enabledPrayers = buildEnabledPrayersSet()
-                val preReminderEnabled = preferencesDataStore.showReminderBefore.first()
-                val preReminderMinutes = preferencesDataStore.notificationReminderMinutes.first()
+                val enabledPrayers = preferencesDataStore.enabledPrayerTypes()
+                val preReminders = preferencesDataStore.preReminderMinutesByPrayer()
                 val fridayReminderEnabled = preferencesDataStore.fridayReminderEnabled.first()
                 val fridayReminderMinutes = preferencesDataStore.fridayReminderMinutes.first()
 
@@ -142,8 +140,7 @@ class BootReceiver : BroadcastReceiver() {
                     longitude = longitude,
                     notificationsEnabled = notificationsEnabled,
                     enabledPrayers = enabledPrayers,
-                    preReminderEnabled = preReminderEnabled,
-                    preReminderMinutes = preReminderMinutes,
+                    preReminders = preReminders,
                     fridayReminderEnabled = fridayReminderEnabled,
                     fridayReminderMinutes = fridayReminderMinutes
                 )
@@ -152,17 +149,6 @@ class BootReceiver : BroadcastReceiver() {
                 CrashReporter.recordException(e)
                 e.printStackTrace()
             }
-        }
-    }
-
-    private suspend fun buildEnabledPrayersSet(): Set<com.arshadshah.nimaz.domain.model.PrayerType> {
-        return buildSet {
-            if (preferencesDataStore.fajrNotificationEnabled.first()) add(com.arshadshah.nimaz.domain.model.PrayerType.FAJR)
-            if (preferencesDataStore.sunriseNotificationEnabled.first()) add(com.arshadshah.nimaz.domain.model.PrayerType.SUNRISE)
-            if (preferencesDataStore.dhuhrNotificationEnabled.first()) add(com.arshadshah.nimaz.domain.model.PrayerType.DHUHR)
-            if (preferencesDataStore.asrNotificationEnabled.first()) add(com.arshadshah.nimaz.domain.model.PrayerType.ASR)
-            if (preferencesDataStore.maghribNotificationEnabled.first()) add(com.arshadshah.nimaz.domain.model.PrayerType.MAGHRIB)
-            if (preferencesDataStore.ishaNotificationEnabled.first()) add(com.arshadshah.nimaz.domain.model.PrayerType.ISHA)
         }
     }
 
@@ -202,7 +188,12 @@ class BootReceiver : BroadcastReceiver() {
                 val vibrationEnabled = preferencesDataStore.notificationVibration.first()
 
                 if (isPreReminder) {
-                    val reminderMinutes = preferencesDataStore.notificationReminderMinutes.first()
+                    // The lead time rides on the alarm, because it is now per prayer — a
+                    // global read here would put the wrong number in the text.
+                    val reminderMinutes = intent.getIntExtra(
+                        PrayerNotificationScheduler.EXTRA_REMINDER_MINUTES,
+                        preferencesDataStore.notificationReminderMinutes.first()
+                    )
                     showEnhancedPreReminderNotification(
                         context,
                         prayerName,
@@ -221,13 +212,17 @@ class BootReceiver : BroadcastReceiver() {
                 }
 
                 val globalAdhanEnabled = preferencesDataStore.adhanEnabled.first()
-                val prayerAdhanEnabled =
-                    preferencesDataStore.isAdhanEnabledForPrayer(prayerType).first()
+                val alertStyle = preferencesDataStore.prayerAlertStyle(prayerType).first()
                 val selectedAdhan = preferencesDataStore.selectedAdhanSound.first()
 
+                // The per-prayer alert style decides what this prayer does. Both rules live
+                // on PrayerAlertStyle so the scheduler, this receiver and the tests read the
+                // same one rather than three copies that can drift apart.
+                val wantsAdhan = alertStyle.playsAdhan(globalAdhanEnabled, isSunrise)
+                val muted = alertStyle.isMuted(isSunrise)
+
                 // DND gates only the audio — the visual notification still shows.
-                val shouldPlayAdhan =
-                    globalAdhanEnabled && prayerAdhanEnabled && !isSunrise && !dndBlocksAdhan
+                val shouldPlayAdhan = wantsAdhan && !dndBlocksAdhan
                 val shouldPlayBeep = globalAdhanEnabled && isSunrise && !dndBlocksAdhan
 
                 // Get notification content for merging into adhan service notification
@@ -280,7 +275,8 @@ class BootReceiver : BroadcastReceiver() {
                             prayerType = prayerType,
                             prayerTime = prayerTime,
                             adhanEnabled = false,
-                            vibrationEnabled = vibrationEnabled
+                            vibrationEnabled = vibrationEnabled,
+                            muted = muted
                         )
                     }
                 } else if (shouldPlayBeep) {
@@ -309,14 +305,15 @@ class BootReceiver : BroadcastReceiver() {
                         )
                     }
                 } else {
-                    // No adhan - show standalone prayer notification
+                    // No adhan — a plain prayer notification, silent if the user asked for it.
                     showEnhancedPrayerNotification(
                         context = context,
                         prayerName = prayerName,
                         prayerType = prayerType,
                         prayerTime = prayerTime,
                         adhanEnabled = false,
-                        vibrationEnabled = vibrationEnabled
+                        vibrationEnabled = vibrationEnabled,
+                        muted = muted
                     )
                 }
 
@@ -434,7 +431,8 @@ class BootReceiver : BroadcastReceiver() {
         prayerType: String,
         prayerTime: String,
         adhanEnabled: Boolean = false,
-        vibrationEnabled: Boolean = true
+        vibrationEnabled: Boolean = true,
+        muted: Boolean = false
     ) {
         val notificationManager =
             context.getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
@@ -474,7 +472,7 @@ class BootReceiver : BroadcastReceiver() {
         val channelId = if (adhanEnabled) {
             PrayerNotificationScheduler.channelForAdhan(vibrationEnabled)
         } else {
-            PrayerNotificationScheduler.channelForPrayer(vibrationEnabled)
+            PrayerNotificationScheduler.channelForPrayer(vibrationEnabled, muted = muted)
         }
 
         val notification = NotificationCompat.Builder(context, channelId)
@@ -489,13 +487,23 @@ class BootReceiver : BroadcastReceiver() {
             .setAutoCancel(true)
             .setContentIntent(openPendingIntent)
             .setDeleteIntent(dismissPendingIntent)
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setCategory(NotificationCompat.CATEGORY_ALARM)
+            .setPriority(
+                // A silenced prayer must not push a heads-up banner over what the user is
+                // doing. The channel already decides this on Android 8+, but the priority
+                // is what older builds and some launchers read.
+                if (muted) NotificationCompat.PRIORITY_LOW else NotificationCompat.PRIORITY_HIGH
+            )
+            .setCategory(
+                if (muted) NotificationCompat.CATEGORY_REMINDER
+                else NotificationCompat.CATEGORY_ALARM
+            )
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setColorized(true)
             .setColor(getPrayerColor(prayerType))
             .apply {
-                if (!vibrationEnabled) {
+                if (muted) {
+                    setSilent(true)
+                } else if (!vibrationEnabled) {
                     setVibrate(longArrayOf(0L))
                 }
                 // Add action to mark prayer as done (optional future feature)

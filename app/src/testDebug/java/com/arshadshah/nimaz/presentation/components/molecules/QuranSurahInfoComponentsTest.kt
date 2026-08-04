@@ -2,6 +2,8 @@ package com.arshadshah.nimaz.presentation.components.molecules
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuBook
+import androidx.compose.material.icons.filled.FormatListNumbered
+import androidx.compose.material.icons.filled.Layers
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -17,20 +19,27 @@ class QuranSurahInfoComponentsTest {
     @get:Rule
     val composeRule = createComponentComposeRule()
 
-    // ----- DetailCard -----
+    // ----- SurahMetaStrip -----
 
     @Test
-    fun detailCard_showsLabelAndValue() {
+    fun metaStrip_showsEveryStatsLabelAndValue() {
+        // Three elevated cards became one strip; the figures still have to be readable,
+        // and each label still has to sit with its own value.
         composeRule.setThemedContent {
-            DetailCard(
-                icon = Icons.AutoMirrored.Filled.MenuBook,
-                label = "Juz",
-                value = "1"
+            SurahMetaStrip(
+                stats = listOf(
+                    SurahMetaStat(Icons.Default.FormatListNumbered, "Verses", "286"),
+                    SurahMetaStat(Icons.Default.Layers, "Juz", "1"),
+                    SurahMetaStat(Icons.AutoMirrored.Filled.MenuBook, "Page", "2"),
+                )
             )
         }
 
+        composeRule.onNodeWithText("Verses").assertExists()
+        composeRule.onNodeWithText("286").assertExists()
         composeRule.onNodeWithText("Juz").assertExists()
-        composeRule.onNodeWithText("1").assertExists()
+        composeRule.onNodeWithText("Page").assertExists()
+        composeRule.onNodeWithText("2").assertExists()
     }
 
     // ----- SurahAudioControlBar -----

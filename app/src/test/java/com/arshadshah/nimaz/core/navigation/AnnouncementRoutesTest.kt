@@ -24,7 +24,10 @@ class AnnouncementRoutesTest {
         assertThat(announcementRoute("settings/notifications/prayers")).isEqualTo(Route.SettingsNotificationsPrayers)
         assertThat(announcementRoute("settings/notifications/weekly")).isEqualTo(Route.SettingsNotificationsWeekly)
         assertThat(announcementRoute("settings/notifications/sound")).isEqualTo(Route.SettingsNotificationsSound)
-        assertThat(announcementRoute("settings/notifications/troubleshooting")).isEqualTo(Route.SettingsNotificationsTroubleshooting)
+        assertThat(announcementRoute("settings/notifications/diagnostics")).isEqualTo(Route.SettingsNotificationsDiagnostics)
+        // The screen was renamed from Troubleshooting to Diagnostics. This key is already
+        // published, so an announcement composed against the old name must still land.
+        assertThat(announcementRoute("settings/notifications/troubleshooting")).isEqualTo(Route.SettingsNotificationsDiagnostics)
     }
 
     @Test

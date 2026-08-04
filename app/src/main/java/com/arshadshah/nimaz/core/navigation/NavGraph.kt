@@ -106,7 +106,7 @@ import com.arshadshah.nimaz.presentation.screens.settings.LanguageScreen
 import com.arshadshah.nimaz.presentation.screens.settings.LocationScreen
 import com.arshadshah.nimaz.presentation.screens.settings.NotificationSettingsScreen
 import com.arshadshah.nimaz.presentation.screens.settings.NotificationSoundScreen
-import com.arshadshah.nimaz.presentation.screens.settings.NotificationTroubleshootingScreen
+import com.arshadshah.nimaz.presentation.screens.settings.NotificationDiagnosticsScreen
 import com.arshadshah.nimaz.presentation.screens.settings.NotificationWeeklyScreen
 import com.arshadshah.nimaz.presentation.screens.settings.PrayerNotificationsScreen
 import com.arshadshah.nimaz.presentation.screens.settings.WorshipRemindersScreen
@@ -948,7 +948,7 @@ fun NavGraph(
                     onNavigateToWorshipReminders = { navController.navigate(Route.SettingsWorshipReminders) },
                     onNavigateToWeekly = { navController.navigate(Route.SettingsNotificationsWeekly) },
                     onNavigateToSound = { navController.navigate(Route.SettingsNotificationsSound) },
-                    onNavigateToTroubleshooting = { navController.navigate(Route.SettingsNotificationsTroubleshooting) },
+                    onNavigateToDiagnostics = { navController.navigate(Route.SettingsNotificationsDiagnostics) },
                 )
             }
 
@@ -972,10 +972,10 @@ fun NavGraph(
             ) {
                 NotificationSoundScreen(onNavigateBack = { navController.popBackStack() })
             }
-            taggedComposable<Route.SettingsNotificationsTroubleshooting>(
-                ScreenTags.SettingsNotificationsTroubleshooting
+            taggedComposable<Route.SettingsNotificationsDiagnostics>(
+                ScreenTags.SettingsNotificationsDiagnostics
             ) {
-                NotificationTroubleshootingScreen(onNavigateBack = { navController.popBackStack() })
+                NotificationDiagnosticsScreen(onNavigateBack = { navController.popBackStack() })
             }
 
             taggedComposable<Route.SettingsAppearance>(ScreenTags.SettingsAppearance) {

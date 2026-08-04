@@ -781,9 +781,11 @@ class QuranRepositoryImpl @Inject constructor(
             transliteration = ayah.transliteration,
             textTajweed = ayah.textTajweed,
             rukuNumber = rukuNumber,
-            // A division is *marked* on the verse that opens it, as in a printed Mushaf —
-            // not on every verse inside it.
-            isRukuStart = rukuStartAyahId != null && rukuStartAyahId == ayah.id,
+            // A division is marked once, on one verse, as in a printed Mushaf — not on
+            // every verse inside it. Which verse differs by division: the ʿayn closes a
+            // rukūʿ, so it lands on the section's last verse, while the ۞ opens a hizb
+            // quarter and lands on its first.
+            isRukuEnd = rukuEndAyahId != null && rukuEndAyahId == ayah.id,
             isRubStart = rubStartAyahId != null && rubStartAyahId == ayah.id
         )
     }

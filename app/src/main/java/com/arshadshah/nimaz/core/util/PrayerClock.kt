@@ -65,7 +65,7 @@ fun prayerTimelineProgressAt(instants: List<Instant>, now: Instant): Float {
     for (k in 0 until instants.size - 1) {
         val start = instants[k]
         val end = instants[k + 1]
-        if (now >= start && now < end) {
+        if (now in start..<end) {
             val span = (end - start).inWholeSeconds.toFloat()
             if (span <= 0f) return (k.toFloat() / (instants.size - 1)).coerceIn(0f, 1f)
             val frac = (now - start).inWholeSeconds.toFloat() / span

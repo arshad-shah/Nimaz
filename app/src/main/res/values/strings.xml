@@ -502,15 +502,65 @@
     <string name="worship_witr_mode_after_isha">After Isha</string>
     <string name="worship_witr_mode_before_fajr">Before Fajr</string>
 
-    <!-- Notification settings hub (#301) -->
-    <string name="notif_hub_prayers_title">Prayer notifications</string>
-    <string name="notif_hub_prayers_subtitle">5 daily prayers · pre-adhan · sunrise</string>
-    <string name="notif_hub_weekly_title">Weekly &amp; reading</string>
-    <string name="notif_hub_weekly_subtitle">Jumu\'ah · Khatam reminder</string>
-    <string name="notif_hub_sound_title">Sound &amp; delivery</string>
-    <string name="notif_hub_sound_subtitle">Adhan · muezzin · vibration · Do Not Disturb</string>
-    <string name="notif_hub_troubleshooting_title">Troubleshooting</string>
-    <string name="notif_hub_troubleshooting_subtitle">Test · reset · battery optimization</string>
+    <!-- Notification settings hub (#301). Each row's subtitle reports the live setting
+         rather than describing what the screen contains. -->
+    <string name="notif_hub_prayers_title">Prayers</string>
+    <string name="notif_hub_weekly_title">Weekly</string>
+    <string name="notif_hub_sound_title">Adhan &amp; sound</string>
+    <string name="notif_hub_diagnostics_title">Diagnostics</string>
+    <string name="notif_hub_diagnostics_subtitle">Check what could stop alerts arriving</string>
+    <string name="notif_hub_count_of">%1$d of %2$d</string>
+    <string name="notif_hub_count_on">%1$d on</string>
+    <string name="notif_hub_worship_subtitle">Tahajjud, Witr, Suhoor, Iftar and more</string>
+    <string name="notif_hub_delivery_warning">Alerts may not arrive on time on this device.</string>
+    <string name="notif_hub_weekly_both">Jumu\'ah and khatam on</string>
+    <string name="notif_hub_weekly_jumuah">Jumu\'ah on · khatam off</string>
+    <string name="notif_hub_weekly_khatam">Khatam on · Jumu\'ah off</string>
+    <string name="notif_hub_weekly_none">Both off</string>
+    <string name="notif_hub_sound_dnd">%1$s · Do Not Disturb honoured</string>
+    <string name="notif_hub_sound_vibration">%1$s · vibration on</string>
+    <string name="notif_hub_sound_plain">%1$s</string>
+
+    <!-- Per-prayer alert style and reminder -->
+    <string name="notif_prayers_section">Daily prayers</string>
+    <string name="notif_alert_style">Alert style</string>
+    <string name="notif_alert_style_adhan">Adhan</string>
+    <string name="notif_alert_style_adhan_subtitle">The call to prayer plays aloud</string>
+    <string name="notif_alert_style_notification">Notification only</string>
+    <string name="notif_alert_style_notification_subtitle">The standard notification tone</string>
+    <string name="notif_alert_style_silent">Silent</string>
+    <string name="notif_alert_style_silent_subtitle">It appears and waits — no sound, no vibration</string>
+    <string name="notif_reminder_before">Reminder before</string>
+    <string name="notif_reminder_none">No reminder</string>
+    <plurals name="notif_reminder_minutes_before">
+        <item quantity="one">%1$d min before</item>
+        <item quantity="other">%1$d min before</item>
+    </plurals>
+    <!-- Header summary: the alert style, then how far ahead the reminder lands. -->
+    <string name="notif_prayer_summary">%1$s · %2$s</string>
+    <string name="notif_prayer_off">Off</string>
+    <string name="notif_sunrise">Sunrise</string>
+    <string name="notif_sunrise_subtitle">A beep when Fajr\'s window closes</string>
+
+    <string name="notif_sound_voice">Adhan voice</string>
+    <string name="prayer_settings_fajr_reminder">Fajr reminder</string>
+    <string name="worship_settings_ramadan_notice">Ramadan reminders stay quiet until Ramadan begins. Set them up now and they will start on their own.</string>
+
+    <!-- Diagnostics: every row states something read from the device. -->
+    <string name="notif_diag_status_section">Device checks</string>
+    <string name="notif_diag_permission">Notification permission</string>
+    <string name="notif_diag_granted">Granted</string>
+    <string name="notif_diag_blocked">Blocked</string>
+    <string name="notif_diag_exact_alarms">Exact alarms</string>
+    <string name="notif_diag_allowed">Allowed</string>
+    <string name="notif_diag_not_allowed">Not allowed</string>
+    <string name="notif_diag_battery">Battery optimisation</string>
+    <string name="notif_diag_unrestricted">Unrestricted</string>
+    <string name="notif_diag_restricted">Restricted</string>
+    <string name="notif_diag_needs_attention">Needs attention</string>
+    <string name="notif_diag_reset_confirm_title">Reset all notifications?</string>
+    <string name="notif_diag_reset_confirm_body">Every scheduled alarm is cancelled and rebuilt from your current settings. Your choices are kept — only the schedule is redrawn.</string>
+    <string name="notif_diag_reset_confirm_action">Reset</string>
 
     <!-- Home "Next Worship" card labels -->
     <string name="worship_card_begins">Begins</string>
@@ -970,16 +1020,9 @@
     <!-- Notification Settings Screen -->
     <string name="notification_settings_enable">Enable Notifications</string>
     <string name="notification_settings_enable_subtitle">Receive prayer time alerts</string>
-    <string name="notification_settings_prayer_section">PRAYER NOTIFICATIONS</string>
     <string name="notification_settings_adhan_section">ADHAN SOUND</string>
     <string name="notification_settings_enable_adhan">Enable Adhan Sound</string>
     <string name="notification_settings_enable_adhan_subtitle">Play adhan at prayer times</string>
-    <string name="notification_settings_additional_section">ADDITIONAL ALERTS</string>
-    <string name="notification_settings_pre_adhan">Pre-Adhan Reminder</string>
-    <plurals name="notification_settings_pre_adhan_subtitle">
-        <item quantity="one">%1$d minute before</item>
-        <item quantity="other">%1$d minutes before</item>
-    </plurals>
 
     <!-- Adhan Download Notifications -->
     <string name="adhan_download_channel_name">Adhan Downloads</string>
@@ -996,8 +1039,6 @@
     <string name="adhan_download_failed">Adhan download failed</string>
     <string name="adhan_download_failed_subtitle">Check your internet connection and try again</string>
 
-    <string name="notification_settings_sunrise">Sunrise Alert</string>
-    <string name="notification_settings_sunrise_subtitle">End of Fajr prayer time</string>
     <string name="notification_settings_friday_reminder">Friday (Jummah) Reminder</string>
     <string name="notification_settings_friday_subtitle">Weekly reminder before Friday prayer</string>
     <string name="notification_settings_lead_time">Lead time</string>
@@ -1013,12 +1054,12 @@
     <string name="notif_friday_2">It\'s Friday. Make ghusl and head to Jummah early.</string>
     <string name="notif_friday_3">Don\'t forget to read Surah Al-Kahf this blessed Friday.</string>
     <string name="notif_friday_bigtext">Prepare for Jummah: perform ghusl, wear your best clothes, apply perfume, read Surah Al-Kahf, and arrive early. \n\n\"O you who believe! When the call is made for prayer on Friday, hasten to the remembrance of Allah.\" — Quran 62:9</string>
-    <string name="notification_settings_troubleshooting_section">TROUBLESHOOTING</string>
-    <string name="notification_settings_test">Test Notification</string>
+    <string name="notif_diag_actions_section">Check delivery</string>
+    <string name="notification_settings_test">Send a test notification</string>
     <string name="notification_settings_test_sent">Test notification sent</string>
-    <string name="notification_settings_test_all">Test All Prayers</string>
+    <string name="notification_settings_test_all">Test all five prayers</string>
     <string name="notification_settings_test_all_sent">Testing all prayer notifications…</string>
-    <string name="notification_settings_reset">Reset Notifications</string>
+    <string name="notification_settings_reset">Reset and reschedule</string>
     <string name="notification_settings_reset_success">Notifications reset successfully</string>
     <string name="notification_settings_battery_section">BATTERY OPTIMIZATION</string>
     <string name="notification_settings_battery_title">Battery Optimization</string>
@@ -1027,10 +1068,6 @@
     <string name="notification_settings_battery_exempted">Exempted</string>
     <string name="notification_settings_battery_explanation">When battery optimization is enabled, Android may delay or skip prayer notifications to save battery. Disabling it ensures notifications arrive on time.</string>
     <string name="notification_settings_disable_battery">Disable Battery Optimization</string>
-    <string name="notification_settings_info_banner">Make sure to enable notifications in your device settings and disable battery optimization for accurate prayer alerts.</string>
-    <string name="notification_settings_prayer_notification">Prayer notification</string>
-    <string name="notification_settings_sound_on">Sound on</string>
-    <string name="notification_settings_sound_off">Sound off</string>
     <string name="notification_settings_preview">Preview</string>
 
     <!-- Prayer notification copy (non-scripture UI strings) -->
@@ -1519,7 +1556,6 @@
     <string name="twilight_angle">Twilight Angle</string>
     <string name="manual_adjustments">Manual Adjustments (Minutes)</string>
     <string name="adhan_notifications">Adhan Notifications</string>
-    <string name="pre_adhan_reminder">Pre-Adhan Reminder</string>
     <!-- Prayer Settings summary subtitles that mirror the Notification Settings screen -->
     <string name="prayer_settings_notifications_off">Notifications off</string>
     <string name="prayer_settings_all_prayers_enabled">All prayers enabled</string>

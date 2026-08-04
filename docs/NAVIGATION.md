@@ -154,7 +154,7 @@ flowchart LR
         Settings --> SettingsNotifications & SettingsHelp & SettingsAbout
         SettingsNotifications --> SettingsNotificationsPrayers & SettingsWorshipReminders
         SettingsNotifications --> SettingsNotificationsWeekly & SettingsNotificationsSound
-        SettingsNotifications --> SettingsNotificationsTroubleshooting
+        SettingsNotifications --> SettingsNotificationsDiagnostics
         SettingsQuran --> SelectReciter & SelectTranslation
         SettingsHelp --> HelpTopicDetail & HelpGuide
         SettingsAbout --> Licenses --> LicenseDetail
@@ -313,7 +313,7 @@ archive/delete, which previously lived behind an undiscoverable long-press on th
 | `SettingsWorshipReminders` | — | WorshipRemindersScreen (extended worship reminders: Tahajjud, Suhoor, Iftar, adhkar …; #300) |
 | `SettingsNotificationsWeekly` | — | NotificationWeeklyScreen (Jumu'ah · Khatam; #301) |
 | `SettingsNotificationsSound` | — | NotificationSoundScreen (adhan · muezzin · vibration · DND; #301) |
-| `SettingsNotificationsTroubleshooting` | — | NotificationTroubleshootingScreen (test · reset · battery; #301) |
+| `SettingsNotificationsDiagnostics` | — | NotificationDiagnosticsScreen (device checks · test · reset; #301) |
 | `SettingsAppearance` | — | AppearanceSettingsScreen |
 | `SettingsLanguage` | — | LanguageSettingsScreen |
 | `SettingsLocation` | — | LocationSettingsScreen |
@@ -418,7 +418,8 @@ only its CTA disappears.
 | `settings/notifications/prayers` | `SettingsNotificationsPrayers` (#301) |
 | `settings/notifications/weekly` | `SettingsNotificationsWeekly` (#301) |
 | `settings/notifications/sound` | `SettingsNotificationsSound` (#301) |
-| `settings/notifications/troubleshooting` | `SettingsNotificationsTroubleshooting` (#301) |
+| `settings/notifications/diagnostics` | `SettingsNotificationsDiagnostics` (#301) |
+| `settings/notifications/troubleshooting` | `SettingsNotificationsDiagnostics` — retained alias; the screen was renamed and this key is already published (#301) |
 
 ### 4.2 Parameterised grammar (pattern-matched after the allowlist)
 

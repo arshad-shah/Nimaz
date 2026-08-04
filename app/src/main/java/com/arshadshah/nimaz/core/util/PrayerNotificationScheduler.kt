@@ -61,6 +61,12 @@ class PrayerNotificationScheduler @Inject constructor(
         const val CHANNEL_ID_PRAYER_SILENT = "prayer_notifications_silent"
         const val CHANNEL_ID_ADHAN_SILENT = "adhan_notifications_silent"
 
+        // A prayer set to the SILENT alert style posts here: no sound, no vibration, no
+        // heads-up. The two channels above are only *no-vibration* siblings — they still
+        // carry the channel's sound at IMPORTANCE_HIGH — and Android will not let an
+        // existing channel's importance be lowered from code, so silence needs its own.
+        const val CHANNEL_ID_PRAYER_MUTED = "prayer_notifications_muted"
+
         const val ACTION_PRAYER_NOTIFICATION = "com.arshadshah.nimaz.PRAYER_NOTIFICATION"
         const val ACTION_DAILY_SUMMARY = "com.arshadshah.nimaz.DAILY_SUMMARY"
         const val ACTION_FRIDAY_REMINDER = "com.arshadshah.nimaz.FRIDAY_REMINDER"
@@ -69,6 +75,9 @@ class PrayerNotificationScheduler @Inject constructor(
         const val EXTRA_PRAYER_NAME = "prayer_name"
         const val EXTRA_PRAYER_TIME = "prayer_time"
         const val EXTRA_IS_PRE_REMINDER = "is_pre_reminder"
+
+        /** Lead time carried by a pre-reminder alarm, now that it differs per prayer. */
+        const val EXTRA_REMINDER_MINUTES = "reminder_minutes"
 
         // Request codes for different prayers (use prayer ordinal * 10 for different notification types)
         private const val REQUEST_CODE_BASE = 1000
@@ -90,9 +99,17 @@ class PrayerNotificationScheduler @Inject constructor(
         const val ACTION_MIDNIGHT_RESCHEDULE = "com.arshadshah.nimaz.MIDNIGHT_RESCHEDULE"
         private const val MIDNIGHT_REQUEST_CODE = 9999
 
-        /** Channel id for a standalone prayer notification honouring the vibration pref. */
-        fun channelForPrayer(vibrate: Boolean): String =
-            if (vibrate) CHANNEL_ID_PRAYER else CHANNEL_ID_PRAYER_SILENT
+        /**
+         * Channel id for a standalone prayer notification honouring the vibration pref.
+         *
+         * [muted] wins over [vibrate]: a prayer the user has silenced posts on the muted
+         * channel whatever the vibration preference says.
+         */
+        fun channelForPrayer(vibrate: Boolean, muted: Boolean = false): String = when {
+            muted -> CHANNEL_ID_PRAYER_MUTED
+            vibrate -> CHANNEL_ID_PRAYER
+            else -> CHANNEL_ID_PRAYER_SILENT
+        }
 
         /** Channel id for an adhan notification honouring the vibration pref. */
         fun channelForAdhan(vibrate: Boolean): String =
@@ -158,6 +175,19 @@ class PrayerNotificationScheduler @Inject constructor(
             enableLights(true)
         }
 
+        // Prayers set to the silent alert style: it appears and waits. LOW importance keeps
+        // it out of the heads-up path; the null sound keeps it quiet even so.
+        val prayerChannelMuted = NotificationChannel(
+            CHANNEL_ID_PRAYER_MUTED,
+            "Prayer Time Notifications (Silent)",
+            NotificationManager.IMPORTANCE_LOW
+        ).apply {
+            description = "Prayer time notifications with no sound and no vibration"
+            setSound(null, null)
+            enableVibration(false)
+            enableLights(true)
+        }
+
         // Khatam reminder channel — a gentle nudge to read, not an alarm, so it
         // stays at DEFAULT importance and never interrupts.
         val khatamChannel = NotificationChannel(
@@ -189,7 +219,8 @@ class PrayerNotificationScheduler @Inject constructor(
                 khatamChannel,
                 worshipChannel,
                 prayerChannelSilent,
-                adhanChannelSilent
+                adhanChannelSilent,
+                prayerChannelMuted
             )
         )
     }
@@ -199,16 +230,15 @@ class PrayerNotificationScheduler @Inject constructor(
      * This should be called after boot, when settings change, or at midnight.
      *
      * @param enabledPrayers If provided, only schedule for these prayer types. If null, schedule all non-sunrise prayers.
-     * @param preReminderEnabled If true, schedule pre-reminder notifications.
-     * @param preReminderMinutes Minutes before prayer to show pre-reminder.
+     * @param preReminders Lead time in minutes per prayer. A prayer absent from the map gets
+     *   no pre-reminder — that is how "off" is expressed, rather than a zero lead time.
      */
     fun scheduleTodaysPrayerNotifications(
         latitude: Double,
         longitude: Double,
         notificationsEnabled: Boolean,
         enabledPrayers: Set<PrayerType>? = null,
-        preReminderEnabled: Boolean = false,
-        preReminderMinutes: Int = 15,
+        preReminders: Map<PrayerType, Int> = emptyMap(),
         calculationMethod: CalculationMethod = CalculationMethod.MUSLIM_WORLD_LEAGUE,
         asrCalculation: AsrCalculation = AsrCalculation.STANDARD,
         highLatitudeRule: HighLatitudeRule? = null,
@@ -262,12 +292,17 @@ class PrayerNotificationScheduler @Inject constructor(
                 schedulePrayerNotification(prayerTime.type, prayerLocalDateTime)
                 scheduledCount++
 
-                // Schedule pre-reminder if enabled (not for sunrise)
-                if (preReminderEnabled && prayerTime.type != PrayerType.SUNRISE) {
+                // Schedule this prayer's own pre-reminder, if it has one (never for sunrise).
+                val leadMinutes = preReminders[prayerTime.type]
+                if (leadMinutes != null && prayerTime.type != PrayerType.SUNRISE) {
                     val preReminderTime =
-                        prayerLocalDateTime.minusMinutes(preReminderMinutes.toLong())
+                        PrayerAlarmTimes.preReminderAt(prayerLocalDateTime, leadMinutes)
                     if (preReminderTime.isAfter(now)) {
-                        schedulePreReminderNotification(prayerTime.type, preReminderTime)
+                        schedulePreReminderNotification(
+                            prayerTime.type,
+                            preReminderTime,
+                            leadMinutes
+                        )
                     }
                 }
             }
@@ -315,7 +350,7 @@ class PrayerNotificationScheduler @Inject constructor(
         // determine whether these alarms will actually fire on time.
         AppAnalytics.logNotificationsScheduled(
             scheduledCount = scheduledCount,
-            preRemindersEnabled = preReminderEnabled,
+            preRemindersEnabled = preReminders.isNotEmpty(),
             exactAlarmAllowed = AppAnalytics.exactAlarmAllowed(context),
             postNotificationsGranted = AppAnalytics.postNotificationsGranted(context),
         )
@@ -650,15 +685,19 @@ class PrayerNotificationScheduler @Inject constructor(
      */
     private fun schedulePreReminderNotification(
         prayerType: PrayerType,
-        reminderTime: LocalDateTime
+        reminderTime: LocalDateTime,
+        leadMinutes: Int
     ) {
-        // Use explicit intent for BootReceiver (required for Android 8.0+)
+        // Use explicit intent for BootReceiver (required for Android 8.0+).
+        // The lead time travels with the alarm because it is now per prayer: reading a
+        // global value back at fire time would put the wrong number in the text.
         val intent = Intent(context, BootReceiver::class.java).apply {
             action = ACTION_PRAYER_NOTIFICATION
             putExtra(EXTRA_PRAYER_TYPE, prayerType.name)
             putExtra(EXTRA_PRAYER_NAME, prayerType.displayName)
             putExtra(EXTRA_PRAYER_TIME, reminderTime.toString())
             putExtra(EXTRA_IS_PRE_REMINDER, true)
+            putExtra(EXTRA_REMINDER_MINUTES, leadMinutes)
         }
 
         val requestCode = PRE_REMINDER_REQUEST_CODE_BASE + prayerType.ordinal
@@ -669,10 +708,7 @@ class PrayerNotificationScheduler @Inject constructor(
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        val triggerTimeMillis = reminderTime
-            .atZone(ZoneId.systemDefault())
-            .toInstant()
-            .toEpochMilli()
+        val triggerTimeMillis = PrayerAlarmTimes.triggerMillis(reminderTime)
 
         alarmManager.setExactAndAllowWhileIdle(
             AlarmManager.RTC_WAKEUP,
@@ -726,10 +762,7 @@ class PrayerNotificationScheduler @Inject constructor(
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        val triggerTimeMillis = prayerTime
-            .atZone(ZoneId.systemDefault())
-            .toInstant()
-            .toEpochMilli()
+        val triggerTimeMillis = PrayerAlarmTimes.triggerMillis(prayerTime)
 
         // Use setExactAndAllowWhileIdle for precise timing
         alarmManager.setExactAndAllowWhileIdle(
