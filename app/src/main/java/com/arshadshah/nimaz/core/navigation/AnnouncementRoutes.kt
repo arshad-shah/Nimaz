@@ -46,7 +46,9 @@ private fun staticAnnouncementRoute(key: String): Route? = when (key) {
     "settings/notifications/prayers" -> Route.SettingsNotificationsPrayers
     "settings/notifications/weekly" -> Route.SettingsNotificationsWeekly
     "settings/notifications/sound" -> Route.SettingsNotificationsSound
-    "settings/notifications/troubleshooting" -> Route.SettingsNotificationsTroubleshooting
+    // The screen was renamed to Diagnostics. The old key stays because it is published — an
+    // announcement already sent, or composed against the old name, must still land somewhere.
+    "settings/notifications/diagnostics", "settings/notifications/troubleshooting" -> Route.SettingsNotificationsDiagnostics
     "settings/about" -> Route.SettingsAbout
     "settings/help" -> Route.SettingsHelp
     "bookmarks" -> Route.AllBookmarks

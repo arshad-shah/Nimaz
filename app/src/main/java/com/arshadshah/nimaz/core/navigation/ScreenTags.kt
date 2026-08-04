@@ -106,8 +106,8 @@ object ScreenTags {
     const val SettingsNotificationsPrayers = "screen_settings_notifications_prayers"
     const val SettingsNotificationsWeekly = "screen_settings_notifications_weekly"
     const val SettingsNotificationsSound = "screen_settings_notifications_sound"
-    const val SettingsNotificationsTroubleshooting =
-        "screen_settings_notifications_troubleshooting"
+    const val SettingsNotificationsDiagnostics =
+        "screen_settings_notifications_diagnostics"
 
     /** Scrollable lists on hub screens — let UI tests scroll to off-screen entries. */
     const val MoreList = "more_menu_list"

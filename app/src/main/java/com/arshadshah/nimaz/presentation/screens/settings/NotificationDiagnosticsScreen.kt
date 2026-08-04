@@ -48,7 +48,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.molecules.NimazConfirmDialog
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
-import com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsItem
+import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuItem
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.viewmodel.SettingsEvent
 import com.arshadshah.nimaz.presentation.viewmodel.SettingsViewModel
@@ -62,7 +62,7 @@ import com.arshadshah.nimaz.presentation.viewmodel.SettingsViewModel
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NotificationTroubleshootingScreen(
+fun NotificationDiagnosticsScreen(
     onNavigateBack: () -> Unit,
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
@@ -104,7 +104,7 @@ fun NotificationTroubleshootingScreen(
                         okLabel = stringResource(R.string.notif_diag_granted),
                         problemLabel = stringResource(R.string.notif_diag_blocked),
                         icon = Icons.Default.NotificationsActive,
-                        onFix = {
+                        onOpenSystemSettings = {
                             context.startActivity(
                                 Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
                                     .putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
@@ -117,7 +117,7 @@ fun NotificationTroubleshootingScreen(
                         okLabel = stringResource(R.string.notif_diag_allowed),
                         problemLabel = stringResource(R.string.notif_diag_not_allowed),
                         icon = Icons.Default.Schedule,
-                        onFix = {
+                        onOpenSystemSettings = {
                             context.startActivity(
                                 Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
                             )
@@ -129,7 +129,7 @@ fun NotificationTroubleshootingScreen(
                         okLabel = stringResource(R.string.notif_diag_unrestricted),
                         problemLabel = stringResource(R.string.notif_diag_restricted),
                         icon = Icons.Default.BatteryAlert,
-                        onFix = {
+                        onOpenSystemSettings = {
                             context.startActivity(
                                 Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
                             )
@@ -138,7 +138,7 @@ fun NotificationTroubleshootingScreen(
                 }
             }
 
-            item { NimazSectionHeader(title = stringResource(R.string.notification_settings_troubleshooting_section)) }
+            item { NimazSectionHeader(title = stringResource(R.string.notif_diag_actions_section)) }
             item {
                 val testSentMsg = stringResource(R.string.notification_settings_test_sent)
                 val testAllSentMsg = stringResource(R.string.notification_settings_test_all_sent)
@@ -217,9 +217,12 @@ fun NotificationTroubleshootingScreen(
 }
 
 /**
- * One checked prerequisite. The badge carries the state so the row can be read at a glance,
- * and tapping opens the system screen that changes it — but only when there is something
- * to fix, because sending someone to a settings page that is already correct is noise.
+ * One checked prerequisite, as a menu row with its state as a badge.
+ *
+ * Every row opens the system screen it reports on, passing or failing. Making only the
+ * failing ones tappable was tempting, but it leaves a row that looks like the others and
+ * does nothing when tapped — and someone who wants to see *why* a check passes has nowhere
+ * to go. The badge already says which rows need attention.
  */
 @Composable
 private fun DiagnosticRow(
@@ -228,14 +231,13 @@ private fun DiagnosticRow(
     okLabel: String,
     problemLabel: String,
     icon: ImageVector,
-    onFix: () -> Unit,
+    onOpenSystemSettings: () -> Unit,
 ) {
-    NimazSettingsItem(
+    NimazMenuItem(
         title = title,
         icon = icon,
-        onClick = if (ok) null else onFix,
-        showArrow = !ok,
-        trailingContent = {
+        onClick = onOpenSystemSettings,
+        trailing = {
             NimazBadge(
                 text = if (ok) okLabel else problemLabel,
                 tone = if (ok) NimazTone.SUCCESS else NimazTone.WARNING

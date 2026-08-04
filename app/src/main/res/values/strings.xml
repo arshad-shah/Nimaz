@@ -1054,7 +1054,7 @@
     <string name="notif_friday_2">It\'s Friday. Make ghusl and head to Jummah early.</string>
     <string name="notif_friday_3">Don\'t forget to read Surah Al-Kahf this blessed Friday.</string>
     <string name="notif_friday_bigtext">Prepare for Jummah: perform ghusl, wear your best clothes, apply perfume, read Surah Al-Kahf, and arrive early. \n\n\"O you who believe! When the call is made for prayer on Friday, hasten to the remembrance of Allah.\" — Quran 62:9</string>
-    <string name="notification_settings_troubleshooting_section">TROUBLESHOOTING</string>
+    <string name="notif_diag_actions_section">Check delivery</string>
     <string name="notification_settings_test">Send a test notification</string>
     <string name="notification_settings_test_sent">Test notification sent</string>
     <string name="notification_settings_test_all">Test all five prayers</string>

@@ -632,7 +632,7 @@
     <string name="notification_settings_vibration_subtitle">Bergetar dengan notifikasi</string>
     <string name="notification_settings_dnd">Hormati Jangan Ganggu</string>
     <string name="notification_settings_dnd_subtitle">Lewati adzan saat mode Jangan Ganggu aktif</string>
-    <string name="notification_settings_troubleshooting_section">PEMECAHAN MASALAH</string>
+    <string name="notif_diag_actions_section">Periksa pengiriman</string>
     <string name="notification_settings_test">Kirim notifikasi uji</string>
     <string name="notification_settings_test_sent">Notifikasi tes terkirim</string>
     <string name="notification_settings_test_all">Uji kelima salat</string>

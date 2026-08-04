@@ -449,7 +449,7 @@ with copy from `WorshipReminderContent`. Prefs are generic dynamic keys
 (`worship_<key>_enabled` / `_offset` / `_mode`) on `SettingsRepository`/`PreferencesDataStore`. The
 notification settings screen is now a **hub** (`NotificationSettingsScreen`, #301) linking to focused
 subscreens — `PrayerNotificationsScreen`, `WorshipRemindersScreen`, `NotificationWeeklyScreen`,
-`NotificationSoundScreen`, `NotificationTroubleshootingScreen` (all new `Route`s), each rendering a
+`NotificationSoundScreen`, `NotificationDiagnosticsScreen` (all new `Route`s), each rendering a
 slice of `SettingsViewModel` state (its **own instance** of it — see "One `SettingsViewModel` per
 screen" in §6). Settings live
 on the dedicated `WorshipRemindersScreen` (`Route.SettingsWorshipReminders`), and the Home

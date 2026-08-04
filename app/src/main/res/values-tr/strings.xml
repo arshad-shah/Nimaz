@@ -652,7 +652,7 @@
     <string name="notification_settings_vibration_subtitle">Bildirimle birlikte titret</string>
     <string name="notification_settings_dnd">Rahatsız Etmeyin Moduna Uy</string>
     <string name="notification_settings_dnd_subtitle">Rahatsız Etmeyin aktifken ezanı atla</string>
-    <string name="notification_settings_troubleshooting_section">SORUN GİDERME</string>
+    <string name="notif_diag_actions_section">Teslimatı denetle</string>
     <string name="notification_settings_test">Test bildirimi gönder</string>
     <string name="notification_settings_test_sent">Test bildirimi gönderildi</string>
     <string name="notification_settings_test_all">Beş vaktin tümünü test et</string>

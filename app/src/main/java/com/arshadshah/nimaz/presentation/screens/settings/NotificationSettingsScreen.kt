@@ -58,7 +58,7 @@ fun NotificationSettingsScreen(
     onNavigateToWorshipReminders: () -> Unit = {},
     onNavigateToWeekly: () -> Unit = {},
     onNavigateToSound: () -> Unit = {},
-    onNavigateToTroubleshooting: () -> Unit = {},
+    onNavigateToDiagnostics: () -> Unit = {},
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val notificationState by viewModel.notificationState.collectAsStateWithLifecycle()
@@ -119,7 +119,7 @@ fun NotificationSettingsScreen(
                             variant = NimazBannerVariant.WARNING,
                             icon = Icons.Default.WarningAmber,
                             showBorder = true,
-                            onClick = onNavigateToTroubleshooting,
+                            onClick = onNavigateToDiagnostics,
                             modifier = Modifier.fillMaxWidth()
                         )
                     }
@@ -173,7 +173,7 @@ fun NotificationSettingsScreen(
                         NimazSettingsItem(
                             title = stringResource(R.string.notif_hub_diagnostics_title),
                             subtitle = stringResource(R.string.notif_hub_diagnostics_subtitle),
-                            onClick = onNavigateToTroubleshooting,
+                            onClick = onNavigateToDiagnostics,
                             showArrow = true,
                             trailingContent = if (diagnostics?.hasProblem == true) {
                                 {

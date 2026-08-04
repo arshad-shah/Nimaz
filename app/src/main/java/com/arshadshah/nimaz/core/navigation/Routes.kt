@@ -184,7 +184,7 @@ sealed interface Route {
     data object SettingsNotificationsSound : Route
 
     @Serializable
-    data object SettingsNotificationsTroubleshooting : Route
+    data object SettingsNotificationsDiagnostics : Route
 
     @Serializable
     data object SettingsAppearance : Route

@@ -648,7 +648,7 @@
     <string name="notification_settings_vibration_subtitle">Bei Benachrichtigung vibrieren</string>
     <string name="notification_settings_dnd">Bitte-nicht-stören beachten</string>
     <string name="notification_settings_dnd_subtitle">Adhan bei aktiviertem Nicht-stören-Modus unterdrücken</string>
-    <string name="notification_settings_troubleshooting_section">FEHLERBEHEBUNG</string>
+    <string name="notif_diag_actions_section">Zustellung prüfen</string>
     <string name="notification_settings_test">Testbenachrichtigung senden</string>
     <string name="notification_settings_test_sent">Testbenachrichtigung gesendet</string>
     <string name="notification_settings_test_all">Alle fünf Gebete testen</string>

@@ -670,7 +670,7 @@
     <string name="notification_settings_vibration_subtitle">Vibrer avec la notification</string>
     <string name="notification_settings_dnd">Respecter Ne pas déranger</string>
     <string name="notification_settings_dnd_subtitle">Ignorer l\'adhan quand NPD est actif</string>
-    <string name="notification_settings_troubleshooting_section">DÉPANNAGE</string>
+    <string name="notif_diag_actions_section">Vérifier la diffusion</string>
     <string name="notification_settings_test">Envoyer une notification de test</string>
     <string name="notification_settings_test_sent">Notification de test envoyée</string>
     <string name="notification_settings_test_all">Tester les cinq prières</string>
