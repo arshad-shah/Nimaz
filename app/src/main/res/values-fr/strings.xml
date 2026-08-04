@@ -671,11 +671,11 @@
     <string name="notification_settings_dnd">Respecter Ne pas déranger</string>
     <string name="notification_settings_dnd_subtitle">Ignorer l\'adhan quand NPD est actif</string>
     <string name="notification_settings_troubleshooting_section">DÉPANNAGE</string>
-    <string name="notification_settings_test">Tester la notification</string>
+    <string name="notification_settings_test">Envoyer une notification de test</string>
     <string name="notification_settings_test_sent">Notification de test envoyée</string>
-    <string name="notification_settings_test_all">Tester toutes les prières</string>
+    <string name="notification_settings_test_all">Tester les cinq prières</string>
     <string name="notification_settings_test_all_sent">Test de toutes les notifications de prière…</string>
-    <string name="notification_settings_reset">Réinitialiser les notifications</string>
+    <string name="notification_settings_reset">Réinitialiser et reprogrammer</string>
     <string name="notification_settings_reset_success">Notifications réinitialisées avec succès</string>
     <string name="notification_settings_battery_section">OPTIMISATION DE LA BATTERIE</string>
     <string name="notification_settings_battery_title">Optimisation de la batterie</string>
@@ -1772,8 +1772,8 @@
     <string name="notif_diag_unrestricted">Sans restriction</string>
     <string name="notif_diag_restricted">Restreinte</string>
     <string name="notif_diag_needs_attention">À corriger</string>
-    <string name="notif_diag_reset_confirm_title">Réinitialiser les notifications ?</string>
-    <string name="notif_diag_reset_confirm_body">Chaque alerte programmée est annulée puis reconstruite à partir de vos réglages actuels. Les réglages eux-mêmes ne changent pas.</string>
+    <string name="notif_diag_reset_confirm_title">Réinitialiser toutes les notifications ?</string>
+    <string name="notif_diag_reset_confirm_body">Chaque alarme programmée est annulée puis reconstruite à partir de vos réglages actuels. Vos choix sont conservés — seul le calendrier est redessiné.</string>
     <string name="notif_diag_reset_confirm_action">Réinitialiser</string>
     <string name="prayer_settings_fajr_reminder">Rappel du Fajr</string>
     <plurals name="notif_reminder_minutes_before">

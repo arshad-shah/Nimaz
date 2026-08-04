@@ -633,11 +633,11 @@
     <string name="notification_settings_dnd">Hormati Jangan Ganggu</string>
     <string name="notification_settings_dnd_subtitle">Langkau azan apabila Jangan Ganggu aktif</string>
     <string name="notification_settings_troubleshooting_section">PENYELESAIAN MASALAH</string>
-    <string name="notification_settings_test">Uji Pemberitahuan</string>
+    <string name="notification_settings_test">Hantar pemberitahuan ujian</string>
     <string name="notification_settings_test_sent">Pemberitahuan ujian dihantar</string>
-    <string name="notification_settings_test_all">Uji Semua Solat</string>
+    <string name="notification_settings_test_all">Uji kelima-lima solat</string>
     <string name="notification_settings_test_all_sent">Menguji semua pemberitahuan solat…</string>
-    <string name="notification_settings_reset">Set Semula Pemberitahuan</string>
+    <string name="notification_settings_reset">Tetapkan semula dan jadualkan semula</string>
     <string name="notification_settings_reset_success">Pemberitahuan berjaya diset semula</string>
     <string name="notification_settings_battery_section">PENGOPTIMUMAN BATERI</string>
     <string name="notification_settings_battery_title">Pengoptimuman Bateri</string>
@@ -1708,8 +1708,8 @@
     <string name="notif_diag_unrestricted">Tiada sekatan</string>
     <string name="notif_diag_restricted">Disekat</string>
     <string name="notif_diag_needs_attention">Perlu perhatian</string>
-    <string name="notif_diag_reset_confirm_title">Tetapkan semula pemberitahuan?</string>
-    <string name="notif_diag_reset_confirm_body">Setiap peringatan berjadual dibatalkan dan dibina semula daripada tetapan semasa anda. Tetapan itu sendiri tidak berubah.</string>
+    <string name="notif_diag_reset_confirm_title">Tetapkan semula semua pemberitahuan?</string>
+    <string name="notif_diag_reset_confirm_body">Setiap penggera berjadual dibatalkan dan dibina semula daripada tetapan semasa anda. Pilihan anda dikekalkan — hanya jadualnya dilukis semula.</string>
     <string name="notif_diag_reset_confirm_action">Tetapkan semula</string>
     <string name="prayer_settings_fajr_reminder">Peringatan Subuh</string>
     <plurals name="notif_reminder_minutes_before">

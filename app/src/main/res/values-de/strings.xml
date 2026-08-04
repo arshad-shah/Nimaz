@@ -649,11 +649,11 @@
     <string name="notification_settings_dnd">Bitte-nicht-stören beachten</string>
     <string name="notification_settings_dnd_subtitle">Adhan bei aktiviertem Nicht-stören-Modus unterdrücken</string>
     <string name="notification_settings_troubleshooting_section">FEHLERBEHEBUNG</string>
-    <string name="notification_settings_test">Testbenachrichtigung</string>
+    <string name="notification_settings_test">Testbenachrichtigung senden</string>
     <string name="notification_settings_test_sent">Testbenachrichtigung gesendet</string>
-    <string name="notification_settings_test_all">Alle Gebete testen</string>
+    <string name="notification_settings_test_all">Alle fünf Gebete testen</string>
     <string name="notification_settings_test_all_sent">Alle Gebetsbenachrichtigungen werden getestet…</string>
-    <string name="notification_settings_reset">Benachrichtigungen zurücksetzen</string>
+    <string name="notification_settings_reset">Zurücksetzen und neu planen</string>
     <string name="notification_settings_reset_success">Benachrichtigungen erfolgreich zurückgesetzt</string>
     <string name="notification_settings_battery_section">AKKUOPTIMIERUNG</string>
     <string name="notification_settings_battery_title">Akkuoptimierung</string>
@@ -1737,8 +1737,8 @@
     <string name="notif_diag_unrestricted">Uneingeschränkt</string>
     <string name="notif_diag_restricted">Eingeschränkt</string>
     <string name="notif_diag_needs_attention">Handlung nötig</string>
-    <string name="notif_diag_reset_confirm_title">Benachrichtigungen zurücksetzen?</string>
-    <string name="notif_diag_reset_confirm_body">Jeder geplante Hinweis wird abgebrochen und aus deinen aktuellen Einstellungen neu aufgebaut. Die Einstellungen selbst ändern sich nicht.</string>
+    <string name="notif_diag_reset_confirm_title">Alle Benachrichtigungen zurücksetzen?</string>
+    <string name="notif_diag_reset_confirm_body">Jeder geplante Alarm wird abgebrochen und aus deinen aktuellen Einstellungen neu aufgebaut. Deine Auswahl bleibt — nur der Zeitplan wird neu gezeichnet.</string>
     <string name="notif_diag_reset_confirm_action">Zurücksetzen</string>
     <string name="prayer_settings_fajr_reminder">Fadschr-Erinnerung</string>
     <plurals name="notif_reminder_minutes_before">

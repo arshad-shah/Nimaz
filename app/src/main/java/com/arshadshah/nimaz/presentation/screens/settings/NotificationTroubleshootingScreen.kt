@@ -7,11 +7,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BatteryAlert
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.Refresh
@@ -25,6 +27,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
@@ -36,14 +39,14 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.util.NotificationDiagnostics
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBanner
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBannerVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
-import com.arshadshah.nimaz.presentation.components.molecules.NimazDialog
-import com.arshadshah.nimaz.presentation.components.molecules.NimazDialogCancelButton
-import com.arshadshah.nimaz.presentation.components.molecules.NimazDialogConfirmButton
+import com.arshadshah.nimaz.presentation.components.molecules.NimazConfirmDialog
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
 import com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsItem
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
@@ -166,9 +169,10 @@ fun NotificationTroubleshootingScreen(
                         )
                         NimazButton(
                             text = stringResource(R.string.notification_settings_reset),
-                            // Reset cancels and rebuilds every alarm, so it asks first.
+                            // Reset cancels and rebuilds every armed alarm, so it carries
+                            // the destructive colour and asks before doing it.
                             onClick = { confirmingReset = true },
-                            variant = NimazButtonVariant.OUTLINED,
+                            variant = NimazButtonVariant.DESTRUCTIVE,
                             leadingIcon = Icons.Default.Refresh,
                             fullWidth = true
                         )
@@ -176,11 +180,15 @@ fun NotificationTroubleshootingScreen(
                 }
             }
 
+            // Why battery optimisation matters, as a banner rather than loose grey text —
+            // it is guidance about the checks above, so it should read as one.
             item {
-                Text(
-                    text = stringResource(R.string.notification_settings_battery_explanation),
-                    style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
-                    color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant
+                NimazBanner(
+                    message = stringResource(R.string.notification_settings_battery_explanation),
+                    variant = NimazBannerVariant.INFO,
+                    icon = Icons.Default.Info,
+                    showBorder = true,
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
 
@@ -190,25 +198,20 @@ fun NotificationTroubleshootingScreen(
 
     if (confirmingReset) {
         val resetSuccessMsg = stringResource(R.string.notification_settings_reset_success)
-        NimazDialog(
+        // Destructive: it cancels every armed alarm before rebuilding them, so the accent
+        // stripe and the confirm button carry the risk in colour as well as in words.
+        NimazConfirmDialog(
             title = stringResource(R.string.notif_diag_reset_confirm_title),
-            subtitle = stringResource(R.string.notif_diag_reset_confirm_body),
-            onDismiss = { confirmingReset = false },
+            message = stringResource(R.string.notif_diag_reset_confirm_body),
+            confirmText = stringResource(R.string.notif_diag_reset_confirm_action),
+            cancelText = stringResource(R.string.cancel),
             titleIcon = Icons.Default.Refresh,
-            actions = {
-                NimazDialogCancelButton(
-                    text = stringResource(R.string.cancel),
-                    onClick = { confirmingReset = false }
-                )
-                NimazDialogConfirmButton(
-                    text = stringResource(R.string.notif_diag_reset_confirm_action),
-                    onClick = {
-                        confirmingReset = false
-                        viewModel.onEvent(SettingsEvent.ResetNotifications)
-                        Toast.makeText(context, resetSuccessMsg, Toast.LENGTH_SHORT).show()
-                    }
-                )
-            }
+            isDestructive = true,
+            onConfirm = {
+                viewModel.onEvent(SettingsEvent.ResetNotifications)
+                Toast.makeText(context, resetSuccessMsg, Toast.LENGTH_SHORT).show()
+            },
+            onDismiss = { confirmingReset = false }
         )
     }
 }
@@ -224,7 +227,7 @@ private fun DiagnosticRow(
     ok: Boolean,
     okLabel: String,
     problemLabel: String,
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    icon: ImageVector,
     onFix: () -> Unit,
 ) {
     NimazSettingsItem(

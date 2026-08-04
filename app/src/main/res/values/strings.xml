@@ -558,8 +558,8 @@
     <string name="notif_diag_unrestricted">Unrestricted</string>
     <string name="notif_diag_restricted">Restricted</string>
     <string name="notif_diag_needs_attention">Needs attention</string>
-    <string name="notif_diag_reset_confirm_title">Reset notifications?</string>
-    <string name="notif_diag_reset_confirm_body">Every scheduled alert is cancelled and rebuilt from your current settings. Your settings themselves are not changed.</string>
+    <string name="notif_diag_reset_confirm_title">Reset all notifications?</string>
+    <string name="notif_diag_reset_confirm_body">Every scheduled alarm is cancelled and rebuilt from your current settings. Your choices are kept — only the schedule is redrawn.</string>
     <string name="notif_diag_reset_confirm_action">Reset</string>
 
     <!-- Home "Next Worship" card labels -->
@@ -1055,11 +1055,11 @@
     <string name="notif_friday_3">Don\'t forget to read Surah Al-Kahf this blessed Friday.</string>
     <string name="notif_friday_bigtext">Prepare for Jummah: perform ghusl, wear your best clothes, apply perfume, read Surah Al-Kahf, and arrive early. \n\n\"O you who believe! When the call is made for prayer on Friday, hasten to the remembrance of Allah.\" — Quran 62:9</string>
     <string name="notification_settings_troubleshooting_section">TROUBLESHOOTING</string>
-    <string name="notification_settings_test">Test Notification</string>
+    <string name="notification_settings_test">Send a test notification</string>
     <string name="notification_settings_test_sent">Test notification sent</string>
-    <string name="notification_settings_test_all">Test All Prayers</string>
+    <string name="notification_settings_test_all">Test all five prayers</string>
     <string name="notification_settings_test_all_sent">Testing all prayer notifications…</string>
-    <string name="notification_settings_reset">Reset Notifications</string>
+    <string name="notification_settings_reset">Reset and reschedule</string>
     <string name="notification_settings_reset_success">Notifications reset successfully</string>
     <string name="notification_settings_battery_section">BATTERY OPTIMIZATION</string>
     <string name="notification_settings_battery_title">Battery Optimization</string>

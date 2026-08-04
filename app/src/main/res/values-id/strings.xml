@@ -633,11 +633,11 @@
     <string name="notification_settings_dnd">Hormati Jangan Ganggu</string>
     <string name="notification_settings_dnd_subtitle">Lewati adzan saat mode Jangan Ganggu aktif</string>
     <string name="notification_settings_troubleshooting_section">PEMECAHAN MASALAH</string>
-    <string name="notification_settings_test">Tes Notifikasi</string>
+    <string name="notification_settings_test">Kirim notifikasi uji</string>
     <string name="notification_settings_test_sent">Notifikasi tes terkirim</string>
-    <string name="notification_settings_test_all">Tes Semua Shalat</string>
+    <string name="notification_settings_test_all">Uji kelima salat</string>
     <string name="notification_settings_test_all_sent">Menguji semua notifikasi shalat…</string>
-    <string name="notification_settings_reset">Reset Notifikasi</string>
+    <string name="notification_settings_reset">Atur ulang dan jadwalkan lagi</string>
     <string name="notification_settings_reset_success">Notifikasi berhasil direset</string>
     <string name="notification_settings_battery_section">OPTIMASI BATERAI</string>
     <string name="notification_settings_battery_title">Optimasi Baterai</string>
@@ -1707,8 +1707,8 @@
     <string name="notif_diag_unrestricted">Tanpa batas</string>
     <string name="notif_diag_restricted">Dibatasi</string>
     <string name="notif_diag_needs_attention">Perlu perhatian</string>
-    <string name="notif_diag_reset_confirm_title">Atur ulang notifikasi?</string>
-    <string name="notif_diag_reset_confirm_body">Setiap notifikasi terjadwal dibatalkan dan disusun ulang dari pengaturan Anda saat ini. Pengaturannya sendiri tidak berubah.</string>
+    <string name="notif_diag_reset_confirm_title">Atur ulang semua notifikasi?</string>
+    <string name="notif_diag_reset_confirm_body">Setiap alarm terjadwal dibatalkan dan disusun ulang dari pengaturan Anda saat ini. Pilihan Anda tetap — hanya jadwalnya yang digambar ulang.</string>
     <string name="notif_diag_reset_confirm_action">Atur ulang</string>
     <string name="prayer_settings_fajr_reminder">Pengingat Subuh</string>
     <plurals name="notif_reminder_minutes_before">

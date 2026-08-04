@@ -653,11 +653,11 @@
     <string name="notification_settings_dnd">Rahatsız Etmeyin Moduna Uy</string>
     <string name="notification_settings_dnd_subtitle">Rahatsız Etmeyin aktifken ezanı atla</string>
     <string name="notification_settings_troubleshooting_section">SORUN GİDERME</string>
-    <string name="notification_settings_test">Bildirim Testi</string>
+    <string name="notification_settings_test">Test bildirimi gönder</string>
     <string name="notification_settings_test_sent">Test bildirimi gönderildi</string>
-    <string name="notification_settings_test_all">Tüm Namazları Test Et</string>
+    <string name="notification_settings_test_all">Beş vaktin tümünü test et</string>
     <string name="notification_settings_test_all_sent">Tüm namaz bildirimleri test ediliyor…</string>
-    <string name="notification_settings_reset">Bildirimleri Sıfırla</string>
+    <string name="notification_settings_reset">Sıfırla ve yeniden planla</string>
     <string name="notification_settings_reset_success">Bildirimler başarıyla sıfırlandı</string>
     <string name="notification_settings_battery_section">PİL OPTİMİZASYONU</string>
     <string name="notification_settings_battery_title">Pil Optimizasyonu</string>
@@ -1743,8 +1743,8 @@
     <string name="notif_diag_unrestricted">Kısıtlamasız</string>
     <string name="notif_diag_restricted">Kısıtlı</string>
     <string name="notif_diag_needs_attention">İlgilenilmeli</string>
-    <string name="notif_diag_reset_confirm_title">Bildirimler sıfırlansın mı?</string>
-    <string name="notif_diag_reset_confirm_body">Zamanlanmış her bildirim iptal edilip mevcut ayarlarınızdan yeniden kurulur. Ayarlarınız değişmez.</string>
+    <string name="notif_diag_reset_confirm_title">Tüm bildirimler sıfırlansın mı?</string>
+    <string name="notif_diag_reset_confirm_body">Zamanlanmış her alarm iptal edilip mevcut ayarlarınızdan yeniden kurulur. Seçimleriniz korunur — yalnızca zamanlama yeniden çizilir.</string>
     <string name="notif_diag_reset_confirm_action">Sıfırla</string>
     <string name="prayer_settings_fajr_reminder">Sabah hatırlatması</string>
     <plurals name="notif_reminder_minutes_before">
