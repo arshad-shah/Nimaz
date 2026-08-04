@@ -621,7 +621,7 @@ fun NavGraph(
                         navController.navigate(Route.QuranReader(surah, ayah))
                     },
                     onNavigateToHadith = { bookId, hadithNumber ->
-                        navController.navigate(Route.HadithReader(hadithNumber.toString()))
+                        navController.navigate(Route.HadithByNumber(bookId, hadithNumber))
                     },
                     onNavigateToDua = { duaId ->
                         navController.navigate(Route.DuaReader(duaId))
@@ -670,6 +670,17 @@ fun NavGraph(
                 )
             }
 
+            taggedComposable<Route.HadithByNumber>(ScreenTags.HadithByNumber) { backStackEntry ->
+                val args = backStackEntry.toRoute<Route.HadithByNumber>()
+                HadithReaderScreen(
+                    bookId = args.bookId,
+                    chapterId = "",
+                    hadithNumber = args.hadithNumber,
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToSettings = { navController.navigate(Route.HadithSettings) }
+                )
+            }
+
             taggedComposable<Route.HadithSettings>(ScreenTags.HadithSettings) {
                 HadithSettingsScreen(
                     onNavigateBack = { navController.popBackStack() }
@@ -701,7 +712,7 @@ fun NavGraph(
                         navController.navigate(Route.QuranReader(surah, ayah))
                     },
                     onNavigateToHadith = { bookId, hadithNumber ->
-                        navController.navigate(Route.HadithReader(hadithNumber.toString()))
+                        navController.navigate(Route.HadithByNumber(bookId, hadithNumber))
                     },
                     onNavigateToDua = { duaId ->
                         navController.navigate(Route.DuaReader(duaId))
@@ -1260,7 +1271,7 @@ fun NavGraph(
                         navController.navigate(Route.QuranReader(surah, ayah))
                     },
                     onNavigateToHadith = { bookId, hadithNumber ->
-                        navController.navigate(Route.HadithReader(hadithNumber.toString()))
+                        navController.navigate(Route.HadithByNumber(bookId, hadithNumber))
                     },
                     onNavigateToDua = { duaId ->
                         navController.navigate(Route.DuaReader(duaId))

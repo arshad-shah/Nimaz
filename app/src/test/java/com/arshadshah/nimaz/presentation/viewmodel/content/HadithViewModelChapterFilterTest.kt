@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.presentation.viewmodel.content
 
+import com.arshadshah.nimaz.core.monitoring.RecordingTelemetry
 import com.arshadshah.nimaz.domain.model.HadithChapter
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.usecase.HadithUseCases
@@ -69,7 +70,8 @@ class HadithViewModelChapterFilterTest {
     @After
     fun tearDown() = Dispatchers.resetMain()
 
-    private fun viewModel() = HadithViewModel(hadithUseCases, settingsRepository)
+    private fun viewModel() =
+        HadithViewModel(hadithUseCases, settingsRepository, RecordingTelemetry())
 
     @Test
     fun `a chapter list re-emission keeps the active chapter search applied`() = runTest {

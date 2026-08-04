@@ -311,12 +311,25 @@ rg -U --multiline-dotall -n '\.collect\s*\{(?:[^}]|
 - [x] ~~**`SyncViewModel` — untriaged.**~~ **Not a defect.** Its single `collect` is a lifetime
   observer started once from `init`, which is exactly what the detect command cannot distinguish
   and what the parameterised/not split above is for. Left as-is.
-- [ ] **`HadithViewModel.loadHadithByNumber` reads state it just asked for.** It calls
-  `loadChapter(...)` (which launches) and then immediately reads `_readerState.value.hadiths` to
-  find the index, so the list is still empty and the index is always 0. Latent rather than shipped:
-  `HadithEvent.LoadHadithByNumber` is never dispatched from any screen. Fix by awaiting the
-  chapter's first emission (or by folding the lookup into the loader) if that path is ever wired up
-  — and note the "lying signature" parallel with AP-7.3.
+- [x] ~~**`HadithViewModel.loadHadithByNumber` reads state it just asked for.**~~ **Resolved —
+  and it was shipped, not latent.** It called `loadChapter(...)`, which launches, then read
+  `_readerState.value.hadiths` on the next line: still the *previous* chapter's list, so
+  `indexOfFirst` was always -1 and the branch setting the index could never run. It also passed
+  the chapter id raw where `getChapterById` is keyed on the composite `bookId_chapterId`, so the
+  header resolved to null.
+
+  This entry previously recorded the path as unreachable because no screen dispatches the event.
+  **That was the wrong question.** A `HadithBookmark` stores `bookId` and `hadithNumber` and no
+  hadith id, so opening a bookmarked hadith can only go through this path — and lacking a route
+  for it, three bookmark screens navigated to `Route.HadithReader(hadithNumber.toString())`,
+  putting a *number* in an *id* slot. `getHadithById` resolves that against the **primary key**,
+  so every hadith bookmark opened a real hadith from an arbitrary book, with no error.
+
+  The lesson generalises: "no screen emits this event" establishes that the *event* is unused, not
+  that the *capability* is. Check what the feature's data model can express first — here the
+  bookmark's shape proved the capability was mandatory. Fixed with a `Route.HadithByNumber`
+  carrying both parts, and one reader load path shared by all three entry points.
+  (`HadithReaderTest`)
 
 Detect:
 

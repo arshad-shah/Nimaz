@@ -100,6 +100,7 @@ flowchart LR
     subgraph H["Hadith"]
         HadithHome --> HadithBook --> HadithChapter --> HadithReader
         HadithHome --> HadithSearch & HadithBookmarks & HadithSettings
+        HadithBookmarks --> HadithByNumber
     end
 
     subgraph D["Dua"]
@@ -171,7 +172,7 @@ flowchart LR
 ## 3. Route reference
 
 All routes live in `core/navigation/Routes.kt` and are wired in `core/navigation/NavGraph.kt`
-(90 `composable<Route.X>` destinations). `data object` = no args; `data class` = typed args.
+(91 `composable<Route.X>` destinations). `data object` = no args; `data class` = typed args.
 Every route below also has a `ScreenTags` entry of the same name.
 
 ### 3.1 Bottom navigation (`BottomNavDestination`)
@@ -209,6 +210,7 @@ Every route below also has a `ScreenTags` entry of the same name.
 | `HadithBook` | `bookId: String` | HadithBookScreen |
 | `HadithChapter` | `bookId: String, chapterId: String` | HadithChapterScreen |
 | `HadithReader` | `hadithId: String` | HadithReaderScreen |
+| `HadithByNumber` | `bookId: String, hadithNumber: Int` | HadithReaderScreen |
 | `HadithSearch` | — | HadithSearchScreen |
 | `HadithBookmarks` | — | HadithBookmarksScreen |
 | `HadithSettings` | — | HadithSettingsScreen |

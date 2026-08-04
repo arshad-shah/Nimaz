@@ -48,6 +48,19 @@ sealed interface Route {
     @Serializable
     data class HadithReader(val hadithId: String) : Route
 
+    /**
+     * A hadith addressed the way a reader cites one — book plus the number printed on it —
+     * rather than by database id.
+     *
+     * Separate from [HadithReader] because they are genuinely different addresses, and
+     * collapsing them is what broke the bookmarks: a `HadithBookmark` stores `bookId` and
+     * `hadithNumber` and no id, so the bookmark screen had to pass `hadithNumber.toString()`
+     * into [HadithReader]'s `hadithId` slot. That resolves to the row whose **primary key**
+     * equals the number — a real hadith, from an arbitrary book, opened with no error.
+     */
+    @Serializable
+    data class HadithByNumber(val bookId: String, val hadithNumber: Int) : Route
+
     @Serializable
     data object HadithSearch : Route
 

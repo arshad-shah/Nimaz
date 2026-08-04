@@ -37,7 +37,16 @@ data class Hadith(
     val gradeArabic: String?,
     val reference: String?,
     val isBookmarked: Boolean = false
-)
+) {
+    /**
+     * The key [HadithChapter.id] is stored under — `bookId_chapterId`, not the bare
+     * [chapterId].
+     *
+     * Derived here because two callers built it by hand and one of them got it wrong, so the
+     * chapter header resolved to null for every hadith opened by number.
+     */
+    val chapterKey: String get() = "${bookId}_$chapterId"
+}
 
 data class HadithBookmark(
     val id: Long,
