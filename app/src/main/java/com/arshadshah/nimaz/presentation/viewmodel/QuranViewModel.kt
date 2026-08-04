@@ -85,9 +85,19 @@ data class FavoriteAyahUi(
 data class SurahThematicUiState(
     val overview: SurahOverview? = null,
     val passages: List<AyahTheme> = emptyList(),
+
+    /**
+     * How many subjects this surah's verses are cited under.
+     *
+     * A count and not the list: the info screen labels one row with it, and loading a few
+     * hundred topics to render a single integer is what the counting query exists to avoid.
+     */
+    val subjectCount: Int = 0,
+
     val isLoading: Boolean = true,
 ) {
-    val isAvailable: Boolean get() = overview != null || passages.isNotEmpty()
+    val isAvailable: Boolean
+        get() = overview != null || passages.isNotEmpty() || subjectCount > 0
 }
 
 data class QuranHomeUiState(
@@ -682,9 +692,11 @@ class QuranViewModel @Inject constructor(
             _surahThematic.value = SurahThematicUiState(isLoading = true)
             val overview = quranUseCases.getSurahOverview(surahNumber)
             val themes = quranUseCases.getSurahThemes(surahNumber)
+            val subjects = quranUseCases.getTopicsForSurah.count(surahNumber)
             _surahThematic.value = SurahThematicUiState(
                 overview = overview,
                 passages = themes,
+                subjectCount = subjects,
                 isLoading = false,
             )
         }

@@ -97,7 +97,12 @@ fun QuranReaderScreen(
     onNavigateToQuranSettings: () -> Unit = {},
     onNavigateToTafseer: (surahNumber: Int, ayahNumber: Int) -> Unit = { _, _ -> },
     onNavigateToPassages: (surahNumber: Int, currentAyah: Int) -> Unit = { _, _ -> },
-    onNavigateToSubjects: () -> Unit = {},
+    /**
+     * The subject index. [surahNumber] is the surah on screen when there is one, and the
+     * destination is that surah's own subjects; null in page and juz mode before the layout
+     * has resolved a surah, where the only honest answer is the whole index.
+     */
+    onNavigateToSubjects: (surahNumber: Int?) -> Unit = {},
     onNavigateToNextSurah: (Int) -> Unit = {},
     onPageModeChanged: (Boolean) -> Unit = {},
     viewModel: QuranViewModel = hiltViewModel()
@@ -456,12 +461,21 @@ fun QuranReaderScreen(
                                 )
                             }
                         }
+                        // Scoped to the surah on screen where there is one, and labelled as
+                        // such. "Topics" opening the whole index from inside a surah was the
+                        // reader asking a question about these verses and being handed the
+                        // table of contents for all 114.
+                        val subjectsSurah = state.surahWithAyahs?.surah?.number
                         NimazDropdownRow(
-                            text = stringResource(R.string.quran_topics_title),
+                            text = if (subjectsSurah != null) {
+                                stringResource(R.string.surah_info_subjects)
+                            } else {
+                                stringResource(R.string.quran_topics_title)
+                            },
                             leadingIcon = Icons.Default.AccountTree,
                             onClick = {
                                 menuExpanded = false
-                                onNavigateToSubjects()
+                                onNavigateToSubjects(subjectsSurah)
                             },
                         )
                         if (state.showTajweed) {

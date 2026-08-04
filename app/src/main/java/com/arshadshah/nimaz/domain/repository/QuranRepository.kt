@@ -14,6 +14,7 @@ import com.arshadshah.nimaz.domain.model.RevelationType
 import com.arshadshah.nimaz.domain.model.Surah
 import com.arshadshah.nimaz.domain.model.SurahInfo
 import com.arshadshah.nimaz.domain.model.SurahOverview
+import com.arshadshah.nimaz.domain.model.SurahTopic
 import com.arshadshah.nimaz.domain.model.SurahWithAyahs
 import com.arshadshah.nimaz.domain.model.TopicDetail
 import com.arshadshah.nimaz.domain.model.TopicTree
@@ -139,6 +140,19 @@ interface QuranRepository {
 
     suspend fun getTopicDetail(topicId: Int, tree: TopicTree): TopicDetail?
     suspend fun getTopicsForAyah(ayahId: Int): List<QuranTopic>
+
+    /**
+     * Which subjects this surah speaks about, and how many of its verses each one takes.
+     *
+     * The surah-scoped counterpart to [getTopicTreeRoots]: a reader who arrived from a surah is
+     * asking what *this* surah is about, and the three hierarchies' roots — the same 20-odd
+     * nouns for all 114 surahs — cannot answer that. Ordered by weight inside the surah.
+     */
+    suspend fun getTopicsForSurah(surahNumber: Int): List<SurahTopic>
+
+    /** How many subjects [getTopicsForSurah] would return, without returning them. */
+    suspend fun countTopicsForSurah(surahNumber: Int): Int
+
     suspend fun searchTopics(query: String, limit: Int = 60): List<QuranTopic>
 
     /** Whether this install's artifact actually carries the thematic layer at all. */

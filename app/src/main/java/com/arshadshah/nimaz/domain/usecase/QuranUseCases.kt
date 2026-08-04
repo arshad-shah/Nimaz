@@ -15,6 +15,7 @@ import com.arshadshah.nimaz.domain.model.AyahTheme
 import com.arshadshah.nimaz.domain.model.QuranTopic
 import com.arshadshah.nimaz.domain.model.SurahInfo
 import com.arshadshah.nimaz.domain.model.SurahOverview
+import com.arshadshah.nimaz.domain.model.SurahTopic
 import com.arshadshah.nimaz.domain.model.TopicDetail
 import com.arshadshah.nimaz.domain.model.TopicTree
 import com.arshadshah.nimaz.domain.model.SurahWithAyahs
@@ -252,6 +253,23 @@ class GetTopicsForAyahUseCase @Inject constructor(
         repository.getTopicsForAyah(ayahId)
 }
 
+/**
+ * Which subjects this surah speaks about, weightiest here first.
+ *
+ * What "Subjects in this surah" has to be answered with. The global browser's roots are the
+ * same twenty nouns whichever surah you came from, so opening it from a surah drops the one
+ * thing the reader was holding.
+ */
+class GetTopicsForSurahUseCase @Inject constructor(
+    private val repository: QuranRepository
+) {
+    suspend operator fun invoke(surahNumber: Int): List<SurahTopic> =
+        repository.getTopicsForSurah(surahNumber)
+
+    /** Just the number of them — what a menu row needs to say how much is behind it. */
+    suspend fun count(surahNumber: Int): Int = repository.countTopicsForSurah(surahNumber)
+}
+
 class SearchTopicsUseCase @Inject constructor(
     private val repository: QuranRepository
 ) {
@@ -412,6 +430,7 @@ data class QuranUseCases(
     val getTopicChildren: GetTopicChildrenUseCase,
     val getTopicDetail: GetTopicDetailUseCase,
     val getTopicsForAyah: GetTopicsForAyahUseCase,
+    val getTopicsForSurah: GetTopicsForSurahUseCase,
     val searchTopics: SearchTopicsUseCase,
     val hasThematicContent: HasThematicContentUseCase,
     val getPageAyahRanges: GetPageAyahRangesUseCase,
