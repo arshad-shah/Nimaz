@@ -50,6 +50,18 @@ abstract class CatalogViewModel<T : Any>(
 
     private var detailJob: Job? = null
 
+    /**
+     * The item the detail surface is currently *for*, set synchronously when it is asked for.
+     *
+     * [detailJob] alone does not close the race: a coroutine cancelled after its last suspension
+     * point still runs to the end of its block, and `source.byId` *is* that suspension point
+     * with the state write immediately after it. Open Adam, back, open Muhammad quickly enough
+     * — the detail screen fires `LoadDetail` from a `LaunchedEffect(id)` and the instance is
+     * shared through the list screen's back-stack entry — and Adam's read resolving second put
+     * **Adam's story under Muhammad's route**, with `isLoading = false` to say it was ready.
+     */
+    private var requestedItemId: Int? = null
+
     init {
         observeItems()
         observeFavourites()
@@ -102,6 +114,7 @@ abstract class CatalogViewModel<T : Any>(
 
     private fun loadDetail(itemId: Int) {
         _detailState.update { it.copy(isLoading = true) }
+        requestedItemId = itemId
         detailJob?.cancel()
         detailJob = launchSafely(
             telemetry,
@@ -109,7 +122,9 @@ abstract class CatalogViewModel<T : Any>(
             "load_detail",
             onFailure = { _detailState.update { it.copy(isLoading = false) } },
         ) {
-            _detailState.update { it.copy(item = source.byId(itemId), isLoading = false) }
+            val item = source.byId(itemId)
+            if (requestedItemId != itemId) return@launchSafely
+            _detailState.update { it.copy(item = item, isLoading = false) }
         }
     }
 

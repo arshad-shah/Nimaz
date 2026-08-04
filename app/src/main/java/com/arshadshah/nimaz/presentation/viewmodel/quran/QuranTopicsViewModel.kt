@@ -12,6 +12,7 @@ import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.usecase.QuranUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -61,6 +62,28 @@ class QuranTopicsViewModel @Inject constructor(
     val surahSubjects: StateFlow<SurahSubjectsState> = _surahSubjects.asStateFlow()
 
     private val queries = MutableStateFlow("")
+
+    /**
+     * The in-flight browse navigation — a focus or a crumb rebase.
+     *
+     * One handle, because the browser is at one place at a time. Without it, tapping crumb 0
+     * and then crumb 2 left both `getTopicChildren` calls racing, and each ends in a whole-state
+     * update setting `focus` *and* `level` together: whichever query was slower wrote last, so
+     * a reader who tapped crumb 2 landed on crumb 0.
+     */
+    private var browseJob: Job? = null
+
+    /** The in-flight topic-detail load. See [requestedTopicId]. */
+    private var detailJob: Job? = null
+
+    /**
+     * The topic the detail pane is currently *for*, set synchronously when it is asked for.
+     *
+     * Cancelling [detailJob] is necessary but not sufficient: a coroutine cancelled after its
+     * last suspension point still runs to the end of its block. This is what the writes are
+     * checked against, the way [loadSurahSubjects] already checks its surah.
+     */
+    private var requestedTopicId: Int? = null
 
     /**
      * Only the query pipeline. The roots are *not* loaded here.
@@ -224,14 +247,27 @@ class QuranTopicsViewModel @Inject constructor(
             _browseState.update { it.copy(expanded = it.expanded + topic.id) }
             return
         }
+        val focusWhenAsked = state.focus
         viewModelScope.launch {
             val loaded = quranUseCases.getTopicChildren(topic.id, state.tree)
             _browseState.update {
                 // An empty result means the branch set and the corpus disagree. Cache it anyway
                 // so the row stops asking, and leave it closed rather than opening onto nothing.
+                //
+                // Caching is always safe — a node's children do not depend on where the browser
+                // is. *Expanding* does: a focus or rebase landing while this was in flight reset
+                // `expanded` and moved to a different level, where this row is not on screen, so
+                // opening it would re-open a node the reader had just navigated away from.
+                //
+                // Deliberately not sharing `browseJob`: two toggles on two rows are both
+                // legitimate and must not cancel each other.
                 it.copy(
                     children = it.children + (topic.id to loaded),
-                    expanded = if (loaded.isEmpty()) it.expanded else it.expanded + topic.id,
+                    expanded = when {
+                        loaded.isEmpty() -> it.expanded
+                        it.focus != focusWhenAsked -> it.expanded
+                        else -> it.expanded + topic.id
+                    },
                 )
             }
         }
@@ -241,7 +277,8 @@ class QuranTopicsViewModel @Inject constructor(
     private fun focus(topic: QuranTopic) {
         val state = _browseState.value
         val trail = state.focus + ancestorsWithin(state, topic) + topic
-        viewModelScope.launch {
+        browseJob?.cancel()
+        browseJob = viewModelScope.launch {
             val level = state.children[topic.id]
                 ?: quranUseCases.getTopicChildren(topic.id, state.tree)
             _browseState.update {
@@ -270,7 +307,8 @@ class QuranTopicsViewModel @Inject constructor(
         }
         val trail = state.focus.take(index + 1)
         val target = trail.last()
-        viewModelScope.launch {
+        browseJob?.cancel()
+        browseJob = viewModelScope.launch {
             val level = state.children[target.id]
                 ?: quranUseCases.getTopicChildren(target.id, state.tree)
             _browseState.update {
@@ -363,9 +401,12 @@ class QuranTopicsViewModel @Inject constructor(
      * holding is answering the question they opened the subject with.
      */
     private fun loadDetail(topicId: Int, tree: TopicTree, fromSurah: Int? = null) {
-        viewModelScope.launch {
+        requestedTopicId = topicId
+        detailJob?.cancel()
+        detailJob = viewModelScope.launch {
             _detailState.update { it.copy(isLoading = true) }
             val detail = quranUseCases.getTopicDetail(topicId, tree)
+            if (requestedTopicId != topicId) return@launch
             if (detail == null) {
                 _detailState.value = TopicDetailState(isLoading = false)
                 return@launch
@@ -386,6 +427,11 @@ class QuranTopicsViewModel @Inject constructor(
                 }
                 .sortedByDescending { it.isFromSurah }
 
+            // A hard assign here was the compounding half of the race: with two loads in
+            // flight, the one completing second replaced the whole object — wiping not just
+            // the other topic's detail but any previews that had already landed for it,
+            // walking straight past the staleness guard this same function applies below.
+            if (requestedTopicId != topicId) return@launch
             _detailState.value = TopicDetailState(
                 detail = detail,
                 citationGroups = groups,
