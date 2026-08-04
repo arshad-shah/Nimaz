@@ -1,10 +1,12 @@
 package com.arshadshah.nimaz.presentation.components.molecules
 
+import android.content.res.Configuration
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -34,6 +36,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconWell
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconWellShape
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconWellSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazSwitch
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
@@ -46,8 +49,18 @@ import com.arshadshah.nimaz.presentation.theme.NimazTheme
  * rotates 180° to signal state. Pass a [leadingIcon] for a small tinted accent
  * badge on the left; omit it for a plain header.
  *
+ * The header can also carry a [subtitle] under the title and a [trailing] slot
+ * before the chevron, so a row can summarise its own state without being opened
+ * ("Adhan · 10 min before", plus the time and an enable switch). The header
+ * itself is the expand/collapse target, so anything interactive placed in
+ * [trailing] handles its own taps — a `NimazSwitch` there toggles without
+ * expanding the body.
+ *
  * @param title header text, always visible.
+ * @param subtitle optional summary line under the title, always visible.
  * @param leadingIcon optional accent icon shown in a rounded badge.
+ * @param trailing optional header content rendered between the title and the
+ *   chevron, laid out in the header's [RowScope].
  * @param initiallyExpanded whether the body starts open.
  * @param content the collapsible body; laid out in a [ColumnScope].
  */
@@ -55,7 +68,9 @@ import com.arshadshah.nimaz.presentation.theme.NimazTheme
 fun NimazAccordion(
     title: String,
     modifier: Modifier = Modifier,
+    subtitle: String? = null,
     leadingIcon: ImageVector? = null,
+    trailing: (@Composable RowScope.() -> Unit)? = null,
     initiallyExpanded: Boolean = false,
     content: @Composable ColumnScope.() -> Unit,
 ) {
@@ -83,12 +98,25 @@ fun NimazAccordion(
                     )
                     Spacer(modifier = Modifier.width(12.dp))
                 }
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Medium,
-                    modifier = Modifier.weight(1f)
-                )
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.Medium
+                    )
+                    if (!subtitle.isNullOrBlank()) {
+                        Text(
+                            text = subtitle,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+                if (trailing != null) {
+                    Spacer(modifier = Modifier.width(12.dp))
+                    trailing()
+                    Spacer(modifier = Modifier.width(4.dp))
+                }
                 NimazIcon(
                     imageVector = Icons.Default.ExpandMore,
                     contentDescription = null,
@@ -135,6 +163,70 @@ private fun NimazAccordion_Expanded_Preview() {
         ) {
             Text(
                 text = "Nimaz calculates prayer times from your saved location and the calculation method you choose.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+// The subtitle + trailing configuration the prayer rows are built from: the header
+// has to carry the name, its summary, the prayer time and the enable switch without
+// crowding, which is the first thing that breaks at a large font scale.
+
+@Preview(showBackground = true, widthDp = 400, name = "Accordion — subtitle + trailing")
+@Composable
+private fun NimazAccordion_Trailing_Preview() {
+    NimazTheme {
+        NimazAccordion(
+            title = "Fajr",
+            subtitle = "Adhan · 10 min before",
+            trailing = {
+                Text(
+                    text = "05:12",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(modifier = Modifier.width(12.dp))
+                NimazSwitch(checked = true, onCheckedChange = {})
+            },
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Text(
+                text = "Alert style and reminder settings for Fajr.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+@Preview(
+    showBackground = true,
+    widthDp = 400,
+    name = "Accordion — subtitle + trailing (dark)",
+    uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL
+)
+@Composable
+private fun NimazAccordion_Trailing_Dark_Preview() {
+    NimazTheme {
+        NimazAccordion(
+            title = "Maghrib",
+            subtitle = "Notification only · no reminder",
+            initiallyExpanded = true,
+            trailing = {
+                Text(
+                    text = "20:47",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(modifier = Modifier.width(12.dp))
+                NimazSwitch(checked = false, onCheckedChange = {})
+            },
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Text(
+                text = "Alert style and reminder settings for Maghrib.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
