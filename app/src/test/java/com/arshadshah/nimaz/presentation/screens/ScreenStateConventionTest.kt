@@ -13,10 +13,12 @@ import java.io.File
  * anything read this error field, does this failure path record something a user could
  * see — and a test that merely *runs* the code cannot answer any of them.
  *
- * Each backlog below is seeded with exactly the violations that existed when the
- * screen-state epic began, and shrinks as its layers land. Entries are only ever
- * removed. When a set empties it becomes a pure ratchet: the next regression fails the
- * PR that introduces it.
+ * Each backlog below was seeded with exactly the violations that existed when the
+ * screen-state epic began, and shrank as its layers landed. **All three are empty**, so
+ * all three are pure ratchets: the next regression fails the PR that introduces it.
+ *
+ * Entries only ever come out. If one of these sets ever gains a member, something has
+ * gone in the wrong direction and the commit adding it should say why.
  *
  * See `docs/superpowers/specs/2026-08-05-screen-state-migration-design.md`.
  */
@@ -36,58 +38,38 @@ class ScreenStateConventionTest {
 
     /**
      * `UiState` files declaring an `error` that no screen reads — a failure the user is
-     * never told about. Emptied by layers 2-4 and 6.
+     * never told about.
+     *
+     * **Empty**, as of layer 6. Eleven states started here: seven were given a screen that
+     * renders them, and four were deleted, because no ViewModel ever assigned them and an
+     * error field connected at neither end is not a state — it is a field.
      */
-    private val acceptedUnreadErrors = setOf(
-        // Vestigial: no ViewModel ever assigns these. Layer 6 gives them a producer or
-        // deletes them — an error field connected at neither end is not a state.
-        "FastingUiState.kt",
-        "PrayerTrackerUiState.kt",
-        "QuranUiState.kt",
-        "TasbihUiState.kt",
-    )
+    private val acceptedUnreadErrors = emptySet<String>()
 
     /**
-     * ViewModels with a `launchSafely` that passes no `onFailure`, so the failure reaches
-     * telemetry and the abandoned state still says `isLoading = true`.
+     * ViewModels with a `launchSafely` that turns a spinner on and cannot turn it off with
+     * a reason.
      *
-     * **This list grew, and that is not a regression.** It was seeded at 9 against the tree
-     * before #441, which converted every bare `viewModelScope.launch` in the app to
-     * `launchSafely`. That is a strict improvement — those failures used to escape to the
-     * uncaught handler — but it did the containing half and left the telling half, so 19
-     * ViewModels now hold a reported-but-unshown failure where 9 did before.
+     * **Empty**, as of layer 6 — but the number this reached along the way is the more
+     * useful fact. Seeded at 9. After #441 converted every bare `viewModelScope.launch` in
+     * the app to `launchSafely` — a strict improvement, since those failures used to reach
+     * the uncaught handler — the same question returned **211** call sites, because it was
+     * now being asked of every coroutine in every ViewModel rather than of the loads a
+     * screen waits on.
      *
-     * The check is also cruder than the situation now warrants: it counts `launchSafely(`
-     * against `onFailure =`, so it cannot see a `launchSafely` whose inner flow already
-     * reports through a `catchAndReport` fallback — several of the entries below are that
-     * shape and are already correct. Layer 4 both tightens the check and empties this list;
-     * doing it here would have meant re-auditing 19 ViewModels inside a layer about eight.
+     * Answering it 211 times would have meant rubber-stamping, so the question was narrowed
+     * instead, to the one this epic can actually assert: **if a launch sets
+     * `isLoading = true`, it must be able to set it false with a reason.** That is the
+     * defect class — a spinner that never stops — and it left exactly two real sites, both
+     * fixed here. A `launchSafely` that only performs a repository write is fire-and-forget
+     * by construction: nothing is showing a spinner for it, so there is no stuck state for
+     * a failure to strand.
+     *
+     * What is *not* covered, and is worth its own pass one day: whether those
+     * fire-and-forget writes should tell the user. `launchBestEffort` marks the ones where
+     * the answer has been considered and is no.
      */
-    private val acceptedSilentFailures = setOf(
-        "AskViewModel.kt",
-        "CalendarViewModel.kt",
-        "CatalogViewModel.kt",
-        "DuaViewModel.kt",
-        "FastingViewModel.kt",
-        "HadithViewModel.kt",
-        "HomeViewModel.kt",
-        "KhatamViewModel.kt",
-        "LocationViewModel.kt",
-        "MonthlyPrayerTimesViewModel.kt",
-        "OnboardingViewModel.kt",
-        "PrayerTimesViewModel.kt",
-        "PrayerTrackerViewModel.kt",
-        "QaidaReaderViewModel.kt",
-        "QiblaViewModel.kt",
-        "QuranTopicsViewModel.kt",
-        "QuranViewModel.kt",
-        "SearchSettingsViewModel.kt",
-        "SearchViewModel.kt",
-        "SettingsViewModel.kt",
-        "SyncViewModel.kt",
-        "TafseerViewModel.kt",
-        "TasbihViewModel.kt",
-    )
+    private val acceptedSilentFailures = emptySet<String>()
 
     @Test
     fun `no screen rolls its own loading spinner`() {
@@ -178,10 +160,24 @@ class ScreenStateConventionTest {
             if (at < 0) return silent
             from = at + 1
             val call = source.substring(at, callEnd(source, at))
+            // Only loads a screen waits on. A `launchSafely` that just calls a repository
+            // write is fire-and-forget by construction: nothing is showing a spinner for
+            // it, so there is no stuck state for a failure to leave behind.
+            val context = source.substring(maxOf(0, at - LOOKBEHIND), at) + call
+            if (!context.contains("isLoading = true")) continue
             val guarded = Regex("""catchAndReport\([^)]*\)\s*\{[^}]""").containsMatchIn(call)
             if ("onFailure" !in call && !guarded) silent += at
         }
     }
+
+    /**
+     * How far back to look for the `isLoading = true` that a `launchSafely` is clearing.
+     *
+     * Loads write the flag on the line or two above the launch far more often than inside
+     * it, so the window has to reach behind the call — but only far enough to catch the
+     * same statement group, not the previous function.
+     */
+    private val LOOKBEHIND = 400
 
     /** End index of the `launchSafely(...) { ... }` beginning at [start], braces balanced. */
     private fun callEnd(source: String, start: Int): Int {

@@ -221,7 +221,14 @@ class QuranTopicsViewModel @Inject constructor(
     }
 
     private fun loadRoots(tree: TopicTree) {
-        launchSafely(telemetry, AppAnalytics.Feature.QURAN_TOPICS, "load_roots") {
+        launchSafely(
+            telemetry, AppAnalytics.Feature.QURAN_TOPICS, "load_roots",
+            // The browse screen has no error surface of its own — `isAvailable` already
+            // distinguishes "this install has no thematic content" from "this branch is
+            // empty", and a failed read is a third thing. Clearing the spinner resolves it
+            // to the unavailable copy, which is at least true of what is on screen.
+            onFailure = { _browseState.update { it.copy(isLoading = false) } },
+        ) {
             val available = quranUseCases.hasThematicContent()
             val roots = if (available) quranUseCases.getTopicTreeRoots(tree) else emptyList()
             val branches =

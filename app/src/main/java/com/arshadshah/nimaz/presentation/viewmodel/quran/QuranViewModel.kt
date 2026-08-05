@@ -713,7 +713,6 @@ class QuranViewModel @Inject constructor(
         _readerState.update {
             it.copy(
                 isLoading = true,
-                error = null,
                 readingMode = ReadingMode.SURAH,
                 surahWithAyahs = null,
                 ayahs = emptyList(),
@@ -759,7 +758,6 @@ class QuranViewModel @Inject constructor(
         _readerState.update {
             it.copy(
                 isLoading = true,
-                error = null,
                 readingMode = ReadingMode.JUZ,
                 surahWithAyahs = null,
                 ayahs = emptyList(),
@@ -826,7 +824,6 @@ class QuranViewModel @Inject constructor(
             // Load from database - DON'T clear ayahs to prevent flicker
             _readerState.update {
                 it.copy(
-                    error = null,
                     readingMode = ReadingMode.PAGE,
                     surahWithAyahs = null,
                     // Keep existing ayahs to prevent flicker during page transition

@@ -277,7 +277,12 @@ class KhatamViewModel @Inject constructor(
             mode = KhatamFormMode.Edit(khatamId),
             isLoading = true
         )
-        launchSafely(telemetry, AppAnalytics.Feature.KHATAM, "start_edit") {
+        launchSafely(
+            telemetry, AppAnalytics.Feature.KHATAM, "start_edit",
+            // Without this, a failed read left the edit form on its spinner for good: the
+            // only `isLoading = false` was inside the block, past the throw.
+            onFailure = { _formState.update { it.copy(isLoading = false) } },
+        ) {
             val khatam = runCatching {
                 khatamUseCases.observeKhatamById(khatamId).filterNotNull().first()
             }.getOrNull()

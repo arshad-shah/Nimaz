@@ -59,7 +59,6 @@ data class QuranHomeUiState(
      */
     val hasThematicContent: Boolean = false,
     val isLoading: Boolean = true,
-    val error: String? = null
 )
 
 data class QuranReaderUiState(
@@ -70,7 +69,6 @@ data class QuranReaderUiState(
     val subtitle: String = "",
     val currentAyahIndex: Int = 0,
     val isLoading: Boolean = true,
-    val error: String? = null,
     val showTranslation: Boolean = true,
     val showTransliteration: Boolean = false,
     val selectedTranslatorId: String = "sahih_international",

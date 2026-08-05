@@ -10,7 +10,6 @@ data class PrayerTrackerUiState(
     val prayerRecords: List<PrayerRecord> = emptyList(),
     val prayerTimes: PrayerTimes? = null,
     val isLoading: Boolean = true,
-    val error: String? = null
 )
 
 data class PrayerStatsUiState(

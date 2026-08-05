@@ -11,7 +11,6 @@ data class TasbihPresetsUiState(
     val selectedCategory: TasbihCategory? = null,
     val favorites: Set<Long> = emptySet(),
     val isLoading: Boolean = true,
-    val error: String? = null
 ) {
     /**
      * The presets the list should show — **derived**, never stored.
