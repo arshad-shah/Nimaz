@@ -177,6 +177,11 @@
     <string name="qaida_subtitle">Learn to read the Qur\'an, letter by letter</string>
     <string name="prayer_times_menu_subtitle">Daily prayer times with a month view</string>
     <string name="zakat">Zakat</string>
+    <string name="zakat_calculate_failed">That calculation couldn\'t be completed</string>
+    <string name="zakat_save_failed">That calculation couldn\'t be saved</string>
+    <string name="zakat_mark_paid_failed">That couldn\'t be marked as paid</string>
+    <string name="zakat_delete_failed">That calculation couldn\'t be deleted</string>
+    <string name="zakat_history_load_failed">Your past calculations couldn\'t be loaded</string>
     <string name="zakat_subtitle">Zakat calculator</string>
     <string name="support">Support</string>
     <string name="about_nimaz">About Nimaz</string>

@@ -56,7 +56,6 @@ class ScreenStateConventionTest {
         "PrayerTrackerUiState.kt",
         "QuranUiState.kt",
         "TasbihUiState.kt",
-        "ZakatUiState.kt",
     )
 
     /**
@@ -70,7 +69,6 @@ class ScreenStateConventionTest {
         "DuaViewModel.kt",
         "PrayerTrackerViewModel.kt",
         "SearchSettingsViewModel.kt",
-        "ZakatViewModel.kt",
     )
 
     @Test
@@ -180,6 +178,6 @@ class ScreenStateConventionTest {
         "SyncUiState.kt" to setOf("SyncScreen.kt"),
         "TafseerChaptersUiState.kt" to setOf("TafseerChaptersScreen.kt"),
         "TasbihUiState.kt" to setOf("TasbihScreen.kt"),
-        "ZakatUiState.kt" to setOf("ZakatCalculatorScreen.kt"),
+        "ZakatUiState.kt" to setOf("ZakatCalculatorScreen.kt", "ZakatHistoryScreen.kt"),
     )
 }

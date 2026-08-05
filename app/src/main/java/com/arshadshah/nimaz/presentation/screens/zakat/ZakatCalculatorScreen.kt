@@ -74,6 +74,9 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazIconWell
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconWellShape
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconWellSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorState
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.molecules.ZakatHeroStat
@@ -223,6 +226,25 @@ private fun ZakatCompactContent(
             )
         }
         item { LiabilityInputCards(state = state, viewModel = viewModel) }
+
+        // INLINE, and above the result rather than in place of the form: every figure the
+        // user typed is still on screen and still valid, and losing an afternoon of asset
+        // entries to report a failed sum would be far worse than the failure.
+        state.error?.let { error ->
+            item {
+                NimazErrorState(
+                    title = stringResource(error.message),
+                    kind = error.kind,
+                    variant = NimazErrorVariant.INLINE,
+                    primaryAction = NimazErrorDefaults.retry(
+                        onRetry = { viewModel.onEvent(ZakatEvent.Recalculate) },
+                        label = stringResource(R.string.try_again),
+                    ),
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                )
+            }
+        }
+
         state.calculation?.let { calculation ->
             item {
                 Spacer(modifier = Modifier.height(8.dp))
