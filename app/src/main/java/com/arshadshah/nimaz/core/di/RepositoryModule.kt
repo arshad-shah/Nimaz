@@ -18,6 +18,7 @@ import com.arshadshah.nimaz.data.repository.QaidaRepositoryImpl
 import com.arshadshah.nimaz.data.repository.QuranRepositoryImpl
 import com.arshadshah.nimaz.data.repository.TafseerRepositoryImpl
 import com.arshadshah.nimaz.data.repository.TasbihRepositoryImpl
+import com.arshadshah.nimaz.data.repository.UserDataRepositoryImpl
 import com.arshadshah.nimaz.data.repository.ZakatRepositoryImpl
 import com.arshadshah.nimaz.domain.repository.AsmaUlHusnaRepository
 import com.arshadshah.nimaz.domain.repository.AsmaUnNabiRepository
@@ -35,6 +36,7 @@ import com.arshadshah.nimaz.domain.repository.ProphetRepository
 import com.arshadshah.nimaz.domain.repository.QaidaRepository
 import com.arshadshah.nimaz.domain.repository.QuranRepository
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
+import com.arshadshah.nimaz.domain.repository.UserDataRepository
 import com.arshadshah.nimaz.domain.repository.settings.AiSettings
 import com.arshadshah.nimaz.domain.repository.settings.AppSettings
 import com.arshadshah.nimaz.domain.repository.settings.DuaDisplaySettings
@@ -378,6 +380,12 @@ abstract class RepositoryModule {
     abstract fun bindIslamicEventRepository(
         islamicEventRepositoryImpl: IslamicEventRepositoryImpl
     ): IslamicEventRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindUserDataRepository(
+        userDataRepositoryImpl: UserDataRepositoryImpl
+    ): UserDataRepository
 
     @Binds
     @Singleton

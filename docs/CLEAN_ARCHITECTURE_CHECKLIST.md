@@ -89,6 +89,15 @@ grep -rlnE "private val [a-zA-Z]+: [A-Za-z]+(Dao|RepositoryImpl)" \
   into the repositories. Home no longer imports any `data.local.database.*`.
 - [x] ~~**`QuranViewModel` imports `PageAyahRange`** (DAO type).~~ **Resolved** with AP-1.
 - [x] ~~**`QuranPageGrid` (organism) imports `PageAyahRange`** (DAO type).~~ **Resolved** with AP-1.
+- [x] ~~**`SettingsViewModel` injects `NimazUserDatabase`** — a whole Room database in the
+  presentation layer — and writes out eleven `xxxDao()` clears inline for "delete all my data".~~
+  **Resolved.** The operation is now `UserDataRepository.clearAllUserData()` behind
+  `ClearAllUserDataUseCase`; `UserDataRepositoryImpl` owns the DAO list, and the doc comment about
+  never reaching the content corpus moved with it. A new table added to `NimazUserDatabase` now has
+  exactly one place to be registered, instead of a list a ViewModel could quietly fall behind on.
+  **Detect a regression:**
+  `grep -rn "NimazUserDatabase\|RoomDatabase\|Dao\b" app/src/main/java/com/arshadshah/nimaz/presentation --include='*ViewModel.kt'`
+  — should return nothing.
 
 ---
 
