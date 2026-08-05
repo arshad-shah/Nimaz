@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -58,7 +59,7 @@ class TafseerViewModel @Inject constructor(
             }
             is TafseerEvent.NavigateToAyah -> onAyahChanged(event.index)
             is TafseerEvent.NavigateToTafseerPage ->
-                _state.value = _state.value.copy(currentTafseerPage = event.page)
+                _state.update { it.copy(currentTafseerPage = event.page) }
 
             is TafseerEvent.SwitchSource -> {
                 AppAnalytics.logFeatureUsed(AppAnalytics.Feature.TAFSEER, "switch_source")
@@ -101,7 +102,7 @@ class TafseerViewModel @Inject constructor(
 
     private fun loadSurah(surahNumber: Int, ayahNumber: Int) {
         viewModelScope.launch {
-            _state.value = _state.value.copy(isLoading = true, surahNumber = surahNumber)
+            _state.update { it.copy(isLoading = true, surahNumber = surahNumber) }
 
             val surah = quranUseCases.getSurahByNumber(surahNumber)
             val ayahs = quranUseCases.getAyahsBySurah(surahNumber).first()
@@ -109,12 +110,14 @@ class TafseerViewModel @Inject constructor(
             val initialIndex = ayahs.indexOfFirst { it.ayahNumber == ayahNumber }
                 .coerceAtLeast(0)
 
-            _state.value = _state.value.copy(
-                ayahs = ayahs,
-                currentAyahIndex = initialIndex,
-                surahName = surah?.nameEnglish ?: "Surah $surahNumber",
-                isLoading = false
-            )
+            _state.update {
+                it.copy(
+                    ayahs = ayahs,
+                    currentAyahIndex = initialIndex,
+                    surahName = surah?.nameEnglish ?: "Surah $surahNumber",
+                    isLoading = false
+                )
+            }
 
             loadTafseerForCurrentAyah()
         }
@@ -123,12 +126,12 @@ class TafseerViewModel @Inject constructor(
     private fun onAyahChanged(index: Int) {
         val ayahs = _state.value.ayahs
         if (index < 0 || index >= ayahs.size) return
-        _state.value = _state.value.copy(currentAyahIndex = index)
+        _state.update { it.copy(currentAyahIndex = index) }
         loadTafseerForCurrentAyah()
     }
 
     private fun switchSource(source: TafseerSource) {
-        _state.value = _state.value.copy(selectedSource = source)
+        _state.update { it.copy(selectedSource = source) }
         loadTafseerForCurrentAyah()
     }
 
@@ -144,42 +147,60 @@ class TafseerViewModel @Inject constructor(
         ayahAnnotationsJob = viewModelScope.launch {
             val tafseer =
                 tafseerUseCases.getTafseerForAyah(ayah.surahNumber, ayah.ayahNumber, tafseerId)
-            // Probe every source so the UI can suggest an alternate one when the
-            // selected source has no content for this ayah (seed coverage is partial).
-            val available = TafseerSource.entries.filter { source ->
-                tafseerUseCases.getTafseerForAyah(ayah.surahNumber, ayah.ayahNumber, source.id)
-                    ?.text?.isNotBlank() == true
-            }.toSet()
-            // Only reset the reading position when the block itself changed —
-            // swiping to the next ayah of the same block should hold position,
-            // not reopen the commentary from page 1.
-            val sameBlock = tafseer != null && tafseer.id == _state.value.currentTafseer?.id
-            _state.value = _state.value.copy(
-                currentTafseer = tafseer,
-                currentTafseerPage = if (sameBlock) _state.value.currentTafseerPage else 0,
-                availableSources = available,
-                // Keyed on the verse, not the block: a block can span nine verses and the
-                // subjects the corpus files 43:81 under are not the ones it files 43:89 under.
-                topics = quranUseCases.getTopicsForAyah(ayah.id)
-            )
+
+            // Probed **only when the selected source came back empty**, which is the one time
+            // the answer is used: `availableSources` reaches exactly one consumer,
+            // `TafseerEmptyState`, and that is rendered only on an empty selection.
+            //
+            // It used to run unconditionally — one read per `TafseerSource` on top of the one
+            // above, on every ayah swipe *and* every source switch. With five sources, swiping
+            // through Al-Baqarah issued 286 × 6 = 1,716 reads to populate a set that all but a
+            // handful of those verses never looked at.
+            val available = if (tafseer?.text.isNullOrBlank()) {
+                TafseerSource.entries.filter { source ->
+                    source.id != tafseerId &&
+                        tafseerUseCases
+                            .getTafseerForAyah(ayah.surahNumber, ayah.ayahNumber, source.id)
+                            ?.text?.isNotBlank() == true
+                }.toSet()
+            } else {
+                emptySet()
+            }
+            val topics = quranUseCases.getTopicsForAyah(ayah.id)
+
+            _state.update {
+                // Only reset the reading position when the block itself changed —
+                // swiping to the next ayah of the same block should hold position,
+                // not reopen the commentary from page 1.
+                val sameBlock = tafseer != null && tafseer.id == it.currentTafseer?.id
+                it.copy(
+                    currentTafseer = tafseer,
+                    currentTafseerPage = if (sameBlock) it.currentTafseerPage else 0,
+                    availableSources = available,
+                    // Keyed on the verse, not the block: a block can span nine verses and the
+                    // subjects the corpus files 43:81 under are not the ones it files 43:89
+                    // under.
+                    topics = topics
+                )
+            }
 
             if (tafseer != null) {
                 launch {
                     tafseerUseCases.getHighlightsForRange(
                         tafseer.surahNumber, tafseer.ayahStart, tafseer.ayahEnd, tafseerId
                     ).collectLatest { highlights ->
-                        _state.value = _state.value.copy(highlights = highlights)
+                        _state.update { it.copy(highlights = highlights) }
                     }
                 }
                 launch {
                     tafseerUseCases.getNotesForRange(
                         tafseer.surahNumber, tafseer.ayahStart, tafseer.ayahEnd, tafseerId
                     ).collectLatest { notes ->
-                        _state.value = _state.value.copy(notes = notes)
+                        _state.update { it.copy(notes = notes) }
                     }
                 }
             } else {
-                _state.value = _state.value.copy(highlights = emptyList(), notes = emptyList())
+                _state.update { it.copy(highlights = emptyList(), notes = emptyList()) }
             }
         }
     }
