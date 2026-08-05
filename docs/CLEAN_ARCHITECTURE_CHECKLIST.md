@@ -934,26 +934,43 @@ module (`ObserveLocalEventsUseCase`) is a false positive. Read the hit before ac
 
 ---
 
-### AP-7.12 · Screen states improvised per screen
+### AP-7.16 · Screen states improvised per screen
 
-- [ ] **19 screens spin their own spinner, 11 `UiState`s carry an error nothing reads, and 9
-  ViewModels `launchSafely` without an `onFailure`.** Three separate defects, one missing rule.
-  A failure that reaches only telemetry leaves the abandoned state saying `isLoading = true`, so
-  the screen spins forever; a failure that reaches state nothing renders is invisible; and
-  `SurahSubjects`/`Passages`/`Background` evaluate `isEmpty()` before `error`, so a failed load
-  is reported to the reader as "there is nothing here".
+- [x] ~~**19 screens spin their own spinner, 11 `UiState`s carry an error nothing reads, and 9
+  ViewModels `launchSafely` without an `onFailure`.**~~ **Resolved.** Three separate defects, one
+  missing rule. A failure that reaches only telemetry left the abandoned state saying
+  `isLoading = true`, so the screen span forever; a failure that reached state nothing renders
+  was invisible; and `SurahSubjects`/`Passages`/`Background` evaluated `isEmpty()` before
+  `error`, so a failed load was reported to the reader as "there is nothing here".
 
-  Held by `ScreenStateConventionTest`, whose three backlogs are seeded with exactly the above
-  and asserted in both directions — a stale entry fails as loudly as a new violation. Tick this
-  when all three empty. The contract and the six delivery layers are in
+  Held by `ScreenStateConventionTest`, whose three backlogs were seeded with exactly the above,
+  asserted in both directions — a stale entry fails as loudly as a new violation — and are
+  **all now empty**. 25 spinner call sites across 19 screens converted; 7 states given a screen
+  that renders them and 4 deleted for having no producer; the failing-load check narrowed to the
+  question it can assert (see below) and its two real sites fixed.
+
+  Two things came out of it that were not in the plan. **`launchBestEffort`** exists so a
+  deliberately-quiet failure is distinguishable from a forgotten `onFailure` — the ratchet
+  flagged three such sites, which was the right question and the wrong answer. And the
+  unread-error check had to stop asking "does any screen in the feature's *package* read
+  `.error`": `quran/` serves four ViewModels, so two states passed without a line of their code
+  changing. It maps each `UiState` to the screen files that render it now.
+
+  The failing-load check asks **"if a launch sets `isLoading = true`, can it set it false with a
+  reason?"** — deliberately narrower than "every `launchSafely` has an `onFailure`", which after
+  #441 was 211 call sites and would have meant rubber-stamping. That narrowing agrees with
+  AP-7.12's triage: a `launchSafely` performing only a repository write is fire-and-forget, and
+  nothing is showing a spinner for it.
+
+  The contract and the six delivery layers are in
   `docs/superpowers/specs/2026-08-05-screen-state-migration-design.md`; the rule itself is
   `ARCHITECTURE.md` §8.
 
   ```bash
+  # All three should print nothing but the two determinate rings.
   cd app/src/main/java/com/arshadshah/nimaz
-  echo "hand-rolled spinners:";  grep -rln --include='*.kt' 'CircularProgressIndicator(' presentation/screens
-  echo "UiStates with an error:"; grep -rln --include='*.kt' -E 'val error(Res)? ' presentation/viewmodel | sort
-  echo "silent launchSafely:";    grep -rc 'launchSafely(' --include='*ViewModel.kt' presentation/viewmodel
+  grep -rn --include='*.kt' 'CircularProgressIndicator(' presentation/screens
+  ./gradlew :app:testDebugUnitTest --tests '*ScreenStateConventionTest*'
   ```
 
 ---
