@@ -1334,6 +1334,8 @@
     <string name="surah_info_passage_verse">1 verse</string>
 
     <!-- Surah passages screen -->
+    <string name="surah_thematic_load_failed">This surah\'s notes couldn\'t be loaded</string>
+    <string name="surah_thematic_load_failed_body">The background and passage outline are stored on your device, so trying again usually works.</string>
     <string name="surah_passages_filter_hint">Filter passages</string>
     <string name="surah_passages_reading">Reading</string>
     <string name="surah_passages_none_title">Nothing matched</string>

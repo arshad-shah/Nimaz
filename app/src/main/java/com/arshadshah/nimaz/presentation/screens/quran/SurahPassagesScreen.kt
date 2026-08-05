@@ -11,7 +11,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.SearchOff
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -26,6 +25,9 @@ import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.AyahTheme
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorState
+import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
 import com.arshadshah.nimaz.presentation.components.molecules.NimazRangeRow
 import com.arshadshah.nimaz.presentation.components.organisms.NimazSearchBar
@@ -95,10 +97,25 @@ fun SurahPassagesScreen(
                 .padding(padding),
         ) {
             if (state.isLoading) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center,
-                ) { CircularProgressIndicator() }
+                NimazLoadingState()
+                return@Column
+            }
+
+            // Before the search bar and the empty branch: with an unfiltered list, an empty
+            // result is indistinguishable from a failed load, and the empty copy says
+            // "clear the filter to see all 0" — advice for a filter the reader never set.
+            val error = state.error
+            if (error != null) {
+                NimazErrorState(
+                    title = stringResource(error.message),
+                    message = stringResource(R.string.surah_thematic_load_failed_body),
+                    kind = error.kind,
+                    details = error.details,
+                    primaryAction = NimazErrorDefaults.retry(
+                        onRetry = { viewModel.onEvent(SurahThematicEvent.Load(surahNumber)) },
+                        label = stringResource(R.string.try_again),
+                    ),
+                )
                 return@Column
             }
 

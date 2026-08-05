@@ -3,6 +3,7 @@ package com.arshadshah.nimaz.presentation.viewmodel.quran
 import com.arshadshah.nimaz.domain.model.AyahTheme
 import com.arshadshah.nimaz.domain.model.Surah
 import com.arshadshah.nimaz.domain.model.SurahOverview
+import com.arshadshah.nimaz.presentation.viewmodel.UiError
 
 /**
  * One surah's background and its passage outline — the two screens that carry the long stuff.
@@ -27,7 +28,7 @@ data class SurahBackgroundState(
     val proseFontSize: Float = DEFAULT_PROSE_FONT_SIZE,
     val isLoading: Boolean = true,
     /** Set when the background fails to load, so the screen can say so rather than look empty. */
-    val error: String? = null,
+    val error: UiError? = null,
 )
 
 data class SurahPassagesState(
@@ -36,7 +37,7 @@ data class SurahPassagesState(
     val query: String = "",
     val isLoading: Boolean = true,
     /** Set when the passages fail to load. */
-    val error: String? = null,
+    val error: UiError? = null,
 ) {
     /**
      * The outline, narrowed by the filter.
