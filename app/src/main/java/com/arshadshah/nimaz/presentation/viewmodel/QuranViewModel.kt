@@ -435,10 +435,10 @@ class QuranViewModel @Inject constructor(
 
     fun onEvent(event: QuranEvent) {
         when (event) {
-            is QuranEvent.LoadSurah -> AppAnalytics.logFeatureUsed("quran", "open_surah")
-            is QuranEvent.PlaySurahAudio -> AppAnalytics.logFeatureUsed("quran", "play_surah_audio")
-            is QuranEvent.PlayAyahAudio -> AppAnalytics.logFeatureUsed("quran", "play_ayah_audio")
-            is QuranEvent.ToggleBookmark -> AppAnalytics.logFeatureUsed("quran", "toggle_bookmark")
+            is QuranEvent.LoadSurah -> AppAnalytics.logFeatureUsed(AppAnalytics.Feature.QURAN, "open_surah")
+            is QuranEvent.PlaySurahAudio -> AppAnalytics.logFeatureUsed(AppAnalytics.Feature.QURAN, "play_surah_audio")
+            is QuranEvent.PlayAyahAudio -> AppAnalytics.logFeatureUsed(AppAnalytics.Feature.QURAN, "play_ayah_audio")
+            is QuranEvent.ToggleBookmark -> AppAnalytics.logFeatureUsed(AppAnalytics.Feature.QURAN, "toggle_bookmark")
             is QuranEvent.Search -> AppAnalytics.logSearch("quran", event.query.trim().length)
             else -> {}
         }

@@ -126,7 +126,7 @@ class OnboardingViewModel @Inject constructor(
                 }
             } catch (e: Exception) {
                 CrashReporter.recordException(e)
-                AppAnalytics.logError("onboarding", "check_status", e.message)
+                AppAnalytics.logError(AppAnalytics.Feature.ONBOARDING, "check_status", e.message)
                 _state.update {
                     it.copy(
                         isLoading = false,
@@ -151,7 +151,12 @@ class OnboardingViewModel @Inject constructor(
             } catch (e: Exception) {
                 CrashReporter.recordException(e)
                 _state.update { it.copy(error = e.message) }
-                AppAnalytics.logError("onboarding", e.javaClass.simpleName, e.message)
+                // The `type` is the operation, as at every other logError site. Passing
+                // `e.javaClass.simpleName` made this one dimension unbounded — a new
+                // exception class is a new value — so onboarding failures never grouped
+                // with anything and could not be counted. The class still reaches
+                // Crashlytics above, where cardinality is the point.
+                AppAnalytics.logError(AppAnalytics.Feature.ONBOARDING, "complete", e.message)
             }
         }
     }
@@ -256,7 +261,7 @@ class OnboardingViewModel @Inject constructor(
                 }
             } catch (e: Exception) {
                 CrashReporter.recordException(e)
-                AppAnalytics.logError("onboarding", "detect_location", e.message)
+                AppAnalytics.logError(AppAnalytics.Feature.ONBOARDING, "detect_location", e.message)
                 _state.update { it.copy(error = "Failed to detect location: ${e.message}") }
             }
         }
@@ -320,7 +325,7 @@ class OnboardingViewModel @Inject constructor(
             }
         } catch (e: Exception) {
             CrashReporter.recordException(e)
-            AppAnalytics.logError("onboarding", "reverse_geocode", e.message)
+            AppAnalytics.logError(AppAnalytics.Feature.ONBOARDING, "reverse_geocode", e.message)
             "Unknown Location"
         }
     }

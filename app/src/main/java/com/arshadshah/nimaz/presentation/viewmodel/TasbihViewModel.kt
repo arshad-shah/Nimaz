@@ -202,16 +202,16 @@ class TasbihViewModel @Inject constructor(
 
     fun onEvent(event: TasbihEvent) {
         when (event) {
-            TasbihEvent.StartSession -> AppAnalytics.logFeatureUsed("tasbih", "session_start")
-            TasbihEvent.CompleteSession -> AppAnalytics.logFeatureUsed("tasbih", "session_complete")
-            TasbihEvent.Reset -> AppAnalytics.logFeatureUsed("tasbih", "reset")
+            TasbihEvent.StartSession -> AppAnalytics.logFeatureUsed(AppAnalytics.Feature.TASBIH, "session_start")
+            TasbihEvent.CompleteSession -> AppAnalytics.logFeatureUsed(AppAnalytics.Feature.TASBIH, "session_complete")
+            TasbihEvent.Reset -> AppAnalytics.logFeatureUsed(AppAnalytics.Feature.TASBIH, "reset")
             is TasbihEvent.CreateCustomPreset -> AppAnalytics.logFeatureUsed(
-                "tasbih",
+                AppAnalytics.Feature.TASBIH,
                 "preset_created"
             )
 
             is TasbihEvent.DeleteCustomPreset -> AppAnalytics.logFeatureUsed(
-                "tasbih",
+                AppAnalytics.Feature.TASBIH,
                 "preset_deleted"
             )
 
@@ -687,7 +687,7 @@ class TasbihViewModel @Inject constructor(
     companion object {
         /** Bump when new default presets are added to DefaultTasbihPresets. */
         private const val LATEST_PRESET_SEED_VERSION = 1
-        private const val DOMAIN = "tasbih"
+        private const val DOMAIN = AppAnalytics.Feature.TASBIH
         private const val MILLIS_PER_DAY = 24L * 60 * 60 * 1000
         private const val MILLIS_PER_WEEK = 7 * MILLIS_PER_DAY
     }

@@ -474,6 +474,79 @@ object AppAnalytics {
         const val QUERY_LENGTH = "query_length"
     }
 
+    /**
+     * Feature names — the `feature` dimension of [logFeatureUsed] and the `domain` of
+     * [logError].
+     *
+     * The catalog stopped one level short of these: `Event` and `Param` named the *event* and
+     * *parameter*, while the values that actually vary per call site stayed hand-typed strings.
+     * About 120 of them across the ViewModel layer, with no compiler check — and the drift is
+     * measurable, not hypothetical:
+     *
+     *  - `"khatam"` and `"khatam_save"` were two domains for one feature, splitting its
+     *    dashboards in half.
+     *  - `"prayer_times"` and `"monthly_prayer_times"` were two features for one screen family.
+     *
+     * Both are reconciled here, so historical data for the retired value will not join the
+     * surviving one — noted in the PR that landed this.
+     */
+    object Feature {
+        const val AI_ASK = "ai_ask"
+        const val ASMA_UL_HUSNA = "asma_ul_husna"
+        const val ASMA_UN_NABI = "asma_un_nabi"
+        const val BOOKMARKS = "bookmarks"
+        const val CALENDAR = "calendar"
+        const val DUA = "dua"
+        const val FASTING = "fasting"
+        const val HADITH = "hadith"
+        const val HELP = "help"
+        const val HOME = "home"
+        const val KHATAM = "khatam"
+        const val LOCATION = "location"
+        const val ONBOARDING = "onboarding"
+
+        /**
+         * Covers the monthly timetable too.
+         *
+         * `"monthly_prayer_times"` used to be its own feature, which meant the timetable's
+         * usage never appeared in the prayer-times funnel. The screen is a view of the same
+         * feature; the month is an *action*, not a different product area.
+         */
+        const val PRAYER_TIMES = "prayer_times"
+        const val PRAYER_TRACKER = "prayer_tracker"
+        const val PROPHET = "prophet"
+        const val QAIDA = "qaida"
+        const val QIBLA = "qibla"
+        const val QURAN = "quran"
+        const val QURAN_TOPICS = "quran_topics"
+        const val SEARCH = "search"
+        const val SETTINGS = "settings"
+        const val SYNC = "sync"
+        const val TAFSEER = "tafseer"
+        const val TASBIH = "tasbih"
+        const val ZAKAT = "zakat"
+    }
+
+    /**
+     * Action names — the `action` dimension of [logFeatureUsed].
+     *
+     * Deliberately generic where the behaviour is generic: `OPEN_DETAIL`, `TOGGLE_FAVORITE`,
+     * `SEARCH` and `TOGGLE_FAVORITES_FILTER` are the same four verbs written out three times
+     * across the Asma ul-Husna, Asma un-Nabi and Prophet ViewModels (see #361), and naming them
+     * once is the first step to those three sharing an implementation.
+     */
+    object Action {
+        const val OPEN_DETAIL = "open_detail"
+        const val TOGGLE_FAVORITE = "toggle_favorite"
+        const val TOGGLE_FAVORITES_FILTER = "toggle_favorites_filter"
+        const val SEARCH = "search"
+        const val SAVE = "save"
+        const val DELETE = "delete"
+        const val COMPLETE = "complete"
+        const val SHARE = "share"
+        const val VIEW_MONTH = "view_month"
+    }
+
     /** User-property names (Firebase limit: 24 chars). */
     object UserProperty {
         const val NOTIFICATIONS_ENABLED = "notifications_enabled"

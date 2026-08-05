@@ -512,6 +512,33 @@ channels — the stack trace to Crashlytics, the frequency to analytics — and 
 only as the production binding and for callers with no injection point (`NimazApp`, `BootReceiver`,
 workers).
 
+#### Analytics values come from the catalog, never a string literal
+
+`AppAnalytics` names its *events* and *parameters* in `object Event` and `object Param`. It did
+not name the **values** — the feature, action, domain and setting each call site passes — and
+about 120 of those were typed by hand across the ViewModel layer with no compiler check. The
+drift that produced was measurable, not hypothetical: `"khatam"` beside `"khatam_save"` split one
+feature's dashboards, `"prayer_times"` beside `"monthly_prayer_times"` split one screen family's,
+and one prayer state arrived in `Param.STATUS` under four spellings.
+
+Use `AppAnalytics.Feature.*` and `AppAnalytics.Action.*`:
+
+```kotlin
+telemetry.featureUsed(AppAnalytics.Feature.QURAN, AppAnalytics.Action.OPEN_DETAIL)
+telemetry.failure(AppAnalytics.Feature.HADITH, "load_chapter", throwable)
+```
+
+Two rules the drift teaches:
+
+- **A feature is a product area, not a screen.** A month view of the prayer timetable is
+  `Feature.PRAYER_TIMES` with a month-shaped *action*, not a feature of its own — otherwise its
+  usage never appears in the feature's funnel.
+- **The `type`/`action` dimension must be bounded.** Passing `e.javaClass.simpleName` makes it
+  unbounded, so those failures group with nothing and cannot be counted. The exception class
+  belongs in the Crashlytics report, where cardinality is the point.
+
+Adding a feature means adding a constant, in the same commit as the call site.
+
 #### "Today" comes from `TodayProvider`, never `LocalDate.now()`
 
 `LocalDate.now()` was called directly at **39 sites across 12 ViewModels**, always at `init`

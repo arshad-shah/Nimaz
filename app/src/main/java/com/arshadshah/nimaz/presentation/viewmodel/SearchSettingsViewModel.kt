@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
@@ -138,6 +139,6 @@ class SearchSettingsViewModel @Inject constructor(
     }
 
     private companion object {
-        private const val DOMAIN = "ai_ask"
+        private const val DOMAIN = AppAnalytics.Feature.AI_ASK
     }
 }

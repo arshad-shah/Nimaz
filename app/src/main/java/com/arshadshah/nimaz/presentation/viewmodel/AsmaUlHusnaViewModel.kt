@@ -55,18 +55,18 @@ class AsmaUlHusnaViewModel @Inject constructor(
     fun onEvent(event: AsmaUlHusnaEvent) {
         when (event) {
             is AsmaUlHusnaEvent.LoadDetail -> AppAnalytics.logFeatureUsed(
-                "asma_ul_husna",
+                AppAnalytics.Feature.ASMA_UL_HUSNA,
                 "open_detail"
             )
 
             is AsmaUlHusnaEvent.ToggleFavorite -> AppAnalytics.logFeatureUsed(
-                "asma_ul_husna",
+                AppAnalytics.Feature.ASMA_UL_HUSNA,
                 "toggle_favorite"
             )
 
-            is AsmaUlHusnaEvent.Search -> AppAnalytics.logFeatureUsed("asma_ul_husna", "search")
+            is AsmaUlHusnaEvent.Search -> AppAnalytics.logFeatureUsed(AppAnalytics.Feature.ASMA_UL_HUSNA, "search")
             AsmaUlHusnaEvent.ToggleFavoritesFilter -> AppAnalytics.logFeatureUsed(
-                "asma_ul_husna",
+                AppAnalytics.Feature.ASMA_UL_HUSNA,
                 "toggle_favorites_filter"
             )
 

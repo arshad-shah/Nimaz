@@ -102,16 +102,16 @@ class TafseerViewModel @Inject constructor(
 
     fun onEvent(event: TafseerEvent) {
         when (event) {
-            is TafseerEvent.LoadSurah -> AppAnalytics.logFeatureUsed("tafseer", "open_surah")
-            is TafseerEvent.SwitchSource -> AppAnalytics.logFeatureUsed("tafseer", "switch_source")
-            is TafseerEvent.AddHighlight -> AppAnalytics.logFeatureUsed("tafseer", "add_highlight")
+            is TafseerEvent.LoadSurah -> AppAnalytics.logFeatureUsed(AppAnalytics.Feature.TAFSEER, "open_surah")
+            is TafseerEvent.SwitchSource -> AppAnalytics.logFeatureUsed(AppAnalytics.Feature.TAFSEER, "switch_source")
+            is TafseerEvent.AddHighlight -> AppAnalytics.logFeatureUsed(AppAnalytics.Feature.TAFSEER, "add_highlight")
             is TafseerEvent.DeleteHighlight -> AppAnalytics.logFeatureUsed(
-                "tafseer",
+                AppAnalytics.Feature.TAFSEER,
                 "delete_highlight"
             )
 
-            is TafseerEvent.AddNote -> AppAnalytics.logFeatureUsed("tafseer", "add_note")
-            is TafseerEvent.DeleteNote -> AppAnalytics.logFeatureUsed("tafseer", "delete_note")
+            is TafseerEvent.AddNote -> AppAnalytics.logFeatureUsed(AppAnalytics.Feature.TAFSEER, "add_note")
+            is TafseerEvent.DeleteNote -> AppAnalytics.logFeatureUsed(AppAnalytics.Feature.TAFSEER, "delete_note")
             else -> {}
         }
         when (event) {

@@ -114,15 +114,15 @@ class QaidaReaderViewModel @Inject constructor(
     fun onEvent(event: QaidaReaderEvent) {
         when (event) {
             is QaidaReaderEvent.SelectLesson -> AppAnalytics.logFeatureUsed(
-                "qaida",
+                AppAnalytics.Feature.QAIDA,
                 "select_lesson"
             )
 
-            is QaidaReaderEvent.CellTapped -> AppAnalytics.logFeatureUsed("qaida", "play_cell")
-            is QaidaReaderEvent.PlayLine -> AppAnalytics.logFeatureUsed("qaida", "play_line")
-            is QaidaReaderEvent.PlayLetter -> AppAnalytics.logFeatureUsed("qaida", "play_letter")
-            QaidaReaderEvent.Resume -> AppAnalytics.logFeatureUsed("qaida", "resume")
-            QaidaReaderEvent.ResetJourney -> AppAnalytics.logFeatureUsed("qaida", "reset_journey")
+            is QaidaReaderEvent.CellTapped -> AppAnalytics.logFeatureUsed(AppAnalytics.Feature.QAIDA, "play_cell")
+            is QaidaReaderEvent.PlayLine -> AppAnalytics.logFeatureUsed(AppAnalytics.Feature.QAIDA, "play_line")
+            is QaidaReaderEvent.PlayLetter -> AppAnalytics.logFeatureUsed(AppAnalytics.Feature.QAIDA, "play_letter")
+            QaidaReaderEvent.Resume -> AppAnalytics.logFeatureUsed(AppAnalytics.Feature.QAIDA, "resume")
+            QaidaReaderEvent.ResetJourney -> AppAnalytics.logFeatureUsed(AppAnalytics.Feature.QAIDA, "reset_journey")
             else -> {}
         }
         when (event) {

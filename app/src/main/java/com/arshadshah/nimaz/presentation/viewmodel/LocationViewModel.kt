@@ -117,7 +117,7 @@ class LocationViewModel @Inject constructor(
             }
 
             LocationEvent.Search -> {
-                AppAnalytics.logFeatureUsed("location", "search")
+                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.LOCATION, "search")
                 searchLocations(_state.value.searchQuery)
             }
 
@@ -126,17 +126,17 @@ class LocationViewModel @Inject constructor(
             }
 
             is LocationEvent.SelectRegion -> {
-                AppAnalytics.logFeatureUsed("location", "filter_region")
+                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.LOCATION, "filter_region")
                 _state.update { it.copy(selectedRegion = event.region) }
             }
 
             is LocationEvent.SelectLocation -> {
-                AppAnalytics.logFeatureUsed("location", "select_location")
+                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.LOCATION, "select_location")
                 selectLocation(event.location)
             }
 
             LocationEvent.UseCurrentGpsLocation -> {
-                AppAnalytics.logFeatureUsed("location", "use_gps")
+                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.LOCATION, "use_gps")
                 detectCurrentLocation()
             }
 
@@ -162,7 +162,7 @@ class LocationViewModel @Inject constructor(
                 }
             } catch (e: Exception) {
                 CrashReporter.recordException(e)
-                AppAnalytics.logError("location", "load_current", e.message)
+                AppAnalytics.logError(AppAnalytics.Feature.LOCATION, "load_current", e.message)
                 // Silently fail - location not set
             }
         }
@@ -192,7 +192,7 @@ class LocationViewModel @Inject constructor(
                 }
             } catch (e: Exception) {
                 CrashReporter.recordException(e)
-                AppAnalytics.logError("location", "load_recent", e.message)
+                AppAnalytics.logError(AppAnalytics.Feature.LOCATION, "load_recent", e.message)
                 // Silently fail
             }
         }
@@ -210,7 +210,7 @@ class LocationViewModel @Inject constructor(
                 _state.update { it.copy(searchResults = results, isSearching = false) }
             } catch (e: Exception) {
                 CrashReporter.recordException(e)
-                AppAnalytics.logError("location", "search", e.message)
+                AppAnalytics.logError(AppAnalytics.Feature.LOCATION, "search", e.message)
                 _state.update {
                     it.copy(
                         isSearching = false,
@@ -260,7 +260,7 @@ class LocationViewModel @Inject constructor(
             }.distinctBy { "${it.name}, ${it.country}" }
         } catch (e: Exception) {
             CrashReporter.recordException(e)
-            AppAnalytics.logError("location", "geocode_search", e.message)
+            AppAnalytics.logError(AppAnalytics.Feature.LOCATION, "geocode_search", e.message)
             emptyList()
         }
     }
@@ -308,7 +308,7 @@ class LocationViewModel @Inject constructor(
                 }
             } catch (e: Exception) {
                 CrashReporter.recordException(e)
-                AppAnalytics.logError("location", "select_location", e.message)
+                AppAnalytics.logError(AppAnalytics.Feature.LOCATION, "select_location", e.message)
                 _state.update { it.copy(error = "Failed to save location: ${e.message}") }
             }
         }
@@ -358,7 +358,7 @@ class LocationViewModel @Inject constructor(
                 }
             } catch (e: Exception) {
                 CrashReporter.recordException(e)
-                AppAnalytics.logError("location", "detect_gps", e.message)
+                AppAnalytics.logError(AppAnalytics.Feature.LOCATION, "detect_gps", e.message)
                 _state.update {
                     it.copy(
                         isLoadingGps = false,
@@ -438,7 +438,7 @@ class LocationViewModel @Inject constructor(
             }
         } catch (e: Exception) {
             CrashReporter.recordException(e)
-            AppAnalytics.logError("location", "reverse_geocode", e.message)
+            AppAnalytics.logError(AppAnalytics.Feature.LOCATION, "reverse_geocode", e.message)
             "Unknown Location"
         }
     }

@@ -85,13 +85,13 @@ class MonthlyPrayerTimesViewModel @Inject constructor(
     fun onEvent(event: MonthlyPrayerTimesEvent) {
         when (event) {
             MonthlyPrayerTimesEvent.NextMonth -> {
-                AppAnalytics.logFeatureUsed("monthly_prayer_times", "next_month")
+                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.PRAYER_TIMES, "next_month")
                 _state.update { it.copy(currentMonth = it.currentMonth.plusMonths(1)) }
                 calculateMonth()
             }
 
             MonthlyPrayerTimesEvent.PreviousMonth -> {
-                AppAnalytics.logFeatureUsed("monthly_prayer_times", "previous_month")
+                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.PRAYER_TIMES, "previous_month")
                 _state.update { it.copy(currentMonth = it.currentMonth.minusMonths(1)) }
                 calculateMonth()
             }
@@ -154,20 +154,14 @@ class MonthlyPrayerTimesViewModel @Inject constructor(
                     val resolved = resolveLocation(lat, lng, name)
                     latitude = resolved.latitude
                     longitude = resolved.longitude
-                    calcMethod = try {
-                        CalculationMethod.valueOf(calcStr)
-                    } catch (_: Exception) {
-                        CalculationMethod.MUSLIM_WORLD_LEAGUE
-                    }
-                    asrCalc = when (asrStr.lowercase()) {
-                        "hanafi" -> AsrCalculation.HANAFI
-                        else -> AsrCalculation.STANDARD
-                    }
-                    highLatRule = try {
-                        HighLatitudeRule.valueOf(highStr)
-                    } catch (_: Exception) {
-                        null
-                    }
+                    // The domain's own parsers, in place of `valueOf` in a swallowing `try` plus a
+                    // hand-written "hanafi" comparison. `valueOf` throws on every persisted alias
+                    // the app itself writes — "MWL", "ISNA", "MAKKAH" — and the catch then
+                    // substituted Muslim World League, so a user on ISNA silently got MWL prayer
+                    // times, forever, with no signal. `fromString` knows the aliases.
+                    calcMethod = CalculationMethod.fromString(calcStr)
+                    asrCalc = AsrCalculation.fromString(asrStr)
+                    highLatRule = HighLatitudeRule.fromString(highStr)
                     adjustments = adj
 
                     _state.update {
