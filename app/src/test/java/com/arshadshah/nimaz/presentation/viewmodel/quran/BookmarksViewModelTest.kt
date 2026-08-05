@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.presentation.viewmodel.quran
 
+import com.arshadshah.nimaz.presentation.viewmodel.FakeStringProvider
 import android.content.Context
 import com.arshadshah.nimaz.core.monitoring.RecordingTelemetry
 import com.arshadshah.nimaz.domain.model.DuaBookmark
@@ -72,7 +73,7 @@ class BookmarksViewModelTest {
     @After
     fun tearDown() = Dispatchers.resetMain()
 
-    private fun viewModel() = BookmarksViewModel(quran, hadith, dua, context, telemetry)
+    private fun viewModel() = BookmarksViewModel(quran, hadith, dua, FakeStringProvider(), telemetry)
 
     @Test
     fun `a failing bookmark stream reports and stops loading instead of hanging`() = runTest {

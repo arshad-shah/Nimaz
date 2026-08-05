@@ -1,6 +1,7 @@
 package com.arshadshah.nimaz.core.util
 
 import android.content.Context
+import com.arshadshah.nimaz.core.text.StringProvider
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.WorshipReminderType
 
@@ -13,6 +14,18 @@ import com.arshadshah.nimaz.domain.model.WorshipReminderType
  * for that reminder.
  */
 object WorshipReminderContent {
+
+    // StringProvider overloads, for callers that must not hold a Context (see
+    // core/text/StringProvider.kt). Same resource ids, resolved through the seam.
+    fun name(strings: StringProvider, type: WorshipReminderType): String =
+        strings.get(nameRes(type))
+
+    fun arabic(strings: StringProvider, type: WorshipReminderType): String =
+        strings.get(arabicRes(type))
+
+    fun body(strings: StringProvider, type: WorshipReminderType, subKey: String? = null): String =
+        strings.get(bodyRes(type))
+
 
     /** Short display name shown as the card eyebrow and used in generic copy. */
     fun name(context: Context, type: WorshipReminderType): String =

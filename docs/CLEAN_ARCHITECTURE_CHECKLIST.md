@@ -237,6 +237,32 @@ This one is **pervasive and lower priority** — listed so it's tracked, not bec
   (the wrapper is the seam the UI depends on), but if a use case adds no value and the feature is
   trivial, that's fine — don't over-engineer net-new tiny features.
 
+### AP-7.15 · `@ApplicationContext` in a ViewModel
+
+A ViewModel holding the application `Context` can reach the entire platform — system services,
+the package manager, WorkManager, `Service` start. Six held one; five no longer do.
+
+- [x] ~~**String resolution** (`Bookmarks`, `Quran`, `Home`).~~ **Resolved** via
+  `core/text/StringProvider`. Note the first instinct — delete the derived `title`/`subtitle`
+  from `UnifiedBookmark` and resolve them in the screen — is **wrong here**: `BookmarksViewModel`
+  *searches* and *alphabetically sorts* on those labels, so the comparison happens where the list
+  is filtered, not where it is drawn. Moving them would have quietly changed what "Quran" matches.
+- [x] ~~**Permissions and battery** (`Home`, `Onboarding`).~~ **Resolved** — the existing
+  `PermissionChecker` / `PowerSettings` seams, which already existed and were simply not used here.
+- [x] ~~**`getBatteryOptimizationIntent(): Intent`** in `Home` and `Onboarding`.~~ **Resolved** —
+  built in the screens. A ViewModel returning an `android.content.Intent` is the arrow backwards.
+- [x] ~~**Widget refresh** (`Home` called `PrayerTrackerWorker.enqueueImmediateWork(context)`).~~
+  **Resolved** — `WidgetRefresher`. What Home wants to say is "the tracker changed, redraw".
+- [x] ~~**Locale and adhan download** (`Settings`).~~ **Resolved** — `AppLocale`, `AdhanDownloader`.
+- [ ] **`QiblaViewModel` — the last one, and the only hard one.** It holds `SensorManager` and
+  `Vibrator`. The vibration half is trivial (a `Haptics` seam). The compass half is not: the
+  `SensorEventListener` low-pass-filters gravity and geomagnetic samples **before**
+  `SensorManager.getRotationMatrix`/`getOrientation`, then unwraps the azimuth to avoid the
+  360→0 snap. So the seam boundary is a real decision — emit raw samples and leave the fusion in
+  the ViewModel (keeping an Android static dependency), or emit finished orientation and move the
+  smoothing down (which `CompassSmoothingTest` currently pins in the ViewModel). It also handles
+  `onAccuracyChanged` for magnetometer calibration. Do not rush this one for the sake of the grep.
+
 ### AP-7.14 · A ViewModel that cannot be constructed on the JVM has no tests, and that is why
 
 - [x] ~~**`OnboardingViewModel` built a `FusedLocationProviderClient` in a property initializer.**~~

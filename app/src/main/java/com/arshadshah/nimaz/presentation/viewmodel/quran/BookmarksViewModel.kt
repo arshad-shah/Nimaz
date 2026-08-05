@@ -1,10 +1,10 @@
 package com.arshadshah.nimaz.presentation.viewmodel.quran
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.monitoring.Telemetry
+import com.arshadshah.nimaz.core.text.StringProvider
 import com.arshadshah.nimaz.core.monitoring.catchAndReport
 import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.domain.model.DuaBookmark
@@ -14,7 +14,6 @@ import com.arshadshah.nimaz.domain.usecase.DuaUseCases
 import com.arshadshah.nimaz.domain.usecase.HadithUseCases
 import com.arshadshah.nimaz.domain.usecase.QuranUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -33,7 +32,7 @@ class BookmarksViewModel @Inject constructor(
     private val quranUseCases: QuranUseCases,
     private val hadithUseCases: HadithUseCases,
     private val duaUseCases: DuaUseCases,
-    @ApplicationContext private val context: Context,
+    private val strings: StringProvider,
     private val telemetry: Telemetry,
 ) : ViewModel() {
 
@@ -421,8 +420,8 @@ class BookmarksViewModel @Inject constructor(
     private fun QuranBookmark.toUnified() = UnifiedBookmark(
         id = BookmarkType.QURAN.idFor(ayahId),
         type = BookmarkType.QURAN,
-        title = context.getString(R.string.bookmark_surah_ayah_format, surahNumber, ayahNumber),
-        subtitle = context.getString(R.string.quran),
+        title = strings.get(R.string.bookmark_surah_ayah_format, surahNumber, ayahNumber),
+        subtitle = strings.get(R.string.quran),
         arabicText = null, // Enriched in loadQuranBookmarks via getAyahById
         createdAt = createdAt,
         note = note,
@@ -434,7 +433,7 @@ class BookmarksViewModel @Inject constructor(
     private fun HadithBookmark.toUnified() = UnifiedBookmark(
         id = BookmarkType.HADITH.idFor(hadithId),
         type = BookmarkType.HADITH,
-        title = context.getString(R.string.bookmark_hadith_format, hadithNumber),
+        title = strings.get(R.string.bookmark_hadith_format, hadithNumber),
         subtitle = bookId,
         arabicText = null, // Enriched in loadHadithBookmarks via getHadithById
         createdAt = createdAt,
@@ -447,7 +446,7 @@ class BookmarksViewModel @Inject constructor(
     private fun DuaBookmark.toUnified() = UnifiedBookmark(
         id = BookmarkType.DUA.idFor(duaId),
         type = BookmarkType.DUA,
-        title = context.getString(R.string.dua_label),
+        title = strings.get(R.string.dua_label),
         subtitle = categoryId,
         arabicText = null, // Enriched in loadDuaBookmarks via getDuaById
         createdAt = createdAt,
