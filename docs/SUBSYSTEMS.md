@@ -589,6 +589,18 @@ Two Room `@Database`es, both provided in `core/di/DatabaseModule.kt`:
   `schemaVersion 23`; `MIGRATION_22_23` is deliberately empty, because the old tables are **left
   in place** rather than dropped so the original rows stay recoverable.
 
+**One current location, and it is the newest.** `locations` lives in the *user* database, and
+`LocationDao.saveCurrentLocation` is the only supported way to record a chosen place. It clears
+`isCurrentLocation` everywhere, then inserts — or refreshes the row already within ~100 m
+(`ROUND(lat, 3)`) — and flags it, **in one `@Transaction`**, so no reader can observe the table
+with zero or two current locations. Before it, the screen composed a `Location(id = 0, …)` and
+called `@Insert(onConflict = REPLACE)`, which on an autogenerate primary key always inserts: the
+table grew one row per selection and both `WHERE isCurrentLocation = 1 LIMIT 1` reads returned the
+**lowest rowid**, so widgets and workers saw the *first* place the user had ever picked. Recency
+comes from `getRecentLocations(limit)` ordering by the `updatedAt` that has been on the table since
+it was created — a "recent" row must never be built by taking the head of `getAllLocations()`,
+which sorts `isFavorite DESC, name ASC`. No schema change was needed for any of this.
+
 **Legacy user-data import.** `LegacyUserDataImport` copies an existing install's rows out of the
 content database into the user database the first time it is opened, driven by `UserDataMigrator`
 from `AppInitializer` (§9) and awaited before the splash screen lifts. It is one transaction of

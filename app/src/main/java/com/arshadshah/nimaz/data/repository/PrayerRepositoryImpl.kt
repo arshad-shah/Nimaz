@@ -258,6 +258,14 @@ class PrayerRepositoryImpl @Inject constructor(
         locationDao.setCurrentLocation(id)
     }
 
+    override fun getRecentLocations(limit: Int): Flow<List<Location>> {
+        return locationDao.getRecentLocations(limit).mapItems { it.toDomain() }
+    }
+
+    override suspend fun saveCurrentLocation(location: Location, now: Long): Long {
+        return locationDao.saveCurrentLocation(location.toEntity(), now)
+    }
+
     override suspend fun toggleFavorite(id: Long) {
         locationDao.toggleFavorite(id)
     }

@@ -29,6 +29,8 @@ import javax.inject.Inject
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -123,7 +125,10 @@ class LocationViewModel @Inject constructor(
     private fun loadRecentLocations() {
         viewModelScope.launch {
             try {
-                prayerUseCases.getAllLocations().collect { locations ->
+                // Ordered by the database, newest first. Taking the first five of
+                // `getAllLocations()` — which sorts `isFavorite DESC, name ASC` — produced an
+                // alphabetical "recent" row that a newly saved location never entered.
+                prayerUseCases.getRecentLocations().collect { locations ->
                     val recentLocations = locations
                         .map { location ->
                             SearchLocation(
@@ -150,10 +155,27 @@ class LocationViewModel @Inject constructor(
         }
     }
 
+    /**
+     * The in-flight geocode.
+     *
+     * `UpdateSearchQuery` fires per keystroke, and each call launched an unhandled coroutine, so
+     * typing "london" put six network geocodes in the air with no ordering between them —
+     * whichever resolved last won. The `lon` results (Lonavla, Long Beach) landing after the
+     * `london` ones left the list describing a query the user had already finished typing, and
+     * `isSearching` flickered false as soon as *any* of them returned. AP-7.1b, already fixed
+     * this way in `HadithViewModel`.
+     */
+    private var searchJob: Job? = null
+
     private fun searchLocations(query: String) {
         if (query.length < 2) return
 
-        viewModelScope.launch {
+        searchJob?.cancel()
+        searchJob = viewModelScope.launch {
+            // Inside the cancellable block, so it debounces and cancel-and-replaces with one
+            // mechanism: a keystroke within the window kills the previous coroutine before it
+            // has issued anything at all.
+            delay(SEARCH_DEBOUNCE_MS)
             _state.update { it.copy(isSearching = true) }
             try {
                 val results = withContext(Dispatchers.IO) {
@@ -227,24 +249,17 @@ class LocationViewModel @Inject constructor(
                     name = "${location.name}, ${location.country}"
                 )
 
-                // Save to database for recent locations
-                val domainLocation = Location(
-                    id = 0,
+                // One transaction: clear the flag everywhere, then insert this place or
+                // refresh the row already at these coordinates. Composing a `Location` here —
+                // with `id = 0` against an autogenerate primary key — is what made every
+                // selection insert a duplicate and left several rows flagged current.
+                prayerUseCases.saveCurrentLocation(
                     name = location.name,
+                    country = location.country,
                     latitude = location.latitude,
                     longitude = location.longitude,
                     timezone = TimeZone.getDefault().id,
-                    country = location.country,
-                    city = location.name,
-                    isCurrentLocation = true,
-                    isFavorite = false,
-                    calculationMethod = CalculationMethod.MUSLIM_WORLD_LEAGUE,
-                    asrCalculation = AsrCalculation.STANDARD,
-                    highLatitudeRule = null,
-                    fajrAngle = null,
-                    ishaAngle = null
                 )
-                prayerUseCases.insertLocation(domainLocation)
 
                 // Update state
                 _state.update {
@@ -395,3 +410,6 @@ class LocationViewModel @Inject constructor(
         }
     }
 }
+
+/** Long enough that a fast typist issues one geocode, short enough to feel immediate. */
+private const val SEARCH_DEBOUNCE_MS = 300L

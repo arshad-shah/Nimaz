@@ -56,5 +56,14 @@ interface PrayerRepository {
     suspend fun updateLocation(location: Location)
     suspend fun deleteLocation(location: Location)
     suspend fun setCurrentLocation(id: Long)
+
+    /** The most recently used locations, newest first. */
+    fun getRecentLocations(limit: Int): Flow<List<Location>>
+
+    /**
+     * Makes [location] the one and only current location, inserting it or refreshing the stored
+     * row at the same coordinates, in one transaction. Returns that row's id.
+     */
+    suspend fun saveCurrentLocation(location: Location, now: Long): Long
     suspend fun toggleFavorite(id: Long)
 }
