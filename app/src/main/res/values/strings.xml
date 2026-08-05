@@ -1036,6 +1036,9 @@
     <!-- License Detail Screen -->
     <string name="license_detail_title">License Detail</string>
     <string name="license_detail_library_not_found">Library not found</string>
+    <string name="license_detail_not_found_body">This library isn\'t in the bundled licence list. It may have been removed in a newer version of the app.</string>
+    <string name="licenses_load_failed">The licence list couldn\'t be loaded</string>
+    <string name="licenses_load_failed_body">This list is built from data bundled with the app, so trying again usually works.</string>
     <string name="license_detail_version">Version %1$s</string>
     <string name="license_detail_author">Author: %1$s</string>
 
