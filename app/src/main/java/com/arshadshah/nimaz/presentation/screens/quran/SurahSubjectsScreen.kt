@@ -35,8 +35,8 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuItem
 import com.arshadshah.nimaz.presentation.components.molecules.NimazTreeRow
 import com.arshadshah.nimaz.presentation.components.organisms.NimazSearchBar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazTopAppBar
-import com.arshadshah.nimaz.presentation.viewmodel.QuranTopicsEvent
-import com.arshadshah.nimaz.presentation.viewmodel.QuranTopicsViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.quran.QuranTopicsEvent
+import com.arshadshah.nimaz.presentation.viewmodel.quran.QuranTopicsViewModel
 
 /**
  * What one surah speaks about — its own subjects, weightiest here first.

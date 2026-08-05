@@ -52,8 +52,8 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
-import com.arshadshah.nimaz.presentation.viewmodel.DuaEvent
-import com.arshadshah.nimaz.presentation.viewmodel.DuaViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.content.DuaEvent
+import com.arshadshah.nimaz.presentation.viewmodel.content.DuaViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

@@ -11,7 +11,7 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazDialogDestruc
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownMenu
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownRow
 import com.arshadshah.nimaz.presentation.components.organisms.NimazSearchBar
-import com.arshadshah.nimaz.presentation.viewmodel.BookmarkSortOrder
+import com.arshadshah.nimaz.presentation.viewmodel.quran.BookmarkSortOrder
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -69,10 +69,10 @@ import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazMenuAction
 import com.arshadshah.nimaz.presentation.components.organisms.NimazPillTabs
 import com.arshadshah.nimaz.presentation.components.organisms.SwipeableSavedCard
-import com.arshadshah.nimaz.presentation.viewmodel.BookmarkType
-import com.arshadshah.nimaz.presentation.viewmodel.BookmarksEvent
-import com.arshadshah.nimaz.presentation.viewmodel.BookmarksViewModel
-import com.arshadshah.nimaz.presentation.viewmodel.UnifiedBookmark
+import com.arshadshah.nimaz.presentation.viewmodel.quran.BookmarkType
+import com.arshadshah.nimaz.presentation.viewmodel.quran.BookmarksEvent
+import com.arshadshah.nimaz.presentation.viewmodel.quran.BookmarksViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.quran.UnifiedBookmark
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

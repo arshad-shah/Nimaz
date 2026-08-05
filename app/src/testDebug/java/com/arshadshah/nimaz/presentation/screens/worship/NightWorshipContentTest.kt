@@ -9,8 +9,8 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.test.core.app.ApplicationProvider
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.presentation.viewmodel.NightWorshipEvent
-import com.arshadshah.nimaz.presentation.viewmodel.NightWorshipUiState
+import com.arshadshah.nimaz.presentation.viewmodel.worship.NightWorshipEvent
+import com.arshadshah.nimaz.presentation.viewmodel.worship.NightWorshipUiState
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test

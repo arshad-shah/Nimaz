@@ -171,7 +171,10 @@ com.arshadshah.nimaz/
 │
 ├── presentation/
 │   ├── screens/<feature>/   # Composable screens grouped by feature
-│   ├── viewmodel/           # All ViewModels (flat package)
+│   ├── viewmodel/<feature>/ # ViewModels, one sub-package per feature area
+│   │                        #   quran/ prayer/ tracker/ worship/ calendar/
+│   │                        #   settings/ help/ content/ search/ ai/
+│   │                        #   location/ home/ onboarding/ tools/
 │   ├── components/
 │   │   ├── atoms/           # Smallest reusable UI (NimazCard, NimazBadge, ArabicText…)
 │   │   ├── molecules/       # Composed (PrayerTimeCard, NimazDialog, NimazCalendar…)
@@ -238,9 +241,17 @@ flowchart LR
 
 ### 4.1 Presentation — ViewModels (MVVM + UDF)
 
-Canonical reference: `presentation/viewmodel/AsmaUlHusnaViewModel.kt`.
+Canonical reference: `presentation/viewmodel/help/HelpViewModel.kt` — a feature-sized
+ViewModel in the sub-package layout, with one exhaustive `onEvent`, `Telemetry` injected, and
+`catchAndReport` applied inside its `flatMapLatest` rather than outside it.
+
+**A ViewModel lives in `viewmodel/<feature>/`, and a new feature gets its own sub-package.**
+The layer was one flat package of 32 files until this became the rule; the sub-package is not
+optional tidiness, it is where the file goes.
 
 Rules:
+- Lives in `presentation/viewmodel/<feature>/`. Pick the existing sub-package the feature
+  belongs to; add one only for a genuinely new area.
 - Annotated `@HiltViewModel`, constructor injection only.
 - Inject the feature's **`XxxUseCases`** wrapper (not a repository, never a DAO).
 - Expose immutable state as `StateFlow<XxxUiState>` via `asStateFlow()`. A ViewModel
@@ -1067,6 +1078,7 @@ copy anything listed as Open.
 | Area | What was fixed |
 |------|----------------|
 | Use-case layer | `Hadith`, `Dua`, `Fasting`, `Prayer`, `Tasbih`, `Tafseer`, `Zakat` now have `XxxUseCases` wrappers; `PrayerTimes/PrayerTracker/Home/Settings/Location`, `Search`, `Bookmarks` ViewModels inject use cases instead of repositories. |
+| ViewModel package layout | The layer was one flat package of 32 files, documented as deliberate. It is now `viewmodel/<feature>/` across 14 sub-packages, and §2/§4.1 **prescribe** that shape for new features rather than describing a move. The `HighLatitudeRule` enum that `SettingsViewModel` declared — shadowing the domain one, with different member spellings — is deleted; the domain type and its alias-tolerant `fromString` are used everywhere. |
 | Zakat clean-arch leak | `ZakatRepository` now exposes the `ZakatHistoryEntry` domain model (promoted to `domain/model`); entity↔domain mapping lives in `ZakatRepositoryImpl`. |
 | Calendar layer bypass | New `IslamicEventRepository` (+ impl mapping) and `IslamicEventUseCases`; `CalendarViewModel` no longer touches `IslamicEventDao`. |
 | QaidaReader UDF | `QaidaReaderViewModel` now has a sealed `QaidaReaderEvent` + single `onEvent`; action methods are private; Qaida screens dispatch events. |

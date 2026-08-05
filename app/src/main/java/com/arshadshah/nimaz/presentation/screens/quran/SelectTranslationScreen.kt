@@ -51,8 +51,8 @@ import com.arshadshah.nimaz.presentation.components.organisms.NimazSearchBar
 import com.arshadshah.nimaz.presentation.theme.QuranArabicFont
 import com.arshadshah.nimaz.presentation.theme.asLanguageLabel
 import com.arshadshah.nimaz.presentation.theme.asTranslationText
-import com.arshadshah.nimaz.presentation.viewmodel.SettingsEvent
-import com.arshadshah.nimaz.presentation.viewmodel.SettingsViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.settings.SettingsEvent
+import com.arshadshah.nimaz.presentation.viewmodel.settings.SettingsViewModel
 
 /**
  * Picks the Quran translation, as a dedicated screen in the shape of [SelectReciterScreen]:
@@ -65,7 +65,7 @@ import com.arshadshah.nimaz.presentation.viewmodel.SettingsViewModel
  * The hero card previews the Bismillah in the selected translation and **updates as you tap
  * down the list**, so a translation can be judged by reading it rather than by its
  * translator's name. That preview is driven by
- * [com.arshadshah.nimaz.presentation.viewmodel.SettingsViewModel.observeQuranPreviewTranslation];
+ * [SettingsViewModel.observeQuranPreviewTranslation];
  * because a translation's first read is also what seeds it, the card doubles as
  * confirmation the content actually landed.
  */

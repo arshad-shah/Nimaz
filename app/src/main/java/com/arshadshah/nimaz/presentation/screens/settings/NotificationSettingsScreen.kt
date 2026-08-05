@@ -38,9 +38,9 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
 import com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsItem
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
-import com.arshadshah.nimaz.presentation.viewmodel.NotificationSettingsUiState
-import com.arshadshah.nimaz.presentation.viewmodel.SettingsEvent
-import com.arshadshah.nimaz.presentation.viewmodel.SettingsViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.settings.NotificationSettingsUiState
+import com.arshadshah.nimaz.presentation.viewmodel.settings.SettingsEvent
+import com.arshadshah.nimaz.presentation.viewmodel.settings.SettingsViewModel
 
 /**
  * Notifications hub (#301): a master switch and five rows into focused subscreens.

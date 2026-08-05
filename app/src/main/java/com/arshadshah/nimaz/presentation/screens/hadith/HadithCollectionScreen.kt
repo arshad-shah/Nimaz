@@ -69,8 +69,8 @@ import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazStatData
 import com.arshadshah.nimaz.presentation.components.organisms.NimazStatsGrid
 import com.arshadshah.nimaz.presentation.theme.NimazColors
-import com.arshadshah.nimaz.presentation.viewmodel.HadithEvent
-import com.arshadshah.nimaz.presentation.viewmodel.HadithViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.content.HadithEvent
+import com.arshadshah.nimaz.presentation.viewmodel.content.HadithViewModel
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)

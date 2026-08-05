@@ -46,8 +46,8 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuItem
 import com.arshadshah.nimaz.presentation.components.molecules.SurahHeaderCartouche
 import com.arshadshah.nimaz.presentation.components.organisms.BottomActions
 import com.arshadshah.nimaz.presentation.components.organisms.NimazTopAppBar
-import com.arshadshah.nimaz.presentation.viewmodel.QuranEvent
-import com.arshadshah.nimaz.presentation.viewmodel.QuranViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.quran.QuranEvent
+import com.arshadshah.nimaz.presentation.viewmodel.quran.QuranViewModel
 
 /**
  * What a surah is, and where to go to learn more about it.

@@ -74,11 +74,11 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazBottomSheet
 import com.arshadshah.nimaz.presentation.components.molecules.PrayerTimeCard
 import com.arshadshah.nimaz.presentation.components.molecules.calendar.NimazCalendar
 import com.arshadshah.nimaz.presentation.components.organisms.PrayerSkyScene
-import com.arshadshah.nimaz.presentation.viewmodel.PrayerTimeDisplay
-import com.arshadshah.nimaz.presentation.viewmodel.PrayerTimesEvent
-import com.arshadshah.nimaz.presentation.viewmodel.PrayerTimesUiState
-import com.arshadshah.nimaz.presentation.viewmodel.PrayerTimesViewModel
-import com.arshadshah.nimaz.presentation.viewmodel.withClockState
+import com.arshadshah.nimaz.presentation.viewmodel.home.PrayerTimeDisplay
+import com.arshadshah.nimaz.presentation.viewmodel.prayer.PrayerTimesEvent
+import com.arshadshah.nimaz.presentation.viewmodel.prayer.PrayerTimesUiState
+import com.arshadshah.nimaz.presentation.viewmodel.prayer.PrayerTimesViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.home.withClockState
 import java.time.LocalDate
 import java.time.YearMonth
 

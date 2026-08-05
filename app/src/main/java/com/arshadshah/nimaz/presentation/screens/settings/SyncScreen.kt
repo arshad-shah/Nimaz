@@ -61,12 +61,12 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
-import com.arshadshah.nimaz.presentation.viewmodel.ActivityLogEntry
-import com.arshadshah.nimaz.presentation.viewmodel.SyncDataSummary
-import com.arshadshah.nimaz.presentation.viewmodel.SyncEvent
-import com.arshadshah.nimaz.presentation.viewmodel.SyncMode
-import com.arshadshah.nimaz.presentation.viewmodel.SyncUiState
-import com.arshadshah.nimaz.presentation.viewmodel.SyncViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.settings.ActivityLogEntry
+import com.arshadshah.nimaz.presentation.viewmodel.settings.SyncDataSummary
+import com.arshadshah.nimaz.presentation.viewmodel.settings.SyncEvent
+import com.arshadshah.nimaz.presentation.viewmodel.settings.SyncMode
+import com.arshadshah.nimaz.presentation.viewmodel.settings.SyncUiState
+import com.arshadshah.nimaz.presentation.viewmodel.settings.SyncViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

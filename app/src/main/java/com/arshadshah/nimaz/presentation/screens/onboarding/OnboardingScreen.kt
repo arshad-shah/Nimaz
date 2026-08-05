@@ -70,8 +70,8 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.rememberNimazPagerState
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
-import com.arshadshah.nimaz.presentation.viewmodel.OnboardingEvent
-import com.arshadshah.nimaz.presentation.viewmodel.OnboardingViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.onboarding.OnboardingEvent
+import com.arshadshah.nimaz.presentation.viewmodel.onboarding.OnboardingViewModel
 import kotlinx.coroutines.launch
 
 private data class InfoPage(

@@ -71,11 +71,11 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazReaderBottomB
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.AdaptiveSpacing
 import com.arshadshah.nimaz.presentation.theme.NimazColors
-import com.arshadshah.nimaz.presentation.viewmodel.DuaEvent
-import com.arshadshah.nimaz.presentation.viewmodel.DuaReaderUiState
-import com.arshadshah.nimaz.presentation.viewmodel.DuaViewModel
-import com.arshadshah.nimaz.presentation.viewmodel.TasbihEvent
-import com.arshadshah.nimaz.presentation.viewmodel.TasbihViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.content.DuaEvent
+import com.arshadshah.nimaz.presentation.viewmodel.content.DuaReaderUiState
+import com.arshadshah.nimaz.presentation.viewmodel.content.DuaViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.tracker.TasbihEvent
+import com.arshadshah.nimaz.presentation.viewmodel.tracker.TasbihViewModel
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)

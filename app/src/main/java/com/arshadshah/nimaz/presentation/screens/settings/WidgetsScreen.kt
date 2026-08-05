@@ -66,7 +66,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.TickResolution
 import com.arshadshah.nimaz.presentation.components.atoms.rememberNow
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
-import com.arshadshah.nimaz.presentation.viewmodel.SettingsViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.settings.SettingsViewModel
 import com.arshadshah.nimaz.widget.core.formatWidgetTime
 import java.time.LocalDate
 import kotlin.time.Clock

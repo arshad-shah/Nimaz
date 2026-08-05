@@ -61,8 +61,8 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.molecules.NimazConfirmDialog
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.NimazColors
-import com.arshadshah.nimaz.presentation.viewmodel.TasbihEvent
-import com.arshadshah.nimaz.presentation.viewmodel.TasbihViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.tracker.TasbihEvent
+import com.arshadshah.nimaz.presentation.viewmodel.tracker.TasbihViewModel
 
 private data class DhikrTab(
     val category: TasbihCategory? = null,

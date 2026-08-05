@@ -32,8 +32,8 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionTitle
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
-import com.arshadshah.nimaz.presentation.viewmodel.HelpEvent
-import com.arshadshah.nimaz.presentation.viewmodel.HelpViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.help.HelpEvent
+import com.arshadshah.nimaz.presentation.viewmodel.help.HelpViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

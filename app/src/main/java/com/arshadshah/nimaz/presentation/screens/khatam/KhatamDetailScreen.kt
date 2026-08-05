@@ -40,9 +40,10 @@ import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazStatData
 import com.arshadshah.nimaz.presentation.components.organisms.NimazStatsGrid
 import com.arshadshah.nimaz.presentation.theme.NimazSpacing
-import com.arshadshah.nimaz.presentation.viewmodel.KhatamEvent
-import com.arshadshah.nimaz.presentation.viewmodel.KhatamViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.quran.KhatamEvent
+import com.arshadshah.nimaz.presentation.viewmodel.quran.KhatamViewModel
 import kotlin.math.roundToInt
+import com.arshadshah.nimaz.presentation.viewmodel.quran.KhatamDetailUiState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -144,7 +145,7 @@ fun KhatamDetailScreen(
 @Composable
 private fun KhatamDetailContent(
     khatam: Khatam,
-    state: com.arshadshah.nimaz.presentation.viewmodel.KhatamDetailUiState,
+    state: KhatamDetailUiState,
     contentPadding: PaddingValues,
     onContinue: () -> Unit,
 ) {

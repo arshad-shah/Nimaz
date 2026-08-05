@@ -36,8 +36,8 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazPager
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.rememberNimazPagerState
 import com.arshadshah.nimaz.presentation.components.organisms.TafseerPageContent
-import com.arshadshah.nimaz.presentation.viewmodel.TafseerEvent
-import com.arshadshah.nimaz.presentation.viewmodel.TafseerViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.quran.TafseerEvent
+import com.arshadshah.nimaz.presentation.viewmodel.quran.TafseerViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext

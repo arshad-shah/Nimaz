@@ -80,10 +80,10 @@ import com.arshadshah.nimaz.presentation.components.organisms.PassageHeading
 import com.arshadshah.nimaz.presentation.components.organisms.MushafLinePage
 import com.arshadshah.nimaz.presentation.components.organisms.MushafPage
 import com.arshadshah.nimaz.presentation.components.organisms.TajweedLegendSheet
-import com.arshadshah.nimaz.presentation.viewmodel.QuranEvent
-import com.arshadshah.nimaz.presentation.viewmodel.QuranReaderUiState
-import com.arshadshah.nimaz.presentation.viewmodel.QuranViewModel
-import com.arshadshah.nimaz.presentation.viewmodel.ReadingMode
+import com.arshadshah.nimaz.presentation.viewmodel.quran.QuranEvent
+import com.arshadshah.nimaz.presentation.viewmodel.quran.QuranReaderUiState
+import com.arshadshah.nimaz.presentation.viewmodel.quran.QuranViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.quran.ReadingMode
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)

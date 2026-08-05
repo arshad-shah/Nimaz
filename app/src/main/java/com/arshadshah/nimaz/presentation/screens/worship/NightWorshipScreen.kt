@@ -45,9 +45,9 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.TickResolution
 import com.arshadshah.nimaz.presentation.components.atoms.rememberNow
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
-import com.arshadshah.nimaz.presentation.viewmodel.NightWorshipEvent
-import com.arshadshah.nimaz.presentation.viewmodel.NightWorshipUiState
-import com.arshadshah.nimaz.presentation.viewmodel.NightWorshipViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.worship.NightWorshipEvent
+import com.arshadshah.nimaz.presentation.viewmodel.worship.NightWorshipUiState
+import com.arshadshah.nimaz.presentation.viewmodel.worship.NightWorshipViewModel
 import kotlin.time.Instant
 
 /**

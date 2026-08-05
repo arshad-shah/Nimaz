@@ -28,8 +28,8 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazSearchBar
 import com.arshadshah.nimaz.presentation.theme.NimazSpacing
-import com.arshadshah.nimaz.presentation.viewmodel.AsmaUlHusnaEvent
-import com.arshadshah.nimaz.presentation.viewmodel.AsmaUlHusnaViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.content.AsmaUlHusnaEvent
+import com.arshadshah.nimaz.presentation.viewmodel.content.AsmaUlHusnaViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

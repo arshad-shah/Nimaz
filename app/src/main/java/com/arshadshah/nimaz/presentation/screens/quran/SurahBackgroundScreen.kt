@@ -47,8 +47,8 @@ import com.arshadshah.nimaz.presentation.components.molecules.ThematicText
 import com.arshadshah.nimaz.presentation.components.organisms.NimazScrollSpyIndex
 import com.arshadshah.nimaz.presentation.components.organisms.NimazTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.rememberScrollSpyIndex
-import com.arshadshah.nimaz.presentation.viewmodel.SurahThematicEvent
-import com.arshadshah.nimaz.presentation.viewmodel.SurahThematicViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.quran.SurahThematicEvent
+import com.arshadshah.nimaz.presentation.viewmodel.quran.SurahThematicViewModel
 import kotlinx.coroutines.launch
 
 /**

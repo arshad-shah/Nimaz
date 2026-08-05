@@ -42,8 +42,8 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuItem
 import com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsItem
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
-import com.arshadshah.nimaz.presentation.viewmodel.SearchSettingsEvent
-import com.arshadshah.nimaz.presentation.viewmodel.SearchSettingsViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.settings.SearchSettingsEvent
+import com.arshadshah.nimaz.presentation.viewmodel.settings.SearchSettingsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

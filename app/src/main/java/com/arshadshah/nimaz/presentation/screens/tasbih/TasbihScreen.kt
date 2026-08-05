@@ -84,9 +84,10 @@ import com.arshadshah.nimaz.presentation.components.organisms.NimazPillTabs
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.currentWindowSizeClass
 import com.arshadshah.nimaz.presentation.theme.isExpandedWidth
-import com.arshadshah.nimaz.presentation.viewmodel.TasbihCounterStyle
-import com.arshadshah.nimaz.presentation.viewmodel.TasbihEvent
-import com.arshadshah.nimaz.presentation.viewmodel.TasbihViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.tracker.TasbihCounterStyle
+import com.arshadshah.nimaz.presentation.viewmodel.tracker.TasbihEvent
+import com.arshadshah.nimaz.presentation.viewmodel.tracker.TasbihViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.tracker.TasbihCounterUiState
 
 @Composable
 fun TasbihScreen(
@@ -306,7 +307,7 @@ private fun TasbihTopBar(
 @Composable
 private fun TasbihCounterArea(
     beadsMode: Boolean,
-    counterState: com.arshadshah.nimaz.presentation.viewmodel.TasbihCounterUiState,
+    counterState: TasbihCounterUiState,
     onIncrement: () -> Unit,
     modifier: Modifier = Modifier
 ) {

@@ -50,8 +50,8 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazConfirmDialog
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuItem
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
-import com.arshadshah.nimaz.presentation.viewmodel.SettingsEvent
-import com.arshadshah.nimaz.presentation.viewmodel.SettingsViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.settings.SettingsEvent
+import com.arshadshah.nimaz.presentation.viewmodel.settings.SettingsViewModel
 
 /**
  * Diagnostics: what the OS is currently allowing, and the three actions that fix it.

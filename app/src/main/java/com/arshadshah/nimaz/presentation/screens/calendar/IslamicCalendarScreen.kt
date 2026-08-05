@@ -47,9 +47,11 @@ import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.currentWindowSizeClass
 import com.arshadshah.nimaz.presentation.theme.isCompact
-import com.arshadshah.nimaz.presentation.viewmodel.CalendarEvent
-import com.arshadshah.nimaz.presentation.viewmodel.CalendarViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.calendar.CalendarEvent
+import com.arshadshah.nimaz.presentation.viewmodel.calendar.CalendarViewModel
 import java.time.YearMonth
+import com.arshadshah.nimaz.presentation.viewmodel.calendar.CalendarUiState
+import com.arshadshah.nimaz.presentation.viewmodel.calendar.EventsUiState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -105,8 +107,8 @@ fun IslamicCalendarScreen(
 
 @Composable
 private fun CalendarCompactContent(
-    state: com.arshadshah.nimaz.presentation.viewmodel.CalendarUiState,
-    eventsState: com.arshadshah.nimaz.presentation.viewmodel.EventsUiState,
+    state: CalendarUiState,
+    eventsState: EventsUiState,
     viewModel: CalendarViewModel,
     modifier: Modifier = Modifier
 ) {
@@ -150,8 +152,8 @@ private fun CalendarCompactContent(
 
 @Composable
 private fun CalendarTabletContent(
-    state: com.arshadshah.nimaz.presentation.viewmodel.CalendarUiState,
-    eventsState: com.arshadshah.nimaz.presentation.viewmodel.EventsUiState,
+    state: CalendarUiState,
+    eventsState: EventsUiState,
     viewModel: CalendarViewModel,
     modifier: Modifier = Modifier
 ) {
@@ -217,7 +219,7 @@ private fun CalendarTabletContent(
 
 @Composable
 private fun CalendarSection(
-    state: com.arshadshah.nimaz.presentation.viewmodel.CalendarUiState,
+    state: CalendarUiState,
     viewModel: CalendarViewModel
 ) {
     // The grid draws with or without events, so a content-database fault costs the event

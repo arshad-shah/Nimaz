@@ -73,8 +73,9 @@ import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazShapes
 import com.arshadshah.nimaz.presentation.theme.currentWindowSizeClass
 import com.arshadshah.nimaz.presentation.theme.isCompact
-import com.arshadshah.nimaz.presentation.viewmodel.ZakatEvent
-import com.arshadshah.nimaz.presentation.viewmodel.ZakatViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.tools.ZakatEvent
+import com.arshadshah.nimaz.presentation.viewmodel.tools.ZakatViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.tools.ZakatCalculatorUiState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -134,7 +135,7 @@ fun ZakatCalculatorScreen(
 
 @Composable
 private fun ZakatCompactContent(
-    state: com.arshadshah.nimaz.presentation.viewmodel.ZakatCalculatorUiState,
+    state: ZakatCalculatorUiState,
     viewModel: ZakatViewModel,
     modifier: Modifier = Modifier
 ) {
@@ -219,7 +220,7 @@ private fun ZakatCompactContent(
 
 @Composable
 private fun ZakatTabletContent(
-    state: com.arshadshah.nimaz.presentation.viewmodel.ZakatCalculatorUiState,
+    state: ZakatCalculatorUiState,
     viewModel: ZakatViewModel,
     modifier: Modifier = Modifier
 ) {
@@ -317,7 +318,7 @@ private fun ZakatTabletContent(
 
 @Composable
 private fun AssetInputCards(
-    state: com.arshadshah.nimaz.presentation.viewmodel.ZakatCalculatorUiState,
+    state: ZakatCalculatorUiState,
     viewModel: ZakatViewModel
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -400,7 +401,7 @@ private fun AssetInputCards(
 
 @Composable
 private fun LiabilityInputCards(
-    state: com.arshadshah.nimaz.presentation.viewmodel.ZakatCalculatorUiState,
+    state: ZakatCalculatorUiState,
     viewModel: ZakatViewModel
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
