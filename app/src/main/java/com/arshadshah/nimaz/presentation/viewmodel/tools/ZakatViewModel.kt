@@ -257,8 +257,23 @@ class ZakatViewModel @Inject constructor(
         }
     }
 
+    /**
+     * `ZakatHistoryUiState.isLoading` defaults to `true` and was only ever cleared *inside*
+     * the collect, so a stream that failed before its first emission — a missing table after
+     * a content-database replacement, say — left the history screen spinning for the life of
+     * the ViewModel, with nothing on screen to say why.
+     *
+     * The failure clears the spinner so the empty state shows instead. It does not set
+     * `error`: `ZakatScreen` never reads that field, so writing it would be error production
+     * with nothing rendering it. Reporting still happens through `launchSafely`.
+     */
     private fun loadHistory() {
-        launchSafely(telemetry, DOMAIN, "load_history") {
+        launchSafely(
+            telemetry,
+            DOMAIN,
+            "load_history",
+            onFailure = { _historyState.update { it.copy(isLoading = false) } },
+        ) {
             zakatUseCases.getAllHistory().collect { entries ->
                 val totalPaid = zakatUseCases.getTotalPaid()
                 _historyState.update {

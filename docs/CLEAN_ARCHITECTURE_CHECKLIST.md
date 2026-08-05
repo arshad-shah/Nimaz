@@ -237,6 +237,39 @@ This one is **pervasive and lower priority** — listed so it's tracked, not bec
   (the wrapper is the seam the UI depends on), but if a use case adds no value and the feature is
   trivial, that's fine — don't over-engineer net-new tiny features.
 
+### AP-7.12 · A `launchSafely` without `onFailure` is not automatically a defect
+
+`launchSafely` **always reports to telemetry** — that is what it does. A call site without
+`onFailure` is therefore silent *to the user*, not silent to monitoring, and whether that is
+wrong depends entirely on what the ViewModel does with its state. Triaged all 25 such sites:
+
+- [x] ~~**`BookmarksViewModel.deleteBookmark` wrote the undo state outside the coroutine.**~~
+  **Resolved.** The pending-restore entry and the "Deleted — Undo" snackbar were set the moment
+  the event arrived, so a delete that threw left the row on screen *with* an Undo beside it —
+  and that undo would have re-inserted a bookmark which was never removed. Both now happen
+  inside the block, after the delete returns.
+- [x] ~~**`ZakatViewModel.loadHistory` could strand its spinner.**~~ **Resolved.**
+  `ZakatHistoryUiState.isLoading` defaults to `true` and was cleared only *inside* the collect,
+  so a stream failing before first emission span for ever. `onFailure` now clears it.
+- [ ] **The remaining 23 are correct as telemetry-only — do not "fix" them.** Their state is
+  driven by observed settings/data flows, so a failed write simply does not move the UI: the
+  switch stays where it was, the row stays in the list, the entry never joins history. That is
+  truthful and self-correcting, and it already reports. Adding `onFailure` to set an `error`
+  would in most cases be **error production with no rendering** — `BookmarksScreen`,
+  `ZakatScreen`, `SearchSettingsScreen` (outside its consent sheet), `TafseerScreen` and
+  `CatalogScreen` never read `state.error`. Only `DuaCategoryScreen`/`DuaReaderScreen` and
+  `IslamicCalendarScreen` render one.
+
+**The test to apply per site**, in order: (1) does the ViewModel write state optimistically,
+*outside* the coroutine? Then move it inside — the bug is the UI claiming success. (2) Can a
+failure strand a loading flag, including one that is a `UiState` **default** rather than an
+assignment? Then clear it in `onFailure`. (3) Otherwise, does a screen actually render the
+error field? If not, wiring one changes nothing a user can see. Leave it, and record why.
+
+**Detect new call sites:** `grep -rn "launchSafely(" app/src/main --include='*ViewModel.kt'`,
+then check each against the three questions above. Note a site whose *inner* flow uses
+`catchAndReport` needs no outer `onFailure` — that is the documented pattern, not an omission.
+
 ### AP-7.1 · Nested `collect` (silently kills reactivity)
 
 - [x] ~~**Khatam observers in `QuranViewModel` and `KhatamViewModel`.**~~ **Resolved.** Both
