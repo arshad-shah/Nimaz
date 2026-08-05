@@ -47,7 +47,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
@@ -69,6 +68,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuItem
 import com.arshadshah.nimaz.presentation.components.organisms.NimazTopAppBar
+import com.arshadshah.nimaz.presentation.screens.resolve
 import com.arshadshah.nimaz.presentation.viewmodel.more.MoreEvent
 import com.arshadshah.nimaz.presentation.viewmodel.more.MoreUiState
 import com.arshadshah.nimaz.presentation.viewmodel.more.MoreViewModel
@@ -438,26 +438,3 @@ private fun MoreUiState.zakatSubtitle(): String? = MoreSubtitles.zakat(
     loaded = zakatHistoryLoaded,
     dueThisYear = zakatDueThisYear?.let { formatCurrency(it, zakatCurrency) },
 ).resolve()
-
-/**
- * A [SubtitleSpec] as text, or null when there is nothing to say.
- *
- * Null in, null out — so a row passes `subtitle = spec.resolve()` and renders nothing at all when
- * the figure has not arrived. That is the loading contract: absent, never a dash or a spinner.
- */
-@Composable
-private fun SubtitleSpec?.resolve(): String? {
-    val spec = this ?: return null
-    val args: Array<Any> = spec.args.map<SubtitleArg, Any> { arg ->
-        when (arg) {
-            is SubtitleArg.Count -> arg.value
-            is SubtitleArg.Text -> arg.value
-            is SubtitleArg.Resource -> stringResource(arg.res)
-        }
-    }.toTypedArray()
-    // A plural resource read with stringResource throws, so the quantity is what picks the call —
-    // which is why MoreSubtitles guarantees "plural iff quantity".
-    return spec.quantity
-        ?.let { pluralStringResource(spec.res, it, *args) }
-        ?: stringResource(spec.res, *args)
-}

@@ -2065,6 +2065,39 @@
     <string name="more_zakat_due">%1$s due</string>
     <string name="more_calendar_hijri">%1$s</string>
 
+    <!--
+      Fasting — the "Go deeper" group. Same rule as More: these report, they do not restate the
+      row's own title, and a row with nothing true to say gets no subtitle at all.
+    -->
+    <string name="fasting_go_deeper">Go deeper</string>
+    <string name="fasting_log_a_fast">Log a fast</string>
+    <string name="fasting_row_calendar">Fasting calendar</string>
+    <plurals name="fasting_row_calendar_fasted">
+        <item quantity="one">%1$d fasted this month</item>
+        <item quantity="other">%1$d fasted this month</item>
+    </plurals>
+    <string name="fasting_row_recommended">Recommended fasts</string>
+    <string name="fasting_row_recommended_today">The next one is today</string>
+    <string name="fasting_row_recommended_tomorrow">The next one is tomorrow</string>
+    <plurals name="fasting_row_recommended_in_days">
+        <item quantity="one">The next one is in %1$d day</item>
+        <item quantity="other">The next one is in %1$d days</item>
+    </plurals>
+    <string name="fasting_row_makeup">Makeup fasts</string>
+    <plurals name="fasting_row_makeup_pending">
+        <item quantity="one">%1$d still to make up</item>
+        <item quantity="other">%1$d still to make up</item>
+    </plurals>
+    <string name="fasting_row_makeup_none">Nothing outstanding</string>
+    <string name="fasting_row_makeup_fidya">Nothing outstanding · %1$s fidya paid</string>
+    <string name="fasting_row_ramadan">Ramadan</string>
+    <string name="fasting_row_ramadan_day">Day %1$d</string>
+    <string name="fasting_row_ramadan_today">Begins today</string>
+    <plurals name="fasting_row_ramadan_in_days">
+        <item quantity="one">Begins in %1$d day</item>
+        <item quantity="other">Begins in %1$d days</item>
+    </plurals>
+
     <!-- More — the pinned shortcut row. -->
     <string name="more_pinned_title">Pinned</string>
     <string name="more_pinned_edit">Edit pinned shortcuts</string>

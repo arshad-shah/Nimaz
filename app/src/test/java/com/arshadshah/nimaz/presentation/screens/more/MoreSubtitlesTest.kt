@@ -1,6 +1,7 @@
 package com.arshadshah.nimaz.presentation.screens.more
 
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.presentation.screens.SubtitleArg
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 

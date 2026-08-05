@@ -109,6 +109,19 @@ import java.time.YearMonth
 import java.time.ZoneId
 import java.time.temporal.TemporalAdjusters
 import com.arshadshah.nimaz.presentation.viewmodel.tracker.MakeupFastsUiState
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.ExpandLess
+import com.arshadshah.nimaz.presentation.theme.ThemeMode
+import android.content.res.Configuration
+import androidx.compose.material.icons.filled.EventAvailable
+import androidx.compose.material.icons.filled.Restore
+import com.arshadshah.nimaz.core.util.formatCurrency
+import com.arshadshah.nimaz.domain.model.ZakatDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazDivider
+import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
+import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuItem
+import com.arshadshah.nimaz.presentation.screens.resolve
 
 // Color constants for makeup fasts
 private val OrangeAccent = NimazColors.PrayerColors.Asr
@@ -120,6 +133,7 @@ private val GreenAccent = NimazColors.Success
 fun FastTrackerScreen(
     onNavigateBack: () -> Unit,
     onNavigateToHistory: () -> Unit,
+    onNavigateToCalendar: () -> Unit,
     viewModel: FastingViewModel = hiltViewModel()
 ) {
     val state by viewModel.trackerState.collectAsStateWithLifecycle()
@@ -129,6 +143,11 @@ fun FastTrackerScreen(
     val sheetState by viewModel.sheetState.collectAsStateWithLifecycle()
 
     var selectedTab by remember { mutableIntStateOf(0) }
+    // The two long sections start folded. The tracker tab was a very long scroll with the
+    // calendar and the recommended list always open; the Go deeper rows now report what is in
+    // each and reveal it on demand, which is what "go deeper" should mean.
+    var showCalendar by rememberSaveable { mutableStateOf(false) }
+    var showRecommended by rememberSaveable { mutableStateOf(false) }
     val tabs = listOf(
         stringResource(R.string.fasting_tab_tracker),
         stringResource(R.string.fasting_tab_makeup)
@@ -242,7 +261,7 @@ fun FastTrackerScreen(
                                     records = calendarState.records
                                 )
                             }
-                        } else if (HijriDateCalculator.daysUntilNextRamadan() <= 30) {
+                        } else if (HijriDateCalculator.daysUntilNextRamadan() <= RamadanCardWindowDays) {
                             // Ramadan approaching (within 30 days) - show countdown
                             item {
                                 RamadanCountdownCard()
@@ -264,8 +283,8 @@ fun FastTrackerScreen(
                             )
                         }
 
-                        // Calendar with Ramadan indicators
-                        item {
+                        // Calendar with Ramadan indicators — revealed by its Go deeper row.
+                        if (showCalendar) item {
                             FastingCalendarSection(
                                 records = calendarState.records,
                                 selectedMonth = calendarState.selectedMonth,
@@ -293,7 +312,7 @@ fun FastTrackerScreen(
                         }
 
                         // Recommended voluntary fasts - only outside Ramadan
-                        if (!ramadanState.isRamadan) {
+                        if (!ramadanState.isRamadan && showRecommended) {
                             item {
                                 RecommendedFastsSection(
                                     records = calendarState.records,
@@ -305,10 +324,38 @@ fun FastTrackerScreen(
                             }
                         }
 
-                        // Log Fast Button
+                        // Go deeper — one group of rows that report, replacing subtitles that
+                        // restated their own titles. The makeup count is a badge rather than
+                        // prose: it is the number someone came here to check.
+                        item {
+                            FastingGoDeeperGroup(
+                                fastedThisMonth = calendarState.records.count {
+                                    it.status == FastStatus.FASTED
+                                },
+                                daysUntilRecommended = calculateAyyamAlBeedDays(LocalDate.now()),
+                                showRecommendedRow = !ramadanState.isRamadan,
+                                pendingMakeup = makeupState.pendingCount,
+                                fidyaPaid = makeupState.totalFidyaPaid,
+                                isRamadan = ramadanState.isRamadan,
+                                ramadanDay = ramadanState.currentDay,
+                                daysUntilRamadan = HijriDateCalculator.daysUntilNextRamadan(),
+                                calendarExpanded = showCalendar,
+                                recommendedExpanded = showRecommended,
+                                onToggleCalendar = { showCalendar = !showCalendar },
+                                onToggleRecommended = { showRecommended = !showRecommended },
+                                onOpenMakeup = { selectedTab = 1 },
+                                onOpenRamadanCalendar = onNavigateToCalendar,
+                            )
+                        }
+
+                        // Log a fast for the selected day. Kept as its own action: the calendar
+                        // reaches any date, but "log today" should not require finding today on a
+                        // grid that may be folded away.
                         item {
                             LogFastButton(
-                                onClick = { viewModel.onEvent(FastingEvent.OpenFastSheet(state.selectedDate)) }
+                                onClick = {
+                                    viewModel.onEvent(FastingEvent.OpenFastSheet(state.selectedDate))
+                                }
                             )
                         }
                     }
@@ -568,13 +615,19 @@ private fun TodayFastSection(
                             fontWeight = FontWeight.SemiBold,
                             color = MaterialTheme.colorScheme.onSurface
                         )
-                        if (ramadanDay != null) {
-                            Text(
-                                text = stringResource(R.string.fasting_ramadan_day, ramadanDay),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
+                        // The Hijri date, because a fast is a Hijri-calendar act: "13 Sha'ban" is
+                        // what tells someone *which* recommended fast today is, and the Gregorian
+                        // line above cannot. Inside Ramadan the day number is the better fact, so
+                        // it takes the slot instead of stacking three dates.
+                        Text(
+                            text = if (ramadanDay != null) {
+                                stringResource(R.string.fasting_ramadan_day, ramadanDay)
+                            } else {
+                                HijriDateCalculator.toHijri(selectedDate).formatted()
+                            },
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     }
 
                     val fastingStatusText = stringResource(R.string.fasting_status_fasting)
@@ -1125,23 +1178,131 @@ private fun RecommendedFastCard(
     }
 }
 
+/**
+ * The rows under the day's card: where to go next, each reporting rather than describing.
+ *
+ * Every row does something **different**, which is the constraint that shaped this. Three rows
+ * that all opened the day sheet would be one row wearing three hats. So the calendar and the
+ * recommended list fold and unfold in place, makeup switches to its tab, and Ramadan — which has
+ * no destination on this screen — opens the Islamic calendar, the one place that does own it.
+ *
+ * Makeup fasts carries a [NimazBadge] rather than putting its count in the subtitle. The count is
+ * the reason someone opens that row, and a number in prose is a number you read a sentence to find.
+ *
+ * The Ramadan row appears **only beyond thirty days**. Inside that window the countdown card at
+ * the top of this screen says the same thing far better, and during Ramadan the banner does —
+ * a row repeating either would state one fact twice on one screen.
+ */
+@Composable
+private fun FastingGoDeeperGroup(
+    fastedThisMonth: Int,
+    daysUntilRecommended: Int,
+    showRecommendedRow: Boolean,
+    pendingMakeup: Int,
+    fidyaPaid: Double,
+    isRamadan: Boolean,
+    ramadanDay: Int,
+    daysUntilRamadan: Int,
+    calendarExpanded: Boolean,
+    recommendedExpanded: Boolean,
+    onToggleCalendar: () -> Unit,
+    onToggleRecommended: () -> Unit,
+    onOpenMakeup: () -> Unit,
+    onOpenRamadanCalendar: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Text(
+            text = stringResource(R.string.fasting_go_deeper),
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onBackground,
+        )
+        NimazMenuGroup {
+            NimazMenuItem(
+                title = stringResource(R.string.fasting_row_calendar),
+                subtitle = FastingSubtitles.calendar(fastedThisMonth).resolve(),
+                icon = Icons.Default.CalendarMonth,
+                onClick = onToggleCalendar,
+                // A chevron, not an arrow: this reveals a section on this screen rather than
+                // going somewhere, and the two should not look the same.
+                trailingIcon = if (calendarExpanded) Icons.Default.ExpandLess
+                else Icons.Default.ExpandMore,
+            )
+            if (showRecommendedRow) {
+                NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
+                NimazMenuItem(
+                    title = stringResource(R.string.fasting_row_recommended),
+                    subtitle = FastingSubtitles.recommended(daysUntilRecommended).resolve(),
+                    icon = Icons.Default.EventAvailable,
+                    onClick = onToggleRecommended,
+                    trailingIcon = if (recommendedExpanded) Icons.Default.ExpandLess
+                    else Icons.Default.ExpandMore,
+                )
+            }
+            NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
+            NimazMenuItem(
+                title = stringResource(R.string.fasting_row_makeup),
+                subtitle = FastingSubtitles.makeup(
+                    pending = pendingMakeup,
+                    // Only the paid figure, and only once nothing is outstanding — the mapper
+                    // decides which of the two facts the row leads with.
+                    fidyaPaid = fidyaPaid.takeIf { it > 0.0 }
+                        ?.let { formatCurrency(it, ZakatDefaults.CURRENCY) },
+                ).resolve(),
+                icon = Icons.Default.Restore,
+                onClick = onOpenMakeup,
+                trailingIcon = null,
+                trailing = {
+                    if (pendingMakeup > 0) {
+                        NimazBadge(
+                            text = pendingMakeup.toString(),
+                            tone = NimazTone.WARNING,
+                            size = NimazBadgeSize.SMALL,
+                        )
+                    }
+                },
+            )
+            if (!isRamadan && daysUntilRamadan > RamadanCardWindowDays) {
+                NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
+                NimazMenuItem(
+                    title = stringResource(R.string.fasting_row_ramadan),
+                    subtitle = FastingSubtitles.ramadan(
+                        isRamadan = isRamadan,
+                        currentDay = ramadanDay,
+                        daysUntil = daysUntilRamadan,
+                    ).resolve(),
+                    icon = Icons.Default.NightsStay,
+                    onClick = onOpenRamadanCalendar,
+                )
+            }
+        }
+    }
+}
+
+/**
+ * How close Ramadan has to be before the countdown card takes over from the Go deeper row.
+ *
+ * Named because it is used in two places that must agree — the card's own gate and the row's —
+ * and the failure mode of them disagreeing is either both showing or neither.
+ */
+private const val RamadanCardWindowDays = 30
+
+/** Opens the day sheet for the selected date. */
 @Composable
 private fun LogFastButton(
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     NimazButton(
-        text = stringResource(R.string.fasting_log_today),
+        text = stringResource(R.string.fasting_log_a_fast),
         onClick = onClick,
-        modifier = modifier,
-        variant = NimazButtonVariant.FILLED,
-        size = NimazButtonSize.LARGE,
         leadingIcon = Icons.Default.Add,
-        fullWidth = true
+        fullWidth = true,
+        modifier = modifier,
     )
 }
 
-// Makeup Fasts Content Components
 @Composable
 private fun MakeupFastsContent(
     makeupState: MakeupFastsUiState,
@@ -1515,11 +1676,43 @@ private fun RecommendedFastsSectionPreview() {
     }
 }
 
-@Preview(showBackground = true, widthDp = 400, name = "Log Fast Button")
 @Composable
-private fun LogFastButtonPreview() {
-    NimazTheme {
-        LogFastButton(onClick = {})
+private fun GoDeeperShowcase() {
+    FastingGoDeeperGroup(
+        fastedThisMonth = 18,
+        daysUntilRecommended = 4,
+        showRecommendedRow = true,
+        pendingMakeup = 3,
+        fidyaPaid = 0.0,
+        isRamadan = false,
+        ramadanDay = 0,
+        daysUntilRamadan = 96,
+        calendarExpanded = false,
+        recommendedExpanded = false,
+        onToggleCalendar = {},
+        onToggleRecommended = {},
+        onOpenMakeup = {},
+        onOpenRamadanCalendar = {},
+        modifier = Modifier.padding(20.dp),
+    )
+}
+
+@Preview(showBackground = true, widthDp = 400, name = "Go deeper — Light")
+@Composable
+private fun FastingGoDeeperLightPreview() {
+    NimazTheme(themeMode = ThemeMode.LIGHT) {
+        GoDeeperShowcase()
+    }
+}
+
+@Preview(
+    showBackground = true, widthDp = 400, name = "Go deeper — Dark",
+    uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL
+)
+@Composable
+private fun FastingGoDeeperDarkPreview() {
+    NimazTheme(themeMode = ThemeMode.DARK) {
+        GoDeeperShowcase()
     }
 }
 

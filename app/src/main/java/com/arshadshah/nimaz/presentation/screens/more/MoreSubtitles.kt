@@ -1,42 +1,9 @@
 package com.arshadshah.nimaz.presentation.screens.more
 
-import androidx.annotation.PluralsRes
 import androidx.annotation.StringRes
 import com.arshadshah.nimaz.R
-
-/**
- * One argument inside a [SubtitleSpec].
- *
- * A plain `List<Any>` would not do: some subtitles interpolate a **string resource** (the worship
- * reminder's own translated name), and an `Int` in an untyped arg list is indistinguishable from a
- * count. That distinction only shows up as a bug in a non-English locale, where the row renders a
- * resource id where a name should be.
- */
-sealed interface SubtitleArg {
-    /** A number to interpolate — and, for a plural, also the quantity. */
-    data class Count(val value: Int) : SubtitleArg
-
-    /** Text already resolved by the layer that had it (a formatted amount, a Hijri date). */
-    data class Text(val value: String) : SubtitleArg
-
-    /** A string resource to resolve at render time, so it lands in the reader's language. */
-    data class Resource(@StringRes val res: Int) : SubtitleArg
-}
-
-/**
- * What a More row should say, before anything has resolved it into text.
- *
- * [quantity] is non-null exactly when [res] is a `plurals` resource. The screen switches on it to
- * pick `pluralStringResource` over `stringResource`; getting that wrong throws at render time, in
- * a locale the author may well not read, which is why `MoreSubtitlesTest` asserts the invariant
- * rather than trusting each call site.
- */
-data class SubtitleSpec(
-    /** A `@StringRes` when [quantity] is null, a `@PluralsRes` when it is not. */
-    @StringRes @PluralsRes val res: Int,
-    val args: List<SubtitleArg> = emptyList(),
-    val quantity: Int? = null,
-)
+import com.arshadshah.nimaz.presentation.screens.SubtitleArg
+import com.arshadshah.nimaz.presentation.screens.SubtitleSpec
 
 /**
  * Which string each More row reports, given the state behind it.

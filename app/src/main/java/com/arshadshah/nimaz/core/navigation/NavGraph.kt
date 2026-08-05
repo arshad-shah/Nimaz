@@ -860,14 +860,16 @@ fun NavGraph(
             taggedComposable<Route.FastingHome>(ScreenTags.FastingHome) {
                 FastTrackerScreen(
                     onNavigateBack = { navController.popBackStack() },
-                    onNavigateToHistory = { navController.navigate(Route.FastingStats) }
+                    onNavigateToHistory = { navController.navigate(Route.FastingStats) },
+                    onNavigateToCalendar = { navController.navigate(Route.IslamicCalendar) }
                 )
             }
 
             taggedComposable<Route.FastingTracker>(ScreenTags.FastingTracker) {
                 FastTrackerScreen(
                     onNavigateBack = { navController.popBackStack() },
-                    onNavigateToHistory = { navController.navigate(Route.FastingStats) }
+                    onNavigateToHistory = { navController.navigate(Route.FastingStats) },
+                    onNavigateToCalendar = { navController.navigate(Route.IslamicCalendar) }
                 )
             }
 
@@ -883,7 +885,8 @@ fun NavGraph(
             taggedComposable<Route.FastingStats>(ScreenTags.FastingStats) {
                 FastTrackerScreen(
                     onNavigateBack = { navController.popBackStack() },
-                    onNavigateToHistory = { }
+                    onNavigateToHistory = { },
+                    onNavigateToCalendar = { navController.navigate(Route.IslamicCalendar) }
                 )
             }
 
