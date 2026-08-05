@@ -1675,6 +1675,7 @@
     <string name="night_worship_opens_in">Dimulai dalam</string>
     <string name="night_worship_closed">Waktu malam ini telah berlalu</string>
     <string name="night_worship_times_unavailable">Atur lokasi Anda untuk melihat waktunya</string>
+    <string name="night_worship_times_failed">Waktu malam ini tidak dapat dihitung.</string>
     <string name="night_worship_rakah_title">Rakaat dikerjakan</string>
     <string name="night_worship_rakah_body">Salat malam dikerjakan dua rakaat sekali salam</string>
     <string name="night_worship_add_pair">+2 rakaat</string>

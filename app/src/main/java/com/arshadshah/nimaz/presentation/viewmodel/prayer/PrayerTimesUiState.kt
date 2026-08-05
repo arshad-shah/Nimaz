@@ -21,7 +21,15 @@ data class PrayerTimesUiState(
      * header must not assert a city they have never been to.
      */
     val isUsingFallbackLocation: Boolean = false,
-    val selectedDate: LocalDate = LocalDate.now(),
+    /**
+     * Null until the ViewModel anchors it, rather than a `LocalDate.now()` data-class default.
+     *
+     * A default is evaluated when the instance is constructed, so it froze at whatever day the
+     * screen was opened and nothing re-evaluated it. The ViewModel sets it from `TodayProvider`
+     * and re-anchors at midnight; making it nullable is what stops the old shape being written
+     * back by habit.
+     */
+    val selectedDate: LocalDate? = null,
     val isToday: Boolean = true,
     val prayers: List<PrayerTimeDisplay> = emptyList(),
     /** Tomorrow's Fajr, so the UI can wrap the countdown once today's Isha has passed. */

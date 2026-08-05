@@ -14,7 +14,6 @@ data class GeneralSettingsUiState(
     val useHijriPrimary: Boolean = false,
     val hijriDayOffset: Int = 0,
     val use24HourFormat: Boolean = false,
-    val showSeconds: Boolean = false,
     val hapticFeedback: Boolean = true,
     val showIslamicPatterns: Boolean = true,
     val patternStyle: NimazPatternStyle = NimazPatternStyle.CORNER_MEDALLION,
@@ -27,8 +26,6 @@ data class PrayerSettingsUiState(
     val calculationMethod: CalculationMethod = CalculationMethod.MUSLIM_WORLD_LEAGUE,
     val asrMethod: AsrJuristicMethod = AsrJuristicMethod.STANDARD,
     val highLatitudeRule: HighLatitudeRule = HighLatitudeRule.MIDDLE_OF_THE_NIGHT,
-    val fajrAngle: Double = 18.0,
-    val ishaAngle: Double = 17.0,
     val fajrAdjustment: Int = 0,
     val sunriseAdjustment: Int = 0,
     val dhuhrAdjustment: Int = 0,
@@ -114,6 +111,5 @@ data class LocationSettingsUiState(
     val currentLocation: Location? = null,
     val savedLocations: List<Location> = emptyList(),
     val favoriteLocations: List<Location> = emptyList(),
-    val autoDetectLocation: Boolean = true,
     val isLoading: Boolean = true
 )

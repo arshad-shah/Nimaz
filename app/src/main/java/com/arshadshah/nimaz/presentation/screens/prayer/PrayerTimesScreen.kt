@@ -109,7 +109,11 @@ private data class PrayerSky(
 )
 
 @Composable
-private fun rememberPrayerSky(state: PrayerTimesUiState, today: java.time.LocalDate): PrayerSky {
+private fun rememberPrayerSky(
+    state: PrayerTimesUiState,
+    today: java.time.LocalDate,
+    selectedDate: java.time.LocalDate,
+): PrayerSky {
     val now by rememberNow(TickResolution.MINUTES)
     val prayers = remember(state.prayers, now) { state.prayers.withClockState(now) }
     val next = prayers.firstOrNull { it.isNext }
@@ -124,7 +128,8 @@ private fun rememberPrayerSky(state: PrayerTimesUiState, today: java.time.LocalD
     }
     val timeOfDay = (nowLocal.hour * 60 + nowLocal.minute) / 1440f
 
-    val timeLabel = if (state.isToday) clockTimeText(now) else state.selectedDate.formatWeekdayDayMonth()
+    val timeLabel =
+        if (state.isToday) clockTimeText(now) else selectedDate.formatWeekdayDayMonth()
     val statusLabel = if (state.isToday && nextAt != null) {
         val parts by rememberCountdownTo(nextAt)
         stringResource(
@@ -135,7 +140,7 @@ private fun rememberPrayerSky(state: PrayerTimesUiState, today: java.time.LocalD
     } else if (state.isToday) {
         nextName
     } else {
-        "${daysFromToday(state.selectedDate, today)} · " +
+        "${daysFromToday(selectedDate, today)} · " +
             "${state.sunriseAt?.let { clockTimeText(it) } ?: "--:--"} — " +
             "${state.sunsetAt?.let { clockTimeText(it) } ?: "--:--"}"
     }
@@ -156,8 +161,12 @@ fun PrayerTimesScreen(
     viewModel: PrayerTimesViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val today = remember { LocalDate.now() }
-    val sky = rememberPrayerSky(state, today)
+    // Both follow the ViewModel rather than a `remember { LocalDate.now() }`, which froze at
+    // whatever day the screen was opened — so across midnight "today" stayed yesterday and the
+    // "Today" chip, which renders only `if (!state.isToday)`, never appeared to offer a way back.
+    val today = state.selectedDate.takeIf { state.isToday } ?: LocalDate.now()
+    val selectedDate = state.selectedDate ?: today
+    val sky = rememberPrayerSky(state, today, selectedDate)
     var showMonthSheet by remember { mutableStateOf(false) }
 
     // Edge-to-edge: the living sky reaches the very top, behind the status bar,
@@ -233,7 +242,7 @@ fun PrayerTimesScreen(
             elevation = 4.dp,
         ) {
             DayNavBar(
-                selectedDate = state.selectedDate,
+                selectedDate = selectedDate,
                 isToday = state.isToday,
                 onPrev = { viewModel.onEvent(PrayerTimesEvent.PreviousDay) },
                 onNext = { viewModel.onEvent(PrayerTimesEvent.NextDay) },
@@ -262,7 +271,7 @@ fun PrayerTimesScreen(
                 },
         ) {
             AnimatedContent(
-                targetState = state.selectedDate,
+                targetState = selectedDate,
                 transitionSpec = {
                     val dir = if (targetState.isAfter(initialState)) 1 else -1
                     (slideInHorizontally(tween(260)) { w -> dir * w } + fadeIn(tween(260))) togetherWith

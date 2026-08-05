@@ -1740,6 +1740,7 @@
     <string name="night_worship_opens_in">Commence dans</string>
     <string name="night_worship_closed">La fenêtre de cette nuit est passée</string>
     <string name="night_worship_times_unavailable">Définissez votre position pour voir les horaires</string>
+    <string name="night_worship_times_failed">Les horaires de cette nuit n\'ont pas pu être calculés.</string>
     <string name="night_worship_rakah_title">Rakats accomplies</string>
     <string name="night_worship_rakah_body">La prière de nuit se fait deux par deux</string>
     <string name="night_worship_add_pair">+2 rakats</string>

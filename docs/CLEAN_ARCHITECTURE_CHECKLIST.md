@@ -380,6 +380,15 @@ rg -n -U --multiline-dotall \
   screen recalculates through `recalculate()` on every entry), so they were deleted rather than
   wired, along with two private handlers left with no caller.
 
+- [x] ~~**Prayer-time computation on `Dispatchers.Main`.**~~ **Resolved.** `calculateMonth` ran
+  28–31 passes of solar geometry plus 28–31 Hijri conversions with no dispatcher, on every
+  settings emission and every month tap; `recomputeDay` ran a day's geometry synchronously from
+  a `Main.immediate` collector, and `publishDisplays` ran a **second** full day for tomorrow's
+  Fajr on every publish — including every Room re-emission of the tracker statuses, so toggling
+  one prayer recomputed a whole day's astronomy on the UI thread. Worst of all, `ramadanDays()`
+  was a **public synchronous** function computing ~30 days, called straight from a click handler.
+  All of it moved behind the injected `@DefaultDispatcher`, and the Ramadan export became an
+  event whose result lands in state — which fixes the UDF violation at the same time.
 - [ ] **`WidgetsScreen` constructs `PrayerTimeCalculator()` directly.** The five ViewModels that
   injected it now go through `PrayerUseCases`, but the widget-preview screen still calls
   `PrayerTimeCalculator()` in a composable — a screen instantiating a `@Singleton` and computing

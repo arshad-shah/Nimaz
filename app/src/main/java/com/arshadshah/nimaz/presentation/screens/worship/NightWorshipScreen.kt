@@ -36,6 +36,7 @@ import com.arshadshah.nimaz.core.navigation.DUA_CATEGORY_WITR_AND_NIGHT_PRAYER
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
+import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazClockText
@@ -128,7 +129,13 @@ fun NightWorshipContent(
         ) {
             Spacer(Modifier.height(4.dp))
 
-            NightWindowCard(lastThirdAt = state.lastThirdAt, fajrAt = state.fajrAt)
+            NightWindowCard(
+                lastThirdAt = state.lastThirdAt,
+                fajrAt = state.fajrAt,
+                isLoading = state.isLoading,
+                hasError = state.error != null,
+                onRetry = { onEvent(NightWorshipEvent.Refresh) },
+            )
 
             RakahCounterCard(
                 count = state.rakahCount,
@@ -176,8 +183,23 @@ fun NightWorshipContent(
 /** Where "now" sits relative to tonight's window. */
 private enum class NightWindow { BEFORE, OPEN, CLOSED }
 
+/**
+ * [isLoading] and [hasError] were both on the state and **neither was read**.
+ *
+ * The card renders "Set your location to see tonight's times" whenever the instants are null, so
+ * for the length of a settings read plus three astronomical passes every cold open showed that
+ * copy and then snapped to real times — a user-visible defect caused purely by an unread field.
+ * And because a genuine failure produced the same null instants, it was indistinguishable from
+ * loading, with no way to retry: `NightWorshipEvent.Refresh` existed and no screen emitted it.
+ */
 @Composable
-private fun NightWindowCard(lastThirdAt: Instant?, fajrAt: Instant?) {
+private fun NightWindowCard(
+    lastThirdAt: Instant?,
+    fajrAt: Instant?,
+    isLoading: Boolean,
+    hasError: Boolean,
+    onRetry: () -> Unit,
+) {
     NimazCard(
         modifier = Modifier
             .fillMaxWidth()
@@ -193,12 +215,29 @@ private fun NightWindowCard(lastThirdAt: Instant?, fajrAt: Instant?) {
             )
             Spacer(Modifier.height(8.dp))
 
+            if (isLoading && lastThirdAt == null) {
+                NimazLoadingState(modifier = Modifier.fillMaxWidth())
+                return@Column
+            }
+
             if (lastThirdAt == null || fajrAt == null) {
                 Text(
-                    text = stringResource(R.string.night_worship_times_unavailable),
+                    text = stringResource(
+                        if (hasError) R.string.night_worship_times_failed
+                        else R.string.night_worship_times_unavailable
+                    ),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
+                if (hasError) {
+                    Spacer(Modifier.height(12.dp))
+                    NimazButton(
+                        text = stringResource(R.string.try_again),
+                        onClick = onRetry,
+                        variant = NimazButtonVariant.OUTLINED,
+                        size = NimazButtonSize.SMALL,
+                    )
+                }
                 return@Column
             }
 
