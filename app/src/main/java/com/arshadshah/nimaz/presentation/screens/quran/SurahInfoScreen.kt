@@ -48,6 +48,8 @@ import com.arshadshah.nimaz.presentation.components.organisms.BottomActions
 import com.arshadshah.nimaz.presentation.components.organisms.NimazTopAppBar
 import com.arshadshah.nimaz.presentation.viewmodel.quran.QuranEvent
 import com.arshadshah.nimaz.presentation.viewmodel.quran.QuranViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.quran.SurahThematicEvent
+import com.arshadshah.nimaz.presentation.viewmodel.quran.SurahThematicViewModel
 
 /**
  * What a surah is, and where to go to learn more about it.
@@ -71,15 +73,19 @@ fun SurahInfoScreen(
     onOpenBackground: () -> Unit = {},
     onOpenPassages: () -> Unit = {},
     onOpenSubjects: () -> Unit = {},
-    viewModel: QuranViewModel = hiltViewModel()
+    viewModel: QuranViewModel = hiltViewModel(),
+    // The thematic layer comes from the ViewModel that owns it and that the two prose screens
+    // already use, rather than a second copy of the same three reads inside QuranViewModel.
+    thematicViewModel: SurahThematicViewModel = hiltViewModel(),
 ) {
     val homeState by viewModel.homeState.collectAsStateWithLifecycle()
-    val thematic by viewModel.surahThematic.collectAsStateWithLifecycle()
+    val thematic by thematicViewModel.thematic.collectAsStateWithLifecycle()
     val audioState by viewModel.audioState.collectAsStateWithLifecycle()
     val surah = homeState.surahs.find { it.number == surahNumber }
 
     LaunchedEffect(surahNumber) {
         viewModel.onEvent(QuranEvent.LoadSurahInfo(surahNumber))
+        thematicViewModel.onEvent(SurahThematicEvent.Load(surahNumber))
     }
 
     // The audio control bar should only reflect playback that belongs to THIS
