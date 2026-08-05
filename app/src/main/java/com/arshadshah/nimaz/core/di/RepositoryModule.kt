@@ -19,6 +19,10 @@ import com.arshadshah.nimaz.data.repository.QuranRepositoryImpl
 import com.arshadshah.nimaz.data.repository.TafseerRepositoryImpl
 import com.arshadshah.nimaz.data.repository.TasbihRepositoryImpl
 import com.arshadshah.nimaz.core.text.StringProvider
+import com.arshadshah.nimaz.domain.repository.CompassSensors
+import com.arshadshah.nimaz.domain.repository.Haptics
+import com.arshadshah.nimaz.data.device.AndroidCompassSensors
+import com.arshadshah.nimaz.data.device.AndroidHaptics
 import com.arshadshah.nimaz.domain.repository.AdhanDownloader
 import com.arshadshah.nimaz.domain.repository.AppLocale
 import com.arshadshah.nimaz.data.platform.AndroidAppLocale
@@ -392,6 +396,14 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindStringProvider(impl: AndroidStringProvider): StringProvider
+
+    @Binds
+    @Singleton
+    abstract fun bindCompassSensors(impl: AndroidCompassSensors): CompassSensors
+
+    @Binds
+    @Singleton
+    abstract fun bindHaptics(impl: AndroidHaptics): Haptics
 
     @Binds
     @Singleton
