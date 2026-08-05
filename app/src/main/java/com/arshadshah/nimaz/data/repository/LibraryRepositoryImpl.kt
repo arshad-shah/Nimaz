@@ -1,12 +1,13 @@
 package com.arshadshah.nimaz.data.repository
 
 import android.content.Context
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.LibraryLicense
 import com.arshadshah.nimaz.domain.model.OpenSourceLibrary
 import com.arshadshah.nimaz.domain.repository.LibraryRepository
 import com.mikepenz.aboutlibraries.Libs
 import com.mikepenz.aboutlibraries.entity.Library
-import com.mikepenz.aboutlibraries.util.withContext
+import com.mikepenz.aboutlibraries.util.withJson
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import javax.inject.Inject
@@ -25,6 +26,24 @@ import kotlinx.coroutines.withContext as onDispatcher
  * at most twice per visit to the About area. A `by lazy` over a suspend-produced list
  * cannot be written correctly, and a `Mutex`-guarded cache is more machinery than two
  * screens justify.
+ *
+ * ## Why the resource id, and not `withContext(context)`
+ *
+ * `withContext(context)` looks the JSON up **by name** — `resources.getIdentifier("aboutlibraries",
+ * "raw", packageName)` — and nothing in this app references `R.raw.aboutlibraries` in code. With
+ * `isShrinkResources = true` on release, the shrinker therefore reads the resource as unused and
+ * strips it from the APK. `getIdentifier` then returns 0, `openRawResource(0)` throws, and
+ * AboutLibraries **catches that and returns the builder unchanged**, logging to logcat and
+ * carrying on with no data. The failure only surfaces one call later, out of
+ * `Libs.Builder.build()`, as "Please provide the required library data via the available APIs" —
+ * which describes a caller mistake rather than a missing file, and sent the Licenses screen's
+ * error state to say the list could not be loaded when what had happened was that the list had
+ * been deleted from the build.
+ *
+ * Passing `R.raw.aboutlibraries` fixes it at the root: a compile-time `R` reference is exactly
+ * what the resource shrinker looks for, so the JSON is kept. It also means that if the Gradle
+ * plugin ever stops generating the file, this stops **compiling** rather than failing silently in
+ * a release build that debug cannot reproduce.
  */
 @Singleton
 class LibraryRepositoryImpl @Inject constructor(
@@ -32,7 +51,7 @@ class LibraryRepositoryImpl @Inject constructor(
 ) : LibraryRepository {
 
     override suspend fun getLibraries(): List<OpenSourceLibrary> = onDispatcher(Dispatchers.IO) {
-        Libs.Builder().withContext(context).build()
+        Libs.Builder().withJson(context, R.raw.aboutlibraries).build()
             .libraries
             .map { it.toDomain() }
             .sortedBy { it.name.lowercase() }

@@ -13,6 +13,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -27,10 +28,9 @@ import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeEmphasis
-import androidx.annotation.FloatRange
-import androidx.compose.ui.draw.alpha
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.ui.unit.TextUnit
-import androidx.compose.ui.unit.lerp
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
@@ -82,10 +82,17 @@ private val PlinthBottomPadding = 34.dp
  * @param stats up to three figures; pass empty for a plinth-only hero.
  * @param muteAmount renders [amount] at reduced emphasis — for a zero/ineligible
  *   state, where a full-strength figure would overstate a number that is not owed.
- * @param collapseProgress 0f full, 1f collapsed — for a hero pinned above a scrolling form.
- *   The tiles and the subtitle fold away and the amount shrinks; **the amount never
- *   disappears**, because on the calculator it is the one figure the whole task is about, and
- *   losing sight of it mid-entry is what a scrolling hero got wrong.
+ * @param collapsed folds the tiles and the subtitle away and shrinks the amount, for a hero
+ *   pinned above a scrolling form. **The amount never disappears** — on the calculator it is the
+ *   one figure the whole task is about, and losing sight of it mid-entry is what a hero that
+ *   scrolls away got wrong.
+ *
+ *   A boolean, not a 0..1 progress. The first attempt took a progress float and interpolated
+ *   paddings, font size and alpha against it, which animated everything *except the thing that
+ *   matters*: `offset` and `alpha` are draw-time modifiers, so the tile row and the subtitle kept
+ *   their full measured height at every intermediate value and the hero only actually shrank at
+ *   exactly 1f. `animateContentSize` animates the height itself, which is what the progress float
+ *   was pretending to do.
  */
 @Composable
 fun ZakatSummaryHero(
@@ -96,13 +103,15 @@ fun ZakatSummaryHero(
     status: ZakatHeroStatus? = null,
     stats: List<ZakatHeroStat> = emptyList(),
     muteAmount: Boolean = false,
-    @FloatRange(from = 0.0, to = 1.0) collapseProgress: Float = 0f,
+    collapsed: Boolean = false,
 ) {
-    val collapse = collapseProgress.coerceIn(0f, 1f)
-    // Interpolated rather than switched between two layouts: a hard swap at the threshold makes
-    // the whole form jump by the tile row's height, which reads as a glitch rather than a
-    // collapse. `showStats` still gates the tiles entirely, so at rest they cost nothing.
-    val showStats = stats.isNotEmpty() && collapse < 1f
+    // Drives the amount's type scale only. The height is animated by animateContentSize below,
+    // because a font size is a value to interpolate and a layout is not.
+    val collapse by animateFloatAsState(
+        targetValue = if (collapsed) 1f else 0f,
+        label = "zakat_hero_collapse",
+    )
+    val showStats = stats.isNotEmpty() && !collapsed
     // One announcement for the whole plinth: TalkBack should read "Zakat due,
     // $1,284.50, above nisab" as a phrase, not as four unrelated fragments.
     val plinthDescription = if (status != null) {
@@ -111,7 +120,9 @@ fun ZakatSummaryHero(
         stringResource(R.string.zakat_a11y_stat_format, label, amount)
     }
 
-    Column(modifier = modifier.fillMaxWidth()) {
+    // The whole hero, so removing the tile row animates the height the form is laid out against
+    // rather than snapping it. This is the one modifier that makes the collapse a collapse.
+    Column(modifier = modifier.fillMaxWidth().animateContentSize()) {
         NimazCard(
             modifier = Modifier.fillMaxWidth(),
             style = NimazCardStyle.GRADIENT,
@@ -129,10 +140,9 @@ fun ZakatSummaryHero(
                     .padding(
                         start = 18.dp,
                         end = 18.dp,
-                        top = lerp(18.dp, 12.dp, collapse),
+                        top = if (collapsed) 12.dp else 18.dp,
                         // Only reserve dead space when tiles will actually cover it.
-                        bottom = if (!showStats) lerp(18.dp, 12.dp, collapse)
-                        else lerp(PlinthBottomPadding, 18.dp, collapse),
+                        bottom = if (showStats) PlinthBottomPadding else 12.dp,
                     )
                     .clearAndSetSemantics { contentDescription = plinthDescription }
             ) {
@@ -153,7 +163,7 @@ fun ZakatSummaryHero(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(lerp(10.dp, 2.dp, collapse)))
+                Spacer(modifier = Modifier.height(if (collapsed) 2.dp else 10.dp))
 
                 val displaySmall = MaterialTheme.typography.displaySmall
                 val titleLarge = MaterialTheme.typography.titleLarge
@@ -173,12 +183,12 @@ fun ZakatSummaryHero(
 
                 // The subtitle is the first thing to go: it explains how the figure is derived,
                 // which is worth reading once and not worth the height on every scroll.
-                if (collapse < 1f) {
+                if (!collapsed) {
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = subtitle,
                         style = MaterialTheme.typography.bodySmall,
-                        color = ZakatSurfaceColors.plinthInkMuted.copy(alpha = 1f - collapse),
+                        color = ZakatSurfaceColors.plinthInkMuted,
                     )
                 }
             }
@@ -189,7 +199,6 @@ fun ZakatSummaryHero(
                 modifier = Modifier
                     .fillMaxWidth()
                     .offset(y = -TileOverlap)
-                    .alpha(1f - collapse)
                     .padding(horizontal = 10.dp),
                 horizontalArrangement = Arrangement.spacedBy(7.dp),
             ) {
@@ -279,6 +288,21 @@ private fun ZakatSummaryHeroShowcase() {
                 ZakatHeroStat("$5,847", "Nisab · Gold", accented = true),
                 ZakatHeroStat("2.5%", "Rate"),
             ),
+        )
+        // Collapsed, directly under its expanded twin: the pair is the review. The tiles and the
+        // subtitle are gone, the amount is smaller and still the largest thing on the card, and
+        // the height difference between the two is what the calculator's form gains back.
+        ZakatSummaryHero(
+            label = "Zakat Due",
+            amount = "$1,284.50",
+            subtitle = "2.5% of eligible wealth",
+            status = ZakatHeroStatus(text = "Above nisab", met = true),
+            stats = listOf(
+                ZakatHeroStat("$51,380", "Net"),
+                ZakatHeroStat("$5,847", "Nisab · Gold", accented = true),
+                ZakatHeroStat("2.5%", "Rate"),
+            ),
+            collapsed = true,
         )
         ZakatSummaryHero(
             label = "Total Paid",
