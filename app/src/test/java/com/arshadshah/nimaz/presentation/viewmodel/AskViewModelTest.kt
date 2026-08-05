@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.presentation.viewmodel
 
+import com.arshadshah.nimaz.core.monitoring.RecordingTelemetry
 import com.arshadshah.nimaz.domain.model.AiError
 import com.arshadshah.nimaz.domain.model.AnswerConfidence
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
@@ -38,7 +39,7 @@ class AskViewModelTest {
     @After
     fun tearDown() = Dispatchers.resetMain()
 
-    private fun viewModel() = AskViewModel(askWithProof, settings)
+    private fun viewModel() = AskViewModel(askWithProof, settings, RecordingTelemetry())
 
     @Test
     fun `reflects enabled state from settings`() = runTest {

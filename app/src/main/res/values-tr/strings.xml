@@ -1769,4 +1769,7 @@
     <string name="bookmarks_clear_all_title">Tüm yer imleri silinsin mi?</string>
     <string name="bookmarks_clear_all_confirm">Tümünü sil</string>
     <string name="bookmarks_clear_all_body">Bu, %1$d yer iminin tamamını siler — Kur\'an, Hadis ve Dua. Geri alınamaz.</string>
+    <string name="ai_error_consent_title">Delille Sor kapalı</string>
+    <string name="ai_error_consent">Soru sormak için Arama ayarlarından açın. Kur\'an, hadis ve dualarda anahtar kelime araması her durumda çevrimdışı çalışır.</string>
+    <string name="ai_consent_save_failed">Bu ayar kaydedilemedi. Lütfen tekrar deneyin.</string>
 </resources>

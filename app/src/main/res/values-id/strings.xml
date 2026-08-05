@@ -1732,4 +1732,7 @@
     <string name="bookmarks_clear_all_title">Hapus semua markah?</string>
     <string name="bookmarks_clear_all_confirm">Hapus semua</string>
     <string name="bookmarks_clear_all_body">Ini menghapus semua %1$d markah — Al-Qur\'an, Hadis, dan Doa. Tindakan ini tidak dapat dibatalkan.</string>
+    <string name="ai_error_consent_title">Tanya dengan Dalil nonaktif</string>
+    <string name="ai_error_consent">Aktifkan di pengaturan pencarian untuk mengajukan pertanyaan. Pencarian kata kunci di Al-Qur\'an, hadis, dan doa tetap berfungsi offline.</string>
+    <string name="ai_consent_save_failed">Pengaturan itu tidak dapat disimpan. Silakan coba lagi.</string>
 </resources>

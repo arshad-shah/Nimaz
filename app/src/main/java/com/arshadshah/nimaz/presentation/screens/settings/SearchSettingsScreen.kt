@@ -188,6 +188,15 @@ fun SearchSettingsScreen(
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
+                if (state.consentFailed) {
+                    // The write did not commit. Saying so beats the sheet closing over a
+                    // switch that has quietly stayed off.
+                    Text(
+                        text = stringResource(R.string.ai_consent_save_failed),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                }
                 NimazButton(
                     text = stringResource(R.string.ai_consent_enable),
                     onClick = { viewModel.onEvent(SearchSettingsEvent.ConsentAccepted) },

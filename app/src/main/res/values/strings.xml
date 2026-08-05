@@ -1934,4 +1934,7 @@
     <string name="bookmarks_clear_all_title">Clear all bookmarks?</string>
     <string name="bookmarks_clear_all_confirm">Clear all</string>
     <string name="bookmarks_clear_all_body">This removes all %1$d bookmarks — Qur\'an, Hadith and Dua. It cannot be undone.</string>
+    <string name="ai_error_consent_title">Ask with Proof is off</string>
+    <string name="ai_error_consent">Turn it on in Search settings to ask a question. Keyword search across the Qur\'an, Hadith and duas works offline either way.</string>
+    <string name="ai_consent_save_failed">That setting couldn\'t be saved. Please try again.</string>
 </resources>

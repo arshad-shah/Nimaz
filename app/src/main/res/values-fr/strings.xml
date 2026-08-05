@@ -1798,4 +1798,7 @@
     <string name="bookmarks_clear_all_title">Effacer tous les favoris ?</string>
     <string name="bookmarks_clear_all_confirm">Tout effacer</string>
     <string name="bookmarks_clear_all_body">Cela supprime les %1$d favoris — Coran, Hadith et invocations. Action irréversible.</string>
+    <string name="ai_error_consent_title">Demander avec preuve est désactivé</string>
+    <string name="ai_error_consent">Activez-le dans les paramètres de recherche pour poser une question. La recherche par mot-clé dans le Coran, les hadiths et les invocations fonctionne hors ligne dans tous les cas.</string>
+    <string name="ai_consent_save_failed">Ce réglage n\'a pas pu être enregistré. Veuillez réessayer.</string>
 </resources>
