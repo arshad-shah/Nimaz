@@ -3,7 +3,6 @@ package com.arshadshah.nimaz.presentation.viewmodel.tracker
 import com.arshadshah.nimaz.core.monitoring.RecordingTelemetry
 
 import app.cash.turbine.test
-import com.arshadshah.nimaz.core.util.PrayerTimeCalculator
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.model.ExemptionReason
 import com.arshadshah.nimaz.domain.model.FastRecord
@@ -33,6 +32,8 @@ import org.junit.Test
 import java.time.LocalDate
 import java.time.ZoneOffset
 import com.arshadshah.nimaz.presentation.viewmodel.buildFastingUseCases
+import com.arshadshah.nimaz.presentation.viewmodel.buildPrayerUseCases
+import com.arshadshah.nimaz.presentation.viewmodel.FakePrayerTimetableRepository
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class FastingViewModelTest {
@@ -40,7 +41,7 @@ class FastingViewModelTest {
     private val testDispatcher = StandardTestDispatcher()
 
     private lateinit var repository: FastingRepository
-    private lateinit var prayerTimeCalculator: PrayerTimeCalculator
+    private val prayers = FakePrayerTimetableRepository()
     private lateinit var settingsRepository: SettingsRepository
     private lateinit var viewModel: FastingViewModel
 
@@ -51,7 +52,6 @@ class FastingViewModelTest {
         Dispatchers.setMain(testDispatcher)
 
         repository = mockk(relaxed = true)
-        prayerTimeCalculator = mockk(relaxed = true)
         settingsRepository = mockk(relaxed = true)
 
         // Provide defaults so ViewModel init doesn't crash
@@ -79,7 +79,7 @@ class FastingViewModelTest {
     private fun createViewModel(): FastingViewModel {
         return FastingViewModel(
             buildFastingUseCases(repository),
-            prayerTimeCalculator,
+            buildPrayerUseCases(prayers),
             settingsRepository,
             RecordingTelemetry(),
         )

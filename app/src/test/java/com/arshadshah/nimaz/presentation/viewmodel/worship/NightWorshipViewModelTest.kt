@@ -1,7 +1,10 @@
 package com.arshadshah.nimaz.presentation.viewmodel.worship
 
-import com.arshadshah.nimaz.core.util.PrayerTimeCalculator
 import com.arshadshah.nimaz.core.monitoring.RecordingTelemetry
+import com.arshadshah.nimaz.domain.model.HighLatitudeRule
+import com.arshadshah.nimaz.presentation.viewmodel.prayerCalculationSettings
+import com.arshadshah.nimaz.presentation.viewmodel.buildPrayerUseCases
+import com.arshadshah.nimaz.presentation.viewmodel.FakePrayerTimetableRepository
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import io.mockk.every
 import io.mockk.mockk
@@ -40,23 +43,24 @@ class NightWorshipViewModelTest {
     private val dispatcher = StandardTestDispatcher()
 
     /**
-     * The real calculator — it is pure and Android-free, so there is nothing to gain from faking
-     * astronomy, and a fake would let a wrong-day Fajr bug through unnoticed.
+     * The real astronomy behind a controllable settings snapshot.
+     *
+     * Six mocked preference flows used to stand in for this. The seam turns that into one value,
+     * and keeps the calculation itself real — faking astronomy would let a wrong-day Fajr bug
+     * through unnoticed, which is exactly the bug this suite exists for.
      */
-    private val calculator = PrayerTimeCalculator()
-
-    private lateinit var settings: SettingsRepository
+    private lateinit var prayers: FakePrayerTimetableRepository
 
     @Before
     fun setUp() {
         Dispatchers.setMain(dispatcher)
-        settings = mockk(relaxed = true) {
-            every { latitude } returns flowOf(LONDON_LAT)
-            every { longitude } returns flowOf(LONDON_LON)
-            every { calculationMethod } returns flowOf("MUSLIM_WORLD_LEAGUE")
-            every { asrCalculation } returns flowOf("STANDARD")
-            every { highLatitudeRule } returns flowOf("MIDDLE_OF_THE_NIGHT")
-        }
+        prayers = FakePrayerTimetableRepository(
+            prayerCalculationSettings(
+                latitude = LONDON_LAT,
+                longitude = LONDON_LON,
+                highLatitudeRule = HighLatitudeRule.MIDDLE_OF_THE_NIGHT,
+            ),
+        )
     }
 
     @After
@@ -64,7 +68,7 @@ class NightWorshipViewModelTest {
 
     @Test
     fun `publishes tonight's window with fajr after the last third`() = runTest(dispatcher) {
-        val viewModel = NightWorshipViewModel(calculator, settings, RecordingTelemetry())
+        val viewModel = NightWorshipViewModel(buildPrayerUseCases(prayers), RecordingTelemetry())
         dispatcher.scheduler.advanceUntilIdle()
 
         val state = viewModel.state.value
@@ -81,7 +85,7 @@ class NightWorshipViewModelTest {
 
     @Test
     fun `stops loading once the night times resolve`() = runTest(dispatcher) {
-        val viewModel = NightWorshipViewModel(calculator, settings, RecordingTelemetry())
+        val viewModel = NightWorshipViewModel(buildPrayerUseCases(prayers), RecordingTelemetry())
         dispatcher.scheduler.advanceUntilIdle()
 
         assertEquals(false, viewModel.state.value.isLoading)
@@ -90,7 +94,7 @@ class NightWorshipViewModelTest {
 
     @Test
     fun `rakah counter moves two at a time and resets`() = runTest(dispatcher) {
-        val viewModel = NightWorshipViewModel(calculator, settings, RecordingTelemetry())
+        val viewModel = NightWorshipViewModel(buildPrayerUseCases(prayers), RecordingTelemetry())
         dispatcher.scheduler.advanceUntilIdle()
 
         assertEquals(0, viewModel.state.value.rakahCount)

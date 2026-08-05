@@ -4,13 +4,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.Telemetry
-import com.arshadshah.nimaz.core.util.PrayerTimeCalculator
 import com.arshadshah.nimaz.domain.model.AsrCalculation
 import com.arshadshah.nimaz.domain.model.CalculationMethod
 import com.arshadshah.nimaz.domain.model.HighLatitudeRule
 import com.arshadshah.nimaz.domain.model.PrayerName
 import com.arshadshah.nimaz.domain.model.PrayerStatus
 import com.arshadshah.nimaz.domain.model.PrayerTime
+import com.arshadshah.nimaz.domain.model.PrayerCalculationSettings
 import com.arshadshah.nimaz.domain.model.PrayerType
 import com.arshadshah.nimaz.domain.model.FallbackLocation
 import com.arshadshah.nimaz.domain.model.resolveLocation
@@ -36,7 +36,6 @@ import com.arshadshah.nimaz.presentation.model.PrayerTimeDisplay
 
 @HiltViewModel
 class PrayerTimesViewModel @Inject constructor(
-    private val prayerTimeCalculator: PrayerTimeCalculator,
     private val prayerUseCases: PrayerUseCases,
     private val settingsRepository: SettingsRepository,
     private val telemetry: Telemetry,
@@ -45,14 +44,8 @@ class PrayerTimesViewModel @Inject constructor(
     private val _state = MutableStateFlow(PrayerTimesUiState())
     val state: StateFlow<PrayerTimesUiState> = _state.asStateFlow()
 
-    // Cached location + calculation settings (mirrors MonthlyPrayerTimesViewModel).
-    private var latitude = 0.0
-    private var longitude = 0.0
-    private var calcMethod = CalculationMethod.MUSLIM_WORLD_LEAGUE
-    private var asrCalc = AsrCalculation.STANDARD
-    private var highLatRule: HighLatitudeRule? = null
-    private var adjustments = mapOf<PrayerType, Int>()
-    private var settingsReady = false
+    /** The user's calculation settings, mirrored so a recompute never has to suspend. */
+    private var settings: PrayerCalculationSettings? = null
 
     // Cached prayer instants for the selected day, and the tracking statuses.
     private var dayTimes: List<PrayerTime> = emptyList()
@@ -105,86 +98,37 @@ class PrayerTimesViewModel @Inject constructor(
         recomputeDay()
     }
 
+    /**
+     * One flow instead of thirteen.
+     *
+     * Four nested `combine`s over six preference flows, plus three `fromString` calls, appeared
+     * here, in `MonthlyPrayerTimesViewModel` and in `HomeViewModel` in near-identical form — and
+     * a fifth ViewModel, `FastingViewModel`, skipped the whole block and silently used defaults.
+     * The parsing now lives once in the data layer; this observes its result.
+     */
     private fun observeSettings() {
         viewModelScope.launch {
-            combine(
-                settingsRepository.latitude,
-                settingsRepository.longitude,
-                settingsRepository.locationName,
-            ) { lat, lng, name -> Triple(lat, lng, name) }
-                .combine(
-                    combine(
-                        settingsRepository.calculationMethod,
-                        settingsRepository.asrCalculation,
-                        settingsRepository.highLatitudeRule,
-                    ) { calc, asr, high -> Triple(calc, asr, high) },
-                ) { location, calcSettings -> Pair(location, calcSettings) }
-                .combine(
-                    combine(
-                        settingsRepository.fajrAdjustment,
-                        settingsRepository.sunriseAdjustment,
-                        settingsRepository.dhuhrAdjustment,
-                        settingsRepository.asrAdjustment,
-                    ) { fajr, sunrise, dhuhr, asr ->
-                        mapOf(
-                            PrayerType.FAJR to fajr,
-                            PrayerType.SUNRISE to sunrise,
-                            PrayerType.DHUHR to dhuhr,
-                            PrayerType.ASR to asr,
-                        )
-                    }.combine(
-                        combine(
-                            settingsRepository.maghribAdjustment,
-                            settingsRepository.ishaAdjustment,
-                        ) { maghrib, isha ->
-                            mapOf(PrayerType.MAGHRIB to maghrib, PrayerType.ISHA to isha)
-                        },
-                    ) { first, second -> first + second },
-                ) { (location, calcSettings), adj -> Triple(location, calcSettings, adj) }
-                .collect { (location, calcSettings, adj) ->
-                    val (lat, lng, name) = location
-                    val (calcStr, asrStr, highStr) = calcSettings
+            prayerUseCases.observeCalculationSettings().collect { resolved ->
+                settings = resolved
+                pinCalculationInputs(resolved)
 
-                    val resolved = resolveLocation(lat, lng, name)
-                    latitude = resolved.latitude
-                    longitude = resolved.longitude
-                    // The domain's own parsers, in place of `valueOf` in a swallowing `try` plus a
-                    // hand-written "hanafi" comparison. `valueOf` throws on every persisted alias
-                    // the app itself writes — "MWL", "ISNA", "MAKKAH" — and the catch then
-                    // substituted Muslim World League, so a user on ISNA silently got MWL prayer
-                    // times, forever, with no signal. `fromString` knows the aliases.
-                    calcMethod = CalculationMethod.fromString(calcStr)
-                    asrCalc = AsrCalculation.fromString(asrStr)
-                    highLatRule = HighLatitudeRule.fromString(highStr)
-                    adjustments = adj
-                    settingsReady = true
-                    pinCalculationInputs()
-
-                    _state.update {
-                        it.copy(
-                            locationName = resolved.name,
-                            isUsingFallbackLocation = resolved.isFallback
-                        )
-                    }
-                    recomputeDay()
+                _state.update {
+                    it.copy(
+                        locationName = resolved.location.name,
+                        isUsingFallbackLocation = resolved.location.isFallback,
+                    )
                 }
+                recomputeDay()
+            }
         }
     }
 
     /** Recompute the cached prayer instants + day-info for the selected date. */
     private fun recomputeDay() {
-        if (!settingsReady) return
+        val resolved = settings ?: return
         val date = _state.value.selectedDate
 
-        dayTimes = prayerTimeCalculator.getPrayerTimes(
-            latitude = latitude,
-            longitude = longitude,
-            date = date,
-            calculationMethod = calcMethod,
-            asrCalculation = asrCalc,
-            highLatitudeRule = highLatRule,
-            adjustments = adjustments,
-        )
+        dayTimes = prayerUseCases.getDaySchedule(date, resolved)
 
         // Day-info: sunrise/sunset/daylight + method label + moon phase.
         val byType = dayTimes.associate { it.type to it.time }
@@ -211,7 +155,8 @@ class PrayerTimesViewModel @Inject constructor(
                 sunriseAt = sunriseInstant,
                 sunsetAt = maghribInstant,
                 daylight = daylightStr,
-                methodLabel = "${calcMethod.shortName()} · ${asrCalc.shortName()}",
+                methodLabel = "${resolved.calculationMethod.shortName()} · " +
+                        resolved.asrCalculation.shortName(),
                 moonFraction = moon,
                 sunriseFraction = sunriseFraction,
                 sunsetFraction = sunsetFraction,
@@ -257,13 +202,10 @@ class PrayerTimesViewModel @Inject constructor(
             }
 
         // Only today can wrap past Isha, and only today needs tomorrow's Fajr.
-        val tomorrowFajr = if (isToday) {
-            prayerTimeCalculator.getPrayerTimes(
-                latitude = latitude, longitude = longitude, date = today.plusDays(1),
-                calculationMethod = calcMethod, asrCalculation = asrCalc,
-                highLatitudeRule = highLatRule, adjustments = adjustments,
-            ).firstOrNull { it.type == PrayerType.FAJR }?.time
-        } else null
+        val tomorrowFajr = settings
+            ?.takeIf { isToday }
+            ?.let { prayerUseCases.getDaySchedule(today.plusDays(1), it) }
+            ?.firstOrNull { it.type == PrayerType.FAJR }?.time
 
         _state.update {
             it.copy(
@@ -309,10 +251,13 @@ class PrayerTimesViewModel @Inject constructor(
      * is. The latitude is **rounded to a whole degree**: a degree is enough to tell a
      * high-latitude failure from an equatorial one, and not enough to locate anyone.
      */
-    private fun pinCalculationInputs() {
-        telemetry.customKey("calc_method", calcMethod.name)
-        telemetry.customKey("asr_calculation", asrCalc.name)
-        telemetry.customKey("high_latitude_rule", highLatRule?.name ?: "none")
-        telemetry.customKey("latitude_rounded", latitude.roundToInt().toString())
+    private fun pinCalculationInputs(settings: PrayerCalculationSettings) {
+        telemetry.customKey("calc_method", settings.calculationMethod.name)
+        telemetry.customKey("asr_calculation", settings.asrCalculation.name)
+        telemetry.customKey("high_latitude_rule", settings.highLatitudeRule?.name ?: "none")
+        telemetry.customKey(
+            "latitude_rounded",
+            settings.location.latitude.roundToInt().toString(),
+        )
     }
 }

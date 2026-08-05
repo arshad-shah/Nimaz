@@ -127,6 +127,13 @@ god-object.
   through repository methods (`getHadithCount`/`getHadithByOffset`, `getDuasByCategoryOnce`),
   which used to seed-then-read until the content seeders retired at versionCode 385. Behaviour preserved (identical
   queries/selection math; field mappings verified); full unit suite green.
+- [x] ~~**Prayer-time calculation assembled in five ViewModels.**~~ **Resolved.** Each injected the
+  concrete `core/util/PrayerTimeCalculator` and built its own arguments: three of them ran a
+  near-identical tower of `combine`s over six preference flows and parsed the persisted strings
+  themselves, and the fourth — `FastingViewModel` — skipped the block and took the calculator's
+  four defaults, so Fast Tracker ignored every calculation preference the user had set. The
+  assembly moved behind `PrayerRepository.observeCalculationSettings()` and the ViewModels now
+  observe one `PrayerCalculationSettings`. Pinned by `FastingPrayerSettingsTest`.
 - [ ] **General watch:** when a `private fun` in a ViewModel does multi-step computation over
   repository/use-case results (filtering, combining, ranking), consider whether it's a use case.
 
@@ -373,6 +380,15 @@ rg -n -U --multiline-dotall \
   screen recalculates through `recalculate()` on every entry), so they were deleted rather than
   wired, along with two private handlers left with no caller.
 
+- [ ] **`WidgetsScreen` constructs `PrayerTimeCalculator()` directly.** The five ViewModels that
+  injected it now go through `PrayerUseCases`, but the widget-preview screen still calls
+  `PrayerTimeCalculator()` in a composable — a screen instantiating a `@Singleton` and computing
+  astronomy inline, one layer further out than the deviation that was just closed. It renders a
+  preview rather than anything the user acts on, which is why it is listed rather than fixed
+  here; route it through the same use case.
+  ```bash
+  grep -rn "PrayerTimeCalculator()" app/src/main/java/com/arshadshah/nimaz/presentation/
+  ```
 - [ ] **`ZakatEvent.SetCurrency` has no producer.** Not an analytics finding — its branch is a
   `persist { … }` that logs no usage — so the ratchet does not see it, and it surfaced only
   because a neighbouring branch's new logging spilled into the old flat scan window. The

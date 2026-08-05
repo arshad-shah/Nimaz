@@ -17,7 +17,6 @@ import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.core.util.HijriDateCalculator
 import com.arshadshah.nimaz.core.util.MILLIS_PER_DAY
 import com.arshadshah.nimaz.core.util.NextWorshipResolver
-import com.arshadshah.nimaz.core.util.PrayerTimeCalculator
 import com.arshadshah.nimaz.core.util.WorshipReminderContent
 import com.arshadshah.nimaz.core.util.currentPrayerIndexAt
 import com.arshadshah.nimaz.core.util.nextPrayerIndexAt
@@ -35,6 +34,7 @@ import com.arshadshah.nimaz.domain.model.HomeEventCard
 import com.arshadshah.nimaz.domain.model.PrayerName
 import com.arshadshah.nimaz.domain.model.PrayerStatus
 import com.arshadshah.nimaz.domain.model.PrayerTime
+import com.arshadshah.nimaz.domain.model.PrayerCalculationSettings
 import com.arshadshah.nimaz.domain.model.PrayerType
 import com.arshadshah.nimaz.domain.model.WorshipReminderOccurrence
 import com.arshadshah.nimaz.domain.model.resolveLocation
@@ -81,7 +81,6 @@ import com.arshadshah.nimaz.presentation.model.withClockState
 class HomeViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val telemetry: Telemetry,
-    private val prayerTimeCalculator: PrayerTimeCalculator,
     private val prayerUseCases: PrayerUseCases,
     private val fastingUseCases: FastingUseCases,
     private val hadithUseCases: HadithUseCases,
@@ -406,87 +405,26 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    // Cached prayer calculation settings
-    private var cachedCalcMethod = CalculationMethod.MUSLIM_WORLD_LEAGUE
-    private var cachedAsrCalc = AsrCalculation.STANDARD
-    private var cachedHighLatRule: HighLatitudeRule? = null
-    private var cachedAdjustments = mapOf<PrayerType, Int>()
+    /** The user's calculation settings, mirrored so the recompute never has to suspend for them. */
+    private var calculationSettings: PrayerCalculationSettings? = null
 
+    /**
+     * One flow instead of thirteen.
+     *
+     * Three `combine`s over six preference flows, plus three `fromString` calls, appeared here and
+     * in near-identical form in `PrayerTimesViewModel` and `MonthlyPrayerTimesViewModel`; a fourth
+     * ViewModel skipped the block entirely and used the calculator's defaults. The parsing now
+     * happens once in the data layer and this observes its result.
+     */
     private fun observeLocation() {
         viewModelScope.launch {
-            // Combine location with all prayer calculation settings
-            val locationFlow = combine(
-                settingsRepository.latitude,
-                settingsRepository.longitude,
-                settingsRepository.locationName
-            ) { lat: Double, lng: Double, name: String ->
-                Triple(lat, lng, name)
-            }
-
-            val calcSettingsFlow = combine(
-                settingsRepository.calculationMethod,
-                settingsRepository.asrCalculation,
-                settingsRepository.highLatitudeRule
-            ) { calc: String, asr: String, high: String ->
-                Triple(calc, asr, high)
-            }
-
-            val adjustmentsFlow = combine(
-                settingsRepository.fajrAdjustment,
-                settingsRepository.sunriseAdjustment,
-                settingsRepository.dhuhrAdjustment,
-                settingsRepository.asrAdjustment,
-            ) { fajr, sunrise, dhuhr, asr ->
-                mapOf(
-                    PrayerType.FAJR to fajr,
-                    PrayerType.SUNRISE to sunrise,
-                    PrayerType.DHUHR to dhuhr,
-                    PrayerType.ASR to asr
-                )
-            }.combine(
-                combine(
-                    settingsRepository.maghribAdjustment,
-                    settingsRepository.ishaAdjustment
-                ) { maghrib, isha ->
-                    mapOf(
-                        PrayerType.MAGHRIB to maghrib,
-                        PrayerType.ISHA to isha
-                    )
-                }
-            ) { first, second -> first + second }
-
-            combine(
-                locationFlow,
-                calcSettingsFlow,
-                adjustmentsFlow
-            ) { location, calcSettings, adjustments ->
-                Triple(location, calcSettings, adjustments)
-            }.collect { (location, calcSettings, adjustments) ->
-                val (lat, lng, name) = location
-                val (calcStr, asrStr, highStr) = calcSettings
-
-                val resolved = resolveLocation(lat, lng, name)
-                val hasLocation = !resolved.isFallback
-                val latitude = resolved.latitude
-                val longitude = resolved.longitude
-                val locationName = resolved.name.ifBlank { FallbackLocation.NAME }
-
-                // Cache calculation settings
-                // The domain's own parsers, in place of `valueOf` in a swallowing `try` plus a
-                // hand-written "hanafi" comparison. `valueOf` throws on every persisted alias
-                // the app itself writes — "MWL", "ISNA", "MAKKAH" — and the catch then
-                // substituted Muslim World League, so a user on ISNA silently got MWL prayer
-                // times, forever, with no signal. `fromString` knows the aliases.
-                cachedCalcMethod = CalculationMethod.fromString(calcStr)
-                cachedAsrCalc = AsrCalculation.fromString(asrStr)
-                cachedHighLatRule = HighLatitudeRule.fromString(highStr)
-                cachedAdjustments = adjustments
-
+            prayerUseCases.observeCalculationSettings().collect { resolved ->
+                calculationSettings = resolved
                 _state.update {
                     it.copy(
-                        latitude = latitude,
-                        longitude = longitude,
-                        locationName = locationName
+                        latitude = resolved.location.latitude,
+                        longitude = resolved.location.longitude,
+                        locationName = resolved.location.name.ifBlank { FallbackLocation.NAME },
                     )
                 }
                 calculatePrayerTimes()
@@ -547,9 +485,7 @@ class HomeViewModel @Inject constructor(
      * path at all.
      */
     private fun calculatePrayerTimes() {
-        val resolved = resolveLocation(_state.value.latitude, _state.value.longitude)
-        val latitude = resolved.latitude
-        val longitude = resolved.longitude
+        val settings = calculationSettings ?: return
 
         viewModelScope.launch {
             try {
@@ -563,26 +499,11 @@ class HomeViewModel @Inject constructor(
                 }
 
                 val today = todayProvider.today()
-                val prayerTimes = prayerTimeCalculator.getPrayerTimes(
-                    latitude = latitude,
-                    longitude = longitude,
-                    date = today,
-                    calculationMethod = cachedCalcMethod,
-                    asrCalculation = cachedAsrCalc,
-                    highLatitudeRule = cachedHighLatRule,
-                    adjustments = cachedAdjustments
-                )
+                val prayerTimes = prayerUseCases.getDaySchedule(today, settings)
                 // Tomorrow's Fajr, for the after-Isha wrap. Computed here rather
                 // than lazily in the tick so the hot path stays branch-free.
-                tomorrowFajr = prayerTimeCalculator.getPrayerTimes(
-                    latitude = latitude,
-                    longitude = longitude,
-                    date = today.plusDays(1),
-                    calculationMethod = cachedCalcMethod,
-                    asrCalculation = cachedAsrCalc,
-                    highLatitudeRule = cachedHighLatRule,
-                    adjustments = cachedAdjustments
-                ).find { it.type == PrayerType.FAJR }?.time
+                tomorrowFajr = prayerUseCases.getDaySchedule(today.plusDays(1), settings)
+                    .find { it.type == PrayerType.FAJR }?.time
                 dayTimes = prayerTimes
                 dayTimesDate = today
 

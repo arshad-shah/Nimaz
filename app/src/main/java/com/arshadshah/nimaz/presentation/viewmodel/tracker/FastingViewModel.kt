@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.core.util.HijriDateCalculator
-import com.arshadshah.nimaz.core.util.PrayerTimeCalculator
 import com.arshadshah.nimaz.core.util.toUtcMidnightMillis
 import com.arshadshah.nimaz.domain.model.ExemptionReason
 import com.arshadshah.nimaz.domain.model.FastRecord
@@ -13,6 +12,9 @@ import com.arshadshah.nimaz.domain.model.FastType
 import com.arshadshah.nimaz.domain.model.FastingStats
 import com.arshadshah.nimaz.domain.model.MakeupFast
 import com.arshadshah.nimaz.domain.model.MakeupFastStatus
+import com.arshadshah.nimaz.domain.model.PrayerCalculationSettings
+import com.arshadshah.nimaz.domain.usecase.PrayerUseCases
+import com.arshadshah.nimaz.domain.model.PrayerType
 import com.arshadshah.nimaz.domain.model.resolveLocation
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.usecase.FastingUseCases
@@ -36,7 +38,7 @@ enum class FastingStatsPeriod {
 @HiltViewModel
 class FastingViewModel @Inject constructor(
     private val fastingUseCases: FastingUseCases,
-    private val prayerTimeCalculator: PrayerTimeCalculator,
+    private val prayerUseCases: PrayerUseCases,
     private val settingsRepository: SettingsRepository,
     private val telemetry: Telemetry,
 ) : ViewModel() {
@@ -79,32 +81,35 @@ class FastingViewModel @Inject constructor(
         loadStats()
     }
 
+    /**
+     * Suhoor and iftar, recomputed whenever *any* calculation setting changes.
+     *
+     * This used to watch latitude, longitude and the clock format, and then call
+     * `prayerTimeCalculator.getPrayerTimes(lat, lng)` — **taking all four calculation defaults**.
+     * Fast Tracker therefore showed Muslim World League, Shafi, no high-latitude rule and no
+     * adjustments no matter what the user had set, while Home honoured all four: the same Fajr,
+     * two different times, in one app. Nothing in the type system objected, because every one of
+     * those four arguments has a default.
+     *
+     * Observing the settings snapshot fixes both halves — the values are the user's, and a
+     * change to any of them (not just to the location) now recomputes.
+     */
     private fun observeLocationAndLoadPrayerTimes() {
         viewModelScope.launch {
-            combine(
-                settingsRepository.latitude,
-                settingsRepository.longitude,
-                settingsRepository.use24HourFormat
-            ) { lat, lng, h24 -> Triple(lat, lng, h24) }
-                .collect { (lat, lng, _) ->
-                    val resolved = resolveLocation(lat, lng)
-                    loadPrayerTimes(resolved.latitude, resolved.longitude)
-                }
+            prayerUseCases.observeCalculationSettings().collect { settings ->
+                loadPrayerTimes(settings)
+            }
         }
     }
 
-    private fun loadPrayerTimes(latitude: Double, longitude: Double) {
+    private fun loadPrayerTimes(settings: PrayerCalculationSettings) {
         try {
-            val prayerTimes = prayerTimeCalculator.getPrayerTimes(latitude, longitude)
-            val timeZone = TimeZone.currentSystemDefault()
+            val prayerTimes = prayerUseCases.getDaySchedule(LocalDate.now(), settings)
 
-            val fajrPrayer = prayerTimes.find { it.type.name == "FAJR" }
-            val maghribPrayer = prayerTimes.find { it.type.name == "MAGHRIB" }
+            val fajrPrayer = prayerTimes.find { it.type == PrayerType.FAJR }
+            val maghribPrayer = prayerTimes.find { it.type == PrayerType.MAGHRIB }
 
             if (fajrPrayer != null && maghribPrayer != null) {
-                val fajrLocalTime = fajrPrayer.time.toLocalDateTime(timeZone)
-                val maghribLocalTime = maghribPrayer.time.toLocalDateTime(timeZone)
-
                 _trackerState.update {
                     it.copy(
                         suhoorAt = fajrPrayer.time,
