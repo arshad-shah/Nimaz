@@ -459,6 +459,32 @@ Conventions:
 **Adding a use-case wrapper:** add a `provideXxxUseCases(repository: XxxRepository): XxxUseCases`
 function to `UseCaseModule`, mirroring `provideAsmaUlHusnaUseCases`.
 
+### 6.1 Monitoring — inject `Telemetry`, do not call the objects
+
+`AppAnalytics` and `CrashReporter` are Kotlin `object`s holding a static `Context`. They no-op
+safely when Firebase is absent, so they never *blocked* testing — but a test could never assert
+that an action had been logged, and two live defects survived exactly that gap (a drop-off funnel
+that has never fired, and a `logFeatureUsed` call on a branch no screen can reach).
+
+**ViewModels and use cases inject `Telemetry`** (`core/monitoring/Telemetry.kt`), bound to
+`FirebaseTelemetry` in `MonitoringModule`. Tests inject `RecordingTelemetry` and assert on its
+`calls`.
+
+```kotlin
+@HiltViewModel
+class ExampleViewModel @Inject constructor(
+    private val exampleUseCases: ExampleUseCases,
+    private val telemetry: Telemetry,
+) : ViewModel()
+```
+
+Report every failure through **`telemetry.failure(domain, type, throwable)`**, which reaches both
+channels — the stack trace to Crashlytics, the frequency to analytics — and ignores
+`CancellationException`, because a load cancelled by navigating away is not a failure. Calling
+`AppAnalytics.*` or `CrashReporter.*` directly from a ViewModel is a deviation; the objects remain
+only as the production binding and for callers with no injection point (`NimazApp`, `BootReceiver`,
+workers).
+
 ---
 
 ## 7. Navigation
