@@ -12,6 +12,9 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import com.arshadshah.nimaz.domain.usecase.PrayerUseCases
+import io.mockk.coEvery
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -63,6 +66,29 @@ class NightWorshipViewModelTest {
                 highLatitudeRule = HighLatitudeRule.MIDDLE_OF_THE_NIGHT,
             ),
         )
+    }
+
+    @Test
+    fun `a failing settings stream reports instead of taking the app down`() = runTest {
+        // Both launches read the settings flow *outside* computeNightTimes' runCatching, so
+        // an upstream throw reached the thread's uncaught handler — in viewModelScope that
+        // is a crash, not a caught error.
+        val telemetry = RecordingTelemetry()
+        val useCases = mockk<PrayerUseCases>(relaxed = true)
+        every { useCases.observeCalculationSettings() } returns flow {
+            throw IllegalStateException("settings unavailable")
+        }
+
+        val viewModel = NightWorshipViewModel(
+            useCases,
+            FakeTodayProvider(LocalDate.now()),
+            dispatcher,
+            telemetry,
+        )
+        dispatcher.scheduler.advanceUntilIdle()
+
+        assertEquals(false, viewModel.state.value.isLoading)
+        assertTrue(telemetry.errors.isNotEmpty())
     }
 
     @After

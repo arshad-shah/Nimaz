@@ -135,7 +135,7 @@ abstract class CatalogViewModel<T : Any>(
      */
     @OptIn(FlowPreview::class)
     private fun observeSearchQueries() {
-        viewModelScope.launch {
+        launchSafely(telemetry, feature, "observe_search_queries") {
             searchQueries
                 .debounce(SEARCH_DEBOUNCE_MS)
                 .map { it.trim() }

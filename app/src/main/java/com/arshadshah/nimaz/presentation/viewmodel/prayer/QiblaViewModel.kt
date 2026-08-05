@@ -14,6 +14,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.Telemetry
+import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.domain.model.CompassAccuracy
 import com.arshadshah.nimaz.domain.model.CompassData
 import com.arshadshah.nimaz.domain.model.Location
@@ -207,7 +208,7 @@ class QiblaViewModel @Inject constructor(
     }
 
     private fun observeLocation() {
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.QIBLA, "observe_location") {
             combine(
                 locationSettings.latitude,
                 locationSettings.longitude,
@@ -245,7 +246,7 @@ class QiblaViewModel @Inject constructor(
         }.getOrDefault(0f)
 
     private fun setLocationFromCoords(latitude: Double, longitude: Double, locationName: String) {
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.QIBLA, "set_location_from_coords") {
             try {
                 val qiblaDirection = QiblaCalculator.calculateQiblaDirection(latitude, longitude)
                 val declination = declinationAt(latitude, longitude)
@@ -275,7 +276,12 @@ class QiblaViewModel @Inject constructor(
     private fun setLocation(location: Location) {
         _qiblaState.update { it.copy(currentLocation = location, isLoading = true) }
 
-        viewModelScope.launch {
+        launchSafely(
+            telemetry,
+            AppAnalytics.Feature.QIBLA,
+            "set_location",
+            onFailure = { _qiblaState.update { it.copy(isLoading = false) } },
+        ) {
             try {
                 val qiblaDirection = QiblaCalculator.calculateQiblaDirection(
                     location.latitude, location.longitude

@@ -14,6 +14,7 @@ import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.Telemetry
+import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.core.util.HijriDateCalculator
 import com.arshadshah.nimaz.core.util.MILLIS_PER_DAY
 import com.arshadshah.nimaz.core.util.NextWorshipResolver
@@ -181,7 +182,7 @@ class HomeViewModel @Inject constructor(
      * `calculatePrayerTimes()`. This re-issues the lot as one unit.
      */
     private fun observeDateRollover() {
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.HOME, "observe_date_rollover") {
             todayProvider.todayChanges.collect { today ->
                 // `dayTimesDate` is the record of which day the cached prayer instants were
                 // computed for. It was assigned and read nowhere, while the comment beside it
@@ -199,7 +200,7 @@ class HomeViewModel @Inject constructor(
 
     /** Local calendar occasions merged with any pushed CELEBRATION announcement. */
     private fun observeCelebrationCards() {
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.HOME, "observe_celebration_cards") {
             observeEventCards().collect { cards ->
                 _state.update { it.copy(celebrationCards = cards) }
             }
@@ -211,7 +212,7 @@ class HomeViewModel @Inject constructor(
         // bound to that epoch — so this needs re-invoking at rollover exactly as the fasting
         // collector does, or Home's prayer card stays bound to the day the app was opened.
         prayerRecordsJob?.cancel()
-        prayerRecordsJob = viewModelScope.launch {
+        prayerRecordsJob = launchSafely(telemetry, AppAnalytics.Feature.HOME, "load_prayer_records") {
             prayerUseCases.getTodayPrayerRecords().collect { records ->
                 _prayerRecords.update { records }
             }
@@ -220,7 +221,7 @@ class HomeViewModel @Inject constructor(
 
     private fun observeFastingStatus() {
         fastingJob?.cancel()
-        fastingJob = viewModelScope.launch {
+        fastingJob = launchSafely(telemetry, AppAnalytics.Feature.HOME, "observe_fasting_status") {
             val today = todayProvider.today()
             val startOfDay = today.toUtcMidnightMillis()
             val endOfDay = startOfDay + MILLIS_PER_DAY - 1
@@ -234,14 +235,14 @@ class HomeViewModel @Inject constructor(
 
     private fun loadDailyHadith() {
         dailyHadithJob?.cancel()
-        dailyHadithJob = viewModelScope.launch {
+        dailyHadithJob = launchSafely(telemetry, AppAnalytics.Feature.HOME, "load_daily_hadith") {
             try {
                 // GetDailyHadithUseCase seeds the backfill and applies the Knuth
                 // multiplicative-hash scatter so consecutive days land on very
                 // different hadiths while staying deterministic per day.
                 val hadith =
                     hadithUseCases.getDailyHadith(todayProvider.today().toEpochDay())
-                        ?: return@launch
+                        ?: return@launchSafely
                 _state.update {
                     it.copy(
                         dailyHadith = hadith.textEnglish.let { text ->
@@ -280,13 +281,13 @@ class HomeViewModel @Inject constructor(
      */
     private fun loadDailyDua() {
         dailyDuaJob?.cancel()
-        dailyDuaJob = viewModelScope.launch {
+        dailyDuaJob = launchSafely(telemetry, AppAnalytics.Feature.HOME, "load_daily_dua") {
             try {
                 val now = todayProvider.today()
                 val selection = duaUseCases.getDailyDua(
                     hourOfDay = LocalTime.now().hour,
                     dayOfYear = now.dayOfYear
-                ) ?: return@launch
+                ) ?: return@launchSafely
                 val dua = selection.dua
                 _state.update {
                     it.copy(
@@ -322,7 +323,7 @@ class HomeViewModel @Inject constructor(
 
     private fun dismissAnnouncement() {
         val active = announcement.value.announcement ?: return
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.HOME, "dismiss_announcement") {
             announcementUseCases.dismissAnnouncement(active.id)
             AppAnalytics.logAnnouncementDismissed(active.id)
         }
@@ -371,7 +372,7 @@ class HomeViewModel @Inject constructor(
         // Sunrise is not a prayer - don't allow toggling
         if (prayerType == PrayerType.SUNRISE) return
 
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.HOME, "toggle_prayer_status") {
             val prayerName = PrayerName.valueOf(prayerType.name)
             val todayEpoch = todayProvider.today().toUtcMidnightMillis()
             val currentStatus = _prayerRecords.value[prayerName] ?: PrayerStatus.NOT_PRAYED
@@ -417,7 +418,7 @@ class HomeViewModel @Inject constructor(
      * happens once in the data layer and this observes its result.
      */
     private fun observeLocation() {
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.HOME, "observe_location") {
             prayerUseCases.observeCalculationSettings().collect { resolved ->
                 calculationSettings = resolved
                 _state.update {
@@ -448,7 +449,7 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun updateLocation(latitude: Double, longitude: Double, name: String) {
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.HOME, "update_location") {
             locationSettings.updateLocation(latitude, longitude, name)
             _state.update {
                 it.copy(
@@ -487,7 +488,12 @@ class HomeViewModel @Inject constructor(
     private fun calculatePrayerTimes() {
         val settings = calculationSettings ?: return
 
-        viewModelScope.launch {
+        launchSafely(
+            telemetry,
+            AppAnalytics.Feature.HOME,
+            "calculate_prayer_times",
+            onFailure = { _state.update { it.copy(isLoading = false) } },
+        ) {
             try {
                 // `isLoading` means "nothing to show yet", not "busy". Only the
                 // genuine first load may show the full-screen spinner; a refresh
@@ -593,7 +599,7 @@ class HomeViewModel @Inject constructor(
 
     private fun scheduleWorshipRefresh() {
         worshipJob?.cancel()
-        worshipJob = viewModelScope.launch {
+        worshipJob = launchSafely(telemetry, AppAnalytics.Feature.HOME, "schedule_worship_refresh") {
             // Not a tick loop: exactly one wake per transition. `delay` is cancellable, so
             // cancelling the job (or the scope) exits here without an isActive guard.
             while (true) {

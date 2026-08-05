@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.Telemetry
+import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.data.audio.AudioState
 import com.arshadshah.nimaz.data.audio.QuranAudioManager
 import com.arshadshah.nimaz.domain.model.Ayah
@@ -113,7 +114,7 @@ class QuranViewModel @Inject constructor(
      */
     private fun loadReaderPassages(surahNumber: Int) {
         passagesJob?.cancel()
-        passagesJob = viewModelScope.launch {
+        passagesJob = launchSafely(telemetry, AppAnalytics.Feature.QURAN, "load_reader_passages") {
             val passages = quranUseCases.getSurahThemes(surahNumber)
             _readerState.update { state ->
                 // A slower load for a surah the reader has since left must not repaint headings
@@ -304,7 +305,7 @@ class QuranViewModel @Inject constructor(
                     newValue = !it.showTranslation
                     it.copy(showTranslation = newValue)
                 }
-                viewModelScope.launch { quranSettings.setShowTranslation(newValue) }
+                launchSafely(telemetry, AppAnalytics.Feature.QURAN, "on_event") { quranSettings.setShowTranslation(newValue) }
             }
 
             QuranEvent.ClearSearch -> {
@@ -363,7 +364,7 @@ class QuranViewModel @Inject constructor(
     }
 
     private fun observeQuranSettings() {
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.QURAN, "observe_quran_settings") {
             // DataStore's first emission is hydration, not a change the user made — and the
             // reader state it is compared against holds compiled-in defaults until it arrives.
             // Treating it as a change re-issued a load the reader had already performed with
@@ -534,13 +535,13 @@ class QuranViewModel @Inject constructor(
     )
 
     private fun loadSurahInfo(surahNumber: Int) {
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.QURAN, "load_surah_info") {
             _surahInfo.value = quranUseCases.getSurahInfo(surahNumber)
         }
     }
 
     private fun playSurahFromInfo(surahNumber: Int) {
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.QURAN, "play_surah_from_info") {
             quranUseCases.getSurahWithAyahs(surahNumber, translatorId())
                 .first()?.let { surahWithAyahs ->
                     val audioItems = surahWithAyahs.ayahs.map { ayah ->
@@ -601,11 +602,11 @@ class QuranViewModel @Inject constructor(
     }
 
     private fun loadSurahs() {
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.QURAN, "load_surahs") {
             val thematic = quranUseCases.hasThematicContent()
             _homeState.update { it.copy(hasThematicContent = thematic) }
         }
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.QURAN, "load_surahs") {
             // Collected directly. Wrapping it in `stateIn(…, emptyList())` first published the
             // seed — surahs = [], isLoading = false — before Room had produced a row, so the
             // list rendered its "nothing here" state for a frame on every cold open.
@@ -627,7 +628,7 @@ class QuranViewModel @Inject constructor(
      * a surah's sections are a property of the surah, not of a pagination.
      */
     private fun loadRukuCounts() {
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.QURAN, "load_ruku_counts") {
             quranUseCases.getSurahRukuCounts().collect { counts ->
                 _homeState.update { it.copy(rukuCounts = counts) }
             }
@@ -643,7 +644,7 @@ class QuranViewModel @Inject constructor(
      * (for the 16-line edition that load also triggers its one-time seeding).
      */
     private fun observeMushafPagination() {
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.QURAN, "observe_mushaf_pagination") {
             quranSettings.quranMushafScript
                 .map { MushafScript.fromName(it) }
                 .distinctUntilChanged()
@@ -682,7 +683,7 @@ class QuranViewModel @Inject constructor(
         MushafScript.fromName(quranSettings.quranMushafScript.first())
 
     private fun loadVerseOfTheDay() {
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.QURAN, "load_verse_of_the_day") {
             val translatorId = translatorId()
             val epochDay = java.time.LocalDate.now().toEpochDay()
             val verse = quranUseCases.getVerseOfTheDay(epochDay, translatorId)
@@ -691,7 +692,7 @@ class QuranViewModel @Inject constructor(
     }
 
     private fun loadReadingProgress() {
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.QURAN, "load_reading_progress") {
             quranUseCases.getReadingProgress()
                 .collect { progress ->
                     _homeState.update { it.copy(readingProgress = progress) }
@@ -700,7 +701,7 @@ class QuranViewModel @Inject constructor(
     }
 
     private fun loadBookmarks() {
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.QURAN, "load_bookmarks") {
             quranUseCases.getBookmarks()
                 .collect { bookmarks ->
                     _bookmarksState.update { it.copy(bookmarks = bookmarks, isLoading = false) }
@@ -725,7 +726,12 @@ class QuranViewModel @Inject constructor(
         loadReaderPassages(surahNumber)
         contentJob?.cancel()
         cancelPageJobs()
-        contentJob = viewModelScope.launch {
+        contentJob = launchSafely(
+            telemetry,
+            AppAnalytics.Feature.QURAN,
+            "load_surah",
+            onFailure = { _readerState.update { it.copy(isLoading = false) } },
+        ) {
             quranUseCases.getSurahWithAyahs(surahNumber, translatorId())
                 .collect { surahWithAyahs ->
                     _readerState.update {
@@ -764,7 +770,12 @@ class QuranViewModel @Inject constructor(
         }
         contentJob?.cancel()
         cancelPageJobs()
-        contentJob = viewModelScope.launch {
+        contentJob = launchSafely(
+            telemetry,
+            AppAnalytics.Feature.QURAN,
+            "load_juz",
+            onFailure = { _readerState.update { it.copy(isLoading = false) } },
+        ) {
             quranUseCases.getAyahsByJuz(juzNumber, translatorId())
                 .collect { ayahs ->
                     _readerState.update {
@@ -831,7 +842,7 @@ class QuranViewModel @Inject constructor(
         // would throw away the emissions of the first.
         if (pageJobs[pageNumber]?.isActive == true) return
 
-        pageJobs[pageNumber] = viewModelScope.launch {
+        pageJobs[pageNumber] = launchSafely(telemetry, AppAnalytics.Feature.QURAN, "load_page") {
             // Resolved through the active edition: in the 16-line view page N holds a
             // different span of ayahs than Madani page N, and this cache feeds the page
             // info bar, "mark page read" for khatam and the ayah-action lookups (#325).
@@ -892,7 +903,7 @@ class QuranViewModel @Inject constructor(
     private fun loadMushafPageLayout(pageNumber: Int) {
         // Already cached (e.g. a neighbouring pager page pre-loaded it) — nothing to do.
         if (_readerState.value.mushafPageLayoutCache.containsKey(pageNumber)) return
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.QURAN, "load_mushaf_page_layout") {
             val layout = quranUseCases.getMushafPageLayout(pageNumber, mushafScript())
             _readerState.update {
                 it.copy(
@@ -928,7 +939,7 @@ class QuranViewModel @Inject constructor(
         }
 
         searchJob?.cancel()
-        searchJob = viewModelScope.launch {
+        searchJob = launchSafely(telemetry, AppAnalytics.Feature.QURAN, "perform_search") {
             quranUseCases.searchQuran(query, translatorId())
                 .collect { results ->
                     // Populate surah names and limit results to 50 for performance
@@ -961,7 +972,7 @@ class QuranViewModel @Inject constructor(
     }
 
     private fun loadFavorites() {
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.QURAN, "load_favorites") {
             quranUseCases.getFavorites()
                 .collect { favorites ->
                     // Enrich each favourite with its Arabic text so the Favourites tab can
@@ -983,7 +994,7 @@ class QuranViewModel @Inject constructor(
     // toggleFavorite both removes and (on undo) re-adds, so the same call drives the
     // swipe-to-delete removal and its Undo restore.
     private fun removeFavorite(favorite: FavoriteAyahUi) {
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.QURAN, "remove_favorite") {
             quranUseCases.toggleFavorite(
                 favorite.ayahId,
                 favorite.surahNumber,
@@ -995,7 +1006,7 @@ class QuranViewModel @Inject constructor(
 
     private fun undoRemoveFavorite() {
         val favorite = _homeState.value.recentlyRemovedFavorite ?: return
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.QURAN, "undo_remove_favorite") {
             quranUseCases.toggleFavorite(
                 favorite.ayahId,
                 favorite.surahNumber,
@@ -1006,7 +1017,7 @@ class QuranViewModel @Inject constructor(
     }
 
     private fun loadFavoriteAyahIds() {
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.QURAN, "load_favorite_ayah_ids") {
             quranUseCases.getFavoriteAyahIds()
                 .collect { ids ->
                     _readerState.update { it.copy(favoriteAyahIds = ids.toSet()) }
@@ -1015,7 +1026,7 @@ class QuranViewModel @Inject constructor(
     }
 
     private fun toggleFavorite(ayahId: Int, surahNumber: Int, ayahNumber: Int) {
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.QURAN, "toggle_favorite") {
             quranUseCases.toggleFavorite(ayahId, surahNumber, ayahNumber)
         }
     }
@@ -1035,13 +1046,13 @@ class QuranViewModel @Inject constructor(
             }
             state.copy(surahWithAyahs = updatedSurah, ayahs = updatedAyahs)
         }
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.QURAN, "toggle_bookmark") {
             quranUseCases.toggleBookmark(ayahId, surahNumber, ayahNumber)
         }
     }
 
     private fun updateReadingPosition(surah: Int, ayah: Int, page: Int, juz: Int) {
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.QURAN, "update_reading_position") {
             quranUseCases.updateReadingPosition(surah, ayah, page, juz)
         }
     }
@@ -1057,7 +1068,7 @@ class QuranViewModel @Inject constructor(
      */
 
     private fun observeActiveKhatam() {
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.QURAN, "observe_active_khatam") {
             activeKhatamStream.collect { snapshot ->
                 _readerState.update {
                     it.copy(
@@ -1085,7 +1096,7 @@ class QuranViewModel @Inject constructor(
     }
 
     private fun observeActiveKhatamForHome() {
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.QURAN, "observe_active_khatam_for_home") {
             activeKhatamStream.collect { snapshot ->
                 _homeState.update {
                     it.copy(
@@ -1096,7 +1107,7 @@ class QuranViewModel @Inject constructor(
                 }
             }
         }
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.QURAN, "observe_active_khatam_for_home") {
             khatamUseCases.observeCompletedKhatams().collect { completed ->
                 _homeState.update { it.copy(completedKhatamCount = completed.size) }
             }
@@ -1106,7 +1117,7 @@ class QuranViewModel @Inject constructor(
     private fun toggleKhatamAyah(ayahId: Int) {
         val khatamId = _readerState.value.activeKhatamId ?: return
         val isRead = ayahId in _readerState.value.khatamReadAyahIds
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.QURAN, "toggle_khatam_ayah") {
             if (isRead) {
                 khatamUseCases.unmarkAyahRead(khatamId, ayahId)
             } else {
@@ -1117,7 +1128,7 @@ class QuranViewModel @Inject constructor(
 
     private fun markSurahAsReadForKhatam(surahNumber: Int) {
         val khatamId = _readerState.value.activeKhatamId ?: return
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.QURAN, "mark_surah_as_read_for_khatam") {
             khatamUseCases.markSurahAsRead(khatamId, surahNumber)
         }
     }
@@ -1127,7 +1138,7 @@ class QuranViewModel @Inject constructor(
         val readIds = _readerState.value.khatamReadAyahIds
         val unreadIds = ayahIds.filter { it !in readIds }
         if (unreadIds.isEmpty()) return
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.QURAN, "toggle_page_khatam") {
             khatamUseCases.markAyahsRead(khatamId, unreadIds)
         }
     }

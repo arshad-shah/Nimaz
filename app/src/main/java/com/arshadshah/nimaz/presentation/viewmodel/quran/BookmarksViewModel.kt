@@ -103,7 +103,7 @@ class BookmarksViewModel @Inject constructor(
     }
 
     private fun loadQuranBookmarks() {
-        viewModelScope.launch {
+        launchSafely(telemetry, DOMAIN, "load_quran_bookmarks") {
             quranUseCases.getBookmarks()
                 .catchAndReport(telemetry, DOMAIN, "load_quran") { throwable ->
                     // Enrichment runs a suspend query per row inside this collector, so a
@@ -143,7 +143,7 @@ class BookmarksViewModel @Inject constructor(
     }
 
     private fun loadHadithBookmarks() {
-        viewModelScope.launch {
+        launchSafely(telemetry, DOMAIN, "load_hadith_bookmarks") {
             hadithUseCases.getAllBookmarks()
                 .catchAndReport(telemetry, DOMAIN, "load_hadith") { throwable ->
                     // Enrichment runs a suspend query per row inside this collector, so a
@@ -179,7 +179,7 @@ class BookmarksViewModel @Inject constructor(
     }
 
     private fun loadDuaBookmarks() {
-        viewModelScope.launch {
+        launchSafely(telemetry, DOMAIN, "load_dua_bookmarks") {
             duaUseCases.getAllBookmarks()
                 .catchAndReport(telemetry, DOMAIN, "load_dua") { throwable ->
                     // Enrichment runs a suspend query per row inside this collector, so a

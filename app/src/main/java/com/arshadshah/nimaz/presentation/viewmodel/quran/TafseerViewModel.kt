@@ -112,7 +112,12 @@ class TafseerViewModel @Inject constructor(
     }
 
     private fun loadSurah(surahNumber: Int, ayahNumber: Int) {
-        viewModelScope.launch {
+        launchSafely(
+            telemetry,
+            AppAnalytics.Feature.TAFSEER,
+            "load_surah",
+            onFailure = { _state.update { it.copy(isLoading = false) } },
+        ) {
             _state.update { it.copy(isLoading = true, surahNumber = surahNumber) }
 
             val surah = quranUseCases.getSurahByNumber(surahNumber)
@@ -155,7 +160,7 @@ class TafseerViewModel @Inject constructor(
         val tafseerId = currentState.selectedSource.id
 
         ayahAnnotationsJob?.cancel()
-        ayahAnnotationsJob = viewModelScope.launch {
+        ayahAnnotationsJob = launchSafely(telemetry, AppAnalytics.Feature.TAFSEER, "load_tafseer_for_current_ayah") {
             val tafseer =
                 tafseerUseCases.getTafseerForAyah(ayah.surahNumber, ayah.ayahNumber, tafseerId)
 
@@ -222,7 +227,7 @@ class TafseerViewModel @Inject constructor(
         if (ayahs.isEmpty()) return
 
         val ayah = ayahs[currentState.currentAyahIndex]
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.TAFSEER, "add_highlight") {
             tafseerUseCases.addHighlight(
                 ayahId = ayah.id,
                 tafseerId = currentState.selectedSource.id,
@@ -235,14 +240,14 @@ class TafseerViewModel @Inject constructor(
     }
 
     private fun deleteHighlight(highlightId: Long) {
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.TAFSEER, "delete_highlight") {
             tafseerUseCases.deleteHighlight(highlightId)
         }
     }
 
     private fun updateHighlight(highlightId: Long, color: String, note: String?) {
         val highlight = _state.value.highlights.find { it.id == highlightId } ?: return
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.TAFSEER, "update_highlight") {
             tafseerUseCases.updateHighlight(
                 highlight.copy(
                     color = color,

@@ -6,6 +6,7 @@ import com.arshadshah.nimaz.core.di.DefaultDispatcher
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.time.TodayProvider
 import com.arshadshah.nimaz.core.monitoring.Telemetry
+import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.domain.model.AsrCalculation
 import com.arshadshah.nimaz.domain.model.CalculationMethod
 import com.arshadshah.nimaz.domain.model.HighLatitudeRule
@@ -85,7 +86,7 @@ class PrayerTimesViewModel @Inject constructor(
      * would be its own bug.
      */
     private fun observeToday() {
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.PRAYER_TIMES, "observe_today") {
             todayProvider.todayChanges.collect { today ->
                 val selected = _state.value.selectedDate
                 if (selected == null || selected == today.minusDays(1)) {
@@ -144,7 +145,7 @@ class PrayerTimesViewModel @Inject constructor(
      * The parsing now lives once in the data layer; this observes its result.
      */
     private fun observeSettings() {
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.PRAYER_TIMES, "observe_settings") {
             prayerUseCases.observeCalculationSettings().collect { resolved ->
                 settings = resolved
                 pinCalculationInputs(resolved)
@@ -173,7 +174,7 @@ class PrayerTimesViewModel @Inject constructor(
         val resolved = settings ?: return
         val date = _state.value.selectedDate ?: return
         dayJob?.cancel()
-        dayJob = viewModelScope.launch {
+        dayJob = launchSafely(telemetry, AppAnalytics.Feature.PRAYER_TIMES, "recompute_day") {
             recompute(date, resolved)
         }
     }
@@ -235,7 +236,7 @@ class PrayerTimesViewModel @Inject constructor(
     private fun observeStatuses(date: LocalDate) {
         statusJob?.cancel()
         val dateKey = date.toEpochDay() * 86_400_000L
-        statusJob = viewModelScope.launch {
+        statusJob = launchSafely(telemetry, AppAnalytics.Feature.PRAYER_TIMES, "observe_statuses") {
             prayerUseCases.getPrayerRecordsForDate(dateKey).collect { records ->
                 statuses = records.associate { it.prayerName to it.status }
                 publishDisplays()
@@ -279,7 +280,7 @@ class PrayerTimesViewModel @Inject constructor(
         if (type == PrayerType.SUNRISE) return
         val date = _state.value.selectedDate ?: return
         if (date.isAfter(todayProvider.today())) return // can't track future prayers
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.PRAYER_TIMES, "toggle_prayer") {
             val dateKey = date.toEpochDay() * 86_400_000L
             val name = PrayerName.valueOf(type.name)
             val current = statuses[name] ?: PrayerStatus.NOT_PRAYED

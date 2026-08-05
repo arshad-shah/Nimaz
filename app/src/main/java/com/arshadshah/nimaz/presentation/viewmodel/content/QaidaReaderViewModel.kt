@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.Telemetry
+import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.data.audio.QaidaAudioManager
 import com.arshadshah.nimaz.data.audio.QaidaAudioState
 import com.arshadshah.nimaz.domain.model.LessonStatus
@@ -117,7 +118,7 @@ class QaidaReaderViewModel @Inject constructor(
     }
 
     private fun observeLoadedCells() {
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.QAIDA, "observe_loaded_cells") {
             lessonContent.collect { content ->
                 loadedCells = content?.lines?.flatMap { it.cells }.orEmpty()
             }
@@ -178,7 +179,7 @@ class QaidaReaderViewModel @Inject constructor(
      */
     private fun onCellTapped(cell: QaidaCell) {
         audioManager.play(cell.audioKey)
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.QAIDA, "on_cell_tapped") {
             qaidaUseCases.markCellHeard(cell.lessonId, cell.id)
         }
     }
@@ -211,7 +212,7 @@ class QaidaReaderViewModel @Inject constructor(
      * has left; the same resolution [playingCell] does for highlighting.
      */
     private fun observeHeardCells() {
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.QAIDA, "observe_heard_cells") {
             audioManager.completions.collect { key ->
                 val cell = loadedCells.firstOrNull { it.audioKey == key } ?: return@collect
                 qaidaUseCases.markCellHeard(cell.lessonId, cell.id)
@@ -259,7 +260,7 @@ class QaidaReaderViewModel @Inject constructor(
     private fun resetJourney() {
         audioManager.stop()
         _selectedLessonId.value = null
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.QAIDA, "reset_journey") {
             qaidaUseCases.resetProgress()
         }
     }

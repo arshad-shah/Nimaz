@@ -3,6 +3,7 @@ package com.arshadshah.nimaz.presentation.viewmodel.help
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.monitoring.Telemetry
+import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.core.monitoring.catchAndReport
 import com.arshadshah.nimaz.domain.model.HelpGuideDetail
 import com.arshadshah.nimaz.domain.model.HelpSearchResult
@@ -61,7 +62,7 @@ class HelpViewModel @Inject constructor(
 
     init {
         // Topics re-resolve when the app language changes.
-        viewModelScope.launch {
+        launchSafely(telemetry, DOMAIN, "launch") {
             language
                 .flatMapLatest { lang ->
                     // Guarded INSIDE flatMapLatest. Flow.catch completes the flow it is
@@ -83,7 +84,7 @@ class HelpViewModel @Inject constructor(
                 }
         }
         // Search results, debounced.
-        viewModelScope.launch {
+        launchSafely(telemetry, DOMAIN, "launch") {
             combine(query.debounce(SEARCH_DEBOUNCE_MS), language) { q, lang -> q to lang }
                 .flatMapLatest { (q, lang) ->
                     if (q.isBlank()) {
@@ -136,7 +137,7 @@ class HelpViewModel @Inject constructor(
     private fun loadTopic(topicId: String) {
         _topicState.update { it.copy(isLoading = true) }
         topicJob?.cancel()
-        topicJob = viewModelScope.launch {
+        topicJob = launchSafely(telemetry, DOMAIN, "load_topic") {
             language.flatMapLatest { lang -> useCases.getTopicDetail(topicId, lang) }
                 .catchAndReport(telemetry, DOMAIN, "load_topic") { throwable ->
                     _topicState.update { it.copy(isLoading = false, error = throwable.message) }
@@ -155,7 +156,7 @@ class HelpViewModel @Inject constructor(
     private fun loadGuide(guideId: String) {
         _guideState.update { it.copy(isLoading = true) }
         guideJob?.cancel()
-        guideJob = viewModelScope.launch {
+        guideJob = launchSafely(telemetry, DOMAIN, "load_guide") {
             language.flatMapLatest { lang -> useCases.getGuide(guideId, lang) }
                 .catchAndReport(telemetry, DOMAIN, "load_guide") { throwable ->
                     _guideState.update { it.copy(isLoading = false, error = throwable.message) }

@@ -5,6 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
+import com.arshadshah.nimaz.core.monitoring.Telemetry
+import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.domain.model.DailyLogEntry
 import com.arshadshah.nimaz.domain.model.JuzProgressInfo
 import com.arshadshah.nimaz.domain.model.Khatam
@@ -66,7 +68,8 @@ enum class KhatamPacePreset(val divisor: Int?) {
 class KhatamViewModel @Inject constructor(
     private val khatamUseCases: KhatamUseCases,
     // Only used to turn the next-unread surah number into its name for the continue label.
-    private val quranUseCases: QuranUseCases
+    private val quranUseCases: QuranUseCases,
+    private val telemetry: Telemetry,
 ) : ViewModel() {
 
     private val _listState = MutableStateFlow(KhatamListUiState())
@@ -144,22 +147,22 @@ class KhatamViewModel @Inject constructor(
     }
 
     private fun observeKhatams() {
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.KHATAM, "observe_khatams") {
             khatamUseCases.observeInProgressKhatams().collect { list ->
                 _listState.update { it.copy(inProgressKhatams = list, isLoading = false) }
             }
         }
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.KHATAM, "observe_khatams") {
             khatamUseCases.observeCompletedKhatams().collect { list ->
                 _listState.update { it.copy(completedKhatams = list) }
             }
         }
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.KHATAM, "observe_khatams") {
             khatamUseCases.observeAbandonedKhatams().collect { list ->
                 _listState.update { it.copy(abandonedKhatams = list) }
             }
         }
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.KHATAM, "observe_khatams") {
             khatamUseCases.observeKhatamStats().collect { stats ->
                 _listState.update { it.copy(stats = stats) }
             }
@@ -167,7 +170,7 @@ class KhatamViewModel @Inject constructor(
 
         // The active khatam's insights come from the detail snapshot so the list hero
         // shows exactly the same pace and streak numbers as the detail screen.
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.KHATAM, "observe_khatams") {
             khatamUseCases.observeActiveKhatam()
                 .flatMapLatest { active ->
                     if (active == null) {
@@ -195,7 +198,7 @@ class KhatamViewModel @Inject constructor(
      */
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun observeDetail() {
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.KHATAM, "observe_detail") {
             detailKhatamId
                 .filterNotNull()
                 .flatMapLatest { id -> khatamUseCases.observeKhatamDetail(id) }
@@ -226,7 +229,7 @@ class KhatamViewModel @Inject constructor(
      * one-shot query refreshed whenever the khatam's progress changes.
      */
     private fun refreshDetailNextUnread(khatamId: Long) {
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.KHATAM, "refresh_detail_next_unread") {
             val next = khatamUseCases.getNextUnreadPosition(khatamId)
             val name = next?.first?.let { surahName(it) }
             _detailState.update {
@@ -241,7 +244,7 @@ class KhatamViewModel @Inject constructor(
     }
 
     private fun refreshListNextUnread(khatamId: Long) {
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.KHATAM, "refresh_list_next_unread") {
             val next = khatamUseCases.getNextUnreadPosition(khatamId)
             val name = next?.first?.let { surahName(it) }
             _listState.update {
@@ -274,13 +277,13 @@ class KhatamViewModel @Inject constructor(
             mode = KhatamFormMode.Edit(khatamId),
             isLoading = true
         )
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.KHATAM, "start_edit") {
             val khatam = runCatching {
                 khatamUseCases.observeKhatamById(khatamId).filterNotNull().first()
             }.getOrNull()
             if (khatam == null) {
                 _formState.update { it.copy(isLoading = false) }
-                return@launch
+                return@launchSafely
             }
             _formState.update { form ->
                 // A whole-object assign here threw away whatever the reader had typed while the
@@ -341,7 +344,7 @@ class KhatamViewModel @Inject constructor(
 
         _formState.update { it.copy(isSaving = true, errorRes = null) }
 
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.KHATAM, "save_khatam") {
             runCatching {
                 when (val mode = state.mode) {
                     is KhatamFormMode.Create -> {
@@ -396,7 +399,7 @@ class KhatamViewModel @Inject constructor(
     }
 
     private fun launchAction(block: suspend () -> Unit) {
-        viewModelScope.launch { runCatching { block() } }
+        launchSafely(telemetry, AppAnalytics.Feature.KHATAM, "launch_action") { runCatching { block() } }
     }
 
     private companion object {

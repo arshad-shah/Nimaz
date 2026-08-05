@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.Telemetry
+import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.domain.model.QuranTopic
 import com.arshadshah.nimaz.domain.model.SurahTopic
 import com.arshadshah.nimaz.domain.model.TopicCitation
@@ -165,7 +166,7 @@ class QuranTopicsViewModel @Inject constructor(
      */
     @OptIn(FlowPreview::class)
     private fun observeQueries() {
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.QURAN_TOPICS, "observe_queries") {
             queries
                 .debounce(SEARCH_DEBOUNCE_MS)
                 .distinctUntilChanged()
@@ -220,7 +221,7 @@ class QuranTopicsViewModel @Inject constructor(
     }
 
     private fun loadRoots(tree: TopicTree) {
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.QURAN_TOPICS, "load_roots") {
             val available = quranUseCases.hasThematicContent()
             val roots = if (available) quranUseCases.getTopicTreeRoots(tree) else emptyList()
             val branches =
@@ -254,7 +255,7 @@ class QuranTopicsViewModel @Inject constructor(
             return
         }
         val focusWhenAsked = state.focus
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.QURAN_TOPICS, "toggle") {
             val loaded = quranUseCases.getTopicChildren(topic.id, state.tree)
             _browseState.update {
                 // An empty result means the branch set and the corpus disagree. Cache it anyway
@@ -284,7 +285,7 @@ class QuranTopicsViewModel @Inject constructor(
         val state = _browseState.value
         val trail = state.focus + ancestorsWithin(state, topic) + topic
         browseJob?.cancel()
-        browseJob = viewModelScope.launch {
+        browseJob = launchSafely(telemetry, AppAnalytics.Feature.QURAN_TOPICS, "focus") {
             val level = state.children[topic.id]
                 ?: quranUseCases.getTopicChildren(topic.id, state.tree)
             _browseState.update {
@@ -314,7 +315,12 @@ class QuranTopicsViewModel @Inject constructor(
         val trail = state.focus.take(index + 1)
         val target = trail.last()
         browseJob?.cancel()
-        browseJob = viewModelScope.launch {
+        browseJob = launchSafely(
+            telemetry,
+            AppAnalytics.Feature.QURAN_TOPICS,
+            "rebase_to",
+            onFailure = { _browseState.update { it.copy(isLoading = false) } },
+        ) {
             val level = state.children[target.id]
                 ?: quranUseCases.getTopicChildren(target.id, state.tree)
             _browseState.update {
@@ -367,7 +373,12 @@ class QuranTopicsViewModel @Inject constructor(
      * which the screen says in words rather than treating as a failure.
      */
     private fun loadSurahSubjects(surahNumber: Int) {
-        viewModelScope.launch {
+        launchSafely(
+            telemetry,
+            AppAnalytics.Feature.QURAN_TOPICS,
+            "load_surah_subjects",
+            onFailure = { _surahSubjects.update { it.copy(isLoading = false) } },
+        ) {
             _surahSubjects.value = SurahSubjectsState(
                 surahNumber = surahNumber,
                 isLoading = true,
@@ -409,13 +420,18 @@ class QuranTopicsViewModel @Inject constructor(
     private fun loadDetail(topicId: Int, tree: TopicTree, fromSurah: Int? = null) {
         requestedTopicId = topicId
         detailJob?.cancel()
-        detailJob = viewModelScope.launch {
+        detailJob = launchSafely(
+            telemetry,
+            AppAnalytics.Feature.QURAN_TOPICS,
+            "load_detail",
+            onFailure = { _detailState.update { it.copy(isLoading = false) } },
+        ) {
             _detailState.update { it.copy(isLoading = true) }
             val detail = quranUseCases.getTopicDetail(topicId, tree)
-            if (requestedTopicId != topicId) return@launch
+            if (requestedTopicId != topicId) return@launchSafely
             if (detail == null) {
                 _detailState.value = TopicDetailState(isLoading = false)
-                return@launch
+                return@launchSafely
             }
 
             val names = quranUseCases.getSurahList().first().associate {
@@ -437,7 +453,7 @@ class QuranTopicsViewModel @Inject constructor(
             // flight, the one completing second replaced the whole object — wiping not just
             // the other topic's detail but any previews that had already landed for it,
             // walking straight past the staleness guard this same function applies below.
-            if (requestedTopicId != topicId) return@launch
+            if (requestedTopicId != topicId) return@launchSafely
             _detailState.value = TopicDetailState(
                 detail = detail,
                 citationGroups = groups,
