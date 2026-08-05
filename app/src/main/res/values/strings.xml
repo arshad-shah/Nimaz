@@ -841,7 +841,6 @@
     <string name="net_zakatable_wealth">Net Zakatable Wealth</string>
     <string name="nisab_threshold">Nisab Threshold</string>
     <string name="meets_nisab">Meets Nisab</string>
-    <string name="save_calculation">Save Calculation</string>
     <string name="loans">Loans</string>
     <string name="bills_due">Bills Due</string>
     <string name="hint_physical_cash">Physical cash you possess</string>
@@ -2025,6 +2024,15 @@
     <string name="tafseer_note_edit">Edit</string>
     <string name="quran_search_surahs">Search surahs</string>
     <string name="zakat_currency">Currency</string>
+    <!-- Unit suffix on the gold/silver weight fields. Grams, abbreviated. -->
+    <string name="zakat_unit_grams">g</string>
+    <string name="zakat_section_deducted">Deducted</string>
+    <string name="zakat_section_nisab">Nisab threshold</string>
+    <string name="zakat_section_assets_subtitle">What you own that zakat is due on</string>
+    <string name="zakat_section_deducted_subtitle">Debts and bills taken off the total</string>
+    <string name="zakat_section_nisab_subtitle">The minimum wealth zakat applies above</string>
+    <string name="zakat_save_this_year">Save this year\'s zakat</string>
+    <string name="zakat_share">Share this calculation</string>
 
     <!--
       More — live subtitles. Titles label, subtitles report: every one of these is a claim about

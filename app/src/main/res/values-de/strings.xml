@@ -477,7 +477,6 @@
     <string name="net_zakatable_wealth">Zakat-pflichtiges Nettovermögen</string>
     <string name="nisab_threshold">Nisab-Schwelle</string>
     <string name="meets_nisab">Nisab erreicht</string>
-    <string name="save_calculation">Berechnung speichern</string>
     <string name="loans">Darlehen</string>
     <string name="bills_due">Fällige Rechnungen</string>
     <string name="hint_physical_cash">Bargeld, das Sie besitzen</string>

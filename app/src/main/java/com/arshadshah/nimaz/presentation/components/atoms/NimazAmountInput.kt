@@ -122,13 +122,21 @@ internal fun amountToInput(amount: Double): String = when {
  *
  * Replaces the per-keystroke `text.toDoubleOrNull() ?: 0.0` the Zakat form used to do, which made
  * a decimal amount literally unenterable — the `.` was parsed away before the next digit arrived.
+ *
+ * A currency symbol leads and a unit follows, which is not a styling preference: "$ 1,200" and
+ * "1,200 g" are how each is read, and the field that replaced this used to decide between them by
+ * comparing its suffix against the string `"$"`. Passing both, or neither, is a call-site bug —
+ * hence the requirement stated in the parameter docs rather than a silent fallback.
  */
 @Composable
 fun NimazAmountInput(
     value: String,
     onValueChange: (String) -> Unit,
-    currencySymbol: String,
     modifier: Modifier = Modifier,
+    /** Leads the number, e.g. `$`. Mutually exclusive with [unitSuffix]; supply exactly one. */
+    currencySymbol: String? = null,
+    /** Follows the number, e.g. `g` for grams. Mutually exclusive with [currencySymbol]. */
+    unitSuffix: String? = null,
     enabled: Boolean = true,
     placeholder: String = "0.00",
 ) {
@@ -144,12 +152,14 @@ fun NimazAmountInput(
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(
-                text = currencySymbol,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Spacer(Modifier.width(4.dp))
+            if (currencySymbol != null) {
+                Text(
+                    text = currencySymbol,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Spacer(Modifier.width(4.dp))
+            }
             val textStyle = MaterialTheme.typography.titleSmall.copy(
                 fontWeight = FontWeight.SemiBold,
                 textAlign = TextAlign.End,
@@ -181,6 +191,14 @@ fun NimazAmountInput(
                     }
                 },
             )
+            if (unitSuffix != null) {
+                Spacer(Modifier.width(4.dp))
+                Text(
+                    text = unitSuffix,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
         }
     }
 }
@@ -198,6 +216,13 @@ private fun NimazAmountInputShowcase() {
         NimazAmountInput(value = "42,180.50", onValueChange = {}, currencySymbol = "€")
         // Mid-typing: the trailing point the old field could not hold.
         NimazAmountInput(value = "1,284.", onValueChange = {}, currencySymbol = "£")
+        // A weight, not money: the unit follows the number rather than leading it.
+        NimazAmountInput(
+            value = "87.48",
+            onValueChange = {},
+            unitSuffix = "g",
+            placeholder = "0",
+        )
         NimazAmountInput(
             value = "65.00",
             onValueChange = {},

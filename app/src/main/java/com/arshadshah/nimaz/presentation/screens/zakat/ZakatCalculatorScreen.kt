@@ -3,6 +3,7 @@ package com.arshadshah.nimaz.presentation.screens.zakat
 import com.arshadshah.nimaz.domain.model.ZakatDefaults
 import com.arshadshah.nimaz.presentation.components.molecules.NimazListPicker
 import com.arshadshah.nimaz.presentation.components.molecules.NimazPickerItem
+import com.arshadshah.nimaz.presentation.components.molecules.NimazAccordion
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuItem
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
@@ -20,7 +21,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -34,6 +37,7 @@ import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.IosShare
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.Receipt
@@ -47,9 +51,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -58,18 +67,26 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.share.ContentShareManager
+import com.arshadshah.nimaz.core.share.Shareables
+import com.arshadshah.nimaz.core.util.HijriDateCalculator
 import com.arshadshah.nimaz.core.util.formatCurrency
 import com.arshadshah.nimaz.domain.model.NisabType
+import com.arshadshah.nimaz.presentation.components.atoms.NimazAmountInput
+import com.arshadshah.nimaz.presentation.components.atoms.amountToInput
+import com.arshadshah.nimaz.presentation.components.atoms.parseAmountInput
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconButton
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconButtonStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconWell
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconWellShape
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconWellSize
@@ -90,6 +107,7 @@ import com.arshadshah.nimaz.presentation.theme.isCompact
 import com.arshadshah.nimaz.presentation.viewmodel.tools.ZakatEvent
 import com.arshadshah.nimaz.presentation.viewmodel.tools.ZakatViewModel
 import com.arshadshah.nimaz.presentation.viewmodel.tools.ZakatCalculatorUiState
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -154,115 +172,156 @@ private fun ZakatCompactContent(
     modifier: Modifier = Modifier
 ) {
     var showCurrencyPicker by rememberSaveable { mutableStateOf(false) }
+    val listState = rememberLazyListState()
+    val onShareCalculation = rememberZakatShareAction(state)
 
-    LazyColumn(
-        modifier = modifier,
-        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        item {
-            ZakatResultSummaryCard(
-                zakatDue = state.calculation?.zakatDue ?: 0.0,
-                nisabValue = state.calculation?.nisabValue ?: 0.0,
-                netWealth = state.calculation?.netWorth ?: 0.0,
-                isAboveNisab = state.calculation?.isAboveNisab ?: false,
-                nisabType = state.nisabType,
-                currency = state.currency
-            )
+    // Threshold on the first item's own scroll offset, not an accumulated delta. A delta drifts
+    // over a long form and can strand the hero half-collapsed after a fling; this is derived from
+    // where the list actually is, so it cannot disagree with the scroll position.
+    val collapsed by remember {
+        derivedStateOf {
+            listState.firstVisibleItemIndex > 0 ||
+                listState.firstVisibleItemScrollOffset > HeroCollapseThresholdPx
         }
-        item {
-            Spacer(modifier = Modifier.height(8.dp))
-            // ZakatEvent.SetCurrency existed with a handler and no producer: every figure on
-            // this screen was formatted with state.currency, and nothing could change it, so
-            // anyone outside the default read someone else's symbol on their own zakat.
-            NimazMenuItem(
-                title = stringResource(R.string.zakat_currency),
-                subtitle = currencyLabel(state.currency),
-                onClick = { showCurrencyPicker = true },
-            )
-        }
-        item {
-            Spacer(modifier = Modifier.height(8.dp))
-            NisabSelector(
-                selectedType = state.nisabType,
-                goldPrice = state.goldPricePerGram,
-                silverPrice = state.silverPricePerGram,
-                currency = state.currency,
-                onTypeChange = { viewModel.onEvent(ZakatEvent.SetNisabType(it)) },
-                onGoldPriceChange = { viewModel.onEvent(ZakatEvent.UpdateGoldPrice(it)) },
-                onSilverPriceChange = { viewModel.onEvent(ZakatEvent.UpdateSilverPrice(it)) }
-            )
-        }
-        item {
-            Spacer(modifier = Modifier.height(8.dp))
-            NimazSectionHeader(
-                title = stringResource(R.string.assets),
-                trailingContent = {
-                    Text(
-                        text = formatCurrency(
-                            state.assets.total +
-                                    (state.assets.goldGrams * state.goldPricePerGram) +
-                                    (state.assets.silverGrams * state.silverPricePerGram),
-                            state.currency
+    }
+    val collapseProgress by animateFloatAsState(
+        targetValue = if (collapsed) 1f else 0f,
+        label = "zakat_hero_collapse",
+    )
+
+    Column(modifier = modifier) {
+        // Above the LazyColumn, not inside it. The total is what the whole task is about, and a
+        // hero that scrolls away loses it exactly when the numbers being typed are changing it.
+        ZakatResultSummaryCard(
+            zakatDue = state.calculation?.zakatDue ?: 0.0,
+            nisabValue = state.calculation?.nisabValue ?: 0.0,
+            netWealth = state.calculation?.netWorth ?: 0.0,
+            isAboveNisab = state.calculation?.isAboveNisab ?: false,
+            nisabType = state.nisabType,
+            currency = state.currency,
+            collapseProgress = collapseProgress,
+            modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp),
+        )
+
+        LazyColumn(
+            state = listState,
+            modifier = Modifier.weight(1f),
+            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            // Each accordion header carries its running subtotal, so the shape of the
+            // calculation is legible before anything is opened.
+            item {
+                NimazAccordion(
+                    title = stringResource(R.string.assets),
+                    subtitle = stringResource(R.string.zakat_section_assets_subtitle),
+                    initiallyExpanded = true,
+                    trailing = {
+                        SubtotalLabel(
+                            amount = state.assetsTotal(),
+                            currency = state.currency,
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+                    },
+                ) {
+                    AssetInputCards(state = state, viewModel = viewModel)
+                }
+            }
+            item {
+                NimazAccordion(
+                    title = stringResource(R.string.zakat_section_deducted),
+                    subtitle = stringResource(R.string.zakat_section_deducted_subtitle),
+                    trailing = {
+                        SubtotalLabel(
+                            amount = state.liabilities.total,
+                            currency = state.currency,
+                            color = MaterialTheme.colorScheme.error,
+                        )
+                    },
+                ) {
+                    LiabilityInputCards(state = state, viewModel = viewModel)
+                }
+            }
+            item {
+                NimazAccordion(
+                    title = stringResource(R.string.zakat_section_nisab),
+                    subtitle = stringResource(R.string.zakat_section_nisab_subtitle),
+                    trailing = {
+                        SubtotalLabel(
+                            amount = state.calculation?.nisabValue ?: 0.0,
+                            currency = state.currency,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    },
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        NisabSelector(
+                            selectedType = state.nisabType,
+                            goldPrice = state.goldPricePerGram,
+                            silverPrice = state.silverPricePerGram,
+                            currency = state.currency,
+                            onTypeChange = { viewModel.onEvent(ZakatEvent.SetNisabType(it)) },
+                            onGoldPriceChange = { viewModel.onEvent(ZakatEvent.UpdateGoldPrice(it)) },
+                            onSilverPriceChange = { viewModel.onEvent(ZakatEvent.UpdateSilverPrice(it)) }
+                        )
+                        // ZakatEvent.SetCurrency existed with a handler and no producer: every
+                        // figure on this screen was formatted with state.currency, and nothing
+                        // could change it, so anyone outside the default read someone else's
+                        // symbol on their own zakat.
+                        NimazMenuItem(
+                            title = stringResource(R.string.zakat_currency),
+                            subtitle = currencyLabel(state.currency),
+                            onClick = { showCurrencyPicker = true },
+                        )
+                    }
+                }
+            }
+
+            // INLINE, and above the result rather than in place of the form: every figure the
+            // user typed is still on screen and still valid, and losing an afternoon of asset
+            // entries to report a failed sum would be far worse than the failure.
+            state.error?.let { error ->
+                item {
+                    NimazErrorState(
+                        title = stringResource(error.message),
+                        kind = error.kind,
+                        variant = NimazErrorVariant.INLINE,
+                        primaryAction = NimazErrorDefaults.retry(
+                            onRetry = { viewModel.onEvent(ZakatEvent.Recalculate) },
+                            label = stringResource(R.string.try_again),
                         ),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.primary
+                        modifier = Modifier.padding(vertical = 8.dp),
                     )
                 }
-            )
-        }
-        item { AssetInputCards(state = state, viewModel = viewModel) }
-        item {
-            Spacer(modifier = Modifier.height(8.dp))
-            NimazSectionHeader(
-                title = stringResource(R.string.liabilities),
-                trailingContent = {
-                    Text(
-                        text = formatCurrency(state.liabilities.total, state.currency),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.error
+            }
+
+            state.calculation?.let { calculation ->
+                item {
+                    BreakdownCard(
+                        totalAssets = calculation.totalAssets,
+                        totalLiabilities = calculation.totalLiabilities,
+                        netWorth = calculation.netWorth,
+                        nisabValue = calculation.nisabValue,
+                        isAboveNisab = calculation.isAboveNisab,
+                        zakatDue = calculation.zakatDue,
+                        currency = state.currency,
+                        expanded = state.showBreakdown,
+                        onToggleExpanded = { viewModel.onEvent(ZakatEvent.ToggleBreakdown) },
                     )
                 }
-            )
-        }
-        item { LiabilityInputCards(state = state, viewModel = viewModel) }
-
-        // INLINE, and above the result rather than in place of the form: every figure the
-        // user typed is still on screen and still valid, and losing an afternoon of asset
-        // entries to report a failed sum would be far worse than the failure.
-        state.error?.let { error ->
-            item {
-                NimazErrorState(
-                    title = stringResource(error.message),
-                    kind = error.kind,
-                    variant = NimazErrorVariant.INLINE,
-                    primaryAction = NimazErrorDefaults.retry(
-                        onRetry = { viewModel.onEvent(ZakatEvent.Recalculate) },
-                        label = stringResource(R.string.try_again),
-                    ),
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                )
             }
+            item { Spacer(modifier = Modifier.height(8.dp)) }
         }
 
-        state.calculation?.let { calculation ->
-            item {
-                Spacer(modifier = Modifier.height(8.dp))
-                BreakdownCard(
-                    totalAssets = calculation.totalAssets,
-                    totalLiabilities = calculation.totalLiabilities,
-                    netWorth = calculation.netWorth,
-                    nisabValue = calculation.nisabValue,
-                    isAboveNisab = calculation.isAboveNisab,
-                    zakatDue = calculation.zakatDue,
-                    currency = state.currency,
-                    expanded = state.showBreakdown,
-                    onToggleExpanded = { viewModel.onEvent(ZakatEvent.ToggleBreakdown) },
-                    onSaveClick = { viewModel.onEvent(ZakatEvent.SaveCalculation) }
-                )
-            }
-        }
-        item { Spacer(modifier = Modifier.height(24.dp)) }
+        // Save and share live here because the screen had nowhere good for them, and the
+        // keyboard covering them is fine: they are pressed *after* typing, not during. The
+        // total deliberately is not repeated here — showing €1,284.50 twice means the eye
+        // never settles, and a bottom bar is exactly where the keyboard would hide it.
+        ZakatActionBar(
+            enabled = state.calculation != null,
+            onSave = { viewModel.onEvent(ZakatEvent.SaveCalculation) },
+            onShare = onShareCalculation,
+        )
     }
 
     if (showCurrencyPicker) {
@@ -278,6 +337,112 @@ private fun ZakatCompactContent(
     }
 }
 
+/**
+ * How far the list must scroll before the hero collapses, in pixels.
+ *
+ * A raw pixel threshold rather than a `Dp` because `firstVisibleItemScrollOffset` is in pixels;
+ * converting per frame to compare against a `Dp` would be work for no accuracy, and the exact
+ * distance is a feel decision, not a layout measurement.
+ */
+private const val HeroCollapseThresholdPx = 120
+
+/**
+ * The assets subtotal, with gold and silver valued at the prices currently in the form.
+ *
+ * `assets.total` counts only the cash-like rows — gold and silver are stored as *grams*, so
+ * without the two multiplications the header would report a figure that disagrees with the
+ * breakdown by the whole value of someone's jewellery.
+ */
+private fun ZakatCalculatorUiState.assetsTotal(): Double =
+    assets.total +
+        (assets.goldGrams * goldPricePerGram) +
+        (assets.silverGrams * silverPricePerGram)
+
+/**
+ * The share action, built once for both size classes.
+ *
+ * A no-op until there is a calculation: sharing a card of zeroes would be worse than the button
+ * doing nothing, and the bar disables itself in that state anyway.
+ */
+@Composable
+private fun rememberZakatShareAction(state: ZakatCalculatorUiState): () -> Unit {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    return {
+        val calculation = state.calculation
+        if (calculation != null) {
+            scope.launch {
+                ContentShareManager.shareBranded(
+                    context,
+                    Shareables.zakat(
+                        context = context,
+                        due = formatCurrency(calculation.zakatDue, state.currency),
+                        assets = formatCurrency(calculation.totalAssets, state.currency),
+                        deducted = formatCurrency(calculation.totalLiabilities, state.currency),
+                        net = formatCurrency(calculation.netWorth, state.currency),
+                        nisab = formatCurrency(calculation.nisabValue, state.currency),
+                        // The Hijri year the calculation belongs to — zakat is owed on a lunar
+                        // year, so the Gregorian one would label it with the wrong period.
+                        yearLabel = HijriDateCalculator.today().year.toString(),
+                    ),
+                )
+            }
+        }
+    }
+}
+
+/** A running subtotal in an accordion header. */
+@Composable
+private fun SubtotalLabel(amount: Double, currency: String, color: Color) {
+    Text(
+        text = formatCurrency(amount, currency),
+        style = MaterialTheme.typography.bodyMedium,
+        color = color,
+    )
+}
+
+/**
+ * Save and share, pinned below the form.
+ *
+ * Disabled until there is something to act on: saving or sharing a calculation that does not
+ * exist yet would either write an empty row or share a card of zeroes.
+ */
+@Composable
+private fun ZakatActionBar(
+    enabled: Boolean,
+    onSave: () -> Unit,
+    onShare: () -> Unit,
+) {
+    NimazCard(
+        modifier = Modifier.fillMaxWidth(),
+        style = NimazCardStyle.FILLED,
+        tone = NimazTone.NEUTRAL,
+        shape = RoundedCornerShape(topStart = 18.dp, topEnd = 18.dp),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            NimazButton(
+                text = stringResource(R.string.zakat_save_this_year),
+                onClick = onSave,
+                enabled = enabled,
+                modifier = Modifier.weight(1f),
+            )
+            NimazIconButton(
+                icon = Icons.Default.IosShare,
+                onClick = onShare,
+                enabled = enabled,
+                contentDescription = stringResource(R.string.zakat_share),
+                style = NimazIconButtonStyle.FILLED_TONAL,
+            )
+        }
+    }
+}
+
 @Composable
 private fun ZakatTabletContent(
     state: ZakatCalculatorUiState,
@@ -285,6 +450,7 @@ private fun ZakatTabletContent(
     modifier: Modifier = Modifier
 ) {
     var showCurrencyPicker by rememberSaveable { mutableStateOf(false) }
+    val onShareCalculation = rememberZakatShareAction(state)
 
     Column(
         modifier = modifier
@@ -331,15 +497,10 @@ private fun ZakatTabletContent(
                 NimazSectionHeader(
                     title = stringResource(R.string.assets),
                     trailingContent = {
-                        Text(
-                            text = formatCurrency(
-                                state.assets.total +
-                                        (state.assets.goldGrams * state.goldPricePerGram) +
-                                        (state.assets.silverGrams * state.silverPricePerGram),
-                                state.currency
-                            ),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.primary
+                        SubtotalLabel(
+                            amount = state.assetsTotal(),
+                            currency = state.currency,
+                            color = MaterialTheme.colorScheme.primary,
                         )
                     }
                 )
@@ -354,10 +515,10 @@ private fun ZakatTabletContent(
                 NimazSectionHeader(
                     title = stringResource(R.string.liabilities),
                     trailingContent = {
-                        Text(
-                            text = formatCurrency(state.liabilities.total, state.currency),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.error
+                        SubtotalLabel(
+                            amount = state.liabilities.total,
+                            currency = state.currency,
+                            color = MaterialTheme.colorScheme.error,
                         )
                     }
                 )
@@ -377,9 +538,17 @@ private fun ZakatTabletContent(
                 currency = state.currency,
                 expanded = state.showBreakdown,
                 onToggleExpanded = { viewModel.onEvent(ZakatEvent.ToggleBreakdown) },
-                onSaveClick = { viewModel.onEvent(ZakatEvent.SaveCalculation) }
             )
         }
+
+        // The tablet layout does not collapse its hero — there is no scroll pressure on a wide
+        // screen where the whole form fits — but save and share live in the same bar, so there is
+        // one place to look for them whatever the size class.
+        ZakatActionBar(
+            enabled = state.calculation != null,
+            onSave = { viewModel.onEvent(ZakatEvent.SaveCalculation) },
+            onShare = onShareCalculation,
+        )
 
         Spacer(modifier = Modifier.height(24.dp))
     }
@@ -409,7 +578,8 @@ private fun AssetInputCards(
             label = stringResource(R.string.cash_on_hand),
             hint = stringResource(R.string.hint_physical_cash),
             value = state.assets.cashOnHand,
-            onValueChange = { viewModel.onEvent(ZakatEvent.UpdateCash(it)) }
+            onValueChange = { viewModel.onEvent(ZakatEvent.UpdateCash(it)) },
+            currency = state.currency
         )
         InputCard(
             icon = Icons.Default.AccountBalance,
@@ -417,7 +587,8 @@ private fun AssetInputCards(
             label = stringResource(R.string.bank_balance),
             hint = stringResource(R.string.hint_bank_accounts),
             value = state.assets.bankBalance,
-            onValueChange = { viewModel.onEvent(ZakatEvent.UpdateBankBalance(it)) }
+            onValueChange = { viewModel.onEvent(ZakatEvent.UpdateBankBalance(it)) },
+            currency = state.currency
         )
         InputCard(
             icon = Icons.Default.Savings,
@@ -426,7 +597,8 @@ private fun AssetInputCards(
             hint = stringResource(R.string.hint_weight_in_grams),
             value = state.assets.goldGrams,
             onValueChange = { viewModel.onEvent(ZakatEvent.UpdateGold(it)) },
-            suffix = "g"
+            currency = state.currency,
+            unitSuffix = stringResource(R.string.zakat_unit_grams)
         )
         InputCard(
             icon = Icons.Default.Savings,
@@ -435,7 +607,8 @@ private fun AssetInputCards(
             hint = stringResource(R.string.hint_weight_in_grams),
             value = state.assets.silverGrams,
             onValueChange = { viewModel.onEvent(ZakatEvent.UpdateSilver(it)) },
-            suffix = "g"
+            currency = state.currency,
+            unitSuffix = stringResource(R.string.zakat_unit_grams)
         )
         InputCard(
             icon = Icons.AutoMirrored.Filled.ShowChart,
@@ -443,7 +616,8 @@ private fun AssetInputCards(
             label = stringResource(R.string.investments),
             hint = stringResource(R.string.hint_stocks_bonds),
             value = state.assets.investments,
-            onValueChange = { viewModel.onEvent(ZakatEvent.UpdateInvestments(it)) }
+            onValueChange = { viewModel.onEvent(ZakatEvent.UpdateInvestments(it)) },
+            currency = state.currency
         )
         InputCard(
             icon = Icons.Default.Business,
@@ -451,7 +625,8 @@ private fun AssetInputCards(
             label = stringResource(R.string.business_inventory),
             hint = stringResource(R.string.hint_goods_for_trade),
             value = state.assets.businessInventory,
-            onValueChange = { viewModel.onEvent(ZakatEvent.UpdateBusinessInventory(it)) }
+            onValueChange = { viewModel.onEvent(ZakatEvent.UpdateBusinessInventory(it)) },
+            currency = state.currency
         )
         InputCard(
             icon = Icons.Default.Receipt,
@@ -459,7 +634,8 @@ private fun AssetInputCards(
             label = stringResource(R.string.receivables),
             hint = stringResource(R.string.hint_money_owed_to_you),
             value = state.assets.receivables,
-            onValueChange = { viewModel.onEvent(ZakatEvent.UpdateReceivables(it)) }
+            onValueChange = { viewModel.onEvent(ZakatEvent.UpdateReceivables(it)) },
+            currency = state.currency
         )
         InputCard(
             icon = Icons.Default.Home,
@@ -467,7 +643,8 @@ private fun AssetInputCards(
             label = stringResource(R.string.rental_income),
             hint = stringResource(R.string.hint_income_from_properties),
             value = state.assets.rentalIncome,
-            onValueChange = { viewModel.onEvent(ZakatEvent.UpdateRentalIncome(it)) }
+            onValueChange = { viewModel.onEvent(ZakatEvent.UpdateRentalIncome(it)) },
+            currency = state.currency
         )
         InputCard(
             icon = Icons.Default.MoreHoriz,
@@ -475,7 +652,8 @@ private fun AssetInputCards(
             label = stringResource(R.string.other_assets),
             hint = stringResource(R.string.hint_other_zakatable_assets),
             value = state.assets.otherAssets,
-            onValueChange = { viewModel.onEvent(ZakatEvent.UpdateOtherAssets(it)) }
+            onValueChange = { viewModel.onEvent(ZakatEvent.UpdateOtherAssets(it)) },
+            currency = state.currency
         )
     }
 }
@@ -492,7 +670,8 @@ private fun LiabilityInputCards(
             label = stringResource(R.string.debts_owed),
             hint = stringResource(R.string.hint_personal_debts),
             value = state.liabilities.debts,
-            onValueChange = { viewModel.onEvent(ZakatEvent.UpdateDebts(it)) }
+            onValueChange = { viewModel.onEvent(ZakatEvent.UpdateDebts(it)) },
+            currency = state.currency
         )
         InputCard(
             icon = Icons.Default.AccountBalance,
@@ -500,7 +679,8 @@ private fun LiabilityInputCards(
             label = stringResource(R.string.loans),
             hint = stringResource(R.string.hint_bank_personal_loans),
             value = state.liabilities.loans,
-            onValueChange = { viewModel.onEvent(ZakatEvent.UpdateLoans(it)) }
+            onValueChange = { viewModel.onEvent(ZakatEvent.UpdateLoans(it)) },
+            currency = state.currency
         )
         InputCard(
             icon = Icons.Default.Receipt,
@@ -508,7 +688,8 @@ private fun LiabilityInputCards(
             label = stringResource(R.string.bills_due),
             hint = stringResource(R.string.hint_outstanding_bills),
             value = state.liabilities.billsDue,
-            onValueChange = { viewModel.onEvent(ZakatEvent.UpdateBillsDue(it)) }
+            onValueChange = { viewModel.onEvent(ZakatEvent.UpdateBillsDue(it)) },
+            currency = state.currency
         )
         InputCard(
             icon = Icons.Default.MoreHoriz,
@@ -516,7 +697,8 @@ private fun LiabilityInputCards(
             label = stringResource(R.string.other_liabilities),
             hint = stringResource(R.string.hint_other_liabilities),
             value = state.liabilities.otherLiabilities,
-            onValueChange = { viewModel.onEvent(ZakatEvent.UpdateOtherLiabilities(it)) }
+            onValueChange = { viewModel.onEvent(ZakatEvent.UpdateOtherLiabilities(it)) },
+            currency = state.currency
         )
     }
 }
@@ -531,10 +713,12 @@ private fun ZakatResultSummaryCard(
     isAboveNisab: Boolean,
     nisabType: NisabType,
     currency: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    collapseProgress: Float = 0f,
 ) {
     ZakatSummaryHero(
         modifier = modifier,
+        collapseProgress = collapseProgress,
         label = stringResource(R.string.zakat_due),
         amount = formatCurrency(zakatDue, currency),
         // Below nisab nothing is owed, so the rate line would be misleading —
@@ -633,6 +817,7 @@ private fun NisabSelector(
         MetalPricesEditor(
             goldPrice = goldPrice,
             silverPrice = silverPrice,
+            currency = currency,
             onGoldPriceChange = onGoldPriceChange,
             onSilverPriceChange = onSilverPriceChange
         )
@@ -651,6 +836,7 @@ private fun NisabSelector(
 private fun MetalPricesEditor(
     goldPrice: Double,
     silverPrice: Double,
+    currency: String,
     onGoldPriceChange: (Double) -> Unit,
     onSilverPriceChange: (Double) -> Unit,
     modifier: Modifier = Modifier
@@ -674,7 +860,11 @@ private fun MetalPricesEditor(
                     color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.weight(1f)
                 )
-                CompactAmountField(value = goldPrice, onValueChange = onGoldPriceChange)
+                AmountField(
+                    value = goldPrice,
+                    onValueChange = onGoldPriceChange,
+                    currencySymbol = currencySymbolOf(currency),
+                )
             }
 
             Row(
@@ -687,7 +877,11 @@ private fun MetalPricesEditor(
                     color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.weight(1f)
                 )
-                CompactAmountField(value = silverPrice, onValueChange = onSilverPriceChange)
+                AmountField(
+                    value = silverPrice,
+                    onValueChange = onSilverPriceChange,
+                    currencySymbol = currencySymbolOf(currency),
+                )
             }
 
             Text(
@@ -761,7 +955,9 @@ private fun InputCard(
     hint: String,
     value: Double,
     onValueChange: (Double) -> Unit,
-    suffix: String = "$",
+    currency: String,
+    /** A weight unit that follows the number. Null means this row is money in [currency]. */
+    unitSuffix: String? = null,
     modifier: Modifier = Modifier
 ) {
     NimazCard(
@@ -800,94 +996,57 @@ private fun InputCard(
                 )
             }
 
-            // Compact input field
-            CompactAmountField(
+            AmountField(
                 value = value,
                 onValueChange = onValueChange,
-                suffix = suffix
+                // Money leads with its symbol, a weight follows with its unit. The field this
+                // replaced chose between them by comparing its suffix against the string "$",
+                // which meant every non-dollar currency rendered a dollar sign.
+                currencySymbol = if (unitSuffix == null) currencySymbolOf(currency) else null,
+                unitSuffix = unitSuffix,
+                placeholder = if (unitSuffix == null) "0.00" else "0",
             )
         }
     }
 }
 
+/**
+ * A money or weight field bound to a `Double` on the ViewModel.
+ *
+ * The text is **local state**, and that is the whole fix. The field this replaced parsed every
+ * keystroke straight to a `Double` and re-rendered the result, so "10." became "10" before the
+ * next digit landed and a decimal amount was literally unenterable. Here the string is what the
+ * person typed and the `Double` is derived from it.
+ *
+ * The sync back the other way is guarded: an incoming [value] only overwrites the text when it
+ * disagrees with what the text already parses to. Without that guard, the ViewModel echoing back
+ * the user's own keystroke would erase the trailing point as fast as it was typed — while
+ * "Clear all" and a restored calculation, which genuinely differ, still win.
+ */
 @Composable
-private fun CompactAmountField(
+private fun AmountField(
     value: Double,
     onValueChange: (Double) -> Unit,
-    suffix: String = "$",
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    currencySymbol: String? = null,
+    unitSuffix: String? = null,
+    placeholder: String = "0.00",
 ) {
-    val displayText = if (value == 0.0) "" else {
-        if (value == value.toLong().toDouble()) {
-            value.toLong().toString()
-        } else {
-            value.toString()
-        }
+    var text by rememberSaveable { mutableStateOf(amountToInput(value)) }
+    LaunchedEffect(value) {
+        if (parseAmountInput(text) != value) text = amountToInput(value)
     }
-
-    // A recessed text-entry well nested inside the input card: outlined, never
-    // elevated, with a MUTED container so it reads as a field rather than a card.
-    NimazCard(
-        modifier = modifier.width(100.dp),
-        style = NimazCardStyle.OUTLINED,
-        shape = NimazShapes.small
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            if (suffix == "$") {
-                Text(
-                    text = "$",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Spacer(modifier = Modifier.width(2.dp))
-            }
-
-            BasicTextField(
-                value = displayText,
-                onValueChange = { text ->
-                    val newValue = text.toDoubleOrNull() ?: 0.0
-                    onValueChange(newValue)
-                },
-                textStyle = TextStyle(
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    textAlign = TextAlign.End
-                ),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                singleLine = true,
-                modifier = Modifier.weight(1f),
-                decorationBox = { innerTextField ->
-                    Box(contentAlignment = Alignment.CenterEnd) {
-                        if (displayText.isEmpty()) {
-                            Text(
-                                text = "0",
-                                style = TextStyle(
-                                    fontSize = 16.sp,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                                    textAlign = TextAlign.End
-                                )
-                            )
-                        }
-                        innerTextField()
-                    }
-                }
-            )
-
-            if (suffix != "$") {
-                Spacer(modifier = Modifier.width(2.dp))
-                Text(
-                    text = suffix,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        }
-    }
+    NimazAmountInput(
+        value = text,
+        onValueChange = { next ->
+            text = next
+            onValueChange(parseAmountInput(next))
+        },
+        modifier = modifier,
+        currencySymbol = currencySymbol,
+        unitSuffix = unitSuffix,
+        placeholder = placeholder,
+    )
 }
 
 // --- Breakdown Card ---
@@ -899,8 +1058,9 @@ private fun CompactAmountField(
  * [expanded] is `showBreakdown` from the ViewModel rather than local `remember` state: the
  * calculator is a long screen whose state survives rotation and process death through the
  * ViewModel, and a breakdown that silently re-opened on the way back would undo the choice.
- * Only the rows collapse — the save button does not, because hiding the way to record a
- * calculation behind a disclosure is how a calculation gets lost.
+ * Saving used to live at the bottom of this card, deliberately outside the disclosure so it could
+ * not be hidden. It has moved to the screen's action bar, which is a strictly better home for the
+ * same reason: it is reachable without finding the breakdown at all.
  */
 @Composable
 private fun BreakdownCard(
@@ -913,7 +1073,6 @@ private fun BreakdownCard(
     currency: String,
     expanded: Boolean,
     onToggleExpanded: () -> Unit,
-    onSaveClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
@@ -1020,24 +1179,6 @@ private fun BreakdownCard(
             Spacer(modifier = Modifier.height(12.dp))
         }
 
-        // Save button
-        NimazCard(
-            onClick = onSaveClick,
-            modifier = Modifier.fillMaxWidth(),
-            style = NimazCardStyle.FILLED,
-            shape = RoundedCornerShape(14.dp),
-            tone = NimazTone.PROMINENT
-        ) {
-            Text(
-                text = stringResource(R.string.save_calculation),
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.SemiBold,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                textAlign = TextAlign.Center
-            )
-        }
     }
 }
 
@@ -1073,6 +1214,17 @@ private fun BreakdownRow(
  * "US Dollar ($)" in English, "US-Dollar ($)" in German — resolved by `java.util.Currency`
  * from the ISO code, so the picker carries no translated strings of its own.
  */
+/**
+ * The bare symbol for an ISO code — `€` for EUR — falling back to the code itself.
+ *
+ * The same resolution `formatCurrency` performs, so the symbol inside a field and the symbol
+ * beside the total cannot disagree. A code with no symbol on this device renders as the code,
+ * which is still true and still readable.
+ */
+internal fun currencySymbolOf(code: String): String = runCatching {
+    Currency.getInstance(code).getSymbol(Locale.getDefault())
+}.getOrDefault(code)
+
 private fun currencyLabel(code: String): String = runCatching {
     val currency = Currency.getInstance(code)
     val name = currency.getDisplayName(Locale.getDefault())

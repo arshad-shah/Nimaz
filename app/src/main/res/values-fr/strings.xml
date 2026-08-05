@@ -492,7 +492,6 @@
     <string name="net_zakatable_wealth">Richesse nette soumise à la Zakat</string>
     <string name="nisab_threshold">Seuil du Nissab</string>
     <string name="meets_nisab">Atteint le Nissab</string>
-    <string name="save_calculation">Enregistrer le calcul</string>
     <string name="loans">Prêts</string>
     <string name="bills_due">Factures à payer</string>
     <string name="hint_physical_cash">Espèces que vous possédez</string>
