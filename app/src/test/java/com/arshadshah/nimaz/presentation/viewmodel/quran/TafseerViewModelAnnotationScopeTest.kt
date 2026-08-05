@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.presentation.viewmodel.quran
 
+import com.arshadshah.nimaz.core.monitoring.RecordingTelemetry
 import com.arshadshah.nimaz.domain.model.Ayah
 import com.arshadshah.nimaz.domain.model.SajdaType
 import com.arshadshah.nimaz.domain.model.TafseerHighlight
@@ -91,7 +92,7 @@ class TafseerViewModelAnnotationScopeTest {
 
     @Test
     fun `a previous ayah's highlights cannot overwrite the ayah on screen`() = runTest {
-        val viewModel = TafseerViewModel(tafseerUseCases, quranUseCases)
+        val viewModel = TafseerViewModel(tafseerUseCases, quranUseCases, RecordingTelemetry())
 
         viewModel.onEvent(TafseerEvent.LoadSurah(surahNumber = 1, ayahNumber = 1))
         advanceUntilIdle()
@@ -114,7 +115,7 @@ class TafseerViewModelAnnotationScopeTest {
 
     @Test
     fun `a previous ayah's notes cannot overwrite the ayah on screen`() = runTest {
-        val viewModel = TafseerViewModel(tafseerUseCases, quranUseCases)
+        val viewModel = TafseerViewModel(tafseerUseCases, quranUseCases, RecordingTelemetry())
 
         viewModel.onEvent(TafseerEvent.LoadSurah(surahNumber = 1, ayahNumber = 1))
         advanceUntilIdle()
@@ -135,7 +136,7 @@ class TafseerViewModelAnnotationScopeTest {
     fun `swiping back re-subscribes, so the earlier ayah's annotations return`() = runTest {
         // The cancellation must be scoped to "not the current ayah", not "load once" — a
         // reader swiping 1 -> 2 -> 1 has to see ayah 1's highlights again.
-        val viewModel = TafseerViewModel(tafseerUseCases, quranUseCases)
+        val viewModel = TafseerViewModel(tafseerUseCases, quranUseCases, RecordingTelemetry())
 
         viewModel.onEvent(TafseerEvent.LoadSurah(surahNumber = 1, ayahNumber = 1))
         advanceUntilIdle()
