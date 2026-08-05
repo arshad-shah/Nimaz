@@ -875,7 +875,7 @@ module (`ObserveLocalEventsUseCase`) is a false positive. Read the hit before ac
   event with no producer) and read by nothing, so the breakdown was permanently expanded and
   the flag was decoration. The calculator's breakdown is now a disclosure driven by it, and it
   defaults to `true` so the working stays visible on first open.
-- [ ] **`DuaOccasion.displayName()` is unused hardcoded English.** Its two call sites were the
+- [x] ~~**`DuaOccasion.displayName()` is unused hardcoded English.**~~ **Resolved — deleted.** Its two call sites were the
   dua reader and the category list, which now resolve the label through
   `presentation/screens/dua/DuaOccasionLabels.kt` so a German reader sees German. The domain
   function has no callers left; delete it with the rest of #356's user-facing English rather

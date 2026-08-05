@@ -101,27 +101,6 @@ enum class DuaOccasion {
         }
     }
 
-    fun displayName(): String {
-        return when (this) {
-            MORNING -> "Morning"
-            EVENING -> "Evening"
-            AFTER_PRAYER -> "After Prayer"
-            BEFORE_SLEEP -> "Before Sleep"
-            WAKING_UP -> "Waking Up"
-            EATING -> "Eating"
-            TRAVELING -> "Traveling"
-            ENTERING_MOSQUE -> "Entering Mosque"
-            LEAVING_MOSQUE -> "Leaving Mosque"
-            ENTERING_HOME -> "Entering Home"
-            LEAVING_HOME -> "Leaving Home"
-            RAIN -> "Rain"
-            DISTRESS -> "Distress"
-            FORGIVENESS -> "Forgiveness"
-            PARENTS -> "Parents"
-            GRATITUDE -> "Gratitude"
-            GENERAL -> "General"
-        }
-    }
 }
 
 data class DuaSearchResult(
