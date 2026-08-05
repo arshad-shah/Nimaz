@@ -237,6 +237,22 @@ This one is **pervasive and lower priority** — listed so it's tracked, not bec
   (the wrapper is the seam the UI depends on), but if a use case adds no value and the feature is
   trivial, that's fine — don't over-engineer net-new tiny features.
 
+### AP-7.14 · A ViewModel that cannot be constructed on the JVM has no tests, and that is why
+
+- [x] ~~**`OnboardingViewModel` built a `FusedLocationProviderClient` in a property initializer.**~~
+  **Resolved.** Constructing the ViewModel therefore reached into Play Services before a single
+  line of its own logic ran, so no JVM unit test could exist — `DeviceLocationRepository`'s KDoc
+  had already named it as the second of the two stuck that way, `LocationViewModel` having been
+  freed in #435. It now injects `DeviceLocationRepository`, `PermissionChecker` and
+  `PowerSettings`; `Context` is gone entirely, and `getBatteryOptimizationIntent(): Intent` — a
+  ViewModel handing the UI an `android.content.Intent` — moved to `OnboardingScreen`, which is
+  what `PowerSettings`' KDoc asks for. Seven tests now cover permission reads, detection,
+  persistence, the empty fix, the throwing fix, completion and error dismissal.
+  A second, quieter blocker went with it: `detectLocation` wrapped its geocode in
+  `withContext(Dispatchers.IO)`, a **real** dispatcher no test scheduler can advance. The
+  repository implementation already does its own `withContext(ioDispatcher)`, so the wrapper was
+  both redundant and untestable.
+
 ### AP-7.13 · Raw `viewModelScope.launch` (an uncaught throw is a crash)
 
 `viewModelScope` is a `SupervisorJob` + `Dispatchers.Main.immediate`. A `SupervisorJob`

@@ -2,9 +2,12 @@ package com.arshadshah.nimaz.presentation.screens.onboarding
 
 import android.Manifest
 import android.app.Activity
+import android.content.Intent
 import android.os.Build
+import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.net.toUri
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -36,6 +39,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.snapshotFlow
@@ -122,6 +126,8 @@ fun OnboardingScreen(
     ) { granted ->
         viewModel.onEvent(OnboardingEvent.UpdatePermissionStatus(notification = granted))
     }
+
+    val context = LocalContext.current
 
     val batteryOptimizationLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
@@ -262,7 +268,13 @@ fun OnboardingScreen(
                                 }
                             },
                             onRequestBattery = {
-                                batteryOptimizationLauncher.launch(viewModel.getBatteryOptimizationIntent())
+                                // The Intent is built here rather than handed out by the
+                                // ViewModel: a ViewModel returning an android.content.Intent
+                                // points the dependency arrow the wrong way (see PowerSettings).
+                                batteryOptimizationLauncher.launch(
+                                    Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
+                                        .apply { data = "package:${context.packageName}".toUri() }
+                                )
                             }
                         )
                     }
