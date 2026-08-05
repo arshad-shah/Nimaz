@@ -1842,4 +1842,15 @@
     <string name="zakat_mark_paid_failed">Ödendi olarak işaretlenemedi</string>
     <string name="zakat_delete_failed">Bu hesaplama silinemedi</string>
     <string name="zakat_history_load_failed">Önceki hesaplamalarınız yüklenemedi</string>
+    <string name="sync_connection_failed">Diğer cihaza bağlantı kurulamadı</string>
+    <string name="sync_import_failed">Gelen veriler içe aktarılamadı</string>
+    <string name="sync_export_failed">Verileriniz gönderilemedi</string>
+    <string name="sync_failed_body">Aktarım bitene kadar iki cihaz da aynı ağda ve uygulama açık kalmalı.</string>
+    <string name="qibla_no_location">Kıble, nerede olduğunuzu bilmeli</string>
+    <string name="qibla_no_location_body">Ayarlardan bir konum belirleyin ya da Nimaz\'ın bulmasına izin verin; pusula yönü gösterecek.</string>
+    <string name="qibla_failed">Yön hesaplanamadı</string>
+    <string name="dua_collection_load_failed">Dua koleksiyonları yüklenemedi</string>
+    <string name="dua_category_load_failed">Bu koleksiyon yüklenemedi</string>
+    <string name="dua_load_failed_body">Dualar cihazınızda saklanır; yeniden denemek genellikle işe yarar.</string>
+    <string name="calendar_events_load_failed">İslami günler yüklenemedi</string>
 </resources>

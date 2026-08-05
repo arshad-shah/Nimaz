@@ -88,6 +88,8 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeShape
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorState
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
@@ -160,18 +162,19 @@ fun DuasCollectionScreen(
             NimazLoadingState(modifier = Modifier.padding(paddingValues))
         } else if (errorRes != null) {
             // Before the collection load was guarded, a content-database fault killed the
-            // collector and left the spinner up for good. It now resolves to this.
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = stringResource(errorRes),
-                    color = MaterialTheme.colorScheme.error
-                )
-            }
+            // collector and left the spinner up for good. It now resolves to this — and
+            // says what failed, rather than printing a red line.
+            NimazErrorState(
+                title = stringResource(errorRes.message),
+                message = stringResource(R.string.dua_load_failed_body),
+                kind = errorRes.kind,
+                details = errorRes.details,
+                primaryAction = NimazErrorDefaults.retry(
+                    onRetry = { viewModel.onEvent(DuaEvent.LoadAllCategories) },
+                    label = stringResource(R.string.try_again),
+                ),
+                modifier = Modifier.padding(paddingValues),
+            )
         } else {
             LazyColumn(
                 modifier = Modifier

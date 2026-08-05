@@ -5,7 +5,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import android.util.Log
 import com.arshadshah.nimaz.BuildConfig
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorKind
+import com.arshadshah.nimaz.presentation.viewmodel.UiError
 import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.data.sync.CancelReason
@@ -121,7 +124,15 @@ class SyncViewModel @Inject constructor(
                         telemetry.error(AppAnalytics.Feature.SYNC, "connection", state.message)
                         debugLog("Error state: ${state.message}")
                         addLogEntry("Error: ${state.message}")
-                        _uiState.update { it.copy(error = state.message) }
+                        _uiState.update {
+                            it.copy(
+                                error = UiError(
+                                    message = R.string.sync_connection_failed,
+                                    kind = NimazErrorKind.OFFLINE,
+                                    details = state.message,
+                                ),
+                            )
+                        }
                     }
 
                     is ConnectionState.Cancelled -> {
@@ -297,7 +308,14 @@ class SyncViewModel @Inject constructor(
                     telemetry.failure(AppAnalytics.Feature.SYNC, "import", e)
                     debugLog("Import failed: ${e.message}")
                     addLogEntry("Import failed: ${e.message}")
-                    _uiState.update { it.copy(error = "Import failed: ${e.message}") }
+                    _uiState.update {
+                        it.copy(
+                            error = UiError(
+                                message = R.string.sync_import_failed,
+                                details = e.message,
+                            ),
+                        )
+                    }
                 }
             }
         }
@@ -347,7 +365,14 @@ class SyncViewModel @Inject constructor(
                 telemetry.failure(AppAnalytics.Feature.SYNC, "export", e)
                 debugLog("Export/send failed: ${e.message}")
                 addLogEntry("Export failed: ${e.message}")
-                _uiState.update { it.copy(error = "Export failed: ${e.message}") }
+                _uiState.update {
+                    it.copy(
+                        error = UiError(
+                            message = R.string.sync_export_failed,
+                            details = e.message,
+                        ),
+                    )
+                }
             }
         }
     }

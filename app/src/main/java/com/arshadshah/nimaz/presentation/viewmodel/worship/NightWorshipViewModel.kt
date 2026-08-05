@@ -2,7 +2,10 @@ package com.arshadshah.nimaz.presentation.viewmodel.worship
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.PrayerType
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorKind
+import com.arshadshah.nimaz.presentation.viewmodel.UiError
 import com.arshadshah.nimaz.domain.usecase.PrayerUseCases
 import com.arshadshah.nimaz.core.di.DefaultDispatcher
 import com.arshadshah.nimaz.core.time.TodayProvider
@@ -40,7 +43,16 @@ class NightWorshipViewModel @Inject constructor(
             AppAnalytics.Feature.NIGHT_WORSHIP,
             "refresh",
             onFailure = { throwable ->
-                _state.update { it.copy(isLoading = false, error = throwable.message) }
+                _state.update {
+                    it.copy(
+                        isLoading = false,
+                        error = UiError(
+                            message = R.string.night_worship_times_failed,
+                            kind = NimazErrorKind.LOCATION,
+                            details = throwable.message,
+                        ),
+                    )
+                }
             },
         ) {
             _state.update { it.copy(isLoading = true, error = null) }
@@ -122,7 +134,16 @@ class NightWorshipViewModel @Inject constructor(
             AppAnalytics.Feature.NIGHT_WORSHIP,
             "observe_night_times",
             onFailure = { throwable ->
-                _state.update { it.copy(isLoading = false, error = throwable.message) }
+                _state.update {
+                    it.copy(
+                        isLoading = false,
+                        error = UiError(
+                            message = R.string.night_worship_times_failed,
+                            kind = NimazErrorKind.LOCATION,
+                            details = throwable.message,
+                        ),
+                    )
+                }
             },
         ) {
             combine(
@@ -190,7 +211,16 @@ class NightWorshipViewModel @Inject constructor(
             // `failure`, not a bare `recordException`: the stack trace reached Crashlytics
             // and the frequency reached nothing, so how often this fails was not visible.
             telemetry.failure(AppAnalytics.Feature.NIGHT_WORSHIP, "load", e)
-            _state.update { it.copy(isLoading = false, error = e.message) }
+            _state.update {
+                it.copy(
+                    isLoading = false,
+                    error = UiError(
+                        message = R.string.night_worship_times_failed,
+                        kind = NimazErrorKind.LOCATION,
+                        details = e.message,
+                    ),
+                )
+            }
         }
     }
 }

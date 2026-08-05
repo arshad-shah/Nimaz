@@ -3,6 +3,7 @@ package com.arshadshah.nimaz.presentation.viewmodel.calendar
 import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.presentation.viewmodel.UiError
 import com.arshadshah.nimaz.core.di.DefaultDispatcher
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.Telemetry
@@ -84,11 +85,18 @@ class CalendarViewModel @Inject constructor(
     private fun observeEvents() {
         launchSafely(telemetry, DOMAIN, "load_events") {
             islamicEventUseCases.getAllEvents()
-                .catchAndReport(telemetry, DOMAIN, "load_events") {
+                .catchAndReport(telemetry, DOMAIN, "load_events") { throwable ->
                     // Deliberately no fallback emission: there are no events to report, and
                     // emitting an empty list here would run the collector below and clear
                     // the very error just set.
-                    _calendarState.update { it.copy(error = R.string.error_generic) }
+                    _calendarState.update {
+                        it.copy(
+                            error = UiError(
+                                message = R.string.calendar_events_load_failed,
+                                details = throwable.message,
+                            ),
+                        )
+                    }
                 }
                 .collect { events ->
                     cachedEvents = events

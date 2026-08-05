@@ -54,6 +54,9 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorAction
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorState
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
@@ -162,15 +165,30 @@ fun SyncScreen(
                 }
 
                 state.error != null -> {
-                    ErrorContent(
-                        error = state.error!!,
-                        activityLog = state.activityLog,
-                        onRetry = { viewModel.onEvent(SyncEvent.Cancel) },
-                        onDismiss = {
-                            viewModel.onEvent(SyncEvent.Cancel)
-                            onNavigateBack()
-                        }
+                    val error = state.error!!
+                    NimazErrorState(
+                        title = stringResource(error.message),
+                        message = stringResource(R.string.sync_failed_body),
+                        kind = error.kind,
+                        details = error.details,
+                        primaryAction = NimazErrorDefaults.retry(
+                            onRetry = { viewModel.onEvent(SyncEvent.Cancel) },
+                            label = stringResource(R.string.try_again),
+                        ),
+                        secondaryAction = NimazErrorAction(
+                            label = stringResource(R.string.close),
+                            onClick = {
+                                viewModel.onEvent(SyncEvent.Cancel)
+                                onNavigateBack()
+                            },
+                        ),
                     )
+                    // The activity log stays: it is the transcript of what the two devices
+                    // managed before the failure, which is the one thing a reader can use
+                    // to work out whether to retry or start over.
+                    if (state.activityLog.isNotEmpty()) {
+                        ActivityLog(entries = state.activityLog)
+                    }
                 }
 
                 state.connectionState is ConnectionState.Completed -> {
@@ -928,55 +946,3 @@ private fun CompletedContent(
     )
 }
 
-@Composable
-private fun ErrorContent(
-    error: String,
-    activityLog: List<ActivityLogEntry>,
-    onRetry: () -> Unit,
-    onDismiss: () -> Unit
-) {
-    Spacer(modifier = Modifier.height(48.dp))
-
-    NimazIcon(
-        imageVector = Icons.Default.Close,
-        contentDescription = null,
-        iconSize = 64.dp,
-        variant = NimazIconVariant.ERROR
-    )
-
-    Spacer(modifier = Modifier.height(16.dp))
-
-    Text(
-        text = stringResource(R.string.sync_failed),
-        style = MaterialTheme.typography.headlineSmall,
-        fontWeight = FontWeight.Bold,
-        color = MaterialTheme.colorScheme.error
-    )
-
-    Text(
-        text = error,
-        style = MaterialTheme.typography.bodyMedium,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        textAlign = TextAlign.Center,
-        modifier = Modifier.padding(horizontal = 16.dp)
-    )
-
-    if (activityLog.isNotEmpty()) {
-        ActivityLog(entries = activityLog)
-    }
-
-    Spacer(modifier = Modifier.height(32.dp))
-
-    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-        NimazButton(
-            text = stringResource(R.string.close),
-            onClick = onDismiss,
-            variant = NimazButtonVariant.OUTLINED
-        )
-        NimazButton(
-            text = stringResource(R.string.try_again),
-            onClick = onRetry,
-            variant = NimazButtonVariant.FILLED
-        )
-    }
-}

@@ -1,6 +1,7 @@
 package com.arshadshah.nimaz.presentation.viewmodel.content
 
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorKind
 import com.arshadshah.nimaz.core.monitoring.RecordingTelemetry
 import com.arshadshah.nimaz.domain.model.Dua
 import com.arshadshah.nimaz.domain.model.DuaBookmark
@@ -130,8 +131,12 @@ class DuaViewModelErrorPathTest {
         advanceUntilIdle()
 
         // A string resource, resolved by the screen in the user's language — not `e.message`.
-        assertThat(vm.categoryState.value.error).isEqualTo(R.string.error_generic)
-        // The exception itself still reaches the crash report, where it belongs.
+        assertThat(vm.categoryState.value.error?.message)
+            .isEqualTo(R.string.dua_category_load_failed)
+        // The exception's own words are carried, but as detail the component hides behind a
+        // toggle — never as the readable message.
+        assertThat(vm.categoryState.value.error?.details).isEqualTo("no such table: duas")
+        // And it still reaches the crash report, where it belongs.
         assertThat(telemetry.exceptions.map { it.message })
             .contains("no such table: duas")
     }
@@ -151,7 +156,10 @@ class DuaViewModelErrorPathTest {
             // Otherwise the reader keeps paging through the previous dua while its state
             // says the requested one was not found.
             assertThat(vm.readerState.value.duas).isEmpty()
-            assertThat(vm.readerState.value.error).isEqualTo(R.string.dua_reader_not_found)
+            assertThat(vm.readerState.value.error?.message)
+                .isEqualTo(R.string.dua_reader_not_found)
+            // A dua that is not there is an answer, not a failure.
+            assertThat(vm.readerState.value.error?.kind).isEqualTo(NimazErrorKind.NOT_FOUND)
             assertThat(vm.readerState.value.isLoading).isFalse()
         }
 }

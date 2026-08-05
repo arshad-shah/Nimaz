@@ -1836,4 +1836,15 @@
     <string name="zakat_mark_paid_failed">Das konnte nicht als bezahlt markiert werden</string>
     <string name="zakat_delete_failed">Diese Berechnung konnte nicht gelöscht werden</string>
     <string name="zakat_history_load_failed">Deine früheren Berechnungen konnten nicht geladen werden</string>
+    <string name="sync_connection_failed">Die Verbindung zum anderen Gerät ist fehlgeschlagen</string>
+    <string name="sync_import_failed">Die empfangenen Daten konnten nicht importiert werden</string>
+    <string name="sync_export_failed">Deine Daten konnten nicht gesendet werden</string>
+    <string name="sync_failed_body">Beide Geräte müssen im selben Netzwerk bleiben, mit geöffneter App, bis die Übertragung abgeschlossen ist.</string>
+    <string name="qibla_no_location">Qibla muss wissen, wo du bist</string>
+    <string name="qibla_no_location_body">Lege in den Einstellungen einen Standort fest oder lass Nimaz ihn ermitteln – dann zeigt der Kompass.</string>
+    <string name="qibla_failed">Die Richtung konnte nicht bestimmt werden</string>
+    <string name="dua_collection_load_failed">Die Dua-Sammlungen konnten nicht geladen werden</string>
+    <string name="dua_category_load_failed">Diese Sammlung konnte nicht geladen werden</string>
+    <string name="dua_load_failed_body">Duas sind auf deinem Gerät gespeichert – ein erneuter Versuch hilft meistens.</string>
+    <string name="calendar_events_load_failed">Islamische Ereignisse konnten nicht geladen werden</string>
 </resources>

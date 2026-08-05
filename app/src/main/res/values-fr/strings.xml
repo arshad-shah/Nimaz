@@ -1871,4 +1871,15 @@
     <string name="zakat_mark_paid_failed">Impossible de marquer comme payé</string>
     <string name="zakat_delete_failed">Ce calcul n\'a pas pu être supprimé</string>
     <string name="zakat_history_load_failed">Vos calculs précédents n\'ont pas pu être chargés</string>
+    <string name="sync_connection_failed">La connexion à l\'autre appareil a échoué</string>
+    <string name="sync_import_failed">Les données reçues n\'ont pas pu être importées</string>
+    <string name="sync_export_failed">Vos données n\'ont pas pu être envoyées</string>
+    <string name="sync_failed_body">Les deux appareils doivent rester sur le même réseau, application ouverte, jusqu\'à la fin du transfert.</string>
+    <string name="qibla_no_location">La qibla a besoin de savoir où vous êtes</string>
+    <string name="qibla_no_location_body">Définissez un lieu dans les réglages, ou laissez Nimaz le détecter, et la boussole s\'orientera.</string>
+    <string name="qibla_failed">La direction n\'a pas pu être calculée</string>
+    <string name="dua_collection_load_failed">Les recueils de douas n\'ont pas pu être chargés</string>
+    <string name="dua_category_load_failed">Ce recueil n\'a pas pu être chargé</string>
+    <string name="dua_load_failed_body">Les douas sont stockées sur votre appareil : réessayer suffit généralement.</string>
+    <string name="calendar_events_load_failed">Les événements islamiques n\'ont pas pu être chargés</string>
 </resources>

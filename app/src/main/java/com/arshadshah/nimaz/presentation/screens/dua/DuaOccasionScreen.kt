@@ -26,6 +26,8 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.DuaOccasion
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorState
 import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
@@ -80,17 +82,17 @@ fun DuaOccasionScreen(
         when {
             state.isLoading -> NimazLoadingState(modifier = Modifier.padding(paddingValues))
 
-            errorRes != null -> Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = stringResource(errorRes),
-                    color = MaterialTheme.colorScheme.error
-                )
-            }
+            errorRes != null -> NimazErrorState(
+                title = stringResource(errorRes.message),
+                message = stringResource(R.string.dua_load_failed_body),
+                kind = errorRes.kind,
+                details = errorRes.details,
+                primaryAction = NimazErrorDefaults.retry(
+                    onRetry = { viewModel.onEvent(DuaEvent.LoadDuasByOccasion(occasion)) },
+                    label = stringResource(R.string.try_again),
+                ),
+                modifier = Modifier.padding(paddingValues),
+            )
 
             state.duas.isEmpty() -> Box(
                 modifier = Modifier

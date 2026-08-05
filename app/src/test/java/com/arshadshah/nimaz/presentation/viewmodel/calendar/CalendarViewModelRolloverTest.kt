@@ -94,7 +94,8 @@ class CalendarViewModelRolloverTest {
         assertThat(vm.calendarState.value.currentMonth).isNotNull()
         assertThat(vm.calendarState.value.currentMonth!!.days).hasSize(today.lengthOfMonth())
         // …and the failure is said out loud rather than swallowed into a blank screen.
-        assertThat(vm.calendarState.value.error).isEqualTo(R.string.error_generic)
+        assertThat(vm.calendarState.value.error?.message)
+            .isEqualTo(R.string.calendar_events_load_failed)
         assertThat(telemetry.errors.map { it.type }).contains("load_events")
     }
 
