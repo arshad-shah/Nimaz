@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.presentation.viewmodel
 
+import com.arshadshah.nimaz.core.monitoring.RecordingTelemetry
 import com.arshadshah.nimaz.domain.model.Dua
 import com.arshadshah.nimaz.domain.model.DuaCategory
 import com.arshadshah.nimaz.domain.model.DuaOccasion
@@ -86,7 +87,7 @@ class DuaViewModelLoadScopeTest {
     @After
     fun tearDown() = Dispatchers.resetMain()
 
-    private fun viewModel() = DuaViewModel(duaUseCases, settingsRepository)
+    private fun viewModel() = DuaViewModel(duaUseCases, settingsRepository, RecordingTelemetry())
 
     @Test
     fun `a previously opened category cannot overwrite the category on screen`() = runTest {

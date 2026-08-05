@@ -512,6 +512,27 @@ channels — the stack trace to Crashlytics, the frequency to analytics — and 
 only as the production binding and for callers with no injection point (`NimazApp`, `BootReceiver`,
 workers).
 
+#### A throwable's `message` is a diagnostic, never UI copy
+
+`_state.copy(error = e.message)` is the shortest thing to write and it puts SQLite's own words on
+the user's screen: `DuaCategoryScreen` rendered `state.error` directly, so a fault in the content
+database surfaced as `SQLiteException: no such table: duas` — in English, whatever the app's
+language.
+
+User-facing error text is a **string resource id** on the UI state, resolved by the screen:
+
+```kotlin
+data class XxxUiState(
+    val isLoading: Boolean = true,
+    @StringRes val error: Int? = null,
+)
+// screen: Text(stringResource(state.error ?: R.string.error_generic))
+```
+
+The throwable still goes to `telemetry.failure(...)`, which is the one place its wording earns
+its keep. An `error` field that no screen renders is worse than none — see the several this epic
+found written and never read — so add the field and the rendering together.
+
 ---
 
 ## 7. Navigation

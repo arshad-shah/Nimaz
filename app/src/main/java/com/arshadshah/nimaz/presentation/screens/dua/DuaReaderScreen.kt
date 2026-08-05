@@ -142,8 +142,10 @@ fun DuaReaderScreen(
                 }
 
                 duas.isEmpty() -> {
+                    // A load that failed says so; an id that resolved to nothing keeps the
+                    // "not found" wording. Both come from the ViewModel as a resource id.
                     Text(
-                        text = stringResource(R.string.dua_reader_not_found),
+                        text = stringResource(state.error ?: R.string.dua_reader_not_found),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.align(Alignment.Center)

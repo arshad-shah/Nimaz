@@ -155,8 +155,23 @@ fun DuasCollectionScreen(
             )
         }
     ) { paddingValues ->
+        val errorRes = state.error
         if (state.isLoading) {
             NimazLoadingState(modifier = Modifier.padding(paddingValues))
+        } else if (errorRes != null) {
+            // Before the collection load was guarded, a content-database fault killed the
+            // collector and left the spinner up for good. It now resolves to this.
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = stringResource(errorRes),
+                    color = MaterialTheme.colorScheme.error
+                )
+            }
         } else {
             LazyColumn(
                 modifier = Modifier
