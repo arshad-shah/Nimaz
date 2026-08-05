@@ -4,7 +4,9 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.core.monitoring.AppAnalytics
+import com.arshadshah.nimaz.core.monitoring.Telemetry
+import com.arshadshah.nimaz.core.monitoring.catchAndReport
+import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.domain.model.DuaBookmark
 import com.arshadshah.nimaz.domain.model.HadithBookmark
 import com.arshadshah.nimaz.domain.model.QuranBookmark
@@ -38,8 +40,24 @@ data class UnifiedBookmark(
     val categoryId: String? = null
 )
 
-enum class BookmarkType {
-    QURAN, HADITH, DUA
+enum class BookmarkType(val prefix: String) {
+    QURAN("quran_"),
+    HADITH("hadith_"),
+    DUA("dua_");
+
+    /** The unified id for a bookmark of this type. */
+    fun idFor(rawId: Any): String = "$prefix$rawId"
+
+    companion object {
+        /**
+         * The type a unified id belongs to, or null.
+         *
+         * The three prefixes used to be written out at nine separate call sites, split
+         * between construction and parsing — and a typo in one of them was a silent
+         * no-op rather than a compile error.
+         */
+        fun ofId(id: String): BookmarkType? = entries.firstOrNull { id.startsWith(it.prefix) }
+    }
 }
 
 enum class BookmarkSortOrder {
@@ -79,7 +97,9 @@ sealed interface BookmarksEvent {
 
     /** Set (or clear, with null) the note on any bookmark by its unified id. */
     data class EditNote(val id: String, val note: String?) : BookmarksEvent
-    data object RefreshAll : BookmarksEvent
+
+    data class SetSearchQuery(val query: String) : BookmarksEvent
+    data class SetSortOrder(val order: BookmarkSortOrder) : BookmarksEvent
     data object ClearAllBookmarks : BookmarksEvent
 }
 
@@ -88,8 +108,13 @@ class BookmarksViewModel @Inject constructor(
     private val quranUseCases: QuranUseCases,
     private val hadithUseCases: HadithUseCases,
     private val duaUseCases: DuaUseCases,
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
+    private val telemetry: Telemetry,
 ) : ViewModel() {
+
+    private companion object {
+        const val DOMAIN = "bookmarks"
+    }
 
     private val _bookmarksState = MutableStateFlow(BookmarksUiState())
     val bookmarksState: StateFlow<BookmarksUiState> = _bookmarksState.asStateFlow()
@@ -102,26 +127,42 @@ class BookmarksViewModel @Inject constructor(
     }
 
     fun onEvent(event: BookmarksEvent) {
+        // One exhaustive table: an analytics `when` with an `else -> {}` alongside the
+        // dispatch meant a new event shipped with no telemetry and no compiler warning.
         when (event) {
-            is BookmarksEvent.SetFilter -> AppAnalytics.logFeatureUsed("bookmarks", "set_filter")
-            is BookmarksEvent.DeleteBookmark -> AppAnalytics.logFeatureUsed("bookmarks", "delete")
-            BookmarksEvent.UndoDelete -> AppAnalytics.logFeatureUsed("bookmarks", "undo_delete")
-            is BookmarksEvent.EditNote -> AppAnalytics.logFeatureUsed("bookmarks", "update_note")
-            BookmarksEvent.ClearAllBookmarks -> AppAnalytics.logFeatureUsed(
-                "bookmarks",
-                "clear_all"
-            )
+            is BookmarksEvent.SetFilter -> {
+                telemetry.featureUsed(DOMAIN, "set_filter")
+                setFilter(event.type)
+            }
 
-            else -> {}
-        }
-        when (event) {
-            is BookmarksEvent.SetFilter -> setFilter(event.type)
-            is BookmarksEvent.DeleteBookmark -> deleteBookmark(event.id)
-            BookmarksEvent.UndoDelete -> undoDelete()
+            is BookmarksEvent.DeleteBookmark -> {
+                telemetry.featureUsed(DOMAIN, "delete")
+                deleteBookmark(event.id)
+            }
+
+            BookmarksEvent.UndoDelete -> {
+                telemetry.featureUsed(DOMAIN, "undo_delete")
+                undoDelete()
+            }
+
             BookmarksEvent.DismissUndo -> dismissUndo()
-            is BookmarksEvent.EditNote -> editNote(event.id, event.note)
-            BookmarksEvent.RefreshAll -> loadAllBookmarks()
-            BookmarksEvent.ClearAllBookmarks -> clearAllBookmarks()
+
+            is BookmarksEvent.EditNote -> {
+                telemetry.featureUsed(DOMAIN, "update_note")
+                editNote(event.id, event.note)
+            }
+
+            is BookmarksEvent.SetSearchQuery -> setSearchQuery(event.query)
+
+            is BookmarksEvent.SetSortOrder -> {
+                telemetry.settingChanged("bookmark_sort", event.order.name)
+                setSortOrder(event.order)
+            }
+
+            BookmarksEvent.ClearAllBookmarks -> {
+                telemetry.featureUsed(DOMAIN, "clear_all")
+                clearAllBookmarks()
+            }
         }
     }
 
@@ -133,7 +174,16 @@ class BookmarksViewModel @Inject constructor(
 
     private fun loadQuranBookmarks() {
         viewModelScope.launch {
-            quranUseCases.getBookmarks().collect { bookmarks ->
+            quranUseCases.getBookmarks()
+                .catchAndReport(telemetry, DOMAIN, "load_quran") { throwable ->
+                    // Enrichment runs a suspend query per row inside this collector, so a
+                    // content row missing after a database replacement used to kill the
+                    // stream and pin isLoading on for ever, silently.
+                    _bookmarksState.update {
+                        it.copy(isLoading = false, error = throwable.message)
+                    }
+                }
+                .collect { bookmarks ->
                 val mapped = bookmarks.map { bm ->
                     bm.toUnified()
                         .copy(arabicText = quranUseCases.getAyahById(bm.ayahId)?.textArabic)
@@ -160,7 +210,16 @@ class BookmarksViewModel @Inject constructor(
 
     private fun loadHadithBookmarks() {
         viewModelScope.launch {
-            hadithUseCases.getAllBookmarks().collect { bookmarks ->
+            hadithUseCases.getAllBookmarks()
+                .catchAndReport(telemetry, DOMAIN, "load_hadith") { throwable ->
+                    // Enrichment runs a suspend query per row inside this collector, so a
+                    // content row missing after a database replacement used to kill the
+                    // stream and pin isLoading on for ever, silently.
+                    _bookmarksState.update {
+                        it.copy(isLoading = false, error = throwable.message)
+                    }
+                }
+                .collect { bookmarks ->
                 val mapped = bookmarks.map { bm ->
                     bm.toUnified()
                         .copy(arabicText = hadithUseCases.getHadithById(bm.hadithId)?.textArabic)
@@ -187,7 +246,16 @@ class BookmarksViewModel @Inject constructor(
 
     private fun loadDuaBookmarks() {
         viewModelScope.launch {
-            duaUseCases.getAllBookmarks().collect { bookmarks ->
+            duaUseCases.getAllBookmarks()
+                .catchAndReport(telemetry, DOMAIN, "load_dua") { throwable ->
+                    // Enrichment runs a suspend query per row inside this collector, so a
+                    // content row missing after a database replacement used to kill the
+                    // stream and pin isLoading on for ever, silently.
+                    _bookmarksState.update {
+                        it.copy(isLoading = false, error = throwable.message)
+                    }
+                }
+                .collect { bookmarks ->
                 val mapped = bookmarks.map { bm ->
                     bm.toUnified().copy(arabicText = duaUseCases.getDuaById(bm.duaId)?.textArabic)
                 }
@@ -220,6 +288,36 @@ class BookmarksViewModel @Inject constructor(
                     type,
                     state.searchQuery,
                     state.sortOrder
+                )
+            )
+        }
+    }
+
+    private fun setSearchQuery(query: String) {
+        _bookmarksState.update { state ->
+            state.copy(
+                searchQuery = query,
+                filteredBookmarks = applyFilters(
+                    state.allBookmarks,
+                    state.selectedFilter,
+                    query,
+                    state.sortOrder
+                )
+            )
+        }
+        // Post-filter, length only — the query text never reaches analytics.
+        if (query.isNotBlank()) telemetry.search(DOMAIN, query.trim().length)
+    }
+
+    private fun setSortOrder(order: BookmarkSortOrder) {
+        _bookmarksState.update { state ->
+            state.copy(
+                sortOrder = order,
+                filteredBookmarks = applyFilters(
+                    state.allBookmarks,
+                    state.selectedFilter,
+                    state.searchQuery,
+                    order
                 )
             )
         }
@@ -259,67 +357,92 @@ class BookmarksViewModel @Inject constructor(
         return result
     }
 
-    // The re-insert action captured when a bookmark is deleted, so Undo can
-    // losslessly restore it (note/colour/favourite preserved).
-    private var pendingRestore: (suspend () -> Unit)? = null
+    /**
+     * Re-insert actions captured when bookmarks are deleted, newest last, so Undo can
+     * losslessly restore them (note/colour preserved).
+     *
+     * This was a single `var`: deleting a second bookmark before the snackbar timed
+     * out overwrote the first, making it unrecoverable — while the UI still showed an
+     * ordinary single-item undo. It is a stack now, so every delete stays undoable
+     * until the user dismisses.
+     */
+    private val pendingRestores = ArrayDeque<Pair<UnifiedBookmark, suspend () -> Unit>>()
 
     private fun deleteBookmark(id: String) {
         val state = _bookmarksState.value
         val unified = state.allBookmarks.find { it.id == id } ?: return
         when (unified.type) {
             BookmarkType.QURAN -> {
-                val original = state.quranBookmarks.find { "quran_${it.ayahId}" == id } ?: return
-                pendingRestore = { quranUseCases.insertBookmark(original) }
-                viewModelScope.launch { quranUseCases.deleteBookmark(original.ayahId) }
+                val original = state.quranBookmarks
+                    .find { BookmarkType.QURAN.idFor(it.ayahId) == id } ?: return
+                pendingRestores.addLast(unified to { quranUseCases.insertBookmark(original) })
+                launchSafely(telemetry, DOMAIN, "delete") {
+                    quranUseCases.deleteBookmark(original.ayahId)
+                }
             }
 
             BookmarkType.HADITH -> {
-                val original =
-                    state.hadithBookmarks.find { "hadith_${it.hadithId}" == id } ?: return
-                pendingRestore = { hadithUseCases.insertBookmark(original) }
-                viewModelScope.launch { hadithUseCases.deleteBookmark(original.hadithId) }
+                val original = state.hadithBookmarks
+                    .find { BookmarkType.HADITH.idFor(it.hadithId) == id } ?: return
+                pendingRestores.addLast(unified to { hadithUseCases.insertBookmark(original) })
+                launchSafely(telemetry, DOMAIN, "delete") {
+                    hadithUseCases.deleteBookmark(original.hadithId)
+                }
             }
 
             BookmarkType.DUA -> {
-                val original = state.duaBookmarks.find { "dua_${it.duaId}" == id } ?: return
-                pendingRestore = { duaUseCases.insertBookmark(original) }
-                viewModelScope.launch { duaUseCases.deleteBookmark(original.duaId) }
+                val original = state.duaBookmarks
+                    .find { BookmarkType.DUA.idFor(it.duaId) == id } ?: return
+                pendingRestores.addLast(unified to { duaUseCases.insertBookmark(original) })
+                launchSafely(telemetry, DOMAIN, "delete") {
+                    duaUseCases.deleteBookmark(original.duaId)
+                }
             }
         }
         _bookmarksState.update { it.copy(recentlyDeleted = unified) }
     }
 
     private fun undoDelete() {
-        val restore = pendingRestore ?: return
-        pendingRestore = null
-        viewModelScope.launch { restore() }
-        _bookmarksState.update { it.copy(recentlyDeleted = null) }
+        val (_, restore) = pendingRestores.removeLastOrNull() ?: return
+        launchSafely(telemetry, DOMAIN, "undo_delete") { restore() }
+        // Surface the next pending restore so a run of deletes can be undone one by one.
+        _bookmarksState.update { it.copy(recentlyDeleted = pendingRestores.lastOrNull()?.first) }
     }
 
     private fun dismissUndo() {
-        pendingRestore = null
+        pendingRestores.clear()
         _bookmarksState.update { it.copy(recentlyDeleted = null) }
     }
 
     private fun editNote(id: String, note: String?) {
         val state = _bookmarksState.value
         val trimmed = note?.trim()?.ifBlank { null }
-        viewModelScope.launch {
-            when {
-                id.startsWith("quran_") -> state.quranBookmarks.find { "quran_${it.ayahId}" == id }
+        launchSafely(telemetry, DOMAIN, "update_note") {
+            when (BookmarkType.ofId(id)) {
+                BookmarkType.QURAN -> state.quranBookmarks
+                    .find { BookmarkType.QURAN.idFor(it.ayahId) == id }
                     ?.let { quranUseCases.updateBookmark(it.copy(note = trimmed)) }
 
-                id.startsWith("hadith_") -> state.hadithBookmarks.find { "hadith_${it.hadithId}" == id }
+                BookmarkType.HADITH -> state.hadithBookmarks
+                    .find { BookmarkType.HADITH.idFor(it.hadithId) == id }
                     ?.let { hadithUseCases.updateBookmark(it.copy(note = trimmed)) }
 
-                id.startsWith("dua_") -> state.duaBookmarks.find { "dua_${it.duaId}" == id }
+                BookmarkType.DUA -> state.duaBookmarks
+                    .find { BookmarkType.DUA.idFor(it.duaId) == id }
                     ?.let { duaUseCases.updateBookmark(it.copy(note = trimmed)) }
+
+                null -> Unit
             }
         }
     }
 
     private fun clearAllBookmarks() {
-        viewModelScope.launch {
+        // Destructive and, by decision, not undoable — the confirmation dialog is the
+        // safety net. Pending restores are dropped so a stale snackbar cannot
+        // resurrect one bookmark out of a wipe the user confirmed.
+        pendingRestores.clear()
+        _bookmarksState.update { it.copy(recentlyDeleted = null) }
+        launchSafely(telemetry, DOMAIN, "clear_all") {
             _bookmarksState.value.quranBookmarks.forEach {
                 quranUseCases.deleteBookmark(it.ayahId)
             }
@@ -346,7 +469,7 @@ class BookmarksViewModel @Inject constructor(
 
     // Extension functions to convert to unified format
     private fun QuranBookmark.toUnified() = UnifiedBookmark(
-        id = "quran_$ayahId",
+        id = BookmarkType.QURAN.idFor(ayahId),
         type = BookmarkType.QURAN,
         title = context.getString(R.string.bookmark_surah_ayah_format, surahNumber, ayahNumber),
         subtitle = context.getString(R.string.quran),
@@ -359,7 +482,7 @@ class BookmarksViewModel @Inject constructor(
     )
 
     private fun HadithBookmark.toUnified() = UnifiedBookmark(
-        id = "hadith_$hadithId",
+        id = BookmarkType.HADITH.idFor(hadithId),
         type = BookmarkType.HADITH,
         title = context.getString(R.string.bookmark_hadith_format, hadithNumber),
         subtitle = bookId,
@@ -372,7 +495,7 @@ class BookmarksViewModel @Inject constructor(
     )
 
     private fun DuaBookmark.toUnified() = UnifiedBookmark(
-        id = "dua_$duaId",
+        id = BookmarkType.DUA.idFor(duaId),
         type = BookmarkType.DUA,
         title = context.getString(R.string.dua_label),
         subtitle = categoryId,
