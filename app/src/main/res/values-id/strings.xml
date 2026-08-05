@@ -1769,4 +1769,5 @@
     <string name="tafseer_note_hint">Renungan Anda tentang bagian ini</string>
     <string name="tafseer_note_edit">Ubah</string>
     <string name="quran_search_surahs">Cari surah</string>
+    <string name="zakat_currency">Mata Uang</string>
 </resources>

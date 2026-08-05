@@ -24,7 +24,32 @@ object WorshipReminderContent {
         strings.get(arabicRes(type))
 
     fun body(strings: StringProvider, type: WorshipReminderType, subKey: String? = null): String =
-        strings.get(bodyRes(type))
+        when (type) {
+            // Mirrors the Context overload below exactly. The first cut of this dropped the
+            // subKey branch and always returned bodyRes(type), which silently gave every
+            // Arafah/Ashura reminder the Arafah body.
+            WorshipReminderType.ARAFAH_ASHURA_FAST -> strings.get(
+                if (subKey == "ashura") R.string.worship_ashura_body
+                else R.string.worship_arafah_body
+            )
+
+            else -> strings.get(bodyRes(type))
+        }
+
+    fun title(strings: StringProvider, type: WorshipReminderType, subKey: String? = null): String =
+        when (type) {
+            WorshipReminderType.MONDAY_THURSDAY_FAST -> strings.get(
+                if (subKey == "thursday") R.string.worship_mon_thu_title_thursday
+                else R.string.worship_mon_thu_title_monday
+            )
+
+            WorshipReminderType.ARAFAH_ASHURA_FAST -> strings.get(
+                if (subKey == "ashura") R.string.worship_ashura_title
+                else R.string.worship_arafah_title
+            )
+
+            else -> strings.get(titleRes(type))
+        }
 
 
     /** Short display name shown as the card eyebrow and used in generic copy. */

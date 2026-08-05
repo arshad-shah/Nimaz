@@ -1806,4 +1806,5 @@
     <string name="tafseer_note_hint">Bu bölüm hakkındaki düşünceniz</string>
     <string name="tafseer_note_edit">Düzenle</string>
     <string name="quran_search_surahs">Sure ara</string>
+    <string name="zakat_currency">Para Birimi</string>
 </resources>
