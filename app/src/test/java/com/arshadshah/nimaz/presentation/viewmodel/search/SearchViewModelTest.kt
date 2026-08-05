@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.presentation.viewmodel.search
 
+import com.arshadshah.nimaz.core.monitoring.RecordingTelemetry
 import com.arshadshah.nimaz.domain.model.LibrarySearchResults
 import com.arshadshah.nimaz.domain.usecase.SearchLibraryUseCase
 import com.google.common.truth.Truth.assertThat
@@ -34,7 +35,7 @@ class SearchViewModelTest {
     @After
     fun tearDown() = Dispatchers.resetMain()
 
-    private fun viewModel() = SearchViewModel(searchLibrary)
+    private fun viewModel() = SearchViewModel(searchLibrary, RecordingTelemetry())
 
     @Test
     fun `typing a query runs the search without pressing enter`() = runTest {

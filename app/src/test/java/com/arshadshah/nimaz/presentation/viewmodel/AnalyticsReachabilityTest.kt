@@ -59,13 +59,8 @@ class AnalyticsReachabilityTest {
             // `is XxxEvent.Name ->` or `XxxEvent.Name ->`, and whether its branch logs.
             BRANCH.findAll(onEvent).forEach { match ->
                 val event = match.groupValues[1]
-                val branch = onEvent.substring(
-                    match.range.last,
-                    minOf(onEvent.length, match.range.last + BRANCH_WINDOW),
-                )
-                val logs = LOGGING.containsMatchIn(branch.substringBefore("\n            is ")
-                    .substringBefore("\n            Xxx"))
-                if (!logs) return@forEach
+                val branch = branchBody(onEvent, match.range.last)
+                if (!LOGGING.containsMatchIn(branch)) return@forEach
                 if (event in accepted) return@forEach
                 if (!ui.contains(event)) unreachable += "$event  (${file.name})"
             }
@@ -74,9 +69,34 @@ class AnalyticsReachabilityTest {
         assertThat(unreachable).isEmpty()
     }
 
+    /**
+     * One branch's body: from its `->` to the start of the next branch, or the window's end.
+     *
+     * This used to be a flat 220-character window cut only on `"\n            is "`, which
+     * attributed a **neighbour's** logging to a branch that logged nothing whenever the next
+     * branch was `Xxx.Name ->` rather than `is Xxx.Name ->`. That produced false positives the
+     * moment an adjacent branch gained a `telemetry` call — `ZakatEvent.SetCurrency`, whose
+     * body is a `persist { … }` and logs no usage at all, was reported as an unreachable
+     * analytics branch because `ClearAll` two lines below it had just been instrumented.
+     *
+     * Ending at the next branch of **either** shape is strictly more precise: nothing that
+     * genuinely logs stops being seen, and a branch is no longer judged by its neighbours.
+     */
+    private fun branchBody(onEvent: String, arrowEnd: Int): String {
+        val window = onEvent.substring(
+            arrowEnd,
+            minOf(onEvent.length, arrowEnd + BRANCH_WINDOW),
+        )
+        val next = NEXT_BRANCH.find(window, startIndex = 1)?.range?.first ?: window.length
+        return window.substring(0, next)
+    }
+
     private companion object {
         val BRANCH = Regex("""(?:is\s+)?(\w+Event\.\w+)\s*->""")
-        val LOGGING = Regex("""telemetry\.(featureUsed|search|settingChanged|prayerTracked|fastTracked)|AppAnalytics\.log""")
+
+        /** The start of the following branch, at `when` indentation, either shape. */
+        val NEXT_BRANCH = Regex("""\n {12}(?:is\s+)?\w+Event\.\w+""")
+        val LOGGING = Regex("""telemetry\.(featureUsed|search|settingChanged|prayerTracked|fastTracked|aiAnswered)|AppAnalytics\.log""")
         const val BRANCH_WINDOW = 220
     }
 }

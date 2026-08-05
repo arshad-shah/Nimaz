@@ -319,6 +319,27 @@ object AppAnalytics {
     }
 
     /**
+     * Logged when "Ask with Proof" returns an answer.
+     *
+     * Two numbers that `logFeatureUsed` had nowhere to put, and that are the feature's
+     * health rather than its usage. **[proofCount]** is the silent-degradation signal: an
+     * answer with no citations resolved locally still renders, so a drift in the Worker's
+     * reference format shows up as proofs trending to zero and in no other way.
+     * **[durationMs]** is the cost signal `docs/ai-ask-with-proof.md` asks for — one Worker
+     * call per question, so latency is what a bill looks like from the client.
+     *
+     * The question itself is never recorded, here or anywhere.
+     */
+    fun logAiAnswered(proofCount: Int, durationMs: Long, confidence: String) {
+        logEvent(
+            Event.AI_ANSWERED,
+            Param.PROOF_COUNT to proofCount,
+            Param.DURATION_MS to durationMs,
+            Param.CONFIDENCE to confidence,
+        )
+    }
+
+    /**
      * Logged when a search runs. The raw query is deliberately not recorded — only
      * the active filter and the query length — to keep user input out of analytics.
      */
@@ -431,6 +452,7 @@ object AppAnalytics {
         const val FAST_TRACKED = "fast_tracked"
         const val SETTING_CHANGED = "setting_changed"
         const val SEARCH = "search_performed"
+        const val AI_ANSWERED = "ai_answered"
     }
 
     /** Custom parameter names (Firebase limit: 40 chars). */
@@ -472,6 +494,8 @@ object AppAnalytics {
         const val VALUE = "value"
         const val FILTER = "filter"
         const val QUERY_LENGTH = "query_length"
+        const val PROOF_COUNT = "proof_count"
+        const val CONFIDENCE = "confidence"
     }
 
     /**

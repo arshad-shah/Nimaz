@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.presentation.viewmodel.content
 
+import com.arshadshah.nimaz.core.monitoring.RecordingTelemetry
 import com.arshadshah.nimaz.data.audio.QaidaAudioManager
 import com.arshadshah.nimaz.data.audio.QaidaAudioState
 import com.arshadshah.nimaz.domain.model.QaidaCell
@@ -92,7 +93,7 @@ class QaidaProgressTest {
     fun tearDown() = Dispatchers.resetMain()
 
     private fun reader(): QaidaReaderViewModel {
-        val vm = QaidaReaderViewModel(useCases, audioManager)
+        val vm = QaidaReaderViewModel(useCases, audioManager, RecordingTelemetry())
         vm.onEvent(QaidaReaderEvent.SelectLesson(1))
         dispatcher.scheduler.advanceUntilIdle()
         return vm

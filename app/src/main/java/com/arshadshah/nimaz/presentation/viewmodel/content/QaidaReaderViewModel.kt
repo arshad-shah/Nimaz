@@ -5,6 +5,7 @@ package com.arshadshah.nimaz.presentation.viewmodel.content
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
+import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.data.audio.QaidaAudioManager
 import com.arshadshah.nimaz.data.audio.QaidaAudioState
 import com.arshadshah.nimaz.domain.model.LessonStatus
@@ -42,7 +43,8 @@ import javax.inject.Inject
 @HiltViewModel
 class QaidaReaderViewModel @Inject constructor(
     private val qaidaUseCases: QaidaUseCases,
-    private val audioManager: QaidaAudioManager
+    private val audioManager: QaidaAudioManager,
+    private val telemetry: Telemetry,
 ) : ViewModel() {
 
     private val sharing = SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS)
@@ -125,32 +127,39 @@ class QaidaReaderViewModel @Inject constructor(
     fun onEvent(event: QaidaReaderEvent) {
         when (event) {
             is QaidaReaderEvent.SelectLesson -> {
-                AppAnalytics.logFeatureUsed(
-                    AppAnalytics.Feature.QAIDA,
-                    "select_lesson"
-                )
+                telemetry.featureUsed(AppAnalytics.Feature.QAIDA, "select_lesson")
                 selectLesson(event.lessonId)
             }
             is QaidaReaderEvent.CellTapped -> {
-                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.QAIDA, "play_cell")
+                telemetry.featureUsed(AppAnalytics.Feature.QAIDA, "play_cell")
                 onCellTapped(event.cell)
             }
             is QaidaReaderEvent.PlayLine -> {
-                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.QAIDA, "play_line")
+                telemetry.featureUsed(AppAnalytics.Feature.QAIDA, "play_line")
                 playLine(event.lineId)
             }
             is QaidaReaderEvent.PlayLetter -> {
-                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.QAIDA, "play_letter")
+                telemetry.featureUsed(AppAnalytics.Feature.QAIDA, "play_letter")
                 playLetter(event.letter)
             }
-            QaidaReaderEvent.NextLesson -> nextLesson()
-            QaidaReaderEvent.PreviousLesson -> previousLesson()
+            // Lesson advancement is the core progression signal of the whole feature and was
+            // logged nowhere, while a single cell tap was. Both directions are recorded: a
+            // learner going backwards is repeating a lesson, which is the shape that says the
+            // gating is too tight.
+            QaidaReaderEvent.NextLesson -> {
+                telemetry.featureUsed(AppAnalytics.Feature.QAIDA, "next_lesson")
+                nextLesson()
+            }
+            QaidaReaderEvent.PreviousLesson -> {
+                telemetry.featureUsed(AppAnalytics.Feature.QAIDA, "previous_lesson")
+                previousLesson()
+            }
             QaidaReaderEvent.Resume -> {
-                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.QAIDA, "resume")
+                telemetry.featureUsed(AppAnalytics.Feature.QAIDA, "resume")
                 resume()
             }
             QaidaReaderEvent.ResetJourney -> {
-                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.QAIDA, "reset_journey")
+                telemetry.featureUsed(AppAnalytics.Feature.QAIDA, "reset_journey")
                 resetJourney()
             }
         }

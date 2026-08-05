@@ -31,6 +31,15 @@ class RecordingTelemetry : Telemetry {
     val searches: List<TelemetryCall.Search>
         get() = calls.filterIsInstance<TelemetryCall.Search>()
 
+    val prayersTracked: List<TelemetryCall.PrayerTracked>
+        get() = calls.filterIsInstance<TelemetryCall.PrayerTracked>()
+
+    val customKeys: List<TelemetryCall.CustomKey>
+        get() = calls.filterIsInstance<TelemetryCall.CustomKey>()
+
+    val aiAnswers: List<TelemetryCall.AiAnswered>
+        get() = calls.filterIsInstance<TelemetryCall.AiAnswered>()
+
     fun clear() = calls.clear()
 
     override fun featureUsed(feature: String, action: String?) {
@@ -47,6 +56,10 @@ class RecordingTelemetry : Telemetry {
 
     override fun search(filter: String, queryLength: Int) {
         calls += TelemetryCall.Search(filter, queryLength)
+    }
+
+    override fun aiAnswered(proofCount: Int, durationMs: Long, confidence: String) {
+        calls += TelemetryCall.AiAnswered(proofCount, durationMs, confidence)
     }
 
     override fun prayerTracked(prayer: String, status: String, isJamaah: Boolean) {
@@ -83,6 +96,12 @@ sealed interface TelemetryCall {
     ) : TelemetryCall
 
     data class FastTracked(val action: String, val fastType: String?) : TelemetryCall
+    data class AiAnswered(
+        val proofCount: Int,
+        val durationMs: Long,
+        val confidence: String,
+    ) : TelemetryCall
+
     data class Exception(val throwable: Throwable) : TelemetryCall
     data class Breadcrumb(val message: String) : TelemetryCall
     data class CustomKey(val key: String, val value: String) : TelemetryCall

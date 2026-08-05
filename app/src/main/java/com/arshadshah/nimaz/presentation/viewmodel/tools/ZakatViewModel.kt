@@ -88,7 +88,13 @@ class ZakatViewModel @Inject constructor(
             is ZakatEvent.UpdateLoans -> updateLiability { it.copy(loans = event.amount) }
             is ZakatEvent.UpdateBillsDue -> updateLiability { it.copy(billsDue = event.amount) }
             is ZakatEvent.UpdateOtherLiabilities -> updateLiability { it.copy(otherLiabilities = event.amount) }
+            // The amount-entry events above are deliberately **not** logged. #359 asks for
+            // "every amount entry"; each is dispatched from a text field on every character,
+            // so instrumenting them literally would emit a stream of events per figure typed
+            // — the firehose §4 of the same issue objects to. The once-per-filled-form signal
+            // from `calculate()` is what says a calculation happened; these say a digit did.
             is ZakatEvent.SetNisabType -> {
+                telemetry.settingChanged("zakat_nisab_type", event.nisabType.name)
                 _calculatorState.update { it.copy(nisabType = event.nisabType) }
                 recalculate()
             }
@@ -107,17 +113,15 @@ class ZakatViewModel @Inject constructor(
                 settingsRepository.setZakatCurrency(event.currency)
             }
 
-            // No producer: the screen recalculates through `recalculate()` on every amount
-            // entry, so this branch never runs. Its analytics used to live here, which is why
-            // the dashboard read "nobody calculates zakat" — false, and worse than silence.
-            // The signal now fires from `calculate()`, once per filled-in form.
-            ZakatEvent.Calculate -> calculate()
-
             ZakatEvent.ClearAll -> {
+                telemetry.featureUsed(DOMAIN, "clear_all")
                 hasLoggedCalculation = false
                 clearAll()
             }
-            ZakatEvent.ToggleBreakdown -> _calculatorState.update { it.copy(showBreakdown = !it.showBreakdown) }
+            ZakatEvent.ToggleBreakdown -> {
+                telemetry.featureUsed(DOMAIN, "toggle_breakdown")
+                _calculatorState.update { it.copy(showBreakdown = !it.showBreakdown) }
+            }
             ZakatEvent.SaveCalculation -> {
                 telemetry.featureUsed(DOMAIN, "save")
                 saveCalculation()
@@ -128,7 +132,10 @@ class ZakatViewModel @Inject constructor(
                 markAsPaid(event.entryId)
             }
 
-            is ZakatEvent.DeleteCalculation -> deleteCalculation(event.entryId)
+            is ZakatEvent.DeleteCalculation -> {
+                telemetry.featureUsed(DOMAIN, "delete_calculation")
+                deleteCalculation(event.entryId)
+            }
             ZakatEvent.LoadHistory -> loadHistory()
         }
     }

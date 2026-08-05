@@ -3,6 +3,7 @@ package com.arshadshah.nimaz.presentation.viewmodel.prayer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
+import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.core.util.HijriDateCalculator
 import com.arshadshah.nimaz.core.util.PrayerTimeCalculator
 import com.arshadshah.nimaz.domain.model.AsrCalculation
@@ -27,7 +28,8 @@ import com.arshadshah.nimaz.domain.model.DayPrayerTimes
 @HiltViewModel
 class MonthlyPrayerTimesViewModel @Inject constructor(
     private val prayerTimeCalculator: PrayerTimeCalculator,
-    private val settingsRepository: SettingsRepository
+    private val settingsRepository: SettingsRepository,
+    private val telemetry: Telemetry,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(MonthlyPrayerTimesUiState())
@@ -50,18 +52,19 @@ class MonthlyPrayerTimesViewModel @Inject constructor(
     fun onEvent(event: MonthlyPrayerTimesEvent) {
         when (event) {
             MonthlyPrayerTimesEvent.NextMonth -> {
-                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.PRAYER_TIMES, "next_month")
+                telemetry.featureUsed(AppAnalytics.Feature.PRAYER_TIMES, "next_month")
                 _state.update { it.copy(currentMonth = it.currentMonth.plusMonths(1)) }
                 calculateMonth()
             }
 
             MonthlyPrayerTimesEvent.PreviousMonth -> {
-                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.PRAYER_TIMES, "previous_month")
+                telemetry.featureUsed(AppAnalytics.Feature.PRAYER_TIMES, "previous_month")
                 _state.update { it.copy(currentMonth = it.currentMonth.minusMonths(1)) }
                 calculateMonth()
             }
 
             is MonthlyPrayerTimesEvent.ToggleDayExpanded -> {
+                telemetry.featureUsed(AppAnalytics.Feature.PRAYER_TIMES, "toggle_day_expanded")
                 _state.update {
                     it.copy(
                         expandedDay = if (it.expandedDay == event.date) null else event.date

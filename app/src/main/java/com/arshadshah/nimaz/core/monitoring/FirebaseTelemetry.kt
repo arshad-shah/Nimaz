@@ -24,6 +24,9 @@ class FirebaseTelemetry @Inject constructor() : Telemetry {
     override fun search(filter: String, queryLength: Int) =
         AppAnalytics.logSearch(filter, queryLength)
 
+    override fun aiAnswered(proofCount: Int, durationMs: Long, confidence: String) =
+        AppAnalytics.logAiAnswered(proofCount, durationMs, confidence)
+
     override fun prayerTracked(prayer: String, status: String, isJamaah: Boolean) =
         AppAnalytics.logPrayerTracked(prayer, status, isJamaah)
 

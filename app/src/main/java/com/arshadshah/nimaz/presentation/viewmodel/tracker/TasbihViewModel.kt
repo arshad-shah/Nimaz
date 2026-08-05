@@ -121,27 +121,38 @@ class TasbihViewModel @Inject constructor(
 
     fun onEvent(event: TasbihEvent) {
         when (event) {
-            is TasbihEvent.SelectPreset -> selectPreset(event.preset)
+            is TasbihEvent.SelectPreset -> {
+                telemetry.featureUsed(DOMAIN, "select_preset")
+                selectPreset(event.preset)
+            }
             TasbihEvent.ClearPreset -> clearPreset()
             is TasbihEvent.SetTargetCount -> setTargetCount(event.count)
             is TasbihEvent.CreateCustomPreset -> {
-                AppAnalytics.logFeatureUsed(
-                    AppAnalytics.Feature.TASBIH,
-                    "preset_created"
-                )
+                telemetry.featureUsed(DOMAIN, "preset_created")
                 createCustomPreset(event.preset)
             }
-            is TasbihEvent.UpdateCustomPreset -> updateCustomPreset(event.preset)
+            is TasbihEvent.UpdateCustomPreset -> {
+                telemetry.featureUsed(DOMAIN, "preset_updated")
+                updateCustomPreset(event.preset)
+            }
             is TasbihEvent.DeleteCustomPreset -> {
-                AppAnalytics.logFeatureUsed(
-                    AppAnalytics.Feature.TASBIH,
-                    "preset_deleted"
-                )
+                telemetry.featureUsed(DOMAIN, "preset_deleted")
                 deleteCustomPreset(event.presetId)
             }
-            is TasbihEvent.ToggleVibration -> _counterState.update { it.copy(vibrationEnabled = event.enabled) }
-            is TasbihEvent.ToggleSound -> _counterState.update { it.copy(soundEnabled = event.enabled) }
+            is TasbihEvent.ToggleVibration -> {
+                telemetry.settingChanged("tasbih_vibration", event.enabled.toString())
+                _counterState.update { it.copy(vibrationEnabled = event.enabled) }
+            }
+            is TasbihEvent.ToggleSound -> {
+                telemetry.settingChanged("tasbih_sound", event.enabled.toString())
+                _counterState.update { it.copy(soundEnabled = event.enabled) }
+            }
+            // The counter style, bead design and handedness all write DataStore, so they are
+            // settings and belong on the settings dashboard rather than in the feature's usage
+            // counter — the bead design in particular is the one place the app asks the user
+            // for a purely aesthetic preference, and nothing recorded which one they picked.
             is TasbihEvent.SetCounterStyle -> {
+                telemetry.settingChanged("tasbih_counter_style", event.style.name)
                 _counterState.update { it.copy(counterStyle = event.style) }
                 viewModelScope.launch {
                     preferences.setTasbihBeadMode(event.style == TasbihCounterStyle.BEADS)
@@ -149,19 +160,24 @@ class TasbihViewModel @Inject constructor(
             }
 
             is TasbihEvent.SetBeadDesign -> {
+                telemetry.settingChanged("tasbih_bead_design", event.key)
                 _counterState.update { it.copy(beadDesignKey = event.key) }
                 viewModelScope.launch { preferences.setTasbihBeadDesign(event.key) }
             }
 
-            is TasbihEvent.ToggleFavorite -> toggleFavorite(event.presetId)
+            is TasbihEvent.ToggleFavorite -> {
+                telemetry.featureUsed(DOMAIN, AppAnalytics.Action.TOGGLE_FAVORITE)
+                toggleFavorite(event.presetId)
+            }
             is TasbihEvent.SetLeftHanded -> {
+                telemetry.settingChanged("tasbih_left_handed", event.enabled.toString())
                 _counterState.update { it.copy(leftHanded = event.enabled) }
                 viewModelScope.launch { preferences.setTasbihLeftHanded(event.enabled) }
             }
 
             TasbihEvent.Increment -> increment()
             TasbihEvent.Reset -> {
-                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.TASBIH, "reset")
+                telemetry.featureUsed(DOMAIN, "reset")
                 reset()
             }
             TasbihEvent.LoadPresets -> loadPresets()
@@ -345,6 +361,12 @@ class TasbihViewModel @Inject constructor(
 
         val previousLaps = _counterState.value.laps
 
+        // NOT logged per tap. #359 asks for `Increment` — "the single most-used action in the
+        // feature" — to be instrumented, and instrumenting it literally would emit one event
+        // per finger tap on a counter people run to 100 and beyond: the same firehose §4 of
+        // that issue objects to on search keystrokes, at a worse rate. The unit that answers
+        // "is the tasbih used" is a **completed lap**, logged below, and a started session,
+        // logged in `startSessionAndIncrement`. Both are bounded by real activity.
         _counterState.update { state ->
             var newCount = state.count + 1
             var newLaps = state.laps
@@ -369,6 +391,7 @@ class TasbihViewModel @Inject constructor(
 
                 // Refresh stats when a lap completes to update sessions count
                 if (_counterState.value.laps > previousLaps) {
+                    telemetry.featureUsed(DOMAIN, "lap_completed")
                     loadStats()
                 }
             }
@@ -378,6 +401,7 @@ class TasbihViewModel @Inject constructor(
     private fun startSessionAndIncrement() {
         val preset = _counterState.value.selectedPreset
 
+        telemetry.featureUsed(DOMAIN, "session_started")
         sessionStartTime = System.currentTimeMillis()
 
         viewModelScope.launch {

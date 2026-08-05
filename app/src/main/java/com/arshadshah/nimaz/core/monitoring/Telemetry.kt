@@ -39,6 +39,13 @@ interface Telemetry {
      */
     fun search(filter: String, queryLength: Int)
 
+    /**
+     * "Ask with Proof" answered a question: how many citations resolved locally into proof
+     * cards, how long the round trip took, and the answer's confidence. The question text is
+     * never recorded.
+     */
+    fun aiAnswered(proofCount: Int, durationMs: Long, confidence: String)
+
     /** A prayer's tracker status changed — the app's core engagement signal. */
     fun prayerTracked(prayer: String, status: String, isJamaah: Boolean = false)
 

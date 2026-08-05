@@ -46,8 +46,6 @@ sealed interface QuranEvent {
     data object StopAudio : QuranEvent
     data class PlaySurahFromInfo(val surahNumber: Int) : QuranEvent
     data class LoadSurahInfo(val surahNumber: Int) : QuranEvent
-    data class MarkAyahsReadForKhatam(val ayahIds: List<Int>) : QuranEvent
-    data class UnmarkAyahReadForKhatam(val ayahId: Int) : QuranEvent
     data class ToggleKhatamAyah(val ayahId: Int) : QuranEvent
     data class MarkSurahAsReadForKhatam(val surahNumber: Int) : QuranEvent
 

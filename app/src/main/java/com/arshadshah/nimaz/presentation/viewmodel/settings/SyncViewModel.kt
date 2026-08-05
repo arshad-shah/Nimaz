@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import android.util.Log
 import com.arshadshah.nimaz.BuildConfig
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
-import com.arshadshah.nimaz.core.monitoring.CrashReporter
+import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.data.sync.CancelReason
 import com.arshadshah.nimaz.data.sync.ConnectionState
 import com.arshadshah.nimaz.data.sync.NearbyConnectionsManager
@@ -46,7 +46,8 @@ data class ActivityLogEntry(val label: String, val timestamp: Long = System.curr
 class SyncViewModel @Inject constructor(
     private val connectionsManager: NearbyConnectionsManager,
     private val exporter: SyncDataExporter,
-    private val importer: SyncDataImporter
+    private val importer: SyncDataImporter,
+    private val telemetry: Telemetry,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SyncUiState())
@@ -101,6 +102,7 @@ class SyncViewModel @Inject constructor(
                     is ConnectionState.Completed -> {
                         debugLog("Completed state received (mode=${_uiState.value.mode})")
                         if (_uiState.value.mode == SyncMode.SEND) {
+                            telemetry.featureUsed(AppAnalytics.Feature.SYNC, "send_completed")
                             addLogEntry("Data sent — waiting for partner to import...")
                             _uiState.update {
                                 it.copy(
@@ -112,6 +114,10 @@ class SyncViewModel @Inject constructor(
                     }
 
                     is ConnectionState.Error -> {
+                        // Sync is the highest-risk feature in the app and only its two
+                        // exception paths were instrumented; this branch — a transport error
+                        // with no throwable to record — went to `Log.e` and nowhere else.
+                        telemetry.error(AppAnalytics.Feature.SYNC, "connection", state.message)
                         debugLog("Error state: ${state.message}")
                         addLogEntry("Error: ${state.message}")
                         _uiState.update { it.copy(error = state.message) }
@@ -123,6 +129,10 @@ class SyncViewModel @Inject constructor(
                             CancelReason.BY_PARTNER -> "Cancelled by partner"
                             CancelReason.CONNECTION_LOST -> "Connection lost"
                         }
+                        // Which of the three ended it is the whole question: a sync people
+                        // abandon and a sync the transport drops need different fixes, and
+                        // both looked identical from outside.
+                        telemetry.featureUsed(AppAnalytics.Feature.SYNC, "cancelled_${state.reason.name.lowercase()}")
                         debugLog("Cancelled: $reason")
                         addLogEntry(reason)
                     }
@@ -208,17 +218,17 @@ class SyncViewModel @Inject constructor(
     fun onEvent(event: SyncEvent) {
         when (event) {
             is SyncEvent.StartSend -> {
-                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.SYNC, "start_send")
+                telemetry.featureUsed(AppAnalytics.Feature.SYNC, "start_send")
                 startSend()
             }
             is SyncEvent.StartReceive -> {
-                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.SYNC, "start_receive")
+                telemetry.featureUsed(AppAnalytics.Feature.SYNC, "start_receive")
                 startReceive()
             }
             is SyncEvent.AcceptConnection -> acceptConnection(event.endpointId)
             is SyncEvent.RejectConnection -> rejectConnection(event.endpointId)
             is SyncEvent.Cancel -> {
-                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.SYNC, "cancel")
+                telemetry.featureUsed(AppAnalytics.Feature.SYNC, "cancel")
                 cancel()
             }
         }
@@ -273,6 +283,7 @@ class SyncViewModel @Inject constructor(
                     importWithProgress(payload)
 
                     debugLog("Import complete! Setting Completed state.")
+                    telemetry.featureUsed(AppAnalytics.Feature.SYNC, "receive_completed")
                     _uiState.update {
                         it.copy(
                             connectionState = ConnectionState.Completed(bytes.size.toLong()),
@@ -282,8 +293,7 @@ class SyncViewModel @Inject constructor(
                         )
                     }
                 } catch (e: Exception) {
-                    CrashReporter.recordException(e)
-                    AppAnalytics.logError(AppAnalytics.Feature.SYNC, "import", e.message)
+                    telemetry.failure(AppAnalytics.Feature.SYNC, "import", e)
                     debugLog("Import failed: ${e.message}")
                     addLogEntry("Import failed: ${e.message}")
                     _uiState.update { it.copy(error = "Import failed: ${e.message}") }
@@ -333,8 +343,7 @@ class SyncViewModel @Inject constructor(
                 connectionsManager.sendData(jsonBytes)
                 debugLog("sendData returned — transfer queued")
             } catch (e: Exception) {
-                CrashReporter.recordException(e)
-                AppAnalytics.logError(AppAnalytics.Feature.SYNC, "export", e.message)
+                telemetry.failure(AppAnalytics.Feature.SYNC, "export", e)
                 debugLog("Export/send failed: ${e.message}")
                 addLogEntry("Export failed: ${e.message}")
                 _uiState.update { it.copy(error = "Export failed: ${e.message}") }

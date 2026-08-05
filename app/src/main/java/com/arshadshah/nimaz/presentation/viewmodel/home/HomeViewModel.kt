@@ -13,7 +13,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
-import com.arshadshah.nimaz.core.monitoring.CrashReporter
+import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.core.util.HijriDateCalculator
 import com.arshadshah.nimaz.core.util.MILLIS_PER_DAY
 import com.arshadshah.nimaz.core.util.NextWorshipResolver
@@ -80,6 +80,7 @@ import com.arshadshah.nimaz.presentation.model.withClockState
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
+    private val telemetry: Telemetry,
     private val prayerTimeCalculator: PrayerTimeCalculator,
     private val prayerUseCases: PrayerUseCases,
     private val fastingUseCases: FastingUseCases,
@@ -255,8 +256,7 @@ class HomeViewModel @Inject constructor(
                     )
                 }
             } catch (e: Exception) {
-                CrashReporter.recordException(e)
-                AppAnalytics.logError(AppAnalytics.Feature.HOME, "load_daily_hadith", e.message)
+                telemetry.failure(AppAnalytics.Feature.HOME, "load_daily_hadith", e)
                 // No hadith data available
             }
         }
@@ -302,8 +302,7 @@ class HomeViewModel @Inject constructor(
                     )
                 }
             } catch (e: Exception) {
-                CrashReporter.recordException(e)
-                AppAnalytics.logError(AppAnalytics.Feature.HOME, "load_daily_dua", e.message)
+                telemetry.failure(AppAnalytics.Feature.HOME, "load_daily_dua", e)
                 // No dua data available
             }
         }
@@ -373,8 +372,6 @@ class HomeViewModel @Inject constructor(
         // Sunrise is not a prayer - don't allow toggling
         if (prayerType == PrayerType.SUNRISE) return
 
-        AppAnalytics.logFeatureUsed(AppAnalytics.Feature.HOME, "toggle_prayer_status")
-
         viewModelScope.launch {
             val prayerName = PrayerName.valueOf(prayerType.name)
             val todayEpoch = todayProvider.today().toUtcMidnightMillis()
@@ -385,6 +382,12 @@ class HomeViewModel @Inject constructor(
                 if (newStatus == PrayerStatus.PRAYED) System.currentTimeMillis() else null
 
             prayerUseCases.updatePrayerStatus(todayEpoch, prayerName, newStatus, prayedAt, false)
+            // `prayerTracked`, not `featureUsed`. The generic call recorded that *a* prayer
+            // toggle happened on Home and threw away both which prayer and which direction —
+            // so the one event `AppAnalytics` documents as "the app's core engagement signal"
+            // had no caller anywhere, and the signal it names could not be reconstructed from
+            // what was logged. Recorded after the write, so a failed write is not counted.
+            telemetry.prayerTracked(prayerName.name, newStatus.name, isJamaah = false)
             _prayerRecords.update { it + (prayerName to newStatus) }
 
             // Update displays with new status
@@ -596,8 +599,7 @@ class HomeViewModel @Inject constructor(
                 // move the occurrence's expiry, so the pending sleep must be replaced too.
                 scheduleWorshipRefresh()
             } catch (e: Exception) {
-                CrashReporter.recordException(e)
-                AppAnalytics.logError(AppAnalytics.Feature.HOME, "calculate_prayer_times", e.message)
+                telemetry.failure(AppAnalytics.Feature.HOME, "calculate_prayer_times", e)
                 _state.update { it.copy(isLoading = false, error = e.message) }
             }
         }
@@ -691,7 +693,7 @@ class HomeViewModel @Inject constructor(
                             .toMillis()
                             .coerceIn(MIN_WORSHIP_RECHECK_MS, FALLBACK_WORSHIP_RECHECK_MS)
                     }
-                }.onFailure { CrashReporter.recordException(it) }
+                }.onFailure { telemetry.recordException(it) }
                     .getOrDefault(FALLBACK_WORSHIP_RECHECK_MS)
                 delay(millis)
             }
@@ -722,7 +724,7 @@ class HomeViewModel @Inject constructor(
                 worshipStale = false
             }
             worshipOccurrence?.let { renderWorshipCard(it) }
-        }.onFailure { CrashReporter.recordException(it) }.getOrNull()
+        }.onFailure { telemetry.recordException(it) }.getOrNull()
         _state.update { it.copy(worshipCard = card) }
     }
 

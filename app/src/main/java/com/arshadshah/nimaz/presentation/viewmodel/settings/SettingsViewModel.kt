@@ -4,7 +4,6 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
-import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.core.monitoring.catchAndReport
 import com.arshadshah.nimaz.core.util.LocaleHelper
@@ -300,12 +299,16 @@ class SettingsViewModel @Inject constructor(
     }
 
     fun onEvent(event: SettingsEvent) {
-        // Record meaningful configuration changes. Notification and calculation
-        // settings are the ones most often behind "it's doing the wrong thing".
+        // Every settings-shaped event reports itself, from one table rather than a line in
+        // each of 78 branches — which is how 56 of them came to report nothing at all. See
+        // `asSettingChange`. The events that are not setting changes return null and are
+        // logged where they happen.
+        event.asSettingChange()?.let { (setting, value) ->
+            telemetry.settingChanged(setting, value)
+        }
         when (event) {
             // General
             is SettingsEvent.SetTheme -> {
-                AppAnalytics.logSettingChanged("theme", event.theme.name)
                 _generalState.update { it.copy(theme = event.theme) }
                 viewModelScope.launch {
                     val modeString = when (event.theme) {
@@ -318,10 +321,6 @@ class SettingsViewModel @Inject constructor(
             }
 
             is SettingsEvent.SetLanguage -> {
-                AppAnalytics.logSettingChanged(
-                    "language",
-                    event.language.name
-                )
                 _generalState.update { it.copy(language = event.language) }
                 // AppAnalytics.UserProperty.APP_LANGUAGE has been declared and never set, so
                 // every segmentation by language has been empty since it was added.
@@ -393,10 +392,6 @@ class SettingsViewModel @Inject constructor(
 
             // Prayer
             is SettingsEvent.SetCalculationMethod -> {
-                AppAnalytics.logSettingChanged(
-                    "calculation_method",
-                    event.method.name
-                )
                 _prayerState.update { it.copy(calculationMethod = event.method) }
                 AppAnalytics.setUserProperty(
                     AppAnalytics.UserProperty.CALC_METHOD,
@@ -409,10 +404,6 @@ class SettingsViewModel @Inject constructor(
             }
 
             is SettingsEvent.SetAsrMethod -> {
-                AppAnalytics.logSettingChanged(
-                    "asr_method",
-                    event.method.name
-                )
                 _prayerState.update { it.copy(asrMethod = event.method) }
                 viewModelScope.launch {
                     settingsRepository.setAsrCalculation(event.method.name.lowercase())
@@ -421,10 +412,6 @@ class SettingsViewModel @Inject constructor(
             }
 
             is SettingsEvent.SetHighLatitudeRule -> {
-                AppAnalytics.logSettingChanged(
-                    "high_latitude_rule",
-                    event.rule.name
-                )
                 _prayerState.update { it.copy(highLatitudeRule = event.rule) }
                 viewModelScope.launch {
                     settingsRepository.setHighLatitudeRule(event.rule.name)
@@ -452,10 +439,6 @@ class SettingsViewModel @Inject constructor(
 
             // Notifications
             is SettingsEvent.SetNotificationsEnabled -> {
-                AppAnalytics.logSettingChanged(
-                    "notifications_enabled",
-                    event.enabled.toString()
-                )
                 _notificationState.update { it.copy(notificationsEnabled = event.enabled) }
                 AppAnalytics.setUserProperty(
                     AppAnalytics.UserProperty.NOTIFICATIONS_ENABLED,
@@ -468,10 +451,6 @@ class SettingsViewModel @Inject constructor(
             }
 
             is SettingsEvent.SetPrayerNotification -> {
-                AppAnalytics.logSettingChanged(
-                    "prayer_notification_${event.prayer.lowercase()}",
-                    event.enabled.toString()
-                )
                 updatePrayerNotification(event.prayer, event.enabled)
                 viewModelScope.launch {
                     settingsRepository.setPrayerNotificationEnabled(event.prayer, event.enabled)
@@ -480,10 +459,6 @@ class SettingsViewModel @Inject constructor(
             }
 
             is SettingsEvent.SetAdhanEnabled -> {
-                AppAnalytics.logSettingChanged(
-                    "adhan_enabled",
-                    event.enabled.toString()
-                )
                 _notificationState.update { it.copy(adhanEnabled = event.enabled) }
                 viewModelScope.launch {
                     settingsRepository.setAdhanEnabled(event.enabled)
@@ -492,10 +467,6 @@ class SettingsViewModel @Inject constructor(
             }
 
             is SettingsEvent.SetPrayerAlertStyle -> {
-                AppAnalytics.logSettingChanged(
-                    "alert_style_${event.prayer.lowercase()}",
-                    event.style.name
-                )
                 val prayer = event.prayer.lowercase()
                 _notificationState.update {
                     it.copy(alertStyles = it.alertStyles + (prayer to event.style))
@@ -507,10 +478,6 @@ class SettingsViewModel @Inject constructor(
             }
 
             is SettingsEvent.SetPrayerReminderEnabled -> {
-                AppAnalytics.logSettingChanged(
-                    "reminder_enabled_${event.prayer.lowercase()}",
-                    event.enabled.toString()
-                )
                 val prayer = event.prayer.lowercase()
                 _notificationState.update {
                     it.copy(reminderEnabled = it.reminderEnabled + (prayer to event.enabled))
@@ -523,10 +490,6 @@ class SettingsViewModel @Inject constructor(
             }
 
             is SettingsEvent.SetPrayerReminderMinutes -> {
-                AppAnalytics.logSettingChanged(
-                    "reminder_minutes_${event.prayer.lowercase()}",
-                    event.minutes.toString()
-                )
                 val prayer = event.prayer.lowercase()
                 _notificationState.update {
                     it.copy(reminderOffsets = it.reminderOffsets + (prayer to event.minutes))
@@ -543,19 +506,11 @@ class SettingsViewModel @Inject constructor(
             }
 
             is SettingsEvent.SetRespectDnd -> {
-                AppAnalytics.logSettingChanged(
-                    "respect_dnd",
-                    event.enabled.toString()
-                )
                 _notificationState.update { it.copy(respectDnd = event.enabled) }
                 viewModelScope.launch { settingsRepository.setAdhanRespectDnd(event.enabled) }
             }
 
             is SettingsEvent.SetReminderMinutes -> {
-                AppAnalytics.logSettingChanged(
-                    "reminder_minutes",
-                    event.minutes.toString()
-                )
                 _notificationState.update { it.copy(reminderMinutes = event.minutes) }
                 viewModelScope.launch {
                     settingsRepository.setNotificationReminderMinutes(event.minutes)
@@ -564,10 +519,6 @@ class SettingsViewModel @Inject constructor(
             }
 
             is SettingsEvent.SetShowReminderBefore -> {
-                AppAnalytics.logSettingChanged(
-                    "pre_reminder_enabled",
-                    event.enabled.toString()
-                )
                 _notificationState.update { it.copy(showReminderBefore = event.enabled) }
                 viewModelScope.launch {
                     settingsRepository.setShowReminderBefore(event.enabled)
@@ -643,10 +594,6 @@ class SettingsViewModel @Inject constructor(
             }
 
             is SettingsEvent.SetAdhanSound -> {
-                AppAnalytics.logSettingChanged(
-                    "adhan_sound",
-                    event.sound
-                )
                 _notificationState.update { it.copy(selectedAdhanSound = event.sound) }
                 viewModelScope.launch {
                     settingsRepository.setSelectedAdhanSound(event.sound)
@@ -674,8 +621,7 @@ class SettingsViewModel @Inject constructor(
                         // Now play the preview
                         adhanAudioManager.preview(sound, false)
                     } catch (e: Exception) {
-                        CrashReporter.recordException(e)
-                        AppAnalytics.logError(AppAnalytics.Feature.SETTINGS, "adhan_preview", e.message)
+                        telemetry.failure(AppAnalytics.Feature.SETTINGS, "adhan_preview", e)
                         _adhanPreviewError.value = "Failed to play adhan preview: ${e.message}"
                     }
                 }
@@ -830,16 +776,19 @@ class SettingsViewModel @Inject constructor(
                 // AppAnalytics.logTestNotification exists for exactly this and was never
                 // called, so "did the user try a test notification before reporting that
                 // notifications do not work" has been unanswerable.
+                telemetry.featureUsed(AppAnalytics.Feature.SETTINGS, "test_notification")
                 AppAnalytics.logTestNotification(allPrayers = false)
                 prayerNotificationScheduler.sendTestNotification()
             }
 
             SettingsEvent.TestAllNotifications -> {
+                telemetry.featureUsed(AppAnalytics.Feature.SETTINGS, "test_all_notifications")
                 AppAnalytics.logTestNotification(allPrayers = true)
                 prayerNotificationScheduler.sendAllPrayerTestNotifications()
             }
 
             SettingsEvent.ResetNotifications -> {
+                telemetry.featureUsed(AppAnalytics.Feature.SETTINGS, "reset_notifications")
                 viewModelScope.launch {
                     prayerNotificationScheduler.cancelAllPrayerNotifications()
                     rescheduleNotifications()
@@ -1116,7 +1065,14 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    /**
+     * The three destructive actions were the least instrumented in the app, which is exactly
+     * backwards: a wipe is the event you most want to see in a funnel, because it is either
+     * someone tidying up or someone about to uninstall, and the two look nothing alike in
+     * context. Logged before the work, so an action that fails part-way is still visible.
+     */
     private fun resetToDefaults() {
+        telemetry.featureUsed(AppAnalytics.Feature.SETTINGS, "reset_to_defaults")
         viewModelScope.launch {
             settingsRepository.clearAllData()
             _generalState.update { GeneralSettingsUiState() }
@@ -1128,6 +1084,7 @@ class SettingsViewModel @Inject constructor(
     }
 
     private fun deleteAllData() {
+        telemetry.featureUsed(AppAnalytics.Feature.SETTINGS, "delete_all_data")
         viewModelScope.launch {
             // Everything the person made lives in the user database now, so "delete all my
             // data" clears that one — and it is a much more honest operation for it: the

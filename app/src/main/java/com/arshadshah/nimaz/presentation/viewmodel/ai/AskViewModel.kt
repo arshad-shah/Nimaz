@@ -94,14 +94,20 @@ class AskViewModel @Inject constructor(
 
             AskEvent.Submit -> submit(_uiState.value.question)
             is AskEvent.SelectRecent -> {
+                // Distinguished from a typed submit: re-asking a remembered question is the
+                // signal that the history list earns its place, and it was indistinguishable
+                // from any other ask.
+                telemetry.featureUsed(DOMAIN, "select_recent")
                 _uiState.update { it.copy(question = event.question) }
                 submit(event.question)
             }
 
-            AskEvent.Clear ->
+            AskEvent.Clear -> {
+                telemetry.featureUsed(DOMAIN, "clear")
                 _uiState.update {
                     it.copy(question = "", phase = AskPhase.Idle, relatedTerms = emptyList())
                 }
+            }
 
             AskEvent.DismissHint ->
                 launchSafely(telemetry, DOMAIN, "dismiss_hint") {
@@ -127,6 +133,7 @@ class AskViewModel @Inject constructor(
         if (!_uiState.value.aiEnabled) return
 
         telemetry.featureUsed(DOMAIN, "submitted") // action only — never the question text
+        val startedAt = System.currentTimeMillis()
         // Reset the terms so a stale set can't drive the list if this ask fails;
         // only a fresh answer sets relatedTerms again.
         _uiState.update { it.copy(phase = AskPhase.Loading, relatedTerms = emptyList()) }
@@ -139,7 +146,16 @@ class AskViewModel @Inject constructor(
         ) {
             when (val outcome = askWithProof(question)) {
                 is AskWithProofUseCase.Outcome.Answered -> {
-                    telemetry.featureUsed(DOMAIN, "answered")
+                    // The proof count is the silent-degradation signal for the whole feature:
+                    // an answer whose citations resolve to nothing still renders, and reads
+                    // as a working answer. Zero proofs trending upward is the only way that
+                    // shows. The duration is the cost signal `docs/ai-ask-with-proof.md`
+                    // asks for — one billed Worker call per question.
+                    telemetry.aiAnswered(
+                        proofCount = outcome.proofs.size,
+                        durationMs = System.currentTimeMillis() - startedAt,
+                        confidence = outcome.confidence.name,
+                    )
                     addRecent(question)
                     _uiState.update {
                         it.copy(

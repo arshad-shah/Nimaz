@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.presentation.viewmodel.quran
 
+import com.arshadshah.nimaz.core.monitoring.RecordingTelemetry
 import com.arshadshah.nimaz.domain.model.QuranTopic
 import com.arshadshah.nimaz.domain.model.RevelationType
 import com.arshadshah.nimaz.domain.model.Surah
@@ -243,7 +244,7 @@ class QuranTopicsRaceTest {
     }
 
     private fun openedBrowser(): QuranTopicsViewModel {
-        val vm = QuranTopicsViewModel(useCases, settings)
+        val vm = QuranTopicsViewModel(useCases, settings, RecordingTelemetry())
         vm.onEvent(QuranTopicsEvent.OpenBrowser)
         dispatcher.scheduler.advanceUntilIdle()
         return vm

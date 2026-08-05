@@ -363,6 +363,27 @@ rg -n -U --multiline-dotall \
   The rule: **an event is not reachable because a test dispatches it.** A test is a second
   producer, and it is the one that keeps dead branches looking alive.
 
+- [x] ~~**Three more unreachable branches, found by instrumenting them.**~~ **Deleted.**
+  `QuranEvent.MarkAyahsReadForKhatam`, `QuranEvent.UnmarkAyahReadForKhatam` and
+  `ZakatEvent.Calculate` had no producer in any screen. They were invisible to the ratchet
+  while they logged nothing, and failed it the moment #359 §5's instrumentation was added —
+  which is the test working as intended, and a useful warning about the order of operations:
+  **instrument, then check reachability, then keep the instrumentation.** All three are
+  superseded by a wired sibling (`ToggleKhatamAyah` calls the same two use cases; the zakat
+  screen recalculates through `recalculate()` on every entry), so they were deleted rather than
+  wired, along with two private handlers left with no caller.
+
+- [ ] **`ZakatEvent.SetCurrency` has no producer.** Not an analytics finding — its branch is a
+  `persist { … }` that logs no usage — so the ratchet does not see it, and it surfaced only
+  because a neighbouring branch's new logging spilled into the old flat scan window. The
+  calculator formats every figure with `state.currency` and offers no way to change it, so a
+  user outside the default currency reads someone else's symbol on their own zakat. Wire a
+  currency picker or delete the event; it is a product decision, like the eight of #357.
+  ```bash
+  cd app/src/main/java/com/arshadshah/nimaz
+  grep -rn "ZakatEvent.SetCurrency" presentation/screens presentation/components
+  ```
+
   The **eight signed off as features** were wired rather than deleted: a Previous/Continue/Next
   footer in the Qaida reader (`PreviousLesson`, `Resume`), the zakat breakdown's disclosure
   (`ToggleBreakdown`), an all-prayers pre-reminder switch and lead-time picker

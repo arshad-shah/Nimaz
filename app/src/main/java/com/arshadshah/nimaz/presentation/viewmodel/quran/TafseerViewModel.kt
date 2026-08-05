@@ -54,19 +54,27 @@ class TafseerViewModel @Inject constructor(
     fun onEvent(event: TafseerEvent) {
         when (event) {
             is TafseerEvent.LoadSurah -> {
-                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.TAFSEER, "open_surah")
+                telemetry.featureUsed(AppAnalytics.Feature.TAFSEER, "open_surah")
                 loadSurah(event.surahNumber, event.ayahNumber)
             }
-            is TafseerEvent.NavigateToAyah -> onAyahChanged(event.index)
-            is TafseerEvent.NavigateToTafseerPage ->
+            // Swiping between ayahs and turning a commentary page are how this screen is read;
+            // only opening it and switching source were counted, so "opened tafseer" looked
+            // like the whole of the engagement.
+            is TafseerEvent.NavigateToAyah -> {
+                telemetry.featureUsed(AppAnalytics.Feature.TAFSEER, "navigate_ayah")
+                onAyahChanged(event.index)
+            }
+            is TafseerEvent.NavigateToTafseerPage -> {
+                telemetry.featureUsed(AppAnalytics.Feature.TAFSEER, "navigate_page")
                 _state.update { it.copy(currentTafseerPage = event.page) }
+            }
 
             is TafseerEvent.SwitchSource -> {
-                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.TAFSEER, "switch_source")
+                telemetry.featureUsed(AppAnalytics.Feature.TAFSEER, "switch_source")
                 switchSource(event.source)
             }
             is TafseerEvent.AddHighlight -> {
-                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.TAFSEER, "add_highlight")
+                telemetry.featureUsed(AppAnalytics.Feature.TAFSEER, "add_highlight")
                 addHighlight(
                     event.startOffset,
                     event.endOffset,
@@ -76,25 +84,28 @@ class TafseerViewModel @Inject constructor(
             }
 
             is TafseerEvent.DeleteHighlight -> {
-                AppAnalytics.logFeatureUsed(
-                    AppAnalytics.Feature.TAFSEER,
-                    "delete_highlight"
-                )
+                telemetry.featureUsed(AppAnalytics.Feature.TAFSEER, "delete_highlight")
                 deleteHighlight(event.highlightId)
             }
-            is TafseerEvent.UpdateHighlight -> updateHighlight(
-                event.highlightId,
-                event.color,
-                event.note
-            )
+            is TafseerEvent.UpdateHighlight -> {
+                telemetry.featureUsed(AppAnalytics.Feature.TAFSEER, "update_highlight")
+                updateHighlight(
+                    event.highlightId,
+                    event.color,
+                    event.note
+                )
+            }
 
             is TafseerEvent.AddNote -> {
-                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.TAFSEER, "add_note")
+                telemetry.featureUsed(AppAnalytics.Feature.TAFSEER, "add_note")
                 addNote(event.text)
             }
-            is TafseerEvent.UpdateNote -> updateNote(event.note)
+            is TafseerEvent.UpdateNote -> {
+                telemetry.featureUsed(AppAnalytics.Feature.TAFSEER, "update_note")
+                updateNote(event.note)
+            }
             is TafseerEvent.DeleteNote -> {
-                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.TAFSEER, "delete_note")
+                telemetry.featureUsed(AppAnalytics.Feature.TAFSEER, "delete_note")
                 deleteNote(event.noteId)
             }
         }
