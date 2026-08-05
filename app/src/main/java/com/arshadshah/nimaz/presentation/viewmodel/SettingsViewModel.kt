@@ -5,6 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.CrashReporter
+import com.arshadshah.nimaz.core.monitoring.Telemetry
+import com.arshadshah.nimaz.core.monitoring.catchAndReport
 import com.arshadshah.nimaz.core.util.LocaleHelper
 import com.arshadshah.nimaz.core.util.PrayerNotificationScheduler
 import com.arshadshah.nimaz.core.util.preReminderMinutesByPrayer
@@ -21,6 +23,7 @@ import com.arshadshah.nimaz.domain.model.PrayerAlertStyle
 import com.arshadshah.nimaz.domain.model.PrayerTimes
 import com.arshadshah.nimaz.domain.model.PrayerType
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
+import com.arshadshah.nimaz.domain.usecase.notification.RescheduleNotificationsUseCase
 import com.arshadshah.nimaz.domain.usecase.PrayerUseCases
 import com.arshadshah.nimaz.domain.usecase.QuranUseCases
 import com.arshadshah.nimaz.presentation.theme.NimazPatternStyle
@@ -316,6 +319,10 @@ class SettingsViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository,
     private val quranUseCases: QuranUseCases,
     private val prayerNotificationScheduler: PrayerNotificationScheduler,
+    private val rescheduleNotificationsUseCase: RescheduleNotificationsUseCase,
+    // Only the new failure paths report through this so far. The ~40 existing AppAnalytics
+    // calls in this file are the analytics catalog's job (#355), not this layer's.
+    private val telemetry: Telemetry,
     val adhanAudioManager: AdhanAudioManager,
     private val database: NimazDatabase,
     private val userDatabase: NimazUserDatabase,
@@ -499,6 +506,12 @@ class SettingsViewModel @Inject constructor(
             .distinctUntilChanged()
             .flatMapLatest { translatorId ->
                 flow { emit(quranUseCases.getAyahTranslation(PREVIEW_AYAH_ID, translatorId)) }
+                    // Inside the flatMapLatest, deliberately. Applied outside, the first
+                    // failed read would end the whole chain — `quranTranslatorId` never
+                    // completes on its own, but a caught upstream throw completes it anyway —
+                    // and the preview would be frozen on the previous translation for the
+                    // ViewModel's entire life, with every later change silently doing nothing.
+                    .catchAndReport(telemetry, "settings", "preview_translation") { emit(null) }
             }
             .onEach { text ->
                 // Keep the previous text on a null (missing/failed) result rather than
@@ -1259,64 +1272,17 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Delegates to [RescheduleNotificationsUseCase], which reads the persisted values.
+     *
+     * This used to build the alarm set from `_notificationState.value` and `_prayerState.value`
+     * — construction-time snapshots. Since `hiltViewModel()` gives each settings screen its own
+     * instance, one screen's snapshot went stale as soon as another wrote, and a prayer the
+     * user had switched off in Notification Settings was re-armed by an unrelated change in
+     * Prayer Settings. See the use case's KDoc.
+     */
     private suspend fun rescheduleNotifications() {
-        val prefs = settingsRepository.userPreferences.first()
-        val lat = prefs.latitude
-        val lng = prefs.longitude
-        val notifState = _notificationState.value
-        val prayerSettings = _prayerState.value
-
-        val enabledPrayers = buildSet {
-            if (notifState.fajrNotification) add(PrayerType.FAJR)
-            if (notifState.dhuhrNotification) add(PrayerType.DHUHR)
-            if (notifState.asrNotification) add(PrayerType.ASR)
-            if (notifState.maghribNotification) add(PrayerType.MAGHRIB)
-            if (notifState.ishaNotification) add(PrayerType.ISHA)
-            if (notifState.sunriseNotification) add(PrayerType.SUNRISE)
-        }
-
-        val calcMethod = prayerSettings.calculationMethod
-        val asrCalc = when (prayerSettings.asrMethod) {
-            AsrJuristicMethod.STANDARD -> AsrCalculation.STANDARD
-            AsrJuristicMethod.HANAFI -> AsrCalculation.HANAFI
-        }
-        val highLatRule = try {
-            com.arshadshah.nimaz.domain.model.HighLatitudeRule.valueOf(
-                prayerSettings.highLatitudeRule.name.let {
-                    // Map SettingsViewModel enum names to domain model enum names
-                    when (it) {
-                        "MIDDLE_OF_NIGHT" -> "MIDDLE_OF_THE_NIGHT"
-                        "SEVENTH_OF_NIGHT" -> "SEVENTH_OF_THE_NIGHT"
-                        else -> it
-                    }
-                }
-            )
-        } catch (_: Exception) {
-            null
-        }
-
-        val adjustments = mapOf(
-            PrayerType.FAJR to prayerSettings.fajrAdjustment,
-            PrayerType.SUNRISE to prayerSettings.sunriseAdjustment,
-            PrayerType.DHUHR to prayerSettings.dhuhrAdjustment,
-            PrayerType.ASR to prayerSettings.asrAdjustment,
-            PrayerType.MAGHRIB to prayerSettings.maghribAdjustment,
-            PrayerType.ISHA to prayerSettings.ishaAdjustment
-        )
-
-        prayerNotificationScheduler.scheduleTodaysPrayerNotifications(
-            latitude = lat,
-            longitude = lng,
-            notificationsEnabled = notifState.notificationsEnabled,
-            enabledPrayers = enabledPrayers,
-            preReminders = settingsRepository.preReminderMinutesByPrayer(),
-            calculationMethod = calcMethod,
-            asrCalculation = asrCalc,
-            highLatitudeRule = highLatRule,
-            adjustments = adjustments,
-            fridayReminderEnabled = notifState.fridayReminderEnabled,
-            fridayReminderMinutes = notifState.fridayReminderMinutes
-        )
+        rescheduleNotificationsUseCase()
     }
 
     private fun updatePrayerAdjustment(prayer: String, minutes: Int) {

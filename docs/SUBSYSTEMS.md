@@ -365,6 +365,16 @@ sequenceDiagram
     Note over BR,Sched: self-perpetuating daily chain —<br/>an alarm armed outside this call fires once and never again
 ```
 
+**Who calls it, and with what.** Every caller builds its arguments from **DataStore**, never from
+ViewModel state: `BootReceiver` reads `PreferencesDataStore` directly, and the settings screens go
+through `RescheduleNotificationsUseCase` (`domain/usecase/notification/`). That is a rule with a
+scar behind it — `SettingsViewModel` used to build the alarm set from `_notificationState.value`,
+a snapshot taken at construction, and since `hiltViewModel()` gives each settings screen its own
+instance, a prayer switched off on the Notification screen was re-armed by an unrelated change on
+the Prayer screen. The use case exists so there is no state to pass in. Reuse
+`settingsRepository.enabledPrayerTypes()` and `preReminderMinutesByPrayer()`
+(`core/util/PrayerNotificationPrefs.kt`) rather than re-deriving either.
+
 **Scheduling.** `scheduleTodaysPrayerNotifications(...)` cancels everything then re-arms enabled prayers, using `setExactAndAllowWhileIdle(RTC_WAKEUP, …)` with `PendingIntent.getBroadcast` targeting `BootReceiver` (explicit intent). Request codes: prayer `1000 + ordinal`, pre-reminder `2000 + ordinal`, midnight reschedule `9999` (00:01), daily summary `8889` (23:00), Friday reminder `8890`, Khatam reminder `8891`. Pre-reminders fire at `prayerTime − preReminders[type]` (skipped for Sunrise) — see **per-prayer alert style and reminder** below. The **Friday (Jummah) reminder** (`scheduleFridayReminder`, gated on `fridayReminderEnabled`) is a one-shot at the upcoming Friday's Dhuhr − `fridayReminderMinutes`, re-armed on every reschedule so it always targets the next Friday.
 
 **Firing.** `BootReceiver.onReceive` dispatches on action: boot → reschedule; `ACTION_MIDNIGHT_RESCHEDULE` → mark missed prayers + reschedule (self-perpetuating daily chain); `ACTION_PRAYER_NOTIFICATION` → post notification &/or play adhan; `ACTION_DAILY_SUMMARY` → summary; `ACTION_FRIDAY_REMINDER` → post the Jummah reminder; `ACTION_KHATAM_REMINDER` → post the Khatam nudge. If adhan should play and the file exists, it calls `AdhanPlaybackService.playAdhan(...)` and the service's foreground notification **doubles as** the prayer notification (shared id `prayerName.hashCode()`); if the file is missing it triggers a download for next time and falls back to beep. **Do Not Disturb:** when `adhanRespectDnd` is on and the system is in a DND mode, `dndBlocksAdhan` gates only the **adhan audio** (`shouldPlayAdhan`/`shouldPlayBeep`) — the visual prayer notification is still posted, and the OS silences its channel sound under DND. The `SILENT` alert style is different in kind: it is the user's own choice, so it silences the visual notification too. The Friday reminder (no adhan audio) always posts and is likewise silenced by the OS under DND.
