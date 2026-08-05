@@ -64,7 +64,7 @@ fun NimazMenuItem(
     modifier: Modifier = Modifier,
     subtitle: String? = null,
     icon: ImageVector? = null,
-    iconTint: Color = MaterialTheme.colorScheme.primary,
+    iconTint: Color = MaterialTheme.colorScheme.onPrimaryContainer,
     trailingIcon: ImageVector? = Icons.AutoMirrored.Filled.ArrowForward,
     trailing: (@Composable RowScope.() -> Unit)? = null,
     enabled: Boolean = true,
@@ -109,7 +109,8 @@ fun NimazMenuItem(
                 NimazIconWell(
                      icon,
                     contentDescription = null,
-                    shape = NimazIconWellShape.ROUNDED
+                    shape = NimazIconWellShape.ROUNDED,
+                    accent = iconTint
                 )
                 Spacer(modifier = Modifier.width(16.dp))
             }
