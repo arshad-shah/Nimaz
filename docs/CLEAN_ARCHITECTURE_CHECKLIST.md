@@ -327,6 +327,31 @@ rg -n -U --multiline-dotall \
   app/src/main/java --glob '*ViewModel.kt' | grep -v 'Job = viewModelScope'
 ```
 
+### AP-7.4 · Pure domain logic held hostage inside a ViewModel
+
+- [x] ~~**`CalendarViewModel`'s seven generators.**~~ **Resolved.** 75 lines of pure functions
+  over domain models — `generateGregorianMonth`, `generateHijriMonthDays`,
+  `generateGregorianYearMonths`, `getEventsForDate`, `getEventsForMonth`,
+  `getUpcomingIslamicEvents`, `getApproximateGregorianDate` — all `private`, all reachable only
+  through a ViewModel with mocked use cases. Nothing in them needed a ViewModel: they took
+  values and returned values.
+
+  That is why two of the app's sharpest bugs shipped and stayed. Every Islamic event was
+  projected into the **current** Hijri year only, so in the last weeks of a Hijri year the
+  "upcoming events" list dropped Islamic New Year and Ashura — precisely the events that were
+  upcoming — and the month grid dropped every Muharram event from the Gregorian month that
+  straddles the boundary. Both are three-line tests once the code is reachable, and neither
+  had one.
+
+  Moved to `domain/usecase/calendar/`, with the projection in **one** `IslamicEventProjection`
+  so the two callers cannot drift apart. `today` is a parameter, not a clock read, so a grid
+  can be rebuilt for a new day. (`CalendarUseCasesTest` — three of its tests fail against the
+  single-year projection, verified by restoring it.)
+
+  Rule of thumb: **if a private ViewModel function neither reads state nor writes it, it does
+  not belong to the ViewModel.** It is domain logic that happens to live in the wrong file,
+  and it is untested for exactly that reason.
+
 ### AP-7.2 · `Get*` and `Observe*` variants of the same read
 
 - [x] ~~**Khatam had both `GetActiveKhatamUseCase` and `ObserveActiveKhatamUseCase`**~~ (also

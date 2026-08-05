@@ -220,6 +220,18 @@ private fun CalendarSection(
     state: com.arshadshah.nimaz.presentation.viewmodel.CalendarUiState,
     viewModel: CalendarViewModel
 ) {
+    // The grid draws with or without events, so a content-database fault costs the event
+    // markers and nothing else. Before, it cost the whole screen: `loadToday()` ran inside
+    // the events `try`, so a throw left `currentMonth` null and this rendered nothing at all.
+    state.error?.let { error ->
+        Text(
+            text = stringResource(error),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.error,
+            modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)
+        )
+    }
+
     state.currentMonth?.let { month ->
         val eventMap = remember(month.days) {
             month.days.associate { day -> day.gregorianDate to day.events }

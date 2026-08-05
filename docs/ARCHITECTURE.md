@@ -512,6 +512,39 @@ channels — the stack trace to Crashlytics, the frequency to analytics — and 
 only as the production binding and for callers with no injection point (`NimazApp`, `BootReceiver`,
 workers).
 
+#### "Today" comes from `TodayProvider`, never `LocalDate.now()`
+
+`LocalDate.now()` was called directly at **39 sites across 12 ViewModels**, always at `init`
+or collection time, and nothing re-evaluated it. There was no seam to fake in a test and no
+notion of "the day changed" anywhere in the layer, so a whole family of defects shipped
+together — a Room query bound to a fixed day range forever, a "daily" hadith frozen at the
+day it loaded, a month grid built at 23:59 still highlighting yesterday.
+
+Inject **`TodayProvider`** (`core/time/TodayProvider.kt`) and use whichever half fits:
+
+```kotlin
+todayProvider.today()                       // what day is it — fakeable
+todayProvider.todayChanges.collect { … }    // …and tell me when that changes
+```
+
+`todayChanges` emits immediately and again at each local midnight, so re-arming everything
+scoped to today is an ordinary flow collection rather than a check each feature has to
+remember to write. Tests use `FakeTodayProvider`, whose `now` a test can move to roll the
+date over without waiting for one. The backing `java.time.Clock` is provided by `TimeModule`.
+
+Anything scoped to a day takes the date as a **parameter** rather than reading the clock
+inside itself — see `domain/usecase/calendar/`, where the grid builders take `today` — so the
+same call can be re-issued for the new day.
+
+#### CPU-bound work goes on the injected `@DefaultDispatcher`
+
+`viewModelScope.launch` is `Dispatchers.Main`. `CalendarViewModel.navigateToYear` did ~365
+Hijri conversions plus a filter per day there. Inject
+`@DefaultDispatcher CoroutineDispatcher` (`core/di/TimeModule.kt`) and `withContext` it —
+injected rather than `Dispatchers.Default` directly, because a test that substitutes its own
+scheduler stays deterministic, and one that does not has nothing for `advanceUntilIdle()` to
+wait on.
+
 #### A throwable's `message` is a diagnostic, never UI copy
 
 `_state.copy(error = e.message)` is the shortest thing to write and it puts SQLite's own words on
