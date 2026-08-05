@@ -14,7 +14,7 @@ import com.arshadshah.nimaz.domain.model.DuaCategory
 import com.arshadshah.nimaz.domain.model.DuaOccasion
 import com.arshadshah.nimaz.domain.model.DuaProgress
 import com.arshadshah.nimaz.domain.model.DuaSearchResult
-import com.arshadshah.nimaz.domain.repository.SettingsRepository
+import com.arshadshah.nimaz.domain.repository.settings.DuaDisplaySettings
 import com.arshadshah.nimaz.domain.usecase.DuaUseCases
 import com.arshadshah.nimaz.presentation.theme.AmiriFontFamily
 import com.arshadshah.nimaz.presentation.theme.QuranArabicFont
@@ -31,7 +31,7 @@ import javax.inject.Inject
 @HiltViewModel
 class DuaViewModel @Inject constructor(
     private val duaUseCases: DuaUseCases,
-    private val settingsRepository: SettingsRepository,
+    private val duaSettings: DuaDisplaySettings,
     private val telemetry: Telemetry
 ) : ViewModel() {
 
@@ -130,7 +130,7 @@ class DuaViewModel @Inject constructor(
         ) {
             combine(
                 duaUseCases.getAllCategories(),
-                settingsRepository.duaCategoriesSortAlphabetical
+                duaSettings.duaCategoriesSortAlphabetical
             ) { categories, alphabetical -> categories to alphabetical }
                 .collect { (categories, alphabetical) ->
                     _collectionState.update {
@@ -161,7 +161,7 @@ class DuaViewModel @Inject constructor(
     private fun toggleCategoriesSort() {
         val alphabetical = !_collectionState.value.sortAlphabetical
         launchSafely(telemetry, DOMAIN, "toggle_category_sort") {
-            settingsRepository.setDuaCategoriesSortAlphabetical(alphabetical)
+            duaSettings.setDuaCategoriesSortAlphabetical(alphabetical)
             telemetry.settingChanged(
                 "dua_categories_sort",
                 if (alphabetical) "alphabetical" else "curated",
@@ -258,15 +258,15 @@ class DuaViewModel @Inject constructor(
     private fun observeDuaSettings() {
         launchSafely(telemetry, DOMAIN, "observe_settings") {
             val displayFlow = combine(
-                settingsRepository.duaArabicFont,
-                settingsRepository.duaArabicFontSize,
-                settingsRepository.duaTranslationFontSize
+                duaSettings.duaArabicFont,
+                duaSettings.duaArabicFontSize,
+                duaSettings.duaTranslationFontSize
             ) { fontId, arabicSize, transSize -> Triple(fontId, arabicSize, transSize) }
 
             val toggleFlow = combine(
-                settingsRepository.duaShowArabic,
-                settingsRepository.duaShowTransliteration,
-                settingsRepository.duaShowTranslation
+                duaSettings.duaShowArabic,
+                duaSettings.duaShowTransliteration,
+                duaSettings.duaShowTranslation
             ) { showArabic, showTranslit, showTrans -> Triple(showArabic, showTranslit, showTrans) }
 
             combine(displayFlow, toggleFlow) { display, toggles -> display to toggles }

@@ -1,17 +1,34 @@
 package com.arshadshah.nimaz.domain.repository
 
 import com.arshadshah.nimaz.domain.model.PrayerAlertStyle
-import com.arshadshah.nimaz.domain.model.UserPreferences
+import com.arshadshah.nimaz.domain.repository.settings.AiSettings
+import com.arshadshah.nimaz.domain.repository.settings.AppSettings
+import com.arshadshah.nimaz.domain.repository.settings.DuaDisplaySettings
+import com.arshadshah.nimaz.domain.repository.settings.HadithDisplaySettings
+import com.arshadshah.nimaz.domain.repository.settings.LocationSettings
+import com.arshadshah.nimaz.domain.repository.settings.QuranPreferences
+import com.arshadshah.nimaz.domain.repository.settings.TasbihSettings
+import com.arshadshah.nimaz.domain.repository.settings.ZakatSettings
 import kotlinx.coroutines.flow.Flow
 
 /**
  * App-wide user settings/preferences. Implemented by the DataStore-backed
  * PreferencesDataStore in the data layer; presentation depends on this interface.
+ *
+ * The feature-scoped seams it extends live in [com.arshadshah.nimaz.domain.repository.settings].
+ * A ViewModel that needs one feature's preferences injects that seam, not this whole
+ * surface — only `SettingsViewModel`, which edits nearly all of it, takes this type.
  */
-interface SettingsRepository {
+interface SettingsRepository :
+    QuranPreferences,
+    HadithDisplaySettings,
+    DuaDisplaySettings,
+    TasbihSettings,
+    ZakatSettings,
+    AiSettings,
+    LocationSettings,
+    AppSettings {
     suspend fun clearAllData()
-    val onboardingCompleted: Flow<Boolean>
-    suspend fun setOnboardingCompleted(completed: Boolean)
     val themeMode: Flow<String>
     suspend fun setThemeMode(mode: String)
     val dynamicColor: Flow<Boolean>
@@ -39,21 +56,6 @@ interface SettingsRepository {
      *  for local moon-sighting differences (see HijriDateCalculator.today(offsetDays)). */
     val hijriDayOffset: Flow<Int>
     suspend fun setHijriDayOffset(days: Int)
-    val appLanguage: Flow<String>
-    suspend fun setAppLanguage(language: String)
-
-    val tasbihBeadMode: Flow<Boolean>
-    suspend fun setTasbihBeadMode(enabled: Boolean)
-    val tasbihBeadDesign: Flow<String>
-    suspend fun setTasbihBeadDesign(key: String)
-    val tasbihSelectedPresetId: Flow<Long>
-    suspend fun setTasbihSelectedPresetId(id: Long)
-    val tasbihPresetSeedVersion: Flow<Int>
-    suspend fun setTasbihPresetSeedVersion(version: Int)
-    val tasbihFavorites: Flow<Set<String>>
-    suspend fun setTasbihFavorites(ids: Set<String>)
-    val tasbihLeftHanded: Flow<Boolean>
-    suspend fun setTasbihLeftHanded(enabled: Boolean)
     val arabicFontSize: Flow<String>
     suspend fun setArabicFontSize(size: String)
     val calculationMethod: Flow<String>
@@ -147,92 +149,6 @@ interface SettingsRepository {
     /** Optional per-reminder mode string (e.g. Witr: "after_isha" | "before_fajr"). */
     fun worshipReminderMode(key: String, default: String): Flow<String>
     suspend fun setWorshipReminderMode(key: String, mode: String)
-    val quranTranslatorId: Flow<String>
-    suspend fun setQuranTranslatorId(translatorId: String)
-    val showTranslation: Flow<Boolean>
-    suspend fun setShowTranslation(show: Boolean)
-    val showTransliteration: Flow<Boolean>
-    suspend fun setShowTransliteration(show: Boolean)
-    val selectedReciterId: Flow<String?>
-    suspend fun setSelectedReciterId(reciterId: String?)
-    val quranArabicFont: Flow<String>
-    suspend fun setQuranArabicFont(fontId: String)
-
-    /** The Mushaf edition/layout for the page reader, as a [com.arshadshah.nimaz.domain.model.MushafScript]
-     *  name ("MADANI" = default Uthmani/604; "INDOPAK_16" = 16-line IndoPak/548). */
-    val quranMushafScript: Flow<String>
-    suspend fun setQuranMushafScript(script: String)
-    val quranArabicFontSize: Flow<Float>
-    suspend fun setQuranArabicFontSize(size: Float)
-    val quranTranslationFontSize: Flow<Float>
-    suspend fun setQuranTranslationFontSize(size: Float)
-    val continuousReading: Flow<Boolean>
-    suspend fun setContinuousReading(enabled: Boolean)
-    val keepScreenOn: Flow<Boolean>
-    suspend fun setKeepScreenOn(enabled: Boolean)
-    val showTajweed: Flow<Boolean>
-    suspend fun setShowTajweed(enabled: Boolean)
-    val tajweedUnderline: Flow<Boolean>
-    suspend fun setTajweedUnderline(enabled: Boolean)
-    val duaArabicFont: Flow<String>
-    suspend fun setDuaArabicFont(fontId: String)
-    val duaArabicFontSize: Flow<Float>
-    suspend fun setDuaArabicFontSize(size: Float)
-    val duaTranslationFontSize: Flow<Float>
-    suspend fun setDuaTranslationFontSize(size: Float)
-    val duaShowArabic: Flow<Boolean>
-    suspend fun setDuaShowArabic(show: Boolean)
-    val duaShowTransliteration: Flow<Boolean>
-    suspend fun setDuaShowTransliteration(show: Boolean)
-    val duaShowTranslation: Flow<Boolean>
-    suspend fun setDuaShowTranslation(show: Boolean)
-    val duaCategoriesSortAlphabetical: Flow<Boolean>
-    suspend fun setDuaCategoriesSortAlphabetical(enabled: Boolean)
-    val hadithArabicFont: Flow<String>
-    suspend fun setHadithArabicFont(fontId: String)
-    val hadithArabicFontSize: Flow<Float>
-    suspend fun setHadithArabicFontSize(size: Float)
-    val hadithTranslationFontSize: Flow<Float>
-    suspend fun setHadithTranslationFontSize(size: Float)
-    val hadithShowArabic: Flow<Boolean>
-    suspend fun setHadithShowArabic(show: Boolean)
-    val hadithShowTranslation: Flow<Boolean>
-    suspend fun setHadithShowTranslation(show: Boolean)
-    val hadithShowGrade: Flow<Boolean>
-    suspend fun setHadithShowGrade(show: Boolean)
-    val hadithShowChain: Flow<Boolean>
-    suspend fun setHadithShowChain(show: Boolean)
-    val tasbihVibrationEnabled: Flow<Boolean>
-    suspend fun setTasbihVibrationEnabled(enabled: Boolean)
-    val tasbihSoundEnabled: Flow<Boolean>
-    suspend fun setTasbihSoundEnabled(enabled: Boolean)
-    val latitude: Flow<Double>
-    val longitude: Flow<Double>
-    val locationName: Flow<String>
-    suspend fun updateLocation(latitude: Double, longitude: Double, name: String)
-
-    // AI — Ask with Proof (opt-in)
-    val aiAskEnabled: Flow<Boolean>
-    suspend fun setAiAskEnabled(enabled: Boolean)
-    val aiConsentTimestamp: Flow<Long>
-    suspend fun setAiConsentTimestamp(timestamp: Long)
-    val aiHistoryEnabled: Flow<Boolean>
-    suspend fun setAiHistoryEnabled(enabled: Boolean)
-    val aiAskHintDismissed: Flow<Boolean>
-    suspend fun setAiAskHintDismissed(dismissed: Boolean)
-    val aiQuestionHistory: Flow<String>
-    suspend fun setAiQuestionHistory(json: String)
-    // Zakat — the metal prices the nisab threshold and the metal valuation are both
-    // derived from. Persisted because they were previously hardcoded constants no user
-    // could change, which made every zakat figure wrong by however stale they were.
-    val zakatGoldPricePerGram: Flow<Double>
-    suspend fun setZakatGoldPricePerGram(pricePerGram: Double)
-    val zakatSilverPricePerGram: Flow<Double>
-    suspend fun setZakatSilverPricePerGram(pricePerGram: Double)
-    val zakatCurrency: Flow<String>
-    suspend fun setZakatCurrency(currency: String)
-
     suspend fun exportAllPreferences(): Map<String, String>
     suspend fun importPreferences(prefsMap: Map<String, String>)
-    val userPreferences: Flow<UserPreferences>
 }

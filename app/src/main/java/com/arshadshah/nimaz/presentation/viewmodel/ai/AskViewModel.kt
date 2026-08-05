@@ -8,7 +8,7 @@ import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.domain.model.AiError
 import com.arshadshah.nimaz.domain.model.AnswerConfidence
 import com.arshadshah.nimaz.domain.model.Proof
-import com.arshadshah.nimaz.domain.repository.SettingsRepository
+import com.arshadshah.nimaz.domain.repository.settings.AiSettings
 import com.arshadshah.nimaz.domain.usecase.ai.AskWithProofUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -39,7 +39,7 @@ sealed interface AskPhase {
 @HiltViewModel
 class AskViewModel @Inject constructor(
     private val askWithProof: AskWithProofUseCase,
-    private val settingsRepository: SettingsRepository,
+    private val aiSettings: AiSettings,
     private val telemetry: Telemetry,
 ) : ViewModel() {
 
@@ -54,10 +54,10 @@ class AskViewModel @Inject constructor(
         // place that reads as a mapping — and that list was also mutated from `addRecent`
         // on a different coroutine, with no synchronisation.
         combine(
-            settingsRepository.aiAskEnabled,
-            settingsRepository.aiAskHintDismissed,
-            settingsRepository.aiHistoryEnabled,
-            settingsRepository.aiQuestionHistory,
+            aiSettings.aiAskEnabled,
+            aiSettings.aiAskHintDismissed,
+            aiSettings.aiHistoryEnabled,
+            aiSettings.aiQuestionHistory,
         ) { enabled, hintDismissed, historyEnabled, historyJson ->
             // The stored history is the single source of truth, re-read on every change
             // rather than loaded once "if the in-memory list happens to be empty". That
@@ -111,7 +111,7 @@ class AskViewModel @Inject constructor(
 
             AskEvent.DismissHint ->
                 launchSafely(telemetry, DOMAIN, "dismiss_hint") {
-                    settingsRepository.setAiAskHintDismissed(true)
+                    aiSettings.setAiAskHintDismissed(true)
                 }
         }
     }
@@ -183,8 +183,8 @@ class AskViewModel @Inject constructor(
         _uiState.update { it.copy(recentQuestions = updated) }
         // Persisting re-emits `aiQuestionHistory`, which flows back through the combine
         // above — so the stored list stays the source of truth and the two cannot drift.
-        if (settingsRepository.aiHistoryEnabled.first()) {
-            settingsRepository.setAiQuestionHistory(encodeHistory(updated))
+        if (aiSettings.aiHistoryEnabled.first()) {
+            aiSettings.setAiQuestionHistory(encodeHistory(updated))
         }
     }
 

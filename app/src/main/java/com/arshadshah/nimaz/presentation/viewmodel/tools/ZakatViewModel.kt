@@ -12,7 +12,7 @@ import com.arshadshah.nimaz.domain.model.ZakatCalculator
 import com.arshadshah.nimaz.domain.model.ZakatDefaults
 import com.arshadshah.nimaz.domain.model.ZakatHistoryEntry
 import com.arshadshah.nimaz.domain.model.ZakatLiabilities
-import com.arshadshah.nimaz.domain.repository.SettingsRepository
+import com.arshadshah.nimaz.domain.repository.settings.ZakatSettings
 import com.arshadshah.nimaz.domain.usecase.ZakatUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,7 +27,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ZakatViewModel @Inject constructor(
     private val zakatUseCases: ZakatUseCases,
-    private val settingsRepository: SettingsRepository,
+    private val zakatSettings: ZakatSettings,
     private val telemetry: Telemetry,
 ) : ViewModel() {
 
@@ -51,9 +51,9 @@ class ZakatViewModel @Inject constructor(
      */
     private fun observeMetalPrices() {
         combine(
-            settingsRepository.zakatGoldPricePerGram,
-            settingsRepository.zakatSilverPricePerGram,
-            settingsRepository.zakatCurrency,
+            zakatSettings.zakatGoldPricePerGram,
+            zakatSettings.zakatSilverPricePerGram,
+            zakatSettings.zakatCurrency,
         ) { gold, silver, currency ->
             Triple(gold, silver, currency)
         }
@@ -102,15 +102,15 @@ class ZakatViewModel @Inject constructor(
             // Persisted, not just held in state: these survived only until process death
             // before, and the observer above feeds the new value back in.
             is ZakatEvent.UpdateGoldPrice -> persist("gold_price") {
-                settingsRepository.setZakatGoldPricePerGram(event.pricePerGram)
+                zakatSettings.setZakatGoldPricePerGram(event.pricePerGram)
             }
 
             is ZakatEvent.UpdateSilverPrice -> persist("silver_price") {
-                settingsRepository.setZakatSilverPricePerGram(event.pricePerGram)
+                zakatSettings.setZakatSilverPricePerGram(event.pricePerGram)
             }
 
             is ZakatEvent.SetCurrency -> persist("currency") {
-                settingsRepository.setZakatCurrency(event.currency)
+                zakatSettings.setZakatCurrency(event.currency)
             }
 
             ZakatEvent.ClearAll -> {

@@ -110,7 +110,7 @@ class HomeViewModelTest {
             fastingUseCases = buildFastingUseCases(fastingRepository),
             hadithUseCases = buildHadithUseCases(hadithRepository),
             duaUseCases = buildDuaUseCases(duaRepository),
-            settingsRepository = settingsRepository,
+            locationSettings = settingsRepository,
             announcementUseCases = announcementUseCases,
             observeEventCards = buildObserveEventCardsUseCase(announcementUseCases),
             nextWorshipResolver = nextWorshipResolver,

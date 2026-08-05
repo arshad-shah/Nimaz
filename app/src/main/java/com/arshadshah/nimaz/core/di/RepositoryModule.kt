@@ -35,6 +35,14 @@ import com.arshadshah.nimaz.domain.repository.ProphetRepository
 import com.arshadshah.nimaz.domain.repository.QaidaRepository
 import com.arshadshah.nimaz.domain.repository.QuranRepository
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
+import com.arshadshah.nimaz.domain.repository.settings.AiSettings
+import com.arshadshah.nimaz.domain.repository.settings.AppSettings
+import com.arshadshah.nimaz.domain.repository.settings.DuaDisplaySettings
+import com.arshadshah.nimaz.domain.repository.settings.HadithDisplaySettings
+import com.arshadshah.nimaz.domain.repository.settings.LocationSettings
+import com.arshadshah.nimaz.domain.repository.settings.QuranPreferences
+import com.arshadshah.nimaz.domain.repository.settings.TasbihSettings
+import com.arshadshah.nimaz.domain.repository.settings.ZakatSettings
 import com.arshadshah.nimaz.domain.repository.TafseerRepository
 import com.arshadshah.nimaz.domain.repository.TasbihRepository
 import com.arshadshah.nimaz.domain.repository.ZakatRepository
@@ -376,6 +384,43 @@ abstract class RepositoryModule {
     abstract fun bindSettingsRepository(
         preferencesDataStore: PreferencesDataStore
     ): SettingsRepository
+
+    // Feature-scoped settings seams. Every one resolves to the same DataStore-backed
+    // singleton as SettingsRepository above — the split exists so a ViewModel declares
+    // which feature's preferences it depends on instead of taking all 179 members.
+    // See domain/repository/settings/SettingsSeams.kt.
+
+    @Binds
+    @Singleton
+    abstract fun bindQuranPreferences(impl: PreferencesDataStore): QuranPreferences
+
+    @Binds
+    @Singleton
+    abstract fun bindHadithDisplaySettings(impl: PreferencesDataStore): HadithDisplaySettings
+
+    @Binds
+    @Singleton
+    abstract fun bindDuaDisplaySettings(impl: PreferencesDataStore): DuaDisplaySettings
+
+    @Binds
+    @Singleton
+    abstract fun bindTasbihSettings(impl: PreferencesDataStore): TasbihSettings
+
+    @Binds
+    @Singleton
+    abstract fun bindZakatSettings(impl: PreferencesDataStore): ZakatSettings
+
+    @Binds
+    @Singleton
+    abstract fun bindAiSettings(impl: PreferencesDataStore): AiSettings
+
+    @Binds
+    @Singleton
+    abstract fun bindLocationSettings(impl: PreferencesDataStore): LocationSettings
+
+    @Binds
+    @Singleton
+    abstract fun bindAppSettings(impl: PreferencesDataStore): AppSettings
 }
 
 @Module

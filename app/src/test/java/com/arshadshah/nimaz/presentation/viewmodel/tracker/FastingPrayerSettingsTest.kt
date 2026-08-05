@@ -61,7 +61,6 @@ class FastingPrayerSettingsTest {
     private fun viewModel(prayers: FakePrayerTimetableRepository) = FastingViewModel(
         buildFastingUseCases(fasting),
         buildPrayerUseCases(prayers),
-        settings,
         RecordingTelemetry(),
     )
 

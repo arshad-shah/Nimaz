@@ -21,7 +21,7 @@ import com.arshadshah.nimaz.domain.model.QiblaCalculator
 import com.arshadshah.nimaz.domain.model.QiblaDirection
 import com.arshadshah.nimaz.domain.model.QiblaInfo
 import com.arshadshah.nimaz.domain.model.isLocationSet
-import com.arshadshah.nimaz.domain.repository.SettingsRepository
+import com.arshadshah.nimaz.domain.repository.settings.LocationSettings
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
@@ -36,7 +36,7 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class QiblaViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val settingsRepository: SettingsRepository,
+    private val locationSettings: LocationSettings,
     private val telemetry: Telemetry,
 ) : ViewModel() {
 
@@ -209,9 +209,9 @@ class QiblaViewModel @Inject constructor(
     private fun observeLocation() {
         viewModelScope.launch {
             combine(
-                settingsRepository.latitude,
-                settingsRepository.longitude,
-                settingsRepository.locationName
+                locationSettings.latitude,
+                locationSettings.longitude,
+                locationSettings.locationName
             ) { lat, lng, name ->
                 Triple(lat, lng, name)
             }.collect { (lat, lng, name) ->

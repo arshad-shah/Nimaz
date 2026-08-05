@@ -56,7 +56,6 @@ class PrayerTimesMidnightTest {
 
     private fun viewModel() = PrayerTimesViewModel(
         buildPrayerUseCases(FakePrayerTimetableRepository(prayerCalculationSettings())),
-        settings,
         todayProvider,
         dispatcher,
         RecordingTelemetry(),

@@ -30,7 +30,7 @@ import com.arshadshah.nimaz.domain.model.SurahInfo
 import com.arshadshah.nimaz.domain.model.SurahOverview
 import com.arshadshah.nimaz.domain.model.SurahWithAyahs
 import com.arshadshah.nimaz.domain.model.TranslationLanguage
-import com.arshadshah.nimaz.domain.repository.SettingsRepository
+import com.arshadshah.nimaz.domain.repository.settings.QuranPreferences
 import com.arshadshah.nimaz.domain.usecase.KhatamUseCases
 import com.arshadshah.nimaz.domain.usecase.QuranUseCases
 import com.arshadshah.nimaz.presentation.theme.AmiriFontFamily
@@ -79,7 +79,7 @@ data class FavoriteAyahUi(
 class QuranViewModel @Inject constructor(
     private val quranUseCases: QuranUseCases,
     val audioManager: QuranAudioManager,
-    private val settingsRepository: SettingsRepository,
+    private val quranSettings: QuranPreferences,
     private val khatamUseCases: KhatamUseCases,
     private val telemetry: Telemetry,
     @ApplicationContext private val context: Context
@@ -304,7 +304,7 @@ class QuranViewModel @Inject constructor(
                     newValue = !it.showTranslation
                     it.copy(showTranslation = newValue)
                 }
-                viewModelScope.launch { settingsRepository.setShowTranslation(newValue) }
+                viewModelScope.launch { quranSettings.setShowTranslation(newValue) }
             }
 
             QuranEvent.ClearSearch -> {
@@ -372,20 +372,20 @@ class QuranViewModel @Inject constructor(
             var hydrated = false
             // Split into two groups of 4 to use typed combine overloads
             val displayFlow = combine(
-                settingsRepository.quranTranslatorId,
-                settingsRepository.showTranslation,
-                settingsRepository.showTransliteration,
-                settingsRepository.quranArabicFontSize,
-                settingsRepository.quranArabicFont
+                quranSettings.quranTranslatorId,
+                quranSettings.showTranslation,
+                quranSettings.showTransliteration,
+                quranSettings.quranArabicFontSize,
+                quranSettings.quranArabicFont
             ) { translatorId: String, showTrans: Boolean, showTranslit: Boolean, arabicSize: Float, fontId: String ->
                 QuranDisplaySettings(translatorId, showTrans, showTranslit, arabicSize, fontId)
             }
 
             val behaviorFlow = combine(
-                settingsRepository.quranTranslationFontSize,
-                settingsRepository.continuousReading,
-                settingsRepository.keepScreenOn,
-                settingsRepository.selectedReciterId
+                quranSettings.quranTranslationFontSize,
+                quranSettings.continuousReading,
+                quranSettings.keepScreenOn,
+                quranSettings.selectedReciterId
             ) { transSize: Float, continuous: Boolean, keepOn: Boolean, reciter: String? ->
                 QuranBehaviorSettings(transSize, continuous, keepOn, reciter)
             }
@@ -393,9 +393,9 @@ class QuranViewModel @Inject constructor(
             combine(
                 displayFlow,
                 behaviorFlow,
-                settingsRepository.showTajweed,
-                settingsRepository.tajweedUnderline,
-                settingsRepository.quranMushafScript
+                quranSettings.showTajweed,
+                quranSettings.tajweedUnderline,
+                quranSettings.quranMushafScript
             ) { display, behavior, showTajweed, tajweedUnderline, mushafScript ->
                 QuranReaderSettings(display, behavior, showTajweed, tajweedUnderline,
                     MushafScript.fromName(mushafScript))
@@ -644,7 +644,7 @@ class QuranViewModel @Inject constructor(
      */
     private fun observeMushafPagination() {
         viewModelScope.launch {
-            settingsRepository.quranMushafScript
+            quranSettings.quranMushafScript
                 .map { MushafScript.fromName(it) }
                 .distinctUntilChanged()
                 .collect { script ->
@@ -671,7 +671,7 @@ class QuranViewModel @Inject constructor(
      * wasted full-surah read on every reader open. [loadVerseOfTheDay] already resolved the
      * preference this way; the reader paths did not.
      */
-    private suspend fun translatorId(): String = settingsRepository.quranTranslatorId.first()
+    private suspend fun translatorId(): String = quranSettings.quranTranslatorId.first()
 
     /**
      * The Mushaf edition content is fetched with, read from where it is persisted — the same
@@ -679,7 +679,7 @@ class QuranViewModel @Inject constructor(
      * decides which ayahs page N even holds.
      */
     private suspend fun mushafScript(): MushafScript =
-        MushafScript.fromName(settingsRepository.quranMushafScript.first())
+        MushafScript.fromName(quranSettings.quranMushafScript.first())
 
     private fun loadVerseOfTheDay() {
         viewModelScope.launch {

@@ -15,7 +15,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.CrashReporter
-import com.arshadshah.nimaz.domain.repository.SettingsRepository
+import com.arshadshah.nimaz.domain.repository.settings.AppSettings
+import com.arshadshah.nimaz.domain.repository.settings.LocationSettings
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
@@ -39,7 +40,8 @@ import kotlin.coroutines.resumeWithException
 @HiltViewModel
 class OnboardingViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val settingsRepository: SettingsRepository
+    private val appSettings: AppSettings,
+    private val locationSettings: LocationSettings
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(OnboardingUiState())
@@ -89,7 +91,7 @@ class OnboardingViewModel @Inject constructor(
     private fun checkOnboardingStatus() {
         viewModelScope.launch {
             try {
-                val completed = settingsRepository.onboardingCompleted.first()
+                val completed = appSettings.onboardingCompleted.first()
                 _state.update {
                     it.copy(
                         onboardingCompleted = completed,
@@ -112,7 +114,7 @@ class OnboardingViewModel @Inject constructor(
     private fun completeOnboarding() {
         viewModelScope.launch {
             try {
-                settingsRepository.setOnboardingCompleted(true)
+                appSettings.setOnboardingCompleted(true)
                 val current = _state.value
                 AppAnalytics.logOnboardingCompleted(
                     locationGranted = current.locationPermissionGranted,
@@ -226,7 +228,7 @@ class OnboardingViewModel @Inject constructor(
                     }
 
                     // Save location to DataStore
-                    settingsRepository.updateLocation(
+                    locationSettings.updateLocation(
                         latitude = location.first,
                         longitude = location.second,
                         name = locationName

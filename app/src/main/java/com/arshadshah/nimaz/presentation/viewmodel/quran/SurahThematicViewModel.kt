@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.domain.model.AyahTheme
 import com.arshadshah.nimaz.domain.model.Surah
 import com.arshadshah.nimaz.domain.model.SurahOverview
-import com.arshadshah.nimaz.domain.repository.SettingsRepository
+import com.arshadshah.nimaz.domain.repository.settings.QuranPreferences
 import com.arshadshah.nimaz.domain.usecase.QuranUseCases
 import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.core.monitoring.launchSafely
@@ -22,7 +22,7 @@ import javax.inject.Inject
 @HiltViewModel
 class SurahThematicViewModel @Inject constructor(
     private val quranUseCases: QuranUseCases,
-    settingsRepository: SettingsRepository,
+    quranSettings: QuranPreferences,
     private val telemetry: Telemetry,
 ) : ViewModel() {
 
@@ -64,7 +64,7 @@ class SurahThematicViewModel @Inject constructor(
     private var loadingSurah: Int? = null
 
     init {
-        settingsRepository.quranTranslationFontSize
+        quranSettings.quranTranslationFontSize
             .onEach { size -> _backgroundState.update { it.copy(proseFontSize = size) } }
             .launchIn(viewModelScope)
     }
