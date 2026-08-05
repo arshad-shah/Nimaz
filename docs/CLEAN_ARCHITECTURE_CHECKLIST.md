@@ -934,6 +934,30 @@ module (`ObserveLocalEventsUseCase`) is a false positive. Read the hit before ac
 
 ---
 
+### AP-7.12 · Screen states improvised per screen
+
+- [ ] **19 screens spin their own spinner, 11 `UiState`s carry an error nothing reads, and 9
+  ViewModels `launchSafely` without an `onFailure`.** Three separate defects, one missing rule.
+  A failure that reaches only telemetry leaves the abandoned state saying `isLoading = true`, so
+  the screen spins forever; a failure that reaches state nothing renders is invisible; and
+  `SurahSubjects`/`Passages`/`Background` evaluate `isEmpty()` before `error`, so a failed load
+  is reported to the reader as "there is nothing here".
+
+  Held by `ScreenStateConventionTest`, whose three backlogs are seeded with exactly the above
+  and asserted in both directions — a stale entry fails as loudly as a new violation. Tick this
+  when all three empty. The contract and the six delivery layers are in
+  `docs/superpowers/specs/2026-08-05-screen-state-migration-design.md`; the rule itself is
+  `ARCHITECTURE.md` §8.
+
+  ```bash
+  cd app/src/main/java/com/arshadshah/nimaz
+  echo "hand-rolled spinners:";  grep -rln --include='*.kt' 'CircularProgressIndicator(' presentation/screens
+  echo "UiStates with an error:"; grep -rln --include='*.kt' -E 'val error(Res)? ' presentation/viewmodel | sort
+  echo "silent launchSafely:";    grep -rc 'launchSafely(' --include='*ViewModel.kt' presentation/viewmodel
+  ```
+
+---
+
 ## Quick full re-scan
 
 ```bash

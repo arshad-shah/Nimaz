@@ -817,6 +817,28 @@ typed route object.
   In particular:
     - a full-screen centred spinner is `NimazLoadingState(modifier = Modifier.padding(padding))`,
       **not** an inline `Box(fillMaxSize, Center) { CircularProgressIndicator() }`;
+    - a failed load is `NimazErrorState(title = …, kind = NimazErrorKind.X, variant = …)` — **not**
+      a bare red `Text` or a hand-rolled icon + `TextButton` column. It mirrors
+      `NimazLoadingState`'s `FULLSCREEN`/`SECTION`/`INLINE` variants so a screen can swap
+      loading → error without changing layout; the `NimazErrorKind` picks the glyph and
+      `NimazTone`, the caller owns the copy, and the whole state is announced as a polite live
+      region. Full-screen and section failures are anchored by the *fractured shamsa* — the
+      `scallopPath` medallion drawn as a slowly turning broken ring;
+    - **the four states are evaluated in one fixed order, in every screen:**
+      `isLoading && empty` → `NimazLoadingState`; `error != null` → `NimazErrorState`;
+      `empty` → `NimazEmptyState`; else content. Three properties follow, and each one fixes a
+      defect the app shipped: **error beats empty**, so a failed load can never be reported as
+      "there is nothing here" (`SurahSubjects`/`Passages`/`Background` did exactly that);
+      **loading only wins when the screen is bare**, so a failed *refresh* never blanks out
+      content someone is reading — that case is a `SECTION`/`INLINE` error or a `NimazBanner`;
+      and **all three take the scaffold's `paddingValues`**, because they fill and centre, so
+      omitting it centres them against the window and tucks them under the top bar.
+      A failing `UiState` carries `error: UiError?`
+      (`presentation/viewmodel/UiError.kt`) and never a raw `String`: the copy is a `@StringRes`
+      so it is translated, and the exception's text goes in `details`, which the component hides
+      behind a toggle. Every user-visible load path passes `onFailure` to `launchSafely` — a
+      failure that reaches only telemetry leaves the state saying `isLoading = true` forever.
+      `ScreenStateConventionTest` holds all of this, with a backlog that only shrinks;
     - **card separation is chosen by context, never by hand-rolled colours** — three strategies:
       a card sitting on the page background is
       `NimazCard(tone = NimazTone.NEUTRAL, style = NimazCardStyle.ELEVATED)` (the shadow reads in
