@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.time.TodayProvider
 import com.arshadshah.nimaz.core.monitoring.Telemetry
+import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.core.monitoring.catchAndReport
 import com.arshadshah.nimaz.core.util.LocaleHelper
 import com.arshadshah.nimaz.core.util.PrayerNotificationScheduler
@@ -323,7 +324,7 @@ class SettingsViewModel @Inject constructor(
             // General
             is SettingsEvent.SetTheme -> {
                 _generalState.update { it.copy(theme = event.theme) }
-                viewModelScope.launch {
+                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") {
                     val modeString = when (event.theme) {
                         AppTheme.SYSTEM -> "system"
                         AppTheme.LIGHT -> "light"
@@ -341,7 +342,7 @@ class SettingsViewModel @Inject constructor(
                     AppAnalytics.UserProperty.APP_LANGUAGE,
                     event.language.code
                 )
-                viewModelScope.launch {
+                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") {
                     settingsRepository.setAppLanguage(event.language.code)
                     LocaleHelper.setLocale(context, event.language.code)
                     _shouldRestart.value = true
@@ -350,27 +351,27 @@ class SettingsViewModel @Inject constructor(
 
             is SettingsEvent.SetHijriPrimary -> {
                 _generalState.update { it.copy(useHijriPrimary = event.enabled) }
-                viewModelScope.launch { settingsRepository.setUseHijriPrimary(event.enabled) }
+                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") { settingsRepository.setUseHijriPrimary(event.enabled) }
             }
 
             is SettingsEvent.SetHijriDayOffset -> {
                 _generalState.update { it.copy(hijriDayOffset = event.days) }
-                viewModelScope.launch { settingsRepository.setHijriDayOffset(event.days) }
+                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") { settingsRepository.setHijriDayOffset(event.days) }
             }
 
             is SettingsEvent.Set24HourFormat -> {
                 _generalState.update { it.copy(use24HourFormat = event.enabled) }
-                viewModelScope.launch { settingsRepository.setUse24HourFormat(event.enabled) }
+                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") { settingsRepository.setUse24HourFormat(event.enabled) }
             }
 
             is SettingsEvent.SetHapticFeedback -> {
                 _generalState.update { it.copy(hapticFeedback = event.enabled) }
-                viewModelScope.launch { settingsRepository.setHapticFeedback(event.enabled) }
+                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") { settingsRepository.setHapticFeedback(event.enabled) }
             }
 
             is SettingsEvent.SetShowIslamicPatterns -> {
                 _generalState.update { it.copy(showIslamicPatterns = event.enabled) }
-                viewModelScope.launch { settingsRepository.setShowIslamicPatterns(event.enabled) }
+                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") { settingsRepository.setShowIslamicPatterns(event.enabled) }
             }
 
             is SettingsEvent.SetPatternStyle -> {
@@ -381,7 +382,7 @@ class SettingsViewModel @Inject constructor(
                 _generalState.update {
                     it.copy(patternStyle = event.style, showIslamicPatterns = enabled)
                 }
-                viewModelScope.launch {
+                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") {
                     settingsRepository.setPatternStyle(event.style.name)
                     settingsRepository.setShowIslamicPatterns(enabled)
                 }
@@ -389,17 +390,17 @@ class SettingsViewModel @Inject constructor(
 
             is SettingsEvent.SetAnimationsEnabled -> {
                 _generalState.update { it.copy(animationsEnabled = event.enabled) }
-                viewModelScope.launch { settingsRepository.setAnimationsEnabled(event.enabled) }
+                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") { settingsRepository.setAnimationsEnabled(event.enabled) }
             }
 
             is SettingsEvent.SetShowCountdown -> {
                 _generalState.update { it.copy(showCountdown = event.enabled) }
-                viewModelScope.launch { settingsRepository.setShowCountdown(event.enabled) }
+                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") { settingsRepository.setShowCountdown(event.enabled) }
             }
 
             is SettingsEvent.SetShowQuickActions -> {
                 _generalState.update { it.copy(showQuickActions = event.enabled) }
-                viewModelScope.launch { settingsRepository.setShowQuickActions(event.enabled) }
+                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") { settingsRepository.setShowQuickActions(event.enabled) }
             }
 
             // Prayer
@@ -409,7 +410,7 @@ class SettingsViewModel @Inject constructor(
                     AppAnalytics.UserProperty.CALC_METHOD,
                     event.method.name
                 )
-                viewModelScope.launch {
+                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") {
                     settingsRepository.setCalculationMethod(event.method.name)
                     rescheduleNotifications()
                 }
@@ -417,7 +418,7 @@ class SettingsViewModel @Inject constructor(
 
             is SettingsEvent.SetAsrMethod -> {
                 _prayerState.update { it.copy(asrMethod = event.method) }
-                viewModelScope.launch {
+                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") {
                     settingsRepository.setAsrCalculation(event.method.name.lowercase())
                     rescheduleNotifications()
                 }
@@ -425,7 +426,7 @@ class SettingsViewModel @Inject constructor(
 
             is SettingsEvent.SetHighLatitudeRule -> {
                 _prayerState.update { it.copy(highLatitudeRule = event.rule) }
-                viewModelScope.launch {
+                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") {
                     settingsRepository.setHighLatitudeRule(event.rule.name)
                     rescheduleNotifications()
                 }
@@ -433,7 +434,7 @@ class SettingsViewModel @Inject constructor(
 
             is SettingsEvent.SetPrayerAdjustment -> {
                 updatePrayerAdjustment(event.prayer, event.minutes)
-                viewModelScope.launch {
+                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") {
                     settingsRepository.setPrayerAdjustment(event.prayer, event.minutes)
                     rescheduleNotifications()
                 }
@@ -446,7 +447,7 @@ class SettingsViewModel @Inject constructor(
                     AppAnalytics.UserProperty.NOTIFICATIONS_ENABLED,
                     event.enabled.toString()
                 )
-                viewModelScope.launch {
+                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") {
                     settingsRepository.setPrayerNotificationsEnabled(event.enabled)
                     rescheduleNotifications()
                 }
@@ -454,7 +455,7 @@ class SettingsViewModel @Inject constructor(
 
             is SettingsEvent.SetPrayerNotification -> {
                 updatePrayerNotification(event.prayer, event.enabled)
-                viewModelScope.launch {
+                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") {
                     settingsRepository.setPrayerNotificationEnabled(event.prayer, event.enabled)
                     rescheduleNotifications()
                 }
@@ -462,7 +463,7 @@ class SettingsViewModel @Inject constructor(
 
             is SettingsEvent.SetAdhanEnabled -> {
                 _notificationState.update { it.copy(adhanEnabled = event.enabled) }
-                viewModelScope.launch {
+                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") {
                     settingsRepository.setAdhanEnabled(event.enabled)
                     rescheduleNotifications()
                 }
@@ -474,7 +475,7 @@ class SettingsViewModel @Inject constructor(
                     it.copy(alertStyles = it.alertStyles + (prayer to event.style))
                 }
                 // The style is read at fire time, so there is nothing to reschedule.
-                viewModelScope.launch {
+                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") {
                     settingsRepository.setPrayerAlertStyle(prayer, event.style)
                 }
             }
@@ -484,7 +485,7 @@ class SettingsViewModel @Inject constructor(
                 _notificationState.update {
                     it.copy(reminderEnabled = it.reminderEnabled + (prayer to event.enabled))
                 }
-                viewModelScope.launch {
+                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") {
                     settingsRepository.setPrayerReminderEnabled(prayer, event.enabled)
                     // The lead time is baked into the alarm, so this one does need rearming.
                     rescheduleNotifications()
@@ -496,7 +497,7 @@ class SettingsViewModel @Inject constructor(
                 _notificationState.update {
                     it.copy(reminderOffsets = it.reminderOffsets + (prayer to event.minutes))
                 }
-                viewModelScope.launch {
+                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") {
                     settingsRepository.setPrayerReminderMinutes(prayer, event.minutes)
                     rescheduleNotifications()
                 }
@@ -504,17 +505,17 @@ class SettingsViewModel @Inject constructor(
 
             is SettingsEvent.SetVibrationEnabled -> {
                 _notificationState.update { it.copy(vibrationEnabled = event.enabled) }
-                viewModelScope.launch { settingsRepository.setNotificationVibration(event.enabled) }
+                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") { settingsRepository.setNotificationVibration(event.enabled) }
             }
 
             is SettingsEvent.SetRespectDnd -> {
                 _notificationState.update { it.copy(respectDnd = event.enabled) }
-                viewModelScope.launch { settingsRepository.setAdhanRespectDnd(event.enabled) }
+                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") { settingsRepository.setAdhanRespectDnd(event.enabled) }
             }
 
             is SettingsEvent.SetReminderMinutes -> {
                 _notificationState.update { it.copy(reminderMinutes = event.minutes) }
-                viewModelScope.launch {
+                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") {
                     settingsRepository.setNotificationReminderMinutes(event.minutes)
                     rescheduleNotifications()
                 }
@@ -522,7 +523,7 @@ class SettingsViewModel @Inject constructor(
 
             is SettingsEvent.SetShowReminderBefore -> {
                 _notificationState.update { it.copy(showReminderBefore = event.enabled) }
-                viewModelScope.launch {
+                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") {
                     settingsRepository.setShowReminderBefore(event.enabled)
                     rescheduleNotifications()
                 }
@@ -530,12 +531,12 @@ class SettingsViewModel @Inject constructor(
 
             is SettingsEvent.SetPersistentNotification -> {
                 _notificationState.update { it.copy(persistentNotification = event.enabled) }
-                viewModelScope.launch { settingsRepository.setPersistentNotification(event.enabled) }
+                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") { settingsRepository.setPersistentNotification(event.enabled) }
             }
 
             is SettingsEvent.SetFridayReminderEnabled -> {
                 _notificationState.update { it.copy(fridayReminderEnabled = event.enabled) }
-                viewModelScope.launch {
+                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") {
                     settingsRepository.setFridayReminderEnabled(event.enabled)
                     rescheduleNotifications()
                 }
@@ -543,7 +544,7 @@ class SettingsViewModel @Inject constructor(
 
             is SettingsEvent.SetFridayReminderMinutes -> {
                 _notificationState.update { it.copy(fridayReminderMinutes = event.minutes) }
-                viewModelScope.launch {
+                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") {
                     settingsRepository.setFridayReminderMinutes(event.minutes)
                     rescheduleNotifications()
                 }
@@ -551,7 +552,7 @@ class SettingsViewModel @Inject constructor(
 
             is SettingsEvent.SetKhatamReminderEnabled -> {
                 _notificationState.update { it.copy(khatamReminderEnabled = event.enabled) }
-                viewModelScope.launch {
+                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") {
                     settingsRepository.setKhatamReminderEnabled(event.enabled)
                     rescheduleNotifications()
                 }
@@ -559,7 +560,7 @@ class SettingsViewModel @Inject constructor(
 
             is SettingsEvent.SetKhatamReminderTime -> {
                 _notificationState.update { it.copy(khatamReminderTime = event.time) }
-                viewModelScope.launch {
+                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") {
                     settingsRepository.setKhatamReminderTime(event.time)
                     rescheduleNotifications()
                 }
@@ -569,7 +570,7 @@ class SettingsViewModel @Inject constructor(
                 _notificationState.update {
                     it.copy(worshipReminders = it.worshipReminders + (event.key to event.enabled))
                 }
-                viewModelScope.launch {
+                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") {
                     settingsRepository.setWorshipReminderEnabled(event.key, event.enabled)
                     rescheduleNotifications()
                 }
@@ -579,7 +580,7 @@ class SettingsViewModel @Inject constructor(
                 _notificationState.update {
                     it.copy(worshipOffsets = it.worshipOffsets + (event.key to event.minutes))
                 }
-                viewModelScope.launch {
+                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") {
                     settingsRepository.setWorshipReminderOffset(event.key, event.minutes)
                     rescheduleNotifications()
                 }
@@ -589,7 +590,7 @@ class SettingsViewModel @Inject constructor(
                 _notificationState.update {
                     it.copy(worshipModes = it.worshipModes + (event.key to event.mode))
                 }
-                viewModelScope.launch {
+                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") {
                     settingsRepository.setWorshipReminderMode(event.key, event.mode)
                     rescheduleNotifications()
                 }
@@ -597,7 +598,7 @@ class SettingsViewModel @Inject constructor(
 
             is SettingsEvent.SetAdhanSound -> {
                 _notificationState.update { it.copy(selectedAdhanSound = event.sound) }
-                viewModelScope.launch {
+                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") {
                     settingsRepository.setSelectedAdhanSound(event.sound)
                     // Download the selected adhan if not already downloaded
                     val sound = AdhanSound.fromName(event.sound)
@@ -609,7 +610,7 @@ class SettingsViewModel @Inject constructor(
 
             SettingsEvent.PreviewAdhanSound -> {
                 val sound = AdhanSound.fromName(_notificationState.value.selectedAdhanSound)
-                viewModelScope.launch {
+                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") {
                     try {
                         // Ensure both variants are downloaded
                         if (!adhanAudioManager.isFullyDownloaded(sound)) {
@@ -617,7 +618,7 @@ class SettingsViewModel @Inject constructor(
                             if (!success) {
                                 _adhanPreviewError.value =
                                     "Failed to download adhan audio. Please check your internet connection."
-                                return@launch
+                                return@launchSafely
                             }
                         }
                         // Now play the preview
@@ -636,129 +637,129 @@ class SettingsViewModel @Inject constructor(
             // Quran
             is SettingsEvent.SetTranslator -> {
                 _quranState.update { it.copy(selectedTranslatorId = event.translatorId) }
-                viewModelScope.launch { settingsRepository.setQuranTranslatorId(event.translatorId) }
+                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") { settingsRepository.setQuranTranslatorId(event.translatorId) }
             }
 
             is SettingsEvent.SetArabicFont -> {
                 _quranState.update { it.copy(selectedArabicFontId = event.fontId) }
-                viewModelScope.launch { settingsRepository.setQuranArabicFont(event.fontId) }
+                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") { settingsRepository.setQuranArabicFont(event.fontId) }
             }
 
             is SettingsEvent.SetShowTranslation -> {
                 _quranState.update { it.copy(showTranslation = event.enabled) }
-                viewModelScope.launch { settingsRepository.setShowTranslation(event.enabled) }
+                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") { settingsRepository.setShowTranslation(event.enabled) }
             }
 
             is SettingsEvent.SetShowTransliteration -> {
                 _quranState.update { it.copy(showTransliteration = event.enabled) }
-                viewModelScope.launch { settingsRepository.setShowTransliteration(event.enabled) }
+                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") { settingsRepository.setShowTransliteration(event.enabled) }
             }
 
             is SettingsEvent.SetArabicFontSize -> {
                 _quranState.update { it.copy(arabicFontSize = event.size) }
-                viewModelScope.launch { settingsRepository.setQuranArabicFontSize(event.size) }
+                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") { settingsRepository.setQuranArabicFontSize(event.size) }
             }
 
             is SettingsEvent.SetTranslationFontSize -> {
                 _quranState.update { it.copy(translationFontSize = event.size) }
-                viewModelScope.launch { settingsRepository.setQuranTranslationFontSize(event.size) }
+                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") { settingsRepository.setQuranTranslationFontSize(event.size) }
             }
 
             is SettingsEvent.SetContinuousReading -> {
                 _quranState.update { it.copy(continuousReading = event.enabled) }
-                viewModelScope.launch { settingsRepository.setContinuousReading(event.enabled) }
+                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") { settingsRepository.setContinuousReading(event.enabled) }
             }
 
             is SettingsEvent.SetKeepScreenOn -> {
                 _quranState.update { it.copy(keepScreenOn = event.enabled) }
-                viewModelScope.launch { settingsRepository.setKeepScreenOn(event.enabled) }
+                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") { settingsRepository.setKeepScreenOn(event.enabled) }
             }
 
             is SettingsEvent.SetReciter -> {
                 _quranState.update { it.copy(selectedReciterId = event.reciterId) }
-                viewModelScope.launch { settingsRepository.setSelectedReciterId(event.reciterId) }
+                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") { settingsRepository.setSelectedReciterId(event.reciterId) }
             }
 
             is SettingsEvent.SetShowTajweed -> {
                 _quranState.update { it.copy(showTajweed = event.enabled) }
-                viewModelScope.launch { settingsRepository.setShowTajweed(event.enabled) }
+                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") { settingsRepository.setShowTajweed(event.enabled) }
             }
 
             is SettingsEvent.SetTajweedUnderline -> {
                 _quranState.update { it.copy(tajweedUnderline = event.enabled) }
-                viewModelScope.launch { settingsRepository.setTajweedUnderline(event.enabled) }
+                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") { settingsRepository.setTajweedUnderline(event.enabled) }
             }
 
             is SettingsEvent.SetMushafScript -> {
                 _quranState.update { it.copy(mushafScript = event.script) }
-                viewModelScope.launch { settingsRepository.setQuranMushafScript(event.script.name) }
+                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") { settingsRepository.setQuranMushafScript(event.script.name) }
             }
 
             // Dua
             is SettingsEvent.SetDuaArabicFont -> {
                 _duaState.update { it.copy(selectedArabicFontId = event.fontId) }
-                viewModelScope.launch { settingsRepository.setDuaArabicFont(event.fontId) }
+                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") { settingsRepository.setDuaArabicFont(event.fontId) }
             }
 
             is SettingsEvent.SetDuaArabicFontSize -> {
                 _duaState.update { it.copy(arabicFontSize = event.size) }
-                viewModelScope.launch { settingsRepository.setDuaArabicFontSize(event.size) }
+                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") { settingsRepository.setDuaArabicFontSize(event.size) }
             }
 
             is SettingsEvent.SetDuaTranslationFontSize -> {
                 _duaState.update { it.copy(translationFontSize = event.size) }
-                viewModelScope.launch { settingsRepository.setDuaTranslationFontSize(event.size) }
+                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") { settingsRepository.setDuaTranslationFontSize(event.size) }
             }
 
             is SettingsEvent.SetDuaShowArabic -> {
                 _duaState.update { it.copy(showArabic = event.enabled) }
-                viewModelScope.launch { settingsRepository.setDuaShowArabic(event.enabled) }
+                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") { settingsRepository.setDuaShowArabic(event.enabled) }
             }
 
             is SettingsEvent.SetDuaShowTransliteration -> {
                 _duaState.update { it.copy(showTransliteration = event.enabled) }
-                viewModelScope.launch { settingsRepository.setDuaShowTransliteration(event.enabled) }
+                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") { settingsRepository.setDuaShowTransliteration(event.enabled) }
             }
 
             is SettingsEvent.SetDuaShowTranslation -> {
                 _duaState.update { it.copy(showTranslation = event.enabled) }
-                viewModelScope.launch { settingsRepository.setDuaShowTranslation(event.enabled) }
+                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") { settingsRepository.setDuaShowTranslation(event.enabled) }
             }
 
             // Hadith
             is SettingsEvent.SetHadithArabicFont -> {
                 _hadithState.update { it.copy(selectedArabicFontId = event.fontId) }
-                viewModelScope.launch { settingsRepository.setHadithArabicFont(event.fontId) }
+                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") { settingsRepository.setHadithArabicFont(event.fontId) }
             }
 
             is SettingsEvent.SetHadithArabicFontSize -> {
                 _hadithState.update { it.copy(arabicFontSize = event.size) }
-                viewModelScope.launch { settingsRepository.setHadithArabicFontSize(event.size) }
+                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") { settingsRepository.setHadithArabicFontSize(event.size) }
             }
 
             is SettingsEvent.SetHadithTranslationFontSize -> {
                 _hadithState.update { it.copy(translationFontSize = event.size) }
-                viewModelScope.launch { settingsRepository.setHadithTranslationFontSize(event.size) }
+                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") { settingsRepository.setHadithTranslationFontSize(event.size) }
             }
 
             is SettingsEvent.SetHadithShowArabic -> {
                 _hadithState.update { it.copy(showArabic = event.enabled) }
-                viewModelScope.launch { settingsRepository.setHadithShowArabic(event.enabled) }
+                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") { settingsRepository.setHadithShowArabic(event.enabled) }
             }
 
             is SettingsEvent.SetHadithShowTranslation -> {
                 _hadithState.update { it.copy(showTranslation = event.enabled) }
-                viewModelScope.launch { settingsRepository.setHadithShowTranslation(event.enabled) }
+                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") { settingsRepository.setHadithShowTranslation(event.enabled) }
             }
 
             is SettingsEvent.SetHadithShowGrade -> {
                 _hadithState.update { it.copy(showGrade = event.enabled) }
-                viewModelScope.launch { settingsRepository.setHadithShowGrade(event.enabled) }
+                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") { settingsRepository.setHadithShowGrade(event.enabled) }
             }
 
             is SettingsEvent.SetHadithShowChain -> {
                 _hadithState.update { it.copy(showChain = event.enabled) }
-                viewModelScope.launch { settingsRepository.setHadithShowChain(event.enabled) }
+                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") { settingsRepository.setHadithShowChain(event.enabled) }
             }
 
             // Location
@@ -785,7 +786,7 @@ class SettingsViewModel @Inject constructor(
 
             SettingsEvent.ResetNotifications -> {
                 telemetry.featureUsed(AppAnalytics.Feature.SETTINGS, "reset_notifications")
-                viewModelScope.launch {
+                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") {
                     prayerNotificationScheduler.cancelAllPrayerNotifications()
                     rescheduleNotifications()
                 }
@@ -796,7 +797,7 @@ class SettingsViewModel @Inject constructor(
     }
 
     private fun loadSettings() {
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "load_settings") {
             // General settings
             val theme = when (settingsRepository.themeMode.first()) {
                 "light" -> AppTheme.LIGHT
@@ -976,19 +977,19 @@ class SettingsViewModel @Inject constructor(
     }
 
     private fun loadLocations() {
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "load_locations") {
             prayerUseCases.getCurrentLocation().collect { location ->
                 _locationState.update { it.copy(currentLocation = location) }
             }
         }
 
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "load_locations") {
             prayerUseCases.getAllLocations().collect { locations ->
                 _locationState.update { it.copy(savedLocations = locations, isLoading = false) }
             }
         }
 
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "load_locations") {
             prayerUseCases.getFavoriteLocations().collect { favorites ->
                 _locationState.update { it.copy(favoriteLocations = favorites) }
             }
@@ -1037,26 +1038,26 @@ class SettingsViewModel @Inject constructor(
     }
 
     private fun setCurrentLocation(location: Location) {
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "set_current_location") {
             val id = prayerUseCases.insertLocation(location)
             prayerUseCases.setCurrentLocation(id)
         }
     }
 
     private fun addLocation(location: Location) {
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "add_location") {
             prayerUseCases.insertLocation(location)
         }
     }
 
     private fun removeLocation(location: Location) {
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "remove_location") {
             prayerUseCases.deleteLocation(location)
         }
     }
 
     private fun toggleLocationFavorite(locationId: Long) {
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "toggle_location_favorite") {
             prayerUseCases.toggleFavorite(locationId)
         }
     }
@@ -1069,7 +1070,7 @@ class SettingsViewModel @Inject constructor(
      */
     private fun resetToDefaults() {
         telemetry.featureUsed(AppAnalytics.Feature.SETTINGS, "reset_to_defaults")
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "reset_to_defaults") {
             settingsRepository.clearAllData()
             resetAllUiState()
             _shouldRestart.value = true
@@ -1098,7 +1099,7 @@ class SettingsViewModel @Inject constructor(
 
     private fun deleteAllData() {
         telemetry.featureUsed(AppAnalytics.Feature.SETTINGS, "delete_all_data")
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "delete_all_data") {
             // Everything the person made lives in the user database now, so "delete all my
             // data" clears that one — and it is a much more honest operation for it: the
             // content database is not touched at all, so there is no way for this to reach

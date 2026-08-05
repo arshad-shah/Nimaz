@@ -6,6 +6,7 @@ import com.arshadshah.nimaz.core.di.DefaultDispatcher
 import com.arshadshah.nimaz.core.time.TodayProvider
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.Telemetry
+import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.core.util.HijriDateCalculator
 import com.arshadshah.nimaz.domain.model.PrayerCalculationSettings
 import com.arshadshah.nimaz.domain.model.PrayerType
@@ -61,7 +62,7 @@ class MonthlyPrayerTimesViewModel @Inject constructor(
      * who has paged forward to Ramadan should not be yanked back at midnight.
      */
     private fun observeToday() {
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.PRAYER_TIMES, "observe_today") {
             todayProvider.todayChanges.collect { today ->
                 val month = YearMonth.from(today)
                 val wasOnCurrentMonth = _state.value.currentMonth?.let { it == month.minusMonths(1) }
@@ -123,7 +124,7 @@ class MonthlyPrayerTimesViewModel @Inject constructor(
      * result.
      */
     private fun observeSettings() {
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.PRAYER_TIMES, "observe_settings") {
             prayerUseCases.observeCalculationSettings().collect { resolved ->
                 settings = resolved
                 _state.update {
@@ -159,7 +160,12 @@ class MonthlyPrayerTimesViewModel @Inject constructor(
     private fun calculateMonth() {
         val month = _state.value.currentMonth ?: return
         monthJob?.cancel()
-        monthJob = viewModelScope.launch {
+        monthJob = launchSafely(
+            telemetry,
+            AppAnalytics.Feature.PRAYER_TIMES,
+            "calculate_month",
+            onFailure = { _state.update { it.copy(isLoading = false) } },
+        ) {
             _state.update { it.copy(isLoading = true) }
             val (days, ramadanYear) = withContext(defaultDispatcher) {
                 val computed = (1..month.lengthOfMonth()).map { dayTimesFor(month.atDay(it)) }
@@ -189,7 +195,7 @@ class MonthlyPrayerTimesViewModel @Inject constructor(
      */
     private fun prepareRamadanExport() {
         val year = _state.value.ramadanHijriYear ?: return
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.PRAYER_TIMES, "prepare_ramadan_export") {
             val rows = withContext(defaultDispatcher) {
                 val start = HijriDateCalculator.getFirstDayOfRamadan(year)
                 val end = HijriDateCalculator.getLastDayOfRamadan(year)

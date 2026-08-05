@@ -237,6 +237,26 @@ This one is **pervasive and lower priority** — listed so it's tracked, not bec
   (the wrapper is the seam the UI depends on), but if a use case adds no value and the feature is
   trivial, that's fine — don't over-engineer net-new tiny features.
 
+### AP-7.13 · Raw `viewModelScope.launch` (an uncaught throw is a crash)
+
+`viewModelScope` is a `SupervisorJob` + `Dispatchers.Main.immediate`. A `SupervisorJob`
+isolates *siblings* — it does **not** contain an exception thrown inside a child `launch`.
+That reaches the thread's uncaught handler, which on Android is a crash, and nothing is
+reported on the way out.
+
+- [x] ~~**229 raw `viewModelScope.launch` calls across 21 ViewModels.**~~ **Resolved.** All are
+  now `launchSafely(telemetry, feature, "label")`, so a throw is caught, reported to both
+  monitoring channels, and cancellation still propagates untouched. Labels are the enclosing
+  function in snake_case, so a failure names the operation that produced it.
+  `KhatamViewModel` and `OnboardingViewModel` were still calling the static `AppAnalytics` /
+  `CrashReporter` rather than the injected seam; both now take `Telemetry`, which is what made
+  them convertible. Every ViewModel in the package is now on the seam.
+  Twelve of the converted sites set `isLoading = true` and so could strand a spinner on
+  failure — those got an `onFailure` that clears it, per the triage in AP-7.12. The rest are
+  telemetry-only for the reasons recorded there.
+  **Detect:** `grep -rn "viewModelScope.launch" app/src/main --include='*ViewModel.kt'` — should
+  return nothing.
+
 ### AP-7.12 · A `launchSafely` without `onFailure` is not automatically a defect
 
 `launchSafely` **always reports to telemetry** — that is what it does. A call site without

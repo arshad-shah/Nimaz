@@ -3,6 +3,7 @@ package com.arshadshah.nimaz.presentation.viewmodel.search
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.monitoring.Telemetry
+import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.domain.model.DuaSearchResult
 import com.arshadshah.nimaz.domain.model.HadithSearchResult
 import com.arshadshah.nimaz.domain.model.LibrarySearchResults
@@ -143,7 +144,7 @@ class SearchViewModel @Inject constructor(
     ) {
         searchJob?.cancel()
         _searchState.update { it.copy(isSearching = true, error = null) }
-        searchJob = viewModelScope.launch {
+        searchJob = launchSafely(telemetry, DOMAIN, "launch_search") {
             if (debounceMillis > 0) delay(debounceMillis)
             // Logged here rather than in `onEvent`, which is both too early and too narrow.
             // Too early: it fired before `executeSearch` had checked the query, so tapping the
@@ -162,7 +163,7 @@ class SearchViewModel @Inject constructor(
                 _searchState.update {
                     it.copy(isSearching = false, error = e.message ?: "Search failed")
                 }
-                return@launch
+                return@launchSafely
             }
             publish(results)
         }

@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.withContext
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.Telemetry
+import com.arshadshah.nimaz.core.monitoring.launchSafely
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -34,7 +35,14 @@ class NightWorshipViewModel @Inject constructor(
 ) : ViewModel() {
 
     private fun refresh() {
-        viewModelScope.launch {
+        launchSafely(
+            telemetry,
+            AppAnalytics.Feature.NIGHT_WORSHIP,
+            "refresh",
+            onFailure = { throwable ->
+                _state.update { it.copy(isLoading = false, error = throwable.message) }
+            },
+        ) {
             _state.update { it.copy(isLoading = true, error = null) }
             computeNightTimes(
                 prayerUseCases.observeCalculationSettings().first(),
@@ -109,7 +117,14 @@ class NightWorshipViewModel @Inject constructor(
      * and the documented fix there is the one applied here: **collect**, do not `.first()`.
      */
     private fun observeNightTimes() {
-        viewModelScope.launch {
+        launchSafely(
+            telemetry,
+            AppAnalytics.Feature.NIGHT_WORSHIP,
+            "observe_night_times",
+            onFailure = { throwable ->
+                _state.update { it.copy(isLoading = false, error = throwable.message) }
+            },
+        ) {
             combine(
                 prayerUseCases.observeCalculationSettings(),
                 todayProvider.todayChanges,

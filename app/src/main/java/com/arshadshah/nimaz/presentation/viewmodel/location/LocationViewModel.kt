@@ -11,6 +11,7 @@ import com.arshadshah.nimaz.domain.model.CalculationMethod
 import com.arshadshah.nimaz.domain.model.Location
 import com.arshadshah.nimaz.domain.model.isLocationSet
 import com.arshadshah.nimaz.core.monitoring.Telemetry
+import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.domain.repository.DeviceLocationRepository
 import com.arshadshah.nimaz.domain.repository.PermissionChecker
 import com.arshadshah.nimaz.domain.repository.settings.LocationSettings
@@ -89,7 +90,7 @@ class LocationViewModel @Inject constructor(
     }
 
     private fun loadCurrentLocation() {
-        viewModelScope.launch {
+        launchSafely(telemetry, DOMAIN, "load_current_location") {
             try {
                 val prefs = locationSettings.userPreferences.first()
                 if (isLocationSet(prefs.latitude, prefs.longitude)) {
@@ -111,7 +112,7 @@ class LocationViewModel @Inject constructor(
     }
 
     private fun loadRecentLocations() {
-        viewModelScope.launch {
+        launchSafely(telemetry, DOMAIN, "load_recent_locations") {
             try {
                 // Ordered by the database, newest first. Taking the first five of
                 // `getAllLocations()` — which sorts `isFavorite DESC, name ASC` — produced an
@@ -158,7 +159,7 @@ class LocationViewModel @Inject constructor(
         if (query.length < 2) return
 
         searchJob?.cancel()
-        searchJob = viewModelScope.launch {
+        searchJob = launchSafely(telemetry, DOMAIN, "search_locations") {
             // Inside the cancellable block, so it debounces and cancel-and-replaces with one
             // mechanism: a keystroke within the window kills the previous coroutine before it
             // has issued anything at all.
@@ -202,7 +203,7 @@ class LocationViewModel @Inject constructor(
         }
 
     private fun selectLocation(location: SearchLocation) {
-        viewModelScope.launch {
+        launchSafely(telemetry, DOMAIN, "select_location") {
             try {
                 // Save to DataStore
                 locationSettings.updateLocation(
@@ -249,7 +250,7 @@ class LocationViewModel @Inject constructor(
             return
         }
 
-        viewModelScope.launch {
+        launchSafely(telemetry, DOMAIN, "detect_current_location") {
             _state.update { it.copy(isLoadingGps = true) }
             try {
                 val location = getCurrentLocation()

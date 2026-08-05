@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.presentation.viewmodel.quran
 
+import com.arshadshah.nimaz.core.monitoring.RecordingTelemetry
 import com.arshadshah.nimaz.domain.model.Khatam
 import com.arshadshah.nimaz.domain.usecase.KhatamUseCases
 import com.arshadshah.nimaz.domain.usecase.ObserveKhatamByIdUseCase
@@ -59,7 +60,7 @@ class KhatamEditFormTest {
     @After
     fun tearDown() = Dispatchers.resetMain()
 
-    private fun viewModel() = KhatamViewModel(useCases, quranUseCases)
+    private fun viewModel() = KhatamViewModel(useCases, quranUseCases, RecordingTelemetry())
 
     @Test
     fun `typing during the load survives it`() = runTest {

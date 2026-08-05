@@ -14,6 +14,8 @@ import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
+import com.arshadshah.nimaz.core.monitoring.Telemetry
+import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.domain.repository.settings.AppSettings
 import com.arshadshah.nimaz.domain.repository.settings.LocationSettings
@@ -41,7 +43,8 @@ import kotlin.coroutines.resumeWithException
 class OnboardingViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val appSettings: AppSettings,
-    private val locationSettings: LocationSettings
+    private val locationSettings: LocationSettings,
+    private val telemetry: Telemetry,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(OnboardingUiState())
@@ -89,7 +92,7 @@ class OnboardingViewModel @Inject constructor(
     }
 
     private fun checkOnboardingStatus() {
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.ONBOARDING, "check_onboarding_status") {
             try {
                 val completed = appSettings.onboardingCompleted.first()
                 _state.update {
@@ -112,7 +115,7 @@ class OnboardingViewModel @Inject constructor(
     }
 
     private fun completeOnboarding() {
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.ONBOARDING, "complete_onboarding") {
             try {
                 appSettings.setOnboardingCompleted(true)
                 val current = _state.value
@@ -219,7 +222,7 @@ class OnboardingViewModel @Inject constructor(
             return
         }
 
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.ONBOARDING, "detect_location") {
             try {
                 val location = getCurrentLocation()
                 if (location != null) {

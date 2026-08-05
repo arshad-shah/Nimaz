@@ -7,6 +7,7 @@ import android.util.Log
 import com.arshadshah.nimaz.BuildConfig
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.Telemetry
+import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.data.sync.CancelReason
 import com.arshadshah.nimaz.data.sync.ConnectionState
 import com.arshadshah.nimaz.data.sync.NearbyConnectionsManager
@@ -59,7 +60,7 @@ class SyncViewModel @Inject constructor(
         debugLog("SyncViewModel init")
         connectionsManager.setOnSignalReceived { signal -> handleSignal(signal) }
 
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.SYNC, "launch") {
             connectionsManager.connectionState.collect { state ->
                 debugLog("connectionState changed: $state (mode=${_uiState.value.mode})")
                 _uiState.update { current ->
@@ -263,7 +264,7 @@ class SyncViewModel @Inject constructor(
         connectionsManager.setOnDataReceived { bytes ->
             debugLog("onDataReceived callback invoked: ${bytes.size} bytes")
             addLogEntry("Received ${formatBytes(bytes.size.toLong())} of data")
-            viewModelScope.launch {
+            launchSafely(telemetry, AppAnalytics.Feature.SYNC, "start_receive") {
                 try {
                     updateStep("Reading received data...", 1)
                     debugLog("Decoding JSON payload (${bytes.size} bytes)...")
@@ -306,7 +307,7 @@ class SyncViewModel @Inject constructor(
 
     private fun sendData() {
         debugLog("sendData: starting export")
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.SYNC, "send_data") {
             try {
                 val payload = exporter.export { completed, _, step ->
                     addLogEntry(step)

@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.Telemetry
+import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.domain.model.Hadith
 import com.arshadshah.nimaz.domain.model.HadithBook
 import com.arshadshah.nimaz.domain.model.HadithBookmark
@@ -48,7 +49,7 @@ class HadithViewModel @Inject constructor(
     val bookmarksState: StateFlow<HadithBookmarksUiState> = _bookmarksState.asStateFlow()
 
     // Each of these collects a Room Flow, and a Room Flow never completes — so a bare
-    // `viewModelScope.launch { flow.collect { … } }` with no handle leaks a collector per
+    // `launchSafely(telemetry, AppAnalytics.Feature.HADITH, "launch") { flow.collect { … } }` with no handle leaks a collector per
     // invocation, all of them writing the same state for the lifetime of the ViewModel.
     // Search re-runs per keystroke (so an earlier, slower query could land last and win),
     // and the chapter/reader loaders re-run per navigation. One handle per *identity of the
@@ -140,7 +141,7 @@ class HadithViewModel @Inject constructor(
     }
 
     private fun loadAllBooks() {
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.HADITH, "load_all_books") {
             hadithUseCases.getAllBooks().collect { books ->
                 _collectionState.update {
                     it.copy(books = books, isLoading = false)
@@ -150,7 +151,7 @@ class HadithViewModel @Inject constructor(
     }
 
     private fun loadHadithOfTheDay() {
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.HADITH, "load_hadith_of_the_day") {
             val hadith = hadithUseCases.getHadithOfTheDay()
             _collectionState.update { it.copy(hadithOfTheDay = hadith) }
         }
@@ -159,7 +160,12 @@ class HadithViewModel @Inject constructor(
     private fun loadBook(bookId: String) {
         _chaptersState.update { it.copy(isLoading = true, error = null) }
         chaptersJob?.cancel()
-        chaptersJob = viewModelScope.launch {
+        chaptersJob = launchSafely(
+            telemetry,
+            AppAnalytics.Feature.HADITH,
+            "load_book",
+            onFailure = { _chaptersState.update { it.copy(isLoading = false) } },
+        ) {
             try {
                 val book = hadithUseCases.getBookById(bookId)
                 _chaptersState.update { it.copy(book = book) }
@@ -227,12 +233,17 @@ class HadithViewModel @Inject constructor(
     ) {
         _readerState.update { it.copy(isLoading = true, error = null) }
         readerJob?.cancel()
-        readerJob = viewModelScope.launch {
+        readerJob = launchSafely(
+            telemetry,
+            AppAnalytics.Feature.HADITH,
+            "start_reader_load",
+            onFailure = { _readerState.update { it.copy(isLoading = false) } },
+        ) {
             try {
                 val target = resolve()
                 if (target == null) {
                     _readerState.update { it.copy(error = "Hadith not found", isLoading = false) }
-                    return@launch
+                    return@launchSafely
                 }
                 val (chapterId, focusHadithId) = target
                 anchorHadithId = focusHadithId
@@ -274,7 +285,7 @@ class HadithViewModel @Inject constructor(
     private fun filterByGrade(grade: HadithGrade) {
         readerJob?.cancel()
         anchorHadithId = null
-        readerJob = viewModelScope.launch {
+        readerJob = launchSafely(telemetry, AppAnalytics.Feature.HADITH, "filter_by_grade") {
             try {
                 hadithUseCases.getHadithsByGrade(grade).collect { hadiths ->
                     _readerState.update {
@@ -295,13 +306,13 @@ class HadithViewModel @Inject constructor(
     }
 
     private fun toggleBookmark(hadithId: String, bookId: String, hadithNumber: Int) {
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.HADITH, "toggle_bookmark") {
             hadithUseCases.toggleBookmark(hadithId, bookId, hadithNumber)
         }
     }
 
     private fun loadBookmarks() {
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.HADITH, "load_bookmarks") {
             hadithUseCases.getAllBookmarks().collect { bookmarks ->
                 _bookmarksState.update { it.copy(bookmarks = bookmarks, isLoading = false) }
             }
@@ -315,7 +326,7 @@ class HadithViewModel @Inject constructor(
      * state, exactly as the Quran/Dua readers observe their own prefs.
      */
     private fun observeHadithSettings() {
-        viewModelScope.launch {
+        launchSafely(telemetry, AppAnalytics.Feature.HADITH, "observe_hadith_settings") {
             val displayFlow = combine(
                 hadithSettings.hadithArabicFont,
                 hadithSettings.hadithArabicFontSize,
