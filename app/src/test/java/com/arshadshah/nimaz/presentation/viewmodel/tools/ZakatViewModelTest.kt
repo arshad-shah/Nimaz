@@ -63,6 +63,19 @@ class ZakatViewModelTest {
     private fun viewModel() = ZakatViewModel(useCases, settings, telemetry)
 
     @Test
+    fun `setting a currency persists it and re-reaches state`() = runTest {
+        // ZakatEvent.SetCurrency had a handler and no producer until the calculator grew a
+        // picker: every figure was formatted with state.currency and nothing could change it.
+        val vm = viewModel()
+        advanceUntilIdle()
+
+        vm.onEvent(ZakatEvent.SetCurrency("GBP"))
+        advanceUntilIdle()
+
+        coVerify { settings.setZakatCurrency("GBP") }
+    }
+
+    @Test
     fun `a failing history stream clears the spinner instead of hanging on it`() = runTest {
         // ZakatHistoryUiState.isLoading defaults to true and loadHistory only cleared it
         // *inside* the collect, so a stream that threw before its first emission left the

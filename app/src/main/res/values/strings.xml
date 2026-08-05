@@ -1971,4 +1971,5 @@
     <string name="tafseer_note_hint">Your reflection on this passage</string>
     <string name="tafseer_note_edit">Edit</string>
     <string name="quran_search_surahs">Search surahs</string>
+    <string name="zakat_currency">Currency</string>
 </resources>

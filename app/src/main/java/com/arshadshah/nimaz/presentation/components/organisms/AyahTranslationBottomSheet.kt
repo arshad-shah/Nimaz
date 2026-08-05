@@ -1,5 +1,8 @@
 package com.arshadshah.nimaz.presentation.components.organisms
 
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.text.font.FontWeight
+import com.arshadshah.nimaz.presentation.theme.NimazPalette
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -233,3 +236,36 @@ private val translationPreviewAyahSajda = Ayah(
     transliteration = "Inna alladhina 'inda rabbika la yastakbiroona 'an 'ibadatihi wa yusabbihoonahu wa lahu yasjudoon",
     isBookmarked = false
 )
+
+/**
+ * The sajda badge shown beside a verse that carries a prostration.
+ *
+ * Moved here when `AyahActionsBottomSheet` was retired: the sheet itself was never composed
+ * by any screen, but this one composable was, from `AyahTranslationBottomSheet` below — the
+ * kind of thing a "delete the unreachable organism" sweep takes out with it.
+ */
+@Composable
+
+internal fun SajdaIndicator(
+    sajdaType: SajdaType,
+    modifier: Modifier = Modifier,
+    withGlyph: Boolean = false
+) {
+    val label = when (sajdaType) {
+        SajdaType.OBLIGATORY -> stringResource(R.string.sajdah_wajib)
+        else -> stringResource(R.string.sajdah_recommended)
+    }
+    Surface(
+        shape = RoundedCornerShape(8.dp),
+        color = NimazPalette.Red600.copy(alpha = 0.15f),
+        modifier = modifier
+    ) {
+        Text(
+            text = if (withGlyph) stringResource(R.string.sajdah_glyph_format, label) else label,
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.SemiBold,
+            color = NimazPalette.Red600,
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+        )
+    }
+}

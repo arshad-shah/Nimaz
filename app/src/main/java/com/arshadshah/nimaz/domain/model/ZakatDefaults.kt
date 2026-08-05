@@ -18,4 +18,20 @@ object ZakatDefaults {
     const val GOLD_PRICE_PER_GRAM: Double = 65.0
     const val SILVER_PRICE_PER_GRAM: Double = 0.80
     const val CURRENCY: String = "USD"
+
+    /**
+     * The currencies offered by the calculator, as ISO 4217 codes.
+     *
+     * Codes only — no names. `java.util.Currency` resolves both the display name and the
+     * symbol in the user's locale, so a German reader picking `USD` sees "US-Dollar", and
+     * nothing here has to be translated. Curated rather than
+     * `Currency.getAvailableCurrencies()`, which is ~150 entries deep in codes nobody is
+     * calculating zakat in.
+     */
+    val CURRENCIES: List<String> = listOf(
+        "USD", "EUR", "GBP", "CAD", "AUD", "CHF", "JPY", "CNY",
+        "SAR", "AED", "QAR", "KWD", "BHD", "OMR", "JOD", "EGP",
+        "PKR", "INR", "BDT", "IDR", "MYR", "TRY", "NGN", "ZAR",
+        "MAD", "DZD", "TND", "LKR", "SGD", "SEK", "NOK", "DKK",
+    )
 }
