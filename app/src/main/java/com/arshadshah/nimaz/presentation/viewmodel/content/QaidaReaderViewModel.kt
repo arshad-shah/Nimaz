@@ -27,17 +27,6 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-sealed interface QaidaReaderEvent {
-    data class SelectLesson(val lessonId: Int) : QaidaReaderEvent
-    data class CellTapped(val cell: QaidaCell) : QaidaReaderEvent
-    data class PlayLine(val lineId: Int) : QaidaReaderEvent
-    data class PlayLetter(val letter: QaidaLetter) : QaidaReaderEvent
-    data object NextLesson : QaidaReaderEvent
-    data object PreviousLesson : QaidaReaderEvent
-    data object Resume : QaidaReaderEvent
-    data object ResetJourney : QaidaReaderEvent
-}
-
 /**
  * The state holder behind the Qaida Reader UI (epic #171, sub-issue F of #177).
  *

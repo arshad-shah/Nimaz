@@ -24,88 +24,8 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 import javax.inject.Inject
 
-data class TasbihPresetsUiState(
-    val defaultPresets: List<TasbihPreset> = emptyList(),
-    val customPresets: List<TasbihPreset> = emptyList(),
-    val selectedCategory: TasbihCategory? = null,
-    val favorites: Set<Long> = emptySet(),
-    val isLoading: Boolean = true,
-    val error: String? = null
-) {
-    /**
-     * The presets the list should show — **derived**, never stored.
-     *
-     * This used to be a stored field recomputed by hand wherever an input changed, and the
-     * two Room collectors in `loadPresets` rebuilt it as `defaults + customs` without
-     * consulting [selectedCategory]. So saving or deleting a custom dhikr re-emitted the
-     * presets flow and silently dropped the active category filter, while the category chip
-     * carried on looking selected. Deriving it here means there is no site left to forget.
-     */
-    val filteredPresets: List<TasbihPreset>
-        get() {
-            val all = defaultPresets + customPresets
-            return if (selectedCategory == null) all else all.filter { it.category == selectedCategory }
-        }
-}
-
 /** How the counter is presented: the classic tap-circle or the tasbih beads. */
 enum class TasbihCounterStyle { CLASSIC, BEADS }
-
-data class TasbihCounterUiState(
-    val selectedPreset: TasbihPreset? = null,
-    val currentSession: TasbihSession? = null,
-    val count: Int = 0,
-    val laps: Int = 0,
-    val targetCount: Int = 33,
-    val isActive: Boolean = false,
-    val vibrationEnabled: Boolean = true,
-    val soundEnabled: Boolean = false,
-    val autoLap: Boolean = true,
-    val counterStyle: TasbihCounterStyle = TasbihCounterStyle.CLASSIC,
-    val beadDesignKey: String = "wood",
-    val leftHanded: Boolean = false
-)
-
-data class TasbihHistoryUiState(
-    val todaySessions: List<TasbihSession> = emptyList(),
-    val weekSessions: List<TasbihSession> = emptyList(),
-    val isLoading: Boolean = true
-)
-
-data class TasbihStatsUiState(
-    val stats: TasbihStats? = null,
-    val totalToday: Int = 0,
-    val baseTotalToday: Int = 0, // Total excluding current session, for real-time display
-    val totalThisWeek: Int = 0,
-    val completedSessions: Int = 0,
-    val isLoading: Boolean = true
-)
-
-sealed interface TasbihEvent {
-    data class SelectPreset(val preset: TasbihPreset) : TasbihEvent
-    data class FilterByCategory(val category: TasbihCategory?) : TasbihEvent
-    data class SetTargetCount(val count: Int) : TasbihEvent
-    data class CreateCustomPreset(val preset: TasbihPreset) : TasbihEvent
-    data class UpdateCustomPreset(val preset: TasbihPreset) : TasbihEvent
-    data class DeleteCustomPreset(val presetId: Long) : TasbihEvent
-    data class ToggleVibration(val enabled: Boolean) : TasbihEvent
-    data class ToggleSound(val enabled: Boolean) : TasbihEvent
-    data class ToggleAutoLap(val enabled: Boolean) : TasbihEvent
-    data class SetCounterStyle(val style: TasbihCounterStyle) : TasbihEvent
-    data class SetBeadDesign(val key: String) : TasbihEvent
-    data class ToggleFavorite(val presetId: Long) : TasbihEvent
-    data class SetLeftHanded(val enabled: Boolean) : TasbihEvent
-    data object ClearPreset : TasbihEvent
-    data object Increment : TasbihEvent
-    data object Reset : TasbihEvent
-    data object StartSession : TasbihEvent
-    data object PauseSession : TasbihEvent
-    data object ResumeSession : TasbihEvent
-    data object CompleteSession : TasbihEvent
-    data object LoadPresets : TasbihEvent
-    data object LoadHistory : TasbihEvent
-    data object LoadStats : TasbihEvent
-}
 
 @HiltViewModel
 class TasbihViewModel @Inject constructor(
@@ -604,7 +524,6 @@ class TasbihViewModel @Inject constructor(
             }
         }
     }
-
 
     private fun checkForActiveSession() {
         viewModelScope.launch {

@@ -40,24 +40,6 @@ data class DayPrayerTimes(
     val fastMinutes: Int? = null
 )
 
-data class MonthlyPrayerTimesUiState(
-    val currentMonth: YearMonth = YearMonth.now(),
-    val dayPrayerTimes: List<DayPrayerTimes> = emptyList(),
-    val locationName: String = "Location not set",
-    val methodLabel: String = "",
-    val latitude: Double = 0.0,
-    val longitude: Double = 0.0,
-    val ramadanHijriYear: Int? = null,
-    val isLoading: Boolean = true,
-    val expandedDay: LocalDate? = LocalDate.now()
-)
-
-sealed interface MonthlyPrayerTimesEvent {
-    data object NextMonth : MonthlyPrayerTimesEvent
-    data object PreviousMonth : MonthlyPrayerTimesEvent
-    data class ToggleDayExpanded(val date: LocalDate) : MonthlyPrayerTimesEvent
-}
-
 @HiltViewModel
 class MonthlyPrayerTimesViewModel @Inject constructor(
     private val prayerTimeCalculator: PrayerTimeCalculator,
@@ -241,6 +223,5 @@ class MonthlyPrayerTimesViewModel @Inject constructor(
             fastMinutes = fastMinutes,
         )
     }
-
 
 }

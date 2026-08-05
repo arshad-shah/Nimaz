@@ -36,34 +36,6 @@ import javax.inject.Inject
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
-data class OnboardingUiState(
-    val isLoading: Boolean = true,
-    val onboardingCompleted: Boolean = false,
-    val currentPage: Int = 0,
-    val locationPermissionGranted: Boolean = false,
-    val notificationPermissionGranted: Boolean = false,
-    val batteryOptimizationDisabled: Boolean = false,
-    val locationDetected: Boolean = false,
-    val locationName: String = "",
-    val error: String? = null
-)
-
-sealed interface OnboardingEvent {
-    data object CheckOnboardingStatus : OnboardingEvent
-    data object CompleteOnboarding : OnboardingEvent
-    data class SetCurrentPage(val page: Int) : OnboardingEvent
-    data object CheckLocationPermission : OnboardingEvent
-    data object CheckNotificationPermission : OnboardingEvent
-    data object CheckBatteryOptimization : OnboardingEvent
-    data object DetectLocation : OnboardingEvent
-    data object DismissError : OnboardingEvent
-    data class UpdatePermissionStatus(
-        val location: Boolean? = null,
-        val notification: Boolean? = null,
-        val battery: Boolean? = null
-    ) : OnboardingEvent
-}
-
 @HiltViewModel
 class OnboardingViewModel @Inject constructor(
     @ApplicationContext private val context: Context,

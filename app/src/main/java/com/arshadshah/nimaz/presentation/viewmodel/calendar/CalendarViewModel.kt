@@ -27,53 +27,8 @@ import kotlinx.coroutines.withContext
 import java.time.LocalDate
 import javax.inject.Inject
 
-data class CalendarUiState(
-    val currentMonth: CalendarMonth? = null,
-    val selectedDate: LocalDate = LocalDate.now(),
-    val selectedHijriDate: HijriDate? = null,
-    val viewMode: CalendarViewMode = CalendarViewMode.GREGORIAN,
-    val isLoading: Boolean = true,
-    /** A string resource, resolved by the screen — see ARCHITECTURE §6.1. */
-    @StringRes val error: Int? = null
-)
-
-data class HijriCalendarUiState(
-    val currentHijriMonth: Int? = null,
-    val currentHijriYear: Int = 1446, // Default year
-    val days: List<CalendarDay> = emptyList(),
-    val isLoading: Boolean = true
-)
-
-data class EventsUiState(
-    val upcomingEvents: List<IslamicEvent> = emptyList(),
-    val eventsForSelectedDate: List<IslamicEvent> = emptyList(),
-    val eventsThisMonth: List<IslamicEvent> = emptyList(),
-    val isLoading: Boolean = true
-)
-
-data class YearOverviewUiState(
-    val months: List<CalendarMonth> = emptyList(),
-    val year: Int = LocalDate.now().year,
-    val isHijriYear: Boolean = false,
-    val isLoading: Boolean = true
-)
-
 enum class CalendarViewMode {
     GREGORIAN, HIJRI, DUAL
-}
-
-sealed interface CalendarEvent {
-    data class SelectDate(val date: LocalDate) : CalendarEvent
-    data class NavigateToMonth(val month: Int, val year: Int) : CalendarEvent
-    data class NavigateToHijriMonth(val month: Int, val year: Int) : CalendarEvent
-    data class SetViewMode(val mode: CalendarViewMode) : CalendarEvent
-    data class NavigateToYear(val year: Int, val isHijri: Boolean) : CalendarEvent
-    data object LoadToday : CalendarEvent
-    data object LoadUpcomingEvents : CalendarEvent
-    data object NavigateToPreviousMonth : CalendarEvent
-    data object NavigateToNextMonth : CalendarEvent
-    data object NavigateToPreviousYear : CalendarEvent
-    data object NavigateToNextYear : CalendarEvent
 }
 
 @HiltViewModel

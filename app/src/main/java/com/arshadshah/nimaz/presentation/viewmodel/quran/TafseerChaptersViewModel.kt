@@ -18,22 +18,6 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 
-/**
- * Immutable UI state for the Tafseer chapters page — a surah picker plus the
- * "My notes" tab listing the user's annotated tafseer.
- */
-data class TafseerChaptersUiState(
-    val surahs: List<Surah> = emptyList(),
-    val notes: List<TafseerNoteItem> = emptyList(),
-    val isLoading: Boolean = true,
-    /**
-     * Set when the surah list or the notes fail to load. Without it a content-database
-     * failure rendered as an empty picker with the spinner turned off — indistinguishable
-     * from "you have no notes yet".
-     */
-    val error: String? = null,
-)
-
 @HiltViewModel
 class TafseerChaptersViewModel @Inject constructor(
     private val quranUseCases: QuranUseCases,

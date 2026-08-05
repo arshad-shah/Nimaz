@@ -171,7 +171,7 @@ com.arshadshah.nimaz/
 │
 ├── presentation/
 │   ├── screens/<feature>/   # Composable screens grouped by feature
-│   ├── viewmodel/<feature>/ # ViewModels, one sub-package per feature area
+│   ├── viewmodel/<feature>/ # {XxxViewModel, XxxUiState, XxxEvent}.kt per feature
 │   │                        #   quran/ prayer/ tracker/ worship/ calendar/
 │   │                        #   settings/ help/ content/ search/ ai/
 │   │                        #   location/ home/ onboarding/ tools/
@@ -245,13 +245,28 @@ Canonical reference: `presentation/viewmodel/help/HelpViewModel.kt` — a featur
 ViewModel in the sub-package layout, with one exhaustive `onEvent`, `Telemetry` injected, and
 `catchAndReport` applied inside its `flatMapLatest` rather than outside it.
 
-**A ViewModel lives in `viewmodel/<feature>/`, and a new feature gets its own sub-package.**
-The layer was one flat package of 32 files until this became the rule; the sub-package is not
-optional tidiness, it is where the file goes.
+**A feature gets its own sub-package, holding three files:**
+
+```
+viewmodel/help/
+  HelpViewModel.kt     # the class, and nothing else
+  HelpUiState.kt       # every XxxUiState the feature exposes
+  HelpEvent.kt         # the sealed XxxEvent hierarchy
+```
+
+The layer was one flat package of 32 files, each carrying its own states, events and enums —
+`SettingsViewModel.kt` opened with 7 UiStates, 4 enums and a 102-line event hierarchy before
+its class started at line 313, and `QuranTopicsViewModel.kt` was 39% type declarations. Both
+the sub-package and the split are where the code goes, not optional tidiness.
+
+The types stay in the **same package** as the ViewModel, so splitting them costs no imports —
+which is exactly why there is no excuse for a 1,400-line file that opens with 200 lines of
+`data class`.
 
 Rules:
-- Lives in `presentation/viewmodel/<feature>/`. Pick the existing sub-package the feature
-  belongs to; add one only for a genuinely new area.
+- Lives in `presentation/viewmodel/<feature>/`, with its `XxxUiState`s in `XxxUiState.kt` and
+  its `XxxEvent` in `XxxEvent.kt` beside it. Pick the existing sub-package the feature belongs
+  to; add one only for a genuinely new area.
 - Annotated `@HiltViewModel`, constructor injection only.
 - Inject the feature's **`XxxUseCases`** wrapper (not a repository, never a DAO).
 - Expose immutable state as `StateFlow<XxxUiState>` via `asStateFlow()`. A ViewModel
