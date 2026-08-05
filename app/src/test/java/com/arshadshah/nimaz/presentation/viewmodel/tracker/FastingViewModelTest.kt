@@ -1,6 +1,7 @@
 package com.arshadshah.nimaz.presentation.viewmodel.tracker
 
 import com.arshadshah.nimaz.core.time.FakeTodayProvider
+import com.arshadshah.nimaz.presentation.viewmodel.FakeZakatSettings
 import com.arshadshah.nimaz.core.monitoring.RecordingTelemetry
 
 import app.cash.turbine.test
@@ -21,7 +22,6 @@ import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -35,6 +35,8 @@ import java.time.ZoneOffset
 import com.arshadshah.nimaz.presentation.viewmodel.buildFastingUseCases
 import com.arshadshah.nimaz.presentation.viewmodel.buildPrayerUseCases
 import com.arshadshah.nimaz.presentation.viewmodel.FakePrayerTimetableRepository
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class FastingViewModelTest {
@@ -82,6 +84,7 @@ class FastingViewModelTest {
             buildFastingUseCases(repository),
             buildPrayerUseCases(prayers),
             FakeTodayProvider(LocalDate.now()),
+            FakeZakatSettings(),
             RecordingTelemetry(),
         )
     }

@@ -27,6 +27,10 @@ import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeEmphasis
+import androidx.annotation.FloatRange
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.lerp
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
@@ -78,6 +82,10 @@ private val PlinthBottomPadding = 34.dp
  * @param stats up to three figures; pass empty for a plinth-only hero.
  * @param muteAmount renders [amount] at reduced emphasis — for a zero/ineligible
  *   state, where a full-strength figure would overstate a number that is not owed.
+ * @param collapseProgress 0f full, 1f collapsed — for a hero pinned above a scrolling form.
+ *   The tiles and the subtitle fold away and the amount shrinks; **the amount never
+ *   disappears**, because on the calculator it is the one figure the whole task is about, and
+ *   losing sight of it mid-entry is what a scrolling hero got wrong.
  */
 @Composable
 fun ZakatSummaryHero(
@@ -88,7 +96,13 @@ fun ZakatSummaryHero(
     status: ZakatHeroStatus? = null,
     stats: List<ZakatHeroStat> = emptyList(),
     muteAmount: Boolean = false,
+    @FloatRange(from = 0.0, to = 1.0) collapseProgress: Float = 0f,
 ) {
+    val collapse = collapseProgress.coerceIn(0f, 1f)
+    // Interpolated rather than switched between two layouts: a hard swap at the threshold makes
+    // the whole form jump by the tile row's height, which reads as a glitch rather than a
+    // collapse. `showStats` still gates the tiles entirely, so at rest they cost nothing.
+    val showStats = stats.isNotEmpty() && collapse < 1f
     // One announcement for the whole plinth: TalkBack should read "Zakat due,
     // $1,284.50, above nisab" as a phrase, not as four unrelated fragments.
     val plinthDescription = if (status != null) {
@@ -115,9 +129,10 @@ fun ZakatSummaryHero(
                     .padding(
                         start = 18.dp,
                         end = 18.dp,
-                        top = 18.dp,
+                        top = lerp(18.dp, 12.dp, collapse),
                         // Only reserve dead space when tiles will actually cover it.
-                        bottom = if (stats.isEmpty()) 18.dp else PlinthBottomPadding,
+                        bottom = if (!showStats) lerp(18.dp, 12.dp, collapse)
+                        else lerp(PlinthBottomPadding, 18.dp, collapse),
                     )
                     .clearAndSetSemantics { contentDescription = plinthDescription }
             ) {
@@ -138,13 +153,16 @@ fun ZakatSummaryHero(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(lerp(10.dp, 2.dp, collapse)))
 
+                val displaySmall = MaterialTheme.typography.displaySmall
+                val titleLarge = MaterialTheme.typography.titleLarge
                 Text(
                     text = amount,
-                    style = MaterialTheme.typography.displaySmall.copy(
+                    style = displaySmall.copy(
                         fontWeight = FontWeight.Bold,
-                        lineHeight = 40.sp,
+                        fontSize = lerp(displaySmall.fontSize, titleLarge.fontSize, collapse),
+                        lineHeight = lerp(40.sp, 28.sp, collapse),
                     ),
                     color = if (muteAmount) {
                         ZakatSurfaceColors.plinthInk.copy(alpha = 0.42f)
@@ -153,21 +171,25 @@ fun ZakatSummaryHero(
                     },
                 )
 
-                Spacer(modifier = Modifier.height(4.dp))
-
-                Text(
-                    text = subtitle,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = ZakatSurfaceColors.plinthInkMuted,
-                )
+                // The subtitle is the first thing to go: it explains how the figure is derived,
+                // which is worth reading once and not worth the height on every scroll.
+                if (collapse < 1f) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = subtitle,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = ZakatSurfaceColors.plinthInkMuted.copy(alpha = 1f - collapse),
+                    )
+                }
             }
         }
 
-        if (stats.isNotEmpty()) {
+        if (showStats) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .offset(y = -TileOverlap)
+                    .alpha(1f - collapse)
                     .padding(horizontal = 10.dp),
                 horizontalArrangement = Arrangement.spacedBy(7.dp),
             ) {
@@ -280,3 +302,7 @@ private fun ZakatSummaryHeroLightPreview() {
 private fun ZakatSummaryHeroDarkPreview() {
     NimazTheme(themeMode = ThemeMode.DARK) { ZakatSummaryHeroShowcase() }
 }
+
+/** Linear interpolation for a font size, which `Dp.lerp` cannot do. */
+private fun lerp(start: TextUnit, stop: TextUnit, fraction: Float): TextUnit =
+    (start.value + (stop.value - start.value) * fraction).sp

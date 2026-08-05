@@ -1,8 +1,8 @@
 Yenilikler:
 
-• Kur'an: seçebileceğiniz 15 meal, yenilenen okuyucu ve sure filtresi geri döndü.
-• Kur'an, hadis ve duaları tek seferde arayın; eşleşmeler vurgulanır.
-• Yer imleri: arama, sıralama ve silmeyi geri alma.
-• Tefsir: istediğiniz ayete kendi notlarınızı tutun.
-• Zekât: para biriminizi seçin.
-• Her ekran artık ne zaman yüklendiğini, ne zaman boş olduğunu ve ne zaman bir şeyin ters gittiğini açıkça söylüyor.
+• Kur'an: 15 meal, yenilenen okuyucu, Kur'an, hadis ve dualarda arama.
+• Yer imleri: arama, sıralama, geri alma. Tefsir: kendi notlarınız.
+• “Daha fazla” gerçeği bildirir — bugünün namazları, hatminizin cüzü, bu yılın zekâtı — artı beş sabit kısayol.
+• Zekât: yazarken toplam görünür kalır, tutarlar kendi para biriminizde ondalıklı.
+• Oruç: güncel sayılar, kaza oruçları rozet olarak.
+• Daha net yükleniyor, boş ve hata durumları.

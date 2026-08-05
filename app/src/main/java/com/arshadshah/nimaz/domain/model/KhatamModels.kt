@@ -158,6 +158,31 @@ object KhatamProgressCalculator {
     fun averagePace(totalAyahsRead: Int, daysActive: Int): Float =
         if (daysActive > 0) totalAyahsRead.toFloat() / daysActive else 0f
 
+    /**
+     * How many days ahead of — or behind — the daily target a reader is, or null when the
+     * question has no answer yet.
+     *
+     * [paceStatus] answers "roughly how are they doing" as one of four labels, which is right for
+     * a badge. This answers "by how much", which is what a one-line report needs: *4 days ahead of
+     * pace* is a fact somebody can act on, where *slightly behind* is a mood.
+     *
+     * The unit is **days of the reader's own target**, not calendar days — a shortfall of 40 ayahs
+     * against a 20/day target is two days behind however long they have been going. Positive is
+     * ahead, negative is behind, and the sign is the caller's to interpret; a plural rule cannot
+     * take a negative count.
+     *
+     * Null rather than zero when there is nothing to measure against: no days elapsed, or no
+     * target set. Zero means *measured, and exactly on pace*, which is a different statement.
+     */
+    fun daysAgainstPace(totalAyahsRead: Int, daysActive: Int, dailyTarget: Int): Int? {
+        if (daysActive <= 0 || dailyTarget <= 0) return null
+        val expected = dailyTarget.toLong() * daysActive
+        val surplus = totalAyahsRead - expected
+        // Truncating toward zero on purpose: a reader half a day ahead is on pace, not ahead.
+        // Rounding up would report "1 day ahead" for a single extra ayah.
+        return (surplus / dailyTarget).toInt()
+    }
+
     fun paceStatus(averagePace: Float, dailyTarget: Int, daysActive: Int): KhatamPace = when {
         daysActive <= 0 -> KhatamPace.NOT_STARTED
         dailyTarget <= 0 -> KhatamPace.ON_TRACK

@@ -429,6 +429,30 @@ Stored, it has to be refreshed at every site that touches an input, and the site
 not fail loudly — they leave a filter that is on beside a list that ignores it. Both instances
 the sweep found (tasbih categories, hadith chapter search) were exactly that. See AP-9.
 
+**A subtitle that reports state is a pure function, not a `when` inside a composable.**
+`presentation/screens/SubtitleSpec.kt` declares the shared contract — a `@StringRes`/`@PluralsRes`
+id, typed args (`SubtitleArg.Count`/`Text`/`Resource`), and a nullable `quantity` — plus the one
+`@Composable SubtitleSpec?.resolve()` that renders it. Each screen's mapper is an `object` of pure
+functions from state to `SubtitleSpec?`: `NotificationHubSubtitles`, `MoreSubtitles`,
+`FastingSubtitles`.
+
+Three properties make it worth the indirection:
+
+- **A wrong row is catchable off-device.** Once a subtitle asserts something ("4 of 5 logged
+  today"), it can be false, and a screenshot review will not notice. A pure mapper is a JVM test.
+- **`null` means the row renders no subtitle at all** — not a dash, not a spinner, not a zero. It
+  covers both "has not loaded" and "nothing true to say", which must look identical, because a dash
+  reads as a value and a spinner makes a static menu look busy.
+- **`quantity` is non-null exactly when `res` is a `plurals`.** `resolve()` switches on it, and
+  getting it wrong throws at render time in a locale the author may not read — so the mappers'
+  tests assert the invariant rather than trusting call sites. Counts always go through `plurals`;
+  Turkish and Malay do not pluralise like English.
+
+Args are a sealed type rather than `List<Any>` because a subtitle can interpolate a *string
+resource* (a worship reminder's own translated name), and an `Int` in an untyped arg list is
+indistinguishable from a count — a bug that only surfaces as a resource id rendered where a name
+belongs.
+
 ### 4.2 Domain — use cases
 
 Canonical reference: `domain/usecase/AsmaUlHusnaUseCases.kt`.
@@ -1159,7 +1183,7 @@ copy anything listed as Open.
 | Use-case layer | `Hadith`, `Dua`, `Fasting`, `Prayer`, `Tasbih`, `Tafseer`, `Zakat` now have `XxxUseCases` wrappers; `PrayerTimes/PrayerTracker/Home/Settings/Location`, `Search`, `Bookmarks` ViewModels inject use cases instead of repositories. |
 | Coroutine failure paths | **No ViewModel launches a bare coroutine any more.** All 229 raw `viewModelScope.launch` calls are `launchSafely(telemetry, feature, "label")` — `viewModelScope`'s `SupervisorJob` isolates siblings but does not contain a throw inside a child `launch`, so each of those was a potential crash that reported nothing. `KhatamViewModel` and `OnboardingViewModel` were still on the static `AppAnalytics`/`CrashReporter`; both now inject `Telemetry`. Sites that set `isLoading = true` clear it in `onFailure`; the rest are deliberately telemetry-only — see `CLEAN_ARCHITECTURE_CHECKLIST.md` AP-7.12 for the per-site test, which turns on whether a screen renders the error at all. |
 | Home daily content | **Stale entry removed from Open.** §9 row 1 still claimed `HomeViewModel` injects `FastingDao`/`HadithDao`/`DuaDao`. It does not: it takes `FastingUseCases`/`HadithUseCases`/`DuaUseCases`, and the daily rotation goes through `GetDailyHadithUseCase`/`GetDailyDuaUseCase`. The fix landed with AP-4; only the registry was not updated. |
-| Settings seams | **`SettingsRepository` is no longer injected into feature ViewModels.** It is a flat preference store — 179 members, a `Flow` plus a setter per preference — so wrapping it in per-operation use cases the way `ZakatUseCases` wraps `ZakatRepository` would have meant ~179 one-line classes, the "use case that adds no value" the checklist warns about. Instead `domain/repository/settings/SettingsSeams.kt` declares eight feature-scoped slices — `QuranPreferences`, `HadithDisplaySettings`, `DuaDisplaySettings`, `TasbihSettings`, `ZakatSettings`, `AiSettings`, `LocationSettings`, `AppSettings` — and `SettingsRepository` **extends all eight**. The DataStore implementation is untouched and `RepositoryModule` binds every seam to the same `PreferencesDataStore` singleton; what changes is reach. 13 ViewModels now declare the one feature's preferences they consume, `OnboardingViewModel` takes two, and `PrayerTimesViewModel`/`FastingViewModel` injected `SettingsRepository` without ever reading it — those params are gone. `SettingsViewModel` keeps the full repository: it *is* the settings feature and edits nearly every preference. **When adding a preference, put it on the seam its feature reads, not on `SettingsRepository` directly.** |
+| Settings seams | **`SettingsRepository` is no longer injected into feature ViewModels.** It is a flat preference store — 179 members, a `Flow` plus a setter per preference — so wrapping it in per-operation use cases the way `ZakatUseCases` wraps `ZakatRepository` would have meant ~179 one-line classes, the "use case that adds no value" the checklist warns about. Instead `domain/repository/settings/SettingsSeams.kt` declares nine feature-scoped slices — `QuranPreferences`, `HadithDisplaySettings`, `DuaDisplaySettings`, `TasbihSettings`, `ZakatSettings`, `AiSettings`, `LocationSettings`, `MoreSettings`, `AppSettings` — and `SettingsRepository` **extends all nine**. The DataStore implementation is untouched and `RepositoryModule` binds every seam to the same `PreferencesDataStore` singleton; what changes is reach. 13 ViewModels now declare the one feature's preferences they consume, `OnboardingViewModel` takes two, and `PrayerTimesViewModel`/`FastingViewModel` injected `SettingsRepository` without ever reading it — those params are gone. `SettingsViewModel` keeps the full repository: it *is* the settings feature and edits nearly every preference. **When adding a preference, put it on the seam its feature reads, not on `SettingsRepository` directly.** |
 | ViewModel package layout | The layer was one flat package of 32 files, documented as deliberate. It is now `viewmodel/<feature>/` across 14 sub-packages, and §2/§4.1 **prescribe** that shape for new features rather than describing a move. The `HighLatitudeRule` enum that `SettingsViewModel` declared — shadowing the domain one, with different member spellings — is deleted; the domain type and its alias-tolerant `fromString` are used everywhere. |
 | Zakat clean-arch leak | `ZakatRepository` now exposes the `ZakatHistoryEntry` domain model (promoted to `domain/model`); entity↔domain mapping lives in `ZakatRepositoryImpl`. |
 | Calendar layer bypass | New `IslamicEventRepository` (+ impl mapping) and `IslamicEventUseCases`; `CalendarViewModel` no longer touches `IslamicEventDao`. |

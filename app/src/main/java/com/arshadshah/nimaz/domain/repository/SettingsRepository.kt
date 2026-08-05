@@ -6,6 +6,7 @@ import com.arshadshah.nimaz.domain.repository.settings.AppSettings
 import com.arshadshah.nimaz.domain.repository.settings.DuaDisplaySettings
 import com.arshadshah.nimaz.domain.repository.settings.HadithDisplaySettings
 import com.arshadshah.nimaz.domain.repository.settings.LocationSettings
+import com.arshadshah.nimaz.domain.repository.settings.MoreSettings
 import com.arshadshah.nimaz.domain.repository.settings.QuranPreferences
 import com.arshadshah.nimaz.domain.repository.settings.TasbihSettings
 import com.arshadshah.nimaz.domain.repository.settings.ZakatSettings
@@ -27,6 +28,7 @@ interface SettingsRepository :
     ZakatSettings,
     AiSettings,
     LocationSettings,
+    MoreSettings,
     AppSettings {
     suspend fun clearAllData()
     val themeMode: Flow<String>

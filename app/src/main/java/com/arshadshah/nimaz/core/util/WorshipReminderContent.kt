@@ -85,7 +85,14 @@ object WorshipReminderContent {
             else -> context.getString(bodyRes(type))
         }
 
-    private fun nameRes(type: WorshipReminderType): Int = when (type) {
+    /**
+     * The translated display name of a reminder type.
+     *
+     * Public because More's night-worship subtitle interpolates it, and the alternative is a
+     * fourth copy of this `when` — `WorshipRemindersScreen` already keeps its own, which is one
+     * too many. A caller wanting the string rather than the id has [name].
+     */
+    fun nameRes(type: WorshipReminderType): Int = when (type) {
         WorshipReminderType.TAHAJJUD -> R.string.worship_tahajjud_name
         WorshipReminderType.WITR -> R.string.worship_witr_name
         WorshipReminderType.SUHOOR -> R.string.worship_suhoor_name

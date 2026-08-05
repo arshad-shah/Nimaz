@@ -1,8 +1,8 @@
-Yang baharu:
+Apa yang baharu:
 
-• Al-Quran: 15 terjemahan untuk dipilih, paparan bacaan yang diperbaharui, dan penapis surah kembali.
-• Cari Al-Quran, Hadis dan doa serentak, dengan padanan diserlahkan.
-• Penanda buku: cari, isih, dan batalkan pemadaman.
-• Tafsir: simpan nota anda sendiri pada mana-mana ayat.
-• Zakat: pilih mata wang anda.
-• Setiap skrin kini menyatakan dengan jelas bila ia memuatkan, bila kosong, dan bila berlaku masalah.
+• Al-Quran: 15 terjemahan, pembaca diperbaharui, carian dalam Quran, hadis dan doa.
+• Penanda: cari, susun, buat asal. Tafsir: nota anda sendiri.
+• “Lain-lain” melaporkan fakta — solat hari ini, juzuk khatam anda, zakat tahun ini — plus lima pintasan disemat.
+• Zakat: jumlah kekal kelihatan sewaktu mengisi, nilai perpuluhan dalam mata wang anda.
+• Puasa: angka terkini, puasa qada sebagai lencana.
+• Keadaan memuat, kosong dan ralat lebih jelas.

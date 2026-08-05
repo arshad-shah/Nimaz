@@ -942,6 +942,17 @@ observes all three and recalculates on change; the editable fields sit under the
 `nimaz_preferences` keys they ride the sync payload (§10), and they are declared in
 `PreferenceCodec.TYPES` like every other key.
 
+**Pinned shortcuts on More.** `more_pinned_shortcuts: String` — the `PinnedShortcut.key` values of
+the pill row above More's first section, joined with `|`, capped at `PinnedShortcut.MAX_PINS` (5),
+defaulting to Tasbih / Prayer tracker / Khatam / Zakat when unset. Deliberately **not** a
+`stringSetPreferencesKey`: the row's order is what the user arranged, and a `Set` discards it. The
+encode/decode pair, the cap and the unknown-key handling live on `PinnedShortcut` in the domain
+layer rather than in `PreferencesDataStore`, because the same rule has to hold for a value that
+arrived off the device-sync wire (§10) as for one this store wrote — an unrecognised key from a
+newer build is **dropped**, so a future pin cannot crash an older install's More screen. An
+explicitly saved empty value means *no pins* and is honoured rather than reset to the defaults,
+or unpinning the last shortcut would not stick. Read through the `MoreSettings` seam.
+
 **Mushaf script / layout.** `quran_mushaf_script: String` (a `MushafScript` enum name, default `MADANI`) selects the Mushaf edition the page reader renders — ayah-flow Uthmani/Madani (604 pages) vs a line-accurate IndoPak edition (16-line/548, 15-line/610 or 13-line/847; #270). Stored raw and mapped to the domain enum at the boundary (mirrors `quran_arabic_font`/`pattern_style`); read by `QuranViewModel` (drives `useLineAccurateLayout` + script-aware page counts) and written from the "Mushaf Script" dropdown in `QuranSettingsScreen`. Off by default. See §5 (16-line renderer).
 
 **One `SettingsViewModel` per screen — so settings state must be *collected*, not snapshotted.**

@@ -492,7 +492,6 @@
     <string name="net_zakatable_wealth">Richesse nette soumise à la Zakat</string>
     <string name="nisab_threshold">Seuil du Nissab</string>
     <string name="meets_nisab">Atteint le Nissab</string>
-    <string name="save_calculation">Enregistrer le calcul</string>
     <string name="loans">Prêts</string>
     <string name="bills_due">Factures à payer</string>
     <string name="hint_physical_cash">Espèces que vous possédez</string>
@@ -1882,4 +1881,95 @@
     <string name="dua_category_load_failed">Ce recueil n\'a pas pu être chargé</string>
     <string name="dua_load_failed_body">Les douas sont stockées sur votre appareil : réessayer suffit généralement.</string>
     <string name="calendar_events_load_failed">Les événements islamiques n\'ont pas pu être chargés</string>
+
+    <!-- More, Zakat and Fasting: live subtitles, pinned shortcuts, the zakat share. -->
+    <string name="share_eyebrow_zakat">Zakât</string>
+    <string name="share_zakat_due">Zakât à verser</string>
+    <string name="share_zakat_assets">Avoirs</string>
+    <string name="share_zakat_deducted">Déduit</string>
+    <string name="share_zakat_net">Net soumis à la zakât</string>
+    <string name="share_zakat_nisab">Seuil du nisab</string>
+    <string name="share_zakat_line_format">%1$s : %2$s</string>
+    <string name="share_zakat_year_format">Année lunaire %1$s</string>
+    <string name="zakat_unit_grams">g</string>
+    <string name="zakat_section_deducted">Déduit</string>
+    <string name="zakat_section_nisab">Seuil du nisab</string>
+    <string name="zakat_section_assets_subtitle">Ce que vous possédez et qui est soumis à la zakât</string>
+    <string name="zakat_section_deducted_subtitle">Dettes et factures retirées du total</string>
+    <string name="zakat_section_nisab_subtitle">Le patrimoine minimum au-delà duquel la zakât s\'applique</string>
+    <string name="zakat_save_this_year">Enregistrer la zakât de cette année</string>
+    <string name="zakat_share">Partager ce calcul</string>
+    <string name="more_tracker_logged">%1$d sur %2$d notées aujourd\'hui</string>
+    <string name="more_tracker_all">Toute la journée est notée</string>
+    <string name="more_tracker_none">Rien de noté aujourd\'hui</string>
+    <string name="more_worship_next_hm">%1$s dans %2$d h %3$d min</string>
+    <string name="more_worship_next_m">%1$s dans %2$d min</string>
+    <string name="more_worship_now">%1$s maintenant</string>
+    <string name="more_khatam_juz">Juz %1$d</string>
+    <string name="more_khatam_juz_on_pace">Juz %1$d · dans les temps</string>
+    <string name="more_qaida_lesson">Leçon %1$d sur %2$d</string>
+    <string name="more_zakat_not_calculated">Pas calculée cette année</string>
+    <string name="more_zakat_due">%1$s à verser</string>
+    <string name="more_pinned_title">Épinglés</string>
+    <string name="more_pinned_edit">Modifier les raccourcis épinglés</string>
+    <string name="more_pins_sheet_title">Raccourcis épinglés</string>
+    <string name="more_pins_count">%1$d sur %2$d épinglés</string>
+    <string name="more_pins_full">%1$d sur %1$d épinglés — détachez-en un pour en ajouter</string>
+    <string name="more_pins_empty">Rien d\'épinglé</string>
+    <string name="more_pin_tasbih">Tasbih</string>
+    <string name="more_pin_prayer_tracker">Suivi des prières</string>
+    <string name="more_pin_khatam">Khatam</string>
+    <string name="more_pin_zakat">Zakât</string>
+    <string name="more_pin_qibla">Qibla</string>
+    <string name="more_pin_fasting">Jeûne</string>
+    <string name="more_pin_night_worship">Prière nocturne</string>
+    <string name="more_pin_qaida">Qaida</string>
+    <string name="more_pin_islamic_calendar">Calendrier</string>
+    <string name="fasting_go_deeper">Aller plus loin</string>
+    <string name="fasting_log_a_fast">Noter un jeûne</string>
+    <string name="fasting_row_calendar">Calendrier des jeûnes</string>
+    <string name="fasting_row_recommended">Jeûnes recommandés</string>
+    <string name="fasting_row_recommended_today">Le prochain est aujourd\'hui</string>
+    <string name="fasting_row_recommended_tomorrow">Le prochain est demain</string>
+    <string name="fasting_row_makeup">Jeûnes à rattraper</string>
+    <string name="fasting_row_makeup_none">Rien en attente</string>
+    <string name="fasting_row_makeup_fidya">Rien en attente · %1$s de fidya versée</string>
+    <string name="fasting_row_ramadan">Ramadan</string>
+    <string name="fasting_row_ramadan_day">Jour %1$d</string>
+    <string name="fasting_row_ramadan_today">Commence aujourd\'hui</string>
+    <plurals name="more_fasting_makeup_pending">
+        <item quantity="one">%1$d jeûne à rattraper</item>
+        <item quantity="many">%1$d jeûnes à rattraper</item>
+        <item quantity="other">%1$d jeûnes à rattraper</item>
+    </plurals>
+    <plurals name="more_khatam_juz_ahead">
+        <item quantity="one">Juz %1$d · %2$d jour d\'avance</item>
+        <item quantity="many">Juz %1$d · %2$d jours d\'avance</item>
+        <item quantity="other">Juz %1$d · %2$d jours d\'avance</item>
+    </plurals>
+    <plurals name="more_khatam_juz_behind">
+        <item quantity="one">Juz %1$d · %2$d jour de retard</item>
+        <item quantity="many">Juz %1$d · %2$d jours de retard</item>
+        <item quantity="other">Juz %1$d · %2$d jours de retard</item>
+    </plurals>
+    <plurals name="fasting_row_calendar_fasted">
+        <item quantity="one">%1$d jour jeûné ce mois-ci</item>
+        <item quantity="many">%1$d jours jeûnés ce mois-ci</item>
+        <item quantity="other">%1$d jours jeûnés ce mois-ci</item>
+    </plurals>
+    <plurals name="fasting_row_recommended_in_days">
+        <item quantity="one">Le prochain est dans %1$d jour</item>
+        <item quantity="many">Le prochain est dans %1$d jours</item>
+        <item quantity="other">Le prochain est dans %1$d jours</item>
+    </plurals>
+    <plurals name="fasting_row_makeup_pending">
+        <item quantity="one">%1$d encore à rattraper</item>
+        <item quantity="many">%1$d encore à rattraper</item>
+        <item quantity="other">%1$d encore à rattraper</item>
+    </plurals>
+    <plurals name="fasting_row_ramadan_in_days">
+        <item quantity="one">Commence dans %1$d jour</item>
+        <item quantity="many">Commence dans %1$d jours</item>
+        <item quantity="other">Commence dans %1$d jours</item>
+    </plurals>
 </resources>

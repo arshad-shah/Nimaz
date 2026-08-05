@@ -6,6 +6,7 @@ import com.arshadshah.nimaz.domain.model.FastStatus
 import com.arshadshah.nimaz.domain.model.FastType
 import com.arshadshah.nimaz.domain.model.FastingStats
 import com.arshadshah.nimaz.domain.model.MakeupFast
+import com.arshadshah.nimaz.domain.model.ZakatDefaults
 import java.time.LocalDate
 
 /**
@@ -66,6 +67,14 @@ data class MakeupFastsUiState(
     val allMakeupFasts: List<MakeupFast> = emptyList(),
     val pendingCount: Int = 0,
     val totalFidyaPaid: Double = 0.0,
+    /**
+     * The currency [totalFidyaPaid] is denominated in.
+     *
+     * Fidya is money, and the app has exactly one currency setting — the zakat one. Carrying it
+     * here rather than letting the screen assume a default is the difference between a euro user
+     * reading "€24.00" and reading "$24.00" against the same number.
+     */
+    val currency: String = ZakatDefaults.CURRENCY,
     val isLoading: Boolean = true
 )
 

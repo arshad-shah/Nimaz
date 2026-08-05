@@ -841,7 +841,6 @@
     <string name="net_zakatable_wealth">Net Zakatable Wealth</string>
     <string name="nisab_threshold">Nisab Threshold</string>
     <string name="meets_nisab">Meets Nisab</string>
-    <string name="save_calculation">Save Calculation</string>
     <string name="loans">Loans</string>
     <string name="bills_due">Bills Due</string>
     <string name="hint_physical_cash">Physical cash you possess</string>
@@ -901,6 +900,15 @@
     <string name="share_eyebrow_dua">Dua</string>
     <string name="share_reference_ayah">Surah %1$s · Ayah %2$d</string>
     <string name="share_reference_hadith">Hadith #%1$d</string>
+    <string name="share_eyebrow_zakat">Zakat</string>
+    <!-- The shared zakat breakdown. Labels, not sentences: the card reads as a receipt. -->
+    <string name="share_zakat_due">Zakat due</string>
+    <string name="share_zakat_assets">Assets</string>
+    <string name="share_zakat_deducted">Deducted</string>
+    <string name="share_zakat_net">Net zakatable</string>
+    <string name="share_zakat_nisab">Nisab threshold</string>
+    <string name="share_zakat_line_format">%1$s: %2$s</string>
+    <string name="share_zakat_year_format">Lunar year %1$s</string>
     <string name="contact_email_subject">Nimaz App Feedback</string>
 
     <!-- Quran Home Screen -->
@@ -2016,4 +2024,94 @@
     <string name="tafseer_note_edit">Edit</string>
     <string name="quran_search_surahs">Search surahs</string>
     <string name="zakat_currency">Currency</string>
+    <!-- Unit suffix on the gold/silver weight fields. Grams, abbreviated. -->
+    <string name="zakat_unit_grams">g</string>
+    <string name="zakat_section_deducted">Deducted</string>
+    <string name="zakat_section_nisab">Nisab threshold</string>
+    <string name="zakat_section_assets_subtitle">What you own that zakat is due on</string>
+    <string name="zakat_section_deducted_subtitle">Debts and bills taken off the total</string>
+    <string name="zakat_section_nisab_subtitle">The minimum wealth zakat applies above</string>
+    <string name="zakat_save_this_year">Save this year\'s zakat</string>
+    <string name="zakat_share">Share this calculation</string>
+
+    <!--
+      More — live subtitles. Titles label, subtitles report: every one of these is a claim about
+      the app right now, which is why none of them restates its own row's title. A row with
+      nothing true to say gets no subtitle at all, so there is deliberately no "—" or "loading"
+      string here to fall back on.
+    -->
+    <string name="more_tracker_logged">%1$d of %2$d logged today</string>
+    <string name="more_tracker_all">All of today logged</string>
+    <string name="more_tracker_none">Nothing logged today yet</string>
+    <plurals name="more_fasting_makeup_pending">
+        <item quantity="one">%1$d makeup fast pending</item>
+        <item quantity="other">%1$d makeup fasts pending</item>
+    </plurals>
+    <string name="more_worship_next_hm">%1$s in %2$dh %3$dm</string>
+    <string name="more_worship_next_m">%1$s in %2$dm</string>
+    <string name="more_worship_now">%1$s now</string>
+    <string name="more_khatam_juz">Juz %1$d</string>
+    <string name="more_khatam_juz_on_pace">Juz %1$d · on pace</string>
+    <plurals name="more_khatam_juz_ahead">
+        <item quantity="one">Juz %1$d · %2$d day ahead of pace</item>
+        <item quantity="other">Juz %1$d · %2$d days ahead of pace</item>
+    </plurals>
+    <plurals name="more_khatam_juz_behind">
+        <item quantity="one">Juz %1$d · %2$d day behind pace</item>
+        <item quantity="other">Juz %1$d · %2$d days behind pace</item>
+    </plurals>
+    <string name="more_qaida_lesson">Lesson %1$d of %2$d</string>
+    <string name="more_zakat_not_calculated">Not calculated this year</string>
+    <string name="more_zakat_due">%1$s due</string>
+    <string name="more_calendar_hijri">%1$s</string>
+
+    <!--
+      Fasting — the "Go deeper" group. Same rule as More: these report, they do not restate the
+      row's own title, and a row with nothing true to say gets no subtitle at all.
+    -->
+    <string name="fasting_go_deeper">Go deeper</string>
+    <string name="fasting_log_a_fast">Log a fast</string>
+    <string name="fasting_row_calendar">Fasting calendar</string>
+    <plurals name="fasting_row_calendar_fasted">
+        <item quantity="one">%1$d fasted this month</item>
+        <item quantity="other">%1$d fasted this month</item>
+    </plurals>
+    <string name="fasting_row_recommended">Recommended fasts</string>
+    <string name="fasting_row_recommended_today">The next one is today</string>
+    <string name="fasting_row_recommended_tomorrow">The next one is tomorrow</string>
+    <plurals name="fasting_row_recommended_in_days">
+        <item quantity="one">The next one is in %1$d day</item>
+        <item quantity="other">The next one is in %1$d days</item>
+    </plurals>
+    <string name="fasting_row_makeup">Makeup fasts</string>
+    <plurals name="fasting_row_makeup_pending">
+        <item quantity="one">%1$d still to make up</item>
+        <item quantity="other">%1$d still to make up</item>
+    </plurals>
+    <string name="fasting_row_makeup_none">Nothing outstanding</string>
+    <string name="fasting_row_makeup_fidya">Nothing outstanding · %1$s fidya paid</string>
+    <string name="fasting_row_ramadan">Ramadan</string>
+    <string name="fasting_row_ramadan_day">Day %1$d</string>
+    <string name="fasting_row_ramadan_today">Begins today</string>
+    <plurals name="fasting_row_ramadan_in_days">
+        <item quantity="one">Begins in %1$d day</item>
+        <item quantity="other">Begins in %1$d days</item>
+    </plurals>
+
+    <!-- More — the pinned shortcut row. -->
+    <string name="more_pinned_title">Pinned</string>
+    <string name="more_pinned_edit">Edit pinned shortcuts</string>
+    <string name="more_pins_sheet_title">Pinned shortcuts</string>
+    <string name="more_pins_count">%1$d of %2$d pinned</string>
+    <string name="more_pins_full">%1$d of %1$d pinned — unpin one to add another</string>
+    <string name="more_pins_empty">Nothing pinned</string>
+    <string name="more_pin_tasbih">Tasbih</string>
+    <string name="more_pin_prayer_tracker">Prayer tracker</string>
+    <string name="more_pin_khatam">Khatam</string>
+    <string name="more_pin_zakat">Zakat</string>
+    <string name="more_pin_qibla">Qibla</string>
+    <string name="more_pin_fasting">Fasting</string>
+    <string name="more_pin_night_worship">Night worship</string>
+    <string name="more_pin_qaida">Qaida</string>
+    <string name="more_pin_islamic_calendar">Calendar</string>
 </resources>

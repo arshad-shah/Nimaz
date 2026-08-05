@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.domain.repository.settings
 
+import com.arshadshah.nimaz.domain.model.PinnedShortcut
 import com.arshadshah.nimaz.domain.model.UserPreferences
 import kotlinx.coroutines.flow.Flow
 
@@ -142,6 +143,22 @@ interface LocationSettings {
     val locationName: Flow<String>
     suspend fun updateLocation(latitude: Double, longitude: Double, name: String)
     val userPreferences: Flow<UserPreferences>
+}
+
+/**
+ * What the More screen persists — today just the pinned-shortcut row.
+ *
+ * A seam of one member looks thin, and it is still the right shape: More is the only reader, and
+ * the alternative is handing a menu screen's ViewModel the whole 179-member preference surface to
+ * fetch one ordered list. The seam is also where the pin *type* lives, so the ViewModel never sees
+ * the delimited string the store actually holds.
+ */
+interface MoreSettings {
+    /** The pinned row, in order, capped at [PinnedShortcut.MAX_PINS], defaults when unset. */
+    val pinnedShortcuts: Flow<List<PinnedShortcut>>
+
+    /** Persists [shortcuts] in order. Over-long lists are capped, not rejected. */
+    suspend fun setPinnedShortcuts(shortcuts: List<PinnedShortcut>)
 }
 
 /** First-run state and the app's language, read outside the settings screen. */

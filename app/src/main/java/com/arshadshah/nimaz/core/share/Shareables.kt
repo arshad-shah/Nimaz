@@ -170,6 +170,59 @@ object Shareables {
             ),
         )
 
+    /**
+     * A saved zakat calculation.
+     *
+     * Every figure arrives **already formatted** — the caller has them rendered by
+     * `formatCurrency` in the user's chosen currency, and re-deriving them here would mean
+     * this builder holding the currency code and the two of them disagreeing eventually.
+     *
+     * `arabic` is null: a zakat breakdown is arithmetic, not scripture, and the card's Arabic
+     * slot is drawn large in Amiri for a reason. What it gets instead is the due figure as the
+     * headline, the working as the body, and the lunar year as attribution — the shape of a
+     * receipt, which is what someone forwarding this to their family is sending.
+     *
+     * This shares somebody's personal finances, so it is reachable only by an explicit tap and
+     * carries exactly what is on screen — nothing pre-filled, nothing extra.
+     */
+    fun zakat(
+        context: Context,
+        due: String,
+        assets: String,
+        deducted: String,
+        net: String,
+        nisab: String,
+        yearLabel: String,
+    ): Shareable {
+        fun line(labelRes: Int, value: String) =
+            context.getString(R.string.share_zakat_line_format, context.getString(labelRes), value)
+
+        val attribution = context.getString(R.string.share_zakat_year_format, yearLabel)
+        val breakdown = listOf(
+            line(R.string.share_zakat_assets, assets),
+            line(R.string.share_zakat_deducted, deducted),
+            line(R.string.share_zakat_net, net),
+            line(R.string.share_zakat_nisab, nisab),
+        )
+        val plain = buildString {
+            appendLine(line(R.string.share_zakat_due, due))
+            appendLine()
+            breakdown.forEach { appendLine(it) }
+            appendLine()
+            append(attribution)
+            appendBranding(context)
+        }
+        return Shareable(
+            plainText = plain,
+            card = ShareCard(
+                eyebrow = context.getString(R.string.share_eyebrow_zakat),
+                arabic = null,
+                body = (listOf(due) + breakdown).joinToString("\n"),
+                attribution = attribution,
+            ),
+        )
+    }
+
     /** A pre-built file caption / arbitrary text passthrough (e.g. PDF exports). */
     fun text(plainText: String, subject: String? = null): Shareable =
         Shareable(plainText = plainText, subject = subject)

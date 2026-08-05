@@ -1,8 +1,8 @@
 Neu:
 
-• Qur'an: 15 Übersetzungen zur Auswahl, überarbeiteter Leser und der Sura-Filter ist zurück.
-• Qur'an, Hadith und Bittgebete gemeinsam durchsuchen — mit hervorgehobenen Treffern.
-• Lesezeichen: suchen, sortieren und Löschen rückgängig machen.
-• Tafsir: eigene Notizen zu jedem Vers.
-• Zakat: Währung frei wählbar.
-• Jeder Bildschirm sagt jetzt klar, wann geladen wird, wann nichts da ist und wann etwas schiefgelaufen ist.
+• Qur'an: 15 Übersetzungen, überarbeiteter Reader, Suche über Qur'an, Hadith und Bittgebete.
+• Lesezeichen: suchen, sortieren, widerrufen. Tafsir: eigene Notizen.
+• „Mehr“ zeigt Fakten — heutige Gebete, Dschus deines Khatam, Zakat dieses Jahres — plus fünf angepinnte Verknüpfungen.
+• Zakat: Summe bleibt beim Tippen sichtbar, Beträge mit Dezimalstellen in deiner Währung.
+• Fasten: aktuelle Zahlen, offene Fastentage als Zähler.
+• Klarere Lade-, Leer- und Fehlerzustände.

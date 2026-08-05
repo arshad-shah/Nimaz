@@ -136,6 +136,9 @@ internal object PreferenceCodec {
         "ai_history_enabled" to PrefType.BOOLEAN,
         "ai_ask_hint_dismissed" to PrefType.BOOLEAN,
         "ai_question_history" to PrefType.STRING,
+        // A delimited string of PinnedShortcut keys, not a STRING_SET: the row's order is what
+        // the user arranged, and a Set discards it.
+        "more_pinned_shortcuts" to PrefType.STRING,
         "notification_prefs_migration_version" to PrefType.INT
     )
 

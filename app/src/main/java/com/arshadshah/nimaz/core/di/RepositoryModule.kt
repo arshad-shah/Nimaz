@@ -56,6 +56,7 @@ import com.arshadshah.nimaz.domain.repository.settings.HadithDisplaySettings
 import com.arshadshah.nimaz.domain.repository.settings.LocationSettings
 import com.arshadshah.nimaz.domain.repository.settings.QuranPreferences
 import com.arshadshah.nimaz.domain.repository.settings.TasbihSettings
+import com.arshadshah.nimaz.domain.repository.settings.MoreSettings
 import com.arshadshah.nimaz.domain.repository.settings.ZakatSettings
 import com.arshadshah.nimaz.domain.repository.TafseerRepository
 import com.arshadshah.nimaz.domain.repository.TasbihRepository
@@ -461,6 +462,10 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindLocationSettings(impl: PreferencesDataStore): LocationSettings
+
+    @Binds
+    @Singleton
+    abstract fun bindMoreSettings(impl: PreferencesDataStore): MoreSettings
 
     @Binds
     @Singleton

@@ -1,8 +1,8 @@
 Yang baru:
 
-• Al-Qur'an: 15 terjemahan untuk dipilih, tampilan baca yang disegarkan, dan filter surah kembali.
-• Cari Al-Qur'an, Hadis, dan doa sekaligus, dengan kata yang cocok disorot.
-• Markah: cari, urutkan, dan batalkan penghapusan.
-• Tafsir: simpan catatan Anda sendiri pada ayat mana pun.
-• Zakat: pilih mata uang Anda.
-• Setiap layar kini menyatakan dengan jelas saat memuat, saat kosong, dan saat terjadi kesalahan.
+• Al-Qur'an: 15 terjemahan, pembaca yang disegarkan, pencarian di Qur'an, hadis, dan doa.
+• Markah: cari, urutkan, batalkan. Tafsir: catatan Anda sendiri.
+• “Lainnya” melaporkan fakta — salat hari ini, juz khatam Anda, zakat tahun ini — plus lima pintasan tersemat.
+• Zakat: total tetap terlihat saat mengisi, nilai desimal dalam mata uang Anda.
+• Puasa: angka terkini, puasa qada sebagai lencana.
+• Status memuat, kosong, dan galat lebih jelas.

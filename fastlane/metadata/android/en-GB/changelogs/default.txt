@@ -1,8 +1,8 @@
 What's new:
 
-• Qur'an: 15 translations to choose from, a refreshed reader, and the surah filter is back.
-• Search the Qur'an, Hadith and duas together, with matches highlighted.
-• Bookmarks: search, sort, and undo a delete.
-• Tafseer: keep your own notes on any verse.
-• Zakat: choose your currency.
-• Every screen now says plainly when it is loading, when there is nothing there, and when something has gone wrong.
+• Qur'an: 15 translations, a refreshed reader, and search across Qur'an, Hadith and duas.
+• Bookmarks: search, sort, undo. Tafseer: your own notes.
+• More reports what's true — today's prayers, your khatam's juz, this year's zakat — plus five pinned shortcuts.
+• Zakat: the total stays in view as you type, and amounts take decimals in your own currency.
+• Fasting: live figures, and the fasts you owe as a badge.
+• Clearer loading, empty and error states throughout.

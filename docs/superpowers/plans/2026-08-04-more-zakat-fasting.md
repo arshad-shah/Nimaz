@@ -1,0 +1,785 @@
+# More, Zakat and Fasting Implementation Plan
+
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+
+**Goal:** Make More, Zakat and Fasting report live state instead of describing themselves, and give Zakat a form you can fill in without losing sight of the total.
+
+**Architecture:** More gains its first ViewModel (`MoreViewModel` + `MoreUseCases`), assembling subtitles from use cases that already exist — no new repository work. Zakat keeps its ViewModel and gains a collapsing sticky hero, three subtotal-bearing accordions, and a bottom action bar. Every subtitle decision is a **pure function from state to `@StringRes Int`**, so it is testable off-device, following `NotificationHubSubtitles` from #351.
+
+**Tech Stack:** Kotlin, Jetpack Compose, Hilt, DataStore Preferences, Room (read-only here), JUnit4 + Truth, Robolectric (`testDebug`), instrumented tests via emulator.wtf.
+
+**Spec:** `docs/superpowers/specs/2026-08-04-more-zakat-fasting-design.md` — read it first, especially §0.
+
+**Pre-flight status:** ✅ **done, 2026-08-05, against `dev` at `29fea675`.** Spec §0 is now the
+report rather than the instruction. Read it — the tasks below were retargeted onto the seams that
+landed in the meantime (#353 sub-packages, #363 `TodayProvider`, #436 settings seams,
+#448 `Telemetry`/`launchSafely`, #454 the state contract). Task 0 is closed out.
+
+## Global Constraints
+
+- **Read spec §0 before Task 1.** It records what the pre-flight found and which seams these tasks
+  now sit on. Do not rebuild anything §0.2 says `dev` already provides.
+- New ViewModels live in `presentation/viewmodel/<feature>/` as three files
+  (`XxxViewModel.kt`, `XxxUiState.kt`, `XxxEvent.kt`) — per #353.
+- ViewModels take `Telemetry` and use `launchSafely(telemetry, feature, op, onFailure = …)`; never
+  a bare `viewModelScope.launch`, never a `Context`.
+- Anything date-scoped reads `TodayProvider` (`today()` / `todayChanges`), never `LocalDate.now()`.
+- A new preference goes on a **feature seam** in `domain/repository/settings/SettingsSeams.kt`,
+  not on `SettingsRepository` directly.
+- Dependencies point inward: domain never imports `data`; presentation never imports entities/DAOs.
+- ViewModels inject `XxxUseCases`, never repositories or DAOs.
+- ViewModels expose `StateFlow<XxxUiState>` (immutable `data class`) + a single `onEvent(event)`. No exposed `MutableStateFlow`.
+- Interactive UI comes from the design system. A tappable card is `NimazCard(onClick = …)` / `NimazMenuItem`, never `Modifier.clickable` wrapped around a card.
+- No hardcoded `Color(0xFF…)` — `MaterialTheme.colorScheme.*` / `NimazColors.*`.
+- **No new route.** If you think you need one, re-read the spec.
+- New strings in `values/strings.xml`, sentence case, active voice; titles label, subtitles report. Translated into `de`, `fr`, `id`, `ms`, `tr`. Counts use `plurals`.
+- Every new/extended component ships `@Preview` in **light and dark**.
+- Gates before every commit: `./gradlew :app:compileDebugKotlin :app:testDebugUnitTest` and `python3 scripts/check_docs.py`.
+- Gradle needs the content artifact token: `export NIMAZ_DATA_TOKEN=$(gh auth token -h github.com -u arshad-shah)`.
+  Without it, `fetchNimazData` fails and the gates must be run as
+  `./gradlew :app:compileDebugKotlin :app:testDebugUnitTest -x fetchNimazData`. Exactly one test
+  needs the artifact — `DeviceStateCorpusTest`, whose whole job is asserting the shipped database
+  — so it fails on a tokenless machine and passes on CI. Everything else runs.
+
+## File Structure
+
+| File | Responsibility |
+|---|---|
+| `presentation/components/atoms/NimazAmountInput.kt` | **Create.** Currency-aware numeric input, input only. |
+| `core/share/Shareables.kt` | **Modify.** Add `zakat(...)` builder. |
+| `data/local/datastore/PreferencesDataStore.kt` | **Modify.** `more_pinned_shortcuts` (ordered, delimited string). |
+| `data/local/datastore/PreferenceCodec.kt` | **Modify.** Register the new key. |
+| `domain/repository/settings/SettingsSeams.kt` | **Modify.** New `MoreSettings` seam — pinned-shortcut flow + setter. |
+| `domain/repository/SettingsRepository.kt` | **Modify.** Extend `MoreSettings`. |
+| `data/repository/SettingsRepositoryImpl.kt` | **Modify.** Implement the seam. |
+| `domain/model/PinnedShortcut.kt` | **Create.** The pinnable destinations, the cap, and the encode/decode codec. |
+| `presentation/screens/more/MoreSubtitles.kt` | **Create.** Pure state → `@StringRes` mapper. |
+| `presentation/viewmodel/more/MoreViewModel.kt` | **Create.** The ViewModel (per #353 — sub-package). |
+| `presentation/viewmodel/more/MoreUiState.kt` | **Create.** Immutable state, every field nullable. |
+| `presentation/viewmodel/more/MoreEvent.kt` | **Create.** The sealed event interface. |
+| `domain/usecase/MoreUseCases.kt` | **Create.** Bundle of existing use cases. |
+| `core/di/MoreModule.kt` | **Create.** `@Provides` for `MoreUseCases`. |
+| `presentation/screens/more/MoreMenuScreen.kt` | **Modify.** Pills + live subtitles. |
+| `presentation/screens/more/PinnedShortcutsSheet.kt` | **Create.** Edit sheet with the cap behaviour. |
+| `presentation/screens/zakat/ZakatCalculatorScreen.kt` | **Modify.** Hero collapse, accordions, bottom bar. |
+| `presentation/screens/fasting/…` | **Modify.** Hero, single switch, Go deeper. |
+| `fastlane/metadata/android/<locale>/changelogs/` | **Modify.** Nine locales. |
+
+---
+
+### Task 0: Pre-flight — take `dev` and re-validate — ✅ **DONE 2026-08-05**
+
+**Files:** the spec and this plan (verification only, plus the amendments it forced)
+
+- [x] **Step 1: Merge current `dev`** — merged at `29fea675`, no conflicts.
+- [x] **Step 2: Run every check in spec §0 step 2** — all seven claims still hold; findings and
+      exact line numbers are in **spec §0.1**.
+- [x] **Step 3: Report, do not adapt silently** — the report is **spec §0.2–§0.4**. Nothing was
+      falsified, but five landed seams moved the ground; the spec and this plan were amended
+      before any code was written.
+- [x] **Step 4: Commit** — the amendments are the commit.
+
+The three findings the #368 review raised (no currency setting, `formatCurrency` ignoring its
+argument, the dead four-state fasting toggle) have all been **fixed on `dev`** by #357/#366/#445.
+Spec §0.3 has the evidence. Do not re-fix them.
+
+---
+
+### Task 1: `NimazAmountInput` atom
+
+**Files:**
+- Create: `app/src/main/java/com/arshadshah/nimaz/presentation/components/atoms/NimazAmountInput.kt`
+- Test: `app/src/test/java/com/arshadshah/nimaz/presentation/components/atoms/AmountFormattingTest.kt`
+
+**Interfaces:**
+- Consumes: nothing
+- Produces: `NimazAmountInput(value: String, onValueChange: (String) -> Unit, currencySymbol: String, modifier: Modifier = Modifier, enabled: Boolean = true, placeholder: String = "0.00")`, and `internal fun formatAmountInput(raw: String): String`
+
+- [x] **Step 1: Write the failing test**
+
+```kotlin
+package com.arshadshah.nimaz.presentation.components.atoms
+
+import com.google.common.truth.Truth.assertThat
+import org.junit.Test
+
+/**
+ * What a person may type into a money field, and what it should read back as. Grouping is
+ * applied as you type, so the rule has to survive a partially-typed number — not just a
+ * finished one.
+ */
+class AmountFormattingTest {
+
+    @Test
+    fun `thousands are grouped as you type`() {
+        assertThat(formatAmountInput("42180")).isEqualTo("42,180")
+        assertThat(formatAmountInput("1234567")).isEqualTo("1,234,567")
+    }
+
+    @Test
+    fun `a decimal point survives and is never grouped`() {
+        assertThat(formatAmountInput("42180.5")).isEqualTo("42,180.5")
+        assertThat(formatAmountInput("42180.50")).isEqualTo("42,180.50")
+    }
+
+    @Test
+    fun `a trailing point is kept so the next keystroke lands after it`() {
+        assertThat(formatAmountInput("42180.")).isEqualTo("42,180.")
+    }
+
+    @Test
+    fun `more than two decimals are refused rather than silently rounded`() {
+        // Rounding someone's money without telling them is worse than not accepting the key.
+        assertThat(formatAmountInput("10.555")).isEqualTo("10.55")
+    }
+
+    @Test
+    fun `junk is dropped, not rejected wholesale`() {
+        assertThat(formatAmountInput("4a2b1")).isEqualTo("421")
+        assertThat(formatAmountInput("")).isEqualTo("")
+    }
+
+    @Test
+    fun `a second decimal point is ignored`() {
+        assertThat(formatAmountInput("10.5.5")).isEqualTo("10.55")
+    }
+}
+```
+
+- [x] **Step 2: Run test to verify it fails**
+
+Run: `./gradlew :app:testDebugUnitTest --tests "*AmountFormattingTest*"`
+Expected: FAIL — `Unresolved reference 'formatAmountInput'`
+
+- [x] **Step 3: Write the implementation**
+
+```kotlin
+package com.arshadshah.nimaz.presentation.components.atoms
+
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+
+/**
+ * Grouping applied to a partially-typed amount.
+ *
+ * Kept apart from the composable so the rule can be tested without a device — the awkward
+ * cases are all mid-typing ("42180." with nothing after the point yet), which a finished-value
+ * formatter never sees.
+ */
+internal fun formatAmountInput(raw: String): String {
+    val cleaned = buildString {
+        var seenPoint = false
+        var decimals = 0
+        for (ch in raw) {
+            when {
+                ch.isDigit() && seenPoint && decimals >= 2 -> Unit
+                ch.isDigit() -> {
+                    append(ch)
+                    if (seenPoint) decimals++
+                }
+                ch == '.' && !seenPoint -> {
+                    seenPoint = true
+                    append(ch)
+                }
+                else -> Unit
+            }
+        }
+    }
+    if (cleaned.isEmpty()) return ""
+    val point = cleaned.indexOf('.')
+    val whole = if (point >= 0) cleaned.substring(0, point) else cleaned
+    val rest = if (point >= 0) cleaned.substring(point) else ""
+    val grouped = whole.reversed().chunked(3).joinToString(",").reversed()
+    return grouped + rest
+}
+
+/**
+ * A currency-aware amount field — the input only.
+ *
+ * The label and hint belong to the screen: Zakat is the one caller today, and baking its row
+ * arrangement into the atom would fix a layout that only one screen needs.
+ */
+@Composable
+fun NimazAmountInput(
+    value: String,
+    onValueChange: (String) -> Unit,
+    currencySymbol: String,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    placeholder: String = "0.00",
+) {
+    Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
+        Text(
+            text = currencySymbol,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Spacer(Modifier.width(6.dp))
+        BasicTextField(
+            value = value,
+            onValueChange = { onValueChange(formatAmountInput(it)) },
+            enabled = enabled,
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+            textStyle = MaterialTheme.typography.titleMedium.copy(
+                fontWeight = FontWeight.SemiBold,
+                textAlign = TextAlign.End,
+                color = MaterialTheme.colorScheme.onSurface
+            ),
+            decorationBox = { inner ->
+                if (value.isEmpty()) {
+                    Text(
+                        text = placeholder,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f),
+                        textAlign = TextAlign.End,
+                        modifier = Modifier.padding(end = 0.dp)
+                    )
+                }
+                inner()
+            }
+        )
+    }
+}
+```
+
+- [x] **Step 4: Run the test to verify it passes**
+
+Run: `./gradlew :app:testDebugUnitTest --tests "*AmountFormattingTest*"`
+Expected: PASS (6 tests)
+
+- [x] **Step 5: Add light and dark previews**
+
+Append to the same file — a filled field and an empty one, in both themes, following the
+`@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL)`
+convention used across `presentation/components`.
+
+- [x] **Step 6: Commit**
+
+```bash
+git add app/src/main/java/com/arshadshah/nimaz/presentation/components/atoms/NimazAmountInput.kt \
+        app/src/test/java/com/arshadshah/nimaz/presentation/components/atoms/AmountFormattingTest.kt
+git commit -m "feat(components): add a currency-aware amount input"
+```
+
+---
+
+### Task 2: `Shareables.zakat`
+
+**Files:**
+- Modify: `app/src/main/java/com/arshadshah/nimaz/core/share/Shareables.kt`
+- Modify: `app/src/main/res/values/strings.xml`
+- Test: `app/src/test/java/com/arshadshah/nimaz/core/share/ShareablesZakatTest.kt`
+
+**Interfaces:**
+- Consumes: `Shareable`, `ShareCard` from `core/share/Shareable.kt`
+- Produces: `Shareables.zakat(context: Context, due: String, assets: String, deducted: String, net: String, nisab: String, yearLabel: String): Shareable`
+
+- [x] **Step 1: Write the failing test**
+
+Use Robolectric (`testDebug`) so `Context` resolves real strings, matching the other
+resource-backed tests. Assert: the card's `eyebrow` is the Zakat label, `arabic` is **null**
+(a zakat breakdown is not scripture), `attribution` is the lunar-year label, and `plainText`
+contains the due figure and all four breakdown lines.
+
+- [x] **Step 2: Run to verify it fails**
+
+Run: `./gradlew :app:testDebugUnitTest --tests "*ShareablesZakatTest*"`
+Expected: FAIL — `Unresolved reference 'zakat'`
+
+- [x] **Step 3: Implement the builder**
+
+Follow `Shareables.ayah` exactly: resolve every label from `R.string.*` inside the builder,
+build `plainText` with `appendBranding(context)`, and return
+`Shareable(plainText = …, card = ShareCard(eyebrow = …, arabic = null, body = …, attribution = …))`.
+
+- [x] **Step 4: Run to verify it passes**
+
+- [x] **Step 5: Commit**
+
+```bash
+git commit -am "feat(share): add a zakat shareable following the existing catalogue"
+```
+
+---
+
+### Task 3: Pinned-shortcut persistence
+
+**Files:**
+- Create: `app/src/main/java/com/arshadshah/nimaz/domain/model/PinnedShortcut.kt`
+- Modify: `app/src/main/java/com/arshadshah/nimaz/data/local/datastore/PreferencesDataStore.kt`
+- Modify: `app/src/main/java/com/arshadshah/nimaz/data/local/datastore/PreferenceCodec.kt`
+- Modify: `app/src/main/java/com/arshadshah/nimaz/domain/repository/settings/SettingsSeams.kt` — **new `MoreSettings` seam** (#436; not `SettingsRepository` directly)
+- Modify: `app/src/main/java/com/arshadshah/nimaz/domain/repository/SettingsRepository.kt` — extend it
+- Modify: `app/src/main/java/com/arshadshah/nimaz/data/repository/SettingsRepositoryImpl.kt`
+- Test: `app/src/test/java/com/arshadshah/nimaz/domain/model/PinnedShortcutCodecTest.kt` — the rule
+- Test: `app/src/androidTest/java/com/arshadshah/nimaz/preferences/PinnedShortcutsTest.kt` — the round trip
+
+**Interfaces:**
+- Consumes: nothing
+- Produces: `PinnedShortcut` enum (`key: String`), `PinnedShortcut.MAX_PINS = 5`, `PinnedShortcut.DEFAULTS`, `PinnedShortcut.decode(String?)` / `PinnedShortcut.encode(List<PinnedShortcut>)`, and on the `MoreSettings` seam: `val pinnedShortcuts: Flow<List<PinnedShortcut>>` / `suspend fun setPinnedShortcuts(shortcuts: List<PinnedShortcut>)`
+
+The cap and the ordering are **in the codec**, not only in the DataStore read — so the rule is a
+JVM test that runs on every commit, and the instrumented test only has to prove the round trip.
+
+- [x] **Step 1: Write the domain model**
+
+```kotlin
+package com.arshadshah.nimaz.domain.model
+
+/**
+ * A destination that can be pinned to the top of More.
+ *
+ * Capped deliberately: a pin row that holds everything is a second menu, and the whole point
+ * of pinning is that the few things you actually use are reachable without scrolling.
+ */
+enum class PinnedShortcut(val key: String) {
+    TASBIH("tasbih"),
+    PRAYER_TRACKER("prayer_tracker"),
+    KHATAM("khatam"),
+    ZAKAT("zakat"),
+    QIBLA("qibla"),
+    FASTING("fasting"),
+    NIGHT_WORSHIP("night_worship"),
+    QAIDA("qaida"),
+    ISLAMIC_CALENDAR("islamic_calendar");
+
+    companion object {
+        const val MAX_PINS = 5
+        val DEFAULTS = listOf(TASBIH, PRAYER_TRACKER, KHATAM, ZAKAT)
+        fun fromKey(key: String): PinnedShortcut? = entries.firstOrNull { it.key == key }
+    }
+}
+```
+
+- [x] **Step 2: Write the failing instrumented test**
+
+```kotlin
+@Test
+fun pinnedShortcuts_roundTripPreservesOrder() = runTest {
+    val order = listOf(PinnedShortcut.ZAKAT, PinnedShortcut.TASBIH, PinnedShortcut.KHATAM)
+    settings.setPinnedShortcuts(order)
+    // Order is the whole point — a Set would lose it, which is why this is a delimited string.
+    assertThat(settings.pinnedShortcuts.first()).containsExactlyElementsIn(order).inOrder()
+}
+
+@Test
+fun pinnedShortcuts_areCappedOnWrite() = runTest {
+    settings.setPinnedShortcuts(PinnedShortcut.entries.toList())  // 9
+    assertThat(settings.pinnedShortcuts.first()).hasSize(PinnedShortcut.MAX_PINS)
+}
+
+@Test
+fun pinnedShortcuts_unsetGivesTheDefaults() = runTest {
+    assertThat(settings.pinnedShortcuts.first()).isEqualTo(PinnedShortcut.DEFAULTS)
+}
+
+@Test
+fun pinnedShortcuts_anUnknownKeyIsDropped() = runTest {
+    // A key written by a newer build must not crash an older one.
+    settings.setPinnedShortcutKeysRaw("tasbih|not_a_screen|zakat")
+    assertThat(settings.pinnedShortcuts.first())
+        .containsExactly(PinnedShortcut.TASBIH, PinnedShortcut.ZAKAT).inOrder()
+}
+```
+
+- [x] **Step 3: Implement storage**
+
+Key: `stringPreferencesKey("more_pinned_shortcuts")`, value is keys joined with `|`.
+Read maps through `PinnedShortcut.fromKey`, drops nulls, and `take(MAX_PINS)`. Write applies
+`take(MAX_PINS)` too, so the cap holds even if a caller passes more. Register in
+`PreferenceCodec.TYPES` as `PrefType.STRING` — `PreferenceCodecTest` fails until you do.
+
+- [x] **Step 4: Run the unit gate (the codec guard) and the instrumented test**
+
+Run: `./gradlew :app:testDebugUnitTest --tests "*PreferenceCodecTest*"` → PASS
+Then the instrumented test on a device/emulator.
+
+- [x] **Step 5: Commit**
+
+```bash
+git commit -am "feat(more): persist pinned shortcuts, capped and ordered"
+```
+
+---
+
+### Task 4: `MoreSubtitles` — the pure mapper
+
+**Files:**
+- Create: `app/src/main/java/com/arshadshah/nimaz/presentation/screens/more/MoreSubtitles.kt`
+- Test: `app/src/test/java/com/arshadshah/nimaz/presentation/screens/more/MoreSubtitlesTest.kt`
+
+**Interfaces:**
+- Consumes: `MoreUiState` (defined in Task 5 — write that data class here if Task 5 has not run; it is the same file either way)
+- Produces: `MoreSubtitles.prayerTracker(logged: Int, total: Int): SubtitleSpec?`, and one function per row, each returning `SubtitleSpec?`. `data class SubtitleSpec(@StringRes val res: Int, val args: List<Any> = emptyList())`. **Null means the row renders no subtitle.**
+
+- [x] **Step 1: Write the failing test**
+
+```kotlin
+/**
+ * More stopped describing itself and started reporting. Each row's subtitle is therefore a
+ * claim about the app's state, and a wrong one is worse than the static text it replaced.
+ *
+ * Null is the interesting case: where there is nothing true to say, the row says nothing —
+ * it does not fall back to a dash, a spinner, or a restatement of its own title.
+ */
+class MoreSubtitlesTest {
+
+    @Test
+    fun `the tracker reports how much of today is logged`() {
+        assertThat(MoreSubtitles.prayerTracker(logged = 4, total = 5)?.res)
+            .isEqualTo(R.string.more_tracker_logged)
+        assertThat(MoreSubtitles.prayerTracker(logged = 4, total = 5)?.args)
+            .containsExactly(4, 5).inOrder()
+    }
+
+    @Test
+    fun `a row with nothing true to say has no subtitle`() {
+        // Not yet loaded — absent, never "—".
+        assertThat(MoreSubtitles.prayerTracker(logged = null, total = 5)).isNull()
+        assertThat(MoreSubtitles.khatam(progress = null)).isNull()
+        assertThat(MoreSubtitles.qaida(currentLesson = null, totalLessons = 21)).isNull()
+    }
+
+    @Test
+    fun `zakat distinguishes not-yet-calculated from a saved figure`() {
+        assertThat(MoreSubtitles.zakat(dueThisYear = null)?.res)
+            .isEqualTo(R.string.more_zakat_not_calculated)
+        assertThat(MoreSubtitles.zakat(dueThisYear = "€1,284.50")?.res)
+            .isEqualTo(R.string.more_zakat_due)
+    }
+
+    @Test
+    fun `no makeup fasts pending means no subtitle rather than "0 pending"`() {
+        assertThat(MoreSubtitles.fasting(pendingMakeup = 0)).isNull()
+        assertThat(MoreSubtitles.fasting(pendingMakeup = 3)?.args).containsExactly(3)
+    }
+}
+```
+
+- [x] **Step 2: Run to verify it fails**
+
+Run: `./gradlew :app:testDebugUnitTest --tests "*MoreSubtitlesTest*"`
+Expected: FAIL — unresolved `MoreSubtitles`
+
+- [x] **Step 3: Implement `MoreSubtitles`**
+
+An `object` of pure functions, each taking nullable inputs and returning `SubtitleSpec?`.
+No `Context`, no `stringResource` — the screen resolves the spec.
+
+- [x] **Step 4: Run to verify it passes**
+
+- [x] **Step 5: Commit**
+
+```bash
+git commit -am "feat(more): map state to subtitles as a pure, testable function"
+```
+
+---
+
+### Task 5: `MoreUseCases`, `MoreViewModel`, DI
+
+**Files:**
+- Create: `app/src/main/java/com/arshadshah/nimaz/domain/usecase/MoreUseCases.kt`
+- Create: `app/src/main/java/com/arshadshah/nimaz/presentation/viewmodel/more/MoreViewModel.kt`
+- Create: `app/src/main/java/com/arshadshah/nimaz/presentation/viewmodel/more/MoreUiState.kt`
+- Create: `app/src/main/java/com/arshadshah/nimaz/presentation/viewmodel/more/MoreEvent.kt`
+- Create: `app/src/main/java/com/arshadshah/nimaz/core/di/MoreModule.kt`
+- Test: `app/src/test/java/com/arshadshah/nimaz/presentation/viewmodel/more/MoreViewModelTest.kt`
+
+**Interfaces:**
+- Consumes: `MoreSubtitles` (Task 4), `MoreSettings.pinnedShortcuts` (Task 3), `TodayProvider`, `Telemetry`
+- Produces: `MoreUiState`, `sealed interface MoreEvent { data class SetPins(val pins: List<PinnedShortcut>) : MoreEvent; data object Refresh : MoreEvent }`, `MoreViewModel.state: StateFlow<MoreUiState>`
+
+Three files, not one — per #353. The ViewModel is created in the shape #353 is migrating
+everything else into, so #353 has nothing left to move.
+
+- [x] **Step 1: Write `MoreUseCases`**
+
+A `data class` bundling only what More reads — `getTodayPrayerRecords`, `getPendingMakeupFasts`,
+`nextWorship`, `khatamProgress`, `qaidaProgress`, `zakatHistory`, `hijriToday`. All exist
+already (spec §2.1); none are created here. **`NextWorshipResolver`, `KhatamProgressCalculator`
+and `HijriDateCalculator` are wrapped here, not injected into the ViewModel** (spec §2.1) — two are
+concrete `core/util` classes and the third is a static `object`, so a ViewModel holding them
+directly cannot be constructed in a JVM test.
+
+- [x] **Step 2: Write `MoreUiState` and `MoreEvent`**
+
+Every state field nullable, defaulting to null, so a subtitle that has not resolved renders as
+absent. **No `UiError` field** — spec §2.4 says why. `MoreEvent` is a sealed interface handled by a
+single exhaustive `when` in `onEvent`, no `else -> {}` (#354/#358/#359).
+
+- [x] **Step 3: Write `MoreViewModel`**
+
+`combine` the flows — including `todayProvider.todayChanges`, so the three date-scoped subtitles
+roll over at midnight (#363) — inside `launchSafely(telemetry, Feature.MORE, "observe", onFailure = …)`,
+never a bare `viewModelScope.launch` (#448/#441). No `Context` in the constructor.
+
+- [x] **Step 4: Provide `MoreUseCases` in `core/di/MoreModule.kt`**
+
+`@Module @InstallIn(SingletonComponent::class)`, `@Provides @Singleton`.
+
+- [x] **Step 5: Test the ViewModel, then verify Hilt wiring compiles**
+
+`MoreViewModelTest` with fakes: state assembles from the sources, and a source that throws leaves
+its field null rather than taking the screen down (spec §2.4).
+
+Run: `./gradlew :app:testDebugUnitTest --tests "*MoreViewModelTest*"` then
+`./gradlew :app:compileDebugKotlin` (runs KSP → validates Hilt)
+Expected: BUILD SUCCESSFUL
+
+- [x] **Step 5: Commit**
+
+```bash
+git commit -am "feat(more): add MoreViewModel and its use-case bundle"
+```
+
+---
+
+### Task 6: More screen — pills and live subtitles
+
+**Files:**
+- Modify: `app/src/main/java/com/arshadshah/nimaz/presentation/screens/more/MoreMenuScreen.kt`
+- Create: `app/src/main/java/com/arshadshah/nimaz/presentation/screens/more/PinnedShortcutsSheet.kt`
+
+**Interfaces:**
+- Consumes: `MoreViewModel`, `MoreSubtitles`, `PinnedShortcut`
+- Produces: nothing downstream
+
+- [x] **Step 1: Replace static subtitles with the mapper**
+
+Each row resolves `MoreSubtitles.x(state…)` and passes `subtitle = spec?.let { stringResource(it.res, *it.args.toTypedArray()) }`. Rows whose spec is null pass `subtitle = null`.
+
+- [x] **Step 2: Add the pinned row**
+
+A `LazyRow` of `NimazCard(onClick = …)` pills above the first section, with a
+`NimazSectionHeader`-style label and a `NimazIconButton` pencil.
+
+- [x] **Step 3: Build the edit sheet**
+
+`NimazBottomSheet` listing `PinnedShortcut.entries` with `NimazCheckbox`. When
+`pins.size == MAX_PINS`, unpinned rows are `enabled = false` and the header reads
+"5 of 5 pinned" (`R.string.more_pins_full`). Tapping a disabled row does nothing.
+
+- [x] **Step 4: Verify**
+
+Run: `./gradlew :app:compileDebugKotlin :app:testDebugUnitTest` → BUILD SUCCESSFUL
+
+- [x] **Step 5: Commit**
+
+```bash
+git commit -am "feat(more): pinned shortcuts and subtitles that report live state"
+```
+
+---
+
+### Task 7: Zakat — hero, accordions, bottom bar
+
+**Files:**
+- Modify: `app/src/main/java/com/arshadshah/nimaz/presentation/screens/zakat/ZakatCalculatorScreen.kt`
+
+**Interfaces:**
+- Consumes: `NimazAmountInput` (Task 1), `Shareables.zakat` (Task 2), existing `ZakatViewModel`
+- Produces: nothing downstream
+
+- [x] **Step 1: Move History to the app bar**
+
+`NimazBackTopAppBar(actions = { NimazIconButton(Icons.Default.History, …) })`; delete the
+history row from the bottom of the form.
+
+- [x] **Step 2: Make the hero sticky and collapsing**
+
+```kotlin
+val listState = rememberLazyListState()
+// Threshold on the first item's scroll offset, not an accumulated delta: a delta drifts and
+// can strand the hero half-collapsed after a fling.
+val collapsed by remember {
+    derivedStateOf { listState.firstVisibleItemIndex > 0 || listState.firstVisibleItemScrollOffset > 120 }
+}
+```
+
+Hero above the `LazyColumn`, not inside it. Animate the amount's font size with
+`animateFloatAsState`; the stat tiles and percentage line animate to zero height.
+
+- [x] **Step 3: Three accordions with subtotals**
+
+`NimazAccordion(title = …, subtitle = …, trailing = { Text(subtotal) })` for Assets, Deducted
+and Nisab, each body a column of labelled rows using `NimazAmountInput`. The **metal-price fields
+in the Nisab accordion get the same atom** — they became user-editable in #357 and they are money
+typed the same way (spec §3.2).
+
+- [x] **Step 4: Bottom action bar**
+
+`NimazButton` "Save this year's zakat" → existing `ZakatEvent` for `insertCalculation`;
+`NimazIconButton` share → `ContentShareManager.shareBranded(context, Shareables.zakat(...))`,
+launched in a coroutine scope exactly as `QuranAyahItem` does.
+
+- [x] **Step 5: Verify and commit**
+
+```bash
+./gradlew :app:compileDebugKotlin :app:testDebugUnitTest
+git commit -am "feat(zakat): keep the total in view, and give save and share a home"
+```
+
+---
+
+### Task 8: Fasting screen
+
+**Files:**
+- Modify: the Fasting home screen (find via `Route.FastingHome` in `NavGraph.kt`; the spec's §4 applies wherever it lives)
+
+**Interfaces:**
+- Consumes: existing `FastingViewModel`
+- Produces: nothing downstream
+
+- [x] **Step 1: Countdown hero**
+
+`NimazCard` with the Hijri date, time to Maghrib, and when suhoor ended, from the existing
+prayer-times source.
+
+- [x] **Step 2: Replace the two buttons with one switch**
+
+A `NimazSettingsItem` with `checked`/`onCheckedChange`, subtitle "Logged · tap to undo" or
+"Not logged yet". Delete the two-button row.
+
+**Read `enabled` from `state.canToggleToday`, and the subtitle from `state.toggleBlockedReason`
+when it is non-null.** `FastStatus` has four values and a switch expresses two; #366 already
+decided the answer and put it on the UiState (spec §4). An exempted or makeup-due day renders the
+switch disabled with the reason as its subtitle — do not add a second rule for this.
+
+- [x] **Step 3: Go deeper + Ramadan groups**
+
+`NimazMenuGroup` rows with live subtitles; makeup fasts carries a `NimazBadge` count.
+
+- [x] **Step 4: Verify and commit**
+
+```bash
+./gradlew :app:compileDebugKotlin :app:testDebugUnitTest
+git commit -am "feat(fasting): one switch for today, and a hero that says what is left"
+```
+
+---
+
+### Task 9: Strings, translations, docs
+
+**Files:**
+- Modify: `app/src/main/res/values/strings.xml` + `values-{de,fr,id,ms,tr}/strings.xml`
+- Modify: `docs/SUBSYSTEMS.md` (§6 — the `more_pinned_shortcuts` key)
+
+- [x] **Step 1: Add every new string to `values/strings.xml`**
+
+Counts as `plurals`. Titles label, subtitles report.
+
+- [x] **Step 2: Translate into the five app locales**
+
+- [x] **Step 3: Validate XML and docs**
+
+```bash
+for f in app/src/main/res/values*/strings.xml; do python3 -c "import xml.etree.ElementTree as E; E.parse('$f')"; done
+python3 scripts/check_docs.py
+```
+
+- [x] **Step 4: Commit**
+
+```bash
+git commit -am "i18n(more): translate the new strings and document the pin preference"
+```
+
+---
+
+### Task 10: Release notes
+
+**Files:**
+- Modify: `fastlane/metadata/android/<locale>/changelogs/default.txt` — **nine** locales: `ar`, `de-DE`, `en-GB`, `en-US`, `fr-FR`, `id`, `ms`, `tr-TR`, `ur`
+
+- [x] **Step 1: Write `en-US` from what actually shipped**
+
+Follow the existing house style — a "What's new:" line then `•` bullets, user-facing language,
+no component names. Cover only what landed; if a task was dropped, it is not in the notes.
+
+- [x] **Step 2: Translate into the other eight**
+
+Note this is **wider than the app's six UI locales** — `ar` and `ur` have store listings but no
+app translation.
+
+- [x] **Step 3: Write the GitHub release body**
+
+Longer than the store notes: what changed, why, and anything a returning user should know
+(pinned shortcuts default to four; existing zakat history is untouched).
+
+- [x] **Step 4: Commit**
+
+```bash
+git commit -am "docs(release): release notes for the More, Zakat and Fasting work"
+```
+
+---
+
+## What actually landed, and where it differs
+
+All ten tasks are done. Five places where the implementation departed from the plan, each because
+the plan was written before the tree it had to fit:
+
+1. **`NimazAmountInput` gained `unitSuffix`.** The plan's signature took `currencySymbol: String`
+   only, but two of Zakat's fields are **weights** in grams, and the field being replaced chose
+   between a leading symbol and a trailing unit by comparing its suffix against the literal string
+   `"$"` — which is why every non-dollar currency rendered a dollar sign. The atom now takes one or
+   the other explicitly. It also grew `parseAmountInput` and `amountToInput`, because a field whose
+   text is local state needs both directions, and both are the interesting cases to test.
+2. **`ZakatSummaryHero` gained `collapseProgress`.** The plan assumed the hero could be collapsed
+   from outside by passing `stats = emptyList()`. That switches layouts at the threshold and makes
+   the form jump by the tile row's height, so the collapse is interpolated inside the molecule
+   instead. The amount never disappears.
+3. **`SubtitleSpec` lives in `presentation/screens/`, not in the More package.** Fasting needed the
+   same contract, and one shared resolver is better than two that can disagree about
+   `pluralStringResource`.
+4. **`FastingSubtitles` is new, and Task 8 restructured rather than replaced.** §4's switch and its
+   four-state handling had already landed on `dev` (spec §0.3), so what was left was the reporting:
+   a Go deeper group where **each row does something different** — the calendar and the recommended
+   list fold in place, makeup switches tab, Ramadan opens the Islamic calendar. Three rows opening
+   the day sheet would have been one row wearing three hats. `LogFastButton` was kept, because
+   logging today should not require finding today on a grid that may be folded away.
+5. **`onNavigateToCalendar` added to `FastTrackerScreen`** — no new route (§8 holds), just a
+   destination that already existed reached from one more place.
+6. **`MakeupFastsUiState` gained `currency`, and `FastingViewModel` a `ZakatSettings` seam.** The
+   makeup row reports the fidya paid, which is money, and `totalFidyaPaid` had no currency attached
+   because nothing had ever rendered it. The first draft formatted it with `ZakatDefaults.CURRENCY`
+   — which shows `$24.00` to a euro user, precisely the disagreement-between-symbol-and-number
+   defect spec §0.3 records as fixed. The zakat currency is the app's only currency setting, so it
+   is collected (not read once — it can change while this screen sits on the back stack).
+
+**`MoreEvent.Refresh` is dispatched on resume.** Worth calling out because the plan did not say
+where it came from, and an event no screen emits is exactly the defect `NightWorshipEvent.Refresh`
+was.
+
+## Self-Review
+
+**Spec coverage:** §0 → Task 0 (done). §2.1 subtitles → Tasks 4, 5, 6. §2.2 pins → Tasks 3, 6.
+§2.3 unchanged-deliberately → no task needed (it is a "do not change" instruction, enforced by
+review). §2.4 no-error-state → Task 5 (the absence of a `UiError` field is the deliverable).
+§3.1 layout → Task 7. §3.2 `NimazAmountInput` → Task 1. §3.3 save/share → Tasks 2, 7.
+§4 Fasting → Task 8. §5 strings/locales → Tasks 9, 10. §6 testing → tests live inside Tasks 1–5.
+§7 documentation → Task 9. §8 out-of-scope → constraints.
+
+**Placeholder scan:** no TBD/TODO. Tasks 7 and 8 give code for the load-bearing parts (the
+collapse threshold, the switch) and prose for the mechanical composition — acceptable because
+both screens are edits to existing files whose surrounding patterns are already established;
+an implementer reads the file, not a transcription of it.
+
+**Type consistency:** `PinnedShortcut.MAX_PINS` used in Tasks 3 and 6. `SubtitleSpec(res, args)`
+returned in Task 4, consumed in Task 6. `formatAmountInput` internal to Task 1, used by
+`NimazAmountInput` only. `Shareables.zakat(...)` signature in Task 2 matches its call in Task 7.

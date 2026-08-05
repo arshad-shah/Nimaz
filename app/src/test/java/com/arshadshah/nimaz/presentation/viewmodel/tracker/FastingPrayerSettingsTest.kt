@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.presentation.viewmodel.tracker
 
 import java.time.LocalDate
 import com.arshadshah.nimaz.core.time.FakeTodayProvider
+import com.arshadshah.nimaz.presentation.viewmodel.FakeZakatSettings
 import com.arshadshah.nimaz.core.monitoring.RecordingTelemetry
 import com.arshadshah.nimaz.domain.model.AsrCalculation
 import com.arshadshah.nimaz.domain.model.CalculationMethod
@@ -18,7 +19,6 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -27,6 +27,8 @@ import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 
 /**
  * Fast Tracker's suhoor and iftar honour the user's calculation settings.
@@ -64,6 +66,7 @@ class FastingPrayerSettingsTest {
         buildFastingUseCases(fasting),
         buildPrayerUseCases(prayers),
         FakeTodayProvider(LocalDate.now()),
+        FakeZakatSettings(),
         RecordingTelemetry(),
     )
 

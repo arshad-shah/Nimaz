@@ -479,7 +479,6 @@
     <string name="net_zakatable_wealth">Net Zekata Tabi Servet</string>
     <string name="nisab_threshold">Nisab Eşiği</string>
     <string name="meets_nisab">Nisab\'ı Karşılıyor</string>
-    <string name="save_calculation">Hesaplamayı Kaydet</string>
     <string name="loans">Krediler</string>
     <string name="bills_due">Ödenmesi Gereken Faturalar</string>
     <string name="hint_physical_cash">Elinizde bulunan nakit para</string>
@@ -1853,4 +1852,88 @@
     <string name="dua_category_load_failed">Bu koleksiyon yüklenemedi</string>
     <string name="dua_load_failed_body">Dualar cihazınızda saklanır; yeniden denemek genellikle işe yarar.</string>
     <string name="calendar_events_load_failed">İslami günler yüklenemedi</string>
+
+    <!-- More, Zakat and Fasting: live subtitles, pinned shortcuts, the zakat share. -->
+    <string name="share_eyebrow_zakat">Zekât</string>
+    <string name="share_zakat_due">Ödenecek zekât</string>
+    <string name="share_zakat_assets">Varlıklar</string>
+    <string name="share_zakat_deducted">Düşülen</string>
+    <string name="share_zakat_net">Zekâta tabi net</string>
+    <string name="share_zakat_nisab">Nisap eşiği</string>
+    <string name="share_zakat_line_format">%1$s: %2$s</string>
+    <string name="share_zakat_year_format">Hicri yıl %1$s</string>
+    <string name="zakat_unit_grams">g</string>
+    <string name="zakat_section_deducted">Düşülen</string>
+    <string name="zakat_section_nisab">Nisap eşiği</string>
+    <string name="zakat_section_assets_subtitle">Zekâta tabi olan mal varlığınız</string>
+    <string name="zakat_section_deducted_subtitle">Toplamdan düşülen borç ve faturalar</string>
+    <string name="zakat_section_nisab_subtitle">Zekâtın uygulandığı en az mal varlığı</string>
+    <string name="zakat_save_this_year">Bu yılın zekâtını kaydet</string>
+    <string name="zakat_share">Bu hesabı paylaş</string>
+    <string name="more_tracker_logged">Bugün %2$d vakitten %1$d tanesi işlendi</string>
+    <string name="more_tracker_all">Bugünün tamamı işlendi</string>
+    <string name="more_tracker_none">Bugün henüz bir şey işlenmedi</string>
+    <string name="more_worship_next_hm">%1$s %2$d sa %3$d dk sonra</string>
+    <string name="more_worship_next_m">%1$s %2$d dk sonra</string>
+    <string name="more_worship_now">%1$s şimdi</string>
+    <string name="more_khatam_juz">%1$d. cüz</string>
+    <string name="more_khatam_juz_on_pace">%1$d. cüz · hedefte</string>
+    <string name="more_qaida_lesson">%2$d dersten %1$d. ders</string>
+    <string name="more_zakat_not_calculated">Bu yıl hesaplanmadı</string>
+    <string name="more_zakat_due">%1$s ödenecek</string>
+    <string name="more_pinned_title">Sabitlenenler</string>
+    <string name="more_pinned_edit">Sabitlenen kısayolları düzenle</string>
+    <string name="more_pins_sheet_title">Sabitlenen kısayollar</string>
+    <string name="more_pins_count">%2$d kısayoldan %1$d tanesi sabit</string>
+    <string name="more_pins_full">%1$d kısayolun %1$d tanesi sabit — yeni eklemek için birini kaldır</string>
+    <string name="more_pins_empty">Sabitlenmiş bir şey yok</string>
+    <string name="more_pin_tasbih">Tesbih</string>
+    <string name="more_pin_prayer_tracker">Namaz takibi</string>
+    <string name="more_pin_khatam">Hatim</string>
+    <string name="more_pin_zakat">Zekât</string>
+    <string name="more_pin_qibla">Kıble</string>
+    <string name="more_pin_fasting">Oruç</string>
+    <string name="more_pin_night_worship">Gece ibadeti</string>
+    <string name="more_pin_qaida">Kaide</string>
+    <string name="more_pin_islamic_calendar">Takvim</string>
+    <string name="fasting_go_deeper">Daha fazlası</string>
+    <string name="fasting_log_a_fast">Oruç işle</string>
+    <string name="fasting_row_calendar">Oruç takvimi</string>
+    <string name="fasting_row_recommended">Tavsiye edilen oruçlar</string>
+    <string name="fasting_row_recommended_today">Sıradaki bugün</string>
+    <string name="fasting_row_recommended_tomorrow">Sıradaki yarın</string>
+    <string name="fasting_row_makeup">Kaza oruçları</string>
+    <string name="fasting_row_makeup_none">Bekleyen bir şey yok</string>
+    <string name="fasting_row_makeup_fidya">Bekleyen bir şey yok · %1$s fidye ödendi</string>
+    <string name="fasting_row_ramadan">Ramazan</string>
+    <string name="fasting_row_ramadan_day">%1$d. gün</string>
+    <string name="fasting_row_ramadan_today">Bugün başlıyor</string>
+    <plurals name="more_fasting_makeup_pending">
+        <item quantity="one">%1$d kaza orucu bekliyor</item>
+        <item quantity="other">%1$d kaza orucu bekliyor</item>
+    </plurals>
+    <plurals name="more_khatam_juz_ahead">
+        <item quantity="one">%1$d. cüz · %2$d gün önde</item>
+        <item quantity="other">%1$d. cüz · %2$d gün önde</item>
+    </plurals>
+    <plurals name="more_khatam_juz_behind">
+        <item quantity="one">%1$d. cüz · %2$d gün geride</item>
+        <item quantity="other">%1$d. cüz · %2$d gün geride</item>
+    </plurals>
+    <plurals name="fasting_row_calendar_fasted">
+        <item quantity="one">Bu ay %1$d gün oruç</item>
+        <item quantity="other">Bu ay %1$d gün oruç</item>
+    </plurals>
+    <plurals name="fasting_row_recommended_in_days">
+        <item quantity="one">Sıradaki %1$d gün sonra</item>
+        <item quantity="other">Sıradaki %1$d gün sonra</item>
+    </plurals>
+    <plurals name="fasting_row_makeup_pending">
+        <item quantity="one">%1$d tanesi hâlâ kaza edilecek</item>
+        <item quantity="other">%1$d tanesi hâlâ kaza edilecek</item>
+    </plurals>
+    <plurals name="fasting_row_ramadan_in_days">
+        <item quantity="one">%1$d gün sonra başlıyor</item>
+        <item quantity="other">%1$d gün sonra başlıyor</item>
+    </plurals>
 </resources>
