@@ -1,7 +1,7 @@
 Neu:
 
-• NEU: Optionale Andachtserinnerungen — Tahajjud, Suhoor & Iftar, Taraweeh, Laylatul Qadr, Morgen- & Abend-Adhkar und Sunnah-Fastentage. Nur die gewünschten aktivieren.
-• Eine „Nächste Andacht“-Karte auf der Startseite zeigt, was ansteht.
-• Benachrichtigungen in klare Bereiche gegliedert.
-• Qur'an: redaktionelle Empfehlungskarten auf der Startseite.
-• Mehr Feinschliff und Fehlerbehebungen.
+• „Mehr“ zeigt Fakten: heute erfasste Gebete, den Dschus deines Khatam, die Zakat dieses Jahres, das Hidschri-Datum.
+• Bis zu fünf Verknüpfungen oben anpinnen.
+• Zakat: Summe bleibt beim Tippen sichtbar, Abschnitte mit Zwischensummen, Berechnung teilbar.
+• Zakat-Felder nehmen Dezimalstellen und deine Währung.
+• Fasten: aktuelle Zahlen, offene Fastentage als Zähler.

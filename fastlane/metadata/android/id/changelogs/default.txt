@@ -1,7 +1,7 @@
 Yang baru:
 
-• BARU: Pengingat ibadah opsional — Tahajud, Sahur & Buka, Tarawih, Lailatul Qadar, zikir pagi & petang, dan hari puasa sunnah. Aktifkan yang Anda mau saja.
-• Kartu "Ibadah Berikutnya" di Beranda menampilkan yang akan datang.
-• Pengaturan notifikasi ditata ulang menjadi bagian yang jelas.
-• Al-Qur'an: kartu rekomendasi di beranda.
-• Pemolesan dan perbaikan.
+• “Lainnya” melaporkan fakta: salat tercatat hari ini, juz khatam Anda, zakat tahun ini, tanggal Hijriah.
+• Sematkan hingga lima pintasan di bagian atas.
+• Zakat: total tetap terlihat saat mengisi, bagian dengan subtotal, perhitungan bisa dibagikan.
+• Kolom zakat menerima desimal dan mata uang Anda.
+• Puasa: angka terkini, puasa qada sebagai lencana.

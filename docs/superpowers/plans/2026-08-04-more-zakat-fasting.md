@@ -36,6 +36,10 @@ landed in the meantime (#353 sub-packages, #363 `TodayProvider`, #436 settings s
 - Every new/extended component ships `@Preview` in **light and dark**.
 - Gates before every commit: `./gradlew :app:compileDebugKotlin :app:testDebugUnitTest` and `python3 scripts/check_docs.py`.
 - Gradle needs the content artifact token: `export NIMAZ_DATA_TOKEN=$(gh auth token -h github.com -u arshad-shah)`.
+  Without it, `fetchNimazData` fails and the gates must be run as
+  `./gradlew :app:compileDebugKotlin :app:testDebugUnitTest -x fetchNimazData`. Exactly one test
+  needs the artifact — `DeviceStateCorpusTest`, whose whole job is asserting the shipped database
+  — so it fails on a tokenless machine and passes on CI. Everything else runs.
 
 ## File Structure
 

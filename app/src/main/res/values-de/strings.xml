@@ -1846,4 +1846,88 @@
     <string name="dua_category_load_failed">Diese Sammlung konnte nicht geladen werden</string>
     <string name="dua_load_failed_body">Duas sind auf deinem Gerät gespeichert – ein erneuter Versuch hilft meistens.</string>
     <string name="calendar_events_load_failed">Islamische Ereignisse konnten nicht geladen werden</string>
+
+    <!-- More, Zakat and Fasting: live subtitles, pinned shortcuts, the zakat share. -->
+    <string name="share_eyebrow_zakat">Zakat</string>
+    <string name="share_zakat_due">Fällige Zakat</string>
+    <string name="share_zakat_assets">Vermögen</string>
+    <string name="share_zakat_deducted">Abgezogen</string>
+    <string name="share_zakat_net">Zakatpflichtiges Netto</string>
+    <string name="share_zakat_nisab">Nisab-Schwelle</string>
+    <string name="share_zakat_line_format">%1$s: %2$s</string>
+    <string name="share_zakat_year_format">Mondjahr %1$s</string>
+    <string name="zakat_unit_grams">g</string>
+    <string name="zakat_section_deducted">Abgezogen</string>
+    <string name="zakat_section_nisab">Nisab-Schwelle</string>
+    <string name="zakat_section_assets_subtitle">Was du besitzt und worauf Zakat fällig ist</string>
+    <string name="zakat_section_deducted_subtitle">Schulden und Rechnungen, die abgezogen werden</string>
+    <string name="zakat_section_nisab_subtitle">Das Mindestvermögen, ab dem Zakat gilt</string>
+    <string name="zakat_save_this_year">Zakat dieses Jahres speichern</string>
+    <string name="zakat_share">Diese Berechnung teilen</string>
+    <string name="more_tracker_logged">%1$d von %2$d heute erfasst</string>
+    <string name="more_tracker_all">Der ganze Tag ist erfasst</string>
+    <string name="more_tracker_none">Heute noch nichts erfasst</string>
+    <string name="more_worship_next_hm">%1$s in %2$d Std. %3$d Min.</string>
+    <string name="more_worship_next_m">%1$s in %2$d Min.</string>
+    <string name="more_worship_now">%1$s jetzt</string>
+    <string name="more_khatam_juz">Dschus %1$d</string>
+    <string name="more_khatam_juz_on_pace">Dschus %1$d · im Plan</string>
+    <string name="more_qaida_lesson">Lektion %1$d von %2$d</string>
+    <string name="more_zakat_not_calculated">Dieses Jahr nicht berechnet</string>
+    <string name="more_zakat_due">%1$s fällig</string>
+    <string name="more_pinned_title">Angepinnt</string>
+    <string name="more_pinned_edit">Angepinnte Verknüpfungen bearbeiten</string>
+    <string name="more_pins_sheet_title">Angepinnte Verknüpfungen</string>
+    <string name="more_pins_count">%1$d von %2$d angepinnt</string>
+    <string name="more_pins_full">%1$d von %1$d angepinnt — löse eine, um eine andere anzupinnen</string>
+    <string name="more_pins_empty">Nichts angepinnt</string>
+    <string name="more_pin_tasbih">Tasbih</string>
+    <string name="more_pin_prayer_tracker">Gebetstracker</string>
+    <string name="more_pin_khatam">Khatam</string>
+    <string name="more_pin_zakat">Zakat</string>
+    <string name="more_pin_qibla">Qibla</string>
+    <string name="more_pin_fasting">Fasten</string>
+    <string name="more_pin_night_worship">Nachtgebet</string>
+    <string name="more_pin_qaida">Qaida</string>
+    <string name="more_pin_islamic_calendar">Kalender</string>
+    <string name="fasting_go_deeper">Mehr dazu</string>
+    <string name="fasting_log_a_fast">Fasten erfassen</string>
+    <string name="fasting_row_calendar">Fastenkalender</string>
+    <string name="fasting_row_recommended">Empfohlene Fastentage</string>
+    <string name="fasting_row_recommended_today">Der nächste ist heute</string>
+    <string name="fasting_row_recommended_tomorrow">Der nächste ist morgen</string>
+    <string name="fasting_row_makeup">Nachzuholende Fastentage</string>
+    <string name="fasting_row_makeup_none">Nichts offen</string>
+    <string name="fasting_row_makeup_fidya">Nichts offen · %1$s Fidya bezahlt</string>
+    <string name="fasting_row_ramadan">Ramadan</string>
+    <string name="fasting_row_ramadan_day">Tag %1$d</string>
+    <string name="fasting_row_ramadan_today">Beginnt heute</string>
+    <plurals name="more_fasting_makeup_pending">
+        <item quantity="one">%1$d Fastentag nachzuholen</item>
+        <item quantity="other">%1$d Fastentage nachzuholen</item>
+    </plurals>
+    <plurals name="more_khatam_juz_ahead">
+        <item quantity="one">Dschus %1$d · %2$d Tag vor dem Plan</item>
+        <item quantity="other">Dschus %1$d · %2$d Tage vor dem Plan</item>
+    </plurals>
+    <plurals name="more_khatam_juz_behind">
+        <item quantity="one">Dschus %1$d · %2$d Tag hinter dem Plan</item>
+        <item quantity="other">Dschus %1$d · %2$d Tage hinter dem Plan</item>
+    </plurals>
+    <plurals name="fasting_row_calendar_fasted">
+        <item quantity="one">%1$d Tag diesen Monat gefastet</item>
+        <item quantity="other">%1$d Tage diesen Monat gefastet</item>
+    </plurals>
+    <plurals name="fasting_row_recommended_in_days">
+        <item quantity="one">Der nächste ist in %1$d Tag</item>
+        <item quantity="other">Der nächste ist in %1$d Tagen</item>
+    </plurals>
+    <plurals name="fasting_row_makeup_pending">
+        <item quantity="one">%1$d noch nachzuholen</item>
+        <item quantity="other">%1$d noch nachzuholen</item>
+    </plurals>
+    <plurals name="fasting_row_ramadan_in_days">
+        <item quantity="one">Beginnt in %1$d Tag</item>
+        <item quantity="other">Beginnt in %1$d Tagen</item>
+    </plurals>
 </resources>

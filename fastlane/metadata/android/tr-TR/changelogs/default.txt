@@ -1,7 +1,7 @@
 Yenilikler:
 
-• YENİ: İsteğe bağlı ibadet hatırlatıcıları — Teheccüd, Sahur & İftar, Teravih, Kadir Gecesi, sabah & akşam zikirleri ve sünnet oruç günleri. Yalnızca istediklerinizi açın.
-• Ana ekranda "Sıradaki İbadet" kartı yaklaşanı gösterir.
-• Bildirim ayarları net bölümlere yeniden düzenlendi.
-• Kur'an: ana ekranda önerilen kartlar.
-• İyileştirmeler ve hata düzeltmeleri.
+• “Daha fazla” gerçeği bildirir: bugün işlenen namazlar, hatminizin cüzü, bu yılın zekâtı, hicri tarih.
+• En çok beş kısayolu en üste sabitleyin.
+• Zekât: yazarken toplam görünür kalır, bölümlerde ara toplam, hesap paylaşılabilir.
+• Zekât alanları ondalık ve kendi para biriminizi kabul eder.
+• Oruç: güncel sayılar, kaza oruçları rozet olarak.

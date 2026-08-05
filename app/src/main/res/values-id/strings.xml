@@ -1815,4 +1815,81 @@
     <string name="dua_category_load_failed">Kumpulan ini tidak dapat dimuat</string>
     <string name="dua_load_failed_body">Doa tersimpan di perangkat Anda, jadi mencoba lagi biasanya berhasil.</string>
     <string name="calendar_events_load_failed">Peristiwa Islam tidak dapat dimuat</string>
+
+    <!-- More, Zakat and Fasting: live subtitles, pinned shortcuts, the zakat share. -->
+    <string name="share_eyebrow_zakat">Zakat</string>
+    <string name="share_zakat_due">Zakat yang wajib</string>
+    <string name="share_zakat_assets">Aset</string>
+    <string name="share_zakat_deducted">Dikurangi</string>
+    <string name="share_zakat_net">Neto kena zakat</string>
+    <string name="share_zakat_nisab">Batas nisab</string>
+    <string name="share_zakat_line_format">%1$s: %2$s</string>
+    <string name="share_zakat_year_format">Tahun hijriah %1$s</string>
+    <string name="zakat_unit_grams">g</string>
+    <string name="zakat_section_deducted">Dikurangi</string>
+    <string name="zakat_section_nisab">Batas nisab</string>
+    <string name="zakat_section_assets_subtitle">Harta milik Anda yang wajib dizakati</string>
+    <string name="zakat_section_deducted_subtitle">Utang dan tagihan yang dikurangkan dari total</string>
+    <string name="zakat_section_nisab_subtitle">Harta minimum yang di atasnya zakat berlaku</string>
+    <string name="zakat_save_this_year">Simpan zakat tahun ini</string>
+    <string name="zakat_share">Bagikan perhitungan ini</string>
+    <string name="more_tracker_logged">%1$d dari %2$d tercatat hari ini</string>
+    <string name="more_tracker_all">Seluruh hari ini tercatat</string>
+    <string name="more_tracker_none">Belum ada catatan hari ini</string>
+    <string name="more_worship_next_hm">%1$s dalam %2$d j %3$d m</string>
+    <string name="more_worship_next_m">%1$s dalam %2$d m</string>
+    <string name="more_worship_now">%1$s sekarang</string>
+    <string name="more_khatam_juz">Juz %1$d</string>
+    <string name="more_khatam_juz_on_pace">Juz %1$d · sesuai target</string>
+    <string name="more_qaida_lesson">Pelajaran %1$d dari %2$d</string>
+    <string name="more_zakat_not_calculated">Belum dihitung tahun ini</string>
+    <string name="more_zakat_due">%1$s wajib</string>
+    <string name="more_pinned_title">Disematkan</string>
+    <string name="more_pinned_edit">Ubah pintasan yang disematkan</string>
+    <string name="more_pins_sheet_title">Pintasan yang disematkan</string>
+    <string name="more_pins_count">%1$d dari %2$d disematkan</string>
+    <string name="more_pins_full">%1$d dari %1$d disematkan — lepas satu untuk menambah</string>
+    <string name="more_pins_empty">Belum ada yang disematkan</string>
+    <string name="more_pin_tasbih">Tasbih</string>
+    <string name="more_pin_prayer_tracker">Pelacak salat</string>
+    <string name="more_pin_khatam">Khatam</string>
+    <string name="more_pin_zakat">Zakat</string>
+    <string name="more_pin_qibla">Kiblat</string>
+    <string name="more_pin_fasting">Puasa</string>
+    <string name="more_pin_night_worship">Ibadah malam</string>
+    <string name="more_pin_qaida">Qaida</string>
+    <string name="more_pin_islamic_calendar">Kalender</string>
+    <string name="fasting_go_deeper">Selengkapnya</string>
+    <string name="fasting_log_a_fast">Catat puasa</string>
+    <string name="fasting_row_calendar">Kalender puasa</string>
+    <string name="fasting_row_recommended">Puasa yang dianjurkan</string>
+    <string name="fasting_row_recommended_today">Yang berikutnya hari ini</string>
+    <string name="fasting_row_recommended_tomorrow">Yang berikutnya besok</string>
+    <string name="fasting_row_makeup">Puasa qada</string>
+    <string name="fasting_row_makeup_none">Tidak ada yang tertunggak</string>
+    <string name="fasting_row_makeup_fidya">Tidak ada yang tertunggak · fidyah %1$s dibayar</string>
+    <string name="fasting_row_ramadan">Ramadan</string>
+    <string name="fasting_row_ramadan_day">Hari %1$d</string>
+    <string name="fasting_row_ramadan_today">Mulai hari ini</string>
+    <plurals name="more_fasting_makeup_pending">
+        <item quantity="other">%1$d puasa qada tertunggak</item>
+    </plurals>
+    <plurals name="more_khatam_juz_ahead">
+        <item quantity="other">Juz %1$d · %2$d hari lebih cepat</item>
+    </plurals>
+    <plurals name="more_khatam_juz_behind">
+        <item quantity="other">Juz %1$d · %2$d hari tertinggal</item>
+    </plurals>
+    <plurals name="fasting_row_calendar_fasted">
+        <item quantity="other">%1$d hari puasa bulan ini</item>
+    </plurals>
+    <plurals name="fasting_row_recommended_in_days">
+        <item quantity="other">Yang berikutnya dalam %1$d hari</item>
+    </plurals>
+    <plurals name="fasting_row_makeup_pending">
+        <item quantity="other">%1$d masih harus diqada</item>
+    </plurals>
+    <plurals name="fasting_row_ramadan_in_days">
+        <item quantity="other">Mulai dalam %1$d hari</item>
+    </plurals>
 </resources>

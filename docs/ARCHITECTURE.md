@@ -429,6 +429,30 @@ Stored, it has to be refreshed at every site that touches an input, and the site
 not fail loudly — they leave a filter that is on beside a list that ignores it. Both instances
 the sweep found (tasbih categories, hadith chapter search) were exactly that. See AP-9.
 
+**A subtitle that reports state is a pure function, not a `when` inside a composable.**
+`presentation/screens/SubtitleSpec.kt` declares the shared contract — a `@StringRes`/`@PluralsRes`
+id, typed args (`SubtitleArg.Count`/`Text`/`Resource`), and a nullable `quantity` — plus the one
+`@Composable SubtitleSpec?.resolve()` that renders it. Each screen's mapper is an `object` of pure
+functions from state to `SubtitleSpec?`: `NotificationHubSubtitles`, `MoreSubtitles`,
+`FastingSubtitles`.
+
+Three properties make it worth the indirection:
+
+- **A wrong row is catchable off-device.** Once a subtitle asserts something ("4 of 5 logged
+  today"), it can be false, and a screenshot review will not notice. A pure mapper is a JVM test.
+- **`null` means the row renders no subtitle at all** — not a dash, not a spinner, not a zero. It
+  covers both "has not loaded" and "nothing true to say", which must look identical, because a dash
+  reads as a value and a spinner makes a static menu look busy.
+- **`quantity` is non-null exactly when `res` is a `plurals`.** `resolve()` switches on it, and
+  getting it wrong throws at render time in a locale the author may not read — so the mappers'
+  tests assert the invariant rather than trusting call sites. Counts always go through `plurals`;
+  Turkish and Malay do not pluralise like English.
+
+Args are a sealed type rather than `List<Any>` because a subtitle can interpolate a *string
+resource* (a worship reminder's own translated name), and an `Int` in an untyped arg list is
+indistinguishable from a count — a bug that only surfaces as a resource id rendered where a name
+belongs.
+
 ### 4.2 Domain — use cases
 
 Canonical reference: `domain/usecase/AsmaUlHusnaUseCases.kt`.

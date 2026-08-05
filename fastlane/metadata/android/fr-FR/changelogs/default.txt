@@ -1,7 +1,7 @@
 Nouveautés :
 
-• NOUVEAU : rappels d'adoration optionnels — Tahajjud, Suhoor & Iftar, Tarawih, Laylat al-Qadr, adhkar du matin & soir, et jours de jeûne surérogatoire. Activez ceux que vous voulez.
-• Une carte « Prochaine adoration » sur l'accueil.
-• Paramètres de notification réorganisés en sections claires.
-• Coran : cartes recommandées sur l'accueil.
-• Peaufinage et corrections.
+• « Plus » indique les faits : prières notées aujourd'hui, juz de votre khatam, zakât de l'année, date hégirienne.
+• Épinglez jusqu'à cinq raccourcis en haut.
+• Zakât : total visible pendant la saisie, sections avec sous-totaux, calcul partageable.
+• Les montants acceptent décimales et votre devise.
+• Jeûne : chiffres à jour, jeûnes dus en badge.

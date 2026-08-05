@@ -1,7 +1,7 @@
 What's new:
 
-• NEW: Optional worship reminders — Tahajjud, Suhoor & Iftar, Taraweeh, Laylatul Qadr, morning & evening adhkar, and Sunnah fasting days. Turn on just the ones you want.
-• A "Next Worship" card on Home shows what's coming up next.
-• Notification settings reorganised into clear sections.
-• Qur'an: editorial recommended cards on the home screen.
-• More polish, smoother loading, and fixes throughout.
+• More reports what's true now: today's logged prayers, your khatam's juz, this year's zakat, the Hijri date.
+• Pin up to five shortcuts to the top of More.
+• Zakat: the total stays in view while you type, sections carry subtotals, and you can share a calculation.
+• Zakat amounts now take decimals and your own currency.
+• Fasting: live figures, and the fasts you owe as a badge.
