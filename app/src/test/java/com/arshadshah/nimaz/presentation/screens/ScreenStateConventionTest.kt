@@ -32,7 +32,6 @@ class ScreenStateConventionTest {
     private val acceptedSpinners = setOf(
         "AsmaUnNabiDetailScreen.kt",
         "DuaReaderScreen.kt",
-        "HomeScreen.kt",
         "LocationScreen.kt",
         "QuranHomeScreen.kt",
         "QuranReaderScreen.kt",
@@ -57,7 +56,6 @@ class ScreenStateConventionTest {
         "PrayerTrackerUiState.kt",
         "QuranUiState.kt",
         "TasbihUiState.kt",
-        "HomeUiState.kt",
         "ZakatUiState.kt",
     )
 

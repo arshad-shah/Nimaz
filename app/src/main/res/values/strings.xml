@@ -86,6 +86,8 @@
     <string name="grade_mawdu">Mawdu\'</string>
     <string name="dua_of_the_moment">Dua of the Moment</string>
     <string name="prayer_times">Prayer Times</string>
+    <string name="home_prayer_times_failed">Today\'s prayer times couldn\'t be calculated</string>
+    <string name="home_prayer_times_failed_body">Check that a location is set, then try again.</string>
     <string name="hours">Hours</string>
     <string name="minutes">Minutes</string>
     <string name="seconds">Seconds</string>
