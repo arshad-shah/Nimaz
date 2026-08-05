@@ -9,6 +9,7 @@ import kotlin.time.Instant
 import com.arshadshah.nimaz.presentation.model.DailyDua
 import com.arshadshah.nimaz.presentation.model.PrayerTimeDisplay
 import com.arshadshah.nimaz.presentation.model.withClockState
+import com.arshadshah.nimaz.presentation.viewmodel.UiError
 
 data class HomeUiState(
     // `currentDate` used to live here, set once at construction and read by no screen
@@ -41,7 +42,14 @@ data class HomeUiState(
     // derived at the leaf, so no per-second string lives here.
     val jumuahAt: Instant? = null,
     val isLoading: Boolean = true,
-    val error: String? = null,
+    /**
+     * Set when the day's prayer times could not be calculated.
+     *
+     * Scoped to the prayer card by the screen, not to the dashboard: the rest of the home
+     * screen — the worship card, the daily hadith, the tracker — is built by independent
+     * loaders, and one failing loader must not take the others down with it.
+     */
+    val error: UiError? = null,
     // Permission states
     val hasNotificationPermission: Boolean = true,
     val hasLocationPermission: Boolean = true,

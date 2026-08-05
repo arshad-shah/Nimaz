@@ -1,6 +1,7 @@
 package com.arshadshah.nimaz.presentation.viewmodel.settings
 
 import com.arshadshah.nimaz.data.sync.ConnectionState
+import com.arshadshah.nimaz.presentation.viewmodel.UiError
 
 data class SyncUiState(
     val mode: SyncMode = SyncMode.NONE,
@@ -11,6 +12,6 @@ data class SyncUiState(
     val totalSteps: Int = 0,
     val transferProgress: Float = 0f,
     val dataSummary: SyncDataSummary? = null,
-    val error: String? = null,
+    val error: UiError? = null,
     val activityLog: List<ActivityLogEntry> = emptyList(),
 )

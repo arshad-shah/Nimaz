@@ -23,7 +23,6 @@ data class FastingTrackerUiState(
     val iftarAt: kotlin.time.Instant? = null,
     val isSuhoorTime: Boolean = false,
     val isLoading: Boolean = true,
-    val error: String? = null
 ) {
     /**
      * Whether the one-tap "fasting today" control can act on the selected day.

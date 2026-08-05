@@ -5,6 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorKind
+import com.arshadshah.nimaz.presentation.viewmodel.UiError
 import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.core.text.StringProvider
 import com.arshadshah.nimaz.domain.repository.PermissionChecker
@@ -506,7 +508,16 @@ class HomeViewModel @Inject constructor(
                 scheduleWorshipRefresh()
             } catch (e: Exception) {
                 telemetry.failure(AppAnalytics.Feature.HOME, "calculate_prayer_times", e)
-                _state.update { it.copy(isLoading = false, error = e.message) }
+                _state.update {
+                    it.copy(
+                        isLoading = false,
+                        error = UiError(
+                            message = R.string.home_prayer_times_failed,
+                            kind = NimazErrorKind.LOCATION,
+                            details = e.message,
+                        ),
+                    )
+                }
             }
         }
     }

@@ -64,6 +64,28 @@ fun ViewModel.launchSafely(
 }
 
 /**
+ * Launches work whose failure is **deliberately** not shown to the user: reported to
+ * monitoring, then dropped.
+ *
+ * This exists to be distinguishable from [launchSafely] with a forgotten `onFailure`,
+ * which looks identical at the call site and is the defect the screen-state epic was
+ * built to find. Some work genuinely should fail quietly — a decorative card on a screen
+ * whose real content loaded fine, a bookmark toggle behind content that is still perfectly
+ * readable — and replacing the screen to report it would be the worse outcome. Saying so
+ * in the function name makes that a decision on the record rather than an omission.
+ *
+ * `ScreenStateConventionTest` checks [launchSafely] call sites for an `onFailure` and
+ * leaves these alone, so choosing this is choosing to be exempt — do it on purpose, and
+ * only where the user loses nothing by not being told.
+ */
+fun ViewModel.launchBestEffort(
+    telemetry: Telemetry,
+    domain: String,
+    type: String,
+    block: suspend CoroutineScope.() -> Unit,
+): Job = launchSafely(telemetry, domain, type, block = block)
+
+/**
  * Reports an upstream failure to both channels and lets [fallback] decide what the
  * collector sees.
  *

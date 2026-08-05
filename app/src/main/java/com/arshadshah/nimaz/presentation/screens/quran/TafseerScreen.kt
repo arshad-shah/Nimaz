@@ -7,11 +7,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -32,6 +33,7 @@ import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.core.share.ContentShareManager
 import com.arshadshah.nimaz.core.util.TafseerPdfExporter
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.atoms.NimazPager
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.rememberNimazPagerState
@@ -71,6 +73,7 @@ fun TafseerScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     var showNotes by remember { mutableStateOf(false) }
     val context = LocalContext.current
+    val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(surahNumber, ayahNumber) {
@@ -107,7 +110,19 @@ fun TafseerScreen(
         }
     }
 
+    // A note that failed to save is reported here and nowhere else: it must not take away
+    // the commentary being read, but it is not droppable either — from the reader's side, a
+    // note that silently failed to save is a note they wrote and lost.
+    val noteError = state.noteError
+    LaunchedEffect(noteError) {
+        if (noteError != null) {
+            snackbarHostState.showSnackbar(context.getString(noteError.message))
+            viewModel.onEvent(TafseerEvent.DismissNoteError)
+        }
+    }
+
     NimazScreenScaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = {
@@ -171,15 +186,7 @@ fun TafseerScreen(
                 .padding(paddingValues)
         ) {
             if (state.isLoading) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator(
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(48.dp)
-                    )
-                }
+                NimazLoadingState()
             } else if (state.ayahs.isNotEmpty()) {
                 val pagerState = rememberNimazPagerState(
                     initialPage = state.currentAyahIndex,

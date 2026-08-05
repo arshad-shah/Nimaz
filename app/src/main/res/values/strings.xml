@@ -46,6 +46,8 @@
     <string name="cancel">Cancel</string>
     <string name="delete">Delete</string>
     <string name="search">Search</string>
+    <string name="search_failed">That search couldn\'t be completed</string>
+    <string name="search_failed_body">The library is searched on your device. Try again, or try different words.</string>
     <string name="location">Location</string>
     <string name="location_set_prompt">Set location</string>
     <string name="settings">Settings</string>
@@ -84,6 +86,8 @@
     <string name="grade_mawdu">Mawdu\'</string>
     <string name="dua_of_the_moment">Dua of the Moment</string>
     <string name="prayer_times">Prayer Times</string>
+    <string name="home_prayer_times_failed">Today\'s prayer times couldn\'t be calculated</string>
+    <string name="home_prayer_times_failed_body">Check that a location is set, then try again.</string>
     <string name="hours">Hours</string>
     <string name="minutes">Minutes</string>
     <string name="seconds">Seconds</string>
@@ -151,9 +155,18 @@
     <string name="prophets_of_islam_subtitle">Stories and lessons from 25 prophets</string>
     <string name="hadith">Hadith</string>
     <string name="hadith_subtitle">Authentic hadith collections</string>
+    <string name="hadith_books_load_failed">The hadith collections couldn\'t be loaded</string>
+    <string name="hadith_chapters_load_failed">This collection\'s chapters couldn\'t be loaded</string>
+    <string name="hadith_load_failed">This chapter couldn\'t be loaded</string>
+    <string name="hadith_not_found">That hadith isn\'t in the collection</string>
+    <string name="hadith_load_failed_body">The hadith library is stored on your device, so trying again usually works.</string>
     <string name="duas">Duas</string>
     <string name="duas_subtitle">Daily duas and supplications</string>
     <string name="tafseer">Tafseer</string>
+    <string name="tafseer_load_failed">The commentary list couldn\'t be loaded</string>
+    <string name="tafseer_load_failed_body">Commentary is stored on your device, so trying again usually works.</string>
+    <string name="tafseer_note_save_failed">That note couldn\'t be saved</string>
+    <string name="tafseer_note_delete_failed">That note couldn\'t be deleted</string>
     <string name="tafseer_subtitle">Quran interpretation and commentary</string>
     <string name="tools">Tools</string>
     <string name="calendar">Calendar</string>
@@ -164,6 +177,11 @@
     <string name="qaida_subtitle">Learn to read the Qur\'an, letter by letter</string>
     <string name="prayer_times_menu_subtitle">Daily prayer times with a month view</string>
     <string name="zakat">Zakat</string>
+    <string name="zakat_calculate_failed">That calculation couldn\'t be completed</string>
+    <string name="zakat_save_failed">That calculation couldn\'t be saved</string>
+    <string name="zakat_mark_paid_failed">That couldn\'t be marked as paid</string>
+    <string name="zakat_delete_failed">That calculation couldn\'t be deleted</string>
+    <string name="zakat_history_load_failed">Your past calculations couldn\'t be loaded</string>
     <string name="zakat_subtitle">Zakat calculator</string>
     <string name="support">Support</string>
     <string name="about_nimaz">About Nimaz</string>
@@ -736,6 +754,12 @@
 
     <!-- Bookmarks Screen -->
     <string name="bookmarks_title">Bookmarks</string>
+    <string name="bookmarks_load_failed">Your bookmarks couldn\'t be loaded</string>
+    <string name="bookmarks_load_failed_body">Bookmarks are stored on your device, so trying again usually works.</string>
+    <string name="bookmarks_delete_failed">That bookmark couldn\'t be removed</string>
+    <string name="bookmarks_restore_failed">That bookmark couldn\'t be restored</string>
+    <string name="bookmarks_note_failed">That note couldn\'t be saved</string>
+    <string name="bookmarks_clear_failed">Your bookmarks couldn\'t be cleared</string>
     <string name="no_bookmarks_yet">No Bookmarks Yet</string>
     <string name="no_bookmarks_hint">Save ayahs, hadiths, and duas for quick access</string>
     <string name="share">Share</string>
@@ -1036,6 +1060,9 @@
     <!-- License Detail Screen -->
     <string name="license_detail_title">License Detail</string>
     <string name="license_detail_library_not_found">Library not found</string>
+    <string name="license_detail_not_found_body">This library isn\'t in the bundled licence list. It may have been removed in a newer version of the app.</string>
+    <string name="licenses_load_failed">The licence list couldn\'t be loaded</string>
+    <string name="licenses_load_failed_body">This list is built from data bundled with the app, so trying again usually works.</string>
     <string name="license_detail_version">Version %1$s</string>
     <string name="license_detail_author">Author: %1$s</string>
 
@@ -1326,6 +1353,8 @@
     <string name="surah_info_passage_verse">1 verse</string>
 
     <!-- Surah passages screen -->
+    <string name="surah_thematic_load_failed">This surah\'s notes couldn\'t be loaded</string>
+    <string name="surah_thematic_load_failed_body">The background and passage outline are stored on your device, so trying again usually works.</string>
     <string name="surah_passages_filter_hint">Filter passages</string>
     <string name="surah_passages_reading">Reading</string>
     <string name="surah_passages_none_title">Nothing matched</string>
@@ -1671,6 +1700,10 @@
     <string name="sync_total_size">Total size</string>
     <string name="sync_complete">Sync Complete!</string>
     <string name="sync_failed">Sync Failed</string>
+    <string name="sync_connection_failed">The connection to the other device failed</string>
+    <string name="sync_import_failed">The data that arrived couldn\'t be imported</string>
+    <string name="sync_export_failed">Your data couldn\'t be sent</string>
+    <string name="sync_failed_body">Both devices need to stay on the same network, with the app open, until the transfer finishes.</string>
     <string name="sync_data_being_sent">Data Being Sent</string>
     <string name="sync_data_being_received">Data Being Received</string>
     <string name="sync_sent_success">Data sent successfully</string>
@@ -1704,6 +1737,10 @@
 
     <!-- Help screens -->
     <string name="help_title">Help</string>
+    <string name="help_topics_load_failed">Help topics couldn\'t be loaded</string>
+    <string name="help_topic_load_failed">This topic couldn\'t be loaded</string>
+    <string name="help_guide_load_failed">This guide couldn\'t be loaded</string>
+    <string name="help_load_failed_body">Help content is stored on your device, so trying again usually works.</string>
     <string name="help_search_hint">Search help…</string>
     <string name="help_no_results">No results. Try different words.</string>
     <string name="help_browse_topics">Browse topics</string>
@@ -1869,6 +1906,13 @@
     <string name="chart_legend_format">%1$s: %2$s</string>
     <string name="tafseer_alternate_has_commentary_format">%1$s has commentary for this ayah.</string>
     <string name="tafseer_no_commentary_anywhere">Commentary for this ayah isn\'t available in any installed source yet.</string>
+    <string name="calendar_events_load_failed">Islamic events couldn\'t be loaded</string>
+    <string name="dua_collection_load_failed">The dua collections couldn\'t be loaded</string>
+    <string name="dua_category_load_failed">This collection couldn\'t be loaded</string>
+    <string name="dua_load_failed_body">Duas are stored on your device, so trying again usually works.</string>
+    <string name="qibla_no_location">Qibla needs to know where you are</string>
+    <string name="qibla_no_location_body">Set a location in settings, or let Nimaz detect it, and the compass will point.</string>
+    <string name="qibla_failed">The direction couldn\'t be worked out</string>
     <string name="qibla_turn_right_hint">Turn right\nto find Qibla</string>
     <string name="qibla_turn_left_hint">Turn left\nto find Qibla</string>
     <string name="zakat_nisab_gold_subtitle">87.48g @ %1$s/g</string>

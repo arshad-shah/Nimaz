@@ -37,6 +37,8 @@ import com.arshadshah.nimaz.domain.model.IslamicEvent
 import com.arshadshah.nimaz.domain.model.IslamicEventType
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorState
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.molecules.IslamicEventCard
@@ -226,10 +228,13 @@ private fun CalendarSection(
     // markers and nothing else. Before, it cost the whole screen: `loadToday()` ran inside
     // the events `try`, so a throw left `currentMonth` null and this rendered nothing at all.
     state.error?.let { error ->
-        Text(
-            text = stringResource(error),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.error,
+        // SECTION, not a screen: the grid is still correct and still useful without its
+        // event markers, so this sits above it rather than in place of it.
+        NimazErrorState(
+            title = stringResource(error.message),
+            kind = error.kind,
+            details = error.details,
+            variant = NimazErrorVariant.SECTION,
             modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)
         )
     }

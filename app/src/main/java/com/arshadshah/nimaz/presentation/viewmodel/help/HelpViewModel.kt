@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.presentation.viewmodel.help
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.core.monitoring.catchAndReport
@@ -11,6 +12,7 @@ import com.arshadshah.nimaz.domain.model.HelpTopic
 import com.arshadshah.nimaz.domain.model.HelpTopicDetail
 import com.arshadshah.nimaz.domain.repository.settings.AppSettings
 import com.arshadshah.nimaz.domain.usecase.HelpUseCases
+import com.arshadshah.nimaz.presentation.viewmodel.UiError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -60,10 +62,19 @@ class HelpViewModel @Inject constructor(
     private var topicJob: Job? = null
     private var guideJob: Job? = null
 
+    /** Bumped by [HelpEvent.Retry] to re-run the topics load; see the init block. */
+    private val retryTick = MutableStateFlow(0)
+
+    /** What a [HelpEvent.Retry] should re-issue, per surface. */
+    private var lastTopicId: String? = null
+    private var lastGuideId: String? = null
+
     init {
-        // Topics re-resolve when the app language changes.
+        // Topics re-resolve when the app language changes — or when a retry is asked for.
+        // The tick is what makes retry possible at all: `language` is a StateFlow of a
+        // preference, so there is nothing to re-emit when the language has not changed.
         launchSafely(telemetry, DOMAIN, "launch") {
-            language
+            combine(language, retryTick) { lang, _ -> lang }
                 .flatMapLatest { lang ->
                     // Guarded INSIDE flatMapLatest. Flow.catch completes the flow it is
                     // applied to, so catching outside ended the whole chain on the first
@@ -73,7 +84,13 @@ class HelpViewModel @Inject constructor(
                     useCases.getTopics(lang)
                         .catchAndReport(telemetry, DOMAIN, "load_topics") { throwable ->
                             _homeState.update {
-                                it.copy(isLoading = false, error = throwable.message)
+                                it.copy(
+                                    isLoading = false,
+                                    error = UiError(
+                                        message = R.string.help_topics_load_failed,
+                                        details = throwable.message,
+                                    ),
+                                )
                             }
                         }
                 }
@@ -126,7 +143,19 @@ class HelpViewModel @Inject constructor(
                 telemetry.featureUsed(DOMAIN, "open_guide")
                 loadGuide(event.guideId)
             }
+
+            HelpEvent.Retry -> retryFailedLoads()
         }
+    }
+
+    /** Re-runs only the surfaces currently failing, so a retry in a guide leaves Help alone. */
+    private fun retryFailedLoads() {
+        if (_homeState.value.error != null) {
+            _homeState.update { it.copy(isLoading = true, error = null) }
+            retryTick.value += 1
+        }
+        if (_topicState.value.error != null) lastTopicId?.let(::loadTopic)
+        if (_guideState.value.error != null) lastGuideId?.let(::loadGuide)
     }
 
     private companion object {
@@ -135,12 +164,23 @@ class HelpViewModel @Inject constructor(
     }
 
     private fun loadTopic(topicId: String) {
-        _topicState.update { it.copy(isLoading = true) }
+        lastTopicId = topicId
+        // Clears the previous attempt's error too: without it a retry showed the stale
+        // failure under a fresh spinner.
+        _topicState.update { it.copy(isLoading = true, error = null) }
         topicJob?.cancel()
         topicJob = launchSafely(telemetry, DOMAIN, "load_topic") {
             language.flatMapLatest { lang -> useCases.getTopicDetail(topicId, lang) }
                 .catchAndReport(telemetry, DOMAIN, "load_topic") { throwable ->
-                    _topicState.update { it.copy(isLoading = false, error = throwable.message) }
+                    _topicState.update {
+                        it.copy(
+                            isLoading = false,
+                            error = UiError(
+                                message = R.string.help_topic_load_failed,
+                                details = throwable.message,
+                            ),
+                        )
+                    }
                 }
                 .collect { detail ->
                     _topicState.update {
@@ -154,12 +194,21 @@ class HelpViewModel @Inject constructor(
     }
 
     private fun loadGuide(guideId: String) {
-        _guideState.update { it.copy(isLoading = true) }
+        lastGuideId = guideId
+        _guideState.update { it.copy(isLoading = true, error = null) }
         guideJob?.cancel()
         guideJob = launchSafely(telemetry, DOMAIN, "load_guide") {
             language.flatMapLatest { lang -> useCases.getGuide(guideId, lang) }
                 .catchAndReport(telemetry, DOMAIN, "load_guide") { throwable ->
-                    _guideState.update { it.copy(isLoading = false, error = throwable.message) }
+                    _guideState.update {
+                        it.copy(
+                            isLoading = false,
+                            error = UiError(
+                                message = R.string.help_guide_load_failed,
+                                details = throwable.message,
+                            ),
+                        )
+                    }
                 }
                 .collect { guide ->
                     _guideState.update {

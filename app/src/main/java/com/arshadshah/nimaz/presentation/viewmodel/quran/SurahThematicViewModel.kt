@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.presentation.viewmodel.quran
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.AyahTheme
 import com.arshadshah.nimaz.domain.model.Surah
 import com.arshadshah.nimaz.domain.model.SurahOverview
@@ -9,6 +10,7 @@ import com.arshadshah.nimaz.domain.repository.settings.QuranPreferences
 import com.arshadshah.nimaz.domain.usecase.QuranUseCases
 import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.core.monitoring.launchSafely
+import com.arshadshah.nimaz.presentation.viewmodel.UiError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -101,8 +103,12 @@ class SurahThematicViewModel @Inject constructor(
                 // The surah was never actually loaded, so clear the marker: otherwise the
                 // guard above would short-circuit a later retry and strand the screen.
                 loadingSurah = null
-                _backgroundState.update { it.copy(isLoading = false, error = throwable.message) }
-                _passagesState.update { it.copy(isLoading = false, error = throwable.message) }
+                val failure = UiError(
+                    message = R.string.surah_thematic_load_failed,
+                    details = throwable.message,
+                )
+                _backgroundState.update { it.copy(isLoading = false, error = failure) }
+                _passagesState.update { it.copy(isLoading = false, error = failure) }
                 _thematic.update { it.copy(isLoading = false) }
             },
         ) {

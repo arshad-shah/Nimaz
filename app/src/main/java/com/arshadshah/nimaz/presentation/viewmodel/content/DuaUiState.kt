@@ -5,6 +5,7 @@ import androidx.compose.ui.text.font.FontFamily
 import com.arshadshah.nimaz.domain.model.Dua
 import com.arshadshah.nimaz.domain.model.DuaBookmark
 import com.arshadshah.nimaz.domain.model.DuaCategory
+import com.arshadshah.nimaz.presentation.viewmodel.UiError
 import com.arshadshah.nimaz.domain.model.DuaProgress
 import com.arshadshah.nimaz.domain.model.DuaSearchResult
 import com.arshadshah.nimaz.presentation.theme.AmiriFontFamily
@@ -23,21 +24,21 @@ data class DuaCollectionUiState(
      * `SQLiteException: no such table: duas`. The throwable still goes to the crash
      * report, which is the only place its wording is any use.
      */
-    @StringRes val error: Int? = null
+    val error: UiError? = null
 )
 
 data class DuaCategoryUiState(
     val category: DuaCategory? = null,
     val duas: List<Dua> = emptyList(),
     val isLoading: Boolean = true,
-    @StringRes val error: Int? = null
+    val error: UiError? = null
 )
 
 data class DuaReaderUiState(
     val duas: List<Dua> = emptyList(),
     val initialIndex: Int = 0,
     val isLoading: Boolean = true,
-    @StringRes val error: Int? = null,
+    val error: UiError? = null,
     val showArabic: Boolean = true,
     val showTransliteration: Boolean = true,
     val showTranslation: Boolean = true,

@@ -29,7 +29,6 @@ import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
@@ -51,6 +50,9 @@ import com.arshadshah.nimaz.core.util.formatFullDate
 import com.arshadshah.nimaz.core.util.UpdateState
 import com.arshadshah.nimaz.domain.model.PrayerType
 import com.arshadshah.nimaz.domain.model.WorshipReminderType
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorState
+import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
 import com.arshadshah.nimaz.presentation.components.atoms.TickResolution
@@ -214,13 +216,25 @@ fun HomeScreen(
                 .padding(innerPadding)
                 .background(MaterialTheme.colorScheme.background)
         ) {
+            val error = state.error
             when {
-                state.isLoading -> {
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center),
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
+                state.isLoading -> NimazLoadingState()
+
+                // Full-screen here, and only here, because this is the one loader whose
+                // output the whole dashboard is arranged around: without today's prayer
+                // times there is no next prayer, no countdown and no tracker row to draw.
+                // Every other card's failure stays in its own card by construction — they
+                // are independent loaders writing independent fields.
+                error != null -> NimazErrorState(
+                    title = stringResource(error.message),
+                    message = stringResource(R.string.home_prayer_times_failed_body),
+                    kind = error.kind,
+                    details = error.details,
+                    primaryAction = NimazErrorDefaults.retry(
+                        onRetry = { viewModel.onEvent(HomeEvent.RefreshPrayerTimes) },
+                        label = stringResource(R.string.try_again),
+                    ),
+                )
 
                 windowSizeClass.isCompact -> {
                     // List draws under the bar; the bar overlays the sky and

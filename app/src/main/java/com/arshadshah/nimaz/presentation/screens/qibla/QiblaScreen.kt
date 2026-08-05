@@ -37,6 +37,9 @@ import androidx.core.content.ContextCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorAction
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorState
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
@@ -150,29 +153,28 @@ fun QiblaScreen(
                     else MaterialTheme.colorScheme.background
                 )
         ) {
-            // Error state
-            if (state.error != null && state.qiblaInfo == null) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(20.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    NimazIcon(
-                        imageVector = Icons.Default.Warning,
-                        contentDescription = null,
-                        variant = NimazIconVariant.ERROR,
-                        iconSize = 48.dp
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text(
-                        text = state.error ?: stringResource(R.string.unknown_error),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.error,
-                        textAlign = TextAlign.Center
-                    )
-                }
+            // Only when there is no direction to draw: a compass already pointing somewhere
+            // is more use than a message about a refresh that failed.
+            val error = state.error
+            if (error != null && state.qiblaInfo == null) {
+                NimazErrorState(
+                    title = stringResource(error.message),
+                    message = stringResource(R.string.qibla_no_location_body),
+                    kind = error.kind,
+                    details = error.details,
+                    // The screen offered no way out of this at all — a reader with no
+                    // location set saw a red sentence telling them to go to settings, and
+                    // no way to get there or to retry.
+                    primaryAction = NimazErrorDefaults.retry(
+                        onRetry = { viewModel.onEvent(QiblaEvent.RefreshLocation) },
+                        label = stringResource(R.string.try_again),
+                    ),
+                    secondaryAction = NimazErrorAction(
+                        label = stringResource(R.string.location_set_prompt),
+                        onClick = { viewModel.onEvent(QiblaEvent.ShowLocationPicker) },
+                    ),
+                    modifier = Modifier.padding(20.dp),
+                )
                 return@Box
             }
 

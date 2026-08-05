@@ -1,7 +1,9 @@
 package com.arshadshah.nimaz.presentation.viewmodel.quran
 
+import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.core.monitoring.launchSafely
@@ -10,6 +12,7 @@ import com.arshadshah.nimaz.domain.model.QuranTopic
 import com.arshadshah.nimaz.domain.model.TafseerHighlight
 import com.arshadshah.nimaz.domain.model.TafseerNote
 import com.arshadshah.nimaz.domain.model.TafseerSource
+import com.arshadshah.nimaz.presentation.viewmodel.UiError
 import com.arshadshah.nimaz.domain.model.TafseerText
 import com.arshadshah.nimaz.domain.usecase.QuranUseCases
 import com.arshadshah.nimaz.domain.usecase.TafseerUseCases
@@ -108,6 +111,8 @@ class TafseerViewModel @Inject constructor(
                 telemetry.featureUsed(AppAnalytics.Feature.TAFSEER, "delete_note")
                 deleteNote(event.noteId)
             }
+
+            TafseerEvent.DismissNoteError -> dismissNoteError()
         }
     }
 
@@ -272,7 +277,10 @@ class TafseerViewModel @Inject constructor(
         // which is why nothing found it.
         val ayah = currentState.ayahs.getOrNull(currentState.currentAyahIndex) ?: return
 
-        launchSafely(telemetry, DOMAIN, "add_note") {
+        launchSafely(
+            telemetry, DOMAIN, "add_note",
+            onFailure = { noteWriteFailed(R.string.tafseer_note_save_failed, it) },
+        ) {
             tafseerUseCases.addNote(
                 ayahId = ayah.id,
                 tafseerId = currentState.selectedSource.id,
@@ -284,7 +292,10 @@ class TafseerViewModel @Inject constructor(
     private fun updateNote(note: TafseerNote) {
         val body = note.text.trim()
         if (body.isEmpty()) return
-        launchSafely(telemetry, DOMAIN, "update_note") {
+        launchSafely(
+            telemetry, DOMAIN, "update_note",
+            onFailure = { noteWriteFailed(R.string.tafseer_note_save_failed, it) },
+        ) {
             // The id carries through unchanged, so the DAO's @Update targets this row rather
             // than the insert-a-second-copy that an id of 0 would have produced.
             tafseerUseCases.updateNote(note.copy(text = body))
@@ -292,9 +303,30 @@ class TafseerViewModel @Inject constructor(
     }
 
     private fun deleteNote(noteId: Long) {
-        launchSafely(telemetry, DOMAIN, "delete_note") {
+        launchSafely(
+            telemetry, DOMAIN, "delete_note",
+            onFailure = { noteWriteFailed(R.string.tafseer_note_delete_failed, it) },
+        ) {
             tafseerUseCases.deleteNote(noteId)
         }
+    }
+
+    /**
+     * A note write that did not land.
+     *
+     * Not droppable, unlike most write failures: from where the reader is standing, a note
+     * that silently failed to save is a note they wrote and lost. Not full-screen either —
+     * it must not take away the commentary they are reading. So: a snackbar, and the
+     * commentary stays.
+     */
+    private fun noteWriteFailed(@StringRes message: Int, throwable: Throwable) {
+        _state.update {
+            it.copy(noteError = UiError(message = message, details = throwable.message))
+        }
+    }
+
+    private fun dismissNoteError() {
+        _state.update { it.copy(noteError = null) }
     }
 
     private companion object {

@@ -6,6 +6,7 @@ import com.arshadshah.nimaz.domain.model.TafseerHighlight
 import com.arshadshah.nimaz.domain.model.TafseerNote
 import com.arshadshah.nimaz.domain.model.TafseerSource
 import com.arshadshah.nimaz.domain.model.TafseerText
+import com.arshadshah.nimaz.presentation.viewmodel.UiError
 import kotlinx.coroutines.flow.first
 
 data class TafseerUiState(
@@ -32,5 +33,14 @@ data class TafseerUiState(
      * "what else does the Qur'an say about this" is the next question. Empty for a verse no
      * topic cites, and on an install whose artifact predates the topic index.
      */
-    val topics: List<QuranTopic> = emptyList()
+    val topics: List<QuranTopic> = emptyList(),
+
+    /**
+     * A note that failed to save, update or delete.
+     *
+     * A write, so it does not replace the commentary a reader is in the middle of — but it
+     * is not droppable either: from where the reader is standing, a note that silently
+     * failed to save is a note they wrote and lost. It surfaces on a snackbar.
+     */
+    val noteError: UiError? = null,
 )

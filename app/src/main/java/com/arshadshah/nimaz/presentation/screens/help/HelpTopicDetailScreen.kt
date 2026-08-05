@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -29,6 +28,9 @@ import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.HelpTopic
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorState
+import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionTitle
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
@@ -57,16 +59,25 @@ fun HelpTopicDetailScreen(
             )
         }
     ) { padding ->
+        val error = state.error
         when {
             state.isLoading && detail == null -> {
-                Box(
-                    Modifier
-                        .fillMaxSize()
-                        .padding(padding), contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
-                }
+                NimazLoadingState(modifier = Modifier.padding(padding))
             }
+
+            // Before the null-detail branch: a failed load also leaves `detail` null, and
+            // "this topic isn't available" is the wrong thing to say about one that is.
+            error != null -> NimazErrorState(
+                title = stringResource(error.message),
+                message = stringResource(R.string.help_load_failed_body),
+                kind = error.kind,
+                details = error.details,
+                primaryAction = NimazErrorDefaults.retry(
+                    onRetry = { viewModel.onEvent(HelpEvent.Retry) },
+                    label = stringResource(R.string.try_again),
+                ),
+                modifier = Modifier.padding(padding),
+            )
 
             detail == null -> {
                 Box(

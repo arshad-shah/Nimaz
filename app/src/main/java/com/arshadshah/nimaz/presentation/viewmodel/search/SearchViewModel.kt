@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.presentation.viewmodel.search
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.domain.model.DuaSearchResult
@@ -10,6 +11,7 @@ import com.arshadshah.nimaz.domain.model.LibrarySearchResults
 import com.arshadshah.nimaz.domain.model.QuranSearchResult
 import com.arshadshah.nimaz.domain.model.Surah
 import com.arshadshah.nimaz.domain.usecase.SearchLibraryUseCase
+import com.arshadshah.nimaz.presentation.viewmodel.UiError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -161,7 +163,13 @@ class SearchViewModel @Inject constructor(
             val results = runCatching { lookup() }.getOrElse { e ->
                 if (e is kotlinx.coroutines.CancellationException) throw e
                 _searchState.update {
-                    it.copy(isSearching = false, error = e.message ?: "Search failed")
+                    it.copy(
+                        isSearching = false,
+                        error = UiError(
+                            message = R.string.search_failed,
+                            details = e.message,
+                        ),
+                    )
                 }
                 return@launchSafely
             }

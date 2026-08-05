@@ -817,6 +817,28 @@ typed route object.
   In particular:
     - a full-screen centred spinner is `NimazLoadingState(modifier = Modifier.padding(padding))`,
       **not** an inline `Box(fillMaxSize, Center) { CircularProgressIndicator() }`;
+    - a failed load is `NimazErrorState(title = …, kind = NimazErrorKind.X, variant = …)` — **not**
+      a bare red `Text` or a hand-rolled icon + `TextButton` column. It mirrors
+      `NimazLoadingState`'s `FULLSCREEN`/`SECTION`/`INLINE` variants so a screen can swap
+      loading → error without changing layout; the `NimazErrorKind` picks the glyph and
+      `NimazTone`, the caller owns the copy, and the whole state is announced as a polite live
+      region. Full-screen and section failures are anchored by the *fractured shamsa* — the
+      `scallopPath` medallion drawn as a slowly turning broken ring;
+    - **the four states are evaluated in one fixed order, in every screen:**
+      `isLoading && empty` → `NimazLoadingState`; `error != null` → `NimazErrorState`;
+      `empty` → `NimazEmptyState`; else content. Three properties follow, and each one fixes a
+      defect the app shipped: **error beats empty**, so a failed load can never be reported as
+      "there is nothing here" (`SurahSubjects`/`Passages`/`Background` did exactly that);
+      **loading only wins when the screen is bare**, so a failed *refresh* never blanks out
+      content someone is reading — that case is a `SECTION`/`INLINE` error or a `NimazBanner`;
+      and **all three take the scaffold's `paddingValues`**, because they fill and centre, so
+      omitting it centres them against the window and tucks them under the top bar.
+      A failing `UiState` carries `error: UiError?`
+      (`presentation/viewmodel/UiError.kt`) and never a raw `String`: the copy is a `@StringRes`
+      so it is translated, and the exception's text goes in `details`, which the component hides
+      behind a toggle. Every user-visible load path passes `onFailure` to `launchSafely` — a
+      failure that reaches only telemetry leaves the state saying `isLoading = true` forever.
+      `ScreenStateConventionTest` holds all of this, with a backlog that only shrinks;
     - **card separation is chosen by context, never by hand-rolled colours** — three strategies:
       a card sitting on the page background is
       `NimazCard(tone = NimazTone.NEUTRAL, style = NimazCardStyle.ELEVATED)` (the shadow reads in
@@ -1133,6 +1155,7 @@ copy anything listed as Open.
 
 | Area | What was fixed |
 |------|----------------|
+| Screen states | **Loading, empty and error were improvised per screen.** 25 hand-rolled spinners across 19 screens, 9 hand-rolled error blocks, 11 `UiState`s carrying an error no screen read, and three Qur'an screens that reported a failed load as an empty one. Resolved by the screen-states epic: the four states are now evaluated in one fixed order (§8), a failing `UiState` carries `UiError` (`@StringRes` copy, exception text in `details`), and `ScreenStateConventionTest` holds all three lines with empty backlogs. `AP-7.16`. |
 | Use-case layer | `Hadith`, `Dua`, `Fasting`, `Prayer`, `Tasbih`, `Tafseer`, `Zakat` now have `XxxUseCases` wrappers; `PrayerTimes/PrayerTracker/Home/Settings/Location`, `Search`, `Bookmarks` ViewModels inject use cases instead of repositories. |
 | Coroutine failure paths | **No ViewModel launches a bare coroutine any more.** All 229 raw `viewModelScope.launch` calls are `launchSafely(telemetry, feature, "label")` — `viewModelScope`'s `SupervisorJob` isolates siblings but does not contain a throw inside a child `launch`, so each of those was a potential crash that reported nothing. `KhatamViewModel` and `OnboardingViewModel` were still on the static `AppAnalytics`/`CrashReporter`; both now inject `Telemetry`. Sites that set `isLoading = true` clear it in `onFailure`; the rest are deliberately telemetry-only — see `CLEAN_ARCHITECTURE_CHECKLIST.md` AP-7.12 for the per-site test, which turns on whether a screen renders the error at all. |
 | Home daily content | **Stale entry removed from Open.** §9 row 1 still claimed `HomeViewModel` injects `FastingDao`/`HadithDao`/`DuaDao`. It does not: it takes `FastingUseCases`/`HadithUseCases`/`DuaUseCases`, and the daily rotation goes through `GetDailyHadithUseCase`/`GetDailyDuaUseCase`. The fix landed with AP-4; only the registry was not updated. |
@@ -1196,6 +1219,15 @@ copy anything listed as Open.
 > **Accepted patterns (NOT deviations):**
 > - **Mushaf editions and Quran translations shipped as seeded JSON assets, not in the prepackaged DB** (sub-task 2/7 of #263, extended when the catalogue grew to 4 editions + 15 translations) — **resolved at versionCode 385**. Each edition's glyph text + layout, and each translation's verses, were populated at runtime by `MushafLayoutSeeder` / `QuranTranslationSeeder` from `assets/quran/`, with the migrations creating only the empty tables. The alternative — regenerating `assets/database/nimaz_prepopulated.db` — was rejected at the time because it was a ~147 MB Git-LFS blob that `createFromAsset` copies **only on fresh install**, so baking the data in would (a) never reach existing installs and (b) grow the LFS asset by tens of MB. What dissolved the trade-off was the prepackaged DB ceasing to be a tracked blob: it is now a hash-pinned artifact fetched from **arshad-shah/nimaz-data**, regenerated per release, and `ContentPatchSeeder` carries corrections to existing installs. Both seeders and their ~30 MB of assets were retired (`docs/retirement.yaml`); `QuranRepositoryImpl` no longer seeds on read, and `seededTranslationId(...)` survives as `translationId(...)` for its catalogue normalisation alone. The line-accurate read path (`getMushafLayoutByPage` → `MushafLayoutMapper` → `MushafPageLayout` domain model → `GetMushafPageLayoutUseCase`) is unchanged and still keeps the layers clean. See `SUBSYSTEMS.md` §5/§7 and `DATA_RETIREMENT.md`.
 > - **16-line renderer, now user-selectable & persisted** (sub-tasks 5/7 + 6/7 of #263, #270). The line-accurate renderer (`MushafLineLayout` + `MushafLinePage`) is integrated into the reader pager via the `ReaderMushafPage` helper, gated on `QuranReaderUiState.use16LineLayout`. As of 6/7 that gate is driven by a persisted preference: `SettingsRepository.quranMushafScript` (DataStore key `quran_mushaf_script`, a `MushafScript` enum-name string, default `MADANI`) is folded into `QuranViewModel` state, where `use16LineLayout` and `totalPages` are **computed from** `mushafScript` (single seam — no drift between "which renderer" and "how many pages"). The "Mushaf Script" dropdown in `QuranSettingsScreen` (`SettingsEvent.SetMushafScript`) writes it; the reader's pager count, dual-page spread count, and the Quran-home jump-to-page all read `state.mushafScript.totalPages` (604 vs 548), and deep-link page bounds validate against `MushafScript.MAX_TOTAL_PAGES`. It stays **off by default**, so the Uthmani/604 view is unchanged unless the user opts in. The renderer is covered by Compose previews and, as of 7/7 (#271), Robolectric render tests (`MushafLinePageTest`), a data-fidelity suite over the shipped assets (`MushafLayoutFidelityTest`), and a generated per-page pass/fail sheet (`docs/quran/16-line-fidelity-sheet.md`). See `SUBSYSTEMS.md` §5/§6.
+> - **`LocalInAppUpdateManager` stays a CompositionLocal** — the Play in-app update flow needs an
+>   `Activity` to start, so routing the manager through a ViewModel would put an Activity
+>   reference in one, which is worse than the coupling it removes. The *decision* the About screen
+>   makes from `UpdateState` is not exempt: which label, which icon, whether a tap does anything
+>   used to be four parallel `when` expressions inside `UpdateStatusItem`, next to the lambda that
+>   performed the click, so none of it could be asserted — including whether a **failed** check
+>   was still tappable. That moved to `updatePrompt()`
+>   (`presentation/viewmodel/about/UpdatePrompt.kt`) and is unit-tested. Only the manager handle
+>   itself is reached through the composition.
 > - **Flag emoji on the Location screen** — the Location screen renders country flags as emoji,
 >   the one sanctioned exception to the "Material icons via `NimazIcon`, no emoji" rule (§7).
 >   Bounded to curated cities in `LocationCatalog.kt` / `LocationScreen.kt`; do not generalise.

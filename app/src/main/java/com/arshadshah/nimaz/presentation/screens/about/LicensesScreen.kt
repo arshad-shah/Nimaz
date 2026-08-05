@@ -2,7 +2,6 @@ package com.arshadshah.nimaz.presentation.screens.about
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -15,51 +14,42 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.domain.model.OpenSourceLibrary
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorState
+import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
-import com.mikepenz.aboutlibraries.Libs
-import com.mikepenz.aboutlibraries.entity.Library
-import com.mikepenz.aboutlibraries.util.withContext
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext as kotlinWithContext
+import com.arshadshah.nimaz.presentation.viewmodel.about.LicensesEvent
+import com.arshadshah.nimaz.presentation.viewmodel.about.LicensesViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LicensesScreen(
     onNavigateBack: () -> Unit,
-    onNavigateToDetail: (Int) -> Unit
+    onNavigateToDetail: (Int) -> Unit,
+    viewModel: LicensesViewModel = hiltViewModel(),
 ) {
-    val context = LocalContext.current
-    var libraries by remember { mutableStateOf<List<Library>>(emptyList()) }
-    var isLoading by remember { mutableStateOf(true) }
+    val state by viewModel.listState.collectAsStateWithLifecycle()
 
-    LaunchedEffect(Unit) {
-        kotlinWithContext(Dispatchers.IO) {
-            val libs = Libs.Builder().withContext(context).build()
-            libraries = libs.libraries.sortedBy { it.name.lowercase() }
-        }
-        isLoading = false
-    }
+    LaunchedEffect(Unit) { viewModel.onEvent(LicensesEvent.LoadLibraries) }
 
     NimazScreenScaffold(
         topBar = {
@@ -69,27 +59,36 @@ fun LicensesScreen(
             )
         }
     ) { paddingValues ->
-        if (isLoading) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
-            }
-        } else {
-            LazyColumn(
+        // Bound to a local so the null check smart-casts: `state` is a delegated
+        // property, so `state.error` does not, and `!!` at every use is not the answer.
+        val error = state.error
+        when {
+            state.isLoading && state.libraries.isEmpty() ->
+                NimazLoadingState(modifier = Modifier.padding(paddingValues))
+
+            error != null -> NimazErrorState(
+                title = stringResource(R.string.licenses_load_failed),
+                message = stringResource(R.string.licenses_load_failed_body),
+                kind = error.kind,
+                details = error.details,
+                primaryAction = NimazErrorDefaults.retry(
+                    onRetry = { viewModel.onEvent(LicensesEvent.Retry) },
+                    label = stringResource(R.string.try_again),
+                ),
+                modifier = Modifier.padding(paddingValues),
+            )
+
+            else -> LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues),
                 contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(libraries, key = { it.hashCode() }) { library ->
+                items(state.libraries, key = { it.id }) { library ->
                     LibraryCard(
                         library = library,
-                        onClick = { onNavigateToDetail(library.hashCode()) }
+                        onClick = { onNavigateToDetail(library.id) }
                     )
                 }
                 item { Spacer(modifier = Modifier.height(16.dp)) }
@@ -100,7 +99,7 @@ fun LicensesScreen(
 
 @Composable
 private fun LibraryCard(
-    library: Library,
+    library: OpenSourceLibrary,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -129,7 +128,7 @@ private fun LibraryCard(
                     color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.weight(1f)
                 )
-                library.artifactVersion?.let { version ->
+                library.version?.let { version ->
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = version,
@@ -145,7 +144,7 @@ private fun LibraryCard(
                 }
             }
 
-            library.developers.firstOrNull()?.name?.let { author ->
+            library.author?.let { author ->
                 Text(
                     text = author,
                     style = MaterialTheme.typography.bodySmall,

@@ -49,6 +49,8 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeShape
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorState
 import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
@@ -85,20 +87,21 @@ fun DuaCategoryScreen(
             )
         }
     ) { paddingValues ->
+        val error = state.error
         if (state.isLoading) {
             NimazLoadingState(modifier = Modifier.padding(paddingValues))
-        } else if (state.error != null) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = stringResource(state.error ?: R.string.error_generic),
-                    color = MaterialTheme.colorScheme.error
-                )
-            }
+        } else if (error != null) {
+            NimazErrorState(
+                title = stringResource(error.message),
+                message = stringResource(R.string.dua_load_failed_body),
+                kind = error.kind,
+                details = error.details,
+                primaryAction = NimazErrorDefaults.retry(
+                    onRetry = { viewModel.onEvent(DuaEvent.LoadCategory(categoryId)) },
+                    label = stringResource(R.string.try_again),
+                ),
+                modifier = Modifier.padding(paddingValues),
+            )
         } else {
             LazyColumn(
                 modifier = Modifier

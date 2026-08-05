@@ -1,6 +1,7 @@
 package com.arshadshah.nimaz.presentation.viewmodel.worship
 
 import androidx.lifecycle.ViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.UiError
 import kotlinx.coroutines.flow.first
 import kotlin.time.Instant
 
@@ -29,5 +30,5 @@ data class NightWorshipUiState(
     val lastThirdAt: Instant? = null,
     val fajrAt: Instant? = null,
     val rakahCount: Int = 0,
-    val error: String? = null,
+    val error: UiError? = null,
 )
