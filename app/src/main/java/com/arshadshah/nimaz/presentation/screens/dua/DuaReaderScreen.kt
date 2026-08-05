@@ -221,7 +221,7 @@ private fun DuaPage(
         ) {
             dua.occasion?.let { occasion ->
                 NimazBadge(
-                    text = occasion.displayName(),
+                    text = occasion.label(),
                     tone = NimazTone.ACCENT,
                     size = NimazBadgeSize.MEDIUM
                 )

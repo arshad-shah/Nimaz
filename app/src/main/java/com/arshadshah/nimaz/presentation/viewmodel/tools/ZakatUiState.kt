@@ -16,7 +16,12 @@ data class ZakatCalculatorUiState(
     val currency: String = ZakatDefaults.CURRENCY,
     val calculation: ZakatCalculation? = null,
     val isCalculating: Boolean = false,
-    val showBreakdown: Boolean = false,
+    /**
+     * Whether the line-by-line working is open. Starts open: it is the part of the screen that
+     * explains where the figure came from, and the toggle exists to get it out of the way once
+     * you have read it — not to make you find it first.
+     */
+    val showBreakdown: Boolean = true,
     val error: String? = null
 )
 

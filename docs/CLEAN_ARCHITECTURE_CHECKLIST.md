@@ -342,9 +342,11 @@ rg -n -U --multiline-dotall \
 
 ### AP-7.11 · Events nothing dispatches
 
-- [x] ~~**29 event branches that log and that no screen reaches.**~~ **21 deleted, 8 signed off to
-  be wired.** Found by `AnalyticsReachabilityTest`, which asks a question no ordinary test can —
-  *is there a producer for this branch anywhere in the UI?* — by scanning the source tree.
+- [x] ~~**29 event branches that log and that no screen reaches.**~~ **Resolved: 21 deleted, 8
+  wired.** Found by `AnalyticsReachabilityTest`, which asks a question no ordinary test can —
+  *is there a producer for this branch anywhere in the UI?* — by scanning the source tree. Its
+  accepted-backlog set is now **empty**, so the test is a pure ratchet: the next unreachable
+  analytics branch fails the PR that introduces it.
 
   The nineteen deleted as **superseded** each had a wired sibling doing the same job: the fasting
   transitions (`StartFast`/`CompleteFast`/`BreakFast`/`MissFast`/…) against the sheet's
@@ -360,6 +362,25 @@ rg -n -U --multiline-dotall \
 
   The rule: **an event is not reachable because a test dispatches it.** A test is a second
   producer, and it is the one that keeps dead branches looking alive.
+
+  The **eight signed off as features** were wired rather than deleted: a Previous/Continue/Next
+  footer in the Qaida reader (`PreviousLesson`, `Resume`), the zakat breakdown's disclosure
+  (`ToggleBreakdown`), an all-prayers pre-reminder switch and lead-time picker
+  (`SetShowReminderBefore`, `SetReminderMinutes`), grade browsing from the hadith collection
+  (`FilterByGrade`, via `Route.HadithByGrade`), editing a custom tasbih (`UpdateCustomPreset`,
+  via `Route.TasbihAddPreset`'s new `presetId`), and browsing duas by occasion
+  (`LoadDuasByOccasion`, via `Route.DuaOccasion`).
+
+  Two of them needed **more than a producer**, which the wire-or-delete framing had not
+  anticipated. `ZakatCalculatorUiState.showBreakdown` was described as already read by the
+  screen and was not read anywhere — an AP-12 field as well as an AP-7.11 event. And the
+  app-wide pre-reminder pair had been superseded by the per-prayer reminders of the
+  notifications rework: nothing but a `BootReceiver` fallback default still reads
+  `notificationReminderMinutes`, and the alarms are scheduled from
+  `PrayerNotificationPrefs`'s per-prayer map. A control writing only the app-wide pair would
+  have changed no notification, so the bulk control writes the five per-prayer settings too.
+  **Wiring a producer is not the same as making the branch do something**; where they came
+  apart, the second half was the work.
 
 ### AP-7.10 · A cache marker recording the request instead of the result
 
@@ -715,6 +736,18 @@ module (`ObserveLocalEventsUseCase`) is a false positive. Read the hit before ac
 - [x] `QuranReaderUiState.mushafPageLayout` — **Removed**, superseded by
   `mushafPageLayoutCache`, which is what the reader actually reads.
 - [x] `QiblaCalculator.calculateQiblaAngle` — **Removed**, unused.
+- [x] `ZakatCalculatorUiState.showBreakdown` — **Resolved**, now read. It was settable (by an
+  event with no producer) and read by nothing, so the breakdown was permanently expanded and
+  the flag was decoration. The calculator's breakdown is now a disclosure driven by it, and it
+  defaults to `true` so the working stays visible on first open.
+- [ ] **`DuaOccasion.displayName()` is unused hardcoded English.** Its two call sites were the
+  dua reader and the category list, which now resolve the label through
+  `presentation/screens/dua/DuaOccasionLabels.kt` so a German reader sees German. The domain
+  function has no callers left; delete it with the rest of #356's user-facing English rather
+  than leaving an English fallback for someone to reach for.
+  ```bash
+  grep -rn "displayName()" app/src/main/java/com/arshadshah/nimaz --include=*.kt | grep -i occasion
+  ```
 - [ ] **`AyahActionsBottomSheet` — an unreachable *organism*, not just an unread field.** The
   sheet, its `buildAyahActions` table and its Robolectric suite all exist and no screen composes
   it: the reader's per-verse actions are an inline row inside `QuranAyahItem`, and the sheet a

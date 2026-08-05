@@ -100,11 +100,13 @@ flowchart LR
     subgraph H["Hadith"]
         HadithHome --> HadithBook --> HadithChapter --> HadithReader
         HadithHome --> HadithSearch & HadithBookmarks & HadithSettings
+        HadithHome --> HadithByGrade
         HadithBookmarks --> HadithByNumber
     end
 
     subgraph D["Dua"]
         DuaHome --> DuaCategory --> DuaReader
+        DuaCategory --> DuaOccasion --> DuaReader
         DuaHome --> DuaFavorites & DuaSearch & DuaSettings
     end
 
@@ -142,6 +144,7 @@ flowchart LR
 
     subgraph T["Tasbih"]
         TasbihHome --> TasbihCounter & TasbihPresets & TasbihStats & TasbihHistory & TasbihAddPreset
+        TasbihPresets --> TasbihAddPreset
     end
 
     subgraph Z["Zakat / Calendar"]
@@ -172,7 +175,7 @@ flowchart LR
 ## 3. Route reference
 
 All routes live in `core/navigation/Routes.kt` and are wired in `core/navigation/NavGraph.kt`
-(91 `composable<Route.X>` destinations). `data object` = no args; `data class` = typed args.
+(93 `composable<Route.X>` destinations). `data object` = no args; `data class` = typed args.
 Every route below also has a `ScreenTags` entry of the same name.
 
 ### 3.1 Bottom navigation (`BottomNavDestination`)
@@ -211,6 +214,7 @@ Every route below also has a `ScreenTags` entry of the same name.
 | `HadithChapter` | `bookId: String, chapterId: String` | HadithChapterScreen |
 | `HadithReader` | `hadithId: String` | HadithReaderScreen |
 | `HadithByNumber` | `bookId: String, hadithNumber: Int` | HadithReaderScreen |
+| `HadithByGrade` | `grade: String` (a `HadithGrade` name) | HadithReaderScreen — every hadith in the collection carrying that grade, read as one list, with the grade's label standing in for the chapter title. Reached from the "Browse by grade" pills on the collection screen; the only producer of `HadithEvent.FilterByGrade` |
 | `HadithSearch` | — | HadithSearchScreen |
 | `HadithBookmarks` | — | HadithBookmarksScreen |
 | `HadithSettings` | — | HadithSettingsScreen |
@@ -220,6 +224,7 @@ Every route below also has a `ScreenTags` entry of the same name.
 |-------|------|--------|
 | `DuaHome` | — | DuasCollectionScreen |
 | `DuaCategory` | `categoryId: String` | DuaCategoryScreen |
+| `DuaOccasion` | `occasion: String` (a `DuaOccasion` name; an unknown value falls back to `GENERAL`) | DuaOccasionScreen — every dua filed under one occasion, across the curated categories. Reached by tapping the occasion under a dua's title in a category list; the only producer of `DuaEvent.LoadDuasByOccasion` |
 | `DuaReader` | `duaId: String` | DuaReaderScreen |
 | `DuaFavorites` | — | DuaFavoritesScreen |
 | `DuaSearch` | — | DuaSearchScreen |
@@ -265,7 +270,7 @@ Every route below also has a `ScreenTags` entry of the same name.
 | `TasbihPresets` | — | TasbihPresetsScreen |
 | `TasbihStats` | — | TasbihStatsScreen |
 | `TasbihHistory` | — | TasbihHistoryScreen |
-| `TasbihAddPreset` | — | TasbihAddPresetScreen |
+| `TasbihAddPreset` | `presetId: Long? = null` | AddPresetScreen — creates a custom dhikr when `presetId` is null, edits that one when it is set. One destination rather than two near-identical forms |
 
 ### 3.9 Zakat, Qibla, Calendar
 | Route | Args | Screen |

@@ -402,6 +402,24 @@
     <string name="target_count">Hedef Sayı</string>
     <string name="category">Kategori</string>
     <string name="duas_adhkar">Dualar &amp; Zikirler</string>
+    <string name="dua_occasion_empty">Bu durum için henüz dua kaydedilmemiş.</string>
+    <string name="dua_occasion_morning">Sabah</string>
+    <string name="dua_occasion_evening">Akşam</string>
+    <string name="dua_occasion_after_prayer">Namazdan sonra</string>
+    <string name="dua_occasion_before_sleep">Uyumadan önce</string>
+    <string name="dua_occasion_waking_up">Uyanınca</string>
+    <string name="dua_occasion_eating">Yemek</string>
+    <string name="dua_occasion_traveling">Yolculuk</string>
+    <string name="dua_occasion_entering_mosque">Camiye girerken</string>
+    <string name="dua_occasion_leaving_mosque">Camiden çıkarken</string>
+    <string name="dua_occasion_entering_home">Eve girerken</string>
+    <string name="dua_occasion_leaving_home">Evden çıkarken</string>
+    <string name="dua_occasion_rain">Yağmur</string>
+    <string name="dua_occasion_distress">Sıkıntı</string>
+    <string name="dua_occasion_forgiveness">Bağışlanma</string>
+    <string name="dua_occasion_parents">Anne baba</string>
+    <string name="dua_occasion_gratitude">Şükür</string>
+    <string name="dua_occasion_general">Genel</string>
     <string name="bookmarks">Yer İmleri</string>
     <string name="daily_adhkar">Günlük Zikirler</string>
     <string name="situational_duas">Durumsal Dualar</string>
@@ -862,6 +880,8 @@
     <string name="qaida_new_lesson_unlocked">Yeni ders: %1$s</string>
     <string name="qaida_map">Harita</string>
     <string name="qaida_next_lesson">Sonraki ders</string>
+    <string name="qaida_previous_lesson">Önceki</string>
+    <string name="qaida_resume_lesson">Devam et</string>
     <string name="qaida_play_line">Satırı oynat</string>
 
     <!-- Missing strings (tr) -->
@@ -1141,6 +1161,7 @@
     <string name="hadith_narrated_by_format">%1$s tarafından rivayet edilmiştir</string>
     <string name="hadith_isnad">Rivayet Zinciri (İsnad)</string>
     <string name="hadith_copied">Panoya kopyalandı</string>
+    <string name="hadith_browse_by_grade">Dereceye göre gözat</string>
     <string name="hadith_grade_sahih">Sahih</string>
     <string name="hadith_grade_hasan">Hasan</string>
     <string name="hadith_grade_daif">Daʿīf</string>
@@ -1170,6 +1191,9 @@
     <string name="prayer_info_method">Yöntem</string>
     <string name="qaida_lesson_progress">Ders %1$d / %2$d</string>
     <string name="save">Kaydet</string>
+    <string name="edit_tasbih">Tesbihi düzenle</string>
+    <string name="save_tasbih">Değişiklikleri kaydet</string>
+    <string name="tasbih_edit_preset">Bu tesbihi düzenle</string>
     <string name="pause">Duraklat</string>
     <string name="sajdah">Secde</string>
     <string name="cd_mark_as_read">Okundu olarak işaretle</string>
@@ -1717,6 +1741,10 @@
     <string name="notif_hub_sound_vibration">%1$s · titreşim açık</string>
     <string name="notif_hub_sound_plain">%1$s</string>
     <string name="notif_prayers_section">Günlük namazlar</string>
+    <string name="notif_all_prayers_section">Tüm namazlar</string>
+    <string name="notif_all_prayers_reminder_title">Her namazdan önce hatırlat</string>
+    <string name="notif_all_prayers_reminder_subtitle">Aynı hatırlatmayı beş vaktin tamamına uygular. Geçersiz kılmak için aşağıdan birini değiştirin.</string>
+    <string name="notif_all_prayers_lead_title">Tüm namazlardan önce hatırlatma</string>
     <string name="notif_alert_style">Bildirim türü</string>
     <string name="notif_alert_style_adhan">Ezan</string>
     <string name="notif_alert_style_adhan_subtitle">Ezan sesli olarak okunur</string>
