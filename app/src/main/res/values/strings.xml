@@ -2025,4 +2025,52 @@
     <string name="tafseer_note_edit">Edit</string>
     <string name="quran_search_surahs">Search surahs</string>
     <string name="zakat_currency">Currency</string>
+
+    <!--
+      More — live subtitles. Titles label, subtitles report: every one of these is a claim about
+      the app right now, which is why none of them restates its own row's title. A row with
+      nothing true to say gets no subtitle at all, so there is deliberately no "—" or "loading"
+      string here to fall back on.
+    -->
+    <string name="more_tracker_logged">%1$d of %2$d logged today</string>
+    <string name="more_tracker_all">All of today logged</string>
+    <string name="more_tracker_none">Nothing logged today yet</string>
+    <plurals name="more_fasting_makeup_pending">
+        <item quantity="one">%1$d makeup fast pending</item>
+        <item quantity="other">%1$d makeup fasts pending</item>
+    </plurals>
+    <string name="more_worship_next_hm">%1$s in %2$dh %3$dm</string>
+    <string name="more_worship_next_m">%1$s in %2$dm</string>
+    <string name="more_worship_now">%1$s now</string>
+    <string name="more_khatam_juz">Juz %1$d</string>
+    <string name="more_khatam_juz_on_pace">Juz %1$d · on pace</string>
+    <plurals name="more_khatam_juz_ahead">
+        <item quantity="one">Juz %1$d · %2$d day ahead of pace</item>
+        <item quantity="other">Juz %1$d · %2$d days ahead of pace</item>
+    </plurals>
+    <plurals name="more_khatam_juz_behind">
+        <item quantity="one">Juz %1$d · %2$d day behind pace</item>
+        <item quantity="other">Juz %1$d · %2$d days behind pace</item>
+    </plurals>
+    <string name="more_qaida_lesson">Lesson %1$d of %2$d</string>
+    <string name="more_zakat_not_calculated">Not calculated this year</string>
+    <string name="more_zakat_due">%1$s due</string>
+    <string name="more_calendar_hijri">%1$s</string>
+
+    <!-- More — the pinned shortcut row. -->
+    <string name="more_pinned_title">Pinned</string>
+    <string name="more_pinned_edit">Edit pinned shortcuts</string>
+    <string name="more_pins_sheet_title">Pinned shortcuts</string>
+    <string name="more_pins_count">%1$d of %2$d pinned</string>
+    <string name="more_pins_full">%1$d of %1$d pinned — unpin one to add another</string>
+    <string name="more_pins_empty">Nothing pinned</string>
+    <string name="more_pin_tasbih">Tasbih</string>
+    <string name="more_pin_prayer_tracker">Prayer tracker</string>
+    <string name="more_pin_khatam">Khatam</string>
+    <string name="more_pin_zakat">Zakat</string>
+    <string name="more_pin_qibla">Qibla</string>
+    <string name="more_pin_fasting">Fasting</string>
+    <string name="more_pin_night_worship">Night worship</string>
+    <string name="more_pin_qaida">Qaida</string>
+    <string name="more_pin_islamic_calendar">Calendar</string>
 </resources>
