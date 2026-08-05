@@ -237,16 +237,14 @@ class SearchViewModel @Inject constructor(
         _searchState.update { it.copy(recentSearches = emptyList()) }
     }
 
+    /**
+     * The count the screen shows is the count of what the screen is showing — `filteredResults`,
+     * the same list the results column renders. See [SearchStatsUiState] for the four per-corpus
+     * counts that used to sit beside it and disagree with it.
+     */
     private fun updateStats() {
-        val state = _searchState.value
         _statsState.update {
-            SearchStatsUiState(
-                totalResults = state.filteredResults.size,
-                quranCount = state.quranResults.size,
-                hadithCount = state.hadithResults.size,
-                duaCount = state.duaResults.size,
-                surahCount = state.surahResults.size
-            )
+            SearchStatsUiState(totalResults = _searchState.value.filteredResults.size)
         }
     }
 }

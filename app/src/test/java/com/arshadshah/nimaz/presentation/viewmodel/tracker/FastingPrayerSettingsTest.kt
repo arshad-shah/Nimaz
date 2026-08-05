@@ -1,5 +1,7 @@
 package com.arshadshah.nimaz.presentation.viewmodel.tracker
 
+import java.time.LocalDate
+import com.arshadshah.nimaz.core.time.FakeTodayProvider
 import com.arshadshah.nimaz.core.monitoring.RecordingTelemetry
 import com.arshadshah.nimaz.domain.model.AsrCalculation
 import com.arshadshah.nimaz.domain.model.CalculationMethod
@@ -61,6 +63,7 @@ class FastingPrayerSettingsTest {
     private fun viewModel(prayers: FakePrayerTimetableRepository) = FastingViewModel(
         buildFastingUseCases(fasting),
         buildPrayerUseCases(prayers),
+        FakeTodayProvider(LocalDate.now()),
         RecordingTelemetry(),
     )
 

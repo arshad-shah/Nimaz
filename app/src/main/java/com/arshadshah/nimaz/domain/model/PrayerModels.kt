@@ -189,22 +189,32 @@ enum class CalculationMethod {
     TURKEY;
 
     companion object {
-        fun fromString(value: String?): CalculationMethod {
-            return when (value?.uppercase()) {
-                "MWL", "MUSLIM_WORLD_LEAGUE" -> MUSLIM_WORLD_LEAGUE
-                "EGYPTIAN", "EGYPT" -> EGYPTIAN
-                "KARACHI" -> KARACHI
-                "UMM_AL_QURA", "MAKKAH" -> UMM_AL_QURA
-                "DUBAI" -> DUBAI
-                "MOON_SIGHTING_COMMITTEE", "MOONSIGHTING" -> MOON_SIGHTING_COMMITTEE
-                "NORTH_AMERICA", "ISNA" -> NORTH_AMERICA
-                "KUWAIT" -> KUWAIT
-                "QATAR" -> QATAR
-                "SINGAPORE" -> SINGAPORE
-                "TURKEY" -> TURKEY
-                else -> MUSLIM_WORLD_LEAGUE
-            }
+        /**
+         * The persisted string as a method, or `null` if it is not one we recognise.
+         *
+         * [fromString] folds an unrecognised value into [MUSLIM_WORLD_LEAGUE], which is the
+         * right default but the wrong thing to do *quietly* — a caller that wants to report
+         * "this install has a calculation method we cannot read" has no way to tell that
+         * apart from a user who genuinely chose MWL. This distinguishes them.
+         */
+        fun parseOrNull(value: String?): CalculationMethod? = when (value?.uppercase()) {
+            "MWL", "MUSLIM_WORLD_LEAGUE" -> MUSLIM_WORLD_LEAGUE
+            "EGYPTIAN", "EGYPT" -> EGYPTIAN
+            "KARACHI" -> KARACHI
+            "UMM_AL_QURA", "MAKKAH" -> UMM_AL_QURA
+            "DUBAI" -> DUBAI
+            "MOON_SIGHTING_COMMITTEE", "MOONSIGHTING" -> MOON_SIGHTING_COMMITTEE
+            "NORTH_AMERICA", "ISNA" -> NORTH_AMERICA
+            "KUWAIT" -> KUWAIT
+            "QATAR" -> QATAR
+            "SINGAPORE" -> SINGAPORE
+            "TURKEY" -> TURKEY
+            else -> null
         }
+
+        /** As [parseOrNull], defaulting an unrecognised value to [MUSLIM_WORLD_LEAGUE]. */
+        fun fromString(value: String?): CalculationMethod =
+            parseOrNull(value) ?: MUSLIM_WORLD_LEAGUE
     }
 
     fun displayName(): String {

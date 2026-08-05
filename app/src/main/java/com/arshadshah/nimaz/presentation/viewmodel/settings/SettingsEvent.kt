@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.presentation.viewmodel.settings
 
+import com.arshadshah.nimaz.domain.model.AsrCalculation
 import com.arshadshah.nimaz.domain.model.HighLatitudeRule
 import com.arshadshah.nimaz.domain.model.CalculationMethod
 import com.arshadshah.nimaz.domain.model.Location
@@ -23,7 +24,7 @@ sealed interface SettingsEvent {
 
     // Prayer
     data class SetCalculationMethod(val method: CalculationMethod) : SettingsEvent
-    data class SetAsrMethod(val method: AsrJuristicMethod) : SettingsEvent
+    data class SetAsrMethod(val method: AsrCalculation) : SettingsEvent
     data class SetHighLatitudeRule(val rule: HighLatitudeRule) : SettingsEvent
     data class SetPrayerAdjustment(val prayer: String, val minutes: Int) : SettingsEvent
 

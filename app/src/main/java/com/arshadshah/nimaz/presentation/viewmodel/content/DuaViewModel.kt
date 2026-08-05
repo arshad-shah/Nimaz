@@ -7,6 +7,7 @@ import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.core.monitoring.launchSafely
+import com.arshadshah.nimaz.core.time.TodayProvider
 import com.arshadshah.nimaz.core.util.toUtcMidnightMillis
 import com.arshadshah.nimaz.domain.model.Dua
 import com.arshadshah.nimaz.domain.model.DuaBookmark
@@ -32,6 +33,7 @@ import javax.inject.Inject
 class DuaViewModel @Inject constructor(
     private val duaUseCases: DuaUseCases,
     private val duaSettings: DuaDisplaySettings,
+    private val todayProvider: TodayProvider,
     private val telemetry: Telemetry
 ) : ViewModel() {
 
@@ -347,7 +349,7 @@ class DuaViewModel @Inject constructor(
     }
 
     private fun getTodayEpoch(): Long {
-        return LocalDate.now().toUtcMidnightMillis()
+        return todayProvider.today().toUtcMidnightMillis()
     }
 
     fun isDuaFavorite(duaId: String) = duaUseCases.isDuaFavorite(duaId)

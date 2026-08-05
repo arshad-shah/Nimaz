@@ -9,6 +9,7 @@ import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.core.text.StringProvider
+import com.arshadshah.nimaz.core.time.TodayProvider
 import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.data.audio.AudioState
 import com.arshadshah.nimaz.data.audio.QuranAudioManager
@@ -78,10 +79,11 @@ data class FavoriteAyahUi(
 @HiltViewModel
 class QuranViewModel @Inject constructor(
     private val quranUseCases: QuranUseCases,
-    val audioManager: QuranAudioManager,
+    private val audioManager: QuranAudioManager,
     private val quranSettings: QuranPreferences,
     private val khatamUseCases: KhatamUseCases,
     private val telemetry: Telemetry,
+    private val todayProvider: TodayProvider,
     private val strings: StringProvider
 ) : ViewModel() {
 
@@ -324,6 +326,12 @@ class QuranViewModel @Inject constructor(
                     event.surahNumber,
                     event.ayahNumber
                 )
+            }
+
+            is QuranEvent.PreviewReciter -> {
+                telemetry.featureUsed(AppAnalytics.Feature.QURAN, "preview_reciter")
+                audioManager.setReciter(event.reciterId)
+                playAyahAudio(ayahGlobalId = 1, surahNumber = 1, ayahNumber = 1)
             }
 
             QuranEvent.PauseAudio -> audioManager.togglePlayPause()
@@ -684,7 +692,7 @@ class QuranViewModel @Inject constructor(
     private fun loadVerseOfTheDay() {
         launchSafely(telemetry, AppAnalytics.Feature.QURAN, "load_verse_of_the_day") {
             val translatorId = translatorId()
-            val epochDay = java.time.LocalDate.now().toEpochDay()
+            val epochDay = todayProvider.today().toEpochDay()
             val verse = quranUseCases.getVerseOfTheDay(epochDay, translatorId)
             _homeState.update { it.copy(verseOfTheDay = verse) }
         }

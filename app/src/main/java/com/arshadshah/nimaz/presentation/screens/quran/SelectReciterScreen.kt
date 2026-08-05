@@ -214,14 +214,7 @@ fun SelectReciterScreen(
                             previewingReciterId = null
                         } else {
                             previewingReciterId = reciter.id
-                            quranViewModel.audioManager.setReciter(reciter.id)
-                            quranViewModel.onEvent(
-                                QuranEvent.PlayAyahAudio(
-                                    ayahGlobalId = 1,
-                                    surahNumber = 1,
-                                    ayahNumber = 1
-                                )
-                            )
+                            quranViewModel.onEvent(QuranEvent.PreviewReciter(reciter.id))
                         }
                     }
                 )

@@ -20,10 +20,19 @@ data class SearchUiState(
     val error: String? = null
 )
 
+/**
+ * The result count the screen renders, and nothing else.
+ *
+ * There were four more fields here — `quranCount`, `hadithCount`, `duaCount`, `surahCount` —
+ * written on every search and read by no screen. They were not merely dead, they were *wrong*
+ * in a way that would only have surfaced once someone rendered them: [totalResults] counted
+ * `filteredResults` while the four counted the **unfiltered** per-corpus lists, so a HADITH
+ * filter over 3 hadith and 40 Qur'an matches reported `totalResults = 3` beside
+ * `quranCount = 40`. `applyFilter` also groups `SurahResult` under the QURAN filter while
+ * `quranCount` counted only `quranResults`, so the two disagreed in the other direction too.
+ * Deleted rather than corrected: no design calls for per-corpus counts, and the filter chips
+ * already say which corpus is showing.
+ */
 data class SearchStatsUiState(
-    val totalResults: Int = 0,
-    val quranCount: Int = 0,
-    val hadithCount: Int = 0,
-    val duaCount: Int = 0,
-    val surahCount: Int = 0
+    val totalResults: Int = 0
 )

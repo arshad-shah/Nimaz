@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.core.monitoring.launchSafely
+import com.arshadshah.nimaz.core.time.TodayProvider
 import com.arshadshah.nimaz.core.util.HijriDateCalculator
 import com.arshadshah.nimaz.core.util.toUtcMidnightMillis
 import com.arshadshah.nimaz.domain.model.ExemptionReason
@@ -39,16 +40,22 @@ enum class FastingStatsPeriod {
 class FastingViewModel @Inject constructor(
     private val fastingUseCases: FastingUseCases,
     private val prayerUseCases: PrayerUseCases,
+    private val todayProvider: TodayProvider,
     private val telemetry: Telemetry,
 ) : ViewModel() {
 
-    private val _trackerState = MutableStateFlow(FastingTrackerUiState())
+    private val _trackerState =
+        MutableStateFlow(FastingTrackerUiState(selectedDate = todayProvider.today()))
     val trackerState: StateFlow<FastingTrackerUiState> = _trackerState.asStateFlow()
 
     private val _ramadanState = MutableStateFlow(RamadanTrackerUiState())
     val ramadanState: StateFlow<RamadanTrackerUiState> = _ramadanState.asStateFlow()
 
-    private val _calendarState = MutableStateFlow(FastingCalendarUiState())
+    private val _calendarState = MutableStateFlow(
+        todayProvider.today().let {
+            FastingCalendarUiState(selectedMonth = it.monthValue, selectedYear = it.year)
+        }
+    )
     val calendarState: StateFlow<FastingCalendarUiState> = _calendarState.asStateFlow()
 
     private val _makeupState = MutableStateFlow(MakeupFastsUiState())
@@ -57,7 +64,8 @@ class FastingViewModel @Inject constructor(
     private val _statsState = MutableStateFlow(FastingStatsUiState())
     val statsState: StateFlow<FastingStatsUiState> = _statsState.asStateFlow()
 
-    private val _sheetState = MutableStateFlow(FastManagementSheetState())
+    private val _sheetState =
+        MutableStateFlow(FastManagementSheetState(date = todayProvider.today()))
     val sheetState: StateFlow<FastManagementSheetState> = _sheetState.asStateFlow()
 
     private var calendarJob: Job? = null
@@ -103,7 +111,7 @@ class FastingViewModel @Inject constructor(
 
     private fun loadPrayerTimes(settings: PrayerCalculationSettings) {
         try {
-            val prayerTimes = prayerUseCases.getDaySchedule(LocalDate.now(), settings)
+            val prayerTimes = prayerUseCases.getDaySchedule(todayProvider.today(), settings)
 
             val fajrPrayer = prayerTimes.find { it.type == PrayerType.FAJR }
             val maghribPrayer = prayerTimes.find { it.type == PrayerType.MAGHRIB }
@@ -167,7 +175,7 @@ class FastingViewModel @Inject constructor(
     }
 
     private fun loadToday() {
-        selectDate(LocalDate.now())
+        selectDate(todayProvider.today())
     }
 
     private fun selectDate(date: LocalDate) {
@@ -291,7 +299,7 @@ class FastingViewModel @Inject constructor(
     private fun loadRamadan() {
         ramadanJob?.cancel()
         ramadanJob = launchSafely(telemetry, DOMAIN, "load_ramadan") {
-            val today = LocalDate.now()
+            val today = todayProvider.today()
             val hijriToday = HijriDateCalculator.toHijri(today)
             val isCurrentlyRamadan = hijriToday.month == 9
 
@@ -378,7 +386,7 @@ class FastingViewModel @Inject constructor(
 
     private fun loadStats() {
         val period = _statsState.value.period
-        val now = LocalDate.now()
+        val now = todayProvider.today()
 
         val (startDate, endDate) = when (period) {
             FastingStatsPeriod.THIS_MONTH -> now.withDayOfMonth(1) to now
