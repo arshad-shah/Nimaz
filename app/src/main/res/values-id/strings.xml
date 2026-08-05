@@ -1500,8 +1500,8 @@
     <string name="tafseer_no_commentary_anywhere">Tafsir untuk Ayah ini belum tersedia di sumber mana pun yang terpasang.</string>
     <string name="qibla_turn_right_hint">Putar ke kanan\nuntuk menemukan Kiblat</string>
     <string name="qibla_turn_left_hint">Putar ke kiri\nuntuk menemukan Kiblat</string>
-    <string name="zakat_nisab_gold_subtitle">87,48 g @ $%1$d/g</string>
-    <string name="zakat_nisab_silver_subtitle">612,36 g @ $%1$s/g</string>
+    <string name="zakat_nisab_gold_subtitle">87,48 g @ %1$s/g</string>
+    <string name="zakat_nisab_silver_subtitle">612,36 g @ %1$s/g</string>
     <string name="yes">Ya</string>
     <string name="no">Tidak</string>
     <string name="fasting_event_ashura_name">Hari Asyura</string>
@@ -1714,4 +1714,7 @@
     <plurals name="notif_reminder_minutes_before">
         <item quantity="other">%1$d mnt sebelumnya</item>
     </plurals>
+    <string name="zakat_gold_price_label">Harga emas per gram</string>
+    <string name="zakat_silver_price_label">Harga perak per gram</string>
+    <string name="zakat_metal_prices_hint">Perkiraan — sesuaikan dengan harga setempat. Ambang nisab dihitung dari nilai ini.</string>
 </resources>

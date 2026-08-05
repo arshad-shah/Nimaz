@@ -1,0 +1,166 @@
+package com.arshadshah.nimaz.presentation.viewmodel
+
+import com.arshadshah.nimaz.core.monitoring.RecordingTelemetry
+import com.arshadshah.nimaz.domain.model.NisabType
+import com.arshadshah.nimaz.domain.model.ZakatDefaults
+import com.arshadshah.nimaz.domain.repository.SettingsRepository
+import com.arshadshah.nimaz.domain.usecase.ZakatUseCases
+import com.google.common.truth.Truth.assertThat
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.every
+import io.mockk.mockk
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import org.junit.After
+import org.junit.Before
+import org.junit.Test
+
+/**
+ * `ZakatViewModel` had **no tests at all**, which is how two defects shipped:
+ *
+ *  - The gold and silver prices were hardcoded literals that no screen could change,
+ *    and `ZakatCalculator` derives the **nisab threshold** from the gold price as well
+ *    as the metal valuation — so a stale price changes whether zakat is owed at all.
+ *  - Clearing the last asset field left the previous calculation on screen, because
+ *    `recalculate()` skipped when nothing had a value.
+ */
+@OptIn(ExperimentalCoroutinesApi::class)
+class ZakatViewModelTest {
+
+    private val dispatcher = StandardTestDispatcher()
+    private val telemetry = RecordingTelemetry()
+    private lateinit var useCases: ZakatUseCases
+    private lateinit var settings: SettingsRepository
+
+    private val goldPrice = MutableStateFlow(ZakatDefaults.GOLD_PRICE_PER_GRAM)
+    private val silverPrice = MutableStateFlow(ZakatDefaults.SILVER_PRICE_PER_GRAM)
+    private val currency = MutableStateFlow(ZakatDefaults.CURRENCY)
+
+    @Before
+    fun setUp() {
+        Dispatchers.setMain(dispatcher)
+        useCases = mockk(relaxed = true)
+        every { useCases.getAllHistory() } returns flowOf(emptyList())
+        coEvery { useCases.getTotalPaid() } returns 0.0
+
+        settings = mockk(relaxed = true)
+        every { settings.zakatGoldPricePerGram } returns goldPrice
+        every { settings.zakatSilverPricePerGram } returns silverPrice
+        every { settings.zakatCurrency } returns currency
+    }
+
+    @After
+    fun tearDown() = Dispatchers.resetMain()
+
+    private fun viewModel() = ZakatViewModel(useCases, settings, telemetry)
+
+    @Test
+    fun `clearing the last asset clears the result instead of leaving it stale`() = runTest {
+        val vm = viewModel()
+        advanceUntilIdle()
+
+        vm.onEvent(ZakatEvent.UpdateCash(10_000.0))
+        advanceUntilIdle()
+        assertThat(vm.calculatorState.value.calculation).isNotNull()
+
+        vm.onEvent(ZakatEvent.UpdateCash(0.0))
+        advanceUntilIdle()
+
+        // The breakdown card renders whenever calculation != null, so a stale value
+        // here shows "zakat due" over an empty form.
+        assertThat(vm.calculatorState.value.calculation).isNull()
+    }
+
+    @Test
+    fun `an edited gold price is persisted, not just held in state`() = runTest {
+        val vm = viewModel()
+        advanceUntilIdle()
+
+        vm.onEvent(ZakatEvent.UpdateGoldPrice(85.0))
+        advanceUntilIdle()
+
+        coVerify { settings.setZakatGoldPricePerGram(85.0) }
+    }
+
+    @Test
+    fun `a persisted price reaches the calculation`() = runTest {
+        val vm = viewModel()
+        advanceUntilIdle()
+
+        vm.onEvent(ZakatEvent.UpdateGold(100.0))
+        advanceUntilIdle()
+        val atDefaultPrice = vm.calculatorState.value.calculation!!.zakatDue
+
+        // Simulate the DataStore write landing back through the observed flow.
+        goldPrice.value = 85.0
+        advanceUntilIdle()
+        val atRealPrice = vm.calculatorState.value.calculation!!.zakatDue
+
+        assertThat(vm.calculatorState.value.goldPricePerGram).isEqualTo(85.0)
+        assertThat(atRealPrice).isGreaterThan(atDefaultPrice)
+    }
+
+    @Test
+    fun `the gold price moves the nisab threshold, not just the amount`() = runTest {
+        val vm = viewModel()
+        advanceUntilIdle()
+
+        // 87.48g is the gold nisab. Holding 80g is below the threshold at any price,
+        // but the *value* comparison is what decides — so a price change can flip it.
+        vm.onEvent(ZakatEvent.SetNisabType(NisabType.GOLD))
+        vm.onEvent(ZakatEvent.UpdateCash(6_000.0))
+        advanceUntilIdle()
+
+        val atDefault = vm.calculatorState.value.calculation!!
+        goldPrice.value = 85.0
+        advanceUntilIdle()
+        val atHigher = vm.calculatorState.value.calculation!!
+
+        assertThat(atDefault.nisabValue).isNotEqualTo(atHigher.nisabValue)
+        // 6,000 clears a 65/g nisab (5,686) but not an 85/g one (7,436).
+        assertThat(atDefault.zakatDue).isGreaterThan(0.0)
+        assertThat(atHigher.zakatDue).isEqualTo(0.0)
+    }
+
+    @Test
+    fun `currency changes are persisted`() = runTest {
+        val vm = viewModel()
+        advanceUntilIdle()
+
+        vm.onEvent(ZakatEvent.SetCurrency("EUR"))
+        advanceUntilIdle()
+
+        coVerify { settings.setZakatCurrency("EUR") }
+    }
+
+    @Test
+    fun `saving with no calculation does not insert`() = runTest {
+        val vm = viewModel()
+        advanceUntilIdle()
+
+        vm.onEvent(ZakatEvent.SaveCalculation)
+        advanceUntilIdle()
+
+        coVerify(exactly = 0) { useCases.insertCalculation(any()) }
+    }
+
+    @Test
+    fun `a failing history load is reported rather than crashing`() = runTest {
+        every { useCases.getAllHistory() } returns kotlinx.coroutines.flow.flow {
+            throw IllegalStateException("no such table: zakat_history")
+        }
+
+        viewModel()
+        advanceUntilIdle()
+
+        assertThat(telemetry.errors.map { it.domain }).contains("zakat")
+    }
+}

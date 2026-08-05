@@ -1501,8 +1501,8 @@
     <string name="tafseer_no_commentary_anywhere">Tafsir untuk Ayah ini belum tersedia dalam mana-mana sumber yang dipasang.</string>
     <string name="qibla_turn_right_hint">Pusing ke kanan\nuntuk mencari Kiblat</string>
     <string name="qibla_turn_left_hint">Pusing ke kiri\nuntuk mencari Kiblat</string>
-    <string name="zakat_nisab_gold_subtitle">87.48 g @ $%1$d/g</string>
-    <string name="zakat_nisab_silver_subtitle">612.36 g @ $%1$s/g</string>
+    <string name="zakat_nisab_gold_subtitle">87.48g @ %1$s/g</string>
+    <string name="zakat_nisab_silver_subtitle">612.36g @ %1$s/g</string>
     <string name="yes">Ya</string>
     <string name="no">Tidak</string>
     <string name="fasting_event_ashura_name">Hari Asyura</string>
@@ -1715,4 +1715,7 @@
     <plurals name="notif_reminder_minutes_before">
         <item quantity="other">%1$d min sebelum</item>
     </plurals>
+    <string name="zakat_gold_price_label">Harga emas segram</string>
+    <string name="zakat_silver_price_label">Harga perak segram</string>
+    <string name="zakat_metal_prices_hint">Anggaran — tetapkan mengikut harga tempatan. Ambang nisab dikira daripadanya.</string>
 </resources>

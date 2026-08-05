@@ -222,6 +222,16 @@ interface SettingsRepository {
     suspend fun setAiAskHintDismissed(dismissed: Boolean)
     val aiQuestionHistory: Flow<String>
     suspend fun setAiQuestionHistory(json: String)
+    // Zakat — the metal prices the nisab threshold and the metal valuation are both
+    // derived from. Persisted because they were previously hardcoded constants no user
+    // could change, which made every zakat figure wrong by however stale they were.
+    val zakatGoldPricePerGram: Flow<Double>
+    suspend fun setZakatGoldPricePerGram(pricePerGram: Double)
+    val zakatSilverPricePerGram: Flow<Double>
+    suspend fun setZakatSilverPricePerGram(pricePerGram: Double)
+    val zakatCurrency: Flow<String>
+    suspend fun setZakatCurrency(currency: String)
+
     suspend fun exportAllPreferences(): Map<String, String>
     suspend fun importPreferences(prefsMap: Map<String, String>)
     val userPreferences: Flow<UserPreferences>

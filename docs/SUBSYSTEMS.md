@@ -891,6 +891,18 @@ Getters expose `Flow<…>` only (never `MutableStateFlow`/`LiveData`); writes ar
 
 **Hijri date offset.** `hijri_day_offset: Int` (range −2 to +2, default 0) allows users to adjust the displayed Hijri date relative to the system calculation. Stored in `PreferencesDataStore`, read by both Hijri widgets (`HijriDateWorker`, `HijriCalendarWorker`) and passed to `HijriDateCalculator.today(offsetDays)` to compute today's Hijri date for event matching and display. Wired via the "Adjust Hijri date" stepper in `AppearanceSettingsScreen`.
 
+**Zakat metal prices.** `zakat_gold_price_per_gram: Double` (default 65.0),
+`zakat_silver_price_per_gram: Double` (default 0.80) and `zakat_currency: String` (default `USD`),
+with the defaults themselves in `domain/model/ZakatDefaults`. These were previously literals on
+`ZakatCalculatorUiState` that **no screen could change** — the events existed but nothing emitted
+them — so every zakat figure the app produced was wrong by however stale they had become. It was
+not only the amount: `ZakatCalculator` derives the **nisab threshold** from the gold price as well
+as the metal valuation, so a stale price changes whether any zakat is owed at all. `ZakatViewModel`
+observes all three and recalculates on change; the editable fields sit under the nisab selector in
+`ZakatCalculatorScreen`, labelled as estimates so a default is never read as a market rate. Being
+`nimaz_preferences` keys they ride the sync payload (§10), and they are declared in
+`PreferenceCodec.TYPES` like every other key.
+
 **Mushaf script / layout.** `quran_mushaf_script: String` (a `MushafScript` enum name, default `MADANI`) selects the Mushaf edition the page reader renders — ayah-flow Uthmani/Madani (604 pages) vs a line-accurate IndoPak edition (16-line/548, 15-line/610 or 13-line/847; #270). Stored raw and mapped to the domain enum at the boundary (mirrors `quran_arabic_font`/`pattern_style`); read by `QuranViewModel` (drives `useLineAccurateLayout` + script-aware page counts) and written from the "Mushaf Script" dropdown in `QuranSettingsScreen`. Off by default. See §5 (16-line renderer).
 
 **One `SettingsViewModel` per screen — so settings state must be *collected*, not snapshotted.**

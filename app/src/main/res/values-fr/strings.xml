@@ -1563,8 +1563,8 @@
     <string name="tafseer_no_commentary_anywhere">Aucun commentaire pour cette Ayah n\'est encore disponible dans les sources installées.</string>
     <string name="qibla_turn_right_hint">Tournez à droite\npour trouver la Qibla</string>
     <string name="qibla_turn_left_hint">Tournez à gauche\npour trouver la Qibla</string>
-    <string name="zakat_nisab_gold_subtitle">87,48 g @ $%1$d/g</string>
-    <string name="zakat_nisab_silver_subtitle">612,36 g @ $%1$s/g</string>
+    <string name="zakat_nisab_gold_subtitle">87,48 g à %1$s/g</string>
+    <string name="zakat_nisab_silver_subtitle">612,36 g à %1$s/g</string>
     <string name="yes">Oui</string>
     <string name="no">Non</string>
     <string name="fasting_event_ashura_name">Jour d\'Achoura</string>
@@ -1780,4 +1780,7 @@
         <item quantity="one">%1$d min avant</item>
         <item quantity="other">%1$d min avant</item>
     </plurals>
+    <string name="zakat_gold_price_label">Prix de l’or par gramme</string>
+    <string name="zakat_silver_price_label">Prix de l’argent par gramme</string>
+    <string name="zakat_metal_prices_hint">Estimations — indiquez votre cours local. Le seuil du nisab en découle.</string>
 </resources>

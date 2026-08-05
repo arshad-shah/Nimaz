@@ -1843,8 +1843,8 @@
     <string name="tafseer_no_commentary_anywhere">Commentary for this ayah isn\'t available in any installed source yet.</string>
     <string name="qibla_turn_right_hint">Turn right\nto find Qibla</string>
     <string name="qibla_turn_left_hint">Turn left\nto find Qibla</string>
-    <string name="zakat_nisab_gold_subtitle">87.48g @ $%1$d/g</string>
-    <string name="zakat_nisab_silver_subtitle">612.36g @ $%1$s/g</string>
+    <string name="zakat_nisab_gold_subtitle">87.48g @ %1$s/g</string>
+    <string name="zakat_nisab_silver_subtitle">612.36g @ %1$s/g</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="fasting_event_ashura_name">Day of Ashura</string>
@@ -1916,4 +1916,7 @@
     <string name="night_worship_why_body">&quot;Our Lord descends to the nearest heaven…&quot;</string>
     <string name="widget_location">Location</string>
     <string name="widget_tomorrow">Tomorrow</string>
+    <string name="zakat_gold_price_label">Gold price per gram</string>
+    <string name="zakat_silver_price_label">Silver price per gram</string>
+    <string name="zakat_metal_prices_hint">Estimates — set these to your local rate. The nisab threshold is worked out from them.</string>
 </resources>

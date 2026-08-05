@@ -12,6 +12,7 @@ import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.arshadshah.nimaz.domain.model.ZakatDefaults
 import com.arshadshah.nimaz.domain.model.MushafScript
 import com.arshadshah.nimaz.domain.model.PrayerAlertStyle
 import com.arshadshah.nimaz.domain.model.UserPreferences
@@ -152,6 +153,9 @@ class PreferencesDataStore @Inject constructor(
         val QURAN_MUSHAF_SCRIPT = stringPreferencesKey("quran_mushaf_script")
         val QURAN_ARABIC_FONT_SIZE = floatPreferencesKey("quran_arabic_font_size")
         val QURAN_TRANSLATION_FONT_SIZE = floatPreferencesKey("quran_translation_font_size")
+        val ZAKAT_GOLD_PRICE_PER_GRAM = doublePreferencesKey("zakat_gold_price_per_gram")
+        val ZAKAT_SILVER_PRICE_PER_GRAM = doublePreferencesKey("zakat_silver_price_per_gram")
+        val ZAKAT_CURRENCY = stringPreferencesKey("zakat_currency")
         val CONTINUOUS_READING = booleanPreferencesKey("continuous_reading")
         val KEEP_SCREEN_ON = booleanPreferencesKey("keep_screen_on")
         val SHOW_TAJWEED = booleanPreferencesKey("show_tajweed")
@@ -687,6 +691,24 @@ class PreferencesDataStore @Inject constructor(
 
     override suspend fun setQuranTranslationFontSize(size: Float) =
         put(PreferencesKeys.QURAN_TRANSLATION_FONT_SIZE, size)
+
+    override val zakatGoldPricePerGram: Flow<Double> =
+        preference(PreferencesKeys.ZAKAT_GOLD_PRICE_PER_GRAM, ZakatDefaults.GOLD_PRICE_PER_GRAM)
+
+    override suspend fun setZakatGoldPricePerGram(pricePerGram: Double) =
+        put(PreferencesKeys.ZAKAT_GOLD_PRICE_PER_GRAM, pricePerGram)
+
+    override val zakatSilverPricePerGram: Flow<Double> =
+        preference(PreferencesKeys.ZAKAT_SILVER_PRICE_PER_GRAM, ZakatDefaults.SILVER_PRICE_PER_GRAM)
+
+    override suspend fun setZakatSilverPricePerGram(pricePerGram: Double) =
+        put(PreferencesKeys.ZAKAT_SILVER_PRICE_PER_GRAM, pricePerGram)
+
+    override val zakatCurrency: Flow<String> =
+        preference(PreferencesKeys.ZAKAT_CURRENCY, ZakatDefaults.CURRENCY)
+
+    override suspend fun setZakatCurrency(currency: String) =
+        put(PreferencesKeys.ZAKAT_CURRENCY, currency)
 
     override val continuousReading: Flow<Boolean> =
         preference(PreferencesKeys.CONTINUOUS_READING, true)
