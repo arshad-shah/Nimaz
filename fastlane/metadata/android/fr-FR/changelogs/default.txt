@@ -1,7 +1,8 @@
 Nouveautés :
 
-• NOUVEAU : rappels d'adoration optionnels — Tahajjud, Suhoor & Iftar, Tarawih, Laylat al-Qadr, adhkar du matin & soir, et jours de jeûne surérogatoire. Activez ceux que vous voulez.
-• Une carte « Prochaine adoration » sur l'accueil.
-• Paramètres de notification réorganisés en sections claires.
-• Coran : cartes recommandées sur l'accueil.
-• Peaufinage et corrections.
+• Coran : 15 traductions au choix, lecteur revu, et le filtre des sourates est de retour.
+• Cherchez dans le Coran, les hadiths et les invocations d'un seul coup, résultats surlignés.
+• Favoris : recherche, tri, et annulation d'une suppression.
+• Tafsir : gardez vos propres notes sur n'importe quel verset.
+• Zakat : choisissez votre devise.
+• Chaque écran dit maintenant clairement s'il charge, s'il est vide, ou si quelque chose a échoué.

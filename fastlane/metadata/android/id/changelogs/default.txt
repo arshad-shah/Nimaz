@@ -1,7 +1,8 @@
 Yang baru:
 
-• BARU: Pengingat ibadah opsional — Tahajud, Sahur & Buka, Tarawih, Lailatul Qadar, zikir pagi & petang, dan hari puasa sunnah. Aktifkan yang Anda mau saja.
-• Kartu "Ibadah Berikutnya" di Beranda menampilkan yang akan datang.
-• Pengaturan notifikasi ditata ulang menjadi bagian yang jelas.
-• Al-Qur'an: kartu rekomendasi di beranda.
-• Pemolesan dan perbaikan.
+• Al-Qur'an: 15 terjemahan untuk dipilih, tampilan baca yang disegarkan, dan filter surah kembali.
+• Cari Al-Qur'an, Hadis, dan doa sekaligus, dengan kata yang cocok disorot.
+• Markah: cari, urutkan, dan batalkan penghapusan.
+• Tafsir: simpan catatan Anda sendiri pada ayat mana pun.
+• Zakat: pilih mata uang Anda.
+• Setiap layar kini menyatakan dengan jelas saat memuat, saat kosong, dan saat terjadi kesalahan.
