@@ -523,6 +523,10 @@
 
     <!-- Per-prayer alert style and reminder -->
     <string name="notif_prayers_section">Daily prayers</string>
+    <string name="notif_all_prayers_section">All prayers</string>
+    <string name="notif_all_prayers_reminder_title">Remind me before every prayer</string>
+    <string name="notif_all_prayers_reminder_subtitle">Sets the same reminder on all five prayers. Change one below to override it.</string>
+    <string name="notif_all_prayers_lead_title">Reminder before all prayers</string>
     <string name="notif_alert_style">Alert style</string>
     <string name="notif_alert_style_adhan">Adhan</string>
     <string name="notif_alert_style_adhan_subtitle">The call to prayer plays aloud</string>
@@ -701,6 +705,24 @@
 
     <!-- Duas Collection Screen -->
     <string name="duas_adhkar">Duas &amp; Adhkar</string>
+    <string name="dua_occasion_empty">No duas recorded for this occasion yet.</string>
+    <string name="dua_occasion_morning">Morning</string>
+    <string name="dua_occasion_evening">Evening</string>
+    <string name="dua_occasion_after_prayer">After prayer</string>
+    <string name="dua_occasion_before_sleep">Before sleep</string>
+    <string name="dua_occasion_waking_up">Waking up</string>
+    <string name="dua_occasion_eating">Eating</string>
+    <string name="dua_occasion_traveling">Travelling</string>
+    <string name="dua_occasion_entering_mosque">Entering the mosque</string>
+    <string name="dua_occasion_leaving_mosque">Leaving the mosque</string>
+    <string name="dua_occasion_entering_home">Entering the home</string>
+    <string name="dua_occasion_leaving_home">Leaving the home</string>
+    <string name="dua_occasion_rain">Rain</string>
+    <string name="dua_occasion_distress">Distress</string>
+    <string name="dua_occasion_forgiveness">Forgiveness</string>
+    <string name="dua_occasion_parents">Parents</string>
+    <string name="dua_occasion_gratitude">Gratitude</string>
+    <string name="dua_occasion_general">General</string>
     <string name="bookmarks">Bookmarks</string>
     <string name="daily_adhkar">Daily Adhkar</string>
     <string name="situational_duas">Situational Duas</string>
@@ -1151,6 +1173,8 @@
     <string name="qaida_new_lesson_unlocked">New lesson: %1$s</string>
     <string name="qaida_map">Map</string>
     <string name="qaida_next_lesson">Next lesson</string>
+    <string name="qaida_previous_lesson">Previous</string>
+    <string name="qaida_resume_lesson">Continue</string>
     <string name="qaida_play_line">Play line</string>
 
     <!-- Quran Settings Screen -->
@@ -1478,6 +1502,7 @@
     <string name="hadith_narrated_by_format">Narrated by %1$s</string>
     <string name="hadith_isnad">Chain of Narration (Isnad)</string>
     <string name="hadith_copied">Copied to clipboard</string>
+    <string name="hadith_browse_by_grade">Browse by grade</string>
     <string name="hadith_grade_sahih">Sahih</string>
     <string name="hadith_grade_hasan">Hasan</string>
     <string name="hadith_grade_daif">Daʿīf</string>
@@ -1516,6 +1541,9 @@
 
     <!-- Common actions / content descriptions -->
     <string name="save">Save</string>
+    <string name="edit_tasbih">Edit tasbih</string>
+    <string name="save_tasbih">Save changes</string>
+    <string name="tasbih_edit_preset">Edit this tasbih</string>
     <string name="pause">Pause</string>
     <string name="sajdah">Sajdah</string>
     <string name="cd_mark_as_read">Mark as read</string>

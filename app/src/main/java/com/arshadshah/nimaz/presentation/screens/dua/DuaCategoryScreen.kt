@@ -40,6 +40,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.Dua
+import com.arshadshah.nimaz.domain.model.DuaOccasion
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
@@ -61,6 +62,7 @@ fun DuaCategoryScreen(
     categoryId: String,
     onNavigateBack: () -> Unit,
     onNavigateToDua: (String) -> Unit,
+    onNavigateToOccasion: (DuaOccasion) -> Unit = {},
     viewModel: DuaViewModel = hiltViewModel()
 ) {
     val state by viewModel.categoryState.collectAsStateWithLifecycle()
@@ -122,7 +124,8 @@ fun DuaCategoryScreen(
                 ) { dua ->
                     DuaListItem(
                         dua = dua,
-                        onClick = { onNavigateToDua(dua.id) }
+                        onClick = { onNavigateToDua(dua.id) },
+                        onOccasionClick = onNavigateToOccasion
                     )
                 }
 
@@ -192,12 +195,18 @@ private fun CategoryHeaderCard(
     }
 }
 
+/**
+ * One dua in a list. Shared with [DuaOccasionScreen], which lists the same rows for a
+ * different query rather than owning a near-copy of this.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun DuaListItem(
+internal fun DuaListItem(
     dua: Dua,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    /** Given, the occasion under the title becomes the way into that occasion's whole list. */
+    onOccasionClick: ((DuaOccasion) -> Unit)? = null,
 ) {
     NimazCard(
         style = NimazCardStyle.FILLED,
@@ -244,11 +253,22 @@ private fun DuaListItem(
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     dua.occasion?.let { occasion ->
-                        Text(
-                            text = occasion.displayName(),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                        if (onOccasionClick != null) {
+                            NimazBadge(
+                                text = occasion.label(),
+                                tone = NimazTone.ACCENT,
+                                emphasis = NimazBadgeEmphasis.SOFT,
+                                shape = NimazBadgeShape.ROUNDED,
+                                size = NimazBadgeSize.SMALL,
+                                onClick = { onOccasionClick(occasion) }
+                            )
+                        } else {
+                            Text(
+                                text = occasion.label(),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                 }
 

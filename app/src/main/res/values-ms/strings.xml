@@ -389,6 +389,24 @@
     <string name="target_count">Kiraan Sasaran</string>
     <string name="category">Kategori</string>
     <string name="duas_adhkar">Doa &amp; Zikir</string>
+    <string name="dua_occasion_empty">Belum ada doa direkodkan untuk keadaan ini.</string>
+    <string name="dua_occasion_morning">Pagi</string>
+    <string name="dua_occasion_evening">Petang</string>
+    <string name="dua_occasion_after_prayer">Selepas solat</string>
+    <string name="dua_occasion_before_sleep">Sebelum tidur</string>
+    <string name="dua_occasion_waking_up">Ketika bangun tidur</string>
+    <string name="dua_occasion_eating">Makan</string>
+    <string name="dua_occasion_traveling">Dalam perjalanan</string>
+    <string name="dua_occasion_entering_mosque">Masuk masjid</string>
+    <string name="dua_occasion_leaving_mosque">Keluar masjid</string>
+    <string name="dua_occasion_entering_home">Masuk rumah</string>
+    <string name="dua_occasion_leaving_home">Keluar rumah</string>
+    <string name="dua_occasion_rain">Hujan</string>
+    <string name="dua_occasion_distress">Kesusahan</string>
+    <string name="dua_occasion_forgiveness">Keampunan</string>
+    <string name="dua_occasion_parents">Ibu bapa</string>
+    <string name="dua_occasion_gratitude">Kesyukuran</string>
+    <string name="dua_occasion_general">Umum</string>
     <string name="bookmarks">Penanda Buku</string>
     <string name="daily_adhkar">Zikir Harian</string>
     <string name="situational_duas">Doa Situasi</string>
@@ -840,6 +858,8 @@
     <string name="qaida_new_lesson_unlocked">Pelajaran baharu: %1$s</string>
     <string name="qaida_map">Peta</string>
     <string name="qaida_next_lesson">Pelajaran seterusnya</string>
+    <string name="qaida_previous_lesson">Sebelumnya</string>
+    <string name="qaida_resume_lesson">Teruskan</string>
     <string name="qaida_play_line">Main baris</string>
 
     <!-- Missing strings (ms) -->
@@ -1118,6 +1138,7 @@
     <string name="hadith_narrated_by_format">Diriwayatkan oleh %1$s</string>
     <string name="hadith_isnad">Rantaian Periwayatan (Isnad)</string>
     <string name="hadith_copied">Disalin ke papan keratan</string>
+    <string name="hadith_browse_by_grade">Layari mengikut darjat</string>
     <string name="hadith_grade_sahih">Sahih</string>
     <string name="hadith_grade_hasan">Hasan</string>
     <string name="hadith_grade_daif">Daʿīf</string>
@@ -1146,6 +1167,9 @@
     <string name="prayer_info_method">Kaedah</string>
     <string name="qaida_lesson_progress">Pelajaran %1$d daripada %2$d</string>
     <string name="save">Simpan</string>
+    <string name="edit_tasbih">Edit tasbih</string>
+    <string name="save_tasbih">Simpan perubahan</string>
+    <string name="tasbih_edit_preset">Edit tasbih ini</string>
     <string name="pause">Jeda</string>
     <string name="sajdah">Sajdah</string>
     <string name="cd_mark_as_read">Tandakan sebagai dibaca</string>
@@ -1682,6 +1706,10 @@
     <string name="notif_hub_sound_vibration">%1$s · getaran aktif</string>
     <string name="notif_hub_sound_plain">%1$s</string>
     <string name="notif_prayers_section">Solat harian</string>
+    <string name="notif_all_prayers_section">Semua solat</string>
+    <string name="notif_all_prayers_reminder_title">Ingatkan saya sebelum setiap solat</string>
+    <string name="notif_all_prayers_reminder_subtitle">Menetapkan peringatan yang sama pada kelima-lima solat. Ubah satu di bawah untuk menggantikannya.</string>
+    <string name="notif_all_prayers_lead_title">Peringatan sebelum semua solat</string>
     <string name="notif_alert_style">Jenis peringatan</string>
     <string name="notif_alert_style_adhan">Azan</string>
     <string name="notif_alert_style_adhan_subtitle">Azan dimainkan dengan bunyi</string>

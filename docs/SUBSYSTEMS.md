@@ -410,6 +410,14 @@ state the fire-time rules once: the global adhan switch stays a **master gate** 
 style, so turning the adhan off in Adhan & sound silences the call everywhere without rewriting
 five styles.
 
+**The app-wide pre-reminder pair is not a sixth setting.** `notification_reminder_minutes` and
+`show_reminder_before` predate the split and are **not read when alarms are scheduled** — only
+`BootReceiver` still reads the former, as the lead time a fired pre-reminder states when its alarm
+carries no `EXTRA_REMINDER_MINUTES` (an alarm armed before the split). They survive as the
+remembered bulk choice behind the **All prayers** group at the top of `PrayerNotificationsScreen`,
+which writes them *and* fans the same value out to all five per-prayer settings. Writing only the
+pair would change no notification, so a control that touches one must touch the other.
+
 Wall-clock arithmetic lives in `core/util/PrayerAlarmTimes.kt`, apart from the scheduler so it can
 be tested without an `AlarmManager`. A reminder before an early Fajr crosses back over midnight;
 a time inside a spring-forward gap resolves **forward** (an alarm slightly late beats one that

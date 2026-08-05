@@ -68,6 +68,7 @@ import com.arshadshah.nimaz.presentation.screens.asmaunnabi.AsmaUnNabiDetailScre
 import com.arshadshah.nimaz.presentation.screens.bookmarks.BookmarksScreen
 import com.arshadshah.nimaz.presentation.screens.calendar.IslamicCalendarScreen
 import com.arshadshah.nimaz.presentation.screens.dua.DuaCategoryScreen
+import com.arshadshah.nimaz.presentation.screens.dua.DuaOccasionScreen
 import com.arshadshah.nimaz.presentation.screens.dua.DuaReaderScreen
 import com.arshadshah.nimaz.presentation.screens.dua.DuaSettingsScreen
 import com.arshadshah.nimaz.presentation.screens.dua.DuasCollectionScreen
@@ -91,6 +92,8 @@ import com.arshadshah.nimaz.presentation.screens.qibla.QiblaScreen
 import com.arshadshah.nimaz.presentation.screens.quran.QuranReaderScreen
 import com.arshadshah.nimaz.presentation.screens.quran.SelectReciterScreen
 import com.arshadshah.nimaz.presentation.screens.quran.SelectTranslationScreen
+import com.arshadshah.nimaz.domain.model.DuaOccasion
+import com.arshadshah.nimaz.domain.model.HadithGrade
 import com.arshadshah.nimaz.domain.model.TopicTree
 import com.arshadshah.nimaz.presentation.screens.quran.QuranTopicDetailScreen
 import com.arshadshah.nimaz.presentation.screens.quran.QuranTopicsScreen
@@ -371,7 +374,7 @@ fun NavGraph(
                 TasbihScreen(
                     onNavigateToHistory = { navController.navigate(Route.TasbihHistory) },
                     onNavigateToChooseDhikr = { navController.navigate(Route.TasbihPresets) },
-                    onNavigateToAddPreset = { navController.navigate(Route.TasbihAddPreset) },
+                    onNavigateToAddPreset = { navController.navigate(Route.TasbihAddPreset()) },
                     onNavigateToSettings = { navController.navigate(Route.Settings) }
                 )
             }
@@ -636,6 +639,9 @@ fun NavGraph(
                     onNavigateBack = { navController.popBackStack() },
                     onNavigateToSearch = { navController.navigate(Route.HadithSearch) },
                     onNavigateToBookmarks = { navController.navigate(Route.HadithBookmarks) },
+                    onNavigateToGrade = { grade ->
+                        navController.navigate(Route.HadithByGrade(grade.name))
+                    },
                 )
             }
 
@@ -676,6 +682,17 @@ fun NavGraph(
                     bookId = args.bookId,
                     chapterId = "",
                     hadithNumber = args.hadithNumber,
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToSettings = { navController.navigate(Route.HadithSettings) }
+                )
+            }
+
+            taggedComposable<Route.HadithByGrade>(ScreenTags.HadithByGrade) { backStackEntry ->
+                val args = backStackEntry.toRoute<Route.HadithByGrade>()
+                HadithReaderScreen(
+                    bookId = "",
+                    chapterId = "",
+                    grade = HadithGrade.entries.firstOrNull { it.name == args.grade },
                     onNavigateBack = { navController.popBackStack() },
                     onNavigateToSettings = { navController.navigate(Route.HadithSettings) }
                 )
@@ -734,6 +751,21 @@ fun NavGraph(
                 val args = backStackEntry.toRoute<Route.DuaCategory>()
                 DuaCategoryScreen(
                     categoryId = args.categoryId,
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToDua = { duaId ->
+                        navController.navigate(Route.DuaReader(duaId))
+                    },
+                    onNavigateToOccasion = { occasion ->
+                        navController.navigate(Route.DuaOccasion(occasion.name))
+                    }
+                )
+            }
+
+            taggedComposable<Route.DuaOccasion>(ScreenTags.DuaOccasion) { backStackEntry ->
+                val args = backStackEntry.toRoute<Route.DuaOccasion>()
+                DuaOccasionScreen(
+                    occasion = DuaOccasion.entries.firstOrNull { it.name == args.occasion }
+                        ?: DuaOccasion.GENERAL,
                     onNavigateBack = { navController.popBackStack() },
                     onNavigateToDua = { duaId ->
                         navController.navigate(Route.DuaReader(duaId))
@@ -860,7 +892,7 @@ fun NavGraph(
                 TasbihScreen(
                     onNavigateToHistory = { navController.navigate(Route.TasbihHistory) },
                     onNavigateToChooseDhikr = { navController.navigate(Route.TasbihPresets) },
-                    onNavigateToAddPreset = { navController.navigate(Route.TasbihAddPreset) },
+                    onNavigateToAddPreset = { navController.navigate(Route.TasbihAddPreset()) },
                     onNavigateToSettings = { navController.navigate(Route.Settings) }
                 )
             }
@@ -877,7 +909,10 @@ fun NavGraph(
             taggedComposable<Route.TasbihPresets>(ScreenTags.TasbihPresets) {
                 com.arshadshah.nimaz.presentation.screens.tasbih.ChooseDhikrScreen(
                     onBack = { navController.popBackStack() },
-                    onNavigateToAddPreset = { navController.navigate(Route.TasbihAddPreset) }
+                    onNavigateToAddPreset = { navController.navigate(Route.TasbihAddPreset()) },
+                    onEditPreset = { presetId ->
+                        navController.navigate(Route.TasbihAddPreset(presetId))
+                    }
                 )
             }
 
@@ -894,8 +929,10 @@ fun NavGraph(
                 )
             }
 
-            taggedComposable<Route.TasbihAddPreset>(ScreenTags.TasbihAddPreset) {
+            taggedComposable<Route.TasbihAddPreset>(ScreenTags.TasbihAddPreset) { backStackEntry ->
+                val args = backStackEntry.toRoute<Route.TasbihAddPreset>()
                 com.arshadshah.nimaz.presentation.screens.tasbih.AddPresetScreen(
+                    presetId = args.presetId,
                     onNavigateBack = { navController.popBackStack() }
                 )
             }

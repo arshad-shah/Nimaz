@@ -41,6 +41,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSwitch
 import com.arshadshah.nimaz.presentation.components.molecules.NimazAccordion
 import com.arshadshah.nimaz.presentation.components.molecules.NimazListPicker
+import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
 import com.arshadshah.nimaz.presentation.components.molecules.NimazPickerItem
 import com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsItem
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
@@ -115,6 +116,33 @@ fun PrayerNotificationsScreen(
         ) {
             item { Spacer(Modifier.height(4.dp)) }
             item {
+                NimazSectionHeader(title = stringResource(R.string.notif_all_prayers_section))
+            }
+            item {
+                NimazMenuGroup {
+                    NimazSettingsItem(
+                        title = stringResource(R.string.notif_all_prayers_reminder_title),
+                        subtitle = stringResource(R.string.notif_all_prayers_reminder_subtitle),
+                        checked = notificationState.showReminderBefore,
+                        onCheckedChange = { enabled ->
+                            viewModel.applyReminderToAllPrayers(
+                                enabled = enabled,
+                                minutes = notificationState.reminderMinutes,
+                            )
+                        }
+                    )
+                    NimazSettingsItem(
+                        title = stringResource(R.string.notif_all_prayers_lead_title),
+                        value = reminderLabel(
+                            notificationState.reminderMinutes
+                                .takeIf { notificationState.showReminderBefore }
+                        ),
+                        onClick = { openSheet = PrayerSettingSheet.AllPrayersReminder },
+                        showArrow = true,
+                    )
+                }
+            }
+            item {
                 NimazSectionHeader(title = stringResource(R.string.notif_prayers_section))
             }
 
@@ -147,6 +175,18 @@ fun PrayerNotificationsScreen(
             onDismiss = { openSheet = null }
         )
 
+        PrayerSettingSheet.AllPrayersReminder -> ReminderPicker(
+            selected = notificationState.reminderMinutes
+                .takeIf { notificationState.showReminderBefore },
+            onSelected = { minutes ->
+                viewModel.applyReminderToAllPrayers(
+                    enabled = minutes != null,
+                    minutes = minutes ?: notificationState.reminderMinutes,
+                )
+            },
+            onDismiss = { openSheet = null }
+        )
+
         is PrayerSettingSheet.Reminder -> ReminderPicker(
             selected = notificationState.reminderMinutesFor(sheet.prayer),
             onSelected = { minutes ->
@@ -170,6 +210,35 @@ fun PrayerNotificationsScreen(
 private sealed interface PrayerSettingSheet {
     data class AlertStyle(val prayer: String) : PrayerSettingSheet
     data class Reminder(val prayer: String) : PrayerSettingSheet
+
+    /** The bulk lead-time picker, which is not about one prayer. */
+    data object AllPrayersReminder : PrayerSettingSheet
+}
+
+/**
+ * Set every prayer's reminder at once, and remember the choice as the app-wide default.
+ *
+ * The reminder became per prayer in the notifications rework, which left no way to say "warn
+ * me before all five" without opening five accordions — and left the app-wide preference
+ * ([SettingsEvent.SetShowReminderBefore] / [SettingsEvent.SetReminderMinutes]) with nothing
+ * writing it, so it sat at its default while the per-prayer values moved. Both are written
+ * here: the app-wide pair is what a new prayer's reminder falls back to and what a delivered
+ * reminder reads when its alarm predates the per-prayer split, and the five per-prayer events
+ * are what actually reschedules the alarms. Writing only the app-wide pair would ship a
+ * control that changes no notification.
+ *
+ * The lead time is written even when the reminder is being turned off, so switching it back on
+ * restores the number the user last chose rather than the default.
+ */
+private fun SettingsViewModel.applyReminderToAllPrayers(enabled: Boolean, minutes: Int) {
+    onEvent(SettingsEvent.SetShowReminderBefore(enabled))
+    onEvent(SettingsEvent.SetReminderMinutes(minutes))
+    PrayerAlertStyle.PRAYER_KEYS.forEach { prayer ->
+        onEvent(SettingsEvent.SetPrayerReminderEnabled(prayer, enabled))
+        if (enabled) {
+            onEvent(SettingsEvent.SetPrayerReminderMinutes(prayer, minutes))
+        }
+    }
 }
 
 @Composable

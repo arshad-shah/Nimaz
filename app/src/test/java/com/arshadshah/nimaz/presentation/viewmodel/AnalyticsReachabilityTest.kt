@@ -27,32 +27,21 @@ class AnalyticsReachabilityTest {
     )
 
     /**
-     * The **existing** unreachable-analytics backlog, captured so this test can be a ratchet.
+     * The unreachable-analytics backlog, which is now **empty** — and must stay that way.
      *
-     * Every entry is a branch that logs and that no screen, component, widget or nav callback
-     * dispatches — so its metric reads zero in production and always will. They are listed
-     * rather than fixed here because each is a wire-or-delete **product** decision, which is
-     * exactly what #357 tracks: whether "start a tasbih session" or "filter hadith by grade" is
-     * a feature someone meant to ship or a leftover.
+     * An entry here is a branch that logs and that no screen, component, widget or nav callback
+     * dispatches, so its metric reads zero in production and always will. Scanning for #357
+     * found **29** of them, against the three #359 had named. Twenty-one were deleted in the
+     * layer that introduced this list; the remaining eight were the ones signed off as features
+     * someone meant to ship, and their UI landed here — a lesson-navigation footer in the Qaida
+     * reader, the zakat breakdown's disclosure, an all-prayers pre-reminder control, hadith
+     * grade browsing, editing a custom tasbih, and browsing duas by occasion.
      *
-     * #359 names three of these. Scanning found **29**. Twenty-one were deleted in the layer
-     * that introduced this list; the eight below are the ones signed off to be **wired** as
-     * features, and they leave when their UI lands.
-     *
-     * The list only ever shrinks. A new unreachable analytics branch fails this test on the PR
-     * that introduces it, which is the whole point — all three of #359's findings survived
-     * because nothing could see them.
+     * The list only ever shrinks, and it has nowhere left to shrink to. A new unreachable
+     * analytics branch fails this test on the PR that introduces it, which is the whole point —
+     * all three of #359's findings survived because nothing could see them.
      */
-    private val accepted = setOf(
-        "DuaEvent.LoadDuasByOccasion",
-        "HadithEvent.FilterByGrade",
-        "QaidaReaderEvent.PreviousLesson",
-        "QaidaReaderEvent.Resume",
-        "SettingsEvent.SetReminderMinutes",
-        "SettingsEvent.SetShowReminderBefore",
-        "TasbihEvent.UpdateCustomPreset",
-        "ZakatEvent.ToggleBreakdown",
-    )
+    private val accepted = emptySet<String>()
 
     @Test
     fun `every analytics-bearing event branch has a producer`() {

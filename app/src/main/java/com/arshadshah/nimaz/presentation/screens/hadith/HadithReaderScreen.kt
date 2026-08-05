@@ -72,6 +72,7 @@ import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.share.ContentShareManager
 import com.arshadshah.nimaz.core.share.Shareables
 import com.arshadshah.nimaz.domain.model.Hadith
+import com.arshadshah.nimaz.domain.model.HadithGrade
 import com.arshadshah.nimaz.presentation.components.atoms.HadithArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
@@ -100,6 +101,12 @@ fun HadithReaderScreen(
     onNavigateToSettings: () -> Unit = {},
     /** Set by `Route.HadithByNumber` — open hadith number N of [bookId], as a bookmark cites it. */
     hadithNumber: Int? = null,
+    /**
+     * Set by `Route.HadithByGrade` — read every hadith in the collection carrying this grade,
+     * rather than one book's chapter. There is no chapter in this mode, so the title falls back
+     * to the grade's own label.
+     */
+    grade: HadithGrade? = null,
     viewModel: HadithViewModel = hiltViewModel()
 ) {
     val state by viewModel.readerState.collectAsStateWithLifecycle()
@@ -111,8 +118,12 @@ fun HadithReaderScreen(
         pageCount = { hadiths.size }
     )
 
-    LaunchedEffect(chapterId, bookId, hadithNumber) {
+    LaunchedEffect(chapterId, bookId, hadithNumber, grade) {
         when {
+            // Grade browsing replaces the whole list and clears the chapter, so it must win
+            // over the chapter/hadithId reading of the other two arguments — which are both
+            // empty in this mode and would otherwise resolve to "a hadithId from search".
+            grade != null -> viewModel.onEvent(HadithEvent.FilterByGrade(grade))
             // Stated by the route rather than inferred from the shape of a string: a bookmark
             // knows the book and the number, and passing the number through `hadithId` made the
             // reader look it up as a **primary key** — a real hadith, from an arbitrary book.
@@ -136,9 +147,13 @@ fun HadithReaderScreen(
     NimazScreenScaffold(
         topBar = {
             NimazBackTopAppBar(
-                title = state.chapter?.nameEnglish ?: stringResource(R.string.loading),
+                title = state.chapter?.nameEnglish
+                    ?: gradeTitle(grade)
+                    ?: stringResource(R.string.loading),
                 subtitle = state.chapter?.let {
                     stringResource(R.string.hadith_chapter_format, it.chapterNumber)
+                } ?: grade?.let {
+                    stringResource(R.string.hadith_count_format, hadiths.size.toString())
                 },
                 onBackClick = onNavigateBack,
                 actions = {
@@ -518,3 +533,7 @@ private fun HadithReaderBottomBar(
         )
     }
 }
+
+/** The grade's own label, standing in for a chapter name when the reader is browsing a grade. */
+@Composable
+private fun gradeTitle(grade: HadithGrade?): String? = hadithGradeDisplay(grade)?.label

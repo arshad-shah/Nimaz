@@ -22,6 +22,8 @@ import androidx.compose.material.icons.automirrored.filled.ShowChart
 import androidx.compose.material.icons.filled.AccountBalance
 import androidx.compose.material.icons.filled.Business
 import androidx.compose.material.icons.filled.CreditCard
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.MoreHoriz
@@ -210,6 +212,8 @@ private fun ZakatCompactContent(
                     isAboveNisab = calculation.isAboveNisab,
                     zakatDue = calculation.zakatDue,
                     currency = state.currency,
+                    expanded = state.showBreakdown,
+                    onToggleExpanded = { viewModel.onEvent(ZakatEvent.ToggleBreakdown) },
                     onSaveClick = { viewModel.onEvent(ZakatEvent.SaveCalculation) }
                 )
             }
@@ -308,6 +312,8 @@ private fun ZakatTabletContent(
                 isAboveNisab = calculation.isAboveNisab,
                 zakatDue = calculation.zakatDue,
                 currency = state.currency,
+                expanded = state.showBreakdown,
+                onToggleExpanded = { viewModel.onEvent(ZakatEvent.ToggleBreakdown) },
                 onSaveClick = { viewModel.onEvent(ZakatEvent.SaveCalculation) }
             )
         }
@@ -811,6 +817,16 @@ private fun CompactAmountField(
 
 // --- Breakdown Card ---
 
+/**
+ * The line-by-line working behind the zakat figure, collapsible so the summary and the save
+ * action stay reachable without scrolling past eight rows of arithmetic.
+ *
+ * [expanded] is `showBreakdown` from the ViewModel rather than local `remember` state: the
+ * calculator is a long screen whose state survives rotation and process death through the
+ * ViewModel, and a breakdown that silently re-opened on the way back would undo the choice.
+ * Only the rows collapse — the save button does not, because hiding the way to record a
+ * calculation behind a disclosure is how a calculation gets lost.
+ */
 @Composable
 private fun BreakdownCard(
     totalAssets: Double,
@@ -820,85 +836,114 @@ private fun BreakdownCard(
     isAboveNisab: Boolean,
     zakatDue: Double,
     currency: String,
+    expanded: Boolean,
+    onToggleExpanded: () -> Unit,
     onSaveClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
-        Text(
-            text = stringResource(R.string.calculation_breakdown),
-            style = MaterialTheme.typography.titleSmall,
-            fontWeight = FontWeight.SemiBold,
-            color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.padding(bottom = 12.dp)
-        )
-
         NimazCard(
+            onClick = onToggleExpanded,
             modifier = Modifier.fillMaxWidth(),
-            // A section card on the page background → elevated.
+            style = NimazCardStyle.FILLED,
             tone = NimazTone.NEUTRAL,
-            style = NimazCardStyle.ELEVATED,
             shape = RoundedCornerShape(14.dp)
         ) {
-            Column(
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                BreakdownRow(
-                    label = stringResource(R.string.total_assets),
-                    value = formatCurrency(totalAssets, currency),
-                    valueColor = MaterialTheme.colorScheme.primary
+                Text(
+                    text = stringResource(R.string.calculation_breakdown),
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
-                BreakdownRow(
-                    label = stringResource(R.string.total_liabilities),
-                    value = "- ${formatCurrency(totalLiabilities, currency)}",
-                    valueColor = MaterialTheme.colorScheme.error
-                )
-
-                HorizontalDivider(
-                    color = MaterialTheme.colorScheme.outlineVariant,
-                    thickness = 1.dp
-                )
-
-                BreakdownRow(
-                    label = stringResource(R.string.net_zakatable_wealth),
-                    value = formatCurrency(netWorth, currency),
-                    valueColor = MaterialTheme.colorScheme.onSurface,
-                    isBold = true
-                )
-
-                BreakdownRow(
-                    label = stringResource(R.string.nisab_threshold),
-                    value = formatCurrency(nisabValue, currency),
-                    valueColor = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-
-                BreakdownRow(
-                    label = stringResource(R.string.meets_nisab),
-                    value = stringResource(if (isAboveNisab) R.string.yes else R.string.no),
-                    valueColor = if (isAboveNisab) {
-                        MaterialTheme.colorScheme.primary
-                    } else {
-                        MaterialTheme.colorScheme.error
-                    }
-                )
-
-                HorizontalDivider(
-                    color = MaterialTheme.colorScheme.outlineVariant,
-                    thickness = 1.dp
-                )
-
-                BreakdownRow(
-                    label = stringResource(R.string.zakat_due_2_5_percent),
-                    value = formatCurrency(zakatDue, currency),
-                    valueColor = NimazColors.ZakatColors.Gold,
-                    isBold = true
+                NimazIcon(
+                    imageVector = if (expanded) Icons.Filled.ExpandLess
+                    else Icons.Filled.ExpandMore,
+                    contentDescription = stringResource(
+                        if (expanded) R.string.cd_collapse else R.string.cd_expand
+                    ),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
 
         Spacer(modifier = Modifier.height(12.dp))
+
+        if (expanded) {
+            NimazCard(
+                modifier = Modifier.fillMaxWidth(),
+                // A section card on the page background → elevated.
+                tone = NimazTone.NEUTRAL,
+                style = NimazCardStyle.ELEVATED,
+                shape = RoundedCornerShape(14.dp)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    BreakdownRow(
+                        label = stringResource(R.string.total_assets),
+                        value = formatCurrency(totalAssets, currency),
+                        valueColor = MaterialTheme.colorScheme.primary
+                    )
+                    BreakdownRow(
+                        label = stringResource(R.string.total_liabilities),
+                        value = "- ${formatCurrency(totalLiabilities, currency)}",
+                        valueColor = MaterialTheme.colorScheme.error
+                    )
+
+                    HorizontalDivider(
+                        color = MaterialTheme.colorScheme.outlineVariant,
+                        thickness = 1.dp
+                    )
+
+                    BreakdownRow(
+                        label = stringResource(R.string.net_zakatable_wealth),
+                        value = formatCurrency(netWorth, currency),
+                        valueColor = MaterialTheme.colorScheme.onSurface,
+                        isBold = true
+                    )
+
+                    BreakdownRow(
+                        label = stringResource(R.string.nisab_threshold),
+                        value = formatCurrency(nisabValue, currency),
+                        valueColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
+                    BreakdownRow(
+                        label = stringResource(R.string.meets_nisab),
+                        value = stringResource(if (isAboveNisab) R.string.yes else R.string.no),
+                        valueColor = if (isAboveNisab) {
+                            MaterialTheme.colorScheme.primary
+                        } else {
+                            MaterialTheme.colorScheme.error
+                        }
+                    )
+
+                    HorizontalDivider(
+                        color = MaterialTheme.colorScheme.outlineVariant,
+                        thickness = 1.dp
+                    )
+
+                    BreakdownRow(
+                        label = stringResource(R.string.zakat_due_2_5_percent),
+                        value = formatCurrency(zakatDue, currency),
+                        valueColor = NimazColors.ZakatColors.Gold,
+                        isBold = true
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+        }
 
         // Save button
         NimazCard(
