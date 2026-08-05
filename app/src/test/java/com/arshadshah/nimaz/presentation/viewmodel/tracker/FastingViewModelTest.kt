@@ -165,48 +165,7 @@ class FastingViewModelTest {
 
     // ── StartFast event ─────────────────────────────────────────────
 
-    @Test
-    fun `StartFast inserts record via repository`() = runTest {
-        viewModel = createViewModel()
-        advanceUntilIdle()
-
-        val date = LocalDate.of(2025, 6, 15)
-        viewModel.onEvent(FastingEvent.StartFast(date, FastType.VOLUNTARY))
-        advanceUntilIdle()
-
-        coVerify {
-            repository.insertFastRecord(match { record ->
-                record.fastType == FastType.VOLUNTARY &&
-                record.status == FastStatus.FASTED
-            })
-        }
-    }
-
     // ── CompleteFast / BreakFast events ─────────────────────────────
-
-    @Test
-    fun `CompleteFast updates status to FASTED`() = runTest {
-        viewModel = createViewModel()
-        advanceUntilIdle()
-
-        val date = LocalDate.of(2025, 6, 15)
-        viewModel.onEvent(FastingEvent.CompleteFast(date))
-        advanceUntilIdle()
-
-        coVerify { repository.updateFastStatus(dateToEpoch(date), FastStatus.FASTED) }
-    }
-
-    @Test
-    fun `BreakFast updates status to NOT_FASTED`() = runTest {
-        viewModel = createViewModel()
-        advanceUntilIdle()
-
-        val date = LocalDate.of(2025, 6, 15)
-        viewModel.onEvent(FastingEvent.BreakFast(date))
-        advanceUntilIdle()
-
-        coVerify { repository.updateFastStatus(dateToEpoch(date), FastStatus.NOT_FASTED) }
-    }
 
     // ── ToggleTodayFast event ───────────────────────────────────────
 

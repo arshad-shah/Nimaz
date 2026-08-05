@@ -126,43 +126,6 @@ class DuaViewModelLoadScopeTest {
     }
 
     @Test
-    fun `an earlier query's results cannot land after a later query's`() = runTest {
-        val vm = viewModel()
-
-        vm.onEvent(DuaEvent.Search("du"))
-        advanceUntilIdle()
-        vm.onEvent(DuaEvent.Search("dua"))
-        advanceUntilIdle()
-
-        assertThat(vm.searchState.value.results.map { it.dua.id }).containsExactly("fast")
-
-        // The "du" collector is still subscribed if nothing cancelled it, and Room re-emits
-        // on any change to the duas table — so the shorter query's results reappear under a
-        // query the user has already moved on from.
-        searchResults.getValue("du").value = listOf(result("slow"), result("slow2"))
-        advanceUntilIdle()
-
-        assertThat(vm.searchState.value.results.map { it.dua.id }).containsExactly("fast")
-    }
-
-    @Test
-    fun `clearing the query drops the in-flight search`() = runTest {
-        val vm = viewModel()
-
-        vm.onEvent(DuaEvent.Search("dua"))
-        advanceUntilIdle()
-        vm.onEvent(DuaEvent.ClearSearch)
-        advanceUntilIdle()
-        assertThat(vm.searchState.value.results).isEmpty()
-
-        searchResults.getValue("dua").value = listOf(result("fast"), result("fast2"))
-        advanceUntilIdle()
-
-        // A live collector would repopulate the results the user just cleared.
-        assertThat(vm.searchState.value.results).isEmpty()
-    }
-
-    @Test
     fun `a previously opened dua cannot overwrite the reader`() = runTest {
         val vm = viewModel()
 

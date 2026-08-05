@@ -8,13 +8,8 @@ import java.time.LocalDate
 
 sealed interface FastingEvent {
     data class SelectDate(val date: LocalDate) : FastingEvent
-    data class StartFast(val date: LocalDate, val fastType: FastType) : FastingEvent
-    data class CompleteFast(val date: LocalDate) : FastingEvent
-    data class BreakFast(val date: LocalDate) : FastingEvent
-    data class MissFast(val date: LocalDate, val reason: String?) : FastingEvent
     data class SetFastType(val fastType: FastType) : FastingEvent
     data class SelectMonth(val month: Int, val year: Int) : FastingEvent
-    data class AddMakeupFast(val makeupFast: MakeupFast) : FastingEvent
     data class CompleteMakeupFast(val makeupFastId: Long) : FastingEvent
     data class PayFidya(val makeupFastId: Long, val amount: Double) : FastingEvent
     data class SetStatsPeriod(val period: FastingStatsPeriod) : FastingEvent
@@ -35,5 +30,4 @@ sealed interface FastingEvent {
 
     data class DeleteFastRecord(val date: LocalDate) : FastingEvent
     data class UpdateMakeupFast(val makeupFast: MakeupFast) : FastingEvent
-    data class LogRecommendedFast(val date: LocalDate, val fastType: FastType) : FastingEvent
 }

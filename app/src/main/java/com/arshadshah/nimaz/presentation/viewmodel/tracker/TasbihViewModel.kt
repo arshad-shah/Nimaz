@@ -123,7 +123,6 @@ class TasbihViewModel @Inject constructor(
         when (event) {
             is TasbihEvent.SelectPreset -> selectPreset(event.preset)
             TasbihEvent.ClearPreset -> clearPreset()
-            is TasbihEvent.FilterByCategory -> filterByCategory(event.category)
             is TasbihEvent.SetTargetCount -> setTargetCount(event.count)
             is TasbihEvent.CreateCustomPreset -> {
                 AppAnalytics.logFeatureUsed(
@@ -160,21 +159,10 @@ class TasbihViewModel @Inject constructor(
                 viewModelScope.launch { preferences.setTasbihLeftHanded(event.enabled) }
             }
 
-            is TasbihEvent.ToggleAutoLap -> _counterState.update { it.copy(autoLap = event.enabled) }
             TasbihEvent.Increment -> increment()
             TasbihEvent.Reset -> {
                 AppAnalytics.logFeatureUsed(AppAnalytics.Feature.TASBIH, "reset")
                 reset()
-            }
-            TasbihEvent.StartSession -> {
-                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.TASBIH, "session_start")
-                startSession()
-            }
-            TasbihEvent.PauseSession -> pauseSession()
-            TasbihEvent.ResumeSession -> resumeSession()
-            TasbihEvent.CompleteSession -> {
-                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.TASBIH, "session_complete")
-                completeSession()
             }
             TasbihEvent.LoadPresets -> loadPresets()
             TasbihEvent.LoadHistory -> loadHistory()
@@ -319,11 +307,6 @@ class TasbihViewModel @Inject constructor(
         viewModelScope.launch { preferences.setTasbihSelectedPresetId(preset.id) }
     }
 
-    private fun filterByCategory(category: TasbihCategory?) {
-        // Setting the input is the whole job — the list derives from it.
-        _presetsState.update { it.copy(selectedCategory = category) }
-    }
-
     private fun createCustomPreset(preset: TasbihPreset) {
         viewModelScope.launch {
             tasbihUseCases.insertPreset(preset)
@@ -451,54 +434,6 @@ class TasbihViewModel @Inject constructor(
                 loadStats()
             }
         }
-    }
-
-    private fun startSession() {
-        val preset = _counterState.value.selectedPreset
-
-        sessionStartTime = System.currentTimeMillis()
-
-        viewModelScope.launch {
-            val session = TasbihSession(
-                id = 0,
-                presetId = preset?.id,
-                // Null, not "Free Count": presetName is nullable all the way down and
-                // the history screen already renders a localized fallback. Storing the
-                // English string put untranslatable text in every user's database.
-                presetName = preset?.name,
-                date = getTodayEpoch(),
-                currentCount = 0,
-                targetCount = _counterState.value.targetCount,
-                totalLaps = 0,
-                isCompleted = false,
-                duration = null,
-                startedAt = sessionStartTime,
-                completedAt = null,
-                note = null
-            )
-            val sessionId = tasbihUseCases.insertSession(session)
-            val insertedSession = tasbihUseCases.getSessionById(sessionId)
-
-            _counterState.update {
-                it.copy(
-                    currentSession = insertedSession,
-                    isActive = true,
-                    count = 0,
-                    laps = 0,
-                )
-            }
-
-            // Refresh stats to include the new session
-            loadStats()
-        }
-    }
-
-    private fun pauseSession() {
-        _counterState.update { it.copy(isActive = false) }
-    }
-
-    private fun resumeSession() {
-        _counterState.update { it.copy(isActive = true) }
     }
 
     private fun completeSession() {

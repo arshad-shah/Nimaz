@@ -7,11 +7,6 @@ import java.time.LocalDate
 
 sealed interface PrayerTrackerEvent {
     data class SelectDate(val date: LocalDate) : PrayerTrackerEvent
-    data class UpdatePrayerStatus(
-        val prayerName: PrayerName,
-        val status: PrayerStatus,
-        val isJamaah: Boolean = false
-    ) : PrayerTrackerEvent
 
     data class MarkPrayerPrayed(val prayerName: PrayerName, val isJamaah: Boolean = false) :
         PrayerTrackerEvent

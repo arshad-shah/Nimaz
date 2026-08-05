@@ -92,19 +92,6 @@ class PrayerTrackerViewModel @Inject constructor(
     fun onEvent(event: PrayerTrackerEvent) {
         when (event) {
             is PrayerTrackerEvent.SelectDate -> selectDate(event.date)
-            is PrayerTrackerEvent.UpdatePrayerStatus -> {
-                telemetry.prayerTracked(
-                        event.prayerName.name,
-                        event.status.name,
-                        event.isJamaah
-                    )
-                updatePrayerStatus(
-                    event.prayerName,
-                    event.status,
-                    event.isJamaah
-                )
-            }
-
             is PrayerTrackerEvent.MarkPrayerPrayed -> {
                 telemetry.prayerTracked(
                         event.prayerName.name,

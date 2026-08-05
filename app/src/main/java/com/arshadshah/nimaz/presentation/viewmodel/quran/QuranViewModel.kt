@@ -294,7 +294,6 @@ class QuranViewModel @Inject constructor(
             // the play button actually reaches — recorded nothing. A dashboard reading zero for a
             // thing users do daily is worse than no dashboard. The unreachable *handler* is #357's
             // wire-or-delete call, not this layer's.
-            is QuranEvent.PlaySurahAudio -> playSurahAudio(event.surahNumber, event.surahName)
             is QuranEvent.PlayAyahAudio -> {
                 telemetry.featureUsed(AppAnalytics.Feature.QURAN, "play_ayah_audio")
                 playAyahAudio(
