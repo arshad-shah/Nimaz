@@ -46,6 +46,8 @@
     <string name="cancel">Cancel</string>
     <string name="delete">Delete</string>
     <string name="search">Search</string>
+    <string name="search_failed">That search couldn\'t be completed</string>
+    <string name="search_failed_body">The library is searched on your device. Try again, or try different words.</string>
     <string name="location">Location</string>
     <string name="location_set_prompt">Set location</string>
     <string name="settings">Settings</string>
