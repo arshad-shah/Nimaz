@@ -10,9 +10,22 @@
 
 **Spec:** `docs/superpowers/specs/2026-08-04-more-zakat-fasting-design.md` — read it first, especially §0.
 
+**Pre-flight status:** ✅ **done, 2026-08-05, against `dev` at `29fea675`.** Spec §0 is now the
+report rather than the instruction. Read it — the tasks below were retargeted onto the seams that
+landed in the meantime (#353 sub-packages, #363 `TodayProvider`, #436 settings seams,
+#448 `Telemetry`/`launchSafely`, #454 the state contract). Task 0 is closed out.
+
 ## Global Constraints
 
-- **Do §0 of the spec before Task 1.** VM cleanup is in flight on `dev`; merge it and re-validate every claim before writing code.
+- **Read spec §0 before Task 1.** It records what the pre-flight found and which seams these tasks
+  now sit on. Do not rebuild anything §0.2 says `dev` already provides.
+- New ViewModels live in `presentation/viewmodel/<feature>/` as three files
+  (`XxxViewModel.kt`, `XxxUiState.kt`, `XxxEvent.kt`) — per #353.
+- ViewModels take `Telemetry` and use `launchSafely(telemetry, feature, op, onFailure = …)`; never
+  a bare `viewModelScope.launch`, never a `Context`.
+- Anything date-scoped reads `TodayProvider` (`today()` / `todayChanges`), never `LocalDate.now()`.
+- A new preference goes on a **feature seam** in `domain/repository/settings/SettingsSeams.kt`,
+  not on `SettingsRepository` directly.
 - Dependencies point inward: domain never imports `data`; presentation never imports entities/DAOs.
 - ViewModels inject `XxxUseCases`, never repositories or DAOs.
 - ViewModels expose `StateFlow<XxxUiState>` (immutable `data class`) + a single `onEvent(event)`. No exposed `MutableStateFlow`.
@@ -32,10 +45,14 @@
 | `core/share/Shareables.kt` | **Modify.** Add `zakat(...)` builder. |
 | `data/local/datastore/PreferencesDataStore.kt` | **Modify.** `more_pinned_shortcuts` (ordered, delimited string). |
 | `data/local/datastore/PreferenceCodec.kt` | **Modify.** Register the new key. |
-| `domain/repository/SettingsRepository.kt` | **Modify.** Pinned-shortcut flow + setter. |
-| `domain/model/PinnedShortcut.kt` | **Create.** The pinnable destinations + cap. |
+| `domain/repository/settings/SettingsSeams.kt` | **Modify.** New `MoreSettings` seam — pinned-shortcut flow + setter. |
+| `domain/repository/SettingsRepository.kt` | **Modify.** Extend `MoreSettings`. |
+| `data/repository/SettingsRepositoryImpl.kt` | **Modify.** Implement the seam. |
+| `domain/model/PinnedShortcut.kt` | **Create.** The pinnable destinations, the cap, and the encode/decode codec. |
 | `presentation/screens/more/MoreSubtitles.kt` | **Create.** Pure state → `@StringRes` mapper. |
-| `presentation/viewmodel/MoreViewModel.kt` | **Create.** `MoreUiState`, `MoreEvent`, the ViewModel. |
+| `presentation/viewmodel/more/MoreViewModel.kt` | **Create.** The ViewModel (per #353 — sub-package). |
+| `presentation/viewmodel/more/MoreUiState.kt` | **Create.** Immutable state, every field nullable. |
+| `presentation/viewmodel/more/MoreEvent.kt` | **Create.** The sealed event interface. |
 | `domain/usecase/MoreUseCases.kt` | **Create.** Bundle of existing use cases. |
 | `core/di/MoreModule.kt` | **Create.** `@Provides` for `MoreUseCases`. |
 | `presentation/screens/more/MoreMenuScreen.kt` | **Modify.** Pills + live subtitles. |
@@ -46,40 +63,21 @@
 
 ---
 
-### Task 0: Pre-flight — take `dev` and re-validate
+### Task 0: Pre-flight — take `dev` and re-validate — ✅ **DONE 2026-08-05**
 
-**Files:** none (verification only)
+**Files:** the spec and this plan (verification only, plus the amendments it forced)
 
-**Interfaces:**
-- Consumes: nothing
-- Produces: a merged branch and a confirmed-or-corrected spec
+- [x] **Step 1: Merge current `dev`** — merged at `29fea675`, no conflicts.
+- [x] **Step 2: Run every check in spec §0 step 2** — all seven claims still hold; findings and
+      exact line numbers are in **spec §0.1**.
+- [x] **Step 3: Report, do not adapt silently** — the report is **spec §0.2–§0.4**. Nothing was
+      falsified, but five landed seams moved the ground; the spec and this plan were amended
+      before any code was written.
+- [x] **Step 4: Commit** — the amendments are the commit.
 
-- [ ] **Step 1: Merge current `dev`**
-
-```bash
-git checkout feat/more-zakat-fasting
-git fetch origin
-git merge origin/dev
-export NIMAZ_DATA_TOKEN=$(gh auth token -h github.com -u arshad-shah)
-./gradlew :app:compileDebugKotlin :app:testDebugUnitTest
-python3 scripts/check_docs.py
-```
-
-Expected: merge clean or conflicts only in files the VM cleanup touched; all gates pass.
-
-- [ ] **Step 2: Run every check in spec §0 step 2**
-
-Run each `grep` in the spec's claim table. Expected findings are in the table's right-hand column.
-
-- [ ] **Step 3: If any finding differs — stop and report**
-
-Do not adapt silently. Amend the spec, then amend this plan's affected tasks, then continue.
-
-- [ ] **Step 4: Commit the merge**
-
-```bash
-git add -A && git commit -m "chore: take dev before starting the More/Zakat/Fasting work"
-```
+The three findings the #368 review raised (no currency setting, `formatCurrency` ignoring its
+argument, the dead four-state fasting toggle) have all been **fixed on `dev`** by #357/#366/#445.
+Spec §0.3 has the evidence. Do not re-fix them.
 
 ---
 
@@ -321,12 +319,18 @@ git commit -am "feat(share): add a zakat shareable following the existing catalo
 - Create: `app/src/main/java/com/arshadshah/nimaz/domain/model/PinnedShortcut.kt`
 - Modify: `app/src/main/java/com/arshadshah/nimaz/data/local/datastore/PreferencesDataStore.kt`
 - Modify: `app/src/main/java/com/arshadshah/nimaz/data/local/datastore/PreferenceCodec.kt`
-- Modify: `app/src/main/java/com/arshadshah/nimaz/domain/repository/SettingsRepository.kt`
-- Test: `app/src/androidTest/java/com/arshadshah/nimaz/preferences/PinnedShortcutsTest.kt`
+- Modify: `app/src/main/java/com/arshadshah/nimaz/domain/repository/settings/SettingsSeams.kt` — **new `MoreSettings` seam** (#436; not `SettingsRepository` directly)
+- Modify: `app/src/main/java/com/arshadshah/nimaz/domain/repository/SettingsRepository.kt` — extend it
+- Modify: `app/src/main/java/com/arshadshah/nimaz/data/repository/SettingsRepositoryImpl.kt`
+- Test: `app/src/test/java/com/arshadshah/nimaz/domain/model/PinnedShortcutCodecTest.kt` — the rule
+- Test: `app/src/androidTest/java/com/arshadshah/nimaz/preferences/PinnedShortcutsTest.kt` — the round trip
 
 **Interfaces:**
 - Consumes: nothing
-- Produces: `PinnedShortcut` enum (`key: String`), `PinnedShortcut.MAX_PINS = 5`, `PinnedShortcut.DEFAULTS`, and on `SettingsRepository`: `val pinnedShortcuts: Flow<List<PinnedShortcut>>` / `suspend fun setPinnedShortcuts(shortcuts: List<PinnedShortcut>)`
+- Produces: `PinnedShortcut` enum (`key: String`), `PinnedShortcut.MAX_PINS = 5`, `PinnedShortcut.DEFAULTS`, `PinnedShortcut.decode(String?)` / `PinnedShortcut.encode(List<PinnedShortcut>)`, and on the `MoreSettings` seam: `val pinnedShortcuts: Flow<List<PinnedShortcut>>` / `suspend fun setPinnedShortcuts(shortcuts: List<PinnedShortcut>)`
+
+The cap and the ordering are **in the codec**, not only in the DataStore read — so the rule is a
+JVM test that runs on every commit, and the instrumented test only has to prove the round trip.
 
 - [ ] **Step 1: Write the domain model**
 
@@ -487,31 +491,51 @@ git commit -am "feat(more): map state to subtitles as a pure, testable function"
 
 **Files:**
 - Create: `app/src/main/java/com/arshadshah/nimaz/domain/usecase/MoreUseCases.kt`
-- Create: `app/src/main/java/com/arshadshah/nimaz/presentation/viewmodel/MoreViewModel.kt`
+- Create: `app/src/main/java/com/arshadshah/nimaz/presentation/viewmodel/more/MoreViewModel.kt`
+- Create: `app/src/main/java/com/arshadshah/nimaz/presentation/viewmodel/more/MoreUiState.kt`
+- Create: `app/src/main/java/com/arshadshah/nimaz/presentation/viewmodel/more/MoreEvent.kt`
 - Create: `app/src/main/java/com/arshadshah/nimaz/core/di/MoreModule.kt`
+- Test: `app/src/test/java/com/arshadshah/nimaz/presentation/viewmodel/more/MoreViewModelTest.kt`
 
 **Interfaces:**
-- Consumes: `MoreSubtitles` (Task 4), `SettingsRepository.pinnedShortcuts` (Task 3)
-- Produces: `MoreUiState`, `sealed interface MoreEvent { data class SetPins(val pins: List<PinnedShortcut>) : MoreEvent }`, `MoreViewModel.uiState: StateFlow<MoreUiState>`
+- Consumes: `MoreSubtitles` (Task 4), `MoreSettings.pinnedShortcuts` (Task 3), `TodayProvider`, `Telemetry`
+- Produces: `MoreUiState`, `sealed interface MoreEvent { data class SetPins(val pins: List<PinnedShortcut>) : MoreEvent; data object Refresh : MoreEvent }`, `MoreViewModel.state: StateFlow<MoreUiState>`
+
+Three files, not one — per #353. The ViewModel is created in the shape #353 is migrating
+everything else into, so #353 has nothing left to move.
 
 - [ ] **Step 1: Write `MoreUseCases`**
 
 A `data class` bundling only what More reads — `getTodayPrayerRecords`, `getPendingMakeupFasts`,
 `nextWorship`, `khatamProgress`, `qaidaProgress`, `zakatHistory`, `hijriToday`. All exist
-already (spec §2.1); none are created here.
+already (spec §2.1); none are created here. **`NextWorshipResolver`, `KhatamProgressCalculator`
+and `HijriDateCalculator` are wrapped here, not injected into the ViewModel** (spec §2.1) — two are
+concrete `core/util` classes and the third is a static `object`, so a ViewModel holding them
+directly cannot be constructed in a JVM test.
 
-- [ ] **Step 2: Write `MoreViewModel`**
+- [ ] **Step 2: Write `MoreUiState` and `MoreEvent`**
 
-`combine` the flows into `MoreUiState`. Every field nullable, defaulting to null, so a subtitle
-that has not resolved renders as absent. `stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), MoreUiState())`.
+Every state field nullable, defaulting to null, so a subtitle that has not resolved renders as
+absent. **No `UiError` field** — spec §2.4 says why. `MoreEvent` is a sealed interface handled by a
+single exhaustive `when` in `onEvent`, no `else -> {}` (#354/#358/#359).
 
-- [ ] **Step 3: Provide `MoreUseCases` in `core/di/MoreModule.kt`**
+- [ ] **Step 3: Write `MoreViewModel`**
+
+`combine` the flows — including `todayProvider.todayChanges`, so the three date-scoped subtitles
+roll over at midnight (#363) — inside `launchSafely(telemetry, Feature.MORE, "observe", onFailure = …)`,
+never a bare `viewModelScope.launch` (#448/#441). No `Context` in the constructor.
+
+- [ ] **Step 4: Provide `MoreUseCases` in `core/di/MoreModule.kt`**
 
 `@Module @InstallIn(SingletonComponent::class)`, `@Provides @Singleton`.
 
-- [ ] **Step 4: Verify Hilt wiring compiles**
+- [ ] **Step 5: Test the ViewModel, then verify Hilt wiring compiles**
 
-Run: `./gradlew :app:compileDebugKotlin` (runs KSP → validates Hilt)
+`MoreViewModelTest` with fakes: state assembles from the sources, and a source that throws leaves
+its field null rather than taking the screen down (spec §2.4).
+
+Run: `./gradlew :app:testDebugUnitTest --tests "*MoreViewModelTest*"` then
+`./gradlew :app:compileDebugKotlin` (runs KSP → validates Hilt)
 Expected: BUILD SUCCESSFUL
 
 - [ ] **Step 5: Commit**
@@ -590,7 +614,9 @@ Hero above the `LazyColumn`, not inside it. Animate the amount's font size with
 - [ ] **Step 3: Three accordions with subtotals**
 
 `NimazAccordion(title = …, subtitle = …, trailing = { Text(subtotal) })` for Assets, Deducted
-and Nisab, each body a column of labelled rows using `NimazAmountInput`.
+and Nisab, each body a column of labelled rows using `NimazAmountInput`. The **metal-price fields
+in the Nisab accordion get the same atom** — they became user-editable in #357 and they are money
+typed the same way (spec §3.2).
 
 - [ ] **Step 4: Bottom action bar**
 
@@ -625,6 +651,11 @@ prayer-times source.
 
 A `NimazSettingsItem` with `checked`/`onCheckedChange`, subtitle "Logged · tap to undo" or
 "Not logged yet". Delete the two-button row.
+
+**Read `enabled` from `state.canToggleToday`, and the subtitle from `state.toggleBlockedReason`
+when it is non-null.** `FastStatus` has four values and a switch expresses two; #366 already
+decided the answer and put it on the UiState (spec §4). An exempted or makeup-due day renders the
+switch disabled with the reason as its subtitle — do not add a second rule for this.
 
 - [ ] **Step 3: Go deeper + Ramadan groups**
 
@@ -696,10 +727,11 @@ git commit -am "docs(release): release notes for the More, Zakat and Fasting wor
 
 ## Self-Review
 
-**Spec coverage:** §0 → Task 0. §2.1 subtitles → Tasks 4, 5, 6. §2.2 pins → Tasks 3, 6.
+**Spec coverage:** §0 → Task 0 (done). §2.1 subtitles → Tasks 4, 5, 6. §2.2 pins → Tasks 3, 6.
 §2.3 unchanged-deliberately → no task needed (it is a "do not change" instruction, enforced by
-review). §3.1 layout → Task 7. §3.2 `NimazAmountInput` → Task 1. §3.3 save/share → Tasks 2, 7.
-§4 Fasting → Task 8. §5 strings/locales → Tasks 9, 10. §6 testing → tests live inside Tasks 1–4.
+review). §2.4 no-error-state → Task 5 (the absence of a `UiError` field is the deliverable).
+§3.1 layout → Task 7. §3.2 `NimazAmountInput` → Task 1. §3.3 save/share → Tasks 2, 7.
+§4 Fasting → Task 8. §5 strings/locales → Tasks 9, 10. §6 testing → tests live inside Tasks 1–5.
 §7 documentation → Task 9. §8 out-of-scope → constraints.
 
 **Placeholder scan:** no TBD/TODO. Tasks 7 and 8 give code for the load-bearing parts (the
