@@ -327,6 +327,33 @@ rg -n -U --multiline-dotall \
   app/src/main/java --glob '*ViewModel.kt' | grep -v 'Job = viewModelScope'
 ```
 
+### AP-7.5 · Two `when`s over one sealed hierarchy
+
+- [x] ~~**The dual-`when` `onEvent` shape, in 20 of 31 ViewModels.**~~ **Resolved.** An analytics
+  `when (event)` ending in `else -> {}`, followed by the real dispatch `when (event)`. The `else`
+  means the compiler checks exhaustiveness on the behaviour table only, so **every event added
+  afterwards ships with working behaviour and no telemetry** — silently, and permanently, because
+  nothing ever fails.
+
+  Not hypothetical: `SettingsViewModel`'s `else` dropped **63 of its 78** events, `ZakatViewModel`
+  logged 3 of 24, `TasbihViewModel` 5 of 23, `FastingViewModel` 10 of 24, `HomeViewModel` 2 of 6.
+
+  It also produced logged actions that never happened — Home logged `toggle_prayer_status` before
+  `togglePrayerStatus` returned early for Sunrise.
+
+  Collapsed to one exhaustive table per `onEvent`, with the analytics call inside the branch that
+  owns it. Detect:
+
+  ```bash
+  # Any onEvent with more than one dispatch table:
+  for f in app/src/main/java/com/arshadshah/nimaz/presentation/viewmodel/*.kt; do
+    n=$(awk '/fun onEvent\(/,/^    }$/' "$f" | grep -c "when (event)")
+    [ "$n" -gt 1 ] && echo "$n $f"
+  done
+  # Any else-fallthrough over an Event hierarchy:
+  grep -rn "else -> {}" app/src/main/java/com/arshadshah/nimaz/presentation/viewmodel/
+  ```
+
 ### AP-7.4 · Pure domain logic held hostage inside a ViewModel
 
 - [x] ~~**`CalendarViewModel`'s seven generators.**~~ **Resolved.** 75 lines of pure functions

@@ -54,26 +54,29 @@ class ProphetViewModel @Inject constructor(
 
     fun onEvent(event: ProphetEvent) {
         when (event) {
-            is ProphetEvent.LoadDetail -> AppAnalytics.logFeatureUsed(AppAnalytics.Feature.PROPHET, "open_detail")
-            is ProphetEvent.ToggleFavorite -> AppAnalytics.logFeatureUsed(
-                AppAnalytics.Feature.PROPHET,
-                "toggle_favorite"
-            )
-
-            is ProphetEvent.Search -> AppAnalytics.logFeatureUsed(AppAnalytics.Feature.PROPHET, "search")
-            ProphetEvent.ToggleFavoritesFilter -> AppAnalytics.logFeatureUsed(
-                AppAnalytics.Feature.PROPHET,
-                "toggle_favorites_filter"
-            )
-
-            else -> {}
-        }
-        when (event) {
-            is ProphetEvent.LoadDetail -> loadDetail(event.prophetId)
-            is ProphetEvent.ToggleFavorite -> toggleFavorite(event.prophetId)
-            is ProphetEvent.Search -> search(event.query)
+            is ProphetEvent.LoadDetail -> {
+                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.PROPHET, "open_detail")
+                loadDetail(event.prophetId)
+            }
+            is ProphetEvent.ToggleFavorite -> {
+                AppAnalytics.logFeatureUsed(
+                    AppAnalytics.Feature.PROPHET,
+                    "toggle_favorite"
+                )
+                toggleFavorite(event.prophetId)
+            }
+            is ProphetEvent.Search -> {
+                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.PROPHET, "search")
+                search(event.query)
+            }
             ProphetEvent.ClearSearch -> clearSearch()
-            ProphetEvent.ToggleFavoritesFilter -> toggleFavoritesFilter()
+            ProphetEvent.ToggleFavoritesFilter -> {
+                AppAnalytics.logFeatureUsed(
+                    AppAnalytics.Feature.PROPHET,
+                    "toggle_favorites_filter"
+                )
+                toggleFavoritesFilter()
+            }
         }
     }
 

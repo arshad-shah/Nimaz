@@ -152,20 +152,27 @@ class DuaViewModel @Inject constructor(
 
     fun onEvent(event: DuaEvent) {
         when (event) {
-            is DuaEvent.LoadCategory -> telemetry.featureUsed(DOMAIN, "open_category")
-            is DuaEvent.LoadDua -> telemetry.featureUsed(DOMAIN, "open_reader")
-            is DuaEvent.LoadDuasByOccasion -> telemetry.featureUsed(DOMAIN, "open_occasion")
-            is DuaEvent.Search -> telemetry.featureUsed(DOMAIN, "search")
-            is DuaEvent.ToggleFavorite -> telemetry.featureUsed(DOMAIN, "toggle_favorite")
-            else -> {}
-        }
-        when (event) {
-            is DuaEvent.LoadCategory -> loadCategory(event.categoryId)
-            is DuaEvent.LoadDua -> loadDua(event.duaId)
-            is DuaEvent.LoadDuasByOccasion -> loadDuasByOccasion(event.occasion)
-            is DuaEvent.Search -> search(event.query)
+            is DuaEvent.LoadCategory -> {
+                telemetry.featureUsed(DOMAIN, "open_category")
+                loadCategory(event.categoryId)
+            }
+            is DuaEvent.LoadDua -> {
+                telemetry.featureUsed(DOMAIN, "open_reader")
+                loadDua(event.duaId)
+            }
+            is DuaEvent.LoadDuasByOccasion -> {
+                telemetry.featureUsed(DOMAIN, "open_occasion")
+                loadDuasByOccasion(event.occasion)
+            }
+            is DuaEvent.Search -> {
+                telemetry.featureUsed(DOMAIN, "search")
+                search(event.query)
+            }
             is DuaEvent.SearchCategories -> searchCategories(event.query)
-            is DuaEvent.ToggleFavorite -> toggleFavorite(event.duaId, event.categoryId)
+            is DuaEvent.ToggleFavorite -> {
+                telemetry.featureUsed(DOMAIN, "toggle_favorite")
+                toggleFavorite(event.duaId, event.categoryId)
+            }
             is DuaEvent.SetFontSize -> _readerState.update { it.copy(fontSize = event.size) }
             is DuaEvent.SetArabicFontSize -> _readerState.update { it.copy(arabicFontSize = event.size) }
             is DuaEvent.LoadProgressForDate -> loadProgressForDate(event.date)

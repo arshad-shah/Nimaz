@@ -171,18 +171,20 @@ class CalendarViewModel @Inject constructor(
 
     fun onEvent(event: CalendarEvent) {
         when (event) {
-            is CalendarEvent.SelectDate -> telemetry.featureUsed(DOMAIN, "select_date")
-            is CalendarEvent.SetViewMode -> telemetry.featureUsed(DOMAIN, "set_view_mode")
-            is CalendarEvent.NavigateToYear -> telemetry.featureUsed(DOMAIN, "navigate_year")
-
-            else -> {}
-        }
-        when (event) {
-            is CalendarEvent.SelectDate -> selectDate(event.date)
+            is CalendarEvent.SelectDate -> {
+                telemetry.featureUsed(DOMAIN, "select_date")
+                selectDate(event.date)
+            }
             is CalendarEvent.NavigateToMonth -> navigateToMonth(event.month, event.year)
             is CalendarEvent.NavigateToHijriMonth -> navigateToHijriMonth(event.month, event.year)
-            is CalendarEvent.SetViewMode -> setViewMode(event.mode)
-            is CalendarEvent.NavigateToYear -> navigateToYear(event.year, event.isHijri)
+            is CalendarEvent.SetViewMode -> {
+                telemetry.featureUsed(DOMAIN, "set_view_mode")
+                setViewMode(event.mode)
+            }
+            is CalendarEvent.NavigateToYear -> {
+                telemetry.featureUsed(DOMAIN, "navigate_year")
+                navigateToYear(event.year, event.isHijri)
+            }
             CalendarEvent.LoadToday -> loadToday()
             CalendarEvent.LoadUpcomingEvents -> loadUpcomingEvents()
             CalendarEvent.NavigateToPreviousMonth -> navigateToPreviousMonth()

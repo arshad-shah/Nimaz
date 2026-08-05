@@ -525,82 +525,9 @@ class SettingsViewModel @Inject constructor(
         // Record meaningful configuration changes. Notification and calculation
         // settings are the ones most often behind "it's doing the wrong thing".
         when (event) {
-            is SettingsEvent.SetTheme -> AppAnalytics.logSettingChanged("theme", event.theme.name)
-            is SettingsEvent.SetLanguage -> AppAnalytics.logSettingChanged(
-                "language",
-                event.language.name
-            )
-
-            is SettingsEvent.SetCalculationMethod -> AppAnalytics.logSettingChanged(
-                "calculation_method",
-                event.method.name
-            )
-
-            is SettingsEvent.SetAsrMethod -> AppAnalytics.logSettingChanged(
-                "asr_method",
-                event.method.name
-            )
-
-            is SettingsEvent.SetHighLatitudeRule -> AppAnalytics.logSettingChanged(
-                "high_latitude_rule",
-                event.rule.name
-            )
-
-            is SettingsEvent.SetNotificationsEnabled -> AppAnalytics.logSettingChanged(
-                "notifications_enabled",
-                event.enabled.toString()
-            )
-
-            is SettingsEvent.SetPrayerNotification -> AppAnalytics.logSettingChanged(
-                "prayer_notification_${event.prayer.lowercase()}",
-                event.enabled.toString()
-            )
-
-            is SettingsEvent.SetAdhanEnabled -> AppAnalytics.logSettingChanged(
-                "adhan_enabled",
-                event.enabled.toString()
-            )
-
-            is SettingsEvent.SetPrayerAlertStyle -> AppAnalytics.logSettingChanged(
-                "alert_style_${event.prayer.lowercase()}",
-                event.style.name
-            )
-
-            is SettingsEvent.SetPrayerReminderEnabled -> AppAnalytics.logSettingChanged(
-                "reminder_enabled_${event.prayer.lowercase()}",
-                event.enabled.toString()
-            )
-
-            is SettingsEvent.SetPrayerReminderMinutes -> AppAnalytics.logSettingChanged(
-                "reminder_minutes_${event.prayer.lowercase()}",
-                event.minutes.toString()
-            )
-
-            is SettingsEvent.SetAdhanSound -> AppAnalytics.logSettingChanged(
-                "adhan_sound",
-                event.sound
-            )
-
-            is SettingsEvent.SetRespectDnd -> AppAnalytics.logSettingChanged(
-                "respect_dnd",
-                event.enabled.toString()
-            )
-
-            is SettingsEvent.SetShowReminderBefore -> AppAnalytics.logSettingChanged(
-                "pre_reminder_enabled",
-                event.enabled.toString()
-            )
-
-            is SettingsEvent.SetReminderMinutes -> AppAnalytics.logSettingChanged(
-                "reminder_minutes",
-                event.minutes.toString()
-            )
-
-            else -> {}
-        }
-        when (event) {
             // General
             is SettingsEvent.SetTheme -> {
+                AppAnalytics.logSettingChanged("theme", event.theme.name)
                 _generalState.update { it.copy(theme = event.theme) }
                 viewModelScope.launch {
                     val modeString = when (event.theme) {
@@ -613,6 +540,10 @@ class SettingsViewModel @Inject constructor(
             }
 
             is SettingsEvent.SetLanguage -> {
+                AppAnalytics.logSettingChanged(
+                    "language",
+                    event.language.name
+                )
                 _generalState.update { it.copy(language = event.language) }
                 // AppAnalytics.UserProperty.APP_LANGUAGE has been declared and never set, so
                 // every segmentation by language has been empty since it was added.
@@ -684,6 +615,10 @@ class SettingsViewModel @Inject constructor(
 
             // Prayer
             is SettingsEvent.SetCalculationMethod -> {
+                AppAnalytics.logSettingChanged(
+                    "calculation_method",
+                    event.method.name
+                )
                 _prayerState.update { it.copy(calculationMethod = event.method) }
                 AppAnalytics.setUserProperty(
                     AppAnalytics.UserProperty.CALC_METHOD,
@@ -696,6 +631,10 @@ class SettingsViewModel @Inject constructor(
             }
 
             is SettingsEvent.SetAsrMethod -> {
+                AppAnalytics.logSettingChanged(
+                    "asr_method",
+                    event.method.name
+                )
                 _prayerState.update { it.copy(asrMethod = event.method) }
                 viewModelScope.launch {
                     settingsRepository.setAsrCalculation(event.method.name.lowercase())
@@ -704,6 +643,10 @@ class SettingsViewModel @Inject constructor(
             }
 
             is SettingsEvent.SetHighLatitudeRule -> {
+                AppAnalytics.logSettingChanged(
+                    "high_latitude_rule",
+                    event.rule.name
+                )
                 _prayerState.update { it.copy(highLatitudeRule = event.rule) }
                 viewModelScope.launch {
                     settingsRepository.setHighLatitudeRule(event.rule.name)
@@ -731,6 +674,10 @@ class SettingsViewModel @Inject constructor(
 
             // Notifications
             is SettingsEvent.SetNotificationsEnabled -> {
+                AppAnalytics.logSettingChanged(
+                    "notifications_enabled",
+                    event.enabled.toString()
+                )
                 _notificationState.update { it.copy(notificationsEnabled = event.enabled) }
                 AppAnalytics.setUserProperty(
                     AppAnalytics.UserProperty.NOTIFICATIONS_ENABLED,
@@ -743,6 +690,10 @@ class SettingsViewModel @Inject constructor(
             }
 
             is SettingsEvent.SetPrayerNotification -> {
+                AppAnalytics.logSettingChanged(
+                    "prayer_notification_${event.prayer.lowercase()}",
+                    event.enabled.toString()
+                )
                 updatePrayerNotification(event.prayer, event.enabled)
                 viewModelScope.launch {
                     settingsRepository.setPrayerNotificationEnabled(event.prayer, event.enabled)
@@ -751,6 +702,10 @@ class SettingsViewModel @Inject constructor(
             }
 
             is SettingsEvent.SetAdhanEnabled -> {
+                AppAnalytics.logSettingChanged(
+                    "adhan_enabled",
+                    event.enabled.toString()
+                )
                 _notificationState.update { it.copy(adhanEnabled = event.enabled) }
                 viewModelScope.launch {
                     settingsRepository.setAdhanEnabled(event.enabled)
@@ -759,6 +714,10 @@ class SettingsViewModel @Inject constructor(
             }
 
             is SettingsEvent.SetPrayerAlertStyle -> {
+                AppAnalytics.logSettingChanged(
+                    "alert_style_${event.prayer.lowercase()}",
+                    event.style.name
+                )
                 val prayer = event.prayer.lowercase()
                 _notificationState.update {
                     it.copy(alertStyles = it.alertStyles + (prayer to event.style))
@@ -770,6 +729,10 @@ class SettingsViewModel @Inject constructor(
             }
 
             is SettingsEvent.SetPrayerReminderEnabled -> {
+                AppAnalytics.logSettingChanged(
+                    "reminder_enabled_${event.prayer.lowercase()}",
+                    event.enabled.toString()
+                )
                 val prayer = event.prayer.lowercase()
                 _notificationState.update {
                     it.copy(reminderEnabled = it.reminderEnabled + (prayer to event.enabled))
@@ -782,6 +745,10 @@ class SettingsViewModel @Inject constructor(
             }
 
             is SettingsEvent.SetPrayerReminderMinutes -> {
+                AppAnalytics.logSettingChanged(
+                    "reminder_minutes_${event.prayer.lowercase()}",
+                    event.minutes.toString()
+                )
                 val prayer = event.prayer.lowercase()
                 _notificationState.update {
                     it.copy(reminderOffsets = it.reminderOffsets + (prayer to event.minutes))
@@ -798,11 +765,19 @@ class SettingsViewModel @Inject constructor(
             }
 
             is SettingsEvent.SetRespectDnd -> {
+                AppAnalytics.logSettingChanged(
+                    "respect_dnd",
+                    event.enabled.toString()
+                )
                 _notificationState.update { it.copy(respectDnd = event.enabled) }
                 viewModelScope.launch { settingsRepository.setAdhanRespectDnd(event.enabled) }
             }
 
             is SettingsEvent.SetReminderMinutes -> {
+                AppAnalytics.logSettingChanged(
+                    "reminder_minutes",
+                    event.minutes.toString()
+                )
                 _notificationState.update { it.copy(reminderMinutes = event.minutes) }
                 viewModelScope.launch {
                     settingsRepository.setNotificationReminderMinutes(event.minutes)
@@ -811,6 +786,10 @@ class SettingsViewModel @Inject constructor(
             }
 
             is SettingsEvent.SetShowReminderBefore -> {
+                AppAnalytics.logSettingChanged(
+                    "pre_reminder_enabled",
+                    event.enabled.toString()
+                )
                 _notificationState.update { it.copy(showReminderBefore = event.enabled) }
                 viewModelScope.launch {
                     settingsRepository.setShowReminderBefore(event.enabled)
@@ -886,6 +865,10 @@ class SettingsViewModel @Inject constructor(
             }
 
             is SettingsEvent.SetAdhanSound -> {
+                AppAnalytics.logSettingChanged(
+                    "adhan_sound",
+                    event.sound
+                )
                 _notificationState.update { it.copy(selectedAdhanSound = event.sound) }
                 viewModelScope.launch {
                     settingsRepository.setSelectedAdhanSound(event.sound)

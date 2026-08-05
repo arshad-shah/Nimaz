@@ -54,30 +54,32 @@ class AsmaUlHusnaViewModel @Inject constructor(
 
     fun onEvent(event: AsmaUlHusnaEvent) {
         when (event) {
-            is AsmaUlHusnaEvent.LoadDetail -> AppAnalytics.logFeatureUsed(
-                AppAnalytics.Feature.ASMA_UL_HUSNA,
-                "open_detail"
-            )
-
-            is AsmaUlHusnaEvent.ToggleFavorite -> AppAnalytics.logFeatureUsed(
-                AppAnalytics.Feature.ASMA_UL_HUSNA,
-                "toggle_favorite"
-            )
-
-            is AsmaUlHusnaEvent.Search -> AppAnalytics.logFeatureUsed(AppAnalytics.Feature.ASMA_UL_HUSNA, "search")
-            AsmaUlHusnaEvent.ToggleFavoritesFilter -> AppAnalytics.logFeatureUsed(
-                AppAnalytics.Feature.ASMA_UL_HUSNA,
-                "toggle_favorites_filter"
-            )
-
-            else -> {}
-        }
-        when (event) {
-            is AsmaUlHusnaEvent.LoadDetail -> loadDetail(event.nameId)
-            is AsmaUlHusnaEvent.ToggleFavorite -> toggleFavorite(event.nameId)
-            is AsmaUlHusnaEvent.Search -> search(event.query)
+            is AsmaUlHusnaEvent.LoadDetail -> {
+                AppAnalytics.logFeatureUsed(
+                    AppAnalytics.Feature.ASMA_UL_HUSNA,
+                    "open_detail"
+                )
+                loadDetail(event.nameId)
+            }
+            is AsmaUlHusnaEvent.ToggleFavorite -> {
+                AppAnalytics.logFeatureUsed(
+                    AppAnalytics.Feature.ASMA_UL_HUSNA,
+                    "toggle_favorite"
+                )
+                toggleFavorite(event.nameId)
+            }
+            is AsmaUlHusnaEvent.Search -> {
+                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.ASMA_UL_HUSNA, "search")
+                search(event.query)
+            }
             AsmaUlHusnaEvent.ClearSearch -> clearSearch()
-            AsmaUlHusnaEvent.ToggleFavoritesFilter -> toggleFavoritesFilter()
+            AsmaUlHusnaEvent.ToggleFavoritesFilter -> {
+                AppAnalytics.logFeatureUsed(
+                    AppAnalytics.Feature.ASMA_UL_HUSNA,
+                    "toggle_favorites_filter"
+                )
+                toggleFavoritesFilter()
+            }
         }
     }
 

@@ -202,29 +202,25 @@ class TasbihViewModel @Inject constructor(
 
     fun onEvent(event: TasbihEvent) {
         when (event) {
-            TasbihEvent.StartSession -> AppAnalytics.logFeatureUsed(AppAnalytics.Feature.TASBIH, "session_start")
-            TasbihEvent.CompleteSession -> AppAnalytics.logFeatureUsed(AppAnalytics.Feature.TASBIH, "session_complete")
-            TasbihEvent.Reset -> AppAnalytics.logFeatureUsed(AppAnalytics.Feature.TASBIH, "reset")
-            is TasbihEvent.CreateCustomPreset -> AppAnalytics.logFeatureUsed(
-                AppAnalytics.Feature.TASBIH,
-                "preset_created"
-            )
-
-            is TasbihEvent.DeleteCustomPreset -> AppAnalytics.logFeatureUsed(
-                AppAnalytics.Feature.TASBIH,
-                "preset_deleted"
-            )
-
-            else -> {}
-        }
-        when (event) {
             is TasbihEvent.SelectPreset -> selectPreset(event.preset)
             TasbihEvent.ClearPreset -> clearPreset()
             is TasbihEvent.FilterByCategory -> filterByCategory(event.category)
             is TasbihEvent.SetTargetCount -> setTargetCount(event.count)
-            is TasbihEvent.CreateCustomPreset -> createCustomPreset(event.preset)
+            is TasbihEvent.CreateCustomPreset -> {
+                AppAnalytics.logFeatureUsed(
+                    AppAnalytics.Feature.TASBIH,
+                    "preset_created"
+                )
+                createCustomPreset(event.preset)
+            }
             is TasbihEvent.UpdateCustomPreset -> updateCustomPreset(event.preset)
-            is TasbihEvent.DeleteCustomPreset -> deleteCustomPreset(event.presetId)
+            is TasbihEvent.DeleteCustomPreset -> {
+                AppAnalytics.logFeatureUsed(
+                    AppAnalytics.Feature.TASBIH,
+                    "preset_deleted"
+                )
+                deleteCustomPreset(event.presetId)
+            }
             is TasbihEvent.ToggleVibration -> _counterState.update { it.copy(vibrationEnabled = event.enabled) }
             is TasbihEvent.ToggleSound -> _counterState.update { it.copy(soundEnabled = event.enabled) }
             is TasbihEvent.SetCounterStyle -> {
@@ -247,11 +243,20 @@ class TasbihViewModel @Inject constructor(
 
             is TasbihEvent.ToggleAutoLap -> _counterState.update { it.copy(autoLap = event.enabled) }
             TasbihEvent.Increment -> increment()
-            TasbihEvent.Reset -> reset()
-            TasbihEvent.StartSession -> startSession()
+            TasbihEvent.Reset -> {
+                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.TASBIH, "reset")
+                reset()
+            }
+            TasbihEvent.StartSession -> {
+                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.TASBIH, "session_start")
+                startSession()
+            }
             TasbihEvent.PauseSession -> pauseSession()
             TasbihEvent.ResumeSession -> resumeSession()
-            TasbihEvent.CompleteSession -> completeSession()
+            TasbihEvent.CompleteSession -> {
+                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.TASBIH, "session_complete")
+                completeSession()
+            }
             TasbihEvent.LoadPresets -> loadPresets()
             TasbihEvent.LoadHistory -> loadHistory()
             TasbihEvent.LoadStats -> loadStats()

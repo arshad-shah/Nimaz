@@ -113,27 +113,35 @@ class QaidaReaderViewModel @Inject constructor(
 
     fun onEvent(event: QaidaReaderEvent) {
         when (event) {
-            is QaidaReaderEvent.SelectLesson -> AppAnalytics.logFeatureUsed(
-                AppAnalytics.Feature.QAIDA,
-                "select_lesson"
-            )
-
-            is QaidaReaderEvent.CellTapped -> AppAnalytics.logFeatureUsed(AppAnalytics.Feature.QAIDA, "play_cell")
-            is QaidaReaderEvent.PlayLine -> AppAnalytics.logFeatureUsed(AppAnalytics.Feature.QAIDA, "play_line")
-            is QaidaReaderEvent.PlayLetter -> AppAnalytics.logFeatureUsed(AppAnalytics.Feature.QAIDA, "play_letter")
-            QaidaReaderEvent.Resume -> AppAnalytics.logFeatureUsed(AppAnalytics.Feature.QAIDA, "resume")
-            QaidaReaderEvent.ResetJourney -> AppAnalytics.logFeatureUsed(AppAnalytics.Feature.QAIDA, "reset_journey")
-            else -> {}
-        }
-        when (event) {
-            is QaidaReaderEvent.SelectLesson -> selectLesson(event.lessonId)
-            is QaidaReaderEvent.CellTapped -> onCellTapped(event.cell)
-            is QaidaReaderEvent.PlayLine -> playLine(event.lineId)
-            is QaidaReaderEvent.PlayLetter -> playLetter(event.letter)
+            is QaidaReaderEvent.SelectLesson -> {
+                AppAnalytics.logFeatureUsed(
+                    AppAnalytics.Feature.QAIDA,
+                    "select_lesson"
+                )
+                selectLesson(event.lessonId)
+            }
+            is QaidaReaderEvent.CellTapped -> {
+                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.QAIDA, "play_cell")
+                onCellTapped(event.cell)
+            }
+            is QaidaReaderEvent.PlayLine -> {
+                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.QAIDA, "play_line")
+                playLine(event.lineId)
+            }
+            is QaidaReaderEvent.PlayLetter -> {
+                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.QAIDA, "play_letter")
+                playLetter(event.letter)
+            }
             QaidaReaderEvent.NextLesson -> nextLesson()
             QaidaReaderEvent.PreviousLesson -> previousLesson()
-            QaidaReaderEvent.Resume -> resume()
-            QaidaReaderEvent.ResetJourney -> resetJourney()
+            QaidaReaderEvent.Resume -> {
+                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.QAIDA, "resume")
+                resume()
+            }
+            QaidaReaderEvent.ResetJourney -> {
+                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.QAIDA, "reset_journey")
+                resetJourney()
+            }
         }
     }
 

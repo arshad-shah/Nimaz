@@ -102,42 +102,50 @@ class TafseerViewModel @Inject constructor(
 
     fun onEvent(event: TafseerEvent) {
         when (event) {
-            is TafseerEvent.LoadSurah -> AppAnalytics.logFeatureUsed(AppAnalytics.Feature.TAFSEER, "open_surah")
-            is TafseerEvent.SwitchSource -> AppAnalytics.logFeatureUsed(AppAnalytics.Feature.TAFSEER, "switch_source")
-            is TafseerEvent.AddHighlight -> AppAnalytics.logFeatureUsed(AppAnalytics.Feature.TAFSEER, "add_highlight")
-            is TafseerEvent.DeleteHighlight -> AppAnalytics.logFeatureUsed(
-                AppAnalytics.Feature.TAFSEER,
-                "delete_highlight"
-            )
-
-            is TafseerEvent.AddNote -> AppAnalytics.logFeatureUsed(AppAnalytics.Feature.TAFSEER, "add_note")
-            is TafseerEvent.DeleteNote -> AppAnalytics.logFeatureUsed(AppAnalytics.Feature.TAFSEER, "delete_note")
-            else -> {}
-        }
-        when (event) {
-            is TafseerEvent.LoadSurah -> loadSurah(event.surahNumber, event.ayahNumber)
+            is TafseerEvent.LoadSurah -> {
+                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.TAFSEER, "open_surah")
+                loadSurah(event.surahNumber, event.ayahNumber)
+            }
             is TafseerEvent.NavigateToAyah -> onAyahChanged(event.index)
             is TafseerEvent.NavigateToTafseerPage ->
                 _state.value = _state.value.copy(currentTafseerPage = event.page)
 
-            is TafseerEvent.SwitchSource -> switchSource(event.source)
-            is TafseerEvent.AddHighlight -> addHighlight(
-                event.startOffset,
-                event.endOffset,
-                event.color,
-                event.note
-            )
+            is TafseerEvent.SwitchSource -> {
+                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.TAFSEER, "switch_source")
+                switchSource(event.source)
+            }
+            is TafseerEvent.AddHighlight -> {
+                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.TAFSEER, "add_highlight")
+                addHighlight(
+                    event.startOffset,
+                    event.endOffset,
+                    event.color,
+                    event.note
+                )
+            }
 
-            is TafseerEvent.DeleteHighlight -> deleteHighlight(event.highlightId)
+            is TafseerEvent.DeleteHighlight -> {
+                AppAnalytics.logFeatureUsed(
+                    AppAnalytics.Feature.TAFSEER,
+                    "delete_highlight"
+                )
+                deleteHighlight(event.highlightId)
+            }
             is TafseerEvent.UpdateHighlight -> updateHighlight(
                 event.highlightId,
                 event.color,
                 event.note
             )
 
-            is TafseerEvent.AddNote -> addNote(event.text)
+            is TafseerEvent.AddNote -> {
+                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.TAFSEER, "add_note")
+                addNote(event.text)
+            }
             is TafseerEvent.UpdateNote -> updateNote(event.note)
-            is TafseerEvent.DeleteNote -> deleteNote(event.noteId)
+            is TafseerEvent.DeleteNote -> {
+                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.TAFSEER, "delete_note")
+                deleteNote(event.noteId)
+            }
         }
     }
 

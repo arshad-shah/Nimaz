@@ -110,26 +110,29 @@ class PrayerTimesViewModel @Inject constructor(
 
     fun onEvent(event: PrayerTimesEvent) {
         when (event) {
-            PrayerTimesEvent.PreviousDay -> AppAnalytics.logFeatureUsed(
-                AppAnalytics.Feature.PRAYER_TIMES,
-                "previous_day"
-            )
-
-            PrayerTimesEvent.NextDay -> AppAnalytics.logFeatureUsed(AppAnalytics.Feature.PRAYER_TIMES, "next_day")
-            PrayerTimesEvent.GoToToday -> AppAnalytics.logFeatureUsed(AppAnalytics.Feature.PRAYER_TIMES, "go_to_today")
-            is PrayerTimesEvent.TogglePrayer -> AppAnalytics.logFeatureUsed(
-                AppAnalytics.Feature.PRAYER_TIMES,
-                "toggle_prayer"
-            )
-
-            else -> {}
-        }
-        when (event) {
-            PrayerTimesEvent.PreviousDay -> changeDay(-1)
-            PrayerTimesEvent.NextDay -> changeDay(1)
-            PrayerTimesEvent.GoToToday -> selectDate(LocalDate.now())
+            PrayerTimesEvent.PreviousDay -> {
+                AppAnalytics.logFeatureUsed(
+                    AppAnalytics.Feature.PRAYER_TIMES,
+                    "previous_day"
+                )
+                changeDay(-1)
+            }
+            PrayerTimesEvent.NextDay -> {
+                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.PRAYER_TIMES, "next_day")
+                changeDay(1)
+            }
+            PrayerTimesEvent.GoToToday -> {
+                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.PRAYER_TIMES, "go_to_today")
+                selectDate(LocalDate.now())
+            }
             is PrayerTimesEvent.SelectDate -> selectDate(event.date)
-            is PrayerTimesEvent.TogglePrayer -> togglePrayer(event.type)
+            is PrayerTimesEvent.TogglePrayer -> {
+                AppAnalytics.logFeatureUsed(
+                    AppAnalytics.Feature.PRAYER_TIMES,
+                    "toggle_prayer"
+                )
+                togglePrayer(event.type)
+            }
         }
     }
 
