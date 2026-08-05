@@ -5,6 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.core.time.TodayProvider
+import com.arshadshah.nimaz.core.monitoring.launchBestEffort
+import com.arshadshah.nimaz.domain.repository.settings.ZakatSettings
 import com.arshadshah.nimaz.core.util.HijriDateCalculator
 import com.arshadshah.nimaz.core.util.toUtcMidnightMillis
 import com.arshadshah.nimaz.domain.model.ExemptionReason
@@ -41,6 +43,9 @@ class FastingViewModel @Inject constructor(
     private val fastingUseCases: FastingUseCases,
     private val prayerUseCases: PrayerUseCases,
     private val todayProvider: TodayProvider,
+    // Fidya is money, and the one currency setting the app has is the zakat one. The seam, not
+    // the whole SettingsRepository (#436).
+    private val zakatSettings: ZakatSettings,
     private val telemetry: Telemetry,
 ) : ViewModel() {
 
@@ -361,6 +366,13 @@ class FastingViewModel @Inject constructor(
         launchSafely(telemetry, DOMAIN, "load_makeup_fasts") {
             val totalFidya = fastingUseCases.getTotalFidyaPaid()
             _makeupState.update { it.copy(totalFidyaPaid = totalFidya, isLoading = false) }
+        }
+        // Collected, not read once: the currency can change while this screen is on the
+        // back stack, and a fidya figure labelled with the old symbol is worse than none.
+        launchBestEffort(telemetry, DOMAIN, "observe_currency") {
+            zakatSettings.zakatCurrency.collect { code ->
+                _makeupState.update { it.copy(currency = code) }
+            }
         }
     }
 

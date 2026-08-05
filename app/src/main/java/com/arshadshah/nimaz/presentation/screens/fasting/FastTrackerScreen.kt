@@ -117,7 +117,6 @@ import android.content.res.Configuration
 import androidx.compose.material.icons.filled.EventAvailable
 import androidx.compose.material.icons.filled.Restore
 import com.arshadshah.nimaz.core.util.formatCurrency
-import com.arshadshah.nimaz.domain.model.ZakatDefaults
 import com.arshadshah.nimaz.presentation.components.atoms.NimazDivider
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuItem
@@ -336,6 +335,7 @@ fun FastTrackerScreen(
                                 showRecommendedRow = !ramadanState.isRamadan,
                                 pendingMakeup = makeupState.pendingCount,
                                 fidyaPaid = makeupState.totalFidyaPaid,
+                                currency = makeupState.currency,
                                 isRamadan = ramadanState.isRamadan,
                                 ramadanDay = ramadanState.currentDay,
                                 daysUntilRamadan = HijriDateCalculator.daysUntilNextRamadan(),
@@ -1200,6 +1200,7 @@ private fun FastingGoDeeperGroup(
     showRecommendedRow: Boolean,
     pendingMakeup: Int,
     fidyaPaid: Double,
+    currency: String,
     isRamadan: Boolean,
     ramadanDay: Int,
     daysUntilRamadan: Int,
@@ -1248,7 +1249,7 @@ private fun FastingGoDeeperGroup(
                     // Only the paid figure, and only once nothing is outstanding — the mapper
                     // decides which of the two facts the row leads with.
                     fidyaPaid = fidyaPaid.takeIf { it > 0.0 }
-                        ?.let { formatCurrency(it, ZakatDefaults.CURRENCY) },
+                        ?.let { formatCurrency(it, currency) },
                 ).resolve(),
                 icon = Icons.Default.Restore,
                 onClick = onOpenMakeup,
@@ -1683,7 +1684,8 @@ private fun GoDeeperShowcase() {
         daysUntilRecommended = 4,
         showRecommendedRow = true,
         pendingMakeup = 3,
-        fidyaPaid = 0.0,
+        fidyaPaid = 24.0,
+        currency = "GBP",
         isRamadan = false,
         ramadanDay = 0,
         daysUntilRamadan = 96,
