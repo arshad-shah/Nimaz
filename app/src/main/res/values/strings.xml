@@ -1712,6 +1712,10 @@
 
     <!-- Help screens -->
     <string name="help_title">Help</string>
+    <string name="help_topics_load_failed">Help topics couldn\'t be loaded</string>
+    <string name="help_topic_load_failed">This topic couldn\'t be loaded</string>
+    <string name="help_guide_load_failed">This guide couldn\'t be loaded</string>
+    <string name="help_load_failed_body">Help content is stored on your device, so trying again usually works.</string>
     <string name="help_search_hint">Search help…</string>
     <string name="help_no_results">No results. Try different words.</string>
     <string name="help_browse_topics">Browse topics</string>

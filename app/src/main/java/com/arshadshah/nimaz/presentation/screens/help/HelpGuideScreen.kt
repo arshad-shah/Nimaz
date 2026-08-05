@@ -33,6 +33,8 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeEmphasis
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorState
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
@@ -64,10 +66,25 @@ fun HelpGuideScreen(
             )
         }
     ) { padding ->
+        val error = state.error
         when {
             state.isLoading && guide == null -> {
                 NimazLoadingState(modifier = Modifier.padding(padding))
             }
+
+            // Before the null-guide branch: a failed load also leaves `guide` null, and
+            // "this guide isn't available" is the wrong thing to say about one that is.
+            error != null -> NimazErrorState(
+                title = stringResource(error.message),
+                message = stringResource(R.string.help_load_failed_body),
+                kind = error.kind,
+                details = error.details,
+                primaryAction = NimazErrorDefaults.retry(
+                    onRetry = { viewModel.onEvent(HelpEvent.Retry) },
+                    label = stringResource(R.string.try_again),
+                ),
+                modifier = Modifier.padding(padding),
+            )
 
             guide == null -> {
                 Box(
