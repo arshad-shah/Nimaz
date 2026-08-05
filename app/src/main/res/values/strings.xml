@@ -977,7 +977,7 @@
         <item quantity="one">In %1$d day</item>
         <item quantity="other">In %1$d days</item>
     </plurals>
-    <string name="fasting_log_today">Log Today\'s Fast</string>
+    <string name="fasting_log_today">Log today\'s fast</string>
     <string name="fasting_no_makeup">No Makeup Fasts</string>
     <string name="fasting_all_up_to_date">All your fasts are up to date!</string>
     <string name="fasting_fasts_to_makeup">Fasts to Make Up</string>
@@ -1919,4 +1919,7 @@
     <string name="zakat_gold_price_label">Gold price per gram</string>
     <string name="zakat_silver_price_label">Silver price per gram</string>
     <string name="zakat_metal_prices_hint">Estimates — set these to your local rate. The nisab threshold is worked out from them.</string>
+    <string name="fasting_log_on_subtitle">Logged — tap to undo</string>
+    <string name="fasting_log_off_subtitle">Not logged yet</string>
+    <string name="fasting_log_managed_in_sheet">Managed in the day\'s details</string>
 </resources>

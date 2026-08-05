@@ -2,8 +2,7 @@ package com.arshadshah.nimaz.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.arshadshah.nimaz.core.monitoring.AppAnalytics
-import com.arshadshah.nimaz.core.monitoring.CrashReporter
+import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.core.util.HijriDateCalculator
 import com.arshadshah.nimaz.core.util.PrayerTimeCalculator
 import com.arshadshah.nimaz.core.util.formatClockTime
@@ -44,7 +43,25 @@ data class FastingTrackerUiState(
     val isSuhoorTime: Boolean = false,
     val isLoading: Boolean = true,
     val error: String? = null
-)
+) {
+    /**
+     * Whether the one-tap "fasting today" control can act on the selected day.
+     *
+     * `FastStatus` has four values, and only `FASTED`/`NOT_FASTED` are two ends of a
+     * toggle. `EXEMPTED` and `MAKEUP_DUE` are considered states recorded in the day
+     * sheet — with a reason attached — so a single tap must not silently overwrite
+     * them. The toggle renders disabled for those, with [toggleBlockedReason] saying
+     * why, rather than looking live and doing nothing (which is what it used to do).
+     */
+    val canToggleToday: Boolean
+        get() = todayRecord == null ||
+            todayRecord.status == FastStatus.FASTED ||
+            todayRecord.status == FastStatus.NOT_FASTED
+
+    /** The status blocking the toggle, or null when it is actionable. */
+    val toggleBlockedReason: FastStatus?
+        get() = if (canToggleToday) null else todayRecord?.status
+}
 
 data class RamadanTrackerUiState(
     val ramadanRecords: List<FastRecord> = emptyList(),
@@ -129,8 +146,10 @@ sealed interface FastingEvent {
 class FastingViewModel @Inject constructor(
     private val fastingUseCases: FastingUseCases,
     private val prayerTimeCalculator: PrayerTimeCalculator,
-    private val settingsRepository: SettingsRepository
+    private val settingsRepository: SettingsRepository,
+    private val telemetry: Telemetry,
 ) : ViewModel() {
+
 
     private val _trackerState = MutableStateFlow(FastingTrackerUiState())
     val trackerState: StateFlow<FastingTrackerUiState> = _trackerState.asStateFlow()
@@ -157,8 +176,8 @@ class FastingViewModel @Inject constructor(
 
     // No `use24HourFormat` mirror: suhoor/iftar are instants, formatted at the leaf.
 
-    companion object {
-        // Default location: Dublin, Ireland (fallback)
+    private companion object {
+        const val DOMAIN = "fasting"
     }
 
     init {
@@ -204,34 +223,33 @@ class FastingViewModel @Inject constructor(
                 }
             }
         } catch (e: Exception) {
-            CrashReporter.recordException(e)
-            AppAnalytics.logError("fasting", "load_prayer_times", e.message)
+            telemetry.failure(DOMAIN, "load_prayer_times", e)
             // Keep default placeholder times
         }
     }
 
     fun onEvent(event: FastingEvent) {
         when (event) {
-            is FastingEvent.StartFast -> AppAnalytics.logFastTracked("start", event.fastType.name)
-            is FastingEvent.CompleteFast -> AppAnalytics.logFastTracked("complete")
-            is FastingEvent.BreakFast -> AppAnalytics.logFastTracked("break")
-            is FastingEvent.MissFast -> AppAnalytics.logFastTracked("miss")
-            is FastingEvent.LogRecommendedFast -> AppAnalytics.logFastTracked(
+            is FastingEvent.StartFast -> telemetry.fastTracked("start", event.fastType.name)
+            is FastingEvent.CompleteFast -> telemetry.fastTracked("complete")
+            is FastingEvent.BreakFast -> telemetry.fastTracked("break")
+            is FastingEvent.MissFast -> telemetry.fastTracked("miss")
+            is FastingEvent.LogRecommendedFast -> telemetry.fastTracked(
                 "recommended",
                 event.fastType.name
             )
 
-            is FastingEvent.PayFidya -> AppAnalytics.logFeatureUsed("fasting", "pay_fidya")
-            is FastingEvent.AddMakeupFast -> AppAnalytics.logFeatureUsed("fasting", "add_makeup")
+            is FastingEvent.PayFidya -> telemetry.featureUsed(DOMAIN, "pay_fidya")
+            is FastingEvent.AddMakeupFast -> telemetry.featureUsed(DOMAIN, "add_makeup")
             is FastingEvent.CompleteMakeupFast ->
-                AppAnalytics.logFeatureUsed("fasting", "complete_makeup")
+                telemetry.featureUsed(DOMAIN, "complete_makeup")
             // Status/type only — never the user's exemption reason or note text.
-            is FastingEvent.SaveFastForDate -> AppAnalytics.logFastTracked(
+            is FastingEvent.SaveFastForDate -> telemetry.fastTracked(
                 "save_for_date",
                 event.fastType.name
             )
 
-            is FastingEvent.DeleteFastRecord -> AppAnalytics.logFastTracked("delete")
+            is FastingEvent.DeleteFastRecord -> telemetry.fastTracked("delete")
             else -> {}
         }
         when (event) {
@@ -385,7 +403,13 @@ class FastingViewModel @Inject constructor(
                     }
                 }
 
-                else -> {}
+                // Exhaustive on purpose: these two are managed in the day sheet, where
+                // the reason lives, and the screen disables the toggle for them via
+                // canToggleToday. Reaching here means the UI let through a tap it should
+                // not have, so it is recorded rather than silently dropped.
+                FastStatus.EXEMPTED,
+                FastStatus.MAKEUP_DUE ->
+                    telemetry.featureUsed(DOMAIN, "toggle_blocked_${currentRecord.status.name.lowercase()}")
             }
         }
     }
@@ -644,6 +668,10 @@ class FastingViewModel @Inject constructor(
             loadCalendarMonth()
             loadStats()
             loadRamadan()
+            // saveFastForDate auto-creates a makeup fast for a missed or exempted
+            // Ramadan day. Deleting the record left that row behind for ever and the
+            // pending count stale on screen, because this path never reloaded it.
+            loadMakeupFasts()
         }
     }
 
