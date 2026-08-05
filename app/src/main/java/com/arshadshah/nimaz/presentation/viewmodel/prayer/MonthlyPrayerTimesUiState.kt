@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.presentation.viewmodel.prayer
 
 import java.time.LocalDate
 import java.time.YearMonth
+import com.arshadshah.nimaz.domain.model.DayPrayerTimes
 
 data class MonthlyPrayerTimesUiState(
     val currentMonth: YearMonth = YearMonth.now(),

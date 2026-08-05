@@ -77,8 +77,8 @@ import com.arshadshah.nimaz.presentation.viewmodel.home.AnnouncementUiState
 import com.arshadshah.nimaz.presentation.viewmodel.home.HomeEvent
 import com.arshadshah.nimaz.presentation.viewmodel.home.HomeUiState
 import com.arshadshah.nimaz.presentation.viewmodel.home.HomeViewModel
-import com.arshadshah.nimaz.presentation.viewmodel.home.PrayerTimeDisplay
-import com.arshadshah.nimaz.presentation.viewmodel.home.withClockState
+import com.arshadshah.nimaz.presentation.model.PrayerTimeDisplay
+import com.arshadshah.nimaz.presentation.model.withClockState
 import kotlin.time.Instant
 
 /**

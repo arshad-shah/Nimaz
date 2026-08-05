@@ -63,14 +63,14 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionTitle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazSearchBar
-import com.arshadshah.nimaz.presentation.viewmodel.location.CityRegion
+import com.arshadshah.nimaz.domain.model.CityRegion
 import com.arshadshah.nimaz.presentation.viewmodel.location.CurrentLocationState
 import com.arshadshah.nimaz.presentation.viewmodel.location.LocationEvent
 import com.arshadshah.nimaz.presentation.viewmodel.location.LocationViewModel
-import com.arshadshah.nimaz.presentation.viewmodel.location.SearchLocation
-import com.arshadshah.nimaz.presentation.viewmodel.location.citiesForRegion
-import com.arshadshah.nimaz.presentation.viewmodel.location.formatCoordinates
-import com.arshadshah.nimaz.presentation.viewmodel.location.groupCitiesByRegion
+import com.arshadshah.nimaz.domain.model.SearchLocation
+import com.arshadshah.nimaz.domain.model.citiesForRegion
+import com.arshadshah.nimaz.presentation.screens.settings.formatCoordinates
+import com.arshadshah.nimaz.domain.model.groupCitiesByRegion
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

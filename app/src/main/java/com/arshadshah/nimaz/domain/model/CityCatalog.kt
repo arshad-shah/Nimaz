@@ -1,7 +1,20 @@
-package com.arshadshah.nimaz.presentation.viewmodel.location
+package com.arshadshah.nimaz.domain.model
 
-import java.util.Locale
-import kotlin.math.abs
+data class SearchLocation(
+    val name: String,
+    val country: String,
+    val latitude: Double,
+    val longitude: Double,
+    val region: CityRegion? = null,   // set for curated cities; null for Geocoder & recent results
+    val flag: String? = null,         // country-flag emoji for curated cities; null otherwise
+) {
+    /**
+     * Stable identity for a lazy-list `key`. Coordinates rather than the name: the same city
+     * name recurs across countries, and the Geocoder and the curated catalogue can both
+     * produce a row for one place with differently-cased names.
+     */
+    val key: String get() = "$latitude,$longitude"
+}
 
 /**
  * Geographic grouping for the curated city list shown on the Location screen.
@@ -78,8 +91,8 @@ val defaultPopularCities: List<SearchLocation> = listOf(
 
 /** Groups curated cities by region, preserving [CityRegion.order]; skips regions with no cities. */
 fun groupCitiesByRegion(cities: List<SearchLocation>): List<Pair<CityRegion, List<SearchLocation>>> =
-    cities.filter { it.region != null }
-        .groupBy { it.region!! }
+    cities.mapNotNull { city -> city.region?.let { it to city } }
+        .groupBy({ it.first }, { it.second })
         .toList()
         .sortedBy { it.first.order }
 
@@ -87,9 +100,3 @@ fun groupCitiesByRegion(cities: List<SearchLocation>): List<Pair<CityRegion, Lis
 fun citiesForRegion(cities: List<SearchLocation>, region: CityRegion?): List<SearchLocation> =
     if (region == null) cities else cities.filter { it.region == region }
 
-/** Formats a coordinate pair with sign-derived hemispheres, e.g. "21.4225° N, 39.8262° E". */
-fun formatCoordinates(latitude: Double, longitude: Double): String {
-    val ns = if (latitude >= 0) "N" else "S"
-    val ew = if (longitude >= 0) "E" else "W"
-    return String.format(Locale.US, "%.4f° %s, %.4f° %s", abs(latitude), ns, abs(longitude), ew)
-}

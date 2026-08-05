@@ -16,8 +16,8 @@ import com.arshadshah.nimaz.presentation.components.molecules.DuaOfTheMomentCard
 import com.arshadshah.nimaz.presentation.components.molecules.FastingStatusCard
 import com.arshadshah.nimaz.presentation.components.molecules.HadithOfTheDayCard
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
-import com.arshadshah.nimaz.presentation.viewmodel.home.DailyDua
-import com.arshadshah.nimaz.presentation.viewmodel.home.PrayerTimeDisplay
+import com.arshadshah.nimaz.presentation.model.DailyDua
+import com.arshadshah.nimaz.presentation.model.PrayerTimeDisplay
 import kotlin.time.Instant
 import androidx.compose.runtime.getValue
 import com.arshadshah.nimaz.core.util.prayerTimelineProgressAt

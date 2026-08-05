@@ -2,6 +2,11 @@ package com.arshadshah.nimaz.presentation.viewmodel.location
 
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
+import com.arshadshah.nimaz.domain.model.CityRegion
+import com.arshadshah.nimaz.domain.model.citiesForRegion
+import com.arshadshah.nimaz.domain.model.defaultPopularCities
+import com.arshadshah.nimaz.domain.model.groupCitiesByRegion
+import com.arshadshah.nimaz.presentation.screens.settings.formatCoordinates
 
 class LocationCatalogTest {
 

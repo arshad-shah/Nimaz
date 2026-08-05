@@ -263,6 +263,20 @@ The types stay in the **same package** as the ViewModel, so splitting them costs
 which is exactly why there is no excuse for a 1,400-line file that opens with 200 lines of
 `data class`.
 
+**What does *not* belong there: anything a screen, component or widget also imports.** A type
+in `viewmodel/<feature>/` is that feature's business. `PrayerTimeDisplay` lived in
+`HomeViewModel.kt` and was imported by eight files — including `PrayerTimesViewModel`, which
+reached into an unrelated feature's ViewModel for a type it renders. Shared display models go
+to **`presentation/model/`**; anything that is a fact about the content rather than about how
+it is drawn (`UnifiedBookmark`, `UnifiedSearchResult`, `DayPrayerTimes`, the city catalogue)
+goes to **`domain/model/`**. `widget/` and `components/` must import from neither
+`viewmodel/` — that is a layering leak, and it is currently at zero:
+
+```bash
+grep -rn "import com.arshadshah.nimaz.presentation.viewmodel" \
+  app/src/main/java/com/arshadshah/nimaz/{widget,presentation/components}/   # expect none
+```
+
 Rules:
 - Lives in `presentation/viewmodel/<feature>/`, with its `XxxUiState`s in `XxxUiState.kt` and
   its `XxxEvent` in `XxxEvent.kt` beside it. Pick the existing sub-package the feature belongs
