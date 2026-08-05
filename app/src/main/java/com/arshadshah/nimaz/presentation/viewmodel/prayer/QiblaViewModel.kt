@@ -13,7 +13,7 @@ import android.os.VibratorManager
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
-import com.arshadshah.nimaz.core.monitoring.CrashReporter
+import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.domain.model.CompassAccuracy
 import com.arshadshah.nimaz.domain.model.CompassData
 import com.arshadshah.nimaz.domain.model.Location
@@ -36,7 +36,8 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class QiblaViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val settingsRepository: SettingsRepository
+    private val settingsRepository: SettingsRepository,
+    private val telemetry: Telemetry,
 ) : ViewModel() {
 
     private val _qiblaState = MutableStateFlow(QiblaUiState())
@@ -168,14 +169,14 @@ class QiblaViewModel @Inject constructor(
             }
 
             QiblaEvent.StartCompass -> {
-                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.QIBLA, "start_compass")
+                telemetry.featureUsed(AppAnalytics.Feature.QIBLA, "start_compass")
                 resetSensorState()
                 registerSensors()
             }
 
             QiblaEvent.StopCompass -> unregisterSensors()
             is QiblaEvent.SetArMode -> {
-                AppAnalytics.logFeatureUsed(
+                telemetry.featureUsed(
                     AppAnalytics.Feature.QIBLA,
                     if (event.enabled) "ar_on" else "ar_off"
                 )
@@ -183,6 +184,13 @@ class QiblaViewModel @Inject constructor(
             }
         }
     }
+
+    /**
+     * The last accuracy reported to analytics, so only changes are recorded. Deliberately not
+     * reset by [resetSensorState]: re-entering the screen with the same uncalibrated
+     * magnetometer is the same fact, not a new one.
+     */
+    private var lastReportedAccuracy: CompassAccuracy? = null
 
     private fun resetSensorState() {
         gravity.fill(0f)
@@ -258,8 +266,7 @@ class QiblaViewModel @Inject constructor(
                     )
                 }
             } catch (e: Exception) {
-                CrashReporter.recordException(e)
-                AppAnalytics.logError(AppAnalytics.Feature.QIBLA, "calculate_direction", e.message)
+                telemetry.failure(AppAnalytics.Feature.QIBLA, "calculate_direction", e)
                 _qiblaState.update { it.copy(error = e.message, isLoading = false) }
             }
         }
@@ -293,8 +300,7 @@ class QiblaViewModel @Inject constructor(
                     )
                 }
             } catch (e: Exception) {
-                CrashReporter.recordException(e)
-                AppAnalytics.logError(AppAnalytics.Feature.QIBLA, "set_location", e.message)
+                telemetry.failure(AppAnalytics.Feature.QIBLA, "set_location", e)
                 _qiblaState.update { it.copy(error = e.message, isLoading = false) }
             }
         }
@@ -369,9 +375,29 @@ class QiblaViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Track the magnetometer's reported accuracy, and report each **transition**.
+     *
+     * "How many users have an uncalibrated magnetometer" is exactly the population-level
+     * question `AppAnalytics`' KDoc describes, and it was answerable from nothing: the compass
+     * shows a calibration prompt and the app had no idea how often. It matters more here than
+     * a usual usage counter, because a qibla needle drawn from an unreliable sensor is
+     * confidently wrong rather than visibly broken.
+     *
+     * Transitions only. `SensorManager` re-delivers the same accuracy on every reading, so
+     * logging each callback would emit tens of events a second for as long as the screen is
+     * open — the firehose problem, at sensor rate.
+     */
     private fun updateAccuracy(accuracy: CompassAccuracy) {
         val needsCalibration =
             accuracy == CompassAccuracy.LOW || accuracy == CompassAccuracy.UNRELIABLE
+        if (accuracy != lastReportedAccuracy) {
+            lastReportedAccuracy = accuracy
+            telemetry.featureUsed(
+                AppAnalytics.Feature.QIBLA,
+                "accuracy_" + accuracy.name.lowercase(),
+            )
+        }
         _qiblaState.update {
             it.copy(
                 compassData = it.compassData.copy(accuracy = accuracy),

@@ -2,7 +2,6 @@ package com.arshadshah.nimaz.presentation.viewmodel.worship
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.core.util.PrayerTimeCalculator
 import com.arshadshah.nimaz.domain.model.AsrCalculation
 import com.arshadshah.nimaz.domain.model.CalculationMethod
@@ -116,7 +115,9 @@ class NightWorshipViewModel @Inject constructor(
                     )
                 }
             }.onFailure { e ->
-                CrashReporter.recordException(e)
+                // `failure`, not a bare `recordException`: the stack trace reached Crashlytics
+                // and the frequency reached nothing, so how often this fails was not visible.
+                telemetry.failure(AppAnalytics.Feature.NIGHT_WORSHIP, "load", e)
                 _state.update { it.copy(isLoading = false, error = e.message) }
             }
         }

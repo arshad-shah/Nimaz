@@ -2,6 +2,7 @@
 
 package com.arshadshah.nimaz.presentation.viewmodel.content
 
+import com.arshadshah.nimaz.core.monitoring.RecordingTelemetry
 import app.cash.turbine.test
 import com.arshadshah.nimaz.data.audio.QaidaAudioManager
 import com.arshadshah.nimaz.data.audio.QaidaAudioState
@@ -101,7 +102,7 @@ class QaidaReaderViewModelTest {
     @After
     fun tearDown() = Dispatchers.resetMain()
 
-    private fun createViewModel() = QaidaReaderViewModel(useCases, audioManager)
+    private fun createViewModel() = QaidaReaderViewModel(useCases, audioManager, RecordingTelemetry())
 
     @Test
     fun `tapping a cell plays its clip and marks it heard`() = runTest {

@@ -3,6 +3,7 @@ package com.arshadshah.nimaz.presentation.viewmodel.prayer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
+import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.core.util.PrayerTimeCalculator
 import com.arshadshah.nimaz.domain.model.AsrCalculation
 import com.arshadshah.nimaz.domain.model.CalculationMethod
@@ -28,6 +29,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import com.arshadshah.nimaz.presentation.model.PrayerTimeDisplay
@@ -37,6 +39,7 @@ class PrayerTimesViewModel @Inject constructor(
     private val prayerTimeCalculator: PrayerTimeCalculator,
     private val prayerUseCases: PrayerUseCases,
     private val settingsRepository: SettingsRepository,
+    private val telemetry: Telemetry,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(PrayerTimesUiState())
@@ -65,28 +68,28 @@ class PrayerTimesViewModel @Inject constructor(
     fun onEvent(event: PrayerTimesEvent) {
         when (event) {
             PrayerTimesEvent.PreviousDay -> {
-                AppAnalytics.logFeatureUsed(
+                telemetry.featureUsed(
                     AppAnalytics.Feature.PRAYER_TIMES,
                     "previous_day"
                 )
                 changeDay(-1)
             }
             PrayerTimesEvent.NextDay -> {
-                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.PRAYER_TIMES, "next_day")
+                telemetry.featureUsed(AppAnalytics.Feature.PRAYER_TIMES, "next_day")
                 changeDay(1)
             }
             PrayerTimesEvent.GoToToday -> {
-                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.PRAYER_TIMES, "go_to_today")
+                telemetry.featureUsed(AppAnalytics.Feature.PRAYER_TIMES, "go_to_today")
                 selectDate(LocalDate.now())
             }
-            is PrayerTimesEvent.SelectDate -> selectDate(event.date)
-            is PrayerTimesEvent.TogglePrayer -> {
-                AppAnalytics.logFeatureUsed(
-                    AppAnalytics.Feature.PRAYER_TIMES,
-                    "toggle_prayer"
-                )
-                togglePrayer(event.type)
+            is PrayerTimesEvent.SelectDate -> {
+                telemetry.featureUsed(AppAnalytics.Feature.PRAYER_TIMES, "select_date")
+                selectDate(event.date)
             }
+            // The `toggle_prayer` feature event moved into `togglePrayer`, past its two
+            // guards, and became `prayerTracked`. Logged here it counted taps on Sunrise and
+            // on future days, neither of which changes anything.
+            is PrayerTimesEvent.TogglePrayer -> togglePrayer(event.type)
         }
     }
 
@@ -155,6 +158,7 @@ class PrayerTimesViewModel @Inject constructor(
                     highLatRule = HighLatitudeRule.fromString(highStr)
                     adjustments = adj
                     settingsReady = true
+                    pinCalculationInputs()
 
                     _state.update {
                         it.copy(
@@ -283,6 +287,11 @@ class PrayerTimesViewModel @Inject constructor(
             val prayedAt =
                 if (newStatus == PrayerStatus.PRAYED) Instant.now().toEpochMilli() else null
             prayerUseCases.updatePrayerStatus(dateKey, name, newStatus, prayedAt, false)
+            // The third place a prayer is tracked, alongside the tracker and Home. #359 names
+            // only two; this one recorded a generic `toggle_prayer` and is the reason a
+            // dashboard built on `prayer_tracked` would still have under-counted after fixing
+            // the other two.
+            telemetry.prayerTracked(name.name, newStatus.name, isJamaah = false)
             // getPrayerRecordsForDate re-emits → applyTick refreshes the UI.
         }
     }
@@ -290,4 +299,20 @@ class PrayerTimesViewModel @Inject constructor(
     // No `use24HourFormat` mirror: times are formatted at the leaf from LocalUse24HourFormat, so
     // toggling the preference no longer forces a full day recompute.
 
+
+    /**
+     * Pin the inputs a prayer-time crash needs to be reproducible.
+     *
+     * `CrashReporter.setCustomKey` was used nowhere in the ViewModel layer, so a crash in the
+     * calculator arrived with a stack trace and nothing else — and "Fajr is wrong" is a class
+     * of report that is unanswerable without the method, the school and roughly where the user
+     * is. The latitude is **rounded to a whole degree**: a degree is enough to tell a
+     * high-latitude failure from an equatorial one, and not enough to locate anyone.
+     */
+    private fun pinCalculationInputs() {
+        telemetry.customKey("calc_method", calcMethod.name)
+        telemetry.customKey("asr_calculation", asrCalc.name)
+        telemetry.customKey("high_latitude_rule", highLatRule?.name ?: "none")
+        telemetry.customKey("latitude_rounded", latitude.roundToInt().toString())
+    }
 }

@@ -20,7 +20,6 @@ sealed interface ZakatEvent {
     data class UpdateGoldPrice(val pricePerGram: Double) : ZakatEvent
     data class UpdateSilverPrice(val pricePerGram: Double) : ZakatEvent
     data class SetCurrency(val currency: String) : ZakatEvent
-    data object Calculate : ZakatEvent
     data object ClearAll : ZakatEvent
     data object ToggleBreakdown : ZakatEvent
     data object SaveCalculation : ZakatEvent

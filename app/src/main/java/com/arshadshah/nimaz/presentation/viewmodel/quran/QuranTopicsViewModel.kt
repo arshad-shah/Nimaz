@@ -3,6 +3,7 @@ package com.arshadshah.nimaz.presentation.viewmodel.quran
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
+import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.domain.model.QuranTopic
 import com.arshadshah.nimaz.domain.model.SurahTopic
 import com.arshadshah.nimaz.domain.model.TopicCitation
@@ -50,6 +51,7 @@ data class TopicSurahContext(
 class QuranTopicsViewModel @Inject constructor(
     private val quranUseCases: QuranUseCases,
     private val settingsRepository: SettingsRepository,
+    private val telemetry: Telemetry,
 ) : ViewModel() {
 
     private val _browseState = MutableStateFlow(TopicBrowseState())
@@ -104,14 +106,14 @@ class QuranTopicsViewModel @Inject constructor(
             }
 
             is QuranTopicsEvent.SelectTree -> {
-                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.QURAN_TOPICS, "select_tree")
+                telemetry.featureUsed(AppAnalytics.Feature.QURAN_TOPICS, "select_tree")
                 selectTree(event.tree)
             }
 
             is QuranTopicsEvent.Toggle -> toggle(event.topic)
 
             is QuranTopicsEvent.Focus -> {
-                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.QURAN_TOPICS, "focus_branch")
+                telemetry.featureUsed(AppAnalytics.Feature.QURAN_TOPICS, "focus_branch")
                 focus(event.topic)
             }
 
@@ -138,7 +140,7 @@ class QuranTopicsViewModel @Inject constructor(
 
             is QuranTopicsEvent.LoadSurahSubjects -> {
                 if (_surahSubjects.value.surahNumber != event.surahNumber) {
-                    AppAnalytics.logFeatureUsed(AppAnalytics.Feature.QURAN_TOPICS, "open_surah_subjects")
+                    telemetry.featureUsed(AppAnalytics.Feature.QURAN_TOPICS, "open_surah_subjects")
                     loadSurahSubjects(event.surahNumber)
                 }
             }
@@ -150,7 +152,7 @@ class QuranTopicsViewModel @Inject constructor(
                 _surahSubjects.update { it.copy(query = "") }
 
             is QuranTopicsEvent.LoadDetail -> {
-                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.QURAN_TOPICS, "open_detail")
+                telemetry.featureUsed(AppAnalytics.Feature.QURAN_TOPICS, "open_detail")
                 loadDetail(event.topicId, event.tree, event.fromSurah)
             }
         }
@@ -179,6 +181,10 @@ class QuranTopicsViewModel @Inject constructor(
                         return@collect
                     }
                     _browseState.update { it.copy(isSearching = true) }
+                    // Logged post-debounce, where the FTS walk actually happens. The topic
+                    // search ran the most expensive query in the feature and logged nothing,
+                    // so its usage read as zero next to `select_tree` and `focus_branch`.
+                    telemetry.search(AppAnalytics.Feature.QURAN_TOPICS, query.trim().length)
                     val tree = _browseState.value.tree
                     val results = quranUseCases.searchTopics(query)
                     val paths = quranUseCases.searchTopics.pathsFor(results, tree)

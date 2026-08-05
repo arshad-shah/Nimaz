@@ -1127,14 +1127,28 @@ formatted strings.
 
 **Instrumentation conventions (apply these as you write code):**
 - **Error-swallowing `catch`/`runCatching`** that hides a real failure (data load, IO, parse,
-  audio, network, background work) should call `CrashReporter.recordException(e)` — rename
-  `catch (_: …)` to `catch (e: …)`. In ViewModels, also call `AppAnalytics.logError(feature, type, e.message)`
-  for frequency. Skip *expected* control-flow catches (permission probes, optional system
+  audio, network, background work) should report through **`telemetry.failure(feature, type, e)`**,
+  which reaches both channels and ignores `CancellationException` — rename `catch (_: …)` to
+  `catch (e: …)`. Skip *expected* control-flow catches (permission probes, optional system
   services, "no data yet"). All monitoring calls are safe no-ops when Firebase is absent.
 - **Significant user actions** (open a reader/detail, toggle favorite/bookmark, create/complete/delete,
-  play audio, run a search) get one `AppAnalytics.logFeatureUsed("<feature>", "<action>")` in the
-  relevant `onEvent` branch — never log trivial state churn (text edits, scroll). Coverage is broad:
-  every ViewModel logs usage, and error paths across data/widget/worker/util/VM layers report to Crashlytics.
+  play audio, run a search) get one `telemetry.featureUsed("<feature>", "<action>")` in the
+  relevant `onEvent` branch — never log trivial state churn (text edits, scroll).
+- **Use the purpose-built helper, not the generic one.** `featureUsed` is the fallback; a
+  tracked prayer is `prayerTracked`, a completed search is `search`, a persisted preference is
+  `settingChanged`, an AI answer is `aiAnswered`. The generic call throws away the very field
+  the specific one exists to carry — which prayer, how long the query was, what the setting
+  landed on — and those are not recoverable afterwards.
+- **Rate matters as much as coverage.** Anything driven by a text field, a slider or a sensor
+  fires far faster than a user acts: log **post-debounce** (search boxes), on the **transition**
+  (compass accuracy, which `SensorManager` re-delivers per reading), or at the **unit of
+  meaning** (a completed tasbih lap rather than each tap, one filled-in zakat form rather than
+  each digit). A per-keystroke event is not better coverage, it is a firehose that costs money
+  and answers nothing.
+- **Settings report from one table.** `SettingsEvent` is 78 branches; per-branch logging left 56
+  of them silent. `presentation/viewmodel/settings/SettingsTelemetry.kt` maps every
+  settings-shaped event to its name and value, exhaustively, so a new event cannot compile
+  without a decision. A location event never carries the place name or its coordinates.
 
 ---
 

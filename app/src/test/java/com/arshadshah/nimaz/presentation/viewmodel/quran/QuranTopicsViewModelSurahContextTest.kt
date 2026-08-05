@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.presentation.viewmodel.quran
 
+import com.arshadshah.nimaz.core.monitoring.RecordingTelemetry
 import com.arshadshah.nimaz.domain.model.QuranTopic
 import com.arshadshah.nimaz.domain.model.RevelationType
 import com.arshadshah.nimaz.domain.model.Surah
@@ -257,7 +258,7 @@ class QuranTopicsViewModelSurahContextTest {
         ).isEqualTo(TopicTree.INDEX)
     }
 
-    private fun viewModel() = QuranTopicsViewModel(useCases, settings)
+    private fun viewModel() = QuranTopicsViewModel(useCases, settings, RecordingTelemetry())
 
     /** Citations across three surahs, in the order the corpus gives them — by ayah id. */
     private fun detailOf(topic: QuranTopic) = TopicDetail(

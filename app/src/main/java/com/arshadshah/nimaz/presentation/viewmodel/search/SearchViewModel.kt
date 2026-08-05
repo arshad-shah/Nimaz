@@ -2,7 +2,7 @@ package com.arshadshah.nimaz.presentation.viewmodel.search
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.arshadshah.nimaz.core.monitoring.AppAnalytics
+import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.domain.model.DuaSearchResult
 import com.arshadshah.nimaz.domain.model.HadithSearchResult
 import com.arshadshah.nimaz.domain.model.LibrarySearchResults
@@ -26,10 +26,12 @@ enum class SearchFilter {
 
 /** Idle time after the last keystroke before a search-as-you-type lookup fires. */
 private const val SEARCH_DEBOUNCE_MS = 300L
+private const val DOMAIN = "global_search"
 
 @HiltViewModel
 class SearchViewModel @Inject constructor(
     private val searchLibrary: SearchLibraryUseCase,
+    private val telemetry: Telemetry,
 ) : ViewModel() {
 
     private val _searchState = MutableStateFlow(SearchUiState())
@@ -45,22 +47,29 @@ class SearchViewModel @Inject constructor(
     private var searchJob: Job? = null
 
     fun onEvent(event: SearchEvent) {
-        // Record the search action with its filter and query length only — never
-        // the query text itself.
-        if (event is SearchEvent.ExecuteSearch) {
-            AppAnalytics.logSearch(
-                filter = _searchState.value.selectedFilter.name,
-                queryLength = _searchState.value.query.trim().length,
-            )
-        }
         when (event) {
             is SearchEvent.UpdateQuery -> updateQuery(event.query)
-            is SearchEvent.SetFilter -> setFilter(event.filter)
+            // The filter is the one place this screen learns what people are looking for
+            // without recording what they typed — which of Qur'an, hadith or dua they narrow
+            // to is the shape, and it was not recorded at all.
+            is SearchEvent.SetFilter -> {
+                telemetry.featureUsed(DOMAIN, "set_filter_" + event.filter.name.lowercase())
+                setFilter(event.filter)
+            }
             is SearchEvent.SelectRecentSearch -> selectRecentSearch(event.query)
-            is SearchEvent.RemoveRecentSearch -> removeRecentSearch(event.query)
+            is SearchEvent.RemoveRecentSearch -> {
+                telemetry.featureUsed(DOMAIN, "remove_recent")
+                removeRecentSearch(event.query)
+            }
             SearchEvent.ExecuteSearch -> executeSearch()
-            SearchEvent.ClearSearch -> clearSearch()
-            SearchEvent.ClearRecentSearches -> clearRecentSearches()
+            SearchEvent.ClearSearch -> {
+                telemetry.featureUsed(DOMAIN, "clear")
+                clearSearch()
+            }
+            SearchEvent.ClearRecentSearches -> {
+                telemetry.featureUsed(DOMAIN, "clear_recents")
+                clearRecentSearches()
+            }
             is SearchEvent.ApplyAiTerms -> applyAiTerms(event.terms)
         }
     }
@@ -136,6 +145,18 @@ class SearchViewModel @Inject constructor(
         _searchState.update { it.copy(isSearching = true, error = null) }
         searchJob = viewModelScope.launch {
             if (debounceMillis > 0) delay(debounceMillis)
+            // Logged here rather than in `onEvent`, which is both too early and too narrow.
+            // Too early: it fired before `executeSearch` had checked the query, so tapping the
+            // keyboard's search key on an empty box emitted `search_performed` with
+            // `query_length = 0` and no search ran. Too narrow: it was on `ExecuteSearch` only,
+            // so search-as-you-type — the way this screen is actually used — was never counted
+            // at all. Past the debounce and inside the job that survived cancellation, this
+            // fires once per search that genuinely runs, typed or submitted.
+            // Length and filter only; the query itself never reaches analytics.
+            telemetry.search(
+                filter = _searchState.value.selectedFilter.name,
+                queryLength = _searchState.value.query.trim().length,
+            )
             val results = runCatching { lookup() }.getOrElse { e ->
                 if (e is kotlinx.coroutines.CancellationException) throw e
                 _searchState.update {

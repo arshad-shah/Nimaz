@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.presentation.viewmodel.home
 
+import com.arshadshah.nimaz.core.monitoring.RecordingTelemetry
 import android.app.Application
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
@@ -111,6 +112,7 @@ class HomeViewModelRolloverTest {
         val announcementUseCases = buildAnnouncementUseCases(announcementRepository)
         return HomeViewModel(
             context = context,
+            telemetry = RecordingTelemetry(),
             prayerTimeCalculator = prayerTimeCalculator,
             prayerUseCases = buildPrayerUseCases(prayerRepository),
             fastingUseCases = buildFastingUseCases(fastingRepository),

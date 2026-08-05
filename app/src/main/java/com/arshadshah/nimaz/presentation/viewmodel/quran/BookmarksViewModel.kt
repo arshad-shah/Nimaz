@@ -70,7 +70,12 @@ class BookmarksViewModel @Inject constructor(
                 undoDelete()
             }
 
-            BookmarksEvent.DismissUndo -> dismissUndo()
+            // The undo banner expiring unused is the signal that a delete was meant, which
+            // is only legible next to `undo_delete`.
+            BookmarksEvent.DismissUndo -> {
+                telemetry.featureUsed(DOMAIN, "dismiss_undo")
+                dismissUndo()
+            }
 
             is BookmarksEvent.EditNote -> {
                 telemetry.featureUsed(DOMAIN, "update_note")

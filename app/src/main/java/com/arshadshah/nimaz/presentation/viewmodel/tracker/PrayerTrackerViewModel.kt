@@ -91,7 +91,10 @@ class PrayerTrackerViewModel @Inject constructor(
 
     fun onEvent(event: PrayerTrackerEvent) {
         when (event) {
-            is PrayerTrackerEvent.SelectDate -> selectDate(event.date)
+            is PrayerTrackerEvent.SelectDate -> {
+                telemetry.featureUsed(DOMAIN, "select_date")
+                selectDate(event.date)
+            }
             is PrayerTrackerEvent.MarkPrayerPrayed -> {
                 telemetry.prayerTracked(
                         event.prayerName.name,
@@ -112,8 +115,14 @@ class PrayerTrackerViewModel @Inject constructor(
                 telemetry.featureUsed(DOMAIN, "qada_completed")
                 markQadaCompleted(event.record)
             }
-            is PrayerTrackerEvent.SetStatsPeriod -> setStatsPeriod(event.period)
-            is PrayerTrackerEvent.LoadHistory -> loadHistory(event.startDate, event.endDate)
+            is PrayerTrackerEvent.SetStatsPeriod -> {
+                telemetry.featureUsed(DOMAIN, "set_stats_period")
+                setStatsPeriod(event.period)
+            }
+            is PrayerTrackerEvent.LoadHistory -> {
+                telemetry.featureUsed(DOMAIN, "load_history")
+                loadHistory(event.startDate, event.endDate)
+            }
             PrayerTrackerEvent.LoadToday -> loadToday()
             PrayerTrackerEvent.LoadStats -> loadStats()
             PrayerTrackerEvent.LoadQadaPrayers -> loadQadaPrayers()

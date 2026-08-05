@@ -1,15 +1,22 @@
 package com.arshadshah.nimaz.presentation.viewmodel.content
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.core.monitoring.launchSafely
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 /**
  * The browse-a-catalogue-of-things feature, once.
@@ -62,9 +69,21 @@ abstract class CatalogViewModel<T : Any>(
      */
     private var requestedItemId: Int? = null
 
+    /**
+     * The live search box, for **analytics only** — the filter itself stays synchronous.
+     *
+     * Filtering a catalogue is an in-memory `List.filter` over a few hundred rows, so it should
+     * and does happen on every keystroke. Recording it should not: the screens dispatch
+     * [CatalogEvent.Search] from `onQueryChange`, so typing "Ibrahim" logged seven events and
+     * two backspaces logged two more. Debouncing this flow separates the two rates — the list
+     * still tracks the finger, and one settled query is one `search` event.
+     */
+    private val searchQueries = MutableStateFlow("")
+
     init {
         observeItems()
         observeFavourites()
+        observeSearchQueries()
     }
 
     fun onEvent(event: CatalogEvent) = when (event) {
@@ -79,11 +98,14 @@ abstract class CatalogViewModel<T : Any>(
         }
 
         is CatalogEvent.Search -> {
-            telemetry.featureUsed(feature, AppAnalytics.Action.SEARCH)
+            searchQueries.value = event.query
             updateList { it.copy(searchQuery = event.query) }
         }
 
-        CatalogEvent.ClearSearch -> updateList { it.copy(searchQuery = "") }
+        CatalogEvent.ClearSearch -> {
+            searchQueries.value = ""
+            updateList { it.copy(searchQuery = "") }
+        }
 
         CatalogEvent.ToggleFavoritesFilter -> {
             telemetry.featureUsed(feature, AppAnalytics.Action.TOGGLE_FAVORITES_FILTER)
@@ -101,6 +123,25 @@ abstract class CatalogViewModel<T : Any>(
             source.all().collect { items ->
                 updateList { it.copy(items = items, isLoading = false) }
             }
+        }
+    }
+
+    /**
+     * One [Telemetry.search] per settled, non-blank query.
+     *
+     * `logFeatureUsed(feature, "search")` was the wrong helper as well as the wrong rate: it
+     * threw away the query length, which is the one thing `search` records and the only way to
+     * tell "people type a name" from "people type a letter and give up".
+     */
+    @OptIn(FlowPreview::class)
+    private fun observeSearchQueries() {
+        viewModelScope.launch {
+            searchQueries
+                .debounce(SEARCH_DEBOUNCE_MS)
+                .map { it.trim() }
+                .filter { it.isNotEmpty() }
+                .distinctUntilChanged()
+                .collect { query -> telemetry.search(feature, query.length) }
         }
     }
 
@@ -159,5 +200,10 @@ abstract class CatalogViewModel<T : Any>(
                 },
             )
         }
+    }
+
+    private companion object {
+        /** Long enough that a word typed at speed is one event, short enough to feel live. */
+        const val SEARCH_DEBOUNCE_MS = 300L
     }
 }

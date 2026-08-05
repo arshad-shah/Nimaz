@@ -234,16 +234,30 @@ class QuranViewModel @Inject constructor(
                 telemetry.featureUsed(AppAnalytics.Feature.QURAN, "open_surah")
                 loadSurah(event.surahNumber)
             }
-            is QuranEvent.LoadJuz -> loadJuz(event.juzNumber)
-            is QuranEvent.LoadPage -> loadPage(event.pageNumber)
+            // Only `LoadSurah` was logged, so the reader's usage read as "everyone browses by
+            // surah" — which is what you see when the other two ways in are not counted.
+            is QuranEvent.LoadJuz -> {
+                telemetry.featureUsed(AppAnalytics.Feature.QURAN, "open_juz")
+                loadJuz(event.juzNumber)
+            }
+            is QuranEvent.LoadPage -> {
+                telemetry.featureUsed(AppAnalytics.Feature.QURAN, "open_page")
+                loadPage(event.pageNumber)
+            }
             is QuranEvent.PrefetchPage -> loadPage(event.pageNumber, makeActive = false)
             is QuranEvent.LoadMushafPageLayout -> loadMushafPageLayout(event.pageNumber)
             is QuranEvent.Search -> {
                 telemetry.search("quran", event.query.trim().length)
                 search(event.query)
             }
-            is QuranEvent.SetTopTab -> _homeState.update { it.copy(topTab = event.index) }
-            is QuranEvent.SetTab -> _homeState.update { it.copy(selectedTab = event.index) }
+            is QuranEvent.SetTopTab -> {
+                telemetry.featureUsed(AppAnalytics.Feature.QURAN, "set_top_tab")
+                _homeState.update { it.copy(topTab = event.index) }
+            }
+            is QuranEvent.SetTab -> {
+                telemetry.featureUsed(AppAnalytics.Feature.QURAN, "set_tab")
+                _homeState.update { it.copy(selectedTab = event.index) }
+            }
             is QuranEvent.ToggleBookmark -> {
                 telemetry.featureUsed(AppAnalytics.Feature.QURAN, "toggle_bookmark")
                 toggleBookmark(
@@ -253,14 +267,23 @@ class QuranViewModel @Inject constructor(
                 )
             }
 
-            is QuranEvent.ToggleFavorite -> toggleFavorite(
-                event.ayahId,
-                event.surahNumber,
-                event.ayahNumber
-            )
+            is QuranEvent.ToggleFavorite -> {
+                telemetry.featureUsed(AppAnalytics.Feature.QURAN, AppAnalytics.Action.TOGGLE_FAVORITE)
+                toggleFavorite(
+                    event.ayahId,
+                    event.surahNumber,
+                    event.ayahNumber
+                )
+            }
 
-            is QuranEvent.RemoveFavorite -> removeFavorite(event.favorite)
-            QuranEvent.UndoRemoveFavorite -> undoRemoveFavorite()
+            is QuranEvent.RemoveFavorite -> {
+                telemetry.featureUsed(AppAnalytics.Feature.QURAN, "remove_favorite")
+                removeFavorite(event.favorite)
+            }
+            QuranEvent.UndoRemoveFavorite -> {
+                telemetry.featureUsed(AppAnalytics.Feature.QURAN, "undo_remove_favorite")
+                undoRemoveFavorite()
+            }
             QuranEvent.DismissFavoriteUndo ->
                 _homeState.update { it.copy(recentlyRemovedFavorite = null) }
 
@@ -310,12 +333,32 @@ class QuranViewModel @Inject constructor(
                 telemetry.featureUsed(AppAnalytics.Feature.QURAN, "play_surah_audio")
                 playSurahFromInfo(event.surahNumber)
             }
-            is QuranEvent.LoadSurahInfo -> loadSurahInfo(event.surahNumber)
-            is QuranEvent.MarkAyahsReadForKhatam -> markAyahsReadForKhatam(event.ayahIds)
-            is QuranEvent.UnmarkAyahReadForKhatam -> unmarkAyahReadForKhatam(event.ayahId)
-            is QuranEvent.ToggleKhatamAyah -> toggleKhatamAyah(event.ayahId)
-            is QuranEvent.MarkSurahAsReadForKhatam -> markSurahAsReadForKhatam(event.surahNumber)
-            is QuranEvent.TogglePageKhatam -> togglePageKhatam(event.ayahIds)
+            is QuranEvent.LoadSurahInfo -> {
+                telemetry.featureUsed(AppAnalytics.Feature.QURAN, "open_surah_info")
+                loadSurahInfo(event.surahNumber)
+            }
+            // Khatam marking is the app's core engagement loop — a reader working through a
+            // whole Qur'an — and not one of its events was recorded, so the loop the feature
+            // exists for was invisible while `toggle_bookmark` was counted.
+            //
+            // `MarkAyahsReadForKhatam` and `UnmarkAyahReadForKhatam` were deleted rather than
+            // instrumented: adding analytics surfaced them as having no producer in any
+            // screen, and `ToggleKhatamAyah` — which the reader does dispatch — already calls
+            // `markAyahsRead`/`unmarkAyahRead` for exactly the same effect. Instrumenting them
+            // would have produced two more metrics that read zero for ever, which is the
+            // defect this issue is about.
+            is QuranEvent.ToggleKhatamAyah -> {
+                telemetry.featureUsed(AppAnalytics.Feature.QURAN, "khatam_toggle_ayah")
+                toggleKhatamAyah(event.ayahId)
+            }
+            is QuranEvent.MarkSurahAsReadForKhatam -> {
+                telemetry.featureUsed(AppAnalytics.Feature.QURAN, "khatam_mark_surah")
+                markSurahAsReadForKhatam(event.surahNumber)
+            }
+            is QuranEvent.TogglePageKhatam -> {
+                telemetry.featureUsed(AppAnalytics.Feature.QURAN, "khatam_toggle_page")
+                togglePageKhatam(event.ayahIds)
+            }
         }
     }
 
@@ -1086,24 +1129,6 @@ class QuranViewModel @Inject constructor(
         if (unreadIds.isEmpty()) return
         viewModelScope.launch {
             khatamUseCases.markAyahsRead(khatamId, unreadIds)
-        }
-    }
-
-    private fun unmarkAyahReadForKhatam(ayahId: Int) {
-        val khatamId = _readerState.value.activeKhatamId ?: return
-        viewModelScope.launch {
-            khatamUseCases.unmarkAyahRead(khatamId, ayahId)
-        }
-    }
-
-    private fun markAyahsReadForKhatam(ayahIds: List<Int>) {
-        val khatamId = _readerState.value.activeKhatamId ?: return
-        val readIds = _readerState.value.khatamReadAyahIds
-        val newIds = ayahIds.filter { it !in readIds }
-        if (newIds.isEmpty()) return
-
-        viewModelScope.launch {
-            khatamUseCases.markAyahsRead(khatamId, newIds)
         }
     }
 

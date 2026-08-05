@@ -149,11 +149,22 @@ class DuaViewModel @Inject constructor(
         }
     }
 
+    /**
+     * `settingChanged`, not `featureUsed`: this writes a persisted preference, so it belongs on
+     * the settings dashboard beside every other one rather than in the dua feature's usage
+     * counter, where "how many people prefer A–Z" was not answerable — the old event recorded
+     * that the sort was toggled and not which way it landed.
+     *
+     * Recorded after the write for the same reason the prayer events are: a failed write is not
+     * a setting change.
+     */
     private fun toggleCategoriesSort() {
-        telemetry.featureUsed(DOMAIN, "toggle_category_sort")
+        val alphabetical = !_collectionState.value.sortAlphabetical
         launchSafely(telemetry, DOMAIN, "toggle_category_sort") {
-            settingsRepository.setDuaCategoriesSortAlphabetical(
-                !_collectionState.value.sortAlphabetical
+            settingsRepository.setDuaCategoriesSortAlphabetical(alphabetical)
+            telemetry.settingChanged(
+                "dua_categories_sort",
+                if (alphabetical) "alphabetical" else "curated",
             )
         }
     }
