@@ -327,7 +327,6 @@ class ZakatViewModel @Inject constructor(
                     )
                 }
             },
->>>>>>> 0a179b62 (fix(zakat): a failed sum does not take the figures with it)
         ) {
             zakatUseCases.getAllHistory().collect { entries ->
                 val totalPaid = zakatUseCases.getTotalPaid()
