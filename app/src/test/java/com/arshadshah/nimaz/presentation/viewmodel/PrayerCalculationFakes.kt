@@ -5,6 +5,7 @@ import com.arshadshah.nimaz.domain.model.AsrCalculation
 import com.arshadshah.nimaz.domain.model.CalculationMethod
 import com.arshadshah.nimaz.domain.model.HighLatitudeRule
 import com.arshadshah.nimaz.domain.model.PrayerCalculationSettings
+import com.arshadshah.nimaz.domain.model.PrayerRecord
 import com.arshadshah.nimaz.domain.model.PrayerTime
 import com.arshadshah.nimaz.domain.model.PrayerType
 import com.arshadshah.nimaz.domain.model.ResolvedLocation
@@ -92,6 +93,14 @@ class FakePrayerTimetableRepository(
 
     override suspend fun getSunnahNightTimes(date: LocalDate): SunnahNightTimes =
         getSunnahNightTimes(date, settingsFlow.value)
+
+    /**
+     * A day with nothing tracked. `PrayerTimesViewModel` collects this to decorate each row with
+     * its status, so it has to answer — but "which prayers were marked" is not what this double
+     * is about, and a test that cares should use a real repository mock.
+     */
+    override fun getPrayerRecordsForDate(date: Long): Flow<List<PrayerRecord>> =
+        MutableStateFlow(emptyList())
 }
 
 /** Delegation target: every member fails, so only the overridden ones are usable. */

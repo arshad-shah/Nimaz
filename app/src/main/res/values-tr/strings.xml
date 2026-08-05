@@ -1711,6 +1711,7 @@
     <string name="night_worship_opens_in">Başlamasına</string>
     <string name="night_worship_closed">Bu gecenin vakti geçti</string>
     <string name="night_worship_times_unavailable">Vakitleri görmek için konumunuzu ayarlayın</string>
+    <string name="night_worship_times_failed">Bu gecenin vakitleri hesaplanamadı.</string>
     <string name="night_worship_rakah_title">Kılınan rekât</string>
     <string name="night_worship_rakah_body">Gece namazı ikişer rekât kılınır</string>
     <string name="night_worship_add_pair">+2 rekât</string>

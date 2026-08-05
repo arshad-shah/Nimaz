@@ -14,7 +14,6 @@ sealed interface SettingsEvent {
     data class SetHijriPrimary(val enabled: Boolean) : SettingsEvent
     data class SetHijriDayOffset(val days: Int) : SettingsEvent
     data class Set24HourFormat(val enabled: Boolean) : SettingsEvent
-    data class SetShowSeconds(val enabled: Boolean) : SettingsEvent
     data class SetHapticFeedback(val enabled: Boolean) : SettingsEvent
     data class SetShowIslamicPatterns(val enabled: Boolean) : SettingsEvent
     data class SetPatternStyle(val style: NimazPatternStyle) : SettingsEvent
@@ -26,8 +25,6 @@ sealed interface SettingsEvent {
     data class SetCalculationMethod(val method: CalculationMethod) : SettingsEvent
     data class SetAsrMethod(val method: AsrJuristicMethod) : SettingsEvent
     data class SetHighLatitudeRule(val rule: HighLatitudeRule) : SettingsEvent
-    data class SetFajrAngle(val angle: Double) : SettingsEvent
-    data class SetIshaAngle(val angle: Double) : SettingsEvent
     data class SetPrayerAdjustment(val prayer: String, val minutes: Int) : SettingsEvent
 
     // Notifications
@@ -97,7 +94,6 @@ sealed interface SettingsEvent {
     data class AddLocation(val location: Location) : SettingsEvent
     data class RemoveLocation(val location: Location) : SettingsEvent
     data class ToggleLocationFavorite(val locationId: Long) : SettingsEvent
-    data class SetAutoDetectLocation(val enabled: Boolean) : SettingsEvent
 
     // Actions
     data object ResetToDefaults : SettingsEvent

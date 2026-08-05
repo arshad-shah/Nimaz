@@ -28,7 +28,6 @@ internal fun SettingsEvent.asSettingChange(): Pair<String, String>? = when (this
     is SettingsEvent.SetHijriPrimary -> "hijri_primary" to enabled.toString()
     is SettingsEvent.SetHijriDayOffset -> "hijri_day_offset" to days.toString()
     is SettingsEvent.Set24HourFormat -> "24_hour_format" to enabled.toString()
-    is SettingsEvent.SetShowSeconds -> "show_seconds" to enabled.toString()
     is SettingsEvent.SetHapticFeedback -> "haptic_feedback" to enabled.toString()
     is SettingsEvent.SetShowIslamicPatterns -> "show_islamic_patterns" to enabled.toString()
     is SettingsEvent.SetPatternStyle -> "pattern_style" to style.name
@@ -40,8 +39,6 @@ internal fun SettingsEvent.asSettingChange(): Pair<String, String>? = when (this
     is SettingsEvent.SetCalculationMethod -> "calculation_method" to method.name
     is SettingsEvent.SetAsrMethod -> "asr_method" to method.name
     is SettingsEvent.SetHighLatitudeRule -> "high_latitude_rule" to rule.name
-    is SettingsEvent.SetFajrAngle -> "fajr_angle" to angle.toString()
-    is SettingsEvent.SetIshaAngle -> "isha_angle" to angle.toString()
     // Keyed by prayer, because "someone adjusted a prayer by 3 minutes" is not the question —
     // "which prayer, and by how much" is, and a per-prayer key is what makes a systematic
     // offset (everyone nudging Fajr the same way) visible as a shape rather than a mean.
@@ -108,7 +105,6 @@ internal fun SettingsEvent.asSettingChange(): Pair<String, String>? = when (this
     is SettingsEvent.AddLocation -> "saved_locations" to "added"
     is SettingsEvent.RemoveLocation -> "saved_locations" to "removed"
     is SettingsEvent.ToggleLocationFavorite -> "saved_locations" to "favourite_toggled"
-    is SettingsEvent.SetAutoDetectLocation -> "auto_detect_location" to enabled.toString()
 
     // -- Not setting changes ---------------------------------------------------
     SettingsEvent.PreviewAdhanSound,

@@ -1705,6 +1705,7 @@
     <string name="night_worship_opens_in">Beginnt in</string>
     <string name="night_worship_closed">Das Zeitfenster heute Nacht ist vorbei</string>
     <string name="night_worship_times_unavailable">Lege deinen Standort fest, um die Zeiten zu sehen</string>
+    <string name="night_worship_times_failed">Die Zeiten für heute Nacht konnten nicht ermittelt werden.</string>
     <string name="night_worship_rakah_title">Gebetene Rakat</string>
     <string name="night_worship_rakah_body">Das Nachtgebet wird paarweise verrichtet</string>
     <string name="night_worship_add_pair">+2 Rakat</string>

@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
+import com.arshadshah.nimaz.core.time.TodayProvider
 import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.core.monitoring.catchAndReport
 import com.arshadshah.nimaz.core.util.LocaleHelper
@@ -103,6 +104,7 @@ class SettingsViewModel @Inject constructor(
     private val telemetry: Telemetry,
     val adhanAudioManager: AdhanAudioManager,
     private val userDatabase: NimazUserDatabase,
+    private val todayProvider: TodayProvider,
 ) : ViewModel() {
 
     private val _generalState = MutableStateFlow(GeneralSettingsUiState())
@@ -174,11 +176,22 @@ class SettingsViewModel @Inject constructor(
      * The prayer notification rows show each prayer's time in their header, so the setting
      * reads against the thing it governs rather than as an abstraction.
      */
-    val todayPrayerTimes: StateFlow<PrayerTimes?> = prayerUseCases.getCurrentLocation()
-        .map { location ->
+    /**
+     * Today's times for the notification rows — re-derived when the **day** changes, not only
+     * when the location does.
+     *
+     * `LocalDate.now()` was read inside the `map`, so the date was fixed at whatever it was when
+     * `getCurrentLocation()` last emitted. A settings screen left open across midnight went on
+     * showing yesterday's prayer times next to each notification row. Combining with
+     * `todayChanges` makes the day an input rather than an ambient read.
+     */
+    val todayPrayerTimes: StateFlow<PrayerTimes?> = combine(
+        prayerUseCases.getCurrentLocation(),
+        todayProvider.todayChanges,
+    ) { location, today ->
             location?.let {
                 runCatching {
-                    prayerUseCases.getPrayerTimesForDate(LocalDate.now(), it)
+                    prayerUseCases.getPrayerTimesForDate(today, it)
                 }.getOrNull()
             }
         }
@@ -350,7 +363,6 @@ class SettingsViewModel @Inject constructor(
                 viewModelScope.launch { settingsRepository.setUse24HourFormat(event.enabled) }
             }
 
-            is SettingsEvent.SetShowSeconds -> _generalState.update { it.copy(showSeconds = event.enabled) }
             is SettingsEvent.SetHapticFeedback -> {
                 _generalState.update { it.copy(hapticFeedback = event.enabled) }
                 viewModelScope.launch { settingsRepository.setHapticFeedback(event.enabled) }
@@ -417,16 +429,6 @@ class SettingsViewModel @Inject constructor(
                     settingsRepository.setHighLatitudeRule(event.rule.name)
                     rescheduleNotifications()
                 }
-            }
-
-            is SettingsEvent.SetFajrAngle -> {
-                _prayerState.update { it.copy(fajrAngle = event.angle) }
-                viewModelScope.launch { rescheduleNotifications() }
-            }
-
-            is SettingsEvent.SetIshaAngle -> {
-                _prayerState.update { it.copy(ishaAngle = event.angle) }
-                viewModelScope.launch { rescheduleNotifications() }
             }
 
             is SettingsEvent.SetPrayerAdjustment -> {
@@ -764,12 +766,6 @@ class SettingsViewModel @Inject constructor(
             is SettingsEvent.AddLocation -> addLocation(event.location)
             is SettingsEvent.RemoveLocation -> removeLocation(event.location)
             is SettingsEvent.ToggleLocationFavorite -> toggleLocationFavorite(event.locationId)
-            is SettingsEvent.SetAutoDetectLocation -> _locationState.update {
-                it.copy(
-                    autoDetectLocation = event.enabled
-                )
-            }
-
             // Actions
             SettingsEvent.ResetToDefaults -> resetToDefaults()
             SettingsEvent.TestNotification -> {
@@ -1075,12 +1071,29 @@ class SettingsViewModel @Inject constructor(
         telemetry.featureUsed(AppAnalytics.Feature.SETTINGS, "reset_to_defaults")
         viewModelScope.launch {
             settingsRepository.clearAllData()
-            _generalState.update { GeneralSettingsUiState() }
-            _prayerState.update { PrayerSettingsUiState() }
-            _notificationState.update { NotificationSettingsUiState() }
-            _quranState.update { QuranSettingsUiState() }
+            resetAllUiState()
             _shouldRestart.value = true
         }
+    }
+
+    /**
+     * Every settings surface back to its defaults, in one place.
+     *
+     * The two reset paths disagreed about what "reset everything" means: `resetToDefaults`
+     * cleared general, prayer, notification and Quran; `deleteAllData` cleared those plus
+     * location; **neither** cleared Dua or Hadith. So after "reset to defaults" the Dua and
+     * Hadith settings screens went on showing pre-reset font sizes. `_shouldRestart` papered
+     * over it — the app restarts and reloads — but two functions that disagree about the same
+     * word are a trap for the next person to add a state holder to only one of them.
+     */
+    private fun resetAllUiState() {
+        _generalState.update { GeneralSettingsUiState() }
+        _prayerState.update { PrayerSettingsUiState() }
+        _notificationState.update { NotificationSettingsUiState() }
+        _quranState.update { QuranSettingsUiState() }
+        _duaState.update { DuaSettingsUiState() }
+        _hadithState.update { HadithSettingsUiState() }
+        _locationState.update { LocationSettingsUiState() }
     }
 
     private fun deleteAllData() {
@@ -1109,11 +1122,7 @@ class SettingsViewModel @Inject constructor(
             settingsRepository.clearAllData()
 
             // Reset UI state to defaults
-            _generalState.update { GeneralSettingsUiState() }
-            _prayerState.update { PrayerSettingsUiState() }
-            _notificationState.update { NotificationSettingsUiState() }
-            _quranState.update { QuranSettingsUiState() }
-            _locationState.update { LocationSettingsUiState() }
+            resetAllUiState()
             _shouldRestart.value = true
         }
     }
