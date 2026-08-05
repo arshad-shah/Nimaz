@@ -1145,8 +1145,8 @@ fun NavGraph(
             taggedComposable<Route.Licenses>(ScreenTags.Licenses) {
                 LicensesScreen(
                     onNavigateBack = { navController.popBackStack() },
-                    onNavigateToDetail = { hashCode ->
-                        navController.navigate(Route.LicenseDetail(hashCode))
+                    onNavigateToDetail = { libraryId ->
+                        navController.navigate(Route.LicenseDetail(libraryId))
                     }
                 )
             }
@@ -1154,7 +1154,7 @@ fun NavGraph(
             taggedComposable<Route.LicenseDetail>(ScreenTags.LicenseDetail) { backStackEntry ->
                 val args = backStackEntry.toRoute<Route.LicenseDetail>()
                 LicenseDetailScreen(
-                    libraryHashCode = args.libraryHashCode,
+                    libraryId = args.libraryHashCode,
                     onNavigateBack = { navController.popBackStack() }
                 )
             }
