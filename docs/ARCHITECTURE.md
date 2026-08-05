@@ -1303,8 +1303,13 @@ copy anything listed as Open.
 # Unit tests
 ./gradlew :app:testDebugUnitTest      # or: ./gradlew test
 
-# Lint
-./gradlew lint
+# Lint — CI-blocking, and slow (~10 min). A lint *error* fails the PR check.
+# It is the only gate that catches LocalContextGetResourceValueCall (a context.getString
+# inside a composable, which will not re-resolve across a configuration change) and
+# MissingTranslation (a new string missing from a shipped locale). A pass-through string
+# with genuinely nothing to localise declares translatable="false" rather than shipping
+# identical copies to five locales.
+./gradlew :app:lintDebug
 
 # Full CI lane (Gradle tests + lint), as run on PRs
 bundle exec fastlane android test

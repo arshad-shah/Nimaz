@@ -120,10 +120,16 @@ fun BookmarksScreen(
     // are still correct, so a delete that did not go through must not take the list with
     // it. No action — there is nothing useful to offer beyond trying again by hand.
     val writeError = state.writeError
+    // Resolved in composition, not with `context.getString` inside the effect. A Context read
+    // through LocalContext.current does not re-resolve when the configuration changes, so a
+    // locale or font-scale change would leave the snackbar reading from the old resources —
+    // which is what `LocalContextGetResourceValueCall` is pointing at. The Undo snackbar above
+    // already does it this way; this is the same shape, with a @StringRes that varies.
+    val writeErrorMessage = writeError?.let { stringResource(it.message) }
     LaunchedEffect(writeError) {
-        if (writeError != null) {
+        if (writeErrorMessage != null) {
             snackbarHostState.showSnackbar(
-                message = context.getString(writeError.message),
+                message = writeErrorMessage,
                 duration = SnackbarDuration.Short,
             )
             viewModel.onEvent(BookmarksEvent.DismissWriteError)

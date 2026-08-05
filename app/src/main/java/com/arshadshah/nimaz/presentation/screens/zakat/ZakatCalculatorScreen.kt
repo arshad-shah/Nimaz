@@ -21,7 +21,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
@@ -52,10 +51,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -175,19 +174,34 @@ private fun ZakatCompactContent(
     val listState = rememberLazyListState()
     val onShareCalculation = rememberZakatShareAction(state)
 
-    // Threshold on the first item's own scroll offset, not an accumulated delta. A delta drifts
-    // over a long form and can strand the hero half-collapsed after a fling; this is derived from
-    // where the list actually is, so it cannot disagree with the scroll position.
-    val collapsed by remember {
-        derivedStateOf {
-            listState.firstVisibleItemIndex > 0 ||
-                listState.firstVisibleItemScrollOffset > HeroCollapseThresholdPx
-        }
+    // Collapse past a threshold, but **re-expand only at a true top**, and the asymmetry is the
+    // whole point rather than a nicety.
+    //
+    // The hero sits above the list and the list takes the height the hero leaves, so the trigger
+    // is reading a scroll position that the trigger's own outcome changes. With one symmetric
+    // threshold that is a loop: scrolling past it collapses the hero, the taller viewport lets the
+    // list clamp its offset back under the threshold, the hero expands, the shorter viewport pushes
+    // the offset back over it. Whether that settles expanded, settles collapsed or flickers depends
+    // on the exact content height, which is why it presented as a hero that simply never
+    // collapsed.
+    //
+    // Re-expanding only at offset 0 breaks it, because clamping can lower the offset but never
+    // raise it. Where collapsing frees enough room for the whole form, the clamp lands on 0, the
+    // hero expands, and nothing moves it again — expanded is the correct answer there anyway.
+    var collapsed by remember { mutableStateOf(false) }
+    // Written from an effect, never during composition. A `collapsed = …` in the composition body
+    // compiles and even mostly works, and it is the shape that turns a layout that feeds back into
+    // its own trigger from a settling loop into a non-settling one.
+    LaunchedEffect(listState) {
+        snapshotFlow { listState.firstVisibleItemIndex to listState.firstVisibleItemScrollOffset }
+            .collect { (index, offset) ->
+                collapsed = when {
+                    index == 0 && offset == 0 -> false
+                    index > 0 || offset > HeroCollapseThresholdPx -> true
+                    else -> collapsed
+                }
+            }
     }
-    val collapseProgress by animateFloatAsState(
-        targetValue = if (collapsed) 1f else 0f,
-        label = "zakat_hero_collapse",
-    )
 
     Column(modifier = modifier) {
         // Above the LazyColumn, not inside it. The total is what the whole task is about, and a
@@ -199,7 +213,7 @@ private fun ZakatCompactContent(
             isAboveNisab = state.calculation?.isAboveNisab ?: false,
             nisabType = state.nisabType,
             currency = state.currency,
-            collapseProgress = collapseProgress,
+            collapsed = collapsed,
             modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp),
         )
 
@@ -714,11 +728,11 @@ private fun ZakatResultSummaryCard(
     nisabType: NisabType,
     currency: String,
     modifier: Modifier = Modifier,
-    collapseProgress: Float = 0f,
+    collapsed: Boolean = false,
 ) {
     ZakatSummaryHero(
         modifier = modifier,
-        collapseProgress = collapseProgress,
+        collapsed = collapsed,
         label = stringResource(R.string.zakat_due),
         amount = formatCurrency(zakatDue, currency),
         // Below nisab nothing is owed, so the rate line would be misleading —

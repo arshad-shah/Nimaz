@@ -127,8 +127,16 @@ The obligations, in short:
 ```bash
 ./gradlew :app:compileDebugKotlin     # runs KSP → validates Hilt + Room wiring
 ./gradlew :app:testDebugUnitTest
+./gradlew :app:lintDebug              # SLOW (~10 min) and CI-blocking — do not skip it
 python3 scripts/check_docs.py         # docs still describe the code (no toolchain needed)
 ```
+
+**`lintDebug` is a real gate, not an optional extra.** `fastlane/Fastfile`'s `test` lane runs
+`gradle test` *and* `gradle lint`, so every PR check fails on a lint **error** — and lint catches a
+class of defect the other three cannot: `LocalContextGetResourceValueCall` (a `context.getString`
+inside a composable, which does not re-resolve across a configuration change) and
+`MissingTranslation` (a new string absent from a shipped locale). Neither breaks a build or a test.
+It is slow, and running it is still cheaper than a red `dev`.
 
 Requires JDK 21 + Android SDK (compileSdk 36); set `sdk.dir` in `local.properties` or
 `ANDROID_HOME`. Develop on a feature branch; do not push to `dev` without explicit approval.
