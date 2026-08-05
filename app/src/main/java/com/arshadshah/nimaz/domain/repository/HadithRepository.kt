@@ -25,6 +25,9 @@ interface HadithRepository {
     fun getHadithsByChapter(chapterId: String): Flow<List<Hadith>>
     fun getHadithsByBook(bookId: String): Flow<List<Hadith>>
     suspend fun getHadithById(hadithId: String): Hadith?
+
+    /** Batched [getHadithById]; order is not guaranteed, look results up by id. */
+    suspend fun getHadithsByIds(hadithIds: List<String>): List<Hadith>
     suspend fun getHadithByNumber(bookId: String, hadithNumber: Int): Hadith?
 
     /**

@@ -1786,4 +1786,16 @@
     <string name="fasting_log_on_subtitle">Enregistré — appuyez pour annuler</string>
     <string name="fasting_log_off_subtitle">Pas encore enregistré</string>
     <string name="fasting_log_managed_in_sheet">Géré dans les détails du jour</string>
+    <string name="bookmarks_search_placeholder">Rechercher dans les favoris</string>
+    <string name="bookmarks_sort">Trier</string>
+    <string name="bookmarks_sort_newest">Plus récents d’abord</string>
+    <string name="bookmarks_sort_oldest">Plus anciens d’abord</string>
+    <string name="bookmarks_sort_type">Par type</string>
+    <string name="bookmarks_sort_alphabetical">A–Z</string>
+    <string name="bookmarks_no_matches">Aucun résultat</string>
+    <string name="bookmarks_no_matches_hint">Essayez une autre recherche ou retirez le filtre.</string>
+    <string name="bookmarks_clear_all">Effacer tous les favoris</string>
+    <string name="bookmarks_clear_all_title">Effacer tous les favoris ?</string>
+    <string name="bookmarks_clear_all_confirm">Tout effacer</string>
+    <string name="bookmarks_clear_all_body">Cela supprime les %1$d favoris — Coran, Hadith et invocations. Action irréversible.</string>
 </resources>

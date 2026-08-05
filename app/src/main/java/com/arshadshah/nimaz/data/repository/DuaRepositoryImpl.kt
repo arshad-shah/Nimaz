@@ -64,6 +64,12 @@ class DuaRepositoryImpl @Inject constructor(
             .map { it.toDomain() }
     }
 
+    override suspend fun getDuasByIds(duaIds: List<String>): List<Dua> {
+        val numeric = duaIds.mapNotNull { it.toIntOrNull() }
+        if (numeric.isEmpty()) return emptyList()
+        return duaDao.getDuasByIds(numeric).map { it.toDomain() }
+    }
+
     override suspend fun getDuaById(duaId: String): Dua? {
         return duaDao.getDuaById(duaId.toIntOrNull() ?: return null)?.toDomain()
     }

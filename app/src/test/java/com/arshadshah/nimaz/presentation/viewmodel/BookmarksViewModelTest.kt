@@ -9,6 +9,7 @@ import com.arshadshah.nimaz.domain.usecase.DuaUseCases
 import com.arshadshah.nimaz.domain.usecase.HadithUseCases
 import com.arshadshah.nimaz.domain.usecase.QuranUseCases
 import com.google.common.truth.Truth.assertThat
+import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
@@ -147,6 +148,23 @@ class BookmarksViewModelTest {
 
         assertThat(vm.bookmarksState.value.recentlyDeleted).isNull()
         coVerify(exactly = 0) { quran.insertBookmark(any()) }
+    }
+
+    @Test
+    fun `enrichment is one batched query, not one per bookmark`() = runTest {
+        val getAyahById = mockk<com.arshadshah.nimaz.domain.usecase.GetAyahByIdUseCase>(relaxed = true)
+        coEvery { getAyahById.forIds(any()) } returns emptyMap()
+        every { quran.getAyahById } returns getAyahById
+        quranBookmarks.value = (1..50).map { quranBookmark(it, it.toLong()) }
+
+        viewModel()
+        advanceUntilIdle()
+
+        // Was a suspend call per row inside the collector: 50 bookmarks meant 50
+        // sequential round-trips on every re-emission, and clearing them all re-emitted
+        // once per delete — O(N^2) on the most destructive action in the feature.
+        coVerify(exactly = 1) { getAyahById.forIds(any()) }
+        coVerify(exactly = 0) { getAyahById.invoke(any()) }
     }
 
     @Test

@@ -1922,4 +1922,16 @@
     <string name="fasting_log_on_subtitle">Logged — tap to undo</string>
     <string name="fasting_log_off_subtitle">Not logged yet</string>
     <string name="fasting_log_managed_in_sheet">Managed in the day\'s details</string>
+    <string name="bookmarks_search_placeholder">Search bookmarks</string>
+    <string name="bookmarks_sort">Sort</string>
+    <string name="bookmarks_sort_newest">Newest first</string>
+    <string name="bookmarks_sort_oldest">Oldest first</string>
+    <string name="bookmarks_sort_type">By type</string>
+    <string name="bookmarks_sort_alphabetical">A–Z</string>
+    <string name="bookmarks_no_matches">No matches</string>
+    <string name="bookmarks_no_matches_hint">Try a different search, or clear the filter.</string>
+    <string name="bookmarks_clear_all">Clear all bookmarks</string>
+    <string name="bookmarks_clear_all_title">Clear all bookmarks?</string>
+    <string name="bookmarks_clear_all_confirm">Clear all</string>
+    <string name="bookmarks_clear_all_body">This removes all %1$d bookmarks — Qur\'an, Hadith and Dua. It cannot be undone.</string>
 </resources>

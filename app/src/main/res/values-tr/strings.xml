@@ -1757,4 +1757,16 @@
     <string name="fasting_log_on_subtitle">Kaydedildi — geri almak için dokunun</string>
     <string name="fasting_log_off_subtitle">Henüz kaydedilmedi</string>
     <string name="fasting_log_managed_in_sheet">Gün ayrıntılarında yönetilir</string>
+    <string name="bookmarks_search_placeholder">Yer imlerinde ara</string>
+    <string name="bookmarks_sort">Sırala</string>
+    <string name="bookmarks_sort_newest">Önce en yeni</string>
+    <string name="bookmarks_sort_oldest">Önce en eski</string>
+    <string name="bookmarks_sort_type">Türe göre</string>
+    <string name="bookmarks_sort_alphabetical">A–Z</string>
+    <string name="bookmarks_no_matches">Eşleşme yok</string>
+    <string name="bookmarks_no_matches_hint">Farklı bir arama deneyin veya filtreyi kaldırın.</string>
+    <string name="bookmarks_clear_all">Tüm yer imlerini sil</string>
+    <string name="bookmarks_clear_all_title">Tüm yer imleri silinsin mi?</string>
+    <string name="bookmarks_clear_all_confirm">Tümünü sil</string>
+    <string name="bookmarks_clear_all_body">Bu, %1$d yer iminin tamamını siler — Kur\'an, Hadis ve Dua. Geri alınamaz.</string>
 </resources>
