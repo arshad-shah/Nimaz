@@ -8,8 +8,13 @@ import com.arshadshah.nimaz.domain.model.FastingStats
 import com.arshadshah.nimaz.domain.model.MakeupFast
 import java.time.LocalDate
 
+/**
+ * [selectedDate] has no default on purpose — a `LocalDate.now()` data-class default is
+ * evaluated once at construction and never again, which is the frozen-"today" shape behind
+ * the rollover bugs in #363. The ViewModel anchors it through `TodayProvider`.
+ */
 data class FastingTrackerUiState(
-    val selectedDate: LocalDate = LocalDate.now(),
+    val selectedDate: LocalDate,
     val todayRecord: FastRecord? = null,
     val isFastingToday: Boolean = false,
     val selectedFastType: FastType = FastType.VOLUNTARY,
@@ -48,10 +53,11 @@ data class RamadanTrackerUiState(
     val isLoading: Boolean = true
 )
 
+/** The month grid is anchored by the ViewModel — see [FastingTrackerUiState]. */
 data class FastingCalendarUiState(
     val records: List<FastRecord> = emptyList(),
-    val selectedMonth: Int = LocalDate.now().monthValue,
-    val selectedYear: Int = LocalDate.now().year,
+    val selectedMonth: Int,
+    val selectedYear: Int,
     val isLoading: Boolean = true
 )
 
@@ -71,9 +77,13 @@ data class FastingStatsUiState(
     val isLoading: Boolean = true
 )
 
+/**
+ * The day sheet. [date] is always supplied by the event that opens the sheet; the
+ * `LocalDate.now()` default it used to carry was never the date the sheet showed.
+ */
 data class FastManagementSheetState(
     val isVisible: Boolean = false,
-    val date: LocalDate = LocalDate.now(),
+    val date: LocalDate,
     val existingRecord: FastRecord? = null,
     val selectedStatus: FastStatus = FastStatus.FASTED,
     val selectedFastType: FastType = FastType.VOLUNTARY,

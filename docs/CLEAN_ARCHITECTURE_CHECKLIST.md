@@ -222,11 +222,27 @@ This one is **pervasive and lower priority** — listed so it's tracked, not bec
   `QaidaReaderViewModel` surface `audioManager.state` (a `data.audio` type) to the UI. This is an
   **accepted pattern** for playback features (see `ARCHITECTURE.md` §9). If desired, mirror the
   fields the UI needs into a domain/UI-state type to drop the `data.audio` import — optional.
+- [x] ~~**The managers themselves were public.** `QuranViewModel.audioManager` and
+  `SettingsViewModel.adhanAudioManager` were public `val`s, so the accepted "forward the engine's
+  flow" pattern had in fact handed screens `play`, `stop`, `setReciter` and `downloadAdhan` —
+  and `SelectReciterScreen` used it.~~ **Resolved.** Both are `private`; previewing a reciter is
+  `QuranEvent.PreviewReciter` and the adhan screen reads three named `StateFlow`s.
+  **Detect a regression:**
+  `grep -rn "val \(audioManager\|adhanAudioManager\)" app/src/main --include='*ViewModel.kt'`
+  — every match must be `private val`.
 
 ---
 
 ## AP-7 · General watchlist (no scripted detector — review during PRs)
 
+- [x] ~~**`LocalDate.now()` as a UiState data-class default.** Nine state types defaulted a date
+  field to `LocalDate.now()`. A default is evaluated once, when the state object is constructed,
+  so the value freezes for the life of the ViewModel — the calendar grid built at 23:59 kept
+  highlighting yesterday, and the fasting month grid built on 31 March stayed on March.~~
+  **Resolved.** Those fields are required constructor parameters now, so the compiler forces the
+  ViewModel to anchor them through `TodayProvider`. **Detect a regression:**
+  `grep -rn "= LocalDate.now()" app/src/main --include='*UiState.kt'` — must be empty. (The
+  bare name still appears in those files' KDoc, explaining why the parameter is required.)
 - [ ] **God ViewModels / mega-state:** a single VM owning many unrelated `StateFlow`s is fine for
   distinct sub-screens (house style), but watch for one VM serving several *features*.
 - [ ] **`!!` and unsafe casts** on domain/data boundaries — prefer safe mapping + defaults (see

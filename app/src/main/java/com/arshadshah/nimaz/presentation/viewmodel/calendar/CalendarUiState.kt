@@ -7,9 +7,14 @@ import com.arshadshah.nimaz.domain.model.IslamicEvent
 import com.arshadshah.nimaz.presentation.viewmodel.UiError
 import java.time.LocalDate
 
+/**
+ * [selectedDate] has no default on purpose — a `LocalDate.now()` data-class default is
+ * evaluated once at construction and never again, which is the frozen-"today" shape behind
+ * the rollover bugs in #363. The ViewModel anchors it through `TodayProvider`.
+ */
 data class CalendarUiState(
     val currentMonth: CalendarMonth? = null,
-    val selectedDate: LocalDate = LocalDate.now(),
+    val selectedDate: LocalDate,
     val selectedHijriDate: HijriDate? = null,
     val viewMode: CalendarViewMode = CalendarViewMode.GREGORIAN,
     val isLoading: Boolean = true,
@@ -31,9 +36,10 @@ data class EventsUiState(
     val isLoading: Boolean = true
 )
 
+/** [year] is anchored by the ViewModel — see [CalendarUiState]. */
 data class YearOverviewUiState(
     val months: List<CalendarMonth> = emptyList(),
-    val year: Int = LocalDate.now().year,
+    val year: Int,
     val isHijriYear: Boolean = false,
     val isLoading: Boolean = true
 )

@@ -7,6 +7,7 @@ import com.arshadshah.nimaz.core.feedback.CounterFeedback
 import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.core.monitoring.catchAndReport
+import com.arshadshah.nimaz.core.time.TodayProvider
 import com.arshadshah.nimaz.core.util.toUtcMidnightMillis
 import com.arshadshah.nimaz.domain.model.TasbihCategory
 import com.arshadshah.nimaz.domain.model.TasbihPreset
@@ -33,6 +34,7 @@ class TasbihViewModel @Inject constructor(
     private val tasbihUseCases: TasbihUseCases,
     private val tasbihSettings: TasbihSettings,
     private val feedback: CounterFeedback,
+    private val todayProvider: TodayProvider,
     private val telemetry: Telemetry,
 ) : ViewModel() {
 
@@ -564,7 +566,7 @@ class TasbihViewModel @Inject constructor(
     }
 
     private fun getTodayEpoch(): Long {
-        return LocalDate.now().toUtcMidnightMillis()
+        return todayProvider.today().toUtcMidnightMillis()
     }
 
     companion object {

@@ -85,4 +85,26 @@ class SearchViewModelTest {
         advanceUntilIdle()
         coVerify { searchLibrary.byTerms(listOf("patience", "sabr"), any()) }
     }
+
+    /**
+     * The count beside the results must be a count *of the results*. It reported
+     * `filteredResults.size` while four sibling fields reported the unfiltered per-corpus
+     * sizes, so narrowing to HADITH left a "40" from the Qur'an list sitting next to a list
+     * of 3. Those four fields are gone; this pins the one that is left to the filtered list.
+     */
+    @Test
+    fun `the result count follows the active filter`() = runTest {
+        coEvery { searchLibrary.invoke(any(), any()) } returns LibrarySearchResults(
+            quran = List(40) { mockk() },
+            hadith = List(3) { mockk() },
+        )
+        val vm = viewModel()
+        vm.onEvent(SearchEvent.UpdateQuery("noor"))
+        advanceUntilIdle()
+        assertThat(vm.statsState.value.totalResults).isEqualTo(43)
+
+        vm.onEvent(SearchEvent.SetFilter(SearchFilter.HADITH))
+        assertThat(vm.statsState.value.totalResults).isEqualTo(3)
+        assertThat(vm.searchState.value.filteredResults).hasSize(3)
+    }
 }

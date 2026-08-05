@@ -1,5 +1,7 @@
 package com.arshadshah.nimaz.presentation.viewmodel.content
 
+import java.time.LocalDate
+import com.arshadshah.nimaz.core.time.FakeTodayProvider
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorKind
 import com.arshadshah.nimaz.core.monitoring.RecordingTelemetry
@@ -70,7 +72,7 @@ class DuaViewModelErrorPathTest {
     @After
     fun tearDown() = Dispatchers.resetMain()
 
-    private fun viewModel() = DuaViewModel(duaUseCases, settingsRepository, telemetry)
+    private fun viewModel() = DuaViewModel(duaUseCases, settingsRepository, FakeTodayProvider(LocalDate.now()), telemetry)
 
     @Test
     fun `a failing category list clears the spinner instead of hanging on it`() = runTest {

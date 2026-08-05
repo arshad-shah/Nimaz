@@ -14,6 +14,7 @@ import com.arshadshah.nimaz.core.util.PrayerNotificationScheduler
 import com.arshadshah.nimaz.data.audio.AdhanAudioManager
 import com.arshadshah.nimaz.data.audio.AdhanDownloadService
 import com.arshadshah.nimaz.data.audio.AdhanSound
+import com.arshadshah.nimaz.data.audio.DownloadState
 import com.arshadshah.nimaz.domain.model.HighLatitudeRule
 import com.arshadshah.nimaz.domain.model.AsrCalculation
 import com.arshadshah.nimaz.domain.model.CalculationMethod
@@ -68,11 +69,6 @@ enum class AppLanguage(
     GERMAN("de", "German", "Deutsch", "DE")
 }
 
-enum class AsrJuristicMethod {
-    STANDARD, // Shafi'i, Maliki, Hanbali
-    HANAFI
-}
-
 /**
  * A small, read-only rollup of the notification settings that other screens (e.g. Prayer
  * Settings) show as summary subtitles. Sourced reactively from DataStore so it stays in sync
@@ -104,7 +100,7 @@ class SettingsViewModel @Inject constructor(
     // Only the new failure paths report through this so far. The ~40 existing AppAnalytics
     // calls in this file are the analytics catalog's job (#355), not this layer's.
     private val telemetry: Telemetry,
-    val adhanAudioManager: AdhanAudioManager,
+    private val adhanAudioManager: AdhanAudioManager,
     private val clearAllUserData: ClearAllUserDataUseCase,
     private val todayProvider: TodayProvider,
 ) : ViewModel() {
@@ -135,6 +131,15 @@ class SettingsViewModel @Inject constructor(
 
     private val _adhanPreviewError = MutableStateFlow<String?>(null)
     val adhanPreviewError: StateFlow<String?> = _adhanPreviewError.asStateFlow()
+
+    // The adhan engine's live playback and download state, named and re-exposed rather than
+    // reached through the manager itself. `ARCHITECTURE.md` §9 sanctions a playback ViewModel
+    // forwarding the engine's `StateFlow` for live progress; it does not sanction handing the
+    // screen the whole manager, which also gave it `play`, `stop` and `downloadAdhan`.
+    val adhanDownloadState: StateFlow<Map<AdhanSound, DownloadState>> =
+        adhanAudioManager.downloadState
+    val isAdhanPlaying: StateFlow<Boolean> = adhanAudioManager.isPlaying
+    val currentlyPlayingAdhan: StateFlow<AdhanSound?> = adhanAudioManager.currentlyPlaying
 
     /**
      * Reactive rollup of the notification settings for summary subtitles on other screens.
@@ -836,23 +841,37 @@ class SettingsViewModel @Inject constructor(
 
             // Prayer settings
             val calcMethodStr = settingsRepository.calculationMethod.first()
-            val calcMethod = try {
-                CalculationMethod.valueOf(calcMethodStr)
-            } catch (_: Exception) {
-                CalculationMethod.MUSLIM_WORLD_LEAGUE
-            }
+            // `valueOf` inside `catch (_: Exception)`, falling back to MWL. Two things were
+            // wrong with that: the exception carried the only evidence that a persisted
+            // method could not be read and it was dropped on the floor, and `valueOf` is
+            // stricter than what the app persists — `CalculationMethod.fromString` accepts
+            // "MWL" and "ISNA" style aliases, so a legitimately stored value could be
+            // silently reset to MWL. Prayer times are the app's core output; a settings
+            // screen quietly showing a method the user did not choose is not a small bug.
+            val calcMethod = CalculationMethod.parseOrNull(calcMethodStr)
+                ?: run {
+                    telemetry.error(
+                        AppAnalytics.Feature.SETTINGS,
+                        "unreadable_calculation_method",
+                    )
+                    CalculationMethod.MUSLIM_WORLD_LEAGUE
+                }
             val asrStr = settingsRepository.asrCalculation.first()
             // Routed through the domain parser rather than a hand-written comparison, so a
             // rename of AsrCalculation.HANAFI cannot compile and silently mean STANDARD.
-            val asrMethod = when (AsrCalculation.fromString(asrStr)) {
-                AsrCalculation.HANAFI -> AsrJuristicMethod.HANAFI
-                AsrCalculation.STANDARD -> AsrJuristicMethod.STANDARD
-            }
+            val asrMethod = AsrCalculation.fromString(asrStr)
             val highLatStr = settingsRepository.highLatitudeRule.first()
             // The domain parser accepts both the old and the new spelling, so a value
             // persisted by the deleted presentation enum still reads back correctly.
             val highLat = HighLatitudeRule.fromString(highLatStr)
-                ?: HighLatitudeRule.MIDDLE_OF_THE_NIGHT
+                ?: run {
+                    // Same rule as the calculation method above: fall back, but say so.
+                    telemetry.error(
+                        AppAnalytics.Feature.SETTINGS,
+                        "unreadable_high_latitude_rule",
+                    )
+                    HighLatitudeRule.MIDDLE_OF_THE_NIGHT
+                }
 
             val fajrAdj = settingsRepository.fajrAdjustment.first()
             val sunriseAdj = settingsRepository.sunriseAdjustment.first()

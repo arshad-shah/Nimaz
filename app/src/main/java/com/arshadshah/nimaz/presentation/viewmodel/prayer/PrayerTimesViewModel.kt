@@ -111,7 +111,7 @@ class PrayerTimesViewModel @Inject constructor(
             }
             PrayerTimesEvent.GoToToday -> {
                 telemetry.featureUsed(AppAnalytics.Feature.PRAYER_TIMES, "go_to_today")
-                selectDate(LocalDate.now())
+                selectDate(todayProvider.today())
             }
             is PrayerTimesEvent.SelectDate -> {
                 telemetry.featureUsed(AppAnalytics.Feature.PRAYER_TIMES, "select_date")

@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.presentation.viewmodel.settings
 
+import com.arshadshah.nimaz.domain.model.AsrCalculation
 import com.arshadshah.nimaz.domain.model.HighLatitudeRule
 import com.arshadshah.nimaz.domain.model.CalculationMethod
 import com.arshadshah.nimaz.domain.model.Location
@@ -24,7 +25,7 @@ data class GeneralSettingsUiState(
 
 data class PrayerSettingsUiState(
     val calculationMethod: CalculationMethod = CalculationMethod.MUSLIM_WORLD_LEAGUE,
-    val asrMethod: AsrJuristicMethod = AsrJuristicMethod.STANDARD,
+    val asrMethod: AsrCalculation = AsrCalculation.STANDARD,
     val highLatitudeRule: HighLatitudeRule = HighLatitudeRule.MIDDLE_OF_THE_NIGHT,
     val fajrAdjustment: Int = 0,
     val sunriseAdjustment: Int = 0,

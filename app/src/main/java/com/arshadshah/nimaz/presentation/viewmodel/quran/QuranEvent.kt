@@ -41,6 +41,17 @@ sealed interface QuranEvent {
     data class PlayAyahAudio(val ayahGlobalId: Int, val surahNumber: Int, val ayahNumber: Int) :
         QuranEvent
 
+    /**
+     * Play the opening ayah in [reciterId] so the user can hear a reciter before choosing
+     * them, without changing the persisted selection.
+     *
+     * The reciter screen used to reach through the ViewModel and call
+     * `quranViewModel.audioManager.setReciter(...)` itself. That is the UI mutating the audio
+     * engine directly — the exact coupling `ARCHITECTURE.md` §9 permits for *observing*
+     * `audioState` and not for driving it, and it is untestable from a ViewModel test.
+     */
+    data class PreviewReciter(val reciterId: String) : QuranEvent
+
     data object PauseAudio : QuranEvent
     data object ResumeAudio : QuranEvent
     data object StopAudio : QuranEvent

@@ -53,7 +53,8 @@ class CalendarViewModel @Inject constructor(
     private var yearJob: Job? = null
     private var upcomingJob: Job? = null
 
-    private val _calendarState = MutableStateFlow(CalendarUiState())
+    private val _calendarState =
+        MutableStateFlow(CalendarUiState(selectedDate = todayProvider.today()))
     val calendarState: StateFlow<CalendarUiState> = _calendarState.asStateFlow()
 
     private val _hijriState = MutableStateFlow(HijriCalendarUiState())
@@ -62,7 +63,8 @@ class CalendarViewModel @Inject constructor(
     private val _eventsState = MutableStateFlow(EventsUiState())
     val eventsState: StateFlow<EventsUiState> = _eventsState.asStateFlow()
 
-    private val _yearState = MutableStateFlow(YearOverviewUiState())
+    private val _yearState =
+        MutableStateFlow(YearOverviewUiState(year = todayProvider.today().year))
     val yearState: StateFlow<YearOverviewUiState> = _yearState.asStateFlow()
 
     init {
