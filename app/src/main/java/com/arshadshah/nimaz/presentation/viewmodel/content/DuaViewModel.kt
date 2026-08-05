@@ -6,6 +6,8 @@ import androidx.lifecycle.ViewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.Telemetry
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorKind
+import com.arshadshah.nimaz.presentation.viewmodel.UiError
 import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.core.util.toUtcMidnightMillis
 import com.arshadshah.nimaz.domain.model.Dua
@@ -126,7 +128,17 @@ class DuaViewModel @Inject constructor(
             telemetry,
             DOMAIN,
             "load_categories",
-            onFailure = { _collectionState.update { it.copy(isLoading = false, error = R.string.error_generic) } }
+            onFailure = { throwable ->
+                _collectionState.update {
+                    it.copy(
+                        isLoading = false,
+                        error = UiError(
+                            message = R.string.dua_collection_load_failed,
+                            details = throwable.message,
+                        ),
+                    )
+                }
+            }
         ) {
             combine(
                 duaUseCases.getAllCategories(),
@@ -201,7 +213,17 @@ class DuaViewModel @Inject constructor(
             telemetry,
             DOMAIN,
             "load_category",
-            onFailure = { _categoryState.update { it.copy(isLoading = false, error = R.string.error_generic) } }
+            onFailure = { throwable ->
+                _categoryState.update {
+                    it.copy(
+                        isLoading = false,
+                        error = UiError(
+                            message = R.string.dua_category_load_failed,
+                            details = throwable.message,
+                        ),
+                    )
+                }
+            }
         ) {
             val category = duaUseCases.getCategoryById(categoryId)
             _categoryState.update { it.copy(category = category) }
@@ -244,9 +266,14 @@ class DuaViewModel @Inject constructor(
         }
     }
 
-    private fun failReader(@StringRes error: Int) {
+    private fun failReader(@StringRes error: Int, kind: NimazErrorKind = NimazErrorKind.NOT_FOUND) {
         _readerState.update {
-            it.copy(duas = emptyList(), initialIndex = 0, isLoading = false, error = error)
+            it.copy(
+                duas = emptyList(),
+                initialIndex = 0,
+                isLoading = false,
+                error = UiError(message = error, kind = kind),
+            )
         }
     }
 
@@ -295,7 +322,17 @@ class DuaViewModel @Inject constructor(
             telemetry,
             DOMAIN,
             "load_occasion",
-            onFailure = { _categoryState.update { it.copy(isLoading = false, error = R.string.error_generic) } }
+            onFailure = { throwable ->
+                _categoryState.update {
+                    it.copy(
+                        isLoading = false,
+                        error = UiError(
+                            message = R.string.dua_category_load_failed,
+                            details = throwable.message,
+                        ),
+                    )
+                }
+            }
         ) {
             duaUseCases.getDuasByOccasion(occasion).collect { duas ->
                 _categoryState.update {

@@ -60,8 +60,11 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorKind
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorState
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
+import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.atoms.NimazPager
 import com.arshadshah.nimaz.presentation.components.atoms.NimazPillActionButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
@@ -134,21 +137,17 @@ fun DuaReaderScreen(
                 .padding(paddingValues)
         ) {
             when {
-                state.isLoading && duas.isEmpty() -> {
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center),
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
+                state.isLoading && duas.isEmpty() -> NimazLoadingState()
 
                 duas.isEmpty() -> {
                     // A load that failed says so; an id that resolved to nothing keeps the
-                    // "not found" wording. Both come from the ViewModel as a resource id.
-                    Text(
-                        text = stringResource(state.error ?: R.string.dua_reader_not_found),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.align(Alignment.Center)
+                    // "not found" wording — and the kind now carries which of the two it is,
+                    // so the two stop looking identical.
+                    val error = state.error
+                    NimazErrorState(
+                        title = stringResource(error?.message ?: R.string.dua_reader_not_found),
+                        kind = error?.kind ?: NimazErrorKind.NOT_FOUND,
+                        details = error?.details,
                     )
                 }
 

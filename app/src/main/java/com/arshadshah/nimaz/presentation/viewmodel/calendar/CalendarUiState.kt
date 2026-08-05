@@ -1,10 +1,10 @@
 package com.arshadshah.nimaz.presentation.viewmodel.calendar
 
-import androidx.annotation.StringRes
 import com.arshadshah.nimaz.domain.model.CalendarDay
 import com.arshadshah.nimaz.domain.model.CalendarMonth
 import com.arshadshah.nimaz.domain.model.HijriDate
 import com.arshadshah.nimaz.domain.model.IslamicEvent
+import com.arshadshah.nimaz.presentation.viewmodel.UiError
 import java.time.LocalDate
 
 data class CalendarUiState(
@@ -14,7 +14,7 @@ data class CalendarUiState(
     val viewMode: CalendarViewMode = CalendarViewMode.GREGORIAN,
     val isLoading: Boolean = true,
     /** A string resource, resolved by the screen — see ARCHITECTURE §6.1. */
-    @StringRes val error: Int? = null
+    val error: UiError? = null
 )
 
 data class HijriCalendarUiState(

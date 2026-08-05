@@ -31,7 +31,6 @@ class ScreenStateConventionTest {
      */
     private val acceptedSpinners = setOf(
         "AsmaUnNabiDetailScreen.kt",
-        "DuaReaderScreen.kt",
         "LocationScreen.kt",
         "QuranHomeScreen.kt",
         "QuranReaderScreen.kt",
@@ -76,13 +75,11 @@ class ScreenStateConventionTest {
      */
     private val acceptedSilentFailures = setOf(
         "AskViewModel.kt",
-        "BookmarksViewModel.kt",
         "CalendarViewModel.kt",
         "CatalogViewModel.kt",
         "DuaViewModel.kt",
         "FastingViewModel.kt",
         "HadithViewModel.kt",
-        "HelpViewModel.kt",
         "HomeViewModel.kt",
         "KhatamViewModel.kt",
         "LocationViewModel.kt",
@@ -142,17 +139,55 @@ class ScreenStateConventionTest {
     fun `every launchSafely records the failure for the user`() {
         val offenders = viewModelDir.walkTopDown()
             .filter { it.name.endsWith("ViewModel.kt") }
-            .filter { file ->
-                val text = file.readText()
-                val launches = Regex("""launchSafely\(""").findAll(text).count()
-                val handled = Regex("""onFailure\s*=""").findAll(text).count()
-                launches > handled
-            }
+            .filter { file -> silentLaunches(file.readText()).isNotEmpty() }
             .map { it.name }
             .toSortedSet()
 
         assertThat(offenders - acceptedSilentFailures).isEmpty()
         assertThat(acceptedSilentFailures - offenders).isEmpty()
+    }
+
+    /**
+     * The `launchSafely` calls in [source] that record nothing a user could see.
+     *
+     * Reads each call's own text rather than counting call sites against `onFailure`
+     * occurrences, which the first version of this check did. Counting cannot tell which
+     * `onFailure` belongs to which call, and — the reason it had to change — it cannot see
+     * a `launchSafely` whose inner flow already reports through a `catchAndReport`
+     * fallback. Several call sites are that shape and were being reported as silent when
+     * they are not.
+     *
+     * A call is satisfied when it passes `onFailure`, or its block guards a flow with a
+     * `catchAndReport` that has a non-empty fallback. `launchBestEffort` is not examined
+     * at all: choosing it is choosing to be exempt, out loud.
+     */
+    private fun silentLaunches(source: String): List<Int> {
+        val silent = mutableListOf<Int>()
+        var from = 0
+        while (true) {
+            val at = source.indexOf("launchSafely(", from)
+            if (at < 0) return silent
+            from = at + 1
+            val call = source.substring(at, callEnd(source, at))
+            val guarded = Regex("""catchAndReport\([^)]*\)\s*\{[^}]""").containsMatchIn(call)
+            if ("onFailure" !in call && !guarded) silent += at
+        }
+    }
+
+    /** End index of the `launchSafely(...) { ... }` beginning at [start], braces balanced. */
+    private fun callEnd(source: String, start: Int): Int {
+        var depth = 0
+        var seenBody = false
+        for (i in start until source.length) {
+            when (source[i]) {
+                '{' -> { depth++; seenBody = true }
+                '}' -> {
+                    depth--
+                    if (seenBody && depth == 0) return i + 1
+                }
+            }
+        }
+        return source.length
     }
 
     /**

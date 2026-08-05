@@ -1806,4 +1806,15 @@
     <string name="zakat_mark_paid_failed">Tidak dapat ditanda sebagai dibayar</string>
     <string name="zakat_delete_failed">Pengiraan itu tidak dapat dipadamkan</string>
     <string name="zakat_history_load_failed">Pengiraan lepas anda tidak dapat dimuatkan</string>
+    <string name="sync_connection_failed">Sambungan ke peranti lain gagal</string>
+    <string name="sync_import_failed">Data yang diterima tidak dapat diimport</string>
+    <string name="sync_export_failed">Data anda tidak dapat dihantar</string>
+    <string name="sync_failed_body">Kedua-dua peranti perlu kekal pada rangkaian yang sama, dengan aplikasi dibuka, sehingga pemindahan selesai.</string>
+    <string name="qibla_no_location">Kiblat perlu tahu lokasi anda</string>
+    <string name="qibla_no_location_body">Tetapkan lokasi dalam tetapan, atau biarkan Nimaz mengesannya, dan kompas akan menunjuk.</string>
+    <string name="qibla_failed">Arah kiblat tidak dapat dikira</string>
+    <string name="dua_collection_load_failed">Koleksi doa tidak dapat dimuatkan</string>
+    <string name="dua_category_load_failed">Koleksi ini tidak dapat dimuatkan</string>
+    <string name="dua_load_failed_body">Doa disimpan pada peranti anda, jadi mencuba lagi biasanya berjaya.</string>
+    <string name="calendar_events_load_failed">Peristiwa Islam tidak dapat dimuatkan</string>
 </resources>

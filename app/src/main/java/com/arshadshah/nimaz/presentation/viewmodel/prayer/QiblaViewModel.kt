@@ -3,6 +3,7 @@ package com.arshadshah.nimaz.presentation.viewmodel.prayer
 import android.hardware.GeomagneticField
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.core.monitoring.launchSafely
@@ -12,6 +13,8 @@ import com.arshadshah.nimaz.domain.model.Location
 import com.arshadshah.nimaz.domain.model.QiblaCalculator
 import com.arshadshah.nimaz.domain.model.QiblaDirection
 import com.arshadshah.nimaz.domain.model.QiblaInfo
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorKind
+import com.arshadshah.nimaz.presentation.viewmodel.UiError
 import com.arshadshah.nimaz.domain.model.isLocationSet
 import com.arshadshah.nimaz.domain.repository.CompassSensors
 import com.arshadshah.nimaz.domain.repository.Haptics
@@ -162,7 +165,10 @@ class QiblaViewModel @Inject constructor(
                 } else {
                     _qiblaState.update {
                         it.copy(
-                            error = "No location set. Please set your location in settings.",
+                            error = UiError(
+                                message = R.string.qibla_no_location,
+                                kind = NimazErrorKind.LOCATION,
+                            ),
                             isLoading = false
                         )
                     }
@@ -209,7 +215,16 @@ class QiblaViewModel @Inject constructor(
                 }
             } catch (e: Exception) {
                 telemetry.failure(AppAnalytics.Feature.QIBLA, "calculate_direction", e)
-                _qiblaState.update { it.copy(error = e.message, isLoading = false) }
+                _qiblaState.update {
+                    it.copy(
+                        isLoading = false,
+                        error = UiError(
+                            message = R.string.qibla_failed,
+                            kind = NimazErrorKind.LOCATION,
+                            details = e.message,
+                        ),
+                    )
+                }
             }
         }
     }
@@ -248,7 +263,16 @@ class QiblaViewModel @Inject constructor(
                 }
             } catch (e: Exception) {
                 telemetry.failure(AppAnalytics.Feature.QIBLA, "set_location", e)
-                _qiblaState.update { it.copy(error = e.message, isLoading = false) }
+                _qiblaState.update {
+                    it.copy(
+                        isLoading = false,
+                        error = UiError(
+                            message = R.string.qibla_failed,
+                            kind = NimazErrorKind.LOCATION,
+                            details = e.message,
+                        ),
+                    )
+                }
             }
         }
     }

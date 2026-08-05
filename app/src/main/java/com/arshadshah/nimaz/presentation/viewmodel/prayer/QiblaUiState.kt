@@ -4,6 +4,7 @@ import com.arshadshah.nimaz.domain.model.CompassData
 import com.arshadshah.nimaz.domain.model.Location
 import com.arshadshah.nimaz.domain.model.QiblaDirection
 import com.arshadshah.nimaz.domain.model.QiblaInfo
+import com.arshadshah.nimaz.presentation.viewmodel.UiError
 
 data class QiblaUiState(
     val qiblaDirection: QiblaDirection? = null,
@@ -24,7 +25,7 @@ data class QiblaUiState(
     /** Cumulative unwrapped azimuth — use for smooth rotation animation */
     val animatedAzimuth: Float = 0f,
     val isLoading: Boolean = true,
-    val error: String? = null,
+    val error: UiError? = null,
     val showLocationPicker: Boolean = false,
     val showCalibrationDialog: Boolean = false,
     val isArMode: Boolean = false

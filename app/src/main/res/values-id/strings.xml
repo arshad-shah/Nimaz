@@ -1805,4 +1805,15 @@
     <string name="zakat_mark_paid_failed">Tidak dapat ditandai sebagai dibayar</string>
     <string name="zakat_delete_failed">Perhitungan itu tidak dapat dihapus</string>
     <string name="zakat_history_load_failed">Perhitungan Anda sebelumnya tidak dapat dimuat</string>
+    <string name="sync_connection_failed">Koneksi ke perangkat lain gagal</string>
+    <string name="sync_import_failed">Data yang diterima tidak dapat diimpor</string>
+    <string name="sync_export_failed">Data Anda tidak dapat dikirim</string>
+    <string name="sync_failed_body">Kedua perangkat harus tetap di jaringan yang sama, dengan aplikasi terbuka, sampai transfer selesai.</string>
+    <string name="qibla_no_location">Kiblat perlu tahu lokasi Anda</string>
+    <string name="qibla_no_location_body">Atur lokasi di pengaturan, atau biarkan Nimaz mendeteksinya, dan kompas akan menunjuk.</string>
+    <string name="qibla_failed">Arah kiblat tidak dapat dihitung</string>
+    <string name="dua_collection_load_failed">Kumpulan doa tidak dapat dimuat</string>
+    <string name="dua_category_load_failed">Kumpulan ini tidak dapat dimuat</string>
+    <string name="dua_load_failed_body">Doa tersimpan di perangkat Anda, jadi mencoba lagi biasanya berhasil.</string>
+    <string name="calendar_events_load_failed">Peristiwa Islam tidak dapat dimuat</string>
 </resources>

@@ -36,6 +36,10 @@ import com.arshadshah.nimaz.core.navigation.DUA_CATEGORY_WITR_AND_NIGHT_PRAYER
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
+import com.arshadshah.nimaz.presentation.viewmodel.UiError
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorState
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
@@ -133,7 +137,7 @@ fun NightWorshipContent(
                 lastThirdAt = state.lastThirdAt,
                 fajrAt = state.fajrAt,
                 isLoading = state.isLoading,
-                hasError = state.error != null,
+                error = state.error,
                 onRetry = { onEvent(NightWorshipEvent.Refresh) },
             )
 
@@ -184,7 +188,7 @@ fun NightWorshipContent(
 private enum class NightWindow { BEFORE, OPEN, CLOSED }
 
 /**
- * [isLoading] and [hasError] were both on the state and **neither was read**.
+ * [isLoading] and [error] were both on the state and **neither was read**.
  *
  * The card renders "Set your location to see tonight's times" whenever the instants are null, so
  * for the length of a settings read plus three astronomical passes every cold open showed that
@@ -197,7 +201,7 @@ private fun NightWindowCard(
     lastThirdAt: Instant?,
     fajrAt: Instant?,
     isLoading: Boolean,
-    hasError: Boolean,
+    error: UiError?,
     onRetry: () -> Unit,
 ) {
     NimazCard(
@@ -220,24 +224,29 @@ private fun NightWindowCard(
                 return@Column
             }
 
-            if (lastThirdAt == null || fajrAt == null) {
-                Text(
-                    text = stringResource(
-                        if (hasError) R.string.night_worship_times_failed
-                        else R.string.night_worship_times_unavailable
+            if (error != null) {
+                // INLINE inside the card: the night-worship hub has other cards that are
+                // still correct, and this one failing must not take them with it.
+                NimazErrorState(
+                    title = stringResource(error.message),
+                    kind = error.kind,
+                    details = error.details,
+                    variant = NimazErrorVariant.INLINE,
+                    primaryAction = NimazErrorDefaults.retry(
+                        onRetry = onRetry,
+                        label = stringResource(R.string.try_again),
                     ),
+                )
+                return@Column
+            }
+
+            if (lastThirdAt == null || fajrAt == null) {
+                // Not a failure: the times are genuinely not available yet.
+                Text(
+                    text = stringResource(R.string.night_worship_times_unavailable),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-                if (hasError) {
-                    Spacer(Modifier.height(12.dp))
-                    NimazButton(
-                        text = stringResource(R.string.try_again),
-                        onClick = onRetry,
-                        variant = NimazButtonVariant.OUTLINED,
-                        size = NimazButtonSize.SMALL,
-                    )
-                }
                 return@Column
             }
 
