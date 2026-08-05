@@ -1,6 +1,7 @@
 package com.arshadshah.nimaz.domain.usecase
 
 import com.arshadshah.nimaz.domain.model.CelebrationEvent
+import com.arshadshah.nimaz.domain.model.PinnedShortcut
 import com.arshadshah.nimaz.domain.model.UserPreferences
 import com.arshadshah.nimaz.domain.model.PrayerAlertStyle
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
@@ -53,6 +54,8 @@ private class FakeSettings(private val offset: Int) : SettingsRepository {
     override suspend fun setZakatSilverPricePerGram(pricePerGram: Double) {}
     override val zakatCurrency: Flow<String> = flowOf("USD")
     override suspend fun setZakatCurrency(currency: String) {}
+    override val pinnedShortcuts: Flow<List<PinnedShortcut>> = flowOf(PinnedShortcut.DEFAULTS)
+    override suspend fun setPinnedShortcuts(shortcuts: List<PinnedShortcut>) {}
     override suspend fun clearAllData() {}
     override val onboardingCompleted: Flow<Boolean> = flowOf(true)
     override suspend fun setOnboardingCompleted(completed: Boolean) {}

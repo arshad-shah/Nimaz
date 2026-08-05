@@ -14,6 +14,7 @@ import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.arshadshah.nimaz.domain.model.ZakatDefaults
 import com.arshadshah.nimaz.domain.model.MushafScript
+import com.arshadshah.nimaz.domain.model.PinnedShortcut
 import com.arshadshah.nimaz.domain.model.PrayerAlertStyle
 import com.arshadshah.nimaz.domain.model.UserPreferences
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
@@ -198,6 +199,11 @@ class PreferencesDataStore @Inject constructor(
         // JSON-encoded List<String> of recent AI questions (only persisted when
         // AI_HISTORY_ENABLED). See recent-searches mechanism in SearchViewModel.
         val AI_QUESTION_HISTORY = stringPreferencesKey("ai_question_history")
+
+        // More — the pinned shortcut row. A delimited string of PinnedShortcut keys, not a
+        // stringSetPreferencesKey: the row's order is what the user arranged, and a Set
+        // discards it. PinnedShortcut owns the encoding.
+        val MORE_PINNED_SHORTCUTS = stringPreferencesKey("more_pinned_shortcuts")
     }
 
     override suspend fun clearAllData() {
@@ -900,6 +906,15 @@ class PreferencesDataStore @Inject constructor(
 
     override suspend fun setAiQuestionHistory(json: String) =
         put(PreferencesKeys.AI_QUESTION_HISTORY, json)
+
+    // More — pinned shortcuts. The cap, the ordering and the unknown-key handling belong to
+    // PinnedShortcut, not here: they are the same rule whether the value came from this
+    // DataStore or off the device-sync wire, and this class stores strings.
+    override val pinnedShortcuts: Flow<List<PinnedShortcut>> =
+        preference(PreferencesKeys.MORE_PINNED_SHORTCUTS).map(PinnedShortcut::decode)
+
+    override suspend fun setPinnedShortcuts(shortcuts: List<PinnedShortcut>) =
+        put(PreferencesKeys.MORE_PINNED_SHORTCUTS, PinnedShortcut.encode(shortcuts))
 
     // Combined user preferences
     override val userPreferences: Flow<UserPreferences> = dataStore.data.map { preferences ->
