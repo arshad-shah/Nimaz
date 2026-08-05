@@ -392,4 +392,63 @@ class KhatamProgressCalculatorTest {
 
         assertThat(logs.map { it.date }).isInOrder()
     }
+
+    // ── daysAgainstPace ──────────────────────────────────────────────────
+
+    @Test
+    fun `being ahead is measured in days of the reader's own target`() {
+        // 5 days at 20/day is 100 expected; 180 read is 80 surplus, four target-days of it.
+        // Not four calendar days — the unit is the reader's target, which is the only thing
+        // "4 days ahead" can honestly mean when everyone's target differs.
+        assertThat(
+            KhatamProgressCalculator.daysAgainstPace(
+                totalAyahsRead = 180, daysActive = 5, dailyTarget = 20
+            )
+        ).isEqualTo(4)
+    }
+
+    @Test
+    fun `being behind comes back negative rather than as a magnitude`() {
+        // The sign is the caller's to interpret: a plural rule cannot take a negative count, so
+        // the direction has to be legible here and turned into copy there.
+        assertThat(
+            KhatamProgressCalculator.daysAgainstPace(
+                totalAyahsRead = 60, daysActive = 5, dailyTarget = 20
+            )
+        ).isEqualTo(-2)
+    }
+
+    @Test
+    fun `a fraction of a day either way is on pace`() {
+        // Truncating toward zero: one extra ayah is not "a day ahead", and one ayah short is not
+        // "a day behind". Rounding away from zero would make the subtitle flicker every mark.
+        assertThat(
+            KhatamProgressCalculator.daysAgainstPace(101, daysActive = 5, dailyTarget = 20)
+        ).isEqualTo(0)
+        assertThat(
+            KhatamProgressCalculator.daysAgainstPace(99, daysActive = 5, dailyTarget = 20)
+        ).isEqualTo(0)
+        assertThat(
+            KhatamProgressCalculator.daysAgainstPace(100, daysActive = 5, dailyTarget = 20)
+        ).isEqualTo(0)
+    }
+
+    @Test
+    fun `nothing to measure against is null, not zero`() {
+        // Zero means "measured, and exactly on pace" — a different statement from "there is no
+        // pace yet", and the two get different copy on the More row.
+        assertThat(KhatamProgressCalculator.daysAgainstPace(0, daysActive = 0, dailyTarget = 20))
+            .isNull()
+        assertThat(KhatamProgressCalculator.daysAgainstPace(100, daysActive = 5, dailyTarget = 0))
+            .isNull()
+    }
+
+    @Test
+    fun `a whole quran read on day one does not overflow`() {
+        // 6236 ayahs against a target of 1 is 6235 days ahead. Absurd, and it must still be an
+        // Int rather than wrapping — hence the Long multiply behind the subtraction.
+        assertThat(
+            KhatamProgressCalculator.daysAgainstPace(6236, daysActive = 1, dailyTarget = 1)
+        ).isEqualTo(6235)
+    }
 }

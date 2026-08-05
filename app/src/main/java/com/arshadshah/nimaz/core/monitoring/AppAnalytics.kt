@@ -527,6 +527,15 @@ object AppAnalytics {
         const val HOME = "home"
         const val KHATAM = "khatam"
         const val LOCATION = "location"
+
+        /**
+         * The More menu itself — its pinned row and its live subtitles.
+         *
+         * Distinct from the destinations it links to: a tap on a pin is a fact about More's own
+         * shortcut row, and folding it into the destination's feature would make the pin row look
+         * like ordinary navigation and hide whether anyone pins anything at all.
+         */
+        const val MORE = "more"
         const val ONBOARDING = "onboarding"
 
         /**
