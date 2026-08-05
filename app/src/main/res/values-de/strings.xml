@@ -1770,4 +1770,5 @@
     <string name="tafseer_note_add">Notiz hinzufügen</string>
     <string name="tafseer_note_hint">Deine Gedanken zu diesem Abschnitt</string>
     <string name="tafseer_note_edit">Bearbeiten</string>
+    <string name="quran_search_surahs">Suren suchen</string>
 </resources>

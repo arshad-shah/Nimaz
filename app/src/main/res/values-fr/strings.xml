@@ -1805,4 +1805,5 @@
     <string name="tafseer_note_add">Ajouter une note</string>
     <string name="tafseer_note_hint">Votre réflexion sur ce passage</string>
     <string name="tafseer_note_edit">Modifier</string>
+    <string name="quran_search_surahs">Rechercher des sourates</string>
 </resources>

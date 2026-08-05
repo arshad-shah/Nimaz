@@ -113,6 +113,7 @@ import com.arshadshah.nimaz.presentation.viewmodel.quran.QuranViewModel
 import java.time.DayOfWeek
 import java.time.LocalDate
 import kotlinx.coroutines.launch
+import com.arshadshah.nimaz.presentation.components.organisms.NimazSearchBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -261,6 +262,8 @@ fun QuranHomeScreen(
                         onNavigateToJuz = onNavigateToJuz,
                         onNavigateToPage = onNavigateToPage,
                         onTabSelect = { viewModel.onEvent(QuranEvent.SetTab(it)) },
+                        onSearchQueryChange = { viewModel.onEvent(QuranEvent.Search(it)) },
+                        onSearchCleared = { viewModel.onEvent(QuranEvent.ClearSearch) },
                         onNavigateToSurahInfo = onNavigateToSurahInfo,
                         selectedSurahNumber = selectedSurahNumber,
                         selectedJuzNumber = selectedJuzNumber,
@@ -487,6 +490,8 @@ private fun BrowseTabContent(
     onNavigateToJuz: (Int) -> Unit,
     onNavigateToPage: (Int) -> Unit,
     onTabSelect: (Int) -> Unit,
+    onSearchQueryChange: (String) -> Unit,
+    onSearchCleared: () -> Unit,
     onNavigateToSurahInfo: (Int) -> Unit = {},
     selectedSurahNumber: Int? = null,
     selectedJuzNumber: Int? = null,
@@ -640,8 +645,27 @@ private fun BrowseTabContent(
         }
 
         Box(modifier = Modifier.fillMaxSize()) {
+            Column(modifier = Modifier.fillMaxSize()) {
+            // The surah filter. `filteredSurahs` and the whole debounced `Search`/`ClearSearch`
+            // path existed in the ViewModel with no producer, so the filter argument was
+            // permanently "" and `filteredSurahs` was permanently identical to `surahs`.
+            // Deliberately a *list filter*, not the global content search on SearchScreen —
+            // it narrows the 114 surahs in place rather than navigating away.
+            if (state.selectedTab == 0) {
+                NimazSearchBar(
+                    query = state.searchQuery,
+                    onQueryChange = onSearchQueryChange,
+                    onClear = onSearchCleared,
+                    placeholder = stringResource(R.string.quran_search_surahs),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                )
+            }
             LazyColumn(
-                modifier = Modifier.testTag(ScreenTags.QuranSurahList),
+                modifier = Modifier
+                    .weight(1f)
+                    .testTag(ScreenTags.QuranSurahList),
                 state = when (state.selectedTab) {
                     1 -> juzListState
                     2 -> pageListState
@@ -721,6 +745,7 @@ private fun BrowseTabContent(
                         }
                     }
                 }
+            }
             }
 
             // Juz scrollbar rail — only shown on Page tab

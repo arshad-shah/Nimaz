@@ -1739,4 +1739,5 @@
     <string name="tafseer_note_add">Tambah catatan</string>
     <string name="tafseer_note_hint">Renungan Anda tentang bagian ini</string>
     <string name="tafseer_note_edit">Ubah</string>
+    <string name="quran_search_surahs">Cari surah</string>
 </resources>
