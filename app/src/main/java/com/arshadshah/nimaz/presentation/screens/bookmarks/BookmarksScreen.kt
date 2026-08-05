@@ -29,7 +29,6 @@ import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -62,6 +61,9 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.molecules.NimazBottomSheet
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorState
+import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
 import com.arshadshah.nimaz.presentation.components.molecules.NimazSheetFooterButtons
 import com.arshadshah.nimaz.presentation.components.molecules.NimazSheetSectionLabel
@@ -111,6 +113,20 @@ fun BookmarksScreen(
             } else {
                 viewModel.onEvent(BookmarksEvent.DismissUndo)
             }
+        }
+    }
+
+    // A failed write goes to the same snackbar, and only there: the bookmarks on screen
+    // are still correct, so a delete that did not go through must not take the list with
+    // it. No action — there is nothing useful to offer beyond trying again by hand.
+    val writeError = state.writeError
+    LaunchedEffect(writeError) {
+        if (writeError != null) {
+            snackbarHostState.showSnackbar(
+                message = context.getString(writeError.message),
+                duration = SnackbarDuration.Short,
+            )
+            viewModel.onEvent(BookmarksEvent.DismissWriteError)
         }
     }
 
@@ -170,17 +186,26 @@ fun BookmarksScreen(
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
+        val readError = state.error
         when {
             state.isLoading && state.allBookmarks.isEmpty() -> {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
-                }
+                NimazLoadingState(modifier = Modifier.padding(paddingValues))
             }
+
+            // Before the empty branch: an empty list is also what a failed load leaves
+            // behind, and "no bookmarks yet" is a painful thing to tell someone who has
+            // saved a hundred of them.
+            readError != null -> NimazErrorState(
+                title = stringResource(readError.message),
+                message = stringResource(R.string.bookmarks_load_failed_body),
+                kind = readError.kind,
+                details = readError.details,
+                primaryAction = NimazErrorDefaults.retry(
+                    onRetry = { viewModel.onEvent(BookmarksEvent.Retry) },
+                    label = stringResource(R.string.try_again),
+                ),
+                modifier = Modifier.padding(paddingValues),
+            )
 
             state.allBookmarks.isEmpty() -> {
                 NimazEmptyState(

@@ -31,7 +31,6 @@ class ScreenStateConventionTest {
      */
     private val acceptedSpinners = setOf(
         "AsmaUnNabiDetailScreen.kt",
-        "BookmarksScreen.kt",
         "DuaReaderScreen.kt",
         "HomeScreen.kt",
         "LocationScreen.kt",
@@ -53,7 +52,6 @@ class ScreenStateConventionTest {
      * never told about. Emptied by layers 2-4 and 6.
      */
     private val acceptedUnreadErrors = setOf(
-        "BookmarksUiState.kt",
         // Vestigial: no ViewModel ever assigns these. Layer 6 gives them a producer or
         // deletes them — an error field connected at neither end is not a state.
         "FastingUiState.kt",
@@ -71,7 +69,6 @@ class ScreenStateConventionTest {
      */
     private val acceptedSilentFailures = setOf(
         "AskViewModel.kt",
-        "BookmarksViewModel.kt",
         "CalendarViewModel.kt",
         "CatalogViewModel.kt",
         "DuaViewModel.kt",

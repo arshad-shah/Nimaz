@@ -741,6 +741,12 @@
 
     <!-- Bookmarks Screen -->
     <string name="bookmarks_title">Bookmarks</string>
+    <string name="bookmarks_load_failed">Your bookmarks couldn\'t be loaded</string>
+    <string name="bookmarks_load_failed_body">Bookmarks are stored on your device, so trying again usually works.</string>
+    <string name="bookmarks_delete_failed">That bookmark couldn\'t be removed</string>
+    <string name="bookmarks_restore_failed">That bookmark couldn\'t be restored</string>
+    <string name="bookmarks_note_failed">That note couldn\'t be saved</string>
+    <string name="bookmarks_clear_failed">Your bookmarks couldn\'t be cleared</string>
     <string name="no_bookmarks_yet">No Bookmarks Yet</string>
     <string name="no_bookmarks_hint">Save ayahs, hadiths, and duas for quick access</string>
     <string name="share">Share</string>
