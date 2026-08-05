@@ -110,6 +110,8 @@ fun AdaptiveMoreScreen(
             onNavigateToAsmaUnNabi = { navController.navigate(Route.AsmaUnNabiList) },
             onNavigateToProphets = { navController.navigate(Route.ProphetsList) },
             onNavigateToQaida = { navController.navigate(Route.QaidaHome) },
+            onNavigateToTasbih = { navController.navigate(Route.TasbihHome) },
+            onNavigateToQibla = { navController.navigate(Route.Qibla) },
             onShareApp = shareApp,
             onRateApp = rateApp,
         )
@@ -156,6 +158,8 @@ fun AdaptiveMoreScreen(
                         onNavigateToAsmaUnNabi = { navController.navigate(Route.AsmaUnNabiList) },
                         onNavigateToProphets = { navController.navigate(Route.ProphetsList) },
                         onNavigateToQaida = { navController.navigate(Route.QaidaHome) },
+                        onNavigateToTasbih = { navController.navigate(Route.TasbihHome) },
+                        onNavigateToQibla = { navController.navigate(Route.Qibla) },
                         onShareApp = shareApp,
                         onRateApp = rateApp,
                     )
