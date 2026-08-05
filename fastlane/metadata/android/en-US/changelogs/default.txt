@@ -1,7 +1,8 @@
 What's new:
 
-• NEW: Optional worship reminders — Tahajjud, Suhoor & Iftar, Taraweeh, Laylatul Qadr, morning & evening adhkar, and Sunnah fasting days. Turn on just the ones you want.
-• A "Next Worship" card on Home shows what's coming up next.
-• Notification settings reorganised into clear sections.
-• Qur'an: editorial recommended cards on the home screen.
-• More polish, smoother loading, and fixes throughout.
+• Qur'an: 15 translations to choose from, a refreshed reader, and the surah filter is back.
+• Search the Qur'an, Hadith and duas together, with matches highlighted.
+• Bookmarks: search, sort, and undo a delete.
+• Tafseer: keep your own notes on any verse.
+• Zakat: choose your currency.
+• Every screen now says plainly when it is loading, when there is nothing there, and when something has gone wrong.

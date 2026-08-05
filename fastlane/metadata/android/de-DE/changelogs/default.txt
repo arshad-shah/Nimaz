@@ -1,7 +1,8 @@
 Neu:
 
-• NEU: Optionale Andachtserinnerungen — Tahajjud, Suhoor & Iftar, Taraweeh, Laylatul Qadr, Morgen- & Abend-Adhkar und Sunnah-Fastentage. Nur die gewünschten aktivieren.
-• Eine „Nächste Andacht“-Karte auf der Startseite zeigt, was ansteht.
-• Benachrichtigungen in klare Bereiche gegliedert.
-• Qur'an: redaktionelle Empfehlungskarten auf der Startseite.
-• Mehr Feinschliff und Fehlerbehebungen.
+• Qur'an: 15 Übersetzungen zur Auswahl, überarbeiteter Leser und der Sura-Filter ist zurück.
+• Qur'an, Hadith und Bittgebete gemeinsam durchsuchen — mit hervorgehobenen Treffern.
+• Lesezeichen: suchen, sortieren und Löschen rückgängig machen.
+• Tafsir: eigene Notizen zu jedem Vers.
+• Zakat: Währung frei wählbar.
+• Jeder Bildschirm sagt jetzt klar, wann geladen wird, wann nichts da ist und wann etwas schiefgelaufen ist.

@@ -1,7 +1,8 @@
 Yang baharu:
 
-• BAHARU: Peringatan ibadah pilihan — Tahajud, Sahur & Berbuka, Terawih, Lailatulqadar, zikir pagi & petang, dan hari puasa sunat. Hidupkan yang anda mahu sahaja.
-• Kad "Ibadah Seterusnya" di Laman Utama menunjukkan yang akan datang.
-• Tetapan pemberitahuan disusun semula kepada bahagian yang jelas.
-• Al-Quran: kad cadangan di laman utama.
-• Penambahbaikan dan pembaikan.
+• Al-Quran: 15 terjemahan untuk dipilih, paparan bacaan yang diperbaharui, dan penapis surah kembali.
+• Cari Al-Quran, Hadis dan doa serentak, dengan padanan diserlahkan.
+• Penanda buku: cari, isih, dan batalkan pemadaman.
+• Tafsir: simpan nota anda sendiri pada mana-mana ayat.
+• Zakat: pilih mata wang anda.
+• Setiap skrin kini menyatakan dengan jelas bila ia memuatkan, bila kosong, dan bila berlaku masalah.
