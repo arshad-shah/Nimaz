@@ -6,7 +6,6 @@ import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.arshadshah.nimaz.core.time.FakeTodayProvider
 import com.arshadshah.nimaz.core.util.NextWorshipResolver
-import com.arshadshah.nimaz.core.util.PrayerTimeCalculator
 import com.arshadshah.nimaz.core.util.toUtcMidnightMillis
 import com.arshadshah.nimaz.domain.model.FastRecord
 import com.arshadshah.nimaz.domain.model.FastStatus
@@ -74,7 +73,6 @@ class HomeViewModelRolloverTest {
     private lateinit var duaRepository: DuaRepository
     private lateinit var settingsRepository: SettingsRepository
     private lateinit var announcementRepository: AnnouncementRepository
-    private lateinit var prayerTimeCalculator: PrayerTimeCalculator
     private lateinit var nextWorshipResolver: NextWorshipResolver
 
     /** Which day's records each range query asked for, in order. */
@@ -89,7 +87,6 @@ class HomeViewModelRolloverTest {
         duaRepository = mockk(relaxed = true)
         settingsRepository = mockk(relaxed = true)
         announcementRepository = mockk(relaxed = true)
-        prayerTimeCalculator = mockk(relaxed = true)
         nextWorshipResolver = mockk(relaxed = true)
 
         // Only *yesterday* has a fast recorded. If the collector is still bound to
@@ -113,7 +110,6 @@ class HomeViewModelRolloverTest {
         return HomeViewModel(
             context = context,
             telemetry = RecordingTelemetry(),
-            prayerTimeCalculator = prayerTimeCalculator,
             prayerUseCases = buildPrayerUseCases(prayerRepository),
             fastingUseCases = buildFastingUseCases(fastingRepository),
             hadithUseCases = buildHadithUseCases(hadithRepository),

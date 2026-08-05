@@ -76,7 +76,10 @@ fun buildPrayerUseCases(repository: PrayerRepository) = PrayerUseCases(
     setCurrentLocation = SetCurrentLocationUseCase(repository),
     getRecentLocations = GetRecentLocationsUseCase(repository),
     saveCurrentLocation = SaveCurrentLocationUseCase(repository),
-    toggleFavorite = ToggleLocationFavoriteUseCase(repository)
+    toggleFavorite = ToggleLocationFavoriteUseCase(repository),
+    observeCalculationSettings = ObservePrayerCalculationSettingsUseCase(repository),
+    getDaySchedule = GetDayPrayerScheduleUseCase(repository),
+    getSunnahNightTimes = GetSunnahNightTimesUseCase(repository),
 )
 
 fun buildHadithUseCases(repository: HadithRepository) = HadithUseCases(

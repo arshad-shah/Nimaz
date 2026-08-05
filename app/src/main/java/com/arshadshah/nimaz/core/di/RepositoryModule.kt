@@ -201,6 +201,9 @@ import com.arshadshah.nimaz.domain.usecase.ObserveKhatamByIdUseCase
 import com.arshadshah.nimaz.domain.usecase.ObserveKhatamDetailUseCase
 import com.arshadshah.nimaz.domain.usecase.ObserveKhatamStatsUseCase
 import com.arshadshah.nimaz.domain.usecase.ObserveReadAyahIdsUseCase
+import com.arshadshah.nimaz.domain.usecase.GetDayPrayerScheduleUseCase
+import com.arshadshah.nimaz.domain.usecase.GetSunnahNightTimesUseCase
+import com.arshadshah.nimaz.domain.usecase.ObservePrayerCalculationSettingsUseCase
 import com.arshadshah.nimaz.domain.usecase.PrayerUseCases
 import com.arshadshah.nimaz.domain.usecase.ProphetUseCases
 import com.arshadshah.nimaz.domain.usecase.QaidaUseCases
@@ -625,6 +628,9 @@ object UseCaseModule {
             getTodayPrayerRecords = GetTodayPrayerRecordsUseCase(repository),
             updatePrayerStatus = UpdatePrayerStatusUseCase(repository),
             getPrayerTimesForDate = GetPrayerTimesForDateUseCase(repository),
+            observeCalculationSettings = ObservePrayerCalculationSettingsUseCase(repository),
+            getDaySchedule = GetDayPrayerScheduleUseCase(repository),
+            getSunnahNightTimes = GetSunnahNightTimesUseCase(repository),
             getCurrentStreak = GetCurrentStreakUseCase(repository),
             getLongestStreak = GetLongestStreakUseCase(repository),
             getMissedPrayersRequiringQada = GetMissedPrayersRequiringQadaUseCase(repository),

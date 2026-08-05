@@ -6,7 +6,6 @@ import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.arshadshah.nimaz.core.time.FakeTodayProvider
 import com.arshadshah.nimaz.core.util.NextWorshipResolver
-import com.arshadshah.nimaz.core.util.PrayerTimeCalculator
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.model.PrayerName
 import com.arshadshah.nimaz.domain.model.PrayerStatus
@@ -17,6 +16,7 @@ import com.arshadshah.nimaz.domain.repository.DuaRepository
 import com.arshadshah.nimaz.domain.repository.FastingRepository
 import com.arshadshah.nimaz.domain.repository.HadithRepository
 import com.arshadshah.nimaz.domain.repository.PrayerRepository
+import com.arshadshah.nimaz.presentation.viewmodel.prayerCalculationSettings
 import com.google.common.truth.Truth.assertThat
 import io.mockk.clearMocks
 import io.mockk.coEvery
@@ -61,7 +61,6 @@ class HomeViewModelTest {
     private val testDispatcher = UnconfinedTestDispatcher()
 
     private lateinit var context: Context
-    private lateinit var prayerTimeCalculator: PrayerTimeCalculator
     private lateinit var prayerRepository: PrayerRepository
     private lateinit var fastingRepository: FastingRepository
     private lateinit var hadithRepository: HadithRepository
@@ -75,7 +74,6 @@ class HomeViewModelTest {
         Dispatchers.setMain(testDispatcher)
 
         context = ApplicationProvider.getApplicationContext()
-        prayerTimeCalculator = mockk(relaxed = true)
         prayerRepository = mockk(relaxed = true)
         fastingRepository = mockk(relaxed = true)
         hadithRepository = mockk(relaxed = true)
@@ -89,6 +87,11 @@ class HomeViewModelTest {
         // initial value during ViewModel init before the rest of the constructor
         // has finished running.
         every { prayerRepository.getTodayPrayerRecords() } returns flowOf(emptyMap())
+        // The calculation settings must emit: the ViewModel mirrors them and skips the
+        // recompute until they arrive, which is what a relaxed mock's empty flow would cause.
+        every { prayerRepository.observeCalculationSettings() } returns
+                flowOf(prayerCalculationSettings())
+        every { prayerRepository.getDaySchedule(any(), any()) } returns emptyList()
     }
 
     @After
@@ -103,7 +106,6 @@ class HomeViewModelTest {
         return HomeViewModel(
             context = context,
             telemetry = RecordingTelemetry(),
-            prayerTimeCalculator = prayerTimeCalculator,
             prayerUseCases = buildPrayerUseCases(prayerRepository),
             fastingUseCases = buildFastingUseCases(fastingRepository),
             hadithUseCases = buildHadithUseCases(hadithRepository),
@@ -204,7 +206,7 @@ class HomeViewModelTest {
             // worship-card resolution — real DataStore I/O — in the middle of it,
             // which let the transient `true` reach the UI on every tick.
             every {
-                prayerTimeCalculator.getPrayerTimes(any(), any(), any(), any(), any(), any(), any())
+                prayerRepository.getDaySchedule(any(), any())
             } returns samplePrayerTimes()
             // Make the worship resolution genuinely suspend, exactly as the real
             // DataStore-backed resolver does. Without this the bug is unobservable.
@@ -239,7 +241,7 @@ class HomeViewModelTest {
             // it costs ~30 sequential DataStore reads. Ticking the countdown must
             // not drag that resolution along with it once a second.
             every {
-                prayerTimeCalculator.getPrayerTimes(any(), any(), any(), any(), any(), any(), any())
+                prayerRepository.getDaySchedule(any(), any())
             } returns samplePrayerTimes()
             coEvery { nextWorshipResolver.nearest(any()) } returns null
 
