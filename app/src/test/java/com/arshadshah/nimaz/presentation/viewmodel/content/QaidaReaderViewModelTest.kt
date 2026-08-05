@@ -33,6 +33,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -57,6 +58,7 @@ class QaidaReaderViewModelTest {
     private lateinit var useCases: QaidaUseCases
     private lateinit var audioManager: QaidaAudioManager
     private lateinit var audioStateFlow: MutableStateFlow<QaidaAudioState>
+    private lateinit var completionsFlow: MutableSharedFlow<String>
 
     @Before
     fun setUp() {
@@ -83,7 +85,9 @@ class QaidaReaderViewModelTest {
 
         audioManager = mockk(relaxed = true)
         audioStateFlow = MutableStateFlow(QaidaAudioState())
+        completionsFlow = MutableSharedFlow(extraBufferCapacity = 32)
         every { audioManager.state } returns audioStateFlow
+        every { audioManager.completions } returns completionsFlow
 
 
         // Default stubs — individual tests override the per-lesson ones.
@@ -154,7 +158,7 @@ class QaidaReaderViewModelTest {
     }
 
     @Test
-    fun `playLine plays the whole line and marks every cell heard`() = runTest {
+    fun `playLine plays the whole line and credits each cell as its clip ends`() = runTest {
         val vm = createViewModel()
 
         vm.lessonContent.test {
@@ -166,7 +170,18 @@ class QaidaReaderViewModelTest {
             advanceUntilIdle()
 
             verify { audioManager.playSequence(listOf("l1_alif", "l1_baa")) }
+            // This test previously asserted both marks **here**, which is the defect #364 R9
+            // describes: progress was written from the intent to play, not from playback. A
+            // learner who tapped and immediately left was credited with the whole line.
+            coVerify(exactly = 0) { markCellHeard.invoke(1, 11, any()) }
+
+            completionsFlow.emit("l1_alif")
+            advanceUntilIdle()
             coVerify { markCellHeard.invoke(1, 11, any()) }
+            coVerify(exactly = 0) { markCellHeard.invoke(1, 12, any()) }
+
+            completionsFlow.emit("l1_baa")
+            advanceUntilIdle()
             coVerify { markCellHeard.invoke(1, 12, any()) }
         }
     }
