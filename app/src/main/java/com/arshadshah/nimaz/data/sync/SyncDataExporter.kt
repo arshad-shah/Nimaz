@@ -49,9 +49,20 @@ class SyncDataExporter @Inject constructor(
     private val locationDao: LocationDao,
     private val preferencesDataStore: PreferencesDataStore
 ) {
-    suspend fun export(onProgress: suspend (String) -> Unit = {}): SyncPayload {
+    /**
+     * Exports everything, reporting `(stepIndex, total, label)` as it goes.
+     *
+     * The total comes from [STEP_COUNT] rather than from the caller, because the caller cannot
+     * know it: `SyncViewModel` hard-coded `SEND_TOTAL_STEPS = 10` against **eleven** reports
+     * here, and then hand-numbered the encode and send steps as 8 and 9 — so the progress bar
+     * filled to 120%, captioned "Step 11 of 10", and then visibly rewound to 80%.
+     */
+    suspend fun export(onProgress: suspend (Int, Int, String) -> Unit = { _, _, _ -> }): SyncPayload {
+        var step = 0
+        suspend fun report(label: String) = onProgress(++step, STEP_COUNT, label)
+
         // Quran
-        onProgress("Exporting Quran data...")
+        report("Exporting Quran data...")
         // The wire format is unchanged on purpose — a phone on this version has to sync with
         // one that still keeps seven bookmark tables — so the consolidated rows are read back
         // out into the shapes the payload has always had. A verse that is both bookmarked and
@@ -85,7 +96,7 @@ class SyncDataExporter @Inject constructor(
         }
 
         // Prayer & Fasting
-        onProgress("Exporting prayer records...")
+        report("Exporting prayer records...")
         val prayerRecords = prayerDao.getAllPrayerRecords().map {
             SyncPrayerRecord(
                 it.id,
@@ -102,7 +113,7 @@ class SyncDataExporter @Inject constructor(
             )
         }
 
-        onProgress("Exporting fasting records...")
+        report("Exporting fasting records...")
         val fastRecords = fastingDao.getAllFastRecords().map {
             SyncFastRecord(
                 it.id,
@@ -136,7 +147,7 @@ class SyncDataExporter @Inject constructor(
         }
 
         // Tasbih
-        onProgress("Exporting tasbih data...")
+        report("Exporting tasbih data...")
         val presets = tasbihDao.getAllPresetsSync().map {
             SyncTasbihPreset(
                 it.id,
@@ -169,7 +180,7 @@ class SyncDataExporter @Inject constructor(
         }
 
         // Khatam
-        onProgress("Exporting khatam data...")
+        report("Exporting khatam data...")
         val khatams = khatamDao.getAllKhatamsSync().map {
             SyncKhatam(
                 it.id,
@@ -200,7 +211,7 @@ class SyncDataExporter @Inject constructor(
         }
 
         // Tafseer & Zakat
-        onProgress("Exporting tafseer & zakat data...")
+        report("Exporting tafseer & zakat data...")
         val highlights = tafseerUserDao.getAllHighlightsSync().map {
             SyncTafseerHighlight(
                 it.id,
@@ -235,7 +246,7 @@ class SyncDataExporter @Inject constructor(
         }
 
         // Names & Prophets favorites
-        onProgress("Exporting saved names & prophets...")
+        report("Exporting saved names & prophets...")
         val asmaUlHusnaBookmarks = marks.filter { it.kind == BookmarkKind.ASMA_UL_HUSNA }.map {
             SyncNameBookmark(0, it.targetId, it.favourite, it.createdAt)
         }
@@ -247,7 +258,7 @@ class SyncDataExporter @Inject constructor(
         }
 
         // Hadith & Dua bookmarks
-        onProgress("Exporting hadith & dua bookmarks...")
+        report("Exporting hadith & dua bookmarks...")
         // The payload shape is unchanged on purpose: a phone on this version has to be able
         // to sync with one that still has seven bookmark tables, so the wire format keeps the
         // old field names and the consolidated row is mapped onto them.
@@ -290,7 +301,7 @@ class SyncDataExporter @Inject constructor(
         }
 
         // Qaida learning progress
-        onProgress("Exporting Qaida progress...")
+        report("Exporting Qaida progress...")
         val qaidaLessonProgress = counts.filter { it.kind == ProgressKind.QAIDA_LESSON }.map {
             SyncQaidaLessonProgress(
                 it.targetId,
@@ -313,7 +324,7 @@ class SyncDataExporter @Inject constructor(
         }
 
         // Saved (favorite) locations only — current-location flag is not carried.
-        onProgress("Exporting saved locations...")
+        report("Exporting saved locations...")
         val favoriteLocations = locationDao.getFavoriteLocationsSync().map {
             SyncLocation(
                 it.name,
@@ -333,8 +344,12 @@ class SyncDataExporter @Inject constructor(
         }
 
         // Preferences
-        onProgress("Exporting preferences...")
+        report("Exporting preferences...")
         val preferences = preferencesDataStore.exportAllPreferences()
+
+        // If someone adds a report() without updating STEP_COUNT, the bar silently goes wrong
+        // again. Fail loudly in debug instead.
+        check(step == STEP_COUNT) { "SyncDataExporter reported $step steps, STEP_COUNT is $STEP_COUNT" }
 
         return SyncPayload(
             exportedAt = System.currentTimeMillis(),
@@ -364,5 +379,10 @@ class SyncDataExporter @Inject constructor(
             favoriteLocations = favoriteLocations,
             preferences = preferences
         )
+    }
+
+    companion object {
+        /** How many times [export] calls its progress callback. Pinned by SyncDataExporterTest. */
+        const val STEP_COUNT = 11
     }
 }

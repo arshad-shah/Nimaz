@@ -534,13 +534,18 @@ class NearbyConnectionsManager @Inject constructor(
         return GZIPInputStream(ByteArrayInputStream(data)).use { it.readBytes() }
     }
 
-    fun setOnDataReceived(callback: (ByteArray) -> Unit) {
-        Log.d(TAG, "setOnDataReceived: callback set")
+    /**
+     * Nullable on purpose: this manager is a `@Singleton`, and the callback captures the
+     * ViewModel that set it. Without a way to clear it, a destroyed `SyncViewModel` — and its
+     * dead `viewModelScope` — stayed reachable from here for the process's life.
+     */
+    fun setOnDataReceived(callback: ((ByteArray) -> Unit)?) {
+        Log.d(TAG, "setOnDataReceived: callback ${if (callback == null) "cleared" else "set"}")
         onDataReceived = callback
     }
 
-    fun setOnSignalReceived(callback: (SyncSignal) -> Unit) {
-        Log.d(TAG, "setOnSignalReceived: callback set")
+    fun setOnSignalReceived(callback: ((SyncSignal) -> Unit)?) {
+        Log.d(TAG, "setOnSignalReceived: callback ${if (callback == null) "cleared" else "set"}")
         onSignalReceived = callback
     }
 

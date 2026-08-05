@@ -1,9 +1,10 @@
 package com.arshadshah.nimaz.presentation.viewmodel.settings
 
 import android.os.Build
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import android.util.Log
+import com.arshadshah.nimaz.BuildConfig
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.data.sync.CancelReason
@@ -54,12 +55,12 @@ class SyncViewModel @Inject constructor(
     private val json = Json { ignoreUnknownKeys = true }
 
     init {
-        Log.d(TAG, "SyncViewModel init")
+        debugLog("SyncViewModel init")
         connectionsManager.setOnSignalReceived { signal -> handleSignal(signal) }
 
         viewModelScope.launch {
             connectionsManager.connectionState.collect { state ->
-                Log.d(TAG, "connectionState changed: $state (mode=${_uiState.value.mode})")
+                debugLog("connectionState changed: $state (mode=${_uiState.value.mode})")
                 _uiState.update { current ->
                     val newState = current.copy(connectionState = state)
                     when (state) {
@@ -82,12 +83,12 @@ class SyncViewModel @Inject constructor(
                     is ConnectionState.Connected -> {
                         addLogEntry("Connected to ${state.endpointName}")
                         if (_uiState.value.mode == SyncMode.SEND) {
-                            Log.d(TAG, "SEND mode: sending Ready signal and starting export")
+                            debugLog("SEND mode: sending Ready signal and starting export")
                             connectionsManager.sendSignal(SyncSignal.Ready)
                             addLogEntry("Preparing data for export...")
                             sendData()
                         } else {
-                            Log.d(TAG, "RECEIVE mode: waiting for data")
+                            debugLog("RECEIVE mode: waiting for data")
                             _uiState.update {
                                 it.copy(
                                     currentStep = "Connected — waiting for data...",
@@ -98,7 +99,7 @@ class SyncViewModel @Inject constructor(
                     }
 
                     is ConnectionState.Completed -> {
-                        Log.d(TAG, "Completed state received (mode=${_uiState.value.mode})")
+                        debugLog("Completed state received (mode=${_uiState.value.mode})")
                         if (_uiState.value.mode == SyncMode.SEND) {
                             addLogEntry("Data sent — waiting for partner to import...")
                             _uiState.update {
@@ -111,7 +112,7 @@ class SyncViewModel @Inject constructor(
                     }
 
                     is ConnectionState.Error -> {
-                        Log.e(TAG, "Error state: ${state.message}")
+                        debugLog("Error state: ${state.message}")
                         addLogEntry("Error: ${state.message}")
                         _uiState.update { it.copy(error = state.message) }
                     }
@@ -122,7 +123,7 @@ class SyncViewModel @Inject constructor(
                             CancelReason.BY_PARTNER -> "Cancelled by partner"
                             CancelReason.CONNECTION_LOST -> "Connection lost"
                         }
-                        Log.d(TAG, "Cancelled: $reason")
+                        debugLog("Cancelled: $reason")
                         addLogEntry(reason)
                     }
 
@@ -133,7 +134,7 @@ class SyncViewModel @Inject constructor(
     }
 
     private fun handleSignal(signal: SyncSignal) {
-        Log.d(TAG, "handleSignal: $signal")
+        debugLog("handleSignal: $signal")
         when (signal) {
             is SyncSignal.Cancel -> {
                 addLogEntry("Partner cancelled the sync")
@@ -250,31 +251,28 @@ class SyncViewModel @Inject constructor(
         }
 
         connectionsManager.setOnDataReceived { bytes ->
-            Log.d(TAG, "onDataReceived callback invoked: ${bytes.size} bytes")
+            debugLog("onDataReceived callback invoked: ${bytes.size} bytes")
             addLogEntry("Received ${formatBytes(bytes.size.toLong())} of data")
             viewModelScope.launch {
                 try {
                     updateStep("Reading received data...", 1)
-                    Log.d(TAG, "Decoding JSON payload (${bytes.size} bytes)...")
+                    debugLog("Decoding JSON payload (${bytes.size} bytes)...")
                     val jsonString = String(bytes)
-                    Log.d(
-                        TAG,
-                        "JSON string length: ${jsonString.length}, first 200 chars: ${
-                            jsonString.take(200)
-                        }"
-                    )
+                    // The log that used to sit here printed the first 200 characters of the
+                    // payload — real bookmark ids and prayer records — with no DEBUG guard.
+                    // Deleted rather than guarded: payload content has no business in a log.
                     val payload = json.decodeFromString<SyncPayload>(jsonString)
-                    Log.d(
-                        TAG, "JSON decoded successfully: bookmarks=${payload.bookmarks.size}, " +
+                    debugLog(
+                        "JSON decoded successfully: bookmarks=${payload.bookmarks.size}, " +
                                 "favorites=${payload.favorites.size}, prayers=${payload.prayerRecords.size}"
                     )
                     val summary = buildSummaryFromPayload(payload, bytes.size.toLong())
                     _uiState.update { it.copy(dataSummary = summary) }
 
-                    Log.d(TAG, "Starting import with progress...")
+                    debugLog("Starting import with progress...")
                     importWithProgress(payload)
 
-                    Log.d(TAG, "Import complete! Setting Completed state.")
+                    debugLog("Import complete! Setting Completed state.")
                     _uiState.update {
                         it.copy(
                             connectionState = ConnectionState.Completed(bytes.size.toLong()),
@@ -286,7 +284,7 @@ class SyncViewModel @Inject constructor(
                 } catch (e: Exception) {
                     CrashReporter.recordException(e)
                     AppAnalytics.logError(AppAnalytics.Feature.SYNC, "import", e.message)
-                    Log.e(TAG, "Import failed!", e)
+                    debugLog("Import failed: ${e.message}")
                     addLogEntry("Import failed: ${e.message}")
                     _uiState.update { it.copy(error = "Import failed: ${e.message}") }
                 }
@@ -297,33 +295,30 @@ class SyncViewModel @Inject constructor(
     }
 
     private fun sendData() {
-        Log.d(TAG, "sendData: starting export")
+        debugLog("sendData: starting export")
         viewModelScope.launch {
             try {
-                var exportStep = 0
-                val payload = exporter.export { step ->
-                    exportStep++
-                    Log.d(TAG, "Export step $exportStep: $step")
+                val payload = exporter.export { completed, _, step ->
                     addLogEntry(step)
-                    _uiState.update { it.copy(currentStep = step, stepsCompleted = exportStep) }
+                    _uiState.update { it.copy(currentStep = step, stepsCompleted = completed) }
                     yield()
                 }
 
-                Log.d(
-                    TAG, "Export returned: bookmarks=${payload.bookmarks.size}, " +
+                debugLog(
+                    "Export returned: bookmarks=${payload.bookmarks.size}, " +
                             "favorites=${payload.favorites.size}, prayers=${payload.prayerRecords.size}, " +
                             "khatamAyahs=${payload.khatamAyahs.size}, prefs=${payload.preferences.size}"
                 )
                 val summary = buildSummaryFromPayload(payload, 0)
                 _uiState.update { it.copy(dataSummary = summary) }
 
-                updateStep("Encoding data...", 8)
+                updateStep("Encoding data...", SyncDataExporter.STEP_COUNT + 1)
                 addLogEntry("Encoding data...")
-                Log.d(TAG, "Starting JSON encode...")
+                debugLog("Starting JSON encode...")
                 val startEncode = System.currentTimeMillis()
                 val jsonBytes = json.encodeToString(SyncPayload.serializer(), payload).toByteArray()
                 val encodeMs = System.currentTimeMillis() - startEncode
-                Log.d(TAG, "JSON encoded: ${jsonBytes.size} bytes in ${encodeMs}ms")
+                debugLog("JSON encoded: ${jsonBytes.size} bytes in ${encodeMs}ms")
 
                 _uiState.update {
                     it.copy(
@@ -332,15 +327,15 @@ class SyncViewModel @Inject constructor(
                 }
 
                 val sizeText = formatBytes(jsonBytes.size.toLong())
-                updateStep("Sending $sizeText...", 9)
+                updateStep("Sending $sizeText...", SyncDataExporter.STEP_COUNT + 2)
                 addLogEntry("Sending $sizeText to partner...")
-                Log.d(TAG, "Calling connectionsManager.sendData(${jsonBytes.size} bytes)")
+                debugLog("Calling connectionsManager.sendData(${jsonBytes.size} bytes)")
                 connectionsManager.sendData(jsonBytes)
-                Log.d(TAG, "sendData returned — transfer queued")
+                debugLog("sendData returned — transfer queued")
             } catch (e: Exception) {
                 CrashReporter.recordException(e)
                 AppAnalytics.logError(AppAnalytics.Feature.SYNC, "export", e.message)
-                Log.e(TAG, "Export/send failed!", e)
+                debugLog("Export/send failed: ${e.message}")
                 addLogEntry("Export failed: ${e.message}")
                 _uiState.update { it.copy(error = "Export failed: ${e.message}") }
             }
@@ -348,8 +343,7 @@ class SyncViewModel @Inject constructor(
     }
 
     private suspend fun importWithProgress(payload: SyncPayload) {
-        val totalImportSteps = 8
-        Log.d(TAG, "importWithProgress: starting $totalImportSteps steps")
+
         connectionsManager.sendSignal(SyncSignal.ImportStarted)
 
         val steps: List<Pair<String, suspend () -> Unit>> = listOf(
@@ -367,19 +361,25 @@ class SyncViewModel @Inject constructor(
             "Importing preferences..." to { importer.importPreferencesData(payload) },
         )
 
+        // Both totals come from `steps` itself. They used to be two hand-maintained numbers
+        // against a list of twelve: the wire signal said "12 of 8" on the partner's screen, and
+        // the local caption reached "Step 13 of 10".
+        val totalImportSteps = steps.size
+        check(totalImportSteps == IMPORT_STEP_COUNT) {
+            "import steps ($totalImportSteps) disagree with IMPORT_STEP_COUNT ($IMPORT_STEP_COUNT)"
+        }
         steps.forEachIndexed { index, (label, action) ->
             val step = index + 2 // step 1 is "Reading received data..."
-            Log.d(TAG, "Import step ${index + 1}/$totalImportSteps: $label")
             connectionsManager.sendSignal(
                 SyncSignal.ImportProgress(step = index + 1, total = totalImportSteps, label = label)
             )
             updateStep(label, step)
             addLogEntry(label)
             action()
-            Log.d(TAG, "Import step ${index + 1} completed")
+            debugLog("Import step ${index + 1} completed")
         }
 
-        Log.d(TAG, "All import steps complete, sending ImportComplete signal")
+        debugLog("All import steps complete, sending ImportComplete signal")
         connectionsManager.sendSignal(SyncSignal.ImportComplete)
         addLogEntry("Import complete — waiting for confirmation...")
     }
@@ -406,7 +406,7 @@ class SyncViewModel @Inject constructor(
         val current = _uiState.value.connectionState
         val isTerminal =
             current is ConnectionState.Completed || current is ConnectionState.Cancelled
-        Log.d(TAG, "cancel: currentState=$current, isTerminal=$isTerminal")
+        debugLog("cancel: currentState=$current, isTerminal=$isTerminal")
 
         if (!isTerminal) {
             if (current is ConnectionState.Connected ||
@@ -414,7 +414,7 @@ class SyncViewModel @Inject constructor(
                 current is ConnectionState.WaitingForPartnerAccept ||
                 current is ConnectionState.PartnerImporting
             ) {
-                Log.d(TAG, "cancel: sending cancel signal to partner")
+                debugLog("cancel: sending cancel signal to partner")
                 connectionsManager.cancelWithSignal()
             }
         }
@@ -442,17 +442,37 @@ class SyncViewModel @Inject constructor(
 
     override fun onCleared() {
         super.onCleared()
+        // `connectionsManager` is a @Singleton, and both callbacks capture this ViewModel. Only
+        // stopping the transport left the singleton holding a destroyed ViewModel and its dead
+        // `viewModelScope` — so the receive handler stayed armed and its `launch` was a silent
+        // no-op. Clearing them is the half that was missing.
+        connectionsManager.setOnSignalReceived(null)
+        connectionsManager.setOnDataReceived(null)
         connectionsManager.stopAll()
     }
 
     companion object {
         private const val TAG = "SyncVM"
 
-        // 7 export callbacks + packaging + sending + complete
-        private const val SEND_TOTAL_STEPS = 10
+        /**
+         * Every step the send flow reports: the exporter's own, then encoding, then sending.
+         *
+         * Derived rather than counted by hand. The comment that used to sit here said
+         * "7 export callbacks" against an exporter that made **eleven** calls, which is how
+         * the bar reached 120% and then rewound.
+         */
+        private val SEND_TOTAL_STEPS = SyncDataExporter.STEP_COUNT + 2
 
-        // reading + 8 import categories + complete
-        private const val RECEIVE_TOTAL_STEPS = 10
+        /** Reading the received bytes, then one step per import category. */
+        internal val RECEIVE_TOTAL_STEPS = IMPORT_STEP_COUNT + 1
+
+        /**
+         * The number of categories [importWithProgress] imports.
+         *
+         * Kept beside the totals so the two cannot drift the way `8` did against a list of
+         * twelve; `importWithProgress` asserts the list still matches.
+         */
+        internal const val IMPORT_STEP_COUNT = 12
 
         fun formatBytes(bytes: Long): String = when {
             bytes < 1024 -> "$bytes B"
@@ -466,4 +486,17 @@ class SyncViewModel @Inject constructor(
             )
         }
     }
+}
+
+/**
+ * Sync's verbose tracing, compiled out of release builds.
+ *
+ * This ViewModel is the only one in the app that uses `android.util.Log` — 29 calls — and the
+ * app ships no proguard rule stripping it, so all of it reached release logcat. One of those
+ * calls printed the first 200 characters of the decoded `SyncPayload`: real bookmark ids and
+ * prayer records, readable by any app holding READ_LOGS on an older device or by anyone with
+ * adb. That call is deleted rather than guarded; the rest are behind this.
+ */
+private fun debugLog(message: String) {
+    if (BuildConfig.DEBUG) Log.d("SyncVM", message)
 }
