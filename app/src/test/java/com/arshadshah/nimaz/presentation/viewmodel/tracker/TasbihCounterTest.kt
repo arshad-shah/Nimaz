@@ -1,5 +1,7 @@
 package com.arshadshah.nimaz.presentation.viewmodel.tracker
 
+import java.time.LocalDate
+import com.arshadshah.nimaz.core.time.FakeTodayProvider
 import com.arshadshah.nimaz.core.feedback.CounterFeedback
 import com.arshadshah.nimaz.core.monitoring.RecordingTelemetry
 import com.arshadshah.nimaz.domain.model.TasbihSession
@@ -82,7 +84,7 @@ class TasbihCounterTest {
     @After
     fun tearDown() = Dispatchers.resetMain()
 
-    private fun viewModel() = TasbihViewModel(useCases, prefs, feedback, telemetry)
+    private fun viewModel() = TasbihViewModel(useCases, prefs, feedback, FakeTodayProvider(LocalDate.now()), telemetry)
 
     @Test
     fun `a single tap starts one session and counts one`() = runTest {

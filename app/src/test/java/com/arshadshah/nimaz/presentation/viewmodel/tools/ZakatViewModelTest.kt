@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.presentation.viewmodel.tools
 
+import androidx.lifecycle.SavedStateHandle
 import com.arshadshah.nimaz.core.monitoring.RecordingTelemetry
 import com.arshadshah.nimaz.domain.model.NisabType
 import com.arshadshah.nimaz.domain.model.ZakatDefaults
@@ -60,7 +61,8 @@ class ZakatViewModelTest {
     @After
     fun tearDown() = Dispatchers.resetMain()
 
-    private fun viewModel() = ZakatViewModel(useCases, settings, telemetry)
+    private fun viewModel(saved: SavedStateHandle = SavedStateHandle()) =
+        ZakatViewModel(useCases, settings, telemetry, saved)
 
     @Test
     fun `setting a currency persists it and re-reaches state`() = runTest {
@@ -179,6 +181,50 @@ class ZakatViewModelTest {
         advanceUntilIdle()
 
         coVerify(exactly = 0) { useCases.insertCalculation(any()) }
+    }
+
+    /**
+     * The longest form in the app lived in a `MutableStateFlow` and nothing else, so a phone
+     * call part-way through entering thirteen figures returned the user to a blank form. The
+     * saved handle is the same one the framework hands back after process death.
+     */
+    @Test
+    fun `the typed form survives process death`() = runTest {
+        val saved = SavedStateHandle()
+        val before = viewModel(saved)
+        advanceUntilIdle()
+
+        before.onEvent(ZakatEvent.UpdateCash(10_000.0))
+        before.onEvent(ZakatEvent.UpdateGold(120.0))
+        before.onEvent(ZakatEvent.UpdateDebts(2_500.0))
+        before.onEvent(ZakatEvent.SetNisabType(NisabType.SILVER))
+        advanceUntilIdle()
+
+        // A new ViewModel over the same handle is what the process restart produces.
+        val after = viewModel(saved)
+        advanceUntilIdle()
+
+        val restored = after.calculatorState.value
+        assertThat(restored.assets.cashOnHand).isEqualTo(10_000.0)
+        assertThat(restored.assets.goldGrams).isEqualTo(120.0)
+        assertThat(restored.liabilities.debts).isEqualTo(2_500.0)
+        assertThat(restored.nisabType).isEqualTo(NisabType.SILVER)
+        // And the result is recomputed from it, not left null under a filled-in form.
+        assertThat(restored.calculation).isNotNull()
+    }
+
+    @Test
+    fun `clearing the form also clears what would be restored`() = runTest {
+        val saved = SavedStateHandle()
+        val vm = viewModel(saved)
+        advanceUntilIdle()
+
+        vm.onEvent(ZakatEvent.UpdateCash(10_000.0))
+        advanceUntilIdle()
+        vm.onEvent(ZakatEvent.ClearAll)
+        advanceUntilIdle()
+
+        assertThat(viewModel(saved).calculatorState.value.assets.cashOnHand).isEqualTo(0.0)
     }
 
     @Test

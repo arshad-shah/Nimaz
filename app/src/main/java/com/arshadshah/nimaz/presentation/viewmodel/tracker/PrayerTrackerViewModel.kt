@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.core.monitoring.launchSafely
+import com.arshadshah.nimaz.core.time.TodayProvider
 import com.arshadshah.nimaz.core.util.toUtcMidnightMillis
 import com.arshadshah.nimaz.domain.model.Location
 import com.arshadshah.nimaz.domain.model.PrayerName
@@ -49,10 +50,12 @@ internal fun statsWindow(period: StatsPeriod, today: LocalDate): Pair<LocalDate,
 @HiltViewModel
 class PrayerTrackerViewModel @Inject constructor(
     private val prayerUseCases: PrayerUseCases,
+    private val todayProvider: TodayProvider,
     private val telemetry: Telemetry
 ) : ViewModel() {
 
-    private val _trackerState = MutableStateFlow(PrayerTrackerUiState())
+    private val _trackerState =
+        MutableStateFlow(PrayerTrackerUiState(selectedDate = todayProvider.today()))
     val trackerState: StateFlow<PrayerTrackerUiState> = _trackerState.asStateFlow()
 
     private val _statsState = MutableStateFlow(PrayerStatsUiState())
@@ -61,7 +64,11 @@ class PrayerTrackerViewModel @Inject constructor(
     private val _qadaState = MutableStateFlow(QadaPrayersUiState())
     val qadaState: StateFlow<QadaPrayersUiState> = _qadaState.asStateFlow()
 
-    private val _historyState = MutableStateFlow(PrayerHistoryUiState())
+    private val _historyState = MutableStateFlow(
+        todayProvider.today().let { today ->
+            PrayerHistoryUiState(startDate = today.minusDays(30), endDate = today)
+        }
+    )
     val historyState: StateFlow<PrayerHistoryUiState> = _historyState.asStateFlow()
 
     private var currentLocation: Location? = null
@@ -145,7 +152,7 @@ class PrayerTrackerViewModel @Inject constructor(
     }
 
     private fun loadToday() {
-        selectDate(LocalDate.now())
+        selectDate(todayProvider.today())
     }
 
     private fun selectDate(date: LocalDate) {
@@ -231,7 +238,7 @@ class PrayerTrackerViewModel @Inject constructor(
 
     private fun loadStats() {
         val period = _statsState.value.period
-        val now = LocalDate.now()
+        val now = todayProvider.today()
 
         val (startDate, endDate) = statsWindow(period, now)
         val startEpoch = startDate.toUtcMidnightMillis()
@@ -335,7 +342,7 @@ class PrayerTrackerViewModel @Inject constructor(
 
     private fun navigateToNextDay() {
         val nextDay = _trackerState.value.selectedDate.plusDays(1)
-        if (!nextDay.isAfter(LocalDate.now())) {
+        if (!nextDay.isAfter(todayProvider.today())) {
             selectDate(nextDay)
         }
     }

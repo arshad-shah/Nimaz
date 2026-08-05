@@ -1,5 +1,7 @@
 package com.arshadshah.nimaz.presentation.viewmodel.content
 
+import java.time.LocalDate
+import com.arshadshah.nimaz.core.time.FakeTodayProvider
 import com.arshadshah.nimaz.core.monitoring.RecordingTelemetry
 import com.arshadshah.nimaz.domain.model.Dua
 import com.arshadshah.nimaz.domain.model.DuaCategory
@@ -87,7 +89,7 @@ class DuaViewModelLoadScopeTest {
     @After
     fun tearDown() = Dispatchers.resetMain()
 
-    private fun viewModel() = DuaViewModel(duaUseCases, settingsRepository, RecordingTelemetry())
+    private fun viewModel() = DuaViewModel(duaUseCases, settingsRepository, FakeTodayProvider(LocalDate.now()), RecordingTelemetry())
 
     @Test
     fun `a previously opened category cannot overwrite the category on screen`() = runTest {

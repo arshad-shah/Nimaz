@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.presentation.viewmodel.tracker
 
+import com.arshadshah.nimaz.core.time.FakeTodayProvider
 import com.arshadshah.nimaz.core.monitoring.RecordingTelemetry
 import com.arshadshah.nimaz.core.util.toUtcMidnightMillis
 import com.arshadshah.nimaz.domain.model.PrayerName
@@ -73,7 +74,7 @@ class PrayerTrackerStatsTest {
     @After
     fun tearDown() = Dispatchers.resetMain()
 
-    private fun viewModel() = PrayerTrackerViewModel(prayerUseCases, telemetry)
+    private fun viewModel() = PrayerTrackerViewModel(prayerUseCases, FakeTodayProvider(LocalDate.now()), telemetry)
 
     // -- The window (D8) ---------------------------------------------------
 

@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.presentation.viewmodel.tools
 
+import androidx.lifecycle.SavedStateHandle
 import com.arshadshah.nimaz.core.monitoring.RecordingTelemetry
 import com.arshadshah.nimaz.domain.model.ZakatDefaults
 import com.arshadshah.nimaz.domain.repository.settings.ZakatSettings
@@ -78,7 +79,7 @@ class ZakatSettingsSeamTest {
     fun `currency from the seam reaches state`() = runTest(dispatcher) {
         val settings = FakeZakatSettings(initialCurrency = "GBP")
 
-        val viewModel = ZakatViewModel(useCases, settings, telemetry)
+        val viewModel = ZakatViewModel(useCases, settings, telemetry, SavedStateHandle())
         advanceUntilIdle()
 
         assertThat(viewModel.calculatorState.value.currency).isEqualTo("GBP")
@@ -88,7 +89,7 @@ class ZakatSettingsSeamTest {
     fun `a gold price written through the seam is observed`() = runTest(dispatcher) {
         val settings = FakeZakatSettings(initialGold = 60.0)
 
-        val viewModel = ZakatViewModel(useCases, settings, telemetry)
+        val viewModel = ZakatViewModel(useCases, settings, telemetry, SavedStateHandle())
         advanceUntilIdle()
         settings.setZakatGoldPricePerGram(75.0)
         advanceUntilIdle()

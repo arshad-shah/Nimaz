@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.presentation.viewmodel.tools
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.monitoring.Telemetry
@@ -29,9 +30,19 @@ class ZakatViewModel @Inject constructor(
     private val zakatUseCases: ZakatUseCases,
     private val zakatSettings: ZakatSettings,
     private val telemetry: Telemetry,
+    private val savedState: SavedStateHandle,
 ) : ViewModel() {
 
-    private val _calculatorState = MutableStateFlow(ZakatCalculatorUiState())
+    /**
+     * The form starts from whatever the user had typed before the process died.
+     *
+     * This is the longest form in the app — up to thirteen monetary figures, several of which
+     * a user has to look up — and it lived entirely in a `MutableStateFlow`. A phone call
+     * during data entry returned them to an empty form with no indication anything had been
+     * lost. The metal prices and currency are not restored here: those are persisted
+     * settings, and [observeMetalPrices] re-reads them.
+     */
+    private val _calculatorState = MutableStateFlow(savedState.restoreForm())
     val calculatorState: StateFlow<ZakatCalculatorUiState> = _calculatorState.asStateFlow()
 
     private val _historyState = MutableStateFlow(ZakatHistoryUiState())
@@ -96,6 +107,7 @@ class ZakatViewModel @Inject constructor(
             is ZakatEvent.SetNisabType -> {
                 telemetry.settingChanged("zakat_nisab_type", event.nisabType.name)
                 _calculatorState.update { it.copy(nisabType = event.nisabType) }
+                saveForm()
                 recalculate()
             }
 
@@ -144,6 +156,7 @@ class ZakatViewModel @Inject constructor(
         _calculatorState.update { state ->
             state.copy(assets = update(state.assets))
         }
+        saveForm()
         recalculate()
     }
 
@@ -151,6 +164,7 @@ class ZakatViewModel @Inject constructor(
         _calculatorState.update { state ->
             state.copy(liabilities = update(state.liabilities))
         }
+        saveForm()
         recalculate()
     }
 
@@ -226,6 +240,35 @@ class ZakatViewModel @Inject constructor(
                 currency = it.currency
             )
         }
+        // Clearing has to reach the saved state too, or a cleared form comes back on the
+        // next process death.
+        saveForm()
+    }
+
+    /**
+     * Mirror the typed figures into [SavedStateHandle].
+     *
+     * Written field by field rather than as one blob: the state types are domain models, and
+     * making them `Serializable`/`Parcelable` to fit a `Bundle` would push a presentation
+     * storage concern down into `domain/model`. Only what the user typed is saved — the
+     * result, the spinner and the error are all derived and are recomputed on restore.
+     */
+    private fun saveForm() {
+        val state = _calculatorState.value
+        savedState[KEY_CASH] = state.assets.cashOnHand
+        savedState[KEY_BANK] = state.assets.bankBalance
+        savedState[KEY_GOLD_GRAMS] = state.assets.goldGrams
+        savedState[KEY_SILVER_GRAMS] = state.assets.silverGrams
+        savedState[KEY_INVESTMENTS] = state.assets.investments
+        savedState[KEY_INVENTORY] = state.assets.businessInventory
+        savedState[KEY_RECEIVABLES] = state.assets.receivables
+        savedState[KEY_RENTAL] = state.assets.rentalIncome
+        savedState[KEY_OTHER_ASSETS] = state.assets.otherAssets
+        savedState[KEY_DEBTS] = state.liabilities.debts
+        savedState[KEY_LOANS] = state.liabilities.loans
+        savedState[KEY_BILLS] = state.liabilities.billsDue
+        savedState[KEY_OTHER_LIABILITIES] = state.liabilities.otherLiabilities
+        savedState[KEY_NISAB_TYPE] = state.nisabType.name
     }
 
     private fun saveCalculation() {
@@ -287,8 +330,56 @@ class ZakatViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Rebuild the form from [SavedStateHandle], falling back to an empty form.
+     *
+     * Every figure defaults to `0.0` and the nisab basis to whatever the state class defaults
+     * to, so a saved state written by an older build that is missing a key restores a blank
+     * field rather than failing.
+     */
+    private fun SavedStateHandle.restoreForm(): ZakatCalculatorUiState {
+        val default = ZakatCalculatorUiState()
+        return default.copy(
+            assets = ZakatAssets(
+                cashOnHand = get<Double>(KEY_CASH) ?: 0.0,
+                bankBalance = get<Double>(KEY_BANK) ?: 0.0,
+                goldGrams = get<Double>(KEY_GOLD_GRAMS) ?: 0.0,
+                silverGrams = get<Double>(KEY_SILVER_GRAMS) ?: 0.0,
+                investments = get<Double>(KEY_INVESTMENTS) ?: 0.0,
+                businessInventory = get<Double>(KEY_INVENTORY) ?: 0.0,
+                receivables = get<Double>(KEY_RECEIVABLES) ?: 0.0,
+                rentalIncome = get<Double>(KEY_RENTAL) ?: 0.0,
+                otherAssets = get<Double>(KEY_OTHER_ASSETS) ?: 0.0,
+            ),
+            liabilities = ZakatLiabilities(
+                debts = get<Double>(KEY_DEBTS) ?: 0.0,
+                loans = get<Double>(KEY_LOANS) ?: 0.0,
+                billsDue = get<Double>(KEY_BILLS) ?: 0.0,
+                otherLiabilities = get<Double>(KEY_OTHER_LIABILITIES) ?: 0.0,
+            ),
+            nisabType = get<String>(KEY_NISAB_TYPE)
+                ?.let { name -> NisabType.entries.firstOrNull { it.name == name } }
+                ?: default.nisabType,
+        )
+    }
+
     private companion object {
         const val DOMAIN = "zakat"
+
+        const val KEY_CASH = "zakat_cash_on_hand"
+        const val KEY_BANK = "zakat_bank_balance"
+        const val KEY_GOLD_GRAMS = "zakat_gold_grams"
+        const val KEY_SILVER_GRAMS = "zakat_silver_grams"
+        const val KEY_INVESTMENTS = "zakat_investments"
+        const val KEY_INVENTORY = "zakat_business_inventory"
+        const val KEY_RECEIVABLES = "zakat_receivables"
+        const val KEY_RENTAL = "zakat_rental_income"
+        const val KEY_OTHER_ASSETS = "zakat_other_assets"
+        const val KEY_DEBTS = "zakat_debts"
+        const val KEY_LOANS = "zakat_loans"
+        const val KEY_BILLS = "zakat_bills_due"
+        const val KEY_OTHER_LIABILITIES = "zakat_other_liabilities"
+        const val KEY_NISAB_TYPE = "zakat_nisab_type"
     }
 
     private fun ZakatAssets.hasAnyValue(): Boolean {

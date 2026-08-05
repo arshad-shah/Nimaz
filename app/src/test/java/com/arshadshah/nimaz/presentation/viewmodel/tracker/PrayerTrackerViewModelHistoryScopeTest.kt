@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.presentation.viewmodel.tracker
 
+import com.arshadshah.nimaz.core.time.FakeTodayProvider
 import com.arshadshah.nimaz.core.monitoring.RecordingTelemetry
 import com.arshadshah.nimaz.domain.model.PrayerName
 import com.arshadshah.nimaz.domain.model.PrayerRecord
@@ -61,7 +62,7 @@ class PrayerTrackerViewModelHistoryScopeTest {
 
     @Test
     fun `an earlier history range cannot redraw over the range on screen`() = runTest {
-        val vm = PrayerTrackerViewModel(prayerUseCases, RecordingTelemetry())
+        val vm = PrayerTrackerViewModel(prayerUseCases, FakeTodayProvider(LocalDate.now()), RecordingTelemetry())
 
         vm.onEvent(PrayerTrackerEvent.LoadHistory(weekStart, end))
         advanceUntilIdle()
@@ -79,7 +80,7 @@ class PrayerTrackerViewModelHistoryScopeTest {
 
     @Test
     fun `returning to a range re-subscribes to it`() = runTest {
-        val vm = PrayerTrackerViewModel(prayerUseCases, RecordingTelemetry())
+        val vm = PrayerTrackerViewModel(prayerUseCases, FakeTodayProvider(LocalDate.now()), RecordingTelemetry())
 
         vm.onEvent(PrayerTrackerEvent.LoadHistory(weekStart, end))
         advanceUntilIdle()

@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.presentation.viewmodel.tracker
 
+import com.arshadshah.nimaz.core.time.FakeTodayProvider
 import com.arshadshah.nimaz.core.monitoring.RecordingTelemetry
 
 import app.cash.turbine.test
@@ -80,6 +81,7 @@ class FastingViewModelTest {
         return FastingViewModel(
             buildFastingUseCases(repository),
             buildPrayerUseCases(prayers),
+            FakeTodayProvider(LocalDate.now()),
             RecordingTelemetry(),
         )
     }

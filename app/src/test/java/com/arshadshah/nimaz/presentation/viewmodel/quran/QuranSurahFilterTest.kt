@@ -1,5 +1,7 @@
 package com.arshadshah.nimaz.presentation.viewmodel.quran
 
+import java.time.LocalDate
+import com.arshadshah.nimaz.core.time.FakeTodayProvider
 import com.arshadshah.nimaz.presentation.viewmodel.FakeStringProvider
 import android.content.Context
 import com.arshadshah.nimaz.core.monitoring.RecordingTelemetry
@@ -83,7 +85,7 @@ class QuranSurahFilterTest {
     fun tearDown() = Dispatchers.resetMain()
 
     private fun viewModel() =
-        QuranViewModel(useCases, audioManager, settingsRepository, khatamUseCases, RecordingTelemetry(), FakeStringProvider())
+        QuranViewModel(useCases, audioManager, settingsRepository, khatamUseCases, RecordingTelemetry(), FakeTodayProvider(LocalDate.now()), FakeStringProvider())
 
     @Test
     fun `the list narrows to the transliterated name`() = runTest {

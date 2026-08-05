@@ -19,6 +19,7 @@ import java.time.LocalDate
 class FastingToggleTest {
 
     private fun stateWith(status: FastStatus?) = FastingTrackerUiState(
+        selectedDate = LocalDate.of(2026, 3, 12),
         todayRecord = status?.let {
             FastRecord(
                 id = 1L,

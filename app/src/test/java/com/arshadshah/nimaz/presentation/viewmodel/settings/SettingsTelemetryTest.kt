@@ -35,7 +35,7 @@ class SettingsTelemetryTest {
             SettingsEvent.SetLanguage(AppLanguage.ENGLISH) to "language",
             SettingsEvent.SetCalculationMethod(CalculationMethod.MUSLIM_WORLD_LEAGUE)
                 to "calculation_method",
-            SettingsEvent.SetAsrMethod(AsrJuristicMethod.STANDARD) to "asr_method",
+            SettingsEvent.SetAsrMethod(AsrCalculation.STANDARD) to "asr_method",
             SettingsEvent.SetHighLatitudeRule(HighLatitudeRule.MIDDLE_OF_THE_NIGHT)
                 to "high_latitude_rule",
             SettingsEvent.SetNotificationsEnabled(true) to "notifications_enabled",
