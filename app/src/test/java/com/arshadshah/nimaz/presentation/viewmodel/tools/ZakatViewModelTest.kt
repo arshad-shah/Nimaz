@@ -63,6 +63,22 @@ class ZakatViewModelTest {
     private fun viewModel() = ZakatViewModel(useCases, settings, telemetry)
 
     @Test
+    fun `a failing history stream clears the spinner instead of hanging on it`() = runTest {
+        // ZakatHistoryUiState.isLoading defaults to true and loadHistory only cleared it
+        // *inside* the collect, so a stream that threw before its first emission left the
+        // history screen spinning for the lifetime of the ViewModel.
+        every { useCases.getAllHistory() } returns kotlinx.coroutines.flow.flow {
+            throw IllegalStateException("no such table: zakat_history")
+        }
+
+        val vm = viewModel()
+        advanceUntilIdle()
+
+        assertThat(vm.historyState.value.isLoading).isFalse()
+        assertThat(telemetry.errors.map { it.domain }).contains("zakat")
+    }
+
+    @Test
     fun `clearing the last asset clears the result instead of leaving it stale`() = runTest {
         val vm = viewModel()
         advanceUntilIdle()
