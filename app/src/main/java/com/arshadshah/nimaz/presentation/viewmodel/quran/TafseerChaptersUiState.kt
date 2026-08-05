@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.presentation.viewmodel.quran
 
 import com.arshadshah.nimaz.domain.model.Surah
 import com.arshadshah.nimaz.domain.model.TafseerNoteItem
+import com.arshadshah.nimaz.presentation.viewmodel.UiError
 
 /**
  * Immutable UI state for the Tafseer chapters page — a surah picker plus the
@@ -16,5 +17,5 @@ data class TafseerChaptersUiState(
      * failure rendered as an empty picker with the spinner turned off — indistinguishable
      * from "you have no notes yet".
      */
-    val error: String? = null,
+    val error: UiError? = null,
 )

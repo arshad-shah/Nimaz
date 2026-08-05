@@ -27,4 +27,7 @@ sealed interface TafseerEvent {
     data class AddNote(val text: String) : TafseerEvent
     data class UpdateNote(val note: TafseerNote) : TafseerEvent
     data class DeleteNote(val noteId: Long) : TafseerEvent
+
+    /** Clears a failed note-write message once its snackbar has been shown. */
+    data object DismissNoteError : TafseerEvent
 }

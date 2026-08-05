@@ -43,7 +43,6 @@ class ScreenStateConventionTest {
         // Renders QuranTopicsViewModel's state, not the thematic one — its own group.
         "SurahSubjectsScreen.kt",
         "SyncScreen.kt",
-        "TafseerChaptersScreen.kt",
         "TafseerScreen.kt",
     )
 
@@ -59,7 +58,6 @@ class ScreenStateConventionTest {
         "QuranUiState.kt",
         "TasbihUiState.kt",
         "HomeUiState.kt",
-        "TafseerChaptersUiState.kt",
         "ZakatUiState.kt",
     )
 
@@ -74,7 +72,6 @@ class ScreenStateConventionTest {
         "DuaViewModel.kt",
         "PrayerTrackerViewModel.kt",
         "SearchSettingsViewModel.kt",
-        "TafseerViewModel.kt",
         "ZakatViewModel.kt",
     )
 

@@ -159,6 +159,10 @@
     <string name="duas">Duas</string>
     <string name="duas_subtitle">Daily duas and supplications</string>
     <string name="tafseer">Tafseer</string>
+    <string name="tafseer_load_failed">The commentary list couldn\'t be loaded</string>
+    <string name="tafseer_load_failed_body">Commentary is stored on your device, so trying again usually works.</string>
+    <string name="tafseer_note_save_failed">That note couldn\'t be saved</string>
+    <string name="tafseer_note_delete_failed">That note couldn\'t be deleted</string>
     <string name="tafseer_subtitle">Quran interpretation and commentary</string>
     <string name="tools">Tools</string>
     <string name="calendar">Calendar</string>

@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -36,6 +35,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.TafseerNoteItem
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorState
+import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.molecules.SurahListItem
 import com.arshadshah.nimaz.presentation.components.molecules.parseColor
@@ -84,13 +85,19 @@ fun TafseerChaptersScreen(
                     .padding(horizontal = 16.dp, vertical = 10.dp)
             )
 
+            val error = state.error
             when {
-                state.isLoading -> Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
-                }
+                state.isLoading -> NimazLoadingState()
+
+                // Before either tab: an empty surah picker and an empty notes list are both
+                // what a failed load leaves behind, and the notes tab would call that
+                // "you have no notes yet".
+                error != null -> NimazErrorState(
+                    title = stringResource(error.message),
+                    message = stringResource(R.string.tafseer_load_failed_body),
+                    kind = error.kind,
+                    details = error.details,
+                )
 
                 selectedTab == 0 -> LazyColumn(
                     modifier = Modifier.fillMaxSize(),
