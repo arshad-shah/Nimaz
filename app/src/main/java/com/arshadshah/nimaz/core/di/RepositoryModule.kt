@@ -9,6 +9,9 @@ import com.arshadshah.nimaz.data.repository.HadithRepositoryImpl
 import com.arshadshah.nimaz.data.repository.HelpRepositoryImpl
 import com.arshadshah.nimaz.data.repository.IslamicEventRepositoryImpl
 import com.arshadshah.nimaz.data.repository.KhatamRepositoryImpl
+import com.arshadshah.nimaz.data.device.AndroidDeviceLocationRepository
+import com.arshadshah.nimaz.data.device.AndroidPermissionChecker
+import com.arshadshah.nimaz.data.device.AndroidPowerSettings
 import com.arshadshah.nimaz.data.repository.PrayerRepositoryImpl
 import com.arshadshah.nimaz.data.repository.ProphetRepositoryImpl
 import com.arshadshah.nimaz.data.repository.QaidaRepositoryImpl
@@ -24,6 +27,9 @@ import com.arshadshah.nimaz.domain.repository.HadithRepository
 import com.arshadshah.nimaz.domain.repository.HelpRepository
 import com.arshadshah.nimaz.domain.repository.IslamicEventRepository
 import com.arshadshah.nimaz.domain.repository.KhatamRepository
+import com.arshadshah.nimaz.domain.repository.DeviceLocationRepository
+import com.arshadshah.nimaz.domain.repository.PermissionChecker
+import com.arshadshah.nimaz.domain.repository.PowerSettings
 import com.arshadshah.nimaz.domain.repository.PrayerRepository
 import com.arshadshah.nimaz.domain.repository.ProphetRepository
 import com.arshadshah.nimaz.domain.repository.QaidaRepository
@@ -274,6 +280,24 @@ abstract class RepositoryModule {
     abstract fun bindDuaRepository(
         duaRepositoryImpl: DuaRepositoryImpl
     ): DuaRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindDeviceLocationRepository(
+        impl: AndroidDeviceLocationRepository
+    ): DeviceLocationRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindPermissionChecker(
+        impl: AndroidPermissionChecker
+    ): PermissionChecker
+
+    @Binds
+    @Singleton
+    abstract fun bindPowerSettings(
+        impl: AndroidPowerSettings
+    ): PowerSettings
 
     @Binds
     @Singleton

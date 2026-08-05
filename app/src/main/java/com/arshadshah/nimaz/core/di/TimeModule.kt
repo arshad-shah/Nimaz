@@ -23,6 +23,15 @@ import javax.inject.Singleton
 @Retention(AnnotationRetention.BINARY)
 annotation class DefaultDispatcher
 
+/**
+ * The dispatcher for work that blocks on I/O — a geocoder round trip, a location fix.
+ *
+ * Same reason as [DefaultDispatcher]: injected so a test stays deterministic.
+ */
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class IoDispatcher
+
 @Module
 @InstallIn(SingletonComponent::class)
 object TimeModule {
@@ -34,6 +43,10 @@ object TimeModule {
     @Provides
     @DefaultDispatcher
     fun provideDefaultDispatcher(): CoroutineDispatcher = Dispatchers.Default
+
+    @Provides
+    @IoDispatcher
+    fun provideIoDispatcher(): CoroutineDispatcher = Dispatchers.IO
 }
 
 @Module

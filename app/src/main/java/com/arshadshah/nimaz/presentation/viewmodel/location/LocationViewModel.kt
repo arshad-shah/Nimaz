@@ -1,33 +1,23 @@
 package com.arshadshah.nimaz.presentation.viewmodel.location
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.pm.PackageManager
 import android.location.Geocoder
-import android.os.Build
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
-import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.domain.model.AsrCalculation
 import com.arshadshah.nimaz.domain.model.CalculationMethod
 import com.arshadshah.nimaz.domain.model.Location
 import com.arshadshah.nimaz.domain.model.isLocationSet
+import com.arshadshah.nimaz.core.monitoring.Telemetry
+import com.arshadshah.nimaz.domain.repository.DeviceLocationRepository
+import com.arshadshah.nimaz.domain.repository.PermissionChecker
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.usecase.PrayerUseCases
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationServices
-import com.google.android.gms.location.Priority
-import com.google.android.gms.tasks.CancellationTokenSource
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
-import java.util.Locale
 import java.util.TimeZone
 import javax.inject.Inject
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -43,16 +33,15 @@ import com.arshadshah.nimaz.domain.model.SearchLocation
 
 @HiltViewModel
 class LocationViewModel @Inject constructor(
-    @ApplicationContext private val context: Context,
+    private val deviceLocation: DeviceLocationRepository,
+    private val permissions: PermissionChecker,
     private val settingsRepository: SettingsRepository,
-    private val prayerUseCases: PrayerUseCases
+    private val prayerUseCases: PrayerUseCases,
+    private val telemetry: Telemetry,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(LocationUiState())
     val state: StateFlow<LocationUiState> = _state.asStateFlow()
-
-    private val fusedLocationClient: FusedLocationProviderClient =
-        LocationServices.getFusedLocationProviderClient(context)
 
     init {
         loadCurrentLocation()
@@ -71,7 +60,7 @@ class LocationViewModel @Inject constructor(
             }
 
             LocationEvent.Search -> {
-                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.LOCATION, "search")
+                telemetry.featureUsed(DOMAIN, "search")
                 searchLocations(_state.value.searchQuery)
             }
 
@@ -80,17 +69,17 @@ class LocationViewModel @Inject constructor(
             }
 
             is LocationEvent.SelectRegion -> {
-                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.LOCATION, "filter_region")
+                telemetry.featureUsed(DOMAIN, "filter_region")
                 _state.update { it.copy(selectedRegion = event.region) }
             }
 
             is LocationEvent.SelectLocation -> {
-                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.LOCATION, "select_location")
+                telemetry.featureUsed(DOMAIN, "select_location")
                 selectLocation(event.location)
             }
 
             LocationEvent.UseCurrentGpsLocation -> {
-                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.LOCATION, "use_gps")
+                telemetry.featureUsed(DOMAIN, "use_gps")
                 detectCurrentLocation()
             }
 
@@ -115,8 +104,7 @@ class LocationViewModel @Inject constructor(
                     }
                 }
             } catch (e: Exception) {
-                CrashReporter.recordException(e)
-                AppAnalytics.logError(AppAnalytics.Feature.LOCATION, "load_current", e.message)
+                telemetry.failure(DOMAIN, "load_current", e)
                 // Silently fail - location not set
             }
         }
@@ -148,8 +136,7 @@ class LocationViewModel @Inject constructor(
                     _state.update { it.copy(recentLocations = recentLocations) }
                 }
             } catch (e: Exception) {
-                CrashReporter.recordException(e)
-                AppAnalytics.logError(AppAnalytics.Feature.LOCATION, "load_recent", e.message)
+                telemetry.failure(DOMAIN, "load_recent", e)
                 // Silently fail
             }
         }
@@ -178,13 +165,15 @@ class LocationViewModel @Inject constructor(
             delay(SEARCH_DEBOUNCE_MS)
             _state.update { it.copy(isSearching = true) }
             try {
-                val results = withContext(Dispatchers.IO) {
-                    searchWithGeocoder(query)
-                }
+                // No `withContext(Dispatchers.IO)` here any more. The geocode is dispatched
+                // by `AndroidDeviceLocationRepository`, which is where the knowledge that it
+                // blocks belongs — and a ViewModel that hardcodes a real dispatcher cannot be
+                // driven by a test scheduler, which is half of why this debounce shipped
+                // untested.
+                val results = searchWithGeocoder(query)
                 _state.update { it.copy(searchResults = results, isSearching = false) }
             } catch (e: Exception) {
-                CrashReporter.recordException(e)
-                AppAnalytics.logError(AppAnalytics.Feature.LOCATION, "search", e.message)
+                telemetry.failure(DOMAIN, "search", e)
                 _state.update {
                     it.copy(
                         isSearching = false,
@@ -195,49 +184,22 @@ class LocationViewModel @Inject constructor(
         }
     }
 
-    @Suppress("DEPRECATION")
-    private suspend fun searchWithGeocoder(query: String): List<SearchLocation> {
-        return try {
-            val geocoder = Geocoder(context, Locale.getDefault())
-            val addresses = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                suspendCancellableCoroutine { continuation ->
-                    geocoder.getFromLocationName(query, 10) { addresses ->
-                        continuation.resume(addresses)
-                    }
-                }
-            } else {
-                geocoder.getFromLocationName(query, 10) ?: emptyList()
-            }
-
-            addresses.mapNotNull { address ->
-                val name = buildString {
-                    address.locality?.let { append(it) }
-                    if (isEmpty() && address.subAdminArea != null) {
-                        append(address.subAdminArea)
-                    }
-                    if (isEmpty() && address.adminArea != null) {
-                        append(address.adminArea)
-                    }
-                    if (isEmpty()) {
-                        address.featureName?.let { append(it) }
-                    }
-                }
-
-                if (name.isNotEmpty()) {
-                    SearchLocation(
-                        name = name,
-                        country = address.countryName ?: "",
-                        latitude = address.latitude,
-                        longitude = address.longitude
-                    )
-                } else null
-            }.distinctBy { "${it.name}, ${it.country}" }
+    /**
+     * What places match what the user typed.
+     *
+     * This was forty lines: build a `Geocoder` from an injected `Context`, branch on API 33,
+     * wrap the listener form in `suspendCancellableCoroutine`, then flatten each `Address`
+     * through a four-way name fallback — all of it duplicated verbatim in
+     * `OnboardingViewModel`. It lives in `AndroidDeviceLocationRepository` now, so this asks a
+     * question and the ViewModel can be constructed in a JVM test.
+     */
+    private suspend fun searchWithGeocoder(query: String): List<SearchLocation> =
+        try {
+            deviceLocation.search(query).distinctBy { "${it.name}, ${it.country}" }
         } catch (e: Exception) {
-            CrashReporter.recordException(e)
-            AppAnalytics.logError(AppAnalytics.Feature.LOCATION, "geocode_search", e.message)
+            telemetry.failure(DOMAIN, "geocode_search", e)
             emptyList()
         }
-    }
 
     private fun selectLocation(location: SearchLocation) {
         viewModelScope.launch {
@@ -274,8 +236,7 @@ class LocationViewModel @Inject constructor(
                     )
                 }
             } catch (e: Exception) {
-                CrashReporter.recordException(e)
-                AppAnalytics.logError(AppAnalytics.Feature.LOCATION, "select_location", e.message)
+                telemetry.failure(DOMAIN, "select_location", e)
                 _state.update { it.copy(error = "Failed to save location: ${e.message}") }
             }
         }
@@ -294,9 +255,7 @@ class LocationViewModel @Inject constructor(
                 val location = getCurrentLocation()
                 if (location != null) {
                     // Reverse geocode to get location name
-                    val locationName = withContext(Dispatchers.IO) {
-                        reverseGeocode(location.first, location.second)
-                    }
+                    val locationName = reverseGeocode(location.first, location.second)
 
                     // Save location
                     settingsRepository.updateLocation(
@@ -324,8 +283,7 @@ class LocationViewModel @Inject constructor(
                     }
                 }
             } catch (e: Exception) {
-                CrashReporter.recordException(e)
-                AppAnalytics.logError(AppAnalytics.Feature.LOCATION, "detect_gps", e.message)
+                telemetry.failure(DOMAIN, "detect_gps", e)
                 _state.update {
                     it.copy(
                         isLoadingGps = false,
@@ -336,80 +294,25 @@ class LocationViewModel @Inject constructor(
         }
     }
 
-    private fun hasLocationPermission(): Boolean {
-        return ContextCompat.checkSelfPermission(
-            context,
-            Manifest.permission.ACCESS_FINE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED ||
-                ContextCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.ACCESS_COARSE_LOCATION
-                ) == PackageManager.PERMISSION_GRANTED
-    }
+    private fun hasLocationPermission(): Boolean = permissions.hasLocationPermission()
 
-    @SuppressLint("MissingPermission")
-    private suspend fun getCurrentLocation(): Pair<Double, Double>? {
-        return suspendCancellableCoroutine { continuation ->
-            val cancellationTokenSource = CancellationTokenSource()
+    private suspend fun getCurrentLocation(): Pair<Double, Double>? =
+        deviceLocation.currentCoordinates()?.let { it.latitude to it.longitude }
 
-            fusedLocationClient.getCurrentLocation(
-                Priority.PRIORITY_HIGH_ACCURACY,
-                cancellationTokenSource.token
-            ).addOnSuccessListener { location ->
-                if (location != null) {
-                    continuation.resume(Pair(location.latitude, location.longitude))
-                } else {
-                    continuation.resume(null)
-                }
-            }.addOnFailureListener { e ->
-                continuation.resumeWithException(e)
-            }
-
-            continuation.invokeOnCancellation {
-                cancellationTokenSource.cancel()
-            }
-        }
-    }
-
-    @Suppress("DEPRECATION")
-    private suspend fun reverseGeocode(latitude: Double, longitude: Double): String {
-        return try {
-            val geocoder = Geocoder(context, Locale.getDefault())
-            val addresses = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                suspendCancellableCoroutine { continuation ->
-                    geocoder.getFromLocation(latitude, longitude, 1) { addresses ->
-                        continuation.resume(addresses)
-                    }
-                }
-            } else {
-                geocoder.getFromLocation(latitude, longitude, 1) ?: emptyList()
-            }
-
-            val address = addresses.firstOrNull()
-            if (address != null) {
-                buildString {
-                    address.locality?.let { append(it) }
-                    if (isEmpty() && address.subAdminArea != null) {
-                        append(address.subAdminArea)
-                    }
-                    if (isEmpty() && address.adminArea != null) {
-                        append(address.adminArea)
-                    }
-                    address.countryName?.let { country ->
-                        if (isNotEmpty()) append(", ")
-                        append(country)
-                    }
-                }.ifEmpty { "Unknown Location" }
-            } else {
-                "Unknown Location"
-            }
+    private suspend fun reverseGeocode(latitude: Double, longitude: Double): String =
+        try {
+            deviceLocation.reverseGeocode(latitude, longitude) ?: UNKNOWN_LOCATION
         } catch (e: Exception) {
-            CrashReporter.recordException(e)
-            AppAnalytics.logError(AppAnalytics.Feature.LOCATION, "reverse_geocode", e.message)
-            "Unknown Location"
+            telemetry.failure(DOMAIN, "reverse_geocode", e)
+            UNKNOWN_LOCATION
         }
-    }
 }
 
 /** Long enough that a fast typist issues one geocode, short enough to feel immediate. */
 private const val SEARCH_DEBOUNCE_MS = 300L
+
+/** The analytics feature name for everything in this ViewModel. */
+private const val DOMAIN = AppAnalytics.Feature.LOCATION
+
+/** Shown when the geocoder has nothing to call a place. */
+private const val UNKNOWN_LOCATION = "Unknown Location"
