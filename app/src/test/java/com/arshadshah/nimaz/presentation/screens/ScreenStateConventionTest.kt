@@ -165,6 +165,7 @@ class ScreenStateConventionTest {
         // Khatam's errorRes is form validation read as a TextField supportingText, which
         // is the right tool for a field error and out of this epic's scope.
         "Khatam" -> setOf("khatam")
+        "Licenses" -> setOf("about")
         "Home" -> setOf("home")
         "Zakat" -> setOf("zakat")
         "Search" -> setOf("search")
