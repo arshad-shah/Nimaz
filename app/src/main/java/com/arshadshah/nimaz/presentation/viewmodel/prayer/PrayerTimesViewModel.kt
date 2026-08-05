@@ -16,7 +16,6 @@ import com.arshadshah.nimaz.domain.model.PrayerCalculationSettings
 import com.arshadshah.nimaz.domain.model.PrayerType
 import com.arshadshah.nimaz.domain.model.FallbackLocation
 import com.arshadshah.nimaz.domain.model.resolveLocation
-import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.usecase.PrayerUseCases
 import com.arshadshah.nimaz.presentation.components.organisms.MoonPhase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -42,7 +41,6 @@ import com.arshadshah.nimaz.presentation.model.PrayerTimeDisplay
 @HiltViewModel
 class PrayerTimesViewModel @Inject constructor(
     private val prayerUseCases: PrayerUseCases,
-    private val settingsRepository: SettingsRepository,
     private val todayProvider: TodayProvider,
     @DefaultDispatcher private val defaultDispatcher: CoroutineDispatcher,
     private val telemetry: Telemetry,

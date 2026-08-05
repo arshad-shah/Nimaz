@@ -8,7 +8,7 @@ import com.arshadshah.nimaz.domain.model.HelpGuideDetail
 import com.arshadshah.nimaz.domain.model.HelpSearchResult
 import com.arshadshah.nimaz.domain.model.HelpTopic
 import com.arshadshah.nimaz.domain.model.HelpTopicDetail
-import com.arshadshah.nimaz.domain.repository.SettingsRepository
+import com.arshadshah.nimaz.domain.repository.settings.AppSettings
 import com.arshadshah.nimaz.domain.usecase.HelpUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -33,11 +33,11 @@ import javax.inject.Inject
 @HiltViewModel
 class HelpViewModel @Inject constructor(
     private val useCases: HelpUseCases,
-    preferences: SettingsRepository,
+    appSettings: AppSettings,
     private val telemetry: Telemetry,
 ) : ViewModel() {
 
-    private val language: StateFlow<String> = preferences.appLanguage
+    private val language: StateFlow<String> = appSettings.appLanguage
         .stateIn(viewModelScope, SharingStarted.Eagerly, "en")
 
     private val query = MutableStateFlow("")

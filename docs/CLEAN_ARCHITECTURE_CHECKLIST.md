@@ -193,6 +193,17 @@ This one is **pervasive and lower priority** — listed so it's tracked, not bec
   now implements it, and `UserPreferences` moved to `domain/model`. All 13 ViewModels + `MainActivity`
   inject `SettingsRepository`; bound via `@Binds` in `RepositoryModule`. Data-layer consumers
   (seeders, sync, workers, `AppInitializer`, `BootReceiver`) keep the concrete class.
+- [x] ~~**`SettingsRepository` itself injected whole into 15 feature ViewModels.**~~ **Resolved.**
+  The interface that replaced `PreferencesDataStore` was still the entire preference surface, so a
+  ViewModel reading three fields could reach all 179 members.
+  `domain/repository/settings/SettingsSeams.kt` splits it into eight feature-scoped interfaces that
+  `SettingsRepository` extends; DI binds each to the same singleton, so the implementation and the
+  DataStore are unchanged. 13 ViewModels now take one seam, `OnboardingViewModel` takes two
+  (`AppSettings` + `LocationSettings`), and `PrayerTimesViewModel`/`FastingViewModel` — which
+  injected the repository and never read it — take none. `SettingsViewModel` keeps the full surface
+  by design. **Detect a regression:**
+  `grep -rln "SettingsRepository" app/src/main --include='*ViewModel.kt'` — only `SettingsViewModel`
+  should match.
   - [ ] **Minor leftover:** `settings/WidgetsScreen.kt` still *instantiates* `PreferencesDataStore(context)`
     inline instead of going through DI/a ViewModel — convert when that screen is next touched.
     Partially mitigated: the read is now a one-off (`loadPreviewLocation`) rather than being repeated

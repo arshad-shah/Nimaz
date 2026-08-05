@@ -38,7 +38,7 @@ import com.arshadshah.nimaz.domain.model.PrayerCalculationSettings
 import com.arshadshah.nimaz.domain.model.PrayerType
 import com.arshadshah.nimaz.domain.model.WorshipReminderOccurrence
 import com.arshadshah.nimaz.domain.model.resolveLocation
-import com.arshadshah.nimaz.domain.repository.SettingsRepository
+import com.arshadshah.nimaz.domain.repository.settings.LocationSettings
 import com.arshadshah.nimaz.domain.usecase.AnnouncementUseCases
 import com.arshadshah.nimaz.domain.usecase.DuaUseCases
 import com.arshadshah.nimaz.domain.usecase.FastingUseCases
@@ -85,7 +85,7 @@ class HomeViewModel @Inject constructor(
     private val fastingUseCases: FastingUseCases,
     private val hadithUseCases: HadithUseCases,
     private val duaUseCases: DuaUseCases,
-    private val settingsRepository: SettingsRepository,
+    private val locationSettings: LocationSettings,
     private val announcementUseCases: AnnouncementUseCases,
     private val observeEventCards: ObserveEventCardsUseCase,
     private val nextWorshipResolver: NextWorshipResolver,
@@ -449,7 +449,7 @@ class HomeViewModel @Inject constructor(
 
     private fun updateLocation(latitude: Double, longitude: Double, name: String) {
         viewModelScope.launch {
-            settingsRepository.updateLocation(latitude, longitude, name)
+            locationSettings.updateLocation(latitude, longitude, name)
             _state.update {
                 it.copy(
                     latitude = latitude,

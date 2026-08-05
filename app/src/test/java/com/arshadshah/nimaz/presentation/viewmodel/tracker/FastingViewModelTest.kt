@@ -80,7 +80,6 @@ class FastingViewModelTest {
         return FastingViewModel(
             buildFastingUseCases(repository),
             buildPrayerUseCases(prayers),
-            settingsRepository,
             RecordingTelemetry(),
         )
     }

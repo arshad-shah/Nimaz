@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.core.monitoring.launchSafely
-import com.arshadshah.nimaz.domain.repository.SettingsRepository
+import com.arshadshah.nimaz.domain.repository.settings.AiSettings
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,7 +21,7 @@ import com.arshadshah.nimaz.presentation.viewmodel.ai.AskViewModel
 
 @HiltViewModel
 class SearchSettingsViewModel @Inject constructor(
-    private val settingsRepository: SettingsRepository,
+    private val aiSettings: AiSettings,
     private val telemetry: Telemetry,
 ) : ViewModel() {
 
@@ -32,9 +32,9 @@ class SearchSettingsViewModel @Inject constructor(
 
     init {
         combine(
-            settingsRepository.aiAskEnabled,
-            settingsRepository.aiHistoryEnabled,
-            settingsRepository.aiQuestionHistory,
+            aiSettings.aiAskEnabled,
+            aiSettings.aiHistoryEnabled,
+            aiSettings.aiQuestionHistory,
         ) { enabled, history, historyJson ->
             _uiState.update {
                 it.copy(
@@ -65,8 +65,8 @@ class SearchSettingsViewModel @Inject constructor(
 
             is SearchSettingsEvent.SetHistoryEnabled ->
                 launchSafely(telemetry, DOMAIN, "set_history") {
-                    settingsRepository.setAiHistoryEnabled(event.enabled)
-                    if (!event.enabled) settingsRepository.setAiQuestionHistory("")
+                    aiSettings.setAiHistoryEnabled(event.enabled)
+                    if (!event.enabled) aiSettings.setAiQuestionHistory("")
                     telemetry.settingChanged(
                         "ai_ask_history",
                         if (event.enabled) "on" else "off",
@@ -75,7 +75,7 @@ class SearchSettingsViewModel @Inject constructor(
 
             SearchSettingsEvent.ClearHistory ->
                 launchSafely(telemetry, DOMAIN, "clear_history") {
-                    settingsRepository.setAiQuestionHistory("")
+                    aiSettings.setAiQuestionHistory("")
                     telemetry.featureUsed(DOMAIN, "history_cleared")
                 }
         }
@@ -85,7 +85,7 @@ class SearchSettingsViewModel @Inject constructor(
         if (_uiState.value.aiEnabled) {
             // Turning OFF is instant — no consent required.
             launchSafely(telemetry, DOMAIN, "disable") {
-                settingsRepository.setAiAskEnabled(false)
+                aiSettings.setAiAskEnabled(false)
                 telemetry.settingChanged("ai_ask", "off")
             }
         } else {
@@ -110,8 +110,8 @@ class SearchSettingsViewModel @Inject constructor(
             "consent",
             onFailure = { _uiState.update { it.copy(consentFailed = true) } },
         ) {
-            settingsRepository.setAiAskEnabled(true)
-            settingsRepository.setAiConsentTimestamp(System.currentTimeMillis())
+            aiSettings.setAiAskEnabled(true)
+            aiSettings.setAiConsentTimestamp(System.currentTimeMillis())
             telemetry.settingChanged("ai_ask", "on")
             _uiState.update { it.copy(showConsentSheet = false, consentFailed = false) }
         }

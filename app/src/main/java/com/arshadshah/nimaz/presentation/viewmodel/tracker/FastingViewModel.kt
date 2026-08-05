@@ -16,7 +16,6 @@ import com.arshadshah.nimaz.domain.model.PrayerCalculationSettings
 import com.arshadshah.nimaz.domain.usecase.PrayerUseCases
 import com.arshadshah.nimaz.domain.model.PrayerType
 import com.arshadshah.nimaz.domain.model.resolveLocation
-import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.usecase.FastingUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.LocalDate
@@ -39,7 +38,6 @@ enum class FastingStatsPeriod {
 class FastingViewModel @Inject constructor(
     private val fastingUseCases: FastingUseCases,
     private val prayerUseCases: PrayerUseCases,
-    private val settingsRepository: SettingsRepository,
     private val telemetry: Telemetry,
 ) : ViewModel() {
 

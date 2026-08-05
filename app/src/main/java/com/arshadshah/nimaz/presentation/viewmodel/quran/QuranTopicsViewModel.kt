@@ -9,7 +9,7 @@ import com.arshadshah.nimaz.domain.model.SurahTopic
 import com.arshadshah.nimaz.domain.model.TopicCitation
 import com.arshadshah.nimaz.domain.model.TopicDetail
 import com.arshadshah.nimaz.domain.model.TopicTree
-import com.arshadshah.nimaz.domain.repository.SettingsRepository
+import com.arshadshah.nimaz.domain.repository.settings.QuranPreferences
 import com.arshadshah.nimaz.domain.usecase.QuranUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
@@ -50,7 +50,7 @@ data class TopicSurahContext(
 @HiltViewModel
 class QuranTopicsViewModel @Inject constructor(
     private val quranUseCases: QuranUseCases,
-    private val settingsRepository: SettingsRepository,
+    private val quranSettings: QuranPreferences,
     private val telemetry: Telemetry,
 ) : ViewModel() {
 
@@ -467,7 +467,7 @@ class QuranTopicsViewModel @Inject constructor(
 
     private suspend fun previewsFor(ayahIds: List<Int>): Map<Int, String> {
         if (ayahIds.isEmpty()) return emptyMap()
-        val translatorId = settingsRepository.quranTranslatorId.first()
+        val translatorId = quranSettings.quranTranslatorId.first()
         return runCatching {
             quranUseCases.getAyahTranslation.forAyahs(ayahIds, translatorId)
         }.getOrDefault(emptyMap())

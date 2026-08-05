@@ -11,7 +11,7 @@ import com.arshadshah.nimaz.domain.model.HadithBookmark
 import com.arshadshah.nimaz.domain.model.HadithChapter
 import com.arshadshah.nimaz.domain.model.HadithGrade
 import com.arshadshah.nimaz.domain.model.HadithSearchResult
-import com.arshadshah.nimaz.domain.repository.SettingsRepository
+import com.arshadshah.nimaz.domain.repository.settings.HadithDisplaySettings
 import com.arshadshah.nimaz.domain.usecase.HadithUseCases
 import com.arshadshah.nimaz.presentation.theme.AmiriFontFamily
 import com.arshadshah.nimaz.presentation.theme.QuranArabicFont
@@ -28,7 +28,7 @@ import javax.inject.Inject
 @HiltViewModel
 class HadithViewModel @Inject constructor(
     private val hadithUseCases: HadithUseCases,
-    private val settingsRepository: SettingsRepository,
+    private val hadithSettings: HadithDisplaySettings,
     private val telemetry: Telemetry
 ) : ViewModel() {
 
@@ -317,16 +317,16 @@ class HadithViewModel @Inject constructor(
     private fun observeHadithSettings() {
         viewModelScope.launch {
             val displayFlow = combine(
-                settingsRepository.hadithArabicFont,
-                settingsRepository.hadithArabicFontSize,
-                settingsRepository.hadithTranslationFontSize
+                hadithSettings.hadithArabicFont,
+                hadithSettings.hadithArabicFontSize,
+                hadithSettings.hadithTranslationFontSize
             ) { fontId, arabicSize, transSize -> Triple(fontId, arabicSize, transSize) }
 
             val toggleFlow = combine(
-                settingsRepository.hadithShowArabic,
-                settingsRepository.hadithShowTranslation,
-                settingsRepository.hadithShowGrade,
-                settingsRepository.hadithShowChain
+                hadithSettings.hadithShowArabic,
+                hadithSettings.hadithShowTranslation,
+                hadithSettings.hadithShowGrade,
+                hadithSettings.hadithShowChain
             ) { showArabic, showTranslation, showGrade, showChain ->
                 HadithToggles(showArabic, showTranslation, showGrade, showChain)
             }

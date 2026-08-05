@@ -13,7 +13,7 @@ import com.arshadshah.nimaz.domain.model.isLocationSet
 import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.domain.repository.DeviceLocationRepository
 import com.arshadshah.nimaz.domain.repository.PermissionChecker
-import com.arshadshah.nimaz.domain.repository.SettingsRepository
+import com.arshadshah.nimaz.domain.repository.settings.LocationSettings
 import com.arshadshah.nimaz.domain.usecase.PrayerUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.util.TimeZone
@@ -35,7 +35,7 @@ import com.arshadshah.nimaz.domain.model.SearchLocation
 class LocationViewModel @Inject constructor(
     private val deviceLocation: DeviceLocationRepository,
     private val permissions: PermissionChecker,
-    private val settingsRepository: SettingsRepository,
+    private val locationSettings: LocationSettings,
     private val prayerUseCases: PrayerUseCases,
     private val telemetry: Telemetry,
 ) : ViewModel() {
@@ -91,7 +91,7 @@ class LocationViewModel @Inject constructor(
     private fun loadCurrentLocation() {
         viewModelScope.launch {
             try {
-                val prefs = settingsRepository.userPreferences.first()
+                val prefs = locationSettings.userPreferences.first()
                 if (isLocationSet(prefs.latitude, prefs.longitude)) {
                     _state.update {
                         it.copy(
@@ -205,7 +205,7 @@ class LocationViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 // Save to DataStore
-                settingsRepository.updateLocation(
+                locationSettings.updateLocation(
                     latitude = location.latitude,
                     longitude = location.longitude,
                     name = "${location.name}, ${location.country}"
@@ -258,7 +258,7 @@ class LocationViewModel @Inject constructor(
                     val locationName = reverseGeocode(location.first, location.second)
 
                     // Save location
-                    settingsRepository.updateLocation(
+                    locationSettings.updateLocation(
                         latitude = location.first,
                         longitude = location.second,
                         name = locationName
