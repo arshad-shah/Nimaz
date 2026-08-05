@@ -1,30 +1,18 @@
 package com.arshadshah.nimaz.presentation.viewmodel.onboarding
 
-import android.Manifest
-import android.annotation.SuppressLint
-import android.content.Context
-import android.content.Intent
-import android.content.pm.PackageManager
-import android.location.Geocoder
 import android.os.Build
-import android.os.PowerManager
-import android.provider.Settings
-import androidx.core.content.ContextCompat
-import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
+import com.arshadshah.nimaz.domain.repository.DeviceLocationRepository
+import com.arshadshah.nimaz.domain.repository.PermissionChecker
+import com.arshadshah.nimaz.domain.repository.PowerSettings
 import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.domain.repository.settings.AppSettings
 import com.arshadshah.nimaz.domain.repository.settings.LocationSettings
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationServices
-import com.google.android.gms.location.Priority
-import com.google.android.gms.tasks.CancellationTokenSource
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -34,14 +22,15 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
-import java.util.Locale
 import javax.inject.Inject
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
 @HiltViewModel
 class OnboardingViewModel @Inject constructor(
-    @ApplicationContext private val context: Context,
+    private val deviceLocation: DeviceLocationRepository,
+    private val permissions: PermissionChecker,
+    private val powerSettings: PowerSettings,
     private val appSettings: AppSettings,
     private val locationSettings: LocationSettings,
     private val telemetry: Telemetry,
@@ -50,8 +39,6 @@ class OnboardingViewModel @Inject constructor(
     private val _state = MutableStateFlow(OnboardingUiState())
     val state: StateFlow<OnboardingUiState> = _state.asStateFlow()
 
-    private val fusedLocationClient: FusedLocationProviderClient =
-        LocationServices.getFusedLocationProviderClient(context)
 
     init {
         checkOnboardingStatus()
@@ -145,29 +132,13 @@ class OnboardingViewModel @Inject constructor(
     }
 
     private fun checkLocationPermission() {
-        val hasPermission = ContextCompat.checkSelfPermission(
-            context,
-            Manifest.permission.ACCESS_FINE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED ||
-                ContextCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.ACCESS_COARSE_LOCATION
-                ) == PackageManager.PERMISSION_GRANTED
-
-        _state.update { it.copy(locationPermissionGranted = hasPermission) }
+        _state.update { it.copy(locationPermissionGranted = permissions.hasLocationPermission()) }
     }
 
     private fun checkNotificationPermission() {
-        val hasPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.POST_NOTIFICATIONS
-            ) == PackageManager.PERMISSION_GRANTED
-        } else {
-            true // Permission not required before Android 13
+        _state.update {
+            it.copy(notificationPermissionGranted = permissions.hasNotificationPermission())
         }
-
-        _state.update { it.copy(notificationPermissionGranted = hasPermission) }
     }
 
     /**
@@ -181,41 +152,16 @@ class OnboardingViewModel @Inject constructor(
      * skipping it.
      */
     private fun checkBatteryOptimization() {
-        val powerManager = context.getSystemService(Context.POWER_SERVICE) as? PowerManager
-        val isIgnoringBatteryOptimizations =
-            powerManager?.isIgnoringBatteryOptimizations(context.packageName) ?: false
-        _state.update { it.copy(batteryOptimizationDisabled = isIgnoringBatteryOptimizations) }
-    }
-
-    fun hasLocationPermission(): Boolean {
-        return ContextCompat.checkSelfPermission(
-            context,
-            Manifest.permission.ACCESS_FINE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED ||
-                ContextCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.ACCESS_COARSE_LOCATION
-                ) == PackageManager.PERMISSION_GRANTED
-    }
-
-    fun hasNotificationPermission(): Boolean {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.POST_NOTIFICATIONS
-            ) == PackageManager.PERMISSION_GRANTED
-        } else {
-            true
+        _state.update {
+            it.copy(batteryOptimizationDisabled = powerSettings.isIgnoringBatteryOptimizations())
         }
     }
 
-    fun getBatteryOptimizationIntent(): Intent {
-        return Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
-            data = "package:${context.packageName}".toUri()
-        }
-    }
+    fun hasLocationPermission(): Boolean = permissions.hasLocationPermission()
 
-    @SuppressLint("MissingPermission")
+    fun hasNotificationPermission(): Boolean = permissions.hasNotificationPermission()
+
+
     private fun detectLocation() {
         if (!hasLocationPermission()) {
             _state.update { it.copy(error = "Location permission not granted") }
@@ -226,9 +172,12 @@ class OnboardingViewModel @Inject constructor(
             try {
                 val location = getCurrentLocation()
                 if (location != null) {
-                    val locationName = withContext(Dispatchers.IO) {
-                        reverseGeocode(location.first, location.second)
-                    }
+                    // No `withContext(Dispatchers.IO)` here any more: geocoding moved behind
+                    // DeviceLocationRepository, whose implementation already does its own
+                    // `withContext(ioDispatcher)`. Wrapping it again pinned the work to a real
+                    // dispatcher that no test scheduler can advance — which is half of why this
+                    // ViewModel had no tests.
+                    val locationName = reverseGeocode(location.first, location.second)
 
                     // Save location to DataStore
                     locationSettings.updateLocation(
@@ -254,66 +203,9 @@ class OnboardingViewModel @Inject constructor(
         }
     }
 
-    @SuppressLint("MissingPermission")
-    private suspend fun getCurrentLocation(): Pair<Double, Double>? {
-        return suspendCancellableCoroutine { continuation ->
-            val cancellationTokenSource = CancellationTokenSource()
+    private suspend fun getCurrentLocation(): Pair<Double, Double>? =
+        deviceLocation.currentCoordinates()?.let { it.latitude to it.longitude }
 
-            fusedLocationClient.getCurrentLocation(
-                Priority.PRIORITY_HIGH_ACCURACY,
-                cancellationTokenSource.token
-            ).addOnSuccessListener { location ->
-                if (location != null) {
-                    continuation.resume(Pair(location.latitude, location.longitude))
-                } else {
-                    continuation.resume(null)
-                }
-            }.addOnFailureListener { e ->
-                continuation.resumeWithException(e)
-            }
-
-            continuation.invokeOnCancellation {
-                cancellationTokenSource.cancel()
-            }
-        }
-    }
-
-    @Suppress("DEPRECATION")
-    private suspend fun reverseGeocode(latitude: Double, longitude: Double): String {
-        return try {
-            val geocoder = Geocoder(context, Locale.getDefault())
-            val addresses = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                suspendCancellableCoroutine { continuation ->
-                    geocoder.getFromLocation(latitude, longitude, 1) { addresses ->
-                        continuation.resume(addresses)
-                    }
-                }
-            } else {
-                geocoder.getFromLocation(latitude, longitude, 1) ?: emptyList()
-            }
-
-            val address = addresses.firstOrNull()
-            if (address != null) {
-                buildString {
-                    address.locality?.let { append(it) }
-                    if (isEmpty() && address.subAdminArea != null) {
-                        append(address.subAdminArea)
-                    }
-                    if (isEmpty() && address.adminArea != null) {
-                        append(address.adminArea)
-                    }
-                    address.countryName?.let { country ->
-                        if (isNotEmpty()) append(", ")
-                        append(country)
-                    }
-                }.ifEmpty { "Unknown Location" }
-            } else {
-                "Unknown Location"
-            }
-        } catch (e: Exception) {
-            CrashReporter.recordException(e)
-            AppAnalytics.logError(AppAnalytics.Feature.ONBOARDING, "reverse_geocode", e.message)
-            "Unknown Location"
-        }
-    }
+    private suspend fun reverseGeocode(latitude: Double, longitude: Double): String =
+        deviceLocation.reverseGeocode(latitude, longitude) ?: "Unknown Location"
 }
