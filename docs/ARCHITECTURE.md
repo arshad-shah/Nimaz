@@ -478,6 +478,11 @@ class ExampleViewModel @Inject constructor(
 ) : ViewModel()
 ```
 
+Device feedback follows the same rule: `CounterFeedback` (`core/feedback/`) is the seam for the
+tick a counter makes, so a ViewModel never holds a `Vibrator` or a `ToneGenerator`. Before it
+existed, `TasbihViewModel.increment()` — the most-used action in the feature — could not run in a
+JVM test at all, which is why its double-tap race shipped.
+
 Report every failure through **`telemetry.failure(domain, type, throwable)`**, which reaches both
 channels — the stack trace to Crashlytics, the frequency to analytics — and ignores
 `CancellationException`, because a load cancelled by navigating away is not a failure. Calling

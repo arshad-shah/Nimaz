@@ -1,5 +1,7 @@
 package com.arshadshah.nimaz.presentation.viewmodel
 
+import com.arshadshah.nimaz.core.monitoring.RecordingTelemetry
+
 import android.content.Context
 import android.os.Vibrator
 import android.os.VibratorManager
@@ -92,7 +94,8 @@ class TasbihViewModelPresetFilterTest {
     @After
     fun tearDown() = Dispatchers.resetMain()
 
-    private fun viewModel() = TasbihViewModel(tasbihUseCases, preferences, context)
+    private fun viewModel() =
+        TasbihViewModel(tasbihUseCases, preferences, mockk(relaxed = true), RecordingTelemetry())
 
     @Test
     fun `adding a custom dhikr keeps the selected category filter applied`() = runTest {
