@@ -20,7 +20,6 @@ import com.arshadshah.nimaz.core.util.NextWorshipResolver
 import com.arshadshah.nimaz.core.util.PrayerTimeCalculator
 import com.arshadshah.nimaz.core.util.WorshipReminderContent
 import com.arshadshah.nimaz.core.util.currentPrayerIndexAt
-import com.arshadshah.nimaz.core.util.formatClockTime
 import com.arshadshah.nimaz.core.util.nextPrayerIndexAt
 import com.arshadshah.nimaz.core.util.toUtcMidnightMillis
 import com.arshadshah.nimaz.domain.model.Announcement
@@ -38,7 +37,6 @@ import com.arshadshah.nimaz.domain.model.PrayerStatus
 import com.arshadshah.nimaz.domain.model.PrayerTime
 import com.arshadshah.nimaz.domain.model.PrayerType
 import com.arshadshah.nimaz.domain.model.WorshipReminderOccurrence
-import com.arshadshah.nimaz.domain.model.WorshipReminderType
 import com.arshadshah.nimaz.domain.model.resolveLocation
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.usecase.AnnouncementUseCases
@@ -58,7 +56,6 @@ import java.time.LocalTime
 import java.time.ZoneId
 import javax.inject.Inject
 import com.arshadshah.nimaz.core.time.TodayProvider
-import kotlin.time.Clock
 import kotlin.time.Duration
 import kotlin.time.Instant
 import kotlinx.coroutines.Job

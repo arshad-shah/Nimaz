@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.util.PrayerTimeCalculator
-import com.arshadshah.nimaz.core.util.formatClockTime
 import com.arshadshah.nimaz.domain.model.AsrCalculation
 import com.arshadshah.nimaz.domain.model.CalculationMethod
 import com.arshadshah.nimaz.domain.model.HighLatitudeRule
@@ -20,18 +19,14 @@ import com.arshadshah.nimaz.presentation.components.organisms.MoonPhase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.Instant
 import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.ZoneId
 import java.time.ZoneOffset
 import javax.inject.Inject
-import kotlin.math.abs
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -67,7 +62,6 @@ data class PrayerTimesUiState(
     val daylight: String = "",
     val methodLabel: String = "",
     // +1 when moving to a later day, -1 to an earlier day (drives slide direction)
-    val navDirection: Int = 0,
 )
 
 sealed interface PrayerTimesEvent {
@@ -144,8 +138,7 @@ class PrayerTimesViewModel @Inject constructor(
     private fun selectDate(date: LocalDate) {
         val current = _state.value.selectedDate
         if (date == current) return
-        val dir = if (date.isAfter(current)) 1 else -1
-        _state.update { it.copy(selectedDate = date, navDirection = dir) }
+        _state.update { it.copy(selectedDate = date) }
         recomputeDay()
     }
 
@@ -336,24 +329,5 @@ class PrayerTimesViewModel @Inject constructor(
 
     // No `use24HourFormat` mirror: times are formatted at the leaf from LocalUse24HourFormat, so
     // toggling the preference no longer forces a full day recompute.
-
-    private fun formatCountdown(totalSeconds: Long): String {
-        val s = if (totalSeconds < 0) 0 else totalSeconds
-        val hours = s / 3600
-        val minutes = (s % 3600) / 60
-        return if (hours > 0) "${hours}h ${minutes}m" else "${minutes}m"
-    }
-
-    private fun daysFromToday(date: LocalDate, today: LocalDate): String {
-        val diff = date.toEpochDay() - today.toEpochDay()
-        return when {
-            diff == 0L -> "Today"
-            diff == 1L -> "Tomorrow"
-            diff == -1L -> "Yesterday"
-            diff > 0 -> "in ${diff} days"
-            else -> "${abs(diff)} days ago"
-        }
-    }
-
 
 }

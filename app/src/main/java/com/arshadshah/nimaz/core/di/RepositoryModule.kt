@@ -207,13 +207,10 @@ import com.arshadshah.nimaz.domain.usecase.QaidaUseCases
 import com.arshadshah.nimaz.domain.usecase.QuranUseCases
 import com.arshadshah.nimaz.domain.usecase.ReactivateKhatamUseCase
 import com.arshadshah.nimaz.domain.usecase.ResetQaidaProgressUseCase
-import com.arshadshah.nimaz.domain.usecase.SearchAsmaUlHusnaUseCase
-import com.arshadshah.nimaz.domain.usecase.SearchAsmaUnNabiUseCase
 import com.arshadshah.nimaz.domain.usecase.SearchDuasUseCase
 import com.arshadshah.nimaz.domain.usecase.SearchHadithsInBookUseCase
 import com.arshadshah.nimaz.domain.usecase.SearchHadithsUseCase
 import com.arshadshah.nimaz.domain.usecase.SearchHelpUseCase
-import com.arshadshah.nimaz.domain.usecase.SearchProphetsUseCase
 import com.arshadshah.nimaz.domain.usecase.SearchQuranUseCase
 import com.arshadshah.nimaz.domain.usecase.SeedMissingDefaultsUseCase
 import com.arshadshah.nimaz.domain.usecase.SetActiveKhatamUseCase
@@ -447,7 +444,6 @@ object UseCaseModule {
         return AsmaUlHusnaUseCases(
             getAllNames = GetAllAsmaUlHusnaUseCase(repository),
             getNameById = GetAsmaUlHusnaByIdUseCase(repository),
-            searchNames = SearchAsmaUlHusnaUseCase(repository),
             toggleFavorite = ToggleAsmaUlHusnaFavoriteUseCase(repository),
             getFavorites = GetFavoriteAsmaUlHusnaUseCase(repository)
         )
@@ -461,7 +457,6 @@ object UseCaseModule {
         return AsmaUnNabiUseCases(
             getAllNames = GetAllAsmaUnNabiUseCase(repository),
             getNameById = GetAsmaUnNabiByIdUseCase(repository),
-            searchNames = SearchAsmaUnNabiUseCase(repository),
             toggleFavorite = ToggleAsmaUnNabiFavoriteUseCase(repository),
             getFavorites = GetFavoriteAsmaUnNabiUseCase(repository)
         )
@@ -475,7 +470,6 @@ object UseCaseModule {
         return ProphetUseCases(
             getAllProphets = GetAllProphetsUseCase(repository),
             getProphetById = GetProphetByIdUseCase(repository),
-            searchProphets = SearchProphetsUseCase(repository),
             toggleFavorite = ToggleProphetFavoriteUseCase(repository),
             getFavorites = GetFavoriteProphetsUseCase(repository)
         )

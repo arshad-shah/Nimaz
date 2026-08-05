@@ -8,7 +8,6 @@ import javax.inject.Inject
 data class AsmaUnNabiUseCases(
     val getAllNames: GetAllAsmaUnNabiUseCase,
     val getNameById: GetAsmaUnNabiByIdUseCase,
-    val searchNames: SearchAsmaUnNabiUseCase,
     val toggleFavorite: ToggleAsmaUnNabiFavoriteUseCase,
     val getFavorites: GetFavoriteAsmaUnNabiUseCase
 )
@@ -19,10 +18,6 @@ class GetAllAsmaUnNabiUseCase @Inject constructor(private val repository: AsmaUn
 
 class GetAsmaUnNabiByIdUseCase @Inject constructor(private val repository: AsmaUnNabiRepository) {
     suspend operator fun invoke(id: Int): AsmaUnNabi? = repository.getNameById(id)
-}
-
-class SearchAsmaUnNabiUseCase @Inject constructor(private val repository: AsmaUnNabiRepository) {
-    operator fun invoke(query: String): Flow<List<AsmaUnNabi>> = repository.searchNames(query)
 }
 
 class ToggleAsmaUnNabiFavoriteUseCase @Inject constructor(private val repository: AsmaUnNabiRepository) {
