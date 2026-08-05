@@ -31,23 +31,17 @@ class ScreenStateConventionTest {
      */
     private val acceptedSpinners = setOf(
         "AsmaUnNabiDetailScreen.kt",
-        "BookmarksScreen.kt",
         "DuaReaderScreen.kt",
-        "HadithReaderScreen.kt",
-        "HelpTopicDetailScreen.kt",
-        "HomeScreen.kt",
         "LocationScreen.kt",
         "QuranHomeScreen.kt",
         "QuranReaderScreen.kt",
         "QuranTopicDetailScreen.kt",
         "QuranTopicsScreen.kt",
         "SearchScreen.kt",
-        "SurahBackgroundScreen.kt",
         "SurahInfoScreen.kt",
-        "SurahPassagesScreen.kt",
+        // Renders QuranTopicsViewModel's state, not the thematic one — its own group.
         "SurahSubjectsScreen.kt",
         "SyncScreen.kt",
-        "TafseerChaptersScreen.kt",
         "TafseerScreen.kt",
     )
 
@@ -56,24 +50,29 @@ class ScreenStateConventionTest {
      * never told about. Emptied by layers 2-4 and 6.
      */
     private val acceptedUnreadErrors = setOf(
-        "BookmarksUiState.kt",
         // Vestigial: no ViewModel ever assigns these. Layer 6 gives them a producer or
         // deletes them — an error field connected at neither end is not a state.
         "FastingUiState.kt",
         "PrayerTrackerUiState.kt",
         "QuranUiState.kt",
         "TasbihUiState.kt",
-        "HadithUiState.kt",
-        "HelpUiState.kt",
-        "HomeUiState.kt",
-        "SurahThematicUiState.kt",
-        "TafseerChaptersUiState.kt",
-        "ZakatUiState.kt",
     )
 
     /**
      * ViewModels with a `launchSafely` that passes no `onFailure`, so the failure reaches
-     * telemetry and the abandoned state still says `isLoading = true`. Emptied by layers 3-4.
+     * telemetry and the abandoned state still says `isLoading = true`.
+     *
+     * **This list grew, and that is not a regression.** It was seeded at 9 against the tree
+     * before #441, which converted every bare `viewModelScope.launch` in the app to
+     * `launchSafely`. That is a strict improvement — those failures used to escape to the
+     * uncaught handler — but it did the containing half and left the telling half, so 19
+     * ViewModels now hold a reported-but-unshown failure where 9 did before.
+     *
+     * The check is also cruder than the situation now warrants: it counts `launchSafely(`
+     * against `onFailure =`, so it cannot see a `launchSafely` whose inner flow already
+     * reports through a `catchAndReport` fallback — several of the entries below are that
+     * shape and are already correct. Layer 4 both tightens the check and empties this list;
+     * doing it here would have meant re-auditing 19 ViewModels inside a layer about eight.
      */
     private val acceptedSilentFailures = setOf(
         "AskViewModel.kt",
@@ -81,10 +80,26 @@ class ScreenStateConventionTest {
         "CalendarViewModel.kt",
         "CatalogViewModel.kt",
         "DuaViewModel.kt",
+        "FastingViewModel.kt",
+        "HadithViewModel.kt",
+        "HelpViewModel.kt",
+        "HomeViewModel.kt",
+        "KhatamViewModel.kt",
+        "LocationViewModel.kt",
+        "MonthlyPrayerTimesViewModel.kt",
+        "OnboardingViewModel.kt",
+        "PrayerTimesViewModel.kt",
         "PrayerTrackerViewModel.kt",
+        "QaidaReaderViewModel.kt",
+        "QiblaViewModel.kt",
+        "QuranTopicsViewModel.kt",
+        "QuranViewModel.kt",
         "SearchSettingsViewModel.kt",
+        "SearchViewModel.kt",
+        "SettingsViewModel.kt",
+        "SyncViewModel.kt",
         "TafseerViewModel.kt",
-        "ZakatViewModel.kt",
+        "TasbihViewModel.kt",
     )
 
     @Test
@@ -115,7 +130,7 @@ class ScreenStateConventionTest {
                 val text = file.readText()
                 "val error" in text || "val errorRes" in text
             }
-            .filterNot { file -> featureReadsItsError(file.name.removeSuffix("UiState.kt")) }
+            .filterNot { file -> featureReadsItsError(file.name) }
             .map { it.name }
             .toSortedSet()
 
@@ -141,43 +156,59 @@ class ScreenStateConventionTest {
     }
 
     /**
-     * True when some screen in [feature]'s own directory reads an error off a state.
+     * True when one of the screens that actually renders [stateFile] reads an error off it.
      *
-     * Deliberately a hand-written directory map rather than a clever regex over state type
-     * names. A feature's screens do not always live in a directory named after its
-     * `UiState` — `SurahThematicUiState` is read by three screens in `quran/` — and a
-     * heuristic that guesses wrong here fails the build for the wrong reason. An
-     * unmapped feature counts as unread, so a new one has to be declared rather than
-     * silently passing.
+     * Named files, not a directory. This started as "any screen in the feature's package",
+     * which is wrong wherever one package serves several ViewModels: `quran/` holds the
+     * screens for `QuranViewModel`, `SurahThematicViewModel`, `TafseerChaptersViewModel`
+     * and `QuranTopicsViewModel`, so the moment the thematic screens learned to render an
+     * error, the other two states **passed without a line of their code changing**. A
+     * false pass in a ratchet is worse than no ratchet: it retires the entry that was
+     * supposed to keep the work honest.
+     *
+     * An unmapped state counts as unread, so a new one has to be declared here — which
+     * also makes this map the answer to "which screen shows this state's failures?".
      */
-    private fun featureReadsItsError(feature: String): Boolean =
-        screensDir.walkTopDown()
-            .filter { it.extension == "kt" && it.parentFile?.name in featureDirs(feature) }
+    private fun featureReadsItsError(stateFile: String): Boolean {
+        val screens = renderedBy[stateFile] ?: return false
+        return screensDir.walkTopDown()
+            .filter { it.extension == "kt" && it.name in screens }
             .any { it.readText().contains(Regex("""(state|uiState|phase|\w+State)\.error""")) }
-
-    /** Directory names a feature's screens live in. */
-    private fun featureDirs(feature: String): Set<String> = when (feature) {
-        "Hadith" -> setOf("hadith")
-        "Help" -> setOf("help")
-        "Dua" -> setOf("dua")
-        "Quran", "SurahThematic", "TafseerChapters" -> setOf("quran")
-        "Bookmarks" -> setOf("bookmarks")
-        // Khatam's errorRes is form validation read as a TextField supportingText, which
-        // is the right tool for a field error and out of this epic's scope.
-        "Khatam" -> setOf("khatam")
-        "Licenses" -> setOf("about")
-        "Home" -> setOf("home")
-        "Zakat" -> setOf("zakat")
-        "Search" -> setOf("search")
-        "Sync" -> setOf("settings")
-        "Location" -> setOf("settings")
-        "Calendar" -> setOf("calendar")
-        "Qibla" -> setOf("qibla")
-        "NightWorship" -> setOf("worship")
-        "PrayerTracker" -> setOf("prayer")
-        "Tasbih" -> setOf("tasbih")
-        "Fasting" -> setOf("fasting")
-        "Onboarding" -> setOf("onboarding")
-        else -> emptySet()
     }
+
+    /** Which screen files render which `UiState` file's failures. */
+    private val renderedBy: Map<String, Set<String>> = mapOf(
+        "BookmarksUiState.kt" to setOf("BookmarksScreen.kt"),
+        "CalendarUiState.kt" to setOf("IslamicCalendarScreen.kt"),
+        "DuaUiState.kt" to setOf(
+            "DuaCategoryScreen.kt", "DuaOccasionScreen.kt",
+            "DuasCollectionScreen.kt", "DuaReaderScreen.kt",
+        ),
+        "FastingUiState.kt" to setOf("FastTrackerScreen.kt"),
+        "HadithUiState.kt" to setOf(
+            "HadithCollectionScreen.kt", "HadithChaptersScreen.kt", "HadithReaderScreen.kt",
+        ),
+        "HelpUiState.kt" to setOf(
+            "HelpScreen.kt", "HelpTopicDetailScreen.kt", "HelpGuideScreen.kt",
+        ),
+        "HomeUiState.kt" to setOf("HomeScreen.kt"),
+        // Khatam's errorRes is form validation, read as a TextField supportingText — the
+        // right tool for a field error, and out of this epic's scope.
+        "KhatamUiState.kt" to setOf("KhatamFormScreen.kt"),
+        "LicensesUiState.kt" to setOf("LicensesScreen.kt", "LicenseDetailScreen.kt"),
+        "LocationUiState.kt" to setOf("LocationScreen.kt"),
+        "NightWorshipUiState.kt" to setOf("NightWorshipScreen.kt"),
+        "OnboardingUiState.kt" to setOf("OnboardingScreen.kt"),
+        "PrayerTrackerUiState.kt" to setOf("PrayerTrackerScreen.kt"),
+        "QiblaUiState.kt" to setOf("QiblaScreen.kt"),
+        "QuranUiState.kt" to setOf("QuranHomeScreen.kt", "QuranReaderScreen.kt"),
+        "SearchUiState.kt" to setOf("SearchScreen.kt"),
+        "SurahThematicUiState.kt" to setOf(
+            "SurahBackgroundScreen.kt", "SurahPassagesScreen.kt",
+        ),
+        "SyncUiState.kt" to setOf("SyncScreen.kt"),
+        "TafseerChaptersUiState.kt" to setOf("TafseerChaptersScreen.kt"),
+        "TasbihUiState.kt" to setOf("TasbihScreen.kt"),
+        "ZakatUiState.kt" to setOf("ZakatCalculatorScreen.kt", "ZakatHistoryScreen.kt"),
+    )
 }

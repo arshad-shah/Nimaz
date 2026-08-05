@@ -15,4 +15,10 @@ sealed interface BookmarksEvent {
     data class SetSearchQuery(val query: String) : BookmarksEvent
     data class SetSortOrder(val order: BookmarkSortOrder) : BookmarksEvent
     data object ClearAllBookmarks : BookmarksEvent
+
+    /** Re-runs the three bookmark loads after a failed read. */
+    data object Retry : BookmarksEvent
+
+    /** Clears a failed-write message once the snackbar carrying it has been shown. */
+    data object DismissWriteError : BookmarksEvent
 }

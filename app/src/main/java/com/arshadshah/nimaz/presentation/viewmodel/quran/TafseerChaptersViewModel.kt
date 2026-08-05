@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.presentation.viewmodel.quran
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.core.monitoring.catchAndReport
@@ -9,6 +10,7 @@ import com.arshadshah.nimaz.domain.model.Surah
 import com.arshadshah.nimaz.domain.model.TafseerNoteItem
 import com.arshadshah.nimaz.domain.usecase.QuranUseCases
 import com.arshadshah.nimaz.domain.usecase.TafseerUseCases
+import com.arshadshah.nimaz.presentation.viewmodel.UiError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -42,7 +44,15 @@ class TafseerChaptersViewModel @Inject constructor(
         }
             .onEach { loaded -> _state.update { loaded } }
             .catchAndReport(telemetry, DOMAIN, "load") { throwable ->
-                _state.update { it.copy(isLoading = false, error = throwable.message) }
+                _state.update {
+                    it.copy(
+                        isLoading = false,
+                        error = UiError(
+                            message = R.string.tafseer_load_failed,
+                            details = throwable.message,
+                        ),
+                    )
+                }
             }
             .launchIn(viewModelScope)
     }

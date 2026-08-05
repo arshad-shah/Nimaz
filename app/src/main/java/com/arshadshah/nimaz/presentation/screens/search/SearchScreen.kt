@@ -80,6 +80,9 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazIconWellShape
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconWellSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorState
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorVariant
 import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazSearchBar
@@ -393,7 +396,30 @@ fun SearchScreen(
                         item { SearchingIndicator() }
                     }
 
-                    if (!state.isSearching && state.filteredResults.isNotEmpty()) {
+                    // A failed search is a SECTION inside the list, not a screen: the query
+                    // box above it must stay usable, since trying different words is the
+                    // other thing a reader can do here. Before the no-results branch, which
+                    // is otherwise what a failure renders as.
+                    val searchError = state.error
+                    if (!state.isSearching && searchError != null) {
+                        item {
+                            NimazErrorState(
+                                title = stringResource(searchError.message),
+                                message = stringResource(R.string.search_failed_body),
+                                kind = searchError.kind,
+                                details = searchError.details,
+                                variant = NimazErrorVariant.SECTION,
+                                primaryAction = NimazErrorDefaults.retry(
+                                    onRetry = { viewModel.onEvent(SearchEvent.ExecuteSearch) },
+                                    label = stringResource(R.string.try_again),
+                                ),
+                            )
+                        }
+                    }
+
+                    if (!state.isSearching && searchError == null &&
+                        state.filteredResults.isNotEmpty()
+                    ) {
                         item {
                             Text(
                                 text = pluralStringResource(
@@ -418,7 +444,9 @@ fun SearchScreen(
                         )
                     }
 
-                    if (!state.isSearching && state.filteredResults.isEmpty()) {
+                    if (!state.isSearching && searchError == null &&
+                        state.filteredResults.isEmpty()
+                    ) {
                         item {
                             NimazEmptyState(
                                 title = stringResource(R.string.no_results_format, state.query),

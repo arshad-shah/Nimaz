@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.presentation.viewmodel.quran
 
+import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.R
@@ -13,6 +14,7 @@ import com.arshadshah.nimaz.domain.model.QuranBookmark
 import com.arshadshah.nimaz.domain.usecase.DuaUseCases
 import com.arshadshah.nimaz.domain.usecase.HadithUseCases
 import com.arshadshah.nimaz.domain.usecase.QuranUseCases
+import com.arshadshah.nimaz.presentation.viewmodel.UiError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -92,6 +94,16 @@ class BookmarksViewModel @Inject constructor(
                 telemetry.featureUsed(DOMAIN, "clear_all")
                 clearAllBookmarks()
             }
+
+            BookmarksEvent.Retry -> {
+                _bookmarksState.update { it.copy(isLoading = true, error = null) }
+                loadQuranBookmarks()
+                loadHadithBookmarks()
+                loadDuaBookmarks()
+            }
+
+            BookmarksEvent.DismissWriteError ->
+                _bookmarksState.update { it.copy(writeError = null) }
         }
     }
 
@@ -109,7 +121,13 @@ class BookmarksViewModel @Inject constructor(
                     // content row missing after a database replacement used to kill the
                     // stream and pin isLoading on for ever, silently.
                     _bookmarksState.update {
-                        it.copy(isLoading = false, error = throwable.message)
+                        it.copy(
+                            isLoading = false,
+                            error = UiError(
+                                message = R.string.bookmarks_load_failed,
+                                details = throwable.message,
+                            ),
+                        )
                     }
                 }
                 .collect { bookmarks ->
@@ -149,7 +167,13 @@ class BookmarksViewModel @Inject constructor(
                     // content row missing after a database replacement used to kill the
                     // stream and pin isLoading on for ever, silently.
                     _bookmarksState.update {
-                        it.copy(isLoading = false, error = throwable.message)
+                        it.copy(
+                            isLoading = false,
+                            error = UiError(
+                                message = R.string.bookmarks_load_failed,
+                                details = throwable.message,
+                            ),
+                        )
                     }
                 }
                 .collect { bookmarks ->
@@ -185,7 +209,13 @@ class BookmarksViewModel @Inject constructor(
                     // content row missing after a database replacement used to kill the
                     // stream and pin isLoading on for ever, silently.
                     _bookmarksState.update {
-                        it.copy(isLoading = false, error = throwable.message)
+                        it.copy(
+                            isLoading = false,
+                            error = UiError(
+                                message = R.string.bookmarks_load_failed,
+                                details = throwable.message,
+                            ),
+                        )
                     }
                 }
                 .collect { bookmarks ->
@@ -303,6 +333,19 @@ class BookmarksViewModel @Inject constructor(
     private val pendingRestores = ArrayDeque<Pair<UnifiedBookmark, suspend () -> Unit>>()
 
     /**
+     * Records a failed **write** without disturbing the list.
+     *
+     * Never touches `isLoading` or `error`: the bookmarks on screen are still correct, and
+     * replacing them with a full-screen failure because a delete did not go through would
+     * destroy good content to report a bad button press.
+     */
+    private fun writeFailed(@StringRes message: Int, throwable: Throwable) {
+        _bookmarksState.update {
+            it.copy(writeError = UiError(message = message, details = throwable.message))
+        }
+    }
+
+    /**
      * Deletes a bookmark, and only then offers the undo.
      *
      * The undo snackbar and the pending-restore entry used to be written the moment the
@@ -310,7 +353,7 @@ class BookmarksViewModel @Inject constructor(
      * therefore left the row on screen *and* an "Undo" for it — the UI asserting
      * something untrue, and an undo that would have re-inserted a bookmark which was
      * never removed. Both now happen inside the block, after the delete has returned, so
-     * a failure leaves the screen exactly as it was and reports through `launchSafely`.
+     * a failure leaves the screen exactly as it was and says so.
      */
     private fun deleteBookmark(id: String) {
         val state = _bookmarksState.value
@@ -344,7 +387,10 @@ class BookmarksViewModel @Inject constructor(
             }
         }
         val (delete, restore) = operation
-        launchSafely(telemetry, DOMAIN, "delete") {
+        launchSafely(
+            telemetry, DOMAIN, "delete",
+            onFailure = { writeFailed(R.string.bookmarks_delete_failed, it) },
+        ) {
             delete()
             pendingRestores.addLast(unified to restore)
             _bookmarksState.update { it.copy(recentlyDeleted = unified) }
@@ -353,7 +399,10 @@ class BookmarksViewModel @Inject constructor(
 
     private fun undoDelete() {
         val (_, restore) = pendingRestores.removeLastOrNull() ?: return
-        launchSafely(telemetry, DOMAIN, "undo_delete") { restore() }
+        launchSafely(
+            telemetry, DOMAIN, "undo_delete",
+            onFailure = { writeFailed(R.string.bookmarks_restore_failed, it) },
+        ) { restore() }
         // Surface the next pending restore so a run of deletes can be undone one by one.
         _bookmarksState.update { it.copy(recentlyDeleted = pendingRestores.lastOrNull()?.first) }
     }
@@ -366,7 +415,10 @@ class BookmarksViewModel @Inject constructor(
     private fun editNote(id: String, note: String?) {
         val state = _bookmarksState.value
         val trimmed = note?.trim()?.ifBlank { null }
-        launchSafely(telemetry, DOMAIN, "update_note") {
+        launchSafely(
+            telemetry, DOMAIN, "update_note",
+            onFailure = { writeFailed(R.string.bookmarks_note_failed, it) },
+        ) {
             when (BookmarkType.ofId(id)) {
                 BookmarkType.QURAN -> state.quranBookmarks
                     .find { BookmarkType.QURAN.idFor(it.ayahId) == id }
@@ -391,7 +443,10 @@ class BookmarksViewModel @Inject constructor(
         // resurrect one bookmark out of a wipe the user confirmed.
         pendingRestores.clear()
         _bookmarksState.update { it.copy(recentlyDeleted = null) }
-        launchSafely(telemetry, DOMAIN, "clear_all") {
+        launchSafely(
+            telemetry, DOMAIN, "clear_all",
+            onFailure = { writeFailed(R.string.bookmarks_clear_failed, it) },
+        ) {
             _bookmarksState.value.quranBookmarks.forEach {
                 quranUseCases.deleteBookmark(it.ayahId)
             }

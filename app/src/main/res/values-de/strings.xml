@@ -1801,4 +1801,39 @@
     <string name="tafseer_note_edit">Bearbeiten</string>
     <string name="quran_search_surahs">Suren suchen</string>
     <string name="zakat_currency">Währung</string>
+
+    <!-- Screen states: failures the app can report -->
+    <string name="licenses_load_failed">Die Lizenzliste konnte nicht geladen werden</string>
+    <string name="licenses_load_failed_body">Diese Liste stammt aus Daten, die mit der App geliefert werden – ein erneuter Versuch hilft meistens.</string>
+    <string name="license_detail_not_found_body">Diese Bibliothek ist nicht in der mitgelieferten Lizenzliste. Möglicherweise wurde sie in einer neueren Version der App entfernt.</string>
+    <string name="hadith_books_load_failed">Die Hadith-Sammlungen konnten nicht geladen werden</string>
+    <string name="hadith_chapters_load_failed">Die Kapitel dieser Sammlung konnten nicht geladen werden</string>
+    <string name="hadith_load_failed">Dieses Kapitel konnte nicht geladen werden</string>
+    <string name="hadith_not_found">Dieser Hadith ist nicht in der Sammlung</string>
+    <string name="hadith_load_failed_body">Die Hadith-Bibliothek ist auf deinem Gerät gespeichert – ein erneuter Versuch hilft meistens.</string>
+    <string name="help_topics_load_failed">Die Hilfethemen konnten nicht geladen werden</string>
+    <string name="help_topic_load_failed">Dieses Thema konnte nicht geladen werden</string>
+    <string name="help_guide_load_failed">Diese Anleitung konnte nicht geladen werden</string>
+    <string name="help_load_failed_body">Hilfeinhalte sind auf deinem Gerät gespeichert – ein erneuter Versuch hilft meistens.</string>
+    <string name="surah_thematic_load_failed">Die Notizen zu dieser Sure konnten nicht geladen werden</string>
+    <string name="surah_thematic_load_failed_body">Hintergrund und Abschnittsübersicht sind auf deinem Gerät gespeichert – ein erneuter Versuch hilft meistens.</string>
+    <string name="bookmarks_load_failed">Deine Lesezeichen konnten nicht geladen werden</string>
+    <string name="bookmarks_load_failed_body">Lesezeichen werden auf deinem Gerät gespeichert – ein erneuter Versuch hilft meistens.</string>
+    <string name="bookmarks_delete_failed">Dieses Lesezeichen konnte nicht entfernt werden</string>
+    <string name="bookmarks_restore_failed">Dieses Lesezeichen konnte nicht wiederhergestellt werden</string>
+    <string name="bookmarks_note_failed">Diese Notiz konnte nicht gespeichert werden</string>
+    <string name="bookmarks_clear_failed">Deine Lesezeichen konnten nicht gelöscht werden</string>
+    <string name="tafseer_load_failed">Die Kommentarliste konnte nicht geladen werden</string>
+    <string name="tafseer_load_failed_body">Kommentare sind auf deinem Gerät gespeichert – ein erneuter Versuch hilft meistens.</string>
+    <string name="tafseer_note_save_failed">Diese Notiz konnte nicht gespeichert werden</string>
+    <string name="tafseer_note_delete_failed">Diese Notiz konnte nicht gelöscht werden</string>
+    <string name="search_failed">Diese Suche konnte nicht abgeschlossen werden</string>
+    <string name="search_failed_body">Die Bibliothek wird auf deinem Gerät durchsucht. Versuche es erneut oder mit anderen Wörtern.</string>
+    <string name="home_prayer_times_failed">Die heutigen Gebetszeiten konnten nicht berechnet werden</string>
+    <string name="home_prayer_times_failed_body">Prüfe, ob ein Standort festgelegt ist, und versuche es erneut.</string>
+    <string name="zakat_calculate_failed">Diese Berechnung konnte nicht abgeschlossen werden</string>
+    <string name="zakat_save_failed">Diese Berechnung konnte nicht gespeichert werden</string>
+    <string name="zakat_mark_paid_failed">Das konnte nicht als bezahlt markiert werden</string>
+    <string name="zakat_delete_failed">Diese Berechnung konnte nicht gelöscht werden</string>
+    <string name="zakat_history_load_failed">Deine früheren Berechnungen konnten nicht geladen werden</string>
 </resources>

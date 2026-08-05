@@ -1,15 +1,19 @@
 package com.arshadshah.nimaz.presentation.viewmodel.tools
 
+import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.core.monitoring.catchAndReport
+import com.arshadshah.nimaz.core.monitoring.launchBestEffort
 import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.domain.model.NisabType
 import com.arshadshah.nimaz.domain.model.ZakatAssets
 import com.arshadshah.nimaz.domain.model.ZakatCalculation
 import com.arshadshah.nimaz.domain.model.ZakatCalculator
 import com.arshadshah.nimaz.domain.model.ZakatDefaults
+import com.arshadshah.nimaz.presentation.viewmodel.UiError
 import com.arshadshah.nimaz.domain.model.ZakatHistoryEntry
 import com.arshadshah.nimaz.domain.model.ZakatLiabilities
 import com.arshadshah.nimaz.domain.repository.settings.ZakatSettings
@@ -122,6 +126,8 @@ class ZakatViewModel @Inject constructor(
                 telemetry.featureUsed(DOMAIN, "toggle_breakdown")
                 _calculatorState.update { it.copy(showBreakdown = !it.showBreakdown) }
             }
+            ZakatEvent.Recalculate -> calculate()
+
             ZakatEvent.SaveCalculation -> {
                 telemetry.featureUsed(DOMAIN, "save")
                 saveCalculation()
@@ -171,8 +177,14 @@ class ZakatViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Persists a form preference — the gold price, the silver price, the currency, the nisab
+     * type. Best-effort on purpose: these are echoes of what the user just typed, still on
+     * screen and still driving the sum, so a failed write costs them the value only on the
+     * next launch. Interrupting a calculation to say so would be the worse trade.
+     */
     private fun persist(type: String, write: suspend () -> Unit) {
-        launchSafely(telemetry, DOMAIN, type) { write() }
+        launchBestEffort(telemetry, DOMAIN, type) { write() }
     }
 
     /**
@@ -212,7 +224,13 @@ class ZakatViewModel @Inject constructor(
             } catch (e: Exception) {
                 telemetry.failure(DOMAIN, "calculate", e)
                 _calculatorState.update {
-                    it.copy(error = e.message, isCalculating = false)
+                    it.copy(
+                        isCalculating = false,
+                        error = UiError(
+                            message = R.string.zakat_calculate_failed,
+                            details = e.message,
+                        ),
+                    )
                 }
             }
         }
@@ -231,7 +249,10 @@ class ZakatViewModel @Inject constructor(
     private fun saveCalculation() {
         val calculation = _calculatorState.value.calculation ?: return
 
-        launchSafely(telemetry, DOMAIN, "save") {
+        launchSafely(
+            telemetry, DOMAIN, "save",
+            onFailure = { calculatorWriteFailed(R.string.zakat_save_failed, it) },
+        ) {
             val entry = ZakatHistoryEntry(
                 calculatedAt = calculation.calculatedAt,
                 totalAssets = calculation.totalAssets,
@@ -246,14 +267,39 @@ class ZakatViewModel @Inject constructor(
     }
 
     private fun markAsPaid(entryId: Long) {
-        launchSafely(telemetry, DOMAIN, "mark_paid") {
+        launchSafely(
+            telemetry, DOMAIN, "mark_paid",
+            onFailure = { historyWriteFailed(R.string.zakat_mark_paid_failed, it) },
+        ) {
             zakatUseCases.markAsPaid(entryId, System.currentTimeMillis())
         }
     }
 
     private fun deleteCalculation(entryId: Long) {
-        launchSafely(telemetry, DOMAIN, "delete") {
+        launchSafely(
+            telemetry, DOMAIN, "delete",
+            onFailure = { historyWriteFailed(R.string.zakat_delete_failed, it) },
+        ) {
             zakatUseCases.deleteCalculation(entryId)
+        }
+    }
+
+    /**
+     * A calculator-side write that did not land.
+     *
+     * Never clears the form: every figure the user typed is still there and still valid,
+     * and losing an afternoon's worth of asset entries to report a failed save would be a
+     * far worse outcome than the failure itself.
+     */
+    private fun calculatorWriteFailed(@StringRes message: Int, throwable: Throwable) {
+        _calculatorState.update {
+            it.copy(error = UiError(message = message, details = throwable.message))
+        }
+    }
+
+    private fun historyWriteFailed(@StringRes message: Int, throwable: Throwable) {
+        _historyState.update {
+            it.copy(error = UiError(message = message, details = throwable.message))
         }
     }
 
@@ -263,16 +309,24 @@ class ZakatViewModel @Inject constructor(
      * a content-database replacement, say — left the history screen spinning for the life of
      * the ViewModel, with nothing on screen to say why.
      *
-     * The failure clears the spinner so the empty state shows instead. It does not set
-     * `error`: `ZakatScreen` never reads that field, so writing it would be error production
-     * with nothing rendering it. Reporting still happens through `launchSafely`.
+     * It now sets `error` as well as clearing the spinner, and `ZakatHistoryScreen` renders
+     * it. Until this layer that field had no reader, which is why the previous fix
+     * deliberately stopped at the spinner.
      */
     private fun loadHistory() {
         launchSafely(
-            telemetry,
-            DOMAIN,
-            "load_history",
-            onFailure = { _historyState.update { it.copy(isLoading = false) } },
+            telemetry, DOMAIN, "load_history",
+            onFailure = { throwable ->
+                _historyState.update {
+                    it.copy(
+                        isLoading = false,
+                        error = UiError(
+                            message = R.string.zakat_history_load_failed,
+                            details = throwable.message,
+                        ),
+                    )
+                }
+            },
         ) {
             zakatUseCases.getAllHistory().collect { entries ->
                 val totalPaid = zakatUseCases.getTotalPaid()

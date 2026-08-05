@@ -5,6 +5,7 @@ import com.arshadshah.nimaz.domain.model.HadithSearchResult
 import com.arshadshah.nimaz.domain.model.QuranSearchResult
 import com.arshadshah.nimaz.domain.model.Surah
 import com.arshadshah.nimaz.domain.model.UnifiedSearchResult
+import com.arshadshah.nimaz.presentation.viewmodel.UiError
 
 data class SearchUiState(
     val query: String = "",
@@ -17,7 +18,7 @@ data class SearchUiState(
     val duaResults: List<DuaSearchResult> = emptyList(),
     val surahResults: List<Surah> = emptyList(),
     val recentSearches: List<String> = emptyList(),
-    val error: String? = null
+    val error: UiError? = null
 )
 
 data class SearchStatsUiState(

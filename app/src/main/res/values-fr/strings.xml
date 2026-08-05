@@ -1836,4 +1836,39 @@
     <string name="tafseer_note_edit">Modifier</string>
     <string name="quran_search_surahs">Rechercher des sourates</string>
     <string name="zakat_currency">Devise</string>
+
+    <!-- Screen states: failures the app can report -->
+    <string name="licenses_load_failed">La liste des licences n\'a pas pu être chargée</string>
+    <string name="licenses_load_failed_body">Cette liste provient de données fournies avec l\'application : réessayer suffit généralement.</string>
+    <string name="license_detail_not_found_body">Cette bibliothèque ne figure pas dans la liste des licences fournie. Elle a peut-être été retirée dans une version plus récente de l\'application.</string>
+    <string name="hadith_books_load_failed">Les recueils de hadiths n\'ont pas pu être chargés</string>
+    <string name="hadith_chapters_load_failed">Les chapitres de ce recueil n\'ont pas pu être chargés</string>
+    <string name="hadith_load_failed">Ce chapitre n\'a pas pu être chargé</string>
+    <string name="hadith_not_found">Ce hadith ne figure pas dans le recueil</string>
+    <string name="hadith_load_failed_body">La bibliothèque de hadiths est stockée sur votre appareil : réessayer suffit généralement.</string>
+    <string name="help_topics_load_failed">Les rubriques d\'aide n\'ont pas pu être chargées</string>
+    <string name="help_topic_load_failed">Cette rubrique n\'a pas pu être chargée</string>
+    <string name="help_guide_load_failed">Ce guide n\'a pas pu être chargé</string>
+    <string name="help_load_failed_body">Le contenu d\'aide est stocké sur votre appareil : réessayer suffit généralement.</string>
+    <string name="surah_thematic_load_failed">Les notes de cette sourate n\'ont pas pu être chargées</string>
+    <string name="surah_thematic_load_failed_body">Le contexte et le plan des passages sont stockés sur votre appareil : réessayer suffit généralement.</string>
+    <string name="bookmarks_load_failed">Vos favoris n\'ont pas pu être chargés</string>
+    <string name="bookmarks_load_failed_body">Les favoris sont stockés sur votre appareil : réessayer suffit généralement.</string>
+    <string name="bookmarks_delete_failed">Ce favori n\'a pas pu être supprimé</string>
+    <string name="bookmarks_restore_failed">Ce favori n\'a pas pu être restauré</string>
+    <string name="bookmarks_note_failed">Cette note n\'a pas pu être enregistrée</string>
+    <string name="bookmarks_clear_failed">Vos favoris n\'ont pas pu être effacés</string>
+    <string name="tafseer_load_failed">La liste des commentaires n\'a pas pu être chargée</string>
+    <string name="tafseer_load_failed_body">Les commentaires sont stockés sur votre appareil : réessayer suffit généralement.</string>
+    <string name="tafseer_note_save_failed">Cette note n\'a pas pu être enregistrée</string>
+    <string name="tafseer_note_delete_failed">Cette note n\'a pas pu être supprimée</string>
+    <string name="search_failed">Cette recherche n\'a pas pu aboutir</string>
+    <string name="search_failed_body">La bibliothèque est consultée sur votre appareil. Réessayez, ou essayez d\'autres mots.</string>
+    <string name="home_prayer_times_failed">Les horaires de prière du jour n\'ont pas pu être calculés</string>
+    <string name="home_prayer_times_failed_body">Vérifiez qu\'un lieu est défini, puis réessayez.</string>
+    <string name="zakat_calculate_failed">Ce calcul n\'a pas pu aboutir</string>
+    <string name="zakat_save_failed">Ce calcul n\'a pas pu être enregistré</string>
+    <string name="zakat_mark_paid_failed">Impossible de marquer comme payé</string>
+    <string name="zakat_delete_failed">Ce calcul n\'a pas pu être supprimé</string>
+    <string name="zakat_history_load_failed">Vos calculs précédents n\'ont pas pu être chargés</string>
 </resources>

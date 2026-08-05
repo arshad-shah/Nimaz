@@ -12,6 +12,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -71,6 +73,7 @@ fun TafseerScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     var showNotes by remember { mutableStateOf(false) }
     val context = LocalContext.current
+    val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(surahNumber, ayahNumber) {
@@ -107,7 +110,19 @@ fun TafseerScreen(
         }
     }
 
+    // A note that failed to save is reported here and nowhere else: it must not take away
+    // the commentary being read, but it is not droppable either — from the reader's side, a
+    // note that silently failed to save is a note they wrote and lost.
+    val noteError = state.noteError
+    LaunchedEffect(noteError) {
+        if (noteError != null) {
+            snackbarHostState.showSnackbar(context.getString(noteError.message))
+            viewModel.onEvent(TafseerEvent.DismissNoteError)
+        }
+    }
+
     NimazScreenScaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = {

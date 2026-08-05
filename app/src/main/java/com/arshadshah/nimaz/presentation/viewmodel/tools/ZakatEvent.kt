@@ -26,4 +26,7 @@ sealed interface ZakatEvent {
     data class MarkAsPaid(val entryId: Long) : ZakatEvent
     data class DeleteCalculation(val entryId: Long) : ZakatEvent
     data object LoadHistory : ZakatEvent
+
+    /** Runs the sum again over the figures already entered, after a failed calculation. */
+    data object Recalculate : ZakatEvent
 }

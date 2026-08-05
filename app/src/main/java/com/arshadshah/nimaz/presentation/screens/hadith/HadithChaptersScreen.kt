@@ -45,6 +45,8 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorState
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
@@ -78,10 +80,25 @@ fun HadithChaptersScreen(
             )
         }
     ) { paddingValues ->
+        val error = state.error
         when {
-            state.isLoading -> {
+            state.isLoading && state.chapters.isEmpty() -> {
                 NimazLoadingState(modifier = Modifier.padding(paddingValues))
             }
+
+            // Before the error branch, because `chapters.isEmpty()` is also true when the
+            // load failed — which is how a failure came to be reported as "no chapters".
+            error != null -> NimazErrorState(
+                title = stringResource(error.message),
+                message = stringResource(R.string.hadith_load_failed_body),
+                kind = error.kind,
+                details = error.details,
+                primaryAction = NimazErrorDefaults.retry(
+                    onRetry = { viewModel.onEvent(HadithEvent.Retry) },
+                    label = stringResource(R.string.try_again),
+                ),
+                modifier = Modifier.padding(paddingValues),
+            )
 
             state.chapters.isEmpty() -> {
                 Box(

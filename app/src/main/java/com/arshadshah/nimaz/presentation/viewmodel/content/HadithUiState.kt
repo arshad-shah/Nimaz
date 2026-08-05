@@ -7,12 +7,13 @@ import com.arshadshah.nimaz.domain.model.HadithBookmark
 import com.arshadshah.nimaz.domain.model.HadithChapter
 import com.arshadshah.nimaz.domain.model.HadithSearchResult
 import com.arshadshah.nimaz.presentation.theme.AmiriFontFamily
+import com.arshadshah.nimaz.presentation.viewmodel.UiError
 
 data class HadithCollectionUiState(
     val books: List<HadithBook> = emptyList(),
     val hadithOfTheDay: Hadith? = null,
     val isLoading: Boolean = true,
-    val error: String? = null
+    val error: UiError? = null
 )
 
 data class HadithChaptersUiState(
@@ -20,7 +21,7 @@ data class HadithChaptersUiState(
     val chapters: List<HadithChapter> = emptyList(),
     val searchQuery: String = "",
     val isLoading: Boolean = true,
-    val error: String? = null
+    val error: UiError? = null
 ) {
     /**
      * The chapters the list should show — **derived**, never stored.
@@ -46,7 +47,7 @@ data class HadithReaderUiState(
     val hadiths: List<Hadith> = emptyList(),
     val currentHadithIndex: Int = 0,
     val isLoading: Boolean = true,
-    val error: String? = null,
+    val error: UiError? = null,
     val showArabic: Boolean = true,
     val showTranslation: Boolean = true,
     val showGrade: Boolean = true,
