@@ -327,6 +327,24 @@ rg -n -U --multiline-dotall \
   app/src/main/java --glob '*ViewModel.kt' | grep -v 'Job = viewModelScope'
 ```
 
+### AP-7.7 · The same ViewModel written three times
+
+- [x] ~~**`AsmaUlHusnaViewModel`, `AsmaUnNabiViewModel`, `ProphetViewModel`.**~~ **Resolved.**
+  171, 171 and 172 lines that were **byte-identical after identifier substitution** — same two
+  states, same five events, same six handlers, same filter, differing only in what the thing is
+  called.
+
+  Triplication does not merely cost lines, it costs correctness twice over. A fix lands in one
+  copy and rots in the other two — and nobody writes the same test three times, so between them
+  the three had four tests and **none touched the filter**, the one piece with any logic in it.
+
+  Collapsed onto `CatalogViewModel<T>` + a `CatalogSource<T>` per feature, which is the only
+  genuinely varying part (where the rows come from, and which fields a search reads). The
+  filter now applies inside the single state mutator, so a new emission cannot arrive
+  unfiltered — the bug all three were one forgotten `applyFilters()` call away from.
+
+  Detect: two ViewModels whose bodies match after substituting their feature nouns.
+
 ### AP-7.6 · A search path nobody can reach
 
 - [x] ~~**Three `search*` use cases, three repository methods, three DAO queries.**~~ **Resolved by
