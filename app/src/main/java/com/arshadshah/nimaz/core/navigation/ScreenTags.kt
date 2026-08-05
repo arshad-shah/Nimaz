@@ -43,6 +43,7 @@ object ScreenTags {
     const val HadithBook = "screen_hadith_book"
     const val HadithChapter = "screen_hadith_chapter"
     const val HadithReader = "screen_hadith_reader"
+    const val HadithByNumber = "screen_hadith_by_number"
     const val HadithSettings = "screen_hadith_settings"
     const val HadithSearch = "screen_hadith_search"
     const val HadithBookmarks = "screen_hadith_bookmarks"

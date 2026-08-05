@@ -4,7 +4,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
-import com.arshadshah.nimaz.core.monitoring.CrashReporter
+import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.domain.model.Hadith
 import com.arshadshah.nimaz.domain.model.HadithBook
 import com.arshadshah.nimaz.domain.model.HadithBookmark
@@ -28,7 +28,8 @@ import javax.inject.Inject
 @HiltViewModel
 class HadithViewModel @Inject constructor(
     private val hadithUseCases: HadithUseCases,
-    private val settingsRepository: SettingsRepository
+    private val settingsRepository: SettingsRepository,
+    private val telemetry: Telemetry
 ) : ViewModel() {
 
     private val _collectionState = MutableStateFlow(HadithCollectionUiState())
@@ -57,6 +58,19 @@ class HadithViewModel @Inject constructor(
     private var chaptersJob: Job? = null
     private var readerJob: Job? = null
 
+    /**
+     * The hadith the reader is anchored to, by id.
+     *
+     * `getHadithsByChapter` is a Room Flow: any write touching the hadiths table re-emits, and
+     * so does a content-database swap by `ContentArtifactInstaller`. The loader used to set
+     * `currentHadithIndex = 0` inside that collector — on *every* emission, not just the first
+     * — so a background content refresh scrolled a reader at hadith 50 back to hadith 1.
+     *
+     * Held by id rather than by index so the anchor survives a refresh that inserts or reorders
+     * rows, which an index would not.
+     */
+    private var anchorHadithId: String? = null
+
     init {
         loadAllBooks()
         loadBookmarks()
@@ -67,19 +81,19 @@ class HadithViewModel @Inject constructor(
     fun onEvent(event: HadithEvent) {
         when (event) {
             is HadithEvent.LoadBook -> {
-                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.HADITH, "open_book")
+                telemetry.featureUsed(AppAnalytics.Feature.HADITH, "open_book")
                 loadBook(event.bookId)
             }
             is HadithEvent.LoadChapter -> {
-                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.HADITH, "open_reader")
+                telemetry.featureUsed(AppAnalytics.Feature.HADITH, "open_reader")
                 loadChapter(event.chapterId)
             }
             is HadithEvent.LoadHadithById -> {
-                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.HADITH, "open_hadith")
+                telemetry.featureUsed(AppAnalytics.Feature.HADITH, "open_hadith")
                 loadHadithById(event.hadithId)
             }
             is HadithEvent.LoadHadithByNumber -> {
-                AppAnalytics.logFeatureUsed(
+                telemetry.featureUsed(
                     AppAnalytics.Feature.HADITH,
                     "open_hadith"
                 )
@@ -90,20 +104,20 @@ class HadithViewModel @Inject constructor(
             }
 
             is HadithEvent.Search -> {
-                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.HADITH, "search")
+                telemetry.featureUsed(AppAnalytics.Feature.HADITH, "search")
                 search(event.query)
             }
             is HadithEvent.SearchInBook -> {
-                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.HADITH, "search_in_book")
+                telemetry.featureUsed(AppAnalytics.Feature.HADITH, "search_in_book")
                 searchInBook(event.bookId, event.query)
             }
             is HadithEvent.SearchChapters -> searchChapters(event.query)
             is HadithEvent.FilterByGrade -> {
-                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.HADITH, "filter_by_grade")
+                telemetry.featureUsed(AppAnalytics.Feature.HADITH, "filter_by_grade")
                 filterByGrade(event.grade)
             }
             is HadithEvent.ToggleBookmark -> {
-                AppAnalytics.logFeatureUsed(
+                telemetry.featureUsed(
                     AppAnalytics.Feature.HADITH,
                     "toggle_bookmark"
                 )
@@ -114,7 +128,12 @@ class HadithViewModel @Inject constructor(
                 )
             }
 
-            is HadithEvent.NavigateToHadith -> _readerState.update { it.copy(currentHadithIndex = event.index) }
+            is HadithEvent.NavigateToHadith -> {
+                // Re-anchor, so the hadith the reader is *now* on is the one a content refresh
+                // restores — not the one it was opened at.
+                anchorHadithId = _readerState.value.hadiths.getOrNull(event.index)?.id
+                _readerState.update { it.copy(currentHadithIndex = event.index) }
+            }
             is HadithEvent.SetFontSize -> _readerState.update { it.copy(fontSize = event.size) }
             is HadithEvent.SetArabicFontSize -> _readerState.update { it.copy(arabicFontSize = event.size) }
             HadithEvent.ToggleArabic -> _readerState.update { it.copy(showArabic = !it.showArabic) }
@@ -158,86 +177,96 @@ class HadithViewModel @Inject constructor(
                     _chaptersState.update { it.copy(chapters = chapters, isLoading = false) }
                 }
             } catch (e: Exception) {
-                CrashReporter.recordException(e)
-                AppAnalytics.logError(AppAnalytics.Feature.HADITH, "load_book", e.message)
+                telemetry.recordException(e)
+                telemetry.error(AppAnalytics.Feature.HADITH, "load_book", e.message)
                 _chaptersState.update { it.copy(error = e.message, isLoading = false) }
             }
         }
     }
 
-    private fun loadChapter(chapterId: String) {
+    /**
+     * Opens [chapterId] in the reader, optionally landing on [focusHadithId] rather than the
+     * top — which is what "open this hadith" and "open hadith number N" both reduce to, since
+     * the reader is a pager over a whole chapter either way.
+     *
+     * The one load path for all three entry points, so the composite-id and index-resolution
+     * rules cannot drift between them: they did, and `loadHadithByNumber` had both wrong.
+     */
+    private fun loadChapter(chapterId: String) =
+        startReaderLoad("load_chapter") { chapterId to null }
+
+    private fun loadHadithById(hadithId: String) =
+        startReaderLoad("load_hadith_by_id") {
+            hadithUseCases.getHadithById(hadithId)?.let { it.chapterKey to it.id }
+        }
+
+    /**
+     * Opens hadith number [hadithNumber] of book [bookId].
+     *
+     * This is the **only** way to reach a bookmarked hadith: a `HadithBookmark` stores the book
+     * and the number printed in the reader, not the database id — see `UnifiedBookmark`, which
+     * carries `hadithBookId` and `hadithNumber` and no id at all.
+     *
+     * Two defects lived in the old two-line body. The chapter id was passed **raw**, while
+     * `getChapterById` is keyed on the composite `bookId_chapterId`, so the chapter header
+     * resolved to null. And the index was read out of `_readerState` on the line *after*
+     * `loadChapter` had launched its own coroutine, so it always saw the **previous** chapter's
+     * list: `indexOfFirst` was always -1 and the branch that sets the index could never run.
+     */
+    private fun loadHadithByNumber(bookId: String, hadithNumber: Int) =
+        startReaderLoad("load_hadith_by_number") {
+            hadithUseCases.getHadithByNumber(bookId, hadithNumber)?.let { it.chapterKey to it.id }
+        }
+
+    /**
+     * The one reader load path, for all three ways in.
+     *
+     * [resolve] returns the chapter to open and the hadith to land on within it (null to open at
+     * the top), or null if the target does not exist. Everything after that — the chapter
+     * header, the collector, the anchor — is identical for all three, and keeping it in one
+     * place is why the composite-id and index rules can no longer drift between them.
+     *
+     * Deliberately one coroutine: resolving the hadith and then collecting its chapter used to
+     * be two, and the second cancelled `readerJob` — the handle owned by the first — from inside
+     * it.
+     */
+    private fun startReaderLoad(
+        errorType: String,
+        resolve: suspend () -> Pair<String, String?>?
+    ) {
         _readerState.update { it.copy(isLoading = true, error = null) }
         readerJob?.cancel()
         readerJob = viewModelScope.launch {
             try {
+                val target = resolve()
+                if (target == null) {
+                    _readerState.update { it.copy(error = "Hadith not found", isLoading = false) }
+                    return@launch
+                }
+                val (chapterId, focusHadithId) = target
+                anchorHadithId = focusHadithId
+
                 val chapter = hadithUseCases.getChapterById(chapterId)
                 _readerState.update { it.copy(chapter = chapter) }
 
                 hadithUseCases.getHadithsByChapter(chapterId).collect { hadiths ->
+                    // Re-resolved against the list that just arrived. On the first emission the
+                    // anchor is the requested hadith (or absent, meaning the top); on a later
+                    // one it is wherever the reader already is — a content refresh re-emits, and
+                    // must not move it.
+                    val index = anchorHadithId
+                        ?.let { id -> hadiths.indexOfFirst { it.id == id } }
+                        ?.takeIf { it >= 0 }
+                        ?: 0
+                    anchorHadithId = hadiths.getOrNull(index)?.id
                     _readerState.update {
-                        it.copy(hadiths = hadiths, isLoading = false, currentHadithIndex = 0)
+                        it.copy(hadiths = hadiths, isLoading = false, currentHadithIndex = index)
                     }
                 }
             } catch (e: Exception) {
-                CrashReporter.recordException(e)
-                AppAnalytics.logError(AppAnalytics.Feature.HADITH, "load_chapter", e.message)
+                telemetry.recordException(e)
+                telemetry.error(AppAnalytics.Feature.HADITH, errorType, e.message)
                 _readerState.update { it.copy(error = e.message, isLoading = false) }
-            }
-        }
-    }
-
-    private fun loadHadithById(hadithId: String) {
-        _readerState.update { it.copy(isLoading = true, error = null) }
-        readerJob?.cancel()
-        readerJob = viewModelScope.launch {
-            try {
-                val hadith = hadithUseCases.getHadithById(hadithId)
-                if (hadith != null) {
-                    // Load the chapter containing this hadith to get context
-                    val chapterId = "${hadith.bookId}_${hadith.chapterId}"
-                    val chapter = hadithUseCases.getChapterById(chapterId)
-
-                    // Get all hadiths in this chapter
-                    hadithUseCases.getHadithsByChapter(chapterId).collect { hadiths ->
-                        // Find the index of the target hadith
-                        val index = hadiths.indexOfFirst { it.id == hadithId }
-                        _readerState.update {
-                            it.copy(
-                                chapter = chapter,
-                                hadiths = hadiths,
-                                currentHadithIndex = if (index >= 0) index else 0,
-                                isLoading = false
-                            )
-                        }
-                    }
-                } else {
-                    _readerState.update { it.copy(error = "Hadith not found", isLoading = false) }
-                }
-            } catch (e: Exception) {
-                CrashReporter.recordException(e)
-                AppAnalytics.logError(AppAnalytics.Feature.HADITH, "load_hadith_by_id", e.message)
-                _readerState.update { it.copy(error = e.message, isLoading = false) }
-            }
-        }
-    }
-
-    private fun loadHadithByNumber(bookId: String, hadithNumber: Int) {
-        viewModelScope.launch {
-            try {
-                val hadith = hadithUseCases.getHadithByNumber(bookId, hadithNumber)
-                hadith?.let {
-                    // Load the chapter containing this hadith
-                    loadChapter(it.chapterId)
-                    // Find the index in the list
-                    val index = _readerState.value.hadiths.indexOfFirst { h -> h.id == it.id }
-                    if (index >= 0) {
-                        _readerState.update { state -> state.copy(currentHadithIndex = index) }
-                    }
-                }
-            } catch (e: Exception) {
-                CrashReporter.recordException(e)
-                AppAnalytics.logError(AppAnalytics.Feature.HADITH, "load_hadith_by_number", e.message)
-                _readerState.update { it.copy(error = e.message) }
             }
         }
     }
@@ -281,11 +310,34 @@ class HadithViewModel @Inject constructor(
         _chaptersState.update { it.copy(searchQuery = query) }
     }
 
+    /**
+     * Replaces the reader's list with every hadith of [grade], across all chapters.
+     *
+     * Still reachable from no screen (#357). It is fixed rather than deleted because leaving it
+     * as-is left a trap: it swapped `hadiths` while leaving `chapter` naming the chapter the
+     * reader came from and `currentHadithIndex` pointing into the old list — so the first screen
+     * to wire it would have rendered a foreign chapter header over the results and opened at
+     * whatever index the previous chapter happened to be on. Both are cleared with the swap.
+     */
     private fun filterByGrade(grade: HadithGrade) {
         readerJob?.cancel()
+        anchorHadithId = null
         readerJob = viewModelScope.launch {
-            hadithUseCases.getHadithsByGrade(grade).collect { hadiths ->
-                _readerState.update { it.copy(hadiths = hadiths) }
+            try {
+                hadithUseCases.getHadithsByGrade(grade).collect { hadiths ->
+                    _readerState.update {
+                        it.copy(
+                            hadiths = hadiths,
+                            chapter = null,
+                            currentHadithIndex = 0,
+                            isLoading = false
+                        )
+                    }
+                }
+            } catch (e: Exception) {
+                telemetry.recordException(e)
+                telemetry.error(AppAnalytics.Feature.HADITH, "filter_by_grade", e.message)
+                _readerState.update { it.copy(error = e.message, isLoading = false) }
             }
         }
     }

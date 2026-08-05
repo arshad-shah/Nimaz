@@ -98,6 +98,8 @@ fun HadithReaderScreen(
     chapterId: String,
     onNavigateBack: () -> Unit,
     onNavigateToSettings: () -> Unit = {},
+    /** Set by `Route.HadithByNumber` — open hadith number N of [bookId], as a bookmark cites it. */
+    hadithNumber: Int? = null,
     viewModel: HadithViewModel = hiltViewModel()
 ) {
     val state by viewModel.readerState.collectAsStateWithLifecycle()
@@ -109,12 +111,17 @@ fun HadithReaderScreen(
         pageCount = { hadiths.size }
     )
 
-    LaunchedEffect(chapterId, bookId) {
-        // If bookId is empty and chapterId isn't a "book_chapter" id, it's a hadithId from search.
-        if (bookId.isEmpty() && !chapterId.contains("_")) {
-            viewModel.onEvent(HadithEvent.LoadHadithById(chapterId))
-        } else {
-            viewModel.onEvent(HadithEvent.LoadChapter(chapterId))
+    LaunchedEffect(chapterId, bookId, hadithNumber) {
+        when {
+            // Stated by the route rather than inferred from the shape of a string: a bookmark
+            // knows the book and the number, and passing the number through `hadithId` made the
+            // reader look it up as a **primary key** — a real hadith, from an arbitrary book.
+            hadithNumber != null ->
+                viewModel.onEvent(HadithEvent.LoadHadithByNumber(bookId, hadithNumber))
+            // No book, and no "book_chapter" composite: a hadithId, from search.
+            bookId.isEmpty() && !chapterId.contains("_") ->
+                viewModel.onEvent(HadithEvent.LoadHadithById(chapterId))
+            else -> viewModel.onEvent(HadithEvent.LoadChapter(chapterId))
         }
     }
 
