@@ -1,5 +1,7 @@
 package com.arshadshah.nimaz.presentation.viewmodel
 
+import com.arshadshah.nimaz.core.monitoring.RecordingTelemetry
+
 import app.cash.turbine.test
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.model.HelpTopic
@@ -44,7 +46,7 @@ class HelpViewModelTest {
 
     @Test
     fun loadsTopicsOnInit() = runTest {
-        val vm = HelpViewModel(useCases, prefs)
+        val vm = HelpViewModel(useCases, prefs, RecordingTelemetry())
         advanceUntilIdle()
         vm.homeState.test {
             val state = expectMostRecentItem()

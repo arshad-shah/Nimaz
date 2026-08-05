@@ -1,5 +1,7 @@
 package com.arshadshah.nimaz.presentation.viewmodel
 
+import com.arshadshah.nimaz.core.monitoring.RecordingTelemetry
+
 import com.arshadshah.nimaz.domain.model.HelpGuideDetail
 import com.arshadshah.nimaz.domain.model.HelpItem
 import com.arshadshah.nimaz.domain.model.HelpTopic
@@ -79,7 +81,7 @@ class HelpViewModelLoadScopeTest {
 
     @Test
     fun `a previously opened topic cannot overwrite the topic on screen`() = runTest {
-        val vm = HelpViewModel(useCases, prefs)
+        val vm = HelpViewModel(useCases, prefs, RecordingTelemetry())
 
         vm.onEvent(HelpEvent.LoadTopic("t1"))
         advanceUntilIdle()
@@ -96,7 +98,7 @@ class HelpViewModelLoadScopeTest {
 
     @Test
     fun `a previously opened guide cannot overwrite the guide on screen`() = runTest {
-        val vm = HelpViewModel(useCases, prefs)
+        val vm = HelpViewModel(useCases, prefs, RecordingTelemetry())
 
         vm.onEvent(HelpEvent.LoadGuide("g1"))
         advanceUntilIdle()
@@ -113,7 +115,7 @@ class HelpViewModelLoadScopeTest {
 
     @Test
     fun `reopening a topic re-subscribes to it`() = runTest {
-        val vm = HelpViewModel(useCases, prefs)
+        val vm = HelpViewModel(useCases, prefs, RecordingTelemetry())
 
         vm.onEvent(HelpEvent.LoadTopic("t1"))
         advanceUntilIdle()
