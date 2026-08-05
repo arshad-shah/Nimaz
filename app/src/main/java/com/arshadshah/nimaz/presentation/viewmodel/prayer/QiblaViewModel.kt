@@ -1,15 +1,6 @@
 package com.arshadshah.nimaz.presentation.viewmodel.prayer
 
-import android.content.Context
 import android.hardware.GeomagneticField
-import android.hardware.Sensor
-import android.hardware.SensorEvent
-import android.hardware.SensorEventListener
-import android.hardware.SensorManager
-import android.os.Build
-import android.os.VibrationEffect
-import android.os.Vibrator
-import android.os.VibratorManager
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
@@ -22,9 +13,11 @@ import com.arshadshah.nimaz.domain.model.QiblaCalculator
 import com.arshadshah.nimaz.domain.model.QiblaDirection
 import com.arshadshah.nimaz.domain.model.QiblaInfo
 import com.arshadshah.nimaz.domain.model.isLocationSet
+import com.arshadshah.nimaz.domain.repository.CompassSensors
+import com.arshadshah.nimaz.domain.repository.Haptics
 import com.arshadshah.nimaz.domain.repository.settings.LocationSettings
+import kotlinx.coroutines.Job
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import kotlin.math.abs
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -36,7 +29,8 @@ import kotlinx.coroutines.launch
 
 @HiltViewModel
 class QiblaViewModel @Inject constructor(
-    @ApplicationContext private val context: Context,
+    private val compassSensors: CompassSensors,
+    private val haptics: Haptics,
     private val locationSettings: LocationSettings,
     private val telemetry: Telemetry,
 ) : ViewModel() {
@@ -47,20 +41,6 @@ class QiblaViewModel @Inject constructor(
     private val _settingsState = MutableStateFlow(QiblaSettingsUiState())
     val settingsState: StateFlow<QiblaSettingsUiState> = _settingsState.asStateFlow()
 
-    // Sensor management
-    private val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
-    private val vibrator: Vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-        (context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager).defaultVibrator
-    } else {
-        @Suppress("DEPRECATION")
-        context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-    }
-
-    // Low-pass filtered sensor arrays
-    private val gravity = FloatArray(3)
-    private val geomagnetic = FloatArray(3)
-    private var hasGravity = false
-    private var hasMagnetic = false
 
     // Azimuth unwrapping state
     private var prevRawAzimuth = 0f
@@ -68,62 +48,6 @@ class QiblaViewModel @Inject constructor(
 
     // Track previous facing state for haptic
     private var wasFacingQibla = false
-
-    private val sensorListener = object : SensorEventListener {
-        override fun onSensorChanged(event: SensorEvent) {
-            when (event.sensor.type) {
-                Sensor.TYPE_ACCELEROMETER -> {
-                    smoothInto(gravity, event.values, seed = !hasGravity)
-                    hasGravity = true
-                }
-
-                Sensor.TYPE_MAGNETIC_FIELD -> {
-                    smoothInto(geomagnetic, event.values, seed = !hasMagnetic)
-                    hasMagnetic = true
-                }
-            }
-
-            if (hasGravity && hasMagnetic) {
-                val rotationMatrix = FloatArray(9)
-                val inclinationMatrix = FloatArray(9)
-                if (SensorManager.getRotationMatrix(
-                        rotationMatrix,
-                        inclinationMatrix,
-                        gravity,
-                        geomagnetic
-                    )
-                ) {
-                    val orientation = FloatArray(3)
-                    SensorManager.getOrientation(rotationMatrix, orientation)
-                    val azimuthDeg =
-                        ((Math.toDegrees(orientation[0].toDouble()).toFloat() + 360) % 360)
-                    val pitchDeg = Math.toDegrees(orientation[1].toDouble()).toFloat()
-                    val rollDeg = Math.toDegrees(orientation[2].toDouble()).toFloat()
-
-                    // Unwrap azimuth to avoid 360->0 snap
-                    var delta = azimuthDeg - prevRawAzimuth
-                    if (delta > 180) delta -= 360
-                    if (delta < -180) delta += 360
-                    prevRawAzimuth = azimuthDeg
-                    cumulativeAzimuth += delta
-
-                    updateCompassData(azimuthDeg, pitchDeg, rollDeg, cumulativeAzimuth)
-                }
-            }
-        }
-
-        override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {
-            if (sensor.type == Sensor.TYPE_MAGNETIC_FIELD) {
-                val compassAccuracy = when (accuracy) {
-                    SensorManager.SENSOR_STATUS_ACCURACY_HIGH -> CompassAccuracy.HIGH
-                    SensorManager.SENSOR_STATUS_ACCURACY_MEDIUM -> CompassAccuracy.MEDIUM
-                    SensorManager.SENSOR_STATUS_ACCURACY_LOW -> CompassAccuracy.LOW
-                    else -> CompassAccuracy.UNRELIABLE
-                }
-                updateAccuracy(compassAccuracy)
-            }
-        }
-    }
 
     init {
         observeLocation()
@@ -134,19 +58,40 @@ class QiblaViewModel @Inject constructor(
         unregisterSensors()
     }
 
+    /** The in-flight compass collection; cancelling it unregisters the sensors. */
+    private var compassJob: Job? = null
+
     private fun registerSensors() {
-        val accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
-        val magnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)
-        accelerometer?.let {
-            sensorManager.registerListener(sensorListener, it, SensorManager.SENSOR_DELAY_GAME)
-        }
-        magnetometer?.let {
-            sensorManager.registerListener(sensorListener, it, SensorManager.SENSOR_DELAY_GAME)
+        if (!compassSensors.isAvailable) return
+        compassJob?.cancel()
+        compassJob = launchSafely(telemetry, AppAnalytics.Feature.QIBLA, "observe_compass") {
+            compassSensors.orientation().collect { reading ->
+                if (reading.accuracy != _qiblaState.value.compassData.accuracy) {
+                    updateAccuracy(reading.accuracy)
+                }
+
+                // Unwrap so the needle does not snap through 360 -> 0. Kept here rather than in
+                // the seam because it is stateful across readings, and the state belongs with
+                // the screen it is drawn on.
+                var delta = reading.azimuthDegrees - prevRawAzimuth
+                if (delta > 180) delta -= 360
+                if (delta < -180) delta += 360
+                prevRawAzimuth = reading.azimuthDegrees
+                cumulativeAzimuth += delta
+
+                updateCompassData(
+                    reading.azimuthDegrees,
+                    reading.pitchDegrees,
+                    reading.rollDegrees,
+                    cumulativeAzimuth,
+                )
+            }
         }
     }
 
     private fun unregisterSensors() {
-        sensorManager.unregisterListener(sensorListener)
+        compassJob?.cancel()
+        compassJob = null
     }
 
     fun onEvent(event: QiblaEvent) {
@@ -194,10 +139,6 @@ class QiblaViewModel @Inject constructor(
     private var lastReportedAccuracy: CompassAccuracy? = null
 
     private fun resetSensorState() {
-        gravity.fill(0f)
-        geomagnetic.fill(0f)
-        hasGravity = false
-        hasMagnetic = false
         prevRawAzimuth = 0f
         cumulativeAzimuth = 0f
         // Reset with the rest of the sensor state. Left set, the rising-edge test below never
@@ -413,31 +354,7 @@ class QiblaViewModel @Inject constructor(
     }
 
     private fun triggerHaptic() {
-        vibrator.vibrate(VibrationEffect.createOneShot(100, VibrationEffect.DEFAULT_AMPLITUDE))
+        haptics.tap()
     }
 }
 
-/** Low-pass coefficient for the accelerometer and magnetometer vectors. */
-private const val SMOOTHING = 0.97f
-
-/**
- * Low-pass filter, seeded from the first sample.
- *
- * The vectors start as all-zero and `resetSensorState()` re-zeroes them on every
- * `StartCompass`, while `SMOOTHING` is 0.97 — so the first sample contributed **3%** of its
- * value and the filtered vector needed ~100 samples to reach 95% of the truth. At
- * `SENSOR_DELAY_GAME` (~20 ms) that is **about two seconds**, and `isCompassReady` is
- * published on the *first* successful `getRotationMatrix`. So the screen said ready and the
- * needle swept in from a meaningless heading — every time, because the screen's
- * `DisposableEffect` stops and starts the compass on each entry.
- *
- * Seeding costs nothing: one sample is a worse estimate than a hundred, but it is an
- * estimate *of the right thing*, which zero is not.
- */
-internal fun smoothInto(filtered: FloatArray, sample: FloatArray, seed: Boolean) {
-    for (i in filtered.indices) {
-        filtered[i] =
-            if (seed) sample[i]
-            else SMOOTHING * filtered[i] + (1 - SMOOTHING) * sample[i]
-    }
-}

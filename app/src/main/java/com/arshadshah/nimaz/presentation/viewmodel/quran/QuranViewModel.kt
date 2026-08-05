@@ -2,13 +2,13 @@
 
 package com.arshadshah.nimaz.presentation.viewmodel.quran
 
-import android.content.Context
 import androidx.compose.ui.text.font.FontFamily
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.Telemetry
+import com.arshadshah.nimaz.core.text.StringProvider
 import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.data.audio.AudioState
 import com.arshadshah.nimaz.data.audio.QuranAudioManager
@@ -37,7 +37,6 @@ import com.arshadshah.nimaz.domain.usecase.QuranUseCases
 import com.arshadshah.nimaz.presentation.theme.AmiriFontFamily
 import com.arshadshah.nimaz.presentation.theme.QuranArabicFont
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
@@ -83,7 +82,7 @@ class QuranViewModel @Inject constructor(
     private val quranSettings: QuranPreferences,
     private val khatamUseCases: KhatamUseCases,
     private val telemetry: Telemetry,
-    @ApplicationContext private val context: Context
+    private val strings: StringProvider
 ) : ViewModel() {
 
     private val _homeState = MutableStateFlow(QuranHomeUiState())
@@ -591,7 +590,7 @@ class QuranViewModel @Inject constructor(
             )
         }
         val title = _readerState.value.title.ifEmpty {
-            context.getString(
+            strings.get(
                 R.string.quran_home_surah_fallback,
                 surahNumber
             )
@@ -740,7 +739,7 @@ class QuranViewModel @Inject constructor(
                             ayahs = surahWithAyahs?.ayahs ?: emptyList(),
                             title = surahWithAyahs?.surah?.nameEnglish ?: "",
                             subtitle = surahWithAyahs?.let { s ->
-                                context.resources.getQuantityString(
+                                strings.quantity(
                                     R.plurals.quran_surah_ayahs_format,
                                     s.surah.numberOfAyahs,
                                     s.surah.number,
@@ -764,7 +763,7 @@ class QuranViewModel @Inject constructor(
                 readingMode = ReadingMode.JUZ,
                 surahWithAyahs = null,
                 ayahs = emptyList(),
-                title = context.getString(R.string.quran_juz_number_format, juzNumber),
+                title = strings.get(R.string.quran_juz_number_format, juzNumber),
                 subtitle = ""
             )
         }
@@ -781,7 +780,7 @@ class QuranViewModel @Inject constructor(
                     _readerState.update {
                         it.copy(
                             ayahs = ayahs,
-                            title = context.getString(R.string.quran_juz_number_format, juzNumber),
+                            title = strings.get(R.string.quran_juz_number_format, juzNumber),
                             subtitle = "${ayahs.size} Ayahs",
                             isLoading = false
                         )
@@ -814,7 +813,7 @@ class QuranViewModel @Inject constructor(
                     it.copy(
                         ayahs = cached,
                         readingMode = ReadingMode.PAGE,
-                        title = context.getString(R.string.page_single_format, pageNumber),
+                        title = strings.get(R.string.page_single_format, pageNumber),
                         subtitle = "${cached.size} Ayahs",
                         isLoading = false
                     )
@@ -831,7 +830,7 @@ class QuranViewModel @Inject constructor(
                     readingMode = ReadingMode.PAGE,
                     surahWithAyahs = null,
                     // Keep existing ayahs to prevent flicker during page transition
-                    title = context.getString(R.string.page_single_format, pageNumber),
+                    title = strings.get(R.string.page_single_format, pageNumber),
                     subtitle = ""
                 )
             }
@@ -948,7 +947,7 @@ class QuranViewModel @Inject constructor(
                         if (result.surahName.isEmpty()) {
                             val surahName =
                                 surahs.find { it.number == result.ayah.surahNumber }?.nameEnglish
-                                    ?: context.getString(
+                                    ?: strings.get(
                                         R.string.quran_home_surah_fallback,
                                         result.ayah.surahNumber
                                     )

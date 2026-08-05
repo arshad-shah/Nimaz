@@ -2,6 +2,7 @@
 
 package com.arshadshah.nimaz.presentation.viewmodel.quran
 
+import com.arshadshah.nimaz.presentation.viewmodel.FakeStringProvider
 import android.content.Context
 import com.arshadshah.nimaz.core.monitoring.RecordingTelemetry
 import com.arshadshah.nimaz.data.audio.QuranAudioManager
@@ -118,7 +119,7 @@ class QuranViewModelPageLoadTest {
     }
 
     private fun viewModel() =
-        QuranViewModel(useCases, audioManager, settingsRepository, khatamUseCases, RecordingTelemetry(), context)
+        QuranViewModel(useCases, audioManager, settingsRepository, khatamUseCases, RecordingTelemetry(), FakeStringProvider())
 
     private fun ayahOnPage(page: Int) = Ayah(
         id = page,

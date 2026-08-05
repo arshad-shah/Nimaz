@@ -1,11 +1,12 @@
 package com.arshadshah.nimaz.presentation.viewmodel.settings
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.time.TodayProvider
 import com.arshadshah.nimaz.core.monitoring.Telemetry
+import com.arshadshah.nimaz.domain.repository.AdhanDownloader
+import com.arshadshah.nimaz.domain.repository.AppLocale
 import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.core.monitoring.catchAndReport
 import com.arshadshah.nimaz.core.util.LocaleHelper
@@ -27,7 +28,6 @@ import com.arshadshah.nimaz.domain.usecase.PrayerUseCases
 import com.arshadshah.nimaz.domain.usecase.QuranUseCases
 import com.arshadshah.nimaz.presentation.theme.NimazPatternStyle
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -94,7 +94,8 @@ data class NotificationSummary(
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
-    @ApplicationContext private val context: Context,
+    private val appLocale: AppLocale,
+    private val adhanDownloader: AdhanDownloader,
     private val prayerUseCases: PrayerUseCases,
     private val settingsRepository: SettingsRepository,
     private val quranUseCases: QuranUseCases,
@@ -344,7 +345,7 @@ class SettingsViewModel @Inject constructor(
                 )
                 launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") {
                     settingsRepository.setAppLanguage(event.language.code)
-                    LocaleHelper.setLocale(context, event.language.code)
+                    appLocale.apply(event.language.code)
                     _shouldRestart.value = true
                 }
             }
@@ -603,7 +604,7 @@ class SettingsViewModel @Inject constructor(
                     // Download the selected adhan if not already downloaded
                     val sound = AdhanSound.fromName(event.sound)
                     if (!adhanAudioManager.isFullyDownloaded(sound)) {
-                        AdhanDownloadService.downloadSelected(context, sound)
+                        adhanDownloader.download(sound.name)
                     }
                 }
             }

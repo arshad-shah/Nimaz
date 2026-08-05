@@ -32,6 +32,7 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -148,6 +149,9 @@ fun HomeScreen(
     val locationPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions()
     ) { viewModel.onEvent(HomeEvent.RefreshPermissions) }
+
+
+
 
     val notificationPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
@@ -303,6 +307,7 @@ private fun HomeCompactContent(
     batteryOptimizationLauncher: androidx.activity.result.ActivityResultLauncher<android.content.Intent>,
     viewModel: HomeViewModel,
 ) {
+    val activityContext = LocalContext.current
     val gregorianDate = remember {
         java.time.LocalDate.now().formatFullDate()
     }
@@ -320,7 +325,7 @@ private fun HomeCompactContent(
         notificationPermissionLauncher = notificationPermissionLauncher,
         locationPermissionLauncher = locationPermissionLauncher,
         batteryOptimizationLauncher = batteryOptimizationLauncher,
-        getBatteryIntent = { viewModel.getBatteryOptimizationIntent() },
+        getBatteryIntent = { batteryOptimizationIntent(activityContext) },
     )
 
     LazyColumn(
@@ -469,6 +474,7 @@ private fun HomeTabletContent(
     batteryOptimizationLauncher: androidx.activity.result.ActivityResultLauncher<android.content.Intent>,
     viewModel: HomeViewModel,
 ) {
+    val activityContext = LocalContext.current
     val gregorianDate = remember {
         java.time.LocalDate.now().formatFullDate()
     }
@@ -481,7 +487,7 @@ private fun HomeTabletContent(
         notificationPermissionLauncher = notificationPermissionLauncher,
         locationPermissionLauncher = locationPermissionLauncher,
         batteryOptimizationLauncher = batteryOptimizationLauncher,
-        getBatteryIntent = { viewModel.getBatteryOptimizationIntent() },
+        getBatteryIntent = { batteryOptimizationIntent(activityContext) },
     )
 
     Column(
@@ -764,3 +770,14 @@ private fun buildHomeBannerItems(
         }
     }
 }
+
+/**
+ * The battery-optimisation exemption prompt.
+ *
+ * Built here rather than handed out by the ViewModel: `HomeViewModel.getBatteryOptimizationIntent()`
+ * returned an `android.content.Intent` to the UI, which is the dependency arrow pointing the wrong
+ * way — see `PowerSettings`' KDoc, which called out this exact duplicate pair.
+ */
+private fun batteryOptimizationIntent(ctx: android.content.Context): android.content.Intent =
+    android.content.Intent(android.provider.Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
+        .apply { data = android.net.Uri.parse("package:" + ctx.packageName) }

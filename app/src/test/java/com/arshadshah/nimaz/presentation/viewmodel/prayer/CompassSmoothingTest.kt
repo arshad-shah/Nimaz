@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.presentation.viewmodel.prayer
 
+import com.arshadshah.nimaz.data.device.smoothInto
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import kotlin.math.abs

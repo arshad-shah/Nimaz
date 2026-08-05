@@ -1,19 +1,15 @@
 package com.arshadshah.nimaz.presentation.viewmodel.home
 
-import android.Manifest
-import android.content.Context
-import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.Build
-import android.os.PowerManager
-import android.provider.Settings
-import androidx.core.content.ContextCompat
-import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.Telemetry
+import com.arshadshah.nimaz.core.text.StringProvider
+import com.arshadshah.nimaz.domain.repository.PermissionChecker
+import com.arshadshah.nimaz.domain.repository.PowerSettings
+import com.arshadshah.nimaz.domain.repository.WidgetRefresher
 import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.core.util.HijriDateCalculator
 import com.arshadshah.nimaz.core.util.MILLIS_PER_DAY
@@ -47,9 +43,7 @@ import com.arshadshah.nimaz.domain.usecase.HadithUseCases
 import com.arshadshah.nimaz.domain.usecase.ObserveEventCardsUseCase
 import com.arshadshah.nimaz.domain.usecase.PrayerUseCases
 import com.arshadshah.nimaz.presentation.components.organisms.WorshipCardUi
-import com.arshadshah.nimaz.widget.prayertracker.PrayerTrackerWorker
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -80,7 +74,10 @@ import com.arshadshah.nimaz.presentation.model.withClockState
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    @ApplicationContext private val context: Context,
+    private val strings: StringProvider,
+    private val permissions: PermissionChecker,
+    private val powerSettings: PowerSettings,
+    private val widgets: WidgetRefresher,
     private val telemetry: Telemetry,
     private val prayerUseCases: PrayerUseCases,
     private val fastingUseCases: FastingUseCases,
@@ -268,10 +265,10 @@ class HomeViewModel @Inject constructor(
      */
     private fun shortGradeLabel(grade: HadithGrade?): String? =
         when (grade) {
-            HadithGrade.SAHIH -> context.getString(R.string.grade_sahih)
-            HadithGrade.HASAN -> context.getString(R.string.grade_hasan)
-            HadithGrade.DAIF -> context.getString(R.string.grade_daif)
-            HadithGrade.MAWDU -> context.getString(R.string.grade_mawdu)
+            HadithGrade.SAHIH -> strings.get(R.string.grade_sahih)
+            HadithGrade.HASAN -> strings.get(R.string.grade_hasan)
+            HadithGrade.DAIF -> strings.get(R.string.grade_daif)
+            HadithGrade.MAWDU -> strings.get(R.string.grade_mawdu)
             else -> null
         }
 
@@ -336,28 +333,10 @@ class HomeViewModel @Inject constructor(
         AppAnalytics.logAnnouncementCtaClicked(active.id, active.route)
     }
 
-    fun getBatteryOptimizationIntent(): Intent {
-        return Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
-            data = "package:${context.packageName}".toUri()
-        }
-    }
-
     private fun checkPermissions() {
-        val hasNotification = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            ContextCompat.checkSelfPermission(
-                context, Manifest.permission.POST_NOTIFICATIONS
-            ) == PackageManager.PERMISSION_GRANTED
-        } else true
-
-        val hasLocation = ContextCompat.checkSelfPermission(
-            context, Manifest.permission.ACCESS_FINE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED ||
-                ContextCompat.checkSelfPermission(
-                    context, Manifest.permission.ACCESS_COARSE_LOCATION
-                ) == PackageManager.PERMISSION_GRANTED
-
-        val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
-        val isBatteryOptimized = !powerManager.isIgnoringBatteryOptimizations(context.packageName)
+        val hasNotification = permissions.hasNotificationPermission()
+        val hasLocation = permissions.hasLocationPermission()
+        val isBatteryOptimized = !powerSettings.isIgnoringBatteryOptimizations()
 
         _state.update {
             it.copy(
@@ -402,7 +381,7 @@ class HomeViewModel @Inject constructor(
             }
 
             // Notify widget to refresh via WorkManager
-            PrayerTrackerWorker.enqueueImmediateWork(context)
+            widgets.refreshPrayerTracker()
         }
     }
 
@@ -677,9 +656,9 @@ class HomeViewModel @Inject constructor(
             Instant.fromEpochMilliseconds(ldt.atZone(zone).toInstant().toEpochMilli())
         return WorshipCardUi(
             type = occ.type,
-            name = WorshipReminderContent.name(context, occ.type),
-            arabic = WorshipReminderContent.arabic(context, occ.type),
-            body = WorshipReminderContent.body(context, occ.type, occ.subKey),
+            name = WorshipReminderContent.name(strings, occ.type),
+            arabic = WorshipReminderContent.arabic(strings, occ.type),
+            body = WorshipReminderContent.body(strings, occ.type, occ.subKey),
             eventAt = toInstant(occ.eventAt),
             windowStart = occ.windowStart?.let(::toInstant),
             windowEnd = occ.windowEnd?.let(::toInstant),

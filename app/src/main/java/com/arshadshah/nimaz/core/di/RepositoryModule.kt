@@ -18,6 +18,18 @@ import com.arshadshah.nimaz.data.repository.QaidaRepositoryImpl
 import com.arshadshah.nimaz.data.repository.QuranRepositoryImpl
 import com.arshadshah.nimaz.data.repository.TafseerRepositoryImpl
 import com.arshadshah.nimaz.data.repository.TasbihRepositoryImpl
+import com.arshadshah.nimaz.core.text.StringProvider
+import com.arshadshah.nimaz.domain.repository.CompassSensors
+import com.arshadshah.nimaz.domain.repository.Haptics
+import com.arshadshah.nimaz.data.device.AndroidCompassSensors
+import com.arshadshah.nimaz.data.device.AndroidHaptics
+import com.arshadshah.nimaz.domain.repository.AdhanDownloader
+import com.arshadshah.nimaz.domain.repository.AppLocale
+import com.arshadshah.nimaz.data.platform.AndroidAppLocale
+import com.arshadshah.nimaz.data.platform.ServiceAdhanDownloader
+import com.arshadshah.nimaz.domain.repository.WidgetRefresher
+import com.arshadshah.nimaz.data.widget.WorkManagerWidgetRefresher
+import com.arshadshah.nimaz.data.text.AndroidStringProvider
 import com.arshadshah.nimaz.data.repository.UserDataRepositoryImpl
 import com.arshadshah.nimaz.data.repository.ZakatRepositoryImpl
 import com.arshadshah.nimaz.domain.repository.AsmaUlHusnaRepository
@@ -380,6 +392,30 @@ abstract class RepositoryModule {
     abstract fun bindIslamicEventRepository(
         islamicEventRepositoryImpl: IslamicEventRepositoryImpl
     ): IslamicEventRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindStringProvider(impl: AndroidStringProvider): StringProvider
+
+    @Binds
+    @Singleton
+    abstract fun bindCompassSensors(impl: AndroidCompassSensors): CompassSensors
+
+    @Binds
+    @Singleton
+    abstract fun bindHaptics(impl: AndroidHaptics): Haptics
+
+    @Binds
+    @Singleton
+    abstract fun bindAppLocale(impl: AndroidAppLocale): AppLocale
+
+    @Binds
+    @Singleton
+    abstract fun bindAdhanDownloader(impl: ServiceAdhanDownloader): AdhanDownloader
+
+    @Binds
+    @Singleton
+    abstract fun bindWidgetRefresher(impl: WorkManagerWidgetRefresher): WidgetRefresher
 
     @Binds
     @Singleton

@@ -1,5 +1,9 @@
 package com.arshadshah.nimaz.presentation.viewmodel.home
 
+import com.arshadshah.nimaz.presentation.viewmodel.FakePermissionChecker
+import com.arshadshah.nimaz.presentation.viewmodel.FakePowerSettings
+import com.arshadshah.nimaz.presentation.viewmodel.FakeStringProvider
+import com.arshadshah.nimaz.presentation.viewmodel.RecordingWidgetRefresher
 import com.arshadshah.nimaz.core.monitoring.RecordingTelemetry
 import android.app.Application
 import android.content.Context
@@ -104,7 +108,10 @@ class HomeViewModelTest {
     private fun createViewModel(): HomeViewModel {
         val announcementUseCases = buildAnnouncementUseCases(announcementRepository)
         return HomeViewModel(
-            context = context,
+            strings = FakeStringProvider(),
+            permissions = FakePermissionChecker(),
+            powerSettings = FakePowerSettings(),
+            widgets = RecordingWidgetRefresher(),
             telemetry = RecordingTelemetry(),
             prayerUseCases = buildPrayerUseCases(prayerRepository),
             fastingUseCases = buildFastingUseCases(fastingRepository),
