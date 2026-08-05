@@ -53,7 +53,6 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.shareIn
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -318,6 +317,12 @@ class QuranViewModel @Inject constructor(
 
     private fun observeQuranSettings() {
         viewModelScope.launch {
+            // DataStore's first emission is hydration, not a change the user made — and the
+            // reader state it is compared against holds compiled-in defaults until it arrives.
+            // Treating it as a change re-issued a load the reader had already performed with
+            // the right values (see `translatorId`/`mushafScript`), and for a non-default
+            // edition it repaginated a page number *from* an edition the reader was never on.
+            var hydrated = false
             // Split into two groups of 4 to use typed combine overloads
             val displayFlow = combine(
                 settingsRepository.quranTranslatorId,
@@ -350,12 +355,13 @@ class QuranViewModel @Inject constructor(
             }.collect { settings ->
                 val (display, behavior, showTajweed, tajweedUnderline, mushafScript) = settings
                 // Captured before the state update below overwrites them.
-                val translationChanged =
+                val translationChanged = hydrated &&
                     _readerState.value.selectedTranslatorId != display.translatorId
                 // A different edition repaginates the Quran, so page N no longer holds the
                 // same ayahs.
                 val previousScript = _readerState.value.mushafScript
-                val scriptChanged = previousScript != mushafScript
+                val scriptChanged = hydrated && previousScript != mushafScript
+                hydrated = true
                 audioManager.setReciter(behavior.reciterId)
                 // Push continuous-reading reactively so toggling the setting while
                 // in the reader takes effect immediately, not on next play-start.
@@ -512,7 +518,7 @@ class QuranViewModel @Inject constructor(
 
     private fun playSurahFromInfo(surahNumber: Int) {
         viewModelScope.launch {
-            quranUseCases.getSurahWithAyahs(surahNumber, _readerState.value.selectedTranslatorId)
+            quranUseCases.getSurahWithAyahs(surahNumber, translatorId())
                 .first()?.let { surahWithAyahs ->
                     val audioItems = surahWithAyahs.ayahs.map { ayah ->
                         QuranAudioManager.AyahAudioItem(
@@ -577,8 +583,10 @@ class QuranViewModel @Inject constructor(
             _homeState.update { it.copy(hasThematicContent = thematic) }
         }
         viewModelScope.launch {
+            // Collected directly. Wrapping it in `stateIn(…, emptyList())` first published the
+            // seed — surahs = [], isLoading = false — before Room had produced a row, so the
+            // list rendered its "nothing here" state for a frame on every cold open.
             quranUseCases.getSurahList()
-                .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
                 .collect { surahs ->
                     _homeState.update { state ->
                         state.copy(
@@ -629,9 +637,30 @@ class QuranViewModel @Inject constructor(
         }
     }
 
+    /**
+     * The translation content is fetched with, read from where it is persisted.
+     *
+     * [QuranReaderUiState.selectedTranslatorId] carries a compiled-in default —
+     * `sahih_international` — and is only replaced once [observeQuranSettings]' first emission
+     * lands, which is after DataStore's first read and so generally *after* the screen has
+     * already asked for a surah. Reading it off the state handed every non-default user English
+     * first, then `translationChanged` re-issued the entire query: a visible flash **and** a
+     * wasted full-surah read on every reader open. [loadVerseOfTheDay] already resolved the
+     * preference this way; the reader paths did not.
+     */
+    private suspend fun translatorId(): String = settingsRepository.quranTranslatorId.first()
+
+    /**
+     * The Mushaf edition content is fetched with, read from where it is persisted — the same
+     * pre-hydration hazard as [translatorId], and worse in page mode, because an edition
+     * decides which ayahs page N even holds.
+     */
+    private suspend fun mushafScript(): MushafScript =
+        MushafScript.fromName(settingsRepository.quranMushafScript.first())
+
     private fun loadVerseOfTheDay() {
         viewModelScope.launch {
-            val translatorId = settingsRepository.quranTranslatorId.first()
+            val translatorId = translatorId()
             val epochDay = java.time.LocalDate.now().toEpochDay()
             val verse = quranUseCases.getVerseOfTheDay(epochDay, translatorId)
             _homeState.update { it.copy(verseOfTheDay = verse) }
@@ -674,7 +703,7 @@ class QuranViewModel @Inject constructor(
         contentJob?.cancel()
         cancelPageJobs()
         contentJob = viewModelScope.launch {
-            quranUseCases.getSurahWithAyahs(surahNumber, _readerState.value.selectedTranslatorId)
+            quranUseCases.getSurahWithAyahs(surahNumber, translatorId())
                 .collect { surahWithAyahs ->
                     _readerState.update {
                         it.copy(
@@ -713,7 +742,7 @@ class QuranViewModel @Inject constructor(
         contentJob?.cancel()
         cancelPageJobs()
         contentJob = viewModelScope.launch {
-            quranUseCases.getAyahsByJuz(juzNumber, _readerState.value.selectedTranslatorId)
+            quranUseCases.getAyahsByJuz(juzNumber, translatorId())
                 .collect { ayahs ->
                     _readerState.update {
                         it.copy(
@@ -785,8 +814,8 @@ class QuranViewModel @Inject constructor(
             // info bar, "mark page read" for khatam and the ayah-action lookups (#325).
             quranUseCases.getAyahsByPage(
                 pageNumber = pageNumber,
-                translatorId = _readerState.value.selectedTranslatorId,
-                script = _readerState.value.mushafScript
+                translatorId = translatorId(),
+                script = mushafScript()
             )
                 .collect { ayahs ->
                     // Re-read at emission time: a prefetch started while the user was on this
@@ -841,10 +870,7 @@ class QuranViewModel @Inject constructor(
         // Already cached (e.g. a neighbouring pager page pre-loaded it) — nothing to do.
         if (_readerState.value.mushafPageLayoutCache.containsKey(pageNumber)) return
         viewModelScope.launch {
-            val layout = quranUseCases.getMushafPageLayout(
-                pageNumber,
-                _readerState.value.mushafScript
-            )
+            val layout = quranUseCases.getMushafPageLayout(pageNumber, mushafScript())
             _readerState.update {
                 it.copy(
                     mushafPageLayoutCache = it.mushafPageLayoutCache + (pageNumber to layout)
@@ -880,7 +906,7 @@ class QuranViewModel @Inject constructor(
 
         searchJob?.cancel()
         searchJob = viewModelScope.launch {
-            quranUseCases.searchQuran(query, _readerState.value.selectedTranslatorId)
+            quranUseCases.searchQuran(query, translatorId())
                 .collect { results ->
                     // Populate surah names and limit results to 50 for performance
                     val surahs = _homeState.value.surahs

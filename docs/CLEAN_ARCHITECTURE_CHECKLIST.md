@@ -327,6 +327,32 @@ rg -n -U --multiline-dotall \
   app/src/main/java --glob '*ViewModel.kt' | grep -v 'Job = viewModelScope'
 ```
 
+### AP-7.8 · A UiState default answering a question only the repository can
+
+- [x] ~~**`QuranViewModel`'s reader loads read the translator and Mushaf edition off
+  `_readerState`.**~~ **Resolved.** A persisted preference has exactly one source of truth — the
+  repository. A `UiState` field that *mirrors* one carries a compiled-in default until the
+  settings collector's first emission lands, and that emission is disk-bound, so on a cold open
+  it generally arrives **after** the screen has already asked for content. Every non-default user
+  therefore got the default's content first, then a second full query when the real preference
+  turned up: a visible flash and a wasted read on every reader open.
+
+  Two rules come out of it, and the second is the one that bites on the way to fixing the first:
+
+  - Resolve the preference where it lives (`settingsRepository.x.first()`), inside the load. The
+    file already did this in `loadVerseOfTheDay`; the reader paths did not.
+  - Once the loads read DataStore, **the settings collector's first emission is hydration, not a
+    change.** Comparing it against the state's defaults reports a change that never happened —
+    which re-issues the load, and for a non-default Mushaf edition repaginates a page number
+    *from* an edition the reader was never on. Guard the first emission.
+
+  Detect: a `_state.value.<field>` read as a *query argument*, where `<field>` is also written by
+  a settings collector.
+
+  ```bash
+  rg -n '_\w+State\.value\.\w+' app/src/main/java --glob '*ViewModel.kt' | grep -i 'get\|load\|search'
+  ```
+
 ### AP-7.7 · The same ViewModel written three times
 
 - [x] ~~**`AsmaUlHusnaViewModel`, `AsmaUnNabiViewModel`, `ProphetViewModel`.**~~ **Resolved.**
