@@ -303,38 +303,53 @@ class BookmarksViewModel @Inject constructor(
      */
     private val pendingRestores = ArrayDeque<Pair<UnifiedBookmark, suspend () -> Unit>>()
 
+    /**
+     * Deletes a bookmark, and only then offers the undo.
+     *
+     * The undo snackbar and the pending-restore entry used to be written the moment the
+     * event arrived, outside the coroutine that did the deleting. A delete that threw
+     * therefore left the row on screen *and* an "Undo" for it — the UI asserting
+     * something untrue, and an undo that would have re-inserted a bookmark which was
+     * never removed. Both now happen inside the block, after the delete has returned, so
+     * a failure leaves the screen exactly as it was and reports through `launchSafely`.
+     */
     private fun deleteBookmark(id: String) {
         val state = _bookmarksState.value
         val unified = state.allBookmarks.find { it.id == id } ?: return
-        when (unified.type) {
+        val operation: Pair<suspend () -> Unit, suspend () -> Unit> = when (unified.type) {
             BookmarkType.QURAN -> {
                 val original = state.quranBookmarks
                     .find { BookmarkType.QURAN.idFor(it.ayahId) == id } ?: return
-                pendingRestores.addLast(unified to { quranUseCases.insertBookmark(original) })
-                launchSafely(telemetry, DOMAIN, "delete") {
-                    quranUseCases.deleteBookmark(original.ayahId)
-                }
+                Pair<suspend () -> Unit, suspend () -> Unit>(
+                    { quranUseCases.deleteBookmark(original.ayahId) },
+                    { quranUseCases.insertBookmark(original) },
+                )
             }
 
             BookmarkType.HADITH -> {
                 val original = state.hadithBookmarks
                     .find { BookmarkType.HADITH.idFor(it.hadithId) == id } ?: return
-                pendingRestores.addLast(unified to { hadithUseCases.insertBookmark(original) })
-                launchSafely(telemetry, DOMAIN, "delete") {
-                    hadithUseCases.deleteBookmark(original.hadithId)
-                }
+                Pair<suspend () -> Unit, suspend () -> Unit>(
+                    { hadithUseCases.deleteBookmark(original.hadithId) },
+                    { hadithUseCases.insertBookmark(original) },
+                )
             }
 
             BookmarkType.DUA -> {
                 val original = state.duaBookmarks
                     .find { BookmarkType.DUA.idFor(it.duaId) == id } ?: return
-                pendingRestores.addLast(unified to { duaUseCases.insertBookmark(original) })
-                launchSafely(telemetry, DOMAIN, "delete") {
-                    duaUseCases.deleteBookmark(original.duaId)
-                }
+                Pair<suspend () -> Unit, suspend () -> Unit>(
+                    { duaUseCases.deleteBookmark(original.duaId) },
+                    { duaUseCases.insertBookmark(original) },
+                )
             }
         }
-        _bookmarksState.update { it.copy(recentlyDeleted = unified) }
+        val (delete, restore) = operation
+        launchSafely(telemetry, DOMAIN, "delete") {
+            delete()
+            pendingRestores.addLast(unified to restore)
+            _bookmarksState.update { it.copy(recentlyDeleted = unified) }
+        }
     }
 
     private fun undoDelete() {

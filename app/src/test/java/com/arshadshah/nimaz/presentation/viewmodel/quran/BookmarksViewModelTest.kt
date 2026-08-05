@@ -89,6 +89,23 @@ class BookmarksViewModelTest {
     }
 
     @Test
+    fun `a delete that fails does not offer an undo for something still there`() = runTest {
+        quranBookmarks.value = listOf(quranBookmark(1, 100))
+        coEvery { quran.deleteBookmark(any()) } throws IllegalStateException("database is locked")
+        val vm = viewModel()
+        advanceUntilIdle()
+
+        vm.onEvent(BookmarksEvent.DeleteBookmark("quran_1"))
+        advanceUntilIdle()
+
+        // The delete threw, so the bookmark is still there. Offering "Deleted — Undo"
+        // would be the UI stating something untrue, and an undo tapped against it would
+        // re-insert a row that was never removed.
+        assertThat(vm.bookmarksState.value.recentlyDeleted).isNull()
+        assertThat(telemetry.errors.map { it.domain }).contains("bookmarks")
+    }
+
+    @Test
     fun `two deletes in a row can both be undone`() = runTest {
         quranBookmarks.value = listOf(quranBookmark(1, 100), quranBookmark(2, 200))
         val vm = viewModel()
