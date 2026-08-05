@@ -165,10 +165,20 @@ class OnboardingViewModel @Inject constructor(
         _state.update { it.copy(notificationPermissionGranted = hasPermission) }
     }
 
+    /**
+     * Whether the app is exempt from battery optimisation.
+     *
+     * `as?` rather than `as`, matching `AppAnalytics` — which does the same lookup, defensively,
+     * two hundred lines away. This runs from `init`, so on any device or emulator without the
+     * service the hard cast threw during **ViewModel construction**: an onboarding crash on
+     * first launch, with nothing else on screen to fall back to. Absent service reads as "not
+     * exempt", which is the safe answer — it shows the user the prompt rather than silently
+     * skipping it.
+     */
     private fun checkBatteryOptimization() {
-        val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
+        val powerManager = context.getSystemService(Context.POWER_SERVICE) as? PowerManager
         val isIgnoringBatteryOptimizations =
-            powerManager.isIgnoringBatteryOptimizations(context.packageName)
+            powerManager?.isIgnoringBatteryOptimizations(context.packageName) ?: false
         _state.update { it.copy(batteryOptimizationDisabled = isIgnoringBatteryOptimizations) }
     }
 
