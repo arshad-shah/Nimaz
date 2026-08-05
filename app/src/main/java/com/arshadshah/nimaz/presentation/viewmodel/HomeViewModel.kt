@@ -57,6 +57,7 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
 import javax.inject.Inject
+import com.arshadshah.nimaz.core.time.TodayProvider
 import kotlin.time.Clock
 import kotlin.time.Duration
 import kotlin.time.Instant
@@ -77,7 +78,11 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 
 data class HomeUiState(
-    val currentDate: LocalDate = LocalDate.now(),
+    // `currentDate` used to live here, set once at construction and read by no screen
+    // (`grep state.currentDate` in `screens/` returned nothing). It was the field that was
+    // *supposed* to detect a date rollover, and being inert is why nothing did. The rollover
+    // now comes from `TodayProvider.todayChanges`, so the dead field is gone rather than
+    // quietly kept and still unread.
     val hijriDate: String = "",
     val prayerTimes: List<PrayerTimeDisplay> = emptyList(),
     // Tomorrow's Fajr, so the UI can wrap the "next prayer" countdown past Isha without the
@@ -205,6 +210,7 @@ class HomeViewModel @Inject constructor(
     private val announcementUseCases: AnnouncementUseCases,
     private val observeEventCards: ObserveEventCardsUseCase,
     private val nextWorshipResolver: NextWorshipResolver,
+    private val todayProvider: TodayProvider,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(HomeUiState())
@@ -260,6 +266,13 @@ class HomeViewModel @Inject constructor(
     // after the init block it would still be null at that point, causing an NPE.
     private val _prayerRecords = MutableStateFlow<Map<PrayerName, PrayerStatus>>(emptyMap())
 
+    // Re-armable per rollover: each of these is scoped to a specific day, either because it
+    // collects a Room flow bound to a fixed epoch range or because it reads the date once.
+    private var fastingJob: Job? = null
+    private var prayerRecordsJob: Job? = null
+    private var dailyHadithJob: Job? = null
+    private var dailyDuaJob: Job? = null
+
     init {
         checkPermissions()
         // observeLocation() also observes the calculation settings and adjustments, and triggers
@@ -272,6 +285,37 @@ class HomeViewModel @Inject constructor(
         loadDailyDua()
         observeCelebrationCards()
         scheduleWorshipRefresh()
+        observeDateRollover()
+    }
+
+    /**
+     * One place where the day changing re-arms everything scoped to it.
+     *
+     * Each of these read the date once, at `init`, and never again: the fasting collector
+     * bound a Room query to a fixed `[startOfDay, endOfDay]` range, the prayer-record flow
+     * resolved "today" inside the repository at call time, and the daily hadith and dua were
+     * picked from a day number and an hour read at construction. Left open at 23:50 the app
+     * still said "fasting today" at 00:05 about yesterday's record — and marking the new day's
+     * fast could never light it up, because the collector's range did not include the new day.
+     *
+     * `HomeScreen` already dispatched `RefreshPrayerTimes` on rollover, but that reached only
+     * `calculatePrayerTimes()`. This re-issues the lot as one unit.
+     */
+    private fun observeDateRollover() {
+        viewModelScope.launch {
+            todayProvider.todayChanges.collect { today ->
+                // `dayTimesDate` is the record of which day the cached prayer instants were
+                // computed for. It was assigned and read nowhere, while the comment beside it
+                // claimed it guarded the rollover recompute. It does now.
+                if (dayTimesDate == today) return@collect
+
+                observeFastingStatus()
+                loadPrayerRecords()
+                loadDailyHadith()
+                loadDailyDua()
+                calculatePrayerTimes()
+            }
+        }
     }
 
     /** Local calendar occasions merged with any pushed CELEBRATION announcement. */
@@ -284,7 +328,11 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun loadPrayerRecords() {
-        viewModelScope.launch {
+        // `getTodayPrayerRecords()` resolves "today" once, at call time, and returns a Flow
+        // bound to that epoch — so this needs re-invoking at rollover exactly as the fasting
+        // collector does, or Home's prayer card stays bound to the day the app was opened.
+        prayerRecordsJob?.cancel()
+        prayerRecordsJob = viewModelScope.launch {
             prayerUseCases.getTodayPrayerRecords().collect { records ->
                 _prayerRecords.update { records }
             }
@@ -292,8 +340,9 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun observeFastingStatus() {
-        viewModelScope.launch {
-            val today = LocalDate.now()
+        fastingJob?.cancel()
+        fastingJob = viewModelScope.launch {
+            val today = todayProvider.today()
             val startOfDay = today.toUtcMidnightMillis()
             val endOfDay = startOfDay + MILLIS_PER_DAY - 1
 
@@ -305,13 +354,15 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun loadDailyHadith() {
-        viewModelScope.launch {
+        dailyHadithJob?.cancel()
+        dailyHadithJob = viewModelScope.launch {
             try {
                 // GetDailyHadithUseCase seeds the backfill and applies the Knuth
                 // multiplicative-hash scatter so consecutive days land on very
                 // different hadiths while staying deterministic per day.
                 val hadith =
-                    hadithUseCases.getDailyHadith(LocalDate.now().toEpochDay()) ?: return@launch
+                    hadithUseCases.getDailyHadith(todayProvider.today().toEpochDay())
+                        ?: return@launch
                 _state.update {
                     it.copy(
                         dailyHadith = hadith.textEnglish.let { text ->
@@ -350,9 +401,10 @@ class HomeViewModel @Inject constructor(
      * sleep adhkar) and rotates the specific dua daily within that category.
      */
     private fun loadDailyDua() {
-        viewModelScope.launch {
+        dailyDuaJob?.cancel()
+        dailyDuaJob = viewModelScope.launch {
             try {
-                val now = LocalDate.now()
+                val now = todayProvider.today()
                 val selection = duaUseCases.getDailyDua(
                     hourOfDay = LocalTime.now().hour,
                     dayOfYear = now.dayOfYear
@@ -456,7 +508,7 @@ class HomeViewModel @Inject constructor(
 
         viewModelScope.launch {
             val prayerName = PrayerName.valueOf(prayerType.name)
-            val todayEpoch = LocalDate.now().toUtcMidnightMillis()
+            val todayEpoch = todayProvider.today().toUtcMidnightMillis()
             val currentStatus = _prayerRecords.value[prayerName] ?: PrayerStatus.NOT_PRAYED
             val newStatus =
                 if (currentStatus == PrayerStatus.PRAYED) PrayerStatus.NOT_PRAYED else PrayerStatus.PRAYED
@@ -644,7 +696,7 @@ class HomeViewModel @Inject constructor(
                     _state.update { it.copy(isLoading = true) }
                 }
 
-                val today = LocalDate.now()
+                val today = todayProvider.today()
                 val prayerTimes = prayerTimeCalculator.getPrayerTimes(
                     latitude = latitude,
                     longitude = longitude,
@@ -726,7 +778,7 @@ class HomeViewModel @Inject constructor(
             ?.toLocalDateTime(timeZone)
             ?.let { (it.hour * 60 + it.minute) / 1440f } ?: 0.80f
 
-        val isFriday = LocalDate.now().dayOfWeek == DayOfWeek.FRIDAY
+        val isFriday = todayProvider.today().dayOfWeek == DayOfWeek.FRIDAY
         val dhuhrInstant = prayerTimes.find { it.type == PrayerType.DHUHR }?.time
 
         _state.update {

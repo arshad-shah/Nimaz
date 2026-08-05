@@ -3,6 +3,7 @@ package com.arshadshah.nimaz.presentation.viewmodel
 import android.app.Application
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
+import com.arshadshah.nimaz.core.time.FakeTodayProvider
 import com.arshadshah.nimaz.core.util.NextWorshipResolver
 import com.arshadshah.nimaz.core.util.PrayerTimeCalculator
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
@@ -88,6 +89,8 @@ class HomeViewModelTest {
         Dispatchers.resetMain()
     }
 
+    private val todayProvider = FakeTodayProvider(java.time.LocalDate.now())
+
     private fun createViewModel(): HomeViewModel {
         val announcementUseCases = buildAnnouncementUseCases(announcementRepository)
         return HomeViewModel(
@@ -101,6 +104,7 @@ class HomeViewModelTest {
             announcementUseCases = announcementUseCases,
             observeEventCards = buildObserveEventCardsUseCase(announcementUseCases),
             nextWorshipResolver = nextWorshipResolver,
+            todayProvider = todayProvider,
         )
     }
 
