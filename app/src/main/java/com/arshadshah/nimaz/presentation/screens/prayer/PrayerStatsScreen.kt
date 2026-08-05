@@ -48,9 +48,9 @@ import com.arshadshah.nimaz.presentation.components.organisms.PrayerChartType
 import com.arshadshah.nimaz.presentation.components.organisms.PrayerStatsChart
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
-import com.arshadshah.nimaz.presentation.viewmodel.PrayerTrackerEvent
-import com.arshadshah.nimaz.presentation.viewmodel.PrayerTrackerViewModel
-import com.arshadshah.nimaz.presentation.viewmodel.StatsPeriod
+import com.arshadshah.nimaz.presentation.viewmodel.tracker.PrayerTrackerEvent
+import com.arshadshah.nimaz.presentation.viewmodel.tracker.PrayerTrackerViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.tracker.StatsPeriod
 import java.time.Instant
 import java.time.ZoneId
 

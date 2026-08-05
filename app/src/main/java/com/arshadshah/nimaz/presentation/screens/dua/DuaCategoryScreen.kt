@@ -40,6 +40,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.Dua
+import com.arshadshah.nimaz.domain.model.DuaOccasion
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
@@ -48,12 +49,14 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeShape
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorState
 import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
-import com.arshadshah.nimaz.presentation.viewmodel.DuaEvent
-import com.arshadshah.nimaz.presentation.viewmodel.DuaViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.content.DuaEvent
+import com.arshadshah.nimaz.presentation.viewmodel.content.DuaViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -61,6 +64,7 @@ fun DuaCategoryScreen(
     categoryId: String,
     onNavigateBack: () -> Unit,
     onNavigateToDua: (String) -> Unit,
+    onNavigateToOccasion: (DuaOccasion) -> Unit = {},
     viewModel: DuaViewModel = hiltViewModel()
 ) {
     val state by viewModel.categoryState.collectAsStateWithLifecycle()
@@ -83,20 +87,21 @@ fun DuaCategoryScreen(
             )
         }
     ) { paddingValues ->
+        val error = state.error
         if (state.isLoading) {
             NimazLoadingState(modifier = Modifier.padding(paddingValues))
-        } else if (state.error != null) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = state.error ?: stringResource(R.string.error_generic),
-                    color = MaterialTheme.colorScheme.error
-                )
-            }
+        } else if (error != null) {
+            NimazErrorState(
+                title = stringResource(error.message),
+                message = stringResource(R.string.dua_load_failed_body),
+                kind = error.kind,
+                details = error.details,
+                primaryAction = NimazErrorDefaults.retry(
+                    onRetry = { viewModel.onEvent(DuaEvent.LoadCategory(categoryId)) },
+                    label = stringResource(R.string.try_again),
+                ),
+                modifier = Modifier.padding(paddingValues),
+            )
         } else {
             LazyColumn(
                 modifier = Modifier
@@ -122,7 +127,8 @@ fun DuaCategoryScreen(
                 ) { dua ->
                     DuaListItem(
                         dua = dua,
-                        onClick = { onNavigateToDua(dua.id) }
+                        onClick = { onNavigateToDua(dua.id) },
+                        onOccasionClick = onNavigateToOccasion
                     )
                 }
 
@@ -192,12 +198,18 @@ private fun CategoryHeaderCard(
     }
 }
 
+/**
+ * One dua in a list. Shared with [DuaOccasionScreen], which lists the same rows for a
+ * different query rather than owning a near-copy of this.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun DuaListItem(
+internal fun DuaListItem(
     dua: Dua,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    /** Given, the occasion under the title becomes the way into that occasion's whole list. */
+    onOccasionClick: ((DuaOccasion) -> Unit)? = null,
 ) {
     NimazCard(
         style = NimazCardStyle.FILLED,
@@ -244,11 +256,22 @@ private fun DuaListItem(
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     dua.occasion?.let { occasion ->
-                        Text(
-                            text = occasion.displayName(),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                        if (onOccasionClick != null) {
+                            NimazBadge(
+                                text = occasion.label(),
+                                tone = NimazTone.ACCENT,
+                                emphasis = NimazBadgeEmphasis.SOFT,
+                                shape = NimazBadgeShape.ROUNDED,
+                                size = NimazBadgeSize.SMALL,
+                                onClick = { onOccasionClick(occasion) }
+                            )
+                        } else {
+                            Text(
+                                text = occasion.label(),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                 }
 

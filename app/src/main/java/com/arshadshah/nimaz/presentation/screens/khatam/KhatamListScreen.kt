@@ -40,8 +40,8 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazPillTabs
 import com.arshadshah.nimaz.presentation.theme.NimazSpacing
-import com.arshadshah.nimaz.presentation.viewmodel.KhatamListUiState
-import com.arshadshah.nimaz.presentation.viewmodel.KhatamViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.quran.KhatamListUiState
+import com.arshadshah.nimaz.presentation.viewmodel.quran.KhatamViewModel
 
 /** Which status bucket the list is filtered to. */
 private enum class KhatamTab { IN_PROGRESS, COMPLETED, ARCHIVED }

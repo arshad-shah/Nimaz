@@ -171,7 +171,10 @@ com.arshadshah.nimaz/
 │
 ├── presentation/
 │   ├── screens/<feature>/   # Composable screens grouped by feature
-│   ├── viewmodel/           # All ViewModels (flat package)
+│   ├── viewmodel/<feature>/ # {XxxViewModel, XxxUiState, XxxEvent}.kt per feature
+│   │                        #   quran/ prayer/ tracker/ worship/ calendar/
+│   │                        #   settings/ help/ content/ search/ ai/
+│   │                        #   location/ home/ onboarding/ tools/
 │   ├── components/
 │   │   ├── atoms/           # Smallest reusable UI (NimazCard, NimazBadge, ArabicText…)
 │   │   ├── molecules/       # Composed (PrayerTimeCard, NimazDialog, NimazCalendar…)
@@ -238,9 +241,46 @@ flowchart LR
 
 ### 4.1 Presentation — ViewModels (MVVM + UDF)
 
-Canonical reference: `presentation/viewmodel/AsmaUlHusnaViewModel.kt`.
+Canonical reference: `presentation/viewmodel/help/HelpViewModel.kt` — a feature-sized
+ViewModel in the sub-package layout, with one exhaustive `onEvent`, `Telemetry` injected, and
+`catchAndReport` applied inside its `flatMapLatest` rather than outside it.
+
+**A feature gets its own sub-package, holding three files:**
+
+```
+viewmodel/help/
+  HelpViewModel.kt     # the class, and nothing else
+  HelpUiState.kt       # every XxxUiState the feature exposes
+  HelpEvent.kt         # the sealed XxxEvent hierarchy
+```
+
+The layer was one flat package of 32 files, each carrying its own states, events and enums —
+`SettingsViewModel.kt` opened with 7 UiStates, 4 enums and a 102-line event hierarchy before
+its class started at line 313, and `QuranTopicsViewModel.kt` was 39% type declarations. Both
+the sub-package and the split are where the code goes, not optional tidiness.
+
+The types stay in the **same package** as the ViewModel, so splitting them costs no imports —
+which is exactly why there is no excuse for a 1,400-line file that opens with 200 lines of
+`data class`.
+
+**What does *not* belong there: anything a screen, component or widget also imports.** A type
+in `viewmodel/<feature>/` is that feature's business. `PrayerTimeDisplay` lived in
+`HomeViewModel.kt` and was imported by eight files — including `PrayerTimesViewModel`, which
+reached into an unrelated feature's ViewModel for a type it renders. Shared display models go
+to **`presentation/model/`**; anything that is a fact about the content rather than about how
+it is drawn (`UnifiedBookmark`, `UnifiedSearchResult`, `DayPrayerTimes`, the city catalogue)
+goes to **`domain/model/`**. `widget/` and `components/` must import from neither
+`viewmodel/` — that is a layering leak, and it is currently at zero:
+
+```bash
+grep -rn "import com.arshadshah.nimaz.presentation.viewmodel" \
+  app/src/main/java/com/arshadshah/nimaz/{widget,presentation/components}/   # expect none
+```
 
 Rules:
+- Lives in `presentation/viewmodel/<feature>/`, with its `XxxUiState`s in `XxxUiState.kt` and
+  its `XxxEvent` in `XxxEvent.kt` beside it. Pick the existing sub-package the feature belongs
+  to; add one only for a genuinely new area.
 - Annotated `@HiltViewModel`, constructor injection only.
 - Inject the feature's **`XxxUseCases`** wrapper (not a repository, never a DAO).
 - Expose immutable state as `StateFlow<XxxUiState>` via `asStateFlow()`. A ViewModel
@@ -287,6 +327,42 @@ class XxxViewModel @Inject constructor(
 }
 ```
 
+#### One `when (event)` per `onEvent` — never two
+
+`onEvent` used to be written as **two** consecutive `when (event)` blocks over the same sealed
+hierarchy: the first logging analytics and ending in `else -> {}`, the second dispatching. The
+`else` means the compiler only checks exhaustiveness on the *behaviour* table, so **every event
+added afterwards ships with working behaviour and no telemetry, silently**. That was the measured
+state of 20 of 31 ViewModels — `SettingsViewModel`'s `else` dropped 63 of its 78 events, `Zakat`
+logged 3 of 24, `Tasbih` 5 of 23.
+
+Put the analytics call **inside the branch that owns it**, in one exhaustive table:
+
+```kotlin
+fun onEvent(event: XxxEvent) = when (event) {
+    is XxxEvent.Select -> {
+        telemetry.featureUsed(AppAnalytics.Feature.XXX, AppAnalytics.Action.OPEN_DETAIL)
+        select(event.id)
+    }
+    XxxEvent.Refresh -> refresh()          // deliberately not logged, and visibly so
+}
+```
+
+A new event then **fails to compile** until someone decides whether it is logged — which is the
+whole regression test, and cheaper than any runtime one. It also lets the log be conditional:
+`QuranTopicsViewModel` logs a load only when it actually loads, and `HomeViewModel` now logs a
+prayer toggle only past its Sunrise guard — before, it counted taps that toggled nothing.
+
+A branch that deliberately does nothing gets an explicit empty body with a comment, never an
+`else`.
+
+#### A read-only ViewModel may have no `onEvent`
+
+`TafseerChaptersViewModel` is `combine(...).launchIn` and nothing else — its screen has no
+intents to send. That is sanctioned for a genuinely read-only surface, and it is the reason the
+file has no analytics seam: there is no event to hang one on. If such a screen later gains a
+single tappable thing, it gains an `XxxEvent` at the same time rather than a bare public method.
+
 Screens collect with `collectAsStateWithLifecycle()` and call `viewModel.onEvent(...)`.
 
 #### Cancellation: one handle per identity of the request
@@ -309,6 +385,28 @@ Scope the handle to the **identity of the request**, not to the function:
 Clearing a query counts as a change of request: cancel there too, or the last collector's next
 emission repopulates the results the user just cleared. See AP-7.1b in
 [`CLEAN_ARCHITECTURE_CHECKLIST.md`](CLEAN_ARCHITECTURE_CHECKLIST.md).
+
+**A one-shot suspend read is the same hazard.** It is easy to read the rule above as being about
+`collect`, but nothing in it depends on the flow: two `launch`es that `await` a query and then
+write the same state race exactly as two collectors do, and the slower one wins. That is how
+`PrayerTrackerViewModel.loadStats` shipped — a period switch racing a stats read left week
+numbers under a MONTH chip. Cancellation alone does not close it, either: a coroutine cancelled
+after its **last** suspension point still runs to the end of the block, so the write needs a
+guard as well as a handle.
+
+```kotlin
+statsJob?.cancel()
+statsJob = launchSafely(telemetry, DOMAIN, "load_stats", …) {
+    val stats = useCases.getStats(startEpoch, endEpoch)   // last suspension point
+    if (_state.value.period != period) return@launchSafely // …so check before writing
+    _state.update { it.copy(stats = stats) }
+}
+```
+
+**Prefer removing the trigger to guarding the race.** A number derived from a Room table does not
+need re-reading after a write to that table — subscribe to it instead, and Room re-emits. Calling
+a loader imperatively after every write is what puts the second read in flight in the first
+place, and it also freezes the value when the write comes from *another* screen.
 
 #### Derived state is computed on the UI-state class, never stored
 
@@ -459,6 +557,145 @@ Conventions:
 **Adding a use-case wrapper:** add a `provideXxxUseCases(repository: XxxRepository): XxxUseCases`
 function to `UseCaseModule`, mirroring `provideAsmaUlHusnaUseCases`.
 
+### 6.1 Monitoring — inject `Telemetry`, do not call the objects
+
+`AppAnalytics` and `CrashReporter` are Kotlin `object`s holding a static `Context`. They no-op
+safely when Firebase is absent, so they never *blocked* testing — but a test could never assert
+that an action had been logged, and two live defects survived exactly that gap (a drop-off funnel
+that has never fired, and a `logFeatureUsed` call on a branch no screen can reach).
+
+**ViewModels and use cases inject `Telemetry`** (`core/monitoring/Telemetry.kt`), bound to
+`FirebaseTelemetry` in `MonitoringModule`. Tests inject `RecordingTelemetry` and assert on its
+`calls`.
+
+```kotlin
+@HiltViewModel
+class ExampleViewModel @Inject constructor(
+    private val exampleUseCases: ExampleUseCases,
+    private val telemetry: Telemetry,
+) : ViewModel()
+```
+
+Device feedback follows the same rule: `CounterFeedback` (`core/feedback/`) is the seam for the
+tick a counter makes, so a ViewModel never holds a `Vibrator` or a `ToneGenerator`. Before it
+existed, `TasbihViewModel.increment()` — the most-used action in the feature — could not run in a
+JVM test at all, which is why its double-tap race shipped.
+
+Report every failure through **`telemetry.failure(domain, type, throwable)`**, which reaches both
+channels — the stack trace to Crashlytics, the frequency to analytics — and ignores
+`CancellationException`, because a load cancelled by navigating away is not a failure. Calling
+`AppAnalytics.*` or `CrashReporter.*` directly from a ViewModel is a deviation; the objects remain
+only as the production binding and for callers with no injection point (`NimazApp`, `BootReceiver`,
+workers).
+
+#### Analytics values come from the catalog, never a string literal
+
+`AppAnalytics` names its *events* and *parameters* in `object Event` and `object Param`. It did
+not name the **values** — the feature, action, domain and setting each call site passes — and
+about 120 of those were typed by hand across the ViewModel layer with no compiler check. The
+drift that produced was measurable, not hypothetical: `"khatam"` beside `"khatam_save"` split one
+feature's dashboards, `"prayer_times"` beside `"monthly_prayer_times"` split one screen family's,
+and one prayer state arrived in `Param.STATUS` under four spellings.
+
+Use `AppAnalytics.Feature.*` and `AppAnalytics.Action.*`:
+
+```kotlin
+telemetry.featureUsed(AppAnalytics.Feature.QURAN, AppAnalytics.Action.OPEN_DETAIL)
+telemetry.failure(AppAnalytics.Feature.HADITH, "load_chapter", throwable)
+```
+
+Two rules the drift teaches:
+
+- **A feature is a product area, not a screen.** A month view of the prayer timetable is
+  `Feature.PRAYER_TIMES` with a month-shaped *action*, not a feature of its own — otherwise its
+  usage never appears in the feature's funnel.
+- **The `type`/`action` dimension must be bounded.** Passing `e.javaClass.simpleName` makes it
+  unbounded, so those failures group with nothing and cannot be counted. The exception class
+  belongs in the Crashlytics report, where cardinality is the point.
+
+Adding a feature means adding a constant, in the same commit as the call site.
+
+#### "Today" comes from `TodayProvider`, never `LocalDate.now()`
+
+`LocalDate.now()` was called directly at **39 sites across 12 ViewModels**, always at `init`
+or collection time, and nothing re-evaluated it. There was no seam to fake in a test and no
+notion of "the day changed" anywhere in the layer, so a whole family of defects shipped
+together — a Room query bound to a fixed day range forever, a "daily" hadith frozen at the
+day it loaded, a month grid built at 23:59 still highlighting yesterday.
+
+Inject **`TodayProvider`** (`core/time/TodayProvider.kt`) and use whichever half fits:
+
+```kotlin
+todayProvider.today()                       // what day is it — fakeable
+todayProvider.todayChanges.collect { … }    // …and tell me when that changes
+```
+
+`todayChanges` emits immediately and again at each local midnight, so re-arming everything
+scoped to today is an ordinary flow collection rather than a check each feature has to
+remember to write. Tests use `FakeTodayProvider`, whose `now` a test can move to roll the
+date over without waiting for one. The backing `java.time.Clock` is provided by `TimeModule`.
+
+Anything scoped to a day takes the date as a **parameter** rather than reading the clock
+inside itself — see `domain/usecase/calendar/`, where the grid builders take `today` — so the
+same call can be re-issued for the new day.
+
+#### A persisted preference is read from the repository, never off the UI state
+
+A `UiState` field that mirrors a preference is a **cache of it, not the value**. It holds a
+compiled-in default until the settings collector's first emission lands, and that emission is
+disk-bound — so on a cold open it generally arrives *after* the screen has already asked for
+content.
+
+`QuranViewModel` read `_readerState.value.selectedTranslatorId` as the argument to its surah,
+juz, page and search queries. Every user whose translation was not `sahih_international` — the
+default declared on the state class — got **English first**, then a second full-surah query when
+the real preference arrived. A flash and a wasted read on every reader open. Resolve it where it
+lives, inside the load:
+
+```kotlin
+private suspend fun translatorId(): String = settingsRepository.quranTranslatorId.first()
+```
+
+**And then guard the settings collector's first emission**, because it is hydration, not a
+change. Comparing it against the state's defaults reports a change that never happened, and the
+"invalidate and reload" branch that hangs off that comparison then re-issues a load which already
+used the right values. Worse for anything positional: a Mushaf edition change repaginates the
+Quran, so a phantom change repaginated a page number *from* an edition the reader was never on.
+
+The same reasoning rules out `stateIn(scope, Eagerly, <empty>)` on a flow that is only collected:
+the seed publishes an empty result — with `isLoading = false` — before the database has answered,
+which the screen renders as its empty state. Collect the flow.
+
+#### CPU-bound work goes on the injected `@DefaultDispatcher`
+
+`viewModelScope.launch` is `Dispatchers.Main`. `CalendarViewModel.navigateToYear` did ~365
+Hijri conversions plus a filter per day there. Inject
+`@DefaultDispatcher CoroutineDispatcher` (`core/di/TimeModule.kt`) and `withContext` it —
+injected rather than `Dispatchers.Default` directly, because a test that substitutes its own
+scheduler stays deterministic, and one that does not has nothing for `advanceUntilIdle()` to
+wait on.
+
+#### A throwable's `message` is a diagnostic, never UI copy
+
+`_state.copy(error = e.message)` is the shortest thing to write and it puts SQLite's own words on
+the user's screen: `DuaCategoryScreen` rendered `state.error` directly, so a fault in the content
+database surfaced as `SQLiteException: no such table: duas` — in English, whatever the app's
+language.
+
+User-facing error text is a **string resource id** on the UI state, resolved by the screen:
+
+```kotlin
+data class XxxUiState(
+    val isLoading: Boolean = true,
+    @StringRes val error: Int? = null,
+)
+// screen: Text(stringResource(state.error ?: R.string.error_generic))
+```
+
+The throwable still goes to `telemetry.failure(...)`, which is the one place its wording earns
+its keep. An `error` field that no screen renders is worse than none — see the several this epic
+found written and never read — so add the field and the rendering together.
+
 ---
 
 ## 7. Navigation
@@ -580,6 +817,28 @@ typed route object.
   In particular:
     - a full-screen centred spinner is `NimazLoadingState(modifier = Modifier.padding(padding))`,
       **not** an inline `Box(fillMaxSize, Center) { CircularProgressIndicator() }`;
+    - a failed load is `NimazErrorState(title = …, kind = NimazErrorKind.X, variant = …)` — **not**
+      a bare red `Text` or a hand-rolled icon + `TextButton` column. It mirrors
+      `NimazLoadingState`'s `FULLSCREEN`/`SECTION`/`INLINE` variants so a screen can swap
+      loading → error without changing layout; the `NimazErrorKind` picks the glyph and
+      `NimazTone`, the caller owns the copy, and the whole state is announced as a polite live
+      region. Full-screen and section failures are anchored by the *fractured shamsa* — the
+      `scallopPath` medallion drawn as a slowly turning broken ring;
+    - **the four states are evaluated in one fixed order, in every screen:**
+      `isLoading && empty` → `NimazLoadingState`; `error != null` → `NimazErrorState`;
+      `empty` → `NimazEmptyState`; else content. Three properties follow, and each one fixes a
+      defect the app shipped: **error beats empty**, so a failed load can never be reported as
+      "there is nothing here" (`SurahSubjects`/`Passages`/`Background` did exactly that);
+      **loading only wins when the screen is bare**, so a failed *refresh* never blanks out
+      content someone is reading — that case is a `SECTION`/`INLINE` error or a `NimazBanner`;
+      and **all three take the scaffold's `paddingValues`**, because they fill and centre, so
+      omitting it centres them against the window and tucks them under the top bar.
+      A failing `UiState` carries `error: UiError?`
+      (`presentation/viewmodel/UiError.kt`) and never a raw `String`: the copy is a `@StringRes`
+      so it is translated, and the exception's text goes in `details`, which the component hides
+      behind a toggle. Every user-visible load path passes `onFailure` to `launchSafely` — a
+      failure that reaches only telemetry leaves the state saying `isLoading = true` forever.
+      `ScreenStateConventionTest` holds all of this, with a backlog that only shrinks;
     - **card separation is chosen by context, never by hand-rolled colours** — three strategies:
       a card sitting on the page background is
       `NimazCard(tone = NimazTone.NEUTRAL, style = NimazCardStyle.ELEVATED)` (the shadow reads in
@@ -896,7 +1155,12 @@ copy anything listed as Open.
 
 | Area | What was fixed |
 |------|----------------|
+| Screen states | **Loading, empty and error were improvised per screen.** 25 hand-rolled spinners across 19 screens, 9 hand-rolled error blocks, 11 `UiState`s carrying an error no screen read, and three Qur'an screens that reported a failed load as an empty one. Resolved by the screen-states epic: the four states are now evaluated in one fixed order (§8), a failing `UiState` carries `UiError` (`@StringRes` copy, exception text in `details`), and `ScreenStateConventionTest` holds all three lines with empty backlogs. `AP-7.16`. |
 | Use-case layer | `Hadith`, `Dua`, `Fasting`, `Prayer`, `Tasbih`, `Tafseer`, `Zakat` now have `XxxUseCases` wrappers; `PrayerTimes/PrayerTracker/Home/Settings/Location`, `Search`, `Bookmarks` ViewModels inject use cases instead of repositories. |
+| Coroutine failure paths | **No ViewModel launches a bare coroutine any more.** All 229 raw `viewModelScope.launch` calls are `launchSafely(telemetry, feature, "label")` — `viewModelScope`'s `SupervisorJob` isolates siblings but does not contain a throw inside a child `launch`, so each of those was a potential crash that reported nothing. `KhatamViewModel` and `OnboardingViewModel` were still on the static `AppAnalytics`/`CrashReporter`; both now inject `Telemetry`. Sites that set `isLoading = true` clear it in `onFailure`; the rest are deliberately telemetry-only — see `CLEAN_ARCHITECTURE_CHECKLIST.md` AP-7.12 for the per-site test, which turns on whether a screen renders the error at all. |
+| Home daily content | **Stale entry removed from Open.** §9 row 1 still claimed `HomeViewModel` injects `FastingDao`/`HadithDao`/`DuaDao`. It does not: it takes `FastingUseCases`/`HadithUseCases`/`DuaUseCases`, and the daily rotation goes through `GetDailyHadithUseCase`/`GetDailyDuaUseCase`. The fix landed with AP-4; only the registry was not updated. |
+| Settings seams | **`SettingsRepository` is no longer injected into feature ViewModels.** It is a flat preference store — 179 members, a `Flow` plus a setter per preference — so wrapping it in per-operation use cases the way `ZakatUseCases` wraps `ZakatRepository` would have meant ~179 one-line classes, the "use case that adds no value" the checklist warns about. Instead `domain/repository/settings/SettingsSeams.kt` declares eight feature-scoped slices — `QuranPreferences`, `HadithDisplaySettings`, `DuaDisplaySettings`, `TasbihSettings`, `ZakatSettings`, `AiSettings`, `LocationSettings`, `AppSettings` — and `SettingsRepository` **extends all eight**. The DataStore implementation is untouched and `RepositoryModule` binds every seam to the same `PreferencesDataStore` singleton; what changes is reach. 13 ViewModels now declare the one feature's preferences they consume, `OnboardingViewModel` takes two, and `PrayerTimesViewModel`/`FastingViewModel` injected `SettingsRepository` without ever reading it — those params are gone. `SettingsViewModel` keeps the full repository: it *is* the settings feature and edits nearly every preference. **When adding a preference, put it on the seam its feature reads, not on `SettingsRepository` directly.** |
+| ViewModel package layout | The layer was one flat package of 32 files, documented as deliberate. It is now `viewmodel/<feature>/` across 14 sub-packages, and §2/§4.1 **prescribe** that shape for new features rather than describing a move. The `HighLatitudeRule` enum that `SettingsViewModel` declared — shadowing the domain one, with different member spellings — is deleted; the domain type and its alias-tolerant `fromString` are used everywhere. |
 | Zakat clean-arch leak | `ZakatRepository` now exposes the `ZakatHistoryEntry` domain model (promoted to `domain/model`); entity↔domain mapping lives in `ZakatRepositoryImpl`. |
 | Calendar layer bypass | New `IslamicEventRepository` (+ impl mapping) and `IslamicEventUseCases`; `CalendarViewModel` no longer touches `IslamicEventDao`. |
 | QaidaReader UDF | `QaidaReaderViewModel` now has a sealed `QaidaReaderEvent` + single `onEvent`; action methods are private; Qaida screens dispatch events. |
@@ -910,6 +1174,8 @@ copy anything listed as Open.
 | Design system — semantic tones | Card surfaces no longer carry hand-rolled colours. `NimazCardTone` was renamed **`NimazTone`** and promoted to a vocabulary shared by `NimazCard` *and* `NimazBadge` (NEUTRAL/MUTED/ACCENT/PROMINENT/SUCCESS/WARNING/ERROR/TRANSPARENT), resolved in exactly two places — `NimazCardDefaults.tone()` and `NimazBadgeDefaults.colors()`. Every tone maps to an **opaque** Material role rather than a `surfaceVariant.copy(alpha = 0.4/0.5/0.6)` tint, so contrast is checked in both themes and `contentColorFor` yields a real `onXxx` for `LocalContentColor`. A `NimazCardLevel` (BASE/RAISED/NESTED) axis names the `surface`→`surfaceContainer`→`surfaceContainerHigh` ladder for NEUTRAL cards. ~14 feature areas (quran, khatam, prayer, fasting, settings, dua, hadith, tasbih, zakat, qaida, qibla, banners, about, search) were swept onto tones. See §8.1. |
 | Design system — card separation | Separation is now chosen by **context**, not by fill: page-level `NEUTRAL` + `ELEVATED`; nested-in-a-card/sheet `OUTLINED` + `elevation = 0.dp`; selected-among-peers lets the fill carry state. `NimazSurfaceCard` (`surface` fill + 1.dp outline + 0 elevation) was **deleted** — in light mode `surface` and `background` are within a few percent luminance, so those cards barely read as cards. See §8.1. |
 | Design system — badges/pills | `NimazBadge` absorbed the badge/pill/status-label family: `tone` × `NimazBadgeEmphasis` (FILLED/SOFT/OUTLINED/CUTOUT) × `NimazBadgeShape` (PILL/ROUNDED) × `NimazBadgeSize`, with `selected`/`selectedTone` collapsing the tab-pill pattern. `NimazLabelChip` (and its test) was deleted, as were the private duplicates `TabPill`, `CategoryTab`, `ExampleQuestionChip`, `CitedChip` and `CutoutBadge`. `BadgeType`/`StatusBadge` keep the Islamic domain palette as feature art via `NimazBadgeDefaults.feature()`. `NimazChip` and `NimazActionPill` were intentionally left alone — different jobs. See §8.2. |
+| `PrayerTimeCalculator` injected into five ViewModels | `FastingViewModel`, `HomeViewModel`, `MonthlyPrayerTimesViewModel`, `NightWorshipViewModel` and `PrayerTimesViewModel` each injected the concrete `core/util/PrayerTimeCalculator`. It is not a use case and not an interface, so it **cannot be faked** — every prayer-time path in five ViewModels was untestable without the real astronomical library, and the untestability was not theoretical: `FastingViewModel` called `getPrayerTimes(lat, lng)` and took **all four** calculation defaults, so Fast Tracker's suhoor and iftar ignored the user's method, school, high-latitude rule and per-prayer adjustments while Home honoured all four. Every one of those arguments has a default, so forgetting them compiled and produced plausible times for the wrong configuration. The seam is `PrayerRepository.observeCalculationSettings()` + `getDaySchedule(date[, settings])` + `getSunnahNightTimes(date[, settings])`, wrapped as `ObservePrayerCalculationSettingsUseCase`/`GetDayPrayerScheduleUseCase`/`GetSunnahNightTimesUseCase` in `PrayerUseCases`. `PrayerCalculationSettings` carries a **already-resolved** `ResolvedLocation`, so no caller can compute against the unset (0, 0). The four near-identical `combine` towers over six preference flows — and the three copies of `try { CalculationMethod.valueOf(s) } catch { MWL }` that came with them — collapse to one flow parsed once in the data layer. Pinned by `FastingPrayerSettingsTest`, which could not have been written before the seam existed. |
+| Device seams — `Geocoder`, `FusedLocationProviderClient`, permissions, battery optimisation | `LocationViewModel` and `OnboardingViewModel` each built a `Geocoder` and a `FusedLocationProviderClient` from an injected `@ApplicationContext`, wrapped both in their own `suspendCancellableCoroutine`, branched on API 33 twice each, and flattened an `Address` into a display name with their own copy of the same four-way fallback. Neither ViewModel could be **constructed** on the JVM as a result — which is why both had zero tests, and why the location-search debounce shipped untested. `domain/repository/DeviceLocationRepository` (`currentCoordinates`/`search`/`reverseGeocode`), `PermissionChecker` and `PowerSettings` are the seams; `data/device/AndroidDeviceLocationRepository` is the single Android implementation, dispatching on the new `@IoDispatcher` so the knowledge that a geocode blocks lives where the geocode does. `LocationViewModel` is now Context-free and pinned by `LocationSearchDebounceTest`. `PowerSettings` also replaces the unchecked `getSystemService(POWER_SERVICE) as PowerManager` cast that both ViewModels ran from `init`. |
 | Preferences abstraction | ViewModels no longer inject the `PreferencesDataStore` data class — they depend on the `domain/repository/SettingsRepository` interface (implemented by `PreferencesDataStore`, bound via `@Binds`). `UserPreferences` moved to `domain/model`. |
 | 16-line Mushaf — dropped basmalah (7/7, #271) | The fidelity pass found `MushafLayoutMapper` collapsed a `line_number` group to its first row's type, so the **81 surahs** whose `surah_header` and `basmalah` ship on one `line_number` rendered header-only — the basmalah vanished. The mapper now emits each structural row as its own `MushafLine` (header then basmalah); ayah segments still concatenate. Pinned by `MushafLayoutFidelityTest` (real-data round-trip = 112 basmalah lines), `MushafLayoutMapperTest`, and `MushafLinePageTest`. |
 | Mushaf pagination not script-aware (#325) | `MushafScript` supplied only a page *count*; every page→content mapping (the Page tab's juz table ending in a literal `604`, `ayahs.page`, `surahs.start_page`, a third copy of the Madani juz table in `QuranSurahListItem`) stayed Madani-only, so the 16-line layout still listed 604 tiles and khatam page progress/marking hit the wrong ayahs. The pure domain model `MushafPagination` is now the single source of truth for `totalPages`, page↔ayah lookups and juz page spans; it is derived per edition (`ayahs.page` vs `mushaf_layout_lines`) and re-derived reactively when the setting changes. The duplicate juz page tables were deleted. Pinned by `MushafPaginationTest`, `QuranPageGridTest`, `QuranJuzGridTest`. |
@@ -924,12 +1190,17 @@ copy anything listed as Open.
 | Arabic font size did nothing on the IndoPak editions | `MushafLineLayout` auto-fitted **each line independently**, shrinking from the requested size until it fit the width. The densest line of a 16-line page fits at none of the 18–42sp the slider offers, so every value collapsed onto the same width-determined size: the preference moved the Madani reader (`MushafContinuousText` uses it raw) and did nothing at all on the three IndoPak editions. It also meant lines on one page rendered at different sizes, which no printed Mushaf does. The page's densest line is now measured **once** at a reference size and `pageFitFontSize` (pure, `internal`, `MushafLinePageFitTest`) derives one size for the whole page — the fit-to-width size at the default preference, scaled proportionally from there. Above the default the page pans horizontally rather than shrinking back, because line accuracy is what the renderer exists for. See `SUBSYSTEMS.md` §5. |
 | Hizb quarter marker on every verse, labelling four of them | `QuranAyahItem` rendered its quarter badge for every verse with a `rubNumber` — which is every verse, since `hizb_quarters` tiles 1..6236 — and then `when`-matched `rubNumber` against 1..4 as though it were the position within a hizb. It is the **global** quarter (1..240), so the four quarters at the very start of the Quran produced a label and the other 236 produced an empty string: no marker anywhere else in the book. `Ayah.quarterInHizb`/`hizbOfQuarter` derive the position and its hizb from the one counter (`AyahDivisionsTest`), and the `AyahWithText` projection now also carries each division's `start_ayah_id`, so a division a verse *begins* is distinguishable from one it merely falls inside — which is what a printed Mushaf marks. The `rukus` and `surah_structure` tables, shipped but read by nothing, drive a matching rukūʿ badge in the reader and a rukūʿ-count badge on `SurahListItem`. See `SUBSYSTEMS.md` §5. |
 | Juz ayah boundaries wrong (#325) | `KhatamConstants.JUZ_AYAH_RANGES` had drifted — juz 7 off by one, juz 15-30 wrong by hundreds of ayahs (juz 30 started at 4090 instead of 5673) — so the Juz tab's khatam rings disagreed with the Khatam detail screen, which groups by the DB's `ayahs.juz`. Corrected and pinned by `KhatamJuzBoundariesTest`, which re-derives every boundary from the 114 surah ayah counts rather than restating the constant. |
+| "Today" read straight from the clock in ten ViewModels | `TodayProvider` landed with the calendar/home rollover work, and twenty `LocalDate.now()` calls stayed behind it — six in ViewModel bodies (`Dua`, `Tasbih`, `Quran`, `PrayerTimes`, `PrayerTracker`, `Fasting`) and, worse, **nine as data-class defaults on UiState types**, which are evaluated once when the state object is constructed and never again. A `FastingCalendarUiState` built at 23:59 on 31 March stayed on March. Those defaults are now **required constructor parameters** — the compiler makes the ViewModel anchor the date through `TodayProvider`, which a test can fake and a midnight can move. `LocalDate.now()` appears nowhere in `presentation/viewmodel/` except in prose. |
+| `AsrJuristicMethod` shadowing `AsrCalculation` | The presentation layer declared its own two-member Asr enum beside the domain's, with a hand-written `when` mapping between them — the same shape as the `HighLatitudeRule` shadow deleted above, and it survived that sweep. Deleted; `SettingsUiState`, `SettingsEvent` and `PrayerSettingsScreen` use `domain.model.AsrCalculation` directly, so the mapping table is gone rather than maintained. |
+| The audio engines were handed to screens whole | `QuranViewModel.audioManager` and `SettingsViewModel.adhanAudioManager` were public `val`s. The accepted pattern below permits a playback ViewModel forwarding the engine's `StateFlow` for live highlight and progress; it does not permit giving the screen `play`, `stop`, `setReciter` and `downloadAdhan` too — and `SelectReciterScreen` was calling `quranViewModel.audioManager.setReciter(...)` to preview a reciter, which no ViewModel test could reach. Both managers are `private`; the reciter preview is `QuranEvent.PreviewReciter`, and `NotificationSoundScreen` reads three named `StateFlow`s (`adhanDownloadState`, `isAdhanPlaying`, `currentlyPlayingAdhan`) instead of the manager. |
+| A calculation method the user did not choose, chosen silently | `SettingsViewModel` read the persisted method with `CalculationMethod.valueOf(...)` inside `catch (_: Exception)`, falling back to Muslim World League. `valueOf` is stricter than what the app persists — `fromString` accepts `"MWL"` and `"ISNA"` aliases — so a legitimately stored value could reset the user's method, and the exception carrying the only evidence was dropped. Now `CalculationMethod.parseOrNull` (which `fromString` delegates to) plus a `telemetry.error`, so the fallback still happens and is no longer silent. Same treatment for the high-latitude rule. |
+| The longest form in the app lost on process death | `ZakatViewModel` held up to thirteen typed monetary figures in a `MutableStateFlow` and nothing else — no ViewModel in the app used `SavedStateHandle` — so a phone call during data entry returned the user to a blank form. The typed figures and the nisab basis are mirrored into `SavedStateHandle` field by field (the state types are domain models; making them `Parcelable` to fit a `Bundle` would push a presentation storage concern into `domain/model`). Only input is saved — the result is recomputed on restore. |
+| Search result counts that disagreed with the results | `SearchStatsUiState` carried `quranCount`/`hadithCount`/`duaCount`/`surahCount` beside `totalResults`. `totalResults` counted `filteredResults`; the four counted the **unfiltered** per-corpus lists, so a HADITH filter over 3 hadith and 40 Qur'an matches reported `totalResults = 3` next to `quranCount = 40`. No screen read them, which is the only reason it never showed. Deleted rather than corrected — the filter chips already say which corpus is on screen. |
 
 ### Open (still to do — do not copy)
 
 | # | Area | Deviation | Canonical fix |
 |---|------|-----------|---------------|
-| 1 | Layer bypass | `HomeViewModel` injects `FastingDao`, `HadithDao`, `DuaDao` directly for its "daily hadith / daily dua of the day" features. This logic reads entity-level fields and uses prepopulated-DB integer ids + seeders, so it is **not** a mechanical swap — the domain models differ (`Hadith.grade` is an enum, `DuaCategory.iconName` vs `icon`, String vs Int ids). | Extract `GetDailyHadithUseCase` / `GetDailyDuaUseCase` that own the daily-rotation business logic, returning domain models. Needs runtime/visual validation. |
 | 2 | Design system | `EventCard` (organism) and `IslamicEventCard` (molecule) both render occasion cards. `IslamicEventCard` migration onto `EventCard` and reconciling `HijriDateCalculator.EventType` with `EventOccasion` is deferred. | See `docs/superpowers/specs/2026-07-24-event-cards-and-celebration-routing-design.md` §8 for the spec. Migrate `IslamicEventCard` onto `EventCard` and unify event-type enums. |
 | 3 | Theming | Bespoke per-item gradient palettes still hold raw `Color(0xFF…)` literals: `hadith/HadithCollectionScreen.kt` (`getBookGradient`, per-collection pairs) and `tasbih/BeadDesign.kt` (bead style gradients). These are centralized design tokens, not scattered ad-hoc colors. | Relocate into `NimazColors` (e.g. `HadithCollectionColors`, `TasbihBeadStyles`) preserving exact hex; do under visual review. |
 | 4 | Design system | **A tone carries container + content, but not a border.** A card that needs a stroke therefore falls back to an explicit `colors = NimazCardDefaults.colors(container = …, border = …)` — 10 files do this today. This is the most likely re-entry point for colour drift. | Add a border to the tone resolver (e.g. a `bordered: Boolean` / `outline` argument on `NimazCardDefaults.tone()`), then convert those call sites back onto `tone`. |
@@ -948,14 +1219,31 @@ copy anything listed as Open.
 > **Accepted patterns (NOT deviations):**
 > - **Mushaf editions and Quran translations shipped as seeded JSON assets, not in the prepackaged DB** (sub-task 2/7 of #263, extended when the catalogue grew to 4 editions + 15 translations) — **resolved at versionCode 385**. Each edition's glyph text + layout, and each translation's verses, were populated at runtime by `MushafLayoutSeeder` / `QuranTranslationSeeder` from `assets/quran/`, with the migrations creating only the empty tables. The alternative — regenerating `assets/database/nimaz_prepopulated.db` — was rejected at the time because it was a ~147 MB Git-LFS blob that `createFromAsset` copies **only on fresh install**, so baking the data in would (a) never reach existing installs and (b) grow the LFS asset by tens of MB. What dissolved the trade-off was the prepackaged DB ceasing to be a tracked blob: it is now a hash-pinned artifact fetched from **arshad-shah/nimaz-data**, regenerated per release, and `ContentPatchSeeder` carries corrections to existing installs. Both seeders and their ~30 MB of assets were retired (`docs/retirement.yaml`); `QuranRepositoryImpl` no longer seeds on read, and `seededTranslationId(...)` survives as `translationId(...)` for its catalogue normalisation alone. The line-accurate read path (`getMushafLayoutByPage` → `MushafLayoutMapper` → `MushafPageLayout` domain model → `GetMushafPageLayoutUseCase`) is unchanged and still keeps the layers clean. See `SUBSYSTEMS.md` §5/§7 and `DATA_RETIREMENT.md`.
 > - **16-line renderer, now user-selectable & persisted** (sub-tasks 5/7 + 6/7 of #263, #270). The line-accurate renderer (`MushafLineLayout` + `MushafLinePage`) is integrated into the reader pager via the `ReaderMushafPage` helper, gated on `QuranReaderUiState.use16LineLayout`. As of 6/7 that gate is driven by a persisted preference: `SettingsRepository.quranMushafScript` (DataStore key `quran_mushaf_script`, a `MushafScript` enum-name string, default `MADANI`) is folded into `QuranViewModel` state, where `use16LineLayout` and `totalPages` are **computed from** `mushafScript` (single seam — no drift between "which renderer" and "how many pages"). The "Mushaf Script" dropdown in `QuranSettingsScreen` (`SettingsEvent.SetMushafScript`) writes it; the reader's pager count, dual-page spread count, and the Quran-home jump-to-page all read `state.mushafScript.totalPages` (604 vs 548), and deep-link page bounds validate against `MushafScript.MAX_TOTAL_PAGES`. It stays **off by default**, so the Uthmani/604 view is unchanged unless the user opts in. The renderer is covered by Compose previews and, as of 7/7 (#271), Robolectric render tests (`MushafLinePageTest`), a data-fidelity suite over the shipped assets (`MushafLayoutFidelityTest`), and a generated per-page pass/fail sheet (`docs/quran/16-line-fidelity-sheet.md`). See `SUBSYSTEMS.md` §5/§6.
+> - **`LocalInAppUpdateManager` stays a CompositionLocal** — the Play in-app update flow needs an
+>   `Activity` to start, so routing the manager through a ViewModel would put an Activity
+>   reference in one, which is worse than the coupling it removes. The *decision* the About screen
+>   makes from `UpdateState` is not exempt: which label, which icon, whether a tap does anything
+>   used to be four parallel `when` expressions inside `UpdateStatusItem`, next to the lambda that
+>   performed the click, so none of it could be asserted — including whether a **failed** check
+>   was still tappable. That moved to `updatePrompt()`
+>   (`presentation/viewmodel/about/UpdatePrompt.kt`) and is unit-tested. Only the manager handle
+>   itself is reached through the composition.
 > - **Flag emoji on the Location screen** — the Location screen renders country flags as emoji,
 >   the one sanctioned exception to the "Material icons via `NimazIcon`, no emoji" rule (§7).
 >   Bounded to curated cities in `LocationCatalog.kt` / `LocationScreen.kt`; do not generalise.
 > - Exposing multiple `StateFlow`s from one ViewModel for distinct sub-screens (list/detail) is
 >   the house style (see `AsmaUlHusnaViewModel`). Do **not** "consolidate" them into one mega-state.
-> - Audio-playback ViewModels (`QaidaReaderViewModel`, `QuranViewModel`) expose the audio engine's
->   `StateFlow` (`audioManager.state`) directly to the UI for live highlight/progress. This is an
->   intentional, consistent pattern for playback features — not a leak to "fix".
+> - Audio-playback ViewModels (`QaidaReaderViewModel`, `QuranViewModel`, `SettingsViewModel`)
+>   forward the audio engine's `StateFlow` (`audioManager.state`, `adhanAudioManager.downloadState`)
+>   to the UI for live highlight/progress/download state. This is an intentional, consistent
+>   pattern for playback features — not a leak to "fix". **What is forwarded is the flow, never
+>   the manager:** the manager itself is `private` in every one of them, and a screen that needs
+>   to *drive* playback dispatches an event (see the §9 row on the audio engines above).
+> - **`SyncViewModel` imports `data.sync.*`** — `ConnectionState`, `SyncSignal`, `SyncPayload`,
+>   `SyncCategory`, `NearbyConnectionsManager` and the two transfer helpers. Accepted, for the
+>   same reason as the audio engines: peer-to-peer transfer is a stateful transport session, not
+>   a query, and `ConnectionState` is a sealed value type the screen renders directly. It is
+>   deliberately the *only* such ViewModel; a new feature does not get one by pointing at this.
 > - **Domain→`core.navigation.Route` coupling (announcement routing)** — `AnnouncementAction.NavigateToFeature(route: Route)` and `ResolveAnnouncementRouteUseCase(resolveFeatureKey: (String) -> Route?)` introduce a domain-layer dependency on `core.navigation.Route`. This is **permitted** because `Route` is a core/navigation type, not a data-layer entity or DAO; it is a **pure Kotlin value type** (serializable). The coupling is intentional: the domain use case resolves the abstract grammar into a typed navigation target; DI passes `::announcementRoute` as the resolver function.
 > - **`announcement_route_rejected` fired from presentation, not domain** — the `announcement_route_rejected` analytics event is logged from `HomeViewModel`, not from `ResolveAnnouncementRouteUseCase`, to keep the domain layer free of `AppAnalytics` dependencies. HomeViewModel fires it when a non-empty announcement route resolves to `null` (unparseable or out-of-range).
 

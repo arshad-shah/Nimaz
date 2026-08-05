@@ -58,6 +58,7 @@ import com.arshadshah.nimaz.domain.model.FastStatus
 import com.arshadshah.nimaz.domain.model.FastType
 import com.arshadshah.nimaz.domain.model.MakeupFast
 import com.arshadshah.nimaz.domain.model.MakeupFastStatus
+import com.arshadshah.nimaz.presentation.components.atoms.NimazSwitch
 import com.arshadshah.nimaz.presentation.components.atoms.GradientCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeDefaults
@@ -99,14 +100,15 @@ import com.arshadshah.nimaz.presentation.components.organisms.NimazStatData
 import com.arshadshah.nimaz.presentation.components.organisms.NimazStatsGrid
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
-import com.arshadshah.nimaz.presentation.viewmodel.FastingEvent
-import com.arshadshah.nimaz.presentation.viewmodel.FastingViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.tracker.FastingEvent
+import com.arshadshah.nimaz.presentation.viewmodel.tracker.FastingViewModel
 import java.time.DayOfWeek
 import java.time.Instant
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.ZoneId
 import java.time.temporal.TemporalAdjusters
+import com.arshadshah.nimaz.presentation.viewmodel.tracker.MakeupFastsUiState
 
 // Color constants for makeup fasts
 private val OrangeAccent = NimazColors.PrayerColors.Asr
@@ -257,6 +259,7 @@ fun FastTrackerScreen(
                                 ramadanDay = if (ramadanState.isRamadan) ramadanState.currentDay else null,
                                 suhoorAt = state.suhoorAt,
                                 iftarAt = state.iftarAt,
+                                canToggle = state.canToggleToday,
                                 onToggleFast = { viewModel.onEvent(FastingEvent.ToggleTodayFast) }
                             )
                         }
@@ -526,6 +529,7 @@ private fun TodayFastSection(
     ramadanDay: Int?,
     suhoorAt: kotlin.time.Instant?,
     iftarAt: kotlin.time.Instant?,
+    canToggle: Boolean,
     onToggleFast: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -617,6 +621,47 @@ private fun TodayFastSection(
                             color = statusColor
                         )
                     }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // The one-tap log for the day.
+                //
+                // `onToggleFast` was previously passed into this composable and never
+                // invoked, so FastingEvent.ToggleTodayFast had no producer at all and
+                // the day could only be logged through the management sheet.
+                //
+                // Disabled for EXEMPTED and MAKEUP_DUE: those are considered states
+                // recorded in the sheet with a reason attached, and a single tap must
+                // not silently overwrite one. The subtitle says where to change it
+                // rather than leaving a control that looks live and does nothing.
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = stringResource(R.string.fasting_log_today),
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Text(
+                            text = when {
+                                !canToggle -> stringResource(R.string.fasting_log_managed_in_sheet)
+                                isFasting -> stringResource(R.string.fasting_log_on_subtitle)
+                                else -> stringResource(R.string.fasting_log_off_subtitle)
+                            },
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    NimazSwitch(
+                        checked = isFasting,
+                        enabled = canToggle,
+                        onCheckedChange = { onToggleFast() },
+                        contentDescription = stringResource(R.string.fasting_log_today)
+                    )
                 }
 
                 Spacer(modifier = Modifier.height(20.dp))
@@ -1099,7 +1144,7 @@ private fun LogFastButton(
 // Makeup Fasts Content Components
 @Composable
 private fun MakeupFastsContent(
-    makeupState: com.arshadshah.nimaz.presentation.viewmodel.MakeupFastsUiState,
+    makeupState: MakeupFastsUiState,
     onCompleteMakeupFast: (Long) -> Unit,
     onUpdateMakeupFast: (MakeupFast) -> Unit = {},
     onPayFidya: (Long, Double) -> Unit = { _, _ -> },

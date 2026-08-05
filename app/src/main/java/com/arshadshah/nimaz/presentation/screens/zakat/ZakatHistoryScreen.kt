@@ -52,12 +52,14 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorState
 import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
 import com.arshadshah.nimaz.presentation.components.molecules.ZakatSummaryHero
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.NimazColors
-import com.arshadshah.nimaz.presentation.viewmodel.ZakatEvent
-import com.arshadshah.nimaz.presentation.viewmodel.ZakatViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.tools.ZakatEvent
+import com.arshadshah.nimaz.presentation.viewmodel.tools.ZakatViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
 
@@ -92,7 +94,21 @@ fun ZakatHistoryScreen(
             }
         }
     ) { paddingValues ->
-        if (historyState.history.isEmpty() && !historyState.isLoading) {
+        val error = historyState.error
+        if (error != null) {
+            // Before the empty branch: a failed read also leaves the list empty, and
+            // "no zakat history yet" is the wrong thing to tell someone who has years of it.
+            NimazErrorState(
+                title = stringResource(error.message),
+                kind = error.kind,
+                details = error.details,
+                primaryAction = NimazErrorDefaults.retry(
+                    onRetry = { viewModel.onEvent(ZakatEvent.LoadHistory) },
+                    label = stringResource(R.string.try_again),
+                ),
+                modifier = Modifier.padding(paddingValues),
+            )
+        } else if (historyState.history.isEmpty() && !historyState.isLoading) {
             NimazEmptyState(
                 title = stringResource(R.string.no_zakat_history),
                 message = stringResource(R.string.zakat_history_empty_message),

@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -20,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.molecules.FavoriteFab
 import com.arshadshah.nimaz.presentation.components.molecules.NameDetailHeader
@@ -27,8 +27,8 @@ import com.arshadshah.nimaz.presentation.components.molecules.NameDetailSectionC
 import com.arshadshah.nimaz.presentation.components.molecules.NamesAccents
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.NimazSpacing
-import com.arshadshah.nimaz.presentation.viewmodel.AsmaUnNabiEvent
-import com.arshadshah.nimaz.presentation.viewmodel.AsmaUnNabiViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.content.CatalogEvent
+import com.arshadshah.nimaz.presentation.viewmodel.content.AsmaUnNabiViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -38,7 +38,7 @@ fun AsmaUnNabiDetailScreen(
     viewModel: AsmaUnNabiViewModel = hiltViewModel()
 ) {
     LaunchedEffect(nameId) {
-        viewModel.onEvent(AsmaUnNabiEvent.LoadDetail(nameId))
+        viewModel.onEvent(CatalogEvent.LoadDetail(nameId))
     }
 
     val state by viewModel.detailState.collectAsStateWithLifecycle()
@@ -47,31 +47,31 @@ fun AsmaUnNabiDetailScreen(
     NimazScreenScaffold(
         topBar = {
             NimazBackTopAppBar(
-                title = state.name?.nameTransliteration ?: stringResource(R.string.name_detail),
+                title = state.item?.nameTransliteration ?: stringResource(R.string.name_detail),
                 onBackClick = onNavigateBack
             )
         },
         floatingActionButton = {
-            state.name?.let { name ->
+            state.item?.let { name ->
                 FavoriteFab(
                     isFavorite = name.isFavorite,
                     accent = accent,
-                    onClick = { viewModel.onEvent(AsmaUnNabiEvent.ToggleFavorite(name.id)) }
+                    onClick = { viewModel.onEvent(CatalogEvent.ToggleFavorite(name.id)) }
                 )
             }
         }
     ) { paddingValues ->
-        if (state.isLoading || state.name == null) {
+        if (state.isLoading || state.item == null) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues),
                 contentAlignment = Alignment.Center
             ) {
-                CircularProgressIndicator()
+                NimazLoadingState()
             }
         } else {
-            val name = state.name!!
+            val name = state.item!!
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()

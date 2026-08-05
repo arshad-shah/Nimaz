@@ -12,12 +12,20 @@ import com.arshadshah.nimaz.domain.model.CalculationMethod
 import com.arshadshah.nimaz.domain.model.HighLatitudeRule
 import com.arshadshah.nimaz.domain.model.Location
 import com.arshadshah.nimaz.domain.model.PrayerName
+import com.arshadshah.nimaz.domain.model.PrayerCalculationSettings
 import com.arshadshah.nimaz.domain.model.PrayerRecord
 import com.arshadshah.nimaz.domain.model.PrayerStats
 import com.arshadshah.nimaz.domain.model.PrayerStatus
+import com.arshadshah.nimaz.domain.model.PrayerTime
+import com.arshadshah.nimaz.domain.model.PrayerType
 import com.arshadshah.nimaz.domain.model.PrayerTimes
+import com.arshadshah.nimaz.domain.model.SunnahNightTimes
+import com.arshadshah.nimaz.domain.model.resolveLocation
 import com.arshadshah.nimaz.domain.repository.PrayerRepository
+import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import java.time.LocalDate
 import javax.inject.Inject
@@ -27,8 +35,95 @@ import javax.inject.Singleton
 class PrayerRepositoryImpl @Inject constructor(
     private val prayerDao: PrayerDao,
     private val locationDao: LocationDao,
-    private val prayerTimeCalculator: PrayerTimeCalculator
+    private val prayerTimeCalculator: PrayerTimeCalculator,
+    private val settingsRepository: SettingsRepository,
 ) : PrayerRepository {
+
+    /**
+     * The user's calculation settings, parsed once.
+     *
+     * `fromString` rather than `valueOf`: the persisted values include aliases the app itself
+     * writes ("MWL", "ISNA", "MAKKAH", "hanafi"), and `valueOf` throws on every one of them. The
+     * four ViewModels that each rolled this themselves caught that throw and substituted Muslim
+     * World League, which is how a user on ISNA silently got MWL times.
+     */
+    override fun observeCalculationSettings(): Flow<PrayerCalculationSettings> {
+        val locationFlow = combine(
+            settingsRepository.latitude,
+            settingsRepository.longitude,
+            settingsRepository.locationName,
+        ) { lat, lng, name -> resolveLocation(lat, lng, name) }
+
+        val methodFlow = combine(
+            settingsRepository.calculationMethod,
+            settingsRepository.asrCalculation,
+            settingsRepository.highLatitudeRule,
+        ) { method, asr, highLat ->
+            Triple(
+                CalculationMethod.fromString(method),
+                AsrCalculation.fromString(asr),
+                HighLatitudeRule.fromString(highLat),
+            )
+        }
+
+        // Six flows, so the vararg `combine` — the arity-specific overloads stop at five. The
+        // order of the arguments is the order of [ADJUSTED_PRAYERS].
+        val adjustmentsFlow = combine(
+            settingsRepository.fajrAdjustment,
+            settingsRepository.sunriseAdjustment,
+            settingsRepository.dhuhrAdjustment,
+            settingsRepository.asrAdjustment,
+            settingsRepository.maghribAdjustment,
+            settingsRepository.ishaAdjustment,
+        ) { minutes: Array<Int> -> ADJUSTED_PRAYERS.zip(minutes.toList()).toMap() }
+
+        return combine(locationFlow, methodFlow, adjustmentsFlow) { location, method, adjustments ->
+            PrayerCalculationSettings(
+                location = location,
+                calculationMethod = method.first,
+                asrCalculation = method.second,
+                highLatitudeRule = method.third,
+                adjustments = adjustments,
+            )
+        }
+    }
+
+    override fun getDaySchedule(
+        date: LocalDate,
+        settings: PrayerCalculationSettings,
+    ): List<PrayerTime> = prayerTimeCalculator.getPrayerTimes(
+        latitude = settings.location.latitude,
+        longitude = settings.location.longitude,
+        date = date,
+        calculationMethod = settings.calculationMethod,
+        asrCalculation = settings.asrCalculation,
+        highLatitudeRule = settings.highLatitudeRule,
+        adjustments = settings.adjustments,
+    )
+
+    override suspend fun getDaySchedule(date: LocalDate): List<PrayerTime> =
+        getDaySchedule(date, observeCalculationSettings().first())
+
+    override fun getSunnahNightTimes(
+        date: LocalDate,
+        settings: PrayerCalculationSettings,
+    ): SunnahNightTimes {
+        val sunnah = prayerTimeCalculator.getSunnahTimes(
+            latitude = settings.location.latitude,
+            longitude = settings.location.longitude,
+            date = date,
+            calculationMethod = settings.calculationMethod,
+            asrCalculation = settings.asrCalculation,
+            highLatitudeRule = settings.highLatitudeRule,
+        )
+        return SunnahNightTimes(
+            middleOfTheNight = sunnah.middleOfTheNight,
+            lastThirdOfTheNight = sunnah.lastThirdOfTheNight,
+        )
+    }
+
+    override suspend fun getSunnahNightTimes(date: LocalDate): SunnahNightTimes =
+        getSunnahNightTimes(date, observeCalculationSettings().first())
 
     override fun getTodayPrayerRecords(): Flow<Map<PrayerName, PrayerStatus>> {
         val todayEpoch = LocalDate.now().toUtcMidnightMillis()
@@ -258,6 +353,14 @@ class PrayerRepositoryImpl @Inject constructor(
         locationDao.setCurrentLocation(id)
     }
 
+    override fun getRecentLocations(limit: Int): Flow<List<Location>> {
+        return locationDao.getRecentLocations(limit).mapItems { it.toDomain() }
+    }
+
+    override suspend fun saveCurrentLocation(location: Location, now: Long): Long {
+        return locationDao.saveCurrentLocation(location.toEntity(), now)
+    }
+
     override suspend fun toggleFavorite(id: Long) {
         locationDao.toggleFavorite(id)
     }
@@ -330,6 +433,18 @@ class PrayerRepositoryImpl @Inject constructor(
             highLatitudeRule = highLatitudeRule?.name?.lowercase(),
             fajrAngle = fajrAngle,
             ishaAngle = ishaAngle
+        )
+    }
+
+    private companion object {
+        /** The prayers an adjustment applies to, in the order their preference flows are combined. */
+        val ADJUSTED_PRAYERS = listOf(
+            PrayerType.FAJR,
+            PrayerType.SUNRISE,
+            PrayerType.DHUHR,
+            PrayerType.ASR,
+            PrayerType.MAGHRIB,
+            PrayerType.ISHA,
         )
     }
 }

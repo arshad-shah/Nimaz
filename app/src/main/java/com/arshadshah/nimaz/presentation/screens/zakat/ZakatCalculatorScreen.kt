@@ -1,5 +1,14 @@
 package com.arshadshah.nimaz.presentation.screens.zakat
 
+import com.arshadshah.nimaz.domain.model.ZakatDefaults
+import com.arshadshah.nimaz.presentation.components.molecules.NimazListPicker
+import com.arshadshah.nimaz.presentation.components.molecules.NimazPickerItem
+import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuItem
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import java.util.Currency
+import java.util.Locale
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,6 +31,8 @@ import androidx.compose.material.icons.automirrored.filled.ShowChart
 import androidx.compose.material.icons.filled.AccountBalance
 import androidx.compose.material.icons.filled.Business
 import androidx.compose.material.icons.filled.CreditCard
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.MoreHoriz
@@ -63,6 +74,9 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazIconWell
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconWellShape
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconWellSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorState
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.molecules.ZakatHeroStat
@@ -73,8 +87,9 @@ import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazShapes
 import com.arshadshah.nimaz.presentation.theme.currentWindowSizeClass
 import com.arshadshah.nimaz.presentation.theme.isCompact
-import com.arshadshah.nimaz.presentation.viewmodel.ZakatEvent
-import com.arshadshah.nimaz.presentation.viewmodel.ZakatViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.tools.ZakatEvent
+import com.arshadshah.nimaz.presentation.viewmodel.tools.ZakatViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.tools.ZakatCalculatorUiState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -134,10 +149,12 @@ fun ZakatCalculatorScreen(
 
 @Composable
 private fun ZakatCompactContent(
-    state: com.arshadshah.nimaz.presentation.viewmodel.ZakatCalculatorUiState,
+    state: ZakatCalculatorUiState,
     viewModel: ZakatViewModel,
     modifier: Modifier = Modifier
 ) {
+    var showCurrencyPicker by rememberSaveable { mutableStateOf(false) }
+
     LazyColumn(
         modifier = modifier,
         contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp),
@@ -155,11 +172,25 @@ private fun ZakatCompactContent(
         }
         item {
             Spacer(modifier = Modifier.height(8.dp))
+            // ZakatEvent.SetCurrency existed with a handler and no producer: every figure on
+            // this screen was formatted with state.currency, and nothing could change it, so
+            // anyone outside the default read someone else's symbol on their own zakat.
+            NimazMenuItem(
+                title = stringResource(R.string.zakat_currency),
+                subtitle = currencyLabel(state.currency),
+                onClick = { showCurrencyPicker = true },
+            )
+        }
+        item {
+            Spacer(modifier = Modifier.height(8.dp))
             NisabSelector(
                 selectedType = state.nisabType,
                 goldPrice = state.goldPricePerGram,
                 silverPrice = state.silverPricePerGram,
-                onTypeChange = { viewModel.onEvent(ZakatEvent.SetNisabType(it)) }
+                currency = state.currency,
+                onTypeChange = { viewModel.onEvent(ZakatEvent.SetNisabType(it)) },
+                onGoldPriceChange = { viewModel.onEvent(ZakatEvent.UpdateGoldPrice(it)) },
+                onSilverPriceChange = { viewModel.onEvent(ZakatEvent.UpdateSilverPrice(it)) }
             )
         }
         item {
@@ -195,6 +226,25 @@ private fun ZakatCompactContent(
             )
         }
         item { LiabilityInputCards(state = state, viewModel = viewModel) }
+
+        // INLINE, and above the result rather than in place of the form: every figure the
+        // user typed is still on screen and still valid, and losing an afternoon of asset
+        // entries to report a failed sum would be far worse than the failure.
+        state.error?.let { error ->
+            item {
+                NimazErrorState(
+                    title = stringResource(error.message),
+                    kind = error.kind,
+                    variant = NimazErrorVariant.INLINE,
+                    primaryAction = NimazErrorDefaults.retry(
+                        onRetry = { viewModel.onEvent(ZakatEvent.Recalculate) },
+                        label = stringResource(R.string.try_again),
+                    ),
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                )
+            }
+        }
+
         state.calculation?.let { calculation ->
             item {
                 Spacer(modifier = Modifier.height(8.dp))
@@ -206,20 +256,36 @@ private fun ZakatCompactContent(
                     isAboveNisab = calculation.isAboveNisab,
                     zakatDue = calculation.zakatDue,
                     currency = state.currency,
+                    expanded = state.showBreakdown,
+                    onToggleExpanded = { viewModel.onEvent(ZakatEvent.ToggleBreakdown) },
                     onSaveClick = { viewModel.onEvent(ZakatEvent.SaveCalculation) }
                 )
             }
         }
         item { Spacer(modifier = Modifier.height(24.dp)) }
     }
+
+    if (showCurrencyPicker) {
+        NimazListPicker(
+            title = stringResource(R.string.zakat_currency),
+            items = ZakatDefaults.CURRENCIES.map { code ->
+                NimazPickerItem(value = code, title = code, description = currencyLabel(code))
+            },
+            selected = state.currency,
+            onSelected = { viewModel.onEvent(ZakatEvent.SetCurrency(it)) },
+            onDismiss = { showCurrencyPicker = false },
+        )
+    }
 }
 
 @Composable
 private fun ZakatTabletContent(
-    state: com.arshadshah.nimaz.presentation.viewmodel.ZakatCalculatorUiState,
+    state: ZakatCalculatorUiState,
     viewModel: ZakatViewModel,
     modifier: Modifier = Modifier
 ) {
+    var showCurrencyPicker by rememberSaveable { mutableStateOf(false) }
+
     Column(
         modifier = modifier
             .verticalScroll(rememberScrollState())
@@ -241,7 +307,15 @@ private fun ZakatTabletContent(
             selectedType = state.nisabType,
             goldPrice = state.goldPricePerGram,
             silverPrice = state.silverPricePerGram,
-            onTypeChange = { viewModel.onEvent(ZakatEvent.SetNisabType(it)) }
+            currency = state.currency,
+            onTypeChange = { viewModel.onEvent(ZakatEvent.SetNisabType(it)) },
+            onGoldPriceChange = { viewModel.onEvent(ZakatEvent.UpdateGoldPrice(it)) },
+            onSilverPriceChange = { viewModel.onEvent(ZakatEvent.UpdateSilverPrice(it)) }
+        )
+        NimazMenuItem(
+            title = stringResource(R.string.zakat_currency),
+            subtitle = currencyLabel(state.currency),
+            onClick = { showCurrencyPicker = true },
         )
 
         // Two columns: Assets left, Liabilities right
@@ -301,17 +375,31 @@ private fun ZakatTabletContent(
                 isAboveNisab = calculation.isAboveNisab,
                 zakatDue = calculation.zakatDue,
                 currency = state.currency,
+                expanded = state.showBreakdown,
+                onToggleExpanded = { viewModel.onEvent(ZakatEvent.ToggleBreakdown) },
                 onSaveClick = { viewModel.onEvent(ZakatEvent.SaveCalculation) }
             )
         }
 
         Spacer(modifier = Modifier.height(24.dp))
     }
+
+    if (showCurrencyPicker) {
+        NimazListPicker(
+            title = stringResource(R.string.zakat_currency),
+            items = ZakatDefaults.CURRENCIES.map { code ->
+                NimazPickerItem(value = code, title = code, description = currencyLabel(code))
+            },
+            selected = state.currency,
+            onSelected = { viewModel.onEvent(ZakatEvent.SetCurrency(it)) },
+            onDismiss = { showCurrencyPicker = false },
+        )
+    }
 }
 
 @Composable
 private fun AssetInputCards(
-    state: com.arshadshah.nimaz.presentation.viewmodel.ZakatCalculatorUiState,
+    state: ZakatCalculatorUiState,
     viewModel: ZakatViewModel
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -394,7 +482,7 @@ private fun AssetInputCards(
 
 @Composable
 private fun LiabilityInputCards(
-    state: com.arshadshah.nimaz.presentation.viewmodel.ZakatCalculatorUiState,
+    state: ZakatCalculatorUiState,
     viewModel: ZakatViewModel
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -501,30 +589,113 @@ private fun NisabSelector(
     selectedType: NisabType,
     goldPrice: Double,
     silverPrice: Double,
+    currency: String,
     onTypeChange: (NisabType) -> Unit,
+    onGoldPriceChange: (Double) -> Unit,
+    onSilverPriceChange: (Double) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Row(
+    Column(
         modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(10.dp)
+        verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        NisabOptionCard(
-            label = stringResource(R.string.gold),
-            subtitle = stringResource(R.string.zakat_nisab_gold_subtitle, goldPrice.toInt()),
-            isSelected = selectedType == NisabType.GOLD,
-            accentColor = NimazColors.ZakatColors.Gold,
-            onClick = { onTypeChange(NisabType.GOLD) },
-            modifier = Modifier.weight(1f)
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            NisabOptionCard(
+                label = stringResource(R.string.gold),
+                // Formatted, not truncated: goldPrice.toInt() rendered the silver
+                // price of 0.80 as "0", and the hardcoded "$" ignored the currency.
+                subtitle = stringResource(
+                    R.string.zakat_nisab_gold_subtitle,
+                    formatCurrency(goldPrice, currency)
+                ),
+                isSelected = selectedType == NisabType.GOLD,
+                accentColor = NimazColors.ZakatColors.Gold,
+                onClick = { onTypeChange(NisabType.GOLD) },
+                modifier = Modifier.weight(1f)
+            )
 
-        NisabOptionCard(
-            label = stringResource(R.string.silver),
-            subtitle = stringResource(R.string.zakat_nisab_silver_subtitle, silverPrice.toString()),
-            isSelected = selectedType == NisabType.SILVER,
-            accentColor = NimazColors.ZakatColors.Silver,
-            onClick = { onTypeChange(NisabType.SILVER) },
-            modifier = Modifier.weight(1f)
+            NisabOptionCard(
+                label = stringResource(R.string.silver),
+                subtitle = stringResource(
+                    R.string.zakat_nisab_silver_subtitle,
+                    formatCurrency(silverPrice, currency)
+                ),
+                isSelected = selectedType == NisabType.SILVER,
+                accentColor = NimazColors.ZakatColors.Silver,
+                onClick = { onTypeChange(NisabType.SILVER) },
+                modifier = Modifier.weight(1f)
+            )
+        }
+
+        MetalPricesEditor(
+            goldPrice = goldPrice,
+            silverPrice = silverPrice,
+            onGoldPriceChange = onGoldPriceChange,
+            onSilverPriceChange = onSilverPriceChange
         )
+    }
+}
+
+/**
+ * The metal prices the nisab threshold is derived from, editable.
+ *
+ * These used to be constants no user could reach, so every zakat figure was wrong by
+ * however stale they were — and because the gold price sets the nisab threshold as
+ * well as the metal valuation, a stale price could change whether zakat was owed at
+ * all. The hint says they are estimates so a default is never mistaken for a rate.
+ */
+@Composable
+private fun MetalPricesEditor(
+    goldPrice: Double,
+    silverPrice: Double,
+    onGoldPriceChange: (Double) -> Unit,
+    onSilverPriceChange: (Double) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    NimazCard(
+        modifier = modifier.fillMaxWidth(),
+        style = NimazCardStyle.OUTLINED,
+        shape = NimazShapes.small
+    ) {
+        Column(
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(R.string.zakat_gold_price_label),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.weight(1f)
+                )
+                CompactAmountField(value = goldPrice, onValueChange = onGoldPriceChange)
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(R.string.zakat_silver_price_label),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.weight(1f)
+                )
+                CompactAmountField(value = silverPrice, onValueChange = onSilverPriceChange)
+            }
+
+            Text(
+                text = stringResource(R.string.zakat_metal_prices_hint),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
     }
 }
 
@@ -721,6 +892,16 @@ private fun CompactAmountField(
 
 // --- Breakdown Card ---
 
+/**
+ * The line-by-line working behind the zakat figure, collapsible so the summary and the save
+ * action stay reachable without scrolling past eight rows of arithmetic.
+ *
+ * [expanded] is `showBreakdown` from the ViewModel rather than local `remember` state: the
+ * calculator is a long screen whose state survives rotation and process death through the
+ * ViewModel, and a breakdown that silently re-opened on the way back would undo the choice.
+ * Only the rows collapse — the save button does not, because hiding the way to record a
+ * calculation behind a disclosure is how a calculation gets lost.
+ */
 @Composable
 private fun BreakdownCard(
     totalAssets: Double,
@@ -730,85 +911,114 @@ private fun BreakdownCard(
     isAboveNisab: Boolean,
     zakatDue: Double,
     currency: String,
+    expanded: Boolean,
+    onToggleExpanded: () -> Unit,
     onSaveClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
-        Text(
-            text = stringResource(R.string.calculation_breakdown),
-            style = MaterialTheme.typography.titleSmall,
-            fontWeight = FontWeight.SemiBold,
-            color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.padding(bottom = 12.dp)
-        )
-
         NimazCard(
+            onClick = onToggleExpanded,
             modifier = Modifier.fillMaxWidth(),
-            // A section card on the page background → elevated.
+            style = NimazCardStyle.FILLED,
             tone = NimazTone.NEUTRAL,
-            style = NimazCardStyle.ELEVATED,
             shape = RoundedCornerShape(14.dp)
         ) {
-            Column(
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                BreakdownRow(
-                    label = stringResource(R.string.total_assets),
-                    value = formatCurrency(totalAssets, currency),
-                    valueColor = MaterialTheme.colorScheme.primary
+                Text(
+                    text = stringResource(R.string.calculation_breakdown),
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
-                BreakdownRow(
-                    label = stringResource(R.string.total_liabilities),
-                    value = "- ${formatCurrency(totalLiabilities, currency)}",
-                    valueColor = MaterialTheme.colorScheme.error
-                )
-
-                HorizontalDivider(
-                    color = MaterialTheme.colorScheme.outlineVariant,
-                    thickness = 1.dp
-                )
-
-                BreakdownRow(
-                    label = stringResource(R.string.net_zakatable_wealth),
-                    value = formatCurrency(netWorth, currency),
-                    valueColor = MaterialTheme.colorScheme.onSurface,
-                    isBold = true
-                )
-
-                BreakdownRow(
-                    label = stringResource(R.string.nisab_threshold),
-                    value = formatCurrency(nisabValue, currency),
-                    valueColor = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-
-                BreakdownRow(
-                    label = stringResource(R.string.meets_nisab),
-                    value = stringResource(if (isAboveNisab) R.string.yes else R.string.no),
-                    valueColor = if (isAboveNisab) {
-                        MaterialTheme.colorScheme.primary
-                    } else {
-                        MaterialTheme.colorScheme.error
-                    }
-                )
-
-                HorizontalDivider(
-                    color = MaterialTheme.colorScheme.outlineVariant,
-                    thickness = 1.dp
-                )
-
-                BreakdownRow(
-                    label = stringResource(R.string.zakat_due_2_5_percent),
-                    value = formatCurrency(zakatDue, currency),
-                    valueColor = NimazColors.ZakatColors.Gold,
-                    isBold = true
+                NimazIcon(
+                    imageVector = if (expanded) Icons.Filled.ExpandLess
+                    else Icons.Filled.ExpandMore,
+                    contentDescription = stringResource(
+                        if (expanded) R.string.cd_collapse else R.string.cd_expand
+                    ),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
 
         Spacer(modifier = Modifier.height(12.dp))
+
+        if (expanded) {
+            NimazCard(
+                modifier = Modifier.fillMaxWidth(),
+                // A section card on the page background → elevated.
+                tone = NimazTone.NEUTRAL,
+                style = NimazCardStyle.ELEVATED,
+                shape = RoundedCornerShape(14.dp)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    BreakdownRow(
+                        label = stringResource(R.string.total_assets),
+                        value = formatCurrency(totalAssets, currency),
+                        valueColor = MaterialTheme.colorScheme.primary
+                    )
+                    BreakdownRow(
+                        label = stringResource(R.string.total_liabilities),
+                        value = "- ${formatCurrency(totalLiabilities, currency)}",
+                        valueColor = MaterialTheme.colorScheme.error
+                    )
+
+                    HorizontalDivider(
+                        color = MaterialTheme.colorScheme.outlineVariant,
+                        thickness = 1.dp
+                    )
+
+                    BreakdownRow(
+                        label = stringResource(R.string.net_zakatable_wealth),
+                        value = formatCurrency(netWorth, currency),
+                        valueColor = MaterialTheme.colorScheme.onSurface,
+                        isBold = true
+                    )
+
+                    BreakdownRow(
+                        label = stringResource(R.string.nisab_threshold),
+                        value = formatCurrency(nisabValue, currency),
+                        valueColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
+                    BreakdownRow(
+                        label = stringResource(R.string.meets_nisab),
+                        value = stringResource(if (isAboveNisab) R.string.yes else R.string.no),
+                        valueColor = if (isAboveNisab) {
+                            MaterialTheme.colorScheme.primary
+                        } else {
+                            MaterialTheme.colorScheme.error
+                        }
+                    )
+
+                    HorizontalDivider(
+                        color = MaterialTheme.colorScheme.outlineVariant,
+                        thickness = 1.dp
+                    )
+
+                    BreakdownRow(
+                        label = stringResource(R.string.zakat_due_2_5_percent),
+                        value = formatCurrency(zakatDue, currency),
+                        valueColor = NimazColors.ZakatColors.Gold,
+                        isBold = true
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+        }
 
         // Save button
         NimazCard(
@@ -859,3 +1069,13 @@ private fun BreakdownRow(
     }
 }
 
+/**
+ * "US Dollar ($)" in English, "US-Dollar ($)" in German — resolved by `java.util.Currency`
+ * from the ISO code, so the picker carries no translated strings of its own.
+ */
+private fun currencyLabel(code: String): String = runCatching {
+    val currency = Currency.getInstance(code)
+    val name = currency.getDisplayName(Locale.getDefault())
+    val symbol = currency.getSymbol(Locale.getDefault())
+    if (symbol == code) name else "$name ($symbol)"
+}.getOrDefault(code)

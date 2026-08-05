@@ -9,12 +9,28 @@ import com.arshadshah.nimaz.data.repository.HadithRepositoryImpl
 import com.arshadshah.nimaz.data.repository.HelpRepositoryImpl
 import com.arshadshah.nimaz.data.repository.IslamicEventRepositoryImpl
 import com.arshadshah.nimaz.data.repository.KhatamRepositoryImpl
+import com.arshadshah.nimaz.data.device.AndroidDeviceLocationRepository
+import com.arshadshah.nimaz.data.device.AndroidPermissionChecker
+import com.arshadshah.nimaz.data.device.AndroidPowerSettings
 import com.arshadshah.nimaz.data.repository.PrayerRepositoryImpl
 import com.arshadshah.nimaz.data.repository.ProphetRepositoryImpl
 import com.arshadshah.nimaz.data.repository.QaidaRepositoryImpl
 import com.arshadshah.nimaz.data.repository.QuranRepositoryImpl
 import com.arshadshah.nimaz.data.repository.TafseerRepositoryImpl
 import com.arshadshah.nimaz.data.repository.TasbihRepositoryImpl
+import com.arshadshah.nimaz.core.text.StringProvider
+import com.arshadshah.nimaz.domain.repository.CompassSensors
+import com.arshadshah.nimaz.domain.repository.Haptics
+import com.arshadshah.nimaz.data.device.AndroidCompassSensors
+import com.arshadshah.nimaz.data.device.AndroidHaptics
+import com.arshadshah.nimaz.domain.repository.AdhanDownloader
+import com.arshadshah.nimaz.domain.repository.AppLocale
+import com.arshadshah.nimaz.data.platform.AndroidAppLocale
+import com.arshadshah.nimaz.data.platform.ServiceAdhanDownloader
+import com.arshadshah.nimaz.domain.repository.WidgetRefresher
+import com.arshadshah.nimaz.data.widget.WorkManagerWidgetRefresher
+import com.arshadshah.nimaz.data.text.AndroidStringProvider
+import com.arshadshah.nimaz.data.repository.UserDataRepositoryImpl
 import com.arshadshah.nimaz.data.repository.ZakatRepositoryImpl
 import com.arshadshah.nimaz.domain.repository.AsmaUlHusnaRepository
 import com.arshadshah.nimaz.domain.repository.AsmaUnNabiRepository
@@ -24,11 +40,23 @@ import com.arshadshah.nimaz.domain.repository.HadithRepository
 import com.arshadshah.nimaz.domain.repository.HelpRepository
 import com.arshadshah.nimaz.domain.repository.IslamicEventRepository
 import com.arshadshah.nimaz.domain.repository.KhatamRepository
+import com.arshadshah.nimaz.domain.repository.DeviceLocationRepository
+import com.arshadshah.nimaz.domain.repository.PermissionChecker
+import com.arshadshah.nimaz.domain.repository.PowerSettings
 import com.arshadshah.nimaz.domain.repository.PrayerRepository
 import com.arshadshah.nimaz.domain.repository.ProphetRepository
 import com.arshadshah.nimaz.domain.repository.QaidaRepository
 import com.arshadshah.nimaz.domain.repository.QuranRepository
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
+import com.arshadshah.nimaz.domain.repository.UserDataRepository
+import com.arshadshah.nimaz.domain.repository.settings.AiSettings
+import com.arshadshah.nimaz.domain.repository.settings.AppSettings
+import com.arshadshah.nimaz.domain.repository.settings.DuaDisplaySettings
+import com.arshadshah.nimaz.domain.repository.settings.HadithDisplaySettings
+import com.arshadshah.nimaz.domain.repository.settings.LocationSettings
+import com.arshadshah.nimaz.domain.repository.settings.QuranPreferences
+import com.arshadshah.nimaz.domain.repository.settings.TasbihSettings
+import com.arshadshah.nimaz.domain.repository.settings.ZakatSettings
 import com.arshadshah.nimaz.domain.repository.TafseerRepository
 import com.arshadshah.nimaz.domain.repository.TasbihRepository
 import com.arshadshah.nimaz.domain.repository.ZakatRepository
@@ -60,6 +88,12 @@ import com.arshadshah.nimaz.domain.usecase.GetAllBooksUseCase
 import com.arshadshah.nimaz.domain.usecase.GetAllCategoriesUseCase
 import com.arshadshah.nimaz.domain.usecase.GetAllHistoryUseCase
 import com.arshadshah.nimaz.domain.usecase.GetAllIslamicEventsUseCase
+import com.arshadshah.nimaz.domain.usecase.calendar.BuildCalendarMonthUseCase
+import com.arshadshah.nimaz.domain.usecase.calendar.BuildHijriMonthUseCase
+import com.arshadshah.nimaz.domain.usecase.calendar.CalendarUseCases
+import com.arshadshah.nimaz.domain.usecase.calendar.GetEventsForDateUseCase
+import com.arshadshah.nimaz.domain.usecase.calendar.GetEventsForMonthUseCase
+import com.arshadshah.nimaz.domain.usecase.calendar.GetUpcomingEventsUseCase
 import com.arshadshah.nimaz.domain.usecase.GetAllLocationsUseCase
 import com.arshadshah.nimaz.domain.usecase.GetAllMakeupFastsUseCase
 import com.arshadshah.nimaz.domain.usecase.GetAllProphetsUseCase
@@ -195,22 +229,24 @@ import com.arshadshah.nimaz.domain.usecase.ObserveKhatamByIdUseCase
 import com.arshadshah.nimaz.domain.usecase.ObserveKhatamDetailUseCase
 import com.arshadshah.nimaz.domain.usecase.ObserveKhatamStatsUseCase
 import com.arshadshah.nimaz.domain.usecase.ObserveReadAyahIdsUseCase
+import com.arshadshah.nimaz.domain.usecase.GetDayPrayerScheduleUseCase
+import com.arshadshah.nimaz.domain.usecase.GetSunnahNightTimesUseCase
+import com.arshadshah.nimaz.domain.usecase.ObservePrayerCalculationSettingsUseCase
 import com.arshadshah.nimaz.domain.usecase.PrayerUseCases
 import com.arshadshah.nimaz.domain.usecase.ProphetUseCases
 import com.arshadshah.nimaz.domain.usecase.QaidaUseCases
 import com.arshadshah.nimaz.domain.usecase.QuranUseCases
 import com.arshadshah.nimaz.domain.usecase.ReactivateKhatamUseCase
 import com.arshadshah.nimaz.domain.usecase.ResetQaidaProgressUseCase
-import com.arshadshah.nimaz.domain.usecase.SearchAsmaUlHusnaUseCase
-import com.arshadshah.nimaz.domain.usecase.SearchAsmaUnNabiUseCase
 import com.arshadshah.nimaz.domain.usecase.SearchDuasUseCase
 import com.arshadshah.nimaz.domain.usecase.SearchHadithsInBookUseCase
 import com.arshadshah.nimaz.domain.usecase.SearchHadithsUseCase
 import com.arshadshah.nimaz.domain.usecase.SearchHelpUseCase
-import com.arshadshah.nimaz.domain.usecase.SearchProphetsUseCase
 import com.arshadshah.nimaz.domain.usecase.SearchQuranUseCase
 import com.arshadshah.nimaz.domain.usecase.SeedMissingDefaultsUseCase
 import com.arshadshah.nimaz.domain.usecase.SetActiveKhatamUseCase
+import com.arshadshah.nimaz.domain.usecase.GetRecentLocationsUseCase
+import com.arshadshah.nimaz.domain.usecase.SaveCurrentLocationUseCase
 import com.arshadshah.nimaz.domain.usecase.SetCurrentLocationUseCase
 import com.arshadshah.nimaz.domain.usecase.TafseerUseCases
 import com.arshadshah.nimaz.domain.usecase.TasbihUseCases
@@ -266,6 +302,24 @@ abstract class RepositoryModule {
     abstract fun bindDuaRepository(
         duaRepositoryImpl: DuaRepositoryImpl
     ): DuaRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindDeviceLocationRepository(
+        impl: AndroidDeviceLocationRepository
+    ): DeviceLocationRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindPermissionChecker(
+        impl: AndroidPermissionChecker
+    ): PermissionChecker
+
+    @Binds
+    @Singleton
+    abstract fun bindPowerSettings(
+        impl: AndroidPowerSettings
+    ): PowerSettings
 
     @Binds
     @Singleton
@@ -341,9 +395,76 @@ abstract class RepositoryModule {
 
     @Binds
     @Singleton
+    abstract fun bindStringProvider(impl: AndroidStringProvider): StringProvider
+
+    @Binds
+    @Singleton
+    abstract fun bindCompassSensors(impl: AndroidCompassSensors): CompassSensors
+
+    @Binds
+    @Singleton
+    abstract fun bindHaptics(impl: AndroidHaptics): Haptics
+
+    @Binds
+    @Singleton
+    abstract fun bindAppLocale(impl: AndroidAppLocale): AppLocale
+
+    @Binds
+    @Singleton
+    abstract fun bindAdhanDownloader(impl: ServiceAdhanDownloader): AdhanDownloader
+
+    @Binds
+    @Singleton
+    abstract fun bindWidgetRefresher(impl: WorkManagerWidgetRefresher): WidgetRefresher
+
+    @Binds
+    @Singleton
+    abstract fun bindUserDataRepository(
+        userDataRepositoryImpl: UserDataRepositoryImpl
+    ): UserDataRepository
+
+    @Binds
+    @Singleton
     abstract fun bindSettingsRepository(
         preferencesDataStore: PreferencesDataStore
     ): SettingsRepository
+
+    // Feature-scoped settings seams. Every one resolves to the same DataStore-backed
+    // singleton as SettingsRepository above — the split exists so a ViewModel declares
+    // which feature's preferences it depends on instead of taking all 179 members.
+    // See domain/repository/settings/SettingsSeams.kt.
+
+    @Binds
+    @Singleton
+    abstract fun bindQuranPreferences(impl: PreferencesDataStore): QuranPreferences
+
+    @Binds
+    @Singleton
+    abstract fun bindHadithDisplaySettings(impl: PreferencesDataStore): HadithDisplaySettings
+
+    @Binds
+    @Singleton
+    abstract fun bindDuaDisplaySettings(impl: PreferencesDataStore): DuaDisplaySettings
+
+    @Binds
+    @Singleton
+    abstract fun bindTasbihSettings(impl: PreferencesDataStore): TasbihSettings
+
+    @Binds
+    @Singleton
+    abstract fun bindZakatSettings(impl: PreferencesDataStore): ZakatSettings
+
+    @Binds
+    @Singleton
+    abstract fun bindAiSettings(impl: PreferencesDataStore): AiSettings
+
+    @Binds
+    @Singleton
+    abstract fun bindLocationSettings(impl: PreferencesDataStore): LocationSettings
+
+    @Binds
+    @Singleton
+    abstract fun bindAppSettings(impl: PreferencesDataStore): AppSettings
 }
 
 @Module
@@ -441,7 +562,6 @@ object UseCaseModule {
         return AsmaUlHusnaUseCases(
             getAllNames = GetAllAsmaUlHusnaUseCase(repository),
             getNameById = GetAsmaUlHusnaByIdUseCase(repository),
-            searchNames = SearchAsmaUlHusnaUseCase(repository),
             toggleFavorite = ToggleAsmaUlHusnaFavoriteUseCase(repository),
             getFavorites = GetFavoriteAsmaUlHusnaUseCase(repository)
         )
@@ -455,7 +575,6 @@ object UseCaseModule {
         return AsmaUnNabiUseCases(
             getAllNames = GetAllAsmaUnNabiUseCase(repository),
             getNameById = GetAsmaUnNabiByIdUseCase(repository),
-            searchNames = SearchAsmaUnNabiUseCase(repository),
             toggleFavorite = ToggleAsmaUnNabiFavoriteUseCase(repository),
             getFavorites = GetFavoriteAsmaUnNabiUseCase(repository)
         )
@@ -469,7 +588,6 @@ object UseCaseModule {
         return ProphetUseCases(
             getAllProphets = GetAllProphetsUseCase(repository),
             getProphetById = GetProphetByIdUseCase(repository),
-            searchProphets = SearchProphetsUseCase(repository),
             toggleFavorite = ToggleProphetFavoriteUseCase(repository),
             getFavorites = GetFavoriteProphetsUseCase(repository)
         )
@@ -623,6 +741,9 @@ object UseCaseModule {
             getTodayPrayerRecords = GetTodayPrayerRecordsUseCase(repository),
             updatePrayerStatus = UpdatePrayerStatusUseCase(repository),
             getPrayerTimesForDate = GetPrayerTimesForDateUseCase(repository),
+            observeCalculationSettings = ObservePrayerCalculationSettingsUseCase(repository),
+            getDaySchedule = GetDayPrayerScheduleUseCase(repository),
+            getSunnahNightTimes = GetSunnahNightTimesUseCase(repository),
             getCurrentStreak = GetCurrentStreakUseCase(repository),
             getLongestStreak = GetLongestStreakUseCase(repository),
             getMissedPrayersRequiringQada = GetMissedPrayersRequiringQadaUseCase(repository),
@@ -633,6 +754,8 @@ object UseCaseModule {
             insertLocation = InsertLocationUseCase(repository),
             deleteLocation = DeleteLocationUseCase(repository),
             setCurrentLocation = SetCurrentLocationUseCase(repository),
+            getRecentLocations = GetRecentLocationsUseCase(repository),
+            saveCurrentLocation = SaveCurrentLocationUseCase(repository),
             toggleFavorite = ToggleLocationFavoriteUseCase(repository)
         )
     }
@@ -678,6 +801,21 @@ object UseCaseModule {
     ): IslamicEventUseCases {
         return IslamicEventUseCases(
             getAllEvents = GetAllIslamicEventsUseCase(repository)
+        )
+    }
+
+    @Provides
+    @Singleton
+    fun provideCalendarUseCases(): CalendarUseCases {
+        // No repository: these are the calendar's arithmetic, taking the events and the
+        // date as parameters so they can be tested without a ViewModel or a clock.
+        val eventsForDate = GetEventsForDateUseCase()
+        return CalendarUseCases(
+            buildGregorianMonth = BuildCalendarMonthUseCase(eventsForDate),
+            buildHijriMonth = BuildHijriMonthUseCase(eventsForDate),
+            eventsForMonth = GetEventsForMonthUseCase(),
+            upcomingEvents = GetUpcomingEventsUseCase(),
+            eventsForDate = eventsForDate,
         )
     }
 }

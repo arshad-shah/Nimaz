@@ -183,7 +183,7 @@ Adhan, Qaida tap-to-hear) plus an Adhan **download** pipeline. They share no pla
 | `data/audio/AdhanPlaybackService.kt` | foreground `mediaPlayback` service; plays the adhan when a prayer fires (works app-closed) using `ExoPlayer` with `USAGE_ALARM` + wake lock + audio focus |
 | `data/audio/AdhanDownloadService.kt` | foreground `dataSync` service that downloads both adhan variants with a progress notification (channel `adhan_download_channel`, id 7777) |
 | `data/audio/AdhanDownloadWorker.kt` | `@HiltWorker` background fallback for the download (see §3) |
-| `data/audio/QaidaAudioManager.kt` | `@Singleton`; stripped-down `ExoPlayer` for single Qaida tokens — **no service/notification/MediaSession/CDN**; exposes `val state: StateFlow<QaidaAudioState>` |
+| `data/audio/QaidaAudioManager.kt` | `@Singleton`; stripped-down `ExoPlayer` for single Qaida tokens — **no service/notification/MediaSession/CDN**; exposes `val state: StateFlow<QaidaAudioState>` and `val completions: SharedFlow<String>` |
 | `data/audio/AdhanSound.kt` | enum of adhans (MISHARY, ABDUL_BASIT, MAKKAH, SIMPLE_BEEP) with per-variant file names + download URLs |
 
 **Wiring.** None of these have a DI module — the managers are `@Singleton @Inject constructor(@ApplicationContext …)` (Hilt provides them automatically) and the services are `@AndroidEntryPoint` field-injecting their manager. Services are declared in `AndroidManifest.xml` with `foregroundServiceType` `mediaPlayback`/`dataSync`; permissions `FOREGROUND_SERVICE`, `FOREGROUND_SERVICE_MEDIA_PLAYBACK`, `FOREGROUND_SERVICE_DATA_SYNC`.
@@ -191,6 +191,15 @@ Adhan, Qaida tap-to-hear) plus an Adhan **download** pipeline. They share no pla
 **Media3/ExoPlayer specifics (Quran).** Ayahs are downloaded first then added as a `List<MediaItem>` for gapless sequential playback. ExoPlayer reports `0` duration for unloaded items, so durations are pre-extracted with `MediaMetadataRetriever`; a `ForwardingPlayer` (`getPlayer()`) translates per-item ExoPlayer position/duration into **whole-surah** ("total playlist") coordinates so the lock-screen scrubber reflects the surah, not one ayah. Recitations stream from `cdn.islamic.network`, cached under `filesDir/quran_audio/`. **Who** the reciters are is the `QuranReciter` catalogue in `domain/model/QuranReciter.kt` (frozen `id` + `aliases` for ids older builds persisted, display name, country, `RecitationStyle`); only the CDN wiring — which edition slug at which bitrate — stays in the data layer, as `RECITER_CDN_MAP`, now keyed by the enum. Before that the catalogue existed three times over (a `popularReciters` list in `SelectReciterScreen`, the map plus a `getReciterDisplayName` `when` in `QuranAudioManager`, and a third `when` in `QuranSettingsScreen`) and they disagreed: the settings row matched on ids the picker never writes, so eight of the ten reciters left it showing a raw id ("hussary") instead of a name. Three reciters that had working CDN editions and display names but were missing from the picker's hardcoded list — Muhammad Ayyoub, Muhammad Jibreel, Abdullah Basfar — are selectable now that one list drives everything. Adhan files cache under `filesDir/adhan/`, Qaida clips fall back to the bundled asset `file:///android_asset/qaida/audio/{key}.mp3`.
 
 **How ViewModels consume it.** ViewModels inject the manager **directly** and re-expose its flow (e.g. `QuranViewModel.audioState = audioManager.audioState`; `QaidaReaderViewModel.audioState = audioManager.state`; `SettingsViewModel` injects `adhanAudioManager` for preview/download). They drive playback via `onEvent`. *Deviation:* this bypasses the "ViewModels inject `XxxUseCases`" rule (§ARCHITECTURE), and `QuranViewModel` even exposes the manager as a public field — a known clean-architecture deviation, not a pattern to copy.
+
+**Qaida progress is credited by playback, not by intent.** `QaidaAudioManager.completions` emits an
+`audio_key` only when its clip reached its **natural** end — a media-item transition with
+`MEDIA_ITEM_TRANSITION_REASON_AUTO`, or `STATE_ENDED` with nothing queued after it. `stop()`, a
+lesson change and a tap that replaces what is playing emit nothing. `state.currentKey` cannot answer
+this question: it goes null in every one of those cases, and the difference is the whole point when
+completion awards stars and unlocks the next lesson. `QaidaReaderViewModel` collects `completions`
+and calls `markCellHeard` from there; `playLine` starts playback and writes no progress at all.
+(Tapping a single cell still marks eagerly — one tap, one clip, one intent.)
 
 **Gotchas.**
 - Two player APIs: ExoPlayer everywhere **except** `AdhanAudioManager.preview()` (legacy `MediaPlayer`).
@@ -365,6 +374,16 @@ sequenceDiagram
     Note over BR,Sched: self-perpetuating daily chain —<br/>an alarm armed outside this call fires once and never again
 ```
 
+**Who calls it, and with what.** Every caller builds its arguments from **DataStore**, never from
+ViewModel state: `BootReceiver` reads `PreferencesDataStore` directly, and the settings screens go
+through `RescheduleNotificationsUseCase` (`domain/usecase/notification/`). That is a rule with a
+scar behind it — `SettingsViewModel` used to build the alarm set from `_notificationState.value`,
+a snapshot taken at construction, and since `hiltViewModel()` gives each settings screen its own
+instance, a prayer switched off on the Notification screen was re-armed by an unrelated change on
+the Prayer screen. The use case exists so there is no state to pass in. Reuse
+`settingsRepository.enabledPrayerTypes()` and `preReminderMinutesByPrayer()`
+(`core/util/PrayerNotificationPrefs.kt`) rather than re-deriving either.
+
 **Scheduling.** `scheduleTodaysPrayerNotifications(...)` cancels everything then re-arms enabled prayers, using `setExactAndAllowWhileIdle(RTC_WAKEUP, …)` with `PendingIntent.getBroadcast` targeting `BootReceiver` (explicit intent). Request codes: prayer `1000 + ordinal`, pre-reminder `2000 + ordinal`, midnight reschedule `9999` (00:01), daily summary `8889` (23:00), Friday reminder `8890`, Khatam reminder `8891`. Pre-reminders fire at `prayerTime − preReminders[type]` (skipped for Sunrise) — see **per-prayer alert style and reminder** below. The **Friday (Jummah) reminder** (`scheduleFridayReminder`, gated on `fridayReminderEnabled`) is a one-shot at the upcoming Friday's Dhuhr − `fridayReminderMinutes`, re-armed on every reschedule so it always targets the next Friday.
 
 **Firing.** `BootReceiver.onReceive` dispatches on action: boot → reschedule; `ACTION_MIDNIGHT_RESCHEDULE` → mark missed prayers + reschedule (self-perpetuating daily chain); `ACTION_PRAYER_NOTIFICATION` → post notification &/or play adhan; `ACTION_DAILY_SUMMARY` → summary; `ACTION_FRIDAY_REMINDER` → post the Jummah reminder; `ACTION_KHATAM_REMINDER` → post the Khatam nudge. If adhan should play and the file exists, it calls `AdhanPlaybackService.playAdhan(...)` and the service's foreground notification **doubles as** the prayer notification (shared id `prayerName.hashCode()`); if the file is missing it triggers a download for next time and falls back to beep. **Do Not Disturb:** when `adhanRespectDnd` is on and the system is in a DND mode, `dndBlocksAdhan` gates only the **adhan audio** (`shouldPlayAdhan`/`shouldPlayBeep`) — the visual prayer notification is still posted, and the OS silences its channel sound under DND. The `SILENT` alert style is different in kind: it is the user's own choice, so it silences the visual notification too. The Friday reminder (no adhan audio) always posts and is likewise silenced by the OS under DND.
@@ -390,6 +409,14 @@ cannot drift. `PrayerAlertStyle.playsAdhan(globalAdhanEnabled, isSunrise)` and `
 state the fire-time rules once: the global adhan switch stays a **master gate** over the per-prayer
 style, so turning the adhan off in Adhan & sound silences the call everywhere without rewriting
 five styles.
+
+**The app-wide pre-reminder pair is not a sixth setting.** `notification_reminder_minutes` and
+`show_reminder_before` predate the split and are **not read when alarms are scheduled** — only
+`BootReceiver` still reads the former, as the lead time a fired pre-reminder states when its alarm
+carries no `EXTRA_REMINDER_MINUTES` (an alarm armed before the split). They survive as the
+remembered bulk choice behind the **All prayers** group at the top of `PrayerNotificationsScreen`,
+which writes them *and* fans the same value out to all five per-prayer settings. Writing only the
+pair would change no notification, so a control that touches one must touch the other.
 
 Wall-clock arithmetic lives in `core/util/PrayerAlarmTimes.kt`, apart from the scheduler so it can
 be tested without an `AlarmManager`. A reminder before an early Fajr crosses back over midnight;
@@ -569,6 +596,18 @@ Two Room `@Database`es, both provided in `core/di/DatabaseModule.kt`:
   everything the user made. Created by Room on the device, never shipped. Split out at content
   `schemaVersion 23`; `MIGRATION_22_23` is deliberately empty, because the old tables are **left
   in place** rather than dropped so the original rows stay recoverable.
+
+**One current location, and it is the newest.** `locations` lives in the *user* database, and
+`LocationDao.saveCurrentLocation` is the only supported way to record a chosen place. It clears
+`isCurrentLocation` everywhere, then inserts — or refreshes the row already within ~100 m
+(`ROUND(lat, 3)`) — and flags it, **in one `@Transaction`**, so no reader can observe the table
+with zero or two current locations. Before it, the screen composed a `Location(id = 0, …)` and
+called `@Insert(onConflict = REPLACE)`, which on an autogenerate primary key always inserts: the
+table grew one row per selection and both `WHERE isCurrentLocation = 1 LIMIT 1` reads returned the
+**lowest rowid**, so widgets and workers saw the *first* place the user had ever picked. Recency
+comes from `getRecentLocations(limit)` ordering by the `updatedAt` that has been on the table since
+it was created — a "recent" row must never be built by taking the head of `getAllLocations()`,
+which sorts `isFavorite DESC, name ASC`. No schema change was needed for any of this.
 
 **Legacy user-data import.** `LegacyUserDataImport` copies an existing install's rows out of the
 content database into the user database the first time it is opened, driven by `UserDataMigrator`
@@ -891,6 +930,18 @@ Getters expose `Flow<…>` only (never `MutableStateFlow`/`LiveData`); writes ar
 
 **Hijri date offset.** `hijri_day_offset: Int` (range −2 to +2, default 0) allows users to adjust the displayed Hijri date relative to the system calculation. Stored in `PreferencesDataStore`, read by both Hijri widgets (`HijriDateWorker`, `HijriCalendarWorker`) and passed to `HijriDateCalculator.today(offsetDays)` to compute today's Hijri date for event matching and display. Wired via the "Adjust Hijri date" stepper in `AppearanceSettingsScreen`.
 
+**Zakat metal prices.** `zakat_gold_price_per_gram: Double` (default 65.0),
+`zakat_silver_price_per_gram: Double` (default 0.80) and `zakat_currency: String` (default `USD`),
+with the defaults themselves in `domain/model/ZakatDefaults`. These were previously literals on
+`ZakatCalculatorUiState` that **no screen could change** — the events existed but nothing emitted
+them — so every zakat figure the app produced was wrong by however stale they had become. It was
+not only the amount: `ZakatCalculator` derives the **nisab threshold** from the gold price as well
+as the metal valuation, so a stale price changes whether any zakat is owed at all. `ZakatViewModel`
+observes all three and recalculates on change; the editable fields sit under the nisab selector in
+`ZakatCalculatorScreen`, labelled as estimates so a default is never read as a market rate. Being
+`nimaz_preferences` keys they ride the sync payload (§10), and they are declared in
+`PreferenceCodec.TYPES` like every other key.
+
 **Mushaf script / layout.** `quran_mushaf_script: String` (a `MushafScript` enum name, default `MADANI`) selects the Mushaf edition the page reader renders — ayah-flow Uthmani/Madani (604 pages) vs a line-accurate IndoPak edition (16-line/548, 15-line/610 or 13-line/847; #270). Stored raw and mapped to the domain enum at the boundary (mirrors `quran_arabic_font`/`pattern_style`); read by `QuranViewModel` (drives `useLineAccurateLayout` + script-aware page counts) and written from the "Mushaf Script" dropdown in `QuranSettingsScreen`. Off by default. See §5 (16-line renderer).
 
 **One `SettingsViewModel` per screen — so settings state must be *collected*, not snapshotted.**
@@ -1076,14 +1127,28 @@ formatted strings.
 
 **Instrumentation conventions (apply these as you write code):**
 - **Error-swallowing `catch`/`runCatching`** that hides a real failure (data load, IO, parse,
-  audio, network, background work) should call `CrashReporter.recordException(e)` — rename
-  `catch (_: …)` to `catch (e: …)`. In ViewModels, also call `AppAnalytics.logError(feature, type, e.message)`
-  for frequency. Skip *expected* control-flow catches (permission probes, optional system
+  audio, network, background work) should report through **`telemetry.failure(feature, type, e)`**,
+  which reaches both channels and ignores `CancellationException` — rename `catch (_: …)` to
+  `catch (e: …)`. Skip *expected* control-flow catches (permission probes, optional system
   services, "no data yet"). All monitoring calls are safe no-ops when Firebase is absent.
 - **Significant user actions** (open a reader/detail, toggle favorite/bookmark, create/complete/delete,
-  play audio, run a search) get one `AppAnalytics.logFeatureUsed("<feature>", "<action>")` in the
-  relevant `onEvent` branch — never log trivial state churn (text edits, scroll). Coverage is broad:
-  every ViewModel logs usage, and error paths across data/widget/worker/util/VM layers report to Crashlytics.
+  play audio, run a search) get one `telemetry.featureUsed("<feature>", "<action>")` in the
+  relevant `onEvent` branch — never log trivial state churn (text edits, scroll).
+- **Use the purpose-built helper, not the generic one.** `featureUsed` is the fallback; a
+  tracked prayer is `prayerTracked`, a completed search is `search`, a persisted preference is
+  `settingChanged`, an AI answer is `aiAnswered`. The generic call throws away the very field
+  the specific one exists to carry — which prayer, how long the query was, what the setting
+  landed on — and those are not recoverable afterwards.
+- **Rate matters as much as coverage.** Anything driven by a text field, a slider or a sensor
+  fires far faster than a user acts: log **post-debounce** (search boxes), on the **transition**
+  (compass accuracy, which `SensorManager` re-delivers per reading), or at the **unit of
+  meaning** (a completed tasbih lap rather than each tap, one filled-in zakat form rather than
+  each digit). A per-keystroke event is not better coverage, it is a firehose that costs money
+  and answers nothing.
+- **Settings report from one table.** `SettingsEvent` is 78 branches; per-branch logging left 56
+  of them silent. `presentation/viewmodel/settings/SettingsTelemetry.kt` maps every
+  settings-shaped event to its name and value, exhaustively, so a new event cannot compile
+  without a decision. A location event never carries the place name or its coordinates.
 
 ---
 
@@ -1092,6 +1157,21 @@ formatted strings.
 `data/sync/` — offline peer-to-peer transfer of a user's app data directly between two phones
 over Google's **Nearby Connections** API. No server, no account: one device sends, the other
 receives.
+
+**Progress totals come from one source each, and logging carries no payload.**
+`SyncDataExporter.export` reports `(step, total, label)` with the total from
+`SyncDataExporter.STEP_COUNT`, which `SyncDataExporterStepsTest` pins by counting the real
+callbacks; the import side derives its total from the step list it iterates. Both used to be
+hand-maintained constants that had drifted — the send bar filled to 120% and rewound to 80%, and
+the receive caption read "Step 13 of 10".
+
+`SyncViewModel` is the only ViewModel using `android.util.Log`, and the app ships **no proguard
+rule stripping it**, so anything logged there reaches release logcat. Its verbose tracing is
+therefore behind a `BuildConfig.DEBUG` helper, and **payload content is never logged at all** —
+a call printing the first 200 characters of a decoded `SyncPayload` (bookmark ids, prayer
+records) was deleted rather than guarded. `NearbyConnectionsManager` is a `@Singleton`, so its
+two callbacks are nullable and cleared in `SyncViewModel.onCleared()`; leaving them set kept a
+destroyed ViewModel and its dead scope reachable for the life of the process.
 
 | File | Role |
 |---|---|

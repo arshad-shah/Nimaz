@@ -31,7 +31,6 @@ import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Mosque
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Tune
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.IconButton
@@ -78,18 +77,23 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconWell
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconWellShape
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconWellSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingState
+import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorState
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorVariant
 import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazSearchBar
-import com.arshadshah.nimaz.presentation.viewmodel.AskEvent
-import com.arshadshah.nimaz.presentation.viewmodel.AskPhase
-import com.arshadshah.nimaz.presentation.viewmodel.AskViewModel
-import com.arshadshah.nimaz.presentation.viewmodel.SearchEvent
-import com.arshadshah.nimaz.presentation.viewmodel.SearchFilter
-import com.arshadshah.nimaz.presentation.viewmodel.SearchViewModel
-import com.arshadshah.nimaz.presentation.viewmodel.UnifiedSearchResult
+import com.arshadshah.nimaz.presentation.viewmodel.ai.AskEvent
+import com.arshadshah.nimaz.presentation.viewmodel.ai.AskPhase
+import com.arshadshah.nimaz.presentation.viewmodel.ai.AskViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.search.SearchEvent
+import com.arshadshah.nimaz.presentation.viewmodel.search.SearchFilter
+import com.arshadshah.nimaz.presentation.viewmodel.search.SearchViewModel
+import com.arshadshah.nimaz.domain.model.UnifiedSearchResult
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -393,7 +397,30 @@ fun SearchScreen(
                         item { SearchingIndicator() }
                     }
 
-                    if (!state.isSearching && state.filteredResults.isNotEmpty()) {
+                    // A failed search is a SECTION inside the list, not a screen: the query
+                    // box above it must stay usable, since trying different words is the
+                    // other thing a reader can do here. Before the no-results branch, which
+                    // is otherwise what a failure renders as.
+                    val searchError = state.error
+                    if (!state.isSearching && searchError != null) {
+                        item {
+                            NimazErrorState(
+                                title = stringResource(searchError.message),
+                                message = stringResource(R.string.search_failed_body),
+                                kind = searchError.kind,
+                                details = searchError.details,
+                                variant = NimazErrorVariant.SECTION,
+                                primaryAction = NimazErrorDefaults.retry(
+                                    onRetry = { viewModel.onEvent(SearchEvent.ExecuteSearch) },
+                                    label = stringResource(R.string.try_again),
+                                ),
+                            )
+                        }
+                    }
+
+                    if (!state.isSearching && searchError == null &&
+                        state.filteredResults.isNotEmpty()
+                    ) {
                         item {
                             Text(
                                 text = pluralStringResource(
@@ -418,7 +445,9 @@ fun SearchScreen(
                         )
                     }
 
-                    if (!state.isSearching && state.filteredResults.isEmpty()) {
+                    if (!state.isSearching && searchError == null &&
+                        state.filteredResults.isEmpty()
+                    ) {
                         item {
                             NimazEmptyState(
                                 title = stringResource(R.string.no_results_format, state.query),
@@ -477,7 +506,7 @@ private fun SearchingIndicator(modifier: Modifier = Modifier) {
             .padding(32.dp),
         contentAlignment = Alignment.Center
     ) {
-        CircularProgressIndicator()
+        NimazLoadingState(variant = NimazLoadingVariant.SECTION)
     }
 }
 

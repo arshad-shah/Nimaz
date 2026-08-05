@@ -35,7 +35,6 @@ import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Verified
 import androidx.compose.material.icons.filled.WorkOutline
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -47,6 +46,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -63,10 +63,14 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
+import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingState
+import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionTitle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
+import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuItem
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
+import com.arshadshah.nimaz.presentation.viewmodel.about.updatePrompt
 import java.time.LocalDate
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -284,40 +288,36 @@ private fun LinksCard(
         shape = RoundedCornerShape(16.dp),
         tone = NimazTone.NEUTRAL
     ) {
-        LinkItem(
-            Icons.Default.Email,
-            stringResource(R.string.contact_support),
-            stringResource(R.string.contact_email),
-            onContactUs,
-            true
+        NimazMenuItem(
+            title = stringResource(R.string.contact_support),
+            subtitle = stringResource(R.string.contact_email),
+            onClick = onContactUs,
+            icon = Icons.Default.Email,
         )
-        LinkItem(
-            Icons.Default.Language,
-            stringResource(R.string.website),
-            stringResource(R.string.website_url_display),
-            { uriHandler.openUri("https://nimaz.arshadshah.com") },
-            true
+        NimazMenuItem(
+            icon = Icons.Default.Language,
+            title = stringResource(R.string.website),
+            subtitle = stringResource(R.string.website_url_display),
+            onClick = { uriHandler.openUri("https://nimaz.arshadshah.com") },
         )
-        LinkItem(
-            Icons.Default.Shield,
-            stringResource(R.string.privacy_policy),
-            stringResource(R.string.privacy_policy_subtitle),
-            onNavigateToPrivacyPolicy,
-            true
+        NimazMenuItem(
+            icon = Icons.Default.Shield,
+            title = stringResource(R.string.privacy_policy),
+            subtitle = stringResource(R.string.privacy_policy_subtitle),
+            onClick = onNavigateToPrivacyPolicy,
         )
-        LinkItem(
-            Icons.Default.Description,
-            stringResource(R.string.terms_of_service),
-            stringResource(R.string.terms_of_service_subtitle),
-            onNavigateToTerms,
-            true
+
+        NimazMenuItem(
+            icon = Icons.Default.Description,
+            title = stringResource(R.string.terms_of_service),
+            subtitle = stringResource(R.string.terms_of_service_subtitle),
+            onClick = onNavigateToTerms,
         )
-        LinkItem(
-            Icons.Default.Gavel,
-            stringResource(R.string.open_source_licenses),
-            stringResource(R.string.open_source_licenses_subtitle),
-            onNavigateToLicenses,
-            true
+        NimazMenuItem(
+            icon = Icons.Default.Gavel,
+            title = stringResource(R.string.open_source_licenses),
+            subtitle = stringResource(R.string.open_source_licenses_subtitle),
+            onClick = onNavigateToLicenses
         )
         UpdateStatusItem(
             updateState = updateState,
@@ -332,161 +332,27 @@ private fun UpdateStatusItem(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val busy = updateState is UpdateState.Checking ||
-            updateState is UpdateState.Starting ||
-            updateState is UpdateState.Downloading
-    val actionable = updateState is UpdateState.UpdateAvailable ||
-            updateState is UpdateState.Downloaded
-    val isError = updateState is UpdateState.Error
-
-    val subtitle = when (updateState) {
-        is UpdateState.Checking -> stringResource(R.string.update_checking)
-        is UpdateState.UpdateAvailable -> stringResource(R.string.update_new_version)
-        is UpdateState.Starting -> stringResource(R.string.update_starting)
-        is UpdateState.Downloading -> stringResource(R.string.update_downloading)
-        is UpdateState.Downloaded -> stringResource(R.string.update_downloaded)
-        is UpdateState.NoUpdateAvailable -> stringResource(R.string.update_up_to_date)
-        is UpdateState.Error -> stringResource(R.string.update_check_failed)
-        else -> stringResource(R.string.update_tap_to_check)
-    }
+    // Which label, which icon, and whether a tap does anything is decided by
+    // `updatePrompt` and unit-tested there. This composable only paints it.
+    val prompt = updatePrompt(updateState)
 
     val accent = when {
-        isError -> MaterialTheme.colorScheme.error
-        actionable || updateState is UpdateState.NoUpdateAvailable -> MaterialTheme.colorScheme.primary
+        prompt.isError -> MaterialTheme.colorScheme.error
+        prompt.isHighlighted -> MaterialTheme.colorScheme.primary
         else -> MaterialTheme.colorScheme.onSurfaceVariant
     }
 
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .clickable(enabled = !busy, onClick = onClick)
-            .padding(14.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Box(
-            modifier = Modifier
-                .size(34.dp)
-                .clip(RoundedCornerShape(10.dp))
-                .background(
-                    when {
-                        actionable -> MaterialTheme.colorScheme.primary
-                        isError -> MaterialTheme.colorScheme.errorContainer
-                        else -> MaterialTheme.colorScheme.surface
-                    }
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            if (busy) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(18.dp),
-                    strokeWidth = 2.dp,
-                    color = MaterialTheme.colorScheme.primary
-                )
-            } else {
-                val icon = when (updateState) {
-                    is UpdateState.UpdateAvailable -> Icons.Default.Download
-                    is UpdateState.Downloaded -> Icons.Default.InstallMobile
-                    is UpdateState.NoUpdateAvailable -> Icons.Default.CheckCircle
-                    is UpdateState.Error -> Icons.Default.ErrorOutline
-                    else -> Icons.Default.Refresh
-                }
-                NimazIcon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    tint = if (actionable) MaterialTheme.colorScheme.onPrimary else accent,
-                    iconSize = 18.dp
-                )
-            }
-        }
-        Spacer(modifier = Modifier.width(12.dp))
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = stringResource(R.string.check_for_updates),
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Text(
-                text = subtitle,
-                style = MaterialTheme.typography.bodySmall,
-                fontWeight = if (actionable) FontWeight.SemiBold else FontWeight.Normal,
-                color = if (actionable || isError) accent else MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-        if (!busy) {
-            NimazIcon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
-                contentDescription = null,
-                tint = if (actionable) MaterialTheme.colorScheme.primary
-                else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                iconSize = 15.dp
-            )
-        }
-    }
-}
-
-@Composable
-private fun LinkItem(
-    icon: ImageVector,
-    title: String,
-    subtitle: String,
-    onClick: () -> Unit,
-    showDivider: Boolean,
-    modifier: Modifier = Modifier
-) {
-    Column(modifier = modifier) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable(onClick = onClick)
-                .padding(14.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(34.dp)
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(MaterialTheme.colorScheme.surface),
-                contentAlignment = Alignment.Center
-            ) {
-                NimazIcon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    variant = NimazIconVariant.MUTED,
-                    iconSize = 18.dp
-                )
-            }
-            Spacer(modifier = Modifier.width(12.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Text(
-                    text = subtitle,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            NimazIcon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                iconSize = 15.dp
-            )
-        }
-        if (showDivider) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(1.dp)
-                    .padding(horizontal = 14.dp)
-                    .background(MaterialTheme.colorScheme.surface)
-            )
-        }
-    }
+    NimazMenuItem(
+        modifier = modifier,
+        title = stringResource(R.string.check_for_updates),
+        subtitle = stringResource(prompt.label),
+        icon = prompt.icon,
+        onClick = onClick,
+        enabled = !prompt.isBusy,
+        subtitleStyle = TextStyle(
+            color = accent
+        )
+    )
 }
 
 @Composable

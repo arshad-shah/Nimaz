@@ -30,7 +30,7 @@ import com.arshadshah.nimaz.presentation.screens.help.HelpScreen
 import com.arshadshah.nimaz.presentation.screens.more.MoreMenuScreen
 import com.arshadshah.nimaz.presentation.theme.currentWindowSizeClass
 import com.arshadshah.nimaz.presentation.theme.isCompact
-import com.arshadshah.nimaz.presentation.viewmodel.SettingsViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.settings.SettingsViewModel
 import com.google.android.play.core.review.ReviewManagerFactory
 import kotlinx.coroutines.launch
 

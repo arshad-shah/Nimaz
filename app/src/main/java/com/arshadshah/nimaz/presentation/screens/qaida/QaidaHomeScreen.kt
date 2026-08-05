@@ -28,8 +28,8 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownRow
 import com.arshadshah.nimaz.presentation.components.molecules.QaidaCourseHeader
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.QaidaCoursePath
-import com.arshadshah.nimaz.presentation.viewmodel.QaidaReaderEvent
-import com.arshadshah.nimaz.presentation.viewmodel.QaidaReaderViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.content.QaidaReaderEvent
+import com.arshadshah.nimaz.presentation.viewmodel.content.QaidaReaderViewModel
 
 /**
  * The Qaida course map: a pinned header (title, progress, continue) above the

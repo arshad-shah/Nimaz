@@ -37,13 +37,6 @@ class AsmaUlHusnaRepositoryImpl @Inject constructor(
         return entity.toDomain(isFavorite = isFav)
     }
 
-    override fun searchNames(query: String): Flow<List<AsmaUlHusna>> {
-        return combine(dao.searchNames(query), bookmarkDao.favourites(BookmarkKind.ASMA_UL_HUSNA)) { names, bookmarks ->
-            val bookmarkedIds = bookmarks.map { it.targetId }.toSet()
-            names.map { it.toDomain(isFavorite = it.id in bookmarkedIds) }
-        }
-    }
-
     override fun getFavoriteNames(): Flow<List<AsmaUlHusna>> {
         // Ids from the user's database, then the names from the content one.
         return bookmarkDao.favourites(BookmarkKind.ASMA_UL_HUSNA)

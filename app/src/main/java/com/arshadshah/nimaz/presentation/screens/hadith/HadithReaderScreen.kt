@@ -38,7 +38,6 @@ import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
@@ -72,11 +71,15 @@ import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.share.ContentShareManager
 import com.arshadshah.nimaz.core.share.Shareables
 import com.arshadshah.nimaz.domain.model.Hadith
+import com.arshadshah.nimaz.domain.model.HadithGrade
 import com.arshadshah.nimaz.presentation.components.atoms.HadithArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorState
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
+import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.atoms.NimazPager
 import com.arshadshah.nimaz.presentation.components.atoms.NimazPillActionButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
@@ -86,9 +89,9 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazReaderBottomB
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.AdaptiveSpacing
 import com.arshadshah.nimaz.presentation.theme.NimazColors
-import com.arshadshah.nimaz.presentation.viewmodel.HadithEvent
-import com.arshadshah.nimaz.presentation.viewmodel.HadithReaderUiState
-import com.arshadshah.nimaz.presentation.viewmodel.HadithViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.content.HadithEvent
+import com.arshadshah.nimaz.presentation.viewmodel.content.HadithReaderUiState
+import com.arshadshah.nimaz.presentation.viewmodel.content.HadithViewModel
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -98,6 +101,14 @@ fun HadithReaderScreen(
     chapterId: String,
     onNavigateBack: () -> Unit,
     onNavigateToSettings: () -> Unit = {},
+    /** Set by `Route.HadithByNumber` — open hadith number N of [bookId], as a bookmark cites it. */
+    hadithNumber: Int? = null,
+    /**
+     * Set by `Route.HadithByGrade` — read every hadith in the collection carrying this grade,
+     * rather than one book's chapter. There is no chapter in this mode, so the title falls back
+     * to the grade's own label.
+     */
+    grade: HadithGrade? = null,
     viewModel: HadithViewModel = hiltViewModel()
 ) {
     val state by viewModel.readerState.collectAsStateWithLifecycle()
@@ -109,12 +120,21 @@ fun HadithReaderScreen(
         pageCount = { hadiths.size }
     )
 
-    LaunchedEffect(chapterId, bookId) {
-        // If bookId is empty and chapterId isn't a "book_chapter" id, it's a hadithId from search.
-        if (bookId.isEmpty() && !chapterId.contains("_")) {
-            viewModel.onEvent(HadithEvent.LoadHadithById(chapterId))
-        } else {
-            viewModel.onEvent(HadithEvent.LoadChapter(chapterId))
+    LaunchedEffect(chapterId, bookId, hadithNumber, grade) {
+        when {
+            // Grade browsing replaces the whole list and clears the chapter, so it must win
+            // over the chapter/hadithId reading of the other two arguments — which are both
+            // empty in this mode and would otherwise resolve to "a hadithId from search".
+            grade != null -> viewModel.onEvent(HadithEvent.FilterByGrade(grade))
+            // Stated by the route rather than inferred from the shape of a string: a bookmark
+            // knows the book and the number, and passing the number through `hadithId` made the
+            // reader look it up as a **primary key** — a real hadith, from an arbitrary book.
+            hadithNumber != null ->
+                viewModel.onEvent(HadithEvent.LoadHadithByNumber(bookId, hadithNumber))
+            // No book, and no "book_chapter" composite: a hadithId, from search.
+            bookId.isEmpty() && !chapterId.contains("_") ->
+                viewModel.onEvent(HadithEvent.LoadHadithById(chapterId))
+            else -> viewModel.onEvent(HadithEvent.LoadChapter(chapterId))
         }
     }
 
@@ -129,9 +149,13 @@ fun HadithReaderScreen(
     NimazScreenScaffold(
         topBar = {
             NimazBackTopAppBar(
-                title = state.chapter?.nameEnglish ?: stringResource(R.string.loading),
+                title = state.chapter?.nameEnglish
+                    ?: gradeTitle(grade)
+                    ?: stringResource(R.string.loading),
                 subtitle = state.chapter?.let {
                     stringResource(R.string.hadith_chapter_format, it.chapterNumber)
+                } ?: grade?.let {
+                    stringResource(R.string.hadith_count_format, hadiths.size.toString())
                 },
                 onBackClick = onNavigateBack,
                 actions = {
@@ -153,13 +177,25 @@ fun HadithReaderScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
+            val error = state.error
             when {
                 state.isLoading && hadiths.isEmpty() -> {
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center),
-                        color = MaterialTheme.colorScheme.primary
-                    )
+                    NimazLoadingState()
                 }
+
+                // Before the empty branch: `hadiths.isEmpty()` is also true when the load
+                // failed or the hadith does not exist, and "no hadith found" is the wrong
+                // thing to tell someone whose chapter simply would not load.
+                error != null -> NimazErrorState(
+                    title = stringResource(error.message),
+                    message = stringResource(R.string.hadith_load_failed_body),
+                    kind = error.kind,
+                    details = error.details,
+                    primaryAction = NimazErrorDefaults.retry(
+                        onRetry = { viewModel.onEvent(HadithEvent.Retry) },
+                        label = stringResource(R.string.try_again),
+                    ),
+                )
 
                 hadiths.isEmpty() -> {
                     Text(
@@ -511,3 +547,7 @@ private fun HadithReaderBottomBar(
         )
     }
 }
+
+/** The grade's own label, standing in for a chapter name when the reader is browsing a grade. */
+@Composable
+private fun gradeTitle(grade: HadithGrade?): String? = hadithGradeDisplay(grade)?.label

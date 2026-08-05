@@ -1,11 +1,14 @@
 package com.arshadshah.nimaz.domain.repository
 
 import com.arshadshah.nimaz.domain.model.Location
+import com.arshadshah.nimaz.domain.model.PrayerCalculationSettings
 import com.arshadshah.nimaz.domain.model.PrayerName
 import com.arshadshah.nimaz.domain.model.PrayerRecord
 import com.arshadshah.nimaz.domain.model.PrayerStats
 import com.arshadshah.nimaz.domain.model.PrayerStatus
+import com.arshadshah.nimaz.domain.model.PrayerTime
 import com.arshadshah.nimaz.domain.model.PrayerTimes
+import com.arshadshah.nimaz.domain.model.SunnahNightTimes
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDate
 
@@ -20,6 +23,43 @@ interface PrayerRepository {
         endDate: LocalDate,
         location: Location
     ): List<PrayerTimes>
+
+    /**
+     * The user's own calculation settings — location, method, school, high-latitude rule and the
+     * six per-prayer adjustments — resolved from preferences and re-emitted when any of them
+     * changes.
+     *
+     * The single place the persisted strings are parsed. Four ViewModels each did it with their
+     * own `try { valueOf(s) } catch { MWL }`, which throws on every alias the app itself writes
+     * ("MWL", "ISNA", "MAKKAH") and then silently substituted Muslim World League — so a user on
+     * ISNA got MWL prayer times, for ever, with no signal.
+     */
+    fun observeCalculationSettings(): Flow<PrayerCalculationSettings>
+
+    /**
+     * The prayer times for [date] under [settings]. Pure and synchronous, so a caller holding a
+     * settings snapshot can compute a month of days without a suspension point per day.
+     */
+    fun getDaySchedule(date: LocalDate, settings: PrayerCalculationSettings): List<PrayerTime>
+
+    /**
+     * The prayer times for [date] under whatever the user has currently set.
+     *
+     * The convenience the calculator never offered: its `getPrayerTimes` defaulted all four
+     * calculation arguments, so *forgetting* to pass the user's settings compiled, ran, and
+     * produced plausible times for the wrong configuration. A caller that does not care about
+     * the settings now gets the right ones instead of the defaults.
+     */
+    suspend fun getDaySchedule(date: LocalDate): List<PrayerTime>
+
+    /** The Sunnah night instants for the night beginning on [date], under [settings]. */
+    fun getSunnahNightTimes(
+        date: LocalDate,
+        settings: PrayerCalculationSettings,
+    ): SunnahNightTimes
+
+    /** The Sunnah night instants for the night beginning on [date], under the user's settings. */
+    suspend fun getSunnahNightTimes(date: LocalDate): SunnahNightTimes
 
     // Prayer records
     fun getPrayerRecordsForDate(date: Long): Flow<List<PrayerRecord>>
@@ -56,5 +96,14 @@ interface PrayerRepository {
     suspend fun updateLocation(location: Location)
     suspend fun deleteLocation(location: Location)
     suspend fun setCurrentLocation(id: Long)
+
+    /** The most recently used locations, newest first. */
+    fun getRecentLocations(limit: Int): Flow<List<Location>>
+
+    /**
+     * Makes [location] the one and only current location, inserting it or refreshing the stored
+     * row at the same coordinates, in one transaction. Returns that row's id.
+     */
+    suspend fun saveCurrentLocation(location: Location, now: Long): Long
     suspend fun toggleFavorite(id: Long)
 }

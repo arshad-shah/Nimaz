@@ -60,8 +60,8 @@ import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.TajweedLegendSheet
 import com.arshadshah.nimaz.presentation.theme.QuranArabicFont
 import com.arshadshah.nimaz.presentation.theme.asTranslationText
-import com.arshadshah.nimaz.presentation.viewmodel.SettingsEvent
-import com.arshadshah.nimaz.presentation.viewmodel.SettingsViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.settings.SettingsEvent
+import com.arshadshah.nimaz.presentation.viewmodel.settings.SettingsViewModel
 
 /**
  * Quran reading preferences.

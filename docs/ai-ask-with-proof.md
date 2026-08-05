@@ -247,9 +247,33 @@ action and the Settings hub):
   that answers can be wrong and must be verified against the cited sources,
   and that it is not a fatwa. "Enable" sets `aiAskEnabled=true` +
   `aiConsentTimestamp`. Turning it **off** is instant, no sheet.
+
+  The sheet closes **after** those two writes commit, not before. Closing it first —
+  which is what shipped — meant a failed write left the user having consented, the sheet
+  gone, and the toggle re-emitting `false`: a switch that flips itself back with no
+  explanation. A write that fails now keeps the sheet up and says so
+  (`SearchSettingsUiState.consentFailed`).
 - **Privacy** — an expandable "What gets shared" repeating the disclosure; an
   "AI question history" toggle (off = recent questions kept in memory only;
   on = persisted to DataStore as a JSON list); and "Clear AI history".
+
+### Where consent is enforced
+
+**In `AskWithProofUseCase`, before anything is sent.** It reads
+`settingsRepository.aiAskEnabled.first()` and returns
+`Outcome.Failed(AiError.ConsentRequired)` if the feature is off, so no caller can reach the
+Worker without consent. `AskViewModel.submit()` also returns early when `aiEnabled` is
+false, but only to keep the UI out of a `Loading` phase it would never leave — the
+guarantee lives in the use case.
+
+Before that, `aiAskEnabled` was checked in exactly one place: a visibility condition in
+`SearchScreen`. Nothing in the ViewModel, the use case, `AiRepository` or the Worker client
+re-checked it, so any second caller of `AskEvent.Submit` would have sent the question off
+the device with the feature switched off.
+
+**One Worker call per question is enforced too.** `submit()` returns early while
+`phase == AskPhase.Loading`. Without that guard, tapping "Ask" twice on a slow network —
+or tapping the error card's retry twice — billed two Worker invocations for one question.
 
 DataStore keys (in `PreferencesDataStore`, declared on `SettingsRepository`):
 `aiAskEnabled` (false), `aiConsentTimestamp` (0), `aiHistoryEnabled` (false),
@@ -260,9 +284,15 @@ rebuild — sources are no longer uploaded, so there is nothing to configure.)
 ### Privacy / analytics
 
 Only the question text ever leaves the device. It is **never** sent to
-Firebase. `AskViewModel` logs only event names via `AppAnalytics.logEvent`:
-`ai_ask_submitted`, `ai_ask_answered`, `ai_ask_error_{slug}` — no content
-payloads. The Worker stores nothing.
+Firebase. `AskViewModel` reports through the injected `Telemetry` seam and logs only
+actions, never content: `featureUsed("ai_ask", "submitted")`,
+`featureUsed("ai_ask", "answered")` and `error("ai_ask", "ask_{slug}")`. The Worker stores
+nothing.
+
+Turning "AI question history" **off** clears the stored list *and* what is on screen. The
+recent questions are derived from `aiQuestionHistory` on every emission rather than loaded
+once into a mutable list, so the two cannot drift — previously the loaded questions stayed
+visible for the rest of the session after the toggle went off.
 
 ## Cost model
 

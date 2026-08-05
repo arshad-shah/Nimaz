@@ -15,7 +15,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.Link
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -37,6 +36,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
 import com.arshadshah.nimaz.presentation.components.atoms.NimazChip
 import com.arshadshah.nimaz.presentation.components.atoms.NimazChipVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconButton
+import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
@@ -47,8 +47,8 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
 import com.arshadshah.nimaz.presentation.components.molecules.NimazTreeRow
 import com.arshadshah.nimaz.presentation.components.molecules.ThematicText
 import com.arshadshah.nimaz.presentation.components.organisms.NimazTopAppBar
-import com.arshadshah.nimaz.presentation.viewmodel.QuranTopicsEvent
-import com.arshadshah.nimaz.presentation.viewmodel.QuranTopicsViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.quran.QuranTopicsEvent
+import com.arshadshah.nimaz.presentation.viewmodel.quran.QuranTopicsViewModel
 
 /**
  * One subject: what it is, where it sits, and every verse that speaks to it.
@@ -99,12 +99,7 @@ fun QuranTopicDetailScreen(
         },
     ) { padding ->
         when {
-            state.isLoading -> Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding),
-                contentAlignment = Alignment.Center,
-            ) { CircularProgressIndicator() }
+            state.isLoading -> NimazLoadingState(modifier = Modifier.padding(padding))
 
             detail == null -> NimazEmptyState(
                 title = stringResource(R.string.quran_topics_no_results_title),

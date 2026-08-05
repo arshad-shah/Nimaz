@@ -18,6 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Calculate
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.StarBorder
@@ -56,13 +57,15 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconButton
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconButtonSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.molecules.NimazConfirmDialog
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.NimazColors
-import com.arshadshah.nimaz.presentation.viewmodel.TasbihEvent
-import com.arshadshah.nimaz.presentation.viewmodel.TasbihViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.tracker.TasbihEvent
+import com.arshadshah.nimaz.presentation.viewmodel.tracker.TasbihViewModel
 
 private data class DhikrTab(
     val category: TasbihCategory? = null,
@@ -85,6 +88,7 @@ private fun tabLabel(tab: DhikrTab): String = when {
 fun ChooseDhikrScreen(
     onBack: () -> Unit,
     onNavigateToAddPreset: () -> Unit,
+    onEditPreset: (Long) -> Unit = {},
     viewModel: TasbihViewModel = hiltViewModel()
 ) {
     val presetsState by viewModel.presetsState.collectAsStateWithLifecycle()
@@ -204,6 +208,7 @@ fun ChooseDhikrScreen(
                             onBack()
                         },
                         onToggleFavorite = { viewModel.onEvent(TasbihEvent.ToggleFavorite(preset.id)) },
+                        onEdit = { onEditPreset(preset.id) },
                         onRequestDelete = { presetToDelete = preset }
                     )
                 }
@@ -252,6 +257,7 @@ private fun SwipeableDhikrRow(
     isCustom: Boolean,
     onClick: () -> Unit,
     onToggleFavorite: () -> Unit,
+    onEdit: () -> Unit,
     onRequestDelete: () -> Unit,
 ) {
     if (!isCustom) {
@@ -298,7 +304,7 @@ private fun SwipeableDhikrRow(
             }
         }
     ) {
-        DhikrRow(preset, selected, isFavorite, onClick, onToggleFavorite)
+        DhikrRow(preset, selected, isFavorite, onClick, onToggleFavorite, onEdit)
     }
 }
 
@@ -350,6 +356,8 @@ private fun DhikrRow(
     isFavorite: Boolean,
     onClick: () -> Unit,
     onToggleFavorite: () -> Unit,
+    /** Non-null only for a custom preset — the default adhkar are not the user's to change. */
+    onEdit: (() -> Unit)? = null,
 ) {
     NimazCard(
         modifier = Modifier.fillMaxWidth(),
@@ -388,6 +396,14 @@ private fun DhikrRow(
                         modifier = Modifier.padding(top = 2.dp)
                     )
                 }
+            }
+            if (onEdit != null) {
+                NimazIconButton(
+                    icon = Icons.Default.Edit,
+                    onClick = onEdit,
+                    contentDescription = stringResource(R.string.tasbih_edit_preset),
+                    size = NimazIconButtonSize.SMALL,
+                )
             }
             IconButton(onClick = onToggleFavorite, modifier = Modifier.size(36.dp)) {
                 NimazIcon(

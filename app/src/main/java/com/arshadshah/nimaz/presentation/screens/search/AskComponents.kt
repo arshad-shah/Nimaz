@@ -373,6 +373,12 @@ internal fun AskErrorCard(error: AiError, onRetry: () -> Unit) {
             body = stringResource(R.string.ai_error_invalid)
         }
 
+        AiError.ConsentRequired -> {
+            icon = Icons.Outlined.Shield
+            title = stringResource(R.string.ai_error_consent_title)
+            body = stringResource(R.string.ai_error_consent)
+        }
+
         AiError.Unknown -> {
             icon = Icons.Outlined.Info
             title = stringResource(R.string.ai_error_unknown_title)

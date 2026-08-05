@@ -48,6 +48,28 @@ sealed interface Route {
     @Serializable
     data class HadithReader(val hadithId: String) : Route
 
+    /**
+     * A hadith addressed the way a reader cites one — book plus the number printed on it —
+     * rather than by database id.
+     *
+     * Separate from [HadithReader] because they are genuinely different addresses, and
+     * collapsing them is what broke the bookmarks: a `HadithBookmark` stores `bookId` and
+     * `hadithNumber` and no id, so the bookmark screen had to pass `hadithNumber.toString()`
+     * into [HadithReader]'s `hadithId` slot. That resolves to the row whose **primary key**
+     * equals the number — a real hadith, from an arbitrary book, opened with no error.
+     */
+    @Serializable
+    data class HadithByNumber(val bookId: String, val hadithNumber: Int) : Route
+
+    /**
+     * Every hadith in the collection carrying one authenticity grade, read as one list.
+     *
+     * [grade] is the [com.arshadshah.nimaz.domain.model.HadithGrade] name, because a route
+     * argument has to survive being written into a URL — the reader parses it back.
+     */
+    @Serializable
+    data class HadithByGrade(val grade: String) : Route
+
     @Serializable
     data object HadithSearch : Route
 
@@ -63,6 +85,15 @@ sealed interface Route {
 
     @Serializable
     data class DuaCategory(val categoryId: String) : Route
+
+    /**
+     * Every dua filed under one occasion, across the curated categories.
+     *
+     * [occasion] is the [com.arshadshah.nimaz.domain.model.DuaOccasion] name; the screen parses
+     * it back, and an unknown value falls back to `GENERAL` rather than opening an empty list.
+     */
+    @Serializable
+    data class DuaOccasion(val occasion: String) : Route
 
     @Serializable
     data class DuaReader(val duaId: String) : Route
@@ -128,8 +159,12 @@ sealed interface Route {
     @Serializable
     data object TasbihHistory : Route
 
+    /**
+     * The custom-dhikr form. With [presetId] null it creates one; with an id it edits that one
+     * — the same fields either way, so the same destination rather than a near-copy of it.
+     */
     @Serializable
-    data object TasbihAddPreset : Route
+    data class TasbihAddPreset(val presetId: Long? = null) : Route
 
     // Zakat screens
     @Serializable

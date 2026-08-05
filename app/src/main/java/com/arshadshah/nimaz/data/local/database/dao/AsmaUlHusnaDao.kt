@@ -13,9 +13,6 @@ interface AsmaUlHusnaDao {
     @Query("SELECT * FROM asma_ul_husna WHERE id = :id")
     suspend fun getNameById(id: Int): AsmaUlHusnaEntity?
 
-    @Query("SELECT * FROM asma_ul_husna WHERE name_english LIKE '%' || :query || '%' OR name_transliteration LIKE '%' || :query || '%' OR meaning LIKE '%' || :query || '%' ORDER BY display_order ASC")
-    fun searchNames(query: String): Flow<List<AsmaUlHusnaEntity>>
-
     /**
      * The favourited entries, from ids the user's database supplied.
      *

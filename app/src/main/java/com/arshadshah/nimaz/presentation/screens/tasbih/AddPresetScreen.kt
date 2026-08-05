@@ -19,6 +19,7 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,6 +33,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.TasbihCategory
 import com.arshadshah.nimaz.domain.model.TasbihPreset
@@ -50,16 +52,33 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazNumberStepper
 import com.arshadshah.nimaz.presentation.components.molecules.NimazNumberStepperVariant
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.NimazColors
-import com.arshadshah.nimaz.presentation.viewmodel.TasbihEvent
-import com.arshadshah.nimaz.presentation.viewmodel.TasbihViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.tracker.TasbihEvent
+import com.arshadshah.nimaz.presentation.viewmodel.tracker.TasbihViewModel
 
+/**
+ * The custom-dhikr form, in both of its modes.
+ *
+ * With [presetId] set it edits that preset instead of creating one — the third of the trio
+ * that had a handler (`TasbihEvent.UpdateCustomPreset`) but no way in, next to create and
+ * delete which have had UI since they shipped. A typo in a dhikr's name or a target of 33
+ * that should have been 100 meant deleting it and typing it again.
+ *
+ * The fields are seeded from the loaded preset the first time it arrives rather than on every
+ * recomposition: the presets flow re-emits on any write to the table, and re-seeding would
+ * throw away whatever the user had typed since.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddPresetScreen(
     onNavigateBack: () -> Unit,
+    presetId: Long? = null,
     viewModel: TasbihViewModel = hiltViewModel()
 ) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+    val presetsState by viewModel.presetsState.collectAsStateWithLifecycle()
+    val editing = presetId?.let { id ->
+        presetsState.customPresets.firstOrNull { it.id == id }
+    }
 
     var name by remember { mutableStateOf("") }
     var arabicText by remember { mutableStateOf("") }
@@ -68,27 +87,47 @@ fun AddPresetScreen(
     var targetCount by remember { mutableStateOf("33") }
     var selectedCategory by remember { mutableStateOf(TasbihCategory.CUSTOM) }
     var nameError by remember { mutableStateOf(false) }
+    var seeded by remember(presetId) { mutableStateOf(false) }
+
+    LaunchedEffect(editing?.id) {
+        val preset = editing ?: return@LaunchedEffect
+        if (seeded) return@LaunchedEffect
+        name = preset.name
+        arabicText = preset.arabicText.orEmpty()
+        transliteration = preset.transliteration.orEmpty()
+        translation = preset.translation.orEmpty()
+        targetCount = preset.targetCount.toString()
+        selectedCategory = preset.category ?: TasbihCategory.CUSTOM
+        seeded = true
+    }
 
     fun submit() {
         if (name.isBlank()) {
             nameError = true
             return
         }
+        val now = System.currentTimeMillis()
         val preset = TasbihPreset(
-            id = 0,
+            id = editing?.id ?: 0,
             name = name.trim(),
             arabicText = arabicText.ifBlank { null },
             transliteration = transliteration.ifBlank { null },
             translation = translation.ifBlank { null },
             targetCount = targetCount.toIntOrNull() ?: 33,
             category = selectedCategory,
-            reference = null,
+            reference = editing?.reference,
             isDefault = false,
-            displayOrder = 0,
-            createdAt = System.currentTimeMillis(),
-            updatedAt = System.currentTimeMillis()
+            displayOrder = editing?.displayOrder ?: 0,
+            createdAt = editing?.createdAt ?: now,
+            updatedAt = now
         )
-        viewModel.onEvent(TasbihEvent.CreateCustomPreset(preset))
+        viewModel.onEvent(
+            if (editing != null) {
+                TasbihEvent.UpdateCustomPreset(preset)
+            } else {
+                TasbihEvent.CreateCustomPreset(preset)
+            }
+        )
         onNavigateBack()
     }
 
@@ -96,7 +135,9 @@ fun AddPresetScreen(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             NimazBackTopAppBar(
-                title = stringResource(R.string.new_tasbih),
+                title = stringResource(
+                    if (editing != null) R.string.edit_tasbih else R.string.new_tasbih
+                ),
                 onBackClick = onNavigateBack,
                 scrollBehavior = scrollBehavior
                 // No top-bar Save action — the prominent "Create Tasbih" button submits.
@@ -203,7 +244,9 @@ fun AddPresetScreen(
 
             // Create button (primary CTA)
             NimazButton(
-                text = stringResource(R.string.create_tasbih),
+                text = stringResource(
+                    if (editing != null) R.string.save_tasbih else R.string.create_tasbih
+                ),
                 onClick = { submit() },
                 variant = NimazButtonVariant.FILLED,
                 size = NimazButtonSize.LARGE,

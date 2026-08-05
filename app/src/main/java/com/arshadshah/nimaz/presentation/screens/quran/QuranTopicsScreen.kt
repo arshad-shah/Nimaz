@@ -18,7 +18,6 @@ import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.CenterFocusStrong
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.SearchOff
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -40,6 +39,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconButtonSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.molecules.NimazBreadcrumbBar
 import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
@@ -47,9 +47,9 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazTreeRow
 import com.arshadshah.nimaz.presentation.components.organisms.NimazPillTabs
 import com.arshadshah.nimaz.presentation.components.organisms.NimazSearchBar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazTopAppBar
-import com.arshadshah.nimaz.presentation.viewmodel.QuranTopicsEvent
-import com.arshadshah.nimaz.presentation.viewmodel.QuranTopicsViewModel
-import com.arshadshah.nimaz.presentation.viewmodel.TopicBrowseState
+import com.arshadshah.nimaz.presentation.viewmodel.quran.QuranTopicsEvent
+import com.arshadshah.nimaz.presentation.viewmodel.quran.QuranTopicsViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.quran.TopicBrowseState
 
 /**
  * Browsing the Qur'an's 2,512 subjects — three hierarchies, one screen.
@@ -165,10 +165,7 @@ fun QuranTopicsScreen(
             )
 
             when {
-                state.isLoading -> Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center,
-                ) { CircularProgressIndicator() }
+                state.isLoading -> NimazLoadingState()
 
                 state.isSearchMode -> SearchResults(
                     state = state,

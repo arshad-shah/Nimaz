@@ -37,13 +37,6 @@ class ProphetRepositoryImpl @Inject constructor(
         return entity.toDomain(isFavorite = isFav)
     }
 
-    override fun searchProphets(query: String): Flow<List<Prophet>> {
-        return combine(dao.searchProphets(query), bookmarkDao.favourites(BookmarkKind.PROPHET)) { prophets, bookmarks ->
-            val bookmarkedIds = bookmarks.map { it.targetId }.toSet()
-            prophets.map { it.toDomain(isFavorite = it.id in bookmarkedIds) }
-        }
-    }
-
     override fun getFavoriteProphets(): Flow<List<Prophet>> {
         return bookmarkDao.favourites(BookmarkKind.PROPHET)
             .flatMapLatest { marks ->

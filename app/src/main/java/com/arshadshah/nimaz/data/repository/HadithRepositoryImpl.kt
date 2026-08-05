@@ -120,6 +120,12 @@ class HadithRepositoryImpl @Inject constructor(
         return hadithDao.getHadithsByBook(bookId.toIntOrNull() ?: 0).mapItems { it.toDomain() }
     }
 
+    override suspend fun getHadithsByIds(hadithIds: List<String>): List<Hadith> {
+        val numeric = hadithIds.mapNotNull { it.toIntOrNull() }
+        if (numeric.isEmpty()) return emptyList()
+        return hadithDao.getHadithsByIds(numeric).map { it.toDomain() }
+    }
+
     override suspend fun getHadithById(hadithId: String): Hadith? {
         return hadithDao.getHadithById(hadithId.toIntOrNull() ?: return null)?.toDomain()
     }

@@ -12,7 +12,7 @@ import com.arshadshah.nimaz.presentation.components.molecules.DuaOfTheMomentCard
 import com.arshadshah.nimaz.presentation.components.molecules.FastingStatusCard
 import com.arshadshah.nimaz.presentation.components.molecules.HadithOfTheDayCard
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
-import com.arshadshah.nimaz.presentation.viewmodel.DailyDua
+import com.arshadshah.nimaz.presentation.model.DailyDua
 
 /**
  * Stacked "Today" info cards (fasting status, optional hadith of the day, and

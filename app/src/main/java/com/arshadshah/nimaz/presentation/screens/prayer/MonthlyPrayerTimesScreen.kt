@@ -33,6 +33,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -86,9 +87,10 @@ import com.arshadshah.nimaz.presentation.theme.LocalUse24HourFormat
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazCornerRadius
 import com.arshadshah.nimaz.presentation.theme.NimazSpacing
-import com.arshadshah.nimaz.presentation.viewmodel.DayPrayerTimes
-import com.arshadshah.nimaz.presentation.viewmodel.MonthlyPrayerTimesEvent
-import com.arshadshah.nimaz.presentation.viewmodel.MonthlyPrayerTimesViewModel
+import com.arshadshah.nimaz.domain.model.DayPrayerTimes
+import com.arshadshah.nimaz.presentation.viewmodel.prayer.MonthlyPrayerTimesEvent
+import com.arshadshah.nimaz.presentation.viewmodel.prayer.MonthlyPrayerTimesUiState
+import com.arshadshah.nimaz.presentation.viewmodel.prayer.MonthlyPrayerTimesViewModel
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.TextStyle
@@ -104,6 +106,9 @@ fun MonthlyPrayerTimesScreen(
     // Captured from the composition so the (non-composable) PDF export can honour the preference.
     val use24HourForExport = LocalUse24HourFormat.current
     var exportMenuExpanded by remember { mutableStateOf(false) }
+    // Resolved in composition because the PDF export is not a composable and cannot read
+    // resources; the ViewModel deliberately does not hardcode a city name.
+    val pdfLocationName = locationLabel(state)
     val canExport = !state.isLoading && state.dayPrayerTimes.isNotEmpty()
 
     fun shareRows(rows: List<DayPrayerTimes>) {
@@ -120,7 +125,7 @@ fun MonthlyPrayerTimesScreen(
             }
             val file = PrayerTimesPdfExporter.export(
                 context = context,
-                locationName = state.locationName,
+                locationName = pdfLocationName,
                 methodLabel = state.methodLabel,
                 rows = pdfRows,
                 latitude = state.latitude,
@@ -132,6 +137,15 @@ fun MonthlyPrayerTimesScreen(
                 mimeType = "application/pdf",
             )
         }.onFailure { CrashReporter.recordException(it) }
+    }
+
+    // The Ramadan timetable is computed off the main thread and lands in state; take it, share
+    // it, and tell the ViewModel it is consumed so a recomposition cannot fire the sheet twice.
+    LaunchedEffect(state.ramadanExport) {
+        state.ramadanExport?.let { rows ->
+            shareRows(rows)
+            viewModel.onEvent(MonthlyPrayerTimesEvent.RamadanExportConsumed)
+        }
     }
 
     NimazScreenScaffold(
@@ -153,7 +167,7 @@ fun MonthlyPrayerTimesScreen(
                     ) {
                         NimazDropdownRow(
                             text = stringResource(R.string.monthly_this_month),
-                            description = "${state.currentMonth.formatMonthYear()} · ${
+                            description = "${state.currentMonth?.formatMonthYear().orEmpty()} · ${
                                 pluralStringResource(
                                     R.plurals.days_count_format,
                                     state.dayPrayerTimes.size,
@@ -173,7 +187,9 @@ fun MonthlyPrayerTimesScreen(
                                 leadingIcon = Icons.Default.DarkMode,
                                 onClick = {
                                     exportMenuExpanded = false
-                                    shareRows(viewModel.ramadanDays())
+                                    viewModel.onEvent(
+                                        MonthlyPrayerTimesEvent.PrepareRamadanExport
+                                    )
                                 },
                             )
                         }
@@ -189,9 +205,9 @@ fun MonthlyPrayerTimesScreen(
         ) {
             // Pinned month-navigation header — stays put while the list scrolls.
             MonthNavigationHeader(
-                monthYear = state.currentMonth.formatMonthYear(),
-                hijriLabel = hijriRangeLabel(state.currentMonth),
-                locationName = state.locationName,
+                monthYear = state.currentMonth?.formatMonthYear().orEmpty(),
+                hijriLabel = state.currentMonth?.let { hijriRangeLabel(it) }.orEmpty(),
+                locationName = locationLabel(state),
                 isRamadan = state.ramadanHijriYear != null,
                 onPrevious = { viewModel.onEvent(MonthlyPrayerTimesEvent.PreviousMonth) },
                 onNext = { viewModel.onEvent(MonthlyPrayerTimesEvent.NextMonth) }
@@ -804,3 +820,19 @@ private fun previewInstant(hour: Int, minute: Int): kotlin.time.Instant =
         java.time.LocalDate.now().atTime(hour, minute)
             .atZone(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli()
     )
+
+/**
+ * What to call the place the timetable was computed for.
+ *
+ * The ViewModel used to write `if (name.isNotBlank()) name else "Dublin, Ireland"` — a hardcoded
+ * English string, chosen independently of the coordinates `resolveLocation` had already picked. A
+ * user with coordinates set and a blank display name got a correct timetable under a foreign
+ * city's name. The state now carries the resolved name and whether it is the app's fallback, and
+ * the copy is decided here, in the layer that can read resources.
+ */
+@Composable
+private fun locationLabel(state: MonthlyPrayerTimesUiState): String = when {
+    state.isUsingFallbackLocation -> stringResource(R.string.location_using_default)
+    !state.locationName.isNullOrBlank() -> state.locationName
+    else -> stringResource(R.string.location_not_set)
+}

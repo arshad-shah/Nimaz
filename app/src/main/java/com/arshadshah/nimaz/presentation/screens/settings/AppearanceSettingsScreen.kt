@@ -60,9 +60,9 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsItem
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.LocalIsDarkTheme
 import com.arshadshah.nimaz.presentation.theme.NimazPatternStyle
-import com.arshadshah.nimaz.presentation.viewmodel.AppTheme
-import com.arshadshah.nimaz.presentation.viewmodel.SettingsEvent
-import com.arshadshah.nimaz.presentation.viewmodel.SettingsViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.settings.AppTheme
+import com.arshadshah.nimaz.presentation.viewmodel.settings.SettingsEvent
+import com.arshadshah.nimaz.presentation.viewmodel.settings.SettingsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

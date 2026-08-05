@@ -37,6 +37,8 @@ import com.arshadshah.nimaz.domain.model.IslamicEvent
 import com.arshadshah.nimaz.domain.model.IslamicEventType
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorState
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.molecules.IslamicEventCard
@@ -47,9 +49,11 @@ import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.currentWindowSizeClass
 import com.arshadshah.nimaz.presentation.theme.isCompact
-import com.arshadshah.nimaz.presentation.viewmodel.CalendarEvent
-import com.arshadshah.nimaz.presentation.viewmodel.CalendarViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.calendar.CalendarEvent
+import com.arshadshah.nimaz.presentation.viewmodel.calendar.CalendarViewModel
 import java.time.YearMonth
+import com.arshadshah.nimaz.presentation.viewmodel.calendar.CalendarUiState
+import com.arshadshah.nimaz.presentation.viewmodel.calendar.EventsUiState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -105,8 +109,8 @@ fun IslamicCalendarScreen(
 
 @Composable
 private fun CalendarCompactContent(
-    state: com.arshadshah.nimaz.presentation.viewmodel.CalendarUiState,
-    eventsState: com.arshadshah.nimaz.presentation.viewmodel.EventsUiState,
+    state: CalendarUiState,
+    eventsState: EventsUiState,
     viewModel: CalendarViewModel,
     modifier: Modifier = Modifier
 ) {
@@ -150,8 +154,8 @@ private fun CalendarCompactContent(
 
 @Composable
 private fun CalendarTabletContent(
-    state: com.arshadshah.nimaz.presentation.viewmodel.CalendarUiState,
-    eventsState: com.arshadshah.nimaz.presentation.viewmodel.EventsUiState,
+    state: CalendarUiState,
+    eventsState: EventsUiState,
     viewModel: CalendarViewModel,
     modifier: Modifier = Modifier
 ) {
@@ -217,9 +221,24 @@ private fun CalendarTabletContent(
 
 @Composable
 private fun CalendarSection(
-    state: com.arshadshah.nimaz.presentation.viewmodel.CalendarUiState,
+    state: CalendarUiState,
     viewModel: CalendarViewModel
 ) {
+    // The grid draws with or without events, so a content-database fault costs the event
+    // markers and nothing else. Before, it cost the whole screen: `loadToday()` ran inside
+    // the events `try`, so a throw left `currentMonth` null and this rendered nothing at all.
+    state.error?.let { error ->
+        // SECTION, not a screen: the grid is still correct and still useful without its
+        // event markers, so this sits above it rather than in place of it.
+        NimazErrorState(
+            title = stringResource(error.message),
+            kind = error.kind,
+            details = error.details,
+            variant = NimazErrorVariant.SECTION,
+            modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)
+        )
+    }
+
     state.currentMonth?.let { month ->
         val eventMap = remember(month.days) {
             month.days.associate { day -> day.gregorianDate to day.events }

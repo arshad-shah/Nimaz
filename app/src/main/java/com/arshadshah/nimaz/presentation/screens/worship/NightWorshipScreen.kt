@@ -40,14 +40,19 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazClockText
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCountdownText
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorState
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.TickResolution
+import com.arshadshah.nimaz.presentation.viewmodel.UiError
 import com.arshadshah.nimaz.presentation.components.atoms.rememberNow
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
-import com.arshadshah.nimaz.presentation.viewmodel.NightWorshipEvent
-import com.arshadshah.nimaz.presentation.viewmodel.NightWorshipUiState
-import com.arshadshah.nimaz.presentation.viewmodel.NightWorshipViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.worship.NightWorshipEvent
+import com.arshadshah.nimaz.presentation.viewmodel.worship.NightWorshipUiState
+import com.arshadshah.nimaz.presentation.viewmodel.worship.NightWorshipViewModel
 import kotlin.time.Instant
 
 /**
@@ -128,7 +133,13 @@ fun NightWorshipContent(
         ) {
             Spacer(Modifier.height(4.dp))
 
-            NightWindowCard(lastThirdAt = state.lastThirdAt, fajrAt = state.fajrAt)
+            NightWindowCard(
+                lastThirdAt = state.lastThirdAt,
+                fajrAt = state.fajrAt,
+                isLoading = state.isLoading,
+                error = state.error,
+                onRetry = { onEvent(NightWorshipEvent.Refresh) },
+            )
 
             RakahCounterCard(
                 count = state.rakahCount,
@@ -176,8 +187,23 @@ fun NightWorshipContent(
 /** Where "now" sits relative to tonight's window. */
 private enum class NightWindow { BEFORE, OPEN, CLOSED }
 
+/**
+ * [isLoading] and [error] were both on the state and **neither was read**.
+ *
+ * The card renders "Set your location to see tonight's times" whenever the instants are null, so
+ * for the length of a settings read plus three astronomical passes every cold open showed that
+ * copy and then snapped to real times — a user-visible defect caused purely by an unread field.
+ * And because a genuine failure produced the same null instants, it was indistinguishable from
+ * loading, with no way to retry: `NightWorshipEvent.Refresh` existed and no screen emitted it.
+ */
 @Composable
-private fun NightWindowCard(lastThirdAt: Instant?, fajrAt: Instant?) {
+private fun NightWindowCard(
+    lastThirdAt: Instant?,
+    fajrAt: Instant?,
+    isLoading: Boolean,
+    error: UiError?,
+    onRetry: () -> Unit,
+) {
     NimazCard(
         modifier = Modifier
             .fillMaxWidth()
@@ -193,7 +219,29 @@ private fun NightWindowCard(lastThirdAt: Instant?, fajrAt: Instant?) {
             )
             Spacer(Modifier.height(8.dp))
 
+            if (isLoading && lastThirdAt == null) {
+                NimazLoadingState(modifier = Modifier.fillMaxWidth())
+                return@Column
+            }
+
+            if (error != null) {
+                // INLINE inside the card: the night-worship hub has other cards that are
+                // still correct, and this one failing must not take them with it.
+                NimazErrorState(
+                    title = stringResource(error.message),
+                    kind = error.kind,
+                    details = error.details,
+                    variant = NimazErrorVariant.INLINE,
+                    primaryAction = NimazErrorDefaults.retry(
+                        onRetry = onRetry,
+                        label = stringResource(R.string.try_again),
+                    ),
+                )
+                return@Column
+            }
+
             if (lastThirdAt == null || fajrAt == null) {
+                // Not a failure: the times are genuinely not available yet.
                 Text(
                     text = stringResource(R.string.night_worship_times_unavailable),
                     style = MaterialTheme.typography.bodyMedium,

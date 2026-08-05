@@ -66,6 +66,8 @@ import com.arshadshah.nimaz.domain.model.MushafLineType
 import com.arshadshah.nimaz.domain.model.MushafPageLayout
 import com.arshadshah.nimaz.domain.model.Surah
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingState
+import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazPager
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.PageSurahSeparator
@@ -80,10 +82,10 @@ import com.arshadshah.nimaz.presentation.components.organisms.PassageHeading
 import com.arshadshah.nimaz.presentation.components.organisms.MushafLinePage
 import com.arshadshah.nimaz.presentation.components.organisms.MushafPage
 import com.arshadshah.nimaz.presentation.components.organisms.TajweedLegendSheet
-import com.arshadshah.nimaz.presentation.viewmodel.QuranEvent
-import com.arshadshah.nimaz.presentation.viewmodel.QuranReaderUiState
-import com.arshadshah.nimaz.presentation.viewmodel.QuranViewModel
-import com.arshadshah.nimaz.presentation.viewmodel.ReadingMode
+import com.arshadshah.nimaz.presentation.viewmodel.quran.QuranEvent
+import com.arshadshah.nimaz.presentation.viewmodel.quran.QuranReaderUiState
+import com.arshadshah.nimaz.presentation.viewmodel.quran.QuranViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.quran.ReadingMode
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -348,11 +350,7 @@ fun QuranReaderScreen(
                 title = {
                     Column {
                         if (headerLoading) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(20.dp),
-                                strokeWidth = 2.dp,
-                                color = MaterialTheme.colorScheme.primary
-                            )
+                            NimazLoadingState(variant = NimazLoadingVariant.INLINE)
                         } else {
                             Text(
                                 text = headerTitle,
@@ -641,12 +639,7 @@ fun QuranReaderScreen(
                 .padding(paddingValues)
         ) {
             if (state.isLoading && state.readingMode != ReadingMode.PAGE && !usePageView) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
-                }
+                NimazLoadingState()
             } else if (pagerState != null && (state.readingMode == ReadingMode.PAGE || usePageView)) {
                 // Page mode with HorizontalPager (RTL so swipe-left = next page)
                 val surahMap = surahByNumber
@@ -972,9 +965,7 @@ private fun ReaderMushafPage(
             }
         }
         if (layout == null) {
-            Box(modifier = modifier, contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
-            }
+            NimazLoadingState(modifier = modifier)
         } else {
             MushafLinePage(
                 pageNumber = pageNumber,
@@ -1024,9 +1015,7 @@ private fun ReaderMushafPage(
         // Not fetched yet — distinct from a fetched page that happens to be empty, which
         // still renders (as the framed, empty page it is).
         if (pageNumber !in state.pageCache && ayahs.isEmpty()) {
-            Box(modifier = modifier, contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
-            }
+            NimazLoadingState(modifier = modifier)
         } else {
             MushafPage(
                 pageNumber = pageNumber,

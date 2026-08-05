@@ -40,8 +40,8 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
 import com.arshadshah.nimaz.presentation.components.molecules.NimazQadaPrayerItem
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.NimazColors
-import com.arshadshah.nimaz.presentation.viewmodel.PrayerTrackerEvent
-import com.arshadshah.nimaz.presentation.viewmodel.PrayerTrackerViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.tracker.PrayerTrackerEvent
+import com.arshadshah.nimaz.presentation.viewmodel.tracker.PrayerTrackerViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

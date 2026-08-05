@@ -42,8 +42,8 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuItem
 import com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsItem
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
-import com.arshadshah.nimaz.presentation.viewmodel.SearchSettingsEvent
-import com.arshadshah.nimaz.presentation.viewmodel.SearchSettingsViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.settings.SearchSettingsEvent
+import com.arshadshah.nimaz.presentation.viewmodel.settings.SearchSettingsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -188,6 +188,15 @@ fun SearchSettingsScreen(
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
+                if (state.consentFailed) {
+                    // The write did not commit. Saying so beats the sheet closing over a
+                    // switch that has quietly stayed off.
+                    Text(
+                        text = stringResource(R.string.ai_consent_save_failed),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                }
                 NimazButton(
                     text = stringResource(R.string.ai_consent_enable),
                     onClick = { viewModel.onEvent(SearchSettingsEvent.ConsentAccepted) },

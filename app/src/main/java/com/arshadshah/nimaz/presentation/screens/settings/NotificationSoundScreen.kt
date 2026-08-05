@@ -47,8 +47,8 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
 import com.arshadshah.nimaz.presentation.components.molecules.NimazPickerItem
 import com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsItem
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
-import com.arshadshah.nimaz.presentation.viewmodel.SettingsEvent
-import com.arshadshah.nimaz.presentation.viewmodel.SettingsViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.settings.SettingsEvent
+import com.arshadshah.nimaz.presentation.viewmodel.settings.SettingsViewModel
 
 /**
  * Sound & delivery subscreen (#301): the global adhan toggle, muezzin (voice) selection with
@@ -62,9 +62,9 @@ fun NotificationSoundScreen(
 ) {
     val context = LocalContext.current
     val notificationState by viewModel.notificationState.collectAsStateWithLifecycle()
-    val downloadState by viewModel.adhanAudioManager.downloadState.collectAsStateWithLifecycle()
-    val isPlaying by viewModel.adhanAudioManager.isPlaying.collectAsStateWithLifecycle()
-    val currentlyPlaying by viewModel.adhanAudioManager.currentlyPlaying.collectAsStateWithLifecycle()
+    val downloadState by viewModel.adhanDownloadState.collectAsStateWithLifecycle()
+    val isPlaying by viewModel.isAdhanPlaying.collectAsStateWithLifecycle()
+    val currentlyPlaying by viewModel.currentlyPlayingAdhan.collectAsStateWithLifecycle()
     val adhanPreviewError by viewModel.adhanPreviewError.collectAsStateWithLifecycle()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 

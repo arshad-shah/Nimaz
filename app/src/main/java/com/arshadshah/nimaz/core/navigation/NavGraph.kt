@@ -68,6 +68,7 @@ import com.arshadshah.nimaz.presentation.screens.asmaunnabi.AsmaUnNabiDetailScre
 import com.arshadshah.nimaz.presentation.screens.bookmarks.BookmarksScreen
 import com.arshadshah.nimaz.presentation.screens.calendar.IslamicCalendarScreen
 import com.arshadshah.nimaz.presentation.screens.dua.DuaCategoryScreen
+import com.arshadshah.nimaz.presentation.screens.dua.DuaOccasionScreen
 import com.arshadshah.nimaz.presentation.screens.dua.DuaReaderScreen
 import com.arshadshah.nimaz.presentation.screens.dua.DuaSettingsScreen
 import com.arshadshah.nimaz.presentation.screens.dua.DuasCollectionScreen
@@ -91,6 +92,8 @@ import com.arshadshah.nimaz.presentation.screens.qibla.QiblaScreen
 import com.arshadshah.nimaz.presentation.screens.quran.QuranReaderScreen
 import com.arshadshah.nimaz.presentation.screens.quran.SelectReciterScreen
 import com.arshadshah.nimaz.presentation.screens.quran.SelectTranslationScreen
+import com.arshadshah.nimaz.domain.model.DuaOccasion
+import com.arshadshah.nimaz.domain.model.HadithGrade
 import com.arshadshah.nimaz.domain.model.TopicTree
 import com.arshadshah.nimaz.presentation.screens.quran.QuranTopicDetailScreen
 import com.arshadshah.nimaz.presentation.screens.quran.QuranTopicsScreen
@@ -118,8 +121,8 @@ import com.arshadshah.nimaz.presentation.screens.tasbih.TasbihScreen
 import com.arshadshah.nimaz.presentation.screens.zakat.ZakatCalculatorScreen
 import com.arshadshah.nimaz.presentation.screens.zakat.ZakatHistoryScreen
 import com.arshadshah.nimaz.presentation.theme.isTablet
-import com.arshadshah.nimaz.presentation.viewmodel.OnboardingViewModel
-import com.arshadshah.nimaz.presentation.viewmodel.SearchFilter
+import com.arshadshah.nimaz.presentation.viewmodel.onboarding.OnboardingViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.search.SearchFilter
 import com.google.android.play.core.review.ReviewManagerFactory
 import kotlinx.coroutines.launch
 import kotlin.system.exitProcess
@@ -371,7 +374,7 @@ fun NavGraph(
                 TasbihScreen(
                     onNavigateToHistory = { navController.navigate(Route.TasbihHistory) },
                     onNavigateToChooseDhikr = { navController.navigate(Route.TasbihPresets) },
-                    onNavigateToAddPreset = { navController.navigate(Route.TasbihAddPreset) },
+                    onNavigateToAddPreset = { navController.navigate(Route.TasbihAddPreset()) },
                     onNavigateToSettings = { navController.navigate(Route.Settings) }
                 )
             }
@@ -621,7 +624,7 @@ fun NavGraph(
                         navController.navigate(Route.QuranReader(surah, ayah))
                     },
                     onNavigateToHadith = { bookId, hadithNumber ->
-                        navController.navigate(Route.HadithReader(hadithNumber.toString()))
+                        navController.navigate(Route.HadithByNumber(bookId, hadithNumber))
                     },
                     onNavigateToDua = { duaId ->
                         navController.navigate(Route.DuaReader(duaId))
@@ -636,6 +639,9 @@ fun NavGraph(
                     onNavigateBack = { navController.popBackStack() },
                     onNavigateToSearch = { navController.navigate(Route.HadithSearch) },
                     onNavigateToBookmarks = { navController.navigate(Route.HadithBookmarks) },
+                    onNavigateToGrade = { grade ->
+                        navController.navigate(Route.HadithByGrade(grade.name))
+                    },
                 )
             }
 
@@ -665,6 +671,28 @@ fun NavGraph(
                 HadithReaderScreen(
                     bookId = "",
                     chapterId = args.hadithId,
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToSettings = { navController.navigate(Route.HadithSettings) }
+                )
+            }
+
+            taggedComposable<Route.HadithByNumber>(ScreenTags.HadithByNumber) { backStackEntry ->
+                val args = backStackEntry.toRoute<Route.HadithByNumber>()
+                HadithReaderScreen(
+                    bookId = args.bookId,
+                    chapterId = "",
+                    hadithNumber = args.hadithNumber,
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToSettings = { navController.navigate(Route.HadithSettings) }
+                )
+            }
+
+            taggedComposable<Route.HadithByGrade>(ScreenTags.HadithByGrade) { backStackEntry ->
+                val args = backStackEntry.toRoute<Route.HadithByGrade>()
+                HadithReaderScreen(
+                    bookId = "",
+                    chapterId = "",
+                    grade = HadithGrade.entries.firstOrNull { it.name == args.grade },
                     onNavigateBack = { navController.popBackStack() },
                     onNavigateToSettings = { navController.navigate(Route.HadithSettings) }
                 )
@@ -701,7 +729,7 @@ fun NavGraph(
                         navController.navigate(Route.QuranReader(surah, ayah))
                     },
                     onNavigateToHadith = { bookId, hadithNumber ->
-                        navController.navigate(Route.HadithReader(hadithNumber.toString()))
+                        navController.navigate(Route.HadithByNumber(bookId, hadithNumber))
                     },
                     onNavigateToDua = { duaId ->
                         navController.navigate(Route.DuaReader(duaId))
@@ -723,6 +751,21 @@ fun NavGraph(
                 val args = backStackEntry.toRoute<Route.DuaCategory>()
                 DuaCategoryScreen(
                     categoryId = args.categoryId,
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToDua = { duaId ->
+                        navController.navigate(Route.DuaReader(duaId))
+                    },
+                    onNavigateToOccasion = { occasion ->
+                        navController.navigate(Route.DuaOccasion(occasion.name))
+                    }
+                )
+            }
+
+            taggedComposable<Route.DuaOccasion>(ScreenTags.DuaOccasion) { backStackEntry ->
+                val args = backStackEntry.toRoute<Route.DuaOccasion>()
+                DuaOccasionScreen(
+                    occasion = DuaOccasion.entries.firstOrNull { it.name == args.occasion }
+                        ?: DuaOccasion.GENERAL,
                     onNavigateBack = { navController.popBackStack() },
                     onNavigateToDua = { duaId ->
                         navController.navigate(Route.DuaReader(duaId))
@@ -849,7 +892,7 @@ fun NavGraph(
                 TasbihScreen(
                     onNavigateToHistory = { navController.navigate(Route.TasbihHistory) },
                     onNavigateToChooseDhikr = { navController.navigate(Route.TasbihPresets) },
-                    onNavigateToAddPreset = { navController.navigate(Route.TasbihAddPreset) },
+                    onNavigateToAddPreset = { navController.navigate(Route.TasbihAddPreset()) },
                     onNavigateToSettings = { navController.navigate(Route.Settings) }
                 )
             }
@@ -866,7 +909,10 @@ fun NavGraph(
             taggedComposable<Route.TasbihPresets>(ScreenTags.TasbihPresets) {
                 com.arshadshah.nimaz.presentation.screens.tasbih.ChooseDhikrScreen(
                     onBack = { navController.popBackStack() },
-                    onNavigateToAddPreset = { navController.navigate(Route.TasbihAddPreset) }
+                    onNavigateToAddPreset = { navController.navigate(Route.TasbihAddPreset()) },
+                    onEditPreset = { presetId ->
+                        navController.navigate(Route.TasbihAddPreset(presetId))
+                    }
                 )
             }
 
@@ -883,8 +929,10 @@ fun NavGraph(
                 )
             }
 
-            taggedComposable<Route.TasbihAddPreset>(ScreenTags.TasbihAddPreset) {
+            taggedComposable<Route.TasbihAddPreset>(ScreenTags.TasbihAddPreset) { backStackEntry ->
+                val args = backStackEntry.toRoute<Route.TasbihAddPreset>()
                 com.arshadshah.nimaz.presentation.screens.tasbih.AddPresetScreen(
+                    presetId = args.presetId,
                     onNavigateBack = { navController.popBackStack() }
                 )
             }
@@ -1097,8 +1145,8 @@ fun NavGraph(
             taggedComposable<Route.Licenses>(ScreenTags.Licenses) {
                 LicensesScreen(
                     onNavigateBack = { navController.popBackStack() },
-                    onNavigateToDetail = { hashCode ->
-                        navController.navigate(Route.LicenseDetail(hashCode))
+                    onNavigateToDetail = { libraryId ->
+                        navController.navigate(Route.LicenseDetail(libraryId))
                     }
                 )
             }
@@ -1106,7 +1154,7 @@ fun NavGraph(
             taggedComposable<Route.LicenseDetail>(ScreenTags.LicenseDetail) { backStackEntry ->
                 val args = backStackEntry.toRoute<Route.LicenseDetail>()
                 LicenseDetailScreen(
-                    libraryHashCode = args.libraryHashCode,
+                    libraryId = args.libraryHashCode,
                     onNavigateBack = { navController.popBackStack() }
                 )
             }
@@ -1260,7 +1308,7 @@ fun NavGraph(
                         navController.navigate(Route.QuranReader(surah, ayah))
                     },
                     onNavigateToHadith = { bookId, hadithNumber ->
-                        navController.navigate(Route.HadithReader(hadithNumber.toString()))
+                        navController.navigate(Route.HadithByNumber(bookId, hadithNumber))
                     },
                     onNavigateToDua = { duaId ->
                         navController.navigate(Route.DuaReader(duaId))

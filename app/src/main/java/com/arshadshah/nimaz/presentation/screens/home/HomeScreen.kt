@@ -29,9 +29,9 @@ import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -50,6 +50,9 @@ import com.arshadshah.nimaz.core.util.formatFullDate
 import com.arshadshah.nimaz.core.util.UpdateState
 import com.arshadshah.nimaz.domain.model.PrayerType
 import com.arshadshah.nimaz.domain.model.WorshipReminderType
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorState
+import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
 import com.arshadshah.nimaz.presentation.components.atoms.TickResolution
@@ -73,12 +76,12 @@ import com.arshadshah.nimaz.presentation.components.organisms.TodaysProgressCard
 import com.arshadshah.nimaz.presentation.components.organisms.toOccasion
 import com.arshadshah.nimaz.presentation.theme.currentWindowSizeClass
 import com.arshadshah.nimaz.presentation.theme.isCompact
-import com.arshadshah.nimaz.presentation.viewmodel.AnnouncementUiState
-import com.arshadshah.nimaz.presentation.viewmodel.HomeEvent
-import com.arshadshah.nimaz.presentation.viewmodel.HomeUiState
-import com.arshadshah.nimaz.presentation.viewmodel.HomeViewModel
-import com.arshadshah.nimaz.presentation.viewmodel.PrayerTimeDisplay
-import com.arshadshah.nimaz.presentation.viewmodel.withClockState
+import com.arshadshah.nimaz.presentation.viewmodel.home.AnnouncementUiState
+import com.arshadshah.nimaz.presentation.viewmodel.home.HomeEvent
+import com.arshadshah.nimaz.presentation.viewmodel.home.HomeUiState
+import com.arshadshah.nimaz.presentation.viewmodel.home.HomeViewModel
+import com.arshadshah.nimaz.presentation.model.PrayerTimeDisplay
+import com.arshadshah.nimaz.presentation.model.withClockState
 import kotlin.time.Instant
 
 /**
@@ -149,6 +152,9 @@ fun HomeScreen(
         contract = ActivityResultContracts.RequestMultiplePermissions()
     ) { viewModel.onEvent(HomeEvent.RefreshPermissions) }
 
+
+
+
     val notificationPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { viewModel.onEvent(HomeEvent.RefreshPermissions) }
@@ -210,13 +216,25 @@ fun HomeScreen(
                 .padding(innerPadding)
                 .background(MaterialTheme.colorScheme.background)
         ) {
+            val error = state.error
             when {
-                state.isLoading -> {
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center),
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
+                state.isLoading -> NimazLoadingState()
+
+                // Full-screen here, and only here, because this is the one loader whose
+                // output the whole dashboard is arranged around: without today's prayer
+                // times there is no next prayer, no countdown and no tracker row to draw.
+                // Every other card's failure stays in its own card by construction — they
+                // are independent loaders writing independent fields.
+                error != null -> NimazErrorState(
+                    title = stringResource(error.message),
+                    message = stringResource(R.string.home_prayer_times_failed_body),
+                    kind = error.kind,
+                    details = error.details,
+                    primaryAction = NimazErrorDefaults.retry(
+                        onRetry = { viewModel.onEvent(HomeEvent.RefreshPrayerTimes) },
+                        label = stringResource(R.string.try_again),
+                    ),
+                )
 
                 windowSizeClass.isCompact -> {
                     // List draws under the bar; the bar overlays the sky and
@@ -303,6 +321,7 @@ private fun HomeCompactContent(
     batteryOptimizationLauncher: androidx.activity.result.ActivityResultLauncher<android.content.Intent>,
     viewModel: HomeViewModel,
 ) {
+    val activityContext = LocalContext.current
     val gregorianDate = remember {
         java.time.LocalDate.now().formatFullDate()
     }
@@ -320,7 +339,7 @@ private fun HomeCompactContent(
         notificationPermissionLauncher = notificationPermissionLauncher,
         locationPermissionLauncher = locationPermissionLauncher,
         batteryOptimizationLauncher = batteryOptimizationLauncher,
-        getBatteryIntent = { viewModel.getBatteryOptimizationIntent() },
+        getBatteryIntent = { batteryOptimizationIntent(activityContext) },
     )
 
     LazyColumn(
@@ -469,6 +488,7 @@ private fun HomeTabletContent(
     batteryOptimizationLauncher: androidx.activity.result.ActivityResultLauncher<android.content.Intent>,
     viewModel: HomeViewModel,
 ) {
+    val activityContext = LocalContext.current
     val gregorianDate = remember {
         java.time.LocalDate.now().formatFullDate()
     }
@@ -481,7 +501,7 @@ private fun HomeTabletContent(
         notificationPermissionLauncher = notificationPermissionLauncher,
         locationPermissionLauncher = locationPermissionLauncher,
         batteryOptimizationLauncher = batteryOptimizationLauncher,
-        getBatteryIntent = { viewModel.getBatteryOptimizationIntent() },
+        getBatteryIntent = { batteryOptimizationIntent(activityContext) },
     )
 
     Column(
@@ -764,3 +784,14 @@ private fun buildHomeBannerItems(
         }
     }
 }
+
+/**
+ * The battery-optimisation exemption prompt.
+ *
+ * Built here rather than handed out by the ViewModel: `HomeViewModel.getBatteryOptimizationIntent()`
+ * returned an `android.content.Intent` to the UI, which is the dependency arrow pointing the wrong
+ * way — see `PowerSettings`' KDoc, which called out this exact duplicate pair.
+ */
+private fun batteryOptimizationIntent(ctx: android.content.Context): android.content.Intent =
+    android.content.Intent(android.provider.Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
+        .apply { data = android.net.Uri.parse("package:" + ctx.packageName) }

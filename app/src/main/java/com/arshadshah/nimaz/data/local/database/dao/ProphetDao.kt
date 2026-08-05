@@ -13,9 +13,6 @@ interface ProphetDao {
     @Query("SELECT * FROM prophets WHERE id = :id")
     suspend fun getProphetById(id: Int): ProphetEntity?
 
-    @Query("SELECT * FROM prophets WHERE name_english LIKE '%' || :query || '%' OR name_transliteration LIKE '%' || :query || '%' OR title_english LIKE '%' || :query || '%' ORDER BY display_order ASC")
-    fun searchProphets(query: String): Flow<List<ProphetEntity>>
-
     /**
      * The favourited entries, from ids the user's database supplied.
      *

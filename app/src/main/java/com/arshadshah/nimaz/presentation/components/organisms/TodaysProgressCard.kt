@@ -37,7 +37,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
-import com.arshadshah.nimaz.presentation.viewmodel.PrayerTimeDisplay
+import com.arshadshah.nimaz.presentation.model.PrayerTimeDisplay
 import kotlin.time.Instant
 import androidx.compose.runtime.getValue
 import com.arshadshah.nimaz.core.util.prayerTimelineProgressAt

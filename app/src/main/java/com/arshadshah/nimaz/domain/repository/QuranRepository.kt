@@ -31,6 +31,9 @@ interface QuranRepository {
     // Ayah operations
     fun getAyahsBySurah(surahNumber: Int): Flow<List<Ayah>>
     suspend fun getAyahById(ayahId: Int): Ayah?
+
+    /** Batched [getAyahById]; order is not guaranteed, look results up by id. */
+    suspend fun getAyahsByIds(ayahIds: List<Int>): List<Ayah>
     fun getAyahsByJuz(juzNumber: Int, translatorId: String? = null): Flow<List<Ayah>>
     /**
      * The ayahs printed on [pageNumber] of [script]'s edition. Ayah-flow editions (Madani)

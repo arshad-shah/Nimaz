@@ -25,7 +25,6 @@ import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
@@ -60,8 +59,11 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorKind
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorState
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
+import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.atoms.NimazPager
 import com.arshadshah.nimaz.presentation.components.atoms.NimazPillActionButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
@@ -71,11 +73,11 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazReaderBottomB
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.AdaptiveSpacing
 import com.arshadshah.nimaz.presentation.theme.NimazColors
-import com.arshadshah.nimaz.presentation.viewmodel.DuaEvent
-import com.arshadshah.nimaz.presentation.viewmodel.DuaReaderUiState
-import com.arshadshah.nimaz.presentation.viewmodel.DuaViewModel
-import com.arshadshah.nimaz.presentation.viewmodel.TasbihEvent
-import com.arshadshah.nimaz.presentation.viewmodel.TasbihViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.content.DuaEvent
+import com.arshadshah.nimaz.presentation.viewmodel.content.DuaReaderUiState
+import com.arshadshah.nimaz.presentation.viewmodel.content.DuaViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.tracker.TasbihEvent
+import com.arshadshah.nimaz.presentation.viewmodel.tracker.TasbihViewModel
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -134,19 +136,17 @@ fun DuaReaderScreen(
                 .padding(paddingValues)
         ) {
             when {
-                state.isLoading && duas.isEmpty() -> {
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center),
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
+                state.isLoading && duas.isEmpty() -> NimazLoadingState()
 
                 duas.isEmpty() -> {
-                    Text(
-                        text = stringResource(R.string.dua_reader_not_found),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.align(Alignment.Center)
+                    // A load that failed says so; an id that resolved to nothing keeps the
+                    // "not found" wording — and the kind now carries which of the two it is,
+                    // so the two stop looking identical.
+                    val error = state.error
+                    NimazErrorState(
+                        title = stringResource(error?.message ?: R.string.dua_reader_not_found),
+                        kind = error?.kind ?: NimazErrorKind.NOT_FOUND,
+                        details = error?.details,
                     )
                 }
 
@@ -219,7 +219,7 @@ private fun DuaPage(
         ) {
             dua.occasion?.let { occasion ->
                 NimazBadge(
-                    text = occasion.displayName(),
+                    text = occasion.label(),
                     tone = NimazTone.ACCENT,
                     size = NimazBadgeSize.MEDIUM
                 )

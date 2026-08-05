@@ -16,7 +16,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.MenuBook
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -42,13 +41,16 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.icon
 import com.arshadshah.nimaz.presentation.components.atoms.labelRes
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorState
+import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
 import com.arshadshah.nimaz.presentation.components.molecules.ThematicText
 import com.arshadshah.nimaz.presentation.components.organisms.NimazScrollSpyIndex
 import com.arshadshah.nimaz.presentation.components.organisms.NimazTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.rememberScrollSpyIndex
-import com.arshadshah.nimaz.presentation.viewmodel.SurahThematicEvent
-import com.arshadshah.nimaz.presentation.viewmodel.SurahThematicViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.quran.SurahThematicEvent
+import com.arshadshah.nimaz.presentation.viewmodel.quran.SurahThematicViewModel
 import kotlinx.coroutines.launch
 
 /**
@@ -110,11 +112,23 @@ fun SurahBackgroundScreen(
                 .fillMaxSize()
                 .padding(padding),
         ) {
+            val error = state.error
             when {
-                state.isLoading -> Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center,
-                ) { CircularProgressIndicator() }
+                state.isLoading -> NimazLoadingState()
+
+                // Before the empty branch. `sections.isEmpty()` is also true when the load
+                // failed, so a failure was being reported to the reader as "this surah has
+                // no background" — a claim about the content, not about the failure.
+                error != null -> NimazErrorState(
+                    title = stringResource(error.message),
+                    message = stringResource(R.string.surah_thematic_load_failed_body),
+                    kind = error.kind,
+                    details = error.details,
+                    primaryAction = NimazErrorDefaults.retry(
+                        onRetry = { viewModel.onEvent(SurahThematicEvent.Load(surahNumber)) },
+                        label = stringResource(R.string.try_again),
+                    ),
+                )
 
                 sections.isEmpty() -> NimazEmptyState(
                     title = stringResource(R.string.quran_topics_unavailable_title),

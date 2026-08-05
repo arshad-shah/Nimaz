@@ -57,6 +57,10 @@ class GetHadithsByChapterUseCase @Inject constructor(private val repository: Had
 
 class GetHadithByIdUseCase @Inject constructor(private val repository: HadithRepository) {
     suspend operator fun invoke(hadithId: String): Hadith? = repository.getHadithById(hadithId)
+
+    /** Batched lookup, keyed by hadith id, for callers enriching a whole list at once. */
+    suspend fun forIds(hadithIds: List<String>): Map<String, Hadith> =
+        repository.getHadithsByIds(hadithIds).associateBy { it.id }
 }
 
 class GetHadithByNumberUseCase @Inject constructor(private val repository: HadithRepository) {

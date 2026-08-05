@@ -37,8 +37,8 @@ import com.arshadshah.nimaz.presentation.components.molecules.NameDetailSectionC
 import com.arshadshah.nimaz.presentation.components.molecules.NamesAccents
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.NimazSpacing
-import com.arshadshah.nimaz.presentation.viewmodel.AsmaUlHusnaEvent
-import com.arshadshah.nimaz.presentation.viewmodel.AsmaUlHusnaViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.content.CatalogEvent
+import com.arshadshah.nimaz.presentation.viewmodel.content.AsmaUlHusnaViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -48,7 +48,7 @@ fun AsmaUlHusnaDetailScreen(
     viewModel: AsmaUlHusnaViewModel = hiltViewModel()
 ) {
     LaunchedEffect(nameId) {
-        viewModel.onEvent(AsmaUlHusnaEvent.LoadDetail(nameId))
+        viewModel.onEvent(CatalogEvent.LoadDetail(nameId))
     }
 
     val state by viewModel.detailState.collectAsStateWithLifecycle()
@@ -57,24 +57,24 @@ fun AsmaUlHusnaDetailScreen(
     NimazScreenScaffold(
         topBar = {
             NimazBackTopAppBar(
-                title = state.name?.nameTransliteration ?: stringResource(R.string.name_detail),
+                title = state.item?.nameTransliteration ?: stringResource(R.string.name_detail),
                 onBackClick = onNavigateBack
             )
         },
         floatingActionButton = {
-            state.name?.let { name ->
+            state.item?.let { name ->
                 FavoriteFab(
                     isFavorite = name.isFavorite,
                     accent = accent,
-                    onClick = { viewModel.onEvent(AsmaUlHusnaEvent.ToggleFavorite(name.id)) }
+                    onClick = { viewModel.onEvent(CatalogEvent.ToggleFavorite(name.id)) }
                 )
             }
         }
     ) { paddingValues ->
-        if (state.isLoading || state.name == null) {
+        if (state.isLoading || state.item == null) {
             NimazLoadingState(modifier = Modifier.padding(paddingValues))
         } else {
-            val name = state.name!!
+            val name = state.item!!
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()

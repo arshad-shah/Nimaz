@@ -35,18 +35,25 @@ fun hadithGradeDisplay(grade: HadithGrade?): HadithGradeDisplay? = when (grade) 
     else -> null
 }
 
-/** A small colour-coded pill showing a hadith's authenticity grade. */
+/**
+ * A small colour-coded pill showing a hadith's authenticity grade.
+ *
+ * [onClick] makes the same pill a filter control on the collection screen; left null it is
+ * the read-only chip the reader shows against a hadith.
+ */
 @Composable
 fun HadithGradeChip(
     label: String,
     color: Color,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onClick: (() -> Unit)? = null,
 ) {
     NimazBadge(
         text = label,
         modifier = modifier,
         size = NimazBadgeSize.LARGE,
         icon = Icons.Filled.FiberManualRecord,
+        onClick = onClick,
         colors = NimazBadgeDefaults
             .feature(color = color, emphasis = NimazBadgeEmphasis.SOFT)
             .copy(borderColor = color.copy(alpha = 0.35f))

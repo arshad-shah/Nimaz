@@ -2,9 +2,12 @@ package com.arshadshah.nimaz.presentation.screens.onboarding
 
 import android.Manifest
 import android.app.Activity
+import android.content.Intent
 import android.os.Build
+import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.net.toUri
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -36,8 +39,11 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.snapshotFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -70,8 +76,8 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.rememberNimazPagerState
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
-import com.arshadshah.nimaz.presentation.viewmodel.OnboardingEvent
-import com.arshadshah.nimaz.presentation.viewmodel.OnboardingViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.onboarding.OnboardingEvent
+import com.arshadshah.nimaz.presentation.viewmodel.onboarding.OnboardingViewModel
 import kotlinx.coroutines.launch
 
 private data class InfoPage(
@@ -120,6 +126,8 @@ fun OnboardingScreen(
     ) { granted ->
         viewModel.onEvent(OnboardingEvent.UpdatePermissionStatus(notification = granted))
     }
+
+    val context = LocalContext.current
 
     val batteryOptimizationLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
@@ -173,6 +181,17 @@ fun OnboardingScreen(
 
     val totalPages = infoPages.size + 1 // +1 for permissions page
     val pagerState = rememberNimazPagerState(pageCount = { totalPages })
+
+    // The onboarding funnel's only producer. `OnboardingEvent.SetCurrentPage` was emitted by
+    // nothing — the pager drove itself from `pagerState.currentPage` locally — so
+    // `AppAnalytics.Event.ONBOARDING_STEP`, documented as the event that "reveals where people
+    // drop off", had fired **zero times in production**. `snapshotFlow` reports settled pages
+    // only, so a swipe that is released half way does not count as reaching the next step.
+    LaunchedEffect(pagerState) {
+        snapshotFlow { pagerState.currentPage }
+            .distinctUntilChanged()
+            .collect { viewModel.onEvent(OnboardingEvent.SetCurrentPage(it)) }
+    }
 
     NimazScreenScaffold(
         // Opts out of the app ornament: onboarding owns its own gradient backdrop.
@@ -249,7 +268,13 @@ fun OnboardingScreen(
                                 }
                             },
                             onRequestBattery = {
-                                batteryOptimizationLauncher.launch(viewModel.getBatteryOptimizationIntent())
+                                // The Intent is built here rather than handed out by the
+                                // ViewModel: a ViewModel returning an android.content.Intent
+                                // points the dependency arrow the wrong way (see PowerSettings).
+                                batteryOptimizationLauncher.launch(
+                                    Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
+                                        .apply { data = "package:${context.packageName}".toUri() }
+                                )
                             }
                         )
                     }

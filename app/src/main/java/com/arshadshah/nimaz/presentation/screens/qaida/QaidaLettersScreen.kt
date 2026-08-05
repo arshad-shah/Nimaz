@@ -22,8 +22,8 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazBottomSheet
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.QaidaLetterBoard
 import com.arshadshah.nimaz.presentation.components.organisms.QaidaLetterDetailSheet
-import com.arshadshah.nimaz.presentation.viewmodel.QaidaReaderEvent
-import com.arshadshah.nimaz.presentation.viewmodel.QaidaReaderViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.content.QaidaReaderEvent
+import com.arshadshah.nimaz.presentation.viewmodel.content.QaidaReaderViewModel
 
 /**
  * The letter explorer: an alphabet board; tapping a letter opens its detail in

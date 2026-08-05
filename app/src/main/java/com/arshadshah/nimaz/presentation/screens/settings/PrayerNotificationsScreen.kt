@@ -41,14 +41,16 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSwitch
 import com.arshadshah.nimaz.presentation.components.molecules.NimazAccordion
 import com.arshadshah.nimaz.presentation.components.molecules.NimazListPicker
+import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
 import com.arshadshah.nimaz.presentation.components.molecules.NimazPickerItem
 import com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsItem
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.NimazColors
-import com.arshadshah.nimaz.presentation.viewmodel.SettingsEvent
-import com.arshadshah.nimaz.presentation.viewmodel.SettingsViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.settings.SettingsEvent
+import com.arshadshah.nimaz.presentation.viewmodel.settings.SettingsViewModel
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import com.arshadshah.nimaz.presentation.viewmodel.settings.NotificationSettingsUiState
 
 /** The lead times the reminder picker offers. Null is "no reminder". */
 private val REMINDER_CHOICES = listOf(null, 5, 10, 15, 20, 30, 45, 60)
@@ -114,6 +116,33 @@ fun PrayerNotificationsScreen(
         ) {
             item { Spacer(Modifier.height(4.dp)) }
             item {
+                NimazSectionHeader(title = stringResource(R.string.notif_all_prayers_section))
+            }
+            item {
+                NimazMenuGroup {
+                    NimazSettingsItem(
+                        title = stringResource(R.string.notif_all_prayers_reminder_title),
+                        subtitle = stringResource(R.string.notif_all_prayers_reminder_subtitle),
+                        checked = notificationState.showReminderBefore,
+                        onCheckedChange = { enabled ->
+                            viewModel.applyReminderToAllPrayers(
+                                enabled = enabled,
+                                minutes = notificationState.reminderMinutes,
+                            )
+                        }
+                    )
+                    NimazSettingsItem(
+                        title = stringResource(R.string.notif_all_prayers_lead_title),
+                        value = reminderLabel(
+                            notificationState.reminderMinutes
+                                .takeIf { notificationState.showReminderBefore }
+                        ),
+                        onClick = { openSheet = PrayerSettingSheet.AllPrayersReminder },
+                        showArrow = true,
+                    )
+                }
+            }
+            item {
                 NimazSectionHeader(title = stringResource(R.string.notif_prayers_section))
             }
 
@@ -146,6 +175,18 @@ fun PrayerNotificationsScreen(
             onDismiss = { openSheet = null }
         )
 
+        PrayerSettingSheet.AllPrayersReminder -> ReminderPicker(
+            selected = notificationState.reminderMinutes
+                .takeIf { notificationState.showReminderBefore },
+            onSelected = { minutes ->
+                viewModel.applyReminderToAllPrayers(
+                    enabled = minutes != null,
+                    minutes = minutes ?: notificationState.reminderMinutes,
+                )
+            },
+            onDismiss = { openSheet = null }
+        )
+
         is PrayerSettingSheet.Reminder -> ReminderPicker(
             selected = notificationState.reminderMinutesFor(sheet.prayer),
             onSelected = { minutes ->
@@ -169,6 +210,35 @@ fun PrayerNotificationsScreen(
 private sealed interface PrayerSettingSheet {
     data class AlertStyle(val prayer: String) : PrayerSettingSheet
     data class Reminder(val prayer: String) : PrayerSettingSheet
+
+    /** The bulk lead-time picker, which is not about one prayer. */
+    data object AllPrayersReminder : PrayerSettingSheet
+}
+
+/**
+ * Set every prayer's reminder at once, and remember the choice as the app-wide default.
+ *
+ * The reminder became per prayer in the notifications rework, which left no way to say "warn
+ * me before all five" without opening five accordions — and left the app-wide preference
+ * ([SettingsEvent.SetShowReminderBefore] / [SettingsEvent.SetReminderMinutes]) with nothing
+ * writing it, so it sat at its default while the per-prayer values moved. Both are written
+ * here: the app-wide pair is what a new prayer's reminder falls back to and what a delivered
+ * reminder reads when its alarm predates the per-prayer split, and the five per-prayer events
+ * are what actually reschedules the alarms. Writing only the app-wide pair would ship a
+ * control that changes no notification.
+ *
+ * The lead time is written even when the reminder is being turned off, so switching it back on
+ * restores the number the user last chose rather than the default.
+ */
+private fun SettingsViewModel.applyReminderToAllPrayers(enabled: Boolean, minutes: Int) {
+    onEvent(SettingsEvent.SetShowReminderBefore(enabled))
+    onEvent(SettingsEvent.SetReminderMinutes(minutes))
+    PrayerAlertStyle.PRAYER_KEYS.forEach { prayer ->
+        onEvent(SettingsEvent.SetPrayerReminderEnabled(prayer, enabled))
+        if (enabled) {
+            onEvent(SettingsEvent.SetPrayerReminderMinutes(prayer, minutes))
+        }
+    }
 }
 
 @Composable
@@ -317,7 +387,7 @@ private fun alertStyleLabel(style: PrayerAlertStyle): Int = when (style) {
 }
 
 /** This prayer's lead time, or null when its reminder is off. */
-private fun com.arshadshah.nimaz.presentation.viewmodel.NotificationSettingsUiState
+private fun NotificationSettingsUiState
         .reminderMinutesFor(prayer: String): Int? =
     if (reminderEnabled[prayer] == true) {
         reminderOffsets[prayer] ?: PrayerAlertStyle.DEFAULT_REMINDER_MINUTES
@@ -327,7 +397,7 @@ private fun com.arshadshah.nimaz.presentation.viewmodel.NotificationSettingsUiSt
 
 @Composable
 private fun rememberPrayerRows(
-    state: com.arshadshah.nimaz.presentation.viewmodel.NotificationSettingsUiState,
+    state: NotificationSettingsUiState,
     times: PrayerTimes?,
 ): List<PrayerNotificationRowState> {
     val names = listOf(

@@ -46,6 +46,8 @@
     <string name="cancel">Cancel</string>
     <string name="delete">Delete</string>
     <string name="search">Search</string>
+    <string name="search_failed">That search couldn\'t be completed</string>
+    <string name="search_failed_body">The library is searched on your device. Try again, or try different words.</string>
     <string name="location">Location</string>
     <string name="location_set_prompt">Set location</string>
     <string name="settings">Settings</string>
@@ -84,6 +86,8 @@
     <string name="grade_mawdu">Mawdu\'</string>
     <string name="dua_of_the_moment">Dua of the Moment</string>
     <string name="prayer_times">Prayer Times</string>
+    <string name="home_prayer_times_failed">Today\'s prayer times couldn\'t be calculated</string>
+    <string name="home_prayer_times_failed_body">Check that a location is set, then try again.</string>
     <string name="hours">Hours</string>
     <string name="minutes">Minutes</string>
     <string name="seconds">Seconds</string>
@@ -151,9 +155,18 @@
     <string name="prophets_of_islam_subtitle">Stories and lessons from 25 prophets</string>
     <string name="hadith">Hadith</string>
     <string name="hadith_subtitle">Authentic hadith collections</string>
+    <string name="hadith_books_load_failed">The hadith collections couldn\'t be loaded</string>
+    <string name="hadith_chapters_load_failed">This collection\'s chapters couldn\'t be loaded</string>
+    <string name="hadith_load_failed">This chapter couldn\'t be loaded</string>
+    <string name="hadith_not_found">That hadith isn\'t in the collection</string>
+    <string name="hadith_load_failed_body">The hadith library is stored on your device, so trying again usually works.</string>
     <string name="duas">Duas</string>
     <string name="duas_subtitle">Daily duas and supplications</string>
     <string name="tafseer">Tafseer</string>
+    <string name="tafseer_load_failed">The commentary list couldn\'t be loaded</string>
+    <string name="tafseer_load_failed_body">Commentary is stored on your device, so trying again usually works.</string>
+    <string name="tafseer_note_save_failed">That note couldn\'t be saved</string>
+    <string name="tafseer_note_delete_failed">That note couldn\'t be deleted</string>
     <string name="tafseer_subtitle">Quran interpretation and commentary</string>
     <string name="tools">Tools</string>
     <string name="calendar">Calendar</string>
@@ -164,6 +177,11 @@
     <string name="qaida_subtitle">Learn to read the Qur\'an, letter by letter</string>
     <string name="prayer_times_menu_subtitle">Daily prayer times with a month view</string>
     <string name="zakat">Zakat</string>
+    <string name="zakat_calculate_failed">That calculation couldn\'t be completed</string>
+    <string name="zakat_save_failed">That calculation couldn\'t be saved</string>
+    <string name="zakat_mark_paid_failed">That couldn\'t be marked as paid</string>
+    <string name="zakat_delete_failed">That calculation couldn\'t be deleted</string>
+    <string name="zakat_history_load_failed">Your past calculations couldn\'t be loaded</string>
     <string name="zakat_subtitle">Zakat calculator</string>
     <string name="support">Support</string>
     <string name="about_nimaz">About Nimaz</string>
@@ -523,6 +541,10 @@
 
     <!-- Per-prayer alert style and reminder -->
     <string name="notif_prayers_section">Daily prayers</string>
+    <string name="notif_all_prayers_section">All prayers</string>
+    <string name="notif_all_prayers_reminder_title">Remind me before every prayer</string>
+    <string name="notif_all_prayers_reminder_subtitle">Sets the same reminder on all five prayers. Change one below to override it.</string>
+    <string name="notif_all_prayers_lead_title">Reminder before all prayers</string>
     <string name="notif_alert_style">Alert style</string>
     <string name="notif_alert_style_adhan">Adhan</string>
     <string name="notif_alert_style_adhan_subtitle">The call to prayer plays aloud</string>
@@ -701,6 +723,24 @@
 
     <!-- Duas Collection Screen -->
     <string name="duas_adhkar">Duas &amp; Adhkar</string>
+    <string name="dua_occasion_empty">No duas recorded for this occasion yet.</string>
+    <string name="dua_occasion_morning">Morning</string>
+    <string name="dua_occasion_evening">Evening</string>
+    <string name="dua_occasion_after_prayer">After prayer</string>
+    <string name="dua_occasion_before_sleep">Before sleep</string>
+    <string name="dua_occasion_waking_up">Waking up</string>
+    <string name="dua_occasion_eating">Eating</string>
+    <string name="dua_occasion_traveling">Travelling</string>
+    <string name="dua_occasion_entering_mosque">Entering the mosque</string>
+    <string name="dua_occasion_leaving_mosque">Leaving the mosque</string>
+    <string name="dua_occasion_entering_home">Entering the home</string>
+    <string name="dua_occasion_leaving_home">Leaving the home</string>
+    <string name="dua_occasion_rain">Rain</string>
+    <string name="dua_occasion_distress">Distress</string>
+    <string name="dua_occasion_forgiveness">Forgiveness</string>
+    <string name="dua_occasion_parents">Parents</string>
+    <string name="dua_occasion_gratitude">Gratitude</string>
+    <string name="dua_occasion_general">General</string>
     <string name="bookmarks">Bookmarks</string>
     <string name="daily_adhkar">Daily Adhkar</string>
     <string name="situational_duas">Situational Duas</string>
@@ -714,6 +754,12 @@
 
     <!-- Bookmarks Screen -->
     <string name="bookmarks_title">Bookmarks</string>
+    <string name="bookmarks_load_failed">Your bookmarks couldn\'t be loaded</string>
+    <string name="bookmarks_load_failed_body">Bookmarks are stored on your device, so trying again usually works.</string>
+    <string name="bookmarks_delete_failed">That bookmark couldn\'t be removed</string>
+    <string name="bookmarks_restore_failed">That bookmark couldn\'t be restored</string>
+    <string name="bookmarks_note_failed">That note couldn\'t be saved</string>
+    <string name="bookmarks_clear_failed">Your bookmarks couldn\'t be cleared</string>
     <string name="no_bookmarks_yet">No Bookmarks Yet</string>
     <string name="no_bookmarks_hint">Save ayahs, hadiths, and duas for quick access</string>
     <string name="share">Share</string>
@@ -977,7 +1023,7 @@
         <item quantity="one">In %1$d day</item>
         <item quantity="other">In %1$d days</item>
     </plurals>
-    <string name="fasting_log_today">Log Today\'s Fast</string>
+    <string name="fasting_log_today">Log today\'s fast</string>
     <string name="fasting_no_makeup">No Makeup Fasts</string>
     <string name="fasting_all_up_to_date">All your fasts are up to date!</string>
     <string name="fasting_fasts_to_makeup">Fasts to Make Up</string>
@@ -1014,6 +1060,9 @@
     <!-- License Detail Screen -->
     <string name="license_detail_title">License Detail</string>
     <string name="license_detail_library_not_found">Library not found</string>
+    <string name="license_detail_not_found_body">This library isn\'t in the bundled licence list. It may have been removed in a newer version of the app.</string>
+    <string name="licenses_load_failed">The licence list couldn\'t be loaded</string>
+    <string name="licenses_load_failed_body">This list is built from data bundled with the app, so trying again usually works.</string>
     <string name="license_detail_version">Version %1$s</string>
     <string name="license_detail_author">Author: %1$s</string>
 
@@ -1151,6 +1200,8 @@
     <string name="qaida_new_lesson_unlocked">New lesson: %1$s</string>
     <string name="qaida_map">Map</string>
     <string name="qaida_next_lesson">Next lesson</string>
+    <string name="qaida_previous_lesson">Previous</string>
+    <string name="qaida_resume_lesson">Continue</string>
     <string name="qaida_play_line">Play line</string>
 
     <!-- Quran Settings Screen -->
@@ -1302,6 +1353,8 @@
     <string name="surah_info_passage_verse">1 verse</string>
 
     <!-- Surah passages screen -->
+    <string name="surah_thematic_load_failed">This surah\'s notes couldn\'t be loaded</string>
+    <string name="surah_thematic_load_failed_body">The background and passage outline are stored on your device, so trying again usually works.</string>
     <string name="surah_passages_filter_hint">Filter passages</string>
     <string name="surah_passages_reading">Reading</string>
     <string name="surah_passages_none_title">Nothing matched</string>
@@ -1478,6 +1531,7 @@
     <string name="hadith_narrated_by_format">Narrated by %1$s</string>
     <string name="hadith_isnad">Chain of Narration (Isnad)</string>
     <string name="hadith_copied">Copied to clipboard</string>
+    <string name="hadith_browse_by_grade">Browse by grade</string>
     <string name="hadith_grade_sahih">Sahih</string>
     <string name="hadith_grade_hasan">Hasan</string>
     <string name="hadith_grade_daif">Daʿīf</string>
@@ -1516,6 +1570,9 @@
 
     <!-- Common actions / content descriptions -->
     <string name="save">Save</string>
+    <string name="edit_tasbih">Edit tasbih</string>
+    <string name="save_tasbih">Save changes</string>
+    <string name="tasbih_edit_preset">Edit this tasbih</string>
     <string name="pause">Pause</string>
     <string name="sajdah">Sajdah</string>
     <string name="cd_mark_as_read">Mark as read</string>
@@ -1643,6 +1700,10 @@
     <string name="sync_total_size">Total size</string>
     <string name="sync_complete">Sync Complete!</string>
     <string name="sync_failed">Sync Failed</string>
+    <string name="sync_connection_failed">The connection to the other device failed</string>
+    <string name="sync_import_failed">The data that arrived couldn\'t be imported</string>
+    <string name="sync_export_failed">Your data couldn\'t be sent</string>
+    <string name="sync_failed_body">Both devices need to stay on the same network, with the app open, until the transfer finishes.</string>
     <string name="sync_data_being_sent">Data Being Sent</string>
     <string name="sync_data_being_received">Data Being Received</string>
     <string name="sync_sent_success">Data sent successfully</string>
@@ -1676,6 +1737,10 @@
 
     <!-- Help screens -->
     <string name="help_title">Help</string>
+    <string name="help_topics_load_failed">Help topics couldn\'t be loaded</string>
+    <string name="help_topic_load_failed">This topic couldn\'t be loaded</string>
+    <string name="help_guide_load_failed">This guide couldn\'t be loaded</string>
+    <string name="help_load_failed_body">Help content is stored on your device, so trying again usually works.</string>
     <string name="help_search_hint">Search help…</string>
     <string name="help_no_results">No results. Try different words.</string>
     <string name="help_browse_topics">Browse topics</string>
@@ -1841,10 +1906,17 @@
     <string name="chart_legend_format">%1$s: %2$s</string>
     <string name="tafseer_alternate_has_commentary_format">%1$s has commentary for this ayah.</string>
     <string name="tafseer_no_commentary_anywhere">Commentary for this ayah isn\'t available in any installed source yet.</string>
+    <string name="calendar_events_load_failed">Islamic events couldn\'t be loaded</string>
+    <string name="dua_collection_load_failed">The dua collections couldn\'t be loaded</string>
+    <string name="dua_category_load_failed">This collection couldn\'t be loaded</string>
+    <string name="dua_load_failed_body">Duas are stored on your device, so trying again usually works.</string>
+    <string name="qibla_no_location">Qibla needs to know where you are</string>
+    <string name="qibla_no_location_body">Set a location in settings, or let Nimaz detect it, and the compass will point.</string>
+    <string name="qibla_failed">The direction couldn\'t be worked out</string>
     <string name="qibla_turn_right_hint">Turn right\nto find Qibla</string>
     <string name="qibla_turn_left_hint">Turn left\nto find Qibla</string>
-    <string name="zakat_nisab_gold_subtitle">87.48g @ $%1$d/g</string>
-    <string name="zakat_nisab_silver_subtitle">612.36g @ $%1$s/g</string>
+    <string name="zakat_nisab_gold_subtitle">87.48g @ %1$s/g</string>
+    <string name="zakat_nisab_silver_subtitle">612.36g @ %1$s/g</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="fasting_event_ashura_name">Day of Ashura</string>
@@ -1902,6 +1974,7 @@
     <string name="night_worship_opens_in">Opens in</string>
     <string name="night_worship_closed">Tonight\'s window has passed</string>
     <string name="night_worship_times_unavailable">Set your location to see tonight\'s times</string>
+    <string name="night_worship_times_failed">Tonight\'s times could not be worked out.</string>
     <string name="night_worship_rakah_title">Rakahs prayed</string>
     <string name="night_worship_rakah_body">Night prayer is offered two by two</string>
     <string name="night_worship_add_pair">+2 rakah</string>
@@ -1916,4 +1989,31 @@
     <string name="night_worship_why_body">&quot;Our Lord descends to the nearest heaven…&quot;</string>
     <string name="widget_location">Location</string>
     <string name="widget_tomorrow">Tomorrow</string>
+    <string name="zakat_gold_price_label">Gold price per gram</string>
+    <string name="zakat_silver_price_label">Silver price per gram</string>
+    <string name="zakat_metal_prices_hint">Estimates — set these to your local rate. The nisab threshold is worked out from them.</string>
+    <string name="fasting_log_on_subtitle">Logged — tap to undo</string>
+    <string name="fasting_log_off_subtitle">Not logged yet</string>
+    <string name="fasting_log_managed_in_sheet">Managed in the day\'s details</string>
+    <string name="bookmarks_search_placeholder">Search bookmarks</string>
+    <string name="bookmarks_sort">Sort</string>
+    <string name="bookmarks_sort_newest">Newest first</string>
+    <string name="bookmarks_sort_oldest">Oldest first</string>
+    <string name="bookmarks_sort_type">By type</string>
+    <string name="bookmarks_sort_alphabetical">A–Z</string>
+    <string name="bookmarks_no_matches">No matches</string>
+    <string name="bookmarks_no_matches_hint">Try a different search, or clear the filter.</string>
+    <string name="bookmarks_clear_all">Clear all bookmarks</string>
+    <string name="bookmarks_clear_all_title">Clear all bookmarks?</string>
+    <string name="bookmarks_clear_all_confirm">Clear all</string>
+    <string name="bookmarks_clear_all_body">This removes all %1$d bookmarks — Qur\'an, Hadith and Dua. It cannot be undone.</string>
+    <string name="ai_error_consent_title">Ask with Proof is off</string>
+    <string name="ai_error_consent">Turn it on in Search settings to ask a question. Keyword search across the Qur\'an, Hadith and duas works offline either way.</string>
+    <string name="ai_consent_save_failed">That setting couldn\'t be saved. Please try again.</string>
+    <string name="tafseer_notes">Notes</string>
+    <string name="tafseer_note_add">Add note</string>
+    <string name="tafseer_note_hint">Your reflection on this passage</string>
+    <string name="tafseer_note_edit">Edit</string>
+    <string name="quran_search_surahs">Search surahs</string>
+    <string name="zakat_currency">Currency</string>
 </resources>

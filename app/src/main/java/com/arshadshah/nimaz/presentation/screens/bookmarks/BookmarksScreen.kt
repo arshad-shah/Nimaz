@@ -1,5 +1,17 @@
 package com.arshadshah.nimaz.presentation.screens.bookmarks
 
+import androidx.annotation.StringRes
+import androidx.compose.material.icons.automirrored.filled.Sort
+import androidx.compose.material.icons.filled.DeleteSweep
+import androidx.compose.material3.IconButton
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.molecules.NimazDialog
+import com.arshadshah.nimaz.presentation.components.molecules.NimazDialogCancelButton
+import com.arshadshah.nimaz.presentation.components.molecules.NimazDialogDestructiveButton
+import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownMenu
+import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownRow
+import com.arshadshah.nimaz.presentation.components.organisms.NimazSearchBar
+import com.arshadshah.nimaz.presentation.viewmodel.quran.BookmarkSortOrder
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,7 +29,6 @@ import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -50,6 +61,9 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.molecules.NimazBottomSheet
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorState
+import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
 import com.arshadshah.nimaz.presentation.components.molecules.NimazSheetFooterButtons
 import com.arshadshah.nimaz.presentation.components.molecules.NimazSheetSectionLabel
@@ -57,10 +71,10 @@ import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazMenuAction
 import com.arshadshah.nimaz.presentation.components.organisms.NimazPillTabs
 import com.arshadshah.nimaz.presentation.components.organisms.SwipeableSavedCard
-import com.arshadshah.nimaz.presentation.viewmodel.BookmarkType
-import com.arshadshah.nimaz.presentation.viewmodel.BookmarksEvent
-import com.arshadshah.nimaz.presentation.viewmodel.BookmarksViewModel
-import com.arshadshah.nimaz.presentation.viewmodel.UnifiedBookmark
+import com.arshadshah.nimaz.domain.model.BookmarkType
+import com.arshadshah.nimaz.presentation.viewmodel.quran.BookmarksEvent
+import com.arshadshah.nimaz.presentation.viewmodel.quran.BookmarksViewModel
+import com.arshadshah.nimaz.domain.model.UnifiedBookmark
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -79,6 +93,8 @@ fun BookmarksScreen(
     // The bookmark whose note is being edited (null = no editor showing). The
     // overflow menu is an anchored dropdown owned by each card.
     var noteTarget by remember { mutableStateOf<UnifiedBookmark?>(null) }
+    var sortMenuExpanded by remember { mutableStateOf(false) }
+    var showClearAllDialog by remember { mutableStateOf(false) }
     val context = LocalContext.current
 
     // Drive the Undo snackbar off the most recently deleted bookmark.
@@ -100,6 +116,28 @@ fun BookmarksScreen(
         }
     }
 
+    // A failed write goes to the same snackbar, and only there: the bookmarks on screen
+    // are still correct, so a delete that did not go through must not take the list with
+    // it. No action — there is nothing useful to offer beyond trying again by hand.
+    val writeError = state.writeError
+    LaunchedEffect(writeError) {
+        if (writeError != null) {
+            snackbarHostState.showSnackbar(
+                message = context.getString(writeError.message),
+                duration = SnackbarDuration.Short,
+            )
+            viewModel.onEvent(BookmarksEvent.DismissWriteError)
+        }
+    }
+
+    if (showClearAllDialog) {
+        ClearAllBookmarksDialog(
+            total = statsState.totalBookmarks,
+            onConfirm = { viewModel.onEvent(BookmarksEvent.ClearAllBookmarks) },
+            onDismiss = { showClearAllDialog = false },
+        )
+    }
+
     NimazScreenScaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
@@ -109,22 +147,65 @@ fun BookmarksScreen(
                     stringResource(R.string.bookmarks_count, statsState.totalBookmarks)
                 } else null,
                 onBackClick = onNavigateBack,
-                scrollBehavior = scrollBehavior
+                scrollBehavior = scrollBehavior,
+                actions = {
+                    if (state.allBookmarks.isNotEmpty()) {
+                        IconButton(onClick = { sortMenuExpanded = true }) {
+                            NimazIcon(
+                                Icons.AutoMirrored.Filled.Sort,
+                                contentDescription = stringResource(R.string.bookmarks_sort)
+                            )
+                        }
+                        NimazDropdownMenu(
+                            expanded = sortMenuExpanded,
+                            onDismissRequest = { sortMenuExpanded = false },
+                        ) {
+                            BookmarkSortOrder.entries.forEach { order ->
+                                NimazDropdownRow(
+                                    text = stringResource(order.labelRes()),
+                                    selected = state.sortOrder == order,
+                                    onClick = {
+                                        sortMenuExpanded = false
+                                        viewModel.onEvent(BookmarksEvent.SetSortOrder(order))
+                                    },
+                                )
+                            }
+                            NimazDropdownRow(
+                                text = stringResource(R.string.bookmarks_clear_all),
+                                leadingIcon = Icons.Filled.DeleteSweep,
+                                destructive = true,
+                                onClick = {
+                                    sortMenuExpanded = false
+                                    showClearAllDialog = true
+                                },
+                            )
+                        }
+                    }
+                }
             )
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
+        val readError = state.error
         when {
             state.isLoading && state.allBookmarks.isEmpty() -> {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
-                }
+                NimazLoadingState(modifier = Modifier.padding(paddingValues))
             }
+
+            // Before the empty branch: an empty list is also what a failed load leaves
+            // behind, and "no bookmarks yet" is a painful thing to tell someone who has
+            // saved a hundred of them.
+            readError != null -> NimazErrorState(
+                title = stringResource(readError.message),
+                message = stringResource(R.string.bookmarks_load_failed_body),
+                kind = readError.kind,
+                details = readError.details,
+                primaryAction = NimazErrorDefaults.retry(
+                    onRetry = { viewModel.onEvent(BookmarksEvent.Retry) },
+                    label = stringResource(R.string.try_again),
+                ),
+                modifier = Modifier.padding(paddingValues),
+            )
 
             state.allBookmarks.isEmpty() -> {
                 NimazEmptyState(
@@ -148,6 +229,17 @@ fun BookmarksScreen(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     item {
+                        NimazSearchBar(
+                            query = state.searchQuery,
+                            onQueryChange = {
+                                viewModel.onEvent(BookmarksEvent.SetSearchQuery(it))
+                            },
+                            onClear = { viewModel.onEvent(BookmarksEvent.SetSearchQuery("")) },
+                            placeholder = stringResource(R.string.bookmarks_search_placeholder)
+                        )
+                    }
+
+                    item {
                         BookmarkFilterTabs(
                             selectedFilter = state.selectedFilter,
                             allCount = statsState.totalBookmarks,
@@ -156,6 +248,19 @@ fun BookmarksScreen(
                             duaCount = statsState.duaCount,
                             onFilterSelected = { viewModel.onEvent(BookmarksEvent.SetFilter(it)) }
                         )
+                    }
+
+                    if (state.filteredBookmarks.isEmpty()) {
+                        item {
+                            NimazEmptyState(
+                                title = stringResource(R.string.bookmarks_no_matches),
+                                message = stringResource(R.string.bookmarks_no_matches_hint),
+                                icon = Icons.Default.Bookmark,
+                                iconTint = MaterialTheme.colorScheme.onSurfaceVariant
+                                    .copy(alpha = 0.5f),
+                                modifier = Modifier.padding(vertical = 32.dp)
+                            )
+                        }
                     }
 
                     items(
@@ -331,6 +436,56 @@ private fun NoteEditorSheet(
             placeholder = { Text(stringResource(R.string.note_hint)) }
         )
         Spacer(modifier = Modifier.height(8.dp))
+    }
+}
+
+/**
+ * The label for a sort order. Lives here rather than on the enum so the enum stays a
+ * plain domain-shaped value with no Android dependency.
+ */
+@StringRes
+private fun BookmarkSortOrder.labelRes(): Int = when (this) {
+    BookmarkSortOrder.DATE_NEWEST -> R.string.bookmarks_sort_newest
+    BookmarkSortOrder.DATE_OLDEST -> R.string.bookmarks_sort_oldest
+    BookmarkSortOrder.TYPE -> R.string.bookmarks_sort_type
+    BookmarkSortOrder.ALPHABETICAL -> R.string.bookmarks_sort_alphabetical
+}
+
+/**
+ * Confirmation for clearing every bookmark.
+ *
+ * Destructive, irreversible, and — by decision — **not undoable**: the dialog is the
+ * safety net, so it names exactly what disappears rather than saying "are you sure".
+ * Quran, Hadith and Dua bookmarks all go, which is not obvious from a button on a
+ * screen that is currently filtered to one of them.
+ */
+@Composable
+private fun ClearAllBookmarksDialog(
+    total: Int,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    NimazDialog(
+        title = stringResource(R.string.bookmarks_clear_all_title),
+        titleIcon = Icons.Filled.DeleteSweep,
+        accentColor = MaterialTheme.colorScheme.error,
+        onDismiss = onDismiss,
+        actions = {
+            NimazDialogCancelButton(onClick = onDismiss)
+            NimazDialogDestructiveButton(
+                text = stringResource(R.string.bookmarks_clear_all_confirm),
+                onClick = {
+                    onConfirm()
+                    onDismiss()
+                },
+            )
+        },
+    ) {
+        Text(
+            text = stringResource(R.string.bookmarks_clear_all_body, total),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }
 

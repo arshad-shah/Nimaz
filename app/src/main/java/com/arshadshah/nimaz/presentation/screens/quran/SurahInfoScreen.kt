@@ -16,7 +16,6 @@ import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.AccountTree
 import androidx.compose.material.icons.filled.FormatListNumbered
 import androidx.compose.material.icons.filled.Layers
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -37,6 +36,7 @@ import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconButton
+import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
 import com.arshadshah.nimaz.presentation.components.molecules.SurahMetaStat
@@ -46,8 +46,10 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuItem
 import com.arshadshah.nimaz.presentation.components.molecules.SurahHeaderCartouche
 import com.arshadshah.nimaz.presentation.components.organisms.BottomActions
 import com.arshadshah.nimaz.presentation.components.organisms.NimazTopAppBar
-import com.arshadshah.nimaz.presentation.viewmodel.QuranEvent
-import com.arshadshah.nimaz.presentation.viewmodel.QuranViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.quran.QuranEvent
+import com.arshadshah.nimaz.presentation.viewmodel.quran.QuranViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.quran.SurahThematicEvent
+import com.arshadshah.nimaz.presentation.viewmodel.quran.SurahThematicViewModel
 
 /**
  * What a surah is, and where to go to learn more about it.
@@ -71,15 +73,19 @@ fun SurahInfoScreen(
     onOpenBackground: () -> Unit = {},
     onOpenPassages: () -> Unit = {},
     onOpenSubjects: () -> Unit = {},
-    viewModel: QuranViewModel = hiltViewModel()
+    viewModel: QuranViewModel = hiltViewModel(),
+    // The thematic layer comes from the ViewModel that owns it and that the two prose screens
+    // already use, rather than a second copy of the same three reads inside QuranViewModel.
+    thematicViewModel: SurahThematicViewModel = hiltViewModel(),
 ) {
     val homeState by viewModel.homeState.collectAsStateWithLifecycle()
-    val thematic by viewModel.surahThematic.collectAsStateWithLifecycle()
+    val thematic by thematicViewModel.thematic.collectAsStateWithLifecycle()
     val audioState by viewModel.audioState.collectAsStateWithLifecycle()
     val surah = homeState.surahs.find { it.number == surahNumber }
 
     LaunchedEffect(surahNumber) {
         viewModel.onEvent(QuranEvent.LoadSurahInfo(surahNumber))
+        thematicViewModel.onEvent(SurahThematicEvent.Load(surahNumber))
     }
 
     // The audio control bar should only reflect playback that belongs to THIS
@@ -201,7 +207,7 @@ fun SurahInfoScreen(
                     .padding(paddingValues),
                 contentAlignment = Alignment.Center
             ) {
-                CircularProgressIndicator()
+                NimazLoadingState()
             }
         }
     }

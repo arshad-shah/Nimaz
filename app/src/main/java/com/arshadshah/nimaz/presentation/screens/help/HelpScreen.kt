@@ -34,14 +34,17 @@ import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.HelpSearchResult
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorState
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionTitle
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazSearchBar
-import com.arshadshah.nimaz.presentation.viewmodel.HelpEvent
-import com.arshadshah.nimaz.presentation.viewmodel.HelpViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.help.HelpEvent
+import com.arshadshah.nimaz.presentation.viewmodel.help.HelpViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -93,6 +96,24 @@ fun HelpScreen(
                             result = result,
                             onClick = { onNavigateToTopic(result.topicId) })
                     }
+                }
+            } else if (state.error != null) {
+                // SECTION, not FULLSCREEN, and inside the list so the search bar above it
+                // stays usable: search reads a different code path, and a reader whose
+                // topic list failed can still find a topic by name.
+                item {
+                    val error = state.error!!
+                    NimazErrorState(
+                        title = stringResource(error.message),
+                        message = stringResource(R.string.help_load_failed_body),
+                        kind = error.kind,
+                        details = error.details,
+                        variant = NimazErrorVariant.SECTION,
+                        primaryAction = NimazErrorDefaults.retry(
+                            onRetry = { viewModel.onEvent(HelpEvent.Retry) },
+                            label = stringResource(R.string.try_again),
+                        ),
+                    )
                 }
             } else {
                 item {

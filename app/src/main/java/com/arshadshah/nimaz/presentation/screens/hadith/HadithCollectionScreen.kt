@@ -51,6 +51,7 @@ import com.arshadshah.nimaz.core.share.Shareables
 import com.arshadshah.nimaz.core.util.formatGrouped
 import com.arshadshah.nimaz.domain.model.Hadith
 import com.arshadshah.nimaz.domain.model.HadithBook
+import com.arshadshah.nimaz.domain.model.HadithGrade
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.components.atoms.HadithArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.NimazActionPill
@@ -61,6 +62,8 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorState
 import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.atoms.NimazPillActionButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
@@ -69,9 +72,15 @@ import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazStatData
 import com.arshadshah.nimaz.presentation.components.organisms.NimazStatsGrid
 import com.arshadshah.nimaz.presentation.theme.NimazColors
-import com.arshadshah.nimaz.presentation.viewmodel.HadithEvent
-import com.arshadshah.nimaz.presentation.viewmodel.HadithViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.content.HadithEvent
+import com.arshadshah.nimaz.presentation.viewmodel.content.HadithViewModel
 import kotlinx.coroutines.launch
+
+/**
+ * The grades a reader can browse by. Mawḍūʿ (fabricated) is deliberately absent: it is a
+ * warning label on an individual narration, not a shelf anyone should be invited to read.
+ */
+private val BROWSABLE_GRADES = listOf(HadithGrade.SAHIH, HadithGrade.HASAN, HadithGrade.DAIF)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -80,6 +89,7 @@ fun HadithCollectionScreen(
     onNavigateToBook: (String) -> Unit,
     onNavigateToBookmarks: () -> Unit,
     onNavigateToSearch: () -> Unit,
+    onNavigateToGrade: (HadithGrade) -> Unit = {},
     viewModel: HadithViewModel = hiltViewModel()
 ) {
     val state by viewModel.collectionState.collectAsStateWithLifecycle()
@@ -112,10 +122,24 @@ fun HadithCollectionScreen(
             )
         }
     ) { paddingValues ->
-        if (state.isLoading) {
-            NimazLoadingState(modifier = Modifier.padding(paddingValues))
-        } else {
-            LazyColumn(
+        val error = state.error
+        when {
+            state.isLoading && state.books.isEmpty() ->
+                NimazLoadingState(modifier = Modifier.padding(paddingValues))
+
+            error != null -> NimazErrorState(
+                title = stringResource(error.message),
+                message = stringResource(R.string.hadith_load_failed_body),
+                kind = error.kind,
+                details = error.details,
+                primaryAction = NimazErrorDefaults.retry(
+                    onRetry = { viewModel.onEvent(HadithEvent.Retry) },
+                    label = stringResource(R.string.try_again),
+                ),
+                modifier = Modifier.padding(paddingValues),
+            )
+
+            else -> LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
@@ -176,6 +200,20 @@ fun HadithCollectionScreen(
                                 }
                             }
                         },
+                        modifier = Modifier.padding(horizontal = 20.dp)
+                    )
+                }
+
+                item {
+                    NimazSectionHeader(
+                        title = stringResource(R.string.hadith_browse_by_grade),
+                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)
+                    )
+                }
+
+                item {
+                    GradeFilterRow(
+                        onGradeClick = onNavigateToGrade,
                         modifier = Modifier.padding(horizontal = 20.dp)
                     )
                 }
@@ -392,5 +430,31 @@ private fun getBookGradient(bookId: String): List<Color> {
         "abudawud" -> NimazColors.HadithCollectionColors.AbuDawud
         "ibnmajah" -> NimazColors.HadithCollectionColors.IbnMajah
         else -> NimazColors.HadithCollectionColors.Default
+    }
+}
+
+/**
+ * The three grades as tappable pills. Tapping one opens the reader over every hadith in the
+ * collection carrying that grade — the only route to `HadithEvent.FilterByGrade`, which had a
+ * handler and an analytics event but nothing that could dispatch it.
+ */
+@Composable
+private fun GradeFilterRow(
+    onGradeClick: (HadithGrade) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        BROWSABLE_GRADES.forEach { grade ->
+            hadithGradeDisplay(grade)?.let { display ->
+                HadithGradeChip(
+                    label = display.label,
+                    color = display.color,
+                    onClick = { onGradeClick(grade) }
+                )
+            }
+        }
     }
 }

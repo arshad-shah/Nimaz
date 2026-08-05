@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.presentation.screens.settings
 
+import com.arshadshah.nimaz.domain.model.AsrCalculation
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -38,11 +39,10 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazNumberStepper
 import com.arshadshah.nimaz.presentation.components.molecules.NimazPickerItem
 import com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsItem
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
-import com.arshadshah.nimaz.presentation.viewmodel.AsrJuristicMethod
-import com.arshadshah.nimaz.presentation.viewmodel.HighLatitudeRule
-import com.arshadshah.nimaz.presentation.viewmodel.NotificationSummary
-import com.arshadshah.nimaz.presentation.viewmodel.SettingsEvent
-import com.arshadshah.nimaz.presentation.viewmodel.SettingsViewModel
+import com.arshadshah.nimaz.domain.model.HighLatitudeRule
+import com.arshadshah.nimaz.presentation.viewmodel.settings.NotificationSummary
+import com.arshadshah.nimaz.presentation.viewmodel.settings.SettingsEvent
+import com.arshadshah.nimaz.presentation.viewmodel.settings.SettingsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -100,8 +100,8 @@ fun PrayerSettingsScreen(
                         icon = Icons.Default.WbSunny,
                         title = stringResource(R.string.asr_calculation),
                         value = when (prayerState.asrMethod) {
-                            AsrJuristicMethod.STANDARD -> stringResource(R.string.asr_standard)
-                            AsrJuristicMethod.HANAFI -> stringResource(R.string.asr_hanafi)
+                            AsrCalculation.STANDARD -> stringResource(R.string.asr_standard)
+                            AsrCalculation.HANAFI -> stringResource(R.string.asr_hanafi)
                         },
                         onClick = { showAsrMethodDialog = true }
                     )
@@ -110,8 +110,8 @@ fun PrayerSettingsScreen(
                         icon = Icons.Default.WbSunny,
                         title = stringResource(R.string.high_latitude_method),
                         value = when (prayerState.highLatitudeRule) {
-                            HighLatitudeRule.MIDDLE_OF_NIGHT -> stringResource(R.string.middle_of_night)
-                            HighLatitudeRule.SEVENTH_OF_NIGHT -> stringResource(R.string.seventh_of_night)
+                            HighLatitudeRule.MIDDLE_OF_THE_NIGHT -> stringResource(R.string.middle_of_night)
+                            HighLatitudeRule.SEVENTH_OF_THE_NIGHT -> stringResource(R.string.seventh_of_night)
                             HighLatitudeRule.TWILIGHT_ANGLE -> stringResource(R.string.twilight_angle)
                         },
                         onClick = { showHighLatitudeDialog = true }
@@ -265,12 +265,12 @@ fun PrayerSettingsScreen(
             title = stringResource(R.string.asr_calculation),
             items = listOf(
                 NimazPickerItem(
-                    value = AsrJuristicMethod.STANDARD,
+                    value = AsrCalculation.STANDARD,
                     title = stringResource(R.string.asr_standard),
                     description = stringResource(R.string.asr_standard_desc),
                 ),
                 NimazPickerItem(
-                    value = AsrJuristicMethod.HANAFI,
+                    value = AsrCalculation.HANAFI,
                     title = stringResource(R.string.asr_hanafi),
                     description = stringResource(R.string.asr_hanafi_desc),
                 ),
@@ -286,12 +286,12 @@ fun PrayerSettingsScreen(
             title = stringResource(R.string.high_latitude_method),
             items = listOf(
                 NimazPickerItem(
-                    value = HighLatitudeRule.MIDDLE_OF_NIGHT,
+                    value = HighLatitudeRule.MIDDLE_OF_THE_NIGHT,
                     title = stringResource(R.string.middle_of_night),
                     description = stringResource(R.string.high_lat_middle_desc),
                 ),
                 NimazPickerItem(
-                    value = HighLatitudeRule.SEVENTH_OF_NIGHT,
+                    value = HighLatitudeRule.SEVENTH_OF_THE_NIGHT,
                     title = stringResource(R.string.seventh_of_night),
                     description = stringResource(R.string.high_lat_seventh_desc),
                 ),

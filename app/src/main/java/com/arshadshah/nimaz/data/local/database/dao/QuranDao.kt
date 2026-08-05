@@ -215,6 +215,7 @@ interface QuranDao {
     )
     suspend fun getAyahWithTextById(ayahId: Int): AyahWithText?
 
+
     @Query(
         """
         SELECT a.*,

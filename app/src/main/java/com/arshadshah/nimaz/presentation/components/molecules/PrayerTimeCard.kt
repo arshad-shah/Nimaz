@@ -37,7 +37,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.getArabicPrayerName
 import com.arshadshah.nimaz.presentation.components.atoms.getPrayerColor
 import com.arshadshah.nimaz.presentation.components.atoms.getPrayerIcon
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
-import com.arshadshah.nimaz.presentation.viewmodel.PrayerTimeDisplay
+import com.arshadshah.nimaz.presentation.model.PrayerTimeDisplay
 import kotlin.time.Instant
 import com.arshadshah.nimaz.presentation.components.atoms.clockTimeText
 

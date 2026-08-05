@@ -28,8 +28,8 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazSearchBar
 import com.arshadshah.nimaz.presentation.theme.NimazSpacing
-import com.arshadshah.nimaz.presentation.viewmodel.AsmaUnNabiEvent
-import com.arshadshah.nimaz.presentation.viewmodel.AsmaUnNabiViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.content.CatalogEvent
+import com.arshadshah.nimaz.presentation.viewmodel.content.AsmaUnNabiViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -56,21 +56,21 @@ fun AsmaUnNabiListScreen(
         ) {
             NimazSearchBar(
                 query = state.searchQuery,
-                onQueryChange = { viewModel.onEvent(AsmaUnNabiEvent.Search(it)) },
+                onQueryChange = { viewModel.onEvent(CatalogEvent.Search(it)) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = NimazSpacing.Large, vertical = NimazSpacing.Small),
                 placeholder = stringResource(R.string.asma_un_nabi_search_hint),
                 showClearButton = state.searchQuery.isNotEmpty(),
-                onClear = { viewModel.onEvent(AsmaUnNabiEvent.ClearSearch) },
-                onSearch = { viewModel.onEvent(AsmaUnNabiEvent.Search(it)) }
+                onClear = { viewModel.onEvent(CatalogEvent.ClearSearch) },
+                onSearch = { viewModel.onEvent(CatalogEvent.Search(it)) }
             )
 
             // Filter Chips
             NameFilterRow(
                 showFavoritesOnly = state.showFavoritesOnly,
-                onShowAll = { viewModel.onEvent(AsmaUnNabiEvent.ToggleFavoritesFilter) },
-                onShowFavorites = { viewModel.onEvent(AsmaUnNabiEvent.ToggleFavoritesFilter) },
+                onShowAll = { viewModel.onEvent(CatalogEvent.ToggleFavoritesFilter) },
+                onShowFavorites = { viewModel.onEvent(CatalogEvent.ToggleFavoritesFilter) },
                 accent = accent,
                 allLabel = stringResource(R.string.all),
                 favoritesLabel = stringResource(R.string.favorites),
@@ -84,7 +84,7 @@ fun AsmaUnNabiListScreen(
             if (state.isLoading) {
                 NimazLoadingState()
             } else {
-                val displayList = state.filteredNames
+                val displayList = state.filteredItems
 
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
@@ -107,7 +107,7 @@ fun AsmaUnNabiListScreen(
                             accent = accent,
                             onClick = { onNavigateToDetail(name.id) },
                             onFavoriteClick = {
-                                viewModel.onEvent(AsmaUnNabiEvent.ToggleFavorite(name.id))
+                                viewModel.onEvent(CatalogEvent.ToggleFavorite(name.id))
                             }
                         )
                     }
