@@ -27,22 +27,12 @@ class ScreenStateConventionTest {
 
     /**
      * Screens that still centre their own `CircularProgressIndicator` instead of using
-     * `NimazLoadingState`. Emptied by layer 5.
+     * `NimazLoadingState`.
+     *
+     * **Empty**, as of layer 5 — 25 call sites across 19 screens, gone. This one is a pure
+     * ratchet now: the next hand-rolled spinner fails the PR that introduces it.
      */
-    private val acceptedSpinners = setOf(
-        "AsmaUnNabiDetailScreen.kt",
-        "LocationScreen.kt",
-        "QuranHomeScreen.kt",
-        "QuranReaderScreen.kt",
-        "QuranTopicDetailScreen.kt",
-        "QuranTopicsScreen.kt",
-        "SearchScreen.kt",
-        "SurahInfoScreen.kt",
-        // Renders QuranTopicsViewModel's state, not the thematic one — its own group.
-        "SurahSubjectsScreen.kt",
-        "SyncScreen.kt",
-        "TafseerScreen.kt",
-    )
+    private val acceptedSpinners = emptySet<String>()
 
     /**
      * `UiState` files declaring an `error` that no screen reads — a failure the user is
@@ -103,18 +93,14 @@ class ScreenStateConventionTest {
     fun `no screen rolls its own loading spinner`() {
         val offenders = screensDir.walkTopDown()
             .filter { it.extension == "kt" }
-            .filter { file ->
-                file.readText()
-                    .lineSequence()
-                    .filterNot { it.trimStart().startsWith("//") }
-                    .any { "CircularProgressIndicator(" in it }
-            }
+            .filter { file -> indeterminateSpinners(file.readText()).isNotEmpty() }
             .map { it.name }
             .toSortedSet()
 
-        // A determinate `LinearProgressIndicator` is deliberately not checked: a bar
-        // reporting how far along a known-length operation is (widget pin, sync, the
-        // fasting day) is not a loading state, and NimazLoadingState cannot express it.
+        // Determinate indicators are deliberately not checked, `Circular` as well as
+        // `Linear`: a ring or bar reporting how far along a known-length operation is —
+        // the sync transfer, the khatam ring, the widget pin, the fasting day — is not a
+        // loading state, and NimazLoadingState cannot express it.
         assertThat(offenders - acceptedSpinners).isEmpty()
         assertThat(acceptedSpinners - offenders).isEmpty()
     }
@@ -145,6 +131,29 @@ class ScreenStateConventionTest {
 
         assertThat(offenders - acceptedSilentFailures).isEmpty()
         assertThat(acceptedSilentFailures - offenders).isEmpty()
+    }
+
+    /**
+     * The hand-rolled **indeterminate** spinners in [source] — the ones that should be
+     * `NimazLoadingState`.
+     *
+     * A `CircularProgressIndicator(progress = …)` is excluded for the same reason the
+     * `Linear` ones always were: it reports a fraction of a known-length operation, which
+     * is a different thing from "waiting", and the component has nothing to say about it.
+     * Two survive on that basis — the sync transfer ring and the khatam progress ring.
+     */
+    private fun indeterminateSpinners(source: String): List<Int> {
+        val found = mutableListOf<Int>()
+        var from = 0
+        while (true) {
+            val at = source.indexOf("CircularProgressIndicator(", from)
+            if (at < 0) return found
+            from = at + 1
+            val lineStart = source.lastIndexOf('\n', at) + 1
+            if (source.substring(lineStart, at).trimStart().startsWith("//")) continue
+            val call = source.substring(at, minOf(source.length, callEnd(source, at)))
+            if (!Regex("""\bprogress\s*=""").containsMatchIn(call)) found += at
+        }
     }
 
     /**
