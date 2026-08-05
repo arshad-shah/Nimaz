@@ -12,7 +12,6 @@ import com.arshadshah.nimaz.core.util.PrayerNotificationScheduler
 import com.arshadshah.nimaz.data.audio.AdhanAudioManager
 import com.arshadshah.nimaz.data.audio.AdhanDownloadService
 import com.arshadshah.nimaz.data.audio.AdhanSound
-import com.arshadshah.nimaz.data.local.user.NimazUserDatabase
 import com.arshadshah.nimaz.domain.model.HighLatitudeRule
 import com.arshadshah.nimaz.domain.model.AsrCalculation
 import com.arshadshah.nimaz.domain.model.CalculationMethod
@@ -21,6 +20,7 @@ import com.arshadshah.nimaz.domain.model.MushafScript
 import com.arshadshah.nimaz.domain.model.PrayerAlertStyle
 import com.arshadshah.nimaz.domain.model.PrayerTimes
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
+import com.arshadshah.nimaz.domain.usecase.ClearAllUserDataUseCase
 import com.arshadshah.nimaz.domain.usecase.notification.RescheduleNotificationsUseCase
 import com.arshadshah.nimaz.domain.usecase.PrayerUseCases
 import com.arshadshah.nimaz.domain.usecase.QuranUseCases
@@ -103,7 +103,7 @@ class SettingsViewModel @Inject constructor(
     // calls in this file are the analytics catalog's job (#355), not this layer's.
     private val telemetry: Telemetry,
     val adhanAudioManager: AdhanAudioManager,
-    private val userDatabase: NimazUserDatabase,
+    private val clearAllUserData: ClearAllUserDataUseCase,
     private val todayProvider: TodayProvider,
 ) : ViewModel() {
 
@@ -1103,17 +1103,7 @@ class SettingsViewModel @Inject constructor(
             // data" clears that one — and it is a much more honest operation for it: the
             // content database is not touched at all, so there is no way for this to reach
             // the corpus, and no way for it to miss a table by forgetting a DAO.
-            userDatabase.bookmarkDao().clear()
-            userDatabase.progressDao().clear()
-            userDatabase.prayerDao().deleteAllUserData()
-            userDatabase.fastingDao().deleteAllUserData()
-            userDatabase.zakatDao().deleteAllUserData()
-            userDatabase.locationDao().deleteAllUserData()
-            userDatabase.tasbihSessionDao().deleteAllSessions()
-            userDatabase.tafseerUserDao().deleteAllUserData()
-            userDatabase.readingProgressDao().clear()
-            userDatabase.khatamDao().deleteAllUserData()
-            userDatabase.customPresetDao().clear()
+            clearAllUserData()
 
             // The content database is deliberately not touched. Content is not user data: the
             // corpus, and the presets we ship, are ours to replace and never theirs to lose.
