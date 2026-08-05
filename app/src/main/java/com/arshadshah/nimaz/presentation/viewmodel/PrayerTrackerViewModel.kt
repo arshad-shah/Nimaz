@@ -1,8 +1,8 @@
 package com.arshadshah.nimaz.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.arshadshah.nimaz.core.monitoring.AppAnalytics
+import com.arshadshah.nimaz.core.monitoring.Telemetry
+import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.core.util.toUtcMidnightMillis
 import com.arshadshah.nimaz.domain.model.Location
 import com.arshadshah.nimaz.domain.model.PrayerName
@@ -12,11 +12,12 @@ import com.arshadshah.nimaz.domain.model.PrayerStatus
 import com.arshadshah.nimaz.domain.model.PrayerTimes
 import com.arshadshah.nimaz.domain.usecase.PrayerUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import java.time.LocalDate
 import javax.inject.Inject
 
@@ -55,6 +56,26 @@ enum class StatsPeriod {
     WEEK, MONTH, YEAR, ALL_TIME
 }
 
+/**
+ * The **inclusive** first and last day a [StatsPeriod] covers, ending today.
+ *
+ * Every window used to start a day too early: `WEEK` ran `today-7 .. today` and the caller
+ * then made the end exclusive with `plusDays(1)`, so the query spanned eight days. A user
+ * who prayed all five prayers for seven days but missed three on the eighth day back read
+ * "37/40" under a chip labelled *Week*. The end is still made exclusive by the caller, so a
+ * window of `n` days starts `n - 1` days back.
+ *
+ * `ALL_TIME` is a floor rather than a window — nothing is counted out of it — so it keeps its
+ * ten-year reach.
+ */
+internal fun statsWindow(period: StatsPeriod, today: LocalDate): Pair<LocalDate, LocalDate> =
+    when (period) {
+        StatsPeriod.WEEK -> today.minusDays(6)
+        StatsPeriod.MONTH -> today.minusMonths(1).plusDays(1)
+        StatsPeriod.YEAR -> today.minusYears(1).plusDays(1)
+        StatsPeriod.ALL_TIME -> today.minusYears(10)
+    } to today
+
 sealed interface PrayerTrackerEvent {
     data class SelectDate(val date: LocalDate) : PrayerTrackerEvent
     data class UpdatePrayerStatus(
@@ -79,7 +100,8 @@ sealed interface PrayerTrackerEvent {
 
 @HiltViewModel
 class PrayerTrackerViewModel @Inject constructor(
-    private val prayerUseCases: PrayerUseCases
+    private val prayerUseCases: PrayerUseCases,
+    private val telemetry: Telemetry
 ) : ViewModel() {
 
     private val _trackerState = MutableStateFlow(PrayerTrackerUiState())
@@ -95,13 +117,22 @@ class PrayerTrackerViewModel @Inject constructor(
     val historyState: StateFlow<PrayerHistoryUiState> = _historyState.asStateFlow()
 
     private var currentLocation: Location? = null
-    private var dateRecordsJob: kotlinx.coroutines.Job? = null
+    private var dateRecordsJob: Job? = null
 
     // The history range is re-requested every time the user changes period. Like
     // `dateRecordsJob` above, this collects a Room flow that never completes, so without a
     // handle each range left a collector alive on `_historyState` and an earlier range could
     // redraw the chart under a later one. (AP-7.1b.)
-    private var historyJob: kotlinx.coroutines.Job? = null
+    private var historyJob: Job? = null
+
+    // The same hazard twice more, both missed when the two above were fixed — because neither
+    // takes a parameter, so the sweep that found those read them as one-shot observers.
+    // `loadStats` is re-entered from `init`, `SetStatsPeriod` and `LoadStats` (it takes its
+    // period from `_statsState`), and `loadQadaPrayers` from `init` and `LoadQadaPrayers`.
+    // Un-handled, `loadQadaPrayers` left a collector per call and `loadStats` a read in
+    // flight per call, the slowest of which won.
+    private var statsJob: Job? = null
+    private var qadaJob: Job? = null
 
     init {
         loadCurrentLocation()
@@ -113,20 +144,20 @@ class PrayerTrackerViewModel @Inject constructor(
     fun onEvent(event: PrayerTrackerEvent) {
         when (event) {
             is PrayerTrackerEvent.MarkPrayerPrayed ->
-                AppAnalytics.logPrayerTracked(event.prayerName.name, "prayed", event.isJamaah)
+                telemetry.prayerTracked(event.prayerName.name, "prayed", event.isJamaah)
 
             is PrayerTrackerEvent.MarkPrayerMissed ->
-                AppAnalytics.logPrayerTracked(event.prayerName.name, "missed")
+                telemetry.prayerTracked(event.prayerName.name, "missed")
 
             is PrayerTrackerEvent.UpdatePrayerStatus ->
-                AppAnalytics.logPrayerTracked(
+                telemetry.prayerTracked(
                     event.prayerName.name,
                     event.status.name,
                     event.isJamaah
                 )
 
             is PrayerTrackerEvent.MarkQadaCompleted ->
-                AppAnalytics.logFeatureUsed("prayer_tracker", "qada_completed")
+                telemetry.featureUsed(DOMAIN, "qada_completed")
 
             else -> {}
         }
@@ -156,7 +187,8 @@ class PrayerTrackerViewModel @Inject constructor(
     }
 
     private fun loadCurrentLocation() {
-        viewModelScope.launch {
+        // Started once from `init`, so it needs no handle (§4.1).
+        launchSafely(telemetry, DOMAIN, "observe_location") {
             prayerUseCases.getCurrentLocation().collect { location ->
                 currentLocation = location
                 // Reload prayer times if we have a location
@@ -178,7 +210,12 @@ class PrayerTrackerViewModel @Inject constructor(
 
         // Cancel previous date's Flow collection before starting new one
         dateRecordsJob?.cancel()
-        dateRecordsJob = viewModelScope.launch {
+        dateRecordsJob = launchSafely(
+            telemetry,
+            DOMAIN,
+            "load_date_records",
+            onFailure = { _trackerState.update { it.copy(isLoading = false) } }
+        ) {
             // Room's reactive Flow ensures cross-screen sync: when HomeScreen or
             // PrayerTracker updates a prayer status via the repository, Room emits
             // the change to all active Flow collectors automatically.
@@ -211,10 +248,11 @@ class PrayerTrackerViewModel @Inject constructor(
             System.currentTimeMillis()
         } else null
 
-        viewModelScope.launch {
+        launchSafely(telemetry, DOMAIN, "update_status") {
             prayerUseCases.updatePrayerStatus(dateEpoch, prayerName, status, prayedAt, isJamaah)
-            // Refresh stats after update
-            loadStats()
+            // No `loadStats()` here. The stats collector observes the same table, so Room
+            // re-emits to it on this write. Re-reading imperatively is what put a second
+            // load in flight and let a period change race it.
         }
     }
 
@@ -227,7 +265,7 @@ class PrayerTrackerViewModel @Inject constructor(
     }
 
     private fun markQadaCompleted(record: PrayerRecord) {
-        viewModelScope.launch {
+        launchSafely(telemetry, DOMAIN, "complete_qada") {
             prayerUseCases.updatePrayerStatus(
                 record.date,
                 record.prayerName,
@@ -235,8 +273,9 @@ class PrayerTrackerViewModel @Inject constructor(
                 System.currentTimeMillis(),
                 false
             )
-            loadQadaPrayers()
-            loadStats()
+            // The qada list and the stats are both Room-backed observers of this table;
+            // the write re-emits to both. Re-calling the loaders here is what left three
+            // live collectors on the missed-prayer list after two completions.
         }
     }
 
@@ -249,42 +288,65 @@ class PrayerTrackerViewModel @Inject constructor(
         val period = _statsState.value.period
         val now = LocalDate.now()
 
-        val (startDate, endDate) = when (period) {
-            StatsPeriod.WEEK -> now.minusDays(7) to now
-            StatsPeriod.MONTH -> now.minusMonths(1) to now
-            StatsPeriod.YEAR -> now.minusYears(1) to now
-            StatsPeriod.ALL_TIME -> now.minusYears(10) to now
-        }
-
+        val (startDate, endDate) = statsWindow(period, now)
         val startEpoch = startDate.toUtcMidnightMillis()
         val endEpoch = endDate.plusDays(1).toUtcMidnightMillis()
         val currentEpoch = now.toUtcMidnightMillis()
 
-        // Always load monthly stats
-        val monthStart = now.minusMonths(1)
+        // The month summary is shown alongside every period, so it is always read.
+        val (monthStart, monthEnd) = statsWindow(StatsPeriod.MONTH, now)
         val monthStartEpoch = monthStart.toUtcMidnightMillis()
-        val monthEndEpoch = now.plusDays(1).toUtcMidnightMillis()
+        val monthEndEpoch = monthEnd.plusDays(1).toUtcMidnightMillis()
 
-        viewModelScope.launch {
-            val stats = prayerUseCases.getPrayerStats(startEpoch, endEpoch)
-            val monthlyStats = prayerUseCases.getPrayerStats(monthStartEpoch, monthEndEpoch)
-            val currentStreak = prayerUseCases.getCurrentStreak(currentEpoch)
-            val longestStreak = prayerUseCases.getLongestStreak()
+        statsJob?.cancel()
+        statsJob = launchSafely(
+            telemetry,
+            DOMAIN,
+            "load_stats",
+            onFailure = { _statsState.update { it.copy(isLoading = false) } }
+        ) {
+            // The four reads below are one-shot, but every number they produce is a view of
+            // `prayer_records` — a table Home, the widget and this screen all write. Read
+            // once and they freeze: marking Fajr on the Home card while the tracker sat in
+            // the back stack left the streak card showing the streak from before the tap.
+            // Collecting the records for the same window turns them into a subscription;
+            // Room re-emits on any write to the table, so the numbers follow it.
+            //
+            // `collectLatest` cancels a recompute a newer emission has overtaken, so a burst
+            // of writes costs one set of reads rather than one per emission.
+            prayerUseCases.getPrayerRecordsInRange(startEpoch, endEpoch).collectLatest {
+                val stats = prayerUseCases.getPrayerStats(startEpoch, endEpoch)
+                val monthlyStats = prayerUseCases.getPrayerStats(monthStartEpoch, monthEndEpoch)
+                val currentStreak = prayerUseCases.getCurrentStreak(currentEpoch)
+                val longestStreak = prayerUseCases.getLongestStreak()
 
-            _statsState.update {
-                it.copy(
-                    stats = stats,
-                    monthlyStats = monthlyStats,
-                    currentStreak = currentStreak,
-                    longestStreak = longestStreak,
-                    isLoading = false
-                )
+                // Cancelling the previous job stops an abandoned period at its next
+                // suspension point — and after the last read there isn't one, so a load
+                // that finished just as the period changed could still write. The captured
+                // period is checked against the live one so it cannot.
+                if (_statsState.value.period != period) return@collectLatest
+
+                _statsState.update {
+                    it.copy(
+                        stats = stats,
+                        monthlyStats = monthlyStats,
+                        currentStreak = currentStreak,
+                        longestStreak = longestStreak,
+                        isLoading = false
+                    )
+                }
             }
         }
     }
 
     private fun loadQadaPrayers() {
-        viewModelScope.launch {
+        qadaJob?.cancel()
+        qadaJob = launchSafely(
+            telemetry,
+            DOMAIN,
+            "load_qada",
+            onFailure = { _qadaState.update { it.copy(isLoading = false) } }
+        ) {
             prayerUseCases.getMissedPrayersRequiringQada().collect { missedPrayers ->
                 val grouped = missedPrayers.groupBy { record ->
                     val date = LocalDate.ofEpochDay(record.date / (24 * 60 * 60 * 1000))
@@ -310,7 +372,12 @@ class PrayerTrackerViewModel @Inject constructor(
         val endEpoch = endDate.plusDays(1).toUtcMidnightMillis()
 
         historyJob?.cancel()
-        historyJob = viewModelScope.launch {
+        historyJob = launchSafely(
+            telemetry,
+            DOMAIN,
+            "load_history",
+            onFailure = { _historyState.update { it.copy(isLoading = false) } }
+        ) {
             prayerUseCases.getPrayerRecordsInRange(startEpoch, endEpoch).collect { records ->
                 _historyState.update { it.copy(records = records, isLoading = false) }
             }
@@ -326,5 +393,9 @@ class PrayerTrackerViewModel @Inject constructor(
         if (!nextDay.isAfter(LocalDate.now())) {
             selectDate(nextDay)
         }
+    }
+
+    private companion object {
+        private const val DOMAIN = "prayer_tracker"
     }
 }

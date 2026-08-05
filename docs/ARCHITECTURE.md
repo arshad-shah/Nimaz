@@ -310,6 +310,28 @@ Clearing a query counts as a change of request: cancel there too, or the last co
 emission repopulates the results the user just cleared. See AP-7.1b in
 [`CLEAN_ARCHITECTURE_CHECKLIST.md`](CLEAN_ARCHITECTURE_CHECKLIST.md).
 
+**A one-shot suspend read is the same hazard.** It is easy to read the rule above as being about
+`collect`, but nothing in it depends on the flow: two `launch`es that `await` a query and then
+write the same state race exactly as two collectors do, and the slower one wins. That is how
+`PrayerTrackerViewModel.loadStats` shipped — a period switch racing a stats read left week
+numbers under a MONTH chip. Cancellation alone does not close it, either: a coroutine cancelled
+after its **last** suspension point still runs to the end of the block, so the write needs a
+guard as well as a handle.
+
+```kotlin
+statsJob?.cancel()
+statsJob = launchSafely(telemetry, DOMAIN, "load_stats", …) {
+    val stats = useCases.getStats(startEpoch, endEpoch)   // last suspension point
+    if (_state.value.period != period) return@launchSafely // …so check before writing
+    _state.update { it.copy(stats = stats) }
+}
+```
+
+**Prefer removing the trigger to guarding the race.** A number derived from a Room table does not
+need re-reading after a write to that table — subscribe to it instead, and Room re-emits. Calling
+a loader imperatively after every write is what puts the second read in flight in the first
+place, and it also freezes the value when the write comes from *another* screen.
+
 #### Derived state is computed on the UI-state class, never stored
 
 A filtered list, a resolved language, a total — anything that is a pure function of other state
