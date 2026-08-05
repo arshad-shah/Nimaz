@@ -1,7 +1,8 @@
 Neu:
 
-• „Mehr“ zeigt Fakten: heute erfasste Gebete, den Dschus deines Khatam, die Zakat dieses Jahres, das Hidschri-Datum.
-• Bis zu fünf Verknüpfungen oben anpinnen.
-• Zakat: Summe bleibt beim Tippen sichtbar, Abschnitte mit Zwischensummen, Berechnung teilbar.
-• Zakat-Felder nehmen Dezimalstellen und deine Währung.
+• Qur'an: 15 Übersetzungen, überarbeiteter Reader, Suche über Qur'an, Hadith und Bittgebete.
+• Lesezeichen: suchen, sortieren, widerrufen. Tafsir: eigene Notizen.
+• „Mehr“ zeigt Fakten — heutige Gebete, Dschus deines Khatam, Zakat dieses Jahres — plus fünf angepinnte Verknüpfungen.
+• Zakat: Summe bleibt beim Tippen sichtbar, Beträge mit Dezimalstellen in deiner Währung.
 • Fasten: aktuelle Zahlen, offene Fastentage als Zähler.
+• Klarere Lade-, Leer- und Fehlerzustände.

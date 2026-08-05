@@ -1,7 +1,8 @@
 What's new:
 
-• More reports what's true now: today's logged prayers, your khatam's juz, this year's zakat, the Hijri date.
-• Pin up to five shortcuts to the top of More.
-• Zakat: the total stays in view while you type, sections carry subtotals, and you can share a calculation.
-• Zakat amounts now take decimals and your own currency.
+• Qur'an: 15 translations, a refreshed reader, and search across Qur'an, Hadith and duas.
+• Bookmarks: search, sort, undo. Tafseer: your own notes.
+• More reports what's true — today's prayers, your khatam's juz, this year's zakat — plus five pinned shortcuts.
+• Zakat: the total stays in view as you type, and amounts take decimals in your own currency.
 • Fasting: live figures, and the fasts you owe as a badge.
+• Clearer loading, empty and error states throughout.

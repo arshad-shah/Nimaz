@@ -1,7 +1,8 @@
 Yang baru:
 
-• “Lainnya” melaporkan fakta: salat tercatat hari ini, juz khatam Anda, zakat tahun ini, tanggal Hijriah.
-• Sematkan hingga lima pintasan di bagian atas.
-• Zakat: total tetap terlihat saat mengisi, bagian dengan subtotal, perhitungan bisa dibagikan.
-• Kolom zakat menerima desimal dan mata uang Anda.
+• Al-Qur'an: 15 terjemahan, pembaca yang disegarkan, pencarian di Qur'an, hadis, dan doa.
+• Markah: cari, urutkan, batalkan. Tafsir: catatan Anda sendiri.
+• “Lainnya” melaporkan fakta — salat hari ini, juz khatam Anda, zakat tahun ini — plus lima pintasan tersemat.
+• Zakat: total tetap terlihat saat mengisi, nilai desimal dalam mata uang Anda.
 • Puasa: angka terkini, puasa qada sebagai lencana.
+• Status memuat, kosong, dan galat lebih jelas.

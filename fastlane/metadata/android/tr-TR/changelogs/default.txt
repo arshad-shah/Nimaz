@@ -1,7 +1,8 @@
 Yenilikler:
 
-• “Daha fazla” gerçeği bildirir: bugün işlenen namazlar, hatminizin cüzü, bu yılın zekâtı, hicri tarih.
-• En çok beş kısayolu en üste sabitleyin.
-• Zekât: yazarken toplam görünür kalır, bölümlerde ara toplam, hesap paylaşılabilir.
-• Zekât alanları ondalık ve kendi para biriminizi kabul eder.
+• Kur'an: 15 meal, yenilenen okuyucu, Kur'an, hadis ve dualarda arama.
+• Yer imleri: arama, sıralama, geri alma. Tefsir: kendi notlarınız.
+• “Daha fazla” gerçeği bildirir — bugünün namazları, hatminizin cüzü, bu yılın zekâtı — artı beş sabit kısayol.
+• Zekât: yazarken toplam görünür kalır, tutarlar kendi para biriminizde ondalıklı.
 • Oruç: güncel sayılar, kaza oruçları rozet olarak.
+• Daha net yükleniyor, boş ve hata durumları.
