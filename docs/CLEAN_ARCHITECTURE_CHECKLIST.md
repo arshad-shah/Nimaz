@@ -340,6 +340,33 @@ rg -n -U --multiline-dotall \
   app/src/main/java --glob '*ViewModel.kt' | grep -v 'Job = viewModelScope'
 ```
 
+### AP-7.9 · One handle for requests that are not alternatives
+
+- [x] ~~**`QuranTopicsViewModel.toggle` / `focus` / `rebaseTo`, and the catalogue detail load.**~~
+  **Resolved.** AP-7.1b says one `Job` per *identity of the request*. The follow-on question is
+  what counts as one identity, and it is not "one per function":
+
+  - `focus` and `rebaseTo` are **alternatives** — the browser is at one place at a time, and each
+    ends in a whole-state update setting `focus` *and* `level` together. They share `browseJob`,
+    cancel-and-replace. Without it, tapping crumb 0 then crumb 2 let the slower query write last
+    and the reader landed on the crumb they did not tap.
+  - `toggle` is **not** an alternative to another toggle: opening two rows is two intentions, and
+    a shared handle would throw away the first row's children. It keeps no handle, and instead
+    guards the part of its write that is position-dependent — caching a node's children is valid
+    wherever the browser is, *expanding* it is not, so a toggle resolving after a rebase caches
+    and does not open.
+
+  And the standing rule from the tracker's stats race: **cancelling is necessary, not
+  sufficient.** A coroutine cancelled after its last suspension point still runs to the end of
+  its block, so the write is checked against a `requested…Id` set synchronously at the call —
+  which `loadSurahSubjects` in the same file already did, while `loadDetail` next to it used a
+  whole-object assign that wiped the winner's already-landed previews.
+
+  Note on evidence: the browse races are pinned by failing-first tests
+  (`QuranTopicsRaceTest`). The post-suspension-point guard is **not** — awaiting a gate is a
+  cancellable suspension point, so a test cannot deterministically hold a coroutine between "read
+  returned" and "state written". It is defence, and labelled as such where it appears.
+
 ### AP-7.8 · A UiState default answering a question only the repository can
 
 - [x] ~~**`QuranViewModel`'s reader loads read the translator and Mushaf edition off
