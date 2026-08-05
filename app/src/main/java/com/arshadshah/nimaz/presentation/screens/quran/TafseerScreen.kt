@@ -114,9 +114,13 @@ fun TafseerScreen(
     // the commentary being read, but it is not droppable either — from the reader's side, a
     // note that silently failed to save is a note they wrote and lost.
     val noteError = state.noteError
+    // Resolved in composition rather than with `context.getString` inside the effect — see the
+    // same fix in BookmarksScreen. LocalContext.current does not re-resolve across a
+    // configuration change, so the message could come from the previous locale's resources.
+    val noteErrorMessage = noteError?.let { stringResource(it.message) }
     LaunchedEffect(noteError) {
-        if (noteError != null) {
-            snackbarHostState.showSnackbar(context.getString(noteError.message))
+        if (noteErrorMessage != null) {
+            snackbarHostState.showSnackbar(noteErrorMessage)
             viewModel.onEvent(TafseerEvent.DismissNoteError)
         }
     }

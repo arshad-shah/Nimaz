@@ -2063,7 +2063,14 @@
     <string name="more_qaida_lesson">Lesson %1$d of %2$d</string>
     <string name="more_zakat_not_calculated">Not calculated this year</string>
     <string name="more_zakat_due">%1$s due</string>
-    <string name="more_calendar_hijri">%1$s</string>
+    <!--
+      A bare pass-through: the Hijri date arrives already formatted and already localised by
+      HijriDateCalculator, so this exists only because SubtitleSpec identifies its copy by
+      resource id. translatable="false" states that there is nothing here to translate —
+      shipping five identical "%1$s" copies to satisfy the MissingTranslation check would be
+      five files of noise saying the same nothing.
+    -->
+    <string name="more_calendar_hijri" translatable="false">%1$s</string>
 
     <!--
       Fasting — the "Go deeper" group. Same rule as More: these report, they do not restate the
