@@ -18,4 +18,12 @@ sealed interface HadithEvent {
     data object ClearSearch : HadithEvent
     data object LoadAllBooks : HadithEvent
     data object LoadBookmarks : HadithEvent
+
+    /**
+     * Re-runs whichever loads are currently failing.
+     *
+     * One event rather than three because a screen only ever shows its own surface's
+     * error, so "retry what is broken" is unambiguous from where the reader is standing.
+     */
+    data object Retry : HadithEvent
 }

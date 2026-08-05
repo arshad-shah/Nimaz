@@ -151,6 +151,11 @@
     <string name="prophets_of_islam_subtitle">Stories and lessons from 25 prophets</string>
     <string name="hadith">Hadith</string>
     <string name="hadith_subtitle">Authentic hadith collections</string>
+    <string name="hadith_books_load_failed">The hadith collections couldn\'t be loaded</string>
+    <string name="hadith_chapters_load_failed">This collection\'s chapters couldn\'t be loaded</string>
+    <string name="hadith_load_failed">This chapter couldn\'t be loaded</string>
+    <string name="hadith_not_found">That hadith isn\'t in the collection</string>
+    <string name="hadith_load_failed_body">The hadith library is stored on your device, so trying again usually works.</string>
     <string name="duas">Duas</string>
     <string name="duas_subtitle">Daily duas and supplications</string>
     <string name="tafseer">Tafseer</string>

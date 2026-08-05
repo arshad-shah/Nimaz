@@ -3,8 +3,10 @@ package com.arshadshah.nimaz.presentation.viewmodel.content
 import androidx.compose.ui.text.font.FontFamily
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.Telemetry
+import com.arshadshah.nimaz.core.monitoring.launchBestEffort
 import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.domain.model.Hadith
 import com.arshadshah.nimaz.domain.model.HadithBook
@@ -14,8 +16,10 @@ import com.arshadshah.nimaz.domain.model.HadithGrade
 import com.arshadshah.nimaz.domain.model.HadithSearchResult
 import com.arshadshah.nimaz.domain.repository.settings.HadithDisplaySettings
 import com.arshadshah.nimaz.domain.usecase.HadithUseCases
+import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorKind
 import com.arshadshah.nimaz.presentation.theme.AmiriFontFamily
 import com.arshadshah.nimaz.presentation.theme.QuranArabicFont
+import com.arshadshah.nimaz.presentation.viewmodel.UiError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -71,6 +75,10 @@ class HadithViewModel @Inject constructor(
      * rows, which an index would not.
      */
     private var anchorHadithId: String? = null
+
+    /** What a [HadithEvent.Retry] should re-issue, per surface. */
+    private var lastBookId: String? = null
+    private var lastReaderLoad: (() -> Unit)? = null
 
     init {
         loadAllBooks()
@@ -137,11 +145,36 @@ class HadithViewModel @Inject constructor(
 
             HadithEvent.LoadAllBooks -> loadAllBooks()
             HadithEvent.LoadBookmarks -> loadBookmarks()
+            HadithEvent.Retry -> retryFailedLoads()
         }
     }
 
+    /**
+     * Re-runs only the surfaces that are actually failing, so a retry tapped in the reader
+     * does not also re-fetch the book list behind it.
+     */
+    private fun retryFailedLoads() {
+        if (_collectionState.value.error != null) loadAllBooks()
+        if (_chaptersState.value.error != null) lastBookId?.let(::loadBook)
+        if (_readerState.value.error != null) lastReaderLoad?.invoke()
+    }
+
     private fun loadAllBooks() {
-        launchSafely(telemetry, AppAnalytics.Feature.HADITH, "load_all_books") {
+        _collectionState.update { it.copy(isLoading = true, error = null) }
+        launchSafely(
+            telemetry, AppAnalytics.Feature.HADITH, "load_all_books",
+            onFailure = { throwable ->
+                _collectionState.update {
+                    it.copy(
+                        isLoading = false,
+                        error = UiError(
+                            message = R.string.hadith_books_load_failed,
+                            details = throwable.message,
+                        ),
+                    )
+                }
+            },
+        ) {
             hadithUseCases.getAllBooks().collect { books ->
                 _collectionState.update {
                     it.copy(books = books, isLoading = false)
@@ -150,33 +183,47 @@ class HadithViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Best-effort: the hadith of the day is one card on a screen whose real content is the
+     * book list, so its failure is reported and dropped rather than shown. Replacing the
+     * whole collection screen because one card could not load would be a worse outcome
+     * than the missing card.
+     */
     private fun loadHadithOfTheDay() {
-        launchSafely(telemetry, AppAnalytics.Feature.HADITH, "load_hadith_of_the_day") {
+        launchBestEffort(telemetry, AppAnalytics.Feature.HADITH, "load_hadith_of_the_day") {
             val hadith = hadithUseCases.getHadithOfTheDay()
             _collectionState.update { it.copy(hadithOfTheDay = hadith) }
         }
     }
 
     private fun loadBook(bookId: String) {
+        lastBookId = bookId
         _chaptersState.update { it.copy(isLoading = true, error = null) }
         chaptersJob?.cancel()
         chaptersJob = launchSafely(
             telemetry,
             AppAnalytics.Feature.HADITH,
             "load_book",
-            onFailure = { _chaptersState.update { it.copy(isLoading = false) } },
-        ) {
-            try {
-                val book = hadithUseCases.getBookById(bookId)
-                _chaptersState.update { it.copy(book = book) }
-
-                hadithUseCases.getChaptersByBook(bookId).collect { chapters ->
-                    _chaptersState.update { it.copy(chapters = chapters, isLoading = false) }
+            onFailure = { throwable ->
+                _chaptersState.update {
+                    it.copy(
+                        isLoading = false,
+                        error = UiError(
+                            message = R.string.hadith_chapters_load_failed,
+                            details = throwable.message,
+                        ),
+                    )
                 }
-            } catch (e: Exception) {
-                telemetry.recordException(e)
-                telemetry.error(AppAnalytics.Feature.HADITH, "load_book", e.message)
-                _chaptersState.update { it.copy(error = e.message, isLoading = false) }
+            },
+        ) {
+            // The inner try/catch is gone: launchSafely's onFailure is the one failure path,
+            // and duplicating it here meant two places could disagree about what a failed
+            // load leaves on screen.
+            val book = hadithUseCases.getBookById(bookId)
+            _chaptersState.update { it.copy(book = book) }
+
+            hadithUseCases.getChaptersByBook(bookId).collect { chapters ->
+                _chaptersState.update { it.copy(chapters = chapters, isLoading = false) }
             }
         }
     }
@@ -189,13 +236,17 @@ class HadithViewModel @Inject constructor(
      * The one load path for all three entry points, so the composite-id and index-resolution
      * rules cannot drift between them: they did, and `loadHadithByNumber` had both wrong.
      */
-    private fun loadChapter(chapterId: String) =
+    private fun loadChapter(chapterId: String) {
+        lastReaderLoad = { loadChapter(chapterId) }
         startReaderLoad("load_chapter") { chapterId to null }
+    }
 
-    private fun loadHadithById(hadithId: String) =
+    private fun loadHadithById(hadithId: String) {
+        lastReaderLoad = { loadHadithById(hadithId) }
         startReaderLoad("load_hadith_by_id") {
             hadithUseCases.getHadithById(hadithId)?.let { it.chapterKey to it.id }
         }
+    }
 
     /**
      * Opens hadith number [hadithNumber] of book [bookId].
@@ -210,10 +261,12 @@ class HadithViewModel @Inject constructor(
      * `loadChapter` had launched its own coroutine, so it always saw the **previous** chapter's
      * list: `indexOfFirst` was always -1 and the branch that sets the index could never run.
      */
-    private fun loadHadithByNumber(bookId: String, hadithNumber: Int) =
+    private fun loadHadithByNumber(bookId: String, hadithNumber: Int) {
+        lastReaderLoad = { loadHadithByNumber(bookId, hadithNumber) }
         startReaderLoad("load_hadith_by_number") {
             hadithUseCases.getHadithByNumber(bookId, hadithNumber)?.let { it.chapterKey to it.id }
         }
+    }
 
     /**
      * The one reader load path, for all three ways in.
@@ -236,39 +289,55 @@ class HadithViewModel @Inject constructor(
         readerJob = launchSafely(
             telemetry,
             AppAnalytics.Feature.HADITH,
-            "start_reader_load",
-            onFailure = { _readerState.update { it.copy(isLoading = false) } },
+            errorType,
+            onFailure = { throwable ->
+                _readerState.update {
+                    it.copy(
+                        isLoading = false,
+                        error = UiError(
+                            message = R.string.hadith_load_failed,
+                            details = throwable.message,
+                        ),
+                    )
+                }
+            },
         ) {
-            try {
-                val target = resolve()
-                if (target == null) {
-                    _readerState.update { it.copy(error = "Hadith not found", isLoading = false) }
-                    return@launchSafely
+            val target = resolve()
+            if (target == null) {
+                // A hadith that is not in the collection is an answer, not a failure:
+                // nothing went wrong, so nothing is reported to telemetry — but the
+                // reader is still told, and told in their own language. This used to set
+                // the English literal "Hadith not found" as the state's error string.
+                _readerState.update {
+                    it.copy(
+                        isLoading = false,
+                        error = UiError(
+                            message = R.string.hadith_not_found,
+                            kind = NimazErrorKind.NOT_FOUND,
+                        ),
+                    )
                 }
-                val (chapterId, focusHadithId) = target
-                anchorHadithId = focusHadithId
+                return@launchSafely
+            }
+            val (chapterId, focusHadithId) = target
+            anchorHadithId = focusHadithId
 
-                val chapter = hadithUseCases.getChapterById(chapterId)
-                _readerState.update { it.copy(chapter = chapter) }
+            val chapter = hadithUseCases.getChapterById(chapterId)
+            _readerState.update { it.copy(chapter = chapter) }
 
-                hadithUseCases.getHadithsByChapter(chapterId).collect { hadiths ->
-                    // Re-resolved against the list that just arrived. On the first emission the
-                    // anchor is the requested hadith (or absent, meaning the top); on a later
-                    // one it is wherever the reader already is — a content refresh re-emits, and
-                    // must not move it.
-                    val index = anchorHadithId
-                        ?.let { id -> hadiths.indexOfFirst { it.id == id } }
-                        ?.takeIf { it >= 0 }
-                        ?: 0
-                    anchorHadithId = hadiths.getOrNull(index)?.id
-                    _readerState.update {
-                        it.copy(hadiths = hadiths, isLoading = false, currentHadithIndex = index)
-                    }
+            hadithUseCases.getHadithsByChapter(chapterId).collect { hadiths ->
+                // Re-resolved against the list that just arrived. On the first emission the
+                // anchor is the requested hadith (or absent, meaning the top); on a later
+                // one it is wherever the reader already is — a content refresh re-emits, and
+                // must not move it.
+                val index = anchorHadithId
+                    ?.let { id -> hadiths.indexOfFirst { it.id == id } }
+                    ?.takeIf { it >= 0 }
+                    ?: 0
+                anchorHadithId = hadiths.getOrNull(index)?.id
+                _readerState.update {
+                    it.copy(hadiths = hadiths, isLoading = false, currentHadithIndex = index)
                 }
-            } catch (e: Exception) {
-                telemetry.recordException(e)
-                telemetry.error(AppAnalytics.Feature.HADITH, errorType, e.message)
-                _readerState.update { it.copy(error = e.message, isLoading = false) }
             }
         }
     }
@@ -285,34 +354,50 @@ class HadithViewModel @Inject constructor(
     private fun filterByGrade(grade: HadithGrade) {
         readerJob?.cancel()
         anchorHadithId = null
-        readerJob = launchSafely(telemetry, AppAnalytics.Feature.HADITH, "filter_by_grade") {
-            try {
-                hadithUseCases.getHadithsByGrade(grade).collect { hadiths ->
-                    _readerState.update {
-                        it.copy(
-                            hadiths = hadiths,
-                            chapter = null,
-                            currentHadithIndex = 0,
-                            isLoading = false
-                        )
-                    }
+        readerJob = launchSafely(
+            telemetry, AppAnalytics.Feature.HADITH, "filter_by_grade",
+            onFailure = { throwable ->
+                _readerState.update {
+                    it.copy(
+                        isLoading = false,
+                        error = UiError(
+                            message = R.string.hadith_load_failed,
+                            details = throwable.message,
+                        ),
+                    )
                 }
-            } catch (e: Exception) {
-                telemetry.recordException(e)
-                telemetry.error(AppAnalytics.Feature.HADITH, "filter_by_grade", e.message)
-                _readerState.update { it.copy(error = e.message, isLoading = false) }
+            },
+        ) {
+            hadithUseCases.getHadithsByGrade(grade).collect { hadiths ->
+                _readerState.update {
+                    it.copy(
+                        hadiths = hadiths,
+                        chapter = null,
+                        currentHadithIndex = 0,
+                        isLoading = false
+                    )
+                }
             }
         }
     }
 
+    /**
+     * A write: a failed bookmark toggle is reported and dropped rather than shown, because
+     * the hadith on screen is still perfectly readable and blanking it to report a failed
+     * star would be the worse outcome.
+     */
     private fun toggleBookmark(hadithId: String, bookId: String, hadithNumber: Int) {
-        launchSafely(telemetry, AppAnalytics.Feature.HADITH, "toggle_bookmark") {
+        launchBestEffort(telemetry, AppAnalytics.Feature.HADITH, "toggle_bookmark") {
             hadithUseCases.toggleBookmark(hadithId, bookId, hadithNumber)
         }
     }
 
+    /**
+     * Feeds the "bookmarked" count on the collection screen. Best-effort: a wrong count on
+     * one stat tile is not worth replacing a working book list over.
+     */
     private fun loadBookmarks() {
-        launchSafely(telemetry, AppAnalytics.Feature.HADITH, "load_bookmarks") {
+        launchBestEffort(telemetry, AppAnalytics.Feature.HADITH, "load_bookmarks") {
             hadithUseCases.getAllBookmarks().collect { bookmarks ->
                 _bookmarksState.update { it.copy(bookmarks = bookmarks, isLoading = false) }
             }
@@ -326,7 +411,7 @@ class HadithViewModel @Inject constructor(
      * state, exactly as the Quran/Dua readers observe their own prefs.
      */
     private fun observeHadithSettings() {
-        launchSafely(telemetry, AppAnalytics.Feature.HADITH, "observe_hadith_settings") {
+        launchBestEffort(telemetry, AppAnalytics.Feature.HADITH, "observe_hadith_settings") {
             val displayFlow = combine(
                 hadithSettings.hadithArabicFont,
                 hadithSettings.hadithArabicFontSize,
