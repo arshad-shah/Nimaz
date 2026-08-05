@@ -8,6 +8,8 @@ import com.arshadshah.nimaz.domain.model.AsrCalculation
 import com.arshadshah.nimaz.domain.model.CalculationMethod
 import com.arshadshah.nimaz.domain.model.HighLatitudeRule
 import com.arshadshah.nimaz.domain.model.PrayerType
+import com.arshadshah.nimaz.core.monitoring.AppAnalytics
+import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,6 +27,7 @@ import kotlin.time.Instant
 class NightWorshipViewModel @Inject constructor(
     private val prayerTimeCalculator: PrayerTimeCalculator,
     private val settingsRepository: SettingsRepository,
+    private val telemetry: Telemetry,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(NightWorshipUiState())
@@ -36,8 +39,20 @@ class NightWorshipViewModel @Inject constructor(
 
     fun onEvent(event: NightWorshipEvent) {
         when (event) {
-            NightWorshipEvent.AddRakahPair -> _state.update { it.copy(rakahCount = it.rakahCount + 2) }
-            NightWorshipEvent.ResetRakahs -> _state.update { it.copy(rakahCount = 0) }
+            // The screen's primary interaction, and it was unrecorded. That matters more here
+            // than usual: the rakah count is deliberately **not persisted**, and this file's own
+            // KDoc asks whether the counter is worth keeping. Usage is the only way to answer
+            // that, and it was not being collected.
+            NightWorshipEvent.AddRakahPair -> {
+                telemetry.featureUsed(AppAnalytics.Feature.NIGHT_WORSHIP, "add_rakah_pair")
+                _state.update { it.copy(rakahCount = it.rakahCount + 2) }
+            }
+
+            NightWorshipEvent.ResetRakahs -> {
+                telemetry.featureUsed(AppAnalytics.Feature.NIGHT_WORSHIP, "reset_rakahs")
+                _state.update { it.copy(rakahCount = 0) }
+            }
+
             NightWorshipEvent.Refresh -> loadNightTimes()
         }
     }

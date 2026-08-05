@@ -1,6 +1,7 @@
 package com.arshadshah.nimaz.presentation.viewmodel.quran
 
 import android.content.Context
+import com.arshadshah.nimaz.core.monitoring.RecordingTelemetry
 import com.arshadshah.nimaz.data.audio.QuranAudioManager
 import com.arshadshah.nimaz.domain.model.RevelationType
 import com.arshadshah.nimaz.domain.model.Surah
@@ -94,7 +95,7 @@ class QuranReaderHydrationTest {
     fun tearDown() = Dispatchers.resetMain()
 
     private fun viewModel() =
-        QuranViewModel(useCases, audioManager, settingsRepository, khatamUseCases, context)
+        QuranViewModel(useCases, audioManager, settingsRepository, khatamUseCases, RecordingTelemetry(), context)
 
     // R1 — the home list must stay on its skeleton until Room answers.
 

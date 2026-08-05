@@ -132,18 +132,28 @@ class CalendarViewModel @Inject constructor(
             }
             is CalendarEvent.NavigateToMonth -> navigateToMonth(event.month, event.year)
             is CalendarEvent.NavigateToHijriMonth -> navigateToHijriMonth(event.month, event.year)
+            // No producer — see `NavigateToPreviousMonth`/`NavigateToNextMonth` below, which are
+            // what the screen dispatches and were the only calendar actions with no analytics.
             is CalendarEvent.SetViewMode -> {
-                telemetry.featureUsed(DOMAIN, "set_view_mode")
                 setViewMode(event.mode)
             }
             is CalendarEvent.NavigateToYear -> {
-                telemetry.featureUsed(DOMAIN, "navigate_year")
                 navigateToYear(event.year, event.isHijri)
             }
             CalendarEvent.LoadToday -> loadToday()
             CalendarEvent.LoadUpcomingEvents -> loadUpcomingEvents()
-            CalendarEvent.NavigateToPreviousMonth -> navigateToPreviousMonth()
-            CalendarEvent.NavigateToNextMonth -> navigateToNextMonth()
+            // The only thing the calendar screen actually does, and the only thing it had no
+            // analytics for — while `SetViewMode` and `NavigateToYear` above, which no screen
+            // dispatches, were the two events that did.
+            CalendarEvent.NavigateToPreviousMonth -> {
+                telemetry.featureUsed(DOMAIN, "navigate_month")
+                navigateToPreviousMonth()
+            }
+
+            CalendarEvent.NavigateToNextMonth -> {
+                telemetry.featureUsed(DOMAIN, "navigate_month")
+                navigateToNextMonth()
+            }
             CalendarEvent.NavigateToPreviousYear -> navigateToPreviousYear()
             CalendarEvent.NavigateToNextYear -> navigateToNextYear()
         }

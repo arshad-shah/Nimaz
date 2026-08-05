@@ -38,6 +38,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.snapshotFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -173,6 +175,17 @@ fun OnboardingScreen(
 
     val totalPages = infoPages.size + 1 // +1 for permissions page
     val pagerState = rememberNimazPagerState(pageCount = { totalPages })
+
+    // The onboarding funnel's only producer. `OnboardingEvent.SetCurrentPage` was emitted by
+    // nothing — the pager drove itself from `pagerState.currentPage` locally — so
+    // `AppAnalytics.Event.ONBOARDING_STEP`, documented as the event that "reveals where people
+    // drop off", had fired **zero times in production**. `snapshotFlow` reports settled pages
+    // only, so a swipe that is released half way does not count as reaching the next step.
+    LaunchedEffect(pagerState) {
+        snapshotFlow { pagerState.currentPage }
+            .distinctUntilChanged()
+            .collect { viewModel.onEvent(OnboardingEvent.SetCurrentPage(it)) }
+    }
 
     NimazScreenScaffold(
         // Opts out of the app ornament: onboarding owns its own gradient backdrop.

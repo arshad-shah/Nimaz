@@ -523,6 +523,8 @@ object AppAnalytics {
         const val SETTINGS = "settings"
         const val SYNC = "sync"
         const val TAFSEER = "tafseer"
+        const val TAFSEER_CHAPTERS = "tafseer_chapters"
+        const val NIGHT_WORSHIP = "night_worship"
         const val TASBIH = "tasbih"
         const val ZAKAT = "zakat"
     }

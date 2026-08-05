@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
+import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.data.audio.AudioState
 import com.arshadshah.nimaz.data.audio.QuranAudioManager
 import com.arshadshah.nimaz.domain.model.Ayah
@@ -80,6 +81,7 @@ class QuranViewModel @Inject constructor(
     val audioManager: QuranAudioManager,
     private val settingsRepository: SettingsRepository,
     private val khatamUseCases: KhatamUseCases,
+    private val telemetry: Telemetry,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
 
@@ -229,7 +231,7 @@ class QuranViewModel @Inject constructor(
     fun onEvent(event: QuranEvent) {
         when (event) {
             is QuranEvent.LoadSurah -> {
-                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.QURAN, "open_surah")
+                telemetry.featureUsed(AppAnalytics.Feature.QURAN, "open_surah")
                 loadSurah(event.surahNumber)
             }
             is QuranEvent.LoadJuz -> loadJuz(event.juzNumber)
@@ -237,13 +239,13 @@ class QuranViewModel @Inject constructor(
             is QuranEvent.PrefetchPage -> loadPage(event.pageNumber, makeActive = false)
             is QuranEvent.LoadMushafPageLayout -> loadMushafPageLayout(event.pageNumber)
             is QuranEvent.Search -> {
-                AppAnalytics.logSearch("quran", event.query.trim().length)
+                telemetry.search("quran", event.query.trim().length)
                 search(event.query)
             }
             is QuranEvent.SetTopTab -> _homeState.update { it.copy(topTab = event.index) }
             is QuranEvent.SetTab -> _homeState.update { it.copy(selectedTab = event.index) }
             is QuranEvent.ToggleBookmark -> {
-                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.QURAN, "toggle_bookmark")
+                telemetry.featureUsed(AppAnalytics.Feature.QURAN, "toggle_bookmark")
                 toggleBookmark(
                     event.ayahId,
                     event.surahNumber,
@@ -287,12 +289,14 @@ class QuranViewModel @Inject constructor(
                 _homeState.update { it.copy(searchQuery = "", filteredSurahs = it.surahs) }
             }
 
-            is QuranEvent.PlaySurahAudio -> {
-                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.QURAN, "play_surah_audio")
-                playSurahAudio(event.surahNumber, event.surahName)
-            }
+            // Deliberately unlogged: no screen emits this. The analytics that used to sit here
+            // reported zero for "surah audio played" while `PlaySurahFromInfo` below — the branch
+            // the play button actually reaches — recorded nothing. A dashboard reading zero for a
+            // thing users do daily is worse than no dashboard. The unreachable *handler* is #357's
+            // wire-or-delete call, not this layer's.
+            is QuranEvent.PlaySurahAudio -> playSurahAudio(event.surahNumber, event.surahName)
             is QuranEvent.PlayAyahAudio -> {
-                AppAnalytics.logFeatureUsed(AppAnalytics.Feature.QURAN, "play_ayah_audio")
+                telemetry.featureUsed(AppAnalytics.Feature.QURAN, "play_ayah_audio")
                 playAyahAudio(
                     event.ayahGlobalId,
                     event.surahNumber,
@@ -303,7 +307,10 @@ class QuranViewModel @Inject constructor(
             QuranEvent.PauseAudio -> audioManager.togglePlayPause()
             QuranEvent.ResumeAudio -> audioManager.togglePlayPause()
             QuranEvent.StopAudio -> audioManager.stop()
-            is QuranEvent.PlaySurahFromInfo -> playSurahFromInfo(event.surahNumber)
+            is QuranEvent.PlaySurahFromInfo -> {
+                telemetry.featureUsed(AppAnalytics.Feature.QURAN, "play_surah_audio")
+                playSurahFromInfo(event.surahNumber)
+            }
             is QuranEvent.LoadSurahInfo -> loadSurahInfo(event.surahNumber)
             is QuranEvent.MarkAyahsReadForKhatam -> markAyahsReadForKhatam(event.ayahIds)
             is QuranEvent.UnmarkAyahReadForKhatam -> unmarkAyahReadForKhatam(event.ayahId)

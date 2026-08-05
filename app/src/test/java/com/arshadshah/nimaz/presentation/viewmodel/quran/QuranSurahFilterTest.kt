@@ -1,6 +1,7 @@
 package com.arshadshah.nimaz.presentation.viewmodel.quran
 
 import android.content.Context
+import com.arshadshah.nimaz.core.monitoring.RecordingTelemetry
 import com.arshadshah.nimaz.data.audio.QuranAudioManager
 import com.arshadshah.nimaz.domain.model.RevelationType
 import com.arshadshah.nimaz.domain.model.Surah
@@ -81,7 +82,7 @@ class QuranSurahFilterTest {
     fun tearDown() = Dispatchers.resetMain()
 
     private fun viewModel() =
-        QuranViewModel(useCases, audioManager, settingsRepository, khatamUseCases, context)
+        QuranViewModel(useCases, audioManager, settingsRepository, khatamUseCases, RecordingTelemetry(), context)
 
     @Test
     fun `the list narrows to the transliterated name`() = runTest {

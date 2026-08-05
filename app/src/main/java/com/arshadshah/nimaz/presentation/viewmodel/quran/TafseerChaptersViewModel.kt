@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.presentation.viewmodel.quran
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.core.monitoring.catchAndReport
 import com.arshadshah.nimaz.domain.model.Surah
@@ -29,6 +30,10 @@ class TafseerChaptersViewModel @Inject constructor(
     val state: StateFlow<TafseerChaptersUiState> = _state.asStateFlow()
 
     init {
+        // A read-only ViewModel has no `onEvent` to hang this on, so construction *is* the
+        // action: this screen is reached by an explicit tap and nothing else builds it. Every
+        // sibling reader logs an open; this one logged nothing at all.
+        telemetry.featureUsed(AppAnalytics.Feature.TAFSEER_CHAPTERS, "open")
         combine(
             quranUseCases.getSurahList(),
             tafseerUseCases.getTafseerNotes()
