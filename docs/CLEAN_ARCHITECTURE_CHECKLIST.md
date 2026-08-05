@@ -487,7 +487,9 @@ rg -n -U --multiline-dotall \
   ```bash
   grep -rn "PrayerTimeCalculator()" app/src/main/java/com/arshadshah/nimaz/presentation/
   ```
-- [ ] **`ZakatEvent.SetCurrency` has no producer.** Not an analytics finding — its branch is a
+- [x] ~~**`ZakatEvent.SetCurrency` has no producer.**~~ **Resolved — a picker was wired.** `ZakatCalculatorScreen` (both the compact and tablet layouts) now opens a `NimazListPicker` over `ZakatDefaults.CURRENCIES`, 32 ISO 4217 codes. The list carries **codes only** — `java.util.Currency` resolves the display name and symbol in the user's locale, so nothing there needs translating and no English is added. Original text follows.
+
+   Not an analytics finding — its branch is a
   `persist { … }` that logs no usage — so the ratchet does not see it, and it surfaced only
   because a neighbouring branch's new logging spilled into the old flat scan window. The
   calculator formats every figure with `state.currency` and offers no way to change it, so a
@@ -883,7 +885,9 @@ module (`ObserveLocalEventsUseCase`) is a false positive. Read the hit before ac
   ```bash
   grep -rn "displayName()" app/src/main/java/com/arshadshah/nimaz --include=*.kt | grep -i occasion
   ```
-- [ ] **`AyahActionsBottomSheet` — an unreachable *organism*, not just an unread field.** The
+- [x] ~~**`AyahActionsBottomSheet` — an unreachable *organism*, not just an unread field.**~~ **Resolved — retired**, following the precedent `2748002` set. The organism, its `buildAyahActions` table and its Robolectric suite are deleted. One caveat worth remembering for the next sweep of this kind: the file also hosted `SajdaIndicator`, which **was** reachable — `AyahTranslationBottomSheet` composes it — so deleting the file wholesale broke the build. That composable moved rather than died. Original text follows.
+
+   The
   sheet, its `buildAyahActions` table and its Robolectric suite all exist and no screen composes
   it: the reader's per-verse actions are an inline row inside `QuranAyahItem`, and the sheet a
   verse actually opens is `AyahTranslationBottomSheet` (from `MushafLinePage`'s tooltip). The

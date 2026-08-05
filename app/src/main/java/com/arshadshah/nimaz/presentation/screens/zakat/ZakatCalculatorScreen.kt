@@ -1,5 +1,14 @@
 package com.arshadshah.nimaz.presentation.screens.zakat
 
+import com.arshadshah.nimaz.domain.model.ZakatDefaults
+import com.arshadshah.nimaz.presentation.components.molecules.NimazListPicker
+import com.arshadshah.nimaz.presentation.components.molecules.NimazPickerItem
+import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuItem
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import java.util.Currency
+import java.util.Locale
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -141,6 +150,8 @@ private fun ZakatCompactContent(
     viewModel: ZakatViewModel,
     modifier: Modifier = Modifier
 ) {
+    var showCurrencyPicker by rememberSaveable { mutableStateOf(false) }
+
     LazyColumn(
         modifier = modifier,
         contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp),
@@ -154,6 +165,17 @@ private fun ZakatCompactContent(
                 isAboveNisab = state.calculation?.isAboveNisab ?: false,
                 nisabType = state.nisabType,
                 currency = state.currency
+            )
+        }
+        item {
+            Spacer(modifier = Modifier.height(8.dp))
+            // ZakatEvent.SetCurrency existed with a handler and no producer: every figure on
+            // this screen was formatted with state.currency, and nothing could change it, so
+            // anyone outside the default read someone else's symbol on their own zakat.
+            NimazMenuItem(
+                title = stringResource(R.string.zakat_currency),
+                subtitle = currencyLabel(state.currency),
+                onClick = { showCurrencyPicker = true },
             )
         }
         item {
@@ -220,6 +242,18 @@ private fun ZakatCompactContent(
         }
         item { Spacer(modifier = Modifier.height(24.dp)) }
     }
+
+    if (showCurrencyPicker) {
+        NimazListPicker(
+            title = stringResource(R.string.zakat_currency),
+            items = ZakatDefaults.CURRENCIES.map { code ->
+                NimazPickerItem(value = code, title = code, description = currencyLabel(code))
+            },
+            selected = state.currency,
+            onSelected = { viewModel.onEvent(ZakatEvent.SetCurrency(it)) },
+            onDismiss = { showCurrencyPicker = false },
+        )
+    }
 }
 
 @Composable
@@ -228,6 +262,8 @@ private fun ZakatTabletContent(
     viewModel: ZakatViewModel,
     modifier: Modifier = Modifier
 ) {
+    var showCurrencyPicker by rememberSaveable { mutableStateOf(false) }
+
     Column(
         modifier = modifier
             .verticalScroll(rememberScrollState())
@@ -253,6 +289,11 @@ private fun ZakatTabletContent(
             onTypeChange = { viewModel.onEvent(ZakatEvent.SetNisabType(it)) },
             onGoldPriceChange = { viewModel.onEvent(ZakatEvent.UpdateGoldPrice(it)) },
             onSilverPriceChange = { viewModel.onEvent(ZakatEvent.UpdateSilverPrice(it)) }
+        )
+        NimazMenuItem(
+            title = stringResource(R.string.zakat_currency),
+            subtitle = currencyLabel(state.currency),
+            onClick = { showCurrencyPicker = true },
         )
 
         // Two columns: Assets left, Liabilities right
@@ -319,6 +360,18 @@ private fun ZakatTabletContent(
         }
 
         Spacer(modifier = Modifier.height(24.dp))
+    }
+
+    if (showCurrencyPicker) {
+        NimazListPicker(
+            title = stringResource(R.string.zakat_currency),
+            items = ZakatDefaults.CURRENCIES.map { code ->
+                NimazPickerItem(value = code, title = code, description = currencyLabel(code))
+            },
+            selected = state.currency,
+            onSelected = { viewModel.onEvent(ZakatEvent.SetCurrency(it)) },
+            onDismiss = { showCurrencyPicker = false },
+        )
     }
 }
 
@@ -994,3 +1047,13 @@ private fun BreakdownRow(
     }
 }
 
+/**
+ * "US Dollar ($)" in English, "US-Dollar ($)" in German — resolved by `java.util.Currency`
+ * from the ISO code, so the picker carries no translated strings of its own.
+ */
+private fun currencyLabel(code: String): String = runCatching {
+    val currency = Currency.getInstance(code)
+    val name = currency.getDisplayName(Locale.getDefault())
+    val symbol = currency.getSymbol(Locale.getDefault())
+    if (symbol == code) name else "$name ($symbol)"
+}.getOrDefault(code)
