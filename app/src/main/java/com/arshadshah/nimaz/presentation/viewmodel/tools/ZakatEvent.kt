@@ -1,7 +1,13 @@
 package com.arshadshah.nimaz.presentation.viewmodel.tools
 
-import com.arshadshah.nimaz.domain.model.NisabType
-
+/**
+ * What the zakat **calculator** can do.
+ *
+ * The nisab basis, the two metal prices and the currency used to live here too. They are
+ * persisted preferences rather than figures typed per calculation, and they moved with their
+ * controls to `ZakatSettingsEvent` — leaving this interface as exactly the form plus the four
+ * things you do with a finished calculation.
+ */
 sealed interface ZakatEvent {
     data class UpdateCash(val amount: Double) : ZakatEvent
     data class UpdateBankBalance(val amount: Double) : ZakatEvent
@@ -16,10 +22,6 @@ sealed interface ZakatEvent {
     data class UpdateLoans(val amount: Double) : ZakatEvent
     data class UpdateBillsDue(val amount: Double) : ZakatEvent
     data class UpdateOtherLiabilities(val amount: Double) : ZakatEvent
-    data class SetNisabType(val nisabType: NisabType) : ZakatEvent
-    data class UpdateGoldPrice(val pricePerGram: Double) : ZakatEvent
-    data class UpdateSilverPrice(val pricePerGram: Double) : ZakatEvent
-    data class SetCurrency(val currency: String) : ZakatEvent
     data object ClearAll : ZakatEvent
     data object ToggleBreakdown : ZakatEvent
     data object SaveCalculation : ZakatEvent

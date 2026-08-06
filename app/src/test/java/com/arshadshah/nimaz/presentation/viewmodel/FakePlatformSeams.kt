@@ -1,11 +1,13 @@
 package com.arshadshah.nimaz.presentation.viewmodel
 
 import com.arshadshah.nimaz.core.text.StringProvider
+import com.arshadshah.nimaz.domain.model.NisabType
 import com.arshadshah.nimaz.domain.repository.PermissionChecker
 import com.arshadshah.nimaz.domain.repository.PowerSettings
 import com.arshadshah.nimaz.domain.repository.WidgetRefresher
 import com.arshadshah.nimaz.domain.repository.settings.ZakatSettings
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 
 /**
@@ -47,21 +49,43 @@ class RecordingWidgetRefresher : WidgetRefresher {
 }
 
 /**
- * A [ZakatSettings] fixed at one currency.
+ * A writable [ZakatSettings] — eight members, not the two hundred of `SettingsRepository`.
  *
- * The zakat currency is the app's only currency setting, so anything rendering money reads it —
- * `FastingViewModel` needs it for the fidya total. Shared rather than duplicated per test file,
- * because a private copy in each one collides the moment two live in the same package.
+ * Shared rather than duplicated per test file, because a private copy in each one collides the
+ * moment two live in the same package. Two very different tests lean on it: the fidya total in
+ * `FastingViewModel` only needs the currency to be *some* fixed code, while the zakat settings
+ * screen needs writes to be **observable** — the whole point of that screen is that a value
+ * written through the seam comes back through the flow, and a `flowOf(…)` fake makes a
+ * ViewModel that never persists anything look identical to one that does.
  */
 class FakeZakatSettings(
-    private val code: String = "USD",
-    private val gold: Double = 65.0,
-    private val silver: Double = 0.80,
+    code: String = "USD",
+    gold: Double = 65.0,
+    silver: Double = 0.80,
+    nisabType: String = NisabType.DEFAULT.name,
 ) : ZakatSettings {
-    override val zakatGoldPricePerGram: Flow<Double> = flowOf(gold)
-    override suspend fun setZakatGoldPricePerGram(pricePerGram: Double) = Unit
-    override val zakatSilverPricePerGram: Flow<Double> = flowOf(silver)
-    override suspend fun setZakatSilverPricePerGram(pricePerGram: Double) = Unit
-    override val zakatCurrency: Flow<String> = flowOf(code)
-    override suspend fun setZakatCurrency(currency: String) = Unit
+    private val goldFlow = MutableStateFlow(gold)
+    private val silverFlow = MutableStateFlow(silver)
+    private val currencyFlow = MutableStateFlow(code)
+    private val nisabFlow = MutableStateFlow(nisabType)
+
+    override val zakatGoldPricePerGram: Flow<Double> = goldFlow
+    override suspend fun setZakatGoldPricePerGram(pricePerGram: Double) {
+        goldFlow.value = pricePerGram
+    }
+
+    override val zakatSilverPricePerGram: Flow<Double> = silverFlow
+    override suspend fun setZakatSilverPricePerGram(pricePerGram: Double) {
+        silverFlow.value = pricePerGram
+    }
+
+    override val zakatCurrency: Flow<String> = currencyFlow
+    override suspend fun setZakatCurrency(currency: String) {
+        currencyFlow.value = currency
+    }
+
+    override val zakatNisabType: Flow<String> = nisabFlow
+    override suspend fun setZakatNisabType(type: String) {
+        nisabFlow.value = type
+    }
 }

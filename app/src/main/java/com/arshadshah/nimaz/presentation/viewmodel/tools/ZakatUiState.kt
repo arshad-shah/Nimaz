@@ -3,6 +3,7 @@ package com.arshadshah.nimaz.presentation.viewmodel.tools
 import com.arshadshah.nimaz.domain.model.NisabType
 import com.arshadshah.nimaz.domain.model.ZakatAssets
 import com.arshadshah.nimaz.domain.model.ZakatCalculation
+import com.arshadshah.nimaz.domain.model.ZakatCalculator
 import com.arshadshah.nimaz.domain.model.ZakatDefaults
 import com.arshadshah.nimaz.domain.model.ZakatHistoryEntry
 import com.arshadshah.nimaz.domain.model.ZakatLiabilities
@@ -32,7 +33,18 @@ data class ZakatCalculatorUiState(
      * lose work they cannot get back with a button.
      */
     val error: UiError? = null,
-)
+) {
+    /**
+     * The threshold the current basis and prices come to, whether or not anything has been
+     * typed yet.
+     *
+     * [calculation] carries the same figure, but only once the form has a value in it — and
+     * the screen reports the basis above an empty form too. Derived through [ZakatCalculator]
+     * so the row cannot quote a threshold the calculation would not use.
+     */
+    val nisabValue: Double
+        get() = ZakatCalculator.nisabValue(nisabType, goldPricePerGram, silverPricePerGram)
+}
 
 data class ZakatHistoryUiState(
     val history: List<ZakatHistoryEntry> = emptyList(),

@@ -116,6 +116,7 @@ import com.arshadshah.nimaz.presentation.screens.settings.WorshipRemindersScreen
 import com.arshadshah.nimaz.presentation.screens.settings.PrayerSettingsScreen
 import com.arshadshah.nimaz.presentation.screens.settings.QuranSettingsScreen
 import com.arshadshah.nimaz.presentation.screens.settings.SearchSettingsScreen
+import com.arshadshah.nimaz.presentation.screens.settings.ZakatSettingsScreen
 import com.arshadshah.nimaz.presentation.screens.settings.WidgetsScreen
 import com.arshadshah.nimaz.presentation.screens.tasbih.TasbihScreen
 import com.arshadshah.nimaz.presentation.screens.zakat.ZakatCalculatorScreen
@@ -944,7 +945,14 @@ fun NavGraph(
             taggedComposable<Route.ZakatCalculator>(ScreenTags.ZakatCalculator) {
                 ZakatCalculatorScreen(
                     onNavigateBack = { navController.popBackStack() },
-                    onNavigateToHistory = { navController.navigate(Route.ZakatHistory) }
+                    onNavigateToHistory = { navController.navigate(Route.ZakatHistory) },
+                    onNavigateToSettings = { navController.navigate(Route.SettingsZakat) }
+                )
+            }
+
+            taggedComposable<Route.SettingsZakat>(ScreenTags.SettingsZakat) {
+                ZakatSettingsScreen(
+                    onNavigateBack = { navController.popBackStack() }
                 )
             }
 

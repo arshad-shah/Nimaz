@@ -148,13 +148,14 @@ flowchart LR
     end
 
     subgraph Z["Zakat / Calendar"]
-        ZakatCalculator --> ZakatHistory
+        ZakatCalculator --> ZakatHistory & SettingsZakat
         IslamicCalendar --> IslamicMonth
     end
 
     subgraph S["Settings"]
         Settings --> SettingsPrayerCalculation & SettingsAppearance & SettingsLanguage
         Settings --> SettingsLocation & SettingsQuran & SettingsWidgets & SettingsSync
+        Settings --> SettingsZakat
         Settings --> SettingsNotifications & SettingsHelp & SettingsAbout
         SettingsNotifications --> SettingsNotificationsPrayers & SettingsWorshipReminders
         SettingsNotifications --> SettingsNotificationsWeekly & SettingsNotificationsSound
@@ -175,7 +176,7 @@ flowchart LR
 ## 3. Route reference
 
 All routes live in `core/navigation/Routes.kt` and are wired in `core/navigation/NavGraph.kt`
-(93 `composable<Route.X>` destinations). `data object` = no args; `data class` = typed args.
+(94 `composable<Route.X>` destinations). `data object` = no args; `data class` = typed args.
 Every route below also has a `ScreenTags` entry of the same name.
 
 ### 3.1 Bottom navigation (`BottomNavDestination`)
@@ -277,6 +278,7 @@ Every route below also has a `ScreenTags` entry of the same name.
 |-------|------|--------|
 | `ZakatCalculator` | — | ZakatCalculatorScreen |
 | `ZakatHistory` | — | ZakatHistoryScreen |
+| `SettingsZakat` | — | ZakatSettingsScreen — the nisab basis, the metal prices it is priced from, and the display currency. Reached from the calculator's top bar and from the Settings hub; on a wide screen the hub renders it as a detail pane (`SettingsDetailPane.ZAKAT`) instead of navigating |
 | `Qibla` | — | QiblaScreen |
 | `IslamicCalendar` | — | IslamicCalendarScreen |
 | `IslamicMonth` | `month: Int, year: Int` | IslamicMonthScreen |

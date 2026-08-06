@@ -104,7 +104,18 @@ interface TasbihSettings {
     suspend fun setTasbihSoundEnabled(enabled: Boolean)
 }
 
-/** Metal prices and the display currency the zakat calculator values assets in. */
+/**
+ * The nisab basis, the metal prices it is priced from, and the display currency the zakat
+ * calculator values assets in — everything on `ZakatSettingsScreen`.
+ *
+ * The basis lives here rather than in the calculator's `SavedStateHandle` because it is a
+ * ruling the user follows, not a figure they type: it should outlive the form the way the
+ * prices do, and the two ViewModels that read it (the calculator and its settings screen)
+ * need one source of truth between them.
+ *
+ * [zakatNisabType] is a `NisabType` **enum name**, not the enum — the same shape as
+ * `quran_mushaf_script`, mapped at the boundary via `NisabType.fromName`.
+ */
 interface ZakatSettings {
     val zakatGoldPricePerGram: Flow<Double>
     suspend fun setZakatGoldPricePerGram(pricePerGram: Double)
@@ -112,6 +123,8 @@ interface ZakatSettings {
     suspend fun setZakatSilverPricePerGram(pricePerGram: Double)
     val zakatCurrency: Flow<String>
     suspend fun setZakatCurrency(currency: String)
+    val zakatNisabType: Flow<String>
+    suspend fun setZakatNisabType(type: String)
 }
 
 /**

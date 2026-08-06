@@ -533,7 +533,7 @@ rg -n -U --multiline-dotall \
   ```bash
   grep -rn "PrayerTimeCalculator()" app/src/main/java/com/arshadshah/nimaz/presentation/
   ```
-- [x] ~~**`ZakatEvent.SetCurrency` has no producer.**~~ **Resolved — a picker was wired.** `ZakatCalculatorScreen` (both the compact and tablet layouts) now opens a `NimazListPicker` over `ZakatDefaults.CURRENCIES`, 32 ISO 4217 codes. The list carries **codes only** — `java.util.Currency` resolves the display name and symbol in the user's locale, so nothing there needs translating and no English is added. Original text follows.
+- [x] ~~**`ZakatEvent.SetCurrency` has no producer.**~~ **Resolved — a picker was wired.** A `NimazListPicker` over `ZakatDefaults.CURRENCIES`, 32 ISO 4217 codes. The list carries **codes only** — `java.util.Currency` resolves the display name and symbol in the user's locale, so nothing there needs translating and no English is added. It was wired into `ZakatCalculatorScreen` first and has since moved, with the event, to `ZakatSettingsScreen` / `ZakatSettingsEvent.SetCurrency` — the currency is a preference, not a figure typed per calculation. Original text follows.
 
    Not an analytics finding — its branch is a
   `persist { … }` that logs no usage — so the ratchet does not see it, and it surfaced only

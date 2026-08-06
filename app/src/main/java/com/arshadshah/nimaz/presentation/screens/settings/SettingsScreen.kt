@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Restore
+import androidx.compose.material.icons.filled.Savings
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material.icons.filled.Widgets
@@ -63,6 +64,7 @@ fun SettingsScreen(
     onNavigateToWidgets: () -> Unit,
     onNavigateToSync: () -> Unit = {},
     onNavigateToSearchSettings: () -> Unit = {},
+    onNavigateToZakatSettings: () -> Unit = {},
     onRestartApp: () -> Unit,
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
@@ -131,6 +133,21 @@ fun SettingsScreen(
                         subtitle = stringResource(R.string.quran_settings_subtitle),
                         icon = Icons.AutoMirrored.Filled.MenuBook,
                         onClick = onNavigateToQuranSettings
+                    )
+                }
+            }
+
+            // Zakat — the nisab basis, the metal prices and the currency. These were an
+            // accordion inside the calculator's form; they are preferences, so they belong
+            // here alongside the other per-feature settings.
+            item { NimazSectionHeader(title = stringResource(R.string.zakat)) }
+            item {
+                NimazMenuGroup {
+                    NimazMenuItem(
+                        title = stringResource(R.string.zakat_settings),
+                        subtitle = stringResource(R.string.zakat_settings_subtitle),
+                        icon = Icons.Default.Savings,
+                        onClick = onNavigateToZakatSettings
                     )
                 }
             }

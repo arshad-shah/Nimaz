@@ -173,6 +173,14 @@ sealed interface Route {
     @Serializable
     data object ZakatHistory : Route
 
+    /**
+     * The nisab basis, the metal prices and the display currency. Named `SettingsZakat`
+     * rather than `ZakatSettings` so it sorts with the other `Settings*` destinations —
+     * it is reachable from the Settings hub as well as from the calculator's top bar.
+     */
+    @Serializable
+    data object SettingsZakat : Route
+
     // Qibla screen
     @Serializable
     data object Qibla : Route

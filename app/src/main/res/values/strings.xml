@@ -2000,6 +2000,12 @@
     <string name="zakat_gold_price_label">Gold price per gram</string>
     <string name="zakat_silver_price_label">Silver price per gram</string>
     <string name="zakat_metal_prices_hint">Estimates — set these to your local rate. The nisab threshold is worked out from them.</string>
+    <!-- The zakat settings screen: the nisab basis, the metal prices it is priced from, and
+         the display currency. Reached from the calculator's top bar and from Settings. -->
+    <string name="zakat_settings">Zakat Settings</string>
+    <string name="zakat_settings_subtitle">Nisab basis, metal prices and currency</string>
+    <string name="zakat_metal_prices">Metal prices</string>
+    <string name="zakat_settings_nisab_hint">Choose the basis your school of thought follows — the silver nisab works out lower than the gold one, so it applies to more people.</string>
     <string name="fasting_log_on_subtitle">Logged — tap to undo</string>
     <string name="fasting_log_off_subtitle">Not logged yet</string>
     <string name="fasting_log_managed_in_sheet">Managed in the day\'s details</string>

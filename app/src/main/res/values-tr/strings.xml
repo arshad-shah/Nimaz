@@ -1782,6 +1782,10 @@
     <string name="zakat_gold_price_label">Gram başına altın fiyatı</string>
     <string name="zakat_silver_price_label">Gram başına gümüş fiyatı</string>
     <string name="zakat_metal_prices_hint">Tahmini değerler — yerel kurunuza göre ayarlayın. Nisap eşiği bunlardan hesaplanır.</string>
+    <string name="zakat_settings">Zekât Ayarları</string>
+    <string name="zakat_settings_subtitle">Nisap ölçüsü, maden fiyatları ve para birimi</string>
+    <string name="zakat_metal_prices">Maden fiyatları</string>
+    <string name="zakat_settings_nisab_hint">Mezhebinizin esas aldığı ölçüyü seçin — gümüş nisabı altın nisabından düşüktür, bu yüzden daha çok kişiyi kapsar.</string>
     <string name="fasting_log_on_subtitle">Kaydedildi — geri almak için dokunun</string>
     <string name="fasting_log_off_subtitle">Henüz kaydedilmedi</string>
     <string name="fasting_log_managed_in_sheet">Gün ayrıntılarında yönetilir</string>

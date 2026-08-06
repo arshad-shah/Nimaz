@@ -76,6 +76,29 @@ enum class NisabType {
             SILVER -> 612.36 // 52.5 tola
         }
     }
+
+    companion object {
+        /**
+         * The basis a user who has never chosen one calculates against.
+         *
+         * Gold, not silver, because it is the majority position and the more conservative
+         * of the two — the silver nisab is roughly an order of magnitude lower, so
+         * defaulting to it would tell people zakat is owed when the ruling they follow may
+         * say it is not.
+         */
+        val DEFAULT: NisabType = GOLD
+
+        /**
+         * Maps a persisted enum name back to a basis, falling back to [DEFAULT].
+         *
+         * The preference is stored as a raw name (the same shape as `quran_mushaf_script`),
+         * and names arrive from DataStore *and* from synced payloads written by other
+         * builds — a value this build does not know must land on a sane basis rather than
+         * throw in the middle of someone's zakat.
+         */
+        fun fromName(name: String?): NisabType =
+            entries.firstOrNull { it.name == name } ?: DEFAULT
+    }
 }
 
 data class MetalPrice(
@@ -113,6 +136,23 @@ object ZakatCalculator {
     const val GOLD_NISAB_GRAMS = 87.48
     const val SILVER_NISAB_GRAMS = 612.36
 
+    /**
+     * The threshold the chosen basis prices out to, in the same currency as the prices.
+     *
+     * Exposed separately from [calculate] because the zakat **settings** screen shows the
+     * threshold a basis and price combination produces before any assets have been entered —
+     * and a second copy of `87.48 × goldPrice` living on a UI state class is exactly how the
+     * screen and the calculator would come to disagree about what nisab is.
+     */
+    fun nisabValue(
+        nisabType: NisabType,
+        goldPricePerGram: Double,
+        silverPricePerGram: Double,
+    ): Double = when (nisabType) {
+        NisabType.GOLD -> GOLD_NISAB_GRAMS * goldPricePerGram
+        NisabType.SILVER -> SILVER_NISAB_GRAMS * silverPricePerGram
+    }
+
     fun calculate(
         assets: ZakatAssets,
         liabilities: ZakatLiabilities,
@@ -133,10 +173,7 @@ object ZakatCalculator {
         // positive threshold.
         val netWorth = totalAssets - totalLiabilities
 
-        val nisabValue = when (nisabType) {
-            NisabType.GOLD -> GOLD_NISAB_GRAMS * goldPricePerGram
-            NisabType.SILVER -> SILVER_NISAB_GRAMS * silverPricePerGram
-        }
+        val nisabValue = nisabValue(nisabType, goldPricePerGram, silverPricePerGram)
 
         // A threshold priced at zero has not been *met*, it has failed to be established —
         // and `netWorth >= 0.0` would otherwise make every user liable, including one who

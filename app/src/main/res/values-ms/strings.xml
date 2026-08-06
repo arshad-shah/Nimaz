@@ -1746,6 +1746,10 @@
     <string name="zakat_gold_price_label">Harga emas segram</string>
     <string name="zakat_silver_price_label">Harga perak segram</string>
     <string name="zakat_metal_prices_hint">Anggaran — tetapkan mengikut harga tempatan. Ambang nisab dikira daripadanya.</string>
+    <string name="zakat_settings">Tetapan Zakat</string>
+    <string name="zakat_settings_subtitle">Asas nisab, harga logam dan mata wang</string>
+    <string name="zakat_metal_prices">Harga logam</string>
+    <string name="zakat_settings_nisab_hint">Pilih asas yang diikuti mazhab anda — nisab perak lebih rendah daripada nisab emas, jadi ia terpakai kepada lebih ramai orang.</string>
     <string name="fasting_log_on_subtitle">Direkod — ketik untuk batalkan</string>
     <string name="fasting_log_off_subtitle">Belum direkod</string>
     <string name="fasting_log_managed_in_sheet">Diurus dalam butiran hari</string>

@@ -2,8 +2,8 @@ package com.arshadshah.nimaz.presentation.viewmodel.tools
 
 import androidx.lifecycle.SavedStateHandle
 import com.arshadshah.nimaz.core.monitoring.RecordingTelemetry
-import com.arshadshah.nimaz.domain.model.ZakatDefaults
-import com.arshadshah.nimaz.domain.repository.settings.ZakatSettings
+import com.arshadshah.nimaz.presentation.viewmodel.FakeZakatSettings
+import com.arshadshah.nimaz.domain.model.NisabType
 import com.arshadshah.nimaz.domain.usecase.ZakatUseCases
 import com.google.common.truth.Truth.assertThat
 import io.mockk.coEvery
@@ -11,8 +11,6 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -23,12 +21,15 @@ import org.junit.Before
 import org.junit.Test
 
 /**
- * `ZakatViewModel` used to inject the whole 179-member [SettingsRepository] to reach
- * three fields. It now injects [ZakatSettings] — a six-member seam — so the test can
- * supply a real fake instead of a relaxed mock over a surface it never touches.
+ * `ZakatViewModel` used to inject the whole 179-member `SettingsRepository` to reach three
+ * fields. It now injects `ZakatSettings` — an eight-member seam — so the test can supply a real
+ * fake instead of a relaxed mock over a surface it never touches.
  *
- * The assertion that matters: a currency written through the seam reaches state, and
- * nothing outside those six members is reachable from the ViewModel at all.
+ * The assertions that matter: the currency and the nisab basis written through the seam reach
+ * state, and nothing outside those eight members is reachable from the ViewModel at all. The
+ * basis is here rather than in the calculator's `SavedStateHandle` since the settings screen
+ * took ownership of it — a `SavedStateHandle` survives process death, a preference survives a
+ * cold start too.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class ZakatSettingsSeamTest {
@@ -36,33 +37,6 @@ class ZakatSettingsSeamTest {
     private val dispatcher = StandardTestDispatcher()
     private val telemetry = RecordingTelemetry()
     private lateinit var useCases: ZakatUseCases
-
-    /** A hand-written fake — six members, not two hundred. */
-    private class FakeZakatSettings(
-        initialGold: Double = ZakatDefaults.GOLD_PRICE_PER_GRAM,
-        initialSilver: Double = ZakatDefaults.SILVER_PRICE_PER_GRAM,
-        initialCurrency: String = ZakatDefaults.CURRENCY,
-    ) : ZakatSettings {
-        private val gold = MutableStateFlow(initialGold)
-        private val silver = MutableStateFlow(initialSilver)
-        private val currencyFlow = MutableStateFlow(initialCurrency)
-
-        override val zakatGoldPricePerGram: Flow<Double> = gold
-        override val zakatSilverPricePerGram: Flow<Double> = silver
-        override val zakatCurrency: Flow<String> = currencyFlow
-
-        override suspend fun setZakatGoldPricePerGram(pricePerGram: Double) {
-            gold.value = pricePerGram
-        }
-
-        override suspend fun setZakatSilverPricePerGram(pricePerGram: Double) {
-            silver.value = pricePerGram
-        }
-
-        override suspend fun setZakatCurrency(currency: String) {
-            currencyFlow.value = currency
-        }
-    }
 
     @Before
     fun setUp() {
@@ -77,7 +51,7 @@ class ZakatSettingsSeamTest {
 
     @Test
     fun `currency from the seam reaches state`() = runTest(dispatcher) {
-        val settings = FakeZakatSettings(initialCurrency = "GBP")
+        val settings = FakeZakatSettings(code = "GBP")
 
         val viewModel = ZakatViewModel(useCases, settings, telemetry, SavedStateHandle())
         advanceUntilIdle()
@@ -86,8 +60,32 @@ class ZakatSettingsSeamTest {
     }
 
     @Test
+    fun `the nisab basis comes from the seam, not from the saved form`() = runTest(dispatcher) {
+        // The basis used to live only in SavedStateHandle, so a cold start forgot which ruling
+        // the user follows — and the silver nisab is roughly an order of magnitude lower than
+        // the gold one, so forgetting it changes whether zakat is owed at all.
+        val settings = FakeZakatSettings(nisabType = NisabType.SILVER.name)
+
+        val viewModel = ZakatViewModel(useCases, settings, telemetry, SavedStateHandle())
+        advanceUntilIdle()
+
+        assertThat(viewModel.calculatorState.value.nisabType).isEqualTo(NisabType.SILVER)
+    }
+
+    @Test
+    fun `an unknown basis name falls back rather than throwing`() = runTest(dispatcher) {
+        // Names arrive from synced payloads written by other builds.
+        val settings = FakeZakatSettings(nisabType = "PLATINUM")
+
+        val viewModel = ZakatViewModel(useCases, settings, telemetry, SavedStateHandle())
+        advanceUntilIdle()
+
+        assertThat(viewModel.calculatorState.value.nisabType).isEqualTo(NisabType.DEFAULT)
+    }
+
+    @Test
     fun `a gold price written through the seam is observed`() = runTest(dispatcher) {
-        val settings = FakeZakatSettings(initialGold = 60.0)
+        val settings = FakeZakatSettings(gold = 60.0)
 
         val viewModel = ZakatViewModel(useCases, settings, telemetry, SavedStateHandle())
         advanceUntilIdle()

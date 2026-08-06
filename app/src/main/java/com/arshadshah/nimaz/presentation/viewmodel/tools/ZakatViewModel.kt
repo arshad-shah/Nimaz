@@ -7,7 +7,6 @@ import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.core.monitoring.catchAndReport
-import com.arshadshah.nimaz.core.monitoring.launchBestEffort
 import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.domain.model.NisabType
 import com.arshadshah.nimaz.domain.model.ZakatAssets
@@ -43,8 +42,8 @@ class ZakatViewModel @Inject constructor(
      * This is the longest form in the app — up to thirteen monetary figures, several of which
      * a user has to look up — and it lived entirely in a `MutableStateFlow`. A phone call
      * during data entry returned them to an empty form with no indication anything had been
-     * lost. The metal prices and currency are not restored here: those are persisted
-     * settings, and [observeMetalPrices] re-reads them.
+     * lost. The nisab basis, the metal prices and the currency are not restored here: those
+     * are persisted settings, and [observeZakatSettings] re-reads them.
      */
     private val _calculatorState = MutableStateFlow(savedState.restoreForm())
     val calculatorState: StateFlow<ZakatCalculatorUiState> = _calculatorState.asStateFlow()
@@ -54,37 +53,50 @@ class ZakatViewModel @Inject constructor(
 
     init {
         loadHistory()
-        observeMetalPrices()
+        observeZakatSettings()
     }
 
     /**
-     * The metal prices and currency are persisted, not constants: [ZakatCalculator]
-     * derives the nisab threshold from the gold price as well as the metal valuation,
-     * so a stale price changes whether zakat is owed at all, not merely how much.
+     * The basis, the metal prices and the currency are persisted settings, not constants and
+     * not form fields: [ZakatCalculator] derives the nisab threshold from the basis and the
+     * gold price as well as the metal valuation, so a stale price changes whether zakat is
+     * owed at all, not merely how much.
      *
-     * Recalculates on every change so an edited price is reflected immediately.
+     * This is also the *only* channel between `ZakatSettingsViewModel` and this one — the
+     * settings screen writes to DataStore, and an open calculator recalculates from here.
+     * Recalculating on every emission is what makes a change made mid-form land immediately.
      */
-    private fun observeMetalPrices() {
+    private fun observeZakatSettings() {
         combine(
             zakatSettings.zakatGoldPricePerGram,
             zakatSettings.zakatSilverPricePerGram,
             zakatSettings.zakatCurrency,
-        ) { gold, silver, currency ->
-            Triple(gold, silver, currency)
+            zakatSettings.zakatNisabType,
+        ) { gold, silver, currency, nisab ->
+            ZakatBasis(gold, silver, currency, NisabType.fromName(nisab))
         }
-            .onEach { (gold, silver, currency) ->
+            .onEach { basis ->
                 _calculatorState.update {
                     it.copy(
-                        goldPricePerGram = gold,
-                        silverPricePerGram = silver,
-                        currency = currency,
+                        goldPricePerGram = basis.goldPricePerGram,
+                        silverPricePerGram = basis.silverPricePerGram,
+                        currency = basis.currency,
+                        nisabType = basis.nisabType,
                     )
                 }
                 recalculate()
             }
-            .catchAndReport(telemetry, DOMAIN, "observe_prices")
+            .catchAndReport(telemetry, DOMAIN, "observe_settings")
             .launchIn(viewModelScope)
     }
+
+    /** The four persisted settings, folded together so one emission is one update. */
+    private data class ZakatBasis(
+        val goldPricePerGram: Double,
+        val silverPricePerGram: Double,
+        val currency: String,
+        val nisabType: NisabType,
+    )
 
     fun onEvent(event: ZakatEvent) {
         // Log only the actions, never the monetary amounts (financial data stays
@@ -108,27 +120,6 @@ class ZakatViewModel @Inject constructor(
             // so instrumenting them literally would emit a stream of events per figure typed
             // — the firehose §4 of the same issue objects to. The once-per-filled-form signal
             // from `calculate()` is what says a calculation happened; these say a digit did.
-            is ZakatEvent.SetNisabType -> {
-                telemetry.settingChanged("zakat_nisab_type", event.nisabType.name)
-                _calculatorState.update { it.copy(nisabType = event.nisabType) }
-                saveForm()
-                recalculate()
-            }
-
-            // Persisted, not just held in state: these survived only until process death
-            // before, and the observer above feeds the new value back in.
-            is ZakatEvent.UpdateGoldPrice -> persist("gold_price") {
-                zakatSettings.setZakatGoldPricePerGram(event.pricePerGram)
-            }
-
-            is ZakatEvent.UpdateSilverPrice -> persist("silver_price") {
-                zakatSettings.setZakatSilverPricePerGram(event.pricePerGram)
-            }
-
-            is ZakatEvent.SetCurrency -> persist("currency") {
-                zakatSettings.setZakatCurrency(event.currency)
-            }
-
             ZakatEvent.ClearAll -> {
                 telemetry.featureUsed(DOMAIN, "clear_all")
                 hasLoggedCalculation = false
@@ -189,16 +180,6 @@ class ZakatViewModel @Inject constructor(
         } else {
             _calculatorState.update { it.copy(calculation = null, error = null) }
         }
-    }
-
-    /**
-     * Persists a form preference — the gold price, the silver price, the currency, the nisab
-     * type. Best-effort on purpose: these are echoes of what the user just typed, still on
-     * screen and still driving the sum, so a failed write costs them the value only on the
-     * next launch. Interrupting a calculation to say so would be the worse trade.
-     */
-    private fun persist(type: String, write: suspend () -> Unit) {
-        launchBestEffort(telemetry, DOMAIN, type) { write() }
     }
 
     /**
@@ -286,7 +267,6 @@ class ZakatViewModel @Inject constructor(
         savedState[KEY_LOANS] = state.liabilities.loans
         savedState[KEY_BILLS] = state.liabilities.billsDue
         savedState[KEY_OTHER_LIABILITIES] = state.liabilities.otherLiabilities
-        savedState[KEY_NISAB_TYPE] = state.nisabType.name
     }
 
     private fun saveCalculation() {
@@ -387,13 +367,14 @@ class ZakatViewModel @Inject constructor(
     /**
      * Rebuild the form from [SavedStateHandle], falling back to an empty form.
      *
-     * Every figure defaults to `0.0` and the nisab basis to whatever the state class defaults
-     * to, so a saved state written by an older build that is missing a key restores a blank
-     * field rather than failing.
+     * Every figure defaults to `0.0`, so a saved state written by an older build that is
+     * missing a key restores a blank field rather than failing. The basis is deliberately not
+     * here: it is a persisted setting now, and [observeZakatSettings] supplies it — reading a
+     * stale copy out of the bundle would briefly show a basis the settings screen had already
+     * changed.
      */
     private fun SavedStateHandle.restoreForm(): ZakatCalculatorUiState {
-        val default = ZakatCalculatorUiState()
-        return default.copy(
+        return ZakatCalculatorUiState(
             assets = ZakatAssets(
                 cashOnHand = get<Double>(KEY_CASH) ?: 0.0,
                 bankBalance = get<Double>(KEY_BANK) ?: 0.0,
@@ -411,9 +392,6 @@ class ZakatViewModel @Inject constructor(
                 billsDue = get<Double>(KEY_BILLS) ?: 0.0,
                 otherLiabilities = get<Double>(KEY_OTHER_LIABILITIES) ?: 0.0,
             ),
-            nisabType = get<String>(KEY_NISAB_TYPE)
-                ?.let { name -> NisabType.entries.firstOrNull { it.name == name } }
-                ?: default.nisabType,
         )
     }
 
@@ -433,7 +411,6 @@ class ZakatViewModel @Inject constructor(
         const val KEY_LOANS = "zakat_loans"
         const val KEY_BILLS = "zakat_bills_due"
         const val KEY_OTHER_LIABILITIES = "zakat_other_liabilities"
-        const val KEY_NISAB_TYPE = "zakat_nisab_type"
     }
 
     private fun ZakatAssets.hasAnyValue(): Boolean {

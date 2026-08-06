@@ -1745,6 +1745,10 @@
     <string name="zakat_gold_price_label">Harga emas per gram</string>
     <string name="zakat_silver_price_label">Harga perak per gram</string>
     <string name="zakat_metal_prices_hint">Perkiraan — sesuaikan dengan harga setempat. Ambang nisab dihitung dari nilai ini.</string>
+    <string name="zakat_settings">Pengaturan Zakat</string>
+    <string name="zakat_settings_subtitle">Dasar nisab, harga logam, dan mata uang</string>
+    <string name="zakat_metal_prices">Harga logam</string>
+    <string name="zakat_settings_nisab_hint">Pilih dasar yang diikuti mazhab Anda — nisab perak lebih rendah daripada nisab emas, sehingga berlaku bagi lebih banyak orang.</string>
     <string name="fasting_log_on_subtitle">Tercatat — ketuk untuk membatalkan</string>
     <string name="fasting_log_off_subtitle">Belum dicatat</string>
     <string name="fasting_log_managed_in_sheet">Dikelola di rincian hari ini</string>

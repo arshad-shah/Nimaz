@@ -54,6 +54,8 @@ private class FakeSettings(private val offset: Int) : SettingsRepository {
     override suspend fun setZakatSilverPricePerGram(pricePerGram: Double) {}
     override val zakatCurrency: Flow<String> = flowOf("USD")
     override suspend fun setZakatCurrency(currency: String) {}
+    override val zakatNisabType: Flow<String> = flowOf("GOLD")
+    override suspend fun setZakatNisabType(type: String) {}
     override val pinnedShortcuts: Flow<List<PinnedShortcut>> = flowOf(PinnedShortcut.DEFAULTS)
     override suspend fun setPinnedShortcuts(shortcuts: List<PinnedShortcut>) {}
     override suspend fun clearAllData() {}

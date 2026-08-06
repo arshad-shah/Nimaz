@@ -18,6 +18,7 @@ import com.arshadshah.nimaz.presentation.screens.settings.QuranSettingsScreen
 import com.arshadshah.nimaz.presentation.screens.settings.SettingsScreen
 import com.arshadshah.nimaz.presentation.screens.settings.SyncScreen
 import com.arshadshah.nimaz.presentation.screens.settings.WidgetsScreen
+import com.arshadshah.nimaz.presentation.screens.settings.ZakatSettingsScreen
 import com.arshadshah.nimaz.presentation.theme.currentWindowSizeClass
 import com.arshadshah.nimaz.presentation.theme.isCompact
 import kotlinx.coroutines.launch
@@ -42,6 +43,7 @@ fun AdaptiveSettingsScreen(
             onNavigateToWidgets = { navController.navigate(Route.SettingsWidgets) },
             onNavigateToSync = { navController.navigate(Route.SettingsSync) },
             onNavigateToSearchSettings = { navController.navigate(Route.SearchSettings) },
+            onNavigateToZakatSettings = { navController.navigate(Route.SettingsZakat) },
             onRestartApp = onRestartApp,
         )
     } else {
@@ -121,6 +123,14 @@ fun AdaptiveSettingsScreen(
                         onNavigateToSearchSettings = {
                             navController.navigate(Route.SearchSettings)
                         },
+                        onNavigateToZakatSettings = {
+                            scope.launch {
+                                navigator.navigateTo(
+                                    ListDetailPaneScaffoldRole.Detail,
+                                    SettingsDetailArgs(SettingsDetailPane.ZAKAT)
+                                )
+                            }
+                        },
                         onRestartApp = onRestartApp,
                     )
                 }
@@ -175,6 +185,10 @@ fun AdaptiveSettingsScreen(
                             SettingsDetailPane.SYNC -> SyncScreen(
                                 onNavigateBack = { scope.launch { navigator.navigateBack() } }
                             )
+
+                            SettingsDetailPane.ZAKAT -> ZakatSettingsScreen(
+                                onNavigateBack = { scope.launch { navigator.navigateBack() } }
+                            )
                         }
                     }
                 }
@@ -184,7 +198,7 @@ fun AdaptiveSettingsScreen(
 }
 
 enum class SettingsDetailPane {
-    PRAYER, NOTIFICATIONS, QURAN, APPEARANCE, LOCATION, LANGUAGE, WIDGETS, SYNC
+    PRAYER, NOTIFICATIONS, QURAN, APPEARANCE, LOCATION, LANGUAGE, WIDGETS, SYNC, ZAKAT
 }
 
 @kotlinx.parcelize.Parcelize
