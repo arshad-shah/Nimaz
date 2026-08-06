@@ -930,17 +930,32 @@ Getters expose `Flow<…>` only (never `MutableStateFlow`/`LiveData`); writes ar
 
 **Hijri date offset.** `hijri_day_offset: Int` (range −2 to +2, default 0) allows users to adjust the displayed Hijri date relative to the system calculation. Stored in `PreferencesDataStore`, read by both Hijri widgets (`HijriDateWorker`, `HijriCalendarWorker`) and passed to `HijriDateCalculator.today(offsetDays)` to compute today's Hijri date for event matching and display. Wired via the "Adjust Hijri date" stepper in `AppearanceSettingsScreen`.
 
-**Zakat metal prices.** `zakat_gold_price_per_gram: Double` (default 65.0),
-`zakat_silver_price_per_gram: Double` (default 0.80) and `zakat_currency: String` (default `USD`),
-with the defaults themselves in `domain/model/ZakatDefaults`. These were previously literals on
-`ZakatCalculatorUiState` that **no screen could change** — the events existed but nothing emitted
-them — so every zakat figure the app produced was wrong by however stale they had become. It was
-not only the amount: `ZakatCalculator` derives the **nisab threshold** from the gold price as well
-as the metal valuation, so a stale price changes whether any zakat is owed at all. `ZakatViewModel`
-observes all three and recalculates on change; the editable fields sit under the nisab selector in
-`ZakatCalculatorScreen`, labelled as estimates so a default is never read as a market rate. Being
-`nimaz_preferences` keys they ride the sync payload (§10), and they are declared in
-`PreferenceCodec.TYPES` like every other key.
+**Zakat basis.** `zakat_gold_price_per_gram: Double` (default 65.0),
+`zakat_silver_price_per_gram: Double` (default 0.80), `zakat_currency: String` (default `USD`) and
+`zakat_nisab_type: String` (a `NisabType` enum name, default `GOLD`), with the defaults themselves
+in `domain/model/ZakatDefaults` and `NisabType.DEFAULT`. The three prices were previously literals
+on `ZakatCalculatorUiState` that **no screen could change** — the events existed but nothing
+emitted them — so every zakat figure the app produced was wrong by however stale they had become.
+It was not only the amount: `ZakatCalculator` derives the **nisab threshold** from the basis and
+the gold price as well as the metal valuation, so a stale price changes whether any zakat is owed
+at all.
+
+The basis is the newest of the four and the one that was not a preference before: it lived in
+`ZakatViewModel`'s `SavedStateHandle`, which survives process death but not a cold start — so the
+ruling a user follows was forgotten every time the app was killed, and the silver nisab works out
+roughly an order of magnitude below the gold one. Stored as a raw enum name and mapped at the
+boundary by `NisabType.fromName` (mirrors `quran_mushaf_script`), so an unknown name from an older
+build's sync payload falls back to the default rather than throwing mid-calculation.
+
+All four are edited on **`ZakatSettingsScreen`** (`Route.SettingsZakat`) via
+`ZakatSettingsViewModel`, which injects the `ZakatSettings` seam — the eight members this screen
+touches, not the 179 of `SettingsRepository`. They used to sit in an accordion in the middle of
+`ZakatCalculatorScreen`'s form; the calculator now *reports* the basis in a row that navigates
+here and observes all four itself, so a change made on the settings screen recalculates an open
+calculator through DataStore with no shared state between the two ViewModels. The price fields are
+labelled as estimates so a default is never read as a market rate. Being `nimaz_preferences` keys
+they ride the sync payload (§10), and they are declared in `PreferenceCodec.TYPES` like every
+other key.
 
 **Pinned shortcuts on More.** `more_pinned_shortcuts: String` — the `PinnedShortcut.key` values of
 the pill row above More's first section, joined with `|`, capped at `PinnedShortcut.MAX_PINS` (5),
@@ -1250,12 +1265,21 @@ now no screen constructs a share `Intent` directly (enforceable: `grep -rn "ACTI
 
 | File | Role |
 |---|---|
-| `core/share/Shareable.kt` | `data class Shareable(plainText, subject?, card?)` — domain-agnostic description of something to share. `ShareCard` is the structured payload (eyebrow / arabic / body / transliteration / attribution) for the branded image. |
-| `core/share/Shareables.kt` | `object` factory — the **one** place each content type's share-body string is built (`ayah`, `favorite`, `hadith`, `dua`, `bookmark`, `appInvite`, `text`). Takes `Context` so bodies/attribution stay localized. |
+| `core/share/Shareable.kt` | `data class Shareable(plainText, subject?, card?)` — domain-agnostic description of something to share. `ShareCard` is the structured payload for the branded image, and carries **two shapes**: scripture fills `arabic` / `transliteration` / `body`, a figure fills `headline: ShareCardFigure` (label, value, caption, badge, muted) and `rows: List<ShareCardRow>` (label, value, `ShareCardRowTone` = NEUTRAL/POSITIVE/NEGATIVE/TOTAL). Both sit under a shared `eyebrow` + `attribution`. |
+| `core/share/Shareables.kt` | `object` factory — the **one** place each content type's share-body string is built (`ayah`, `favorite`, `hadith`, `dua`, `bookmark`, `appInvite`, `zakat`, `text`). Takes `Context` so bodies/attribution stay localized. |
 | `core/share/ContentShareManager.kt` | `object` entry point. `shareText` (text/plain), `shareFile` (FileProvider + grant flag; PDFs & images), `sendEmail` (`ACTION_SENDTO` `mailto:`), and `shareBranded` (suspend — render card → PNG → `shareFile`, text fallback). Owns MIME, `EXTRA_SUBJECT/TEXT`, and the localized chooser title (`R.string.share_chooser_title`). |
-| `core/share/ShareCardRenderer.kt` | Draws a `ShareCard` into a teal/gold **Nimaz-branded PNG** (Amiri Arabic, wordmark, app-icon monogram) via `Canvas`, written to the `exports/` cache dir. Deliberately mirrors the PDF exporters' visual language. |
+| `core/share/ShareCardRenderer.kt` | Draws a `ShareCard` into a teal/gold **Nimaz-branded PNG** (Amiri Arabic, wordmark, app-icon monogram) via `Canvas`, written to the `exports/` cache dir. Deliberately mirrors the PDF exporters' visual language. Scripture blocks are centred `StaticLayout`s; the figure plinth and the ledger are `drawText` (a ledger row needs its label flush left and its value flush right on one baseline, which a `StaticLayout` cannot promise). |
 
-**Branded image path.** `ayah`, `favorite`, `hadith` and `dua` carry a `ShareCard`, so their
+**The zakat card.** The one `ShareCard` that is a figure rather than scripture, and the reason
+the headline/ledger fields exist. It used to newline-join all five amounts into `body`, which the
+renderer drew centred at prose size — five numbers in a column with nothing saying which was the
+answer and which the working. It now sets `arabic = body = null` and fills `headline` (the due
+figure, its rate line, and an above/below-nisab pill) plus four `rows` toned by what each figure
+does to the total: assets teal, deductions red, the net a ruled TOTAL, the nisab named with its
+basis. The `plainText` fallback keeps the flat five-line shape — a text target has no rules, no
+colour and no plinth to carry that structure.
+
+**Branded image path.** `ayah`, `favorite`, `hadith`, `dua` and `zakat` carry a `ShareCard`, so their
 share button calls `ContentShareManager.shareBranded(...)` from a `rememberCoroutineScope()` —
 the bitmap is rendered on `Dispatchers.Default`, then shared as `image/png` with `plainText` as
 the caption/fallback; if rendering fails it degrades to `shareText`. Bookmarks, the app-invite and
@@ -1272,7 +1296,8 @@ PNGs) live under the `exports/` cache dir exposed by `res/xml/file_paths.xml`.
 composable coroutine scope.
 
 **Gotchas.**
-- `ShareCardRenderer` measures then draws in one `draw(canvas)` walk (null canvas = measure pass) so the bitmap height can't drift from the content; Arabic/body text is length-capped for the card, but the full text always survives in the `plainText` fallback.
+- `ShareCardRenderer` measures then draws in one `draw(canvas)` walk (null canvas = measure pass) so the bitmap height can't drift from the content; Arabic/body text is length-capped for the card, but the full text always survives in the `plainText` fallback. `ShareCardRendererTest` renders with Robolectric's **native** graphics for exactly this reason — a legacy no-op canvas would let the two walks disagree and crop the last rows silently.
+- The cache filename is hashed over **everything drawn**, headline and rows included. Built from the eyebrow and attribution alone it would give every zakat calculation made in the same lunar year the same path, and a share hands that file to another app by URI.
 - Chooser title is a single shared `R.string.share_chooser_title` — the old per-feature titles (`share_hadith`, `dua_reader_share`, `tafseer_share_chooser`) are no longer wired to the chooser.
 
 ---

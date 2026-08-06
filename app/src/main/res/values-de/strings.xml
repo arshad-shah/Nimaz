@@ -1776,6 +1776,10 @@
     <string name="zakat_gold_price_label">Goldpreis pro Gramm</string>
     <string name="zakat_silver_price_label">Silberpreis pro Gramm</string>
     <string name="zakat_metal_prices_hint">Schätzwerte — bitte an den lokalen Kurs anpassen. Der Nisab-Schwellenwert wird daraus berechnet.</string>
+    <string name="zakat_settings">Zakat-Einstellungen</string>
+    <string name="zakat_settings_subtitle">Nisab-Grundlage, Metallpreise und Währung</string>
+    <string name="zakat_metal_prices">Metallpreise</string>
+    <string name="zakat_settings_nisab_hint">Wählen Sie die Grundlage Ihrer Rechtsschule — der Silber-Nisab liegt niedriger als der Gold-Nisab und betrifft daher mehr Menschen.</string>
     <string name="fasting_log_on_subtitle">Erfasst — zum Rückgängigmachen tippen</string>
     <string name="fasting_log_off_subtitle">Noch nicht erfasst</string>
     <string name="fasting_log_managed_in_sheet">Wird in den Tagesdetails verwaltet</string>

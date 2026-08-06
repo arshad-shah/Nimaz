@@ -44,6 +44,7 @@ class ZakatViewModelTest {
     private val goldPrice = MutableStateFlow(ZakatDefaults.GOLD_PRICE_PER_GRAM)
     private val silverPrice = MutableStateFlow(ZakatDefaults.SILVER_PRICE_PER_GRAM)
     private val currency = MutableStateFlow(ZakatDefaults.CURRENCY)
+    private val nisabType = MutableStateFlow(NisabType.DEFAULT.name)
 
     @Before
     fun setUp() {
@@ -56,6 +57,7 @@ class ZakatViewModelTest {
         every { settings.zakatGoldPricePerGram } returns goldPrice
         every { settings.zakatSilverPricePerGram } returns silverPrice
         every { settings.zakatCurrency } returns currency
+        every { settings.zakatNisabType } returns nisabType
     }
 
     @After
@@ -65,16 +67,18 @@ class ZakatViewModelTest {
         ZakatViewModel(useCases, settings, telemetry, saved)
 
     @Test
-    fun `setting a currency persists it and re-reaches state`() = runTest {
-        // ZakatEvent.SetCurrency had a handler and no producer until the calculator grew a
-        // picker: every figure was formatted with state.currency and nothing could change it.
+    fun `a currency set in settings reaches the calculator`() = runTest {
+        // The calculator no longer writes the currency — ZakatSettingsViewModel does, and this
+        // observation is the only channel between them. Every figure on the screen is formatted
+        // with state.currency, so a settings write that did not arrive here would leave someone
+        // reading their own zakat under someone else's symbol.
         val vm = viewModel()
         advanceUntilIdle()
 
-        vm.onEvent(ZakatEvent.SetCurrency("GBP"))
+        currency.value = "GBP"
         advanceUntilIdle()
 
-        coVerify { settings.setZakatCurrency("GBP") }
+        assertThat(vm.calculatorState.value.currency).isEqualTo("GBP")
     }
 
     @Test
@@ -111,17 +115,6 @@ class ZakatViewModelTest {
     }
 
     @Test
-    fun `an edited gold price is persisted, not just held in state`() = runTest {
-        val vm = viewModel()
-        advanceUntilIdle()
-
-        vm.onEvent(ZakatEvent.UpdateGoldPrice(85.0))
-        advanceUntilIdle()
-
-        coVerify { settings.setZakatGoldPricePerGram(85.0) }
-    }
-
-    @Test
     fun `a persisted price reaches the calculation`() = runTest {
         val vm = viewModel()
         advanceUntilIdle()
@@ -146,7 +139,7 @@ class ZakatViewModelTest {
 
         // 87.48g is the gold nisab. Holding 80g is below the threshold at any price,
         // but the *value* comparison is what decides — so a price change can flip it.
-        vm.onEvent(ZakatEvent.SetNisabType(NisabType.GOLD))
+        nisabType.value = NisabType.GOLD.name
         vm.onEvent(ZakatEvent.UpdateCash(6_000.0))
         advanceUntilIdle()
 
@@ -159,17 +152,6 @@ class ZakatViewModelTest {
         // 6,000 clears a 65/g nisab (5,686) but not an 85/g one (7,436).
         assertThat(atDefault.zakatDue).isGreaterThan(0.0)
         assertThat(atHigher.zakatDue).isEqualTo(0.0)
-    }
-
-    @Test
-    fun `currency changes are persisted`() = runTest {
-        val vm = viewModel()
-        advanceUntilIdle()
-
-        vm.onEvent(ZakatEvent.SetCurrency("EUR"))
-        advanceUntilIdle()
-
-        coVerify { settings.setZakatCurrency("EUR") }
     }
 
     @Test
@@ -197,10 +179,10 @@ class ZakatViewModelTest {
         before.onEvent(ZakatEvent.UpdateCash(10_000.0))
         before.onEvent(ZakatEvent.UpdateGold(120.0))
         before.onEvent(ZakatEvent.UpdateDebts(2_500.0))
-        before.onEvent(ZakatEvent.SetNisabType(NisabType.SILVER))
         advanceUntilIdle()
 
         // A new ViewModel over the same handle is what the process restart produces.
+        nisabType.value = NisabType.SILVER.name
         val after = viewModel(saved)
         advanceUntilIdle()
 
@@ -208,6 +190,9 @@ class ZakatViewModelTest {
         assertThat(restored.assets.cashOnHand).isEqualTo(10_000.0)
         assertThat(restored.assets.goldGrams).isEqualTo(120.0)
         assertThat(restored.liabilities.debts).isEqualTo(2_500.0)
+        // The basis is a persisted setting now, not part of the saved form — it comes back
+        // from DataStore rather than from the bundle, which is why it survives a cold start
+        // and not only a process death.
         assertThat(restored.nisabType).isEqualTo(NisabType.SILVER)
         // And the result is recomputed from it, not left null under a filled-in form.
         assertThat(restored.calculation).isNotNull()

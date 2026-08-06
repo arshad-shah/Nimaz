@@ -11,6 +11,7 @@ import android.graphics.Typeface
 import android.text.Layout
 import android.text.StaticLayout
 import android.text.TextPaint
+import android.text.TextUtils
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.createBitmap
 import androidx.core.graphics.withTranslation
@@ -54,6 +55,12 @@ object ShareCardRenderer {
     private val GOLD_INK = 0xFF3A2A00.toInt()
     private val LINE = 0xFFE7E5E4.toInt()
 
+    // The figure plinth. A warm gold wash rather than the deep teal the in-app hero uses:
+    // this sits *inside* the white card, and a dark block there reads as a second card.
+    private val PLINTH = 0xFFFEF9E7.toInt()
+    private val PLINTH_LINE = 0xFFF3E3A8.toInt()
+    private val NEGATIVE = 0xFFB91C1C.toInt()
+
     fun renderToCache(context: Context, card: ShareCard): File {
         val bitmap = Renderer(context, card).render()
         val dir = File(context.cacheDir, "exports").apply { mkdirs() }
@@ -63,10 +70,25 @@ object ShareCardRenderer {
         return file
     }
 
+    /**
+     * A filename discriminator, over **everything drawn**.
+     *
+     * The headline and the ledger are in it because for a zakat card they are the only fields
+     * that differ between two calculations: eyebrow and attribution are "Zakat" and the lunar
+     * year, so a key built from those alone would give every calculation made in the same year
+     * the same filename.
+     */
     private fun cardKey(card: ShareCard): String =
         Integer.toHexString(
-            listOf(card.eyebrow, card.attribution, card.arabic, card.body, card.transliteration)
-                .joinToString("|").hashCode()
+            buildList {
+                add(card.eyebrow)
+                add(card.attribution)
+                add(card.arabic)
+                add(card.body)
+                add(card.transliteration)
+                card.headline?.let { add(it.label); add(it.value); add(it.caption); add(it.badge) }
+                card.rows.forEach { add(it.label); add(it.value); add(it.tone.name) }
+            }.joinToString("|").hashCode()
         )
 
     /**
@@ -201,6 +223,11 @@ object ShareCardRenderer {
             }
             y += 4f + 44f
 
+            // ── Headline figure (zakat and anything else that is a number, not prose) ──
+            card.headline?.let { y = drawHeadline(canvas, it, left, right, y) + 34f }
+            // ── The working behind it ──
+            if (card.rows.isNotEmpty()) y = drawRows(canvas, left, right, y) + 34f
+
             // ── Arabic ──
             arabicLayout?.let { y = drawBlock(canvas, it, left, y) + 36f }
             // ── Transliteration ──
@@ -227,6 +254,150 @@ object ShareCardRenderer {
             y = drawBlock(canvas, footerLayout, left, y)
 
             return y + CARD_PAD
+        }
+
+        // ── Figure + ledger ────────────────────────────────────────────────────────────
+        //
+        // These two are drawn with `drawText` rather than `StaticLayout` because both are
+        // *tabular*: a ledger row needs its label flush left and its value flush right on one
+        // shared baseline, which is a layout a StaticLayout of "label   value" cannot promise
+        // at any font. Every height below therefore comes from the paint's own font metrics,
+        // so the measuring walk (canvas == null) and the drawing walk agree by construction.
+
+        private val figureLabelPaint = paint(bold, 24f, GOLD_INK, letterSpacing = 0.12f)
+        private val figureValuePaint = paint(bold, 88f, INK)
+        private val figureCaptionPaint = paint(bodyFont, 28f, MUTED)
+        private val badgePaint = paint(bold, 22f, Color.WHITE, letterSpacing = 0.08f)
+        private val rowLabelPaint = paint(bodyFont, 30f, MUTED)
+        private val rowValuePaint = paint(bold, 30f, INK)
+        private val totalLabelPaint = paint(bold, 32f, INK)
+        private val totalValuePaint = paint(bold, 34f, INK)
+
+        /**
+         * The headline figure in its plinth: caption, optional status pill, the number, and a
+         * line saying how the number was arrived at.
+         */
+        private fun drawHeadline(
+            canvas: Canvas?,
+            figure: ShareCardFigure,
+            left: Float,
+            right: Float,
+            y: Float,
+        ): Float {
+            val pad = 32f
+            var cursor = y + pad
+            cursor += lineHeight(figureLabelPaint)
+            val labelBaseline = cursor - figureLabelPaint.descent()
+            cursor += 14f + lineHeight(figureValuePaint)
+            val valueBaseline = cursor - figureValuePaint.descent()
+            val captionBaseline = figure.caption?.let {
+                cursor += 10f + lineHeight(figureCaptionPaint)
+                cursor - figureCaptionPaint.descent()
+            }
+            val bottom = cursor + pad
+
+            if (canvas != null) {
+                canvas.drawRoundRect(left, y, right, bottom, 28f, 28f, fill(PLINTH))
+                canvas.drawRoundRect(
+                    left, y, right, bottom, 28f, 28f,
+                    Paint().apply {
+                        isAntiAlias = true; style = Paint.Style.STROKE
+                        strokeWidth = 2f; color = PLINTH_LINE
+                    }
+                )
+                canvas.drawText(
+                    figure.label.uppercase(), left + pad, labelBaseline, figureLabelPaint
+                )
+                figure.badge?.let {
+                    drawBadgePill(canvas, it.uppercase(), right - pad, labelBaseline - 10f)
+                }
+                // A muted figure is one that is zero *because nothing is owed* — drawing it at
+                // full strength overstates a number the card is saying is not due.
+                figureValuePaint.alpha = if (figure.muted) 110 else 255
+                canvas.drawText(figure.value, left + pad, valueBaseline, figureValuePaint)
+                figureValuePaint.alpha = 255
+                if (captionBaseline != null && figure.caption != null) {
+                    canvas.drawText(
+                        figure.caption, left + pad, captionBaseline, figureCaptionPaint
+                    )
+                }
+            }
+            return bottom
+        }
+
+        /** The ledger: one label/value line per row, ruled, with totals set apart. */
+        private fun drawRows(canvas: Canvas?, left: Float, right: Float, y: Float): Float {
+            var cursor = y
+            card.rows.forEachIndexed { index, row ->
+                val total = row.tone == ShareCardRowTone.TOTAL
+                val labelPaint = if (total) totalLabelPaint else rowLabelPaint
+                val valuePaint = if (total) totalValuePaint else rowValuePaint
+
+                if (index > 0) {
+                    // A total is separated by a full rule; ordinary rows by a hairline.
+                    if (canvas != null) {
+                        canvas.drawRect(
+                            left, cursor, right, cursor + if (total) 2f else 1f,
+                            fill(if (total) MUTED else LINE)
+                        )
+                    }
+                    cursor += (if (total) 2f else 1f) + if (total) 22f else 16f
+                }
+
+                val height = lineHeight(labelPaint).coerceAtLeast(lineHeight(valuePaint))
+                if (canvas != null) {
+                    val baseline = cursor + height - valuePaint.descent()
+                    valuePaint.color = when (row.tone) {
+                        ShareCardRowTone.POSITIVE -> TEAL_DARK
+                        ShareCardRowTone.NEGATIVE -> NEGATIVE
+                        ShareCardRowTone.TOTAL, ShareCardRowTone.NEUTRAL -> INK
+                    }
+                    // The value is laid out first and keeps its width — it is the figure, and
+                    // a truncated amount is worse than a truncated label by a wide margin.
+                    val valueWidth = valuePaint.measureText(row.value)
+                    valuePaint.textAlign = Paint.Align.RIGHT
+                    canvas.drawText(row.value, right, baseline, valuePaint)
+                    valuePaint.textAlign = Paint.Align.LEFT
+                    val labelWidth = (right - left) - valueWidth - 24f
+                    canvas.drawText(
+                        TextUtils.ellipsize(
+                            row.label, TextPaint(labelPaint), labelWidth.coerceAtLeast(1f),
+                            TextUtils.TruncateAt.END,
+                        ).toString(),
+                        left, baseline, labelPaint,
+                    )
+                }
+                cursor += height + if (index == card.rows.lastIndex) 0f else 16f
+            }
+            return cursor
+        }
+
+        private fun drawBadgePill(canvas: Canvas, text: String, rightEdge: Float, centerY: Float) {
+            val width = badgePaint.measureText(text)
+            val height = 44f
+            val l = rightEdge - width - 32f
+            canvas.drawRoundRect(
+                l, centerY - height / 2, rightEdge, centerY + height / 2,
+                height / 2, height / 2, fill(TEAL_800),
+            )
+            badgePaint.textAlign = Paint.Align.CENTER
+            canvas.drawText(text, (l + rightEdge) / 2f, centerY + 8f, badgePaint)
+            badgePaint.textAlign = Paint.Align.LEFT
+        }
+
+        private fun lineHeight(paint: Paint): Float = paint.descent() - paint.ascent()
+
+        private fun paint(
+            face: Typeface,
+            size: Float,
+            colorInt: Int,
+            letterSpacing: Float = 0f,
+        ) = Paint().apply {
+            isAntiAlias = true
+            typeface = face
+            textSize = size
+            color = colorInt
+            this.letterSpacing = letterSpacing
         }
 
         /** Draws (or just advances past) a text block, returning the new y cursor. */

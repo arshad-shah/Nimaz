@@ -108,6 +108,7 @@ internal object PreferenceCodec {
         "zakat_gold_price_per_gram" to PrefType.DOUBLE,
         "zakat_silver_price_per_gram" to PrefType.DOUBLE,
         "zakat_currency" to PrefType.STRING,
+        "zakat_nisab_type" to PrefType.STRING,
         "continuous_reading" to PrefType.BOOLEAN,
         "keep_screen_on" to PrefType.BOOLEAN,
         "show_tajweed" to PrefType.BOOLEAN,

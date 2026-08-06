@@ -72,6 +72,7 @@ object ScreenTags {
     const val TasbihAddPreset = "screen_tasbih_add_preset"
     const val ZakatCalculator = "screen_zakat_calculator"
     const val ZakatHistory = "screen_zakat_history"
+    const val SettingsZakat = "screen_settings_zakat"
     const val Qibla = "screen_qibla"
     const val IslamicCalendar = "screen_islamic_calendar"
     const val IslamicMonth = "screen_islamic_month"

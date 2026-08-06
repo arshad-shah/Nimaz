@@ -14,6 +14,7 @@ import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.arshadshah.nimaz.domain.model.ZakatDefaults
 import com.arshadshah.nimaz.domain.model.MushafScript
+import com.arshadshah.nimaz.domain.model.NisabType
 import com.arshadshah.nimaz.domain.model.PinnedShortcut
 import com.arshadshah.nimaz.domain.model.PrayerAlertStyle
 import com.arshadshah.nimaz.domain.model.UserPreferences
@@ -157,6 +158,11 @@ class PreferencesDataStore @Inject constructor(
         val ZAKAT_GOLD_PRICE_PER_GRAM = doublePreferencesKey("zakat_gold_price_per_gram")
         val ZAKAT_SILVER_PRICE_PER_GRAM = doublePreferencesKey("zakat_silver_price_per_gram")
         val ZAKAT_CURRENCY = stringPreferencesKey("zakat_currency")
+
+        // Which nisab basis the calculator compares net wealth against; stored as the
+        // NisabType enum name ("GOLD"/"SILVER"). It used to live only in the calculator's
+        // SavedStateHandle, so the basis a user follows was forgotten on every cold start.
+        val ZAKAT_NISAB_TYPE = stringPreferencesKey("zakat_nisab_type")
         val CONTINUOUS_READING = booleanPreferencesKey("continuous_reading")
         val KEEP_SCREEN_ON = booleanPreferencesKey("keep_screen_on")
         val SHOW_TAJWEED = booleanPreferencesKey("show_tajweed")
@@ -715,6 +721,15 @@ class PreferencesDataStore @Inject constructor(
 
     override suspend fun setZakatCurrency(currency: String) =
         put(PreferencesKeys.ZAKAT_CURRENCY, currency)
+
+    // Stored as a raw enum-name string; NisabType.fromName maps it at the domain boundary
+    // (mirrors quran_mushaf_script), so an unknown name from an older sync payload falls
+    // back to the default basis instead of throwing mid-calculation.
+    override val zakatNisabType: Flow<String> =
+        preference(PreferencesKeys.ZAKAT_NISAB_TYPE, NisabType.DEFAULT.name)
+
+    override suspend fun setZakatNisabType(type: String) =
+        put(PreferencesKeys.ZAKAT_NISAB_TYPE, type)
 
     override val continuousReading: Flow<Boolean> =
         preference(PreferencesKeys.CONTINUOUS_READING, true)

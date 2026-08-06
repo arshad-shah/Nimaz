@@ -1,17 +1,11 @@
 package com.arshadshah.nimaz.presentation.screens.zakat
 
-import com.arshadshah.nimaz.domain.model.ZakatDefaults
-import com.arshadshah.nimaz.presentation.components.molecules.NimazListPicker
-import com.arshadshah.nimaz.presentation.components.molecules.NimazPickerItem
 import com.arshadshah.nimaz.presentation.components.molecules.NimazAccordion
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuItem
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
-import java.util.Currency
-import java.util.Locale
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -20,13 +14,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ShowChart
@@ -42,6 +33,7 @@ import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.Receipt
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Savings
+import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.filled.Wallet
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -59,28 +51,24 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.share.ContentShareManager
 import com.arshadshah.nimaz.core.share.Shareables
 import com.arshadshah.nimaz.core.util.HijriDateCalculator
+import com.arshadshah.nimaz.core.util.currencySymbolOf
 import com.arshadshah.nimaz.core.util.formatCurrency
 import com.arshadshah.nimaz.domain.model.NisabType
 import com.arshadshah.nimaz.presentation.components.atoms.NimazAmountInput
 import com.arshadshah.nimaz.presentation.components.atoms.amountToInput
 import com.arshadshah.nimaz.presentation.components.atoms.parseAmountInput
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
@@ -100,7 +88,6 @@ import com.arshadshah.nimaz.presentation.components.molecules.ZakatHeroStatus
 import com.arshadshah.nimaz.presentation.components.molecules.ZakatSummaryHero
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.NimazColors
-import com.arshadshah.nimaz.presentation.theme.NimazShapes
 import com.arshadshah.nimaz.presentation.theme.currentWindowSizeClass
 import com.arshadshah.nimaz.presentation.theme.isCompact
 import com.arshadshah.nimaz.presentation.viewmodel.tools.ZakatEvent
@@ -113,6 +100,7 @@ import kotlinx.coroutines.launch
 fun ZakatCalculatorScreen(
     onNavigateBack: () -> Unit,
     onNavigateToHistory: () -> Unit,
+    onNavigateToSettings: () -> Unit,
     viewModel: ZakatViewModel = hiltViewModel()
 ) {
     val state by viewModel.calculatorState.collectAsStateWithLifecycle()
@@ -138,6 +126,16 @@ fun ZakatCalculatorScreen(
                             contentDescription = stringResource(R.string.cd_history)
                         )
                     }
+                    // The nisab basis, the metal prices and the currency used to be an
+                    // accordion in the middle of this form. They are persisted preferences,
+                    // not figures typed per calculation, so they live on their own screen —
+                    // reachable from here the same way the Quran reader reaches its settings.
+                    IconButton(onClick = onNavigateToSettings) {
+                        NimazIcon(
+                            imageVector = Icons.Default.Tune,
+                            contentDescription = stringResource(R.string.zakat_settings)
+                        )
+                    }
                 }
             )
         }
@@ -148,6 +146,7 @@ fun ZakatCalculatorScreen(
             ZakatCompactContent(
                 state = state,
                 viewModel = viewModel,
+                onNavigateToSettings = onNavigateToSettings,
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
@@ -156,6 +155,7 @@ fun ZakatCalculatorScreen(
             ZakatTabletContent(
                 state = state,
                 viewModel = viewModel,
+                onNavigateToSettings = onNavigateToSettings,
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
@@ -168,9 +168,9 @@ fun ZakatCalculatorScreen(
 private fun ZakatCompactContent(
     state: ZakatCalculatorUiState,
     viewModel: ZakatViewModel,
+    onNavigateToSettings: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var showCurrencyPicker by rememberSaveable { mutableStateOf(false) }
     val listState = rememberLazyListState()
     val onShareCalculation = rememberZakatShareAction(state)
 
@@ -256,39 +256,17 @@ private fun ZakatCompactContent(
                     LiabilityInputCards(state = state, viewModel = viewModel)
                 }
             }
+            // The basis is *reported* here and *set* in settings. It stays on the form
+            // because the threshold is what decides whether anything is owed at all — a
+            // reader who cannot see it cannot tell why the total says zero — but nothing
+            // about it is editable in the middle of typing thirteen figures.
             item {
-                NimazAccordion(
-                    title = stringResource(R.string.zakat_section_nisab),
-                    subtitle = stringResource(R.string.zakat_section_nisab_subtitle),
-                    trailing = {
-                        SubtotalLabel(
-                            amount = state.calculation?.nisabValue ?: 0.0,
-                            currency = state.currency,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    },
-                ) {
-                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                        NisabSelector(
-                            selectedType = state.nisabType,
-                            goldPrice = state.goldPricePerGram,
-                            silverPrice = state.silverPricePerGram,
-                            currency = state.currency,
-                            onTypeChange = { viewModel.onEvent(ZakatEvent.SetNisabType(it)) },
-                            onGoldPriceChange = { viewModel.onEvent(ZakatEvent.UpdateGoldPrice(it)) },
-                            onSilverPriceChange = { viewModel.onEvent(ZakatEvent.UpdateSilverPrice(it)) }
-                        )
-                        // ZakatEvent.SetCurrency existed with a handler and no producer: every
-                        // figure on this screen was formatted with state.currency, and nothing
-                        // could change it, so anyone outside the default read someone else's
-                        // symbol on their own zakat.
-                        NimazMenuItem(
-                            title = stringResource(R.string.zakat_currency),
-                            subtitle = currencyLabel(state.currency),
-                            onClick = { showCurrencyPicker = true },
-                        )
-                    }
-                }
+                NisabBasisRow(
+                    nisabType = state.nisabType,
+                    nisabValue = state.calculation?.nisabValue ?: state.nisabValue,
+                    currency = state.currency,
+                    onClick = onNavigateToSettings,
+                )
             }
 
             // INLINE, and above the result rather than in place of the form: every figure the
@@ -337,18 +315,6 @@ private fun ZakatCompactContent(
             onShare = onShareCalculation,
         )
     }
-
-    if (showCurrencyPicker) {
-        NimazListPicker(
-            title = stringResource(R.string.zakat_currency),
-            items = ZakatDefaults.CURRENCIES.map { code ->
-                NimazPickerItem(value = code, title = code, description = currencyLabel(code))
-            },
-            selected = state.currency,
-            onSelected = { viewModel.onEvent(ZakatEvent.SetCurrency(it)) },
-            onDismiss = { showCurrencyPicker = false },
-        )
-    }
 }
 
 /**
@@ -382,6 +348,15 @@ private fun ZakatCalculatorUiState.assetsTotal(): Double =
 private fun rememberZakatShareAction(state: ZakatCalculatorUiState): () -> Unit {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    // Resolved in composition, not inside the click: `context.getString` from a callback does
+    // not re-resolve across a configuration change, so a card shared after switching language
+    // would carry the previous locale's basis name.
+    val basis = stringResource(
+        when (state.nisabType) {
+            NisabType.GOLD -> R.string.gold
+            NisabType.SILVER -> R.string.silver
+        }
+    )
     return {
         val calculation = state.calculation
         if (calculation != null) {
@@ -398,6 +373,8 @@ private fun rememberZakatShareAction(state: ZakatCalculatorUiState): () -> Unit 
                         // The Hijri year the calculation belongs to — zakat is owed on a lunar
                         // year, so the Gregorian one would label it with the wrong period.
                         yearLabel = HijriDateCalculator.today().year.toString(),
+                        basis = basis,
+                        aboveNisab = calculation.isAboveNisab,
                     ),
                 )
             }
@@ -461,9 +438,9 @@ private fun ZakatActionBar(
 private fun ZakatTabletContent(
     state: ZakatCalculatorUiState,
     viewModel: ZakatViewModel,
+    onNavigateToSettings: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var showCurrencyPicker by rememberSaveable { mutableStateOf(false) }
     val onShareCalculation = rememberZakatShareAction(state)
 
     Column(
@@ -482,20 +459,12 @@ private fun ZakatTabletContent(
             currency = state.currency
         )
 
-        // Nisab selector spans full width
-        NisabSelector(
-            selectedType = state.nisabType,
-            goldPrice = state.goldPricePerGram,
-            silverPrice = state.silverPricePerGram,
+        // Reported, not editable — the basis is set on the zakat settings screen.
+        NisabBasisRow(
+            nisabType = state.nisabType,
+            nisabValue = state.calculation?.nisabValue ?: state.nisabValue,
             currency = state.currency,
-            onTypeChange = { viewModel.onEvent(ZakatEvent.SetNisabType(it)) },
-            onGoldPriceChange = { viewModel.onEvent(ZakatEvent.UpdateGoldPrice(it)) },
-            onSilverPriceChange = { viewModel.onEvent(ZakatEvent.UpdateSilverPrice(it)) }
-        )
-        NimazMenuItem(
-            title = stringResource(R.string.zakat_currency),
-            subtitle = currencyLabel(state.currency),
-            onClick = { showCurrencyPicker = true },
+            onClick = onNavigateToSettings,
         )
 
         // Two columns: Assets left, Liabilities right
@@ -566,18 +535,40 @@ private fun ZakatTabletContent(
 
         Spacer(modifier = Modifier.height(24.dp))
     }
+}
 
-    if (showCurrencyPicker) {
-        NimazListPicker(
-            title = stringResource(R.string.zakat_currency),
-            items = ZakatDefaults.CURRENCIES.map { code ->
-                NimazPickerItem(value = code, title = code, description = currencyLabel(code))
-            },
-            selected = state.currency,
-            onSelected = { viewModel.onEvent(ZakatEvent.SetCurrency(it)) },
-            onDismiss = { showCurrencyPicker = false },
-        )
-    }
+/**
+ * The nisab basis and the threshold it prices out to, as a row into the settings screen.
+ *
+ * A `NimazMenuItem`, not a card wrapped in `Modifier.clickable` — a wrapping clickable paints a
+ * sharp-cornered ripple that ignores the card radius.
+ */
+@Composable
+private fun NisabBasisRow(
+    nisabType: NisabType,
+    nisabValue: Double,
+    currency: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val basis = stringResource(
+        when (nisabType) {
+            NisabType.GOLD -> R.string.gold
+            NisabType.SILVER -> R.string.silver
+        }
+    )
+    NimazMenuItem(
+        modifier = modifier,
+        title = stringResource(R.string.zakat_section_nisab),
+        // "Gold · €5,687.10" — the basis and what it comes to, which together are the whole
+        // of what this row has to say.
+        subtitle = stringResource(
+            R.string.settings_value_with_qualifier,
+            basis,
+            formatCurrency(nisabValue, currency),
+        ),
+        onClick = onClick,
+    )
 }
 
 @Composable
@@ -778,185 +769,6 @@ private fun ZakatResultSummaryCard(
             ),
         ),
     )
-}
-
-// --- Nisab Selector ---
-
-@Composable
-private fun NisabSelector(
-    selectedType: NisabType,
-    goldPrice: Double,
-    silverPrice: Double,
-    currency: String,
-    onTypeChange: (NisabType) -> Unit,
-    onGoldPriceChange: (Double) -> Unit,
-    onSilverPriceChange: (Double) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            NisabOptionCard(
-                label = stringResource(R.string.gold),
-                // Formatted, not truncated: goldPrice.toInt() rendered the silver
-                // price of 0.80 as "0", and the hardcoded "$" ignored the currency.
-                subtitle = stringResource(
-                    R.string.zakat_nisab_gold_subtitle,
-                    formatCurrency(goldPrice, currency)
-                ),
-                isSelected = selectedType == NisabType.GOLD,
-                accentColor = NimazColors.ZakatColors.Gold,
-                onClick = { onTypeChange(NisabType.GOLD) },
-                modifier = Modifier.weight(1f)
-            )
-
-            NisabOptionCard(
-                label = stringResource(R.string.silver),
-                subtitle = stringResource(
-                    R.string.zakat_nisab_silver_subtitle,
-                    formatCurrency(silverPrice, currency)
-                ),
-                isSelected = selectedType == NisabType.SILVER,
-                accentColor = NimazColors.ZakatColors.Silver,
-                onClick = { onTypeChange(NisabType.SILVER) },
-                modifier = Modifier.weight(1f)
-            )
-        }
-
-        MetalPricesEditor(
-            goldPrice = goldPrice,
-            silverPrice = silverPrice,
-            currency = currency,
-            onGoldPriceChange = onGoldPriceChange,
-            onSilverPriceChange = onSilverPriceChange
-        )
-    }
-}
-
-/**
- * The metal prices the nisab threshold is derived from, editable.
- *
- * These used to be constants no user could reach, so every zakat figure was wrong by
- * however stale they were — and because the gold price sets the nisab threshold as
- * well as the metal valuation, a stale price could change whether zakat was owed at
- * all. The hint says they are estimates so a default is never mistaken for a rate.
- */
-@Composable
-private fun MetalPricesEditor(
-    goldPrice: Double,
-    silverPrice: Double,
-    currency: String,
-    onGoldPriceChange: (Double) -> Unit,
-    onSilverPriceChange: (Double) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    NimazCard(
-        modifier = modifier.fillMaxWidth(),
-        style = NimazCardStyle.OUTLINED,
-        shape = NimazShapes.small
-    ) {
-        Column(
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = stringResource(R.string.zakat_gold_price_label),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.weight(1f)
-                )
-                AmountField(
-                    value = goldPrice,
-                    onValueChange = onGoldPriceChange,
-                    currencySymbol = currencySymbolOf(currency),
-                )
-            }
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = stringResource(R.string.zakat_silver_price_label),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.weight(1f)
-                )
-                AmountField(
-                    value = silverPrice,
-                    onValueChange = onSilverPriceChange,
-                    currencySymbol = currencySymbolOf(currency),
-                )
-            }
-
-            Text(
-                text = stringResource(R.string.zakat_metal_prices_hint),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-    }
-}
-
-@Composable
-private fun NisabOptionCard(
-    label: String,
-    subtitle: String,
-    isSelected: Boolean,
-    accentColor: Color,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val surface = MaterialTheme.colorScheme.surface
-    NimazCard(
-        onClick = onClick,
-        modifier = modifier,
-        // Two peers on the page background: elevation gives each option a card
-        // boundary, the accent fill + border carries the selection.
-        // FILLED (not ELEVATED) because only Material's `Card` renders a border —
-        // `ElevatedCard` has no border slot, so an ELEVATED card drops
-        // `activeBorder` silently. Elevation is passed explicitly to keep the lift.
-        style = NimazCardStyle.FILLED,
-        elevation = 1.dp,
-        shape = RoundedCornerShape(14.dp),
-        selected = isSelected,
-        colors = NimazCardDefaults.selectable(
-            container = surface,
-            // Composited to an OPAQUE colour on purpose. A translucent container on
-            // a shadow-casting surface makes the RenderNode non-opaque, so Android
-            // fills the shadow's interior behind it — that leaked through as a pale
-            // box in the middle of the selected gold/silver card.
-            activeContainer = accentColor.copy(alpha = 0.15f).compositeOver(surface),
-            // Border alpha is safe — it is stroked on top, not behind the shadow.
-            activeBorder = accentColor.copy(alpha = 0.5f),
-        )
-    ) {
-        Column(
-            modifier = Modifier.padding(15.dp)
-        ) {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.Bold,
-                color = if (isSelected) accentColor else MaterialTheme.colorScheme.onSurface
-            )
-            Spacer(modifier = Modifier.height(2.dp))
-            Text(
-                text = subtitle,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-    }
 }
 
 // --- Input Card ---
@@ -1224,24 +1036,3 @@ private fun BreakdownRow(
     }
 }
 
-/**
- * "US Dollar ($)" in English, "US-Dollar ($)" in German — resolved by `java.util.Currency`
- * from the ISO code, so the picker carries no translated strings of its own.
- */
-/**
- * The bare symbol for an ISO code — `€` for EUR — falling back to the code itself.
- *
- * The same resolution `formatCurrency` performs, so the symbol inside a field and the symbol
- * beside the total cannot disagree. A code with no symbol on this device renders as the code,
- * which is still true and still readable.
- */
-internal fun currencySymbolOf(code: String): String = runCatching {
-    Currency.getInstance(code).getSymbol(Locale.getDefault())
-}.getOrDefault(code)
-
-private fun currencyLabel(code: String): String = runCatching {
-    val currency = Currency.getInstance(code)
-    val name = currency.getDisplayName(Locale.getDefault())
-    val symbol = currency.getSymbol(Locale.getDefault())
-    if (symbol == code) name else "$name ($symbol)"
-}.getOrDefault(code)

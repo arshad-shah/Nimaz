@@ -1811,6 +1811,10 @@
     <string name="zakat_gold_price_label">Prix de l’or par gramme</string>
     <string name="zakat_silver_price_label">Prix de l’argent par gramme</string>
     <string name="zakat_metal_prices_hint">Estimations — indiquez votre cours local. Le seuil du nisab en découle.</string>
+    <string name="zakat_settings">Paramètres de la zakat</string>
+    <string name="zakat_settings_subtitle">Base du nisab, cours des métaux et devise</string>
+    <string name="zakat_metal_prices">Cours des métaux</string>
+    <string name="zakat_settings_nisab_hint">Choisissez la base suivie par votre école — le nisab de l\'argent est plus bas que celui de l\'or, il concerne donc plus de personnes.</string>
     <string name="fasting_log_on_subtitle">Enregistré — appuyez pour annuler</string>
     <string name="fasting_log_off_subtitle">Pas encore enregistré</string>
     <string name="fasting_log_managed_in_sheet">Géré dans les détails du jour</string>
