@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -305,7 +304,13 @@ fun NimazCard(
                     )
             ) {
                 CompositionLocalProvider(LocalContentColor provides contentColor) {
-                    Column(modifier = Modifier.fillMaxSize(), content = content)
+                    // Width, never height. `fillMaxSize` here made the card as tall as whatever
+                    // height its parent offered, which is a no-op inside a scrollable (the
+                    // constraint is infinite) but stretches the card to the full viewport in a
+                    // bounded parent — how the zakat hero came to eat the whole calculator screen.
+                    // The other styles delegate to Material's `Card`, whose column wraps its
+                    // content; this branch has to say so itself.
+                    Column(modifier = Modifier.fillMaxWidth(), content = content)
                 }
             }
         }
