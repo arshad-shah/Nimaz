@@ -7,23 +7,17 @@ import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.arshadshah.nimaz.core.monitoring.CrashReporter
-import com.arshadshah.nimaz.core.util.HijriDateCalculator
-import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.widget.core.WidgetWork
 import com.arshadshah.nimaz.widget.core.updateWidgetState
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
-import kotlinx.coroutines.flow.first
 import java.time.Duration
-import java.time.LocalDate
-import java.time.format.TextStyle
-import java.util.Locale
 
 @HiltWorker
 class HijriCalendarWorker @AssistedInject constructor(
     @Assisted private val context: Context,
     @Assisted workerParams: WorkerParameters,
-    private val settingsRepository: SettingsRepository
+    private val dataSource: HijriCalendarWidgetDataSource
 ) : CoroutineWorker(context, workerParams) {
 
     companion object {
@@ -63,47 +57,7 @@ class HijriCalendarWorker @AssistedInject constructor(
         }
 
         return try {
-            val offset = settingsRepository.hijriDayOffset.first()
-            val hijriDate = HijriDateCalculator.today(offset)
-            val today = LocalDate.now().plusDays(offset.toLong())
-            val gregorianDate = "${today.dayOfMonth} ${
-                today.month.getDisplayName(TextStyle.SHORT, Locale.getDefault())
-            }"
-
-            val daysInMonth = HijriDateCalculator.getDaysInHijriMonth(
-                hijriDate.year, hijriDate.month
-            )
-
-            // Get the Gregorian date of the 1st of the current Hijri month
-            val firstOfMonth = HijriDateCalculator.toGregorian(1, hijriDate.month, hijriDate.year)
-            // dayOfWeek: MONDAY=1 .. SUNDAY=7, convert to 0=Sun..6=Sat
-            val javaDow = firstOfMonth.dayOfWeek.value // 1=Mon..7=Sun
-            val firstDayOfWeekOffset = if (javaDow == 7) 0 else javaDow // Sun=0, Mon=1..Sat=6
-
-            // Get today's events
-            val allEvents = HijriDateCalculator.getIslamicEvents(hijriDate.year)
-            val todayEvents = allEvents.filter { event ->
-                event.day == hijriDate.day && event.month == hijriDate.month
-            }.map { event ->
-                HijriCalendarEventData(
-                    name = event.name,
-                    nameArabic = event.nameArabic,
-                    type = event.type.name
-                )
-            }
-
-            val data = HijriCalendarData(
-                hijriMonth = hijriDate.month,
-                hijriMonthName = hijriDate.monthName,
-                hijriYear = hijriDate.year,
-                gregorianDate = gregorianDate,
-                daysInMonth = daysInMonth,
-                firstDayOfWeekOffset = firstDayOfWeekOffset,
-                todayHijriDay = hijriDate.day,
-                events = todayEvents
-            )
-
-            setWidgetState(glanceIds, HijriCalendarWidgetState.Success(data))
+            setWidgetState(glanceIds, HijriCalendarWidgetState.Success(dataSource.load()))
             Result.success()
         } catch (e: Exception) {
             CrashReporter.log("HijriCalendarWorker failed")
