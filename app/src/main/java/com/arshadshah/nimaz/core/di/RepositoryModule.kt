@@ -1,6 +1,8 @@
 package com.arshadshah.nimaz.core.di
 
 import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
+import com.arshadshah.nimaz.data.audio.AyahAudioDownloader
+import com.arshadshah.nimaz.data.audio.HttpAyahAudioDownloader
 import com.arshadshah.nimaz.data.repository.AsmaUlHusnaRepositoryImpl
 import com.arshadshah.nimaz.data.repository.AsmaUnNabiRepositoryImpl
 import com.arshadshah.nimaz.data.repository.DuaRepositoryImpl
@@ -291,6 +293,17 @@ abstract class RepositoryModule {
     abstract fun bindQuranRepository(
         quranRepositoryImpl: QuranRepositoryImpl
     ): QuranRepository
+
+    /**
+     * The byte transfer behind an ayah download, and only that — see [AyahAudioDownloader].
+     * A seam rather than a direct `URL.openConnection()` so the download path in
+     * `QuranAudioManager` can be driven by a test without a network.
+     */
+    @Binds
+    @Singleton
+    abstract fun bindAyahAudioDownloader(
+        impl: HttpAyahAudioDownloader
+    ): AyahAudioDownloader
 
     @Binds
     @Singleton

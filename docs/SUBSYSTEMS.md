@@ -214,6 +214,15 @@ completion awards stars and unlocks the next lesson. `QaidaReaderViewModel` coll
 and calls `markCellHeard` from there; `playLine` starts playback and writes no progress at all.
 (Tapping a single cell still marks eagerly — one tap, one clip, one intent.)
 
+**The download path is testable, and that is deliberate.** `QuranAudioManager` takes an
+[`AyahAudioDownloader`] and an `@IoDispatcher` rather than reaching for `URL.openConnection()`
+and `Dispatchers.IO` inline. The seam is narrow on purpose — de-duplication, concurrency, retry
+and progress reporting all stay in the manager; the downloader is only the byte transfer, which
+is the one thing that cannot run in a unit test. Without both, the cancellation contract below
+cannot be asserted: the transfers run on a real thread pool that a test dispatcher cannot drive.
+`QuranAudioManagerDownloadTest` fails if the sibling-launch defect is reintroduced, which is
+checked rather than assumed.
+
 **Download concurrency and cancellation.** `downloadAllAyahs` runs at most
 `MAX_PARALLEL_DOWNLOADS` (5) at a time, held by a `Semaphore` inside a `coroutineScope`.
 Both details are load-bearing and both replaced something broken:
