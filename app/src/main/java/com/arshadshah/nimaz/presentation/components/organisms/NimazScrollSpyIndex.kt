@@ -61,7 +61,11 @@ fun NimazScrollSpyIndex(
                 contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                itemsIndexed(labels) { index, label ->
+                // Keyed by label, not position: the row is rebuilt whenever the section list
+                // changes, and a position key would hand one chip's selection state to another.
+                // Labels are section headings, which have to be distinct for scroll-to to mean
+                // anything, so they are a safe identity.
+                itemsIndexed(labels, key = { _, label -> label }) { index, label ->
                     NimazChip(
                         text = label,
                         selected = index == selectedIndex,
