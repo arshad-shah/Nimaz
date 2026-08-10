@@ -28,6 +28,23 @@ if (file("google-services.json").exists()) {
     apply(plugin = libs.plugins.firebase.perf.get().pluginId)
 }
 
+// Compose compiler metrics and reports (#467).
+//
+// Measurement only — nothing in this PR acts on the output. The presentation layer has
+// 4 @Immutable, 1 @Stable and no immutable collections across 375 files, against 48
+// List<…> and 6 Map<…> parameters in presentation/components alone. Kotlin 2.3's strong
+// skipping compares unstable parameters by identity rather than treating them as
+// always-changed, so the picture is better than those numbers suggest — but a List
+// rebuilt on every emission still fails that comparison and forces a redraw.
+//
+// Read `<build>/compose_compiler/*-composables.txt` for restartable-but-not-skippable
+// functions and fix only the ones on a hot path: the reader, the home carousel, the
+// search results list. Do not rewrite on suspicion — that is why this landed on its own.
+composeCompiler {
+    reportsDestination = layout.buildDirectory.dir("compose_compiler")
+    metricsDestination = layout.buildDirectory.dir("compose_compiler")
+}
+
 android {
     namespace = "com.arshadshah.nimaz"
     compileSdk = 37
