@@ -69,6 +69,15 @@ class ContentArtifactInstaller(
     private val context: Context,
     private val store: ContentArtifactStore,
     private val installedArtifact: String = com.arshadshah.nimaz.BuildConfig.CONTENT_ARTIFACT_SHA256,
+    /**
+     * Called once when a device looks stuck rather than merely deferred.
+     *
+     * A lambda rather than a direct `CrashReporter` call so a test can assert it fired —
+     * `CrashReporter` is an `object` with a static `Context` and no seam, which is why no test
+     * in this repo can currently assert that anything was reported. The general fix for that is
+     * the injectable `Telemetry` seam in #359; this is the local version of it.
+     */
+    private val reportStuck: (String) -> Unit = { CrashReporter.log(it) },
 ) {
 
     /**
@@ -85,11 +94,15 @@ class ContentArtifactInstaller(
         // artifact it copies is this one. Recording it now is what makes the *next* release a
         // comparison rather than a guess.
         if (!database.exists()) {
+            store.clearDeferrals()
             store.setInstalledArtifact(installedArtifact)
             return Outcome.FreshInstall
         }
 
-        if (store.installedArtifact() == installedArtifact) return Outcome.AlreadyCurrent
+        if (store.installedArtifact() == installedArtifact) {
+            store.clearDeferrals()
+            return Outcome.AlreadyCurrent
+        }
 
         // The order matters: ask the cheap flag first. Once the copy has run, the rows in the
         // content database are a spare copy and reading the file to find them is wasted work on
@@ -102,6 +115,7 @@ class ContentArtifactInstaller(
                 // the next launch replaces. One launch of delay, for the shrinking set of installs
                 // that predate schemaVersion 23, against destroying the only copy of their data.
                 Log.i(TAG, "holding off the content replace: $blocker still has un-copied rows")
+                noteDeferral(blocker)
                 return Outcome.DeferredForLegacyData(blocker)
             }
         }
@@ -113,6 +127,7 @@ class ContentArtifactInstaller(
             if (!deleted && database.exists()) {
                 Outcome.Failed("deleteDatabase returned false and the file is still there")
             } else {
+                store.clearDeferrals()
                 store.setInstalledArtifact(installedArtifact)
                 Outcome.Replaced
             }
@@ -122,6 +137,27 @@ class ContentArtifactInstaller(
             // artifact is deliberately *not* updated, so the next launch tries again.
             CrashReporter.recordException(e)
             Outcome.Failed(e.message ?: e::class.java.simpleName)
+        }
+    }
+
+    /**
+     * Count this deferral, and report once when the count says the device is stuck.
+     *
+     * One deferral is by design. Repeated ones are not: they mean this install has stopped
+     * receiving content releases entirely — no new content, and no FTS index, so every Arabic
+     * search on it returns zero rows against a corpus where الله alone appears in 1,746 verses.
+     * Reported exactly once, at the threshold, so a stuck device does not become a repeating
+     * report for the rest of its life.
+     */
+    private fun noteDeferral(blocker: String) {
+        store.recordDeferral()
+        val deferrals = store.consecutiveDeferrals()
+        if (deferrals == STUCK_AFTER_DEFERRALS) {
+            reportStuck(
+                "content artifact deferred $deferrals launches running; " +
+                    "\"$blocker\" still holds un-copied rows and the legacy import has not " +
+                    "completed — this install is no longer receiving content or a search index"
+            )
         }
     }
 
@@ -175,8 +211,17 @@ class ContentArtifactInstaller(
         data class Failed(val reason: String) : Outcome
     }
 
-    private companion object {
-        const val TAG = "ContentArtifactInstaller"
+    companion object {
+        /**
+         * Consecutive deferrals before this install is treated as stuck rather than waiting.
+         *
+         * Three, not one: a single deferral is the designed path, and two can legitimately
+         * happen if the first launch was killed before `UserDataMigrator` finished. Three in a
+         * row is not a slow migration, it is a migration that is not completing.
+         */
+        const val STUCK_AFTER_DEFERRALS = 3
+
+        private const val TAG = "ContentArtifactInstaller"
 
         /**
          * Tables the app writes to at runtime. Mirrors `user_tables` in the data console's
@@ -187,7 +232,7 @@ class ContentArtifactInstaller(
          * in the artifact. The list survives here for the one case where they *are* still on
          * disk: an install that predates that split and has not yet had its rows copied out.
          */
-        val USER_TABLES = setOf(
+        private val USER_TABLES = setOf(
             "reading_progress", "quran_bookmarks", "quran_favorites", "hadith_bookmarks",
             "dua_bookmarks", "dua_progress", "prayer_records", "fast_records", "makeup_fasts",
             "khatams", "khatam_ayahs", "khatam_daily_log", "tasbih_sessions", "zakat_history",

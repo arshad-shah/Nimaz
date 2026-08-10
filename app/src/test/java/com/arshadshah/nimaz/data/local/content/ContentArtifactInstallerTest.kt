@@ -184,6 +184,76 @@ class ContentArtifactInstallerTest {
         assertThat(databaseFile().exists()).isTrue()
     }
 
+    // ── Stuck-deferral detection (#472, #473) ────────────────────────────────────
+    //
+    // A deferral is meant to last exactly one launch: `UserDataMigrator` runs on every
+    // launch and is awaited before the splash lifts, so the copy completes during that
+    // session and the next launch replaces. The failure that is *not* designed for is a
+    // deferral that repeats — a migrator that keeps failing, or a database that cannot be
+    // read (`legacyDataBlocking` treats any read failure as "something is there"). Such a
+    // device silently stops receiving content releases altogether, which also means it
+    // never receives an FTS index, which is why Arabic search returns nothing on it.
+    //
+    // Nothing reported that. These tests are what make it reportable.
+
+    @Test
+    fun `a deferral is counted`() {
+        writeContentDatabase("v22 content")
+        addLegacyUserTable("quran_bookmarks", rows = 3)
+        store.setInstalledArtifact("sha-v7")
+
+        installer("sha-v8").installIfChanged()
+
+        assertThat(store.consecutiveDeferrals()).isEqualTo(1)
+    }
+
+    @Test
+    fun `a successful replace clears the deferral count`() {
+        writeContentDatabase("v22 content")
+        addLegacyUserTable("quran_bookmarks", rows = 3)
+        store.setInstalledArtifact("sha-v7")
+        installer("sha-v8").installIfChanged()
+        assertThat(store.consecutiveDeferrals()).isEqualTo(1)
+
+        // The migrator has now run, which is what unblocks it.
+        store.setLegacyImportComplete()
+        val outcome = installer("sha-v8").installIfChanged()
+
+        assertThat(outcome).isEqualTo(ContentArtifactInstaller.Outcome.Replaced)
+        assertThat(store.consecutiveDeferrals()).isEqualTo(0)
+    }
+
+    @Test
+    fun `a deferral that repeats past the threshold is reported`() {
+        writeContentDatabase("v22 content")
+        addLegacyUserTable("quran_bookmarks", rows = 3)
+        store.setInstalledArtifact("sha-v7")
+
+        val reported = mutableListOf<String>()
+        repeat(ContentArtifactInstaller.STUCK_AFTER_DEFERRALS) {
+            ContentArtifactInstaller(
+                context, store, installedArtifact = "sha-v8", reportStuck = reported::add,
+            ).installIfChanged()
+        }
+
+        assertThat(reported).hasSize(1)
+        assertThat(reported.single()).contains("quran_bookmarks")
+    }
+
+    @Test
+    fun `a single deferral is not reported`() {
+        writeContentDatabase("v22 content")
+        addLegacyUserTable("quran_bookmarks", rows = 3)
+        store.setInstalledArtifact("sha-v7")
+
+        val reported = mutableListOf<String>()
+        ContentArtifactInstaller(
+            context, store, installedArtifact = "sha-v8", reportStuck = reported::add,
+        ).installIfChanged()
+
+        assertThat(reported).isEmpty()
+    }
+
     private class FakeStore : ContentArtifactStore {
         private var value: String? = null
         private var legacyDone = false
@@ -195,6 +265,16 @@ class ContentArtifactInstallerTest {
         override fun legacyImportComplete(): Boolean = legacyDone
         override fun setLegacyImportComplete() {
             legacyDone = true
+        }
+
+        private var deferrals = 0
+        override fun consecutiveDeferrals(): Int = deferrals
+        override fun recordDeferral() {
+            deferrals++
+        }
+
+        override fun clearDeferrals() {
+            deferrals = 0
         }
     }
 }
