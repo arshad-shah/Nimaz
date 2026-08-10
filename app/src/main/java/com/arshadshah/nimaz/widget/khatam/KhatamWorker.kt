@@ -7,19 +7,17 @@ import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.arshadshah.nimaz.core.monitoring.CrashReporter
-import com.arshadshah.nimaz.domain.repository.KhatamRepository
 import com.arshadshah.nimaz.widget.core.WidgetWork
 import com.arshadshah.nimaz.widget.core.updateWidgetState
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
-import kotlinx.coroutines.flow.first
 import java.time.Duration
 
 @HiltWorker
 class KhatamWorker @AssistedInject constructor(
     @Assisted private val context: Context,
     @Assisted workerParams: WorkerParameters,
-    private val khatamRepository: KhatamRepository
+    private val dataSource: KhatamWidgetDataSource
 ) : CoroutineWorker(context, workerParams) {
 
     companion object {
@@ -53,29 +51,7 @@ class KhatamWorker @AssistedInject constructor(
         }
 
         return try {
-            val khatam = khatamRepository.observeActiveKhatam().first()
-            val data = if (khatam == null) {
-                // No active khatam — the widget renders its empty state.
-                KhatamWidgetData(hasActiveKhatam = false)
-            } else {
-                // The detail snapshot is the only place insights (juz completed)
-                // are computed, so read it rather than recomputing here.
-                val insights = khatamRepository.observeKhatamDetail(khatam.id).first()?.insights
-                KhatamWidgetData(
-                    hasActiveKhatam = true,
-                    name = khatam.name,
-                    progressPercent = (khatam.progressPercent * 100).toInt().coerceIn(0, 100),
-                    // The reader is *inside* the juz after the completed ones;
-                    // cap at 30 for a finished khatam.
-                    currentJuz = insights?.currentJuz ?: 1,
-                    juzCompleted = insights?.juzCompleted ?: 0,
-                    remainingAyahs = insights?.remainingAyahs ?: khatam.remainingAyahs,
-                    dailyTarget = khatam.dailyTarget,
-                    currentStreak = insights?.currentStreak ?: 0
-                )
-            }
-
-            setWidgetState(glanceIds, KhatamWidgetState.Success(data))
+            setWidgetState(glanceIds, KhatamWidgetState.Success(dataSource.load()))
             Result.success()
         } catch (e: Exception) {
             CrashReporter.log("KhatamWorker failed")
