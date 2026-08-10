@@ -7,23 +7,17 @@ import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.arshadshah.nimaz.core.monitoring.CrashReporter
-import com.arshadshah.nimaz.core.util.HijriDateCalculator
-import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.widget.core.WidgetWork
 import com.arshadshah.nimaz.widget.core.updateWidgetState
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
-import kotlinx.coroutines.flow.first
 import java.time.Duration
-import java.time.LocalDate
-import java.time.format.TextStyle
-import java.util.Locale
 
 @HiltWorker
 class HijriDateWorker @AssistedInject constructor(
     @Assisted private val context: Context,
     @Assisted workerParams: WorkerParameters,
-    private val settingsRepository: SettingsRepository
+    private val dataSource: HijriDateWidgetDataSource
 ) : CoroutineWorker(context, workerParams) {
 
     companion object {
@@ -57,26 +51,7 @@ class HijriDateWorker @AssistedInject constructor(
         }
 
         return try {
-            val offset = settingsRepository.hijriDayOffset.first()
-            val hijriDate = HijriDateCalculator.today(offset)
-            val today = LocalDate.now().plusDays(offset.toLong())
-            val dayOfWeek = today.dayOfWeek.getDisplayName(TextStyle.FULL, Locale.getDefault())
-            val gregorianDate = "${today.dayOfMonth} ${
-                today.month.getDisplayName(
-                    TextStyle.SHORT,
-                    Locale.getDefault()
-                )
-            }"
-
-            val data = HijriDateData(
-                hijriDay = hijriDate.day,
-                hijriMonth = hijriDate.monthName,
-                hijriYear = hijriDate.year,
-                gregorianDayOfWeek = dayOfWeek,
-                gregorianDate = gregorianDate
-            )
-
-            setWidgetState(glanceIds, HijriDateWidgetState.Success(data))
+            setWidgetState(glanceIds, HijriDateWidgetState.Success(dataSource.load()))
             Result.success()
         } catch (e: Exception) {
             CrashReporter.log("HijriDateWorker failed")
