@@ -107,6 +107,19 @@ row here.
 Every `@HiltWorker CoroutineWorker` in the app. All widget workers are enqueued through
 `widget/core/WidgetWork.kt`.
 
+**A widget worker holds no logic.** Each `doWork()` is *get glance ids → `dataSource.load()` →
+write state*, with the computation in an injectable `XxxWidgetDataSource` beside it. That split
+is not cosmetic — it is the only way this code is testable at all. `doWork()` opens by asking
+`GlanceAppWidgetManager` for the widget's glance ids and returns `Result.success()` when there
+are none, and **a test device never has a widget placed**, so the entire body is unreachable from
+an instrumented test. `WidgetWorkersTest` was green for a year while asserting nothing about what
+any widget displays; it proves the `@AssistedInject` graph resolves, which is worth having and is
+all it does. Anything that can be wrong belongs in the data source, where it has JVM tests.
+
+A data source takes `TodayProvider` and `java.time.Clock` rather than calling `LocalDate.now()`
+or `Clock.System.now()` — without that seam the rollover branches (tomorrow's Fajr, the date
+label) cannot be tested, and those are the states the widgets sit in most of the time.
+
 | Worker | Package | Trigger | Section |
 |---|---|---|---|
 | `NextPrayerWorker` | `widget/nextprayer/` | periodic 15 min + widget `onEnabled` | [§2](#2-glance-widgets) |

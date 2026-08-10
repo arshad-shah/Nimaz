@@ -11,7 +11,7 @@ import javax.inject.Inject
  * asking `GlanceAppWidgetManager` for the widget's glance ids, and a test device has none placed
  * on its home screen, so the whole body is skipped by the `glanceIds.isEmpty()` early return.
  * That is why `WidgetWorkersTest` was green for a year while asserting nothing about the data —
- * see #474. With the computation here, `doWork()` is *get ids → load → write*, and the part that
+ * see #474. With the computation here, `doWork()` is *get ids, load, write*, and the part that
  * can be wrong has tests.
  */
 class KhatamWidgetDataSource @Inject constructor(
