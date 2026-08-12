@@ -3,15 +3,18 @@ package com.arshadshah.nimaz.data.audio
 import android.content.Context
 import android.media.MediaMetadataRetriever
 import androidx.annotation.OptIn
+import androidx.annotation.VisibleForTesting
 import androidx.media3.common.ForwardingPlayer
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
+import com.arshadshah.nimaz.core.di.IoDispatcher
 import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.domain.model.QuranReciter
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -31,7 +34,6 @@ import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
 import java.io.File
-import java.net.URL
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -66,7 +68,15 @@ data class AudioState(
 @UnstableApi
 @Singleton
 class QuranAudioManager @Inject constructor(
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
+    private val downloader: AyahAudioDownloader,
+    /**
+     * Where file transfers run. Injected rather than `Dispatchers.IO` inline so a test can
+     * substitute a test dispatcher — without it the download loop runs on a real thread pool
+     * that `advanceUntilIdle()` cannot drive, and the cancellation behaviour #468 fixed cannot
+     * be asserted at all.
+     */
+    @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private var player: ExoPlayer? = null
@@ -338,7 +348,8 @@ class QuranAudioManager @Inject constructor(
      * Download all ayahs for the playlist in parallel, then start playback.
      * Shows download progress as files are downloaded.
      */
-    private suspend fun downloadAllAyahs(ayahs: List<AyahAudioItem>): List<File> {
+    @VisibleForTesting
+    internal suspend fun downloadAllAyahs(ayahs: List<AyahAudioItem>): List<File> {
         val files = mutableListOf<File>()
         val toDownload = mutableListOf<Pair<AyahAudioItem, File>>()
 
@@ -378,7 +389,7 @@ class QuranAudioManager @Inject constructor(
         // A Semaphore rather than `chunked(5) + join`: the old shape waited for the
         // slowest file in each group of five before starting the next group, so one slow
         // connection idled four others. This keeps five in flight at all times.
-        withContext(Dispatchers.IO) {
+        withContext(ioDispatcher) {
             val slots = Semaphore(MAX_PARALLEL_DOWNLOADS)
             coroutineScope {
                 toDownload.forEach { (ayah, file) ->
@@ -783,25 +794,13 @@ class QuranAudioManager @Inject constructor(
         }
 
         try {
-            withContext(Dispatchers.IO) {
+            withContext(ioDispatcher) {
                 var lastException: Exception? = null
                 val maxRetries = 2
                 for (attempt in 0..maxRetries) {
                     ensureActive() // Bail out if cancelled
                     try {
-                        val connection = URL(url).openConnection()
-                        connection.connectTimeout = 15000
-                        connection.readTimeout = 30000
-
-                        connection.getInputStream().use { input ->
-                            destination.outputStream().use { output ->
-                                val buffer = ByteArray(8192)
-                                var bytesRead: Int
-                                while (input.read(buffer).also { bytesRead = it } != -1) {
-                                    output.write(buffer, 0, bytesRead)
-                                }
-                            }
-                        }
+                        downloader.download(url, destination)
                         return@withContext // Success
                     } catch (e: Exception) {
                         destination.delete()
