@@ -293,6 +293,16 @@
     <string name="asr_standard">Standard (Shafi\'i, Maliki, Hanbali)</string>
     <string name="asr_hanafi">Hanafi</string>
 
+    <!-- Names — the three catalogues as one tabbed screen -->
+    <string name="names_title">Names</string>
+    <string name="names_more_subtitle">Allah, the Prophet ﷺ, and the Prophets</string>
+    <string name="names_search_hint">Search all names…</string>
+    <string name="names_tab_allah">Allah</string>
+    <string name="names_tab_prophet">Prophet ﷺ</string>
+    <string name="names_tab_prophets">Prophets</string>
+    <string name="cd_open_favourites">Open favourites</string>
+    <string name="favourites_empty_message">Tap the heart on a name to keep it here.</string>
+
     <!-- Asma ul Husna -->
     <string name="asma_ul_husna_title">Allah\'s 99 Names</string>
     <string name="asma_ul_husna_search_hint">Search by name or meaning…</string>
@@ -1841,6 +1851,7 @@
     <string name="search_source_quran_desc">Verses, translations and surah names</string>
     <string name="search_source_hadith_desc">Narrations across the hadith collections</string>
     <string name="search_source_duas_desc">Supplications and their translations</string>
+    <string name="search_source_names_desc">The Names of Allah, the Prophet ﷺ, and the Prophets</string>
     <string name="search_source_last_one">Search needs at least one source</string>
     <string name="search_strictness">How closely to match</string>
     <string name="search_strictness_exact">Exact</string>

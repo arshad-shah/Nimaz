@@ -4,6 +4,7 @@ import com.arshadshah.nimaz.domain.model.DuaSearchResult
 import com.arshadshah.nimaz.domain.model.HadithSearchResult
 import com.arshadshah.nimaz.domain.model.LibrarySearchResults
 import com.arshadshah.nimaz.domain.model.LibrarySource
+import com.arshadshah.nimaz.domain.model.NameSearchResult
 import com.arshadshah.nimaz.domain.model.QuranSearchResult
 import com.arshadshah.nimaz.domain.model.Surah
 import com.arshadshah.nimaz.domain.usecase.SearchLibraryUseCase.Companion.PHRASE_SCORE
@@ -45,6 +46,7 @@ class SearchLibraryUseCase @Inject constructor(
     private val quranUseCases: QuranUseCases,
     private val hadithUseCases: HadithUseCases,
     private val duaUseCases: DuaUseCases,
+    private val searchNames: SearchNamesUseCase,
     private val searchPreferences: ObserveSearchPreferencesUseCase,
 ) {
     suspend operator fun invoke(
@@ -87,6 +89,7 @@ class SearchLibraryUseCase @Inject constructor(
         val surahs = Ranked<Int, Surah>()
         val hadith = Ranked<String, HadithSearchResult>()
         val duas = Ranked<String, DuaSearchResult>()
+        val names = Ranked<String, NameSearchResult>()
 
         val passes = buildList {
             if (phrase != null) add(phrase to PHRASE_SCORE)
@@ -111,6 +114,10 @@ class SearchLibraryUseCase @Inject constructor(
                 duaUseCases.searchDuas(term).first()
                     .forEach { duas.add(it.dua.id, it, score) }
             }
+            if (LibrarySource.NAMES in prefs.sources) {
+                searchNames(term)
+                    .forEach { names.add("${it.catalog}:${it.id}", it, score) }
+            }
         }
 
         return LibrarySearchResults(
@@ -118,6 +125,7 @@ class SearchLibraryUseCase @Inject constructor(
             surahs = surahs.top(prefs.resultsPerSource),
             hadith = hadith.top(prefs.resultsPerSource),
             duas = duas.top(prefs.resultsPerSource),
+            names = names.top(prefs.resultsPerSource),
         )
     }
 

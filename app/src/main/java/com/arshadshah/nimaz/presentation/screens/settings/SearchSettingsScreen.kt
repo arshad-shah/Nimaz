@@ -361,6 +361,7 @@ private fun sourceLabel(source: LibrarySource): Int = when (source) {
     LibrarySource.QURAN -> R.string.quran
     LibrarySource.HADITH -> R.string.hadith
     LibrarySource.DUAS -> R.string.duas
+    LibrarySource.NAMES -> R.string.names_title
 }
 
 @StringRes
@@ -368,6 +369,7 @@ private fun sourceDescription(source: LibrarySource): Int = when (source) {
     LibrarySource.QURAN -> R.string.search_source_quran_desc
     LibrarySource.HADITH -> R.string.search_source_hadith_desc
     LibrarySource.DUAS -> R.string.search_source_duas_desc
+    LibrarySource.NAMES -> R.string.search_source_names_desc
 }
 
 @StringRes

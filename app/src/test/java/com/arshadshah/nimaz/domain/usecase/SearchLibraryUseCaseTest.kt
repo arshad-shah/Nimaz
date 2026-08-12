@@ -3,10 +3,14 @@ package com.arshadshah.nimaz.domain.usecase
 import com.arshadshah.nimaz.domain.model.Ayah
 import com.arshadshah.nimaz.domain.model.LibrarySource
 import com.arshadshah.nimaz.domain.model.MatchStrictness
+import com.arshadshah.nimaz.domain.model.NameCatalog
+import com.arshadshah.nimaz.domain.model.NameSearchResult
 import com.arshadshah.nimaz.domain.model.QuranSearchResult
 import com.arshadshah.nimaz.domain.model.SearchType
 import com.arshadshah.nimaz.presentation.viewmodel.FakeSearchSettings
 import com.google.common.truth.Truth.assertThat
+import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -27,6 +31,8 @@ class SearchLibraryUseCaseTest {
     private val searchDuasUC = mockk<SearchDuasUseCase>()
     private val duaUseCases = mockk<DuaUseCases>()
 
+    private val searchNamesUC = mockk<SearchNamesUseCase>()
+
     private lateinit var useCase: SearchLibraryUseCase
 
     @Before
@@ -41,6 +47,7 @@ class SearchLibraryUseCaseTest {
         every { getSurahListUC.search(any()) } returns flowOf(emptyList())
         every { searchHadithsUC.invoke(any()) } returns flowOf(emptyList())
         every { searchDuasUC.invoke(any()) } returns flowOf(emptyList())
+        coEvery { searchNamesUC.invoke(any()) } returns emptyList()
 
         useCase = searchingUnder(FakeSearchSettings())
     }
@@ -50,6 +57,7 @@ class SearchLibraryUseCaseTest {
         quranUseCases,
         hadithUseCases,
         duaUseCases,
+        searchNamesUC,
         ObserveSearchPreferencesUseCase(settings),
     )
 
@@ -158,6 +166,34 @@ class SearchLibraryUseCaseTest {
         verify(exactly = 1) { getSurahListUC.search("patience") }
         verify(exactly = 0) { searchHadithsUC.invoke(any()) }
         verify(exactly = 0) { searchDuasUC.invoke(any()) }
+        coVerify(exactly = 0) { searchNamesUC.invoke(any()) }
+    }
+
+    @Test
+    fun `the three name catalogues are one source, and reach the results`() = runTest {
+        // The Names screen merged three destinations into one, so global search treats them as
+        // one source too — one switch, one filter chip, one merged list.
+        coEvery { searchNamesUC.invoke("rahman") } returns listOf(
+            NameSearchResult(
+                catalog = NameCatalog.ASMA_UL_HUSNA,
+                id = 1,
+                arabic = "الرحمن",
+                transliteration = "Ar-Rahman",
+                english = "The Most Merciful",
+            ),
+            NameSearchResult(
+                catalog = NameCatalog.ASMA_UN_NABI,
+                id = 7,
+                arabic = "رحمة",
+                transliteration = "Rahmatun lil-Alamin",
+                english = "Mercy to the Worlds",
+            ),
+        )
+
+        val results = useCase("rahman")
+
+        assertThat(results.names.map { it.catalog })
+            .containsExactly(NameCatalog.ASMA_UL_HUSNA, NameCatalog.ASMA_UN_NABI)
     }
 
     @Test

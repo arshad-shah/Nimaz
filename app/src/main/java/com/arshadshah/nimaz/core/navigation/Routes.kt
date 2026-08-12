@@ -361,23 +361,31 @@ sealed interface Route {
     @Serializable
     data class LicenseDetail(val libraryHashCode: Int) : Route
 
-    // Asma ul Husna (99 Names of Allah)
+    /**
+     * The three name catalogues, as one tabbed screen.
+     *
+     * They were `AsmaUlHusnaList`, `AsmaUnNabiList` and `ProphetsList` — three destinations,
+     * three More entries, three search boxes and three favourites filters for what a reader
+     * thinks of as one place. [tab] says which tab opens; it is an ordinal rather than the
+     * enum because a `Route` has to serialise into a deep link.
+     */
     @Serializable
-    data object AsmaUlHusnaList : Route
+    data class Names(val tab: Int = 0) : Route
+
+    /**
+     * Everything the user has starred, in one place.
+     *
+     * Reached from the Names top bar. Sectioned by what the item is, so consolidating the
+     * rest of the app's favourites here later adds a section rather than a screen.
+     */
+    @Serializable
+    data object Favourites : Route
 
     @Serializable
     data class AsmaUlHusnaDetail(val nameId: Int) : Route
 
-    // Asma un Nabi (99 Names of Prophet Muhammad)
-    @Serializable
-    data object AsmaUnNabiList : Route
-
     @Serializable
     data class AsmaUnNabiDetail(val nameId: Int) : Route
-
-    // Prophets of Islam
-    @Serializable
-    data object ProphetsList : Route
 
     @Serializable
     data class ProphetDetail(val prophetId: Int) : Route

@@ -79,19 +79,22 @@ class CatalogViewModelTest {
     }
 
     @Test
-    fun `the favourites filter and the query compose`() = runTest {
+    fun `favourites are tracked alongside the list, not as a filter on it`() = runTest {
+        // There used to be a `ToggleFavoritesFilter` event and a `showFavoritesOnly` flag,
+        // because each of the three name screens had its own all/favourites chip row. There
+        // is one Favourites destination now, and it reads this list directly — so the flag
+        // and its event went with the chips.
         val vm = TestCatalog()
         advanceUntilIdle()
 
-        vm.onEvent(CatalogEvent.ToggleFavoritesFilter)
-        advanceUntilIdle()
-        assertThat(vm.listState.value.filteredItems.map { it.id }).containsExactly(3)
+        assertThat(vm.listState.value.favorites.map { it.id }).containsExactly(3)
 
+        // A query narrows what is *listed* and leaves the favourites alone.
         vm.onEvent(CatalogEvent.Search("rahman"))
         advanceUntilIdle()
 
-        // Ar-Rahman matches the query but is not a favourite, so nothing survives both.
-        assertThat(vm.listState.value.filteredItems).isEmpty()
+        assertThat(vm.listState.value.filteredItems.map { it.id }).containsExactly(1)
+        assertThat(vm.listState.value.favorites.map { it.id }).containsExactly(3)
     }
 
     @Test

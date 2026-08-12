@@ -106,11 +106,6 @@ abstract class CatalogViewModel<T : Any>(
             searchQueries.value = ""
             updateList { it.copy(searchQuery = "") }
         }
-
-        CatalogEvent.ToggleFavoritesFilter -> {
-            telemetry.featureUsed(feature, AppAnalytics.Action.TOGGLE_FAVORITES_FILTER)
-            updateList { it.copy(showFavoritesOnly = !it.showFavoritesOnly) }
-        }
     }
 
     private fun observeItems() {
@@ -191,12 +186,11 @@ abstract class CatalogViewModel<T : Any>(
     private fun updateList(mutate: (CatalogListState<T>) -> CatalogListState<T>) {
         _listState.update { current ->
             val next = mutate(current)
-            val pool = if (next.showFavoritesOnly) next.favorites else next.items
             next.copy(
                 filteredItems = if (next.searchQuery.isBlank()) {
-                    pool
+                    next.items
                 } else {
-                    pool.filter { source.matches(it, next.searchQuery) }
+                    next.items.filter { source.matches(it, next.searchQuery) }
                 },
             )
         }

@@ -27,7 +27,7 @@ import javax.inject.Inject
 import com.arshadshah.nimaz.domain.model.UnifiedSearchResult
 
 enum class SearchFilter {
-    ALL, QURAN, HADITH, DUA
+    ALL, QURAN, HADITH, DUA, NAMES
 }
 
 /**
@@ -40,6 +40,7 @@ private fun LibrarySource?.asFilter(): SearchFilter = when (this) {
     LibrarySource.QURAN -> SearchFilter.QURAN
     LibrarySource.HADITH -> SearchFilter.HADITH
     LibrarySource.DUAS -> SearchFilter.DUA
+    LibrarySource.NAMES -> SearchFilter.NAMES
     null -> SearchFilter.ALL
 }
 
@@ -219,13 +220,15 @@ class SearchViewModel @Inject constructor(
         val unified = results.quran.map { UnifiedSearchResult.QuranResult(it) } +
                 results.surahs.map { UnifiedSearchResult.SurahResult(it) } +
                 results.hadith.map { UnifiedSearchResult.HadithResult(it) } +
-                results.duas.map { UnifiedSearchResult.DuaResult(it) }
+                results.duas.map { UnifiedSearchResult.DuaResult(it) } +
+                results.names.map { UnifiedSearchResult.NameResult(it) }
         _searchState.update { state ->
             state.copy(
                 quranResults = results.quran,
                 surahResults = results.surahs,
                 hadithResults = results.hadith,
                 duaResults = results.duas,
+                nameResults = results.names,
                 allResults = unified,
                 filteredResults = applyFilter(unified, state.selectedFilter),
                 isSearching = false,
@@ -243,6 +246,7 @@ class SearchViewModel @Inject constructor(
             SearchFilter.QURAN -> results.filter { it is UnifiedSearchResult.QuranResult || it is UnifiedSearchResult.SurahResult }
             SearchFilter.HADITH -> results.filter { it is UnifiedSearchResult.HadithResult }
             SearchFilter.DUA -> results.filter { it is UnifiedSearchResult.DuaResult }
+            SearchFilter.NAMES -> results.filter { it is UnifiedSearchResult.NameResult }
         }
     }
 

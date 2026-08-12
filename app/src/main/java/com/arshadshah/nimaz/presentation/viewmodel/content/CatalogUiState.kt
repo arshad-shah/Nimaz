@@ -6,7 +6,6 @@ data class CatalogListState<T>(
     val filteredItems: List<T> = emptyList(),
     val isLoading: Boolean = true,
     val searchQuery: String = "",
-    val showFavoritesOnly: Boolean = false,
 )
 
 data class CatalogDetailState<T>(

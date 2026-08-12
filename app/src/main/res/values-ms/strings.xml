@@ -189,6 +189,16 @@
     <string name="asr_calculation">Pengiraan Asar</string>
     <string name="asr_standard">Standard (Syafi\'i, Maliki, Hanbali)</string>
     <string name="asr_hanafi">Hanafi</string>
+    <!-- Names — the three catalogues as one tabbed screen -->
+    <string name="names_title">Nama</string>
+    <string name="names_more_subtitle">Allah, Nabi ﷺ dan para nabi</string>
+    <string name="names_search_hint">Cari semua nama…</string>
+    <string name="names_tab_allah">Allah</string>
+    <string name="names_tab_prophet">Nabi ﷺ</string>
+    <string name="names_tab_prophets">Para Nabi</string>
+    <string name="cd_open_favourites">Buka kegemaran</string>
+    <string name="favourites_empty_message">Ketik ikon hati pada sesuatu nama untuk menyimpannya di sini.</string>
+
     <string name="asma_ul_husna_title">99 Nama Allah</string>
     <string name="asma_ul_husna_search_hint">Cari mengikut nama atau makna\u2026</string>
     <string name="asma_ul_husna_no_names_found">Tiada nama ditemui</string>
@@ -1426,6 +1436,7 @@
     <string name="search_source_quran_desc">Ayat, terjemahan dan nama surah</string>
     <string name="search_source_hadith_desc">Riwayat daripada koleksi hadis</string>
     <string name="search_source_duas_desc">Doa dan terjemahannya</string>
+    <string name="search_source_names_desc">Nama-nama Allah, Nabi ﷺ dan para nabi</string>
     <string name="search_source_last_one">Carian memerlukan sekurang-kurangnya satu sumber</string>
     <string name="search_strictness">Ketepatan padanan</string>
     <string name="search_strictness_exact">Tepat</string>

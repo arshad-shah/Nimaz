@@ -16,8 +16,8 @@ into Global Search's **single search bar** — the same text drives both keyword
 search (as-you-type) and the AI ask (there is no separate "ask" field). While
 AI is enabled and there is text, the shared `NimazSearchBar` shows a trailing
 **Ask** pill; tapping it — or pressing Enter — submits the question. The
-source filter (All / Qur'an / Hadith / Duas) is **pinned under the search
-bar** and scopes everything below it.
+source filter (All / Qur'an / Hadith / Duas / Names) is **pinned under the
+search bar** and scopes everything below it.
 
 When AI is enabled, each submit makes **one** Worker call (`search-assist`):
 
@@ -253,9 +253,19 @@ changed mid-query cannot leave half the passes on the old settings):
 | `strictness` | `MAX_WORD_QUERIES = 8` | `MatchStrictness` — `EXACT` (0 word passes), `BALANCED` (8, the old behaviour), `BROAD` (20) |
 | `defaultScope` | always "All" | which filter chip `SearchScreen` opens on; `null` is everything |
 
-`LibrarySource` is `QURAN` (ayat, translations **and** surah names), `HADITH`, `DUAS`. Surah
-names are not a separate source: "search the Qur'an but not its surah names" is not a
-distinction anyone wants.
+`LibrarySource` is `QURAN` (ayat, translations **and** surah names), `HADITH`, `DUAS` and
+`NAMES`. Surah names are not a separate source — "search the Qur'an but not its surah names" is
+not a distinction anyone wants — and for the same reason `NAMES` is one source covering all
+three name catalogues rather than three: they are one destination (`Route.Names`), one search
+box and one favourites area, so they are one switch and one filter chip too.
+
+`NAMES` is the one source that is **not** a database query. `SearchNamesUseCase` filters the
+catalogues in memory: they are 99 + 99 + 25 rows, already loaded by whatever screen is showing
+them, and none of the three repositories has a search method — a `LIKE` round trip would be
+slower than the filter *and* would need three new DAO queries to exist first. It matches the
+same fields the Names screen's own filter does, so a query typed into either box finds the same
+names. Hits arrive as `NameSearchResult`, flattened out of the three catalogue models, which is
+why `LibrarySearchResults` carries one `names` list rather than three.
 
 Two invariants are enforced in `SearchPreferences.sanitised` rather than trusted, because a
 preferences file outlives the build that wrote it (a downgrade, a restore from a device on a

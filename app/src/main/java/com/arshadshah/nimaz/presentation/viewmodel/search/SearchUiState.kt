@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.presentation.viewmodel.search
 
 import com.arshadshah.nimaz.domain.model.DuaSearchResult
 import com.arshadshah.nimaz.domain.model.HadithSearchResult
+import com.arshadshah.nimaz.domain.model.NameSearchResult
 import com.arshadshah.nimaz.domain.model.QuranSearchResult
 import com.arshadshah.nimaz.domain.model.Surah
 import com.arshadshah.nimaz.domain.model.UnifiedSearchResult
@@ -17,6 +18,7 @@ data class SearchUiState(
     val hadithResults: List<HadithSearchResult> = emptyList(),
     val duaResults: List<DuaSearchResult> = emptyList(),
     val surahResults: List<Surah> = emptyList(),
+    val nameResults: List<NameSearchResult> = emptyList(),
     val recentSearches: List<String> = emptyList(),
     val error: UiError? = null
 )

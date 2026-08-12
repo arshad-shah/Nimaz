@@ -91,6 +91,7 @@ import com.arshadshah.nimaz.presentation.viewmodel.ai.AskEvent
 import com.arshadshah.nimaz.presentation.viewmodel.ai.AskPhase
 import com.arshadshah.nimaz.presentation.viewmodel.ai.AskViewModel
 import com.arshadshah.nimaz.presentation.viewmodel.search.SearchEvent
+import com.arshadshah.nimaz.domain.model.NameCatalog
 import com.arshadshah.nimaz.presentation.viewmodel.search.SearchFilter
 import com.arshadshah.nimaz.presentation.viewmodel.search.SearchViewModel
 import com.arshadshah.nimaz.domain.model.UnifiedSearchResult
@@ -103,6 +104,7 @@ fun SearchScreen(
     onNavigateToSurah: (Int) -> Unit,
     onNavigateToHadith: (String, String) -> Unit,
     onNavigateToDua: (String) -> Unit,
+    onNavigateToName: (NameCatalog, Int) -> Unit,
     initialFilter: SearchFilter? = null,
     enableAsk: Boolean = false,
     onNavigateToSearchSettings: () -> Unit = {},
@@ -216,6 +218,7 @@ fun SearchScreen(
                                             SearchFilter.QURAN -> stringResource(R.string.quran)
                                             SearchFilter.HADITH -> stringResource(R.string.hadith)
                                             SearchFilter.DUA -> stringResource(R.string.duas)
+                                            SearchFilter.NAMES -> stringResource(R.string.names_title)
                                         }
                                     )
                                 }
@@ -306,7 +309,8 @@ fun SearchScreen(
                             onNavigateToQuranAyah = onNavigateToQuranAyah,
                             onNavigateToSurah = onNavigateToSurah,
                             onNavigateToHadith = onNavigateToHadith,
-                            onNavigateToDua = onNavigateToDua
+                            onNavigateToDua = onNavigateToDua,
+                            onNavigateToName = onNavigateToName,
                         )
                     }
 
@@ -441,7 +445,8 @@ fun SearchScreen(
                             onNavigateToQuranAyah = onNavigateToQuranAyah,
                             onNavigateToSurah = onNavigateToSurah,
                             onNavigateToHadith = onNavigateToHadith,
-                            onNavigateToDua = onNavigateToDua
+                            onNavigateToDua = onNavigateToDua,
+                            onNavigateToName = onNavigateToName,
                         )
                     }
 
@@ -482,6 +487,9 @@ private fun ProofSource.matchesFilter(filter: SearchFilter): Boolean = when (fil
     SearchFilter.QURAN -> this == ProofSource.QURAN
     SearchFilter.HADITH -> this == ProofSource.HADITH
     SearchFilter.DUA -> this == ProofSource.DUA
+    // The AI cites verses, hadiths and duas; it has no name citations, so narrowing to
+    // Names hides the cited-proof strip rather than filtering it to nothing.
+    SearchFilter.NAMES -> false
 }
 
 /**
@@ -496,6 +504,7 @@ private fun UnifiedSearchResult.citationKey(): String? = when (this) {
     is UnifiedSearchResult.HadithResult -> CitationId.Hadith(result.hadith.id).raw
     is UnifiedSearchResult.DuaResult -> CitationId.Dua(result.dua.id).raw
     is UnifiedSearchResult.SurahResult -> null
+    is UnifiedSearchResult.NameResult -> null
 }
 
 @Composable
@@ -601,6 +610,7 @@ private fun UnifiedResultCard(
     onNavigateToSurah: (Int) -> Unit,
     onNavigateToHadith: (String, String) -> Unit,
     onNavigateToDua: (String) -> Unit,
+    onNavigateToName: (NameCatalog, Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     when (result) {
@@ -662,7 +672,28 @@ private fun UnifiedResultCard(
             onClick = { onNavigateToDua(result.result.dua.id) },
             modifier = modifier
         )
+
+        is UnifiedSearchResult.NameResult -> SearchResultCard(
+            icon = Icons.Default.AutoAwesome,
+            iconColor = MaterialTheme.colorScheme.tertiary,
+            // The tag says which catalogue, because "Names" alone would not tell you
+            // whether you are looking at a Name of Allah or a prophet.
+            type = stringResource(nameCatalogLabel(result.result.catalog)),
+            title = result.result.transliteration.ifBlank { result.result.english },
+            subtitle = result.result.arabic,
+            highlightedText = result.result.meaning,
+            query = query,
+            onClick = { onNavigateToName(result.result.catalog, result.result.id) },
+            modifier = modifier
+        )
     }
+}
+
+@androidx.annotation.StringRes
+private fun nameCatalogLabel(catalog: NameCatalog): Int = when (catalog) {
+    NameCatalog.ASMA_UL_HUSNA -> R.string.names_tab_allah
+    NameCatalog.ASMA_UN_NABI -> R.string.names_tab_prophet
+    NameCatalog.PROPHETS -> R.string.names_tab_prophets
 }
 
 /**
