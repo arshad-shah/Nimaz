@@ -5,6 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.core.time.TodayProvider
+import com.arshadshah.nimaz.domain.repository.settings.HijriSettings
+import com.arshadshah.nimaz.domain.usecase.fasting.GetDaysUntilAyyamAlBeedUseCase
 import com.arshadshah.nimaz.core.monitoring.launchBestEffort
 import com.arshadshah.nimaz.domain.repository.settings.ZakatSettings
 import com.arshadshah.nimaz.core.util.HijriDateCalculator
@@ -26,6 +28,7 @@ import java.time.LocalDate
 import javax.inject.Inject
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
@@ -43,6 +46,10 @@ class FastingViewModel @Inject constructor(
     private val fastingUseCases: FastingUseCases,
     private val prayerUseCases: PrayerUseCases,
     private val todayProvider: TodayProvider,
+    private val daysUntilAyyamAlBeed: GetDaysUntilAyyamAlBeedUseCase,
+    // The offset the user set to match their local moon sighting. The seam, not the whole
+    // SettingsRepository — the same argument ZakatSettings settled for the currency (#436).
+    private val hijriSettings: HijriSettings,
     // Fidya is money, and the one currency setting the app has is the zakat one. The seam, not
     // the whole SettingsRepository (#436).
     private val zakatSettings: ZakatSettings,
@@ -304,6 +311,11 @@ class FastingViewModel @Inject constructor(
     private fun loadRamadan() {
         ramadanJob?.cancel()
         ramadanJob = launchSafely(telemetry, DOMAIN, "load_ramadan") {
+            // The offset the user set to match their local moon sighting. Read once per load
+            // rather than collected: this whole block re-runs when the day does.
+            val ayyamDays = daysUntilAyyamAlBeed(hijriSettings.hijriDayOffset.first())
+            _ramadanState.update { it.copy(daysUntilAyyamAlBeed = ayyamDays) }
+
             val today = todayProvider.today()
             val hijriToday = HijriDateCalculator.toHijri(today)
             val isCurrentlyRamadan = hijriToday.month == 9

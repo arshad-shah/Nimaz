@@ -5,6 +5,7 @@ import com.arshadshah.nimaz.domain.model.NisabType
 import com.arshadshah.nimaz.domain.repository.PermissionChecker
 import com.arshadshah.nimaz.domain.repository.PowerSettings
 import com.arshadshah.nimaz.domain.repository.WidgetRefresher
+import com.arshadshah.nimaz.domain.repository.settings.HijriSettings
 import com.arshadshah.nimaz.domain.repository.settings.ZakatSettings
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -88,4 +89,14 @@ class FakeZakatSettings(
     override suspend fun setZakatNisabType(type: String) {
         nisabFlow.value = type
     }
+}
+
+/**
+ * The Hijri day offset, fixed.
+ *
+ * A whole fake for one `Flow<Int>` because the seam is one `Flow<Int>` — which is the point of
+ * it being its own interface rather than another reason to fake `SettingsRepository`.
+ */
+class FakeHijriSettings(offset: Int = 0) : HijriSettings {
+    override val hijriDayOffset: Flow<Int> = MutableStateFlow(offset)
 }

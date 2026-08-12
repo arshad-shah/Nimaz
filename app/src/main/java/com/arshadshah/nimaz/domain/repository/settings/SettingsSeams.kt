@@ -181,3 +181,24 @@ interface AppSettings {
     val appLanguage: Flow<String>
     suspend fun setAppLanguage(language: String)
 }
+
+/**
+ * The user's Hijri day offset — how many days to shift the computed Hijri date by, so the app
+ * agrees with their local moon sighting.
+ *
+ * Its own seam because it is read from three unrelated places (More's Hijri card, the
+ * calendar's event matching, and the fasting tab's Ayyām al-Bīḍ countdown) and none of them
+ * wants the other 179 members of `SettingsRepository` — the same argument [ZakatSettings]
+ * settled for the currency (#436).
+ *
+ * Registry Open #10 is about this preference reaching *all* of the Hijri helpers rather than
+ * only `HijriDateCalculator.today(offsetDays)`. A narrow seam is what makes passing it to one
+ * more of them cheap.
+ */
+interface HijriSettings {
+    /**
+     * Signed day offset (-2..+2, default 0) applied to the tabular Hijri date to correct for
+     * local moon-sighting differences. See `HijriDateCalculator.today(offsetDays)`.
+     */
+    val hijriDayOffset: Flow<Int>
+}

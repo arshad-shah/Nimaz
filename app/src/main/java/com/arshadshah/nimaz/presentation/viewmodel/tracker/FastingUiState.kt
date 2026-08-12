@@ -51,6 +51,15 @@ data class RamadanTrackerUiState(
     val remainingDays: Int = 0,
     val currentDay: Int = 0,
     val isRamadan: Boolean = false,
+    /**
+     * Days until the next Ayyām al-Bīḍ — 0 while they are in progress.
+     *
+     * Computed here rather than in the screen, which used to call a private
+     * `calculateAyyamAlBeedDays(LocalDate.now())`: that read the clock at composition, so a
+     * screen open across midnight counted down to yesterday's answer, and it ignored the
+     * user's `hijriDayOffset` while everything else honoured it (registry Open #10).
+     */
+    val daysUntilAyyamAlBeed: Int = 0,
     val isLoading: Boolean = true
 )
 
