@@ -1079,6 +1079,29 @@ Three things make deleting it safe, and the third is the one that bites on a rea
    delay, against destroying the only copy of somebody's data. The check reads the *file*, not a
    "migration done" flag, because what is in the file is what a delete would destroy.
 
+**When the deferral does not end.** One deferral is the design. Repeated ones are not — and the
+failure is silent in a way that matters: an install whose `UserDataMigrator` keeps failing, or
+whose content database cannot be read at all (`legacyDataBlocking` treats *any* read failure as
+"something is there", which is the safe answer but an indefinitely sticky one), simply stops
+receiving content releases. It also never receives an **FTS index**, because the index ships
+inside the artifact; `ContentSearchIndex.status()` returns `Absent` and search falls back to
+`LIKE`, which matches no Arabic at all. الله appears in 1,746 verses and returns nothing, and an
+empty result list reads as "no results", so nobody reports it.
+
+`ContentArtifactStore` therefore counts consecutive deferrals, cleared by any outcome that is not
+one. At `ContentArtifactInstaller.STUCK_AFTER_DEFERRALS` (3 — one is designed, two can happen if a
+launch was killed mid-migration, three is a migration that is not completing) the installer
+reports **once**, so a stuck device does not become a repeating report for the rest of its life.
+The threshold is reported through an injectable `reportStuck` lambda rather than calling
+`CrashReporter` directly, because `CrashReporter` is an `object` with a static `Context` and no
+seam — this is the local version of the injectable `Telemetry` seam that #359 introduces generally.
+
+`DatabaseModule` additionally publishes `content_artifact_outcome` and
+`content_artifact_deferrals` as Crashlytics custom keys on every launch. Before this the outcome
+was computed and thrown away at a `Log.i`, so "did this release actually reach the device" had no
+answer in production — which is the first question to ask about both stale content and empty
+Arabic search.
+
 **What this retired.** `ContentPatchSeeder` existed because content had to reach existing installs
 *without* replacing the file, and it had a hard limit: `nz patch emit` cannot express a table the
 baseline lacks — it files those under `out_of_scope` and emits nothing. So a newly added table
