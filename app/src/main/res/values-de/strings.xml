@@ -189,6 +189,16 @@
     <string name="asr_calculation">Asr-Berechnung</string>
     <string name="asr_standard">Standard (Schafi\'i, Maliki, Hanbali)</string>
     <string name="asr_hanafi">Hanafi</string>
+    <!-- Names — the three catalogues as one tabbed screen -->
+    <string name="names_title">Namen</string>
+    <string name="names_more_subtitle">Allah, der Prophet ﷺ und die Propheten</string>
+    <string name="names_search_hint">Alle Namen durchsuchen…</string>
+    <string name="names_tab_allah">Allah</string>
+    <string name="names_tab_prophet">Prophet ﷺ</string>
+    <string name="names_tab_prophets">Propheten</string>
+    <string name="cd_open_favourites">Favoriten öffnen</string>
+    <string name="favourites_empty_message">Tippe auf das Herz bei einem Namen, um ihn hier zu behalten.</string>
+
     <string name="asma_ul_husna_title">Allahs 99 Namen</string>
     <string name="asma_ul_husna_search_hint">Nach Name oder Bedeutung suchen…</string>
     <string name="asma_ul_husna_no_names_found">Keine Namen gefunden</string>
@@ -1448,6 +1458,7 @@
     <string name="search_source_quran_desc">Verse, Übersetzungen und Surennamen</string>
     <string name="search_source_hadith_desc">Überlieferungen aus den Hadith-Sammlungen</string>
     <string name="search_source_duas_desc">Bittgebete und ihre Übersetzungen</string>
+    <string name="search_source_names_desc">Die Namen Allahs, des Propheten ﷺ und die Propheten</string>
     <string name="search_source_last_one">Die Suche braucht mindestens eine Quelle</string>
     <string name="search_strictness">Genauigkeit der Treffer</string>
     <string name="search_strictness_exact">Genau</string>

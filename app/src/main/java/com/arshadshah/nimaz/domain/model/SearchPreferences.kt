@@ -61,6 +61,9 @@ enum class LibrarySource {
     QURAN,
     HADITH,
     DUAS,
+
+    /** All three name catalogues — see [NameCatalog]. They are one destination, so one source. */
+    NAMES,
 }
 
 /**

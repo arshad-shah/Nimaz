@@ -115,9 +115,9 @@ flowchart LR
     end
 
     subgraph Names["Names & Prophets"]
-        AsmaUlHusnaList --> AsmaUlHusnaDetail
-        AsmaUnNabiList --> AsmaUnNabiDetail
-        ProphetsList --> ProphetDetail
+        NamesScreen["Names (3 tabs)"] --> AsmaUlHusnaDetail & AsmaUnNabiDetail & ProphetDetail
+        NamesScreen --> Favourites
+        Favourites --> AsmaUlHusnaDetail & AsmaUnNabiDetail & ProphetDetail
     end
 
     subgraph Kh["Khatam"]
@@ -176,7 +176,7 @@ flowchart LR
 ## 3. Route reference
 
 All routes live in `core/navigation/Routes.kt` and are wired in `core/navigation/NavGraph.kt`
-(94 `composable<Route.X>` destinations). `data object` = no args; `data class` = typed args.
+(93 `composable<Route.X>` destinations). `data object` = no args; `data class` = typed args.
 Every route below also has a `ScreenTags` entry of the same name.
 
 ### 3.1 Bottom navigation (`BottomNavDestination`)
@@ -293,12 +293,21 @@ Every route below also has a `ScreenTags` entry of the same name.
 ### 3.11 Names & Prophets
 | Route | Args | Screen |
 |-------|------|--------|
-| `AsmaUlHusnaList` | — | AsmaUlHusnaListScreen |
+| `Names` | `tab: Int = 0` | AdaptiveNamesScreen → NamesScreen |
+| `Favourites` | — | FavouritesScreen |
 | `AsmaUlHusnaDetail` | `nameId: Int` | AsmaUlHusnaDetailScreen |
-| `AsmaUnNabiList` | — | AsmaUnNabiListScreen |
 | `AsmaUnNabiDetail` | `nameId: Int` | AsmaUnNabiDetailScreen |
-| `ProphetsList` | — | ProphetsListScreen |
 | `ProphetDetail` | `prophetId: Int` | ProphetDetailScreen |
+
+`Names` replaces `AsmaUlHusnaList`, `AsmaUnNabiList` and `ProphetsList` — three destinations,
+three More entries, three search boxes and three all/favourites filter rows for what a reader
+thinks of as one place. `tab` is a `NamesTab` **ordinal** rather than the enum, because a route
+has to serialise into a deep link; reordering `NamesTab` therefore repoints every saved link,
+and an out-of-range index falls back to the first tab rather than crashing.
+
+`Favourites` is reached from the Names top bar and is deliberately not per-catalogue: it is
+sectioned by what the item is, so consolidating the rest of the app's favourites (duas, ayat,
+hadiths all carry an `isFavorite`) adds a section rather than a screen.
 
 ### 3.12 Khatam
 | Route | Args | Screen |
@@ -407,9 +416,11 @@ only its CTA disappears.
 | `qaida` | `QaidaHome` |
 | `qaida/letters` | `QaidaLetters` |
 | `khatam` | `KhatamList` |
-| `names/allah` | `AsmaUlHusnaList` |
-| `names/prophet` | `AsmaUnNabiList` |
-| `prophets` | `ProphetsList` |
+| `names` | `Names` |
+| `names/allah` | `Names` (Allah tab) |
+| `names/prophet` | `Names` (Prophet ﷺ tab) |
+| `prophets` | `Names` (Prophets tab) |
+| `favourites` | `Favourites` |
 | `bookmarks` | `AllBookmarks` |
 | `search` / `search/ask` | `GlobalSearch` |
 | `search/settings` | `SearchSettings` |

@@ -10,9 +10,12 @@ data class LibrarySearchResults(
     val surahs: List<Surah> = emptyList(),
     val hadith: List<HadithSearchResult> = emptyList(),
     val duas: List<DuaSearchResult> = emptyList(),
+    /** All three name catalogues, already merged — see [NameSearchResult]. */
+    val names: List<NameSearchResult> = emptyList(),
 ) {
     val isEmpty: Boolean
-        get() = quran.isEmpty() && surahs.isEmpty() && hadith.isEmpty() && duas.isEmpty()
+        get() = quran.isEmpty() && surahs.isEmpty() && hadith.isEmpty() &&
+            duas.isEmpty() && names.isEmpty()
 
     companion object {
         val EMPTY = LibrarySearchResults()

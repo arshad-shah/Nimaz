@@ -189,6 +189,16 @@
     <string name="asr_calculation">İkindi Hesaplaması</string>
     <string name="asr_standard">Standart (Şafii, Maliki, Hanbeli)</string>
     <string name="asr_hanafi">Hanefi</string>
+    <!-- Names — the three catalogues as one tabbed screen -->
+    <string name="names_title">İsimler</string>
+    <string name="names_more_subtitle">Allah, Peygamber ﷺ ve peygamberler</string>
+    <string name="names_search_hint">Tüm isimlerde ara…</string>
+    <string name="names_tab_allah">Allah</string>
+    <string name="names_tab_prophet">Peygamber ﷺ</string>
+    <string name="names_tab_prophets">Peygamberler</string>
+    <string name="cd_open_favourites">Favorileri aç</string>
+    <string name="favourites_empty_message">Bir ismin yanındaki kalbe dokunarak burada saklayın.</string>
+
     <string name="asma_ul_husna_title">Allah\'ın 99 İsmi</string>
     <string name="asma_ul_husna_search_hint">İsim veya anlam ara…</string>
     <string name="asma_ul_husna_no_names_found">İsim bulunamadı</string>
@@ -1454,6 +1464,7 @@
     <string name="search_source_quran_desc">Ayetler, mealler ve sûre adları</string>
     <string name="search_source_hadith_desc">Hadis külliyatındaki rivayetler</string>
     <string name="search_source_duas_desc">Dualar ve çevirileri</string>
+    <string name="search_source_names_desc">Allah\'ın isimleri, Peygamber ﷺ ve peygamberler</string>
     <string name="search_source_last_one">Arama için en az bir kaynak gerekir</string>
     <string name="search_strictness">Eşleşme sıkılığı</string>
     <string name="search_strictness_exact">Tam</string>

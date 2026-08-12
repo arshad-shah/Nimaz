@@ -9,5 +9,4 @@ sealed interface CatalogEvent {
     data class ToggleFavorite(val itemId: Int) : CatalogEvent
     data class Search(val query: String) : CatalogEvent
     data object ClearSearch : CatalogEvent
-    data object ToggleFavoritesFilter : CatalogEvent
 }

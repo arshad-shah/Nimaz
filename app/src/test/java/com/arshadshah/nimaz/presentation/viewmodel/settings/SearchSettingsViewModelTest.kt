@@ -177,7 +177,7 @@ class SearchSettingsViewModelTest {
         advanceUntilIdle()
 
         assertThat(vm.uiState.value.search.sources)
-            .containsExactly(LibrarySource.QURAN, LibrarySource.DUAS)
+            .containsExactlyElementsIn(LibrarySource.entries - LibrarySource.HADITH)
     }
 
     @Test
