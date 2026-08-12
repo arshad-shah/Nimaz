@@ -46,6 +46,9 @@ class BootReceiver : BroadcastReceiver() {
     lateinit var prayerRepository: PrayerRepository
 
     @Inject
+    lateinit var prayerRescheduler: PrayerRescheduler
+
+    @Inject
     lateinit var khatamRepository: KhatamRepository
 
     @Inject
@@ -90,66 +93,25 @@ class BootReceiver : BroadcastReceiver() {
         }
     }
 
+    /**
+     * Re-arm today's notifications after a reboot.
+     *
+     * The day has not changed, so past prayers are left alone: marking them missed here would
+     * overwrite what the user actually recorded.
+     */
     private fun reschedulePrayerNotifications() {
-        scope.launch {
-            try {
-                val prefs = preferencesDataStore.userPreferences.first()
-                val notificationsEnabled = prefs.prayerNotificationsEnabled
-                val latitude = prefs.latitude
-                val longitude = prefs.longitude
-
-                val enabledPrayers = preferencesDataStore.enabledPrayerTypes()
-                val preReminders = preferencesDataStore.preReminderMinutesByPrayer()
-                val fridayReminderEnabled = preferencesDataStore.fridayReminderEnabled.first()
-                val fridayReminderMinutes = preferencesDataStore.fridayReminderMinutes.first()
-
-                prayerNotificationScheduler.scheduleTodaysPrayerNotifications(
-                    latitude = latitude,
-                    longitude = longitude,
-                    notificationsEnabled = notificationsEnabled,
-                    enabledPrayers = enabledPrayers,
-                    preReminders = preReminders,
-                    fridayReminderEnabled = fridayReminderEnabled,
-                    fridayReminderMinutes = fridayReminderMinutes
-                )
-            } catch (e: Exception) {
-                CrashReporter.log("BootReceiver reschedule failed")
-                CrashReporter.recordException(e)
-                e.printStackTrace()
-            }
-        }
+        scope.launch { prayerRescheduler.rescheduleToday(markPastAsMissed = false) }
     }
 
+    /**
+     * Re-arm across a date change or timezone shift, marking anything already past as missed.
+     *
+     * This and [reschedulePrayerNotifications] used to be the same twenty-odd lines written out
+     * twice — two copies of the code that decides whether a user is reminded to pray. See
+     * [PrayerRescheduler].
+     */
     private fun markMissedPrayersAndReschedule() {
-        scope.launch {
-            try {
-                prayerRepository.markPastPrayersAsMissed()
-
-                val prefs = preferencesDataStore.userPreferences.first()
-                val notificationsEnabled = prefs.prayerNotificationsEnabled
-                val latitude = prefs.latitude
-                val longitude = prefs.longitude
-
-                val enabledPrayers = preferencesDataStore.enabledPrayerTypes()
-                val preReminders = preferencesDataStore.preReminderMinutesByPrayer()
-                val fridayReminderEnabled = preferencesDataStore.fridayReminderEnabled.first()
-                val fridayReminderMinutes = preferencesDataStore.fridayReminderMinutes.first()
-
-                prayerNotificationScheduler.scheduleTodaysPrayerNotifications(
-                    latitude = latitude,
-                    longitude = longitude,
-                    notificationsEnabled = notificationsEnabled,
-                    enabledPrayers = enabledPrayers,
-                    preReminders = preReminders,
-                    fridayReminderEnabled = fridayReminderEnabled,
-                    fridayReminderMinutes = fridayReminderMinutes
-                )
-            } catch (e: Exception) {
-                CrashReporter.log("BootReceiver markMissedPrayersAndReschedule failed")
-                CrashReporter.recordException(e)
-                e.printStackTrace()
-            }
-        }
+        scope.launch { prayerRescheduler.rescheduleToday(markPastAsMissed = true) }
     }
 
     private fun handlePrayerNotification(context: Context, intent: Intent) {

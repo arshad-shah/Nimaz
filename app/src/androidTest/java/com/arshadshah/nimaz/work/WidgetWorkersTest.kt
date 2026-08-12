@@ -11,6 +11,7 @@ import androidx.work.testing.TestListenableWorkerBuilder
 import androidx.work.testing.WorkManagerTestInitHelper
 import com.arshadshah.nimaz.data.audio.AdhanDownloadWorker
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
+import com.arshadshah.nimaz.widget.khatam.KhatamWorker
 import com.arshadshah.nimaz.widget.hijricalendar.HijriCalendarWorker
 import com.arshadshah.nimaz.widget.hijridate.HijriDateWorker
 import com.arshadshah.nimaz.widget.nextprayer.NextPrayerWorker
@@ -27,8 +28,18 @@ import org.junit.runner.RunWith
 import javax.inject.Inject
 
 /**
- * Drives every background [androidx.work.CoroutineWorker] the app ships through its
- * `doWork()` once, built by the real [HiltWorkerFactory].
+ * Builds every background [androidx.work.CoroutineWorker] the app ships with the real
+ * [HiltWorkerFactory] and runs `doWork()` once.
+ *
+ * **Read what this does and does not prove.** A test device has no widgets on its home screen,
+ * so `GlanceAppWidgetManager.getGlanceIds(...)` is empty and every widget worker returns
+ * `Result.success()` from its first branch without touching a repository or writing a widget
+ * state. So this suite proves the `@AssistedInject` graph resolves and `doWork()` does not throw
+ * — worth having, and genuinely all it is. It does **not** prove a worker computes or writes the
+ * right thing; a worker that returned Success having updated nothing would pass every test here.
+ *
+ * Covering the actual work means lifting the computation out from behind the Glance plumbing so
+ * it can be asserted on the JVM. That is #474.
  *
  * What this proves:
  *  - Each `@HiltWorker` can actually be instantiated by the factory — i.e. its
@@ -93,6 +104,9 @@ class WidgetWorkersTest {
 
     @Test
     fun hijriCalendarWorker_runs() = assertNotFailure(runWorker<HijriCalendarWorker>())
+
+    @Test
+    fun khatamWorker_runs() = assertNotFailure(runWorker<KhatamWorker>())
 
     @Test
     fun adhanDownloadWorker_isConstructableByFactory() {
