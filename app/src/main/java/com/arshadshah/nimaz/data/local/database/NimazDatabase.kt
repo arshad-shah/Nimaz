@@ -8,6 +8,9 @@ import com.arshadshah.nimaz.data.local.database.NimazDatabase.Companion.MIGRATIO
 import com.arshadshah.nimaz.data.local.database.NimazDatabase.Companion.PREPACKAGED_CALLBACK
 import com.arshadshah.nimaz.data.local.database.dao.AsmaUlHusnaDao
 import com.arshadshah.nimaz.data.local.database.dao.AsmaUnNabiDao
+import com.arshadshah.nimaz.data.local.database.dao.AYAH_WITH_TEXT_BODY
+import com.arshadshah.nimaz.data.local.database.dao.AYAH_WITH_TEXT_VIEW_NAME
+import com.arshadshah.nimaz.data.local.database.dao.AyahWithText
 import com.arshadshah.nimaz.data.local.database.dao.DuaDao
 import com.arshadshah.nimaz.data.local.database.dao.HadithDao
 import com.arshadshah.nimaz.data.local.database.dao.HelpDao
@@ -60,7 +63,18 @@ import com.arshadshah.nimaz.data.local.database.entity.TranslationEntity
  * migration) for any schema change — it drives both the Room `@Database(version = …)`
  * annotation below and `NimazDatabase.SCHEMA_VERSION` (used to tag crash reports).
  */
-const val NIMAZ_DATABASE_VERSION = 24
+const val NIMAZ_DATABASE_VERSION = 25
+
+/**
+ * The `CREATE VIEW` statement for `ayah_with_text`, in the exact form Room generates from
+ * [AyahWithText]'s `@DatabaseView` — `CREATE VIEW \`name\` AS ` followed by the trimmed body.
+ *
+ * Room reads the view's statement back out of `sqlite_master` on open and compares the whole
+ * string, so this is the one place the text is assembled: the migration runs it, and the
+ * artifact nimaz-data ships has to carry the same bytes.
+ */
+val AYAH_WITH_TEXT_VIEW_SQL: String =
+    "CREATE VIEW `$AYAH_WITH_TEXT_VIEW_NAME` AS ${AYAH_WITH_TEXT_BODY.trim()}"
 
 @Database(
     entities = [
@@ -116,6 +130,7 @@ const val NIMAZ_DATABASE_VERSION = 24
         // Other
         IslamicEventEntity::class
     ],
+    views = [AyahWithText::class],
     version = NIMAZ_DATABASE_VERSION,
     exportSchema = true
 )
@@ -459,6 +474,80 @@ abstract class NimazDatabase : RoomDatabase() {
                     """.trimIndent()
                 )
                 db.execSQL("CREATE INDEX IF NOT EXISTS `index_quran_topic_ayahs_ayah_id` ON `quran_topic_ayahs` (`ayah_id`)")
+            }
+        }
+
+        /**
+         * schemaVersion 25 — the ayah projection becomes a view, over division columns that are
+         * derived at build time rather than joined at read time.
+         *
+         * Two things move here, and they have to move together because both are schema:
+         *
+         * 1. `ayahs` gains `ruku_number`, `ruku_end_ayah_id`, `rub_number` and
+         *    `rub_start_ayah_id`. nimaz-data computes them once per build (`data-v9`) and ships
+         *    them in the artifact, with a pipeline check asserting they agree with `rukus` and
+         *    `hizb_quarters`. Reading them as ranges cost two joins SQLite cannot serve from an
+         *    index, plus a `MIN(number) … GROUP BY surah_id` subquery over the whole `rukus`
+         *    table on every call.
+         * 2. `ayah_with_text` — the projection that was written out eight times in `QuranDao`.
+         *
+         * The `UPDATE`s are the one-time cost of the same arithmetic the range joins used to do
+         * per read, and they are what keeps the rukūʿ and hizb markers on screen in the window
+         * between this migration and `ContentArtifactInstaller` replacing the database with the
+         * `data-v9` artifact. Without them a device that updated first would read four nulls and
+         * render no markers until the content landed. They are idempotent, and on a fresh
+         * install off a schemaVersion 25 artifact they only rewrite the values already there.
+         *
+         * `addColumnIfMissing` and `CREATE VIEW IF NOT EXISTS` keep the whole thing safe to run
+         * against a database that already arrived with both.
+         */
+        val MIGRATION_24_25 = object : Migration(24, 25) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.addColumnIfMissing("ayahs", "ruku_number", "INTEGER")
+                db.addColumnIfMissing("ayahs", "ruku_end_ayah_id", "INTEGER")
+                db.addColumnIfMissing("ayahs", "rub_number", "INTEGER")
+                db.addColumnIfMissing("ayahs", "rub_start_ayah_id", "INTEGER")
+
+                // The rukūʿ a verse falls in, numbered within its surah — `rukus.number` counts
+                // 1..556 across the whole Quran and no Mushaf has ever printed that.
+                db.execSQL(
+                    """
+                    UPDATE ayahs SET
+                        ruku_number = (
+                            SELECT r.number - (
+                                SELECT MIN(r2.number) FROM rukus r2 WHERE r2.surah_id = r.surah_id
+                            ) + 1
+                            FROM rukus r
+                            WHERE ayahs.id BETWEEN r.start_ayah_id AND r.end_ayah_id
+                        ),
+                        ruku_end_ayah_id = (
+                            SELECT r.end_ayah_id FROM rukus r
+                            WHERE ayahs.id BETWEEN r.start_ayah_id AND r.end_ayah_id
+                        )
+                    """.trimIndent()
+                )
+                db.execSQL(
+                    """
+                    UPDATE ayahs SET
+                        rub_number = (
+                            SELECT hq.number FROM hizb_quarters hq
+                            WHERE ayahs.id BETWEEN hq.start_ayah_id AND hq.end_ayah_id
+                        ),
+                        rub_start_ayah_id = (
+                            SELECT hq.start_ayah_id FROM hizb_quarters hq
+                            WHERE ayahs.id BETWEEN hq.start_ayah_id AND hq.end_ayah_id
+                        )
+                    """.trimIndent()
+                )
+
+                // DROP-then-CREATE, not `CREATE VIEW IF NOT EXISTS`. SQLite stores a view's
+                // defining statement verbatim, and Room reads it back on open and compares the
+                // whole string against the one it generated from the @DatabaseView annotation —
+                // so the `IF NOT EXISTS` would itself be the mismatch that makes the database
+                // unopenable. This text must stay byte-identical to [AyahWithText]'s annotation
+                // body; `NimazDatabaseSchemaTest` is what holds the two together.
+                db.execSQL("DROP VIEW IF EXISTS `ayah_with_text`")
+                db.execSQL(AYAH_WITH_TEXT_VIEW_SQL)
             }
         }
 
@@ -1157,6 +1246,7 @@ abstract class NimazDatabase : RoomDatabase() {
             MIGRATION_21_22,
             MIGRATION_22_23,
             MIGRATION_23_24,
+            MIGRATION_24_25,
         )
     }
 }

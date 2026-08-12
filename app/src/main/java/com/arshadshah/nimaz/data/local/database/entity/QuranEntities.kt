@@ -58,6 +58,19 @@ data class SurahEntity(
  * [SajdaEntity], fifteen rows instead of two columns on six thousand. `transliteration` and
  * `text_tajweed` stay for now — the first has no second source to sit beside, and the second is
  * JSON spans rather than a script, so filing it under a text *source* would conflate two things.
+ *
+ * The four division columns are **derived, and derived at build time** (schemaVersion 25). They
+ * say which rukūʿ and which hizb quarter a verse falls in, which [RukuEntity] and
+ * [HizbQuarterEntity] also say — as ranges. Reading them as ranges meant
+ * `a.id BETWEEN r.start_ayah_id AND r.end_ayah_id`, a join SQLite cannot serve from an index,
+ * plus a `MIN(number) … GROUP BY surah_id` subquery that re-scanned the whole `rukus` table on
+ * every call including the single-verse lookup. nimaz-data computes them once now and ships them
+ * in the artifact, with a pipeline check asserting they still agree with the range tables — so a
+ * bad derivation fails that build rather than reaching a reader.
+ *
+ * All four are nullable, and that is load-bearing: a device whose `rukus`/`hizb_quarters` tables
+ * have not been filled yet reads null and simply renders no marker, rather than rendering the
+ * wrong one.
  */
 data class AyahEntity(
     @PrimaryKey
@@ -73,7 +86,22 @@ data class AyahEntity(
     val page: Int,
     val transliteration: String? = null,
     @ColumnInfo(name = "text_tajweed")
-    val textTajweed: String? = null
+    val textTajweed: String? = null,
+    /**
+     * The rukūʿ's index **within its surah**, not [RukuEntity.number], which counts 1..556
+     * across the whole Quran and which no Mushaf has ever printed.
+     */
+    @ColumnInfo(name = "ruku_number")
+    val rukuNumber: Int? = null,
+    /** The last verse of that rukūʿ — the ʿayn (ع) closes a section, so this is where it goes. */
+    @ColumnInfo(name = "ruku_end_ayah_id")
+    val rukuEndAyahId: Int? = null,
+    /** The hizb quarter, counted 1..240 across the whole Quran. */
+    @ColumnInfo(name = "rub_number")
+    val rubNumber: Int? = null,
+    /** The first verse of that quarter — the ۞ opens one, the opposite convention to the ʿayn. */
+    @ColumnInfo(name = "rub_start_ayah_id")
+    val rubStartAyahId: Int? = null
 )
 
 @Entity(

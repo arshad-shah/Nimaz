@@ -626,7 +626,7 @@ Ramadan.
 
 ## 5. Database & migrations
 
-> **Current schema version:** `24` (`NIMAZ_DATABASE_VERSION` in
+> **Current schema version:** `25` (`NIMAZ_DATABASE_VERSION` in
 > `data/local/database/NimazDatabase.kt`). Bumping it without updating this section fails
 > `SUB-01`. Every bump needs a `Migration` **and** a line in the migration history below.
 
@@ -715,6 +715,45 @@ therefore has the tables and no rows, and every read path treats that as "nothin
 `DeviceStateCorpusTest.assertThematicLayerIsWholeOrAbsent` asserts the layer is whole *or* absent
 rather than requiring it, so the app's own PR is not red on a fact about another repository.
 
+**`ayah_with_text`, and the divisions it stopped computing (schemaVersion 25).** The Qur'an
+reader's projection — a verse with both scripts, its prostration and the divisions it sits in —
+was written out **eight times** in `QuranDao`, differing only in the `WHERE` clause. It is one
+`@DatabaseView` now, `ayah_with_text`, declared on `AyahWithText`; the eight are one-line selects
+over it. It is the project's first `@DatabaseView`.
+
+What left the projection matters more than the deduplication. It carried five `LEFT JOIN`s, two of
+them **range** joins (`a.id BETWEEN hq.start_ayah_id AND hq.end_ayah_id`, and the same for
+`rukus`) which SQLite cannot serve from an index the way it serves an equality join, plus a
+`(SELECT surah_id, MIN(number) … GROUP BY surah_id)` subquery that re-scanned and re-grouped the
+whole `rukus` table on **every call** — including the single-verse lookup `getAyahWithTextById`.
+That is shipped, read-only reference data whose answer never varies, so nimaz-data derives it at
+build time (`data-v9`, its stage 4) and `ayahs` carries four columns: `ruku_number` (the rukūʿ's
+index **within its surah**, which is what a Mushaf prints — `rukus.number` is 1..556 global),
+`ruku_end_ayah_id`, `rub_number` and `rub_start_ayah_id`. Three equality joins remain. A blocking
+rule in that repo re-derives all four from the range tables and fails its build on disagreement;
+against the real corpus the two answers differ on 0 of 6,236 verses.
+
+All four are nullable and read as absent rather than wrong: a device whose `rukus`/`hizb_quarters`
+are unfilled renders no marker.
+
+**A view is schema, and Room checks it harder than a table.** SQLite stores a view's defining
+statement *verbatim*, and Room reads it back on open and compares the **whole string** — so the
+artifact has to carry byte-identical SQL or the database will not open, on every device, at
+launch. Three copies therefore have to agree: the `@DatabaseView` annotation, `MIGRATION_24_25`,
+and `data/schema.sql` in nimaz-data. The app keeps its two honest by assembling both from one
+`const` (`AYAH_WITH_TEXT_BODY` → `AYAH_WITH_TEXT_VIEW_SQL`), with `AyahWithTextViewTest` asserting
+the assembled statement against the exported Room schema and against what Room actually created;
+nimaz-data's stage-9 contract check compares the artifact's view SQL to the same export. This is
+also why the view and the columns are **one** release: two would have meant two 180 MB artifacts,
+the first carrying a view still full of the joins the second deletes.
+
+`MIGRATION_24_25` adds the four columns, back-fills them with the same arithmetic the range joins
+encoded, and drops-then-recreates the view. The back-fill is what keeps the rukūʿ and hizb markers
+on screen between the app update and `ContentArtifactInstaller` replacing the database with the
+`data-v9` artifact. It is `DROP VIEW IF EXISTS` then `CREATE VIEW` rather than
+`CREATE VIEW IF NOT EXISTS`, because SQLite would store the `IF NOT EXISTS` too and that text is
+itself the mismatch.
+
 **One HTML dialect.** `surah_overview_sections.body` and `quran_topics.description` carry markup,
 normalised at import onto four tags — `<p>`, `<strong>`, `<em>`, and `<a href="quran:2:153-251">` /
 `<a href="topic:61">`. A build rule (`thematic.sections-dialect`) refuses to ship a fifth, so
@@ -782,12 +821,12 @@ The old table is dropped and `ayahs.text_indopak` is set to `NULL` (kept as an i
 
 **Translation uniqueness (`v19`).** `translations.id` is auto-generated and had no uniqueness constraint, so a re-seed that inserted without deleting first would silently double every verse and the reader would pick an arbitrary copy. `MIGRATION_18_19` collapses any existing duplicates (keeping the lowest `id` per `(ayah_id, translator_id)`) and adds the unique index that makes the class of bug impossible.
 
-**Mushaf divisions as ranges (`juzs`, `hizb_quarters`, `manzils`, `rukus`, `pages`, `sajdas`, `surah_structure`).** The divisions are stored as one row per division with an inclusive global-ayah-id span, not as columns on all 6,236 verses — the data console asserts each set tiles 1..6236 exactly once. `QuranDao`'s `AyahWithText` projection resolves the ones a verse needs in the same join that fetches its text:
+**Mushaf divisions as ranges (`juzs`, `hizb_quarters`, `manzils`, `rukus`, `pages`, `sajdas`, `surah_structure`).** The divisions are stored as one row per division with an inclusive global-ayah-id span, not as columns on all 6,236 verses — the data console asserts each set tiles 1..6236 exactly once. Until schemaVersion 25 `QuranDao`'s `AyahWithText` projection resolved the ones a verse needs in the same join that fetched its text, with two range joins and a `MIN(number)`/`GROUP BY` subquery. It no longer computes them at all: they are four columns on `ayahs`, derived by nimaz-data at build time, and the projection is the `ayah_with_text` view (see "**`ayah_with_text`, and the divisions it stopped computing**" above). The values are the same ones, under the same names:
 
-- `hq.number AS rub_number` — the **global** quarter (1..240) the verse falls in, plus `hq.start_ayah_id`.
-- `r.start_ayah_id` and `(r.number - rs.first_number + 1) AS ruku_number` — the rukūʿ, numbered **within its surah** the way a printed Mushaf numbers them (`rukus.number` is global 1..556, which no Mushaf prints). `rs` is a 114-row derived table of each surah's first rukūʿ number.
+- `rub_number` — the **global** quarter (1..240) the verse falls in, plus `rub_start_ayah_id`.
+- `ruku_number` — the rukūʿ, numbered **within its surah** the way a printed Mushaf numbers them (`rukus.number` is global 1..556, which no Mushaf prints), plus `ruku_end_ayah_id`.
 
-The two `*_start_ayah_id` columns are what let the reader tell a division a verse *falls inside* from one it *begins*, which is what a printed Mushaf marks. `QuranRepositoryImpl.AyahWithText.toDomain` compares them to `ayahs.id` and publishes `Ayah.rukuNumber`, `isRukuStart` and `isRubStart`; `Ayah.quarterInHizb` / `hizbOfQuarter` derive the 1..4 position and its hizb from `rubNumber`. `QuranAyahItem` renders both as `NimazBadge` markers in its indicators row — the hizb quarter in `SUCCESS`, the rukūʿ in `ACCENT` — only on the opening verse. Before this, the quarter badge rendered on *every* verse and matched `rubNumber` against 1..4 as though it were the position within a hizb, so the four quarters at the very start of the Quran produced a label and the other 236 produced an empty string, i.e. no marker anywhere else in the book. All of the rukūʿ columns are `LEFT JOIN`ed and null on a device whose `rukus`/`surah_structure` tables have not been filled, so the markers simply do not render rather than rendering wrongly — and that is not a hypothetical state. `MIGRATION_21_22` creates those two tables (and `manzils`) empty, and nothing in the app has ever filled them: the `QuranStructureSeeder` its comment named as the upgrade path does not exist, and `QuranDao.insertRukus`/`insertSurahStructure` have no callers. Until `ContentArtifactInstaller` (§7) began replacing the content database on a release, they therefore reached fresh installs only and stayed empty for good on every upgrade. Replacing the file is what makes these markers reachable on an install that predates them. `surah_structure.ruku_count` surfaces through `QuranRepository.getSurahRukuCounts()` → `GetSurahRukuCountsUseCase` → `QuranHomeUiState.rukuCounts` as a badge on `SurahListItem`, beside the verse count and page span.
+The two `*_start_ayah_id`/`*_end_ayah_id` columns are what let the reader tell a division a verse *falls inside* from one it *begins* or *ends*, which is what a printed Mushaf marks. `QuranRepositoryImpl.AyahWithText.toDomain` compares them to `ayahs.id` and publishes `Ayah.rukuNumber`, `isRukuEnd` and `isRubStart` — opposite conventions, because the ʿayn closes a rukūʿ while the ۞ opens a quarter; `Ayah.quarterInHizb` / `hizbOfQuarter` derive the 1..4 position and its hizb from `rubNumber`. `QuranAyahItem` renders both as `NimazBadge` markers in its indicators row — the hizb quarter in `SUCCESS`, the rukūʿ in `ACCENT` — only on the opening verse. Before this, the quarter badge rendered on *every* verse and matched `rubNumber` against 1..4 as though it were the position within a hizb, so the four quarters at the very start of the Quran produced a label and the other 236 produced an empty string, i.e. no marker anywhere else in the book. All four division columns are nullable and null on a device whose `rukus`/`hizb_quarters` have not been filled, so the markers simply do not render rather than rendering wrongly — and that is not a hypothetical state. `MIGRATION_21_22` creates those two tables (and `manzils`) empty, and nothing in the app has ever filled them: the `QuranStructureSeeder` its comment named as the upgrade path does not exist, and `QuranDao.insertRukus`/`insertSurahStructure` have no callers. Until `ContentArtifactInstaller` (§7) began replacing the content database on a release, they therefore reached fresh installs only and stayed empty for good on every upgrade. Replacing the file is what makes these markers reachable on an install that predates them. `surah_structure.ruku_count` surfaces through `QuranRepository.getSurahRukuCounts()` → `GetSurahRukuCountsUseCase` → `QuranHomeUiState.rukuCounts` as a badge on `SurahListItem`, beside the verse count and page span.
 
 **16-line IndoPak read path (sub-task 4/7 of #263).** The renderer needs a page grouped **by printed line**, not by ayah. `QuranDao.getMushafLayoutByPage(script, textSource, page)` LEFT-JOINs `mushaf_layout_lines` onto `mushaf_ayah_texts` (for the glyph text) and `ayahs` (for `number_in_surah`) and returns ordered `MushafLayoutLineRow` segments; `MushafLayoutMapper` (data layer, pure/Android-free) groups them by `line` and reconstructs each segment's glyph words by slicing that text with the stored `first/last_word_position`, yielding the domain model `MushafPageLayout(page, lines: List<MushafLine>)` where each `MushafLine` carries typed segments (`AYAH` words, or a word-less `SURAH_HEADER`/`BASMALAH` line + `surahId`). Ayah segments on one `line_number` concatenate into a single `AYAH` line, but each **structural** row (`SURAH_HEADER`/`BASMALAH`) maps 1:1 to its own `MushafLine` — even when the source data places a header and its basmalah on the *same* `line_number` (81 of the 112 basmalah-bearing surahs do; see the 7/7 verification note below). It surfaces through `QuranRepository.getMushafPageLayout` → `GetMushafPageLayoutUseCase` → `QuranViewModel` (`QuranEvent.LoadMushafPageLayout`, `QuranReaderUiState.mushafPageLayout` + the per-page `mushafPageLayoutCache`). Page-count totals are script-aware via `MushafScript` (`MADANI` = 604, `INDOPAK_16` = 548, `INDOPAK_15` = 610, `INDOPAK_13` = 847); `ReadingProgressCalculator.TOTAL_QURAN_PAGES` is single-sourced from `MushafScript.MADANI`.
 
