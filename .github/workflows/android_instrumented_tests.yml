@@ -4,7 +4,9 @@ name: Android Instrumentation Tests (emulator.wtf)
 # (DB / notifications / workers / preferences / navigation flows) on emulator.wtf.
 #
 # Triggers:
-#  - push to main           → the canonical lane.
+#  - push to dev            → the canonical lane. This said `main` until 2026-08-10, and
+#    since this repository's branches are `dev` and `master`, it had never once fired —
+#    only `pull_request` was doing anything. See #461.
 #  - pull_request (any base) → so it validates this branch's PR (and every future PR).
 #
 # The debug build needs no secrets: google-services.json is only required for the
@@ -14,7 +16,7 @@ name: Android Instrumentation Tests (emulator.wtf)
 # warning) instead of failing.
 on:
   push:
-    branches: [ main ]
+    branches: [ dev ]
   pull_request:
 
 concurrency:

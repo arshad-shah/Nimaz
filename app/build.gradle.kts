@@ -384,31 +384,39 @@ val coverageExclusions = listOf(
     "**/*Hilt_*.*",
 )
 
-val kotlinDebugClassesDir = layout.buildDirectory.dir("tmp/kotlin-classes/debug").get().asFile
+// Where the debug classes live, which is not where it used to be.
+//
+// These tasks pointed at `tmp/kotlin-classes/debug` alone. AGP 9 does not write there
+// — compiled classes land under `intermediates/classes/debug/…` — so the directory
+// simply did not exist, `classDirectories` resolved to nothing, and every one of the
+// four jacoco reports came out as a 237-byte file containing a `sessioninfo` and no
+// classes at all. Coverage was not merely unreported (#464); it was not being measured.
+//
+// Both paths are listed so the report is correct on either AGP, and so this cannot
+// fail silently again: an empty report is indistinguishable from 0% at a glance.
+val debugClassRoots = listOf(
+    layout.buildDirectory.dir("intermediates/classes/debug").get().asFile,
+    layout.buildDirectory.dir("tmp/kotlin-classes/debug").get().asFile,
+)
 val buildOutputDir = layout.buildDirectory.get().asFile
 
-fun atomsClassTree(): ConfigurableFileTree =
-    fileTree(kotlinDebugClassesDir) {
-        include("**/presentation/components/atoms/**")
-        exclude(coverageExclusions)
-    }
+fun classTree(vararg includes: String): FileCollection =
+    files(
+        debugClassRoots.map { root ->
+            fileTree(root) {
+                if (includes.isNotEmpty()) include(*includes)
+                exclude(coverageExclusions)
+            }
+        }
+    )
 
-fun moleculesClassTree(): ConfigurableFileTree =
-    fileTree(kotlinDebugClassesDir) {
-        include("**/presentation/components/molecules/**")
-        exclude(coverageExclusions)
-    }
+fun atomsClassTree(): FileCollection = classTree("**/presentation/components/atoms/**")
 
-fun organismsClassTree(): ConfigurableFileTree =
-    fileTree(kotlinDebugClassesDir) {
-        include("**/presentation/components/organisms/**")
-        exclude(coverageExclusions)
-    }
+fun moleculesClassTree(): FileCollection = classTree("**/presentation/components/molecules/**")
 
-fun debugClassTree(): ConfigurableFileTree =
-    fileTree(kotlinDebugClassesDir) {
-        exclude(coverageExclusions)
-    }
+fun organismsClassTree(): FileCollection = classTree("**/presentation/components/organisms/**")
+
+fun debugClassTree(): FileCollection = classTree()
 
 fun coverageExecutionData(): ConfigurableFileTree =
     fileTree(buildOutputDir) {
@@ -427,6 +435,11 @@ tasks.register<JacocoReport>("jacocoTestReport") {
         html.required.set(true)
         xml.required.set(true)
         csv.required.set(false)
+        // Pinned: the default XML destination is derived from the task name, and
+        // scripts/coverage_summary.py (wired into pr_checks.yml) reads this path.
+        xml.outputLocation.set(
+            layout.buildDirectory.file("reports/jacoco/jacocoTestReport.xml")
+        )
     }
 
     classDirectories.setFrom(debugClassTree())
