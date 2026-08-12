@@ -129,7 +129,15 @@ The obligations, in short:
 ./gradlew :app:testDebugUnitTest
 ./gradlew :app:lintDebug              # SLOW (~10 min) and CI-blocking — do not skip it
 python3 scripts/check_docs.py         # docs still describe the code (no toolchain needed)
+
+# Only when a Route, a ScreenTags entry or a screen's signature changed:
+./gradlew :app:assembleDebugAndroidTest
 ```
+
+**None of the first four compile `androidTest`.** `FeatureNavigationTest` names `ScreenTags`
+constants directly, so removing or renaming one leaves the instrumented source set broken while
+all four gates stay green — a branch that goes out clean locally and red on the emulator. If you
+touched navigation, build `androidTest` too.
 
 **`lintDebug` is a real gate, not an optional extra.** `fastlane/Fastfile`'s `test` lane runs
 `gradle test` *and* `gradle lint`, so every PR check fails on a lint **error** — and lint catches a
