@@ -1831,7 +1831,28 @@
 
     <!-- Search & AI (Ask with Proof) -->
     <string name="search_settings">Search &amp; AI</string>
-    <string name="search_settings_subtitle">AI answers and privacy</string>
+    <string name="search_settings_subtitle">Results, sources, AI answers and privacy</string>
+
+    <!-- Local search behaviour -->
+    <string name="search_results_section">Results</string>
+    <string name="search_results_per_source">Results per source</string>
+    <string name="search_results_per_source_subtitle">Up to %1$d results in total across the sources you search.</string>
+    <string name="search_sources_section">Where to search</string>
+    <string name="search_source_quran_desc">Verses, translations and surah names</string>
+    <string name="search_source_hadith_desc">Narrations across the hadith collections</string>
+    <string name="search_source_duas_desc">Supplications and their translations</string>
+    <string name="search_source_last_one">Search needs at least one source</string>
+    <string name="search_strictness">How closely to match</string>
+    <string name="search_strictness_exact">Exact</string>
+    <string name="search_strictness_exact_desc">Match the whole phrase you typed and nothing looser</string>
+    <string name="search_strictness_balanced">Balanced</string>
+    <string name="search_strictness_balanced_desc">Also match individual words, ranking results that match more of them higher</string>
+    <string name="search_strictness_broad">Broad</string>
+    <string name="search_strictness_broad_desc">Match as many words as possible. More to look through, and slower on long questions</string>
+    <string name="search_default_scope">Start search in</string>
+    <string name="search_default_scope_subtitle">Which filter search opens on</string>
+    <string name="search_scope_everything">Everything</string>
+    <string name="search_scope_everything_desc">Show results from every source you search</string>
     <string name="ai_answers">AI answers</string>
     <string name="ai_answers_enable">Enable AI answers</string>
     <string name="ai_answers_enable_subtitle">Ask a question and get an answer with verses and hadiths from your library as proof</string>

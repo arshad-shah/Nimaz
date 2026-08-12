@@ -2,7 +2,10 @@ package com.arshadshah.nimaz.presentation.viewmodel.search
 
 import com.arshadshah.nimaz.core.monitoring.RecordingTelemetry
 import com.arshadshah.nimaz.domain.model.LibrarySearchResults
+import com.arshadshah.nimaz.domain.model.LibrarySource
+import com.arshadshah.nimaz.domain.usecase.ObserveSearchPreferencesUseCase
 import com.arshadshah.nimaz.domain.usecase.SearchLibraryUseCase
+import com.arshadshah.nimaz.presentation.viewmodel.FakeSearchSettings
 import com.google.common.truth.Truth.assertThat
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -35,7 +38,12 @@ class SearchViewModelTest {
     @After
     fun tearDown() = Dispatchers.resetMain()
 
-    private fun viewModel() = SearchViewModel(searchLibrary, RecordingTelemetry())
+    private fun viewModel(settings: FakeSearchSettings = FakeSearchSettings()) =
+        SearchViewModel(
+            searchLibrary,
+            ObserveSearchPreferencesUseCase(settings),
+            RecordingTelemetry(),
+        )
 
     @Test
     fun `typing a query runs the search without pressing enter`() = runTest {
@@ -106,5 +114,35 @@ class SearchViewModelTest {
         vm.onEvent(SearchEvent.SetFilter(SearchFilter.HADITH))
         assertThat(vm.statsState.value.totalResults).isEqualTo(3)
         assertThat(vm.searchState.value.filteredResults).hasSize(3)
+    }
+
+    // ── the stored default scope ──────────────────────────────────────────────
+
+    @Test
+    fun `search opens on the filter the user made their default`() = runTest {
+        val vm = viewModel(FakeSearchSettings(defaultScope = LibrarySource.HADITH.name))
+        advanceUntilIdle()
+
+        assertThat(vm.searchState.value.selectedFilter).isEqualTo(SearchFilter.HADITH)
+    }
+
+    @Test
+    fun `no stored default leaves search on everything`() = runTest {
+        val vm = viewModel()
+        advanceUntilIdle()
+
+        assertThat(vm.searchState.value.selectedFilter).isEqualTo(SearchFilter.ALL)
+    }
+
+    @Test
+    fun `a filter chosen on this screen wins over the stored default`() = runTest {
+        // The preference is read asynchronously, so this is the race: opening search *from*
+        // duas passes an initial filter, and the settings value must not land on top of it.
+        // "Search duas", said now, beats "usually start on hadith", said once in settings.
+        val vm = viewModel(FakeSearchSettings(defaultScope = LibrarySource.HADITH.name))
+        vm.onEvent(SearchEvent.SetFilter(SearchFilter.DUA))
+        advanceUntilIdle()
+
+        assertThat(vm.searchState.value.selectedFilter).isEqualTo(SearchFilter.DUA)
     }
 }

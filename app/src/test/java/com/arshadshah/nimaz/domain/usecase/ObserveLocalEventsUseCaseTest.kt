@@ -83,6 +83,14 @@ private class FakeSettings(private val offset: Int) : SettingsRepository {
     override suspend fun setUseHijriPrimary(enabled: Boolean) {}
     override val hijriDayOffset: Flow<Int> = flowOf(offset)
     override suspend fun setHijriDayOffset(days: Int) {}
+    override val searchResultsPerSource: Flow<Int> = flowOf(60)
+    override suspend fun setSearchResultsPerSource(count: Int) {}
+    override val searchSources: Flow<String> = flowOf("")
+    override suspend fun setSearchSources(sources: String) {}
+    override val searchStrictness: Flow<String> = flowOf("BALANCED")
+    override suspend fun setSearchStrictness(strictness: String) {}
+    override val searchDefaultScope: Flow<String> = flowOf("")
+    override suspend fun setSearchDefaultScope(scope: String) {}
     override val appLanguage: Flow<String> = flowOf("en")
     override suspend fun setAppLanguage(language: String) {}
     override val tasbihBeadMode: Flow<Boolean> = flowOf(false)

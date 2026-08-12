@@ -60,6 +60,7 @@ import com.arshadshah.nimaz.domain.repository.settings.QuranPreferences
 import com.arshadshah.nimaz.domain.repository.settings.TasbihSettings
 import com.arshadshah.nimaz.domain.repository.settings.MoreSettings
 import com.arshadshah.nimaz.domain.repository.settings.HijriSettings
+import com.arshadshah.nimaz.domain.repository.settings.SearchSettings
 import com.arshadshah.nimaz.domain.repository.settings.ZakatSettings
 import com.arshadshah.nimaz.domain.repository.TafseerRepository
 import com.arshadshah.nimaz.domain.repository.TasbihRepository
@@ -471,6 +472,9 @@ abstract class RepositoryModule {
 
     @Binds
     abstract fun bindHijriSettings(impl: PreferencesDataStore): HijriSettings
+
+    @Binds
+    abstract fun bindSearchSettings(impl: PreferencesDataStore): SearchSettings
 
     @Binds
     @Singleton

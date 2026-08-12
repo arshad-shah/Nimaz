@@ -202,3 +202,31 @@ interface HijriSettings {
      */
     val hijriDayOffset: Flow<Int>
 }
+
+/**
+ * How search behaves, as the user has set it.
+ *
+ * Primitives rather than the [com.arshadshah.nimaz.domain.model.SearchPreferences] model,
+ * like every other seam here: the store persists values, and
+ * `ObserveSearchPreferencesUseCase` is where they become a typed model with its invariants
+ * applied. Keeping the mapping out of the store means a preference file written by a newer
+ * build — an unknown source name, a strictness that no longer exists — degrades to the
+ * default instead of throwing on read.
+ */
+interface SearchSettings {
+    /** How many results each source may contribute. */
+    val searchResultsPerSource: Flow<Int>
+    suspend fun setSearchResultsPerSource(count: Int)
+
+    /** Comma-separated `LibrarySource` names. Empty string means "everything". */
+    val searchSources: Flow<String>
+    suspend fun setSearchSources(sources: String)
+
+    /** A `MatchStrictness` name. */
+    val searchStrictness: Flow<String>
+    suspend fun setSearchStrictness(strictness: String)
+
+    /** A `LibrarySource` name, or empty for "everything". */
+    val searchDefaultScope: Flow<String>
+    suspend fun setSearchDefaultScope(scope: String)
+}

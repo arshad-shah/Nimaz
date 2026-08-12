@@ -10,6 +10,7 @@ import com.arshadshah.nimaz.domain.repository.settings.MoreSettings
 import com.arshadshah.nimaz.domain.repository.settings.QuranPreferences
 import com.arshadshah.nimaz.domain.repository.settings.TasbihSettings
 import com.arshadshah.nimaz.domain.repository.settings.HijriSettings
+import com.arshadshah.nimaz.domain.repository.settings.SearchSettings
 import com.arshadshah.nimaz.domain.repository.settings.ZakatSettings
 import kotlinx.coroutines.flow.Flow
 
@@ -28,6 +29,7 @@ interface SettingsRepository :
     TasbihSettings,
     ZakatSettings,
     HijriSettings,
+    SearchSettings,
     AiSettings,
     LocationSettings,
     MoreSettings,
