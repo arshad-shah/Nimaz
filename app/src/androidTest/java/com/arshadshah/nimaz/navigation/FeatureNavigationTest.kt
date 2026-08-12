@@ -51,9 +51,7 @@ class FeatureNavigationTest : BaseAppTest() {
     fun learningSection_opensEveryFeature() = visitAll(
         listOf(
             More.qaida to ScreenTags.QaidaHome,
-            More.asmaUlHusna to ScreenTags.AsmaUlHusnaList,
-            More.asmaUnNabi to ScreenTags.AsmaUnNabiList,
-            More.prophets to ScreenTags.ProphetsList,
+            More.names to ScreenTags.Names,
             More.hadith to ScreenTags.HadithHome,
             More.duas to ScreenTags.DuaHome,
             More.tafseer to ScreenTags.TafseerChapters,

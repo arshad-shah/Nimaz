@@ -59,9 +59,8 @@ object Selectors {
         @StringRes val fasting = R.string.fasting
         @StringRes val khatam = R.string.khatam_quran
         @StringRes val qaida = R.string.qaida
-        @StringRes val asmaUlHusna = R.string.allahs_99_names
-        @StringRes val asmaUnNabi = R.string.prophets_99_names
-        @StringRes val prophets = R.string.prophets_of_islam
+        // One row for what used to be three: the catalogues are tabs of `Route.Names` now.
+        @StringRes val names = R.string.names_title
         @StringRes val hadith = R.string.hadith
         @StringRes val duas = R.string.duas
         @StringRes val tafseer = R.string.tafseer
