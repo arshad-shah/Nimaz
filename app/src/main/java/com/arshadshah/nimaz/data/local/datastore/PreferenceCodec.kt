@@ -137,6 +137,13 @@ internal object PreferenceCodec {
         "ai_history_enabled" to PrefType.BOOLEAN,
         "ai_ask_hint_dismissed" to PrefType.BOOLEAN,
         "ai_question_history" to PrefType.STRING,
+        "search_results_per_source" to PrefType.INT,
+        // A comma-separated list of LibrarySource names, not a STRING_SET, for the same reason
+        // as the shortcuts below: an empty value is meaningful here (it means "every source,
+        // including ones added later"), and a Set gives no way to tell it from unset.
+        "search_sources" to PrefType.STRING,
+        "search_strictness" to PrefType.STRING,
+        "search_default_scope" to PrefType.STRING,
         // A delimited string of PinnedShortcut keys, not a STRING_SET: the row's order is what
         // the user arranged, and a Set discards it.
         "more_pinned_shortcuts" to PrefType.STRING,

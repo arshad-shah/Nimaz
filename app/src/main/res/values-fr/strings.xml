@@ -1466,7 +1466,28 @@
 
     <!-- Search & AI (Ask with Proof) -->
     <string name="search_settings">Recherche &amp; IA</string>
-    <string name="search_settings_subtitle">Réponses IA et confidentialité</string>
+    <string name="search_settings_subtitle">Résultats, sources, réponses IA et confidentialité</string>
+
+    <!-- Local search behaviour -->
+    <string name="search_results_section">Résultats</string>
+    <string name="search_results_per_source">Résultats par source</string>
+    <string name="search_results_per_source_subtitle">Jusqu\'à %1$d résultats au total sur les sources consultées.</string>
+    <string name="search_sources_section">Où chercher</string>
+    <string name="search_source_quran_desc">Versets, traductions et noms des sourates</string>
+    <string name="search_source_hadith_desc">Narrations dans les recueils de hadiths</string>
+    <string name="search_source_duas_desc">Invocations et leurs traductions</string>
+    <string name="search_source_last_one">La recherche a besoin d\'au moins une source</string>
+    <string name="search_strictness">Précision des correspondances</string>
+    <string name="search_strictness_exact">Exact</string>
+    <string name="search_strictness_exact_desc">Chercher uniquement la phrase saisie, telle quelle</string>
+    <string name="search_strictness_balanced">Équilibré</string>
+    <string name="search_strictness_balanced_desc">Chercher aussi les mots isolés ; les résultats correspondant à plus de mots passent devant</string>
+    <string name="search_strictness_broad">Large</string>
+    <string name="search_strictness_broad_desc">Chercher le plus de mots possible. Plus de résultats à trier, et plus lent sur les questions longues</string>
+    <string name="search_default_scope">Commencer la recherche dans</string>
+    <string name="search_default_scope_subtitle">Le filtre actif à l\'ouverture de la recherche</string>
+    <string name="search_scope_everything">Tout</string>
+    <string name="search_scope_everything_desc">Afficher les résultats de toutes les sources consultées</string>
     <string name="ai_answers">Réponses de l\'IA</string>
     <string name="ai_answers_enable">Activer les réponses de l\'IA</string>
     <string name="ai_answers_enable_subtitle">Posez une question et obtenez une réponse avec des versets et des hadiths de votre bibliothèque comme preuve</string>

@@ -5,13 +5,18 @@ import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.core.monitoring.launchSafely
+import com.arshadshah.nimaz.domain.model.LibrarySource
+import com.arshadshah.nimaz.domain.model.SearchPreferences
 import com.arshadshah.nimaz.domain.repository.settings.AiSettings
+import com.arshadshah.nimaz.domain.repository.settings.SearchSettings
+import com.arshadshah.nimaz.domain.usecase.ObserveSearchPreferencesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
@@ -22,6 +27,8 @@ import com.arshadshah.nimaz.presentation.viewmodel.ai.AskViewModel
 @HiltViewModel
 class SearchSettingsViewModel @Inject constructor(
     private val aiSettings: AiSettings,
+    private val searchSettings: SearchSettings,
+    searchPreferences: ObserveSearchPreferencesUseCase,
     private val telemetry: Telemetry,
 ) : ViewModel() {
 
@@ -44,6 +51,13 @@ class SearchSettingsViewModel @Inject constructor(
                 )
             }
         }.launchIn(viewModelScope)
+
+        // The same use case search itself reads, so the screen can never show a value search
+        // is not using — including the corrections `sanitised` makes to a preferences file
+        // written by some other build.
+        searchPreferences()
+            .onEach { prefs -> _uiState.update { it.copy(search = prefs) } }
+            .launchIn(viewModelScope)
     }
 
     // Same wire format as AskViewModel's encodeHistory: a JSON string list.
@@ -58,6 +72,37 @@ class SearchSettingsViewModel @Inject constructor(
 
     fun onEvent(event: SearchSettingsEvent) {
         when (event) {
+            is SearchSettingsEvent.SetResultsPerSource ->
+                launchSafely(telemetry, SEARCH_DOMAIN, "set_results_per_source") {
+                    searchSettings.setSearchResultsPerSource(
+                        event.count.coerceIn(
+                            SearchPreferences.MIN_RESULTS_PER_SOURCE,
+                            SearchPreferences.MAX_RESULTS_PER_SOURCE,
+                        )
+                    )
+                    telemetry.settingChanged("search_results_per_source", event.count.toString())
+                }
+
+            is SearchSettingsEvent.ToggleSource -> onToggleSource(event.source)
+
+            is SearchSettingsEvent.SetStrictness ->
+                launchSafely(telemetry, SEARCH_DOMAIN, "set_strictness") {
+                    searchSettings.setSearchStrictness(event.strictness.name)
+                    telemetry.settingChanged(
+                        "search_strictness",
+                        event.strictness.name.lowercase(),
+                    )
+                }
+
+            is SearchSettingsEvent.SetDefaultScope ->
+                launchSafely(telemetry, SEARCH_DOMAIN, "set_default_scope") {
+                    searchSettings.setSearchDefaultScope(event.source?.name.orEmpty())
+                    telemetry.settingChanged(
+                        "search_default_scope",
+                        event.source?.name?.lowercase() ?: "all",
+                    )
+                }
+
             SearchSettingsEvent.ToggleAiRequested -> onToggleRequested()
             SearchSettingsEvent.ConsentAccepted -> onConsentAccepted()
             SearchSettingsEvent.ConsentDismissed ->
@@ -78,6 +123,38 @@ class SearchSettingsViewModel @Inject constructor(
                     aiSettings.setAiQuestionHistory("")
                     telemetry.featureUsed(DOMAIN, "history_cleared")
                 }
+        }
+    }
+
+    /**
+     * Switching a source on or off — except the last one on, which is refused.
+     *
+     * An empty source set is search that returns nothing for every query. `sanitised` would
+     * quietly read it back as "everything", so obeying the tap would show a switch that turns
+     * itself back on; the screen disables the last remaining switch instead, and this is the
+     * guard behind it.
+     *
+     * The default scope follows: it is stored as a source name, and a scope pointing at a
+     * source that is no longer searched opens the results list already filtered to nothing.
+     */
+    private fun onToggleSource(source: LibrarySource) {
+        val current = _uiState.value.search
+        val updated = if (source in current.sources) {
+            current.sources - source
+        } else {
+            current.sources + source
+        }
+        if (updated.isEmpty()) return
+
+        launchSafely(telemetry, SEARCH_DOMAIN, "toggle_source") {
+            searchSettings.setSearchSources(ObserveSearchPreferencesUseCase.encode(updated))
+            if (current.defaultScope != null && current.defaultScope !in updated) {
+                searchSettings.setSearchDefaultScope("")
+            }
+            telemetry.settingChanged(
+                "search_source_" + source.name.lowercase(),
+                if (source in updated) "on" else "off",
+            )
         }
     }
 
@@ -119,5 +196,8 @@ class SearchSettingsViewModel @Inject constructor(
 
     private companion object {
         private const val DOMAIN = AppAnalytics.Feature.AI_ASK
+
+        /** Local search is not the AI feature — its telemetry does not belong under it. */
+        private const val SEARCH_DOMAIN = "global_search"
     }
 }

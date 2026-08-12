@@ -1415,7 +1415,28 @@
 
     <!-- Search & AI (Ask with Proof) -->
     <string name="search_settings">Pencarian &amp; AI</string>
-    <string name="search_settings_subtitle">Jawaban AI dan privasi</string>
+    <string name="search_settings_subtitle">Hasil, sumber, jawaban AI, dan privasi</string>
+
+    <!-- Local search behaviour -->
+    <string name="search_results_section">Hasil</string>
+    <string name="search_results_per_source">Hasil per sumber</string>
+    <string name="search_results_per_source_subtitle">Hingga %1$d hasil secara keseluruhan dari sumber yang dicari.</string>
+    <string name="search_sources_section">Tempat pencarian</string>
+    <string name="search_source_quran_desc">Ayat, terjemahan, dan nama surah</string>
+    <string name="search_source_hadith_desc">Riwayat dari kitab-kitab hadis</string>
+    <string name="search_source_duas_desc">Doa beserta terjemahannya</string>
+    <string name="search_source_last_one">Pencarian membutuhkan setidaknya satu sumber</string>
+    <string name="search_strictness">Ketepatan pencocokan</string>
+    <string name="search_strictness_exact">Tepat</string>
+    <string name="search_strictness_exact_desc">Cocokkan seluruh frasa yang Anda ketik, tanpa pelonggaran</string>
+    <string name="search_strictness_balanced">Seimbang</string>
+    <string name="search_strictness_balanced_desc">Cocokkan juga kata per kata; hasil yang cocok dengan lebih banyak kata diurutkan lebih dulu</string>
+    <string name="search_strictness_broad">Luas</string>
+    <string name="search_strictness_broad_desc">Cocokkan sebanyak mungkin kata. Lebih banyak yang harus disaring, dan lebih lambat untuk pertanyaan panjang</string>
+    <string name="search_default_scope">Mulai pencarian di</string>
+    <string name="search_default_scope_subtitle">Filter yang aktif saat pencarian dibuka</string>
+    <string name="search_scope_everything">Semua</string>
+    <string name="search_scope_everything_desc">Tampilkan hasil dari setiap sumber yang dicari</string>
     <string name="ai_answers">Jawaban AI</string>
     <string name="ai_answers_enable">Aktifkan jawaban AI</string>
     <string name="ai_answers_enable_subtitle">Ajukan pertanyaan dan dapatkan jawaban dengan ayat dan hadis dari pustaka Anda sebagai bukti</string>

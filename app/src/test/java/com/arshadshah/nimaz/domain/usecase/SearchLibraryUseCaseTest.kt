@@ -1,8 +1,11 @@
 package com.arshadshah.nimaz.domain.usecase
 
 import com.arshadshah.nimaz.domain.model.Ayah
+import com.arshadshah.nimaz.domain.model.LibrarySource
+import com.arshadshah.nimaz.domain.model.MatchStrictness
 import com.arshadshah.nimaz.domain.model.QuranSearchResult
 import com.arshadshah.nimaz.domain.model.SearchType
+import com.arshadshah.nimaz.presentation.viewmodel.FakeSearchSettings
 import com.google.common.truth.Truth.assertThat
 import io.mockk.every
 import io.mockk.mockk
@@ -39,8 +42,16 @@ class SearchLibraryUseCaseTest {
         every { searchHadithsUC.invoke(any()) } returns flowOf(emptyList())
         every { searchDuasUC.invoke(any()) } returns flowOf(emptyList())
 
-        useCase = SearchLibraryUseCase(quranUseCases, hadithUseCases, duaUseCases)
+        useCase = searchingUnder(FakeSearchSettings())
     }
+
+    /** The same use case reading a given set of stored preferences. */
+    private fun searchingUnder(settings: FakeSearchSettings) = SearchLibraryUseCase(
+        quranUseCases,
+        hadithUseCases,
+        duaUseCases,
+        ObserveSearchPreferencesUseCase(settings),
+    )
 
     @Test
     fun `multi-word query finds per-word matches the phrase search misses`() = runTest {
@@ -112,6 +123,66 @@ class SearchLibraryUseCaseTest {
         assertThat(results.quran).hasSize(2)
         // The record matched by both terms ranks first.
         assertThat(results.quran.first().ayah.surahNumber).isEqualTo(2)
+    }
+
+    // ── what the four settings actually change ────────────────────────────────
+
+    @Test
+    fun `EXACT strictness runs the phrase and nothing else`() = runTest {
+        val exact = searchingUnder(
+            FakeSearchSettings(strictness = MatchStrictness.EXACT.name)
+        )
+
+        exact("patience during hardship")
+
+        verify(exactly = 1) { searchQuranUC.invoke("patience during hardship", any()) }
+        verify(exactly = 0) { searchQuranUC.invoke("patience", any()) }
+        verify(exactly = 0) { searchQuranUC.invoke("hardship", any()) }
+    }
+
+    @Test
+    fun `a switched-off source is not queried at all`() = runTest {
+        // Not merely filtered out of the results: the query is the expensive part, and the
+        // point of the setting is that narrowing search also makes it faster.
+        val quranOnly = searchingUnder(
+            FakeSearchSettings(
+                sources = ObserveSearchPreferencesUseCase.encode(setOf(LibrarySource.QURAN))
+            )
+        )
+
+        quranOnly("patience")
+
+        verify(exactly = 1) { searchQuranUC.invoke("patience", any()) }
+        // Surah names are part of the Qur'an source, not a source of their own — "search the
+        // Qur'an but not its surah names" is not a distinction worth a switch.
+        verify(exactly = 1) { getSurahListUC.search("patience") }
+        verify(exactly = 0) { searchHadithsUC.invoke(any()) }
+        verify(exactly = 0) { searchDuasUC.invoke(any()) }
+    }
+
+    @Test
+    fun `the per-source cap is the setting, not a constant`() = runTest {
+        // The 180-results-for-الله report: three sources each capped at a hardcoded 60.
+        val hits = (1..100).map { quranResult(2, it) }
+        every { searchQuranUC.invoke("patience", any()) } returns flowOf(hits)
+
+        val narrow = searchingUnder(FakeSearchSettings(resultsPerSource = 25))
+        assertThat(narrow("patience").quran).hasSize(25)
+
+        val wide = searchingUnder(FakeSearchSettings(resultsPerSource = 100))
+        assertThat(wide("patience").quran).hasSize(100)
+    }
+
+    @Test
+    fun `a preferences file that would return nothing still searches everything`() = runTest {
+        // An empty stored source set is reachable by a downgrade or a restore; honouring it
+        // literally would make every search look broken.
+        val empty = searchingUnder(FakeSearchSettings(sources = "NOT_A_SOURCE"))
+
+        empty("patience")
+
+        verify(exactly = 1) { searchQuranUC.invoke("patience", any()) }
+        verify(exactly = 1) { searchHadithsUC.invoke("patience") }
     }
 
     @Test

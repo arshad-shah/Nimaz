@@ -1,6 +1,14 @@
 package com.arshadshah.nimaz.presentation.viewmodel.settings
 
+import com.arshadshah.nimaz.domain.model.SearchPreferences
+
 data class SearchSettingsUiState(
+    /**
+     * How local search behaves. All four of these were compile-time constants, which is how a
+     * search for الله came to return exactly 180 results — three sources each capped at a
+     * hidden 60 — and read as a defect.
+     */
+    val search: SearchPreferences = SearchPreferences(),
     val aiEnabled: Boolean = false,
     val historyEnabled: Boolean = false,
     /** Persisted recent questions — shown in the clear-history confirm dialog. */

@@ -1444,7 +1444,28 @@
 
     <!-- Search & AI (Ask with Proof) -->
     <string name="search_settings">Arama &amp; Yapay Zekâ</string>
-    <string name="search_settings_subtitle">Yapay zekâ yanıtları ve gizlilik</string>
+    <string name="search_settings_subtitle">Sonuçlar, kaynaklar, yapay zekâ yanıtları ve gizlilik</string>
+
+    <!-- Local search behaviour -->
+    <string name="search_results_section">Sonuçlar</string>
+    <string name="search_results_per_source">Kaynak başına sonuç</string>
+    <string name="search_results_per_source_subtitle">Aranan kaynaklar genelinde toplam en fazla %1$d sonuç.</string>
+    <string name="search_sources_section">Nerede aranacak</string>
+    <string name="search_source_quran_desc">Ayetler, mealler ve sûre adları</string>
+    <string name="search_source_hadith_desc">Hadis külliyatındaki rivayetler</string>
+    <string name="search_source_duas_desc">Dualar ve çevirileri</string>
+    <string name="search_source_last_one">Arama için en az bir kaynak gerekir</string>
+    <string name="search_strictness">Eşleşme sıkılığı</string>
+    <string name="search_strictness_exact">Tam</string>
+    <string name="search_strictness_exact_desc">Yalnızca yazdığınız ifadenin tamamını eşleştir</string>
+    <string name="search_strictness_balanced">Dengeli</string>
+    <string name="search_strictness_balanced_desc">Tek tek kelimeleri de eşleştir; daha çok kelimeyi tutturan sonuçlar üste çıkar</string>
+    <string name="search_strictness_broad">Geniş</string>
+    <string name="search_strictness_broad_desc">Olabildiğince çok kelimeyi eşleştir. Elemesi daha uzun sürer ve uzun sorularda yavaşlar</string>
+    <string name="search_default_scope">Aramaya şurada başla</string>
+    <string name="search_default_scope_subtitle">Arama açıldığında hangi filtrenin seçili olacağı</string>
+    <string name="search_scope_everything">Her şey</string>
+    <string name="search_scope_everything_desc">Aranan her kaynaktan sonuç göster</string>
     <string name="ai_answers">Yapay zekâ yanıtları</string>
     <string name="ai_answers_enable">Yapay zekâ yanıtlarını etkinleştir</string>
     <string name="ai_answers_enable_subtitle">Bir soru sorun, kitaplığınızdaki ayet ve hadislerle kanıtlanmış bir yanıt alın</string>

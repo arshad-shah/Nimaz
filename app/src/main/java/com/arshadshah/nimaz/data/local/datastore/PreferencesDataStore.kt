@@ -25,6 +25,8 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
+import com.arshadshah.nimaz.domain.model.MatchStrictness
+import com.arshadshah.nimaz.domain.model.SearchPreferences
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "nimaz_preferences")
 
@@ -197,6 +199,12 @@ class PreferencesDataStore @Inject constructor(
         val LOCATION_NAME = stringPreferencesKey("location_name")
 
         // AI — Ask with Proof (opt-in; all off/neutral by default)
+        // Search behaviour, user-controlled since the four caps stopped being constants.
+        val SEARCH_RESULTS_PER_SOURCE = intPreferencesKey("search_results_per_source")
+        val SEARCH_SOURCES = stringPreferencesKey("search_sources")
+        val SEARCH_STRICTNESS = stringPreferencesKey("search_strictness")
+        val SEARCH_DEFAULT_SCOPE = stringPreferencesKey("search_default_scope")
+
         val AI_ASK_ENABLED = booleanPreferencesKey("ai_ask_enabled")
         val AI_CONSENT_TIMESTAMP = longPreferencesKey("ai_consent_timestamp")
         val AI_HISTORY_ENABLED = booleanPreferencesKey("ai_history_enabled")
@@ -893,6 +901,34 @@ class PreferencesDataStore @Inject constructor(
     }
 
     // AI — Ask with Proof
+    // --- search behaviour -------------------------------------------------------------
+
+    override val searchResultsPerSource: Flow<Int> =
+        preference(PreferencesKeys.SEARCH_RESULTS_PER_SOURCE, SearchPreferences.DEFAULT_RESULTS_PER_SOURCE)
+
+    override suspend fun setSearchResultsPerSource(count: Int) =
+        put(PreferencesKeys.SEARCH_RESULTS_PER_SOURCE, count)
+
+    // Empty string, not a joined list of every source: "the user has not chosen" and "the user
+    // chose all of them" look the same today but stop being the same the moment a source is
+    // added, and the unset case should pick that one up.
+    override val searchSources: Flow<String> = preference(PreferencesKeys.SEARCH_SOURCES, "")
+
+    override suspend fun setSearchSources(sources: String) =
+        put(PreferencesKeys.SEARCH_SOURCES, sources)
+
+    override val searchStrictness: Flow<String> =
+        preference(PreferencesKeys.SEARCH_STRICTNESS, MatchStrictness.BALANCED.name)
+
+    override suspend fun setSearchStrictness(strictness: String) =
+        put(PreferencesKeys.SEARCH_STRICTNESS, strictness)
+
+    override val searchDefaultScope: Flow<String> =
+        preference(PreferencesKeys.SEARCH_DEFAULT_SCOPE, "")
+
+    override suspend fun setSearchDefaultScope(scope: String) =
+        put(PreferencesKeys.SEARCH_DEFAULT_SCOPE, scope)
+
     override val aiAskEnabled: Flow<Boolean> = preference(PreferencesKeys.AI_ASK_ENABLED, false)
 
     override suspend fun setAiAskEnabled(enabled: Boolean) =

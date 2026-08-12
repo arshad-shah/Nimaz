@@ -1050,6 +1050,25 @@ newer build is **dropped**, so a future pin cannot crash an older install's More
 explicitly saved empty value means *no pins* and is honoured rather than reset to the defaults,
 or unpinning the last shortcut would not stick. Read through the `MoreSettings` seam.
 
+**Local search behaviour.** `search_results_per_source: Int` (default 60, clamped to 10–200),
+`search_sources: String` (comma-separated `LibrarySource` names, **empty = every source**),
+`search_strictness: String` (a `MatchStrictness` name, default `BALANCED`) and
+`search_default_scope: String` (a `LibrarySource` name, empty = no scope). All four were
+compile-time constants in `SearchLibraryUseCase` until a search for الله returned exactly 180
+results — three sources each capped at a hidden 60 — and was reported as a defect.
+
+Read through the **`SearchSettings`** seam (four flows and four setters, not the 179 members of
+`SettingsRepository`) and turned into the typed `SearchPreferences` by
+`ObserveSearchPreferencesUseCase`, which is where a value this build cannot parse degrades to
+the default instead of throwing on the first search anyone runs. Stored as raw names for the
+usual reason — a payload from a newer build's sync (§10) must not crash an older install — and
+`search_sources` is a delimited string rather than a `stringSetPreferencesKey` because *empty*
+is meaningful here: it means "every source, including any added later", so a build that adds a
+source starts searching it for existing users rather than silently leaving it out. Written from
+`SearchSettingsScreen`; the invariants (a non-empty source set, a scope that points at a source
+still being searched) are applied in `SearchPreferences.sanitised` on every read. See
+[`docs/ai-ask-with-proof.md`](ai-ask-with-proof.md#smart-local-search-searchlibraryusecase).
+
 **Mushaf script / layout.** `quran_mushaf_script: String` (a `MushafScript` enum name, default `MADANI`) selects the Mushaf edition the page reader renders — ayah-flow Uthmani/Madani (604 pages) vs a line-accurate IndoPak edition (16-line/548, 15-line/610 or 13-line/847; #270). Stored raw and mapped to the domain enum at the boundary (mirrors `quran_arabic_font`/`pattern_style`); read by `QuranViewModel` (drives `useLineAccurateLayout` + script-aware page counts) and written from the "Mushaf Script" dropdown in `QuranSettingsScreen`. Off by default. See §5 (16-line renderer).
 
 **One `SettingsViewModel` per screen — so settings state must be *collected*, not snapshotted.**

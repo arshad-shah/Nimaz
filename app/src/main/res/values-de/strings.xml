@@ -1438,7 +1438,28 @@
 
     <!-- Search & AI (Ask with Proof) -->
     <string name="search_settings">Suche &amp; KI</string>
-    <string name="search_settings_subtitle">KI-Antworten und Datenschutz</string>
+    <string name="search_settings_subtitle">Ergebnisse, Quellen, KI-Antworten und Datenschutz</string>
+
+    <!-- Local search behaviour -->
+    <string name="search_results_section">Ergebnisse</string>
+    <string name="search_results_per_source">Ergebnisse pro Quelle</string>
+    <string name="search_results_per_source_subtitle">Bis zu %1$d Ergebnisse insgesamt über die durchsuchten Quellen.</string>
+    <string name="search_sources_section">Wo gesucht wird</string>
+    <string name="search_source_quran_desc">Verse, Übersetzungen und Surennamen</string>
+    <string name="search_source_hadith_desc">Überlieferungen aus den Hadith-Sammlungen</string>
+    <string name="search_source_duas_desc">Bittgebete und ihre Übersetzungen</string>
+    <string name="search_source_last_one">Die Suche braucht mindestens eine Quelle</string>
+    <string name="search_strictness">Genauigkeit der Treffer</string>
+    <string name="search_strictness_exact">Genau</string>
+    <string name="search_strictness_exact_desc">Nur den eingegebenen Ausdruck als Ganzes suchen</string>
+    <string name="search_strictness_balanced">Ausgewogen</string>
+    <string name="search_strictness_balanced_desc">Auch einzelne Wörter suchen; Treffer mit mehr passenden Wörtern stehen weiter oben</string>
+    <string name="search_strictness_broad">Weit</string>
+    <string name="search_strictness_broad_desc">So viele Wörter wie möglich suchen. Mehr zu sichten und langsamer bei langen Fragen</string>
+    <string name="search_default_scope">Suche beginnen in</string>
+    <string name="search_default_scope_subtitle">Mit welchem Filter die Suche öffnet</string>
+    <string name="search_scope_everything">Alles</string>
+    <string name="search_scope_everything_desc">Ergebnisse aus allen durchsuchten Quellen anzeigen</string>
     <string name="ai_answers">KI-Antworten</string>
     <string name="ai_answers_enable">KI-Antworten aktivieren</string>
     <string name="ai_answers_enable_subtitle">Stelle eine Frage und erhalte eine Antwort mit Versen und Hadithen aus deiner Bibliothek als Beleg</string>
