@@ -746,6 +746,34 @@ typed route object.
 
 ## 8. Theming & components
 
+### 8.0 Accessibility — the obligation
+
+Three rules, and they are obligations rather than suggestions: the app shipped **373
+`contentDescription`s and zero `heading()` and zero `stateDescription`** before this section
+existed, which is the difference between being *operable* with a screen reader and being
+*usable* with one.
+
+1. **A section title is a heading.** `Modifier.semantics { heading() }` is what lets TalkBack's
+   heading navigation jump between sections instead of making the user swipe through every
+   element in order. Declare it **on the component, not at the call site** — `NimazSectionTitle`,
+   `NimazSectionHeader`, `PrayerTimesSectionHeader` and the shared top app bar already do, which
+   covers 72 call sites and every screen title. A new section-heading component must do the same.
+2. **A toggle says what its state means.** `Role.Checkbox` announces "checked" / "not checked",
+   which is true and useless — "Fajr, prayed" is the sentence a user needs. Pass
+   `stateDescription` (`NimazCheckbox` takes one) whenever the state stands for something in the
+   domain rather than for a bare boolean. It is a `stringResource`, always: this text is read
+   aloud, so it is translated like any other.
+3. **A container that holds text is bounded by `heightIn(min = …)`, not `height(…)`.** Android 14+
+   scales fonts to 200% and a fixed-height row clips its second line silently. This matters more
+   here than in most apps: the Amiri and Nastaliq faces have taller line boxes than Latin ones at
+   the same nominal size. A fixed `height` is still right for things that are not text — an icon
+   box, a divider, a fixed-ratio piece of art.
+
+`AccessibilityChecks.enable()` runs on every instrumented UI test (`BaseAppTest`), so a control
+with no label and a touch target under 48dp fail the lane we already run. It cannot see rules 1–3
+— nothing automatic can — which is why they are written down here.
+
+
 - **Colors — every literal lives in the `theme/` package, never in a component/screen:**
     - **Tier 1 — `presentation/theme/Palette.kt` (`NimazPalette`):** the source of the brand/semantic
       hues. Hue ramps named `Family + shade` (e.g. `Teal500`, `Stone900`, `Amber500`). Don't

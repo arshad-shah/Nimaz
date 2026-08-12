@@ -33,6 +33,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -125,6 +126,16 @@ fun NimazCheckbox(
     enabled: Boolean = true,
     tint: Color? = null,
     contentDescription: String? = null,
+    /**
+     * What the checkbox's state *means*, for a screen reader.
+     *
+     * Without it TalkBack announces the `Role.Checkbox` default — "checked" / "not checked" —
+     * which is true and useless: the prayer tracker is the app's core daily interaction and
+     * "checked" does not say whether Fajr was prayed on time, late, or not recorded at all.
+     * There were **zero** `stateDescription`s in the whole presentation layer before this
+     * (audit §4).
+     */
+    stateDescription: String? = null,
 ) {
     val fill = tint ?: variant.resolveFill()
     val onFill = variant.resolveOnFill()
@@ -151,8 +162,11 @@ fun NimazCheckbox(
         Modifier
     }
 
-    val descriptionModifier = if (contentDescription != null) {
-        Modifier.semantics { this.contentDescription = contentDescription }
+    val descriptionModifier = if (contentDescription != null || stateDescription != null) {
+        Modifier.semantics {
+            contentDescription?.let { this.contentDescription = it }
+            stateDescription?.let { this.stateDescription = it }
+        }
     } else {
         Modifier
     }
