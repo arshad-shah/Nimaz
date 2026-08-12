@@ -778,20 +778,20 @@ class QuranRepositoryImpl @Inject constructor(
             textSimple = textSimple ?: textUthmani.orEmpty(),
             juzNumber = ayah.juz,
             hizbNumber = ayah.hizb,
-            rubNumber = rubNumber ?: 0,
+            rubNumber = ayah.rubNumber ?: 0,
             pageNumber = ayah.page,
             sajdaType = SajdaType.fromString(sajdaKind),
             sajdaNumber = sajdaSequence,
             translation = translation,
             transliteration = ayah.transliteration,
             textTajweed = ayah.textTajweed,
-            rukuNumber = rukuNumber,
+            rukuNumber = ayah.rukuNumber,
             // A division is marked once, on one verse, as in a printed Mushaf — not on
             // every verse inside it. Which verse differs by division: the ʿayn closes a
             // rukūʿ, so it lands on the section's last verse, while the ۞ opens a hizb
             // quarter and lands on its first.
-            isRukuEnd = rukuEndAyahId != null && rukuEndAyahId == ayah.id,
-            isRubStart = rubStartAyahId != null && rubStartAyahId == ayah.id
+            isRukuEnd = ayah.rukuEndAyahId != null && ayah.rukuEndAyahId == ayah.id,
+            isRubStart = ayah.rubStartAyahId != null && ayah.rubStartAyahId == ayah.id
         )
     }
 
