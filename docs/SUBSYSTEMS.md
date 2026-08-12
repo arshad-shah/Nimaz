@@ -201,6 +201,27 @@ completion awards stars and unlocks the next lesson. `QaidaReaderViewModel` coll
 and calls `markCellHeard` from there; `playLine` starts playback and writes no progress at all.
 (Tapping a single cell still marks eagerly — one tap, one clip, one intent.)
 
+**Download concurrency and cancellation.** `downloadAllAyahs` runs at most
+`MAX_PARALLEL_DOWNLOADS` (5) at a time, held by a `Semaphore` inside a `coroutineScope`.
+Both details are load-bearing and both replaced something broken:
+
+- The per-file jobs were started on the manager's own `scope`, which made them **siblings**
+  of `downloadJob` rather than children. `downloadJob.cancel()` therefore stopped the
+  waiting and left every download running, still writing `downloadedCount` and
+  `downloadProgress` into the shared `AudioState` — so switching surah mid-download let the
+  old surah's progress overwrite the new one's and then jump backwards. Anything launched
+  here must be a **child** of the download job.
+- The old shape was `chunked(5)` followed by `jobs.forEach { it.join() }`, a barrier that
+  waited for the slowest file in each group of five before starting the next, so one slow
+  connection idled four others. The semaphore keeps five in flight throughout.
+
+**Position tracking.** `startPositionTracking` republishes position every
+`POSITION_TICK_MS` (400 ms) and **only while `_audioState` has collectors**. It previously
+ticked every 100 ms unconditionally — ten wake-ups a second, forever, including with the
+screen off during background playback and including while paused, since `isPlaying` guarded
+only the state update and not the delay. Each tick recomputes `computeTotalPosition` and
+`computeTotalDuration` across the whole playlist, which is not free on a 286-ayah surah.
+
 **Gotchas.**
 - Two player APIs: ExoPlayer everywhere **except** `AdhanAudioManager.preview()` (legacy `MediaPlayer`).
 - `QuranAudioManager.stop()` deliberately does **not** send a stop intent to the service — it sets `isActive=false` and lets the service's state-observer self-stop after a 500 ms debounce, avoiding a start/stop race.
