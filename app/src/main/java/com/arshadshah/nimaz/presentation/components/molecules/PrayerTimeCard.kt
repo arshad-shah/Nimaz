@@ -137,7 +137,18 @@ fun PrayerTimeCard(
                         variant = NimazCheckboxVariant.SUCCESS,
                         size = NimazCheckboxSize.LARGE,
                         type = NimazCheckboxType.CIRCLE,
-                        contentDescription = stringResource(R.string.prayed)
+                        contentDescription = stringResource(R.string.prayed),
+                        // "Fajr, prayed" rather than "checked" — the prayer's name travels with
+                        // its state, because the checkbox sits in a row a screen reader reaches
+                        // on its own.
+                        stateDescription = stringResource(
+                            if (isPrayed) {
+                                R.string.a11y_prayer_state_prayed
+                            } else {
+                                R.string.a11y_prayer_state_not_recorded
+                            },
+                            prayer.name,
+                        ),
                     )
                 } else {
                     Spacer(modifier = Modifier.size(28.dp))

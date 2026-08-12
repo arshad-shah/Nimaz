@@ -13,6 +13,8 @@
     <string name="widgets">Widget\'lar</string>
     <string name="today">Bugün</string>
     <string name="prayed">Kılındı</string>
+    <string name="a11y_prayer_state_prayed">%1$s, kılındı</string>
+    <string name="a11y_prayer_state_not_recorded">%1$s, henüz kaydedilmedi</string>
     <string name="no_favorites_yet">Henüz favori yok</string>
     <string name="remove_from_favorites">Favorilerden kaldır</string>
     <string name="add_to_favorites">Favorilere ekle</string>

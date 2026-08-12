@@ -13,6 +13,8 @@
     <string name="widgets">Widget</string>
     <string name="today">Hari Ini</string>
     <string name="prayed">Telah Solat</string>
+    <string name="a11y_prayer_state_prayed">%1$s, telah solat</string>
+    <string name="a11y_prayer_state_not_recorded">%1$s, belum direkodkan</string>
     <string name="no_favorites_yet">Belum ada kegemaran</string>
     <string name="remove_from_favorites">Buang dari kegemaran</string>
     <string name="add_to_favorites">Tambah ke kegemaran</string>

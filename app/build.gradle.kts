@@ -373,6 +373,9 @@ dependencies {
     // Instrumented Testing
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    // Espresso's accessibility validator: missing labels and sub-48dp touch targets, on the
+    // instrumented lane we already run (audit §4).
+    androidTestImplementation(libs.androidx.espresso.accessibility)
     // UI Automator drives the app from *outside* Compose's test harness. Required for the
     // live-countdown tests: a ComposeTestRule puts the frame clock under test control, so a test
     // that sleeps in real time never sees the UI redraw. See LiveCountdownTest.

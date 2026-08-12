@@ -28,6 +28,7 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import javax.inject.Inject
+import androidx.test.espresso.accessibility.AccessibilityChecks
 
 /**
  * Base class for end-to-end UI flow tests that drive the real [MainActivity] and its
@@ -52,6 +53,7 @@ import javax.inject.Inject
  */
 abstract class BaseAppTest {
 
+
     @get:Rule(order = 0)
     val hiltRule = HiltAndroidRule(this)
 
@@ -73,7 +75,23 @@ abstract class BaseAppTest {
     @Before
     fun setup() {
         hiltRule.inject()
+        enableAccessibilityChecks()
         runBlocking { seedState() }
+    }
+
+    /**
+     * Turn Espresso's accessibility validator on for every UI test we already run.
+     *
+     * It catches the two defects that are invisible in review and invisible on screen: a
+     * control with no label, and a touch target under 48dp. The app had 373 `contentDescription`s
+     * and no automated check that any of them was present where it mattered (audit §4).
+     *
+     * `setRunChecksFromRootView(true)` walks the whole hierarchy rather than only the view under
+     * test, so a screen is validated as a screen rather than as whichever node an assertion
+     * happened to touch.
+     */
+    private fun enableAccessibilityChecks() {
+        AccessibilityChecks.enable().setRunChecksFromRootView(true)
     }
 
     /**

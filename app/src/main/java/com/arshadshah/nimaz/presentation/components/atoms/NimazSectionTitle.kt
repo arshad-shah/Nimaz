@@ -7,6 +7,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -30,7 +32,11 @@ fun NimazSectionTitle(
             fontWeight = FontWeight.Medium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             letterSpacing = 1.sp,
-            modifier = if (trailingContent != null) Modifier.weight(1f) else Modifier
+            // A heading, so TalkBack's heading navigation can jump between sections instead of
+            // making the user swipe through every element in order. Declared here rather than at
+            // each of the call sites, which is the point of the section title being a component.
+            modifier = (if (trailingContent != null) Modifier.weight(1f) else Modifier)
+                .semantics { heading() }
         )
         trailingContent?.invoke()
     }

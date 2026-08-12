@@ -13,6 +13,8 @@
     <string name="widgets">Widgets</string>
     <string name="today">Heute</string>
     <string name="prayed">Gebetet</string>
+    <string name="a11y_prayer_state_prayed">%1$s, gebetet</string>
+    <string name="a11y_prayer_state_not_recorded">%1$s, noch nicht erfasst</string>
     <string name="no_favorites_yet">Noch keine Favoriten</string>
     <string name="remove_from_favorites">Aus Favoriten entfernen</string>
     <string name="add_to_favorites">Zu Favoriten hinzufügen</string>
