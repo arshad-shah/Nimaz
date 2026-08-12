@@ -1323,6 +1323,42 @@ bundle exec fastlane android test
 Requires JDK 21 and an Android SDK (compileSdk 36). Set `sdk.dir` in `local.properties` or
 `ANDROID_HOME`.
 
+### Modules
+
+Two: **`:app`**, which is the whole application, and **`:baselineprofile`**, a
+`com.android.test` module that exists only to generate `app/src/main/baseline-prof.txt`.
+Nothing depends on `:baselineprofile` at runtime and no product code lives there.
+
+### The baseline profile
+
+```bash
+./gradlew :app:generateBaselineProfile
+```
+
+Boots the `pixel6Api34` managed device (no emulator needs to be open, but it downloads a
+system image the first time), runs `BaselineProfileGenerator` over cold start → Home →
+Quran → surah list scroll → reader scroll, and writes the profile the release build then
+compiles ahead of time.
+
+Two things about it are deliberate:
+
+- The generation variants (`nonMinifiedRelease`, `benchmarkRelease`) are re-signed with the
+  **debug** key in an `androidComponents.finalizeDsl` block. The plugin copies them from
+  `release`, whose keystore comes from the environment and exists only on CI, so without
+  this the task fails for everyone running it locally — which is where it is most likely to
+  be run. It must be `finalizeDsl`: the plugin assigns the signing config after the
+  `buildTypes` DSL block, so a `configureEach` there is overwritten.
+- Regenerating is **maintenance, not a gate.** A stale profile is less useful, never wrong.
+  Regenerate after a change that moves the startup path or the reader.
+
+### Compose compiler reports
+
+`composeCompiler` writes metrics and reports to `app/build/compose_compiler/`. They are
+diagnostics, not a gate — read `app-composables.csv` for restartable-but-not-skippable
+functions before doing any recomposition work. As of 2026-08-10 there are **none**: 1,234
+composables, 1,120 restartable, 0 non-skippable. Strong skipping (Kotlin 2.3) covers the
+unstable-parameter case, so measure before assuming there is something to fix.
+
 ---
 
 *Keep this document in sync with reality.* When you intentionally change a pattern, update

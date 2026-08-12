@@ -10,6 +10,9 @@
 /.idea/assetWizardSettings.xml
 .DS_Store
 /build
+# Every module's build directory, not just the root one. `/build` alone let
+# baselineprofile/build/ into a commit the moment a second module existed.
+**/build/
 /captures
 .externalNativeBuild
 .cxx
