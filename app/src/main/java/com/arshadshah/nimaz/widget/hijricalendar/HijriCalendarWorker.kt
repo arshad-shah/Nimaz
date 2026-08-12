@@ -1,14 +1,11 @@
 package com.arshadshah.nimaz.widget.hijricalendar
 
 import android.content.Context
-import androidx.glance.GlanceId
-import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.widget.core.WidgetWork
-import com.arshadshah.nimaz.widget.core.updateWidgetState
+import com.arshadshah.nimaz.widget.core.refreshWidget
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import java.time.Duration
@@ -37,33 +34,13 @@ class HijriCalendarWorker @AssistedInject constructor(
             WidgetWork.cancel(context, UNIQUE_WORK_NAME, ONE_TIME_WORK_NAME)
     }
 
-    private suspend fun setWidgetState(
-        glanceIds: List<GlanceId>,
-        newState: HijriCalendarWidgetState
-    ) = updateWidgetState(
-        context,
-        HijriCalendarWidget(),
-        HijriCalendarStateDefinition,
-        glanceIds,
-        newState
+    override suspend fun doWork(): Result = refreshWidget(
+        context = context,
+        widget = HijriCalendarWidget(),
+        definition = HijriCalendarStateDefinition,
+        widgetClass = HijriCalendarWidget::class.java,
+        workerName = "HijriCalendarWorker",
+        success = { HijriCalendarWidgetState.Success(dataSource.load()) },
+        error = { message -> HijriCalendarWidgetState.Error(message) },
     )
-
-    override suspend fun doWork(): Result {
-        val manager = GlanceAppWidgetManager(context)
-        val glanceIds = manager.getGlanceIds(HijriCalendarWidget::class.java)
-
-        if (glanceIds.isEmpty()) {
-            return Result.success()
-        }
-
-        return try {
-            setWidgetState(glanceIds, HijriCalendarWidgetState.Success(dataSource.load()))
-            Result.success()
-        } catch (e: Exception) {
-            CrashReporter.log("HijriCalendarWorker failed")
-            CrashReporter.recordException(e)
-            setWidgetState(glanceIds, HijriCalendarWidgetState.Error(e.message))
-            if (runAttemptCount < 3) Result.retry() else Result.failure()
-        }
-    }
 }

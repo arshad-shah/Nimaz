@@ -1,9 +1,5 @@
 package com.arshadshah.nimaz.presentation.components.organisms
 
-import android.content.ClipData
-import android.content.ClipboardManager
-import android.content.Context
-import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,25 +8,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.core.share.ContentShareManager
-import com.arshadshah.nimaz.core.share.Shareables
 import com.arshadshah.nimaz.domain.model.Ayah
 import com.arshadshah.nimaz.domain.model.MushafLineType
 import com.arshadshah.nimaz.domain.model.MushafPageLayout
@@ -46,7 +34,6 @@ import com.arshadshah.nimaz.presentation.components.molecules.sampleSurahFatihah
 import com.arshadshah.nimaz.presentation.theme.IndoPakFontFamily
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.theme.ThemeMode
-import kotlinx.coroutines.launch
 
 /**
  * The 16-line IndoPak Mushaf page organism (sub-task 5/7 of #263) — the line-accurate
@@ -91,23 +78,11 @@ fun MushafLinePage(
     onKhatamToggle: (Ayah) -> Unit = {},
     onTafseerClick: (Ayah) -> Unit = {},
 ) {
-    val context = LocalContext.current
-    val shareScope = rememberCoroutineScope()
-    val copiedMessage = stringResource(R.string.ayah_copied_to_clipboard)
-
-    // Tooltip state
-    var tooltipAyah by remember { mutableStateOf<Ayah?>(null) }
-    var tooltipTapY by remember { mutableFloatStateOf(0f) }
+    // The tooltip, its actions and the translation sheet — shared with MushafPage, which draws
+    // a different page and means the same thing by a tap.
+    val actions = rememberMushafAyahActionsState()
     var parentHeight by remember { mutableFloatStateOf(0f) }
     var parentWindowY by remember { mutableFloatStateOf(0f) }
-
-    // Translation bottom sheet state
-    var translationAyah by remember { mutableStateOf<Ayah?>(null) }
-    val sheetState = rememberModalBottomSheetState()
-
-    // Live overrides for bookmark/favorite while tooltip is open
-    var bookmarkOverride by remember { mutableStateOf<Boolean?>(null) }
-    var favoriteOverrides by remember { mutableStateOf<Map<Int, Boolean>>(emptyMap()) }
 
     // Per-ayah metadata reconstructed from the layout — lets id-only taps produce a usable
     // Ayah for the tooltip even when the host supplies no full-content lookup.
@@ -180,88 +155,34 @@ fun MushafLinePage(
                     arabicFontSize = arabicFontSize,
                     arabicFontFamily = arabicFontFamily,
                     highlightedAyahId = highlightedAyahId,
-                    selectedAyahId = tooltipAyah?.id,
+                    selectedAyahId = actions.tooltipAyah?.id,
                     divisionMarks = { divisionMarks[it] ?: MushafDivisionMarks.NONE },
                     onAyahClick = { ayahId, tapWindowY ->
                         resolveAyah(ayahId)?.let { ayah ->
-                            bookmarkOverride = null
-                            tooltipAyah = ayah
-                            tooltipTapY = tapWindowY - parentWindowY
+                            actions.show(ayah, tapWindowY - parentWindowY)
                         }
                     },
                 )
             }
         }
 
-        // Tooltip overlay (anchored near tap position)
-        tooltipAyah?.let { ayah ->
-            val currentBookmarked = bookmarkOverride ?: ayah.isBookmarked
-            val currentFavorite = favoriteOverrides[ayah.id] ?: (ayah.id in favoriteAyahIds)
-            // Only offer the translation sheet when the resolved ayah actually carries content.
-            val showTranslationButton = (showTranslation || showTransliteration) &&
-                (ayah.translation != null || ayah.transliteration != null)
-
-            AyahTooltip(
-                tapY = tooltipTapY,
-                parentHeight = parentHeight,
-                isBookmarked = currentBookmarked,
-                isFavorite = currentFavorite,
-                isKhatamActive = isKhatamActive,
-                isKhatamRead = ayah.id in khatamReadAyahIds,
-                showTranslationButton = showTranslationButton,
-                onDismiss = { tooltipAyah = null },
-                onPlayClick = {
-                    onPlayClick(ayah)
-                    tooltipAyah = null
-                },
-                onBookmarkClick = {
-                    bookmarkOverride = !currentBookmarked
-                    onBookmarkClick(ayah)
-                },
-                onFavoriteClick = {
-                    favoriteOverrides = favoriteOverrides + (ayah.id to !currentFavorite)
-                    onFavoriteClick(ayah)
-                },
-                onCopyClick = {
-                    copyAyahToClipboard(context, ayah, copiedMessage)
-                    onCopyClick(ayah)
-                    tooltipAyah = null
-                },
-                onShareClick = {
-                    shareScope.launch {
-                        ContentShareManager.shareBranded(context, Shareables.ayah(context, ayah))
-                    }
-                    onShareClick(ayah)
-                    tooltipAyah = null
-                },
-                onTafseerClick = {
-                    onTafseerClick(ayah)
-                    tooltipAyah = null
-                },
-                onKhatamToggle = {
-                    onKhatamToggle(ayah)
-                },
-                onTranslationClick = {
-                    val forSheet = ayah
-                    tooltipAyah = null
-                    translationAyah = forSheet
-                }
-            )
-        }
-    }
-
-    // Translation bottom sheet
-    translationAyah?.let { ayah ->
-        val surah = surahMap[ayah.surahNumber]
-
-        AyahTranslationBottomSheet(
-            translationLanguage = translationLanguage,
-            ayah = ayah,
-            surahName = surah?.nameEnglish,
+        MushafAyahActions(
+            state = actions,
+            parentHeight = parentHeight,
+            surahMap = surahMap,
+            favoriteAyahIds = favoriteAyahIds,
+            isKhatamActive = isKhatamActive,
+            khatamReadAyahIds = khatamReadAyahIds,
             showTranslation = showTranslation,
             showTransliteration = showTransliteration,
-            sheetState = sheetState,
-            onDismissRequest = { translationAyah = null }
+            translationLanguage = translationLanguage,
+            onPlayClick = onPlayClick,
+            onBookmarkClick = onBookmarkClick,
+            onFavoriteClick = onFavoriteClick,
+            onCopyClick = onCopyClick,
+            onShareClick = onShareClick,
+            onTafseerClick = onTafseerClick,
+            onKhatamToggle = onKhatamToggle,
         )
     }
 }
@@ -286,28 +207,6 @@ private fun buildAyahMeta(layout: MushafPageLayout): Map<Int, LayoutAyahMeta> =
             }
         }
     }
-
-private fun copyAyahToClipboard(context: Context, ayah: Ayah, copiedMessage: String) {
-    val textToCopy = buildString {
-        appendLine(ayah.textArabic)
-        if (!ayah.translation.isNullOrBlank()) {
-            appendLine(); appendLine(ayah.translation)
-        }
-        appendLine()
-        append(
-            context.getString(
-                R.string.quran_copy_reference_format,
-                ayah.surahNumber,
-                ayah.ayahNumber
-            )
-        )
-    }
-    val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-    clipboard.setPrimaryClip(
-        ClipData.newPlainText(context.getString(R.string.quran_clipboard_label), textToCopy)
-    )
-    Toast.makeText(context, copiedMessage, Toast.LENGTH_SHORT).show()
-}
 
 // ==================== PREVIEWS ====================
 
