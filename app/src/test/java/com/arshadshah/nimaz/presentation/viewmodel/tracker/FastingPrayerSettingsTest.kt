@@ -2,6 +2,8 @@ package com.arshadshah.nimaz.presentation.viewmodel.tracker
 
 import java.time.LocalDate
 import com.arshadshah.nimaz.core.time.FakeTodayProvider
+import com.arshadshah.nimaz.domain.usecase.fasting.GetDaysUntilAyyamAlBeedUseCase
+import com.arshadshah.nimaz.presentation.viewmodel.FakeHijriSettings
 import com.arshadshah.nimaz.presentation.viewmodel.FakeZakatSettings
 import com.arshadshah.nimaz.core.monitoring.RecordingTelemetry
 import com.arshadshah.nimaz.domain.model.AsrCalculation
@@ -66,6 +68,8 @@ class FastingPrayerSettingsTest {
         buildFastingUseCases(fasting),
         buildPrayerUseCases(prayers),
         FakeTodayProvider(LocalDate.now()),
+        GetDaysUntilAyyamAlBeedUseCase(FakeTodayProvider(LocalDate.now())),
+        FakeHijriSettings(),
         FakeZakatSettings(),
         RecordingTelemetry(),
     )
