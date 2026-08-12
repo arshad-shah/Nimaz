@@ -1,14 +1,11 @@
 package com.arshadshah.nimaz.widget.khatam
 
 import android.content.Context
-import androidx.glance.GlanceId
-import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.widget.core.WidgetWork
-import com.arshadshah.nimaz.widget.core.updateWidgetState
+import com.arshadshah.nimaz.widget.core.refreshWidget
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import java.time.Duration
@@ -37,27 +34,13 @@ class KhatamWorker @AssistedInject constructor(
             WidgetWork.cancel(context, UNIQUE_WORK_NAME, ONE_TIME_WORK_NAME)
     }
 
-    private suspend fun setWidgetState(
-        glanceIds: List<GlanceId>,
-        newState: KhatamWidgetState
-    ) = updateWidgetState(context, KhatamWidget(), KhatamStateDefinition, glanceIds, newState)
-
-    override suspend fun doWork(): Result {
-        val manager = GlanceAppWidgetManager(context)
-        val glanceIds = manager.getGlanceIds(KhatamWidget::class.java)
-
-        if (glanceIds.isEmpty()) {
-            return Result.success()
-        }
-
-        return try {
-            setWidgetState(glanceIds, KhatamWidgetState.Success(dataSource.load()))
-            Result.success()
-        } catch (e: Exception) {
-            CrashReporter.log("KhatamWorker failed")
-            CrashReporter.recordException(e)
-            setWidgetState(glanceIds, KhatamWidgetState.Error(e.message))
-            if (runAttemptCount < 3) Result.retry() else Result.failure()
-        }
-    }
+    override suspend fun doWork(): Result = refreshWidget(
+        context = context,
+        widget = KhatamWidget(),
+        definition = KhatamStateDefinition,
+        widgetClass = KhatamWidget::class.java,
+        workerName = "KhatamWorker",
+        success = { KhatamWidgetState.Success(dataSource.load()) },
+        error = { message -> KhatamWidgetState.Error(message) },
+    )
 }
