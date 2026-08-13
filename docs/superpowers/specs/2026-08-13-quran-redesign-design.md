@@ -440,8 +440,8 @@ constrain screens here:
 
 | Defect | Where |
 |--------|-------|
-| Khatam stat tiles render as empty ovals — `Day streak`, `Avg Pace`, `Juz done` draw a bare outlined ellipse where the value belongs | `KhatamDetailScreen` |
-| A khatam created seconds ago is already "Behind pace" in red — no starting grace | Khatam pace calculation |
+| Khatam stat tiles read as empty. `KhatamDetailScreen.kt:164-177` does pass `"0"` for all three, so the data is fine — the zero renders so lightly and so large that it reads as a bare outlined ellipse rather than a digit. A **presentation** fix in `NimazStatsGrid`, not a missing-data one | `NimazStatsGrid` |
+| A khatam created seconds ago is already "Behind pace" in red. `KhatamProgressCalculator.paceStatus` only grants `NOT_STARTED` when `daysActive <= 0`; on its first day a plan has `daysActive == 1` and `averagePace == 0`, so it falls straight through to `BEHIND` | `KhatamModels.kt:186` |
 | Tafseer commentary line height ~80 px for Latin prose — an Arabic line height applied to translation text | `TafseerPageContent` |
 | "1 passages across 7 verses" — unpluralised string | `SurahPassagesScreen` |
 | The Recommended strip reports "Juz 1" for every surah — Al-Kahf (15) and Al-Mulk (29) both read Juz 1 | `QuranRecommendedSurahs` |
