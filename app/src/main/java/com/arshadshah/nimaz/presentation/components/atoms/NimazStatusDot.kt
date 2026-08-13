@@ -89,6 +89,9 @@ fun NimazStatusDot(
  * The calendar's `CalendarDayState` carries one — day colours there come from feature palettes
  * that predate the tone vocabulary — and making it invent a [NimazTone] just to have the atom
  * turn that back into a colour would be a round trip through a language it does not speak.
+ *
+ * @param diameter exact size, overriding [size]. For callers that already expose their own `Dp`
+ *   and would otherwise be silently resized by snapping to the nearest rung.
  */
 @Composable
 fun NimazStatusDot(
@@ -96,6 +99,7 @@ fun NimazStatusDot(
     modifier: Modifier = Modifier,
     style: NimazStatusDotStyle = NimazStatusDotStyle.FILLED,
     size: NimazStatusDotSize = NimazStatusDotSize.MEDIUM,
+    diameter: Dp? = null,
     contentDescription: String? = null,
 ) {
     val semanticsModifier = if (contentDescription != null) {
@@ -111,7 +115,7 @@ fun NimazStatusDot(
 
     Box(
         modifier = modifier
-            .size(size.diameter)
+            .size(diameter ?: size.diameter)
             .then(paintModifier)
             .then(semanticsModifier)
     )

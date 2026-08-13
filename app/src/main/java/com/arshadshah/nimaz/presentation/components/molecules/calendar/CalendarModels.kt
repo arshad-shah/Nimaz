@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.presentation.components.molecules.calendar
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import com.arshadshah.nimaz.presentation.components.atoms.NimazStatusDotStyle
 
 /**
  * Public data models and enums for the reusable calendar component.
@@ -61,6 +62,9 @@ enum class CalendarHeaderAlignment {
  *   marks a Hijri month start when the Hijri date is the primary (centered) one.
  * @param emphasizeSecondary Renders [secondaryLabel] in the primary accent + bold —
  *   the robust, layout-stable Hijri month-start marker (just the number, no pill).
+ * @param indicatorStyle Whether the dot is a disc or a ring. A ring says the day was
+ *   *recorded as not happening*, which an absent dot cannot distinguish from no record at
+ *   all. Defaults to a disc, so every caller written before rings existed is unaffected.
  */
 data class CalendarDayState(
     val indicatorColor: Color? = null,
@@ -71,13 +75,18 @@ data class CalendarDayState(
     val primaryLabel: String? = null,
     val secondaryLabel: String? = null,
     val emphasizePrimary: Boolean = false,
-    val emphasizeSecondary: Boolean = false
+    val emphasizeSecondary: Boolean = false,
+    val indicatorStyle: NimazStatusDotStyle = NimazStatusDotStyle.FILLED
 )
 
 /**
  * A legend entry displayed below the calendar grid.
+ *
+ * @param indicatorStyle Must match the [CalendarDayState.indicatorStyle] the entry explains —
+ *   a legend that draws a disc for a state the grid draws as a ring is worse than no legend.
  */
 data class CalendarLegendItem(
     val color: Color,
-    val label: String
+    val label: String,
+    val indicatorStyle: NimazStatusDotStyle = NimazStatusDotStyle.FILLED
 )
