@@ -17,7 +17,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.presentation.components.atoms.qibla.QiblaLocationLabel
-import com.arshadshah.nimaz.presentation.components.organisms.NimazPillTabs
+import com.arshadshah.nimaz.presentation.components.atoms.NimazSegmentedControl
+import com.arshadshah.nimaz.presentation.components.atoms.NimazSegmentedPurpose
+import com.arshadshah.nimaz.presentation.components.atoms.NimazSegmentedSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazSegmentedWidth
+import com.arshadshah.nimaz.presentation.components.atoms.asSegments
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
@@ -58,10 +62,13 @@ fun QiblaTopBar(
                     modifier = Modifier.weight(1f)
                 )
                 Spacer(modifier = Modifier.width(12.dp))
-                NimazPillTabs(
-                    tabs = tabs,
+                NimazSegmentedControl(
+                    options = tabs.asSegments(),
                     selectedIndex = selectedIndex,
-                    onTabSelect = onTabSelect
+                    onSelect = onTabSelect,
+                    size = NimazSegmentedSize.SMALL,
+                    width = NimazSegmentedWidth.WRAP,
+                    purpose = NimazSegmentedPurpose.VIEW,
                 )
             }
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)

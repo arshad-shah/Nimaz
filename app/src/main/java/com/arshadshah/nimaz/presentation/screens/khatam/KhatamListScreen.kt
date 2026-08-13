@@ -38,7 +38,9 @@ import com.arshadshah.nimaz.presentation.components.molecules.KhatamHeroCard
 import com.arshadshah.nimaz.presentation.components.molecules.KhatamRowCard
 import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
-import com.arshadshah.nimaz.presentation.components.organisms.NimazPillTabs
+import com.arshadshah.nimaz.presentation.components.atoms.NimazSegmentedControl
+import com.arshadshah.nimaz.presentation.components.atoms.NimazSegmentedPurpose
+import com.arshadshah.nimaz.presentation.components.atoms.asSegments
 import com.arshadshah.nimaz.presentation.theme.NimazSpacing
 import com.arshadshah.nimaz.presentation.viewmodel.quran.KhatamListUiState
 import com.arshadshah.nimaz.presentation.viewmodel.quran.KhatamViewModel
@@ -165,10 +167,11 @@ private fun KhatamListContent(
         }
 
         item(key = "tabs") {
-            NimazPillTabs(
-                tabs = tabs,
+            NimazSegmentedControl(
+                options = tabs.asSegments(),
                 selectedIndex = selectedTab.ordinal,
-                onTabSelect = { onTabSelect(KhatamTab.entries[it]) },
+                onSelect = { onTabSelect(KhatamTab.entries[it]) },
+                purpose = NimazSegmentedPurpose.VIEW,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = NimazSpacing.Small),

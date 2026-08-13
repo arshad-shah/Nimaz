@@ -60,6 +60,9 @@ import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.Ayah
 import com.arshadshah.nimaz.domain.model.QuranTopic
 import com.arshadshah.nimaz.presentation.components.atoms.NimazChip
+import com.arshadshah.nimaz.presentation.components.atoms.NimazSegmentedControl
+import com.arshadshah.nimaz.presentation.components.atoms.NimazSegmentedPurpose
+import com.arshadshah.nimaz.presentation.components.atoms.asSegments
 import com.arshadshah.nimaz.presentation.components.atoms.NimazChipVariant
 import com.arshadshah.nimaz.domain.model.TafseerHighlight
 import com.arshadshah.nimaz.domain.model.TafseerSource
@@ -233,12 +236,13 @@ fun TafseerPageContent(
     val sources = TafseerSource.entries
 
     Column(modifier = modifier.fillMaxSize()) {
-        // ── Source switcher (top) — reuses the Qibla/Tasbih NimazPillTabs ──
+        // ── Source switcher (top) — the house segmented control ──
         if (sources.size > 1) {
-            NimazPillTabs(
-                tabs = sources.map { it.displayName },
+            NimazSegmentedControl(
+                options = sources.map { it.displayName }.asSegments(),
                 selectedIndex = sources.indexOf(selectedSource).coerceAtLeast(0),
-                onTabSelect = { onSourceSwitch(sources[it]) },
+                onSelect = { onSourceSwitch(sources[it]) },
+                purpose = NimazSegmentedPurpose.VIEW,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 12.dp, vertical = 8.dp)

@@ -69,7 +69,10 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazSheetFooterBu
 import com.arshadshah.nimaz.presentation.components.molecules.NimazSheetSectionLabel
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazMenuAction
-import com.arshadshah.nimaz.presentation.components.organisms.NimazPillTabs
+import com.arshadshah.nimaz.presentation.components.atoms.NimazSegmentedControl
+import com.arshadshah.nimaz.presentation.components.atoms.NimazSegmentedPurpose
+import com.arshadshah.nimaz.presentation.components.atoms.NimazSegmentedWidth
+import com.arshadshah.nimaz.presentation.components.atoms.asSegments
 import com.arshadshah.nimaz.presentation.components.organisms.SwipeableSavedCard
 import com.arshadshah.nimaz.domain.model.BookmarkType
 import com.arshadshah.nimaz.presentation.viewmodel.quran.BookmarksEvent
@@ -339,10 +342,10 @@ private fun BookmarkFilterTabs(
         BookmarkType.HADITH -> 2
         BookmarkType.DUA -> 3
     }
-    NimazPillTabs(
-        tabs = tabs,
+    NimazSegmentedControl(
+        options = tabs.asSegments(),
         selectedIndex = selectedIndex,
-        onTabSelect = { index ->
+        onSelect = { index ->
             onFilterSelected(
                 when (index) {
                     1 -> BookmarkType.QURAN
@@ -352,6 +355,8 @@ private fun BookmarkFilterTabs(
                 }
             )
         },
+        width = NimazSegmentedWidth.WRAP,
+        purpose = NimazSegmentedPurpose.VIEW,
         modifier = modifier.horizontalScroll(rememberScrollState())
     )
 }

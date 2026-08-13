@@ -44,7 +44,10 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.molecules.NimazBreadcrumbBar
 import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
 import com.arshadshah.nimaz.presentation.components.molecules.NimazTreeRow
-import com.arshadshah.nimaz.presentation.components.organisms.NimazPillTabs
+import com.arshadshah.nimaz.presentation.components.atoms.NimazSegmentedControl
+import com.arshadshah.nimaz.presentation.components.atoms.NimazSegmentedPurpose
+import com.arshadshah.nimaz.presentation.components.atoms.NimazSegmentedWidth
+import com.arshadshah.nimaz.presentation.components.atoms.asSegments
 import com.arshadshah.nimaz.presentation.components.organisms.NimazSearchBar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazTopAppBar
 import com.arshadshah.nimaz.presentation.viewmodel.quran.QuranTopicsEvent
@@ -145,14 +148,16 @@ fun QuranTopicsScreen(
                     .alpha(if (state.isSearchMode) DIMMED_ALPHA else 1f),
                 horizontalArrangement = Arrangement.Center,
             ) {
-                NimazPillTabs(
-                    tabs = TREES.map { stringResource(it.second) },
+                NimazSegmentedControl(
+                    options = TREES.map { stringResource(it.second) }.asSegments(),
                     selectedIndex = TREES.indexOfFirst { it.first == state.tree },
-                    onTabSelect = { index ->
+                    onSelect = { index ->
                         if (!state.isSearchMode) {
                             viewModel.onEvent(QuranTopicsEvent.SelectTree(TREES[index].first))
                         }
                     },
+                    width = NimazSegmentedWidth.WRAP,
+                    purpose = NimazSegmentedPurpose.VIEW,
                 )
             }
 

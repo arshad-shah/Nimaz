@@ -27,7 +27,9 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.molecules.NameCard
 import com.arshadshah.nimaz.presentation.components.molecules.NamesAccents
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
-import com.arshadshah.nimaz.presentation.components.organisms.NimazPillTabs
+import com.arshadshah.nimaz.presentation.components.atoms.NimazSegmentedControl
+import com.arshadshah.nimaz.presentation.components.atoms.NimazSegmentedPurpose
+import com.arshadshah.nimaz.presentation.components.atoms.asSegments
 import com.arshadshah.nimaz.presentation.components.organisms.NimazSearchBar
 import com.arshadshah.nimaz.presentation.screens.catalog.CatalogList
 import com.arshadshah.nimaz.presentation.theme.NimazSpacing
@@ -156,15 +158,16 @@ fun NamesScreen(
                 onSearch = ::search,
             )
 
-            NimazPillTabs(
-                tabs = NamesTab.entries.mapIndexed { index, tab ->
+            NimazSegmentedControl(
+                options = NamesTab.entries.mapIndexed { index, tab ->
                     val label = stringResource(tab.label)
                     // The count is only meaningful against a query — without one it would
                     // just restate how big each catalogue is, on every tab, forever.
                     if (query.isBlank()) label else "$label (${counts[index]})"
-                },
+                }.asSegments(),
                 selectedIndex = selectedTab,
-                onTabSelect = { selectedTab = it },
+                onSelect = { selectedTab = it },
+                purpose = NimazSegmentedPurpose.VIEW,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(
