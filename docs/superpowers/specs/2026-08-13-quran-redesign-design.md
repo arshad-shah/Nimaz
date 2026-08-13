@@ -1,548 +1,510 @@
-# Quran section redesign — decisions log
+# Qur'an section redesign — design
 
-> **Status:** in progress — being filled in screen by screen against the prototype at
-> `docs/superpowers/prototypes/2026-08-13-quran-redesign.html`.
-> Not yet a spec. When every screen is walked, this becomes the design doc.
+**Date:** 2026-08-13
+**Branch:** `feat/quran-redesign`
+**Status:** Design agreed screen by screen against the running app; pending spec review.
+**Companion record:** [`2026-08-13-quran-redesign-walk.md`](2026-08-13-quran-redesign-walk.md)
+— the screen-by-screen comparison this design was decided from.
+**Prototypes:** [`../prototypes/2026-08-13-quran-redesign.html`](../prototypes/2026-08-13-quran-redesign.html)
+(the section) and
+[`../prototypes/2026-08-13-quran-mushaf-and-player.html`](../prototypes/2026-08-13-quran-mushaf-and-player.html)
+(mushaf modes and the recitation player).
 
-## How this was decided
+## Contents
 
-Each screen was rendered twice: the prototype in a browser at phone width, and the same
-screen from a debug build driven on a Pixel 10 Pro emulator. Decisions below were taken
-against those two images side by side.
-
-## Inventory — what exists today
-
-Fifteen Quran-cluster routes already ship: `Quran`, `QuranReader`, `QuranPage`, `QuranJuz`,
-`QuranSearch`, `QuranBookmarks`, `SurahInfo`, `SurahBackground`, `SurahPassages`,
-`SurahSubjects`, `TafseerChapters`, `Tafseer`, `QuranTopics`, `QuranTopicDetail`, plus
-`KhatamList` / `KhatamDetail` / `KhatamCreate` / `KhatamEdit`.
-
-The prototype is therefore **not greenfield**. It is a visual redesign plus a small number
-of structural moves.
-
----
-
-## Screen 1 — Quran home (`Route.Quran`, `QuranHomeScreen`)
-
-**Today:** pill-chip title with three app-bar actions (search, bookmark, settings); an
-in-screen tab row *Home · Browse · Favorites*; a "Start Reading" hero; a Khatam card; a
-"Recommended" horizontal strip; a "Subjects in the Qur'an" row; Verse of the day.
-
-**Prototype:** plain title with two actions (search, settings); no tabs; a continue-reading
-hero carrying juz / page / ayah and a progress bar; one card of four rows (Browse, Saved,
-Themes, Khatam); Verse of the day; a "Recently saved" strip.
-
-### Decided
-
-- **Kill the tabs.** `Home · Browse · Favorites` collapse into the four-row card, and each
-  row pushes a real destination with its own back arrow. Browse gets a full screen, which
-  it needs for the juz/page search. The Favorites tab's content moves to a new Saved screen.
-- **Keep the Recommended strip, and add Recently saved.** Recommended is the only surfaced
-  entry into Al-Kahf / Al-Mulk / Yasin by occasion, and it is the one thing on the screen
-  that works for a user with nothing saved yet. Home gets longer; that is accepted.
-
-### Open
-
-- Where the app-bar bookmark action goes once Saved is a row (drop it, or keep as a shortcut).
-- Whether the hero shows progress when there is no reading position yet.
+- [1. Overview](#1-overview)
+- [2. Goals and non-goals](#2-goals-and-non-goals)
+- [3. What supersedes what](#3-what-supersedes-what)
+- [4. Navigation](#4-navigation)
+- [5. Screen designs](#5-screen-designs)
+- [6. Shared components and tokens](#6-shared-components-and-tokens)
+- [7. Audio subsystem](#7-audio-subsystem)
+- [8. Khatam](#8-khatam)
+- [9. Data and content dependencies](#9-data-and-content-dependencies)
+- [10. Defects](#10-defects)
+- [11. Phasing](#11-phasing)
+- [12. Testing](#12-testing)
+- [13. Documentation obligations](#13-documentation-obligations)
+- [14. Risks and open questions](#14-risks-and-open-questions)
 
 ---
 
-## Screen 2 — Browse (today: a tab inside `Quran`)
+## 1. Overview
 
-**Today:** two stacked tab rows — `Home · Browse · Favorites`, then `Surah · Juz · Page` —
-so four rows of chrome precede the first surah. A "Search surahs" box that matches names
-only. Rows are ~200 px: a scalloped gold medallion, the name, and a second line of five
-pills (place, verses, page range, juz, ruku).
+The Qur'an section already ships fifteen routes and a great deal of well-made content
+surface. This is **not** a rebuild. Every screen in the section was rendered twice — the
+prototype in a browser and the same screen driven on a Pixel 10 Pro emulator — and the
+design below is what survived that comparison.
 
-**Prototype:** one screen. One search box that also understands `juz 15` and `page 299`,
-with a jump-to card. Juz section headers, carrying the juz's Arabic name, run inline
-through the surah list. Rows are ~64 px: a flat number chip, the name, one meta line.
+The comparison changed the brief. Six screens turned out to be **better than the prototype**
+and are kept, tightened rather than replaced: Tafseer, Subjects-in-this-surah, Search,
+Passages, Surah info's counted onward rows, and the Khatam journey trail. Two prototype
+assumptions were simply wrong about the app: the Bookmarks screen is **app-wide** (Qur'an,
+Hadith and Dua), and the **mushaf page view does not exist in the prototype at all** — its
+Browse redesign would have silently deleted both the page grid and the reading mode behind
+it.
 
-### Decided
+What remains is three structural moves, one visual system, and one genuinely new capability:
 
-- **Adopt the dense single-line row.** ~64 px, roughly nine surahs visible instead of three.
-- **Fold Surah / Juz / Page into one searchable list — without losing any of the three.**
-  Juz becomes section headers with the surahs beneath it, and **the page information stays
-  on the row**, so a reader can still see where a surah sits in the mushaf. Smart search
-  handles `juz 15` and `page 299`.
-- **Keep the place chip as a chip; fix its palette.** Meccan and Medinan get a deliberate
-  paired palette. Today's purple Makkah / teal Madinah reads as a status colour.
+1. **Structural** — the Qur'an home's in-screen tabs become real destinations; Browse folds
+   surah/juz/page into one dense searchable list; saving consolidates into one app-wide
+   Saved screen.
+2. **Visual** — the section flattens to a denser, quieter language, with one exception: the
+   mushaf adopts a warm **paper** register. Yellow stops meaning "selected".
+3. **New** — the recitation player grows from a collapsed bar into a real player with seek,
+   repeat, speed, follow-along and visible downloads.
 
-### Open
+## 2. Goals and non-goals
 
-- Whether the row keeps the page *range* or only the start page.
-- Whether the ruku count survives the density cut.
+### Goals
 
----
+- Raise information density across the section's lists without losing information. Browse
+  goes from ~3 visible surahs to ~9; the reader from ~3.5 ayahs to ~6.
+- Reduce navigation chrome. Qur'an home currently stacks four rows of it before content.
+- Make one accent mean one thing. Yellow currently marks selection in four unrelated places.
+- Give the mushaf a coherent identity of its own rather than borrowing the app's chrome.
+- Make recitation usable for memorisation (repeat, speed, follow-along).
+- Keep every existing feature. Nothing in the current section is dropped except decoration.
 
-## Screen 3 — Saved (today: split three ways)
+### Non-goals
 
-**Today:** saving is split across a **Favorites tab** (favourites only, cards leading with
-the Arabic ayah), an **app-wide Bookmarks screen** behind the app-bar icon (with its own
-search, sort, and `All · Quran · Hadith · Dua` tabs), and no surface found yet for notes.
-Bookmarks name items "Surah 1, Ayah 3"; favourites name the same thing "Al-Fatiha · Verse 2".
+- No change to Hadith, Dua, Names, Qaida or Tasbih, beyond Saved and Search becoming
+  app-wide surfaces that already had app-wide data.
+- No change to prayer times, widgets, notifications or background work.
+- No AI/Ask-with-Proof changes. The consent card on Search stays exactly as it is.
+- No content authoring. Content faults are filed against `arshad-shah/nimaz-data`
+  (§9), not fixed here.
+- No new translations or reciters.
 
-**Prototype:** one Quran-scoped Saved screen merging all three kinds, with
-`Everything / Bookmarks / Favourites / Notes` chips and dense rows.
+## 3. What supersedes what
 
-### Decided
+[`2026-06-22-tafseer-reskin-and-quran-player-design.md`](2026-06-22-tafseer-reskin-and-quran-player-design.md)
+declared the player a presentation-only reskin and explicitly ruled out seek/scrub, route
+changes and ViewModel edits. **This design supersedes it** for the player and the reader:
+seek is added, the player gains repeat/speed/follow-along, and navigation changes. Its
+Tafseer decisions still stand and are carried forward unchanged (§5.9).
 
-- **One app-wide Saved**, reached from the Quran home row *and* from wherever the current
-  Bookmarks screen is reached. It carries kind chips (bookmark / favourite / note) **and**
-  content chips (Quran / Hadith / Dua). It stops being a Quran-only screen — that is the
-  point: the existing bookmark store is already app-wide, and scoping it down would strand
-  a user's hadith and dua bookmarks.
-- **Adopt the prototype's dense row**, with one change: the uppercase kind word
-  (`BOOKMARK`, `FAVOURITE`, `NOTE`) becomes a **small chip**, keeping the per-kind colour.
-  Row = coloured spine · reference · note or excerpt · kind chip.
-- Fix the naming inconsistency: one reference format everywhere.
+## 4. Navigation
 
-### Open
+### 4.1 Principle
 
-- What a bookmark row shows in the excerpt slot, having no note attached.
+Two things were conflated today and are separated here:
 
----
+- **Finding** — surah, juz, page and search are all ways of *locating* a place. They belong
+  to one Browse surface.
+- **Reading** — translation, mushaf and 16-line are *modes* of reading the same place. They
+  belong to the reader.
 
-## Bugs found along the way (not part of this redesign)
+The current app makes page a browse tab that happens to open a different reading mode. That
+is why folding Browse naively would have deleted the mushaf.
 
-- **The Quran home screen crashes for any user with two or more Quran bookmarks.**
-  `IllegalArgumentException: Key "0" was already used`, thrown when the home screen's
-  bookmarks `LazyRow` composes.
+### 4.2 Route changes
 
-  Root cause: `QuranRepositoryImpl.toQuranBookmark()` hardcodes `id = 0`
-  (`QuranRepositoryImpl.kt:879`), so every Quran bookmark carries the same id, and
-  `QuranHomeScreen.kt:458` keys that row by `it.id`.
+| Route | Change |
+|-------|--------|
+| `Quran` | Keeps its route; loses its three in-screen tabs |
+| `QuranBrowse` | **New.** The merged surah/juz/page list, previously a tab |
+| `QuranSaved` | **New.** App-wide saved items, absorbing `QuranBookmarks` |
+| `QuranBookmarks` | **Retired**, replaced by `QuranSaved` |
+| `QuranPage` | **Kept as a route**, now opening the reader in mushaf mode |
+| `QuranJuz` | **Kept as a route**, now opening the reader anchored to that juz |
+| `SurahInfo` | **Retired as a screen**; becomes a bottom sheet |
+| everything else | Unchanged |
 
-  It first appeared when tapping "Start New Khatam" and again on "Subjects in the Qur'an" —
-  both taps merely triggered the lazy prefetch that composed the row. The destination is
-  irrelevant; only the bookmark count matters. Deterministic with two bookmarks.
+`QuranPage` and `QuranJuz` are deliberately **kept even though they stop being browse
+destinations**, because `docs/NAVIGATION.md` §4 documents `quran/page/{n}` and
+`quran/juz/{n}` as announcement route keys. They become thin entry points that open
+`QuranReader` in the right mode at the right anchor.
 
-  Fix is one line in either place — give the domain model the entity's real id, or key the
-  row by `ayahId` — but it belongs on its own branch, not in the redesign.
+Two retirements break documented announcement routes in §4 and must be resolved before the
+routes are deleted:
 
-- **The Recommended strip on Qur'an home reports the wrong juz.** Every card shows
-  "Juz 1" — Al-Kahf (juz 15) and Al-Mulk (juz 29) both read "Juz 1". A presentation bug,
-  not content: the juz is not being resolved per surah.
+- `quran/surah/{n}/info` → `SurahInfo`. Must instead open the reader (or Browse) with the
+  sheet raised.
+- `quran/bookmarks` → `QuranBookmarks`. Repoints to `QuranSaved`.
 
-- **Content: the thematic tree's first root is titled "Doctraine".** Its own description
-  says "Doctrine". A content fix, against `arshad-shah/nimaz-data`.
+Every new destination is wired with `taggedComposable<Route.X>(ScreenTags.X)` and a
+`ScreenTags` entry, per non-negotiable rule 6.
 
-- **Content/behaviour: a branch topic reports "0 verses".** Technically true — the root
-  cites no ayahs itself — but it reads as broken. Resolved by the rolled-up counts and
-  rolled-up ayah list decided for screens 5 and 6.
+### 4.3 Qur'an home's four rows
 
----
+Browse · Saved · Themes · Khatam, each pushing a real destination. `Themes` maps to the
+existing `QuranTopics`; `Khatam` to the existing `KhatamList`.
 
-## Screen 4 — Reader (`QuranReader`)
+## 5. Screen designs
 
-**Today:** ~440 px per ayah — about three and a half ayahs on a 6" screen. Each ayah carries
-a permanent five-icon action pill (favourite, bookmark, share, play, tafseer), a number
-circle, a hollow read-toggle, the Arabic with an ornamental inline ayah medallion, the
-translation inside its own outlined box, and a `Juz 1 · Page 1` pill **repeated on every
-ayah**. A persistent audio bar sits at the bottom.
+### 5.1 Qur'an home (`Quran`)
 
-**Prototype:** ~200 px per ayah. An anchor card at the top (`Al-Kahf · Juz 15 · page 293 ·
-110 ayahs`, with "Go to…"), a gold bismillah, then per ayah only a small `18:1` chip, the
-Arabic, and the translation as plain text. No action pill, no read-toggle, no audio bar.
+- App bar: title, search, settings. The bookmark action is **removed** — Saved is a row.
+- Continue-reading hero: one tap target for the whole card (today a card *and* a Resume
+  button do the same thing). Shows surah, ayah, juz, page and progress.
+- One card of four rows → four destinations, each with a count or status badge.
+- **Recommended strip kept** — it is the only surfaced entry into Al-Kahf / Al-Mulk / Yasin
+  by occasion, and the only thing on the screen that works for a user with nothing saved.
+- **Recently saved strip added** beneath it.
+- Verse of the day kept.
 
-### Decided
+Home gets longer as a result. That is accepted deliberately.
+
+### 5.2 Browse (`QuranBrowse`)
+
+- One screen, no tabs.
+- One search field understanding names, numbers, `juz 15` and `page 299`, with a jump-to
+  card for exact matches.
+- **Juz section headers** carrying the juz's Arabic name run inline through the surah list.
+- Rows compress from ~200 px to ~64 px: number chip, name, one meta line
+  (place · ayahs · page). About nine surahs visible instead of three.
+- **Page information stays on the row.** Folding the Page tab must not cost the reader the
+  ability to see where a surah sits in the mushaf.
+- The place chip stays a chip, with a deliberate Meccan/Medinan palette pair replacing the
+  current purple/teal accident.
+
+Open: whether the row keeps the page *range* or only the start page, and whether the ruku
+count survives the density cut.
+
+### 5.3 Saved (`QuranSaved`)
+
+One **app-wide** screen. The existing bookmark store is already app-wide; scoping it to the
+Qur'an would strand a user's Hadith and Dua bookmarks.
+
+- Two chip groups: kind (bookmark / favourite / note) and content (Qur'an / Hadith / Dua).
+- Rows: a coloured spine, the reference, the note or excerpt, and a **small coloured kind
+  chip** — not the prototype's uppercase word.
+- One reference format throughout (§6.4).
+
+Open: what a bookmark row shows in the excerpt slot, having no note attached.
+
+### 5.4 Reader (`QuranReader`)
 
 - **Ayah actions move to a tap-to-open bottom sheet.** The permanent five-icon pill goes.
-- **Per-ayah read tracking stays.** It is what drives khatam progress; dropping it would
-  break the feature. It needs a home in the new ayah row — the prototype has no answer for
-  this and one must be designed.
-- **Translation becomes plain text**, and the juz/page marker appears **once in the anchor
-  bar** rather than on every ayah.
-- **The audio bar stays.** The prototype omits it rather than arguing against it;
-  recitation is a shipped feature with its own reciter picker. It is carried forward,
-  restyled to the new language.
+  The sheet carries: play from here, repeat this ayah, bookmark, favourite, tafseer,
+  subjects, copy, share, and — only with an active khatam — mark read.
+- **Translation renders as plain text**, not inside an outlined box.
+- **The juz/page marker appears once**, in the anchor bar, not on every ayah.
+- Anchor bar shows the current surah/juz/page with a "Go to…" action.
+- ~200 px per ayah instead of ~440.
 
-### Open
+#### Reading modes
 
-- Where the read-toggle lives in the new, lighter ayah row.
-- Whether the ornamental inline ayah medallion survives, or is replaced by the leading chip.
+Three: **Translation**, **Mushaf**, **16-line (IndoPak)**. Switched from a **top-bar icon**
+that shows the current mode and opens a short menu — *not* the prototype's segmented row.
+The app already has "Switch to page view" in the reader overflow, so this extends an
+existing pattern rather than inventing one. Place is kept across a mode switch.
 
----
+#### Mushaf and 16-line modes
 
-## Screen 4b — Mushaf page view (`QuranPage`)
+- A warm **paper** register: cream ground, hairline rules, a simple ruled cartouche, a small
+  page medallion at the foot. The current double gold/teal border, scalloped cartouche and
+  gold rosette are dropped.
+- A page bar: prev/next, `Page N · juz · hizb`, and a hairline position indicator across the
+  full 604 (or the active script's count).
+- Page-fit: the page is sized to fit without scrolling, with a font stepper.
+- A dual-page toggle in the app bar.
 
-**The prototype omits this screen entirely.** Its only nod to pages is typing `page 299`
-into Browse, and that jump lands in the *translation* reader. So the prototype does not
-simplify the mushaf view — it deletes it, along with the Page grid that leads to it.
+#### Read tracking
 
-**Today** it is well developed and quite unlike anything else in the app: a framed page
-with a gold/teal double border, ornamental head and foot dividers, the scalloped surah
-cartouche, and a page-number rosette at the foot; **continuous mushaf line layout**, where
-the Arabic flows as lines of the page rather than one block per ayah, with inline ayah
-medallions and the ruku `ع` marker in place; a `Page · Juz · Hizb` pill bar with prev/next
-arrows and the read-toggle; and the audio bar.
+A **page-level read mark in the page bar**, plus **"Mark read for khatam"** in the ayah
+sheet — **both shown only while a khatam is active**. The always-present per-ayah circle is
+retired. Most reading is not part of a plan and should carry no tracking chrome; marking a
+whole page matches how a juz-a-day plan is actually kept; the sheet keeps per-verse precision
+available.
 
-The Page **grid** that reaches it is also substantial: a jump-to-page field, juz group
-headers with their page ranges, a fast-scroll juz rail, and page tiles labelled where a
-surah begins.
+### 5.5 Surah info — now a bottom sheet
 
-### Decided
+Raised from Browse and from the reader, keeping you in place rather than pushing a screen
+you immediately back out of. It keeps what the current **screen** does better than the
+prototype's sheet:
 
-- **The mushaf becomes a first-class reader mode.** One reader, two modes — Translation and
-  Mushaf — switched from the reader itself and keeping your place across the switch. It
-  stops being something reachable only through a browse tab.
-- **The mushaf keeps its ornament while the rest of the section flattens.** The gold frame,
-  cartouche and rosette are imitating a printed Quran, which is real work; the lists and
-  the translation reader take the prototype's flatter language. Two registers, used
-  deliberately.
+- The summary paragraph.
+- **Counted** onward rows — "Background · 3 sections", "Passages · 1 across 7 verses",
+  "Subjects · 14, most-cited first". A bare "Subjects" does not tell you whether to tap.
+- Four fact tiles including "Revealed in", which the current screen lacks.
+- **One primary action** — "Read surah" in the section accent. Listen becomes secondary.
+  Today's yellow-beside-teal pair puts two accents in one row.
 
-### Consequence for screen 2
+Taller than the prototype's sheet, and scrollable.
 
-Folding Surah / Juz / Page into one list is right for *finding*, but Page was also the door
-to a different reading **mode**. With the mushaf promoted to a reader mode, that door moves
-into the reader — and Browse keeps the page **information** on its rows, as already decided,
-rather than a Page tab.
+### 5.6 Surah background (`SurahBackground`)
 
----
+- The sticky section chips **stay as a jump index** — the longest background is 47 KB of
+  prose — but lose the check mark and the selected-yellow. They mark position; they do not
+  filter.
+- **One heading per section.** Today every section prints its name twice (a teal icon
+  eyebrow, then a large heading), costing ~90 px per section.
+- **Pull-quotes**: cited ayahs render in a gold-ruled block with their reference, tapping
+  through to the reader.
 
-## Screen 5 — Themes (`QuranTopics`)
+### 5.7 Passages (`SurahPassages`) — an outline, not highlights
 
-**Today:** the three-way segment the prototype proposes is **already shipped** —
-`Themes · Kinds · Index` against the prototype's `Outline · By kind · Index`. Three roots
-render (Doctraine, Stories, The Unseen) as bare text plus a chevron on the page background,
-with **no counts anywhere**, even though the Qur'an home advertises "2,512 subjects,
-indexed by hand". The row carries two tap targets that read as one: the chevron expands,
-the label navigates.
+Checked on Al-Kahf: **18 passages across 110 verses**, contiguous.
 
-**Prototype:** each node is a card with a count, children indented under a rail.
+- **Keep the timeline** — verse range and count in a left column, a rail with dots, the
+  entry to the right. It handles 18 rows well.
+- **Keep the reading marker** — a filled dot and a chip on the passage containing your
+  position, driven by the existing `currentAyah` argument. **Recoloured to teal.**
+- **Clamp entries to two lines**, full text on the passage currently being read.
+- **Keep contiguous coverage** and retitle the screen as an outline. The prototype's
+  "notable passages" framing is dropped.
 
-### Decided
+The prototype's title-plus-description card **cannot be built from this content**: there is
+no description field, and most entries are full sentences rather than titles (§9).
 
-- **Rolled-up counts on every node** — the total ayahs beneath it, children included. It
-  gives the tree a sense of scale, and it makes a branch showing "0 verses" impossible.
-  Needs a recursive count, computed once and cached.
+### 5.8 Subjects in this surah (`SurahSubjects`)
 
-### Open
+The shipping screen beats the prototype and is kept: the filter box, the
+`14 subjects / 25 citations` summary, Arabic names inline, count badges, and the well-judged
+context line ("148 more verses elsewhere in the Qur'an", with a special case for "Every
+verse on this subject is in this surah").
 
-- Whether the chevron/label split survives, or the whole row becomes one target.
+Changes: compress to the §6 row density, and **add a chevron** — the rows carry no
+affordance today.
 
----
+### 5.9 Tafseer (`Tafseer`)
 
-## Screen 6 — Topic detail (`QuranTopicDetail`)
+Richer than the prototype, which drops three things it does well. All three are kept: the
+**topic chips** linking commentary into the subject index, the **note editor**, and the
+**ayah pager** with position.
 
-**Today:** a title, a `0 verses` chip, a prose description, and a "Subtopics" list rendered
-as plain bullets with no counts and no chevrons — they do not read as tappable. No Arabic
-name, no breadcrumb, and **no ayah list at all**, which is the point of a subject.
+- The framed treatment **stays as it is** on this screen.
+- Topic chips restyled to the section's chips, with casing normalised.
+- The ayah card shows **Arabic and translation**, and **collapses** to the reference once you
+  are deep in a long commentary.
 
-**Prototype:** name plus "N ayahs across the Quran", provenance ("Arrived from Al-Kahf", or
-a breadcrumb), a card carrying the Arabic name and description, "Ayahs — first 3 of N"
-tapping into the reader, and related subjects.
+**Noted tension:** with the mushaf moving to paper, the gold/teal frame will live *only* on
+Tafseer. That is a deliberate choice, worth revisiting once both are visible in the new
+language.
 
-### Decided
+### 5.10 Themes (`QuranTopics`) and Topic detail (`QuranTopicDetail`)
 
+The three-way segment the prototype proposes is **already shipped**
+(`Themes · Kinds · Index`). What is missing is scale and substance:
+
+- **Rolled-up counts on every tree node** — the total ayahs beneath it, children included.
+  Requires a recursive count, computed once and cached.
 - **Every topic shows an ayah list, rolled up from its children.** A branch topic lists the
-  ayahs of everything beneath it, so "Doctrine" is never empty and the 0-verses state
-  becomes unreachable.
+  ayahs of everything beneath it, so a root is never empty and "0 verses" becomes
+  unreachable.
+- Nodes become cards with a rotating chevron and an indent rail (§6.2).
 
----
+Open: whether the chevron-expands / label-navigates split survives, or the whole row becomes
+one target.
 
-## Screen 7 — Surah info (`SurahInfo`)
+### 5.11 Search (`QuranSearch`)
 
-**Today:** a full destination. Scalloped gold cartouche, a Verses · Juz · Page strip, a
-short summary of how the surah got its name, then "Go deeper" — Background, Passages and
-Subjects, **each carrying a count** ("14 subjects, most-cited first") — and a bottom bar of
-`Listen` (yellow) and `Start Reading` (teal).
+Already app-wide and already opening with the Ask-with-Proof consent card, which is
+unchanged.
 
-**Prototype:** a bottom sheet. Four labelled fact tiles (it adds "Revealed in", which the
-screen lacks), then four flat buttons with **no counts** and **no summary**.
+- **Keep the chips, add per-type counts** (`Quran 42`, `Hadith 18`, …) so you can see where
+  matches are before filtering.
+- **Keep the term highlighting** — the prototype has no equivalent.
+- **Add Subjects as a result type.** 2,512 hand-indexed subjects are currently reachable only
+  by walking the tree.
 
-### Decided
+### 5.12 Khatam list and detail
 
-- **Adopt the sheet, and carry over what the screen does better.** The sheet keeps you in
-  Browse instead of pushing a screen you immediately back out of — but it keeps the summary
-  paragraph and the **counted** onward rows, because "14 subjects, most-cited first" tells
-  you whether tapping is worth it and a bare "Subjects" does not. Taller than the
-  prototype's sheet, and scrollable.
-- **One primary action.** "Read surah" is primary in the section accent; Listen becomes
-  secondary. Today's yellow-beside-teal pair puts two accents in one row and reads as a
-  warning.
+- **Lead with today's portion** (`Juz 18 · Al-Mu'minun to An-Nur`) with "Read today's
+  portion"; resume-where-you-stopped becomes secondary. A khatam exists to assign a daily
+  portion; position is the fallback, not the headline.
+- **Keep the journey trail** — the snaking 30-juz path is the most distinctive thing in the
+  section — and **add a recent-days list beneath it**, which the trail cannot express.
+- Fix the two defects in §10.
 
----
+## 6. Shared components and tokens
 
-## Component rebuilds (applies across screens)
+### 6.1 Segmented tabs — rebuilt
 
-Two shared components are **rebuilt to the prototype's design**, not restyled in place:
+The prototype's pill-in-tray control: a recessed track with the selected segment lifted as a
+raised pill. **Rebuilt, not restyled**, and it replaces:
 
-- **The segmented tabs** — the prototype's pill-in-tray control: a recessed track with the
-  selected segment lifted as a white pill. This replaces the underlined `TabRow` on Quran
-  home and the pill tabs on Themes, Khatam and Bookmarks, so one control serves them all.
-- **The accordion / tree node** — the prototype's card-per-node with a rotating chevron and
-  an indent rail down the children, replacing the bare text rows on Themes.
+- the underlined `TabRow` on Qur'an home (which is being removed anyway),
+- the `Surah/Juz/Page` sub-tabs (removed),
+- `NimazPillTabs` on Khatam,
+- the tab row on Saved/Bookmarks,
+- the `Themes · Kinds · Index` segment,
+- the repeat and speed selectors in the player sheet.
 
----
+One control for all of them.
 
-## Screen 8 — Surah background (`SurahBackground`)
+### 6.2 Tree node / accordion — rebuilt
 
-**Today:** a sticky, horizontally-scrolling chip row across the top styled as a **filter**
-(`✓ Name` selected in yellow) when it is really a jump index. Every section then prints its
-name **twice** — a small teal icon eyebrow, then a large heading saying the same word.
+The prototype's card-per-node with a rotating chevron and an indent rail down the children,
+replacing the bare text rows on Themes.
 
-**Prototype:** no chip row, one small uppercase eyebrow per section, a gold-ruled ayah
-pull-quote, and Passages / Subjects buttons at the foot.
+### 6.3 Paper palette
 
-### Decided
+New tokens held **separately** from the app's surfaces, with their own dark-mode values:
+`paper`, `paperLine`, `paperInk`. Used only by the mushaf and 16-line modes. Per rule 7
+these live in the theme, not in screens.
 
-- **Keep the chip row as a jump index, restyle away the filter look.** The longest
-  background is 47 KB of prose, so an index earns its place — but the check mark and the
-  selected-yellow have to go. It marks position; it does not filter.
-- **One heading per section**, in the eyebrow style. Deleting the duplicate recovers about
-  90 px per section.
-- **Adopt the pull-quote.** Cited ayahs render in the gold-ruled block with their reference,
-  tapping through to the reader.
+### 6.4 Reference formatting
 
----
+The same ayah is currently named three ways — `Al-Fatiha · Verse 2` (favourites),
+`Surah 1, Ayah 3` (bookmarks), `Surah 2:45 / Al-Baqara` (search). **One format, decided once,
+used everywhere**, including the bookmark rows that today drop the surah name entirely.
 
-## Screen 4c — Recitation player
+### 6.5 Colour
 
-**Today:** the whole player is one collapsed bar — play, "Al-Fatiha", pills for
-`Ayah 1/7 · Juz 1 · p.1`, and a hairline progress line. No seek, no reciter shown, no
-repeat, no speed; tapping it does not expand. Reciter choice lives away in
-Settings → Quran → Select Reciter.
+**Yellow is retired as a selection colour.** It currently marks selection in four unrelated
+places: the search `All` chip, the background `✓ Name` chip, the `Listen` button, and the
+passages "Reading" chip. Selection is teal throughout; yellow and gold are reserved for
+Qur'anic ornament — ayah medallions, the mushaf cartouche, the pull-quote rule. One accent
+for interaction, one for scripture.
 
-**Prototype:** seek with elapsed/remaining, prev/next ayah, reciter name and style inline
-and tappable, repeat (off / ayah / range / surah) with a count stepper and range picker,
-speed 0.75–1.5×, a "Follow along and turn the page" toggle, a violet
-"Downloading N of M" strip, follow-along highlighting in the text, and
-"Play from here" / "Repeat this ayah" in the ayah sheet.
+Meccan and Medinan get a deliberate palette pair, replacing today's purple/teal.
 
-`docs/SUBSYSTEMS.md` §1 already says ayahs are downloaded before playback and cached under
-`filesDir/quran_audio/` — so the download strip gives a UI to work the app already does
-invisibly. Repeat and speed are genuinely new.
+### 6.6 Row density
 
-### Decided
+A shared list-row density of roughly 64 px — number/leading element, name, one meta line —
+applied to Browse, Saved and Subjects.
 
-- **Build all of it** — repeat, speed, follow-along and the download strip. Repeat-by-range
-  and repeat-count are memorisation features; the download strip only surfaces existing
-  behaviour. This is the largest single piece of scope in the redesign.
+## 7. Audio subsystem
 
----
+The largest single piece of scope. `docs/SUBSYSTEMS.md` §1 already records that ayahs are
+downloaded before playback and cached under `filesDir/quran_audio/`, so the download UI
+surfaces existing behaviour rather than adding machinery. Repeat and speed are new.
 
-## Reader mode switching (revises screen 4b)
+### 7.1 Player bar
 
-The second prototype puts a three-way `Translation · Mushaf · 16-line` segmented row under
-the app bar. **That row is rejected.**
+- Now-playing (surah, ayah N of M, page).
+- Prev ayah · play/pause · next ayah · expand.
+- **Seek** with elapsed and remaining. This is the item the June design explicitly excluded;
+  it is now in scope.
+- Reciter name and style inline, tapping to the reciter sheet.
+- A **download strip** — "Downloading N of M" with progress — shown while downloading.
 
-### Decided
+### 7.2 Recitation sheet
 
-- **A top-bar icon showing the current mode**, opening a short menu to switch. Always one
-  tap, no permanent row, and the icon states which mode you are in.
-- The mode set grows to three: Translation, Mushaf, and **16-line (IndoPak)**.
+- Reciter row → reciter sheet (per-reciter downloaded audio).
+- **Repeat**: off / ayah / range / surah, with a count stepper for ayah and a from–to picker
+  for range.
+- **Speed**: 0.75× / 1× / 1.25× / 1.5×.
+- **Follow along and turn the page** toggle.
+- Stop / Done.
 
----
+### 7.3 Follow-along
 
-## Mushaf visual register (revises screen 4b)
+While playing, the current ayah is highlighted **in all three reading modes**, and with
+follow-along enabled the page turns to keep it visible.
 
-The two prototypes disagree with the shipping app about how ornate the mushaf should be.
-The shipping page has a double gold/teal border, a scalloped cartouche and a gold rosette;
-the second prototype uses a warm **paper** register — cream ground, hairline rules, a simple
-ruled cartouche, a small page medallion.
+### 7.4 Notes
 
-### Decided
+`QuranViewModel` currently injects `QuranAudioManager` directly and exposes it as a public
+field — a known clean-architecture deviation recorded in `docs/ARCHITECTURE.md` §9. This work
+touches that surface substantially. Whether to fix the deviation here or carry it is an open
+question (§14).
 
-- **Adopt the prototype's paper register**, including a paper palette
-  (`--paper` / `--paper-line` / `--paper-ink`) held separately from the app's surface
-  colours, with its own dark-mode values. The heavy gold border, scalloped cartouche and
-  rosette are dropped.
+## 8. Khatam
 
-This supersedes the earlier, looser "the mushaf keeps its ornament" note: the mushaf still
-reads as a printed page, but through paper and hairlines rather than gold.
+- **Today's portion** must be derivable from the plan's pace. The pace setting already
+  implies it; the computation needs to exist in the domain layer, not the screen.
+- Page-level read marks (§5.4) feed khatam progress. The existing per-ayah marking path must
+  keep working, since the ayah sheet still offers it.
+- Stat tiles get real zero states (§10).
+- Pace gets a starting grace so a new plan is not immediately "Behind pace" (§10).
 
----
-
-## Read tracking (revises screen 4)
-
-### Decided
-
-- **A page-level read mark in the page bar, plus "Mark read for khatam" in the ayah sheet —
-  both shown only while a khatam is active.** The control disappears entirely for the
-  majority of reading, which is not part of a plan; marking a whole page matches how a
-  juz-a-day plan is actually kept, and the ayah sheet keeps per-verse precision available.
-
-This resolves the open question left on screen 4 about where the read-toggle lives, and
-retires the always-present per-ayah circle.
-
----
-
-## Screen 9 — Tafseer (`Tafseer`)
-
-Here the shipping screen is **richer than the prototype**, which drops three things it does
-well: topic chips linking commentary into the subject index, a note editor, and an ayah
-pager showing position ("1 / 71").
-
-**Today:** source pill tabs (`Ibn Kathir`, `Ma'arif al-Qur'an`), then the ornate gold/teal
-frame containing an ornamental divider, the ayah in Arabic, another divider, a "Topics" chip
-row, and the commentary. A bottom pager with prev/next, note and share.
-
-**Prototype:** three source chips, a plain card with the ayah **and its translation**, then
-prose. No chips, no notes, no pager.
-
-### Decided
-
-- **Keep the framed treatment as it is** on this screen.
-- **Keep the topic chips** — they are the only place commentary links into the
-  2,512-subject index — restyled to the redesign's chips, with the casing normalised
-  (today: `Allah`, `Judgement day`, `only god worthy of worship`).
-- **The ayah card shows Arabic and translation, and collapses** to just the reference once
-  you are deep in a long commentary.
-
-### Noted tension
-
-The mushaf is moving to the paper register, so the gold/teal frame kept here will end up
-living **only** on Tafseer. That is a deliberate choice rather than an oversight, but it is
-worth revisiting once both screens can be seen side by side in the new language.
-
-### Bug
-
-The commentary's **line spacing is roughly 80 px between lines of Latin prose** — an
-Arabic-tuned line height applied to the translation text. It makes a long commentary
-punishing to read and should be fixed regardless of which design lands.
-
----
-
-## Screen 10 — Subjects in this surah (`SurahSubjects`)
-
-Another screen where the shipping app **beats the prototype**: a filter box, a
-`14 subjects / 25 citations` summary, the Arabic name inline, a count badge, and a context
-line that is genuinely well judged — "148 more verses elsewhere in the Qur'an", with a
-special case for "Every verse on this subject is in this surah". The prototype offers a
-plainer row and less information.
-
-### Decided
-
-- **Keep all of that content and tighten it to the agreed density** — the ~64 px row
-  language used by Browse and Saved — and **add a chevron**, since the rows carry no
-  affordance today and do not read as tappable.
-
----
-
-## Screen 11 — Passages (`SurahPassages`)
-
-**Today:** a filter box and a timeline treatment — the verse range and "N verses" in a left
-column, a dot on a connecting rail, and the passage title to the right. The rail suits
-sequential passages well.
-
-**Prototype:** a card list with a short title, a description line, and the range as a pill.
-
-Checked properly on **Al-Kahf — 18 passages across 110 verses**. The timeline holds up well
-at that length, and its best detail has no prototype equivalent: the passage containing your
-current position gets a filled dot and a **"Reading"** chip — `SurahPassages`' `currentAyah`
-argument doing real work.
-
-**But the prototype's card cannot be built from this data.** It assumes a short title plus a
-separate description; the content has neither. Some entries are titles
-("Story of the Companions of the Cave", "Parable of a believer and a disbeliever"), most are
-full sentences — one runs to four lines:
-*Whenever you promise to do something in future, always say, "Insha Allah (If Allah wills)"*.
-There is no description field; the sentence **is** the entry. Rows therefore range from one
-to four lines and the rail reads ragged.
-
-The two designs also describe different things: the prototype shows **4 curated "notable"
-passages**, the app has **18 contiguous ones covering every verse**.
-
-### Decided
-
-- **Keep the timeline, clamp entries to two lines** with an ellipsis, showing the full text
-  on the passage currently being read. Ships against today's content and evens the rows.
-- **Keep contiguous coverage.** Eighteen sections spanning all 110 verses is a structural
-  **outline** of the surah, which is more useful than a highlights reel and is what the data
-  actually is. Drop the prototype's "notable passages" framing and title the screen as an
-  outline.
-- **Recolour the reading marker to teal**, keeping both the filled dot and the chip. It was
-  the fourth appearance of yellow-as-state, and yellow is now reserved for scripture ornament.
-
-### Bugs
-
-- The header reads "**1 passages** across 7 verses" — an unpluralised string.
-- Content: "*They are in a state of sleep and They were waken up by Allah after hundreds of
-  year*" — "waken", a missing plural, and mid-sentence capitals ("and They had to run away")
-  recur across entries. For `arshad-shah/nimaz-data`.
-
----
-
-## Content bugs to file (against `arshad-shah/nimaz-data`)
-
-- "Doctraine" as the first root of the thematic tree; its own description says "Doctrine".
-- Near-duplicate subjects sharing one Arabic label: `Dua الدعاء` / `Supplication الدعاء`,
-  and `Judgement day يوم القيامة` / `Day of Resurrection يوم القيامة`. Two duplicate pairs
-  in a 14-row list. Fix the index rather than deduping in the app, which would hide it.
-- Inconsistent subject casing — `only god worthy of worship` beside `Allah` and
-  `Judgement day`. It appears in both the subject list and the tafseer chips, so it is in
-  the source data.
-
----
-
-## Screen 12 — Search (`QuranSearch`)
-
-Already app-wide, as the prototype wants — "Search the Qur'an, Hadith & duas" — and it
-opens with the **Ask with Proof** consent card, which the prototype knows nothing about
-(see `docs/ai-ask-with-proof.md`).
-
-**Today:** content-type chips (`All · Quran · Hadith · Duas · Names`), a `103 matches`
-count, and result cards with a type badge, reference and snippet with **the term
-highlighted**. **Prototype:** results grouped into labelled sections with per-type counts,
-no chips, no highlighting.
-
-### Decided
-
-- **Keep the chips, and put the count on each one** (`Quran 42`, `Hadith 18`, …) so you can
-  see where the matches are before filtering. The prototype's information, the app's
-  interaction. Keep the highlighting — the prototype has no equivalent.
-- **Add Subjects as a result type.** 2,512 hand-indexed subjects are currently reachable
-  only by walking the tree.
-
----
-
-## Screen 13 — Khatam detail (`KhatamDetail`)
-
-**Today:** a hero card (Active Khatam · Behind pace · 0% ring · "0 of 6236 ayahs read" ·
-"Juz 1 · ~312 days left" · a large `Continue · Al-Fatiha 1`), three stat tiles, then
-"Your journey" — a snaking 30-juz trail.
-
-**Prototype:** a "Today's portion" card naming the portion
-(`Juz 18 · Al-Mu'minun to An-Nur`) with `Read today's portion`, then "Recent days" with
-Done badges.
-
-### Decided
-
-- **Lead with today's portion, keep resume underneath.** A khatam exists to assign a daily
-  portion; the position is the fallback, not the headline.
-- **Keep the journey trail and add recent days beneath it.** The trail shows the whole plan
-  at a glance and is the most distinctive thing in the section; the list adds what the trail
-  cannot — what was actually done lately.
-- **Fix both defects as part of this work** (see below).
-
-### Bugs — fixed here, not filed
-
-- **The three stat tiles render as empty ovals.** `Day streak`, `Avg Pace` and `Juz done`
-  each draw a bare outlined ellipse where the value belongs — no zero, no dash. They need
-  real zero states.
-- **A plan created seconds ago is already "Behind pace" in red.** The pace calculation
-  grants no starting grace, so every new khatam opens by telling the user they have failed.
-
----
-
-## Colour
-
-`Yellow` currently marks selection in three unrelated places — the search `All` chip, the
-background `✓ Name` chip, and the `Listen` button — and has become an accidental second
-accent.
-
-### Decided
-
-- **Retire yellow as a selection colour.** Selection is teal throughout. Yellow and gold are
-  reserved for Qur'anic ornament: ayah medallions, the mushaf cartouche, the pull-quote rule.
-  One accent for interaction, one for scripture.
-
----
-
-## Cross-cutting: reference formatting
-
-The same ayah is named three different ways across the section — `Al-Fatiha · Verse 2`
-(favourites), `Surah 1, Ayah 3` (bookmarks), `Surah 2:45 / Al-Baqara` (search). One format
-throughout, decided once.
+## 9. Data and content dependencies
+
+Filed against `arshad-shah/nimaz-data`; **not fixed in this branch**, but three of them
+constrain screens here:
+
+| Fault | Blocks |
+|-------|--------|
+| Passage entries are full sentences, no separate title/description field | §5.7 — clamping is the workaround chosen |
+| Near-duplicate subjects sharing one Arabic label (`Dua`/`Supplication`, `Judgement day`/`Day of Resurrection`) | §5.8 — two duplicate pairs in a 14-row list |
+| Inconsistent subject casing (`only god worthy of worship`) | §5.8, §5.9 chips |
+| Thematic root titled "Doctraine"; its own description says "Doctrine" | §5.10 |
+| Passage prose faults — "waken up", "hundreds of year", mid-sentence capitals | §5.7 |
+
+## 10. Defects
+
+### Fixed as part of this work
+
+| Defect | Where |
+|--------|-------|
+| Khatam stat tiles render as empty ovals — `Day streak`, `Avg Pace`, `Juz done` draw a bare outlined ellipse where the value belongs | `KhatamDetailScreen` |
+| A khatam created seconds ago is already "Behind pace" in red — no starting grace | Khatam pace calculation |
+| Tafseer commentary line height ~80 px for Latin prose — an Arabic line height applied to translation text | `TafseerPageContent` |
+| "1 passages across 7 verses" — unpluralised string | `SurahPassagesScreen` |
+| The Recommended strip reports "Juz 1" for every surah — Al-Kahf (15) and Al-Mulk (29) both read Juz 1 | `QuranRecommendedSurahs` |
+
+### Filed separately — own branch, not this one
+
+**The Qur'an home screen crashes for any user with two or more Qur'an bookmarks.**
+`IllegalArgumentException: Key "0" was already used`, thrown when the home bookmarks
+`LazyRow` composes.
+
+`QuranRepositoryImpl.toQuranBookmark()` hardcodes `id = 0`
+(`QuranRepositoryImpl.kt:879`), so every Qur'an bookmark carries the same id, and
+`QuranHomeScreen.kt:458` keys that row by `it.id`. Deterministic with two bookmarks. One
+line in either place — give the domain model the entity's real id, or key by `ayahId`.
+
+This is a **shipping crash on `dev`** and should not wait for the redesign.
+
+## 11. Phasing
+
+The work is too large for one plan. Five phases, each independently shippable:
+
+| # | Phase | Contains |
+|---|-------|----------|
+| 1 | **Foundations** | Paper palette, colour rules (§6.5), reference formatting (§6.4), row density (§6.6), the rebuilt segmented tabs (§6.1) and tree node (§6.2). No screen changes beyond adopting them. |
+| 2 | **Navigation & lists** | `QuranBrowse`, `QuranSaved`, home's four rows, surah info as a sheet, route changes and doc updates. The biggest navigation risk, done once. |
+| 3 | **Reader** | Ayah sheet, plain translation, anchor bar, mode switching, mushaf and 16-line in the paper register, page-level read marks. |
+| 4 | **Player** | Seek, repeat, speed, follow-along, download strip, reciter sheet. |
+| 5 | **Content screens & khatam** | Themes counts and rolled-up ayahs, Topic detail, Passages, Subjects, Search, Background, Tafseer, Khatam portion and defects. |
+
+Phase 1 must land first; 2–5 are independent of each other except that 3 depends on 2 for
+the reader's entry points.
+
+## 12. Testing
+
+Per `CLAUDE.md`:
+
+```bash
+./gradlew :app:compileDebugKotlin
+./gradlew :app:testDebugUnitTest
+./gradlew :app:lintDebug
+python3 scripts/check_docs.py
+./gradlew :app:assembleDebugAndroidTest    # phase 2 changes routes and ScreenTags
+```
+
+Phase 2 **must** build `androidTest` — `FeatureNavigationTest` names `ScreenTags` constants
+directly, and retiring `SurahInfo`/`QuranBookmarks` will break the instrumented source set
+while all four other gates stay green.
+
+Additional coverage:
+
+- Robolectric tests for the two rebuilt components (§6.1, §6.2).
+- Unit tests for the rolled-up topic counts (§5.10) and today's-portion computation (§8).
+- Unit test for the pace grace period (§10).
+- A regression test for the bookmark-key crash, wherever that fix lands.
+
+## 13. Documentation obligations
+
+Enforced by `scripts/check_docs.py` and the PR workflow:
+
+- **`docs/NAVIGATION.md`** — §3.2 route table for `QuranBrowse`, `QuranSaved`, the retirement
+  of `QuranBookmarks` and `SurahInfo`, and the changed meaning of `QuranPage`/`QuranJuz`; the
+  §2 mermaid map (validate with `scripts/check_mermaid.mjs`); **§4 announcement route keys**
+  `quran/surah/{n}/info` and `quran/bookmarks`, both of which lose their destination; §5 help
+  deep links if any Qur'an key changes; the destination count.
+- **`docs/SUBSYSTEMS.md`** — §1 audio, for repeat/speed/follow-along and the download UI.
+- **`docs/ARCHITECTURE.md`** — §8 for the new/rebuilt components; §9 if the
+  `QuranViewModel`/`QuranAudioManager` deviation is resolved or deliberately carried.
+- **`docs/CLEAN_ARCHITECTURE_CHECKLIST.md`** — tick anything resolved in passing.
+
+## 14. Risks and open questions
+
+1. **`SurahInfo`'s deep link.** Retiring the route leaves `quran/surah/{n}/info` needing a
+   destination. Must be resolved before the route is deleted — likely the reader with the
+   sheet raised.
+2. **The `QuranViewModel` / `QuranAudioManager` deviation.** Phase 4 rewrites much of this
+   surface. Fixing the deviation there is natural but enlarges the phase; carrying it means
+   touching it again later. Needs an `ARCHITECTURE.md` decision.
+3. **Today's-portion computation** does not exist yet and is assumed derivable from pace.
+   Confirm against `KhatamUiState` before phase 5.
+4. **Rolled-up topic counts** over a 2,512-subject tree need a cost check; the recursive
+   count should be computed once and cached, not per composition.
+5. **Two ornamental registers.** Paper on the mushaf, gold/teal on Tafseer only. Revisit once
+   both are visible.
+6. **Browse row content** — page range vs start page, and whether ruku survives.
+7. **Saved rows for bookmarks**, which have no note to show in the excerpt slot.
