@@ -31,6 +31,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
+import com.arshadshah.nimaz.presentation.components.atoms.NimazDivider
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconWell
@@ -295,6 +296,95 @@ private fun NimazAccordion_Trailing_Dark_Preview() {
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+        }
+    }
+}
+
+// The FLAT style exists for exactly this arrangement: several accordions nested inside one
+// enclosing NimazCard, the way the five prayer rows sit inside a single day card. A FLAT row
+// must not paint a second card and its ripple must not leave a sharp-cornered artifact against
+// the parent card's radius -- both only show up once the row is actually nested, which is why
+// this preview wraps the rows in a real NimazCard rather than previewing FLAT in isolation.
+@Preview(showBackground = true, widthDp = 400, name = "Accordion — FLAT nested in a card")
+@Composable
+private fun NimazAccordion_FlatNested_Preview() {
+    NimazTheme {
+        NimazCard(
+            style = NimazCardStyle.FILLED,
+            shape = RoundedCornerShape(12.dp),
+            elevation = 1.dp,
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Column {
+                NimazAccordion(
+                    title = "Fajr",
+                    subtitle = "Adhan · 10 min before",
+                    expanded = false,
+                    onExpandedChange = {},
+                    style = NimazAccordionStyle.FLAT,
+                    trailing = {
+                        Text(
+                            text = "05:12",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        NimazSwitch(checked = true, onCheckedChange = {})
+                    }
+                ) {
+                    Text(
+                        text = "Alert style and reminder settings for Fajr.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                NimazAccordion(
+                    title = "Dhuhr",
+                    subtitle = "Adhan only",
+                    expanded = true,
+                    onExpandedChange = {},
+                    style = NimazAccordionStyle.FLAT,
+                    trailing = {
+                        Text(
+                            text = "12:31",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        NimazSwitch(checked = true, onCheckedChange = {})
+                    }
+                ) {
+                    Text(
+                        text = "Alert style and reminder settings for Dhuhr.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                NimazAccordion(
+                    title = "Asr",
+                    subtitle = "Notification only · no reminder",
+                    expanded = false,
+                    onExpandedChange = {},
+                    style = NimazAccordionStyle.FLAT,
+                    trailing = {
+                        Text(
+                            text = "15:58",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        NimazSwitch(checked = false, onCheckedChange = {})
+                    }
+                ) {
+                    Text(
+                        text = "Alert style and reminder settings for Asr.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
         }
     }
 }
