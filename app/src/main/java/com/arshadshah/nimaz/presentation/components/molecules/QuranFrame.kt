@@ -11,11 +11,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -60,29 +62,47 @@ fun QuranFrame(
     number: Int? = null,
     content: @Composable () -> Unit,
 ) {
-    val gold = QuranSurfaceColors.frameGold
-    val teal = QuranSurfaceColors.frameTeal
+    // The two variants part company here, and deliberately. READER *is* a printed page and
+    // takes the paper register: cream ground, one hairline rule, a small medallion at the foot.
+    // STUDY is a study surface and keeps the illuminated gold-over-teal frame, which is what
+    // the June tafseer design chose and what still reads correctly on a page of prose.
+    //
+    // Two ornamental registers in one app is a deliberate cost, taken because the mushaf's job
+    // is to disappear behind the text and Tafseer's is to frame it.
+    val isPaper = variant == QuranFrameVariant.READER
+    val ground = if (isPaper) QuranSurfaceColors.paper else QuranSurfaceColors.pageSurface
+    val rule = if (isPaper) QuranSurfaceColors.paperLine else QuranSurfaceColors.frameGold
+    val medallionRule = if (isPaper) QuranSurfaceColors.paperLine else QuranSurfaceColors.frameGold
+    val medallionInk =
+        if (isPaper) QuranSurfaceColors.paperInk else QuranSurfaceColors.medallionInk
 
-    Box(
-        modifier = modifier
-            .clip(RoundedCornerShape(5.dp))
-            .background(QuranSurfaceColors.pageSurface)
-            .border(1.5.dp, gold, RoundedCornerShape(5.dp))
-            .padding(3.dp)
-            .border(1.dp, teal, RoundedCornerShape(3.dp))
-            .padding(2.dp)
-    ) {
+    val outer = modifier
+        .clip(RoundedCornerShape(5.dp))
+        .background(ground)
+        .let { base ->
+            if (isPaper) {
+                base.border(1.dp, rule, RoundedCornerShape(5.dp)).padding(4.dp)
+            } else {
+                base
+                    .border(1.5.dp, QuranSurfaceColors.frameGold, RoundedCornerShape(5.dp))
+                    .padding(3.dp)
+                    .border(1.dp, QuranSurfaceColors.frameTeal, RoundedCornerShape(3.dp))
+                    .padding(2.dp)
+            }
+        }
+
+    Box(modifier = outer) {
         Column(
             modifier = when (variant) {
                 QuranFrameVariant.READER -> Modifier.fillMaxSize()
                 QuranFrameVariant.STUDY -> Modifier.fillMaxWidth()
             }
         ) {
-            QuranOrnamentalDivider()
+            FrameRule(isPaper = isPaper, color = rule)
 
             FrameBody(variant = variant, content = content)
 
-            QuranOrnamentalDivider()
+            FrameRule(isPaper = isPaper, color = rule)
 
             if (number != null) {
                 Box(
@@ -93,14 +113,32 @@ fun QuranFrame(
                 ) {
                     ShamsaMedallion(
                         number = number,
-                        size = 45.dp,
-                        numberColor = QuranSurfaceColors.medallionInk,
-                        gold = QuranSurfaceColors.frameGold,
+                        size = if (isPaper) 34.dp else 45.dp,
+                        numberColor = medallionInk,
+                        gold = medallionRule,
+                        teal = medallionRule,
                         numberStyle = MaterialTheme.typography.labelSmall
                     )
                 }
             }
         }
+    }
+}
+
+/**
+ * The rule above and below the content: a hairline on paper, the floret divider on the study
+ * frame. A printed mushaf rules its text block; it does not garland it.
+ */
+@Composable
+private fun FrameRule(isPaper: Boolean, color: Color) {
+    if (isPaper) {
+        HorizontalDivider(
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp),
+            thickness = 1.dp,
+            color = color,
+        )
+    } else {
+        QuranOrnamentalDivider(color = color)
     }
 }
 

@@ -150,7 +150,10 @@ fun MushafPage(
                             showTajweed = showTajweed,
                             tajweedUnderline = tajweedUnderline,
                             onRuleTap = { code -> tappedRuleCode = code },
-                            textColor = QuranSurfaceColors.ayahInk,
+                            // Ink on paper, not `ayahInk`: the page's ground is the warm cream
+                            // `paper` register now, and the app's text colour is mixed for a
+                            // card.
+                            textColor = QuranSurfaceColors.paperInk,
                             modifier = Modifier.padding(horizontal = 4.dp)
                         )
                     }

@@ -1,6 +1,7 @@
 package com.arshadshah.nimaz.presentation.components.molecules
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -25,6 +26,8 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeEmphasis
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazNavArrowButton
+import com.arshadshah.nimaz.presentation.components.atoms.NimazProgressSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazProgressTrack
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
@@ -49,6 +52,23 @@ internal fun MushafPageBar(
     Surface(
         modifier = modifier.fillMaxWidth(),
     ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+        // Where this page sits in the whole mushaf, as one hairline across the bar's width.
+        // The page number alone answers "which page"; it does not answer "how far in", and a
+        // reader turning pages in a 604-page book wants both. Across the *active* edition's
+        // count, so a 548-page IndoPak reads as full at 548 and not at 604.
+        NimazProgressTrack(
+            progress = if (totalPages > 0) {
+                (secondPageNumber ?: pageNumber).toFloat() / totalPages
+            } else {
+                0f
+            },
+            tone = NimazTone.ACCENT,
+            size = NimazProgressSize.THIN,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp),
+        )
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -128,6 +148,7 @@ internal fun MushafPageBar(
                 contentDescription = stringResource(R.string.cd_previous_page),
                 size = 44.dp
             )
+        }
         }
     }
 }
