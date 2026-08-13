@@ -10,7 +10,6 @@ import androidx.glance.GlanceTheme
 import androidx.glance.action.actionStartActivity
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
-import androidx.glance.appwidget.GlanceAppWidgetReceiver
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.provideContent
 import androidx.glance.background
@@ -31,13 +30,16 @@ import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import com.arshadshah.nimaz.MainActivity
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.widget.core.WidgetError
+import com.arshadshah.nimaz.widget.core.WidgetLoading
+import com.arshadshah.nimaz.widget.core.WidgetPalette
+import com.arshadshah.nimaz.widget.core.WidgetWorkReceiver
 import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.core.util.toUtcMidnightMillis
 import com.arshadshah.nimaz.domain.model.PrayerType
 import com.arshadshah.nimaz.widget.WidgetEntryPoint
 import com.arshadshah.nimaz.widget.core.WidgetCard
 import com.arshadshah.nimaz.widget.core.WidgetIcon
-import com.arshadshah.nimaz.widget.core.WidgetLoadingBox
 import com.arshadshah.nimaz.widget.core.WidgetMessageBox
 import dagger.hilt.android.EntryPointAccessors
 import java.time.LocalDate
@@ -62,31 +64,24 @@ class PrayerTrackerWidget : GlanceAppWidget() {
 
 @Composable
 private fun PrayerTrackerContent(context: Context, state: PrayerTrackerWidgetState) {
-    val backgroundColor = ColorProvider(R.color.widget_background)
-    val textColor = ColorProvider(R.color.widget_text)
-    val textSecondary = ColorProvider(R.color.widget_text_secondary)
-    val primaryColor = ColorProvider(R.color.widget_primary)
+    val palette = WidgetPalette()
 
     when (state) {
-        is PrayerTrackerWidgetState.Loading -> WidgetLoadingBox(
-            background = backgroundColor,
-            textSecondary = textSecondary,
-            onClick = actionStartActivity<MainActivity>(),
-        )
+        is PrayerTrackerWidgetState.Loading -> WidgetLoading(palette)
 
         is PrayerTrackerWidgetState.Success -> {
             PrayerTrackerSuccessContent(
                 context = context,
                 data = state.data,
-                backgroundColor = backgroundColor,
-                textColor = textColor,
-                textSecondary = textSecondary,
-                primaryColor = primaryColor
+                backgroundColor = palette.background,
+                textColor = palette.text,
+                textSecondary = palette.textSecondary,
+                primaryColor = palette.primary
             )
         }
 
         is PrayerTrackerWidgetState.Error -> WidgetMessageBox(
-            background = backgroundColor,
+            background = palette.background,
             onClick = actionStartActivity<MainActivity>(),
         ) {
             Column(
@@ -95,7 +90,7 @@ private fun PrayerTrackerContent(context: Context, state: PrayerTrackerWidgetSta
                 Text(
                     text = context.getString(R.string.widget_error_loading),
                     style = TextStyle(
-                        color = textSecondary,
+                        color = palette.textSecondary,
                         fontSize = 12.sp
                     )
                 )
@@ -103,7 +98,7 @@ private fun PrayerTrackerContent(context: Context, state: PrayerTrackerWidgetSta
                 Text(
                     text = context.getString(R.string.widget_tap_to_retry),
                     style = TextStyle(
-                        color = primaryColor,
+                        color = palette.primary,
                         fontSize = 10.sp
                     )
                 )
@@ -276,16 +271,11 @@ private fun togglePrayerStatus(context: Context, prayerName: String) {
     }
 }
 
-class PrayerTrackerWidgetReceiver : GlanceAppWidgetReceiver() {
+class PrayerTrackerWidgetReceiver : WidgetWorkReceiver() {
     override val glanceAppWidget: GlanceAppWidget = PrayerTrackerWidget()
 
-    override fun onEnabled(context: Context) {
-        super.onEnabled(context)
+    override fun enqueueWork(context: Context) =
         PrayerTrackerWorker.enqueuePeriodicWork(context, force = true)
-    }
 
-    override fun onDisabled(context: Context) {
-        super.onDisabled(context)
-        PrayerTrackerWorker.cancel(context)
-    }
+    override fun cancelWork(context: Context) = PrayerTrackerWorker.cancel(context)
 }

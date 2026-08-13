@@ -7,10 +7,8 @@ import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.GlanceTheme
-import androidx.glance.LocalContext
 import androidx.glance.action.actionStartActivity
 import androidx.glance.appwidget.GlanceAppWidget
-import androidx.glance.appwidget.GlanceAppWidgetReceiver
 import androidx.glance.appwidget.provideContent
 import androidx.glance.currentState
 import androidx.glance.layout.Alignment
@@ -27,11 +25,13 @@ import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import com.arshadshah.nimaz.MainActivity
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.widget.core.WidgetError
+import com.arshadshah.nimaz.widget.core.WidgetLoading
+import com.arshadshah.nimaz.widget.core.WidgetPalette
+import com.arshadshah.nimaz.widget.core.WidgetWorkReceiver
 import com.arshadshah.nimaz.widget.core.WidgetCard
 import com.arshadshah.nimaz.widget.core.WidgetIcon
 import com.arshadshah.nimaz.widget.core.WidgetLabel
-import com.arshadshah.nimaz.widget.core.WidgetLoadingBox
-import com.arshadshah.nimaz.widget.core.WidgetMessageBox
 
 class HijriDateWidget : GlanceAppWidget() {
 
@@ -50,38 +50,22 @@ class HijriDateWidget : GlanceAppWidget() {
 
 @Composable
 private fun HijriDateContent(state: HijriDateWidgetState) {
-    val context = LocalContext.current
-    val backgroundColor = ColorProvider(R.color.widget_background)
-    val textColor = ColorProvider(R.color.widget_text)
-    val textSecondary = ColorProvider(R.color.widget_text_secondary)
-    val primaryColor = ColorProvider(R.color.widget_primary)
+    val palette = WidgetPalette()
 
     when (state) {
-        is HijriDateWidgetState.Loading -> WidgetLoadingBox(
-            background = backgroundColor,
-            textSecondary = textSecondary,
-            onClick = actionStartActivity<MainActivity>(),
-        )
+        is HijriDateWidgetState.Loading -> WidgetLoading(palette)
 
         is HijriDateWidgetState.Success -> {
             HijriDateSuccessContent(
                 data = state.data,
-                backgroundColor = backgroundColor,
-                textColor = textColor,
-                textSecondary = textSecondary,
-                primaryColor = primaryColor
+                backgroundColor = palette.background,
+                textColor = palette.text,
+                textSecondary = palette.textSecondary,
+                primaryColor = palette.primary
             )
         }
 
-        is HijriDateWidgetState.Error -> WidgetMessageBox(
-            background = backgroundColor,
-            onClick = actionStartActivity<MainActivity>(),
-        ) {
-            Text(
-                text = context.getString(R.string.widget_tap_to_refresh),
-                style = TextStyle(color = textSecondary, fontSize = 12.sp)
-            )
-        }
+        is HijriDateWidgetState.Error -> WidgetError(palette)
     }
 }
 
@@ -135,16 +119,11 @@ private fun HijriDateSuccessContent(
     }
 }
 
-class HijriDateWidgetReceiver : GlanceAppWidgetReceiver() {
+class HijriDateWidgetReceiver : WidgetWorkReceiver() {
     override val glanceAppWidget: GlanceAppWidget = HijriDateWidget()
 
-    override fun onEnabled(context: Context) {
-        super.onEnabled(context)
+    override fun enqueueWork(context: Context) =
         HijriDateWorker.enqueuePeriodicWork(context, force = true)
-    }
 
-    override fun onDisabled(context: Context) {
-        super.onDisabled(context)
-        HijriDateWorker.cancel(context)
-    }
+    override fun cancelWork(context: Context) = HijriDateWorker.cancel(context)
 }

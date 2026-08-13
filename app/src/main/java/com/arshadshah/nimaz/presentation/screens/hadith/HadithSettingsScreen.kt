@@ -37,6 +37,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownField
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownItem
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
+import com.arshadshah.nimaz.presentation.components.molecules.readerTypographySettings
 import com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsItem
 import com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsSlider
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
@@ -90,63 +91,14 @@ fun HadithSettingsScreen(
                 )
             }
 
-            item { NimazSectionHeader(title = stringResource(R.string.arabic_text)) }
-            item {
-                NimazMenuGroup {
-                    NimazSettingsSlider(
-                        title = stringResource(R.string.arabic_font_size),
-                        valueLabel = stringResource(
-                            R.string.arabic_font_size_value,
-                            hadithState.arabicFontSize.toInt()
-                        ),
-                        value = hadithState.arabicFontSize,
-                        onValueChange = { viewModel.onEvent(SettingsEvent.SetHadithArabicFontSize(it)) },
-                        valueRange = 18f..42f,
-                        contentDescription = stringResource(R.string.arabic_font_size)
-                    )
-
-                    NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
-
-                    Column(
-                        modifier = Modifier.padding(
-                            start = 16.dp,
-                            end = 16.dp,
-                            top = 12.dp,
-                            bottom = 14.dp
-                        )
-                    ) {
-                        NimazDropdownField(
-                            label = stringResource(R.string.arabic_font),
-                            items = QuranArabicFont.entries.map { font ->
-                                NimazDropdownItem(
-                                    value = font.id,
-                                    label = font.displayName,
-                                    textFontFamily = font.fontFamily,
-                                )
-                            },
-                            selected = selectedFont.id,
-                            onSelected = { viewModel.onEvent(SettingsEvent.SetHadithArabicFont(it)) }
-                        )
-                    }
-                }
-            }
-
-            item { NimazSectionHeader(title = stringResource(R.string.translation)) }
-            item {
-                NimazMenuGroup {
-                    NimazSettingsSlider(
-                        title = stringResource(R.string.translation_font_size),
-                        valueLabel = stringResource(
-                            R.string.arabic_font_size_value,
-                            hadithState.translationFontSize.toInt()
-                        ),
-                        value = hadithState.translationFontSize,
-                        onValueChange = { viewModel.onEvent(SettingsEvent.SetHadithTranslationFontSize(it)) },
-                        valueRange = 12f..28f,
-                        contentDescription = stringResource(R.string.translation_font_size)
-                    )
-                }
-            }
+            readerTypographySettings(
+                arabicFontSize = hadithState.arabicFontSize,
+                onArabicFontSize = { viewModel.onEvent(SettingsEvent.SetHadithArabicFontSize(it)) },
+                selectedFont = selectedFont,
+                onArabicFont = { viewModel.onEvent(SettingsEvent.SetHadithArabicFont(it)) },
+                translationFontSize = hadithState.translationFontSize,
+                onTranslationFontSize = { viewModel.onEvent(SettingsEvent.SetHadithTranslationFontSize(it)) },
+            )
 
             item { NimazSectionHeader(title = stringResource(R.string.display_options)) }
             item {
