@@ -1269,6 +1269,36 @@ card there, including Verse-of-the-Day and the Khatam row, uses the normal `Nima
 treatment. Verse-of-the-Day and continue-reading previously both carried
 `QuranColors.BannerGradient` and consumed the whole first screenful between them.
 
+### 8.3 Segmented control (`NimazSegmentedTabs`) and tree rows (`NimazTreeNode`)
+
+- **`NimazSegmentedTabs`** (organism, `components/organisms/NimazSegmentedTabs.kt`) is the house
+  segmented control: a recessed tray (`surfaceVariant`) with the selected segment **lifted** out
+  of it as a raised `surface` pill. Deliberately not a filled-primary pill — that's what
+  `NimazPillTabs` does, and several segmented controls can appear on one screen, so spending the
+  brand colour on every one of them leaves nothing left to mark the actual accent. The lift, not
+  the hue, carries the selection. Segments share the row width equally and ellipsise rather than
+  wrap, keeping the tray one row high; `selectedIndex` is matched by equality rather than a bounds
+  check, so an out-of-range index selects none of the segments — the deliberate way to express
+  "nothing chosen yet" instead of crashing on it. `NimazSegmentedTabs` is meant to progressively
+  replace `NimazPillTabs` and four other tab treatments across phases 2–5 of the Qur'an redesign,
+  but **`NimazPillTabs` is not removed in this phase** — it still has live callers (Tasbih, Names,
+  Bookmarks, Khatam, Qibla and several Qur'an screens) and stays until each is migrated.
+- **`NimazTreeNode`** (molecule, `components/molecules/NimazTreeNode.kt`) is one node of an
+  expandable tree: a `NimazCard` carrying a label, an optional count, a rotating chevron, and its
+  children behind an indent rail. It takes **two** callbacks on purpose — a subject tree has two
+  distinct actions on one row (open this subject, and show what's under it) and which one the row
+  as a whole performs is a call the tree makes at each site, not the component. Supplying only
+  `onToggleExpand` makes the whole row a toggle; supplying `onClick` as well puts expansion on the
+  chevron and navigation on the label. `content` is composed only while `expanded`, so a deep tree
+  costs nothing until it is opened. A later phase picks which callback shape each call site uses.
+- `QuranSurfaceColors` (`presentation/theme/QuranSurfaceColors.kt`) now also carries a **`paper`**
+  register — `paper` / `paperLine` / `paperInk` — used **only** by the mushaf and 16-line reading
+  modes. It is held apart from `pageSurface` and the rest of the app's `surface` tokens because
+  the mushaf imitates a printed page while the rest of the Qur'an section moves to a flatter,
+  cooler language; reusing `surface` there would make the page indistinguishable from an ordinary
+  card. Light is a warm cream with a soft brown rule; dark keeps the app's existing deep teal
+  ground so the page doesn't glare at night.
+
 ---
 
 ### 8.3 Typography (`NimazTypography`)
