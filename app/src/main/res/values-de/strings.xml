@@ -1986,4 +1986,9 @@
     <string name="fasting_why_exempt">Warum befreit?</string>
     <string name="fasting_note_title">Notiz</string>
     <string name="fasting_note_hint">Was ist an diesem Tag passiert?</string>
+    <string name="fasting_log_this_fast">Fasten erfassen</string>
+    <string name="fasting_coming_up">Demnächst</string>
+    <string name="fasting_your_month">Dein Monat</string>
+    <string name="fasting_sunnah_virtuous">Sunna &amp; verdienstvolle Tage</string>
+    <string name="fasting_fasted_count">%1$d gefastet</string>
 </resources>

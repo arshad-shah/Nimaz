@@ -1948,4 +1948,9 @@
     <string name="fasting_why_exempt">Mengapa dikecualikan?</string>
     <string name="fasting_note_title">Catatan</string>
     <string name="fasting_note_hint">Apa yang terjadi pada hari ini?</string>
+    <string name="fasting_log_this_fast">Catat puasa ini</string>
+    <string name="fasting_coming_up">Akan datang</string>
+    <string name="fasting_your_month">Bulan Anda</string>
+    <string name="fasting_sunnah_virtuous">Sunnah &amp; hari utama</string>
+    <string name="fasting_fasted_count">%1$d berpuasa</string>
 </resources>

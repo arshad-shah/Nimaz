@@ -2181,4 +2181,9 @@
     <string name="fasting_why_exempt">Why exempt?</string>
     <string name="fasting_note_title">Note</string>
     <string name="fasting_note_hint">What happened on this day?</string>
+    <string name="fasting_log_this_fast">Log this fast</string>
+    <string name="fasting_coming_up">Coming up</string>
+    <string name="fasting_your_month">Your month</string>
+    <string name="fasting_sunnah_virtuous">Sunnah &amp; virtuous days</string>
+    <string name="fasting_fasted_count">%1$d fasted</string>
 </resources>

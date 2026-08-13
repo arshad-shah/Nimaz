@@ -2028,4 +2028,9 @@
     <string name="fasting_why_exempt">Pourquoi dispensé ?</string>
     <string name="fasting_note_title">Note</string>
     <string name="fasting_note_hint">Que s\'est-il passé ce jour-là ?</string>
+    <string name="fasting_log_this_fast">Enregistrer ce jeûne</string>
+    <string name="fasting_coming_up">À venir</string>
+    <string name="fasting_your_month">Votre mois</string>
+    <string name="fasting_sunnah_virtuous">Sunna et jours méritoires</string>
+    <string name="fasting_fasted_count">%1$d jeûnés</string>
 </resources>

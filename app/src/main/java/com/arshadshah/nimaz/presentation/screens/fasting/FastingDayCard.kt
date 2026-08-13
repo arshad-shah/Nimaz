@@ -24,6 +24,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -66,7 +67,6 @@ import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.format.TextStyle
 import java.time.temporal.TemporalAdjusters
-import java.util.Locale
 
 /** Placeholder for a time the schedule has not produced yet. */
 private const val NO_TIME = "--:--"
@@ -376,11 +376,14 @@ fun FastingWeekRail(
     }
     val days = (0..6).map { weekStart.plusDays(it.toLong()) }
 
+    // Not `Locale.getDefault()`: that reads no observable state, so the rail's weekday initials
+    // would keep the old language after a locale change until something else recomposed it.
+    val locale = LocalLocale.current.platformLocale
+
     NimazDayRail(
         days = days.map { date ->
             NimazDayRailItem(
-                weekdayLabel = date.dayOfWeek
-                    .getDisplayName(TextStyle.NARROW, Locale.getDefault()),
+                weekdayLabel = date.dayOfWeek.getDisplayName(TextStyle.NARROW, locale),
                 dayLabel = date.dayOfMonth.toString(),
                 marker = statusByDate[date]?.dotSpec(),
                 isToday = date == today,

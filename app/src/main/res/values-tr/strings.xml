@@ -1992,4 +1992,9 @@
     <string name="fasting_why_exempt">Neden muaf?</string>
     <string name="fasting_note_title">Not</string>
     <string name="fasting_note_hint">Bu gün ne oldu?</string>
+    <string name="fasting_log_this_fast">Bu orucu kaydet</string>
+    <string name="fasting_coming_up">Yaklaşanlar</string>
+    <string name="fasting_your_month">Ayınız</string>
+    <string name="fasting_sunnah_virtuous">Sünnet ve faziletli günler</string>
+    <string name="fasting_fasted_count">%1$d oruç</string>
 </resources>

@@ -50,6 +50,9 @@ enum class NimazProgressSize(val height: Dp) {
  * @param gradient ramps the fill from the tone into gold. Reserved for celebratory progress —
  *   the Ramadan strip — not everyday bars, which should read as one flat colour.
  * @param trackColor overrides the unfilled bed; `null` uses the tone's container colour.
+ * @param fillColor overrides the filled portion; `null` uses the tone's foreground. Needed for
+ *   bars drawn on a coloured backdrop — the Ramadan banner is white-on-gradient, and no scheme
+ *   role resolves to "whatever reads on top of this card's own gradient".
  * @param contentDescription accessibility label; `null` leaves the bar decorative, which is
  *   correct when an adjacent label already states the numbers it is drawing.
  */
@@ -61,10 +64,11 @@ fun NimazProgressTrack(
     size: NimazProgressSize = NimazProgressSize.MEDIUM,
     gradient: Boolean = false,
     trackColor: Color? = null,
+    fillColor: Color? = null,
     contentDescription: String? = null,
 ) {
     val safeProgress = if (progress.isNaN()) 0f else progress.coerceIn(0f, 1f)
-    val fillColor = NimazToneColors.foreground(tone)
+    val resolvedFill = fillColor ?: NimazToneColors.foreground(tone)
     val bed = trackColor ?: NimazToneColors.container(tone)
     val shape = RoundedCornerShape(percent = 50)
 
@@ -98,11 +102,11 @@ fun NimazProgressTrack(
                 .clip(shape)
                 .background(
                     if (gradient) {
-                        Brush.horizontalGradient(listOf(fillColor, NimazColors.Gold500))
+                        Brush.horizontalGradient(listOf(resolvedFill, NimazColors.Gold500))
                     } else {
                         // A one-colour gradient rather than a branch on the modifier chain, so
                         // both paths produce the same node tree and neither can drift.
-                        Brush.horizontalGradient(listOf(fillColor, fillColor))
+                        Brush.horizontalGradient(listOf(resolvedFill, resolvedFill))
                     }
                 )
         )
