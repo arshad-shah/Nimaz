@@ -1,0 +1,122 @@
+package com.arshadshah.nimaz.presentation.screens.prayer
+
+import com.arshadshah.nimaz.domain.model.PrayerName
+import com.arshadshah.nimaz.domain.model.PrayerRecord
+import com.arshadshah.nimaz.domain.model.PrayerStatus
+import com.arshadshah.nimaz.domain.model.PrayerTimes
+import com.arshadshah.nimaz.presentation.components.atoms.NimazStatusDotStyle
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
+import java.time.LocalDate
+import java.time.LocalDateTime
+
+/** The five obligatory prayers, in the order they fall. `SUNRISE` is a time, not a prayer. */
+val TRACKED_PRAYERS: List<PrayerName> = listOf(
+    PrayerName.FAJR,
+    PrayerName.DHUHR,
+    PrayerName.ASR,
+    PrayerName.MAGHRIB,
+    PrayerName.ISHA,
+)
+
+/**
+ * What the tracker shows for one prayer on one day.
+ *
+ * [NOT_RECORDED] is the reason this type exists. It is **not** a stored [PrayerStatus] and never
+ * becomes one on its own: the app used to rewrite every unlogged past prayer to `missed` at
+ * midnight, so a user who simply had not opened the app was told they had missed prayers, and
+ * those fabricated rows fed the qada list. A prayer nobody logged is a prayer nobody logged.
+ */
+enum class PrayerDisplayStatus {
+    PRAYED,
+    LATE,
+    QADA,
+    MISSED,
+    NOT_RECORDED,
+    UPCOMING,
+}
+
+/**
+ * Resolve every tracked prayer's displayed status for [date].
+ *
+ * A record counts only when it carries an **assertion** — `PRAYED`, `LATE`, `MISSED` or `QADA`.
+ * A missing row, a `PENDING` row and a `NOT_PRAYED` row all say the same thing (nobody has said),
+ * so all three fall through to the derivation. That equivalence is also what makes the picker's
+ * tap-to-clear free: clearing writes `NOT_PRAYED` and the row reads back as [NOT_RECORDED].
+ *
+ * @param times the day's schedule, or `null` when no location is set yet. Without times there is
+ *   no basis to claim a prayer has passed, so on [date] == today everything reads [UPCOMING];
+ *   a date wholly in the past still resolves, because the day being over is enough.
+ * @param now read from a ticking clock by the caller. A bare `LocalDateTime.now()` is not
+ *   observable state, so a screen holding one would not re-resolve as a prayer time arrives.
+ */
+fun resolvePrayerStatuses(
+    records: List<PrayerRecord>,
+    times: PrayerTimes?,
+    date: LocalDate,
+    now: LocalDateTime,
+): Map<PrayerName, PrayerDisplayStatus> {
+    val today = now.toLocalDate()
+    val dayIsOver = date.isBefore(today)
+    val dayIsFuture = date.isAfter(today)
+
+    val asserted = records
+        .mapNotNull { rec -> rec.status.asAssertion()?.let { rec.prayerName to it } }
+        .toMap()
+
+    return TRACKED_PRAYERS.associateWith { prayer ->
+        asserted[prayer] ?: when {
+            dayIsFuture -> PrayerDisplayStatus.UPCOMING
+            dayIsOver -> PrayerDisplayStatus.NOT_RECORDED
+            // Today. `isAfter` rather than `!isBefore`: a prayer at exactly its own time has
+            // arrived, not passed, and calling it unrecorded on the minute is a false accusation.
+            times?.timeFor(prayer)?.let { now.isAfter(it) } == true -> PrayerDisplayStatus.NOT_RECORDED
+            else -> PrayerDisplayStatus.UPCOMING
+        }
+    }
+}
+
+/** The stored status as an assertion, or `null` when it asserts nothing. */
+private fun PrayerStatus.asAssertion(): PrayerDisplayStatus? = when (this) {
+    PrayerStatus.PRAYED -> PrayerDisplayStatus.PRAYED
+    PrayerStatus.LATE -> PrayerDisplayStatus.LATE
+    PrayerStatus.QADA -> PrayerDisplayStatus.QADA
+    PrayerStatus.MISSED -> PrayerDisplayStatus.MISSED
+    PrayerStatus.PENDING, PrayerStatus.NOT_PRAYED -> null
+}
+
+/** The scheduled time of one tracked prayer, or `null` for `SUNRISE`. */
+fun PrayerTimes.timeFor(prayer: PrayerName): LocalDateTime? = when (prayer) {
+    PrayerName.FAJR -> fajr
+    PrayerName.DHUHR -> dhuhr
+    PrayerName.ASR -> asr
+    PrayerName.MAGHRIB -> maghrib
+    PrayerName.ISHA -> isha
+    PrayerName.SUNRISE -> null
+}
+
+/** Whether the obligation was fulfilled — on time, late, or made up. */
+fun PrayerDisplayStatus.isDone(): Boolean = when (this) {
+    PrayerDisplayStatus.PRAYED, PrayerDisplayStatus.LATE, PrayerDisplayStatus.QADA -> true
+    PrayerDisplayStatus.MISSED, PrayerDisplayStatus.NOT_RECORDED, PrayerDisplayStatus.UPCOMING -> false
+}
+
+/** The semantic colour this status paints in. */
+fun PrayerDisplayStatus.tone(): NimazTone = when (this) {
+    PrayerDisplayStatus.PRAYED -> NimazTone.SUCCESS
+    PrayerDisplayStatus.LATE -> NimazTone.ACCENT
+    PrayerDisplayStatus.QADA -> NimazTone.PROMINENT
+    PrayerDisplayStatus.MISSED -> NimazTone.ERROR
+    PrayerDisplayStatus.NOT_RECORDED -> NimazTone.WARNING
+    PrayerDisplayStatus.UPCOMING -> NimazTone.MUTED
+}
+
+/**
+ * Disc or ring.
+ *
+ * [NOT_RECORDED] is the only ring: a hollow marker is how the design system says "this is an
+ * absence of information", which a filled dot in any colour cannot distinguish from a fact.
+ */
+fun PrayerDisplayStatus.dotStyle(): NimazStatusDotStyle = when (this) {
+    PrayerDisplayStatus.NOT_RECORDED -> NimazStatusDotStyle.OUTLINED
+    else -> NimazStatusDotStyle.FILLED
+}
