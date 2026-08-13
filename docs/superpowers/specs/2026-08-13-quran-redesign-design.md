@@ -386,12 +386,31 @@ surfaces existing behaviour rather than adding machinery. Repeat and speed are n
 While playing, the current ayah is highlighted **in all three reading modes**, and with
 follow-along enabled the page turns to keep it visible.
 
-### 7.4 Notes
+### 7.4 The architecture "deviation" is already resolved — the docs are stale
 
-`QuranViewModel` currently injects `QuranAudioManager` directly and exposes it as a public
-field — a known clean-architecture deviation recorded in `docs/ARCHITECTURE.md` §9. This work
-touches that surface substantially. Whether to fix the deviation here or carry it is an open
-question (§14).
+An earlier draft of this spec said `QuranViewModel` exposes `QuranAudioManager` as a public
+field, citing `docs/SUBSYSTEMS.md` §1. **That is no longer true of the code.**
+
+`QuranViewModel.kt:82` declares `private val audioManager: QuranAudioManager`. The only
+thing exposed is `audioState: StateFlow<AudioState>` (line 105), and every playback command
+goes through `onEvent` (`SetReciter`, `PauseAudio`, `ResumeAudio`, `StopAudio`).
+
+`docs/ARCHITECTURE.md` §9 agrees: "The audio engines were handed to screens whole" sits in
+the **resolved** table, and forwarding the engine's `StateFlow` is listed explicitly as an
+**accepted pattern, not a deviation** — "What is forwarded is the flow, never the manager".
+
+So there is nothing to fix. What is wrong is **`docs/SUBSYSTEMS.md` §1**, which still says
+"`QuranViewModel` even exposes the manager as a public field — a known clean-architecture
+deviation, not a pattern to copy". It describes a state that no longer exists and contradicts
+`ARCHITECTURE.md`.
+
+**Action for phase 4:** correct that paragraph in `docs/SUBSYSTEMS.md` §1 so the two
+documents agree with each other and with the code. Phase 4 already has to touch §1 for
+repeat/speed/downloads, so it is the natural place.
+
+The new player must **hold the accepted pattern**: repeat mode, speed, follow-along and
+download progress are exposed as state and driven by `QuranEvent`s — the manager stays
+private, and no screen gets a handle to it.
 
 ## 8. Khatam
 
@@ -488,8 +507,9 @@ Enforced by `scripts/check_docs.py` and the PR workflow:
   `quran/surah/{n}/info` and `quran/bookmarks`, both of which lose their destination; §5 help
   deep links if any Qur'an key changes; the destination count.
 - **`docs/SUBSYSTEMS.md`** — §1 audio, for repeat/speed/follow-along and the download UI.
-- **`docs/ARCHITECTURE.md`** — §8 for the new/rebuilt components; §9 if the
-  `QuranViewModel`/`QuranAudioManager` deviation is resolved or deliberately carried.
+- **`docs/ARCHITECTURE.md`** — §8 for the new/rebuilt components.
+- **`docs/SUBSYSTEMS.md` §1** — correct the stale "exposes the manager as a public field"
+  paragraph, which contradicts both the code and `ARCHITECTURE.md` §9 (§7.4).
 - **`docs/CLEAN_ARCHITECTURE_CHECKLIST.md`** — tick anything resolved in passing.
 
 ## 14. Risks and open questions
@@ -497,9 +517,9 @@ Enforced by `scripts/check_docs.py` and the PR workflow:
 1. **`SurahInfo`'s deep link.** Retiring the route leaves `quran/surah/{n}/info` needing a
    destination. Must be resolved before the route is deleted — likely the reader with the
    sheet raised.
-2. **The `QuranViewModel` / `QuranAudioManager` deviation.** Phase 4 rewrites much of this
-   surface. Fixing the deviation there is natural but enlarges the phase; carrying it means
-   touching it again later. Needs an `ARCHITECTURE.md` decision.
+2. ~~The `QuranViewModel` / `QuranAudioManager` deviation.~~ **Closed** — the deviation was
+   already resolved in code; `docs/SUBSYSTEMS.md` §1 is simply stale. Phase 4 corrects the
+   doc and holds the accepted pattern (§7.4).
 3. **Today's-portion computation** does not exist yet and is assumed derivable from pace.
    Confirm against `KhatamUiState` before phase 5.
 4. **Rolled-up topic counts** over a 2,512-subject tree need a cost check; the recursive
