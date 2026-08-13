@@ -2186,4 +2186,6 @@
     <string name="fasting_your_month">Your month</string>
     <string name="fasting_sunnah_virtuous">Sunnah &amp; virtuous days</string>
     <string name="fasting_fasted_count">%1$d fasted</string>
+    <string name="tree_node_expand">Expand %1$s</string>
+    <string name="tree_node_collapse">Collapse %1$s</string>
 </resources>
