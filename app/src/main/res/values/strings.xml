@@ -1468,6 +1468,19 @@
     <!-- Qada Prayers Screen -->
     <string name="qada_prayers">Qada Prayers</string>
     <string name="qada_mark_made_up">Mark made up</string>
+    <string name="qada_summary_subtitle">Missed prayers waiting to be made up</string>
+    <string name="qada_summary_empty">Nothing outstanding</string>
+
+    <!-- Prayer Tracker Screen -->
+    <string name="prayer_status_not_recorded">Not recorded</string>
+    <string name="prayer_recorded_count_format">%1$d of %2$d recorded</string>
+    <string name="prayer_streak_format">%1$d-day streak</string>
+    <string name="back_to_today">Back to today</string>
+    <string name="prayer_not_recorded_note">This prayer\'s time has passed with nothing recorded. It isn\'t counted as missed until you say so.</string>
+    <string name="prayer_unrecorded_banner_format">%1$d prayers from the past week have no record. They aren\'t in your qada list until you mark them.</string>
+    <string name="prayer_unrecorded_banner_action">Review</string>
+    <string name="prayer_month_section">Your month</string>
+    <string name="prayer_complete_days_format">%1$d complete days</string>
 
     <!-- Settings Screen -->
     <string name="sync_data">Sync Data</string>
