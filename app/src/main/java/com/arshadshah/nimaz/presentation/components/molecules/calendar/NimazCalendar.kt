@@ -504,7 +504,10 @@ private fun CalendarDayCell(
         }
 
         // Indicator dot — picks a contrasting tone on selected cells so the
-        // dot stays visible against primary fill.
+        // dot stays visible against primary fill. When a fill bar is also present,
+        // BOTTOM_CENTER lifts clear of it (see the fill bar block below) so the two
+        // render as distinct marks instead of overlapping; TOP_END never shares the
+        // bar's band, so it is unaffected either way.
         dayState.indicatorColor?.let { color ->
             val resolvedDot = if (isSelectedBackgroundFill) {
                 // On a primary-filled selected cell, white-ish dots read better
@@ -518,7 +521,9 @@ private fun CalendarDayCell(
                     size = NimazStatusDotSize.SMALL,
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
-                        .padding(bottom = 4.dp)
+                        // Bar (when present) occupies the 3dp-6dp band; 8dp clears it
+                        // with a 2dp gap. Bar-less cells keep the original 4dp.
+                        .padding(bottom = if (dayState.indicatorBar != null) 8.dp else 4.dp)
                 )
 
                 IndicatorPosition.TOP_END -> NimazStatusDot(
@@ -532,8 +537,10 @@ private fun CalendarDayCell(
             }
         }
 
-        // Fill bar — how much of the day was completed. Sits under the number rather than
-        // replacing it, so a bar and a dot can coexist on the same cell.
+        // Fill bar — how much of the day was completed. Pinned to the very bottom of the
+        // cell so a BOTTOM_CENTER dot (raised above it, see the dot block above) and the
+        // bar read as two distinct marks with clear space between them, rather than
+        // overlapping.
         dayState.indicatorBar?.let { rawFraction ->
             val fraction = if (rawFraction.isNaN()) 0f else rawFraction.coerceIn(0f, 1f)
             val barColor = when {
@@ -764,14 +771,33 @@ private fun NimazCalendarFillBarPreview() {
             dayStateProvider = { date ->
                 // A repeating 5,4,0,5,3,5,2 pattern so every bar length is visible at once.
                 val prayed = listOf(5, 4, 0, 5, 3, 5, 2)[date.dayOfMonth % 7]
-                CalendarDayState(
-                    indicatorBar = if (date.dayOfMonth <= 13) prayed / 5f else null,
-                    indicatorBarColor = if (prayed == 5) {
-                        NimazColors.StatusColors.Prayed
-                    } else {
-                        NimazColors.StatusColors.Partial
-                    }
-                )
+                val barColor = if (prayed == 5) {
+                    NimazColors.StatusColors.Prayed
+                } else {
+                    NimazColors.StatusColors.Partial
+                }
+                when {
+                    // Days 1-13: bar only, sweeping through every fraction the pattern
+                    // produces.
+                    date.dayOfMonth <= 13 -> CalendarDayState(
+                        indicatorBar = prayed / 5f,
+                        indicatorBarColor = barColor
+                    )
+                    // Days 14-27: bar AND dot together — the combined case that must
+                    // read as two distinct marks with clear space between them, not a
+                    // smudge.
+                    date.dayOfMonth <= 27 -> CalendarDayState(
+                        indicatorBar = prayed / 5f,
+                        indicatorBarColor = barColor,
+                        indicatorColor = if (prayed == 0) {
+                            NimazColors.StatusColors.Missed
+                        } else {
+                            NimazColors.StatusColors.Prayed
+                        }
+                    )
+                    // The rest of the month: no indicators at all, the untouched default.
+                    else -> CalendarDayState()
+                }
             }
         )
     }
