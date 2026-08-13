@@ -655,7 +655,7 @@
     <string name="prayer_tracker_title">Prayer Tracker</string>
     <string name="view_statistics">View Statistics</string>
     <string name="all_caught_up">All Caught Up!</string>
-    <string name="all_caught_up_message">You have no missed prayers to make up. Keep up the good work!</string>
+    <string name="all_caught_up_message">You have no missed prayers to make up. Prayers only land here once you mark them missed yourself -- nothing is added on your behalf.</string>
     <string name="prayers_to_make_up">Prayers to Make Up</string>
     <string name="all_caught_up_short">All caught up!</string>
     <plurals name="missed_prayers_pending">
@@ -1467,10 +1467,6 @@
 
     <!-- Qada Prayers Screen -->
     <string name="qada_prayers">Qada Prayers</string>
-    <string name="qada_outstanding">Outstanding</string>
-    <string name="qada_count_format">%1$d prayers</string>
-    <string name="qada_empty_title">Nothing to make up</string>
-    <string name="qada_empty_body">A prayer only lands here once you mark it as missed yourself — nothing is added automatically.</string>
     <string name="qada_mark_made_up">Mark made up</string>
 
     <!-- Settings Screen -->
