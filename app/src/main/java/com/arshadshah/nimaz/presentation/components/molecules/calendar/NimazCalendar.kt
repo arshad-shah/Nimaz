@@ -17,10 +17,12 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
@@ -529,6 +531,32 @@ private fun CalendarDayCell(
                 )
             }
         }
+
+        // Fill bar — how much of the day was completed. Sits under the number rather than
+        // replacing it, so a bar and a dot can coexist on the same cell.
+        dayState.indicatorBar?.let { rawFraction ->
+            val fraction = if (rawFraction.isNaN()) 0f else rawFraction.coerceIn(0f, 1f)
+            val barColor = when {
+                isSelectedBackgroundFill -> scheme.onPrimary
+                else -> dayState.indicatorBarColor ?: scheme.primary
+            }
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 3.dp)
+                    .width(18.dp)
+                    .height(3.dp)
+                    .clip(RoundedCornerShape(percent = 50))
+                    .background(scheme.outlineVariant)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .fillMaxWidth(fraction)
+                        .background(barColor)
+                )
+            }
+        }
     }
 }
 
@@ -718,5 +746,33 @@ private fun NimazCalendarNoNavPreview() {
                 showNavigation = false
             )
         }
+    }
+}
+
+@Preview(showBackground = true, name = "NimazCalendar - prayer fill bars")
+@Composable
+private fun NimazCalendarFillBarPreview() {
+    val month = YearMonth.of(2026, 8)
+    NimazTheme {
+        NimazCalendar(
+            displayedMonth = month,
+            selectedDate = month.atDay(13),
+            onDateSelected = {},
+            onPreviousMonth = {},
+            onNextMonth = {},
+            selectionStyle = SelectionStyle.BORDER,
+            dayStateProvider = { date ->
+                // A repeating 5,4,0,5,3,5,2 pattern so every bar length is visible at once.
+                val prayed = listOf(5, 4, 0, 5, 3, 5, 2)[date.dayOfMonth % 7]
+                CalendarDayState(
+                    indicatorBar = if (date.dayOfMonth <= 13) prayed / 5f else null,
+                    indicatorBarColor = if (prayed == 5) {
+                        NimazColors.StatusColors.Prayed
+                    } else {
+                        NimazColors.StatusColors.Partial
+                    }
+                )
+            }
+        )
     }
 }
