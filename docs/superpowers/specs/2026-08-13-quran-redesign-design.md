@@ -121,6 +121,10 @@ Bookmarks name items "Surah 1, Ayah 3"; favourites name the same thing "Al-Fatih
   Fix is one line in either place — give the domain model the entity's real id, or key the
   row by `ayahId` — but it belongs on its own branch, not in the redesign.
 
+- **The Recommended strip on Qur'an home reports the wrong juz.** Every card shows
+  "Juz 1" — Al-Kahf (juz 15) and Al-Mulk (juz 29) both read "Juz 1". A presentation bug,
+  not content: the juz is not being resolved per surah.
+
 - **Content: the thematic tree's first root is titled "Doctraine".** Its own description
   says "Doctrine". A content fix, against `arshad-shah/nimaz-data`.
 
@@ -423,16 +427,41 @@ plainer row and less information.
 column, a dot on a connecting rail, and the passage title to the right. The rail suits
 sequential passages well.
 
-**Prototype:** a card list with the title, a description line, and the range as a pill.
+**Prototype:** a card list with a short title, a description line, and the range as a pill.
 
-### Open
+Checked properly on **Al-Kahf — 18 passages across 110 verses**. The timeline holds up well
+at that length, and its best detail has no prototype equivalent: the passage containing your
+current position gets a filled dot and a **"Reading"** chip — `SurahPassages`' `currentAyah`
+argument doing real work.
 
-Judged only on Al-Fatiha, which has a single passage — too thin a sample for a screen
-`docs/NAVIGATION.md` says can reach 282 rows. Revisit on a long surah before deciding.
+**But the prototype's card cannot be built from this data.** It assumes a short title plus a
+separate description; the content has neither. Some entries are titles
+("Story of the Companions of the Cave", "Parable of a believer and a disbeliever"), most are
+full sentences — one runs to four lines:
+*Whenever you promise to do something in future, always say, "Insha Allah (If Allah wills)"*.
+There is no description field; the sentence **is** the entry. Rows therefore range from one
+to four lines and the rail reads ragged.
 
-### Bug
+The two designs also describe different things: the prototype shows **4 curated "notable"
+passages**, the app has **18 contiguous ones covering every verse**.
 
-The header reads "**1 passages** across 7 verses" — an unpluralised string.
+### Decided
+
+- **Keep the timeline, clamp entries to two lines** with an ellipsis, showing the full text
+  on the passage currently being read. Ships against today's content and evens the rows.
+- **Keep contiguous coverage.** Eighteen sections spanning all 110 verses is a structural
+  **outline** of the surah, which is more useful than a highlights reel and is what the data
+  actually is. Drop the prototype's "notable passages" framing and title the screen as an
+  outline.
+- **Recolour the reading marker to teal**, keeping both the filled dot and the chip. It was
+  the fourth appearance of yellow-as-state, and yellow is now reserved for scripture ornament.
+
+### Bugs
+
+- The header reads "**1 passages** across 7 verses" — an unpluralised string.
+- Content: "*They are in a state of sleep and They were waken up by Allah after hundreds of
+  year*" — "waken", a missing plural, and mid-sentence capitals ("and They had to run away")
+  recur across entries. For `arshad-shah/nimaz-data`.
 
 ---
 
