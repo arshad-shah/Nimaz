@@ -245,23 +245,30 @@ private const val RAIL_HALF_SPAN = 3L
  * A day's overall bucket, for both the rail's dot and its screen-reader description -- computed
  * once so the two can never say different things about the same day.
  */
-private enum class DayBucket {
+internal enum class DayBucket {
     ALL_DONE,
     ALL_UNRECORDED,
     PARTIAL,
-    OTHER,
+    HAS_MISSED,
 }
 
-private fun Map<PrayerName, PrayerDisplayStatus>.bucket(): DayBucket {
+/**
+ * Classifies a day from what is actually asserted about it, not from whether every slot happens
+ * to be [PrayerDisplayStatus.NOT_RECORDED]. [PrayerDisplayStatus.UPCOMING] entries (later prayers
+ * on today, which the day hasn't reached yet) must never push a day into [DayBucket.HAS_MISSED]:
+ * a red dot is earned only by an actual [PrayerDisplayStatus.MISSED] assertion, never by the mere
+ * absence of a done one. A day whose unfulfilled prayers are all `NOT_RECORDED`/`UPCOMING`, with
+ * nothing asserted as missed, is [DayBucket.ALL_UNRECORDED] (a ring) -- the whole point of the
+ * redesign is that "no record" and "you missed these" are different claims.
+ */
+internal fun Map<PrayerName, PrayerDisplayStatus>.bucket(): DayBucket {
     val done = values.count { it.isDone() }
-    val allUnrecorded = values.all { it == PrayerDisplayStatus.NOT_RECORDED }
+    val hasMissed = values.any { it == PrayerDisplayStatus.MISSED }
     return when {
         done == TRACKED_PRAYERS.size -> DayBucket.ALL_DONE
-        // A day nobody touched gets a ring, not a red dot -- the whole point of the redesign is
-        // that "no record" and "you missed these" are different claims.
-        allUnrecorded -> DayBucket.ALL_UNRECORDED
         done > 0 -> DayBucket.PARTIAL
-        else -> DayBucket.OTHER
+        hasMissed -> DayBucket.HAS_MISSED
+        else -> DayBucket.ALL_UNRECORDED
     }
 }
 
@@ -269,7 +276,7 @@ private fun DayBucket.dotSpec(): NimazStatusDotSpec = when (this) {
     DayBucket.ALL_DONE -> NimazStatusDotSpec(NimazTone.SUCCESS)
     DayBucket.ALL_UNRECORDED -> NimazStatusDotSpec(NimazTone.WARNING, NimazStatusDotStyle.OUTLINED)
     DayBucket.PARTIAL -> NimazStatusDotSpec(NimazTone.WARNING)
-    DayBucket.OTHER -> NimazStatusDotSpec(NimazTone.ERROR)
+    DayBucket.HAS_MISSED -> NimazStatusDotSpec(NimazTone.ERROR)
 }
 
 @Composable
@@ -309,7 +316,7 @@ private fun DayRail(
                     DayBucket.ALL_UNRECORDED ->
                         stringResource(R.string.a11y_prayer_state_not_recorded, localizedDate)
                     DayBucket.PARTIAL -> stringResource(R.string.a11y_prayer_state_partial, localizedDate)
-                    DayBucket.OTHER -> stringResource(R.string.a11y_prayer_state_missed, localizedDate)
+                    DayBucket.HAS_MISSED -> stringResource(R.string.a11y_prayer_state_missed, localizedDate)
                     null -> "$localizedDate, ${stringResource(R.string.upcoming)}"
                 },
             )
@@ -365,22 +372,24 @@ private fun MonthSection(
                 } else {
                     val statuses = statusesOn(date)
                     val done = statuses.values.count { it.isDone() }
-                    val allUnrecorded = statuses.values.all { it == PrayerDisplayStatus.NOT_RECORDED }
+                    // Shared with the rail's bucket() so the calendar ring and the rail dot can
+                    // never disagree about the same day -- see bucket()'s doc comment for why
+                    // UPCOMING must not be conflated with a genuine MISSED assertion.
+                    val bucket = statuses.bucket()
                     CalendarDayState(
                         indicatorBar = done.toFloat() / TRACKED_PRAYERS.size,
-                        indicatorBarColor = when {
-                            done == TRACKED_PRAYERS.size -> NimazColors.StatusColors.Prayed
-                            done > 0 -> NimazColors.StatusColors.Partial
-                            statuses.values.any { it == PrayerDisplayStatus.MISSED } ->
-                                NimazColors.StatusColors.Missed
-                            else -> noRecordBarColor
+                        indicatorBarColor = when (bucket) {
+                            DayBucket.ALL_DONE -> NimazColors.StatusColors.Prayed
+                            DayBucket.PARTIAL -> NimazColors.StatusColors.Partial
+                            DayBucket.HAS_MISSED -> NimazColors.StatusColors.Missed
+                            DayBucket.ALL_UNRECORDED -> noRecordBarColor
                         },
                         // The bar alone drew nothing distinctive for a day nobody touched: zero
                         // done means a zero-length bar whichever colour it's given. The dot
                         // channel is independent of the bar (CalendarDayState's own contract), so
                         // a genuinely untouched day also gets a ring here -- the same signal the
                         // rail's ALL_UNRECORDED bucket and the day card's NOT_RECORDED rows use.
-                        indicatorColor = if (allUnrecorded) notRecordedRingColor else null,
+                        indicatorColor = if (bucket == DayBucket.ALL_UNRECORDED) notRecordedRingColor else null,
                         indicatorStyle = NimazStatusDotStyle.OUTLINED,
                     )
                 }
