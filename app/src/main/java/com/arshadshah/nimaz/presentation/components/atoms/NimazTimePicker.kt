@@ -32,8 +32,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import com.arshadshah.nimaz.presentation.theme.rememberNimazHaptics
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
@@ -200,7 +200,7 @@ private fun WheelSlot(
 ) {
     val initialIndex = items.indexOf(selected).coerceAtLeast(0)
     val listState = rememberLazyListState(initialFirstVisibleItemIndex = initialIndex)
-    val haptics = LocalHapticFeedback.current
+    val haptics = rememberNimazHaptics()
     var lastReported by remember { mutableIntStateOf(initialIndex) }
 
     // Report while scrolling rather than only when settled, so a caller's preview text

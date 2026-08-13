@@ -10,8 +10,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,6 +30,8 @@ import com.arshadshah.nimaz.presentation.components.atoms.GradientCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
+import com.arshadshah.nimaz.presentation.components.atoms.NimazProgressSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazProgressTrack
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import java.time.LocalDate
@@ -50,13 +52,21 @@ import java.time.LocalDate
  * `TodayProvider` seam and can be tested.
  */
 
-/** Progress through Ramadan: which day it is, and how many of them have been fasted. */
+/**
+ * Progress through Ramadan: which day it is, how many have been fasted, and what is outstanding.
+ *
+ * The three counts used to sit in a separate `NimazStatsGrid` item below this banner, with a
+ * missed-fasts alert under that — three components down the screen all answering "how is Ramadan
+ * going". They read as one fact, so they are one card.
+ */
 @Composable
 fun RamadanBanner(
     fastedDays: Int,
     totalDays: Int,
     currentDay: Int,
     modifier: Modifier = Modifier,
+    missedDays: Int? = null,
+    remainingDays: Int? = null,
 ) {
     GradientCard(
         modifier = modifier.fillMaxWidth(),
@@ -86,14 +96,14 @@ fun RamadanBanner(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                LinearProgressIndicator(
-                    progress = { if (totalDays > 0) fastedDays.toFloat() / totalDays else 0f },
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(8.dp)
-                        .clip(RoundedCornerShape(4.dp)),
-                    color = Color.White,
-                    trackColor = Color.White.copy(alpha = 0.2f)
+                NimazProgressTrack(
+                    // Guarded here as well as inside the atom: a caller should not lean on a
+                    // primitive to rescue its own zero denominator.
+                    progress = if (totalDays > 0) fastedDays.toFloat() / totalDays else 0f,
+                    modifier = Modifier.weight(1f),
+                    size = NimazProgressSize.THICK,
+                    fillColor = Color.White,
+                    trackColor = Color.White.copy(alpha = 0.2f),
                 )
                 Text(
                     text = "$fastedDays/$totalDays",
@@ -102,7 +112,37 @@ fun RamadanBanner(
                     color = Color.White
                 )
             }
+
+            if (missedDays != null || remainingDays != null) {
+                Spacer(modifier = Modifier.height(14.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(18.dp)) {
+                    RamadanStat(fastedDays, stringResource(R.string.fasting_fasted))
+                    missedDays?.let { RamadanStat(it, stringResource(R.string.fasting_missed)) }
+                    remainingDays?.let {
+                        RamadanStat(it, stringResource(R.string.fasting_remaining))
+                    }
+                }
+            }
         }
+    }
+}
+
+/** One count in the banner's stat row. White because it sits on the gradient. */
+@Composable
+private fun RamadanStat(value: Int, label: String) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(
+            text = value.toString(),
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.Bold,
+            color = Color.White,
+        )
+        Spacer(modifier = Modifier.width(5.dp))
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodySmall,
+            color = Color.White.copy(alpha = 0.75f),
+        )
     }
 }
 

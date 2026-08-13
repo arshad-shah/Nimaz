@@ -2553,6 +2553,29 @@ Delete `FastingGoDeeperGroup`, `LogFastButton`, `TodayFastSection`, `Recommended
 `FastingViewModelTest` that exercised them — their subjects moved to `SetFastStatus` and
 `SaveExemption`, which Task 9 already covered.
 
+- [ ] **Step 3b: Reinstate the telemetry on the three new events**
+
+Task 9 deliberately left `SetFastStatus` / `SaveExemption` / `SaveNote` **unlogged**:
+`AnalyticsReachabilityTest` fails any logging `onEvent` branch that no screen dispatches, and
+their producer is the day card built in Task 11. Now that it exists, add to `FastingViewModel`:
+
+```kotlin
+            is FastingEvent.SetFastStatus -> {
+                telemetry.fastTracked("set_status", event.status.name)
+                setFastStatus(event.date, event.status)
+            }
+
+            is FastingEvent.SaveExemption -> {
+                // The status is recorded; the reason never is — it is health information.
+                telemetry.fastTracked("save_exemption")
+                saveExemption(event.date, event.reason)
+            }
+```
+
+`SaveNote` stays unlogged: the note is the user's own words, and there is nothing to count that
+`set_status` does not already say. Re-run `./gradlew :app:testDebugUnitTest --tests
+"*AnalyticsReachabilityTest*"` — it must stay green, which is the proof the producer is real.
+
 - [ ] **Step 4: Update the three `NavGraph` call sites**
 
 All three of `Route.FastingHome`, `Route.FastingTracker` and `Route.FastingStats` now pass:

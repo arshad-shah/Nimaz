@@ -366,7 +366,7 @@ private fun ChainOfNarrationSection(
         modifier = modifier
             .fillMaxWidth()
             .background(
-                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
+                MaterialTheme.colorScheme.surfaceContainerLow,
                 RoundedCornerShape(14.dp)
             )
             .clickable { isExpanded = !isExpanded }

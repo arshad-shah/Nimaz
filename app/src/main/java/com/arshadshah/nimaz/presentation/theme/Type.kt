@@ -1,9 +1,11 @@
 package com.arshadshah.nimaz.presentation.theme
 
 import androidx.compose.material3.Typography
+import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontVariation
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDirection
@@ -17,20 +19,41 @@ import com.arshadshah.nimaz.domain.model.TranslationLanguage
 // - Plus Jakarta Sans (variable font) for body
 // - Amiri (regular, bold) for Arabic text
 
-// Using variable fonts - they will use default weight and respond to FontWeight
-val OutfitFontFamily = FontFamily(
-    Font(R.font.outfit_variable, weight = FontWeight.Normal),
-    Font(R.font.outfit_variable, weight = FontWeight.Medium),
-    Font(R.font.outfit_variable, weight = FontWeight.SemiBold),
-    Font(R.font.outfit_variable, weight = FontWeight.Bold)
+/**
+ * The weights each variable family exposes, and the `wght` axis value for each.
+ *
+ * **A variable font does not respond to `FontWeight` on its own.** Declaring the same file four
+ * times under four weights — which is what this did — registers four entries that all resolve to
+ * the file's *default instance*, so `SemiBold` and `Bold` rendered identically to `Normal`. For
+ * Outfit that default is the thin end of the axis, which is why every heading in the app came out
+ * lighter than it was asked to be.
+ *
+ * `FontVariation.Settings(FontVariation.weight(n))` is what actually moves the axis. minSdk is 29,
+ * comfortably above the API 26 these settings require, so there is no fallback path to keep.
+ */
+private val VariableWeights = listOf(
+    FontWeight.Light to 300,
+    FontWeight.Normal to 400,
+    FontWeight.Medium to 500,
+    FontWeight.SemiBold to 600,
+    FontWeight.Bold to 700,
+    FontWeight.ExtraBold to 800,
 )
 
-val PlusJakartaSansFontFamily = FontFamily(
-    Font(R.font.plus_jakarta_sans_variable, weight = FontWeight.Normal),
-    Font(R.font.plus_jakarta_sans_variable, weight = FontWeight.Medium),
-    Font(R.font.plus_jakarta_sans_variable, weight = FontWeight.SemiBold),
-    Font(R.font.plus_jakarta_sans_variable, weight = FontWeight.Bold)
+@OptIn(ExperimentalTextApi::class)
+private fun variableFontFamily(resId: Int): FontFamily = FontFamily(
+    VariableWeights.map { (weight, axis) ->
+        Font(
+            resId = resId,
+            weight = weight,
+            variationSettings = FontVariation.Settings(FontVariation.weight(axis)),
+        )
+    }
 )
+
+val OutfitFontFamily = variableFontFamily(R.font.outfit_variable)
+
+val PlusJakartaSansFontFamily = variableFontFamily(R.font.plus_jakarta_sans_variable)
 
 val AmiriFontFamily = FontFamily(
     Font(R.font.amiri_regular, weight = FontWeight.Normal),
@@ -214,23 +237,34 @@ val NimazTypography = Typography(
         letterSpacing = 0.sp
     ),
 
+    // Title and label styles carry Outfit; body carries Plus Jakarta Sans.
+    //
+    // The two faces do different jobs. Outfit is geometric and tight — it suits the things that
+    // are read as *structure* or as a *value*: card titles, section headings, prayer times, day
+    // numbers, button labels. Plus Jakarta Sans has the wider apertures that make continuous
+    // prose comfortable, so it keeps the body scales.
+    //
+    // Only display and headline were on Outfit before, which split the difference in the wrong
+    // place: a card title and the sentence under it were the same face at different weights, so
+    // nothing separated the label from the prose.
+
     // Title styles - For card titles and list items
     titleLarge = TextStyle(
-        fontFamily = PlusJakartaSansFontFamily,
+        fontFamily = OutfitFontFamily,
         fontWeight = FontWeight.SemiBold,
         fontSize = 22.sp,
         lineHeight = 28.sp,
         letterSpacing = 0.sp
     ),
     titleMedium = TextStyle(
-        fontFamily = PlusJakartaSansFontFamily,
+        fontFamily = OutfitFontFamily,
         fontWeight = FontWeight.SemiBold,
         fontSize = 16.sp,
         lineHeight = 24.sp,
         letterSpacing = 0.15.sp
     ),
     titleSmall = TextStyle(
-        fontFamily = PlusJakartaSansFontFamily,
+        fontFamily = OutfitFontFamily,
         fontWeight = FontWeight.Medium,
         fontSize = 14.sp,
         lineHeight = 20.sp,
@@ -262,21 +296,21 @@ val NimazTypography = Typography(
 
     // Label styles - For buttons, tabs, and small labels
     labelLarge = TextStyle(
-        fontFamily = PlusJakartaSansFontFamily,
+        fontFamily = OutfitFontFamily,
         fontWeight = FontWeight.Medium,
         fontSize = 14.sp,
         lineHeight = 20.sp,
         letterSpacing = 0.1.sp
     ),
     labelMedium = TextStyle(
-        fontFamily = PlusJakartaSansFontFamily,
+        fontFamily = OutfitFontFamily,
         fontWeight = FontWeight.Medium,
         fontSize = 12.sp,
         lineHeight = 16.sp,
         letterSpacing = 0.5.sp
     ),
     labelSmall = TextStyle(
-        fontFamily = PlusJakartaSansFontFamily,
+        fontFamily = OutfitFontFamily,
         fontWeight = FontWeight.Medium,
         fontSize = 11.sp,
         lineHeight = 16.sp,

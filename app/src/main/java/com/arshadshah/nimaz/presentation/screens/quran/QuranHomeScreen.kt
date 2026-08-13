@@ -455,7 +455,7 @@ private fun HomeTabContent(
                 ) {
                     items(
                         items = bookmarks,
-                        key = { it.id }
+                        key = { quranBookmarkKey(it) }
                     ) { bookmark ->
                         BookmarkCard(
                             bookmark = bookmark,
@@ -888,7 +888,7 @@ private fun BookmarksTabContent(
         } else {
             items(
                 items = bookmarks,
-                key = { "bm_${it.id}" }
+                key = { "bm_${quranBookmarkKey(it)}" }
             ) { bookmark ->
                 BookmarkListItem(
                     bookmark = bookmark,
@@ -917,7 +917,7 @@ private fun JuzScrollbar(
         modifier = modifier
             .width(32.dp)
             .clip(RoundedCornerShape(8.dp))
-            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f))
+            .background(MaterialTheme.colorScheme.surfaceContainer)
             .pointerInput(Unit) {
                 detectVerticalDragGestures { change, _ ->
                     change.consume()
@@ -972,3 +972,17 @@ private fun JuzScrollbarPreview() {
         )
     }
 }
+
+/**
+ * The stable identity of a bookmark in a lazy list.
+ *
+ * **Not** [QuranBookmark.id]. `BookmarkEntity` has no id column — its primary key is
+ * the composite `(kind, target_id)` — so `QuranRepositoryImpl.toQuranBookmark()` has
+ * nothing to map and passes a literal `0` for every bookmark. Keying by it gave every
+ * row the same key, and Compose threw `Key "0" was already used` as soon as a reader
+ * had two bookmarks, taking the whole Qur'an home screen down.
+ *
+ * [QuranBookmark.ayahId] is the global ayah id, which is precisely what
+ * `(kind = AYAH, target_id)` makes unique.
+ */
+internal fun quranBookmarkKey(bookmark: QuranBookmark): Int = bookmark.ayahId

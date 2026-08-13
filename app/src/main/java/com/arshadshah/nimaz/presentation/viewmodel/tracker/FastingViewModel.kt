@@ -82,10 +82,6 @@ class FastingViewModel @Inject constructor(
     private val _statsState = MutableStateFlow(FastingStatsUiState())
     val statsState: StateFlow<FastingStatsUiState> = _statsState.asStateFlow()
 
-    private val _sheetState =
-        MutableStateFlow(FastManagementSheetState(date = todayProvider.today()))
-    val sheetState: StateFlow<FastManagementSheetState> = _sheetState.asStateFlow()
-
     private var calendarJob: Job? = null
     private var ramadanJob: Job? = null
     private var makeupPendingJob: Job? = null
@@ -194,7 +190,6 @@ class FastingViewModel @Inject constructor(
     fun onEvent(event: FastingEvent) {
         when (event) {
             is FastingEvent.SelectDate -> selectDate(event.date)
-            is FastingEvent.SetFastType -> _trackerState.update { it.copy(selectedFastType = event.fastType) }
             is FastingEvent.SelectMonth -> selectMonth(event.month, event.year)
             is FastingEvent.CompleteMakeupFast -> {
                 telemetry.featureUsed(DOMAIN, "complete_makeup")
@@ -210,27 +205,6 @@ class FastingViewModel @Inject constructor(
             FastingEvent.LoadRamadan -> loadRamadan()
             FastingEvent.LoadMakeupFasts -> loadMakeupFasts()
             FastingEvent.LoadStats -> loadStats()
-            FastingEvent.ToggleTodayFast -> toggleTodayFast()
-            is FastingEvent.OpenFastSheet -> openFastSheet(event.date)
-            FastingEvent.DismissFastSheet -> _sheetState.update { it.copy(isVisible = false) }
-            is FastingEvent.SaveFastForDate -> {
-                telemetry.fastTracked(
-                    "save_for_date",
-                    event.fastType.name
-                )
-                saveFastForDate(
-                    event.date,
-                    event.status,
-                    event.fastType,
-                    event.exemptionReason,
-                    event.note
-                )
-            }
-
-            is FastingEvent.DeleteFastRecord -> {
-                telemetry.fastTracked("delete")
-                deleteFastRecord(event.date)
-            }
             is FastingEvent.UpdateMakeupFast -> updateMakeupFastRecord(event.makeupFast)
 
             is FastingEvent.SetFastStatus -> {
@@ -239,12 +213,14 @@ class FastingViewModel @Inject constructor(
             }
 
             is FastingEvent.SaveExemption -> {
+                // That a day was exempt is worth counting; *why* never is — it is health
+                // information, and it stays on the device.
                 telemetry.fastTracked("save_exemption")
-                // The reason itself is never recorded — it is health information.
                 saveExemption(event.date, event.reason)
             }
 
-            // No telemetry: the note is the user's own words.
+            // Unlogged on purpose: the note is the user's own words, and there is nothing to
+            // count here that set_status does not already say.
             is FastingEvent.SaveNote -> saveNote(event.date, event.note)
         }
     }
@@ -302,72 +278,6 @@ class FastingViewModel @Inject constructor(
         weekJob = launchSafely(telemetry, DOMAIN, "load_week") {
             fastingUseCases.getFastRecordsInRange(startEpoch, endEpoch).collect { records ->
                 _trackerState.update { it.copy(weekRecords = records) }
-            }
-        }
-    }
-
-    private fun startFast(date: LocalDate, fastType: FastType) {
-        val dateEpoch = date.toUtcMidnightMillis()
-
-        launchSafely(telemetry, DOMAIN, "start_fast") {
-            val now = System.currentTimeMillis()
-            val hijri = HijriDateCalculator.toHijri(date)
-            val record = FastRecord(
-                id = 0,
-                date = dateEpoch,
-                hijriDate = hijri.formattedShort(),
-                hijriMonth = hijri.month,
-                hijriYear = hijri.year,
-                fastType = fastType,
-                status = FastStatus.FASTED,
-                exemptionReason = null,
-                suhoorTime = null,
-                iftarTime = null,
-                note = null,
-                createdAt = now,
-                updatedAt = now
-            )
-            fastingUseCases.insertFastRecord(record)
-            selectDate(date)
-            loadStats()
-        }
-    }
-
-    private fun breakFast(date: LocalDate) {
-        val dateEpoch = date.toUtcMidnightMillis()
-
-        launchSafely(telemetry, DOMAIN, "break_fast") {
-            fastingUseCases.updateFastStatus(dateEpoch, FastStatus.NOT_FASTED)
-            selectDate(date)
-            loadStats()
-        }
-    }
-
-    private fun toggleTodayFast() {
-        val date = _trackerState.value.selectedDate
-        val currentRecord = _trackerState.value.todayRecord
-
-        if (currentRecord == null) {
-            startFast(date, _trackerState.value.selectedFastType)
-        } else {
-            when (currentRecord.status) {
-                FastStatus.FASTED -> breakFast(date)
-                FastStatus.NOT_FASTED -> {
-                    val dateEpoch = date.toUtcMidnightMillis()
-                    launchSafely(telemetry, DOMAIN, "toggle_today_fast") {
-                        fastingUseCases.updateFastStatus(dateEpoch, FastStatus.FASTED)
-                        selectDate(date)
-                        loadStats()
-                    }
-                }
-
-                // Exhaustive on purpose: these two are managed in the day sheet, where
-                // the reason lives, and the screen disables the toggle for them via
-                // canToggleToday. Reaching here means the UI let through a tap it should
-                // not have, so it is recorded rather than silently dropped.
-                FastStatus.EXEMPTED,
-                FastStatus.MAKEUP_DUE ->
-                    telemetry.featureUsed(DOMAIN, "toggle_blocked_${currentRecord.status.name.lowercase()}")
             }
         }
     }
@@ -540,96 +450,6 @@ class FastingViewModel @Inject constructor(
         }
     }
 
-    private fun openFastSheet(date: LocalDate) {
-        val dateEpoch = date.toUtcMidnightMillis()
-
-        launchSafely(telemetry, DOMAIN, "open_fast_sheet") {
-            val existingRecord = fastingUseCases.getFastRecordForDate(dateEpoch)
-            val hijri = HijriDateCalculator.toHijri(date)
-            val isRamadan = hijri.month == 9
-
-            _sheetState.update {
-                FastManagementSheetState(
-                    isVisible = true,
-                    date = date,
-                    existingRecord = existingRecord,
-                    selectedStatus = existingRecord?.status ?: FastStatus.FASTED,
-                    selectedFastType = existingRecord?.fastType
-                        ?: if (isRamadan) FastType.RAMADAN else FastType.VOLUNTARY,
-                    selectedExemptionReason = existingRecord?.exemptionReason,
-                    note = existingRecord?.note ?: ""
-                )
-            }
-        }
-    }
-
-    private fun saveFastForDate(
-        date: LocalDate,
-        status: FastStatus,
-        fastType: FastType,
-        exemptionReason: ExemptionReason?,
-        note: String
-    ) {
-        val dateEpoch = date.toUtcMidnightMillis()
-
-        launchSafely(telemetry, DOMAIN, "save_fast_for_date") {
-            val existingRecord = fastingUseCases.getFastRecordForDate(dateEpoch)
-            val now = System.currentTimeMillis()
-            val hijri = HijriDateCalculator.toHijri(date)
-
-            val record = FastRecord(
-                id = existingRecord?.id ?: 0,
-                date = dateEpoch,
-                hijriDate = hijri.formattedShort(),
-                hijriMonth = hijri.month,
-                hijriYear = hijri.year,
-                fastType = fastType,
-                status = status,
-                exemptionReason = if (status == FastStatus.EXEMPTED) exemptionReason else null,
-                suhoorTime = existingRecord?.suhoorTime,
-                iftarTime = existingRecord?.iftarTime,
-                note = note.ifBlank { null },
-                createdAt = existingRecord?.createdAt ?: now,
-                updatedAt = now
-            )
-
-            if (existingRecord != null) {
-                fastingUseCases.updateFastRecord(record)
-            } else {
-                fastingUseCases.insertFastRecord(record)
-            }
-
-            // Auto-create makeup fast for missed/exempted Ramadan days
-            if (fastType == FastType.RAMADAN &&
-                (status == FastStatus.NOT_FASTED || status == FastStatus.EXEMPTED)
-            ) {
-                val existingMakeupCount = fastingUseCases.getMakeupFastCountForDate(dateEpoch)
-                if (existingMakeupCount == 0) {
-                    val makeupFast = MakeupFast(
-                        id = 0,
-                        originalDate = dateEpoch,
-                        originalHijriDate = hijri.formattedShort(),
-                        reason = exemptionReason?.displayName() ?: "Missed Ramadan fast",
-                        status = MakeupFastStatus.PENDING,
-                        completedDate = null,
-                        fidyaAmount = null,
-                        note = note.ifBlank { null },
-                        createdAt = now,
-                        updatedAt = now
-                    )
-                    fastingUseCases.insertMakeupFast(makeupFast)
-                }
-            }
-
-            _sheetState.update { it.copy(isVisible = false) }
-            selectDate(date)
-            loadCalendarMonth()
-            loadStats()
-            loadRamadan()
-            loadMakeupFasts()
-        }
-    }
-
     /**
      * Writes [status] for [date] from the day card's segmented control.
      *
@@ -651,8 +471,8 @@ class FastingViewModel @Inject constructor(
                     date = date,
                     existing = existing,
                     status = status,
-                    // Re-tapping a different status keeps whatever reason was on the day only
-                    // when the day stays exempt; otherwise the reason no longer applies.
+                    // A reason only survives while the day stays exempt; on any other status it
+                    // no longer applies to what is being claimed.
                     exemptionReason = existing?.exemptionReason.takeIf {
                         status == FastStatus.EXEMPTED
                     },
@@ -706,13 +526,13 @@ class FastingViewModel @Inject constructor(
      * Inserts or updates the record for [date], and auto-creates its make-up fast when a Ramadan
      * day ends up missed or exempted.
      *
-     * Factored out of [saveFastForDate] rather than written afresh: that method carried the
-     * make-up auto-creation, and a second constructor that forgot it would have quietly stopped
+     * Factored out of the old `saveFastForDate` rather than written afresh: that method carried
+     * the make-up auto-creation, and a fresh constructor that forgot it would have quietly stopped
      * a missed Ramadan day from ever appearing as owed.
      *
      * The fast type is **inferred** — a Ramadan day is `RAMADAN`, anything else `VOLUNTARY` —
      * except that an existing record keeps the type it already has, so a record created when the
-     * type was still user-pickable is not rewritten to something else on an unrelated edit.
+     * type was still user-pickable is not rewritten on an unrelated edit.
      */
     private suspend fun writeRecord(
         date: LocalDate,
@@ -779,23 +599,6 @@ class FastingViewModel @Inject constructor(
         loadStats()
         loadRamadan()
         loadMakeupFasts()
-    }
-
-    private fun deleteFastRecord(date: LocalDate) {
-        val dateEpoch = date.toUtcMidnightMillis()
-
-        launchSafely(telemetry, DOMAIN, "delete_fast_record") {
-            fastingUseCases.deleteFastRecordByDate(dateEpoch)
-            _sheetState.update { it.copy(isVisible = false) }
-            selectDate(date)
-            loadCalendarMonth()
-            loadStats()
-            loadRamadan()
-            // saveFastForDate auto-creates a makeup fast for a missed or exempted
-            // Ramadan day. Deleting the record left that row behind for ever and the
-            // pending count stale on screen, because this path never reloaded it.
-            loadMakeupFasts()
-        }
     }
 
     private fun updateMakeupFastRecord(makeupFast: MakeupFast) {

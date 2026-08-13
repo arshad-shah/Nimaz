@@ -2183,4 +2183,27 @@
     <string name="more_pin_night_worship">Night worship</string>
     <string name="more_pin_qaida">Qaida</string>
     <string name="more_pin_islamic_calendar">Calendar</string>
+    <string name="fasting_makeup_owed">Owed</string>
+    <string name="fasting_makeup_settled">Settled</string>
+    <string name="fasting_this_day">This day</string>
+    <string name="fasting_back_to_today">Back to today</string>
+    <string name="fasting_seg_fasted">Fasted</string>
+    <string name="fasting_seg_not_fasting">Not fasting</string>
+    <string name="fasting_seg_exempt">Exempt</string>
+    <string name="fasting_not_logged_yet">Not logged yet</string>
+    <string name="fasting_owed_make_up_later">Owed — make up later</string>
+    <string name="fasting_add_note">Add a note</string>
+    <string name="fasting_window_suhoor_in">Suhoor ends in %1$s</string>
+    <string name="fasting_window_iftar_in">Iftar in %1$s</string>
+    <string name="fasting_window_closed">Fasting window closed</string>
+    <string name="fasting_window_length">Fasting window · %1$s long</string>
+    <string name="fasting_window_a11y">Fasting window, %1$s until %2$s</string>
+    <string name="fasting_why_exempt">Why exempt?</string>
+    <string name="fasting_note_title">Note</string>
+    <string name="fasting_note_hint">What happened on this day?</string>
+    <string name="fasting_log_this_fast">Log this fast</string>
+    <string name="fasting_coming_up">Coming up</string>
+    <string name="fasting_your_month">Your month</string>
+    <string name="fasting_sunnah_virtuous">Sunnah &amp; virtuous days</string>
+    <string name="fasting_fasted_count">%1$d fasted</string>
 </resources>

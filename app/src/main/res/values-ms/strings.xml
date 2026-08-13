@@ -1948,4 +1948,27 @@
     <plurals name="fasting_row_ramadan_in_days">
         <item quantity="other">Bermula dalam %1$d hari</item>
     </plurals>
+    <string name="fasting_makeup_owed">Tertunggak</string>
+    <string name="fasting_makeup_settled">Selesai</string>
+    <string name="fasting_this_day">Hari ini</string>
+    <string name="fasting_back_to_today">Kembali ke hari ini</string>
+    <string name="fasting_seg_fasted">Berpuasa</string>
+    <string name="fasting_seg_not_fasting">Tidak berpuasa</string>
+    <string name="fasting_seg_exempt">Dikecualikan</string>
+    <string name="fasting_not_logged_yet">Belum direkod</string>
+    <string name="fasting_owed_make_up_later">Tertunggak — ganti kemudian</string>
+    <string name="fasting_add_note">Tambah nota</string>
+    <string name="fasting_window_suhoor_in">Sahur tamat dalam %1$s</string>
+    <string name="fasting_window_iftar_in">Berbuka dalam %1$s</string>
+    <string name="fasting_window_closed">Waktu puasa tamat</string>
+    <string name="fasting_window_length">Waktu puasa · %1$s</string>
+    <string name="fasting_window_a11y">Waktu puasa, %1$s hingga %2$s</string>
+    <string name="fasting_why_exempt">Mengapa dikecualikan?</string>
+    <string name="fasting_note_title">Nota</string>
+    <string name="fasting_note_hint">Apa yang berlaku pada hari ini?</string>
+    <string name="fasting_log_this_fast">Rekod puasa ini</string>
+    <string name="fasting_coming_up">Akan datang</string>
+    <string name="fasting_your_month">Bulan anda</string>
+    <string name="fasting_sunnah_virtuous">Sunnah &amp; hari utama</string>
+    <string name="fasting_fasted_count">%1$d berpuasa</string>
 </resources>

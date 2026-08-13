@@ -11,8 +11,10 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -36,6 +38,9 @@ private val BandHeight = 36.dp
 
 /** Width of the "now" marker. Thin enough to read as a position, not a segment. */
 private val MarkerWidth = 2.dp
+
+/** The dot at the top of the marker, which is what stops the line reading as a seam. */
+private val MarkerHeadSize = 7.dp
 
 /**
  * A labelled span with an optional "now" marker inside it.
@@ -110,13 +115,28 @@ fun NimazWindowTrack(
             )
 
             if (safeProgress != null) {
+                // A line with a head, not a bare hairline. At 2dp the line alone reads as a seam
+                // between the lit and unlit halves; the head is what makes it a position.
                 Box(
                     modifier = Modifier
-                        .offset(x = bandWidth * safeProgress - MarkerWidth / 2)
-                        .width(MarkerWidth)
-                        .fillMaxHeight()
-                        .background(MaterialTheme.colorScheme.onSurface)
-                )
+                        .offset(x = bandWidth * safeProgress - MarkerHeadSize / 2)
+                        .fillMaxHeight(),
+                    contentAlignment = Alignment.TopCenter,
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .width(MarkerWidth)
+                            .fillMaxHeight()
+                            .background(MaterialTheme.colorScheme.onSurface)
+                    )
+                    Box(
+                        modifier = Modifier
+                            .padding(top = 3.dp)
+                            .size(MarkerHeadSize)
+                            .background(MaterialTheme.colorScheme.onSurface, CircleShape)
+                    )
+                }
             }
         }
 

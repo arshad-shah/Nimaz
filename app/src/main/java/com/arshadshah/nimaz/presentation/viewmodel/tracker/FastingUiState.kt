@@ -133,16 +133,3 @@ data class FastingStatsUiState(
     val isLoading: Boolean = true
 )
 
-/**
- * The day sheet. [date] is always supplied by the event that opens the sheet; the
- * `LocalDate.now()` default it used to carry was never the date the sheet showed.
- */
-data class FastManagementSheetState(
-    val isVisible: Boolean = false,
-    val date: LocalDate,
-    val existingRecord: FastRecord? = null,
-    val selectedStatus: FastStatus = FastStatus.FASTED,
-    val selectedFastType: FastType = FastType.VOLUNTARY,
-    val selectedExemptionReason: ExemptionReason? = null,
-    val note: String = ""
-)
