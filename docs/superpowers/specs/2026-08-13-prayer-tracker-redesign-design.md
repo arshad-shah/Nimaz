@@ -67,8 +67,18 @@ neither of them.
 A prayer's displayed status is:
 
 ```
-record?.status  ?:  if (its time has passed) NOT_RECORDED else UPCOMING
+assertedStatus  ?:  if (its time has passed) NOT_RECORDED else UPCOMING
 ```
+
+where `assertedStatus` is the record's status **only when the user actually asserted something** —
+`PRAYED`, `LATE`, `MISSED`, `QADA`. A missing row, a `PENDING` row and a `NOT_PRAYED` row are all
+the same fact — *nobody has said* — and all three derive.
+
+That equivalence is what makes tap-to-clear free: clearing writes `NOT_PRAYED` through the existing
+`UpdatePrayerStatusUseCase` rather than needing a delete path, and the row immediately reads back as
+`NOT_RECORDED` (or `UPCOMING`). It is also why `PENDING` must be included: rows created ahead of
+time by the scheduler carry it, and treating it as an assertion would show every future prayer as
+recorded.
 
 `NOT_RECORDED` is **derived at presentation time and never persisted**. No Room migration, no new
 `PrayerStatus` value, no change to sync export/import, no widget state change.
