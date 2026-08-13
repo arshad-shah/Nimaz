@@ -1467,6 +1467,11 @@
 
     <!-- Qada Prayers Screen -->
     <string name="qada_prayers">Qada Prayers</string>
+    <string name="qada_outstanding">Outstanding</string>
+    <string name="qada_count_format">%1$d prayers</string>
+    <string name="qada_empty_title">Nothing to make up</string>
+    <string name="qada_empty_body">A prayer only lands here once you mark it as missed yourself — nothing is added automatically.</string>
+    <string name="qada_mark_made_up">Mark made up</string>
 
     <!-- Settings Screen -->
     <string name="sync_data">Sync Data</string>
