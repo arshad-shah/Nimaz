@@ -42,5 +42,6 @@ class HijriCalendarWorker @AssistedInject constructor(
         workerName = "HijriCalendarWorker",
         success = { HijriCalendarWidgetState.Success(dataSource.load()) },
         error = { message -> HijriCalendarWidgetState.Error(message) },
+        hasData = { it.hasData },
     )
 }

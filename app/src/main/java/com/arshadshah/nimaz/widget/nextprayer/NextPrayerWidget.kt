@@ -93,8 +93,16 @@ private fun NextPrayerSuccessContent(
     primaryColor: ColorProvider
 ) {
     val context = LocalContext.current
-    val liveCountdown = if (data.nextPrayerEpochMillis > 0L) {
-        WidgetUpdateScheduler.computeCountdown(data.nextPrayerEpochMillis)
+
+    // Which prayer is next is decided here, not by the worker: the widget redraws every minute
+    // and the worker runs every fifteen, so reading the worker's answer meant naming a prayer
+    // that had already started for up to a quarter of an hour. `schedule` is empty only for
+    // state written by a version that did not persist one, in which case the flat fields — the
+    // worker's answer — are all there is.
+    val entry = data.nextEntry(System.currentTimeMillis())
+
+    val liveCountdown = if (entry.epochMillis > 0L) {
+        WidgetUpdateScheduler.computeCountdown(entry.epochMillis)
     } else {
         data.countdown.ifEmpty { "—" }
     }
@@ -107,10 +115,10 @@ private fun NextPrayerSuccessContent(
         Column(modifier = GlanceModifier.fillMaxSize()) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 WidgetIcon(
-                    resId = prayerIconRes(data.prayerName),
+                    resId = prayerIconRes(entry.prayerName),
                     tint = primaryColor,
                     size = 16.dp,
-                    contentDescription = data.prayerName,
+                    contentDescription = entry.prayerName,
                 )
                 Spacer(modifier = GlanceModifier.width(6.dp))
                 WidgetLabel(
@@ -120,7 +128,7 @@ private fun NextPrayerSuccessContent(
             }
             Spacer(modifier = GlanceModifier.height(10.dp))
             Text(
-                text = context.prayerShortName(data.prayerName).ifEmpty { "—" },
+                text = context.prayerShortName(entry.prayerName).ifEmpty { "—" },
                 style = TextStyle(
                     color = primaryColor,
                     fontSize = 20.sp,
@@ -133,8 +141,8 @@ private fun NextPrayerSuccessContent(
                 // the word here means a language change lands on the next redraw rather than
                 // waiting up to 30 minutes for the worker.
                 text = when {
-                    data.isTomorrow -> context.getString(R.string.widget_tomorrow)
-                    else -> data.prayerTime.ifEmpty { "—" }
+                    entry.isTomorrow -> context.getString(R.string.widget_tomorrow)
+                    else -> entry.prayerTime.ifEmpty { "—" }
                 },
                 style = TextStyle(
                     color = textColor,
@@ -166,14 +174,16 @@ private fun NextPrayerSuccessContent(
 class NextPrayerWidgetReceiver : WidgetWorkReceiver() {
     override val glanceAppWidget: GlanceAppWidget = NextPrayerWidget()
 
-    override fun enqueueWork(context: Context) =
-        NextPrayerWorker.enqueuePeriodicWork(context, force = true)
+    override fun enqueueWork(context: Context, force: Boolean) =
+        NextPrayerWorker.enqueuePeriodicWork(context, force = force)
+
+    override fun refreshNow(context: Context) = NextPrayerWorker.enqueueImmediateWork(context)
 
     override fun cancelWork(context: Context) = NextPrayerWorker.cancel(context)
 
-    override fun onWidgetEnabled(context: Context) =
+    override fun onWidgetPresent(context: Context) =
         WidgetUpdateScheduler.schedule(context)
 
-    override fun onWidgetDisabled(context: Context) =
-        WidgetUpdateScheduler.cancel(context)
+    override fun onWidgetAbsent(context: Context) =
+        WidgetUpdateScheduler.cancelIfUnused(context)
 }

@@ -75,7 +75,7 @@ android {
         // Source of truth for the app version. CI bumps these at build time and
         // pushes the change back to dev (with a bypass GitHub App token) after a successful
         // deploy, so the committed baseline stays in sync for the next build.
-        versionCode = 414
+        versionCode = 415
         versionName = "3.0.114"
 
         // Custom runner swaps in HiltTestApplication so instrumented tests run on

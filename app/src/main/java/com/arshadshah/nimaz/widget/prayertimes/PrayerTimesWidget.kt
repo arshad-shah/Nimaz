@@ -239,14 +239,16 @@ private fun PrayerPill(
 class PrayerTimesWidgetReceiver : WidgetWorkReceiver() {
     override val glanceAppWidget: GlanceAppWidget = PrayerTimesWidget()
 
-    override fun enqueueWork(context: Context) =
-        PrayerTimesWorker.enqueuePeriodicWork(context, force = true)
+    override fun enqueueWork(context: Context, force: Boolean) =
+        PrayerTimesWorker.enqueuePeriodicWork(context, force = force)
+
+    override fun refreshNow(context: Context) = PrayerTimesWorker.enqueueImmediateWork(context)
 
     override fun cancelWork(context: Context) = PrayerTimesWorker.cancel(context)
 
-    override fun onWidgetEnabled(context: Context) =
+    override fun onWidgetPresent(context: Context) =
         WidgetUpdateScheduler.schedule(context)
 
-    override fun onWidgetDisabled(context: Context) =
-        WidgetUpdateScheduler.cancel(context)
+    override fun onWidgetAbsent(context: Context) =
+        WidgetUpdateScheduler.cancelIfUnused(context)
 }

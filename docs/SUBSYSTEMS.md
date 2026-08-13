@@ -122,24 +122,27 @@ label) cannot be tested, and those are the states the widgets sit in most of the
 
 | Worker | Package | Trigger | Section |
 |---|---|---|---|
-| `NextPrayerWorker` | `widget/nextprayer/` | periodic 15 min + widget `onEnabled` | [§2](#2-glance-widgets) |
-| `PrayerTimesWorker` | `widget/prayertimes/` | periodic 15 min + widget `onEnabled` | [§2](#2-glance-widgets) |
-| `PrayerTrackerWorker` | `widget/prayertracker/` | periodic 30 min + immediate on toggle | [§2](#2-glance-widgets) |
-| `HijriDateWorker` | `widget/hijridate/` | periodic 6 hr | [§2](#2-glance-widgets) |
-| `HijriCalendarWorker` | `widget/hijricalendar/` | periodic 6 hr | [§2](#2-glance-widgets) |
-| `KhatamWorker` | `widget/khatam/` | periodic 30 min | [§2](#2-glance-widgets) |
+| `NextPrayerWorker` | `widget/nextprayer/` | periodic 15 min + widget `onEnabled`/`onUpdate` + settings change | [§2](#2-glance-widgets) |
+| `PrayerTimesWorker` | `widget/prayertimes/` | periodic 15 min + widget `onEnabled`/`onUpdate` + settings change | [§2](#2-glance-widgets) |
+| `PrayerTrackerWorker` | `widget/prayertracker/` | periodic 30 min + immediate on toggle + settings change | [§2](#2-glance-widgets) |
+| `HijriDateWorker` | `widget/hijridate/` | periodic 6 hr + widget `onEnabled`/`onUpdate` + settings change | [§2](#2-glance-widgets) |
+| `HijriCalendarWorker` | `widget/hijricalendar/` | periodic 6 hr + widget `onEnabled`/`onUpdate` + settings change | [§2](#2-glance-widgets) |
+| `KhatamWorker` | `widget/khatam/` | periodic 30 min + widget `onEnabled`/`onUpdate` + settings change | [§2](#2-glance-widgets) |
 | `AdhanDownloadWorker` | `data/audio/` | one-shot fallback when a foreground service can't start | [§3](#3-background-work-workmanager) |
 
 ### 0.4 Widgets
 
 | Widget | Package | Refresh | State type |
 |---|---|---|---|
-| Next Prayer | `widget/nextprayer/` | Worker 15 min + AlarmManager 1 min tick | `NextPrayerWidgetState` |
-| Prayer Times | `widget/prayertimes/` | Worker 15 min + 1 min tick | `PrayerTimesWidgetState` |
-| Prayer Tracker | `widget/prayertracker/` | Worker 30 min + immediate on toggle | `PrayerTrackerWidgetState` |
-| Hijri Date | `widget/hijridate/` | Worker 6 hr | `HijriDateWidgetState` |
-| Hijri Calendar | `widget/hijricalendar/` | Worker 6 hr | `HijriCalendarWidgetState` |
-| Khatam | `widget/khatam/` | Worker 30 min | `KhatamWidgetState` |
+| Next Prayer | `widget/nextprayer/` | Worker 15 min + AlarmManager 1 min tick + `onUpdate` | `NextPrayerWidgetState` |
+| Prayer Times | `widget/prayertimes/` | Worker 15 min + 1 min tick + `onUpdate` | `PrayerTimesWidgetState` |
+| Prayer Tracker | `widget/prayertracker/` | Worker 30 min + immediate on toggle + `onUpdate` | `PrayerTrackerWidgetState` |
+| Hijri Date | `widget/hijridate/` | Worker 6 hr + `onUpdate` | `HijriDateWidgetState` |
+| Hijri Calendar | `widget/hijricalendar/` | Worker 6 hr + `onUpdate` | `HijriCalendarWidgetState` |
+| Khatam | `widget/khatam/` | Worker 30 min + `onUpdate` | `KhatamWidgetState` |
+
+Every widget also refreshes when a setting it is computed from changes, via
+`WidgetSettingsWatcher` ([§2](#2-glance-widgets)).
 
 ### 0.5 DataStore files
 
@@ -265,13 +268,16 @@ section documents how they work, not which ones exist.
 
 ```mermaid
 flowchart LR
-    subgraph Refresh["Three refresh layers"]
+    subgraph Refresh["Refresh layers"]
         WM["WorkManager<br/>periodic 15/30 min / 6 hr"]
         Tick["AlarmManager 1-min tick<br/>WidgetTickReceiver"]
-        Imm["Immediate enqueue<br/>(tracker toggle, HomeViewModel)"]
+        Imm["Immediate enqueue<br/>(tracker toggle, HomeViewModel,<br/>WidgetSettingsWatcher)"]
+        Sys["System APPWIDGET_UPDATE<br/>onUpdate → re-arm + refresh"]
     end
     WM -->|"@HiltWorker doWork()"| Compute["compute fresh data"]
     Imm --> Compute
+    Sys --> WM
+    Sys --> Tick
     Compute -->|"setWidgetState → Success/Error"| Store["JsonGlanceStateDefinition<br/>(one DataStore per widget)"]
     Store --> Render["provideGlance → currentState&lt;T&gt;()"]
     Tick -->|"updateAll() — recompose only"| Render
@@ -282,19 +288,48 @@ The split matters: the **worker** stores absolute instants, the **tick** only re
 countdown/highlight is derived at render time — so the display tracks the wall clock even when
 Doze throttles the worker.
 
-Each widget = a `GlanceAppWidget` subclass (`provideGlance` → `provideContent { GlanceTheme { … } }`, reads `currentState<T>()`) + a `GlanceAppWidgetReceiver` (the manifest-registered `BroadcastReceiver`; `onEnabled` starts refresh, `onDisabled` cancels). State is a `@Serializable sealed interface` with `Loading`/`Success(data)`/`Error(message)`. Colors come from `res/color` via `ColorProvider(R.color.widget_*)` — no hardcoded colors.
+Each widget = a `GlanceAppWidget` subclass (`provideGlance` → `provideContent { GlanceTheme { … } }`, reads `currentState<T>()`) + a `GlanceAppWidgetReceiver` (the manifest-registered `BroadcastReceiver`; `onEnabled` starts refresh, `onUpdate` re-arms it, `onDisabled` cancels). State is a `@Serializable sealed interface` with `Loading`/`Success(data)`/`Error(message)`. Colors come from `res/color` via `ColorProvider(R.color.widget_*)` — no hardcoded colors.
 
 **Data access — two patterns.**
-1. **`@HiltWorker` injection (main path).** Workers inject real deps directly (e.g. `NextPrayerWorker` injects `PrayerTimeCalculator` + `PreferencesDataStore`; `PrayerTrackerWorker` injects `PrayerDao`; `HijriDateWorker` + `HijriCalendarWorker` inject `PreferencesDataStore` to read the `hijriDayOffset`). Each `doWork()` returns `Result.success()` early if no widgets are placed, computes fresh data, persists via `setWidgetState(...) → Success`, and on failure persists `Error` + `Result.retry()` for the first 3 attempts. This only works because `NimazApp` provides the `HiltWorkerFactory` (§3).
+1. **`@HiltWorker` injection (main path).** Workers inject an `XxxWidgetDataSource`, which injects the real deps (e.g. `NextPrayerWidgetDataSource` and `PrayerTimesWidgetDataSource` inject `PrayerRepository` + `SettingsRepository`; `PrayerTrackerWidgetDataSource` injects `PrayerDao`; the two Hijri sources inject `SettingsRepository` to read the `hijriDayOffset`). Each `doWork()` returns `Result.success()` early if no widgets are placed, computes fresh data, persists via `setWidgetState(...) → Success`, and on failure retries for the first 3 attempts — see **failure handling** below for what it does and does not publish. This only works because `NimazApp` provides the `HiltWorkerFactory` (§3).
 2. **Hilt `@EntryPoint`** — `widget/WidgetEntryPoint.kt` exposes `prayerDao()` via `EntryPointAccessors.fromApplication(...)`. Used by the **only interactive widget** (Prayer Tracker): its checkbox click handler (`togglePrayerStatus` in `PrayerTrackerWidget.kt`) writes to Room from inside the composable click callback (not a Worker), then re-renders via `PrayerTrackerWorker.enqueueImmediateWork(context)`.
 
-**Update mechanism — three layers.**
-- **Periodic WorkManager** via `widget/core/WidgetWork.kt` (`enqueuePeriodic`/`enqueueImmediate`/`cancel`), enqueued in each receiver's `onEnabled`.
-- **Per-minute AlarmManager tick** via `widget/WidgetUpdateScheduler.kt` (WorkManager's 15-min floor is too coarse for a live countdown). `setInexactRepeating(ELAPSED_REALTIME, …, 60_000)` fires `WidgetTickReceiver`, which just calls `updateAll(context)` on the two countdown widgets — it does **not** recompute prayer times; the composable recomputes the live values from the stored absolute prayer instants.
-  - **Prayer Times "next prayer" highlight is render-time, not worker-time.** The worker stores each prayer's absolute `…EpochMillis` (not pre-computed "passed" flags). The composable picks which pill to highlight via `widget/core/PrayerHighlight.kt#nextPrayerIndex(epochs, now)` — the first prayer whose instant is still in the future, or `-1` (none) after Isha — and derives the header "X in Ym" from the same index. So every redraw tracks the wall clock; the highlight no longer lags behind the 15-min worker or gets stuck on a passed prayer under Doze throttling. (Pure function, unit-tested in `PrayerHighlightTest`.)
-- **Immediate refresh** on prayer-status change, from the tracker toggle and from `HomeViewModel` (keeps the widget in sync with in-app tracking).
+**Prayer times come from `PrayerRepository`, not `PrayerTimeCalculator`.** Both prayer widgets
+used to call `getPrayerTimes(latitude, longitude)` and take all four calculation defaults —
+Muslim World League, Shafi asr, no high-latitude rule, no per-prayer adjustments — so the times
+on the home screen disagreed with the times in the app for every user who had changed any of
+them, and the countdown and "next prayer" highlight were wrong by the same margin. They now go
+through `PrayerRepository.getDaySchedule(date, settings)` with `observeCalculationSettings()`,
+which is the same path the app itself uses (§8). This is the identical bug `FastingViewModel`
+had, and the identical fix.
 
-**Shared `widget/core/`.** `JsonGlanceStateDefinition.kt` (generic JSON-over-DataStore `GlanceStateDefinition`, one DataStore per file via a process-wide map), `WidgetStateUpdater.kt` (`updateWidgetState(...)`, and `refreshWidget(...)` — the whole of a worker's `doWork`: find the placed widgets, return success early when there are none, load, publish, and on failure record the exception, publish an error state and retry twice. All six workers wrote that out; they pass their widget, state definition and data source to it now), `WidgetFormatters.kt` (time/countdown), `WidgetUi.kt` (`WidgetPalette`, `WidgetMessageBox`, `WidgetLoadingBox`, plus the redesign atoms `WidgetCard`, `WidgetIcon`, `WidgetLabel`, `WidgetPill`, `prayerIconRes`), `WidgetWork.kt`.
+**Update mechanism — four layers.**
+- **Periodic WorkManager** via `widget/core/WidgetWork.kt` (`enqueuePeriodic`/`enqueueImmediate`/`cancel`), enqueued in each receiver's `onEnabled` (with `CANCEL_AND_REENQUEUE`) and re-armed in `onUpdate` (with `KEEP`).
+- **Per-minute AlarmManager tick** via `widget/WidgetUpdateScheduler.kt` (WorkManager's 15-min floor is too coarse for a live countdown). `setInexactRepeating(ELAPSED_REALTIME, …, 60_000)` fires `WidgetTickReceiver`, which just calls `updateAll(context)` on the two countdown widgets — it does **not** recompute prayer times; the composable recomputes the live values from the stored absolute prayer instants.
+  - **"Next prayer" selection is render-time, not worker-time — on both prayer widgets.** The worker stores each prayer's absolute `…EpochMillis` (not pre-computed "passed" flags). Prayer Times picks which pill to highlight via `widget/core/PrayerHighlight.kt#nextPrayerIndex(epochs, now)` — the first prayer whose instant is still in the future, or `-1` (none) after Isha — and derives the header "X in Ym" from the same index. Next Prayer persists the day's whole schedule in `NextPrayerData.schedule` (today's prayers, closed by tomorrow's first) and selects from it through `nextEntry(now)`, which reuses the same helper. Before that it held one prayer only, so once that instant passed it kept naming a prayer that had already started, with an em dash where its countdown should be, until the next worker run. So every redraw tracks the wall clock on both widgets, whatever Doze is doing to the workers. (Pure functions, unit-tested in `PrayerHighlightTest` and `WidgetStateRetentionTest`.)
+- **Immediate refresh** on prayer-status change, from the tracker toggle and from `HomeViewModel` (keeps the widget in sync with in-app tracking), and on a settings change via `WidgetSettingsWatcher` — see below.
+- **`onUpdate` as the recovery channel.** `WidgetWorkReceiver.onUpdate` re-arms the periodic work (`KEEP`), re-arms the alarm and enqueues one immediate refresh. `onEnabled` fires once, when the *first* instance of a provider is placed, so it used to be the app's only chance to schedule correctly for the lifetime of the widget — and a force-stop drops the app's jobs while a reboot drops its alarms outright. `onUpdate` does not depend on anything the app persisted: the system broadcasts it on boot, after a package update and every `updatePeriodMillis`. Re-arming is idempotent, so an unnecessary call costs nothing and a missing one costs a dead widget.
+
+**Failure handling — a failed refresh does not wipe the widget.** `refreshWidget` asks the
+persisted state's `hasData` before publishing an error: a state carrying loaded values is left
+alone (with a `updateAll` so its countdowns still advance), and only a widget with nothing to
+show gets the "tap to set up" frame. It used to overwrite unconditionally, so one transient throw
+— a DataStore read that lost a race, a database busy for a moment — turned a widget showing
+correct prayer times into an error frame until a later run happened to succeed. `hasData` is a
+member of each state interface (default `false`, overridden on `Success`) rather than "is it
+`Success`", because the *default* state is `Success` with an empty payload. `getGlanceIds` is
+inside its own `try` for the same reason: it reaches the AppWidget host, which can be busy right
+after boot, and a throw there used to fail the worker with no retry.
+
+**Refresh on settings change** — `data/widget/WidgetSettingsWatcher.kt`, a `@Singleton` started
+from `AppInitializer`. It collects `observeCalculationSettings()` + `use24HourFormat` +
+`hijriDayOffset`, drops the startup emission, and calls `WidgetRefresher.refreshAll()` on any
+change. Only the tracker had a push before, so changing location or calculation method left the
+home screen on the old answer for up to 15 minutes — 6 hours for the Hijri widgets. Watching the
+resolved settings rather than hooking each setter is what makes it complete: those values are
+written from four different ViewModels, and the next one that writes them gets this for free.
+
+**Shared `widget/core/`.** `JsonGlanceStateDefinition.kt` (generic JSON-over-DataStore `GlanceStateDefinition`, one DataStore per file via a process-wide map; the `Json` is `ignoreUnknownKeys` and the store has a `ReplaceFileCorruptionHandler` that resets to the default — with the strict default a release that dropped or renamed a state field made the previous release's file unreadable, and with no handler DataStore rethrew that on every subsequent read, so the widget was stuck on its error frame until app data was cleared), `WidgetStateUpdater.kt` (`updateWidgetState(...)`, and `refreshWidget(...)` — the whole of a worker's `doWork`: find the placed widgets, return success early when there are none, load, publish, and on failure record the exception, keep or replace the state per `hasData`, and retry twice. All six workers wrote that out; they pass their widget, state definition and data source to it now), `WidgetScaffold.kt` (`WidgetLoading`/`WidgetError`, and `WidgetWorkReceiver` — the `onEnabled`/`onUpdate`/`onDisabled` lifecycle, all `final`), `WidgetFormatters.kt` (time/countdown), `WidgetUi.kt` (`WidgetPalette`, `WidgetMessageBox`, `WidgetLoadingBox`, plus the redesign atoms `WidgetCard`, `WidgetIcon`, `WidgetLabel`, `WidgetPill`, `prayerIconRes`), `WidgetWork.kt`.
 
 **Widget UI design ("Refined Minimal").** Solid `widget_background` surface, `16dp`
 corners, teal `widget_primary` accent. **No emoji/ASCII/unicode glyphs** — all icons
@@ -333,10 +368,12 @@ scans `widget/` for English prayer/weekday literals outside comments.
 **Manifest/res.** Six `<receiver>`s + the non-exported `WidgetTickReceiver` in `AndroidManifest.xml`; provider-info XMLs in `res/xml/*_widget_info.xml`.
 
 **Gotchas.**
-- Default state is `Success(emptyData)`, not `Loading` → widgets show em-dash skeletons, not a spinner, before the first worker run.
-- The 1-min tick only recomposes; prayer time/name only refresh on the 15-min worker.
-- NextPrayer and PrayerTimes share one AlarmManager request code (`9876`); removing one countdown widget can silently cancel the tick for the other (documented in `NextPrayerWidget.onDisabled`).
+- Default state is `Success(emptyData)`, not `Loading` → widgets show em-dash skeletons, not a spinner, before the first worker run. That is why retention asks `hasData` rather than "is it `Success`".
+- The 1-min tick only recomposes. The *values* — prayer times, the Hijri date, the tracker's ticks — only refresh on the worker; what the tick advances is the selection and countdown derived from stored instants.
+- NextPrayer and PrayerTimes share one AlarmManager request code (`9876`), so they share one alarm. `cancelIfUnused` is what keeps removing one from cancelling the other's tick: it checks `AppWidgetManager.getAppWidgetIds` for both providers and only cancels when neither is placed. `WidgetUpdateScheduler.schedule` is idempotent (`FLAG_UPDATE_CURRENT`), so the shared code is safe to re-arm from either side.
+- The alarm does not survive a reboot. `BootReceiver` calls `WidgetUpdateScheduler.ensureScheduled` on `BOOT_COMPLETED`, and `onUpdate` re-arms it as well; periodic work needs neither, because WorkManager persists it itself.
 - `togglePrayerStatus` writes a Room `PrayerRecordEntity` directly from the widget layer via the EntryPoint — a layering deviation, noted but intentional for interactivity.
+- `PrayerTimesWidgetDataSource` still calls `HijriDateCalculator.today()` with **no** offset, so it ignores `hijriDayOffset` — the inverse of the Hijri-date widget, which applies it to too much (#509). Two widgets on one home screen can disagree about the Hijri date.
 
 ---
 
@@ -351,8 +388,9 @@ at runtime.
 download fallback. What is worth knowing beyond the list:
 
 - The six widget workers each return `Result.success()` early when no widget of their type is
-  placed, so an unused widget costs nothing. On failure they persist an `Error` state and
-  `Result.retry()` for the first 3 attempts.
+  placed, so an unused widget costs nothing. On failure they `Result.retry()` for the first 3
+  attempts, and publish an `Error` state only when the widget has no loaded data to keep
+  ([§2](#2-glance-widgets)).
 - `AdhanDownloadWorker` builds a `OneTimeWorkRequest` with a `CONNECTED` constraint,
   `ExistingWorkPolicy.KEEP` and the unique name `adhan_download_work`, retrying up to 3 times. It
   shares its download logic with `AdhanDownloadService` via `AdhanAudioManager`.
@@ -361,7 +399,7 @@ download fallback. What is worth knowing beyond the list:
 
 **Note: prayer notifications do NOT use WorkManager** — they use `AlarmManager` exact alarms (§4). WorkManager here is widgets + the adhan-download fallback.
 
-**Boot.** `core/util/BootReceiver.kt` re-runs scheduling on `BOOT_COMPLETED` (§4); widget periodic work survives reboots via WorkManager's own persistence.
+**Boot.** `core/util/BootReceiver.kt` re-runs scheduling on `BOOT_COMPLETED` (§4); widget periodic work survives reboots via WorkManager's own persistence. The widgets' per-minute **AlarmManager** tick does not, so the same branch calls `WidgetUpdateScheduler.ensureScheduled` (§2).
 
 ---
 
@@ -1003,7 +1041,7 @@ backed by a Jetpack Preferences DataStore (`preferencesDataStore(name = "nimaz_p
 (ViewModels, `MainActivity`) injects **`SettingsRepository`**, not the concrete class (bound via
 `@Binds` in `RepositoryModule`); the combined snapshot model `UserPreferences` lives in
 `domain/model`. Data-layer consumers (both sync classes, all content seeders, `AppInitializer`,
-`BootReceiver`, widget workers) inject the concrete `PreferencesDataStore` directly — that's fine,
+`BootReceiver`) inject the concrete `PreferencesDataStore` directly — that's fine,
 they're in the data layer. When you add a new setting, add it to **both** the class and the
 `SettingsRepository` interface.
 
@@ -1014,7 +1052,7 @@ suspend fun setCalculationMethod(method: String) = put(PreferencesKeys.CALCULATI
 ```
 Getters expose `Flow<…>` only (never `MutableStateFlow`/`LiveData`); writes are `suspend`. Internal helpers `preference(key, default)` / `preference(key)` / `put(key, value)` keep the surface uniform. `private object PreferencesKeys` holds all typed keys and is private to the class — consumers never touch raw keys.
 
-**Hijri date offset.** `hijri_day_offset: Int` (range −2 to +2, default 0) allows users to adjust the displayed Hijri date relative to the system calculation. Stored in `PreferencesDataStore`, read by both Hijri widgets (`HijriDateWorker`, `HijriCalendarWorker`) and passed to `HijriDateCalculator.today(offsetDays)` to compute today's Hijri date for event matching and display. Wired via the "Adjust Hijri date" stepper in `AppearanceSettingsScreen`.
+**Hijri date offset.** `hijri_day_offset: Int` (range −2 to +2, default 0) allows users to adjust the displayed Hijri date relative to the system calculation. Stored in `PreferencesDataStore`, read by both Hijri widgets (`HijriDateWidgetDataSource`, `HijriCalendarWidgetDataSource`) and passed to `HijriDateCalculator.today(offsetDays)` to compute today's Hijri date for event matching and display. Wired via the "Adjust Hijri date" stepper in `AppearanceSettingsScreen`.
 
 **Zakat basis.** `zakat_gold_price_per_gram: Double` (default 65.0),
 `zakat_silver_price_per_gram: Double` (default 0.80), `zakat_currency: String` (default `USD`) and
@@ -1252,7 +1290,7 @@ no deps). All third-party usage is isolated here.
 
 **Hijri conversion** — `core/util/HijriDateCalculator.kt`, a stateless Kotlin `object` (no Hilt). It does **not** use `ummalqura`; it delegates to the platform `java.time.chrono.HijrahChronology.INSTANCE` (OS-updated Umm al-Qura). Provides `toHijri`/`toGregorian`, Ramadan helpers, validity checks, and a hardcoded Islamic-events calendar (`getIslamicEvents`/`getUpcomingEvents`). **Day-offset support:** `today(offsetDays = 0)` returns today's Hijri date adjusted by the user's `hijriDayOffset` preference (§6), used for local event matching and both Hijri widgets. Other `now()` helpers (`isTodayRamadan`, `daysUntilNextRamadan`, …) currently ignore the offset — see deferred follow-up in §9.
 
-**Wiring.** No module — both are constructor-injected / static. `PrayerTimeCalculator` is injected into `PrayerRepositoryImpl` and (a deviation from the use-case rule) directly into several ViewModels, widget workers, and `PrayerNotificationScheduler`.
+**Wiring.** No module — both are constructor-injected / static. `PrayerTimeCalculator` is injected into `PrayerRepositoryImpl`, into `PrayerNotificationScheduler`, and (a deviation from the use-case rule) into `WidgetsScreen`. The widget data sources used to take it too and are the one place that has been closed: they go through `PrayerRepository` now, so they honour the user's calculation settings ([§2](#2-glance-widgets)).
 
 **Display formatting.** Wall-clock times are rendered through `core/util/TimeFormatting.kt`
 (`formatClockTime(hour, minute, use24Hour)` + `LocalTime`/`LocalDateTime.formatClock(...)`),
