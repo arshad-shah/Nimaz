@@ -385,6 +385,10 @@
     <string name="prayer_legend_some">Einige</string>
     <string name="prayer_legend_none">Keine</string>
     <string name="prayer_legend_not_recorded">Nicht erfasst</string>
+    <string name="prayer_next_in">%1$s in %2$s</string>
+    <string name="prayer_day_complete">Tag abgeschlossen</string>
+    <string name="prayer_day_summary_past">Tag abgeschlossen · %1$d von %2$d gebetet</string>
+    <string name="prayer_day_upcoming">Bevorstehender Tag</string>
     <string name="prayer_tracker_title">Gebets-Tracker</string>
     <string name="view_statistics">Statistiken anzeigen</string>
     <string name="all_caught_up">Alles erledigt!</string>

@@ -1487,6 +1487,10 @@
     <string name="prayer_legend_some">Some</string>
     <string name="prayer_legend_none">None</string>
     <string name="prayer_legend_not_recorded">Not recorded</string>
+    <string name="prayer_next_in">%1$s in %2$s</string>
+    <string name="prayer_day_complete">Day complete</string>
+    <string name="prayer_day_summary_past" tools:ignore="PluralsCandidate">Day complete · %1$d of %2$d prayed</string>
+    <string name="prayer_day_upcoming">Upcoming day</string>
 
     <!-- Settings Screen -->
     <string name="sync_data">Sync Data</string>

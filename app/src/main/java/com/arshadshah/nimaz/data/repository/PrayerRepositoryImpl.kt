@@ -249,8 +249,60 @@ class PrayerRepositoryImpl @Inject constructor(
         return calculateStreaks(perfectDays).second
     }
 
-    override suspend fun markUnrecordedAsMissed(from: Long, to: Long): Int =
-        prayerDao.markUnrecordedAsMissed(from, to)
+    /**
+     * Confirm every unrecorded tracked prayer between [from] and [to] (both inclusive, UTC-midnight
+     * epoch millis) as missed.
+     *
+     * Two things have to happen for the count the review banner promised to be the count the user
+     * gets, because [PrayerName.SUNRISE] aside, "unrecorded" covers two different situations:
+     *  - A row exists (`pending`/`not_prayed`) — [PrayerDao.markUnrecordedAsMissed] flips it.
+     *  - No row exists at all, because the user never opened the app that day — nothing for an
+     *    `UPDATE` to match, so this method inserts a `missed` row for it, shaped exactly like the
+     *    one [updatePrayerStatus] would insert for a single tap on "Missed" (same `scheduledTime`
+     *    placeholder, `isJamaah = false`, `isQadaFor = null`), so it flows into the qada list
+     *    identically.
+     *
+     * A `prayed`, `late`, `missed` or `qada` row is never touched by either path — that invariant
+     * is why this whole feature exists.
+     *
+     * @return the number of prayers actually confirmed (existing rows flipped + rows inserted).
+     */
+    override suspend fun markUnrecordedAsMissed(from: Long, to: Long): Int {
+        val existingKeys = prayerDao.getPrayerRecordsInRangeSync(from, to)
+            .mapTo(HashSet()) { it.date to it.prayerName }
+
+        val updatedCount = prayerDao.markUnrecordedAsMissed(from, to)
+
+        val now = System.currentTimeMillis()
+        val missingRecords = mutableListOf<PrayerRecordEntity>()
+        var date = from
+        while (date <= to) {
+            for (prayerName in TRACKED_PRAYERS) {
+                val prayerKey = prayerName.name.lowercase()
+                if (date to prayerKey !in existingKeys) {
+                    missingRecords += PrayerRecordEntity(
+                        id = 0,
+                        date = date,
+                        prayerName = prayerKey,
+                        status = PrayerStatus.MISSED.name.lowercase(),
+                        prayedAt = null,
+                        scheduledTime = date,
+                        isJamaah = false,
+                        isQadaFor = null,
+                        note = null,
+                        createdAt = now,
+                        updatedAt = now,
+                    )
+                }
+            }
+            date += ONE_DAY_MILLIS
+        }
+        if (missingRecords.isNotEmpty()) {
+            prayerDao.insertPrayerRecords(missingRecords)
+        }
+
+        return updatedCount + missingRecords.size
+    }
 
     /**
      * Calculate current streak and longest streak from a list of perfect days.
@@ -443,5 +495,10 @@ class PrayerRepositoryImpl @Inject constructor(
             PrayerType.MAGHRIB,
             PrayerType.ISHA,
         )
+
+        /** The prayers the tracker records. Sunrise is calculated but never tracked. */
+        val TRACKED_PRAYERS = PrayerName.entries.filter { it != PrayerName.SUNRISE }
+
+        private const val ONE_DAY_MILLIS = 24 * 60 * 60 * 1000L
     }
 }

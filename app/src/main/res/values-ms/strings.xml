@@ -374,6 +374,10 @@
     <string name="prayer_legend_some">Sebahagian</string>
     <string name="prayer_legend_none">Tiada</string>
     <string name="prayer_legend_not_recorded">Belum direkodkan</string>
+    <string name="prayer_next_in">%1$s dalam %2$s</string>
+    <string name="prayer_day_complete">Hari selesai</string>
+    <string name="prayer_day_summary_past">Hari selesai · %1$d daripada %2$d ditunaikan</string>
+    <string name="prayer_day_upcoming">Hari akan datang</string>
     <string name="prayer_tracker_title">Penjejak Solat</string>
     <string name="view_statistics">Lihat Statistik</string>
     <string name="all_caught_up">Semua Selesai!</string>

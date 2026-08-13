@@ -387,6 +387,10 @@
     <string name="prayer_legend_some">Bazıları</string>
     <string name="prayer_legend_none">Hiçbiri</string>
     <string name="prayer_legend_not_recorded">Kaydedilmedi</string>
+    <string name="prayer_next_in">%2$s içinde %1$s</string>
+    <string name="prayer_day_complete">Gün tamamlandı</string>
+    <string name="prayer_day_summary_past">Gün tamamlandı · %2$d namazdan %1$d kılındı</string>
+    <string name="prayer_day_upcoming">Yaklaşan gün</string>
     <string name="prayer_tracker_title">Namaz Takibi</string>
     <string name="view_statistics">İstatistikleri Görüntüle</string>
     <string name="all_caught_up">Tamamı Kılındı!</string>

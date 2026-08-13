@@ -30,6 +30,8 @@ import com.arshadshah.nimaz.core.util.formatFullDate
 import com.arshadshah.nimaz.core.util.toUtcMidnightMillis
 import com.arshadshah.nimaz.domain.model.PrayerName
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeEmphasis
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBanner
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBannerVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazDayRail
@@ -42,6 +44,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazStatusDotStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.atoms.TickResolution
 import com.arshadshah.nimaz.presentation.components.atoms.rememberNow
+import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuItem
 import com.arshadshah.nimaz.presentation.components.molecules.calendar.CalendarDayState
 import com.arshadshah.nimaz.presentation.components.molecules.calendar.CalendarLegendItem
@@ -218,21 +221,38 @@ fun PrayerTrackerScreen(
             }
 
             item {
-                NimazMenuItem(
-                    title = stringResource(R.string.qada_prayers),
-                    subtitle = if (qadaState.missedPrayers.isEmpty()) {
-                        stringResource(R.string.qada_summary_empty)
-                    } else {
-                        stringResource(R.string.qada_summary_subtitle)
-                    },
-                    icon = Icons.Default.Restore,
-                    onClick = onNavigateToQada,
-                    trailing = {
-                        if (qadaState.missedPrayers.isNotEmpty()) {
-                            NimazBadge(text = qadaState.missedPrayers.size.toString())
-                        }
-                    },
-                )
+                // Carded like every other section on this screen, rather than sitting flat on
+                // the page background -- NimazMenuGroup is the same FILLED, rounded NimazCard
+                // the day card and the month section already use.
+                NimazMenuGroup {
+                    NimazMenuItem(
+                        title = stringResource(R.string.qada_prayers),
+                        subtitle = if (qadaState.missedPrayers.isEmpty()) {
+                            stringResource(R.string.qada_summary_empty)
+                        } else {
+                            stringResource(R.string.qada_summary_subtitle)
+                        },
+                        icon = Icons.Default.Restore,
+                        // Qada is purple everywhere else in the tracker (the picker, the
+                        // timeline dot) -- NimazColors.StatusColors.Qada, not an invented tone.
+                        iconTint = NimazColors.StatusColors.Qada,
+                        onClick = onNavigateToQada,
+                        trailing = {
+                            if (qadaState.missedPrayers.isNotEmpty()) {
+                                // A filled purple count badge, not the default neutral/outlined
+                                // one -- NimazBadgeDefaults.feature is the same escape hatch
+                                // StatusBadge uses for this exact colour.
+                                NimazBadge(
+                                    text = qadaState.missedPrayers.size.toString(),
+                                    colors = NimazBadgeDefaults.feature(
+                                        color = NimazColors.StatusColors.Qada,
+                                        emphasis = NimazBadgeEmphasis.FILLED,
+                                    ),
+                                )
+                            }
+                        },
+                    )
+                }
             }
         }
     }

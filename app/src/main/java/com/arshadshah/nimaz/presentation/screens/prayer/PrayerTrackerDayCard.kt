@@ -3,10 +3,13 @@ package com.arshadshah.nimaz.presentation.screens.prayer
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocalFireDepartment
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -17,6 +20,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.util.countdownOf
 import com.arshadshah.nimaz.core.util.formatClock
 import com.arshadshah.nimaz.core.util.formatFullDate
 import com.arshadshah.nimaz.domain.model.PrayerName
@@ -31,18 +35,22 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazDivider
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSegmentedControl
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSegmentedOption
 import com.arshadshah.nimaz.presentation.components.atoms.NimazStatusDotSpec
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTimelineNode
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTimelineTrack
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
+import com.arshadshah.nimaz.presentation.components.atoms.countdownText
 import com.arshadshah.nimaz.presentation.components.molecules.NimazAccordion
 import com.arshadshah.nimaz.presentation.components.molecules.NimazAccordionStyle
 import com.arshadshah.nimaz.presentation.theme.LocalUse24HourFormat
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
+import kotlin.time.toKotlinDuration
 
 /** The four assertions a user can make, in picker order. */
 private val PICKER_STATUSES = listOf(
@@ -133,6 +141,14 @@ fun PrayerTrackerDayCard(
                 }
             }
 
+            DayLede(
+                selectedDate = selectedDate,
+                times = times,
+                now = now,
+                doneCount = doneCount,
+                modifier = Modifier.padding(horizontal = 18.dp, vertical = 10.dp),
+            )
+
             DayTimeline(
                 statuses = statuses,
                 times = times,
@@ -176,6 +192,70 @@ fun PrayerTrackerDayCard(
                 )
             }
         }
+    }
+}
+
+/**
+ * The lede line under the header: the next prayer with a live countdown for today, or a plain
+ * summary for any other day.
+ *
+ * A day in the past reads what was recorded, not the schedule -- it has already happened, so a
+ * countdown to it would be meaningless. A future day has no records to summarize yet, so it gets
+ * a neutral line instead of claiming a status nobody could have set.
+ */
+@Composable
+private fun DayLede(
+    selectedDate: LocalDate,
+    times: PrayerTimes?,
+    now: LocalDateTime,
+    doneCount: Int,
+    modifier: Modifier = Modifier,
+) {
+    val today = now.toLocalDate()
+    val text = when {
+        selectedDate == today -> {
+            val next = times?.let { schedule ->
+                TRACKED_PRAYERS.firstNotNullOfOrNull { prayer ->
+                    schedule.timeFor(prayer)?.takeIf { it.isAfter(now) }?.let { prayer to it }
+                }
+            }
+            if (next == null) {
+                stringResource(R.string.prayer_day_complete)
+            } else {
+                val (prayer, at) = next
+                val duration = countdownText(
+                    countdownOf(Duration.between(now, at).toKotlinDuration()),
+                    showSeconds = false,
+                )
+                stringResource(R.string.prayer_next_in, prayer.displayName(), duration)
+            }
+        }
+
+        selectedDate.isBefore(today) -> stringResource(
+            R.string.prayer_day_summary_past,
+            doneCount,
+            TRACKED_PRAYERS.size,
+        )
+
+        else -> stringResource(R.string.prayer_day_upcoming)
+    }
+
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        NimazIcon(
+            imageVector = Icons.Default.Schedule,
+            contentDescription = null,
+            size = NimazIconSize.SMALL,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Spacer(modifier = Modifier.width(6.dp))
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }
 
