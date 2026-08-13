@@ -42,5 +42,6 @@ class PrayerTrackerWorker @AssistedInject constructor(
         workerName = "PrayerTrackerWorker",
         success = { PrayerTrackerWidgetState.Success(dataSource.load()) },
         error = { message -> PrayerTrackerWidgetState.Error(message) },
+        hasData = { it.hasData },
     )
 }

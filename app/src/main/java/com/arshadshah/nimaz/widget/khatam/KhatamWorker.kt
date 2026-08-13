@@ -42,5 +42,6 @@ class KhatamWorker @AssistedInject constructor(
         workerName = "KhatamWorker",
         success = { KhatamWidgetState.Success(dataSource.load()) },
         error = { message -> KhatamWidgetState.Error(message) },
+        hasData = { it.hasData },
     )
 }

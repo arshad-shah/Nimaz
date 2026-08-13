@@ -5,11 +5,20 @@ import kotlinx.serialization.Serializable
 @Serializable
 sealed interface PrayerTimesWidgetState {
 
+    /**
+     * Whether this state is a reading worth keeping on screen when a refresh fails — see
+     * `refreshWidget`. The default state every widget starts on is `Success` with an empty
+     * payload, so "is it Success" is not the question; carrying loaded values is.
+     */
+    val hasData: Boolean get() = false
+
     @Serializable
     data object Loading : PrayerTimesWidgetState
 
     @Serializable
-    data class Success(val data: PrayerTimesData) : PrayerTimesWidgetState
+    data class Success(val data: PrayerTimesData) : PrayerTimesWidgetState {
+        override val hasData: Boolean get() = data.fajrEpochMillis > 0L
+    }
 
     @Serializable
     data class Error(val message: String?) : PrayerTimesWidgetState

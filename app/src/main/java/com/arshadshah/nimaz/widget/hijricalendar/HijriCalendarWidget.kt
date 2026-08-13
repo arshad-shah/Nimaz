@@ -433,8 +433,10 @@ private fun EventRow(
 class HijriCalendarWidgetReceiver : WidgetWorkReceiver() {
     override val glanceAppWidget: GlanceAppWidget = HijriCalendarWidget()
 
-    override fun enqueueWork(context: Context) =
-        HijriCalendarWorker.enqueuePeriodicWork(context, force = true)
+    override fun enqueueWork(context: Context, force: Boolean) =
+        HijriCalendarWorker.enqueuePeriodicWork(context, force = force)
+
+    override fun refreshNow(context: Context) = HijriCalendarWorker.enqueueImmediateWork(context)
 
     override fun cancelWork(context: Context) = HijriCalendarWorker.cancel(context)
 }
