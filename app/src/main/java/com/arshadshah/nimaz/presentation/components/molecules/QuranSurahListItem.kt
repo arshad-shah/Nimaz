@@ -79,6 +79,11 @@ internal fun SurahListItem(
     isKhatamActive: Boolean = false,
     isSelected: Boolean = false,
     startPage: Int = 0,
+    /**
+     * Which juz (or juz range) this surah is printed in, already formatted. Null where the
+     * caller's list is not sectioned by juz and the row would only be repeating its header.
+     */
+    juzLabel: String? = null,
     modifier: Modifier = Modifier
 ) {
     val isComplete = isKhatamActive && khatamTotalAyahs > 0 && khatamReadCount == khatamTotalAyahs
@@ -165,7 +170,8 @@ internal fun SurahListItem(
                             null
                         }
                         Text(
-                            text = listOfNotNull(verses, page).joinToString(MetaSeparator),
+                            text = listOfNotNull(verses, page, juzLabel)
+                                .joinToString(MetaSeparator),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             maxLines = 1,

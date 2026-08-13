@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.presentation.components.molecules
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Article
 import androidx.compose.material.icons.automirrored.filled.List
@@ -21,6 +22,8 @@ import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.RevelationType
 import com.arshadshah.nimaz.domain.model.Surah
+import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
+import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 
 /**
  * What a surah is, raised where you are rather than pushed as a screen.
@@ -60,9 +63,18 @@ fun SurahInfoSheet(
         onDismissRequest = onDismiss,
         modifier = modifier,
         title = surah.nameEnglish,
-        subtitle = surah.nameTransliteration,
+        // Only when it is a second name. The `surahs` table carries no translated meaning —
+        // `name_english` and `name_transliteration` are both romanisations and are equal for
+        // most surahs — so printing both put "At-Tawbah" over "At-Tawbah". Where they do
+        // differ the second one is worth showing; where they do not, saying it twice is not
+        // extra information, and inventing an English meaning the data does not hold would be
+        // worse than saying nothing.
+        subtitle = surah.nameTransliteration
+            .takeIf { it.isNotBlank() && !it.equals(surah.nameEnglish, ignoreCase = true) },
         icon = Icons.AutoMirrored.Filled.MenuBook,
-        badge = surah.nameArabic,
+        // The Arabic name is not a badge. A chip sets it in the UI's Latin face at label size,
+        // where the diacritics collide and the ligatures break; it belongs in the Arabic face,
+        // at Arabic size, and it gets that at the top of the body.
         onClose = onDismiss,
         footer = {
             NimazSheetFooterButtons(
@@ -74,6 +86,15 @@ fun SurahInfoSheet(
         }
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
+            surah.nameArabic.takeIf { it.isNotBlank() }?.let {
+                ArabicText(
+                    text = it,
+                    size = ArabicTextSize.LARGE,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+
             SurahMetaStrip(
                 stats = listOf(
                     SurahMetaStat(

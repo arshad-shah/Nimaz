@@ -177,6 +177,10 @@ fun NimazSegmentedControl(
                     .then(
                         if (width == NimazSegmentedWidth.FILL) Modifier.weight(1f) else Modifier
                     )
+                    // Clipped *before* selectable, or the ripple is a square over a rounded
+                    // pill: `Surface(shape)` clips its own drawing, not the indication of a
+                    // modifier applied outside it.
+                    .clip(cellShape)
                     .selectable(
                         selected = selected,
                         enabled = enabled,

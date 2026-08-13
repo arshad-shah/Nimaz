@@ -1289,9 +1289,23 @@ treatment. Verse-of-the-Day and continue-reading previously both carried
 - **`ReaderAnchorBar`** (molecule, `components/molecules/ReaderAnchorBar.kt`) says where you are
   **once**. `Juz 15 · Page 293` used to be a badge on every ayah — the same sentence repeated six
   times a screen about a fact that changes about once a page — and it is one bar under the app bar
-  now, where it is true of everything below it. It carries the "Go to…" affordance too, so the
-  place you are is also the control for changing it; the reader points it at the surah's passage
-  outline, opened at the verse being read.
+  now, where it is true of everything below it. It renders the **coordinate only**: the surah's
+  name is already in the app bar one line above, and printing it twice is the repetition the bar
+  exists to end. It carries the "Go to…" affordance too, so the place you are is also the control
+  for changing it.
+- **`ReaderGoToSheet`** (molecule, `components/molecules/ReaderGoToSheet.kt`) is what "Go to…"
+  opens: a `NimazSegmentedControl` over Verse / Juz / Page, a bounded numeric field, and a jump.
+  The affordance used to open the *passage outline*, which answers "what is this surah about" — a
+  good question, and not the one a control called "Go to" is asking. The host scrolls when the
+  target is already loaded and re-targets the reader (`LoadJuz` / `LoadPage`) when it is not, so
+  "page 300" works from anywhere. Verse is offered only in surah mode; juz and page span several.
+- **`NoteEditorSheet`** (molecule, `components/molecules/NoteEditorSheet.kt`) is the **one** note
+  editor, shared by the Saved screen's bookmark menu and the reader's ayah sheet. The ayah sheet's
+  Note action used to open **Tafseer** — the scholars' commentary, which is the neighbouring
+  action — so the app had no way to write a note about a verse at all. A note lives on the verse's
+  bookmark row (`QuranEvent.SetAyahNote` creates the mark if there isn't one), and the annotated
+  subset is carried on `QuranReaderUiState.ayahNotes` so the editor opens on what is already
+  written rather than on a blank field that would overwrite it.
 - The reader's **reading-mode control** is an app-bar icon showing the current mode, not a row in
   the overflow next to Passages and Settings. **Two** modes, Translation and Mushaf — the 16-line
   and 15-line IndoPak editions are a *script* (`MushafScript`, a persisted `SettingsQuran`
@@ -1327,12 +1341,26 @@ treatment. Verse-of-the-Day and continue-reading previously both carried
   `QuranTopicsScreen`, `QuranTopicDetailScreen` and `SurahSubjectsScreen` — the three screens later
   phases of this redesign rewrite — so it is the tree component to build on, not to duplicate.
 - **`QuranFrame`'s two variants have parted company.** `READER` — the mushaf page — takes the
-  paper register: a `paper` ground, one `paperLine` hairline rule above and below the text block,
-  and a small `paperLine` medallion at the foot. `STUDY` — Tafseer — keeps the illuminated
-  gold-over-teal double border and the floret divider. Both mushaf renderers draw their Arabic in
-  `paperInk` rather than `onBackground`, which is mixed for a card and not for cream. Two
-  ornamental registers in one app is a deliberate cost (spec §5.9's "noted tension"), taken
-  because the mushaf's job is to disappear behind the text and Tafseer's is to frame it.
+  paper register: a `paper` ground inside a 16dp rounded card, a second `paperLine` keyline drawn
+  **inside** it at 12dp, and the page number as a small `paper`-filled pill straddling that
+  keyline's bottom edge in `frameGold`. Two nested rounded rectangles is how a printed mushaf
+  frames its text block, and what the design prototype
+  (`docs/superpowers/prototypes/2026-08-13-quran-mushaf-and-player.html`) draws; the earlier
+  hairline-rule-plus-shamsa version put a rosette at the foot of every page, competing with the ۞
+  and ع markers inside it that are actually carrying meaning. `STUDY` — Tafseer — keeps the
+  illuminated gold-over-teal double border, the floret divider and the shamsa. Both mushaf
+  renderers draw their Arabic in `paperInk` rather than `onBackground`, which is mixed for a card
+  and not for cream. Two ornamental registers in one app is a deliberate cost (spec §5.9's "noted
+  tension"), taken because the mushaf's job is to disappear behind the text and Tafseer's is to
+  frame it.
+- **`RuledSurahHeading`** (molecule, `components/molecules/RuledSurahHeading.kt`) opens a surah
+  **on the paper page**: a `paperLine`-bordered box washed with 7% `frameGold`, holding
+  hairline / Arabic surah name in gold / hairline, with the Basmala on its own line beneath in
+  `paperInk`. Both mushaf renderers (`MushafPage`, `MushafLineLayout`) use it. They used to render
+  `SurahHeaderCartouche`, which pins the brand ramps regardless of theme and so landed on a cream
+  page as a dark teal plaque carrying the surah's *English* name and a "Meccan" badge — card
+  furniture, in the middle of the text block. The cartouche is **not** retired: it still opens the
+  translation reader, where the surface genuinely is a card.
 - `QuranSurfaceColors` (`presentation/theme/QuranSurfaceColors.kt`) now also carries a **`paper`**
   register — `paper` / `paperLine` / `paperInk` — used **only** by the mushaf and 16-line reading
   modes. It is held apart from `pageSurface` and the rest of the app's `surface` tokens because

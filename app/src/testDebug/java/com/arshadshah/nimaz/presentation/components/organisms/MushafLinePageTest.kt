@@ -76,7 +76,7 @@ class MushafLinePageTest {
     fun `renders the surah header and its dedicated basmalah line`() {
         // The mapper (post-#271 fix) emits a header line and a separate basmalah line for the
         // 81 surahs that ship both on one line_number, e.g. Al-Anbiya (21) on p.290. The page
-        // must draw both — the header cartouche AND the standalone basmalah.
+        // must draw both — the ruled heading AND the standalone basmalah.
         composeRule.setThemedContent {
             MushafLinePage(
                 pageNumber = 290,
@@ -93,8 +93,9 @@ class MushafLinePageTest {
             )
         }
 
-        composeRule.onNodeWithText("Al-Anbiya").assertExists()
-        composeRule.onNodeWithText("Meccan").assertExists()
+        // The ruled heading prints the Arabic name only — see `RuledSurahHeading`.
+        composeRule.onNodeWithText("الأنبياء").assertExists()
+        composeRule.onNodeWithText("Meccan").assertDoesNotExist()
         composeRule.onNodeWithText(BISMILLAH_TEXT).assertExists()
         composeRule.onNodeWithText("ٱقْتَرَبَ").assertExists()
     }
@@ -140,7 +141,7 @@ class MushafLinePageTest {
             )
         }
 
-        composeRule.onNodeWithText("Al-Fatihah").assertExists()
+        composeRule.onNodeWithText("الفاتحة").assertExists()
         // The full centred basmalah line (BISMILLAH_TEXT) is not drawn as a standalone line.
         composeRule.onAllNodesWithText(BISMILLAH_TEXT).assertCountEquals(0)
     }

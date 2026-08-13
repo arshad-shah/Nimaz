@@ -29,7 +29,7 @@ import com.arshadshah.nimaz.presentation.components.molecules.AyahTooltip
 import com.arshadshah.nimaz.presentation.components.molecules.MushafContinuousText
 import com.arshadshah.nimaz.presentation.components.molecules.QuranFrame
 import com.arshadshah.nimaz.presentation.components.molecules.QuranFrameVariant
-import com.arshadshah.nimaz.presentation.components.molecules.SurahHeaderCartouche
+import com.arshadshah.nimaz.presentation.components.molecules.RuledSurahHeading
 import com.arshadshah.nimaz.presentation.components.molecules.sampleFatihahAyahs
 import com.arshadshah.nimaz.presentation.components.molecules.sampleSurahBaqarah
 import com.arshadshah.nimaz.presentation.components.molecules.sampleSurahFatihah
@@ -119,7 +119,10 @@ fun MushafPage(
                     val isNewSurah = surahAyahs.firstOrNull()?.ayahNumber == 1
 
                     if (isNewSurah && surah != null) {
-                        SurahHeaderCartouche(
+                        // Ruled, not the cartouche: the page is paper, and the cartouche is a
+                        // teal-and-gold plaque that reads as a card dropped into the text
+                        // block. See `RuledSurahHeading`.
+                        RuledSurahHeading(
                             surah = surah,
                             modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
                             showBismillah = surahNumber != 1 && surahNumber != 9

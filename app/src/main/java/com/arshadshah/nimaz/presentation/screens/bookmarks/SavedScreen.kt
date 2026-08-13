@@ -31,7 +31,6 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -60,13 +59,11 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeEmphasis
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
-import com.arshadshah.nimaz.presentation.components.molecules.NimazBottomSheet
 import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorDefaults
 import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorState
 import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
-import com.arshadshah.nimaz.presentation.components.molecules.NimazSheetFooterButtons
-import com.arshadshah.nimaz.presentation.components.molecules.NimazSheetSectionLabel
+import com.arshadshah.nimaz.presentation.components.molecules.NoteEditorSheet
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazMenuAction
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSegmentedControl
@@ -335,7 +332,8 @@ fun SavedScreen(
     // Note editor sheet.
     noteTarget?.let { target ->
         NoteEditorSheet(
-            bookmark = target,
+            subject = target.title,
+            initialNote = target.note,
             onDismiss = { noteTarget = null },
             onSave = { note ->
                 viewModel.onEvent(BookmarksEvent.EditNote(target.id, note))
@@ -484,42 +482,6 @@ private fun BookmarkSavedCard(
             )
         }
     )
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun NoteEditorSheet(
-    bookmark: UnifiedBookmark,
-    onDismiss: () -> Unit,
-    onSave: (String?) -> Unit
-) {
-    var text by remember(bookmark.id) { mutableStateOf(bookmark.note.orEmpty()) }
-    NimazBottomSheet(
-        onDismissRequest = onDismiss,
-        title = stringResource(R.string.edit_note),
-        subtitle = bookmark.title,
-        icon = Icons.Default.Edit,
-        onClose = onDismiss,
-        footer = {
-            NimazSheetFooterButtons(
-                primaryText = stringResource(R.string.save),
-                onPrimary = { onSave(text) },
-                secondaryText = stringResource(R.string.cancel),
-                onSecondary = onDismiss
-            )
-        }
-    ) {
-        NimazSheetSectionLabel(text = stringResource(R.string.edit_note))
-        OutlinedTextField(
-            value = text,
-            onValueChange = { text = it },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(140.dp),
-            placeholder = { Text(stringResource(R.string.note_hint)) }
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-    }
 }
 
 /**

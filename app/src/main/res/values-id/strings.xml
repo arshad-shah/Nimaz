@@ -908,8 +908,8 @@
     <string name="show_transliteration_subtitle">Pelafalan dengan huruf Latin</string>
     <string name="show_translation">Tampilkan Terjemahan</string>
     <string name="show_translation_subtitle">Makna dalam bahasa Anda</string>
-    <string name="continuous_reading">Bacaan Berkelanjutan</string>
-    <string name="continuous_reading_subtitle">Lanjutkan membaca antar surah dan putar otomatis ayat berikutnya</string>
+    <string name="continuous_reading">Pemutaran berkelanjutan</string>
+    <string name="continuous_reading_subtitle">Lanjut ke ayat berikutnya dan surah berikutnya, bukan berhenti di akhir</string>
     <string name="keep_screen_on">Biarkan Layar Menyala</string>
     <string name="keep_screen_on_subtitle">Cegah layar dari mati</string>
     <string name="show_tajweed_colors">Tampilkan Warna Tajwid</string>
@@ -1983,6 +1983,7 @@
     <string name="khatam">Khatam</string>
     <string name="quran_browse_search_hint">Surah, juz 15, halaman 299</string>
     <string name="quran_browse_page_start">hlm. %1$d</string>
+    <string name="quran_browse_juz_span">Juz %1$d–%2$d</string>
     <string name="quran_browse_load_failed">Daftar surah tidak dapat dimuat</string>
     <string name="quran_browse_open_juz">Buka juz %1$d</string>
     <string name="quran_browse_open_page">Buka halaman %1$d</string>
@@ -2008,6 +2009,9 @@
     <string name="ayah_action_share">Bagikan</string>
     <string name="ayah_action_mark_read">Tandai dibaca</string>
     <string name="reader_go_to">Buka…</string>
+    <string name="reader_go_to_action">Buka</string>
+    <string name="reader_go_to_range">%1$d–%2$d</string>
+    <string name="reader_go_to_verse">Ayat</string>
     <string name="reader_mode">Mode baca</string>
     <string name="reader_mode_translation">Terjemahan</string>
     <string name="reader_mode_mushaf">Mushaf</string>

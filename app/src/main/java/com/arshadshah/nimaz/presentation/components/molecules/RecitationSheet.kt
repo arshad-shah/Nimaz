@@ -105,10 +105,13 @@ fun RecitationSheet(
                         maxValue = MAX_TIMES,
                     )
 
-                    is RecitationRepeat.Range -> Row(
+                    // Stacked, not side by side. Two steppers sharing a phone's width leaves
+                    // each about 160dp for a label, a minus, a number and a plus — the label
+                    // ellipsises and the buttons crowd the value. A row each costs one line of
+                    // sheet and gives both their full width.
+                    is RecitationRepeat.Range -> Column(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        verticalAlignment = Alignment.CenterVertically,
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         NimazNumberStepper(
                             label = stringResource(R.string.recitation_repeat_from),
@@ -123,7 +126,7 @@ fun RecitationSheet(
                             },
                             minValue = 1,
                             maxValue = maxOf(1, ayahCount),
-                            modifier = Modifier.weight(1f),
+                            modifier = Modifier.fillMaxWidth(),
                         )
                         NimazNumberStepper(
                             label = stringResource(R.string.recitation_repeat_to),
@@ -138,7 +141,7 @@ fun RecitationSheet(
                             },
                             minValue = 1,
                             maxValue = maxOf(1, ayahCount),
-                            modifier = Modifier.weight(1f),
+                            modifier = Modifier.fillMaxWidth(),
                         )
                     }
 

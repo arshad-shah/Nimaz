@@ -28,13 +28,11 @@ import com.arshadshah.nimaz.presentation.theme.NimazTheme
  * here, under the app bar, where it is true of everything below it — and takes the "Go to…"
  * action with it, so the place you are is also the control for changing it.
  *
- * @param title what is being read — the surah, or the juz/page in those modes.
  * @param subtitle the coordinate: juz and page.
  * @param onGoTo opens the jump control; null hides the affordance where there is nowhere to go.
  */
 @Composable
 fun ReaderAnchorBar(
-    title: String,
     subtitle: String,
     modifier: Modifier = Modifier,
     onGoTo: (() -> Unit)? = null,
@@ -51,23 +49,17 @@ fun ReaderAnchorBar(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-                Text(
-                    text = subtitle,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            }
+            // The coordinate only. The surah's name is already in the app bar directly above,
+            // and printing it twice, one line apart, is the repetition this bar exists to end.
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f),
+            )
             if (onGoTo != null) {
                 NimazIconButton(
                     icon = Icons.Default.MyLocation,
@@ -84,7 +76,6 @@ fun ReaderAnchorBar(
 private fun ReaderAnchorBarPreview() {
     NimazTheme {
         ReaderAnchorBar(
-            title = "Al-Kahf",
             subtitle = "Juz 15 · Page 293",
             onGoTo = {},
         )

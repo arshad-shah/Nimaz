@@ -927,8 +927,8 @@
     <string name="show_transliteration_subtitle">Aussprache in lateinischen Buchstaben</string>
     <string name="show_translation">Übersetzung anzeigen</string>
     <string name="show_translation_subtitle">Bedeutung in Ihrer Sprache</string>
-    <string name="continuous_reading">Fortlaufendes Lesen</string>
-    <string name="continuous_reading_subtitle">Zwischen Surahs weiterlesen und nächste Ayah automatisch abspielen</string>
+    <string name="continuous_reading">Durchgehende Wiedergabe</string>
+    <string name="continuous_reading_subtitle">Nach dem Ende einer Ayah mit der nächsten und der nächsten Surah weiterspielen</string>
     <string name="keep_screen_on">Bildschirm anlassen</string>
     <string name="keep_screen_on_subtitle">Verhindern, dass sich der Bildschirm ausschaltet</string>
     <string name="show_tajweed_colors">Tadschwid-Farben anzeigen</string>
@@ -2024,6 +2024,7 @@
     <string name="khatam">Khatam</string>
     <string name="quran_browse_search_hint">Sure, Dschus 15, Seite 299</string>
     <string name="quran_browse_page_start">S. %1$d</string>
+    <string name="quran_browse_juz_span">Dschuz %1$d–%2$d</string>
     <string name="quran_browse_load_failed">Die Surenliste konnte nicht geladen werden</string>
     <string name="quran_browse_open_juz">Dschus %1$d öffnen</string>
     <string name="quran_browse_open_page">Seite %1$d öffnen</string>
@@ -2049,6 +2050,9 @@
     <string name="ayah_action_share">Teilen</string>
     <string name="ayah_action_mark_read">Als gelesen</string>
     <string name="reader_go_to">Gehe zu…</string>
+    <string name="reader_go_to_action">Los</string>
+    <string name="reader_go_to_range">%1$d–%2$d</string>
+    <string name="reader_go_to_verse">Vers</string>
     <string name="reader_mode">Lesemodus</string>
     <string name="reader_mode_translation">Übersetzung</string>
     <string name="reader_mode_mushaf">Mushaf</string>

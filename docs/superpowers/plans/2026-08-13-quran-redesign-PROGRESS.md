@@ -242,6 +242,27 @@ environmental — see [§1](#1-start-here).
 | "1 passages across 7 verses" | A `plurals` resource, in all six locales |
 | Recommended strip reports "Juz 1" for every surah | `Surah.juzStart` deleted; every caller resolves through `MushafPagination.juzForPage` |
 
+**Found on device by the user (internal build 3.0.114), fixed on this branch:**
+
+| Defect | Fix |
+|--------|-----|
+| The player looked nothing like the prototype | `AudioBottomBar` rebuilt against `prototypes/2026-08-13-quran-mushaf-and-player.html`: violet full-bleed download strip, now-playing left / transport right, seek rail between two clocks, reciter+speed left with repeat in the accent right |
+| The player was always on screen | It draws nothing unless `isAudioActive \|\| isPreparing`; playback starts from the ayah sheet or surah info |
+| Stop sat beside next/previous | Removed from the bar — it is the recitation sheet's secondary action |
+| Juz headers did not stick | `stickyHeader` in `QuranBrowseScreen`, with an opaque background so rows do not scroll through the text |
+| Surahs crossing a juz were filed under one | `juzBySurah: Map<Int, Int>` → `juzSpans: Map<Int, IntRange>`, derived from a new `pageSpans`; the row names its range, and a `juz 2` query now finds Al-Baqarah instead of returning nothing |
+| The `next` surah was found by `number + 1` | By list position instead, so a filtered or partial list spans correctly |
+| Bookmark and favourite in the ayah sheet were grey | Gold and red — the colours they carried on the pill the sheet replaced |
+| "Go to…" opened the passage outline | New `ReaderGoToSheet` — Verse / Juz / Page, bounded, scrolls or re-targets |
+| The surah's name was rendered twice | `ReaderAnchorBar` lost its `title`; the app bar one line above already says it |
+| The ayah sheet's Note action opened Tafseer | New shared `NoteEditorSheet` + `QuranEvent.SetAyahNote`; `QuranReaderUiState.ayahNotes` carries what is already written |
+| The segmented control's ripple was a square | `.clip(cellShape)` **before** `.selectable` — `Surface(shape)` clips its own drawing, not the indication of a modifier applied outside it |
+| The mushaf did not look like the prototype | `QuranFrame.READER` is two nested rounded rectangles with a page-number pill on the inner keyline; new `RuledSurahHeading` replaces the teal cartouche on both paper renderers |
+| Follow-along and Continuous Reading read as duplicates | "Continuous playback", reworded and moved under **Audio** beside the reciter |
+| The repeat range steppers were crushed side by side | Stacked in a `Column`, each full width |
+| Surah info printed the transliteration as if it were a translation | The subtitle is drawn only when it differs from the title; the Arabic name moved out of the badge chip into `ArabicText` at the head of the sheet |
+| Hizb was wrong, and doubled | Derived from the 1..240 quarter counter (`Ayah.hizbOfQuarter`) and omitted entirely when that counter is absent — `Ayah.hizbNumber` holds the quarter index in the shipped data, so page 82 reported "Hizb 33" for what is hizb 9 |
+
 **Content, for `arshad-shah/nimaz-data` — not fixable in this repo:**
 
 - The thematic tree's first root is titled **"Doctraine"**; its own description says "Doctrine".

@@ -29,6 +29,8 @@ import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazToneColors
+import com.arshadshah.nimaz.presentation.theme.NimazColors
+import com.arshadshah.nimaz.presentation.theme.NimazPalette
 import com.arshadshah.nimaz.presentation.theme.asTranslationText
 
 /** What the ayah sheet can do, in one bundle so the host wires them once. */
@@ -105,12 +107,17 @@ fun AyahActionSheet(
                         icon = Icons.Default.PlayArrow,
                         label = stringResource(R.string.ayah_action_play_from_here),
                         onClick = actions.onPlayFromHere,
+                        tint = MaterialTheme.colorScheme.primary,
                     ),
                     NimazSheetAction(
                         icon = Icons.Default.Repeat,
                         label = stringResource(R.string.ayah_action_repeat),
                         onClick = actions.onRepeatAyah,
                     ),
+                    // Bookmark and favourite keep the colours they carried on the pill this
+                    // sheet replaced — gold for a mark, red for a heart. They are the two
+                    // actions a reader looks for by colour rather than by reading the label,
+                    // and a row of identical grey circles takes that away.
                     NimazSheetAction(
                         icon = if (isBookmarked) Icons.Default.Bookmark
                         else Icons.Default.BookmarkBorder,
@@ -120,6 +127,7 @@ fun AyahActionSheet(
                         ),
                         onClick = actions.onBookmark,
                         selected = isBookmarked,
+                        tint = NimazColors.QuranColors.BookmarkPrimary,
                     ),
                     NimazSheetAction(
                         icon = if (isFavourite) Icons.Default.Favorite
@@ -130,6 +138,7 @@ fun AyahActionSheet(
                         ),
                         onClick = actions.onFavourite,
                         selected = isFavourite,
+                        tint = NimazPalette.Red500,
                     ),
                     NimazSheetAction(
                         icon = Icons.Default.EditNote,

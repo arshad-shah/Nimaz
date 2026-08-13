@@ -114,14 +114,14 @@ class QuranBrowseViewModel @Inject constructor(
         raw: String,
     ): QuranBrowseUiState {
         val pages = startPages(surahs, pagination)
-        val juz = pages.mapValues { (_, page) -> pagination.juzForPage(page) }
+        val juz = juzSpans(surahs, pages, pagination)
         val parsed = QuranSearchQuery.parse(raw)
         return copy(
             query = raw,
             isLoading = false,
             error = null,
             startPages = pages,
-            juzBySurah = juz,
+            juzSpans = juz,
             rows = filterRows(surahs, parsed, pages, juz),
             // A name search is answered by the list itself; only a query naming a place gets
             // a jump card, and an empty field names nothing.
@@ -134,26 +134,25 @@ class QuranBrowseViewModel @Inject constructor(
     /**
      * What the list shows for a query.
      *
-     * A juz query narrows to the surahs that *start* in that juz — the rows the old Juz tab
-     * would have taken you to. A page query narrows to the surah printed on that page, which
-     * is more useful than an empty list beneath a jump card. A name matches the English name,
-     * the transliteration and the Arabic, because a reader typing "Kahf" and a reader typing
+     * A juz query narrows to every surah *printed in* that juz, not only the ones that open in
+     * it — `juz 2` is entirely inside Al-Baqarah, so the start-only version answered it with an
+     * empty list. A page query narrows to the surah printed on that page, which is more useful
+     * than an empty list beneath a jump card. A name matches the English name, the
+     * transliteration and the Arabic, because a reader typing "Kahf" and a reader typing
      * "الكهف" are asking the same thing.
      */
     private fun QuranBrowseUiState.filterRows(
         surahs: List<Surah>,
         query: QuranSearchQuery,
         pages: Map<Int, Int>,
-        juz: Map<Int, Int>,
+        juz: Map<Int, IntRange>,
     ): List<Surah> = when (query) {
         QuranSearchQuery.Empty -> surahs
-        is QuranSearchQuery.Juz -> surahs.filter { juz[it.number] == query.number }
+        is QuranSearchQuery.Juz -> surahs.filter { juz[it.number]?.contains(query.number) == true }
         is QuranSearchQuery.SurahNumber -> surahs.filter { it.number == query.number }
-        is QuranSearchQuery.Page -> surahs.filter { surah ->
-            val start = pages[surah.number] ?: surah.startPage
-            val next = surahs.firstOrNull { it.number == surah.number + 1 }
-            val end = next?.let { (pages[it.number] ?: it.startPage) - 1 } ?: pagination.totalPages
-            query.number in start..maxOf(start, end)
+        is QuranSearchQuery.Page -> {
+            val spans = pageSpans(surahs, pages, pagination)
+            surahs.filter { query.number in (spans[it.number] ?: IntRange.EMPTY) }
         }
 
         is QuranSearchQuery.Name -> surahs.filter { surah ->
@@ -178,5 +177,40 @@ class QuranBrowseViewModel @Inject constructor(
             firstAyahId += surah.ayahCount
             surah.number to page
         }
+    }
+
+    /**
+     * Surah number → the pages it is printed on, first..last.
+     *
+     * A surah's last page is the page before the *next surah in this list* opens — by position,
+     * not by `number + 1`, so the span is right whatever subset of surahs it is given. An-Nas
+     * runs to the edition's last page. `coerceAtLeast` because several of the short surahs share
+     * an opening page with their neighbour, which would otherwise give a backwards range.
+     */
+    private fun pageSpans(
+        surahs: List<Surah>,
+        pages: Map<Int, Int>,
+        pagination: MushafPagination,
+    ): Map<Int, IntRange> = surahs.mapIndexed { index, surah ->
+        val start = pages[surah.number] ?: surah.startPage
+        val nextStart = surahs.getOrNull(index + 1)
+            ?.let { pages[it.number] ?: it.startPage }
+        val end = (nextStart?.let { it - 1 } ?: pagination.totalPages).coerceAtLeast(start)
+        surah.number to start..end
+    }.toMap()
+
+    /**
+     * Surah number → the juz it opens in .. the juz it ends in.
+     *
+     * Derived from [pageSpans], so it moves with the edition exactly the way the page on each
+     * row does — no second pass over the ayah table.
+     */
+    private fun juzSpans(
+        surahs: List<Surah>,
+        pages: Map<Int, Int>,
+        pagination: MushafPagination,
+    ): Map<Int, IntRange> = pageSpans(surahs, pages, pagination).mapValues { (_, span) ->
+        val firstJuz = pagination.juzForPage(span.first)
+        firstJuz..pagination.juzForPage(span.last).coerceAtLeast(firstJuz)
     }
 }

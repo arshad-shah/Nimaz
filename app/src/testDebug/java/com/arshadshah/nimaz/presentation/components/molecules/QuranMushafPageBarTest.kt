@@ -21,7 +21,9 @@ class QuranMushafPageBarTest {
     private fun ayah(
         id: Int,
         juzNumber: Int = 1,
-        hizbNumber: Int = 2,
+        // The bar derives hizb from the 1..240 quarter counter, never from `hizbNumber` (which
+        // holds the quarter index in the shipped data). Quarter 5 is the opening of hizb 2.
+        rubNumber: Int = 5,
         pageNumber: Int = 15
     ) = Ayah(
         id = id,
@@ -30,8 +32,8 @@ class QuranMushafPageBarTest {
         textArabic = "",
         textSimple = "",
         juzNumber = juzNumber,
-        hizbNumber = hizbNumber,
-        rubNumber = 0,
+        hizbNumber = 0,
+        rubNumber = rubNumber,
         pageNumber = pageNumber,
         sajdaType = null,
         sajdaNumber = null
@@ -43,7 +45,7 @@ class QuranMushafPageBarTest {
             MushafPageBar(
                 pageNumber = 15,
                 totalPages = 604,
-                ayahs = listOf(ayah(id = 100, juzNumber = 1, hizbNumber = 2)),
+                ayahs = listOf(ayah(id = 100, juzNumber = 1, rubNumber = 5)),
                 isKhatamActive = false,
                 khatamReadAyahIds = emptySet(),
                 onKhatamTogglePage = {},
@@ -52,8 +54,9 @@ class QuranMushafPageBarTest {
             )
         }
         composeRule.onNodeWithText("Page 15").assertExists()
-        composeRule.onNodeWithText("Juz 1").assertExists()
-        composeRule.onNodeWithText("Hizb 2").assertExists()
+        // Juz and hizb are one muted run appended to the page label, not separate chips.
+        composeRule.onNodeWithText("Juz 1", substring = true).assertExists()
+        composeRule.onNodeWithText("Hizb 2", substring = true).assertExists()
         composeRule.onNodeWithContentDescription("Next page").assertExists()
         composeRule.onNodeWithContentDescription("Previous page").assertExists()
     }
@@ -92,7 +95,7 @@ class QuranMushafPageBarTest {
         }
         composeRule.onNodeWithText("Page 1").assertExists()
         // juz/hizb are 0 -> not rendered
-        composeRule.onNodeWithText("Juz 0").assertDoesNotExist()
+        composeRule.onNodeWithText("Juz 0", substring = true).assertDoesNotExist()
         // khatam active but ayahs empty -> toggle button not rendered
         composeRule.onNodeWithContentDescription("Mark page as read").assertDoesNotExist()
     }

@@ -65,7 +65,7 @@ import com.arshadshah.nimaz.presentation.theme.ThemeMode
  * - [MushafLineType.AYAH] → words rendered right-to-left and **justified to full width**
  *   ([Arrangement.SpaceBetween]), except the last ayah line of the page and the last line of a
  *   surah (the line before a [MushafLineType.SURAH_HEADER]), which sit at natural width.
- * - [MushafLineType.SURAH_HEADER] → a centred [SurahHeaderCartouche] (bismillah suppressed;
+ * - [MushafLineType.SURAH_HEADER] → a centred [RuledSurahHeading] (bismillah suppressed;
  *   the basmalah is its own line in the layout).
  * - [MushafLineType.BASMALAH] → the basmalah centred on its own line.
  *
@@ -174,7 +174,9 @@ fun MushafLineLayout(
                     MushafLineType.SURAH_HEADER -> {
                         val surah = surahMap[line.surahId]
                         if (surah != null) {
-                            SurahHeaderCartouche(
+                            // Ruled, not the cartouche: this page is paper. See
+                            // `RuledSurahHeading`.
+                            RuledSurahHeading(
                                 surah = surah,
                                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
                                 // Basmalah is a separate line in the 16-line layout.

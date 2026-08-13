@@ -1242,8 +1242,8 @@
     <string name="show_transliteration_subtitle">Roman letters pronunciation</string>
     <string name="show_translation">Show Translation</string>
     <string name="show_translation_subtitle">Meaning in your language</string>
-    <string name="continuous_reading">Continuous Reading</string>
-    <string name="continuous_reading_subtitle">Continue reading between surahs and auto-play next verse</string>
+    <string name="continuous_reading">Continuous playback</string>
+    <string name="continuous_reading_subtitle">Play on to the next verse and the next surah instead of stopping at the end of one</string>
     <string name="keep_screen_on">Keep Screen On</string>
     <string name="keep_screen_on_subtitle">Prevent screen from turning off</string>
     <string name="show_tajweed_colors">Show Tajweed Colors</string>
@@ -2220,6 +2220,7 @@
     <string name="khatam">Khatam</string>
     <string name="quran_browse_search_hint">Surah, juz 15, page 299</string>
     <string name="quran_browse_page_start">p. %1$d</string>
+    <string name="quran_browse_juz_span">Juz %1$d–%2$d</string>
     <string name="quran_browse_load_failed">The surah list couldn\'t be loaded</string>
     <string name="quran_browse_open_juz">Open juz %1$d</string>
     <string name="quran_browse_open_page">Open page %1$d</string>
@@ -2245,6 +2246,9 @@
     <string name="ayah_action_share">Share</string>
     <string name="ayah_action_mark_read">Mark read</string>
     <string name="reader_go_to">Go to…</string>
+    <string name="reader_go_to_action">Go</string>
+    <string name="reader_go_to_range">%1$d–%2$d</string>
+    <string name="reader_go_to_verse">Verse</string>
     <string name="reader_mode">Reading mode</string>
     <string name="reader_mode_translation">Translation</string>
     <string name="reader_mode_mushaf">Mushaf</string>

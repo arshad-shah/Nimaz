@@ -933,8 +933,8 @@
     <string name="show_transliteration_subtitle">Latin harfleriyle okunuş</string>
     <string name="show_translation">Çeviriyi Göster</string>
     <string name="show_translation_subtitle">Kendi dilinizdeki anlamı</string>
-    <string name="continuous_reading">Sürekli Okuma</string>
-    <string name="continuous_reading_subtitle">Sureler arasında okumaya devam edin ve sonraki ayeti otomatik oynatın</string>
+    <string name="continuous_reading">Kesintisiz çalma</string>
+    <string name="continuous_reading_subtitle">Bir ayet bitince durmak yerine sonraki ayete ve sonraki sureye geç</string>
     <string name="keep_screen_on">Ekranı Açık Tut</string>
     <string name="keep_screen_on_subtitle">Ekranın kapanmasını engelle</string>
     <string name="show_tajweed_colors">Tecvid Renklerini Göster</string>
@@ -2030,6 +2030,7 @@
     <string name="khatam">Hatim</string>
     <string name="quran_browse_search_hint">Sure, cüz 15, sayfa 299</string>
     <string name="quran_browse_page_start">s. %1$d</string>
+    <string name="quran_browse_juz_span">Cüz %1$d–%2$d</string>
     <string name="quran_browse_load_failed">Sure listesi yüklenemedi</string>
     <string name="quran_browse_open_juz">Cüz %1$d\'i aç</string>
     <string name="quran_browse_open_page">Sayfa %1$d\'i aç</string>
@@ -2055,6 +2056,9 @@
     <string name="ayah_action_share">Paylaş</string>
     <string name="ayah_action_mark_read">Okundu</string>
     <string name="reader_go_to">Git…</string>
+    <string name="reader_go_to_action">Git</string>
+    <string name="reader_go_to_range">%1$d–%2$d</string>
+    <string name="reader_go_to_verse">Ayet</string>
     <string name="reader_mode">Okuma modu</string>
     <string name="reader_mode_translation">Meal</string>
     <string name="reader_mode_mushaf">Mushaf</string>
