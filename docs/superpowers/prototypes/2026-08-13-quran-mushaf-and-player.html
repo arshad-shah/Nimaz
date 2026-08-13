@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nimaz — mushaf pages &amp; recitation player</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --teal-400:#2DD4BF; --teal-500:#14B8A6; --teal-600:#0D9488; --teal-700:#0F766E; --teal-950:#042F2E;
+  --gold:#EAB308; --gold-dark:#CA8A04; --violet:#8B5CF6; --green:#4CAF50;
+  --bg:#F4F7F7; --surface:#FFFFFF; --surface-2:#EDF2F2;
+  --paper:#FBF7EC; --paper-line:#E0D6BC; --paper-ink:#1C1A14;
+  --ink:#0A1F1E; --ink-2:#41605D; --ink-3:#7A9491;
+  --line:rgba(4,47,46,.10); --line-2:rgba(4,47,46,.05);
+  --shadow:0 1px 2px rgba(4,47,46,.05), 0 8px 24px -12px rgba(4,47,46,.18);
+  --accent:var(--teal-600);
+}
+[data-theme="dark"]{
+  --bg:#061412; --surface:#0D2321; --surface-2:#12302D;
+  --paper:#0B1D1B; --paper-line:#1F4340; --paper-ink:#E8F1EF;
+  --ink:#E4F2F0; --ink-2:#9FBCB8; --ink-3:#6E8B88;
+  --line:rgba(224,242,240,.12); --line-2:rgba(224,242,240,.06);
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px -14px rgba(0,0,0,.7);
+  --accent:var(--teal-400);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0}
+body{background:var(--bg);font-family:'Plus Jakarta Sans',system-ui,sans-serif;color:var(--ink);
+  display:flex;flex-direction:column;align-items:center;padding:26px 16px 60px;min-height:100vh}
+button{font:inherit;color:inherit;background:none;border:none;padding:0;cursor:pointer;text-align:left}
+:focus-visible{outline:2px solid var(--teal-500);outline-offset:2px;border-radius:8px}
+svg{display:block;flex:0 0 auto}
+
+.harness{width:100%;max-width:392px;display:flex;flex-direction:column;gap:12px}
+.hbar{display:flex;gap:6px;flex-wrap:wrap}
+.hbtn{font-family:'Outfit';font-size:12px;font-weight:500;padding:7px 12px;border-radius:999px;
+  border:1px solid var(--line);background:var(--surface);color:var(--ink-2)}
+.hbtn.on{background:var(--teal-700);border-color:var(--teal-700);color:#fff}
+.note{font-size:11.5px;color:var(--ink-3);line-height:1.5}
+
+.phone{position:relative;overflow:hidden;background:var(--bg);border:1px solid var(--line);
+  border-radius:34px;box-shadow:var(--shadow);height:812px;display:flex;flex-direction:column}
+.appbar{display:flex;align-items:center;gap:2px;padding:14px 8px 6px 6px;flex:0 0 auto}
+.appbar h1{font-family:'Outfit';font-size:18px;font-weight:600;letter-spacing:-.015em;margin:0;flex:1}
+.appbar .sub{display:block;font-size:11px;font-weight:400;color:var(--ink-3);margin-top:1px}
+.ico{width:38px;height:38px;display:grid;place-items:center;border-radius:12px;color:var(--ink-2)}
+.ico:hover{background:var(--surface-2)}
+.ico.on{color:var(--accent);background:rgba(20,184,166,.12)}
+
+.modes{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;background:var(--surface-2);
+  padding:4px;border-radius:14px;margin:0 14px 8px}
+.modes button{padding:9px 4px;border-radius:11px;text-align:center;font-family:'Outfit';
+  font-size:12px;font-weight:500;color:var(--ink-2)}
+.modes button.on{background:var(--surface);box-shadow:var(--shadow);color:var(--ink);font-weight:600}
+
+.pagebar{display:flex;align-items:center;gap:6px;padding:0 12px 8px}
+.pagebar .arrow,.readmark{width:40px;height:40px;display:grid;place-items:center;border-radius:13px;
+  background:var(--surface);border:1px solid var(--line);color:var(--ink-2)}
+.pagebar .arrow[disabled]{opacity:.35}
+.pagebar .mid{flex:1;text-align:center}
+.pagebar .pos{font-family:'Outfit';font-size:13.5px;font-weight:600;font-variant-numeric:tabular-nums}
+.pagebar .pos small{font-weight:500;color:var(--ink-3);font-size:12px}
+.pagebar .hair{height:2px;border-radius:99px;background:var(--surface-2);margin:6px 10px 0;overflow:hidden}
+.pagebar .hair i{display:block;height:100%;background:var(--accent)}
+.readmark{color:var(--ink-3)}
+.readmark.done{color:var(--green);border-color:rgba(76,175,80,.4);background:rgba(76,175,80,.1)}
+
+.content{flex:1;overflow-y:auto;padding:0 14px}
+.content::-webkit-scrollbar{width:0}
+
+.frame{background:var(--paper);border:1px solid var(--paper-line);border-radius:16px;
+  padding:6px;margin-bottom:14px}
+.frame-in{border:1px solid var(--paper-line);border-radius:12px;padding:16px 14px 34px;position:relative}
+.medallion{position:absolute;left:50%;bottom:-13px;transform:translateX(-50%);width:52px;height:26px;
+  display:grid;place-items:center;background:var(--paper);border:1px solid var(--paper-line);
+  border-radius:99px;font-family:'Outfit';font-size:11.5px;font-weight:600;color:var(--gold-dark);
+  font-variant-numeric:tabular-nums}
+[data-theme="dark"] .medallion{color:var(--gold)}
+.cartouche{display:flex;align-items:center;gap:10px;margin:2px 0 12px;padding:9px 12px;
+  border:1px solid var(--paper-line);border-radius:11px;background:rgba(234,179,8,.07)}
+.cartouche .rule{flex:1;height:1px;background:var(--paper-line)}
+.cartouche .nm{font-family:'Amiri';font-size:19px;color:var(--gold-dark);direction:rtl}
+[data-theme="dark"] .cartouche .nm{color:var(--gold)}
+.bismillah{font-family:'Amiri';font-size:20px;text-align:center;direction:rtl;color:var(--paper-ink);
+  opacity:.85;margin-bottom:12px}
+.flow{font-family:'Amiri';line-height:2.35;text-align:justify;direction:rtl;color:var(--paper-ink)}
+.flow .a{border-radius:5px}
+.flow .a.play{background:rgba(234,179,8,.3)}
+.flow .mk{font-family:'Outfit';font-size:11px;color:var(--gold-dark);padding:0 4px;font-variant-numeric:tabular-nums}
+.lines{display:flex;flex-direction:column;justify-content:space-between;direction:rtl;min-height:430px}
+.lines .ln{font-family:'Amiri';line-height:1.85;text-align:justify;text-align-last:justify;
+  color:var(--paper-ink);white-space:nowrap;overflow:hidden;width:100%;border-radius:6px}
+.lines .ln.play{background:rgba(234,179,8,.24)}
+.lines .ln.center{text-align:center;text-align-last:center;color:var(--gold-dark)}
+[data-theme="dark"] .lines .ln.center{color:var(--gold)}
+.fitnote{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 12px;
+  margin-bottom:10px;border-radius:12px;background:var(--surface);border:1px solid var(--line);
+  font-size:11.5px;color:var(--ink-3)}
+.fitnote b{font-family:'Outfit';color:var(--ink-2);font-weight:600}
+.stepper{display:flex;gap:4px}
+.stepper button{width:28px;height:28px;border-radius:9px;background:var(--surface-2);
+  display:grid;place-items:center;color:var(--ink-2);font-family:'Outfit';font-weight:600}
+
+.ayah{padding:15px 4px;border-bottom:1px solid var(--line-2);width:100%;display:block}
+.ayah.play{background:rgba(234,179,8,.1);border-radius:14px;padding:15px 12px}
+.ayah .num{display:inline-flex;align-items:center;justify-content:center;min-width:26px;height:26px;
+  padding:0 7px;border-radius:9px;background:var(--surface-2);color:var(--ink-2);font-family:'Outfit';
+  font-size:11.5px;font-weight:600;margin-bottom:9px;font-variant-numeric:tabular-nums}
+.ayah .ar{display:block;font-family:'Amiri';font-size:24px;line-height:2.1;text-align:right;direction:rtl}
+.ayah .tr{display:block;font-size:13.5px;line-height:1.65;color:var(--ink-2);margin-top:9px}
+
+.player{margin:0 12px 12px;background:var(--surface);border:1px solid var(--line);
+  border-radius:18px;box-shadow:var(--shadow);overflow:hidden}
+.dl{display:flex;align-items:center;gap:9px;padding:8px 14px;background:rgba(139,92,246,.1);
+  border-bottom:1px solid var(--line-2);font-size:11.5px;color:var(--violet);font-weight:600;font-family:'Outfit'}
+.dl .track{flex:1;height:3px;border-radius:99px;background:rgba(139,92,246,.22);overflow:hidden}
+.dl .track i{display:block;height:100%;background:var(--violet)}
+.p-top{display:flex;align-items:center;gap:10px;padding:12px 14px 8px}
+.p-txt{flex:1;min-width:0}
+.p-nm{font-family:'Outfit';font-size:14px;font-weight:600;letter-spacing:-.01em}
+.p-sub{font-size:11.5px;color:var(--ink-3);margin-top:2px;font-variant-numeric:tabular-nums}
+.p-ctl{display:flex;align-items:center;gap:4px}
+.p-btn{width:38px;height:38px;display:grid;place-items:center;border-radius:12px;color:var(--ink-2)}
+.p-btn:hover{background:var(--surface-2)}
+.p-btn.main{width:46px;height:46px;border-radius:15px;background:var(--teal-700);color:#fff}
+.p-btn.on{color:var(--accent);background:rgba(20,184,166,.12)}
+.p-seek{padding:0 14px 10px}
+.seekrow{display:flex;align-items:center;gap:10px}
+.seekrow .t{font-family:'Outfit';font-size:10.5px;color:var(--ink-3);font-variant-numeric:tabular-nums;min-width:30px}
+.seek{flex:1;height:22px;display:flex;align-items:center}
+.rail{width:100%;height:4px;border-radius:99px;background:var(--surface-2);position:relative}
+.fill{position:absolute;left:0;top:0;bottom:0;border-radius:99px;background:var(--accent)}
+.knob{position:absolute;top:50%;width:12px;height:12px;margin:-6px 0 0 -6px;border-radius:99px;
+  background:var(--accent);box-shadow:0 1px 4px rgba(0,0,0,.25)}
+.p-meta{display:flex;align-items:center;gap:8px;padding:0 14px 12px;font-size:11.5px;color:var(--ink-3)}
+.p-meta .rec{font-family:'Outfit';font-weight:600;color:var(--ink-2)}
+.p-meta .dot{width:3px;height:3px;border-radius:99px;background:currentColor;opacity:.6}
+.p-meta .rep{margin-left:auto;font-family:'Outfit';font-weight:600;color:var(--accent)}
+
+.scrim{position:absolute;inset:0;background:rgba(4,20,19,.45);opacity:0;pointer-events:none;
+  transition:opacity .22s;z-index:40}
+.scrim.open{opacity:1;pointer-events:auto}
+.sheet{position:absolute;left:0;right:0;bottom:0;z-index:41;background:var(--surface);
+  border-radius:26px 26px 0 0;padding:10px 18px 22px;transform:translateY(103%);
+  transition:transform .26s cubic-bezier(.32,.72,0,1);box-shadow:0 -12px 40px -20px rgba(0,0,0,.5);
+  max-height:90%;overflow-y:auto}
+.sheet.open{transform:translateY(0)}
+.sheet::-webkit-scrollbar{width:0}
+.grab{width:36px;height:4px;border-radius:99px;background:var(--line);margin:0 auto 14px}
+.sh-nm{font-family:'Outfit';font-size:18px;font-weight:600;letter-spacing:-.015em}
+.sh-sub{font-size:12.5px;color:var(--ink-3);margin-top:3px}
+.sh-ar{font-family:'Amiri';font-size:23px;direction:rtl;text-align:right;line-height:2;margin:14px 0 6px}
+.sh-tr{font-size:13.5px;line-height:1.6;color:var(--ink-2);margin-bottom:14px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.act{display:flex;align-items:center;gap:10px;padding:13px 14px;border-radius:14px;
+  background:var(--surface-2);font-family:'Outfit';font-size:13.5px;font-weight:500}
+.act.wide{grid-column:1 / -1}
+.act.on{background:rgba(20,184,166,.13);color:var(--accent)}
+.btn{padding:14px;border-radius:15px;font-family:'Outfit';font-size:14.5px;font-weight:600;text-align:center;flex:1}
+.btn.p{background:var(--teal-700);color:#fff}
+.btn.g{background:var(--surface-2);color:var(--ink-2)}
+.rowbtn{display:flex;align-items:center;gap:12px;padding:13px 2px;width:100%}
+.rowbtn + .rowbtn{border-top:1px solid var(--line-2)}
+.rowbtn .n{font-family:'Outfit';font-size:14px;font-weight:600;display:block}
+.rowbtn .s{font-size:12px;color:var(--ink-3);margin-top:2px;display:block}
+.seg{display:grid;grid-auto-flow:column;gap:4px;background:var(--surface-2);padding:4px;
+  border-radius:13px;margin:8px 0 4px}
+.seg button{padding:10px 4px;border-radius:10px;text-align:center;font-family:'Outfit';
+  font-size:12.5px;font-weight:500;color:var(--ink-2)}
+.seg button.on{background:var(--surface);box-shadow:var(--shadow);color:var(--ink);font-weight:600}
+.lbl{font-family:'Outfit';font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--ink-3);margin:18px 0 0}
+.range{display:flex;gap:8px;align-items:center;margin-top:8px}
+.rangebox{flex:1;background:var(--surface-2);border-radius:12px;padding:10px 13px}
+.rangebox .l{font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+.rangebox .v{font-family:'Outfit';font-size:15px;font-weight:600;margin-top:2px;font-variant-numeric:tabular-nums}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="harness">
+  <div class="hbar">
+    <button class="hbtn" id="tTheme">Dark</button>
+    <button class="hbtn" id="tPlay">Start audio</button>
+    <button class="hbtn" id="tDl">Simulate download</button>
+    <button class="hbtn" id="tKhatam">Khatam on</button>
+  </div>
+
+<div class="phone" id="phone">
+  <div class="appbar">
+    <button class="ico" aria-label="Back"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>
+    <h1>Al-Kahf<span class="sub">The Cave · juz 15</span></h1>
+    <button class="ico" id="bDual" aria-label="Two pages"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="8" height="16" rx="1.5"/><rect x="13" y="4" width="8" height="16" rx="1.5"/></svg></button>
+    <button class="ico" aria-label="Reading settings"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg></button>
+  </div>
+
+  <div class="modes" id="modes">
+    <button data-m="list" class="on">Translation</button>
+    <button data-m="flow">Mushaf</button>
+    <button data-m="line">16-line</button>
+  </div>
+
+  <div class="pagebar" id="pagebar"></div>
+  <div class="content" id="content"></div>
+  <div id="playerSlot"></div>
+
+  <div class="scrim" id="scrim"></div>
+  <div class="sheet" id="sheet"></div>
+</div>
+
+  <p class="note">Tap any ayah — in all three modes it opens the same sheet. Start audio for the player, the follow-along highlight and the repeat controls. Page text is Al-Kahf 1–7; the line layout is illustrative, not a real 16-line page.</p>
+</div>
+
+<script>
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+
+const A=[
+ {n:1,ar:"ٱلْحَمْدُ لِلَّهِ ٱلَّذِىٓ أَنزَلَ عَلَىٰ عَبْدِهِ ٱلْكِتَـٰبَ وَلَمْ يَجْعَل لَّهُۥ عِوَجَا",tr:"All praise belongs to God, who sent down the Book to His servant and left in it nothing crooked."},
+ {n:2,ar:"قَيِّمًا لِّيُنذِرَ بَأْسًۭا شَدِيدًۭا مِّن لَّدُنْهُ وَيُبَشِّرَ ٱلْمُؤْمِنِينَ ٱلَّذِينَ يَعْمَلُونَ ٱلصَّـٰلِحَـٰتِ أَنَّ لَهُمْ أَجْرًا حَسَنًۭا",tr:"Straight, to warn of a severe punishment from Him, and to bring good news to the believers who do good that a fine reward awaits them."},
+ {n:3,ar:"مَّـٰكِثِينَ فِيهِ أَبَدًۭا",tr:"In which they will remain, always."},
+ {n:4,ar:"وَيُنذِرَ ٱلَّذِينَ قَالُوا۟ ٱتَّخَذَ ٱللَّهُ وَلَدًۭا",tr:"And to warn those who say that God has taken a son."},
+ {n:5,ar:"مَّا لَهُم بِهِۦ مِنْ عِلْمٍۢ وَلَا لِـَٔابَآئِهِمْ ۚ كَبُرَتْ كَلِمَةًۭ تَخْرُجُ مِنْ أَفْوَٰهِهِمْ ۚ إِن يَقُولُونَ إِلَّا كَذِبًۭا",tr:"They have no knowledge of it, nor did their forefathers. It is a grave word that comes out of their mouths; what they say is nothing but a lie."},
+ {n:6,ar:"فَلَعَلَّكَ بَـٰخِعٌۭ نَّفْسَكَ عَلَىٰٓ ءَاثَـٰرِهِمْ إِن لَّمْ يُؤْمِنُوا۟ بِهَـٰذَا ٱلْحَدِيثِ أَسَفًا",tr:"Would you then grieve yourself to death over them, if they will not believe in this message?"},
+ {n:7,ar:"إِنَّا جَعَلْنَا مَا عَلَى ٱلْأَرْضِ زِينَةًۭ لَّهَا لِنَبْلُوَهُمْ أَيُّهُمْ أَحْسَنُ عَمَلًۭا",tr:"We have made what is on the earth an adornment for it, to test which of them is best in deed."}
+];
+
+const LINES=[
+ {t:"ٱلْحَمْدُ لِلَّهِ ٱلَّذِىٓ أَنزَلَ عَلَىٰ عَبْدِهِ ٱلْكِتَـٰبَ",n:1},
+ {t:"وَلَمْ يَجْعَل لَّهُۥ عِوَجَا ﴿١﴾ قَيِّمًا لِّيُنذِرَ بَأْسًۭا",n:1},
+ {t:"شَدِيدًۭا مِّن لَّدُنْهُ وَيُبَشِّرَ ٱلْمُؤْمِنِينَ ٱلَّذِينَ",n:2},
+ {t:"يَعْمَلُونَ ٱلصَّـٰلِحَـٰتِ أَنَّ لَهُمْ أَجْرًا حَسَنًۭا ﴿٢﴾",n:2},
+ {t:"مَّـٰكِثِينَ فِيهِ أَبَدًۭا ﴿٣﴾ وَيُنذِرَ ٱلَّذِينَ قَالُوا۟",n:3},
+ {t:"ٱتَّخَذَ ٱللَّهُ وَلَدًۭا ﴿٤﴾ مَّا لَهُم بِهِۦ مِنْ عِلْمٍۢ",n:4},
+ {t:"وَلَا لِـَٔابَآئِهِمْ ۚ كَبُرَتْ كَلِمَةًۭ تَخْرُجُ مِنْ",n:5},
+ {t:"أَفْوَٰهِهِمْ ۚ إِن يَقُولُونَ إِلَّا كَذِبًۭا ﴿٥﴾ فَلَعَلَّكَ",n:5},
+ {t:"بَـٰخِعٌۭ نَّفْسَكَ عَلَىٰٓ ءَاثَـٰرِهِمْ إِن لَّمْ يُؤْمِنُوا۟",n:6},
+ {t:"بِهَـٰذَا ٱلْحَدِيثِ أَسَفًا ﴿٦﴾ إِنَّا جَعَلْنَا مَا عَلَى",n:6},
+ {t:"ٱلْأَرْضِ زِينَةًۭ لَّهَا لِنَبْلُوَهُمْ أَيُّهُمْ أَحْسَنُ",n:7},
+ {t:"عَمَلًۭا ﴿٧﴾ وَإِنَّا لَجَـٰعِلُونَ مَا عَلَيْهَا صَعِيدًۭا",n:7}
+];
+
+const RECITERS=[["Mishary Rashid Alafasy","Kuwait","Murattal"],["Abdul Rahman Al-Sudais","Saudi Arabia","Murattal"],
+ ["Abdul Basit Abdus Samad","Egypt","Mujawwad"],["Saad Al-Ghamdi","Saudi Arabia","Murattal"],
+ ["Maher Al-Muaiqly","Saudi Arabia","Murattal"]];
+
+const st={mode:"list",page:293,total:604,dual:false,khatam:false,pageRead:false,fontStep:0,
+ active:false,playing:false,downloading:false,dlDone:0,dlTotal:110,
+ current:1,pos:0,len:38,reciter:RECITERS[0][0],style:RECITERS[0][2],country:RECITERS[0][1],
+ speed:1,repeat:"off",repeatCount:3,from:1,to:7,follow:true};
+let timer=null;
+
+const fmt=s=>Math.floor(s/60)+":"+String(Math.floor(s%60)).padStart(2,"0");
+const svg=(p,w)=>'<svg width="'+(w||18)+'" height="'+(w||18)+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+p+'</svg>';
+const IC={
+ chevL:'<path d="m15 18-6-6 6-6"/>', chevR:'<path d="m9 18 6-6-6-6"/>',
+ check:'<path d="M20 6 9 17l-5-5"/>', circle:'<circle cx="12" cy="12" r="8.5"/>',
+ up:'<path d="m18 15-6-6-6 6"/>', dl:'<path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M4 21h16"/>',
+ rep:'<path d="M17 2l4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/>',
+ mark:'<path d="m19 21-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>',
+ heart:'<path d="M20.8 5.6a5 5 0 0 0-7.1 0L12 7.3l-1.7-1.7a5 5 0 0 0-7.1 7.1l8.8 8.8 8.8-8.8a5 5 0 0 0 0-7.1Z"/>',
+ text:'<path d="M4 6h16M4 12h16M4 18h10"/>', subj:'<circle cx="12" cy="12" r="9"/><path d="M12 7v10M7 12h10"/>',
+ copy:'<rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/>',
+ share:'<path d="M12 3v13"/><path d="m8 7 4-4 4 4"/><path d="M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/>',
+ eye:'<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>',
+ skipB:'<path d="M18 5v14L8 12z"/><path d="M6 5v14"/>', skipF:'<path d="M6 5v14l10-7z"/><path d="M18 5v14"/>'
+};
+
+/* ── page bar ── */
+function pagebar(){
+  const label = st.dual ? "Pages "+st.page+"–"+(st.page+1) : "Page "+st.page;
+  $("pagebar").innerHTML=
+   '<button class="arrow" data-a="next" aria-label="Next page">'+svg(IC.chevL)+'</button>'+
+   '<div class="mid"><div class="pos">'+label+' <small>· juz 15 · hizb 30</small></div>'+
+   '<div class="hair"><i style="width:'+(st.page/st.total*100).toFixed(1)+'%"></i></div></div>'+
+   (st.khatam?'<button class="readmark'+(st.pageRead?" done":"")+'" data-a="read" aria-label="'+
+     (st.pageRead?"Mark page unread":"Mark page read")+'">'+svg(st.pageRead?IC.check:IC.circle,19)+'</button>':"")+
+   '<button class="arrow" data-a="prev"'+(st.page<=1?" disabled":"")+' aria-label="Previous page">'+svg(IC.chevR)+'</button>';
+}
+
+/* ── content ── */
+const CART='<div class="cartouche"><span class="rule"></span><span class="nm">سورة الكهف</span><span class="rule"></span></div>'+
+ '<div class="bismillah">بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ</div>';
+const fitnote = label => '<div class="fitnote"><span><b>'+label+'</b> · fits the page, no scrolling</span>'+
+ '<span class="stepper"><button data-a="fs-" aria-label="Smaller">−</button>'+
+ '<button data-a="fs+" aria-label="Larger">+</button></span></div>';
+
+function content(){
+  const c=$("content"), hl=n=>st.active&&st.current===n?" play":"";
+  if(st.mode==="list"){
+    c.innerHTML=A.map(a=>'<button class="ayah'+hl(a.n)+'" data-a="ayah" data-n="'+a.n+'">'+
+      '<span class="num">18:'+a.n+'</span><span class="ar">'+a.ar+'</span>'+
+      '<span class="tr">'+a.tr+'</span></button>').join("")+'<div style="height:20px"></div>';
+  } else if(st.mode==="flow"){
+    c.innerHTML='<div class="frame"><div class="frame-in">'+CART+
+      '<div class="flow" style="font-size:'+(23+st.fontStep*2)+'px">'+
+      A.map(a=>'<span class="a'+hl(a.n)+'" data-a="ayah" data-n="'+a.n+'">'+a.ar+
+        '<span class="mk">﴿'+a.n+'﴾</span></span> ').join("")+
+      '</div><span class="medallion">'+st.page+'</span></div></div>'+fitnote("Mushaf · Madani");
+  } else {
+    const size=19+st.fontStep*1.5;
+    c.innerHTML=fitnote("16-line · IndoPak")+
+      '<div class="frame"><div class="frame-in" style="padding-bottom:30px"><div class="lines">'+
+      '<div class="ln center" style="font-size:'+(size+1)+'px">سورة الكهف</div>'+
+      LINES.map(l=>'<button class="ln'+hl(l.n)+'" data-a="ayah" data-n="'+l.n+'" style="font-size:'+size+'px">'+
+        l.t+'</button>').join("")+
+      '</div><span class="medallion">'+st.page+'</span></div></div>';
+  }
+}
+
+/* ── player ── */
+function player(){
+  const slot=$("playerSlot");
+  if(!st.active && !st.downloading){ slot.innerHTML=""; return; }
+  const pct=st.pos/st.len*100;
+  const rep = st.repeat==="off" ? "" :
+    st.repeat==="ayah" ? "Repeat ayah ×"+st.repeatCount :
+    st.repeat==="range" ? "Repeat 18:"+st.from+"–"+st.to : "Repeat surah";
+  slot.innerHTML='<div class="player">'+
+   (st.downloading?'<div class="dl">'+svg(IC.dl,14)+'<span>Downloading '+st.dlDone+' of '+st.dlTotal+'</span>'+
+     '<span class="track"><i style="width:'+(st.dlDone/st.dlTotal*100)+'%"></i></span></div>':"")+
+   (st.active?
+   '<div class="p-top"><div class="p-txt"><div class="p-nm">Al-Kahf</div>'+
+     '<div class="p-sub">Ayah '+st.current+' of 110 · page '+st.page+'</div></div>'+
+     '<div class="p-ctl">'+
+       '<button class="p-btn" data-a="prev-ayah" aria-label="Previous ayah">'+svg(IC.skipB,19)+'</button>'+
+       '<button class="p-btn main" data-a="toggle" aria-label="'+(st.playing?"Pause":"Play")+'">'+
+        (st.playing?'<svg width="21" height="21" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>'
+                   :'<svg width="21" height="21" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>')+'</button>'+
+       '<button class="p-btn" data-a="next-ayah" aria-label="Next ayah">'+svg(IC.skipF,19)+'</button>'+
+       '<button class="p-btn'+(st.repeat!=="off"?" on":"")+'" data-a="expand" aria-label="Recitation options">'+svg(IC.up,19)+'</button>'+
+     '</div></div>'+
+   '<div class="p-seek"><div class="seekrow"><span class="t">'+fmt(st.pos)+'</span>'+
+     '<div class="seek" data-a="seek"><div class="rail"><div class="fill" style="width:'+pct+'%"></div>'+
+     '<div class="knob" style="left:'+pct+'%"></div></div></div>'+
+     '<span class="t" style="text-align:right">-'+fmt(st.len-st.pos)+'</span></div></div>'+
+   '<div class="p-meta"><button class="rec" data-a="reciter">'+st.reciter+'</button>'+
+     '<span class="dot"></span><span>'+st.style+'</span>'+
+     (st.speed!==1?'<span class="dot"></span><span>'+st.speed+'×</span>':"")+
+     (rep?'<span class="rep">'+rep+'</span>':"")+'</div>':"")+
+   '</div>';
+}
+
+/* ── sheets ── */
+const sheet=$("sheet"), scrim=$("scrim");
+function openSheet(html){ sheet.innerHTML='<div class="grab"></div>'+html; sheet.classList.add("open"); scrim.classList.add("open"); }
+function closeSheet(){ sheet.classList.remove("open"); scrim.classList.remove("open"); }
+scrim.addEventListener("click",closeSheet);
+const act=(k,label,icon,wide)=>'<button class="act'+(wide?" wide":"")+'" data-s="'+k+'">'+icon+'<span>'+label+'</span></button>';
+
+function ayahSheet(n){
+  const a=A.find(x=>x.n===n)||A[0];
+  openSheet('<div class="sh-nm">Al-Kahf 18:'+a.n+'</div>'+
+   '<div class="sh-sub">Juz 15 · page '+st.page+' · hizb 30</div>'+
+   '<div class="sh-ar">'+a.ar+'</div><div class="sh-tr">'+a.tr+'</div>'+
+   '<div class="grid2">'+
+     act("play","Play from here",'<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>')+
+     act("rep","Repeat this ayah",svg(IC.rep))+
+     act("x","Bookmark",svg(IC.mark))+act("x","Favourite",svg(IC.heart))+
+     act("x","Tafseer",svg(IC.text))+act("x","Subjects",svg(IC.subj))+
+     act("x","Copy",svg(IC.copy))+act("x","Share",svg(IC.share))+
+     (st.khatam?act("x","Mark read for khatam",svg(IC.check),true):"")+
+   '</div>');
+}
+
+function playerSheet(){
+  openSheet('<div class="sh-nm">Recitation</div>'+
+   '<div class="sh-sub">Al-Kahf · ayah '+st.current+' of 110</div>'+
+   '<div class="lbl">Reciter</div>'+
+   '<button class="rowbtn" data-s="reciter"><span style="flex:1"><span class="n">'+st.reciter+'</span>'+
+     '<span class="s">'+st.style+' · '+st.country+'</span></span>'+
+     '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--ink-3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+IC.chevR+'</svg></button>'+
+   '<div class="lbl">Repeat</div><div class="seg">'+
+     [["off","Off"],["ayah","Ayah"],["range","Range"],["loop","Surah"]].map(r=>
+       '<button data-r="'+r[0]+'" class="'+(st.repeat===r[0]?"on":"")+'">'+r[1]+'</button>').join("")+'</div>'+
+   (st.repeat==="ayah"?'<div class="range"><div class="rangebox"><div class="l">Times</div>'+
+     '<div class="v">'+st.repeatCount+'</div></div>'+
+     '<button class="p-btn" data-s="rc-">−</button><button class="p-btn" data-s="rc+">+</button></div>':"")+
+   (st.repeat==="range"?'<div class="range"><div class="rangebox"><div class="l">From</div>'+
+     '<div class="v">18:'+st.from+'</div></div><div class="rangebox"><div class="l">To</div>'+
+     '<div class="v">18:'+st.to+'</div></div></div>':"")+
+   '<div class="lbl">Speed</div><div class="seg">'+
+     [0.75,1,1.25,1.5].map(v=>'<button data-sp="'+v+'" class="'+(st.speed===v?"on":"")+'">'+v+'×</button>').join("")+'</div>'+
+   '<div class="lbl">While playing</div>'+
+   '<button class="act wide'+(st.follow?" on":"")+'" data-s="follow" style="margin-top:8px">'+
+     svg(IC.eye)+'<span>Follow along and turn the page</span></button>'+
+   '<div style="display:flex;gap:10px;margin-top:16px">'+
+     '<button class="btn g" data-s="stop">Stop</button>'+
+     '<button class="btn p" data-s="close">Done</button></div>');
+  sheet.querySelectorAll("[data-r]").forEach(b=>b.addEventListener("click",()=>{st.repeat=b.dataset.r;playerSheet();player();}));
+  sheet.querySelectorAll("[data-sp]").forEach(b=>b.addEventListener("click",()=>{st.speed=+b.dataset.sp;playerSheet();player();}));
+}
+
+function reciterSheet(){
+  openSheet('<div class="sh-nm">Reciter</div>'+
+   '<div class="sh-sub">Downloaded audio is kept per reciter</div><div style="margin-top:8px">'+
+   RECITERS.map(r=>'<button class="rowbtn" data-rc="'+r[0]+'" data-c="'+r[1]+'" data-st="'+r[2]+'">'+
+     '<span style="flex:1"><span class="n">'+r[0]+'</span><span class="s">'+r[2]+' · '+r[1]+'</span></span>'+
+     (st.reciter===r[0]
+       ?'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">'+IC.check+'</svg>'
+       :'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--ink-3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+IC.chevR+'</svg>')+
+     '</button>').join("")+'</div>');
+  sheet.querySelectorAll("[data-rc]").forEach(b=>b.addEventListener("click",()=>{
+    st.reciter=b.dataset.rc; st.country=b.dataset.c; st.style=b.dataset.st; closeSheet(); player();
+  }));
+}
+
+/* ── events ── */
+$("phone").addEventListener("click",ev=>{
+  const t=ev.target.closest("[data-a]"); if(!t) return;
+  const a=t.dataset.a;
+  if(a==="ayah") return ayahSheet(+t.dataset.n);
+  if(a==="next"){ st.page++; st.pageRead=false; return render(); }
+  if(a==="prev"&&st.page>1){ st.page--; st.pageRead=false; return render(); }
+  if(a==="read"){ st.pageRead=!st.pageRead; return pagebar(); }
+  if(a==="fs+"){ st.fontStep=Math.min(3,st.fontStep+1); return content(); }
+  if(a==="fs-"){ st.fontStep=Math.max(-2,st.fontStep-1); return content(); }
+  if(a==="toggle"){ st.playing=!st.playing; tick(); return player(); }
+  if(a==="next-ayah"){ st.current=Math.min(7,st.current+1); st.pos=0; return render(); }
+  if(a==="prev-ayah"){ st.current=Math.max(1,st.current-1); st.pos=0; return render(); }
+  if(a==="expand") return playerSheet();
+  if(a==="reciter") return reciterSheet();
+  if(a==="seek"){
+    const r=t.getBoundingClientRect();
+    st.pos=Math.max(0,Math.min(st.len,(ev.clientX-r.left)/r.width*st.len));
+    return player();
+  }
+});
+sheet.addEventListener("click",ev=>{
+  const t=ev.target.closest("[data-s]"); if(!t) return;
+  const k=t.dataset.s;
+  if(k==="close") return closeSheet();
+  if(k==="reciter") return reciterSheet();
+  if(k==="follow"){ st.follow=!st.follow; return playerSheet(); }
+  if(k==="rc+"){ st.repeatCount++; return playerSheet(); }
+  if(k==="rc-"){ st.repeatCount=Math.max(2,st.repeatCount-1); return playerSheet(); }
+  if(k==="stop"){ st.active=false; st.playing=false; sync(); closeSheet(); return render(); }
+  if(k==="play"){ st.active=true; st.playing=true; st.pos=0; sync(); closeSheet(); tick(); return render(); }
+  if(k==="rep"){ st.repeat="ayah"; st.active=true; st.playing=true; st.pos=0; sync(); closeSheet(); tick(); return render(); }
+  closeSheet();
+});
+$("modes").addEventListener("click",ev=>{
+  const b=ev.target.closest("[data-m]"); if(!b) return;
+  st.mode=b.dataset.m;
+  $("modes").querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b));
+  render();
+});
+$("bDual").addEventListener("click",function(){ st.dual=!st.dual; this.classList.toggle("on",st.dual); pagebar(); });
+$("tPlay").addEventListener("click",function(){
+  st.active=!st.active; st.playing=st.active; st.pos=0; sync(); tick(); render();
+});
+$("tDl").addEventListener("click",function(){
+  st.downloading=!st.downloading; st.dlDone=0;
+  this.classList.toggle("on",st.downloading); tick(); player();
+});
+$("tKhatam").addEventListener("click",function(){
+  st.khatam=!st.khatam; this.textContent=st.khatam?"Khatam off":"Khatam on";
+  this.classList.toggle("on",st.khatam); render();
+});
+$("tTheme").addEventListener("click",function(){
+  const d=document.documentElement.getAttribute("data-theme")==="dark";
+  document.documentElement.setAttribute("data-theme",d?"light":"dark");
+  this.textContent=d?"Dark":"Light";
+});
+function sync(){
+  const b=$("tPlay"); b.textContent=st.active?"Stop audio":"Start audio"; b.classList.toggle("on",st.active);
+}
+
+function tick(){
+  clearInterval(timer);
+  if(!st.playing && !st.downloading) return;
+  timer=setInterval(()=>{
+    if(st.downloading){ st.dlDone+=3; if(st.dlDone>=st.dlTotal){ st.dlDone=st.dlTotal; st.downloading=false; $("tDl").classList.remove("on"); } }
+    if(st.playing){
+      st.pos+=1;
+      if(st.pos>=st.len){
+        st.pos=0;
+        if(st.repeat!=="ayah"){ st.current = st.current>=7 ? 1 : st.current+1; if(st.follow) content(); }
+      }
+    }
+    player();
+  },240);
+}
+
+function render(){ pagebar(); content(); player(); }
+sync(); render();
+})();
+</script>
+</body>
+</html>

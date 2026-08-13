@@ -273,6 +273,98 @@ Two shared components are **rebuilt to the prototype's design**, not restyled in
 
 ---
 
-## Screens 8+ — pending
+## Screen 8 — Surah background (`SurahBackground`)
 
-Background · Passages · Subjects · Tafseer · Khatam list · Khatam detail · Search.
+**Today:** a sticky, horizontally-scrolling chip row across the top styled as a **filter**
+(`✓ Name` selected in yellow) when it is really a jump index. Every section then prints its
+name **twice** — a small teal icon eyebrow, then a large heading saying the same word.
+
+**Prototype:** no chip row, one small uppercase eyebrow per section, a gold-ruled ayah
+pull-quote, and Passages / Subjects buttons at the foot.
+
+### Decided
+
+- **Keep the chip row as a jump index, restyle away the filter look.** The longest
+  background is 47 KB of prose, so an index earns its place — but the check mark and the
+  selected-yellow have to go. It marks position; it does not filter.
+- **One heading per section**, in the eyebrow style. Deleting the duplicate recovers about
+  90 px per section.
+- **Adopt the pull-quote.** Cited ayahs render in the gold-ruled block with their reference,
+  tapping through to the reader.
+
+---
+
+## Screen 4c — Recitation player
+
+**Today:** the whole player is one collapsed bar — play, "Al-Fatiha", pills for
+`Ayah 1/7 · Juz 1 · p.1`, and a hairline progress line. No seek, no reciter shown, no
+repeat, no speed; tapping it does not expand. Reciter choice lives away in
+Settings → Quran → Select Reciter.
+
+**Prototype:** seek with elapsed/remaining, prev/next ayah, reciter name and style inline
+and tappable, repeat (off / ayah / range / surah) with a count stepper and range picker,
+speed 0.75–1.5×, a "Follow along and turn the page" toggle, a violet
+"Downloading N of M" strip, follow-along highlighting in the text, and
+"Play from here" / "Repeat this ayah" in the ayah sheet.
+
+`docs/SUBSYSTEMS.md` §1 already says ayahs are downloaded before playback and cached under
+`filesDir/quran_audio/` — so the download strip gives a UI to work the app already does
+invisibly. Repeat and speed are genuinely new.
+
+### Decided
+
+- **Build all of it** — repeat, speed, follow-along and the download strip. Repeat-by-range
+  and repeat-count are memorisation features; the download strip only surfaces existing
+  behaviour. This is the largest single piece of scope in the redesign.
+
+---
+
+## Reader mode switching (revises screen 4b)
+
+The second prototype puts a three-way `Translation · Mushaf · 16-line` segmented row under
+the app bar. **That row is rejected.**
+
+### Decided
+
+- **A top-bar icon showing the current mode**, opening a short menu to switch. Always one
+  tap, no permanent row, and the icon states which mode you are in.
+- The mode set grows to three: Translation, Mushaf, and **16-line (IndoPak)**.
+
+---
+
+## Mushaf visual register (revises screen 4b)
+
+The two prototypes disagree with the shipping app about how ornate the mushaf should be.
+The shipping page has a double gold/teal border, a scalloped cartouche and a gold rosette;
+the second prototype uses a warm **paper** register — cream ground, hairline rules, a simple
+ruled cartouche, a small page medallion.
+
+### Decided
+
+- **Adopt the prototype's paper register**, including a paper palette
+  (`--paper` / `--paper-line` / `--paper-ink`) held separately from the app's surface
+  colours, with its own dark-mode values. The heavy gold border, scalloped cartouche and
+  rosette are dropped.
+
+This supersedes the earlier, looser "the mushaf keeps its ornament" note: the mushaf still
+reads as a printed page, but through paper and hairlines rather than gold.
+
+---
+
+## Read tracking (revises screen 4)
+
+### Decided
+
+- **A page-level read mark in the page bar, plus "Mark read for khatam" in the ayah sheet —
+  both shown only while a khatam is active.** The control disappears entirely for the
+  majority of reading, which is not part of a plan; marking a whole page matches how a
+  juz-a-day plan is actually kept, and the ayah sheet keeps per-verse precision available.
+
+This resolves the open question left on screen 4 about where the read-toggle lives, and
+retires the always-present per-ayah circle.
+
+---
+
+## Screens 9+ — pending
+
+Passages · Subjects · Tafseer · Khatam list · Khatam detail · Search.
