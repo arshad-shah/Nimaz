@@ -1028,6 +1028,42 @@ with no label and a touch target under 48dp fail the lane we already run. It can
       Pass `onCheckedChange = null` when an enclosing clickable row owns the toggle (the
       `NimazSettingsItem` pattern — the row toggles, the switch just renders state). It centralised
       the settings/notification toggles, the tasbih left-handed switch and the calendar preview.
+    - a **mutually-exclusive value choice** laid out as one inset row is
+      `NimazSegmentedControl(options = listOf(NimazSegmentedOption(label, icon, selectedTone)),
+      selectedIndex, onSelect, size = …)` (`components/atoms/NimazSegmentedControl.kt`). Distinct
+      from `NimazPillTabs`, which switches **views**, is text-only and paints every selected tab
+      `primary`: this picks a **value**, carries an icon per cell, and lets each cell own the tone
+      it takes when selected (a fasting day wants green for "fasted" and amber for "exempt").
+      `selectedIndex` is **nullable** — "nothing chosen yet" is a real state that a `NimazSwitch`
+      cannot express, which is why it replaced one on the fasting screen. `onSelect` fires even for
+      the already-selected cell so a caller can implement tap-to-clear; a control cannot know
+      whether clearing is legal, so it does not decide.
+    - a **determinate progress bar** is `NimazProgressTrack(progress, tone = …, size = …,
+      gradient = …)` (`components/atoms/NimazProgressTrack.kt`), **not** a raw
+      `LinearProgressIndicator`. `progress` is coerced inside the atom (`NaN` → `0f`, clamped to
+      `0f..1f`) so a zero denominator upstream cannot take a screen down. `gradient = true` ramps
+      the fill into gold and is reserved for celebratory progress (the Ramadan strip). Eight files
+      still hand-roll `LinearProgressIndicator` — see §9 Open; do not add a ninth.
+    - a **labelled span with a "now" marker** — two named, differently-tinted ends and a position
+      between them — is `NimazWindowTrack(startLabel, startValue, endLabel, endValue,
+      progress = …)` (`components/atoms/NimazWindowTrack.kt`). Deliberately not `NimazProgressTrack`
+      with extra parameters: a progress bar has one meaningful end. `progress = null` lights the
+      whole band and draws no marker, which is the rendering for any day that is not today. Pass
+      `contentDescription` to make it speak as one sentence — four unlabelled text nodes read as
+      noise.
+    - a **week strip** is `NimazDayRail(days = listOf(NimazDayRailItem(weekdayLabel, dayLabel,
+      marker, isToday, enabled, contentDescription)), selectedIndex, onSelect)`
+      (`components/atoms/NimazDayRail.kt`). Labels arrive pre-formatted — the rail knows nothing
+      about dates or locales. A `Row`, not a `LazyRow`; the marker slot is always occupied so the
+      rail does not reflow as records load. `contentDescription` is **required** per item: a rail
+      of seven bare numbers is unusable with a screen reader.
+    - a **status dot** is `NimazStatusDot(spec = NimazStatusDotSpec(tone, style), size = …)`, or the
+      `color =` overload for callers already holding a resolved `Color`
+      (`components/atoms/NimazStatusDot.kt`). `NimazStatusDotStyle.OUTLINED` draws a ring, which is
+      how "recorded as not happening" is told apart from "no record at all" — an absent dot cannot
+      make that distinction. `NimazLegendItem` and `NimazCalendar`'s day indicators both draw
+      through it; `CalendarDayState.indicatorStyle` / `CalendarLegendItem.indicatorStyle` carry the
+      choice and default to `FILLED`.
     - a **saved-item row** (a stored ayah/hadith/dua reference shown with a badge, relative
       timestamp, Arabic preview and overflow menu) is
       `SwipeableSavedCard(title, timestamp, menuActions, onClick, onDelete, enableSwipeToDelete = …,
@@ -1072,6 +1108,12 @@ with no label and a touch target under 48dp fail the lane we already run. It can
 `NimazTone` (declared in `components/atoms/NimazCard.kt`) is the **one** vocabulary for what a
 surface *signifies*. It is shared across primitives: `NimazCard` and `NimazBadge` both take a
 `tone`, and each resolves it to colours appropriate to its own scale.
+
+The atom layer resolves tone through **`NimazToneColors`** (`components/atoms/NimazToneColors.kt`),
+an `internal object` with `foreground(tone)` / `container(tone)` / `outline(tone)`. Use it in any
+new atom rather than writing another `when (tone)` block: `NimazBadgeDefaults` kept its copies
+private, and the failure mode of a second private copy is a `WARNING` that is amber in a badge and
+orange in a dot on the same screen, with neither file admitting the other exists.
 
 | Tone | Means | Card container | Badge `FILLED` / `SOFT` |
 |------|-------|----------------|-------------------------|
@@ -1271,6 +1313,8 @@ copy anything listed as Open.
 | 12 | Quran / 16-line Mushaf | **A raw page number is not equivalent across Mushaf editions.** A page `Int` means a different slice of the Quran in the 604-page Madani scheme vs. the 548-page IndoPak-16 scheme (unrelated pagination). In-app navigation is safe as of #325: "Continue reading" resolves by surah/ayah (`ContinueReadingCard.onClick` → `onNavigateToQuranAyah(lastSurah, lastAyah)`, `lastReadPage` is display-only), and every in-app page surface — the Page tab grid, its juz sections, the surah page ranges, the jump-to-page field and the reader's page content — now resolves through the active edition's `MushafPagination` rather than the Madani tables. The one real gap is `AnnouncementRoutes.parameterisedAnnouncementRoute`'s `quran/page/N` deep link: it validates against `MushafScript.MAX_TOTAL_PAGES` (now 847, the largest edition) and the reader then clamps to the active edition's count, so it can't crash, but a server-sent page deep link can land the reader on unrelated content if the user's active script differs from the one the link was authored against. Accepted as v1 scope — announcement payloads are first-party/curated, not user input. | If this becomes user-facing (e.g. shared deep links), anchor `quran/page/N` by surah/ayah instead of raw page, or tag the page number with its edition in the route. |
 
 | 13 | Quran / search | **An install made before the index shipped never gets one.** `createFromAsset` copies the artifact exactly once, and neither a Room migration nor a content patch can add a table — so the folded search index reaches fresh installs only. Those installs fall back to the `LIKE` queries, which is the search they already had: working for Latin scripts, empty for Arabic. The repositories ask `ContentSearchIndex.isAvailable()` rather than assuming, so nothing crashes and nothing lies. | Either build the index once in a background `WorkManager` job when it is missing (the folding is already in Kotlin; the cost is ~150k documents written off the critical path, and the reason the *previous* attempt failed was doing it synchronously at first launch), or accept that it lands with the next reinstall. Needs a decision, not just code. |
+| 14 | Design system | **Eight files still hand-roll `LinearProgressIndicator`** — `QaidaCourseHeader`, `QuranAudioBottomBar`, `QuranSurahInfoComponents`, `QuranSurahListItem`, `RamadanCards`, `search/AskComponents`, `settings/SyncScreen`, `settings/WidgetsScreen` — each with its own height, shape and colours. `NimazProgressTrack` (§8) now exists and coerces its input; these predate it. Migrating them was deliberately kept out of the fasting redesign so an app-wide sweep did not ride along inside one screen's change. | Convert each to `NimazProgressTrack(progress, tone = …, size = …)`, dropping the local height/shape/colour constants; verify under visual review since several sit on tinted surfaces. |
+| 15 | Design system | **`NimazPillTabs` and `NimazSegmentedControl` overlap visually while doing different jobs** — the first switches views (organism, text-only, single accent), the second chooses a value (atom, icon per cell, per-cell selected tone, nullable selection). Two inset pill rows that look alike and behave differently is a real risk of a caller reaching for the wrong one. | Decide whether they consolidate (one component with a `role` axis) or stay separate with the distinction documented at both call sites. A design decision, not a mechanical migration. |
 
 > **Accepted patterns (NOT deviations):**
 > - **Mushaf editions and Quran translations shipped as seeded JSON assets, not in the prepackaged DB** (sub-task 2/7 of #263, extended when the catalogue grew to 4 editions + 15 translations) — **resolved at versionCode 385**. Each edition's glyph text + layout, and each translation's verses, were populated at runtime by `MushafLayoutSeeder` / `QuranTranslationSeeder` from `assets/quran/`, with the migrations creating only the empty tables. The alternative — regenerating `assets/database/nimaz_prepopulated.db` — was rejected at the time because it was a ~147 MB Git-LFS blob that `createFromAsset` copies **only on fresh install**, so baking the data in would (a) never reach existing installs and (b) grow the LFS asset by tens of MB. What dissolved the trade-off was the prepackaged DB ceasing to be a tracked blob: it is now a hash-pinned artifact fetched from **arshad-shah/nimaz-data**, regenerated per release, and `ContentPatchSeeder` carries corrections to existing installs. Both seeders and their ~30 MB of assets were retired (`docs/retirement.yaml`); `QuranRepositoryImpl` no longer seeds on read, and `seededTranslationId(...)` survives as `translationId(...)` for its catalogue normalisation alone. The line-accurate read path (`getMushafLayoutByPage` → `MushafLayoutMapper` → `MushafPageLayout` domain model → `GetMushafPageLayoutUseCase`) is unchanged and still keeps the layers clean. See `SUBSYSTEMS.md` §5/§7 and `DATA_RETIREMENT.md`.
