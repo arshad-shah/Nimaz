@@ -64,6 +64,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.navigation.ScreenTags
 import com.arshadshah.nimaz.domain.model.Ayah
+import com.arshadshah.nimaz.domain.model.RecitationRepeat
+import com.arshadshah.nimaz.domain.model.RecitationSpeed
+import com.arshadshah.nimaz.presentation.components.molecules.RecitationSheet
 import com.arshadshah.nimaz.core.share.ContentShareManager
 import com.arshadshah.nimaz.core.share.Shareables
 import com.arshadshah.nimaz.domain.model.AyahReference
@@ -116,6 +119,7 @@ fun QuranReaderScreen(
      */
     onNavigateToSubjects: (surahNumber: Int?) -> Unit = {},
     onNavigateToNextSurah: (Int) -> Unit = {},
+    onNavigateToReciters: () -> Unit = {},
     onPageModeChanged: (Boolean) -> Unit = {},
     viewModel: QuranViewModel = hiltViewModel()
 ) {
@@ -131,6 +135,7 @@ fun QuranReaderScreen(
     // The verse the ayah sheet is acting on, or null when it is closed. State, not navigation:
     // the sheet is raised over the reader and must leave the reading position exactly as it is.
     var sheetAyah by remember { mutableStateOf<Ayah?>(null) }
+    var showRecitationSheet by remember { mutableStateOf(false) }
     val copiedMessage = stringResource(R.string.ayah_copied_to_clipboard)
     var savedListIndex by rememberSaveable { mutableIntStateOf(0) }
     var savedListOffset by rememberSaveable { mutableIntStateOf(0) }
@@ -231,20 +236,6 @@ fun QuranReaderScreen(
         )
     }
 
-    // Auto-scroll to currently playing ayah
-    LaunchedEffect(audioState.currentAyahId) {
-        if (audioState.currentAyahId > 0) {
-            val displayAyahs = when (state.readingMode) {
-                ReadingMode.SURAH -> state.surahWithAyahs?.ayahs ?: emptyList()
-                ReadingMode.JUZ, ReadingMode.PAGE -> state.ayahs
-            }
-            val idx = displayAyahs.indexOfFirst { it.id == audioState.currentAyahId }
-            if (idx >= 0) {
-                listState.animateScrollToItem(idx + 1)
-            }
-        }
-    }
-
     // Scroll to initial ayah when content first loads (for search/bookmarks/favorites navigation)
     LaunchedEffect(state.surahWithAyahs, initialAyahNumber) {
         if (initialAyahNumber > 1 && state.readingMode == ReadingMode.SURAH) {
@@ -333,6 +324,33 @@ fun QuranReaderScreen(
                     ps.animateScrollToPage(targetIndex)
                 }
             }
+        }
+    }
+
+    // Follow along: keep the verse being recited on screen.
+    //
+    // Gated on the toggle now, rather than always on. Scrolling the page out from under someone
+    // who started audio and then went to read something else is the reader arguing with them;
+    // the highlight alone still says where the recitation is. In mushaf mode this turns the
+    // page, which the list-only version could not do at all.
+    LaunchedEffect(audioState.currentAyahId, audioState.followAlong) {
+        if (audioState.currentAyahId <= 0 || !audioState.followAlong) return@LaunchedEffect
+        val recitedAyahs = when (state.readingMode) {
+            ReadingMode.SURAH -> state.surahWithAyahs?.ayahs ?: emptyList()
+            ReadingMode.JUZ, ReadingMode.PAGE -> state.ayahs
+        }
+        val recited = recitedAyahs.firstOrNull { it.id == audioState.currentAyahId }
+        if (usePageView || state.readingMode == ReadingMode.PAGE) {
+            // Mushaf mode: turn to the page the verse is printed on.
+            val targetPage = recited?.page ?: return@LaunchedEffect
+            pagerState?.let { ps ->
+                val targetIndex =
+                    if (isDualPageMode) (targetPage - 1) / 2 else targetPage - 1
+                if (ps.currentPage != targetIndex) ps.animateScrollToPage(targetIndex)
+            }
+        } else {
+            val idx = recitedAyahs.indexOfFirst { it.id == audioState.currentAyahId }
+            if (idx >= 0) listState.animateScrollToItem(idx + 1)
         }
     }
 
@@ -617,7 +635,34 @@ fun QuranReaderScreen(
                         )
                     }
                 },
-                onStopClick = { viewModel.onEvent(QuranEvent.StopAudio) }
+                onStopClick = { viewModel.onEvent(QuranEvent.StopAudio) },
+                positionMs = audioState.position,
+                durationMs = audioState.duration,
+                reciterName = audioState.reciterName,
+                // Only named when it is not the default: a bar that says "1×" on every
+                // screen is a bar that says nothing.
+                speedLabel = audioState.speed
+                    .takeIf { it != RecitationSpeed.DEFAULT }
+                    ?.let { stringResource(R.string.recitation_speed_label, it.multiplier) },
+                repeatLabel = when (val repeat = audioState.repeat) {
+                    RecitationRepeat.Off -> null
+                    is RecitationRepeat.Ayah -> stringResource(
+                        R.string.recitation_repeat_summary_ayah, repeat.times
+                    )
+
+                    is RecitationRepeat.Range -> stringResource(
+                        R.string.recitation_repeat_summary_range,
+                        repeat.fromAyah,
+                        repeat.toAyah
+                    )
+
+                    RecitationRepeat.Surah ->
+                        stringResource(R.string.recitation_repeat_summary_surah)
+                },
+                onSeek = { viewModel.onEvent(QuranEvent.SeekAudioTo(it)) },
+                onNextAyah = { viewModel.onEvent(QuranEvent.NextAyahAudio) },
+                onPreviousAyah = { viewModel.onEvent(QuranEvent.PreviousAyahAudio) },
+                onExpand = { showRecitationSheet = true },
             )
         },
         floatingActionButton = {
@@ -952,6 +997,29 @@ fun QuranReaderScreen(
     // Tajweed colour guide, reachable from the reader's overflow menu (#294).
     if (showTajweedLegend) {
         TajweedLegendSheet(onDismiss = { showTajweedLegend = false })
+    }
+
+    // How the recitation is played, rather than what is played: repeat, speed, follow-along.
+    if (showRecitationSheet) {
+        RecitationSheet(
+            reciterName = audioState.reciterName,
+            repeat = audioState.repeat,
+            speed = audioState.speed,
+            followAlong = audioState.followAlong,
+            ayahCount = state.surahWithAyahs?.ayahs?.size ?: displayAyahs.size,
+            onOpenReciters = {
+                showRecitationSheet = false
+                onNavigateToReciters()
+            },
+            onRepeatChange = { viewModel.onEvent(QuranEvent.SetRecitationRepeat(it)) },
+            onSpeedChange = { viewModel.onEvent(QuranEvent.SetPlaybackSpeed(it)) },
+            onFollowAlongChange = { viewModel.onEvent(QuranEvent.SetFollowAlong(it)) },
+            onStop = {
+                viewModel.onEvent(QuranEvent.StopAudio)
+                showRecitationSheet = false
+            },
+            onDismiss = { showRecitationSheet = false },
+        )
     }
 
     // Everything you can do to one verse, on request — the pill that used to sit on every ayah.

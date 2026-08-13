@@ -35,6 +35,8 @@ import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
+import com.arshadshah.nimaz.domain.model.RecitationRepeat
+import com.arshadshah.nimaz.domain.model.RecitationSpeed
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -58,7 +60,16 @@ data class AudioState(
     // Download progress for batch downloads
     val downloadedCount: Int = 0,
     val totalToDownload: Int = 0,
-    val isPreparing: Boolean = false
+    val isPreparing: Boolean = false,
+    /** What to go back and say again — off, a verse N times, a range, or the whole surah. */
+    val repeat: RecitationRepeat = RecitationRepeat.Off,
+    /** Playback rate. Deliberately not persisted — see [QuranAudioManager.setSpeed]. */
+    val speed: RecitationSpeed = RecitationSpeed.DEFAULT,
+    /**
+     * Whether the reader follows the recitation: scrolling the verse list, or turning the
+     * mushaf page, to keep the verse being recited on screen.
+     */
+    val followAlong: Boolean = false,
 ) {
     // Calculate surah progress as percentage (0.0 to 1.0)
     val surahProgress: Float
@@ -114,6 +125,86 @@ class QuranAudioManager @Inject constructor(
      */
     fun setContinuousPlayback(enabled: Boolean) {
         continuousPlayback = enabled
+    }
+
+    /**
+     * Choose what gets repeated.
+     *
+     * [RecitationRepeat.Surah] is the only mode ExoPlayer can do by itself, as
+     * `REPEAT_MODE_ALL` over the playlist. The other two are counted here, in
+     * [onAyahCompleted], because both have to *stop*: an ayah repeat has to move on after N,
+     * and a range has to come back to its start rather than loop a single item forever.
+     * `REPEAT_MODE_ONE` can express neither.
+     */
+    fun setRepeat(repeat: RecitationRepeat) {
+        ayahRepeatsDone = 0
+        player?.repeatMode = if (repeat is RecitationRepeat.Surah) {
+            Player.REPEAT_MODE_ALL
+        } else {
+            Player.REPEAT_MODE_OFF
+        }
+        _audioState.update { it.copy(repeat = repeat) }
+    }
+
+    /**
+     * Set the playback rate.
+     *
+     * **Not persisted, deliberately.** A reader who slowed one difficult passage to follow the
+     * madd does not want every session for the next year slowed; the setting belongs to the
+     * sitting, not to the person.
+     */
+    fun setSpeed(speed: RecitationSpeed) {
+        player?.setPlaybackSpeed(speed.multiplier)
+        _audioState.update { it.copy(speed = speed) }
+    }
+
+    /** Whether the reader scrolls or turns pages to keep the recited verse visible. */
+    fun setFollowAlong(enabled: Boolean) {
+        _audioState.update { it.copy(followAlong = enabled) }
+    }
+
+    /**
+     * How many times the current verse has been played under [RecitationRepeat.Ayah].
+     *
+     * Reset whenever the mode changes or the playlist moves on, so a reader who sets "3 times"
+     * on verse 5 and then jumps to verse 40 gets three plays of 40, not the remainder of 5's.
+     */
+    private var ayahRepeatsDone = 0
+
+    /**
+     * The verse just finished — decide whether to say it again, jump back, or carry on.
+     *
+     * Called from the media-item transition listener, which is where ExoPlayer tells us an item
+     * ended. Returns true when it has taken over the transition, so the caller leaves the
+     * player where this put it.
+     */
+    private fun handleRepeatOnTransition(p: ExoPlayer, previousIndex: Int): Boolean {
+        return when (val repeat = _audioState.value.repeat) {
+            is RecitationRepeat.Ayah -> {
+                ayahRepeatsDone += 1
+                if (ayahRepeatsDone < repeat.times) {
+                    p.seekTo(previousIndex, 0L)
+                    true
+                } else {
+                    ayahRepeatsDone = 0
+                    false
+                }
+            }
+
+            is RecitationRepeat.Range -> {
+                // The playlist is the surah's verses in order, so verse numbers index it.
+                val fromIndex = (repeat.fromAyah - 1).coerceIn(0, ayahPlaylist.lastIndex)
+                val toIndex = (repeat.toAyah - 1).coerceIn(0, ayahPlaylist.lastIndex)
+                if (previousIndex >= toIndex) {
+                    p.seekTo(fromIndex, 0L)
+                    true
+                } else {
+                    false
+                }
+            }
+
+            RecitationRepeat.Off, RecitationRepeat.Surah -> false
+        }
     }
 
     /**
@@ -279,6 +370,19 @@ class QuranAudioManager @Inject constructor(
                 }
 
                 override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+                    // Repeat first, and only on an *automatic* transition: a reader who taps
+                    // next while "repeat 3 times" is on is asking to move on, and a repeat that
+                    // fought the next button would be a control that ignores you.
+                    if (reason == Player.MEDIA_ITEM_TRANSITION_REASON_AUTO &&
+                        handleRepeatOnTransition(newPlayer, currentPlaylistIndex)
+                    ) {
+                        return
+                    }
+                    if (reason != Player.MEDIA_ITEM_TRANSITION_REASON_AUTO) {
+                        // Moving by hand starts the count again — see [ayahRepeatsDone].
+                        ayahRepeatsDone = 0
+                    }
+
                     // Honor "Continuous Reading" setting: pause when an ayah ends naturally
                     // so the user can advance manually. User-driven transitions (next/prev,
                     // seek, playlist change) are still allowed through.

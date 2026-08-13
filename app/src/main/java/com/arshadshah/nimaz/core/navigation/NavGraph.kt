@@ -456,6 +456,7 @@ fun NavGraph(
                             if (surah != null) Route.SurahSubjects(surah) else Route.QuranTopics
                         )
                     },
+                    onNavigateToReciters = { navController.navigate(Route.SelectReciter) },
                     onNavigateToNextSurah = { nextSurah ->
                         navController.navigate(Route.QuranReader(nextSurah)) {
                             popUpTo<Route.QuranReader> { inclusive = true }
@@ -576,7 +577,8 @@ fun NavGraph(
                         navController.navigate(
                             if (surah != null) Route.SurahSubjects(surah) else Route.QuranTopics
                         )
-                    }
+                    },
+                    onNavigateToReciters = { navController.navigate(Route.SelectReciter) }
                 )
             }
 
@@ -596,7 +598,8 @@ fun NavGraph(
                         navController.navigate(
                             if (surah != null) Route.SurahSubjects(surah) else Route.QuranTopics
                         )
-                    }
+                    },
+                    onNavigateToReciters = { navController.navigate(Route.SelectReciter) }
                 )
             }
 

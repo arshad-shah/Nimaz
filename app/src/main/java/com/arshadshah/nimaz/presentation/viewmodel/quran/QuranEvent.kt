@@ -2,6 +2,9 @@
 
 package com.arshadshah.nimaz.presentation.viewmodel.quran
 
+import com.arshadshah.nimaz.domain.model.RecitationRepeat
+import com.arshadshah.nimaz.domain.model.RecitationSpeed
+
 sealed interface QuranEvent {
     data class LoadSurah(val surahNumber: Int) : QuranEvent
     data class LoadJuz(val juzNumber: Int) : QuranEvent
@@ -42,6 +45,20 @@ sealed interface QuranEvent {
      * `audioState` and not for driving it, and it is untestable from a ViewModel test.
      */
     data class PreviewReciter(val reciterId: String) : QuranEvent
+
+    /** Scrub to a position in the *whole surah*, which is what the seek rail measures. */
+    data class SeekAudioTo(val positionMs: Long) : QuranEvent
+    data object NextAyahAudio : QuranEvent
+    data object PreviousAyahAudio : QuranEvent
+
+    /** Repeat a verse N times, a range, or the whole surah. */
+    data class SetRecitationRepeat(val repeat: RecitationRepeat) : QuranEvent
+
+    /** 0.75x / 1x / 1.25x / 1.5x. Not persisted — it belongs to the sitting. */
+    data class SetPlaybackSpeed(val speed: RecitationSpeed) : QuranEvent
+
+    /** Whether the reader scrolls (or turns pages) to keep the recited verse visible. */
+    data class SetFollowAlong(val enabled: Boolean) : QuranEvent
 
     data object PauseAudio : QuranEvent
     data object ResumeAudio : QuranEvent

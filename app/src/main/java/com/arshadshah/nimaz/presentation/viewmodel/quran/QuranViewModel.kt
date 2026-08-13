@@ -274,6 +274,39 @@ class QuranViewModel @Inject constructor(
                 playAyahAudio(ayahGlobalId = 1, surahNumber = 1, ayahNumber = 1)
             }
 
+            is QuranEvent.SeekAudioTo -> {
+                telemetry.featureUsed(AppAnalytics.Feature.QURAN, "audio_seek")
+                // Whole-surah coordinates: the rail measures the recitation, not the file the
+                // player happens to be on. The manager has been able to do this since the
+                // playlist work; only the UI never offered it.
+                audioManager.seekToTotal(event.positionMs.coerceAtLeast(0L))
+            }
+
+            QuranEvent.NextAyahAudio -> {
+                telemetry.featureUsed(AppAnalytics.Feature.QURAN, "audio_next_ayah")
+                audioManager.skipToNext()
+            }
+
+            QuranEvent.PreviousAyahAudio -> {
+                telemetry.featureUsed(AppAnalytics.Feature.QURAN, "audio_previous_ayah")
+                audioManager.skipToPrevious()
+            }
+
+            is QuranEvent.SetRecitationRepeat -> {
+                telemetry.featureUsed(AppAnalytics.Feature.QURAN, "audio_repeat")
+                audioManager.setRepeat(event.repeat)
+            }
+
+            is QuranEvent.SetPlaybackSpeed -> {
+                telemetry.featureUsed(AppAnalytics.Feature.QURAN, "audio_speed")
+                audioManager.setSpeed(event.speed)
+            }
+
+            is QuranEvent.SetFollowAlong -> {
+                telemetry.featureUsed(AppAnalytics.Feature.QURAN, "audio_follow_along")
+                audioManager.setFollowAlong(event.enabled)
+            }
+
             QuranEvent.PauseAudio -> audioManager.togglePlayPause()
             QuranEvent.ResumeAudio -> audioManager.togglePlayPause()
             QuranEvent.StopAudio -> audioManager.stop()
