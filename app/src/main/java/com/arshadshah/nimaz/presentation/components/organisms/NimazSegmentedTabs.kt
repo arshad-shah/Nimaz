@@ -58,6 +58,10 @@ fun NimazSegmentedTabs(
             horizontalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             tabs.forEachIndexed { index, label ->
+                // Equality, not a bounds check: an out-of-range selectedIndex matches no
+                // segment and so selects none, which is what callers want for a
+                // "nothing selected yet" state. Keep it equality-based — an index lookup
+                // here would turn that case into a crash.
                 val selected = index == selectedIndex
 
                 val container by animateColorAsState(

@@ -85,4 +85,22 @@ class NimazSegmentedTabsTest {
         composeRule.onNodeWithText("By kind").assertIsNotSelected()
         composeRule.onNodeWithText("Index").assertIsNotSelected()
     }
+
+    @Test
+    fun `a negative selection selects nothing rather than crashing`() {
+        composeRule.setThemedContent {
+            NimazSegmentedTabs(tabs = tabs, selectedIndex = -1, onTabSelect = {})
+        }
+        composeRule.onNodeWithText("Outline").assertIsNotSelected()
+        composeRule.onNodeWithText("By kind").assertIsNotSelected()
+        composeRule.onNodeWithText("Index").assertIsNotSelected()
+    }
+
+    @Test
+    fun `an empty tab list renders nothing rather than crashing`() {
+        composeRule.setThemedContent {
+            NimazSegmentedTabs(tabs = emptyList(), selectedIndex = 0, onTabSelect = {})
+        }
+        composeRule.onNodeWithText("Outline").assertDoesNotExist()
+    }
 }
