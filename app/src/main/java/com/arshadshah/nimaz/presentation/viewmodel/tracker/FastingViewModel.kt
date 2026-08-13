@@ -6,7 +6,9 @@ import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.core.time.TodayProvider
 import com.arshadshah.nimaz.domain.repository.settings.HijriSettings
+import com.arshadshah.nimaz.domain.usecase.fasting.CountUnloggedRamadanDaysUseCase
 import com.arshadshah.nimaz.domain.usecase.fasting.GetDaysUntilAyyamAlBeedUseCase
+import com.arshadshah.nimaz.domain.usecase.fasting.GetRamadanCountdownUseCase
 import com.arshadshah.nimaz.core.monitoring.launchBestEffort
 import com.arshadshah.nimaz.domain.repository.settings.ZakatSettings
 import com.arshadshah.nimaz.core.util.HijriDateCalculator
@@ -47,6 +49,8 @@ class FastingViewModel @Inject constructor(
     private val prayerUseCases: PrayerUseCases,
     private val todayProvider: TodayProvider,
     private val daysUntilAyyamAlBeed: GetDaysUntilAyyamAlBeedUseCase,
+    private val ramadanCountdown: GetRamadanCountdownUseCase,
+    private val countUnloggedRamadanDays: CountUnloggedRamadanDaysUseCase,
     // The offset the user set to match their local moon sighting. The seam, not the whole
     // SettingsRepository — the same argument ZakatSettings settled for the currency (#436).
     private val hijriSettings: HijriSettings,
@@ -313,8 +317,16 @@ class FastingViewModel @Inject constructor(
         ramadanJob = launchSafely(telemetry, DOMAIN, "load_ramadan") {
             // The offset the user set to match their local moon sighting. Read once per load
             // rather than collected: this whole block re-runs when the day does.
-            val ayyamDays = daysUntilAyyamAlBeed(hijriSettings.hijriDayOffset.first())
-            _ramadanState.update { it.copy(daysUntilAyyamAlBeed = ayyamDays) }
+            val offset = hijriSettings.hijriDayOffset.first()
+            val ayyamDays = daysUntilAyyamAlBeed(offset)
+            val countdown = ramadanCountdown(offset)
+            _ramadanState.update {
+                it.copy(
+                    daysUntilAyyamAlBeed = ayyamDays,
+                    daysUntilRamadan = countdown.daysAway,
+                    ramadanStartsOn = countdown.startsOn,
+                )
+            }
 
             val today = todayProvider.today()
             val hijriToday = HijriDateCalculator.toHijri(today)
@@ -341,6 +353,7 @@ class FastingViewModel @Inject constructor(
                             missedDays = missed,
                             remainingDays = daysInRamadan - currentDay,
                             currentDay = currentDay,
+                            unloggedDays = countUnloggedRamadanDays(currentDay, records),
                             isRamadan = true,
                             isLoading = false
                         )

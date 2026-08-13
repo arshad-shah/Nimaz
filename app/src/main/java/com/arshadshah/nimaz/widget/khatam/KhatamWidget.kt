@@ -9,7 +9,6 @@ import androidx.glance.GlanceModifier
 import androidx.glance.GlanceTheme
 import androidx.glance.action.actionStartActivity
 import androidx.glance.appwidget.GlanceAppWidget
-import androidx.glance.appwidget.GlanceAppWidgetReceiver
 import androidx.glance.appwidget.LinearProgressIndicator
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.provideContent
@@ -32,8 +31,11 @@ import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import com.arshadshah.nimaz.MainActivity
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.widget.core.WidgetError
+import com.arshadshah.nimaz.widget.core.WidgetLoading
+import com.arshadshah.nimaz.widget.core.WidgetPalette
+import com.arshadshah.nimaz.widget.core.WidgetWorkReceiver
 import com.arshadshah.nimaz.widget.core.WidgetCard
-import com.arshadshah.nimaz.widget.core.WidgetLoadingBox
 import com.arshadshah.nimaz.widget.core.WidgetMessageBox
 
 class KhatamWidget : GlanceAppWidget() {
@@ -53,30 +55,23 @@ class KhatamWidget : GlanceAppWidget() {
 
 @Composable
 private fun KhatamContent(context: Context, state: KhatamWidgetState) {
-    val backgroundColor = ColorProvider(R.color.widget_background)
-    val textColor = ColorProvider(R.color.widget_text)
-    val textSecondary = ColorProvider(R.color.widget_text_secondary)
-    val primaryColor = ColorProvider(R.color.widget_primary)
+    val palette = WidgetPalette()
     val gold = ColorProvider(R.color.widget_gold)
     val goldContainer = ColorProvider(R.color.widget_gold_container)
     val onGoldContainer = ColorProvider(R.color.widget_on_gold_container)
 
     when (state) {
-        is KhatamWidgetState.Loading -> WidgetLoadingBox(
-            background = backgroundColor,
-            textSecondary = textSecondary,
-            onClick = actionStartActivity<MainActivity>(),
-        )
+        is KhatamWidgetState.Loading -> WidgetLoading(palette)
 
         is KhatamWidgetState.Success -> {
             if (state.data.hasActiveKhatam) {
                 KhatamProgressContent(
                     context = context,
                     data = state.data,
-                    backgroundColor = backgroundColor,
-                    textColor = textColor,
-                    textSecondary = textSecondary,
-                    primaryColor = primaryColor,
+                    backgroundColor = palette.background,
+                    textColor = palette.text,
+                    textSecondary = palette.textSecondary,
+                    primaryColor = palette.primary,
                     gold = gold,
                     goldContainer = goldContainer,
                     onGoldContainer = onGoldContainer,
@@ -84,15 +79,15 @@ private fun KhatamContent(context: Context, state: KhatamWidgetState) {
             } else {
                 KhatamEmptyContent(
                     context = context,
-                    backgroundColor = backgroundColor,
-                    textSecondary = textSecondary,
-                    primaryColor = primaryColor
+                    backgroundColor = palette.background,
+                    textSecondary = palette.textSecondary,
+                    primaryColor = palette.primary
                 )
             }
         }
 
         is KhatamWidgetState.Error -> WidgetMessageBox(
-            background = backgroundColor,
+            background = palette.background,
             onClick = actionStartActivity<MainActivity>(),
         ) {
             Column(
@@ -101,7 +96,7 @@ private fun KhatamContent(context: Context, state: KhatamWidgetState) {
                 Text(
                     text = context.getString(R.string.widget_error_loading),
                     style = TextStyle(
-                        color = textSecondary,
+                        color = palette.textSecondary,
                         fontSize = 12.sp
                     )
                 )
@@ -109,7 +104,7 @@ private fun KhatamContent(context: Context, state: KhatamWidgetState) {
                 Text(
                     text = context.getString(R.string.widget_tap_to_retry),
                     style = TextStyle(
-                        color = primaryColor,
+                        color = palette.primary,
                         fontSize = 10.sp
                     )
                 )
@@ -298,16 +293,11 @@ private fun KhatamEmptyContent(
     }
 }
 
-class KhatamWidgetReceiver : GlanceAppWidgetReceiver() {
+class KhatamWidgetReceiver : WidgetWorkReceiver() {
     override val glanceAppWidget: GlanceAppWidget = KhatamWidget()
 
-    override fun onEnabled(context: Context) {
-        super.onEnabled(context)
+    override fun enqueueWork(context: Context) =
         KhatamWorker.enqueuePeriodicWork(context, force = true)
-    }
 
-    override fun onDisabled(context: Context) {
-        super.onDisabled(context)
-        KhatamWorker.cancel(context)
-    }
+    override fun cancelWork(context: Context) = KhatamWorker.cancel(context)
 }

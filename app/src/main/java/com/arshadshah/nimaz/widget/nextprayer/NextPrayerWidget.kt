@@ -10,7 +10,6 @@ import androidx.glance.GlanceTheme
 import androidx.glance.LocalContext
 import androidx.glance.action.actionStartActivity
 import androidx.glance.appwidget.GlanceAppWidget
-import androidx.glance.appwidget.GlanceAppWidgetReceiver
 import androidx.glance.appwidget.provideContent
 import androidx.glance.currentState
 import androidx.glance.layout.Alignment
@@ -27,11 +26,14 @@ import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import com.arshadshah.nimaz.MainActivity
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.widget.core.WidgetError
+import com.arshadshah.nimaz.widget.core.WidgetLoading
+import com.arshadshah.nimaz.widget.core.WidgetPalette
+import com.arshadshah.nimaz.widget.core.WidgetWorkReceiver
 import com.arshadshah.nimaz.widget.WidgetUpdateScheduler
 import com.arshadshah.nimaz.widget.core.WidgetCard
 import com.arshadshah.nimaz.widget.core.WidgetIcon
 import com.arshadshah.nimaz.widget.core.WidgetLabel
-import com.arshadshah.nimaz.widget.core.WidgetLoadingBox
 import com.arshadshah.nimaz.widget.core.WidgetMessageBox
 import com.arshadshah.nimaz.widget.core.WidgetPill
 import com.arshadshah.nimaz.widget.core.prayerIconRes
@@ -55,35 +57,28 @@ class NextPrayerWidget : GlanceAppWidget() {
 @Composable
 private fun NextPrayerContent(state: NextPrayerWidgetState) {
     val context = LocalContext.current
-    val backgroundColor = ColorProvider(R.color.widget_background)
-    val textColor = ColorProvider(R.color.widget_text)
-    val textSecondary = ColorProvider(R.color.widget_text_secondary)
-    val primaryColor = ColorProvider(R.color.widget_primary)
+    val palette = WidgetPalette()
 
     when (state) {
-        is NextPrayerWidgetState.Loading -> WidgetLoadingBox(
-            background = backgroundColor,
-            textSecondary = textSecondary,
-            onClick = actionStartActivity<MainActivity>(),
-        )
+        is NextPrayerWidgetState.Loading -> WidgetLoading(palette)
 
         is NextPrayerWidgetState.Success -> {
             NextPrayerSuccessContent(
                 data = state.data,
-                backgroundColor = backgroundColor,
-                textColor = textColor,
-                textSecondary = textSecondary,
-                primaryColor = primaryColor
+                backgroundColor = palette.background,
+                textColor = palette.text,
+                textSecondary = palette.textSecondary,
+                primaryColor = palette.primary
             )
         }
 
         is NextPrayerWidgetState.Error -> WidgetMessageBox(
-            background = backgroundColor,
+            background = palette.background,
             onClick = actionStartActivity<MainActivity>(),
         ) {
             Text(
                 text = context.getString(R.string.widget_tap_to_setup),
-                style = TextStyle(color = textSecondary, fontSize = 12.sp)
+                style = TextStyle(color = palette.textSecondary, fontSize = 12.sp)
             )
         }
     }
@@ -168,20 +163,17 @@ private fun NextPrayerSuccessContent(
     }
 }
 
-class NextPrayerWidgetReceiver : GlanceAppWidgetReceiver() {
+class NextPrayerWidgetReceiver : WidgetWorkReceiver() {
     override val glanceAppWidget: GlanceAppWidget = NextPrayerWidget()
 
-    override fun onEnabled(context: Context) {
-        super.onEnabled(context)
+    override fun enqueueWork(context: Context) =
         NextPrayerWorker.enqueuePeriodicWork(context, force = true)
-        WidgetUpdateScheduler.schedule(context)
-    }
 
-    override fun onDisabled(context: Context) {
-        super.onDisabled(context)
-        NextPrayerWorker.cancel(context)
-        // Only cancel alarm if no other countdown widgets are active
-        // For simplicity, always re-schedule — PrayerTimesWidget will also schedule
+    override fun cancelWork(context: Context) = NextPrayerWorker.cancel(context)
+
+    override fun onWidgetEnabled(context: Context) =
+        WidgetUpdateScheduler.schedule(context)
+
+    override fun onWidgetDisabled(context: Context) =
         WidgetUpdateScheduler.cancel(context)
-    }
 }

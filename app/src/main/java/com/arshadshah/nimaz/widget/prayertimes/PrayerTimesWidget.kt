@@ -10,7 +10,6 @@ import androidx.glance.GlanceTheme
 import androidx.glance.LocalContext
 import androidx.glance.action.actionStartActivity
 import androidx.glance.appwidget.GlanceAppWidget
-import androidx.glance.appwidget.GlanceAppWidgetReceiver
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.provideContent
 import androidx.glance.background
@@ -31,10 +30,13 @@ import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import com.arshadshah.nimaz.MainActivity
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.widget.core.WidgetError
+import com.arshadshah.nimaz.widget.core.WidgetLoading
+import com.arshadshah.nimaz.widget.core.WidgetPalette
+import com.arshadshah.nimaz.widget.core.WidgetWorkReceiver
 import com.arshadshah.nimaz.domain.model.PrayerType
 import com.arshadshah.nimaz.widget.WidgetUpdateScheduler
 import com.arshadshah.nimaz.widget.core.WidgetCard
-import com.arshadshah.nimaz.widget.core.WidgetLoadingBox
 import com.arshadshah.nimaz.widget.core.WidgetMessageBox
 import com.arshadshah.nimaz.widget.core.nextPrayerIndex
 import com.arshadshah.nimaz.widget.core.prayerShortName
@@ -57,35 +59,28 @@ class PrayerTimesWidget : GlanceAppWidget() {
 @Composable
 private fun PrayerTimesContent(state: PrayerTimesWidgetState) {
     val context = LocalContext.current
-    val backgroundColor = ColorProvider(R.color.widget_background)
-    val textColor = ColorProvider(R.color.widget_text)
-    val textSecondary = ColorProvider(R.color.widget_text_secondary)
-    val primaryColor = ColorProvider(R.color.widget_primary)
+    val palette = WidgetPalette()
 
     when (state) {
-        is PrayerTimesWidgetState.Loading -> WidgetLoadingBox(
-            background = backgroundColor,
-            textSecondary = textSecondary,
-            onClick = actionStartActivity<MainActivity>(),
-        )
+        is PrayerTimesWidgetState.Loading -> WidgetLoading(palette)
 
         is PrayerTimesWidgetState.Success -> {
             PrayerTimesSuccessContent(
                 data = state.data,
-                backgroundColor = backgroundColor,
-                textColor = textColor,
-                textSecondary = textSecondary,
-                primaryColor = primaryColor
+                backgroundColor = palette.background,
+                textColor = palette.text,
+                textSecondary = palette.textSecondary,
+                primaryColor = palette.primary
             )
         }
 
         is PrayerTimesWidgetState.Error -> WidgetMessageBox(
-            background = backgroundColor,
+            background = palette.background,
             onClick = actionStartActivity<MainActivity>(),
         ) {
             Text(
                 text = context.getString(R.string.widget_tap_to_setup),
-                style = TextStyle(color = textSecondary, fontSize = 12.sp)
+                style = TextStyle(color = palette.textSecondary, fontSize = 12.sp)
             )
         }
     }
@@ -241,18 +236,17 @@ private fun PrayerPill(
     }
 }
 
-class PrayerTimesWidgetReceiver : GlanceAppWidgetReceiver() {
+class PrayerTimesWidgetReceiver : WidgetWorkReceiver() {
     override val glanceAppWidget: GlanceAppWidget = PrayerTimesWidget()
 
-    override fun onEnabled(context: Context) {
-        super.onEnabled(context)
+    override fun enqueueWork(context: Context) =
         PrayerTimesWorker.enqueuePeriodicWork(context, force = true)
-        WidgetUpdateScheduler.schedule(context)
-    }
 
-    override fun onDisabled(context: Context) {
-        super.onDisabled(context)
-        PrayerTimesWorker.cancel(context)
+    override fun cancelWork(context: Context) = PrayerTimesWorker.cancel(context)
+
+    override fun onWidgetEnabled(context: Context) =
+        WidgetUpdateScheduler.schedule(context)
+
+    override fun onWidgetDisabled(context: Context) =
         WidgetUpdateScheduler.cancel(context)
-    }
 }

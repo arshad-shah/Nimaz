@@ -13,7 +13,6 @@ import androidx.glance.GlanceTheme
 import androidx.glance.LocalContext
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
-import androidx.glance.appwidget.GlanceAppWidgetReceiver
 import androidx.glance.appwidget.action.actionStartActivity
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.provideContent
@@ -40,6 +39,10 @@ import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import com.arshadshah.nimaz.MainActivity
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.widget.core.WidgetError
+import com.arshadshah.nimaz.widget.core.WidgetLoading
+import com.arshadshah.nimaz.widget.core.WidgetPalette
+import com.arshadshah.nimaz.widget.core.WidgetWorkReceiver
 import com.arshadshah.nimaz.widget.core.WidgetIcon
 import com.arshadshah.nimaz.widget.core.WidgetLoadingBox
 import com.arshadshah.nimaz.widget.core.WidgetMessageBox
@@ -82,15 +85,12 @@ private fun HijriCalendarContent(
     openCalendarIntent: Intent,
 ) {
     val context = LocalContext.current
-    val backgroundColor = ColorProvider(R.color.widget_background)
-    val textColor = ColorProvider(R.color.widget_text)
-    val textSecondary = ColorProvider(R.color.widget_text_secondary)
-    val primaryColor = ColorProvider(R.color.widget_primary)
+    val palette = WidgetPalette()
 
     when (state) {
         is HijriCalendarWidgetState.Loading -> WidgetLoadingBox(
-            background = backgroundColor,
-            textSecondary = textSecondary,
+            background = palette.background,
+            textSecondary = palette.textSecondary,
             onClick = actionStartActivity(openCalendarIntent),
             cornerRadius = 20.dp,
         )
@@ -98,22 +98,22 @@ private fun HijriCalendarContent(
         is HijriCalendarWidgetState.Success -> {
             HijriCalendarSuccessContent(
                 data = state.data,
-                backgroundColor = backgroundColor,
-                textColor = textColor,
-                textSecondary = textSecondary,
-                primaryColor = primaryColor,
+                backgroundColor = palette.background,
+                textColor = palette.text,
+                textSecondary = palette.textSecondary,
+                primaryColor = palette.primary,
                 openCalendarIntent = openCalendarIntent,
             )
         }
 
         is HijriCalendarWidgetState.Error -> WidgetMessageBox(
-            background = backgroundColor,
+            background = palette.background,
             onClick = actionStartActivity(openCalendarIntent),
             cornerRadius = 20.dp,
         ) {
             Text(
                 text = context.getString(R.string.widget_tap_to_refresh),
-                style = TextStyle(color = textSecondary, fontSize = 12.sp)
+                style = TextStyle(color = palette.textSecondary, fontSize = 12.sp)
             )
         }
     }
@@ -430,16 +430,11 @@ private fun EventRow(
     }
 }
 
-class HijriCalendarWidgetReceiver : GlanceAppWidgetReceiver() {
+class HijriCalendarWidgetReceiver : WidgetWorkReceiver() {
     override val glanceAppWidget: GlanceAppWidget = HijriCalendarWidget()
 
-    override fun onEnabled(context: Context) {
-        super.onEnabled(context)
+    override fun enqueueWork(context: Context) =
         HijriCalendarWorker.enqueuePeriodicWork(context, force = true)
-    }
 
-    override fun onDisabled(context: Context) {
-        super.onDisabled(context)
-        HijriCalendarWorker.cancel(context)
-    }
+    override fun cancelWork(context: Context) = HijriCalendarWorker.cancel(context)
 }

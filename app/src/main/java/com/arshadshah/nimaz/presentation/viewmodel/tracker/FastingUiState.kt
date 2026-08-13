@@ -60,6 +60,20 @@ data class RamadanTrackerUiState(
      * user's `hijriDayOffset` while everything else honoured it (registry Open #10).
      */
     val daysUntilAyyamAlBeed: Int = 0,
+    /**
+     * Days until the next Ramadan, and the day it starts.
+     *
+     * Here for the same reason as [daysUntilAyyamAlBeed]: `RamadanCountdownCard` used to call
+     * `HijriDateCalculator.daysUntilNextRamadan()` at composition, and the screen called it a
+     * second time just to decide whether to show the card (#492).
+     */
+    val daysUntilRamadan: Int = 0,
+    val ramadanStartsOn: LocalDate? = null,
+    /**
+     * Days of this Ramadan gone by with no fast record at all — not the same as [missedDays],
+     * which counts days explicitly recorded as not fasted.
+     */
+    val unloggedDays: Int = 0,
     val isLoading: Boolean = true
 )
 

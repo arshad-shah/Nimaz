@@ -92,6 +92,9 @@ import com.arshadshah.nimaz.presentation.components.atoms.countdownText
 import com.arshadshah.nimaz.presentation.components.atoms.rememberCountdownTo
 import com.arshadshah.nimaz.presentation.components.atoms.rememberNow
 import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
+import com.arshadshah.nimaz.presentation.components.molecules.RamadanBanner
+import com.arshadshah.nimaz.presentation.components.molecules.RamadanCountdownCard
+import com.arshadshah.nimaz.presentation.components.molecules.RamadanMissedFastsTracker
 import com.arshadshah.nimaz.presentation.components.molecules.calendar.CalendarDayState
 import com.arshadshah.nimaz.presentation.components.molecules.calendar.CalendarLegendItem
 import com.arshadshah.nimaz.presentation.components.molecules.calendar.NimazCalendar
@@ -256,16 +259,23 @@ fun FastTrackerScreen(
 
                             // Missed Fasts Alert (if any days are missed/not logged)
                             item {
+                                // Renders nothing when there is nothing owing, so it does
+                                // not need the `if` the old private version had inside it.
                                 RamadanMissedFastsTracker(
-                                    currentDay = ramadanState.currentDay,
-                                    fastedDays = ramadanState.fastedDays,
-                                    records = calendarState.records
+                                    unloggedDays = ramadanState.unloggedDays
                                 )
                             }
-                        } else if (HijriDateCalculator.daysUntilNextRamadan() <= RamadanCardWindowDays) {
-                            // Ramadan approaching (within 30 days) - show countdown
-                            item {
-                                RamadanCountdownCard()
+                        } else if (ramadanState.daysUntilRamadan <= RamadanCardWindowDays) {
+                            // Ramadan approaching (within 30 days) — show the countdown. The
+                            // days come from the ViewModel now; this used to be a third call
+                            // to the calculator at composition (#492).
+                            ramadanState.ramadanStartsOn?.let { startsOn ->
+                                item {
+                                    RamadanCountdownCard(
+                                        daysAway = ramadanState.daysUntilRamadan,
+                                        startsOn = startsOn,
+                                    )
+                                }
                             }
                         }
 
@@ -341,7 +351,7 @@ fun FastTrackerScreen(
                                 currency = makeupState.currency,
                                 isRamadan = ramadanState.isRamadan,
                                 ramadanDay = ramadanState.currentDay,
-                                daysUntilRamadan = HijriDateCalculator.daysUntilNextRamadan(),
+                                daysUntilRamadan = ramadanState.daysUntilRamadan,
                                 calendarExpanded = showCalendar,
                                 recommendedExpanded = showRecommended,
                                 onToggleCalendar = { showCalendar = !showCalendar },
@@ -382,189 +392,6 @@ fun FastTrackerScreen(
                     }
                 }
 
-            }
-        }
-    }
-}
-
-@Composable
-private fun RamadanBanner(
-    fastedDays: Int,
-    totalDays: Int,
-    currentDay: Int,
-    modifier: Modifier = Modifier
-) {
-    GradientCard(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        gradientColors = listOf(
-            NimazColors.FastingColors.Ramadan,
-            NimazColors.FastingColors.Ramadan.copy(alpha = 0.85f)
-        )
-    ) {
-        Column(modifier = Modifier.padding(20.dp)) {
-            Text(
-                text = stringResource(R.string.fasting_current),
-                style = MaterialTheme.typography.labelSmall,
-                color = Color.White.copy(alpha = 0.8f),
-                letterSpacing = 1.sp
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = stringResource(R.string.fasting_ramadan_day, currentDay),
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold,
-                color = Color.White
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                LinearProgressIndicator(
-                    progress = { if (totalDays > 0) fastedDays.toFloat() / totalDays else 0f },
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(8.dp)
-                        .clip(RoundedCornerShape(4.dp)),
-                    color = Color.White,
-                    trackColor = Color.White.copy(alpha = 0.2f)
-                )
-                Text(
-                    text = "$fastedDays/$totalDays",
-                    style = MaterialTheme.typography.labelLarge,
-                    fontWeight = FontWeight.SemiBold,
-                    color = Color.White
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun RamadanCountdownCard(
-    modifier: Modifier = Modifier
-) {
-    val daysUntilRamadan = HijriDateCalculator.daysUntilNextRamadan()
-    val hijriToday = HijriDateCalculator.today()
-
-    // Get the target Ramadan year
-    val targetYear = if (hijriToday.month >= 9) hijriToday.year + 1 else hijriToday.year
-    val ramadanStart = HijriDateCalculator.getFirstDayOfRamadan(targetYear)
-
-    GradientCard(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        gradientColors = listOf(
-            NimazColors.FastingColors.Ramadan,
-            NimazColors.FastingColors.Ramadan.copy(alpha = 0.8f)
-        )
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(24.dp)
-        ) {
-            Text(
-                text = stringResource(R.string.fasting_ramadan_starts_in),
-                style = MaterialTheme.typography.labelMedium,
-                color = Color.White.copy(alpha = 0.8f),
-                letterSpacing = 2.sp
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = "$daysUntilRamadan",
-                style = MaterialTheme.typography.displayLarge.copy(
-                    fontWeight = FontWeight.Bold
-                ),
-                color = Color.White
-            )
-            Text(
-                text = if (daysUntilRamadan == 1) stringResource(R.string.fasting_day) else stringResource(
-                    R.string.fasting_days
-                ),
-                style = MaterialTheme.typography.titleMedium,
-                color = Color.White.copy(alpha = 0.9f)
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-            Text(
-                text = ramadanStart.formatLongDate(),
-                style = MaterialTheme.typography.bodyMedium,
-                color = Color.White.copy(alpha = 0.8f)
-            )
-        }
-    }
-}
-
-@Composable
-private fun RamadanMissedFastsTracker(
-    currentDay: Int,
-    fastedDays: Int,
-    records: List<FastRecord>,
-    modifier: Modifier = Modifier
-) {
-    val today = LocalDate.now()
-
-    // Calculate how many past Ramadan days have no logged fast
-    // currentDay is the current day of Ramadan (1-30)
-    // fastedDays is the number of days logged as fasted
-    // Past days without a record are considered missed
-
-    val pastDaysInRamadan = currentDay - 1 // Days before today in Ramadan
-    val recordedDays = records.count { record ->
-        val recordDate = LocalDate.ofEpochDay(record.date / (24 * 60 * 60 * 1000))
-        recordDate.isBefore(today) && HijriDateCalculator.isRamadan(recordDate)
-    }
-
-    val unloggedDays = (pastDaysInRamadan - recordedDays).coerceAtLeast(0)
-
-    if (unloggedDays > 0) {
-        NimazCard(
-            modifier = modifier.fillMaxWidth(),
-            style = NimazCardStyle.OUTLINED,
-            shape = RoundedCornerShape(14.dp),
-            colors = NimazCardDefaults.colors(
-                container = NimazColors.PrayerColors.Maghrib.copy(alpha = 0.1f),
-                border = NimazColors.PrayerColors.Maghrib.copy(alpha = 0.3f),
-                borderWidth = 1.dp
-            )
-        ) {
-            Row(
-                modifier = Modifier.padding(15.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(NimazColors.PrayerColors.Maghrib.copy(alpha = 0.2f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "$unloggedDays",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = NimazColors.PrayerColors.Maghrib
-                    )
-                }
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = if (unloggedDays == 1) stringResource(R.string.fasting_unlogged_day) else stringResource(
-                            R.string.fasting_unlogged_days
-                        ),
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                    Text(
-                        text = stringResource(R.string.fasting_log_calendar_hint),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
             }
         }
     }
@@ -1416,20 +1243,7 @@ private fun MakeupSectionHeaderPreview() {
     }
 }
 
-@Preview(showBackground = true, widthDp = 400, name = "Ramadan Countdown Card")
-@Composable
-private fun RamadanCountdownCardPreview() {
-    NimazTheme {
-        RamadanCountdownCard()
-    }
-}
-
-@Preview(showBackground = true, widthDp = 400, name = "Ramadan Banner")
-@Composable
-private fun RamadanBannerPreview() {
-    NimazTheme {
-        RamadanBanner(fastedDays = 15, totalDays = 30, currentDay = 16)
-    }
-}
+// The Ramadan previews moved with their components, to
+// `presentation/components/molecules/RamadanCards.kt` (#492).
 
 // endregion
