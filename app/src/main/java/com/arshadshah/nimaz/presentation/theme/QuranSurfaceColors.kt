@@ -72,7 +72,7 @@ object QuranSurfaceColors {
     /** Hairline rules, the page frame and the cartouche stroke on [paper]. */
     val paperLine: Color
         @Composable @ReadOnlyComposable
-        get() = if (isDark) Color(0xFF1F4340) else Color(0xFFCBBB90)
+        get() = if (isDark) Color(0xFF1F4340) else Color(0xFFE0D6BC)
 
     /** Arabic body text on [paper]. */
     val paperInk: Color
