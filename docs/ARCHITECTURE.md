@@ -1111,6 +1111,23 @@ with no label and a touch target under 48dp fail the lane we already run. It can
 surface *signifies*. It is shared across primitives: `NimazCard` and `NimazBadge` both take a
 `tone`, and each resolves it to colours appropriate to its own scale.
 
+**The scheme defines every surface role it uses — including the ones Material 3 would otherwise
+invent.** `Theme.kt` sets `surfaceTint` and the whole `surfaceContainer*` ladder explicitly
+(`surfaceContainerLowest` → `surfaceContainerHighest`, plus `surfaceBright`/`surfaceDim`), from the
+neutral ramp in `NimazColors`. Both were previously left out, and Material 3 fills a gap by
+generating from the **primary hue**:
+
+- `surfaceTint` defaulted to `primary` (teal), and M3 paints it over any surface carrying a tonal
+  elevation — so every bottom sheet, dialog, dropdown and top app bar came out mint-tinted while
+  `surface` itself was plain white. It is now `surface`, which makes the overlay a no-op at any
+  elevation; components may keep passing `tonalElevation` and it simply costs nothing.
+- the `surfaceContainer*` roles fell back to M3's lavender-ish baseline, which is where the
+  purple cast on segmented-control tracks, calendar headers and chip beds came from.
+
+**Do not "fix" a tinted surface at the call site.** Before this was found, thirteen call sites
+faked a container with `surfaceVariant.copy(alpha = …)`; they now use the real roles. If a surface
+looks wrong, the scheme is the place to look.
+
 The atom layer resolves tone through **`NimazToneColors`** (`components/atoms/NimazToneColors.kt`),
 an `internal object` with `foreground(tone)` / `container(tone)` / `outline(tone)`. Use it in any
 new atom rather than writing another `when (tone)` block: `NimazBadgeDefaults` kept its copies
@@ -1316,6 +1333,7 @@ copy anything listed as Open.
 
 | 13 | Quran / search | **An install made before the index shipped never gets one.** `createFromAsset` copies the artifact exactly once, and neither a Room migration nor a content patch can add a table — so the folded search index reaches fresh installs only. Those installs fall back to the `LIKE` queries, which is the search they already had: working for Latin scripts, empty for Arabic. The repositories ask `ContentSearchIndex.isAvailable()` rather than assuming, so nothing crashes and nothing lies. | Either build the index once in a background `WorkManager` job when it is missing (the folding is already in Kotlin; the cost is ~150k documents written off the critical path, and the reason the *previous* attempt failed was doing it synchronously at first launch), or accept that it lands with the next reinstall. Needs a decision, not just code. |
 | 14 | Design system | **Seven files still hand-roll `LinearProgressIndicator`** — `QaidaCourseHeader`, `QuranAudioBottomBar`, `QuranSurahInfoComponents`, `QuranSurahListItem`, `search/AskComponents`, `settings/SyncScreen`, `settings/WidgetsScreen` — each with its own height, shape and colours. `NimazProgressTrack` (§8) now exists and coerces its input; these predate it. `RamadanCards` was the eighth and moved onto the atom with the fasting redesign, which is what proved the atom's `fillColor` escape hatch was needed at all. The rest were deliberately left so an app-wide sweep did not ride along inside one screen's change. | Convert each to `NimazProgressTrack(progress, tone = …, size = …)`, dropping the local height/shape/colour constants; verify under visual review since several sit on tinted surfaces. |
+| 16 | Design system | **The app disagrees with itself about what `SUCCESS` and `WARNING` look like.** `NimazBadgeDefaults` maps them onto `colorScheme.tertiary` / `secondary`, which in this theme are **deep purple** and **brand gold**. `NimazSwitch` maps `SUCCESS` onto the green `NimazColors.Success`. `NimazToneColors` (the atom-layer resolver) takes the green/amber side, so the fasting screen's "Fasted" control matches its calendar legend. This was caught on an emulator after every gate passed green — a purple "Fasted" pill beside a green "Fasted" legend dot, which no test asserts about. | Decide which side is canonical and converge, most likely by pointing `NimazBadgeDefaults` at `NimazToneColors` and deleting its private copies. Needs visual review of every badge, so it is not a mechanical change. |
 | 15 | Design system | **`NimazPillTabs` and `NimazSegmentedControl` overlap visually while doing different jobs** — the first switches views (organism, text-only, single accent), the second chooses a value (atom, icon per cell, per-cell selected tone, nullable selection). Two inset pill rows that look alike and behave differently is a real risk of a caller reaching for the wrong one. | Decide whether they consolidate (one component with a `role` axis) or stay separate with the distinction documented at both call sites. A design decision, not a mechanical migration. |
 
 > **Accepted patterns (NOT deviations):**

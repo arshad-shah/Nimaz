@@ -98,6 +98,32 @@ object NimazColors {
     val OnSurfaceDark = P.Gray200
     val OnSurfaceVariantDark = P.Gray500
 
+    // ── The surface-container ladder ──────────────────────────────────────────
+    //
+    // Material 3 generates these from the primary hue when a scheme leaves them out, and the app
+    // left every one of them out. The result was a teal-and-lavender cast on anything that used
+    // them — the segmented-control track, the calendar header, chip beds — while the surfaces the
+    // scheme *did* define stayed a clean white. Two families of grey in one app, one of them
+    // nobody chose.
+    //
+    // Defined here as plain neutrals off the same ramp as `SurfaceVariant`, so a container is a
+    // step of lightness rather than a step of hue.
+    val SurfaceContainerLowestLight = P.White
+    val SurfaceContainerLowLight = P.Stone50
+    val SurfaceContainerLight = P.Stone100
+    val SurfaceContainerHighLight = P.Gray100
+    val SurfaceContainerHighestLight = P.Stone200
+    val SurfaceBrightLight = P.White
+    val SurfaceDimLight = P.Stone200
+
+    val SurfaceContainerLowestDark = P.Stone950
+    val SurfaceContainerLowDark = P.Stone900
+    val SurfaceContainerDark = P.Stone800
+    val SurfaceContainerHighDark = P.Stone700
+    val SurfaceContainerHighestDark = P.Stone600
+    val SurfaceBrightDark = P.Stone700
+    val SurfaceDimDark = P.Stone950
+
     // ── Error ─────────────────────────────────────────────────────────────────
     val Error = P.ErrorRed
     val ErrorLight = P.ErrorPink

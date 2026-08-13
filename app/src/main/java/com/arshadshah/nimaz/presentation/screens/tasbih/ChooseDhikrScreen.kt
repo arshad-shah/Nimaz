@@ -417,7 +417,7 @@ private fun DhikrRow(
             Box(
                 modifier = Modifier
                     .background(
-                        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
+                        MaterialTheme.colorScheme.surfaceContainer,
                         RoundedCornerShape(10.dp)
                     )
                     .padding(horizontal = 9.dp, vertical = 4.dp)

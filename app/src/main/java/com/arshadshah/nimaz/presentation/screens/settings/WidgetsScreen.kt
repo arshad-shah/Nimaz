@@ -268,7 +268,7 @@ private fun WidgetSection(
             shape = RoundedCornerShape(24.dp),
             gradient = listOf(
                 MaterialTheme.colorScheme.surfaceVariant,
-                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.8f)
+                MaterialTheme.colorScheme.surfaceContainerHigh
             )
         ) {
             Box(

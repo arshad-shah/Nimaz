@@ -486,7 +486,7 @@ private fun CurrentTasbihInfoCard(
         onClick = onClick,
         shape = RoundedCornerShape(20.dp),
         colors = NimazCardDefaults.colors(
-            container = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
+            container = MaterialTheme.colorScheme.surfaceContainerLow,
             border = NimazColors.TasbihColors.Milestone.copy(alpha = 0.25f)
         )
     ) {
@@ -666,7 +666,7 @@ private fun ControlButtons(
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(percent = 50),
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+        color = MaterialTheme.colorScheme.surfaceContainer,
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
     ) {
         Row(

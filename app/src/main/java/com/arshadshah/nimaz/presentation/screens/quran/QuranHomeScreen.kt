@@ -917,7 +917,7 @@ private fun JuzScrollbar(
         modifier = modifier
             .width(32.dp)
             .clip(RoundedCornerShape(8.dp))
-            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f))
+            .background(MaterialTheme.colorScheme.surfaceContainer)
             .pointerInput(Unit) {
                 detectVerticalDragGestures { change, _ ->
                     change.consume()
