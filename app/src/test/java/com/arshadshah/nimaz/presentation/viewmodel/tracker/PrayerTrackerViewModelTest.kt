@@ -6,9 +6,11 @@ import com.arshadshah.nimaz.core.util.toUtcMidnightMillis
 import com.arshadshah.nimaz.domain.model.PrayerName
 import com.arshadshah.nimaz.domain.model.PrayerStatus
 import com.arshadshah.nimaz.domain.usecase.PrayerUseCases
+import com.google.common.truth.Truth.assertThat
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
@@ -58,16 +60,25 @@ class PrayerTrackerViewModelTest {
     fun tearDown() = Dispatchers.resetMain()
 
     @Test
-    fun `SetPrayerStatus writes the status the user chose`() = runTest {
-        viewModel.onEvent(
-            PrayerTrackerEvent.SetPrayerStatus(PrayerName.ASR, PrayerStatus.LATE)
-        )
-        advanceUntilIdle()
+    fun `SetPrayerStatus writes the status the user chose and stamps prayedAt for a fulfilled prayer`() =
+        runTest {
+            val prayedAt = slot<Long>()
 
-        coVerify {
-            prayerUseCases.updatePrayerStatus(any(), PrayerName.ASR, PrayerStatus.LATE, any(), false)
+            viewModel.onEvent(
+                PrayerTrackerEvent.SetPrayerStatus(PrayerName.ASR, PrayerStatus.LATE)
+            )
+            advanceUntilIdle()
+
+            coVerify {
+                prayerUseCases.updatePrayerStatus(
+                    any(), PrayerName.ASR, PrayerStatus.LATE, capture(prayedAt), false
+                )
+            }
+            // LATE is a fulfilled prayer, so it must be timestamped — the sibling test below
+            // pins the other half (MISSED must NOT be). Asserting non-null here, rather than
+            // `any()`, means deleting the PRAYED/LATE timestamp branch fails this test.
+            assertThat(prayedAt.captured).isNotNull()
         }
-    }
 
     @Test
     fun `SetPrayerStatus with a null status clears the record back to unrecorded`() = runTest {
@@ -84,12 +95,15 @@ class PrayerTrackerViewModelTest {
     }
 
     @Test
-    fun `SetPrayerStatus stamps prayedAt only for a fulfilled prayer`() = runTest {
+    fun `SetPrayerStatus does not stamp prayedAt for an unfulfilled prayer`() = runTest {
         viewModel.onEvent(
             PrayerTrackerEvent.SetPrayerStatus(PrayerName.FAJR, PrayerStatus.MISSED)
         )
         advanceUntilIdle()
 
+        // Paired with the LATE test above, which asserts prayedAt is genuinely non-null: this
+        // one asserts it is exactly null for MISSED, so together they pin both halves of
+        // "stamped only for a fulfilled prayer".
         coVerify {
             prayerUseCases.updatePrayerStatus(any(), PrayerName.FAJR, PrayerStatus.MISSED, null, false)
         }
