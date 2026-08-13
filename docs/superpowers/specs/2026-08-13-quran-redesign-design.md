@@ -365,6 +365,89 @@ retires the always-present per-ayah circle.
 
 ---
 
-## Screens 9+ — pending
+## Screen 9 — Tafseer (`Tafseer`)
 
-Passages · Subjects · Tafseer · Khatam list · Khatam detail · Search.
+Here the shipping screen is **richer than the prototype**, which drops three things it does
+well: topic chips linking commentary into the subject index, a note editor, and an ayah
+pager showing position ("1 / 71").
+
+**Today:** source pill tabs (`Ibn Kathir`, `Ma'arif al-Qur'an`), then the ornate gold/teal
+frame containing an ornamental divider, the ayah in Arabic, another divider, a "Topics" chip
+row, and the commentary. A bottom pager with prev/next, note and share.
+
+**Prototype:** three source chips, a plain card with the ayah **and its translation**, then
+prose. No chips, no notes, no pager.
+
+### Decided
+
+- **Keep the framed treatment as it is** on this screen.
+- **Keep the topic chips** — they are the only place commentary links into the
+  2,512-subject index — restyled to the redesign's chips, with the casing normalised
+  (today: `Allah`, `Judgement day`, `only god worthy of worship`).
+- **The ayah card shows Arabic and translation, and collapses** to just the reference once
+  you are deep in a long commentary.
+
+### Noted tension
+
+The mushaf is moving to the paper register, so the gold/teal frame kept here will end up
+living **only** on Tafseer. That is a deliberate choice rather than an oversight, but it is
+worth revisiting once both screens can be seen side by side in the new language.
+
+### Bug
+
+The commentary's **line spacing is roughly 80 px between lines of Latin prose** — an
+Arabic-tuned line height applied to the translation text. It makes a long commentary
+punishing to read and should be fixed regardless of which design lands.
+
+---
+
+## Screen 10 — Subjects in this surah (`SurahSubjects`)
+
+Another screen where the shipping app **beats the prototype**: a filter box, a
+`14 subjects / 25 citations` summary, the Arabic name inline, a count badge, and a context
+line that is genuinely well judged — "148 more verses elsewhere in the Qur'an", with a
+special case for "Every verse on this subject is in this surah". The prototype offers a
+plainer row and less information.
+
+### Decided
+
+- **Keep all of that content and tighten it to the agreed density** — the ~64 px row
+  language used by Browse and Saved — and **add a chevron**, since the rows carry no
+  affordance today and do not read as tappable.
+
+---
+
+## Screen 11 — Passages (`SurahPassages`)
+
+**Today:** a filter box and a timeline treatment — the verse range and "N verses" in a left
+column, a dot on a connecting rail, and the passage title to the right. The rail suits
+sequential passages well.
+
+**Prototype:** a card list with the title, a description line, and the range as a pill.
+
+### Open
+
+Judged only on Al-Fatiha, which has a single passage — too thin a sample for a screen
+`docs/NAVIGATION.md` says can reach 282 rows. Revisit on a long surah before deciding.
+
+### Bug
+
+The header reads "**1 passages** across 7 verses" — an unpluralised string.
+
+---
+
+## Content bugs to file (against `arshad-shah/nimaz-data`)
+
+- "Doctraine" as the first root of the thematic tree; its own description says "Doctrine".
+- Near-duplicate subjects sharing one Arabic label: `Dua الدعاء` / `Supplication الدعاء`,
+  and `Judgement day يوم القيامة` / `Day of Resurrection يوم القيامة`. Two duplicate pairs
+  in a 14-row list. Fix the index rather than deduping in the app, which would hide it.
+- Inconsistent subject casing — `only god worthy of worship` beside `Allah` and
+  `Judgement day`. It appears in both the subject list and the tafseer chips, so it is in
+  the source data.
+
+---
+
+## Screens 12+ — pending
+
+Khatam list · Khatam detail · Search.
