@@ -448,6 +448,72 @@ The header reads "**1 passages** across 7 verses" — an unpluralised string.
 
 ---
 
-## Screens 12+ — pending
+## Screen 12 — Search (`QuranSearch`)
 
-Khatam list · Khatam detail · Search.
+Already app-wide, as the prototype wants — "Search the Qur'an, Hadith & duas" — and it
+opens with the **Ask with Proof** consent card, which the prototype knows nothing about
+(see `docs/ai-ask-with-proof.md`).
+
+**Today:** content-type chips (`All · Quran · Hadith · Duas · Names`), a `103 matches`
+count, and result cards with a type badge, reference and snippet with **the term
+highlighted**. **Prototype:** results grouped into labelled sections with per-type counts,
+no chips, no highlighting.
+
+### Decided
+
+- **Keep the chips, and put the count on each one** (`Quran 42`, `Hadith 18`, …) so you can
+  see where the matches are before filtering. The prototype's information, the app's
+  interaction. Keep the highlighting — the prototype has no equivalent.
+- **Add Subjects as a result type.** 2,512 hand-indexed subjects are currently reachable
+  only by walking the tree.
+
+---
+
+## Screen 13 — Khatam detail (`KhatamDetail`)
+
+**Today:** a hero card (Active Khatam · Behind pace · 0% ring · "0 of 6236 ayahs read" ·
+"Juz 1 · ~312 days left" · a large `Continue · Al-Fatiha 1`), three stat tiles, then
+"Your journey" — a snaking 30-juz trail.
+
+**Prototype:** a "Today's portion" card naming the portion
+(`Juz 18 · Al-Mu'minun to An-Nur`) with `Read today's portion`, then "Recent days" with
+Done badges.
+
+### Decided
+
+- **Lead with today's portion, keep resume underneath.** A khatam exists to assign a daily
+  portion; the position is the fallback, not the headline.
+- **Keep the journey trail and add recent days beneath it.** The trail shows the whole plan
+  at a glance and is the most distinctive thing in the section; the list adds what the trail
+  cannot — what was actually done lately.
+- **Fix both defects as part of this work** (see below).
+
+### Bugs — fixed here, not filed
+
+- **The three stat tiles render as empty ovals.** `Day streak`, `Avg Pace` and `Juz done`
+  each draw a bare outlined ellipse where the value belongs — no zero, no dash. They need
+  real zero states.
+- **A plan created seconds ago is already "Behind pace" in red.** The pace calculation
+  grants no starting grace, so every new khatam opens by telling the user they have failed.
+
+---
+
+## Colour
+
+`Yellow` currently marks selection in three unrelated places — the search `All` chip, the
+background `✓ Name` chip, and the `Listen` button — and has become an accidental second
+accent.
+
+### Decided
+
+- **Retire yellow as a selection colour.** Selection is teal throughout. Yellow and gold are
+  reserved for Qur'anic ornament: ayah medallions, the mushaf cartouche, the pull-quote rule.
+  One accent for interaction, one for scripture.
+
+---
+
+## Cross-cutting: reference formatting
+
+The same ayah is named three different ways across the section — `Al-Fatiha · Verse 2`
+(favourites), `Surah 1, Ayah 3` (bookmarks), `Surah 2:45 / Al-Baqara` (search). One format
+throughout, decided once.
