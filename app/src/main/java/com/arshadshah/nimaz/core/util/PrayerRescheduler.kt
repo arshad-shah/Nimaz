@@ -1,7 +1,6 @@
 package com.arshadshah.nimaz.core.util
 
 import com.arshadshah.nimaz.core.monitoring.CrashReporter
-import com.arshadshah.nimaz.domain.repository.PrayerRepository
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import kotlinx.coroutines.flow.first
 import javax.inject.Inject
@@ -25,15 +24,11 @@ import javax.inject.Singleton
  * the extension functions it calls (`enabledPrayerTypes`, `preReminderMinutesByPrayer`) are
  * declared on the interface anyway, and depending on the interface is both the house rule and
  * what lets a test hand it a fake instead of a DataStore.
- *
- * [prayerRepository] is no longer read by [rescheduleToday] — it stays injected only so a test
- * can assert, with a real mock, that rescheduling never calls `markUnrecordedAsMissed` on it.
  */
 @Singleton
 class PrayerRescheduler @Inject constructor(
     private val preferences: SettingsRepository,
     private val scheduler: PrayerNotificationScheduler,
-    private val prayerRepository: PrayerRepository,
 ) {
 
     /**

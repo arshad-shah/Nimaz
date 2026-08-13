@@ -1,10 +1,8 @@
 package com.arshadshah.nimaz.core.util
 
 import com.arshadshah.nimaz.domain.model.PrayerType
-import com.arshadshah.nimaz.domain.repository.PrayerRepository
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.google.common.truth.Truth.assertThat
-import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.verify
 import io.mockk.mockk
@@ -20,17 +18,19 @@ import org.junit.Test
  * no screen that shows an alarm was expected, so a user notices weeks later if at all. That is
  * the failure these tests exist for, and why the logic was lifted out of `BootReceiver` (851
  * lines, a `BroadcastReceiver`, untestable) to somewhere it could have them.
+ *
+ * Verifications against [PrayerNotificationScheduler.scheduleTodaysPrayerNotifications] below are
+ * named rather than positional: the scheduler takes eleven parameters, six of them defaulted, so
+ * a positional `any()`-list silently stops matching the moment one is added.
  */
 class PrayerReschedulerTest {
 
     private lateinit var settings: SettingsRepository
     private lateinit var scheduler: PrayerNotificationScheduler
-    private lateinit var prayers: PrayerRepository
 
     @Before
     fun setUp() {
         scheduler = mockk(relaxed = true)
-        prayers = mockk(relaxed = true)
         settings = mockk(relaxed = true) {
             every { userPreferences } returns flowOf(
                 mockk(relaxed = true) {
@@ -54,7 +54,7 @@ class PrayerReschedulerTest {
         }
     }
 
-    private fun rescheduler() = PrayerRescheduler(settings, scheduler, prayers)
+    private fun rescheduler() = PrayerRescheduler(settings, scheduler)
 
     @Test
     fun `a reboot reschedules today from the stored preferences`() = runTest {
@@ -72,17 +72,6 @@ class PrayerReschedulerTest {
                 fridayReminderMinutes = 30,
             )
         }
-    }
-
-    /**
-     * Rescheduling must never touch prayer records, on any path. Confirming a prayer missed is
-     * now something only the user does, from the tracker's review banner.
-     */
-    @Test
-    fun `rescheduling never marks a prayer missed`() = runTest {
-        rescheduler().rescheduleToday()
-
-        coVerify(exactly = 0) { prayers.markUnrecordedAsMissed(any(), any()) }
     }
 
     /** Notifications switched off must reach the scheduler as off, not as "skip the call". */

@@ -132,7 +132,7 @@ class GetMissedPrayersRequiringQadaUseCase @Inject constructor(private val repos
  *
  * The only way a prayer enters the qada list. Nothing marks a prayer missed on the user's behalf.
  */
-class MarkUnrecordedAsMissedUseCase(private val repository: PrayerRepository) {
+class MarkUnrecordedAsMissedUseCase @Inject constructor(private val repository: PrayerRepository) {
     suspend operator fun invoke(from: Long, to: Long): Int =
         repository.markUnrecordedAsMissed(from, to)
 }
