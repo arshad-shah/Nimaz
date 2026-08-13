@@ -65,6 +65,12 @@ enum class CalendarHeaderAlignment {
  * @param indicatorStyle Whether the dot is a disc or a ring. A ring says the day was
  *   *recorded as not happening*, which an absent dot cannot distinguish from no record at
  *   all. Defaults to a disc, so every caller written before rings existed is unaffected.
+ * @param indicatorBar Fraction of the day completed, `0f..1f`, drawn as a short bar under the
+ *   day number. `null` draws no bar. Independent of [indicatorColor]: a dot answers "what kind
+ *   of day was this", a bar answers "how much of it", and a month grid that can only say the
+ *   first cannot show a day where four of five prayers landed. Callers may set either, both, or
+ *   neither.
+ * @param indicatorBarColor Colour of [indicatorBar]. `null` uses the theme primary.
  */
 data class CalendarDayState(
     val indicatorColor: Color? = null,
@@ -76,7 +82,9 @@ data class CalendarDayState(
     val secondaryLabel: String? = null,
     val emphasizePrimary: Boolean = false,
     val emphasizeSecondary: Boolean = false,
-    val indicatorStyle: NimazStatusDotStyle = NimazStatusDotStyle.FILLED
+    val indicatorStyle: NimazStatusDotStyle = NimazStatusDotStyle.FILLED,
+    val indicatorBar: Float? = null,
+    val indicatorBarColor: Color? = null
 )
 
 /**

@@ -27,7 +27,7 @@ private fun staticAnnouncementRoute(key: String): Route? = when (key) {
     "tasbih" -> Route.TasbihHome
     "qibla" -> Route.Qibla
     "prayer/times" -> Route.PrayerTimes
-    "prayer/tracker" -> Route.PrayerTracker()
+    "prayer/tracker" -> Route.PrayerTracker
     "prayer/stats" -> Route.PrayerStats
     "prayer/qada" -> Route.QadaPrayers
     "fasting" -> Route.FastingHome
@@ -133,7 +133,11 @@ private fun parameterisedAnnouncementRoute(key: String): Route? {
             long(2)?.let { Route.TasbihCounter(it) }
 
         s.size == 3 && s[0] == "prayer" && s[1] == "tracker" ->
-            int(2, 0..10)?.let { Route.PrayerTracker(it) }
+            // The `{tab}` segment predates the tab row's removal. Shipped announcements still
+            // carry it, so it keeps resolving: 1 meant the qada tab and is now its own screen.
+            int(2, 0..10)?.let { tab ->
+                if (tab == 1) Route.QadaPrayers else Route.PrayerTracker
+            }
 
         s.size == 3 && s[0] == "qaida" && s[1] == "lesson" ->
             int(2, 1..Int.MAX_VALUE)?.let { Route.QaidaReader(it) }

@@ -19,6 +19,9 @@ interface PrayerDao {
     @Query("SELECT * FROM prayer_records WHERE date BETWEEN :startDate AND :endDate ORDER BY date ASC, scheduledTime ASC")
     fun getPrayerRecordsInRange(startDate: Long, endDate: Long): Flow<List<PrayerRecordEntity>>
 
+    @Query("SELECT * FROM prayer_records WHERE date BETWEEN :startDate AND :endDate ORDER BY date ASC, scheduledTime ASC")
+    suspend fun getPrayerRecordsInRangeSync(startDate: Long, endDate: Long): List<PrayerRecordEntity>
+
     @Query("SELECT * FROM prayer_records WHERE date = :date AND prayerName = :prayerName LIMIT 1")
     suspend fun getPrayerRecord(date: Long, prayerName: String): PrayerRecordEntity?
 
@@ -91,18 +94,37 @@ interface PrayerDao {
     )
     suspend fun getPerfectDaysCount(startDate: Long, endDate: Long): Int
 
-    // Mark past pending/not_prayed prayers as missed (for dates before today)
+    /**
+     * The update half of confirming a range as missed: flips every *existing* `pending` or
+     * `not_prayed` row in range to `missed`.
+     *
+     * This alone is not the whole operation — it is a plain `UPDATE`, so it can only change rows
+     * that already exist. A day the user never opened the app has no row at all for that day, and
+     * this query silently matches nothing for it. [PrayerRepositoryImpl.markUnrecordedAsMissed]
+     * is the actual entry point: it calls this for the rows that exist, then inserts a `missed`
+     * row for every tracked prayer in range that has none. A `prayed`, `late`, `missed` or `qada`
+     * row is never touched by either half — that is the invariant the whole feature depends on.
+     *
+     * Ranged rather than "everything before today", which is what it used to be. That form ran
+     * from a midnight broadcast and rewrote every prayer the user had simply not logged, so the
+     * qada list filled with rows nobody had asserted. Its only caller now is an explicit tap on
+     * the review banner, over the days that banner counted.
+     *
+     * @param from inclusive UTC-midnight epoch millis.
+     * @param to inclusive UTC-midnight epoch millis.
+     */
     @Query(
         """
         UPDATE prayer_records
         SET status = 'missed', updatedAt = :timestamp
-        WHERE date < :todayDate
+        WHERE date BETWEEN :from AND :to
         AND status IN ('pending', 'not_prayed')
         AND prayerName != 'sunrise'
     """
     )
-    suspend fun markPastPrayersAsMissed(
-        todayDate: Long,
+    suspend fun markUnrecordedAsMissed(
+        from: Long,
+        to: Long,
         timestamp: Long = System.currentTimeMillis()
     ): Int
 

@@ -31,6 +31,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
+import com.arshadshah.nimaz.presentation.components.atoms.NimazDivider
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconWell
@@ -39,6 +40,15 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazIconWellSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSwitch
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
+
+/**
+ * Whether the accordion draws its own surface.
+ *
+ * [CARD] is the standalone row used across Help &amp; Support. [FLAT] draws no card and no
+ * elevation, for rows that are already inside one — five nested cards inside a day card reads as
+ * a stack of receipts rather than a list.
+ */
+enum class NimazAccordionStyle { CARD, FLAT }
 
 /**
  * Centralised expand/collapse ("accordion") card used across the app — most
@@ -62,6 +72,7 @@ import com.arshadshah.nimaz.presentation.theme.NimazTheme
  * @param trailing optional header content rendered between the title and the
  *   chevron, laid out in the header's [RowScope].
  * @param initiallyExpanded whether the body starts open.
+ * @param style whether the accordion draws its own card.
  * @param content the collapsible body; laid out in a [ColumnScope].
  */
 @Composable
@@ -72,21 +83,53 @@ fun NimazAccordion(
     leadingIcon: ImageVector? = null,
     trailing: (@Composable RowScope.() -> Unit)? = null,
     initiallyExpanded: Boolean = false,
+    style: NimazAccordionStyle = NimazAccordionStyle.CARD,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     var expanded by remember { mutableStateOf(initiallyExpanded) }
+    NimazAccordion(
+        title = title,
+        expanded = expanded,
+        onExpandedChange = { expanded = it },
+        modifier = modifier,
+        subtitle = subtitle,
+        leadingIcon = leadingIcon,
+        trailing = trailing,
+        style = style,
+        content = content,
+    )
+}
+
+/**
+ * The state-hoisted accordion.
+ *
+ * Exists because "only one row open at a time" is impossible to express against the overload
+ * above: it owns `expanded` in a private `remember`, so no caller can close a row it did not
+ * click. A day card of five prayers that all unfold at once is a wall, not a list.
+ *
+ * @param expanded whether the body is open. The caller owns it.
+ * @param onExpandedChange invoked with the value the header tap is asking for. Nothing moves
+ *   until the caller feeds a new [expanded] back in.
+ * @param style whether the accordion draws its own card.
+ */
+@Composable
+fun NimazAccordion(
+    title: String,
+    expanded: Boolean,
+    onExpandedChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+    subtitle: String? = null,
+    leadingIcon: ImageVector? = null,
+    trailing: (@Composable RowScope.() -> Unit)? = null,
+    style: NimazAccordionStyle = NimazAccordionStyle.CARD,
+    content: @Composable ColumnScope.() -> Unit,
+) {
     val chevronRotation by animateFloatAsState(
         targetValue = if (expanded) 180f else 0f,
         label = "accordion_chevron"
     )
 
-    NimazCard(
-        style = NimazCardStyle.FILLED,
-        onClick = { expanded = !expanded },
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        elevation = 1.dp
-    ) {
+    val body: @Composable () -> Unit = {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 if (leadingIcon != null) {
@@ -131,6 +174,29 @@ fun NimazAccordion(
                 )
             }
         }
+    }
+
+    when (style) {
+        NimazAccordionStyle.CARD -> NimazCard(
+            style = NimazCardStyle.FILLED,
+            onClick = { onExpandedChange(!expanded) },
+            modifier = modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp),
+            elevation = 1.dp
+        ) { body() }
+
+        // A FLAT accordion is already inside a card, so it must not paint another one. The tap
+        // target is the whole header row, which is what `NimazCard(onClick=…)` gives the CARD
+        // style -- here that role falls to a transparent, radius-free NimazCard so the ripple
+        // still comes from the design system rather than a bare Modifier.clickable.
+        NimazAccordionStyle.FLAT -> NimazCard(
+            style = NimazCardStyle.FILLED,
+            tone = NimazTone.TRANSPARENT,
+            onClick = { onExpandedChange(!expanded) },
+            modifier = modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(0.dp),
+            elevation = 0.dp
+        ) { body() }
     }
 }
 
@@ -230,6 +296,95 @@ private fun NimazAccordion_Trailing_Dark_Preview() {
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+        }
+    }
+}
+
+// The FLAT style exists for exactly this arrangement: several accordions nested inside one
+// enclosing NimazCard, the way the five prayer rows sit inside a single day card. A FLAT row
+// must not paint a second card and its ripple must not leave a sharp-cornered artifact against
+// the parent card's radius -- both only show up once the row is actually nested, which is why
+// this preview wraps the rows in a real NimazCard rather than previewing FLAT in isolation.
+@Preview(showBackground = true, widthDp = 400, name = "Accordion — FLAT nested in a card")
+@Composable
+private fun NimazAccordion_FlatNested_Preview() {
+    NimazTheme {
+        NimazCard(
+            style = NimazCardStyle.FILLED,
+            shape = RoundedCornerShape(12.dp),
+            elevation = 1.dp,
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Column {
+                NimazAccordion(
+                    title = "Fajr",
+                    subtitle = "Adhan · 10 min before",
+                    expanded = false,
+                    onExpandedChange = {},
+                    style = NimazAccordionStyle.FLAT,
+                    trailing = {
+                        Text(
+                            text = "05:12",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        NimazSwitch(checked = true, onCheckedChange = {})
+                    }
+                ) {
+                    Text(
+                        text = "Alert style and reminder settings for Fajr.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                NimazAccordion(
+                    title = "Dhuhr",
+                    subtitle = "Adhan only",
+                    expanded = true,
+                    onExpandedChange = {},
+                    style = NimazAccordionStyle.FLAT,
+                    trailing = {
+                        Text(
+                            text = "12:31",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        NimazSwitch(checked = true, onCheckedChange = {})
+                    }
+                ) {
+                    Text(
+                        text = "Alert style and reminder settings for Dhuhr.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                NimazAccordion(
+                    title = "Asr",
+                    subtitle = "Notification only · no reminder",
+                    expanded = false,
+                    onExpandedChange = {},
+                    style = NimazAccordionStyle.FLAT,
+                    trailing = {
+                        Text(
+                            text = "15:58",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        NimazSwitch(checked = false, onCheckedChange = {})
+                    }
+                ) {
+                    Text(
+                        text = "Alert style and reminder settings for Asr.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
         }
     }
 }

@@ -61,6 +61,8 @@
          "checked"/"not checked", which does not say what was checked or what it meant. -->
     <string name="a11y_prayer_state_prayed">%1$s, prayed</string>
     <string name="a11y_prayer_state_not_recorded">%1$s, not yet recorded</string>
+    <string name="a11y_prayer_state_partial">%1$s, some prayers recorded</string>
+    <string name="a11y_prayer_state_missed">%1$s, prayers missed</string>
     <string name="no_favorites_yet">No favorites yet</string>
     <string name="remove_from_favorites">Remove from favorites</string>
     <string name="add_to_favorites">Add to favorites</string>
@@ -650,20 +652,17 @@
     <string name="widget_hijri_calendar_name">Hijri Calendar</string>
 
     <!-- Prayer Tracker Screen -->
-    <string name="tracker">Tracker</string>
     <string name="qada">Qada</string>
     <string name="prayer_tracker_title">Prayer Tracker</string>
     <string name="view_statistics">View Statistics</string>
     <string name="all_caught_up">All Caught Up!</string>
-    <string name="all_caught_up_message">You have no missed prayers to make up. Keep up the good work!</string>
+    <string name="all_caught_up_message">You have no missed prayers to make up. Prayers only land here once you mark them missed yourself -- nothing is added on your behalf.</string>
     <string name="prayers_to_make_up">Prayers to Make Up</string>
     <string name="all_caught_up_short">All caught up!</string>
     <plurals name="missed_prayers_pending">
         <item quantity="one">%1$d missed prayer pending</item>
         <item quantity="other">%1$d missed prayers pending</item>
     </plurals>
-    <string name="current_streak">Current Streak</string>
-    <string name="consecutive_days_all_prayers">consecutive days with all prayers</string>
     <string name="on_time">On time</string>
     <string name="late">Late</string>
     <string name="missed">Missed</string>
@@ -889,8 +888,6 @@
     <string name="jumuah_arabic">\u0627\u0644\u062C\u0645\u0639\u0629</string>
     <string name="jumuah_hadith_quote">"The best day on which the sun rises is Friday." — Sahih Muslim</string>
 
-    <!-- Prayer Tracker -->
-    <string name="prayers_completed_format">%1$d of %2$d</string>
 
     <!-- Search Screen -->
     <string name="surah_result_format">Surah %1$d:%2$d</string>
@@ -1467,6 +1464,33 @@
 
     <!-- Qada Prayers Screen -->
     <string name="qada_prayers">Qada Prayers</string>
+    <string name="qada_mark_made_up">Mark made up</string>
+    <string name="qada_summary_subtitle">Missed prayers waiting to be made up</string>
+    <string name="qada_summary_empty">Nothing outstanding</string>
+
+    <!-- Prayer Tracker Screen -->
+    <string name="prayer_status_not_recorded">Not recorded</string>
+    <string name="prayer_recorded_count_format" tools:ignore="PluralsCandidate">%1$d of %2$d recorded</string>
+    <string name="back_to_today">Back to today</string>
+    <string name="prayer_not_recorded_note">This prayer\'s time has passed with nothing recorded. It isn\'t counted as missed until you say so.</string>
+    <string name="prayer_unrecorded_banner_action">Review</string>
+    <string name="prayer_month_section">Your month</string>
+    <plurals name="prayer_complete_days">
+        <item quantity="one">%1$d complete day</item>
+        <item quantity="other">%1$d complete days</item>
+    </plurals>
+    <plurals name="prayer_unrecorded_banner">
+        <item quantity="one">%1$d prayer from the past week has no record. It isn\'t in your qada list until you mark it.</item>
+        <item quantity="other">%1$d prayers from the past week have no record. They aren\'t in your qada list until you mark them.</item>
+    </plurals>
+    <string name="prayer_legend_all_five">All five</string>
+    <string name="prayer_legend_some">Some</string>
+    <string name="prayer_legend_none">None</string>
+    <string name="prayer_legend_not_recorded">Not recorded</string>
+    <string name="prayer_next_in">%1$s in %2$s</string>
+    <string name="prayer_day_complete">Day complete</string>
+    <string name="prayer_day_summary_past" tools:ignore="PluralsCandidate">Day complete · %1$d of %2$d prayed</string>
+    <string name="prayer_day_upcoming">Upcoming day</string>
 
     <!-- Settings Screen -->
     <string name="sync_data">Sync Data</string>

@@ -162,6 +162,34 @@ object NimazBadgeDefaults {
     }
 
     /**
+     * The **on-container** colour a [NimazBadgeEmphasis.SOFT] badge's text should use.
+     *
+     * [container] draws from two different kinds of colour, and they need two different pairing
+     * strategies:
+     *  - [NimazTone.ACCENT]/[NimazTone.PROMINENT] and [NimazTone.ERROR] resolve to real Material
+     *    container roles (`primaryContainer`, `errorContainer`), and Material ships each of those
+     *    with a paired `onXxxContainer` role already tuned for contrast against it — that pairing
+     *    is what makes a SOFT badge read as one coloured object instead of body text sitting on a
+     *    tint. Picking it by luminance instead (black or white) threw that pairing away and drew
+     *    black text on every light container, including the green "On time" pill this fixes.
+     *  - [NimazTone.SUCCESS] and [NimazTone.WARNING] draw from [NimazColors] composited over the
+     *    surface at [SOFT_TINT_ALPHA], and the two [NimazTone.NEUTRAL]/[NimazTone.MUTED] surface
+     *    roles are not "containers" at all, just tonal greys — none of the four are real Material
+     *    container roles, so there is no `onXxxContainer` to pair with. [foreground] is already
+     *    the app's fallback for exactly this shape of problem — it is what
+     *    [NimazBadgeEmphasis.OUTLINED] and [NimazBadgeEmphasis.CUTOUT] use to draw tone-coloured
+     *    text with no container behind it at all — so SOFT reuses it rather than inventing a
+     *    second fallback.
+     */
+    @Composable
+    private fun softContentColor(tone: NimazTone): Color = when (tone) {
+        NimazTone.ACCENT, NimazTone.PROMINENT -> MaterialTheme.colorScheme.onPrimaryContainer
+        NimazTone.ERROR -> MaterialTheme.colorScheme.onErrorContainer
+        NimazTone.NEUTRAL, NimazTone.MUTED, NimazTone.SUCCESS, NimazTone.WARNING,
+        NimazTone.TRANSPARENT -> foreground(tone)
+    }
+
+    /**
      * Resolves a [tone] + [emphasis] into badge colours. This is the single place
      * the app decides what a badge looks like — every badge routes through here.
      */
@@ -177,13 +205,10 @@ object NimazBadgeDefaults {
                 contentColor = NimazCardDefaults.onColorFor(solidColor),
             )
 
-            NimazBadgeEmphasis.SOFT -> {
-                val containerColor = container(tone)
-                NimazBadgeColors(
-                    containerColor = containerColor,
-                    contentColor = NimazCardDefaults.onColorFor(containerColor),
-                )
-            }
+            NimazBadgeEmphasis.SOFT -> NimazBadgeColors(
+                containerColor = container(tone),
+                contentColor = softContentColor(tone),
+            )
 
             NimazBadgeEmphasis.OUTLINED -> NimazBadgeColors(
                 containerColor = Color.Transparent,
@@ -442,12 +467,12 @@ private fun NimazBadgeShowcase() {
                 NimazBadge(text = emphasis.name, tone = NimazTone.ACCENT, emphasis = emphasis)
             }
         }
-        // Every tone, at SOFT emphasis.
+        // Every tone, at SOFT emphasis -- the content colour must read as one coloured pill,
+        // not black/white text sitting on a tint, in both this preview and its dark twin below.
         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            listOf(NimazTone.NEUTRAL, NimazTone.SUCCESS, NimazTone.WARNING, NimazTone.ERROR)
-                .forEach { tone ->
-                    NimazBadge(text = tone.name, tone = tone)
-                }
+            NimazTone.entries.filter { it != NimazTone.TRANSPARENT }.forEach { tone ->
+                NimazBadge(text = tone.name, tone = tone)
+            }
         }
         // Selectable tab pills — unselected then selected.
         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {

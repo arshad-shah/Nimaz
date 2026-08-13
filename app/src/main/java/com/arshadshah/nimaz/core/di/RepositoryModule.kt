@@ -222,6 +222,7 @@ import com.arshadshah.nimaz.domain.usecase.MarkCellHeardUseCase
 import com.arshadshah.nimaz.domain.usecase.MarkFidyaPaidUseCase
 import com.arshadshah.nimaz.domain.usecase.MarkMakeupFastCompletedUseCase
 import com.arshadshah.nimaz.domain.usecase.MarkSurahAsReadUseCase
+import com.arshadshah.nimaz.domain.usecase.MarkUnrecordedAsMissedUseCase
 import com.arshadshah.nimaz.domain.usecase.ObserveAbandonedKhatamsUseCase
 import com.arshadshah.nimaz.domain.usecase.ObserveActiveKhatamUseCase
 import com.arshadshah.nimaz.domain.usecase.ObserveAllKhatamsUseCase
@@ -773,6 +774,7 @@ object UseCaseModule {
             getCurrentStreak = GetCurrentStreakUseCase(repository),
             getLongestStreak = GetLongestStreakUseCase(repository),
             getMissedPrayersRequiringQada = GetMissedPrayersRequiringQadaUseCase(repository),
+            markUnrecordedAsMissed = MarkUnrecordedAsMissedUseCase(repository),
             getPrayerStats = GetPrayerStatsUseCase(repository),
             getCurrentLocation = GetCurrentLocationUseCase(repository),
             getAllLocations = GetAllLocationsUseCase(repository),

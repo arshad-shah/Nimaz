@@ -772,6 +772,10 @@ rg -n 'Card\(|Surface\(|Box\(.*\.background\(' app/src/main/java/com/arshadshah/
 - [x] ~~**`JumuahCard`'s hand-rolled `Box` icon well and `Box` divider.**~~ **Resolved.** Replaced
   with `NimazIcon(CONTAINED)` well and `QuranOrnamentalDivider` atoms, improving design-system
   consistency.
+- [x] ~~**`PrayerCheckItem`'s hand-rolled `Box` checkbox circle.**~~ **Resolved.** The prayer
+  tracker's row drew its own 24dp `Box` with `.background()` / `.border()` and a raw `Check` icon.
+  Replaced by `NimazAccordion(style = FLAT)` with a `NimazBadge` status and a
+  `NimazSegmentedControl` picker, so the row's tap target and ripple come from the design system.
 - [ ] **Cards that need a border still bypass `tone`.** A `NimazTone` resolves container + content
   but **not** a stroke, so any bordered card falls back to an explicit
   `NimazCardDefaults.colors(container = …, border = …)`. 10 files today. Fix by teaching the tone
