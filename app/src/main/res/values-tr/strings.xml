@@ -1976,4 +1976,20 @@
     </plurals>
     <string name="fasting_makeup_owed">Borç</string>
     <string name="fasting_makeup_settled">Tamamlandı</string>
+    <string name="fasting_this_day">Bu gün</string>
+    <string name="fasting_back_to_today">Bugüne dön</string>
+    <string name="fasting_seg_fasted">Oruç tutuldu</string>
+    <string name="fasting_seg_not_fasting">Oruç yok</string>
+    <string name="fasting_seg_exempt">Muaf</string>
+    <string name="fasting_not_logged_yet">Henüz kaydedilmedi</string>
+    <string name="fasting_owed_make_up_later">Borç — sonra kaza et</string>
+    <string name="fasting_add_note">Not ekle</string>
+    <string name="fasting_window_suhoor_in">Sahur bitişine %1$s</string>
+    <string name="fasting_window_iftar_in">İftara %1$s</string>
+    <string name="fasting_window_closed">Oruç süresi doldu</string>
+    <string name="fasting_window_length">Oruç süresi · %1$s</string>
+    <string name="fasting_window_a11y">Oruç süresi, %1$s ile %2$s arası</string>
+    <string name="fasting_why_exempt">Neden muaf?</string>
+    <string name="fasting_note_title">Not</string>
+    <string name="fasting_note_hint">Bu gün ne oldu?</string>
 </resources>

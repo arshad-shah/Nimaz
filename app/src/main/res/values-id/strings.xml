@@ -1932,4 +1932,20 @@
     </plurals>
     <string name="fasting_makeup_owed">Terutang</string>
     <string name="fasting_makeup_settled">Selesai</string>
+    <string name="fasting_this_day">Hari ini</string>
+    <string name="fasting_back_to_today">Kembali ke hari ini</string>
+    <string name="fasting_seg_fasted">Berpuasa</string>
+    <string name="fasting_seg_not_fasting">Tidak berpuasa</string>
+    <string name="fasting_seg_exempt">Dikecualikan</string>
+    <string name="fasting_not_logged_yet">Belum dicatat</string>
+    <string name="fasting_owed_make_up_later">Terutang — ganti nanti</string>
+    <string name="fasting_add_note">Tambah catatan</string>
+    <string name="fasting_window_suhoor_in">Sahur berakhir dalam %1$s</string>
+    <string name="fasting_window_iftar_in">Buka puasa dalam %1$s</string>
+    <string name="fasting_window_closed">Waktu puasa selesai</string>
+    <string name="fasting_window_length">Waktu puasa · %1$s</string>
+    <string name="fasting_window_a11y">Waktu puasa, %1$s sampai %2$s</string>
+    <string name="fasting_why_exempt">Mengapa dikecualikan?</string>
+    <string name="fasting_note_title">Catatan</string>
+    <string name="fasting_note_hint">Apa yang terjadi pada hari ini?</string>
 </resources>
