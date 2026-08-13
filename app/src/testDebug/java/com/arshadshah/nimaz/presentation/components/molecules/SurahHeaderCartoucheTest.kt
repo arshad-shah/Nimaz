@@ -25,7 +25,6 @@ class SurahHeaderCartoucheTest {
                     nameTransliteration = "The Cow",
                     revelationType = RevelationType.MEDINAN,
                     ayahCount = 286,
-                    juzStart = 1,
                     orderInMushaf = 2,
                 ),
             )

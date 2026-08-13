@@ -1050,7 +1050,10 @@
     <string name="surah_info_read_more">Devamını oku</string>
     <string name="surah_info_read_less">Daha az göster</string>
     <string name="surah_info_background_subtitle">%1$d bölüm</string>
-    <string name="surah_info_passages_row_subtitle">%2$d ayet boyunca %1$d bölüm</string>
+    <plurals name="surah_info_passages_row_subtitle">
+        <item quantity="one">%2$d ayet boyunca %1$d bölüm</item>
+        <item quantity="other">%2$d ayet boyunca %1$d bölüm</item>
+    </plurals>
     <string name="surah_info_subjects">Bu suredeki konular</string>
     <string name="surah_info_subjects_subtitle">%1$d konu, en çok atıf alan önce</string>
     <string name="surah_info_section_other">Diğer</string>

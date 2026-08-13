@@ -23,7 +23,6 @@ class QuranContinueReadingCardTest {
         nameTransliteration = "The Opening",
         revelationType = RevelationType.MECCAN,
         ayahCount = 7,
-        juzStart = 1,
         orderInMushaf = 5,
         startPage = 1
     )

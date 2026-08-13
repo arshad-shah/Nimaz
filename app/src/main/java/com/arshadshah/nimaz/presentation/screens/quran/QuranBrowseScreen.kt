@@ -190,10 +190,12 @@ internal fun QuranBrowseContent(
                     // in mushaf order, so the boundary is a property of adjacency and the state
                     // stays a flat list a test can assert on.
                     state.rows.forEachIndexed { index, surah ->
-                        val previous = state.rows.getOrNull(index - 1)
-                        if (previous == null || previous.juzStart != surah.juzStart) {
-                            item(key = "juz_${surah.juzStart}_${surah.number}") {
-                                JuzSectionHeader(juz = surah.juzStart)
+                        val juz = state.juzBySurah[surah.number] ?: 1
+                        val previousJuz = state.rows.getOrNull(index - 1)
+                            ?.let { state.juzBySurah[it.number] }
+                        if (previousJuz != juz) {
+                            item(key = "juz_${juz}_${surah.number}") {
+                                JuzSectionHeader(juz = juz)
                             }
                         }
                         item(key = surah.number) {

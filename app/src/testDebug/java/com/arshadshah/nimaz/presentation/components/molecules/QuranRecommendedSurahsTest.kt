@@ -17,9 +17,9 @@ class QuranRecommendedSurahsTest {
     val composeRule = createComponentComposeRule()
 
     private val alKahf =
-        Surah(18, "الكهف", "Al-Kahf", "The Cave", RevelationType.MECCAN, 110, 15, 18, 293)
+        Surah(18, "الكهف", "Al-Kahf", "The Cave", RevelationType.MECCAN, 110, 18, 293)
     private val alMulk =
-        Surah(67, "الملك", "Al-Mulk", "The Sovereignty", RevelationType.MECCAN, 30, 29, 67, 562)
+        Surah(67, "الملك", "Al-Mulk", "The Sovereignty", RevelationType.MECCAN, 30, 67, 562)
 
     @Test
     fun `announces surah name, number and reason as one label`() {
@@ -47,6 +47,9 @@ class QuranRecommendedSurahsTest {
         }
         composeRule.onNodeWithText("Al-Kahf", useUnmergedTree = true).assertExists()
         composeRule.onNodeWithText("Friday Sunnah", useUnmergedTree = true).assertExists()
+        // Juz 15 comes from the *pagination* now — Al-Kahf opens on Madani page 293 — rather
+        // than from a Surah.juzStart the mapper filled with a literal 1 for all 114 rows,
+        // which is why every card on this strip used to read "Juz 1".
         composeRule.onNodeWithText("110 Verses · Juz 15", useUnmergedTree = true).assertExists()
     }
 

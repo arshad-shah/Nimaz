@@ -1044,7 +1044,10 @@
     <string name="surah_info_read_more">Mehr lesen</string>
     <string name="surah_info_read_less">Weniger anzeigen</string>
     <string name="surah_info_background_subtitle">%1$d Abschnitte</string>
-    <string name="surah_info_passages_row_subtitle">%1$d Abschnitte über %2$d Verse</string>
+    <plurals name="surah_info_passages_row_subtitle">
+        <item quantity="one">%1$d Abschnitt über %2$d Verse</item>
+        <item quantity="other">%1$d Abschnitte über %2$d Verse</item>
+    </plurals>
     <string name="surah_info_subjects">Themen in dieser Sure</string>
     <string name="surah_info_subjects_subtitle">%1$d Themen, meistgenannte zuerst</string>
     <string name="surah_info_section_other">Sonstiges</string>

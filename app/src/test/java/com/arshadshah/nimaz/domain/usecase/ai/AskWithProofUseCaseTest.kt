@@ -279,7 +279,6 @@ class AskWithProofUseCaseTest {
         nameTransliteration = "Al-Baqarah",
         revelationType = RevelationType.MEDINAN,
         ayahCount = 286,
-        juzStart = 1,
         orderInMushaf = 2,
     )
 }

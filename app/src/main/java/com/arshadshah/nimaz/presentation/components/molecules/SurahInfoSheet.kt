@@ -15,6 +15,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
@@ -46,6 +47,7 @@ fun SurahInfoSheet(
     passageCount: Int,
     subjectCount: Int,
     startPage: Int,
+    juzNumber: Int,
     onDismiss: () -> Unit,
     onReadSurah: () -> Unit,
     onListen: () -> Unit,
@@ -82,7 +84,7 @@ fun SurahInfoSheet(
                     SurahMetaStat(
                         icon = Icons.Default.Layers,
                         label = stringResource(R.string.quran_juz_label),
-                        value = surah.juzStart.toString(),
+                        value = juzNumber.toString(),
                     ),
                     SurahMetaStat(
                         icon = Icons.AutoMirrored.Filled.MenuBook,
@@ -128,8 +130,9 @@ fun SurahInfoSheet(
                     if (passageCount > 0) {
                         NimazMenuItem(
                             title = stringResource(R.string.surah_info_passages),
-                            subtitle = stringResource(
-                                R.string.surah_info_passages_row_subtitle,
+                            subtitle = pluralStringResource(
+                                R.plurals.surah_info_passages_row_subtitle,
+                                passageCount,
                                 passageCount,
                                 surah.ayahCount
                             ),

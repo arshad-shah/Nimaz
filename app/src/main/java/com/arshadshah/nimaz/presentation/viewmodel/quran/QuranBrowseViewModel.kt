@@ -114,13 +114,15 @@ class QuranBrowseViewModel @Inject constructor(
         raw: String,
     ): QuranBrowseUiState {
         val pages = startPages(surahs, pagination)
+        val juz = pages.mapValues { (_, page) -> pagination.juzForPage(page) }
         val parsed = QuranSearchQuery.parse(raw)
         return copy(
             query = raw,
             isLoading = false,
             error = null,
             startPages = pages,
-            rows = filterRows(surahs, parsed, pages),
+            juzBySurah = juz,
+            rows = filterRows(surahs, parsed, pages, juz),
             // A name search is answered by the list itself; only a query naming a place gets
             // a jump card, and an empty field names nothing.
             jumpTarget = parsed.takeIf {
@@ -142,9 +144,10 @@ class QuranBrowseViewModel @Inject constructor(
         surahs: List<Surah>,
         query: QuranSearchQuery,
         pages: Map<Int, Int>,
+        juz: Map<Int, Int>,
     ): List<Surah> = when (query) {
         QuranSearchQuery.Empty -> surahs
-        is QuranSearchQuery.Juz -> surahs.filter { it.juzStart == query.number }
+        is QuranSearchQuery.Juz -> surahs.filter { juz[it.number] == query.number }
         is QuranSearchQuery.SurahNumber -> surahs.filter { it.number == query.number }
         is QuranSearchQuery.Page -> surahs.filter { surah ->
             val start = pages[surah.number] ?: surah.startPage

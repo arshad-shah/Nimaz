@@ -221,7 +221,6 @@ private fun SurahListItemPreview() {
                 nameTransliteration = "The Opening",
                 revelationType = RevelationType.MECCAN,
                 ayahCount = 7,
-                juzStart = 1,
                 orderInMushaf = 5,
                 startPage = 1
             ),
@@ -244,7 +243,6 @@ private fun SurahListItemLongNamePreview() {
                 nameTransliteration = "The Pleading Woman",
                 revelationType = RevelationType.MEDINAN,
                 ayahCount = 22,
-                juzStart = 28,
                 orderInMushaf = 105,
                 startPage = 542
             ),

@@ -29,7 +29,6 @@ class QuranSurahListItemTest {
         nameTransliteration = "The Opening",
         revelationType = revelationType,
         ayahCount = ayahCount,
-        juzStart = 1,
         orderInMushaf = 5,
         startPage = 1
     )

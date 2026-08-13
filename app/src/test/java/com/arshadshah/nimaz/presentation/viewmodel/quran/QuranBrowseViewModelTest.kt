@@ -1,12 +1,15 @@
 package com.arshadshah.nimaz.presentation.viewmodel.quran
 
 import com.arshadshah.nimaz.core.monitoring.RecordingTelemetry
+import com.arshadshah.nimaz.domain.model.MushafPagination
+import com.arshadshah.nimaz.domain.model.MushafScript
 import com.arshadshah.nimaz.domain.model.QuranSearchQuery
 import com.arshadshah.nimaz.domain.model.RevelationType
 import com.arshadshah.nimaz.domain.model.Surah
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.usecase.QuranUseCases
 import com.google.common.truth.Truth.assertThat
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
@@ -51,6 +54,12 @@ class QuranBrowseViewModelTest {
         settings = mockk(relaxed = true)
         every { settings.quranMushafScript } returns MutableStateFlow("MADANI")
         every { useCases.getSurahList() } returns flowOf(surahs)
+        // The juz on each row and each header comes from the *edition's* page mapping, not from
+        // the surah row — `Surah` has no juzStart any more, because the column it came from does
+        // not exist and the mapper was filling it with a literal 1. The Madani fallback carries
+        // the printed juz start pages, which is real reference data.
+        coEvery { useCases.getMushafPagination(any()) } returns
+            MushafPagination.fallback(MushafScript.MADANI)
     }
 
     @After
@@ -104,6 +113,7 @@ class QuranBrowseViewModelTest {
 
         vm.onEvent(QuranBrowseEvent.QueryChanged("juz 15"))
 
+        // Al-Kahf opens on Madani page 293, which is in juz 15.
         assertThat(vm.state.value.rows.map { it.number }).containsExactly(18)
         assertThat(vm.state.value.jumpTarget).isEqualTo(QuranSearchQuery.Juz(15))
     }
@@ -168,7 +178,6 @@ private fun surah(
     nameTransliteration = transliteration,
     revelationType = RevelationType.MECCAN,
     ayahCount = 7,
-    juzStart = juzStart,
     orderInMushaf = number,
     startPage = startPage,
 )

@@ -351,7 +351,6 @@ internal val sampleSurahFatihah = Surah(
     nameTransliteration = "The Opening",
     revelationType = RevelationType.MECCAN,
     ayahCount = 7,
-    juzStart = 1,
     orderInMushaf = 1
 )
 
@@ -362,6 +361,5 @@ internal val sampleSurahBaqarah = Surah(
     nameTransliteration = "The Cow",
     revelationType = RevelationType.MEDINAN,
     ayahCount = 286,
-    juzStart = 1,
     orderInMushaf = 2
 )

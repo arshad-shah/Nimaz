@@ -44,7 +44,6 @@ class MushafPageTest {
         nameTransliteration = "The Opening",
         revelationType = RevelationType.MECCAN,
         ayahCount = 7,
-        juzStart = 1,
         orderInMushaf = 1,
         startPage = 1
     )
@@ -56,7 +55,6 @@ class MushafPageTest {
         nameTransliteration = "The Cow",
         revelationType = RevelationType.MEDINAN,
         ayahCount = 286,
-        juzStart = 1,
         orderInMushaf = 2,
         startPage = 2
     )

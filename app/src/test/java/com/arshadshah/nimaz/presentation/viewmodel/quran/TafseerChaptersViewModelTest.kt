@@ -77,7 +77,6 @@ class TafseerChaptersViewModelTest {
                 nameTransliteration = "Al-Fatihah",
                 revelationType = RevelationType.MECCAN,
                 ayahCount = 7,
-                juzStart = 1,
                 orderInMushaf = 1,
             )
         )

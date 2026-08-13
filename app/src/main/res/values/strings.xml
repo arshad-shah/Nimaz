@@ -1359,7 +1359,10 @@
     <string name="surah_info_background_subtitle">%1$d sections</string>
     <string name="surah_info_passages">Passages</string>
     <string name="surah_info_passages_subtitle">%1$d passages in this surah</string>
-    <string name="surah_info_passages_row_subtitle">%1$d passages across %2$d verses</string>
+    <plurals name="surah_info_passages_row_subtitle">
+        <item quantity="one">%1$d passage across %2$d verses</item>
+        <item quantity="other">%1$d passages across %2$d verses</item>
+    </plurals>
     <string name="surah_info_subjects">Subjects in this surah</string>
     <string name="surah_info_subjects_subtitle">%1$d subjects, most-cited first</string>
     <string name="surah_info_section_name">Name</string>

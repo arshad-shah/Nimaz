@@ -204,6 +204,7 @@ private fun HomeContent(
                 surahs = state.surahs,
                 isFriday = isFriday,
                 onSurahClick = onNavigateToSurah,
+                pagination = state.pagination,
             )
         }
 

@@ -1066,7 +1066,11 @@
     <string name="surah_info_read_more">Lire la suite</string>
     <string name="surah_info_read_less">Afficher moins</string>
     <string name="surah_info_background_subtitle">%1$d sections</string>
-    <string name="surah_info_passages_row_subtitle">%1$d passages sur %2$d versets</string>
+    <plurals name="surah_info_passages_row_subtitle">
+        <item quantity="one">%1$d passage sur %2$d versets</item>
+        <item quantity="many">%1$d passages sur %2$d versets</item>
+        <item quantity="other">%1$d passages sur %2$d versets</item>
+    </plurals>
     <string name="surah_info_subjects">Sujets de cette sourate</string>
     <string name="surah_info_subjects_subtitle">%1$d sujets, les plus cités d\'abord</string>
     <string name="surah_info_section_other">Autre</string>

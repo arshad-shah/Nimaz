@@ -282,7 +282,6 @@ class QuranTopicsViewModelSurahContextTest {
         nameTransliteration = english,
         revelationType = RevelationType.MEDINAN,
         ayahCount = 7,
-        juzStart = 1,
         orderInMushaf = number,
     )
 

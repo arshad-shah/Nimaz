@@ -44,6 +44,8 @@ fun SurahInfoSheetHost(
     }
 
     val surah = homeState.surahs.find { it.number == surahNumber } ?: return
+    val startPage = homeState.pagination.pageForAyah(firstAyahIdOf(surahNumber, homeState.surahs))
+        ?: surah.startPage
 
     SurahInfoSheet(
         surah = surah,
@@ -51,8 +53,8 @@ fun SurahInfoSheetHost(
         sectionCount = thematic.overview?.sections?.size ?: 0,
         passageCount = thematic.passages.size,
         subjectCount = thematic.subjectCount,
-        startPage = homeState.pagination.pageForAyah(firstAyahIdOf(surahNumber, homeState.surahs))
-            ?: surah.startPage,
+        startPage = startPage,
+        juzNumber = homeState.pagination.juzForPage(startPage),
         onDismiss = onDismiss,
         onReadSurah = onReadSurah,
         onListen = { viewModel.onEvent(QuranEvent.PlaySurahFromInfo(surahNumber)) },

@@ -78,6 +78,20 @@ class KhatamProgressCalculatorTest {
     }
 
     @Test
+    fun `a khatam created today is not started, not behind`() {
+        // The day a plan is created counts as day one, so this used to fall through to BEHIND
+        // and a khatam made seconds ago was reported in red as already behind pace.
+        assertThat(KhatamProgressCalculator.paceStatus(0f, 20, 1))
+            .isEqualTo(KhatamPace.NOT_STARTED)
+    }
+
+    @Test
+    fun `the grace is one day only`() {
+        assertThat(KhatamProgressCalculator.paceStatus(0f, 20, 2))
+            .isEqualTo(KhatamPace.BEHIND)
+    }
+
+    @Test
     fun `meeting the target is on track`() {
         assertThat(KhatamProgressCalculator.paceStatus(20f, 20, 5))
             .isEqualTo(KhatamPace.ON_TRACK)

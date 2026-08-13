@@ -101,9 +101,12 @@ fun TafseerHighlightableText(
     Box(modifier = modifier.fillMaxWidth()) {
         Text(
             text = annotatedString,
-            style = MaterialTheme.typography.bodyLarge.copy(
-                lineHeight = MaterialTheme.typography.bodyLarge.lineHeight * 1.6f
-            ),
+            // The type scale's own leading, not a multiple of it. `bodyLarge.lineHeight` is
+            // already 1.5x its font size — the same ratio `Type.kt` calls LATIN_LEADING — so
+            // multiplying by 1.6 again gave Latin commentary prose ~2.4x leading: an Arabic
+            // line height, applied to a paragraph that is not Arabic, and the reason a page of
+            // Ibn Kathir read as a list of separated lines rather than as prose.
+            style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurface,
             onTextLayout = { textLayoutResult = it },
             modifier = Modifier

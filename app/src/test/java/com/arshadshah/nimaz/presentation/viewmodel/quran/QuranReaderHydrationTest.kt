@@ -182,7 +182,6 @@ private fun surah(number: Int, english: String, transliteration: String, arabic:
     nameTransliteration = transliteration,
     revelationType = RevelationType.MECCAN,
     ayahCount = 7,
-    juzStart = 1,
     orderInMushaf = number,
     startPage = number,
 )

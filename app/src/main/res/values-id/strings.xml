@@ -1025,7 +1025,9 @@
     <string name="surah_info_read_more">Baca selengkapnya</string>
     <string name="surah_info_read_less">Tampilkan lebih sedikit</string>
     <string name="surah_info_background_subtitle">%1$d bagian</string>
-    <string name="surah_info_passages_row_subtitle">%1$d bagian mencakup %2$d ayat</string>
+    <plurals name="surah_info_passages_row_subtitle">
+        <item quantity="other">%1$d bagian mencakup %2$d ayat</item>
+    </plurals>
     <string name="surah_info_subjects">Topik dalam surah ini</string>
     <string name="surah_info_subjects_subtitle">%1$d topik, paling banyak dirujuk lebih dahulu</string>
     <string name="surah_info_section_other">Lainnya</string>
