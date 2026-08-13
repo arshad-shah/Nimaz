@@ -106,10 +106,27 @@ Bookmarks name items "Surah 1, Ayah 3"; favourites name the same thing "Al-Fatih
 
 ## Bugs found along the way (not part of this redesign)
 
-- **Quran home → "Start New Khatam" crashes** with
-  `IllegalArgumentException: Key "0" was already used` from a `LazyColumn`, every time,
-  but only while no khatam exists. The same destination reached from More → Khatam Quran
-  is fine. Needs its own branch.
+- **The Quran home screen crashes for any user with two or more Quran bookmarks.**
+  `IllegalArgumentException: Key "0" was already used`, thrown when the home screen's
+  bookmarks `LazyRow` composes.
+
+  Root cause: `QuranRepositoryImpl.toQuranBookmark()` hardcodes `id = 0`
+  (`QuranRepositoryImpl.kt:879`), so every Quran bookmark carries the same id, and
+  `QuranHomeScreen.kt:458` keys that row by `it.id`.
+
+  It first appeared when tapping "Start New Khatam" and again on "Subjects in the Qur'an" —
+  both taps merely triggered the lazy prefetch that composed the row. The destination is
+  irrelevant; only the bookmark count matters. Deterministic with two bookmarks.
+
+  Fix is one line in either place — give the domain model the entity's real id, or key the
+  row by `ayahId` — but it belongs on its own branch, not in the redesign.
+
+- **Content: the thematic tree's first root is titled "Doctraine".** Its own description
+  says "Doctrine". A content fix, against `arshad-shah/nimaz-data`.
+
+- **Content/behaviour: a branch topic reports "0 verses".** Technically true — the root
+  cites no ayahs itself — but it reads as broken. Resolved by the rolled-up counts and
+  rolled-up ayah list decided for screens 5 and 6.
 
 ---
 
@@ -180,7 +197,82 @@ rather than a Page tab.
 
 ---
 
-## Screens 5+ — pending
+## Screen 5 — Themes (`QuranTopics`)
 
-Background · Passages · Subjects · Themes · Topic detail · Tafseer · Khatam list ·
-Khatam detail · Search.
+**Today:** the three-way segment the prototype proposes is **already shipped** —
+`Themes · Kinds · Index` against the prototype's `Outline · By kind · Index`. Three roots
+render (Doctraine, Stories, The Unseen) as bare text plus a chevron on the page background,
+with **no counts anywhere**, even though the Qur'an home advertises "2,512 subjects,
+indexed by hand". The row carries two tap targets that read as one: the chevron expands,
+the label navigates.
+
+**Prototype:** each node is a card with a count, children indented under a rail.
+
+### Decided
+
+- **Rolled-up counts on every node** — the total ayahs beneath it, children included. It
+  gives the tree a sense of scale, and it makes a branch showing "0 verses" impossible.
+  Needs a recursive count, computed once and cached.
+
+### Open
+
+- Whether the chevron/label split survives, or the whole row becomes one target.
+
+---
+
+## Screen 6 — Topic detail (`QuranTopicDetail`)
+
+**Today:** a title, a `0 verses` chip, a prose description, and a "Subtopics" list rendered
+as plain bullets with no counts and no chevrons — they do not read as tappable. No Arabic
+name, no breadcrumb, and **no ayah list at all**, which is the point of a subject.
+
+**Prototype:** name plus "N ayahs across the Quran", provenance ("Arrived from Al-Kahf", or
+a breadcrumb), a card carrying the Arabic name and description, "Ayahs — first 3 of N"
+tapping into the reader, and related subjects.
+
+### Decided
+
+- **Every topic shows an ayah list, rolled up from its children.** A branch topic lists the
+  ayahs of everything beneath it, so "Doctrine" is never empty and the 0-verses state
+  becomes unreachable.
+
+---
+
+## Screen 7 — Surah info (`SurahInfo`)
+
+**Today:** a full destination. Scalloped gold cartouche, a Verses · Juz · Page strip, a
+short summary of how the surah got its name, then "Go deeper" — Background, Passages and
+Subjects, **each carrying a count** ("14 subjects, most-cited first") — and a bottom bar of
+`Listen` (yellow) and `Start Reading` (teal).
+
+**Prototype:** a bottom sheet. Four labelled fact tiles (it adds "Revealed in", which the
+screen lacks), then four flat buttons with **no counts** and **no summary**.
+
+### Decided
+
+- **Adopt the sheet, and carry over what the screen does better.** The sheet keeps you in
+  Browse instead of pushing a screen you immediately back out of — but it keeps the summary
+  paragraph and the **counted** onward rows, because "14 subjects, most-cited first" tells
+  you whether tapping is worth it and a bare "Subjects" does not. Taller than the
+  prototype's sheet, and scrollable.
+- **One primary action.** "Read surah" is primary in the section accent; Listen becomes
+  secondary. Today's yellow-beside-teal pair puts two accents in one row and reads as a
+  warning.
+
+---
+
+## Component rebuilds (applies across screens)
+
+Two shared components are **rebuilt to the prototype's design**, not restyled in place:
+
+- **The segmented tabs** — the prototype's pill-in-tray control: a recessed track with the
+  selected segment lifted as a white pill. This replaces the underlined `TabRow` on Quran
+  home and the pill tabs on Themes, Khatam and Bookmarks, so one control serves them all.
+- **The accordion / tree node** — the prototype's card-per-node with a rotating chevron and
+  an indent rail down the children, replacing the bare text rows on Themes.
+
+---
+
+## Screens 8+ — pending
+
+Background · Passages · Subjects · Tafseer · Khatam list · Khatam detail · Search.
