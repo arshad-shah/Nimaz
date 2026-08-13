@@ -18,6 +18,16 @@ import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.viewmodel.tracker.PrayerTrackerEvent
 import com.arshadshah.nimaz.presentation.viewmodel.tracker.PrayerTrackerViewModel
 
+/**
+ * The make-up list: every prayer the user has **explicitly** marked missed.
+ *
+ * Delegates to [QadaPrayerList] -- the summary card, month grouping and empty state are shared
+ * with the qada tab inside [PrayerTrackerScreen] on purpose (see the comment on
+ * [QadaPrayerList]); this screen only supplies the top bar and its own padding. Reads
+ * [PrayerTrackerViewModel] rather than owning a ViewModel of its own: the qada state, its event
+ * and its use cases already live there, and a second ViewModel would mean a second collector on
+ * the same Room flow for no gain.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun QadaPrayersScreen(
@@ -44,4 +54,3 @@ fun QadaPrayersScreen(
         )
     }
 }
-

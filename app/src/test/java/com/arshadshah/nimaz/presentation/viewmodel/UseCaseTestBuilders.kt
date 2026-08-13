@@ -67,6 +67,7 @@ fun buildPrayerUseCases(repository: PrayerRepository) = PrayerUseCases(
     getCurrentStreak = GetCurrentStreakUseCase(repository),
     getLongestStreak = GetLongestStreakUseCase(repository),
     getMissedPrayersRequiringQada = GetMissedPrayersRequiringQadaUseCase(repository),
+    markUnrecordedAsMissed = MarkUnrecordedAsMissedUseCase(repository),
     getPrayerStats = GetPrayerStatsUseCase(repository),
     getCurrentLocation = GetCurrentLocationUseCase(repository),
     getAllLocations = GetAllLocationsUseCase(repository),

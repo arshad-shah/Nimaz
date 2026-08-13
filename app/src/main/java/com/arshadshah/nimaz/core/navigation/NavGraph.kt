@@ -85,6 +85,7 @@ import com.arshadshah.nimaz.presentation.screens.prayer.MonthlyPrayerTimesScreen
 import com.arshadshah.nimaz.presentation.screens.prayer.PrayerStatsScreen
 import com.arshadshah.nimaz.presentation.screens.prayer.PrayerTimesScreen
 import com.arshadshah.nimaz.presentation.screens.prayer.PrayerTrackerScreen
+import com.arshadshah.nimaz.presentation.screens.prayer.QadaPrayersScreen
 import com.arshadshah.nimaz.presentation.screens.prophets.ProphetDetailScreen
 import com.arshadshah.nimaz.presentation.screens.qaida.QaidaHomeScreen
 import com.arshadshah.nimaz.presentation.screens.qaida.QaidaLettersScreen
@@ -334,7 +335,7 @@ fun NavGraph(
                     onNavigateToCalendar = { navController.navigate(Route.IslamicCalendar) },
                     onNavigateToFasting = { navController.navigate(Route.FastingHome) },
                     onNavigateToZakat = { navController.navigate(Route.ZakatCalculator) },
-                    onNavigateToPrayerTracker = { navController.navigate(Route.PrayerTracker()) },
+                    onNavigateToPrayerTracker = { navController.navigate(Route.PrayerTracker) },
                     onNavigateToSettings = { navController.navigate(Route.Settings) },
                     onNavigateToPrayerSettings = { navController.navigate(Route.SettingsPrayerCalculation) },
                     onNavigateToPrayerTimes = { navController.navigate(Route.PrayerTimes) },
@@ -856,12 +857,11 @@ fun NavGraph(
                 )
             }
 
-            taggedComposable<Route.PrayerTracker>(ScreenTags.PrayerTracker) { backStackEntry ->
-                val route = backStackEntry.toRoute<Route.PrayerTracker>()
+            taggedComposable<Route.PrayerTracker>(ScreenTags.PrayerTracker) {
                 PrayerTrackerScreen(
                     onNavigateBack = { navController.popBackStack() },
                     onNavigateToStats = { navController.navigate(Route.PrayerStats) },
-                    initialTab = route.initialTab
+                    onNavigateToQada = { navController.navigate(Route.QadaPrayers) },
                 )
             }
 
@@ -871,13 +871,8 @@ fun NavGraph(
                 )
             }
 
-            // Redirect QadaPrayers to PrayerTracker with Qada tab selected
             taggedComposable<Route.QadaPrayers>(ScreenTags.QadaPrayers) {
-                PrayerTrackerScreen(
-                    onNavigateBack = { navController.popBackStack() },
-                    onNavigateToStats = { navController.navigate(Route.PrayerStats) },
-                    initialTab = 1
-                )
+                QadaPrayersScreen(onNavigateBack = { navController.popBackStack() })
             }
 
             taggedComposable<Route.MonthlyPrayerTimes>(ScreenTags.MonthlyPrayerTimes) {

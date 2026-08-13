@@ -68,7 +68,7 @@ class BootReceiver : BroadcastReceiver() {
 
             PrayerNotificationScheduler.ACTION_MIDNIGHT_RESCHEDULE -> {
                 AppAnalytics.logNotificationReschedule(trigger = "midnight")
-                markMissedPrayersAndReschedule()
+                reschedulePrayerNotifications()
             }
 
             PrayerNotificationScheduler.ACTION_PRAYER_NOTIFICATION -> {
@@ -94,24 +94,16 @@ class BootReceiver : BroadcastReceiver() {
     }
 
     /**
-     * Re-arm today's notifications after a reboot.
+     * Re-arm today's notifications, on both a reboot and the midnight chain.
      *
-     * The day has not changed, so past prayers are left alone: marking them missed here would
-     * overwrite what the user actually recorded.
+     * These used to be two separate methods — twenty-odd lines written out twice, differing only
+     * in whether past prayers were marked missed first. Marking is no longer something the
+     * midnight chain does: a prayer nobody logged is not a prayer the user missed, and confirming
+     * one missed is now an explicit action in the prayer tracker. With that difference gone, both
+     * call sites are this one method. See [PrayerRescheduler].
      */
     private fun reschedulePrayerNotifications() {
-        scope.launch { prayerRescheduler.rescheduleToday(markPastAsMissed = false) }
-    }
-
-    /**
-     * Re-arm across a date change or timezone shift, marking anything already past as missed.
-     *
-     * This and [reschedulePrayerNotifications] used to be the same twenty-odd lines written out
-     * twice — two copies of the code that decides whether a user is reminded to pray. See
-     * [PrayerRescheduler].
-     */
-    private fun markMissedPrayersAndReschedule() {
-        scope.launch { prayerRescheduler.rescheduleToday(markPastAsMissed = true) }
+        scope.launch { prayerRescheduler.rescheduleToday() }
     }
 
     private fun handlePrayerNotification(context: Context, intent: Intent) {

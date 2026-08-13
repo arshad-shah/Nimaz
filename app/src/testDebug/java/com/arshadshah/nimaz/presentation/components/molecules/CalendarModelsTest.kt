@@ -48,6 +48,19 @@ class CalendarModelsTest {
         assertThat(state.secondaryLabel).isNull()
         assertThat(state.emphasizePrimary).isFalse()
         assertThat(state.emphasizeSecondary).isFalse()
+        assertThat(state.indicatorBar).isNull()
+        assertThat(state.indicatorBarColor).isNull()
+    }
+
+    @Test
+    fun `the fill bar is independent of the indicator dot`() {
+        val barOnly = CalendarDayState(indicatorBar = 0.6f)
+        assertThat(barOnly.indicatorBar).isEqualTo(0.6f)
+        assertThat(barOnly.indicatorColor).isNull()
+
+        val both = CalendarDayState(indicatorColor = Color.Red, indicatorBar = 1f)
+        assertThat(both.indicatorColor).isEqualTo(Color.Red)
+        assertThat(both.indicatorBar).isEqualTo(1f)
     }
 
     @Test

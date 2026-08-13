@@ -1,10 +1,8 @@
 package com.arshadshah.nimaz.core.util
 
 import com.arshadshah.nimaz.domain.model.PrayerType
-import com.arshadshah.nimaz.domain.repository.PrayerRepository
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.google.common.truth.Truth.assertThat
-import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.verify
 import io.mockk.mockk
@@ -20,17 +18,19 @@ import org.junit.Test
  * no screen that shows an alarm was expected, so a user notices weeks later if at all. That is
  * the failure these tests exist for, and why the logic was lifted out of `BootReceiver` (851
  * lines, a `BroadcastReceiver`, untestable) to somewhere it could have them.
+ *
+ * Verifications against [PrayerNotificationScheduler.scheduleTodaysPrayerNotifications] below are
+ * named rather than positional: the scheduler takes eleven parameters, six of them defaulted, so
+ * a positional `any()`-list silently stops matching the moment one is added.
  */
 class PrayerReschedulerTest {
 
     private lateinit var settings: SettingsRepository
     private lateinit var scheduler: PrayerNotificationScheduler
-    private lateinit var prayers: PrayerRepository
 
     @Before
     fun setUp() {
         scheduler = mockk(relaxed = true)
-        prayers = mockk(relaxed = true)
         settings = mockk(relaxed = true) {
             every { userPreferences } returns flowOf(
                 mockk(relaxed = true) {
@@ -54,45 +54,13 @@ class PrayerReschedulerTest {
         }
     }
 
-    private fun rescheduler() = PrayerRescheduler(settings, scheduler, prayers)
+    private fun rescheduler() = PrayerRescheduler(settings, scheduler)
 
     @Test
     fun `a reboot reschedules today from the stored preferences`() = runTest {
-        val ok = rescheduler().rescheduleToday(markPastAsMissed = false)
+        val ok = rescheduler().rescheduleToday()
 
         assertThat(ok).isTrue()
-        verify(exactly = 1) {
-            scheduler.scheduleTodaysPrayerNotifications(
-                latitude = 51.5,
-                longitude = -0.12,
-                notificationsEnabled = true,
-                enabledPrayers = setOf(PrayerType.FAJR, PrayerType.DHUHR, PrayerType.MAGHRIB),
-                preReminders = emptyMap(),
-                fridayReminderEnabled = true,
-                fridayReminderMinutes = 30,
-            )
-        }
-    }
-
-    /**
-     * A reboot must not touch prayer records. The day has not changed, so marking past prayers
-     * missed here would overwrite what the user actually recorded.
-     */
-    @Test
-    fun `a reboot does not mark past prayers as missed`() = runTest {
-        rescheduler().rescheduleToday(markPastAsMissed = false)
-
-        coVerify(exactly = 0) { prayers.markPastPrayersAsMissed() }
-    }
-
-    /** A date change or timezone shift is the case where marking *is* correct. */
-    @Test
-    fun `a date change marks past prayers missed before rescheduling`() = runTest {
-        rescheduler().rescheduleToday(markPastAsMissed = true)
-
-        coVerify(exactly = 1) { prayers.markPastPrayersAsMissed() }
-        // Named rather than positional: the scheduler takes eleven parameters, six of them
-        // defaulted, so a positional any()-list silently stops matching the moment one is added.
         verify(exactly = 1) {
             scheduler.scheduleTodaysPrayerNotifications(
                 latitude = 51.5,

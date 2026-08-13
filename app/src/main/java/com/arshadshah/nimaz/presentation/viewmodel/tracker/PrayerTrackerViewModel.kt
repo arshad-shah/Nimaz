@@ -102,21 +102,18 @@ class PrayerTrackerViewModel @Inject constructor(
                 telemetry.featureUsed(DOMAIN, "select_date")
                 selectDate(event.date)
             }
-            is PrayerTrackerEvent.MarkPrayerPrayed -> {
+            is PrayerTrackerEvent.SetPrayerStatus -> {
                 telemetry.prayerTracked(
-                        event.prayerName.name,
-                        PrayerStatus.PRAYED.name,
-                        event.isJamaah
-                    )
-                markPrayerPrayed(
-                    event.prayerName,
-                    event.isJamaah
+                    event.prayerName.name,
+                    event.status?.name ?: "cleared",
+                    false
                 )
+                setPrayerStatus(event.prayerName, event.status)
             }
 
-            is PrayerTrackerEvent.MarkPrayerMissed -> {
-                telemetry.prayerTracked(event.prayerName.name, PrayerStatus.MISSED.name)
-                markPrayerMissed(event.prayerName)
+            is PrayerTrackerEvent.ConfirmUnrecordedAsMissed -> {
+                telemetry.featureUsed(DOMAIN, "confirm_unrecorded_missed")
+                confirmUnrecordedAsMissed(event.from, event.to)
             }
             is PrayerTrackerEvent.MarkQadaCompleted -> {
                 telemetry.featureUsed(DOMAIN, "qada_completed")
@@ -208,12 +205,23 @@ class PrayerTrackerViewModel @Inject constructor(
         }
     }
 
-    private fun markPrayerPrayed(prayerName: PrayerName, isJamaah: Boolean) {
-        updatePrayerStatus(prayerName, PrayerStatus.PRAYED, isJamaah)
+    private fun setPrayerStatus(prayerName: PrayerName, status: PrayerStatus?) {
+        // Clearing is a write of NOT_PRAYED rather than a delete. The display derivation treats
+        // NOT_PRAYED as absence, so the row reads back as "not recorded" — and a status the user
+        // withdrew leaving no row at all would be indistinguishable from one never touched,
+        // which is a distinction sync and the widget both care about.
+        updatePrayerStatus(prayerName, status ?: PrayerStatus.NOT_PRAYED, isJamaah = false)
     }
 
-    private fun markPrayerMissed(prayerName: PrayerName) {
-        updatePrayerStatus(prayerName, PrayerStatus.MISSED, false)
+    private fun confirmUnrecordedAsMissed(from: LocalDate, to: LocalDate) {
+        launchSafely(telemetry, DOMAIN, "confirm_unrecorded_missed") {
+            prayerUseCases.markUnrecordedAsMissed(
+                from.toUtcMidnightMillis(),
+                to.toUtcMidnightMillis(),
+            )
+            // No reload. The qada list, the stats and the selected day are all Room-backed
+            // observers of this table, so the write re-emits to every one of them.
+        }
     }
 
     private fun markQadaCompleted(record: PrayerRecord) {

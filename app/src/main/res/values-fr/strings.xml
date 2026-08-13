@@ -15,6 +15,8 @@
     <string name="prayed">Prié</string>
     <string name="a11y_prayer_state_prayed">%1$s, prié</string>
     <string name="a11y_prayer_state_not_recorded">%1$s, pas encore enregistré</string>
+    <string name="a11y_prayer_state_partial">%1$s, certaines prières enregistrées</string>
+    <string name="a11y_prayer_state_missed">%1$s, prières manquées</string>
     <string name="no_favorites_yet">Aucun favori pour le moment</string>
     <string name="remove_from_favorites">Retirer des favoris</string>
     <string name="add_to_favorites">Ajouter aux favoris</string>
@@ -375,8 +377,29 @@
     <string name="widget_hijri_date_name">Date hégirienne</string>
     <string name="widget_prayer_tracker_name">Suivi de prière</string>
     <string name="widget_hijri_calendar_name">Calendrier hégirien</string>
-    <string name="tracker">Suivi</string>
     <string name="qada">Qada</string>
+    <string name="prayer_status_not_recorded">Non enregistrée</string>
+    <string name="prayer_recorded_count_format">%1$d sur %2$d enregistrées</string>
+    <string name="back_to_today">Retour à aujourd\'hui</string>
+    <string name="prayer_not_recorded_note">L\'heure de cette prière est passée sans qu\'aucune information n\'ait été enregistrée. Elle n\'est pas comptée comme manquée tant que vous ne le précisez pas.</string>
+    <string name="prayer_unrecorded_banner_action">Vérifier</string>
+    <string name="prayer_month_section">Votre mois</string>
+    <plurals name="prayer_complete_days">
+        <item quantity="one">%1$d jour complet</item>
+        <item quantity="other">%1$d jours complets</item>
+    </plurals>
+    <plurals name="prayer_unrecorded_banner">
+        <item quantity="one">%1$d prière de la semaine dernière n\'a pas été enregistrée. Elle n\'apparaît dans votre liste qada que si vous la marquez.</item>
+        <item quantity="other">%1$d prières de la semaine dernière n\'ont pas été enregistrées. Elles n\'apparaissent dans votre liste qada que si vous les marquez.</item>
+    </plurals>
+    <string name="prayer_legend_all_five">Les cinq</string>
+    <string name="prayer_legend_some">Certaines</string>
+    <string name="prayer_legend_none">Aucune</string>
+    <string name="prayer_legend_not_recorded">Non enregistrée</string>
+    <string name="prayer_next_in">%1$s dans %2$s</string>
+    <string name="prayer_day_complete">Journée terminée</string>
+    <string name="prayer_day_summary_past">Journée terminée · %1$d sur %2$d effectuées</string>
+    <string name="prayer_day_upcoming">Journée à venir</string>
     <string name="prayer_tracker_title">Suivi de prière</string>
     <string name="view_statistics">Voir les statistiques</string>
     <string name="all_caught_up">Tout est à jour !</string>
@@ -388,8 +411,6 @@
         <item quantity="many">%1$d prières manquées en attente</item>
         <item quantity="other">%1$d prières manquées en attente</item>
     </plurals>
-    <string name="current_streak">Série en cours</string>
-    <string name="consecutive_days_all_prayers">jours consécutifs avec toutes les prières</string>
     <string name="on_time">À l\'heure</string>
     <string name="late">En retard</string>
     <string name="missed">Manquée</string>
@@ -529,7 +550,6 @@
     <string name="hadith_fallback_source">Sahih al-Bukhari 6018</string>
     <string name="jumuah_arabic">\u0627\u0644\u062C\u0645\u0639\u0629</string>
     <string name="jumuah_hadith_quote">"Le meilleur jour où le soleil se lève est le vendredi." — Sahih Muslim</string>
-    <string name="prayers_completed_format">%1$d sur %2$d</string>
     <string name="surah_result_format">Sourate %1$d:%2$d</string>
     <string name="hadith_result_format">Hadith n°%1$d</string>
     <string name="share_message">Découvrez Nimaz - Application d\'horaires de prière : https://play.google.com/store/apps/details?id=com.arshadshah.nimaz</string>
@@ -1130,6 +1150,9 @@
     <string name="prayer_insight_best">Meilleure prière : %1$s</string>
     <string name="prayer_insight_best_desc">Vous accomplissez régulièrement %1$s à %2$d%%.</string>
     <string name="qada_prayers">Prières Qada</string>
+    <string name="qada_mark_made_up">Marquer comme rattrapée</string>
+    <string name="qada_summary_subtitle">Prières manquées en attente d\'être rattrapées</string>
+    <string name="qada_summary_empty">Rien en attente</string>
     <string name="sync_data">Synchroniser les données</string>
     <string name="settings_sync_subtitle">Transférer des données entre appareils</string>
     <string name="location_search_hint">Rechercher une ville ou une adresse…</string>

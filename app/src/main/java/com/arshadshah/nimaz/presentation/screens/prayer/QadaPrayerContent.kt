@@ -87,6 +87,7 @@ fun QadaPrayerList(
             items(prayers, key = { it.id }) { prayer ->
                 NimazQadaPrayerItem(
                     prayer = prayer,
+                    actionText = stringResource(R.string.qada_mark_made_up),
                     onMarkCompleted = { onMarkCompleted(prayer) }
                 )
             }

@@ -15,6 +15,8 @@
     <string name="prayed">Sudah Shalat</string>
     <string name="a11y_prayer_state_prayed">%1$s, sudah salat</string>
     <string name="a11y_prayer_state_not_recorded">%1$s, belum dicatat</string>
+    <string name="a11y_prayer_state_partial">%1$s, sebagian salat tercatat</string>
+    <string name="a11y_prayer_state_missed">%1$s, salat terlewat</string>
     <string name="no_favorites_yet">Belum ada favorit</string>
     <string name="remove_from_favorites">Hapus dari favorit</string>
     <string name="add_to_favorites">Tambahkan ke favorit</string>
@@ -355,8 +357,27 @@
     <string name="widget_hijri_date_name">Tanggal Hijriah</string>
     <string name="widget_prayer_tracker_name">Pelacak Shalat</string>
     <string name="widget_hijri_calendar_name">Kalender Hijriah</string>
-    <string name="tracker">Pelacak</string>
     <string name="qada">Qada</string>
+    <string name="prayer_status_not_recorded">Belum dicatat</string>
+    <string name="prayer_recorded_count_format">%1$d dari %2$d tercatat</string>
+    <string name="back_to_today">Kembali ke hari ini</string>
+    <string name="prayer_not_recorded_note">Waktu shalat ini telah berlalu tanpa ada catatan. Ini belum dihitung terlewat sampai kamu menyatakannya.</string>
+    <string name="prayer_unrecorded_banner_action">Tinjau</string>
+    <string name="prayer_month_section">Bulanmu</string>
+    <plurals name="prayer_complete_days">
+        <item quantity="other">%1$d hari lengkap</item>
+    </plurals>
+    <plurals name="prayer_unrecorded_banner">
+        <item quantity="other">%1$d shalat dari minggu lalu tidak tercatat. Belum masuk daftar qada sampai kamu menandainya.</item>
+    </plurals>
+    <string name="prayer_legend_all_five">Lima lengkap</string>
+    <string name="prayer_legend_some">Sebagian</string>
+    <string name="prayer_legend_none">Tidak ada</string>
+    <string name="prayer_legend_not_recorded">Belum dicatat</string>
+    <string name="prayer_next_in">%1$s dalam %2$s</string>
+    <string name="prayer_day_complete">Hari selesai</string>
+    <string name="prayer_day_summary_past">Hari selesai · %1$d dari %2$d dikerjakan</string>
+    <string name="prayer_day_upcoming">Hari mendatang</string>
     <string name="prayer_tracker_title">Pelacak Shalat</string>
     <string name="view_statistics">Lihat Statistik</string>
     <string name="all_caught_up">Semua Terpenuhi!</string>
@@ -366,8 +387,6 @@
     <plurals name="missed_prayers_pending">
         <item quantity="other">%1$d shalat terlewat tertunda</item>
     </plurals>
-    <string name="current_streak">Pencapaian Beruntun</string>
-    <string name="consecutive_days_all_prayers">hari berturut-turut dengan semua shalat</string>
     <string name="on_time">Tepat waktu</string>
     <string name="late">Terlambat</string>
     <string name="missed">Terlewat</string>
@@ -501,7 +520,6 @@
     <string name="hadith_fallback_source">Shahih al-Bukhari 6018</string>
     <string name="jumuah_arabic">\u0627\u0644\u062C\u0645\u0639\u0629</string>
     <string name="jumuah_hadith_quote">"Hari terbaik di mana matahari terbit adalah hari Jumat." — Shahih Muslim</string>
-    <string name="prayers_completed_format">%1$d dari %2$d</string>
     <string name="surah_result_format">Surah %1$d:%2$d</string>
     <string name="hadith_result_format">Hadis #%1$d</string>
     <string name="share_message">Coba Nimaz - Aplikasi Waktu Shalat: https://play.google.com/store/apps/details?id=com.arshadshah.nimaz</string>
@@ -1091,6 +1109,9 @@
     <string name="prayer_insight_best">Shalat terbaik: %1$s</string>
     <string name="prayer_insight_best_desc">Anda secara konsisten menyelesaikan %1$s pada %2$d%%.</string>
     <string name="qada_prayers">Shalat Qada</string>
+    <string name="qada_mark_made_up">Tandai sebagai diqada</string>
+    <string name="qada_summary_subtitle">Shalat terlewat yang menunggu untuk diqada</string>
+    <string name="qada_summary_empty">Tidak ada yang tertunda</string>
     <string name="sync_data">Sinkronkan Data</string>
     <string name="settings_sync_subtitle">Transfer data antar perangkat</string>
     <string name="location_search_hint">Cari kota atau alamat…</string>

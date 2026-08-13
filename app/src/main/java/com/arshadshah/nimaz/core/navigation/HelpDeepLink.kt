@@ -15,7 +15,7 @@ fun helpDeepLinkRoute(key: String?): Route? = when (key) {
     "tasbih" -> Route.TasbihHome
     "hadith" -> Route.HadithHome
     "zakat" -> Route.ZakatCalculator
-    "prayer_tracker" -> Route.PrayerTracker()
+    "prayer_tracker" -> Route.PrayerTracker
     "qada" -> Route.QadaPrayers
     "qaida" -> Route.QaidaHome
     "dua" -> Route.DuaHome
