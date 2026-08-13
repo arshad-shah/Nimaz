@@ -6,6 +6,7 @@ import android.graphics.Paint
 import android.graphics.RadialGradient
 import android.graphics.RectF
 import android.graphics.Shader
+import androidx.compose.animation.core.withInfiniteAnimationFrameNanos
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -52,6 +53,7 @@ import androidx.compose.ui.graphics.drawscope.CanvasDrawScope
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
@@ -64,7 +66,6 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.delay
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.GlassBackdrop
 import com.arshadshah.nimaz.presentation.components.atoms.GlassIconButton
@@ -120,22 +121,40 @@ fun SkyBackground(
     sunriseFraction: Float = SUNRISE_T,
     sunsetFraction: Float = SUNSET_T,
 ) {
-    // Cloud drift, without holding the frame clock open.
+    // Cloud drift, advanced on the frame clock.
     //
-    // This was a `rememberInfiniteTransition` + `animateFloat`, which requests a frame
-    // *every frame, forever*, for as long as Home is composed — and it ran even with
-    // `cloudsEnabled` false, animating 0f → 0f. The drawing itself is already cheap
-    // (`drawWithCache` over baked sprite layers), so the animation was the cost.
+    // History, because this has moved twice. It began as `rememberInfiniteTransition` +
+    // `animateFloat`, which requests a frame *every frame, forever* for as long as Home is
+    // composed — and ran even with `cloudsEnabled` false, animating 0f → 0f. That was replaced
+    // by a `delay(1s)` loop advancing the phase in 120 discrete steps, on the reasoning that
+    // steps that small would be invisible.
     //
-    // The cycle is 120 seconds. Advancing the phase once a second is 120 steps across
-    // it — invisible at that speed — and it lets the compositor idle in between. When
-    // clouds are off nothing is started at all.
+    // They are not. A step is `width / 120` — about 9px on a 1080px-wide scene — and one 9px
+    // jump per second is not drift, it is a slideshow. Motion is either per-frame or it reads
+    // as broken; there is no cheap middle.
+    //
+    // So: back to the frame clock, but keeping the one thing the delay loop got right — when
+    // `cloudsEnabled` is false nothing is started at all, rather than an animation running to
+    // move nothing. `withInfiniteAnimationFrameNanos` also yields to `InfiniteAnimationPolicy`,
+    // so Robolectric and instrumented tests are not held awake by it.
+    //
+    // The per-frame cost is what it always was: recomputing one float and blitting two already
+    // baked bitmaps.
     var cloudPhase by remember { mutableFloatStateOf(0f) }
     if (cloudsEnabled) {
         LaunchedEffect(Unit) {
+            var previousFrame = 0L
             while (true) {
-                delay(CLOUD_TICK_MS)
-                cloudPhase = (cloudPhase + CLOUD_TICK_MS.toFloat() / CLOUD_CYCLE_MS) % 1f
+                withInfiniteAnimationFrameNanos { frameNanos ->
+                    // The first frame only establishes a baseline — a delta measured against
+                    // zero would be the time since the process booted, and would slam the
+                    // phase to an arbitrary value on the very first frame.
+                    if (previousFrame != 0L) {
+                        val elapsedMs = (frameNanos - previousFrame) / NANOS_PER_MS
+                        cloudPhase = (cloudPhase + elapsedMs / CLOUD_CYCLE_MS) % 1f
+                    }
+                    previousFrame = frameNanos
+                }
             }
         }
     }
@@ -162,20 +181,29 @@ fun SkyBackground(
                 val full = IntSize(w, h)
 
                 onDrawBehind {
-                    val off = (cloudPhase * w).roundToInt()
                     drawImage(scene, dstOffset = IntOffset.Zero, dstSize = full)
-                    drawImage(
-                        clouds,
-                        dstOffset = IntOffset(off, 0),
-                        dstSize = full,
-                        colorFilter = cloudTint
-                    )
-                    drawImage(
-                        clouds,
-                        dstOffset = IntOffset(off - w, 0),
-                        dstSize = full,
-                        colorFilter = cloudTint
-                    )
+
+                    // Translated by a float rather than offset by an `IntOffset`. The drift is
+                    // roughly a sixth of a pixel per frame, so rounding the destination to whole
+                    // pixels would hold the clouds still for six frames and then jump them one —
+                    // a smaller version of the very stutter the frame clock above is fixing.
+                    // A float translate lets the layer land between pixels and be filtered there.
+                    translate(left = cloudPhase * w) {
+                        drawImage(
+                            clouds,
+                            dstOffset = IntOffset.Zero,
+                            dstSize = full,
+                            colorFilter = cloudTint
+                        )
+                        // The trailing copy, so the band wraps seamlessly instead of showing a
+                        // clear gap as the first one leaves.
+                        drawImage(
+                            clouds,
+                            dstOffset = IntOffset(-w, 0),
+                            dstSize = full,
+                            colorFilter = cloudTint
+                        )
+                    }
                 }
             },
     )
@@ -327,9 +355,11 @@ private val LocationPillMaxWidth = 260.dp
 /** A soft drop shadow so overlaid glass text stays crisp over bright sky. */
 private val GlassTextShadow = Shadow(Color.Black.copy(alpha = 0.35f), Offset(0f, 1f), 4f)
 
-/** One cloud-drift step. 120 steps across the cycle — invisible, and lets the compositor idle. */
-private const val CLOUD_TICK_MS = 1_000L
+/** How long the cloud band takes to travel its own width once. */
 private const val CLOUD_CYCLE_MS = 120_000f
+
+/** Frame timestamps arrive in nanoseconds; the cycle above is in milliseconds. */
+private const val NANOS_PER_MS = 1_000_000f
 
 private const val SPRITE_SCALE = 0.6f
 private const val SUNRISE_T = 0.27f
