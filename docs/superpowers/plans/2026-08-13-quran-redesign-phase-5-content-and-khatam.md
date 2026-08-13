@@ -87,7 +87,22 @@ The fourth test is the point of the whole task — it is what makes a root showi
 - Test: `…/screens/quran/QuranTopicsScreenTest.kt`
 
 - [ ] Replace the segment with `NimazSegmentedTabs`.
-- [ ] Replace the bare rows with `NimazTreeNode`, passing the rolled-up count.
+- [ ] **Use the existing `NimazTreeRow`**, passing the rolled-up count.
+
+  > **Amended after Phase 1.** An earlier draft said "replace the bare rows with
+  > `NimazTreeNode`". That component was built in Phase 1 and then **deleted**: the final
+  > review found it duplicated `NimazTreeRow`
+  > (`presentation/components/molecules/NimazTreeRow.kt`), which already existed and was
+  > already consumed by `QuranTopicsScreen`, `QuranTopicDetailScreen` and
+  > `SurahSubjectsScreen` — the very screens this task touches. `NimazTreeRow` is also
+  > richer: depth-based indent ruling, RTL handling via `LocalLayoutDirection`, a
+  > `NimazBadge` count, secondary/supporting text, trailing content, and a 48 dp
+  > `NimazIconButton` chevron.
+  >
+  > The subject browser renders a **flat** list with depth-based indentation, not nested
+  > composition, so no lazy `content` slot is needed. If this task discovers it genuinely
+  > wants nested children, add that slot to `NimazTreeRow` — do not reintroduce a second
+  > tree component.
 - [ ] Cache the roll-up in the ViewModel; assert in a test that it is computed **once** per tree load, not per emission.
 - [ ] **Decide the open question** (spec §5.10): chevron-expands / label-navigates, or whole-row. `NimazTreeNode` supports both — pass `onClick = null` for whole-row. Settle it on the emulator and record the choice in the commit message.
 
