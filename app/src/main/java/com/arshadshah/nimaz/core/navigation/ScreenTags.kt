@@ -123,6 +123,9 @@ object ScreenTags {
     const val TasbihCounter = "tasbih_counter"
     const val TasbihCount = "tasbih_count"
 
+    /** The reader's reading-mode control — Translation or Mushaf. */
+    const val QuranReaderModeMenu = "quran_reader_mode_menu"
+
     /** Quran browse — the scrollable surah list (behavior tests scroll-to a surah). */
     const val QuranSurahList = "quran_surah_list"
 

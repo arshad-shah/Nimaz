@@ -2230,4 +2230,22 @@
     <string name="quran_home_recently_saved">Recently saved</string>
     <string name="surah_info_revealed_in">Revealed in</string>
     <string name="surah_info_read_surah">Read surah</string>
+
+    <!-- Qur'an redesign: the ayah action sheet, the anchor bar, reading modes -->
+    <string name="ayah_action_play_from_here">Play here</string>
+    <string name="ayah_action_repeat">Repeat</string>
+    <string name="ayah_action_bookmark">Bookmark</string>
+    <string name="ayah_action_unbookmark">Unbookmark</string>
+    <string name="ayah_action_favourite">Favourite</string>
+    <string name="ayah_action_unfavourite">Unfavourite</string>
+    <string name="ayah_action_note">Note</string>
+    <string name="ayah_action_tafseer">Tafseer</string>
+    <string name="ayah_action_subjects">Subjects</string>
+    <string name="ayah_action_copy">Copy</string>
+    <string name="ayah_action_share">Share</string>
+    <string name="ayah_action_mark_read">Mark read</string>
+    <string name="reader_go_to">Go to…</string>
+    <string name="reader_mode">Reading mode</string>
+    <string name="reader_mode_translation">Translation</string>
+    <string name="reader_mode_mushaf">Mushaf</string>
 </resources>

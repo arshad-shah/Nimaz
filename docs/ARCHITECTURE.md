@@ -1274,6 +1274,31 @@ card there, including Verse-of-the-Day and the Khatam row, uses the normal `Nima
 treatment. Verse-of-the-Day and continue-reading previously both carried
 `QuranColors.BannerGradient` and consumed the whole first screenful between them.
 
+### 8.3a The reader's ayah surfaces (`AyahActionSheet`, `ReaderAnchorBar`)
+
+- **`AyahActionSheet`** (molecule, `components/molecules/AyahActionSheet.kt`) is where every
+  per-verse action lives. It replaces the permanent five-icon `NimazActionPill` that used to sit
+  on every ayah — five icons per verse, thirty on a screenful, for actions a reader wants on one
+  verse at a time. The sheet holds **ten**, including the note editor and the subject index that
+  had no home in the verse list at all, and costs nothing until it is asked for. `AyahSheetActions`
+  bundles the callbacks so a host wires them once. Bookmark and favourite are **toggles** whose
+  labels state which way they go, so a reader can undo from where they did it. "Mark read for
+  khatam" renders **only while a khatam is active**, matching the gate `QuranMushafPageBar`
+  already applies to the page-level mark: most reading is not part of a plan and should carry no
+  tracking chrome.
+- **`ReaderAnchorBar`** (molecule, `components/molecules/ReaderAnchorBar.kt`) says where you are
+  **once**. `Juz 15 · Page 293` used to be a badge on every ayah — the same sentence repeated six
+  times a screen about a fact that changes about once a page — and it is one bar under the app bar
+  now, where it is true of everything below it. It carries the "Go to…" affordance too, so the
+  place you are is also the control for changing it; the reader points it at the surah's passage
+  outline, opened at the verse being read.
+- The reader's **reading-mode control** is an app-bar icon showing the current mode, not a row in
+  the overflow next to Passages and Settings. **Two** modes, Translation and Mushaf — the 16-line
+  and 15-line IndoPak editions are a *script* (`MushafScript`, a persisted `SettingsQuran`
+  preference that also changes the page count), not a view of the same page, so script stays in
+  reader settings. Offering it here as a third "mode" would mean two places writing one
+  preference. `ScreenTags.QuranReaderModeMenu` tags the control.
+
 ### 8.3 Segmented control (`NimazSegmentedControl`) and tree rows (`NimazTreeRow`)
 
 - **`NimazSegmentedControl`** (atom, `components/atoms/NimazSegmentedControl.kt`) is the house
@@ -1301,6 +1326,13 @@ treatment. Verse-of-the-Day and continue-reading previously both carried
   expand/collapse. It already existed before this redesign and is already the tree row consumed by
   `QuranTopicsScreen`, `QuranTopicDetailScreen` and `SurahSubjectsScreen` — the three screens later
   phases of this redesign rewrite — so it is the tree component to build on, not to duplicate.
+- **`QuranFrame`'s two variants have parted company.** `READER` — the mushaf page — takes the
+  paper register: a `paper` ground, one `paperLine` hairline rule above and below the text block,
+  and a small `paperLine` medallion at the foot. `STUDY` — Tafseer — keeps the illuminated
+  gold-over-teal double border and the floret divider. Both mushaf renderers draw their Arabic in
+  `paperInk` rather than `onBackground`, which is mixed for a card and not for cream. Two
+  ornamental registers in one app is a deliberate cost (spec §5.9's "noted tension"), taken
+  because the mushaf's job is to disappear behind the text and Tafseer's is to frame it.
 - `QuranSurfaceColors` (`presentation/theme/QuranSurfaceColors.kt`) now also carries a **`paper`**
   register — `paper` / `paperLine` / `paperInk` — used **only** by the mushaf and 16-line reading
   modes. It is held apart from `pageSurface` and the rest of the app's `surface` tokens because

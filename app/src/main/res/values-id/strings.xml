@@ -1993,4 +1993,22 @@
     <string name="quran_home_recently_saved">Baru disimpan</string>
     <string name="surah_info_revealed_in">Diturunkan di</string>
     <string name="surah_info_read_surah">Baca surah</string>
+
+    <!-- Qur'an redesign: the ayah action sheet, the anchor bar, reading modes -->
+    <string name="ayah_action_play_from_here">Putar di sini</string>
+    <string name="ayah_action_repeat">Ulangi</string>
+    <string name="ayah_action_bookmark">Markah</string>
+    <string name="ayah_action_unbookmark">Hapus markah</string>
+    <string name="ayah_action_favourite">Favorit</string>
+    <string name="ayah_action_unfavourite">Hapus favorit</string>
+    <string name="ayah_action_note">Catatan</string>
+    <string name="ayah_action_tafseer">Tafsir</string>
+    <string name="ayah_action_subjects">Topik</string>
+    <string name="ayah_action_copy">Salin</string>
+    <string name="ayah_action_share">Bagikan</string>
+    <string name="ayah_action_mark_read">Tandai dibaca</string>
+    <string name="reader_go_to">Buka…</string>
+    <string name="reader_mode">Mode baca</string>
+    <string name="reader_mode_translation">Terjemahan</string>
+    <string name="reader_mode_mushaf">Mushaf</string>
 </resources>

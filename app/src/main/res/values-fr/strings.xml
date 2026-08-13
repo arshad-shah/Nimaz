@@ -2077,4 +2077,22 @@
     <string name="quran_home_recently_saved">Enregistrés récemment</string>
     <string name="surah_info_revealed_in">Révélée à</string>
     <string name="surah_info_read_surah">Lire la sourate</string>
+
+    <!-- Qur'an redesign: the ayah action sheet, the anchor bar, reading modes -->
+    <string name="ayah_action_play_from_here">Lire ici</string>
+    <string name="ayah_action_repeat">Répéter</string>
+    <string name="ayah_action_bookmark">Signet</string>
+    <string name="ayah_action_unbookmark">Retirer</string>
+    <string name="ayah_action_favourite">Favori</string>
+    <string name="ayah_action_unfavourite">Retirer</string>
+    <string name="ayah_action_note">Note</string>
+    <string name="ayah_action_tafseer">Tafsir</string>
+    <string name="ayah_action_subjects">Sujets</string>
+    <string name="ayah_action_copy">Copier</string>
+    <string name="ayah_action_share">Partager</string>
+    <string name="ayah_action_mark_read">Marquer lu</string>
+    <string name="reader_go_to">Aller à…</string>
+    <string name="reader_mode">Mode de lecture</string>
+    <string name="reader_mode_translation">Traduction</string>
+    <string name="reader_mode_mushaf">Mushaf</string>
 </resources>

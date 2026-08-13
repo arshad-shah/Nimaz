@@ -2040,4 +2040,22 @@
     <string name="quran_home_recently_saved">Son kaydedilenler</string>
     <string name="surah_info_revealed_in">İndiği yer</string>
     <string name="surah_info_read_surah">Sureyi oku</string>
+
+    <!-- Qur'an redesign: the ayah action sheet, the anchor bar, reading modes -->
+    <string name="ayah_action_play_from_here">Buradan oynat</string>
+    <string name="ayah_action_repeat">Tekrarla</string>
+    <string name="ayah_action_bookmark">Yer imi</string>
+    <string name="ayah_action_unbookmark">Yer imini kaldır</string>
+    <string name="ayah_action_favourite">Favori</string>
+    <string name="ayah_action_unfavourite">Favoriden çıkar</string>
+    <string name="ayah_action_note">Not</string>
+    <string name="ayah_action_tafseer">Tefsir</string>
+    <string name="ayah_action_subjects">Konular</string>
+    <string name="ayah_action_copy">Kopyala</string>
+    <string name="ayah_action_share">Paylaş</string>
+    <string name="ayah_action_mark_read">Okundu</string>
+    <string name="reader_go_to">Git…</string>
+    <string name="reader_mode">Okuma modu</string>
+    <string name="reader_mode_translation">Meal</string>
+    <string name="reader_mode_mushaf">Mushaf</string>
 </resources>

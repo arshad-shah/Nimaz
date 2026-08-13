@@ -3,6 +3,7 @@ package com.arshadshah.nimaz.presentation.components.organisms
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
@@ -104,15 +105,11 @@ internal fun AyahItem(
     isKhatamMode: Boolean = false,
     showTajweed: Boolean = false,
     tajweedUnderline: Boolean = false,
-    onBookmarkClick: () -> Unit,
-    onFavoriteClick: () -> Unit = {},
-    onPlayAyahClick: () -> Unit = {},
-    onTafseerClick: () -> Unit = {},
+    /** Opens the ayah sheet, which now carries every per-verse action. */
+    onOpenActions: () -> Unit = {},
     onKhatamToggle: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
-    val context = LocalContext.current
-    val shareScope = rememberCoroutineScope()
     val isDarkTheme = isSystemInDarkTheme()
 
     val bgColor by animateColorAsState(
@@ -128,9 +125,16 @@ internal fun AyahItem(
         modifier = modifier
             .fillMaxWidth()
             .background(bgColor)
+            // The whole verse is the target. Rule 8's card guidance does not apply — this is a
+            // list row inside a reader, not a card, and wrapping it in a NimazCard would put a
+            // border around every verse of the Qur'an.
+            .clickable(onClick = onOpenActions)
             .padding(horizontal = 15.dp, vertical = 6.dp)
     ) {
-        // Number badge + actions
+        // Number badge, and — only with a khatam running — the read mark. The permanent
+        // five-icon action pill that used to sit opposite is gone: it drew five icons per
+        // verse, thirty on a screenful, for actions a reader wants on one verse at a time.
+        // Tapping the row opens the sheet that holds all of them, and four more besides.
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -142,7 +146,7 @@ internal fun AyahItem(
             ) {
                 Box(
                     modifier = Modifier
-                        .size(36.dp)
+                        .size(32.dp)
                         .clip(CircleShape)
                         .background(MaterialTheme.colorScheme.primaryContainer),
                     contentAlignment = Alignment.Center
@@ -169,49 +173,6 @@ internal fun AyahItem(
                         )
                     }
                 }
-            }
-
-            NimazActionPill {
-                NimazPillActionButton(
-                    icon = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                    contentDescription = stringResource(R.string.cd_favorite),
-                    onClick = onFavoriteClick,
-                    active = isFavorite,
-                    activeColor = NimazPalette.Red500,
-                )
-                NimazPillActionButton(
-                    icon = if (ayah.isBookmarked) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
-                    contentDescription = stringResource(R.string.cd_bookmark),
-                    onClick = onBookmarkClick,
-                    active = ayah.isBookmarked,
-                    activeColor = NimazColors.QuranColors.BookmarkPrimary,
-                )
-                NimazPillActionButton(
-                    icon = Icons.Default.Share,
-                    contentDescription = stringResource(R.string.cd_share),
-                    onClick = {
-                        shareScope.launch {
-                            ContentShareManager.shareBranded(
-                                context,
-                                Shareables.ayah(context, ayah)
-                            )
-                        }
-                    },
-                )
-                NimazPillActionButton(
-                    icon = if (isAudioPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                    contentDescription = if (isAudioPlaying) stringResource(R.string.pause) else stringResource(
-                        R.string.action_play
-                    ),
-                    onClick = onPlayAyahClick,
-                    active = isAudioPlaying || isHighlighted,
-                )
-                NimazPillActionButton(
-                    icon = Icons.AutoMirrored.Filled.MenuBook,
-                    contentDescription = stringResource(R.string.cd_tafseer),
-                    onClick = onTafseerClick,
-                    active = true,
-                )
             }
         }
 
@@ -286,19 +247,18 @@ internal fun AyahItem(
         // Translation
         if (showTranslation && ayah.translation != null) {
             Spacer(modifier = Modifier.height(12.dp))
-            NimazCard(style = NimazCardStyle.OUTLINED, tone = NimazTone.NEUTRAL, elevation = 0.dp) {
-                Text(
-                    text = ayah.translation,
-                    // The catalogue ships right-to-left translations (Urdu), so the paragraph
-                    // direction has to come from the text itself rather than from the app's
-                    // locale — otherwise Urdu renders left-aligned with its punctuation on the
-                    // wrong side. TextAlign.Start then follows the resolved direction.
-                    style = MaterialTheme.typography.bodyMedium
-                        .asTranslationText(translationLanguage, fontSize.sp),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(12.dp)
-                )
-            }
+            // Plain text, not an outlined box. A box per verse drew 114 borders down a surah
+            // to separate two things that are already separated by script and direction.
+            Text(
+                text = ayah.translation,
+                // The catalogue ships right-to-left translations (Urdu), so the paragraph
+                // direction has to come from the text itself rather than from the app's
+                // locale — otherwise Urdu renders left-aligned with its punctuation on the
+                // wrong side. TextAlign.Start then follows the resolved direction.
+                style = MaterialTheme.typography.bodyMedium
+                    .asTranslationText(translationLanguage, fontSize.sp),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
 
         // Transliteration
@@ -382,16 +342,9 @@ internal fun AyahItem(
                 }
             }
 
-            // Where the verse sits in the book. A badge like the ones beside it, so the row
-            // reads as one system rather than badges plus a stray line of grey text — but
-            // MUTED, because this is a coordinate you look up, not a division you observe.
-            NimazBadge(
-                text = stringResource(R.string.juz_page_dot_format, ayah.juz, ayah.page),
-                tone = NimazTone.MUTED,
-                emphasis = NimazBadgeEmphasis.SOFT,
-                shape = NimazBadgeShape.ROUNDED,
-                size = NimazBadgeSize.SMALL
-            )
+            // The juz/page badge that used to close this row is gone: it repeated the same
+            // coordinate on every verse for a fact that changes about once a page. It is said
+            // once now, in the reader's anchor bar (`ReaderAnchorBar`).
         }
 
         Spacer(modifier = Modifier.height(6.dp))
@@ -448,7 +401,6 @@ private fun AyahItemShowcase() {
             showTranslation = true,
             arabicFontSize = 28f,
             fontSize = 16f,
-            onBookmarkClick = {},
         )
         HorizontalDivider()
         // 2. Active states: bookmarked + favourited
@@ -458,7 +410,6 @@ private fun AyahItemShowcase() {
             isFavorite = true,
             arabicFontSize = 28f,
             fontSize = 16f,
-            onBookmarkClick = {},
         )
         HorizontalDivider()
         // 3. Audio playing + highlighted row
@@ -469,7 +420,6 @@ private fun AyahItemShowcase() {
             isHighlighted = true,
             arabicFontSize = 28f,
             fontSize = 16f,
-            onBookmarkClick = {},
         )
         HorizontalDivider()
         // 4. Transliteration shown
@@ -482,7 +432,6 @@ private fun AyahItemShowcase() {
             showTransliteration = true,
             arabicFontSize = 28f,
             fontSize = 16f,
-            onBookmarkClick = {},
         )
         HorizontalDivider()
         // 5. Sajdah verse marker
@@ -491,7 +440,6 @@ private fun AyahItemShowcase() {
             showTranslation = true,
             arabicFontSize = 28f,
             fontSize = 16f,
-            onBookmarkClick = {},
         )
         HorizontalDivider()
         // 6. Hizb / quarter marker
@@ -500,7 +448,6 @@ private fun AyahItemShowcase() {
             showTranslation = true,
             arabicFontSize = 28f,
             fontSize = 16f,
-            onBookmarkClick = {},
         )
         HorizontalDivider()
         // 6b. Rukūʿ marker, alongside a quarter marker on the same verse
@@ -509,7 +456,6 @@ private fun AyahItemShowcase() {
             showTranslation = true,
             arabicFontSize = 28f,
             fontSize = 16f,
-            onBookmarkClick = {},
         )
         HorizontalDivider()
         // 7. Khatam mode (read-tracking), marked read
@@ -520,7 +466,6 @@ private fun AyahItemShowcase() {
             isKhatamRead = true,
             arabicFontSize = 28f,
             fontSize = 16f,
-            onBookmarkClick = {},
         )
     }
 }
