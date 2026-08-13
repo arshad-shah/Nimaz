@@ -144,6 +144,42 @@ Arabic, and the translation as plain text. No action pill, no read-toggle, no au
 
 ---
 
+## Screen 4b — Mushaf page view (`QuranPage`)
+
+**The prototype omits this screen entirely.** Its only nod to pages is typing `page 299`
+into Browse, and that jump lands in the *translation* reader. So the prototype does not
+simplify the mushaf view — it deletes it, along with the Page grid that leads to it.
+
+**Today** it is well developed and quite unlike anything else in the app: a framed page
+with a gold/teal double border, ornamental head and foot dividers, the scalloped surah
+cartouche, and a page-number rosette at the foot; **continuous mushaf line layout**, where
+the Arabic flows as lines of the page rather than one block per ayah, with inline ayah
+medallions and the ruku `ع` marker in place; a `Page · Juz · Hizb` pill bar with prev/next
+arrows and the read-toggle; and the audio bar.
+
+The Page **grid** that reaches it is also substantial: a jump-to-page field, juz group
+headers with their page ranges, a fast-scroll juz rail, and page tiles labelled where a
+surah begins.
+
+### Decided
+
+- **The mushaf becomes a first-class reader mode.** One reader, two modes — Translation and
+  Mushaf — switched from the reader itself and keeping your place across the switch. It
+  stops being something reachable only through a browse tab.
+- **The mushaf keeps its ornament while the rest of the section flattens.** The gold frame,
+  cartouche and rosette are imitating a printed Quran, which is real work; the lists and
+  the translation reader take the prototype's flatter language. Two registers, used
+  deliberately.
+
+### Consequence for screen 2
+
+Folding Surah / Juz / Page into one list is right for *finding*, but Page was also the door
+to a different reading **mode**. With the mushaf promoted to a reader mode, that door moves
+into the reader — and Browse keeps the page **information** on its rows, as already decided,
+rather than a Page tab.
+
+---
+
 ## Screens 5+ — pending
 
 Background · Passages · Subjects · Themes · Topic detail · Tafseer · Khatam list ·
