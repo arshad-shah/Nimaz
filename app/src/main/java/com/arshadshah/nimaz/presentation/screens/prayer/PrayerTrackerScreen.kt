@@ -209,16 +209,12 @@ private fun TrackerTabContent(viewModel: PrayerTrackerViewModel) {
                 prayerRecords = state.prayerRecords,
                 prayerTimes = state.prayerTimes,
                 onTogglePrayer = { prayerName, currentStatus ->
-                    if (currentStatus == PrayerStatus.PRAYED || currentStatus == PrayerStatus.LATE) {
-                        viewModel.onEvent(PrayerTrackerEvent.MarkPrayerMissed(prayerName))
+                    val newStatus = if (currentStatus == PrayerStatus.PRAYED || currentStatus == PrayerStatus.LATE) {
+                        PrayerStatus.MISSED
                     } else {
-                        viewModel.onEvent(
-                            PrayerTrackerEvent.MarkPrayerPrayed(
-                                prayerName,
-                                false
-                            )
-                        )
+                        PrayerStatus.PRAYED
                     }
+                    viewModel.onEvent(PrayerTrackerEvent.SetPrayerStatus(prayerName, newStatus))
                 }
             )
         }
