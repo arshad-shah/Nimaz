@@ -26,7 +26,9 @@ import com.arshadshah.nimaz.domain.model.PrayerType
 import com.arshadshah.nimaz.domain.model.resolveLocation
 import com.arshadshah.nimaz.domain.usecase.FastingUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
+import java.time.DayOfWeek
 import java.time.LocalDate
+import java.time.temporal.TemporalAdjusters
 import javax.inject.Inject
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -88,11 +90,21 @@ class FastingViewModel @Inject constructor(
     private var ramadanJob: Job? = null
     private var makeupPendingJob: Job? = null
     private var makeupAllJob: Job? = null
+    private var weekJob: Job? = null
+
+    /**
+     * The most recent calculation settings, so a date change can compute that day's window
+     * without re-collecting the settings flow. Written only by the settings observer.
+     */
+    private var latestCalculationSettings: PrayerCalculationSettings? = null
 
     // No `use24HourFormat` mirror: suhoor/iftar are instants, formatted at the leaf.
 
     private companion object {
         const val DOMAIN = "fasting"
+
+        /** Ramadan's index in the Hijri year. Named because it is compared against in two places. */
+        const val RAMADAN_HIJRI_MONTH = 9
     }
 
     init {
@@ -144,6 +156,39 @@ class FastingViewModel @Inject constructor(
             telemetry.failure(DOMAIN, "load_prayer_times", e)
             // Keep default placeholder times
         }
+
+        // The settings that produced today's window also produce the selected day's. Held so
+        // `selectDate` can compute a window without re-collecting the settings flow, and
+        // re-applied here so changing a calculation method updates *both* windows, not just
+        // today's — which is the shape of the bug this observer was written to fix.
+        latestCalculationSettings = settings
+        loadScheduleForSelectedDate()
+    }
+
+    /**
+     * The selected day's own Fajr and Maghrib.
+     *
+     * `getDaySchedule` always took a date. Only the hardcoded `todayProvider.today()` above kept
+     * the screen showing today's window against another day's date — a mismatch nothing in the
+     * type system objected to, because both are just instants.
+     */
+    private fun loadScheduleForSelectedDate() {
+        val settings = latestCalculationSettings ?: return
+        val date = _trackerState.value.selectedDate
+
+        try {
+            val schedule = prayerUseCases.getDaySchedule(date, settings)
+            val fajr = schedule.find { it.type == PrayerType.FAJR }
+            val maghrib = schedule.find { it.type == PrayerType.MAGHRIB }
+
+            if (fajr != null && maghrib != null) {
+                _trackerState.update {
+                    it.copy(selectedSuhoorAt = fajr.time, selectedIftarAt = maghrib.time)
+                }
+            }
+        } catch (e: Exception) {
+            telemetry.failure(DOMAIN, "load_selected_day_schedule", e)
+        }
     }
 
     fun onEvent(event: FastingEvent) {
@@ -187,6 +232,20 @@ class FastingViewModel @Inject constructor(
                 deleteFastRecord(event.date)
             }
             is FastingEvent.UpdateMakeupFast -> updateMakeupFastRecord(event.makeupFast)
+
+            is FastingEvent.SetFastStatus -> {
+                telemetry.fastTracked("set_status", event.status.name)
+                setFastStatus(event.date, event.status)
+            }
+
+            is FastingEvent.SaveExemption -> {
+                telemetry.fastTracked("save_exemption")
+                // The reason itself is never recorded — it is health information.
+                saveExemption(event.date, event.reason)
+            }
+
+            // No telemetry: the note is the user's own words.
+            is FastingEvent.SaveNote -> saveNote(event.date, event.note)
         }
     }
 
@@ -195,7 +254,13 @@ class FastingViewModel @Inject constructor(
     }
 
     private fun selectDate(date: LocalDate) {
-        _trackerState.update { it.copy(selectedDate = date, isLoading = true) }
+        _trackerState.update {
+            it.copy(
+                selectedDate = date,
+                isSelectedToday = date == todayProvider.today(),
+                isLoading = true
+            )
+        }
 
         val dateEpoch = date.toUtcMidnightMillis()
 
@@ -209,9 +274,34 @@ class FastingViewModel @Inject constructor(
             _trackerState.update {
                 it.copy(
                     todayRecord = record,
+                    selectedRecord = record,
                     isFastingToday = record?.status == FastStatus.FASTED,
                     isLoading = false
                 )
+            }
+        }
+
+        loadWeekAround(date)
+        loadScheduleForSelectedDate()
+    }
+
+    /**
+     * The Monday–Sunday containing [date], for the week rail.
+     *
+     * A separate query from the calendar month's on purpose: a week that straddles a month
+     * boundary is half missing from a single-month range, so the rail would silently drop the
+     * markers on one side of the first of the month.
+     */
+    private fun loadWeekAround(date: LocalDate) {
+        weekJob?.cancel()
+
+        val weekStart = date.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
+        val startEpoch = weekStart.toUtcMidnightMillis()
+        val endEpoch = weekStart.plusDays(7).toUtcMidnightMillis()
+
+        weekJob = launchSafely(telemetry, DOMAIN, "load_week") {
+            fastingUseCases.getFastRecordsInRange(startEpoch, endEpoch).collect { records ->
+                _trackerState.update { it.copy(weekRecords = records) }
             }
         }
     }
@@ -538,6 +628,157 @@ class FastingViewModel @Inject constructor(
             loadRamadan()
             loadMakeupFasts()
         }
+    }
+
+    /**
+     * Writes [status] for [date] from the day card's segmented control.
+     *
+     * Re-selecting the status a day already has **deletes** the record rather than rewriting it.
+     * That is what makes the control tap-to-clear, and it is why an unlogged day and a day logged
+     * as not-fasted stay distinguishable: without it, tapping "Not fasting" to undo a mistaken
+     * "Fasted" would leave behind a claim the user never meant to make.
+     */
+    private fun setFastStatus(date: LocalDate, status: FastStatus) {
+        val dateEpoch = date.toUtcMidnightMillis()
+
+        launchSafely(telemetry, DOMAIN, "set_fast_status") {
+            val existing = fastingUseCases.getFastRecordForDate(dateEpoch)
+
+            if (existing?.status == status) {
+                fastingUseCases.deleteFastRecordByDate(dateEpoch)
+            } else {
+                writeRecord(
+                    date = date,
+                    existing = existing,
+                    status = status,
+                    // Re-tapping a different status keeps whatever reason was on the day only
+                    // when the day stays exempt; otherwise the reason no longer applies.
+                    exemptionReason = existing?.exemptionReason.takeIf {
+                        status == FastStatus.EXEMPTED
+                    },
+                    note = existing?.note,
+                )
+            }
+
+            refreshAfterWrite(date)
+        }
+    }
+
+    private fun saveExemption(date: LocalDate, reason: ExemptionReason) {
+        val dateEpoch = date.toUtcMidnightMillis()
+
+        launchSafely(telemetry, DOMAIN, "save_exemption") {
+            val existing = fastingUseCases.getFastRecordForDate(dateEpoch)
+            writeRecord(
+                date = date,
+                existing = existing,
+                status = FastStatus.EXEMPTED,
+                exemptionReason = reason,
+                note = existing?.note,
+            )
+            refreshAfterWrite(date)
+        }
+    }
+
+    /**
+     * Attaches [note] to [date] without disturbing its status.
+     *
+     * An unlogged day gets `NOT_FASTED` rather than `FASTED`: a note is not a claim to have
+     * fasted, and inventing one would put a fast on the calendar the user never logged.
+     */
+    private fun saveNote(date: LocalDate, note: String) {
+        val dateEpoch = date.toUtcMidnightMillis()
+
+        launchSafely(telemetry, DOMAIN, "save_note") {
+            val existing = fastingUseCases.getFastRecordForDate(dateEpoch)
+            writeRecord(
+                date = date,
+                existing = existing,
+                status = existing?.status ?: FastStatus.NOT_FASTED,
+                exemptionReason = existing?.exemptionReason,
+                note = note,
+            )
+            refreshAfterWrite(date)
+        }
+    }
+
+    /**
+     * Inserts or updates the record for [date], and auto-creates its make-up fast when a Ramadan
+     * day ends up missed or exempted.
+     *
+     * Factored out of [saveFastForDate] rather than written afresh: that method carried the
+     * make-up auto-creation, and a second constructor that forgot it would have quietly stopped
+     * a missed Ramadan day from ever appearing as owed.
+     *
+     * The fast type is **inferred** — a Ramadan day is `RAMADAN`, anything else `VOLUNTARY` —
+     * except that an existing record keeps the type it already has, so a record created when the
+     * type was still user-pickable is not rewritten to something else on an unrelated edit.
+     */
+    private suspend fun writeRecord(
+        date: LocalDate,
+        existing: FastRecord?,
+        status: FastStatus,
+        exemptionReason: ExemptionReason?,
+        note: String?,
+    ) {
+        val dateEpoch = date.toUtcMidnightMillis()
+        val now = System.currentTimeMillis()
+        val hijri = HijriDateCalculator.toHijri(date)
+        val fastType = existing?.fastType
+            ?: if (hijri.month == RAMADAN_HIJRI_MONTH) FastType.RAMADAN else FastType.VOLUNTARY
+
+        val record = FastRecord(
+            id = existing?.id ?: 0,
+            date = dateEpoch,
+            hijriDate = hijri.formattedShort(),
+            hijriMonth = hijri.month,
+            hijriYear = hijri.year,
+            fastType = fastType,
+            status = status,
+            exemptionReason = if (status == FastStatus.EXEMPTED) exemptionReason else null,
+            suhoorTime = existing?.suhoorTime,
+            iftarTime = existing?.iftarTime,
+            note = note?.ifBlank { null },
+            createdAt = existing?.createdAt ?: now,
+            updatedAt = now,
+        )
+
+        if (existing != null) {
+            fastingUseCases.updateFastRecord(record)
+        } else {
+            fastingUseCases.insertFastRecord(record)
+        }
+
+        if (fastType == FastType.RAMADAN &&
+            (status == FastStatus.NOT_FASTED || status == FastStatus.EXEMPTED)
+        ) {
+            val existingMakeupCount = fastingUseCases.getMakeupFastCountForDate(dateEpoch)
+            if (existingMakeupCount == 0) {
+                fastingUseCases.insertMakeupFast(
+                    MakeupFast(
+                        id = 0,
+                        originalDate = dateEpoch,
+                        originalHijriDate = hijri.formattedShort(),
+                        reason = exemptionReason?.displayName() ?: "Missed Ramadan fast",
+                        status = MakeupFastStatus.PENDING,
+                        completedDate = null,
+                        fidyaAmount = null,
+                        note = note?.ifBlank { null },
+                        createdAt = now,
+                        updatedAt = now,
+                    )
+                )
+            }
+        }
+    }
+
+    /** Everything a day's write can invalidate, in one place so no path forgets one. */
+    private fun refreshAfterWrite(date: LocalDate) {
+        selectDate(date)
+        loadCalendarMonth()
+        loadStats()
+        loadRamadan()
+        loadMakeupFasts()
     }
 
     private fun deleteFastRecord(date: LocalDate) {

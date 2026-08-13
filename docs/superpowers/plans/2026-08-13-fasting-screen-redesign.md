@@ -1857,6 +1857,11 @@ pass. Name the preview functions to open in Android Studio's preview pane:
   - `FastingEvent.SetFastStatus(date: LocalDate, status: FastStatus)`, `FastingEvent.SaveExemption(date: LocalDate, reason: ExemptionReason)`, `FastingEvent.SaveNote(date: LocalDate, note: String)`.
   - Tasks 11 and 12 consume all of these.
 
+**This task only adds.** `ToggleTodayFast`, `OpenFastSheet`, `DismissFastSheet`, `SaveFastForDate`
+and `SetFastType` are still wired into `FastTrackerScreen`, so retiring them here would leave the
+app uncompilable until Task 12. They are removed **in Task 12**, in the same commit as the screen
+that used them, so every commit on the branch builds.
+
 `SetFastStatus` semantics: writing the status a day *already has* deletes the record. That is what
 makes the segmented control tap-to-clear, and it is the behaviour the prototype has.
 
@@ -1990,8 +1995,7 @@ In `FastingUiState.kt`, add to `FastingTrackerUiState`:
     val isSelectedToday: Boolean = true,
 ```
 
-In `FastingEvent.kt`, add the three events and delete `ToggleTodayFast`, `OpenFastSheet`,
-`DismissFastSheet` and `SaveFastForDate`:
+In `FastingEvent.kt`, add the three events (the old ones stay until Task 12):
 
 ```kotlin
     /**
@@ -2540,6 +2544,14 @@ Hold the two sheets' visibility in `rememberSaveable` state in the screen:
 Delete `FastingGoDeeperGroup`, `LogFastButton`, `TodayFastSection`, `RecommendedFastsSection`,
 `RecommendedFastCard`, and the previews that referenced them. Delete `FastingSubtitles.kt` and
 `FastingSubtitlesTest.kt`.
+
+**Retire the superseded ViewModel surface in this same commit** — now that nothing references it:
+`FastingEvent.ToggleTodayFast`, `OpenFastSheet`, `DismissFastSheet`, `SaveFastForDate`,
+`SetFastType`; `FastingViewModel`'s `sheetState` / `_sheetState`, `toggleTodayFast`,
+`openFastSheet`, `saveFastForDate`, `startFast`, `breakFast`; and `FastManagementSheetState` plus
+`FastingTrackerUiState.selectedFastType` in `FastingUiState.kt`. Update the tests in
+`FastingViewModelTest` that exercised them — their subjects moved to `SetFastStatus` and
+`SaveExemption`, which Task 9 already covered.
 
 - [ ] **Step 4: Update the three `NavGraph` call sites**
 
