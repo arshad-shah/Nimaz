@@ -83,7 +83,7 @@ interface PrayerRepository {
     suspend fun getPrayerStats(startDate: Long, endDate: Long): PrayerStats
     suspend fun getCurrentStreak(currentDate: Long): Int
     suspend fun getLongestStreak(): Int
-    suspend fun markPastPrayersAsMissed(): Int
+    suspend fun markUnrecordedAsMissed(from: Long, to: Long): Int
 
     // Location operations
     fun getAllLocations(): Flow<List<Location>>

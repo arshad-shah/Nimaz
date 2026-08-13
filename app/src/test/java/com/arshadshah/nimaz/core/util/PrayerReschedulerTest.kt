@@ -58,7 +58,7 @@ class PrayerReschedulerTest {
 
     @Test
     fun `a reboot reschedules today from the stored preferences`() = runTest {
-        val ok = rescheduler().rescheduleToday(markPastAsMissed = false)
+        val ok = rescheduler().rescheduleToday()
 
         assertThat(ok).isTrue()
         verify(exactly = 1) {
@@ -75,35 +75,14 @@ class PrayerReschedulerTest {
     }
 
     /**
-     * A reboot must not touch prayer records. The day has not changed, so marking past prayers
-     * missed here would overwrite what the user actually recorded.
+     * Rescheduling must never touch prayer records, on any path. Confirming a prayer missed is
+     * now something only the user does, from the tracker's review banner.
      */
     @Test
-    fun `a reboot does not mark past prayers as missed`() = runTest {
-        rescheduler().rescheduleToday(markPastAsMissed = false)
+    fun `rescheduling never marks a prayer missed`() = runTest {
+        rescheduler().rescheduleToday()
 
-        coVerify(exactly = 0) { prayers.markPastPrayersAsMissed() }
-    }
-
-    /** A date change or timezone shift is the case where marking *is* correct. */
-    @Test
-    fun `a date change marks past prayers missed before rescheduling`() = runTest {
-        rescheduler().rescheduleToday(markPastAsMissed = true)
-
-        coVerify(exactly = 1) { prayers.markPastPrayersAsMissed() }
-        // Named rather than positional: the scheduler takes eleven parameters, six of them
-        // defaulted, so a positional any()-list silently stops matching the moment one is added.
-        verify(exactly = 1) {
-            scheduler.scheduleTodaysPrayerNotifications(
-                latitude = 51.5,
-                longitude = -0.12,
-                notificationsEnabled = true,
-                enabledPrayers = setOf(PrayerType.FAJR, PrayerType.DHUHR, PrayerType.MAGHRIB),
-                preReminders = emptyMap(),
-                fridayReminderEnabled = true,
-                fridayReminderMinutes = 30,
-            )
-        }
+        coVerify(exactly = 0) { prayers.markUnrecordedAsMissed(any(), any()) }
     }
 
     /** Notifications switched off must reach the scheduler as off, not as "skip the call". */

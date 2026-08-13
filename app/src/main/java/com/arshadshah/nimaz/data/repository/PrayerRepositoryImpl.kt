@@ -249,11 +249,8 @@ class PrayerRepositoryImpl @Inject constructor(
         return calculateStreaks(perfectDays).second
     }
 
-    override suspend fun markPastPrayersAsMissed(): Int {
-        val today = LocalDate.now()
-        val todayEpoch = today.atStartOfDay(java.time.ZoneOffset.UTC).toInstant().toEpochMilli()
-        return prayerDao.markPastPrayersAsMissed(todayEpoch)
-    }
+    override suspend fun markUnrecordedAsMissed(from: Long, to: Long): Int =
+        prayerDao.markUnrecordedAsMissed(from, to)
 
     /**
      * Calculate current streak and longest streak from a list of perfect days.

@@ -91,18 +91,29 @@ interface PrayerDao {
     )
     suspend fun getPerfectDaysCount(startDate: Long, endDate: Long): Int
 
-    // Mark past pending/not_prayed prayers as missed (for dates before today)
+    /**
+     * Confirm a range of unrecorded prayers as missed.
+     *
+     * Ranged rather than "everything before today", which is what it used to be. That form ran
+     * from a midnight broadcast and rewrote every prayer the user had simply not logged, so the
+     * qada list filled with rows nobody had asserted. Its only caller now is an explicit tap on
+     * the review banner, over the days that banner counted.
+     *
+     * @param from inclusive UTC-midnight epoch millis.
+     * @param to inclusive UTC-midnight epoch millis.
+     */
     @Query(
         """
         UPDATE prayer_records
         SET status = 'missed', updatedAt = :timestamp
-        WHERE date < :todayDate
+        WHERE date BETWEEN :from AND :to
         AND status IN ('pending', 'not_prayed')
         AND prayerName != 'sunrise'
     """
     )
-    suspend fun markPastPrayersAsMissed(
-        todayDate: Long,
+    suspend fun markUnrecordedAsMissed(
+        from: Long,
+        to: Long,
         timestamp: Long = System.currentTimeMillis()
     ): Int
 
