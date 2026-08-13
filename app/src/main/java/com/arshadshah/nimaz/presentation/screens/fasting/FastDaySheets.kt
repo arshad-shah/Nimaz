@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -85,6 +86,14 @@ fun FastExemptionSheet(
                     selected = selected == reason,
                     onClick = { selected = reason },
                     label = reason.displayName(),
+                    // Pills, not the default 8dp rounded rectangles. Seven reasons wrapping over
+                    // three rows read as a paragraph of boxes at that radius; fully-round chips
+                    // read as a set of choices, which is what they are.
+                    shape = RoundedCornerShape(percent = 50),
+                    // The tick is redundant next to a filled pill and costs the label its width,
+                    // which is what pushed "Menstruation" and "Breastfeeding" onto lines of
+                    // their own.
+                    showSelectedIcon = false,
                 )
             }
         }
@@ -142,10 +151,16 @@ private fun SheetActions(
             .padding(vertical = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
+        // Equal weight, and Cancel is outlined rather than bare text: two buttons of visibly
+        // different weight read as one button beside a link.
+        //
+        // OUTLINED and not TONAL — this theme's `primaryContainer` is a soft amber, so a tonal
+        // Cancel came out looking like a warning sitting next to Save. Neutral is the whole job
+        // of this button.
         NimazButton(
             text = stringResource(R.string.cancel),
             onClick = onCancel,
-            variant = NimazButtonVariant.TEXT,
+            variant = NimazButtonVariant.OUTLINED,
             modifier = Modifier.weight(1f),
         )
         NimazButton(

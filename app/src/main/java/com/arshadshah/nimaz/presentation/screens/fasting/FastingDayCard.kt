@@ -26,6 +26,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -246,24 +248,42 @@ private fun FastingWindow(state: FastingTrackerUiState) {
         null
     }
 
+    // The sentence and the duration inside it, kept apart so only the duration is accented —
+    // "Iftar in **3h 18m**". Highlighting the whole line makes the words compete with the number,
+    // and the number is the only part that changes.
+    val duration: String? = when {
+        suhoorAt == null || iftarAt == null -> null
+        !state.isSelectedToday -> countdownText(countdownOf(iftarAt - suhoorAt), showSeconds = false)
+        now < suhoorAt -> countdownText(rememberCountdownTo(suhoorAt).value, showSeconds = false)
+        now < iftarAt -> countdownText(rememberCountdownTo(iftarAt).value, showSeconds = false)
+        else -> null
+    }
+
     val lede = when {
-        suhoorAt == null || iftarAt == null -> stringResource(R.string.fasting_window_closed)
-        !state.isSelectedToday -> stringResource(
-            R.string.fasting_window_length,
-            countdownText(countdownOf(iftarAt - suhoorAt), showSeconds = false),
-        )
+        suhoorAt == null || iftarAt == null || duration == null ->
+            stringResource(R.string.fasting_window_closed)
 
-        now < suhoorAt -> stringResource(
-            R.string.fasting_window_suhoor_in,
-            countdownText(rememberCountdownTo(suhoorAt).value, showSeconds = false),
-        )
+        !state.isSelectedToday -> stringResource(R.string.fasting_window_length, duration)
+        now < suhoorAt -> stringResource(R.string.fasting_window_suhoor_in, duration)
+        else -> stringResource(R.string.fasting_window_iftar_in, duration)
+    }
 
-        now < iftarAt -> stringResource(
-            R.string.fasting_window_iftar_in,
-            countdownText(rememberCountdownTo(iftarAt).value, showSeconds = false),
-        )
-
-        else -> stringResource(R.string.fasting_window_closed)
+    // Located by search rather than by assuming the placeholder is last: "Iftar in %1$s" and
+    // "Sahur bitişine %1$s" put it in different places, and a hardcoded span would accent the
+    // wrong words in half the shipped locales.
+    val accentColor = MaterialTheme.colorScheme.primary
+    val ledeText = remember(lede, duration, accentColor) {
+        buildAnnotatedString {
+            append(lede)
+            val start = duration?.let { lede.lastIndexOf(it) } ?: -1
+            if (duration != null && start >= 0) {
+                addStyle(
+                    SpanStyle(color = accentColor, fontWeight = FontWeight.SemiBold),
+                    start,
+                    start + duration.length,
+                )
+            }
+        }
     }
 
     val suhoorText = suhoorAt?.let { clockTimeText(it) } ?: NO_TIME
@@ -279,7 +299,7 @@ private fun FastingWindow(state: FastingTrackerUiState) {
             )
             Spacer(modifier = Modifier.width(7.dp))
             Text(
-                text = lede,
+                text = ledeText,
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.Medium,
                 color = MaterialTheme.colorScheme.onSurface,
