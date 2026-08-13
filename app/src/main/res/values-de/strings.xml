@@ -1991,4 +1991,6 @@
     <string name="fasting_your_month">Dein Monat</string>
     <string name="fasting_sunnah_virtuous">Sunna &amp; verdienstvolle Tage</string>
     <string name="fasting_fasted_count">%1$d gefastet</string>
+    <string name="tree_node_expand">%1$s aufklappen</string>
+    <string name="tree_node_collapse">%1$s zuklappen</string>
 </resources>

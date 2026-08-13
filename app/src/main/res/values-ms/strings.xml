@@ -1954,4 +1954,6 @@
     <string name="fasting_your_month">Bulan anda</string>
     <string name="fasting_sunnah_virtuous">Sunnah &amp; hari utama</string>
     <string name="fasting_fasted_count">%1$d berpuasa</string>
+    <string name="tree_node_expand">Kembangkan %1$s</string>
+    <string name="tree_node_collapse">Kuncupkan %1$s</string>
 </resources>

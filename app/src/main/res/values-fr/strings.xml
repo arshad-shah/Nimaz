@@ -2033,4 +2033,6 @@
     <string name="fasting_your_month">Votre mois</string>
     <string name="fasting_sunnah_virtuous">Sunna et jours méritoires</string>
     <string name="fasting_fasted_count">%1$d jeûnés</string>
+    <string name="tree_node_expand">Développer %1$s</string>
+    <string name="tree_node_collapse">Réduire %1$s</string>
 </resources>
