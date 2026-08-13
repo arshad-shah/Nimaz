@@ -586,6 +586,9 @@ class QuranRepositoryImpl @Inject constructor(
     override suspend fun getBranchTopicIds(tree: TopicTree): Set<Int> =
         quranDao.getBranchTopicIds(tree.wire).toSet()
 
+    override suspend fun getAllTopics(): List<QuranTopic> =
+        quranDao.getAllTopics().map { it.toDomain() }
+
     override suspend fun getTopicBreadcrumbs(
         topicIds: List<Int>,
         tree: TopicTree
@@ -631,6 +634,27 @@ class QuranRepositoryImpl @Inject constructor(
      * acyclic at import, so the guard is not for the data that ships — it is for the next
      * corpus, and the cost of being wrong is a screen that hangs.
      */
+    /**
+     * [topicId] and every descendant of it in [tree].
+     *
+     * Breadth-first over the parent columns with a visited set: those columns are content,
+     * regenerated per release elsewhere, and a cycle in them must mislabel a screen rather than
+     * hang one.
+     */
+    private suspend fun subtreeIds(topicId: Int, tree: TopicTree): List<Int> {
+        val ids = mutableListOf(topicId)
+        val seen = mutableSetOf(topicId)
+        var frontier = listOf(topicId)
+        while (frontier.isNotEmpty()) {
+            val next = frontier.flatMap { parent ->
+                quranDao.getChildTopics(tree.wire, parent).map { it.topicId }
+            }.filter { seen.add(it) }
+            ids += next
+            frontier = next
+        }
+        return ids
+    }
+
     override suspend fun getTopicDetail(topicId: Int, tree: TopicTree): TopicDetail? {
         val topic = quranDao.getTopic(topicId)?.toDomain() ?: return null
 
@@ -654,7 +678,11 @@ class QuranRepositoryImpl @Inject constructor(
             breadcrumb = breadcrumb.toList(),
             children = quranDao.getChildTopics(tree.wire, topicId).map { it.toDomain() },
             related = related,
-            citations = quranDao.getTopicAyahs(topicId).map {
+            // The whole subtree's verses, not just this node's. A branch is cited through its
+            // children, so asking only for its own citations is what made "Doctrine" open on
+            // "0 verses" — a title with nothing under it, in a section whose whole claim is
+            // 2,512 hand-indexed subjects.
+            citations = quranDao.getTopicAyahsIn(subtreeIds(topicId, tree)).map {
                 TopicCitation(
                     ayahId = it.ayahId,
                     surahNumber = it.surahNumber,

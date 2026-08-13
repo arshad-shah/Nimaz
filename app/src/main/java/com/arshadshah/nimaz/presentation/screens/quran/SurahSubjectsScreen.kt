@@ -32,6 +32,10 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
 import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuItem
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.components.molecules.NimazTreeRow
 import com.arshadshah.nimaz.presentation.components.organisms.NimazSearchBar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazTopAppBar
@@ -192,6 +196,16 @@ private fun SubjectList(
                 // selected somewhere else — otherwise the 1,817 subjects the thematic outline
                 // does not place open with no breadcrumb and no subtopics.
                 onClick = { onOpenTopic(subject.topic.id, subject.topic.homeTree) },
+                // A chevron, because these rows go somewhere and nothing said so: the count
+                // badge reads as a fact about the row, not as an invitation to open it.
+                trailingContent = {
+                    NimazIcon(
+                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                        contentDescription = null,
+                        variant = NimazIconVariant.MUTED,
+                        size = NimazIconSize.SMALL,
+                    )
+                },
             )
         }
 

@@ -13,6 +13,10 @@ import com.arshadshah.nimaz.domain.model.Khatam
 import com.arshadshah.nimaz.domain.model.KhatamInsights
 import com.arshadshah.nimaz.domain.model.KhatamStats
 import com.arshadshah.nimaz.domain.model.KhatamStatus
+import com.arshadshah.nimaz.core.text.StringProvider
+import com.arshadshah.nimaz.domain.model.Surah
+import com.arshadshah.nimaz.domain.usecase.khatam.GetTodaysPortion
+import com.arshadshah.nimaz.domain.usecase.khatam.KhatamPortion
 import com.arshadshah.nimaz.domain.usecase.KhatamUseCases
 import com.arshadshah.nimaz.domain.usecase.QuranUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -67,8 +71,11 @@ enum class KhatamPacePreset(val divisor: Int?) {
 @HiltViewModel
 class KhatamViewModel @Inject constructor(
     private val khatamUseCases: KhatamUseCases,
-    // Only used to turn the next-unread surah number into its name for the continue label.
+    // The surah list, for the next-unread name and for turning a portion's global ayah ids
+    // back into "Al-Kahf 18:1 → An-Nur 24:12".
     private val quranUseCases: QuranUseCases,
+    private val getTodaysPortion: GetTodaysPortion,
+    private val strings: StringProvider,
     private val telemetry: Telemetry,
 ) : ViewModel() {
 
@@ -232,13 +239,22 @@ class KhatamViewModel @Inject constructor(
         launchSafely(telemetry, AppAnalytics.Feature.KHATAM, "refresh_detail_next_unread") {
             val next = khatamUseCases.getNextUnreadPosition(khatamId)
             val name = next?.first?.let { surahName(it) }
-            _detailState.update {
-                if (it.khatam?.id != khatamId) it
-                else it.copy(
-                    nextUnreadSurah = next?.first,
-                    nextUnreadAyah = next?.second,
-                    nextUnreadSurahName = name,
-                )
+            val surahs = runCatching { quranUseCases.getSurahList().first() }.getOrDefault(
+                emptyList()
+            )
+            val startId = next?.let { globalAyahId(surahs, it.first, it.second) }
+            _detailState.update { state ->
+                if (state.khatam?.id != khatamId) state
+                else {
+                    val portion = state.khatam.let { getTodaysPortion(it, startId) }
+                    state.copy(
+                        nextUnreadSurah = next?.first,
+                        nextUnreadAyah = next?.second,
+                        nextUnreadSurahName = name,
+                        todaysPortion = portion,
+                        todaysPortionLabel = portion?.let { portionLabel(surahs, it) },
+                    )
+                }
             }
         }
     }
@@ -260,6 +276,43 @@ class KhatamViewModel @Inject constructor(
 
     private suspend fun surahName(surahNumber: Int): String? =
         runCatching { quranUseCases.getSurahByNumber(surahNumber)?.nameEnglish }.getOrNull()
+
+    /**
+     * The global id of a verse, from the cumulative verse counts.
+     *
+     * `getNextUnreadPosition` speaks surah/ayah and [GetTodaysPortion] speaks global ids,
+     * because a portion is a span of the *book* and crosses surah boundaries as a matter of
+     * course. This is the one place the two meet.
+     */
+    private fun globalAyahId(surahs: List<Surah>, surahNumber: Int, ayahNumber: Int): Int =
+        surahs.asSequence().filter { it.number < surahNumber }.sumOf { it.ayahCount } + ayahNumber
+
+    /** "Al-Kahf 18:1 → An-Nur 24:12", or the one surah's name when it does not cross one. */
+    private fun portionLabel(surahs: List<Surah>, portion: KhatamPortion): String? {
+        if (surahs.isEmpty()) return null
+        val from = positionOf(surahs, portion.fromAyahId) ?: return null
+        val to = positionOf(surahs, portion.toAyahId) ?: return null
+        val fromName = surahs.firstOrNull { it.number == from.first }?.nameEnglish ?: return null
+        val toName = surahs.firstOrNull { it.number == to.first }?.nameEnglish ?: return null
+        return if (from.first == to.first) {
+            strings.get(R.string.khatam_portion_within, fromName, from.second, to.second)
+        } else {
+            strings.get(
+                R.string.khatam_portion_across,
+                fromName, from.second, toName, to.second
+            )
+        }
+    }
+
+    /** The surah and verse a global id names, or null when it is past the end of the book. */
+    private fun positionOf(surahs: List<Surah>, ayahId: Int): Pair<Int, Int>? {
+        var remaining = ayahId
+        for (surah in surahs.sortedBy { it.number }) {
+            if (remaining <= surah.ayahCount) return surah.number to remaining
+            remaining -= surah.ayahCount
+        }
+        return null
+    }
 
     private fun setActiveKhatam(khatamId: Long) = launchAction {
         khatamUseCases.setActiveKhatam(khatamId)

@@ -52,6 +52,16 @@ data class TopicBrowseState(
      */
     val branchIds: Set<Int> = emptySet(),
 
+    /**
+     * Verses beneath each subject, its whole subtree included, keyed by topic id.
+     *
+     * Rolled up **once per tree load** and kept here, not recomputed per composition: a fold
+     * over 2,512 nodes to draw ten rows would be waste, and asking per node would be 2,512
+     * queries. The rows carried each topic's own citation count before this, which for a branch
+     * is usually zero — so the browser opened on three roots reading "0 verses".
+     */
+    val rolledUpCounts: Map<Int, Int> = emptyMap(),
+
     val searchQuery: String = "",
     val searchResults: List<QuranTopic> = emptyList(),
 

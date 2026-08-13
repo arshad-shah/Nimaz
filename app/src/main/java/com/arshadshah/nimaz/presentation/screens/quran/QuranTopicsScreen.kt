@@ -192,7 +192,11 @@ fun QuranTopicsScreen(
                         NimazTreeRow(
                             label = row.topic.name,
                             secondaryLabel = row.topic.arabicName.takeIf { it.isNotBlank() },
-                            badgeText = row.topic.ayahCount.takeIf { it > 0 }?.toString(),
+                            // The subtree's total, not the node's own citations: a branch is
+                            // cited against its children, so its own count is usually zero.
+                            badgeText = (state.rolledUpCounts[row.topic.id] ?: row.topic.ayahCount)
+                                .takeIf { it > 0 }
+                                ?.toString(),
                             depth = row.depth,
                             expandable = branch && !atCap,
                             expanded = row.topic.id in state.expanded,

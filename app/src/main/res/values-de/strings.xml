@@ -618,7 +618,7 @@
     <string name="show_arabic">Arabisch anzeigen</string>
     <string name="show_arabic_subtitle">Arabische Schrift</string>
     <string name="dua_settings_preview_arabic">اللَّهُمَّ إِنِّي أَسْأَلُكَ الْعِلْمَ النَّافِعَ</string>
-    <string name="dua_settings_preview_transliteration">"Allahumma inni as'aluka al-'ilm an-nafi'"</string>
+    <string name="dua_settings_preview_transliteration">"Allahumma inni as\'aluka al-\'ilm an-nafi\'"</string>
     <string name="dua_settings_preview_translation">O Allah, ich bitte Dich um nützliches Wissen</string>
 
     <!-- Fasting Tracker Screen -->
@@ -2075,4 +2075,10 @@
     <string name="recitation_repeat_summary_surah">Sure wiederholen</string>
     <string name="recitation_speed_label">%1$s×</string>
     <string name="audio_downloading">%1$d von %2$d werden geladen</string>
+
+    <!-- Qur'an redesign: today's khatam portion -->
+    <string name="khatam_portion_within">%1$s %2$d–%3$d</string>
+    <string name="khatam_portion_across">%1$s %2$d → %3$s %4$d</string>
+    <string name="khatam_todays_portion">Heutiges Pensum</string>
+    <string name="khatam_read_todays_portion">Heutiges Pensum lesen</string>
 </resources>

@@ -60,6 +60,14 @@ fun NimazChip(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     selected: Boolean = false,
+    /**
+     * Whether a selected chip grows a check mark.
+     *
+     * False turns a filter chip into a **position indicator**: the background reader's sticky
+     * index marks which section is on screen, which is a statement about where you are, not a
+     * filter you applied — and a tick claims you chose it.
+     */
+    showSelectedIcon: Boolean = true,
     variant: NimazChipVariant = NimazChipVariant.FILTER,
     enabled: Boolean = true,
     leadingIcon: ImageVector? = null
@@ -67,6 +75,7 @@ fun NimazChip(
     when (variant) {
         NimazChipVariant.FILTER -> NimazFilterChip(
             selected = selected,
+            showSelectedIcon = showSelectedIcon,
             onClick = onClick,
             label = text,
             modifier = modifier,

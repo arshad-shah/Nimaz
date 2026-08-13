@@ -33,6 +33,8 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
 import com.arshadshah.nimaz.presentation.components.atoms.rememberKhatamAccent
 import com.arshadshah.nimaz.presentation.components.molecules.KhatamHeroCard
+import androidx.compose.material.icons.automirrored.filled.MenuBook
+import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuItem
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownMenu
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownRow
 import com.arshadshah.nimaz.presentation.components.organisms.KhatamJourneyTrail
@@ -194,9 +196,28 @@ private fun KhatamDetailContent(
                 // The top bar already names the khatam.
                 showName = false,
                 showActiveBadge = khatam.isActive,
-                continueLabel = continueText,
+                // The plan's own instruction leads. A khatam exists to assign a daily portion;
+                // where you happened to stop is the fallback, and it was the headline here
+                // because it was the only thing the screen knew how to say.
+                continueLabel = state.todaysPortionLabel?.let {
+                    stringResource(R.string.khatam_read_todays_portion)
+                } ?: continueText,
                 onContinue = onContinue.takeIf { hasNextPosition },
             )
+        }
+
+        // What today asks for, named. Only where there is a portion — a finished plan should
+        // stop giving orders.
+        state.todaysPortionLabel?.let { portion ->
+            item(key = "todays-portion") {
+                NimazMenuItem(
+                    title = stringResource(R.string.khatam_todays_portion),
+                    subtitle = portion,
+                    icon = Icons.AutoMirrored.Filled.MenuBook,
+                    onClick = onContinue,
+                    trailingIcon = null,
+                )
+            }
         }
 
         item(key = "stats") {

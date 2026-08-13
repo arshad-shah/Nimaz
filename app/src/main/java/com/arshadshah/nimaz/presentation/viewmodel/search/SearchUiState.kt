@@ -24,6 +24,26 @@ data class SearchUiState(
 )
 
 /**
+ * Whether [result] belongs under [filter].
+ *
+ * **The** predicate — the list filters by it and the chips count by it, so the two cannot
+ * disagree. That is not a hypothetical: the four per-corpus count fields this replaces counted
+ * the *unfiltered* per-corpus lists while `totalResults` counted the filtered one, and grouped
+ * `SurahResult` differently from `applyFilter` besides, so they were wrong in both directions.
+ * They were deleted for being dead; the spec now wants counts on the chips, so this is the
+ * shape that makes them safe.
+ */
+fun SearchFilter.accepts(result: UnifiedSearchResult): Boolean = when (this) {
+    SearchFilter.ALL -> true
+    SearchFilter.QURAN ->
+        result is UnifiedSearchResult.QuranResult || result is UnifiedSearchResult.SurahResult
+
+    SearchFilter.HADITH -> result is UnifiedSearchResult.HadithResult
+    SearchFilter.DUA -> result is UnifiedSearchResult.DuaResult
+    SearchFilter.NAMES -> result is UnifiedSearchResult.NameResult
+}
+
+/**
  * The result count the screen renders, and nothing else.
  *
  * There were four more fields here — `quranCount`, `hadithCount`, `duaCount`, `surahCount` —

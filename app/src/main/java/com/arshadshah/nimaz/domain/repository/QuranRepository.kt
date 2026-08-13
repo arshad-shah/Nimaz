@@ -134,6 +134,14 @@ interface QuranRepository {
     suspend fun getBranchTopicIds(tree: TopicTree): Set<Int>
 
     /**
+     * Every topic in the catalogue, for the recursive roll-up of verse counts.
+     *
+     * Deliberately unfiltered by tree: a topic belongs to more than one hierarchy, and the fold
+     * is cheaper over one list than over three near-identical ones.
+     */
+    suspend fun getAllTopics(): List<QuranTopic>
+
+    /**
      * Where each of [topicIds] sits, root-first and excluding the topic itself.
      *
      * For a *set* of topics at once, because the caller is a search result list: resolving one

@@ -514,6 +514,20 @@ interface QuranDao {
     suspend fun getTopicAyahs(topicId: Int): List<QuranTopicAyahEntity>
 
     /**
+     * Citations for a whole subtree, in mushaf order, each verse once.
+     *
+     * A branch subject carries no citations of its own — the Qur'an is cited against "Prophets
+     * of Israel", not against "Stories" — so detail for a root used to open on an empty list
+     * under a title. The ids are resolved by the caller from the parent columns; `DISTINCT`
+     * because a verse cited under two siblings is still one verse.
+     */
+    @Query(
+        "SELECT * FROM quran_topic_ayahs WHERE topic_id IN (:topicIds) " +
+            "GROUP BY ayah_id ORDER BY ayah_id ASC"
+    )
+    suspend fun getTopicAyahsIn(topicIds: List<Int>): List<QuranTopicAyahEntity>
+
+    /**
      * Every topic that cites this verse, busiest first. The index on `ayah_id` is what keeps
      * this off a scan of all 30,687 citations.
      */
@@ -564,6 +578,19 @@ interface QuranDao {
             "ORDER BY ayah_count DESC, name ASC LIMIT :limit"
     )
     suspend fun searchTopicsByName(query: String, limit: Int): List<QuranTopicEntity>
+
+    /**
+     * Every topic in the catalogue, for the one question that cannot be asked per row: how many
+     * verses sit *beneath* a node, children included.
+     *
+     * A roll-up is a fold over the whole hierarchy, so it needs the whole hierarchy — asking
+     * per node would be 2,512 queries to label one list, and asking only for what is expanded
+     * would report a collapsed branch as its own citation count, which is the "0 verses" a root
+     * used to show. One query over a table of a few thousand rows, folded once per tree load
+     * and cached; see `RollUpTopicCounts`.
+     */
+    @Query("SELECT * FROM quran_topics")
+    suspend fun getAllTopics(): List<QuranTopicEntity>
 
     @Query("SELECT COUNT(*) FROM quran_topics")
     suspend fun countTopics(): Int

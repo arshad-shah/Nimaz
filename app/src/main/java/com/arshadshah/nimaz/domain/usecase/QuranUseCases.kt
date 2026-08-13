@@ -232,6 +232,18 @@ class GetTopicTreeRootsUseCase @Inject constructor(
  * breadcrumb, resolves the related topics and reads every citation — 153 of them for "Allah" —
  * which is a lot of work to decide whether to draw a chevron.
  */
+/**
+ * Every topic in the catalogue, for the recursive verse roll-up.
+ *
+ * Its own use case rather than a flag on [GetTopicChildrenUseCase], because it answers a
+ * different question: children are what to *draw*, this is what to *count over*.
+ */
+class GetAllTopicsUseCase @Inject constructor(
+    private val repository: QuranRepository
+) {
+    suspend operator fun invoke(): List<QuranTopic> = repository.getAllTopics()
+}
+
 class GetTopicChildrenUseCase @Inject constructor(
     private val repository: QuranRepository
 ) {
@@ -442,6 +454,7 @@ data class QuranUseCases(
     val getThemeForAyah: GetThemeForAyahUseCase,
     val getTopicTreeRoots: GetTopicTreeRootsUseCase,
     val getTopicChildren: GetTopicChildrenUseCase,
+    val getAllTopics: GetAllTopicsUseCase,
     val getTopicDetail: GetTopicDetailUseCase,
     val getTopicsForAyah: GetTopicsForAyahUseCase,
     val getTopicsForSurah: GetTopicsForSurahUseCase,
