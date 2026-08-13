@@ -15,6 +15,8 @@
     <string name="prayed">Gebetet</string>
     <string name="a11y_prayer_state_prayed">%1$s, gebetet</string>
     <string name="a11y_prayer_state_not_recorded">%1$s, noch nicht erfasst</string>
+    <string name="a11y_prayer_state_partial">%1$s, einige Gebete erfasst</string>
+    <string name="a11y_prayer_state_missed">%1$s, Gebete versäumt</string>
     <string name="no_favorites_yet">Noch keine Favoriten</string>
     <string name="remove_from_favorites">Aus Favoriten entfernen</string>
     <string name="add_to_favorites">Zu Favoriten hinzufügen</string>
@@ -364,8 +366,25 @@
     <string name="widget_hijri_date_name">Hidschri-Datum</string>
     <string name="widget_prayer_tracker_name">Gebets-Tracker</string>
     <string name="widget_hijri_calendar_name">Hidschri-Kalender</string>
-    <string name="tracker">Tracker</string>
     <string name="qada">Qada</string>
+    <string name="prayer_status_not_recorded">Nicht erfasst</string>
+    <string name="prayer_recorded_count_format">%1$d von %2$d erfasst</string>
+    <string name="back_to_today">Zurück zu heute</string>
+    <string name="prayer_not_recorded_note">Die Zeit für dieses Gebet ist verstrichen, ohne dass etwas erfasst wurde. Es gilt erst als versäumt, wenn du es angibst.</string>
+    <string name="prayer_unrecorded_banner_action">Überprüfen</string>
+    <string name="prayer_month_section">Dein Monat</string>
+    <plurals name="prayer_complete_days">
+        <item quantity="one">%1$d vollständiger Tag</item>
+        <item quantity="other">%1$d vollständige Tage</item>
+    </plurals>
+    <plurals name="prayer_unrecorded_banner">
+        <item quantity="one">%1$d Gebet aus der letzten Woche wurde nicht erfasst. Es ist erst in deiner Qada-Liste, wenn du es markierst.</item>
+        <item quantity="other">%1$d Gebete aus der letzten Woche wurden nicht erfasst. Sie sind erst in deiner Qada-Liste, wenn du sie markierst.</item>
+    </plurals>
+    <string name="prayer_legend_all_five">Alle fünf</string>
+    <string name="prayer_legend_some">Einige</string>
+    <string name="prayer_legend_none">Keine</string>
+    <string name="prayer_legend_not_recorded">Nicht erfasst</string>
     <string name="prayer_tracker_title">Gebets-Tracker</string>
     <string name="view_statistics">Statistiken anzeigen</string>
     <string name="all_caught_up">Alles erledigt!</string>
@@ -376,8 +395,6 @@
         <item quantity="one">%1$d versäumtes Gebet ausstehend</item>
         <item quantity="other">%1$d versäumte Gebete ausstehend</item>
     </plurals>
-    <string name="current_streak">Aktuelle Serie</string>
-    <string name="consecutive_days_all_prayers">aufeinanderfolgende Tage mit allen Gebeten</string>
     <string name="on_time">Pünktlich</string>
     <string name="late">Verspätet</string>
     <string name="missed">Versäumt</string>
@@ -514,7 +531,6 @@
     <string name="hadith_fallback_source">Sahih al-Bukhari 6018</string>
     <string name="jumuah_arabic">\u0627\u0644\u062C\u0645\u0639\u0629</string>
     <string name="jumuah_hadith_quote">"Der beste Tag, an dem die Sonne aufgeht, ist der Freitag." — Sahih Muslim</string>
-    <string name="prayers_completed_format">%1$d von %2$d</string>
     <string name="surah_result_format">Sure %1$d:%2$d</string>
     <string name="hadith_result_format">Hadith #%1$d</string>
     <string name="share_message">Entdecken Sie Nimaz - Gebetszeiten-App: https://play.google.com/store/apps/details?id=com.arshadshah.nimaz</string>
@@ -1108,6 +1124,9 @@
     <string name="prayer_insight_best">Bestes Gebet: %1$s</string>
     <string name="prayer_insight_best_desc">Sie schließen %1$s konstant zu %2$d%% ab.</string>
     <string name="qada_prayers">Qada-Gebete</string>
+    <string name="qada_mark_made_up">Als nachgeholt markieren</string>
+    <string name="qada_summary_subtitle">Versäumte Gebete, die nachgeholt werden müssen</string>
+    <string name="qada_summary_empty">Nichts ausstehend</string>
     <string name="sync_data">Daten synchronisieren</string>
     <string name="settings_sync_subtitle">Daten zwischen Geräten übertragen</string>
     <string name="location_search_hint">Stadt oder Adresse suchen…</string>

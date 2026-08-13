@@ -19,11 +19,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalLocale
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.util.formatFullDate
 import com.arshadshah.nimaz.core.util.toUtcMidnightMillis
 import com.arshadshah.nimaz.domain.model.PrayerName
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
@@ -41,6 +44,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.TickResolution
 import com.arshadshah.nimaz.presentation.components.atoms.rememberNow
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuItem
 import com.arshadshah.nimaz.presentation.components.molecules.calendar.CalendarDayState
+import com.arshadshah.nimaz.presentation.components.molecules.calendar.CalendarLegendItem
 import com.arshadshah.nimaz.presentation.components.molecules.calendar.NimazCalendar
 import com.arshadshah.nimaz.presentation.components.molecules.calendar.SelectionStyle
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
@@ -53,7 +57,6 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.time.ZoneId
 import java.time.format.TextStyle
-import java.util.Locale
 
 /** How far back the review banner looks. One week is a period a user can actually remember. */
 private const val REVIEW_WINDOW_DAYS = 7L
@@ -89,13 +92,18 @@ fun PrayerTrackerScreen(
     }
     var expandedPrayer by rememberSaveable { mutableStateOf<PrayerName?>(null) }
 
-    LaunchedEffect(displayedMonth) {
-        viewModel.onEvent(
-            PrayerTrackerEvent.LoadHistory(
-                displayedMonth.atDay(1).minusDays(REVIEW_WINDOW_DAYS),
-                displayedMonth.atEndOfMonth(),
-            )
+    // Spans both the displayed month AND the trailing review window, always -- not just the
+    // month's own window. Loading only the displayed month meant paging to a month that didn't
+    // include "today" left the review banner and the week rail resolving the last seven real
+    // days from an empty record set: every one of them read NOT_RECORDED, so the banner announced
+    // a fabricated count and the rail painted warning rings on days the user actually logged.
+    LaunchedEffect(displayedMonth, today) {
+        val start = minOf(
+            displayedMonth.atDay(1).minusDays(REVIEW_WINDOW_DAYS),
+            today.minusDays(REVIEW_WINDOW_DAYS),
         )
+        val end = maxOf(displayedMonth.atEndOfMonth(), today)
+        viewModel.onEvent(PrayerTrackerEvent.LoadHistory(start, end))
     }
 
     val recordsByDate = remember(historyState.records) {
@@ -142,7 +150,7 @@ fun PrayerTrackerScreen(
             verticalArrangement = Arrangement.spacedBy(18.dp),
         ) {
             item {
-                WeekRail(
+                DayRail(
                     selectedDate = state.selectedDate,
                     today = today,
                     statusesOn = ::statusesOn,
@@ -176,8 +184,9 @@ fun PrayerTrackerScreen(
             if (unrecordedCount > 0) {
                 item {
                     NimazBanner(
-                        message = stringResource(
-                            R.string.prayer_unrecorded_banner_format,
+                        message = pluralStringResource(
+                            R.plurals.prayer_unrecorded_banner,
+                            unrecordedCount,
                             unrecordedCount,
                         ),
                         variant = NimazBannerVariant.WARNING,
@@ -229,29 +238,80 @@ fun PrayerTrackerScreen(
     }
 }
 
+/** How many days either side of the selected date the rail shows. Seven cells total. */
+private const val RAIL_HALF_SPAN = 3L
+
+/**
+ * A day's overall bucket, for both the rail's dot and its screen-reader description -- computed
+ * once so the two can never say different things about the same day.
+ */
+private enum class DayBucket {
+    ALL_DONE,
+    ALL_UNRECORDED,
+    PARTIAL,
+    OTHER,
+}
+
+private fun Map<PrayerName, PrayerDisplayStatus>.bucket(): DayBucket {
+    val done = values.count { it.isDone() }
+    val allUnrecorded = values.all { it == PrayerDisplayStatus.NOT_RECORDED }
+    return when {
+        done == TRACKED_PRAYERS.size -> DayBucket.ALL_DONE
+        // A day nobody touched gets a ring, not a red dot -- the whole point of the redesign is
+        // that "no record" and "you missed these" are different claims.
+        allUnrecorded -> DayBucket.ALL_UNRECORDED
+        done > 0 -> DayBucket.PARTIAL
+        else -> DayBucket.OTHER
+    }
+}
+
+private fun DayBucket.dotSpec(): NimazStatusDotSpec = when (this) {
+    DayBucket.ALL_DONE -> NimazStatusDotSpec(NimazTone.SUCCESS)
+    DayBucket.ALL_UNRECORDED -> NimazStatusDotSpec(NimazTone.WARNING, NimazStatusDotStyle.OUTLINED)
+    DayBucket.PARTIAL -> NimazStatusDotSpec(NimazTone.WARNING)
+    DayBucket.OTHER -> NimazStatusDotSpec(NimazTone.ERROR)
+}
+
 @Composable
-private fun WeekRail(
+private fun DayRail(
     selectedDate: LocalDate,
     today: LocalDate,
     statusesOn: (LocalDate) -> Map<PrayerName, PrayerDisplayStatus>,
     onSelect: (LocalDate) -> Unit,
 ) {
-    val weekStart = remember(selectedDate) {
-        selectedDate.minusDays((selectedDate.dayOfWeek.value - 1).toLong())
+    // Centred on the selected date, not anchored to an ISO week -- the month grid below starts
+    // its weeks on Sunday, so a Monday-anchored rail put the same seven days in two different
+    // weeks on one screen. Centring also means selecting near either end of a calendar week no
+    // longer buries the selection under a run of greyed-out future cells.
+    val days = remember(selectedDate) {
+        (-RAIL_HALF_SPAN..RAIL_HALF_SPAN).map { selectedDate.plusDays(it) }
     }
-    val days = remember(weekStart, today) { (0L..6L).map { weekStart.plusDays(it) } }
+    // Not Locale.getDefault() -- that reads a JVM-global, not composition state, so the label
+    // wouldn't recompose if the user changed the app's language without restarting the process.
+    val locale = LocalLocale.current.platformLocale
 
     NimazDayRail(
         days = days.map { date ->
-            val statuses = statusesOn(date)
+            val isFuture = date.isAfter(today)
+            val bucket = if (isFuture) null else statusesOn(date).bucket()
+            val localizedDate = date.formatFullDate()
             NimazDayRailItem(
                 weekdayLabel = date.dayOfWeek
-                    .getDisplayName(TextStyle.NARROW, Locale.getDefault()),
+                    .getDisplayName(TextStyle.NARROW, locale),
                 dayLabel = date.dayOfMonth.toString(),
-                marker = if (date.isAfter(today)) null else statuses.railMarker(),
+                marker = bucket?.dotSpec(),
                 isToday = date == today,
-                enabled = !date.isAfter(today),
-                contentDescription = date.toString(),
+                enabled = !isFuture,
+                // A localized date plus the day's overall state, e.g. "August 13, 2026, prayed" --
+                // TalkBack's date-only fallback said "2026-08-13" and nothing about the marker.
+                contentDescription = when (bucket) {
+                    DayBucket.ALL_DONE -> stringResource(R.string.a11y_prayer_state_prayed, localizedDate)
+                    DayBucket.ALL_UNRECORDED ->
+                        stringResource(R.string.a11y_prayer_state_not_recorded, localizedDate)
+                    DayBucket.PARTIAL -> stringResource(R.string.a11y_prayer_state_partial, localizedDate)
+                    DayBucket.OTHER -> stringResource(R.string.a11y_prayer_state_missed, localizedDate)
+                    null -> "$localizedDate, ${stringResource(R.string.upcoming)}"
+                },
             )
         },
         selectedIndex = days.indexOf(selectedDate).takeIf { it >= 0 },
@@ -268,18 +328,27 @@ private fun MonthSection(
     onMonthChange: (YearMonth) -> Unit,
     onDateSelected: (LocalDate) -> Unit,
 ) {
-    val completeDays = remember(displayedMonth, today) {
-        (1..displayedMonth.lengthOfMonth())
-            .map(displayedMonth::atDay)
-            .filter { !it.isAfter(today) }
-            .count { date -> statusesOn(date).values.count { it.isDone() } == TRACKED_PRAYERS.size }
-    }
+    // Not `remember`ed: it reads `statusesOn`, a fresh lambda closure every recomposition that
+    // isn't itself a valid `remember` key, so keying on `(displayedMonth, today)` alone let the
+    // count freeze at "0 complete days" for the session (computed before the history load
+    // returned) and then read the *previous* month's records after paging. Thirty-odd iterations
+    // over already-loaded, already-grouped records is cheap enough to just run every time.
+    val completeDays = (1..displayedMonth.lengthOfMonth())
+        .map(displayedMonth::atDay)
+        .filter { !it.isAfter(today) }
+        .count { date -> statusesOn(date).values.count { it.isDone() } == TRACKED_PRAYERS.size }
+
     val noRecordBarColor = MaterialTheme.colorScheme.outlineVariant
+    val notRecordedRingColor = NimazColors.StatusColors.Pending
 
     Column {
         NimazSectionHeader(
             title = stringResource(R.string.prayer_month_section),
-            trailingText = stringResource(R.string.prayer_complete_days_format, completeDays),
+            trailingText = pluralStringResource(
+                R.plurals.prayer_complete_days,
+                completeDays,
+                completeDays,
+            ),
         )
 
         NimazCalendar(
@@ -289,12 +358,14 @@ private fun MonthSection(
             onPreviousMonth = { onMonthChange(displayedMonth.minusMonths(1)) },
             onNextMonth = { onMonthChange(displayedMonth.plusMonths(1)) },
             selectionStyle = SelectionStyle.BORDER,
+            legendItems = monthLegend(),
             dayStateProvider = { date ->
                 if (date.isAfter(today)) {
                     CalendarDayState()
                 } else {
                     val statuses = statusesOn(date)
                     val done = statuses.values.count { it.isDone() }
+                    val allUnrecorded = statuses.values.all { it == PrayerDisplayStatus.NOT_RECORDED }
                     CalendarDayState(
                         indicatorBar = done.toFloat() / TRACKED_PRAYERS.size,
                         indicatorBarColor = when {
@@ -304,6 +375,13 @@ private fun MonthSection(
                                 NimazColors.StatusColors.Missed
                             else -> noRecordBarColor
                         },
+                        // The bar alone drew nothing distinctive for a day nobody touched: zero
+                        // done means a zero-length bar whichever colour it's given. The dot
+                        // channel is independent of the bar (CalendarDayState's own contract), so
+                        // a genuinely untouched day also gets a ring here -- the same signal the
+                        // rail's ALL_UNRECORDED bucket and the day card's NOT_RECORDED rows use.
+                        indicatorColor = if (allUnrecorded) notRecordedRingColor else null,
+                        indicatorStyle = NimazStatusDotStyle.OUTLINED,
                     )
                 }
             },
@@ -311,16 +389,23 @@ private fun MonthSection(
     }
 }
 
-/** One dot summarising a whole day for the week rail. */
-private fun Map<PrayerName, PrayerDisplayStatus>.railMarker(): NimazStatusDotSpec {
-    val done = values.count { it.isDone() }
-    val allUnrecorded = values.all { it == PrayerDisplayStatus.NOT_RECORDED }
-    return when {
-        done == TRACKED_PRAYERS.size -> NimazStatusDotSpec(NimazTone.SUCCESS)
-        // A day nobody touched gets a ring, not a red dot -- the whole point of the redesign is
-        // that "no record" and "you missed these" are different claims.
-        allUnrecorded -> NimazStatusDotSpec(NimazTone.WARNING, NimazStatusDotStyle.OUTLINED)
-        done > 0 -> NimazStatusDotSpec(NimazTone.WARNING)
-        else -> NimazStatusDotSpec(NimazTone.ERROR)
-    }
-}
+@Composable
+private fun monthLegend(): List<CalendarLegendItem> = listOf(
+    CalendarLegendItem(
+        color = NimazColors.StatusColors.Prayed,
+        label = stringResource(R.string.prayer_legend_all_five),
+    ),
+    CalendarLegendItem(
+        color = NimazColors.StatusColors.Partial,
+        label = stringResource(R.string.prayer_legend_some),
+    ),
+    CalendarLegendItem(
+        color = NimazColors.StatusColors.Missed,
+        label = stringResource(R.string.prayer_legend_none),
+    ),
+    CalendarLegendItem(
+        color = NimazColors.StatusColors.Pending,
+        label = stringResource(R.string.prayer_legend_not_recorded),
+        indicatorStyle = NimazStatusDotStyle.OUTLINED,
+    ),
+)

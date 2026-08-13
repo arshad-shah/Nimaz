@@ -15,6 +15,8 @@
     <string name="prayed">Kılındı</string>
     <string name="a11y_prayer_state_prayed">%1$s, kılındı</string>
     <string name="a11y_prayer_state_not_recorded">%1$s, henüz kaydedilmedi</string>
+    <string name="a11y_prayer_state_partial">%1$s, bazı namazlar kaydedildi</string>
+    <string name="a11y_prayer_state_missed">%1$s, namazlar kaçırıldı</string>
     <string name="no_favorites_yet">Henüz favori yok</string>
     <string name="remove_from_favorites">Favorilerden kaldır</string>
     <string name="add_to_favorites">Favorilere ekle</string>
@@ -366,8 +368,25 @@
     <string name="widget_hijri_date_name">Hicri Tarih</string>
     <string name="widget_prayer_tracker_name">Namaz Takibi</string>
     <string name="widget_hijri_calendar_name">Hicri Takvim</string>
-    <string name="tracker">Takip</string>
     <string name="qada">Kaza</string>
+    <string name="prayer_status_not_recorded">Kaydedilmedi</string>
+    <string name="prayer_recorded_count_format">%2$d namazdan %1$d kaydedildi</string>
+    <string name="back_to_today">Bugüne dön</string>
+    <string name="prayer_not_recorded_note">Bu namazın vakti hiçbir kayıt yapılmadan geçti. Siz belirtene kadar kaçırılmış sayılmaz.</string>
+    <string name="prayer_unrecorded_banner_action">İncele</string>
+    <string name="prayer_month_section">Ayınız</string>
+    <plurals name="prayer_complete_days">
+        <item quantity="one">%1$d tam gün</item>
+        <item quantity="other">%1$d tam gün</item>
+    </plurals>
+    <plurals name="prayer_unrecorded_banner">
+        <item quantity="one">Geçen haftadan %1$d namaz kaydedilmedi. Siz işaretleyene kadar kaza listenizde görünmez.</item>
+        <item quantity="other">Geçen haftadan %1$d namaz kaydedilmedi. Siz işaretleyene kadar kaza listenizde görünmez.</item>
+    </plurals>
+    <string name="prayer_legend_all_five">Beşi de</string>
+    <string name="prayer_legend_some">Bazıları</string>
+    <string name="prayer_legend_none">Hiçbiri</string>
+    <string name="prayer_legend_not_recorded">Kaydedilmedi</string>
     <string name="prayer_tracker_title">Namaz Takibi</string>
     <string name="view_statistics">İstatistikleri Görüntüle</string>
     <string name="all_caught_up">Tamamı Kılındı!</string>
@@ -378,8 +397,6 @@
         <item quantity="one">%1$d kaza namazı bekliyor</item>
         <item quantity="other">%1$d kaza namazı bekliyor</item>
     </plurals>
-    <string name="current_streak">Mevcut Seri</string>
-    <string name="consecutive_days_all_prayers">tüm namazların kılındığı ardışık gün</string>
     <string name="on_time">Vaktinde</string>
     <string name="late">Geç</string>
     <string name="missed">Kaçırıldı</string>
@@ -516,7 +533,6 @@
     <string name="hadith_fallback_source">Sahih al-Bukhari 6018</string>
     <string name="jumuah_arabic">\u0627\u0644\u062C\u0645\u0639\u0629</string>
     <string name="jumuah_hadith_quote">"Güneşin doğduğu en hayırlı gün Cuma günüdür." — Sahih Muslim</string>
-    <string name="prayers_completed_format">%2$d namazdan %1$d</string>
     <string name="surah_result_format">Sure %1$d:%2$d</string>
     <string name="hadith_result_format">Hadis #%1$d</string>
     <string name="share_message">Nimaz - Namaz Vakitleri Uygulamasına göz atın: https://play.google.com/store/apps/details?id=com.arshadshah.nimaz</string>
@@ -1114,6 +1130,9 @@
     <string name="prayer_insight_best">En iyi namaz: %1$s</string>
     <string name="prayer_insight_best_desc">%1$s namazını sürekli %%%2$d oranında kılıyorsunuz.</string>
     <string name="qada_prayers">Kaza Namazları</string>
+    <string name="qada_mark_made_up">Kaza edildi olarak işaretle</string>
+    <string name="qada_summary_subtitle">Kaza edilmeyi bekleyen kaçırılan namazlar</string>
+    <string name="qada_summary_empty">Bekleyen yok</string>
     <string name="sync_data">Veriyi Senkronize Et</string>
     <string name="settings_sync_subtitle">Cihazlar arasında veri aktarın</string>
     <string name="location_search_hint">Şehir veya adres ara…</string>

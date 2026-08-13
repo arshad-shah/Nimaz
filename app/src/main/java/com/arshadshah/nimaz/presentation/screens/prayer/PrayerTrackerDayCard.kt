@@ -12,6 +12,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -96,7 +97,15 @@ fun PrayerTrackerDayCard(
                     ) {
                         if (streak > 0) {
                             NimazBadge(
-                                text = stringResource(R.string.prayer_streak_format, streak),
+                                // Shares its text with the Khatam widget's streak badge --
+                                // "N-day streak" is the same claim regardless of what is
+                                // streaking, and a locale that translated it once should not
+                                // have to translate the identical sentence twice.
+                                text = pluralStringResource(
+                                    R.plurals.khatam_widget_streak,
+                                    streak,
+                                    streak,
+                                ),
                                 icon = Icons.Default.LocalFireDepartment,
                                 size = NimazBadgeSize.SMALL,
                                 tone = NimazTone.WARNING,
@@ -130,19 +139,37 @@ fun PrayerTrackerDayCard(
                 now = now,
                 isToday = isToday,
                 use24Hour = use24Hour,
+                // One sentence for TalkBack in place of five bare prayer names with no status --
+                // the same count already shown above the timeline, so this doesn't introduce a
+                // new fact, just carries the existing one to the track's own semantics node.
+                contentDescription = stringResource(
+                    R.string.prayer_recorded_count_format,
+                    doneCount,
+                    TRACKED_PRAYERS.size,
+                ),
                 modifier = Modifier.padding(start = 18.dp, end = 18.dp, top = 18.dp),
             )
 
             NimazDivider(modifier = Modifier.padding(top = 16.dp))
 
+            // Whether a prayer's own time has passed -- not whether it currently carries a
+            // status. `status != UPCOMING` looked equivalent but wasn't: marking an upcoming
+            // prayer PRAYED early (the app allows it) flips its status away from UPCOMING without
+            // its time having arrived, which used to make QADA selectable for a prayer that
+            // hasn't happened yet. Mirrors resolvePrayerStatuses' own "day is over, or this
+            // prayer's time is behind now" test.
+            val dayIsOver = selectedDate.isBefore(now.toLocalDate())
+
             TRACKED_PRAYERS.forEachIndexed { index, prayer ->
                 if (index > 0) NimazDivider()
                 val status = statuses[prayer] ?: PrayerDisplayStatus.UPCOMING
+                val timeHasPassed = dayIsOver ||
+                    times?.timeFor(prayer)?.let { now.isAfter(it) } == true
                 PrayerRow(
                     prayer = prayer,
                     status = status,
                     time = times?.timeFor(prayer)?.formatClock(use24Hour),
-                    canBeMadeUp = status != PrayerDisplayStatus.UPCOMING,
+                    canBeMadeUp = timeHasPassed,
                     expanded = expandedPrayer == prayer,
                     onExpandedChange = { open -> onExpandedChange(if (open) prayer else null) },
                     onSetStatus = { newStatus -> onSetStatus(prayer, newStatus) },
@@ -159,6 +186,7 @@ private fun DayTimeline(
     now: LocalDateTime,
     isToday: Boolean,
     use24Hour: Boolean,
+    contentDescription: String,
     modifier: Modifier = Modifier,
 ) {
     if (times == null) return
@@ -190,6 +218,7 @@ private fun DayTimeline(
         startLabel = "${PrayerName.FAJR.displayName()} ${start.formatClock(use24Hour)}",
         endLabel = "${PrayerName.ISHA.displayName()} ${end.formatClock(use24Hour)}",
         progress = if (isToday) positionOf(now) else null,
+        contentDescription = contentDescription,
         modifier = modifier,
     )
 }
