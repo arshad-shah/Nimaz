@@ -139,7 +139,7 @@ flowchart LR
     end
 
     subgraph F["Fasting"]
-        FastingHome --> FastingTracker & FastingStats
+        FastingHome --> FastingTracker & FastingStats & MakeupFasts
     end
 
     subgraph T["Tasbih"]
@@ -176,7 +176,7 @@ flowchart LR
 ## 3. Route reference
 
 All routes live in `core/navigation/Routes.kt` and are wired in `core/navigation/NavGraph.kt`
-(93 `composable<Route.X>` destinations). `data object` = no args; `data class` = typed args.
+(94 `composable<Route.X>` destinations). `data object` = no args; `data class` = typed args.
 Every route below also has a `ScreenTags` entry of the same name.
 
 ### 3.1 Bottom navigation (`BottomNavDestination`)
@@ -246,9 +246,13 @@ Every route below also has a `ScreenTags` entry of the same name.
 | `FastingHome` | — | FastTrackerScreen |
 | `FastingTracker` | — | FastTrackerScreen |
 | `FastingStats` | — | (fasting stats) |
+| `MakeupFasts` | — | MakeupFastsScreen |
 
-> **Makeup fasts is a tab inside `FastTrackerScreen`** (driven by `FastingEvent.LoadMakeupFasts`),
-> not a standalone route. There is intentionally **no** `Route.MakeupFasts`.
+> **`Route.MakeupFasts` is back**, and this note is kept rather than deleted because it used to
+> say the opposite. Make-up fasts was a standalone route, became a tab inside `FastTrackerScreen`,
+> and is a route again as of the 2026-08 fasting redesign: the tab row was the only thing keeping
+> the tracker from being one uninterrupted scroll, and two tabs is a poor price for that. The
+> pendulum has swung twice; if it is ever pushed back, say why here.
 
 ### 3.7 Night worship
 | Route | Args | Screen |

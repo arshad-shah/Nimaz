@@ -1974,4 +1974,6 @@
         <item quantity="one">%1$d gün sonra başlıyor</item>
         <item quantity="other">%1$d gün sonra başlıyor</item>
     </plurals>
+    <string name="fasting_makeup_owed">Borç</string>
+    <string name="fasting_makeup_settled">Tamamlandı</string>
 </resources>

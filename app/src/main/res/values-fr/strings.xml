@@ -2010,4 +2010,6 @@
         <item quantity="many">Commence dans %1$d jours</item>
         <item quantity="other">Commence dans %1$d jours</item>
     </plurals>
+    <string name="fasting_makeup_owed">Dû</string>
+    <string name="fasting_makeup_settled">Réglé</string>
 </resources>

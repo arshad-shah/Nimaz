@@ -2163,4 +2163,6 @@
     <string name="more_pin_night_worship">Night worship</string>
     <string name="more_pin_qaida">Qaida</string>
     <string name="more_pin_islamic_calendar">Calendar</string>
+    <string name="fasting_makeup_owed">Owed</string>
+    <string name="fasting_makeup_settled">Settled</string>
 </resources>

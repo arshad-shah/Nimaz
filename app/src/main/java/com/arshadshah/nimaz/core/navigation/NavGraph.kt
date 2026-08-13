@@ -73,6 +73,7 @@ import com.arshadshah.nimaz.presentation.screens.dua.DuaReaderScreen
 import com.arshadshah.nimaz.presentation.screens.dua.DuaSettingsScreen
 import com.arshadshah.nimaz.presentation.screens.dua.DuasCollectionScreen
 import com.arshadshah.nimaz.presentation.screens.fasting.FastTrackerScreen
+import com.arshadshah.nimaz.presentation.screens.fasting.MakeupFastsScreen
 import com.arshadshah.nimaz.presentation.screens.hadith.HadithChaptersScreen
 import com.arshadshah.nimaz.presentation.screens.hadith.HadithReaderScreen
 import com.arshadshah.nimaz.presentation.screens.hadith.HadithSettingsScreen
@@ -916,6 +917,12 @@ fun NavGraph(
                     onNavigateBack = { navController.popBackStack() },
                     onNavigateToHistory = { },
                     onNavigateToCalendar = { navController.navigate(Route.IslamicCalendar) }
+                )
+            }
+
+            taggedComposable<Route.MakeupFasts>(ScreenTags.MakeupFasts) {
+                MakeupFastsScreen(
+                    onNavigateBack = { navController.popBackStack() }
                 )
             }
 

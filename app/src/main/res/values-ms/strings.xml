@@ -1931,4 +1931,6 @@
     <plurals name="fasting_row_ramadan_in_days">
         <item quantity="other">Bermula dalam %1$d hari</item>
     </plurals>
+    <string name="fasting_makeup_owed">Tertunggak</string>
+    <string name="fasting_makeup_settled">Selesai</string>
 </resources>

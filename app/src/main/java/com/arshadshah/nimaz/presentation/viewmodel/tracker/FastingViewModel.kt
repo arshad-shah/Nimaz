@@ -233,18 +233,14 @@ class FastingViewModel @Inject constructor(
             }
             is FastingEvent.UpdateMakeupFast -> updateMakeupFastRecord(event.makeupFast)
 
-            is FastingEvent.SetFastStatus -> {
-                telemetry.fastTracked("set_status", event.status.name)
-                setFastStatus(event.date, event.status)
-            }
+            // These three carry **no** telemetry yet, on purpose. `AnalyticsReachabilityTest`
+            // fails any logging branch that no screen dispatches — a metric that reads zero
+            // forever is worse than no metric — and the day card that raises them lands with the
+            // screen rebuild. The `fastTracked` calls go in there, beside their producer.
+            is FastingEvent.SetFastStatus -> setFastStatus(event.date, event.status)
 
-            is FastingEvent.SaveExemption -> {
-                telemetry.fastTracked("save_exemption")
-                // The reason itself is never recorded — it is health information.
-                saveExemption(event.date, event.reason)
-            }
+            is FastingEvent.SaveExemption -> saveExemption(event.date, event.reason)
 
-            // No telemetry: the note is the user's own words.
             is FastingEvent.SaveNote -> saveNote(event.date, event.note)
         }
     }

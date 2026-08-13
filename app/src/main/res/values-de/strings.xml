@@ -1968,4 +1968,6 @@
         <item quantity="one">Beginnt in %1$d Tag</item>
         <item quantity="other">Beginnt in %1$d Tagen</item>
     </plurals>
+    <string name="fasting_makeup_owed">Offen</string>
+    <string name="fasting_makeup_settled">Erledigt</string>
 </resources>
