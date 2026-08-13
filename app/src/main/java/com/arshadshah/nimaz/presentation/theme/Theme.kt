@@ -57,7 +57,23 @@ private val LightColorScheme = lightColorScheme(
     onSurface = md_theme_light_onSurface,
     surfaceVariant = md_theme_light_surfaceVariant,
     onSurfaceVariant = md_theme_light_onSurfaceVariant,
-    outline = md_theme_light_outline
+    outline = md_theme_light_outline,
+    outlineVariant = NimazColors.OutlineVariantLight,
+    inverseSurface = NimazColors.InverseSurfaceLight,
+    inverseOnSurface = NimazColors.InverseOnSurfaceLight,
+    inversePrimary = NimazColors.InversePrimaryLight,
+    // `surfaceTint` defaults to `primary`, and Material 3 paints it over any surface that carries
+    // a tonal elevation — which is why bottom sheets and top app bars came out teal-tinted while
+    // `surface` itself is plain white. Pointing it at the surface colour makes the overlay a
+    // no-op, so a raised surface is the colour the palette says it is.
+    surfaceTint = md_theme_light_surface,
+    surfaceContainerLowest = NimazColors.SurfaceContainerLowestLight,
+    surfaceContainerLow = NimazColors.SurfaceContainerLowLight,
+    surfaceContainer = NimazColors.SurfaceContainerLight,
+    surfaceContainerHigh = NimazColors.SurfaceContainerHighLight,
+    surfaceContainerHighest = NimazColors.SurfaceContainerHighestLight,
+    surfaceBright = NimazColors.SurfaceBrightLight,
+    surfaceDim = NimazColors.SurfaceDimLight,
 )
 
 private val DarkColorScheme = darkColorScheme(
@@ -83,7 +99,19 @@ private val DarkColorScheme = darkColorScheme(
     onSurface = md_theme_dark_onSurface,
     surfaceVariant = md_theme_dark_surfaceVariant,
     onSurfaceVariant = md_theme_dark_onSurfaceVariant,
-    outline = md_theme_dark_outline
+    outline = md_theme_dark_outline,
+    outlineVariant = NimazColors.OutlineVariantDark,
+    inverseSurface = NimazColors.InverseSurfaceDark,
+    inverseOnSurface = NimazColors.InverseOnSurfaceDark,
+    inversePrimary = NimazColors.InversePrimaryDark,
+    surfaceTint = md_theme_dark_surface,
+    surfaceContainerLowest = NimazColors.SurfaceContainerLowestDark,
+    surfaceContainerLow = NimazColors.SurfaceContainerLowDark,
+    surfaceContainer = NimazColors.SurfaceContainerDark,
+    surfaceContainerHigh = NimazColors.SurfaceContainerHighDark,
+    surfaceContainerHighest = NimazColors.SurfaceContainerHighestDark,
+    surfaceBright = NimazColors.SurfaceBrightDark,
+    surfaceDim = NimazColors.SurfaceDimDark,
 )
 
 enum class ThemeMode {

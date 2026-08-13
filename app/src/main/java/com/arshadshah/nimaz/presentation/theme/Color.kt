@@ -98,6 +98,32 @@ object NimazColors {
     val OnSurfaceDark = P.Gray200
     val OnSurfaceVariantDark = P.Gray500
 
+    // ── The surface-container ladder ──────────────────────────────────────────
+    //
+    // Material 3 generates these from the primary hue when a scheme leaves them out, and the app
+    // left every one of them out. The result was a teal-and-lavender cast on anything that used
+    // them — the segmented-control track, the calendar header, chip beds — while the surfaces the
+    // scheme *did* define stayed a clean white. Two families of grey in one app, one of them
+    // nobody chose.
+    //
+    // Defined here as plain neutrals off the same ramp as `SurfaceVariant`, so a container is a
+    // step of lightness rather than a step of hue.
+    val SurfaceContainerLowestLight = P.White
+    val SurfaceContainerLowLight = P.Stone50
+    val SurfaceContainerLight = P.Stone100
+    val SurfaceContainerHighLight = P.Gray100
+    val SurfaceContainerHighestLight = P.Stone200
+    val SurfaceBrightLight = P.White
+    val SurfaceDimLight = P.Stone200
+
+    val SurfaceContainerLowestDark = P.Stone950
+    val SurfaceContainerLowDark = P.Stone900
+    val SurfaceContainerDark = P.Stone800
+    val SurfaceContainerHighDark = P.Stone700
+    val SurfaceContainerHighestDark = P.Stone600
+    val SurfaceBrightDark = P.Stone700
+    val SurfaceDimDark = P.Stone950
+
     // ── Error ─────────────────────────────────────────────────────────────────
     val Error = P.ErrorRed
     val ErrorLight = P.ErrorPink
@@ -108,6 +134,25 @@ object NimazColors {
     // ── Outline ───────────────────────────────────────────────────────────────
     val OutlineLight = P.Gray200
     val OutlineDark = P.Stone800
+
+    /**
+     * The subtle hairline — dividers, chip borders, the quiet edge of an outlined badge.
+     *
+     * Used 49 times across the app and never defined, so every one of those hairlines was
+     * drawing Material 3's generated baseline, which is tinted off the primary hue. It is the
+     * same omission that made surfaces mint and containers lavender.
+     */
+    val OutlineVariantLight = P.Stone200
+    val OutlineVariantDark = P.Stone800
+
+    // ── Inverse — the tooltip / snackbar surface, which flips against the theme ────
+    val InverseSurfaceLight = P.Stone900
+    val InverseOnSurfaceLight = P.Gray100
+    val InversePrimaryLight = Primary400
+
+    val InverseSurfaceDark = P.Gray100
+    val InverseOnSurfaceDark = P.Ink
+    val InversePrimaryDark = Primary700
 
     // ── Prayer-time accents ───────────────────────────────────────────────────
     object PrayerColors {

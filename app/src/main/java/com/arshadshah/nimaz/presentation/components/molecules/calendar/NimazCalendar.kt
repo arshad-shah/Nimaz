@@ -33,7 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalHapticFeedback
+import com.arshadshah.nimaz.presentation.theme.rememberNimazHaptics
 import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
@@ -49,6 +49,8 @@ import com.arshadshah.nimaz.presentation.components.atoms.NavArrowDirection
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazLegendItem
+import com.arshadshah.nimaz.presentation.components.atoms.NimazStatusDot
+import com.arshadshah.nimaz.presentation.components.atoms.NimazStatusDotSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazNavArrowButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.theme.NimazColors
@@ -98,7 +100,7 @@ fun NimazCalendar(
     headerAlignment: CalendarHeaderAlignment = CalendarHeaderAlignment.START
 ) {
     val today = remember { LocalDate.now() }
-    val haptic = LocalHapticFeedback.current
+    val haptic = rememberNimazHaptics()
 
     Column(modifier = modifier) {
         // Navigation header
@@ -181,7 +183,11 @@ fun NimazCalendar(
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         legendItems.forEach { item ->
-                            NimazLegendItem(color = item.color, label = item.label)
+                            NimazLegendItem(
+                                color = item.color,
+                                label = item.label,
+                                style = item.indicatorStyle,
+                            )
                         }
                     }
                 }
@@ -504,22 +510,22 @@ private fun CalendarDayCell(
                 scheme.onPrimary
             } else color
             when (dayState.indicatorPosition) {
-                IndicatorPosition.BOTTOM_CENTER -> Box(
+                IndicatorPosition.BOTTOM_CENTER -> NimazStatusDot(
+                    color = resolvedDot,
+                    style = dayState.indicatorStyle,
+                    size = NimazStatusDotSize.SMALL,
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
                         .padding(bottom = 4.dp)
-                        .size(6.dp)
-                        .clip(CircleShape)
-                        .background(resolvedDot)
                 )
 
-                IndicatorPosition.TOP_END -> Box(
+                IndicatorPosition.TOP_END -> NimazStatusDot(
+                    color = resolvedDot,
+                    style = dayState.indicatorStyle,
+                    size = NimazStatusDotSize.MEDIUM,
                     modifier = Modifier
                         .align(Alignment.TopEnd)
                         .padding(3.dp)
-                        .size(7.dp)
-                        .clip(CircleShape)
-                        .background(resolvedDot)
                 )
             }
         }

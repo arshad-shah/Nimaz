@@ -1,7 +1,5 @@
 package com.arshadshah.nimaz.presentation.screens.fasting
 
-import com.arshadshah.nimaz.core.util.formatFullDate
-import com.arshadshah.nimaz.core.util.formatMediumDate
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -32,188 +30,26 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.util.HijriDateCalculator
-import com.arshadshah.nimaz.domain.model.ExemptionReason
-import com.arshadshah.nimaz.domain.model.FastRecord
-import com.arshadshah.nimaz.domain.model.FastStatus
-import com.arshadshah.nimaz.domain.model.FastType
+import com.arshadshah.nimaz.core.util.formatFullDate
+import com.arshadshah.nimaz.core.util.formatMediumDate
 import com.arshadshah.nimaz.domain.model.MakeupFast
 import com.arshadshah.nimaz.domain.model.MakeupFastStatus
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonType
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
 import com.arshadshah.nimaz.presentation.components.molecules.NimazBottomSheet
-import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownField
-import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownItem
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
-@Composable
-fun FastManagementBottomSheet(
-    isVisible: Boolean,
-    date: LocalDate,
-    existingRecord: FastRecord?,
-    initialStatus: FastStatus,
-    initialFastType: FastType,
-    initialExemptionReason: ExemptionReason?,
-    initialNote: String,
-    onSave: (FastStatus, FastType, ExemptionReason?, String) -> Unit,
-    onDelete: () -> Unit,
-    onDismiss: () -> Unit
-) {
-    if (!isVisible) return
-
-    // Local state managed within the sheet
-    var selectedStatus by remember(date, existingRecord?.id) { mutableStateOf(initialStatus) }
-    var selectedFastType by remember(date, existingRecord?.id) { mutableStateOf(initialFastType) }
-    var selectedExemptionReason by remember(date, existingRecord?.id) {
-        mutableStateOf(
-            initialExemptionReason
-        )
-    }
-    var note by remember(date, existingRecord?.id) { mutableStateOf(initialNote) }
-
-    val hijriDate = remember(date) { HijriDateCalculator.toHijri(date) }
-
-    NimazBottomSheet(
-        onDismissRequest = onDismiss,
-        title = date.formatFullDate(),
-        subtitle = hijriDate.formatted(),
-        footer = {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                if (existingRecord != null) {
-                    NimazButton(
-                        text = stringResource(R.string.fasting_sheet_delete),
-                        onClick = onDelete,
-                        modifier = Modifier.weight(1f),
-                        variant = NimazButtonVariant.DESTRUCTIVE,
-                        type = NimazButtonType.PILL,
-                        leadingIcon = Icons.Default.Delete
-                    )
-                }
-                NimazButton(
-                    text = stringResource(R.string.fasting_sheet_save),
-                    onClick = {
-                        onSave(
-                            selectedStatus,
-                            selectedFastType,
-                            selectedExemptionReason,
-                            note
-                        )
-                    },
-                    modifier = Modifier.weight(1f),
-                    variant = NimazButtonVariant.TONAL,
-                    type = NimazButtonType.PILL,
-                    leadingIcon = Icons.Default.Save
-                )
-            }
-        }
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 4.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            // Status selector
-            Text(
-                text = stringResource(R.string.fasting_sheet_status),
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.Medium
-            )
-            FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                listOf(
-                    FastStatus.FASTED,
-                    FastStatus.NOT_FASTED,
-                    FastStatus.EXEMPTED
-                ).forEach { status ->
-                    FilterChip(
-                        selected = selectedStatus == status,
-                        onClick = { selectedStatus = status },
-                        label = {
-                            Text(
-                                when (status) {
-                                    FastStatus.FASTED -> stringResource(R.string.fasting_status_fasting)
-                                    FastStatus.NOT_FASTED -> stringResource(R.string.fasting_status_not_fasting)
-                                    FastStatus.EXEMPTED -> stringResource(R.string.fasting_status_exempted)
-                                    else -> ""
-                                }
-                            )
-                        },
-                        colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = when (status) {
-                                FastStatus.FASTED -> MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
-                                FastStatus.NOT_FASTED -> MaterialTheme.colorScheme.error.copy(alpha = 0.15f)
-                                FastStatus.EXEMPTED -> MaterialTheme.colorScheme.tertiary.copy(alpha = 0.15f)
-                                else -> MaterialTheme.colorScheme.surfaceVariant
-                            }
-                        )
-                    )
-                }
-            }
-
-            // Fast type selector
-            Text(
-                text = stringResource(R.string.fasting_sheet_type),
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.Medium
-            )
-            FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                FastType.entries.forEach { type ->
-                    FilterChip(
-                        selected = selectedFastType == type,
-                        onClick = { selectedFastType = type },
-                        label = { Text(type.displayName()) }
-                    )
-                }
-            }
-
-            // Exemption reason (only when EXEMPTED)
-            AnimatedVisibility(visible = selectedStatus == FastStatus.EXEMPTED) {
-                ExemptionReasonSelector(
-                    selectedReason = selectedExemptionReason,
-                    onReasonSelected = { selectedExemptionReason = it }
-                )
-            }
-
-            // Note
-            OutlinedTextField(
-                value = note,
-                onValueChange = { note = it },
-                label = { Text(stringResource(R.string.fasting_sheet_note)) },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true
-            )
-        }
-    }
-}
-
-@Composable
-private fun ExemptionReasonSelector(
-    selectedReason: ExemptionReason?,
-    onReasonSelected: (ExemptionReason?) -> Unit
-) {
-    NimazDropdownField(
-        label = stringResource(R.string.fasting_sheet_exemption_reason),
-        items = ExemptionReason.entries.map { reason ->
-            NimazDropdownItem(value = reason, label = reason.displayName())
-        },
-        selected = selectedReason,
-        placeholder = stringResource(R.string.fasting_sheet_select_reason),
-        onSelected = { onReasonSelected(it) }
-    )
-}
-
+/**
+ * Editing a make-up fast: its reason, and whether it was discharged by fidya.
+ *
+ * All that survives of `FastManagementBottomSheet.kt`. That file's other sheet asked four
+ * questions about a *day* — status, fast type, reason, note — and the 2026-08 redesign answered
+ * the first two inline on the day card and split the rest into two small sheets. This one is
+ * about a make-up fast rather than a day, so none of that applied to it.
+ */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun MakeupFastEditBottomSheet(

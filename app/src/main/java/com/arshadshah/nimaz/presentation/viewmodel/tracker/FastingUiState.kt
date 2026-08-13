@@ -23,6 +23,30 @@ data class FastingTrackerUiState(
     val suhoorAt: kotlin.time.Instant? = null,
     val iftarAt: kotlin.time.Instant? = null,
     val isSuhoorTime: Boolean = false,
+    /**
+     * The record for [selectedDate] — `null` when that day has not been logged.
+     *
+     * Distinct from [todayRecord], which is always today's. Before the redesign the two were the
+     * same field under today's name, so "the selected day" was only ever a relabelled today.
+     */
+    val selectedRecord: FastRecord? = null,
+    /**
+     * Records for the Monday–Sunday containing [selectedDate].
+     *
+     * Not derivable from `FastingCalendarUiState.records`: that query covers one calendar month,
+     * and a week straddling a month boundary is half missing from it.
+     */
+    val weekRecords: List<FastRecord> = emptyList(),
+    /**
+     * [selectedDate]'s **own** Fajr / Maghrib.
+     *
+     * `PrayerUseCases.getDaySchedule` always took a date; only this ViewModel's hardcoded
+     * `todayProvider.today()` kept the screen pinned to today's window.
+     */
+    val selectedSuhoorAt: kotlin.time.Instant? = null,
+    val selectedIftarAt: kotlin.time.Instant? = null,
+    /** Whether [selectedDate] is today — decides whether the window draws a "now" marker. */
+    val isSelectedToday: Boolean = true,
     val isLoading: Boolean = true,
 ) {
     /**
@@ -109,16 +133,3 @@ data class FastingStatsUiState(
     val isLoading: Boolean = true
 )
 
-/**
- * The day sheet. [date] is always supplied by the event that opens the sheet; the
- * `LocalDate.now()` default it used to carry was never the date the sheet showed.
- */
-data class FastManagementSheetState(
-    val isVisible: Boolean = false,
-    val date: LocalDate,
-    val existingRecord: FastRecord? = null,
-    val selectedStatus: FastStatus = FastStatus.FASTED,
-    val selectedFastType: FastType = FastType.VOLUNTARY,
-    val selectedExemptionReason: ExemptionReason? = null,
-    val note: String = ""
-)

@@ -1968,4 +1968,27 @@
         <item quantity="one">Beginnt in %1$d Tag</item>
         <item quantity="other">Beginnt in %1$d Tagen</item>
     </plurals>
+    <string name="fasting_makeup_owed">Offen</string>
+    <string name="fasting_makeup_settled">Erledigt</string>
+    <string name="fasting_this_day">Dieser Tag</string>
+    <string name="fasting_back_to_today">Zurück zu heute</string>
+    <string name="fasting_seg_fasted">Gefastet</string>
+    <string name="fasting_seg_not_fasting">Nicht gefastet</string>
+    <string name="fasting_seg_exempt">Befreit</string>
+    <string name="fasting_not_logged_yet">Noch nicht erfasst</string>
+    <string name="fasting_owed_make_up_later">Offen — später nachholen</string>
+    <string name="fasting_add_note">Notiz hinzufügen</string>
+    <string name="fasting_window_suhoor_in">Suhoor endet in %1$s</string>
+    <string name="fasting_window_iftar_in">Iftar in %1$s</string>
+    <string name="fasting_window_closed">Fastenzeit beendet</string>
+    <string name="fasting_window_length">Fastenzeit · %1$s lang</string>
+    <string name="fasting_window_a11y">Fastenzeit, %1$s bis %2$s</string>
+    <string name="fasting_why_exempt">Warum befreit?</string>
+    <string name="fasting_note_title">Notiz</string>
+    <string name="fasting_note_hint">Was ist an diesem Tag passiert?</string>
+    <string name="fasting_log_this_fast">Fasten erfassen</string>
+    <string name="fasting_coming_up">Demnächst</string>
+    <string name="fasting_your_month">Dein Monat</string>
+    <string name="fasting_sunnah_virtuous">Sunna &amp; verdienstvolle Tage</string>
+    <string name="fasting_fasted_count">%1$d gefastet</string>
 </resources>

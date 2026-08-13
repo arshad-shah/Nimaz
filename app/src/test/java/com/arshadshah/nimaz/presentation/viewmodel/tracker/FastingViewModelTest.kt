@@ -175,40 +175,6 @@ class FastingViewModelTest {
         assertThat(state.isFastingToday).isFalse()
     }
 
-    // ── StartFast event ─────────────────────────────────────────────
-
-    // ── CompleteFast / BreakFast events ─────────────────────────────
-
-    // ── ToggleTodayFast event ───────────────────────────────────────
-
-    @Test
-    fun `ToggleTodayFast starts fast when no existing record`() = runTest {
-        coEvery { repository.getFastRecordForDate(any()) } returns null
-
-        viewModel = createViewModel()
-        advanceUntilIdle()
-
-        viewModel.onEvent(FastingEvent.ToggleTodayFast)
-        advanceUntilIdle()
-
-        coVerify { repository.insertFastRecord(any()) }
-    }
-
-    @Test
-    fun `ToggleTodayFast breaks fast when currently fasted`() = runTest {
-        val todayEpoch = dateToEpoch(LocalDate.now())
-        val record = createFastRecord(date = todayEpoch, status = FastStatus.FASTED)
-        coEvery { repository.getFastRecordForDate(todayEpoch) } returns record
-
-        viewModel = createViewModel()
-        advanceUntilIdle()
-
-        viewModel.onEvent(FastingEvent.ToggleTodayFast)
-        advanceUntilIdle()
-
-        coVerify { repository.updateFastStatus(todayEpoch, FastStatus.NOT_FASTED) }
-    }
-
     // ── SelectMonth event ───────────────────────────────────────────
 
     @Test
@@ -260,165 +226,6 @@ class FastingViewModelTest {
         assertThat(state.records).hasSize(2)
     }
 
-    // ── SetFastType event ───────────────────────────────────────────
-
-    @Test
-    fun `SetFastType updates selected fast type`() = runTest {
-        viewModel = createViewModel()
-        advanceUntilIdle()
-
-        viewModel.onEvent(FastingEvent.SetFastType(FastType.VOLUNTARY))
-        advanceUntilIdle()
-
-        val state = viewModel.trackerState.value
-        assertThat(state.selectedFastType).isEqualTo(FastType.VOLUNTARY)
-    }
-
-    // ── SaveFastForDate event ───────────────────────────────────────
-
-    @Test
-    fun `SaveFastForDate inserts new record when none exists`() = runTest {
-        coEvery { repository.getFastRecordForDate(any()) } returns null
-
-        viewModel = createViewModel()
-        advanceUntilIdle()
-
-        val date = LocalDate.of(2025, 6, 15)
-        viewModel.onEvent(
-            FastingEvent.SaveFastForDate(
-                date = date,
-                status = FastStatus.FASTED,
-                fastType = FastType.VOLUNTARY,
-                exemptionReason = null,
-                note = "test note"
-            )
-        )
-        advanceUntilIdle()
-
-        coVerify { repository.insertFastRecord(any()) }
-    }
-
-    @Test
-    fun `SaveFastForDate updates existing record`() = runTest {
-        val date = LocalDate.of(2025, 6, 15)
-        val epoch = dateToEpoch(date)
-        val existing = createFastRecord(id = 5, date = epoch)
-        coEvery { repository.getFastRecordForDate(epoch) } returns existing
-
-        viewModel = createViewModel()
-        advanceUntilIdle()
-
-        viewModel.onEvent(
-            FastingEvent.SaveFastForDate(
-                date = date,
-                status = FastStatus.NOT_FASTED,
-                fastType = FastType.RAMADAN,
-                exemptionReason = null,
-                note = ""
-            )
-        )
-        advanceUntilIdle()
-
-        coVerify { repository.updateFastRecord(match { it.id == 5L }) }
-    }
-
-    @Test
-    fun `SaveFastForDate creates makeup fast for missed Ramadan day`() = runTest {
-        val date = LocalDate.of(2025, 3, 5) // During Ramadan 1446
-        val epoch = dateToEpoch(date)
-        coEvery { repository.getFastRecordForDate(epoch) } returns null
-        coEvery { repository.getMakeupFastCountForDate(epoch) } returns 0
-
-        viewModel = createViewModel()
-        advanceUntilIdle()
-
-        viewModel.onEvent(
-            FastingEvent.SaveFastForDate(
-                date = date,
-                status = FastStatus.NOT_FASTED,
-                fastType = FastType.RAMADAN,
-                exemptionReason = null,
-                note = ""
-            )
-        )
-        advanceUntilIdle()
-
-        coVerify { repository.insertMakeupFast(any()) }
-    }
-
-    @Test
-    fun `SaveFastForDate does not create duplicate makeup fast`() = runTest {
-        val date = LocalDate.of(2025, 3, 5)
-        val epoch = dateToEpoch(date)
-        coEvery { repository.getFastRecordForDate(epoch) } returns null
-        coEvery { repository.getMakeupFastCountForDate(epoch) } returns 1 // already exists
-
-        viewModel = createViewModel()
-        advanceUntilIdle()
-
-        viewModel.onEvent(
-            FastingEvent.SaveFastForDate(
-                date = date,
-                status = FastStatus.NOT_FASTED,
-                fastType = FastType.RAMADAN,
-                exemptionReason = null,
-                note = ""
-            )
-        )
-        advanceUntilIdle()
-
-        coVerify(exactly = 0) { repository.insertMakeupFast(any()) }
-    }
-
-    // ── DeleteFastRecord event ──────────────────────────────────────
-
-    @Test
-    fun `DeleteFastRecord calls repository and dismisses sheet`() = runTest {
-        viewModel = createViewModel()
-        advanceUntilIdle()
-
-        val date = LocalDate.of(2025, 6, 15)
-        viewModel.onEvent(FastingEvent.DeleteFastRecord(date))
-        advanceUntilIdle()
-
-        coVerify { repository.deleteFastRecordByDate(dateToEpoch(date)) }
-
-        val sheetState = viewModel.sheetState.value
-        assertThat(sheetState.isVisible).isFalse()
-    }
-
-    // ── OpenFastSheet / DismissFastSheet ────────────────────────────
-
-    @Test
-    fun `OpenFastSheet makes sheet visible with correct date`() = runTest {
-        val date = LocalDate.of(2025, 6, 15)
-        coEvery { repository.getFastRecordForDate(any()) } returns null
-
-        viewModel = createViewModel()
-        advanceUntilIdle()
-
-        viewModel.onEvent(FastingEvent.OpenFastSheet(date))
-        advanceUntilIdle()
-
-        val sheetState = viewModel.sheetState.value
-        assertThat(sheetState.isVisible).isTrue()
-        assertThat(sheetState.date).isEqualTo(date)
-    }
-
-    @Test
-    fun `DismissFastSheet hides the sheet`() = runTest {
-        viewModel = createViewModel()
-        advanceUntilIdle()
-
-        // Open then dismiss
-        viewModel.onEvent(FastingEvent.OpenFastSheet(LocalDate.now()))
-        advanceUntilIdle()
-        viewModel.onEvent(FastingEvent.DismissFastSheet)
-        advanceUntilIdle()
-
-        assertThat(viewModel.sheetState.value.isVisible).isFalse()
-    }
-
     // ── Stats period ────────────────────────────────────────────────
 
     @Test
@@ -432,6 +239,303 @@ class FastingViewModelTest {
         val state = viewModel.statsState.value
         assertThat(state.period).isEqualTo(FastingStatsPeriod.ALL_TIME)
         assertThat(state.isLoading).isFalse()
+    }
+
+    // ── The selected day is a real day, not a relabelled today ──────
+
+    @Test
+    fun `SelectDate loads that day's record into selectedRecord`() = runTest {
+        val target = LocalDate.of(2026, 8, 11)
+        val epoch = dateToEpoch(target)
+        coEvery { repository.getFastRecordForDate(epoch) } returns
+            createFastRecord(date = epoch, status = FastStatus.FASTED)
+
+        viewModel = createViewModel()
+        advanceUntilIdle()
+
+        viewModel.onEvent(FastingEvent.SelectDate(target))
+        advanceUntilIdle()
+
+        val state = viewModel.trackerState.value
+        assertThat(state.selectedRecord?.status).isEqualTo(FastStatus.FASTED)
+        assertThat(state.isSelectedToday).isFalse()
+    }
+
+    @Test
+    fun `SelectDate on today marks the selection as today`() = runTest {
+        viewModel = createViewModel()
+        advanceUntilIdle()
+
+        viewModel.onEvent(FastingEvent.SelectDate(LocalDate.now()))
+        advanceUntilIdle()
+
+        assertThat(viewModel.trackerState.value.isSelectedToday).isTrue()
+    }
+
+    @Test
+    fun `SelectDate loads the Monday-to-Sunday week around the selection`() = runTest {
+        // 2026-08-12 is a Wednesday, so its week runs Mon 10 Aug to Sun 16 Aug. The query is
+        // half-open, so it ends at Mon 17 Aug.
+        val wednesday = LocalDate.of(2026, 8, 12)
+        val weekStart = dateToEpoch(LocalDate.of(2026, 8, 10))
+        val weekEndExclusive = dateToEpoch(LocalDate.of(2026, 8, 17))
+
+        viewModel = createViewModel()
+        advanceUntilIdle()
+
+        viewModel.onEvent(FastingEvent.SelectDate(wednesday))
+        advanceUntilIdle()
+
+        coVerify { repository.getFastRecordsInRange(weekStart, weekEndExclusive) }
+    }
+
+    @Test
+    fun `the week query spans two months when the week straddles a boundary`() = runTest {
+        // 2026-09-02 is a Wednesday; its week starts Mon 31 Aug — in the previous month, which
+        // is precisely what a single-month calendar query cannot cover.
+        val wednesday = LocalDate.of(2026, 9, 2)
+        val weekStart = dateToEpoch(LocalDate.of(2026, 8, 31))
+        val weekEndExclusive = dateToEpoch(LocalDate.of(2026, 9, 7))
+
+        viewModel = createViewModel()
+        advanceUntilIdle()
+
+        viewModel.onEvent(FastingEvent.SelectDate(wednesday))
+        advanceUntilIdle()
+
+        coVerify { repository.getFastRecordsInRange(weekStart, weekEndExclusive) }
+    }
+
+    @Test
+    fun `SelectDate exposes the week's records`() = runTest {
+        val monday = dateToEpoch(LocalDate.of(2026, 8, 10))
+        every { repository.getFastRecordsInRange(any(), any()) } returns flowOf(
+            listOf(
+                createFastRecord(id = 1, date = monday),
+                createFastRecord(id = 2, date = monday + 86_400_000),
+            )
+        )
+
+        viewModel = createViewModel()
+        advanceUntilIdle()
+
+        viewModel.onEvent(FastingEvent.SelectDate(LocalDate.of(2026, 8, 12)))
+        advanceUntilIdle()
+
+        assertThat(viewModel.trackerState.value.weekRecords).hasSize(2)
+    }
+
+    @Test
+    fun `SelectDate loads that date's own suhoor and iftar, not today's`() = runTest {
+        viewModel = createViewModel()
+        advanceUntilIdle()
+
+        // Six months away, so the two schedules cannot coincide by accident.
+        viewModel.onEvent(FastingEvent.SelectDate(LocalDate.now().plusMonths(6)))
+        advanceUntilIdle()
+
+        val state = viewModel.trackerState.value
+        assertThat(state.selectedSuhoorAt).isNotNull()
+        assertThat(state.selectedIftarAt).isNotNull()
+        assertThat(state.selectedSuhoorAt).isNotEqualTo(state.suhoorAt)
+        assertThat(state.selectedIftarAt).isNotEqualTo(state.iftarAt)
+    }
+
+    // ── SetFastStatus ───────────────────────────────────────────────
+
+    @Test
+    fun `SetFastStatus writes a record for that day`() = runTest {
+        val target = LocalDate.of(2026, 8, 11)
+        coEvery { repository.getFastRecordForDate(any()) } returns null
+
+        viewModel = createViewModel()
+        advanceUntilIdle()
+
+        viewModel.onEvent(FastingEvent.SetFastStatus(target, FastStatus.FASTED))
+        advanceUntilIdle()
+
+        coVerify {
+            repository.insertFastRecord(
+                match { it.status == FastStatus.FASTED && it.date == dateToEpoch(target) }
+            )
+        }
+    }
+
+    @Test
+    fun `SetFastStatus with the status a day already has clears the record`() = runTest {
+        val target = LocalDate.of(2026, 8, 11)
+        val epoch = dateToEpoch(target)
+        coEvery { repository.getFastRecordForDate(epoch) } returns
+            createFastRecord(date = epoch, status = FastStatus.FASTED)
+
+        viewModel = createViewModel()
+        advanceUntilIdle()
+
+        viewModel.onEvent(FastingEvent.SetFastStatus(target, FastStatus.FASTED))
+        advanceUntilIdle()
+
+        coVerify { repository.deleteFastRecordByDate(epoch) }
+        coVerify(exactly = 0) { repository.insertFastRecord(any()) }
+    }
+
+    @Test
+    fun `SetFastStatus to a different status updates rather than clears`() = runTest {
+        val target = LocalDate.of(2026, 8, 11)
+        val epoch = dateToEpoch(target)
+        coEvery { repository.getFastRecordForDate(epoch) } returns
+            createFastRecord(id = 7, date = epoch, status = FastStatus.FASTED)
+
+        viewModel = createViewModel()
+        advanceUntilIdle()
+
+        viewModel.onEvent(FastingEvent.SetFastStatus(target, FastStatus.NOT_FASTED))
+        advanceUntilIdle()
+
+        coVerify { repository.updateFastRecord(match { it.status == FastStatus.NOT_FASTED }) }
+        coVerify(exactly = 0) { repository.deleteFastRecordByDate(any()) }
+    }
+
+    @Test
+    fun `an ordinary day is written as a voluntary fast`() = runTest {
+        // 15 Aug 2026 falls in Safar 1448 — nowhere near Ramadan.
+        val ordinary = LocalDate.of(2026, 8, 15)
+        coEvery { repository.getFastRecordForDate(any()) } returns null
+
+        viewModel = createViewModel()
+        advanceUntilIdle()
+
+        viewModel.onEvent(FastingEvent.SetFastStatus(ordinary, FastStatus.FASTED))
+        advanceUntilIdle()
+
+        coVerify {
+            repository.insertFastRecord(match { it.fastType == FastType.VOLUNTARY })
+        }
+    }
+
+    @Test
+    fun `a Ramadan day is written as a Ramadan fast without being asked`() = runTest {
+        // 5 March 2025 is inside Ramadan 1446.
+        val ramadanDay = LocalDate.of(2025, 3, 5)
+        coEvery { repository.getFastRecordForDate(any()) } returns null
+
+        viewModel = createViewModel()
+        advanceUntilIdle()
+
+        viewModel.onEvent(FastingEvent.SetFastStatus(ramadanDay, FastStatus.FASTED))
+        advanceUntilIdle()
+
+        coVerify {
+            repository.insertFastRecord(match { it.fastType == FastType.RAMADAN })
+        }
+    }
+
+    @Test
+    fun `a missed Ramadan day still auto-creates its makeup fast`() = runTest {
+        val ramadanDay = LocalDate.of(2025, 3, 5)
+        val epoch = dateToEpoch(ramadanDay)
+        coEvery { repository.getFastRecordForDate(epoch) } returns null
+        coEvery { repository.getMakeupFastCountForDate(epoch) } returns 0
+
+        viewModel = createViewModel()
+        advanceUntilIdle()
+
+        viewModel.onEvent(FastingEvent.SetFastStatus(ramadanDay, FastStatus.NOT_FASTED))
+        advanceUntilIdle()
+
+        coVerify { repository.insertMakeupFast(any()) }
+    }
+
+    // ── SaveExemption ───────────────────────────────────────────────
+
+    @Test
+    fun `SaveExemption stores the reason against an exempted day`() = runTest {
+        val target = LocalDate.of(2026, 8, 11)
+        coEvery { repository.getFastRecordForDate(any()) } returns null
+
+        viewModel = createViewModel()
+        advanceUntilIdle()
+
+        viewModel.onEvent(FastingEvent.SaveExemption(target, ExemptionReason.TRAVEL))
+        advanceUntilIdle()
+
+        coVerify {
+            repository.insertFastRecord(
+                match {
+                    it.status == FastStatus.EXEMPTED &&
+                        it.exemptionReason == ExemptionReason.TRAVEL
+                }
+            )
+        }
+    }
+
+    @Test
+    fun `SaveExemption keeps a note already on the day`() = runTest {
+        val target = LocalDate.of(2026, 8, 11)
+        val epoch = dateToEpoch(target)
+        coEvery { repository.getFastRecordForDate(epoch) } returns
+            createFastRecord(id = 3, date = epoch).copy(note = "kept")
+
+        viewModel = createViewModel()
+        advanceUntilIdle()
+
+        viewModel.onEvent(FastingEvent.SaveExemption(target, ExemptionReason.ILLNESS))
+        advanceUntilIdle()
+
+        coVerify { repository.updateFastRecord(match { it.note == "kept" }) }
+    }
+
+    // ── SaveNote ────────────────────────────────────────────────────
+
+    @Test
+    fun `SaveNote keeps the day's existing status`() = runTest {
+        val target = LocalDate.of(2026, 8, 11)
+        val epoch = dateToEpoch(target)
+        coEvery { repository.getFastRecordForDate(epoch) } returns
+            createFastRecord(id = 4, date = epoch, status = FastStatus.FASTED)
+
+        viewModel = createViewModel()
+        advanceUntilIdle()
+
+        viewModel.onEvent(FastingEvent.SaveNote(target, "felt easy"))
+        advanceUntilIdle()
+
+        coVerify {
+            repository.updateFastRecord(
+                match { it.status == FastStatus.FASTED && it.note == "felt easy" }
+            )
+        }
+    }
+
+    @Test
+    fun `SaveNote on an unlogged day does not invent a fasted status`() = runTest {
+        val target = LocalDate.of(2026, 8, 11)
+        coEvery { repository.getFastRecordForDate(any()) } returns null
+
+        viewModel = createViewModel()
+        advanceUntilIdle()
+
+        viewModel.onEvent(FastingEvent.SaveNote(target, "planning to fast"))
+        advanceUntilIdle()
+
+        coVerify {
+            repository.insertFastRecord(match { it.status == FastStatus.NOT_FASTED })
+        }
+    }
+
+    @Test
+    fun `a blank note clears rather than storing an empty string`() = runTest {
+        val target = LocalDate.of(2026, 8, 11)
+        val epoch = dateToEpoch(target)
+        coEvery { repository.getFastRecordForDate(epoch) } returns
+            createFastRecord(id = 6, date = epoch).copy(note = "old")
+
+        viewModel = createViewModel()
+        advanceUntilIdle()
+
+        viewModel.onEvent(FastingEvent.SaveNote(target, "   "))
+        advanceUntilIdle()
+
+        coVerify { repository.updateFastRecord(match { it.note == null }) }
     }
 
     // ── Job cancellation (the bug fix) ──────────────────────────────

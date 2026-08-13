@@ -134,6 +134,18 @@ sealed interface Route {
     data object FastingStats : Route
 
     /**
+     * Make-up fasts — what is owed, and what has been settled by fasting or fidya.
+     *
+     * This route existed once, was deleted when make-up became a tab inside the fast tracker,
+     * and is back because the tab went away again in the 2026-08 redesign. The tab row it lived
+     * in was the only thing standing between the tracker and one uninterrupted scroll, and a
+     * two-tab row is a poor trade for that. Recorded rather than quietly re-added: the pendulum
+     * has swung twice, and the next person deserves to know why it is where it is.
+     */
+    @Serializable
+    data object MakeupFasts : Route
+
+    /**
      * Night worship (Tahajjud / Witr) — the destination for those two Home worship cards.
      *
      * Exists because those reminders had nowhere useful to go: the app can tell you the last

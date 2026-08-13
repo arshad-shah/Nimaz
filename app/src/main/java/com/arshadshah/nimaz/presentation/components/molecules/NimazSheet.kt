@@ -213,7 +213,7 @@ fun NimazSheetHeader(
         if (badge != null) {
             Surface(
                 shape = RoundedCornerShape(8.dp),
-                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
+                color = MaterialTheme.colorScheme.surfaceContainer
             ) {
                 Text(
                     text = badge,
@@ -229,7 +229,7 @@ fun NimazSheetHeader(
             Surface(
                 onClick = onClose,
                 shape = CircleShape,
-                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
+                color = MaterialTheme.colorScheme.surfaceContainer
             ) {
                 NimazIcon(
                     imageVector = Icons.Default.Close,
@@ -251,7 +251,7 @@ fun NimazSheetHeader(
 @Composable
 fun NimazSheetPreviewCard(
     modifier: Modifier = Modifier,
-    color: Color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
+    color: Color = MaterialTheme.colorScheme.surfaceContainerLow,
     shape: Shape = RoundedCornerShape(14.dp),
     contentPadding: PaddingValues = PaddingValues(16.dp),
     content: @Composable ColumnScope.() -> Unit
@@ -344,7 +344,7 @@ private fun ActionPill(
                         if (action.selected) {
                             MaterialTheme.colorScheme.primaryContainer
                         } else {
-                            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
+                            MaterialTheme.colorScheme.surfaceContainer
                         }
                     ),
                 contentAlignment = Alignment.Center
