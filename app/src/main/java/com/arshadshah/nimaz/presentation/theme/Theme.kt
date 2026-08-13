@@ -58,6 +58,10 @@ private val LightColorScheme = lightColorScheme(
     surfaceVariant = md_theme_light_surfaceVariant,
     onSurfaceVariant = md_theme_light_onSurfaceVariant,
     outline = md_theme_light_outline,
+    outlineVariant = NimazColors.OutlineVariantLight,
+    inverseSurface = NimazColors.InverseSurfaceLight,
+    inverseOnSurface = NimazColors.InverseOnSurfaceLight,
+    inversePrimary = NimazColors.InversePrimaryLight,
     // `surfaceTint` defaults to `primary`, and Material 3 paints it over any surface that carries
     // a tonal elevation — which is why bottom sheets and top app bars came out teal-tinted while
     // `surface` itself is plain white. Pointing it at the surface colour makes the overlay a
@@ -96,6 +100,10 @@ private val DarkColorScheme = darkColorScheme(
     surfaceVariant = md_theme_dark_surfaceVariant,
     onSurfaceVariant = md_theme_dark_onSurfaceVariant,
     outline = md_theme_dark_outline,
+    outlineVariant = NimazColors.OutlineVariantDark,
+    inverseSurface = NimazColors.InverseSurfaceDark,
+    inverseOnSurface = NimazColors.InverseOnSurfaceDark,
+    inversePrimary = NimazColors.InversePrimaryDark,
     surfaceTint = md_theme_dark_surface,
     surfaceContainerLowest = NimazColors.SurfaceContainerLowestDark,
     surfaceContainerLow = NimazColors.SurfaceContainerLowDark,

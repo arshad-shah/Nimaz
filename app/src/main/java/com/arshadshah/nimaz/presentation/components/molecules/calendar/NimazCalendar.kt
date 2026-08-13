@@ -33,7 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalHapticFeedback
+import com.arshadshah.nimaz.presentation.theme.rememberNimazHaptics
 import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
@@ -100,7 +100,7 @@ fun NimazCalendar(
     headerAlignment: CalendarHeaderAlignment = CalendarHeaderAlignment.START
 ) {
     val today = remember { LocalDate.now() }
-    val haptic = LocalHapticFeedback.current
+    val haptic = rememberNimazHaptics()
 
     Column(modifier = modifier) {
         // Navigation header

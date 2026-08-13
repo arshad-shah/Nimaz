@@ -135,6 +135,25 @@ object NimazColors {
     val OutlineLight = P.Gray200
     val OutlineDark = P.Stone800
 
+    /**
+     * The subtle hairline — dividers, chip borders, the quiet edge of an outlined badge.
+     *
+     * Used 49 times across the app and never defined, so every one of those hairlines was
+     * drawing Material 3's generated baseline, which is tinted off the primary hue. It is the
+     * same omission that made surfaces mint and containers lavender.
+     */
+    val OutlineVariantLight = P.Stone200
+    val OutlineVariantDark = P.Stone800
+
+    // ── Inverse — the tooltip / snackbar surface, which flips against the theme ────
+    val InverseSurfaceLight = P.Stone900
+    val InverseOnSurfaceLight = P.Gray100
+    val InversePrimaryLight = Primary400
+
+    val InverseSurfaceDark = P.Gray100
+    val InverseOnSurfaceDark = P.Ink
+    val InversePrimaryDark = Primary700
+
     // ── Prayer-time accents ───────────────────────────────────────────────────
     object PrayerColors {
         val Fajr = P.Indigo500

@@ -1128,6 +1128,24 @@ generating from the **primary hue**:
 faked a container with `surfaceVariant.copy(alpha = …)`; they now use the real roles. If a surface
 looks wrong, the scheme is the place to look.
 
+`outlineVariant`, `inverseSurface`, `inverseOnSurface` and `inversePrimary` are defined for the
+same reason — `outlineVariant` alone is read at 49 call sites, so every divider and chip border in
+the app was drawing a generated colour nobody chose. **The only role deliberately left to Material
+is `scrim`**, which nothing reads and whose default (black) is correct.
+
+> **A theme value that nothing consumes is the same bug wearing different clothes.** Three
+> instances have been found and fixed, and they rhyme:
+> - the `surfaceContainer*` roles were *never defined*, so Material generated them;
+> - both variable font families were *declared without `variationSettings`*, so every weight
+>   resolved to the file's default instance and **no text in the app rendered bold** — see §8.3;
+> - `LocalHapticEnabled` was *provided and never read*, so the haptics preference did nothing
+>   while two components buzzed unconditionally. Haptics now go through
+>   `rememberNimazHaptics()` (`theme/NimazHaptics.kt`), **not** `LocalHapticFeedback` — it
+>   returns a silent no-op when the user has switched them off, so no call site has to remember.
+>
+> When adding a theme value, check the other end: something must read it, and reading it must
+> change what is drawn.
+
 The atom layer resolves tone through **`NimazToneColors`** (`components/atoms/NimazToneColors.kt`),
 an `internal object` with `foreground(tone)` / `container(tone)` / `outline(tone)`. Use it in any
 new atom rather than writing another `when (tone)` block: `NimazBadgeDefaults` kept its copies
@@ -1252,6 +1270,25 @@ treatment. Verse-of-the-Day and continue-reading previously both carried
 `QuranColors.BannerGradient` and consumed the whole first screenful between them.
 
 ---
+
+### 8.3 Typography (`NimazTypography`)
+
+Two Latin faces, split by what the text *does* — not by size:
+
+| Scales | Face | Why |
+|---|---|---|
+| `display*`, `headline*`, `title*`, `label*` | **Outfit** | Geometric and tight. Carries anything read as structure or as a value: screen and card titles, section headings, prayer times, day numbers, button and chip labels. |
+| `body*` | **Plus Jakarta Sans** | Wider apertures, easier in continuous prose. |
+
+Arabic keeps its own families (`AmiriFontFamily`, `ScheherazadeFontFamily`, `IndoPakFontFamily`,
+`NotoNastaliqUrduFontFamily`) — see `ArabicTextStyles`.
+
+**Both Latin faces are variable fonts, and a variable font does not respond to `FontWeight` on its
+own.** Declaring the same file once per weight registers entries that all resolve to the file's
+*default instance*; for Outfit that default is the thin end of the axis, so for a long time
+**nothing in the app rendered bold**, however loudly a call site asked. `variableFontFamily()` in
+`theme/Type.kt` builds each family by mapping every weight to an explicit
+`FontVariation.Settings(FontVariation.weight(…))`. Add a weight there, not by re-declaring the font.
 
 ## 9. Known deviations & tech-debt registry
 
