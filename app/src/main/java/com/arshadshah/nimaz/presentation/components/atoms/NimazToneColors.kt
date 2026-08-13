@@ -4,6 +4,7 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import com.arshadshah.nimaz.presentation.theme.NimazColors
 
 /**
  * The one place [NimazTone] turns into colour for the atom layer.
@@ -18,6 +19,10 @@ import androidx.compose.ui.graphics.Color
  */
 internal object NimazToneColors {
 
+    /** How far a tone's own colour is knocked back to become the bed it sits on. */
+    private const val ContainerAlpha = 0.16f
+
+
     /**
      * Text, icon or fill colour carrying the tone's meaning — the part the eye reads as
      * "this is good" or "this needs attention".
@@ -26,8 +31,17 @@ internal object NimazToneColors {
     fun foreground(tone: NimazTone): Color = when (tone) {
         NimazTone.NEUTRAL, NimazTone.MUTED -> MaterialTheme.colorScheme.onSurfaceVariant
         NimazTone.ACCENT, NimazTone.PROMINENT -> MaterialTheme.colorScheme.primary
-        NimazTone.SUCCESS -> MaterialTheme.colorScheme.tertiary
-        NimazTone.WARNING -> MaterialTheme.colorScheme.secondary
+        // `NimazColors.Success` (green), **not** `colorScheme.tertiary`.
+        //
+        // The scheme's tertiary is `DeepPurple`, and a "Fasted" control painted purple next to a
+        // calendar legend painting the same word green is how this was caught — on an emulator,
+        // after the tests passed. The app is already split on this: `NimazSwitch`'s SUCCESS
+        // variant uses the green token, while `NimazBadgeDefaults` uses tertiary. Green is the
+        // side that means what the tone says, so the atom layer takes it. See ARCHITECTURE §9.
+        NimazTone.SUCCESS -> NimazColors.Success
+        // Amber, for the same reason: the scheme's secondary is the brand gold, which reads as
+        // decoration rather than as "needs attention".
+        NimazTone.WARNING -> NimazColors.Warning
         NimazTone.ERROR -> MaterialTheme.colorScheme.error
         // Inherits whatever the enclosing content colour is, which is the whole point of a
         // transparent tone: it takes the surface's word for it.
@@ -43,8 +57,10 @@ internal object NimazToneColors {
         NimazTone.NEUTRAL -> MaterialTheme.colorScheme.surfaceContainerHighest
         NimazTone.MUTED -> MaterialTheme.colorScheme.surfaceContainer
         NimazTone.ACCENT, NimazTone.PROMINENT -> MaterialTheme.colorScheme.primaryContainer
-        NimazTone.SUCCESS -> MaterialTheme.colorScheme.tertiaryContainer
-        NimazTone.WARNING -> MaterialTheme.colorScheme.secondaryContainer
+        // Tinted from the foregrounds above rather than from the scheme's tertiary/secondary
+        // containers, which are purple and gold and would put a green fill on a purple bed.
+        NimazTone.SUCCESS -> NimazColors.Success.copy(alpha = ContainerAlpha)
+        NimazTone.WARNING -> NimazColors.Warning.copy(alpha = ContainerAlpha)
         NimazTone.ERROR -> MaterialTheme.colorScheme.errorContainer
         NimazTone.TRANSPARENT -> Color.Transparent
     }

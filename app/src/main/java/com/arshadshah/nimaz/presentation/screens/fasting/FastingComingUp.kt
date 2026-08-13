@@ -38,6 +38,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazDivider
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
+import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.theme.ThemeMode
 import java.time.DayOfWeek
@@ -157,6 +158,9 @@ fun rememberComingUpFasts(
         }.sortedBy { it.second }.take(3)
     }
 
+    // Sorted, because "Coming up" is a promise about order. Built unsorted, this listed next
+    // Monday before today — the weekly days are added in fixed Mon/Thu sequence, which is only
+    // chronological for part of the week.
     return buildList {
         add(
             ComingUpFast(
@@ -201,7 +205,7 @@ fun rememberComingUpFasts(
                 )
             )
         }
-    }
+    }.sortedBy { it.date }
 }
 
 /**
@@ -293,8 +297,11 @@ private fun ComingUpCard(
                     imageVector = if (fast.isLogged) Icons.Default.Check else Icons.Default.Add,
                     contentDescription = null,
                     size = NimazIconSize.SMALL,
+                    // NimazColors.Success, not colorScheme.tertiary: this theme's tertiary is
+                    // a deep purple, and "Logged" has to match the green the day card and the
+                    // calendar legend both use for the same fact.
                     tint = if (fast.isLogged) {
-                        MaterialTheme.colorScheme.tertiary
+                        NimazColors.Success
                     } else {
                         MaterialTheme.colorScheme.onSurfaceVariant
                     },
@@ -309,7 +316,7 @@ private fun ComingUpCard(
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.SemiBold,
                     color = if (fast.isLogged) {
-                        MaterialTheme.colorScheme.tertiary
+                        NimazColors.Success
                     } else {
                         MaterialTheme.colorScheme.onSurfaceVariant
                     },
