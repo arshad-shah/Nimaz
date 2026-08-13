@@ -25,7 +25,11 @@ import com.arshadshah.nimaz.presentation.theme.QuranSurfaceColors.medallionInk
  *
  * Contrast note: [frameGold] is a border/ornament, so it only needs the 3:1
  * non-text ratio; [medallionInk] paints small numerals and therefore needs the
- * stricter text-grade ratio — hence the two different golds in light mode.
+ * stricter text-grade ratio — hence the two different golds in light mode. The
+ * [paper]/[paperLine]/[paperInk] trio is exempt from that 3:1 bar for [paperLine]:
+ * it is a decorative hairline simulating a printed page's rule, not a component
+ * boundary that needs to be found by contrast, so it is allowed to sit softer than
+ * the ratio a real UI edge would owe.
  */
 object QuranSurfaceColors {
 

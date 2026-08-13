@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.presentation.components.organisms
 
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsNotSelected
@@ -102,5 +103,60 @@ class NimazSegmentedTabsTest {
             NimazSegmentedTabs(tabs = emptyList(), selectedIndex = 0, onTabSelect = {})
         }
         composeRule.onNodeWithText("Outline").assertDoesNotExist()
+    }
+
+    @Test
+    fun `disabled content colour is faded relative to enabled`() {
+        val selectedColor = Color(0xFF112233)
+        val unselectedColor = Color(0xFF445566)
+
+        val enabledSelected = resolveSegmentContentColor(
+            selected = true,
+            enabled = true,
+            selectedColor = selectedColor,
+            unselectedColor = unselectedColor,
+        )
+        val disabledSelected = resolveSegmentContentColor(
+            selected = true,
+            enabled = false,
+            selectedColor = selectedColor,
+            unselectedColor = unselectedColor,
+        )
+        val enabledUnselected = resolveSegmentContentColor(
+            selected = false,
+            enabled = true,
+            selectedColor = selectedColor,
+            unselectedColor = unselectedColor,
+        )
+        val disabledUnselected = resolveSegmentContentColor(
+            selected = false,
+            enabled = false,
+            selectedColor = selectedColor,
+            unselectedColor = unselectedColor,
+        )
+
+        assertThat(disabledSelected).isNotEqualTo(enabledSelected)
+        assertThat(disabledUnselected).isNotEqualTo(enabledUnselected)
+        assertThat(disabledSelected.alpha).isLessThan(enabledSelected.alpha)
+        assertThat(disabledUnselected.alpha).isLessThan(enabledUnselected.alpha)
+    }
+
+    @Test
+    fun `disabled container colour is faded relative to enabled`() {
+        val selectedColor = Color(0xFF778899)
+
+        val enabledContainer = resolveSegmentContainerColor(
+            selected = true,
+            enabled = true,
+            selectedColor = selectedColor,
+        )
+        val disabledContainer = resolveSegmentContainerColor(
+            selected = true,
+            enabled = false,
+            selectedColor = selectedColor,
+        )
+
+        assertThat(disabledContainer).isNotEqualTo(enabledContainer)
+        assertThat(disabledContainer.alpha).isLessThan(enabledContainer.alpha)
     }
 }

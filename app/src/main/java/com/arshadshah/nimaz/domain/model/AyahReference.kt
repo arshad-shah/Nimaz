@@ -16,6 +16,20 @@ data class AyahReference(
     val ayahNumber: Int,
     val surahName: String? = null,
 ) {
+    init {
+        require(surahNumber in 1..114) { "surahNumber must be in 1..114, was $surahNumber" }
+        require(ayahNumber >= 1) { "ayahNumber must be >= 1, was $ayahNumber" }
+    }
+
+    /**
+     * Returns a bare string with no bidirectional isolation applied.
+     *
+     * A caller rendering this inside an RTL paragraph (an Arabic surah name next to
+     * Latin-digit numbers) should wrap the result in FSI/PDI (`⁨…⁩`) at the render
+     * site if it needs isolating from surrounding text — that isolation is
+     * deliberately **not** added here, because it would corrupt every plain,
+     * non-RTL use of this string (logs, non-RTL UI, tests).
+     */
     fun format(): String {
         val numbers = "$surahNumber:$ayahNumber"
         val name = surahName?.trim().orEmpty()

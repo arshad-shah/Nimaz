@@ -1997,6 +1997,4 @@
     <string name="fasting_your_month">Ayınız</string>
     <string name="fasting_sunnah_virtuous">Sünnet ve faziletli günler</string>
     <string name="fasting_fasted_count">%1$d oruç</string>
-    <string name="tree_node_expand">%1$s ögesini genişlet</string>
-    <string name="tree_node_collapse">%1$s ögesini daralt</string>
 </resources>

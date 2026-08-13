@@ -1269,7 +1269,7 @@ card there, including Verse-of-the-Day and the Khatam row, uses the normal `Nima
 treatment. Verse-of-the-Day and continue-reading previously both carried
 `QuranColors.BannerGradient` and consumed the whole first screenful between them.
 
-### 8.3 Segmented control (`NimazSegmentedTabs`) and tree rows (`NimazTreeNode`)
+### 8.3 Segmented control (`NimazSegmentedTabs`) and tree rows (`NimazTreeRow`)
 
 - **`NimazSegmentedTabs`** (organism, `components/organisms/NimazSegmentedTabs.kt`) is the house
   segmented control: a recessed tray (`surfaceVariant`) with the selected segment **lifted** out
@@ -1283,14 +1283,12 @@ treatment. Verse-of-the-Day and continue-reading previously both carried
   replace `NimazPillTabs` and four other tab treatments across phases 2–5 of the Qur'an redesign,
   but **`NimazPillTabs` is not removed in this phase** — it still has live callers (Tasbih, Names,
   Bookmarks, Khatam, Qibla and several Qur'an screens) and stays until each is migrated.
-- **`NimazTreeNode`** (molecule, `components/molecules/NimazTreeNode.kt`) is one node of an
-  expandable tree: a `NimazCard` carrying a label, an optional count, a rotating chevron, and its
-  children behind an indent rail. It takes **two** callbacks on purpose — a subject tree has two
-  distinct actions on one row (open this subject, and show what's under it) and which one the row
-  as a whole performs is a call the tree makes at each site, not the component. Supplying only
-  `onToggleExpand` makes the whole row a toggle; supplying `onClick` as well puts expansion on the
-  chevron and navigation on the label. `content` is composed only while `expanded`, so a deep tree
-  costs nothing until it is opened. A later phase picks which callback shape each call site uses.
+- **`NimazTreeRow`** (molecule, `components/molecules/NimazTreeRow.kt`) is the tree component for
+  the subject browser: a row with depth-based indent ruling, RTL handling, an optional `NimazBadge`
+  count, secondary/supporting text, trailing content, and a 48dp `NimazIconButton` chevron for
+  expand/collapse. It already existed before this redesign and is already the tree row consumed by
+  `QuranTopicsScreen`, `QuranTopicDetailScreen` and `SurahSubjectsScreen` — the three screens later
+  phases of this redesign rewrite — so it is the tree component to build on, not to duplicate.
 - `QuranSurfaceColors` (`presentation/theme/QuranSurfaceColors.kt`) now also carries a **`paper`**
   register — `paper` / `paperLine` / `paperInk` — used **only** by the mushaf and 16-line reading
   modes. It is held apart from `pageSurface` and the rest of the app's `surface` tokens because

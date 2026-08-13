@@ -65,25 +65,28 @@ fun NimazSegmentedTabs(
                 val selected = index == selectedIndex
 
                 val container by animateColorAsState(
-                    targetValue = if (selected) {
-                        MaterialTheme.colorScheme.surface
-                    } else {
-                        Color.Transparent
-                    },
+                    targetValue = resolveSegmentContainerColor(
+                        selected = selected,
+                        enabled = enabled,
+                        selectedColor = MaterialTheme.colorScheme.surface,
+                    ),
                     animationSpec = tween(180),
                     label = "segment_container",
                 )
                 val content by animateColorAsState(
-                    targetValue = if (selected) {
-                        MaterialTheme.colorScheme.onSurface
-                    } else {
-                        MaterialTheme.colorScheme.onSurfaceVariant
-                    },
+                    targetValue = resolveSegmentContentColor(
+                        selected = selected,
+                        enabled = enabled,
+                        selectedColor = MaterialTheme.colorScheme.onSurface,
+                        unselectedColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    ),
                     animationSpec = tween(180),
                     label = "segment_content",
                 )
+                // Disabled drops the lift entirely — a floating shadow reads as
+                // interactive, which a disabled control must not imply.
                 val lift by animateDpAsState(
-                    targetValue = if (selected) 2.dp else 0.dp,
+                    targetValue = if (selected && enabled) 2.dp else 0.dp,
                     animationSpec = tween(180),
                     label = "segment_lift",
                 )
@@ -116,6 +119,43 @@ fun NimazSegmentedTabs(
         }
     }
 }
+
+/**
+ * Content colour for one segment, folding in the disabled fade.
+ *
+ * Matches the disabled-content alpha Material 3's own [androidx.compose.material3.ButtonDefaults]
+ * apply (and that [com.arshadshah.nimaz.presentation.components.molecules.NimazNumberStepper]
+ * mirrors by hand) — `0.38` — so a disabled segmented control reads exactly like a disabled
+ * [com.arshadshah.nimaz.presentation.components.atoms.NimazButton].
+ */
+internal fun resolveSegmentContentColor(
+    selected: Boolean,
+    enabled: Boolean,
+    selectedColor: Color,
+    unselectedColor: Color,
+): Color {
+    val base = if (selected) selectedColor else unselectedColor
+    return if (enabled) base else base.copy(alpha = base.alpha * DISABLED_CONTENT_ALPHA)
+}
+
+/**
+ * Container colour for one segment's lifted pill, folding in the disabled fade.
+ *
+ * `0.12` mirrors Material 3's disabled-container alpha, the same value
+ * [com.arshadshah.nimaz.presentation.components.molecules.NimazNumberStepper] uses for its own
+ * disabled container.
+ */
+internal fun resolveSegmentContainerColor(
+    selected: Boolean,
+    enabled: Boolean,
+    selectedColor: Color,
+): Color {
+    val base = if (selected) selectedColor else Color.Transparent
+    return if (enabled) base else base.copy(alpha = base.alpha * DISABLED_CONTAINER_ALPHA)
+}
+
+private const val DISABLED_CONTENT_ALPHA = 0.38f
+private const val DISABLED_CONTAINER_ALPHA = 0.12f
 
 @Preview(name = "Segmented tabs · light")
 @Preview(name = "Segmented tabs · dark", uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES)
