@@ -173,8 +173,11 @@ fun PrayerTrackerScreen(
                     streak = statsState.currentStreak,
                     expandedPrayer = expandedPrayer,
                     onExpandedChange = { expandedPrayer = it },
+                    // The row stays open. Closing it on the tap that set the status hid the one
+                    // piece of feedback the picker gives -- the chosen segment taking its colour --
+                    // and on a tap-to-clear it slammed shut over the note explaining what
+                    // "not recorded" means. The header is how a row closes.
                     onSetStatus = { prayer, status ->
-                        expandedPrayer = null
                         viewModel.onEvent(PrayerTrackerEvent.SetPrayerStatus(prayer, status))
                     },
                     onBackToToday = {
