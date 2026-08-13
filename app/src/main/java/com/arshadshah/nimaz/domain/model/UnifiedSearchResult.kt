@@ -6,6 +6,7 @@ sealed class UnifiedSearchResult {
     data class HadithResult(val result: HadithSearchResult) : UnifiedSearchResult()
     data class DuaResult(val result: DuaSearchResult) : UnifiedSearchResult()
     data class SurahResult(val surah: Surah) : UnifiedSearchResult()
+    data class NameResult(val result: NameSearchResult) : UnifiedSearchResult()
 
     /**
      * Stable identity for a lazy-list `key`. Prefixed per variant because the underlying ids
@@ -18,5 +19,8 @@ sealed class UnifiedSearchResult {
             is HadithResult -> "hadith:${result.hadith.id}"
             is DuaResult -> "dua:${result.dua.id}"
             is SurahResult -> "surah:${surah.number}"
+            // Three catalogues share one id space per catalogue, so the catalogue is part
+            // of the key: name 1 of Allah and prophet 1 must not collide.
+            is NameResult -> "name:${result.catalog.name}:${result.id}"
         }
 }

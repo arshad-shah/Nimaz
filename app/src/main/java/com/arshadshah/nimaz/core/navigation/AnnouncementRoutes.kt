@@ -1,6 +1,7 @@
 package com.arshadshah.nimaz.core.navigation
 
 import com.arshadshah.nimaz.domain.model.MushafScript
+import com.arshadshah.nimaz.presentation.screens.names.NamesTab
 
 /**
  * Maps an announcement payload `route` key to an in-app Route, or null if
@@ -34,9 +35,14 @@ private fun staticAnnouncementRoute(key: String): Route? = when (key) {
     "calendar" -> Route.IslamicCalendar
     "qaida" -> Route.QaidaHome
     "khatam" -> Route.KhatamList
-    "names/allah" -> Route.AsmaUlHusnaList
-    "names/prophet" -> Route.AsmaUnNabiList
-    "prophets" -> Route.ProphetsList
+    // The three catalogues are one tabbed screen now, so these three keys keep working by
+    // selecting a tab rather than by reaching three destinations. Announcements already sent
+    // still land where they meant to.
+    "names" -> Route.Names()
+    "names/allah" -> Route.Names(NamesTab.ASMA_UL_HUSNA.ordinal)
+    "names/prophet" -> Route.Names(NamesTab.ASMA_UN_NABI.ordinal)
+    "prophets" -> Route.Names(NamesTab.PROPHETS.ordinal)
+    "favourites" -> Route.Favourites
     "search" -> Route.GlobalSearch
     "search/ask" -> Route.GlobalSearch
     "search/settings" -> Route.SearchSettings

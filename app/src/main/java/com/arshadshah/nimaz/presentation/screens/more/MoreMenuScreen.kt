@@ -92,9 +92,7 @@ fun MoreMenuScreen(
     onNavigateToPrayerTimes: () -> Unit,
     onNavigateToMonthlyPrayerTimes: () -> Unit,
     onNavigateToKhatam: () -> Unit,
-    onNavigateToAsmaUlHusna: () -> Unit,
-    onNavigateToAsmaUnNabi: () -> Unit,
-    onNavigateToProphets: () -> Unit,
+    onNavigateToNames: () -> Unit,
     onNavigateToQaida: () -> Unit,
     onNavigateToTasbih: () -> Unit,
     onNavigateToQibla: () -> Unit,
@@ -255,22 +253,14 @@ fun MoreMenuScreen(
                     NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
                     // No subtitle from here down: these are reference collections with nothing
                     // true to report about them. Restating the title is what was removed.
+                    // One row for what used to be three — "Allah's 99 Names", "Prophet's 99
+                    // Names" and "Prophets of Islam" are three tabs of one screen now, and
+                    // this is the one place a reader looks for any of them.
                     NimazMenuItem(
-                        title = stringResource(R.string.allahs_99_names),
+                        title = stringResource(R.string.names_title),
+                        subtitle = stringResource(R.string.names_more_subtitle),
                         icon = Icons.Default.AutoAwesome,
-                        onClick = onNavigateToAsmaUlHusna
-                    )
-                    NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
-                    NimazMenuItem(
-                        title = stringResource(R.string.prophets_99_names),
-                        icon = Icons.Default.Person,
-                        onClick = onNavigateToAsmaUnNabi
-                    )
-                    NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
-                    NimazMenuItem(
-                        title = stringResource(R.string.prophets_of_islam),
-                        icon = Icons.Default.Groups,
-                        onClick = onNavigateToProphets
+                        onClick = onNavigateToNames
                     )
                     NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
                     NimazMenuItem(

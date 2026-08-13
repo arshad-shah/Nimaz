@@ -15,6 +15,11 @@ buildscript {
 
 plugins {
     alias(libs.plugins.android.application) apply false
+    // com.android.test backs :baselineprofile. Declared here because AGP is already on
+    // the build classpath, so requesting it with a version in the module fails with
+    // "already on the classpath with an unknown version".
+    alias(libs.plugins.android.test) apply false
+    alias(libs.plugins.baselineprofile) apply false
     // Note: the standalone org.jetbrains.kotlin.android plugin is intentionally NOT
     // applied — AGP 9 compiles Kotlin through its built-in Kotlin support.
     alias(libs.plugins.kotlin.compose) apply false

@@ -3,29 +3,37 @@ package com.arshadshah.nimaz.data.audio
 import android.content.Context
 import android.media.MediaMetadataRetriever
 import androidx.annotation.OptIn
+import androidx.annotation.VisibleForTesting
 import androidx.media3.common.ForwardingPlayer
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
+import com.arshadshah.nimaz.core.di.IoDispatcher
 import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.domain.model.QuranReciter
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
 import java.io.File
-import java.net.URL
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -60,7 +68,15 @@ data class AudioState(
 @UnstableApi
 @Singleton
 class QuranAudioManager @Inject constructor(
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
+    private val downloader: AyahAudioDownloader,
+    /**
+     * Where file transfers run. Injected rather than `Dispatchers.IO` inline so a test can
+     * substitute a test dispatcher — without it the download loop runs on a real thread pool
+     * that `advanceUntilIdle()` cannot drive, and the cancellation behaviour #468 fixed cannot
+     * be asserted at all.
+     */
+    @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private var player: ExoPlayer? = null
@@ -156,6 +172,12 @@ class QuranAudioManager @Inject constructor(
     }
 
     companion object {
+        /** How often playback position is republished. See [startPositionTracking]. */
+        private const val POSITION_TICK_MS = 400L
+
+        /** Concurrent ayah downloads. Enough to saturate a connection, few enough to share it. */
+        private const val MAX_PARALLEL_DOWNLOADS = 5
+
         // CDN identifiers and bitrates from https://api.alquran.cloud/v1/edition?format=audio&type=versebyverse
         // Pair: (cdnId, bitrate) - some reciters only have 64kbps, others have 128kbps.
         //
@@ -284,23 +306,41 @@ class QuranAudioManager @Inject constructor(
         }
     }
 
+    /**
+     * Publish playback position while something is listening.
+     *
+     * This used to tick every 100 ms unconditionally — ten wake-ups a second, forever,
+     * including with the screen off during background playback, and including while
+     * *paused*, because `isPlaying` guarded only the state update and not the delay.
+     * Each tick recomputes [computeTotalPosition] and [computeTotalDuration] across the
+     * whole playlist, which is not free on a 286-ayah surah.
+     *
+     * Now 400 ms, and only while a collector is attached. A progress bar animating
+     * between 400 ms ticks looks smoother than one snapping to 100 ms ones, so this is
+     * not a quality trade.
+     */
     private fun startPositionTracking() {
         positionTrackingJob?.cancel()
         positionTrackingJob = scope.launch {
-            while (true) {
-                delay(100) // More frequent updates for smoother progress
-                val p = player ?: break
-                if (p.isPlaying) {
-                    val totalPos = computeTotalPosition(p)
-                    val totalDur = computeTotalDuration()
-                    _audioState.update {
-                        it.copy(
-                            position = totalPos,
-                            duration = if (totalDur > 0) totalDur else it.duration
-                        )
+            _audioState.subscriptionCount
+                .map { it > 0 }
+                .distinctUntilChanged()
+                .collectLatest { hasCollectors ->
+                    if (!hasCollectors) return@collectLatest
+                    while (true) {
+                        delay(POSITION_TICK_MS)
+                        val p = player ?: break
+                        if (!p.isPlaying) continue
+                        val totalPos = computeTotalPosition(p)
+                        val totalDur = computeTotalDuration()
+                        _audioState.update {
+                            it.copy(
+                                position = totalPos,
+                                duration = if (totalDur > 0) totalDur else it.duration
+                            )
+                        }
                     }
                 }
-            }
         }
     }
 
@@ -308,7 +348,8 @@ class QuranAudioManager @Inject constructor(
      * Download all ayahs for the playlist in parallel, then start playback.
      * Shows download progress as files are downloaded.
      */
-    private suspend fun downloadAllAyahs(ayahs: List<AyahAudioItem>): List<File> {
+    @VisibleForTesting
+    internal suspend fun downloadAllAyahs(ayahs: List<AyahAudioItem>): List<File> {
         val files = mutableListOf<File>()
         val toDownload = mutableListOf<Pair<AyahAudioItem, File>>()
 
@@ -334,28 +375,40 @@ class QuranAudioManager @Inject constructor(
             )
         }
 
-        // Download files with parallel downloads (limit concurrency to avoid overwhelming network)
         val downloadedCount = java.util.concurrent.atomic.AtomicInteger(0)
 
-        withContext(Dispatchers.IO) {
-            // Use chunked parallel downloads - 5 concurrent downloads at a time
-            toDownload.chunked(5).forEach { chunk ->
-                ensureActive() // Bail out if user cancelled
-                val jobs = chunk.map { (ayah, file) ->
-                    scope.launch(Dispatchers.IO) {
-                        val url =
-                            "https://cdn.islamic.network/quran/audio/$reciterBitrate/$reciterCdnId/${ayah.ayahGlobalId}.mp3"
-                        downloadFileSilent(url, file)
-                        val count = downloadedCount.incrementAndGet()
-                        _audioState.update {
-                            it.copy(
-                                downloadedCount = count,
-                                downloadProgress = count.toFloat() / toDownload.size
-                            )
+        // `coroutineScope { launch { … } }`, not `scope.launch { … }`.
+        //
+        // These used to be started on the manager's own `scope`, which made them
+        // *siblings* of `downloadJob` rather than children of it. So `downloadJob.cancel()`
+        // stopped the waiting and left every download running: they kept writing
+        // `downloadedCount` and `downloadProgress` into the shared audio state, so
+        // switching surah mid-download let the old surah's progress overwrite the new
+        // one's and then jump backwards. Children inherit cancellation; siblings do not.
+        //
+        // A Semaphore rather than `chunked(5) + join`: the old shape waited for the
+        // slowest file in each group of five before starting the next group, so one slow
+        // connection idled four others. This keeps five in flight at all times.
+        withContext(ioDispatcher) {
+            val slots = Semaphore(MAX_PARALLEL_DOWNLOADS)
+            coroutineScope {
+                toDownload.forEach { (ayah, file) ->
+                    ensureActive() // Bail out if the user cancelled.
+                    launch {
+                        slots.withPermit {
+                            val url =
+                                "https://cdn.islamic.network/quran/audio/$reciterBitrate/$reciterCdnId/${ayah.ayahGlobalId}.mp3"
+                            downloadFileSilent(url, file)
+                            val count = downloadedCount.incrementAndGet()
+                            _audioState.update {
+                                it.copy(
+                                    downloadedCount = count,
+                                    downloadProgress = count.toFloat() / toDownload.size
+                                )
+                            }
                         }
                     }
                 }
-                jobs.forEach { it.join() }
             }
         }
 
@@ -741,25 +794,13 @@ class QuranAudioManager @Inject constructor(
         }
 
         try {
-            withContext(Dispatchers.IO) {
+            withContext(ioDispatcher) {
                 var lastException: Exception? = null
                 val maxRetries = 2
                 for (attempt in 0..maxRetries) {
                     ensureActive() // Bail out if cancelled
                     try {
-                        val connection = URL(url).openConnection()
-                        connection.connectTimeout = 15000
-                        connection.readTimeout = 30000
-
-                        connection.getInputStream().use { input ->
-                            destination.outputStream().use { output ->
-                                val buffer = ByteArray(8192)
-                                var bytesRead: Int
-                                while (input.read(buffer).also { bytesRead = it } != -1) {
-                                    output.write(buffer, 0, bytesRead)
-                                }
-                            }
-                        }
+                        downloader.download(url, destination)
                         return@withContext // Success
                     } catch (e: Exception) {
                         destination.delete()

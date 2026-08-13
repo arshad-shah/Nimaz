@@ -40,19 +40,14 @@ Core content and functionality are designed to remain available without constant
 
 ## Tech Stack
 
-- Android Gradle Plugin 8.12.0
-- Kotlin 2.3.0
-- Jetpack Compose BOM 2026.01.00
-- Hilt 2.57.1
-- Room 2.8.4
-- Navigation Compose 2.9.6
-- Coroutines 1.10.2
-- Media3 1.9.0
-- WorkManager 2.11.0
+Kotlin and Jetpack Compose, Clean Architecture with MVVM + UDF, Hilt, Room, DataStore,
+Media3, WorkManager and Glance.
 
-For the full dependency catalog, see:
-
-- `gradle/libs.versions.toml`
+**Versions are not duplicated here.** The version catalog is the single source of truth —
+see [`gradle/libs.versions.toml`](gradle/libs.versions.toml). A hand-maintained list lived
+in this section until eight of its nine entries had drifted from the catalog, and
+`scripts/check_docs.py` enforces 23 documentation obligations but none of them cover this
+file, so nothing could have caught it.
 
 ## Repository Structure
 

@@ -181,3 +181,52 @@ interface AppSettings {
     val appLanguage: Flow<String>
     suspend fun setAppLanguage(language: String)
 }
+
+/**
+ * The user's Hijri day offset — how many days to shift the computed Hijri date by, so the app
+ * agrees with their local moon sighting.
+ *
+ * Its own seam because it is read from three unrelated places (More's Hijri card, the
+ * calendar's event matching, and the fasting tab's Ayyām al-Bīḍ countdown) and none of them
+ * wants the other 179 members of `SettingsRepository` — the same argument [ZakatSettings]
+ * settled for the currency (#436).
+ *
+ * Registry Open #10 is about this preference reaching *all* of the Hijri helpers rather than
+ * only `HijriDateCalculator.today(offsetDays)`. A narrow seam is what makes passing it to one
+ * more of them cheap.
+ */
+interface HijriSettings {
+    /**
+     * Signed day offset (-2..+2, default 0) applied to the tabular Hijri date to correct for
+     * local moon-sighting differences. See `HijriDateCalculator.today(offsetDays)`.
+     */
+    val hijriDayOffset: Flow<Int>
+}
+
+/**
+ * How search behaves, as the user has set it.
+ *
+ * Primitives rather than the [com.arshadshah.nimaz.domain.model.SearchPreferences] model,
+ * like every other seam here: the store persists values, and
+ * `ObserveSearchPreferencesUseCase` is where they become a typed model with its invariants
+ * applied. Keeping the mapping out of the store means a preference file written by a newer
+ * build — an unknown source name, a strictness that no longer exists — degrades to the
+ * default instead of throwing on read.
+ */
+interface SearchSettings {
+    /** How many results each source may contribute. */
+    val searchResultsPerSource: Flow<Int>
+    suspend fun setSearchResultsPerSource(count: Int)
+
+    /** Comma-separated `LibrarySource` names. Empty string means "everything". */
+    val searchSources: Flow<String>
+    suspend fun setSearchSources(sources: String)
+
+    /** A `MatchStrictness` name. */
+    val searchStrictness: Flow<String>
+    suspend fun setSearchStrictness(strictness: String)
+
+    /** A `LibrarySource` name, or empty for "everything". */
+    val searchDefaultScope: Flow<String>
+    suspend fun setSearchDefaultScope(scope: String)
+}

@@ -3,6 +3,8 @@ package com.arshadshah.nimaz.domain.usecase
 import com.arshadshah.nimaz.domain.model.DuaSearchResult
 import com.arshadshah.nimaz.domain.model.HadithSearchResult
 import com.arshadshah.nimaz.domain.model.LibrarySearchResults
+import com.arshadshah.nimaz.domain.model.LibrarySource
+import com.arshadshah.nimaz.domain.model.NameSearchResult
 import com.arshadshah.nimaz.domain.model.QuranSearchResult
 import com.arshadshah.nimaz.domain.model.Surah
 import com.arshadshah.nimaz.domain.usecase.SearchLibraryUseCase.Companion.PHRASE_SCORE
@@ -44,6 +46,8 @@ class SearchLibraryUseCase @Inject constructor(
     private val quranUseCases: QuranUseCases,
     private val hadithUseCases: HadithUseCases,
     private val duaUseCases: DuaUseCases,
+    private val searchNames: SearchNamesUseCase,
+    private val searchPreferences: ObserveSearchPreferencesUseCase,
 ) {
     suspend operator fun invoke(
         query: String,
@@ -77,32 +81,51 @@ class SearchLibraryUseCase @Inject constructor(
         wordQueries: List<String>,
         translatorId: String,
     ): LibrarySearchResults {
+        // Read once per search rather than collected: a preference change mid-query would
+        // otherwise mean half the passes ran under the old settings and half under the new.
+        val prefs = searchPreferences().first()
+
         val quran = Ranked<Int, QuranSearchResult>()
         val surahs = Ranked<Int, Surah>()
         val hadith = Ranked<String, HadithSearchResult>()
         val duas = Ranked<String, DuaSearchResult>()
+        val names = Ranked<String, NameSearchResult>()
 
         val passes = buildList {
             if (phrase != null) add(phrase to PHRASE_SCORE)
-            addAll(wordQueries.take(MAX_WORD_QUERIES).map { it to 1 })
+            addAll(wordQueries.take(prefs.strictness.wordPasses).map { it to 1 })
         }
 
         for ((term, score) in passes) {
-            quranUseCases.searchQuran(term, translatorId).first()
-                .forEach { quran.add(it.ayah.id, it, score) }
-            quranUseCases.getSurahList.search(term).first()
-                .forEach { surahs.add(it.number, it, score) }
-            hadithUseCases.searchHadiths(term).first()
-                .forEach { hadith.add(it.hadith.id, it, score) }
-            duaUseCases.searchDuas(term).first()
-                .forEach { duas.add(it.dua.id, it, score) }
+            // A source the user switched off is not queried at all — the cost of a search is
+            // one query per source per pass, so this is the setting that makes a long query
+            // cheaper as well as the one that makes its results narrower.
+            if (LibrarySource.QURAN in prefs.sources) {
+                quranUseCases.searchQuran(term, translatorId).first()
+                    .forEach { quran.add(it.ayah.id, it, score) }
+                quranUseCases.getSurahList.search(term).first()
+                    .forEach { surahs.add(it.number, it, score) }
+            }
+            if (LibrarySource.HADITH in prefs.sources) {
+                hadithUseCases.searchHadiths(term).first()
+                    .forEach { hadith.add(it.hadith.id, it, score) }
+            }
+            if (LibrarySource.DUAS in prefs.sources) {
+                duaUseCases.searchDuas(term).first()
+                    .forEach { duas.add(it.dua.id, it, score) }
+            }
+            if (LibrarySource.NAMES in prefs.sources) {
+                searchNames(term)
+                    .forEach { names.add("${it.catalog}:${it.id}", it, score) }
+            }
         }
 
         return LibrarySearchResults(
-            quran = quran.top(MAX_PER_SOURCE),
-            surahs = surahs.top(MAX_PER_SOURCE),
-            hadith = hadith.top(MAX_PER_SOURCE),
-            duas = duas.top(MAX_PER_SOURCE),
+            quran = quran.top(prefs.resultsPerSource),
+            surahs = surahs.top(prefs.resultsPerSource),
+            hadith = hadith.top(prefs.resultsPerSource),
+            duas = duas.top(prefs.resultsPerSource),
+            names = names.top(prefs.resultsPerSource),
         )
     }
 
@@ -132,8 +155,10 @@ class SearchLibraryUseCase @Inject constructor(
         private const val PHRASE_SCORE = 100
 
         /** Bound the per-source DB work for very long queries/term lists. */
-        private const val MAX_WORD_QUERIES = 8
-        private const val MAX_PER_SOURCE = 60
+        // MAX_WORD_QUERIES and MAX_PER_SOURCE used to live here as 8 and 60. They are
+        // SearchPreferences.strictness and .resultsPerSource now: the 60 was invisible and
+        // unchangeable, so a search for الله returning 180 results — three sources at their
+        // cap — read as a defect rather than as a setting.
 
         private val NON_WORD = Regex("[^\\p{L}\\p{N}']+")
         private val STOPWORDS = setOf(

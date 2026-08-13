@@ -107,6 +107,19 @@ row here.
 Every `@HiltWorker CoroutineWorker` in the app. All widget workers are enqueued through
 `widget/core/WidgetWork.kt`.
 
+**A widget worker holds no logic.** Each `doWork()` is *get glance ids → `dataSource.load()` →
+write state*, with the computation in an injectable `XxxWidgetDataSource` beside it. That split
+is not cosmetic — it is the only way this code is testable at all. `doWork()` opens by asking
+`GlanceAppWidgetManager` for the widget's glance ids and returns `Result.success()` when there
+are none, and **a test device never has a widget placed**, so the entire body is unreachable from
+an instrumented test. `WidgetWorkersTest` was green for a year while asserting nothing about what
+any widget displays; it proves the `@AssistedInject` graph resolves, which is worth having and is
+all it does. Anything that can be wrong belongs in the data source, where it has JVM tests.
+
+A data source takes `TodayProvider` and `java.time.Clock` rather than calling `LocalDate.now()`
+or `Clock.System.now()` — without that seam the rollover branches (tomorrow's Fajr, the date
+label) cannot be tested, and those are the states the widgets sit in most of the time.
+
 | Worker | Package | Trigger | Section |
 |---|---|---|---|
 | `NextPrayerWorker` | `widget/nextprayer/` | periodic 15 min + widget `onEnabled` | [§2](#2-glance-widgets) |
@@ -201,6 +214,36 @@ completion awards stars and unlocks the next lesson. `QaidaReaderViewModel` coll
 and calls `markCellHeard` from there; `playLine` starts playback and writes no progress at all.
 (Tapping a single cell still marks eagerly — one tap, one clip, one intent.)
 
+**The download path is testable, and that is deliberate.** `QuranAudioManager` takes an
+[`AyahAudioDownloader`] and an `@IoDispatcher` rather than reaching for `URL.openConnection()`
+and `Dispatchers.IO` inline. The seam is narrow on purpose — de-duplication, concurrency, retry
+and progress reporting all stay in the manager; the downloader is only the byte transfer, which
+is the one thing that cannot run in a unit test. Without both, the cancellation contract below
+cannot be asserted: the transfers run on a real thread pool that a test dispatcher cannot drive.
+`QuranAudioManagerDownloadTest` fails if the sibling-launch defect is reintroduced, which is
+checked rather than assumed.
+
+**Download concurrency and cancellation.** `downloadAllAyahs` runs at most
+`MAX_PARALLEL_DOWNLOADS` (5) at a time, held by a `Semaphore` inside a `coroutineScope`.
+Both details are load-bearing and both replaced something broken:
+
+- The per-file jobs were started on the manager's own `scope`, which made them **siblings**
+  of `downloadJob` rather than children. `downloadJob.cancel()` therefore stopped the
+  waiting and left every download running, still writing `downloadedCount` and
+  `downloadProgress` into the shared `AudioState` — so switching surah mid-download let the
+  old surah's progress overwrite the new one's and then jump backwards. Anything launched
+  here must be a **child** of the download job.
+- The old shape was `chunked(5)` followed by `jobs.forEach { it.join() }`, a barrier that
+  waited for the slowest file in each group of five before starting the next, so one slow
+  connection idled four others. The semaphore keeps five in flight throughout.
+
+**Position tracking.** `startPositionTracking` republishes position every
+`POSITION_TICK_MS` (400 ms) and **only while `_audioState` has collectors**. It previously
+ticked every 100 ms unconditionally — ten wake-ups a second, forever, including with the
+screen off during background playback and including while paused, since `isPlaying` guarded
+only the state update and not the delay. Each tick recomputes `computeTotalPosition` and
+`computeTotalDuration` across the whole playlist, which is not free on a 286-ayah surah.
+
 **Gotchas.**
 - Two player APIs: ExoPlayer everywhere **except** `AdhanAudioManager.preview()` (legacy `MediaPlayer`).
 - `QuranAudioManager.stop()` deliberately does **not** send a stop intent to the service — it sets `isActive=false` and lets the service's state-observer self-stop after a 500 ms debounce, avoiding a start/stop race.
@@ -247,7 +290,7 @@ Each widget = a `GlanceAppWidget` subclass (`provideGlance` → `provideContent 
   - **Prayer Times "next prayer" highlight is render-time, not worker-time.** The worker stores each prayer's absolute `…EpochMillis` (not pre-computed "passed" flags). The composable picks which pill to highlight via `widget/core/PrayerHighlight.kt#nextPrayerIndex(epochs, now)` — the first prayer whose instant is still in the future, or `-1` (none) after Isha — and derives the header "X in Ym" from the same index. So every redraw tracks the wall clock; the highlight no longer lags behind the 15-min worker or gets stuck on a passed prayer under Doze throttling. (Pure function, unit-tested in `PrayerHighlightTest`.)
 - **Immediate refresh** on prayer-status change, from the tracker toggle and from `HomeViewModel` (keeps the widget in sync with in-app tracking).
 
-**Shared `widget/core/`.** `JsonGlanceStateDefinition.kt` (generic JSON-over-DataStore `GlanceStateDefinition`, one DataStore per file via a process-wide map), `WidgetStateUpdater.kt` (`updateWidgetState(...)`), `WidgetFormatters.kt` (time/countdown), `WidgetUi.kt` (`WidgetPalette`, `WidgetMessageBox`, `WidgetLoadingBox`, plus the redesign atoms `WidgetCard`, `WidgetIcon`, `WidgetLabel`, `WidgetPill`, `prayerIconRes`), `WidgetWork.kt`.
+**Shared `widget/core/`.** `JsonGlanceStateDefinition.kt` (generic JSON-over-DataStore `GlanceStateDefinition`, one DataStore per file via a process-wide map), `WidgetStateUpdater.kt` (`updateWidgetState(...)`, and `refreshWidget(...)` — the whole of a worker's `doWork`: find the placed widgets, return success early when there are none, load, publish, and on failure record the exception, publish an error state and retry twice. All six workers wrote that out; they pass their widget, state definition and data source to it now), `WidgetFormatters.kt` (time/countdown), `WidgetUi.kt` (`WidgetPalette`, `WidgetMessageBox`, `WidgetLoadingBox`, plus the redesign atoms `WidgetCard`, `WidgetIcon`, `WidgetLabel`, `WidgetPill`, `prayerIconRes`), `WidgetWork.kt`.
 
 **Widget UI design ("Refined Minimal").** Solid `widget_background` surface, `16dp`
 corners, teal `widget_primary` accent. **No emoji/ASCII/unicode glyphs** — all icons
@@ -583,7 +626,7 @@ Ramadan.
 
 ## 5. Database & migrations
 
-> **Current schema version:** `24` (`NIMAZ_DATABASE_VERSION` in
+> **Current schema version:** `25` (`NIMAZ_DATABASE_VERSION` in
 > `data/local/database/NimazDatabase.kt`). Bumping it without updating this section fails
 > `SUB-01`. Every bump needs a `Migration` **and** a line in the migration history below.
 
@@ -672,6 +715,45 @@ therefore has the tables and no rows, and every read path treats that as "nothin
 `DeviceStateCorpusTest.assertThematicLayerIsWholeOrAbsent` asserts the layer is whole *or* absent
 rather than requiring it, so the app's own PR is not red on a fact about another repository.
 
+**`ayah_with_text`, and the divisions it stopped computing (schemaVersion 25).** The Qur'an
+reader's projection — a verse with both scripts, its prostration and the divisions it sits in —
+was written out **eight times** in `QuranDao`, differing only in the `WHERE` clause. It is one
+`@DatabaseView` now, `ayah_with_text`, declared on `AyahWithText`; the eight are one-line selects
+over it. It is the project's first `@DatabaseView`.
+
+What left the projection matters more than the deduplication. It carried five `LEFT JOIN`s, two of
+them **range** joins (`a.id BETWEEN hq.start_ayah_id AND hq.end_ayah_id`, and the same for
+`rukus`) which SQLite cannot serve from an index the way it serves an equality join, plus a
+`(SELECT surah_id, MIN(number) … GROUP BY surah_id)` subquery that re-scanned and re-grouped the
+whole `rukus` table on **every call** — including the single-verse lookup `getAyahWithTextById`.
+That is shipped, read-only reference data whose answer never varies, so nimaz-data derives it at
+build time (`data-v9`, its stage 4) and `ayahs` carries four columns: `ruku_number` (the rukūʿ's
+index **within its surah**, which is what a Mushaf prints — `rukus.number` is 1..556 global),
+`ruku_end_ayah_id`, `rub_number` and `rub_start_ayah_id`. Three equality joins remain. A blocking
+rule in that repo re-derives all four from the range tables and fails its build on disagreement;
+against the real corpus the two answers differ on 0 of 6,236 verses.
+
+All four are nullable and read as absent rather than wrong: a device whose `rukus`/`hizb_quarters`
+are unfilled renders no marker.
+
+**A view is schema, and Room checks it harder than a table.** SQLite stores a view's defining
+statement *verbatim*, and Room reads it back on open and compares the **whole string** — so the
+artifact has to carry byte-identical SQL or the database will not open, on every device, at
+launch. Three copies therefore have to agree: the `@DatabaseView` annotation, `MIGRATION_24_25`,
+and `data/schema.sql` in nimaz-data. The app keeps its two honest by assembling both from one
+`const` (`AYAH_WITH_TEXT_BODY` → `AYAH_WITH_TEXT_VIEW_SQL`), with `AyahWithTextViewTest` asserting
+the assembled statement against the exported Room schema and against what Room actually created;
+nimaz-data's stage-9 contract check compares the artifact's view SQL to the same export. This is
+also why the view and the columns are **one** release: two would have meant two 180 MB artifacts,
+the first carrying a view still full of the joins the second deletes.
+
+`MIGRATION_24_25` adds the four columns, back-fills them with the same arithmetic the range joins
+encoded, and drops-then-recreates the view. The back-fill is what keeps the rukūʿ and hizb markers
+on screen between the app update and `ContentArtifactInstaller` replacing the database with the
+`data-v9` artifact. It is `DROP VIEW IF EXISTS` then `CREATE VIEW` rather than
+`CREATE VIEW IF NOT EXISTS`, because SQLite would store the `IF NOT EXISTS` too and that text is
+itself the mismatch.
+
 **One HTML dialect.** `surah_overview_sections.body` and `quran_topics.description` carry markup,
 normalised at import onto four tags — `<p>`, `<strong>`, `<em>`, and `<a href="quran:2:153-251">` /
 `<a href="topic:61">`. A build rule (`thematic.sections-dialect`) refuses to ship a fifth, so
@@ -739,12 +821,12 @@ The old table is dropped and `ayahs.text_indopak` is set to `NULL` (kept as an i
 
 **Translation uniqueness (`v19`).** `translations.id` is auto-generated and had no uniqueness constraint, so a re-seed that inserted without deleting first would silently double every verse and the reader would pick an arbitrary copy. `MIGRATION_18_19` collapses any existing duplicates (keeping the lowest `id` per `(ayah_id, translator_id)`) and adds the unique index that makes the class of bug impossible.
 
-**Mushaf divisions as ranges (`juzs`, `hizb_quarters`, `manzils`, `rukus`, `pages`, `sajdas`, `surah_structure`).** The divisions are stored as one row per division with an inclusive global-ayah-id span, not as columns on all 6,236 verses — the data console asserts each set tiles 1..6236 exactly once. `QuranDao`'s `AyahWithText` projection resolves the ones a verse needs in the same join that fetches its text:
+**Mushaf divisions as ranges (`juzs`, `hizb_quarters`, `manzils`, `rukus`, `pages`, `sajdas`, `surah_structure`).** The divisions are stored as one row per division with an inclusive global-ayah-id span, not as columns on all 6,236 verses — the data console asserts each set tiles 1..6236 exactly once. Until schemaVersion 25 `QuranDao`'s `AyahWithText` projection resolved the ones a verse needs in the same join that fetched its text, with two range joins and a `MIN(number)`/`GROUP BY` subquery. It no longer computes them at all: they are four columns on `ayahs`, derived by nimaz-data at build time, and the projection is the `ayah_with_text` view (see "**`ayah_with_text`, and the divisions it stopped computing**" above). The values are the same ones, under the same names:
 
-- `hq.number AS rub_number` — the **global** quarter (1..240) the verse falls in, plus `hq.start_ayah_id`.
-- `r.start_ayah_id` and `(r.number - rs.first_number + 1) AS ruku_number` — the rukūʿ, numbered **within its surah** the way a printed Mushaf numbers them (`rukus.number` is global 1..556, which no Mushaf prints). `rs` is a 114-row derived table of each surah's first rukūʿ number.
+- `rub_number` — the **global** quarter (1..240) the verse falls in, plus `rub_start_ayah_id`.
+- `ruku_number` — the rukūʿ, numbered **within its surah** the way a printed Mushaf numbers them (`rukus.number` is global 1..556, which no Mushaf prints), plus `ruku_end_ayah_id`.
 
-The two `*_start_ayah_id` columns are what let the reader tell a division a verse *falls inside* from one it *begins*, which is what a printed Mushaf marks. `QuranRepositoryImpl.AyahWithText.toDomain` compares them to `ayahs.id` and publishes `Ayah.rukuNumber`, `isRukuStart` and `isRubStart`; `Ayah.quarterInHizb` / `hizbOfQuarter` derive the 1..4 position and its hizb from `rubNumber`. `QuranAyahItem` renders both as `NimazBadge` markers in its indicators row — the hizb quarter in `SUCCESS`, the rukūʿ in `ACCENT` — only on the opening verse. Before this, the quarter badge rendered on *every* verse and matched `rubNumber` against 1..4 as though it were the position within a hizb, so the four quarters at the very start of the Quran produced a label and the other 236 produced an empty string, i.e. no marker anywhere else in the book. All of the rukūʿ columns are `LEFT JOIN`ed and null on a device whose `rukus`/`surah_structure` tables have not been filled, so the markers simply do not render rather than rendering wrongly — and that is not a hypothetical state. `MIGRATION_21_22` creates those two tables (and `manzils`) empty, and nothing in the app has ever filled them: the `QuranStructureSeeder` its comment named as the upgrade path does not exist, and `QuranDao.insertRukus`/`insertSurahStructure` have no callers. Until `ContentArtifactInstaller` (§7) began replacing the content database on a release, they therefore reached fresh installs only and stayed empty for good on every upgrade. Replacing the file is what makes these markers reachable on an install that predates them. `surah_structure.ruku_count` surfaces through `QuranRepository.getSurahRukuCounts()` → `GetSurahRukuCountsUseCase` → `QuranHomeUiState.rukuCounts` as a badge on `SurahListItem`, beside the verse count and page span.
+The two `*_start_ayah_id`/`*_end_ayah_id` columns are what let the reader tell a division a verse *falls inside* from one it *begins* or *ends*, which is what a printed Mushaf marks. `QuranRepositoryImpl.AyahWithText.toDomain` compares them to `ayahs.id` and publishes `Ayah.rukuNumber`, `isRukuEnd` and `isRubStart` — opposite conventions, because the ʿayn closes a rukūʿ while the ۞ opens a quarter; `Ayah.quarterInHizb` / `hizbOfQuarter` derive the 1..4 position and its hizb from `rubNumber`. `QuranAyahItem` renders both as `NimazBadge` markers in its indicators row — the hizb quarter in `SUCCESS`, the rukūʿ in `ACCENT` — only on the opening verse. Before this, the quarter badge rendered on *every* verse and matched `rubNumber` against 1..4 as though it were the position within a hizb, so the four quarters at the very start of the Quran produced a label and the other 236 produced an empty string, i.e. no marker anywhere else in the book. All four division columns are nullable and null on a device whose `rukus`/`hizb_quarters` have not been filled, so the markers simply do not render rather than rendering wrongly — and that is not a hypothetical state. `MIGRATION_21_22` creates those two tables (and `manzils`) empty, and nothing in the app has ever filled them: the `QuranStructureSeeder` its comment named as the upgrade path does not exist, and `QuranDao.insertRukus`/`insertSurahStructure` have no callers. Until `ContentArtifactInstaller` (§7) began replacing the content database on a release, they therefore reached fresh installs only and stayed empty for good on every upgrade. Replacing the file is what makes these markers reachable on an install that predates them. `surah_structure.ruku_count` surfaces through `QuranRepository.getSurahRukuCounts()` → `GetSurahRukuCountsUseCase` → `QuranHomeUiState.rukuCounts` as a badge on `SurahListItem`, beside the verse count and page span.
 
 **16-line IndoPak read path (sub-task 4/7 of #263).** The renderer needs a page grouped **by printed line**, not by ayah. `QuranDao.getMushafLayoutByPage(script, textSource, page)` LEFT-JOINs `mushaf_layout_lines` onto `mushaf_ayah_texts` (for the glyph text) and `ayahs` (for `number_in_surah`) and returns ordered `MushafLayoutLineRow` segments; `MushafLayoutMapper` (data layer, pure/Android-free) groups them by `line` and reconstructs each segment's glyph words by slicing that text with the stored `first/last_word_position`, yielding the domain model `MushafPageLayout(page, lines: List<MushafLine>)` where each `MushafLine` carries typed segments (`AYAH` words, or a word-less `SURAH_HEADER`/`BASMALAH` line + `surahId`). Ayah segments on one `line_number` concatenate into a single `AYAH` line, but each **structural** row (`SURAH_HEADER`/`BASMALAH`) maps 1:1 to its own `MushafLine` — even when the source data places a header and its basmalah on the *same* `line_number` (81 of the 112 basmalah-bearing surahs do; see the 7/7 verification note below). It surfaces through `QuranRepository.getMushafPageLayout` → `GetMushafPageLayoutUseCase` → `QuranViewModel` (`QuranEvent.LoadMushafPageLayout`, `QuranReaderUiState.mushafPageLayout` + the per-page `mushafPageLayoutCache`). Page-count totals are script-aware via `MushafScript` (`MADANI` = 604, `INDOPAK_16` = 548, `INDOPAK_15` = 610, `INDOPAK_13` = 847); `ReadingProgressCalculator.TOTAL_QURAN_PAGES` is single-sourced from `MushafScript.MADANI`.
 
@@ -968,6 +1050,25 @@ newer build is **dropped**, so a future pin cannot crash an older install's More
 explicitly saved empty value means *no pins* and is honoured rather than reset to the defaults,
 or unpinning the last shortcut would not stick. Read through the `MoreSettings` seam.
 
+**Local search behaviour.** `search_results_per_source: Int` (default 60, clamped to 10–200),
+`search_sources: String` (comma-separated `LibrarySource` names, **empty = every source**),
+`search_strictness: String` (a `MatchStrictness` name, default `BALANCED`) and
+`search_default_scope: String` (a `LibrarySource` name, empty = no scope). All four were
+compile-time constants in `SearchLibraryUseCase` until a search for الله returned exactly 180
+results — three sources each capped at a hidden 60 — and was reported as a defect.
+
+Read through the **`SearchSettings`** seam (four flows and four setters, not the 179 members of
+`SettingsRepository`) and turned into the typed `SearchPreferences` by
+`ObserveSearchPreferencesUseCase`, which is where a value this build cannot parse degrades to
+the default instead of throwing on the first search anyone runs. Stored as raw names for the
+usual reason — a payload from a newer build's sync (§10) must not crash an older install — and
+`search_sources` is a delimited string rather than a `stringSetPreferencesKey` because *empty*
+is meaningful here: it means "every source, including any added later", so a build that adds a
+source starts searching it for existing users rather than silently leaving it out. Written from
+`SearchSettingsScreen`; the invariants (a non-empty source set, a scope that points at a source
+still being searched) are applied in `SearchPreferences.sanitised` on every read. See
+[`docs/ai-ask-with-proof.md`](ai-ask-with-proof.md#smart-local-search-searchlibraryusecase).
+
 **Mushaf script / layout.** `quran_mushaf_script: String` (a `MushafScript` enum name, default `MADANI`) selects the Mushaf edition the page reader renders — ayah-flow Uthmani/Madani (604 pages) vs a line-accurate IndoPak edition (16-line/548, 15-line/610 or 13-line/847; #270). Stored raw and mapped to the domain enum at the boundary (mirrors `quran_arabic_font`/`pattern_style`); read by `QuranViewModel` (drives `useLineAccurateLayout` + script-aware page counts) and written from the "Mushaf Script" dropdown in `QuranSettingsScreen`. Off by default. See §5 (16-line renderer).
 
 **One `SettingsViewModel` per screen — so settings state must be *collected*, not snapshotted.**
@@ -1057,6 +1158,29 @@ Three things make deleting it safe, and the third is the one that bites on a rea
    launch, so the copy completes during that session and the next launch replaces. One launch of
    delay, against destroying the only copy of somebody's data. The check reads the *file*, not a
    "migration done" flag, because what is in the file is what a delete would destroy.
+
+**When the deferral does not end.** One deferral is the design. Repeated ones are not — and the
+failure is silent in a way that matters: an install whose `UserDataMigrator` keeps failing, or
+whose content database cannot be read at all (`legacyDataBlocking` treats *any* read failure as
+"something is there", which is the safe answer but an indefinitely sticky one), simply stops
+receiving content releases. It also never receives an **FTS index**, because the index ships
+inside the artifact; `ContentSearchIndex.status()` returns `Absent` and search falls back to
+`LIKE`, which matches no Arabic at all. الله appears in 1,746 verses and returns nothing, and an
+empty result list reads as "no results", so nobody reports it.
+
+`ContentArtifactStore` therefore counts consecutive deferrals, cleared by any outcome that is not
+one. At `ContentArtifactInstaller.STUCK_AFTER_DEFERRALS` (3 — one is designed, two can happen if a
+launch was killed mid-migration, three is a migration that is not completing) the installer
+reports **once**, so a stuck device does not become a repeating report for the rest of its life.
+The threshold is reported through an injectable `reportStuck` lambda rather than calling
+`CrashReporter` directly, because `CrashReporter` is an `object` with a static `Context` and no
+seam — this is the local version of the injectable `Telemetry` seam that #359 introduces generally.
+
+`DatabaseModule` additionally publishes `content_artifact_outcome` and
+`content_artifact_deferrals` as Crashlytics custom keys on every launch. Before this the outcome
+was computed and thrown away at a `Log.i`, so "did this release actually reach the device" had no
+answer in production — which is the first question to ask about both stale content and empty
+Arabic search.
 
 **What this retired.** `ContentPatchSeeder` existed because content had to reach existing installs
 *without* replacing the file, and it had a hard limit: `nz patch emit` cannot express a table the

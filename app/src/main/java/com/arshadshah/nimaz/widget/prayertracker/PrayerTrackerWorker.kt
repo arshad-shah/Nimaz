@@ -1,26 +1,20 @@
 package com.arshadshah.nimaz.widget.prayertracker
 
 import android.content.Context
-import androidx.glance.GlanceId
-import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import com.arshadshah.nimaz.core.monitoring.CrashReporter
-import com.arshadshah.nimaz.core.util.toUtcMidnightMillis
-import com.arshadshah.nimaz.data.local.database.dao.PrayerDao
 import com.arshadshah.nimaz.widget.core.WidgetWork
-import com.arshadshah.nimaz.widget.core.updateWidgetState
+import com.arshadshah.nimaz.widget.core.refreshWidget
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import java.time.Duration
-import java.time.LocalDate
 
 @HiltWorker
 class PrayerTrackerWorker @AssistedInject constructor(
     @Assisted private val context: Context,
     @Assisted workerParams: WorkerParameters,
-    private val prayerDao: PrayerDao
+    private val dataSource: PrayerTrackerWidgetDataSource
 ) : CoroutineWorker(context, workerParams) {
 
     companion object {
@@ -40,56 +34,13 @@ class PrayerTrackerWorker @AssistedInject constructor(
             WidgetWork.cancel(context, UNIQUE_WORK_NAME, ONE_TIME_WORK_NAME)
     }
 
-    private suspend fun setWidgetState(
-        glanceIds: List<GlanceId>,
-        newState: PrayerTrackerWidgetState
-    ) = updateWidgetState(
-        context,
-        PrayerTrackerWidget(),
-        PrayerTrackerStateDefinition,
-        glanceIds,
-        newState
+    override suspend fun doWork(): Result = refreshWidget(
+        context = context,
+        widget = PrayerTrackerWidget(),
+        definition = PrayerTrackerStateDefinition,
+        widgetClass = PrayerTrackerWidget::class.java,
+        workerName = "PrayerTrackerWorker",
+        success = { PrayerTrackerWidgetState.Success(dataSource.load()) },
+        error = { message -> PrayerTrackerWidgetState.Error(message) },
     )
-
-    override suspend fun doWork(): Result {
-        val manager = GlanceAppWidgetManager(context)
-        val glanceIds = manager.getGlanceIds(PrayerTrackerWidget::class.java)
-
-        if (glanceIds.isEmpty()) {
-            return Result.success()
-        }
-
-        return try {
-            val today = LocalDate.now()
-            val todayEpoch = today.toUtcMidnightMillis()
-            val records = prayerDao.getPrayerRecordsForDateSync(todayEpoch)
-            val recordMap = records.associate { it.prayerName to it.status }
-
-            val data = PrayerTrackerData(
-                dateLabel = today.dayOfWeek.name.take(3).lowercase()
-                    .replaceFirstChar { it.uppercase() },
-                fajr = recordMap["fajr"] == "prayed",
-                dhuhr = recordMap["dhuhr"] == "prayed",
-                asr = recordMap["asr"] == "prayed",
-                maghrib = recordMap["maghrib"] == "prayed",
-                isha = recordMap["isha"] == "prayed",
-                prayedCount = listOf(
-                    recordMap["fajr"] == "prayed",
-                    recordMap["dhuhr"] == "prayed",
-                    recordMap["asr"] == "prayed",
-                    recordMap["maghrib"] == "prayed",
-                    recordMap["isha"] == "prayed"
-                ).count { it },
-                totalCount = 5
-            )
-
-            setWidgetState(glanceIds, PrayerTrackerWidgetState.Success(data))
-            Result.success()
-        } catch (e: Exception) {
-            CrashReporter.log("PrayerTrackerWorker failed")
-            CrashReporter.recordException(e)
-            setWidgetState(glanceIds, PrayerTrackerWidgetState.Error(e.message))
-            if (runAttemptCount < 3) Result.retry() else Result.failure()
-        }
-    }
 }

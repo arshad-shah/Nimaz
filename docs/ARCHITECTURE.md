@@ -746,6 +746,34 @@ typed route object.
 
 ## 8. Theming & components
 
+### 8.0 Accessibility — the obligation
+
+Three rules, and they are obligations rather than suggestions: the app shipped **373
+`contentDescription`s and zero `heading()` and zero `stateDescription`** before this section
+existed, which is the difference between being *operable* with a screen reader and being
+*usable* with one.
+
+1. **A section title is a heading.** `Modifier.semantics { heading() }` is what lets TalkBack's
+   heading navigation jump between sections instead of making the user swipe through every
+   element in order. Declare it **on the component, not at the call site** — `NimazSectionTitle`,
+   `NimazSectionHeader`, `PrayerTimesSectionHeader` and the shared top app bar already do, which
+   covers 72 call sites and every screen title. A new section-heading component must do the same.
+2. **A toggle says what its state means.** `Role.Checkbox` announces "checked" / "not checked",
+   which is true and useless — "Fajr, prayed" is the sentence a user needs. Pass
+   `stateDescription` (`NimazCheckbox` takes one) whenever the state stands for something in the
+   domain rather than for a bare boolean. It is a `stringResource`, always: this text is read
+   aloud, so it is translated like any other.
+3. **A container that holds text is bounded by `heightIn(min = …)`, not `height(…)`.** Android 14+
+   scales fonts to 200% and a fixed-height row clips its second line silently. This matters more
+   here than in most apps: the Amiri and Nastaliq faces have taller line boxes than Latin ones at
+   the same nominal size. A fixed `height` is still right for things that are not text — an icon
+   box, a divider, a fixed-ratio piece of art.
+
+`AccessibilityChecks.enable()` runs on every instrumented UI test (`BaseAppTest`), so a control
+with no label and a touch target under 48dp fail the lane we already run. It cannot see rules 1–3
+— nothing automatic can — which is why they are written down here.
+
+
 - **Colors — every literal lives in the `theme/` package, never in a component/screen:**
     - **Tier 1 — `presentation/theme/Palette.kt` (`NimazPalette`):** the source of the brand/semantic
       hues. Hue ramps named `Family + shade` (e.g. `Teal500`, `Stone900`, `Amber500`). Don't
@@ -1190,6 +1218,9 @@ copy anything listed as Open.
 | QaidaReader UDF | `QaidaReaderViewModel` now has a sealed `QaidaReaderEvent` + single `onEvent`; action methods are private; Qaida screens dispatch events. |
 | Dead route | The orphaned `Route.MakeupFasts` declaration was removed (makeup fasts is a tab inside `FastTrackerScreen`). |
 | Theming (Zakat) | Zakat screens use `NimazColors.Neutral900` / `NimazColors.ZakatColors.GoldAccent`; no raw color literals remain there. |
+| Qur'an ayah projection duplicated eight times | **The reader's projection is one `@DatabaseView`, `ayah_with_text`** (schemaVersion 25), and it stopped computing what it now reads. It was written out eight times in `QuranDao`, differing only in the `WHERE`, and each copy carried two *range* joins (`a.id BETWEEN hq.start_ayah_id AND hq.end_ayah_id`, and the same for `rukus`) that SQLite cannot serve from an index, plus a `(SELECT surah_id, MIN(number) … GROUP BY surah_id)` subquery that re-grouped the whole `rukus` table on every call — including the single-verse lookup. Those four values are build-time columns on `ayahs` now, derived by nimaz-data (`data-v9`) and cross-checked there against the range tables; three equality joins remain and the eight queries are one-liners. First `@DatabaseView` in the project — note that a view is schema Room validates **verbatim** on open, so its SQL is assembled from one `const` and asserted by `AyahWithTextViewTest`. See `SUBSYSTEMS.md` §5. |
+| Copy-pasted screens and widget scaffolding | **Four clones extracted, and each one had already drifted.** (1) The two Mushaf renderers shared a 93-line per-verse action host — tooltip, seven actions, translation sheet — now `MushafAyahActions` + `MushafAyahActionsState`; they keep only their layouts, which is all they ever really differed in. (2) Three catalog list screens and two detail screens became `CatalogList` and `CatalogDetailScreen`; the *ViewModel* layer was already generic (`CatalogViewModel<T>`), only the screens had been copied. The three destinations they framed have since become one — `Route.Names`, three tabs, one search box and one favourites area — so `CatalogList` is now a tab body rather than a whole screen. (3) The make-up-prayer list, reachable as a screen and as a tab, is one `QadaPrayerList`. (4) All six widget workers share `refreshWidget`. Registry Open #14 closes by recording that `AyahActionsBottomSheet`'s **retirement stands** — the audit proposed wiring it back in, but the shared host is extracted from the two renderers instead. See `SUBSYSTEMS.md` §0/§2 and `CLEAN_ARCHITECTURE_CHECKLIST.md`. |
+| `FastTrackerScreen` at 1,779 lines, and the last two unseamed calculators | **A 340-line tab moved out, a calculation moved down, and the last `PrayerTimeCalculator()` removed.** `MakeupFastsContent` and its four helpers were a whole second screen living as private functions; they are `MakeupFastsTab.kt` now (the file drops to 1,434 lines). `calculateAyyamAlBeedDays` was business logic about the Hijri calendar inside a screen, calling `LocalDate.now()` at one of its two call sites and ignoring the user's `hijriDayOffset`; it is `GetDaysUntilAyyamAlBeedUseCase`, reads the clock through `TodayProvider`, takes the offset, and has tests — which is how registry Open #10 stops being true of one more helper. The offset arrives through a new narrow `HijriSettings` seam rather than the whole `SettingsRepository`, following `ZakatSettings` (#436). `WidgetsScreen` constructed a `PrayerTimeCalculator()` directly — the last such site anywhere; it is injected now. |
 | Domain→data leak (`PageAyahRange`) | Added a `PageAyahRange` domain model; the Room projection is `PageAyahRangeRow` (mapped in `QuranRepositoryImpl`). `domain/` no longer imports anything from `data/`. |
 | Home daily-content DAO coupling | `HomeViewModel` no longer injects `FastingDao`/`HadithDao`/`DuaDao`. Daily hadith/dua logic extracted to `GetDailyHadithUseCase`/`GetDailyDuaUseCase`; seeding moved into the repositories. No presentation ViewModel injects a DAO or `RepositoryImpl` anymore. |
 | Theming (screens) | Raw `Color(0xFF…)` literals removed from ~20 feature screens into `NimazColors` tokens (exact hex; added `Success`/`Warning`/`Info`/etc. and `HadithCollectionColors`). Only bespoke design-token files remain (`tasbih/BeadDesign.kt`, `TasbihBeads.kt`, `onboarding/OnboardingArt.kt`). |
@@ -1235,12 +1266,11 @@ copy anything listed as Open.
 | 7 | Design system | **~47 call sites still pass `style = NimazCardStyle.FILLED` explicitly** and have not been triaged against the light-mode visibility problem (§8.1) — some are deliberate flat cards, some are probably page-level cards that should be `ELEVATED`. | Triage per screen under visual review; convert the page-level ones to `NEUTRAL` + `ELEVATED` and drop the redundant `style =` from the rest (FILLED is already the default). |
 | 8 | Design system | **The tone/badge migration is verified by the Kotlin compiler and unit tests only.** No visual or on-device verification has been done, so a tone that resolves to the wrong role on a particular screen would not have been caught. | Walk the migrated screens in light *and* dark on a device (or drive the `NimazCard`/`NimazBadge` `@Preview` showcases, which render both themes) before this reaches a release branch. |
 | 9 | Announcements | **Dismissed announcement IDs are never pruned.** `dismissed_announcement_ids` is a bare `Set<String>` with no expiry metadata, so the set grows unbounded. Expired announcements can theoretically resurface if re-sent after the expiry window passes and the app was never re-downloaded. | Add expiry timestamps to dismissed IDs (e.g. `Map<String, Long>` where value is the expiry epoch ms); prune entries past the threshold on `ObserveActiveAnnouncementUseCase` observes / app startup. |
-| 10 | Prayers / calendar | **Hijri date offset inconsistency.** Only `HijriDateCalculator.today(offsetDays)` supports the user's `hijriDayOffset` preference; other helpers like `isTodayRamadan()`, `daysUntilNextRamadan()`, etc. ignore it. This can cause the offset to apply to event matching but not to other Hijri date displays. | Audit `HijriDateCalculator.*` methods that should accept the offset parameter (any that read "today" or compute relative dates); add `offsetDays` parameter to `Ramadan` helpers and pass it through call sites. |
+| 10 | Prayers / calendar | **Hijri date offset inconsistency.** Only `HijriDateCalculator.today(offsetDays)` supports the user's `hijriDayOffset` preference; other helpers like `isTodayRamadan()`, `daysUntilNextRamadan()`, etc. ignore it. **Narrowed:** the Ayyam al-Beed countdown honours it as of `GetDaysUntilAyyamAlBeedUseCase`, and `HijriSettings` is the narrow seam that makes passing it to the next helper cheap. The `Ramadan` helpers are what remain. This can cause the offset to apply to event matching but not to other Hijri date displays. | Audit `HijriDateCalculator.*` methods that should accept the offset parameter (any that read "today" or compute relative dates); add `offsetDays` parameter to `Ramadan` helpers and pass it through call sites. |
 | 11 | Quran / 16-line Mushaf | **Sajda & rukūʿ markers are not shown in the line-accurate views.** The shipped glyph text and layouts carry no sajda (۩) or rukūʿ (۞) glyphs or line types (verified in 7/7, #271), so `MushafLineLayout` renders the printed word glyphs faithfully but overlays no sajda/rukūʿ medallions. The metadata itself is no longer missing — sajda lives in `sajdas`, the sections in `rukus`, and the ayah-keyed reader (`QuranAyahItem`) now badges both, plus the hizb quarter, on the verse that opens each. The gap is the line-accurate renderer, which is keyed by printed line rather than by verse and so has nowhere to hang a per-verse badge. | Regenerate the IndoPak assets with sajda/rukūʿ spans (or a `sajda`/`ruku` `line_type`), map them in `MushafLayoutMapper`, and draw a marker in `MushafLineLayout`; extend `MushafLayoutFidelityTest` to pin the known sajda ayahs. Needs asset regeneration + visual review. |
 | 12 | Quran / 16-line Mushaf | **A raw page number is not equivalent across Mushaf editions.** A page `Int` means a different slice of the Quran in the 604-page Madani scheme vs. the 548-page IndoPak-16 scheme (unrelated pagination). In-app navigation is safe as of #325: "Continue reading" resolves by surah/ayah (`ContinueReadingCard.onClick` → `onNavigateToQuranAyah(lastSurah, lastAyah)`, `lastReadPage` is display-only), and every in-app page surface — the Page tab grid, its juz sections, the surah page ranges, the jump-to-page field and the reader's page content — now resolves through the active edition's `MushafPagination` rather than the Madani tables. The one real gap is `AnnouncementRoutes.parameterisedAnnouncementRoute`'s `quran/page/N` deep link: it validates against `MushafScript.MAX_TOTAL_PAGES` (now 847, the largest edition) and the reader then clamps to the active edition's count, so it can't crash, but a server-sent page deep link can land the reader on unrelated content if the user's active script differs from the one the link was authored against. Accepted as v1 scope — announcement payloads are first-party/curated, not user input. | If this becomes user-facing (e.g. shared deep links), anchor `quran/page/N` by surah/ayah instead of raw page, or tag the page number with its edition in the route. |
 
 | 13 | Quran / search | **An install made before the index shipped never gets one.** `createFromAsset` copies the artifact exactly once, and neither a Room migration nor a content patch can add a table — so the folded search index reaches fresh installs only. Those installs fall back to the `LIKE` queries, which is the search they already had: working for Latin scripts, empty for Arabic. The repositories ask `ContentSearchIndex.isAvailable()` rather than assuming, so nothing crashes and nothing lies. | Either build the index once in a background `WorkManager` job when it is missing (the folding is already in Kotlin; the cost is ~150k documents written off the critical path, and the reason the *previous* attempt failed was doing it synchronously at first launch), or accept that it lands with the next reinstall. Needs a decision, not just code. |
-| 14 | Quran / thematic layer | **`AyahActionsBottomSheet` is shipped but unreachable.** The organism, its `buildAyahActions` table and its Robolectric suite all exist, and **no screen composes it** — the reader's per-verse actions are an inline row inside `QuranAyahItem`, and the only bottom sheet a reader reaches from a verse is `AyahTranslationBottomSheet`, opened from `MushafLinePage`'s tooltip. Found while wiring the thematic layer's entry points: the plan called for the ayah sheet to gain the verse's subjects, which would have meant adding a feature to dead code. The subjects entry points that *are* reachable were done instead (the Qur'an home browse card and the reader's overflow). | Decide the sheet's fate before adding to it: either wire it into the reader as the per-verse action surface — at which point it should carry `getTopicsForAyah` chips, capped and ranked the way the Tafseer screen's are — or retire it the way `2748002` retired the last batch of shipped-but-unreachable state. Adding to it while it is unreachable is not a third option; it is how it stays unreachable. |
 
 > **Accepted patterns (NOT deviations):**
 > - **Mushaf editions and Quran translations shipped as seeded JSON assets, not in the prepackaged DB** (sub-task 2/7 of #263, extended when the catalogue grew to 4 editions + 15 translations) — **resolved at versionCode 385**. Each edition's glyph text + layout, and each translation's verses, were populated at runtime by `MushafLayoutSeeder` / `QuranTranslationSeeder` from `assets/quran/`, with the migrations creating only the empty tables. The alternative — regenerating `assets/database/nimaz_prepopulated.db` — was rejected at the time because it was a ~147 MB Git-LFS blob that `createFromAsset` copies **only on fresh install**, so baking the data in would (a) never reach existing installs and (b) grow the LFS asset by tens of MB. What dissolved the trade-off was the prepackaged DB ceasing to be a tracked blob: it is now a hash-pinned artifact fetched from **arshad-shah/nimaz-data**, regenerated per release, and `ContentPatchSeeder` carries corrections to existing installs. Both seeders and their ~30 MB of assets were retired (`docs/retirement.yaml`); `QuranRepositoryImpl` no longer seeds on read, and `seededTranslationId(...)` survives as `translationId(...)` for its catalogue normalisation alone. The line-accurate read path (`getMushafLayoutByPage` → `MushafLayoutMapper` → `MushafPageLayout` domain model → `GetMushafPageLayoutUseCase`) is unchanged and still keeps the layers clean. See `SUBSYSTEMS.md` §5/§7 and `DATA_RETIREMENT.md`.
@@ -1322,6 +1352,42 @@ bundle exec fastlane android test
 
 Requires JDK 21 and an Android SDK (compileSdk 36). Set `sdk.dir` in `local.properties` or
 `ANDROID_HOME`.
+
+### Modules
+
+Two: **`:app`**, which is the whole application, and **`:baselineprofile`**, a
+`com.android.test` module that exists only to generate `app/src/main/baseline-prof.txt`.
+Nothing depends on `:baselineprofile` at runtime and no product code lives there.
+
+### The baseline profile
+
+```bash
+./gradlew :app:generateBaselineProfile
+```
+
+Boots the `pixel6Api34` managed device (no emulator needs to be open, but it downloads a
+system image the first time), runs `BaselineProfileGenerator` over cold start → Home →
+Quran → surah list scroll → reader scroll, and writes the profile the release build then
+compiles ahead of time.
+
+Two things about it are deliberate:
+
+- The generation variants (`nonMinifiedRelease`, `benchmarkRelease`) are re-signed with the
+  **debug** key in an `androidComponents.finalizeDsl` block. The plugin copies them from
+  `release`, whose keystore comes from the environment and exists only on CI, so without
+  this the task fails for everyone running it locally — which is where it is most likely to
+  be run. It must be `finalizeDsl`: the plugin assigns the signing config after the
+  `buildTypes` DSL block, so a `configureEach` there is overwritten.
+- Regenerating is **maintenance, not a gate.** A stale profile is less useful, never wrong.
+  Regenerate after a change that moves the startup path or the reader.
+
+### Compose compiler reports
+
+`composeCompiler` writes metrics and reports to `app/build/compose_compiler/`. They are
+diagnostics, not a gate — read `app-composables.csv` for restartable-but-not-skippable
+functions before doing any recomposition work. As of 2026-08-10 there are **none**: 1,234
+composables, 1,120 restartable, 0 non-skippable. Strong skipping (Kotlin 2.3) covers the
+unstable-parameter case, so measure before assuming there is something to fix.
 
 ---
 

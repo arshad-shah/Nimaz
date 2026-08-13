@@ -13,6 +13,8 @@
     <string name="widgets">Widgets</string>
     <string name="today">Heute</string>
     <string name="prayed">Gebetet</string>
+    <string name="a11y_prayer_state_prayed">%1$s, gebetet</string>
+    <string name="a11y_prayer_state_not_recorded">%1$s, noch nicht erfasst</string>
     <string name="no_favorites_yet">Noch keine Favoriten</string>
     <string name="remove_from_favorites">Aus Favoriten entfernen</string>
     <string name="add_to_favorites">Zu Favoriten hinzufügen</string>
@@ -187,6 +189,16 @@
     <string name="asr_calculation">Asr-Berechnung</string>
     <string name="asr_standard">Standard (Schafi\'i, Maliki, Hanbali)</string>
     <string name="asr_hanafi">Hanafi</string>
+    <!-- Names — the three catalogues as one tabbed screen -->
+    <string name="names_title">Namen</string>
+    <string name="names_more_subtitle">Allah, der Prophet ﷺ und die Propheten</string>
+    <string name="names_search_hint">Alle Namen durchsuchen…</string>
+    <string name="names_tab_allah">Allah</string>
+    <string name="names_tab_prophet">Prophet ﷺ</string>
+    <string name="names_tab_prophets">Propheten</string>
+    <string name="cd_open_favourites">Favoriten öffnen</string>
+    <string name="favourites_empty_message">Tippe auf das Herz bei einem Namen, um ihn hier zu behalten.</string>
+
     <string name="asma_ul_husna_title">Allahs 99 Namen</string>
     <string name="asma_ul_husna_search_hint">Nach Name oder Bedeutung suchen…</string>
     <string name="asma_ul_husna_no_names_found">Keine Namen gefunden</string>
@@ -1436,7 +1448,29 @@
 
     <!-- Search & AI (Ask with Proof) -->
     <string name="search_settings">Suche &amp; KI</string>
-    <string name="search_settings_subtitle">KI-Antworten und Datenschutz</string>
+    <string name="search_settings_subtitle">Ergebnisse, Quellen, KI-Antworten und Datenschutz</string>
+
+    <!-- Local search behaviour -->
+    <string name="search_results_section">Ergebnisse</string>
+    <string name="search_results_per_source">Ergebnisse pro Quelle</string>
+    <string name="search_results_per_source_subtitle">Bis zu %1$d Ergebnisse insgesamt über die durchsuchten Quellen.</string>
+    <string name="search_sources_section">Wo gesucht wird</string>
+    <string name="search_source_quran_desc">Verse, Übersetzungen und Surennamen</string>
+    <string name="search_source_hadith_desc">Überlieferungen aus den Hadith-Sammlungen</string>
+    <string name="search_source_duas_desc">Bittgebete und ihre Übersetzungen</string>
+    <string name="search_source_names_desc">Die Namen Allahs, des Propheten ﷺ und die Propheten</string>
+    <string name="search_source_last_one">Die Suche braucht mindestens eine Quelle</string>
+    <string name="search_strictness">Genauigkeit der Treffer</string>
+    <string name="search_strictness_exact">Genau</string>
+    <string name="search_strictness_exact_desc">Nur den eingegebenen Ausdruck als Ganzes suchen</string>
+    <string name="search_strictness_balanced">Ausgewogen</string>
+    <string name="search_strictness_balanced_desc">Auch einzelne Wörter suchen; Treffer mit mehr passenden Wörtern stehen weiter oben</string>
+    <string name="search_strictness_broad">Weit</string>
+    <string name="search_strictness_broad_desc">So viele Wörter wie möglich suchen. Mehr zu sichten und langsamer bei langen Fragen</string>
+    <string name="search_default_scope">Suche beginnen in</string>
+    <string name="search_default_scope_subtitle">Mit welchem Filter die Suche öffnet</string>
+    <string name="search_scope_everything">Alles</string>
+    <string name="search_scope_everything_desc">Ergebnisse aus allen durchsuchten Quellen anzeigen</string>
     <string name="ai_answers">KI-Antworten</string>
     <string name="ai_answers_enable">KI-Antworten aktivieren</string>
     <string name="ai_answers_enable_subtitle">Stelle eine Frage und erhalte eine Antwort mit Versen und Hadithen aus deiner Bibliothek als Beleg</string>

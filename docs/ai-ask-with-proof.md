@@ -16,8 +16,8 @@ into Global Search's **single search bar** — the same text drives both keyword
 search (as-you-type) and the AI ask (there is no separate "ask" field). While
 AI is enabled and there is text, the shared `NimazSearchBar` shows a trailing
 **Ask** pill; tapping it — or pressing Enter — submits the question. The
-source filter (All / Qur'an / Hadith / Duas) is **pinned under the search
-bar** and scopes everything below it.
+source filter (All / Qur'an / Hadith / Duas / Names) is **pinned under the
+search bar** and scopes everything below it.
 
 When AI is enabled, each submit makes **one** Worker call (`search-assist`):
 
@@ -235,11 +235,65 @@ use case now:
 
 `SearchViewModel` uses it for search-as-you-type, submits, and `ApplyAiTerms`.
 
+### What the user controls (`SearchPreferences`)
+
+Four numbers in that description used to be compile-time constants, and one of them was
+reported as a bug: a search for الله returned exactly 180 results, which is three sources
+each returning a hidden cap of 60. A cap you cannot see and cannot change reads as a defect
+every time someone hits it.
+
+They are now `domain/model/SearchPreferences`, read once per search from
+`ObserveSearchPreferencesUseCase` (reading once, rather than collecting, so a preference
+changed mid-query cannot leave half the passes on the old settings):
+
+| Preference | Was | Now |
+| --- | --- | --- |
+| `resultsPerSource` | `MAX_PER_SOURCE = 60` | 10–200, stepped by 10 |
+| `sources` | all, always | any non-empty subset of `LibrarySource`; a source that is off is **not queried**, so narrowing is faster as well as narrower |
+| `strictness` | `MAX_WORD_QUERIES = 8` | `MatchStrictness` — `EXACT` (0 word passes), `BALANCED` (8, the old behaviour), `BROAD` (20) |
+| `defaultScope` | always "All" | which filter chip `SearchScreen` opens on; `null` is everything |
+
+`LibrarySource` is `QURAN` (ayat, translations **and** surah names), `HADITH`, `DUAS` and
+`NAMES`. Surah names are not a separate source — "search the Qur'an but not its surah names" is
+not a distinction anyone wants — and for the same reason `NAMES` is one source covering all
+three name catalogues rather than three: they are one destination (`Route.Names`), one search
+box and one favourites area, so they are one switch and one filter chip too.
+
+`NAMES` is the one source that is **not** a database query. `SearchNamesUseCase` filters the
+catalogues in memory: they are 99 + 99 + 25 rows, already loaded by whatever screen is showing
+them, and none of the three repositories has a search method — a `LIKE` round trip would be
+slower than the filter *and* would need three new DAO queries to exist first. It matches the
+same fields the Names screen's own filter does, so a query typed into either box finds the same
+names. Hits arrive as `NameSearchResult`, flattened out of the three catalogue models, which is
+why `LibrarySearchResults` carries one `names` list rather than three.
+
+Two invariants are enforced in `SearchPreferences.sanitised` rather than trusted, because a
+preferences file outlives the build that wrote it (a downgrade, a restore from a device on a
+newer version, a hand-edit):
+
+- an **empty** source set means everything, since honouring it literally is a search that
+  returns nothing for every query;
+- a `defaultScope` pointing at a source that is switched off is dropped, since it would open
+  the results list filtered to a source that is never queried — an empty list that reads as
+  "nothing matched".
+
+The source set is stored as a comma-separated list of names with **empty meaning "all"**, so
+a build that adds a source picks it up for existing users instead of silently leaving it
+unsearched. Names this build does not recognise are dropped rather than fatal.
+
 ## Settings & consent behaviour
 
 Search Settings (`Route.SearchSettings`, reachable from the Global Search top-bar
 action and the Settings hub):
 
+- **Results** — "Results per source" (a `NimazNumberStepper`, 10–200 by 10, with the resulting
+  total across the selected sources shown underneath so the number is not a mystery),
+  "How closely to match" (`MatchStrictness`) and "Start search in" (`defaultScope`). The scope
+  picker only offers sources that are switched on, plus "Everything".
+- **Where to search** — one switch per `LibrarySource`. The **last** switch left on is
+  disabled and says so: obeying it would store an empty set, which `sanitised` reads straight
+  back as "everything", so the switch would appear to turn itself on again. Switching off the
+  source the default scope points at clears the scope in the same write.
 - **AI answers** — master toggle. Turning it **on** first opens a consent
   `ModalBottomSheet` stating exactly what is shared (**only the question text**
   → Nimaz server on Cloudflare → Anthropic Claude), that the cited verses and

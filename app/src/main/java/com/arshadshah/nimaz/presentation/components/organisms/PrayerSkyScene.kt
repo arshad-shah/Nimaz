@@ -6,12 +6,6 @@ import android.graphics.Paint
 import android.graphics.RadialGradient
 import android.graphics.RectF
 import android.graphics.Shader
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,6 +25,10 @@ import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -66,6 +64,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.delay
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.GlassBackdrop
 import com.arshadshah.nimaz.presentation.components.atoms.GlassIconButton
@@ -121,16 +120,25 @@ fun SkyBackground(
     sunriseFraction: Float = SUNRISE_T,
     sunsetFraction: Float = SUNSET_T,
 ) {
-    val drift = rememberInfiniteTransition(label = "sky")
-    val cloudPhase by drift.animateFloat(
-        initialValue = 0f,
-        targetValue = if (cloudsEnabled) 1f else 0f,
-        animationSpec = infiniteRepeatable(
-            tween(120_000, easing = LinearEasing),
-            RepeatMode.Restart
-        ),
-        label = "clouds",
-    )
+    // Cloud drift, without holding the frame clock open.
+    //
+    // This was a `rememberInfiniteTransition` + `animateFloat`, which requests a frame
+    // *every frame, forever*, for as long as Home is composed — and it ran even with
+    // `cloudsEnabled` false, animating 0f → 0f. The drawing itself is already cheap
+    // (`drawWithCache` over baked sprite layers), so the animation was the cost.
+    //
+    // The cycle is 120 seconds. Advancing the phase once a second is 120 steps across
+    // it — invisible at that speed — and it lets the compositor idle in between. When
+    // clouds are off nothing is started at all.
+    var cloudPhase by remember { mutableFloatStateOf(0f) }
+    if (cloudsEnabled) {
+        LaunchedEffect(Unit) {
+            while (true) {
+                delay(CLOUD_TICK_MS)
+                cloudPhase = (cloudPhase + CLOUD_TICK_MS.toFloat() / CLOUD_CYCLE_MS) % 1f
+            }
+        }
+    }
 
     Box(
         modifier = modifier
@@ -318,6 +326,10 @@ private val LocationPillMaxWidth = 260.dp
 
 /** A soft drop shadow so overlaid glass text stays crisp over bright sky. */
 private val GlassTextShadow = Shadow(Color.Black.copy(alpha = 0.35f), Offset(0f, 1f), 4f)
+
+/** One cloud-drift step. 120 steps across the cycle — invisible, and lets the compositor idle. */
+private const val CLOUD_TICK_MS = 1_000L
+private const val CLOUD_CYCLE_MS = 120_000f
 
 private const val SPRITE_SCALE = 0.6f
 private const val SUNRISE_T = 0.27f

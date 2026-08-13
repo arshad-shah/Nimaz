@@ -123,9 +123,11 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuItem
 import com.arshadshah.nimaz.presentation.screens.resolve
 
 // Color constants for makeup fasts
-private val OrangeAccent = NimazColors.PrayerColors.Asr
-private val OrangeDark = NimazColors.OrangeDark
-private val GreenAccent = NimazColors.Success
+// Shared with MakeupFastsTab.kt, which was cut out of this file — hence `internal` rather
+// than `private`. They are aliases onto the palette, not literals (CLAUDE.md rule 7).
+internal val OrangeAccent = NimazColors.PrayerColors.Asr
+internal val OrangeDark = NimazColors.OrangeDark
+internal val GreenAccent = NimazColors.Success
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -318,7 +320,8 @@ fun FastTrackerScreen(
                                     onLogFast = { date ->
                                         viewModel.onEvent(FastingEvent.SelectDate(date))
                                         viewModel.onEvent(FastingEvent.OpenFastSheet(date))
-                                    }
+                                    },
+                                    daysUntilAyyamAlBeed = ramadanState.daysUntilAyyamAlBeed,
                                 )
                             }
                         }
@@ -331,7 +334,7 @@ fun FastTrackerScreen(
                                 fastedThisMonth = calendarState.records.count {
                                     it.status == FastStatus.FASTED
                                 },
-                                daysUntilRecommended = calculateAyyamAlBeedDays(LocalDate.now()),
+                                daysUntilRecommended = ramadanState.daysUntilAyyamAlBeed,
                                 showRecommendedRow = !ramadanState.isRamadan,
                                 pendingMakeup = makeupState.pendingCount,
                                 fidyaPaid = makeupState.totalFidyaPaid,
@@ -890,6 +893,7 @@ private fun FastingCalendarSection(
 private fun RecommendedFastsSection(
     records: List<FastRecord> = emptyList(),
     onLogFast: (LocalDate) -> Unit = {},
+    daysUntilAyyamAlBeed: Int = 0,
     modifier: Modifier = Modifier
 ) {
     val today = LocalDate.now()
@@ -917,8 +921,9 @@ private fun RecommendedFastsSection(
         nextThursday.formatDayMonth()
     )
 
-    // Calculate Ayyam al-Beed status (13th, 14th, 15th of lunar month)
-    val ayyamDays = calculateAyyamAlBeedDays(today)
+    // Ayyam al-Beed (13th, 14th, 15th of the lunar month) — counted by the ViewModel, which
+    // is where the clock and the user's Hijri offset both live.
+    val ayyamDays = daysUntilAyyamAlBeed
     val ayyamText = when {
         ayyamDays == 0 -> todayText
         ayyamDays == 1 -> stringResource(R.string.fasting_tomorrow)
@@ -1088,19 +1093,6 @@ private fun RecommendedFastsSection(
     }
 }
 
-private fun calculateAyyamAlBeedDays(today: LocalDate): Int {
-    val hijriDate = HijriDateCalculator.toHijri(today)
-    return when (val hijriDay = hijriDate.day) {
-        13, 14, 15 -> 0 // Currently Ayyam al-Beed
-        in 1..12 -> 13 - hijriDay
-        else -> {
-            val daysInMonth =
-                HijriDateCalculator.getDaysInHijriMonth(hijriDate.year, hijriDate.month)
-            val daysUntilNextMonth = daysInMonth - hijriDay
-            daysUntilNextMonth + 13
-        }
-    }
-}
 
 @Composable
 private fun RecommendedFastCard(
@@ -1304,342 +1296,6 @@ private fun LogFastButton(
     )
 }
 
-@Composable
-private fun MakeupFastsContent(
-    makeupState: MakeupFastsUiState,
-    onCompleteMakeupFast: (Long) -> Unit,
-    onUpdateMakeupFast: (MakeupFast) -> Unit = {},
-    onPayFidya: (Long, Double) -> Unit = { _, _ -> },
-    modifier: Modifier = Modifier
-) {
-    var editingMakeupFast by remember { mutableStateOf<MakeupFast?>(null) }
-
-    // Makeup fast edit bottom sheet
-    MakeupFastEditBottomSheet(
-        makeupFast = editingMakeupFast,
-        isVisible = editingMakeupFast != null,
-        onDismiss = { editingMakeupFast = null },
-        onSave = { updated ->
-            onUpdateMakeupFast(updated)
-            editingMakeupFast = null
-        },
-        onPayFidya = { id, amount ->
-            onPayFidya(id, amount)
-            editingMakeupFast = null
-        }
-    )
-
-    Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        if (makeupState.allMakeupFasts.isEmpty()) {
-            NimazEmptyState(
-                title = stringResource(R.string.fasting_no_makeup),
-                message = stringResource(R.string.fasting_all_up_to_date),
-                iconTint = GreenAccent
-            )
-        } else {
-            val completedFasts = makeupState.allMakeupFasts.filter {
-                it.status == MakeupFastStatus.COMPLETED || it.status == MakeupFastStatus.FIDYA_PAID
-            }
-            val completedCount = completedFasts.size
-            val totalCount = makeupState.allMakeupFasts.size
-
-            // Summary Card
-            MakeupSummaryCard(pendingCount = makeupState.pendingCount)
-
-            // Stats Grid
-            NimazStatsGrid(
-                stats = listOf(
-                    NimazStatData(
-                        "$completedCount",
-                        stringResource(R.string.fasting_completed_label),
-                        GreenAccent
-                    ),
-                    NimazStatData(
-                        "${makeupState.pendingCount}",
-                        stringResource(R.string.fasting_pending_label),
-                        OrangeAccent
-                    ),
-                    NimazStatData("$totalCount", stringResource(R.string.fasting_total_label))
-                )
-            )
-
-            // Info Banner
-            NimazBanner(
-                message = stringResource(R.string.fasting_makeup_info),
-                variant = NimazBannerVariant.INFO,
-                icon = Icons.Default.Info,
-                showBorder = true
-            )
-
-            // Pending Section
-            if (makeupState.pendingMakeupFasts.isNotEmpty()) {
-                NimazSectionHeader(
-                    title = stringResource(R.string.fasting_pending),
-                    trailingText = stringResource(
-                        R.string.fasting_pending_count,
-                        makeupState.pendingCount
-                    ),
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                makeupState.pendingMakeupFasts.forEach { makeupFast ->
-                    MakeupPendingFastCard(
-                        makeupFast = makeupFast,
-                        onComplete = { onCompleteMakeupFast(makeupFast.id) },
-                        onEdit = { editingMakeupFast = makeupFast }
-                    )
-                }
-            }
-
-            // Completed Section
-            if (completedFasts.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(4.dp))
-                NimazSectionHeader(
-                    title = stringResource(R.string.fasting_completed_label),
-                    trailingText = pluralStringResource(
-                        R.plurals.fasting_fasts_count,
-                        completedFasts.size,
-                        completedFasts.size
-                    ),
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                completedFasts.forEach { makeupFast ->
-                    MakeupCompletedFastItem(makeupFast = makeupFast)
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun MakeupSummaryCard(
-    pendingCount: Int,
-    modifier: Modifier = Modifier
-) {
-    GradientCard(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        gradientColors = listOf(OrangeAccent, OrangeDark)
-    ) {
-        Column(modifier = Modifier.padding(25.dp)) {
-            Text(
-                text = stringResource(R.string.fasting_fasts_to_makeup),
-                style = MaterialTheme.typography.labelMedium,
-                color = Color.White.copy(alpha = 0.9f)
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = "$pendingCount",
-                style = MaterialTheme.typography.displaySmall.copy(
-                    fontSize = 48.sp,
-                    fontWeight = FontWeight.Bold
-                ),
-                color = Color.White
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = stringResource(R.string.fasting_remaining_to_complete),
-                style = MaterialTheme.typography.bodyMedium,
-                color = Color.White.copy(alpha = 0.9f)
-            )
-        }
-    }
-}
-
-@Composable
-private fun MakeupPendingFastCard(
-    makeupFast: MakeupFast,
-    onComplete: () -> Unit,
-    onEdit: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val missedDate = Instant.ofEpochMilli(makeupFast.originalDate)
-        .atZone(ZoneId.systemDefault())
-        .toLocalDate()
-        .formatMediumDate()
-
-    val displayDate = makeupFast.originalHijriDate ?: missedDate
-
-    NimazCard(
-        style = NimazCardStyle.FILLED,
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(14.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(15.dp)
-        ) {
-            // Header: date + reason on left, status badge on right
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column {
-                    Text(
-                        text = displayDate,
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                    Text(
-                        text = makeupFast.reason,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-
-                NimazBadge(
-                    text = stringResource(R.string.fasting_pending),
-                    shape = NimazBadgeShape.ROUNDED,
-                    size = NimazBadgeSize.LARGE,
-                    colors = NimazBadgeDefaults.feature(
-                        color = OrangeAccent,
-                        emphasis = NimazBadgeEmphasis.SOFT
-                    )
-                )
-            }
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            // Action buttons
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                // Edit button
-                NimazCard(
-                    onClick = onEdit,
-                    shape = RoundedCornerShape(10.dp),
-                    style = NimazCardStyle.OUTLINED,
-                    tone = NimazTone.NEUTRAL,
-                    elevation = 0.dp,
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Row(
-                        modifier = Modifier.padding(10.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        NimazIcon(
-                            imageVector = Icons.Default.Edit,
-                            contentDescription = null,
-                            variant = NimazIconVariant.MUTED,
-                            size = NimazIconSize.SMALL
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(
-                            text = stringResource(R.string.fasting_edit),
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-
-                // Mark Complete button
-                NimazCard(
-                    onClick = onComplete,
-                    shape = RoundedCornerShape(10.dp),
-                    tone = NimazTone.ACCENT,
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Row(
-                        modifier = Modifier.padding(10.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        NimazIcon(
-                            imageVector = Icons.Default.Check,
-                            contentDescription = null,
-                            size = NimazIconSize.SMALL
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(
-                            text = stringResource(R.string.fasting_mark_complete),
-                            style = MaterialTheme.typography.labelMedium
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun MakeupCompletedFastItem(
-    makeupFast: MakeupFast,
-    modifier: Modifier = Modifier
-) {
-    val missedDate = Instant.ofEpochMilli(makeupFast.originalDate)
-        .atZone(ZoneId.systemDefault())
-        .toLocalDate()
-        .formatMediumDate()
-
-    val completedDateText = makeupFast.completedDate?.let {
-        val date = Instant.ofEpochMilli(it)
-            .atZone(ZoneId.systemDefault())
-            .toLocalDate()
-            .formatMediumDate()
-        if (makeupFast.status == MakeupFastStatus.FIDYA_PAID)
-            stringResource(R.string.fasting_fidya_paid_on, date)
-        else
-            stringResource(R.string.fasting_made_up_on, date)
-    }
-        ?: if (makeupFast.status == MakeupFastStatus.FIDYA_PAID) stringResource(R.string.fasting_fidya_paid) else stringResource(
-            R.string.fasting_completed
-        )
-
-    val originalLabel = makeupFast.originalHijriDate?.let {
-        stringResource(R.string.fasting_originally, it)
-    } ?: stringResource(R.string.fasting_originally, missedDate)
-
-    NimazCard(
-        style = NimazCardStyle.FILLED,
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(14.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(15.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(15.dp)
-        ) {
-            // Green check icon
-            NimazIcon(
-                imageVector = Icons.Default.Check,
-                contentDescription = null,
-                type = NimazIconType.CONTAINED,
-                containerShape = NimazIconContainerShape.ROUNDED_SQUARE,
-                tint = GreenAccent,
-                containerColor = GreenAccent.copy(alpha = 0.2f),
-                containerSize = 32.dp,
-                iconSize = 18.dp,
-                cornerRadius = 10.dp,
-            )
-
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = completedDateText,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Text(
-                    text = originalLabel,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                )
-            }
-        }
-    }
-}
-
-// region Previews
 
 @Preview(showBackground = true, widthDp = 400, name = "Stats Grid")
 @Composable

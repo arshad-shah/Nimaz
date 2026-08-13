@@ -9,6 +9,8 @@ import com.arshadshah.nimaz.domain.repository.settings.LocationSettings
 import com.arshadshah.nimaz.domain.repository.settings.MoreSettings
 import com.arshadshah.nimaz.domain.repository.settings.QuranPreferences
 import com.arshadshah.nimaz.domain.repository.settings.TasbihSettings
+import com.arshadshah.nimaz.domain.repository.settings.HijriSettings
+import com.arshadshah.nimaz.domain.repository.settings.SearchSettings
 import com.arshadshah.nimaz.domain.repository.settings.ZakatSettings
 import kotlinx.coroutines.flow.Flow
 
@@ -26,6 +28,8 @@ interface SettingsRepository :
     DuaDisplaySettings,
     TasbihSettings,
     ZakatSettings,
+    HijriSettings,
+    SearchSettings,
     AiSettings,
     LocationSettings,
     MoreSettings,
@@ -54,9 +58,9 @@ interface SettingsRepository :
     val useHijriPrimary: Flow<Boolean>
     suspend fun setUseHijriPrimary(enabled: Boolean)
 
-    /** Signed day offset (-2..+2, default 0) applied to the tabular Hijri date to correct
-     *  for local moon-sighting differences (see HijriDateCalculator.today(offsetDays)). */
-    val hijriDayOffset: Flow<Int>
+    // `hijriDayOffset` itself is on the HijriSettings seam above — three unrelated readers want
+    // that one flow and none of them wants the rest of this interface. The writer stays here,
+    // because only the settings screen writes it.
     suspend fun setHijriDayOffset(days: Int)
     val arabicFontSize: Flow<String>
     suspend fun setArabicFontSize(size: String)

@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.data.local.database.dao
 
 import androidx.room.ColumnInfo
 import androidx.room.Dao
+import androidx.room.DatabaseView
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
@@ -166,51 +167,17 @@ interface QuranDao {
 
     @Query(
         """
-        SELECT a.*,
-               u.text AS text_uthmani,
-               s.text AS text_simple,
-               sj.kind AS sajda_kind,
-               sj.sequence AS sajda_sequence,
-               hq.number AS rub_number,
-               hq.start_ayah_id AS rub_start_ayah_id,
-               (r.number - rs.first_number + 1) AS ruku_number,
-               r.end_ayah_id AS ruku_end_ayah_id
-        FROM ayahs a
-        LEFT JOIN mushaf_ayah_texts u ON u.ayah_id = a.id AND u.text_source = 'UTHMANI'
-        LEFT JOIN mushaf_ayah_texts s ON s.ayah_id = a.id AND s.text_source = 'SIMPLE'
-        LEFT JOIN sajdas sj ON sj.ayah_id = a.id
-        LEFT JOIN hizb_quarters hq ON a.id BETWEEN hq.start_ayah_id AND hq.end_ayah_id
-        LEFT JOIN rukus r ON a.id BETWEEN r.start_ayah_id AND r.end_ayah_id
-        LEFT JOIN (
-            SELECT surah_id, MIN(number) AS first_number FROM rukus GROUP BY surah_id
-        ) rs ON rs.surah_id = r.surah_id
-        WHERE a.surah_id = :surahId
-        ORDER BY a.number_in_surah ASC
+        SELECT * FROM ayah_with_text
+        WHERE surah_id = :surahId
+        ORDER BY number_in_surah ASC
         """
     )
     fun getAyahsWithTextBySurah(surahId: Int): Flow<List<AyahWithText>>
 
     @Query(
         """
-        SELECT a.*,
-               u.text AS text_uthmani,
-               s.text AS text_simple,
-               sj.kind AS sajda_kind,
-               sj.sequence AS sajda_sequence,
-               hq.number AS rub_number,
-               hq.start_ayah_id AS rub_start_ayah_id,
-               (r.number - rs.first_number + 1) AS ruku_number,
-               r.end_ayah_id AS ruku_end_ayah_id
-        FROM ayahs a
-        LEFT JOIN mushaf_ayah_texts u ON u.ayah_id = a.id AND u.text_source = 'UTHMANI'
-        LEFT JOIN mushaf_ayah_texts s ON s.ayah_id = a.id AND s.text_source = 'SIMPLE'
-        LEFT JOIN sajdas sj ON sj.ayah_id = a.id
-        LEFT JOIN hizb_quarters hq ON a.id BETWEEN hq.start_ayah_id AND hq.end_ayah_id
-        LEFT JOIN rukus r ON a.id BETWEEN r.start_ayah_id AND r.end_ayah_id
-        LEFT JOIN (
-            SELECT surah_id, MIN(number) AS first_number FROM rukus GROUP BY surah_id
-        ) rs ON rs.surah_id = r.surah_id
-        WHERE a.id = :ayahId
+        SELECT * FROM ayah_with_text
+        WHERE id = :ayahId
         """
     )
     suspend fun getAyahWithTextById(ayahId: Int): AyahWithText?
@@ -218,81 +185,30 @@ interface QuranDao {
 
     @Query(
         """
-        SELECT a.*,
-               u.text AS text_uthmani,
-               s.text AS text_simple,
-               sj.kind AS sajda_kind,
-               sj.sequence AS sajda_sequence,
-               hq.number AS rub_number,
-               hq.start_ayah_id AS rub_start_ayah_id,
-               (r.number - rs.first_number + 1) AS ruku_number,
-               r.end_ayah_id AS ruku_end_ayah_id
-        FROM ayahs a
-        LEFT JOIN mushaf_ayah_texts u ON u.ayah_id = a.id AND u.text_source = 'UTHMANI'
-        LEFT JOIN mushaf_ayah_texts s ON s.ayah_id = a.id AND s.text_source = 'SIMPLE'
-        LEFT JOIN sajdas sj ON sj.ayah_id = a.id
-        LEFT JOIN hizb_quarters hq ON a.id BETWEEN hq.start_ayah_id AND hq.end_ayah_id
-        LEFT JOIN rukus r ON a.id BETWEEN r.start_ayah_id AND r.end_ayah_id
-        LEFT JOIN (
-            SELECT surah_id, MIN(number) AS first_number FROM rukus GROUP BY surah_id
-        ) rs ON rs.surah_id = r.surah_id
-        WHERE a.id BETWEEN :minAyahId AND :maxAyahId
-        ORDER BY a.id ASC
+        SELECT * FROM ayah_with_text
+        WHERE id BETWEEN :minAyahId AND :maxAyahId
+        ORDER BY id ASC
         """
     )
     fun getAyahsWithTextByRange(minAyahId: Int, maxAyahId: Int): Flow<List<AyahWithText>>
 
     @Query(
         """
-        SELECT a.*,
-               u.text AS text_uthmani,
-               s.text AS text_simple,
-               sj.kind AS sajda_kind,
-               sj.sequence AS sajda_sequence,
-               hq.number AS rub_number,
-               hq.start_ayah_id AS rub_start_ayah_id,
-               (r.number - rs.first_number + 1) AS ruku_number,
-               r.end_ayah_id AS ruku_end_ayah_id
-        FROM ayahs a
-        LEFT JOIN mushaf_ayah_texts u ON u.ayah_id = a.id AND u.text_source = 'UTHMANI'
-        LEFT JOIN mushaf_ayah_texts s ON s.ayah_id = a.id AND s.text_source = 'SIMPLE'
-        LEFT JOIN sajdas sj ON sj.ayah_id = a.id
-        LEFT JOIN hizb_quarters hq ON a.id BETWEEN hq.start_ayah_id AND hq.end_ayah_id
-        LEFT JOIN rukus r ON a.id BETWEEN r.start_ayah_id AND r.end_ayah_id
-        LEFT JOIN (
-            SELECT surah_id, MIN(number) AS first_number FROM rukus GROUP BY surah_id
-        ) rs ON rs.surah_id = r.surah_id
-        WHERE sj.ayah_id IS NOT NULL
-        ORDER BY sj.sequence ASC
+        SELECT * FROM ayah_with_text
+        WHERE sajda_sequence IS NOT NULL
+        ORDER BY sajda_sequence ASC
         """
     )
     fun getSajdaAyahsWithText(): Flow<List<AyahWithText>>
 
     @Query(
         """
-        SELECT a.*,
-               u.text AS text_uthmani,
-               s.text AS text_simple,
-               sj.kind AS sajda_kind,
-               sj.sequence AS sajda_sequence,
-               hq.number AS rub_number,
-               hq.start_ayah_id AS rub_start_ayah_id,
-               (r.number - rs.first_number + 1) AS ruku_number,
-               r.end_ayah_id AS ruku_end_ayah_id
-        FROM ayahs a
-        LEFT JOIN mushaf_ayah_texts u ON u.ayah_id = a.id AND u.text_source = 'UTHMANI'
-        LEFT JOIN mushaf_ayah_texts s ON s.ayah_id = a.id AND s.text_source = 'SIMPLE'
-        LEFT JOIN sajdas sj ON sj.ayah_id = a.id
-        LEFT JOIN hizb_quarters hq ON a.id BETWEEN hq.start_ayah_id AND hq.end_ayah_id
-        LEFT JOIN rukus r ON a.id BETWEEN r.start_ayah_id AND r.end_ayah_id
-        LEFT JOIN (
-            SELECT surah_id, MIN(number) AS first_number FROM rukus GROUP BY surah_id
-        ) rs ON rs.surah_id = r.surah_id
-        WHERE a.id IN (
+        SELECT * FROM ayah_with_text
+        WHERE id IN (
             SELECT DISTINCT t.ayah_id FROM mushaf_ayah_texts t
             WHERE t.text LIKE '%' || :query || '%'
         )
-        ORDER BY a.id ASC
+        ORDER BY id ASC
         """
     )
     fun searchAyahsWithText(query: String): Flow<List<AyahWithText>>
@@ -306,26 +222,9 @@ interface QuranDao {
      */
     @Query(
         """
-        SELECT a.*,
-               u.text AS text_uthmani,
-               s.text AS text_simple,
-               sj.kind AS sajda_kind,
-               sj.sequence AS sajda_sequence,
-               hq.number AS rub_number,
-               hq.start_ayah_id AS rub_start_ayah_id,
-               (r.number - rs.first_number + 1) AS ruku_number,
-               r.end_ayah_id AS ruku_end_ayah_id
-        FROM ayahs a
-        LEFT JOIN mushaf_ayah_texts u ON u.ayah_id = a.id AND u.text_source = 'UTHMANI'
-        LEFT JOIN mushaf_ayah_texts s ON s.ayah_id = a.id AND s.text_source = 'SIMPLE'
-        LEFT JOIN sajdas sj ON sj.ayah_id = a.id
-        LEFT JOIN hizb_quarters hq ON a.id BETWEEN hq.start_ayah_id AND hq.end_ayah_id
-        LEFT JOIN rukus r ON a.id BETWEEN r.start_ayah_id AND r.end_ayah_id
-        LEFT JOIN (
-            SELECT surah_id, MIN(number) AS first_number FROM rukus GROUP BY surah_id
-        ) rs ON rs.surah_id = r.surah_id
-        WHERE a.id IN (:ayahIds)
-        ORDER BY a.id ASC
+        SELECT * FROM ayah_with_text
+        WHERE id IN (:ayahIds)
+        ORDER BY id ASC
         """
     )
     suspend fun getAyahsWithTextByIds(ayahIds: List<Int>): List<AyahWithText>
@@ -333,52 +232,18 @@ interface QuranDao {
 
     @Query(
         """
-        SELECT a.*,
-               u.text AS text_uthmani,
-               s.text AS text_simple,
-               sj.kind AS sajda_kind,
-               sj.sequence AS sajda_sequence,
-               hq.number AS rub_number,
-               hq.start_ayah_id AS rub_start_ayah_id,
-               (r.number - rs.first_number + 1) AS ruku_number,
-               r.end_ayah_id AS ruku_end_ayah_id
-        FROM ayahs a
-        LEFT JOIN mushaf_ayah_texts u ON u.ayah_id = a.id AND u.text_source = 'UTHMANI'
-        LEFT JOIN mushaf_ayah_texts s ON s.ayah_id = a.id AND s.text_source = 'SIMPLE'
-        LEFT JOIN sajdas sj ON sj.ayah_id = a.id
-        LEFT JOIN hizb_quarters hq ON a.id BETWEEN hq.start_ayah_id AND hq.end_ayah_id
-        LEFT JOIN rukus r ON a.id BETWEEN r.start_ayah_id AND r.end_ayah_id
-        LEFT JOIN (
-            SELECT surah_id, MIN(number) AS first_number FROM rukus GROUP BY surah_id
-        ) rs ON rs.surah_id = r.surah_id
-        WHERE a.page = :pageNumber
-        ORDER BY a.id ASC
+        SELECT * FROM ayah_with_text
+        WHERE page = :pageNumber
+        ORDER BY id ASC
         """
     )
     fun getAyahsWithTextByPage(pageNumber: Int): Flow<List<AyahWithText>>
 
     @Query(
         """
-        SELECT a.*,
-               u.text AS text_uthmani,
-               s.text AS text_simple,
-               sj.kind AS sajda_kind,
-               sj.sequence AS sajda_sequence,
-               hq.number AS rub_number,
-               hq.start_ayah_id AS rub_start_ayah_id,
-               (r.number - rs.first_number + 1) AS ruku_number,
-               r.end_ayah_id AS ruku_end_ayah_id
-        FROM ayahs a
-        LEFT JOIN mushaf_ayah_texts u ON u.ayah_id = a.id AND u.text_source = 'UTHMANI'
-        LEFT JOIN mushaf_ayah_texts s ON s.ayah_id = a.id AND s.text_source = 'SIMPLE'
-        LEFT JOIN sajdas sj ON sj.ayah_id = a.id
-        LEFT JOIN hizb_quarters hq ON a.id BETWEEN hq.start_ayah_id AND hq.end_ayah_id
-        LEFT JOIN rukus r ON a.id BETWEEN r.start_ayah_id AND r.end_ayah_id
-        LEFT JOIN (
-            SELECT surah_id, MIN(number) AS first_number FROM rukus GROUP BY surah_id
-        ) rs ON rs.surah_id = r.surah_id
-        WHERE a.juz = :juzNumber
-        ORDER BY a.id ASC
+        SELECT * FROM ayah_with_text
+        WHERE juz = :juzNumber
+        ORDER BY id ASC
         """
     )
     fun getAyahsWithTextByJuz(juzNumber: Int): Flow<List<AyahWithText>>
@@ -705,38 +570,60 @@ interface QuranDao {
 
 }
 
+/** The view's name, in one place: the annotation, the eight queries and the migration all use it. */
+const val AYAH_WITH_TEXT_VIEW_NAME = "ayah_with_text"
+
 /**
- * A verse with everything the reader needs, resolved in one query.
+ * The body of the [AyahWithText] view.
+ *
+ * A `const`, not a string literal inside the annotation, because three things have to agree on
+ * it exactly: the `@DatabaseView` Room generates its validation from, the `CREATE VIEW` that
+ * `MIGRATION_24_25` runs, and the one nimaz-data writes into the shipped artifact. SQLite stores
+ * a view's defining statement verbatim and Room compares the whole string on open, so "exactly"
+ * is not a figure of speech — a differing space makes the database unopenable.
+ */
+const val AYAH_WITH_TEXT_BODY = """SELECT a.*,
+       u.text AS text_uthmani,
+       s.text AS text_simple,
+       sj.kind AS sajda_kind,
+       sj.sequence AS sajda_sequence
+FROM ayahs a
+LEFT JOIN mushaf_ayah_texts u ON u.ayah_id = a.id AND u.text_source = 'UTHMANI'
+LEFT JOIN mushaf_ayah_texts s ON s.ayah_id = a.id AND s.text_source = 'SIMPLE'
+LEFT JOIN sajdas sj ON sj.ayah_id = a.id"""
+
+/**
+ * A verse with everything the reader needs, resolved in one query — as a database view.
  *
  * Since schemaVersion 22 a verse's text is not on its row: `mushaf_ayah_texts` holds one row per
  * (source, ayah). Reading a page therefore means a join rather than a column, and doing it per
- * verse would be 6,236 queries for a surah view. This is that join, once — both scripts, the
- * prostration if there is one, and the quarter the verse falls in.
+ * verse would be 6,236 queries for a surah view. This is that join, once — both scripts and the
+ * prostration if there is one.
  *
- * `rub_number` is the interesting one: `Ayah.rubNumber` used to be hard-coded to `0` with the
- * comment "Not available in database", because the quarter a verse belongs to could only be got
- * by scanning. It is a column of `hizb_quarters` now.
+ * **Why a view (schemaVersion 25).** This projection used to be written out eight times in
+ * [QuranDao], differing only in the `WHERE` clause; the eight are one-line selects over
+ * `ayah_with_text` now, with one place to change when the projection grows.
  *
- * The two `*_start_ayah_id` columns are what turn a division a verse merely *falls inside* into
- * a division it *begins*: a printed Mushaf marks the opening verse of a quarter or a rukūʿ, not
- * every verse in one. Comparing them to `ayahs.id` in the mapper costs nothing and is the only
- * way the reader can tell the two apart.
+ * **What left the projection.** It used to carry five `LEFT JOIN`s. Two of them were *range*
+ * joins — `a.id BETWEEN hq.start_ayah_id AND hq.end_ayah_id`, and the same shape for `rukus` —
+ * which SQLite cannot serve from an index the way it serves an equality join; and a
+ * `(SELECT surah_id, MIN(number) … GROUP BY surah_id)` subquery re-scanned and re-grouped the
+ * entire `rukus` table on every call, including the single-verse lookup [getAyahWithTextById].
+ * That is shipped, read-only reference data, so it is not computed at read time at all any
+ * more: nimaz-data derives it at build time and the four columns arrive on `ayahs` itself
+ * (see [AyahEntity]). Three joins remain, all of them equality joins on an indexed column.
  *
- * `ruku_number` is the rukūʿ's index **within its surah** — `rukus.number` is global (1..556),
- * and no Mushaf has ever printed that. The derived `rs` table is 114 rows, one per surah.
- * All of the rukūʿ columns are null on a device whose `rukus` table has not been filled yet, so
- * the marker simply does not render rather than rendering wrongly.
+ * The division columns are therefore reached through [AyahEntity] rather than as fields here —
+ * `SELECT a.*` carries them — and the mapper turns a division a verse merely *falls inside*
+ * into one it *begins* or *ends* by comparing them to `ayahs.id`.
  */
+@DatabaseView(viewName = AYAH_WITH_TEXT_VIEW_NAME, value = AYAH_WITH_TEXT_BODY)
 data class AyahWithText(
     @Embedded val ayah: AyahEntity,
     @ColumnInfo(name = "text_uthmani") val textUthmani: String?,
     @ColumnInfo(name = "text_simple") val textSimple: String?,
     @ColumnInfo(name = "sajda_kind") val sajdaKind: String?,
     @ColumnInfo(name = "sajda_sequence") val sajdaSequence: Int?,
-    @ColumnInfo(name = "rub_number") val rubNumber: Int?,
-    @ColumnInfo(name = "rub_start_ayah_id") val rubStartAyahId: Int?,
-    @ColumnInfo(name = "ruku_number") val rukuNumber: Int?,
-    @ColumnInfo(name = "ruku_end_ayah_id") val rukuEndAyahId: Int?,
 )
 
 /** Where a verse sits in the mushaf. */

@@ -8,8 +8,10 @@ import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.domain.model.DuaSearchResult
 import com.arshadshah.nimaz.domain.model.HadithSearchResult
 import com.arshadshah.nimaz.domain.model.LibrarySearchResults
+import com.arshadshah.nimaz.domain.model.LibrarySource
 import com.arshadshah.nimaz.domain.model.QuranSearchResult
 import com.arshadshah.nimaz.domain.model.Surah
+import com.arshadshah.nimaz.domain.usecase.ObserveSearchPreferencesUseCase
 import com.arshadshah.nimaz.domain.usecase.SearchLibraryUseCase
 import com.arshadshah.nimaz.presentation.viewmodel.UiError
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -18,13 +20,28 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import com.arshadshah.nimaz.domain.model.UnifiedSearchResult
 
 enum class SearchFilter {
-    ALL, QURAN, HADITH, DUA
+    ALL, QURAN, HADITH, DUA, NAMES
+}
+
+/**
+ * The chip that corresponds to a [LibrarySource], with `null` — "no default" — as [ALL].
+ *
+ * Exhaustive on purpose: a source added to [LibrarySource] stops this compiling until it has
+ * a chip to filter by, which is the only thing that keeps the two lists from drifting.
+ */
+private fun LibrarySource?.asFilter(): SearchFilter = when (this) {
+    LibrarySource.QURAN -> SearchFilter.QURAN
+    LibrarySource.HADITH -> SearchFilter.HADITH
+    LibrarySource.DUAS -> SearchFilter.DUA
+    LibrarySource.NAMES -> SearchFilter.NAMES
+    null -> SearchFilter.ALL
 }
 
 /** Idle time after the last keystroke before a search-as-you-type lookup fires. */
@@ -34,6 +51,7 @@ private const val DOMAIN = "global_search"
 @HiltViewModel
 class SearchViewModel @Inject constructor(
     private val searchLibrary: SearchLibraryUseCase,
+    private val searchPreferences: ObserveSearchPreferencesUseCase,
     private val telemetry: Telemetry,
 ) : ViewModel() {
 
@@ -49,6 +67,26 @@ class SearchViewModel @Inject constructor(
     // new query so stale results never clobber newer ones.
     private var searchJob: Job? = null
 
+    /**
+     * Whether a filter has been chosen for *this* screen — by a tap, or by the screen being
+     * opened scoped (Duas → search passes `initialFilter`).
+     *
+     * The stored default scope is read asynchronously, so without this it would race the
+     * screen's `LaunchedEffect(initialFilter)` and sometimes overwrite it. The precedence is
+     * not in doubt — "search duas", said by opening search from duas, beats "usually start on
+     * hadith", said once in settings — so the flag settles it rather than the scheduler.
+     */
+    private var filterChosenForThisScreen = false
+
+    init {
+        viewModelScope.launch {
+            val defaultScope = searchPreferences().first().defaultScope
+            if (!filterChosenForThisScreen && defaultScope != null) {
+                setFilter(defaultScope.asFilter())
+            }
+        }
+    }
+
     fun onEvent(event: SearchEvent) {
         when (event) {
             is SearchEvent.UpdateQuery -> updateQuery(event.query)
@@ -56,6 +94,7 @@ class SearchViewModel @Inject constructor(
             // without recording what they typed — which of Qur'an, hadith or dua they narrow
             // to is the shape, and it was not recorded at all.
             is SearchEvent.SetFilter -> {
+                filterChosenForThisScreen = true
                 telemetry.featureUsed(DOMAIN, "set_filter_" + event.filter.name.lowercase())
                 setFilter(event.filter)
             }
@@ -181,13 +220,15 @@ class SearchViewModel @Inject constructor(
         val unified = results.quran.map { UnifiedSearchResult.QuranResult(it) } +
                 results.surahs.map { UnifiedSearchResult.SurahResult(it) } +
                 results.hadith.map { UnifiedSearchResult.HadithResult(it) } +
-                results.duas.map { UnifiedSearchResult.DuaResult(it) }
+                results.duas.map { UnifiedSearchResult.DuaResult(it) } +
+                results.names.map { UnifiedSearchResult.NameResult(it) }
         _searchState.update { state ->
             state.copy(
                 quranResults = results.quran,
                 surahResults = results.surahs,
                 hadithResults = results.hadith,
                 duaResults = results.duas,
+                nameResults = results.names,
                 allResults = unified,
                 filteredResults = applyFilter(unified, state.selectedFilter),
                 isSearching = false,
@@ -205,6 +246,7 @@ class SearchViewModel @Inject constructor(
             SearchFilter.QURAN -> results.filter { it is UnifiedSearchResult.QuranResult || it is UnifiedSearchResult.SurahResult }
             SearchFilter.HADITH -> results.filter { it is UnifiedSearchResult.HadithResult }
             SearchFilter.DUA -> results.filter { it is UnifiedSearchResult.DuaResult }
+            SearchFilter.NAMES -> results.filter { it is UnifiedSearchResult.NameResult }
         }
     }
 

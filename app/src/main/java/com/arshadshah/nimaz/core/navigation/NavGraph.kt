@@ -54,16 +54,16 @@ import com.arshadshah.nimaz.presentation.components.molecules.ShareAppSheet
 import com.arshadshah.nimaz.presentation.screens.about.AboutScreen
 import com.arshadshah.nimaz.presentation.screens.about.LicenseDetailScreen
 import com.arshadshah.nimaz.presentation.screens.about.LicensesScreen
-import com.arshadshah.nimaz.presentation.screens.adaptive.AdaptiveAsmaUlHusnaScreen
-import com.arshadshah.nimaz.presentation.screens.adaptive.AdaptiveAsmaUnNabiScreen
+import com.arshadshah.nimaz.presentation.screens.adaptive.AdaptiveNamesScreen
 import com.arshadshah.nimaz.presentation.screens.adaptive.AdaptiveDuaScreen
 import com.arshadshah.nimaz.presentation.screens.adaptive.AdaptiveHadithScreen
 import com.arshadshah.nimaz.presentation.screens.adaptive.AdaptiveKhatamScreen
 import com.arshadshah.nimaz.presentation.screens.adaptive.AdaptiveMoreScreen
-import com.arshadshah.nimaz.presentation.screens.adaptive.AdaptiveProphetsScreen
 import com.arshadshah.nimaz.presentation.screens.adaptive.AdaptiveQuranScreen
 import com.arshadshah.nimaz.presentation.screens.adaptive.AdaptiveSettingsScreen
 import com.arshadshah.nimaz.presentation.screens.asma.AsmaUlHusnaDetailScreen
+import com.arshadshah.nimaz.presentation.screens.names.FavouritesScreen
+import com.arshadshah.nimaz.presentation.screens.names.NamesTab
 import com.arshadshah.nimaz.presentation.screens.asmaunnabi.AsmaUnNabiDetailScreen
 import com.arshadshah.nimaz.presentation.screens.bookmarks.BookmarksScreen
 import com.arshadshah.nimaz.presentation.screens.calendar.IslamicCalendarScreen
@@ -93,6 +93,7 @@ import com.arshadshah.nimaz.presentation.screens.quran.QuranReaderScreen
 import com.arshadshah.nimaz.presentation.screens.quran.SelectReciterScreen
 import com.arshadshah.nimaz.presentation.screens.quran.SelectTranslationScreen
 import com.arshadshah.nimaz.domain.model.DuaOccasion
+import com.arshadshah.nimaz.domain.model.NameCatalog
 import com.arshadshah.nimaz.domain.model.HadithGrade
 import com.arshadshah.nimaz.domain.model.TopicTree
 import com.arshadshah.nimaz.presentation.screens.quran.QuranTopicDetailScreen
@@ -614,7 +615,16 @@ fun NavGraph(
                     },
                     onNavigateToDua = { duaId ->
                         navController.navigate(Route.DuaReader(duaId))
-                    }
+                    },
+                    onNavigateToName = { catalog, id ->
+                        navController.navigate(
+                            when (catalog) {
+                                NameCatalog.ASMA_UL_HUSNA -> Route.AsmaUlHusnaDetail(id)
+                                NameCatalog.ASMA_UN_NABI -> Route.AsmaUnNabiDetail(id)
+                                NameCatalog.PROPHETS -> Route.ProphetDetail(id)
+                            }
+                        )
+                    },
                 )
             }
 
@@ -629,7 +639,7 @@ fun NavGraph(
                     },
                     onNavigateToDua = { duaId ->
                         navController.navigate(Route.DuaReader(duaId))
-                    }
+                    },
                 )
             }
 
@@ -719,7 +729,16 @@ fun NavGraph(
                     },
                     onNavigateToDua = { duaId ->
                         navController.navigate(Route.DuaReader(duaId))
-                    }
+                    },
+                    onNavigateToName = { catalog, id ->
+                        navController.navigate(
+                            when (catalog) {
+                                NameCatalog.ASMA_UL_HUSNA -> Route.AsmaUlHusnaDetail(id)
+                                NameCatalog.ASMA_UN_NABI -> Route.AsmaUnNabiDetail(id)
+                                NameCatalog.PROPHETS -> Route.ProphetDetail(id)
+                            }
+                        )
+                    },
                 )
             }
 
@@ -734,7 +753,7 @@ fun NavGraph(
                     },
                     onNavigateToDua = { duaId ->
                         navController.navigate(Route.DuaReader(duaId))
-                    }
+                    },
                 )
             }
 
@@ -770,7 +789,7 @@ fun NavGraph(
                     onNavigateBack = { navController.popBackStack() },
                     onNavigateToDua = { duaId ->
                         navController.navigate(Route.DuaReader(duaId))
-                    }
+                    },
                 )
             }
 
@@ -814,6 +833,15 @@ fun NavGraph(
                     },
                     onNavigateToDua = { duaId ->
                         navController.navigate(Route.DuaReader(duaId))
+                    },
+                    onNavigateToName = { catalog, id ->
+                        navController.navigate(
+                            when (catalog) {
+                                NameCatalog.ASMA_UL_HUSNA -> Route.AsmaUlHusnaDetail(id)
+                                NameCatalog.ASMA_UN_NABI -> Route.AsmaUnNabiDetail(id)
+                                NameCatalog.PROPHETS -> Route.ProphetDetail(id)
+                            }
+                        )
                     },
                     initialFilter = SearchFilter.DUA
                 )
@@ -1170,11 +1198,26 @@ fun NavGraph(
                 )
             }
 
-            // Asma ul Husna screens
-            taggedComposable<Route.AsmaUlHusnaList>(ScreenTags.AsmaUlHusnaList) {
-                AdaptiveAsmaUlHusnaScreen(
+            // Names — three catalogues, one tabbed screen
+            taggedComposable<Route.Names>(ScreenTags.Names) { backStackEntry ->
+                val args = backStackEntry.toRoute<Route.Names>()
+                AdaptiveNamesScreen(
                     navController = navController,
+                    initialTab = NamesTab.fromOrdinal(args.tab),
                     onNavigateBack = { navController.popBackStack() },
+                )
+            }
+
+            taggedComposable<Route.Favourites>(ScreenTags.Favourites) {
+                FavouritesScreen(
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToAsmaUlHusna = {
+                        navController.navigate(Route.AsmaUlHusnaDetail(it))
+                    },
+                    onNavigateToAsmaUnNabi = {
+                        navController.navigate(Route.AsmaUnNabiDetail(it))
+                    },
+                    onNavigateToProphet = { navController.navigate(Route.ProphetDetail(it)) },
                 )
             }
 
@@ -1186,27 +1229,11 @@ fun NavGraph(
                 )
             }
 
-            // Asma un Nabi screens
-            taggedComposable<Route.AsmaUnNabiList>(ScreenTags.AsmaUnNabiList) {
-                AdaptiveAsmaUnNabiScreen(
-                    navController = navController,
-                    onNavigateBack = { navController.popBackStack() },
-                )
-            }
-
             taggedComposable<Route.AsmaUnNabiDetail>(ScreenTags.AsmaUnNabiDetail) { backStackEntry ->
                 val args = backStackEntry.toRoute<Route.AsmaUnNabiDetail>()
                 AsmaUnNabiDetailScreen(
                     nameId = args.nameId,
                     onNavigateBack = { navController.popBackStack() }
-                )
-            }
-
-            // Prophets screens
-            taggedComposable<Route.ProphetsList>(ScreenTags.ProphetsList) {
-                AdaptiveProphetsScreen(
-                    navController = navController,
-                    onNavigateBack = { navController.popBackStack() },
                 )
             }
 
@@ -1323,7 +1350,7 @@ fun NavGraph(
                     },
                     onNavigateToDua = { duaId ->
                         navController.navigate(Route.DuaReader(duaId))
-                    }
+                    },
                 )
             }
 
@@ -1343,6 +1370,15 @@ fun NavGraph(
                     },
                     onNavigateToDua = { duaId ->
                         navController.navigate(Route.DuaReader(duaId))
+                    },
+                    onNavigateToName = { catalog, id ->
+                        navController.navigate(
+                            when (catalog) {
+                                NameCatalog.ASMA_UL_HUSNA -> Route.AsmaUlHusnaDetail(id)
+                                NameCatalog.ASMA_UN_NABI -> Route.AsmaUnNabiDetail(id)
+                                NameCatalog.PROPHETS -> Route.ProphetDetail(id)
+                            }
+                        )
                     },
                     onNavigateToSearchSettings = { navController.navigate(Route.SearchSettings) },
                     onNavigateToProof = { route -> navController.navigate(route) }

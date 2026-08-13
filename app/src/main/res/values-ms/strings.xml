@@ -13,6 +13,8 @@
     <string name="widgets">Widget</string>
     <string name="today">Hari Ini</string>
     <string name="prayed">Telah Solat</string>
+    <string name="a11y_prayer_state_prayed">%1$s, telah solat</string>
+    <string name="a11y_prayer_state_not_recorded">%1$s, belum direkodkan</string>
     <string name="no_favorites_yet">Belum ada kegemaran</string>
     <string name="remove_from_favorites">Buang dari kegemaran</string>
     <string name="add_to_favorites">Tambah ke kegemaran</string>
@@ -187,6 +189,16 @@
     <string name="asr_calculation">Pengiraan Asar</string>
     <string name="asr_standard">Standard (Syafi\'i, Maliki, Hanbali)</string>
     <string name="asr_hanafi">Hanafi</string>
+    <!-- Names — the three catalogues as one tabbed screen -->
+    <string name="names_title">Nama</string>
+    <string name="names_more_subtitle">Allah, Nabi ﷺ dan para nabi</string>
+    <string name="names_search_hint">Cari semua nama…</string>
+    <string name="names_tab_allah">Allah</string>
+    <string name="names_tab_prophet">Nabi ﷺ</string>
+    <string name="names_tab_prophets">Para Nabi</string>
+    <string name="cd_open_favourites">Buka kegemaran</string>
+    <string name="favourites_empty_message">Ketik ikon hati pada sesuatu nama untuk menyimpannya di sini.</string>
+
     <string name="asma_ul_husna_title">99 Nama Allah</string>
     <string name="asma_ul_husna_search_hint">Cari mengikut nama atau makna\u2026</string>
     <string name="asma_ul_husna_no_names_found">Tiada nama ditemui</string>
@@ -1414,7 +1426,29 @@
 
     <!-- Search & AI (Ask with Proof) -->
     <string name="search_settings">Carian &amp; AI</string>
-    <string name="search_settings_subtitle">Jawapan AI dan privasi</string>
+    <string name="search_settings_subtitle">Keputusan, sumber, jawapan AI dan privasi</string>
+
+    <!-- Local search behaviour -->
+    <string name="search_results_section">Keputusan</string>
+    <string name="search_results_per_source">Keputusan setiap sumber</string>
+    <string name="search_results_per_source_subtitle">Sehingga %1$d keputusan kesemuanya merentas sumber yang dicari.</string>
+    <string name="search_sources_section">Tempat carian</string>
+    <string name="search_source_quran_desc">Ayat, terjemahan dan nama surah</string>
+    <string name="search_source_hadith_desc">Riwayat daripada koleksi hadis</string>
+    <string name="search_source_duas_desc">Doa dan terjemahannya</string>
+    <string name="search_source_names_desc">Nama-nama Allah, Nabi ﷺ dan para nabi</string>
+    <string name="search_source_last_one">Carian memerlukan sekurang-kurangnya satu sumber</string>
+    <string name="search_strictness">Ketepatan padanan</string>
+    <string name="search_strictness_exact">Tepat</string>
+    <string name="search_strictness_exact_desc">Padankan keseluruhan frasa yang anda taip sahaja</string>
+    <string name="search_strictness_balanced">Seimbang</string>
+    <string name="search_strictness_balanced_desc">Padankan juga perkataan tunggal; keputusan yang memadankan lebih banyak perkataan didahulukan</string>
+    <string name="search_strictness_broad">Luas</string>
+    <string name="search_strictness_broad_desc">Padankan seberapa banyak perkataan yang boleh. Lebih banyak untuk disaring, dan lebih perlahan bagi soalan panjang</string>
+    <string name="search_default_scope">Mula carian dalam</string>
+    <string name="search_default_scope_subtitle">Penapis yang aktif apabila carian dibuka</string>
+    <string name="search_scope_everything">Semua</string>
+    <string name="search_scope_everything_desc">Tunjukkan keputusan daripada setiap sumber yang dicari</string>
     <string name="ai_answers">Jawapan AI</string>
     <string name="ai_answers_enable">Dayakan jawapan AI</string>
     <string name="ai_answers_enable_subtitle">Ajukan soalan dan dapatkan jawapan dengan ayat dan hadis daripada pustaka anda sebagai bukti</string>

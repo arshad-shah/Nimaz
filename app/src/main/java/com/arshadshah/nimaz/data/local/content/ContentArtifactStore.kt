@@ -31,6 +31,23 @@ interface ContentArtifactStore {
     fun legacyImportComplete(): Boolean
 
     fun setLegacyImportComplete()
+
+    /**
+     * How many launches in a row have deferred the content replace.
+     *
+     * A deferral is meant to last exactly one launch — `UserDataMigrator` runs every launch and
+     * is awaited before the splash lifts, so the copy completes during that session. A count that
+     * keeps climbing means the device has stopped receiving content releases altogether: the
+     * migrator is failing, or the content database cannot be read at all (`legacyDataBlocking`
+     * treats any read failure as "something is there", which is the safe answer but an
+     * indefinitely sticky one). Such a device also never receives an FTS index, which is why
+     * Arabic search returns nothing on it.
+     */
+    fun consecutiveDeferrals(): Int
+
+    fun recordDeferral()
+
+    fun clearDeferrals()
 }
 
 class SharedPreferencesContentArtifactStore(
@@ -57,9 +74,22 @@ class SharedPreferencesContentArtifactStore(
         prefs.edit(commit = true) { putBoolean(LEGACY_KEY, true) }
     }
 
+    override fun consecutiveDeferrals(): Int = prefs.getInt(DEFERRAL_KEY, 0)
+
+    override fun recordDeferral() {
+        // `apply`, not `commit`: unlike the other two writes nothing is destroyed by losing this
+        // one. A dropped increment under-counts a stuck device; it cannot cause a bad replace.
+        prefs.edit { putInt(DEFERRAL_KEY, consecutiveDeferrals() + 1) }
+    }
+
+    override fun clearDeferrals() {
+        prefs.edit { remove(DEFERRAL_KEY) }
+    }
+
     private companion object {
         const val FILE = "nimaz_content_artifact"
         const val KEY = "installed_artifact_sha256"
         const val LEGACY_KEY = "legacy_user_data_import_complete"
+        const val DEFERRAL_KEY = "consecutive_deferrals"
     }
 }

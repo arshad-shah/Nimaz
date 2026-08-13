@@ -39,6 +39,10 @@ on:
       - 'claude/**'
       - 'feature/**'
       - 'fix/**'
+      # An epic's integration branch is validated on a real device before it opens a
+      # PR to dev, so it needs this lane too. Without the pattern the `[deploy]`
+      # marker commit produces no failure and no build — it just does nothing. (#462)
+      - 'epic/**'
 
 # One internal upload at a time — two concurrent runs would race for the next versionCode.
 concurrency:

@@ -3,6 +3,7 @@ package com.arshadshah.nimaz.core.di
 import android.content.Context
 import android.util.Log
 import androidx.room.Room
+import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.data.local.content.ContentArtifactInstaller
 import com.arshadshah.nimaz.data.local.content.ContentArtifactStore
 import com.arshadshah.nimaz.data.local.content.SharedPreferencesContentArtifactStore
@@ -69,6 +70,24 @@ object DatabaseModule {
     ): NimazDatabase {
         val outcome = ContentArtifactInstaller(context, contentArtifactStore).installIfChanged()
         Log.i("DatabaseModule", "content artifact: $outcome")
+
+        // Also to Crashlytics, not only logcat. Whether a release actually reached a device is
+        // the first question to ask about any "the app still shows the old content" report — and
+        // about Arabic search returning nothing, since the FTS index arrives inside the artifact
+        // and an install that never takes one falls back to LIKE, which matches no Arabic at all.
+        // Until now the outcome was computed and thrown away at `Log.i`, so that question had no
+        // answer in production.
+        CrashReporter.setCustomKey(
+            "content_artifact_outcome",
+            outcome::class.java.simpleName,
+        )
+        CrashReporter.setCustomKey(
+            "content_artifact_deferrals",
+            contentArtifactStore.consecutiveDeferrals(),
+        )
+        if (outcome is ContentArtifactInstaller.Outcome.Failed) {
+            CrashReporter.log("content artifact install failed: ${outcome.reason}")
+        }
 
         return Room.databaseBuilder(
             context,

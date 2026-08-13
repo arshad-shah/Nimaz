@@ -123,7 +123,9 @@ fun WidgetsScreen(
     // is safe to recompute on each second boundary.
     val nowTick by rememberNow(TickResolution.SECONDS)
     val previewData = remember(previewLocation, nowTick) {
-        previewLocation?.let { buildWidgetPreviewData(context, it) } ?: WidgetPreviewData()
+        previewLocation?.let {
+            buildWidgetPreviewData(context, it, viewModel.prayerTimeCalculator)
+        } ?: WidgetPreviewData()
     }
 
     NimazScreenScaffold(
@@ -927,13 +929,13 @@ private suspend fun loadPreviewLocation(context: android.content.Context): Previ
 private fun buildWidgetPreviewData(
     context: android.content.Context,
     location: PreviewLocation,
+    calculator: PrayerTimeCalculator,
 ): WidgetPreviewData {
     return try {
         val latitude = location.latitude
         val longitude = location.longitude
         val locationName = location.name
 
-        val calculator = PrayerTimeCalculator()
         val prayerTimes = calculator.getPrayerTimes(latitude, longitude)
 
         val currentTime = Clock.System.now()

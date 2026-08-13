@@ -16,15 +16,20 @@ import java.io.File
  *
  * The `items(count)` and `items(list.size)` overloads take an index and have no key parameter,
  * so they are excluded.
+ *
+ * `itemsIndexed` is checked too. It was not, and the gap was invisible: an audit counting
+ * `items(` on a single line reported 22 keyless sites here, all of which turned out to be
+ * multi-line calls whose `key =` sat on the next line — while the one genuinely keyless call in
+ * the presentation layer was an `itemsIndexed` the guard never looked at.
  */
 class LazyListKeyGuardTest {
 
     @Test
-    fun `lazy list items declare a stable key`() {
+    fun `lazy list items and itemsIndexed declare a stable key`() {
         val dir = File("src/main/java/com/arshadshah/nimaz/presentation")
         assert(dir.isDirectory) { "Presentation source dir not found at ${dir.absolutePath}" }
 
-        val callStart = Regex("""(?<![A-Za-z0-9_])items\s*\(""")
+        val callStart = Regex("""(?<![A-Za-z0-9_])items(?:Indexed)?\s*\(""")
         val hasKey = Regex("""\bkey\s*=""")
         val countOverload = Regex("""^\d+$|^[\w.]+\.size$""")
 
@@ -36,7 +41,7 @@ class LazyListKeyGuardTest {
                 if (hasKey.containsMatchIn(args)) return@forEach
                 if (countOverload.matches(args.trim())) return@forEach
                 val line = text.substring(0, match.range.first).count { it == '\n' } + 1
-                offenders += "${file.name}:$line  items(${args.trim().take(60)})"
+                offenders += "${file.name}:$line  ${match.value}${args.trim().take(60)})"
             }
         }
 

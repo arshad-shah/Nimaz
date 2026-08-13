@@ -9,6 +9,7 @@ import com.arshadshah.nimaz.domain.repository.AdhanDownloader
 import com.arshadshah.nimaz.domain.repository.AppLocale
 import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.core.monitoring.catchAndReport
+import com.arshadshah.nimaz.core.util.PrayerTimeCalculator
 import com.arshadshah.nimaz.core.util.LocaleHelper
 import com.arshadshah.nimaz.core.util.PrayerNotificationScheduler
 import com.arshadshah.nimaz.data.audio.AdhanAudioManager
@@ -90,6 +91,10 @@ data class NotificationSummary(
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
+    // The one remaining site that constructed a PrayerTimeCalculator directly was
+    // WidgetsScreen's preview builder; it takes this now, injected like everywhere else
+    // (CLEAN_ARCHITECTURE_CHECKLIST — the pattern already removed from five ViewModels).
+    val prayerTimeCalculator: PrayerTimeCalculator,
     private val appLocale: AppLocale,
     private val adhanDownloader: AdhanDownloader,
     private val prayerUseCases: PrayerUseCases,
