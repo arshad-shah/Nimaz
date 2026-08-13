@@ -17,7 +17,7 @@
 - **Layer rules:** domain never imports `data`; presentation never imports entities or DAOs; ViewModels inject `XxxUseCases`, never repositories; ViewModels expose `StateFlow<XxxUiState>` + a single `onEvent(event)`.
 - **Strings:** every user-visible string is a `strings.xml` entry prefixed `fasting_`, read with `stringResource` inside composables — **never** `context.getString` (lint error `LocalContextGetResourceValueCall`). A new string absent from a shipped locale fails `lintDebug` with `MissingTranslation`.
 - **No clock reads at composition.** "Today" comes from `TodayProvider` via the ViewModel; "now" comes from `rememberNow(TickResolution.MINUTES)` at the leaf. No `LocalDate.now()` in a composable.
-- **Atom test harness:** Robolectric, `@RunWith(RobolectricTestRunner::class)`, `createComponentComposeRule()` + `setThemedContent { }` from `AtomTestSupport.kt`, assertions via `com.google.common.truth.Truth.assertThat`.
+- **Atom test harness:** Robolectric, `@RunWith(RobolectricTestRunner::class)`, `createComponentComposeRule()` + `setThemedContent { }` from `AtomTestSupport.kt`, assertions via `com.google.common.truth.Truth.assertThat`. **`setThemedContent` may be called at most once per test** — a second call throws `IllegalStateException: … has already set content`, so two renderings mean two test methods.
 - **Preview convention:** every atom file ends with a private `…Showcase()` composable plus a light and a dark `@Preview`, using `NimazTheme(themeMode = ThemeMode.LIGHT / ThemeMode.DARK)` and `uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL` on the dark one.
 - **Commit discipline:** one commit per task; docs updated in the same commit as the code they describe. Commit trailer: `Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>`.
 - **Branch:** `feat/fasting-screen-redesign`, based on `dev`. Do not push to `dev`.
@@ -1092,9 +1092,13 @@ class NimazWindowTrackTest {
     }
 
     @Test
-    fun `out of range progress is coerced rather than thrown`() {
+    fun `progress above one is coerced rather than thrown`() {
         composeRule.setThemedContent(content(progress = 9f))
         composeRule.onNodeWithText("20:58").assertIsDisplayed()
+    }
+
+    @Test
+    fun `NaN progress is coerced rather than thrown`() {
         composeRule.setThemedContent(content(progress = Float.NaN))
         composeRule.onNodeWithText("20:58").assertIsDisplayed()
     }
