@@ -888,7 +888,132 @@ rebuilding the component."
 
 ---
 
-### Task 4: Document the components and close the phase
+### Task 4: One ayah reference format
+
+**Files:**
+- Create: `app/src/main/java/com/arshadshah/nimaz/domain/model/AyahReference.kt`
+- Test: `app/src/test/java/com/arshadshah/nimaz/domain/model/AyahReferenceTest.kt`
+
+**Interfaces:**
+- Consumes: nothing.
+- Produces:
+
+```kotlin
+data class AyahReference(
+    val surahNumber: Int,
+    val ayahNumber: Int,
+    val surahName: String?,
+) {
+    /** "Al-Kahf 18:54", or "18:54" when the name is unknown. */
+    fun format(): String
+}
+```
+
+  Phases 2–5 consume `AyahReference.format()` in Saved rows, Search results, the ayah sheet, Tafseer's header and the reader's ayah chip.
+
+**Why this is phase 1.** The same ayah is currently named three different ways — `Al-Fatiha · Verse 2` (favourites), `Surah 1, Ayah 3` (bookmarks, dropping the surah name entirely), `Surah 2:45 / Al-Baqara` (search). Each later phase touches at least one of those call sites, so the format has to exist before any of them start or they will each invent one again.
+
+- [ ] **Step 1: Write the failing test**
+
+Create `app/src/test/java/com/arshadshah/nimaz/domain/model/AyahReferenceTest.kt`:
+
+```kotlin
+package com.arshadshah.nimaz.domain.model
+
+import com.google.common.truth.Truth.assertThat
+import org.junit.Test
+
+class AyahReferenceTest {
+
+    @Test
+    fun `a named reference reads name then colon-separated numbers`() {
+        val ref = AyahReference(surahNumber = 18, ayahNumber = 54, surahName = "Al-Kahf")
+        assertThat(ref.format()).isEqualTo("Al-Kahf 18:54")
+    }
+
+    @Test
+    fun `an unnamed reference still carries both numbers`() {
+        val ref = AyahReference(surahNumber = 1, ayahNumber = 3, surahName = null)
+        assertThat(ref.format()).isEqualTo("1:3")
+    }
+
+    @Test
+    fun `a blank name is treated as no name`() {
+        val ref = AyahReference(surahNumber = 1, ayahNumber = 3, surahName = "   ")
+        assertThat(ref.format()).isEqualTo("1:3")
+    }
+
+    @Test
+    fun `the name is not repeated when it already looks like a reference`() {
+        val ref = AyahReference(surahNumber = 2, ayahNumber = 45, surahName = "Al-Baqara")
+        assertThat(ref.format()).doesNotContain("Surah")
+        assertThat(ref.format()).doesNotContain("Verse")
+    }
+}
+```
+
+- [ ] **Step 2: Run the test to verify it fails**
+
+```bash
+./gradlew :app:testDebugUnitTest --tests "*AyahReferenceTest*"
+```
+
+Expected: FAIL to compile — `Unresolved reference: AyahReference`.
+
+- [ ] **Step 3: Implement**
+
+Create `app/src/main/java/com/arshadshah/nimaz/domain/model/AyahReference.kt`:
+
+```kotlin
+package com.arshadshah.nimaz.domain.model
+
+/**
+ * How an ayah is named, everywhere.
+ *
+ * The section used to name the same verse three ways — "Al-Fatiha · Verse 2" in
+ * favourites, "Surah 1, Ayah 3" in bookmarks (dropping the name), and
+ * "Surah 2:45 / Al-Baqara" in search. One type, one format.
+ *
+ * The chosen form is the conventional citation: the surah's name followed by
+ * `surah:ayah`. The words "Surah" and "Verse" are dropped — they are noise in a
+ * list where every row is a verse.
+ */
+data class AyahReference(
+    val surahNumber: Int,
+    val ayahNumber: Int,
+    val surahName: String? = null,
+) {
+    fun format(): String {
+        val numbers = "$surahNumber:$ayahNumber"
+        val name = surahName?.trim().orEmpty()
+        return if (name.isEmpty()) numbers else "$name $numbers"
+    }
+}
+```
+
+- [ ] **Step 4: Run the test to verify it passes**
+
+```bash
+./gradlew :app:testDebugUnitTest --tests "*AyahReferenceTest*"
+```
+
+Expected: PASS, 4 tests.
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add app/src/main/java/com/arshadshah/nimaz/domain/model/AyahReference.kt \
+        app/src/test/java/com/arshadshah/nimaz/domain/model/AyahReferenceTest.kt
+git commit -m "feat(domain): one way to name an ayah
+
+Favourites said 'Al-Fatiha - Verse 2', bookmarks said 'Surah 1, Ayah 3' and
+dropped the name, search said 'Surah 2:45 / Al-Baqara'. Later phases each
+touch one of those call sites, so the format has to exist before they start."
+```
+
+---
+
+### Task 5: Document the components and close the phase
 
 **Files:**
 - Modify: `docs/ARCHITECTURE.md` §8
@@ -939,7 +1064,8 @@ NimazPillTabs stays until its last caller is migrated in a later phase."
 - [ ] `QuranSurfaceColors.paper` / `.paperLine` / `.paperInk` exist, differ per theme, and have contrast pinned by test.
 - [ ] `NimazSegmentedTabs` exists with 6 passing tests.
 - [ ] `NimazTreeNode` exists with 9 passing tests.
-- [ ] `docs/ARCHITECTURE.md` §8 documents all three.
+- [ ] `AyahReference.format()` exists with 4 passing tests.
+- [ ] `docs/ARCHITECTURE.md` §8 documents all of them.
 - [ ] All four verification gates pass.
 - [ ] **No screen has changed.** `git diff --stat origin/dev -- app/src/main/java/com/arshadshah/nimaz/presentation/screens/` is empty.
 
