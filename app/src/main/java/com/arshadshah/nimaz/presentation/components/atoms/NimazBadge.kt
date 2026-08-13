@@ -21,6 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.TextStyle
@@ -86,6 +87,9 @@ object NimazBadgeDefaults {
 
     /** Opacity of the [NimazBadgeEmphasis.CUTOUT] well and its border. */
     private const val CUTOUT_FILL_ALPHA = 0.6f
+
+    /** How far a tone is knocked back for a SOFT badge. Matches `NimazToneColors.container`. */
+    private const val SOFT_TINT_ALPHA = 0.16f
     private const val CUTOUT_BORDER_ALPHA = 0.4f
 
     /**
@@ -103,8 +107,9 @@ object NimazBadgeDefaults {
         NimazTone.NEUTRAL -> MaterialTheme.colorScheme.surfaceContainerHighest
         NimazTone.MUTED -> MaterialTheme.colorScheme.surfaceContainer
         NimazTone.ACCENT, NimazTone.PROMINENT -> MaterialTheme.colorScheme.primary
-        NimazTone.SUCCESS -> MaterialTheme.colorScheme.tertiary
-        NimazTone.WARNING -> MaterialTheme.colorScheme.secondary
+        // Green and amber, matching NimazToneColors — see the note on `foreground` below.
+        NimazTone.SUCCESS -> NimazColors.Success
+        NimazTone.WARNING -> NimazColors.Warning
         NimazTone.ERROR -> MaterialTheme.colorScheme.error
         NimazTone.TRANSPARENT -> Color.Transparent
     }
@@ -122,8 +127,11 @@ object NimazBadgeDefaults {
     private fun foreground(tone: NimazTone): Color = when (tone) {
         NimazTone.NEUTRAL, NimazTone.MUTED -> MaterialTheme.colorScheme.onSurfaceVariant
         NimazTone.ACCENT, NimazTone.PROMINENT -> MaterialTheme.colorScheme.primary
-        NimazTone.SUCCESS -> MaterialTheme.colorScheme.tertiary
-        NimazTone.WARNING -> MaterialTheme.colorScheme.secondary
+        // `NimazColors.Success` / `Warning`, not the scheme's tertiary / secondary. Those are a
+        // deep purple and the brand gold here, so a SUCCESS badge came out purple beside a
+        // SUCCESS dot drawn green by `NimazToneColors`. One tone, one colour.
+        NimazTone.SUCCESS -> NimazColors.Success
+        NimazTone.WARNING -> NimazColors.Warning
         NimazTone.ERROR -> MaterialTheme.colorScheme.error
         NimazTone.TRANSPARENT -> LocalContentColor.current
     }
@@ -141,8 +149,14 @@ object NimazBadgeDefaults {
         NimazTone.NEUTRAL -> MaterialTheme.colorScheme.surfaceContainerHighest
         NimazTone.MUTED -> MaterialTheme.colorScheme.surfaceContainer
         NimazTone.ACCENT, NimazTone.PROMINENT -> MaterialTheme.colorScheme.primaryContainer
-        NimazTone.SUCCESS -> MaterialTheme.colorScheme.tertiaryContainer
-        NimazTone.WARNING -> MaterialTheme.colorScheme.secondaryContainer
+        // Composited so the badge stays opaque and `onColorFor` can read it.
+        NimazTone.SUCCESS -> NimazColors.Success
+            .copy(alpha = SOFT_TINT_ALPHA)
+            .compositeOver(MaterialTheme.colorScheme.surface)
+
+        NimazTone.WARNING -> NimazColors.Warning
+            .copy(alpha = SOFT_TINT_ALPHA)
+            .compositeOver(MaterialTheme.colorScheme.surface)
         NimazTone.ERROR -> MaterialTheme.colorScheme.errorContainer
         NimazTone.TRANSPARENT -> Color.Transparent
     }

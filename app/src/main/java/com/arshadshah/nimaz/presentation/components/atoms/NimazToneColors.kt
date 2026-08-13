@@ -4,6 +4,7 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.compositeOver
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 
 /**
@@ -59,8 +60,16 @@ internal object NimazToneColors {
         NimazTone.ACCENT, NimazTone.PROMINENT -> MaterialTheme.colorScheme.primaryContainer
         // Tinted from the foregrounds above rather than from the scheme's tertiary/secondary
         // containers, which are purple and gold and would put a green fill on a purple bed.
-        NimazTone.SUCCESS -> NimazColors.Success.copy(alpha = ContainerAlpha)
-        NimazTone.WARNING -> NimazColors.Warning.copy(alpha = ContainerAlpha)
+        //
+        // Composited rather than left translucent: a container is something content sits *on*,
+        // and contrast helpers that pick a text colour from it read alpha as darkness.
+        NimazTone.SUCCESS -> NimazColors.Success
+            .copy(alpha = ContainerAlpha)
+            .compositeOver(MaterialTheme.colorScheme.surface)
+
+        NimazTone.WARNING -> NimazColors.Warning
+            .copy(alpha = ContainerAlpha)
+            .compositeOver(MaterialTheme.colorScheme.surface)
         NimazTone.ERROR -> MaterialTheme.colorScheme.errorContainer
         NimazTone.TRANSPARENT -> Color.Transparent
     }
