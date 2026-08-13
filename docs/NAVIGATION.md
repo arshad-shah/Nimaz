@@ -235,7 +235,7 @@ Every route below also has a `ScreenTags` entry of the same name.
 | Route | Args | Screen |
 |-------|------|--------|
 | `PrayerTimes` | — | PrayerTimesScreen |
-| `PrayerTracker` | `initialTab: Int = 0` | PrayerTrackerScreen |
+| `PrayerTracker` | — | PrayerTrackerScreen |
 | `PrayerStats` | — | PrayerStatsScreen |
 | `QadaPrayers` | — | QadaPrayersScreen |
 | `MonthlyPrayerTimes` | — | MonthlyPrayerTimesScreen |
@@ -407,7 +407,7 @@ only its CTA disappears.
 | `tasbih/history` | `TasbihHistory` |
 | `qibla` | `Qibla` |
 | `prayer/times` | `PrayerTimes` |
-| `prayer/tracker` | `PrayerTracker` (default tab) |
+| `prayer/tracker` | `PrayerTracker` |
 | `prayer/stats` | `PrayerStats` |
 | `prayer/qada` | `QadaPrayers` |
 | `prayer/monthly` | `MonthlyPrayerTimes` |
@@ -463,7 +463,7 @@ only its CTA disappears.
 | `hadith/{id}` | `HadithReader` | non-blank hadith id, **excluding** the reserved segments `book`, `search`, `bookmarks` (which belong to the rules above and to the allowlist) |
 | `tasbih/counter` | `TasbihCounter` | no preset (starts a free count) |
 | `tasbih/counter/{presetId}` | `TasbihCounter` | preset id (Long) |
-| `prayer/tracker/{tab}` | `PrayerTracker` | tab index 0–10 (deliberately wider than today's tab count so adding a tab is not a breaking payload change) |
+| `prayer/tracker/{tab}` | `PrayerTracker` / `QadaPrayers` | tab index 0–10, kept for shipped announcements written before the tab row was removed; `1` resolves to `QadaPrayers`, everything else to `PrayerTracker` |
 | `qaida/lesson/{n}` | `QaidaReader` | lesson number ≥ 1 |
 | `calendar/{month}/{year}` | `IslamicMonth` | month 1–12, Hijri year (any Int) |
 | `names/allah/{n}` | `AsmaUlHusnaDetail` | name id 1–99 |
@@ -514,7 +514,7 @@ without its jump button.
 | `tafseer` | `TafseerChapters` |
 | `khatam` | `KhatamList` |
 | `zakat` | `ZakatCalculator` |
-| `prayer_tracker` | `PrayerTracker` (default tab) |
+| `prayer_tracker` | `PrayerTracker` |
 | `qada` | `QadaPrayers` |
 | `qaida` | `QaidaHome` |
 

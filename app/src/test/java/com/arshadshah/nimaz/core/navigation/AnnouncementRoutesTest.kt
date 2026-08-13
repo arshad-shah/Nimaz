@@ -12,7 +12,7 @@ class AnnouncementRoutesTest {
         assertThat(announcementRoute("quran")).isEqualTo(Route.Quran)
         assertThat(announcementRoute("search/ask")).isEqualTo(Route.GlobalSearch)
         assertThat(announcementRoute("search/settings")).isEqualTo(Route.SearchSettings)
-        assertThat(announcementRoute("prayer/tracker")).isEqualTo(Route.PrayerTracker())
+        assertThat(announcementRoute("prayer/tracker")).isEqualTo(Route.PrayerTracker)
         assertThat(announcementRoute("settings/about")).isEqualTo(Route.SettingsAbout)
         assertThat(announcementRoute("khatam")).isEqualTo(Route.KhatamList)
         // Existing notifications deep-link still resolves to the hub (unchanged) …
@@ -78,7 +78,11 @@ class AnnouncementRoutesTest {
         assertThat(announcementRoute("names/prophet/5")).isEqualTo(Route.AsmaUnNabiDetail(5))
         assertThat(announcementRoute("prophets/3")).isEqualTo(Route.ProphetDetail(3))
         assertThat(announcementRoute("qaida/lesson/7")).isEqualTo(Route.QaidaReader(7))
-        assertThat(announcementRoute("prayer/tracker/2")).isEqualTo(Route.PrayerTracker(2))
+        // Tab index 2 predates the tab row's removal and no longer maps to the qada tab (that's
+        // index 1), so it falls back to the plain tracker screen.
+        assertThat(announcementRoute("prayer/tracker/2")).isEqualTo(Route.PrayerTracker)
+        // Tab index 1 was the qada tab and now resolves to its own screen.
+        assertThat(announcementRoute("prayer/tracker/1")).isEqualTo(Route.QadaPrayers)
         assertThat(announcementRoute("calendar/9/1447")).isEqualTo(Route.IslamicMonth(9, 1447))
     }
 

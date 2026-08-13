@@ -112,7 +112,7 @@ sealed interface Route {
     data object PrayerTimes : Route
 
     @Serializable
-    data class PrayerTracker(val initialTab: Int = 0) : Route
+    data object PrayerTracker : Route
 
     @Serializable
     data object PrayerStats : Route
