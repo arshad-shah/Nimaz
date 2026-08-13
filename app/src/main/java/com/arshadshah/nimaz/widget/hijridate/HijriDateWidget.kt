@@ -122,8 +122,10 @@ private fun HijriDateSuccessContent(
 class HijriDateWidgetReceiver : WidgetWorkReceiver() {
     override val glanceAppWidget: GlanceAppWidget = HijriDateWidget()
 
-    override fun enqueueWork(context: Context) =
-        HijriDateWorker.enqueuePeriodicWork(context, force = true)
+    override fun enqueueWork(context: Context, force: Boolean) =
+        HijriDateWorker.enqueuePeriodicWork(context, force = force)
+
+    override fun refreshNow(context: Context) = HijriDateWorker.enqueueImmediateWork(context)
 
     override fun cancelWork(context: Context) = HijriDateWorker.cancel(context)
 }

@@ -524,12 +524,29 @@ rg -n -U --multiline-dotall \
   was a **public synchronous** function computing ~30 days, called straight from a click handler.
   All of it moved behind the injected `@DefaultDispatcher`, and the Ramadan export became an
   event whose result lands in state — which fixes the UDF violation at the same time.
+- [x] ~~**The widget data sources take `PrayerTimeCalculator`'s defaults.**~~ **Resolved — both
+  prayer widgets go through `PrayerRepository`.** `NextPrayerWidgetDataSource` and
+  `PrayerTimesWidgetDataSource` called `getPrayerTimes(latitude, longitude)` and took all four
+  calculation defaults, exactly as `FastingViewModel` did before the seam existed — Muslim World
+  League, Shafi asr, no high-latitude rule, no per-prayer adjustments. Every argument has a
+  default, so forgetting them compiled and produced plausible times for the wrong configuration;
+  what made this the worst instance is that the widget shows those times on the home screen, with
+  no settings screen beside them to contradict it. They inject `PrayerRepository` now and call
+  `observeCalculationSettings()` + `getDaySchedule(date, settings)`. Widget workers take the
+  repository directly rather than a `XxxUseCases` wrapper — they are not ViewModels, and the rule
+  in question is about the presentation layer.
+  ```bash
+  # Nothing in widget/ should name the calculator at all.
+  grep -rn "PrayerTimeCalculator" app/src/main/java/com/arshadshah/nimaz/widget/
+  ```
 - [ ] **`WidgetsScreen` constructs `PrayerTimeCalculator()` directly.** The five ViewModels that
   injected it now go through `PrayerUseCases`, but the widget-preview screen still calls
   `PrayerTimeCalculator()` in a composable — a screen instantiating a `@Singleton` and computing
   astronomy inline, one layer further out than the deviation that was just closed. It renders a
   preview rather than anything the user acts on, which is why it is listed rather than fixed
-  here; route it through the same use case.
+  here; route it through the same use case. **This now also diverges from the widgets themselves:**
+  the two prayer widgets honour the user's calculation settings, and the preview of them still
+  takes the defaults, so the picker can show times the placed widget will not.
   ```bash
   grep -rn "PrayerTimeCalculator()" app/src/main/java/com/arshadshah/nimaz/presentation/
   ```

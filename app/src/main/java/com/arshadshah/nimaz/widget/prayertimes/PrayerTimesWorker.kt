@@ -42,5 +42,6 @@ class PrayerTimesWorker @AssistedInject constructor(
         workerName = "PrayerTimesWorker",
         success = { PrayerTimesWidgetState.Success(dataSource.load()) },
         error = { message -> PrayerTimesWidgetState.Error(message) },
+        hasData = { it.hasData },
     )
 }

@@ -44,5 +44,6 @@ class NextPrayerWorker @AssistedInject constructor(
         workerName = "NextPrayerWorker",
         success = { NextPrayerWidgetState.Success(dataSource.load()) },
         error = { message -> NextPrayerWidgetState.Error(message) },
+        hasData = { it.hasData },
     )
 }

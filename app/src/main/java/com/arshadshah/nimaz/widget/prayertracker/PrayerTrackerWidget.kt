@@ -274,8 +274,10 @@ private fun togglePrayerStatus(context: Context, prayerName: String) {
 class PrayerTrackerWidgetReceiver : WidgetWorkReceiver() {
     override val glanceAppWidget: GlanceAppWidget = PrayerTrackerWidget()
 
-    override fun enqueueWork(context: Context) =
-        PrayerTrackerWorker.enqueuePeriodicWork(context, force = true)
+    override fun enqueueWork(context: Context, force: Boolean) =
+        PrayerTrackerWorker.enqueuePeriodicWork(context, force = force)
+
+    override fun refreshNow(context: Context) = PrayerTrackerWorker.enqueueImmediateWork(context)
 
     override fun cancelWork(context: Context) = PrayerTrackerWorker.cancel(context)
 }
