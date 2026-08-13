@@ -1974,4 +1974,21 @@
     <string name="fasting_your_month">Bulan Anda</string>
     <string name="fasting_sunnah_virtuous">Sunnah &amp; hari utama</string>
     <string name="fasting_fasted_count">%1$d berpuasa</string>
+
+    <!-- Qur'an section redesign: Browse, Saved and the surah-info sheet -->
+    <string name="saved">Tersimpan</string>
+    <string name="notes">Catatan</string>
+    <string name="khatam">Khatam</string>
+    <string name="quran_browse_search_hint">Surah, juz 15, halaman 299</string>
+    <string name="quran_browse_page_start">hlm. %1$d</string>
+    <string name="quran_browse_load_failed">Daftar surah tidak dapat dimuat</string>
+    <string name="quran_browse_open_juz">Buka juz %1$d</string>
+    <string name="quran_browse_open_page">Buka halaman %1$d</string>
+    <string name="quran_browse_no_matches">Tidak ada yang cocok</string>
+    <string name="quran_home_destination_browse_subtitle">Semua 114 surah, menurut juz</string>
+    <string name="quran_home_destination_saved_subtitle">Markah, favorit, dan catatan</string>
+    <string name="quran_home_destination_khatam_subtitle">Membaca Al-Qur\'an sesuai rencana</string>
+    <string name="quran_home_recently_saved">Baru disimpan</string>
+    <string name="surah_info_revealed_in">Diturunkan di</string>
+    <string name="surah_info_read_surah">Baca surah</string>
 </resources>

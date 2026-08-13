@@ -65,7 +65,7 @@ import com.arshadshah.nimaz.presentation.screens.asma.AsmaUlHusnaDetailScreen
 import com.arshadshah.nimaz.presentation.screens.names.FavouritesScreen
 import com.arshadshah.nimaz.presentation.screens.names.NamesTab
 import com.arshadshah.nimaz.presentation.screens.asmaunnabi.AsmaUnNabiDetailScreen
-import com.arshadshah.nimaz.presentation.screens.bookmarks.BookmarksScreen
+import com.arshadshah.nimaz.presentation.screens.bookmarks.SavedScreen
 import com.arshadshah.nimaz.presentation.screens.calendar.IslamicCalendarScreen
 import com.arshadshah.nimaz.presentation.screens.dua.DuaCategoryScreen
 import com.arshadshah.nimaz.presentation.screens.dua.DuaOccasionScreen
@@ -91,6 +91,7 @@ import com.arshadshah.nimaz.presentation.screens.qaida.QaidaHomeScreen
 import com.arshadshah.nimaz.presentation.screens.qaida.QaidaLettersScreen
 import com.arshadshah.nimaz.presentation.screens.qaida.QaidaReaderScreen
 import com.arshadshah.nimaz.presentation.screens.qibla.QiblaScreen
+import com.arshadshah.nimaz.presentation.screens.quran.QuranBrowseScreen
 import com.arshadshah.nimaz.presentation.screens.quran.QuranReaderScreen
 import com.arshadshah.nimaz.presentation.screens.quran.SelectReciterScreen
 import com.arshadshah.nimaz.presentation.screens.quran.SelectTranslationScreen
@@ -101,7 +102,6 @@ import com.arshadshah.nimaz.domain.model.TopicTree
 import com.arshadshah.nimaz.presentation.screens.quran.QuranTopicDetailScreen
 import com.arshadshah.nimaz.presentation.screens.quran.QuranTopicsScreen
 import com.arshadshah.nimaz.presentation.screens.quran.SurahBackgroundScreen
-import com.arshadshah.nimaz.presentation.screens.quran.SurahInfoScreen
 import com.arshadshah.nimaz.presentation.screens.quran.SurahPassagesScreen
 import com.arshadshah.nimaz.presentation.screens.quran.SurahSubjectsScreen
 import com.arshadshah.nimaz.presentation.screens.quran.TafseerChaptersScreen
@@ -362,15 +362,32 @@ fun NavGraph(
                     navController = navController,
                     onNavigateToSearch = { navController.navigate(Route.GlobalSearch) },
                     onNavigateToTopics = { navController.navigate(Route.QuranTopics) },
-                    onNavigateToBookmarks = { navController.navigate(Route.QuranBookmarks) },
+                    onNavigateToBrowse = { navController.navigate(Route.QuranBrowse()) },
+                    onNavigateToSaved = { navController.navigate(Route.QuranSaved) },
                     onNavigateToSettings = { navController.navigate(Route.SettingsQuran) },
-                    onNavigateToSurahInfo = { surahNumber ->
-                        navController.navigate(Route.SurahInfo(surahNumber))
-                    },
                     onNavigateToKhatam = { navController.navigate(Route.KhatamList) },
-                    onNavigateToKhatamDetail = { khatamId ->
-                        navController.navigate(Route.KhatamDetail(khatamId))
-                    }
+                )
+            }
+
+            taggedComposable<Route.QuranBrowse>(ScreenTags.QuranBrowse) { backStackEntry ->
+                val args = backStackEntry.toRoute<Route.QuranBrowse>()
+                QuranBrowseScreen(
+                    initialInfoForSurah = args.infoForSurah,
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToSurah = { surah ->
+                        navController.navigate(Route.QuranReader(surah))
+                    },
+                    onNavigateToJuz = { juz -> navController.navigate(Route.QuranJuz(juz)) },
+                    onNavigateToPage = { page -> navController.navigate(Route.QuranPage(page)) },
+                    onOpenBackground = { surah ->
+                        navController.navigate(Route.SurahBackground(surah))
+                    },
+                    onOpenPassages = { surah ->
+                        navController.navigate(Route.SurahPassages(surah))
+                    },
+                    onOpenSubjects = { surah ->
+                        navController.navigate(Route.SurahSubjects(surah))
+                    },
                 )
             }
 
@@ -469,26 +486,6 @@ fun NavGraph(
                     onNavigateBack = { navController.popBackStack() },
                     onNavigateToTopic = { topicId ->
                         navController.navigate(Route.QuranTopicDetail(topicId))
-                    }
-                )
-            }
-
-            taggedComposable<Route.SurahInfo>(ScreenTags.SurahInfo) { backStackEntry ->
-                val args = backStackEntry.toRoute<Route.SurahInfo>()
-                SurahInfoScreen(
-                    surahNumber = args.surahNumber,
-                    onNavigateBack = { navController.popBackStack() },
-                    onStartReading = {
-                        navController.navigate(Route.QuranReader(args.surahNumber))
-                    },
-                    onOpenBackground = {
-                        navController.navigate(Route.SurahBackground(args.surahNumber))
-                    },
-                    onOpenPassages = {
-                        navController.navigate(Route.SurahPassages(args.surahNumber))
-                    },
-                    onOpenSubjects = {
-                        navController.navigate(Route.SurahSubjects(args.surahNumber))
                     }
                 )
             }
@@ -630,8 +627,8 @@ fun NavGraph(
                 )
             }
 
-            taggedComposable<Route.QuranBookmarks>(ScreenTags.QuranBookmarks) {
-                BookmarksScreen(
+            taggedComposable<Route.QuranSaved>(ScreenTags.QuranSaved) {
+                SavedScreen(
                     onNavigateBack = { navController.popBackStack() },
                     onNavigateToQuranAyah = { surah, ayah ->
                         navController.navigate(Route.QuranReader(surah, ayah))
@@ -745,7 +742,7 @@ fun NavGraph(
             }
 
             taggedComposable<Route.HadithBookmarks>(ScreenTags.HadithBookmarks) {
-                BookmarksScreen(
+                SavedScreen(
                     onNavigateBack = { navController.popBackStack() },
                     onNavigateToQuranAyah = { surah, ayah ->
                         navController.navigate(Route.QuranReader(surah, ayah))
@@ -1342,7 +1339,7 @@ fun NavGraph(
 
             // Bookmarks
             taggedComposable<Route.AllBookmarks>(ScreenTags.AllBookmarks) {
-                BookmarksScreen(
+                SavedScreen(
                     onNavigateBack = { navController.popBackStack() },
                     onNavigateToQuranAyah = { surah, ayah ->
                         navController.navigate(Route.QuranReader(surah, ayah))

@@ -2056,4 +2056,21 @@
     <string name="fasting_your_month">Votre mois</string>
     <string name="fasting_sunnah_virtuous">Sunna et jours méritoires</string>
     <string name="fasting_fasted_count">%1$d jeûnés</string>
+
+    <!-- Qur'an section redesign: Browse, Saved and the surah-info sheet -->
+    <string name="saved">Enregistré</string>
+    <string name="notes">Notes</string>
+    <string name="khatam">Khatam</string>
+    <string name="quran_browse_search_hint">Sourate, juz 15, page 299</string>
+    <string name="quran_browse_page_start">p. %1$d</string>
+    <string name="quran_browse_load_failed">La liste des sourates n\'a pas pu être chargée</string>
+    <string name="quran_browse_open_juz">Ouvrir le juz %1$d</string>
+    <string name="quran_browse_open_page">Ouvrir la page %1$d</string>
+    <string name="quran_browse_no_matches">Aucun résultat</string>
+    <string name="quran_home_destination_browse_subtitle">Les 114 sourates, par juz</string>
+    <string name="quran_home_destination_saved_subtitle">Signets, favoris et notes</string>
+    <string name="quran_home_destination_khatam_subtitle">Lire le Coran selon un plan</string>
+    <string name="quran_home_recently_saved">Enregistrés récemment</string>
+    <string name="surah_info_revealed_in">Révélée à</string>
+    <string name="surah_info_read_surah">Lire la sourate</string>
 </resources>

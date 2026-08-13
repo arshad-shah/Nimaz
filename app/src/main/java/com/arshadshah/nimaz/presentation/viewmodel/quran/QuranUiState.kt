@@ -23,15 +23,7 @@ import kotlinx.coroutines.flow.first
 
 data class QuranHomeUiState(
     val surahs: List<Surah> = emptyList(),
-    val filteredSurahs: List<Surah> = emptyList(),
-    val searchQuery: String = "",
-    val topTab: Int = 0, // 0 = Home, 1 = Browse, 2 = Favorites, 3 = Bookmarks
-    val selectedTab: Int = 0, // Browse sub-tab: 0=Surah, 1=Juz, 2=Page
     val readingProgress: ReadingProgress? = null,
-    val favorites: List<FavoriteAyahUi> = emptyList(),
-    // Holds the most recently removed favourite so the tab can offer an Undo snackbar;
-    // cleared on undo, dismiss, or a subsequent removal.
-    val recentlyRemovedFavorite: FavoriteAyahUi? = null,
     val activeKhatam: Khatam? = null,
     val activeKhatamInsights: KhatamInsights? = null,
     val khatamReadAyahIds: Set<Int> = emptySet(),
@@ -46,12 +38,6 @@ data class QuranHomeUiState(
      * when the Mushaf layout setting changes instead of staying pinned to the Madani 604.
      */
     val pagination: MushafPagination = MushafPagination.fallback(MushafScript.DEFAULT),
-    /**
-     * Rukūʿ count per surah number, for the surah list's structure badges. Empty until the
-     * `surah_structure` rows are on the device; the badge is simply omitted for a surah that
-     * is missing rather than guessed at.
-     */
-    val rukuCounts: Map<Int, Int> = emptyMap(),
     /**
      * Whether this install's artifact carries the thematic layer, so the home screen offers a
      * way into it only where there is something behind the offer. False between the migration

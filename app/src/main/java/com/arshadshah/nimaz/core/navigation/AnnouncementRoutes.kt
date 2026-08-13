@@ -20,7 +20,9 @@ private fun staticAnnouncementRoute(key: String): Route? = when (key) {
     "home" -> Route.Home
     "quran" -> Route.Quran
     "quran/search" -> Route.QuranSearch
-    "quran/bookmarks" -> Route.QuranBookmarks
+    // Bookmarks are inside Saved now; the published key keeps a destination.
+    "quran/bookmarks" -> Route.QuranSaved
+    "quran/browse" -> Route.QuranBrowse()
     "tafseer" -> Route.TafseerChapters
     "hadith" -> Route.HadithHome
     "dua" -> Route.DuaHome
@@ -93,8 +95,11 @@ private fun parameterisedAnnouncementRoute(key: String): Route? {
         s.size == 5 && s[0] == "quran" && s[1] == "surah" && s[3] == "ayah" ->
             int(2, 1..114)?.let { su -> int(4, 1..300)?.let { Route.QuranReader(su, it) } }
 
+        // Surah info is a sheet now, not a screen. The key resolves to Browse with the sheet
+        // raised rather than being dropped: an announcement already sent to a device must still
+        // land where it meant to.
         s.size == 4 && s[0] == "quran" && s[1] == "surah" && s[3] == "info" ->
-            int(2, 1..114)?.let { Route.SurahInfo(it) }
+            int(2, 1..114)?.let { Route.QuranBrowse(infoForSurah = it) }
 
         // Validate against the largest edition (604) so a page deep-link resolves regardless
         // of the user's active Mushaf script; the reader clamps to the active edition's page

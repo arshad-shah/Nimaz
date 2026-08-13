@@ -4,6 +4,7 @@ import com.arshadshah.nimaz.domain.model.DuaBookmark
 import com.arshadshah.nimaz.domain.model.HadithBookmark
 import com.arshadshah.nimaz.domain.model.QuranBookmark
 import com.arshadshah.nimaz.domain.model.BookmarkType
+import com.arshadshah.nimaz.domain.model.SavedKind
 import com.arshadshah.nimaz.domain.model.UnifiedBookmark
 import com.arshadshah.nimaz.presentation.viewmodel.UiError
 
@@ -14,6 +15,8 @@ data class BookmarksUiState(
     val hadithBookmarks: List<HadithBookmark> = emptyList(),
     val duaBookmarks: List<DuaBookmark> = emptyList(),
     val selectedFilter: BookmarkType? = null,
+    /** Bookmark / favourite / note, or null for every kind. */
+    val selectedKind: SavedKind? = null,
     val sortOrder: BookmarkSortOrder = BookmarkSortOrder.DATE_NEWEST,
     val searchQuery: String = "",
     val isLoading: Boolean = true,
@@ -42,5 +45,8 @@ data class BookmarkStatsUiState(
     val totalBookmarks: Int = 0,
     val quranCount: Int = 0,
     val hadithCount: Int = 0,
-    val duaCount: Int = 0
+    val duaCount: Int = 0,
+    val bookmarkCount: Int = 0,
+    val favouriteCount: Int = 0,
+    val noteCount: Int = 0
 )

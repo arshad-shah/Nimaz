@@ -131,7 +131,6 @@ class QuranReaderHydrationTest {
 
         assertThat(vm.homeState.value.isLoading).isFalse()
         assertThat(vm.homeState.value.surahs.map { it.number }).containsExactly(1, 2)
-        assertThat(vm.homeState.value.filteredSurahs.map { it.number }).containsExactly(1, 2)
     }
 
     // R2 — the reader must open in the user's translation, once.

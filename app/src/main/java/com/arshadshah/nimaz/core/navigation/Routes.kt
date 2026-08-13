@@ -32,8 +32,31 @@ sealed interface Route {
     @Serializable
     data object QuranSearch : Route
 
+    /**
+     * The merged browse surface: every surah in mushaf order, under juz headers, with one field
+     * that also understands "juz 15" and "page 299".
+     *
+     * Replaces the Surah/Juz/Page sub-tabs that used to live inside [Quran]. Page stops being a
+     * browse tab here because it was never really an index — it was the door to a different
+     * *reading mode*, which now lives in the reader.
+     *
+     * [infoForSurah] raises the surah-info sheet on arrival. It exists so the published
+     * announcement key `quran/surah/{n}/info` keeps a destination after `SurahInfo` retired as
+     * a screen: an announcement already on a user's device must still land where it meant to.
+     */
     @Serializable
-    data object QuranBookmarks : Route
+    data class QuranBrowse(val infoForSurah: Int? = null) : Route
+
+    /**
+     * Everything the user has marked, whatever it is about — Qur'an, Hadith or Dua, bookmarked,
+     * favourited or annotated.
+     *
+     * App-wide rather than Qur'an-scoped, because the store always was: `bookmarks` is one table
+     * keyed by `(kind, target_id)`, and scoping this screen to the Qur'an would strand a
+     * reader's existing hadith and dua marks with nowhere to see them.
+     */
+    @Serializable
+    data object QuranSaved : Route
 
     // Hadith screens
     @Serializable
@@ -294,16 +317,12 @@ sealed interface Route {
     @Serializable
     data class Tafseer(val surahNumber: Int, val ayahNumber: Int = 1) : Route
 
-    // Surah Info
-    @Serializable
-    data class SurahInfo(val surahNumber: Int) : Route
-
     /**
      * A surah's long-form background — the source's own sections, read continuously.
      *
-     * Its own destination rather than a block on [SurahInfo], because the longest of them is
-     * 47 KB of prose and burying that under an info screen's first fold made the info screen a
-     * document instead of an answer.
+     * Its own destination rather than a block on the surah-info sheet, because the longest of
+     * them is 47 KB of prose and burying that under an info surface's first fold made the info
+     * surface a document instead of an answer.
      */
     @Serializable
     data class SurahBackground(val surahNumber: Int) : Route

@@ -75,13 +75,24 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazSegmentedWidth
 import com.arshadshah.nimaz.presentation.components.atoms.asSegments
 import com.arshadshah.nimaz.presentation.components.organisms.SwipeableSavedCard
 import com.arshadshah.nimaz.domain.model.BookmarkType
+import com.arshadshah.nimaz.domain.model.SavedKind
 import com.arshadshah.nimaz.presentation.viewmodel.quran.BookmarksEvent
 import com.arshadshah.nimaz.presentation.viewmodel.quran.BookmarksViewModel
 import com.arshadshah.nimaz.domain.model.UnifiedBookmark
 
+/**
+ * Everything the user has marked, whatever it is about.
+ *
+ * App-wide, and always was: the store is one `bookmarks` table keyed by `(kind, target_id)`, so
+ * the Qur'an section's own "Favorites" tab and this screen were two views of overlapping rows
+ * with no way to see them together. Two axes now — **what** (Qur'an / Hadith / Dua) and **how**
+ * (bookmarked / favourited / annotated) — because those are the two questions a reader arrives
+ * with, and one of them had no answer at all before: a note was invisible unless you happened to
+ * open the row that carried it.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BookmarksScreen(
+fun SavedScreen(
     onNavigateBack: () -> Unit,
     onNavigateToQuranAyah: (Int, Int) -> Unit,
     onNavigateToHadith: (String, Int) -> Unit,
@@ -151,7 +162,7 @@ fun BookmarksScreen(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             NimazBackTopAppBar(
-                title = stringResource(R.string.bookmarks_title),
+                title = stringResource(R.string.saved),
                 subtitle = if (statsState.totalBookmarks > 0) {
                     stringResource(R.string.bookmarks_count, statsState.totalBookmarks)
                 } else null,
@@ -248,6 +259,20 @@ fun BookmarksScreen(
                         )
                     }
 
+                    // Two rows, not one combined chip set: kind and corpus are independent —
+                    // "my notes on hadith" is a real question — and folding them into a single
+                    // row of seven chips would make that combination unreachable.
+                    item {
+                        SavedKindTabs(
+                            selectedKind = state.selectedKind,
+                            allCount = statsState.totalBookmarks,
+                            bookmarkCount = statsState.bookmarkCount,
+                            favouriteCount = statsState.favouriteCount,
+                            noteCount = statsState.noteCount,
+                            onKindSelected = { viewModel.onEvent(BookmarksEvent.SetKind(it)) }
+                        )
+                    }
+
                     item {
                         BookmarkFilterTabs(
                             selectedFilter = state.selectedFilter,
@@ -318,6 +343,53 @@ fun BookmarksScreen(
             }
         )
     }
+}
+
+/**
+ * The **how** axis: bookmarked, favourited, annotated.
+ *
+ * Favouriting only exists for the Qur'an, so this row is honest about being a Qur'an-heavy
+ * filter — the count says so rather than the label needing to.
+ */
+@Composable
+private fun SavedKindTabs(
+    selectedKind: SavedKind?,
+    allCount: Int,
+    bookmarkCount: Int,
+    favouriteCount: Int,
+    noteCount: Int,
+    onKindSelected: (SavedKind?) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val tabs = listOf(
+        "${stringResource(R.string.all)}  $allCount",
+        "${stringResource(R.string.bookmarks)}  $bookmarkCount",
+        "${stringResource(R.string.favorites)}  $favouriteCount",
+        "${stringResource(R.string.notes)}  $noteCount",
+    )
+    val selectedIndex = when (selectedKind) {
+        null -> 0
+        SavedKind.BOOKMARK -> 1
+        SavedKind.FAVOURITE -> 2
+        SavedKind.NOTE -> 3
+    }
+    NimazSegmentedControl(
+        options = tabs.asSegments(),
+        selectedIndex = selectedIndex,
+        onSelect = { index ->
+            onKindSelected(
+                when (index) {
+                    1 -> SavedKind.BOOKMARK
+                    2 -> SavedKind.FAVOURITE
+                    3 -> SavedKind.NOTE
+                    else -> null
+                }
+            )
+        },
+        width = NimazSegmentedWidth.WRAP,
+        purpose = NimazSegmentedPurpose.VIEW,
+        modifier = modifier.horizontalScroll(rememberScrollState())
+    )
 }
 
 @Composable

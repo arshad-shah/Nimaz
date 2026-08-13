@@ -1,8 +1,12 @@
 package com.arshadshah.nimaz.presentation.viewmodel.quran
 
 import com.arshadshah.nimaz.domain.model.BookmarkType
+import com.arshadshah.nimaz.domain.model.SavedKind
 sealed interface BookmarksEvent {
     data class SetFilter(val type: BookmarkType?) : BookmarksEvent
+
+    /** Narrow to one way of having marked something, or null for all three. */
+    data class SetKind(val kind: SavedKind?) : BookmarksEvent
 
     /** Delete any bookmark by its unified id (e.g. "quran_12"). Captures it for Undo. */
     data class DeleteBookmark(val id: String) : BookmarksEvent

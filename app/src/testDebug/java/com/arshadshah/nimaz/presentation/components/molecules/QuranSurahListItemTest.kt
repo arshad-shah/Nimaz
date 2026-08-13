@@ -66,30 +66,25 @@ class QuranSurahListItemTest {
     }
 
     @Test
-    fun withPageRange_showsPageAndJuzBadges() {
+    fun withStartPage_showsItOnTheMetaLine() {
         composeRule.setThemedContent {
-            SurahListItem(
-                surah = surah(),
-                onClick = {},
-                startPage = 22,
-                endPage = 30,
-                // Resolved by the caller from the active edition's pagination (#325).
-                juzNumber = 2
-            )
+            // Resolved by the caller from the active edition's pagination (#325).
+            SurahListItem(surah = surah(), onClick = {}, startPage = 22)
         }
 
-        // page_range_format: "p. %1$d–%2$d"
-        composeRule.onNodeWithText("p. 22–30").assertExists()
-        composeRule.onNodeWithText("Juz 2").assertExists()
+        // One meta line: verse count, then the opening page. The page *range* and the juz
+        // are gone — the range answered one question with two numbers, and the juz is the
+        // section header this row now sits under.
+        composeRule.onNodeWithText("7 Verses · p. 22").assertExists()
     }
 
     @Test
-    fun noPageRange_doesNotShowPageBadge() {
+    fun withoutStartPage_showsOnlyTheVerseCount() {
         composeRule.setThemedContent {
-            SurahListItem(surah = surah(), onClick = {}, startPage = 0, endPage = 0)
+            SurahListItem(surah = surah(), onClick = {}, startPage = 0)
         }
 
-        composeRule.onNodeWithText("Juz 1").assertDoesNotExist()
+        composeRule.onNodeWithText("7 Verses").assertExists()
     }
 
     @Test

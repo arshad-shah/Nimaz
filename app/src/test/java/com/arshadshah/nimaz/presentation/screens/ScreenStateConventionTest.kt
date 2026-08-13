@@ -218,8 +218,9 @@ class ScreenStateConventionTest {
 
     /** Which screen files render which `UiState` file's failures. */
     private val renderedBy: Map<String, Set<String>> = mapOf(
-        "BookmarksUiState.kt" to setOf("BookmarksScreen.kt"),
+        "BookmarksUiState.kt" to setOf("SavedScreen.kt"),
         "CalendarUiState.kt" to setOf("IslamicCalendarScreen.kt"),
+        "QuranBrowseUiState.kt" to setOf("QuranBrowseScreen.kt"),
         "DuaUiState.kt" to setOf(
             "DuaCategoryScreen.kt", "DuaOccasionScreen.kt",
             "DuasCollectionScreen.kt", "DuaReaderScreen.kt",

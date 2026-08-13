@@ -6,6 +6,7 @@ import com.arshadshah.nimaz.core.monitoring.RecordingTelemetry
 import com.arshadshah.nimaz.domain.model.DuaBookmark
 import com.arshadshah.nimaz.domain.model.HadithBookmark
 import com.arshadshah.nimaz.domain.model.QuranBookmark
+import com.arshadshah.nimaz.domain.model.QuranFavorite
 import com.arshadshah.nimaz.domain.usecase.DuaUseCases
 import com.arshadshah.nimaz.domain.usecase.HadithUseCases
 import com.arshadshah.nimaz.domain.usecase.QuranUseCases
@@ -66,6 +67,9 @@ class BookmarksViewModelTest {
         hadith = mockk(relaxed = true)
         dua = mockk(relaxed = true)
         every { quran.getBookmarks() } returns quranBookmarks
+        // Saved merges bookmarks with favourites — one row in the store, two queries — so the
+        // Qur'an load does not emit at all until both flows have.
+        every { quran.getFavorites() } returns flowOf(emptyList<QuranFavorite>())
         every { hadith.getAllBookmarks() } returns flowOf(emptyList<HadithBookmark>())
         every { dua.getAllBookmarks() } returns flowOf(emptyList<DuaBookmark>())
     }

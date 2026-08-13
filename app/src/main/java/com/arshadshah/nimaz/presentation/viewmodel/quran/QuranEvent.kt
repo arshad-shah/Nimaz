@@ -17,25 +17,16 @@ sealed interface QuranEvent {
 
     /** Load the line-accurate 16-line IndoPak layout for a page (used by the 16-line view). */
     data class LoadMushafPageLayout(val pageNumber: Int) : QuranEvent
-    data class Search(val query: String) : QuranEvent
-    data class SetTopTab(val index: Int) : QuranEvent
-    data class SetTab(val index: Int) : QuranEvent
     data class ToggleBookmark(val ayahId: Int, val surahNumber: Int, val ayahNumber: Int) :
         QuranEvent
 
     data class ToggleFavorite(val ayahId: Int, val surahNumber: Int, val ayahNumber: Int) :
         QuranEvent
 
-    /** Remove a favourite from the Favourites tab; captures it for an Undo snackbar. */
-    data class RemoveFavorite(val favorite: FavoriteAyahUi) : QuranEvent
-    data object UndoRemoveFavorite : QuranEvent
-    data object DismissFavoriteUndo : QuranEvent
-
     data class UpdateReadingPosition(val surah: Int, val ayah: Int, val page: Int, val juz: Int) :
         QuranEvent
 
     data object ToggleTranslation : QuranEvent
-    data object ClearSearch : QuranEvent
 
     // Audio events
     data class PlayAyahAudio(val ayahGlobalId: Int, val surahNumber: Int, val ayahNumber: Int) :
