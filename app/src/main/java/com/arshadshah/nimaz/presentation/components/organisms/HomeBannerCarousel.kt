@@ -20,7 +20,7 @@ import com.arshadshah.nimaz.presentation.theme.NimazTheme
  * Variant determines the accent/style of a banner. Warnings get the amber
  * warning treatment; updates get the primary container.
  */
-enum class HomeBannerVariant { WARNING, UPDATE }
+enum class HomeBannerVariant { WARNING, UPDATE, INFO, EVENT }
 
 /**
  * One banner in the carousel. Keep [title] short — banners are sized to a
@@ -40,6 +40,8 @@ data class HomeBannerItem(
     val actionLabel: String? = null,
     val onAction: (() -> Unit)? = null,
     val isLoading: Boolean = false,
+    val dismissable: Boolean = false,
+    val onDismiss: (() -> Unit)? = null,
 )
 
 /**
@@ -87,6 +89,8 @@ private fun BannerCard(banner: HomeBannerItem) {
         variant = when (banner.variant) {
             HomeBannerVariant.WARNING -> NimazBannerVariant.WARNING
             HomeBannerVariant.UPDATE -> NimazBannerVariant.UPDATE
+            HomeBannerVariant.INFO -> NimazBannerVariant.INFO
+            HomeBannerVariant.EVENT -> NimazBannerVariant.EVENT
         },
         icon = banner.icon,
         actionLabel = actionLabel,

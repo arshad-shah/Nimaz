@@ -181,6 +181,7 @@ fun NimazBanner(
     isLoading: Boolean = false,
     onClick: (() -> Unit)? = null,
     density: NimazBannerDensity = NimazBannerDensity.STANDALONE,
+    leadingContent: (@Composable () -> Unit)? = null,
 ) {
     val palette = variantPalette(variant)
     val cornerRadius = if (density == NimazBannerDensity.INLINE) 14.dp else 17.dp
@@ -211,11 +212,15 @@ fun NimazBanner(
         horizontalArrangement = Arrangement.spacedBy(13.dp),
     ) {
 
-        NimazIconWell(
-            icon = effectiveIcon,
-            color = palette.accent,
-            size = NimazIconWellSize.SMALL,
-        )
+        if (leadingContent != null) {
+            leadingContent()
+        } else {
+            NimazIconWell(
+                icon = effectiveIcon,
+                color = palette.accent,
+                size = NimazIconWellSize.SMALL,
+            )
+        }
 
         // ── Text block ─────────────────────────────────────────────────────────
         Column(

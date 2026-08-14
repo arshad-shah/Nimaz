@@ -3,14 +3,18 @@ package com.arshadshah.nimaz.presentation.components.organisms
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
@@ -23,64 +27,44 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.arshadshah.nimaz.domain.model.Announcement
+import androidx.compose.ui.unit.sp
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
-import com.arshadshah.nimaz.presentation.components.molecules.AnnouncementBanner
 import com.arshadshah.nimaz.presentation.components.molecules.NimazBanner
 import com.arshadshah.nimaz.presentation.components.molecules.NimazBannerVariant
-import androidx.compose.ui.res.stringResource
-import com.arshadshah.nimaz.R
 
 /**
- * Unified banner slot for the home screen. Renders nothing if there are no banners and no active
- * announcement.
+ * Unified banner slot for the home screen. Renders nothing if [items] is empty.
  *
- * Priority: if [announcement] is non-null it is shown first; system [banners] are the "N more".
- * If no announcement, the first system banner is the primary; remaining system banners are the
- * "N more". The overflow section is expanded/collapsed with a text link.
+ * Shows [items][0] as the primary banner. If there are more items, a "N more to deal with" text
+ * link toggles an expanded list showing ALL items with numbered rank badges.
  */
 @Composable
 fun HomeBannerSlot(
-    banners: List<HomeBannerItem>,
-    announcement: Announcement?,
-    showAnnouncementCta: Boolean,
-    onAnnouncementCta: () -> Unit,
-    onAnnouncementDismiss: () -> Unit,
+    items: List<HomeBannerItem>,
     modifier: Modifier = Modifier,
 ) {
-    val hasAnnouncement = announcement != null
-    val hasBanners = banners.isNotEmpty()
-    if (!hasAnnouncement && !hasBanners) return
+    if (items.isEmpty()) return
 
     var expanded by remember { mutableStateOf(false) }
-
-    // Determine primary item and overflow list.
-    // Primary is rendered as a full NimazBanner; overflow is shown/hidden via "N more" link.
-    val overflowBanners: List<HomeBannerItem>
-    val primaryContent: @Composable () -> Unit
-
-    if (hasAnnouncement) {
-        primaryContent = {
-            AnnouncementBanner(
-                announcement = announcement,
-                showCta = showAnnouncementCta,
-                onCtaClick = onAnnouncementCta,
-                onDismiss = onAnnouncementDismiss,
-            )
-        }
-        overflowBanners = banners
-    } else {
-        val first = banners.first()
-        primaryContent = { BannerSlotCard(first) }
-        overflowBanners = banners.drop(1)
-    }
+    val overflowCount = items.size - 1
 
     Column(modifier = modifier.fillMaxWidth()) {
-        primaryContent()
+        if (expanded) {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                items.forEachIndexed { index, item ->
+                    BannerSlotCard(item, rank = index + 1)
+                }
+            }
+        } else {
+            BannerSlotCard(items[0], rank = null)
+        }
 
-        if (overflowBanners.isNotEmpty()) {
-            val count = overflowBanners.size
+        if (overflowCount > 0) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -90,7 +74,7 @@ fun HomeBannerSlot(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = stringResource(R.string.home_n_more_banners, count),
+                    text = stringResource(R.string.home_n_more_banners, overflowCount),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -101,24 +85,12 @@ fun HomeBannerSlot(
                     iconSize = 14.dp,
                 )
             }
-
-            AnimatedVisibility(
-                visible = expanded,
-                enter = expandVertically(),
-                exit = shrinkVertically(),
-            ) {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    overflowBanners.forEach { banner ->
-                        BannerSlotCard(banner)
-                    }
-                }
-            }
         }
     }
 }
 
 @Composable
-private fun BannerSlotCard(banner: HomeBannerItem) {
+private fun BannerSlotCard(banner: HomeBannerItem, rank: Int?) {
     val cardIsTappable = banner.actionLabel == null && banner.onAction != null
     val actionLabel = if (banner.isLoading) null else banner.actionLabel
     val onAction = if (banner.isLoading) null else banner.onAction
@@ -127,13 +99,37 @@ private fun BannerSlotCard(banner: HomeBannerItem) {
         variant = when (banner.variant) {
             HomeBannerVariant.WARNING -> NimazBannerVariant.WARNING
             HomeBannerVariant.UPDATE -> NimazBannerVariant.UPDATE
+            HomeBannerVariant.INFO -> NimazBannerVariant.INFO
+            HomeBannerVariant.EVENT -> NimazBannerVariant.EVENT
         },
-        icon = banner.icon,
+        icon = if (rank == null) banner.icon else banner.icon,
         title = banner.title,
         message = banner.subtitle,
         actionLabel = actionLabel,
         onAction = onAction,
         isLoading = banner.isLoading,
+        onDismiss = if (banner.dismissable) banner.onDismiss else null,
         onClick = if (cardIsTappable) { { banner.onAction?.invoke() } } else null,
+        leadingContent = if (rank != null) {
+            {
+                Box(
+                    modifier = Modifier
+                        .size(22.dp)
+                        .clip(RoundedCornerShape(7.dp))
+                        .background(MaterialTheme.colorScheme.surfaceVariant),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text = rank.toString(),
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontSize = 10.5.sp,
+                            fontWeight = FontWeight.Bold,
+                        ),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+        } else null,
     )
 }
+

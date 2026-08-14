@@ -26,9 +26,13 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BatteryAlert
 import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.NewReleases
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Policy
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -48,6 +52,8 @@ import com.arshadshah.nimaz.LocalInAppUpdateManager
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.util.UpdateState
 import com.arshadshah.nimaz.core.util.formatFullDate
+import com.arshadshah.nimaz.domain.model.AnnouncementType
+import com.arshadshah.nimaz.domain.model.PrayerStatus
 import com.arshadshah.nimaz.domain.model.PrayerType
 import com.arshadshah.nimaz.domain.model.WorshipReminderType
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
@@ -119,11 +125,10 @@ private fun rememberHomeClock(state: HomeUiState): HomeClock {
 
 @Composable
 fun HomeScreen(
-    onNavigateToQuran: () -> Unit,
+    onNavigateToAlKahf: () -> Unit,
     onNavigateToHadith: () -> Unit,
     onNavigateToDua: () -> Unit,
     onNavigateToTasbih: () -> Unit,
-    onNavigateToQibla: () -> Unit,
     onNavigateToCalendar: () -> Unit,
     onNavigateToFasting: () -> Unit,
     onNavigateToZakat: () -> Unit,
@@ -250,9 +255,8 @@ fun HomeScreen(
                             listState = compactListState,
                             updateState = updateState,
                             updateManager = updateManager,
-                            onNavigateToQuran = onNavigateToQuran,
+                            onNavigateToAlKahf = onNavigateToAlKahf,
                             onNavigateToDua = onNavigateToDua,
-                            onNavigateToQibla = onNavigateToQibla,
                             onNavigateToPrayerSettings = onNavigateToPrayerSettings,
                             onNavigateToPrayerTracker = onNavigateToPrayerTracker,
                             onNavigateToPrayerTimes = onNavigateToPrayerTimes,
@@ -260,6 +264,7 @@ fun HomeScreen(
                             onOpenAnnouncementRoute = onOpenAnnouncementRoute,
                             onOpenWorship = onOpenWorship,
                             onTogglePrayer = { viewModel.onEvent(HomeEvent.TogglePrayerStatus(it)) },
+                            onSetPrayerStatus = { type, status -> viewModel.onEvent(HomeEvent.SetPrayerStatus(type, status)) },
                             notificationPermissionLauncher = notificationPermissionLauncher,
                             locationPermissionLauncher = locationPermissionLauncher,
                             batteryOptimizationLauncher = batteryOptimizationLauncher,
@@ -314,9 +319,8 @@ private fun HomeCompactContent(
     listState: LazyListState,
     updateState: UpdateState,
     updateManager: com.arshadshah.nimaz.core.util.InAppUpdateManager?,
-    onNavigateToQuran: () -> Unit,
+    onNavigateToAlKahf: () -> Unit,
     onNavigateToDua: () -> Unit,
-    onNavigateToQibla: () -> Unit,
     onNavigateToPrayerSettings: () -> Unit,
     onNavigateToPrayerTracker: () -> Unit,
     onNavigateToPrayerTimes: () -> Unit,
@@ -324,6 +328,7 @@ private fun HomeCompactContent(
     onOpenAnnouncementRoute: (String) -> Unit,
     onOpenWorship: (WorshipReminderType) -> Unit,
     onTogglePrayer: (PrayerType) -> Unit,
+    onSetPrayerStatus: (PrayerType, PrayerStatus) -> Unit,
     notificationPermissionLauncher: androidx.activity.result.ActivityResultLauncher<String>,
     locationPermissionLauncher: androidx.activity.result.ActivityResultLauncher<Array<String>>,
     batteryOptimizationLauncher: androidx.activity.result.ActivityResultLauncher<android.content.Intent>,
@@ -363,12 +368,27 @@ private fun HomeCompactContent(
         val hasAnyBanner = banners.isNotEmpty() || announcementState.announcement != null
         if (hasAnyBanner) {
             item(key = "banner_slot") {
+                val allBannerItems = remember(announcementState.announcement, banners) {
+                    buildList {
+                        val ann = announcementState.announcement
+                        if (ann != null) {
+                            add(HomeBannerItem(
+                                id = ann.id,
+                                icon = announcementIcon(ann.type),
+                                title = ann.title,
+                                subtitle = ann.body,
+                                variant = announcementVariant(ann.type),
+                                actionLabel = if (announcementState.showCta) ann.ctaLabel else null,
+                                onAction = if (announcementState.showCta) onAnnouncementCta else null,
+                                dismissable = ann.dismissable,
+                                onDismiss = if (ann.dismissable) onAnnouncementDismiss else null,
+                            ))
+                        }
+                        addAll(banners)
+                    }
+                }
                 HomeBannerSlot(
-                    banners = banners,
-                    announcement = announcementState.announcement,
-                    showAnnouncementCta = announcementState.showCta,
-                    onAnnouncementCta = onAnnouncementCta,
-                    onAnnouncementDismiss = onAnnouncementDismiss,
+                    items = allBannerItems,
                     modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 12.dp),
                 )
             }
@@ -380,6 +400,7 @@ private fun HomeCompactContent(
                 onSettingsClick = onNavigateToPrayerSettings,
                 onTrackerClick = onNavigateToPrayerTracker,
                 onTogglePrayer = onTogglePrayer,
+                onSetPrayerStatus = onSetPrayerStatus,
                 modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp),
             )
         }
@@ -390,11 +411,10 @@ private fun HomeCompactContent(
                 dailyHadith = state.dailyHadith,
                 dailyDua = state.dailyDua,
                 worshipCard = state.worshipCard,
-                onNavigateToQuran = onNavigateToQuran,
+                onNavigateToAlKahf = onNavigateToAlKahf,
                 onOpenHadith = state.dailyHadithId?.let { id -> { onOpenHadith(id) } } ?: {},
                 onNavigateToDua = onNavigateToDua,
                 onOpenWorship = onOpenWorship,
-                onNavigateToQibla = onNavigateToQibla,
                 modifier = Modifier.padding(start = 20.dp, end = 20.dp, bottom = 34.dp),
             )
         }
@@ -739,3 +759,15 @@ private fun buildHomeBannerItems(
 private fun batteryOptimizationIntent(ctx: android.content.Context): android.content.Intent =
     android.content.Intent(android.provider.Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
         .apply { data = android.net.Uri.parse("package:" + ctx.packageName) }
+
+private fun announcementVariant(type: AnnouncementType): HomeBannerVariant = when (type) {
+    AnnouncementType.CELEBRATION -> HomeBannerVariant.EVENT
+    else -> HomeBannerVariant.INFO
+}
+
+private fun announcementIcon(type: AnnouncementType): androidx.compose.ui.graphics.vector.ImageVector = when (type) {
+    AnnouncementType.CELEBRATION -> Icons.Default.Star
+    AnnouncementType.CHANGELOG -> Icons.Default.NewReleases
+    AnnouncementType.PRIVACY, AnnouncementType.TOS -> Icons.Default.Policy
+    else -> Icons.Default.Info
+}

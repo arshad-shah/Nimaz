@@ -303,6 +303,7 @@ class HomeViewModel @Inject constructor(
             // it counted taps that toggled nothing: Sunrise is not a prayer and returns early,
             // so the dashboard has been reporting toggles that never happened.
             is HomeEvent.TogglePrayerStatus -> togglePrayerStatus(event.prayerType)
+            is HomeEvent.SetPrayerStatus -> setPrayerStatus(event.prayerType, event.status)
             HomeEvent.DismissAnnouncement -> dismissAnnouncement()
             HomeEvent.AnnouncementCtaClicked -> logAnnouncementCta()
         }
@@ -371,6 +372,27 @@ class HomeViewModel @Inject constructor(
             }
 
             // Notify widget to refresh via WorkManager
+            widgets.refreshPrayerTracker()
+        }
+    }
+
+    private fun setPrayerStatus(prayerType: PrayerType, status: PrayerStatus) {
+        if (prayerType == PrayerType.SUNRISE) return
+        launchSafely(telemetry, AppAnalytics.Feature.HOME, "set_prayer_status") {
+            val prayerName = PrayerName.valueOf(prayerType.name)
+            val todayEpoch = todayProvider.today().toUtcMidnightMillis()
+            val prayedAt = if (status == PrayerStatus.PRAYED || status == PrayerStatus.LATE) System.currentTimeMillis() else null
+            prayerUseCases.updatePrayerStatus(todayEpoch, prayerName, status, prayedAt, false)
+            telemetry.prayerTracked(prayerName.name, status.name, isJamaah = false)
+            _prayerRecords.update { it + (prayerName to status) }
+            _state.update { state ->
+                state.copy(
+                    prayerTimes = state.prayerTimes.map { display ->
+                        val name = PrayerName.valueOf(display.type.name)
+                        display.copy(prayerStatus = _prayerRecords.value[name] ?: PrayerStatus.NOT_PRAYED)
+                    }
+                )
+            }
             widgets.refreshPrayerTracker()
         }
     }
