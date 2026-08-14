@@ -22,7 +22,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazSwitch
 import com.arshadshah.nimaz.presentation.components.molecules.NimazAccordion
 import com.arshadshah.nimaz.presentation.components.molecules.NimazNumberStepper
 import com.arshadshah.nimaz.presentation.components.molecules.NimazNumberStepperVariant
-import com.arshadshah.nimaz.presentation.components.molecules.NimazTime
+import com.arshadshah.nimaz.presentation.foundation.time.NimazTime
 import com.arshadshah.nimaz.presentation.components.molecules.NimazTimePicker
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.viewmodel.settings.SettingsEvent

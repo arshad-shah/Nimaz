@@ -21,8 +21,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.presentation.components.molecules.NimazTime
-import com.arshadshah.nimaz.presentation.components.molecules.rememberTimeFormatter
+import com.arshadshah.nimaz.presentation.foundation.time.NimazTime
+import com.arshadshah.nimaz.presentation.foundation.time.rememberTimeFormatter
 import com.arshadshah.nimaz.presentation.theme.NimazSpacing
 
 /**

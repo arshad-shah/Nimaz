@@ -58,7 +58,7 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownRow
 import com.arshadshah.nimaz.presentation.components.molecules.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.molecules.NimazNumberStepper
 import com.arshadshah.nimaz.presentation.components.molecules.NimazNumberStepperVariant
-import com.arshadshah.nimaz.presentation.components.molecules.NimazTime
+import com.arshadshah.nimaz.presentation.foundation.time.NimazTime
 import com.arshadshah.nimaz.presentation.components.molecules.NimazTimePickerDialog
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.foundation.tokens.KhatamProgressRing
