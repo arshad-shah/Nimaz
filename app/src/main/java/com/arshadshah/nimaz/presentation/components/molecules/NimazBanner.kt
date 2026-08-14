@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.outlined.Error
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -62,6 +63,8 @@ private data class BannerPalette(
     val accent: Color,
     val onContent: Color,
     val onMessage: Color,
+    val ctaContainerColor: Color,
+    val ctaContentColor: Color = Color.White,
     val isGradient: Boolean = false,
     val gradientColors: List<Color> = emptyList(),
 )
@@ -77,6 +80,7 @@ private fun variantPalette(variant: NimazBannerVariant): BannerPalette = when (v
             accent = accent,
             onContent = MaterialTheme.colorScheme.onSurface,
             onMessage = MaterialTheme.colorScheme.onSurfaceVariant,
+            ctaContainerColor = NimazColors.Primary700,
         )
     }
 
@@ -89,6 +93,7 @@ private fun variantPalette(variant: NimazBannerVariant): BannerPalette = when (v
             accent = accent,
             onContent = MaterialTheme.colorScheme.onSurface,
             onMessage = MaterialTheme.colorScheme.onSurfaceVariant,
+            ctaContainerColor = NimazColors.GoldDark,
         )
     }
 
@@ -101,6 +106,7 @@ private fun variantPalette(variant: NimazBannerVariant): BannerPalette = when (v
             accent = accent,
             onContent = MaterialTheme.colorScheme.onSurface,
             onMessage = MaterialTheme.colorScheme.onSurfaceVariant,
+            ctaContainerColor = accent,
         )
     }
 
@@ -113,6 +119,7 @@ private fun variantPalette(variant: NimazBannerVariant): BannerPalette = when (v
             accent = accent,
             onContent = MaterialTheme.colorScheme.onSurface,
             onMessage = MaterialTheme.colorScheme.onSurfaceVariant,
+            ctaContainerColor = accent,
         )
     }
 
@@ -129,6 +136,8 @@ private fun variantPalette(variant: NimazBannerVariant): BannerPalette = when (v
             accent = gold,
             onContent = lightTeal,
             onMessage = lightTeal.copy(alpha = 0.72f),
+            ctaContainerColor = Color.White.copy(alpha = 0.16f),
+            ctaContentColor = Color.White,
             isGradient = true,
             gradientColors = listOf(teal800, teal950),
         )
@@ -144,11 +153,7 @@ private fun defaultIcon(variant: NimazBannerVariant): ImageVector = when (varian
 }
 
 /** Maps a banner variant to the nearest [NimazButtonVariant] for its action CTA. */
-private fun NimazBannerVariant.actionButtonVariant(): NimazButtonVariant = when (this) {
-    NimazBannerVariant.ERROR -> NimazButtonVariant.DESTRUCTIVE
-    NimazBannerVariant.EVENT -> NimazButtonVariant.QUIET
-    else -> NimazButtonVariant.PRIMARY
-}
+private fun NimazBannerVariant.actionButtonVariant(): NimazButtonVariant = NimazButtonVariant.PRIMARY
 
 /**
  * Unified banner component. A single [BannerPalette] drives all five variants —
@@ -251,9 +256,15 @@ fun NimazBanner(
                     NimazButton(
                         text = actionLabel,
                         onClick = onAction ?: {},
-                        variant = variant.actionButtonVariant(),
+                        variant = NimazButtonVariant.PRIMARY,
                         size = NimazButtonSize.SMALL,
                         loading = isLoading,
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = palette.ctaContainerColor,
+                            contentColor = palette.ctaContentColor,
+                            disabledContainerColor = palette.ctaContainerColor.copy(alpha = 0.4f),
+                            disabledContentColor = palette.ctaContentColor.copy(alpha = 0.6f),
+                        ),
                     )
                 }
 
@@ -261,9 +272,15 @@ fun NimazBanner(
                     NimazButton(
                         text = "",
                         onClick = {},
-                        variant = variant.actionButtonVariant(),
+                        variant = NimazButtonVariant.PRIMARY,
                         size = NimazButtonSize.SMALL,
                         loading = true,
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = palette.ctaContainerColor,
+                            contentColor = palette.ctaContentColor,
+                            disabledContainerColor = palette.ctaContainerColor.copy(alpha = 0.4f),
+                            disabledContentColor = palette.ctaContentColor.copy(alpha = 0.6f),
+                        ),
                     )
                 }
             }

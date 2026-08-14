@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilledTonalButton
@@ -25,12 +26,15 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.theme.ThemeMode
 
@@ -109,6 +113,9 @@ enum class NimazButtonType { STANDARD, PILL }
  * [loading] implies disabled — the button will not respond to clicks while the spinner
  * is shown. The label stays visible alongside the spinner so the button keeps its width.
  *
+ * @param colors optional [ButtonColors] override — use sparingly when a call site genuinely needs
+ *   a colour that no variant provides (e.g. a per-variant banner CTA). Variant colours are used
+ *   when null.
  * @param leadingIcon optional icon shown before the label.
  * @param loading shows a spinner next to the label; implies [enabled] = false.
  * @param fullWidth stretches to the available width.
@@ -122,6 +129,7 @@ fun NimazButton(
     variant: NimazButtonVariant = NimazButtonVariant.PRIMARY,
     size: NimazButtonSize = NimazButtonSize.STANDARD,
     type: NimazButtonType = NimazButtonType.STANDARD,
+    colors: ButtonColors? = null,
     leadingIcon: ImageVector? = null,
     enabled: Boolean = true,
     loading: Boolean = false,
@@ -151,7 +159,12 @@ fun NimazButton(
             modifier = sizedModifier,
             enabled = isEnabled,
             shape = shape,
-            colors = ButtonDefaults.buttonColors(),
+            colors = colors ?: ButtonDefaults.buttonColors(
+                containerColor = NimazColors.Primary700,
+                contentColor = Color.White,
+                disabledContainerColor = NimazColors.Primary700.copy(alpha = 0.4f),
+                disabledContentColor = Color.White.copy(alpha = 0.6f),
+            ),
             contentPadding = contentPadding,
             content = content,
         )
@@ -161,7 +174,7 @@ fun NimazButton(
             modifier = sizedModifier,
             enabled = isEnabled,
             shape = shape,
-            colors = ButtonDefaults.filledTonalButtonColors(
+            colors = colors ?: ButtonDefaults.filledTonalButtonColors(
                 containerColor = MaterialTheme.colorScheme.surfaceVariant,
                 contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
             ),
@@ -174,7 +187,7 @@ fun NimazButton(
             modifier = sizedModifier,
             enabled = isEnabled,
             shape = shape,
-            colors = ButtonDefaults.buttonColors(
+            colors = colors ?: ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.error,
                 contentColor = MaterialTheme.colorScheme.onError,
             ),
@@ -187,7 +200,7 @@ fun NimazButton(
             modifier = sizedModifier,
             enabled = isEnabled,
             shape = shape,
-            colors = ButtonDefaults.textButtonColors(),
+            colors = colors ?: ButtonDefaults.textButtonColors(),
             contentPadding = contentPadding,
             content = content,
         )
@@ -198,6 +211,7 @@ fun NimazButton(
             modifier = sizedModifier,
             enabled = isEnabled,
             shape = shape,
+            colors = colors ?: ButtonDefaults.buttonColors(),
             contentPadding = contentPadding,
             content = content,
         )
@@ -229,8 +243,8 @@ private fun RowScope.ButtonContent(
 
 @Composable
 private fun textStyleFor(size: NimazButtonSize): TextStyle = when (size) {
-    NimazButtonSize.SMALL -> MaterialTheme.typography.labelLarge
-    else -> MaterialTheme.typography.labelLarge
+    NimazButtonSize.SMALL -> MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold)
+    else -> MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold)
 }
 
 // ── Previews ─────────────────────────────────────────────────────────────────
