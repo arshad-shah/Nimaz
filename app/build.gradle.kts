@@ -76,8 +76,8 @@ android {
         // pushes the change back to dev (with a bypass GitHub App token) after a successful
         // deploy, so the committed baseline stays in sync for the next build.
 
-        versionCode = 420
-        versionName = "3.0.119"
+        versionCode = 421
+        versionName = "3.0.120"
 
         // Custom runner swaps in HiltTestApplication so instrumented tests run on
         // the full Hilt graph without NimazApp's Firebase / AppInitializer / device
@@ -361,6 +361,7 @@ dependencies {
     testImplementation(libs.google.truth)
     testImplementation(libs.robolectric)
     testImplementation(libs.ktor.client.mock)
+    testImplementation("org.json:json:20231013")
 
     // Compose UI test harness for the Robolectric atom tests in src/testDebug
     // (createComposeRule, onNodeWithText, performClick, …). Declared here as a
