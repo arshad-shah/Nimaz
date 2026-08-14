@@ -158,14 +158,19 @@ internal fun AudioBottomBar(
                         }
                     }
                     Text(
+                        // Juz and page are dropped when they are not known — a verse being
+                        // recited from a surah the reader is not looking at cannot be located
+                        // in the list on screen, and "Juz 0 · p. 0" is worse than silence.
                         text = listOfNotNull(
                             stringResource(
                                 R.string.audio_position_ayah_format,
                                 currentAyahInSurah,
                                 totalAyahsInSurah
                             ),
-                            stringResource(R.string.audio_position_juz_format, juzNumber),
-                            stringResource(R.string.audio_position_page_format, pageNumber),
+                            juzNumber.takeIf { it > 0 }
+                                ?.let { stringResource(R.string.audio_position_juz_format, it) },
+                            pageNumber.takeIf { it > 0 }
+                                ?.let { stringResource(R.string.audio_position_page_format, it) },
                         ).joinToString(" · "),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,

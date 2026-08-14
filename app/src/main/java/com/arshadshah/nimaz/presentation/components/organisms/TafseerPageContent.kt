@@ -58,6 +58,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.Ayah
+import com.arshadshah.nimaz.domain.model.TranslationLanguage
+import com.arshadshah.nimaz.presentation.theme.asTranslationText
 import com.arshadshah.nimaz.domain.model.QuranTopic
 import com.arshadshah.nimaz.presentation.components.atoms.NimazChip
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSegmentedControl
@@ -199,6 +201,12 @@ fun TafseerPageContent(
      */
     topics: List<QuranTopic> = emptyList(),
     onTopicClick: (topicId: Int) -> Unit = {},
+    /**
+     * Language of the translation printed above the commentary — it decides the face, direction
+     * and leading. Urdu is Nastaliq; without this the app's Latin body face carries no
+     * Arabic-script glyphs at all and the system substitutes a Naskh fallback.
+     */
+    translationLanguage: TranslationLanguage = TranslationLanguage.ENGLISH,
     modifier: Modifier = Modifier
 ) {
     var showNotesSheet by remember { mutableStateOf(false) }
@@ -282,9 +290,9 @@ fun TafseerPageContent(
                             if (!ayah.translation.isNullOrBlank()) {
                                 Text(
                                     text = ayah.translation,
-                                    style = MaterialTheme.typography.bodyMedium,
+                                    style = MaterialTheme.typography.bodyMedium
+                                        .asTranslationText(translationLanguage),
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    textAlign = TextAlign.Start,
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .padding(vertical = 8.dp)

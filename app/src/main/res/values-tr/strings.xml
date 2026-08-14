@@ -556,6 +556,8 @@
     <string name="quran_home_start_reading">Okumaya Başla</string>
     <string name="quran_home_begin_journey">Fatiha Suresi ile Kur\'an yolculuğunuza başlayın</string>
     <string name="quran_home_see_all">Tümünü Gör</string>
+    <string name="see_more">Daha fazla</string>
+    <string name="see_less">Daha az</string>
     <string name="quran_home_no_favorite_ayahs">Henüz favori ayet yok</string>
     <string name="quran_home_favorite_hint">Buraya eklemek için herhangi bir ayetin kalp simgesine dokunun</string>
     <string name="quran_home_no_bookmarks">Henüz yer imi yok</string>

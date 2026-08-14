@@ -271,7 +271,7 @@ class QuranViewModel @Inject constructor(
 
             is QuranEvent.PreviewReciter -> {
                 telemetry.featureUsed(AppAnalytics.Feature.QURAN, "preview_reciter")
-                audioManager.setReciter(event.reciterId)
+                audioManager.setReciter(event.reciterId, restartIfPlaying = false)
                 playAyahAudio(ayahGlobalId = 1, surahNumber = 1, ayahNumber = 1)
             }
 

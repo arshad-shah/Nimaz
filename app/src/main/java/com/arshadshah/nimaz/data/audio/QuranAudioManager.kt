@@ -295,14 +295,36 @@ class QuranAudioManager @Inject constructor(
         private val DEFAULT_CDN = Pair("ar.alafasy", 128)
     }
 
-    fun setReciter(reciterId: String?) {
+    /**
+     * Choose who is reciting.
+     *
+     * The CDN id only decides the URL of the *next* file fetched, so a reciter chosen mid-surah
+     * used to change nothing audible: the queued media items still pointed at the previous
+     * reciter's files, and the reader had to stop and start again to hear the change. When
+     * something is playing, the playlist is rebuilt at the verse being recited — the same thing
+     * a stop-and-restart did, without making the reader do it.
+     *
+     * @param restartIfPlaying false for the reciter *preview*, which sets the CDN and then
+     *   immediately queues its own one-verse playlist; rebuilding the old one first would
+     *   download a whole surah under the new reciter and throw it away a frame later.
+     */
+    fun setReciter(reciterId: String?, restartIfPlaying: Boolean = true) {
         val reciter = QuranReciter.fromId(reciterId)
         val (cdnId, bitrate) = RECITER_CDN_MAP[reciter] ?: DEFAULT_CDN
+        val changed = cdnId != reciterCdnId || bitrate != reciterBitrate
         reciterCdnId = cdnId
         reciterBitrate = bitrate
         _audioState.update {
             it.copy(reciterName = reciter.displayName)
         }
+
+        // Only when there is something to re-cut. On a settings hydration at launch — the common
+        // case — nothing is loaded and this is a no-op.
+        if (!changed || !restartIfPlaying) return
+        val playlist = ayahPlaylist
+        if (!_audioState.value.isActive || playlist.isEmpty()) return
+        val resumeIndex = _audioState.value.currentAyahIndex.coerceIn(0, playlist.lastIndex)
+        playAyahsSequentially(playlist, startIndex = resumeIndex, title = playlistTitle)
     }
 
     data class AyahAudioItem(

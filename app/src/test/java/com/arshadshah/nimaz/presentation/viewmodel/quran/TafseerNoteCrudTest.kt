@@ -22,6 +22,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Before
+import com.arshadshah.nimaz.domain.repository.settings.QuranPreferences
 import org.junit.Test
 
 /**
@@ -97,7 +98,7 @@ class TafseerNoteCrudTest {
     @After
     fun tearDown() = Dispatchers.resetMain()
 
-    private fun viewModel() = TafseerViewModel(tafseerUseCases, quranUseCases, telemetry)
+    private fun viewModel() = TafseerViewModel(tafseerUseCases, quranUseCases, quranSettings(), telemetry)
 
     private fun loadedViewModel() = viewModel().also {
         it.onEvent(TafseerEvent.LoadSurah(surahNumber = 2, ayahNumber = 1))
@@ -201,6 +202,15 @@ class TafseerNoteCrudTest {
 
         assertThat(telemetry.errors.map { it.type }).contains("add_note")
     }
+
+    /**
+     * The commentary screen reads the translator preference only to pick the *face* the verse
+     * above the commentary is drawn in, so a relaxed stub with the default id is enough here.
+     */
+    private fun quranSettings(): QuranPreferences = mockk(relaxed = true) {
+        every { quranTranslatorId } returns flowOf("sahih_international")
+    }
+
 }
 
 private fun ayah(id: Int, number: Int) = Ayah(

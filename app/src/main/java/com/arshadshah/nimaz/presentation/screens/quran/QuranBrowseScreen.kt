@@ -210,16 +210,14 @@ internal fun QuranBrowseContent(
                                 onInfoClick = { infoForSurah = surah.number },
                                 isSelected = selectedSurahNumber == surah.number,
                                 startPage = state.startPages[surah.number] ?: surah.startPage,
-                                // Named on the row because the header cannot say it: a surah
-                                // that runs from juz 1 into juz 3 sits under the "Juz 1"
-                                // header and is mostly not in juz 1.
-                                juzLabel = if (span.first == span.last) {
-                                    stringResource(R.string.quran_home_juz_indicator, span.first)
-                                } else {
-                                    stringResource(
-                                        R.string.quran_browse_juz_span, span.first, span.last
-                                    )
-                                },
+                                // Only when the surah crosses a boundary. The sticky header
+                                // already names the juz it opens in, so repeating that on
+                                // every row bought nothing and cost the width that pushed
+                                // "165 Verses · p. 128 · Juz 7" past the ellipsis. A span is
+                                // the one thing the header genuinely cannot say.
+                                juzLabel = stringResource(
+                                    R.string.quran_browse_juz_span, span.first, span.last
+                                ).takeIf { span.first != span.last },
                             )
                         }
                     }

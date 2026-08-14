@@ -18,8 +18,8 @@ import com.arshadshah.nimaz.presentation.theme.NimazTheme
 fun NimazDivider(
     modifier: Modifier = Modifier,
     color: Color = MaterialTheme.colorScheme.outlineVariant,
-    thickness: Dp = 0.5.dp,
-    alpha: Float = 0.3f
+    thickness: Dp = 1.dp,
+    alpha: Float = 1f
 ) {
     Box(
         modifier = modifier

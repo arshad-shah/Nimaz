@@ -604,11 +604,26 @@ fun QuranReaderScreen(
                 else -> null
             }
 
-            val readerSurah = currentReaderAyah?.let { surahByNumber[it.surahNumber] }
+            // While audio is active the bar describes the **recitation**, not the reader. Open
+            // surah 15 with surah 2 playing and `displayAyahs` no longer contains the recited
+            // verse, so `playingAyah` is null and the bar fell back to the reader's position —
+            // it kept playing Al-Baqarah while announcing Al-Hijr. `audioState` knows which
+            // surah and how far in whether or not that verse is on screen.
+            val audioSurah = audioState.currentSurahNumber
+                .takeIf { audioState.isActive && it > 0 }
+                ?.let { surahByNumber[it] }
+
+            val readerSurah = audioSurah
+                ?: currentReaderAyah?.let { surahByNumber[it.surahNumber] }
             val readerSurahName = readerSurah?.nameEnglish
+                ?: audioState.currentTitle.takeIf { audioState.isActive && it.isNotBlank() }
                 ?: state.surahWithAyahs?.surah?.nameEnglish
                 ?: ""
-            val readerTotalAyahs = readerSurah?.ayahCount ?: 0
+            val readerTotalAyahs = when {
+                audioSurah != null -> audioSurah.ayahCount
+                audioState.isActive && audioState.totalAyahs > 0 -> audioState.totalAyahs
+                else -> readerSurah?.ayahCount ?: 0
+            }
 
             AudioBottomBar(
                 isAudioActive = audioState.isActive,
@@ -619,10 +634,18 @@ fun QuranReaderScreen(
                 downloadedCount = audioState.downloadedCount,
                 totalToDownload = audioState.totalToDownload,
                 surahName = readerSurahName,
-                currentAyahInSurah = currentReaderAyah?.numberInSurah ?: 0,
+                // The recited verse where it is resolvable, the playlist's own index where it
+                // is not — a verse from another surah is not in `displayAyahs` to look up.
+                currentAyahInSurah = playingAyah?.numberInSurah
+                    ?: audioState.currentAyahIndex.takeIf { audioState.isActive }?.plus(1)
+                    ?: currentReaderAyah?.numberInSurah ?: 0,
                 totalAyahsInSurah = readerTotalAyahs,
-                pageNumber = currentReaderAyah?.page ?: 0,
-                juzNumber = currentReaderAyah?.juz ?: 0,
+                // Page and juz only for a verse actually in hand: guessing them for an
+                // off-screen verse would be inventing a coordinate.
+                pageNumber = (playingAyah ?: currentReaderAyah.takeIf { !audioState.isActive })
+                    ?.page ?: 0,
+                juzNumber = (playingAyah ?: currentReaderAyah.takeIf { !audioState.isActive })
+                    ?.juz ?: 0,
                 onPlayClick = {
                     if (audioState.isPlaying) {
                         viewModel.onEvent(QuranEvent.PauseAudio)

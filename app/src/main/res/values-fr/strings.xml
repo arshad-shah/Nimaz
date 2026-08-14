@@ -569,6 +569,8 @@
     <string name="quran_home_start_reading">Commencer la lecture</string>
     <string name="quran_home_begin_journey">Commencez votre parcours coranique avec Al-Fatiha</string>
     <string name="quran_home_see_all">Tout voir</string>
+    <string name="see_more">Voir plus</string>
+    <string name="see_less">Voir moins</string>
     <string name="quran_home_no_favorite_ayahs">Aucun verset favori</string>
     <string name="quran_home_favorite_hint">Appuyez sur l\'icône cœur d\'un verset pour l\'ajouter ici</string>
     <string name="quran_home_no_bookmarks">Aucun signet</string>

@@ -554,6 +554,8 @@
     <string name="quran_home_start_reading">Lesen beginnen</string>
     <string name="quran_home_begin_journey">Beginnen Sie Ihre Quran-Reise mit Al-Fatiha</string>
     <string name="quran_home_see_all">Alle anzeigen</string>
+    <string name="see_more">Mehr anzeigen</string>
+    <string name="see_less">Weniger anzeigen</string>
     <string name="quran_home_no_favorite_ayahs">Noch keine Lieblings-Ayahs</string>
     <string name="quran_home_favorite_hint">Tippen Sie auf das Herz-Symbol bei einer Ayah, um sie hier hinzuzufügen</string>
     <string name="quran_home_no_bookmarks">Noch keine Lesezeichen</string>

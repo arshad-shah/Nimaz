@@ -21,6 +21,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Before
+import com.arshadshah.nimaz.domain.repository.settings.QuranPreferences
 import org.junit.Test
 
 /**
@@ -81,7 +82,7 @@ class TafseerSourceProbeTest {
     @After
     fun tearDown() = Dispatchers.resetMain()
 
-    private fun viewModel() = TafseerViewModel(tafseerUseCases, quranUseCases, telemetry)
+    private fun viewModel() = TafseerViewModel(tafseerUseCases, quranUseCases, quranSettings(), telemetry)
 
     @Test
     fun `an ayah with commentary costs one read`() = runTest {
@@ -165,4 +166,13 @@ class TafseerSourceProbeTest {
         sajdaType = null,
         sajdaNumber = null,
     )
+
+    /**
+     * The commentary screen reads the translator preference only to pick the *face* the verse
+     * above the commentary is drawn in, so a relaxed stub with the default id is enough here.
+     */
+    private fun quranSettings(): QuranPreferences = mockk(relaxed = true) {
+        every { quranTranslatorId } returns flowOf("sahih_international")
+    }
+
 }

@@ -15,15 +15,68 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.RevelationType
 import com.arshadshah.nimaz.domain.model.Surah
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
+
+/**
+ * The summary paragraph, clamped to a few lines with a way to open it.
+ *
+ * Al-Baqarah's runs to a dozen lines, which pushed the onward rows and both buttons off a phone
+ * screen entirely — a reader opening the sheet to decide whether to read the surah had to scroll
+ * past an essay to reach "Read surah". Four lines is enough to tell whether the rest is worth
+ * asking for.
+ *
+ * The toggle only appears when the text actually overflows, which is known after the first
+ * layout pass — a "See more" under three lines of prose is a control that does nothing.
+ */
+@Composable
+private fun CollapsibleSummary(text: String, modifier: Modifier = Modifier) {
+    var expanded by remember(text) { mutableStateOf(false) }
+    var overflows by remember(text) { mutableStateOf(false) }
+
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = if (expanded) Int.MAX_VALUE else COLLAPSED_SUMMARY_LINES,
+            overflow = TextOverflow.Ellipsis,
+            onTextLayout = { result ->
+                // Only ever set true: once collapsed layout reports overflow, the expanded pass
+                // must not report false and take the control away mid-read.
+                if (result.hasVisualOverflow) overflows = true
+            },
+        )
+        if (overflows) {
+            NimazButton(
+                text = stringResource(
+                    if (expanded) R.string.see_less else R.string.see_more
+                ),
+                onClick = { expanded = !expanded },
+                variant = NimazButtonVariant.TEXT,
+                size = NimazButtonSize.SMALL,
+            )
+        }
+    }
+}
+
+/** Enough to judge the paragraph by, without it becoming the sheet. */
+private const val COLLAPSED_SUMMARY_LINES = 4
 
 /**
  * What a surah is, raised where you are rather than pushed as a screen.
@@ -124,13 +177,7 @@ fun SurahInfoSheet(
                 )
             )
 
-            summary?.takeIf { it.isNotBlank() }?.let {
-                Text(
-                    text = it,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
+            summary?.takeIf { it.isNotBlank() }?.let { CollapsibleSummary(text = it) }
 
             // Each row is drawn only where there is something behind it. An install whose
             // artifact predates the thematic layer simply has fewer rows — that gap is normal,

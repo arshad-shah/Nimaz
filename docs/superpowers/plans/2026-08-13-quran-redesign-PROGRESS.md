@@ -274,6 +274,18 @@ environmental — see [§1](#1-start-here).
 | "Search bookmarks" on a screen called Saved | "Search saved"; "Clear all bookmarks" → "Clear everything saved"; "No Bookmarks Yet" → "Nothing saved yet". All six locales |
 | A verse gave no sign it was saved | `AyahItem` draws 14dp bookmark / heart / note glyphs in the same three colours, from `ayah.isBookmarked`, `favoriteAyahIds` and `QuranReaderUiState.ayahNotes` |
 
+**Found on device by the user (internal build 3.0.116), fixed on this branch:**
+
+| Defect | Fix |
+|--------|-----|
+| Changing reciter did nothing until you stopped and restarted | `setReciter` rebuilds the playlist at the verse being recited. The CDN id only ever decided the URL of the *next* file fetched, so the queued items kept pointing at the previous reciter |
+| The player followed the reader, not the recitation | Open surah 15 with surah 2 playing and the recited verse is not in `displayAyahs`, so the bar fell back to the reader's position and announced Al-Hijr while playing Al-Baqarah. It reads `audioState` while audio is active; juz and page are omitted rather than guessed for an off-screen verse |
+| Surah info's summary filled the sheet | Clamped to four lines with a See more / See less toggle, drawn only when the text actually overflows |
+| "Madinah" wrapped to "Madin / ah" in the stat strip | A word and a figure cannot share a type size in a quarter-width column: values over four characters step down to `labelLarge` and stay on one line |
+| Browse rows truncated their meta | The juz label is drawn only when the surah **crosses** a juz. The sticky header already names the one it opens in |
+| Dividers invisible | `NimazDivider` defaulted to `outlineVariant` at **0.3 alpha** and 0.5dp. 1dp at full alpha — `outlineVariant` is already the subtle role |
+| Urdu translations had no face in Tafseer | `TafseerPageContent` rendered them as plain `bodyMedium`. It takes a `translationLanguage` now and routes through `asTranslationText`, fed by a new `TafseerUiState.selectedTranslatorId` |
+
 **Content, for `arshad-shah/nimaz-data` — not fixable in this repo:**
 
 - The thematic tree's first root is titled **"Doctraine"**; its own description says "Doctrine".

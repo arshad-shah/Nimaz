@@ -936,6 +936,8 @@
     <string name="quran_home_start_reading">Start Reading</string>
     <string name="quran_home_begin_journey">Begin your Quran journey with Al-Fatiha</string>
     <string name="quran_home_see_all">See All</string>
+    <string name="see_more">See more</string>
+    <string name="see_less">See less</string>
     <string name="quran_home_no_favorite_ayahs">No favorite ayahs yet</string>
     <string name="quran_home_favorite_hint">Tap the heart icon on any ayah to add it here</string>
     <string name="quran_home_no_bookmarks">No bookmarks yet</string>

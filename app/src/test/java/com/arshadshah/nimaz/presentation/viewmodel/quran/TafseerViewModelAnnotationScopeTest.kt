@@ -24,6 +24,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Before
+import com.arshadshah.nimaz.domain.repository.settings.QuranPreferences
 import org.junit.Test
 
 /**
@@ -92,7 +93,7 @@ class TafseerViewModelAnnotationScopeTest {
 
     @Test
     fun `a previous ayah's highlights cannot overwrite the ayah on screen`() = runTest {
-        val viewModel = TafseerViewModel(tafseerUseCases, quranUseCases, RecordingTelemetry())
+        val viewModel = TafseerViewModel(tafseerUseCases, quranUseCases, quranSettings(), RecordingTelemetry())
 
         viewModel.onEvent(TafseerEvent.LoadSurah(surahNumber = 1, ayahNumber = 1))
         advanceUntilIdle()
@@ -115,7 +116,7 @@ class TafseerViewModelAnnotationScopeTest {
 
     @Test
     fun `a previous ayah's notes cannot overwrite the ayah on screen`() = runTest {
-        val viewModel = TafseerViewModel(tafseerUseCases, quranUseCases, RecordingTelemetry())
+        val viewModel = TafseerViewModel(tafseerUseCases, quranUseCases, quranSettings(), RecordingTelemetry())
 
         viewModel.onEvent(TafseerEvent.LoadSurah(surahNumber = 1, ayahNumber = 1))
         advanceUntilIdle()
@@ -136,7 +137,7 @@ class TafseerViewModelAnnotationScopeTest {
     fun `swiping back re-subscribes, so the earlier ayah's annotations return`() = runTest {
         // The cancellation must be scoped to "not the current ayah", not "load once" — a
         // reader swiping 1 -> 2 -> 1 has to see ayah 1's highlights again.
-        val viewModel = TafseerViewModel(tafseerUseCases, quranUseCases, RecordingTelemetry())
+        val viewModel = TafseerViewModel(tafseerUseCases, quranUseCases, quranSettings(), RecordingTelemetry())
 
         viewModel.onEvent(TafseerEvent.LoadSurah(surahNumber = 1, ayahNumber = 1))
         advanceUntilIdle()
@@ -185,4 +186,13 @@ class TafseerViewModelAnnotationScopeTest {
         createdAt = 0L,
         updatedAt = 0L
     )
+
+    /**
+     * The commentary screen reads the translator preference only to pick the *face* the verse
+     * above the commentary is drawn in, so a relaxed stub with the default id is enough here.
+     */
+    private fun quranSettings(): QuranPreferences = mockk(relaxed = true) {
+        every { quranTranslatorId } returns flowOf("sahih_international")
+    }
+
 }

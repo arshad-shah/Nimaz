@@ -539,6 +539,8 @@
     <string name="quran_home_start_reading">Mula Membaca</string>
     <string name="quran_home_begin_journey">Mulakan perjalanan Al-Quran anda dengan Al-Fatihah</string>
     <string name="quran_home_see_all">Lihat Semua</string>
+    <string name="see_more">Lihat lagi</string>
+    <string name="see_less">Lihat kurang</string>
     <string name="quran_home_no_favorite_ayahs">Belum ada ayat kegemaran</string>
     <string name="quran_home_favorite_hint">Ketik ikon hati pada mana-mana ayat untuk menambahkannya di sini</string>
     <string name="quran_home_no_bookmarks">Belum ada penanda buku</string>
