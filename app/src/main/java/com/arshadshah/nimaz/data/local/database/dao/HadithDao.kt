@@ -60,7 +60,7 @@ interface HadithDao {
     @Query("SELECT * FROM hadiths WHERE book_id = :bookId AND (text_english LIKE '%' || :query || '%' OR text_arabic LIKE '%' || :query || '%')")
     fun searchHadithsInBook(bookId: Int, query: String): Flow<List<HadithEntity>>
 
-    @Query("SELECT * FROM hadiths WHERE grade = :grade ORDER BY book_id, number_in_book")
+    @Query("SELECT * FROM hadiths WHERE grade = :grade COLLATE NOCASE ORDER BY book_id, number_in_book")
     fun getHadithsByGrade(grade: String): Flow<List<HadithEntity>>
 
     @Query("SELECT chapter_id AS chapterId, COUNT(*) AS hadithCount FROM hadiths WHERE book_id = :bookId GROUP BY chapter_id ORDER BY chapter_id ASC")
