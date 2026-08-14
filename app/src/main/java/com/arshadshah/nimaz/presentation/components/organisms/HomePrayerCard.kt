@@ -46,13 +46,13 @@ fun HomePrayerCard(
     Column(modifier = modifier.fillMaxWidth()) {
         NimazSectionHeader(
             title = stringResource(R.string.home_todays_prayers),
-            trailingText = "$doneCount of 5",
+            trailingText = stringResource(R.string.home_prayers_done_of_five, doneCount),
             trailingContent = {
                 androidx.compose.foundation.layout.Row(
                     verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
                 ) {
                     androidx.compose.material3.Text(
-                        text = "$doneCount of 5",
+                        text = stringResource(R.string.home_prayers_done_of_five, doneCount),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.padding(end = 4.dp),

@@ -1409,6 +1409,7 @@
     <string name="dua_label">Dua</string>
     <string name="licenses_title">Açık Kaynak Lisansları</string>
     <string name="quran_juz_number_format">Cüz %1$d</string>
+    <string name="quran_ayah_count">%d Ayet</string>
     <string name="makhraj_jawf">ağız &amp; boğaz (uzun sesler)</string>
     <string name="makhraj_halq">boğaz</string>
     <string name="makhraj_lisan">dil</string>
@@ -1942,6 +1943,8 @@
     <string name="home_todays_prayers">Bugünün namazları</string>
     <string name="home_open_tracker">İzleyiciyi aç</string>
     <string name="home_prayer_settings_cd">Namaz ayarları</string>
+    <string name="home_prayers_done_of_five">5 üzerinden %d</string>
+    <string name="home_n_more_banners">%d tane daha işlem bekliyor</string>
     <string name="home_also_today">Bugün de</string>
     <string name="home_read_al_kahf">Kehf\'i Oku</string>
     <string name="home_recommended_on_fridays">Cuma günü tavsiye edilir</string>

@@ -98,6 +98,8 @@
     <string name="home_todays_prayers">Today\'s prayers</string>
     <string name="home_open_tracker">Open the tracker</string>
     <string name="home_prayer_settings_cd">Prayer settings</string>
+    <string name="home_prayers_done_of_five">%d of 5</string>
+    <string name="home_n_more_banners">%d more to deal with</string>
     <string name="home_also_today">Also today</string>
     <string name="home_read_al_kahf">Read Al-Kahf</string>
     <string name="home_recommended_on_fridays">Recommended on Fridays</string>
@@ -1889,6 +1891,7 @@
 
     <!-- Misc components -->
     <string name="quran_juz_number_format">Juz %1$d</string>
+    <string name="quran_ayah_count">%d Ayahs</string>
     <!-- Makhraj (articulation) areas -->
     <string name="makhraj_jawf">the mouth &amp; throat (long sounds)</string>
     <string name="makhraj_halq">the throat</string>

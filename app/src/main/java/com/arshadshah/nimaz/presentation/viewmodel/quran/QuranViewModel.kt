@@ -754,7 +754,7 @@ class QuranViewModel @Inject constructor(
                         it.copy(
                             ayahs = ayahs,
                             title = strings.get(R.string.quran_juz_number_format, juzNumber),
-                            subtitle = "${ayahs.size} Ayahs",
+                            subtitle = strings.get(R.string.quran_ayah_count, ayahs.size),
                             isLoading = false
                         )
                     }
@@ -787,7 +787,7 @@ class QuranViewModel @Inject constructor(
                         ayahs = cached,
                         readingMode = ReadingMode.PAGE,
                         title = strings.get(R.string.page_single_format, pageNumber),
-                        subtitle = "${cached.size} Ayahs",
+                        subtitle = strings.get(R.string.quran_ayah_count, cached.size),
                         isLoading = false
                     )
                 }
@@ -831,7 +831,7 @@ class QuranViewModel @Inject constructor(
                         it.copy(
                             ayahs = if (isActivePage) ayahs else it.ayahs,
                             pageCache = it.pageCache + (pageNumber to ayahs),
-                            subtitle = if (isActivePage) "${ayahs.size} Ayahs" else it.subtitle,
+                            subtitle = if (isActivePage) strings.get(R.string.quran_ayah_count, ayahs.size) else it.subtitle,
                             isLoading = if (isActivePage) false else it.isLoading
                         )
                     }

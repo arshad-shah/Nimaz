@@ -1403,6 +1403,7 @@
     <string name="dua_label">Dua</string>
     <string name="licenses_title">Open-Source-Lizenzen</string>
     <string name="quran_juz_number_format">Juz %1$d</string>
+    <string name="quran_ayah_count">%d Ayahs</string>
     <string name="makhraj_jawf">Mund &amp; Rachen (lange Laute)</string>
     <string name="makhraj_halq">der Rachen</string>
     <string name="makhraj_lisan">die Zunge</string>
@@ -1936,6 +1937,8 @@
     <string name="home_todays_prayers">Heutige Gebete</string>
     <string name="home_open_tracker">Tracker öffnen</string>
     <string name="home_prayer_settings_cd">Gebetseinstellungen</string>
+    <string name="home_prayers_done_of_five">%d von 5</string>
+    <string name="home_n_more_banners">%d weitere Hinweise</string>
     <string name="home_also_today">Auch heute</string>
     <string name="home_read_al_kahf">Al-Kahf lesen</string>
     <string name="home_recommended_on_fridays">Freitagsempfehlung</string>

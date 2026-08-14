@@ -1380,6 +1380,7 @@
     <string name="dua_label">Doa</string>
     <string name="licenses_title">Lisensi Sumber Terbuka</string>
     <string name="quran_juz_number_format">Juz %1$d</string>
+    <string name="quran_ayah_count">%d Ayat</string>
     <string name="makhraj_jawf">mulut &amp; tenggorokan (bunyi panjang)</string>
     <string name="makhraj_halq">tenggorokan</string>
     <string name="makhraj_lisan">lidah</string>
@@ -1902,6 +1903,8 @@
     <string name="home_todays_prayers">Sholat hari ini</string>
     <string name="home_open_tracker">Buka pelacak</string>
     <string name="home_prayer_settings_cd">Pengaturan salat</string>
+    <string name="home_prayers_done_of_five">%d dari 5</string>
+    <string name="home_n_more_banners">%d lagi untuk ditangani</string>
     <string name="home_also_today">Juga hari ini</string>
     <string name="home_read_al_kahf">Baca Al-Kahf</string>
     <string name="home_recommended_on_fridays">Dianjurkan pada hari Jumat</string>
