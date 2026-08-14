@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BatteryAlert
@@ -23,7 +22,7 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.outlined.Error
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -37,9 +36,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardColors
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconButton
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconButtonSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconWell
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconWellSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
@@ -58,8 +62,6 @@ private data class BannerPalette(
     val accent: Color,
     val onContent: Color,
     val onMessage: Color,
-    val actionBg: Color,
-    val actionFg: Color,
     val isGradient: Boolean = false,
     val gradientColors: List<Color> = emptyList(),
 )
@@ -75,8 +77,6 @@ private fun variantPalette(variant: NimazBannerVariant): BannerPalette = when (v
             accent = accent,
             onContent = MaterialTheme.colorScheme.onSurface,
             onMessage = MaterialTheme.colorScheme.onSurfaceVariant,
-            actionBg = accent,
-            actionFg = MaterialTheme.colorScheme.onPrimary,
         )
     }
 
@@ -89,8 +89,6 @@ private fun variantPalette(variant: NimazBannerVariant): BannerPalette = when (v
             accent = accent,
             onContent = MaterialTheme.colorScheme.onSurface,
             onMessage = MaterialTheme.colorScheme.onSurfaceVariant,
-            actionBg = NimazColors.GoldDark,
-            actionFg = Color.White,
         )
     }
 
@@ -103,8 +101,6 @@ private fun variantPalette(variant: NimazBannerVariant): BannerPalette = when (v
             accent = accent,
             onContent = MaterialTheme.colorScheme.onSurface,
             onMessage = MaterialTheme.colorScheme.onSurfaceVariant,
-            actionBg = accent,
-            actionFg = MaterialTheme.colorScheme.onError,
         )
     }
 
@@ -117,8 +113,6 @@ private fun variantPalette(variant: NimazBannerVariant): BannerPalette = when (v
             accent = accent,
             onContent = MaterialTheme.colorScheme.onSurface,
             onMessage = MaterialTheme.colorScheme.onSurfaceVariant,
-            actionBg = accent,
-            actionFg = MaterialTheme.colorScheme.onTertiary,
         )
     }
 
@@ -135,8 +129,6 @@ private fun variantPalette(variant: NimazBannerVariant): BannerPalette = when (v
             accent = gold,
             onContent = lightTeal,
             onMessage = lightTeal.copy(alpha = 0.72f),
-            actionBg = Color.White.copy(alpha = 0.16f),
-            actionFg = Color.White,
             isGradient = true,
             gradientColors = listOf(teal800, teal950),
         )
@@ -149,6 +141,13 @@ private fun defaultIcon(variant: NimazBannerVariant): ImageVector = when (varian
     NimazBannerVariant.ERROR -> Icons.Outlined.Error
     NimazBannerVariant.UPDATE -> Icons.Default.Download
     NimazBannerVariant.EVENT -> Icons.Default.Star
+}
+
+/** Maps a banner variant to the nearest [NimazButtonVariant] for its action CTA. */
+private fun NimazBannerVariant.actionButtonVariant(): NimazButtonVariant = when (this) {
+    NimazBannerVariant.ERROR -> NimazButtonVariant.DESTRUCTIVE
+    NimazBannerVariant.EVENT -> NimazButtonVariant.QUIET
+    else -> NimazButtonVariant.PRIMARY
 }
 
 /**
@@ -236,7 +235,7 @@ fun NimazBanner(
             }
         }
 
-        // ── Right-side control: chevron | action pill | spinner ────────────────
+        // ── Right-side control: chevron | NimazButton (action / loading) ─────────
         Box(contentAlignment = Alignment.Center, modifier = Modifier.align(Alignment.CenterVertically)) {
             when {
                 onClick != null -> {
@@ -248,50 +247,40 @@ fun NimazBanner(
                     )
                 }
 
-                isLoading -> {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(24.dp),
-                        color = palette.accent,
-                        strokeWidth = 2.5.dp,
+                actionLabel != null -> {
+                    NimazButton(
+                        text = actionLabel,
+                        onClick = onAction ?: {},
+                        variant = variant.actionButtonVariant(),
+                        size = NimazButtonSize.SMALL,
+                        loading = isLoading,
                     )
                 }
 
-                actionLabel != null && onAction != null -> {
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(palette.actionBg)
-                            .clickable(onClick = onAction)
-                            .padding(horizontal = 13.dp, vertical = 9.dp),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Text(
-                            text = actionLabel,
-                            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                            color = palette.actionFg,
-                        )
-                    }
+                isLoading -> {
+                    NimazButton(
+                        text = "",
+                        onClick = {},
+                        variant = variant.actionButtonVariant(),
+                        size = NimazButtonSize.SMALL,
+                        loading = true,
+                    )
                 }
             }
         }
 
         // ── Dismiss button ─────────────────────────────────────────────────────
         if (onDismiss != null) {
-            Box(
-                modifier = Modifier
-                    .size(30.dp)
-                    .clip(RoundedCornerShape(10.dp))
-                    .clickable(onClick = onDismiss)
-                    .align(Alignment.CenterVertically),
-                contentAlignment = Alignment.Center,
-            ) {
-                NimazIcon(
-                    imageVector = Icons.Default.Close,
-                    contentDescription = "Dismiss",
-                    tint = palette.onMessage,
-                    iconSize = 14.dp,
-                )
-            }
+            NimazIconButton(
+                icon = Icons.Default.Close,
+                onClick = onDismiss,
+                contentDescription = "Dismiss",
+                size = NimazIconButtonSize.SMALL,
+                colors = IconButtonDefaults.iconButtonColors(
+                    contentColor = palette.onMessage,
+                ),
+                modifier = Modifier.align(Alignment.CenterVertically),
+            )
         }
     }
 }
