@@ -63,12 +63,15 @@ import com.arshadshah.nimaz.presentation.components.molecules.PrayerTimesSection
 import com.arshadshah.nimaz.presentation.components.organisms.EventAction
 import com.arshadshah.nimaz.presentation.components.organisms.EventCardUi
 import com.arshadshah.nimaz.presentation.components.organisms.EventsCarousel
+import com.arshadshah.nimaz.presentation.components.organisms.HomeAlsoTodaySection
 import com.arshadshah.nimaz.presentation.components.organisms.HomeBannerCarousel
 import com.arshadshah.nimaz.presentation.components.organisms.HomeBannerItem
+import com.arshadshah.nimaz.presentation.components.organisms.HomeBannerSlot
 import com.arshadshah.nimaz.presentation.components.organisms.HomeBannerVariant
 import com.arshadshah.nimaz.presentation.components.organisms.HomeDynamicTopBar
 import com.arshadshah.nimaz.presentation.components.organisms.HomeHeader
 import com.arshadshah.nimaz.presentation.components.organisms.HomeHero
+import com.arshadshah.nimaz.presentation.components.organisms.HomePrayerCard
 import com.arshadshah.nimaz.presentation.components.organisms.TodayCarousel
 import com.arshadshah.nimaz.presentation.components.organisms.TodayInfoCards
 import com.arshadshah.nimaz.presentation.components.organisms.TodaysProgressCard
@@ -247,6 +250,9 @@ fun HomeScreen(
                             listState = compactListState,
                             updateState = updateState,
                             updateManager = updateManager,
+                            onNavigateToQuran = onNavigateToQuran,
+                            onNavigateToDua = onNavigateToDua,
+                            onNavigateToQibla = onNavigateToQibla,
                             onNavigateToPrayerSettings = onNavigateToPrayerSettings,
                             onNavigateToPrayerTracker = onNavigateToPrayerTracker,
                             onNavigateToPrayerTimes = onNavigateToPrayerTimes,
@@ -308,6 +314,9 @@ private fun HomeCompactContent(
     listState: LazyListState,
     updateState: UpdateState,
     updateManager: com.arshadshah.nimaz.core.util.InAppUpdateManager?,
+    onNavigateToQuran: () -> Unit,
+    onNavigateToDua: () -> Unit,
+    onNavigateToQibla: () -> Unit,
     onNavigateToPrayerSettings: () -> Unit,
     onNavigateToPrayerTracker: () -> Unit,
     onNavigateToPrayerTimes: () -> Unit,
@@ -325,12 +334,7 @@ private fun HomeCompactContent(
         java.time.LocalDate.now().formatFullDate()
     }
     val homeClock = rememberHomeClock(state)
-    val jumuahMubarak = stringResource(R.string.jumuah_mubarak)
-    val jumuahHadithQuote = stringResource(R.string.jumuah_hadith_quote)
 
-    // Compact horizontal banner pills — never push content down by more than
-    // one pill height regardless of how many banners are active. Built once
-    // per state/update change; the LazyColumn just reads the resulting list.
     val banners = buildHomeBannerItems(
         state = state,
         updateState = updateState,
@@ -356,117 +360,42 @@ private fun HomeCompactContent(
             )
         }
 
-        // Breathing room between the hero's curved bottom and what follows
-        // so the two read as distinct containers rather than abutting slabs.
-        item(key = "hero_spacer") {
-            Spacer(modifier = Modifier.height(20.dp))
-        }
-
-        // FCM engagement announcement — dismissable, renders nothing (zero
-        // height) when no announcement is active.
-        item(key = "announcement") {
-            AnnouncementBanner(
-                announcement = announcementState.announcement,
-                showCta = announcementState.showCta,
-                onCtaClick = onAnnouncementCta,
-                onDismiss = onAnnouncementDismiss,
-                modifier = Modifier.padding(start = 20.dp, end = 20.dp, bottom = 16.dp),
-            )
-        }
-
-        if (banners.isNotEmpty()) {
-            item(key = "banners") {
-                HomeBannerCarousel(banners = banners)
-            }
-            item(key = "banners_spacer") {
-                Spacer(modifier = Modifier.height(16.dp))
-            }
-        }
-
-        val eventCards = buildList {
-            // "Next Worship" card leads when an extended reminder is enabled and near.
-            state.worshipCard?.let { w ->
-                add(
-                    EventCardUi(
-                        occasion = EventOccasion.GENERIC,
-                        eyebrow = w.name,
-                        body = w.body,
-                        worship = w
-                    )
-                )
-            }
-            if (state.isFriday) {
-                // Jumu'ah routes to JumuahCard, which sources its own strings; eyebrow/headline/body here are unused.
-                add(
-                    EventCardUi(
-                        occasion = EventOccasion.JUMUAH,
-                        eyebrow = jumuahMubarak,
-                        body = jumuahHadithQuote,
-                        jumuahAt = state.jumuahAt,
-                    )
-                )
-            }
-            state.celebrationCards.forEach { c ->
-                add(
-                    EventCardUi(
-                        occasion = c.event.toOccasion(),
-                        eyebrow = c.eyebrow,
-                        // Direction A: compact card — name (eyebrow) + arabic + one body line + one
-                        // action, matching the Jumu'ah card's height.
-                        body = c.body,
-                        arabic = c.arabic,
-                        primaryAction = if (c.ctaLabel != null && c.route != null)
-                            EventAction(c.ctaLabel) { onOpenAnnouncementRoute(c.route) } else null,
-                        onDismiss = if (c.dismissable && c.announcementId != null) {
-                            { viewModel.onEvent(HomeEvent.DismissAnnouncement) }
-                        } else null,
-                    )
+        val hasAnyBanner = banners.isNotEmpty() || announcementState.announcement != null
+        if (hasAnyBanner) {
+            item(key = "banner_slot") {
+                HomeBannerSlot(
+                    banners = banners,
+                    announcement = announcementState.announcement,
+                    showAnnouncementCta = announcementState.showCta,
+                    onAnnouncementCta = onAnnouncementCta,
+                    onAnnouncementDismiss = onAnnouncementDismiss,
+                    modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 12.dp),
                 )
             }
         }
-        if (eventCards.isNotEmpty()) {
-            item(key = "events") {
-                EventsCarousel(events = eventCards, onWorshipClick = onOpenWorship)
-            }
-            item(key = "events_spacer") {
-                Spacer(Modifier.height(16.dp))
-            }
-        }
 
-        // "Today" section: header + swipeable carousel combining progress,
-        // fasting, hadith (and any future widgets) into one card-height pager.
-        item(key = "today_section") {
-            Spacer(modifier = Modifier.height(8.dp))
-            TodayCarousel(
-                prayerTimes = homeClock.prayers,
-                fastingToday = state.fastingToday,
-                dailyHadith = state.dailyHadith,
-                dailyHadithReference = state.dailyHadithReference,
-                dailyHadithGrade = state.dailyHadithGrade,
-                dailyDua = state.dailyDua,
-                onHadithClick = state.dailyHadithId?.let { id -> { onOpenHadith(id) } },
-            )
-        }
-
-        item("prayer_times_header") {
-            Spacer(modifier = Modifier.height(24.dp))
-            PrayerTimesSectionHeader(
-                passedCount = homeClock.prayers.count { it.isPassed },
-                upcomingCount = homeClock.prayers.count { !it.isPassed },
+        item(key = "prayer_section") {
+            HomePrayerCard(
+                prayers = homeClock.prayers,
                 onSettingsClick = onNavigateToPrayerSettings,
-                modifier = Modifier
-                    .padding(horizontal = 20.dp)
-                    .clickable { onNavigateToPrayerTimes() }
+                onTrackerClick = onNavigateToPrayerTracker,
+                onTogglePrayer = onTogglePrayer,
+                modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp),
             )
         }
 
-        items(homeClock.prayers, key = { it.type }) { prayer ->
-            PrayerTimeCard(
-                prayer = prayer,
-                isActive = prayer.isNext,
-                onClick = { onNavigateToPrayerTracker() },
-                onToggle = { onTogglePrayer(prayer.type) },
-                modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp)
+        item(key = "also_today") {
+            HomeAlsoTodaySection(
+                isFriday = state.isFriday,
+                dailyHadith = state.dailyHadith,
+                dailyDua = state.dailyDua,
+                worshipCard = state.worshipCard,
+                onNavigateToQuran = onNavigateToQuran,
+                onOpenHadith = state.dailyHadithId?.let { id -> { onOpenHadith(id) } } ?: {},
+                onNavigateToDua = onNavigateToDua,
+                onOpenWorship = onOpenWorship,
+                onNavigateToQibla = onNavigateToQibla,
+                modifier = Modifier.padding(start = 20.dp, end = 20.dp, bottom = 34.dp),
             )
         }
     }
