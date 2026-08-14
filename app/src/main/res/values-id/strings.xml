@@ -1899,6 +1899,13 @@
     <string name="search_failed_body">Pustaka dicari di perangkat Anda. Coba lagi, atau gunakan kata lain.</string>
     <string name="home_prayer_times_failed">Waktu salat hari ini tidak dapat dihitung</string>
     <string name="home_prayer_times_failed_body">Pastikan lokasi sudah diatur, lalu coba lagi.</string>
+    <string name="home_todays_prayers">Sholat hari ini</string>
+    <string name="home_open_tracker">Buka pelacak</string>
+    <string name="home_prayer_settings_cd">Pengaturan salat</string>
+    <string name="home_also_today">Juga hari ini</string>
+    <string name="home_read_al_kahf">Baca Al-Kahf</string>
+    <string name="home_recommended_on_fridays">Dianjurkan pada hari Jumat</string>
+    <string name="home_find_the_direction">Temukan arah</string>
     <string name="zakat_calculate_failed">Perhitungan itu tidak dapat diselesaikan</string>
     <string name="zakat_save_failed">Perhitungan itu tidak dapat disimpan</string>
     <string name="zakat_mark_paid_failed">Tidak dapat ditandai sebagai dibayar</string>

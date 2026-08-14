@@ -1900,6 +1900,13 @@
     <string name="search_failed_body">Pustaka dicari pada peranti anda. Cuba lagi, atau cuba perkataan lain.</string>
     <string name="home_prayer_times_failed">Waktu solat hari ini tidak dapat dikira</string>
     <string name="home_prayer_times_failed_body">Pastikan lokasi telah ditetapkan, kemudian cuba lagi.</string>
+    <string name="home_todays_prayers">Solat hari ini</string>
+    <string name="home_open_tracker">Buka penjejak</string>
+    <string name="home_prayer_settings_cd">Tetapan solat</string>
+    <string name="home_also_today">Juga hari ini</string>
+    <string name="home_read_al_kahf">Baca Al-Kahf</string>
+    <string name="home_recommended_on_fridays">Disyorkan pada hari Jumaat</string>
+    <string name="home_find_the_direction">Cari arah</string>
     <string name="zakat_calculate_failed">Pengiraan itu tidak dapat diselesaikan</string>
     <string name="zakat_save_failed">Pengiraan itu tidak dapat disimpan</string>
     <string name="zakat_mark_paid_failed">Tidak dapat ditanda sebagai dibayar</string>

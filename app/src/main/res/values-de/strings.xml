@@ -1933,6 +1933,13 @@
     <string name="search_failed_body">Die Bibliothek wird auf deinem Gerät durchsucht. Versuche es erneut oder mit anderen Wörtern.</string>
     <string name="home_prayer_times_failed">Die heutigen Gebetszeiten konnten nicht berechnet werden</string>
     <string name="home_prayer_times_failed_body">Prüfe, ob ein Standort festgelegt ist, und versuche es erneut.</string>
+    <string name="home_todays_prayers">Heutige Gebete</string>
+    <string name="home_open_tracker">Tracker öffnen</string>
+    <string name="home_prayer_settings_cd">Gebetseinstellungen</string>
+    <string name="home_also_today">Auch heute</string>
+    <string name="home_read_al_kahf">Al-Kahf lesen</string>
+    <string name="home_recommended_on_fridays">Freitagsempfehlung</string>
+    <string name="home_find_the_direction">Richtung finden</string>
     <string name="zakat_calculate_failed">Diese Berechnung konnte nicht abgeschlossen werden</string>
     <string name="zakat_save_failed">Diese Berechnung konnte nicht gespeichert werden</string>
     <string name="zakat_mark_paid_failed">Das konnte nicht als bezahlt markiert werden</string>

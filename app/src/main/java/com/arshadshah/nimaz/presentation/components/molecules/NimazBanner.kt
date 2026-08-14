@@ -30,6 +30,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -37,6 +38,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
@@ -291,7 +293,7 @@ fun NimazBanner(
             NimazIconButton(
                 icon = Icons.Default.Close,
                 onClick = onDismiss,
-                contentDescription = "Dismiss",
+                contentDescription = stringResource(R.string.cd_dismiss),
                 size = NimazIconButtonSize.SMALL,
                 colors = IconButtonDefaults.iconButtonColors(
                     contentColor = palette.onMessage,

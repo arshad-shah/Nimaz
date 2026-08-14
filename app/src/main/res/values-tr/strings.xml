@@ -1939,6 +1939,13 @@
     <string name="search_failed_body">Kitaplık cihazınızda aranır. Yeniden deneyin ya da farklı kelimeler kullanın.</string>
     <string name="home_prayer_times_failed">Bugünün namaz vakitleri hesaplanamadı</string>
     <string name="home_prayer_times_failed_body">Bir konum ayarlandığından emin olun, sonra yeniden deneyin.</string>
+    <string name="home_todays_prayers">Bugünün namazları</string>
+    <string name="home_open_tracker">İzleyiciyi aç</string>
+    <string name="home_prayer_settings_cd">Namaz ayarları</string>
+    <string name="home_also_today">Bugün de</string>
+    <string name="home_read_al_kahf">Kehf\'i Oku</string>
+    <string name="home_recommended_on_fridays">Cuma günü tavsiye edilir</string>
+    <string name="home_find_the_direction">Yönü bul</string>
     <string name="zakat_calculate_failed">Bu hesaplama tamamlanamadı</string>
     <string name="zakat_save_failed">Bu hesaplama kaydedilemedi</string>
     <string name="zakat_mark_paid_failed">Ödendi olarak işaretlenemedi</string>

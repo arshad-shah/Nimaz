@@ -94,6 +94,14 @@
     <string name="prayer_times">Prayer Times</string>
     <string name="home_prayer_times_failed">Today\'s prayer times couldn\'t be calculated</string>
     <string name="home_prayer_times_failed_body">Check that a location is set, then try again.</string>
+    <!-- Home compact layout — prayer card and also-today section -->
+    <string name="home_todays_prayers">Today\'s prayers</string>
+    <string name="home_open_tracker">Open the tracker</string>
+    <string name="home_prayer_settings_cd">Prayer settings</string>
+    <string name="home_also_today">Also today</string>
+    <string name="home_read_al_kahf">Read Al-Kahf</string>
+    <string name="home_recommended_on_fridays">Recommended on Fridays</string>
+    <string name="home_find_the_direction">Find the direction</string>
     <string name="hours">Hours</string>
     <string name="minutes">Minutes</string>
     <string name="seconds">Seconds</string>

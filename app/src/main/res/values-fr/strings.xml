@@ -1969,6 +1969,13 @@
     <string name="search_failed_body">La bibliothèque est consultée sur votre appareil. Réessayez, ou essayez d\'autres mots.</string>
     <string name="home_prayer_times_failed">Les horaires de prière du jour n\'ont pas pu être calculés</string>
     <string name="home_prayer_times_failed_body">Vérifiez qu\'un lieu est défini, puis réessayez.</string>
+    <string name="home_todays_prayers">Prières d\'aujourd\'hui</string>
+    <string name="home_open_tracker">Ouvrir le suivi</string>
+    <string name="home_prayer_settings_cd">Paramètres de prière</string>
+    <string name="home_also_today">Aussi aujourd\'hui</string>
+    <string name="home_read_al_kahf">Lire Al-Kahf</string>
+    <string name="home_recommended_on_fridays">Recommandé le vendredi</string>
+    <string name="home_find_the_direction">Trouver la direction</string>
     <string name="zakat_calculate_failed">Ce calcul n\'a pas pu aboutir</string>
     <string name="zakat_save_failed">Ce calcul n\'a pas pu être enregistré</string>
     <string name="zakat_mark_paid_failed">Impossible de marquer comme payé</string>
