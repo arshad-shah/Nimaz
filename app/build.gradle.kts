@@ -361,6 +361,7 @@ dependencies {
     testImplementation(libs.google.truth)
     testImplementation(libs.robolectric)
     testImplementation(libs.ktor.client.mock)
+    testImplementation("org.json:json:20231013")
 
     // Compose UI test harness for the Robolectric atom tests in src/testDebug
     // (createComposeRule, onNodeWithText, performClick, …). Declared here as a
