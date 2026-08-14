@@ -269,7 +269,7 @@ environmental — see [§1](#1-start-here).
 |--------|-----|
 | The ayah sheet reprinted the verse | Actions only. The reader tapped that verse to open the sheet and it is still behind it; the header's reference says which one |
 | The ayah sheet's actions were squished | New `NimazSheetActionGrid` — two columns of wide pills, icon beside label. Five to a row left ~64dp per label, which is where "Unbookmark" ellipsised |
-| Saved had two tab strips | One. Kind stays on screen; corpus moves into the app-bar menu beside sort, each row carrying its count — new `NimazDropdownSectionLabel` heads the two groups |
+| Saved had two tab strips | One. Kind stays on screen; corpus moves into an app-bar **filter** menu of its own, each row carrying its count |
 | Saved did not look like the prototype | A 3dp kind-coloured spine, the kind named small and letter-spaced in that colour, the corpus demoted to muted meta, and the gold ornamental divider dropped |
 | "Search bookmarks" on a screen called Saved | "Search saved"; "Clear all bookmarks" → "Clear everything saved"; "No Bookmarks Yet" → "Nothing saved yet". All six locales |
 | A verse gave no sign it was saved | `AyahItem` draws 14dp bookmark / heart / note glyphs in the same three colours, from `ayah.isBookmarked`, `favoriteAyahIds` and `QuranReaderUiState.ayahNotes` |
@@ -285,6 +285,7 @@ environmental — see [§1](#1-start-here).
 | Browse rows truncated their meta | The juz label is drawn only when the surah **crosses** a juz. The sticky header already names the one it opens in |
 | Dividers invisible | `NimazDivider` defaulted to `outlineVariant` at **0.3 alpha** and 0.5dp. 1dp at full alpha — `outlineVariant` is already the subtle role |
 | Urdu translations had no face in Tafseer | `TafseerPageContent` rendered them as plain `bodyMedium`. It takes a `translationLanguage` now and routes through `asTranslationText`, fed by a new `TafseerUiState.selectedTranslatorId` |
+| One app-bar menu held the corpus filter, the sort order and an irreversible wipe | Three controls for three jobs: a filter icon (tinted while a corpus is chosen), the sort icon, and an overflow holding "Clear everything saved" — which had been sitting one slip below "A–Z" |
 | Deleting from Saved moved the counts but left the row | A verse that is bookmarked **and** favourited is one card and two store rows; delete cleared only the bookmark, so the card came straight back through the favourites half of the merge. Delete unsaves the verse — and a favourite-only card, which could not be deleted at all (the lookup into `quranBookmarks` found nothing and returned early), now can be. Clear-all had the same half-delete |
 
 **Content, for `arshad-shah/nimaz-data` — not fixable in this repo:**

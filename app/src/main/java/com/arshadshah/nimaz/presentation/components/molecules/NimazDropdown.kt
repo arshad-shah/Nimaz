@@ -235,28 +235,6 @@ fun NimazDropdownRow(
  * @param offset shifts the popup from its anchor (passed straight to [DropdownMenu]).
  * @param content the menu rows — typically [NimazDropdownRow]s.
  */
-/**
- * A heading over a group of [NimazDropdownRow]s.
- *
- * A menu that holds two independent choices — "show which corpus" and "sort how" — reads as one
- * long list of unrelated options without them, and a reader has to infer where one group ends
- * from the labels alone. Drawn as a label rather than a divider because the question ("Show")
- * is the useful part; the separation follows from it.
- */
-@Composable
-fun NimazDropdownSectionLabel(
-    text: String,
-    modifier: Modifier = Modifier,
-) {
-    Text(
-        text = text,
-        style = MaterialTheme.typography.labelSmall,
-        fontWeight = FontWeight.SemiBold,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = modifier.padding(start = 16.dp, end = 16.dp, top = 10.dp, bottom = 4.dp),
-    )
-}
-
 @Composable
 fun NimazDropdownMenu(
     expanded: Boolean,

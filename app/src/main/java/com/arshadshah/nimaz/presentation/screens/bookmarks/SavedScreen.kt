@@ -3,14 +3,16 @@ package com.arshadshah.nimaz.presentation.screens.bookmarks
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.DeleteSweep
+import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.IconButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDialog
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDialogCancelButton
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDialogDestructiveButton
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownMenu
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownRow
-import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownSectionLabel
 import com.arshadshah.nimaz.presentation.components.organisms.NimazSearchBar
 import com.arshadshah.nimaz.presentation.viewmodel.quran.BookmarkSortOrder
 import androidx.compose.foundation.horizontalScroll
@@ -105,7 +107,9 @@ fun SavedScreen(
     // The bookmark whose note is being edited (null = no editor showing). The
     // overflow menu is an anchored dropdown owned by each card.
     var noteTarget by remember { mutableStateOf<UnifiedBookmark?>(null) }
+    var filterMenuExpanded by remember { mutableStateOf(false) }
     var sortMenuExpanded by remember { mutableStateOf(false) }
+    var overflowExpanded by remember { mutableStateOf(false) }
     var showClearAllDialog by remember { mutableStateOf(false) }
     val context = LocalContext.current
 
@@ -168,6 +172,42 @@ fun SavedScreen(
                 scrollBehavior = scrollBehavior,
                 actions = {
                     if (state.allBookmarks.isNotEmpty()) {
+                        // Three controls, because there are three jobs. One menu holding the
+                        // corpus filter, the sort order *and* an irreversible wipe made the
+                        // reader read a list of unrelated options to find any of them, and put
+                        // "Clear everything saved" one slip below "A–Z".
+                        IconButton(onClick = { filterMenuExpanded = true }) {
+                            NimazIcon(
+                                Icons.Default.FilterList,
+                                contentDescription = stringResource(R.string.saved_show),
+                                // Tinted while a corpus is chosen, so a filtered list never
+                                // looks like an empty one.
+                                variant = if (state.selectedFilter != null) {
+                                    NimazIconVariant.PRIMARY
+                                } else {
+                                    NimazIconVariant.DEFAULT
+                                },
+                            )
+                        }
+                        NimazDropdownMenu(
+                            expanded = filterMenuExpanded,
+                            onDismissRequest = { filterMenuExpanded = false },
+                        ) {
+                            // Each row carries its count, which is what the corpus tab strip
+                            // was really for — telling you there is nothing under Hadith
+                            // before you tap it.
+                            savedCorpusOptions(statsState).forEach { (type, label) ->
+                                NimazDropdownRow(
+                                    text = label,
+                                    selected = state.selectedFilter == type,
+                                    onClick = {
+                                        filterMenuExpanded = false
+                                        viewModel.onEvent(BookmarksEvent.SetFilter(type))
+                                    },
+                                )
+                            }
+                        }
+
                         IconButton(onClick = { sortMenuExpanded = true }) {
                             NimazIcon(
                                 Icons.AutoMirrored.Filled.Sort,
@@ -178,22 +218,6 @@ fun SavedScreen(
                             expanded = sortMenuExpanded,
                             onDismissRequest = { sortMenuExpanded = false },
                         ) {
-                            // The corpus axis, moved off the screen and in here. Each row
-                            // carries its count, which is what the second tab strip was
-                            // really for — telling you there is nothing under Hadith before
-                            // you tap it.
-                            NimazDropdownSectionLabel(stringResource(R.string.saved_show))
-                            savedCorpusOptions(statsState).forEach { (type, label) ->
-                                NimazDropdownRow(
-                                    text = label,
-                                    selected = state.selectedFilter == type,
-                                    onClick = {
-                                        sortMenuExpanded = false
-                                        viewModel.onEvent(BookmarksEvent.SetFilter(type))
-                                    },
-                                )
-                            }
-                            NimazDropdownSectionLabel(stringResource(R.string.bookmarks_sort))
                             BookmarkSortOrder.entries.forEach { order ->
                                 NimazDropdownRow(
                                     text = stringResource(order.labelRes()),
@@ -204,12 +228,24 @@ fun SavedScreen(
                                     },
                                 )
                             }
+                        }
+
+                        IconButton(onClick = { overflowExpanded = true }) {
+                            NimazIcon(
+                                Icons.Default.MoreVert,
+                                contentDescription = stringResource(R.string.cd_more_options)
+                            )
+                        }
+                        NimazDropdownMenu(
+                            expanded = overflowExpanded,
+                            onDismissRequest = { overflowExpanded = false },
+                        ) {
                             NimazDropdownRow(
                                 text = stringResource(R.string.bookmarks_clear_all),
                                 leadingIcon = Icons.Filled.DeleteSweep,
                                 destructive = true,
                                 onClick = {
-                                    sortMenuExpanded = false
+                                    overflowExpanded = false
                                     showClearAllDialog = true
                                 },
                             )
