@@ -1,12 +1,8 @@
-package com.arshadshah.nimaz.presentation.components.molecules
+package com.arshadshah.nimaz.presentation.foundation.calendar
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import com.arshadshah.nimaz.presentation.foundation.calendar.CalendarDayState
-import com.arshadshah.nimaz.presentation.foundation.calendar.CalendarHeaderAlignment
-import com.arshadshah.nimaz.presentation.foundation.calendar.CalendarLegendItem
-import com.arshadshah.nimaz.presentation.foundation.calendar.IndicatorPosition
-import com.arshadshah.nimaz.presentation.foundation.calendar.SelectionStyle
+import com.arshadshah.nimaz.presentation.components.atoms.NimazStatusDotStyle
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -14,6 +10,8 @@ import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class CalendarModelsTest {
+
+    // ── IndicatorPosition / SelectionStyle / CalendarHeaderAlignment ─────────
 
     @Test
     fun `indicator position enum values`() {
@@ -35,6 +33,8 @@ class CalendarModelsTest {
             CalendarHeaderAlignment.END
         ).inOrder()
     }
+
+    // ── CalendarDayState defaults ────────────────────────────────────────────
 
     @Test
     fun `day state defaults are sensible`() {
@@ -79,11 +79,42 @@ class CalendarModelsTest {
             .isEqualTo(CalendarDayState(primaryLabel = "5", fontWeight = FontWeight.Bold))
     }
 
+    // ── CalendarLegendItem ───────────────────────────────────────────────────
+
     @Test
     fun `legend item holds color and label`() {
         val item = CalendarLegendItem(color = Color.Red, label = "Event")
         assertThat(item.color).isEqualTo(Color.Red)
         assertThat(item.label).isEqualTo("Event")
         assertThat(item).isEqualTo(CalendarLegendItem(Color.Red, "Event"))
+    }
+
+    // ── NimazStatusDotStyle on CalendarDayState / CalendarLegendItem ─────────
+
+    @Test
+    fun `day state indicators default to filled so existing callers are unchanged`() {
+        assertThat(CalendarDayState().indicatorStyle).isEqualTo(NimazStatusDotStyle.FILLED)
+    }
+
+    @Test
+    fun `legend items default to filled so existing callers are unchanged`() {
+        val item = CalendarLegendItem(color = Color.Red, label = "Fasted")
+        assertThat(item.indicatorStyle).isEqualTo(NimazStatusDotStyle.FILLED)
+    }
+
+    @Test
+    fun `a day state can request an outlined indicator`() {
+        assertThat(CalendarDayState(indicatorStyle = NimazStatusDotStyle.OUTLINED).indicatorStyle)
+            .isEqualTo(NimazStatusDotStyle.OUTLINED)
+    }
+
+    @Test
+    fun `a legend item can request an outlined swatch`() {
+        val item = CalendarLegendItem(
+            color = Color.Red,
+            label = "Not fasting",
+            indicatorStyle = NimazStatusDotStyle.OUTLINED,
+        )
+        assertThat(item.indicatorStyle).isEqualTo(NimazStatusDotStyle.OUTLINED)
     }
 }

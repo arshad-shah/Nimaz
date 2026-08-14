@@ -1,12 +1,10 @@
-package com.arshadshah.nimaz.presentation.components.atoms
+package com.arshadshah.nimaz.presentation.components.molecules
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performClick
-import com.arshadshah.nimaz.presentation.components.molecules.NimazDayRail
-import com.arshadshah.nimaz.presentation.components.molecules.NimazDayRailItem
 import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
 import org.junit.Test

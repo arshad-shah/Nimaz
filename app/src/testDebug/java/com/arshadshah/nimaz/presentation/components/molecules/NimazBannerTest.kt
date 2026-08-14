@@ -1,4 +1,4 @@
-package com.arshadshah.nimaz.presentation.components.atoms
+package com.arshadshah.nimaz.presentation.components.molecules
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
@@ -19,7 +19,7 @@ class NimazBannerTest {
 
     @Test
     fun `banner variants enum is complete`() {
-        assertThat(_root_ide_package_.com.arshadshah.nimaz.presentation.components.molecules.NimazBannerVariant.entries).hasSize(4)
+        assertThat(NimazBannerVariant.entries).hasSize(4)
     }
 
     // ── INFO ────────────────────────────────────────────────────────────────
@@ -27,9 +27,9 @@ class NimazBannerTest {
     @Test
     fun `info banner renders without border or icon`() {
         composeRule.setThemedContent {
-            _root_ide_package_.com.arshadshah.nimaz.presentation.components.molecules.NimazBanner(
+            NimazBanner(
                 message = "Info message",
-                variant = _root_ide_package_.com.arshadshah.nimaz.presentation.components.molecules.NimazBannerVariant.INFO
+                variant = NimazBannerVariant.INFO
             )
         }
         composeRule.onNodeWithText("Info message").assertExists()
@@ -38,9 +38,9 @@ class NimazBannerTest {
     @Test
     fun `info banner renders with icon`() {
         composeRule.setThemedContent {
-            _root_ide_package_.com.arshadshah.nimaz.presentation.components.molecules.NimazBanner(
+            NimazBanner(
                 message = "Info with icon",
-                variant = _root_ide_package_.com.arshadshah.nimaz.presentation.components.molecules.NimazBannerVariant.INFO,
+                variant = NimazBannerVariant.INFO,
                 icon = Icons.Default.Info
             )
         }
@@ -50,9 +50,9 @@ class NimazBannerTest {
     @Test
     fun `info banner renders with border and icon`() {
         composeRule.setThemedContent {
-            _root_ide_package_.com.arshadshah.nimaz.presentation.components.molecules.NimazBanner(
+            NimazBanner(
                 message = "Bordered info",
-                variant = _root_ide_package_.com.arshadshah.nimaz.presentation.components.molecules.NimazBannerVariant.INFO,
+                variant = NimazBannerVariant.INFO,
                 icon = Icons.Default.Info,
                 showBorder = true
             )
@@ -63,9 +63,9 @@ class NimazBannerTest {
     @Test
     fun `info banner renders with border and no icon`() {
         composeRule.setThemedContent {
-            _root_ide_package_.com.arshadshah.nimaz.presentation.components.molecules.NimazBanner(
+            NimazBanner(
                 message = "Bordered no icon",
-                variant = _root_ide_package_.com.arshadshah.nimaz.presentation.components.molecules.NimazBannerVariant.INFO,
+                variant = NimazBannerVariant.INFO,
                 showBorder = true
             )
         }
@@ -78,9 +78,9 @@ class NimazBannerTest {
     fun `warning banner renders full content and fires action`() {
         var clicked = false
         composeRule.setThemedContent {
-            _root_ide_package_.com.arshadshah.nimaz.presentation.components.molecules.NimazBanner(
+            NimazBanner(
                 message = "Warning message",
-                variant = _root_ide_package_.com.arshadshah.nimaz.presentation.components.molecules.NimazBannerVariant.WARNING,
+                variant = NimazBannerVariant.WARNING,
                 icon = Icons.Default.Warning,
                 title = "Warning title",
                 actionLabel = "Fix",
@@ -96,9 +96,9 @@ class NimazBannerTest {
     @Test
     fun `warning banner renders minimal content`() {
         composeRule.setThemedContent {
-            _root_ide_package_.com.arshadshah.nimaz.presentation.components.molecules.NimazBanner(
+            NimazBanner(
                 message = "Plain warning",
-                variant = _root_ide_package_.com.arshadshah.nimaz.presentation.components.molecules.NimazBannerVariant.WARNING
+                variant = NimazBannerVariant.WARNING
             )
         }
         composeRule.onNodeWithText("Plain warning").assertExists()
@@ -110,9 +110,9 @@ class NimazBannerTest {
     fun `update banner renders action and fires it`() {
         var clicked = false
         composeRule.setThemedContent {
-            _root_ide_package_.com.arshadshah.nimaz.presentation.components.molecules.NimazBanner(
+            NimazBanner(
                 message = "Update available",
-                variant = _root_ide_package_.com.arshadshah.nimaz.presentation.components.molecules.NimazBannerVariant.UPDATE,
+                variant = NimazBannerVariant.UPDATE,
                 actionLabel = "Update",
                 onAction = { clicked = true }
             )
@@ -124,9 +124,9 @@ class NimazBannerTest {
     @Test
     fun `update banner renders loading spinner`() {
         composeRule.setThemedContent {
-            _root_ide_package_.com.arshadshah.nimaz.presentation.components.molecules.NimazBanner(
+            NimazBanner(
                 message = "Downloading",
-                variant = _root_ide_package_.com.arshadshah.nimaz.presentation.components.molecules.NimazBannerVariant.UPDATE,
+                variant = NimazBannerVariant.UPDATE,
                 isLoading = true
             )
         }
@@ -136,9 +136,9 @@ class NimazBannerTest {
     @Test
     fun `update banner renders message only`() {
         composeRule.setThemedContent {
-            _root_ide_package_.com.arshadshah.nimaz.presentation.components.molecules.NimazBanner(
+            NimazBanner(
                 message = "Up to date",
-                variant = _root_ide_package_.com.arshadshah.nimaz.presentation.components.molecules.NimazBannerVariant.UPDATE
+                variant = NimazBannerVariant.UPDATE
             )
         }
         composeRule.onNodeWithText("Up to date").assertExists()
@@ -150,9 +150,9 @@ class NimazBannerTest {
     fun `error banner renders clickable surface and fires click`() {
         var clicked = false
         composeRule.setThemedContent {
-            _root_ide_package_.com.arshadshah.nimaz.presentation.components.molecules.NimazBanner(
+            NimazBanner(
                 message = "Tap for help",
-                variant = _root_ide_package_.com.arshadshah.nimaz.presentation.components.molecules.NimazBannerVariant.ERROR,
+                variant = NimazBannerVariant.ERROR,
                 icon = Icons.Default.Warning,
                 title = "Calibration",
                 onClick = { clicked = true }
@@ -166,9 +166,9 @@ class NimazBannerTest {
     fun `error banner renders action button and fires it`() {
         var clicked = false
         composeRule.setThemedContent {
-            _root_ide_package_.com.arshadshah.nimaz.presentation.components.molecules.NimazBanner(
+            NimazBanner(
                 message = "Calibrate compass",
-                variant = _root_ide_package_.com.arshadshah.nimaz.presentation.components.molecules.NimazBannerVariant.ERROR,
+                variant = NimazBannerVariant.ERROR,
                 title = "Calibration",
                 actionLabel = "Calibrate",
                 onAction = { clicked = true }
@@ -181,9 +181,9 @@ class NimazBannerTest {
     @Test
     fun `error banner renders minimal content`() {
         composeRule.setThemedContent {
-            _root_ide_package_.com.arshadshah.nimaz.presentation.components.molecules.NimazBanner(
+            NimazBanner(
                 message = "Plain error",
-                variant = _root_ide_package_.com.arshadshah.nimaz.presentation.components.molecules.NimazBannerVariant.ERROR
+                variant = NimazBannerVariant.ERROR
             )
         }
         composeRule.onNodeWithText("Plain error").assertExists()

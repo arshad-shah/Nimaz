@@ -1,4 +1,4 @@
-package com.arshadshah.nimaz.presentation.components.molecules
+package com.arshadshah.nimaz.presentation.components.organisms
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
@@ -58,6 +58,8 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazIconButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconButtonSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
+import com.arshadshah.nimaz.presentation.components.molecules.NimazBottomSheet
+import com.arshadshah.nimaz.presentation.components.molecules.NimazSheetFooterButtons
 import com.arshadshah.nimaz.presentation.components.organisms.NimazSearchBar
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 

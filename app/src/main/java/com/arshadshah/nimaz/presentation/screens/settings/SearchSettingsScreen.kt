@@ -42,12 +42,12 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazAccordion
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDialog
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDialogCancelButton
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDialogDestructiveButton
-import com.arshadshah.nimaz.presentation.components.molecules.NimazListPicker
+import com.arshadshah.nimaz.presentation.components.organisms.NimazListPicker
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuItem
 import com.arshadshah.nimaz.presentation.components.molecules.NimazNumberStepper
 import com.arshadshah.nimaz.presentation.components.molecules.NimazNumberStepperVariant
-import com.arshadshah.nimaz.presentation.components.molecules.NimazPickerItem
+import com.arshadshah.nimaz.presentation.components.organisms.NimazPickerItem
 import com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsItem
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.viewmodel.settings.SearchSettingsEvent

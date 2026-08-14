@@ -43,9 +43,9 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazDivider
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
 import com.arshadshah.nimaz.presentation.components.molecules.NimazAmountInput
-import com.arshadshah.nimaz.presentation.components.molecules.NimazListPicker
+import com.arshadshah.nimaz.presentation.components.organisms.NimazListPicker
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
-import com.arshadshah.nimaz.presentation.components.molecules.NimazPickerItem
+import com.arshadshah.nimaz.presentation.components.organisms.NimazPickerItem
 import com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsItem
 import com.arshadshah.nimaz.presentation.components.molecules.ZakatHeroStat
 import com.arshadshah.nimaz.presentation.components.molecules.ZakatSummaryHero

@@ -1,7 +1,5 @@
-package com.arshadshah.nimaz.presentation.components.molecules
+package com.arshadshah.nimaz.presentation.foundation.calendar
 
-import com.arshadshah.nimaz.presentation.foundation.calendar.buildCalendarDays
-import com.arshadshah.nimaz.presentation.foundation.calendar.formatDefault
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -15,7 +13,6 @@ class CalendarDateUtilsTest {
 
     @Test
     fun `month starting on sunday produces five weeks`() {
-        // June 2025 starts on Sunday (no leading padding, 30 days -> 5 weeks).
         val month = YearMonth.of(2025, 6)
         assertThat(month.atDay(1).dayOfWeek).isEqualTo(DayOfWeek.SUNDAY)
         val days = buildCalendarDays(month)
@@ -42,18 +39,15 @@ class CalendarDateUtilsTest {
 
     @Test
     fun `thirty one day month starting late wraps to six weeks`() {
-        // August 2025 has 31 days and starts on Friday -> needs 6 weeks.
         val month = YearMonth.of(2025, 8)
         assertThat(month.atDay(1).dayOfWeek).isEqualTo(DayOfWeek.FRIDAY)
         val days = buildCalendarDays(month)
         assertThat(days).hasSize(42)
-        // Last day of the month must be present (not silently truncated).
         assertThat(days).contains(LocalDate.of(2025, 8, 31))
     }
 
     @Test
     fun `leading padding pulls in days from the previous month`() {
-        // July 2026 starts on Wednesday -> three padding days before the 1st.
         val month = YearMonth.of(2026, 7)
         val days = buildCalendarDays(month)
         assertThat(days.first()).isEqualTo(LocalDate.of(2026, 6, 28))

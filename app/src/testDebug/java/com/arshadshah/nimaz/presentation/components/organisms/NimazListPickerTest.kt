@@ -1,4 +1,4 @@
-package com.arshadshah.nimaz.presentation.components.molecules
+package com.arshadshah.nimaz.presentation.components.organisms
 
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText

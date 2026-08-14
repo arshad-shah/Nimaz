@@ -15,6 +15,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.molecules.calendar.NimazCalendar
+import com.arshadshah.nimaz.presentation.foundation.time.NimazTime
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.theme.ThemeMode
 import java.time.Instant
