@@ -435,7 +435,7 @@ private fun LicenseTextCard(license: LibraryLicense) {
             onClick = { expanded = !expanded },
             variant = NimazButtonVariant.TEXT,
             size = NimazButtonSize.MEDIUM,
-            trailingIcon = if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+            leadingIcon = if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
             fullWidth = true,
         )
     }

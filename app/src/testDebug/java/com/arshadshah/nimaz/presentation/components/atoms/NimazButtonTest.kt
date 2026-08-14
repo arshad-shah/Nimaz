@@ -3,7 +3,6 @@ package com.arshadshah.nimaz.presentation.components.atoms
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -21,9 +20,9 @@ class NimazButtonTest {
 
     @Test
     fun `button enums are complete`() {
-        assertThat(NimazButtonVariant.entries).hasSize(5)
-        assertThat(NimazButtonSize.entries).hasSize(3)
-        assertThat(NimazButtonType.entries).hasSize(2)
+        assertThat(NimazButtonVariant.entries).hasSize(7) // PRIMARY QUIET DESTRUCTIVE TEXT + deprecated FILLED TONAL OUTLINED
+        assertThat(NimazButtonSize.entries).hasSize(4)    // SMALL STANDARD + deprecated MEDIUM LARGE
+        assertThat(NimazButtonType.entries).hasSize(2)    // STANDARD PILL (deprecated)
     }
 
     @Test
@@ -87,14 +86,13 @@ class NimazButtonTest {
     }
 
     @Test
-    fun `button with leading and trailing icons fires click`() {
+    fun `button with leading icon fires click`() {
         var clicked = false
         composeRule.setThemedContent {
             NimazButton(
                 text = "Next",
                 onClick = { clicked = true },
                 leadingIcon = Icons.Default.Check,
-                trailingIcon = Icons.Default.ChevronRight
             )
         }
         composeRule.onNodeWithText("Next").performClick()
@@ -112,13 +110,13 @@ class NimazButtonTest {
     }
 
     @Test
-    fun `loading button hides label and is not enabled`() {
+    fun `loading button keeps label visible and is not enabled`() {
         var clicked = false
         composeRule.setThemedContent {
             NimazButton(text = "Save", onClick = { clicked = true }, loading = true)
         }
-        // Loading swaps the label for a spinner, so the text node disappears.
-        composeRule.onNodeWithText("Save").assertDoesNotExist()
+        // Loading shows spinner alongside the label — button width stays stable.
+        composeRule.onNodeWithText("Save").assertExists()
         assertThat(clicked).isFalse()
     }
 

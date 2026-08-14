@@ -104,7 +104,6 @@ fun NimazQadaPrayerItem(
                 variant = NimazButtonVariant.TONAL,
                 size = NimazButtonSize.SMALL,
                 leadingIcon = Icons.Default.Check,
-                accent = NimazColors.StatusColors.Prayed
             )
         }
     }

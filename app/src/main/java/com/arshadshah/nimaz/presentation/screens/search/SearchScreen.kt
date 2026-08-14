@@ -77,7 +77,6 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconWell
-import com.arshadshah.nimaz.presentation.components.atoms.NimazIconWellShape
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconWellSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
@@ -861,9 +860,8 @@ private fun SearchResultCard(
             ) {
                 NimazIconWell(
                     icon = icon,
-                    accent = iconColor,
-                    size = NimazIconWellSize.MEDIUM,
-                    shape = NimazIconWellShape.ROUNDED
+                    color = iconColor,
+                    size = NimazIconWellSize.STANDARD,
                 )
 
                 Spacer(modifier = Modifier.width(12.dp))

@@ -37,8 +37,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardColors
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
-import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconWell
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconWellSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
@@ -200,21 +204,12 @@ fun NimazBanner(
         verticalAlignment = Alignment.Top,
         horizontalArrangement = Arrangement.spacedBy(13.dp),
     ) {
-        // ── Icon well ──────────────────────────────────────────────────────────
-        Box(
-            modifier = Modifier
-                .size(36.dp)
-                .clip(RoundedCornerShape(12.dp))
-                .background(palette.iconWell),
-            contentAlignment = Alignment.Center,
-        ) {
-            NimazIcon(
-                imageVector = effectiveIcon,
-                contentDescription = null,
-                tint = palette.accent,
-                size = NimazIconSize.SMALL,
-            )
-        }
+
+        NimazIconWell(
+            icon = effectiveIcon,
+            color = palette.accent,
+            size = NimazIconWellSize.SMALL,
+        )
 
         // ── Text block ─────────────────────────────────────────────────────────
         Column(
@@ -249,7 +244,7 @@ fun NimazBanner(
                         imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                         contentDescription = null,
                         tint = palette.accent,
-                        size = NimazIconSize.SMALL,
+                        iconSize = 18.dp,
                     )
                 }
 
@@ -294,7 +289,7 @@ fun NimazBanner(
                     imageVector = Icons.Default.Close,
                     contentDescription = "Dismiss",
                     tint = palette.onMessage,
-                    size = NimazIconSize.SMALL,
+                    iconSize = 14.dp,
                 )
             }
         }
@@ -305,25 +300,25 @@ fun NimazBanner(
 // NimazBannerDefaults is retained so AnnouncementBanner can continue importing accent/colors.
 object NimazBannerDefaults {
     @Composable
-    fun accent(tone: com.arshadshah.nimaz.presentation.components.atoms.NimazTone): androidx.compose.ui.graphics.Color =
+    fun accent(tone: NimazTone): Color =
         when (tone) {
-            com.arshadshah.nimaz.presentation.components.atoms.NimazTone.ACCENT,
-            com.arshadshah.nimaz.presentation.components.atoms.NimazTone.PROMINENT -> MaterialTheme.colorScheme.primary
-            com.arshadshah.nimaz.presentation.components.atoms.NimazTone.SUCCESS -> MaterialTheme.colorScheme.tertiary
-            com.arshadshah.nimaz.presentation.components.atoms.NimazTone.WARNING -> MaterialTheme.colorScheme.secondary
-            com.arshadshah.nimaz.presentation.components.atoms.NimazTone.ERROR -> MaterialTheme.colorScheme.error
-            com.arshadshah.nimaz.presentation.components.atoms.NimazTone.NEUTRAL,
-            com.arshadshah.nimaz.presentation.components.atoms.NimazTone.MUTED,
-            com.arshadshah.nimaz.presentation.components.atoms.NimazTone.TRANSPARENT ->
+            NimazTone.ACCENT,
+            NimazTone.PROMINENT -> MaterialTheme.colorScheme.primary
+            NimazTone.SUCCESS -> MaterialTheme.colorScheme.tertiary
+            NimazTone.WARNING -> MaterialTheme.colorScheme.secondary
+            NimazTone.ERROR -> MaterialTheme.colorScheme.error
+            NimazTone.NEUTRAL,
+            NimazTone.MUTED,
+            NimazTone.TRANSPARENT ->
                 MaterialTheme.colorScheme.outlineVariant
         }
 
     @Composable
     fun colors(
-        tone: com.arshadshah.nimaz.presentation.components.atoms.NimazTone,
-        border: androidx.compose.ui.graphics.Color? = null,
-    ): com.arshadshah.nimaz.presentation.components.atoms.NimazCardColors =
-        com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults.colors(
+        tone: NimazTone,
+        border: Color? = null,
+    ): NimazCardColors =
+        NimazCardDefaults.colors(
             container = MaterialTheme.colorScheme.surface,
             border = border ?: accent(tone),
         )

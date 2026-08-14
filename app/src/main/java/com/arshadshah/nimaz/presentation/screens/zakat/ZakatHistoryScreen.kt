@@ -312,7 +312,6 @@ private fun HistoryEntryCard(
                         variant = NimazButtonVariant.TONAL,
                         size = NimazButtonSize.SMALL,
                         leadingIcon = Icons.Default.Check,
-                        accent = NimazColors.StatusColors.Prayed
                     )
 
                     Spacer(modifier = Modifier.width(8.dp))

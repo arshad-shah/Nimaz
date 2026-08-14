@@ -421,9 +421,16 @@ private fun InlineError(
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        _root_ide_package_.com.arshadshah.nimaz.presentation.components.atoms.NimazIconWell(
+        com.arshadshah.nimaz.presentation.components.atoms.NimazIconWell(
             icon = glyph,
-            tone = tone,
+            color = when (tone) {
+                com.arshadshah.nimaz.presentation.components.atoms.NimazTone.ACCENT,
+                com.arshadshah.nimaz.presentation.components.atoms.NimazTone.PROMINENT -> MaterialTheme.colorScheme.primary
+                com.arshadshah.nimaz.presentation.components.atoms.NimazTone.SUCCESS -> MaterialTheme.colorScheme.tertiary
+                com.arshadshah.nimaz.presentation.components.atoms.NimazTone.WARNING -> MaterialTheme.colorScheme.secondary
+                com.arshadshah.nimaz.presentation.components.atoms.NimazTone.ERROR -> MaterialTheme.colorScheme.error
+                else -> MaterialTheme.colorScheme.outlineVariant
+            },
             size = com.arshadshah.nimaz.presentation.components.atoms.NimazIconWellSize.SMALL,
         )
         Column(modifier = Modifier.weight(1f)) {

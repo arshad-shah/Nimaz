@@ -70,7 +70,6 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconButtonStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconWell
-import com.arshadshah.nimaz.presentation.components.atoms.NimazIconWellShape
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconWellSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
@@ -802,9 +801,8 @@ private fun InputCard(
         ) {
             NimazIconWell(
                 icon = icon,
-                accent = iconTint,
-                size = NimazIconWellSize.MEDIUM,
-                shape = NimazIconWellShape.ROUNDED
+                color = iconTint,
+                size = NimazIconWellSize.STANDARD,
             )
 
             // Label and hint

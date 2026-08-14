@@ -338,7 +338,7 @@ fun OnboardingScreen(
                                 }
                             },
                             variant = NimazButtonVariant.TONAL,
-                            trailingIcon = if (pagerState.currentPage == totalPages - 1)
+                            leadingIcon = if (pagerState.currentPage == totalPages - 1)
                                 Icons.Default.Check
                             else Icons.AutoMirrored.Filled.ArrowForward
                         )

@@ -208,7 +208,6 @@ fun EventCard(
                                 onClick = it.onClick,
                                 variant = NimazButtonVariant.TONAL,
                                 size = NimazButtonSize.SMALL,
-                                accent = accent,
                             )
                         }
                     }

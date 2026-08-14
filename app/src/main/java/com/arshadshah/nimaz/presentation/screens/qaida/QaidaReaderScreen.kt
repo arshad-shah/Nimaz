@@ -221,7 +221,6 @@ private fun QaidaLessonNav(
                 onClick = onNext,
                 variant = NimazButtonVariant.FILLED,
                 size = NimazButtonSize.MEDIUM,
-                trailingIcon = Icons.AutoMirrored.Filled.ArrowForward,
                 enabled = hasNext,
             )
         }
