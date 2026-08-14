@@ -108,7 +108,7 @@ fun HomePrayerCard(
         }
 
         NimazCard(
-            style = NimazCardStyle.FILLED,
+            style = NimazCardStyle.ELEVATED,
             shape = RoundedCornerShape(20.dp),
             modifier = Modifier.fillMaxWidth(),
         ) {
