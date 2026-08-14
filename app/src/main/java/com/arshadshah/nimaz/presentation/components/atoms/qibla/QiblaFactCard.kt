@@ -14,6 +14,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
@@ -26,7 +27,7 @@ fun QiblaFactCard(
     value: String,
     modifier: Modifier = Modifier,
 ) {
-    NimazCard(modifier = modifier) {
+    NimazCard(modifier = modifier, style = NimazCardStyle.OUTLINED) {
         Column(modifier = Modifier.padding(horizontal = 13.dp, vertical = 11.dp)) {
             Text(
                 text = label.uppercase(),

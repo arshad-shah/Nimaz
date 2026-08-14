@@ -7,11 +7,16 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -34,8 +39,9 @@ import com.arshadshah.nimaz.domain.model.CompassAccuracy
 import com.arshadshah.nimaz.domain.model.QiblaInfo
 import com.arshadshah.nimaz.presentation.components.atoms.qibla.QiblaGold
 import com.arshadshah.nimaz.presentation.components.atoms.qibla.QiblaGreen
-import com.arshadshah.nimaz.presentation.components.molecules.qibla.QiblaArHud
 import com.arshadshah.nimaz.presentation.components.molecules.qibla.QiblaArOverlay
+import com.arshadshah.nimaz.presentation.components.molecules.qibla.QiblaFactsRow
+import com.arshadshah.nimaz.presentation.components.molecules.qibla.QiblaInstructionRow
 import kotlin.math.abs
 
 /** Half of the assumed camera horizontal field of view, in degrees. Beyond this
@@ -62,6 +68,7 @@ fun ArQiblaView(
     isCompassReady: Boolean,
     compassAccuracy: CompassAccuracy,
     modifier: Modifier = Modifier,
+    animatedAzimuth: Float,
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -113,7 +120,6 @@ fun ArQiblaView(
             compassAccuracy = compassAccuracy,
             modifier = Modifier.fillMaxSize()
         )
-
         // ──────────────────────── Off-screen instruction overlay ─────────────────
         if (qiblaOffScreen) {
             // Soft directional wash on the edge you must turn toward.
@@ -147,14 +153,22 @@ fun ArQiblaView(
 
         // ──────────────────────────── Bottom HUD ────────────────────────────
         if (qiblaInfo != null) {
-            QiblaArHud(
-                qiblaInfo = qiblaInfo,
-                isFacingQibla = isFacingQibla,
-                rotationToQibla = rotationToQibla,
-                isCompassReady = isCompassReady,
-                compassAccuracy = compassAccuracy,
-                modifier = Modifier.align(Alignment.BottomCenter)
-            )
+            Column(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .navigationBarsPadding()
+                    .padding(horizontal = 16.dp, vertical = 20.dp)
+                    .widthIn(max = 380.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                QiblaFactsRow(
+                    qiblaBearing = qiblaInfo.direction.bearing.toFloat(),
+                    currentAzimuth = animatedAzimuth,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
         }
 
         // ──────────────────────── Facing Qibla border glow ───────────────────────

@@ -174,6 +174,7 @@ fun QiblaScreen(
                 if (arMode) {
                     ArQiblaView(
                         azimuth = state.compassData.azimuth,
+                        animatedAzimuth = animatedAzimuth,
                         qiblaInfo = state.qiblaInfo,
                         isFacingQibla = state.isFacingQibla,
                         rotationToQibla = state.rotationToQibla,

@@ -25,6 +25,7 @@ class QiblaCompassWidgetTest {
                 qiblaBearing = 119f,
                 isFacingQibla = false,
                 animatedAzimuth = 30f,
+                rotationToQibla = 34f,
                 compassSize = 300.dp
             )
         }
@@ -40,6 +41,7 @@ class QiblaCompassWidgetTest {
                 qiblaBearing = 0f,
                 isFacingQibla = true,
                 animatedAzimuth = 0f,
+                rotationToQibla = 0f,
                 compassSize = 300.dp
             )
         }

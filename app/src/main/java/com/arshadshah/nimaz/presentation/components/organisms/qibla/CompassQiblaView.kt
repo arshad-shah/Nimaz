@@ -16,6 +16,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.domain.model.CompassAccuracy
 import com.arshadshah.nimaz.presentation.components.molecules.qibla.QiblaCalibrationBanner
+import com.arshadshah.nimaz.presentation.components.molecules.qibla.QiblaCompassWidget
 import com.arshadshah.nimaz.presentation.components.molecules.qibla.QiblaFactsRow
 import com.arshadshah.nimaz.presentation.components.molecules.qibla.QiblaInstructionRow
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
