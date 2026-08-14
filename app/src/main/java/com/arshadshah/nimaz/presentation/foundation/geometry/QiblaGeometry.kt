@@ -166,3 +166,13 @@ fun formatCoordinates(latitude: Double, longitude: Double): String {
     val lon = String.format(locale, "%.4f", abs(longitude))
     return "$lat°$ns, $lon°$ew"
 }
+
+/**
+ * Maps a bearing in degrees to an 8-point cardinal abbreviation
+ * (N, NE, E, SE, S, SW, W, NW).
+ */
+fun cardinalDirection(bearing: Float): String {
+    val normalized = ((bearing % 360f) + 360f) % 360f
+    val index = ((normalized + 22.5f) / 45f).toInt() % 8
+    return arrayOf("N", "NE", "E", "SE", "S", "SW", "W", "NW")[index]
+}

@@ -15,6 +15,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.qibla.CompassFacingGlo
 import com.arshadshah.nimaz.presentation.components.atoms.qibla.CompassLubberNotch
 import com.arshadshah.nimaz.presentation.components.atoms.qibla.CompassNeedles
 import com.arshadshah.nimaz.presentation.components.atoms.qibla.CompassRings
+import com.arshadshah.nimaz.presentation.components.atoms.qibla.CompassTurnArc
 import com.arshadshah.nimaz.presentation.components.atoms.qibla.DirectionMarkers
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
@@ -32,6 +33,7 @@ fun QiblaCompassWidget(
     qiblaBearing: Float,
     isFacingQibla: Boolean,
     animatedAzimuth: Float,
+    rotationToQibla: Float,
     modifier: Modifier = Modifier,
     compassSize: Dp = 360.dp,
 ) {
@@ -42,6 +44,12 @@ fun QiblaCompassWidget(
         CompassRings(modifier = Modifier.fillMaxSize())
         CompassDialFace(modifier = Modifier.size(compassSize - 35.dp))
         DirectionMarkers(modifier = Modifier.size(compassSize - 20.dp))
+
+        CompassTurnArc(
+            rotationToQibla = rotationToQibla,
+            isFacingQibla = isFacingQibla,
+            modifier = Modifier.fillMaxSize(),
+        )
 
         CompassNeedles(
             qiblaScreenAngle = qiblaBearing - animatedAzimuth,
@@ -69,6 +77,7 @@ private fun QiblaCompassWidgetPreview() {
             qiblaBearing = 119f,
             isFacingQibla = false,
             animatedAzimuth = 30f,
+            rotationToQibla = 34f,
             compassSize = 300.dp
         )
     }
@@ -82,6 +91,7 @@ private fun QiblaCompassWidgetFacingPreview() {
             qiblaBearing = 0f,
             isFacingQibla = true,
             animatedAzimuth = 0f,
+            rotationToQibla = 0f,
             compassSize = 300.dp
         )
     }

@@ -34,10 +34,10 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazConfirmDialog
 import com.arshadshah.nimaz.presentation.components.molecules.NimazErrorAction
 import com.arshadshah.nimaz.presentation.components.molecules.NimazErrorDefaults
 import com.arshadshah.nimaz.presentation.components.molecules.NimazErrorState
-import com.arshadshah.nimaz.presentation.components.molecules.qibla.QiblaCalibrationDialog
+import com.arshadshah.nimaz.presentation.components.molecules.qibla.QiblaCalibrationSheet
 import com.arshadshah.nimaz.presentation.components.organisms.qibla.ArQiblaView
 import com.arshadshah.nimaz.presentation.components.organisms.qibla.CompassQiblaView
-import com.arshadshah.nimaz.presentation.components.organisms.qibla.QiblaTopBar
+import com.arshadshah.nimaz.presentation.components.molecules.qibla.QiblaTopBar
 import com.arshadshah.nimaz.presentation.viewmodel.prayer.QiblaEvent
 import com.arshadshah.nimaz.presentation.viewmodel.prayer.QiblaViewModel
 
@@ -98,7 +98,7 @@ fun QiblaScreen(
     }
 
     if (state.showCalibrationDialog) {
-        QiblaCalibrationDialog(
+        QiblaCalibrationSheet(
             accuracy = state.compassData.accuracy,
             onDismiss = { viewModel.onEvent(QiblaEvent.DismissCalibrationDialog) }
         )
@@ -122,15 +122,13 @@ fun QiblaScreen(
         topBar = {
             QiblaTopBar(
                 locationName = state.qiblaInfo?.locationName,
-                latitude = state.qiblaInfo?.latitude,
-                longitude = state.qiblaInfo?.longitude,
-                fallbackTitle = stringResource(R.string.guide_qibla_title),
-                tabs = listOf(stringResource(R.string.compass), stringResource(R.string.ar)),
-                selectedIndex = if (isArMode) 1 else 0,
-                onTabSelect = { index ->
-                    if (index == 1) requestArMode()
-                    else viewModel.onEvent(QiblaEvent.SetArMode(false))
-                }
+                accuracy = state.compassData.accuracy,
+                isArMode = isArMode,
+                onCameraToggle = {
+                    if (isArMode) viewModel.onEvent(QiblaEvent.SetArMode(false))
+                    else requestArMode()
+                },
+                onCalibrate = { viewModel.onEvent(QiblaEvent.ShowCalibrationDialog) },
             )
         }
     ) { paddingValues ->

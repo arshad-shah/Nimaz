@@ -262,6 +262,13 @@
     <string name="compass">Compass</string>
     <string name="ar">AR</string>
     <string name="facing_qibla">Facing Qibla</string>
+    <string name="finding_direction">Finding direction…</string>
+    <string name="hold_this_direction">Hold this direction</string>
+    <string name="you_are_facing_format">You are facing %1$d° %2$s</string>
+    <string name="qibla_bearing_label">Qibla bearing</string>
+    <string name="you_are_facing_label">You are facing</string>
+    <string name="compass_is_unsure_title">The compass is unsure</string>
+    <string name="compass_is_unsure_body">Magnets and metal nearby throw it off. A short calibration fixes it.</string>
     <string name="turn_right_format">Turn right %d°</string>
     <string name="turn_left_format">Turn left %d°</string>
     <string name="compass_accuracy">Compass Accuracy</string>
@@ -274,6 +281,10 @@
     <string name="calibration_step_3">Rotate the figure-8 in all three axes</string>
     <string name="calibration_step_4">Repeat until accuracy improves to Medium or High</string>
     <string name="calibration_tip">Tip: If accuracy remains low, try moving to a different location away from electronic devices.</string>
+    <string name="calibration_sheet_subtitle">Keep this open while you move — the reading updates live</string>
+    <string name="accuracy_now_label">Accuracy now</string>
+    <string name="back_to_compass">Back to the compass</string>
+    <string name="point_with_camera">Point with the camera</string>
     <string name="got_it">Got it</string>
     <string name="accuracy_high">High</string>
     <string name="accuracy_high_hint">Compass is accurate</string>
