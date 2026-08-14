@@ -9,6 +9,7 @@ import java.time.LocalDate
 import java.time.LocalTime
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * What day it is, and when that changes.
@@ -56,7 +57,7 @@ class SystemTodayProvider @Inject constructor(
             // waking instead of assuming `date + 1`: a long doze, a timezone change or a
             // clock correction can land the wake-up on a different day than arithmetic
             // would predict, and the loop re-emits whatever is actually true.
-            delay(millisUntilNextMidnight())
+            delay(millisUntilNextMidnight().milliseconds)
         }
     }
 
