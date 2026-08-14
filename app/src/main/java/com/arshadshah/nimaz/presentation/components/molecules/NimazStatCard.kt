@@ -19,6 +19,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
+/**
+ * One number and what it counts.
+ *
+ * **A zero is drawn muted, not accented.** A khatam started today shows 0 / 0 / 0, and three
+ * bold accent-coloured zeroes at headline size read as three empty outlined ovals — the tiles
+ * looked broken rather than empty, and the bug filed against them was "the stat tiles are
+ * blank" when the data was correct all along. An accent is for a figure worth looking at; the
+ * absence of one is not that, and saying so in the colour is what makes the zero legible as a
+ * zero.
+ */
 @Composable
 fun NimazStatCard(
     value: String,
@@ -28,6 +38,10 @@ fun NimazStatCard(
     valueColor: Color = MaterialTheme.colorScheme.primary,
     containerColor: Color = MaterialTheme.colorScheme.surfaceVariant
 ) {
+    val isZero = value.isBlank() || value.all { it == '0' || it == '.' || it == '%' }
+    val resolvedValueColor =
+        if (isZero) MaterialTheme.colorScheme.onSurfaceVariant else valueColor
+
     Box(
         modifier = modifier
             .clip(RoundedCornerShape(if (compact) 10.dp else 14.dp))
@@ -41,7 +55,7 @@ fun NimazStatCard(
                 style = if (compact) MaterialTheme.typography.titleMedium
                 else MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
-                color = valueColor
+                color = resolvedValueColor
             )
             if (!compact) {
                 Spacer(modifier = Modifier.height(4.dp))

@@ -14,6 +14,7 @@ import com.arshadshah.nimaz.domain.usecase.GetTopicDetailUseCase
 import com.arshadshah.nimaz.domain.usecase.GetTopicTreeRootsUseCase
 import com.arshadshah.nimaz.domain.usecase.HasThematicContentUseCase
 import com.arshadshah.nimaz.domain.usecase.QuranUseCases
+import com.arshadshah.nimaz.domain.usecase.quran.RollUpTopicCounts
 import com.arshadshah.nimaz.domain.usecase.SearchTopicsUseCase
 import com.google.common.truth.Truth.assertThat
 import io.mockk.coEvery
@@ -121,7 +122,6 @@ class QuranTopicsRaceTest {
                     nameTransliteration = "Al-Fatihah",
                     revelationType = RevelationType.MECCAN,
                     ayahCount = 7,
-                    juzStart = 1,
                     orderInMushaf = 1,
                     startPage = 1,
                 ),
@@ -244,7 +244,7 @@ class QuranTopicsRaceTest {
     }
 
     private fun openedBrowser(): QuranTopicsViewModel {
-        val vm = QuranTopicsViewModel(useCases, settings, RecordingTelemetry())
+        val vm = QuranTopicsViewModel(useCases, RollUpTopicCounts(), settings, RecordingTelemetry())
         vm.onEvent(QuranTopicsEvent.OpenBrowser)
         dispatcher.scheduler.advanceUntilIdle()
         return vm

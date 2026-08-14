@@ -131,7 +131,6 @@ class QuranReaderHydrationTest {
 
         assertThat(vm.homeState.value.isLoading).isFalse()
         assertThat(vm.homeState.value.surahs.map { it.number }).containsExactly(1, 2)
-        assertThat(vm.homeState.value.filteredSurahs.map { it.number }).containsExactly(1, 2)
     }
 
     // R2 — the reader must open in the user's translation, once.
@@ -183,7 +182,6 @@ private fun surah(number: Int, english: String, transliteration: String, arabic:
     nameTransliteration = transliteration,
     revelationType = RevelationType.MECCAN,
     ayahCount = 7,
-    juzStart = 1,
     orderInMushaf = number,
     startPage = number,
 )

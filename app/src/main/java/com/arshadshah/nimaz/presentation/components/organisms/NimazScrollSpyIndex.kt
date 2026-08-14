@@ -70,6 +70,10 @@ fun NimazScrollSpyIndex(
                         text = label,
                         selected = index == selectedIndex,
                         variant = NimazChipVariant.FILTER,
+                        // No tick. These pills mark *where you are*, not what you chose —
+                        // scrolling moves the mark, and a check next to a section you did not
+                        // select reads as a filter you cannot remember applying (spec §5.6).
+                        showSelectedIcon = false,
                         onClick = { onSelect(index) },
                     )
                 }

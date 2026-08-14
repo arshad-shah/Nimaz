@@ -445,7 +445,7 @@
         <item quantity="other">%d doa</item>
     </plurals>
     <string name="bookmarks_title">Penanda</string>
-    <string name="no_bookmarks_yet">Belum Ada Penanda</string>
+    <string name="no_bookmarks_yet">Belum ada yang tersimpan</string>
     <string name="no_bookmarks_hint">Simpan ayat, hadis, dan doa untuk akses cepat</string>
     <string name="share">Bagikan</string>
     <string name="added_format">Ditambahkan %s</string>
@@ -539,6 +539,8 @@
     <string name="quran_home_start_reading">Mulai Membaca</string>
     <string name="quran_home_begin_journey">Mulai perjalanan Al-Quran Anda dengan Al-Fatihah</string>
     <string name="quran_home_see_all">Lihat Semua</string>
+    <string name="see_more">Lihat selengkapnya</string>
+    <string name="see_less">Lihat lebih sedikit</string>
     <string name="quran_home_no_favorite_ayahs">Belum ada ayat favorit</string>
     <string name="quran_home_favorite_hint">Ketuk ikon hati pada ayat mana pun untuk menambahkannya di sini</string>
     <string name="quran_home_no_bookmarks">Belum ada penanda</string>
@@ -601,7 +603,7 @@
     <string name="show_arabic">Tampilkan Arab</string>
     <string name="show_arabic_subtitle">Aksara Arab</string>
     <string name="dua_settings_preview_arabic">اللَّهُمَّ إِنِّي أَسْأَلُكَ الْعِلْمَ النَّافِعَ</string>
-    <string name="dua_settings_preview_transliteration">"Allahumma inni as'aluka al-'ilm an-nafi'"</string>
+    <string name="dua_settings_preview_transliteration">"Allahumma inni as\'aluka al-\'ilm an-nafi\'"</string>
     <string name="dua_settings_preview_translation">Ya Allah, aku memohon kepada-Mu ilmu yang bermanfaat</string>
 
     <!-- Fasting Tracker Screen -->
@@ -908,8 +910,8 @@
     <string name="show_transliteration_subtitle">Pelafalan dengan huruf Latin</string>
     <string name="show_translation">Tampilkan Terjemahan</string>
     <string name="show_translation_subtitle">Makna dalam bahasa Anda</string>
-    <string name="continuous_reading">Bacaan Berkelanjutan</string>
-    <string name="continuous_reading_subtitle">Lanjutkan membaca antar surah dan putar otomatis ayat berikutnya</string>
+    <string name="continuous_reading">Pemutaran berkelanjutan</string>
+    <string name="continuous_reading_subtitle">Lanjut ke ayat berikutnya dan surah berikutnya, bukan berhenti di akhir</string>
     <string name="keep_screen_on">Biarkan Layar Menyala</string>
     <string name="keep_screen_on_subtitle">Cegah layar dari mati</string>
     <string name="show_tajweed_colors">Tampilkan Warna Tajwid</string>
@@ -1025,7 +1027,9 @@
     <string name="surah_info_read_more">Baca selengkapnya</string>
     <string name="surah_info_read_less">Tampilkan lebih sedikit</string>
     <string name="surah_info_background_subtitle">%1$d bagian</string>
-    <string name="surah_info_passages_row_subtitle">%1$d bagian mencakup %2$d ayat</string>
+    <plurals name="surah_info_passages_row_subtitle">
+        <item quantity="other">%1$d bagian mencakup %2$d ayat</item>
+    </plurals>
     <string name="surah_info_subjects">Topik dalam surah ini</string>
     <string name="surah_info_subjects_subtitle">%1$d topik, paling banyak dirujuk lebih dahulu</string>
     <string name="surah_info_section_other">Lainnya</string>
@@ -1807,7 +1811,7 @@
     <string name="fasting_log_on_subtitle">Tercatat — ketuk untuk membatalkan</string>
     <string name="fasting_log_off_subtitle">Belum dicatat</string>
     <string name="fasting_log_managed_in_sheet">Dikelola di rincian hari ini</string>
-    <string name="bookmarks_search_placeholder">Cari markah</string>
+    <string name="bookmarks_search_placeholder">Cari yang tersimpan</string>
     <string name="bookmarks_sort">Urutkan</string>
     <string name="bookmarks_sort_newest">Terbaru dulu</string>
     <string name="bookmarks_sort_oldest">Terlama dulu</string>
@@ -1815,8 +1819,8 @@
     <string name="bookmarks_sort_alphabetical">A–Z</string>
     <string name="bookmarks_no_matches">Tidak ada hasil</string>
     <string name="bookmarks_no_matches_hint">Coba pencarian lain, atau hapus filternya.</string>
-    <string name="bookmarks_clear_all">Hapus semua markah</string>
-    <string name="bookmarks_clear_all_title">Hapus semua markah?</string>
+    <string name="bookmarks_clear_all">Hapus semua yang tersimpan</string>
+    <string name="bookmarks_clear_all_title">Hapus semua yang tersimpan?</string>
     <string name="bookmarks_clear_all_confirm">Hapus semua</string>
     <string name="bookmarks_clear_all_body">Ini menghapus semua %1$d markah — Al-Qur\'an, Hadis, dan Doa. Tindakan ini tidak dapat dibatalkan.</string>
     <string name="ai_error_consent_title">Tanya dengan Dalil nonaktif</string>
@@ -1974,4 +1978,76 @@
     <string name="fasting_your_month">Bulan Anda</string>
     <string name="fasting_sunnah_virtuous">Sunnah &amp; hari utama</string>
     <string name="fasting_fasted_count">%1$d berpuasa</string>
+
+    <!-- Qur'an section redesign: Browse, Saved and the surah-info sheet -->
+    <string name="saved">Tersimpan</string>
+    <string name="notes">Catatan</string>
+    <string name="saved_show">Tampilkan</string>
+    <string name="saved_kind_bookmark">Markah</string>
+    <string name="saved_kind_favourite">Favorit</string>
+    <string name="saved_kind_note">Catatan</string>
+    <string name="khatam">Khatam</string>
+    <string name="quran_browse_search_hint">Surah, juz 15, halaman 299</string>
+    <string name="quran_browse_page_start">hlm. %1$d</string>
+    <string name="quran_browse_juz_span">Juz %1$d–%2$d</string>
+    <string name="quran_browse_load_failed">Daftar surah tidak dapat dimuat</string>
+    <string name="quran_browse_open_juz">Buka juz %1$d</string>
+    <string name="quran_browse_open_page">Buka halaman %1$d</string>
+    <string name="quran_browse_no_matches">Tidak ada yang cocok</string>
+    <string name="quran_home_destination_browse_subtitle">Semua 114 surah, menurut juz</string>
+    <string name="quran_home_destination_saved_subtitle">Markah, favorit, dan catatan</string>
+    <string name="quran_home_destination_khatam_subtitle">Membaca Al-Qur\'an sesuai rencana</string>
+    <string name="quran_home_recently_saved">Baru disimpan</string>
+    <string name="surah_info_revealed_in">Diturunkan di</string>
+    <string name="surah_info_read_surah">Baca surah</string>
+
+    <!-- Qur'an redesign: the ayah action sheet, the anchor bar, reading modes -->
+    <string name="ayah_action_play_from_here">Putar di sini</string>
+    <string name="ayah_action_repeat">Ulangi</string>
+    <string name="ayah_action_bookmark">Markah</string>
+    <string name="ayah_action_unbookmark">Hapus markah</string>
+    <string name="ayah_action_favourite">Favorit</string>
+    <string name="ayah_action_unfavourite">Hapus favorit</string>
+    <string name="ayah_action_note">Catatan</string>
+    <string name="ayah_action_tafseer">Tafsir</string>
+    <string name="ayah_action_subjects">Topik</string>
+    <string name="ayah_action_copy">Salin</string>
+    <string name="ayah_action_share">Bagikan</string>
+    <string name="ayah_action_mark_read">Tandai dibaca</string>
+    <string name="reader_go_to">Buka…</string>
+    <string name="reader_go_to_action">Buka</string>
+    <string name="reader_go_to_range">%1$d–%2$d</string>
+    <string name="reader_go_to_verse">Ayat</string>
+    <string name="reader_mode">Mode baca</string>
+    <string name="reader_mode_translation">Terjemahan</string>
+    <string name="reader_mode_mushaf">Mushaf</string>
+
+    <!-- Qur'an redesign: the recitation player -->
+    <string name="cd_previous_ayah_audio">Ayat sebelumnya</string>
+    <string name="cd_next_ayah_audio">Ayat berikutnya</string>
+    <string name="recitation_settings">Tilawah</string>
+    <string name="recitation_repeat">Ulangi</string>
+    <string name="recitation_repeat_off">Mati</string>
+    <string name="recitation_repeat_ayah">Ayat</string>
+    <string name="recitation_repeat_range">Rentang</string>
+    <string name="recitation_repeat_surah">Surah</string>
+    <string name="recitation_repeat_times">Kali</string>
+    <string name="recitation_repeat_from">Dari ayat</string>
+    <string name="recitation_repeat_to">Sampai ayat</string>
+    <string name="recitation_speed">Kecepatan</string>
+    <string name="recitation_follow_along">Ikuti bacaan</string>
+    <string name="recitation_follow_along_hint">Gulir dan buka halaman agar ayat yang dibaca tetap terlihat</string>
+    <string name="recitation_done">Selesai</string>
+    <string name="recitation_stop">Berhenti</string>
+    <string name="recitation_repeat_summary_ayah">Ulangi %1$d×</string>
+    <string name="recitation_repeat_summary_range">Ulangi %1$d–%2$d</string>
+    <string name="recitation_repeat_summary_surah">Ulangi surah</string>
+    <string name="recitation_speed_label">%1$s×</string>
+    <string name="audio_downloading">Mengunduh %1$d dari %2$d</string>
+
+    <!-- Qur'an redesign: today's khatam portion -->
+    <string name="khatam_portion_within">%1$s %2$d–%3$d</string>
+    <string name="khatam_portion_across">%1$s %2$d → %3$s %4$d</string>
+    <string name="khatam_todays_portion">Bagian hari ini</string>
+    <string name="khatam_read_todays_portion">Baca bagian hari ini</string>
 </resources>

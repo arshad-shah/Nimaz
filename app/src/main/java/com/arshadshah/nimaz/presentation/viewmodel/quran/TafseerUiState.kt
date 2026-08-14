@@ -2,6 +2,8 @@ package com.arshadshah.nimaz.presentation.viewmodel.quran
 
 import com.arshadshah.nimaz.domain.model.Ayah
 import com.arshadshah.nimaz.domain.model.QuranTopic
+import com.arshadshah.nimaz.domain.model.QuranTranslation
+import com.arshadshah.nimaz.domain.model.TranslationLanguage
 import com.arshadshah.nimaz.domain.model.TafseerHighlight
 import com.arshadshah.nimaz.domain.model.TafseerNote
 import com.arshadshah.nimaz.domain.model.TafseerSource
@@ -22,6 +24,8 @@ data class TafseerUiState(
     val highlights: List<TafseerHighlight> = emptyList(),
     val notes: List<TafseerNote> = emptyList(),
     val surahName: String = "",
+    /** The active translation, so the verse above the commentary is drawn in the right face. */
+    val selectedTranslatorId: String = "sahih_international",
     val isLoading: Boolean = true,
     // Sources whose seed data actually has non-empty text for the current ayah.
     // Used to recommend an alternate source when the selected one has no content.
@@ -43,4 +47,12 @@ data class TafseerUiState(
      * failed to save is a note they wrote and lost. It surfaces on a snackbar.
      */
     val noteError: UiError? = null,
-)
+) {
+    /**
+     * Language of the active translation — what its prose must be *drawn* in. Mirrors
+     * `QuranReaderUiState.translationLanguage` so the reader and the commentary screen cannot
+     * disagree about the face a translation is set in.
+     */
+    val translationLanguage: TranslationLanguage
+        get() = QuranTranslation.fromId(selectedTranslatorId).language
+}

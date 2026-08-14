@@ -3,7 +3,9 @@ package com.arshadshah.nimaz.presentation.viewmodel.quran
 import com.arshadshah.nimaz.domain.model.DuaBookmark
 import com.arshadshah.nimaz.domain.model.HadithBookmark
 import com.arshadshah.nimaz.domain.model.QuranBookmark
+import com.arshadshah.nimaz.domain.model.QuranFavorite
 import com.arshadshah.nimaz.domain.model.BookmarkType
+import com.arshadshah.nimaz.domain.model.SavedKind
 import com.arshadshah.nimaz.domain.model.UnifiedBookmark
 import com.arshadshah.nimaz.presentation.viewmodel.UiError
 
@@ -11,9 +13,20 @@ data class BookmarksUiState(
     val allBookmarks: List<UnifiedBookmark> = emptyList(),
     val filteredBookmarks: List<UnifiedBookmark> = emptyList(),
     val quranBookmarks: List<QuranBookmark> = emptyList(),
+    /**
+     * The favourite rows behind the Qur'an half of the list.
+     *
+     * Kept because a verse can be bookmarked *and* favourited and shows as **one** card — so
+     * deleting that card has to clear both, and undoing it has to put both back. Without the
+     * favourites here, delete could only reach the bookmark row and the card returned through
+     * the other half of the merge.
+     */
+    val quranFavourites: List<QuranFavorite> = emptyList(),
     val hadithBookmarks: List<HadithBookmark> = emptyList(),
     val duaBookmarks: List<DuaBookmark> = emptyList(),
     val selectedFilter: BookmarkType? = null,
+    /** Bookmark / favourite / note, or null for every kind. */
+    val selectedKind: SavedKind? = null,
     val sortOrder: BookmarkSortOrder = BookmarkSortOrder.DATE_NEWEST,
     val searchQuery: String = "",
     val isLoading: Boolean = true,
@@ -42,5 +55,8 @@ data class BookmarkStatsUiState(
     val totalBookmarks: Int = 0,
     val quranCount: Int = 0,
     val hadithCount: Int = 0,
-    val duaCount: Int = 0
+    val duaCount: Int = 0,
+    val bookmarkCount: Int = 0,
+    val favouriteCount: Int = 0,
+    val noteCount: Int = 0
 )

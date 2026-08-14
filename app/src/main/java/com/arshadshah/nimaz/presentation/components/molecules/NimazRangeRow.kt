@@ -20,6 +20,7 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -132,11 +133,21 @@ fun NimazRangeRow(
                         text = label,
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurface,
+                        // Clamped, except on the row the reader is on. The content has no
+                        // separate title field — most entries are whole sentences — so an
+                        // outline of 282 of them at full length is not an outline. The one
+                        // you are reading gets the full text, because that is the one you
+                        // came to read.
+                        maxLines = if (marked) Int.MAX_VALUE else CLAMPED_LINES,
+                        overflow = TextOverflow.Ellipsis,
                     )
                     if (markerLabel != null) {
+                        // Teal, not amber. Yellow marked selection in four unrelated places
+                        // across this section and now marks none of them: selection is teal,
+                        // and gold is reserved for ornament around scripture (spec §6.5).
                         NimazBadge(
                             text = markerLabel,
-                            tone = NimazTone.WARNING,
+                            tone = NimazTone.ACCENT,
                             size = NimazBadgeSize.SMALL,
                         )
                     }
@@ -145,6 +156,9 @@ fun NimazRangeRow(
         }
     }
 }
+
+/** How much of an un-marked entry is shown before it ellipsises. */
+private const val CLAMPED_LINES = 2
 
 private val GutterWidth = 64.dp
 private val TickLane = 16.dp

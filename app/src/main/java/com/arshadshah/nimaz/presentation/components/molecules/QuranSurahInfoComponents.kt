@@ -31,6 +31,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
@@ -79,7 +80,7 @@ internal fun SurahMetaStrip(
                 Column(
                     modifier = Modifier
                         .weight(1f)
-                        .padding(horizontal = 8.dp),
+                        .padding(horizontal = 4.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -90,17 +91,29 @@ internal fun SurahMetaStrip(
                             iconSize = 14.dp
                         )
                         Spacer(modifier = Modifier.width(4.dp))
+                        // A word, not a figure. "286" and "Madinah" cannot share a type size
+                        // in a quarter-width column — at titleMedium the word wrapped to
+                        // "Madin / ah" and shoved its own label out of line. Numbers keep the
+                        // display size; anything longer steps down and stays on one line.
                         Text(
                             text = stat.value,
-                            style = MaterialTheme.typography.titleMedium,
+                            style = if (stat.value.length <= 4) {
+                                MaterialTheme.typography.titleMedium
+                            } else {
+                                MaterialTheme.typography.labelLarge
+                            },
                             fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.onSurface
+                            color = MaterialTheme.colorScheme.onSurface,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
                         )
                     }
                     Text(
                         text = stat.label,
                         style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
                     )
                 }
                 if (index < stats.lastIndex) {

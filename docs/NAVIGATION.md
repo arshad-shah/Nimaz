@@ -85,10 +85,11 @@ flowchart LR
 ```mermaid
 flowchart LR
     subgraph Q["Quran"]
-        QuranHub[Quran] --> QuranReader & QuranPage & QuranJuz & QuranSearch & QuranBookmarks
+        QuranHub[Quran] --> QuranBrowse & QuranSaved & QuranSearch
         QuranHub --> QuranTopics & TafseerChapters
-        QuranReader --> SurahInfo & Tafseer & SurahPassages & SurahSubjects
-        SurahInfo --> SurahBackground & SurahPassages & SurahSubjects
+        QuranBrowse --> QuranReader & QuranPage & QuranJuz
+        QuranBrowse --> SurahBackground & SurahPassages & SurahSubjects
+        QuranReader --> Tafseer & SurahPassages & SurahSubjects
         SurahSubjects --> QuranTopicDetail & QuranTopics
         TafseerChapters --> Tafseer
         QuranTopics --> QuranTopicDetail
@@ -195,8 +196,8 @@ Every route below also has a `ScreenTags` entry of the same name.
 | `QuranPage` | `pageNumber: Int` | QuranPageScreen (mushaf) |
 | `QuranJuz` | `juzNumber: Int` | QuranJuzScreen |
 | `QuranSearch` | — | QuranSearchScreen |
-| `QuranBookmarks` | — | QuranBookmarksScreen |
-| `SurahInfo` | `surahNumber: Int` | SurahInfoScreen — a **hub**, not a document: identity, the numbers, `overview.summary`, and three counted ways into the long content |
+| `QuranBrowse` | `infoForSurah: Int? = null` | QuranBrowseScreen — **the** way to find a place in the Qur'an: every surah in mushaf order under juz headers, and one field that parses a name, a number, `juz 15` and `page 299` alike (`QuranSearchQuery`). Replaces the Surah/Juz/Page sub-tabs that lived inside `Quran`; page stops being a browse tab because it was never an index, it was the door to a reading *mode*. `infoForSurah` raises the surah-info sheet on arrival, which is where the `quran/surah/{n}/info` announcement key lands now that surah info is a sheet rather than a screen |
+| `QuranSaved` | — | SavedScreen — everything the user has marked, filtered on two axes: **what** (Qur'an / Hadith / Dua) and **how** (bookmarked / favourited / annotated). App-wide rather than Qur'an-scoped because the store always was — `bookmarks` is one table keyed by `(kind, target_id)` — so scoping it down would strand a reader's hadith and dua marks. Absorbs the retired `QuranBookmarks` and the Qur'an home's old Favorites tab |
 | `SurahBackground` | `surahNumber: Int` | SurahBackgroundScreen — the surah's long-form background, read continuously under a sticky index of `SurahOverviewGroup` pills. Its own destination because the longest is 47 KB of prose |
 | `SurahPassages` | `surahNumber: Int, currentAyah: Int? = null` | SurahPassagesScreen — the passage outline, up to 282 rows. `currentAyah` is supplied when it is opened **from the reader**, so the passage containing that verse is marked and scrolled to; null from surah info, where there is no such place to be |
 | `TafseerChapters` | — | TafseerChaptersScreen — the surah picker that fronts the commentary; the `tafseer` announcement key and the `tafseer` help deep link both land here |
@@ -393,7 +394,8 @@ only its CTA disappears.
 | `home` | `Home` |
 | `quran` | `Quran` |
 | `quran/search` | `QuranSearch` |
-| `quran/bookmarks` | `QuranBookmarks` |
+| `quran/bookmarks` | `QuranSaved` |
+| `quran/browse` | `QuranBrowse` |
 | `tafseer` | `TafseerChapters` |
 | `hadith` | `HadithHome` |
 | `hadith/search` | `HadithSearch` |
@@ -451,7 +453,7 @@ only its CTA disappears.
 |---|---|---|
 | `quran/surah/{n}` | `QuranReader` | `n` 1–114 |
 | `quran/surah/{n}/ayah/{m}` | `QuranReader` | `n` 1–114, `m` 1–300 (a permissive upper bound — the reader clamps to the surah's real ayah count) |
-| `quran/surah/{n}/info` | `SurahInfo` | `n` 1–114 |
+| `quran/surah/{n}/info` | `QuranBrowse` | `n` 1–114. Surah info is a sheet now, not a screen, so the key resolves to Browse with the sheet raised — an announcement already on a device must still land where it meant to |
 | `quran/page/{n}` | `QuranPage` | `n` 1–`MushafScript.MAX_TOTAL_PAGES` (847). Validated against the **largest** edition so a page link resolves regardless of the reader's active script; the reader then clamps to that script's count — 604 Madani, 548 IndoPak-16, 610 IndoPak-15, 847 IndoPak-13 (#270) |
 | `quran/juz/{n}` | `QuranJuz` | `n` 1–30 |
 | `tafseer/{n}` | `Tafseer` | `n` 1–114 (surah) |

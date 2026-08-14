@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import com.arshadshah.nimaz.domain.model.DailyLogEntry
 import com.arshadshah.nimaz.domain.model.JuzProgressInfo
 import com.arshadshah.nimaz.domain.model.Khatam
+import com.arshadshah.nimaz.domain.usecase.khatam.KhatamPortion
 import com.arshadshah.nimaz.domain.model.KhatamInsights
 import com.arshadshah.nimaz.domain.model.KhatamStats
 
@@ -34,6 +35,15 @@ data class KhatamDetailUiState(
     val nextUnreadSurah: Int? = null,
     val nextUnreadAyah: Int? = null,
     val nextUnreadSurahName: String? = null,
+    /**
+     * What the plan asks for **today**, and how to say it.
+     *
+     * A khatam exists to assign a daily portion; where you happened to stop is the fallback.
+     * The screen led with "resume", which answers a question about the past — the plan's actual
+     * instruction was nowhere on it.
+     */
+    val todaysPortion: KhatamPortion? = null,
+    val todaysPortionLabel: String? = null,
     val isLoading: Boolean = true,
     /** True once the khatam is known to be gone, so the screen can pop instead of spinning. */
     val notFound: Boolean = false

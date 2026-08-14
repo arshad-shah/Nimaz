@@ -33,6 +33,7 @@ import com.arshadshah.nimaz.presentation.components.molecules.sampleMushafPageLa
 import com.arshadshah.nimaz.presentation.components.molecules.sampleSurahFatihah
 import com.arshadshah.nimaz.presentation.theme.IndoPakFontFamily
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
+import com.arshadshah.nimaz.presentation.theme.QuranSurfaceColors
 import com.arshadshah.nimaz.presentation.theme.ThemeMode
 
 /**
@@ -153,6 +154,9 @@ fun MushafLinePage(
                     lines = layout.lines,
                     surahMap = surahMap,
                     arabicFontSize = arabicFontSize,
+                    // Ink on paper — see MushafPage. The line-accurate renderer draws the same
+                    // page in the same register.
+                    textColor = QuranSurfaceColors.paperInk,
                     arabicFontFamily = arabicFontFamily,
                     highlightedAyahId = highlightedAyahId,
                     selectedAyahId = actions.tooltipAyah?.id,

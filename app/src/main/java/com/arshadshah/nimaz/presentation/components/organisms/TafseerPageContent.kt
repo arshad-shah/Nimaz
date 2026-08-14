@@ -58,8 +58,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.Ayah
+import com.arshadshah.nimaz.domain.model.TranslationLanguage
+import com.arshadshah.nimaz.presentation.theme.asTranslationText
 import com.arshadshah.nimaz.domain.model.QuranTopic
 import com.arshadshah.nimaz.presentation.components.atoms.NimazChip
+import com.arshadshah.nimaz.presentation.components.atoms.NimazSegmentedControl
+import com.arshadshah.nimaz.presentation.components.atoms.NimazSegmentedPurpose
+import com.arshadshah.nimaz.presentation.components.atoms.asSegments
 import com.arshadshah.nimaz.presentation.components.atoms.NimazChipVariant
 import com.arshadshah.nimaz.domain.model.TafseerHighlight
 import com.arshadshah.nimaz.domain.model.TafseerSource
@@ -196,6 +201,12 @@ fun TafseerPageContent(
      */
     topics: List<QuranTopic> = emptyList(),
     onTopicClick: (topicId: Int) -> Unit = {},
+    /**
+     * Language of the translation printed above the commentary — it decides the face, direction
+     * and leading. Urdu is Nastaliq; without this the app's Latin body face carries no
+     * Arabic-script glyphs at all and the system substitutes a Naskh fallback.
+     */
+    translationLanguage: TranslationLanguage = TranslationLanguage.ENGLISH,
     modifier: Modifier = Modifier
 ) {
     var showNotesSheet by remember { mutableStateOf(false) }
@@ -233,12 +244,13 @@ fun TafseerPageContent(
     val sources = TafseerSource.entries
 
     Column(modifier = modifier.fillMaxSize()) {
-        // ── Source switcher (top) — reuses the Qibla/Tasbih NimazPillTabs ──
+        // ── Source switcher (top) — the house segmented control ──
         if (sources.size > 1) {
-            NimazPillTabs(
-                tabs = sources.map { it.displayName },
+            NimazSegmentedControl(
+                options = sources.map { it.displayName }.asSegments(),
                 selectedIndex = sources.indexOf(selectedSource).coerceAtLeast(0),
-                onTabSelect = { onSourceSwitch(sources[it]) },
+                onSelect = { onSourceSwitch(sources[it]) },
+                purpose = NimazSegmentedPurpose.VIEW,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 12.dp, vertical = 8.dp)
@@ -278,9 +290,9 @@ fun TafseerPageContent(
                             if (!ayah.translation.isNullOrBlank()) {
                                 Text(
                                     text = ayah.translation,
-                                    style = MaterialTheme.typography.bodyMedium,
+                                    style = MaterialTheme.typography.bodyMedium
+                                        .asTranslationText(translationLanguage),
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    textAlign = TextAlign.Start,
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .padding(vertical = 8.dp)

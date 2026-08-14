@@ -93,6 +93,7 @@ import com.arshadshah.nimaz.presentation.viewmodel.ai.AskViewModel
 import com.arshadshah.nimaz.presentation.viewmodel.search.SearchEvent
 import com.arshadshah.nimaz.domain.model.NameCatalog
 import com.arshadshah.nimaz.presentation.viewmodel.search.SearchFilter
+import com.arshadshah.nimaz.presentation.viewmodel.search.accepts
 import com.arshadshah.nimaz.presentation.viewmodel.search.SearchViewModel
 import com.arshadshah.nimaz.domain.model.UnifiedSearchResult
 
@@ -208,19 +209,23 @@ fun SearchScreen(
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         SearchFilter.entries.forEach { filter ->
+                            // The count is the point: it says where the matches *are* before
+                            // you filter, so narrowing to Hadith and finding nothing is a
+                            // decision you never have to make. Counted with the same predicate
+                            // the list filters by, so the number and the rows agree.
+                            val count = state.allResults.count { filter.accepts(it) }
                             FilterChip(
                                 selected = state.selectedFilter == filter,
                                 onClick = { viewModel.onEvent(SearchEvent.SetFilter(filter)) },
                                 label = {
-                                    Text(
-                                        when (filter) {
-                                            SearchFilter.ALL -> stringResource(R.string.all)
-                                            SearchFilter.QURAN -> stringResource(R.string.quran)
-                                            SearchFilter.HADITH -> stringResource(R.string.hadith)
-                                            SearchFilter.DUA -> stringResource(R.string.duas)
-                                            SearchFilter.NAMES -> stringResource(R.string.names_title)
-                                        }
-                                    )
+                                    val name = when (filter) {
+                                        SearchFilter.ALL -> stringResource(R.string.all)
+                                        SearchFilter.QURAN -> stringResource(R.string.quran)
+                                        SearchFilter.HADITH -> stringResource(R.string.hadith)
+                                        SearchFilter.DUA -> stringResource(R.string.duas)
+                                        SearchFilter.NAMES -> stringResource(R.string.names_title)
+                                    }
+                                    Text(if (count > 0) "$name  $count" else name)
                                 }
                             )
                         }

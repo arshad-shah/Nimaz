@@ -29,7 +29,6 @@ object ScreenTags {
     const val QuranReader = "screen_quran_reader"
     const val TafseerChapters = "screen_tafseer_chapters"
     const val Tafseer = "screen_tafseer"
-    const val SurahInfo = "screen_surah_info"
     const val SurahBackground = "screen_surah_background"
     const val SurahPassages = "screen_surah_passages"
     const val SurahSubjects = "screen_surah_subjects"
@@ -38,7 +37,8 @@ object ScreenTags {
     const val QuranPage = "screen_quran_page"
     const val QuranJuz = "screen_quran_juz"
     const val QuranSearch = "screen_quran_search"
-    const val QuranBookmarks = "screen_quran_bookmarks"
+    const val QuranBrowse = "screen_quran_browse"
+    const val QuranSaved = "screen_quran_saved"
     const val HadithHome = "screen_hadith_home"
     const val HadithBook = "screen_hadith_book"
     const val HadithChapter = "screen_hadith_chapter"
@@ -122,6 +122,9 @@ object ScreenTags {
     /** Interactive elements exercised by behavior tests. */
     const val TasbihCounter = "tasbih_counter"
     const val TasbihCount = "tasbih_count"
+
+    /** The reader's reading-mode control — Translation or Mushaf. */
+    const val QuranReaderModeMenu = "quran_reader_mode_menu"
 
     /** Quran browse — the scrollable surah list (behavior tests scroll-to a surah). */
     const val QuranSurahList = "quran_surah_list"

@@ -41,13 +41,15 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.molecules.SurahListItem
 import com.arshadshah.nimaz.presentation.components.molecules.parseColor
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
-import com.arshadshah.nimaz.presentation.components.organisms.NimazPillTabs
+import com.arshadshah.nimaz.presentation.components.atoms.NimazSegmentedControl
+import com.arshadshah.nimaz.presentation.components.atoms.NimazSegmentedPurpose
+import com.arshadshah.nimaz.presentation.components.atoms.asSegments
 import com.arshadshah.nimaz.presentation.viewmodel.quran.TafseerChaptersViewModel
 
 /**
  * Surah picker shown before the Tafseer reader when entered from the More menu —
  * mirrors the Hadith/Dua/Quran browse flow. A "My notes" tab surfaces the user's
- * annotated tafseer for quick access. Reuses [SurahListItem], [NimazPillTabs] and
+ * annotated tafseer for quick access. Reuses [SurahListItem], [NimazSegmentedControl] and
  * [NimazCard]; tapping a surah or note opens the reader at the right ayah.
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -76,10 +78,14 @@ fun TafseerChaptersScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            NimazPillTabs(
-                tabs = listOf(stringResource(R.string.tafseer_tab_surahs), notesTabLabel),
+            NimazSegmentedControl(
+                options = listOf(
+                    stringResource(R.string.tafseer_tab_surahs),
+                    notesTabLabel
+                ).asSegments(),
                 selectedIndex = selectedTab,
-                onTabSelect = { selectedTab = it },
+                onSelect = { selectedTab = it },
+                purpose = NimazSegmentedPurpose.VIEW,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 10.dp)

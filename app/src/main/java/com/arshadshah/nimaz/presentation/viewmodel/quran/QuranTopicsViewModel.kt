@@ -12,6 +12,7 @@ import com.arshadshah.nimaz.domain.model.TopicDetail
 import com.arshadshah.nimaz.domain.model.TopicTree
 import com.arshadshah.nimaz.domain.repository.settings.QuranPreferences
 import com.arshadshah.nimaz.domain.usecase.QuranUseCases
+import com.arshadshah.nimaz.domain.usecase.quran.RollUpTopicCounts
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
@@ -51,6 +52,7 @@ data class TopicSurahContext(
 @HiltViewModel
 class QuranTopicsViewModel @Inject constructor(
     private val quranUseCases: QuranUseCases,
+    private val rollUpTopicCounts: RollUpTopicCounts,
     private val quranSettings: QuranPreferences,
     private val telemetry: Telemetry,
 ) : ViewModel() {
@@ -233,10 +235,19 @@ class QuranTopicsViewModel @Inject constructor(
             val roots = if (available) quranUseCases.getTopicTreeRoots(tree) else emptyList()
             val branches =
                 if (available) quranUseCases.getTopicChildren.branchesIn(tree) else emptySet()
+            // Once per tree load, here — not per composition, and not per row. A branch's own
+            // citation count is usually zero, so without this the three roots opened reading
+            // "0 verses" under a home screen advertising 2,512 subjects.
+            val counts = if (available) {
+                rollUpTopicCounts(quranUseCases.getAllTopics(), tree)
+            } else {
+                emptyMap()
+            }
             _browseState.update {
                 it.copy(
                     level = roots,
                     branchIds = branches,
+                    rolledUpCounts = counts,
                     isLoading = false,
                     isAvailable = available,
                 )

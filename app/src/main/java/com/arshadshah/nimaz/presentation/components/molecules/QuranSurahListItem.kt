@@ -4,12 +4,10 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -19,7 +17,6 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -43,23 +40,34 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
+import com.arshadshah.nimaz.presentation.components.atoms.NimazProgressTrack
+import com.arshadshah.nimaz.presentation.components.atoms.NimazProgressSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.atoms.ShamsaMedallion
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
-private val SurahNumberSlotWidth = 50.dp
-private val SurahNumberSlotSpacing = 12.dp
+private val SurahNumberSlotWidth = 40.dp
+private val SurahNumberSlotSpacing = 10.dp
+
+/** Between the parts of the meta line — punctuation, not prose, so it is not translated. */
+private const val MetaSeparator = " · "
 
 /**
- * @param startPage / [endPage] the surah's page span in the *active* Mushaf edition.
- * @param juzNumber the juz the surah opens in. Resolved by the caller from the active
- *   edition's pagination — this component used to carry its own copy of the Madani juz page
- *   table, which produced the wrong juz once a non-Madani layout was selected (#325).
- * @param rukuCount how many rukūʿ the surah divides into, from `surah_structure`. 0 means
- *   "not known on this device" and the badge is omitted — the same rule the page-span badges
- *   already follow.
+ * One surah, at the section's shared row density (spec §6.6): a medallion, the name, and one
+ * meta line.
+ *
+ * It used to stand ~200 px tall — two rows of chips under the name, carrying the page *range*,
+ * the juz, the rukūʿ count and the verse count — so three surahs filled a phone screen. The
+ * range answered "where does this sit in the mushaf" with two numbers where one does, the juz
+ * is now the section header this row sits under, and the rukūʿ count is reference data no other
+ * redesigned surface shows. What is left is what a reader browsing for a surah actually reads:
+ * where it was revealed, how long it is, and where it starts.
+ *
+ * @param startPage the page the surah opens on in the *active* Mushaf edition — resolved by the
+ *   caller, because `Surah.startPage` is the Madani column and names the wrong page under any
+ *   other edition (#325). 0 omits it.
  */
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun SurahListItem(
     surah: Surah,
@@ -71,12 +79,16 @@ internal fun SurahListItem(
     isKhatamActive: Boolean = false,
     isSelected: Boolean = false,
     startPage: Int = 0,
-    endPage: Int = 0,
-    juzNumber: Int = 1,
-    rukuCount: Int = 0,
+    /**
+     * Which juz (or juz range) this surah is printed in, already formatted. Null where the
+     * caller's list is not sectioned by juz and the row would only be repeating its header.
+     */
+    juzLabel: String? = null,
     modifier: Modifier = Modifier
 ) {
     val isComplete = isKhatamActive && khatamTotalAyahs > 0 && khatamReadCount == khatamTotalAyahs
+    val isMeccan = surah.revelationType == RevelationType.MECCAN
+
     NimazCard(
         onClick = onClick,
         modifier = modifier
@@ -92,14 +104,13 @@ internal fun SurahListItem(
         selected = isSelected,
     ) {
         Column {
-            // Top row: number + English name + Arabic name + info button
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 14.dp, end = 14.dp, top = 14.dp, bottom = 8.dp),
+                    .defaultMinSize(minHeight = 64.dp)
+                    .padding(horizontal = 12.dp, vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Surah number indicator — shamsa medallion echoing the header cartouche
                 Box(
                     modifier = Modifier.size(SurahNumberSlotWidth),
                     contentAlignment = Alignment.Center
@@ -109,7 +120,7 @@ internal fun SurahListItem(
                             imageVector = Icons.Filled.CheckCircle,
                             contentDescription = stringResource(R.string.quran_home_completed),
                             variant = NimazIconVariant.PRIMARY,
-                            iconSize = 36.dp
+                            iconSize = 30.dp
                         )
                     } else {
                         ShamsaMedallion(
@@ -121,25 +132,60 @@ internal fun SurahListItem(
 
                 Spacer(modifier = Modifier.width(SurahNumberSlotSpacing))
 
-                // English name — takes remaining space, truncates if needed
-                Text(
-                    text = surah.nameEnglish,
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f)
-                )
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(3.dp)
+                ) {
+                    Text(
+                        text = surah.nameEnglish,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        // Revelation stays a chip — it is a category, not a measurement, and
+                        // the pair is deliberate: gold for the sanctuary at Makkah, green for
+                        // Madinah. Teal is not available to either any more; it means
+                        // "selected" everywhere in this section now (spec §6.5).
+                        NimazBadge(
+                            text = if (isMeccan) stringResource(R.string.quran_home_makkah)
+                            else stringResource(R.string.quran_home_madinah),
+                            size = NimazBadgeSize.SMALL,
+                            tone = if (isMeccan) NimazTone.WARNING else NimazTone.SUCCESS,
+                            emphasis = NimazBadgeEmphasis.SOFT
+                        )
+                        val verses = pluralStringResource(
+                            R.plurals.quran_home_verses_count,
+                            surah.ayahCount,
+                            surah.ayahCount
+                        )
+                        val page = if (startPage > 0) {
+                            stringResource(R.string.quran_browse_page_start, startPage)
+                        } else {
+                            null
+                        }
+                        Text(
+                            text = listOfNotNull(verses, page, juzLabel)
+                                .joinToString(MetaSeparator),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
+                }
 
-                // Arabic name — intrinsic width, never truncated; teal for identity
                 ArabicText(
                     text = surah.nameArabic,
-                    size = ArabicTextSize.MEDIUM,
+                    size = ArabicTextSize.SMALL,
                     color = MaterialTheme.colorScheme.primary
                 )
 
-                // Info button
                 if (showInfo) {
                     IconButton(
                         onClick = onInfoClick,
@@ -155,89 +201,15 @@ internal fun SurahListItem(
                 }
             }
 
-            // Metadata badges — design-system NimazBadge chips, aligned with the
-            // English name (40dp box + 12dp spacer = 52dp start), wrapping if needed.
-            val isMeccan = surah.revelationType == RevelationType.MECCAN
-            FlowRow(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(
-                        start = SurahNumberSlotWidth + SurahNumberSlotSpacing,
-                        end = 14.dp,
-                        bottom = 14.dp
-                    ),
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                verticalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                // Revelation — tinted (Makkah gold / Madinah teal)
-                NimazBadge(
-                    text = if (isMeccan) stringResource(R.string.quran_home_makkah)
-                    else stringResource(R.string.quran_home_madinah),
-                    size = NimazBadgeSize.SMALL,
-                    tone = if (isMeccan) NimazTone.SUCCESS else NimazTone.ACCENT,
-                    emphasis = NimazBadgeEmphasis.SOFT
-                )
-                NimazBadge(
-                    text = pluralStringResource(
-                        R.plurals.quran_home_verses_count,
-                        surah.ayahCount,
-                        surah.ayahCount
-                    ),
-                    size = NimazBadgeSize.SMALL,
-                    tone = NimazTone.NEUTRAL,
-                    emphasis = NimazBadgeEmphasis.OUTLINED
-                )
-                if (startPage > 0) {
-                    NimazBadge(
-                        text = stringResource(
-                            R.string.quran_home_page_range_format,
-                            startPage,
-                            endPage
-                        ),
-                        size = NimazBadgeSize.SMALL,
-                        tone = NimazTone.NEUTRAL,
-                        emphasis = NimazBadgeEmphasis.OUTLINED
-                    )
-                    NimazBadge(
-                        text = stringResource(
-                            R.string.quran_home_juz_indicator,
-                            juzNumber
-                        ),
-                        size = NimazBadgeSize.SMALL,
-                        tone = NimazTone.NEUTRAL,
-                        emphasis = NimazBadgeEmphasis.OUTLINED
-                    )
-                }
-                // Rukūʿ — the surah's own sections. Structural like the verse count beside
-                // it (and unlike the page span, independent of the Mushaf edition), so it
-                // reads in the same neutral outline.
-                if (rukuCount > 0) {
-                    NimazBadge(
-                        text = pluralStringResource(
-                            R.plurals.quran_home_ruku_count,
-                            rukuCount,
-                            rukuCount
-                        ),
-                        size = NimazBadgeSize.SMALL,
-                        tone = NimazTone.NEUTRAL,
-                        emphasis = NimazBadgeEmphasis.OUTLINED
-                    )
-                }
-            }
-
-            // Khatam progress bar (unchanged)
             if (isKhatamActive && khatamTotalAyahs > 0 && khatamReadCount > 0) {
-                LinearProgressIndicator(
-                    progress = { khatamReadCount.toFloat() / khatamTotalAyahs },
+                NimazProgressTrack(
+                    progress = khatamReadCount.toFloat() / khatamTotalAyahs,
+                    tone = if (isComplete) NimazTone.ACCENT else NimazTone.SUCCESS,
+                    size = NimazProgressSize.THIN,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(3.dp)
-                        .padding(horizontal = 14.dp),
-                    color = if (isComplete) MaterialTheme.colorScheme.primary
-                    else MaterialTheme.colorScheme.tertiary,
-                    trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                        .padding(start = 12.dp, end = 12.dp, bottom = 8.dp)
                 )
-                Spacer(modifier = Modifier.height(4.dp))
             }
         }
     }
@@ -250,20 +222,17 @@ private fun SurahListItemPreview() {
         SurahListItem(
             surah = Surah(
                 number = 1,
-                nameArabic = "\u0627\u0644\u0641\u0627\u062A\u062D\u0629",
+                nameArabic = "الفاتحة",
                 nameEnglish = "Al-Fatihah",
                 nameTransliteration = "The Opening",
                 revelationType = RevelationType.MECCAN,
                 ayahCount = 7,
-                juzStart = 1,
                 orderInMushaf = 5,
                 startPage = 1
             ),
             onClick = {},
             onInfoClick = {},
             startPage = 1,
-            endPage = 1,
-            rukuCount = 1
         )
     }
 }
@@ -274,21 +243,18 @@ private fun SurahListItemLongNamePreview() {
     NimazTheme {
         SurahListItem(
             surah = Surah(
-                number = 400,
-                nameArabic = "\u0627\u0644\u0645\u062C\u0627\u062F\u0644\u0629",
+                number = 58,
+                nameArabic = "المجادلة",
                 nameEnglish = "Al-Mujadilah",
                 nameTransliteration = "The Pleading Woman",
                 revelationType = RevelationType.MEDINAN,
                 ayahCount = 22,
-                juzStart = 28,
                 orderInMushaf = 105,
                 startPage = 542
             ),
             onClick = {},
             onInfoClick = {},
             startPage = 542,
-            endPage = 545,
-            rukuCount = 3
         )
     }
 }

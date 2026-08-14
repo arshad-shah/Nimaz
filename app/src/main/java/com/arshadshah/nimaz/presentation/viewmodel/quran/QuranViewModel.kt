@@ -10,6 +10,7 @@ import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.core.text.StringProvider
 import com.arshadshah.nimaz.core.time.TodayProvider
+import com.arshadshah.nimaz.core.monitoring.launchBestEffort
 import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.data.audio.AudioState
 import com.arshadshah.nimaz.data.audio.QuranAudioManager
@@ -63,19 +64,6 @@ import kotlin.math.abs
 
 enum class ReadingMode { SURAH, JUZ, PAGE }
 
-/**
- * A Quran favourite enriched for the Favourites tab — the stored [QuranFavorite] plus the
- * ayah's Arabic text, so the tab can show the same rich card (badge, timestamp, Arabic
- * preview, overflow menu) as the Bookmarks screen.
- */
-data class FavoriteAyahUi(
-    val ayahId: Int,
-    val surahNumber: Int,
-    val ayahNumber: Int,
-    val arabicText: String?,
-    val createdAt: Long,
-)
-
 @HiltViewModel
 class QuranViewModel @Inject constructor(
     private val quranUseCases: QuranUseCases,
@@ -92,9 +80,6 @@ class QuranViewModel @Inject constructor(
 
     private val _readerState = MutableStateFlow(QuranReaderUiState())
     val readerState: StateFlow<QuranReaderUiState> = _readerState.asStateFlow()
-
-    private val _searchState = MutableStateFlow(QuranSearchUiState())
-    val searchState: StateFlow<QuranSearchUiState> = _searchState.asStateFlow()
 
     private val _bookmarksState = MutableStateFlow(QuranBookmarksUiState())
     val bookmarksState: StateFlow<QuranBookmarksUiState> = _bookmarksState.asStateFlow()
@@ -127,10 +112,6 @@ class QuranViewModel @Inject constructor(
     }
 
     private var passagesJob: Job? = null
-
-    // Debounced search support
-    private val searchQueryFlow = MutableStateFlow("")
-    private var searchJob: Job? = null
 
     /**
      * What the reader is currently showing. The ayah queries take the translator id as a
@@ -210,24 +191,12 @@ class QuranViewModel @Inject constructor(
         loadSurahs()
         loadReadingProgress()
         loadBookmarks()
-        loadFavorites()
         loadFavoriteAyahIds()
         observeMushafPagination()
-        loadRukuCounts()
         loadVerseOfTheDay()
         observeQuranSettings()
-        setupDebouncedSearch()
         observeActiveKhatam()
         observeActiveKhatamForHome()
-    }
-
-    @OptIn(FlowPreview::class)
-    private fun setupDebouncedSearch() {
-        searchQueryFlow
-            .debounce(300L)
-            .distinctUntilChanged()
-            .onEach { query -> performSearch(query) }
-            .launchIn(viewModelScope)
     }
 
     fun onEvent(event: QuranEvent) {
@@ -248,18 +217,6 @@ class QuranViewModel @Inject constructor(
             }
             is QuranEvent.PrefetchPage -> loadPage(event.pageNumber, makeActive = false)
             is QuranEvent.LoadMushafPageLayout -> loadMushafPageLayout(event.pageNumber)
-            is QuranEvent.Search -> {
-                telemetry.search("quran", event.query.trim().length)
-                search(event.query)
-            }
-            is QuranEvent.SetTopTab -> {
-                telemetry.featureUsed(AppAnalytics.Feature.QURAN, "set_top_tab")
-                _homeState.update { it.copy(topTab = event.index) }
-            }
-            is QuranEvent.SetTab -> {
-                telemetry.featureUsed(AppAnalytics.Feature.QURAN, "set_tab")
-                _homeState.update { it.copy(selectedTab = event.index) }
-            }
             is QuranEvent.ToggleBookmark -> {
                 telemetry.featureUsed(AppAnalytics.Feature.QURAN, "toggle_bookmark")
                 toggleBookmark(
@@ -277,17 +234,6 @@ class QuranViewModel @Inject constructor(
                     event.ayahNumber
                 )
             }
-
-            is QuranEvent.RemoveFavorite -> {
-                telemetry.featureUsed(AppAnalytics.Feature.QURAN, "remove_favorite")
-                removeFavorite(event.favorite)
-            }
-            QuranEvent.UndoRemoveFavorite -> {
-                telemetry.featureUsed(AppAnalytics.Feature.QURAN, "undo_remove_favorite")
-                undoRemoveFavorite()
-            }
-            QuranEvent.DismissFavoriteUndo ->
-                _homeState.update { it.copy(recentlyRemovedFavorite = null) }
 
             is QuranEvent.UpdateReadingPosition -> updateReadingPosition(
                 event.surah,
@@ -309,11 +255,6 @@ class QuranViewModel @Inject constructor(
                 launchSafely(telemetry, AppAnalytics.Feature.QURAN, "on_event") { quranSettings.setShowTranslation(newValue) }
             }
 
-            QuranEvent.ClearSearch -> {
-                _searchState.update { QuranSearchUiState() }
-                _homeState.update { it.copy(searchQuery = "", filteredSurahs = it.surahs) }
-            }
-
             // Deliberately unlogged: no screen emits this. The analytics that used to sit here
             // reported zero for "surah audio played" while `PlaySurahFromInfo` below — the branch
             // the play button actually reaches — recorded nothing. A dashboard reading zero for a
@@ -330,8 +271,41 @@ class QuranViewModel @Inject constructor(
 
             is QuranEvent.PreviewReciter -> {
                 telemetry.featureUsed(AppAnalytics.Feature.QURAN, "preview_reciter")
-                audioManager.setReciter(event.reciterId)
+                audioManager.setReciter(event.reciterId, restartIfPlaying = false)
                 playAyahAudio(ayahGlobalId = 1, surahNumber = 1, ayahNumber = 1)
+            }
+
+            is QuranEvent.SeekAudioTo -> {
+                telemetry.featureUsed(AppAnalytics.Feature.QURAN, "audio_seek")
+                // Whole-surah coordinates: the rail measures the recitation, not the file the
+                // player happens to be on. The manager has been able to do this since the
+                // playlist work; only the UI never offered it.
+                audioManager.seekToTotal(event.positionMs.coerceAtLeast(0L))
+            }
+
+            QuranEvent.NextAyahAudio -> {
+                telemetry.featureUsed(AppAnalytics.Feature.QURAN, "audio_next_ayah")
+                audioManager.skipToNext()
+            }
+
+            QuranEvent.PreviousAyahAudio -> {
+                telemetry.featureUsed(AppAnalytics.Feature.QURAN, "audio_previous_ayah")
+                audioManager.skipToPrevious()
+            }
+
+            is QuranEvent.SetRecitationRepeat -> {
+                telemetry.featureUsed(AppAnalytics.Feature.QURAN, "audio_repeat")
+                audioManager.setRepeat(event.repeat)
+            }
+
+            is QuranEvent.SetPlaybackSpeed -> {
+                telemetry.featureUsed(AppAnalytics.Feature.QURAN, "audio_speed")
+                audioManager.setSpeed(event.speed)
+            }
+
+            is QuranEvent.SetFollowAlong -> {
+                telemetry.featureUsed(AppAnalytics.Feature.QURAN, "audio_follow_along")
+                audioManager.setFollowAlong(event.enabled)
             }
 
             QuranEvent.PauseAudio -> audioManager.togglePlayPause()
@@ -355,6 +329,11 @@ class QuranViewModel @Inject constructor(
             // `markAyahsRead`/`unmarkAyahRead` for exactly the same effect. Instrumenting them
             // would have produced two more metrics that read zero for ever, which is the
             // defect this issue is about.
+            is QuranEvent.SetAyahNote -> {
+                telemetry.featureUsed(AppAnalytics.Feature.QURAN, "set_ayah_note")
+                setAyahNote(event)
+            }
+
             is QuranEvent.ToggleKhatamAyah -> {
                 telemetry.featureUsed(AppAnalytics.Feature.QURAN, "khatam_toggle_ayah")
                 toggleKhatamAyah(event.ayahId)
@@ -620,25 +599,9 @@ class QuranViewModel @Inject constructor(
             quranUseCases.getSurahList()
                 .collect { surahs ->
                     _homeState.update { state ->
-                        state.copy(
-                            surahs = surahs,
-                            filteredSurahs = filterSurahs(surahs, state.searchQuery),
-                            isLoading = false
-                        )
+                        state.copy(surahs = surahs, isLoading = false)
                     }
                 }
-        }
-    }
-
-    /**
-     * Rukūʿ counts for the surah list's structure badges. Independent of the Mushaf edition —
-     * a surah's sections are a property of the surah, not of a pagination.
-     */
-    private fun loadRukuCounts() {
-        launchSafely(telemetry, AppAnalytics.Feature.QURAN, "load_ruku_counts") {
-            quranUseCases.getSurahRukuCounts().collect { counts ->
-                _homeState.update { it.copy(rukuCounts = counts) }
-            }
         }
     }
 
@@ -712,6 +675,12 @@ class QuranViewModel @Inject constructor(
             quranUseCases.getBookmarks()
                 .collect { bookmarks ->
                     _bookmarksState.update { it.copy(bookmarks = bookmarks, isLoading = false) }
+                    // The annotated subset, for the reader's note editor. Derived from the
+                    // stream the bookmarks screen already collects rather than a second query.
+                    val notes = bookmarks
+                        .mapNotNull { bm -> bm.note?.takeIf { it.isNotBlank() }?.let { bm.ayahId to it } }
+                        .toMap()
+                    _readerState.update { it.copy(ayahNotes = notes) }
                 }
         }
     }
@@ -917,107 +886,35 @@ class QuranViewModel @Inject constructor(
         }
     }
 
-    private fun search(query: String) {
-        _homeState.update { it.copy(searchQuery = query) }
-
-        // Always update filtered surahs immediately (no debounce needed for filtering)
-        _homeState.update { state ->
-            state.copy(filteredSurahs = filterSurahs(state.surahs, query))
+    /**
+     * Save the reader's note on a verse, bookmarking it if it was not already.
+     *
+     * `bookmarks` keys on `(kind, target_id)` and carries the note as a column, so there is no
+     * such thing as a note without a mark — and a reader writing one is telling us the verse
+     * matters, which is the same statement a bookmark makes.
+     */
+    private fun setAyahNote(event: QuranEvent.SetAyahNote) {
+        launchBestEffort(telemetry, AppAnalytics.Feature.QURAN, "set_ayah_note") {
+            val existing = quranUseCases.getBookmarks().first()
+                .firstOrNull { it.ayahId == event.ayahId }
+            val note = event.note?.takeIf { it.isNotBlank() }
+            if (existing == null) {
+                quranUseCases.insertBookmark(
+                    QuranBookmark(
+                        id = 0,
+                        ayahId = event.ayahId,
+                        surahNumber = event.surahNumber,
+                        ayahNumber = event.ayahNumber,
+                        note = note,
+                        color = null,
+                        createdAt = System.currentTimeMillis(),
+                        updatedAt = System.currentTimeMillis(),
+                    )
+                )
+            } else {
+                quranUseCases.updateBookmark(existing.copy(note = note))
+            }
         }
-
-        if (query.isBlank()) {
-            _searchState.update { QuranSearchUiState() }
-            searchQueryFlow.value = ""
-            return
-        }
-
-        // Mark as searching and trigger debounced search
-        _searchState.update { it.copy(query = query, isSearching = true) }
-        searchQueryFlow.value = query
-    }
-
-    private fun performSearch(query: String) {
-        if (query.isBlank()) {
-            _searchState.update { QuranSearchUiState() }
-            return
-        }
-
-        searchJob?.cancel()
-        searchJob = launchSafely(telemetry, AppAnalytics.Feature.QURAN, "perform_search") {
-            quranUseCases.searchQuran(query, translatorId())
-                .collect { results ->
-                    // Populate surah names and limit results to 50 for performance
-                    val surahs = _homeState.value.surahs
-                    val enrichedResults = results.take(50).map { result ->
-                        if (result.surahName.isEmpty()) {
-                            val surahName =
-                                surahs.find { it.number == result.ayah.surahNumber }?.nameEnglish
-                                    ?: strings.get(
-                                        R.string.quran_home_surah_fallback,
-                                        result.ayah.surahNumber
-                                    )
-                            result.copy(surahName = surahName)
-                        } else {
-                            result
-                        }
-                    }
-                    _searchState.update { it.copy(results = enrichedResults, isSearching = false) }
-                }
-        }
-    }
-
-    private fun filterSurahs(surahs: List<Surah>, query: String): List<Surah> {
-        return surahs.filter { surah ->
-            query.isBlank() ||
-                    surah.nameEnglish.contains(query, ignoreCase = true) ||
-                    surah.nameTransliteration.contains(query, ignoreCase = true) ||
-                    surah.nameArabic.contains(query)
-        }
-    }
-
-    private fun loadFavorites() {
-        launchSafely(telemetry, AppAnalytics.Feature.QURAN, "load_favorites") {
-            quranUseCases.getFavorites()
-                .collect { favorites ->
-                    // Enrich each favourite with its Arabic text so the Favourites tab can
-                    // render the same rich card as the Bookmarks screen.
-                    val enriched = favorites.map { fav ->
-                        FavoriteAyahUi(
-                            ayahId = fav.ayahId,
-                            surahNumber = fav.surahNumber,
-                            ayahNumber = fav.ayahNumber,
-                            arabicText = quranUseCases.getAyahById(fav.ayahId)?.textArabic,
-                            createdAt = fav.createdAt,
-                        )
-                    }
-                    _homeState.update { it.copy(favorites = enriched) }
-                }
-        }
-    }
-
-    // toggleFavorite both removes and (on undo) re-adds, so the same call drives the
-    // swipe-to-delete removal and its Undo restore.
-    private fun removeFavorite(favorite: FavoriteAyahUi) {
-        launchSafely(telemetry, AppAnalytics.Feature.QURAN, "remove_favorite") {
-            quranUseCases.toggleFavorite(
-                favorite.ayahId,
-                favorite.surahNumber,
-                favorite.ayahNumber
-            )
-        }
-        _homeState.update { it.copy(recentlyRemovedFavorite = favorite) }
-    }
-
-    private fun undoRemoveFavorite() {
-        val favorite = _homeState.value.recentlyRemovedFavorite ?: return
-        launchSafely(telemetry, AppAnalytics.Feature.QURAN, "undo_remove_favorite") {
-            quranUseCases.toggleFavorite(
-                favorite.ayahId,
-                favorite.surahNumber,
-                favorite.ayahNumber
-            )
-        }
-        _homeState.update { it.copy(recentlyRemovedFavorite = null) }
     }
 
     private fun loadFavoriteAyahIds() {

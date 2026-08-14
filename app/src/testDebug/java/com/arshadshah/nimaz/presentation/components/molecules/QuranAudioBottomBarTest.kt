@@ -15,8 +15,12 @@ class QuranAudioBottomBarTest {
     @get:Rule
     val composeRule = createComponentComposeRule()
 
+    /**
+     * The bar is a *player*, not furniture: with nothing playing and nothing being fetched it
+     * draws nothing at all, so the reader keeps the bottom of the page.
+     */
     @Test
-    fun idleState_showsSurahNameAndPositionChips_andPlayButton() {
+    fun idleState_rendersNothing() {
         composeRule.setThemedContent {
             AudioBottomBar(
                 isAudioActive = false,
@@ -31,45 +35,46 @@ class QuranAudioBottomBarTest {
                 totalAyahsInSurah = 286,
                 pageNumber = 8,
                 juzNumber = 1,
-                onPlayClick = {},
-                onStopClick = {}
+                onPlayClick = {}
             )
         }
 
-        composeRule.onNodeWithText("Al-Baqarah").assertExists()
-        // Position is now a single combined line ("Ayah X / Y · Juz · p.").
-        composeRule.onNodeWithText("Ayah 47 / 286", substring = true).assertExists()
-        composeRule.onNodeWithText("p. 8", substring = true).assertExists()
-        composeRule.onNodeWithText("Juz 1", substring = true).assertExists()
-        composeRule.onNodeWithContentDescription("Play").assertExists()
+        composeRule.onNodeWithText("Al-Baqarah").assertDoesNotExist()
+        composeRule.onNodeWithContentDescription("Play").assertDoesNotExist()
     }
 
     @Test
-    fun idleState_noStopButton() {
+    fun activeState_showsSurahNameAndPosition_andTransport() {
         composeRule.setThemedContent {
             AudioBottomBar(
-                isAudioActive = false,
+                isAudioActive = true,
                 isPlaying = false,
                 isDownloading = false,
                 isPreparing = false,
                 downloadProgress = 0f,
                 downloadedCount = 0,
                 totalToDownload = 0,
-                surahName = "Al-Fatihah",
-                currentAyahInSurah = 1,
-                totalAyahsInSurah = 7,
-                pageNumber = 1,
+                surahName = "Al-Baqarah",
+                currentAyahInSurah = 47,
+                totalAyahsInSurah = 286,
+                pageNumber = 8,
                 juzNumber = 1,
-                onPlayClick = {},
-                onStopClick = {}
+                onPlayClick = {}
             )
         }
 
-        composeRule.onNodeWithContentDescription("Stop audio").assertDoesNotExist()
+        composeRule.onNodeWithText("Al-Baqarah").assertExists()
+        // Position is a single combined line ("Ayah X / Y · Juz · p.").
+        composeRule.onNodeWithText("Ayah 47 / 286", substring = true).assertExists()
+        composeRule.onNodeWithText("p. 8", substring = true).assertExists()
+        composeRule.onNodeWithText("Juz 1", substring = true).assertExists()
+        composeRule.onNodeWithContentDescription("Play").assertExists()
+        composeRule.onNodeWithContentDescription("Previous verse").assertExists()
+        composeRule.onNodeWithContentDescription("Next verse").assertExists()
     }
 
     @Test
-    fun playingState_showsPauseIcon_andStopButton() {
+    fun playingState_showsPauseIcon() {
         composeRule.setThemedContent {
             AudioBottomBar(
                 isAudioActive = true,
@@ -84,13 +89,15 @@ class QuranAudioBottomBarTest {
                 totalAyahsInSurah = 7,
                 pageNumber = 1,
                 juzNumber = 1,
-                onPlayClick = {},
-                onStopClick = {}
+                onPlayClick = {}
             )
         }
 
         composeRule.onNodeWithContentDescription("Pause").assertExists()
-        composeRule.onNodeWithContentDescription("Stop audio").assertExists()
+        // Stop is not on the bar: it lives in the recitation sheet behind the settings button,
+        // out of mis-tap range of next/previous.
+        composeRule.onNodeWithContentDescription("Stop audio").assertDoesNotExist()
+        composeRule.onNodeWithContentDescription("Recitation").assertExists()
     }
 
     @Test
@@ -113,16 +120,15 @@ class QuranAudioBottomBarTest {
                 totalAyahsInSurah = 286,
                 pageNumber = 2,
                 juzNumber = 1,
-                onPlayClick = {},
-                onStopClick = {}
+                onPlayClick = {}
             )
         }
 
-        composeRule.onNodeWithText("Downloading 5 / 7…").assertExists()
-        // Surah name should not be shown in preparing state
-        composeRule.onNodeWithText("Al-Baqarah").assertDoesNotExist()
-        // Stop button visible while preparing
-        composeRule.onNodeWithContentDescription("Stop audio").assertExists()
+        composeRule.onNodeWithText("Downloading 5 of 7").assertExists()
+        // The download strip sits *above* the now-playing line rather than replacing it: what
+        // is being fetched is the thing being named, and hiding it left a progress bar with no
+        // subject.
+        composeRule.onNodeWithText("Al-Baqarah").assertExists()
     }
 
     @Test
@@ -130,7 +136,7 @@ class QuranAudioBottomBarTest {
         var clicked = false
         composeRule.setThemedContent {
             AudioBottomBar(
-                isAudioActive = false,
+                isAudioActive = true,
                 isPlaying = false,
                 isDownloading = false,
                 isPreparing = false,
@@ -142,8 +148,7 @@ class QuranAudioBottomBarTest {
                 totalAyahsInSurah = 7,
                 pageNumber = 1,
                 juzNumber = 1,
-                onPlayClick = { clicked = true },
-                onStopClick = {}
+                onPlayClick = { clicked = true }
             )
         }
 
@@ -152,36 +157,10 @@ class QuranAudioBottomBarTest {
     }
 
     @Test
-    fun stopClick_invokesCallback() {
-        var stopped = false
-        composeRule.setThemedContent {
-            AudioBottomBar(
-                isAudioActive = true,
-                isPlaying = true,
-                isDownloading = false,
-                isPreparing = false,
-                downloadProgress = 0f,
-                downloadedCount = 0,
-                totalToDownload = 0,
-                surahName = "Al-Fatihah",
-                currentAyahInSurah = 4,
-                totalAyahsInSurah = 7,
-                pageNumber = 1,
-                juzNumber = 1,
-                onPlayClick = {},
-                onStopClick = { stopped = true }
-            )
-        }
-
-        composeRule.onNodeWithContentDescription("Stop audio").performClick()
-        assertThat(stopped).isTrue()
-    }
-
-    @Test
     fun zeroTotalAyahs_stillRendersSurahName() {
         composeRule.setThemedContent {
             AudioBottomBar(
-                isAudioActive = false,
+                isAudioActive = true,
                 isPlaying = false,
                 isDownloading = false,
                 isPreparing = false,
@@ -193,8 +172,7 @@ class QuranAudioBottomBarTest {
                 totalAyahsInSurah = 0,
                 pageNumber = 604,
                 juzNumber = 30,
-                onPlayClick = {},
-                onStopClick = {}
+                onPlayClick = {}
             )
         }
 

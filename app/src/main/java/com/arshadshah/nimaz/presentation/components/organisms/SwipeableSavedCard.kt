@@ -11,6 +11,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
@@ -31,6 +34,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.em
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
@@ -190,7 +196,14 @@ fun SwipeableSavedCard(
     subtitle: String? = null,
     arabicText: String? = null,
     note: String? = null,
-    leading: @Composable () -> Unit,
+    /**
+     * The kind's colour, drawn as a spine down the left edge and used for [kindLabel]. Null
+     * leaves the card unmarked.
+     */
+    accent: Color? = null,
+    /** The kind, set small and letter-spaced in [accent] under the title. */
+    kindLabel: String? = null,
+    leading: (@Composable () -> Unit)? = null,
 ) {
     val card: @Composable () -> Unit = {
         NimazCard(
@@ -199,10 +212,24 @@ fun SwipeableSavedCard(
             tone = NimazTone.NEUTRAL,
             elevation = 0.dp
         ) {
+            Row(modifier = Modifier.height(IntrinsicSize.Min)) {
+            // A spine in the kind's colour down the left edge, so a list of saved items is
+            // scannable by colour before it is read — the same three colours the ayah sheet
+            // uses for bookmark, favourite and note.
+            accent?.let {
+                Box(
+                    modifier = Modifier
+                        .padding(start = 12.dp, top = 14.dp, bottom = 14.dp)
+                        .width(3.dp)
+                        .fillMaxHeight()
+                        .clip(RoundedCornerShape(99.dp))
+                        .background(it)
+                )
+            }
             Column(modifier = Modifier.padding(16.dp)) {
                 // Header: leading badge + relative time + overflow.
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    leading()
+                    leading?.invoke()
                     Spacer(modifier = Modifier.weight(1f))
                     Text(
                         text = stringResource(
@@ -243,9 +270,25 @@ fun SwipeableSavedCard(
                     )
                 }
 
-                // Arabic preview, set off by a gold ornamental divider.
+                // What kind of save this is, in its own colour. It replaces the filled corpus
+                // badge that used to lead the card: the corpus is the axis you filter by, the
+                // kind is the one you are looking at.
+                if (!kindLabel.isNullOrBlank() && accent != null) {
+                    Text(
+                        text = kindLabel,
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        letterSpacing = 0.07.em,
+                        color = accent,
+                        modifier = Modifier.padding(top = 6.dp),
+                    )
+                }
+
+                // Arabic preview. No ornamental divider: a gold floret rule on every row turned
+                // a list into a page of ornament, and the Arabic is already set apart by being
+                // Arabic.
                 if (!arabicText.isNullOrBlank()) {
-                    QuranOrnamentalDivider(modifier = Modifier.padding(vertical = 4.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
                     ArabicText(
                         text = arabicText,
                         size = ArabicTextSize.SMALL,
@@ -268,6 +311,7 @@ fun SwipeableSavedCard(
                         overflow = TextOverflow.Ellipsis
                     )
                 }
+            }
             }
         }
     }

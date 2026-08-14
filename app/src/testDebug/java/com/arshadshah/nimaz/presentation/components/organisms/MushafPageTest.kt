@@ -44,7 +44,6 @@ class MushafPageTest {
         nameTransliteration = "The Opening",
         revelationType = RevelationType.MECCAN,
         ayahCount = 7,
-        juzStart = 1,
         orderInMushaf = 1,
         startPage = 1
     )
@@ -56,7 +55,6 @@ class MushafPageTest {
         nameTransliteration = "The Cow",
         revelationType = RevelationType.MEDINAN,
         ayahCount = 286,
-        juzStart = 1,
         orderInMushaf = 2,
         startPage = 2
     )
@@ -89,9 +87,10 @@ class MushafPageTest {
             )
         }
 
-        // SurahHeaderCartouche renders the English name and revelation badge
-        composeRule.onNodeWithText("Al-Fatihah").assertExists()
-        composeRule.onNodeWithText("Meccan").assertExists()
+        // The paper page prints the surah's Arabic name between rules — no English name and
+        // no revelation badge, which are card furniture rather than things a mushaf prints.
+        composeRule.onNodeWithText("الفاتحة").assertExists()
+        composeRule.onNodeWithText("Meccan").assertDoesNotExist()
     }
 
     @Test
@@ -107,8 +106,8 @@ class MushafPageTest {
             )
         }
 
-        // The header (and therefore the English name) is not rendered mid-surah
-        composeRule.onNodeWithText("Al-Fatihah").assertDoesNotExist()
+        // The header (and therefore the surah's name) is not rendered mid-surah
+        composeRule.onNodeWithText("الفاتحة").assertDoesNotExist()
         composeRule.onNodeWithText("5").assertExists()
     }
 
@@ -125,8 +124,8 @@ class MushafPageTest {
             )
         }
 
-        composeRule.onNodeWithText("Al-Fatihah").assertExists()
-        composeRule.onNodeWithText("Al-Baqarah").assertExists()
+        composeRule.onNodeWithText("الفاتحة").assertExists()
+        composeRule.onNodeWithText("البقرة").assertExists()
     }
 
     @Test

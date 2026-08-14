@@ -51,6 +51,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -61,7 +62,21 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.navigation.ScreenTags
 import com.arshadshah.nimaz.domain.model.Ayah
+import com.arshadshah.nimaz.domain.model.RecitationRepeat
+import com.arshadshah.nimaz.domain.model.RecitationSpeed
+import com.arshadshah.nimaz.presentation.components.molecules.RecitationSheet
+import com.arshadshah.nimaz.core.share.ContentShareManager
+import com.arshadshah.nimaz.core.share.Shareables
+import com.arshadshah.nimaz.domain.model.AyahReference
+import com.arshadshah.nimaz.presentation.components.molecules.AyahActionSheet
+import com.arshadshah.nimaz.presentation.components.molecules.AyahSheetActions
+import com.arshadshah.nimaz.presentation.components.molecules.ReaderAnchorBar
+import com.arshadshah.nimaz.presentation.components.molecules.ReaderGoToSheet
+import com.arshadshah.nimaz.presentation.components.molecules.NoteEditorSheet
+import com.arshadshah.nimaz.presentation.components.atoms.getDisplayArabicText
+import com.arshadshah.nimaz.presentation.components.organisms.copyAyahToClipboard
 import com.arshadshah.nimaz.domain.model.MushafLineType
 import com.arshadshah.nimaz.domain.model.MushafPageLayout
 import com.arshadshah.nimaz.domain.model.Surah
@@ -106,6 +121,7 @@ fun QuranReaderScreen(
      */
     onNavigateToSubjects: (surahNumber: Int?) -> Unit = {},
     onNavigateToNextSurah: (Int) -> Unit = {},
+    onNavigateToReciters: () -> Unit = {},
     onPageModeChanged: (Boolean) -> Unit = {},
     viewModel: QuranViewModel = hiltViewModel()
 ) {
@@ -118,6 +134,14 @@ fun QuranReaderScreen(
     val coroutineScope = rememberCoroutineScope()
     var usePageView by rememberSaveable { mutableStateOf(false) }
     var showTajweedLegend by remember { mutableStateOf(false) }
+    // The verse the ayah sheet is acting on, or null when it is closed. State, not navigation:
+    // the sheet is raised over the reader and must leave the reading position exactly as it is.
+    var sheetAyah by remember { mutableStateOf<Ayah?>(null) }
+    // The verse whose note is being written, or null when the editor is closed.
+    var noteAyah by remember { mutableStateOf<Ayah?>(null) }
+    var showRecitationSheet by remember { mutableStateOf(false) }
+    var showGoToSheet by remember { mutableStateOf(false) }
+    val copiedMessage = stringResource(R.string.ayah_copied_to_clipboard)
     var savedListIndex by rememberSaveable { mutableIntStateOf(0) }
     var savedListOffset by rememberSaveable { mutableIntStateOf(0) }
     var pendingScrollRestore by rememberSaveable { mutableStateOf(false) }
@@ -217,20 +241,6 @@ fun QuranReaderScreen(
         )
     }
 
-    // Auto-scroll to currently playing ayah
-    LaunchedEffect(audioState.currentAyahId) {
-        if (audioState.currentAyahId > 0) {
-            val displayAyahs = when (state.readingMode) {
-                ReadingMode.SURAH -> state.surahWithAyahs?.ayahs ?: emptyList()
-                ReadingMode.JUZ, ReadingMode.PAGE -> state.ayahs
-            }
-            val idx = displayAyahs.indexOfFirst { it.id == audioState.currentAyahId }
-            if (idx >= 0) {
-                listState.animateScrollToItem(idx + 1)
-            }
-        }
-    }
-
     // Scroll to initial ayah when content first loads (for search/bookmarks/favorites navigation)
     LaunchedEffect(state.surahWithAyahs, initialAyahNumber) {
         if (initialAyahNumber > 1 && state.readingMode == ReadingMode.SURAH) {
@@ -322,6 +332,33 @@ fun QuranReaderScreen(
         }
     }
 
+    // Follow along: keep the verse being recited on screen.
+    //
+    // Gated on the toggle now, rather than always on. Scrolling the page out from under someone
+    // who started audio and then went to read something else is the reader arguing with them;
+    // the highlight alone still says where the recitation is. In mushaf mode this turns the
+    // page, which the list-only version could not do at all.
+    LaunchedEffect(audioState.currentAyahId, audioState.followAlong) {
+        if (audioState.currentAyahId <= 0 || !audioState.followAlong) return@LaunchedEffect
+        val recitedAyahs = when (state.readingMode) {
+            ReadingMode.SURAH -> state.surahWithAyahs?.ayahs ?: emptyList()
+            ReadingMode.JUZ, ReadingMode.PAGE -> state.ayahs
+        }
+        val recited = recitedAyahs.firstOrNull { it.id == audioState.currentAyahId }
+        if (usePageView || state.readingMode == ReadingMode.PAGE) {
+            // Mushaf mode: turn to the page the verse is printed on.
+            val targetPage = recited?.page ?: return@LaunchedEffect
+            pagerState?.let { ps ->
+                val targetIndex =
+                    if (isDualPageMode) (targetPage - 1) / 2 else targetPage - 1
+                if (ps.currentPage != targetIndex) ps.animateScrollToPage(targetIndex)
+            }
+        } else {
+            val idx = recitedAyahs.indexOfFirst { it.id == audioState.currentAyahId }
+            if (idx >= 0) listState.animateScrollToItem(idx + 1)
+        }
+    }
+
     // Load page(s) when pager settles
     pagerState?.let { ps ->
         val settledIndex = ps.settledPage
@@ -359,13 +396,8 @@ fun QuranReaderScreen(
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
                             )
-                            if (headerSubtitle.isNotEmpty()) {
-                                Text(
-                                    text = headerSubtitle,
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
+                            // No subtitle here: where you are is said once, in the anchor
+                            // bar below, which is also the control for changing it.
                         }
                     }
                 },
@@ -407,9 +439,53 @@ fun QuranReaderScreen(
                     // only offered where switching is meaningful (dedicated page mode has
                     // nothing to toggle to).
                     var menuExpanded by remember { mutableStateOf(false) }
+                    var modeMenuExpanded by remember { mutableStateOf(false) }
                     val canToggleView = usePageView ||
                         state.readingMode == ReadingMode.SURAH ||
                         state.readingMode == ReadingMode.JUZ
+
+                    // Reading mode gets its own control rather than a row buried in the
+                    // overflow next to Passages and Settings. Two modes, not three: the
+                    // 16-line edition is a *script* (`MushafScript`, a persisted
+                    // `SettingsQuran` preference that also changes the page count), not a view
+                    // of the same page, so it stays in reader settings — putting it here would
+                    // mean two places writing one preference. The icon shows the mode you are
+                    // in, which nothing on the screen said before.
+                    if (canToggleView) {
+                        IconButton(
+                            onClick = { modeMenuExpanded = true },
+                            modifier = Modifier.testTag(ScreenTags.QuranReaderModeMenu),
+                        ) {
+                            NimazIcon(
+                                imageVector = if (usePageView) Icons.Default.AutoStories
+                                else Icons.AutoMirrored.Filled.ViewList,
+                                contentDescription = stringResource(R.string.reader_mode)
+                            )
+                        }
+                        NimazDropdownMenu(
+                            expanded = modeMenuExpanded,
+                            onDismissRequest = { modeMenuExpanded = false },
+                        ) {
+                            NimazDropdownRow(
+                                text = stringResource(R.string.reader_mode_translation),
+                                leadingIcon = Icons.AutoMirrored.Filled.ViewList,
+                                selected = !usePageView,
+                                onClick = {
+                                    usePageView = false
+                                    modeMenuExpanded = false
+                                },
+                            )
+                            NimazDropdownRow(
+                                text = stringResource(R.string.reader_mode_mushaf),
+                                leadingIcon = Icons.Default.AutoStories,
+                                selected = usePageView,
+                                onClick = {
+                                    usePageView = true
+                                    modeMenuExpanded = false
+                                },
+                            )
+                        }
+                    }
 
                     IconButton(onClick = { menuExpanded = true }) {
                         NimazIcon(
@@ -421,24 +497,6 @@ fun QuranReaderScreen(
                         expanded = menuExpanded,
                         onDismissRequest = { menuExpanded = false },
                     ) {
-                        if (canToggleView) {
-                            NimazDropdownRow(
-                                text = if (usePageView) {
-                                    stringResource(R.string.cd_switch_to_list_view)
-                                } else {
-                                    stringResource(R.string.cd_switch_to_page_view)
-                                },
-                                leadingIcon = if (usePageView) {
-                                    Icons.AutoMirrored.Filled.ViewList
-                                } else {
-                                    Icons.Default.AutoStories
-                                },
-                                onClick = {
-                                    usePageView = !usePageView
-                                    menuExpanded = false
-                                },
-                            )
-                        }
                         // The surah's table of contents, opened at the verse being read.
                         // Reachable here and not only from surah info, because "what is this
                         // passage about, and what comes next" is a question you have while
@@ -546,11 +604,26 @@ fun QuranReaderScreen(
                 else -> null
             }
 
-            val readerSurah = currentReaderAyah?.let { surahByNumber[it.surahNumber] }
+            // While audio is active the bar describes the **recitation**, not the reader. Open
+            // surah 15 with surah 2 playing and `displayAyahs` no longer contains the recited
+            // verse, so `playingAyah` is null and the bar fell back to the reader's position —
+            // it kept playing Al-Baqarah while announcing Al-Hijr. `audioState` knows which
+            // surah and how far in whether or not that verse is on screen.
+            val audioSurah = audioState.currentSurahNumber
+                .takeIf { audioState.isActive && it > 0 }
+                ?.let { surahByNumber[it] }
+
+            val readerSurah = audioSurah
+                ?: currentReaderAyah?.let { surahByNumber[it.surahNumber] }
             val readerSurahName = readerSurah?.nameEnglish
+                ?: audioState.currentTitle.takeIf { audioState.isActive && it.isNotBlank() }
                 ?: state.surahWithAyahs?.surah?.nameEnglish
                 ?: ""
-            val readerTotalAyahs = readerSurah?.ayahCount ?: 0
+            val readerTotalAyahs = when {
+                audioSurah != null -> audioSurah.ayahCount
+                audioState.isActive && audioState.totalAyahs > 0 -> audioState.totalAyahs
+                else -> readerSurah?.ayahCount ?: 0
+            }
 
             AudioBottomBar(
                 isAudioActive = audioState.isActive,
@@ -561,10 +634,18 @@ fun QuranReaderScreen(
                 downloadedCount = audioState.downloadedCount,
                 totalToDownload = audioState.totalToDownload,
                 surahName = readerSurahName,
-                currentAyahInSurah = currentReaderAyah?.numberInSurah ?: 0,
+                // The recited verse where it is resolvable, the playlist's own index where it
+                // is not — a verse from another surah is not in `displayAyahs` to look up.
+                currentAyahInSurah = playingAyah?.numberInSurah
+                    ?: audioState.currentAyahIndex.takeIf { audioState.isActive }?.plus(1)
+                    ?: currentReaderAyah?.numberInSurah ?: 0,
                 totalAyahsInSurah = readerTotalAyahs,
-                pageNumber = currentReaderAyah?.page ?: 0,
-                juzNumber = currentReaderAyah?.juz ?: 0,
+                // Page and juz only for a verse actually in hand: guessing them for an
+                // off-screen verse would be inventing a coordinate.
+                pageNumber = (playingAyah ?: currentReaderAyah.takeIf { !audioState.isActive })
+                    ?.page ?: 0,
+                juzNumber = (playingAyah ?: currentReaderAyah.takeIf { !audioState.isActive })
+                    ?.juz ?: 0,
                 onPlayClick = {
                     if (audioState.isPlaying) {
                         viewModel.onEvent(QuranEvent.PauseAudio)
@@ -582,7 +663,33 @@ fun QuranReaderScreen(
                         )
                     }
                 },
-                onStopClick = { viewModel.onEvent(QuranEvent.StopAudio) }
+                positionMs = audioState.position,
+                durationMs = audioState.duration,
+                reciterName = audioState.reciterName,
+                // Only named when it is not the default: a bar that says "1×" on every
+                // screen is a bar that says nothing.
+                speedLabel = audioState.speed
+                    .takeIf { it != RecitationSpeed.DEFAULT }
+                    ?.let { stringResource(R.string.recitation_speed_label, it.multiplier) },
+                repeatLabel = when (val repeat = audioState.repeat) {
+                    RecitationRepeat.Off -> null
+                    is RecitationRepeat.Ayah -> stringResource(
+                        R.string.recitation_repeat_summary_ayah, repeat.times
+                    )
+
+                    is RecitationRepeat.Range -> stringResource(
+                        R.string.recitation_repeat_summary_range,
+                        repeat.fromAyah,
+                        repeat.toAyah
+                    )
+
+                    RecitationRepeat.Surah ->
+                        stringResource(R.string.recitation_repeat_summary_surah)
+                },
+                onSeek = { viewModel.onEvent(QuranEvent.SeekAudioTo(it)) },
+                onNextAyah = { viewModel.onEvent(QuranEvent.NextAyahAudio) },
+                onPreviousAyah = { viewModel.onEvent(QuranEvent.PreviousAyahAudio) },
+                onExpand = { showRecitationSheet = true },
             )
         },
         floatingActionButton = {
@@ -791,6 +898,9 @@ fun QuranReaderScreen(
                 }
             } else {
                 // Surah/Juz mode: standard LazyColumn
+                val anchorAyah = displayAyahs.getOrNull(
+                    (currentAyahIndex - 1).coerceIn(0, (displayAyahs.size - 1).coerceAtLeast(0))
+                ) ?: displayAyahs.firstOrNull()
                 val surahStartIds = remember(displayAyahs) {
                     if (displayAyahs.isEmpty()) emptySet()
                     else {
@@ -815,9 +925,20 @@ fun QuranReaderScreen(
                         16.dp
                     }
 
+                Column(modifier = Modifier.fillMaxSize()) {
+                // Where you are, said once — the juz and page that used to be stamped on every
+                // verse. "Go to…" takes a number and moves the reader to it; it used to open the
+                // passage outline, which answers a different question entirely.
+                ReaderAnchorBar(
+                    subtitle = anchorAyah?.let {
+                        stringResource(R.string.juz_page_dot_format, it.juz, it.page)
+                    } ?: headerSubtitle,
+                    onGoTo = { showGoToSheet = true },
+                    goToContentDescription = stringResource(R.string.reader_go_to),
+                )
                 LazyColumn(
                     state = listState,
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier.weight(1f),
                     contentPadding = PaddingValues(bottom = listBottomPadding)
                 ) {
                     // Surah Banner or Juz Banner
@@ -878,53 +999,186 @@ fun QuranReaderScreen(
                             isHighlighted = isHighlighted,
                             isAudioPlaying = isAudioPlaying,
                             isFavorite = ayah.id in favoriteAyahIds,
+                            hasNote = ayah.id in state.ayahNotes,
                             isKhatamRead = ayah.id in state.khatamReadAyahIds,
                             isKhatamMode = state.activeKhatamId != null,
                             showTajweed = state.showTajweed,
                             tajweedUnderline = state.tajweedUnderline,
-                            onBookmarkClick = {
-                                viewModel.onEvent(
-                                    QuranEvent.ToggleBookmark(
-                                        ayahId = ayah.id,
-                                        surahNumber = ayah.surahNumber,
-                                        ayahNumber = ayah.numberInSurah
-                                    )
-                                )
-                            },
-                            onFavoriteClick = {
-                                viewModel.onEvent(
-                                    QuranEvent.ToggleFavorite(
-                                        ayahId = ayah.id,
-                                        surahNumber = ayah.surahNumber,
-                                        ayahNumber = ayah.numberInSurah
-                                    )
-                                )
-                            },
-                            onPlayAyahClick = {
-                                viewModel.onEvent(
-                                    QuranEvent.PlayAyahAudio(
-                                        ayahGlobalId = ayah.id,
-                                        surahNumber = ayah.surahNumber,
-                                        ayahNumber = ayah.numberInSurah
-                                    )
-                                )
-                            },
-                            onTafseerClick = {
-                                onNavigateToTafseer(ayah.surahNumber, ayah.numberInSurah)
-                            },
+                            onOpenActions = { sheetAyah = ayah },
                             onKhatamToggle = {
                                 viewModel.onEvent(QuranEvent.ToggleKhatamAyah(ayah.id))
                             }
                         )
                     }
                 }
+                }
             }
         }
+    }
+
+    // Jump to a verse, a juz or a page. Scrolls when the target is already loaded — a verse in
+    // this surah, a page inside this juz — and retargets the reader when it is not, so "page
+    // 300" works from anywhere without the caller needing to know which is which.
+    if (showGoToSheet) {
+        // The banner is item 0 in surah mode only, so the row index shifts by one there.
+        val bannerOffset =
+            if (state.readingMode == ReadingMode.SURAH && state.surahWithAyahs != null) 1 else 0
+        val scrollTo: (Int) -> Unit = { index ->
+            coroutineScope.launch { listState.animateScrollToItem(index + bannerOffset) }
+        }
+        ReaderGoToSheet(
+            // Verse numbers only mean something when one surah is on screen; juz and page mode
+            // span several, and "verse 5" of an unnamed surah is not a destination.
+            maxVerse = if (state.readingMode == ReadingMode.SURAH) {
+                state.surahWithAyahs?.ayahs?.size ?: 0
+            } else {
+                0
+            },
+            maxPage = totalPages,
+            onGoToVerse = { verse ->
+                displayAyahs.indexOfFirst { it.numberInSurah == verse }
+                    .takeIf { it >= 0 }
+                    ?.let(scrollTo)
+            },
+            onGoToJuz = { juz ->
+                val idx = displayAyahs.indexOfFirst { it.juz == juz }
+                if (idx >= 0) scrollTo(idx) else viewModel.onEvent(QuranEvent.LoadJuz(juz))
+            },
+            onGoToPage = { page ->
+                val idx = displayAyahs.indexOfFirst { it.page == page }
+                if (idx >= 0) scrollTo(idx) else viewModel.onEvent(QuranEvent.LoadPage(page))
+            },
+            onDismiss = { showGoToSheet = false },
+        )
+    }
+
+    // The reader's note on a verse, opened on whatever is already written there.
+    noteAyah?.let { ayah ->
+        NoteEditorSheet(
+            subject = AyahReference(
+                surahNumber = ayah.surahNumber,
+                ayahNumber = ayah.numberInSurah,
+                surahName = surahByNumber[ayah.surahNumber]?.nameEnglish,
+            ).format(),
+            initialNote = state.ayahNotes[ayah.id],
+            onDismiss = { noteAyah = null },
+            onSave = { note ->
+                viewModel.onEvent(
+                    QuranEvent.SetAyahNote(
+                        ayahId = ayah.id,
+                        surahNumber = ayah.surahNumber,
+                        ayahNumber = ayah.numberInSurah,
+                        note = note,
+                    )
+                )
+                noteAyah = null
+            },
+        )
     }
 
     // Tajweed colour guide, reachable from the reader's overflow menu (#294).
     if (showTajweedLegend) {
         TajweedLegendSheet(onDismiss = { showTajweedLegend = false })
+    }
+
+    // How the recitation is played, rather than what is played: repeat, speed, follow-along.
+    if (showRecitationSheet) {
+        RecitationSheet(
+            reciterName = audioState.reciterName,
+            repeat = audioState.repeat,
+            speed = audioState.speed,
+            followAlong = audioState.followAlong,
+            ayahCount = state.surahWithAyahs?.ayahs?.size ?: displayAyahs.size,
+            onOpenReciters = {
+                showRecitationSheet = false
+                onNavigateToReciters()
+            },
+            onRepeatChange = { viewModel.onEvent(QuranEvent.SetRecitationRepeat(it)) },
+            onSpeedChange = { viewModel.onEvent(QuranEvent.SetPlaybackSpeed(it)) },
+            onFollowAlongChange = { viewModel.onEvent(QuranEvent.SetFollowAlong(it)) },
+            onStop = {
+                viewModel.onEvent(QuranEvent.StopAudio)
+                showRecitationSheet = false
+            },
+            onDismiss = { showRecitationSheet = false },
+        )
+    }
+
+    // Everything you can do to one verse, on request — the pill that used to sit on every ayah.
+    sheetAyah?.let { ayah ->
+        val close = { sheetAyah = null }
+        AyahActionSheet(
+            reference = AyahReference(
+                surahNumber = ayah.surahNumber,
+                ayahNumber = ayah.numberInSurah,
+                surahName = surahByNumber[ayah.surahNumber]?.nameEnglish,
+            ),
+            juzNumber = ayah.juz,
+            pageNumber = ayah.page,
+            isBookmarked = ayah.isBookmarked,
+            isFavourite = ayah.id in state.favoriteAyahIds,
+            isKhatamActive = state.activeKhatamId != null,
+            onDismiss = close,
+            actions = AyahSheetActions(
+                onPlayFromHere = {
+                    close()
+                    viewModel.onEvent(
+                        QuranEvent.PlayAyahAudio(ayah.id, ayah.surahNumber, ayah.numberInSurah)
+                    )
+                },
+                // Repeat is the player's, and phase 4 gives it a mode of its own. Until then it
+                // starts playback at this verse, which is the honest half of what it will do.
+                onRepeatAyah = {
+                    close()
+                    viewModel.onEvent(
+                        QuranEvent.PlayAyahAudio(ayah.id, ayah.surahNumber, ayah.numberInSurah)
+                    )
+                },
+                onBookmark = {
+                    viewModel.onEvent(
+                        QuranEvent.ToggleBookmark(ayah.id, ayah.surahNumber, ayah.numberInSurah)
+                    )
+                    close()
+                },
+                onFavourite = {
+                    viewModel.onEvent(
+                        QuranEvent.ToggleFavorite(ayah.id, ayah.surahNumber, ayah.numberInSurah)
+                    )
+                    close()
+                },
+                // The reader's own note on this verse — not the scholars' commentary, which
+                // is the neighbouring action. Opening tafseer here meant the app had no way
+                // to write a note about a verse at all.
+                onNote = {
+                    close()
+                    noteAyah = ayah
+                },
+                onTafseer = {
+                    close()
+                    onNavigateToTafseer(ayah.surahNumber, ayah.numberInSurah)
+                },
+                onSubjects = {
+                    close()
+                    onNavigateToSubjects(ayah.surahNumber)
+                },
+                onCopy = {
+                    close()
+                    // The same clipboard helper the two mushaf renderers use — verse,
+                    // translation and reference, in one place.
+                    copyAyahToClipboard(context, ayah, copiedMessage)
+                },
+                onShare = {
+                    close()
+                    coroutineScope.launch {
+                        ContentShareManager.shareBranded(context, Shareables.ayah(context, ayah))
+                    }
+                },
+                onMarkReadForKhatam = {
+                    viewModel.onEvent(QuranEvent.ToggleKhatamAyah(ayah.id))
+                    close()
+                },
+            ),
+        )
     }
 }
 

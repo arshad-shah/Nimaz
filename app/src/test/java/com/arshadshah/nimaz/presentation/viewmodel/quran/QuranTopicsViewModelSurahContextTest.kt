@@ -14,6 +14,7 @@ import com.arshadshah.nimaz.domain.usecase.GetTopicDetailUseCase
 import com.arshadshah.nimaz.domain.usecase.GetTopicsForSurahUseCase
 import com.arshadshah.nimaz.domain.usecase.HasThematicContentUseCase
 import com.arshadshah.nimaz.domain.usecase.QuranUseCases
+import com.arshadshah.nimaz.domain.usecase.quran.RollUpTopicCounts
 import com.google.common.truth.Truth.assertThat
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -258,7 +259,7 @@ class QuranTopicsViewModelSurahContextTest {
         ).isEqualTo(TopicTree.INDEX)
     }
 
-    private fun viewModel() = QuranTopicsViewModel(useCases, settings, RecordingTelemetry())
+    private fun viewModel() = QuranTopicsViewModel(useCases, RollUpTopicCounts(), settings, RecordingTelemetry())
 
     /** Citations across three surahs, in the order the corpus gives them — by ayah id. */
     private fun detailOf(topic: QuranTopic) = TopicDetail(
@@ -282,7 +283,6 @@ class QuranTopicsViewModelSurahContextTest {
         nameTransliteration = english,
         revelationType = RevelationType.MEDINAN,
         ayahCount = 7,
-        juzStart = 1,
         orderInMushaf = number,
     )
 

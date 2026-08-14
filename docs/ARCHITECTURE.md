@@ -1028,16 +1028,21 @@ with no label and a touch target under 48dp fail the lane we already run. It can
       Pass `onCheckedChange = null` when an enclosing clickable row owns the toggle (the
       `NimazSettingsItem` pattern — the row toggles, the switch just renders state). It centralised
       the settings/notification toggles, the tasbih left-handed switch and the calendar preview.
-    - a **mutually-exclusive value choice** laid out as one inset row is
+    - **any** mutually-exclusive inset row of cells — a value choice *or* a view switch — is
       `NimazSegmentedControl(options = listOf(NimazSegmentedOption(label, icon, selectedTone)),
-      selectedIndex, onSelect, size = …)` (`components/atoms/NimazSegmentedControl.kt`). Distinct
-      from `NimazPillTabs`, which switches **views**, is text-only and paints every selected tab
-      `primary`: this picks a **value**, carries an icon per cell, and lets each cell own the tone
-      it takes when selected (a fasting day wants green for "fasted" and amber for "exempt").
-      `selectedIndex` is **nullable** — "nothing chosen yet" is a real state that a `NimazSwitch`
-      cannot express, which is why it replaced one on the fasting screen. `onSelect` fires even for
-      the already-selected cell so a caller can implement tap-to-clear; a control cannot know
-      whether clearing is legal, so it does not decide.
+      selectedIndex, onSelect, size = …, width = …, purpose = …)`
+      (`components/atoms/NimazSegmentedControl.kt`). It is the **only** one; `NimazPillTabs` and
+      the redesign's `NimazSegmentedTabs` were both folded into it (§8.3). Two axes carry the
+      difference the three components used to encode by being three components: `purpose` picks the
+      semantics (`VALUE` → `Role.RadioButton`, `VIEW` → `Role.Tab`), and `width` picks the layout
+      (`FILL` → equal shares of the row, `WRAP` → each cell sized to its label, for a control
+      sharing a row or scrolling horizontally). Each cell owns the tone it takes when selected (a
+      fasting day wants green for "fasted" and amber for "exempt"); plain labels go through
+      `listOf("A", "B").asSegments()`. `selectedIndex` is **nullable** — "nothing chosen yet" is a
+      real state that a `NimazSwitch` cannot express, which is why it replaced one on the fasting
+      screen — and an index outside the list selects nothing too, rather than crashing. `onSelect`
+      fires even for the already-selected cell so a caller can implement tap-to-clear; a control
+      cannot know whether clearing is legal, so it does not decide.
     - a **determinate progress bar** is `NimazProgressTrack(progress, tone = …, size = …,
       gradient = …)` (`components/atoms/NimazProgressTrack.kt`), **not** a raw
       `LinearProgressIndicator`. `progress` is coerced inside the atom (`NaN` → `0f`, clamped to
@@ -1066,17 +1071,23 @@ with no label and a touch target under 48dp fail the lane we already run. It can
       make that distinction. `NimazLegendItem` and `NimazCalendar`'s day indicators both draw
       through it; `CalendarDayState.indicatorStyle` / `CalendarLegendItem.indicatorStyle` carry the
       choice and default to `FILLED`.
-    - a **saved-item row** (a stored ayah/hadith/dua reference shown with a badge, relative
+    - a **saved-item row** (a stored ayah/hadith/dua reference shown with a kind spine, relative
       timestamp, Arabic preview and overflow menu) is
       `SwipeableSavedCard(title, timestamp, menuActions, onClick, onDelete, enableSwipeToDelete = …,
-      subtitle = …, arabicText = …, note = …) { leading }`
+      subtitle = …, arabicText = …, note = …, accent = …, kindLabel = …) { leading }`
       (`components/organisms/SwipeableSavedCard.kt`), **not** a hand-rolled `SwipeToDismissBox` +
       `NimazCard` per screen. The same file owns the two pieces it is built from, reusable on their
       own: `SwipeToDeleteBox(onDelete) { … }` (the end→start swipe gesture + error-tinted backdrop,
       enabled only where the screen opts in) and `NimazOverflowMenu(actions = listOf(NimazMenuAction(text,
       icon, onClick, destructive = …)))` (the `⋮` button + anchored action menu over `NimazDropdownMenu`).
       It centralised the **Bookmarks** screen and the **Quran Favourites** tab so both render
-      identically while keeping delete in the overflow menu.
+      identically while keeping delete in the overflow menu. `accent` draws a 3dp spine down the
+      card's left edge in the save's kind colour — gold bookmark, red favourite, violet note, the
+      same three the ayah sheet uses — and tints `kindLabel`, so a list of saves is scannable by
+      colour before it is read. It replaced a filled corpus badge leading the card: the corpus is
+      the axis you *filter* by, the kind is the one you are looking at. There is no ornamental
+      divider above the Arabic — a gold floret rule on every row turned a list into a page of
+      ornament, and Arabic is already set apart by being Arabic.
     - the **Quran "manuscript" ornaments** share one geometry and one set of atoms so the surah
       header, surah list, Juz/Page grids and mushaf page frame read as a single system. The surah
       header is `SurahHeaderCartouche(surah, showBismillah = …)`
@@ -1269,6 +1280,109 @@ card there, including Verse-of-the-Day and the Khatam row, uses the normal `Nima
 treatment. Verse-of-the-Day and continue-reading previously both carried
 `QuranColors.BannerGradient` and consumed the whole first screenful between them.
 
+### 8.3a The reader's ayah surfaces (`AyahActionSheet`, `ReaderAnchorBar`)
+
+- **`AyahActionSheet`** (molecule, `components/molecules/AyahActionSheet.kt`) is where every
+  per-verse action lives. It replaces the permanent five-icon `NimazActionPill` that used to sit
+  on every ayah — five icons per verse, thirty on a screenful, for actions a reader wants on one
+  verse at a time. The sheet holds **ten**, including the note editor and the subject index that
+  had no home in the verse list at all, and costs nothing until it is asked for. `AyahSheetActions`
+  bundles the callbacks so a host wires them once. Bookmark and favourite are **toggles** whose
+  labels state which way they go, so a reader can undo from where they did it. "Mark read for
+  khatam" renders **only while a khatam is active**, matching the gate `QuranMushafPageBar`
+  already applies to the page-level mark: most reading is not part of a plan and should carry no
+  tracking chrome.
+- **`ReaderAnchorBar`** (molecule, `components/molecules/ReaderAnchorBar.kt`) says where you are
+  **once**. `Juz 15 · Page 293` used to be a badge on every ayah — the same sentence repeated six
+  times a screen about a fact that changes about once a page — and it is one bar under the app bar
+  now, where it is true of everything below it. It renders the **coordinate only**: the surah's
+  name is already in the app bar one line above, and printing it twice is the repetition the bar
+  exists to end. It carries the "Go to…" affordance too, so the place you are is also the control
+  for changing it.
+- **`ReaderGoToSheet`** (molecule, `components/molecules/ReaderGoToSheet.kt`) is what "Go to…"
+  opens: a `NimazSegmentedControl` over Verse / Juz / Page, a bounded numeric field, and a jump.
+  The affordance used to open the *passage outline*, which answers "what is this surah about" — a
+  good question, and not the one a control called "Go to" is asking. The host scrolls when the
+  target is already loaded and re-targets the reader (`LoadJuz` / `LoadPage`) when it is not, so
+  "page 300" works from anywhere. Verse is offered only in surah mode; juz and page span several.
+- The ayah sheet is **actions only**, laid out as a `NimazSheetActionGrid` — two columns of wide
+  pills, icon beside label. It used to reprint the verse and its translation above the actions;
+  the reader tapped that verse to open the sheet and it is still on the screen behind it, so the
+  copy pushed the actions down (off the first screenful entirely on a long verse with a
+  translation) to confirm what the header's reference already states. Five icon-pills to a row
+  also left roughly 64dp per label, which is where "Unbookmark" started ellipsising.
+  `NimazSheetActionRow` (icon above label, up to five across) stays for the sheets that carry
+  three or four actions.
+- **`NoteEditorSheet`** (molecule, `components/molecules/NoteEditorSheet.kt`) is the **one** note
+  editor, shared by the Saved screen's bookmark menu and the reader's ayah sheet. The ayah sheet's
+  Note action used to open **Tafseer** — the scholars' commentary, which is the neighbouring
+  action — so the app had no way to write a note about a verse at all. A note lives on the verse's
+  bookmark row (`QuranEvent.SetAyahNote` creates the mark if there isn't one), and the annotated
+  subset is carried on `QuranReaderUiState.ayahNotes` so the editor opens on what is already
+  written rather than on a blank field that would overwrite it.
+- The reader's **reading-mode control** is an app-bar icon showing the current mode, not a row in
+  the overflow next to Passages and Settings. **Two** modes, Translation and Mushaf — the 16-line
+  and 15-line IndoPak editions are a *script* (`MushafScript`, a persisted `SettingsQuran`
+  preference that also changes the page count), not a view of the same page, so script stays in
+  reader settings. Offering it here as a third "mode" would mean two places writing one
+  preference. `ScreenTags.QuranReaderModeMenu` tags the control.
+
+### 8.3 Segmented control (`NimazSegmentedControl`) and tree rows (`NimazTreeRow`)
+
+- **`NimazSegmentedControl`** (atom, `components/atoms/NimazSegmentedControl.kt`) is the house
+  segmented control, and the app now has exactly one. It is a recessed `surfaceContainer` tray with
+  the selected cell **lifted** out of it as a raised `surface` pill. Deliberately not a
+  filled-primary pill: several of these can appear on one screen, so spending the brand colour on
+  every one of them leaves nothing left to mark the actual accent. The lift, not the hue, carries
+  the selection. Labels ellipsise rather than wrap, keeping the tray one row high whatever a
+  translation does to them, and `selectedIndex` is matched by equality rather than a bounds check,
+  so an out-of-range (or null) index selects none of the cells — the deliberate way to express
+  "nothing chosen yet" instead of crashing on it.
+
+  It absorbed the two components that used to overlap it, which closes deviation 15 in §9. The
+  Qur'an redesign's phase 1 added a third, `NimazSegmentedTabs` (the lifted tray), before
+  `NimazSegmentedControl` had grown a view-switching mode; `NimazPillTabs` was the filled-primary
+  view switcher on Tasbih, Names, Bookmarks, Khatam, Qibla, Themes, Tafseer and Tafseer chapters.
+  Both are deleted. What each contributed survives as a parameter — `purpose` (`VALUE` /`VIEW`) for
+  the semantics `NimazPillTabs` got wrong by announcing every choice as a tab, `width`
+  (`FILL` / `WRAP`) for the intrinsic sizing its call sites in a shared row depended on, and the
+  lift from `NimazSegmentedTabs`. Migrating the eight `NimazPillTabs` call sites is what makes the
+  Qur'an redesign's "one control for all of them" true rather than aspirational.
+- **`NimazTreeRow`** (molecule, `components/molecules/NimazTreeRow.kt`) is the tree component for
+  the subject browser: a row with depth-based indent ruling, RTL handling, an optional `NimazBadge`
+  count, secondary/supporting text, trailing content, and a 48dp `NimazIconButton` chevron for
+  expand/collapse. It already existed before this redesign and is already the tree row consumed by
+  `QuranTopicsScreen`, `QuranTopicDetailScreen` and `SurahSubjectsScreen` — the three screens later
+  phases of this redesign rewrite — so it is the tree component to build on, not to duplicate.
+- **`QuranFrame`'s two variants have parted company.** `READER` — the mushaf page — takes the
+  paper register: a `paper` ground inside a 16dp rounded card, a second `paperLine` keyline drawn
+  **inside** it at 12dp, and the page number as a small `paper`-filled pill straddling that
+  keyline's bottom edge in `frameGold`. Two nested rounded rectangles is how a printed mushaf
+  frames its text block, and what the design prototype
+  (`docs/superpowers/prototypes/2026-08-13-quran-mushaf-and-player.html`) draws; the earlier
+  hairline-rule-plus-shamsa version put a rosette at the foot of every page, competing with the ۞
+  and ع markers inside it that are actually carrying meaning. `STUDY` — Tafseer — keeps the
+  illuminated gold-over-teal double border, the floret divider and the shamsa. Both mushaf
+  renderers draw their Arabic in `paperInk` rather than `onBackground`, which is mixed for a card
+  and not for cream. Two ornamental registers in one app is a deliberate cost (spec §5.9's "noted
+  tension"), taken because the mushaf's job is to disappear behind the text and Tafseer's is to
+  frame it.
+- **`RuledSurahHeading`** (molecule, `components/molecules/RuledSurahHeading.kt`) opens a surah
+  **on the paper page**: a `paperLine`-bordered box washed with 7% `frameGold`, holding
+  hairline / Arabic surah name in gold / hairline, with the Basmala on its own line beneath in
+  `paperInk`. Both mushaf renderers (`MushafPage`, `MushafLineLayout`) use it. They used to render
+  `SurahHeaderCartouche`, which pins the brand ramps regardless of theme and so landed on a cream
+  page as a dark teal plaque carrying the surah's *English* name and a "Meccan" badge — card
+  furniture, in the middle of the text block. The cartouche is **not** retired: it still opens the
+  translation reader, where the surface genuinely is a card.
+- `QuranSurfaceColors` (`presentation/theme/QuranSurfaceColors.kt`) now also carries a **`paper`**
+  register — `paper` / `paperLine` / `paperInk` — used **only** by the mushaf and 16-line reading
+  modes. It is held apart from `pageSurface` and the rest of the app's `surface` tokens because
+  the mushaf imitates a printed page while the rest of the Qur'an section moves to a flatter,
+  cooler language; reusing `surface` there would make the page indistinguishable from an ordinary
+  card. Light is a warm cream with a soft brown rule; dark keeps the app's existing deep teal
+  ground so the page doesn't glare at night.
+
 ---
 
 ### 8.3 Typography (`NimazTypography`)
@@ -1327,6 +1441,7 @@ copy anything listed as Open.
 | Khatam realtime + duplication | Two nested-`collect` leaks removed: `QuranViewModel` nested `observeReadAyahIds(...).collect` **inside** `observeActiveKhatam().collect`, and since `collect` on a Room Flow never returns, the outer flow could never process a second emission — Home and the reader stayed pinned to the first active khatam until process death. `KhatamViewModel.loadKhatamDetail` likewise stacked a new, never-cancelled collector per call and left `isLoading` stuck true for a deleted khatam. Both now use `flatMapLatest`. The all-zeros `getKhatamStats()` stub became a real Flow. `observeJuzProgress` was added so `QuranJuzGrid` no longer recomputes juz progress client-side (two implementations that could drift). One-shot `Get*` use cases that had `Observe*` equivalents were **deleted rather than documented** — leaving both available is what let call sites silently opt into stale data. 14 inline private composables across the Khatam screens collapsed into 4 shared components (`KhatamProgressRing`/`KhatamProgressBar` atoms, `KhatamHeroCard`/`KhatamRowCard` molecules, `KhatamJourneyTrail` organism) plus a `KhatamAccent` in the shape of `NamesAccent`. Create and Edit share one `KhatamFormScreen(mode)`. |
 | Design system — semantic tones | Card surfaces no longer carry hand-rolled colours. `NimazCardTone` was renamed **`NimazTone`** and promoted to a vocabulary shared by `NimazCard` *and* `NimazBadge` (NEUTRAL/MUTED/ACCENT/PROMINENT/SUCCESS/WARNING/ERROR/TRANSPARENT), resolved in exactly two places — `NimazCardDefaults.tone()` and `NimazBadgeDefaults.colors()`. Every tone maps to an **opaque** Material role rather than a `surfaceVariant.copy(alpha = 0.4/0.5/0.6)` tint, so contrast is checked in both themes and `contentColorFor` yields a real `onXxx` for `LocalContentColor`. A `NimazCardLevel` (BASE/RAISED/NESTED) axis names the `surface`→`surfaceContainer`→`surfaceContainerHigh` ladder for NEUTRAL cards. ~14 feature areas (quran, khatam, prayer, fasting, settings, dua, hadith, tasbih, zakat, qaida, qibla, banners, about, search) were swept onto tones. See §8.1. |
 | Design system — card separation | Separation is now chosen by **context**, not by fill: page-level `NEUTRAL` + `ELEVATED`; nested-in-a-card/sheet `OUTLINED` + `elevation = 0.dp`; selected-among-peers lets the fill carry state. `NimazSurfaceCard` (`surface` fill + 1.dp outline + 0 elevation) was **deleted** — in light mode `surface` and `background` are within a few percent luminance, so those cards barely read as cards. See §8.1. |
+| Design system — one segmented control | **Three components drew the same inset pill row.** `NimazPillTabs` (organism, filled-primary, `Modifier.clickable`, `Role`-less) switched views on eight screens; `NimazSegmentedControl` (atom, icon per cell, per-cell tone, nullable selection, `Role.RadioButton`) chose a value on two; and the Qur'an redesign's phase 1 added a third, `NimazSegmentedTabs`, for the lifted-pill treatment the redesign wanted. Registry Open #15 had flagged the first two as a real risk of a caller reaching for the wrong one; the third made it worse. All three are now `NimazSegmentedControl`, with the differences that were real expressed as parameters — `purpose` (`VALUE` → `Role.RadioButton`, `VIEW` → `Role.Tab`) and `width` (`FILL` → equal shares, `WRAP` → sized to each label, which is what the Qibla, Tasbih, Themes and Bookmarks call sites needed) — plus the lift the redesign specified. `NimazPillTabs` and `NimazSegmentedTabs` are deleted along with their tests, and all eight call sites migrated. See §8.3. |
 | Design system — badges/pills | `NimazBadge` absorbed the badge/pill/status-label family: `tone` × `NimazBadgeEmphasis` (FILLED/SOFT/OUTLINED/CUTOUT) × `NimazBadgeShape` (PILL/ROUNDED) × `NimazBadgeSize`, with `selected`/`selectedTone` collapsing the tab-pill pattern. `NimazLabelChip` (and its test) was deleted, as were the private duplicates `TabPill`, `CategoryTab`, `ExampleQuestionChip`, `CitedChip` and `CutoutBadge`. `BadgeType`/`StatusBadge` keep the Islamic domain palette as feature art via `NimazBadgeDefaults.feature()`. `NimazChip` and `NimazActionPill` were intentionally left alone — different jobs. See §8.2. |
 | `PrayerTimeCalculator` injected into five ViewModels | `FastingViewModel`, `HomeViewModel`, `MonthlyPrayerTimesViewModel`, `NightWorshipViewModel` and `PrayerTimesViewModel` each injected the concrete `core/util/PrayerTimeCalculator`. It is not a use case and not an interface, so it **cannot be faked** — every prayer-time path in five ViewModels was untestable without the real astronomical library, and the untestability was not theoretical: `FastingViewModel` called `getPrayerTimes(lat, lng)` and took **all four** calculation defaults, so Fast Tracker's suhoor and iftar ignored the user's method, school, high-latitude rule and per-prayer adjustments while Home honoured all four. Every one of those arguments has a default, so forgetting them compiled and produced plausible times for the wrong configuration. The seam is `PrayerRepository.observeCalculationSettings()` + `getDaySchedule(date[, settings])` + `getSunnahNightTimes(date[, settings])`, wrapped as `ObservePrayerCalculationSettingsUseCase`/`GetDayPrayerScheduleUseCase`/`GetSunnahNightTimesUseCase` in `PrayerUseCases`. `PrayerCalculationSettings` carries a **already-resolved** `ResolvedLocation`, so no caller can compute against the unset (0, 0). The four near-identical `combine` towers over six preference flows — and the three copies of `try { CalculationMethod.valueOf(s) } catch { MWL }` that came with them — collapse to one flow parsed once in the data layer. Pinned by `FastingPrayerSettingsTest`, which could not have been written before the seam existed. |
 | Device seams — `Geocoder`, `FusedLocationProviderClient`, permissions, battery optimisation | `LocationViewModel` and `OnboardingViewModel` each built a `Geocoder` and a `FusedLocationProviderClient` from an injected `@ApplicationContext`, wrapped both in their own `suspendCancellableCoroutine`, branched on API 33 twice each, and flattened an `Address` into a display name with their own copy of the same four-way fallback. Neither ViewModel could be **constructed** on the JVM as a result — which is why both had zero tests, and why the location-search debounce shipped untested. `domain/repository/DeviceLocationRepository` (`currentCoordinates`/`search`/`reverseGeocode`), `PermissionChecker` and `PowerSettings` are the seams; `data/device/AndroidDeviceLocationRepository` is the single Android implementation, dispatching on the new `@IoDispatcher` so the knowledge that a geocode blocks lives where the geocode does. `LocationViewModel` is now Context-free and pinned by `LocationSearchDebounceTest`. `PowerSettings` also replaces the unchecked `getSystemService(POWER_SERVICE) as PowerManager` cast that both ViewModels ran from `init`. |
@@ -1370,9 +1485,8 @@ copy anything listed as Open.
 | 12 | Quran / 16-line Mushaf | **A raw page number is not equivalent across Mushaf editions.** A page `Int` means a different slice of the Quran in the 604-page Madani scheme vs. the 548-page IndoPak-16 scheme (unrelated pagination). In-app navigation is safe as of #325: "Continue reading" resolves by surah/ayah (`ContinueReadingCard.onClick` → `onNavigateToQuranAyah(lastSurah, lastAyah)`, `lastReadPage` is display-only), and every in-app page surface — the Page tab grid, its juz sections, the surah page ranges, the jump-to-page field and the reader's page content — now resolves through the active edition's `MushafPagination` rather than the Madani tables. The one real gap is `AnnouncementRoutes.parameterisedAnnouncementRoute`'s `quran/page/N` deep link: it validates against `MushafScript.MAX_TOTAL_PAGES` (now 847, the largest edition) and the reader then clamps to the active edition's count, so it can't crash, but a server-sent page deep link can land the reader on unrelated content if the user's active script differs from the one the link was authored against. Accepted as v1 scope — announcement payloads are first-party/curated, not user input. | If this becomes user-facing (e.g. shared deep links), anchor `quran/page/N` by surah/ayah instead of raw page, or tag the page number with its edition in the route. |
 
 | 13 | Quran / search | **An install made before the index shipped never gets one.** `createFromAsset` copies the artifact exactly once, and neither a Room migration nor a content patch can add a table — so the folded search index reaches fresh installs only. Those installs fall back to the `LIKE` queries, which is the search they already had: working for Latin scripts, empty for Arabic. The repositories ask `ContentSearchIndex.isAvailable()` rather than assuming, so nothing crashes and nothing lies. | Either build the index once in a background `WorkManager` job when it is missing (the folding is already in Kotlin; the cost is ~150k documents written off the critical path, and the reason the *previous* attempt failed was doing it synchronously at first launch), or accept that it lands with the next reinstall. Needs a decision, not just code. |
-| 14 | Design system | **Seven files still hand-roll `LinearProgressIndicator`** — `QaidaCourseHeader`, `QuranAudioBottomBar`, `QuranSurahInfoComponents`, `QuranSurahListItem`, `search/AskComponents`, `settings/SyncScreen`, `settings/WidgetsScreen` — each with its own height, shape and colours. `NimazProgressTrack` (§8) now exists and coerces its input; these predate it. `RamadanCards` was the eighth and moved onto the atom with the fasting redesign, which is what proved the atom's `fillColor` escape hatch was needed at all. The rest were deliberately left so an app-wide sweep did not ride along inside one screen's change. | Convert each to `NimazProgressTrack(progress, tone = …, size = …)`, dropping the local height/shape/colour constants; verify under visual review since several sit on tinted surfaces. |
+| 14 | Design system | **Five files still hand-roll `LinearProgressIndicator`** — `QaidaCourseHeader`, `QuranSurahInfoComponents`, `search/AskComponents`, `settings/SyncScreen`, `settings/WidgetsScreen`. `QuranSurahListItem` and `QuranAudioBottomBar` moved onto the atom with the Qur'an redesign, which was already rewriting both — each with its own height, shape and colours. `NimazProgressTrack` (§8) now exists and coerces its input; these predate it. `RamadanCards` was the eighth and moved onto the atom with the fasting redesign, which is what proved the atom's `fillColor` escape hatch was needed at all. The rest were deliberately left so an app-wide sweep did not ride along inside one screen's change. | Convert each to `NimazProgressTrack(progress, tone = …, size = …)`, dropping the local height/shape/colour constants; verify under visual review since several sit on tinted surfaces. |
 | 16 | Design system | **The app disagrees with itself about what `SUCCESS` and `WARNING` look like.** `NimazBadgeDefaults` maps them onto `colorScheme.tertiary` / `secondary`, which in this theme are **deep purple** and **brand gold**. `NimazSwitch` maps `SUCCESS` onto the green `NimazColors.Success`. `NimazToneColors` (the atom-layer resolver) takes the green/amber side, so the fasting screen's "Fasted" control matches its calendar legend. This was caught on an emulator after every gate passed green — a purple "Fasted" pill beside a green "Fasted" legend dot, which no test asserts about. | Decide which side is canonical and converge, most likely by pointing `NimazBadgeDefaults` at `NimazToneColors` and deleting its private copies. Needs visual review of every badge, so it is not a mechanical change. |
-| 15 | Design system | **`NimazPillTabs` and `NimazSegmentedControl` overlap visually while doing different jobs** — the first switches views (organism, text-only, single accent), the second chooses a value (atom, icon per cell, per-cell selected tone, nullable selection). Two inset pill rows that look alike and behave differently is a real risk of a caller reaching for the wrong one. | Decide whether they consolidate (one component with a `role` axis) or stay separate with the distinction documented at both call sites. A design decision, not a mechanical migration. |
 
 > **Accepted patterns (NOT deviations):**
 > - **Mushaf editions and Quran translations shipped as seeded JSON assets, not in the prepackaged DB** (sub-task 2/7 of #263, extended when the catalogue grew to 4 editions + 15 translations) — **resolved at versionCode 385**. Each edition's glyph text + layout, and each translation's verses, were populated at runtime by `MushafLayoutSeeder` / `QuranTranslationSeeder` from `assets/quran/`, with the migrations creating only the empty tables. The alternative — regenerating `assets/database/nimaz_prepopulated.db` — was rejected at the time because it was a ~147 MB Git-LFS blob that `createFromAsset` copies **only on fresh install**, so baking the data in would (a) never reach existing installs and (b) grow the LFS asset by tens of MB. What dissolved the trade-off was the prepackaged DB ceasing to be a tracked blob: it is now a hash-pinned artifact fetched from **arshad-shah/nimaz-data**, regenerated per release, and `ContentPatchSeeder` carries corrections to existing installs. Both seeders and their ~30 MB of assets were retired (`docs/retirement.yaml`); `QuranRepositoryImpl` no longer seeds on read, and `seededTranslationId(...)` survives as `translationId(...)` for its catalogue normalisation alone. The line-accurate read path (`getMushafLayoutByPage` → `MushafLayoutMapper` → `MushafPageLayout` domain model → `GetMushafPageLayoutUseCase`) is unchanged and still keeps the layers clean. See `SUBSYSTEMS.md` §5/§7 and `DATA_RETIREMENT.md`.

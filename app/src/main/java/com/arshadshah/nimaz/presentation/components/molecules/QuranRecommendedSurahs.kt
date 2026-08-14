@@ -31,6 +31,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.RevelationType
+import com.arshadshah.nimaz.domain.model.MushafPagination
+import com.arshadshah.nimaz.domain.model.MushafScript
 import com.arshadshah.nimaz.domain.model.Surah
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
@@ -69,7 +71,13 @@ internal fun QuranRecommendedSurahs(
     surahs: List<Surah>,
     isFriday: Boolean,
     onSurahClick: (Int) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    /**
+     * The active edition's page mapping, which is what actually knows a surah's juz. Every card
+     * used to read `Surah.juzStart` and so said "Juz 1" — Al-Kahf and Al-Mulk included, since
+     * the mapper filled that field with a literal 1 for all 114 rows.
+     */
+    pagination: MushafPagination = MushafPagination.fallback(MushafScript.DEFAULT),
 ) {
     val ordered = remember(isFriday) {
         if (isFriday) {
@@ -93,6 +101,7 @@ internal fun QuranRecommendedSurahs(
                 RecommendedSurahCard(
                     surah = surah,
                     reason = stringResource(rec.reasonRes),
+                    juzNumber = pagination.juzForPage(surah.startPage),
                     onClick = { onSurahClick(surah.number) }
                 )
             }
@@ -105,6 +114,7 @@ internal fun QuranRecommendedSurahs(
 private fun RecommendedSurahCard(
     surah: Surah,
     reason: String,
+    juzNumber: Int,
     onClick: () -> Unit
 ) {
     // The card carries one spoken label for the whole tile. The number is only a
@@ -181,7 +191,7 @@ private fun RecommendedSurahCard(
                             surah.ayahCount,
                             surah.ayahCount
                         ),
-                        surah.juzStart
+                        juzNumber
                     ),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -202,7 +212,7 @@ private fun QuranRecommendedSurahsPreview() {
     NimazTheme {
         QuranRecommendedSurahs(
             surahs = listOf(
-                Surah(18, "الكهف", "Al-Kahf", "The Cave", RevelationType.MECCAN, 110, 15, 18, 293),
+                Surah(18, "الكهف", "Al-Kahf", "The Cave", RevelationType.MECCAN, 110, 18, 293),
                 Surah(
                     67,
                     "الملك",
@@ -210,7 +220,6 @@ private fun QuranRecommendedSurahsPreview() {
                     "The Sovereignty",
                     RevelationType.MECCAN,
                     30,
-                    29,
                     67,
                     562
                 )

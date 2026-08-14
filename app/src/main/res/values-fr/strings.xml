@@ -473,7 +473,7 @@
         <item quantity="other">%d duas</item>
     </plurals>
     <string name="bookmarks_title">Favoris</string>
-    <string name="no_bookmarks_yet">Aucun favori pour le moment</string>
+    <string name="no_bookmarks_yet">Rien d’enregistré pour le moment</string>
     <string name="no_bookmarks_hint">Enregistrez des versets, des hadiths et des duas pour un accès rapide</string>
     <string name="share">Partager</string>
     <string name="added_format">Ajouté le %s</string>
@@ -569,6 +569,8 @@
     <string name="quran_home_start_reading">Commencer la lecture</string>
     <string name="quran_home_begin_journey">Commencez votre parcours coranique avec Al-Fatiha</string>
     <string name="quran_home_see_all">Tout voir</string>
+    <string name="see_more">Voir plus</string>
+    <string name="see_less">Voir moins</string>
     <string name="quran_home_no_favorite_ayahs">Aucun verset favori</string>
     <string name="quran_home_favorite_hint">Appuyez sur l\'icône cœur d\'un verset pour l\'ajouter ici</string>
     <string name="quran_home_no_bookmarks">Aucun signet</string>
@@ -637,7 +639,7 @@
     <string name="show_arabic">Afficher l\'arabe</string>
     <string name="show_arabic_subtitle">Écriture arabe</string>
     <string name="dua_settings_preview_arabic">اللَّهُمَّ إِنِّي أَسْأَلُكَ الْعِلْمَ النَّافِعَ</string>
-    <string name="dua_settings_preview_transliteration">"Allahumma inni as'aluka al-'ilm an-nafi'"</string>
+    <string name="dua_settings_preview_transliteration">"Allahumma inni as\'aluka al-\'ilm an-nafi\'"</string>
     <string name="dua_settings_preview_translation">Ô Allah, je Te demande une science utile</string>
 
     <!-- Fasting Tracker Screen -->
@@ -949,8 +951,8 @@
     <string name="show_transliteration_subtitle">Prononciation en lettres latines</string>
     <string name="show_translation">Afficher la traduction</string>
     <string name="show_translation_subtitle">Signification dans votre langue</string>
-    <string name="continuous_reading">Lecture continue</string>
-    <string name="continuous_reading_subtitle">Continuer la lecture entre les sourates et lire automatiquement le verset suivant</string>
+    <string name="continuous_reading">Lecture audio continue</string>
+    <string name="continuous_reading_subtitle">Enchaîner sur le verset suivant et la sourate suivante au lieu de s’arrêter</string>
     <string name="keep_screen_on">Garder l\'écran allumé</string>
     <string name="keep_screen_on_subtitle">Empêcher l\'écran de s\'éteindre</string>
     <string name="show_tajweed_colors">Afficher les couleurs du Tajweed</string>
@@ -1066,7 +1068,11 @@
     <string name="surah_info_read_more">Lire la suite</string>
     <string name="surah_info_read_less">Afficher moins</string>
     <string name="surah_info_background_subtitle">%1$d sections</string>
-    <string name="surah_info_passages_row_subtitle">%1$d passages sur %2$d versets</string>
+    <plurals name="surah_info_passages_row_subtitle">
+        <item quantity="one">%1$d passage sur %2$d versets</item>
+        <item quantity="many">%1$d passages sur %2$d versets</item>
+        <item quantity="other">%1$d passages sur %2$d versets</item>
+    </plurals>
     <string name="surah_info_subjects">Sujets de cette sourate</string>
     <string name="surah_info_subjects_subtitle">%1$d sujets, les plus cités d\'abord</string>
     <string name="surah_info_section_other">Autre</string>
@@ -1875,7 +1881,7 @@
     <string name="fasting_log_on_subtitle">Enregistré — appuyez pour annuler</string>
     <string name="fasting_log_off_subtitle">Pas encore enregistré</string>
     <string name="fasting_log_managed_in_sheet">Géré dans les détails du jour</string>
-    <string name="bookmarks_search_placeholder">Rechercher dans les favoris</string>
+    <string name="bookmarks_search_placeholder">Rechercher dans les enregistrements</string>
     <string name="bookmarks_sort">Trier</string>
     <string name="bookmarks_sort_newest">Plus récents d’abord</string>
     <string name="bookmarks_sort_oldest">Plus anciens d’abord</string>
@@ -1883,8 +1889,8 @@
     <string name="bookmarks_sort_alphabetical">A–Z</string>
     <string name="bookmarks_no_matches">Aucun résultat</string>
     <string name="bookmarks_no_matches_hint">Essayez une autre recherche ou retirez le filtre.</string>
-    <string name="bookmarks_clear_all">Effacer tous les favoris</string>
-    <string name="bookmarks_clear_all_title">Effacer tous les favoris ?</string>
+    <string name="bookmarks_clear_all">Tout effacer</string>
+    <string name="bookmarks_clear_all_title">Tout effacer ?</string>
     <string name="bookmarks_clear_all_confirm">Tout effacer</string>
     <string name="bookmarks_clear_all_body">Cela supprime les %1$d favoris — Coran, Hadith et invocations. Action irréversible.</string>
     <string name="ai_error_consent_title">Demander avec preuve est désactivé</string>
@@ -2056,4 +2062,76 @@
     <string name="fasting_your_month">Votre mois</string>
     <string name="fasting_sunnah_virtuous">Sunna et jours méritoires</string>
     <string name="fasting_fasted_count">%1$d jeûnés</string>
+
+    <!-- Qur'an section redesign: Browse, Saved and the surah-info sheet -->
+    <string name="saved">Enregistré</string>
+    <string name="notes">Notes</string>
+    <string name="saved_show">Afficher</string>
+    <string name="saved_kind_bookmark">Signet</string>
+    <string name="saved_kind_favourite">Favori</string>
+    <string name="saved_kind_note">Note</string>
+    <string name="khatam">Khatam</string>
+    <string name="quran_browse_search_hint">Sourate, juz 15, page 299</string>
+    <string name="quran_browse_page_start">p. %1$d</string>
+    <string name="quran_browse_juz_span">Juz %1$d–%2$d</string>
+    <string name="quran_browse_load_failed">La liste des sourates n\'a pas pu être chargée</string>
+    <string name="quran_browse_open_juz">Ouvrir le juz %1$d</string>
+    <string name="quran_browse_open_page">Ouvrir la page %1$d</string>
+    <string name="quran_browse_no_matches">Aucun résultat</string>
+    <string name="quran_home_destination_browse_subtitle">Les 114 sourates, par juz</string>
+    <string name="quran_home_destination_saved_subtitle">Signets, favoris et notes</string>
+    <string name="quran_home_destination_khatam_subtitle">Lire le Coran selon un plan</string>
+    <string name="quran_home_recently_saved">Enregistrés récemment</string>
+    <string name="surah_info_revealed_in">Révélée à</string>
+    <string name="surah_info_read_surah">Lire la sourate</string>
+
+    <!-- Qur'an redesign: the ayah action sheet, the anchor bar, reading modes -->
+    <string name="ayah_action_play_from_here">Lire ici</string>
+    <string name="ayah_action_repeat">Répéter</string>
+    <string name="ayah_action_bookmark">Signet</string>
+    <string name="ayah_action_unbookmark">Retirer</string>
+    <string name="ayah_action_favourite">Favori</string>
+    <string name="ayah_action_unfavourite">Retirer</string>
+    <string name="ayah_action_note">Note</string>
+    <string name="ayah_action_tafseer">Tafsir</string>
+    <string name="ayah_action_subjects">Sujets</string>
+    <string name="ayah_action_copy">Copier</string>
+    <string name="ayah_action_share">Partager</string>
+    <string name="ayah_action_mark_read">Marquer lu</string>
+    <string name="reader_go_to">Aller à…</string>
+    <string name="reader_go_to_action">Aller</string>
+    <string name="reader_go_to_range">%1$d–%2$d</string>
+    <string name="reader_go_to_verse">Verset</string>
+    <string name="reader_mode">Mode de lecture</string>
+    <string name="reader_mode_translation">Traduction</string>
+    <string name="reader_mode_mushaf">Mushaf</string>
+
+    <!-- Qur'an redesign: the recitation player -->
+    <string name="cd_previous_ayah_audio">Verset précédent</string>
+    <string name="cd_next_ayah_audio">Verset suivant</string>
+    <string name="recitation_settings">Récitation</string>
+    <string name="recitation_repeat">Répéter</string>
+    <string name="recitation_repeat_off">Désactivé</string>
+    <string name="recitation_repeat_ayah">Verset</string>
+    <string name="recitation_repeat_range">Plage</string>
+    <string name="recitation_repeat_surah">Sourate</string>
+    <string name="recitation_repeat_times">Fois</string>
+    <string name="recitation_repeat_from">Du verset</string>
+    <string name="recitation_repeat_to">Au verset</string>
+    <string name="recitation_speed">Vitesse</string>
+    <string name="recitation_follow_along">Suivre</string>
+    <string name="recitation_follow_along_hint">Faire défiler et tourner la page pour garder le verset récité visible</string>
+    <string name="recitation_done">Terminé</string>
+    <string name="recitation_stop">Arrêter</string>
+    <string name="recitation_repeat_summary_ayah">Répétition %1$d×</string>
+    <string name="recitation_repeat_summary_range">Répétition %1$d–%2$d</string>
+    <string name="recitation_repeat_summary_surah">Répéter la sourate</string>
+    <string name="recitation_speed_label">%1$s×</string>
+    <string name="audio_downloading">Téléchargement de %1$d sur %2$d</string>
+
+    <!-- Qur'an redesign: today's khatam portion -->
+    <string name="khatam_portion_within">%1$s %2$d–%3$d</string>
+    <string name="khatam_portion_across">%1$s %2$d → %3$s %4$d</string>
+    <string name="khatam_todays_portion">Portion du jour</string>
+    <string name="khatam_read_todays_portion">Lire la portion du jour</string>
 </resources>

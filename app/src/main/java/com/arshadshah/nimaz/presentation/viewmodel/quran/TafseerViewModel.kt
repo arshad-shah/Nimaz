@@ -14,6 +14,7 @@ import com.arshadshah.nimaz.domain.model.TafseerNote
 import com.arshadshah.nimaz.domain.model.TafseerSource
 import com.arshadshah.nimaz.presentation.viewmodel.UiError
 import com.arshadshah.nimaz.domain.model.TafseerText
+import com.arshadshah.nimaz.domain.repository.settings.QuranPreferences
 import com.arshadshah.nimaz.domain.usecase.QuranUseCases
 import com.arshadshah.nimaz.domain.usecase.TafseerUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -31,8 +32,26 @@ import javax.inject.Inject
 class TafseerViewModel @Inject constructor(
     private val tafseerUseCases: TafseerUseCases,
     private val quranUseCases: QuranUseCases,
+    private val quranSettings: QuranPreferences,
     private val telemetry: Telemetry,
 ) : ViewModel() {
+
+    init {
+        observeTranslator()
+    }
+
+    /**
+     * Which translation is selected, so the verse printed above the commentary is drawn in the
+     * right face. Urdu is Nastaliq, and the app's body faces carry no Arabic-script glyphs — a
+     * translation rendered without this falls back to whatever Naskh the system has.
+     */
+    private fun observeTranslator() {
+        launchSafely(telemetry, AppAnalytics.Feature.QURAN, "tafseer_observe_translator") {
+            quranSettings.quranTranslatorId.collect { id ->
+                _state.update { it.copy(selectedTranslatorId = id) }
+            }
+        }
+    }
 
     private val _state = MutableStateFlow(TafseerUiState())
     val state: StateFlow<TafseerUiState> = _state.asStateFlow()

@@ -80,7 +80,11 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.molecules.tasbih.BeadDesignPickerSheet
 import com.arshadshah.nimaz.presentation.components.molecules.tasbih.CurrentTasbihSheet
-import com.arshadshah.nimaz.presentation.components.organisms.NimazPillTabs
+import com.arshadshah.nimaz.presentation.components.atoms.NimazSegmentedControl
+import com.arshadshah.nimaz.presentation.components.atoms.NimazSegmentedPurpose
+import com.arshadshah.nimaz.presentation.components.atoms.NimazSegmentedSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazSegmentedWidth
+import com.arshadshah.nimaz.presentation.components.atoms.asSegments
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.currentWindowSizeClass
 import com.arshadshah.nimaz.presentation.theme.isExpandedWidth
@@ -277,17 +281,20 @@ private fun TasbihTopBar(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        NimazPillTabs(
-            tabs = listOf(
+        NimazSegmentedControl(
+            options = listOf(
                 stringResource(R.string.tasbih_mode_beads),
                 stringResource(R.string.tasbih_mode_classic)
-            ),
+            ).asSegments(),
             selectedIndex = if (beadsMode) 0 else 1,
-            onTabSelect = { index ->
+            onSelect = { index ->
                 onSelectStyle(
                     if (index == 0) TasbihCounterStyle.BEADS else TasbihCounterStyle.CLASSIC
                 )
-            }
+            },
+            size = NimazSegmentedSize.SMALL,
+            width = NimazSegmentedWidth.WRAP,
+            purpose = NimazSegmentedPurpose.VIEW,
         )
         Spacer(Modifier.weight(1f))
         if (beadsMode) {

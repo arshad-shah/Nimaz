@@ -461,7 +461,7 @@
         <item quantity="other">%d dua</item>
     </plurals>
     <string name="bookmarks_title">Yer İmleri</string>
-    <string name="no_bookmarks_yet">Henüz Yer İmi Yok</string>
+    <string name="no_bookmarks_yet">Henüz kayıt yok</string>
     <string name="no_bookmarks_hint">Hızlı erişim için ayetleri, hadisleri ve duaları kaydedin</string>
     <string name="share">Paylaş</string>
     <string name="added_format">Eklenme: %s</string>
@@ -556,6 +556,8 @@
     <string name="quran_home_start_reading">Okumaya Başla</string>
     <string name="quran_home_begin_journey">Fatiha Suresi ile Kur\'an yolculuğunuza başlayın</string>
     <string name="quran_home_see_all">Tümünü Gör</string>
+    <string name="see_more">Daha fazla</string>
+    <string name="see_less">Daha az</string>
     <string name="quran_home_no_favorite_ayahs">Henüz favori ayet yok</string>
     <string name="quran_home_favorite_hint">Buraya eklemek için herhangi bir ayetin kalp simgesine dokunun</string>
     <string name="quran_home_no_bookmarks">Henüz yer imi yok</string>
@@ -621,8 +623,8 @@
     <string name="show_arabic">Arapçayı Göster</string>
     <string name="show_arabic_subtitle">Arap yazısı</string>
     <string name="dua_settings_preview_arabic">اللَّهُمَّ إِنِّي أَسْأَلُكَ الْعِلْمَ النَّافِعَ</string>
-    <string name="dua_settings_preview_transliteration">"Allahumma inni as'aluka al-'ilm an-nafi'"</string>
-    <string name="dua_settings_preview_translation">"Allah'ım, Senden faydalı ilim isterim"</string>
+    <string name="dua_settings_preview_transliteration">"Allahumma inni as\'aluka al-\'ilm an-nafi\'"</string>
+    <string name="dua_settings_preview_translation">"Allah\'ım, Senden faydalı ilim isterim"</string>
 
     <!-- Fasting Tracker Screen -->
     <string name="fasting_tab_tracker">Takip</string>
@@ -933,8 +935,8 @@
     <string name="show_transliteration_subtitle">Latin harfleriyle okunuş</string>
     <string name="show_translation">Çeviriyi Göster</string>
     <string name="show_translation_subtitle">Kendi dilinizdeki anlamı</string>
-    <string name="continuous_reading">Sürekli Okuma</string>
-    <string name="continuous_reading_subtitle">Sureler arasında okumaya devam edin ve sonraki ayeti otomatik oynatın</string>
+    <string name="continuous_reading">Kesintisiz çalma</string>
+    <string name="continuous_reading_subtitle">Bir ayet bitince durmak yerine sonraki ayete ve sonraki sureye geç</string>
     <string name="keep_screen_on">Ekranı Açık Tut</string>
     <string name="keep_screen_on_subtitle">Ekranın kapanmasını engelle</string>
     <string name="show_tajweed_colors">Tecvid Renklerini Göster</string>
@@ -1050,7 +1052,10 @@
     <string name="surah_info_read_more">Devamını oku</string>
     <string name="surah_info_read_less">Daha az göster</string>
     <string name="surah_info_background_subtitle">%1$d bölüm</string>
-    <string name="surah_info_passages_row_subtitle">%2$d ayet boyunca %1$d bölüm</string>
+    <plurals name="surah_info_passages_row_subtitle">
+        <item quantity="one">%2$d ayet boyunca %1$d bölüm</item>
+        <item quantity="other">%2$d ayet boyunca %1$d bölüm</item>
+    </plurals>
     <string name="surah_info_subjects">Bu suredeki konular</string>
     <string name="surah_info_subjects_subtitle">%1$d konu, en çok atıf alan önce</string>
     <string name="surah_info_section_other">Diğer</string>
@@ -1846,7 +1851,7 @@
     <string name="fasting_log_on_subtitle">Kaydedildi — geri almak için dokunun</string>
     <string name="fasting_log_off_subtitle">Henüz kaydedilmedi</string>
     <string name="fasting_log_managed_in_sheet">Gün ayrıntılarında yönetilir</string>
-    <string name="bookmarks_search_placeholder">Yer imlerinde ara</string>
+    <string name="bookmarks_search_placeholder">Kayıtlarda ara</string>
     <string name="bookmarks_sort">Sırala</string>
     <string name="bookmarks_sort_newest">Önce en yeni</string>
     <string name="bookmarks_sort_oldest">Önce en eski</string>
@@ -1854,8 +1859,8 @@
     <string name="bookmarks_sort_alphabetical">A–Z</string>
     <string name="bookmarks_no_matches">Eşleşme yok</string>
     <string name="bookmarks_no_matches_hint">Farklı bir arama deneyin veya filtreyi kaldırın.</string>
-    <string name="bookmarks_clear_all">Tüm yer imlerini sil</string>
-    <string name="bookmarks_clear_all_title">Tüm yer imleri silinsin mi?</string>
+    <string name="bookmarks_clear_all">Kayıtlı her şeyi sil</string>
+    <string name="bookmarks_clear_all_title">Kayıtlı her şey silinsin mi?</string>
     <string name="bookmarks_clear_all_confirm">Tümünü sil</string>
     <string name="bookmarks_clear_all_body">Bu, %1$d yer iminin tamamını siler — Kur\'an, Hadis ve Dua. Geri alınamaz.</string>
     <string name="ai_error_consent_title">Delille Sor kapalı</string>
@@ -2020,4 +2025,76 @@
     <string name="fasting_your_month">Ayınız</string>
     <string name="fasting_sunnah_virtuous">Sünnet ve faziletli günler</string>
     <string name="fasting_fasted_count">%1$d oruç</string>
+
+    <!-- Qur'an section redesign: Browse, Saved and the surah-info sheet -->
+    <string name="saved">Kaydedilenler</string>
+    <string name="notes">Notlar</string>
+    <string name="saved_show">Göster</string>
+    <string name="saved_kind_bookmark">Yer imi</string>
+    <string name="saved_kind_favourite">Favori</string>
+    <string name="saved_kind_note">Not</string>
+    <string name="khatam">Hatim</string>
+    <string name="quran_browse_search_hint">Sure, cüz 15, sayfa 299</string>
+    <string name="quran_browse_page_start">s. %1$d</string>
+    <string name="quran_browse_juz_span">Cüz %1$d–%2$d</string>
+    <string name="quran_browse_load_failed">Sure listesi yüklenemedi</string>
+    <string name="quran_browse_open_juz">Cüz %1$d\'i aç</string>
+    <string name="quran_browse_open_page">Sayfa %1$d\'i aç</string>
+    <string name="quran_browse_no_matches">Eşleşen bir şey yok</string>
+    <string name="quran_home_destination_browse_subtitle">114 surenin tamamı, cüze göre</string>
+    <string name="quran_home_destination_saved_subtitle">Yer imleri, favoriler ve notlar</string>
+    <string name="quran_home_destination_khatam_subtitle">Kur\'an\'ı bir plana göre okuyun</string>
+    <string name="quran_home_recently_saved">Son kaydedilenler</string>
+    <string name="surah_info_revealed_in">İndiği yer</string>
+    <string name="surah_info_read_surah">Sureyi oku</string>
+
+    <!-- Qur'an redesign: the ayah action sheet, the anchor bar, reading modes -->
+    <string name="ayah_action_play_from_here">Buradan oynat</string>
+    <string name="ayah_action_repeat">Tekrarla</string>
+    <string name="ayah_action_bookmark">Yer imi</string>
+    <string name="ayah_action_unbookmark">Yer imini kaldır</string>
+    <string name="ayah_action_favourite">Favori</string>
+    <string name="ayah_action_unfavourite">Favoriden çıkar</string>
+    <string name="ayah_action_note">Not</string>
+    <string name="ayah_action_tafseer">Tefsir</string>
+    <string name="ayah_action_subjects">Konular</string>
+    <string name="ayah_action_copy">Kopyala</string>
+    <string name="ayah_action_share">Paylaş</string>
+    <string name="ayah_action_mark_read">Okundu</string>
+    <string name="reader_go_to">Git…</string>
+    <string name="reader_go_to_action">Git</string>
+    <string name="reader_go_to_range">%1$d–%2$d</string>
+    <string name="reader_go_to_verse">Ayet</string>
+    <string name="reader_mode">Okuma modu</string>
+    <string name="reader_mode_translation">Meal</string>
+    <string name="reader_mode_mushaf">Mushaf</string>
+
+    <!-- Qur'an redesign: the recitation player -->
+    <string name="cd_previous_ayah_audio">Önceki ayet</string>
+    <string name="cd_next_ayah_audio">Sonraki ayet</string>
+    <string name="recitation_settings">Kıraat</string>
+    <string name="recitation_repeat">Tekrar</string>
+    <string name="recitation_repeat_off">Kapalı</string>
+    <string name="recitation_repeat_ayah">Ayet</string>
+    <string name="recitation_repeat_range">Aralık</string>
+    <string name="recitation_repeat_surah">Sure</string>
+    <string name="recitation_repeat_times">Kez</string>
+    <string name="recitation_repeat_from">Şu ayetten</string>
+    <string name="recitation_repeat_to">Şu ayete</string>
+    <string name="recitation_speed">Hız</string>
+    <string name="recitation_follow_along">Takip et</string>
+    <string name="recitation_follow_along_hint">Okunan ayet görünür kalsın diye kaydır ve sayfayı çevir</string>
+    <string name="recitation_done">Bitti</string>
+    <string name="recitation_stop">Durdur</string>
+    <string name="recitation_repeat_summary_ayah">Tekrar %1$d×</string>
+    <string name="recitation_repeat_summary_range">Tekrar %1$d–%2$d</string>
+    <string name="recitation_repeat_summary_surah">Sureyi tekrarla</string>
+    <string name="recitation_speed_label">%1$s×</string>
+    <string name="audio_downloading">%2$d ögeden %1$d indiriliyor</string>
+
+    <!-- Qur'an redesign: today's khatam portion -->
+    <string name="khatam_portion_within">%1$s %2$d–%3$d</string>
+    <string name="khatam_portion_across">%1$s %2$d → %3$s %4$d</string>
+    <string name="khatam_todays_portion">Bugünün bölümü</string>
+    <string name="khatam_read_todays_portion">Bugünün bölümünü oku</string>
 </resources>

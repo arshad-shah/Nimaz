@@ -47,7 +47,8 @@ class AnnouncementRoutesTest {
         assertThat(announcementRoute("quran/surah/18")).isEqualTo(Route.QuranReader(18))
         assertThat(announcementRoute("quran/surah/18/ayah/10"))
             .isEqualTo(Route.QuranReader(18, 10))
-        assertThat(announcementRoute("quran/surah/18/info")).isEqualTo(Route.SurahInfo(18))
+        assertThat(announcementRoute("quran/surah/18/info"))
+            .isEqualTo(Route.QuranBrowse(infoForSurah = 18))
         assertThat(announcementRoute("quran/page/300")).isEqualTo(Route.QuranPage(300))
         assertThat(announcementRoute("quran/juz/30")).isEqualTo(Route.QuranJuz(30))
     }

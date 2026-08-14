@@ -241,13 +241,8 @@ class SearchViewModel @Inject constructor(
         results: List<UnifiedSearchResult>,
         filter: SearchFilter
     ): List<UnifiedSearchResult> {
-        return when (filter) {
-            SearchFilter.ALL -> results
-            SearchFilter.QURAN -> results.filter { it is UnifiedSearchResult.QuranResult || it is UnifiedSearchResult.SurahResult }
-            SearchFilter.HADITH -> results.filter { it is UnifiedSearchResult.HadithResult }
-            SearchFilter.DUA -> results.filter { it is UnifiedSearchResult.DuaResult }
-            SearchFilter.NAMES -> results.filter { it is UnifiedSearchResult.NameResult }
-        }
+        // One predicate, shared with the chip counts — see `SearchFilter.accepts`.
+        return results.filter { filter.accepts(it) }
     }
 
     private fun clearSearch() {

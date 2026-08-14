@@ -17,6 +17,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -75,8 +76,12 @@ fun SurahPassagesScreen(
             NimazTopAppBar(
                 title = stringResource(R.string.surah_info_passages),
                 subtitle = state.surah?.let { surah ->
-                    stringResource(
-                        R.string.surah_info_passages_row_subtitle,
+                    // A plural, because a surah with one passage read "1 passages across 7
+                    // verses" — and the surahs with exactly one are the short ones every
+                    // reader opens.
+                    pluralStringResource(
+                        R.plurals.surah_info_passages_row_subtitle,
+                        state.passages.size,
                         state.passages.size,
                         surah.ayahCount,
                     )

@@ -76,7 +76,7 @@ data class KhatamStats(
  * place this is decided so the list, detail, home card and widget cannot disagree.
  */
 enum class KhatamPace {
-    /** No [Khatam.startedAt] yet, or fewer than a full day elapsed. */
+    /** No [Khatam.startedAt] yet, or fewer than a full day elapsed — day one included. */
     NOT_STARTED,
 
     /** Meeting or beating the daily target. */
@@ -183,8 +183,21 @@ object KhatamProgressCalculator {
         return (surplus / dailyTarget).toInt()
     }
 
+    /**
+     * What to say about a reader's pace.
+     *
+     * The first day is [KhatamPace.NOT_STARTED], not [KhatamPace.BEHIND]. `daysActive` counts
+     * the day a plan was created as day one, so a khatam made seconds ago arrived here with
+     * `daysActive == 1` and `averagePace == 0f` and fell straight through to BEHIND — a plan
+     * created this morning was reported, in red, as already behind. The enum's own KDoc
+     * already said what the intent was ("fewer than a full day elapsed"); only the boundary
+     * disagreed with it.
+     *
+     * The grace is one day and no more. A reader who has had a full day and read nothing is
+     * behind, and softening that would make the status useless.
+     */
     fun paceStatus(averagePace: Float, dailyTarget: Int, daysActive: Int): KhatamPace = when {
-        daysActive <= 0 -> KhatamPace.NOT_STARTED
+        daysActive <= 1 -> KhatamPace.NOT_STARTED
         dailyTarget <= 0 -> KhatamPace.ON_TRACK
         averagePace >= dailyTarget -> KhatamPace.ON_TRACK
         averagePace >= dailyTarget * BEHIND_TOLERANCE -> KhatamPace.SLIGHTLY_BEHIND

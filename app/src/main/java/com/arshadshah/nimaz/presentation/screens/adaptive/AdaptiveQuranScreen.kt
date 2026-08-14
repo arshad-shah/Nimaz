@@ -17,6 +17,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.arshadshah.nimaz.core.navigation.Route
+import com.arshadshah.nimaz.presentation.screens.quran.QuranBrowseScreen
 import com.arshadshah.nimaz.presentation.screens.quran.QuranHomeScreen
 import com.arshadshah.nimaz.presentation.screens.quran.QuranReaderScreen
 import com.arshadshah.nimaz.presentation.theme.currentWindowSizeClass
@@ -35,11 +36,10 @@ fun AdaptiveQuranScreen(
     navController: NavController,
     onNavigateToSearch: () -> Unit,
     onNavigateToTopics: () -> Unit,
-    onNavigateToBookmarks: () -> Unit,
+    onNavigateToBrowse: () -> Unit,
+    onNavigateToSaved: () -> Unit,
     onNavigateToSettings: () -> Unit,
-    onNavigateToSurahInfo: (Int) -> Unit,
     onNavigateToKhatam: () -> Unit,
-    onNavigateToKhatamDetail: (Long) -> Unit,
 ) {
     val windowSizeClass = currentWindowSizeClass()
 
@@ -51,20 +51,13 @@ fun AdaptiveQuranScreen(
             onNavigateToSurah = { surahNumber ->
                 navController.navigate(Route.QuranReader(surahNumber))
             },
-            onNavigateToJuz = { juzNumber ->
-                navController.navigate(Route.QuranJuz(juzNumber))
-            },
-            onNavigateToPage = { pageNumber ->
-                navController.navigate(Route.QuranPage(pageNumber))
-            },
-            onNavigateToBookmarks = onNavigateToBookmarks,
+            onNavigateToBrowse = onNavigateToBrowse,
+            onNavigateToSaved = onNavigateToSaved,
             onNavigateToSettings = onNavigateToSettings,
-            onNavigateToSurahInfo = onNavigateToSurahInfo,
             onNavigateToQuranAyah = { surahNumber, ayahNumber ->
                 navController.navigate(Route.QuranReader(surahNumber, ayahNumber))
             },
             onNavigateToKhatam = onNavigateToKhatam,
-            onNavigateToKhatamDetail = onNavigateToKhatamDetail,
         )
     } else {
         // Tablet: Two-pane list-detail layout
@@ -99,9 +92,11 @@ fun AdaptiveQuranScreen(
             navigator = navigator,
             listPane = {
                 AnimatedPane {
-                    QuranHomeScreen(
-                        onNavigateToSearch = onNavigateToSearch,
-                        onNavigateToTopics = onNavigateToTopics,
+                    // The list pane is Browse, not home: a two-pane layout wants a *list* on
+                    // the left, and home stopped being one when its 114-row browse tab became
+                    // a destination. Home's other content is a phone-shaped front door.
+                    QuranBrowseScreen(
+                        onNavigateBack = { navController.popBackStack() },
                         onNavigateToSurah = { surahNumber ->
                             scope.launch {
                                 navigator.navigateTo(
@@ -126,25 +121,7 @@ fun AdaptiveQuranScreen(
                                 )
                             }
                         },
-                        onNavigateToBookmarks = onNavigateToBookmarks,
-                        onNavigateToSettings = onNavigateToSettings,
-                        onNavigateToSurahInfo = onNavigateToSurahInfo,
-                        onNavigateToQuranAyah = { surahNumber, ayahNumber ->
-                            scope.launch {
-                                navigator.navigateTo(
-                                    ListDetailPaneScaffoldRole.Detail,
-                                    QuranDetailArgs(
-                                        surahNumber = surahNumber,
-                                        ayahNumber = ayahNumber
-                                    )
-                                )
-                            }
-                        },
-                        onNavigateToKhatam = onNavigateToKhatam,
-                        onNavigateToKhatamDetail = onNavigateToKhatamDetail,
                         selectedSurahNumber = currentArgs?.surahNumber,
-                        selectedJuzNumber = currentArgs?.juzNumber,
-                        selectedPageNumber = currentArgs?.pageNumber,
                     )
                 }
             },

@@ -1,5 +1,7 @@
 package com.arshadshah.nimaz.presentation.viewmodel.quran
 
+import com.arshadshah.nimaz.domain.usecase.khatam.GetTodaysPortion
+import com.arshadshah.nimaz.presentation.viewmodel.FakeStringProvider
 import com.arshadshah.nimaz.core.monitoring.RecordingTelemetry
 import com.arshadshah.nimaz.domain.model.Khatam
 import com.arshadshah.nimaz.domain.usecase.KhatamUseCases
@@ -60,7 +62,7 @@ class KhatamEditFormTest {
     @After
     fun tearDown() = Dispatchers.resetMain()
 
-    private fun viewModel() = KhatamViewModel(useCases, quranUseCases, RecordingTelemetry())
+    private fun viewModel() = KhatamViewModel(useCases, quranUseCases, GetTodaysPortion(), FakeStringProvider(), RecordingTelemetry())
 
     @Test
     fun `typing during the load survives it`() = runTest {

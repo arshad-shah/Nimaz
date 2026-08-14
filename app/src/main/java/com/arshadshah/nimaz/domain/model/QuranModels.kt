@@ -7,12 +7,18 @@ data class Surah(
     val nameTransliteration: String,
     val revelationType: RevelationType,
     val ayahCount: Int,
-    val juzStart: Int,
     val orderInMushaf: Int,
     val startPage: Int = 1
 ) {
     // Alias for backwards compatibility
     val numberOfAyahs: Int get() = ayahCount
+
+    // No `juzStart`. The `surahs` table has no juz column, so the mapper filled the field with
+    // a literal 1 for all 114 rows — which is why the Recommended strip said "Juz 1" under
+    // Al-Kahf and Al-Mulk alike. The juz a surah opens in is a fact about the *edition* anyway
+    // (it moves with the pagination), so it is answered by
+    // `MushafPagination.juzForPage(startPage)` and cannot be cached on a model that does not
+    // know which edition is active.
 }
 
 data class Ayah(

@@ -56,21 +56,21 @@ class QuranAyahItemTest {
     )
 
     @Test
-    fun `renders ayah number badge and juz page footer`() {
+    fun `renders the ayah number, and no longer the juz page coordinate`() {
         composeRule.setThemedContent {
             AyahItem(
                 ayah = ayah(ayahNumber = 5, juzNumber = 1, pageNumber = 3),
                 showTranslation = false,
                 arabicFontSize = 28f,
                 fontSize = 16f,
-                onBookmarkClick = {}
             )
         }
 
         // Number badge shows numberInSurah (== ayahNumber)
         composeRule.onNodeWithText("5").assertExists()
         // Footer: "Juz 1 • Page 3"
-        composeRule.onNodeWithText("Juz 1 • Page 3").assertExists()
+        // Said once in the reader's anchor bar now, not stamped on every verse.
+        composeRule.onNodeWithText("Juz 1 • Page 3").assertDoesNotExist()
     }
 
     @Test
@@ -81,7 +81,6 @@ class QuranAyahItemTest {
                 showTranslation = true,
                 arabicFontSize = 28f,
                 fontSize = 16f,
-                onBookmarkClick = {}
             )
         }
 
@@ -96,7 +95,6 @@ class QuranAyahItemTest {
                 showTranslation = false,
                 arabicFontSize = 28f,
                 fontSize = 16f,
-                onBookmarkClick = {}
             )
         }
 
@@ -112,7 +110,6 @@ class QuranAyahItemTest {
                 showTransliteration = true,
                 arabicFontSize = 28f,
                 fontSize = 16f,
-                onBookmarkClick = {}
             )
         }
 
@@ -120,92 +117,40 @@ class QuranAyahItemTest {
     }
 
     @Test
-    fun `onBookmarkClick fires`() {
-        var fired = false
+    fun `tapping the row opens the ayah actions`() {
+        // The five-icon pill is gone — bookmark, favourite, play, share and tafseer moved into
+        // AyahActionSheet, which holds ten actions and costs nothing until asked for. What the
+        // row owes is one tap target that asks for it.
+        var opened = 0
         composeRule.setThemedContent {
             AyahItem(
                 ayah = ayah(),
                 showTranslation = false,
                 arabicFontSize = 28f,
                 fontSize = 16f,
-                onBookmarkClick = { fired = true }
+                onOpenActions = { opened++ }
             )
         }
 
-        composeRule.onNodeWithContentDescription("Bookmark").performClick()
-        assertThat(fired).isTrue()
+        composeRule.onNodeWithText("5").performClick()
+        assertThat(opened).isEqualTo(1)
     }
 
     @Test
-    fun `onFavoriteClick fires`() {
-        var fired = false
+    fun `the action pill is gone from the row`() {
         composeRule.setThemedContent {
             AyahItem(
                 ayah = ayah(),
                 showTranslation = false,
                 arabicFontSize = 28f,
                 fontSize = 16f,
-                onBookmarkClick = {},
-                onFavoriteClick = { fired = true }
             )
         }
 
-        composeRule.onNodeWithContentDescription("Favorite").performClick()
-        assertThat(fired).isTrue()
-    }
-
-    @Test
-    fun `onTafseerClick fires`() {
-        var fired = false
-        composeRule.setThemedContent {
-            AyahItem(
-                ayah = ayah(),
-                showTranslation = false,
-                arabicFontSize = 28f,
-                fontSize = 16f,
-                onBookmarkClick = {},
-                onTafseerClick = { fired = true }
-            )
-        }
-
-        composeRule.onNodeWithContentDescription("Tafseer").performClick()
-        assertThat(fired).isTrue()
-    }
-
-    @Test
-    fun `onPlayAyahClick fires via play icon`() {
-        var fired = false
-        composeRule.setThemedContent {
-            AyahItem(
-                ayah = ayah(),
-                showTranslation = false,
-                isAudioPlaying = false,
-                arabicFontSize = 28f,
-                fontSize = 16f,
-                onBookmarkClick = {},
-                onPlayAyahClick = { fired = true }
-            )
-        }
-
-        composeRule.onNodeWithContentDescription("Play").performClick()
-        assertThat(fired).isTrue()
-    }
-
-    @Test
-    fun `audio playing shows pause icon instead of play`() {
-        composeRule.setThemedContent {
-            AyahItem(
-                ayah = ayah(),
-                showTranslation = false,
-                isAudioPlaying = true,
-                arabicFontSize = 28f,
-                fontSize = 16f,
-                onBookmarkClick = {}
-            )
-        }
-
-        composeRule.onNodeWithContentDescription("Pause").assertExists()
+        composeRule.onNodeWithContentDescription("Bookmark").assertDoesNotExist()
+        composeRule.onNodeWithContentDescription("Favorite").assertDoesNotExist()
         composeRule.onNodeWithContentDescription("Play").assertDoesNotExist()
+        composeRule.onNodeWithContentDescription("Tafseer").assertDoesNotExist()
     }
 
     @Test
@@ -219,7 +164,6 @@ class QuranAyahItemTest {
                 isKhatamRead = false,
                 arabicFontSize = 28f,
                 fontSize = 16f,
-                onBookmarkClick = {},
                 onKhatamToggle = { fired = true }
             )
         }
@@ -238,7 +182,6 @@ class QuranAyahItemTest {
                 isKhatamRead = true,
                 arabicFontSize = 28f,
                 fontSize = 16f,
-                onBookmarkClick = {}
             )
         }
 
@@ -254,7 +197,6 @@ class QuranAyahItemTest {
                 isKhatamMode = false,
                 arabicFontSize = 28f,
                 fontSize = 16f,
-                onBookmarkClick = {}
             )
         }
 
@@ -270,7 +212,6 @@ class QuranAyahItemTest {
                 showTranslation = false,
                 arabicFontSize = 28f,
                 fontSize = 16f,
-                onBookmarkClick = {}
             )
         }
 
@@ -285,7 +226,6 @@ class QuranAyahItemTest {
                 showTranslation = false,
                 arabicFontSize = 28f,
                 fontSize = 16f,
-                onBookmarkClick = {}
             )
         }
 

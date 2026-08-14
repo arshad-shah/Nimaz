@@ -11,6 +11,8 @@ import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.domain.model.DuaBookmark
 import com.arshadshah.nimaz.domain.model.HadithBookmark
 import com.arshadshah.nimaz.domain.model.QuranBookmark
+import com.arshadshah.nimaz.domain.model.QuranFavorite
+import com.arshadshah.nimaz.domain.model.SavedKind
 import com.arshadshah.nimaz.domain.usecase.DuaUseCases
 import com.arshadshah.nimaz.domain.usecase.HadithUseCases
 import com.arshadshah.nimaz.domain.usecase.QuranUseCases
@@ -19,6 +21,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -56,6 +59,11 @@ class BookmarksViewModel @Inject constructor(
         // One exhaustive table: an analytics `when` with an `else -> {}` alongside the
         // dispatch meant a new event shipped with no telemetry and no compiler warning.
         when (event) {
+            is BookmarksEvent.SetKind -> {
+                telemetry.featureUsed(DOMAIN, "set_kind")
+                setKind(event.kind)
+            }
+
             is BookmarksEvent.SetFilter -> {
                 telemetry.featureUsed(DOMAIN, "set_filter")
                 setFilter(event.type)
@@ -113,9 +121,20 @@ class BookmarksViewModel @Inject constructor(
         loadDuaBookmarks()
     }
 
+    /**
+     * The Qur'an half of Saved: bookmarks **and** favourites, merged.
+     *
+     * They are one row in the store — `bookmarks` carries `bookmarked` and `favourite` as two
+     * flags — but two queries, because everything else in the app asks for one or the other.
+     * Merging here by ayah id is what stops a verse that is both from appearing twice, and is
+     * why the kind axis can be a set rather than a guess.
+     */
     private fun loadQuranBookmarks() {
         launchSafely(telemetry, DOMAIN, "load_quran_bookmarks") {
-            quranUseCases.getBookmarks()
+            combine(
+                quranUseCases.getBookmarks(),
+                quranUseCases.getFavorites(),
+            ) { bookmarks, favourites -> bookmarks to favourites }
                 .catchAndReport(telemetry, DOMAIN, "load_quran") { throwable ->
                     // Enrichment runs a suspend query per row inside this collector, so a
                     // content row missing after a database replacement used to kill the
@@ -130,32 +149,41 @@ class BookmarksViewModel @Inject constructor(
                         )
                     }
                 }
-                .collect { bookmarks ->
-                // One query for the whole list. This used to be a suspend call per row
-                // inside the collector, so N bookmarks meant N round-trips on every
-                // re-emission — and clearing them all re-emitted once per delete, making
-                // the wipe O(N^2).
-                val texts = quranUseCases.getAyahById.forIds(bookmarks.map { it.ayahId })
-                val mapped = bookmarks.map { bm ->
-                    bm.toUnified().copy(arabicText = texts[bm.ayahId]?.textArabic)
+                .collect { (bookmarks, favourites) ->
+                    // One query for the whole list. This used to be a suspend call per row
+                    // inside the collector, so N bookmarks meant N round-trips on every
+                    // re-emission — and clearing them all re-emitted once per delete, making
+                    // the wipe O(N^2).
+                    val favouriteIds = favourites.map { it.ayahId }.toSet()
+                    val bookmarkedIds = bookmarks.map { it.ayahId }.toSet()
+                    val onlyFavourites = favourites.filterNot { it.ayahId in bookmarkedIds }
+                    val ids = bookmarks.map { it.ayahId } + onlyFavourites.map { it.ayahId }
+                    val texts = quranUseCases.getAyahById.forIds(ids)
+                    val mapped = bookmarks.map { bm ->
+                        bm.toUnified(isFavourite = bm.ayahId in favouriteIds)
+                            .copy(arabicText = texts[bm.ayahId]?.textArabic)
+                    } + onlyFavourites.map { fav ->
+                        fav.toUnified().copy(arabicText = texts[fav.ayahId]?.textArabic)
+                    }
+                    _bookmarksState.update { state ->
+                        val unified = state.allBookmarks.filter { it.type != BookmarkType.QURAN } +
+                                mapped
+                        state.copy(
+                            quranBookmarks = bookmarks,
+                            quranFavourites = favourites,
+                            allBookmarks = unified,
+                            filteredBookmarks = applyFilters(
+                                unified,
+                                state.selectedFilter,
+                                state.selectedKind,
+                                state.searchQuery,
+                                state.sortOrder
+                            ),
+                            isLoading = false
+                        )
+                    }
+                    updateStats()
                 }
-                _bookmarksState.update { state ->
-                    val unified = state.allBookmarks.filter { it.type != BookmarkType.QURAN } +
-                            mapped
-                    state.copy(
-                        quranBookmarks = bookmarks,
-                        allBookmarks = unified,
-                        filteredBookmarks = applyFilters(
-                            unified,
-                            state.selectedFilter,
-                            state.searchQuery,
-                            state.sortOrder
-                        ),
-                        isLoading = false
-                    )
-                }
-                updateStats()
-            }
         }
     }
 
@@ -190,6 +218,7 @@ class BookmarksViewModel @Inject constructor(
                         filteredBookmarks = applyFilters(
                             unified,
                             state.selectedFilter,
+                            state.selectedKind,
                             state.searchQuery,
                             state.sortOrder
                         ),
@@ -232,6 +261,7 @@ class BookmarksViewModel @Inject constructor(
                         filteredBookmarks = applyFilters(
                             unified,
                             state.selectedFilter,
+                            state.selectedKind,
                             state.searchQuery,
                             state.sortOrder
                         ),
@@ -250,6 +280,22 @@ class BookmarksViewModel @Inject constructor(
                 filteredBookmarks = applyFilters(
                     state.allBookmarks,
                     type,
+                    state.selectedKind,
+                    state.searchQuery,
+                    state.sortOrder
+                )
+            )
+        }
+    }
+
+    private fun setKind(kind: SavedKind?) {
+        _bookmarksState.update { state ->
+            state.copy(
+                selectedKind = kind,
+                filteredBookmarks = applyFilters(
+                    state.allBookmarks,
+                    state.selectedFilter,
+                    kind,
                     state.searchQuery,
                     state.sortOrder
                 )
@@ -264,6 +310,7 @@ class BookmarksViewModel @Inject constructor(
                 filteredBookmarks = applyFilters(
                     state.allBookmarks,
                     state.selectedFilter,
+                    state.selectedKind,
                     query,
                     state.sortOrder
                 )
@@ -280,6 +327,7 @@ class BookmarksViewModel @Inject constructor(
                 filteredBookmarks = applyFilters(
                     state.allBookmarks,
                     state.selectedFilter,
+                    state.selectedKind,
                     state.searchQuery,
                     order
                 )
@@ -290,6 +338,7 @@ class BookmarksViewModel @Inject constructor(
     private fun applyFilters(
         bookmarks: List<UnifiedBookmark>,
         filter: BookmarkType?,
+        kind: SavedKind?,
         searchQuery: String,
         sortOrder: BookmarkSortOrder
     ): List<UnifiedBookmark> {
@@ -298,6 +347,12 @@ class BookmarksViewModel @Inject constructor(
         // Apply type filter
         if (filter != null) {
             result = result.filter { it.type == filter }
+        }
+
+        // Apply kind filter. Membership, not equality: a verse can be bookmarked and
+        // annotated, and it belongs under both.
+        if (kind != null) {
+            result = result.filter { kind in it.kinds }
         }
 
         // Apply search
@@ -359,12 +414,33 @@ class BookmarksViewModel @Inject constructor(
         val state = _bookmarksState.value
         val unified = state.allBookmarks.find { it.id == id } ?: return
         val operation: Pair<suspend () -> Unit, suspend () -> Unit> = when (unified.type) {
+            // Unsave the verse, not just half of it. A verse that is bookmarked *and*
+            // favourited is one card, and deleting only the bookmark left the card on screen —
+            // it came straight back through the favourites half of the merge, with the counts
+            // moving and nothing else. A favourite-only card could not be deleted at all: the
+            // lookup into `quranBookmarks` found nothing and the whole delete returned early.
             BookmarkType.QURAN -> {
-                val original = state.quranBookmarks
-                    .find { BookmarkType.QURAN.idFor(it.ayahId) == id } ?: return
+                val bookmark = state.quranBookmarks
+                    .find { BookmarkType.QURAN.idFor(it.ayahId) == id }
+                val favourite = state.quranFavourites
+                    .find { BookmarkType.QURAN.idFor(it.ayahId) == id }
+                if (bookmark == null && favourite == null) return
                 Pair<suspend () -> Unit, suspend () -> Unit>(
-                    { quranUseCases.deleteBookmark(original.ayahId) },
-                    { quranUseCases.insertBookmark(original) },
+                    {
+                        bookmark?.let { quranUseCases.deleteBookmark(it.ayahId) }
+                        // A toggle is safe in both directions here because the current state is
+                        // known: it is favourited now, so this clears it; after the delete it is
+                        // not, so the same call in `restore` puts it back.
+                        favourite?.let {
+                            quranUseCases.toggleFavorite(it.ayahId, it.surahNumber, it.ayahNumber)
+                        }
+                    },
+                    {
+                        bookmark?.let { quranUseCases.insertBookmark(it) }
+                        favourite?.let {
+                            quranUseCases.toggleFavorite(it.ayahId, it.surahNumber, it.ayahNumber)
+                        }
+                    },
                 )
             }
 
@@ -447,8 +523,15 @@ class BookmarksViewModel @Inject constructor(
             telemetry, DOMAIN, "clear_all",
             onFailure = { writeFailed(R.string.bookmarks_clear_failed, it) },
         ) {
-            _bookmarksState.value.quranBookmarks.forEach {
+            // Favourites too, not only the bookmark rows: a wipe the user confirmed on a
+            // screen called Saved that left every favourited verse behind is the same
+            // half-delete the per-row action had.
+            val before = _bookmarksState.value
+            before.quranBookmarks.forEach {
                 quranUseCases.deleteBookmark(it.ayahId)
+            }
+            before.quranFavourites.forEach {
+                quranUseCases.toggleFavorite(it.ayahId, it.surahNumber, it.ayahNumber)
             }
             _bookmarksState.value.hadithBookmarks.forEach {
                 hadithUseCases.deleteBookmark(it.hadithId)
@@ -464,17 +547,28 @@ class BookmarksViewModel @Inject constructor(
         _statsState.update {
             BookmarkStatsUiState(
                 totalBookmarks = state.allBookmarks.size,
-                quranCount = state.quranBookmarks.size,
+                // Counted off the unified list, not off `quranBookmarks`: a verse favourited
+                // but not bookmarked is in Saved and is not in that list, so counting it there
+                // would print a Qur'an chip that disagrees with the rows beneath it.
+                quranCount = state.allBookmarks.count { it.type == BookmarkType.QURAN },
                 hadithCount = state.hadithBookmarks.size,
-                duaCount = state.duaBookmarks.size
+                duaCount = state.duaBookmarks.size,
+                bookmarkCount = state.allBookmarks.count { SavedKind.BOOKMARK in it.kinds },
+                favouriteCount = state.allBookmarks.count { SavedKind.FAVOURITE in it.kinds },
+                noteCount = state.allBookmarks.count { SavedKind.NOTE in it.kinds },
             )
         }
     }
 
     // Extension functions to convert to unified format
-    private fun QuranBookmark.toUnified() = UnifiedBookmark(
+    private fun QuranBookmark.toUnified(isFavourite: Boolean = false) = UnifiedBookmark(
         id = BookmarkType.QURAN.idFor(ayahId),
         type = BookmarkType.QURAN,
+        kinds = buildSet {
+            add(SavedKind.BOOKMARK)
+            if (isFavourite) add(SavedKind.FAVOURITE)
+            if (!note.isNullOrBlank()) add(SavedKind.NOTE)
+        },
         title = strings.get(R.string.bookmark_surah_ayah_format, surahNumber, ayahNumber),
         subtitle = strings.get(R.string.quran),
         arabicText = null, // Enriched in loadQuranBookmarks via getAyahById
@@ -488,6 +582,7 @@ class BookmarksViewModel @Inject constructor(
     private fun HadithBookmark.toUnified() = UnifiedBookmark(
         id = BookmarkType.HADITH.idFor(hadithId),
         type = BookmarkType.HADITH,
+        kinds = kindsOf(note),
         title = strings.get(R.string.bookmark_hadith_format, hadithNumber),
         subtitle = bookId,
         arabicText = null, // Enriched in loadHadithBookmarks via getHadithById
@@ -501,6 +596,7 @@ class BookmarksViewModel @Inject constructor(
     private fun DuaBookmark.toUnified() = UnifiedBookmark(
         id = BookmarkType.DUA.idFor(duaId),
         type = BookmarkType.DUA,
+        kinds = kindsOf(note),
         title = strings.get(R.string.dua_label),
         subtitle = categoryId,
         arabicText = null, // Enriched in loadDuaBookmarks via getDuaById
@@ -510,4 +606,29 @@ class BookmarksViewModel @Inject constructor(
         duaId = duaId,
         categoryId = categoryId
     )
+
+    /**
+     * A verse favourited but not bookmarked — a real state, since the two are separate flags on
+     * one row, and one the Saved screen has to show or the Favourites filter would be empty for
+     * anyone who only ever tapped the heart.
+     */
+    private fun QuranFavorite.toUnified() = UnifiedBookmark(
+        id = BookmarkType.QURAN.idFor(ayahId),
+        type = BookmarkType.QURAN,
+        kinds = setOf(SavedKind.FAVOURITE),
+        title = strings.get(R.string.bookmark_surah_ayah_format, surahNumber, ayahNumber),
+        subtitle = strings.get(R.string.quran),
+        arabicText = null,
+        createdAt = createdAt,
+        note = null,
+        color = null,
+        surahNumber = surahNumber,
+        ayahNumber = ayahNumber
+    )
+
+    /** Bookmarked, plus annotated when there is a note. The two corpora without favourites. */
+    private fun kindsOf(note: String?): Set<SavedKind> = buildSet {
+        add(SavedKind.BOOKMARK)
+        if (!note.isNullOrBlank()) add(SavedKind.NOTE)
+    }
 }
