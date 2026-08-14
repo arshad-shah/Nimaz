@@ -43,7 +43,7 @@ fun HomeAlsoTodaySection(
     worshipCard: WorshipCardUi?,
     onNavigateToAlKahf: () -> Unit,
     onOpenHadith: () -> Unit,
-    onNavigateToDua: () -> Unit,
+    onNavigateToDua: (duaId: String) -> Unit,
     onOpenWorship: (WorshipReminderType) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -105,7 +105,7 @@ fun HomeAlsoTodaySection(
                     subtitle = dailyDua.translation.take(60) + if (dailyDua.translation.length > 60) "…" else "",
                     icon = Icons.Default.SelfImprovement,
                     iconTint = Color(0xFF7C4DFF),
-                    onClick = onNavigateToDua,
+                    onClick = { onNavigateToDua(dailyDua.duaId) },
                 )
             }
         }

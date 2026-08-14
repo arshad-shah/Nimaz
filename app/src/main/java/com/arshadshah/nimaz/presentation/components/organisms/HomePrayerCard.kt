@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.PrayerStatus
 import com.arshadshah.nimaz.domain.model.PrayerType
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
@@ -48,12 +49,12 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconButtonSize
+import com.arshadshah.nimaz.presentation.components.atoms.PrayerStatusBadge
 import com.arshadshah.nimaz.presentation.components.atoms.clockTimeText
 import com.arshadshah.nimaz.presentation.foundation.tokens.getPrayerColor
 import com.arshadshah.nimaz.presentation.model.PrayerTimeDisplay
-
-private fun isDone(status: PrayerStatus): Boolean =
-    status == PrayerStatus.PRAYED || status == PrayerStatus.QADA || status == PrayerStatus.LATE
+import com.arshadshah.nimaz.presentation.model.isDone
+import com.arshadshah.nimaz.presentation.model.toDisplayStatus
 
 /**
  * Prayer section for the home compact layout.
@@ -70,15 +71,13 @@ fun HomePrayerCard(
     onSetPrayerStatus: (PrayerType, PrayerStatus) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val doneCount = prayers.count { isDone(it.prayerStatus) }
-    val totalCount = prayers.count { it.type != PrayerType.SUNRISE }
+    val doneCount = prayers.count { it.prayerStatus.toDisplayStatus(it.isPassed).isDone() }
 
     var expandedId by remember { mutableStateOf<PrayerType?>(null) }
 
     val dividerColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
 
     Column(modifier = modifier.fillMaxWidth()) {
-        // Section header
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -126,9 +125,7 @@ fun HomePrayerCard(
                         prayer = prayer,
                         isExpanded = isExpanded,
                         canExpand = canExpand,
-                        onToggleExpand = {
-                            expandedId = if (isExpanded) null else prayer.type
-                        },
+                        onToggleExpand = { expandedId = if (isExpanded) null else prayer.type },
                     )
 
                     if (isExpanded && canExpand) {
@@ -166,18 +163,14 @@ private fun PrayerRow(
         targetValue = if (isExpanded) 90f else 0f,
         label = "chevron_rotate",
     )
-    val bgColor = if (prayer.isNext)
-        MaterialTheme.colorScheme.primary.copy(alpha = 0.07f)
-    else
-        Color.Transparent
+    val bgColor = if (prayer.isNext) MaterialTheme.colorScheme.primary.copy(alpha = 0.07f)
+                  else Color.Transparent
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .background(bgColor)
-            .then(
-                if (canExpand) Modifier.clickable(onClick = onToggleExpand) else Modifier
-            )
+            .then(if (canExpand) Modifier.clickable(onClick = onToggleExpand) else Modifier)
             .padding(horizontal = 15.dp, vertical = 13.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -200,10 +193,9 @@ private fun PrayerRow(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Spacer(Modifier.width(8.dp))
-        Text(
-            text = statusLabel(prayer),
-            style = MaterialTheme.typography.bodySmall,
-            color = statusColor(prayer),
+        PrayerStatusBadge(
+            status = prayer.prayerStatus.toDisplayStatus(prayer.isPassed),
+            size = NimazBadgeSize.SMALL,
         )
         if (canExpand) {
             Spacer(Modifier.width(8.dp))
@@ -296,7 +288,8 @@ private fun StatusChip(
     val isSelected = current == status
     val bgColor = if (isSelected) selectedBg else MaterialTheme.colorScheme.surface
     val textColor = if (isSelected) selectedColor else MaterialTheme.colorScheme.onSurfaceVariant
-    val borderColor = if (isSelected) selectedColor else MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+    val borderColor = if (isSelected) selectedColor
+                      else MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
 
     Box(
         modifier = modifier
@@ -319,27 +312,3 @@ private fun StatusChip(
         )
     }
 }
-
-@Composable
-private fun statusLabel(prayer: PrayerTimeDisplay): String = when (prayer.prayerStatus) {
-    PrayerStatus.PRAYED -> stringResource(R.string.on_time)
-    PrayerStatus.LATE -> stringResource(R.string.late)
-    PrayerStatus.MISSED -> stringResource(R.string.missed)
-    PrayerStatus.QADA -> stringResource(R.string.made_up)
-    PrayerStatus.PENDING,
-    PrayerStatus.NOT_PRAYED -> if (prayer.isPassed)
-        stringResource(R.string.prayer_status_not_recorded)
-    else
-        stringResource(R.string.upcoming)
-}
-
-@Composable
-private fun statusColor(prayer: PrayerTimeDisplay): Color = when (prayer.prayerStatus) {
-    PrayerStatus.PRAYED -> Color(0xFF3B8E3F)
-    PrayerStatus.LATE -> Color(0xFF1976D2)
-    PrayerStatus.MISSED -> Color(0xFFD3392C)
-    PrayerStatus.QADA -> Color(0xFF8E24AA)
-    PrayerStatus.PENDING,
-    PrayerStatus.NOT_PRAYED -> MaterialTheme.colorScheme.onSurfaceVariant
-}
-

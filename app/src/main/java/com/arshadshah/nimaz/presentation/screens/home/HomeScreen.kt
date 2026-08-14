@@ -127,7 +127,7 @@ private fun rememberHomeClock(state: HomeUiState): HomeClock {
 fun HomeScreen(
     onNavigateToAlKahf: () -> Unit,
     onNavigateToHadith: () -> Unit,
-    onNavigateToDua: () -> Unit,
+    onNavigateToDua: (duaId: String) -> Unit,
     onNavigateToTasbih: () -> Unit,
     onNavigateToCalendar: () -> Unit,
     onNavigateToFasting: () -> Unit,
@@ -320,7 +320,7 @@ private fun HomeCompactContent(
     updateState: UpdateState,
     updateManager: com.arshadshah.nimaz.core.util.InAppUpdateManager?,
     onNavigateToAlKahf: () -> Unit,
-    onNavigateToDua: () -> Unit,
+    onNavigateToDua: (duaId: String) -> Unit,
     onNavigateToPrayerSettings: () -> Unit,
     onNavigateToPrayerTracker: () -> Unit,
     onNavigateToPrayerTimes: () -> Unit,

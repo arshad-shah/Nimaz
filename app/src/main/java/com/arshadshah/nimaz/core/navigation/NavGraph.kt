@@ -329,7 +329,7 @@ fun NavGraph(
                 HomeScreen(
                     onNavigateToAlKahf = { navController.navigate(Route.QuranReader(surahNumber = 18)) },
                     onNavigateToHadith = { navController.navigate(Route.HadithHome) },
-                    onNavigateToDua = { navController.navigate(Route.DuaHome) },
+                    onNavigateToDua = { duaId -> navController.navigate(Route.DuaReader(duaId)) },
                     onNavigateToTasbih = { navController.navigate(Route.TasbihHome) },
                     onNavigateToCalendar = { navController.navigate(Route.IslamicCalendar) },
                     onNavigateToFasting = { navController.navigate(Route.FastingHome) },

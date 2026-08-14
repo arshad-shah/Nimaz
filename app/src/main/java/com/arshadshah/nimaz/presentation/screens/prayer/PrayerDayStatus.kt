@@ -4,8 +4,7 @@ import com.arshadshah.nimaz.domain.model.PrayerName
 import com.arshadshah.nimaz.domain.model.PrayerRecord
 import com.arshadshah.nimaz.domain.model.PrayerStatus
 import com.arshadshah.nimaz.domain.model.PrayerTimes
-import com.arshadshah.nimaz.presentation.components.atoms.NimazStatusDotStyle
-import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
+import com.arshadshah.nimaz.presentation.model.PrayerDisplayStatus
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -18,22 +17,9 @@ val TRACKED_PRAYERS: List<PrayerName> = listOf(
     PrayerName.ISHA,
 )
 
-/**
- * What the tracker shows for one prayer on one day.
- *
- * [NOT_RECORDED] is the reason this type exists. It is **not** a stored [PrayerStatus] and never
- * becomes one on its own: the app used to rewrite every unlogged past prayer to `missed` at
- * midnight, so a user who simply had not opened the app was told they had missed prayers, and
- * those fabricated rows fed the qada list. A prayer nobody logged is a prayer nobody logged.
- */
-enum class PrayerDisplayStatus {
-    PRAYED,
-    LATE,
-    QADA,
-    MISSED,
-    NOT_RECORDED,
-    UPCOMING,
-}
+// PrayerDisplayStatus, isDone(), tone(), dotStyle() live in
+// com.arshadshah.nimaz.presentation.model.PrayerDisplayStatus so that organisms
+// (HomePrayerCard) can share the same atom without importing from a screen package.
 
 /**
  * Resolve every tracked prayer's displayed status for [date].
@@ -96,29 +82,4 @@ fun PrayerTimes.timeFor(prayer: PrayerName): LocalDateTime? = when (prayer) {
     PrayerName.SUNRISE -> null
 }
 
-/** Whether the obligation was fulfilled — on time, late, or made up. */
-fun PrayerDisplayStatus.isDone(): Boolean = when (this) {
-    PrayerDisplayStatus.PRAYED, PrayerDisplayStatus.LATE, PrayerDisplayStatus.QADA -> true
-    PrayerDisplayStatus.MISSED, PrayerDisplayStatus.NOT_RECORDED, PrayerDisplayStatus.UPCOMING -> false
-}
-
-/** The semantic colour this status paints in. */
-fun PrayerDisplayStatus.tone(): NimazTone = when (this) {
-    PrayerDisplayStatus.PRAYED -> NimazTone.SUCCESS
-    PrayerDisplayStatus.LATE -> NimazTone.ACCENT
-    PrayerDisplayStatus.QADA -> NimazTone.PROMINENT
-    PrayerDisplayStatus.MISSED -> NimazTone.ERROR
-    PrayerDisplayStatus.NOT_RECORDED -> NimazTone.WARNING
-    PrayerDisplayStatus.UPCOMING -> NimazTone.MUTED
-}
-
-/**
- * Disc or ring.
- *
- * [NOT_RECORDED] is the only ring: a hollow marker is how the design system says "this is an
- * absence of information", which a filled dot in any colour cannot distinguish from a fact.
- */
-fun PrayerDisplayStatus.dotStyle(): NimazStatusDotStyle = when (this) {
-    PrayerDisplayStatus.NOT_RECORDED -> NimazStatusDotStyle.OUTLINED
-    else -> NimazStatusDotStyle.FILLED
-}
+// isDone(), tone(), dotStyle() are defined in PrayerDisplayStatus.kt (presentation/model)

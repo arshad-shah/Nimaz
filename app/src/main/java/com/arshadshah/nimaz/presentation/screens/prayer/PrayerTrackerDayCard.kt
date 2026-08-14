@@ -26,9 +26,14 @@ import com.arshadshah.nimaz.core.util.formatFullDate
 import com.arshadshah.nimaz.domain.model.PrayerName
 import com.arshadshah.nimaz.domain.model.PrayerStatus
 import com.arshadshah.nimaz.domain.model.PrayerTimes
+import com.arshadshah.nimaz.presentation.model.PrayerDisplayStatus
+import com.arshadshah.nimaz.presentation.model.dotStyle
+import com.arshadshah.nimaz.presentation.model.isDone
+import com.arshadshah.nimaz.presentation.model.tone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeEmphasis
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
+import com.arshadshah.nimaz.presentation.components.atoms.PrayerStatusBadge
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
@@ -323,17 +328,10 @@ private fun PrayerRow(
         subtitle = time,
         style = NimazAccordionStyle.FLAT,
         trailing = {
-            NimazBadge(
-                text = status.label(),
+            PrayerStatusBadge(
+                status = status,
                 size = NimazBadgeSize.LARGE,
-                tone = status.tone(),
-                emphasis = if (status == PrayerDisplayStatus.NOT_RECORDED) {
-                    NimazBadgeEmphasis.OUTLINED
-                } else {
-                    NimazBadgeEmphasis.SOFT
-                },
-            )
-        },
+            )        },
     ) {
         NimazSegmentedControl(
             options = options.map { candidate ->
@@ -377,14 +375,4 @@ private fun PrayerStatus.pickerLabel(): String = when (this) {
     PrayerStatus.MISSED -> stringResource(R.string.missed)
     PrayerStatus.QADA -> stringResource(R.string.made_up)
     PrayerStatus.PENDING, PrayerStatus.NOT_PRAYED -> stringResource(R.string.prayer_status_not_recorded)
-}
-
-@Composable
-private fun PrayerDisplayStatus.label(): String = when (this) {
-    PrayerDisplayStatus.PRAYED -> stringResource(R.string.on_time)
-    PrayerDisplayStatus.LATE -> stringResource(R.string.late)
-    PrayerDisplayStatus.QADA -> stringResource(R.string.made_up)
-    PrayerDisplayStatus.MISSED -> stringResource(R.string.missed)
-    PrayerDisplayStatus.NOT_RECORDED -> stringResource(R.string.prayer_status_not_recorded)
-    PrayerDisplayStatus.UPCOMING -> stringResource(R.string.upcoming)
 }

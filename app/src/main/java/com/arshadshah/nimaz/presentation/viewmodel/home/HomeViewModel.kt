@@ -279,6 +279,7 @@ class HomeViewModel @Inject constructor(
                 _state.update {
                     it.copy(
                         dailyDua = DailyDua(
+                            duaId = dua.id,
                             title = dua.titleEnglish,
                             arabic = dua.textArabic,
                             translation = dua.textEnglish,

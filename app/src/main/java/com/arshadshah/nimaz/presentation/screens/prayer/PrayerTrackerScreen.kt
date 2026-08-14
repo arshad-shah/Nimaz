@@ -29,6 +29,8 @@ import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.util.formatFullDate
 import com.arshadshah.nimaz.core.util.toUtcMidnightMillis
 import com.arshadshah.nimaz.domain.model.PrayerName
+import com.arshadshah.nimaz.presentation.model.PrayerDisplayStatus
+import com.arshadshah.nimaz.presentation.model.isDone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeDefaults
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeEmphasis
