@@ -96,9 +96,9 @@ sealed interface Proof {
 /**
  * Errors surfaced by the AI feature, mapped from the Worker's error envelope
  * (and local/transport failures). The presentation layer renders friendly
- * messages from these. Play Integrity is the Worker's only guard: an explicit
- * failed verdict surfaces as [Unverified]; rate limits come from the AI
- * Gateway and surface as [RateLimited].
+ * messages from these. Play Integrity is the Worker's only guard: a failed
+ * verdict — or no usable integrity token at all — surfaces as [Unverified];
+ * rate limits come from the AI Gateway and surface as [RateLimited].
  */
 sealed interface AiError {
     data class RateLimited(val retryAfterSeconds: Long?) : AiError
