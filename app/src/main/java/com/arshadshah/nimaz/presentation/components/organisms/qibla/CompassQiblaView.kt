@@ -14,7 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.domain.model.CompassAccuracy
-import com.arshadshah.nimaz.presentation.components.atoms.qibla.QiblaStatusCapsule
+import com.arshadshah.nimaz.presentation.components.molecules.qibla.QiblaStatusCapsule
 import com.arshadshah.nimaz.presentation.components.molecules.qibla.QiblaAccuracyBar
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.theme.currentWindowSizeClass
