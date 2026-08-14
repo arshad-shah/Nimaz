@@ -285,6 +285,7 @@ environmental — see [§1](#1-start-here).
 | Browse rows truncated their meta | The juz label is drawn only when the surah **crosses** a juz. The sticky header already names the one it opens in |
 | Dividers invisible | `NimazDivider` defaulted to `outlineVariant` at **0.3 alpha** and 0.5dp. 1dp at full alpha — `outlineVariant` is already the subtle role |
 | Urdu translations had no face in Tafseer | `TafseerPageContent` rendered them as plain `bodyMedium`. It takes a `translationLanguage` now and routes through `asTranslationText`, fed by a new `TafseerUiState.selectedTranslatorId` |
+| Deleting from Saved moved the counts but left the row | A verse that is bookmarked **and** favourited is one card and two store rows; delete cleared only the bookmark, so the card came straight back through the favourites half of the merge. Delete unsaves the verse — and a favourite-only card, which could not be deleted at all (the lookup into `quranBookmarks` found nothing and returned early), now can be. Clear-all had the same half-delete |
 
 **Content, for `arshad-shah/nimaz-data` — not fixable in this repo:**
 
