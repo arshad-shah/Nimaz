@@ -41,10 +41,15 @@ class QuranBrowseViewModelTest {
     private lateinit var useCases: QuranUseCases
     private lateinit var settings: SettingsRepository
 
+    // Real Madani opening pages. A surah occupies every page up to the next one's opening, so
+    // the fixture needs enough neighbours to bound the long ones — with only three rows,
+    // Al-Baqarah would "span" from juz 1 to juz 30 and match every juz query there is.
     private val surahs = listOf(
-        surah(1, "The Opening", "Al-Fatihah", "الفاتحة", juzStart = 1, startPage = 1),
-        surah(2, "The Cow", "Al-Baqarah", "البقرة", juzStart = 1, startPage = 2),
-        surah(18, "The Cave", "Al-Kahf", "الكهف", juzStart = 15, startPage = 293),
+        surah(1, "The Opening", "Al-Fatihah", "الفاتحة", startPage = 1),
+        surah(2, "The Cow", "Al-Baqarah", "البقرة", startPage = 2),
+        surah(3, "The Family of Imran", "Ali-Imran", "آل عمران", startPage = 50),
+        surah(17, "The Night Journey", "Al-Isra", "الإسراء", startPage = 282),
+        surah(18, "The Cave", "Al-Kahf", "الكهف", startPage = 293),
     )
 
     @Before
@@ -77,7 +82,7 @@ class QuranBrowseViewModelTest {
         advanceUntilIdle()
 
         assertThat(vm.state.value.isLoading).isFalse()
-        assertThat(vm.state.value.rows.map { it.number }).containsExactly(1, 2, 18).inOrder()
+        assertThat(vm.state.value.rows.map { it.number }).containsExactly(1, 2, 3, 17, 18).inOrder()
         assertThat(vm.state.value.jumpTarget).isNull()
     }
 
@@ -107,15 +112,30 @@ class QuranBrowseViewModelTest {
     }
 
     @Test
-    fun `a juz query filters to the surahs starting there and sets the jump target`() = runTest {
+    fun `a juz query filters to every surah printed in it and sets the jump target`() = runTest {
         val vm = loaded()
         advanceUntilIdle()
 
         vm.onEvent(QuranBrowseEvent.QueryChanged("juz 15"))
 
-        // Al-Kahf opens on Madani page 293, which is in juz 15.
-        assertThat(vm.state.value.rows.map { it.number }).containsExactly(18)
+        // Juz 15 opens on page 282, inside Al-Isra, and runs into Al-Kahf. Both belong to it —
+        // filing a surah under the single juz it *opens* in would have returned Al-Kahf alone.
+        assertThat(vm.state.value.rows.map { it.number }).containsExactly(17, 18)
         assertThat(vm.state.value.jumpTarget).isEqualTo(QuranSearchQuery.Juz(15))
+    }
+
+    /**
+     * The case that made the span necessary: no surah *begins* in juz 2, so a start-only
+     * grouping answered "juz 2" with an empty list and left the juz out of the index entirely.
+     */
+    @Test
+    fun `a juz no surah opens in still finds the surah printed there`() = runTest {
+        val vm = loaded()
+        advanceUntilIdle()
+
+        vm.onEvent(QuranBrowseEvent.QueryChanged("juz 2"))
+
+        assertThat(vm.state.value.rows.map { it.number }).containsExactly(2)
     }
 
     @Test
@@ -147,7 +167,7 @@ class QuranBrowseViewModelTest {
 
         vm.onEvent(QuranBrowseEvent.ClearQuery)
 
-        assertThat(vm.state.value.rows.map { it.number }).containsExactly(1, 2, 18).inOrder()
+        assertThat(vm.state.value.rows.map { it.number }).containsExactly(1, 2, 3, 17, 18).inOrder()
         assertThat(vm.state.value.jumpTarget).isNull()
         assertThat(vm.state.value.query).isEmpty()
     }
@@ -169,7 +189,6 @@ private fun surah(
     english: String,
     transliteration: String,
     arabic: String,
-    juzStart: Int,
     startPage: Int,
 ) = Surah(
     number = number,

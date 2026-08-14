@@ -1,13 +1,18 @@
 package com.arshadshah.nimaz.widget.nextprayer
 
 import com.arshadshah.nimaz.core.time.TodayProvider
-import com.arshadshah.nimaz.core.util.PrayerTimeCalculator
+import com.arshadshah.nimaz.domain.model.AsrCalculation
+import com.arshadshah.nimaz.domain.model.CalculationMethod
+import com.arshadshah.nimaz.domain.model.PrayerCalculationSettings
 import com.arshadshah.nimaz.domain.model.PrayerTime
 import com.arshadshah.nimaz.domain.model.PrayerType
+import com.arshadshah.nimaz.domain.model.resolveLocation
+import com.arshadshah.nimaz.domain.repository.PrayerRepository
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.google.common.truth.Truth.assertThat
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.TimeZone
@@ -32,12 +37,21 @@ import kotlin.time.Instant
  */
 class NextPrayerWidgetDataSourceTest {
 
-    private val calculator: PrayerTimeCalculator = mockk(relaxed = true)
+    private val prayerRepository: PrayerRepository = mockk(relaxed = true)
     private val settings: SettingsRepository = mockk(relaxed = true)
     private val todayProvider: TodayProvider = mockk(relaxed = true)
 
     private val zone = TimeZone.currentSystemDefault()
     private val today = LocalDate.of(2026, 8, 12)
+
+    /** The user's settings, which the widget must compute with rather than the defaults. */
+    private val calculationSettings = PrayerCalculationSettings(
+        location = resolveLocation(51.5, -0.12, "London, England"),
+        calculationMethod = CalculationMethod.NORTH_AMERICA,
+        asrCalculation = AsrCalculation.HANAFI,
+        highLatitudeRule = null,
+        adjustments = mapOf(PrayerType.FAJR to 3),
+    )
 
     /** Builds an Instant at a wall-clock time today, in the system zone the source reads. */
     private fun at(hour: Int, minute: Int = 0): Instant {
@@ -61,24 +75,32 @@ class NextPrayerWidgetDataSourceTest {
         PrayerTime(PrayerType.ISHA, at(21, 30)),
     )
 
+    private val tomorrowFajr = PrayerTime(
+        PrayerType.FAJR,
+        Instant.fromEpochMilliseconds(at(5, 0).toEpochMilliseconds() + DAY_MILLIS),
+    )
+
     @Before
     fun setUp() {
-        every { settings.latitude } returns flowOf(51.5)
-        every { settings.longitude } returns flowOf(-0.12)
         every { settings.use24HourFormat } returns flowOf(true)
         every { todayProvider.today() } returns today
+        every { prayerRepository.observeCalculationSettings() } returns flowOf(calculationSettings)
     }
 
     private fun source(clock: Clock) =
-        NextPrayerWidgetDataSource(calculator, settings, todayProvider, clock)
+        NextPrayerWidgetDataSource(prayerRepository, settings, todayProvider, clock)
 
-    private fun givenToday(prayers: List<PrayerTime> = todaysPrayers) {
-        every { calculator.getPrayerTimes(any(), any(), any(), any(), any(), any(), any()) } returns prayers
+    private fun givenSchedule(
+        todaysSchedule: List<PrayerTime> = todaysPrayers,
+        tomorrowsSchedule: List<PrayerTime> = listOf(tomorrowFajr),
+    ) {
+        every { prayerRepository.getDaySchedule(today, any()) } returns todaysSchedule
+        every { prayerRepository.getDaySchedule(today.plusDays(1), any()) } returns tomorrowsSchedule
     }
 
     @Test
     fun `mid-morning, the next prayer is Dhuhr`() = runTest {
-        givenToday()
+        givenSchedule()
 
         val data = source(clockAt(9, 0)).load()
 
@@ -91,7 +113,7 @@ class NextPrayerWidgetDataSourceTest {
     /** A prayer exactly now has passed — strictly-after, or the widget sticks on it for a minute. */
     @Test
     fun `a prayer at exactly the current time is treated as passed`() = runTest {
-        givenToday()
+        givenSchedule()
 
         val data = source(clockAt(13, 0)).load()
 
@@ -100,7 +122,7 @@ class NextPrayerWidgetDataSourceTest {
 
     @Test
     fun `the countdown is populated for today's next prayer`() = runTest {
-        givenToday()
+        givenSchedule()
 
         val data = source(clockAt(12, 0)).load()
 
@@ -109,21 +131,59 @@ class NextPrayerWidgetDataSourceTest {
     }
 
     /**
+     * The whole point of the schedule: the widget redraws every minute and the worker runs every
+     * fifteen, so the answer to "which prayer is next" has to be something the widget can work
+     * out for itself. Without this the widget kept naming a prayer that had already started.
+     */
+    @Test
+    fun `the whole day is published so the widget can advance on its own`() = runTest {
+        givenSchedule()
+
+        val data = source(clockAt(9, 0)).load()
+
+        assertThat(data.schedule.map { it.prayerName })
+            .containsExactly("Fajr", "Dhuhr", "Asr", "Maghrib", "Isha", "Fajr")
+            .inOrder()
+        // Selecting from that same payload two hours later moves on without the worker running.
+        assertThat(data.nextEntry(at(14, 0).toEpochMilliseconds()).prayerName)
+            .isEqualTo(PrayerType.ASR.displayName)
+        assertThat(data.nextEntry(at(21, 0).toEpochMilliseconds()).prayerName)
+            .isEqualTo(PrayerType.ISHA.displayName)
+    }
+
+    /** Past Isha, the widget selects tomorrow's Fajr out of the payload it already holds. */
+    @Test
+    fun `the schedule carries into tomorrow so the evening never runs out`() = runTest {
+        givenSchedule()
+
+        val data = source(clockAt(9, 0)).load()
+        val lateEvening = data.nextEntry(at(23, 0).toEpochMilliseconds())
+
+        assertThat(lateEvening.prayerName).isEqualTo(PrayerType.FAJR.displayName)
+        assertThat(lateEvening.isTomorrow).isTrue()
+    }
+
+    /**
+     * The widget used to compute with `getPrayerTimes(latitude, longitude)` and take all four
+     * calculation defaults, so it showed Muslim World League / Shafi times to a user reading
+     * North America / Hanafi times inside the app.
+     */
+    @Test
+    fun `prayer times are computed with the user's calculation settings`() = runTest {
+        givenSchedule()
+
+        source(clockAt(9, 0)).load()
+
+        verify { prayerRepository.getDaySchedule(today, calculationSettings) }
+    }
+
+    /**
      * After Isha, every prayer for today has passed. This is the state the widget sits in every
      * single evening, and it was the least testable part of the worker.
      */
     @Test
     fun `after the last prayer it rolls over to tomorrow's Fajr`() = runTest {
-        val tomorrowFajr = PrayerTime(
-            PrayerType.FAJR,
-            Instant.fromEpochMilliseconds(at(5, 0).toEpochMilliseconds() + 24 * 60 * 60 * 1000L),
-        )
-        every {
-            calculator.getPrayerTimes(any(), any(), eq(today), any(), any(), any(), any())
-        } returns todaysPrayers
-        every {
-            calculator.getPrayerTimes(any(), any(), eq(today.plusDays(1)), any(), any(), any(), any())
-        } returns listOf(tomorrowFajr)
+        givenSchedule()
 
         val data = source(clockAt(22, 0)).load()
 
@@ -142,12 +202,7 @@ class NextPrayerWidgetDataSourceTest {
      */
     @Test
     fun `an uncomputable tomorrow still renders a named prayer`() = runTest {
-        every {
-            calculator.getPrayerTimes(any(), any(), eq(today), any(), any(), any(), any())
-        } returns todaysPrayers
-        every {
-            calculator.getPrayerTimes(any(), any(), eq(today.plusDays(1)), any(), any(), any(), any())
-        } returns emptyList()
+        givenSchedule(tomorrowsSchedule = emptyList())
 
         val data = source(clockAt(22, 0)).load()
 
@@ -159,11 +214,15 @@ class NextPrayerWidgetDataSourceTest {
 
     @Test
     fun `no prayer times at all still rolls over rather than failing`() = runTest {
-        every { calculator.getPrayerTimes(any(), any(), any(), any(), any(), any(), any()) } returns emptyList()
+        givenSchedule(todaysSchedule = emptyList(), tomorrowsSchedule = emptyList())
 
         val data = source(clockAt(9, 0)).load()
 
         assertThat(data.isTomorrow).isTrue()
         assertThat(data.isValid).isTrue()
+    }
+
+    private companion object {
+        const val DAY_MILLIS = 24 * 60 * 60 * 1000L
     }
 }

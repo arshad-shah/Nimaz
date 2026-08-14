@@ -459,7 +459,7 @@
         <item quantity="other">%d Duas</item>
     </plurals>
     <string name="bookmarks_title">Lesezeichen</string>
-    <string name="no_bookmarks_yet">Noch keine Lesezeichen</string>
+    <string name="no_bookmarks_yet">Noch nichts gespeichert</string>
     <string name="no_bookmarks_hint">Speichern Sie Ayahs, Hadithe und Duas für schnellen Zugriff</string>
     <string name="share">Teilen</string>
     <string name="added_format">Hinzugefügt am %s</string>
@@ -554,6 +554,8 @@
     <string name="quran_home_start_reading">Lesen beginnen</string>
     <string name="quran_home_begin_journey">Beginnen Sie Ihre Quran-Reise mit Al-Fatiha</string>
     <string name="quran_home_see_all">Alle anzeigen</string>
+    <string name="see_more">Mehr anzeigen</string>
+    <string name="see_less">Weniger anzeigen</string>
     <string name="quran_home_no_favorite_ayahs">Noch keine Lieblings-Ayahs</string>
     <string name="quran_home_favorite_hint">Tippen Sie auf das Herz-Symbol bei einer Ayah, um sie hier hinzuzufügen</string>
     <string name="quran_home_no_bookmarks">Noch keine Lesezeichen</string>
@@ -927,8 +929,8 @@
     <string name="show_transliteration_subtitle">Aussprache in lateinischen Buchstaben</string>
     <string name="show_translation">Übersetzung anzeigen</string>
     <string name="show_translation_subtitle">Bedeutung in Ihrer Sprache</string>
-    <string name="continuous_reading">Fortlaufendes Lesen</string>
-    <string name="continuous_reading_subtitle">Zwischen Surahs weiterlesen und nächste Ayah automatisch abspielen</string>
+    <string name="continuous_reading">Durchgehende Wiedergabe</string>
+    <string name="continuous_reading_subtitle">Nach dem Ende einer Ayah mit der nächsten und der nächsten Surah weiterspielen</string>
     <string name="keep_screen_on">Bildschirm anlassen</string>
     <string name="keep_screen_on_subtitle">Verhindern, dass sich der Bildschirm ausschaltet</string>
     <string name="show_tajweed_colors">Tadschwid-Farben anzeigen</string>
@@ -1843,7 +1845,7 @@
     <string name="fasting_log_on_subtitle">Erfasst — zum Rückgängigmachen tippen</string>
     <string name="fasting_log_off_subtitle">Noch nicht erfasst</string>
     <string name="fasting_log_managed_in_sheet">Wird in den Tagesdetails verwaltet</string>
-    <string name="bookmarks_search_placeholder">Lesezeichen durchsuchen</string>
+    <string name="bookmarks_search_placeholder">Gespeichertes durchsuchen</string>
     <string name="bookmarks_sort">Sortieren</string>
     <string name="bookmarks_sort_newest">Neueste zuerst</string>
     <string name="bookmarks_sort_oldest">Älteste zuerst</string>
@@ -1851,8 +1853,8 @@
     <string name="bookmarks_sort_alphabetical">A–Z</string>
     <string name="bookmarks_no_matches">Keine Treffer</string>
     <string name="bookmarks_no_matches_hint">Versuchen Sie eine andere Suche oder entfernen Sie den Filter.</string>
-    <string name="bookmarks_clear_all">Alle Lesezeichen löschen</string>
-    <string name="bookmarks_clear_all_title">Alle Lesezeichen löschen?</string>
+    <string name="bookmarks_clear_all">Alles Gespeicherte löschen</string>
+    <string name="bookmarks_clear_all_title">Alles Gespeicherte löschen?</string>
     <string name="bookmarks_clear_all_confirm">Alle löschen</string>
     <string name="bookmarks_clear_all_body">Damit werden alle %1$d Lesezeichen entfernt — Koran, Hadith und Bittgebete. Dies kann nicht rückgängig gemacht werden.</string>
     <string name="ai_error_consent_title">Mit Beleg fragen ist aus</string>
@@ -2021,9 +2023,14 @@
     <!-- Qur'an section redesign: Browse, Saved and the surah-info sheet -->
     <string name="saved">Gespeichert</string>
     <string name="notes">Notizen</string>
+    <string name="saved_show">Anzeigen</string>
+    <string name="saved_kind_bookmark">Lesezeichen</string>
+    <string name="saved_kind_favourite">Favorit</string>
+    <string name="saved_kind_note">Notiz</string>
     <string name="khatam">Khatam</string>
     <string name="quran_browse_search_hint">Sure, Dschus 15, Seite 299</string>
     <string name="quran_browse_page_start">S. %1$d</string>
+    <string name="quran_browse_juz_span">Dschuz %1$d–%2$d</string>
     <string name="quran_browse_load_failed">Die Surenliste konnte nicht geladen werden</string>
     <string name="quran_browse_open_juz">Dschus %1$d öffnen</string>
     <string name="quran_browse_open_page">Seite %1$d öffnen</string>
@@ -2049,6 +2056,9 @@
     <string name="ayah_action_share">Teilen</string>
     <string name="ayah_action_mark_read">Als gelesen</string>
     <string name="reader_go_to">Gehe zu…</string>
+    <string name="reader_go_to_action">Los</string>
+    <string name="reader_go_to_range">%1$d–%2$d</string>
+    <string name="reader_go_to_verse">Vers</string>
     <string name="reader_mode">Lesemodus</string>
     <string name="reader_mode_translation">Übersetzung</string>
     <string name="reader_mode_mushaf">Mushaf</string>

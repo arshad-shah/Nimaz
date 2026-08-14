@@ -773,7 +773,7 @@
     <string name="bookmarks_restore_failed">That bookmark couldn\'t be restored</string>
     <string name="bookmarks_note_failed">That note couldn\'t be saved</string>
     <string name="bookmarks_clear_failed">Your bookmarks couldn\'t be cleared</string>
-    <string name="no_bookmarks_yet">No Bookmarks Yet</string>
+    <string name="no_bookmarks_yet">Nothing saved yet</string>
     <string name="no_bookmarks_hint">Save ayahs, hadiths, and duas for quick access</string>
     <string name="share">Share</string>
     <string name="added_format">Added %s</string>
@@ -936,6 +936,8 @@
     <string name="quran_home_start_reading">Start Reading</string>
     <string name="quran_home_begin_journey">Begin your Quran journey with Al-Fatiha</string>
     <string name="quran_home_see_all">See All</string>
+    <string name="see_more">See more</string>
+    <string name="see_less">See less</string>
     <string name="quran_home_no_favorite_ayahs">No favorite ayahs yet</string>
     <string name="quran_home_favorite_hint">Tap the heart icon on any ayah to add it here</string>
     <string name="quran_home_no_bookmarks">No bookmarks yet</string>
@@ -1242,8 +1244,8 @@
     <string name="show_transliteration_subtitle">Roman letters pronunciation</string>
     <string name="show_translation">Show Translation</string>
     <string name="show_translation_subtitle">Meaning in your language</string>
-    <string name="continuous_reading">Continuous Reading</string>
-    <string name="continuous_reading_subtitle">Continue reading between surahs and auto-play next verse</string>
+    <string name="continuous_reading">Continuous playback</string>
+    <string name="continuous_reading_subtitle">Play on to the next verse and the next surah instead of stopping at the end of one</string>
     <string name="keep_screen_on">Keep Screen On</string>
     <string name="keep_screen_on_subtitle">Prevent screen from turning off</string>
     <string name="show_tajweed_colors">Show Tajweed Colors</string>
@@ -2072,7 +2074,7 @@
     <string name="fasting_log_on_subtitle">Logged — tap to undo</string>
     <string name="fasting_log_off_subtitle">Not logged yet</string>
     <string name="fasting_log_managed_in_sheet">Managed in the day\'s details</string>
-    <string name="bookmarks_search_placeholder">Search bookmarks</string>
+    <string name="bookmarks_search_placeholder">Search saved</string>
     <string name="bookmarks_sort">Sort</string>
     <string name="bookmarks_sort_newest">Newest first</string>
     <string name="bookmarks_sort_oldest">Oldest first</string>
@@ -2080,8 +2082,8 @@
     <string name="bookmarks_sort_alphabetical">A–Z</string>
     <string name="bookmarks_no_matches">No matches</string>
     <string name="bookmarks_no_matches_hint">Try a different search, or clear the filter.</string>
-    <string name="bookmarks_clear_all">Clear all bookmarks</string>
-    <string name="bookmarks_clear_all_title">Clear all bookmarks?</string>
+    <string name="bookmarks_clear_all">Clear everything saved</string>
+    <string name="bookmarks_clear_all_title">Clear everything saved?</string>
     <string name="bookmarks_clear_all_confirm">Clear all</string>
     <string name="bookmarks_clear_all_body">This removes all %1$d bookmarks — Qur\'an, Hadith and Dua. It cannot be undone.</string>
     <string name="ai_error_consent_title">Ask with Proof is off</string>
@@ -2217,9 +2219,14 @@
     <!-- Qur'an section redesign: Browse, Saved and the surah-info sheet -->
     <string name="saved">Saved</string>
     <string name="notes">Notes</string>
+    <string name="saved_show">Show</string>
+    <string name="saved_kind_bookmark">Bookmark</string>
+    <string name="saved_kind_favourite">Favourite</string>
+    <string name="saved_kind_note">Note</string>
     <string name="khatam">Khatam</string>
     <string name="quran_browse_search_hint">Surah, juz 15, page 299</string>
     <string name="quran_browse_page_start">p. %1$d</string>
+    <string name="quran_browse_juz_span">Juz %1$d–%2$d</string>
     <string name="quran_browse_load_failed">The surah list couldn\'t be loaded</string>
     <string name="quran_browse_open_juz">Open juz %1$d</string>
     <string name="quran_browse_open_page">Open page %1$d</string>
@@ -2245,6 +2252,9 @@
     <string name="ayah_action_share">Share</string>
     <string name="ayah_action_mark_read">Mark read</string>
     <string name="reader_go_to">Go to…</string>
+    <string name="reader_go_to_action">Go</string>
+    <string name="reader_go_to_range">%1$d–%2$d</string>
+    <string name="reader_go_to_verse">Verse</string>
     <string name="reader_mode">Reading mode</string>
     <string name="reader_mode_translation">Translation</string>
     <string name="reader_mode_mushaf">Mushaf</string>

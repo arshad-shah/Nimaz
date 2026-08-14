@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.presentation.screens.quran
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -8,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
@@ -99,7 +101,7 @@ fun QuranBrowseScreen(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 internal fun QuranBrowseContent(
     state: QuranBrowseUiState,
@@ -190,12 +192,15 @@ internal fun QuranBrowseContent(
                     // in mushaf order, so the boundary is a property of adjacency and the state
                     // stays a flat list a test can assert on.
                     state.rows.forEachIndexed { index, surah ->
-                        val juz = state.juzBySurah[surah.number] ?: 1
+                        val span = state.juzSpans[surah.number] ?: 1..1
                         val previousJuz = state.rows.getOrNull(index - 1)
-                            ?.let { state.juzBySurah[it.number] }
-                        if (previousJuz != juz) {
-                            item(key = "juz_${juz}_${surah.number}") {
-                                JuzSectionHeader(juz = juz)
+                            ?.let { state.juzSpans[it.number]?.first }
+                        if (previousJuz != span.first) {
+                            // Sticky: the header stays under the search field while its own
+                            // surahs scroll past, so "which juz am I looking at" is answered at
+                            // every scroll position and not only at the boundary.
+                            stickyHeader(key = "juz_${span.first}_${surah.number}") {
+                                JuzSectionHeader(juz = span.first)
                             }
                         }
                         item(key = surah.number) {
@@ -205,6 +210,14 @@ internal fun QuranBrowseContent(
                                 onInfoClick = { infoForSurah = surah.number },
                                 isSelected = selectedSurahNumber == surah.number,
                                 startPage = state.startPages[surah.number] ?: surah.startPage,
+                                // Only when the surah crosses a boundary. The sticky header
+                                // already names the juz it opens in, so repeating that on
+                                // every row bought nothing and cost the width that pushed
+                                // "165 Verses · p. 128 · Juz 7" past the ellipsis. A span is
+                                // the one thing the header genuinely cannot say.
+                                juzLabel = stringResource(
+                                    R.string.quran_browse_juz_span, span.first, span.last
+                                ).takeIf { span.first != span.last },
                             )
                         }
                     }
@@ -239,7 +252,10 @@ private fun JuzSectionHeader(juz: Int) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 4.dp, end = 4.dp, top = 12.dp, bottom = 2.dp),
+            // Opaque, because it is sticky: a transparent header would have the surah rows
+            // scroll visibly through its own text.
+            .background(MaterialTheme.colorScheme.background)
+            .padding(start = 4.dp, end = 4.dp, top = 12.dp, bottom = 6.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {

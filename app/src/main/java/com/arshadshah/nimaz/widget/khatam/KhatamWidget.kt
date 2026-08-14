@@ -296,8 +296,10 @@ private fun KhatamEmptyContent(
 class KhatamWidgetReceiver : WidgetWorkReceiver() {
     override val glanceAppWidget: GlanceAppWidget = KhatamWidget()
 
-    override fun enqueueWork(context: Context) =
-        KhatamWorker.enqueuePeriodicWork(context, force = true)
+    override fun enqueueWork(context: Context, force: Boolean) =
+        KhatamWorker.enqueuePeriodicWork(context, force = force)
+
+    override fun refreshNow(context: Context) = KhatamWorker.enqueueImmediateWork(context)
 
     override fun cancelWork(context: Context) = KhatamWorker.cancel(context)
 }

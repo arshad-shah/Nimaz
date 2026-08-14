@@ -355,13 +355,11 @@ fun QuranSettingsScreen(
                         onClick = onNavigateToSelectReciter,
                         showArrow = true
                     )
-                }
-            }
-
-            // ── 7. Reading behaviour ────────────────────────────────────────────────────
-            item { NimazSectionHeader(title = stringResource(R.string.reading_section)) }
-            item {
-                NimazMenuGroup {
+                    NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                    // Under Audio, where it belongs. Called "Continuous Reading" and filed
+                    // under Reading behaviour, it read as a twin of the player's "Follow
+                    // along" — which is the *scroll*. This one is the playlist: whether the
+                    // recitation carries on past the end of a verse.
                     NimazSettingsItem(
                         title = stringResource(R.string.continuous_reading),
                         subtitle = stringResource(R.string.continuous_reading_subtitle),
@@ -372,7 +370,13 @@ fun QuranSettingsScreen(
                             )
                         }
                     )
-                    NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                }
+            }
+
+            // ── 7. Reading behaviour ────────────────────────────────────────────────────
+            item { NimazSectionHeader(title = stringResource(R.string.reading_section)) }
+            item {
+                NimazMenuGroup {
                     NimazSettingsItem(
                         title = stringResource(R.string.keep_screen_on),
                         subtitle = stringResource(R.string.keep_screen_on_subtitle),

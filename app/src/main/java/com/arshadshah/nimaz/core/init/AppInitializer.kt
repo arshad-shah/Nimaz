@@ -14,6 +14,7 @@ import com.arshadshah.nimaz.data.audio.AdhanDownloadService
 import com.arshadshah.nimaz.data.audio.AdhanSound
 import com.arshadshah.nimaz.data.local.user.UserDataMigrator
 import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
+import com.arshadshah.nimaz.data.widget.WidgetSettingsWatcher
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -37,6 +38,7 @@ class AppInitializer @Inject constructor(
     private val adhanAudioManager: AdhanAudioManager,
     private val announcementBootstrap: AnnouncementBootstrap,
     private val userDataMigrator: UserDataMigrator,
+    private val widgetSettingsWatcher: WidgetSettingsWatcher,
 ) {
     private val _isReady = MutableStateFlow(false)
     val isReady: StateFlow<Boolean> = _isReady.asStateFlow()
@@ -44,6 +46,9 @@ class AppInitializer @Inject constructor(
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     fun initialize() {
+        // Outside the timed block: it starts a long-lived collection rather than doing work, so
+        // it neither delays startup nor should be cancelled when startup runs long.
+        widgetSettingsWatcher.start()
         scope.launch {
             val startMs = System.currentTimeMillis()
             var timedOut = false

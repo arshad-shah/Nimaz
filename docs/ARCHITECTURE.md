@@ -1071,17 +1071,23 @@ with no label and a touch target under 48dp fail the lane we already run. It can
       make that distinction. `NimazLegendItem` and `NimazCalendar`'s day indicators both draw
       through it; `CalendarDayState.indicatorStyle` / `CalendarLegendItem.indicatorStyle` carry the
       choice and default to `FILLED`.
-    - a **saved-item row** (a stored ayah/hadith/dua reference shown with a badge, relative
+    - a **saved-item row** (a stored ayah/hadith/dua reference shown with a kind spine, relative
       timestamp, Arabic preview and overflow menu) is
       `SwipeableSavedCard(title, timestamp, menuActions, onClick, onDelete, enableSwipeToDelete = …,
-      subtitle = …, arabicText = …, note = …) { leading }`
+      subtitle = …, arabicText = …, note = …, accent = …, kindLabel = …) { leading }`
       (`components/organisms/SwipeableSavedCard.kt`), **not** a hand-rolled `SwipeToDismissBox` +
       `NimazCard` per screen. The same file owns the two pieces it is built from, reusable on their
       own: `SwipeToDeleteBox(onDelete) { … }` (the end→start swipe gesture + error-tinted backdrop,
       enabled only where the screen opts in) and `NimazOverflowMenu(actions = listOf(NimazMenuAction(text,
       icon, onClick, destructive = …)))` (the `⋮` button + anchored action menu over `NimazDropdownMenu`).
       It centralised the **Bookmarks** screen and the **Quran Favourites** tab so both render
-      identically while keeping delete in the overflow menu.
+      identically while keeping delete in the overflow menu. `accent` draws a 3dp spine down the
+      card's left edge in the save's kind colour — gold bookmark, red favourite, violet note, the
+      same three the ayah sheet uses — and tints `kindLabel`, so a list of saves is scannable by
+      colour before it is read. It replaced a filled corpus badge leading the card: the corpus is
+      the axis you *filter* by, the kind is the one you are looking at. There is no ornamental
+      divider above the Arabic — a gold floret rule on every row turned a list into a page of
+      ornament, and Arabic is already set apart by being Arabic.
     - the **Quran "manuscript" ornaments** share one geometry and one set of atoms so the surah
       header, surah list, Juz/Page grids and mushaf page frame read as a single system. The surah
       header is `SurahHeaderCartouche(surah, showBismillah = …)`
@@ -1289,9 +1295,31 @@ treatment. Verse-of-the-Day and continue-reading previously both carried
 - **`ReaderAnchorBar`** (molecule, `components/molecules/ReaderAnchorBar.kt`) says where you are
   **once**. `Juz 15 · Page 293` used to be a badge on every ayah — the same sentence repeated six
   times a screen about a fact that changes about once a page — and it is one bar under the app bar
-  now, where it is true of everything below it. It carries the "Go to…" affordance too, so the
-  place you are is also the control for changing it; the reader points it at the surah's passage
-  outline, opened at the verse being read.
+  now, where it is true of everything below it. It renders the **coordinate only**: the surah's
+  name is already in the app bar one line above, and printing it twice is the repetition the bar
+  exists to end. It carries the "Go to…" affordance too, so the place you are is also the control
+  for changing it.
+- **`ReaderGoToSheet`** (molecule, `components/molecules/ReaderGoToSheet.kt`) is what "Go to…"
+  opens: a `NimazSegmentedControl` over Verse / Juz / Page, a bounded numeric field, and a jump.
+  The affordance used to open the *passage outline*, which answers "what is this surah about" — a
+  good question, and not the one a control called "Go to" is asking. The host scrolls when the
+  target is already loaded and re-targets the reader (`LoadJuz` / `LoadPage`) when it is not, so
+  "page 300" works from anywhere. Verse is offered only in surah mode; juz and page span several.
+- The ayah sheet is **actions only**, laid out as a `NimazSheetActionGrid` — two columns of wide
+  pills, icon beside label. It used to reprint the verse and its translation above the actions;
+  the reader tapped that verse to open the sheet and it is still on the screen behind it, so the
+  copy pushed the actions down (off the first screenful entirely on a long verse with a
+  translation) to confirm what the header's reference already states. Five icon-pills to a row
+  also left roughly 64dp per label, which is where "Unbookmark" started ellipsising.
+  `NimazSheetActionRow` (icon above label, up to five across) stays for the sheets that carry
+  three or four actions.
+- **`NoteEditorSheet`** (molecule, `components/molecules/NoteEditorSheet.kt`) is the **one** note
+  editor, shared by the Saved screen's bookmark menu and the reader's ayah sheet. The ayah sheet's
+  Note action used to open **Tafseer** — the scholars' commentary, which is the neighbouring
+  action — so the app had no way to write a note about a verse at all. A note lives on the verse's
+  bookmark row (`QuranEvent.SetAyahNote` creates the mark if there isn't one), and the annotated
+  subset is carried on `QuranReaderUiState.ayahNotes` so the editor opens on what is already
+  written rather than on a blank field that would overwrite it.
 - The reader's **reading-mode control** is an app-bar icon showing the current mode, not a row in
   the overflow next to Passages and Settings. **Two** modes, Translation and Mushaf — the 16-line
   and 15-line IndoPak editions are a *script* (`MushafScript`, a persisted `SettingsQuran`
@@ -1327,12 +1355,26 @@ treatment. Verse-of-the-Day and continue-reading previously both carried
   `QuranTopicsScreen`, `QuranTopicDetailScreen` and `SurahSubjectsScreen` — the three screens later
   phases of this redesign rewrite — so it is the tree component to build on, not to duplicate.
 - **`QuranFrame`'s two variants have parted company.** `READER` — the mushaf page — takes the
-  paper register: a `paper` ground, one `paperLine` hairline rule above and below the text block,
-  and a small `paperLine` medallion at the foot. `STUDY` — Tafseer — keeps the illuminated
-  gold-over-teal double border and the floret divider. Both mushaf renderers draw their Arabic in
-  `paperInk` rather than `onBackground`, which is mixed for a card and not for cream. Two
-  ornamental registers in one app is a deliberate cost (spec §5.9's "noted tension"), taken
-  because the mushaf's job is to disappear behind the text and Tafseer's is to frame it.
+  paper register: a `paper` ground inside a 16dp rounded card, a second `paperLine` keyline drawn
+  **inside** it at 12dp, and the page number as a small `paper`-filled pill straddling that
+  keyline's bottom edge in `frameGold`. Two nested rounded rectangles is how a printed mushaf
+  frames its text block, and what the design prototype
+  (`docs/superpowers/prototypes/2026-08-13-quran-mushaf-and-player.html`) draws; the earlier
+  hairline-rule-plus-shamsa version put a rosette at the foot of every page, competing with the ۞
+  and ع markers inside it that are actually carrying meaning. `STUDY` — Tafseer — keeps the
+  illuminated gold-over-teal double border, the floret divider and the shamsa. Both mushaf
+  renderers draw their Arabic in `paperInk` rather than `onBackground`, which is mixed for a card
+  and not for cream. Two ornamental registers in one app is a deliberate cost (spec §5.9's "noted
+  tension"), taken because the mushaf's job is to disappear behind the text and Tafseer's is to
+  frame it.
+- **`RuledSurahHeading`** (molecule, `components/molecules/RuledSurahHeading.kt`) opens a surah
+  **on the paper page**: a `paperLine`-bordered box washed with 7% `frameGold`, holding
+  hairline / Arabic surah name in gold / hairline, with the Basmala on its own line beneath in
+  `paperInk`. Both mushaf renderers (`MushafPage`, `MushafLineLayout`) use it. They used to render
+  `SurahHeaderCartouche`, which pins the brand ramps regardless of theme and so landed on a cream
+  page as a dark teal plaque carrying the surah's *English* name and a "Meccan" badge — card
+  furniture, in the middle of the text block. The cartouche is **not** retired: it still opens the
+  translation reader, where the surface genuinely is a card.
 - `QuranSurfaceColors` (`presentation/theme/QuranSurfaceColors.kt`) now also carries a **`paper`**
   register — `paper` / `paperLine` / `paperInk` — used **only** by the mushaf and 16-line reading
   modes. It is held apart from `pageSurface` and the rest of the app's `surface` tokens because
@@ -1391,6 +1433,7 @@ copy anything listed as Open.
 | Qur'an ayah projection duplicated eight times | **The reader's projection is one `@DatabaseView`, `ayah_with_text`** (schemaVersion 25), and it stopped computing what it now reads. It was written out eight times in `QuranDao`, differing only in the `WHERE`, and each copy carried two *range* joins (`a.id BETWEEN hq.start_ayah_id AND hq.end_ayah_id`, and the same for `rukus`) that SQLite cannot serve from an index, plus a `(SELECT surah_id, MIN(number) … GROUP BY surah_id)` subquery that re-grouped the whole `rukus` table on every call — including the single-verse lookup. Those four values are build-time columns on `ayahs` now, derived by nimaz-data (`data-v9`) and cross-checked there against the range tables; three equality joins remain and the eight queries are one-liners. First `@DatabaseView` in the project — note that a view is schema Room validates **verbatim** on open, so its SQL is assembled from one `const` and asserted by `AyahWithTextViewTest`. See `SUBSYSTEMS.md` §5. |
 | Copy-pasted screens and widget scaffolding | **Four clones extracted, and each one had already drifted.** (1) The two Mushaf renderers shared a 93-line per-verse action host — tooltip, seven actions, translation sheet — now `MushafAyahActions` + `MushafAyahActionsState`; they keep only their layouts, which is all they ever really differed in. (2) Three catalog list screens and two detail screens became `CatalogList` and `CatalogDetailScreen`; the *ViewModel* layer was already generic (`CatalogViewModel<T>`), only the screens had been copied. The three destinations they framed have since become one — `Route.Names`, three tabs, one search box and one favourites area — so `CatalogList` is now a tab body rather than a whole screen. (3) The make-up-prayer list, reachable as a screen and as a tab, is one `QadaPrayerList`. (4) All six widget workers share `refreshWidget`. Registry Open #14 closes by recording that `AyahActionsBottomSheet`'s **retirement stands** — the audit proposed wiring it back in, but the shared host is extracted from the two renderers instead. See `SUBSYSTEMS.md` §0/§2 and `CLEAN_ARCHITECTURE_CHECKLIST.md`. |
 | `FastTrackerScreen` at 1,779 lines, and the last two unseamed calculators | **A 340-line tab moved out, a calculation moved down, and the last `PrayerTimeCalculator()` removed.** `MakeupFastsContent` and its four helpers were a whole second screen living as private functions; they are `MakeupFastsTab.kt` now (the file drops to 1,434 lines). `calculateAyyamAlBeedDays` was business logic about the Hijri calendar inside a screen, calling `LocalDate.now()` at one of its two call sites and ignoring the user's `hijriDayOffset`; it is `GetDaysUntilAyyamAlBeedUseCase`, reads the clock through `TodayProvider`, takes the offset, and has tests — which is how registry Open #10 stops being true of one more helper. The offset arrives through a new narrow `HijriSettings` seam rather than the whole `SettingsRepository`, following `ZakatSettings` (#436). `WidgetsScreen` constructed a `PrayerTimeCalculator()` directly — the last such site anywhere; it is injected now. |
+| Widgets computed with the calculation defaults | **Both prayer widgets went through `PrayerRepository` instead of `PrayerTimeCalculator`.** `NextPrayerWidgetDataSource` and `PrayerTimesWidgetDataSource` each called `getPrayerTimes(latitude, longitude)` and took all four defaults — Muslim World League, Shafi asr, no high-latitude rule, no per-prayer adjustments — the same shape of bug the five ViewModels above had, in the one place a user cannot see the settings that produced it. So the home screen showed one set of times and the app showed another, and nothing in either said why. They now take `PrayerRepository` and use `observeCalculationSettings()` + `getDaySchedule(date, settings)`, the same path `PrayerUseCases` wraps for the ViewModels; the widget layer takes the repository directly, as the data layer does, because a widget worker is not a ViewModel and has no `XxxUseCases`. Pinned by the two widget data-source tests, which assert the resolved settings reach the repository. |
 | Domain→data leak (`PageAyahRange`) | Added a `PageAyahRange` domain model; the Room projection is `PageAyahRangeRow` (mapped in `QuranRepositoryImpl`). `domain/` no longer imports anything from `data/`. |
 | Home daily-content DAO coupling | `HomeViewModel` no longer injects `FastingDao`/`HadithDao`/`DuaDao`. Daily hadith/dua logic extracted to `GetDailyHadithUseCase`/`GetDailyDuaUseCase`; seeding moved into the repositories. No presentation ViewModel injects a DAO or `RepositoryImpl` anymore. |
 | Theming (screens) | Raw `Color(0xFF…)` literals removed from ~20 feature screens into `NimazColors` tokens (exact hex; added `Success`/`Warning`/`Info`/etc. and `HadithCollectionColors`). Only bespoke design-token files remain (`tasbih/BeadDesign.kt`, `TasbihBeads.kt`, `onboarding/OnboardingArt.kt`). |

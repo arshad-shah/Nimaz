@@ -445,7 +445,7 @@
         <item quantity="other">%d doa</item>
     </plurals>
     <string name="bookmarks_title">Penanda</string>
-    <string name="no_bookmarks_yet">Belum Ada Penanda</string>
+    <string name="no_bookmarks_yet">Belum ada yang tersimpan</string>
     <string name="no_bookmarks_hint">Simpan ayat, hadis, dan doa untuk akses cepat</string>
     <string name="share">Bagikan</string>
     <string name="added_format">Ditambahkan %s</string>
@@ -539,6 +539,8 @@
     <string name="quran_home_start_reading">Mulai Membaca</string>
     <string name="quran_home_begin_journey">Mulai perjalanan Al-Quran Anda dengan Al-Fatihah</string>
     <string name="quran_home_see_all">Lihat Semua</string>
+    <string name="see_more">Lihat selengkapnya</string>
+    <string name="see_less">Lihat lebih sedikit</string>
     <string name="quran_home_no_favorite_ayahs">Belum ada ayat favorit</string>
     <string name="quran_home_favorite_hint">Ketuk ikon hati pada ayat mana pun untuk menambahkannya di sini</string>
     <string name="quran_home_no_bookmarks">Belum ada penanda</string>
@@ -908,8 +910,8 @@
     <string name="show_transliteration_subtitle">Pelafalan dengan huruf Latin</string>
     <string name="show_translation">Tampilkan Terjemahan</string>
     <string name="show_translation_subtitle">Makna dalam bahasa Anda</string>
-    <string name="continuous_reading">Bacaan Berkelanjutan</string>
-    <string name="continuous_reading_subtitle">Lanjutkan membaca antar surah dan putar otomatis ayat berikutnya</string>
+    <string name="continuous_reading">Pemutaran berkelanjutan</string>
+    <string name="continuous_reading_subtitle">Lanjut ke ayat berikutnya dan surah berikutnya, bukan berhenti di akhir</string>
     <string name="keep_screen_on">Biarkan Layar Menyala</string>
     <string name="keep_screen_on_subtitle">Cegah layar dari mati</string>
     <string name="show_tajweed_colors">Tampilkan Warna Tajwid</string>
@@ -1809,7 +1811,7 @@
     <string name="fasting_log_on_subtitle">Tercatat — ketuk untuk membatalkan</string>
     <string name="fasting_log_off_subtitle">Belum dicatat</string>
     <string name="fasting_log_managed_in_sheet">Dikelola di rincian hari ini</string>
-    <string name="bookmarks_search_placeholder">Cari markah</string>
+    <string name="bookmarks_search_placeholder">Cari yang tersimpan</string>
     <string name="bookmarks_sort">Urutkan</string>
     <string name="bookmarks_sort_newest">Terbaru dulu</string>
     <string name="bookmarks_sort_oldest">Terlama dulu</string>
@@ -1817,8 +1819,8 @@
     <string name="bookmarks_sort_alphabetical">A–Z</string>
     <string name="bookmarks_no_matches">Tidak ada hasil</string>
     <string name="bookmarks_no_matches_hint">Coba pencarian lain, atau hapus filternya.</string>
-    <string name="bookmarks_clear_all">Hapus semua markah</string>
-    <string name="bookmarks_clear_all_title">Hapus semua markah?</string>
+    <string name="bookmarks_clear_all">Hapus semua yang tersimpan</string>
+    <string name="bookmarks_clear_all_title">Hapus semua yang tersimpan?</string>
     <string name="bookmarks_clear_all_confirm">Hapus semua</string>
     <string name="bookmarks_clear_all_body">Ini menghapus semua %1$d markah — Al-Qur\'an, Hadis, dan Doa. Tindakan ini tidak dapat dibatalkan.</string>
     <string name="ai_error_consent_title">Tanya dengan Dalil nonaktif</string>
@@ -1980,9 +1982,14 @@
     <!-- Qur'an section redesign: Browse, Saved and the surah-info sheet -->
     <string name="saved">Tersimpan</string>
     <string name="notes">Catatan</string>
+    <string name="saved_show">Tampilkan</string>
+    <string name="saved_kind_bookmark">Markah</string>
+    <string name="saved_kind_favourite">Favorit</string>
+    <string name="saved_kind_note">Catatan</string>
     <string name="khatam">Khatam</string>
     <string name="quran_browse_search_hint">Surah, juz 15, halaman 299</string>
     <string name="quran_browse_page_start">hlm. %1$d</string>
+    <string name="quran_browse_juz_span">Juz %1$d–%2$d</string>
     <string name="quran_browse_load_failed">Daftar surah tidak dapat dimuat</string>
     <string name="quran_browse_open_juz">Buka juz %1$d</string>
     <string name="quran_browse_open_page">Buka halaman %1$d</string>
@@ -2008,6 +2015,9 @@
     <string name="ayah_action_share">Bagikan</string>
     <string name="ayah_action_mark_read">Tandai dibaca</string>
     <string name="reader_go_to">Buka…</string>
+    <string name="reader_go_to_action">Buka</string>
+    <string name="reader_go_to_range">%1$d–%2$d</string>
+    <string name="reader_go_to_verse">Ayat</string>
     <string name="reader_mode">Mode baca</string>
     <string name="reader_mode_translation">Terjemahan</string>
     <string name="reader_mode_mushaf">Mushaf</string>

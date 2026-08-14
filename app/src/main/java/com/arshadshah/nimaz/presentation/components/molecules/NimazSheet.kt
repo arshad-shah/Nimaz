@@ -41,6 +41,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -284,14 +285,122 @@ fun NimazSheetSectionLabel(
     )
 }
 
-/** A single icon-pill action in a [NimazSheetActionRow]. */
+/**
+ * A single action in a [NimazSheetActionRow] or a [NimazSheetActionGrid].
+ *
+ * @param wide grid only: give this action a row of its own instead of half of one. For the odd
+ *   action that is longer, rarer or more consequential than its neighbours.
+ */
 data class NimazSheetAction(
     val icon: ImageVector,
     val label: String,
     val onClick: () -> Unit,
     val tint: Color? = null,
-    val selected: Boolean = false
+    val selected: Boolean = false,
+    val wide: Boolean = false
 )
+
+/**
+ * Actions as a **two-column grid** of wide pills — icon beside label, not above it.
+ *
+ * [NimazSheetActionRow] divides the width by the number of actions, so five across a 360dp
+ * screen leaves each about 64dp for a label: "Unbookmark" ellipsises, and the labels crowd. This
+ * gives each action half the width and reads the label on one line at any translation.
+ *
+ * Actions keep their given order. A [NimazSheetAction.wide] action takes a full row; the ones
+ * around it pair up as normal.
+ */
+@Composable
+fun NimazSheetActionGrid(
+    actions: List<NimazSheetAction>,
+    modifier: Modifier = Modifier
+) {
+    // Grouped into rows here rather than with a LazyVerticalGrid: the sheet body already
+    // scrolls, and nesting a scrollable in it is a measurement error rather than a style choice.
+    val rows = buildList {
+        var pending: NimazSheetAction? = null
+        actions.forEach { action ->
+            when {
+                action.wide -> {
+                    pending?.let { add(listOf(it)) }
+                    pending = null
+                    add(listOf(action))
+                }
+
+                pending == null -> pending = action
+                else -> {
+                    add(listOf(pending!!, action))
+                    pending = null
+                }
+            }
+        }
+        pending?.let { add(listOf(it)) }
+    }
+
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        rows.forEach { row ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                row.forEach { action ->
+                    ActionTile(action = action, modifier = Modifier.weight(1f))
+                }
+                // A lone action in a two-column row keeps its half rather than stretching
+                // across, so the grid stays a grid on an odd count.
+                if (row.size == 1 && !row.first().wide) {
+                    Spacer(modifier = Modifier.weight(1f))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ActionTile(
+    action: NimazSheetAction,
+    modifier: Modifier = Modifier
+) {
+    val contentColor = when {
+        action.tint != null -> action.tint
+        action.selected -> MaterialTheme.colorScheme.primary
+        else -> MaterialTheme.colorScheme.onSurface
+    }
+    Surface(
+        onClick = action.onClick,
+        shape = RoundedCornerShape(14.dp),
+        color = if (action.selected) {
+            MaterialTheme.colorScheme.primary.copy(alpha = 0.13f)
+        } else {
+            MaterialTheme.colorScheme.surfaceContainer
+        },
+        modifier = modifier
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 13.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            NimazIcon(
+                imageVector = action.icon,
+                contentDescription = null,
+                tint = contentColor,
+                size = NimazIconSize.MEDIUM
+            )
+            Text(
+                text = action.label,
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Medium,
+                color = contentColor,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+    }
+}
 
 /**
  * Row of labelled icon-pill actions (Play / Bookmark / Share …). Up to five

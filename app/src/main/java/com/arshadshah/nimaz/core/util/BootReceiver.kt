@@ -19,6 +19,7 @@ import com.arshadshah.nimaz.domain.model.PrayerName
 import com.arshadshah.nimaz.domain.model.PrayerStatus
 import com.arshadshah.nimaz.domain.repository.KhatamRepository
 import com.arshadshah.nimaz.domain.repository.PrayerRepository
+import com.arshadshah.nimaz.widget.WidgetUpdateScheduler
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -64,6 +65,11 @@ class BootReceiver : BroadcastReceiver() {
             "com.htc.intent.action.QUICKBOOT_POWERON" -> {
                 AppAnalytics.logNotificationReschedule(trigger = "boot")
                 reschedulePrayerNotifications()
+                // Widget periodic work is WorkManager's and survives the reboot on its own; the
+                // per-minute countdown alarm is ours and does not. Nothing re-armed it, so the
+                // countdown widgets stopped ticking at the first restart after they were placed
+                // and never started again.
+                WidgetUpdateScheduler.ensureScheduled(context)
             }
 
             PrayerNotificationScheduler.ACTION_MIDNIGHT_RESCHEDULE -> {

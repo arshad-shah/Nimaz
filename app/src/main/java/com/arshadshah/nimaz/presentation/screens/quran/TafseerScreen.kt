@@ -235,7 +235,8 @@ fun TafseerScreen(
                         },
                         onShare = { shareTafseerPdf() },
                         topics = if (isCurrentPage) state.topics else emptyList(),
-                        onTopicClick = onNavigateToTopic
+                        onTopicClick = onNavigateToTopic,
+                        translationLanguage = state.translationLanguage,
                     )
                 }
             } else {

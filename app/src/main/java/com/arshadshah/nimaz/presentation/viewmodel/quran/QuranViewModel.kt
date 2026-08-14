@@ -10,6 +10,7 @@ import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.core.text.StringProvider
 import com.arshadshah.nimaz.core.time.TodayProvider
+import com.arshadshah.nimaz.core.monitoring.launchBestEffort
 import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.data.audio.AudioState
 import com.arshadshah.nimaz.data.audio.QuranAudioManager
@@ -270,7 +271,7 @@ class QuranViewModel @Inject constructor(
 
             is QuranEvent.PreviewReciter -> {
                 telemetry.featureUsed(AppAnalytics.Feature.QURAN, "preview_reciter")
-                audioManager.setReciter(event.reciterId)
+                audioManager.setReciter(event.reciterId, restartIfPlaying = false)
                 playAyahAudio(ayahGlobalId = 1, surahNumber = 1, ayahNumber = 1)
             }
 
@@ -328,6 +329,11 @@ class QuranViewModel @Inject constructor(
             // `markAyahsRead`/`unmarkAyahRead` for exactly the same effect. Instrumenting them
             // would have produced two more metrics that read zero for ever, which is the
             // defect this issue is about.
+            is QuranEvent.SetAyahNote -> {
+                telemetry.featureUsed(AppAnalytics.Feature.QURAN, "set_ayah_note")
+                setAyahNote(event)
+            }
+
             is QuranEvent.ToggleKhatamAyah -> {
                 telemetry.featureUsed(AppAnalytics.Feature.QURAN, "khatam_toggle_ayah")
                 toggleKhatamAyah(event.ayahId)
@@ -669,6 +675,12 @@ class QuranViewModel @Inject constructor(
             quranUseCases.getBookmarks()
                 .collect { bookmarks ->
                     _bookmarksState.update { it.copy(bookmarks = bookmarks, isLoading = false) }
+                    // The annotated subset, for the reader's note editor. Derived from the
+                    // stream the bookmarks screen already collects rather than a second query.
+                    val notes = bookmarks
+                        .mapNotNull { bm -> bm.note?.takeIf { it.isNotBlank() }?.let { bm.ayahId to it } }
+                        .toMap()
+                    _readerState.update { it.copy(ayahNotes = notes) }
                 }
         }
     }
@@ -870,6 +882,37 @@ class QuranViewModel @Inject constructor(
                 it.copy(
                     mushafPageLayoutCache = it.mushafPageLayoutCache + (pageNumber to layout)
                 )
+            }
+        }
+    }
+
+    /**
+     * Save the reader's note on a verse, bookmarking it if it was not already.
+     *
+     * `bookmarks` keys on `(kind, target_id)` and carries the note as a column, so there is no
+     * such thing as a note without a mark — and a reader writing one is telling us the verse
+     * matters, which is the same statement a bookmark makes.
+     */
+    private fun setAyahNote(event: QuranEvent.SetAyahNote) {
+        launchBestEffort(telemetry, AppAnalytics.Feature.QURAN, "set_ayah_note") {
+            val existing = quranUseCases.getBookmarks().first()
+                .firstOrNull { it.ayahId == event.ayahId }
+            val note = event.note?.takeIf { it.isNotBlank() }
+            if (existing == null) {
+                quranUseCases.insertBookmark(
+                    QuranBookmark(
+                        id = 0,
+                        ayahId = event.ayahId,
+                        surahNumber = event.surahNumber,
+                        ayahNumber = event.ayahNumber,
+                        note = note,
+                        color = null,
+                        createdAt = System.currentTimeMillis(),
+                        updatedAt = System.currentTimeMillis(),
+                    )
+                )
+            } else {
+                quranUseCases.updateBookmark(existing.copy(note = note))
             }
         }
     }

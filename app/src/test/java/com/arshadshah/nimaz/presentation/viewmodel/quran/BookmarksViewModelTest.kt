@@ -47,6 +47,14 @@ class BookmarksViewModelTest {
     private lateinit var context: Context
 
     private val quranBookmarks = MutableStateFlow(emptyList<QuranBookmark>())
+    private val quranFavourites = MutableStateFlow(emptyList<QuranFavorite>())
+
+    private fun quranFavourite(ayahId: Int) = QuranFavorite(
+        ayahId = ayahId,
+        surahNumber = 2,
+        ayahNumber = ayahId,
+        createdAt = 0L,
+    )
 
     private fun quranBookmark(ayahId: Int, created: Long) = QuranBookmark(
         id = ayahId.toLong(),
@@ -67,9 +75,26 @@ class BookmarksViewModelTest {
         hadith = mockk(relaxed = true)
         dua = mockk(relaxed = true)
         every { quran.getBookmarks() } returns quranBookmarks
+        // The fakes write back to the flows the ViewModel is collecting, so these tests assert
+        // what the reader sees — the row leaving the list — rather than which use case was
+        // called. `coVerify` cannot check the arguments here anyway: `QuranUseCases` exposes
+        // each use case as a *property* with an `operator fun invoke`, so MockK records the
+        // property getter and a verification with arguments quietly matches any call to it.
+        coEvery { quran.deleteBookmark(any()) } answers {
+            val ayahId = firstArg<Int>()
+            quranBookmarks.value = quranBookmarks.value.filterNot { it.ayahId == ayahId }
+        }
+        coEvery { quran.toggleFavorite(any(), any(), any()) } answers {
+            val ayahId = firstArg<Int>()
+            quranFavourites.value = if (quranFavourites.value.any { it.ayahId == ayahId }) {
+                quranFavourites.value.filterNot { it.ayahId == ayahId }
+            } else {
+                quranFavourites.value + quranFavourite(ayahId)
+            }
+        }
         // Saved merges bookmarks with favourites — one row in the store, two queries — so the
         // Qur'an load does not emit at all until both flows have.
-        every { quran.getFavorites() } returns flowOf(emptyList<QuranFavorite>())
+        every { quran.getFavorites() } returns quranFavourites
         every { hadith.getAllBookmarks() } returns flowOf(emptyList<HadithBookmark>())
         every { dua.getAllBookmarks() } returns flowOf(emptyList<DuaBookmark>())
     }
@@ -78,6 +103,58 @@ class BookmarksViewModelTest {
     fun tearDown() = Dispatchers.resetMain()
 
     private fun viewModel() = BookmarksViewModel(quran, hadith, dua, FakeStringProvider(), telemetry)
+
+    /**
+     * The card is the *verse*, and a verse can be bookmarked and favourited at once — one row
+     * in Saved, two rows in the store. Deleting only the bookmark took the card off the
+     * bookmarks half of the merge and left it on the favourites half, so the counts moved and
+     * the row stayed exactly where it was.
+     */
+    @Test
+    fun `deleting a verse that is both bookmarked and favourited takes the row away`() = runTest {
+        quranBookmarks.value = listOf(quranBookmark(1, 100))
+        quranFavourites.value = listOf(quranFavourite(1))
+        val vm = viewModel()
+        advanceUntilIdle()
+        assertThat(vm.bookmarksState.value.allBookmarks).hasSize(1)
+
+        vm.onEvent(BookmarksEvent.DeleteBookmark("quran_1"))
+        advanceUntilIdle()
+
+        assertThat(vm.bookmarksState.value.allBookmarks).isEmpty()
+        assertThat(vm.bookmarksState.value.filteredBookmarks).isEmpty()
+    }
+
+    /**
+     * And a verse that is *only* favourited must be deletable at all: the delete used to look
+     * the row up in `quranBookmarks`, find nothing, and return before doing anything.
+     */
+    @Test
+    fun `deleting a favourite-only verse removes it`() = runTest {
+        quranFavourites.value = listOf(quranFavourite(7))
+        val vm = viewModel()
+        advanceUntilIdle()
+        assertThat(vm.bookmarksState.value.allBookmarks).hasSize(1)
+
+        vm.onEvent(BookmarksEvent.DeleteBookmark("quran_7"))
+        advanceUntilIdle()
+
+        assertThat(vm.bookmarksState.value.allBookmarks).isEmpty()
+        assertThat(vm.bookmarksState.value.recentlyDeleted).isNotNull()
+    }
+
+    @Test
+    fun `clearing everything saved takes the favourites too`() = runTest {
+        quranBookmarks.value = listOf(quranBookmark(1, 100))
+        quranFavourites.value = listOf(quranFavourite(1), quranFavourite(9))
+        val vm = viewModel()
+        advanceUntilIdle()
+
+        vm.onEvent(BookmarksEvent.ClearAllBookmarks)
+        advanceUntilIdle()
+
+        assertThat(vm.bookmarksState.value.allBookmarks).isEmpty()
+    }
 
     @Test
     fun `a failing bookmark stream reports and stops loading instead of hanging`() = runTest {

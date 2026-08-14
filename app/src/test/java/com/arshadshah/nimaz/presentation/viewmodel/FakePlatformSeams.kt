@@ -47,8 +47,17 @@ class RecordingWidgetRefresher : WidgetRefresher {
     var refreshCount = 0
         private set
 
+    /** Counted apart from [refreshCount]: "the tracker changed" and "everything changed" are
+     *  different claims, and a test asserting one should not be satisfied by the other. */
+    var refreshAllCount = 0
+        private set
+
     override fun refreshPrayerTracker() {
         refreshCount++
+    }
+
+    override fun refreshAll() {
+        refreshAllCount++
     }
 }
 

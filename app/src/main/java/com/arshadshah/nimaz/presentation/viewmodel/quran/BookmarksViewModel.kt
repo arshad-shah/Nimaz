@@ -170,6 +170,7 @@ class BookmarksViewModel @Inject constructor(
                                 mapped
                         state.copy(
                             quranBookmarks = bookmarks,
+                            quranFavourites = favourites,
                             allBookmarks = unified,
                             filteredBookmarks = applyFilters(
                                 unified,
@@ -413,12 +414,33 @@ class BookmarksViewModel @Inject constructor(
         val state = _bookmarksState.value
         val unified = state.allBookmarks.find { it.id == id } ?: return
         val operation: Pair<suspend () -> Unit, suspend () -> Unit> = when (unified.type) {
+            // Unsave the verse, not just half of it. A verse that is bookmarked *and*
+            // favourited is one card, and deleting only the bookmark left the card on screen —
+            // it came straight back through the favourites half of the merge, with the counts
+            // moving and nothing else. A favourite-only card could not be deleted at all: the
+            // lookup into `quranBookmarks` found nothing and the whole delete returned early.
             BookmarkType.QURAN -> {
-                val original = state.quranBookmarks
-                    .find { BookmarkType.QURAN.idFor(it.ayahId) == id } ?: return
+                val bookmark = state.quranBookmarks
+                    .find { BookmarkType.QURAN.idFor(it.ayahId) == id }
+                val favourite = state.quranFavourites
+                    .find { BookmarkType.QURAN.idFor(it.ayahId) == id }
+                if (bookmark == null && favourite == null) return
                 Pair<suspend () -> Unit, suspend () -> Unit>(
-                    { quranUseCases.deleteBookmark(original.ayahId) },
-                    { quranUseCases.insertBookmark(original) },
+                    {
+                        bookmark?.let { quranUseCases.deleteBookmark(it.ayahId) }
+                        // A toggle is safe in both directions here because the current state is
+                        // known: it is favourited now, so this clears it; after the delete it is
+                        // not, so the same call in `restore` puts it back.
+                        favourite?.let {
+                            quranUseCases.toggleFavorite(it.ayahId, it.surahNumber, it.ayahNumber)
+                        }
+                    },
+                    {
+                        bookmark?.let { quranUseCases.insertBookmark(it) }
+                        favourite?.let {
+                            quranUseCases.toggleFavorite(it.ayahId, it.surahNumber, it.ayahNumber)
+                        }
+                    },
                 )
             }
 
@@ -501,8 +523,15 @@ class BookmarksViewModel @Inject constructor(
             telemetry, DOMAIN, "clear_all",
             onFailure = { writeFailed(R.string.bookmarks_clear_failed, it) },
         ) {
-            _bookmarksState.value.quranBookmarks.forEach {
+            // Favourites too, not only the bookmark rows: a wipe the user confirmed on a
+            // screen called Saved that left every favourited verse behind is the same
+            // half-delete the per-row action had.
+            val before = _bookmarksState.value
+            before.quranBookmarks.forEach {
                 quranUseCases.deleteBookmark(it.ayahId)
+            }
+            before.quranFavourites.forEach {
+                quranUseCases.toggleFavorite(it.ayahId, it.surahNumber, it.ayahNumber)
             }
             _bookmarksState.value.hadithBookmarks.forEach {
                 hadithUseCases.deleteBookmark(it.hadithId)

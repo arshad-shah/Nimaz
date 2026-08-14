@@ -242,6 +242,52 @@ environmental — see [§1](#1-start-here).
 | "1 passages across 7 verses" | A `plurals` resource, in all six locales |
 | Recommended strip reports "Juz 1" for every surah | `Surah.juzStart` deleted; every caller resolves through `MushafPagination.juzForPage` |
 
+**Found on device by the user (internal build 3.0.114), fixed on this branch:**
+
+| Defect | Fix |
+|--------|-----|
+| The player looked nothing like the prototype | `AudioBottomBar` rebuilt against `prototypes/2026-08-13-quran-mushaf-and-player.html`: violet full-bleed download strip, now-playing left / transport right, seek rail between two clocks, reciter+speed left with repeat in the accent right |
+| The player was always on screen | It draws nothing unless `isAudioActive \|\| isPreparing`; playback starts from the ayah sheet or surah info |
+| Stop sat beside next/previous | Removed from the bar — it is the recitation sheet's secondary action |
+| Juz headers did not stick | `stickyHeader` in `QuranBrowseScreen`, with an opaque background so rows do not scroll through the text |
+| Surahs crossing a juz were filed under one | `juzBySurah: Map<Int, Int>` → `juzSpans: Map<Int, IntRange>`, derived from a new `pageSpans`; the row names its range, and a `juz 2` query now finds Al-Baqarah instead of returning nothing |
+| The `next` surah was found by `number + 1` | By list position instead, so a filtered or partial list spans correctly |
+| Bookmark and favourite in the ayah sheet were grey | Gold and red — the colours they carried on the pill the sheet replaced |
+| "Go to…" opened the passage outline | New `ReaderGoToSheet` — Verse / Juz / Page, bounded, scrolls or re-targets |
+| The surah's name was rendered twice | `ReaderAnchorBar` lost its `title`; the app bar one line above already says it |
+| The ayah sheet's Note action opened Tafseer | New shared `NoteEditorSheet` + `QuranEvent.SetAyahNote`; `QuranReaderUiState.ayahNotes` carries what is already written |
+| The segmented control's ripple was a square | `.clip(cellShape)` **before** `.selectable` — `Surface(shape)` clips its own drawing, not the indication of a modifier applied outside it |
+| The mushaf did not look like the prototype | `QuranFrame.READER` is two nested rounded rectangles with a page-number pill on the inner keyline; new `RuledSurahHeading` replaces the teal cartouche on both paper renderers |
+| Follow-along and Continuous Reading read as duplicates | "Continuous playback", reworded and moved under **Audio** beside the reciter |
+| The repeat range steppers were crushed side by side | Stacked in a `Column`, each full width |
+| Surah info printed the transliteration as if it were a translation | The subtitle is drawn only when it differs from the title; the Arabic name moved out of the badge chip into `ArabicText` at the head of the sheet |
+| Hizb was wrong, and doubled | Derived from the 1..240 quarter counter (`Ayah.hizbOfQuarter`) and omitted entirely when that counter is absent — `Ayah.hizbNumber` holds the quarter index in the shipped data, so page 82 reported "Hizb 33" for what is hizb 9 |
+
+**Found on device by the user (internal build 3.0.115), fixed on this branch:**
+
+| Defect | Fix |
+|--------|-----|
+| The ayah sheet reprinted the verse | Actions only. The reader tapped that verse to open the sheet and it is still behind it; the header's reference says which one |
+| The ayah sheet's actions were squished | New `NimazSheetActionGrid` — two columns of wide pills, icon beside label. Five to a row left ~64dp per label, which is where "Unbookmark" ellipsised |
+| Saved had two tab strips | One. Kind stays on screen; corpus moves into an app-bar **filter** menu of its own, each row carrying its count |
+| Saved did not look like the prototype | A 3dp kind-coloured spine, the kind named small and letter-spaced in that colour, the corpus demoted to muted meta, and the gold ornamental divider dropped |
+| "Search bookmarks" on a screen called Saved | "Search saved"; "Clear all bookmarks" → "Clear everything saved"; "No Bookmarks Yet" → "Nothing saved yet". All six locales |
+| A verse gave no sign it was saved | `AyahItem` draws 14dp bookmark / heart / note glyphs in the same three colours, from `ayah.isBookmarked`, `favoriteAyahIds` and `QuranReaderUiState.ayahNotes` |
+
+**Found on device by the user (internal build 3.0.116), fixed on this branch:**
+
+| Defect | Fix |
+|--------|-----|
+| Changing reciter did nothing until you stopped and restarted | `setReciter` rebuilds the playlist at the verse being recited. The CDN id only ever decided the URL of the *next* file fetched, so the queued items kept pointing at the previous reciter |
+| The player followed the reader, not the recitation | Open surah 15 with surah 2 playing and the recited verse is not in `displayAyahs`, so the bar fell back to the reader's position and announced Al-Hijr while playing Al-Baqarah. It reads `audioState` while audio is active; juz and page are omitted rather than guessed for an off-screen verse |
+| Surah info's summary filled the sheet | Clamped to four lines with a See more / See less toggle, drawn only when the text actually overflows |
+| "Madinah" wrapped to "Madin / ah" in the stat strip | A word and a figure cannot share a type size in a quarter-width column: values over four characters step down to `labelLarge` and stay on one line |
+| Browse rows truncated their meta | The juz label is drawn only when the surah **crosses** a juz. The sticky header already names the one it opens in |
+| Dividers invisible | `NimazDivider` defaulted to `outlineVariant` at **0.3 alpha** and 0.5dp. 1dp at full alpha — `outlineVariant` is already the subtle role |
+| Urdu translations had no face in Tafseer | `TafseerPageContent` rendered them as plain `bodyMedium`. It takes a `translationLanguage` now and routes through `asTranslationText`, fed by a new `TafseerUiState.selectedTranslatorId` |
+| One app-bar menu held the corpus filter, the sort order and an irreversible wipe | Three controls for three jobs: a filter icon (tinted while a corpus is chosen), the sort icon, and an overflow holding "Clear everything saved" — which had been sitting one slip below "A–Z" |
+| Deleting from Saved moved the counts but left the row | A verse that is bookmarked **and** favourited is one card and two store rows; delete cleared only the bookmark, so the card came straight back through the favourites half of the merge. Delete unsaves the verse — and a favourite-only card, which could not be deleted at all (the lookup into `quranBookmarks` found nothing and returned early), now can be. Clear-all had the same half-delete |
+
 **Content, for `arshad-shah/nimaz-data` — not fixable in this repo:**
 
 - The thematic tree's first root is titled **"Doctraine"**; its own description says "Doctrine".

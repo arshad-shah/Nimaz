@@ -65,6 +65,19 @@ sealed interface QuranEvent {
     data object StopAudio : QuranEvent
     data class PlaySurahFromInfo(val surahNumber: Int) : QuranEvent
     data class LoadSurahInfo(val surahNumber: Int) : QuranEvent
+    /**
+     * Write (or clear, with null) the reader's note on a verse.
+     *
+     * A note lives on the verse's bookmark row, so writing one on an unbookmarked verse
+     * creates the mark — which is what a reader means by writing a note about a verse.
+     */
+    data class SetAyahNote(
+        val ayahId: Int,
+        val surahNumber: Int,
+        val ayahNumber: Int,
+        val note: String?,
+    ) : QuranEvent
+
     data class ToggleKhatamAyah(val ayahId: Int) : QuranEvent
     data class MarkSurahAsReadForKhatam(val surahNumber: Int) : QuranEvent
 

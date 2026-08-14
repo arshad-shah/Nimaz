@@ -88,7 +88,14 @@ data class QuranReaderUiState(
      * where the mushaf's own outline starts a new subject. Empty in juz and page mode, and on
      * an install whose artifact predates the thematic layer.
      */
-    val passages: List<AyahTheme> = emptyList()
+    val passages: List<AyahTheme> = emptyList(),
+    /**
+     * Notes the reader has written, by ayah id. A note lives on the verse's bookmark row, so
+     * this is the annotated subset of the bookmarks the app already collects — carried here so
+     * the ayah sheet's note editor opens on what is already written rather than on a blank
+     * field that silently overwrites it.
+     */
+    val ayahNotes: Map<Int, String> = emptyMap(),
 ) {
     /** Whether to render stored line-accurate pages instead of flowing ayahs into a page. */
     val useLineAccurateLayout: Boolean get() = mushafScript.isLineAccurate
