@@ -1,4 +1,4 @@
-package com.arshadshah.nimaz.presentation.components.atoms
+package com.arshadshah.nimaz.presentation.foundation.text
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
@@ -7,12 +7,13 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.withStyle
 import com.arshadshah.nimaz.domain.model.Ayah
+import com.arshadshah.nimaz.presentation.components.atoms.toArabicNumber
 import com.arshadshah.nimaz.presentation.theme.AmiriFontFamily
 
 /**
  * Shared, non-Compose helpers for formatting Quran Arabic text.
  *
- * These were previously copy-pasted (byte-for-byte) across [ArabicText],
+ * These were previously copy-pasted (byte-for-byte) across [com.arshadshah.nimaz.presentation.components.atoms.ArabicText],
  * `MushafContinuousText` and `QuranAyahItem`. Keep them here as the single
  * source of truth so the ayah end-marker and bismillah handling stay
  * consistent everywhere they are rendered.
@@ -55,9 +56,24 @@ fun AnnotatedString.Builder.appendAyahEndMarker(
     numberColor: Color,
     markerFontFamily: FontFamily = AmiriFontFamily,
 ) {
-    withStyle(SpanStyle(color = bracketColor, fontFamily = markerFontFamily)) { append(AYAH_END_OPEN) }
-    withStyle(SpanStyle(color = numberColor, fontFamily = markerFontFamily)) { append(toArabicNumber(ayahNumber)) }
-    withStyle(SpanStyle(color = bracketColor, fontFamily = markerFontFamily)) { append(AYAH_END_CLOSE) }
+    withStyle(
+        SpanStyle(
+            color = bracketColor,
+            fontFamily = markerFontFamily
+        )
+    ) { append(AYAH_END_OPEN) }
+    withStyle(SpanStyle(color = numberColor, fontFamily = markerFontFamily)) {
+        append(
+            toArabicNumber(
+                ayahNumber
+            )
+        )
+    }
+    withStyle(SpanStyle(color = bracketColor, fontFamily = markerFontFamily)) {
+        append(
+            AYAH_END_CLOSE
+        )
+    }
 }
 
 /** The coloured end-marker as a standalone [AnnotatedString]. */

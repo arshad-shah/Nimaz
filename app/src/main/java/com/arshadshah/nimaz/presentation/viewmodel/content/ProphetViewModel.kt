@@ -26,13 +26,16 @@ private class ProphetSource(private val useCases: ProphetUseCases) : CatalogSour
     override fun all(): Flow<List<Prophet>> = useCases.getAllProphets()
     override fun favourites(): Flow<List<Prophet>> = useCases.getFavorites()
     override suspend fun byId(id: Int): Prophet? = useCases.getProphetById(id)
-    override suspend fun toggleFavourite(id: Int) { useCases.toggleFavorite(id) }
+    override suspend fun toggleFavourite(id: Int) {
+        useCases.toggleFavorite(id)
+    }
+
     override fun idOf(item: Prophet): Int = item.id
 
     override fun matches(item: Prophet, query: String): Boolean =
         item.nameArabic.contains(query, ignoreCase = true) ||
-            item.nameEnglish.contains(query, ignoreCase = true) ||
-            item.nameTransliteration.contains(query, ignoreCase = true) ||
-            item.titleEnglish.contains(query, ignoreCase = true) ||
-            item.era.contains(query, ignoreCase = true)
+                item.nameEnglish.contains(query, ignoreCase = true) ||
+                item.nameTransliteration.contains(query, ignoreCase = true) ||
+                item.titleEnglish.contains(query, ignoreCase = true) ||
+                item.era.contains(query, ignoreCase = true)
 }

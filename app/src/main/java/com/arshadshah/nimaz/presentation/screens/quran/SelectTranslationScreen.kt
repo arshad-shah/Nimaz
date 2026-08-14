@@ -34,7 +34,6 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.QuranTranslation
-import com.arshadshah.nimaz.presentation.components.atoms.BISMILLAH_TEXT
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeEmphasis
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
@@ -48,6 +47,7 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuItem
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazSearchBar
+import com.arshadshah.nimaz.presentation.foundation.text.BISMILLAH_TEXT
 import com.arshadshah.nimaz.presentation.theme.QuranArabicFont
 import com.arshadshah.nimaz.presentation.theme.asLanguageLabel
 import com.arshadshah.nimaz.presentation.theme.asTranslationText

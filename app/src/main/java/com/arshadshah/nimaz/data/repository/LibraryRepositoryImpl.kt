@@ -68,6 +68,7 @@ class LibraryRepositoryImpl @Inject constructor(
 internal fun Library.toDomain(): OpenSourceLibrary = OpenSourceLibrary(
     id = uniqueId.hashCode(),
     name = name,
+    coordinate = uniqueId,
     version = artifactVersion,
     author = developers.firstOrNull()?.name,
     website = website,

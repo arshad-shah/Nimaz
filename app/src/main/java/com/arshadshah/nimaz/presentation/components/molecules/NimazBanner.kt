@@ -1,4 +1,4 @@
-package com.arshadshah.nimaz.presentation.components.atoms
+package com.arshadshah.nimaz.presentation.components.molecules
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -45,30 +45,34 @@ enum class NimazBannerVariant {
  * `AnnouncementBanner` molecule alike.
  *
  * A banner is *informational*, not a primary surface: it interrupts the page to say
- * something and then gets out of the way. Resolving its [NimazTone] straight to a
+ * something and then gets out of the way. Resolving its [com.arshadshah.nimaz.presentation.components.atoms.NimazTone] straight to a
  * tonal container (as a card does) made every banner read as a fully saturated
  * panel, louder than the content it annotates. So banners keep a quiet `surface`
  * container and express their tone in the **border** and **icon** instead — an
- * [NimazCardStyle.OUTLINED] card. Content colour is `onSurface`, which is contrast
+ * [com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle.OUTLINED] card. Content colour is `onSurface`, which is contrast
  * checked in light and dark, so titles and messages stay legible either way.
  */
 object NimazBannerDefaults {
 
     /** The tone's accent — the banner's border, and what its icon is tinted with. */
     @Composable
-    fun accent(tone: NimazTone): Color = when (tone) {
-        NimazTone.ACCENT, NimazTone.PROMINENT -> MaterialTheme.colorScheme.primary
-        NimazTone.SUCCESS -> MaterialTheme.colorScheme.tertiary
-        NimazTone.WARNING -> MaterialTheme.colorScheme.secondary
-        NimazTone.ERROR -> MaterialTheme.colorScheme.error
-        NimazTone.NEUTRAL, NimazTone.MUTED, NimazTone.TRANSPARENT ->
-            MaterialTheme.colorScheme.outlineVariant
-    }
+    fun accent(tone: com.arshadshah.nimaz.presentation.components.atoms.NimazTone): Color =
+        when (tone) {
+            com.arshadshah.nimaz.presentation.components.atoms.NimazTone.ACCENT, com.arshadshah.nimaz.presentation.components.atoms.NimazTone.PROMINENT -> MaterialTheme.colorScheme.primary
+            com.arshadshah.nimaz.presentation.components.atoms.NimazTone.SUCCESS -> MaterialTheme.colorScheme.tertiary
+            com.arshadshah.nimaz.presentation.components.atoms.NimazTone.WARNING -> MaterialTheme.colorScheme.secondary
+            com.arshadshah.nimaz.presentation.components.atoms.NimazTone.ERROR -> MaterialTheme.colorScheme.error
+            com.arshadshah.nimaz.presentation.components.atoms.NimazTone.NEUTRAL, com.arshadshah.nimaz.presentation.components.atoms.NimazTone.MUTED, com.arshadshah.nimaz.presentation.components.atoms.NimazTone.TRANSPARENT ->
+                MaterialTheme.colorScheme.outlineVariant
+        }
 
     /** A banner's card colours: quiet `surface` container, tone-coloured border. */
     @Composable
-    fun colors(tone: NimazTone, border: Color? = null): NimazCardColors =
-        NimazCardDefaults.colors(
+    fun colors(
+        tone: com.arshadshah.nimaz.presentation.components.atoms.NimazTone,
+        border: Color? = null
+    ): com.arshadshah.nimaz.presentation.components.atoms.NimazCardColors =
+        com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults.colors(
             container = MaterialTheme.colorScheme.surface,
             border = border ?: accent(tone)
         )
@@ -134,7 +138,7 @@ private fun InfoVariant(
     BannerSurface(
         modifier = modifier,
         shape = RoundedCornerShape(if (showBorder) 14.dp else 12.dp),
-        tone = NimazTone.ACCENT,
+        tone = com.arshadshah.nimaz.presentation.components.atoms.NimazTone.ACCENT,
         borderColor = if (showBorder) MaterialTheme.colorScheme.primary else null
     ) {
         InfoContent(message = message, icon = icon)
@@ -151,11 +155,11 @@ private fun InfoContent(
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         if (icon != null) {
-            NimazIcon(
+            _root_ide_package_.com.arshadshah.nimaz.presentation.components.atoms.NimazIcon(
                 imageVector = icon,
                 contentDescription = null,
-                variant = NimazIconVariant.PRIMARY,
-                size = NimazIconSize.MEDIUM
+                variant = com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant.PRIMARY,
+                size = com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize.MEDIUM
             )
         }
         Text(
@@ -180,7 +184,7 @@ private fun WarningVariant(
     BannerSurface(
         modifier = modifier,
         shape = RoundedCornerShape(16.dp),
-        tone = NimazTone.WARNING,
+        tone = com.arshadshah.nimaz.presentation.components.atoms.NimazTone.WARNING,
         // The warning icon keeps the brand amber rather than the scheme's secondary,
         // so the border takes the same colour — border and icon always agree.
         borderColor = warningColor
@@ -195,7 +199,7 @@ private fun WarningVariant(
             titleColor = null,
             titleBottomSpacing = 4.dp,
             message = message,
-            actionVariant = NimazButtonVariant.TONAL,
+            actionVariant = com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant.TONAL,
             actionLabel = actionLabel,
             onAction = onAction
         )
@@ -213,7 +217,7 @@ private fun UpdateVariant(
     BannerSurface(
         modifier = modifier,
         shape = RoundedCornerShape(16.dp),
-        tone = NimazTone.ACCENT
+        tone = com.arshadshah.nimaz.presentation.components.atoms.NimazTone.ACCENT
     ) {
         Row(
             modifier = Modifier
@@ -230,10 +234,10 @@ private fun UpdateVariant(
             }
             if (actionLabel != null && onAction != null) {
                 Spacer(modifier = Modifier.width(12.dp))
-                NimazCard(
-                    style = NimazCardStyle.FILLED,
+                _root_ide_package_.com.arshadshah.nimaz.presentation.components.atoms.NimazCard(
+                    style = com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle.FILLED,
                     onClick = onAction,
-                    colors = NimazCardDefaults.colors(
+                    colors = com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults.colors(
                         container = MaterialTheme.colorScheme.primary
                     ),
                     shape = RoundedCornerShape(8.dp)
@@ -272,7 +276,7 @@ private fun ErrorVariant(
     BannerSurface(
         modifier = modifier,
         shape = RoundedCornerShape(12.dp),
-        tone = NimazTone.ERROR,
+        tone = com.arshadshah.nimaz.presentation.components.atoms.NimazTone.ERROR,
         onClick = onClick
     ) {
         BannerContentRow(
@@ -285,7 +289,7 @@ private fun ErrorVariant(
             titleColor = null,
             titleBottomSpacing = 2.dp,
             message = message,
-            actionVariant = NimazButtonVariant.DESTRUCTIVE,
+            actionVariant = com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant.DESTRUCTIVE,
             actionLabel = actionLabel,
             onAction = onAction
         )
@@ -294,7 +298,7 @@ private fun ErrorVariant(
 
 /**
  * The rounded container shell shared by every variant: a full-width outlined
- * [NimazCard] with the given [shape], semantic [tone] and optional [borderColor]
+ * [com.arshadshah.nimaz.presentation.components.atoms.NimazCard] with the given [shape], semantic [tone] and optional [borderColor]
  * override. Passing [onClick] makes the whole banner tappable — this is the one
  * place the clickable-vs-static branch lives, so individual variants never repeat it.
  *
@@ -306,14 +310,14 @@ private fun ErrorVariant(
 private fun BannerSurface(
     modifier: Modifier,
     shape: Shape,
-    tone: NimazTone,
+    tone: com.arshadshah.nimaz.presentation.components.atoms.NimazTone,
     borderColor: Color? = null,
     onClick: (() -> Unit)? = null,
     content: @Composable () -> Unit
 ) {
-    NimazCard(
+    _root_ide_package_.com.arshadshah.nimaz.presentation.components.atoms.NimazCard(
         modifier = modifier.fillMaxWidth(),
-        style = NimazCardStyle.OUTLINED,
+        style = com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle.OUTLINED,
         tone = tone,
         onClick = onClick,
         shape = shape,
@@ -346,7 +350,7 @@ private fun BannerContentRow(
     titleColor: Color?,
     titleBottomSpacing: Dp,
     message: String,
-    actionVariant: NimazButtonVariant,
+    actionVariant: com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant,
     actionLabel: String?,
     onAction: (() -> Unit)?
 ) {
@@ -355,11 +359,11 @@ private fun BannerContentRow(
         verticalAlignment = Alignment.CenterVertically
     ) {
         if (icon != null) {
-            NimazIcon(
+            _root_ide_package_.com.arshadshah.nimaz.presentation.components.atoms.NimazIcon(
                 imageVector = icon,
                 contentDescription = null,
                 tint = iconTint,
-                size = NimazIconSize.LARGE
+                size = com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize.LARGE
             )
             Spacer(modifier = Modifier.width(iconSpacing))
         }
@@ -381,11 +385,11 @@ private fun BannerContentRow(
 
         if (actionLabel != null && onAction != null) {
             Spacer(modifier = Modifier.width(10.dp))
-            NimazButton(
+            _root_ide_package_.com.arshadshah.nimaz.presentation.components.atoms.NimazButton(
                 text = actionLabel,
                 onClick = onAction,
                 variant = actionVariant,
-                size = NimazButtonSize.SMALL
+                size = com.arshadshah.nimaz.presentation.components.atoms.NimazButtonSize.SMALL
             )
         }
     }

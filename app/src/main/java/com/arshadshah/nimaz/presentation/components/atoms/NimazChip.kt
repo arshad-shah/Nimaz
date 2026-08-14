@@ -80,7 +80,7 @@ fun NimazChip(
             label = text,
             modifier = modifier,
             enabled = enabled,
-            leadingIcon = leadingIcon
+            leadingIcon = leadingIcon,
         )
 
         NimazChipVariant.SUGGESTION -> NimazSuggestionChip(
@@ -363,7 +363,7 @@ private fun FilterChipPreview() {
                 selected = true,
                 onClick = {},
                 label = "With Icon",
-                leadingIcon = Icons.Default.Star
+                leadingIcon = Icons.Default.Star,
             )
             NimazFilterChip(selected = false, onClick = {}, label = "Elevated", elevated = true)
         }

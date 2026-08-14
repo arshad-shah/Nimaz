@@ -1,6 +1,8 @@
 package com.arshadshah.nimaz.presentation.components.molecules
 
 import android.content.res.Configuration
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -23,14 +25,12 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeEmphasis
-import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.ui.unit.TextUnit
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
@@ -122,7 +122,9 @@ fun ZakatSummaryHero(
 
     // The whole hero, so removing the tile row animates the height the form is laid out against
     // rather than snapping it. This is the one modifier that makes the collapse a collapse.
-    Column(modifier = modifier.fillMaxWidth().animateContentSize()) {
+    Column(modifier = modifier
+        .fillMaxWidth()
+        .animateContentSize()) {
         NimazCard(
             modifier = Modifier.fillMaxWidth(),
             style = NimazCardStyle.GRADIENT,

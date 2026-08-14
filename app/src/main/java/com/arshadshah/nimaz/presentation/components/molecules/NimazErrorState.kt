@@ -1,4 +1,4 @@
-package com.arshadshah.nimaz.presentation.components.atoms
+package com.arshadshah.nimaz.presentation.components.molecules
 
 import android.content.res.Configuration
 import androidx.compose.animation.AnimatedVisibility
@@ -58,6 +58,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.presentation.foundation.geometry.diamondPath
+import com.arshadshah.nimaz.presentation.foundation.geometry.scallopPath
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.theme.ThemeMode
 
@@ -79,7 +81,7 @@ enum class NimazErrorVariant {
 }
 
 /**
- * What *kind* of failure this is. The kind picks the glyph and the [NimazTone], so
+ * What *kind* of failure this is. The kind picks the glyph and the [com.arshadshah.nimaz.presentation.components.atoms.NimazTone], so
  * the same failure always looks the same wherever it surfaces — a dropped network
  * is never red-alarming in one screen and quietly grey in another.
  *
@@ -88,25 +90,43 @@ enum class NimazErrorVariant {
  */
 enum class NimazErrorKind(
     internal val icon: ImageVector,
-    internal val tone: NimazTone,
+    internal val tone: com.arshadshah.nimaz.presentation.components.atoms.NimazTone,
 ) {
     /** Anything without a better home — a thrown exception, an unknown failure. */
-    GENERIC(Icons.Outlined.ErrorOutline, NimazTone.ERROR),
+    GENERIC(
+        Icons.Outlined.ErrorOutline,
+        com.arshadshah.nimaz.presentation.components.atoms.NimazTone.ERROR
+    ),
 
     /** No connection, or a request that never reached the network. */
-    OFFLINE(Icons.Outlined.CloudOff, NimazTone.WARNING),
+    OFFLINE(
+        Icons.Outlined.CloudOff,
+        com.arshadshah.nimaz.presentation.components.atoms.NimazTone.WARNING
+    ),
 
     /** The request reached a server and the server failed. */
-    SERVER(Icons.Outlined.Storage, NimazTone.ERROR),
+    SERVER(
+        Icons.Outlined.Storage,
+        com.arshadshah.nimaz.presentation.components.atoms.NimazTone.ERROR
+    ),
 
     /** The thing asked for isn't there — a bad id, a deleted bookmark. */
-    NOT_FOUND(Icons.Outlined.SearchOff, NimazTone.MUTED),
+    NOT_FOUND(
+        Icons.Outlined.SearchOff,
+        com.arshadshah.nimaz.presentation.components.atoms.NimazTone.MUTED
+    ),
 
     /** A permission is missing — notifications, storage, exact alarms. */
-    PERMISSION(Icons.Outlined.Lock, NimazTone.WARNING),
+    PERMISSION(
+        Icons.Outlined.Lock,
+        com.arshadshah.nimaz.presentation.components.atoms.NimazTone.WARNING
+    ),
 
     /** Location is unavailable or denied — prayer times and qibla depend on it. */
-    LOCATION(Icons.Outlined.LocationOff, NimazTone.WARNING)
+    LOCATION(
+        Icons.Outlined.LocationOff,
+        com.arshadshah.nimaz.presentation.components.atoms.NimazTone.WARNING
+    )
 }
 
 /**
@@ -151,10 +171,10 @@ object NimazErrorDefaults {
  *
  * The [FULLSCREEN][NimazErrorVariant.FULLSCREEN] and
  * [SECTION][NimazErrorVariant.SECTION] variants are anchored by a *fractured
- * shamsa* — the app's manuscript medallion (same [scallopPath] geometry as
- * [ShamsaMedallion]) drawn as a slowly turning, broken ring. It carries the
+ * shamsa* — the app's manuscript medallion (same [com.arshadshah.nimaz.presentation.foundation.geometry.scallopPath] geometry as
+ * [com.arshadshah.nimaz.presentation.components.atoms.ShamsaMedallion]) drawn as a slowly turning, broken ring. It carries the
  * failure without a cartoon or a stock illustration, and it is drawn from the
- * [NimazTone], so it is correct in both themes for free.
+ * [com.arshadshah.nimaz.presentation.components.atoms.NimazTone], so it is correct in both themes for free.
  *
  * @param title the headline. One short sentence in plain language, describing what
  *   failed from the reader's side ("Prayer times couldn't refresh"), not the
@@ -180,7 +200,7 @@ fun NimazErrorState(
     kind: NimazErrorKind = NimazErrorKind.GENERIC,
     variant: NimazErrorVariant = NimazErrorVariant.FULLSCREEN,
     icon: ImageVector? = null,
-    tone: NimazTone? = null,
+    tone: com.arshadshah.nimaz.presentation.components.atoms.NimazTone? = null,
     details: String? = null,
     primaryAction: NimazErrorAction? = null,
     secondaryAction: NimazErrorAction? = null,
@@ -188,12 +208,20 @@ fun NimazErrorState(
 ) {
     val resolvedTone = tone ?: kind.tone
     val glyph = icon ?: kind.icon
-    val accent = NimazBadgeDefaults
-        .colors(tone = resolvedTone, emphasis = NimazBadgeEmphasis.OUTLINED)
-        .contentColor
-    val wash = NimazBadgeDefaults
-        .colors(tone = resolvedTone, emphasis = NimazBadgeEmphasis.SOFT)
-        .containerColor
+    val accent =
+        com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeDefaults
+            .colors(
+                tone = resolvedTone,
+                emphasis = com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeEmphasis.OUTLINED
+            )
+            .contentColor
+    val wash =
+        com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeDefaults
+            .colors(
+                tone = resolvedTone,
+                emphasis = com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeEmphasis.SOFT
+            )
+            .containerColor
 
     // Announced politely: the screen reader finishes its current utterance, then
     // reads the failure. `assertive` would cut the user off mid-word.
@@ -209,11 +237,11 @@ fun NimazErrorState(
             modifier = modifier.then(announce),
         )
 
-        NimazErrorVariant.SECTION -> NimazCard(
+        NimazErrorVariant.SECTION -> _root_ide_package_.com.arshadshah.nimaz.presentation.components.atoms.NimazCard(
             modifier = modifier
                 .fillMaxWidth()
                 .then(announce),
-            style = NimazCardStyle.OUTLINED,
+            style = com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle.OUTLINED,
             tone = resolvedTone,
         ) {
             ErrorBody(
@@ -321,21 +349,21 @@ private fun ErrorBody(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 primaryAction?.let {
-                    NimazButton(
+                    _root_ide_package_.com.arshadshah.nimaz.presentation.components.atoms.NimazButton(
                         text = it.label,
                         onClick = it.onClick,
-                        variant = NimazButtonVariant.FILLED,
-                        type = NimazButtonType.PILL,
+                        variant = com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant.FILLED,
+                        type = com.arshadshah.nimaz.presentation.components.atoms.NimazButtonType.PILL,
                         leadingIcon = it.icon,
                         loading = it.loading,
                     )
                 }
                 secondaryAction?.let {
-                    NimazButton(
+                    _root_ide_package_.com.arshadshah.nimaz.presentation.components.atoms.NimazButton(
                         text = it.label,
                         onClick = it.onClick,
-                        variant = NimazButtonVariant.TEXT,
-                        type = NimazButtonType.PILL,
+                        variant = com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant.TEXT,
+                        type = com.arshadshah.nimaz.presentation.components.atoms.NimazButtonType.PILL,
                         leadingIcon = it.icon,
                         loading = it.loading,
                     )
@@ -345,22 +373,22 @@ private fun ErrorBody(
 
         if (details != null) {
             Spacer(Modifier.height(8.dp))
-            NimazButton(
+            _root_ide_package_.com.arshadshah.nimaz.presentation.components.atoms.NimazButton(
                 text = if (detailsShown) "Hide details" else "Show details",
                 onClick = { detailsShown = !detailsShown },
-                variant = NimazButtonVariant.TEXT,
-                size = NimazButtonSize.SMALL,
+                variant = com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant.TEXT,
+                size = com.arshadshah.nimaz.presentation.components.atoms.NimazButtonSize.SMALL,
             )
             AnimatedVisibility(
                 visible = detailsShown,
                 enter = fadeIn() + expandVertically(),
                 exit = fadeOut() + shrinkVertically(),
             ) {
-                NimazCard(
+                _root_ide_package_.com.arshadshah.nimaz.presentation.components.atoms.NimazCard(
                     modifier = Modifier
                         .fillMaxWidth()
                         .widthIn(max = TEXT_MAX_WIDTH),
-                    tone = NimazTone.MUTED,
+                    tone = com.arshadshah.nimaz.presentation.components.atoms.NimazTone.MUTED,
                 ) {
                     Text(
                         text = details,
@@ -384,7 +412,7 @@ private fun InlineError(
     title: String,
     message: String?,
     glyph: ImageVector,
-    tone: NimazTone,
+    tone: com.arshadshah.nimaz.presentation.components.atoms.NimazTone,
     primaryAction: NimazErrorAction?,
     modifier: Modifier = Modifier,
 ) {
@@ -393,10 +421,10 @@ private fun InlineError(
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        NimazIconWell(
+        _root_ide_package_.com.arshadshah.nimaz.presentation.components.atoms.NimazIconWell(
             icon = glyph,
             tone = tone,
-            size = NimazIconWellSize.SMALL,
+            size = com.arshadshah.nimaz.presentation.components.atoms.NimazIconWellSize.SMALL,
         )
         Column(modifier = Modifier.weight(1f)) {
             Text(
@@ -413,11 +441,11 @@ private fun InlineError(
             }
         }
         primaryAction?.let {
-            NimazButton(
+            _root_ide_package_.com.arshadshah.nimaz.presentation.components.atoms.NimazButton(
                 text = it.label,
                 onClick = it.onClick,
-                variant = NimazButtonVariant.TEXT,
-                size = NimazButtonSize.SMALL,
+                variant = com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant.TEXT,
+                size = com.arshadshah.nimaz.presentation.components.atoms.NimazButtonSize.SMALL,
                 loading = it.loading,
             )
         }
@@ -517,7 +545,7 @@ private fun FracturedShamsa(
             )
         }
 
-        NimazIcon(
+        _root_ide_package_.com.arshadshah.nimaz.presentation.components.atoms.NimazIcon(
             imageVector = icon,
             contentDescription = null,
             iconSize = size * GLYPH_FRACTION,

@@ -2,21 +2,16 @@ package com.arshadshah.nimaz.presentation.viewmodel.quran
 
 import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.core.monitoring.launchSafely
-import com.arshadshah.nimaz.domain.model.Ayah
-import com.arshadshah.nimaz.domain.model.QuranTopic
-import com.arshadshah.nimaz.domain.model.TafseerHighlight
 import com.arshadshah.nimaz.domain.model.TafseerNote
 import com.arshadshah.nimaz.domain.model.TafseerSource
-import com.arshadshah.nimaz.presentation.viewmodel.UiError
-import com.arshadshah.nimaz.domain.model.TafseerText
 import com.arshadshah.nimaz.domain.repository.settings.QuranPreferences
 import com.arshadshah.nimaz.domain.usecase.QuranUseCases
 import com.arshadshah.nimaz.domain.usecase.TafseerUseCases
+import com.arshadshah.nimaz.presentation.viewmodel.UiError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -86,6 +81,7 @@ class TafseerViewModel @Inject constructor(
                 telemetry.featureUsed(AppAnalytics.Feature.TAFSEER, "navigate_ayah")
                 onAyahChanged(event.index)
             }
+
             is TafseerEvent.NavigateToTafseerPage -> {
                 telemetry.featureUsed(AppAnalytics.Feature.TAFSEER, "navigate_page")
                 _state.update { it.copy(currentTafseerPage = event.page) }
@@ -95,6 +91,7 @@ class TafseerViewModel @Inject constructor(
                 telemetry.featureUsed(AppAnalytics.Feature.TAFSEER, "switch_source")
                 switchSource(event.source)
             }
+
             is TafseerEvent.AddHighlight -> {
                 telemetry.featureUsed(AppAnalytics.Feature.TAFSEER, "add_highlight")
                 addHighlight(
@@ -109,6 +106,7 @@ class TafseerViewModel @Inject constructor(
                 telemetry.featureUsed(AppAnalytics.Feature.TAFSEER, "delete_highlight")
                 deleteHighlight(event.highlightId)
             }
+
             is TafseerEvent.UpdateHighlight -> {
                 telemetry.featureUsed(AppAnalytics.Feature.TAFSEER, "update_highlight")
                 updateHighlight(
@@ -122,10 +120,12 @@ class TafseerViewModel @Inject constructor(
                 telemetry.featureUsed(AppAnalytics.Feature.TAFSEER, "add_note")
                 addNote(event.text)
             }
+
             is TafseerEvent.UpdateNote -> {
                 telemetry.featureUsed(AppAnalytics.Feature.TAFSEER, "update_note")
                 updateNote(event.note)
             }
+
             is TafseerEvent.DeleteNote -> {
                 telemetry.featureUsed(AppAnalytics.Feature.TAFSEER, "delete_note")
                 deleteNote(event.noteId)
@@ -184,65 +184,66 @@ class TafseerViewModel @Inject constructor(
         val tafseerId = currentState.selectedSource.id
 
         ayahAnnotationsJob?.cancel()
-        ayahAnnotationsJob = launchSafely(telemetry, AppAnalytics.Feature.TAFSEER, "load_tafseer_for_current_ayah") {
-            val tafseer =
-                tafseerUseCases.getTafseerForAyah(ayah.surahNumber, ayah.ayahNumber, tafseerId)
+        ayahAnnotationsJob =
+            launchSafely(telemetry, AppAnalytics.Feature.TAFSEER, "load_tafseer_for_current_ayah") {
+                val tafseer =
+                    tafseerUseCases.getTafseerForAyah(ayah.surahNumber, ayah.ayahNumber, tafseerId)
 
-            // Probed **only when the selected source came back empty**, which is the one time
-            // the answer is used: `availableSources` reaches exactly one consumer,
-            // `TafseerEmptyState`, and that is rendered only on an empty selection.
-            //
-            // It used to run unconditionally — one read per `TafseerSource` on top of the one
-            // above, on every ayah swipe *and* every source switch. With five sources, swiping
-            // through Al-Baqarah issued 286 × 6 = 1,716 reads to populate a set that all but a
-            // handful of those verses never looked at.
-            val available = if (tafseer?.text.isNullOrBlank()) {
-                TafseerSource.entries.filter { source ->
-                    source.id != tafseerId &&
-                        tafseerUseCases
-                            .getTafseerForAyah(ayah.surahNumber, ayah.ayahNumber, source.id)
-                            ?.text?.isNotBlank() == true
-                }.toSet()
-            } else {
-                emptySet()
-            }
-            val topics = quranUseCases.getTopicsForAyah(ayah.id)
-
-            _state.update {
-                // Only reset the reading position when the block itself changed —
-                // swiping to the next ayah of the same block should hold position,
-                // not reopen the commentary from page 1.
-                val sameBlock = tafseer != null && tafseer.id == it.currentTafseer?.id
-                it.copy(
-                    currentTafseer = tafseer,
-                    currentTafseerPage = if (sameBlock) it.currentTafseerPage else 0,
-                    availableSources = available,
-                    // Keyed on the verse, not the block: a block can span nine verses and the
-                    // subjects the corpus files 43:81 under are not the ones it files 43:89
-                    // under.
-                    topics = topics
-                )
-            }
-
-            if (tafseer != null) {
-                launch {
-                    tafseerUseCases.getHighlightsForRange(
-                        tafseer.surahNumber, tafseer.ayahStart, tafseer.ayahEnd, tafseerId
-                    ).collectLatest { highlights ->
-                        _state.update { it.copy(highlights = highlights) }
-                    }
+                // Probed **only when the selected source came back empty**, which is the one time
+                // the answer is used: `availableSources` reaches exactly one consumer,
+                // `TafseerEmptyState`, and that is rendered only on an empty selection.
+                //
+                // It used to run unconditionally — one read per `TafseerSource` on top of the one
+                // above, on every ayah swipe *and* every source switch. With five sources, swiping
+                // through Al-Baqarah issued 286 × 6 = 1,716 reads to populate a set that all but a
+                // handful of those verses never looked at.
+                val available = if (tafseer?.text.isNullOrBlank()) {
+                    TafseerSource.entries.filter { source ->
+                        source.id != tafseerId &&
+                                tafseerUseCases
+                                    .getTafseerForAyah(ayah.surahNumber, ayah.ayahNumber, source.id)
+                                    ?.text?.isNotBlank() == true
+                    }.toSet()
+                } else {
+                    emptySet()
                 }
-                launch {
-                    tafseerUseCases.getNotesForRange(
-                        tafseer.surahNumber, tafseer.ayahStart, tafseer.ayahEnd, tafseerId
-                    ).collectLatest { notes ->
-                        _state.update { it.copy(notes = notes) }
-                    }
+                val topics = quranUseCases.getTopicsForAyah(ayah.id)
+
+                _state.update {
+                    // Only reset the reading position when the block itself changed —
+                    // swiping to the next ayah of the same block should hold position,
+                    // not reopen the commentary from page 1.
+                    val sameBlock = tafseer != null && tafseer.id == it.currentTafseer?.id
+                    it.copy(
+                        currentTafseer = tafseer,
+                        currentTafseerPage = if (sameBlock) it.currentTafseerPage else 0,
+                        availableSources = available,
+                        // Keyed on the verse, not the block: a block can span nine verses and the
+                        // subjects the corpus files 43:81 under are not the ones it files 43:89
+                        // under.
+                        topics = topics
+                    )
                 }
-            } else {
-                _state.update { it.copy(highlights = emptyList(), notes = emptyList()) }
+
+                if (tafseer != null) {
+                    launch {
+                        tafseerUseCases.getHighlightsForRange(
+                            tafseer.surahNumber, tafseer.ayahStart, tafseer.ayahEnd, tafseerId
+                        ).collectLatest { highlights ->
+                            _state.update { it.copy(highlights = highlights) }
+                        }
+                    }
+                    launch {
+                        tafseerUseCases.getNotesForRange(
+                            tafseer.surahNumber, tafseer.ayahStart, tafseer.ayahEnd, tafseerId
+                        ).collectLatest { notes ->
+                            _state.update { it.copy(notes = notes) }
+                        }
+                    }
+                } else {
+                    _state.update { it.copy(highlights = emptyList(), notes = emptyList()) }
+                }
             }
-        }
     }
 
     private fun addHighlight(startOffset: Int, endOffset: Int, color: String, note: String?) {

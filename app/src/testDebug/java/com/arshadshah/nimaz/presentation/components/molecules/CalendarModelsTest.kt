@@ -2,11 +2,11 @@ package com.arshadshah.nimaz.presentation.components.molecules
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import com.arshadshah.nimaz.presentation.components.molecules.calendar.CalendarDayState
-import com.arshadshah.nimaz.presentation.components.molecules.calendar.CalendarHeaderAlignment
-import com.arshadshah.nimaz.presentation.components.molecules.calendar.CalendarLegendItem
-import com.arshadshah.nimaz.presentation.components.molecules.calendar.IndicatorPosition
-import com.arshadshah.nimaz.presentation.components.molecules.calendar.SelectionStyle
+import com.arshadshah.nimaz.presentation.foundation.calendar.CalendarDayState
+import com.arshadshah.nimaz.presentation.foundation.calendar.CalendarHeaderAlignment
+import com.arshadshah.nimaz.presentation.foundation.calendar.CalendarLegendItem
+import com.arshadshah.nimaz.presentation.foundation.calendar.IndicatorPosition
+import com.arshadshah.nimaz.presentation.foundation.calendar.SelectionStyle
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith

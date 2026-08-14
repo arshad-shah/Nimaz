@@ -1,7 +1,7 @@
 package com.arshadshah.nimaz.presentation.components.molecules
 
-import com.arshadshah.nimaz.presentation.components.molecules.calendar.buildCalendarDays
-import com.arshadshah.nimaz.presentation.components.molecules.calendar.formatDefault
+import com.arshadshah.nimaz.presentation.foundation.calendar.buildCalendarDays
+import com.arshadshah.nimaz.presentation.foundation.calendar.formatDefault
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith

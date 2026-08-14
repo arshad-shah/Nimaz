@@ -2,45 +2,31 @@
 
 package com.arshadshah.nimaz.presentation.viewmodel.quran
 
-import androidx.compose.ui.text.font.FontFamily
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.Telemetry
-import com.arshadshah.nimaz.core.text.StringProvider
-import com.arshadshah.nimaz.core.time.TodayProvider
 import com.arshadshah.nimaz.core.monitoring.launchBestEffort
 import com.arshadshah.nimaz.core.monitoring.launchSafely
+import com.arshadshah.nimaz.core.text.StringProvider
+import com.arshadshah.nimaz.core.time.TodayProvider
 import com.arshadshah.nimaz.data.audio.AudioState
 import com.arshadshah.nimaz.data.audio.QuranAudioManager
-import com.arshadshah.nimaz.domain.model.Ayah
 import com.arshadshah.nimaz.domain.model.Khatam
 import com.arshadshah.nimaz.domain.model.KhatamDetailSnapshot
-import com.arshadshah.nimaz.domain.model.KhatamInsights
 import com.arshadshah.nimaz.domain.model.KhatamStatus
-import com.arshadshah.nimaz.domain.model.MushafPageLayout
 import com.arshadshah.nimaz.domain.model.MushafPagination
 import com.arshadshah.nimaz.domain.model.MushafScript
 import com.arshadshah.nimaz.domain.model.QuranBookmark
-import com.arshadshah.nimaz.domain.model.QuranFavorite
-import com.arshadshah.nimaz.domain.model.QuranSearchResult
-import com.arshadshah.nimaz.domain.model.QuranTranslation
-import com.arshadshah.nimaz.domain.model.ReadingProgress
-import com.arshadshah.nimaz.domain.model.Surah
-import com.arshadshah.nimaz.domain.model.AyahTheme
 import com.arshadshah.nimaz.domain.model.SurahInfo
-import com.arshadshah.nimaz.domain.model.SurahOverview
-import com.arshadshah.nimaz.domain.model.SurahWithAyahs
-import com.arshadshah.nimaz.domain.model.TranslationLanguage
 import com.arshadshah.nimaz.domain.repository.settings.QuranPreferences
 import com.arshadshah.nimaz.domain.usecase.KhatamUseCases
 import com.arshadshah.nimaz.domain.usecase.QuranUseCases
-import com.arshadshah.nimaz.presentation.theme.AmiriFontFamily
 import com.arshadshah.nimaz.presentation.theme.QuranArabicFont
+import com.arshadshah.nimaz.presentation.viewmodel.quran.QuranViewModel.Companion.PAGE_JOB_WINDOW
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -48,17 +34,13 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.math.abs
 
@@ -211,10 +193,12 @@ class QuranViewModel @Inject constructor(
                 telemetry.featureUsed(AppAnalytics.Feature.QURAN, "open_juz")
                 loadJuz(event.juzNumber)
             }
+
             is QuranEvent.LoadPage -> {
                 telemetry.featureUsed(AppAnalytics.Feature.QURAN, "open_page")
                 loadPage(event.pageNumber)
             }
+
             is QuranEvent.PrefetchPage -> loadPage(event.pageNumber, makeActive = false)
             is QuranEvent.LoadMushafPageLayout -> loadMushafPageLayout(event.pageNumber)
             is QuranEvent.ToggleBookmark -> {
@@ -227,7 +211,10 @@ class QuranViewModel @Inject constructor(
             }
 
             is QuranEvent.ToggleFavorite -> {
-                telemetry.featureUsed(AppAnalytics.Feature.QURAN, AppAnalytics.Action.TOGGLE_FAVORITE)
+                telemetry.featureUsed(
+                    AppAnalytics.Feature.QURAN,
+                    AppAnalytics.Action.TOGGLE_FAVORITE
+                )
                 toggleFavorite(
                     event.ayahId,
                     event.surahNumber,
@@ -252,7 +239,11 @@ class QuranViewModel @Inject constructor(
                     newValue = !it.showTranslation
                     it.copy(showTranslation = newValue)
                 }
-                launchSafely(telemetry, AppAnalytics.Feature.QURAN, "on_event") { quranSettings.setShowTranslation(newValue) }
+                launchSafely(
+                    telemetry,
+                    AppAnalytics.Feature.QURAN,
+                    "on_event"
+                ) { quranSettings.setShowTranslation(newValue) }
             }
 
             // Deliberately unlogged: no screen emits this. The analytics that used to sit here
@@ -315,6 +306,7 @@ class QuranViewModel @Inject constructor(
                 telemetry.featureUsed(AppAnalytics.Feature.QURAN, "play_surah_audio")
                 playSurahFromInfo(event.surahNumber)
             }
+
             is QuranEvent.LoadSurahInfo -> {
                 telemetry.featureUsed(AppAnalytics.Feature.QURAN, "open_surah_info")
                 loadSurahInfo(event.surahNumber)
@@ -338,10 +330,12 @@ class QuranViewModel @Inject constructor(
                 telemetry.featureUsed(AppAnalytics.Feature.QURAN, "khatam_toggle_ayah")
                 toggleKhatamAyah(event.ayahId)
             }
+
             is QuranEvent.MarkSurahAsReadForKhatam -> {
                 telemetry.featureUsed(AppAnalytics.Feature.QURAN, "khatam_mark_surah")
                 markSurahAsReadForKhatam(event.surahNumber)
             }
+
             is QuranEvent.TogglePageKhatam -> {
                 telemetry.featureUsed(AppAnalytics.Feature.QURAN, "khatam_toggle_page")
                 togglePageKhatam(event.ayahIds)
@@ -384,13 +378,15 @@ class QuranViewModel @Inject constructor(
                 quranSettings.tajweedUnderline,
                 quranSettings.quranMushafScript
             ) { display, behavior, showTajweed, tajweedUnderline, mushafScript ->
-                QuranReaderSettings(display, behavior, showTajweed, tajweedUnderline,
-                    MushafScript.fromName(mushafScript))
+                QuranReaderSettings(
+                    display, behavior, showTajweed, tajweedUnderline,
+                    MushafScript.fromName(mushafScript)
+                )
             }.collect { settings ->
                 val (display, behavior, showTajweed, tajweedUnderline, mushafScript) = settings
                 // Captured before the state update below overwrites them.
                 val translationChanged = hydrated &&
-                    _readerState.value.selectedTranslatorId != display.translatorId
+                        _readerState.value.selectedTranslatorId != display.translatorId
                 // A different edition repaginates the Quran, so page N no longer holds the
                 // same ayahs.
                 val previousScript = _readerState.value.mushafScript
@@ -678,7 +674,9 @@ class QuranViewModel @Inject constructor(
                     // The annotated subset, for the reader's note editor. Derived from the
                     // stream the bookmarks screen already collects rather than a second query.
                     val notes = bookmarks
-                        .mapNotNull { bm -> bm.note?.takeIf { it.isNotBlank() }?.let { bm.ayahId to it } }
+                        .mapNotNull { bm ->
+                            bm.note?.takeIf { it.isNotBlank() }?.let { bm.ayahId to it }
+                        }
                         .toMap()
                     _readerState.update { it.copy(ayahNotes = notes) }
                 }

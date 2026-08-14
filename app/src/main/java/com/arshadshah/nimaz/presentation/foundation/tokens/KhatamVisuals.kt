@@ -1,4 +1,4 @@
-package com.arshadshah.nimaz.presentation.components.atoms
+package com.arshadshah.nimaz.presentation.foundation.tokens
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -18,6 +18,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -145,7 +147,7 @@ fun KhatamProgressRing(
                     startAngle = 0f,
                     sweepAngle = 360f,
                     useCenter = false,
-                    topLeft = androidx.compose.ui.geometry.Offset(inset, inset),
+                    topLeft = Offset(inset, inset),
                     size = arcSize,
                     style = Stroke(width = stroke, cap = StrokeCap.Round),
                 )
@@ -155,7 +157,7 @@ fun KhatamProgressRing(
                         startAngle = -90f,
                         sweepAngle = 360f * sweep,
                         useCenter = false,
-                        topLeft = androidx.compose.ui.geometry.Offset(inset, inset),
+                        topLeft = Offset(inset, inset),
                         size = arcSize,
                         style = Stroke(width = stroke, cap = StrokeCap.Round),
                     )
@@ -200,13 +202,13 @@ fun KhatamProgressBar(
                 val radius = size.height / 2f
                 drawRoundRect(
                     color = accent.track,
-                    cornerRadius = androidx.compose.ui.geometry.CornerRadius(radius),
+                    cornerRadius = CornerRadius(radius),
                 )
                 if (animatedProgress > 0f) {
                     drawRoundRect(
                         brush = brush,
                         size = Size(size.width * animatedProgress, size.height),
-                        cornerRadius = androidx.compose.ui.geometry.CornerRadius(radius),
+                        cornerRadius = CornerRadius(radius),
                     )
                 }
             }

@@ -1,6 +1,7 @@
-package com.arshadshah.nimaz.presentation.components.organisms
+package com.arshadshah.nimaz.presentation.foundation.tokens
 
 import android.content.res.Configuration
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.CalendarMonth
@@ -12,18 +13,20 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Terrain
 import androidx.compose.material.icons.outlined.WaterDrop
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.layout.padding
-import androidx.compose.ui.Modifier
-import com.arshadshah.nimaz.presentation.theme.NimazPatternStyle
+import com.arshadshah.nimaz.presentation.components.organisms.EventAction
+import com.arshadshah.nimaz.presentation.components.organisms.EventCard
+import com.arshadshah.nimaz.presentation.components.organisms.EventOrnament
 import com.arshadshah.nimaz.presentation.theme.NimazPalette
+import com.arshadshah.nimaz.presentation.theme.NimazPatternStyle
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.theme.ThemeMode
 
-/** Occasion behind an [EventCard] — selects accent, icon, and background ornament. */
+/** Occasion behind an [com.arshadshah.nimaz.presentation.components.organisms.EventCard] — selects accent, icon, and background ornament. */
 enum class EventOccasion {
     EID_AL_FITR, EID_AL_ADHA, RAMADAN, LAYLAT_AL_QADR, ARAFAH,
     ASHURA, MAWLID, HIJRI_NEW_YEAR, JUMUAH, GENERIC
@@ -49,54 +52,63 @@ fun eventCardVisualsFor(occasion: EventOccasion): EventCardVisuals = when (occas
         icon = Icons.Filled.Celebration,
         ornament = EventOrnament.Burst(play = true),
     )
+
     EventOccasion.EID_AL_ADHA -> EventCardVisuals(
         accent = NimazPalette.Teal700,
         containerAccent = NimazPalette.Teal700,
         icon = Icons.Filled.Mosque,
         ornament = EventOrnament.Pattern(NimazPatternStyle.CORNER_MEDALLION),
     )
+
     EventOccasion.RAMADAN -> EventCardVisuals(
         accent = NimazPalette.MatPurple,
         containerAccent = NimazPalette.MatPurple,
         icon = Icons.Filled.NightsStay,
         ornament = EventOrnament.Pattern(NimazPatternStyle.LATTICE),
     )
+
     EventOccasion.LAYLAT_AL_QADR -> EventCardVisuals(
         accent = NimazPalette.MatPurple,
         containerAccent = NimazPalette.MatPurple,
         icon = Icons.Filled.AutoAwesome,
         ornament = EventOrnament.Pattern(NimazPatternStyle.STAR_FIELD),
     )
+
     EventOccasion.ARAFAH -> EventCardVisuals(
         accent = NimazPalette.Teal700,
         containerAccent = NimazPalette.Teal700,
         icon = Icons.Outlined.Terrain,
         ornament = EventOrnament.Divider,
     )
+
     EventOccasion.ASHURA -> EventCardVisuals(
         accent = NimazPalette.Teal700,
         containerAccent = NimazPalette.Teal700,
         icon = Icons.Outlined.WaterDrop,
         ornament = EventOrnament.Divider,
     )
+
     EventOccasion.MAWLID -> EventCardVisuals(
         accent = NimazPalette.Amber700,
         containerAccent = NimazPalette.Amber700,
         icon = Icons.Filled.Star,
         ornament = EventOrnament.Divider,
     )
+
     EventOccasion.HIJRI_NEW_YEAR -> EventCardVisuals(
         accent = NimazPalette.Amber700,
         containerAccent = NimazPalette.Amber700,
         icon = Icons.Filled.CalendarMonth,
         ornament = EventOrnament.Divider,
     )
+
     EventOccasion.JUMUAH -> EventCardVisuals(
         accent = NimazPalette.GreenDeep,
         containerAccent = NimazPalette.GreenDeep,
         icon = Icons.Filled.Mosque,
         ornament = EventOrnament.Divider,
     )
+
     EventOccasion.GENERIC -> EventCardVisuals(
         accent = NimazPalette.Teal700,
         containerAccent = NimazPalette.Teal700,
@@ -192,8 +204,10 @@ private fun EventCard_Generic_Light() {
     NimazTheme(themeMode = ThemeMode.LIGHT) { EventCardOccasionSample(EventOccasion.GENERIC) }
 }
 
-@Preview(showBackground = true, widthDp = 400, name = "Generic — dark",
-    uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL)
+@Preview(
+    showBackground = true, widthDp = 400, name = "Generic — dark",
+    uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL
+)
 @Composable
 private fun EventCard_Generic_Dark() {
     NimazTheme(themeMode = ThemeMode.DARK) { EventCardOccasionSample(EventOccasion.GENERIC) }

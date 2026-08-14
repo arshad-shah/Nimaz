@@ -129,7 +129,7 @@ fun rememberComingUpFasts(
     val hijriToday = remember(today) { HijriDateCalculator.toHijri(today) }
     val islamicFasts = remember(hijriToday.year, today) {
         val events = HijriDateCalculator.getIslamicEvents(hijriToday.year) +
-            HijriDateCalculator.getIslamicEvents(hijriToday.year + 1)
+                HijriDateCalculator.getIslamicEvents(hijriToday.year + 1)
 
         buildList {
             // Events span two Hijri years, so keep only the nearest upcoming occurrence of each

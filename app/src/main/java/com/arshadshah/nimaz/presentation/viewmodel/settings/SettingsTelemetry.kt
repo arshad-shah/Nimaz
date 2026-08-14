@@ -92,6 +92,7 @@ internal fun SettingsEvent.asSettingChange(): Pair<String, String>? = when (this
     is SettingsEvent.SetHadithArabicFontSize -> "hadith_arabic_font_size" to size.toString()
     is SettingsEvent.SetHadithTranslationFontSize ->
         "hadith_translation_font_size" to size.toString()
+
     is SettingsEvent.SetHadithShowArabic -> "hadith_show_arabic" to enabled.toString()
     is SettingsEvent.SetHadithShowTranslation -> "hadith_show_translation" to enabled.toString()
     is SettingsEvent.SetHadithShowGrade -> "hadith_show_grade" to enabled.toString()

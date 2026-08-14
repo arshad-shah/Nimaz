@@ -1,4 +1,4 @@
-package com.arshadshah.nimaz.presentation.components.atoms
+package com.arshadshah.nimaz.presentation.components.molecules
 
 import android.text.format.DateFormat
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
@@ -15,9 +15,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Schedule
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -32,11 +29,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import com.arshadshah.nimaz.presentation.theme.rememberNimazHaptics
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.clearAndSetSemantics
-import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -44,6 +38,7 @@ import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.theme.NimazSpacing
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.theme.ThemeMode
+import com.arshadshah.nimaz.presentation.theme.rememberNimazHaptics
 import kotlinx.coroutines.flow.distinctUntilChanged
 
 private val ItemHeight = 46.dp
@@ -219,9 +214,9 @@ private fun WheelSlot(
 
     // Nested surface (the picker lives inside a dialog/sheet/settings card), so the
     // slot is outlined and flat rather than a hand-rolled tonal fill.
-    NimazCard(
+    _root_ide_package_.com.arshadshah.nimaz.presentation.components.atoms.NimazCard(
         modifier = modifier.height(ItemHeight * VISIBLE_ITEMS),
-        style = NimazCardStyle.OUTLINED,
+        style = com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle.OUTLINED,
         shape = RoundedCornerShape(16.dp),
         elevation = 0.dp,
     ) {
@@ -231,15 +226,15 @@ private fun WheelSlot(
         ) {
             // The selection band — "selected among peers", so the fill is correct
             // here; it just routes through the design system instead of raw alpha.
-            NimazCard(
+            _root_ide_package_.com.arshadshah.nimaz.presentation.components.atoms.NimazCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 6.dp)
                     .height(ItemHeight),
-                style = NimazCardStyle.FILLED,
+                style = com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle.FILLED,
                 shape = RoundedCornerShape(12.dp),
                 selected = true,
-                colors = NimazCardDefaults.selectable(
+                colors = com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults.selectable(
                     activeContainer = accentColor.copy(alpha = 0.16f),
                     activeContent = accentColor,
                 ),
@@ -278,59 +273,6 @@ private fun WheelSlot(
     }
 }
 
-/**
- * A read-only slot showing a time, for opening [NimazTimePicker] from a settings row.
- * Formats to the device's clock preference.
- */
-@Composable
-fun NimazTimeDisplay(
-    time: NimazTime,
-    modifier: Modifier = Modifier,
-    accentColor: Color = MaterialTheme.colorScheme.primary,
-    contentDescription: String? = null,
-) {
-    val format = rememberTimeFormatter()
-    // The accent tint marks the *current* value, so the fill stays — routed through
-    // the design system rather than a raw `.copy(alpha = …)` background.
-    NimazCard(
-        modifier = modifier.then(
-            if (contentDescription != null) {
-                Modifier.clearAndSetSemantics { this.contentDescription = contentDescription }
-            } else Modifier
-        ),
-        style = NimazCardStyle.FILLED,
-        shape = RoundedCornerShape(12.dp),
-        colors = NimazCardDefaults.colors(
-            container = accentColor.copy(alpha = 0.12f),
-            content = accentColor,
-        ),
-        elevation = 0.dp,
-    ) {
-        Row(
-            modifier = Modifier
-                .align(Alignment.CenterHorizontally)
-                .padding(horizontal = NimazSpacing.Medium, vertical = NimazSpacing.Small),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Icon(
-                imageVector = Icons.Default.Schedule,
-                contentDescription = stringResource(R.string.cd_edit_time),
-                tint = accentColor,
-                modifier = Modifier
-                    .padding(end = NimazSpacing.Small)
-                    .width(20.dp)
-            )
-            Text(
-                text = format(time),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
-                color = accentColor,
-            )
-        }
-    }
-}
-
 // ---- Previews ----
 
 @Composable
@@ -341,7 +283,6 @@ private fun TimePickerShowcase(is24Hour: Boolean) {
         verticalArrangement = Arrangement.spacedBy(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        NimazTimeDisplay(time = time)
         NimazTimePicker(value = time, onValueChange = { time = it }, is24Hour = is24Hour)
     }
 }

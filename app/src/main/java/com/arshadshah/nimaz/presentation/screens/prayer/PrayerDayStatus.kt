@@ -69,7 +69,9 @@ fun resolvePrayerStatuses(
             dayIsOver -> PrayerDisplayStatus.NOT_RECORDED
             // Today. `isAfter` rather than `!isBefore`: a prayer at exactly its own time has
             // arrived, not passed, and calling it unrecorded on the minute is a false accusation.
-            times?.timeFor(prayer)?.let { now.isAfter(it) } == true -> PrayerDisplayStatus.NOT_RECORDED
+            times?.timeFor(prayer)
+                ?.let { now.isAfter(it) } == true -> PrayerDisplayStatus.NOT_RECORDED
+
             else -> PrayerDisplayStatus.UPCOMING
         }
     }

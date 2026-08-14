@@ -1,6 +1,5 @@
 package com.arshadshah.nimaz.presentation.viewmodel.tracker
 
-import com.arshadshah.nimaz.domain.model.ExemptionReason
 import com.arshadshah.nimaz.domain.model.FastRecord
 import com.arshadshah.nimaz.domain.model.FastStatus
 import com.arshadshah.nimaz.domain.model.FastType
@@ -60,8 +59,8 @@ data class FastingTrackerUiState(
      */
     val canToggleToday: Boolean
         get() = todayRecord == null ||
-            todayRecord.status == FastStatus.FASTED ||
-            todayRecord.status == FastStatus.NOT_FASTED
+                todayRecord.status == FastStatus.FASTED ||
+                todayRecord.status == FastStatus.NOT_FASTED
 
     /** The status blocking the toggle, or null when it is actionable. */
     val toggleBlockedReason: FastStatus?

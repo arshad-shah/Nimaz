@@ -1,4 +1,4 @@
-package com.arshadshah.nimaz.presentation.components.atoms
+package com.arshadshah.nimaz.presentation.theme
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable

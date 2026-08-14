@@ -1,7 +1,7 @@
 package com.arshadshah.nimaz.presentation.viewmodel
 
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorKind
+import com.arshadshah.nimaz.presentation.components.molecules.NimazErrorKind
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test

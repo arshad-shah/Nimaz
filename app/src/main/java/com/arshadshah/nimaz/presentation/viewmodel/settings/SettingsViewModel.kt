@@ -3,31 +3,29 @@ package com.arshadshah.nimaz.presentation.viewmodel.settings
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
-import com.arshadshah.nimaz.core.time.TodayProvider
 import com.arshadshah.nimaz.core.monitoring.Telemetry
-import com.arshadshah.nimaz.domain.repository.AdhanDownloader
-import com.arshadshah.nimaz.domain.repository.AppLocale
-import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.core.monitoring.catchAndReport
-import com.arshadshah.nimaz.core.util.PrayerTimeCalculator
-import com.arshadshah.nimaz.core.util.LocaleHelper
+import com.arshadshah.nimaz.core.monitoring.launchSafely
+import com.arshadshah.nimaz.core.time.TodayProvider
 import com.arshadshah.nimaz.core.util.PrayerNotificationScheduler
+import com.arshadshah.nimaz.core.util.PrayerTimeCalculator
 import com.arshadshah.nimaz.data.audio.AdhanAudioManager
-import com.arshadshah.nimaz.data.audio.AdhanDownloadService
 import com.arshadshah.nimaz.data.audio.AdhanSound
 import com.arshadshah.nimaz.data.audio.DownloadState
-import com.arshadshah.nimaz.domain.model.HighLatitudeRule
 import com.arshadshah.nimaz.domain.model.AsrCalculation
 import com.arshadshah.nimaz.domain.model.CalculationMethod
+import com.arshadshah.nimaz.domain.model.HighLatitudeRule
 import com.arshadshah.nimaz.domain.model.Location
 import com.arshadshah.nimaz.domain.model.MushafScript
 import com.arshadshah.nimaz.domain.model.PrayerAlertStyle
 import com.arshadshah.nimaz.domain.model.PrayerTimes
+import com.arshadshah.nimaz.domain.repository.AdhanDownloader
+import com.arshadshah.nimaz.domain.repository.AppLocale
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.usecase.ClearAllUserDataUseCase
-import com.arshadshah.nimaz.domain.usecase.notification.RescheduleNotificationsUseCase
 import com.arshadshah.nimaz.domain.usecase.PrayerUseCases
 import com.arshadshah.nimaz.domain.usecase.QuranUseCases
+import com.arshadshah.nimaz.domain.usecase.notification.RescheduleNotificationsUseCase
 import com.arshadshah.nimaz.presentation.theme.NimazPatternStyle
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -40,12 +38,9 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
-import java.time.LocalDate
 import javax.inject.Inject
 
 /** The prayer whose settings stand in for the set on summary rows. */
@@ -201,12 +196,12 @@ class SettingsViewModel @Inject constructor(
         prayerUseCases.getCurrentLocation(),
         todayProvider.todayChanges,
     ) { location, today ->
-            location?.let {
-                runCatching {
-                    prayerUseCases.getPrayerTimesForDate(today, it)
-                }.getOrNull()
-            }
+        location?.let {
+            runCatching {
+                prayerUseCases.getPrayerTimesForDate(today, it)
+            }.getOrNull()
         }
+    }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
@@ -362,27 +357,47 @@ class SettingsViewModel @Inject constructor(
 
             is SettingsEvent.SetHijriPrimary -> {
                 _generalState.update { it.copy(useHijriPrimary = event.enabled) }
-                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") { settingsRepository.setUseHijriPrimary(event.enabled) }
+                launchSafely(
+                    telemetry,
+                    AppAnalytics.Feature.SETTINGS,
+                    "on_event"
+                ) { settingsRepository.setUseHijriPrimary(event.enabled) }
             }
 
             is SettingsEvent.SetHijriDayOffset -> {
                 _generalState.update { it.copy(hijriDayOffset = event.days) }
-                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") { settingsRepository.setHijriDayOffset(event.days) }
+                launchSafely(
+                    telemetry,
+                    AppAnalytics.Feature.SETTINGS,
+                    "on_event"
+                ) { settingsRepository.setHijriDayOffset(event.days) }
             }
 
             is SettingsEvent.Set24HourFormat -> {
                 _generalState.update { it.copy(use24HourFormat = event.enabled) }
-                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") { settingsRepository.setUse24HourFormat(event.enabled) }
+                launchSafely(
+                    telemetry,
+                    AppAnalytics.Feature.SETTINGS,
+                    "on_event"
+                ) { settingsRepository.setUse24HourFormat(event.enabled) }
             }
 
             is SettingsEvent.SetHapticFeedback -> {
                 _generalState.update { it.copy(hapticFeedback = event.enabled) }
-                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") { settingsRepository.setHapticFeedback(event.enabled) }
+                launchSafely(
+                    telemetry,
+                    AppAnalytics.Feature.SETTINGS,
+                    "on_event"
+                ) { settingsRepository.setHapticFeedback(event.enabled) }
             }
 
             is SettingsEvent.SetShowIslamicPatterns -> {
                 _generalState.update { it.copy(showIslamicPatterns = event.enabled) }
-                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") { settingsRepository.setShowIslamicPatterns(event.enabled) }
+                launchSafely(
+                    telemetry,
+                    AppAnalytics.Feature.SETTINGS,
+                    "on_event"
+                ) { settingsRepository.setShowIslamicPatterns(event.enabled) }
             }
 
             is SettingsEvent.SetPatternStyle -> {
@@ -401,17 +416,29 @@ class SettingsViewModel @Inject constructor(
 
             is SettingsEvent.SetAnimationsEnabled -> {
                 _generalState.update { it.copy(animationsEnabled = event.enabled) }
-                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") { settingsRepository.setAnimationsEnabled(event.enabled) }
+                launchSafely(
+                    telemetry,
+                    AppAnalytics.Feature.SETTINGS,
+                    "on_event"
+                ) { settingsRepository.setAnimationsEnabled(event.enabled) }
             }
 
             is SettingsEvent.SetShowCountdown -> {
                 _generalState.update { it.copy(showCountdown = event.enabled) }
-                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") { settingsRepository.setShowCountdown(event.enabled) }
+                launchSafely(
+                    telemetry,
+                    AppAnalytics.Feature.SETTINGS,
+                    "on_event"
+                ) { settingsRepository.setShowCountdown(event.enabled) }
             }
 
             is SettingsEvent.SetShowQuickActions -> {
                 _generalState.update { it.copy(showQuickActions = event.enabled) }
-                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") { settingsRepository.setShowQuickActions(event.enabled) }
+                launchSafely(
+                    telemetry,
+                    AppAnalytics.Feature.SETTINGS,
+                    "on_event"
+                ) { settingsRepository.setShowQuickActions(event.enabled) }
             }
 
             // Prayer
@@ -516,12 +543,20 @@ class SettingsViewModel @Inject constructor(
 
             is SettingsEvent.SetVibrationEnabled -> {
                 _notificationState.update { it.copy(vibrationEnabled = event.enabled) }
-                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") { settingsRepository.setNotificationVibration(event.enabled) }
+                launchSafely(
+                    telemetry,
+                    AppAnalytics.Feature.SETTINGS,
+                    "on_event"
+                ) { settingsRepository.setNotificationVibration(event.enabled) }
             }
 
             is SettingsEvent.SetRespectDnd -> {
                 _notificationState.update { it.copy(respectDnd = event.enabled) }
-                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") { settingsRepository.setAdhanRespectDnd(event.enabled) }
+                launchSafely(
+                    telemetry,
+                    AppAnalytics.Feature.SETTINGS,
+                    "on_event"
+                ) { settingsRepository.setAdhanRespectDnd(event.enabled) }
             }
 
             is SettingsEvent.SetReminderMinutes -> {
@@ -542,7 +577,11 @@ class SettingsViewModel @Inject constructor(
 
             is SettingsEvent.SetPersistentNotification -> {
                 _notificationState.update { it.copy(persistentNotification = event.enabled) }
-                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") { settingsRepository.setPersistentNotification(event.enabled) }
+                launchSafely(
+                    telemetry,
+                    AppAnalytics.Feature.SETTINGS,
+                    "on_event"
+                ) { settingsRepository.setPersistentNotification(event.enabled) }
             }
 
             is SettingsEvent.SetFridayReminderEnabled -> {
@@ -648,129 +687,229 @@ class SettingsViewModel @Inject constructor(
             // Quran
             is SettingsEvent.SetTranslator -> {
                 _quranState.update { it.copy(selectedTranslatorId = event.translatorId) }
-                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") { settingsRepository.setQuranTranslatorId(event.translatorId) }
+                launchSafely(
+                    telemetry,
+                    AppAnalytics.Feature.SETTINGS,
+                    "on_event"
+                ) { settingsRepository.setQuranTranslatorId(event.translatorId) }
             }
 
             is SettingsEvent.SetArabicFont -> {
                 _quranState.update { it.copy(selectedArabicFontId = event.fontId) }
-                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") { settingsRepository.setQuranArabicFont(event.fontId) }
+                launchSafely(
+                    telemetry,
+                    AppAnalytics.Feature.SETTINGS,
+                    "on_event"
+                ) { settingsRepository.setQuranArabicFont(event.fontId) }
             }
 
             is SettingsEvent.SetShowTranslation -> {
                 _quranState.update { it.copy(showTranslation = event.enabled) }
-                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") { settingsRepository.setShowTranslation(event.enabled) }
+                launchSafely(
+                    telemetry,
+                    AppAnalytics.Feature.SETTINGS,
+                    "on_event"
+                ) { settingsRepository.setShowTranslation(event.enabled) }
             }
 
             is SettingsEvent.SetShowTransliteration -> {
                 _quranState.update { it.copy(showTransliteration = event.enabled) }
-                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") { settingsRepository.setShowTransliteration(event.enabled) }
+                launchSafely(
+                    telemetry,
+                    AppAnalytics.Feature.SETTINGS,
+                    "on_event"
+                ) { settingsRepository.setShowTransliteration(event.enabled) }
             }
 
             is SettingsEvent.SetArabicFontSize -> {
                 _quranState.update { it.copy(arabicFontSize = event.size) }
-                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") { settingsRepository.setQuranArabicFontSize(event.size) }
+                launchSafely(
+                    telemetry,
+                    AppAnalytics.Feature.SETTINGS,
+                    "on_event"
+                ) { settingsRepository.setQuranArabicFontSize(event.size) }
             }
 
             is SettingsEvent.SetTranslationFontSize -> {
                 _quranState.update { it.copy(translationFontSize = event.size) }
-                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") { settingsRepository.setQuranTranslationFontSize(event.size) }
+                launchSafely(
+                    telemetry,
+                    AppAnalytics.Feature.SETTINGS,
+                    "on_event"
+                ) { settingsRepository.setQuranTranslationFontSize(event.size) }
             }
 
             is SettingsEvent.SetContinuousReading -> {
                 _quranState.update { it.copy(continuousReading = event.enabled) }
-                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") { settingsRepository.setContinuousReading(event.enabled) }
+                launchSafely(
+                    telemetry,
+                    AppAnalytics.Feature.SETTINGS,
+                    "on_event"
+                ) { settingsRepository.setContinuousReading(event.enabled) }
             }
 
             is SettingsEvent.SetKeepScreenOn -> {
                 _quranState.update { it.copy(keepScreenOn = event.enabled) }
-                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") { settingsRepository.setKeepScreenOn(event.enabled) }
+                launchSafely(
+                    telemetry,
+                    AppAnalytics.Feature.SETTINGS,
+                    "on_event"
+                ) { settingsRepository.setKeepScreenOn(event.enabled) }
             }
 
             is SettingsEvent.SetReciter -> {
                 _quranState.update { it.copy(selectedReciterId = event.reciterId) }
-                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") { settingsRepository.setSelectedReciterId(event.reciterId) }
+                launchSafely(
+                    telemetry,
+                    AppAnalytics.Feature.SETTINGS,
+                    "on_event"
+                ) { settingsRepository.setSelectedReciterId(event.reciterId) }
             }
 
             is SettingsEvent.SetShowTajweed -> {
                 _quranState.update { it.copy(showTajweed = event.enabled) }
-                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") { settingsRepository.setShowTajweed(event.enabled) }
+                launchSafely(
+                    telemetry,
+                    AppAnalytics.Feature.SETTINGS,
+                    "on_event"
+                ) { settingsRepository.setShowTajweed(event.enabled) }
             }
 
             is SettingsEvent.SetTajweedUnderline -> {
                 _quranState.update { it.copy(tajweedUnderline = event.enabled) }
-                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") { settingsRepository.setTajweedUnderline(event.enabled) }
+                launchSafely(
+                    telemetry,
+                    AppAnalytics.Feature.SETTINGS,
+                    "on_event"
+                ) { settingsRepository.setTajweedUnderline(event.enabled) }
             }
 
             is SettingsEvent.SetMushafScript -> {
                 _quranState.update { it.copy(mushafScript = event.script) }
-                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") { settingsRepository.setQuranMushafScript(event.script.name) }
+                launchSafely(
+                    telemetry,
+                    AppAnalytics.Feature.SETTINGS,
+                    "on_event"
+                ) { settingsRepository.setQuranMushafScript(event.script.name) }
             }
 
             // Dua
             is SettingsEvent.SetDuaArabicFont -> {
                 _duaState.update { it.copy(selectedArabicFontId = event.fontId) }
-                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") { settingsRepository.setDuaArabicFont(event.fontId) }
+                launchSafely(
+                    telemetry,
+                    AppAnalytics.Feature.SETTINGS,
+                    "on_event"
+                ) { settingsRepository.setDuaArabicFont(event.fontId) }
             }
 
             is SettingsEvent.SetDuaArabicFontSize -> {
                 _duaState.update { it.copy(arabicFontSize = event.size) }
-                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") { settingsRepository.setDuaArabicFontSize(event.size) }
+                launchSafely(
+                    telemetry,
+                    AppAnalytics.Feature.SETTINGS,
+                    "on_event"
+                ) { settingsRepository.setDuaArabicFontSize(event.size) }
             }
 
             is SettingsEvent.SetDuaTranslationFontSize -> {
                 _duaState.update { it.copy(translationFontSize = event.size) }
-                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") { settingsRepository.setDuaTranslationFontSize(event.size) }
+                launchSafely(
+                    telemetry,
+                    AppAnalytics.Feature.SETTINGS,
+                    "on_event"
+                ) { settingsRepository.setDuaTranslationFontSize(event.size) }
             }
 
             is SettingsEvent.SetDuaShowArabic -> {
                 _duaState.update { it.copy(showArabic = event.enabled) }
-                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") { settingsRepository.setDuaShowArabic(event.enabled) }
+                launchSafely(
+                    telemetry,
+                    AppAnalytics.Feature.SETTINGS,
+                    "on_event"
+                ) { settingsRepository.setDuaShowArabic(event.enabled) }
             }
 
             is SettingsEvent.SetDuaShowTransliteration -> {
                 _duaState.update { it.copy(showTransliteration = event.enabled) }
-                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") { settingsRepository.setDuaShowTransliteration(event.enabled) }
+                launchSafely(
+                    telemetry,
+                    AppAnalytics.Feature.SETTINGS,
+                    "on_event"
+                ) { settingsRepository.setDuaShowTransliteration(event.enabled) }
             }
 
             is SettingsEvent.SetDuaShowTranslation -> {
                 _duaState.update { it.copy(showTranslation = event.enabled) }
-                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") { settingsRepository.setDuaShowTranslation(event.enabled) }
+                launchSafely(
+                    telemetry,
+                    AppAnalytics.Feature.SETTINGS,
+                    "on_event"
+                ) { settingsRepository.setDuaShowTranslation(event.enabled) }
             }
 
             // Hadith
             is SettingsEvent.SetHadithArabicFont -> {
                 _hadithState.update { it.copy(selectedArabicFontId = event.fontId) }
-                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") { settingsRepository.setHadithArabicFont(event.fontId) }
+                launchSafely(
+                    telemetry,
+                    AppAnalytics.Feature.SETTINGS,
+                    "on_event"
+                ) { settingsRepository.setHadithArabicFont(event.fontId) }
             }
 
             is SettingsEvent.SetHadithArabicFontSize -> {
                 _hadithState.update { it.copy(arabicFontSize = event.size) }
-                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") { settingsRepository.setHadithArabicFontSize(event.size) }
+                launchSafely(
+                    telemetry,
+                    AppAnalytics.Feature.SETTINGS,
+                    "on_event"
+                ) { settingsRepository.setHadithArabicFontSize(event.size) }
             }
 
             is SettingsEvent.SetHadithTranslationFontSize -> {
                 _hadithState.update { it.copy(translationFontSize = event.size) }
-                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") { settingsRepository.setHadithTranslationFontSize(event.size) }
+                launchSafely(
+                    telemetry,
+                    AppAnalytics.Feature.SETTINGS,
+                    "on_event"
+                ) { settingsRepository.setHadithTranslationFontSize(event.size) }
             }
 
             is SettingsEvent.SetHadithShowArabic -> {
                 _hadithState.update { it.copy(showArabic = event.enabled) }
-                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") { settingsRepository.setHadithShowArabic(event.enabled) }
+                launchSafely(
+                    telemetry,
+                    AppAnalytics.Feature.SETTINGS,
+                    "on_event"
+                ) { settingsRepository.setHadithShowArabic(event.enabled) }
             }
 
             is SettingsEvent.SetHadithShowTranslation -> {
                 _hadithState.update { it.copy(showTranslation = event.enabled) }
-                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") { settingsRepository.setHadithShowTranslation(event.enabled) }
+                launchSafely(
+                    telemetry,
+                    AppAnalytics.Feature.SETTINGS,
+                    "on_event"
+                ) { settingsRepository.setHadithShowTranslation(event.enabled) }
             }
 
             is SettingsEvent.SetHadithShowGrade -> {
                 _hadithState.update { it.copy(showGrade = event.enabled) }
-                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") { settingsRepository.setHadithShowGrade(event.enabled) }
+                launchSafely(
+                    telemetry,
+                    AppAnalytics.Feature.SETTINGS,
+                    "on_event"
+                ) { settingsRepository.setHadithShowGrade(event.enabled) }
             }
 
             is SettingsEvent.SetHadithShowChain -> {
                 _hadithState.update { it.copy(showChain = event.enabled) }
-                launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") { settingsRepository.setHadithShowChain(event.enabled) }
+                launchSafely(
+                    telemetry,
+                    AppAnalytics.Feature.SETTINGS,
+                    "on_event"
+                ) { settingsRepository.setHadithShowChain(event.enabled) }
             }
 
             // Location
@@ -932,12 +1071,19 @@ class SettingsViewModel @Inject constructor(
             val worshipEnabled = com.arshadshah.nimaz.domain.model.WorshipReminderType.entries
                 .associate { it.key to settingsRepository.worshipReminderEnabled(it.key).first() }
             val worshipOffsets = com.arshadshah.nimaz.domain.model.WorshipReminderType.entries
-                .associate { it.key to settingsRepository.worshipReminderOffset(it.key, it.defaultOffsetMinutes).first() }
-            val witrModeDefault = com.arshadshah.nimaz.core.util.WorshipReminderCalculator.WITR_MODE_AFTER_ISHA
+                .associate {
+                    it.key to settingsRepository.worshipReminderOffset(
+                        it.key,
+                        it.defaultOffsetMinutes
+                    ).first()
+                }
+            val witrModeDefault =
+                com.arshadshah.nimaz.core.util.WorshipReminderCalculator.WITR_MODE_AFTER_ISHA
             val worshipModes = mapOf(
                 com.arshadshah.nimaz.domain.model.WorshipReminderType.WITR.key to
                         settingsRepository.worshipReminderMode(
-                            com.arshadshah.nimaz.domain.model.WorshipReminderType.WITR.key, witrModeDefault
+                            com.arshadshah.nimaz.domain.model.WorshipReminderType.WITR.key,
+                            witrModeDefault
                         ).first()
             )
 

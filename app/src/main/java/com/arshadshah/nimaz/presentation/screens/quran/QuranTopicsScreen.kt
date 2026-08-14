@@ -2,7 +2,6 @@ package com.arshadshah.nimaz.presentation.screens.quran
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -39,15 +38,15 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconButtonSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
-import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
-import com.arshadshah.nimaz.presentation.components.molecules.NimazBreadcrumbBar
-import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
-import com.arshadshah.nimaz.presentation.components.molecules.NimazTreeRow
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSegmentedControl
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSegmentedPurpose
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSegmentedWidth
 import com.arshadshah.nimaz.presentation.components.atoms.asSegments
+import com.arshadshah.nimaz.presentation.components.molecules.NimazBreadcrumbBar
+import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
+import com.arshadshah.nimaz.presentation.components.molecules.NimazLoadingState
+import com.arshadshah.nimaz.presentation.components.molecules.NimazTreeRow
 import com.arshadshah.nimaz.presentation.components.organisms.NimazSearchBar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazTopAppBar
 import com.arshadshah.nimaz.presentation.viewmodel.quran.QuranTopicsEvent

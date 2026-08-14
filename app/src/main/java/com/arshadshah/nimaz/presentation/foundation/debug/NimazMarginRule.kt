@@ -1,4 +1,4 @@
-package com.arshadshah.nimaz.presentation.components.atoms
+package com.arshadshah.nimaz.presentation.foundation.debug
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border

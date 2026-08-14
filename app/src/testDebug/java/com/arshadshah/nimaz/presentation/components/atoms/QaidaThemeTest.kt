@@ -3,6 +3,9 @@ package com.arshadshah.nimaz.presentation.components.atoms
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.test.onRoot
+import com.arshadshah.nimaz.presentation.theme.QaidaMedallionState
+import com.arshadshah.nimaz.presentation.theme.QaidaPalette
+import com.arshadshah.nimaz.presentation.theme.rememberQaidaPalette
 import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
 import org.junit.Test

@@ -157,8 +157,8 @@ class QuranBrowseViewModel @Inject constructor(
 
         is QuranSearchQuery.Name -> surahs.filter { surah ->
             surah.nameEnglish.contains(query.text, ignoreCase = true) ||
-                surah.nameTransliteration.contains(query.text, ignoreCase = true) ||
-                surah.nameArabic.contains(query.text)
+                    surah.nameTransliteration.contains(query.text, ignoreCase = true) ||
+                    surah.nameArabic.contains(query.text)
         }
     }
 

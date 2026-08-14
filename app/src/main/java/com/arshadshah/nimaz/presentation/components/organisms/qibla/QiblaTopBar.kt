@@ -16,12 +16,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.arshadshah.nimaz.presentation.components.atoms.qibla.QiblaLocationLabel
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSegmentedControl
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSegmentedPurpose
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSegmentedSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSegmentedWidth
 import com.arshadshah.nimaz.presentation.components.atoms.asSegments
+import com.arshadshah.nimaz.presentation.components.atoms.qibla.QiblaLocationLabel
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**

@@ -16,26 +16,75 @@ class PrayerVisualsTest {
 
     @Test
     fun `getArabicPrayerName maps every prayer type`() {
-        assertThat(getArabicPrayerName(PrayerType.FAJR)).isEqualTo("الفجر")
-        assertThat(getArabicPrayerName(PrayerType.SUNRISE)).isEqualTo("الشروق")
-        assertThat(getArabicPrayerName(PrayerType.DHUHR)).isEqualTo("الظهر")
-        assertThat(getArabicPrayerName(PrayerType.ASR)).isEqualTo("العصر")
-        assertThat(getArabicPrayerName(PrayerType.MAGHRIB)).isEqualTo("المغرب")
-        assertThat(getArabicPrayerName(PrayerType.ISHA)).isEqualTo("العشاء")
-        assertThat(getArabicPrayerName(null)).isEmpty()
+        assertThat(
+            _root_ide_package_.com.arshadshah.nimaz.presentation.foundation.tokens.getArabicPrayerName(
+                PrayerType.FAJR
+            )
+        ).isEqualTo("الفجر")
+        assertThat(
+            _root_ide_package_.com.arshadshah.nimaz.presentation.foundation.tokens.getArabicPrayerName(
+                PrayerType.SUNRISE
+            )
+        ).isEqualTo("الشروق")
+        assertThat(
+            _root_ide_package_.com.arshadshah.nimaz.presentation.foundation.tokens.getArabicPrayerName(
+                PrayerType.DHUHR
+            )
+        ).isEqualTo("الظهر")
+        assertThat(
+            _root_ide_package_.com.arshadshah.nimaz.presentation.foundation.tokens.getArabicPrayerName(
+                PrayerType.ASR
+            )
+        ).isEqualTo("العصر")
+        assertThat(
+            _root_ide_package_.com.arshadshah.nimaz.presentation.foundation.tokens.getArabicPrayerName(
+                PrayerType.MAGHRIB
+            )
+        ).isEqualTo("المغرب")
+        assertThat(
+            _root_ide_package_.com.arshadshah.nimaz.presentation.foundation.tokens.getArabicPrayerName(
+                PrayerType.ISHA
+            )
+        ).isEqualTo("العشاء")
+        assertThat(
+            _root_ide_package_.com.arshadshah.nimaz.presentation.foundation.tokens.getArabicPrayerName(
+                null
+            )
+        ).isEmpty()
     }
 
     @Test
     fun `getPrayerIcon maps every prayer type`() {
         // Each prayer maps to its custom sun-stage icon (see PrayerStageIcons);
         // null falls back to the Dhuhr (apex) icon.
-        assertThat(getPrayerIcon(PrayerType.FAJR).name).isEqualTo("PrayerFajr")
-        assertThat(getPrayerIcon(PrayerType.SUNRISE).name).isEqualTo("PrayerSunrise")
-        assertThat(getPrayerIcon(PrayerType.DHUHR).name).isEqualTo("PrayerDhuhr")
-        assertThat(getPrayerIcon(PrayerType.ASR).name).isEqualTo("PrayerAsr")
-        assertThat(getPrayerIcon(PrayerType.MAGHRIB).name).isEqualTo("PrayerMaghrib")
-        assertThat(getPrayerIcon(PrayerType.ISHA).name).isEqualTo("PrayerIsha")
-        assertThat(getPrayerIcon(null).name).isEqualTo("PrayerDhuhr")
+        assertThat(
+            _root_ide_package_.com.arshadshah.nimaz.presentation.foundation.tokens.getPrayerIcon(
+                PrayerType.FAJR
+            ).name).isEqualTo("PrayerFajr")
+        assertThat(
+            _root_ide_package_.com.arshadshah.nimaz.presentation.foundation.tokens.getPrayerIcon(
+                PrayerType.SUNRISE
+            ).name).isEqualTo("PrayerSunrise")
+        assertThat(
+            _root_ide_package_.com.arshadshah.nimaz.presentation.foundation.tokens.getPrayerIcon(
+                PrayerType.DHUHR
+            ).name).isEqualTo("PrayerDhuhr")
+        assertThat(
+            _root_ide_package_.com.arshadshah.nimaz.presentation.foundation.tokens.getPrayerIcon(
+                PrayerType.ASR
+            ).name).isEqualTo("PrayerAsr")
+        assertThat(
+            _root_ide_package_.com.arshadshah.nimaz.presentation.foundation.tokens.getPrayerIcon(
+                PrayerType.MAGHRIB
+            ).name).isEqualTo("PrayerMaghrib")
+        assertThat(
+            _root_ide_package_.com.arshadshah.nimaz.presentation.foundation.tokens.getPrayerIcon(
+                PrayerType.ISHA
+            ).name).isEqualTo("PrayerIsha")
+        assertThat(
+            _root_ide_package_.com.arshadshah.nimaz.presentation.foundation.tokens.getPrayerIcon(
+                null
+            ).name).isEqualTo("PrayerDhuhr")
     }
 
     @Test
@@ -47,7 +96,10 @@ class PrayerVisualsTest {
         )
         composeRule.setThemedContent {
             all.forEach { type ->
-                colors[type?.name ?: "NULL"] = getPrayerColor(type)
+                colors[type?.name ?: "NULL"] =
+                    _root_ide_package_.com.arshadshah.nimaz.presentation.foundation.tokens.getPrayerColor(
+                        type
+                    )
             }
         }
         composeRule.waitForIdle()

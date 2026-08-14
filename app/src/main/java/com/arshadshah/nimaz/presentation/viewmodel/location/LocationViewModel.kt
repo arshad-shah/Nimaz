@@ -1,25 +1,17 @@
 package com.arshadshah.nimaz.presentation.viewmodel.location
 
 import android.annotation.SuppressLint
-import android.content.Context
-import android.location.Geocoder
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
-import com.arshadshah.nimaz.domain.model.AsrCalculation
-import com.arshadshah.nimaz.domain.model.CalculationMethod
-import com.arshadshah.nimaz.domain.model.Location
-import com.arshadshah.nimaz.domain.model.isLocationSet
 import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.core.monitoring.launchSafely
+import com.arshadshah.nimaz.domain.model.SearchLocation
+import com.arshadshah.nimaz.domain.model.isLocationSet
 import com.arshadshah.nimaz.domain.repository.DeviceLocationRepository
 import com.arshadshah.nimaz.domain.repository.PermissionChecker
 import com.arshadshah.nimaz.domain.repository.settings.LocationSettings
 import com.arshadshah.nimaz.domain.usecase.PrayerUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
-import java.util.TimeZone
-import javax.inject.Inject
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,10 +19,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlinx.coroutines.withContext
-import com.arshadshah.nimaz.domain.model.SearchLocation
+import java.util.TimeZone
+import javax.inject.Inject
 
 @HiltViewModel
 class LocationViewModel @Inject constructor(

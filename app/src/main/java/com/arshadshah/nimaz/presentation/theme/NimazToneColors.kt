@@ -1,22 +1,23 @@
-package com.arshadshah.nimaz.presentation.components.atoms
+package com.arshadshah.nimaz.presentation.theme
 
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.compositeOver
-import com.arshadshah.nimaz.presentation.theme.NimazColors
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
+import com.arshadshah.nimaz.presentation.theme.NimazToneColors.foreground
 
 /**
- * The one place [NimazTone] turns into colour for the atom layer.
+ * The one place [com.arshadshah.nimaz.presentation.components.atoms.NimazTone] turns into colour for the atom layer.
  *
- * [NimazBadgeDefaults] grew its own private copies of these `when` blocks, and the atoms added
+ * [com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeDefaults] grew its own private copies of these `when` blocks, and the atoms added
  * for the fasting redesign would have been five more. Tone is a vocabulary; a vocabulary with six
  * private dialects is not one — the failure mode is a `WARNING` that is amber in a badge and
  * orange in a dot, on the same screen, with nothing in either file admitting the other exists.
  *
  * `internal` on purpose: this is how atoms paint themselves, not a public colour API. Screens
- * pass a [NimazTone] to a component and let the component resolve it.
+ * pass a [com.arshadshah.nimaz.presentation.components.atoms.NimazTone] to a component and let the component resolve it.
  */
 internal object NimazToneColors {
 
@@ -70,6 +71,7 @@ internal object NimazToneColors {
         NimazTone.WARNING -> NimazColors.Warning
             .copy(alpha = ContainerAlpha)
             .compositeOver(MaterialTheme.colorScheme.surface)
+
         NimazTone.ERROR -> MaterialTheme.colorScheme.errorContainer
         NimazTone.TRANSPARENT -> Color.Transparent
     }

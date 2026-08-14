@@ -1,10 +1,10 @@
 package com.arshadshah.nimaz.presentation.viewmodel.quran
 
+import com.arshadshah.nimaz.domain.model.BookmarkType
 import com.arshadshah.nimaz.domain.model.DuaBookmark
 import com.arshadshah.nimaz.domain.model.HadithBookmark
 import com.arshadshah.nimaz.domain.model.QuranBookmark
 import com.arshadshah.nimaz.domain.model.QuranFavorite
-import com.arshadshah.nimaz.domain.model.BookmarkType
 import com.arshadshah.nimaz.domain.model.SavedKind
 import com.arshadshah.nimaz.domain.model.UnifiedBookmark
 import com.arshadshah.nimaz.presentation.viewmodel.UiError

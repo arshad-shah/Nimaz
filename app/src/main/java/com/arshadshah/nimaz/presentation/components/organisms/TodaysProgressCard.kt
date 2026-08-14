@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -29,6 +30,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.util.prayerTimelineProgressAt
 import com.arshadshah.nimaz.domain.model.PrayerStatus
 import com.arshadshah.nimaz.domain.model.PrayerType
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
@@ -36,14 +38,12 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
-import com.arshadshah.nimaz.presentation.theme.NimazTheme
-import com.arshadshah.nimaz.presentation.model.PrayerTimeDisplay
-import kotlin.time.Instant
-import androidx.compose.runtime.getValue
-import com.arshadshah.nimaz.core.util.prayerTimelineProgressAt
 import com.arshadshah.nimaz.presentation.components.atoms.TickResolution
 import com.arshadshah.nimaz.presentation.components.atoms.clockTimeText
 import com.arshadshah.nimaz.presentation.components.atoms.rememberNow
+import com.arshadshah.nimaz.presentation.model.PrayerTimeDisplay
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
+import kotlin.time.Instant
 
 /**
  * "Today's Progress" card, drawn as a timeline stepper: a track runs through

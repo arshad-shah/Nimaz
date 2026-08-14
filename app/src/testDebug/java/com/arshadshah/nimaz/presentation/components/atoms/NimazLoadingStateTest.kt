@@ -1,6 +1,7 @@
 package com.arshadshah.nimaz.presentation.components.atoms
 
 import androidx.compose.ui.test.onRoot
+import com.arshadshah.nimaz.presentation.components.molecules.NimazLoadingState
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith

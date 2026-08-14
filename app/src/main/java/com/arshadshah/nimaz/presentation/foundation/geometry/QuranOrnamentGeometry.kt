@@ -1,4 +1,4 @@
-package com.arshadshah.nimaz.presentation.components.atoms
+package com.arshadshah.nimaz.presentation.foundation.geometry
 
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect

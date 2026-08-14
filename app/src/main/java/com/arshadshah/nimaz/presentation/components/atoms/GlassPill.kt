@@ -1,8 +1,6 @@
 package com.arshadshah.nimaz.presentation.components.atoms
 
-import android.os.Build
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -33,29 +31,22 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.BlurEffect
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Shadow
-import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.TileMode
-import androidx.compose.ui.graphics.addOutline
-import androidx.compose.ui.graphics.drawscope.clipPath
-import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.layer.GraphicsLayer
 import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.presentation.foundation.glass.glassSurface
 import com.arshadshah.nimaz.presentation.theme.GlassColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
@@ -207,87 +198,6 @@ private data class PillMetrics(
     val gap: Dp,
 )
 
-/**
- * The shared glass treatment: an optional backdrop blur, a [tone]-weighted fill,
- * and the lit edge — a hairline border that fades from a bright top rim to a dim
- * base. Both [GlassPill] and [GlassIconButton] derive their look from here so the
- * family stays visually identical across shapes.
- *
- * The fill alphas are deliberately substantial: a glass pill must stay legible
- * even with no [backdrop] (e.g. on Android < 12, where the blur is skipped).
- */
-@Composable
-private fun Modifier.glassSurface(
-    tone: GlassPillTone,
-    tint: Color,
-    shape: Shape,
-    backdrop: GlassBackdrop?,
-    blurRadius: Dp,
-): Modifier {
-    val fillAlpha = when (tone) {
-        GlassPillTone.Frosted -> 0.26f
-        GlassPillTone.Solid -> 0.42f
-        GlassPillTone.Ghost -> 0.10f
-    }
-    val edgeTopAlpha = when (tone) {
-        GlassPillTone.Frosted -> 0.55f
-        GlassPillTone.Solid -> 0.65f
-        GlassPillTone.Ghost -> 0.45f
-    }
-    val edgeBottomAlpha = 0.12f
-    return this
-        .then(
-            if (backdrop != null && blurRadius > 0.dp) {
-                Modifier.glassBlur(backdrop = backdrop, blurRadius = blurRadius, shape = shape)
-            } else {
-                Modifier
-            }
-        )
-        .background(color = tint.copy(alpha = fillAlpha), shape = shape)
-        .border(
-            width = 1.dp,
-            brush = Brush.verticalGradient(
-                listOf(
-                    tint.copy(alpha = edgeTopAlpha),
-                    tint.copy(alpha = edgeBottomAlpha),
-                )
-            ),
-            shape = shape,
-        )
-}
-
-/**
- * Draws the slice of [backdrop] sitting directly behind this node, blurred and
- * clipped to [shape], beneath the node's own content. Needs API 31+; below that
- * it is a no-op and the translucent fill carries the legibility on its own.
- */
-@Composable
-private fun Modifier.glassBlur(
-    backdrop: GlassBackdrop,
-    blurRadius: Dp,
-    shape: Shape,
-): Modifier {
-    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return this
-    val blurPx = with(LocalDensity.current) { blurRadius.toPx() }
-    val glassLayer = rememberGraphicsLayer()
-    var positionInRoot by remember { mutableStateOf(Offset.Zero) }
-    return this
-        .onGloballyPositioned { positionInRoot = it.positionInRoot() }
-        .drawWithContent {
-            val offset = positionInRoot - backdrop.sourcePositionInRoot
-            glassLayer.renderEffect = BlurEffect(blurPx, blurPx, TileMode.Clamp)
-            glassLayer.record {
-                translate(left = -offset.x, top = -offset.y) {
-                    drawLayer(backdrop.layer)
-                }
-            }
-            val outline = shape.createOutline(size, layoutDirection, this)
-            clipPath(Path().apply { addOutline(outline) }) {
-                drawLayer(glassLayer)
-            }
-            drawContent()
-        }
-}
 
 /**
  * The circular, icon-only sibling of [GlassPill] — same frosted fill and lit

@@ -44,7 +44,6 @@ import com.arshadshah.nimaz.domain.model.MushafScript
 import com.arshadshah.nimaz.domain.model.QuranReciter
 import com.arshadshah.nimaz.domain.model.QuranTranslation
 import com.arshadshah.nimaz.domain.model.TranslationLanguage
-import com.arshadshah.nimaz.presentation.components.atoms.BISMILLAH_TEXT
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazDivider
@@ -58,6 +57,7 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsItem
 import com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsSlider
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.TajweedLegendSheet
+import com.arshadshah.nimaz.presentation.foundation.text.BISMILLAH_TEXT
 import com.arshadshah.nimaz.presentation.theme.QuranArabicFont
 import com.arshadshah.nimaz.presentation.theme.asTranslationText
 import com.arshadshah.nimaz.presentation.viewmodel.settings.SettingsEvent

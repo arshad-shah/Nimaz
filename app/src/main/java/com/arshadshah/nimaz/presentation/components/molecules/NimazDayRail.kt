@@ -1,4 +1,4 @@
-package com.arshadshah.nimaz.presentation.components.atoms
+package com.arshadshah.nimaz.presentation.components.molecules
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
@@ -26,6 +26,11 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.presentation.components.atoms.NimazStatusDot
+import com.arshadshah.nimaz.presentation.components.atoms.NimazStatusDotSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazStatusDotSpec
+import com.arshadshah.nimaz.presentation.components.atoms.NimazStatusDotStyle
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.theme.ThemeMode
 

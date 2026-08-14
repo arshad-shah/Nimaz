@@ -21,9 +21,9 @@ import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.automirrored.filled.ViewList
+import androidx.compose.material.icons.filled.AccountTree
 import androidx.compose.material.icons.filled.AutoStories
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.AccountTree
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.CircularProgressIndicator
@@ -51,8 +51,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -63,40 +63,39 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.navigation.ScreenTags
-import com.arshadshah.nimaz.domain.model.Ayah
-import com.arshadshah.nimaz.domain.model.RecitationRepeat
-import com.arshadshah.nimaz.domain.model.RecitationSpeed
-import com.arshadshah.nimaz.presentation.components.molecules.RecitationSheet
 import com.arshadshah.nimaz.core.share.ContentShareManager
 import com.arshadshah.nimaz.core.share.Shareables
+import com.arshadshah.nimaz.domain.model.Ayah
 import com.arshadshah.nimaz.domain.model.AyahReference
-import com.arshadshah.nimaz.presentation.components.molecules.AyahActionSheet
-import com.arshadshah.nimaz.presentation.components.molecules.AyahSheetActions
-import com.arshadshah.nimaz.presentation.components.molecules.ReaderAnchorBar
-import com.arshadshah.nimaz.presentation.components.molecules.ReaderGoToSheet
-import com.arshadshah.nimaz.presentation.components.molecules.NoteEditorSheet
-import com.arshadshah.nimaz.presentation.components.atoms.getDisplayArabicText
-import com.arshadshah.nimaz.presentation.components.organisms.copyAyahToClipboard
 import com.arshadshah.nimaz.domain.model.MushafLineType
 import com.arshadshah.nimaz.domain.model.MushafPageLayout
+import com.arshadshah.nimaz.domain.model.RecitationRepeat
+import com.arshadshah.nimaz.domain.model.RecitationSpeed
 import com.arshadshah.nimaz.domain.model.Surah
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
-import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingState
-import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazPager
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.PageSurahSeparator
 import com.arshadshah.nimaz.presentation.components.atoms.rememberNimazPagerState
 import com.arshadshah.nimaz.presentation.components.molecules.AudioBottomBar
+import com.arshadshah.nimaz.presentation.components.molecules.AyahActionSheet
+import com.arshadshah.nimaz.presentation.components.molecules.AyahSheetActions
 import com.arshadshah.nimaz.presentation.components.molecules.MushafPageBar
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownMenu
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownRow
+import com.arshadshah.nimaz.presentation.components.molecules.NimazLoadingState
+import com.arshadshah.nimaz.presentation.components.molecules.NimazLoadingVariant
+import com.arshadshah.nimaz.presentation.components.molecules.NoteEditorSheet
+import com.arshadshah.nimaz.presentation.components.molecules.ReaderAnchorBar
+import com.arshadshah.nimaz.presentation.components.molecules.ReaderGoToSheet
+import com.arshadshah.nimaz.presentation.components.molecules.RecitationSheet
 import com.arshadshah.nimaz.presentation.components.molecules.SurahHeaderCartouche
 import com.arshadshah.nimaz.presentation.components.organisms.AyahItem
-import com.arshadshah.nimaz.presentation.components.organisms.PassageHeading
 import com.arshadshah.nimaz.presentation.components.organisms.MushafLinePage
 import com.arshadshah.nimaz.presentation.components.organisms.MushafPage
+import com.arshadshah.nimaz.presentation.components.organisms.PassageHeading
 import com.arshadshah.nimaz.presentation.components.organisms.TajweedLegendSheet
+import com.arshadshah.nimaz.presentation.components.organisms.copyAyahToClipboard
 import com.arshadshah.nimaz.presentation.viewmodel.quran.QuranEvent
 import com.arshadshah.nimaz.presentation.viewmodel.quran.QuranReaderUiState
 import com.arshadshah.nimaz.presentation.viewmodel.quran.QuranViewModel
@@ -441,8 +440,8 @@ fun QuranReaderScreen(
                     var menuExpanded by remember { mutableStateOf(false) }
                     var modeMenuExpanded by remember { mutableStateOf(false) }
                     val canToggleView = usePageView ||
-                        state.readingMode == ReadingMode.SURAH ||
-                        state.readingMode == ReadingMode.JUZ
+                            state.readingMode == ReadingMode.SURAH ||
+                            state.readingMode == ReadingMode.JUZ
 
                     // Reading mode gets its own control rather than a row buried in the
                     // overflow next to Passages and Settings. Two modes, not three: the
@@ -710,7 +709,7 @@ fun QuranReaderScreen(
                     khatamSurah.ayahs.map { it.id }.toSet()
                 }
                 val allRead = surahAyahIds.isNotEmpty() &&
-                    surahAyahIds.all { it in state.khatamReadAyahIds }
+                        surahAyahIds.all { it in state.khatamReadAyahIds }
 
                 when {
                     !allRead -> FloatingActionButton(
@@ -926,91 +925,91 @@ fun QuranReaderScreen(
                     }
 
                 Column(modifier = Modifier.fillMaxSize()) {
-                // Where you are, said once — the juz and page that used to be stamped on every
-                // verse. "Go to…" takes a number and moves the reader to it; it used to open the
-                // passage outline, which answers a different question entirely.
-                ReaderAnchorBar(
-                    subtitle = anchorAyah?.let {
-                        stringResource(R.string.juz_page_dot_format, it.juz, it.page)
-                    } ?: headerSubtitle,
-                    onGoTo = { showGoToSheet = true },
-                    goToContentDescription = stringResource(R.string.reader_go_to),
-                )
-                LazyColumn(
-                    state = listState,
-                    modifier = Modifier.weight(1f),
-                    contentPadding = PaddingValues(bottom = listBottomPadding)
-                ) {
-                    // Surah Banner or Juz Banner
-                    if (state.readingMode == ReadingMode.SURAH) {
-                        state.surahWithAyahs?.let { surahWithAyahs ->
-                            item(key = "banner") {
-                                SurahHeaderCartouche(
-                                    surah = surahWithAyahs.surah,
-                                    modifier = Modifier.padding(
-                                        horizontal = 12.dp,
-                                        vertical = 8.dp
-                                    ),
-                                    showBismillah = (surahNumber ?: 0) != 9 && (surahNumber
-                                        ?: 0) != 1
+                    // Where you are, said once — the juz and page that used to be stamped on every
+                    // verse. "Go to…" takes a number and moves the reader to it; it used to open the
+                    // passage outline, which answers a different question entirely.
+                    ReaderAnchorBar(
+                        subtitle = anchorAyah?.let {
+                            stringResource(R.string.juz_page_dot_format, it.juz, it.page)
+                        } ?: headerSubtitle,
+                        onGoTo = { showGoToSheet = true },
+                        goToContentDescription = stringResource(R.string.reader_go_to),
+                    )
+                    LazyColumn(
+                        state = listState,
+                        modifier = Modifier.weight(1f),
+                        contentPadding = PaddingValues(bottom = listBottomPadding)
+                    ) {
+                        // Surah Banner or Juz Banner
+                        if (state.readingMode == ReadingMode.SURAH) {
+                            state.surahWithAyahs?.let { surahWithAyahs ->
+                                item(key = "banner") {
+                                    SurahHeaderCartouche(
+                                        surah = surahWithAyahs.surah,
+                                        modifier = Modifier.padding(
+                                            horizontal = 12.dp,
+                                            vertical = 8.dp
+                                        ),
+                                        showBismillah = (surahNumber ?: 0) != 9 && (surahNumber
+                                            ?: 0) != 1
+                                    )
+                                }
+                            }
+                        }
+
+                        // Ayahs
+                        items(
+                            items = displayAyahs,
+                            key = { it.id }
+                        ) { ayah ->
+                            // The mushaf's own outline starts a new subject here (schemaVersion 24).
+                            // Printed above the verse it opens on, so reading down the list reads as
+                            // passages rather than as 286 undifferentiated verses.
+                            state.passageStarts[ayah.numberInSurah]?.let { passage ->
+                                PassageHeading(passage = passage)
+                            }
+
+                            if (state.readingMode == ReadingMode.JUZ && ayah.id in surahStartIds) {
+                                val surah = surahByNumber[ayah.surahNumber]
+                                PageSurahSeparator(
+                                    surahNumber = ayah.surahNumber,
+                                    surahNameArabic = surah?.nameArabic ?: "",
+                                    surahNameEnglish = surah?.nameEnglish
+                                        ?: stringResource(
+                                            R.string.surah_number_format,
+                                            ayah.surahNumber
+                                        ),
+                                    showBismillah = ayah.numberInSurah == 1 && ayah.surahNumber != 1 && ayah.surahNumber != 9
                                 )
                             }
-                        }
-                    }
 
-                    // Ayahs
-                    items(
-                        items = displayAyahs,
-                        key = { it.id }
-                    ) { ayah ->
-                        // The mushaf's own outline starts a new subject here (schemaVersion 24).
-                        // Printed above the verse it opens on, so reading down the list reads as
-                        // passages rather than as 286 undifferentiated verses.
-                        state.passageStarts[ayah.numberInSurah]?.let { passage ->
-                            PassageHeading(passage = passage)
-                        }
+                            val isHighlighted =
+                                audioState.currentAyahId == ayah.id && audioState.isActive
+                            val isAudioPlaying = isHighlighted && audioState.isPlaying
 
-                        if (state.readingMode == ReadingMode.JUZ && ayah.id in surahStartIds) {
-                            val surah = surahByNumber[ayah.surahNumber]
-                            PageSurahSeparator(
-                                surahNumber = ayah.surahNumber,
-                                surahNameArabic = surah?.nameArabic ?: "",
-                                surahNameEnglish = surah?.nameEnglish
-                                    ?: stringResource(
-                                        R.string.surah_number_format,
-                                        ayah.surahNumber
-                                    ),
-                                showBismillah = ayah.numberInSurah == 1 && ayah.surahNumber != 1 && ayah.surahNumber != 9
+                            AyahItem(
+                                ayah = ayah,
+                                showTranslation = state.showTranslation,
+                                showTransliteration = state.showTransliteration,
+                                arabicFontSize = state.arabicFontSize,
+                                arabicFontFamily = state.arabicFontFamily,
+                                translationLanguage = state.translationLanguage,
+                                fontSize = state.fontSize,
+                                isHighlighted = isHighlighted,
+                                isAudioPlaying = isAudioPlaying,
+                                isFavorite = ayah.id in favoriteAyahIds,
+                                hasNote = ayah.id in state.ayahNotes,
+                                isKhatamRead = ayah.id in state.khatamReadAyahIds,
+                                isKhatamMode = state.activeKhatamId != null,
+                                showTajweed = state.showTajweed,
+                                tajweedUnderline = state.tajweedUnderline,
+                                onOpenActions = { sheetAyah = ayah },
+                                onKhatamToggle = {
+                                    viewModel.onEvent(QuranEvent.ToggleKhatamAyah(ayah.id))
+                                }
                             )
                         }
-
-                        val isHighlighted =
-                            audioState.currentAyahId == ayah.id && audioState.isActive
-                        val isAudioPlaying = isHighlighted && audioState.isPlaying
-
-                        AyahItem(
-                            ayah = ayah,
-                            showTranslation = state.showTranslation,
-                            showTransliteration = state.showTransliteration,
-                            arabicFontSize = state.arabicFontSize,
-                            arabicFontFamily = state.arabicFontFamily,
-                            translationLanguage = state.translationLanguage,
-                            fontSize = state.fontSize,
-                            isHighlighted = isHighlighted,
-                            isAudioPlaying = isAudioPlaying,
-                            isFavorite = ayah.id in favoriteAyahIds,
-                            hasNote = ayah.id in state.ayahNotes,
-                            isKhatamRead = ayah.id in state.khatamReadAyahIds,
-                            isKhatamMode = state.activeKhatamId != null,
-                            showTajweed = state.showTajweed,
-                            tajweedUnderline = state.tajweedUnderline,
-                            onOpenActions = { sheetAyah = ayah },
-                            onKhatamToggle = {
-                                viewModel.onEvent(QuranEvent.ToggleKhatamAyah(ayah.id))
-                            }
-                        )
                     }
-                }
                 }
             }
         }

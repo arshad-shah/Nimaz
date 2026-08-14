@@ -688,8 +688,45 @@
     <!-- License Detail Screen -->
     <string name="license_detail_title">Lisans Detayı</string>
     <string name="license_detail_library_not_found">Kütüphane bulunamadı</string>
-    <string name="license_detail_version">Sürüm %1$s</string>
-    <string name="license_detail_author">Yazar: %1$s</string>
+    <string name="licenses_subtitle_format">%1$d kitaplık · %2$d lisans</string>
+    <string name="licenses_search_placeholder">Kitaplık veya yazar ara</string>
+    <string name="licenses_credit_title">Paylaşılan emek üzerine kurulu</string>
+    <string name="licenses_credit_body">Nimaz, başkalarının yazıp karşılıksız paylaştığı kitaplıkların üzerinde duruyor. Hepsi burada anılıyor.</string>
+    <string name="licenses_stat_libraries">Kitaplıklar</string>
+    <string name="licenses_stat_licences">Lisanslar</string>
+    <string name="licenses_filter_section">Filtre</string>
+    <string name="licenses_filter_all">Tümü</string>
+    <string name="licenses_chip_format">%1$s · %2$d</string>
+    <string name="licenses_grouped_by_licence">Lisansa göre gruplanmış</string>
+    <string name="licenses_grouped_alphabetically">A\'dan Z\'ye</string>
+    <string name="licenses_action_sort_alphabetically">A–Z sırala</string>
+    <string name="licenses_action_group_by_licence">Lisansa göre grupla</string>
+    <string name="licenses_visible_count_format">%2$d içinden %1$d</string>
+    <string name="licenses_no_matches_title">Eşleşen kitaplık yok</string>
+    <string name="licenses_no_matches_body">Kitaplığın adını ya da onu yayımlayan yazarı deneyin.</string>
+    <string name="licenses_generated_note">Bu liste derleme sırasında oluşturulup uygulamayla birlikte gelir, bu yüzden her zaman çalıştırdığınız sürümle eşleşir.</string>
+    <string name="license_family_apache">Apache 2.0</string>
+    <string name="license_family_mit">MIT</string>
+    <string name="license_family_bsd">BSD</string>
+    <string name="license_family_ofl">Open Font</string>
+    <string name="license_family_gpl">GPL</string>
+    <string name="license_family_other">Diğer</string>
+    <string name="license_plain_title">Kısaca</string>
+    <string name="license_plain_apache">Ücretli bir uygulama dahil olmak üzere serbestçe kullanılabilir ve dağıtılabilir. Bildirimleri koruyun; karşılığında açık bir patent hakkı elde edersiniz.</string>
+    <string name="license_plain_mit">Telif bildirimi kodla birlikte taşındığı sürece neredeyse her şey yapılabilir.</string>
+    <string name="license_plain_bsd">Serbestçe kullanılabilir ve yeniden dağıtılabilir. Bildirimleri koruyun ve yazarların adını bu uygulamayı önermek için kullanmayın.</string>
+    <string name="license_plain_ofl">Bir uygulamaya serbestçe gömülebilir. Yazı tipi tek başına satılamaz ve değiştirilmiş bir kopya özgün adı koruyamaz.</string>
+    <string name="license_plain_gpl">Serbestçe kullanılabilir, ancak değiştirilmiş bir sürümü paylaşmak kaynağını da aynı koşullarla paylaşmak demektir.</string>
+    <string name="license_detail_coordinate">Koordinat</string>
+    <string name="license_detail_published_by">Yayımlayan</string>
+    <string name="license_detail_home_page">Ana sayfa</string>
+    <string name="license_detail_open_home_page">Ana sayfayı aç</string>
+    <string name="license_detail_full_text_format">%1$s — tam metin</string>
+    <string name="license_detail_show_full_text">Tam metni göster</string>
+    <string name="license_detail_collapse">Daralt</string>
+    <string name="license_detail_no_text">Bu kitaplık lisans metnini yayımlamamış. Yukarıdaki ana sayfa okumak için doğru yer.</string>
+    <string name="license_detail_governs_note">Geçerli olan yukarıdaki lisans metnidir — özet yalnızca yön göstermek içindir.</string>
+    <string name="license_text_copied">Lisans metni kopyalandı</string>
 
     <!-- Notification Settings Screen -->
     <string name="notification_settings_enable">Bildirimleri Etkinleştir</string>

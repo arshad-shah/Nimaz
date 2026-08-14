@@ -1,30 +1,22 @@
 package com.arshadshah.nimaz.presentation.viewmodel.onboarding
 
-import android.os.Build
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
+import com.arshadshah.nimaz.core.monitoring.CrashReporter
+import com.arshadshah.nimaz.core.monitoring.Telemetry
+import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.domain.repository.DeviceLocationRepository
 import com.arshadshah.nimaz.domain.repository.PermissionChecker
 import com.arshadshah.nimaz.domain.repository.PowerSettings
-import com.arshadshah.nimaz.core.monitoring.Telemetry
-import com.arshadshah.nimaz.core.monitoring.launchSafely
-import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.domain.repository.settings.AppSettings
 import com.arshadshah.nimaz.domain.repository.settings.LocationSettings
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
 
 @HiltViewModel
 class OnboardingViewModel @Inject constructor(

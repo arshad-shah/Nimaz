@@ -1,26 +1,20 @@
 package com.arshadshah.nimaz.presentation.viewmodel.content
 
 import androidx.annotation.StringRes
-import androidx.compose.ui.text.font.FontFamily
 import androidx.lifecycle.ViewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.Telemetry
-import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorKind
-import com.arshadshah.nimaz.presentation.viewmodel.UiError
 import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.core.time.TodayProvider
 import com.arshadshah.nimaz.core.util.toUtcMidnightMillis
-import com.arshadshah.nimaz.domain.model.Dua
-import com.arshadshah.nimaz.domain.model.DuaBookmark
 import com.arshadshah.nimaz.domain.model.DuaCategory
 import com.arshadshah.nimaz.domain.model.DuaOccasion
-import com.arshadshah.nimaz.domain.model.DuaProgress
-import com.arshadshah.nimaz.domain.model.DuaSearchResult
 import com.arshadshah.nimaz.domain.repository.settings.DuaDisplaySettings
 import com.arshadshah.nimaz.domain.usecase.DuaUseCases
-import com.arshadshah.nimaz.presentation.theme.AmiriFontFamily
+import com.arshadshah.nimaz.presentation.components.molecules.NimazErrorKind
 import com.arshadshah.nimaz.presentation.theme.QuranArabicFont
+import com.arshadshah.nimaz.presentation.viewmodel.UiError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,7 +22,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
-import java.time.LocalDate
 import javax.inject.Inject
 
 @HiltViewModel
@@ -85,18 +78,22 @@ class DuaViewModel @Inject constructor(
                 telemetry.featureUsed(DOMAIN, "open_category")
                 loadCategory(event.categoryId)
             }
+
             is DuaEvent.LoadDua -> {
                 telemetry.featureUsed(DOMAIN, "open_reader")
                 loadDua(event.duaId)
             }
+
             is DuaEvent.LoadDuasByOccasion -> {
                 telemetry.featureUsed(DOMAIN, "open_occasion")
                 loadDuasByOccasion(event.occasion)
             }
+
             is DuaEvent.ToggleFavorite -> {
                 telemetry.featureUsed(DOMAIN, "toggle_favorite")
                 toggleFavorite(event.duaId, event.categoryId)
             }
+
             is DuaEvent.SetFontSize -> _readerState.update { it.copy(fontSize = event.size) }
             is DuaEvent.SetArabicFontSize -> _readerState.update { it.copy(arabicFontSize = event.size) }
             is DuaEvent.LoadProgressForDate -> loadProgressForDate(event.date)

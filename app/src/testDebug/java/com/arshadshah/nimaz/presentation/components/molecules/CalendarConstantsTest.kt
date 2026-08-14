@@ -1,7 +1,7 @@
 package com.arshadshah.nimaz.presentation.components.molecules
 
-import com.arshadshah.nimaz.presentation.components.molecules.calendar.FRIDAY_INDEX
-import com.arshadshah.nimaz.presentation.components.molecules.calendar.WEEKDAY_LABELS
+import com.arshadshah.nimaz.presentation.foundation.calendar.FRIDAY_INDEX
+import com.arshadshah.nimaz.presentation.foundation.calendar.WEEKDAY_LABELS
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith

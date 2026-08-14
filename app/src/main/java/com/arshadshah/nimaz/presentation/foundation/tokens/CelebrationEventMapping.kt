@@ -1,4 +1,4 @@
-package com.arshadshah.nimaz.presentation.components.organisms
+package com.arshadshah.nimaz.presentation.foundation.tokens
 
 import com.arshadshah.nimaz.domain.model.CelebrationEvent
 

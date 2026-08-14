@@ -4,12 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.monitoring.Telemetry
-import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.core.monitoring.catchAndReport
-import com.arshadshah.nimaz.domain.model.HelpGuideDetail
-import com.arshadshah.nimaz.domain.model.HelpSearchResult
-import com.arshadshah.nimaz.domain.model.HelpTopic
-import com.arshadshah.nimaz.domain.model.HelpTopicDetail
+import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.domain.repository.settings.AppSettings
 import com.arshadshah.nimaz.domain.usecase.HelpUseCases
 import com.arshadshah.nimaz.presentation.viewmodel.UiError
@@ -21,7 +17,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flatMapLatest
@@ -29,7 +24,6 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)

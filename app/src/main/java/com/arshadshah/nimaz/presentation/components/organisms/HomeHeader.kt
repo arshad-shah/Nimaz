@@ -32,20 +32,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.PrayerType
-import kotlin.time.Clock
-import kotlin.time.Duration.Companion.hours
-import kotlin.time.Duration.Companion.minutes
-import kotlin.time.Instant
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
-import com.arshadshah.nimaz.presentation.components.atoms.getArabicPrayerName
+import com.arshadshah.nimaz.presentation.components.atoms.clockTimeText
 import com.arshadshah.nimaz.presentation.components.molecules.CountdownTimer
+import com.arshadshah.nimaz.presentation.foundation.tokens.getArabicPrayerName
 import com.arshadshah.nimaz.presentation.theme.LocalUseHijriPrimary
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
-import com.arshadshah.nimaz.presentation.components.atoms.clockTimeText
+import kotlin.time.Clock
+import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Instant
 
 /**
  * Full-width home header used by the tablet (non-compact) layout. Contains

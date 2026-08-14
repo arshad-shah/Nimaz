@@ -2,7 +2,6 @@ package com.arshadshah.nimaz.presentation.viewmodel.tracker
 
 import com.arshadshah.nimaz.domain.model.ExemptionReason
 import com.arshadshah.nimaz.domain.model.FastStatus
-import com.arshadshah.nimaz.domain.model.FastType
 import com.arshadshah.nimaz.domain.model.MakeupFast
 import java.time.LocalDate
 

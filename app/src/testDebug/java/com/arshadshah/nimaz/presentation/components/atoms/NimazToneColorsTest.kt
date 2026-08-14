@@ -1,6 +1,7 @@
 package com.arshadshah.nimaz.presentation.components.atoms
 
 import androidx.compose.ui.graphics.Color
+import com.arshadshah.nimaz.presentation.theme.NimazToneColors
 import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
 import org.junit.Test

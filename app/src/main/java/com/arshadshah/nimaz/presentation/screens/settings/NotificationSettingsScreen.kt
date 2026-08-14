@@ -31,10 +31,10 @@ import com.arshadshah.nimaz.core.util.NotificationDiagnostics
 import com.arshadshah.nimaz.data.audio.AdhanSound
 import com.arshadshah.nimaz.domain.model.PrayerAlertStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
-import com.arshadshah.nimaz.presentation.components.atoms.NimazBanner
-import com.arshadshah.nimaz.presentation.components.atoms.NimazBannerVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
+import com.arshadshah.nimaz.presentation.components.molecules.NimazBanner
+import com.arshadshah.nimaz.presentation.components.molecules.NimazBannerVariant
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
 import com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsItem
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
@@ -129,7 +129,11 @@ fun NotificationSettingsScreen(
                     NimazMenuGroup {
                         NimazSettingsItem(
                             title = stringResource(R.string.notif_hub_prayers_title),
-                            subtitle = prayersSubtitle(summary.fajrAlertStyle, summary.reminderEnabled, summary.reminderMinutes),
+                            subtitle = prayersSubtitle(
+                                summary.fajrAlertStyle,
+                                summary.reminderEnabled,
+                                summary.reminderMinutes
+                            ),
                             value = stringResource(
                                 R.string.notif_hub_count_of,
                                 summary.enabledPrayerCount,

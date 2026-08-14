@@ -1,23 +1,15 @@
 package com.arshadshah.nimaz.presentation.viewmodel.content
 
-import androidx.compose.ui.text.font.FontFamily
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.core.monitoring.launchBestEffort
 import com.arshadshah.nimaz.core.monitoring.launchSafely
-import com.arshadshah.nimaz.domain.model.Hadith
-import com.arshadshah.nimaz.domain.model.HadithBook
-import com.arshadshah.nimaz.domain.model.HadithBookmark
-import com.arshadshah.nimaz.domain.model.HadithChapter
 import com.arshadshah.nimaz.domain.model.HadithGrade
-import com.arshadshah.nimaz.domain.model.HadithSearchResult
 import com.arshadshah.nimaz.domain.repository.settings.HadithDisplaySettings
 import com.arshadshah.nimaz.domain.usecase.HadithUseCases
-import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorKind
-import com.arshadshah.nimaz.presentation.theme.AmiriFontFamily
+import com.arshadshah.nimaz.presentation.components.molecules.NimazErrorKind
 import com.arshadshah.nimaz.presentation.theme.QuranArabicFont
 import com.arshadshah.nimaz.presentation.viewmodel.UiError
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -27,7 +19,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -93,14 +84,17 @@ class HadithViewModel @Inject constructor(
                 telemetry.featureUsed(AppAnalytics.Feature.HADITH, "open_book")
                 loadBook(event.bookId)
             }
+
             is HadithEvent.LoadChapter -> {
                 telemetry.featureUsed(AppAnalytics.Feature.HADITH, "open_reader")
                 loadChapter(event.chapterId)
             }
+
             is HadithEvent.LoadHadithById -> {
                 telemetry.featureUsed(AppAnalytics.Feature.HADITH, "open_hadith")
                 loadHadithById(event.hadithId)
             }
+
             is HadithEvent.LoadHadithByNumber -> {
                 telemetry.featureUsed(
                     AppAnalytics.Feature.HADITH,
@@ -116,6 +110,7 @@ class HadithViewModel @Inject constructor(
                 telemetry.featureUsed(AppAnalytics.Feature.HADITH, "filter_by_grade")
                 filterByGrade(event.grade)
             }
+
             is HadithEvent.ToggleBookmark -> {
                 telemetry.featureUsed(
                     AppAnalytics.Feature.HADITH,
@@ -134,6 +129,7 @@ class HadithViewModel @Inject constructor(
                 anchorHadithId = _readerState.value.hadiths.getOrNull(event.index)?.id
                 _readerState.update { it.copy(currentHadithIndex = event.index) }
             }
+
             is HadithEvent.SetFontSize -> _readerState.update { it.copy(fontSize = event.size) }
             is HadithEvent.SetArabicFontSize -> _readerState.update { it.copy(arabicFontSize = event.size) }
             HadithEvent.ToggleArabic -> _readerState.update { it.copy(showArabic = !it.showArabic) }

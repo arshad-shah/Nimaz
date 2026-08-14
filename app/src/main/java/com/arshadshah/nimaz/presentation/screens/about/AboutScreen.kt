@@ -14,22 +14,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Description
-import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Gavel
-import androidx.compose.material.icons.filled.InstallMobile
 import androidx.compose.material.icons.filled.Language
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.Star
@@ -62,9 +55,6 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
-import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
-import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingState
-import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionTitle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
@@ -85,7 +75,8 @@ fun AboutScreen(
     onContactUs: () -> Unit
 ) {
     val updateManager = LocalInAppUpdateManager.current
-    val updateState = updateManager?.updateState?.collectAsStateWithLifecycle()?.value ?: UpdateState.Idle
+    val updateState =
+        updateManager?.updateState?.collectAsStateWithLifecycle()?.value ?: UpdateState.Idle
     val onUpdateClick = {
         when (updateState) {
             is UpdateState.UpdateAvailable -> updateManager?.startUpdate()

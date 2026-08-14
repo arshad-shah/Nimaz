@@ -1,43 +1,34 @@
 package com.arshadshah.nimaz.presentation.viewmodel.prayer
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.di.DefaultDispatcher
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
-import com.arshadshah.nimaz.core.time.TodayProvider
 import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.core.monitoring.launchSafely
-import com.arshadshah.nimaz.domain.model.AsrCalculation
-import com.arshadshah.nimaz.domain.model.CalculationMethod
-import com.arshadshah.nimaz.domain.model.HighLatitudeRule
+import com.arshadshah.nimaz.core.time.TodayProvider
+import com.arshadshah.nimaz.domain.model.PrayerCalculationSettings
 import com.arshadshah.nimaz.domain.model.PrayerName
 import com.arshadshah.nimaz.domain.model.PrayerStatus
 import com.arshadshah.nimaz.domain.model.PrayerTime
-import com.arshadshah.nimaz.domain.model.PrayerCalculationSettings
 import com.arshadshah.nimaz.domain.model.PrayerType
-import com.arshadshah.nimaz.domain.model.FallbackLocation
-import com.arshadshah.nimaz.domain.model.resolveLocation
 import com.arshadshah.nimaz.domain.usecase.PrayerUseCases
 import com.arshadshah.nimaz.presentation.components.organisms.MoonPhase
+import com.arshadshah.nimaz.presentation.model.PrayerTimeDisplay
 import dagger.hilt.android.lifecycle.HiltViewModel
-import java.time.Instant
-import java.time.LocalDate
-import java.time.ZoneOffset
-import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.launch
-import kotlin.math.roundToInt
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import com.arshadshah.nimaz.presentation.model.PrayerTimeDisplay
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneOffset
+import javax.inject.Inject
+import kotlin.math.roundToInt
 
 @HiltViewModel
 class PrayerTimesViewModel @Inject constructor(
@@ -105,14 +96,17 @@ class PrayerTimesViewModel @Inject constructor(
                 )
                 changeDay(-1)
             }
+
             PrayerTimesEvent.NextDay -> {
                 telemetry.featureUsed(AppAnalytics.Feature.PRAYER_TIMES, "next_day")
                 changeDay(1)
             }
+
             PrayerTimesEvent.GoToToday -> {
                 telemetry.featureUsed(AppAnalytics.Feature.PRAYER_TIMES, "go_to_today")
                 selectDate(todayProvider.today())
             }
+
             is PrayerTimesEvent.SelectDate -> {
                 telemetry.featureUsed(AppAnalytics.Feature.PRAYER_TIMES, "select_date")
                 selectDate(event.date)

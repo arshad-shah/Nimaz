@@ -30,17 +30,17 @@ import com.arshadshah.nimaz.domain.model.RevelationType
 import com.arshadshah.nimaz.domain.model.Surah
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
-import com.arshadshah.nimaz.presentation.components.atoms.BISMILLAH_TEXT
 import com.arshadshah.nimaz.presentation.components.atoms.DiamondFloret
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeDefaults
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeEmphasis
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
-import com.arshadshah.nimaz.presentation.components.atoms.cartouchePath
-import com.arshadshah.nimaz.presentation.components.atoms.circlePath
-import com.arshadshah.nimaz.presentation.components.atoms.diamondPath
-import com.arshadshah.nimaz.presentation.components.atoms.scallopPath
 import com.arshadshah.nimaz.presentation.components.atoms.toArabicNumber
+import com.arshadshah.nimaz.presentation.foundation.geometry.cartouchePath
+import com.arshadshah.nimaz.presentation.foundation.geometry.circlePath
+import com.arshadshah.nimaz.presentation.foundation.geometry.diamondPath
+import com.arshadshah.nimaz.presentation.foundation.geometry.scallopPath
+import com.arshadshah.nimaz.presentation.foundation.text.BISMILLAH_TEXT
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.theme.QuranSurfaceColors
@@ -117,9 +117,11 @@ fun SurahHeaderCartouche(
     val label = if (useArabicIndicNumerals) toArabicNumber(number) else number.toString()
 
     Column(modifier = modifier.fillMaxWidth()) {
-        Box(modifier = Modifier
-            .fillMaxWidth()
-            .height(height)) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(height)
+        ) {
             Canvas(Modifier.fillMaxSize()) {
                 val w = size.width
                 val h = size.height

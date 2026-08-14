@@ -178,8 +178,9 @@ class AskViewModel @Inject constructor(
     }
 
     private suspend fun addRecent(question: String) {
-        val updated = (listOf(question) + _uiState.value.recentQuestions.filterNot { it == question })
-            .take(MAX_RECENT)
+        val updated =
+            (listOf(question) + _uiState.value.recentQuestions.filterNot { it == question })
+                .take(MAX_RECENT)
         _uiState.update { it.copy(recentQuestions = updated) }
         // Persisting re-emits `aiQuestionHistory`, which flows back through the combine
         // above — so the stored list stays the source of truth and the two cannot drift.

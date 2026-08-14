@@ -10,14 +10,12 @@ import com.arshadshah.nimaz.core.monitoring.catchAndReport
 import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.domain.model.NisabType
 import com.arshadshah.nimaz.domain.model.ZakatAssets
-import com.arshadshah.nimaz.domain.model.ZakatCalculation
 import com.arshadshah.nimaz.domain.model.ZakatCalculator
-import com.arshadshah.nimaz.domain.model.ZakatDefaults
-import com.arshadshah.nimaz.presentation.viewmodel.UiError
 import com.arshadshah.nimaz.domain.model.ZakatHistoryEntry
 import com.arshadshah.nimaz.domain.model.ZakatLiabilities
 import com.arshadshah.nimaz.domain.repository.settings.ZakatSettings
 import com.arshadshah.nimaz.domain.usecase.ZakatUseCases
+import com.arshadshah.nimaz.presentation.viewmodel.UiError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -125,10 +123,12 @@ class ZakatViewModel @Inject constructor(
                 hasLoggedCalculation = false
                 clearAll()
             }
+
             ZakatEvent.ToggleBreakdown -> {
                 telemetry.featureUsed(DOMAIN, "toggle_breakdown")
                 _calculatorState.update { it.copy(showBreakdown = !it.showBreakdown) }
             }
+
             ZakatEvent.Recalculate -> calculate()
 
             ZakatEvent.SaveCalculation -> {
@@ -145,6 +145,7 @@ class ZakatViewModel @Inject constructor(
                 telemetry.featureUsed(DOMAIN, "delete_calculation")
                 deleteCalculation(event.entryId)
             }
+
             ZakatEvent.LoadHistory -> loadHistory()
         }
     }

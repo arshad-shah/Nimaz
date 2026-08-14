@@ -31,7 +31,6 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -40,29 +39,29 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.LocalInAppUpdateManager
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.core.util.formatFullDate
 import com.arshadshah.nimaz.core.util.UpdateState
+import com.arshadshah.nimaz.core.util.formatFullDate
 import com.arshadshah.nimaz.domain.model.PrayerType
 import com.arshadshah.nimaz.domain.model.WorshipReminderType
-import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorDefaults
-import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorState
-import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
 import com.arshadshah.nimaz.presentation.components.atoms.TickResolution
 import com.arshadshah.nimaz.presentation.components.atoms.rememberNow
 import com.arshadshah.nimaz.presentation.components.molecules.AnnouncementBanner
+import com.arshadshah.nimaz.presentation.components.molecules.NimazErrorDefaults
+import com.arshadshah.nimaz.presentation.components.molecules.NimazErrorState
+import com.arshadshah.nimaz.presentation.components.molecules.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.molecules.PrayerTimeCard
 import com.arshadshah.nimaz.presentation.components.molecules.PrayerTimesSectionHeader
 import com.arshadshah.nimaz.presentation.components.organisms.EventAction
 import com.arshadshah.nimaz.presentation.components.organisms.EventCardUi
-import com.arshadshah.nimaz.presentation.components.organisms.EventOccasion
 import com.arshadshah.nimaz.presentation.components.organisms.EventsCarousel
 import com.arshadshah.nimaz.presentation.components.organisms.HomeBannerCarousel
 import com.arshadshah.nimaz.presentation.components.organisms.HomeBannerItem
@@ -73,15 +72,16 @@ import com.arshadshah.nimaz.presentation.components.organisms.HomeHero
 import com.arshadshah.nimaz.presentation.components.organisms.TodayCarousel
 import com.arshadshah.nimaz.presentation.components.organisms.TodayInfoCards
 import com.arshadshah.nimaz.presentation.components.organisms.TodaysProgressCard
-import com.arshadshah.nimaz.presentation.components.organisms.toOccasion
+import com.arshadshah.nimaz.presentation.foundation.tokens.EventOccasion
+import com.arshadshah.nimaz.presentation.foundation.tokens.toOccasion
+import com.arshadshah.nimaz.presentation.model.PrayerTimeDisplay
+import com.arshadshah.nimaz.presentation.model.withClockState
 import com.arshadshah.nimaz.presentation.theme.currentWindowSizeClass
 import com.arshadshah.nimaz.presentation.theme.isCompact
 import com.arshadshah.nimaz.presentation.viewmodel.home.AnnouncementUiState
 import com.arshadshah.nimaz.presentation.viewmodel.home.HomeEvent
 import com.arshadshah.nimaz.presentation.viewmodel.home.HomeUiState
 import com.arshadshah.nimaz.presentation.viewmodel.home.HomeViewModel
-import com.arshadshah.nimaz.presentation.model.PrayerTimeDisplay
-import com.arshadshah.nimaz.presentation.model.withClockState
 import kotlin.time.Instant
 
 /**
@@ -146,13 +146,12 @@ fun HomeScreen(
     }
     val homeClock = rememberHomeClock(state)
     val updateManager = LocalInAppUpdateManager.current
-    val updateState = updateManager?.updateState?.collectAsStateWithLifecycle()?.value ?: UpdateState.Idle
+    val updateState =
+        updateManager?.updateState?.collectAsStateWithLifecycle()?.value ?: UpdateState.Idle
 
     val locationPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions()
     ) { viewModel.onEvent(HomeEvent.RefreshPermissions) }
-
-
 
 
     val notificationPermissionLauncher = rememberLauncherForActivityResult(
@@ -387,7 +386,14 @@ private fun HomeCompactContent(
         val eventCards = buildList {
             // "Next Worship" card leads when an extended reminder is enabled and near.
             state.worshipCard?.let { w ->
-                add(EventCardUi(occasion = EventOccasion.GENERIC, eyebrow = w.name, body = w.body, worship = w))
+                add(
+                    EventCardUi(
+                        occasion = EventOccasion.GENERIC,
+                        eyebrow = w.name,
+                        body = w.body,
+                        worship = w
+                    )
+                )
             }
             if (state.isFriday) {
                 // Jumu'ah routes to JumuahCard, which sources its own strings; eyebrow/headline/body here are unused.
@@ -411,8 +417,9 @@ private fun HomeCompactContent(
                         arabic = c.arabic,
                         primaryAction = if (c.ctaLabel != null && c.route != null)
                             EventAction(c.ctaLabel) { onOpenAnnouncementRoute(c.route) } else null,
-                        onDismiss = if (c.dismissable && c.announcementId != null)
-                            { { viewModel.onEvent(HomeEvent.DismissAnnouncement) } } else null,
+                        onDismiss = if (c.dismissable && c.announcementId != null) {
+                            { viewModel.onEvent(HomeEvent.DismissAnnouncement) }
+                        } else null,
                     )
                 )
             }
@@ -538,7 +545,14 @@ private fun HomeTabletContent(
 
         val tabletEventCards = buildList {
             state.worshipCard?.let { w ->
-                add(EventCardUi(occasion = EventOccasion.GENERIC, eyebrow = w.name, body = w.body, worship = w))
+                add(
+                    EventCardUi(
+                        occasion = EventOccasion.GENERIC,
+                        eyebrow = w.name,
+                        body = w.body,
+                        worship = w
+                    )
+                )
             }
             if (state.isFriday) {
                 // Jumu'ah routes to JumuahCard, which sources its own strings; eyebrow/headline/body here are unused.
@@ -562,8 +576,9 @@ private fun HomeTabletContent(
                         arabic = c.arabic,
                         primaryAction = if (c.ctaLabel != null && c.route != null)
                             EventAction(c.ctaLabel) { onOpenAnnouncementRoute(c.route) } else null,
-                        onDismiss = if (c.dismissable && c.announcementId != null)
-                            { { viewModel.onEvent(HomeEvent.DismissAnnouncement) } } else null,
+                        onDismiss = if (c.dismissable && c.announcementId != null) {
+                            { viewModel.onEvent(HomeEvent.DismissAnnouncement) }
+                        } else null,
                     )
                 )
             }

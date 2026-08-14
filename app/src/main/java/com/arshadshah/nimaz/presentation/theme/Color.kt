@@ -247,9 +247,11 @@ object NimazColors {
         val WaqfLight = P.Stone600                 // wq — stop signs (#291)
         val TafkhimLight = P.GreenDeep             // tk — heavy (raa/lam, #291)
         val TarqiqLight = P.Purple600              // tq — light (raa/lam, #291)
+
         // Qalqalah — blue family, kubra deeper than sughra
         val QalqalahSughraLight = P.Blue600
         val QalqalahKubraLight = P.Blue700
+
         // Madd — one warm hue family (rose→red→pink), distinct lightness so the
         // six sub-rules read as related. See TajweedParser KDoc for beat counts.
         val MaddNormalLight = P.Rose600        // mn — natural, 2

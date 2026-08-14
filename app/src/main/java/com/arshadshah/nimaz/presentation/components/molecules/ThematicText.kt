@@ -126,9 +126,9 @@ private fun ThematicTextPreview() {
     NimazTheme {
         ThematicText(
             html = "<p>This Surah is named <strong>Al-Fatihah</strong> because of its " +
-                "subject matter — see <a href=\"quran:1:1-7\">the opening verses</a>.</p>" +
-                "<p>It is <em>a prayer</em> that Allah has taught to all those who want to " +
-                "make a study of His book.</p>",
+                    "subject matter — see <a href=\"quran:1:1-7\">the opening verses</a>.</p>" +
+                    "<p>It is <em>a prayer</em> that Allah has taught to all those who want to " +
+                    "make a study of His book.</p>",
             onLinkClick = {},
         )
     }

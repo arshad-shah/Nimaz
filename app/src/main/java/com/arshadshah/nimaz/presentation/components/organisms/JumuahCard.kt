@@ -10,6 +10,7 @@ import androidx.compose.material.icons.filled.Mosque
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -18,15 +19,16 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.presentation.theme.NimazTheme
-import androidx.compose.runtime.getValue
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCountdownText
 import com.arshadshah.nimaz.presentation.components.atoms.TickResolution
 import com.arshadshah.nimaz.presentation.components.atoms.clockTimeText
 import com.arshadshah.nimaz.presentation.components.atoms.rememberNow
-import kotlin.time.Instant
+import com.arshadshah.nimaz.presentation.foundation.tokens.EventOccasion
+import com.arshadshah.nimaz.presentation.foundation.tokens.eventCardVisualsFor
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.hours
+import kotlin.time.Instant
 
 /**
  * Friday-only Jumu'ah highlight, built on [EventCard]. English/Arabic name, khutbah

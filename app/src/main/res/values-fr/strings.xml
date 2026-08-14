@@ -706,8 +706,45 @@
     <!-- License Detail Screen -->
     <string name="license_detail_title">Détail de la licence</string>
     <string name="license_detail_library_not_found">Bibliothèque introuvable</string>
-    <string name="license_detail_version">Version %1$s</string>
-    <string name="license_detail_author">Auteur : %1$s</string>
+    <string name="licenses_subtitle_format">%1$d bibliothèques · %2$d licences</string>
+    <string name="licenses_search_placeholder">Rechercher une bibliothèque ou un auteur</string>
+    <string name="licenses_credit_title">Bâti sur un travail partagé</string>
+    <string name="licenses_credit_body">Nimaz repose sur des bibliothèques que d\'autres ont écrites et offertes. Chacune est créditée ici.</string>
+    <string name="licenses_stat_libraries">Bibliothèques</string>
+    <string name="licenses_stat_licences">Licences</string>
+    <string name="licenses_filter_section">Filtre</string>
+    <string name="licenses_filter_all">Toutes</string>
+    <string name="licenses_chip_format">%1$s · %2$d</string>
+    <string name="licenses_grouped_by_licence">Regroupé par licence</string>
+    <string name="licenses_grouped_alphabetically">De A à Z</string>
+    <string name="licenses_action_sort_alphabetically">Trier de A à Z</string>
+    <string name="licenses_action_group_by_licence">Regrouper par licence</string>
+    <string name="licenses_visible_count_format">%1$d sur %2$d</string>
+    <string name="licenses_no_matches_title">Aucune bibliothèque ne correspond</string>
+    <string name="licenses_no_matches_body">Essayez le nom de la bibliothèque, ou l\'auteur qui la publie.</string>
+    <string name="licenses_generated_note">Cette liste est générée à la compilation et fournie avec l\'application, elle correspond donc toujours à la version que vous utilisez.</string>
+    <string name="license_family_apache">Apache 2.0</string>
+    <string name="license_family_mit">MIT</string>
+    <string name="license_family_bsd">BSD</string>
+    <string name="license_family_ofl">Open Font</string>
+    <string name="license_family_gpl">GPL</string>
+    <string name="license_family_other">Autre</string>
+    <string name="license_plain_title">En clair</string>
+    <string name="license_plain_apache">Libre d\'utilisation et de distribution, y compris dans une application payante. Conservez les mentions, et vous obtenez une licence de brevet explicite.</string>
+    <string name="license_plain_mit">Presque tout est permis, tant que la mention de copyright accompagne le code.</string>
+    <string name="license_plain_bsd">Libre d\'utilisation et de redistribution. Conservez les mentions, et n\'utilisez pas le nom des auteurs pour promouvoir cette application.</string>
+    <string name="license_plain_ofl">Libre d\'intégration dans une application. La police ne peut pas être vendue seule, et une version modifiée ne peut pas garder le nom d\'origine.</string>
+    <string name="license_plain_gpl">Libre d\'utilisation, mais partager une version modifiée impose d\'en partager le code source aux mêmes conditions.</string>
+    <string name="license_detail_coordinate">Coordonnée</string>
+    <string name="license_detail_published_by">Publié par</string>
+    <string name="license_detail_home_page">Page d\'accueil</string>
+    <string name="license_detail_open_home_page">Ouvrir la page d\'accueil</string>
+    <string name="license_detail_full_text_format">%1$s — texte intégral</string>
+    <string name="license_detail_show_full_text">Afficher le texte intégral</string>
+    <string name="license_detail_collapse">Réduire</string>
+    <string name="license_detail_no_text">Cette bibliothèque n\'a pas publié le texte de sa licence. La page d\'accueil ci-dessus est l\'endroit où le lire.</string>
+    <string name="license_detail_governs_note">C\'est le texte de la licence ci-dessus qui fait foi — le résumé n\'est là que pour vous orienter.</string>
+    <string name="license_text_copied">Texte de la licence copié</string>
 
     <!-- Notification Settings Screen -->
     <string name="notification_settings_enable">Activer les notifications</string>

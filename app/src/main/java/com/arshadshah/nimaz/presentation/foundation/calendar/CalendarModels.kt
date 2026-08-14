@@ -1,4 +1,4 @@
-package com.arshadshah.nimaz.presentation.components.molecules.calendar
+package com.arshadshah.nimaz.presentation.foundation.calendar
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight

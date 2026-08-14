@@ -1,13 +1,12 @@
 package com.arshadshah.nimaz.presentation.viewmodel.quran
 
 import androidx.annotation.StringRes
-import androidx.lifecycle.ViewModel
 import com.arshadshah.nimaz.domain.model.DailyLogEntry
 import com.arshadshah.nimaz.domain.model.JuzProgressInfo
 import com.arshadshah.nimaz.domain.model.Khatam
-import com.arshadshah.nimaz.domain.usecase.khatam.KhatamPortion
 import com.arshadshah.nimaz.domain.model.KhatamInsights
 import com.arshadshah.nimaz.domain.model.KhatamStats
+import com.arshadshah.nimaz.domain.usecase.khatam.KhatamPortion
 
 data class KhatamListUiState(
     val activeKhatam: Khatam? = null,

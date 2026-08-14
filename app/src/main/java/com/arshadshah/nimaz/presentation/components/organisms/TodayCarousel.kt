@@ -15,14 +15,10 @@ import com.arshadshah.nimaz.domain.model.PrayerType
 import com.arshadshah.nimaz.presentation.components.molecules.DuaOfTheMomentCard
 import com.arshadshah.nimaz.presentation.components.molecules.FastingStatusCard
 import com.arshadshah.nimaz.presentation.components.molecules.HadithOfTheDayCard
-import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.model.DailyDua
 import com.arshadshah.nimaz.presentation.model.PrayerTimeDisplay
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import kotlin.time.Instant
-import androidx.compose.runtime.getValue
-import com.arshadshah.nimaz.core.util.prayerTimelineProgressAt
-import com.arshadshah.nimaz.presentation.components.atoms.TickResolution
-import com.arshadshah.nimaz.presentation.components.atoms.rememberNow
 
 /**
  * Identifiers for the carousel's pages. Adding a new page = adding a value

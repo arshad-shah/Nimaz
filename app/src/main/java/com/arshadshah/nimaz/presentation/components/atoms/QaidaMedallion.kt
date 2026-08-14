@@ -22,13 +22,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
+import com.arshadshah.nimaz.presentation.theme.QaidaMedallionState
+import com.arshadshah.nimaz.presentation.theme.QaidaPalette
 import com.arshadshah.nimaz.presentation.theme.ThemeMode
+import com.arshadshah.nimaz.presentation.theme.rememberQaidaPalette
 
 /**
  * A circular lesson node on the Qaida course map. Gold (done), teal (current) or
  * a muted fill (locked). The label is rendered as Arabic-Indic digits via
  * [ArabicText]. Locked medallions are not clickable. Colours come from a
- * [QaidaPalette] so the node matches the active theme.
+ * [com.arshadshah.nimaz.presentation.theme.QaidaPalette] so the node matches the active theme.
  */
 @Composable
 fun QaidaMedallion(

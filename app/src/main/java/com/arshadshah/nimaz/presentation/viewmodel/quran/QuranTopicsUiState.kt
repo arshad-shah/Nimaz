@@ -4,8 +4,7 @@ import com.arshadshah.nimaz.domain.model.QuranTopic
 import com.arshadshah.nimaz.domain.model.SurahTopic
 import com.arshadshah.nimaz.domain.model.TopicDetail
 import com.arshadshah.nimaz.domain.model.TopicTree
-import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.first
+import com.arshadshah.nimaz.presentation.viewmodel.quran.TopicBrowseState.Companion.MAX_DEPTH
 
 /**
  * Browsing and searching the Qur'an's subject hierarchies.
@@ -115,8 +114,9 @@ data class TopicBrowseState(
     fun isAtIndentCap(depth: Int): Boolean = depth >= MAX_DEPTH
 
     /** Back has somewhere to go while anything is open or the tree is rooted somewhere. */
-    val canGoBack: Boolean get() = expanded.any { id -> rows.any { it.topic.id == id } } ||
-        focus.isNotEmpty()
+    val canGoBack: Boolean
+        get() = expanded.any { id -> rows.any { it.topic.id == id } } ||
+                focus.isNotEmpty()
 
     private companion object {
         const val MAX_DEPTH = 3
@@ -156,7 +156,7 @@ data class SurahSubjectsState(
         if (needle.isEmpty()) subjects
         else subjects.filter {
             it.topic.name.contains(needle, ignoreCase = true) ||
-                it.topic.arabicName.contains(needle)
+                    it.topic.arabicName.contains(needle)
         }
     }
 

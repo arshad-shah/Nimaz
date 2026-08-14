@@ -666,8 +666,45 @@
     <!-- License Detail Screen -->
     <string name="license_detail_title">Detail Lisensi</string>
     <string name="license_detail_library_not_found">Pustaka tidak ditemukan</string>
-    <string name="license_detail_version">Versi %1$s</string>
-    <string name="license_detail_author">Penulis: %1$s</string>
+    <string name="licenses_subtitle_format">%1$d pustaka · %2$d lisensi</string>
+    <string name="licenses_search_placeholder">Cari pustaka atau penulis</string>
+    <string name="licenses_credit_title">Dibangun dari karya bersama</string>
+    <string name="licenses_credit_body">Nimaz berdiri di atas pustaka yang ditulis dan dibagikan cuma-cuma oleh orang lain. Semuanya dicantumkan di sini.</string>
+    <string name="licenses_stat_libraries">Pustaka</string>
+    <string name="licenses_stat_licences">Lisensi</string>
+    <string name="licenses_filter_section">Filter</string>
+    <string name="licenses_filter_all">Semua</string>
+    <string name="licenses_chip_format">%1$s · %2$d</string>
+    <string name="licenses_grouped_by_licence">Dikelompokkan menurut lisensi</string>
+    <string name="licenses_grouped_alphabetically">A sampai Z</string>
+    <string name="licenses_action_sort_alphabetically">Urutkan A–Z</string>
+    <string name="licenses_action_group_by_licence">Kelompokkan menurut lisensi</string>
+    <string name="licenses_visible_count_format">%1$d dari %2$d</string>
+    <string name="licenses_no_matches_title">Tidak ada pustaka yang cocok</string>
+    <string name="licenses_no_matches_body">Coba nama pustakanya, atau penulis yang menerbitkannya.</string>
+    <string name="licenses_generated_note">Daftar ini dibuat saat aplikasi dibangun dan disertakan di dalamnya, jadi selalu sesuai dengan versi yang Anda jalankan.</string>
+    <string name="license_family_apache">Apache 2.0</string>
+    <string name="license_family_mit">MIT</string>
+    <string name="license_family_bsd">BSD</string>
+    <string name="license_family_ofl">Open Font</string>
+    <string name="license_family_gpl">GPL</string>
+    <string name="license_family_other">Lainnya</string>
+    <string name="license_plain_title">Secara sederhana</string>
+    <string name="license_plain_apache">Bebas dipakai dan dirilis, termasuk dalam aplikasi berbayar. Pertahankan pemberitahuannya, dan Anda mendapat pemberian hak paten secara tegas.</string>
+    <string name="license_plain_mit">Boleh melakukan hampir apa saja, asalkan pemberitahuan hak cipta ikut menyertai kodenya.</string>
+    <string name="license_plain_bsd">Bebas dipakai dan disebarkan ulang. Pertahankan pemberitahuannya, dan jangan pakai nama penulisnya untuk mempromosikan aplikasi ini.</string>
+    <string name="license_plain_ofl">Bebas disematkan dalam aplikasi. Fonta tidak boleh dijual tersendiri, dan salinan yang diubah tidak boleh memakai nama aslinya.</string>
+    <string name="license_plain_gpl">Bebas dipakai, tetapi membagikan versi yang diubah berarti membagikan kode sumbernya dengan syarat yang sama.</string>
+    <string name="license_detail_coordinate">Koordinat</string>
+    <string name="license_detail_published_by">Diterbitkan oleh</string>
+    <string name="license_detail_home_page">Beranda</string>
+    <string name="license_detail_open_home_page">Buka beranda</string>
+    <string name="license_detail_full_text_format">%1$s — teks lengkap</string>
+    <string name="license_detail_show_full_text">Tampilkan teks lengkap</string>
+    <string name="license_detail_collapse">Tutup</string>
+    <string name="license_detail_no_text">Pustaka ini tidak menerbitkan teks lisensinya. Beranda di atas adalah tempat untuk membacanya.</string>
+    <string name="license_detail_governs_note">Teks lisensi di ataslah yang berlaku — ringkasan ini hanya untuk memberi gambaran.</string>
+    <string name="license_text_copied">Teks lisensi disalin</string>
 
     <!-- Notification Settings Screen -->
     <string name="notification_settings_enable">Aktifkan Notifikasi</string>

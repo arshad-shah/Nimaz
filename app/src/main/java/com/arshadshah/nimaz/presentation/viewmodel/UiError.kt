@@ -1,7 +1,7 @@
 package com.arshadshah.nimaz.presentation.viewmodel
 
 import androidx.annotation.StringRes
-import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorKind
+import com.arshadshah.nimaz.presentation.components.molecules.NimazErrorKind
 
 /**
  * A failure a screen can render — the value every failing `UiState` carries.

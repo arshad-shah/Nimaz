@@ -9,8 +9,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
@@ -47,8 +47,6 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazChip
 import com.arshadshah.nimaz.presentation.components.atoms.NimazChipVariant
-import com.arshadshah.nimaz.presentation.components.atoms.NimazDayRail
-import com.arshadshah.nimaz.presentation.components.atoms.NimazDayRailItem
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSegmentedControl
@@ -62,6 +60,8 @@ import com.arshadshah.nimaz.presentation.components.atoms.clockTimeText
 import com.arshadshah.nimaz.presentation.components.atoms.countdownText
 import com.arshadshah.nimaz.presentation.components.atoms.rememberCountdownTo
 import com.arshadshah.nimaz.presentation.components.atoms.rememberNow
+import com.arshadshah.nimaz.presentation.components.molecules.NimazDayRail
+import com.arshadshah.nimaz.presentation.components.molecules.NimazDayRailItem
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.theme.ThemeMode
 import com.arshadshah.nimaz.presentation.viewmodel.tracker.FastingTrackerUiState
@@ -253,7 +253,11 @@ private fun FastingWindow(state: FastingTrackerUiState) {
     // and the number is the only part that changes.
     val duration: String? = when {
         suhoorAt == null || iftarAt == null -> null
-        !state.isSelectedToday -> countdownText(countdownOf(iftarAt - suhoorAt), showSeconds = false)
+        !state.isSelectedToday -> countdownText(
+            countdownOf(iftarAt - suhoorAt),
+            showSeconds = false
+        )
+
         now < suhoorAt -> countdownText(rememberCountdownTo(suhoorAt).value, showSeconds = false)
         now < iftarAt -> countdownText(rememberCountdownTo(iftarAt).value, showSeconds = false)
         else -> null

@@ -180,7 +180,7 @@ fun PrayerTrackerDayCard(
                 if (index > 0) NimazDivider()
                 val status = statuses[prayer] ?: PrayerDisplayStatus.UPCOMING
                 val timeHasPassed = dayIsOver ||
-                    times?.timeFor(prayer)?.let { now.isAfter(it) } == true
+                        times?.timeFor(prayer)?.let { now.isAfter(it) } == true
                 PrayerRow(
                     prayer = prayer,
                     status = status,

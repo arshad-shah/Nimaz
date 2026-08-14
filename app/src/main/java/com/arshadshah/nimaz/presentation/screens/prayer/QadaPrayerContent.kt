@@ -25,6 +25,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.domain.model.PrayerRecord
 import com.arshadshah.nimaz.presentation.components.atoms.GradientCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconContainerShape
@@ -32,7 +33,6 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazIconType
 import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
 import com.arshadshah.nimaz.presentation.components.molecules.NimazQadaPrayerItem
 import com.arshadshah.nimaz.presentation.theme.NimazColors
-import com.arshadshah.nimaz.domain.model.PrayerRecord
 import com.arshadshah.nimaz.presentation.viewmodel.tracker.QadaPrayersUiState
 
 /**

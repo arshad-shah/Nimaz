@@ -22,6 +22,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
+import com.arshadshah.nimaz.presentation.theme.NimazToneColors
 import com.arshadshah.nimaz.presentation.theme.ThemeMode
 
 /** Whether the dot is a solid disc or a ring. */

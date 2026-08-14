@@ -1,4 +1,4 @@
-package com.arshadshah.nimaz.presentation.components.atoms
+package com.arshadshah.nimaz.presentation.components.molecules
 
 import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
@@ -42,7 +42,7 @@ enum class NimazLoadingVariant {
 /**
  * The app's spinner.
  *
- * **Prefer [NimazSkeleton] when the shape of the incoming content is known** — a
+ * **Prefer [com.arshadshah.nimaz.presentation.components.atoms.NimazSkeleton] when the shape of the incoming content is known** — a
  * skeleton holds the layout still and reads as "this content is arriving", where
  * a spinner reads as "the app is busy" and lets the screen jump when data lands.
  * Reach for this when the result's shape is unknown, the wait is very short, or a

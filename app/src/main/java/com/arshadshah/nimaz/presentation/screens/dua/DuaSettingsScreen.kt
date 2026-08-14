@@ -33,13 +33,10 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazDivider
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
-import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownField
-import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownItem
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
-import com.arshadshah.nimaz.presentation.components.molecules.readerTypographySettings
 import com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsItem
-import com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsSlider
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
+import com.arshadshah.nimaz.presentation.foundation.reader.readerTypographySettings
 import com.arshadshah.nimaz.presentation.theme.QuranArabicFont
 import com.arshadshah.nimaz.presentation.viewmodel.settings.SettingsEvent
 import com.arshadshah.nimaz.presentation.viewmodel.settings.SettingsViewModel
@@ -97,7 +94,13 @@ fun DuaSettingsScreen(
                 selectedFont = selectedFont,
                 onArabicFont = { viewModel.onEvent(SettingsEvent.SetDuaArabicFont(it)) },
                 translationFontSize = duaState.translationFontSize,
-                onTranslationFontSize = { viewModel.onEvent(SettingsEvent.SetDuaTranslationFontSize(it)) },
+                onTranslationFontSize = {
+                    viewModel.onEvent(
+                        SettingsEvent.SetDuaTranslationFontSize(
+                            it
+                        )
+                    )
+                },
             )
 
             // Display options

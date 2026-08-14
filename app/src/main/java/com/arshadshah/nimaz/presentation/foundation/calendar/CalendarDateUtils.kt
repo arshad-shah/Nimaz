@@ -1,4 +1,4 @@
-package com.arshadshah.nimaz.presentation.components.molecules.calendar
+package com.arshadshah.nimaz.presentation.foundation.calendar
 
 import java.time.DayOfWeek
 import java.time.LocalDate

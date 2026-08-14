@@ -52,15 +52,15 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazStatusDotStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.molecules.RamadanBanner
 import com.arshadshah.nimaz.presentation.components.molecules.RamadanCountdownCard
-import com.arshadshah.nimaz.presentation.components.molecules.calendar.CalendarDayState
-import com.arshadshah.nimaz.presentation.components.molecules.calendar.CalendarLegendItem
 import com.arshadshah.nimaz.presentation.components.molecules.calendar.NimazCalendar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
+import com.arshadshah.nimaz.presentation.foundation.calendar.CalendarDayState
+import com.arshadshah.nimaz.presentation.foundation.calendar.CalendarLegendItem
+import com.arshadshah.nimaz.presentation.screens.resolve
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.theme.ThemeMode
 import com.arshadshah.nimaz.presentation.viewmodel.tracker.FastingEvent
-import com.arshadshah.nimaz.presentation.screens.resolve
 import com.arshadshah.nimaz.presentation.viewmodel.tracker.FastingViewModel
 import java.time.LocalDate
 import java.time.YearMonth
@@ -157,7 +157,7 @@ fun FastTrackerScreen(
                     RamadanBanner(
                         fastedDays = ramadanState.fastedDays,
                         totalDays = ramadanState.fastedDays +
-                            ramadanState.missedDays + ramadanState.remainingDays,
+                                ramadanState.missedDays + ramadanState.remainingDays,
                         currentDay = ramadanState.currentDay,
                         missedDays = ramadanState.missedDays,
                         remainingDays = ramadanState.remainingDays,

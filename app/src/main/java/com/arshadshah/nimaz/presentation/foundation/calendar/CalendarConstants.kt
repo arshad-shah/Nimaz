@@ -1,4 +1,4 @@
-package com.arshadshah.nimaz.presentation.components.molecules.calendar
+package com.arshadshah.nimaz.presentation.foundation.calendar
 
 /**
  * Static, non-UI constants for the calendar component.

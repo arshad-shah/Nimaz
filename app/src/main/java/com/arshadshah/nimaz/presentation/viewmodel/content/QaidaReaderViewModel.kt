@@ -26,7 +26,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
@@ -131,14 +130,17 @@ class QaidaReaderViewModel @Inject constructor(
                 telemetry.featureUsed(AppAnalytics.Feature.QAIDA, "select_lesson")
                 selectLesson(event.lessonId)
             }
+
             is QaidaReaderEvent.CellTapped -> {
                 telemetry.featureUsed(AppAnalytics.Feature.QAIDA, "play_cell")
                 onCellTapped(event.cell)
             }
+
             is QaidaReaderEvent.PlayLine -> {
                 telemetry.featureUsed(AppAnalytics.Feature.QAIDA, "play_line")
                 playLine(event.lineId)
             }
+
             is QaidaReaderEvent.PlayLetter -> {
                 telemetry.featureUsed(AppAnalytics.Feature.QAIDA, "play_letter")
                 playLetter(event.letter)
@@ -151,14 +153,17 @@ class QaidaReaderViewModel @Inject constructor(
                 telemetry.featureUsed(AppAnalytics.Feature.QAIDA, "next_lesson")
                 nextLesson()
             }
+
             QaidaReaderEvent.PreviousLesson -> {
                 telemetry.featureUsed(AppAnalytics.Feature.QAIDA, "previous_lesson")
                 previousLesson()
             }
+
             QaidaReaderEvent.Resume -> {
                 telemetry.featureUsed(AppAnalytics.Feature.QAIDA, "resume")
                 resume()
             }
+
             QaidaReaderEvent.ResetJourney -> {
                 telemetry.featureUsed(AppAnalytics.Feature.QAIDA, "reset_journey")
                 resetJourney()

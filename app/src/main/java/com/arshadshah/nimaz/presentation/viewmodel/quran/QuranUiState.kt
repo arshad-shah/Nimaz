@@ -4,6 +4,7 @@ package com.arshadshah.nimaz.presentation.viewmodel.quran
 
 import androidx.compose.ui.text.font.FontFamily
 import com.arshadshah.nimaz.domain.model.Ayah
+import com.arshadshah.nimaz.domain.model.AyahTheme
 import com.arshadshah.nimaz.domain.model.Khatam
 import com.arshadshah.nimaz.domain.model.KhatamInsights
 import com.arshadshah.nimaz.domain.model.MushafPageLayout
@@ -14,12 +15,9 @@ import com.arshadshah.nimaz.domain.model.QuranSearchResult
 import com.arshadshah.nimaz.domain.model.QuranTranslation
 import com.arshadshah.nimaz.domain.model.ReadingProgress
 import com.arshadshah.nimaz.domain.model.Surah
-import com.arshadshah.nimaz.domain.model.AyahTheme
-import com.arshadshah.nimaz.domain.model.SurahOverview
 import com.arshadshah.nimaz.domain.model.SurahWithAyahs
 import com.arshadshah.nimaz.domain.model.TranslationLanguage
 import com.arshadshah.nimaz.presentation.theme.AmiriFontFamily
-import kotlinx.coroutines.flow.first
 
 data class QuranHomeUiState(
     val surahs: List<Surah> = emptyList(),

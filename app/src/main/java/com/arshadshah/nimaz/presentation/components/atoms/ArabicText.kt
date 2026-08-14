@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.arshadshah.nimaz.presentation.foundation.text.appendAyahEndMarker
 import com.arshadshah.nimaz.presentation.theme.AmiriFontFamily
 import com.arshadshah.nimaz.presentation.theme.ArabicTextStyles
 import com.arshadshah.nimaz.presentation.theme.NimazColors

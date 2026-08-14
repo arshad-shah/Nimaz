@@ -1,8 +1,6 @@
 package com.arshadshah.nimaz.presentation.viewmodel.worship
 
-import androidx.lifecycle.ViewModel
 import com.arshadshah.nimaz.presentation.viewmodel.UiError
-import kotlinx.coroutines.flow.first
 import kotlin.time.Instant
 
 /**

@@ -50,7 +50,6 @@ import com.arshadshah.nimaz.core.util.HijriDateCalculator
 import com.arshadshah.nimaz.core.util.PrayerTimeCalculator
 import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
 import com.arshadshah.nimaz.domain.model.FallbackLocation
-import com.arshadshah.nimaz.widget.core.prayerShortName
 import com.arshadshah.nimaz.domain.model.resolveLocation
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
@@ -68,13 +67,13 @@ import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.viewmodel.settings.SettingsViewModel
 import com.arshadshah.nimaz.widget.core.formatWidgetTime
-import java.time.LocalDate
-import kotlin.time.Clock
-import kotlin.time.Duration
-import kotlinx.coroutines.delay
+import com.arshadshah.nimaz.widget.core.prayerShortName
 import kotlinx.coroutines.flow.first
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import java.time.LocalDate
+import kotlin.time.Clock
+import kotlin.time.Duration
 
 // Data classes for widget preview
 private data class WidgetPreviewData(

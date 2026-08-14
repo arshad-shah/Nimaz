@@ -1,14 +1,11 @@
 package com.arshadshah.nimaz.presentation.viewmodel.settings
 
 import android.os.Build
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import android.util.Log
+import androidx.lifecycle.ViewModel
 import com.arshadshah.nimaz.BuildConfig
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
-import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorKind
-import com.arshadshah.nimaz.presentation.viewmodel.UiError
 import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.data.sync.CancelReason
@@ -20,12 +17,13 @@ import com.arshadshah.nimaz.data.sync.SyncDataImporter
 import com.arshadshah.nimaz.data.sync.SyncPayload
 import com.arshadshah.nimaz.data.sync.SyncSignal
 import com.arshadshah.nimaz.data.sync.categories
+import com.arshadshah.nimaz.presentation.components.molecules.NimazErrorKind
+import com.arshadshah.nimaz.presentation.viewmodel.UiError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.yield
 import kotlinx.serialization.json.Json
 import java.util.Locale
@@ -144,7 +142,10 @@ class SyncViewModel @Inject constructor(
                         // Which of the three ended it is the whole question: a sync people
                         // abandon and a sync the transport drops need different fixes, and
                         // both looked identical from outside.
-                        telemetry.featureUsed(AppAnalytics.Feature.SYNC, "cancelled_${state.reason.name.lowercase()}")
+                        telemetry.featureUsed(
+                            AppAnalytics.Feature.SYNC,
+                            "cancelled_${state.reason.name.lowercase()}"
+                        )
                         debugLog("Cancelled: $reason")
                         addLogEntry(reason)
                     }
@@ -233,10 +234,12 @@ class SyncViewModel @Inject constructor(
                 telemetry.featureUsed(AppAnalytics.Feature.SYNC, "start_send")
                 startSend()
             }
+
             is SyncEvent.StartReceive -> {
                 telemetry.featureUsed(AppAnalytics.Feature.SYNC, "start_receive")
                 startReceive()
             }
+
             is SyncEvent.AcceptConnection -> acceptConnection(event.endpointId)
             is SyncEvent.RejectConnection -> rejectConnection(event.endpointId)
             is SyncEvent.Cancel -> {

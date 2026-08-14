@@ -28,9 +28,6 @@ import com.arshadshah.nimaz.domain.model.Khatam
 import com.arshadshah.nimaz.domain.model.KhatamInsights
 import com.arshadshah.nimaz.domain.model.KhatamPace
 import com.arshadshah.nimaz.domain.model.KhatamStatus
-import com.arshadshah.nimaz.presentation.components.atoms.KhatamAccent
-import com.arshadshah.nimaz.presentation.components.atoms.KhatamProgressBar
-import com.arshadshah.nimaz.presentation.components.atoms.KhatamProgressRing
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
@@ -39,9 +36,12 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonType
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
-import com.arshadshah.nimaz.presentation.components.atoms.paceColor
-import com.arshadshah.nimaz.presentation.components.atoms.paceLabel
-import com.arshadshah.nimaz.presentation.components.atoms.rememberKhatamAccent
+import com.arshadshah.nimaz.presentation.foundation.tokens.KhatamAccent
+import com.arshadshah.nimaz.presentation.foundation.tokens.KhatamProgressBar
+import com.arshadshah.nimaz.presentation.foundation.tokens.KhatamProgressRing
+import com.arshadshah.nimaz.presentation.foundation.tokens.paceColor
+import com.arshadshah.nimaz.presentation.foundation.tokens.paceLabel
+import com.arshadshah.nimaz.presentation.foundation.tokens.rememberKhatamAccent
 import com.arshadshah.nimaz.presentation.theme.NimazSpacing
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.theme.ThemeMode

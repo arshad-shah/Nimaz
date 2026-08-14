@@ -1,4 +1,4 @@
-package com.arshadshah.nimaz.presentation.components.molecules
+package com.arshadshah.nimaz.presentation.foundation.reader
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -7,9 +7,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.presentation.theme.QuranArabicFont
 import com.arshadshah.nimaz.presentation.components.atoms.NimazDivider
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
+import com.arshadshah.nimaz.presentation.theme.QuranArabicFont
 
 /**
  * The "how the text looks" half of a reader's settings screen: Arabic size, Arabic font, and
@@ -39,8 +39,8 @@ fun LazyListScope.readerTypographySettings(
 ) {
     item { NimazSectionHeader(title = stringResource(R.string.arabic_text)) }
     item {
-        NimazMenuGroup {
-            NimazSettingsSlider(
+        _root_ide_package_.com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup {
+            _root_ide_package_.com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsSlider(
                 title = stringResource(R.string.arabic_font_size),
                 valueLabel = stringResource(
                     R.string.arabic_font_size_value,
@@ -57,10 +57,10 @@ fun LazyListScope.readerTypographySettings(
             Column(
                 modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 14.dp)
             ) {
-                NimazDropdownField(
+                _root_ide_package_.com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownField(
                     label = stringResource(R.string.arabic_font),
                     items = QuranArabicFont.entries.map { font ->
-                        NimazDropdownItem(
+                        _root_ide_package_.com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownItem(
                             value = font.id,
                             label = font.displayName,
                             textFontFamily = font.fontFamily,
@@ -75,8 +75,8 @@ fun LazyListScope.readerTypographySettings(
 
     item { NimazSectionHeader(title = stringResource(R.string.translation)) }
     item {
-        NimazMenuGroup {
-            NimazSettingsSlider(
+        _root_ide_package_.com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup {
+            _root_ide_package_.com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsSlider(
                 title = stringResource(R.string.translation_font_size),
                 valueLabel = stringResource(
                     R.string.arabic_font_size_value,

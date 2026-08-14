@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.presentation.viewmodel.quran
 
 import com.arshadshah.nimaz.domain.model.QuranTopic
 import com.arshadshah.nimaz.domain.model.TopicTree
+import com.arshadshah.nimaz.presentation.viewmodel.quran.QuranTopicsEvent.RebaseTo.Companion.ROOT
 
 sealed interface QuranTopicsEvent {
     /** The browser is on screen and wants its current level. Idempotent — safe to re-send. */

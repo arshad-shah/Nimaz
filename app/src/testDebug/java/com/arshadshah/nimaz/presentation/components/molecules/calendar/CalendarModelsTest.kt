@@ -2,6 +2,8 @@ package com.arshadshah.nimaz.presentation.components.molecules.calendar
 
 import androidx.compose.ui.graphics.Color
 import com.arshadshah.nimaz.presentation.components.atoms.NimazStatusDotStyle
+import com.arshadshah.nimaz.presentation.foundation.calendar.CalendarDayState
+import com.arshadshah.nimaz.presentation.foundation.calendar.CalendarLegendItem
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith

@@ -2,14 +2,14 @@ package com.arshadshah.nimaz.presentation.screens.settings
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -25,21 +25,21 @@ import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.util.HijriDateCalculator
 import com.arshadshah.nimaz.domain.model.WorshipReminderCategory
 import com.arshadshah.nimaz.domain.model.WorshipReminderType
-import com.arshadshah.nimaz.presentation.components.atoms.NimazBanner
-import com.arshadshah.nimaz.presentation.components.atoms.NimazBannerVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazDivider
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSwitch
 import com.arshadshah.nimaz.presentation.components.molecules.NimazAccordion
+import com.arshadshah.nimaz.presentation.components.molecules.NimazBanner
+import com.arshadshah.nimaz.presentation.components.molecules.NimazBannerVariant
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
 import com.arshadshah.nimaz.presentation.components.molecules.NimazNumberStepper
 import com.arshadshah.nimaz.presentation.components.molecules.NimazNumberStepperVariant
 import com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsItem
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
+import com.arshadshah.nimaz.presentation.viewmodel.settings.NotificationSettingsUiState
 import com.arshadshah.nimaz.presentation.viewmodel.settings.SettingsEvent
 import com.arshadshah.nimaz.presentation.viewmodel.settings.SettingsViewModel
-import com.arshadshah.nimaz.presentation.viewmodel.settings.NotificationSettingsUiState
 
 /**
  * Worship reminders subscreen (spec §3). Data-driven off [WorshipReminderType]: rows are generated
@@ -87,7 +87,14 @@ fun WorshipRemindersScreen(
             }
 
             val onToggle: (String, Boolean) -> Unit =
-                { key, enabled -> viewModel.onEvent(SettingsEvent.SetWorshipReminderEnabled(key, enabled)) }
+                { key, enabled ->
+                    viewModel.onEvent(
+                        SettingsEvent.SetWorshipReminderEnabled(
+                            key,
+                            enabled
+                        )
+                    )
+                }
             val onOffset: (String, Int) -> Unit =
                 { key, min -> viewModel.onEvent(SettingsEvent.SetWorshipReminderOffset(key, min)) }
             val onMode: (String, String) -> Unit =

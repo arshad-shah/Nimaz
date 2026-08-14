@@ -27,6 +27,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
+import com.arshadshah.nimaz.presentation.theme.NimazToneColors
 import com.arshadshah.nimaz.presentation.theme.ThemeMode
 
 /** Height of the row the nodes sit in. Tall enough to centre the largest dot with room to spare. */
@@ -189,7 +190,11 @@ private fun ShowcaseLabel(text: String) {
 private val previewNodes = listOf(
     NimazTimelineNode(0f, NimazStatusDotSpec(NimazTone.SUCCESS), "Fajr"),
     NimazTimelineNode(0.503f, NimazStatusDotSpec(NimazTone.ACCENT), "Dhuhr"),
-    NimazTimelineNode(0.725f, NimazStatusDotSpec(NimazTone.WARNING, NimazStatusDotStyle.OUTLINED), "Asr"),
+    NimazTimelineNode(
+        0.725f,
+        NimazStatusDotSpec(NimazTone.WARNING, NimazStatusDotStyle.OUTLINED),
+        "Asr"
+    ),
     NimazTimelineNode(0.913f, NimazStatusDotSpec(NimazTone.MUTED), "Maghrib"),
     NimazTimelineNode(1f, NimazStatusDotSpec(NimazTone.MUTED), "Isha"),
 )

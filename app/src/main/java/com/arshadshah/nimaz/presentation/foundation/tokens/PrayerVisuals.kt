@@ -1,4 +1,4 @@
-package com.arshadshah.nimaz.presentation.components.atoms
+package com.arshadshah.nimaz.presentation.foundation.tokens
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
@@ -46,13 +46,13 @@ fun getPrayerColor(prayerType: PrayerType?): Color {
 
 fun getPrayerIcon(prayerType: PrayerType?): ImageVector {
     return when (prayerType) {
-        PrayerType.FAJR -> PrayerIconFajr
-        PrayerType.SUNRISE -> PrayerIconSunrise
-        PrayerType.DHUHR -> PrayerIconDhuhr
-        PrayerType.ASR -> PrayerIconAsr
-        PrayerType.MAGHRIB -> PrayerIconMaghrib
-        PrayerType.ISHA -> PrayerIconIsha
-        else -> PrayerIconDhuhr
+        PrayerType.FAJR -> _root_ide_package_.com.arshadshah.nimaz.presentation.components.atoms.PrayerIconFajr
+        PrayerType.SUNRISE -> _root_ide_package_.com.arshadshah.nimaz.presentation.components.atoms.PrayerIconSunrise
+        PrayerType.DHUHR -> _root_ide_package_.com.arshadshah.nimaz.presentation.components.atoms.PrayerIconDhuhr
+        PrayerType.ASR -> _root_ide_package_.com.arshadshah.nimaz.presentation.components.atoms.PrayerIconAsr
+        PrayerType.MAGHRIB -> _root_ide_package_.com.arshadshah.nimaz.presentation.components.atoms.PrayerIconMaghrib
+        PrayerType.ISHA -> _root_ide_package_.com.arshadshah.nimaz.presentation.components.atoms.PrayerIconIsha
+        else -> _root_ide_package_.com.arshadshah.nimaz.presentation.components.atoms.PrayerIconDhuhr
     }
 }
 
@@ -95,7 +95,7 @@ private fun PrayerVisualsShowcase() {
                         .clip(CircleShape)
                         .background(color)
                 )
-                NimazIcon(
+                _root_ide_package_.com.arshadshah.nimaz.presentation.components.atoms.NimazIcon(
                     imageVector = getPrayerIcon(prayer),
                     contentDescription = prayer.displayName,
                     iconSize = 28.dp,
@@ -110,9 +110,9 @@ private fun PrayerVisualsShowcase() {
                 // device happens to have. Every other site renders these names via ArabicText;
                 // this showcase was the one that didn't, so it misrepresented the mapping it
                 // exists to document.
-                ArabicText(
+                _root_ide_package_.com.arshadshah.nimaz.presentation.components.atoms.ArabicText(
                     text = getArabicPrayerName(prayer),
-                    size = ArabicTextSize.SMALL,
+                    size = com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize.SMALL,
                     color = MaterialTheme.colorScheme.onSurface
                 )
             }

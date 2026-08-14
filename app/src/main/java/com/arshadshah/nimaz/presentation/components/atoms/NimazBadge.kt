@@ -21,14 +21,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeDefaults.SOFT_TINT_ALPHA
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeDefaults.container
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeDefaults.foreground
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeDefaults.solid
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazPalette
@@ -157,6 +160,7 @@ object NimazBadgeDefaults {
         NimazTone.WARNING -> NimazColors.Warning
             .copy(alpha = SOFT_TINT_ALPHA)
             .compositeOver(MaterialTheme.colorScheme.surface)
+
         NimazTone.ERROR -> MaterialTheme.colorScheme.errorContainer
         NimazTone.TRANSPARENT -> Color.Transparent
     }

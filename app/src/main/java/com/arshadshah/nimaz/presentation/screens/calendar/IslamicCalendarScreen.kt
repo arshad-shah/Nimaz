@@ -37,23 +37,23 @@ import com.arshadshah.nimaz.domain.model.IslamicEvent
 import com.arshadshah.nimaz.domain.model.IslamicEventType
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
-import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorState
-import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.molecules.IslamicEventCard
-import com.arshadshah.nimaz.presentation.components.molecules.calendar.CalendarDayState
-import com.arshadshah.nimaz.presentation.components.molecules.calendar.CalendarLegendItem
+import com.arshadshah.nimaz.presentation.components.molecules.NimazErrorState
+import com.arshadshah.nimaz.presentation.components.molecules.NimazErrorVariant
 import com.arshadshah.nimaz.presentation.components.molecules.calendar.NimazCalendar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
+import com.arshadshah.nimaz.presentation.foundation.calendar.CalendarDayState
+import com.arshadshah.nimaz.presentation.foundation.calendar.CalendarLegendItem
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.currentWindowSizeClass
 import com.arshadshah.nimaz.presentation.theme.isCompact
 import com.arshadshah.nimaz.presentation.viewmodel.calendar.CalendarEvent
-import com.arshadshah.nimaz.presentation.viewmodel.calendar.CalendarViewModel
-import java.time.YearMonth
 import com.arshadshah.nimaz.presentation.viewmodel.calendar.CalendarUiState
+import com.arshadshah.nimaz.presentation.viewmodel.calendar.CalendarViewModel
 import com.arshadshah.nimaz.presentation.viewmodel.calendar.EventsUiState
+import java.time.YearMonth
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

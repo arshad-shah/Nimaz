@@ -2,7 +2,6 @@ package com.arshadshah.nimaz.presentation.viewmodel.prayer
 
 import android.hardware.GeomagneticField
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.Telemetry
@@ -11,24 +10,22 @@ import com.arshadshah.nimaz.domain.model.CompassAccuracy
 import com.arshadshah.nimaz.domain.model.CompassData
 import com.arshadshah.nimaz.domain.model.Location
 import com.arshadshah.nimaz.domain.model.QiblaCalculator
-import com.arshadshah.nimaz.domain.model.QiblaDirection
 import com.arshadshah.nimaz.domain.model.QiblaInfo
-import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorKind
-import com.arshadshah.nimaz.presentation.viewmodel.UiError
 import com.arshadshah.nimaz.domain.model.isLocationSet
 import com.arshadshah.nimaz.domain.repository.CompassSensors
 import com.arshadshah.nimaz.domain.repository.Haptics
 import com.arshadshah.nimaz.domain.repository.settings.LocationSettings
-import kotlinx.coroutines.Job
+import com.arshadshah.nimaz.presentation.components.molecules.NimazErrorKind
+import com.arshadshah.nimaz.presentation.viewmodel.UiError
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
-import kotlin.math.abs
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
+import javax.inject.Inject
+import kotlin.math.abs
 
 @HiltViewModel
 class QiblaViewModel @Inject constructor(

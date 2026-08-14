@@ -1084,8 +1084,50 @@
     <string name="license_detail_not_found_body">This library isn\'t in the bundled licence list. It may have been removed in a newer version of the app.</string>
     <string name="licenses_load_failed">The licence list couldn\'t be loaded</string>
     <string name="licenses_load_failed_body">This list is built from data bundled with the app, so trying again usually works.</string>
-    <string name="license_detail_version">Version %1$s</string>
-    <string name="license_detail_author">Author: %1$s</string>
+    <string name="licenses_subtitle_format">%1$d libraries · %2$d licences</string>
+    <string name="licenses_search_placeholder">Search libraries or authors</string>
+    <string name="licenses_credit_title">Built on shared work</string>
+    <string name="licenses_credit_body">Nimaz stands on libraries other people wrote and gave away. Every one of them is credited here.</string>
+    <string name="licenses_stat_libraries">Libraries</string>
+    <string name="licenses_stat_licences">Licences</string>
+    <string name="licenses_filter_section">Filter</string>
+    <string name="licenses_filter_all">All</string>
+    <string name="licenses_chip_format">%1$s · %2$d</string>
+    <string name="licenses_grouped_by_licence">Grouped by licence</string>
+    <string name="licenses_grouped_alphabetically">A to Z</string>
+    <string name="licenses_action_sort_alphabetically">Sort A–Z</string>
+    <string name="licenses_action_group_by_licence">Group by licence</string>
+    <string name="licenses_visible_count_format">%1$d of %2$d</string>
+    <string name="licenses_no_matches_title">No libraries match</string>
+    <string name="licenses_no_matches_body">Try the library name, or the author who publishes it.</string>
+    <string name="licenses_generated_note">This list is generated at build time and bundled with the app, so it always matches the version you are running.</string>
+
+    <!-- Licence families: coarse groups the list sorts and colours by, not the declared name -->
+    <string name="license_family_apache">Apache 2.0</string>
+    <string name="license_family_mit">MIT</string>
+    <string name="license_family_bsd">BSD</string>
+    <string name="license_family_ofl">Open Font</string>
+    <string name="license_family_gpl">GPL</string>
+    <string name="license_family_other">Other</string>
+
+    <!-- Plain-language glosses. Never a substitute for the full text; see license_detail_governs_note -->
+    <string name="license_plain_title">In plain terms</string>
+    <string name="license_plain_apache">Free to use and ship, including in a paid app. Keep the notices, and you get an explicit patent grant.</string>
+    <string name="license_plain_mit">Do almost anything with it, as long as the copyright notice travels with the code.</string>
+    <string name="license_plain_bsd">Free to use and redistribute. Keep the notices, and don\'t use the authors\' names to endorse this app.</string>
+    <string name="license_plain_ofl">Free to embed in an app. The font can\'t be sold on its own, and a modified copy can\'t keep the original name.</string>
+    <string name="license_plain_gpl">Free to use, but sharing a modified version means sharing its source under the same terms.</string>
+
+    <string name="license_detail_coordinate">Coordinate</string>
+    <string name="license_detail_published_by">Published by</string>
+    <string name="license_detail_home_page">Home page</string>
+    <string name="license_detail_open_home_page">Open home page</string>
+    <string name="license_detail_full_text_format">%1$s — full text</string>
+    <string name="license_detail_show_full_text">Show full text</string>
+    <string name="license_detail_collapse">Collapse</string>
+    <string name="license_detail_no_text">This library didn\'t publish its licence text. The home page above is the place to read it.</string>
+    <string name="license_detail_governs_note">The licence text above is what governs use of this component — the summary is only there to orient you.</string>
+    <string name="license_text_copied">Licence text copied</string>
 
     <!-- Notification Settings Screen -->
     <string name="notification_settings_enable">Enable Notifications</string>

@@ -37,9 +37,9 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconButtonSize
-import com.arshadshah.nimaz.presentation.components.atoms.NimazMarginRule
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
-import com.arshadshah.nimaz.presentation.components.atoms.nimazMarginRules
+import com.arshadshah.nimaz.presentation.foundation.debug.NimazMarginRule
+import com.arshadshah.nimaz.presentation.foundation.debug.nimazMarginRules
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.theme.ThemeMode
 

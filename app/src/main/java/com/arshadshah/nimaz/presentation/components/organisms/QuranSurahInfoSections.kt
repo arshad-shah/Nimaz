@@ -23,7 +23,6 @@ import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
-import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.molecules.SurahAudioControlBar
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 

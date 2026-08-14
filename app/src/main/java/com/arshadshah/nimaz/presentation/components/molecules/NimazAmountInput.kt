@@ -1,4 +1,4 @@
-package com.arshadshah.nimaz.presentation.components.atoms
+package com.arshadshah.nimaz.presentation.components.molecules
 
 import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
@@ -142,9 +142,9 @@ fun NimazAmountInput(
 ) {
     // A recessed well nested inside its row: outlined, never elevated, so it reads as a field
     // rather than as a card of its own.
-    NimazCard(
+    _root_ide_package_.com.arshadshah.nimaz.presentation.components.atoms.NimazCard(
         modifier = modifier.width(132.dp),
-        style = NimazCardStyle.OUTLINED,
+        style = com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle.OUTLINED,
         shape = NimazShapes.small,
         enabled = enabled,
     ) {

@@ -2,17 +2,18 @@ package com.arshadshah.nimaz.presentation.viewmodel.quran
 
 import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.monitoring.Telemetry
-import com.arshadshah.nimaz.core.text.StringProvider
 import com.arshadshah.nimaz.core.monitoring.catchAndReport
 import com.arshadshah.nimaz.core.monitoring.launchSafely
+import com.arshadshah.nimaz.core.text.StringProvider
+import com.arshadshah.nimaz.domain.model.BookmarkType
 import com.arshadshah.nimaz.domain.model.DuaBookmark
 import com.arshadshah.nimaz.domain.model.HadithBookmark
 import com.arshadshah.nimaz.domain.model.QuranBookmark
 import com.arshadshah.nimaz.domain.model.QuranFavorite
 import com.arshadshah.nimaz.domain.model.SavedKind
+import com.arshadshah.nimaz.domain.model.UnifiedBookmark
 import com.arshadshah.nimaz.domain.usecase.DuaUseCases
 import com.arshadshah.nimaz.domain.usecase.HadithUseCases
 import com.arshadshah.nimaz.domain.usecase.QuranUseCases
@@ -23,10 +24,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import javax.inject.Inject
-import com.arshadshah.nimaz.domain.model.BookmarkType
-import com.arshadshah.nimaz.domain.model.UnifiedBookmark
 
 enum class BookmarkSortOrder {
     DATE_NEWEST, DATE_OLDEST, TYPE, ALPHABETICAL
@@ -205,28 +203,28 @@ class BookmarksViewModel @Inject constructor(
                     }
                 }
                 .collect { bookmarks ->
-                val texts = hadithUseCases.getHadithById.forIds(bookmarks.map { it.hadithId })
-                val mapped = bookmarks.map { bm ->
-                    bm.toUnified().copy(arabicText = texts[bm.hadithId]?.textArabic)
+                    val texts = hadithUseCases.getHadithById.forIds(bookmarks.map { it.hadithId })
+                    val mapped = bookmarks.map { bm ->
+                        bm.toUnified().copy(arabicText = texts[bm.hadithId]?.textArabic)
+                    }
+                    _bookmarksState.update { state ->
+                        val unified = state.allBookmarks.filter { it.type != BookmarkType.HADITH } +
+                                mapped
+                        state.copy(
+                            hadithBookmarks = bookmarks,
+                            allBookmarks = unified,
+                            filteredBookmarks = applyFilters(
+                                unified,
+                                state.selectedFilter,
+                                state.selectedKind,
+                                state.searchQuery,
+                                state.sortOrder
+                            ),
+                            isLoading = false
+                        )
+                    }
+                    updateStats()
                 }
-                _bookmarksState.update { state ->
-                    val unified = state.allBookmarks.filter { it.type != BookmarkType.HADITH } +
-                            mapped
-                    state.copy(
-                        hadithBookmarks = bookmarks,
-                        allBookmarks = unified,
-                        filteredBookmarks = applyFilters(
-                            unified,
-                            state.selectedFilter,
-                            state.selectedKind,
-                            state.searchQuery,
-                            state.sortOrder
-                        ),
-                        isLoading = false
-                    )
-                }
-                updateStats()
-            }
         }
     }
 
@@ -248,28 +246,28 @@ class BookmarksViewModel @Inject constructor(
                     }
                 }
                 .collect { bookmarks ->
-                val texts = duaUseCases.getDuaById.forIds(bookmarks.map { it.duaId })
-                val mapped = bookmarks.map { bm ->
-                    bm.toUnified().copy(arabicText = texts[bm.duaId]?.textArabic)
+                    val texts = duaUseCases.getDuaById.forIds(bookmarks.map { it.duaId })
+                    val mapped = bookmarks.map { bm ->
+                        bm.toUnified().copy(arabicText = texts[bm.duaId]?.textArabic)
+                    }
+                    _bookmarksState.update { state ->
+                        val unified = state.allBookmarks.filter { it.type != BookmarkType.DUA } +
+                                mapped
+                        state.copy(
+                            duaBookmarks = bookmarks,
+                            allBookmarks = unified,
+                            filteredBookmarks = applyFilters(
+                                unified,
+                                state.selectedFilter,
+                                state.selectedKind,
+                                state.searchQuery,
+                                state.sortOrder
+                            ),
+                            isLoading = false
+                        )
+                    }
+                    updateStats()
                 }
-                _bookmarksState.update { state ->
-                    val unified = state.allBookmarks.filter { it.type != BookmarkType.DUA } +
-                            mapped
-                    state.copy(
-                        duaBookmarks = bookmarks,
-                        allBookmarks = unified,
-                        filteredBookmarks = applyFilters(
-                            unified,
-                            state.selectedFilter,
-                            state.selectedKind,
-                            state.searchQuery,
-                            state.sortOrder
-                        ),
-                        isLoading = false
-                    )
-                }
-                updateStats()
-            }
         }
     }
 
