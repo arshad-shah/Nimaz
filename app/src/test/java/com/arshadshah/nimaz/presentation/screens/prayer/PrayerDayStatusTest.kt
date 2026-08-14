@@ -7,6 +7,8 @@ import com.arshadshah.nimaz.domain.model.PrayerName
 import com.arshadshah.nimaz.domain.model.PrayerRecord
 import com.arshadshah.nimaz.domain.model.PrayerStatus
 import com.arshadshah.nimaz.domain.model.PrayerTimes
+import com.arshadshah.nimaz.presentation.model.PrayerDisplayStatus
+import com.arshadshah.nimaz.presentation.model.isDone
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import java.time.LocalDate

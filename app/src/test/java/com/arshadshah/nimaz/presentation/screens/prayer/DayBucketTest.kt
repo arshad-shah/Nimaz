@@ -1,6 +1,7 @@
 package com.arshadshah.nimaz.presentation.screens.prayer
 
 import com.arshadshah.nimaz.domain.model.PrayerName
+import com.arshadshah.nimaz.presentation.model.PrayerDisplayStatus
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 
