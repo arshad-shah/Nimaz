@@ -263,6 +263,17 @@ environmental — see [§1](#1-start-here).
 | Surah info printed the transliteration as if it were a translation | The subtitle is drawn only when it differs from the title; the Arabic name moved out of the badge chip into `ArabicText` at the head of the sheet |
 | Hizb was wrong, and doubled | Derived from the 1..240 quarter counter (`Ayah.hizbOfQuarter`) and omitted entirely when that counter is absent — `Ayah.hizbNumber` holds the quarter index in the shipped data, so page 82 reported "Hizb 33" for what is hizb 9 |
 
+**Found on device by the user (internal build 3.0.115), fixed on this branch:**
+
+| Defect | Fix |
+|--------|-----|
+| The ayah sheet reprinted the verse | Actions only. The reader tapped that verse to open the sheet and it is still behind it; the header's reference says which one |
+| The ayah sheet's actions were squished | New `NimazSheetActionGrid` — two columns of wide pills, icon beside label. Five to a row left ~64dp per label, which is where "Unbookmark" ellipsised |
+| Saved had two tab strips | One. Kind stays on screen; corpus moves into the app-bar menu beside sort, each row carrying its count — new `NimazDropdownSectionLabel` heads the two groups |
+| Saved did not look like the prototype | A 3dp kind-coloured spine, the kind named small and letter-spaced in that colour, the corpus demoted to muted meta, and the gold ornamental divider dropped |
+| "Search bookmarks" on a screen called Saved | "Search saved"; "Clear all bookmarks" → "Clear everything saved"; "No Bookmarks Yet" → "Nothing saved yet". All six locales |
+| A verse gave no sign it was saved | `AyahItem` draws 14dp bookmark / heart / note glyphs in the same three colours, from `ayah.isBookmarked`, `favoriteAyahIds` and `QuranReaderUiState.ayahNotes` |
+
 **Content, for `arshad-shah/nimaz-data` — not fixable in this repo:**
 
 - The thematic tree's first root is titled **"Doctraine"**; its own description says "Doctrine".

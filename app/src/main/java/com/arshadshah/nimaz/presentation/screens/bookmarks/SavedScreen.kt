@@ -10,6 +10,7 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazDialogCancelB
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDialogDestructiveButton
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownMenu
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownRow
+import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownSectionLabel
 import com.arshadshah.nimaz.presentation.components.organisms.NimazSearchBar
 import com.arshadshah.nimaz.presentation.viewmodel.quran.BookmarkSortOrder
 import androidx.compose.foundation.horizontalScroll
@@ -45,6 +46,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -54,11 +56,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.share.ContentShareManager
 import com.arshadshah.nimaz.core.share.Shareables
-import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
-import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeEmphasis
-import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
-import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
+import com.arshadshah.nimaz.presentation.theme.NimazColors
+import com.arshadshah.nimaz.presentation.theme.NimazPalette
 import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorDefaults
 import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorState
 import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingState
@@ -75,6 +75,7 @@ import com.arshadshah.nimaz.domain.model.BookmarkType
 import com.arshadshah.nimaz.domain.model.SavedKind
 import com.arshadshah.nimaz.presentation.viewmodel.quran.BookmarksEvent
 import com.arshadshah.nimaz.presentation.viewmodel.quran.BookmarksViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.quran.BookmarkStatsUiState
 import com.arshadshah.nimaz.domain.model.UnifiedBookmark
 
 /**
@@ -177,6 +178,22 @@ fun SavedScreen(
                             expanded = sortMenuExpanded,
                             onDismissRequest = { sortMenuExpanded = false },
                         ) {
+                            // The corpus axis, moved off the screen and in here. Each row
+                            // carries its count, which is what the second tab strip was
+                            // really for — telling you there is nothing under Hadith before
+                            // you tap it.
+                            NimazDropdownSectionLabel(stringResource(R.string.saved_show))
+                            savedCorpusOptions(statsState).forEach { (type, label) ->
+                                NimazDropdownRow(
+                                    text = label,
+                                    selected = state.selectedFilter == type,
+                                    onClick = {
+                                        sortMenuExpanded = false
+                                        viewModel.onEvent(BookmarksEvent.SetFilter(type))
+                                    },
+                                )
+                            }
+                            NimazDropdownSectionLabel(stringResource(R.string.bookmarks_sort))
                             BookmarkSortOrder.entries.forEach { order ->
                                 NimazDropdownRow(
                                     text = stringResource(order.labelRes()),
@@ -256,9 +273,13 @@ fun SavedScreen(
                         )
                     }
 
-                    // Two rows, not one combined chip set: kind and corpus are independent —
-                    // "my notes on hadith" is a real question — and folding them into a single
-                    // row of seven chips would make that combination unreachable.
+                    // **One** tab row. Kind and corpus are still independent axes — "my notes
+                    // on hadith" is a real question — but two stacked segmented strips above a
+                    // search field is three rows of chrome before a single result, and on a
+                    // phone both scrolled horizontally with their ends cut off. Kind stays on
+                    // screen because it is the axis people actually browse by; corpus moves
+                    // into the app-bar menu beside sort, where it is one tap away and states
+                    // its current value.
                     item {
                         SavedKindTabs(
                             selectedKind = state.selectedKind,
@@ -267,17 +288,6 @@ fun SavedScreen(
                             favouriteCount = statsState.favouriteCount,
                             noteCount = statsState.noteCount,
                             onKindSelected = { viewModel.onEvent(BookmarksEvent.SetKind(it)) }
-                        )
-                    }
-
-                    item {
-                        BookmarkFilterTabs(
-                            selectedFilter = state.selectedFilter,
-                            allCount = statsState.totalBookmarks,
-                            quranCount = statsState.quranCount,
-                            hadithCount = statsState.hadithCount,
-                            duaCount = statsState.duaCount,
-                            onFilterSelected = { viewModel.onEvent(BookmarksEvent.SetFilter(it)) }
                         )
                     }
 
@@ -390,46 +400,21 @@ private fun SavedKindTabs(
     )
 }
 
+/**
+ * The corpus rows for the app-bar menu: every type, each with its count.
+ *
+ * A list rather than a segmented strip because it lives in a menu now — see the note at the
+ * call site for why the second tab row went away.
+ */
 @Composable
-private fun BookmarkFilterTabs(
-    selectedFilter: BookmarkType?,
-    allCount: Int,
-    quranCount: Int,
-    hadithCount: Int,
-    duaCount: Int,
-    onFilterSelected: (BookmarkType?) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val tabs = listOf(
-        "${stringResource(R.string.all)}  $allCount",
-        "${stringResource(R.string.quran_type)}  $quranCount",
-        "${stringResource(R.string.hadith_type)}  $hadithCount",
-        "${stringResource(R.string.dua_type)}  $duaCount"
-    )
-    val selectedIndex = when (selectedFilter) {
-        null -> 0
-        BookmarkType.QURAN -> 1
-        BookmarkType.HADITH -> 2
-        BookmarkType.DUA -> 3
-    }
-    NimazSegmentedControl(
-        options = tabs.asSegments(),
-        selectedIndex = selectedIndex,
-        onSelect = { index ->
-            onFilterSelected(
-                when (index) {
-                    1 -> BookmarkType.QURAN
-                    2 -> BookmarkType.HADITH
-                    3 -> BookmarkType.DUA
-                    else -> null
-                }
-            )
-        },
-        width = NimazSegmentedWidth.WRAP,
-        purpose = NimazSegmentedPurpose.VIEW,
-        modifier = modifier.horizontalScroll(rememberScrollState())
-    )
-}
+private fun savedCorpusOptions(
+    stats: BookmarkStatsUiState,
+): List<Pair<BookmarkType?, String>> = listOf(
+    null to "${stringResource(R.string.all)}  ${stats.totalBookmarks}",
+    BookmarkType.QURAN to "${stringResource(R.string.quran_type)}  ${stats.quranCount}",
+    BookmarkType.HADITH to "${stringResource(R.string.hadith_type)}  ${stats.hadithCount}",
+    BookmarkType.DUA to "${stringResource(R.string.dua_type)}  ${stats.duaCount}",
+)
 
 @Composable
 private fun BookmarkSavedCard(
@@ -440,7 +425,6 @@ private fun BookmarkSavedCard(
     onShare: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val typeTone = bookmark.type.tone()
     val typeLabel = bookmark.type.label()
     SwipeableSavedCard(
         title = bookmark.title,
@@ -473,15 +457,39 @@ private fun BookmarkSavedCard(
             ),
         ),
         modifier = modifier,
+        // A verse can be bookmarked *and* favourited *and* annotated — the store keeps two
+        // flags and a note on one row — so the card names every kind it carries and takes its
+        // spine from the first.
+        accent = bookmark.kinds.minByOrNull { it.ordinal }?.accent(),
+        kindLabel = bookmark.kinds
+            .sortedBy { it.ordinal }
+            .map { stringResource(it.labelRes()) }
+            .joinToString(" · ") { it.uppercase() },
+        // The corpus rides along as quiet meta rather than a filled badge — you filter by it,
+        // you do not scan for it.
         leading = {
-            NimazBadge(
+            Text(
                 text = typeLabel,
-                tone = typeTone,
-                emphasis = NimazBadgeEmphasis.FILLED,
-                size = NimazBadgeSize.SMALL
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
     )
+}
+
+/** The colour a kind is marked with — the same three the ayah action sheet uses. */
+@Composable
+private fun SavedKind.accent(): Color = when (this) {
+    SavedKind.BOOKMARK -> NimazColors.QuranColors.BookmarkPrimary
+    SavedKind.FAVOURITE -> NimazPalette.Red500
+    SavedKind.NOTE -> NimazPalette.Violet500
+}
+
+@StringRes
+private fun SavedKind.labelRes(): Int = when (this) {
+    SavedKind.BOOKMARK -> R.string.saved_kind_bookmark
+    SavedKind.FAVOURITE -> R.string.saved_kind_favourite
+    SavedKind.NOTE -> R.string.saved_kind_note
 }
 
 /**
@@ -537,11 +545,6 @@ private fun ClearAllBookmarksDialog(
 // ---- UnifiedBookmark presentation helpers ----
 
 /** Badge tone per bookmark type — mirrors the old primary/tertiary/secondary trio. */
-private fun BookmarkType.tone(): NimazTone = when (this) {
-    BookmarkType.QURAN -> NimazTone.ACCENT
-    BookmarkType.HADITH -> NimazTone.SUCCESS
-    BookmarkType.DUA -> NimazTone.WARNING
-}
 
 @Composable
 private fun BookmarkType.label(): String = when (this) {

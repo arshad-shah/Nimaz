@@ -459,7 +459,7 @@
         <item quantity="other">%d Duas</item>
     </plurals>
     <string name="bookmarks_title">Lesezeichen</string>
-    <string name="no_bookmarks_yet">Noch keine Lesezeichen</string>
+    <string name="no_bookmarks_yet">Noch nichts gespeichert</string>
     <string name="no_bookmarks_hint">Speichern Sie Ayahs, Hadithe und Duas für schnellen Zugriff</string>
     <string name="share">Teilen</string>
     <string name="added_format">Hinzugefügt am %s</string>
@@ -1843,7 +1843,7 @@
     <string name="fasting_log_on_subtitle">Erfasst — zum Rückgängigmachen tippen</string>
     <string name="fasting_log_off_subtitle">Noch nicht erfasst</string>
     <string name="fasting_log_managed_in_sheet">Wird in den Tagesdetails verwaltet</string>
-    <string name="bookmarks_search_placeholder">Lesezeichen durchsuchen</string>
+    <string name="bookmarks_search_placeholder">Gespeichertes durchsuchen</string>
     <string name="bookmarks_sort">Sortieren</string>
     <string name="bookmarks_sort_newest">Neueste zuerst</string>
     <string name="bookmarks_sort_oldest">Älteste zuerst</string>
@@ -1851,8 +1851,8 @@
     <string name="bookmarks_sort_alphabetical">A–Z</string>
     <string name="bookmarks_no_matches">Keine Treffer</string>
     <string name="bookmarks_no_matches_hint">Versuchen Sie eine andere Suche oder entfernen Sie den Filter.</string>
-    <string name="bookmarks_clear_all">Alle Lesezeichen löschen</string>
-    <string name="bookmarks_clear_all_title">Alle Lesezeichen löschen?</string>
+    <string name="bookmarks_clear_all">Alles Gespeicherte löschen</string>
+    <string name="bookmarks_clear_all_title">Alles Gespeicherte löschen?</string>
     <string name="bookmarks_clear_all_confirm">Alle löschen</string>
     <string name="bookmarks_clear_all_body">Damit werden alle %1$d Lesezeichen entfernt — Koran, Hadith und Bittgebete. Dies kann nicht rückgängig gemacht werden.</string>
     <string name="ai_error_consent_title">Mit Beleg fragen ist aus</string>
@@ -2021,6 +2021,10 @@
     <!-- Qur'an section redesign: Browse, Saved and the surah-info sheet -->
     <string name="saved">Gespeichert</string>
     <string name="notes">Notizen</string>
+    <string name="saved_show">Anzeigen</string>
+    <string name="saved_kind_bookmark">Lesezeichen</string>
+    <string name="saved_kind_favourite">Favorit</string>
+    <string name="saved_kind_note">Notiz</string>
     <string name="khatam">Khatam</string>
     <string name="quran_browse_search_hint">Sure, Dschus 15, Seite 299</string>
     <string name="quran_browse_page_start">S. %1$d</string>

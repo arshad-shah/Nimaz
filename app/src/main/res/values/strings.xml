@@ -773,7 +773,7 @@
     <string name="bookmarks_restore_failed">That bookmark couldn\'t be restored</string>
     <string name="bookmarks_note_failed">That note couldn\'t be saved</string>
     <string name="bookmarks_clear_failed">Your bookmarks couldn\'t be cleared</string>
-    <string name="no_bookmarks_yet">No Bookmarks Yet</string>
+    <string name="no_bookmarks_yet">Nothing saved yet</string>
     <string name="no_bookmarks_hint">Save ayahs, hadiths, and duas for quick access</string>
     <string name="share">Share</string>
     <string name="added_format">Added %s</string>
@@ -2072,7 +2072,7 @@
     <string name="fasting_log_on_subtitle">Logged — tap to undo</string>
     <string name="fasting_log_off_subtitle">Not logged yet</string>
     <string name="fasting_log_managed_in_sheet">Managed in the day\'s details</string>
-    <string name="bookmarks_search_placeholder">Search bookmarks</string>
+    <string name="bookmarks_search_placeholder">Search saved</string>
     <string name="bookmarks_sort">Sort</string>
     <string name="bookmarks_sort_newest">Newest first</string>
     <string name="bookmarks_sort_oldest">Oldest first</string>
@@ -2080,8 +2080,8 @@
     <string name="bookmarks_sort_alphabetical">A–Z</string>
     <string name="bookmarks_no_matches">No matches</string>
     <string name="bookmarks_no_matches_hint">Try a different search, or clear the filter.</string>
-    <string name="bookmarks_clear_all">Clear all bookmarks</string>
-    <string name="bookmarks_clear_all_title">Clear all bookmarks?</string>
+    <string name="bookmarks_clear_all">Clear everything saved</string>
+    <string name="bookmarks_clear_all_title">Clear everything saved?</string>
     <string name="bookmarks_clear_all_confirm">Clear all</string>
     <string name="bookmarks_clear_all_body">This removes all %1$d bookmarks — Qur\'an, Hadith and Dua. It cannot be undone.</string>
     <string name="ai_error_consent_title">Ask with Proof is off</string>
@@ -2217,6 +2217,10 @@
     <!-- Qur'an section redesign: Browse, Saved and the surah-info sheet -->
     <string name="saved">Saved</string>
     <string name="notes">Notes</string>
+    <string name="saved_show">Show</string>
+    <string name="saved_kind_bookmark">Bookmark</string>
+    <string name="saved_kind_favourite">Favourite</string>
+    <string name="saved_kind_note">Note</string>
     <string name="khatam">Khatam</string>
     <string name="quran_browse_search_hint">Surah, juz 15, page 299</string>
     <string name="quran_browse_page_start">p. %1$d</string>

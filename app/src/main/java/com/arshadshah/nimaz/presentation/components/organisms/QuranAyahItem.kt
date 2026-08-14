@@ -22,6 +22,7 @@ import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.EditNote
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Pause
@@ -101,6 +102,8 @@ internal fun AyahItem(
     isHighlighted: Boolean = false,
     isAudioPlaying: Boolean = false,
     isFavorite: Boolean = false,
+    /** Whether a note has been written on this verse — drawn as a third marker. */
+    hasNote: Boolean = false,
     isKhatamRead: Boolean = false,
     isKhatamMode: Boolean = false,
     showTajweed: Boolean = false,
@@ -158,6 +161,16 @@ internal fun AyahItem(
                         color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                 }
+                // Tiny marks for what has been done to this verse. The sheet is where you
+                // bookmark, favourite and annotate, and once it closes there was nothing left
+                // on the row to say you had — so a reader scrolling back could not find their
+                // own marks without opening every verse. Not buttons: 14dp glyphs, tapped
+                // through to the same sheet as the rest of the row.
+                SavedMarks(
+                    isBookmarked = ayah.isBookmarked,
+                    isFavourite = isFavorite,
+                    hasNote = hasNote,
+                )
                 if (isKhatamMode) {
                     IconButton(
                         onClick = onKhatamToggle,
@@ -361,6 +374,53 @@ internal fun AyahItem(
  * hizb quarter, a verse opening a rukūʿ, and khatam (read-tracking) mode. Rendered
  * for both themes below.
  */
+/**
+ * Bookmark, heart, note — whichever of them apply, in the colours the ayah sheet uses.
+ *
+ * Glyphs rather than the filled circles the sheet draws: this sits beside a verse number in a
+ * reading column, and three more tinted circles per row is the permanent action pill coming
+ * back by another route.
+ */
+@Composable
+private fun SavedMarks(
+    isBookmarked: Boolean,
+    isFavourite: Boolean,
+    hasNote: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    if (!isBookmarked && !isFavourite && !hasNote) return
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(3.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        if (isBookmarked) {
+            NimazIcon(
+                imageVector = Icons.Filled.Bookmark,
+                contentDescription = stringResource(R.string.ayah_action_bookmark),
+                tint = NimazColors.QuranColors.BookmarkPrimary,
+                iconSize = 14.dp,
+            )
+        }
+        if (isFavourite) {
+            NimazIcon(
+                imageVector = Icons.Filled.Favorite,
+                contentDescription = stringResource(R.string.ayah_action_favourite),
+                tint = NimazPalette.Red500,
+                iconSize = 14.dp,
+            )
+        }
+        if (hasNote) {
+            NimazIcon(
+                imageVector = Icons.Filled.EditNote,
+                contentDescription = stringResource(R.string.ayah_action_note),
+                tint = NimazPalette.Violet500,
+                iconSize = 14.dp,
+            )
+        }
+    }
+}
+
 @Composable
 private fun AyahItemShowcase() {
     val baseArabic =

@@ -445,7 +445,7 @@
         <item quantity="other">%d doa</item>
     </plurals>
     <string name="bookmarks_title">Penanda Buku</string>
-    <string name="no_bookmarks_yet">Belum Ada Penanda Buku</string>
+    <string name="no_bookmarks_yet">Belum ada yang disimpan</string>
     <string name="no_bookmarks_hint">Simpan ayat, hadis dan doa untuk akses pantas</string>
     <string name="share">Kongsi</string>
     <string name="added_format">Ditambah %s</string>
@@ -1810,7 +1810,7 @@
     <string name="fasting_log_on_subtitle">Direkod — ketik untuk batalkan</string>
     <string name="fasting_log_off_subtitle">Belum direkod</string>
     <string name="fasting_log_managed_in_sheet">Diurus dalam butiran hari</string>
-    <string name="bookmarks_search_placeholder">Cari penanda buku</string>
+    <string name="bookmarks_search_placeholder">Cari yang disimpan</string>
     <string name="bookmarks_sort">Isih</string>
     <string name="bookmarks_sort_newest">Terbaharu dahulu</string>
     <string name="bookmarks_sort_oldest">Terlama dahulu</string>
@@ -1818,8 +1818,8 @@
     <string name="bookmarks_sort_alphabetical">A–Z</string>
     <string name="bookmarks_no_matches">Tiada padanan</string>
     <string name="bookmarks_no_matches_hint">Cuba carian lain, atau buang penapis.</string>
-    <string name="bookmarks_clear_all">Kosongkan semua penanda buku</string>
-    <string name="bookmarks_clear_all_title">Kosongkan semua penanda buku?</string>
+    <string name="bookmarks_clear_all">Kosongkan semua yang disimpan</string>
+    <string name="bookmarks_clear_all_title">Kosongkan semua yang disimpan?</string>
     <string name="bookmarks_clear_all_confirm">Kosongkan semua</string>
     <string name="bookmarks_clear_all_body">Ini membuang kesemua %1$d penanda buku — Al-Quran, Hadis dan Doa. Ia tidak boleh dibatalkan.</string>
     <string name="ai_error_consent_title">Tanya dengan Dalil dimatikan</string>
@@ -1981,6 +1981,10 @@
     <!-- Qur'an section redesign: Browse, Saved and the surah-info sheet -->
     <string name="saved">Disimpan</string>
     <string name="notes">Nota</string>
+    <string name="saved_show">Tunjuk</string>
+    <string name="saved_kind_bookmark">Tanda Buku</string>
+    <string name="saved_kind_favourite">Kegemaran</string>
+    <string name="saved_kind_note">Nota</string>
     <string name="khatam">Khatam</string>
     <string name="quran_browse_search_hint">Surah, juzuk 15, muka surat 299</string>
     <string name="quran_browse_page_start">ms. %1$d</string>

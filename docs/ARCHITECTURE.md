@@ -1071,17 +1071,23 @@ with no label and a touch target under 48dp fail the lane we already run. It can
       make that distinction. `NimazLegendItem` and `NimazCalendar`'s day indicators both draw
       through it; `CalendarDayState.indicatorStyle` / `CalendarLegendItem.indicatorStyle` carry the
       choice and default to `FILLED`.
-    - a **saved-item row** (a stored ayah/hadith/dua reference shown with a badge, relative
+    - a **saved-item row** (a stored ayah/hadith/dua reference shown with a kind spine, relative
       timestamp, Arabic preview and overflow menu) is
       `SwipeableSavedCard(title, timestamp, menuActions, onClick, onDelete, enableSwipeToDelete = …,
-      subtitle = …, arabicText = …, note = …) { leading }`
+      subtitle = …, arabicText = …, note = …, accent = …, kindLabel = …) { leading }`
       (`components/organisms/SwipeableSavedCard.kt`), **not** a hand-rolled `SwipeToDismissBox` +
       `NimazCard` per screen. The same file owns the two pieces it is built from, reusable on their
       own: `SwipeToDeleteBox(onDelete) { … }` (the end→start swipe gesture + error-tinted backdrop,
       enabled only where the screen opts in) and `NimazOverflowMenu(actions = listOf(NimazMenuAction(text,
       icon, onClick, destructive = …)))` (the `⋮` button + anchored action menu over `NimazDropdownMenu`).
       It centralised the **Bookmarks** screen and the **Quran Favourites** tab so both render
-      identically while keeping delete in the overflow menu.
+      identically while keeping delete in the overflow menu. `accent` draws a 3dp spine down the
+      card's left edge in the save's kind colour — gold bookmark, red favourite, violet note, the
+      same three the ayah sheet uses — and tints `kindLabel`, so a list of saves is scannable by
+      colour before it is read. It replaced a filled corpus badge leading the card: the corpus is
+      the axis you *filter* by, the kind is the one you are looking at. There is no ornamental
+      divider above the Arabic — a gold floret rule on every row turned a list into a page of
+      ornament, and Arabic is already set apart by being Arabic.
     - the **Quran "manuscript" ornaments** share one geometry and one set of atoms so the surah
       header, surah list, Juz/Page grids and mushaf page frame read as a single system. The surah
       header is `SurahHeaderCartouche(surah, showBismillah = …)`
@@ -1299,6 +1305,14 @@ treatment. Verse-of-the-Day and continue-reading previously both carried
   good question, and not the one a control called "Go to" is asking. The host scrolls when the
   target is already loaded and re-targets the reader (`LoadJuz` / `LoadPage`) when it is not, so
   "page 300" works from anywhere. Verse is offered only in surah mode; juz and page span several.
+- The ayah sheet is **actions only**, laid out as a `NimazSheetActionGrid` — two columns of wide
+  pills, icon beside label. It used to reprint the verse and its translation above the actions;
+  the reader tapped that verse to open the sheet and it is still on the screen behind it, so the
+  copy pushed the actions down (off the first screenful entirely on a long verse with a
+  translation) to confirm what the header's reference already states. Five icon-pills to a row
+  also left roughly 64dp per label, which is where "Unbookmark" started ellipsising.
+  `NimazSheetActionRow` (icon above label, up to five across) stays for the sheets that carry
+  three or four actions.
 - **`NoteEditorSheet`** (molecule, `components/molecules/NoteEditorSheet.kt`) is the **one** note
   editor, shared by the Saved screen's bookmark menu and the reader's ayah sheet. The ayah sheet's
   Note action used to open **Tafseer** — the scholars' commentary, which is the neighbouring

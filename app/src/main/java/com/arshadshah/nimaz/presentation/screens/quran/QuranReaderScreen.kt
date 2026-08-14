@@ -976,6 +976,7 @@ fun QuranReaderScreen(
                             isHighlighted = isHighlighted,
                             isAudioPlaying = isAudioPlaying,
                             isFavorite = ayah.id in favoriteAyahIds,
+                            hasNote = ayah.id in state.ayahNotes,
                             isKhatamRead = ayah.id in state.khatamReadAyahIds,
                             isKhatamMode = state.activeKhatamId != null,
                             showTajweed = state.showTajweed,
@@ -1089,14 +1090,11 @@ fun QuranReaderScreen(
                 ayahNumber = ayah.numberInSurah,
                 surahName = surahByNumber[ayah.surahNumber]?.nameEnglish,
             ),
-            arabic = ayah.getDisplayArabicText(),
-            translation = ayah.translation,
             juzNumber = ayah.juz,
             pageNumber = ayah.page,
             isBookmarked = ayah.isBookmarked,
             isFavourite = ayah.id in state.favoriteAyahIds,
             isKhatamActive = state.activeKhatamId != null,
-            translationLanguage = state.translationLanguage,
             onDismiss = close,
             actions = AyahSheetActions(
                 onPlayFromHere = {

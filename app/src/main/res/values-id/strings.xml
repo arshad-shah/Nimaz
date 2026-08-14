@@ -445,7 +445,7 @@
         <item quantity="other">%d doa</item>
     </plurals>
     <string name="bookmarks_title">Penanda</string>
-    <string name="no_bookmarks_yet">Belum Ada Penanda</string>
+    <string name="no_bookmarks_yet">Belum ada yang tersimpan</string>
     <string name="no_bookmarks_hint">Simpan ayat, hadis, dan doa untuk akses cepat</string>
     <string name="share">Bagikan</string>
     <string name="added_format">Ditambahkan %s</string>
@@ -1809,7 +1809,7 @@
     <string name="fasting_log_on_subtitle">Tercatat — ketuk untuk membatalkan</string>
     <string name="fasting_log_off_subtitle">Belum dicatat</string>
     <string name="fasting_log_managed_in_sheet">Dikelola di rincian hari ini</string>
-    <string name="bookmarks_search_placeholder">Cari markah</string>
+    <string name="bookmarks_search_placeholder">Cari yang tersimpan</string>
     <string name="bookmarks_sort">Urutkan</string>
     <string name="bookmarks_sort_newest">Terbaru dulu</string>
     <string name="bookmarks_sort_oldest">Terlama dulu</string>
@@ -1817,8 +1817,8 @@
     <string name="bookmarks_sort_alphabetical">A–Z</string>
     <string name="bookmarks_no_matches">Tidak ada hasil</string>
     <string name="bookmarks_no_matches_hint">Coba pencarian lain, atau hapus filternya.</string>
-    <string name="bookmarks_clear_all">Hapus semua markah</string>
-    <string name="bookmarks_clear_all_title">Hapus semua markah?</string>
+    <string name="bookmarks_clear_all">Hapus semua yang tersimpan</string>
+    <string name="bookmarks_clear_all_title">Hapus semua yang tersimpan?</string>
     <string name="bookmarks_clear_all_confirm">Hapus semua</string>
     <string name="bookmarks_clear_all_body">Ini menghapus semua %1$d markah — Al-Qur\'an, Hadis, dan Doa. Tindakan ini tidak dapat dibatalkan.</string>
     <string name="ai_error_consent_title">Tanya dengan Dalil nonaktif</string>
@@ -1980,6 +1980,10 @@
     <!-- Qur'an section redesign: Browse, Saved and the surah-info sheet -->
     <string name="saved">Tersimpan</string>
     <string name="notes">Catatan</string>
+    <string name="saved_show">Tampilkan</string>
+    <string name="saved_kind_bookmark">Markah</string>
+    <string name="saved_kind_favourite">Favorit</string>
+    <string name="saved_kind_note">Catatan</string>
     <string name="khatam">Khatam</string>
     <string name="quran_browse_search_hint">Surah, juz 15, halaman 299</string>
     <string name="quran_browse_page_start">hlm. %1$d</string>
