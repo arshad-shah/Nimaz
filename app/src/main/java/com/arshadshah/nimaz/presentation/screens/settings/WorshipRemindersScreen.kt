@@ -80,7 +80,7 @@ fun WorshipRemindersScreen(
 
             item {
                 NimazBanner(
-                    message = stringResource(R.string.worship_settings_intro),
+                    title = stringResource(R.string.worship_settings_intro),
                     variant = NimazBannerVariant.INFO,
                     modifier = Modifier
                 )
@@ -115,10 +115,9 @@ fun WorshipRemindersScreen(
             if (!isRamadan) {
                 item(key = "ramadan_notice") {
                     NimazBanner(
-                        message = stringResource(R.string.worship_settings_ramadan_notice),
+                        title = stringResource(R.string.worship_settings_ramadan_notice),
                         variant = NimazBannerVariant.INFO,
                         icon = Icons.Default.Schedule,
-                        showBorder = true,
                         modifier = Modifier.fillMaxWidth()
                     )
                 }

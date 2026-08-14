@@ -217,7 +217,7 @@ private fun LicensesContent(
 
             item(key = "note") {
                 NimazBanner(
-                    message = stringResource(R.string.licenses_generated_note),
+                    title = stringResource(R.string.licenses_generated_note),
                     variant = NimazBannerVariant.INFO,
                     modifier = Modifier.padding(top = 8.dp),
                 )

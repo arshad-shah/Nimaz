@@ -19,16 +19,16 @@ class NimazBannerTest {
 
     @Test
     fun `banner variants enum is complete`() {
-        assertThat(NimazBannerVariant.entries).hasSize(4)
+        assertThat(NimazBannerVariant.entries).hasSize(5)
     }
 
     // ── INFO ────────────────────────────────────────────────────────────────
 
     @Test
-    fun `info banner renders without border or icon`() {
+    fun `info banner renders title only`() {
         composeRule.setThemedContent {
             NimazBanner(
-                message = "Info message",
+                title = "Info message",
                 variant = NimazBannerVariant.INFO
             )
         }
@@ -39,7 +39,7 @@ class NimazBannerTest {
     fun `info banner renders with icon`() {
         composeRule.setThemedContent {
             NimazBanner(
-                message = "Info with icon",
+                title = "Info with icon",
                 variant = NimazBannerVariant.INFO,
                 icon = Icons.Default.Info
             )
@@ -48,28 +48,28 @@ class NimazBannerTest {
     }
 
     @Test
-    fun `info banner renders with border and icon`() {
+    fun `info banner renders title and message`() {
         composeRule.setThemedContent {
             NimazBanner(
-                message = "Bordered info",
+                title = "Info title",
+                message = "Details about info",
                 variant = NimazBannerVariant.INFO,
-                icon = Icons.Default.Info,
-                showBorder = true
             )
         }
-        composeRule.onNodeWithText("Bordered info").assertExists()
+        composeRule.onNodeWithText("Info title").assertExists()
+        composeRule.onNodeWithText("Details about info").assertExists()
     }
 
     @Test
-    fun `info banner renders with border and no icon`() {
+    fun `info banner inline density renders`() {
         composeRule.setThemedContent {
             NimazBanner(
-                message = "Bordered no icon",
+                title = "Inline info",
                 variant = NimazBannerVariant.INFO,
-                showBorder = true
+                density = NimazBannerDensity.INLINE,
             )
         }
-        composeRule.onNodeWithText("Bordered no icon").assertExists()
+        composeRule.onNodeWithText("Inline info").assertExists()
     }
 
     // ── WARNING ──────────────────────────────────────────────────────────────
@@ -79,10 +79,10 @@ class NimazBannerTest {
         var clicked = false
         composeRule.setThemedContent {
             NimazBanner(
+                title = "Warning title",
                 message = "Warning message",
                 variant = NimazBannerVariant.WARNING,
                 icon = Icons.Default.Warning,
-                title = "Warning title",
                 actionLabel = "Fix",
                 onAction = { clicked = true }
             )
@@ -97,7 +97,7 @@ class NimazBannerTest {
     fun `warning banner renders minimal content`() {
         composeRule.setThemedContent {
             NimazBanner(
-                message = "Plain warning",
+                title = "Plain warning",
                 variant = NimazBannerVariant.WARNING
             )
         }
@@ -111,7 +111,7 @@ class NimazBannerTest {
         var clicked = false
         composeRule.setThemedContent {
             NimazBanner(
-                message = "Update available",
+                title = "Update available",
                 variant = NimazBannerVariant.UPDATE,
                 actionLabel = "Update",
                 onAction = { clicked = true }
@@ -125,7 +125,7 @@ class NimazBannerTest {
     fun `update banner renders loading spinner`() {
         composeRule.setThemedContent {
             NimazBanner(
-                message = "Downloading",
+                title = "Downloading",
                 variant = NimazBannerVariant.UPDATE,
                 isLoading = true
             )
@@ -134,10 +134,10 @@ class NimazBannerTest {
     }
 
     @Test
-    fun `update banner renders message only`() {
+    fun `update banner renders title only`() {
         composeRule.setThemedContent {
             NimazBanner(
-                message = "Up to date",
+                title = "Up to date",
                 variant = NimazBannerVariant.UPDATE
             )
         }
@@ -151,14 +151,13 @@ class NimazBannerTest {
         var clicked = false
         composeRule.setThemedContent {
             NimazBanner(
+                title = "Calibration",
                 message = "Tap for help",
                 variant = NimazBannerVariant.ERROR,
-                icon = Icons.Default.Warning,
-                title = "Calibration",
                 onClick = { clicked = true }
             )
         }
-        composeRule.onNodeWithText("Tap for help").performClick()
+        composeRule.onNodeWithText("Calibration").performClick()
         assertThat(clicked).isTrue()
     }
 
@@ -167,9 +166,9 @@ class NimazBannerTest {
         var clicked = false
         composeRule.setThemedContent {
             NimazBanner(
+                title = "Calibration",
                 message = "Calibrate compass",
                 variant = NimazBannerVariant.ERROR,
-                title = "Calibration",
                 actionLabel = "Calibrate",
                 onAction = { clicked = true }
             )
@@ -182,10 +181,42 @@ class NimazBannerTest {
     fun `error banner renders minimal content`() {
         composeRule.setThemedContent {
             NimazBanner(
-                message = "Plain error",
+                title = "Plain error",
                 variant = NimazBannerVariant.ERROR
             )
         }
         composeRule.onNodeWithText("Plain error").assertExists()
+    }
+
+    // ── EVENT ────────────────────────────────────────────────────────────────
+
+    @Test
+    fun `event banner renders title and action`() {
+        var clicked = false
+        composeRule.setThemedContent {
+            NimazBanner(
+                title = "Ramadan Mubarak",
+                message = "Wishing you a blessed month.",
+                variant = NimazBannerVariant.EVENT,
+                actionLabel = "Explore",
+                onAction = { clicked = true }
+            )
+        }
+        composeRule.onNodeWithText("Ramadan Mubarak").assertExists()
+        composeRule.onNodeWithText("Explore").performClick()
+        assertThat(clicked).isTrue()
+    }
+
+    @Test
+    fun `event banner renders with dismiss`() {
+        var dismissed = false
+        composeRule.setThemedContent {
+            NimazBanner(
+                title = "Event announcement",
+                variant = NimazBannerVariant.EVENT,
+                onDismiss = { dismissed = true }
+            )
+        }
+        composeRule.onNodeWithText("Event announcement").assertExists()
     }
 }

@@ -190,7 +190,7 @@ fun PrayerTrackerScreen(
             if (unrecordedCount > 0) {
                 item {
                     NimazBanner(
-                        message = pluralStringResource(
+                        title = pluralStringResource(
                             R.plurals.prayer_unrecorded_banner,
                             unrecordedCount,
                             unrecordedCount,

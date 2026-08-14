@@ -1,6 +1,5 @@
 package com.arshadshah.nimaz.presentation.components.organisms
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BatteryAlert
@@ -83,21 +82,17 @@ private fun BannerCard(banner: HomeBannerItem) {
     val hasSubtitle = !banner.subtitle.isNullOrBlank()
 
     NimazBanner(
-        message = if (hasSubtitle) banner.subtitle else banner.title,
+        title = banner.title,
+        message = if (hasSubtitle) banner.subtitle else null,
         variant = when (banner.variant) {
             HomeBannerVariant.WARNING -> NimazBannerVariant.WARNING
             HomeBannerVariant.UPDATE -> NimazBannerVariant.UPDATE
         },
         icon = banner.icon,
-        title = if (hasSubtitle) banner.title else null,
         actionLabel = actionLabel,
         onAction = onAction,
         isLoading = banner.isLoading,
-        modifier = if (cardIsTappable) {
-            Modifier.clickable { banner.onAction.invoke() }
-        } else {
-            Modifier
-        },
+        onClick = if (cardIsTappable) { { banner.onAction.invoke() } } else null,
     )
 }
 

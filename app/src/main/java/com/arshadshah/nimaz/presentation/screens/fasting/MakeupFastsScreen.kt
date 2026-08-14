@@ -15,7 +15,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -188,10 +187,8 @@ internal fun MakeupFastsContent(
 
             // Info Banner
             NimazBanner(
-                message = stringResource(R.string.fasting_makeup_info),
+                title = stringResource(R.string.fasting_makeup_info),
                 variant = NimazBannerVariant.INFO,
-                icon = Icons.Default.Info,
-                showBorder = true
             )
 
             // Owed — what is still outstanding.

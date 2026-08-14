@@ -1,6 +1,10 @@
 package com.arshadshah.nimaz.presentation.components.molecules
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -8,419 +12,341 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BatteryAlert
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.outlined.Error
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
-enum class NimazBannerVariant {
-    INFO,
-    WARNING,
-    UPDATE,
-    ERROR
+enum class NimazBannerVariant { INFO, WARNING, ERROR, UPDATE, EVENT }
+
+enum class NimazBannerDensity { STANDALONE, INLINE }
+
+/** Per-variant colour palette resolved at composition time. */
+private data class BannerPalette(
+    val fill: Color,
+    val border: Color,
+    val iconWell: Color,
+    val accent: Color,
+    val onContent: Color,
+    val onMessage: Color,
+    val actionBg: Color,
+    val actionFg: Color,
+    val isGradient: Boolean = false,
+    val gradientColors: List<Color> = emptyList(),
+)
+
+@Composable
+private fun variantPalette(variant: NimazBannerVariant): BannerPalette = when (variant) {
+    NimazBannerVariant.INFO -> {
+        val accent = MaterialTheme.colorScheme.primary
+        BannerPalette(
+            fill = accent.copy(alpha = 0.10f),
+            border = accent.copy(alpha = 0.30f),
+            iconWell = accent.copy(alpha = 0.18f),
+            accent = accent,
+            onContent = MaterialTheme.colorScheme.onSurface,
+            onMessage = MaterialTheme.colorScheme.onSurfaceVariant,
+            actionBg = accent,
+            actionFg = MaterialTheme.colorScheme.onPrimary,
+        )
+    }
+
+    NimazBannerVariant.WARNING -> {
+        val accent = NimazColors.Warning
+        BannerPalette(
+            fill = accent.copy(alpha = 0.10f),
+            border = accent.copy(alpha = 0.32f),
+            iconWell = accent.copy(alpha = 0.20f),
+            accent = accent,
+            onContent = MaterialTheme.colorScheme.onSurface,
+            onMessage = MaterialTheme.colorScheme.onSurfaceVariant,
+            actionBg = NimazColors.GoldDark,
+            actionFg = Color.White,
+        )
+    }
+
+    NimazBannerVariant.ERROR -> {
+        val accent = MaterialTheme.colorScheme.error
+        BannerPalette(
+            fill = accent.copy(alpha = 0.09f),
+            border = accent.copy(alpha = 0.32f),
+            iconWell = accent.copy(alpha = 0.16f),
+            accent = accent,
+            onContent = MaterialTheme.colorScheme.onSurface,
+            onMessage = MaterialTheme.colorScheme.onSurfaceVariant,
+            actionBg = accent,
+            actionFg = MaterialTheme.colorScheme.onError,
+        )
+    }
+
+    NimazBannerVariant.UPDATE -> {
+        val accent = MaterialTheme.colorScheme.tertiary
+        BannerPalette(
+            fill = accent.copy(alpha = 0.10f),
+            border = accent.copy(alpha = 0.30f),
+            iconWell = accent.copy(alpha = 0.18f),
+            accent = accent,
+            onContent = MaterialTheme.colorScheme.onSurface,
+            onMessage = MaterialTheme.colorScheme.onSurfaceVariant,
+            actionBg = accent,
+            actionFg = MaterialTheme.colorScheme.onTertiary,
+        )
+    }
+
+    NimazBannerVariant.EVENT -> {
+        val teal800 = Color(0xFF115E59)
+        val teal950 = Color(0xFF042F2E)
+        val teal700 = Color(0xFF0F766E)
+        val lightTeal = Color(0xFFEAF7F5)
+        val gold = NimazColors.Gold500
+        BannerPalette(
+            fill = teal800,
+            border = teal700,
+            iconWell = Color.White.copy(alpha = 0.14f),
+            accent = gold,
+            onContent = lightTeal,
+            onMessage = lightTeal.copy(alpha = 0.72f),
+            actionBg = Color.White.copy(alpha = 0.16f),
+            actionFg = Color.White,
+            isGradient = true,
+            gradientColors = listOf(teal800, teal950),
+        )
+    }
+}
+
+private fun defaultIcon(variant: NimazBannerVariant): ImageVector = when (variant) {
+    NimazBannerVariant.INFO -> Icons.Default.Info
+    NimazBannerVariant.WARNING -> Icons.Default.Warning
+    NimazBannerVariant.ERROR -> Icons.Outlined.Error
+    NimazBannerVariant.UPDATE -> Icons.Default.Download
+    NimazBannerVariant.EVENT -> Icons.Default.Star
 }
 
 /**
- * Shared styling for every banner in the app — [NimazBanner]'s variants and the
- * `AnnouncementBanner` molecule alike.
+ * Unified banner component. A single [BannerPalette] drives all five variants —
+ * INFO, WARNING, ERROR, UPDATE and EVENT — through the same layout.
  *
- * A banner is *informational*, not a primary surface: it interrupts the page to say
- * something and then gets out of the way. Resolving its [com.arshadshah.nimaz.presentation.components.atoms.NimazTone] straight to a
- * tonal container (as a card does) made every banner read as a fully saturated
- * panel, louder than the content it annotates. So banners keep a quiet `surface`
- * container and express their tone in the **border** and **icon** instead — an
- * [com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle.OUTLINED] card. Content colour is `onSurface`, which is contrast
- * checked in light and dark, so titles and messages stay legible either way.
+ * - [title] is required; it is the primary text.
+ * - [message] is optional, clamped to 2 lines.
+ * - [onDismiss] adds an × button.
+ * - [onClick] makes the whole banner tappable (adds a chevron, hides the action pill).
+ * - [isLoading] replaces the action pill with a spinner.
+ * - [density] controls corner radius (STANDALONE=17dp, INLINE=14dp) and shadow.
  */
-object NimazBannerDefaults {
+@Composable
+fun NimazBanner(
+    title: String,
+    variant: NimazBannerVariant,
+    modifier: Modifier = Modifier,
+    message: String? = null,
+    icon: ImageVector? = null,
+    actionLabel: String? = null,
+    onAction: (() -> Unit)? = null,
+    onDismiss: (() -> Unit)? = null,
+    isLoading: Boolean = false,
+    onClick: (() -> Unit)? = null,
+    density: NimazBannerDensity = NimazBannerDensity.STANDALONE,
+) {
+    val palette = variantPalette(variant)
+    val cornerRadius = if (density == NimazBannerDensity.INLINE) 14.dp else 17.dp
+    val shape = RoundedCornerShape(cornerRadius)
+    val effectiveIcon = icon ?: defaultIcon(variant)
 
-    /** The tone's accent — the banner's border, and what its icon is tinted with. */
+    val backgroundModifier: Modifier = if (palette.isGradient) {
+        Modifier.background(
+            brush = Brush.linearGradient(colors = palette.gradientColors),
+            shape = shape,
+        )
+    } else {
+        Modifier.background(color = palette.fill, shape = shape)
+    }
+
+    val clickableModifier: Modifier =
+        if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier
+
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .border(width = 1.dp, color = palette.border, shape = shape)
+            .then(backgroundModifier)
+            .then(clickableModifier)
+            .padding(horizontal = 15.dp, vertical = 14.dp),
+        verticalAlignment = Alignment.Top,
+        horizontalArrangement = Arrangement.spacedBy(13.dp),
+    ) {
+        // ── Icon well ──────────────────────────────────────────────────────────
+        Box(
+            modifier = Modifier
+                .size(36.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(palette.iconWell),
+            contentAlignment = Alignment.Center,
+        ) {
+            NimazIcon(
+                imageVector = effectiveIcon,
+                contentDescription = null,
+                tint = palette.accent,
+                size = NimazIconSize.SMALL,
+            )
+        }
+
+        // ── Text block ─────────────────────────────────────────────────────────
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .padding(top = 1.dp),
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                color = palette.onContent,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+            )
+            if (message != null) {
+                Spacer(Modifier.height(3.dp))
+                Text(
+                    text = message,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = palette.onMessage,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+        }
+
+        // ── Right-side control: chevron | action pill | spinner ────────────────
+        Box(contentAlignment = Alignment.Center, modifier = Modifier.align(Alignment.CenterVertically)) {
+            when {
+                onClick != null -> {
+                    NimazIcon(
+                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                        contentDescription = null,
+                        tint = palette.accent,
+                        size = NimazIconSize.SMALL,
+                    )
+                }
+
+                isLoading -> {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        color = palette.accent,
+                        strokeWidth = 2.5.dp,
+                    )
+                }
+
+                actionLabel != null && onAction != null -> {
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(palette.actionBg)
+                            .clickable(onClick = onAction)
+                            .padding(horizontal = 13.dp, vertical = 9.dp),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            text = actionLabel,
+                            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                            color = palette.actionFg,
+                        )
+                    }
+                }
+            }
+        }
+
+        // ── Dismiss button ─────────────────────────────────────────────────────
+        if (onDismiss != null) {
+            Box(
+                modifier = Modifier
+                    .size(30.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .clickable(onClick = onDismiss)
+                    .align(Alignment.CenterVertically),
+                contentAlignment = Alignment.Center,
+            ) {
+                NimazIcon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = "Dismiss",
+                    tint = palette.onMessage,
+                    size = NimazIconSize.SMALL,
+                )
+            }
+        }
+    }
+}
+
+// ── Backward-compatible shim for HomeBannerCarousel ─────────────────────────────────────────────
+// NimazBannerDefaults is retained so AnnouncementBanner can continue importing accent/colors.
+object NimazBannerDefaults {
     @Composable
-    fun accent(tone: com.arshadshah.nimaz.presentation.components.atoms.NimazTone): Color =
+    fun accent(tone: com.arshadshah.nimaz.presentation.components.atoms.NimazTone): androidx.compose.ui.graphics.Color =
         when (tone) {
-            com.arshadshah.nimaz.presentation.components.atoms.NimazTone.ACCENT, com.arshadshah.nimaz.presentation.components.atoms.NimazTone.PROMINENT -> MaterialTheme.colorScheme.primary
+            com.arshadshah.nimaz.presentation.components.atoms.NimazTone.ACCENT,
+            com.arshadshah.nimaz.presentation.components.atoms.NimazTone.PROMINENT -> MaterialTheme.colorScheme.primary
             com.arshadshah.nimaz.presentation.components.atoms.NimazTone.SUCCESS -> MaterialTheme.colorScheme.tertiary
             com.arshadshah.nimaz.presentation.components.atoms.NimazTone.WARNING -> MaterialTheme.colorScheme.secondary
             com.arshadshah.nimaz.presentation.components.atoms.NimazTone.ERROR -> MaterialTheme.colorScheme.error
-            com.arshadshah.nimaz.presentation.components.atoms.NimazTone.NEUTRAL, com.arshadshah.nimaz.presentation.components.atoms.NimazTone.MUTED, com.arshadshah.nimaz.presentation.components.atoms.NimazTone.TRANSPARENT ->
+            com.arshadshah.nimaz.presentation.components.atoms.NimazTone.NEUTRAL,
+            com.arshadshah.nimaz.presentation.components.atoms.NimazTone.MUTED,
+            com.arshadshah.nimaz.presentation.components.atoms.NimazTone.TRANSPARENT ->
                 MaterialTheme.colorScheme.outlineVariant
         }
 
-    /** A banner's card colours: quiet `surface` container, tone-coloured border. */
     @Composable
     fun colors(
         tone: com.arshadshah.nimaz.presentation.components.atoms.NimazTone,
-        border: Color? = null
+        border: androidx.compose.ui.graphics.Color? = null,
     ): com.arshadshah.nimaz.presentation.components.atoms.NimazCardColors =
         com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults.colors(
             container = MaterialTheme.colorScheme.surface,
-            border = border ?: accent(tone)
+            border = border ?: accent(tone),
         )
 }
 
-@Composable
-fun NimazBanner(
-    message: String,
-    variant: NimazBannerVariant,
-    modifier: Modifier = Modifier,
-    icon: ImageVector? = null,
-    title: String? = null,
-    actionLabel: String? = null,
-    onAction: (() -> Unit)? = null,
-    isLoading: Boolean = false,
-    showBorder: Boolean = false,
-    onClick: (() -> Unit)? = null
-) {
-    when (variant) {
-        NimazBannerVariant.INFO -> InfoVariant(
-            message = message,
-            modifier = modifier,
-            icon = icon,
-            showBorder = showBorder
-        )
-
-        NimazBannerVariant.WARNING -> WarningVariant(
-            message = message,
-            modifier = modifier,
-            icon = icon,
-            title = title,
-            actionLabel = actionLabel,
-            onAction = onAction
-        )
-
-        NimazBannerVariant.UPDATE -> UpdateVariant(
-            message = message,
-            modifier = modifier,
-            actionLabel = actionLabel,
-            onAction = onAction,
-            isLoading = isLoading
-        )
-
-        NimazBannerVariant.ERROR -> ErrorVariant(
-            message = message,
-            modifier = modifier,
-            icon = icon,
-            title = title,
-            actionLabel = actionLabel,
-            onAction = onAction,
-            onClick = onClick
-        )
-    }
-}
-
-@Composable
-private fun InfoVariant(
-    message: String,
-    modifier: Modifier = Modifier,
-    icon: ImageVector? = null,
-    showBorder: Boolean = false
-) {
-    BannerSurface(
-        modifier = modifier,
-        shape = RoundedCornerShape(if (showBorder) 14.dp else 12.dp),
-        tone = com.arshadshah.nimaz.presentation.components.atoms.NimazTone.ACCENT,
-        borderColor = if (showBorder) MaterialTheme.colorScheme.primary else null
-    ) {
-        InfoContent(message = message, icon = icon)
-    }
-}
-
-@Composable
-private fun InfoContent(
-    message: String,
-    icon: ImageVector? = null
-) {
-    Row(
-        modifier = Modifier.padding(15.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        if (icon != null) {
-            _root_ide_package_.com.arshadshah.nimaz.presentation.components.atoms.NimazIcon(
-                imageVector = icon,
-                contentDescription = null,
-                variant = com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant.PRIMARY,
-                size = com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize.MEDIUM
-            )
-        }
-        Text(
-            text = message,
-            style = MaterialTheme.typography.bodySmall,
-            lineHeight = MaterialTheme.typography.bodySmall.lineHeight * 1.2
-        )
-    }
-}
-
-@Composable
-private fun WarningVariant(
-    message: String,
-    modifier: Modifier = Modifier,
-    icon: ImageVector? = null,
-    title: String? = null,
-    actionLabel: String? = null,
-    onAction: (() -> Unit)? = null
-) {
-    val warningColor = NimazColors.Warning
-
-    BannerSurface(
-        modifier = modifier,
-        shape = RoundedCornerShape(16.dp),
-        tone = com.arshadshah.nimaz.presentation.components.atoms.NimazTone.WARNING,
-        // The warning icon keeps the brand amber rather than the scheme's secondary,
-        // so the border takes the same colour — border and icon always agree.
-        borderColor = warningColor
-    ) {
-        BannerContentRow(
-            modifier = Modifier.padding(16.dp),
-            icon = icon,
-            iconTint = warningColor,
-            iconSpacing = 14.dp,
-            title = title,
-            titleStyle = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-            titleColor = null,
-            titleBottomSpacing = 4.dp,
-            message = message,
-            actionVariant = com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant.TONAL,
-            actionLabel = actionLabel,
-            onAction = onAction
-        )
-    }
-}
-
-@Composable
-private fun UpdateVariant(
-    message: String,
-    modifier: Modifier = Modifier,
-    actionLabel: String? = null,
-    onAction: (() -> Unit)? = null,
-    isLoading: Boolean = false
-) {
-    BannerSurface(
-        modifier = modifier,
-        shape = RoundedCornerShape(16.dp),
-        tone = com.arshadshah.nimaz.presentation.components.atoms.NimazTone.ACCENT
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = message,
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            }
-            if (actionLabel != null && onAction != null) {
-                Spacer(modifier = Modifier.width(12.dp))
-                _root_ide_package_.com.arshadshah.nimaz.presentation.components.atoms.NimazCard(
-                    style = com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle.FILLED,
-                    onClick = onAction,
-                    colors = com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults.colors(
-                        container = MaterialTheme.colorScheme.primary
-                    ),
-                    shape = RoundedCornerShape(8.dp)
-                ) {
-                    Text(
-                        text = actionLabel,
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                }
-            } else if (isLoading) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(32.dp),
-                    color = MaterialTheme.colorScheme.primary,
-                    strokeWidth = 3.dp
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun ErrorVariant(
-    message: String,
-    modifier: Modifier = Modifier,
-    icon: ImageVector? = null,
-    title: String? = null,
-    actionLabel: String? = null,
-    onAction: (() -> Unit)? = null,
-    onClick: (() -> Unit)? = null
-) {
-    val errorColor = MaterialTheme.colorScheme.error
-
-    BannerSurface(
-        modifier = modifier,
-        shape = RoundedCornerShape(12.dp),
-        tone = com.arshadshah.nimaz.presentation.components.atoms.NimazTone.ERROR,
-        onClick = onClick
-    ) {
-        BannerContentRow(
-            modifier = Modifier.padding(12.dp),
-            icon = icon,
-            iconTint = errorColor,
-            iconSpacing = 8.dp,
-            title = title,
-            titleStyle = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-            titleColor = null,
-            titleBottomSpacing = 2.dp,
-            message = message,
-            actionVariant = com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant.DESTRUCTIVE,
-            actionLabel = actionLabel,
-            onAction = onAction
-        )
-    }
-}
-
-/**
- * The rounded container shell shared by every variant: a full-width outlined
- * [com.arshadshah.nimaz.presentation.components.atoms.NimazCard] with the given [shape], semantic [tone] and optional [borderColor]
- * override. Passing [onClick] makes the whole banner tappable — this is the one
- * place the clickable-vs-static branch lives, so individual variants never repeat it.
- *
- * Colours come from [NimazBannerDefaults]: a quiet container with the tone in the
- * border. The resolved content colour is published to the banner's children, so the
- * title/message inherit it instead of restating an `onXxx` role per variant.
- */
-@Composable
-private fun BannerSurface(
-    modifier: Modifier,
-    shape: Shape,
-    tone: com.arshadshah.nimaz.presentation.components.atoms.NimazTone,
-    borderColor: Color? = null,
-    onClick: (() -> Unit)? = null,
-    content: @Composable () -> Unit
-) {
-    _root_ide_package_.com.arshadshah.nimaz.presentation.components.atoms.NimazCard(
-        modifier = modifier.fillMaxWidth(),
-        style = com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle.OUTLINED,
-        tone = tone,
-        onClick = onClick,
-        shape = shape,
-        colors = NimazBannerDefaults.colors(tone = tone, border = borderColor)
-    ) {
-        content()
-    }
-}
-
-/**
- * Shared icon · title/message · action layout behind the [NimazBannerVariant.WARNING]
- * and [NimazBannerVariant.ERROR] variants. The action button sits to the right of the
- * weighted text column (not below it), matching both variants' original layout.
- *
- * Container styling (background, shape, border, click) is supplied by [BannerSurface];
- * this composable only lays out the content, taking the inner-padding [modifier] plus
- * the per-variant accent, icon spacing and title style.
- *
- * A null [titleColor] inherits the card's published content colour — the default, so a
- * variant only names a colour when it deliberately deviates from its tone.
- */
-@Composable
-private fun BannerContentRow(
-    modifier: Modifier,
-    icon: ImageVector?,
-    iconTint: Color,
-    iconSpacing: Dp,
-    title: String?,
-    titleStyle: TextStyle,
-    titleColor: Color?,
-    titleBottomSpacing: Dp,
-    message: String,
-    actionVariant: com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant,
-    actionLabel: String?,
-    onAction: (() -> Unit)?
-) {
-    Row(
-        modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        if (icon != null) {
-            _root_ide_package_.com.arshadshah.nimaz.presentation.components.atoms.NimazIcon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = iconTint,
-                size = com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize.LARGE
-            )
-            Spacer(modifier = Modifier.width(iconSpacing))
-        }
-
-        Column(modifier = Modifier.weight(1f)) {
-            if (title != null) {
-                Text(
-                    text = title,
-                    style = titleStyle,
-                    color = titleColor ?: LocalContentColor.current
-                )
-                Spacer(modifier = Modifier.height(titleBottomSpacing))
-            }
-            Text(
-                text = message,
-                style = MaterialTheme.typography.bodySmall
-            )
-        }
-
-        if (actionLabel != null && onAction != null) {
-            Spacer(modifier = Modifier.width(10.dp))
-            _root_ide_package_.com.arshadshah.nimaz.presentation.components.atoms.NimazButton(
-                text = actionLabel,
-                onClick = onAction,
-                variant = actionVariant,
-                size = com.arshadshah.nimaz.presentation.components.atoms.NimazButtonSize.SMALL
-            )
-        }
-    }
-}
-
-// Previews
+// ── Previews ─────────────────────────────────────────────────────────────────
 
 @Preview(showBackground = true, widthDp = 400, name = "Info Banner")
 @Composable
 private fun InfoBannerPreview() {
     NimazTheme {
-        NimazBanner(
-            message = "Your location may be at a high latitude. Prayer times may vary significantly during summer months.",
-            variant = NimazBannerVariant.INFO,
-            icon = Icons.Default.Info,
-            modifier = Modifier.padding(16.dp)
-        )
-    }
-}
-
-@Preview(showBackground = true, widthDp = 400, name = "Info Banner with Border")
-@Composable
-private fun InfoBannerWithBorderPreview() {
-    NimazTheme {
-        NimazBanner(
-            message = "Makeup fasts should ideally be completed before the next Ramadan. Fasting on Mondays and Thursdays is recommended.",
-            variant = NimazBannerVariant.INFO,
-            icon = Icons.Default.Info,
-            showBorder = true,
-            modifier = Modifier.padding(16.dp)
-        )
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            NimazBanner(
+                title = "High latitude adjustment",
+                message = "Summer nights in your area are too short for a natural Isha time.",
+                variant = NimazBannerVariant.INFO,
+            )
+            NimazBanner(
+                title = "Makeup fast info",
+                variant = NimazBannerVariant.INFO,
+                density = NimazBannerDensity.INLINE,
+            )
+        }
     }
 }
 
@@ -428,72 +354,24 @@ private fun InfoBannerWithBorderPreview() {
 @Composable
 private fun WarningBannerPreview() {
     NimazTheme {
-        NimazBanner(
-            message = "Prayer notifications need permission to alert you at prayer times.",
-            variant = NimazBannerVariant.WARNING,
-            icon = Icons.Default.Notifications,
-            title = "Notifications Disabled",
-            actionLabel = "Enable",
-            onAction = {},
-            modifier = Modifier.padding(16.dp)
-        )
-    }
-}
-
-@Preview(showBackground = true, widthDp = 400, name = "Warning Banner - Battery")
-@Composable
-private fun WarningBannerBatteryPreview() {
-    NimazTheme {
-        NimazBanner(
-            message = "Battery optimization may prevent timely prayer notifications.",
-            variant = NimazBannerVariant.WARNING,
-            icon = Icons.Default.BatteryAlert,
-            title = "Battery Optimization Active",
-            actionLabel = "Fix",
-            onAction = {},
-            modifier = Modifier.padding(16.dp)
-        )
-    }
-}
-
-@Preview(showBackground = true, widthDp = 400, name = "Update Available Banner")
-@Composable
-private fun UpdateBannerPreview() {
-    NimazTheme {
-        NimazBanner(
-            message = "A new version of Nimaz is available",
-            variant = NimazBannerVariant.UPDATE,
-            actionLabel = "Update",
-            onAction = {},
-            modifier = Modifier.padding(16.dp)
-        )
-    }
-}
-
-@Preview(showBackground = true, widthDp = 400, name = "Update Downloading Banner")
-@Composable
-private fun UpdateBannerDownloadingPreview() {
-    NimazTheme {
-        NimazBanner(
-            message = "Downloading update...",
-            variant = NimazBannerVariant.UPDATE,
-            isLoading = true,
-            modifier = Modifier.padding(16.dp)
-        )
-    }
-}
-
-@Preview(showBackground = true, widthDp = 400, name = "Update Ready Banner")
-@Composable
-private fun UpdateBannerReadyPreview() {
-    NimazTheme {
-        NimazBanner(
-            message = "Update ready to install",
-            variant = NimazBannerVariant.UPDATE,
-            actionLabel = "Restart",
-            onAction = {},
-            modifier = Modifier.padding(16.dp)
-        )
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            NimazBanner(
+                title = "Notifications Disabled",
+                message = "Prayer notifications need permission to alert you at prayer times.",
+                variant = NimazBannerVariant.WARNING,
+                icon = Icons.Default.Notifications,
+                actionLabel = "Enable",
+                onAction = {},
+            )
+            NimazBanner(
+                title = "Battery Optimization Active",
+                message = "Battery optimization may prevent timely prayer notifications.",
+                variant = NimazBannerVariant.WARNING,
+                icon = Icons.Default.BatteryAlert,
+                actionLabel = "Fix",
+                onAction = {},
+            )
+        }
     }
 }
 
@@ -501,29 +379,62 @@ private fun UpdateBannerReadyPreview() {
 @Composable
 private fun ErrorBannerPreview() {
     NimazTheme {
-        NimazBanner(
-            message = "Tap here for calibration instructions",
-            variant = NimazBannerVariant.ERROR,
-            icon = Icons.Default.Warning,
-            title = "Calibration Needed",
-            onClick = {},
-            modifier = Modifier.padding(16.dp)
-        )
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            NimazBanner(
+                title = "Calibration Needed",
+                message = "Tap here for calibration instructions",
+                variant = NimazBannerVariant.ERROR,
+                onClick = {},
+            )
+            NimazBanner(
+                title = "Calibration Needed",
+                message = "Move your phone in a figure-8 pattern to calibrate the compass",
+                variant = NimazBannerVariant.ERROR,
+                actionLabel = "Calibrate",
+                onAction = {},
+            )
+        }
     }
 }
 
-@Preview(showBackground = true, widthDp = 400, name = "Error Banner with Action")
+@Preview(showBackground = true, widthDp = 400, name = "Update Banner")
 @Composable
-private fun ErrorBannerWithActionPreview() {
+private fun UpdateBannerPreview() {
     NimazTheme {
-        NimazBanner(
-            message = "Move your phone in a figure-8 pattern to calibrate the compass",
-            variant = NimazBannerVariant.ERROR,
-            icon = Icons.Default.Warning,
-            title = "Calibration Needed",
-            actionLabel = "Calibrate",
-            onAction = {},
-            modifier = Modifier.padding(16.dp)
-        )
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            NimazBanner(
+                title = "Update Available",
+                message = "A new version of Nimaz is available.",
+                variant = NimazBannerVariant.UPDATE,
+                actionLabel = "Update",
+                onAction = {},
+            )
+            NimazBanner(
+                title = "Downloading update…",
+                variant = NimazBannerVariant.UPDATE,
+                isLoading = true,
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true, widthDp = 400, name = "Event Banner")
+@Composable
+private fun EventBannerPreview() {
+    NimazTheme {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            NimazBanner(
+                title = "Ramadan Mubarak!",
+                message = "Wishing you a blessed and spiritually uplifting month.",
+                variant = NimazBannerVariant.EVENT,
+                actionLabel = "Explore",
+                onAction = {},
+            )
+            NimazBanner(
+                title = "Dismiss example",
+                variant = NimazBannerVariant.EVENT,
+                onDismiss = {},
+            )
+        }
     }
 }

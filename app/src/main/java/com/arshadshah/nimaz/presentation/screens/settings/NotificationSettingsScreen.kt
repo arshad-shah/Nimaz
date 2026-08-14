@@ -115,10 +115,8 @@ fun NotificationSettingsScreen(
                 if (diagnostics?.hasProblem == true) {
                     item {
                         NimazBanner(
-                            message = stringResource(R.string.notif_hub_delivery_warning),
+                            title = stringResource(R.string.notif_hub_delivery_warning),
                             variant = NimazBannerVariant.WARNING,
-                            icon = Icons.Default.WarningAmber,
-                            showBorder = true,
                             onClick = onNavigateToDiagnostics,
                             modifier = Modifier.fillMaxWidth()
                         )

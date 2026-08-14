@@ -147,7 +147,7 @@ private fun LibraryDetailContent(
 
         item(key = "note") {
             NimazBanner(
-                message = stringResource(R.string.license_detail_governs_note),
+                title = stringResource(R.string.license_detail_governs_note),
                 variant = NimazBannerVariant.INFO,
             )
         }

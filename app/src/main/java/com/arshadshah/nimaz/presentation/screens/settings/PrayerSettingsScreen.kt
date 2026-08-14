@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.WbSunny
@@ -122,13 +121,12 @@ fun PrayerSettingsScreen(
             // Info Banner
             item {
                 NimazBanner(
-                    message = stringResource(
+                    title = stringResource(
                         R.string.prayer_settings_high_latitude_notice_format,
                         locationState.currentLocation?.city
                             ?: stringResource(R.string.prayer_settings_your_location)
                     ),
                     variant = NimazBannerVariant.INFO,
-                    icon = Icons.Default.Info
                 )
             }
 

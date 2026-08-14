@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BatteryAlert
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.Refresh
@@ -182,10 +181,8 @@ fun NotificationDiagnosticsScreen(
             // it is guidance about the checks above, so it should read as one.
             item {
                 NimazBanner(
-                    message = stringResource(R.string.notification_settings_battery_explanation),
+                    title = stringResource(R.string.notification_settings_battery_explanation),
                     variant = NimazBannerVariant.INFO,
-                    icon = Icons.Default.Info,
-                    showBorder = true,
                     modifier = Modifier.fillMaxWidth()
                 )
             }

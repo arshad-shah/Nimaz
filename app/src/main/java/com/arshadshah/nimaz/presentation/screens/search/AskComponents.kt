@@ -393,10 +393,10 @@ internal fun AskErrorCard(error: AiError, onRetry: () -> Unit) {
         else -> NimazBannerVariant.ERROR
     }
     NimazBanner(
+        title = title,
         message = body,
         variant = variant,
         icon = icon,
-        title = title,
         actionLabel = if (retryable) stringResource(R.string.ai_try_again) else null,
         onAction = if (retryable) onRetry else null,
         modifier = Modifier.fillMaxWidth(),
