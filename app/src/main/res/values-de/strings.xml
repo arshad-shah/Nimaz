@@ -2139,4 +2139,17 @@
     <string name="khatam_portion_across">%1$s %2$d → %3$s %4$d</string>
     <string name="khatam_todays_portion">Heutiges Pensum</string>
     <string name="khatam_read_todays_portion">Heutiges Pensum lesen</string>
+
+    <!-- Qibla screen redesign -->
+    <string name="finding_direction">Richtung wird gesucht…</string>
+    <string name="hold_this_direction">Diese Richtung halten</string>
+    <string name="you_are_facing_format">Du blickst nach %1$d° %2$s</string>
+    <string name="qibla_bearing_label">Qibla-Peilung</string>
+    <string name="you_are_facing_label">Du blickst nach</string>
+    <string name="compass_is_unsure_title">Der Kompass ist unsicher</string>
+    <string name="compass_is_unsure_body">Magnete und Metall in der Nähe stören ihn. Eine kurze Kalibrierung behebt das.</string>
+    <string name="calibration_sheet_subtitle">Lass dies offen, während du dich bewegst – die Anzeige aktualisiert sich live</string>
+    <string name="accuracy_now_label">Genauigkeit jetzt</string>
+    <string name="back_to_compass">Zurück zum Kompass</string>
+    <string name="point_with_camera">Mit der Kamera zielen</string>
 </resources>

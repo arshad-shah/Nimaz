@@ -114,6 +114,7 @@ object ScreenTags {
         "screen_settings_notifications_diagnostics"
 
     /** Scrollable lists on hub screens — let UI tests scroll to off-screen entries. */
+    const val HomeList = "home_list"
     const val MoreList = "more_menu_list"
     const val SettingsList = "settings_list"
     const val AppearanceList = "settings_appearance_list"

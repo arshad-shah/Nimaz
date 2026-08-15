@@ -2099,4 +2099,17 @@
     <string name="khatam_portion_across">%1$s %2$d → %3$s %4$d</string>
     <string name="khatam_todays_portion">Bahagian hari ini</string>
     <string name="khatam_read_todays_portion">Baca bahagian hari ini</string>
+
+    <!-- Qibla screen redesign -->
+    <string name="finding_direction">Mencari arah…</string>
+    <string name="hold_this_direction">Kekalkan arah ini</string>
+    <string name="you_are_facing_format">Anda menghadap %1$d° %2$s</string>
+    <string name="qibla_bearing_label">Sudut kiblat</string>
+    <string name="you_are_facing_label">Anda menghadap</string>
+    <string name="compass_is_unsure_title">Kompas tidak pasti</string>
+    <string name="compass_is_unsure_body">Magnet dan logam berdekatan mengganggunya. Penentukuran ringkas akan membetulkannya.</string>
+    <string name="calibration_sheet_subtitle">Biarkan ini terbuka semasa anda bergerak — bacaan dikemas kini secara langsung</string>
+    <string name="accuracy_now_label">Ketepatan sekarang</string>
+    <string name="back_to_compass">Kembali ke kompas</string>
+    <string name="point_with_camera">Halakan dengan kamera</string>
 </resources>
