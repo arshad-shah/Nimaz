@@ -7,13 +7,11 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -22,8 +20,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.util.HijriDateCalculator
@@ -34,6 +30,9 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonType
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
 import com.arshadshah.nimaz.presentation.components.molecules.NimazBottomSheet
+import com.arshadshah.nimaz.presentation.components.molecules.NimazFieldLabel
+import com.arshadshah.nimaz.presentation.components.molecules.NimazFieldVariant
+import com.arshadshah.nimaz.presentation.components.molecules.NimazTextField
 import java.time.Instant
 import java.time.ZoneId
 
@@ -117,30 +116,24 @@ fun MakeupFastEditBottomSheet(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
-            // Reason
-            OutlinedTextField(
+            NimazTextField(
                 value = reason,
                 onValueChange = { reason = it },
-                label = { Text(stringResource(R.string.fasting_sheet_reason)) },
+                label = stringResource(R.string.fasting_sheet_reason),
                 modifier = Modifier.fillMaxWidth(),
-                singleLine = true
             )
 
-            // Note
-            OutlinedTextField(
+            NimazTextField(
                 value = note,
                 onValueChange = { note = it },
-                label = { Text(stringResource(R.string.fasting_sheet_note)) },
+                label = stringResource(R.string.fasting_sheet_note),
+                variant = NimazFieldVariant.NOTE,
                 modifier = Modifier.fillMaxWidth(),
-                singleLine = true
             )
 
-            // Status chips
-            Text(
-                text = stringResource(R.string.fasting_sheet_status),
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.Medium
-            )
+            // Status chips — a control, not a field, but it answers a question in the same
+            // sheet, so it wears the family's label.
+            NimazFieldLabel(text = stringResource(R.string.fasting_sheet_status))
             FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
@@ -164,13 +157,12 @@ fun MakeupFastEditBottomSheet(
 
             // Fidya amount (only when FIDYA_PAID)
             AnimatedVisibility(visible = selectedStatus == MakeupFastStatus.FIDYA_PAID) {
-                OutlinedTextField(
+                NimazTextField(
                     value = fidyaAmount,
                     onValueChange = { fidyaAmount = it },
-                    label = { Text(stringResource(R.string.fasting_sheet_fidya_amount)) },
+                    label = stringResource(R.string.fasting_sheet_fidya_amount),
+                    variant = NimazFieldVariant.NUMERIC,
                     modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
                 )
             }
         }

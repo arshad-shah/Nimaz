@@ -3,12 +3,9 @@ package com.arshadshah.nimaz.presentation.components.molecules
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -17,7 +14,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSegmentedControl
@@ -108,21 +104,21 @@ fun ReaderGoToSheet(
                 purpose = NimazSegmentedPurpose.VALUE,
             )
 
-            OutlinedTextField(
+            NimazTextField(
                 value = text,
                 onValueChange = { new -> if (new.all { it.isDigit() }) text = new },
-                label = { Text(stringResource(kind.labelRes())) },
+                label = stringResource(kind.labelRes()),
+                variant = NimazFieldVariant.NUMERIC,
                 // The bound is stated rather than merely enforced: a disabled button with no
-                // explanation is the version of this that wastes a reader's time.
-                supportingText = {
-                    Text(stringResource(R.string.reader_go_to_range, 1, bound))
-                },
-                isError = text.isNotBlank() && target == null,
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Number,
-                    imeAction = ImeAction.Go,
-                ),
+                // explanation is the version of this that wastes a reader's time. Out of range
+                // is an error *message* for the same reason — a red box saying nothing is
+                // barely better than a dead button.
+                helper = stringResource(R.string.reader_go_to_range, 1, bound),
+                error = if (text.isNotBlank() && target == null) {
+                    stringResource(R.string.reader_go_to_range, 1, bound)
+                } else null,
+                imeAction = ImeAction.Go,
+                onImeAction = go,
                 modifier = Modifier.fillMaxWidth(),
             )
         }

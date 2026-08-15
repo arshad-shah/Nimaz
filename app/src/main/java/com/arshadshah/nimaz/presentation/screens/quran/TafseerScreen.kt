@@ -14,7 +14,6 @@ import androidx.compose.material.icons.outlined.EditNote
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -52,7 +51,9 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.rememberNimazPagerState
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDialog
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDialogCancelButton
+import com.arshadshah.nimaz.presentation.components.molecules.NimazFieldVariant
 import com.arshadshah.nimaz.presentation.components.molecules.NimazLoadingState
+import com.arshadshah.nimaz.presentation.components.molecules.NimazTextField
 import com.arshadshah.nimaz.presentation.components.organisms.TafseerPageContent
 import com.arshadshah.nimaz.presentation.viewmodel.quran.TafseerEvent
 import com.arshadshah.nimaz.presentation.viewmodel.quran.TafseerViewModel
@@ -308,14 +309,14 @@ private fun TafseerNotesDialog(
             )
         },
     ) {
-        OutlinedTextField(
+        NimazTextField(
             value = draft,
             onValueChange = { draft = it },
+            label = stringResource(R.string.tafseer_note_hint),
+            variant = NimazFieldVariant.NOTE,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 20.dp),
-            label = { Text(stringResource(R.string.tafseer_note_hint)) },
-            minLines = 3,
         )
 
         Spacer(modifier = Modifier.height(12.dp))

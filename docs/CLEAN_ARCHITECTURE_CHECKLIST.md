@@ -184,6 +184,23 @@ design-token / illustration files (see below).
   surfaces now take a semantic `NimazTone` and resolve through `NimazCardDefaults.tone()` /
   `NimazBadgeDefaults.colors()`. See `ARCHITECTURE.md` §8.1–§8.2.
 
+- [x] ~~**Per-field `shape`, `textStyle` and `colors` on twelve Material text fields.**~~
+  **Resolved.** The app had a dropdown field and an amount field but no *text* field, so every
+  form built its own: `AddPresetScreen` set `RoundedCornerShape(14.dp)` on four fields and gave
+  the Arabic one a hand-written `TextStyle` plus an `OutlinedTextFieldDefaults.colors` block;
+  `KhatamFormScreen`, `TafseerPageContent` and `ChooseDhikrScreen` each picked their own radius.
+  All twelve now call `NimazTextField`, which has **no** `shape`/`colors`/`textStyle` parameter —
+  geometry belongs to `NimazFieldShell` and typography to `NimazFieldVariant`.
+  `MaterialTextFieldGuardTest` fails the build on a raw Material text-field primitive outside the
+  family, and on one of those parameters reappearing. See `ARCHITECTURE.md` §8.
+
+  ```bash
+  # -P (not -E): the lookbehind is what stops `NimazTextField(` matching. Should print only
+  # NimazTextField.kt, NimazSearchBar.kt and NimazNumberStepper.kt — the family's own owners.
+  grep -rnP '(?<![A-Za-z0-9_.])(Outlined|Basic)?TextField\s*\(' \
+    app/src/main/java/com/arshadshah/nimaz/presentation/
+  ```
+
 > Components (`presentation/components/`) also contain literals; many are intentional gradient
 > stops. Prefer named tokens, but a dedicated design-token file (e.g. `BeadDesign.kt`) holding
 > grouped palettes is acceptable — the anti-pattern is *scattered* literals inside screen logic.

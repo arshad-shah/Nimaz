@@ -19,13 +19,11 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Calculate
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxDefaults
 import androidx.compose.material3.SwipeToDismissBoxValue
@@ -63,6 +61,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.molecules.NimazConfirmDialog
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
+import com.arshadshah.nimaz.presentation.components.organisms.NimazSearchBar
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.viewmodel.tracker.TasbihEvent
 import com.arshadshah.nimaz.presentation.viewmodel.tracker.TasbihViewModel
@@ -156,16 +155,17 @@ fun ChooseDhikrScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            OutlinedTextField(
-                value = query,
-                onValueChange = { query = it },
+            // Search is its own member of the field family and the app already had one:
+            // NimazSearchBar, which is this same outlined shell plus the clear button, the
+            // focus border and the loading slot this hand-rolled field had none of.
+            NimazSearchBar(
+                query = query,
+                onQueryChange = { query = it },
+                onClear = { query = "" },
+                placeholder = stringResource(R.string.tasbih_search_dhikr),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 12.dp, vertical = 4.dp),
-                placeholder = { Text(stringResource(R.string.tasbih_search_dhikr)) },
-                leadingIcon = { NimazIcon(Icons.Default.Search, contentDescription = null) },
-                singleLine = true,
-                shape = RoundedCornerShape(12.dp)
             )
 
             LazyRow(

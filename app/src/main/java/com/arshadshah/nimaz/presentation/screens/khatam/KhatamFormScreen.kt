@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Archive
 import androidx.compose.material.icons.filled.CalendarMonth
@@ -22,7 +21,6 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -55,14 +53,17 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownField
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownItem
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownMenu
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownRow
+import com.arshadshah.nimaz.presentation.components.molecules.NimazFieldDefaults
+import com.arshadshah.nimaz.presentation.components.molecules.NimazFieldLabel
+import com.arshadshah.nimaz.presentation.components.molecules.NimazFieldVariant
 import com.arshadshah.nimaz.presentation.components.molecules.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.molecules.NimazNumberStepper
 import com.arshadshah.nimaz.presentation.components.molecules.NimazNumberStepperVariant
+import com.arshadshah.nimaz.presentation.components.molecules.NimazTextField
 import com.arshadshah.nimaz.presentation.foundation.time.NimazTime
 import com.arshadshah.nimaz.presentation.components.molecules.NimazTimePickerDialog
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.foundation.tokens.KhatamProgressRing
-import com.arshadshah.nimaz.presentation.theme.NimazCornerRadius
 import com.arshadshah.nimaz.presentation.theme.NimazSpacing
 import com.arshadshah.nimaz.presentation.viewmodel.quran.KhatamEvent
 import com.arshadshah.nimaz.presentation.viewmodel.quran.KhatamFormMode
@@ -284,16 +285,17 @@ private fun KhatamFormContent(
         }
 
         item(key = "name") {
-            FieldLabel(stringResource(R.string.khatam_name_label))
-            OutlinedTextField(
+            // This is the field that made the mismatch visible: an OutlinedTextField with a
+            // notched border and a floating label, directly above a NimazDropdownField with a
+            // label above an outlined card. Same form, two ideas of what a field is.
+            NimazTextField(
                 value = state.name,
                 onValueChange = { onEvent(KhatamEvent.UpdateName(it)) },
+                label = stringResource(R.string.khatam_name_label),
+                required = true,
+                placeholder = stringResource(R.string.khatam_name_placeholder),
+                error = state.errorRes?.let { stringResource(it) },
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(NimazCornerRadius.Medium),
-                placeholder = { Text(stringResource(R.string.khatam_name_placeholder)) },
-                singleLine = true,
-                isError = state.errorRes != null,
-                supportingText = state.errorRes?.let { { Text(stringResource(it)) } },
             )
         }
 
@@ -355,9 +357,12 @@ private fun KhatamFormContent(
         }
 
         item(key = "deadline") {
-            FieldLabel(
-                stringResource(R.string.khatam_field_deadline) +
-                        " · " + stringResource(R.string.khatam_optional)
+            // A button, not a field — but it answers a form question, so it wears the family's
+            // label rather than a screen-local imitation of one.
+            NimazFieldLabel(
+                text = stringResource(R.string.khatam_field_deadline),
+                optionalLabel = stringResource(R.string.khatam_optional),
+                modifier = Modifier.padding(bottom = NimazFieldDefaults.LabelGap),
             )
             Row(verticalAlignment = Alignment.CenterVertically) {
                 NimazButton(
@@ -379,7 +384,10 @@ private fun KhatamFormContent(
         }
 
         item(key = "reminder") {
-            FieldLabel(stringResource(R.string.khatam_field_reminder))
+            NimazFieldLabel(
+                text = stringResource(R.string.khatam_field_reminder),
+                modifier = Modifier.padding(bottom = NimazFieldDefaults.LabelGap),
+            )
             NimazCard(
                 modifier = Modifier.fillMaxWidth(),
                 tone = NimazTone.NEUTRAL,
@@ -413,17 +421,14 @@ private fun KhatamFormContent(
         }
 
         item(key = "notes") {
-            FieldLabel(stringResource(R.string.khatam_notes_label))
-            OutlinedTextField(
+            NimazTextField(
                 value = state.notes,
                 onValueChange = { onEvent(KhatamEvent.UpdateNotes(it)) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(120.dp),
-                // Multi-line fields inherit the single-line shape, which reads as
-                // under-rounded at this height.
-                shape = RoundedCornerShape(NimazCornerRadius.Medium),
-                placeholder = { Text(stringResource(R.string.khatam_notes_placeholder)) },
+                label = stringResource(R.string.field_notes),
+                optionalLabel = stringResource(R.string.khatam_optional),
+                variant = NimazFieldVariant.NOTE,
+                placeholder = stringResource(R.string.khatam_notes_placeholder),
+                modifier = Modifier.fillMaxWidth(),
             )
         }
 
@@ -467,17 +472,6 @@ private fun KhatamFormContent(
             title = stringResource(R.string.notification_settings_reminder_time),
         )
     }
-}
-
-@Composable
-private fun FieldLabel(text: String) {
-    Text(
-        text = text,
-        style = MaterialTheme.typography.labelMedium,
-        fontWeight = FontWeight.SemiBold,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = Modifier.padding(top = NimazSpacing.Small, bottom = NimazSpacing.ExtraSmall),
-    )
 }
 
 private fun presetLabelRes(preset: KhatamPacePreset): Int = when (preset) {

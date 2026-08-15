@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -30,6 +29,8 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazFilterChip
 import com.arshadshah.nimaz.presentation.components.molecules.NimazBottomSheet
+import com.arshadshah.nimaz.presentation.components.molecules.NimazFieldVariant
+import com.arshadshah.nimaz.presentation.components.molecules.NimazTextField
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.theme.ThemeMode
 import java.time.LocalDate
@@ -127,14 +128,15 @@ fun FastNoteSheet(
             SheetActions(onCancel = onDismiss, onSave = { onSave(note) })
         },
     ) {
-        OutlinedTextField(
+        NimazTextField(
             value = note,
             onValueChange = { note = it },
+            label = stringResource(R.string.fasting_note_title),
+            variant = NimazFieldVariant.NOTE,
+            placeholder = stringResource(R.string.fasting_note_hint),
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 8.dp),
-            placeholder = { Text(stringResource(R.string.fasting_note_hint)) },
-            minLines = 3,
         )
     }
 }

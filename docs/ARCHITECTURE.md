@@ -982,6 +982,50 @@ with no label and a touch target under 48dp fail the lane we already run. It can
       variant. **Not** for `Switch` (on/off settings) or genuine single-choice `RadioButton` pickers
       — those stay as-is. It centralised the prayer/fast trackers, the settings/Quran pickers and
       the dropdown/list selection check indicators.
+    - **anything you type into is `NimazTextField`** (`components/molecules/NimazTextField.kt`),
+      **never** a Material `TextField`/`OutlinedTextField`/`BasicTextField`. The app had a
+      dropdown field and an amount field but no *text* field, so twelve call sites reached for
+      `OutlinedTextField` and each settled the same questions differently — `AddPresetScreen`
+      hand-set a 14dp radius on four fields and styled the Arabic one inline with a `textStyle`
+      *and* an `OutlinedTextFieldDefaults.colors` block; `KhatamFormScreen` put a notched-border
+      floating-label field directly above a label-above-an-outlined-card `NimazDropdownField`;
+      three sites set `isError` with no message to explain it. The whole family now shares one
+      chassis, `NimazFieldShell` (`components/molecules/NimazFieldShell.kt`):
+      - **Geometry** comes from the shell, never from a variant or a call site: label above at
+        `bodyLarge`/Medium with an 8dp gap, an outlined `NimazCard` at 14dp with a 1.5dp border
+        and 14/12 padding, one helper/error line beneath. `NimazFieldDensity.COMPACT` (12dp,
+        12/10, ~42dp tall) is the single exception, for a field that sits *beside* a label
+        rather than under one — the Zakat asset rows.
+      - **`variant`** (`NimazFieldVariant`) chooses typeface, direction, alignment and keyboard
+        only: `TEXT`, `ARABIC` (Amiri 22sp, RTL, right-aligned, `colorScheme.secondary`),
+        `NUMERIC` (tabular, semi-bold, right-aligned, decimal keyboard), `NOTE` (multi-line, no
+        clear button). There is **no variant per feature** — a khatam name, a preset name and a
+        fasting reason are all `TEXT`.
+      - **There is no `shape`, no `colors`, no `textStyle` and no `keyboardOptions` parameter**,
+        and that absence is the point. If a call site needs one, the variant list is missing a
+        member and the fix belongs there. `MaterialTextFieldGuardTest` fails the build both on a
+        raw Material primitive outside the family and on one of those parameters reappearing.
+      - **`error` is a message, not a boolean.** Errors appear on **blur or submit, never on the
+        first keystroke**: pass `validator` for the per-field rule (run when focus leaves, then
+        on every keystroke while an error is showing, so it clears as it is fixed) and `error`
+        for a message the screen decided; `error` wins. An error *replaces* the helper on the
+        same line, so nothing below the field moves.
+      - **`maxLength` marks, it does not truncate** — the counter turns red and the border with
+        it, and the value keeps every character. Cutting off what somebody typed is worse than
+        letting them cut it.
+      - **`NimazAmountField(value: Double, onValueChange: (Double) -> Unit, …)`**
+        (`components/molecules/NimazAmountInput.kt`) is the money/weight member, and it owns the
+        text↔`Double` binding that `ZakatCalculatorScreen` and `ZakatSettingsScreen` each kept a
+        private copy of. `prefix`/`suffix` replace `currencySymbol`/`unitSuffix`, which were the
+        same parameter written twice.
+      - **Search is `NimazSearchBar`** (`components/organisms/NimazSearchBar.kt`) — the same
+        outlined shell plus the clear button, focus border, loading slot and Ask pill. A
+        screen-local "search field" built from anything else is the bug this replaced.
+      - `NimazFieldLabel(text, required = …, optionalLabel = …)` is public for the one case the
+        shell cannot cover: a **control that answers a form question without being a text
+        input** — Khatam's deadline button, its reminder switch, the make-up-fast status chips.
+        Use it rather than a screen-local `FieldLabel`, which is how those rows ended up at
+        `labelMedium`/SemiBold/onSurfaceVariant above fields labelled `bodyLarge`/Medium/onSurface.
     - a **choose-one / act** surface picks by list shape, **never** a raw Material
       `DropdownMenu`/`ExposedDropdownMenuBox`/`DropdownMenuItem`. The whole anchored-dropdown system
       lives in one file, `components/molecules/NimazDropdown.kt`. The rule:
@@ -997,6 +1041,12 @@ with no label and a touch target under 48dp fail the lane we already run. It can
       `selected` for a value choice (accent fill + circular check) or `destructive` for an
       irreversible command — and render on one popover surface via `NimazDropdownDefaults` (16dp
       `surface` card, tonal elevation, faint outline — **not** Material's heavy drop-shadow menu).
+      `NimazDropdownField`'s trigger is drawn on the shared `NimazFieldShell` (the shell's
+      geometry came from it), so it takes `label`/`required`/`helper`/`error` like every other
+      field. One behaviour changed on the way in: the border used to go primary whenever a value
+      was *set*, and is now primary only while the menu is open — in a form of eight completed
+      fields, eight primary boxes stop the colour meaning "you are here", and a value going from
+      muted placeholder to full ink already says the field is filled.
       variant. **Not** for on/off toggles (use `NimazSwitch`) or genuine single-choice `RadioButton`
       pickers (those stay as-is). It centralised the prayer/fast trackers, the settings/Quran pickers
       and the dropdown/list selection check indicators.

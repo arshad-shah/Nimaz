@@ -15,7 +15,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -42,15 +41,13 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazDivider
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
-import com.arshadshah.nimaz.presentation.components.molecules.NimazAmountInput
+import com.arshadshah.nimaz.presentation.components.molecules.NimazAmountField
 import com.arshadshah.nimaz.presentation.components.organisms.NimazListPicker
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
 import com.arshadshah.nimaz.presentation.components.organisms.NimazPickerItem
 import com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsItem
 import com.arshadshah.nimaz.presentation.components.molecules.ZakatHeroStat
 import com.arshadshah.nimaz.presentation.components.molecules.ZakatSummaryHero
-import com.arshadshah.nimaz.presentation.components.molecules.amountToInput
-import com.arshadshah.nimaz.presentation.components.molecules.parseAmountInput
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.viewmodel.settings.ZakatSettingsEvent
@@ -312,46 +309,12 @@ private fun PriceRow(
             color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.weight(1f),
         )
-        PriceField(
+        NimazAmountField(
             value = price,
             onValueChange = onPriceChange,
             currencySymbol = currencySymbolOf(currency),
         )
     }
-}
-
-/**
- * A money field bound to a `Double` on the ViewModel.
- *
- * The text is **local state**, and that is the whole point. A field that parsed every keystroke
- * straight to a `Double` and re-rendered the result turned "10." into "10" before the next digit
- * landed, so a decimal price was literally unenterable — and a per-gram silver price is nothing
- * but decimals.
- *
- * The sync back the other way is guarded: an incoming [value] only overwrites the text when it
- * disagrees with what the text already parses to, so the DataStore write echoing the user's own
- * keystroke cannot erase the trailing point, while a genuinely different value still wins.
- */
-@Composable
-private fun PriceField(
-    value: Double,
-    onValueChange: (Double) -> Unit,
-    modifier: Modifier = Modifier,
-    currencySymbol: String? = null,
-) {
-    var text by rememberSaveable { mutableStateOf(amountToInput(value)) }
-    LaunchedEffect(value) {
-        if (parseAmountInput(text) != value) text = amountToInput(value)
-    }
-    NimazAmountInput(
-        value = text,
-        onValueChange = { next ->
-            text = next
-            onValueChange(parseAmountInput(next))
-        },
-        modifier = modifier,
-        currencySymbol = currencySymbol,
-    )
 }
 
 /**

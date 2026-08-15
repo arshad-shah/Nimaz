@@ -36,7 +36,6 @@ import androidx.compose.material.icons.outlined.TouchApp
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -82,8 +81,10 @@ import com.arshadshah.nimaz.presentation.components.atoms.QuranOrnamentalDivider
 import com.arshadshah.nimaz.presentation.components.atoms.asSegments
 import com.arshadshah.nimaz.presentation.components.molecules.NimazBottomSheet
 import com.arshadshah.nimaz.presentation.components.molecules.NimazConfirmDialog
+import com.arshadshah.nimaz.presentation.components.molecules.NimazFieldVariant
 import com.arshadshah.nimaz.presentation.components.molecules.NimazReaderBottomBar
 import com.arshadshah.nimaz.presentation.components.molecules.NimazSheetSectionLabel
+import com.arshadshah.nimaz.presentation.components.molecules.NimazTextField
 import com.arshadshah.nimaz.presentation.components.molecules.QuranFrame
 import com.arshadshah.nimaz.presentation.components.molecules.QuranFrameVariant
 import com.arshadshah.nimaz.presentation.components.molecules.TafseerHighlightableText
@@ -681,15 +682,14 @@ private fun HighlightEditorSheetContent(
         Spacer(modifier = Modifier.height(20.dp))
 
         // Note (optional).
-        NimazSheetSectionLabel(text = stringResource(R.string.tafseer_note_optional))
-        OutlinedTextField(
+        NimazTextField(
             value = noteText,
             onValueChange = { noteText = it },
-            placeholder = { Text(stringResource(R.string.tafseer_add_note)) },
-            modifier = Modifier.fillMaxWidth(),
-            minLines = 3,
+            label = stringResource(R.string.tafseer_note_optional),
+            variant = NimazFieldVariant.NOTE,
+            placeholder = stringResource(R.string.tafseer_add_note),
             maxLines = 6,
-            shape = RoundedCornerShape(12.dp)
+            modifier = Modifier.fillMaxWidth(),
         )
 
         Spacer(modifier = Modifier.height(20.dp))

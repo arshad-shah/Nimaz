@@ -2,26 +2,19 @@ package com.arshadshah.nimaz.presentation.components.molecules
 
 import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.arshadshah.nimaz.presentation.theme.NimazShapes
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.theme.ThemeMode
 
@@ -114,11 +107,17 @@ internal fun amountToInput(amount: Double): String = when {
     else -> formatAmountInput(amount.toString())
 }
 
+/** The width an in-row amount field occupies beside its label. */
+private val AmountFieldWidth = 132.dp
+
 /**
  * A currency-aware amount field — the input only.
  *
  * The label and hint belong to the screen: Zakat is the one caller today, and baking its row
- * arrangement into the atom would fix a layout that only one screen needs.
+ * arrangement into the component would fix a layout that only one screen needs. That is also
+ * why it is [NimazFieldDensity.COMPACT] — it sits *beside* a label rather than under one, which
+ * is the whole reason this looked different from [NimazDropdownField] before the two were put
+ * on the same shell.
  *
  * Replaces the per-keystroke `text.toDoubleOrNull() ?: 0.0` the Zakat form used to do, which made
  * a decimal amount literally unenterable — the `.` was parsed away before the next digit arrived.
@@ -127,6 +126,8 @@ internal fun amountToInput(amount: Double): String = when {
  * "1,200 g" are how each is read, and the field that replaced this used to decide between them by
  * comparing its suffix against the string `"$"`. Passing both, or neither, is a call-site bug —
  * hence the requirement stated in the parameter docs rather than a silent fallback.
+ *
+ * Most callers want [NimazAmountField] instead, which owns the `Double` binding as well.
  */
 @Composable
 fun NimazAmountInput(
@@ -140,67 +141,68 @@ fun NimazAmountInput(
     enabled: Boolean = true,
     placeholder: String = "0.00",
 ) {
-    // A recessed well nested inside its row: outlined, never elevated, so it reads as a field
-    // rather than as a card of its own.
-    _root_ide_package_.com.arshadshah.nimaz.presentation.components.atoms.NimazCard(
-        modifier = modifier.width(132.dp),
-        style = com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle.OUTLINED,
-        shape = NimazShapes.small,
+    NimazTextField(
+        value = value,
+        // Grouping is applied on the way in, so the field is fed its own previous output on
+        // every keystroke — which is what [formatAmountInput]'s idempotence is for.
+        onValueChange = { onValueChange(formatAmountInput(it)) },
+        modifier = modifier.width(AmountFieldWidth),
+        variant = NimazFieldVariant.NUMERIC,
+        density = NimazFieldDensity.COMPACT,
+        placeholder = placeholder,
+        prefix = currencySymbol,
+        suffix = unitSuffix,
+        // No clear button: the field is 132dp wide and shares that space with a symbol and a
+        // unit, and an amount is quicker to correct than to re-enter.
+        clearable = false,
         enabled = enabled,
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            if (currencySymbol != null) {
-                Text(
-                    text = currencySymbol,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                Spacer(Modifier.width(4.dp))
-            }
-            val textStyle = MaterialTheme.typography.titleSmall.copy(
-                fontWeight = FontWeight.SemiBold,
-                textAlign = TextAlign.End,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-            BasicTextField(
-                value = value,
-                onValueChange = { onValueChange(formatAmountInput(it)) },
-                enabled = enabled,
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                textStyle = textStyle,
-                cursorBrush = androidx.compose.ui.graphics.SolidColor(
-                    MaterialTheme.colorScheme.primary
-                ),
-                modifier = Modifier.weight(1f),
-                decorationBox = { inner ->
-                    Box(contentAlignment = Alignment.CenterEnd) {
-                        if (value.isEmpty()) {
-                            Text(
-                                text = placeholder,
-                                style = textStyle.copy(
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                        .copy(alpha = 0.45f)
-                                ),
-                            )
-                        }
-                        inner()
-                    }
-                },
-            )
-            if (unitSuffix != null) {
-                Spacer(Modifier.width(4.dp))
-                Text(
-                    text = unitSuffix,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-        }
+    )
+}
+
+/**
+ * The same amount field, bound to a `Double` rather than to text.
+ *
+ * This is what the Zakat calculator and the Zakat settings screen each used to keep a private
+ * copy of — `AmountField` and `PriceField`, byte-for-byte the same nineteen lines, including the
+ * same two comments explaining the same guard. One of them was going to be fixed without the
+ * other eventually.
+ *
+ * The text is **local state**, and that is the whole point. A field that parsed every keystroke
+ * straight to a `Double` and re-rendered the result turned "10." into "10" before the next digit
+ * landed, so a decimal amount was literally unenterable — and a per-gram silver price is nothing
+ * but decimals.
+ *
+ * The sync back the other way is guarded: an incoming [value] only overwrites the text when it
+ * disagrees with what the text already parses to. Without that guard, the ViewModel echoing back
+ * the user's own keystroke would erase the trailing point as fast as it was typed — while
+ * "Clear all" and a restored calculation, which genuinely differ, still win.
+ */
+@Composable
+fun NimazAmountField(
+    value: Double,
+    onValueChange: (Double) -> Unit,
+    modifier: Modifier = Modifier,
+    currencySymbol: String? = null,
+    unitSuffix: String? = null,
+    enabled: Boolean = true,
+    placeholder: String = "0.00",
+) {
+    var text by rememberSaveable { mutableStateOf(amountToInput(value)) }
+    LaunchedEffect(value) {
+        if (parseAmountInput(text) != value) text = amountToInput(value)
     }
+    NimazAmountInput(
+        value = text,
+        onValueChange = { next ->
+            text = next
+            onValueChange(parseAmountInput(next))
+        },
+        modifier = modifier,
+        currencySymbol = currencySymbol,
+        unitSuffix = unitSuffix,
+        enabled = enabled,
+        placeholder = placeholder,
+    )
 }
 
 @Composable

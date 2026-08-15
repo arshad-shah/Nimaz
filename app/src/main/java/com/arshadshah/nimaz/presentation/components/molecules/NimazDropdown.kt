@@ -49,8 +49,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCheckbox
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCheckboxSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCheckboxType
@@ -266,11 +264,18 @@ fun NimazDropdownMenu(
  * Use it for **short** option lists (≤ ~7); for long / searchable / grouped lists use the
  * modal [NimazListPicker] instead.
  *
+ * Drawn on the shared [NimazFieldShell], which is where its own geometry came from — so the
+ * dropdown, [NimazTextField] and [NimazAmountInput] cannot drift apart. The one behaviour that
+ * moved into the shell and changed on the way: the border used to go primary whenever a value
+ * was *set*, and is now primary only while the menu is open. See [NimazFieldShell]'s docs.
+ *
  * @param items the selectable options, type-safe over [T].
  * @param selected the currently selected value, or null when nothing is chosen.
  * @param onSelected called with the chosen value; the menu closes automatically.
  * @param label optional caption rendered above the field.
  * @param placeholder shown in the field when [selected] is null.
+ * @param helper optional always-visible line beneath the field.
+ * @param error a message (not a boolean) shown in place of [helper], outlining the field in red.
  * @param enabled when false the field is dimmed and ignores taps.
  */
 @Composable
@@ -281,6 +286,9 @@ fun <T> NimazDropdownField(
     modifier: Modifier = Modifier,
     label: String? = null,
     placeholder: String = "Select",
+    helper: String? = null,
+    error: String? = null,
+    required: Boolean = false,
     enabled: Boolean = true,
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -288,109 +296,34 @@ fun <T> NimazDropdownField(
     val density = LocalDensity.current
 
     val selectedItem = items.firstOrNull { it.value == selected }
+    val isEmpty = selectedItem == null
     val chevronRotation by animateFloatAsState(
         targetValue = if (expanded) 180f else 0f,
         label = "dropdownChevron"
     )
 
-    Column(modifier = modifier) {
-        if (!label.isNullOrBlank()) {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-        }
+    // The chevron well is the family's one piece of character, and it stays: a 26dp circle at
+    // 12% primary that fills solid and flips as the menu opens.
+    val chevronCircleColor = if (expanded) MaterialTheme.colorScheme.primary
+    else MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
+    val chevronTint = when {
+        !enabled -> MaterialTheme.colorScheme.onSurfaceVariant
+        expanded -> MaterialTheme.colorScheme.onPrimary
+        else -> MaterialTheme.colorScheme.primary
+    }
 
-        Box(modifier = Modifier.fillMaxWidth()) {
-            // ── Trigger field ──────────────────────────────────────────────
-            // Outlined field: teal outline when a value is set (neutral when empty /
-            // disabled); on open the chevron flips up and its circle fills solid teal.
-            val isEmpty = selectedItem == null
-            val borderColor = when {
-                !enabled -> MaterialTheme.colorScheme.outlineVariant
-                expanded -> MaterialTheme.colorScheme.primary
-                isEmpty -> MaterialTheme.colorScheme.outlineVariant
-                else -> MaterialTheme.colorScheme.primary
-            }
-            val chevronCircleColor = if (expanded) MaterialTheme.colorScheme.primary
-            else MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
-            val chevronTint = when {
-                !enabled -> MaterialTheme.colorScheme.onSurfaceVariant
-                expanded -> MaterialTheme.colorScheme.onPrimary
-                isEmpty -> MaterialTheme.colorScheme.onSurfaceVariant
-                else -> MaterialTheme.colorScheme.primary
-            }
-
-            // Built from the shared NimazCard primitive (OUTLINED), so the trigger inherits
-            // the app's card shape/elevation handling rather than a hand-rolled border box.
-            NimazCard(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .onSizeChanged { fieldWidthPx = it.width }
-                    .alpha(if (enabled) 1f else 0.55f),
-                style = NimazCardStyle.OUTLINED,
-                onClick = { expanded = true },
-                enabled = enabled,
-                shape = RoundedCornerShape(14.dp),
-                // NEUTRAL/BASE container; kept on `colors` because the trigger's border
-                // is state-driven (focus/error) and tones do not carry borders.
-                colors = NimazCardDefaults.colors(
-                    border = borderColor,
-                    borderWidth = 1.5.dp,
-                ),
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 14.dp, vertical = 12.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    if (selectedItem?.leadingIcon != null) {
-                        NimazIcon(
-                            imageVector = selectedItem.leadingIcon,
-                            contentDescription = null,
-                            type = NimazIconType.CONTAINED,
-                            containerShape = NimazIconContainerShape.ROUNDED_SQUARE,
-                            tint = MaterialTheme.colorScheme.primary,
-                            containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
-                            containerSize = 32.dp,
-                            iconSize = 18.dp,
-                            cornerRadius = 9.dp,
-                        )
-                        Spacer(modifier = Modifier.width(12.dp))
-                    }
-                    Text(
-                        text = selectedItem?.label ?: placeholder,
-                        style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = FontWeight.Medium,
-                        fontFamily = selectedItem?.textFontFamily,
-                        color = if (isEmpty) MaterialTheme.colorScheme.onSurfaceVariant
-                        else MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.weight(1f)
-                    )
-                    Spacer(modifier = Modifier.width(10.dp))
-                    Box(
-                        modifier = Modifier
-                            .size(26.dp)
-                            .clip(CircleShape)
-                            .background(chevronCircleColor),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        NimazIcon(
-                            imageVector = Icons.Default.KeyboardArrowDown,
-                            contentDescription = null,
-                            tint = chevronTint,
-                            iconSize = 16.dp,
-                            modifier = Modifier.rotate(chevronRotation)
-                        )
-                    }
-                }
-            }
-
-            // ── Anchored popup (the shared menu + row) ─────────────────────
+    NimazFieldShell(
+        modifier = modifier,
+        label = label,
+        required = required,
+        helper = helper,
+        error = error,
+        // A dropdown has no caret, so "the menu is open" is what focus means here.
+        focused = expanded,
+        enabled = enabled,
+        onClick = { expanded = true },
+        boxModifier = Modifier.onSizeChanged { fieldWidthPx = it.width },
+        anchored = {
             NimazDropdownMenu(
                 expanded = expanded,
                 onDismissRequest = { expanded = false },
@@ -412,6 +345,46 @@ fun <T> NimazDropdownField(
                     )
                 }
             }
+        },
+    ) {
+        if (selectedItem?.leadingIcon != null) {
+            NimazIcon(
+                imageVector = selectedItem.leadingIcon,
+                contentDescription = null,
+                type = NimazIconType.CONTAINED,
+                containerShape = NimazIconContainerShape.ROUNDED_SQUARE,
+                tint = MaterialTheme.colorScheme.primary,
+                containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
+                containerSize = 32.dp,
+                iconSize = 18.dp,
+                cornerRadius = 9.dp,
+            )
+            Spacer(modifier = Modifier.width(12.dp))
+        }
+        Text(
+            text = selectedItem?.label ?: placeholder,
+            style = MaterialTheme.typography.bodyLarge,
+            fontWeight = FontWeight.Medium,
+            fontFamily = selectedItem?.textFontFamily,
+            color = if (isEmpty) MaterialTheme.colorScheme.onSurfaceVariant
+            else MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.weight(1f)
+        )
+        Spacer(modifier = Modifier.width(10.dp))
+        Box(
+            modifier = Modifier
+                .size(26.dp)
+                .clip(CircleShape)
+                .background(chevronCircleColor),
+            contentAlignment = Alignment.Center
+        ) {
+            NimazIcon(
+                imageVector = Icons.Default.KeyboardArrowDown,
+                contentDescription = null,
+                tint = chevronTint,
+                iconSize = 16.dp,
+                modifier = Modifier.rotate(chevronRotation)
+            )
         }
     }
 }

@@ -2195,4 +2195,6 @@
     <string name="accuracy_now_label">Précision actuelle</string>
     <string name="back_to_compass">Retour à la boussole</string>
     <string name="point_with_camera">Viser avec la caméra</string>
+    <string name="field_name">Nom</string>
+    <string name="field_notes">Notes</string>
 </resources>
