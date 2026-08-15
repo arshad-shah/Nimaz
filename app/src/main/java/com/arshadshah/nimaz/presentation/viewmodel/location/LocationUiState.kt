@@ -3,6 +3,7 @@ package com.arshadshah.nimaz.presentation.viewmodel.location
 import com.arshadshah.nimaz.domain.model.CityRegion
 import com.arshadshah.nimaz.domain.model.SearchLocation
 import com.arshadshah.nimaz.domain.model.defaultPopularCities
+
 data class LocationUiState(
     val searchQuery: String = "",
     val searchResults: List<SearchLocation> = emptyList(),

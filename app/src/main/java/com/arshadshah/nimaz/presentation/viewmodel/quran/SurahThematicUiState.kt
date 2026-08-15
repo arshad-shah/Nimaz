@@ -54,7 +54,7 @@ data class SurahPassagesState(
             val ayah = trimmed.toIntOrNull()
             return passages.filter { passage ->
                 passage.theme.contains(trimmed, ignoreCase = true) ||
-                    (ayah != null && passage.contains(ayah))
+                        (ayah != null && passage.contains(ayah))
             }
         }
 

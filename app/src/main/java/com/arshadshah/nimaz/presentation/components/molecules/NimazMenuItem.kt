@@ -34,10 +34,8 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
-import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconWell
-import com.arshadshah.nimaz.presentation.components.atoms.NimazIconWellShape
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.theme.asLanguageLabel
 
@@ -107,10 +105,9 @@ fun NimazMenuItem(
             if (icon != null) {
 
                 NimazIconWell(
-                     icon,
+                    icon,
                     contentDescription = null,
-                    shape = NimazIconWellShape.ROUNDED,
-                    accent = iconTint
+                    color = iconTint,
                 )
                 Spacer(modifier = Modifier.width(16.dp))
             }

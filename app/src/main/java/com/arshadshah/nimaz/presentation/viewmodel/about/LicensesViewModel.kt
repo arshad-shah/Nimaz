@@ -4,8 +4,10 @@ import androidx.lifecycle.ViewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.core.monitoring.launchSafely
+import com.arshadshah.nimaz.domain.model.LicenseFamily
+import com.arshadshah.nimaz.domain.model.OpenSourceLibrary
 import com.arshadshah.nimaz.domain.usecase.licenses.LicensesUseCases
-import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorKind
+import com.arshadshah.nimaz.presentation.components.molecules.NimazErrorKind
 import com.arshadshah.nimaz.presentation.viewmodel.UiError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -37,6 +39,20 @@ class LicensesViewModel @Inject constructor(
         when (event) {
             LicensesEvent.LoadLibraries -> loadLibraries()
             is LicensesEvent.LoadLibrary -> loadLibrary(event.id)
+            is LicensesEvent.Search ->
+                _listState.update { it.copy(query = event.query).regrouped() }
+
+            is LicensesEvent.SelectFamily ->
+                _listState.update { it.copy(selectedFamily = event.family).regrouped() }
+
+            LicensesEvent.ToggleGrouping -> _listState.update {
+                val next = when (it.grouping) {
+                    LicenseGrouping.BY_LICENCE -> LicenseGrouping.ALPHABETICAL
+                    LicenseGrouping.ALPHABETICAL -> LicenseGrouping.BY_LICENCE
+                }
+                it.copy(grouping = next).regrouped()
+            }
+
             // Retry serves the list only. The detail screen's failure is NOT_FOUND — a
             // library missing from the bundled list will be missing next time too, so
             // offering "try again" there would be a lie.
@@ -66,7 +82,13 @@ class LicensesViewModel @Inject constructor(
             },
         ) {
             val libraries = useCases.getLibraries()
-            _listState.update { it.copy(libraries = libraries, isLoading = false) }
+            _listState.update {
+                it.copy(
+                    libraries = libraries,
+                    isLoading = false,
+                    familyCounts = libraries.familyCounts(),
+                ).regrouped()
+            }
         }
     }
 
@@ -112,3 +134,71 @@ class LicensesViewModel @Inject constructor(
         const val DOMAIN = "about"
     }
 }
+
+/**
+ * Re-derives [LicensesListUiState.sections] from the list, query, filter and grouping.
+ *
+ * A pure function over the state rather than a `combine` of four flows: the inputs all live in
+ * one `MutableStateFlow` already, and every caller changes exactly one of them, so there is no
+ * ordering to coordinate — only one place that must not be forgotten, which is why the state
+ * class does not expose a way to change those fields without going through here.
+ */
+internal fun LicensesListUiState.regrouped(): LicensesListUiState {
+    val matching = libraries
+        .filter { selectedFamily == null || it.family == selectedFamily }
+        .filter { it.matches(query) }
+
+    val sections = when (grouping) {
+        LicenseGrouping.BY_LICENCE -> matching
+            .groupBy { it.family }
+            // Largest family first — Nimaz is overwhelmingly Apache-2.0, and an alphabetical
+            // family order would open the screen on whichever tiny section sorts first.
+            .entries
+            .sortedWith(compareByDescending<Map.Entry<LicenseFamily, List<OpenSourceLibrary>>> {
+                it.value.size
+            }.thenBy { it.key.ordinal })
+            .map { (family, libraries) ->
+                LicenseSection(family = family, letter = null, libraries = libraries.sortedByName())
+            }
+
+        LicenseGrouping.ALPHABETICAL -> matching
+            .groupBy { it.name.initial() }
+            .entries
+            .sortedBy { it.key }
+            .map { (letter, libraries) ->
+                LicenseSection(family = null, letter = letter, libraries = libraries.sortedByName())
+            }
+    }
+
+    return copy(sections = sections)
+}
+
+/** Counts every family present in the full list, largest first. */
+internal fun List<OpenSourceLibrary>.familyCounts(): List<LicenseFamilyCount> =
+    groupingBy { it.family }
+        .eachCount()
+        .map { (family, count) -> LicenseFamilyCount(family, count) }
+        .sortedWith(compareByDescending<LicenseFamilyCount> { it.count }.thenBy { it.family.ordinal })
+
+/**
+ * Whether a library answers to [query].
+ *
+ * Matches the name, the author and the Maven coordinate. The coordinate is included because
+ * the displayed name is AboutLibraries' human one ("Compose UI") while the thing a developer
+ * knows is `androidx.compose.ui:ui`, and searching for the latter finding nothing reads as a
+ * broken search.
+ */
+private fun OpenSourceLibrary.matches(query: String): Boolean {
+    if (query.isBlank()) return true
+    val needle = query.trim()
+    return name.contains(needle, ignoreCase = true) ||
+            author?.contains(needle, ignoreCase = true) == true ||
+            coordinate.contains(needle, ignoreCase = true)
+}
+
+private fun List<OpenSourceLibrary>.sortedByName(): List<OpenSourceLibrary> =
+    sortedBy { it.name.lowercase() }
+
+/** The section letter for a name; anything not starting with a letter lands under "#". */
+private fun String.initial(): String =
+    firstOrNull()?.takeIf { it.isLetter() }?.uppercase() ?: "#"

@@ -2,9 +2,11 @@ package com.arshadshah.nimaz.presentation.viewmodel.about
 
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.monitoring.RecordingTelemetry
+import com.arshadshah.nimaz.domain.model.LibraryLicense
+import com.arshadshah.nimaz.domain.model.LicenseFamily
 import com.arshadshah.nimaz.domain.model.OpenSourceLibrary
 import com.arshadshah.nimaz.domain.usecase.licenses.LicensesUseCases
-import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorKind
+import com.arshadshah.nimaz.presentation.components.molecules.NimazErrorKind
 import com.google.common.truth.Truth.assertThat
 import io.mockk.coEvery
 import io.mockk.mockk
@@ -33,13 +35,25 @@ class LicensesViewModelTest {
     private val telemetry = RecordingTelemetry()
     private lateinit var useCases: LicensesUseCases
 
-    private val compose = OpenSourceLibrary(
-        id = 1,
-        name = "Compose UI",
-        version = "1.7.0",
-        author = "Google",
+    private val compose = library(1, "Compose UI", "androidx.compose.ui:ui", "Google", "Apache License 2.0")
+    private val adhan = library(2, "Adhan", "com.batoulapps.adhan:adhan2", "Batoul Apps", "MIT License")
+    private val amiri = library(3, "Amiri", "org.amirifont:amiri", "Khaled Hosny", "SIL Open Font License 1.1")
+
+    private fun library(
+        id: Int,
+        name: String,
+        coordinate: String,
+        author: String?,
+        licenseName: String?,
+    ) = OpenSourceLibrary(
+        id = id,
+        name = name,
+        coordinate = coordinate,
+        version = "1.0.0",
+        author = author,
         website = null,
-        licenses = emptyList(),
+        licenses = licenseName?.let { listOf(LibraryLicense(it, url = null, content = null)) }
+            ?: emptyList(),
     )
 
     @Before
@@ -96,6 +110,124 @@ class LicensesViewModelTest {
         val state = viewModel.listState.value
         assertThat(state.error).isNull()
         assertThat(state.libraries).containsExactly(compose)
+    }
+
+    @Test
+    fun `the list opens grouped by licence, largest family first`() = runTest(dispatcher) {
+        // Two Apache libraries against one MIT, deliberately loaded MIT-first: an
+        // insertion-ordered grouping would put the single-entry section at the top.
+        coEvery { useCases.getLibraries() } returns listOf(
+            adhan,
+            compose,
+            library(4, "Room", "androidx.room:room-runtime", "Google", "Apache License 2.0"),
+        )
+
+        val viewModel = loadedViewModel()
+
+        val state = viewModel.listState.value
+        assertThat(state.grouping).isEqualTo(LicenseGrouping.BY_LICENCE)
+        assertThat(state.sections.map { it.family })
+            .containsExactly(LicenseFamily.APACHE_2, LicenseFamily.MIT).inOrder()
+        assertThat(state.sections.first().libraries.map { it.name })
+            .containsExactly("Compose UI", "Room").inOrder()
+    }
+
+    @Test
+    fun `every spelling of a licence lands in one family`() = runTest(dispatcher) {
+        coEvery { useCases.getLibraries() } returns listOf(
+            compose,
+            library(4, "Okhttp", "com.squareup.okhttp3:okhttp", "Square", "Apache-2.0"),
+            library(
+                5, "Timber", "com.jakewharton.timber:timber", "Jake Wharton",
+                "The Apache Software License, Version 2.0",
+            ),
+        )
+
+        val state = loadedViewModel().listState.value
+
+        // The defect this pins: grouping by the declared name put one licence in three sections.
+        assertThat(state.sections).hasSize(1)
+        assertThat(state.familyCounts)
+            .containsExactly(LicenseFamilyCount(LicenseFamily.APACHE_2, 3))
+    }
+
+    @Test
+    fun `search matches the coordinate, not only the display name`() = runTest(dispatcher) {
+        coEvery { useCases.getLibraries() } returns listOf(compose, adhan)
+        val viewModel = loadedViewModel()
+
+        // Nothing displayed says "batoulapps" — the name is "Adhan" — but it is what a
+        // developer looking for the dependency would type.
+        viewModel.onEvent(LicensesEvent.Search("batoulapps"))
+
+        val state = viewModel.listState.value
+        assertThat(state.sections.flatMap { it.libraries }).containsExactly(adhan)
+        assertThat(state.visibleCount).isEqualTo(1)
+        assertThat(state.totalCount).isEqualTo(2)
+    }
+
+    @Test
+    fun `a filter narrows the list but leaves the chip counts alone`() = runTest(dispatcher) {
+        coEvery { useCases.getLibraries() } returns listOf(compose, adhan, amiri)
+        val viewModel = loadedViewModel()
+
+        viewModel.onEvent(LicensesEvent.SelectFamily(LicenseFamily.OFL))
+
+        val state = viewModel.listState.value
+        assertThat(state.sections.flatMap { it.libraries }).containsExactly(amiri)
+        // Counts are over the whole list: a chip whose number moved when you pressed it
+        // would be unreadable.
+        assertThat(state.familyCounts.map { it.count }).containsExactly(1, 1, 1)
+    }
+
+    @Test
+    fun `a query that matches nothing is an empty result, not an empty list`() =
+        runTest(dispatcher) {
+            coEvery { useCases.getLibraries() } returns listOf(compose)
+            val viewModel = loadedViewModel()
+
+            viewModel.onEvent(LicensesEvent.Search("nothing here"))
+
+            val state = viewModel.listState.value
+            assertThat(state.sections).isEmpty()
+            // The screen must offer "nothing matches", not the load-failed error state.
+            assertThat(state.isEmptyResult).isTrue()
+            assertThat(state.error).isNull()
+        }
+
+    @Test
+    fun `toggling the grouping re-sections without losing the filter`() = runTest(dispatcher) {
+        coEvery { useCases.getLibraries() } returns listOf(compose, adhan, amiri)
+        val viewModel = loadedViewModel()
+        viewModel.onEvent(LicensesEvent.SelectFamily(LicenseFamily.APACHE_2))
+
+        viewModel.onEvent(LicensesEvent.ToggleGrouping)
+
+        val state = viewModel.listState.value
+        assertThat(state.grouping).isEqualTo(LicenseGrouping.ALPHABETICAL)
+        assertThat(state.sections.map { it.letter }).containsExactly("C")
+        assertThat(state.selectedFamily).isEqualTo(LicenseFamily.APACHE_2)
+    }
+
+    @Test
+    fun `a library declaring no licence is grouped, not dropped`() = runTest(dispatcher) {
+        coEvery { useCases.getLibraries() } returns listOf(
+            compose,
+            library(9, "Mystery", "com.example:mystery", author = null, licenseName = null),
+        )
+
+        val state = loadedViewModel().listState.value
+
+        assertThat(state.sections.flatMap { it.libraries }).hasSize(2)
+        assertThat(state.familyCounts.map { it.family })
+            .containsExactly(LicenseFamily.APACHE_2, LicenseFamily.OTHER)
+    }
+
+    private fun kotlinx.coroutines.test.TestScope.loadedViewModel(): LicensesViewModel {
+        val viewModel = LicensesViewModel(useCases, telemetry)
+        viewModel.onEvent(LicensesEvent.LoadLibraries)
+        advanceUntilIdle()
+        return viewModel
     }
 
     @Test

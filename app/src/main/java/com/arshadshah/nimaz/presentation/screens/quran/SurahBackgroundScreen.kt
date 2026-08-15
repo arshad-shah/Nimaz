@@ -1,7 +1,6 @@
 package com.arshadshah.nimaz.presentation.screens.quran
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -39,16 +38,16 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
-import com.arshadshah.nimaz.presentation.components.atoms.icon
-import com.arshadshah.nimaz.presentation.components.atoms.labelRes
-import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorDefaults
-import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorState
-import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
+import com.arshadshah.nimaz.presentation.components.molecules.NimazErrorDefaults
+import com.arshadshah.nimaz.presentation.components.molecules.NimazErrorState
+import com.arshadshah.nimaz.presentation.components.molecules.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.molecules.ThematicText
 import com.arshadshah.nimaz.presentation.components.organisms.NimazScrollSpyIndex
 import com.arshadshah.nimaz.presentation.components.organisms.NimazTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.rememberScrollSpyIndex
+import com.arshadshah.nimaz.presentation.foundation.tokens.icon
+import com.arshadshah.nimaz.presentation.foundation.tokens.labelRes
 import com.arshadshah.nimaz.presentation.viewmodel.quran.SurahThematicEvent
 import com.arshadshah.nimaz.presentation.viewmodel.quran.SurahThematicViewModel
 import kotlinx.coroutines.launch

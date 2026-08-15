@@ -1,9 +1,8 @@
 package com.arshadshah.nimaz.presentation.viewmodel.prayer
 
 import com.arshadshah.nimaz.domain.model.FallbackLocation
-import java.time.Instant
-import java.time.LocalDate
 import com.arshadshah.nimaz.presentation.model.PrayerTimeDisplay
+import java.time.LocalDate
 
 /**
  * Drives the dedicated Prayer Times screen: a day pager over the prayer

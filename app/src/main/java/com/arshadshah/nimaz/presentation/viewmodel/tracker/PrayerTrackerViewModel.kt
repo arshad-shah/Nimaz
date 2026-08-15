@@ -9,9 +9,7 @@ import com.arshadshah.nimaz.core.util.toUtcMidnightMillis
 import com.arshadshah.nimaz.domain.model.Location
 import com.arshadshah.nimaz.domain.model.PrayerName
 import com.arshadshah.nimaz.domain.model.PrayerRecord
-import com.arshadshah.nimaz.domain.model.PrayerStats
 import com.arshadshah.nimaz.domain.model.PrayerStatus
-import com.arshadshah.nimaz.domain.model.PrayerTimes
 import com.arshadshah.nimaz.domain.usecase.PrayerUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -102,6 +100,7 @@ class PrayerTrackerViewModel @Inject constructor(
                 telemetry.featureUsed(DOMAIN, "select_date")
                 selectDate(event.date)
             }
+
             is PrayerTrackerEvent.SetPrayerStatus -> {
                 telemetry.prayerTracked(
                     event.prayerName.name,
@@ -115,18 +114,22 @@ class PrayerTrackerViewModel @Inject constructor(
                 telemetry.featureUsed(DOMAIN, "confirm_unrecorded_missed")
                 confirmUnrecordedAsMissed(event.from, event.to)
             }
+
             is PrayerTrackerEvent.MarkQadaCompleted -> {
                 telemetry.featureUsed(DOMAIN, "qada_completed")
                 markQadaCompleted(event.record)
             }
+
             is PrayerTrackerEvent.SetStatsPeriod -> {
                 telemetry.featureUsed(DOMAIN, "set_stats_period")
                 setStatsPeriod(event.period)
             }
+
             is PrayerTrackerEvent.LoadHistory -> {
                 telemetry.featureUsed(DOMAIN, "load_history")
                 loadHistory(event.startDate, event.endDate)
             }
+
             PrayerTrackerEvent.LoadToday -> loadToday()
             PrayerTrackerEvent.LoadStats -> loadStats()
             PrayerTrackerEvent.LoadQadaPrayers -> loadQadaPrayers()

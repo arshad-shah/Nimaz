@@ -103,7 +103,7 @@ private fun CitationSample() {
         CitationRow(
             reference = "2:153",
             preview = "You who believe, seek help through patience and prayer. " +
-                "God is with the patient.",
+                    "God is with the patient.",
             onClick = {},
         )
         CitationRow(reference = "3:200", onClick = {})

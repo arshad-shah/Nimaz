@@ -35,7 +35,6 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazDivider
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconWell
-import com.arshadshah.nimaz.presentation.components.atoms.NimazIconWellShape
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconWellSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSwitch
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
@@ -135,9 +134,8 @@ fun NimazAccordion(
                 if (leadingIcon != null) {
                     NimazIconWell(
                         icon = leadingIcon,
-                        tone = NimazTone.ACCENT,
+                        color = MaterialTheme.colorScheme.primary,
                         size = NimazIconWellSize.SMALL,
-                        shape = NimazIconWellShape.ROUNDED
                     )
                     Spacer(modifier = Modifier.width(12.dp))
                 }

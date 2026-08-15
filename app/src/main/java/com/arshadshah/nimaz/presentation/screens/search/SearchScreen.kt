@@ -60,8 +60,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.navigation.Route
 import com.arshadshah.nimaz.domain.model.CitationId
+import com.arshadshah.nimaz.domain.model.NameCatalog
 import com.arshadshah.nimaz.domain.model.Proof
 import com.arshadshah.nimaz.domain.model.ProofSource
+import com.arshadshah.nimaz.domain.model.UnifiedSearchResult
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
@@ -75,27 +77,24 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconWell
-import com.arshadshah.nimaz.presentation.components.atoms.NimazIconWellShape
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconWellSize
-import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingState
-import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
-import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorDefaults
-import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorState
-import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorVariant
 import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
+import com.arshadshah.nimaz.presentation.components.molecules.NimazErrorDefaults
+import com.arshadshah.nimaz.presentation.components.molecules.NimazErrorState
+import com.arshadshah.nimaz.presentation.components.molecules.NimazErrorVariant
+import com.arshadshah.nimaz.presentation.components.molecules.NimazLoadingState
+import com.arshadshah.nimaz.presentation.components.molecules.NimazLoadingVariant
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazSearchBar
 import com.arshadshah.nimaz.presentation.viewmodel.ai.AskEvent
 import com.arshadshah.nimaz.presentation.viewmodel.ai.AskPhase
 import com.arshadshah.nimaz.presentation.viewmodel.ai.AskViewModel
 import com.arshadshah.nimaz.presentation.viewmodel.search.SearchEvent
-import com.arshadshah.nimaz.domain.model.NameCatalog
 import com.arshadshah.nimaz.presentation.viewmodel.search.SearchFilter
-import com.arshadshah.nimaz.presentation.viewmodel.search.accepts
 import com.arshadshah.nimaz.presentation.viewmodel.search.SearchViewModel
-import com.arshadshah.nimaz.domain.model.UnifiedSearchResult
+import com.arshadshah.nimaz.presentation.viewmodel.search.accepts
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -861,9 +860,8 @@ private fun SearchResultCard(
             ) {
                 NimazIconWell(
                     icon = icon,
-                    accent = iconColor,
-                    size = NimazIconWellSize.MEDIUM,
-                    shape = NimazIconWellShape.ROUNDED
+                    color = iconColor,
+                    size = NimazIconWellSize.STANDARD,
                 )
 
                 Spacer(modifier = Modifier.width(12.dp))

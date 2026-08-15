@@ -1,24 +1,18 @@
 package com.arshadshah.nimaz.presentation.viewmodel.quran
 
-import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.core.monitoring.launchSafely
-import com.arshadshah.nimaz.domain.model.DailyLogEntry
-import com.arshadshah.nimaz.domain.model.JuzProgressInfo
-import com.arshadshah.nimaz.domain.model.Khatam
-import com.arshadshah.nimaz.domain.model.KhatamInsights
-import com.arshadshah.nimaz.domain.model.KhatamStats
-import com.arshadshah.nimaz.domain.model.KhatamStatus
 import com.arshadshah.nimaz.core.text.StringProvider
+import com.arshadshah.nimaz.domain.model.Khatam
+import com.arshadshah.nimaz.domain.model.KhatamStatus
 import com.arshadshah.nimaz.domain.model.Surah
-import com.arshadshah.nimaz.domain.usecase.khatam.GetTodaysPortion
-import com.arshadshah.nimaz.domain.usecase.khatam.KhatamPortion
 import com.arshadshah.nimaz.domain.usecase.KhatamUseCases
 import com.arshadshah.nimaz.domain.usecase.QuranUseCases
+import com.arshadshah.nimaz.domain.usecase.khatam.GetTodaysPortion
+import com.arshadshah.nimaz.domain.usecase.khatam.KhatamPortion
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,7 +23,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /** Whether the shared form is creating a new khatam or editing an existing one. */
@@ -457,7 +450,11 @@ class KhatamViewModel @Inject constructor(
     }
 
     private fun launchAction(block: suspend () -> Unit) {
-        launchSafely(telemetry, AppAnalytics.Feature.KHATAM, "launch_action") { runCatching { block() } }
+        launchSafely(
+            telemetry,
+            AppAnalytics.Feature.KHATAM,
+            "launch_action"
+        ) { runCatching { block() } }
     }
 
     private companion object {

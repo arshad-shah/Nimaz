@@ -22,16 +22,20 @@ class AsmaUnNabiViewModel @Inject constructor(
     feature = AppAnalytics.Feature.ASMA_UN_NABI,
 )
 
-private class AsmaUnNabiSource(private val useCases: AsmaUnNabiUseCases) : CatalogSource<AsmaUnNabi> {
+private class AsmaUnNabiSource(private val useCases: AsmaUnNabiUseCases) :
+    CatalogSource<AsmaUnNabi> {
     override fun all(): Flow<List<AsmaUnNabi>> = useCases.getAllNames()
     override fun favourites(): Flow<List<AsmaUnNabi>> = useCases.getFavorites()
     override suspend fun byId(id: Int): AsmaUnNabi? = useCases.getNameById(id)
-    override suspend fun toggleFavourite(id: Int) { useCases.toggleFavorite(id) }
+    override suspend fun toggleFavourite(id: Int) {
+        useCases.toggleFavorite(id)
+    }
+
     override fun idOf(item: AsmaUnNabi): Int = item.id
 
     override fun matches(item: AsmaUnNabi, query: String): Boolean =
         item.nameArabic.contains(query, ignoreCase = true) ||
-            item.nameTransliteration.contains(query, ignoreCase = true) ||
-            item.nameEnglish.contains(query, ignoreCase = true) ||
-            item.meaning.contains(query, ignoreCase = true)
+                item.nameTransliteration.contains(query, ignoreCase = true) ||
+                item.nameEnglish.contains(query, ignoreCase = true) ||
+                item.meaning.contains(query, ignoreCase = true)
 }

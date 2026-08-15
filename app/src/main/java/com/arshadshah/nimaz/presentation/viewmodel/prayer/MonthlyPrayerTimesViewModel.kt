@@ -1,30 +1,27 @@
 package com.arshadshah.nimaz.presentation.viewmodel.prayer
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.di.DefaultDispatcher
-import com.arshadshah.nimaz.core.time.TodayProvider
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.core.monitoring.launchSafely
+import com.arshadshah.nimaz.core.time.TodayProvider
 import com.arshadshah.nimaz.core.util.HijriDateCalculator
+import com.arshadshah.nimaz.domain.model.DayPrayerTimes
 import com.arshadshah.nimaz.domain.model.PrayerCalculationSettings
 import com.arshadshah.nimaz.domain.model.PrayerType
 import com.arshadshah.nimaz.domain.usecase.PrayerUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
-import java.time.LocalDate
-import java.time.YearMonth
-import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.launch
-import com.arshadshah.nimaz.domain.model.DayPrayerTimes
+import java.time.LocalDate
+import java.time.YearMonth
+import javax.inject.Inject
 
 @HiltViewModel
 class MonthlyPrayerTimesViewModel @Inject constructor(
@@ -65,8 +62,9 @@ class MonthlyPrayerTimesViewModel @Inject constructor(
         launchSafely(telemetry, AppAnalytics.Feature.PRAYER_TIMES, "observe_today") {
             todayProvider.todayChanges.collect { today ->
                 val month = YearMonth.from(today)
-                val wasOnCurrentMonth = _state.value.currentMonth?.let { it == month.minusMonths(1) }
-                    ?: true
+                val wasOnCurrentMonth =
+                    _state.value.currentMonth?.let { it == month.minusMonths(1) }
+                        ?: true
                 _state.update {
                     it.copy(
                         currentMonth = if (it.currentMonth == null || wasOnCurrentMonth) {

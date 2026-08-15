@@ -21,9 +21,9 @@ import androidx.compose.ui.res.stringResource
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.AyahReference
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
-import com.arshadshah.nimaz.presentation.components.atoms.NimazToneColors
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazPalette
+import com.arshadshah.nimaz.presentation.theme.NimazToneColors
 
 /** What the ayah sheet can do, in one bundle so the host wires them once. */
 data class AyahSheetActions(

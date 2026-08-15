@@ -1,10 +1,5 @@
 package com.arshadshah.nimaz.presentation.screens.zakat
 
-import com.arshadshah.nimaz.presentation.components.molecules.NimazAccordion
-import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuItem
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -27,8 +22,8 @@ import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.IosShare
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.IosShare
 import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.Receipt
 import androidx.compose.material.icons.filled.Refresh
@@ -44,15 +39,18 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -65,34 +63,35 @@ import com.arshadshah.nimaz.core.util.HijriDateCalculator
 import com.arshadshah.nimaz.core.util.currencySymbolOf
 import com.arshadshah.nimaz.core.util.formatCurrency
 import com.arshadshah.nimaz.domain.model.NisabType
-import com.arshadshah.nimaz.presentation.components.atoms.NimazAmountInput
-import com.arshadshah.nimaz.presentation.components.atoms.amountToInput
-import com.arshadshah.nimaz.presentation.components.atoms.parseAmountInput
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
-import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconButtonStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconWell
-import com.arshadshah.nimaz.presentation.components.atoms.NimazIconWellShape
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconWellSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
-import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorDefaults
-import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorState
-import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
+import com.arshadshah.nimaz.presentation.components.molecules.NimazAccordion
+import com.arshadshah.nimaz.presentation.components.molecules.NimazAmountInput
+import com.arshadshah.nimaz.presentation.components.molecules.NimazErrorDefaults
+import com.arshadshah.nimaz.presentation.components.molecules.NimazErrorState
+import com.arshadshah.nimaz.presentation.components.molecules.NimazErrorVariant
+import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuItem
 import com.arshadshah.nimaz.presentation.components.molecules.ZakatHeroStat
 import com.arshadshah.nimaz.presentation.components.molecules.ZakatHeroStatus
 import com.arshadshah.nimaz.presentation.components.molecules.ZakatSummaryHero
+import com.arshadshah.nimaz.presentation.components.molecules.amountToInput
+import com.arshadshah.nimaz.presentation.components.molecules.parseAmountInput
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.currentWindowSizeClass
 import com.arshadshah.nimaz.presentation.theme.isCompact
+import com.arshadshah.nimaz.presentation.viewmodel.tools.ZakatCalculatorUiState
 import com.arshadshah.nimaz.presentation.viewmodel.tools.ZakatEvent
 import com.arshadshah.nimaz.presentation.viewmodel.tools.ZakatViewModel
-import com.arshadshah.nimaz.presentation.viewmodel.tools.ZakatCalculatorUiState
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -335,8 +334,8 @@ private const val HeroCollapseThresholdPx = 120
  */
 private fun ZakatCalculatorUiState.assetsTotal(): Double =
     assets.total +
-        (assets.goldGrams * goldPricePerGram) +
-        (assets.silverGrams * silverPricePerGram)
+            (assets.goldGrams * goldPricePerGram) +
+            (assets.silverGrams * silverPricePerGram)
 
 /**
  * The share action, built once for both size classes.
@@ -802,9 +801,8 @@ private fun InputCard(
         ) {
             NimazIconWell(
                 icon = icon,
-                accent = iconTint,
-                size = NimazIconWellSize.MEDIUM,
-                shape = NimazIconWellShape.ROUNDED
+                color = iconTint,
+                size = NimazIconWellSize.STANDARD,
             )
 
             // Label and hint

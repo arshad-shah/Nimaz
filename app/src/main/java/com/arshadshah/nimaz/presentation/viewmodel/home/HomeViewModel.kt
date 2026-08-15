@@ -1,42 +1,32 @@
 package com.arshadshah.nimaz.presentation.viewmodel.home
 
-import android.os.Build
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
-import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorKind
-import com.arshadshah.nimaz.presentation.viewmodel.UiError
 import com.arshadshah.nimaz.core.monitoring.Telemetry
-import com.arshadshah.nimaz.core.text.StringProvider
-import com.arshadshah.nimaz.domain.repository.PermissionChecker
-import com.arshadshah.nimaz.domain.repository.PowerSettings
-import com.arshadshah.nimaz.domain.repository.WidgetRefresher
 import com.arshadshah.nimaz.core.monitoring.launchSafely
+import com.arshadshah.nimaz.core.text.StringProvider
+import com.arshadshah.nimaz.core.time.TodayProvider
 import com.arshadshah.nimaz.core.util.HijriDateCalculator
 import com.arshadshah.nimaz.core.util.MILLIS_PER_DAY
 import com.arshadshah.nimaz.core.util.NextWorshipResolver
 import com.arshadshah.nimaz.core.util.WorshipReminderContent
-import com.arshadshah.nimaz.core.util.currentPrayerIndexAt
-import com.arshadshah.nimaz.core.util.nextPrayerIndexAt
 import com.arshadshah.nimaz.core.util.toUtcMidnightMillis
-import com.arshadshah.nimaz.domain.model.Announcement
 import com.arshadshah.nimaz.domain.model.AnnouncementAction
 import com.arshadshah.nimaz.domain.model.AnnouncementType
-import com.arshadshah.nimaz.domain.model.AsrCalculation
-import com.arshadshah.nimaz.domain.model.CalculationMethod
 import com.arshadshah.nimaz.domain.model.FallbackLocation
 import com.arshadshah.nimaz.domain.model.FastStatus
 import com.arshadshah.nimaz.domain.model.HadithGrade
-import com.arshadshah.nimaz.domain.model.HighLatitudeRule
-import com.arshadshah.nimaz.domain.model.HomeEventCard
+import com.arshadshah.nimaz.domain.model.PrayerCalculationSettings
 import com.arshadshah.nimaz.domain.model.PrayerName
 import com.arshadshah.nimaz.domain.model.PrayerStatus
 import com.arshadshah.nimaz.domain.model.PrayerTime
-import com.arshadshah.nimaz.domain.model.PrayerCalculationSettings
 import com.arshadshah.nimaz.domain.model.PrayerType
 import com.arshadshah.nimaz.domain.model.WorshipReminderOccurrence
-import com.arshadshah.nimaz.domain.model.resolveLocation
+import com.arshadshah.nimaz.domain.repository.PermissionChecker
+import com.arshadshah.nimaz.domain.repository.PowerSettings
+import com.arshadshah.nimaz.domain.repository.WidgetRefresher
 import com.arshadshah.nimaz.domain.repository.settings.LocationSettings
 import com.arshadshah.nimaz.domain.usecase.AnnouncementUseCases
 import com.arshadshah.nimaz.domain.usecase.DuaUseCases
@@ -44,35 +34,32 @@ import com.arshadshah.nimaz.domain.usecase.FastingUseCases
 import com.arshadshah.nimaz.domain.usecase.HadithUseCases
 import com.arshadshah.nimaz.domain.usecase.ObserveEventCardsUseCase
 import com.arshadshah.nimaz.domain.usecase.PrayerUseCases
+import com.arshadshah.nimaz.presentation.components.molecules.NimazErrorKind
 import com.arshadshah.nimaz.presentation.components.organisms.WorshipCardUi
+import com.arshadshah.nimaz.presentation.model.DailyDua
+import com.arshadshah.nimaz.presentation.model.PrayerTimeDisplay
+import com.arshadshah.nimaz.presentation.model.withClockState
+import com.arshadshah.nimaz.presentation.viewmodel.UiError
 import dagger.hilt.android.lifecycle.HiltViewModel
-import java.time.DayOfWeek
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.LocalTime
-import java.time.ZoneId
-import javax.inject.Inject
-import com.arshadshah.nimaz.core.time.TodayProvider
-import kotlin.time.Duration
-import kotlin.time.Instant
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import com.arshadshah.nimaz.presentation.model.DailyDua
-import com.arshadshah.nimaz.presentation.model.PrayerTimeDisplay
-import com.arshadshah.nimaz.presentation.model.withClockState
+import java.time.DayOfWeek
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.ZoneId
+import javax.inject.Inject
+import kotlin.time.Instant
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
@@ -211,11 +198,12 @@ class HomeViewModel @Inject constructor(
         // bound to that epoch — so this needs re-invoking at rollover exactly as the fasting
         // collector does, or Home's prayer card stays bound to the day the app was opened.
         prayerRecordsJob?.cancel()
-        prayerRecordsJob = launchSafely(telemetry, AppAnalytics.Feature.HOME, "load_prayer_records") {
-            prayerUseCases.getTodayPrayerRecords().collect { records ->
-                _prayerRecords.update { records }
+        prayerRecordsJob =
+            launchSafely(telemetry, AppAnalytics.Feature.HOME, "load_prayer_records") {
+                prayerUseCases.getTodayPrayerRecords().collect { records ->
+                    _prayerRecords.update { records }
+                }
             }
-        }
     }
 
     private fun observeFastingStatus() {
@@ -291,6 +279,7 @@ class HomeViewModel @Inject constructor(
                 _state.update {
                     it.copy(
                         dailyDua = DailyDua(
+                            duaId = dua.id,
                             title = dua.titleEnglish,
                             arabic = dua.textArabic,
                             translation = dua.textEnglish,
@@ -315,6 +304,7 @@ class HomeViewModel @Inject constructor(
             // it counted taps that toggled nothing: Sunrise is not a prayer and returns early,
             // so the dashboard has been reporting toggles that never happened.
             is HomeEvent.TogglePrayerStatus -> togglePrayerStatus(event.prayerType)
+            is HomeEvent.SetPrayerStatus -> setPrayerStatus(event.prayerType, event.status)
             HomeEvent.DismissAnnouncement -> dismissAnnouncement()
             HomeEvent.AnnouncementCtaClicked -> logAnnouncementCta()
         }
@@ -383,6 +373,27 @@ class HomeViewModel @Inject constructor(
             }
 
             // Notify widget to refresh via WorkManager
+            widgets.refreshPrayerTracker()
+        }
+    }
+
+    private fun setPrayerStatus(prayerType: PrayerType, status: PrayerStatus) {
+        if (prayerType == PrayerType.SUNRISE) return
+        launchSafely(telemetry, AppAnalytics.Feature.HOME, "set_prayer_status") {
+            val prayerName = PrayerName.valueOf(prayerType.name)
+            val todayEpoch = todayProvider.today().toUtcMidnightMillis()
+            val prayedAt = if (status == PrayerStatus.PRAYED || status == PrayerStatus.LATE) System.currentTimeMillis() else null
+            prayerUseCases.updatePrayerStatus(todayEpoch, prayerName, status, prayedAt, false)
+            telemetry.prayerTracked(prayerName.name, status.name, isJamaah = false)
+            _prayerRecords.update { it + (prayerName to status) }
+            _state.update { state ->
+                state.copy(
+                    prayerTimes = state.prayerTimes.map { display ->
+                        val name = PrayerName.valueOf(display.type.name)
+                        display.copy(prayerStatus = _prayerRecords.value[name] ?: PrayerStatus.NOT_PRAYED)
+                    }
+                )
+            }
             widgets.refreshPrayerTracker()
         }
     }
@@ -589,32 +600,33 @@ class HomeViewModel @Inject constructor(
 
     private fun scheduleWorshipRefresh() {
         worshipJob?.cancel()
-        worshipJob = launchSafely(telemetry, AppAnalytics.Feature.HOME, "schedule_worship_refresh") {
-            // Not a tick loop: exactly one wake per transition. `delay` is cancellable, so
-            // cancelling the job (or the scope) exits here without an isActive guard.
-            while (true) {
-                // Guarded end-to-end, including the sleep arithmetic. This runs from a bare
-                // viewModelScope coroutine, so anything escaping here reaches the uncaught
-                // handler and crashes the app — the card is optional, so on failure we show
-                // nothing and retry on the slow fallback instead.
-                val millis = runCatching {
-                    refreshWorshipCard()
-                    val expiry = worshipOccurrence?.let { it.windowEnd ?: it.eventAt }
-                    // Sleep until the surfaced occurrence stops being current. With nothing to
-                    // show, fall back to a slow re-check so a newly-enabled reminder still
-                    // appears without a restart.
-                    if (expiry == null) {
-                        FALLBACK_WORSHIP_RECHECK_MS
-                    } else {
-                        java.time.Duration.between(LocalDateTime.now(), expiry)
-                            .toMillis()
-                            .coerceIn(MIN_WORSHIP_RECHECK_MS, FALLBACK_WORSHIP_RECHECK_MS)
-                    }
-                }.onFailure { telemetry.recordException(it) }
-                    .getOrDefault(FALLBACK_WORSHIP_RECHECK_MS)
-                delay(millis)
+        worshipJob =
+            launchSafely(telemetry, AppAnalytics.Feature.HOME, "schedule_worship_refresh") {
+                // Not a tick loop: exactly one wake per transition. `delay` is cancellable, so
+                // cancelling the job (or the scope) exits here without an isActive guard.
+                while (true) {
+                    // Guarded end-to-end, including the sleep arithmetic. This runs from a bare
+                    // viewModelScope coroutine, so anything escaping here reaches the uncaught
+                    // handler and crashes the app — the card is optional, so on failure we show
+                    // nothing and retry on the slow fallback instead.
+                    val millis = runCatching {
+                        refreshWorshipCard()
+                        val expiry = worshipOccurrence?.let { it.windowEnd ?: it.eventAt }
+                        // Sleep until the surfaced occurrence stops being current. With nothing to
+                        // show, fall back to a slow re-check so a newly-enabled reminder still
+                        // appears without a restart.
+                        if (expiry == null) {
+                            FALLBACK_WORSHIP_RECHECK_MS
+                        } else {
+                            java.time.Duration.between(LocalDateTime.now(), expiry)
+                                .toMillis()
+                                .coerceIn(MIN_WORSHIP_RECHECK_MS, FALLBACK_WORSHIP_RECHECK_MS)
+                        }
+                    }.onFailure { telemetry.recordException(it) }
+                        .getOrDefault(FALLBACK_WORSHIP_RECHECK_MS)
+                    delay(millis)
+                }
             }
-        }
     }
 
     /**

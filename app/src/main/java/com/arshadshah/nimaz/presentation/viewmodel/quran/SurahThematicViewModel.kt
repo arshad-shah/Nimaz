@@ -3,13 +3,10 @@ package com.arshadshah.nimaz.presentation.viewmodel.quran
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.domain.model.AyahTheme
-import com.arshadshah.nimaz.domain.model.Surah
-import com.arshadshah.nimaz.domain.model.SurahOverview
-import com.arshadshah.nimaz.domain.repository.settings.QuranPreferences
-import com.arshadshah.nimaz.domain.usecase.QuranUseCases
 import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.core.monitoring.launchSafely
+import com.arshadshah.nimaz.domain.repository.settings.QuranPreferences
+import com.arshadshah.nimaz.domain.usecase.QuranUseCases
 import com.arshadshah.nimaz.presentation.viewmodel.UiError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job

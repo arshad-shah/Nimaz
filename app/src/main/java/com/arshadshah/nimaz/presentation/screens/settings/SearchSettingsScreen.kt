@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.presentation.screens.settings
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -7,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.annotation.StringRes
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
@@ -42,12 +42,12 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazAccordion
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDialog
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDialogCancelButton
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDialogDestructiveButton
-import com.arshadshah.nimaz.presentation.components.molecules.NimazListPicker
+import com.arshadshah.nimaz.presentation.components.organisms.NimazListPicker
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuItem
 import com.arshadshah.nimaz.presentation.components.molecules.NimazNumberStepper
 import com.arshadshah.nimaz.presentation.components.molecules.NimazNumberStepperVariant
-import com.arshadshah.nimaz.presentation.components.molecules.NimazPickerItem
+import com.arshadshah.nimaz.presentation.components.organisms.NimazPickerItem
 import com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsItem
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.viewmodel.settings.SearchSettingsEvent

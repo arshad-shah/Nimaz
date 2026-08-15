@@ -42,7 +42,7 @@ import com.arshadshah.nimaz.presentation.theme.ThemeMode
  * Prefer this over a spinner whenever the shape of the incoming content is known:
  * a skeleton holds the layout still, so the screen does not jump when data
  * arrives, and it reads as "this is loading" rather than "the app is busy".
- * A spinner ([NimazLoadingState]) is the right choice only when the result's
+ * A spinner ([com.arshadshah.nimaz.presentation.components.molecules.NimazLoadingState]) is the right choice only when the result's
  * shape is unknown or the wait is very short.
  *
  * Honours [LocalAnimationsEnabled]: with animations off the block renders as a

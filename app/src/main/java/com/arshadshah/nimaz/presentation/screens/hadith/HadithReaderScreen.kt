@@ -75,16 +75,16 @@ import com.arshadshah.nimaz.domain.model.HadithGrade
 import com.arshadshah.nimaz.presentation.components.atoms.HadithArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
-import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorDefaults
-import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorState
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
-import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.atoms.NimazPager
 import com.arshadshah.nimaz.presentation.components.atoms.NimazPillActionButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.atoms.rememberNimazPagerState
+import com.arshadshah.nimaz.presentation.components.molecules.NimazErrorDefaults
+import com.arshadshah.nimaz.presentation.components.molecules.NimazErrorState
+import com.arshadshah.nimaz.presentation.components.molecules.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.molecules.NimazReaderBottomBar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.AdaptiveSpacing
@@ -134,6 +134,7 @@ fun HadithReaderScreen(
             // No book, and no "book_chapter" composite: a hadithId, from search.
             bookId.isEmpty() && !chapterId.contains("_") ->
                 viewModel.onEvent(HadithEvent.LoadHadithById(chapterId))
+
             else -> viewModel.onEvent(HadithEvent.LoadChapter(chapterId))
         }
     }

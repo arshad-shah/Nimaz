@@ -20,6 +20,7 @@ import kotlin.time.Instant
  * the current time of day (morning / evening / before sleep adhkar).
  */
 data class DailyDua(
+    val duaId: String,
     val title: String,
     val arabic: String,
     val translation: String,

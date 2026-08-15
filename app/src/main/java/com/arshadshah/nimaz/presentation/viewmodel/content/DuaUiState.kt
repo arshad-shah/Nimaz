@@ -1,14 +1,13 @@
 package com.arshadshah.nimaz.presentation.viewmodel.content
 
-import androidx.annotation.StringRes
 import androidx.compose.ui.text.font.FontFamily
 import com.arshadshah.nimaz.domain.model.Dua
 import com.arshadshah.nimaz.domain.model.DuaBookmark
 import com.arshadshah.nimaz.domain.model.DuaCategory
-import com.arshadshah.nimaz.presentation.viewmodel.UiError
 import com.arshadshah.nimaz.domain.model.DuaProgress
 import com.arshadshah.nimaz.domain.model.DuaSearchResult
 import com.arshadshah.nimaz.presentation.theme.AmiriFontFamily
+import com.arshadshah.nimaz.presentation.viewmodel.UiError
 
 data class DuaCollectionUiState(
     val categories: List<DuaCategory> = emptyList(),

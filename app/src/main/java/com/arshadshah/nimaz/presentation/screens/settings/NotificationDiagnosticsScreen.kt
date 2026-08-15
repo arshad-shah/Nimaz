@@ -13,13 +13,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BatteryAlert
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -34,18 +32,17 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.util.NotificationDiagnostics
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
-import com.arshadshah.nimaz.presentation.components.atoms.NimazBanner
-import com.arshadshah.nimaz.presentation.components.atoms.NimazBannerVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
+import com.arshadshah.nimaz.presentation.components.molecules.NimazBanner
+import com.arshadshah.nimaz.presentation.components.molecules.NimazBannerVariant
 import com.arshadshah.nimaz.presentation.components.molecules.NimazConfirmDialog
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuItem
@@ -184,10 +181,8 @@ fun NotificationDiagnosticsScreen(
             // it is guidance about the checks above, so it should read as one.
             item {
                 NimazBanner(
-                    message = stringResource(R.string.notification_settings_battery_explanation),
+                    title = stringResource(R.string.notification_settings_battery_explanation),
                     variant = NimazBannerVariant.INFO,
-                    icon = Icons.Default.Info,
-                    showBorder = true,
                     modifier = Modifier.fillMaxWidth()
                 )
             }

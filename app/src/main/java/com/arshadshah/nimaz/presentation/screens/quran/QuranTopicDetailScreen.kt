@@ -1,7 +1,6 @@
 package com.arshadshah.nimaz.presentation.screens.quran
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -36,7 +35,6 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
 import com.arshadshah.nimaz.presentation.components.atoms.NimazChip
 import com.arshadshah.nimaz.presentation.components.atoms.NimazChipVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconButton
-import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
@@ -44,6 +42,7 @@ import com.arshadshah.nimaz.presentation.components.molecules.CitationRow
 import com.arshadshah.nimaz.presentation.components.molecules.HOME_INDEX
 import com.arshadshah.nimaz.presentation.components.molecules.NimazBreadcrumbBar
 import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
+import com.arshadshah.nimaz.presentation.components.molecules.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.molecules.NimazTreeRow
 import com.arshadshah.nimaz.presentation.components.molecules.ThematicText
 import com.arshadshah.nimaz.presentation.components.organisms.NimazTopAppBar

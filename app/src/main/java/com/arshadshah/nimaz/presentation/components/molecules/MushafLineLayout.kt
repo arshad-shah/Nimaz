@@ -45,7 +45,7 @@ import com.arshadshah.nimaz.domain.model.MushafWord
 import com.arshadshah.nimaz.domain.model.Surah
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
-import com.arshadshah.nimaz.presentation.components.atoms.BISMILLAH_TEXT
+import com.arshadshah.nimaz.presentation.foundation.text.BISMILLAH_TEXT
 import com.arshadshah.nimaz.presentation.theme.IndoPakFontFamily
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.theme.QuranSurfaceColors
@@ -474,16 +474,24 @@ internal val sampleMushafPageLayout: MushafPageLayout = MushafPageLayout(
         MushafLine(page = 1, lineNumber = 2, type = MushafLineType.BASMALAH, surahId = 1),
         MushafLine(
             page = 1, lineNumber = 3, type = MushafLineType.AYAH, surahId = 1,
-            words = sampleWords("ٱلْحَمْدُ لِلَّهِ رَبِّ ٱلْعَٰلَمِينَ", ayahId = 2, ayahNumber = 2),
+            words = sampleWords(
+                "ٱلْحَمْدُ لِلَّهِ رَبِّ ٱلْعَٰلَمِينَ",
+                ayahId = 2,
+                ayahNumber = 2
+            ),
         ),
         MushafLine(
             page = 1, lineNumber = 4, type = MushafLineType.AYAH, surahId = 1,
             words = sampleWords("ٱلرَّحْمَٰنِ ٱلرَّحِيمِ", ayahId = 3, ayahNumber = 3) +
-                sampleWords("مَٰلِكِ يَوْمِ ٱلدِّينِ", ayahId = 4, ayahNumber = 4),
+                    sampleWords("مَٰلِكِ يَوْمِ ٱلدِّينِ", ayahId = 4, ayahNumber = 4),
         ),
         MushafLine(
             page = 1, lineNumber = 5, type = MushafLineType.AYAH, surahId = 1,
-            words = sampleWords("إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ", ayahId = 5, ayahNumber = 5),
+            words = sampleWords(
+                "إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ",
+                ayahId = 5,
+                ayahNumber = 5
+            ),
         ),
         MushafLine(
             page = 1, lineNumber = 6, type = MushafLineType.AYAH, surahId = 1,

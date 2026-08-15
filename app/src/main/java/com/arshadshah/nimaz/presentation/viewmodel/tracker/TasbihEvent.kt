@@ -1,6 +1,5 @@
 package com.arshadshah.nimaz.presentation.viewmodel.tracker
 
-import com.arshadshah.nimaz.domain.model.TasbihCategory
 import com.arshadshah.nimaz.domain.model.TasbihPreset
 
 sealed interface TasbihEvent {

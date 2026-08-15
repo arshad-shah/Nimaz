@@ -1,6 +1,5 @@
 package com.arshadshah.nimaz.presentation.components.organisms
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BatteryAlert
@@ -13,15 +12,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.arshadshah.nimaz.presentation.components.atoms.NimazBanner
-import com.arshadshah.nimaz.presentation.components.atoms.NimazBannerVariant
+import com.arshadshah.nimaz.presentation.components.molecules.NimazBanner
+import com.arshadshah.nimaz.presentation.components.molecules.NimazBannerVariant
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
  * Variant determines the accent/style of a banner. Warnings get the amber
  * warning treatment; updates get the primary container.
  */
-enum class HomeBannerVariant { WARNING, UPDATE }
+enum class HomeBannerVariant { WARNING, UPDATE, INFO, EVENT }
 
 /**
  * One banner in the carousel. Keep [title] short — banners are sized to a
@@ -41,6 +40,8 @@ data class HomeBannerItem(
     val actionLabel: String? = null,
     val onAction: (() -> Unit)? = null,
     val isLoading: Boolean = false,
+    val dismissable: Boolean = false,
+    val onDismiss: (() -> Unit)? = null,
 )
 
 /**
@@ -83,21 +84,19 @@ private fun BannerCard(banner: HomeBannerItem) {
     val hasSubtitle = !banner.subtitle.isNullOrBlank()
 
     NimazBanner(
-        message = if (hasSubtitle) banner.subtitle else banner.title,
+        title = banner.title,
+        message = if (hasSubtitle) banner.subtitle else null,
         variant = when (banner.variant) {
             HomeBannerVariant.WARNING -> NimazBannerVariant.WARNING
             HomeBannerVariant.UPDATE -> NimazBannerVariant.UPDATE
+            HomeBannerVariant.INFO -> NimazBannerVariant.INFO
+            HomeBannerVariant.EVENT -> NimazBannerVariant.EVENT
         },
         icon = banner.icon,
-        title = if (hasSubtitle) banner.title else null,
         actionLabel = actionLabel,
         onAction = onAction,
         isLoading = banner.isLoading,
-        modifier = if (cardIsTappable) {
-            Modifier.clickable { banner.onAction.invoke() }
-        } else {
-            Modifier
-        },
+        onClick = if (cardIsTappable) { { banner.onAction.invoke() } } else null,
     )
 }
 

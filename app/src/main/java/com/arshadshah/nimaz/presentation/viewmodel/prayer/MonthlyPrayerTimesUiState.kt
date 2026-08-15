@@ -1,8 +1,8 @@
 package com.arshadshah.nimaz.presentation.viewmodel.prayer
 
+import com.arshadshah.nimaz.domain.model.DayPrayerTimes
 import java.time.LocalDate
 import java.time.YearMonth
-import com.arshadshah.nimaz.domain.model.DayPrayerTimes
 
 /**
  * [currentMonth] and [expandedDay] are **not** defaulted to `now()`.

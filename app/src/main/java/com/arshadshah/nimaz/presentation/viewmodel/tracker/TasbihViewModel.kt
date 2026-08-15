@@ -1,18 +1,15 @@
 package com.arshadshah.nimaz.presentation.viewmodel.tracker
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.feedback.CounterFeedback
+import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.Telemetry
-import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.core.monitoring.catchAndReport
+import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.core.time.TodayProvider
 import com.arshadshah.nimaz.core.util.toUtcMidnightMillis
-import com.arshadshah.nimaz.domain.model.TasbihCategory
 import com.arshadshah.nimaz.domain.model.TasbihPreset
 import com.arshadshah.nimaz.domain.model.TasbihSession
-import com.arshadshah.nimaz.domain.model.TasbihStats
 import com.arshadshah.nimaz.domain.repository.settings.TasbihSettings
 import com.arshadshah.nimaz.domain.usecase.TasbihUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -22,8 +19,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
-import java.time.LocalDate
 import javax.inject.Inject
 
 /** How the counter is presented: the classic tap-circle or the tasbih beads. */
@@ -128,24 +123,29 @@ class TasbihViewModel @Inject constructor(
                 telemetry.featureUsed(DOMAIN, "select_preset")
                 selectPreset(event.preset)
             }
+
             TasbihEvent.ClearPreset -> clearPreset()
             is TasbihEvent.SetTargetCount -> setTargetCount(event.count)
             is TasbihEvent.CreateCustomPreset -> {
                 telemetry.featureUsed(DOMAIN, "preset_created")
                 createCustomPreset(event.preset)
             }
+
             is TasbihEvent.UpdateCustomPreset -> {
                 telemetry.featureUsed(DOMAIN, "preset_updated")
                 updateCustomPreset(event.preset)
             }
+
             is TasbihEvent.DeleteCustomPreset -> {
                 telemetry.featureUsed(DOMAIN, "preset_deleted")
                 deleteCustomPreset(event.presetId)
             }
+
             is TasbihEvent.ToggleVibration -> {
                 telemetry.settingChanged("tasbih_vibration", event.enabled.toString())
                 _counterState.update { it.copy(vibrationEnabled = event.enabled) }
             }
+
             is TasbihEvent.ToggleSound -> {
                 telemetry.settingChanged("tasbih_sound", event.enabled.toString())
                 _counterState.update { it.copy(soundEnabled = event.enabled) }
@@ -165,17 +165,26 @@ class TasbihViewModel @Inject constructor(
             is TasbihEvent.SetBeadDesign -> {
                 telemetry.settingChanged("tasbih_bead_design", event.key)
                 _counterState.update { it.copy(beadDesignKey = event.key) }
-                launchSafely(telemetry, DOMAIN, "on_event") { tasbihSettings.setTasbihBeadDesign(event.key) }
+                launchSafely(telemetry, DOMAIN, "on_event") {
+                    tasbihSettings.setTasbihBeadDesign(
+                        event.key
+                    )
+                }
             }
 
             is TasbihEvent.ToggleFavorite -> {
                 telemetry.featureUsed(DOMAIN, AppAnalytics.Action.TOGGLE_FAVORITE)
                 toggleFavorite(event.presetId)
             }
+
             is TasbihEvent.SetLeftHanded -> {
                 telemetry.settingChanged("tasbih_left_handed", event.enabled.toString())
                 _counterState.update { it.copy(leftHanded = event.enabled) }
-                launchSafely(telemetry, DOMAIN, "on_event") { tasbihSettings.setTasbihLeftHanded(event.enabled) }
+                launchSafely(telemetry, DOMAIN, "on_event") {
+                    tasbihSettings.setTasbihLeftHanded(
+                        event.enabled
+                    )
+                }
             }
 
             TasbihEvent.Increment -> increment()
@@ -183,6 +192,7 @@ class TasbihViewModel @Inject constructor(
                 telemetry.featureUsed(DOMAIN, "reset")
                 reset()
             }
+
             TasbihEvent.LoadPresets -> loadPresets()
             TasbihEvent.LoadHistory -> loadHistory()
             TasbihEvent.LoadStats -> loadStats()
@@ -238,7 +248,11 @@ class TasbihViewModel @Inject constructor(
                 isActive = false,
             )
         }
-        launchSafely(telemetry, DOMAIN, "clear_preset") { tasbihSettings.setTasbihSelectedPresetId(-1L) }
+        launchSafely(
+            telemetry,
+            DOMAIN,
+            "clear_preset"
+        ) { tasbihSettings.setTasbihSelectedPresetId(-1L) }
     }
 
     private fun toggleFavorite(id: Long) {
@@ -323,7 +337,11 @@ class TasbihViewModel @Inject constructor(
                 isActive = false,
             )
         }
-        launchSafely(telemetry, DOMAIN, "select_preset") { tasbihSettings.setTasbihSelectedPresetId(preset.id) }
+        launchSafely(telemetry, DOMAIN, "select_preset") {
+            tasbihSettings.setTasbihSelectedPresetId(
+                preset.id
+            )
+        }
     }
 
     private fun createCustomPreset(preset: TasbihPreset) {
@@ -506,7 +524,7 @@ class TasbihViewModel @Inject constructor(
                         isActive = true,
                     )
                 }
-                }
+            }
         }
     }
 

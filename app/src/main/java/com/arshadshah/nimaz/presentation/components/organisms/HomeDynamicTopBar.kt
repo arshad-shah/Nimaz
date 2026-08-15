@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -39,14 +40,13 @@ import com.arshadshah.nimaz.domain.model.PrayerType
 import com.arshadshah.nimaz.presentation.components.atoms.GlassIconButton
 import com.arshadshah.nimaz.presentation.components.atoms.GlassPill
 import com.arshadshah.nimaz.presentation.components.atoms.GlassPillTone
-import com.arshadshah.nimaz.presentation.components.atoms.getPrayerColor
-import com.arshadshah.nimaz.presentation.components.atoms.rememberGlassBackdrop
-import com.arshadshah.nimaz.presentation.theme.MiscArtColors
-import com.arshadshah.nimaz.presentation.theme.NimazTheme
-import androidx.compose.runtime.getValue
 import com.arshadshah.nimaz.presentation.components.atoms.clockTimeText
 import com.arshadshah.nimaz.presentation.components.atoms.countdownText
 import com.arshadshah.nimaz.presentation.components.atoms.rememberCountdownTo
+import com.arshadshah.nimaz.presentation.components.atoms.rememberGlassBackdrop
+import com.arshadshah.nimaz.presentation.foundation.tokens.getPrayerColor
+import com.arshadshah.nimaz.presentation.theme.MiscArtColors
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Instant
@@ -238,7 +238,7 @@ private fun TopBar_AtRest_Preview() {
                 locationName = "Dublin, Ireland",
                 nextPrayer = PrayerType.ASR,
                 nextPrayerAt = Clock.System.now() + 2.hours,
-                                onSettingsClick = {}
+                onSettingsClick = {}
             )
         }
     }
@@ -253,7 +253,7 @@ private fun TopBar_FullyCompact_Preview() {
             locationName = "Dublin, Ireland",
             nextPrayer = PrayerType.ASR,
             nextPrayerAt = Clock.System.now() + 2.hours,
-                        onSettingsClick = {},
+            onSettingsClick = {},
         )
     }
 }
@@ -273,7 +273,7 @@ private fun TopBar_TransitionSnapshots_Preview() {
                         locationName = "Dublin, Ireland",
                         nextPrayer = PrayerType.ASR,
                         nextPrayerAt = Clock.System.now() + 2.hours,
-                                                onSettingsClick = {},
+                        onSettingsClick = {},
                     )
                 }
             }
@@ -290,7 +290,7 @@ private fun TopBar_LongLocation_Preview() {
             locationName = "Kingstown upon Hull, East Riding of Yorkshire",
             nextPrayer = PrayerType.DHUHR,
             nextPrayerAt = Clock.System.now() + 2.hours,
-                        onSettingsClick = {},
+            onSettingsClick = {},
         )
     }
 }

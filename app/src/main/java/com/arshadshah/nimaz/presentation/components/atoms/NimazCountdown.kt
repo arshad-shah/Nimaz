@@ -1,24 +1,24 @@
 package com.arshadshah.nimaz.presentation.components.atoms
 
+import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.material3.LocalTextStyle
-import androidx.compose.material3.Text
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextAlign
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.util.CountdownParts
 import com.arshadshah.nimaz.core.util.CountdownUnit
 import com.arshadshah.nimaz.core.util.EventProximity
 import com.arshadshah.nimaz.core.util.formatClockTime
-import kotlin.time.Duration
 import com.arshadshah.nimaz.presentation.theme.LocalUse24HourFormat
 import java.time.LocalDateTime
 import java.time.ZoneId
+import kotlin.time.Duration
 import kotlin.time.Instant
 
 /**
@@ -63,8 +63,10 @@ fun countdownText(parts: CountdownParts, showSeconds: Boolean = true): String = 
     showSeconds -> when (parts.leadUnit) {
         CountdownUnit.HOURS ->
             stringResource(R.string.countdown_hms, parts.hours, parts.minutes, parts.seconds)
+
         CountdownUnit.MINUTES ->
             stringResource(R.string.countdown_ms, parts.minutes, parts.seconds)
+
         CountdownUnit.SECONDS ->
             stringResource(R.string.countdown_s, parts.seconds)
     }
@@ -72,6 +74,7 @@ fun countdownText(parts: CountdownParts, showSeconds: Boolean = true): String = 
     else -> when (parts.leadUnit) {
         CountdownUnit.HOURS ->
             stringResource(R.string.countdown_hm, parts.hours, parts.minutes)
+
         else ->
             stringResource(R.string.countdown_m, parts.minutes)
     }

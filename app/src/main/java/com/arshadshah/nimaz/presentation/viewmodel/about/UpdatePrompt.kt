@@ -62,8 +62,8 @@ fun updatePrompt(state: UpdateState): UpdatePrompt {
             else -> Icons.Default.Refresh
         },
         isBusy = state is UpdateState.Checking ||
-            state is UpdateState.Starting ||
-            state is UpdateState.Downloading,
+                state is UpdateState.Starting ||
+                state is UpdateState.Downloading,
         isActionable = isActionable,
         isHighlighted = isActionable || state is UpdateState.NoUpdateAvailable,
         isError = state is UpdateState.Error,

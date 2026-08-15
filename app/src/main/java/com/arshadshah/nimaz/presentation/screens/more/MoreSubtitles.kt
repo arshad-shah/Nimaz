@@ -159,6 +159,9 @@ object MoreSubtitles {
     /** Today's Hijri date. Blank is absent — an empty subtitle still costs a row its spacing. */
     fun islamicCalendar(hijriToday: String?): SubtitleSpec? {
         val date = hijriToday?.takeIf { it.isNotBlank() } ?: return null
-        return SubtitleSpec(res = R.string.more_calendar_hijri, args = listOf(SubtitleArg.Text(date)))
+        return SubtitleSpec(
+            res = R.string.more_calendar_hijri,
+            args = listOf(SubtitleArg.Text(date))
+        )
     }
 }

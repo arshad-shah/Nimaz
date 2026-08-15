@@ -1,45 +1,38 @@
 package com.arshadshah.nimaz.presentation.viewmodel.tracker
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.monitoring.Telemetry
+import com.arshadshah.nimaz.core.monitoring.launchBestEffort
 import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.core.time.TodayProvider
-import com.arshadshah.nimaz.domain.repository.settings.HijriSettings
-import com.arshadshah.nimaz.domain.usecase.fasting.CountUnloggedRamadanDaysUseCase
-import com.arshadshah.nimaz.domain.usecase.fasting.GetDaysUntilAyyamAlBeedUseCase
-import com.arshadshah.nimaz.domain.usecase.fasting.GetRamadanCountdownUseCase
-import com.arshadshah.nimaz.core.monitoring.launchBestEffort
-import com.arshadshah.nimaz.domain.repository.settings.ZakatSettings
 import com.arshadshah.nimaz.core.util.HijriDateCalculator
 import com.arshadshah.nimaz.core.util.toUtcMidnightMillis
 import com.arshadshah.nimaz.domain.model.ExemptionReason
 import com.arshadshah.nimaz.domain.model.FastRecord
 import com.arshadshah.nimaz.domain.model.FastStatus
 import com.arshadshah.nimaz.domain.model.FastType
-import com.arshadshah.nimaz.domain.model.FastingStats
 import com.arshadshah.nimaz.domain.model.MakeupFast
 import com.arshadshah.nimaz.domain.model.MakeupFastStatus
 import com.arshadshah.nimaz.domain.model.PrayerCalculationSettings
-import com.arshadshah.nimaz.domain.usecase.PrayerUseCases
 import com.arshadshah.nimaz.domain.model.PrayerType
-import com.arshadshah.nimaz.domain.model.resolveLocation
+import com.arshadshah.nimaz.domain.repository.settings.HijriSettings
+import com.arshadshah.nimaz.domain.repository.settings.ZakatSettings
 import com.arshadshah.nimaz.domain.usecase.FastingUseCases
+import com.arshadshah.nimaz.domain.usecase.PrayerUseCases
+import com.arshadshah.nimaz.domain.usecase.fasting.CountUnloggedRamadanDaysUseCase
+import com.arshadshah.nimaz.domain.usecase.fasting.GetDaysUntilAyyamAlBeedUseCase
+import com.arshadshah.nimaz.domain.usecase.fasting.GetRamadanCountdownUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.update
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.temporal.TemporalAdjusters
 import javax.inject.Inject
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
 
 enum class FastingStatsPeriod {
     THIS_MONTH, THIS_YEAR, ALL_TIME
@@ -196,10 +189,12 @@ class FastingViewModel @Inject constructor(
                 // Status/type only — never the user's exemption reason or note text.
                 completeMakeupFast(event.makeupFastId)
             }
+
             is FastingEvent.PayFidya -> {
                 telemetry.featureUsed(DOMAIN, "pay_fidya")
                 payFidya(event.makeupFastId, event.amount)
             }
+
             is FastingEvent.SetStatsPeriod -> setStatsPeriod(event.period)
             FastingEvent.LoadToday -> loadToday()
             FastingEvent.LoadRamadan -> loadRamadan()

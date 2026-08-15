@@ -22,6 +22,9 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.presentation.foundation.geometry.circlePath
+import com.arshadshah.nimaz.presentation.foundation.geometry.diamondPath
+import com.arshadshah.nimaz.presentation.foundation.geometry.scallopPath
 import com.arshadshah.nimaz.presentation.theme.LocalIsDarkTheme
 import com.arshadshah.nimaz.presentation.theme.LocalPatternStyle
 import com.arshadshah.nimaz.presentation.theme.LocalShowIslamicPatterns
@@ -66,7 +69,7 @@ private val patternColor: Color
  * for free, which is what stops the dead-toggle bug recurring somewhere new.
  *
  * The geometry comes from the same builders as the Quran ornaments
- * ([scallopPath], [diamondPath]) so the ornament language cannot drift.
+ * ([com.arshadshah.nimaz.presentation.foundation.geometry.scallopPath], [com.arshadshah.nimaz.presentation.foundation.geometry.diamondPath]) so the ornament language cannot drift.
  *
  * Drawing is cached via [drawWithCache]: the [Path]s are rebuilt only when the
  * size, style or colour changes, never per frame.

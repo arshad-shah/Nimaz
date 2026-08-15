@@ -21,9 +21,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -35,7 +33,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import com.arshadshah.nimaz.presentation.theme.rememberNimazHaptics
 import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
@@ -51,13 +48,23 @@ import com.arshadshah.nimaz.presentation.components.atoms.NavArrowDirection
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazLegendItem
+import com.arshadshah.nimaz.presentation.components.atoms.NimazNavArrowButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazStatusDot
 import com.arshadshah.nimaz.presentation.components.atoms.NimazStatusDotSize
-import com.arshadshah.nimaz.presentation.components.atoms.NimazNavArrowButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
+import com.arshadshah.nimaz.presentation.foundation.calendar.CalendarDayState
+import com.arshadshah.nimaz.presentation.foundation.calendar.CalendarHeaderAlignment
+import com.arshadshah.nimaz.presentation.foundation.calendar.CalendarLegendItem
+import com.arshadshah.nimaz.presentation.foundation.calendar.FRIDAY_INDEX
+import com.arshadshah.nimaz.presentation.foundation.calendar.IndicatorPosition
+import com.arshadshah.nimaz.presentation.foundation.calendar.SelectionStyle
+import com.arshadshah.nimaz.presentation.foundation.calendar.WEEKDAY_LABELS
+import com.arshadshah.nimaz.presentation.foundation.calendar.buildCalendarDays
+import com.arshadshah.nimaz.presentation.foundation.calendar.formatDefault
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazPalette
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
+import com.arshadshah.nimaz.presentation.theme.rememberNimazHaptics
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.TextStyle
@@ -76,14 +83,14 @@ import java.time.format.TextStyle
  * @param onPreviousMonth Called when the previous-month button is tapped.
  * @param onNextMonth Called when the next-month button is tapped.
  * @param modifier Modifier for the root layout.
- * @param dayStateProvider Returns [CalendarDayState] for each date, controlling indicators and styling.
+ * @param dayStateProvider Returns [com.arshadshah.nimaz.presentation.foundation.calendar.CalendarDayState] for each date, controlling indicators and styling.
  * @param legendItems Legend entries shown below the grid. Empty list hides the legend.
  * @param showNavigation Whether to show the month navigation header.
  * @param headerTitle Custom title text. Defaults to "Month Year" format.
  * @param headerSubtitle Optional subtitle composable below the title (e.g., Arabic month name).
  * @param selectionStyle How the selected date is visually indicated.
  * @param headerAlignment Horizontal placement of the title block in the navigation
- *   header. Defaults to [CalendarHeaderAlignment.START] (the original layout).
+ *   header. Defaults to [com.arshadshah.nimaz.presentation.foundation.calendar.CalendarHeaderAlignment.START] (the original layout).
  */
 @Composable
 fun NimazCalendar(

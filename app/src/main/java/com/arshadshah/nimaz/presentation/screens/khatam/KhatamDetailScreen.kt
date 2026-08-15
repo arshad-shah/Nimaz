@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Star
@@ -28,24 +29,23 @@ import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.Khatam
 import com.arshadshah.nimaz.domain.model.KhatamStatus
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconButton
-import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
-import com.arshadshah.nimaz.presentation.components.atoms.rememberKhatamAccent
 import com.arshadshah.nimaz.presentation.components.molecules.KhatamHeroCard
-import androidx.compose.material.icons.automirrored.filled.MenuBook
-import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuItem
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownMenu
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownRow
+import com.arshadshah.nimaz.presentation.components.molecules.NimazLoadingState
+import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuItem
 import com.arshadshah.nimaz.presentation.components.organisms.KhatamJourneyTrail
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazStatData
 import com.arshadshah.nimaz.presentation.components.organisms.NimazStatsGrid
+import com.arshadshah.nimaz.presentation.foundation.tokens.rememberKhatamAccent
 import com.arshadshah.nimaz.presentation.theme.NimazSpacing
+import com.arshadshah.nimaz.presentation.viewmodel.quran.KhatamDetailUiState
 import com.arshadshah.nimaz.presentation.viewmodel.quran.KhatamEvent
 import com.arshadshah.nimaz.presentation.viewmodel.quran.KhatamViewModel
 import kotlin.math.roundToInt
-import com.arshadshah.nimaz.presentation.viewmodel.quran.KhatamDetailUiState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

@@ -1,6 +1,5 @@
 package com.arshadshah.nimaz.presentation.screens.settings
 
-import com.arshadshah.nimaz.domain.model.AsrCalculation
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -8,7 +7,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.WbSunny
@@ -27,19 +25,20 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.domain.model.AsrCalculation
 import com.arshadshah.nimaz.domain.model.CalculationMethod
-import com.arshadshah.nimaz.presentation.components.atoms.NimazBanner
-import com.arshadshah.nimaz.presentation.components.atoms.NimazBannerVariant
+import com.arshadshah.nimaz.domain.model.HighLatitudeRule
 import com.arshadshah.nimaz.presentation.components.atoms.NimazDivider
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
-import com.arshadshah.nimaz.presentation.components.molecules.NimazListPicker
+import com.arshadshah.nimaz.presentation.components.molecules.NimazBanner
+import com.arshadshah.nimaz.presentation.components.molecules.NimazBannerVariant
+import com.arshadshah.nimaz.presentation.components.organisms.NimazListPicker
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
 import com.arshadshah.nimaz.presentation.components.molecules.NimazNumberStepper
-import com.arshadshah.nimaz.presentation.components.molecules.NimazPickerItem
+import com.arshadshah.nimaz.presentation.components.organisms.NimazPickerItem
 import com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsItem
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
-import com.arshadshah.nimaz.domain.model.HighLatitudeRule
 import com.arshadshah.nimaz.presentation.viewmodel.settings.NotificationSummary
 import com.arshadshah.nimaz.presentation.viewmodel.settings.SettingsEvent
 import com.arshadshah.nimaz.presentation.viewmodel.settings.SettingsViewModel
@@ -122,13 +121,12 @@ fun PrayerSettingsScreen(
             // Info Banner
             item {
                 NimazBanner(
-                    message = stringResource(
+                    title = stringResource(
                         R.string.prayer_settings_high_latitude_notice_format,
                         locationState.currentLocation?.city
                             ?: stringResource(R.string.prayer_settings_your_location)
                     ),
                     variant = NimazBannerVariant.INFO,
-                    icon = Icons.Default.Info
                 )
             }
 

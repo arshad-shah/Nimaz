@@ -65,6 +65,7 @@ sealed interface QuranEvent {
     data object StopAudio : QuranEvent
     data class PlaySurahFromInfo(val surahNumber: Int) : QuranEvent
     data class LoadSurahInfo(val surahNumber: Int) : QuranEvent
+
     /**
      * Write (or clear, with null) the reader's note on a verse.
      *

@@ -201,7 +201,7 @@ internal fun showsTranslationButton(
     showTranslation: Boolean,
     showTransliteration: Boolean,
 ): Boolean = (showTranslation || showTransliteration) &&
-    (ayah.translation != null || ayah.transliteration != null)
+        (ayah.translation != null || ayah.transliteration != null)
 
 /** The verse, its translation if it has one, and its reference — onto the clipboard. */
 internal fun copyAyahToClipboard(context: Context, ayah: Ayah, copiedMessage: String) {

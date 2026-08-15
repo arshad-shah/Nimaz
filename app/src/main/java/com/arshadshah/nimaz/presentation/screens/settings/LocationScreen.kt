@@ -49,6 +49,10 @@ import androidx.core.content.ContextCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.domain.model.CityRegion
+import com.arshadshah.nimaz.domain.model.SearchLocation
+import com.arshadshah.nimaz.domain.model.citiesForRegion
+import com.arshadshah.nimaz.domain.model.groupCitiesByRegion
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
@@ -57,21 +61,16 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazChipVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
-import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingState
-import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionTitle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
+import com.arshadshah.nimaz.presentation.components.molecules.NimazLoadingState
+import com.arshadshah.nimaz.presentation.components.molecules.NimazLoadingVariant
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazSearchBar
-import com.arshadshah.nimaz.domain.model.CityRegion
 import com.arshadshah.nimaz.presentation.viewmodel.location.CurrentLocationState
 import com.arshadshah.nimaz.presentation.viewmodel.location.LocationEvent
 import com.arshadshah.nimaz.presentation.viewmodel.location.LocationViewModel
-import com.arshadshah.nimaz.domain.model.SearchLocation
-import com.arshadshah.nimaz.domain.model.citiesForRegion
-import com.arshadshah.nimaz.presentation.screens.settings.formatCoordinates
-import com.arshadshah.nimaz.domain.model.groupCitiesByRegion
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

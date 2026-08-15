@@ -77,21 +77,21 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
-import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
-import com.arshadshah.nimaz.presentation.components.molecules.tasbih.BeadDesignPickerSheet
-import com.arshadshah.nimaz.presentation.components.molecules.tasbih.CurrentTasbihSheet
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSegmentedControl
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSegmentedPurpose
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSegmentedSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSegmentedWidth
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.atoms.asSegments
+import com.arshadshah.nimaz.presentation.components.molecules.tasbih.BeadDesignPickerSheet
+import com.arshadshah.nimaz.presentation.components.molecules.tasbih.CurrentTasbihSheet
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.currentWindowSizeClass
 import com.arshadshah.nimaz.presentation.theme.isExpandedWidth
 import com.arshadshah.nimaz.presentation.viewmodel.tracker.TasbihCounterStyle
+import com.arshadshah.nimaz.presentation.viewmodel.tracker.TasbihCounterUiState
 import com.arshadshah.nimaz.presentation.viewmodel.tracker.TasbihEvent
 import com.arshadshah.nimaz.presentation.viewmodel.tracker.TasbihViewModel
-import com.arshadshah.nimaz.presentation.viewmodel.tracker.TasbihCounterUiState
 
 @Composable
 fun TasbihScreen(

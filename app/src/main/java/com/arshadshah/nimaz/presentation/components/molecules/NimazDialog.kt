@@ -45,7 +45,6 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconWell
-import com.arshadshah.nimaz.presentation.components.atoms.NimazIconWellShape
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconWellSize
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
@@ -130,9 +129,8 @@ fun NimazDialog(
                     if (titleIcon != null) {
                         NimazIconWell(
                             icon = titleIcon,
-                            accent = resolvedAccent,
-                            size = NimazIconWellSize.MEDIUM,
-                            shape = NimazIconWellShape.ROUNDED
+                            color = resolvedAccent,
+                            size = NimazIconWellSize.STANDARD,
                         )
                         Spacer(modifier = Modifier.width(14.dp))
                     }

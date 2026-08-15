@@ -3,13 +3,12 @@ package com.arshadshah.nimaz.presentation.viewmodel.quran
 import com.arshadshah.nimaz.domain.model.Ayah
 import com.arshadshah.nimaz.domain.model.QuranTopic
 import com.arshadshah.nimaz.domain.model.QuranTranslation
-import com.arshadshah.nimaz.domain.model.TranslationLanguage
 import com.arshadshah.nimaz.domain.model.TafseerHighlight
 import com.arshadshah.nimaz.domain.model.TafseerNote
 import com.arshadshah.nimaz.domain.model.TafseerSource
 import com.arshadshah.nimaz.domain.model.TafseerText
+import com.arshadshah.nimaz.domain.model.TranslationLanguage
 import com.arshadshah.nimaz.presentation.viewmodel.UiError
-import kotlinx.coroutines.flow.first
 
 data class TafseerUiState(
     val surahNumber: Int = 1,

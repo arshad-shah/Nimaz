@@ -2,6 +2,12 @@ package com.arshadshah.nimaz.presentation.components.atoms
 
 import androidx.compose.ui.graphics.Color
 import com.arshadshah.nimaz.domain.model.Ayah
+import com.arshadshah.nimaz.presentation.foundation.text.BISMILLAH_TEXT
+import com.arshadshah.nimaz.presentation.foundation.text.annotatedAyahEndMarker
+import com.arshadshah.nimaz.presentation.foundation.text.formatAyahEndMarker
+import com.arshadshah.nimaz.presentation.foundation.text.formatAyahWithEndMarker
+import com.arshadshah.nimaz.presentation.foundation.text.getDisplayArabicText
+import com.arshadshah.nimaz.presentation.foundation.text.hasLeadingBismillah
 import com.arshadshah.nimaz.presentation.theme.AmiriFontFamily
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
@@ -57,7 +63,7 @@ class QuranTextFormatTest {
 
     @Test
     fun `getDisplayArabicText strips bismillah from first ayah of normal surah`() {
-        val a = ayah(surahNumber = 2, ayahNumber = 1, textArabic = "$BISMILLAH_TEXT الم")
+        val a = ayah(surahNumber = 2, ayahNumber = 1, textArabic = "${BISMILLAH_TEXT} الم")
         assertThat(a.getDisplayArabicText()).isEqualTo("الم")
     }
 
@@ -76,7 +82,7 @@ class QuranTextFormatTest {
 
     @Test
     fun `getDisplayArabicText leaves non-first ayahs untouched`() {
-        val text = "$BISMILLAH_TEXT شيء"
+        val text = "${BISMILLAH_TEXT} شيء"
         val a = ayah(surahNumber = 2, ayahNumber = 5, textArabic = text)
         assertThat(a.getDisplayArabicText()).isEqualTo(text)
     }

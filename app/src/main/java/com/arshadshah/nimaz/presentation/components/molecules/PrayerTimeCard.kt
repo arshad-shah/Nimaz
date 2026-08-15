@@ -33,13 +33,13 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazCheckboxVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconContainerShape
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconType
-import com.arshadshah.nimaz.presentation.components.atoms.getArabicPrayerName
-import com.arshadshah.nimaz.presentation.components.atoms.getPrayerColor
-import com.arshadshah.nimaz.presentation.components.atoms.getPrayerIcon
-import com.arshadshah.nimaz.presentation.theme.NimazTheme
-import com.arshadshah.nimaz.presentation.model.PrayerTimeDisplay
-import kotlin.time.Instant
 import com.arshadshah.nimaz.presentation.components.atoms.clockTimeText
+import com.arshadshah.nimaz.presentation.foundation.tokens.getArabicPrayerName
+import com.arshadshah.nimaz.presentation.foundation.tokens.getPrayerColor
+import com.arshadshah.nimaz.presentation.foundation.tokens.getPrayerIcon
+import com.arshadshah.nimaz.presentation.model.PrayerTimeDisplay
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
+import kotlin.time.Instant
 
 /**
  * A single prayer's row card: icon + name (English / Arabic) + time +

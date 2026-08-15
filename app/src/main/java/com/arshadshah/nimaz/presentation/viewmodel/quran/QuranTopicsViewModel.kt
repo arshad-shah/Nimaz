@@ -1,14 +1,11 @@
 package com.arshadshah.nimaz.presentation.viewmodel.quran
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.domain.model.QuranTopic
-import com.arshadshah.nimaz.domain.model.SurahTopic
 import com.arshadshah.nimaz.domain.model.TopicCitation
-import com.arshadshah.nimaz.domain.model.TopicDetail
 import com.arshadshah.nimaz.domain.model.TopicTree
 import com.arshadshah.nimaz.domain.repository.settings.QuranPreferences
 import com.arshadshah.nimaz.domain.usecase.QuranUseCases
@@ -23,7 +20,6 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /** One visible row of the tree: a subject, and how far in it sits. */

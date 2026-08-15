@@ -29,13 +29,11 @@ import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.util.formatFullDate
 import com.arshadshah.nimaz.core.util.toUtcMidnightMillis
 import com.arshadshah.nimaz.domain.model.PrayerName
+import com.arshadshah.nimaz.presentation.model.PrayerDisplayStatus
+import com.arshadshah.nimaz.presentation.model.isDone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeDefaults
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeEmphasis
-import com.arshadshah.nimaz.presentation.components.atoms.NimazBanner
-import com.arshadshah.nimaz.presentation.components.atoms.NimazBannerVariant
-import com.arshadshah.nimaz.presentation.components.atoms.NimazDayRail
-import com.arshadshah.nimaz.presentation.components.atoms.NimazDayRailItem
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
@@ -44,13 +42,17 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazStatusDotStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.atoms.TickResolution
 import com.arshadshah.nimaz.presentation.components.atoms.rememberNow
+import com.arshadshah.nimaz.presentation.components.molecules.NimazBanner
+import com.arshadshah.nimaz.presentation.components.molecules.NimazBannerVariant
+import com.arshadshah.nimaz.presentation.components.molecules.NimazDayRail
+import com.arshadshah.nimaz.presentation.components.molecules.NimazDayRailItem
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuItem
-import com.arshadshah.nimaz.presentation.components.molecules.calendar.CalendarDayState
-import com.arshadshah.nimaz.presentation.components.molecules.calendar.CalendarLegendItem
 import com.arshadshah.nimaz.presentation.components.molecules.calendar.NimazCalendar
-import com.arshadshah.nimaz.presentation.components.molecules.calendar.SelectionStyle
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
+import com.arshadshah.nimaz.presentation.foundation.calendar.CalendarDayState
+import com.arshadshah.nimaz.presentation.foundation.calendar.CalendarLegendItem
+import com.arshadshah.nimaz.presentation.foundation.calendar.SelectionStyle
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.viewmodel.tracker.PrayerTrackerEvent
 import com.arshadshah.nimaz.presentation.viewmodel.tracker.PrayerTrackerViewModel
@@ -190,7 +192,7 @@ fun PrayerTrackerScreen(
             if (unrecordedCount > 0) {
                 item {
                     NimazBanner(
-                        message = pluralStringResource(
+                        title = pluralStringResource(
                             R.plurals.prayer_unrecorded_banner,
                             unrecordedCount,
                             unrecordedCount,
@@ -335,11 +337,24 @@ private fun DayRail(
                 // A localized date plus the day's overall state, e.g. "August 13, 2026, prayed" --
                 // TalkBack's date-only fallback said "2026-08-13" and nothing about the marker.
                 contentDescription = when (bucket) {
-                    DayBucket.ALL_DONE -> stringResource(R.string.a11y_prayer_state_prayed, localizedDate)
+                    DayBucket.ALL_DONE -> stringResource(
+                        R.string.a11y_prayer_state_prayed,
+                        localizedDate
+                    )
+
                     DayBucket.ALL_UNRECORDED ->
                         stringResource(R.string.a11y_prayer_state_not_recorded, localizedDate)
-                    DayBucket.PARTIAL -> stringResource(R.string.a11y_prayer_state_partial, localizedDate)
-                    DayBucket.HAS_MISSED -> stringResource(R.string.a11y_prayer_state_missed, localizedDate)
+
+                    DayBucket.PARTIAL -> stringResource(
+                        R.string.a11y_prayer_state_partial,
+                        localizedDate
+                    )
+
+                    DayBucket.HAS_MISSED -> stringResource(
+                        R.string.a11y_prayer_state_missed,
+                        localizedDate
+                    )
+
                     null -> "$localizedDate, ${stringResource(R.string.upcoming)}"
                 },
             )

@@ -8,46 +8,36 @@ import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CameraAlt
-import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorAction
-import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorDefaults
-import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorState
-import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
-import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.molecules.NimazConfirmDialog
-import com.arshadshah.nimaz.presentation.components.molecules.qibla.QiblaCalibrationDialog
+import com.arshadshah.nimaz.presentation.components.molecules.NimazErrorAction
+import com.arshadshah.nimaz.presentation.components.molecules.NimazErrorDefaults
+import com.arshadshah.nimaz.presentation.components.molecules.NimazErrorState
+import com.arshadshah.nimaz.presentation.components.molecules.qibla.QiblaCalibrationSheet
 import com.arshadshah.nimaz.presentation.components.organisms.qibla.ArQiblaView
 import com.arshadshah.nimaz.presentation.components.organisms.qibla.CompassQiblaView
-import com.arshadshah.nimaz.presentation.components.organisms.qibla.QiblaTopBar
+import com.arshadshah.nimaz.presentation.components.molecules.qibla.QiblaTopBar
 import com.arshadshah.nimaz.presentation.viewmodel.prayer.QiblaEvent
 import com.arshadshah.nimaz.presentation.viewmodel.prayer.QiblaViewModel
 
@@ -108,7 +98,7 @@ fun QiblaScreen(
     }
 
     if (state.showCalibrationDialog) {
-        QiblaCalibrationDialog(
+        QiblaCalibrationSheet(
             accuracy = state.compassData.accuracy,
             onDismiss = { viewModel.onEvent(QiblaEvent.DismissCalibrationDialog) }
         )
@@ -132,15 +122,13 @@ fun QiblaScreen(
         topBar = {
             QiblaTopBar(
                 locationName = state.qiblaInfo?.locationName,
-                latitude = state.qiblaInfo?.latitude,
-                longitude = state.qiblaInfo?.longitude,
-                fallbackTitle = stringResource(R.string.guide_qibla_title),
-                tabs = listOf(stringResource(R.string.compass), stringResource(R.string.ar)),
-                selectedIndex = if (isArMode) 1 else 0,
-                onTabSelect = { index ->
-                    if (index == 1) requestArMode()
-                    else viewModel.onEvent(QiblaEvent.SetArMode(false))
-                }
+                accuracy = state.compassData.accuracy,
+                isArMode = isArMode,
+                onCameraToggle = {
+                    if (isArMode) viewModel.onEvent(QiblaEvent.SetArMode(false))
+                    else requestArMode()
+                },
+                onCalibrate = { viewModel.onEvent(QiblaEvent.ShowCalibrationDialog) },
             )
         }
     ) { paddingValues ->
@@ -186,6 +174,7 @@ fun QiblaScreen(
                 if (arMode) {
                     ArQiblaView(
                         azimuth = state.compassData.azimuth,
+                        animatedAzimuth = animatedAzimuth,
                         qiblaInfo = state.qiblaInfo,
                         isFacingQibla = state.isFacingQibla,
                         rotationToQibla = state.rotationToQibla,

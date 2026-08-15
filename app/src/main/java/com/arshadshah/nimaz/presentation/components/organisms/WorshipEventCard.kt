@@ -92,7 +92,7 @@ data class WorshipCardUi(
     val subKey: String? = null,
 )
 
-/** Per-type visual treatment for the worship card, mirroring [eventCardVisualsFor]. */
+/** Per-type visual treatment for the worship card, mirroring [com.arshadshah.nimaz.presentation.foundation.tokens.eventCardVisualsFor]. */
 private data class WorshipVisuals(
     val accent: Color,
     val icon: ImageVector,
@@ -101,25 +101,47 @@ private data class WorshipVisuals(
 
 private fun worshipVisualsFor(type: WorshipReminderType): WorshipVisuals = when (type) {
     WorshipReminderType.TAHAJJUD ->
-        WorshipVisuals(NimazPalette.MatPurple, Icons.Filled.NightsStay, EventOrnament.Pattern(NimazPatternStyle.STAR_FIELD))
+        WorshipVisuals(
+            NimazPalette.MatPurple,
+            Icons.Filled.NightsStay,
+            EventOrnament.Pattern(NimazPatternStyle.STAR_FIELD)
+        )
+
     WorshipReminderType.WITR ->
         WorshipVisuals(NimazPalette.Teal700, Icons.Filled.Bedtime, EventOrnament.Divider)
+
     WorshipReminderType.SUHOOR ->
         WorshipVisuals(NimazPalette.Amber700, Icons.Filled.WbTwilight, EventOrnament.Divider)
+
     WorshipReminderType.IFTAR ->
         WorshipVisuals(NimazPalette.GoldDark, Icons.Filled.LocalDining, EventOrnament.Divider)
+
     WorshipReminderType.TARAWEEH ->
-        WorshipVisuals(NimazPalette.MatPurple, Icons.Filled.Mosque, EventOrnament.Pattern(NimazPatternStyle.LATTICE))
+        WorshipVisuals(
+            NimazPalette.MatPurple,
+            Icons.Filled.Mosque,
+            EventOrnament.Pattern(NimazPatternStyle.LATTICE)
+        )
+
     WorshipReminderType.LAYLATUL_QADR ->
-        WorshipVisuals(NimazPalette.MatPurple, Icons.Filled.AutoAwesome, EventOrnament.Pattern(NimazPatternStyle.STAR_FIELD))
+        WorshipVisuals(
+            NimazPalette.MatPurple,
+            Icons.Filled.AutoAwesome,
+            EventOrnament.Pattern(NimazPatternStyle.STAR_FIELD)
+        )
+
     WorshipReminderType.ADHKAR_MORNING ->
         WorshipVisuals(NimazPalette.Amber700, Icons.Filled.WbSunny, EventOrnament.Divider)
+
     WorshipReminderType.ADHKAR_EVENING ->
         WorshipVisuals(NimazPalette.Teal700, Icons.Filled.SelfImprovement, EventOrnament.Divider)
+
     WorshipReminderType.MONDAY_THURSDAY_FAST ->
         WorshipVisuals(NimazPalette.Teal700, Icons.Filled.CalendarMonth, EventOrnament.Divider)
+
     WorshipReminderType.WHITE_DAYS_FAST ->
         WorshipVisuals(NimazPalette.Teal700, Icons.Outlined.WaterDrop, EventOrnament.Divider)
+
     WorshipReminderType.ARAFAH_ASHURA_FAST ->
         WorshipVisuals(NimazPalette.Teal700, Icons.Outlined.Terrain, EventOrnament.Divider)
 }
@@ -301,6 +323,7 @@ private fun actionLabelFor(type: WorshipReminderType): String? = when (type) {
     WorshipReminderType.LAYLATUL_QADR -> stringResource(R.string.worship_action_duas)
     WorshipReminderType.ADHKAR_MORNING,
     WorshipReminderType.ADHKAR_EVENING -> stringResource(R.string.worship_action_adhkar)
+
     WorshipReminderType.MONDAY_THURSDAY_FAST,
     WorshipReminderType.WHITE_DAYS_FAST,
     WorshipReminderType.ARAFAH_ASHURA_FAST -> stringResource(R.string.worship_action_fast_tracker)
@@ -318,7 +341,13 @@ private fun timeLabelFor(type: WorshipReminderType): String? = when (type) {
 // ── Previews ──
 
 @Composable
-private fun sample(type: WorshipReminderType, name: String, arabic: String, body: String, inHours: Long) {
+private fun sample(
+    type: WorshipReminderType,
+    name: String,
+    arabic: String,
+    body: String,
+    inHours: Long
+) {
     val now = Clock.System.now()
     WorshipEventCard(
         card = WorshipCardUi(
@@ -335,7 +364,13 @@ private fun sample(type: WorshipReminderType, name: String, arabic: String, body
 @Composable
 private fun WorshipCard_Tahajjud_Light() {
     NimazTheme(themeMode = ThemeMode.LIGHT) {
-        sample(WorshipReminderType.TAHAJJUD, "Tahajjud", "تَهَجُّد", "A blessed time for du'a.", inHours = 4)
+        sample(
+            WorshipReminderType.TAHAJJUD,
+            "Tahajjud",
+            "تَهَجُّد",
+            "A blessed time for du'a.",
+            inHours = 4
+        )
     }
 }
 
@@ -346,6 +381,12 @@ private fun WorshipCard_Tahajjud_Light() {
 @Composable
 private fun WorshipCard_Iftar_Dark() {
     NimazTheme(themeMode = ThemeMode.DARK) {
-        sample(WorshipReminderType.IFTAR, "Iftar", "إفْطار", "Maghrib has entered. Break your fast.", inHours = 1)
+        sample(
+            WorshipReminderType.IFTAR,
+            "Iftar",
+            "إفْطار",
+            "Maghrib has entered. Break your fast.",
+            inHours = 1
+        )
     }
 }

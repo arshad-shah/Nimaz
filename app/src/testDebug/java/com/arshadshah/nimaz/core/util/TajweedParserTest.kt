@@ -1,6 +1,6 @@
 package com.arshadshah.nimaz.core.util
 
-import com.arshadshah.nimaz.presentation.components.atoms.BISMILLAH_TEXT
+import com.arshadshah.nimaz.presentation.foundation.text.BISMILLAH_TEXT
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith

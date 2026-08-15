@@ -22,7 +22,6 @@ import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
-import com.arshadshah.nimaz.presentation.viewmodel.ai.AskViewModel
 
 @HiltViewModel
 class SearchSettingsViewModel @Inject constructor(

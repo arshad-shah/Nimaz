@@ -6,11 +6,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.domain.model.WorshipReminderType
+import com.arshadshah.nimaz.presentation.foundation.tokens.EventOccasion
+import com.arshadshah.nimaz.presentation.foundation.tokens.eventCardVisualsFor
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Instant
-import com.arshadshah.nimaz.domain.model.WorshipReminderType
 
 /**
  * A single event card's display data. Jumu'ah carries the three jumuah_* fields and

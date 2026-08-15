@@ -89,11 +89,11 @@ fun FastExemptionSheet(
                     // Pills, not the default 8dp rounded rectangles. Seven reasons wrapping over
                     // three rows read as a paragraph of boxes at that radius; fully-round chips
                     // read as a set of choices, which is what they are.
-                    shape = RoundedCornerShape(percent = 50),
+                    showSelectedIcon = false,
                     // The tick is redundant next to a filled pill and costs the label its width,
                     // which is what pushed "Menstruation" and "Breastfeeding" onto lines of
                     // their own.
-                    showSelectedIcon = false,
+                    shape = RoundedCornerShape(percent = 50),
                 )
             }
         }
@@ -205,6 +205,8 @@ private fun FlowRowShowcase() {
                 selected = selected == reason,
                 onClick = { selected = reason },
                 label = reason.displayName(),
+                showSelectedIcon = false,
+                shape = RoundedCornerShape(16.dp),
             )
         }
     }

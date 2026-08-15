@@ -11,10 +11,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -58,17 +58,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.Ayah
-import com.arshadshah.nimaz.domain.model.TranslationLanguage
-import com.arshadshah.nimaz.presentation.theme.asTranslationText
 import com.arshadshah.nimaz.domain.model.QuranTopic
-import com.arshadshah.nimaz.presentation.components.atoms.NimazChip
-import com.arshadshah.nimaz.presentation.components.atoms.NimazSegmentedControl
-import com.arshadshah.nimaz.presentation.components.atoms.NimazSegmentedPurpose
-import com.arshadshah.nimaz.presentation.components.atoms.asSegments
-import com.arshadshah.nimaz.presentation.components.atoms.NimazChipVariant
 import com.arshadshah.nimaz.domain.model.TafseerHighlight
 import com.arshadshah.nimaz.domain.model.TafseerSource
 import com.arshadshah.nimaz.domain.model.TafseerText
+import com.arshadshah.nimaz.domain.model.TranslationLanguage
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
@@ -76,11 +70,16 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonType
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
+import com.arshadshah.nimaz.presentation.components.atoms.NimazChip
+import com.arshadshah.nimaz.presentation.components.atoms.NimazChipVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazPillActionButton
+import com.arshadshah.nimaz.presentation.components.atoms.NimazSegmentedControl
+import com.arshadshah.nimaz.presentation.components.atoms.NimazSegmentedPurpose
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.atoms.QuranOrnamentalDivider
+import com.arshadshah.nimaz.presentation.components.atoms.asSegments
 import com.arshadshah.nimaz.presentation.components.molecules.NimazBottomSheet
 import com.arshadshah.nimaz.presentation.components.molecules.NimazConfirmDialog
 import com.arshadshah.nimaz.presentation.components.molecules.NimazReaderBottomBar
@@ -92,6 +91,7 @@ import com.arshadshah.nimaz.presentation.components.molecules.highlightColors
 import com.arshadshah.nimaz.presentation.components.molecules.parseColor
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.theme.ThemeMode
+import com.arshadshah.nimaz.presentation.theme.asTranslationText
 
 /**
  * Represents a page of tafseer content with its character range in the full text.

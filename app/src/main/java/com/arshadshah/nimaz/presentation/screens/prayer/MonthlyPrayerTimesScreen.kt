@@ -59,10 +59,11 @@ import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.core.share.ContentShareManager
 import com.arshadshah.nimaz.core.util.HijriDateCalculator
-import com.arshadshah.nimaz.core.util.formatMonthYear
 import com.arshadshah.nimaz.core.util.PrayerTimesPdfExporter
 import com.arshadshah.nimaz.core.util.formatClockTime
 import com.arshadshah.nimaz.core.util.formatFastLength
+import com.arshadshah.nimaz.core.util.formatMonthYear
+import com.arshadshah.nimaz.domain.model.DayPrayerTimes
 import com.arshadshah.nimaz.domain.model.IslamicEvent
 import com.arshadshah.nimaz.domain.model.IslamicEventType
 import com.arshadshah.nimaz.domain.model.IslamicEvents
@@ -87,7 +88,6 @@ import com.arshadshah.nimaz.presentation.theme.LocalUse24HourFormat
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazCornerRadius
 import com.arshadshah.nimaz.presentation.theme.NimazSpacing
-import com.arshadshah.nimaz.domain.model.DayPrayerTimes
 import com.arshadshah.nimaz.presentation.viewmodel.prayer.MonthlyPrayerTimesEvent
 import com.arshadshah.nimaz.presentation.viewmodel.prayer.MonthlyPrayerTimesUiState
 import com.arshadshah.nimaz.presentation.viewmodel.prayer.MonthlyPrayerTimesViewModel
@@ -817,7 +817,7 @@ private fun exportClock(instant: kotlin.time.Instant, use24Hour: Boolean): Strin
 /** Fixed wall-clock instants for previews. */
 private fun previewInstant(hour: Int, minute: Int): kotlin.time.Instant =
     kotlin.time.Instant.fromEpochMilliseconds(
-        java.time.LocalDate.now().atTime(hour, minute)
+        LocalDate.now().atTime(hour, minute)
             .atZone(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli()
     )
 

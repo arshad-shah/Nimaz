@@ -18,12 +18,12 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
-import com.arshadshah.nimaz.presentation.components.atoms.NimazTime
-import com.arshadshah.nimaz.presentation.components.atoms.NimazTimePicker
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSwitch
 import com.arshadshah.nimaz.presentation.components.molecules.NimazAccordion
 import com.arshadshah.nimaz.presentation.components.molecules.NimazNumberStepper
 import com.arshadshah.nimaz.presentation.components.molecules.NimazNumberStepperVariant
+import com.arshadshah.nimaz.presentation.foundation.time.NimazTime
+import com.arshadshah.nimaz.presentation.components.molecules.NimazTimePicker
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.viewmodel.settings.SettingsEvent
 import com.arshadshah.nimaz.presentation.viewmodel.settings.SettingsViewModel
@@ -83,7 +83,13 @@ fun NotificationWeeklyScreen(
                 ) {
                     NimazNumberStepper(
                         value = notificationState.fridayReminderMinutes,
-                        onValueChange = { viewModel.onEvent(SettingsEvent.SetFridayReminderMinutes(it)) },
+                        onValueChange = {
+                            viewModel.onEvent(
+                                SettingsEvent.SetFridayReminderMinutes(
+                                    it
+                                )
+                            )
+                        },
                         variant = NimazNumberStepperVariant.INLINE,
                         label = stringResource(R.string.notification_settings_lead_time),
                         formatValue = { min -> minutesValueFormat.format(min) },

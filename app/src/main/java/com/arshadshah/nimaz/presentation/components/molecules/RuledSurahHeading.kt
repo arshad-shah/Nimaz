@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.domain.model.Surah
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
-import com.arshadshah.nimaz.presentation.components.atoms.BISMILLAH_TEXT
+import com.arshadshah.nimaz.presentation.foundation.text.BISMILLAH_TEXT
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.theme.QuranSurfaceColors
 import com.arshadshah.nimaz.presentation.theme.ThemeMode

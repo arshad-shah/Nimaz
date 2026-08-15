@@ -21,6 +21,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.presentation.foundation.geometry.circlePath
+import com.arshadshah.nimaz.presentation.foundation.geometry.diamondPath
+import com.arshadshah.nimaz.presentation.foundation.geometry.scallopPath
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
@@ -29,7 +32,7 @@ import com.arshadshah.nimaz.presentation.theme.NimazTheme
  * the surah-header cartouche anchors on its left tip, extracted so the surah
  * list, grids and header all share one mark.
  *
- * Drawn with [scallopPath] + [circlePath] so the geometry matches the header
+ * Drawn with [com.arshadshah.nimaz.presentation.foundation.geometry.scallopPath] + [com.arshadshah.nimaz.presentation.foundation.geometry.circlePath] so the geometry matches the header
  * exactly: a gold scalloped rim (over a faint gold wash) and a teal inner ring.
  *
  * @param number surah / juz / page number shown at the centre

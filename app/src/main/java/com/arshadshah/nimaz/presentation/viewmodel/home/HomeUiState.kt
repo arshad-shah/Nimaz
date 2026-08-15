@@ -1,15 +1,12 @@
 package com.arshadshah.nimaz.presentation.viewmodel.home
 
-import androidx.lifecycle.ViewModel
 import com.arshadshah.nimaz.domain.model.Announcement
 import com.arshadshah.nimaz.domain.model.HomeEventCard
 import com.arshadshah.nimaz.presentation.components.organisms.WorshipCardUi
-import com.arshadshah.nimaz.core.time.TodayProvider
-import kotlin.time.Instant
 import com.arshadshah.nimaz.presentation.model.DailyDua
 import com.arshadshah.nimaz.presentation.model.PrayerTimeDisplay
-import com.arshadshah.nimaz.presentation.model.withClockState
 import com.arshadshah.nimaz.presentation.viewmodel.UiError
+import kotlin.time.Instant
 
 data class HomeUiState(
     // `currentDate` used to live here, set once at construction and read by no screen

@@ -26,12 +26,15 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BatteryAlert
 import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.NewReleases
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Policy
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -40,48 +43,56 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.LocalInAppUpdateManager
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.core.util.formatFullDate
+import com.arshadshah.nimaz.core.navigation.ScreenTags
 import com.arshadshah.nimaz.core.util.UpdateState
+import com.arshadshah.nimaz.core.util.formatFullDate
+import com.arshadshah.nimaz.domain.model.AnnouncementType
+import com.arshadshah.nimaz.domain.model.PrayerStatus
 import com.arshadshah.nimaz.domain.model.PrayerType
 import com.arshadshah.nimaz.domain.model.WorshipReminderType
-import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorDefaults
-import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorState
-import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
 import com.arshadshah.nimaz.presentation.components.atoms.TickResolution
 import com.arshadshah.nimaz.presentation.components.atoms.rememberNow
 import com.arshadshah.nimaz.presentation.components.molecules.AnnouncementBanner
+import com.arshadshah.nimaz.presentation.components.molecules.NimazErrorDefaults
+import com.arshadshah.nimaz.presentation.components.molecules.NimazErrorState
+import com.arshadshah.nimaz.presentation.components.molecules.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.molecules.PrayerTimeCard
 import com.arshadshah.nimaz.presentation.components.molecules.PrayerTimesSectionHeader
 import com.arshadshah.nimaz.presentation.components.organisms.EventAction
 import com.arshadshah.nimaz.presentation.components.organisms.EventCardUi
-import com.arshadshah.nimaz.presentation.components.organisms.EventOccasion
 import com.arshadshah.nimaz.presentation.components.organisms.EventsCarousel
+import com.arshadshah.nimaz.presentation.components.organisms.HomeAlsoTodaySection
 import com.arshadshah.nimaz.presentation.components.organisms.HomeBannerCarousel
 import com.arshadshah.nimaz.presentation.components.organisms.HomeBannerItem
+import com.arshadshah.nimaz.presentation.components.organisms.HomeBannerSlot
 import com.arshadshah.nimaz.presentation.components.organisms.HomeBannerVariant
 import com.arshadshah.nimaz.presentation.components.organisms.HomeDynamicTopBar
 import com.arshadshah.nimaz.presentation.components.organisms.HomeHeader
 import com.arshadshah.nimaz.presentation.components.organisms.HomeHero
+import com.arshadshah.nimaz.presentation.components.organisms.HomePrayerCard
 import com.arshadshah.nimaz.presentation.components.organisms.TodayCarousel
 import com.arshadshah.nimaz.presentation.components.organisms.TodayInfoCards
 import com.arshadshah.nimaz.presentation.components.organisms.TodaysProgressCard
-import com.arshadshah.nimaz.presentation.components.organisms.toOccasion
+import com.arshadshah.nimaz.presentation.foundation.tokens.EventOccasion
+import com.arshadshah.nimaz.presentation.foundation.tokens.toOccasion
+import com.arshadshah.nimaz.presentation.model.PrayerTimeDisplay
+import com.arshadshah.nimaz.presentation.model.withClockState
 import com.arshadshah.nimaz.presentation.theme.currentWindowSizeClass
 import com.arshadshah.nimaz.presentation.theme.isCompact
 import com.arshadshah.nimaz.presentation.viewmodel.home.AnnouncementUiState
 import com.arshadshah.nimaz.presentation.viewmodel.home.HomeEvent
 import com.arshadshah.nimaz.presentation.viewmodel.home.HomeUiState
 import com.arshadshah.nimaz.presentation.viewmodel.home.HomeViewModel
-import com.arshadshah.nimaz.presentation.model.PrayerTimeDisplay
-import com.arshadshah.nimaz.presentation.model.withClockState
 import kotlin.time.Instant
 
 /**
@@ -116,11 +127,10 @@ private fun rememberHomeClock(state: HomeUiState): HomeClock {
 
 @Composable
 fun HomeScreen(
-    onNavigateToQuran: () -> Unit,
+    onNavigateToAlKahf: () -> Unit,
     onNavigateToHadith: () -> Unit,
-    onNavigateToDua: () -> Unit,
+    onNavigateToDua: (duaId: String) -> Unit,
     onNavigateToTasbih: () -> Unit,
-    onNavigateToQibla: () -> Unit,
     onNavigateToCalendar: () -> Unit,
     onNavigateToFasting: () -> Unit,
     onNavigateToZakat: () -> Unit,
@@ -146,13 +156,12 @@ fun HomeScreen(
     }
     val homeClock = rememberHomeClock(state)
     val updateManager = LocalInAppUpdateManager.current
-    val updateState = updateManager?.updateState?.collectAsStateWithLifecycle()?.value ?: UpdateState.Idle
+    val updateState =
+        updateManager?.updateState?.collectAsStateWithLifecycle()?.value ?: UpdateState.Idle
 
     val locationPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions()
     ) { viewModel.onEvent(HomeEvent.RefreshPermissions) }
-
-
 
 
     val notificationPermissionLauncher = rememberLauncherForActivityResult(
@@ -248,6 +257,8 @@ fun HomeScreen(
                             listState = compactListState,
                             updateState = updateState,
                             updateManager = updateManager,
+                            onNavigateToAlKahf = onNavigateToAlKahf,
+                            onNavigateToDua = onNavigateToDua,
                             onNavigateToPrayerSettings = onNavigateToPrayerSettings,
                             onNavigateToPrayerTracker = onNavigateToPrayerTracker,
                             onNavigateToPrayerTimes = onNavigateToPrayerTimes,
@@ -255,6 +266,7 @@ fun HomeScreen(
                             onOpenAnnouncementRoute = onOpenAnnouncementRoute,
                             onOpenWorship = onOpenWorship,
                             onTogglePrayer = { viewModel.onEvent(HomeEvent.TogglePrayerStatus(it)) },
+                            onSetPrayerStatus = { type, status -> viewModel.onEvent(HomeEvent.SetPrayerStatus(type, status)) },
                             notificationPermissionLauncher = notificationPermissionLauncher,
                             locationPermissionLauncher = locationPermissionLauncher,
                             batteryOptimizationLauncher = batteryOptimizationLauncher,
@@ -309,6 +321,8 @@ private fun HomeCompactContent(
     listState: LazyListState,
     updateState: UpdateState,
     updateManager: com.arshadshah.nimaz.core.util.InAppUpdateManager?,
+    onNavigateToAlKahf: () -> Unit,
+    onNavigateToDua: (duaId: String) -> Unit,
     onNavigateToPrayerSettings: () -> Unit,
     onNavigateToPrayerTracker: () -> Unit,
     onNavigateToPrayerTimes: () -> Unit,
@@ -316,6 +330,7 @@ private fun HomeCompactContent(
     onOpenAnnouncementRoute: (String) -> Unit,
     onOpenWorship: (WorshipReminderType) -> Unit,
     onTogglePrayer: (PrayerType) -> Unit,
+    onSetPrayerStatus: (PrayerType, PrayerStatus) -> Unit,
     notificationPermissionLauncher: androidx.activity.result.ActivityResultLauncher<String>,
     locationPermissionLauncher: androidx.activity.result.ActivityResultLauncher<Array<String>>,
     batteryOptimizationLauncher: androidx.activity.result.ActivityResultLauncher<android.content.Intent>,
@@ -326,12 +341,7 @@ private fun HomeCompactContent(
         java.time.LocalDate.now().formatFullDate()
     }
     val homeClock = rememberHomeClock(state)
-    val jumuahMubarak = stringResource(R.string.jumuah_mubarak)
-    val jumuahHadithQuote = stringResource(R.string.jumuah_hadith_quote)
 
-    // Compact horizontal banner pills — never push content down by more than
-    // one pill height regardless of how many banners are active. Built once
-    // per state/update change; the LazyColumn just reads the resulting list.
     val banners = buildHomeBannerItems(
         state = state,
         updateState = updateState,
@@ -344,7 +354,11 @@ private fun HomeCompactContent(
 
     LazyColumn(
         state = listState,
-        modifier = Modifier.fillMaxSize(),
+        // Tagged so behavior tests can scroll to entries below the fold ("Also today"
+        // sits under the hero, the banner slot and the prayer card).
+        modifier = Modifier
+            .fillMaxSize()
+            .testTag(ScreenTags.HomeList),
     ) {
         item(key = "hero") {
             HomeHero(
@@ -357,109 +371,57 @@ private fun HomeCompactContent(
             )
         }
 
-        // Breathing room between the hero's curved bottom and what follows
-        // so the two read as distinct containers rather than abutting slabs.
-        item(key = "hero_spacer") {
-            Spacer(modifier = Modifier.height(20.dp))
-        }
-
-        // FCM engagement announcement — dismissable, renders nothing (zero
-        // height) when no announcement is active.
-        item(key = "announcement") {
-            AnnouncementBanner(
-                announcement = announcementState.announcement,
-                showCta = announcementState.showCta,
-                onCtaClick = onAnnouncementCta,
-                onDismiss = onAnnouncementDismiss,
-                modifier = Modifier.padding(start = 20.dp, end = 20.dp, bottom = 16.dp),
-            )
-        }
-
-        if (banners.isNotEmpty()) {
-            item(key = "banners") {
-                HomeBannerCarousel(banners = banners)
-            }
-            item(key = "banners_spacer") {
-                Spacer(modifier = Modifier.height(16.dp))
-            }
-        }
-
-        val eventCards = buildList {
-            // "Next Worship" card leads when an extended reminder is enabled and near.
-            state.worshipCard?.let { w ->
-                add(EventCardUi(occasion = EventOccasion.GENERIC, eyebrow = w.name, body = w.body, worship = w))
-            }
-            if (state.isFriday) {
-                // Jumu'ah routes to JumuahCard, which sources its own strings; eyebrow/headline/body here are unused.
-                add(
-                    EventCardUi(
-                        occasion = EventOccasion.JUMUAH,
-                        eyebrow = jumuahMubarak,
-                        body = jumuahHadithQuote,
-                        jumuahAt = state.jumuahAt,
-                    )
-                )
-            }
-            state.celebrationCards.forEach { c ->
-                add(
-                    EventCardUi(
-                        occasion = c.event.toOccasion(),
-                        eyebrow = c.eyebrow,
-                        // Direction A: compact card — name (eyebrow) + arabic + one body line + one
-                        // action, matching the Jumu'ah card's height.
-                        body = c.body,
-                        arabic = c.arabic,
-                        primaryAction = if (c.ctaLabel != null && c.route != null)
-                            EventAction(c.ctaLabel) { onOpenAnnouncementRoute(c.route) } else null,
-                        onDismiss = if (c.dismissable && c.announcementId != null)
-                            { { viewModel.onEvent(HomeEvent.DismissAnnouncement) } } else null,
-                    )
+        val hasAnyBanner = banners.isNotEmpty() || announcementState.announcement != null
+        if (hasAnyBanner) {
+            item(key = "banner_slot") {
+                val allBannerItems = remember(announcementState.announcement, banners) {
+                    buildList {
+                        val ann = announcementState.announcement
+                        if (ann != null) {
+                            add(HomeBannerItem(
+                                id = ann.id,
+                                icon = announcementIcon(ann.type),
+                                title = ann.title,
+                                subtitle = ann.body,
+                                variant = announcementVariant(ann.type),
+                                actionLabel = if (announcementState.showCta) ann.ctaLabel else null,
+                                onAction = if (announcementState.showCta) onAnnouncementCta else null,
+                                dismissable = ann.dismissable,
+                                onDismiss = if (ann.dismissable) onAnnouncementDismiss else null,
+                            ))
+                        }
+                        addAll(banners)
+                    }
+                }
+                HomeBannerSlot(
+                    items = allBannerItems,
+                    modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 12.dp),
                 )
             }
         }
-        if (eventCards.isNotEmpty()) {
-            item(key = "events") {
-                EventsCarousel(events = eventCards, onWorshipClick = onOpenWorship)
-            }
-            item(key = "events_spacer") {
-                Spacer(Modifier.height(16.dp))
-            }
-        }
 
-        // "Today" section: header + swipeable carousel combining progress,
-        // fasting, hadith (and any future widgets) into one card-height pager.
-        item(key = "today_section") {
-            Spacer(modifier = Modifier.height(8.dp))
-            TodayCarousel(
-                prayerTimes = homeClock.prayers,
-                fastingToday = state.fastingToday,
-                dailyHadith = state.dailyHadith,
-                dailyHadithReference = state.dailyHadithReference,
-                dailyHadithGrade = state.dailyHadithGrade,
-                dailyDua = state.dailyDua,
-                onHadithClick = state.dailyHadithId?.let { id -> { onOpenHadith(id) } },
-            )
-        }
-
-        item("prayer_times_header") {
-            Spacer(modifier = Modifier.height(24.dp))
-            PrayerTimesSectionHeader(
-                passedCount = homeClock.prayers.count { it.isPassed },
-                upcomingCount = homeClock.prayers.count { !it.isPassed },
+        item(key = "prayer_section") {
+            HomePrayerCard(
+                prayers = homeClock.prayers,
                 onSettingsClick = onNavigateToPrayerSettings,
-                modifier = Modifier
-                    .padding(horizontal = 20.dp)
-                    .clickable { onNavigateToPrayerTimes() }
+                onTrackerClick = onNavigateToPrayerTracker,
+                onTogglePrayer = onTogglePrayer,
+                onSetPrayerStatus = onSetPrayerStatus,
+                modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp),
             )
         }
 
-        items(homeClock.prayers, key = { it.type }) { prayer ->
-            PrayerTimeCard(
-                prayer = prayer,
-                isActive = prayer.isNext,
-                onClick = { onNavigateToPrayerTracker() },
-                onToggle = { onTogglePrayer(prayer.type) },
-                modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp)
+        item(key = "also_today") {
+            HomeAlsoTodaySection(
+                isFriday = state.isFriday,
+                dailyHadith = state.dailyHadith,
+                dailyDua = state.dailyDua,
+                worshipCard = state.worshipCard,
+                onNavigateToAlKahf = onNavigateToAlKahf,
+                onOpenHadith = state.dailyHadithId?.let { id -> { onOpenHadith(id) } } ?: {},
+                onNavigateToDua = onNavigateToDua,
+                onOpenWorship = onOpenWorship,
+                modifier = Modifier.padding(start = 20.dp, end = 20.dp, bottom = 34.dp),
             )
         }
     }
@@ -538,7 +500,14 @@ private fun HomeTabletContent(
 
         val tabletEventCards = buildList {
             state.worshipCard?.let { w ->
-                add(EventCardUi(occasion = EventOccasion.GENERIC, eyebrow = w.name, body = w.body, worship = w))
+                add(
+                    EventCardUi(
+                        occasion = EventOccasion.GENERIC,
+                        eyebrow = w.name,
+                        body = w.body,
+                        worship = w
+                    )
+                )
             }
             if (state.isFriday) {
                 // Jumu'ah routes to JumuahCard, which sources its own strings; eyebrow/headline/body here are unused.
@@ -562,8 +531,9 @@ private fun HomeTabletContent(
                         arabic = c.arabic,
                         primaryAction = if (c.ctaLabel != null && c.route != null)
                             EventAction(c.ctaLabel) { onOpenAnnouncementRoute(c.route) } else null,
-                        onDismiss = if (c.dismissable && c.announcementId != null)
-                            { { viewModel.onEvent(HomeEvent.DismissAnnouncement) } } else null,
+                        onDismiss = if (c.dismissable && c.announcementId != null) {
+                            { viewModel.onEvent(HomeEvent.DismissAnnouncement) }
+                        } else null,
                     )
                 )
             }
@@ -795,3 +765,15 @@ private fun buildHomeBannerItems(
 private fun batteryOptimizationIntent(ctx: android.content.Context): android.content.Intent =
     android.content.Intent(android.provider.Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
         .apply { data = android.net.Uri.parse("package:" + ctx.packageName) }
+
+private fun announcementVariant(type: AnnouncementType): HomeBannerVariant = when (type) {
+    AnnouncementType.CELEBRATION -> HomeBannerVariant.EVENT
+    else -> HomeBannerVariant.INFO
+}
+
+private fun announcementIcon(type: AnnouncementType): androidx.compose.ui.graphics.vector.ImageVector = when (type) {
+    AnnouncementType.CELEBRATION -> Icons.Default.Star
+    AnnouncementType.CHANGELOG -> Icons.Default.NewReleases
+    AnnouncementType.PRIVACY, AnnouncementType.TOS -> Icons.Default.Policy
+    else -> Icons.Default.Info
+}

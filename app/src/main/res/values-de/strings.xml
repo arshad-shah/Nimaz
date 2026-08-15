@@ -684,8 +684,45 @@
     <!-- License Detail Screen -->
     <string name="license_detail_title">Lizenzdetails</string>
     <string name="license_detail_library_not_found">Bibliothek nicht gefunden</string>
-    <string name="license_detail_version">Version %1$s</string>
-    <string name="license_detail_author">Autor: %1$s</string>
+    <string name="licenses_subtitle_format">%1$d Bibliotheken · %2$d Lizenzen</string>
+    <string name="licenses_search_placeholder">Bibliotheken oder Autoren suchen</string>
+    <string name="licenses_credit_title">Auf geteilter Arbeit aufgebaut</string>
+    <string name="licenses_credit_body">Nimaz baut auf Bibliotheken auf, die andere geschrieben und frei zur Verfügung gestellt haben. Jede einzelne wird hier genannt.</string>
+    <string name="licenses_stat_libraries">Bibliotheken</string>
+    <string name="licenses_stat_licences">Lizenzen</string>
+    <string name="licenses_filter_section">Filter</string>
+    <string name="licenses_filter_all">Alle</string>
+    <string name="licenses_chip_format">%1$s · %2$d</string>
+    <string name="licenses_grouped_by_licence">Nach Lizenz gruppiert</string>
+    <string name="licenses_grouped_alphabetically">A bis Z</string>
+    <string name="licenses_action_sort_alphabetically">A–Z sortieren</string>
+    <string name="licenses_action_group_by_licence">Nach Lizenz gruppieren</string>
+    <string name="licenses_visible_count_format">%1$d von %2$d</string>
+    <string name="licenses_no_matches_title">Keine Bibliothek passt</string>
+    <string name="licenses_no_matches_body">Versuche den Namen der Bibliothek oder den Autor, der sie veröffentlicht.</string>
+    <string name="licenses_generated_note">Diese Liste wird beim Erstellen der App generiert und mitgeliefert, sie passt also immer zur laufenden Version.</string>
+    <string name="license_family_apache">Apache 2.0</string>
+    <string name="license_family_mit">MIT</string>
+    <string name="license_family_bsd">BSD</string>
+    <string name="license_family_ofl">Open Font</string>
+    <string name="license_family_gpl">GPL</string>
+    <string name="license_family_other">Andere</string>
+    <string name="license_plain_title">Kurz gesagt</string>
+    <string name="license_plain_apache">Frei nutzbar und auslieferbar, auch in einer kostenpflichtigen App. Die Hinweise müssen erhalten bleiben, dafür gibt es eine ausdrückliche Patentlizenz.</string>
+    <string name="license_plain_mit">Fast alles ist erlaubt, solange der Copyright-Hinweis beim Code bleibt.</string>
+    <string name="license_plain_bsd">Frei nutzbar und weitergebbar. Die Hinweise müssen erhalten bleiben, und die Namen der Autoren dürfen nicht zur Bewerbung dieser App verwendet werden.</string>
+    <string name="license_plain_ofl">Frei in einer App einbettbar. Die Schrift darf nicht einzeln verkauft werden, und eine geänderte Fassung darf den ursprünglichen Namen nicht behalten.</string>
+    <string name="license_plain_gpl">Frei nutzbar, aber wer eine geänderte Fassung weitergibt, muss auch deren Quelltext unter denselben Bedingungen weitergeben.</string>
+    <string name="license_detail_coordinate">Koordinate</string>
+    <string name="license_detail_published_by">Veröffentlicht von</string>
+    <string name="license_detail_home_page">Website</string>
+    <string name="license_detail_open_home_page">Website öffnen</string>
+    <string name="license_detail_full_text_format">%1$s — vollständiger Text</string>
+    <string name="license_detail_show_full_text">Volltext anzeigen</string>
+    <string name="license_detail_collapse">Einklappen</string>
+    <string name="license_detail_no_text">Diese Bibliothek hat ihren Lizenztext nicht veröffentlicht. Die Website oben ist der Ort zum Nachlesen.</string>
+    <string name="license_detail_governs_note">Maßgeblich ist der Lizenztext oben — die Zusammenfassung dient nur der Orientierung.</string>
+    <string name="license_text_copied">Lizenztext kopiert</string>
 
     <!-- Notification Settings Screen -->
     <string name="notification_settings_enable">Benachrichtigungen aktivieren</string>
@@ -1366,6 +1403,7 @@
     <string name="dua_label">Dua</string>
     <string name="licenses_title">Open-Source-Lizenzen</string>
     <string name="quran_juz_number_format">Juz %1$d</string>
+    <string name="quran_ayah_count">%d Ayahs</string>
     <string name="makhraj_jawf">Mund &amp; Rachen (lange Laute)</string>
     <string name="makhraj_halq">der Rachen</string>
     <string name="makhraj_lisan">die Zunge</string>
@@ -1896,6 +1934,16 @@
     <string name="search_failed_body">Die Bibliothek wird auf deinem Gerät durchsucht. Versuche es erneut oder mit anderen Wörtern.</string>
     <string name="home_prayer_times_failed">Die heutigen Gebetszeiten konnten nicht berechnet werden</string>
     <string name="home_prayer_times_failed_body">Prüfe, ob ein Standort festgelegt ist, und versuche es erneut.</string>
+    <string name="home_todays_prayers">Heutige Gebete</string>
+    <string name="home_open_tracker">Tracker öffnen</string>
+    <string name="home_prayer_settings_cd">Gebetseinstellungen</string>
+    <string name="home_prayers_done_of_five">%d von 5</string>
+    <string name="home_n_more_banners">%d weitere Hinweise</string>
+    <string name="home_also_today">Auch heute</string>
+    <string name="home_worship_subtitle">Witr und Tahajjud heute Nacht</string>
+    <string name="home_read_al_kahf">Al-Kahf lesen</string>
+    <string name="home_recommended_on_fridays">Freitagsempfehlung</string>
+    <string name="home_find_the_direction">Richtung finden</string>
     <string name="zakat_calculate_failed">Diese Berechnung konnte nicht abgeschlossen werden</string>
     <string name="zakat_save_failed">Diese Berechnung konnte nicht gespeichert werden</string>
     <string name="zakat_mark_paid_failed">Das konnte nicht als bezahlt markiert werden</string>
@@ -2091,4 +2139,17 @@
     <string name="khatam_portion_across">%1$s %2$d → %3$s %4$d</string>
     <string name="khatam_todays_portion">Heutiges Pensum</string>
     <string name="khatam_read_todays_portion">Heutiges Pensum lesen</string>
+
+    <!-- Qibla screen redesign -->
+    <string name="finding_direction">Richtung wird gesucht…</string>
+    <string name="hold_this_direction">Diese Richtung halten</string>
+    <string name="you_are_facing_format">Du blickst nach %1$d° %2$s</string>
+    <string name="qibla_bearing_label">Qibla-Peilung</string>
+    <string name="you_are_facing_label">Du blickst nach</string>
+    <string name="compass_is_unsure_title">Der Kompass ist unsicher</string>
+    <string name="compass_is_unsure_body">Magnete und Metall in der Nähe stören ihn. Eine kurze Kalibrierung behebt das.</string>
+    <string name="calibration_sheet_subtitle">Lass dies offen, während du dich bewegst – die Anzeige aktualisiert sich live</string>
+    <string name="accuracy_now_label">Genauigkeit jetzt</string>
+    <string name="back_to_compass">Zurück zum Kompass</string>
+    <string name="point_with_camera">Mit der Kamera zielen</string>
 </resources>

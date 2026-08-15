@@ -15,25 +15,19 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import com.arshadshah.nimaz.presentation.components.atoms.TickResolution
-import com.arshadshah.nimaz.presentation.components.atoms.rememberNow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.platform.testTag
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.util.formatClockTime
 import com.arshadshah.nimaz.domain.model.PrayerType
@@ -43,23 +37,23 @@ import com.arshadshah.nimaz.presentation.components.atoms.GlassPill
 import com.arshadshah.nimaz.presentation.components.atoms.GlassPillTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
-import com.arshadshah.nimaz.presentation.components.atoms.getArabicPrayerName
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCountdownText
+import com.arshadshah.nimaz.presentation.components.atoms.TickResolution
+import com.arshadshah.nimaz.presentation.components.atoms.clockTimeText
 import com.arshadshah.nimaz.presentation.components.atoms.glassBackdropSource
 import com.arshadshah.nimaz.presentation.components.atoms.rememberGlassBackdrop
+import com.arshadshah.nimaz.presentation.components.atoms.rememberNow
+import com.arshadshah.nimaz.presentation.foundation.tokens.getArabicPrayerName
 import com.arshadshah.nimaz.presentation.theme.LocalUse24HourFormat
 import com.arshadshah.nimaz.presentation.theme.LocalUseHijriPrimary
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
-import kotlinx.coroutines.delay
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
 import java.time.ZoneOffset
-import kotlin.time.Duration.Companion.milliseconds
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCountdownText
-import com.arshadshah.nimaz.presentation.components.atoms.clockTimeText
-import kotlin.time.Instant
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.hours
+import kotlin.time.Instant
 
 /**
  * Home hero: a living-sky banner (current time + date) at the original hero
@@ -117,7 +111,9 @@ fun HomeHero(
             SkyBackground(
                 timeOfDay = timeOfDay,
                 moonFraction = moonFraction,
-                modifier = Modifier.matchParentSize().glassBackdropSource(backdrop),
+                modifier = Modifier
+                    .matchParentSize()
+                    .glassBackdropSource(backdrop),
                 shape = RoundedCornerShape(
                     bottomStart = HERO_BOTTOM_RADIUS,
                     bottomEnd = HERO_BOTTOM_RADIUS

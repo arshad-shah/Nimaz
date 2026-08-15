@@ -1,13 +1,12 @@
 package com.arshadshah.nimaz.presentation.viewmodel.settings
 
 import com.arshadshah.nimaz.domain.model.AsrCalculation
-import com.arshadshah.nimaz.domain.model.HighLatitudeRule
 import com.arshadshah.nimaz.domain.model.CalculationMethod
+import com.arshadshah.nimaz.domain.model.HighLatitudeRule
 import com.arshadshah.nimaz.domain.model.Location
 import com.arshadshah.nimaz.domain.model.MushafScript
 import com.arshadshah.nimaz.domain.model.PrayerAlertStyle
 import com.arshadshah.nimaz.presentation.theme.NimazPatternStyle
-import kotlinx.coroutines.flow.first
 
 data class GeneralSettingsUiState(
     val theme: AppTheme = AppTheme.SYSTEM,

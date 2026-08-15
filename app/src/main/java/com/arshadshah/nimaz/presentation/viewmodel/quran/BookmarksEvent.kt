@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.presentation.viewmodel.quran
 
 import com.arshadshah.nimaz.domain.model.BookmarkType
 import com.arshadshah.nimaz.domain.model.SavedKind
+
 sealed interface BookmarksEvent {
     data class SetFilter(val type: BookmarkType?) : BookmarksEvent
 

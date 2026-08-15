@@ -67,8 +67,8 @@ fun FavouritesScreen(
     val prophetsTitle = stringResource(R.string.names_tab_prophets)
 
     val isEmpty = allah.favorites.isEmpty() &&
-        prophetNames.favorites.isEmpty() &&
-        prophets.favorites.isEmpty()
+            prophetNames.favorites.isEmpty() &&
+            prophets.favorites.isEmpty()
 
     NimazScreenScaffold(
         topBar = {

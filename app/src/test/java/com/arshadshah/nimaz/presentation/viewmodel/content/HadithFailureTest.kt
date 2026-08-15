@@ -5,7 +5,7 @@ import com.arshadshah.nimaz.core.monitoring.RecordingTelemetry
 import com.arshadshah.nimaz.domain.model.HadithBook
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.usecase.HadithUseCases
-import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorKind
+import com.arshadshah.nimaz.presentation.components.molecules.NimazErrorKind
 import com.google.common.truth.Truth.assertThat
 import io.mockk.coEvery
 import io.mockk.every

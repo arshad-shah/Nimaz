@@ -37,7 +37,6 @@ import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.Announcement
 import com.arshadshah.nimaz.domain.model.AnnouncementType
-import com.arshadshah.nimaz.presentation.components.atoms.NimazBannerDefaults
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant

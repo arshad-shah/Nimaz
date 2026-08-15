@@ -128,9 +128,14 @@ class HomeBannerCarouselTest {
     }
 
     @Test
-    fun `HomeBannerVariant has warning and update values`() {
+    fun `HomeBannerVariant has warning update info and event values`() {
         assertThat(HomeBannerVariant.values().toList())
-            .containsExactly(HomeBannerVariant.WARNING, HomeBannerVariant.UPDATE)
+            .containsExactly(
+                HomeBannerVariant.WARNING,
+                HomeBannerVariant.UPDATE,
+                HomeBannerVariant.INFO,
+                HomeBannerVariant.EVENT,
+            )
     }
 
     @Test

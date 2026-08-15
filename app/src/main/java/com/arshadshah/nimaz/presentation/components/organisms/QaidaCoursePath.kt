@@ -29,12 +29,12 @@ import com.arshadshah.nimaz.domain.model.LessonStatus
 import com.arshadshah.nimaz.domain.model.QaidaLesson
 import com.arshadshah.nimaz.domain.model.QaidaLessonState
 import com.arshadshah.nimaz.presentation.components.atoms.QaidaMedallion
-import com.arshadshah.nimaz.presentation.components.atoms.QaidaMedallionState
 import com.arshadshah.nimaz.presentation.components.atoms.QaidaStarRow
-import com.arshadshah.nimaz.presentation.components.atoms.rememberQaidaPalette
 import com.arshadshah.nimaz.presentation.components.atoms.toArabicNumber
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
+import com.arshadshah.nimaz.presentation.theme.QaidaMedallionState
 import com.arshadshah.nimaz.presentation.theme.ThemeMode
+import com.arshadshah.nimaz.presentation.theme.rememberQaidaPalette
 import kotlin.math.roundToInt
 
 /**

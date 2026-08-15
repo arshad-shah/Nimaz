@@ -1,9 +1,7 @@
 package com.arshadshah.nimaz.presentation.viewmodel.calendar
 
-import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.presentation.viewmodel.UiError
 import com.arshadshah.nimaz.core.di.DefaultDispatcher
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.Telemetry
@@ -11,12 +9,12 @@ import com.arshadshah.nimaz.core.monitoring.catchAndReport
 import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.core.time.TodayProvider
 import com.arshadshah.nimaz.core.util.HijriDateCalculator
-import com.arshadshah.nimaz.domain.model.CalendarDay
 import com.arshadshah.nimaz.domain.model.CalendarMonth
 import com.arshadshah.nimaz.domain.model.HijriDate
 import com.arshadshah.nimaz.domain.model.IslamicEvent
 import com.arshadshah.nimaz.domain.usecase.IslamicEventUseCases
 import com.arshadshah.nimaz.domain.usecase.calendar.CalendarUseCases
+import com.arshadshah.nimaz.presentation.viewmodel.UiError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Job
@@ -140,6 +138,7 @@ class CalendarViewModel @Inject constructor(
                 telemetry.featureUsed(DOMAIN, "select_date")
                 selectDate(event.date)
             }
+
             is CalendarEvent.NavigateToMonth -> navigateToMonth(event.month, event.year)
             is CalendarEvent.NavigateToHijriMonth -> navigateToHijriMonth(event.month, event.year)
             // No producer — see `NavigateToPreviousMonth`/`NavigateToNextMonth` below, which are
@@ -147,9 +146,11 @@ class CalendarViewModel @Inject constructor(
             is CalendarEvent.SetViewMode -> {
                 setViewMode(event.mode)
             }
+
             is CalendarEvent.NavigateToYear -> {
                 navigateToYear(event.year, event.isHijri)
             }
+
             CalendarEvent.LoadToday -> loadToday()
             CalendarEvent.LoadUpcomingEvents -> loadUpcomingEvents()
             // The only thing the calendar screen actually does, and the only thing it had no
@@ -164,6 +165,7 @@ class CalendarViewModel @Inject constructor(
                 telemetry.featureUsed(DOMAIN, "navigate_month")
                 navigateToNextMonth()
             }
+
             CalendarEvent.NavigateToPreviousYear -> navigateToPreviousYear()
             CalendarEvent.NavigateToNextYear -> navigateToNextYear()
         }
@@ -211,7 +213,7 @@ class CalendarViewModel @Inject constructor(
             // is ~365 of them plus a filter per day.
             val (calendarMonth, eventsThisMonth) = withContext(defaultDispatcher) {
                 calendarUseCases.buildGregorianMonth(month, year, cachedEvents, renderedFor) to
-                    calendarUseCases.eventsForMonth(month, year, cachedEvents)
+                        calendarUseCases.eventsForMonth(month, year, cachedEvents)
             }
 
             _calendarState.update {

@@ -13,8 +13,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -24,12 +22,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
-import com.arshadshah.nimaz.presentation.components.molecules.NameCard
-import com.arshadshah.nimaz.presentation.components.molecules.NamesAccents
-import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSegmentedControl
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSegmentedPurpose
 import com.arshadshah.nimaz.presentation.components.atoms.asSegments
+import com.arshadshah.nimaz.presentation.components.molecules.NameCard
+import com.arshadshah.nimaz.presentation.components.molecules.NamesAccents
+import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazSearchBar
 import com.arshadshah.nimaz.presentation.screens.catalog.CatalogList
 import com.arshadshah.nimaz.presentation.theme.NimazSpacing

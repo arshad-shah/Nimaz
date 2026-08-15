@@ -62,7 +62,7 @@ class NimazChipTest {
             NimazFilterChip(
                 selected = true,
                 onClick = { clicked = true },
-                label = "Selected"
+                label = "Selected",
             )
         }
         composeRule.onNodeWithText("Selected").performClick()
@@ -77,7 +77,7 @@ class NimazChipTest {
                 onClick = {},
                 label = "Leading",
                 leadingIcon = Icons.Default.Star,
-                elevated = true
+                elevated = true,
             )
         }
         composeRule.onNodeWithText("Leading").assertExists()
@@ -90,7 +90,7 @@ class NimazChipTest {
                 selected = false,
                 onClick = {},
                 label = "Plain",
-                showSelectedIcon = false
+                showSelectedIcon = false,
             )
         }
         composeRule.onNodeWithText("Plain").assertExists()

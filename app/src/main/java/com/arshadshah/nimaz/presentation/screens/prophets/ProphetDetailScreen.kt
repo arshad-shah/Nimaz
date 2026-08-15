@@ -34,7 +34,6 @@ import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
-import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.molecules.FavoriteFab
@@ -42,6 +41,7 @@ import com.arshadshah.nimaz.presentation.components.molecules.NameDetailHeader
 import com.arshadshah.nimaz.presentation.components.molecules.NameDetailSectionCard
 import com.arshadshah.nimaz.presentation.components.molecules.NamesAccent
 import com.arshadshah.nimaz.presentation.components.molecules.NamesAccents
+import com.arshadshah.nimaz.presentation.components.molecules.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.NimazSpacing
 import com.arshadshah.nimaz.presentation.viewmodel.content.CatalogEvent

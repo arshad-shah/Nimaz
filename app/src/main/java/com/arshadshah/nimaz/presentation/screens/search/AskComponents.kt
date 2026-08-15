@@ -50,12 +50,12 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeDefaults
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeEmphasis
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeShape
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
-import com.arshadshah.nimaz.presentation.components.atoms.NimazBanner
-import com.arshadshah.nimaz.presentation.components.atoms.NimazBannerVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
+import com.arshadshah.nimaz.presentation.components.molecules.NimazBanner
+import com.arshadshah.nimaz.presentation.components.molecules.NimazBannerVariant
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 
 /**
@@ -393,10 +393,10 @@ internal fun AskErrorCard(error: AiError, onRetry: () -> Unit) {
         else -> NimazBannerVariant.ERROR
     }
     NimazBanner(
+        title = title,
         message = body,
         variant = variant,
         icon = icon,
-        title = title,
         actionLabel = if (retryable) stringResource(R.string.ai_try_again) else null,
         onAction = if (retryable) onRetry else null,
         modifier = Modifier.fillMaxWidth(),

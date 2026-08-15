@@ -5,12 +5,9 @@ import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.core.monitoring.launchSafely
-import com.arshadshah.nimaz.domain.model.DuaSearchResult
-import com.arshadshah.nimaz.domain.model.HadithSearchResult
 import com.arshadshah.nimaz.domain.model.LibrarySearchResults
 import com.arshadshah.nimaz.domain.model.LibrarySource
-import com.arshadshah.nimaz.domain.model.QuranSearchResult
-import com.arshadshah.nimaz.domain.model.Surah
+import com.arshadshah.nimaz.domain.model.UnifiedSearchResult
 import com.arshadshah.nimaz.domain.usecase.ObserveSearchPreferencesUseCase
 import com.arshadshah.nimaz.domain.usecase.SearchLibraryUseCase
 import com.arshadshah.nimaz.presentation.viewmodel.UiError
@@ -24,7 +21,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import com.arshadshah.nimaz.domain.model.UnifiedSearchResult
 
 enum class SearchFilter {
     ALL, QURAN, HADITH, DUA, NAMES
@@ -98,20 +94,24 @@ class SearchViewModel @Inject constructor(
                 telemetry.featureUsed(DOMAIN, "set_filter_" + event.filter.name.lowercase())
                 setFilter(event.filter)
             }
+
             is SearchEvent.SelectRecentSearch -> selectRecentSearch(event.query)
             is SearchEvent.RemoveRecentSearch -> {
                 telemetry.featureUsed(DOMAIN, "remove_recent")
                 removeRecentSearch(event.query)
             }
+
             SearchEvent.ExecuteSearch -> executeSearch()
             SearchEvent.ClearSearch -> {
                 telemetry.featureUsed(DOMAIN, "clear")
                 clearSearch()
             }
+
             SearchEvent.ClearRecentSearches -> {
                 telemetry.featureUsed(DOMAIN, "clear_recents")
                 clearRecentSearches()
             }
+
             is SearchEvent.ApplyAiTerms -> applyAiTerms(event.terms)
         }
     }

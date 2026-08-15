@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
@@ -19,7 +18,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -28,126 +26,98 @@ import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.theme.ThemeMode
 
 /**
- * Size presets for a [NimazIconWell] — the container size and the glyph inside it.
+ * Size presets for a [NimazIconWell].
+ *
+ * - [SMALL] (32dp) — in sheets, dialogs and compact contexts.
+ * - [STANDARD] (40dp) — in rows and cards; the overwhelming majority of uses.
+ * - [LARGE] (48dp) — in empty states and hero positions.
+ *
+ * Deprecated aliases [MEDIUM] → [STANDARD] remain for source-compatibility.
+ * [XSMALL] and [XLARGE] are deleted — they had zero call sites.
  */
 enum class NimazIconWellSize(val container: Dp, val icon: Dp) {
-    XSMALL(24.dp, 13.dp),
     SMALL(32.dp, 16.dp),
-    MEDIUM(40.dp, 20.dp),
+    STANDARD(40.dp, 20.dp),
     LARGE(48.dp, 24.dp),
-    XLARGE(56.dp, 28.dp)
+
+    /** @suppress Use [STANDARD]. */
+    @Deprecated("Use STANDARD", ReplaceWith("STANDARD"))
+    MEDIUM(40.dp, 20.dp),
 }
 
 /**
- * Silhouette of an icon well: a circle, or a squircle with soft corners.
+ * @suppress Shape is always rounded at [container / 3]. This enum is removed.
  */
-enum class NimazIconWellShape {
-    CIRCLE,
-    ROUNDED
-}
+@Deprecated("NimazIconWell shape is always rounded. Remove the shape parameter.")
+enum class NimazIconWellShape { CIRCLE, ROUNDED }
 
 /**
- * A tinted container holding a single icon — the small coloured disc or squircle
- * that sits at the leading edge of list rows, settings entries, quick actions and
- * empty states.
+ * A tinted container holding a single icon — the small coloured squircle that sits
+ * at the leading edge of list rows, settings entries, quick actions and empty states.
  *
- * This exists because the pattern was hand-rolled in roughly fifteen places, each
- * repeating `Box(Modifier.size(n).clip(shape).background(colour), Center) { Icon }`
- * with its own size, alpha and tint. It is deliberately **not** a [NimazCard]: a
- * well is a fixed-size decorative holder for a glyph, not a content surface, so
- * the card separation rule (elevate on a page, outline when nested) does not apply.
+ * **API:** pass the raw hue as [color]; the well applies [ACCENT_WELL_ALPHA] (14%)
+ * automatically for the container and uses the hue at full strength for the icon.
+ * The shape is always `RoundedCornerShape(container / 3)` — no shape override.
  *
- * Colour comes from a [NimazTone] by default. Pass [accent] for Islamic feature
- * art — a per-prayer colour, a status colour — the same escape hatch
- * [NimazButton] and [NimazBadgeDefaults.feature] provide.
+ * ```kotlin
+ * NimazIconWell(icon = Icons.Default.Mosque, color = MaterialTheme.colorScheme.primary)
+ * NimazIconWell(icon = Icons.Default.Star, color = NimazColors.Gold500, size = NimazIconWellSize.LARGE)
+ * ```
  *
- * @param tone semantic colour of the well; ignored when [accent] is set.
- * @param containerSize overrides [size]'s container dimension. An escape hatch for
- *   a well whose size is genuinely load-bearing — one sitting in a fixed grid cell,
- *   or overlapping other art. Reach for a [NimazIconWellSize] first: the presets
- *   exist so wells stay consistent, and an override is how that erodes.
- * @param iconSize overrides [size]'s glyph dimension; defaults to proportional.
- * @param accent feature-art colour override; the container becomes a soft tint of
- *   it and the glyph takes it at full strength.
+ * @param color the raw hue for the icon and (at 14%) the container.
  * @param contentDescription describes the icon for accessibility. Leave null when
- *   the well is purely decorative and its meaning is already carried by adjacent
- *   text — which is the common case in a list row.
+ *   the well is purely decorative and its meaning is already carried by adjacent text.
  */
 @Composable
 fun NimazIconWell(
     icon: ImageVector,
+    color: Color,
     modifier: Modifier = Modifier,
-    tone: NimazTone = NimazTone.ACCENT,
-    accent: Color? = null,
-    size: NimazIconWellSize = NimazIconWellSize.MEDIUM,
-    shape: NimazIconWellShape = NimazIconWellShape.CIRCLE,
+    size: NimazIconWellSize = NimazIconWellSize.STANDARD,
     contentDescription: String? = null,
-    containerSize: Dp? = null,
-    iconSize: Dp? = null,
 ) {
-    val container = containerSize ?: size.container
-    val glyphSize = iconSize ?: containerSize?.let { it / 2 } ?: size.icon
-    val resolvedShape: Shape = when (shape) {
-        NimazIconWellShape.CIRCLE -> CircleShape
-        NimazIconWellShape.ROUNDED -> RoundedCornerShape(container / 3)
-    }
-    val colors = NimazBadgeDefaults.colors(tone = tone, emphasis = NimazBadgeEmphasis.SOFT)
-    val containerColor = accent?.copy(alpha = ACCENT_WELL_ALPHA) ?: colors.containerColor
-    val glyph = accent ?: colors.contentColor
-
+    val shape = RoundedCornerShape(size.container / 3)
     Box(
         modifier = modifier
-            .size(container)
-            .clip(resolvedShape)
-            .background(containerColor),
-        contentAlignment = Alignment.Center
+            .size(size.container)
+            .clip(shape)
+            .background(color.copy(alpha = ACCENT_WELL_ALPHA)),
+        contentAlignment = Alignment.Center,
     ) {
         NimazIcon(
             imageVector = icon,
             contentDescription = contentDescription,
-            iconSize = glyphSize,
-            tint = glyph
+            iconSize = size.icon,
+            tint = color,
         )
     }
 }
 
-/**
- * Tint strength for an [NimazIconWell] container built from a feature-art colour,
- * which has no `onXxxContainer` counterpart to pair with.
- */
-private const val ACCENT_WELL_ALPHA = 0.14f
+/** Fill alpha for the [NimazIconWell] container. Always 14%. */
+const val ACCENT_WELL_ALPHA = 0.14f
 
-// ==================== PREVIEWS ====================
+// ── Previews ─────────────────────────────────────────────────────────────────
 
 @Composable
 private fun NimazIconWellShowcase() {
     Row(
         modifier = Modifier.padding(16.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        NimazIconWellSize.entries.forEach { size ->
-            NimazIconWell(icon = Icons.Default.Bookmark, size = size)
-        }
-        NimazIconWell(
-            icon = Icons.Default.Notifications,
-            tone = NimazTone.WARNING,
-            shape = NimazIconWellShape.ROUNDED
-        )
-        NimazIconWell(icon = Icons.Default.Favorite, tone = NimazTone.ERROR)
-        NimazIconWell(
-            icon = Icons.Default.Favorite,
-            accent = MaterialTheme.colorScheme.tertiary
-        )
+        NimazIconWell(icon = Icons.Default.Bookmark, color = MaterialTheme.colorScheme.primary, size = NimazIconWellSize.SMALL)
+        NimazIconWell(icon = Icons.Default.Bookmark, color = MaterialTheme.colorScheme.primary)
+        NimazIconWell(icon = Icons.Default.Bookmark, color = MaterialTheme.colorScheme.primary, size = NimazIconWellSize.LARGE)
+        NimazIconWell(icon = Icons.Default.Notifications, color = MaterialTheme.colorScheme.secondary)
+        NimazIconWell(icon = Icons.Default.Favorite, color = MaterialTheme.colorScheme.error)
+        NimazIconWell(icon = Icons.Default.Favorite, color = MaterialTheme.colorScheme.tertiary)
     }
 }
 
 @Preview(showBackground = true, name = "Icon Well — Light")
 @Composable
 private fun NimazIconWellLightPreview() {
-    NimazTheme(themeMode = ThemeMode.LIGHT) {
-        NimazIconWellShowcase()
-    }
+    NimazTheme(themeMode = ThemeMode.LIGHT) { NimazIconWellShowcase() }
 }
 
 @Preview(
@@ -156,7 +126,5 @@ private fun NimazIconWellLightPreview() {
 )
 @Composable
 private fun NimazIconWellDarkPreview() {
-    NimazTheme(themeMode = ThemeMode.DARK) {
-        NimazIconWellShowcase()
-    }
+    NimazTheme(themeMode = ThemeMode.DARK) { NimazIconWellShowcase() }
 }

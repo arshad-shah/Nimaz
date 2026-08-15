@@ -1,6 +1,5 @@
 package com.arshadshah.nimaz.presentation.components.molecules
 
-import com.arshadshah.nimaz.core.util.formatFullDate
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,6 +24,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.util.formatFullDate
 import com.arshadshah.nimaz.domain.model.PrayerName
 import com.arshadshah.nimaz.domain.model.PrayerRecord
 import com.arshadshah.nimaz.domain.model.PrayerStatus
@@ -104,7 +104,6 @@ fun NimazQadaPrayerItem(
                 variant = NimazButtonVariant.TONAL,
                 size = NimazButtonSize.SMALL,
                 leadingIcon = Icons.Default.Check,
-                accent = NimazColors.StatusColors.Prayed
             )
         }
     }

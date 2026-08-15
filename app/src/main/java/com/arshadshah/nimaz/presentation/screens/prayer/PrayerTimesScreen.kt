@@ -1,6 +1,5 @@
 package com.arshadshah.nimaz.presentation.screens.prayer
 
-import com.arshadshah.nimaz.core.util.formatWeekdayDayMonth
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -54,6 +53,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.util.formatWeekdayDayMonth
 import com.arshadshah.nimaz.domain.model.PrayerType
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeDefaults
@@ -75,10 +75,10 @@ import com.arshadshah.nimaz.presentation.components.molecules.PrayerTimeCard
 import com.arshadshah.nimaz.presentation.components.molecules.calendar.NimazCalendar
 import com.arshadshah.nimaz.presentation.components.organisms.PrayerSkyScene
 import com.arshadshah.nimaz.presentation.model.PrayerTimeDisplay
+import com.arshadshah.nimaz.presentation.model.withClockState
 import com.arshadshah.nimaz.presentation.viewmodel.prayer.PrayerTimesEvent
 import com.arshadshah.nimaz.presentation.viewmodel.prayer.PrayerTimesUiState
 import com.arshadshah.nimaz.presentation.viewmodel.prayer.PrayerTimesViewModel
-import com.arshadshah.nimaz.presentation.model.withClockState
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -90,7 +90,7 @@ import java.time.YearMonth
  * Relative-day label for a non-today selection. Mirrors the wording the ViewModel used before the
  * migration (still English-only — pre-existing, tracked separately from this change).
  */
-private fun daysFromToday(date: java.time.LocalDate, today: java.time.LocalDate): String {
+private fun daysFromToday(date: LocalDate, today: LocalDate): String {
     val diff = date.toEpochDay() - today.toEpochDay()
     return when {
         diff == 0L -> "Today"
@@ -111,8 +111,8 @@ private data class PrayerSky(
 @Composable
 private fun rememberPrayerSky(
     state: PrayerTimesUiState,
-    today: java.time.LocalDate,
-    selectedDate: java.time.LocalDate,
+    today: LocalDate,
+    selectedDate: LocalDate,
 ): PrayerSky {
     val now by rememberNow(TickResolution.MINUTES)
     val prayers = remember(state.prayers, now) { state.prayers.withClockState(now) }
@@ -141,8 +141,8 @@ private fun rememberPrayerSky(
         nextName
     } else {
         "${daysFromToday(selectedDate, today)} · " +
-            "${state.sunriseAt?.let { clockTimeText(it) } ?: "--:--"} — " +
-            "${state.sunsetAt?.let { clockTimeText(it) } ?: "--:--"}"
+                "${state.sunriseAt?.let { clockTimeText(it) } ?: "--:--"} — " +
+                "${state.sunsetAt?.let { clockTimeText(it) } ?: "--:--"}"
     }
     return PrayerSky(prayers, timeOfDay, timeLabel, statusLabel)
 }
@@ -415,7 +415,10 @@ private fun DayList(
             )
         }
         item {
-            DayInfoCard(sunrise = sunriseAt?.let { clockTimeText(it) } ?: "--:--", sunset = sunsetAt?.let { clockTimeText(it) } ?: "--:--", daylight = daylight, method = method)
+            DayInfoCard(sunrise = sunriseAt?.let { clockTimeText(it) } ?: "--:--",
+                sunset = sunsetAt?.let { clockTimeText(it) } ?: "--:--",
+                daylight = daylight,
+                method = method)
         }
     }
 }

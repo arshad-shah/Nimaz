@@ -21,6 +21,7 @@ class LibraryRepositoryImplTest {
     private fun library(id: Int, name: String) = OpenSourceLibrary(
         id = id,
         name = name,
+        coordinate = "com.example:$name",
         version = "1.0.0",
         author = "Test Author",
         website = "https://example.com",
@@ -72,6 +73,7 @@ class LibraryRepositoryImplTest {
         val lib = OpenSourceLibrary(
             id = expected,
             name = "Compose UI",
+            coordinate = coordinate,
             version = "1.0.0",
             author = null,
             website = null,

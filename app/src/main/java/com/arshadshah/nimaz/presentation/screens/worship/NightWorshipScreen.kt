@@ -40,16 +40,16 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazClockText
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCountdownText
-import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorDefaults
-import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorState
-import com.arshadshah.nimaz.presentation.components.atoms.NimazErrorVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
-import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.TickResolution
-import com.arshadshah.nimaz.presentation.viewmodel.UiError
 import com.arshadshah.nimaz.presentation.components.atoms.rememberNow
+import com.arshadshah.nimaz.presentation.components.molecules.NimazErrorDefaults
+import com.arshadshah.nimaz.presentation.components.molecules.NimazErrorState
+import com.arshadshah.nimaz.presentation.components.molecules.NimazErrorVariant
+import com.arshadshah.nimaz.presentation.components.molecules.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
+import com.arshadshah.nimaz.presentation.viewmodel.UiError
 import com.arshadshah.nimaz.presentation.viewmodel.worship.NightWorshipEvent
 import com.arshadshah.nimaz.presentation.viewmodel.worship.NightWorshipUiState
 import com.arshadshah.nimaz.presentation.viewmodel.worship.NightWorshipViewModel
@@ -404,7 +404,9 @@ private fun NightWorshipRow(
         ) {
             NimazIcon(imageVector = icon, contentDescription = null)
             Spacer(Modifier.height(0.dp))
-            Column(modifier = Modifier.padding(start = 14.dp).weight(1f)) {
+            Column(modifier = Modifier
+                .padding(start = 14.dp)
+                .weight(1f)) {
                 Text(
                     text = title,
                     style = MaterialTheme.typography.titleSmall,
