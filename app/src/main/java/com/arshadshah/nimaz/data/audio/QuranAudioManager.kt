@@ -847,12 +847,18 @@ class QuranAudioManager @Inject constructor(
 
     /**
      * Play all ayahs starting from a specific one in the list.
+     *
+     * Returns whether playback started, which is **false** when [ayahGlobalId] is not in
+     * [allAyahs] — there is no honest index to start at, and starting at the top would play a
+     * verse the reader did not ask for. It used to return `Unit` and simply fall through, so a
+     * caller handing it a list that did not hold the verse got a play button that did nothing
+     * at all: no sound, no error, no state change. Callers must now decide what a miss means.
      */
-    fun playFromAyah(ayahGlobalId: Int, allAyahs: List<AyahAudioItem>, title: String) {
+    fun playFromAyah(ayahGlobalId: Int, allAyahs: List<AyahAudioItem>, title: String): Boolean {
         val startIndex = allAyahs.indexOfFirst { it.ayahGlobalId == ayahGlobalId }
-        if (startIndex >= 0) {
-            playAyahsSequentially(allAyahs, startIndex, title)
-        }
+        if (startIndex < 0) return false
+        playAyahsSequentially(allAyahs, startIndex, title)
+        return true
     }
 
     /**

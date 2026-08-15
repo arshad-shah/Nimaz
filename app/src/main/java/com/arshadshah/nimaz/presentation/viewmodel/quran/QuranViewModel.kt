@@ -13,6 +13,7 @@ import com.arshadshah.nimaz.core.text.StringProvider
 import com.arshadshah.nimaz.core.time.TodayProvider
 import com.arshadshah.nimaz.data.audio.AudioState
 import com.arshadshah.nimaz.data.audio.QuranAudioManager
+import com.arshadshah.nimaz.domain.model.Ayah
 import com.arshadshah.nimaz.domain.model.Khatam
 import com.arshadshah.nimaz.domain.model.KhatamDetailSnapshot
 import com.arshadshah.nimaz.domain.model.KhatamStatus
@@ -561,10 +562,60 @@ class QuranViewModel @Inject constructor(
         audioManager.playSurah(surahNumber, surahName, audioItems)
     }
 
+    /**
+     * Play from one verse — the reader's ayah tooltip, its action sheet, and the audio bar's
+     * "play from here".
+     *
+     * The playlist is the reader's own list of verses **when it holds the verse being asked
+     * for**, so playing from a page plays that page and playing from a juz carries on through
+     * the juz. It often does not hold it, and that is what made the tooltip's play button dead:
+     * `ayahs` tracks one page (in dual-page mode, only the left one of the spread — the two
+     * `LoadPage` calls a settled spread issues leave the right page's verses out of it), while
+     * the line-accurate renderer draws from `mushafPageLayoutCache`, a different source that can
+     * have a page fully on screen before `getAyahsByPage` has landed for it. A verse tapped on
+     * that page was not in the playlist, so [QuranAudioManager.playFromAyah] found no index and
+     * returned without playing, without failing, and without saying anything.
+     *
+     * So a miss is now resolved rather than dropped: the verse's own surah is fetched and it
+     * plays from there, which is the same thing "play from here" means everywhere else. Only if
+     * the verse cannot be found even in its own surah does it fall back to playing that one
+     * verse alone — [QuranAudioManager.playAyah] needs nothing but its id, so there is always
+     * something to play and never nothing to hear.
+     */
     private fun playAyahAudio(ayahGlobalId: Int, surahNumber: Int, ayahNumber: Int) {
-        val ayahs = _readerState.value.ayahs.ifEmpty {
+        val readerAyahs = _readerState.value.ayahs.ifEmpty {
             _readerState.value.surahWithAyahs?.ayahs ?: emptyList()
         }
+        val readerTitle = _readerState.value.title.ifEmpty {
+            strings.get(R.string.quran_home_surah_fallback, surahNumber)
+        }
+        if (playFrom(readerAyahs, ayahGlobalId, readerTitle)) return
+
+        launchSafely(
+            telemetry,
+            AppAnalytics.Feature.QURAN,
+            "play_ayah_audio",
+            // The verse still plays: one verse is a smaller answer than the surah, and a much
+            // better one than the silence this whole path exists to end.
+            onFailure = { audioManager.playAyah(ayahGlobalId, surahNumber, ayahNumber) },
+        ) {
+            val surah = quranUseCases.getSurahWithAyahs(surahNumber, translatorId()).first()
+            val started = playFrom(
+                ayahs = surah?.ayahs.orEmpty(),
+                ayahGlobalId = ayahGlobalId,
+                title = surah?.surah?.nameEnglish ?: readerTitle,
+            )
+            if (!started) audioManager.playAyah(ayahGlobalId, surahNumber, ayahNumber)
+        }
+    }
+
+    /**
+     * Starts [ayahs] at [ayahGlobalId], reporting whether that verse was in them to start at.
+     * Continuous playback is the reader's setting either way — it governs what happens at the
+     * end of the playlist, not which playlist this turned out to be.
+     */
+    private fun playFrom(ayahs: List<Ayah>, ayahGlobalId: Int, title: String): Boolean {
+        if (ayahs.isEmpty()) return false
         val audioItems = ayahs.map { ayah ->
             QuranAudioManager.AyahAudioItem(
                 ayahGlobalId = ayah.id,
@@ -572,15 +623,8 @@ class QuranViewModel @Inject constructor(
                 ayahNumber = ayah.ayahNumber
             )
         }
-        val title = _readerState.value.title.ifEmpty {
-            strings.get(
-                R.string.quran_home_surah_fallback,
-                surahNumber
-            )
-        }
-        // Respect continuousReading setting from QuranReaderScreen
         audioManager.setContinuousPlayback(_readerState.value.continuousReading)
-        audioManager.playFromAyah(ayahGlobalId, audioItems, title)
+        return audioManager.playFromAyah(ayahGlobalId, audioItems, title)
     }
 
     private fun loadSurahs() {

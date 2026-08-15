@@ -57,7 +57,13 @@ fun SurahInfoSheetHost(
         juzNumber = homeState.pagination.juzForPage(startPage),
         onDismiss = onDismiss,
         onReadSurah = onReadSurah,
-        onListen = { viewModel.onEvent(QuranEvent.PlaySurahFromInfo(surahNumber)) },
+        // Acting closes the sheet, the same as "Read surah" beside it. It used to fire the event
+        // and leave the sheet standing over the very player it had just summoned, so the one
+        // visible consequence of the tap was hidden by the thing that was tapped.
+        onListen = {
+            viewModel.onEvent(QuranEvent.PlaySurahFromInfo(surahNumber))
+            onDismiss()
+        },
         onOpenBackground = { onOpenBackground(surahNumber) },
         onOpenPassages = { onOpenPassages(surahNumber) },
         onOpenSubjects = { onOpenSubjects(surahNumber) },
