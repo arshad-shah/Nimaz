@@ -3,6 +3,8 @@ package com.arshadshah.nimaz.core.di
 import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
 import com.arshadshah.nimaz.data.audio.AyahAudioDownloader
 import com.arshadshah.nimaz.data.audio.HttpAyahAudioDownloader
+import com.arshadshah.nimaz.data.audio.NextSurahPlaylistSource
+import com.arshadshah.nimaz.data.audio.QuranNextSurahPlaylistSource
 import com.arshadshah.nimaz.data.repository.AsmaUlHusnaRepositoryImpl
 import com.arshadshah.nimaz.data.repository.AsmaUnNabiRepositoryImpl
 import com.arshadshah.nimaz.data.repository.DuaRepositoryImpl
@@ -308,6 +310,16 @@ abstract class RepositoryModule {
     abstract fun bindAyahAudioDownloader(
         impl: HttpAyahAudioDownloader
     ): AyahAudioDownloader
+
+    /**
+     * What continuous playback rolls into when a surah ends — the other half of a setting that
+     * promised the next surah and could only ever deliver the next verse.
+     */
+    @Binds
+    @Singleton
+    abstract fun bindNextSurahPlaylistSource(
+        impl: QuranNextSurahPlaylistSource
+    ): NextSurahPlaylistSource
 
     @Binds
     @Singleton

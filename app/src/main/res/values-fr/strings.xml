@@ -400,6 +400,7 @@
     <string name="prayer_day_complete">Journée terminée</string>
     <string name="prayer_day_summary_past">Journée terminée · %1$d sur %2$d effectuées</string>
     <string name="prayer_day_upcoming">Journée à venir</string>
+    <string name="prayer_day_no_schedule">Horaires de prière indisponibles</string>
     <string name="prayer_tracker_title">Suivi de prière</string>
     <string name="view_statistics">Voir les statistiques</string>
     <string name="all_caught_up">Tout est à jour !</string>

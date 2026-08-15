@@ -391,6 +391,7 @@
     <string name="prayer_day_complete">Gün tamamlandı</string>
     <string name="prayer_day_summary_past">Gün tamamlandı · %2$d namazdan %1$d kılındı</string>
     <string name="prayer_day_upcoming">Yaklaşan gün</string>
+    <string name="prayer_day_no_schedule">Namaz vakitleri kullanılamıyor</string>
     <string name="prayer_tracker_title">Namaz Takibi</string>
     <string name="view_statistics">İstatistikleri Görüntüle</string>
     <string name="all_caught_up">Tamamı Kılındı!</string>

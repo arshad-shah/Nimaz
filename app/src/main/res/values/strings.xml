@@ -1560,6 +1560,7 @@
     <string name="prayer_day_complete">Day complete</string>
     <string name="prayer_day_summary_past" tools:ignore="PluralsCandidate">Day complete · %1$d of %2$d prayed</string>
     <string name="prayer_day_upcoming">Upcoming day</string>
+    <string name="prayer_day_no_schedule">Prayer times unavailable</string>
 
     <!-- Settings Screen -->
     <string name="sync_data">Sync Data</string>

@@ -378,6 +378,7 @@
     <string name="prayer_day_complete">Hari selesai</string>
     <string name="prayer_day_summary_past">Hari selesai · %1$d daripada %2$d ditunaikan</string>
     <string name="prayer_day_upcoming">Hari akan datang</string>
+    <string name="prayer_day_no_schedule">Waktu solat tidak tersedia</string>
     <string name="prayer_tracker_title">Penjejak Solat</string>
     <string name="view_statistics">Lihat Statistik</string>
     <string name="all_caught_up">Semua Selesai!</string>
