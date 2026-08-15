@@ -1541,6 +1541,20 @@ exclusive surfaces per delivery.
 | `core/navigation/AnnouncementRoutes.kt` | `announcementRoute(key)` — the route allowlist and grammar |
 | `core/di/AnnouncementModule.kt` | the DI wiring |
 | `presentation/components/molecules/AnnouncementBanner.kt` | the banner; state in `HomeViewModel.announcement` (`StateFlow<AnnouncementUiState>`) |
+| `presentation/components/organisms/HomeBannerSlot.kt` | the **attention slot** an announcement shares with the permission/update warnings — see below |
+
+**The attention slot.** Everything that interrupts the home screen — a pushed announcement, a
+missing notification or location permission, battery optimisation, an available update — is one
+list, drawn by `HomeBannerSlot`. It shows **one** banner and, when there are more, a
+"N more to deal with" button that opens **a sheet** (`NimazBottomSheet`) listing all of them,
+ranked. It used to expand the overflow *in place*, so a run of queued interruptions grew the home
+screen and pushed the prayer card below the fold; a queue of interruptions is something you open
+and close, not something that grows the page you were reading, and a sheet is also where an
+unbounded list can afford to be tall. Inside the sheet **acting closes it and dismissing does
+not** — an action sends you somewhere (a permission dialog, a settings screen, an announcement's
+destination) and a modal left over the top of that is covering the thing it just sent you to,
+while a dismissal is housekeeping and the queue stays open. Shrinking to one item closes the
+sheet, because the single remaining banner is already on the screen behind it.
 
 ### 12.3 Payload contract
 

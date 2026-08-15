@@ -1946,6 +1946,8 @@
     <string name="home_prayer_settings_cd">Namaz ayarları</string>
     <string name="home_prayers_done_of_five">5 üzerinden %d</string>
     <string name="home_n_more_banners">%d tane daha işlem bekliyor</string>
+    <string name="home_banner_sheet_title">Dikkatinizi gerektiriyor</string>
+    <string name="home_banner_sheet_subtitle">%d madde işlem bekliyor</string>
     <string name="home_also_today">Bugün de</string>
     <string name="home_worship_subtitle">Bu gece Vitr ve Teheccüd</string>
     <string name="home_read_al_kahf">Kehf\'i Oku</string>

@@ -1976,6 +1976,8 @@
     <string name="home_prayer_settings_cd">Paramètres de prière</string>
     <string name="home_prayers_done_of_five">%d sur 5</string>
     <string name="home_n_more_banners">%d de plus à gérer</string>
+    <string name="home_banner_sheet_title">Nécessite votre attention</string>
+    <string name="home_banner_sheet_subtitle">%d éléments à gérer</string>
     <string name="home_also_today">Aussi aujourd\'hui</string>
     <string name="home_worship_subtitle">Witr et Tahajjud ce soir</string>
     <string name="home_read_al_kahf">Lire Al-Kahf</string>
