@@ -193,14 +193,16 @@ class SettingsViewModel @Inject constructor(
      * `todayChanges` makes the day an input rather than an ambient read.
      */
     val todayPrayerTimes: StateFlow<PrayerTimes?> = combine(
-        prayerUseCases.getCurrentLocation(),
+        // The calculation settings, not `getCurrentLocation()`. That reads the `locations`
+        // table, which is written only by searching for a place and picking it — a user who
+        // detected their location by GPS or set it in onboarding has one in preferences and no
+        // row, so these rows showed no time at all next to a notification they had enabled.
+        prayerUseCases.observeCalculationSettings(),
         todayProvider.todayChanges,
-    ) { location, today ->
-        location?.let {
-            runCatching {
-                prayerUseCases.getPrayerTimesForDate(today, it)
-            }.getOrNull()
-        }
+    ) { settings, today ->
+        runCatching {
+            prayerUseCases.getPrayerTimesForDate(today, settings)
+        }.getOrNull()
     }
         .stateIn(
             scope = viewModelScope,

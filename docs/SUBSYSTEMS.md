@@ -696,6 +696,23 @@ comes from `getRecentLocations(limit)` ordering by the `updatedAt` that has been
 it was created — a "recent" row must never be built by taking the head of `getAllLocations()`,
 which sorts `isFavorite DESC, name ASC`. No schema change was needed for any of this.
 
+**Where a prayer time gets its location, and it is not that table.** There are two stores, and
+only one of them is authoritative. **Preferences** (`LocationSettings.updateLocation` → latitude /
+longitude / locationName) is what `observeCalculationSettings()` resolves and therefore what every
+prayer-time surface computes from; it is written by *all four* ways in — onboarding's GPS detect,
+the location screen's GPS detect, the location screen's search-and-pick, and the home screen's own
+picker. The **`locations` table** is a saved-places list for the browser, and only
+search-and-pick writes it. So a user who set their location by GPS has coordinates everywhere and
+no row at all, and anything reading `getCurrentLocation()` for prayer times had nothing: the
+prayer tracker showed no schedule (and, before its lede was fixed, announced "Day complete" at
+breakfast over five rows correctly reading UPCOMING), and the settings screen's notification rows
+showed no time. Both now take `getPrayerTimesForDate(date, settings)` — the
+`PrayerCalculationSettings` overload — which also applies the method, school, high-latitude rule
+and per-prayer adjustments that a `locations` row's own columns do not carry, and so ends a
+quieter divergence in which the tracker could disagree with Home about when Asr was.
+**Compute prayer times from `observeCalculationSettings()`, never from a `Location` row** — the
+`Location` overload is for the location browser, which really is asking about one saved place.
+
 **Legacy user-data import.** `LegacyUserDataImport` copies an existing install's rows out of the
 content database into the user database the first time it is opened, driven by `UserDataMigrator`
 from `AppInitializer` (§9) and awaited before the splash screen lifts. It is one transaction of

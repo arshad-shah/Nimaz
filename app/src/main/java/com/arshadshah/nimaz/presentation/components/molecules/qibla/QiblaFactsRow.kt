@@ -11,8 +11,8 @@ import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.qibla.QiblaFactCard
 import com.arshadshah.nimaz.presentation.foundation.geometry.cardinalDirection
+import com.arshadshah.nimaz.presentation.foundation.geometry.compassDegrees
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
-import kotlin.math.roundToInt
 
 /**
  * A pair of [QiblaFactCard]s showing the Qibla bearing and the current device
@@ -30,12 +30,14 @@ fun QiblaFactsRow(
     ) {
         QiblaFactCard(
             label = stringResource(R.string.qibla_bearing_label),
-            value = "${qiblaBearing.roundToInt()}° ${cardinalDirection(qiblaBearing)}",
+            value = "${compassDegrees(qiblaBearing)}° ${cardinalDirection(qiblaBearing)}",
             modifier = Modifier.weight(1f),
         )
         QiblaFactCard(
             label = stringResource(R.string.you_are_facing_label),
-            value = "${currentAzimuth.roundToInt()}° ${cardinalDirection(currentAzimuth)}",
+            // `currentAzimuth` is the unwrapped dial value — see [compassDegrees]. Printed raw
+            // it read "-67° NW", a heading no compass has.
+            value = "${compassDegrees(currentAzimuth)}° ${cardinalDirection(currentAzimuth)}",
             modifier = Modifier.weight(1f),
         )
     }

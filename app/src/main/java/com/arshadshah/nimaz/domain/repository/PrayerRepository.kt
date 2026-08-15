@@ -17,7 +17,26 @@ interface PrayerRepository {
     fun getTodayPrayerRecords(): Flow<Map<PrayerName, PrayerStatus>>
 
     // Prayer times calculation
+    //
+    // Two sources of location, and only one of them is the user's. This overload takes a
+    // `Location` — a row in the `locations` table, written only by *searching for and picking* a
+    // place. Detecting by GPS, onboarding and the home screen's own picker all write the
+    // preference store instead, so for those users the table is empty and this has nothing to be
+    // called with. Prefer the [PrayerCalculationSettings] overload below: it reads the
+    // preferences every other prayer-time surface reads, and applies the method, school,
+    // high-latitude rule and per-prayer adjustments that a `Location` row's own columns do not
+    // carry. This one remains for the location *browser*, which genuinely is asking about a
+    // specific saved row rather than about the user's own position.
     fun getPrayerTimesForDate(date: LocalDate, location: Location): PrayerTimes
+
+    /**
+     * The day's five times as wall-clock times, from the user's own calculation settings.
+     *
+     * [getDaySchedule] in the shape a day *card* wants: the same instants, the same adjustments,
+     * named rather than listed. The zone is the device's, which is the zone "has this prayer
+     * passed?" is being asked in.
+     */
+    fun getPrayerTimesForDate(date: LocalDate, settings: PrayerCalculationSettings): PrayerTimes
     fun getPrayerTimesForRange(
         startDate: LocalDate,
         endDate: LocalDate,

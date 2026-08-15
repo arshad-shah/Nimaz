@@ -27,7 +27,10 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlin.time.toJavaInstant
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.ZoneId
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -135,6 +138,52 @@ class PrayerRepositoryImpl @Inject constructor(
     override fun getPrayerTimesForDate(date: LocalDate, location: Location): PrayerTimes {
         return prayerTimeCalculator.calculatePrayerTimes(date, location)
     }
+
+    override fun getPrayerTimesForDate(
+        date: LocalDate,
+        settings: PrayerCalculationSettings,
+    ): PrayerTimes {
+        val zone = ZoneId.systemDefault()
+        val schedule = getDaySchedule(date, settings)
+            .associate { it.type to it.time.toJavaInstant().atZone(zone).toLocalDateTime() }
+
+        // Every type the calculator produces is present — it computes all six for every day —
+        // so a missing one is a contract break, not a case to paper over with `now()`.
+        fun at(type: PrayerType): LocalDateTime = schedule.getValue(type)
+
+        return PrayerTimes(
+            fajr = at(PrayerType.FAJR),
+            sunrise = at(PrayerType.SUNRISE),
+            dhuhr = at(PrayerType.DHUHR),
+            asr = at(PrayerType.ASR),
+            maghrib = at(PrayerType.MAGHRIB),
+            isha = at(PrayerType.ISHA),
+            date = date,
+            // `PrayerTimes.location` is a record of what these were computed for, and what they
+            // were computed for is the preference store, which has no row and no id. Carrying
+            // the resolved coordinates under the settings' own method and school says exactly
+            // that; inventing a `locations` row would claim a saved place that may not exist.
+            location = settings.asLocation(),
+        )
+    }
+
+    /** The resolved settings as the [Location] shape [PrayerTimes] carries. Not a stored row. */
+    private fun PrayerCalculationSettings.asLocation(): Location = Location(
+        id = 0L,
+        name = location.name,
+        latitude = location.latitude,
+        longitude = location.longitude,
+        timezone = ZoneId.systemDefault().id,
+        country = null,
+        city = null,
+        isCurrentLocation = true,
+        isFavorite = false,
+        calculationMethod = calculationMethod,
+        asrCalculation = asrCalculation,
+        highLatitudeRule = highLatitudeRule,
+        fajrAngle = null,
+        ishaAngle = null,
+    )
 
     override fun getPrayerTimesForRange(
         startDate: LocalDate,

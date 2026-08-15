@@ -13,6 +13,7 @@ import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.presentation.theme.CompassArtColors
 import java.util.Locale
 import kotlin.math.abs
+import kotlin.math.roundToInt
 
 /**
  * Pure draw-scope geometry helpers shared by Qibla screens. No Composable
@@ -166,6 +167,20 @@ fun formatCoordinates(latitude: Double, longitude: Double): String {
     val lon = String.format(locale, "%.4f", abs(longitude))
     return "$lat°$ns, $lon°$ew"
 }
+
+/**
+ * A bearing as a compass reading: a whole number of degrees in `0..359`.
+ *
+ * The azimuth the compass screen holds is deliberately **unwrapped** — it accumulates across the
+ * 359°→0° seam so the dial animates the short way round instead of spinning back through every
+ * degree — which means it is routinely negative, and after a few turns in one hand can be past
+ * 700. That is right for a rotation and wrong for a number a person reads: the heading readout
+ * printed "−67° NW" for what a compass calls 293°, the cardinal letters being correct only
+ * because [cardinalDirection] does this normalisation for itself.
+ *
+ * Rounds first, then wraps, so 359.7° reads as 0° and never as 360°.
+ */
+fun compassDegrees(bearing: Float): Int = ((bearing.roundToInt() % 360) + 360) % 360
 
 /**
  * Maps a bearing in degrees to an 8-point cardinal abbreviation
