@@ -88,7 +88,7 @@ sequenceDiagram
 
     U->>App: Ask a question
     App->>W: POST /v1/invoke (search-assist) {question}
-    W->>W: Play Integrity — only guard, fail-open, blocks failed verdicts
+    W->>W: Play Integrity — only guard, blocks unusable tokens, bounded fail-open
     W->>GW: anthropic/v1/messages (cf-aig-authorization, forced submit_result tool)
     GW->>C: Unified Billing — Cloudflare-managed Anthropic credentials
     C-->>GW: tool_use JSON
@@ -107,32 +107,50 @@ injects its managed Anthropic credentials and bills the account's AI credits.
 The Worker's only credential is `CLOUDFLARE_AI_TOKEN` — the gateway's
 authentication token (`cf-aig-authorization`) — never an Anthropic key.
 
-### Play Integrity is the only Worker guard — and it fails open
+### Play Integrity is the only Worker guard — and it fails open only for our own faults
 
 The Worker keeps no rate-limit counters (no KV): request throttling is the AI
 Gateway's **Rate Limiting rule** and the monthly cost cap is its **Spend
 Limit**. The one check the Worker performs is Play Integrity:
 
-| Outcome       | When                                                            | Effect                        |
-| ------------- | ---------------------------------------------------------------- | ----------------------------- |
-| `verified`    | Token decodes with `PLAY_RECOGNIZED` + device/basic integrity    | proceeds                      |
-| `unavailable` | Missing token, Integrity API unreachable/unconfigured            | proceeds (fail-open)          |
-| `failed`      | Google decoded the token and the verdict failed                  | `ATTESTATION_FAILED` (403)    |
+| Outcome       | When                                                                                                                                  | Effect                        |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- |
+| `verified`    | Token decodes with `PLAY_RECOGNIZED` + device/basic integrity + `requestPackageName` = `com.arshadshah.nimaz`                          | proceeds                      |
+| `failed`      | Missing/short token, token Google won't decode (400), no `requestDetails`, or a verdict that fails app / device / package              | `ATTESTATION_FAILED` (403)    |
+| `unavailable` | Service account unconfigured, or a Google-side error (mint failure, 401/403/429/5xx, network throw)                                    | proceeds (bounded fail-open)  |
 
-Fail-open matters: hard-failing the unavailable paths bricked the feature for
-legitimate users whenever Play services hiccuped or Google's API was
-unreachable. Only an explicit failed verdict (unrecognized app, tampered
-device, package mismatch) is rejected; the gateway's rate/spend limits bound
-whatever slips through.
+The line between the last two is *who is at fault*. Anything the caller
+controls is `failed`: a caller can always withhold a token, so treating a
+missing one as "verification could not run" left `POST /v1/invoke` open to
+anyone who omitted it — the request shape is public — on the account's AI
+credits. Only faults on our side (no credentials, Google unreachable) fail
+open, because hard-failing those bricked the feature for legitimate users
+whenever Play services hiccuped.
+
+That fail-open path is **bounded**: consecutive Google-side failures are
+counted per isolate (10, inside a rolling 5-minute window) and past the bound
+the Worker fails closed until Google answers a decode again, so a sustained
+outage can't be ridden as a standing bypass. Whatever still slips through is
+bounded in cost by the gateway's rate/spend limits.
+
+Two known gaps, deliberate: a Worker deployed **without**
+`GOOGLE_SERVICE_ACCOUNT_JSON` passes everything unbounded (there is nothing to
+verify against — set the secret in production), and tokens are **not**
+replay-bound to a per-request nonce, so a captured token can be reused until it
+expires.
 
 The app fetches tokens with the **standard** Play Integrity API (warm up a
 `StandardIntegrityTokenProvider` once, then a cheap `request()` per question),
 not the classic one. Classic requests are throttled per app-instance by Play
 services after a few calls in a short window, so fetching one per question
 meant legitimate installs "worked for a while" and then every token fetch
-failed → empty token → verification skipped for every request. The standard API is
-designed for frequent per-action checks; if the warmed-up provider goes stale,
-`IntegrityTokenProvider` re-prepares it once before falling back. The Worker is
+failed → empty token. That now means `ATTESTATION_FAILED`/403 (the app shows
+the `AiError.Unverified` state), which is exactly why the standard API is not
+optional: it is designed for frequent per-action checks. If the warmed-up
+provider goes stale, `IntegrityTokenProvider` re-prepares it once before
+falling back to an empty token (debug builds fall back to the literal
+`"debug-skip"`, honoured only when the Worker runs `SKIP_ATTESTATION=true`).
+The Worker is
 unaffected: `decodeIntegrityToken` decodes classic and standard tokens alike,
 and the verdict fields it checks are identical.
 
@@ -166,7 +184,7 @@ JSON object so one envelope serves every capability.
 ### `search-assist` (the single call)
 
 ```json
-{ "capability": "search-assist", "integrityToken": "<token or empty>", "deviceId": "…",
+{ "capability": "search-assist", "integrityToken": "<token; empty/short → 403>", "deviceId": "…",
   "input": { "question": "3..500 chars" } }
 ```
 
@@ -199,7 +217,7 @@ Error envelope (HTTP 400/403/429/502/503):
 ```
 
 (`RATE_LIMITED` is a pass-through of the gateway's Rate Limiting rule;
-`ATTESTATION_FAILED` is an explicit failed Play Integrity verdict — see the
+`ATTESTATION_FAILED` is an unusable token or a failed Play Integrity verdict — see the
 table above.)
 
 ### Citation ID grammar (`domain/model/CitationId.kt`)
@@ -374,8 +392,9 @@ visible for the rest of the session after the toggle went off.
   `retry-after` header when present). The monthly USD ceiling is the
   gateway's **Spend Limit** — when it trips (or credits run out) the Worker
   maps the gateway error to `BUDGET_EXCEEDED` (503). The Worker's own guard is
-  Play Integrity only (fail-open; explicit failed verdicts get
-  `ATTESTATION_FAILED`/403).
+  Play Integrity only (unusable tokens and failed verdicts get
+  `ATTESTATION_FAILED`/403; only our-side faults fail open, and only within a
+  bounded window).
 - Observability: every call attaches a `cf-aig-metadata: {"capability": …}`
   header (spend per feature in the dashboard; never the question text), logs
   an `ai_usage` line (token counts only), and echoes usage in the
@@ -411,7 +430,9 @@ committed to the repo.
    Claude credential.
    `npx wrangler secret put GOOGLE_SERVICE_ACCOUNT_JSON`
    (If the Google one is absent the Worker still works — verification is
-   "unavailable" and every request passes, fail-open.) There is **no
+   "unavailable" and every request passes, unbounded. Treat that as a
+   pre-setup state, not a deployment posture: it is an open endpoint on the
+   account's AI credits.) There is **no
    `ANTHROPIC_API_KEY`**: Unified Billing injects the Anthropic credentials.
 3. **Unified Billing (dashboard, cannot be scripted):** AI → AI Gateway →
    confirm the `nimaz` gateway exists → *Credits Available* → **Manage** →
@@ -458,8 +479,11 @@ committed to the repo.
    `playIntegrityCloudProjectNumber` (or pass `-PplayIntegrityCloudProjectNumber=…`).
 
 Note: even with none of this configured, AI answers work — verification is
-"unavailable" and requests pass unverified (fail-open); the gateway's rate and
-spend limits are the backstop.
+"unavailable" and requests pass unverified; the gateway's rate and spend limits
+are then the only backstop, so this is a bring-up state, not a shipping one.
+Once `GOOGLE_SERVICE_ACCOUNT_JSON` is set, a client without a usable token gets
+`ATTESTATION_FAILED`/403 — including release installs whose Play Integrity
+fetch fails, which is the intended trade.
 
 ### 3. GitHub secrets (for `worker_deploy.yml`)
 

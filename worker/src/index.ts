@@ -54,11 +54,13 @@ app.post("/v1/invoke", async (c) => {
   }
 
   try {
-    // 1. Play Integrity — the Worker's only guard. Blocks only an explicit
-    //    failed verdict; "unavailable" (missing token, unconfigured, Google
-    //    outage) fails open. Request throttling and the monthly USD cost cap
-    //    both live in the AI Gateway (Rate Limiting rule + Spend Limit);
-    //    callClaude maps them to RATE_LIMITED / BUDGET_EXCEEDED.
+    // 1. Play Integrity — the Worker's only guard. A missing, short or
+    //    undecodable token is "failed" and is rejected here; "unavailable"
+    //    (no service account configured, or a Google-side error inside the
+    //    bounded fail-open window) proceeds. Request throttling and the
+    //    monthly USD cost cap both live in the AI Gateway (Rate Limiting rule
+    //    + Spend Limit); callClaude maps them to RATE_LIMITED /
+    //    BUDGET_EXCEEDED.
     const integrity = await checkIntegrity(c.env, integrityToken, now.getTime());
     if (integrity === "failed") {
       throw new ApiError(

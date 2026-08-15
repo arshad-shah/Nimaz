@@ -9,7 +9,8 @@ plus related search terms, which the app resolves against its **local**
 database (real records become the proof cards and the results list).
 
 The Worker never stores questions or answers. Its only guard is **Play
-Integrity** (fail-open — see below); it then calls Claude with a fixed cached
+Integrity** (a caller with no usable token is rejected; a Google-side outage
+fails open within a bounded window — see below); it then calls Claude with a fixed cached
 prompt and a forced structured-output tool and returns strict JSON. Request
 throttling and the monthly cost cap are **not Worker code** — they are the
 `nimaz` AI Gateway's Rate Limiting rule and Spend Limit (dashboard).
@@ -28,7 +29,8 @@ code.
 ```
 POST /v1/invoke
   → integrity   (Play Integrity token → verified | unavailable | failed;
-                 only "failed" rejects — ATTESTATION_FAILED/403)
+                 "failed" rejects — ATTESTATION_FAILED/403. Missing, short or
+                 undecodable tokens are "failed", not "unavailable")
   → dispatch    (registry lookup → Zod-validate input → build request
                  → POST gateway.ai.cloudflare.com/v1/{acct}/nimaz/anthropic
                    /v1/messages  (Anthropic-native schema, Unified Billing)
@@ -51,23 +53,45 @@ is the path that works.)
 
 `GET /v1/health` returns `{ ok: true, capabilities: [...] }` (no auth).
 
-### Integrity is the only guard — and it fails open
+### Integrity is the only guard — and it fails open only for our own faults
 
 `checkIntegrity` returns one of three outcomes:
 
-- `verified` — token decodes with `PLAY_RECOGNIZED` and the device meets
-  device or basic integrity (or `SKIP_ATTESTATION=true`). Proceeds.
-- `unavailable` — verification could not run: missing/short token, no service
-  account configured, or a Google API failure. **Proceeds** (fail-open):
-  hard-failing these paths bricked the feature for legitimate users whenever
-  Play services hiccuped or Google's API was unreachable.
-- `failed` — Google decoded the token and the verdict failed (app not
-  Play-recognized, device integrity not met, package mismatch). Rejected with
+- `verified` — token decodes with `PLAY_RECOGNIZED`, the device meets device
+  or basic integrity, and `requestDetails.requestPackageName` is
+  `com.arshadshah.nimaz` (or `SKIP_ATTESTATION=true`). Proceeds.
+- `failed` — **anything the caller controls**: no token, a token shorter than
+  10 chars, a token Google refuses to decode (`400 INVALID_ARGUMENT`), a
+  decoded payload with no `requestDetails`, or a verdict that misses app
+  recognition / device integrity / the package name. Rejected with
   `ATTESTATION_FAILED` (403).
+- `unavailable` — verification could not run for a reason **outside** the
+  caller's control: no service account configured, or a Google-side error
+  (token mint failure, 401/403/429/5xx from `decodeIntegrityToken`, network
+  throw). **Proceeds** (fail-open): hard-failing every outage bricked the
+  feature for legitimate users whenever Play services hiccuped.
 
-Abuse cost is bounded by the AI Gateway: its **Rate Limiting rule** throttles
-request volume (surfaced to the app as `RATE_LIMITED`) and its **Spend Limit**
-is the hard monthly cost backstop. The Worker keeps no counters and has no KV.
+The split matters. Treating a missing token as "verification could not run"
+made the endpoint open to anyone who simply omitted it — the request shape is
+public — and billed the account's AI credits. A caller can always withhold a
+token, so that path can never be a reason to fail open.
+
+**The fail-open path is bounded.** Consecutive Google-side failures are counted
+per isolate (`MAX_CONSECUTIVE_FAIL_OPEN`, currently 10, inside a rolling
+5-minute window); past the bound the Worker fails closed until Google answers a
+decode again, so a sustained "verification is broken" condition can't be ridden
+as a standing bypass. Failures older than the window start a fresh run, so
+occasional blips never accumulate into a closed gate. The counter is
+per-isolate best-effort — the Worker has no KV — and is defence in depth, not a
+precise budget.
+
+Abuse cost is further bounded by the AI Gateway: its **Rate Limiting rule**
+throttles request volume (surfaced to the app as `RATE_LIMITED`) and its
+**Spend Limit** is the hard monthly cost backstop. The Worker keeps no
+per-device counters and has no KV.
+
+Replay protection (binding a token to a per-request nonce/`requestHash`) is
+**not** implemented — a captured token can be reused until it expires.
 
 ## API contract
 
@@ -76,7 +100,7 @@ is the hard monthly cost backstop. The Worker keeps no counters and has no KV.
 ```json
 {
   "capability": "search-assist",
-  "integrityToken": "<play-integrity-token, may be empty>",
+  "integrityToken": "<play-integrity-token; empty/short is rejected 403>",
   "deviceId": "<random UUID generated once per install>",
   "input": {
     "question": "What does the Quran say about patience?"
@@ -115,7 +139,7 @@ Errors use a typed envelope with the matching HTTP status:
 | code                 | status | when                                                     |
 | -------------------- | ------ | -------------------------------------------------------- |
 | `INVALID_INPUT`      | 400    | bad envelope / schema / unknown capability               |
-| `ATTESTATION_FAILED` | 403    | Play Integrity verdict explicitly failed                 |
+| `ATTESTATION_FAILED` | 403    | no usable Play Integrity token, or the verdict failed    |
 | `RATE_LIMITED`       | 429    | the gateway's Rate Limiting rule tripped (pass-through)  |
 | `UPSTREAM_ERROR`     | 502    | Claude call failed / returned bad shape                  |
 | `BUDGET_EXCEEDED`    | 503    | gateway spend limit tripped / AI credits exhausted       |
@@ -140,8 +164,11 @@ Secrets — set with `wrangler secret put`, never committed:
   There is **no Anthropic key** anywhere. In CI it lives as the GitHub secret
   of the same name and is pushed to the Worker on every deploy.
 - `GOOGLE_SERVICE_ACCOUNT_JSON` — the full service-account JSON (one string)
-  used to mint an OAuth token for the Play Integrity API. Optional — without
-  it verification is "unavailable" and every request passes (fail-open).
+  used to mint an OAuth token for the Play Integrity API. Technically optional
+  — without it verification is "unavailable" and **every request passes,
+  unbounded**, since there is nothing to verify against. That is a pre-setup /
+  dev state only: a deployed Worker without this secret is an open endpoint on
+  the account's AI credits. Set it in production.
 
 ## Setup
 

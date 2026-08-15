@@ -13,16 +13,82 @@ const PLAY_INTEGRITY_SCOPE = "https://www.googleapis.com/auth/playintegrity";
  *
  *  - "verified":    Play Integrity confirmed the official app on a sane
  *                   device (or SKIP_ATTESTATION is on) → proceed.
- *  - "unavailable": verification could not run — missing token, service
- *                   account not configured, Google outage → fail OPEN and
- *                   proceed. Hard-failing these paths bricked the feature for
- *                   legitimate users whenever Play services hiccuped; the
- *                   gateway's rate limit + spend limit bound the abuse cost.
- *  - "failed":      Google decoded the token and the verdict failed (app not
- *                   Play-recognized, device integrity not met, package
- *                   mismatch) → the request is rejected (ATTESTATION_FAILED).
+ *  - "unavailable": verification could not run for a reason the *caller does
+ *                   not control* — the service account is not configured, or
+ *                   Google's API is unreachable/erroring → fail OPEN and
+ *                   proceed, but only within a bounded run of consecutive
+ *                   Google failures (see MAX_CONSECUTIVE_FAIL_OPEN).
+ *                   Hard-failing every outage bricked the feature for
+ *                   legitimate users whenever Play services hiccuped.
+ *  - "failed":      the caller did not present a usable token, or Google
+ *                   decoded it and the verdict failed (app not
+ *                   Play-recognized, device integrity not met, missing or
+ *                   mismatched package) → rejected with ATTESTATION_FAILED.
+ *
+ * A missing, short or undecodable token is "failed", NOT "unavailable": it is
+ * entirely caller-controlled, so treating it as an outage let anyone spend the
+ * account's AI credits by simply omitting the token.
  */
 export type IntegrityResult = "verified" | "unavailable" | "failed";
+
+/**
+ * Shortest plausible Play Integrity token. Real tokens (classic and standard
+ * alike) are long JWS strings — anything under this is not a truncated token,
+ * it is no token at all.
+ */
+const MIN_TOKEN_LENGTH = 10;
+
+/**
+ * Bounded fail-open. Google-side failures (token mint failure, 5xx from
+ * `decodeIntegrityToken`, network throw) still pass requests through — but
+ * only for this many consecutive failures inside OUTAGE_WINDOW_MS. Past the
+ * bound the Worker fails closed, so a sustained "verification is broken"
+ * condition cannot be ridden as a standing bypass.
+ *
+ * The counter lives in the isolate (the Worker has no KV), so the bound is
+ * per-isolate and best-effort — defence in depth on top of the AI Gateway's
+ * rate limit and spend limit, not a precise budget. Any decode that Google
+ * actually answers resets it, so recovery is automatic.
+ */
+export const MAX_CONSECUTIVE_FAIL_OPEN = 10;
+const OUTAGE_WINDOW_MS = 5 * 60_000;
+
+let consecutiveOutages = 0;
+let lastOutageAtMs = 0;
+
+/** Test seam: clear the per-isolate fail-open counter between cases. */
+export function resetIntegrityOutageState(): void {
+  consecutiveOutages = 0;
+  lastOutageAtMs = 0;
+}
+
+/**
+ * Record a Google-side failure and decide whether we may still fail open.
+ * Failures older than OUTAGE_WINDOW_MS start a fresh run, so occasional blips
+ * spread over hours never accumulate into a closed gate.
+ */
+function outage(nowMs: number, reason: string): IntegrityResult {
+  if (nowMs - lastOutageAtMs > OUTAGE_WINDOW_MS) consecutiveOutages = 0;
+  lastOutageAtMs = nowMs;
+  consecutiveOutages += 1;
+
+  if (consecutiveOutages > MAX_CONSECUTIVE_FAIL_OPEN) {
+    console.warn(
+      JSON.stringify({
+        event: "integrity_fail_closed",
+        reason,
+        consecutiveOutages,
+      }),
+    );
+    return "failed";
+  }
+  return "unavailable";
+}
+
+/** Google answered a decode — verification works again, end the outage run. */
+function outageCleared(): void {
+  consecutiveOutages = 0;
+}
 
 interface ServiceAccount {
   client_email: string;
@@ -138,10 +204,15 @@ interface IntegrityVerdict {
 }
 
 /**
- * Verify a request's Play Integrity token. NEVER throws. Only an explicit
- * failed verdict returns "failed" (and blocks the request); every path where
- * verification cannot run — missing token, unconfigured service account,
- * Google API outage — returns "unavailable" and the request proceeds.
+ * Verify a request's Play Integrity token. NEVER throws.
+ *
+ * Returns "failed" (→ ATTESTATION_FAILED/403) whenever the *caller* is at
+ * fault: no token, a token too short to be real, a token Google refuses to
+ * decode, or a decoded verdict that does not clear app + device + package.
+ * Returns "unavailable" (→ fail open) only when verification could not run for
+ * a reason outside the caller's control — no service account configured, or a
+ * Google-side error — and then only inside the bounded window enforced by
+ * `outage()`.
  */
 export async function checkIntegrity(
   env: Env,
@@ -152,11 +223,18 @@ export async function checkIntegrity(
     return "verified"; // Explicit bypass for local dev/testing.
   }
 
-  // Not configured yet, or the app couldn't obtain a token (Play services
-  // unavailable, offline fetch) → verification can't run; fail open.
+  // Deployment state, not a caller-controlled one: without credentials there
+  // is nothing to verify against. Unbounded fail-open — a Worker deployed
+  // without the secret is documented as running unverified (setup runbook).
   if (!env.GOOGLE_SERVICE_ACCOUNT_JSON) return "unavailable";
-  if (!integrityToken || integrityToken.length < 10) return "unavailable";
 
+  // Caller-controlled, so never a reason to fail open. Anyone can omit a
+  // token; letting that through billed our AI credits to the whole internet.
+  if (!integrityToken || integrityToken.length < MIN_TOKEN_LENGTH) {
+    return "failed";
+  }
+
+  let res: Response;
   try {
     const accessToken = await getGoogleAccessToken(
       env.GOOGLE_SERVICE_ACCOUNT_JSON,
@@ -164,7 +242,7 @@ export async function checkIntegrity(
     );
 
     const url = `https://playintegrity.googleapis.com/v1/${PACKAGE_NAME}:decodeIntegrityToken`;
-    const res = await fetch(url, {
+    res = await fetch(url, {
       method: "POST",
       headers: {
         authorization: `Bearer ${accessToken}`,
@@ -172,29 +250,54 @@ export async function checkIntegrity(
       },
       body: JSON.stringify({ integrity_token: integrityToken }),
     });
-    if (!res.ok) return "unavailable";
+  } catch {
+    // Token mint failed, network threw, or the service-account JSON is
+    // unparseable — Google-side/config fault, bounded fail-open.
+    return outage(nowMs, "request_failed");
+  }
 
+  if (!res.ok) {
+    // 400 INVALID_ARGUMENT means Google looked at the token and could not
+    // decrypt it — that is the caller's garbage, not an outage, and treating
+    // it as one would leave "send 10 junk characters" as a bypass. Every
+    // other non-2xx (401/403 bad credentials, 429, 5xx) is our side's problem.
+    if (res.status === 400) {
+      outageCleared(); // Google answered — the API is up, this token is junk.
+      return "failed";
+    }
+    return outage(nowMs, `http_${res.status}`);
+  }
+
+  let payload: IntegrityVerdict | undefined;
+  try {
     const decoded = (await res.json()) as {
       tokenPayloadExternal?: IntegrityVerdict;
     };
-    const payload = decoded.tokenPayloadExternal;
-
-    const appVerdict = payload?.appIntegrity?.appRecognitionVerdict;
-    const deviceVerdicts =
-      payload?.deviceIntegrity?.deviceRecognitionVerdict ?? [];
-    const pkg = payload?.requestDetails?.requestPackageName;
-
-    const appOk = appVerdict === "PLAY_RECOGNIZED";
-    // Accept the basic tier too — MEETS_DEVICE_INTEGRITY alone rejects many
-    // real, unrooted devices (custom ROMs, older Widevine states).
-    const deviceOk =
-      deviceVerdicts.includes("MEETS_DEVICE_INTEGRITY") ||
-      deviceVerdicts.includes("MEETS_BASIC_INTEGRITY");
-    const pkgOk = pkg === undefined || pkg === PACKAGE_NAME;
-
-    return appOk && deviceOk && pkgOk ? "verified" : "failed";
+    payload = decoded.tokenPayloadExternal;
   } catch {
-    // Google outage / transient failure — never punish the user for it.
-    return "unavailable";
+    return outage(nowMs, "malformed_response");
   }
+
+  // Google answered a decode, so verification is working again regardless of
+  // what this particular verdict says.
+  outageCleared();
+
+  // No requestDetails at all → not a verdict we can bind to this app. Real
+  // payloads always carry it; accepting its absence made the package check
+  // vacuous for anything that could shape a 200 response.
+  if (!payload?.requestDetails) return "failed";
+
+  const appVerdict = payload.appIntegrity?.appRecognitionVerdict;
+  const deviceVerdicts =
+    payload.deviceIntegrity?.deviceRecognitionVerdict ?? [];
+
+  const appOk = appVerdict === "PLAY_RECOGNIZED";
+  // Accept the basic tier too — MEETS_DEVICE_INTEGRITY alone rejects many
+  // real, unrooted devices (custom ROMs, older Widevine states).
+  const deviceOk =
+    deviceVerdicts.includes("MEETS_DEVICE_INTEGRITY") ||
+    deviceVerdicts.includes("MEETS_BASIC_INTEGRITY");
+  const pkgOk = payload.requestDetails.requestPackageName === PACKAGE_NAME;
+
+  return appOk && deviceOk && pkgOk ? "verified" : "failed";
 }

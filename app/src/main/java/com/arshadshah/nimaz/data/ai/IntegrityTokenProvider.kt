@@ -23,8 +23,8 @@ import kotlin.coroutines.resumeWithException
  * Standard, not classic: classic requests ([com.google.android.play.core.integrity.IntegrityTokenRequest])
  * are throttled per app-instance by Play services after a handful of calls in a
  * short window (TOO_MANY_REQUESTS). Making one per question meant a few asks
- * worked, then every token fetch failed → empty token → the Worker's
- * "unverified" 5/day cap for perfectly legitimate installs. The standard API is
+ * worked, then every token fetch failed → empty token → the Worker rejecting
+ * perfectly legitimate installs. The standard API is
  * built for frequent, per-action checks: one heavier [prepareProvider] warm-up,
  * then cheap [StandardIntegrityTokenProvider.request] calls that Play services
  * serves from its own cache. The Worker decodes both token kinds through the
@@ -34,8 +34,12 @@ import kotlin.coroutines.resumeWithException
  * services unavailable, offline) the behaviour depends on the build type:
  *  - debug builds fall back to the literal `"debug-skip"` token, which the
  *    Worker honours ONLY when it runs with `SKIP_ATTESTATION=true`;
- *  - release builds return an empty token, which the Worker runs at the
- *    unverified tier (smaller daily cap, never an error).
+ *  - release builds return an empty token, which the Worker rejects with
+ *    `ATTESTATION_FAILED` → [com.arshadshah.nimaz.domain.model.AiError.Unverified].
+ *    A missing token is not "verification could not run" server-side: anyone
+ *    could omit it, so the Worker fails closed on it (see
+ *    `worker/src/middleware/integrity.ts`). Hence the retry above — an empty
+ *    token now costs the user the answer.
  */
 @Singleton
 class IntegrityTokenProvider @Inject constructor(
