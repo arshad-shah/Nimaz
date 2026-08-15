@@ -42,7 +42,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -75,7 +74,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.molecules.NimazAccordion
-import com.arshadshah.nimaz.presentation.components.molecules.NimazAmountInput
+import com.arshadshah.nimaz.presentation.components.molecules.NimazAmountField
 import com.arshadshah.nimaz.presentation.components.molecules.NimazErrorDefaults
 import com.arshadshah.nimaz.presentation.components.molecules.NimazErrorState
 import com.arshadshah.nimaz.presentation.components.molecules.NimazErrorVariant
@@ -83,8 +82,6 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuItem
 import com.arshadshah.nimaz.presentation.components.molecules.ZakatHeroStat
 import com.arshadshah.nimaz.presentation.components.molecules.ZakatHeroStatus
 import com.arshadshah.nimaz.presentation.components.molecules.ZakatSummaryHero
-import com.arshadshah.nimaz.presentation.components.molecules.amountToInput
-import com.arshadshah.nimaz.presentation.components.molecules.parseAmountInput
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.currentWindowSizeClass
@@ -820,7 +817,7 @@ private fun InputCard(
                 )
             }
 
-            AmountField(
+            NimazAmountField(
                 value = value,
                 onValueChange = onValueChange,
                 // Money leads with its symbol, a weight follows with its unit. The field this
@@ -832,45 +829,6 @@ private fun InputCard(
             )
         }
     }
-}
-
-/**
- * A money or weight field bound to a `Double` on the ViewModel.
- *
- * The text is **local state**, and that is the whole fix. The field this replaced parsed every
- * keystroke straight to a `Double` and re-rendered the result, so "10." became "10" before the
- * next digit landed and a decimal amount was literally unenterable. Here the string is what the
- * person typed and the `Double` is derived from it.
- *
- * The sync back the other way is guarded: an incoming [value] only overwrites the text when it
- * disagrees with what the text already parses to. Without that guard, the ViewModel echoing back
- * the user's own keystroke would erase the trailing point as fast as it was typed — while
- * "Clear all" and a restored calculation, which genuinely differ, still win.
- */
-@Composable
-private fun AmountField(
-    value: Double,
-    onValueChange: (Double) -> Unit,
-    modifier: Modifier = Modifier,
-    currencySymbol: String? = null,
-    unitSuffix: String? = null,
-    placeholder: String = "0.00",
-) {
-    var text by rememberSaveable { mutableStateOf(amountToInput(value)) }
-    LaunchedEffect(value) {
-        if (parseAmountInput(text) != value) text = amountToInput(value)
-    }
-    NimazAmountInput(
-        value = text,
-        onValueChange = { next ->
-            text = next
-            onValueChange(parseAmountInput(next))
-        },
-        modifier = modifier,
-        currencySymbol = currencySymbol,
-        unitSuffix = unitSuffix,
-        placeholder = placeholder,
-    )
 }
 
 // --- Breakdown Card ---

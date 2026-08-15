@@ -6,8 +6,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -52,19 +50,21 @@ fun NoteEditorSheet(
             NimazSheetFooterButtons(
                 primaryText = stringResource(R.string.save),
                 onPrimary = { onSave(text.trim().takeIf { it.isNotEmpty() }) },
+                // The one place a field's state reaches outside itself: an empty note is not a
+                // note, so Save has nothing to do until there is something in the field.
+                primaryEnabled = text.isNotBlank() || !initialNote.isNullOrBlank(),
                 secondaryText = stringResource(R.string.cancel),
                 onSecondary = onDismiss,
             )
         }
     ) {
-        NimazSheetSectionLabel(text = stringResource(R.string.edit_note))
-        OutlinedTextField(
+        NimazTextField(
             value = text,
             onValueChange = { text = it },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(140.dp),
-            placeholder = { Text(stringResource(R.string.note_hint)) }
+            label = stringResource(R.string.edit_note),
+            variant = NimazFieldVariant.NOTE,
+            placeholder = stringResource(R.string.note_hint),
+            modifier = Modifier.fillMaxWidth(),
         )
         Spacer(modifier = Modifier.height(8.dp))
     }

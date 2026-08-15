@@ -10,12 +10,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -27,9 +24,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -46,10 +41,13 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
+import com.arshadshah.nimaz.presentation.components.molecules.NimazFieldDefaults
+import com.arshadshah.nimaz.presentation.components.molecules.NimazFieldVariant
 import com.arshadshah.nimaz.presentation.components.molecules.NimazNumberStepper
 import com.arshadshah.nimaz.presentation.components.molecules.NimazNumberStepperSize
 import com.arshadshah.nimaz.presentation.components.molecules.NimazNumberStepperType
 import com.arshadshah.nimaz.presentation.components.molecules.NimazNumberStepperVariant
+import com.arshadshah.nimaz.presentation.components.molecules.NimazTextField
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.viewmodel.tracker.TasbihEvent
@@ -150,66 +148,49 @@ fun AddPresetScreen(
                 .padding(paddingValues)
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp, vertical = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            // The field family's rhythm: one field's label must not crowd the helper line of
+            // the field above it.
+            verticalArrangement = Arrangement.spacedBy(NimazFieldDefaults.FieldGap)
         ) {
-            // Name (required)
-            OutlinedTextField(
+            // Name (required). The 14dp radius, the RTL/gold Arabic styling and the error
+            // wiring all used to be set here, per field; they are the shell's and the
+            // variant's job now.
+            NimazTextField(
                 value = name,
                 onValueChange = {
                     name = it
                     nameError = false
                 },
-                label = { Text(stringResource(R.string.name_required)) },
-                placeholder = { Text(stringResource(R.string.preset_name_placeholder)) },
-                isError = nameError,
-                supportingText = if (nameError) {
-                    { Text(stringResource(R.string.name_required_error)) }
-                } else null,
+                label = stringResource(R.string.field_name),
+                required = true,
+                placeholder = stringResource(R.string.preset_name_placeholder),
+                error = if (nameError) stringResource(R.string.name_required_error) else null,
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(14.dp),
-                singleLine = true
             )
 
-            // Arabic Text (RTL, gold-tinted)
-            OutlinedTextField(
+            NimazTextField(
                 value = arabicText,
                 onValueChange = { arabicText = it },
-                label = { Text(stringResource(R.string.arabic_text)) },
-                placeholder = { Text(stringResource(R.string.arabic_placeholder)) },
+                label = stringResource(R.string.arabic_text),
+                variant = NimazFieldVariant.ARABIC,
+                placeholder = stringResource(R.string.arabic_placeholder),
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(14.dp),
-                singleLine = true,
-                textStyle = TextStyle(
-                    textAlign = TextAlign.End,
-                    color = NimazColors.TasbihColors.Milestone,
-                    fontSize = 20.sp
-                ),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedTextColor = NimazColors.TasbihColors.Milestone,
-                    unfocusedTextColor = NimazColors.TasbihColors.Milestone
-                )
             )
 
-            // Transliteration
-            OutlinedTextField(
+            NimazTextField(
                 value = transliteration,
                 onValueChange = { transliteration = it },
-                label = { Text(stringResource(R.string.transliteration)) },
-                placeholder = { Text(stringResource(R.string.transliteration_placeholder)) },
+                label = stringResource(R.string.transliteration),
+                placeholder = stringResource(R.string.transliteration_placeholder),
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(14.dp),
-                singleLine = true
             )
 
-            // Translation
-            OutlinedTextField(
+            NimazTextField(
                 value = translation,
                 onValueChange = { translation = it },
-                label = { Text(stringResource(R.string.translation)) },
-                placeholder = { Text(stringResource(R.string.translation_placeholder)) },
+                label = stringResource(R.string.translation),
+                placeholder = stringResource(R.string.translation_placeholder),
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(14.dp),
-                singleLine = true
             )
 
             // Target Count stepper
