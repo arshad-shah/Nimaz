@@ -2112,4 +2112,6 @@
     <string name="accuracy_now_label">Akurasi saat ini</string>
     <string name="back_to_compass">Kembali ke kompas</string>
     <string name="point_with_camera">Arahkan dengan kamera</string>
+    <string name="field_name">Nama</string>
+    <string name="field_notes">Catatan</string>
 </resources>

@@ -2153,4 +2153,6 @@
     <string name="accuracy_now_label">Genauigkeit jetzt</string>
     <string name="back_to_compass">Zurück zum Kompass</string>
     <string name="point_with_camera">Mit der Kamera zielen</string>
+    <string name="field_name">Name</string>
+    <string name="field_notes">Notizen</string>
 </resources>

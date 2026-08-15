@@ -2159,4 +2159,6 @@
     <string name="accuracy_now_label">Şu anki doğruluk</string>
     <string name="back_to_compass">Pusulaya dön</string>
     <string name="point_with_camera">Kamerayla nişan al</string>
+    <string name="field_name">Ad</string>
+    <string name="field_notes">Notlar</string>
 </resources>

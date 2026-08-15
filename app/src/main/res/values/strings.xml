@@ -2353,4 +2353,8 @@
     <string name="khatam_portion_across">%1$s %2$d → %3$s %4$d</string>
     <string name="khatam_todays_portion">Today\'s portion</string>
     <string name="khatam_read_todays_portion">Read today\'s portion</string>
+    <!-- Character counter on a NimazTextField with a maxLength: "12 / 40". -->
+    <string name="field_character_count" translatable="false">%1$d / %2$d</string>
+    <string name="field_name">Name</string>
+    <string name="field_notes">Notes</string>
 </resources>
