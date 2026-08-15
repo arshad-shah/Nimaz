@@ -358,6 +358,31 @@ fun QuranReaderScreen(
         }
     }
 
+    // Follow the recitation across a surah boundary.
+    //
+    // Continuous playback rolls on into the next surah when one ends (QuranAudioManager's
+    // `nextSurahToPlay`), and the reader did not roll with it: the recitation moved to Maryam
+    // while the screen stayed on the whole of Al-Kahf, so anyone actually looking at the app was
+    // left reading verses nobody was reciting any more. `onNavigateToNextSurah` is the same hop
+    // the khatam action takes — a real navigation, so the route argument moves too and the
+    // reader survives a rotation on the surah it is showing.
+    val openSurahNumber = state.surahWithAyahs?.surah?.number
+    LaunchedEffect(
+        audioState.currentSurahNumber,
+        audioState.isActive,
+        openSurahNumber,
+        state.readingMode,
+        usePageView,
+    ) {
+        surahToFollowRecitationInto(
+            readingMode = state.readingMode,
+            inPageView = usePageView,
+            openSurah = openSurahNumber,
+            isAudioActive = audioState.isActive,
+            recitedSurah = audioState.currentSurahNumber,
+        )?.let(onNavigateToNextSurah)
+    }
+
     // Load page(s) when pager settles
     pagerState?.let { ps ->
         val settledIndex = ps.settledPage
@@ -1310,6 +1335,40 @@ private fun ReaderMushafPage(
             )
         }
     }
+}
+
+/**
+ * The surah the reader should move to because the recitation has rolled past the end of the one
+ * on screen, or `null` to stay where it is.
+ *
+ * Pure, and separate from the effect that acts on it, because the rule is the whole of the
+ * change and the effect is one call: driving it the other way round means an instrumented reader
+ * with a real ExoPlayer reaching the end of a surah — the same reason
+ * `QuranAudioManager.nextSurahToPlay`, the other half of this hand-off, is pure.
+ *
+ * Deliberately narrow. It fires only when the surah on screen is precisely the one that just
+ * ended and the recitation has moved to its immediate successor, which is the one thing
+ * continuous playback does at a boundary. Reading Al-Hijr with Al-Baqarah playing is a supported
+ * state — the audio bar is written for it — and must not throw the reader to Al-Imran when
+ * Al-Baqarah ends.
+ *
+ * Not gated on the player's **follow-along** toggle, which is about scrolling *within* what the
+ * reader is showing and is off by default; what the reader is showing here has finished, and
+ * leaving it up is leaving up a surah nobody is reciting. Surah mode only: in juz mode the
+ * recitation carries on inside content the reader already has, and the mushaf pager is paginated,
+ * not navigated — moving it is a page turn, which is follow-along's job.
+ */
+internal fun surahToFollowRecitationInto(
+    readingMode: ReadingMode,
+    inPageView: Boolean,
+    openSurah: Int?,
+    isAudioActive: Boolean,
+    recitedSurah: Int,
+): Int? {
+    if (!isAudioActive || recitedSurah <= 0) return null
+    if (readingMode != ReadingMode.SURAH || inPageView) return null
+    if (openSurah == null) return null
+    return recitedSurah.takeIf { it == openSurah + 1 }
 }
 
 /**
