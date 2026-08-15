@@ -35,9 +35,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.navigation.ScreenTags
 import com.arshadshah.nimaz.domain.model.QuranSearchQuery
+import com.arshadshah.nimaz.domain.model.RecitationRepeat
+import com.arshadshah.nimaz.domain.model.RecitationSpeed
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.molecules.AudioBottomBar
 import com.arshadshah.nimaz.presentation.components.molecules.NimazErrorState
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconButton
@@ -45,6 +48,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.components.molecules.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
+import com.arshadshah.nimaz.presentation.components.molecules.RecitationSheet
 import com.arshadshah.nimaz.presentation.components.molecules.SurahListItem
 import com.arshadshah.nimaz.presentation.components.organisms.NimazSearchBar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazTopAppBar
@@ -52,6 +56,8 @@ import com.arshadshah.nimaz.presentation.components.organisms.getJuzName
 import com.arshadshah.nimaz.presentation.viewmodel.quran.QuranBrowseEvent
 import com.arshadshah.nimaz.presentation.viewmodel.quran.QuranBrowseUiState
 import com.arshadshah.nimaz.presentation.viewmodel.quran.QuranBrowseViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.quran.QuranEvent
+import com.arshadshah.nimaz.presentation.viewmodel.quran.QuranViewModel
 
 /**
  * One place to find a place in the Qur'an.
@@ -80,9 +86,27 @@ fun QuranBrowseScreen(
     onOpenSubjects: (Int) -> Unit = {},
     /** Highlighted row on a tablet's list pane; null on a phone. */
     selectedSurahNumber: Int? = null,
+    onNavigateToReciters: () -> Unit = {},
+    /**
+     * Whether this screen carries the recitation player.
+     *
+     * True on a phone, where it is the only thing on screen. False for a tablet's list pane
+     * *while the detail pane holds a reader*, because that reader draws the same player from the
+     * same `AudioState` and two of them side by side is one player too many. When the detail
+     * pane is empty there is no other player to defer to, so the list keeps it.
+     */
+    showPlayer: Boolean = true,
     viewModel: QuranBrowseViewModel = hiltViewModel(),
+    /**
+     * The same instance the surah-info sheet raises its "Listen" through — both resolve to this
+     * destination's `QuranViewModel` — so the recitation this screen starts is the recitation
+     * this screen's player is controlling.
+     */
+    quranViewModel: QuranViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val audioState by quranViewModel.audioState.collectAsStateWithLifecycle()
+    var showRecitationSheet by rememberSaveable { mutableStateOf(false) }
 
     QuranBrowseContent(
         state = state,
@@ -98,7 +122,95 @@ fun QuranBrowseScreen(
         onOpenSubjects = onOpenSubjects,
         selectedSurahNumber = selectedSurahNumber,
         modifier = modifier,
+        bottomBar = {
+            // Surah info's "Listen" starts a recitation from *this* screen, and until now this
+            // screen drew nothing to say so: no download strip while the surah was being
+            // fetched, no transport, and no way to stop what you had started without opening a
+            // surah to find a player. The bar is written to draw nothing unless audio is active
+            // or preparing, and `playAyahsSequentially` sets `isPreparing` in the same frame as
+            // the tap — so it appears immediately, which is the whole of what "Listen" was
+            // missing.
+            //
+            // Coordinates come from `AudioState` alone: the list has no reading position to
+            // borrow from, and inventing a page or juz for a verse it is not showing would be
+            // making one up. The reader passes 0 for exactly the same reason when the recited
+            // verse is not on its page.
+            if (showPlayer) {
+                AudioBottomBar(
+                    isAudioActive = audioState.isActive,
+                    isPlaying = audioState.isPlaying,
+                    isDownloading = audioState.isDownloading,
+                    isPreparing = audioState.isPreparing,
+                    downloadProgress = audioState.downloadProgress,
+                    downloadedCount = audioState.downloadedCount,
+                    totalToDownload = audioState.totalToDownload,
+                    surahName = audioState.currentTitle,
+                    currentAyahInSurah = audioState.currentAyahIndex + 1,
+                    totalAyahsInSurah = audioState.totalAyahs,
+                    pageNumber = 0,
+                    juzNumber = 0,
+                    // No "start" branch: the bar is not drawn when there is nothing loaded, so
+                    // the only two things this button can mean here are pause and resume.
+                    onPlayClick = {
+                        if (audioState.isPlaying) {
+                            quranViewModel.onEvent(QuranEvent.PauseAudio)
+                        } else if (audioState.isActive && !audioState.isPreparing) {
+                            quranViewModel.onEvent(QuranEvent.ResumeAudio)
+                        }
+                    },
+                    positionMs = audioState.position,
+                    durationMs = audioState.duration,
+                    reciterName = audioState.reciterName,
+                    speedLabel = audioState.speed
+                        .takeIf { it != RecitationSpeed.DEFAULT }
+                        ?.let { stringResource(R.string.recitation_speed_label, it.multiplier) },
+                    repeatLabel = when (val repeat = audioState.repeat) {
+                        RecitationRepeat.Off -> null
+                        is RecitationRepeat.Ayah -> stringResource(
+                            R.string.recitation_repeat_summary_ayah, repeat.times
+                        )
+
+                        is RecitationRepeat.Range -> stringResource(
+                            R.string.recitation_repeat_summary_range,
+                            repeat.fromAyah,
+                            repeat.toAyah
+                        )
+
+                        RecitationRepeat.Surah ->
+                            stringResource(R.string.recitation_repeat_summary_surah)
+                    },
+                    onSeek = { quranViewModel.onEvent(QuranEvent.SeekAudioTo(it)) },
+                    onNextAyah = { quranViewModel.onEvent(QuranEvent.NextAyahAudio) },
+                    onPreviousAyah = { quranViewModel.onEvent(QuranEvent.PreviousAyahAudio) },
+                    onExpand = { showRecitationSheet = true },
+                )
+            }
+        },
     )
+
+    if (showRecitationSheet) {
+        RecitationSheet(
+            reciterName = audioState.reciterName,
+            repeat = audioState.repeat,
+            speed = audioState.speed,
+            followAlong = audioState.followAlong,
+            // The playlist's own length. There is no surah on screen to count, and the playlist
+            // is what a repeat range would be expressed in anyway.
+            ayahCount = audioState.totalAyahs,
+            onOpenReciters = {
+                showRecitationSheet = false
+                onNavigateToReciters()
+            },
+            onRepeatChange = { quranViewModel.onEvent(QuranEvent.SetRecitationRepeat(it)) },
+            onSpeedChange = { quranViewModel.onEvent(QuranEvent.SetPlaybackSpeed(it)) },
+            onFollowAlongChange = { quranViewModel.onEvent(QuranEvent.SetFollowAlong(it)) },
+            onStop = {
+                quranViewModel.onEvent(QuranEvent.StopAudio)
+                showRecitationSheet = false
+            },
+            onDismiss = { showRecitationSheet = false },
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
@@ -117,11 +229,14 @@ internal fun QuranBrowseContent(
     onOpenPassages: (Int) -> Unit = {},
     onOpenSubjects: (Int) -> Unit = {},
     selectedSurahNumber: Int? = null,
+    /** The recitation player, when there is one. Empty by default so this stays state-free. */
+    bottomBar: @Composable () -> Unit = {},
 ) {
     var infoForSurah by rememberSaveable { mutableStateOf(initialInfoForSurah) }
 
     NimazScreenScaffold(
         modifier = modifier,
+        bottomBar = bottomBar,
         topBar = {
             NimazTopAppBar(
                 title = stringResource(R.string.quran_home_tab_browse),

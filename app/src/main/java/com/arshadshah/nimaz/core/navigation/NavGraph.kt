@@ -387,6 +387,7 @@ fun NavGraph(
                     onOpenSubjects = { surah ->
                         navController.navigate(Route.SurahSubjects(surah))
                     },
+                    onNavigateToReciters = { navController.navigate(Route.SelectReciter) },
                 )
             }
 

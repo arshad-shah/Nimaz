@@ -122,6 +122,12 @@ fun AdaptiveQuranScreen(
                             }
                         },
                         selectedSurahNumber = currentArgs?.surahNumber,
+                        onNavigateToReciters = { navController.navigate(Route.SelectReciter) },
+                        // The detail pane's reader draws the same player from the same
+                        // AudioState; two side by side is one too many. With nothing selected
+                        // there is no reader, so the list keeps it — which is exactly the
+                        // tablet case where "Listen" would otherwise have nowhere to show.
+                        showPlayer = currentArgs == null,
                     )
                 }
             },
