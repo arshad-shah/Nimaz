@@ -1,10 +1,10 @@
 package com.arshadshah.nimaz.behavior
 
-import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.waitUntilAtLeastOneExists
+import androidx.compose.ui.test.performScrollToNode
+import androidx.compose.ui.test.performSemanticsAction
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.arshadshah.nimaz.core.navigation.ScreenTags
 import com.arshadshah.nimaz.domain.model.WorshipReminderType
@@ -16,11 +16,13 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * The Home "Next Worship" card must lead somewhere.
+ * The Home "Next Worship" entry must lead somewhere.
  *
  * It shipped inert: it counted down at you and then did nothing, because `WorshipEventCard` took an
  * `onAction` that Home never passed. Nothing failed — an unwired callback is not a test failure,
- * which is precisely why this needs a test that drives the real navigation graph.
+ * which is precisely why this needs a test that drives the real navigation graph. Compact Home now
+ * surfaces the reminder as an "Also today" row rather than a carousel card; both shapes carry
+ * [WorshipCardTestTag], so this test asserts the destination, not the presentation.
  *
  * ## Keeping it deterministic
  *
@@ -49,10 +51,9 @@ class WorshipCardNavigationTest : BaseAppTest() {
     @Test
     fun tappingTheWorshipCardOpensItsDuaCategory() {
         launchApp()
-        waitForWorshipCard()
+        scrollToWorshipCard()
 
-        compose.onNodeWithTag(WorshipCardTestTag, useUnmergedTree = true).performClick()
-        compose.waitForIdle()
+        tapWorshipCard()
 
         // Both adhkar reminders resolve to a dua category, so that is the destination either way.
         assertScreen(ScreenTags.DuaCategory)
@@ -62,28 +63,50 @@ class WorshipCardNavigationTest : BaseAppTest() {
     @Test
     fun backFromTheWorshipDestinationReturnsHome() {
         launchApp()
-        waitForWorshipCard()
+        scrollToWorshipCard()
 
-        compose.onNodeWithTag(WorshipCardTestTag, useUnmergedTree = true).performClick()
-        compose.waitForIdle()
+        tapWorshipCard()
         assertScreen(ScreenTags.DuaCategory)
 
         pressBack()
         assertScreen(ScreenTags.Home)
     }
 
-    @OptIn(ExperimentalTestApi::class)
-    private fun waitForWorshipCard() {
-        // The card is resolved off ~30 sequential DataStore reads plus an astronomical pass, so it
-        // arrives a beat after Home itself.
-        compose.waitUntilAtLeastOneExists(hasTestTag(WorshipCardTestTag), 15_000)
-        val found = compose.onAllNodes(hasTestTag(WorshipCardTestTag), useUnmergedTree = true)
-            .fetchSemanticsNodes().size
-        assertTrue("No worship card surfaced with both adhkar reminders enabled", found > 0)
+    /**
+     * Bring the worship entry on screen.
+     *
+     * Two things keep a plain `waitUntilAtLeastOneExists` from ever seeing it: the card is resolved
+     * off ~30 sequential DataStore reads plus an astronomical pass, so it arrives a beat after Home
+     * itself; and "Also today" sits below the fold in a `LazyColumn`, so the row is not composed at
+     * all until it is scrolled to. Hence scroll on each attempt until the node exists.
+     */
+    private fun scrollToWorshipCard() {
+        waitForTag(ScreenTags.HomeList)
+        val deadline = System.currentTimeMillis() + WORSHIP_CARD_TIMEOUT_MS
+        var found = false
+        while (!found && System.currentTimeMillis() < deadline) {
+            found = runCatching {
+                compose.onNodeWithTag(ScreenTags.HomeList)
+                    .performScrollToNode(hasTestTag(WorshipCardTestTag))
+            }.isSuccess
+            compose.waitForIdle()
+        }
+        assertTrue("No worship card surfaced with both adhkar reminders enabled", found)
+    }
+
+    /**
+     * Tap coordinate-free via the row's `OnClick` semantics: a list row scrolled just into view can
+     * sit at the viewport edge or under the gesture-nav inset, where a synthetic tap is rejected.
+     */
+    private fun tapWorshipCard() {
+        compose.onNodeWithTag(WorshipCardTestTag)
+            .performSemanticsAction(SemanticsActions.OnClick)
+        compose.waitForIdle()
     }
 
     private companion object {
         const val LONDON_LAT = 51.5074
         const val LONDON_LON = -0.1278
+        const val WORSHIP_CARD_TIMEOUT_MS = 15_000L
     }
 }

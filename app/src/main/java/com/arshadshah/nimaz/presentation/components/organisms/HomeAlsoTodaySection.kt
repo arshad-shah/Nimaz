@@ -13,6 +13,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
@@ -70,6 +71,10 @@ fun HomeAlsoTodaySection(
                     icon = Icons.Default.Bedtime,
                     iconTint = Color(0xFF7C4DFF),
                     onClick = { onOpenWorship(worshipCard.type) },
+                    // Same tag the tablet layout's WorshipEventCard carries: compact Home
+                    // surfaces the next worship reminder as this row, and the behaviour test
+                    // asserts that whichever shape it takes, it navigates.
+                    modifier = Modifier.testTag(WorshipCardTestTag),
                 )
             }
 

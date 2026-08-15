@@ -44,12 +44,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.LocalInAppUpdateManager
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.navigation.ScreenTags
 import com.arshadshah.nimaz.core.util.UpdateState
 import com.arshadshah.nimaz.core.util.formatFullDate
 import com.arshadshah.nimaz.domain.model.AnnouncementType
@@ -352,7 +354,11 @@ private fun HomeCompactContent(
 
     LazyColumn(
         state = listState,
-        modifier = Modifier.fillMaxSize(),
+        // Tagged so behavior tests can scroll to entries below the fold ("Also today"
+        // sits under the hero, the banner slot and the prayer card).
+        modifier = Modifier
+            .fillMaxSize()
+            .testTag(ScreenTags.HomeList),
     ) {
         item(key = "hero") {
             HomeHero(
