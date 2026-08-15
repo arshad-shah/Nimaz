@@ -85,10 +85,24 @@ fun SurahBackgroundScreen(
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
 
-    // Each section is one item, so its index in the list *is* its ordinal. Kept as an explicit
-    // anchor list anyway: the day a header item joins the top of this list, the offset lives
-    // here rather than as a silent +1 inside the spy.
-    val anchors = remember(sections) { sections.indices.toList() }
+    // One pill per *run* of sections sharing a group, not one per section.
+    //
+    // The index is labelled from the group because that vocabulary is stable across all 114
+    // surahs — but it is only four words wide, and a source that prints two Background sections
+    // in one surah (they exist) then produced two pills reading "Historical Background". An
+    // index cannot tell you where you are with the same word twice, and the lazy row underneath
+    // it took the repeat as a duplicate key and crashed. Collapsing the run says the one thing
+    // the pill can honestly say: you are in the background of this surah.
+    //
+    // Each entry is the index of the section it scrolls to, so this doubles as the anchor list
+    // the spy resolves against — and a run keeps naming its group while you read through it.
+    val indexEntries = remember(sections) {
+        sections.mapIndexedNotNull { index, section ->
+            if (index > 0 && sections[index - 1].group == section.group) null
+            else index to section.group
+        }
+    }
+    val anchors = remember(indexEntries) { indexEntries.map { it.first } }
     val activeSection by rememberScrollSpyIndex(listState, anchors)
 
     NimazScreenScaffold(
@@ -138,7 +152,9 @@ fun SurahBackgroundScreen(
 
                 else -> {
                     NimazScrollSpyIndex(
-                        labels = sections.map { stringResource(it.group.labelRes) },
+                        labels = indexEntries.map { (_, group) ->
+                            stringResource(group.labelRes)
+                        },
                         selectedIndex = activeSection,
                         onSelect = { index ->
                             scope.launch {

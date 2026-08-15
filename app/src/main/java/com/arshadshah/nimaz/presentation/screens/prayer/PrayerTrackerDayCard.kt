@@ -218,11 +218,17 @@ private fun DayLede(
 ) {
     val today = now.toLocalDate()
     val text = when {
+        // No schedule is not the same claim as no prayers left, and this said the second when
+        // it meant the first: without a location the whole `times?.let` collapsed to null, so
+        // the card announced "Day complete" at breakfast -- over five rows the very same null
+        // makes it call UPCOMING (see resolvePrayerStatuses). Whatever is missing, it is the
+        // times, and that is what it now says.
+        selectedDate == today && times == null ->
+            stringResource(R.string.prayer_day_no_schedule)
+
         selectedDate == today -> {
-            val next = times?.let { schedule ->
-                TRACKED_PRAYERS.firstNotNullOfOrNull { prayer ->
-                    schedule.timeFor(prayer)?.takeIf { it.isAfter(now) }?.let { prayer to it }
-                }
+            val next = TRACKED_PRAYERS.firstNotNullOfOrNull { prayer ->
+                times?.timeFor(prayer)?.takeIf { it.isAfter(now) }?.let { prayer to it }
             }
             if (next == null) {
                 stringResource(R.string.prayer_day_complete)

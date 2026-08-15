@@ -67,8 +67,19 @@ class UpdatePrayerStatusUseCase @Inject constructor(private val repository: Pray
 }
 
 class GetPrayerTimesForDateUseCase @Inject constructor(private val repository: PrayerRepository) {
+    /** A specific saved place — the location browser's question, not "where am I". */
     operator fun invoke(date: LocalDate, location: Location): PrayerTimes =
         repository.getPrayerTimesForDate(date, location)
+
+    /**
+     * The user's own day, under the settings they actually set.
+     *
+     * The overload to reach for. Its sibling reads the `locations` table, which is only written
+     * when a place is *searched for and picked* — so a user who detected their location by GPS,
+     * or set it during onboarding, has coordinates in preferences and no row at all.
+     */
+    operator fun invoke(date: LocalDate, settings: PrayerCalculationSettings): PrayerTimes =
+        repository.getPrayerTimesForDate(date, settings)
 }
 
 /**

@@ -88,6 +88,8 @@ class QuranAudioManager @Inject constructor(
      * be asserted at all.
      */
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
+    /** What to play when a surah ends — see [NextSurahPlaylistSource]. */
+    private val nextSurah: NextSurahPlaylistSource,
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private var player: ExoPlayer? = null
@@ -120,11 +122,77 @@ class QuranAudioManager @Inject constructor(
     private var continuousPlayback: Boolean = true
 
     /**
+     * Whether the playlist that is loaded is a *reading* — a surah or a juz, something the end
+     * of which has a "next" — rather than a single verse played on its own.
+     *
+     * Only [playAyahsSequentially] sets it. Tapping one verse's play button queues a one-item
+     * playlist too, and rolling from that into the whole of the next surah is not continuous
+     * playback, it is the app deciding to keep going after you asked for one verse.
+     */
+    private var playlistIsAReading: Boolean = false
+
+    /** The in-flight roll into the next surah. Cancelled by anything that takes over playback. */
+    private var advanceJob: Job? = null
+
+    /**
      * Set whether audio should auto-advance to next ayah when current one ends.
      * When false, playback stops after the current ayah completes.
      */
     fun setContinuousPlayback(enabled: Boolean) {
         continuousPlayback = enabled
+    }
+
+    /**
+     * Roll on into the next surah, if that is what the reader asked for.
+     *
+     * Continuous playback has always been described as playing "on to the next verse and the
+     * next surah", and it only ever did the first half: the playlist is one surah's verses and
+     * its end was the end of the sitting, whatever the setting said. So finishing Al-Kahf at
+     * night stopped there instead of carrying into Maryam.
+     *
+     * Returns true when an advance is under way, so the caller leaves the session alive rather
+     * than tearing it down under the surah about to start. What may be advanced into is
+     * [nextSurahToPlay]'s decision; the one thing only this can know is whether the surah it
+     * names has any verses.
+     */
+    private fun advanceToNextSurah(): Boolean {
+        val nextNumber = nextSurahToPlay(
+            continuousPlayback = continuousPlayback,
+            playlistIsAReading = playlistIsAReading,
+            repeat = _audioState.value.repeat,
+            finishedSurah = ayahPlaylist.lastOrNull()?.surahNumber,
+        ) ?: return false
+
+        advanceJob?.cancel()
+        advanceJob = scope.launch {
+            val next = nextSurah.playlistFor(nextNumber)
+            // Released before the handover, so the `advanceJob?.cancel()` in
+            // playAyahsSequentially — which exists to drop an advance the user has overruled —
+            // is not this coroutine cancelling itself mid-handover.
+            advanceJob = null
+            if (next == null || next.items.isEmpty()) {
+                // Nothing to roll into after all. Finish the session the way the end of a
+                // playlist always finished it, rather than leaving a live-looking notification
+                // over a player with nothing in it.
+                markPlaybackFinished()
+                return@launch
+            }
+            playAyahsSequentially(next.items, startIndex = 0, title = next.title)
+        }
+        return true
+    }
+
+    /** The playlist is over and nothing follows it. */
+    private fun markPlaybackFinished() {
+        _audioState.update {
+            it.copy(
+                isPlaying = false,
+                isActive = false,
+                isPreparing = false,
+                currentAyahId = 0,
+                currentSurahNumber = 0
+            )
+        }
     }
 
     /**
@@ -293,6 +361,39 @@ class QuranAudioManager @Inject constructor(
         )
 
         private val DEFAULT_CDN = Pair("ar.alafasy", 128)
+
+        /**
+         * Which surah a finished playlist rolls into, or `null` for "this is the end".
+         *
+         * Pure, and separate from [advanceToNextSurah], because it is the whole of the rule and
+         * none of it can be reached through a player: driving it the other way round means an
+         * ExoPlayer actually reaching `STATE_ENDED`.
+         *
+         * Everything that says *don't*:
+         * - the setting is off — that is precisely what "continuous playback" means;
+         * - a repeat is set — a repeat is a request to stay, and the two modes that end
+         *   ([RecitationRepeat.Ayah], [RecitationRepeat.Range]) end where the reader put them,
+         *   while [RecitationRepeat.Surah] never ends at all;
+         * - a single verse was playing, not a reading — see [playlistIsAReading];
+         * - Al-Nas just finished. There is no 115th.
+         *
+         * A juz playlist ends on some surah's last verse too, and its next is that surah's
+         * neighbour — which is what carrying on from where the recitation stopped means.
+         */
+        @VisibleForTesting
+        internal fun nextSurahToPlay(
+            continuousPlayback: Boolean,
+            playlistIsAReading: Boolean,
+            repeat: RecitationRepeat,
+            finishedSurah: Int?,
+        ): Int? {
+            if (!continuousPlayback || !playlistIsAReading) return null
+            if (repeat != RecitationRepeat.Off) return null
+            if (finishedSurah == null || finishedSurah >= NextSurahPlaylistSource.LAST_SURAH) {
+                return null
+            }
+            return finishedSurah + 1
+        }
     }
 
     /**
@@ -354,16 +455,11 @@ class QuranAudioManager @Inject constructor(
                         }
 
                         Player.STATE_ENDED -> {
-                            // Playlist has fully ended
-                            if (!newPlayer.hasNextMediaItem()) {
-                                _audioState.update {
-                                    it.copy(
-                                        isPlaying = false,
-                                        isActive = false,
-                                        currentAyahId = 0,
-                                        currentSurahNumber = 0
-                                    )
-                                }
+                            // Playlist has fully ended. Under continuous playback that is the
+                            // end of a *surah*, not of the sitting — advanceToNextSurah says
+                            // whether it has taken the session over.
+                            if (!newPlayer.hasNextMediaItem() && !advanceToNextSurah()) {
+                                markPlaybackFinished()
                             }
                         }
 
@@ -556,6 +652,10 @@ class QuranAudioManager @Inject constructor(
     fun playAyahsSequentially(ayahs: List<AyahAudioItem>, startIndex: Int = 0, title: String = "") {
         // Cancel any ongoing download job
         downloadJob?.cancel()
+        // Whoever is calling is choosing what plays next; a roll into the next surah decided a
+        // moment ago no longer is. The advance clears the handle before handing over here, so
+        // this cancels an advance that lost the race, never the one doing the calling.
+        advanceJob?.cancel()
 
         // Release any existing player to ensure a fresh start (avoids stale ENDED state)
         positionTrackingJob?.cancel()
@@ -567,6 +667,7 @@ class QuranAudioManager @Inject constructor(
         ayahPlaylist = ayahs
         currentPlaylistIndex = startIndex
         playlistTitle = title
+        playlistIsAReading = true
 
         _audioState.update {
             AudioState(
@@ -578,7 +679,13 @@ class QuranAudioManager @Inject constructor(
                 totalAyahs = ayahs.size,
                 currentAyahIndex = startIndex,
                 currentAyahId = ayahs.getOrNull(startIndex)?.ayahGlobalId ?: 0,
-                currentSurahNumber = ayahs.getOrNull(startIndex)?.surahNumber ?: 0
+                currentSurahNumber = ayahs.getOrNull(startIndex)?.surahNumber ?: 0,
+                // Speed and follow-along belong to the sitting, not to the playlist. Rolling
+                // from one surah into the next is the same sitting, and dropping back to 1×
+                // and un-following at the surah boundary would be the app undoing what the
+                // reader set a minute ago. Re-applied to the new player below.
+                speed = it.speed,
+                followAlong = it.followAlong
             )
         }
 
@@ -657,6 +764,9 @@ class QuranAudioManager @Inject constructor(
                     exoPlayer.clearMediaItems()
                     exoPlayer.addMediaItems(mediaItems)
                     exoPlayer.seekTo(adjustedStartIndex, 0L)
+                    // The player is new — the rate the reader chose lives in the state, and
+                    // without this the surah after a handover plays at 1×.
+                    exoPlayer.setPlaybackSpeed(_audioState.value.speed.multiplier)
                     exoPlayer.prepare()
                     exoPlayer.play()
 
@@ -686,10 +796,13 @@ class QuranAudioManager @Inject constructor(
     }
 
     fun playAyah(ayahGlobalNumber: Int, surahNumber: Int, ayahNumber: Int) {
+        advanceJob?.cancel()
         // Single ayah play -- creates a 1-item playlist
         val item = AyahAudioItem(ayahGlobalNumber, surahNumber, ayahNumber)
         ayahPlaylist = listOf(item)
         currentPlaylistIndex = 0
+        // One verse, asked for by itself: its end is an end, not a boundary to roll over.
+        playlistIsAReading = false
         _audioState.update {
             it.copy(
                 isActive = true,
@@ -804,6 +917,9 @@ class QuranAudioManager @Inject constructor(
     fun stop() {
         downloadJob?.cancel()
         downloadJob = null
+        advanceJob?.cancel()
+        advanceJob = null
+        playlistIsAReading = false
         positionTrackingJob?.cancel()
         // Release the player entirely so next playback gets a fresh instance
         forwardingPlayer = null
@@ -949,6 +1065,9 @@ class QuranAudioManager @Inject constructor(
 
     fun release() {
         downloadJob?.cancel()
+        advanceJob?.cancel()
+        advanceJob = null
+        playlistIsAReading = false
         positionTrackingJob?.cancel()
         forwardingPlayer = null
         player?.release()

@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.qibla.QiblaGreen
 import com.arshadshah.nimaz.presentation.foundation.geometry.cardinalDirection
+import com.arshadshah.nimaz.presentation.foundation.geometry.compassDegrees
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import kotlin.math.abs
 import kotlin.math.roundToInt
@@ -82,7 +83,10 @@ fun QiblaInstructionRow(
                     textAlign = TextAlign.Center,
                 )
                 Spacer(Modifier.height(4.dp))
-                val az = currentAzimuth.roundToInt()
+                // Normalised, not raw: `currentAzimuth` is the unwrapped dial value, which
+                // runs negative and past 360 so the needle can animate across the seam. This
+                // line printed it as it stood -- "You are facing -67 NW".
+                val az = compassDegrees(currentAzimuth)
                 val card = cardinalDirection(currentAzimuth)
                 Text(
                     text = stringResource(R.string.you_are_facing_format, az, card),

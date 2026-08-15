@@ -1,26 +1,23 @@
 package com.arshadshah.nimaz.presentation.components.organisms
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.NotificationsActive
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,16 +30,32 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
 import com.arshadshah.nimaz.presentation.components.molecules.NimazBanner
 import com.arshadshah.nimaz.presentation.components.molecules.NimazBannerVariant
+import com.arshadshah.nimaz.presentation.components.molecules.NimazBottomSheet
 
 /**
- * Unified banner slot for the home screen. Renders nothing if [items] is empty.
+ * The home screen's attention slot: the one thing to deal with, and a way to see the rest.
  *
- * Shows [items][0] as the primary banner. If there are more items, a "N more to deal with" text
- * link toggles an expanded list showing ALL items with numbered rank badges.
+ * Renders nothing if [items] is empty. The first item is the banner; when there are more, a
+ * "N more to deal with" button opens **a sheet** listing all of them, ranked.
+ *
+ * The overflow used to expand *in place*, pushing a stack of banners down the home screen and
+ * shoving the prayer card below the fold. That is the wrong instrument: this is a queue of
+ * interruptions, and a queue you look through is a thing you open and close, not a thing that
+ * grows the page you were reading. A sheet also gives the list somewhere to be tall — there is
+ * no bound on how many of these there can be at once — without the home screen having to hold
+ * it.
+ *
+ * Inside the sheet, **acting closes it and dismissing does not**: an action takes you somewhere
+ * (a permission dialog, a settings screen, an announcement's destination) and leaving the sheet
+ * over the top of that is a modal covering the thing it just sent you to, while a dismissal is
+ * housekeeping — the row goes and the queue you are working through stays open.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeBannerSlot(
     items: List<HomeBannerItem>,
@@ -50,50 +63,70 @@ fun HomeBannerSlot(
 ) {
     if (items.isEmpty()) return
 
-    var expanded by remember { mutableStateOf(false) }
+    var sheetOpen by remember { mutableStateOf(false) }
     val overflowCount = items.size - 1
 
+    // Everything but one can be dealt with while the sheet is open, and a sheet listing a
+    // single banner that is already on the screen behind it is a sheet with nothing to say.
+    // (The list emptying entirely is covered by the early return, which takes the sheet with it.)
+    LaunchedEffect(overflowCount) { if (overflowCount == 0) sheetOpen = false }
+
     Column(modifier = modifier.fillMaxWidth()) {
-        if (expanded) {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                items.forEachIndexed { index, item ->
-                    BannerSlotCard(item, rank = index + 1)
-                }
-            }
-        } else {
-            BannerSlotCard(items[0], rank = null)
-        }
+        BannerSlotCard(items[0], rank = null)
 
         if (overflowCount > 0) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { expanded = !expanded }
-                    .padding(vertical = 8.dp),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    text = stringResource(R.string.home_n_more_banners, overflowCount),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                Spacer(Modifier.width(4.dp))
-                NimazIcon(
-                    imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                    contentDescription = null,
-                    iconSize = 14.dp,
-                )
+            NimazButton(
+                text = stringResource(R.string.home_n_more_banners, overflowCount),
+                onClick = { sheetOpen = true },
+                variant = NimazButtonVariant.TEXT,
+                size = NimazButtonSize.SMALL,
+                leadingIcon = Icons.Default.KeyboardArrowDown,
+                fullWidth = true,
+                modifier = Modifier.padding(top = 4.dp),
+            )
+        }
+    }
+
+    if (sheetOpen) {
+        NimazBottomSheet(
+            onDismissRequest = { sheetOpen = false },
+            title = stringResource(R.string.home_banner_sheet_title),
+            subtitle = stringResource(R.string.home_banner_sheet_subtitle, items.size),
+            icon = Icons.Default.NotificationsActive,
+            onClose = { sheetOpen = false },
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                items.forEachIndexed { index, item ->
+                    BannerSlotCard(
+                        banner = item,
+                        rank = index + 1,
+                        onActed = { sheetOpen = false },
+                    )
+                }
             }
+            Spacer(Modifier.height(8.dp))
         }
     }
 }
 
+/**
+ * One banner in the slot.
+ *
+ * [rank] numbers it inside the sheet and is null for the one on the home screen itself, which
+ * has nothing to be numbered against. [onActed] runs after the banner's own action — see the
+ * act-closes / dismiss-does-not rule on [HomeBannerSlot] — and is null outside the sheet.
+ */
 @Composable
-private fun BannerSlotCard(banner: HomeBannerItem, rank: Int?) {
+private fun BannerSlotCard(
+    banner: HomeBannerItem,
+    rank: Int?,
+    onActed: (() -> Unit)? = null,
+) {
     val cardIsTappable = banner.actionLabel == null && banner.onAction != null
     val actionLabel = if (banner.isLoading) null else banner.actionLabel
-    val onAction = if (banner.isLoading) null else banner.onAction
+    val onAction: (() -> Unit)? = if (banner.isLoading) null else banner.onAction?.let { act ->
+        { act(); onActed?.invoke() }
+    }
 
     NimazBanner(
         variant = when (banner.variant) {
@@ -102,14 +135,14 @@ private fun BannerSlotCard(banner: HomeBannerItem, rank: Int?) {
             HomeBannerVariant.INFO -> NimazBannerVariant.INFO
             HomeBannerVariant.EVENT -> NimazBannerVariant.EVENT
         },
-        icon = if (rank == null) banner.icon else banner.icon,
+        icon = banner.icon,
         title = banner.title,
         message = banner.subtitle,
         actionLabel = actionLabel,
         onAction = onAction,
         isLoading = banner.isLoading,
         onDismiss = if (banner.dismissable) banner.onDismiss else null,
-        onClick = if (cardIsTappable) { { banner.onAction?.invoke() } } else null,
+        onClick = if (cardIsTappable) onAction else null,
         leadingContent = if (rank != null) {
             {
                 Box(
@@ -132,4 +165,3 @@ private fun BannerSlotCard(banner: HomeBannerItem, rank: Int?) {
         } else null,
     )
 }
-

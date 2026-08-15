@@ -61,11 +61,15 @@ fun NimazScrollSpyIndex(
                 contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                // Keyed by label, not position: the row is rebuilt whenever the section list
-                // changes, and a position key would hand one chip's selection state to another.
-                // Labels are section headings, which have to be distinct for scroll-to to mean
-                // anything, so they are a safe identity.
-                itemsIndexed(labels, key = { _, label -> label }) { index, label ->
+                // Position *and* label. The label alone was the key, on the reasoning that
+                // labels are headings and headings are distinct — but the caller labels its
+                // pills from a small closed vocabulary (a surah's sections are grouped into
+                // Name / Revelation / Theme / Background), and a surah whose source prints two
+                // Background sections handed the row the same key twice, which a lazy list
+                // treats as a fatal error rather than a duplicate. The pair keeps the label in
+                // the identity — so a chip that keeps its label across a rebuild keeps its
+                // state — while the index makes it unique whatever the caller passes.
+                itemsIndexed(labels, key = { index, label -> "$index:$label" }) { index, label ->
                     NimazChip(
                         text = label,
                         selected = index == selectedIndex,

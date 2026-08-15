@@ -400,6 +400,7 @@
     <string name="prayer_day_complete">Journée terminée</string>
     <string name="prayer_day_summary_past">Journée terminée · %1$d sur %2$d effectuées</string>
     <string name="prayer_day_upcoming">Journée à venir</string>
+    <string name="prayer_day_no_schedule">Horaires de prière indisponibles</string>
     <string name="prayer_tracker_title">Suivi de prière</string>
     <string name="view_statistics">Voir les statistiques</string>
     <string name="all_caught_up">Tout est à jour !</string>
@@ -1975,6 +1976,8 @@
     <string name="home_prayer_settings_cd">Paramètres de prière</string>
     <string name="home_prayers_done_of_five">%d sur 5</string>
     <string name="home_n_more_banners">%d de plus à gérer</string>
+    <string name="home_banner_sheet_title">Nécessite votre attention</string>
+    <string name="home_banner_sheet_subtitle">%d éléments à gérer</string>
     <string name="home_also_today">Aussi aujourd\'hui</string>
     <string name="home_worship_subtitle">Witr et Tahajjud ce soir</string>
     <string name="home_read_al_kahf">Lire Al-Kahf</string>

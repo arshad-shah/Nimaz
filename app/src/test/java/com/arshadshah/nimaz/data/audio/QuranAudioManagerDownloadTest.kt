@@ -83,13 +83,19 @@ class QuranAudioManagerDownloadTest {
         }
     }
 
+    /** Nothing follows the surah under test — the download path never reaches the advance. */
+    private object NoNextSurah : NextSurahPlaylistSource {
+        override suspend fun playlistFor(surahNumber: Int): NextSurahPlaylistSource.SurahPlaylist? =
+            null
+    }
+
     private fun playlist(count: Int): List<QuranAudioManager.AyahAudioItem> =
         (1..count).map { QuranAudioManager.AyahAudioItem(ayahGlobalId = it, surahNumber = 1, ayahNumber = it) }
 
     @Test
     fun `cancelling the download stops further progress writes`() = runTest(dispatcher) {
         val downloader = SlowDownloader(millis = 1_000)
-        val manager = QuranAudioManager(context, downloader, dispatcher)
+        val manager = QuranAudioManager(context, downloader, dispatcher, NoNextSurah)
 
         val job = launch { manager.downloadAllAyahs(playlist(20)) }
 
@@ -109,7 +115,7 @@ class QuranAudioManagerDownloadTest {
     @Test
     fun `cancelling the download stops the transfers themselves`() = runTest(dispatcher) {
         val downloader = SlowDownloader(millis = 1_000)
-        val manager = QuranAudioManager(context, downloader, dispatcher)
+        val manager = QuranAudioManager(context, downloader, dispatcher, NoNextSurah)
 
         val job = launch { manager.downloadAllAyahs(playlist(20)) }
         advanceTimeBy(2_500)
@@ -130,7 +136,7 @@ class QuranAudioManagerDownloadTest {
     @Test
     fun `at most five downloads are in flight at once`() = runTest(dispatcher) {
         val downloader = BlockingDownloader()
-        val manager = QuranAudioManager(context, downloader, dispatcher)
+        val manager = QuranAudioManager(context, downloader, dispatcher, NoNextSurah)
 
         val job = launch { manager.downloadAllAyahs(playlist(20)) }
         advanceUntilIdle()
@@ -143,7 +149,7 @@ class QuranAudioManagerDownloadTest {
 
     @Test
     fun `an empty playlist reports nothing to download`() = runTest(dispatcher) {
-        val manager = QuranAudioManager(context, SlowDownloader(millis = 0), dispatcher)
+        val manager = QuranAudioManager(context, SlowDownloader(millis = 0), dispatcher, NoNextSurah)
 
         manager.downloadAllAyahs(emptyList())
         advanceUntilIdle()
@@ -154,7 +160,7 @@ class QuranAudioManagerDownloadTest {
     @Test
     fun `a completed download reports full progress`() = runTest(dispatcher) {
         val downloader = SlowDownloader(millis = 10)
-        val manager = QuranAudioManager(context, downloader, dispatcher)
+        val manager = QuranAudioManager(context, downloader, dispatcher, NoNextSurah)
 
         manager.downloadAllAyahs(playlist(3))
         advanceUntilIdle()

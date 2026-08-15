@@ -6,7 +6,7 @@ import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.core.time.TodayProvider
 import com.arshadshah.nimaz.core.util.toUtcMidnightMillis
-import com.arshadshah.nimaz.domain.model.Location
+import com.arshadshah.nimaz.domain.model.PrayerCalculationSettings
 import com.arshadshah.nimaz.domain.model.PrayerName
 import com.arshadshah.nimaz.domain.model.PrayerRecord
 import com.arshadshah.nimaz.domain.model.PrayerStatus
@@ -69,7 +69,11 @@ class PrayerTrackerViewModel @Inject constructor(
     )
     val historyState: StateFlow<PrayerHistoryUiState> = _historyState.asStateFlow()
 
-    private var currentLocation: Location? = null
+    /**
+     * The latest calculation-settings snapshot, held so [selectDate] can compute a day's
+     * schedule without re-collecting the flow. Null only before the first emission.
+     */
+    private var calculationSettings: PrayerCalculationSettings? = null
     private var dateRecordsJob: Job? = null
 
     // The history range is re-requested every time the user changes period. Like
@@ -88,7 +92,7 @@ class PrayerTrackerViewModel @Inject constructor(
     private var qadaJob: Job? = null
 
     init {
-        loadCurrentLocation()
+        observeCalculationSettings()
         loadToday()
         loadStats()
         loadQadaPrayers()
@@ -138,15 +142,32 @@ class PrayerTrackerViewModel @Inject constructor(
         }
     }
 
-    private fun loadCurrentLocation() {
+    /**
+     * The schedule the tracker measures the day against, from the settings every other
+     * prayer-time surface reads.
+     *
+     * This used to observe `getCurrentLocation()` — the `locations` table, `isCurrentLocation =
+     * 1` — and pass the row to `getPrayerTimesForDate(date, location)`. That row is written by
+     * exactly one path, searching for a place and picking it; detecting by GPS, finishing
+     * onboarding and the home screen's own picker all write the **preference store** and nothing
+     * else. So for a user whose location came from GPS the table was empty, `currentLocation`
+     * stayed null, and the tracker alone had no times at all while every other screen had them —
+     * which is what made the day card announce "Day complete" over five rows correctly reading
+     * UPCOMING.
+     *
+     * It also fixes a quieter divergence. `getPrayerTimesForDate(date, location)` takes its
+     * method and school from the *row's* own columns and applies no per-prayer adjustments, so
+     * even a user with a row could see the tracker disagree with Home about when Asr was.
+     * `FastingViewModel` had the same defect and was moved to this same snapshot; this was the
+     * last surface still on the old path.
+     */
+    private fun observeCalculationSettings() {
         // Started once from `init`, so it needs no handle (§4.1).
-        launchSafely(telemetry, DOMAIN, "observe_location") {
-            prayerUseCases.getCurrentLocation().collect { location ->
-                currentLocation = location
-                // Reload prayer times if we have a location
-                location?.let {
-                    loadPrayerTimes(_trackerState.value.selectedDate, it)
-                }
+        launchSafely(telemetry, DOMAIN, "observe_calculation_settings") {
+            prayerUseCases.observeCalculationSettings().collect { settings ->
+                calculationSettings = settings
+                // Not just today's: a change of method has to move the day being *looked at*.
+                loadPrayerTimes(_trackerState.value.selectedDate, settings)
             }
         }
     }
@@ -178,14 +199,15 @@ class PrayerTrackerViewModel @Inject constructor(
             }
         }
 
-        // Load prayer times if we have location
-        currentLocation?.let { location ->
-            loadPrayerTimes(date, location)
+        // The settings arrive asynchronously; until the first emission there is nothing to
+        // compute with, and the observer above will fill this day in when they land.
+        calculationSettings?.let { settings ->
+            loadPrayerTimes(date, settings)
         }
     }
 
-    private fun loadPrayerTimes(date: LocalDate, location: Location) {
-        val prayerTimes = prayerUseCases.getPrayerTimesForDate(date, location)
+    private fun loadPrayerTimes(date: LocalDate, settings: PrayerCalculationSettings) {
+        val prayerTimes = prayerUseCases.getPrayerTimesForDate(date, settings)
         _trackerState.update { it.copy(prayerTimes = prayerTimes) }
     }
 

@@ -210,6 +210,8 @@ Adhan, Qaida tap-to-hear) plus an Adhan **download** pipeline. They share no pla
 
 **The player.** `AudioState` carries `repeat: RecitationRepeat` (off / a verse N times / a range / the surah), `speed: RecitationSpeed` (0.75×–1.5×) and `followAlong: Boolean` alongside the position, duration and download counts it always had. `RecitationRepeat.Surah` maps to ExoPlayer's `REPEAT_MODE_ALL`; the other two are counted in the media-item transition listener, because both have to *stop* — an ayah repeat moves on after N, a range comes back to its start — and `REPEAT_MODE_ONE` can express neither. Repeat only acts on an **automatic** transition, so tapping next always wins. Speed is deliberately **not persisted**: it belongs to the sitting, not to the reader. Follow-along scrolls the verse list or turns the mushaf page to keep the recited verse on screen; it is off by default, because scrolling the page out from under someone who started audio and went to read elsewhere is the reader arguing with them. Its neighbour in reader settings, **Continuous playback** (`SettingsQuran.continuousReading` → `AudioManager.setContinuousPlayback`), is a different thing entirely — whether the recitation carries on past the end of a verse into the next verse and surah — and now says so: it was called "Continuous Reading", filed under *Reading behaviour*, and read as a twin of the player's "Follow along". It sits under **Audio** with the reciter.
 
+**Past the end of a surah.** Continuous playback promised the next surah and delivered only the next verse: an ExoPlayer playlist is *one* surah's ayahs, so `STATE_ENDED` ended the sitting whatever the setting said, and finishing Al-Kahf never carried into Maryam. The player cannot fetch what it does not have, so the next surah's verses arrive through a seam — **`NextSurahPlaylistSource`** (`data/audio/`, bound in `RepositoryModule` to `QuranNextSurahPlaylistSource`, which reads `QuranRepository.getAyahsBySurah` **without** a translation, since a playlist needs ayah ids and nothing else). *Whether* to advance is `QuranAudioManager.nextSurahToPlay`, pure and unit-tested (`NextSurahToPlayTest`) because the alternative is arranging for a real ExoPlayer to reach `STATE_ENDED`: it declines when the setting is off, when any `RecitationRepeat` is set (a repeat is a request to stay), when a **single verse** was playing rather than a reading (`playAyah` clears the flag `playAyahsSequentially` sets, so tapping one verse's play button does not roll into a whole surah), and after An-Nas. The handover re-enters `playAyahsSequentially`, which now carries `speed` and `followAlong` across it — the same sitting, so dropping back to 1× at a surah boundary would be the app undoing what the reader set — and re-applies the speed to the freshly built player. `STATE_ENDED` only tears the session down when no advance has taken it over, which is what keeps the foreground service alive across the boundary (it stops itself 500 ms after `isActive` goes false).
+
 **The bar.** `AudioBottomBar` (`components/molecules/QuranAudioBottomBar.kt`) draws **nothing** unless audio is active or preparing — a permanent strip with a play button at the foot of the reader is furniture, and recitation starts from the ayah sheet's "Play here" or surah info's "Listen". When it does draw, it follows the design prototype (`docs/superpowers/prototypes/2026-08-13-quran-mushaf-and-player.html`): a full-bleed **violet** download strip across the top while files are being fetched (violet, `NimazPalette.Violet500`, because the accent already means progress *through* the recitation a few millimetres below), then now-playing on the left with previous / play / next / recitation-settings on the right, then the seek rail between elapsed and remaining, then reciter and speed on the left with the repeat mode in the accent on the right. **Stop is not on the bar** — it is the recitation sheet's secondary action, out of mis-tap range of next/previous, and the bar disappearing is its own confirmation.
 
 **Qaida progress is credited by playback, not by intent.** `QaidaAudioManager.completions` emits an
@@ -694,6 +696,23 @@ comes from `getRecentLocations(limit)` ordering by the `updatedAt` that has been
 it was created — a "recent" row must never be built by taking the head of `getAllLocations()`,
 which sorts `isFavorite DESC, name ASC`. No schema change was needed for any of this.
 
+**Where a prayer time gets its location, and it is not that table.** There are two stores, and
+only one of them is authoritative. **Preferences** (`LocationSettings.updateLocation` → latitude /
+longitude / locationName) is what `observeCalculationSettings()` resolves and therefore what every
+prayer-time surface computes from; it is written by *all four* ways in — onboarding's GPS detect,
+the location screen's GPS detect, the location screen's search-and-pick, and the home screen's own
+picker. The **`locations` table** is a saved-places list for the browser, and only
+search-and-pick writes it. So a user who set their location by GPS has coordinates everywhere and
+no row at all, and anything reading `getCurrentLocation()` for prayer times had nothing: the
+prayer tracker showed no schedule (and, before its lede was fixed, announced "Day complete" at
+breakfast over five rows correctly reading UPCOMING), and the settings screen's notification rows
+showed no time. Both now take `getPrayerTimesForDate(date, settings)` — the
+`PrayerCalculationSettings` overload — which also applies the method, school, high-latitude rule
+and per-prayer adjustments that a `locations` row's own columns do not carry, and so ends a
+quieter divergence in which the tracker could disagree with Home about when Asr was.
+**Compute prayer times from `observeCalculationSettings()`, never from a `Location` row** — the
+`Location` overload is for the location browser, which really is asking about one saved place.
+
 **Legacy user-data import.** `LegacyUserDataImport` copies an existing install's rows out of the
 content database into the user database the first time it is opened, driven by `UserDataMigrator`
 from `AppInitializer` (§9) and awaited before the splash screen lifts. It is one transaction of
@@ -814,7 +833,12 @@ schemes address screens this app has: 446 cross-references the source writes as 
 - **`Route.SurahBackground`** reads `surah_overview_sections` continuously under a sticky index of
   pills labelled from `section_group` — stable across all 114 surahs, which the source's own
   `heading` is not. Each section keeps that heading as its title. The longest background runs to
-  47 KB of prose for one surah, which is the reason it is a destination.
+  47 KB of prose for one surah, which is the reason it is a destination. One pill per **run** of
+  sections sharing a group, not one per section: a surah whose source prints two Background
+  sections in a row would otherwise get two pills reading "Historical Background", and an index
+  cannot say where you are with the same word twice. `NimazScrollSpyIndex` keys its lazy row on
+  `"$index:$label"` for the same reason from the other side — it keyed on the label alone, so the
+  repeat was a duplicate key and the screen crashed on open rather than merely reading oddly.
 - **`Route.SurahPassages`** is the surah's table of contents over `ayah_themes`, filterable by
   subject *and* by verse number. Opened from the reader it is passed the verse being read and
   marks and scrolls to the passage containing it.
@@ -1517,6 +1541,20 @@ exclusive surfaces per delivery.
 | `core/navigation/AnnouncementRoutes.kt` | `announcementRoute(key)` — the route allowlist and grammar |
 | `core/di/AnnouncementModule.kt` | the DI wiring |
 | `presentation/components/molecules/AnnouncementBanner.kt` | the banner; state in `HomeViewModel.announcement` (`StateFlow<AnnouncementUiState>`) |
+| `presentation/components/organisms/HomeBannerSlot.kt` | the **attention slot** an announcement shares with the permission/update warnings — see below |
+
+**The attention slot.** Everything that interrupts the home screen — a pushed announcement, a
+missing notification or location permission, battery optimisation, an available update — is one
+list, drawn by `HomeBannerSlot`. It shows **one** banner and, when there are more, a
+"N more to deal with" button that opens **a sheet** (`NimazBottomSheet`) listing all of them,
+ranked. It used to expand the overflow *in place*, so a run of queued interruptions grew the home
+screen and pushed the prayer card below the fold; a queue of interruptions is something you open
+and close, not something that grows the page you were reading, and a sheet is also where an
+unbounded list can afford to be tall. Inside the sheet **acting closes it and dismissing does
+not** — an action sends you somewhere (a permission dialog, a settings screen, an announcement's
+destination) and a modal left over the top of that is covering the thing it just sent you to,
+while a dismissal is housekeeping and the queue stays open. Shrinking to one item closes the
+sheet, because the single remaining banner is already on the screen behind it.
 
 ### 12.3 Payload contract
 
