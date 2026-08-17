@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.SearchOff
@@ -38,6 +37,7 @@ import com.arshadshah.nimaz.domain.model.QuranSearchQuery
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcons
 import com.arshadshah.nimaz.presentation.components.molecules.NimazErrorState
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconButton
@@ -322,7 +322,7 @@ private fun JumpToCard(
                 modifier = Modifier.weight(1f)
             )
             NimazIcon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                imageVector = NimazIcons.Forward,
                 contentDescription = null,
                 variant = NimazIconVariant.MUTED,
             )

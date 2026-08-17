@@ -10,8 +10,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Fastfood
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -27,15 +28,18 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.TranslationLanguage
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
+import com.arshadshah.nimaz.presentation.components.atoms.NimazDivider
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconWell
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcons
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.theme.asLanguageLabel
 
@@ -63,7 +67,7 @@ fun NimazMenuItem(
     subtitle: String? = null,
     icon: ImageVector? = null,
     iconTint: Color = MaterialTheme.colorScheme.onPrimaryContainer,
-    trailingIcon: ImageVector? = Icons.AutoMirrored.Filled.ArrowForward,
+    trailingIcon: ImageVector? = NimazIcons.Forward,
     trailing: (@Composable RowScope.() -> Unit)? = null,
     enabled: Boolean = true,
     selected: Boolean = false,
@@ -167,6 +171,52 @@ fun NimazMenuGroup(
     }
 }
 
+/** The measurements every [NimazMenuGroup] and its rows share. */
+object NimazMenuDefaults {
+    /**
+     * How far a [NimazMenuDivider] is pushed in on a row that carries a leading icon: the row's
+     * own 16dp of padding plus the 40dp icon well, so the line begins where the icon ends.
+     */
+    val RowDividerInset: Dp = 56.dp
+
+    /**
+     * The symmetric inset for a divider between blocks that are *not* icon rows — a slider, a
+     * dropdown, a free-form section. Matches the block's own content padding.
+     */
+    val SectionDividerInset: Dp = 16.dp
+}
+
+/**
+ * The hairline between two rows of a [NimazMenuGroup].
+ *
+ * This exists because the same line was being written out by hand at every call site, and it
+ * drifted: `padding(start = 56.dp), alpha = 0.5f` in More and Settings, `padding(horizontal =
+ * 16.dp)` at full strength in the Qur'an settings, nothing at all on the Qur'an home — four rows
+ * that behave identically, separated four different ways. There is one line now, at one weight,
+ * and a group that wants no separation simply omits it.
+ *
+ * @param inset `true` (the default) starts the line past the leading icon well, which is what a
+ *   group of [NimazMenuItem]/`NimazSettingsItem` rows wants. Pass `false` between blocks that
+ *   have no icon column — a slider, a dropdown, a section of prose — where a start-inset line
+ *   would hang off the content it is meant to divide.
+ */
+@Composable
+fun NimazMenuDivider(
+    modifier: Modifier = Modifier,
+    inset: Boolean = true,
+) {
+    NimazDivider(
+        modifier = modifier.padding(
+            start = if (inset) {
+                NimazMenuDefaults.RowDividerInset
+            } else {
+                NimazMenuDefaults.SectionDividerInset
+            },
+            end = if (inset) 0.dp else NimazMenuDefaults.SectionDividerInset,
+        )
+    )
+}
+
 @Preview(showBackground = true, widthDp = 400, name = "NimazMenuItem")
 @Composable
 private fun NimazMenuItemPreview() {
@@ -191,6 +241,20 @@ private fun NimazMenuGroupPreview() {
                 icon = Icons.Default.Schedule,
                 onClick = {}
             )
+            NimazMenuDivider()
+            NimazMenuItem(
+                title = "Fasting",
+                subtitle = "2 make-up fasts",
+                icon = Icons.Default.Fastfood,
+                onClick = {}
+            )
+            NimazMenuDivider()
+            NimazMenuItem(
+                title = "Khatam",
+                subtitle = "Juz 14 of 30",
+                icon = Icons.AutoMirrored.Filled.MenuBook,
+                onClick = {}
+            )
         }
     }
 }
@@ -207,6 +271,7 @@ private fun NimazMenuItemSelectedPreview() {
                 trailingIcon = null,
                 onClick = {}
             )
+            NimazMenuDivider(inset = false)
             NimazMenuItem(
                 title = "Abul A'ala Maududi",
                 subtitle = "اردو",
@@ -218,6 +283,7 @@ private fun NimazMenuItemSelectedPreview() {
                 selected = true,
                 onClick = {}
             )
+            NimazMenuDivider(inset = false)
             NimazMenuItem(
                 title = "Marmaduke Pickthall",
                 subtitle = "English",

@@ -20,8 +20,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.ContentCopy
-import androidx.compose.material.icons.filled.ExpandLess
-import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -64,6 +62,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazDivider
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcons
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.molecules.NimazBanner
@@ -435,7 +434,7 @@ private fun LicenseTextCard(license: LibraryLicense) {
             onClick = { expanded = !expanded },
             variant = NimazButtonVariant.TEXT,
             size = NimazButtonSize.MEDIUM,
-            leadingIcon = if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+            leadingIcon = if (expanded) NimazIcons.Collapse else NimazIcons.Expand,
             fullWidth = true,
         )
     }

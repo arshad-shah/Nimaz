@@ -14,8 +14,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -37,6 +35,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconButtonSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcons
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.foundation.debug.NimazMarginRule
 import com.arshadshah.nimaz.presentation.foundation.debug.nimazMarginRules
@@ -107,7 +106,7 @@ fun NimazTreeRow(
             ) {
                 if (expandable) {
                     NimazIconButton(
-                        icon = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                        icon = NimazIcons.Forward,
                         onClick = onToggleExpanded,
                         size = NimazIconButtonSize.MEDIUM,
                         contentDescription = stringResource(

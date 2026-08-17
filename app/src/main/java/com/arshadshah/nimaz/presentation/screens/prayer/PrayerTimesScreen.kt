@@ -27,8 +27,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalIconButton
@@ -64,6 +62,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcons
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.atoms.TickResolution
 import com.arshadshah.nimaz.presentation.components.atoms.clockTimeText
@@ -340,7 +339,7 @@ private fun DayNavBar(
     ) {
         FilledTonalIconButton(onClick = onPrev) {
             NimazIcon(
-                Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                NimazIcons.Previous,
                 contentDescription = stringResource(R.string.cd_previous_day)
             )
         }
@@ -383,7 +382,7 @@ private fun DayNavBar(
         }
         FilledTonalIconButton(onClick = onNext) {
             NimazIcon(
-                Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                NimazIcons.Next,
                 contentDescription = stringResource(R.string.cd_next_day)
             )
         }

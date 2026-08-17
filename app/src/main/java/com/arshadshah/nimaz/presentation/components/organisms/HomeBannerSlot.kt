@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -33,6 +32,7 @@ import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcons
 import com.arshadshah.nimaz.presentation.components.molecules.NimazBanner
 import com.arshadshah.nimaz.presentation.components.molecules.NimazBannerVariant
 import com.arshadshah.nimaz.presentation.components.molecules.NimazBottomSheet
@@ -80,7 +80,7 @@ fun HomeBannerSlot(
                 onClick = { sheetOpen = true },
                 variant = NimazButtonVariant.TEXT,
                 size = NimazButtonSize.SMALL,
-                leadingIcon = Icons.Default.KeyboardArrowDown,
+                leadingIcon = NimazIcons.Expand,
                 fullWidth = true,
                 modifier = Modifier.padding(top = 4.dp),
             )

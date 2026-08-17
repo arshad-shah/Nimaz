@@ -35,7 +35,6 @@ import com.arshadshah.nimaz.domain.model.MatchStrictness
 import com.arshadshah.nimaz.domain.model.SearchPreferences
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
-import com.arshadshah.nimaz.presentation.components.atoms.NimazDivider
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
 import com.arshadshah.nimaz.presentation.components.molecules.NimazAccordion
@@ -43,6 +42,7 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazDialog
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDialogCancelButton
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDialogDestructiveButton
 import com.arshadshah.nimaz.presentation.components.organisms.NimazListPicker
+import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuDivider
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuItem
 import com.arshadshah.nimaz.presentation.components.molecules.NimazNumberStepper
@@ -111,7 +111,7 @@ fun SearchSettingsScreen(
                             .padding(horizontal = 16.dp)
                             .padding(bottom = 12.dp),
                     )
-                    NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                    NimazMenuDivider(inset = false)
                     NimazSettingsItem(
                         title = stringResource(R.string.search_strictness),
                         subtitle = stringResource(strictnessDescription(state.search.strictness)),
@@ -119,7 +119,7 @@ fun SearchSettingsScreen(
                         onClick = { showStrictnessPicker = true },
                         showArrow = true,
                     )
-                    NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                    NimazMenuDivider(inset = false)
                     NimazSettingsItem(
                         title = stringResource(R.string.search_default_scope),
                         subtitle = stringResource(R.string.search_default_scope_subtitle),
@@ -138,7 +138,7 @@ fun SearchSettingsScreen(
                 NimazMenuGroup {
                     LibrarySource.entries.forEachIndexed { index, source ->
                         if (index > 0) {
-                            NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                            NimazMenuDivider(inset = false)
                         }
                         val isOn = source in state.search.sources
                         // The last source left on cannot be switched off: an empty set is a
@@ -199,7 +199,7 @@ fun SearchSettingsScreen(
                             viewModel.onEvent(SearchSettingsEvent.SetHistoryEnabled(it))
                         },
                     )
-                    NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                    NimazMenuDivider(inset = false)
                     // An in-place destructive action, not navigation — no
                     // trailing arrow; disabled while there is nothing to clear.
                     NimazMenuItem(

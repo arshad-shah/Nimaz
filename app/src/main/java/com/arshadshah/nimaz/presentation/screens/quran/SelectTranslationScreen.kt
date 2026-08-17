@@ -43,6 +43,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazDivider
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
+import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuDivider
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuItem
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
@@ -207,7 +208,7 @@ fun SelectTranslationScreen(
                                 }
                             )
                             if (index < translations.lastIndex) {
-                                NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                                NimazMenuDivider(inset = false)
                             }
                         }
                     }

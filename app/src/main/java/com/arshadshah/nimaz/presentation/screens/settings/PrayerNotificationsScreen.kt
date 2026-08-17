@@ -41,6 +41,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSwitch
 import com.arshadshah.nimaz.presentation.components.molecules.NimazAccordion
 import com.arshadshah.nimaz.presentation.components.organisms.NimazListPicker
+import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuDivider
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
 import com.arshadshah.nimaz.presentation.components.organisms.NimazPickerItem
 import com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsItem
@@ -131,6 +132,7 @@ fun PrayerNotificationsScreen(
                             )
                         }
                     )
+                    NimazMenuDivider(inset = false)
                     NimazSettingsItem(
                         title = stringResource(R.string.notif_all_prayers_lead_title),
                         value = reminderLabel(

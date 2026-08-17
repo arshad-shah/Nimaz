@@ -7,9 +7,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -18,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcons
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.theme.ThemeMode
 
@@ -49,8 +47,8 @@ fun NimazNavArrowButton(
     size: Dp = 48.dp
 ) {
     val icon = when (direction) {
-        NavArrowDirection.PREVIOUS -> Icons.AutoMirrored.Filled.KeyboardArrowLeft
-        NavArrowDirection.NEXT -> Icons.AutoMirrored.Filled.KeyboardArrowRight
+        NavArrowDirection.PREVIOUS -> NimazIcons.Previous
+        NavArrowDirection.NEXT -> NimazIcons.Next
     }
     val tint = if (enabled) {
         MaterialTheme.colorScheme.primary

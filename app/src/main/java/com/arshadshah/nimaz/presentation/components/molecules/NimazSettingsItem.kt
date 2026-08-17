@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -24,8 +23,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconContainerShape
-import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconType
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcons
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSwitch
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
@@ -130,11 +130,15 @@ fun NimazSettingsItem(
             }
 
             showArrow || (onClick != null && checked == null) -> {
+                // Same glyph, same tint, same 18dp as NimazMenuItem's trailing chevron. It used
+                // to be a 20dp chevron at half opacity here and an 18dp one at full
+                // `onSurfaceVariant` there, so the identical affordance on the Settings list and
+                // the More list did not read as identical.
                 NimazIcon(
-                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    imageVector = NimazIcons.Forward,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                    size = NimazIconSize.MEDIUM
+                    variant = NimazIconVariant.MUTED,
+                    iconSize = 18.dp
                 )
             }
         }

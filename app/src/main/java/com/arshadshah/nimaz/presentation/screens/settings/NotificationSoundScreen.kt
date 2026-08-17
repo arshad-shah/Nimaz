@@ -43,6 +43,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSwitch
 import com.arshadshah.nimaz.presentation.components.organisms.NimazListPicker
+import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuDivider
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
 import com.arshadshah.nimaz.presentation.components.organisms.NimazPickerItem
 import com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsItem
@@ -156,6 +157,7 @@ fun NotificationSoundScreen(
                             viewModel.onEvent(SettingsEvent.SetVibrationEnabled(!notificationState.vibrationEnabled))
                         }
                     )
+                    NimazMenuDivider(inset = false)
                     NimazSettingsItem(
                         title = stringResource(R.string.notification_settings_dnd),
                         subtitle = stringResource(R.string.notification_settings_dnd_subtitle),

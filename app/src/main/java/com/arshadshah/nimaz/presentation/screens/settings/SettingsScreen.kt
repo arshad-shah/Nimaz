@@ -41,10 +41,10 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.navigation.ScreenTags
-import com.arshadshah.nimaz.presentation.components.atoms.NimazDivider
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
 import com.arshadshah.nimaz.presentation.components.molecules.NimazConfirmDialog
+import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuDivider
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuItem
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
@@ -107,14 +107,14 @@ fun SettingsScreen(
                         icon = Icons.Default.Calculate,
                         onClick = onNavigateToPrayerSettings
                     )
-                    NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
+                    NimazMenuDivider()
                     NimazMenuItem(
                         title = stringResource(R.string.location),
                         subtitle = stringResource(R.string.location_subtitle),
                         icon = Icons.Default.LocationOn,
                         onClick = onNavigateToLocation
                     )
-                    NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
+                    NimazMenuDivider()
                     NimazMenuItem(
                         title = stringResource(R.string.notifications),
                         subtitle = stringResource(R.string.notifications_subtitle),
@@ -175,14 +175,14 @@ fun SettingsScreen(
                         icon = Icons.Default.DarkMode,
                         onClick = onNavigateToAppearance
                     )
-                    NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
+                    NimazMenuDivider()
                     NimazMenuItem(
                         title = stringResource(R.string.language),
                         subtitle = stringResource(R.string.language_subtitle),
                         icon = Icons.Default.Language,
                         onClick = onNavigateToLanguage
                     )
-                    NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
+                    NimazMenuDivider()
                     NimazMenuItem(
                         title = stringResource(R.string.widgets),
                         subtitle = stringResource(R.string.widgets_subtitle),
@@ -202,7 +202,7 @@ fun SettingsScreen(
                         icon = Icons.Default.Sync,
                         onClick = onNavigateToSync
                     )
-                    NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
+                    NimazMenuDivider()
                     NimazMenuItem(
                         title = stringResource(R.string.reset_settings),
                         subtitle = stringResource(R.string.reset_settings_subtitle),
@@ -210,7 +210,7 @@ fun SettingsScreen(
                         iconTint = MaterialTheme.colorScheme.error,
                         onClick = { showResetDialog = true }
                     )
-                    NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
+                    NimazMenuDivider()
                     NimazMenuItem(
                         title = stringResource(R.string.delete_all_data),
                         subtitle = stringResource(R.string.delete_all_data_subtitle),

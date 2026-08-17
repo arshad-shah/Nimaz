@@ -17,7 +17,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.automirrored.filled.ViewList
@@ -73,6 +72,7 @@ import com.arshadshah.nimaz.domain.model.RecitationRepeat
 import com.arshadshah.nimaz.domain.model.RecitationSpeed
 import com.arshadshah.nimaz.domain.model.Surah
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcons
 import com.arshadshah.nimaz.presentation.components.atoms.NimazPager
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.PageSurahSeparator
@@ -754,7 +754,7 @@ fun QuranReaderScreen(
                         onClick = { onNavigateToNextSurah(khatamSurah.surah.number + 1) },
                     ) {
                         NimazIcon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                            imageVector = NimazIcons.Next,
                             contentDescription = stringResource(R.string.quran_continue_next_surah),
                         )
                     }
@@ -1031,7 +1031,10 @@ fun QuranReaderScreen(
                                 onOpenActions = { sheetAyah = ayah },
                                 onKhatamToggle = {
                                     viewModel.onEvent(QuranEvent.ToggleKhatamAyah(ayah.id))
-                                }
+                                },
+                                // No rule under the final verse — there is nothing below it to
+                                // divide from, and the line would hang over the list's padding.
+                                showDivider = ayah.id != displayAyahs.lastOrNull()?.id,
                             )
                         }
                     }

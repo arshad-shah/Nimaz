@@ -29,10 +29,10 @@ import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.DuaArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
-import com.arshadshah.nimaz.presentation.components.atoms.NimazDivider
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
+import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuDivider
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
 import com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsItem
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
@@ -113,7 +113,7 @@ fun DuaSettingsScreen(
                         checked = duaState.showArabic,
                         onCheckedChange = { viewModel.onEvent(SettingsEvent.SetDuaShowArabic(!duaState.showArabic)) }
                     )
-                    NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                    NimazMenuDivider(inset = false)
                     NimazSettingsItem(
                         title = stringResource(R.string.show_transliteration),
                         subtitle = stringResource(R.string.show_transliteration_subtitle),
@@ -126,7 +126,7 @@ fun DuaSettingsScreen(
                             )
                         }
                     )
-                    NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                    NimazMenuDivider(inset = false)
                     NimazSettingsItem(
                         title = stringResource(R.string.show_translation),
                         subtitle = stringResource(R.string.show_translation_subtitle),

@@ -23,9 +23,7 @@ import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.AutoStories
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Calculate
-import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.DarkMode
-import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Language
@@ -61,6 +59,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcons
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 
 fun helpIcon(key: String?): ImageVector = when (key) {
@@ -156,7 +155,7 @@ fun HelpQuestionRow(question: HelpItem.HelpQuestion, modifier: Modifier = Modifi
                 modifier = Modifier.weight(1f)
             )
             NimazIcon(
-                imageVector = Icons.Filled.ExpandMore,
+                imageVector = NimazIcons.Expand,
                 contentDescription = null,
                 tint = if (expanded) MaterialTheme.colorScheme.primary
                 else MaterialTheme.colorScheme.onSurfaceVariant,
@@ -206,7 +205,7 @@ fun HelpGuideRow(
                 )
             }
             NimazIcon(
-                imageVector = Icons.Filled.ChevronRight,
+                imageVector = NimazIcons.Forward,
                 contentDescription = null,
                 variant = NimazIconVariant.MUTED
             )
@@ -314,7 +313,7 @@ private fun HelpPathChip(
             )
             if (i != labels.lastIndex) {
                 NimazIcon(
-                    imageVector = Icons.Filled.ChevronRight,
+                    imageVector = NimazIcons.Forward,
                     contentDescription = null,
                     variant = NimazIconVariant.MUTED,
                     iconSize = 14.dp

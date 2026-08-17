@@ -15,7 +15,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.MailOutline
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -36,6 +35,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcons
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionTitle
 import com.arshadshah.nimaz.presentation.components.molecules.NimazErrorDefaults
@@ -156,7 +156,7 @@ private fun HelpResultRow(result: HelpSearchResult, onClick: () -> Unit) {
                 modifier = Modifier.weight(1f)
             )
             NimazIcon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
+                imageVector = NimazIcons.Forward,
                 contentDescription = null,
                 variant = NimazIconVariant.MUTED,
                 modifier = Modifier.padding(start = 8.dp)
@@ -207,7 +207,7 @@ private fun HelpContactCard(onClick: () -> Unit) {
                 )
             }
             NimazIcon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
+                imageVector = NimazIcons.Forward,
                 contentDescription = null,
                 tint = tint
             )

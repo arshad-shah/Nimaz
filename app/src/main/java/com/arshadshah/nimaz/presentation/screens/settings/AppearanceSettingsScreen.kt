@@ -50,10 +50,10 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.navigation.ScreenTags
-import com.arshadshah.nimaz.presentation.components.atoms.NimazDivider
 import com.arshadshah.nimaz.presentation.components.atoms.NimazPatternBackground
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
+import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuDivider
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
 import com.arshadshah.nimaz.presentation.components.molecules.NimazNumberStepper
 import com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsItem
@@ -212,7 +212,7 @@ private fun ThemeSelectionCard(
                     onClick = { onThemeSelected(AppTheme.DARK) },
                 )
             }
-            NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
+            NimazMenuDivider(inset = false)
             NimazSettingsItem(
                 title = stringResource(R.string.theme_follow_device),
                 subtitle = stringResource(R.string.theme_follow_device_subtitle),
@@ -391,14 +391,14 @@ private fun DisplaySettingsCard(
             checked = animationsEnabled,
             onCheckedChange = { onAnimationsToggle() }
         )
-        NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
+        NimazMenuDivider(inset = false)
         NimazSettingsItem(
             title = stringResource(R.string.appearance_haptic),
             subtitle = stringResource(R.string.appearance_haptic_subtitle),
             checked = hapticFeedback,
             onCheckedChange = { onHapticFeedbackToggle() }
         )
-        NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
+        NimazMenuDivider(inset = false)
         NimazSettingsItem(
             title = stringResource(R.string.appearance_24hour),
             subtitle = stringResource(R.string.appearance_24hour_subtitle),
@@ -542,7 +542,7 @@ private fun HomeScreenSettingsCard(
             checked = useHijriPrimary,
             onCheckedChange = { onHijriPrimaryToggle() }
         )
-        NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
+        NimazMenuDivider(inset = false)
         NimazNumberStepper(
             label = stringResource(R.string.hijri_day_offset_label),
             value = hijriDayOffset,

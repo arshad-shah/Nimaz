@@ -28,12 +28,12 @@ import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.AsrCalculation
 import com.arshadshah.nimaz.domain.model.CalculationMethod
 import com.arshadshah.nimaz.domain.model.HighLatitudeRule
-import com.arshadshah.nimaz.presentation.components.atoms.NimazDivider
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
 import com.arshadshah.nimaz.presentation.components.molecules.NimazBanner
 import com.arshadshah.nimaz.presentation.components.molecules.NimazBannerVariant
 import com.arshadshah.nimaz.presentation.components.organisms.NimazListPicker
+import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuDivider
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
 import com.arshadshah.nimaz.presentation.components.molecules.NimazNumberStepper
 import com.arshadshah.nimaz.presentation.components.organisms.NimazPickerItem
@@ -94,7 +94,7 @@ fun PrayerSettingsScreen(
                         value = prayerState.calculationMethod.displayName(),
                         onClick = { showCalculationMethodDialog = true }
                     )
-                    NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                    NimazMenuDivider(inset = false)
                     NimazSettingsItem(
                         icon = Icons.Default.WbSunny,
                         title = stringResource(R.string.asr_calculation),
@@ -104,7 +104,7 @@ fun PrayerSettingsScreen(
                         },
                         onClick = { showAsrMethodDialog = true }
                     )
-                    NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                    NimazMenuDivider(inset = false)
                     NimazSettingsItem(
                         icon = Icons.Default.WbSunny,
                         title = stringResource(R.string.high_latitude_method),
@@ -143,7 +143,7 @@ fun PrayerSettingsScreen(
                             viewModel.onEvent(SettingsEvent.SetPrayerAdjustment("fajr", it))
                         }
                     )
-                    NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                    NimazMenuDivider(inset = false)
                     NimazNumberStepper(
                         label = stringResource(R.string.prayer_sunrise),
                         value = prayerState.sunriseAdjustment,
@@ -151,7 +151,7 @@ fun PrayerSettingsScreen(
                             viewModel.onEvent(SettingsEvent.SetPrayerAdjustment("sunrise", it))
                         }
                     )
-                    NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                    NimazMenuDivider(inset = false)
                     NimazNumberStepper(
                         label = stringResource(R.string.prayer_dhuhr),
                         value = prayerState.dhuhrAdjustment,
@@ -159,7 +159,7 @@ fun PrayerSettingsScreen(
                             viewModel.onEvent(SettingsEvent.SetPrayerAdjustment("dhuhr", it))
                         }
                     )
-                    NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                    NimazMenuDivider(inset = false)
                     NimazNumberStepper(
                         label = stringResource(R.string.prayer_asr),
                         value = prayerState.asrAdjustment,
@@ -167,7 +167,7 @@ fun PrayerSettingsScreen(
                             viewModel.onEvent(SettingsEvent.SetPrayerAdjustment("asr", it))
                         }
                     )
-                    NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                    NimazMenuDivider(inset = false)
                     NimazNumberStepper(
                         label = stringResource(R.string.prayer_maghrib),
                         value = prayerState.maghribAdjustment,
@@ -175,7 +175,7 @@ fun PrayerSettingsScreen(
                             viewModel.onEvent(SettingsEvent.SetPrayerAdjustment("maghrib", it))
                         }
                     )
-                    NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                    NimazMenuDivider(inset = false)
                     NimazNumberStepper(
                         label = stringResource(R.string.prayer_isha),
                         value = prayerState.ishaAdjustment,
@@ -213,7 +213,7 @@ fun PrayerSettingsScreen(
                         },
                         onClick = onNavigateToNotifications
                     )
-                    NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                    NimazMenuDivider(inset = false)
                     NimazSettingsItem(
                         icon = Icons.Default.Schedule,
                         // Reminders are per prayer now; this row reports Fajr's, the same

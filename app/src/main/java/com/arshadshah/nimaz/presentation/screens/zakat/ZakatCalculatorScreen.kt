@@ -19,8 +19,6 @@ import androidx.compose.material.icons.automirrored.filled.ShowChart
 import androidx.compose.material.icons.filled.AccountBalance
 import androidx.compose.material.icons.filled.Business
 import androidx.compose.material.icons.filled.CreditCard
-import androidx.compose.material.icons.filled.ExpandLess
-import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.IosShare
@@ -70,6 +68,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazIconButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconButtonStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconWell
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconWellSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcons
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
@@ -879,8 +878,8 @@ private fun BreakdownCard(
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 NimazIcon(
-                    imageVector = if (expanded) Icons.Filled.ExpandLess
-                    else Icons.Filled.ExpandMore,
+                    imageVector = if (expanded) NimazIcons.Collapse
+                    else NimazIcons.Expand,
                     contentDescription = stringResource(
                         if (expanded) R.string.cd_collapse else R.string.cd_expand
                     ),

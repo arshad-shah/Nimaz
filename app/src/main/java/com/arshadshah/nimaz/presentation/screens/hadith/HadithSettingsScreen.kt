@@ -30,10 +30,10 @@ import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.HadithArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
-import com.arshadshah.nimaz.presentation.components.atoms.NimazDivider
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
+import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuDivider
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
 import com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsItem
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
@@ -112,7 +112,7 @@ fun HadithSettingsScreen(
                         checked = hadithState.showArabic,
                         onCheckedChange = { viewModel.onEvent(SettingsEvent.SetHadithShowArabic(!hadithState.showArabic)) }
                     )
-                    NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                    NimazMenuDivider(inset = false)
                     NimazSettingsItem(
                         title = stringResource(R.string.show_translation),
                         subtitle = stringResource(R.string.show_translation_subtitle),
@@ -125,14 +125,14 @@ fun HadithSettingsScreen(
                             )
                         }
                     )
-                    NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                    NimazMenuDivider(inset = false)
                     NimazSettingsItem(
                         title = stringResource(R.string.hadith_show_grade),
                         subtitle = stringResource(R.string.hadith_show_grade_subtitle),
                         checked = hadithState.showGrade,
                         onCheckedChange = { viewModel.onEvent(SettingsEvent.SetHadithShowGrade(!hadithState.showGrade)) }
                     )
-                    NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                    NimazMenuDivider(inset = false)
                     NimazSettingsItem(
                         title = stringResource(R.string.hadith_show_chain),
                         subtitle = stringResource(R.string.hadith_show_chain_subtitle),

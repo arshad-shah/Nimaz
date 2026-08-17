@@ -119,8 +119,12 @@ The obligations, in short:
    whole-card tap target is `NimazCard(onClick = …)` (or `NimazMenuItem` for list rows), **not** a
    `Modifier.clickable` wrapped around the card — a wrapping `.clickable` paints a **sharp-cornered
    ripple** that ignores the card radius. `.clickable` on *inner* elements (a `Text`, an icon, a
-   sub-row) is fine. For `EventCard`/`WorshipEventCard`, pass `onClick`/`onClickLabel`. See
-   `docs/ARCHITECTURE.md` §8 (the `NimazButton`/`NimazCard` bullets).
+   sub-row) is fine. For `EventCard`/`WorshipEventCard`, pass `onClick`/`onClickLabel`. Rows in a
+   `NimazMenuGroup` are separated with **`NimazMenuDivider()`** (`inset = false` where there is no
+   icon column), never a hand-measured `NimazDivider`; every arrow/chevron comes from
+   **`NimazIcons`** (`Forward` for "this row opens something"), never a per-call-site
+   `ArrowForward`/`ChevronRight`/`KeyboardArrowRight`. See `docs/ARCHITECTURE.md` §8 (the
+   `NimazButton`/`NimazCard`/`NimazMenuDivider`/`NimazIcons` bullets).
 
 ## Verify before finishing
 

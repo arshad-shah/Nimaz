@@ -44,6 +44,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.molecules.NimazBanner
 import com.arshadshah.nimaz.presentation.components.molecules.NimazBannerVariant
 import com.arshadshah.nimaz.presentation.components.molecules.NimazConfirmDialog
+import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuDivider
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuItem
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
@@ -108,6 +109,7 @@ fun NotificationDiagnosticsScreen(
                             )
                         }
                     )
+                    NimazMenuDivider()
                     DiagnosticRow(
                         title = stringResource(R.string.notif_diag_exact_alarms),
                         ok = diagnostics.exactAlarmsAllowed,
@@ -120,6 +122,7 @@ fun NotificationDiagnosticsScreen(
                             )
                         }
                     )
+                    NimazMenuDivider()
                     DiagnosticRow(
                         title = stringResource(R.string.notif_diag_battery),
                         ok = diagnostics.batteryUnrestricted,
