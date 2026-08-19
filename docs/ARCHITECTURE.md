@@ -66,6 +66,10 @@ These are the rules most often broken. Keep this checklist in mind for every cha
    - **A whole card is made tappable with `NimazCard(onClick = …)`, never `Modifier.clickable`
      wrapped around the card** — the latter paints a sharp-cornered ripple that ignores the card's
      radius (see §8, the `NimazCard` bullet). `NimazMenuItem` is the ready-made clickable list row.
+   - **Rows in a `NimazMenuGroup` are separated with `NimazMenuDivider()`, never a hand-measured
+     `NimazDivider`** (`inset = false` between blocks that carry no icon column), and **every
+     arrow/chevron comes from `NimazIcons`** — `Forward` for "this row opens something", never a
+     per-call-site pick between `ArrowForward`, `ChevronRight` and `KeyboardArrowRight`. Both in §8.
    > **Exception (Location screen only):** country flags on the Location screen
    > (`LocationScreen`, curated cities in `LocationCatalog.kt`) are rendered as emoji.
    > This is the single sanctioned emoji use in the app; no other emoji are permitted.
@@ -1066,6 +1070,29 @@ with no label and a touch target under 48dp fail the lane we already run. It can
       the twelve you are not (this is what the translation picker shipped as). `subtitleStyle`
       exists for the same rows, whose subtitle is often a **non-Latin endonym** — see the
       typography bullet below.
+    - the line between two rows of a `NimazMenuGroup` is **`NimazMenuDivider()`**
+      (`components/molecules/NimazMenuItem.kt`), **never** a hand-written `NimazDivider` with its
+      own padding and alpha. The same hairline had been spelled out at ~55 call sites in three
+      different ways — `NimazDivider(Modifier.padding(start = 56.dp), alpha = 0.5f)` in More and
+      Settings, `NimazDivider(Modifier.padding(horizontal = 16.dp))` at full strength in the
+      Qur'an/prayer settings, and nothing at all on the Qur'an home — so four rows that behave
+      identically were separated three different ways or not separated at all. Two shapes, both
+      measured from `NimazMenuDefaults`: the default `inset = true` starts the line past the 40dp
+      icon well (`RowDividerInset`, 56dp) for a group of icon rows, and `inset = false` insets it
+      symmetrically (`SectionDividerInset`, 16dp) between blocks that have no icon column — a
+      slider, a dropdown, a section of prose. A group of one row takes none; a group of two or
+      more takes one between each pair, including where a row is drawn conditionally (guard the
+      divider on what precedes it, as `SurahInfoSheet` does).
+    - **every directional glyph comes from `NimazIcons`** (`components/atoms/NimazIcons.kt`) —
+      `Forward` (row disclosure, and the rotated expander chevron), `Back`, `Previous`/`Next`
+      (stepping a sequence), `Expand`/`Collapse` — **never** a `Icons.*.ArrowForward` /
+      `ChevronRight` / `ArrowForwardIos` / `KeyboardArrowRight` picked per call site. "This row
+      opens something" used to be drawn four ways: `ArrowForward` on the Qur'an home rows and the
+      browse jump card, `KeyboardArrowRight` on every settings row, `ChevronRight` on the prayer
+      card, `ArrowForwardIos` in Help — so the same affordance on two screens did not look like
+      the same affordance. All the reading-order glyphs are auto-mirrored, so an RTL locale flips
+      them without a call site knowing. Prefer `NimazNavArrowButton` over drawing `Previous`/`Next`
+      directly.
     - an on/off toggle is `NimazSwitch(checked, onCheckedChange, variant = …)`
       (`components/atoms/NimazSwitch.kt`), **not** a raw Material 3 `Switch`. It wraps Material's
       `Switch` (keeping the drag gesture, `Role.Switch` semantics and thumb animation) and bakes in

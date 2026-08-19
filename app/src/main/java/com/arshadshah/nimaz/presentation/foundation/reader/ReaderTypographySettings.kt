@@ -7,8 +7,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.presentation.components.atoms.NimazDivider
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
+import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuDivider
 import com.arshadshah.nimaz.presentation.theme.QuranArabicFont
 
 /**
@@ -52,7 +52,7 @@ fun LazyListScope.readerTypographySettings(
                 contentDescription = stringResource(R.string.arabic_font_size)
             )
 
-            NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
+            NimazMenuDivider(inset = false)
 
             Column(
                 modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 14.dp)

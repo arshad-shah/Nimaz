@@ -35,7 +35,6 @@ import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.ContentCopy
-import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -77,6 +76,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcons
 import com.arshadshah.nimaz.presentation.components.atoms.NimazPager
 import com.arshadshah.nimaz.presentation.components.atoms.NimazPillActionButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
@@ -385,7 +385,7 @@ private fun ChainOfNarrationSection(
                 color = MaterialTheme.colorScheme.onSurface
             )
             NimazIcon(
-                imageVector = Icons.Default.KeyboardArrowDown,
+                imageVector = NimazIcons.Expand,
                 contentDescription = null,
                 variant = NimazIconVariant.PRIMARY,
                 modifier = Modifier.rotate(rotation)

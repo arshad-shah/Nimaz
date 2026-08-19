@@ -57,12 +57,12 @@ import com.arshadshah.nimaz.core.util.WorshipReminderContent
 import com.arshadshah.nimaz.core.util.formatCurrency
 import com.arshadshah.nimaz.domain.model.PinnedShortcut
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
-import com.arshadshah.nimaz.presentation.components.atoms.NimazDivider
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconButtonSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
+import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuDivider
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuItem
 import com.arshadshah.nimaz.presentation.components.organisms.NimazTopAppBar
@@ -203,14 +203,14 @@ fun MoreMenuScreen(
                         icon = Icons.Default.Schedule,
                         onClick = onNavigateToPrayerTracker
                     )
-                    NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
+                    NimazMenuDivider()
                     NimazMenuItem(
                         title = stringResource(R.string.fasting),
                         subtitle = MoreSubtitles.fasting(state.pendingMakeupFasts).resolve(),
                         icon = Icons.Default.Fastfood,
                         onClick = onNavigateToFasting
                     )
-                    NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
+                    NimazMenuDivider()
                     NimazMenuItem(
                         title = stringResource(R.string.night_worship_title),
                         subtitle = MoreSubtitles.nightWorship(
@@ -220,7 +220,7 @@ fun MoreMenuScreen(
                         icon = Icons.Default.Bedtime,
                         onClick = onNavigateToNightWorship
                     )
-                    NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
+                    NimazMenuDivider()
                     NimazMenuItem(
                         title = stringResource(R.string.khatam_quran),
                         subtitle = MoreSubtitles.khatam(
@@ -248,7 +248,7 @@ fun MoreMenuScreen(
                         icon = Icons.Default.Abc,
                         onClick = onNavigateToQaida
                     )
-                    NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
+                    NimazMenuDivider()
                     // No subtitle from here down: these are reference collections with nothing
                     // true to report about them. Restating the title is what was removed.
                     // One row for what used to be three — "Allah's 99 Names", "Prophet's 99
@@ -260,19 +260,19 @@ fun MoreMenuScreen(
                         icon = Icons.Default.AutoAwesome,
                         onClick = onNavigateToNames
                     )
-                    NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
+                    NimazMenuDivider()
                     NimazMenuItem(
                         title = stringResource(R.string.hadith),
                         icon = Icons.Default.FormatQuote,
                         onClick = onNavigateToHadith
                     )
-                    NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
+                    NimazMenuDivider()
                     NimazMenuItem(
                         title = stringResource(R.string.duas),
                         icon = ImageVector.vectorResource(R.drawable.ic_dua),
                         onClick = onNavigateToDuas
                     )
-                    NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
+                    NimazMenuDivider()
                     NimazMenuItem(
                         title = stringResource(R.string.tafseer),
                         icon = Icons.AutoMirrored.Filled.Article,
@@ -293,19 +293,19 @@ fun MoreMenuScreen(
                         icon = Icons.Default.CalendarMonth,
                         onClick = onNavigateToCalendar
                     )
-                    NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
+                    NimazMenuDivider()
                     NimazMenuItem(
                         title = stringResource(R.string.prayer_times),
                         icon = Icons.Default.Mosque,
                         onClick = onNavigateToPrayerTimes
                     )
-                    NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
+                    NimazMenuDivider()
                     NimazMenuItem(
                         title = stringResource(R.string.monthly_prayer_times),
                         icon = Icons.Default.CalendarViewMonth,
                         onClick = onNavigateToMonthlyPrayerTimes
                     )
-                    NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
+                    NimazMenuDivider()
                     NimazMenuItem(
                         title = stringResource(R.string.zakat),
                         subtitle = state.zakatSubtitle(),
@@ -326,19 +326,19 @@ fun MoreMenuScreen(
                         icon = Icons.Default.Info,
                         onClick = onNavigateToAbout
                     )
-                    NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
+                    NimazMenuDivider()
                     NimazMenuItem(
                         title = stringResource(R.string.help_support),
                         icon = Icons.AutoMirrored.Filled.Help,
                         onClick = onNavigateToHelp
                     )
-                    NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
+                    NimazMenuDivider()
                     NimazMenuItem(
                         title = stringResource(R.string.share_app),
                         icon = Icons.Default.Share,
                         onClick = onShareApp
                     )
-                    NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
+                    NimazMenuDivider()
                     NimazMenuItem(
                         title = stringResource(R.string.rate_us),
                         icon = Icons.Default.Star,

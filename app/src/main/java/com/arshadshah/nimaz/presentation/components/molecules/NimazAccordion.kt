@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.HelpOutline
-import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -36,6 +35,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconWell
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconWellSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcons
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSwitch
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
@@ -159,7 +159,7 @@ fun NimazAccordion(
                     Spacer(modifier = Modifier.width(4.dp))
                 }
                 NimazIcon(
-                    imageVector = Icons.Default.ExpandMore,
+                    imageVector = NimazIcons.Expand,
                     contentDescription = null,
                     variant = NimazIconVariant.MUTED,
                     modifier = Modifier.rotate(chevronRotation)

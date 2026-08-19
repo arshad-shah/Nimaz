@@ -15,6 +15,7 @@ import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.PinnedShortcut
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCheckbox
 import com.arshadshah.nimaz.presentation.components.molecules.NimazBottomSheet
+import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuDivider
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuItem
 
@@ -53,7 +54,8 @@ fun PinnedShortcutsSheet(
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             NimazMenuGroup {
-                PinnedShortcut.entries.forEach { shortcut ->
+                PinnedShortcut.entries.forEachIndexed { index, shortcut ->
+                    if (index > 0) NimazMenuDivider(inset = false)
                     val isPinned = shortcut in pinned
                     val toggle = {
                         onPinnedChange(

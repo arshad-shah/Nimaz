@@ -196,6 +196,9 @@ fun SurahInfoSheet(
                         )
                     }
                     if (passageCount > 0) {
+                        // Guarded by what precedes it rather than drawn unconditionally: a row
+                        // that is the first one present has nothing above it to divide from.
+                        if (sectionCount > 0) NimazMenuDivider()
                         NimazMenuItem(
                             title = stringResource(R.string.surah_info_passages),
                             subtitle = pluralStringResource(
@@ -209,6 +212,7 @@ fun SurahInfoSheet(
                         )
                     }
                     if (subjectCount > 0) {
+                        if (sectionCount > 0 || passageCount > 0) NimazMenuDivider()
                         NimazMenuItem(
                             title = stringResource(R.string.surah_info_subjects),
                             subtitle = stringResource(

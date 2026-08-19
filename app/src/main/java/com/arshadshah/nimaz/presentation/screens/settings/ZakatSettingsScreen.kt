@@ -38,11 +38,11 @@ import com.arshadshah.nimaz.domain.model.ZakatDefaults
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
-import com.arshadshah.nimaz.presentation.components.atoms.NimazDivider
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
 import com.arshadshah.nimaz.presentation.components.molecules.NimazAmountField
 import com.arshadshah.nimaz.presentation.components.organisms.NimazListPicker
+import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuDivider
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
 import com.arshadshah.nimaz.presentation.components.organisms.NimazPickerItem
 import com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsItem
@@ -178,7 +178,7 @@ fun ZakatSettingsScreen(
                             viewModel.onEvent(ZakatSettingsEvent.SetGoldPrice(it))
                         },
                     )
-                    NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                    NimazMenuDivider(inset = false)
                     PriceRow(
                         label = stringResource(R.string.zakat_silver_price_label),
                         price = state.silverPricePerGram,

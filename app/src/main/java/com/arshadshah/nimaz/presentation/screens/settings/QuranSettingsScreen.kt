@@ -46,12 +46,12 @@ import com.arshadshah.nimaz.domain.model.QuranTranslation
 import com.arshadshah.nimaz.domain.model.TranslationLanguage
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
-import com.arshadshah.nimaz.presentation.components.atoms.NimazDivider
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownField
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownItem
+import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuDivider
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
 import com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsItem
 import com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsSlider
@@ -214,7 +214,7 @@ fun QuranSettingsScreen(
                         )
                     }
 
-                    NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                    NimazMenuDivider(inset = false)
 
                     NimazSettingsSlider(
                         title = stringResource(R.string.arabic_font_size),
@@ -253,7 +253,7 @@ fun QuranSettingsScreen(
                         onClick = onNavigateToSelectTranslation,
                         showArrow = true
                     )
-                    NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                    NimazMenuDivider(inset = false)
                     NimazSettingsItem(
                         title = stringResource(R.string.show_translation),
                         subtitle = stringResource(R.string.show_translation_subtitle),
@@ -264,7 +264,7 @@ fun QuranSettingsScreen(
                             )
                         }
                     )
-                    NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                    NimazMenuDivider(inset = false)
                     // The Quran reader has always read this preference (QuranViewModel ->
                     // AyahItem.fontSize) but no screen ever offered a control for it, unlike
                     // the Dua and Hadith settings screens — so Quran translation size was
@@ -283,7 +283,7 @@ fun QuranSettingsScreen(
                         enabled = quranState.showTranslation,
                         contentDescription = stringResource(R.string.translation_font_size)
                     )
-                    NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                    NimazMenuDivider(inset = false)
                     NimazSettingsItem(
                         title = stringResource(R.string.show_transliteration),
                         subtitle = stringResource(R.string.show_transliteration_subtitle),
@@ -314,7 +314,7 @@ fun QuranSettingsScreen(
                             viewModel.onEvent(SettingsEvent.SetShowTajweed(!quranState.showTajweed))
                         }
                     )
-                    NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                    NimazMenuDivider(inset = false)
                     // Colour-blind-friendly mode: underline rule spans so they are marked by
                     // a non-hue channel too (#294).
                     NimazSettingsItem(
@@ -328,7 +328,7 @@ fun QuranSettingsScreen(
                             )
                         }
                     )
-                    NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                    NimazMenuDivider(inset = false)
                     // Reachable regardless of script so users can learn what the colours
                     // mean even on a layout that cannot show them (#294).
                     NimazSettingsItem(
@@ -355,7 +355,7 @@ fun QuranSettingsScreen(
                         onClick = onNavigateToSelectReciter,
                         showArrow = true
                     )
-                    NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                    NimazMenuDivider(inset = false)
                     // Under Audio, where it belongs. Called "Continuous Reading" and filed
                     // under Reading behaviour, it read as a twin of the player's "Follow
                     // along" — which is the *scroll*. This one is the playlist: whether the

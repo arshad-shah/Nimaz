@@ -52,6 +52,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.molecules.BookmarkCard
 import com.arshadshah.nimaz.presentation.components.molecules.ContinueReadingCard
+import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuDivider
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuItem
 import com.arshadshah.nimaz.presentation.components.molecules.QuranRecommendedSurahs
@@ -289,6 +290,7 @@ private fun Destinations(
             icon = Icons.AutoMirrored.Filled.MenuBook,
             onClick = onNavigateToBrowse,
         )
+        NimazMenuDivider()
         NimazMenuItem(
             title = stringResource(R.string.saved),
             subtitle = stringResource(R.string.quran_home_destination_saved_subtitle),
@@ -301,6 +303,7 @@ private fun Destinations(
             },
         )
         if (state.hasThematicContent) {
+            NimazMenuDivider()
             NimazMenuItem(
                 title = stringResource(R.string.quran_home_browse_subjects),
                 subtitle = stringResource(R.string.quran_home_browse_subjects_subtitle),
@@ -311,6 +314,7 @@ private fun Destinations(
         val khatamPercent = state.activeKhatam?.let {
             (it.progressPercent * 100).toInt().coerceIn(0, 100)
         }
+        NimazMenuDivider()
         NimazMenuItem(
             title = stringResource(R.string.khatam),
             subtitle = stringResource(R.string.quran_home_destination_khatam_subtitle),

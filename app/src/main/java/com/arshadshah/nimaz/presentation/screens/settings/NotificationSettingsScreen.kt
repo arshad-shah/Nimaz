@@ -35,6 +35,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.molecules.NimazBanner
 import com.arshadshah.nimaz.presentation.components.molecules.NimazBannerVariant
+import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuDivider
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
 import com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsItem
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
@@ -140,6 +141,7 @@ fun NotificationSettingsScreen(
                             onClick = onNavigateToPrayers,
                             showArrow = true
                         )
+                        NimazMenuDivider(inset = false)
                         NimazSettingsItem(
                             title = stringResource(R.string.notif_hub_sound_title),
                             subtitle = soundSubtitle(notificationState),
@@ -161,6 +163,7 @@ fun NotificationSettingsScreen(
                             onClick = onNavigateToWorshipReminders,
                             showArrow = true
                         )
+                        NimazMenuDivider(inset = false)
                         NimazSettingsItem(
                             title = stringResource(R.string.notif_hub_weekly_title),
                             subtitle = weeklySubtitle(notificationState),
