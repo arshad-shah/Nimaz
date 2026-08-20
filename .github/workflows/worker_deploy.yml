@@ -18,6 +18,7 @@ jobs:
   test:
     name: Typecheck & test
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
 
@@ -44,6 +45,7 @@ jobs:
     # must never publish unreviewed code to production.
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
 
@@ -81,6 +83,7 @@ jobs:
     needs: deploy
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     # No checkout here, so the workflow-level `working-directory: worker`
     # default would point at a nonexistent dir — run from the workspace root.
     defaults:

@@ -144,8 +144,9 @@ all four gates stay green — a branch that goes out clean locally and red on th
 touched navigation, build `androidTest` too.
 
 **`lintDebug` is a real gate, not an optional extra.** `fastlane/Fastfile`'s `test` lane runs
-`gradle test` *and* `gradle lint`, so every PR check fails on a lint **error** — and lint catches a
-class of defect the other three cannot: `LocalContextGetResourceValueCall` (a `context.getString`
+`:app:testDebugUnitTest` *and* `:app:lintDebug` — the same two tasks listed above — so every PR
+check fails on a lint **error**, and lint catches a class of defect the other three cannot:
+`LocalContextGetResourceValueCall` (a `context.getString`
 inside a composable, which does not re-resolve across a configuration change) and
 `MissingTranslation` (a new string absent from a shipped locale). Neither breaks a build or a test.
 It is slow, and running it is still cheaper than a red `dev`.

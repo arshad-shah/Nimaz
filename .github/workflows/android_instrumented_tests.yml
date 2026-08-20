@@ -11,13 +11,40 @@ name: Android Instrumentation Tests (emulator.wtf)
 #
 # The debug build needs no secrets: google-services.json is only required for the
 # release/deploy lane, and the app's Firebase calls are guarded to no-op without it.
-# The emulator.wtf step requires the EW_API_TOKEN repo secret; if it is missing the
-# workflow still builds + uploads the APKs and simply skips the cloud test run (with a
-# warning) instead of failing.
+# The emulator.wtf step requires the EW_API_TOKEN repo secret. When the run *could* have
+# had it and does not, the lane fails: a missing token used to downgrade "instrumented
+# tests run on every PR" into "the APKs compiled" behind a green check, which is worse than
+# not having the lane at all. Forks and dependabot cannot be given the secret, so those
+# still skip with a warning — see the token step below.
+#
+# Paths are an allowlist and fail closed: a worker-only or docs-only change no longer
+# builds two APKs and books cloud device time for code it did not touch. The two lists are
+# duplicated rather than shared via a YAML anchor — GitHub Actions does not support
+# anchors/aliases in workflow files. Keep them in sync.
 on:
   push:
     branches: [ dev ]
+    paths:
+      - 'app/**'
+      - 'gradle/**'
+      - 'gradlew'
+      - 'gradlew.bat'
+      - 'build.gradle.kts'
+      - 'settings.gradle.kts'
+      - 'gradle.properties'
+      - 'data.lock.json'
+      - '.github/workflows/android_instrumented_tests.yml'
   pull_request:
+    paths:
+      - 'app/**'
+      - 'gradle/**'
+      - 'gradlew'
+      - 'gradlew.bat'
+      - 'build.gradle.kts'
+      - 'settings.gradle.kts'
+      - 'gradle.properties'
+      - 'data.lock.json'
+      - '.github/workflows/android_instrumented_tests.yml'
 
 concurrency:
   group: ew-instrumentation-${{ github.ref }}
@@ -32,6 +59,8 @@ jobs:
   instrumentation-tests:
     name: emulator.wtf instrumentation tests
     runs-on: ubuntu-latest
+    # The emulator.wtf step has its own 20m cap, but the Gradle build before it had none.
+    timeout-minutes: 45
     steps:
       # The content artifact lives in a private repository. Mint a short-lived
       # installation token for it rather than carrying a long-lived PAT: the token
@@ -94,20 +123,37 @@ jobs:
             app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
           if-no-files-found: error
 
-      # ── Gate on the API token so the lane never hard-fails when it's unset ───
-      # (the `secrets` context can't be used directly in an `if:`, so resolve it
-      # into a step output here; the value is masked in logs).
+      # ── The token is required, except where GitHub cannot supply it ──────────
+      # (the `secrets` context can't be used directly in an `if:`, so resolve it into a step
+      # output here; the value is masked in logs).
+      #
+      # A missing token used to skip the cloud run with a warning and leave the job green.
+      # That is the failure mode where the lane looks like it is guarding every PR while
+      # actually asserting nothing but "the APKs compiled" — and a warning annotation is not
+      # something anyone reads on a passing run. So: fail.
+      #
+      # The exception is a run that could never have had the secret. GitHub withholds repo
+      # secrets from fork PRs and gives Dependabot a separate store, so those runs are not
+      # misconfigured and there is nothing their author can do. They skip, loudly, and the
+      # build+upload above still proves the androidTest source set compiles.
       - name: Check emulator.wtf token
         id: ew
         env:
           EW_API_TOKEN: ${{ secrets.EW_API_TOKEN }}
+          IS_FORK: ${{ github.event.pull_request.head.repo.fork || false }}
+          IS_DEPENDABOT: ${{ github.actor == 'dependabot[bot]' }}
         run: |
           if [ -n "$EW_API_TOKEN" ]; then
             echo "enabled=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "enabled=false" >> "$GITHUB_OUTPUT"
-            echo "::warning title=emulator.wtf skipped::EW_API_TOKEN secret is not set. Add it in repo Settings → Secrets to run the cloud instrumentation tests."
+            exit 0
           fi
+          if [ "$IS_FORK" = "true" ] || [ "$IS_DEPENDABOT" = "true" ]; then
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "::warning title=emulator.wtf skipped::EW_API_TOKEN is not available to fork or Dependabot pull requests. The APKs were built and uploaded, but the instrumentation suite did not run."
+            exit 0
+          fi
+          echo "::error title=emulator.wtf token missing::EW_API_TOKEN is not set, so the instrumentation suite cannot run. This lane is the only thing running the androidTest suite, so it fails rather than passing without it. Add the secret in Settings → Secrets and variables → Actions."
+          exit 1
 
       # ── Route the built APKs to emulator.wtf and run the suite ───────────────
       - name: Run instrumentation tests on emulator.wtf

@@ -1,12 +1,45 @@
 name: Android PR Checks
 
+# An allowlist, not a `paths-ignore`: it fails closed. A new top-level directory gets no
+# Gradle build until someone adds it here, which is the safe direction. Before this filter
+# existed, a dependabot bump touching only worker/package.json ran the full test + lint +
+# coverage lane (PR #520 is exactly that); worker/ has its own workflow, docs/ has
+# docs_check.yml, and the theme files have tajweed_contrast_check.yml.
 on:
   pull_request:
     branches: [ master, dev ]
+    paths:
+      - 'app/**'
+      - 'baselineprofile/**'
+      - 'gradle/**'
+      - 'gradlew'
+      - 'gradlew.bat'
+      - 'build.gradle.kts'
+      - 'settings.gradle.kts'
+      - 'gradle.properties'
+      # The lane runs through fastlane and checks the version bump, so its own tooling counts.
+      - 'fastlane/**'
+      - 'Gemfile'
+      - 'Gemfile.lock'
+      # Invoked by the coverage step below.
+      - 'scripts/coverage_summary.py'
+      # A new content artifact changes what the app builds against.
+      - 'data.lock.json'
+      - '.github/workflows/pr_checks.yml'
+
+# A new push to the PR supersedes the old run. Without this every push to an open PR ran the
+# full ~13-minute lane to completion: one branch pushed nine times in four and a half hours and
+# paid for all nine. The sampled history contains zero cancelled runs, which is what a missing
+# guard looks like from the outside.
+concurrency:
+  group: pr-checks-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
 
 jobs:
   check:
     runs-on: ubuntu-latest
+    # The lane's median is ~13 minutes. Without a cap a hang bills toward the 6-hour default.
+    timeout-minutes: 45
     # pull-requests: write is for the sticky coverage comment below. Without it the
     # comment step fails on a repository whose default token is read-only.
     permissions:
@@ -44,6 +77,14 @@ jobs:
         with:
           distribution: temurin
           java-version: "21"
+
+      # This lane had no Gradle caching at all, which made `org.gradle.caching=true` in
+      # gradle.properties a no-op here: the local build cache lives on the runner's disk and
+      # the disk is destroyed when the job ends. Every PR therefore resolved the full
+      # dependency graph and rebuilt from zero. android_instrumented_tests.yml has always done
+      # this correctly; this is the same step.
+      - name: Setup Gradle (with cache)
+        uses: gradle/actions/setup-gradle@v4
 
       - name: Set up ruby env
         uses: ruby/setup-ruby@v1

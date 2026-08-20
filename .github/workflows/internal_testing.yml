@@ -52,6 +52,7 @@ concurrency:
 jobs:
   internal:
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     # workflow_dispatch always runs. A push only runs when it explicitly opts in with [deploy],
     # so ordinary commits on a feature branch never burn a Play version code. [skip ci] (used by
     # the bump commit below) is always excluded, so this cannot re-trigger itself.
