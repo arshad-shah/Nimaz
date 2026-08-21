@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.core.monitoring
 
+import com.arshadshah.nimaz.core.monitoring.RecordingTelemetry
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CancellationException
 import org.junit.Test

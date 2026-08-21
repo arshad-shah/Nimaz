@@ -24,7 +24,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.core.util.formatFullDate
+import com.arshadshah.nimaz.core.common.formatFullDate
 import com.arshadshah.nimaz.domain.model.PrayerName
 import com.arshadshah.nimaz.domain.model.PrayerRecord
 import com.arshadshah.nimaz.domain.model.PrayerStatus

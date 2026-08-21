@@ -14,6 +14,7 @@ import android.text.TextPaint
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.withTranslation
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.common.formatMediumDate
 import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.domain.model.Ayah
 import com.arshadshah.nimaz.domain.model.TafseerHighlight

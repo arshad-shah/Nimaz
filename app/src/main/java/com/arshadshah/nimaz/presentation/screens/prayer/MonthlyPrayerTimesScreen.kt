@@ -59,9 +59,9 @@ import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.core.share.ContentShareManager
 import com.arshadshah.nimaz.domain.calendar.HijriDateCalculator
 import com.arshadshah.nimaz.core.util.PrayerTimesPdfExporter
-import com.arshadshah.nimaz.core.util.formatClockTime
-import com.arshadshah.nimaz.core.util.formatFastLength
-import com.arshadshah.nimaz.core.util.formatMonthYear
+import com.arshadshah.nimaz.core.common.formatClockTime
+import com.arshadshah.nimaz.core.common.formatFastLength
+import com.arshadshah.nimaz.core.common.formatMonthYear
 import com.arshadshah.nimaz.domain.model.DayPrayerTimes
 import com.arshadshah.nimaz.domain.model.IslamicEvent
 import com.arshadshah.nimaz.domain.model.IslamicEventType

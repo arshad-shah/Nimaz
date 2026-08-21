@@ -37,7 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.core.util.formatCurrency
+import com.arshadshah.nimaz.core.common.formatCurrency
 import com.arshadshah.nimaz.domain.model.ZakatHistoryEntry
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeDefaults

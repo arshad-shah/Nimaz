@@ -2,7 +2,7 @@ package com.arshadshah.nimaz.data.repository
 
 import com.arshadshah.nimaz.domain.prayer.PrayerTimeCalculator
 import com.arshadshah.nimaz.core.util.mapItems
-import com.arshadshah.nimaz.core.util.toUtcMidnightMillis
+import com.arshadshah.nimaz.core.common.toUtcMidnightMillis
 import com.arshadshah.nimaz.data.local.database.dao.LocationDao
 import com.arshadshah.nimaz.data.local.database.dao.PrayerDao
 import com.arshadshah.nimaz.data.local.database.entity.LocationEntity

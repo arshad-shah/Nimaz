@@ -1,4 +1,4 @@
-package com.arshadshah.nimaz.core.util
+package com.arshadshah.nimaz.core.common
 
 import com.arshadshah.nimaz.domain.worship.DayWorshipTimes
 import kotlin.time.Duration

@@ -35,7 +35,7 @@ import com.arshadshah.nimaz.widget.core.WidgetLoading
 import com.arshadshah.nimaz.widget.core.WidgetPalette
 import com.arshadshah.nimaz.widget.core.WidgetWorkReceiver
 import com.arshadshah.nimaz.core.monitoring.CrashReporter
-import com.arshadshah.nimaz.core.util.toUtcMidnightMillis
+import com.arshadshah.nimaz.core.common.toUtcMidnightMillis
 import com.arshadshah.nimaz.domain.model.PrayerType
 import com.arshadshah.nimaz.widget.WidgetEntryPoint
 import com.arshadshah.nimaz.widget.core.WidgetCard

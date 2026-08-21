@@ -48,7 +48,7 @@ import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.navigation.ScreenTags
 import com.arshadshah.nimaz.core.share.ContentShareManager
 import com.arshadshah.nimaz.core.share.Shareables
-import com.arshadshah.nimaz.core.util.formatGrouped
+import com.arshadshah.nimaz.core.common.formatGrouped
 import com.arshadshah.nimaz.domain.model.Hadith
 import com.arshadshah.nimaz.domain.model.HadithBook
 import com.arshadshah.nimaz.domain.model.HadithGrade

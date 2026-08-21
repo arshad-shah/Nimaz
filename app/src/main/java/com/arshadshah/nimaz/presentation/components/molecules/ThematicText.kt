@@ -22,8 +22,8 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.arshadshah.nimaz.core.util.ThematicLink
-import com.arshadshah.nimaz.core.util.ThematicMarkup
+import com.arshadshah.nimaz.core.common.ThematicLink
+import com.arshadshah.nimaz.core.common.ThematicMarkup
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**

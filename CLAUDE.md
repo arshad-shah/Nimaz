@@ -4,11 +4,20 @@ Nimaz is an offline-first Android Islamic companion app: **Kotlin + Jetpack Comp
 **Clean Architecture** (`presentation → domain → data`) with **MVVM + UDF**, Hilt DI, Room,
 DataStore, type-safe Navigation Compose.
 
-**Mid-migration to Gradle modules (#551).** `domain/` now lives in **`:core:domain`**, a pure JVM
-module under `core/domain/src/{main,test,testFixtures}/kotlin/` — no Android SDK on its classpath,
-so `import android.*` there is a compile error and `androidFreeClasspath` (wired into `check`)
-fails on any `androidx` artifact someone adds later. Everything else is still `:app` and moves out
-over the remaining PRs. A move does **not** change package names, so imports read the same either
+**Mid-migration to Gradle modules (#551).** Two modules are out of `:app` so far:
+
+- **`:core:domain`** (`core/domain/`) — the whole domain layer, a pure JVM module. No Android SDK
+  on its classpath, so `import android.*` there is a compile error, and `androidFreeClasspath`
+  (wired into `check`) fails on any `androidx` artifact someone adds later.
+- **`:core:common`** (`core/common/`) — `core/common` formatting helpers, `core/monitoring` and
+  `core/text`. An Android library, and **below `:core:ui`, so nothing in it may reference `R`** —
+  a string resolved outside a composable goes through `StringProvider`. `moduleBoundary` (wired
+  into `check` on every Android module) fails if a `:core:*` module depends on `:app` or a
+  `:feature:*`.
+
+Everything else is still `:app` and moves out over the remaining PRs. Files in
+`app/…/core/util/` whose destination module does not exist yet are staying there **on purpose** —
+see `docs/ARCHITECTURE.md` §2 for which goes where. A move does **not** change package names, so imports read the same either
 side of a module boundary. Two consequences worth knowing before you edit:
 
 - **Kotlin will not smart-cast a `val` from another module.** `if (ayah.translation != null)
@@ -143,6 +152,7 @@ The obligations, in short:
 ./gradlew :app:compileDebugKotlin     # runs KSP → validates Hilt + Room wiring
 ./gradlew :app:testDebugUnitTest
 ./gradlew :core:domain:check          # domain tests + androidFreeClasspath — seconds, no Android
+./gradlew :core:common:check          # module tests + moduleBoundary + its own lint
 ./gradlew :app:jacocoTestReport --dry-run   # see below — seconds, and catches a whole class of red CI
 ./gradlew :app:lintDebug              # SLOW (~10 min) and CI-blocking — do not skip it
 python3 scripts/check_docs.py         # docs still describe the code (no toolchain needed)

@@ -231,8 +231,9 @@ That applies to every library module too.
         ├─ :core:data        19 repository impls + mappers
         ├─ :core:database    both Room DBs, 15 entities, 22 DAOs, migrations, schemas/
         ├─ :core:datastore   PreferencesDataStore + the 11 SettingsSeams impls
-        ├─ :core:common      what is left of core/util after PR 5 took the five
-        │                    files domain imports, plus monitoring, share, text
+        ├─ :core:common      seven formatting helpers left from core/util, plus
+        │                    monitoring and text. NOT share — it renders bitmaps
+        │                    and uses R, so it belongs in :core:ui
         └─ :core:domain      models, repository interfaces, 33 use-case files,
                              domain/search, and the four pure calculators domain
                              imports: time, calendar, worship, prayer   ← pure JVM
@@ -300,7 +301,17 @@ own module") and is the model to copy.
 
 Finish the `core/util` triage (§3.6). Phase 1 already took the five files domain imports; split
 what remains between genuinely shared helpers in `:core:common` and files pushed down to their
-real owners. Then:
+real owners.
+
+**Most of the triage resolves to "not yet".** At this point `:core:ui`, `:core:data` and every
+feature module are still hypothetical, so twelve of the nineteen remaining files have a decided
+destination and no module to go to. They stay in `:app` **with the destination recorded**, which
+has to be said loudly in the PR or it reads as exactly the "file that quietly stayed behind"
+failure this document warns about. The same will be true of every triage in later phases.
+
+One constraint that outlives this phase: **anything below `:core:ui` cannot reference `R`**, and
+nine `core/` files did. That is what `core/text/StringProvider` is for, and it is now the only
+way a module below `:core:ui` resolves a string outside a composable. Then:
 
 - `:core:database` — both `@Database` classes, entities, DAOs, migrations, **and the `schemas/`
   directory**; the `room.schemaLocation` KSP arg and the `androidTest` `assets.srcDir(schemas)`

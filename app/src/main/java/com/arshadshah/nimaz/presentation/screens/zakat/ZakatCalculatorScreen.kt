@@ -57,8 +57,8 @@ import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.share.ContentShareManager
 import com.arshadshah.nimaz.core.share.Shareables
 import com.arshadshah.nimaz.domain.calendar.HijriDateCalculator
-import com.arshadshah.nimaz.core.util.currencySymbolOf
-import com.arshadshah.nimaz.core.util.formatCurrency
+import com.arshadshah.nimaz.core.common.currencySymbolOf
+import com.arshadshah.nimaz.core.common.formatCurrency
 import com.arshadshah.nimaz.domain.model.NisabType
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard

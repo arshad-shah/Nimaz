@@ -1,4 +1,4 @@
-package com.arshadshah.nimaz.core.util
+package com.arshadshah.nimaz.core.common
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull

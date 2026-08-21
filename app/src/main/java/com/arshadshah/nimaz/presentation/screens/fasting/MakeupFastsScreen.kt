@@ -34,7 +34,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.core.util.formatMediumDate
+import com.arshadshah.nimaz.core.common.formatMediumDate
 import com.arshadshah.nimaz.domain.model.MakeupFast
 import com.arshadshah.nimaz.domain.model.MakeupFastStatus
 import com.arshadshah.nimaz.presentation.components.atoms.GradientCard

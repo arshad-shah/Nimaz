@@ -4,7 +4,7 @@ package com.arshadshah.nimaz.presentation.viewmodel.quran
 
 import java.time.LocalDate
 import com.arshadshah.nimaz.domain.time.FakeTodayProvider
-import com.arshadshah.nimaz.presentation.viewmodel.FakeStringProvider
+import com.arshadshah.nimaz.core.text.FakeStringProvider
 import android.content.Context
 import com.arshadshah.nimaz.core.monitoring.RecordingTelemetry
 import com.arshadshah.nimaz.data.audio.QuranAudioManager

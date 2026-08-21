@@ -54,7 +54,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.navigation.ScreenTags
 import com.arshadshah.nimaz.core.util.WorshipReminderContent
-import com.arshadshah.nimaz.core.util.formatCurrency
+import com.arshadshah.nimaz.core.common.formatCurrency
 import com.arshadshah.nimaz.domain.model.PinnedShortcut
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon

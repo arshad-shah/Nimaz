@@ -1,4 +1,4 @@
-package com.arshadshah.nimaz.core.util
+package com.arshadshah.nimaz.core.common
 
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
@@ -153,7 +153,13 @@ class DateTimeFormattingTest {
     fun `the shipped locales are the ones the app has resources for`() {
         // res/values-de, -fr, -id, -ms, -tr, plus the default. If a translation is added
         // without extending this list, the new language is not covered by the cases above.
-        val resourceDirs = java.io.File("src/main/res")
+        //
+        // The path reaches out of this module on purpose. `SHIPPED_LOCALES` is a fact about what
+        // the *app* ships, and every resource is staying in `:app` until `:core:ui` takes them in
+        // PR 10 of #551 — at which point this path moves again, and the `isNotEmpty` assertion
+        // below is what makes that a red build rather than a check that quietly stops checking.
+        // CWD for a module's unit tests is the module directory.
+        val resourceDirs = java.io.File("../../app/src/main/res")
             .listFiles { f -> f.isDirectory && f.name.startsWith("values-") }
             .orEmpty()
             .map { it.name.removePrefix("values-") }

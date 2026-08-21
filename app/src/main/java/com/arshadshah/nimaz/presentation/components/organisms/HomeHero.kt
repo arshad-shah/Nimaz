@@ -29,7 +29,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.core.util.formatClockTime
+import com.arshadshah.nimaz.core.common.formatClockTime
 import com.arshadshah.nimaz.domain.model.PrayerType
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize

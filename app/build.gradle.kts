@@ -271,9 +271,12 @@ dependencies {
     // The pure layer. `api`-exposed javax.inject and coroutines-core come with it, so nothing
     // here declares them again.
     implementation(project(":core:domain"))
-    // FakeTodayProvider / FakeSearchSettings — one definition, used by the ViewModel tests here
-    // and the use-case tests over there.
+    // Formatting helpers, the telemetry seam and the string seam. `api`-exposes :core:domain.
+    implementation(project(":core:common"))
+    // FakeTodayProvider / FakeSearchSettings / FakeStringProvider — one definition each, used by
+    // the ViewModel tests here and the tests over there.
     testImplementation(testFixtures(project(":core:domain")))
+    testImplementation(testFixtures(project(":core:common")))
 
     // Core
     implementation(libs.androidx.core.ktx)
@@ -490,6 +493,68 @@ fun organismsClassTree(): FileCollection = classTree("**/presentation/components
 
 fun debugClassTree(): FileCollection = classTree()
 
+/**
+ * A module whose classes belong in the merged coverage report.
+ *
+ * Referenced by directory rather than through `project(":core:domain")`: a live `Project` in a
+ * task action is a configuration-cache failure, and this build runs with `problems=fail`.
+ * [packageRoot] is what the merged report must actually contain — see `coverageFloor`.
+ *
+ * [classesGlobs] and [execGlobs] are globs under the module's `build/` rather than fixed paths,
+ * and they differ per module because Gradle and AGP do not agree on where anything goes:
+ *
+ * | | classes | exec |
+ * |---|---|---|
+ * | `kotlin-jvm` (`:core:domain`) | `classes/kotlin/main` | `jacoco/test.exec` |
+ * | `com.android.library` (`:core:common`) | `intermediates/built_in_kotlinc/debug/**/classes` | `jacoco/testDebugUnitTest.exec` |
+ *
+ * Note that an Android **library** has no `intermediates/classes` at all — that is an
+ * application-module output. Pointing at one anyway is precisely the #464 failure: the directory
+ * does not exist, the tree resolves to nothing, and the report is a valid file describing zero
+ * classes. `coverageFloor` is the assertion that catches it.
+ */
+data class CoverageModule(
+    val gradlePath: String,
+    val projectDir: Directory,
+    val testTask: String,
+    val classesGlobs: List<String>,
+    val execGlobs: List<String>,
+    val sourceDir: String,
+    val packageRoot: String,
+) {
+    val buildDir: Directory get() = projectDir.dir("build")
+}
+
+val coverageModules = listOf(
+    CoverageModule(
+        gradlePath = ":core:domain",
+        projectDir = rootProject.layout.projectDirectory.dir("core/domain"),
+        testTask = "test",
+        classesGlobs = listOf("classes/kotlin/main/**"),
+        execGlobs = listOf("jacoco/test.exec"),
+        sourceDir = "src/main/kotlin",
+        packageRoot = "com/arshadshah/nimaz/domain",
+    ),
+    CoverageModule(
+        gradlePath = ":core:common",
+        projectDir = rootProject.layout.projectDirectory.dir("core/common"),
+        testTask = "testDebugUnitTest",
+        // Both spellings, so this keeps working whichever one a future AGP writes — the same
+        // belt-and-braces the `:app` roots above use, and for the same reason.
+        classesGlobs = listOf(
+            "intermediates/built_in_kotlinc/debug/**/classes/**",
+            "intermediates/classes/debug/**",
+            "tmp/kotlin-classes/debug/**",
+        ),
+        execGlobs = listOf(
+            "jacoco/testDebugUnitTest.exec",
+            "outputs/unit_test_code_coverage/**/*.exec",
+        ),
+        sourceDir = "src/main/kotlin",
+        packageRoot = "com/arshadshah/nimaz/core/common",
+    ),
+)
+
 fun coverageExecutionData(): FileCollection =
     files(
         fileTree(buildOutputDir) {
@@ -502,42 +567,22 @@ fun coverageExecutionData(): FileCollection =
         // less. From PR 5 (:core:domain) onward `:app` no longer holds most of the codebase, and
         // a report scoped to `:app` alone would show a *rising* percentage over a shrinking
         // tree — a metric that gets better by covering fewer classes is worse than none.
-        files(coverageModules.map { fileTree(it.buildDir) { include("jacoco/test.exec") } }),
+        files(
+            coverageModules.map { module ->
+                fileTree(module.buildDir) { include(module.execGlobs) }
+            }
+        ),
     )
-
-/**
- * A module whose classes belong in the merged coverage report.
- *
- * Referenced by directory rather than through `project(":core:domain")`: a live `Project` in a
- * task action is a configuration-cache failure, and this build runs with `problems=fail`.
- * [packageRoot] is what the merged report must actually contain — see `coverageFloor`.
- */
-data class CoverageModule(
-    val gradlePath: String,
-    val projectDir: Directory,
-    val classesDir: String,
-    val sourceDir: String,
-    val packageRoot: String,
-) {
-    val buildDir: Directory get() = projectDir.dir("build")
-}
-
-val coverageModules = listOf(
-    CoverageModule(
-        gradlePath = ":core:domain",
-        projectDir = rootProject.layout.projectDirectory.dir("core/domain"),
-        classesDir = "classes/kotlin/main",
-        sourceDir = "src/main/kotlin",
-        packageRoot = "com/arshadshah/nimaz/domain",
-    ),
-)
 
 fun coverageClassDirs(): FileCollection =
     files(
         debugClassTree(),
         files(
             coverageModules.map { module ->
-                fileTree(module.buildDir.dir(module.classesDir)) { exclude(coverageExclusions) }
+                fileTree(module.buildDir) {
+                    include(module.classesGlobs)
+                    exclude(coverageExclusions)
+                }
             }
         ),
     )
@@ -566,7 +611,7 @@ tasks.register<JacocoReport>("jacocoTestReport") {
     group = "verification"
     description = "Generates a JaCoCo coverage report for the debug unit tests."
     dependsOn("testDebugUnitTest")
-    coverageModules.forEach { dependsOn("${it.gradlePath}:test") }
+    coverageModules.forEach { dependsOn("${it.gradlePath}:${it.testTask}") }
 
     reports {
         html.required.set(true)

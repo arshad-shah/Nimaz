@@ -560,7 +560,7 @@ live in Notification settings (toggle + 24-hour time picker).
 
 **App Bundle language splits are disabled** (`android { bundle { language { enableSplit = false } } }`
 in `app/build.gradle.kts`). Settings lets the user pick an app language independently of the device
-locale (`core/util/LocaleHelper.kt`), but Play's default language splitting only delivers the
+locale (`core/common/LocaleHelper.kt`, in `:core:common`), but Play's default language splitting only delivers the
 resources matching the *device* locale — so on a Play install every other language would silently
 fall back to English. Disabling the split ships all locales in the base APK. This never reproduces
 on a locally built APK, only on an Play-installed build, so **do not re-enable it** without moving
@@ -655,7 +655,7 @@ Ramadan.
 > recomposition instead of two astronomical passes.
 >
 > `PrayerTimeDisplay` carries `timeAt: Instant`; `List<PrayerTimeDisplay>.withClockState(now)`
-> re-derives `isPassed`/`isCurrent`/`isNext`, and `core/util/PrayerClock.kt` holds the pure
+> re-derives `isPassed`/`isCurrent`/`isNext`, and `core/common/PrayerClock.kt` (in `:core:common`) holds the pure
 > `nextPrayerIndexAt` / `currentPrayerIndexAt` / `prayerTimelineProgressAt`. This also fixed a real
 > bug: the old derivation compared `LocalTime` (dropping the date), so after Isha no row highlighted
 > and before Fajr today's Isha rendered as "current".
@@ -837,7 +837,7 @@ itself the mismatch.
 **One HTML dialect.** `surah_overview_sections.body` and `quran_topics.description` carry markup,
 normalised at import onto four tags — `<p>`, `<strong>`, `<em>`, and `<a href="quran:2:153-251">` /
 `<a href="topic:61">`. A build rule (`thematic.sections-dialect`) refuses to ship a fifth, so
-`core/util/ThematicMarkup` is a 130-line scanner rather than an HTML parser, and the two link
+`core/common/ThematicMarkup` (in `:core:common`) is a 130-line scanner rather than an HTML parser, and the two link
 schemes address screens this app has: 446 cross-references the source writes as prose ("see
 2:153-251") are taps into the reader, and 509 `topic:` links are taps into the subject browser.
 
@@ -1336,7 +1336,7 @@ no deps). All third-party usage is isolated here.
 
 **Wiring.** No module — both are constructor-injected / static. `PrayerTimeCalculator` is injected into `PrayerRepositoryImpl`, into `PrayerNotificationScheduler`, and (a deviation from the use-case rule) into `WidgetsScreen`. The widget data sources used to take it too and are the one place that has been closed: they go through `PrayerRepository` now, so they honour the user's calculation settings ([§2](#2-glance-widgets)).
 
-**Display formatting.** Wall-clock times are rendered through `core/util/TimeFormatting.kt`
+**Display formatting.** Wall-clock times are rendered through `core/common/TimeFormatting.kt` (in `:core:common`)
 (`formatClockTime(hour, minute, use24Hour)` + `LocalTime`/`LocalDateTime.formatClock(...)`),
 never via ad-hoc `String.format("%d:%02d %s", …, "AM"/"PM")` or `Locale.US`-pinned formatters.
 It uses the **default locale** (localized am/pm marker and digits — Nimaz is worldwide) and
@@ -1356,7 +1356,7 @@ formatted strings.
 
 **`core/init/AppInitializer.kt`** — `@Singleton`. `initialize()` launches an IO coroutine that runs four tasks **in parallel under a 5 s `withTimeout`** (then proceeds to UI regardless): apply saved locale, schedule today's prayer notifications (§4), download the default adhan/beep if missing (§1), and bootstrap FCM announcements (§12 — create the Updates channel + topic subscribe). It exposes `val isReady: StateFlow<Boolean>` (the splash gate). Failures are reported to monitoring but never block startup.
 
-**`core/monitoring/`** — three thin Kotlin `object` wrappers over Firebase, each guarded so **every call is wrapped in `runCatching` and no-ops if Firebase isn't initialized** (debug/PR-check builds without `google-services.json` run unchanged). They are static singletons, never Hilt-injected.
+**`core/monitoring/`** (in `:core:common`) — three thin Kotlin `object` wrappers over Firebase, each guarded so **every call is wrapped in `runCatching` and no-ops if Firebase isn't initialized** (debug/PR-check builds without `google-services.json` run unchanged). They are static singletons, never Hilt-injected.
 - `AppAnalytics.kt` → Firebase **Analytics**. The only one with `init(context)` (called from `NimazApp`) — it caches `applicationContext` so any caller can log without a `Context`. Provides semantic helpers + name catalogs (`Event`/`Param`/`UserProperty`), notably the notification pipeline (`notification_scheduled`/`_displayed`/`_suppressed`/`_opened`) and `logDiagnostics()` (records OS-level notification/exact-alarm/battery state as durable user properties).
 - `CrashReporter.kt` → Firebase **Crashlytics**. `recordException`, `log` (breadcrumb), `setCustomKey`. Pairs with `AppAnalytics.logError` (frequency) for the stack trace.
 - `PerfMonitor.kt` → Firebase **Performance**. Custom traces via `newTrace`/`stop` + inline `trace { }` / `traceSuspend { }`; catalog `Traces` (`app_initialize`, `notification_schedule`).
