@@ -23,14 +23,24 @@ couple of seconds. Same spirit as `scripts/check_tajweed_contrast.py`.
 from __future__ import annotations
 
 import argparse
+import os
 import re
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-APP = ROOT / "app/src/main/java/com/arshadshah/nimaz"
-NAV_DIR = APP / "core/navigation"
 DOCS = ROOT / "docs"
+
+# Directories that are never source: build output, VCS, tooling caches. Pruned
+# rather than filtered, so the walk below stays fast on a repo with 20 modules
+# each carrying a build/ tree.
+PRUNED_DIRS = {"build", ".git", ".gradle", ".idea", "node_modules", ".kotlin", "generated"}
+
+# Where Kotlin/Java source lives inside a Gradle module.
+SOURCE_SET_SUFFIXES = (
+    Path("src/main/java/com/arshadshah/nimaz"),
+    Path("src/main/kotlin/com/arshadshah/nimaz"),
+)
 
 ARCHITECTURE = DOCS / "ARCHITECTURE.md"
 NAVIGATION = DOCS / "NAVIGATION.md"
@@ -54,6 +64,10 @@ class Report:
     def __init__(self) -> None:
         self.failures: list[tuple[str, str]] = []
         self.passes: list[str] = []
+        # Floors are not checks in their own right — they are a precondition of the
+        # check they belong to — so they are counted separately and never inflate
+        # the "All N documentation checks passed" total.
+        self.floors_met: list[str] = []
 
     def ok(self, check: str, detail: str) -> None:
         self.passes.append(f"{check}  {detail}")
@@ -72,6 +86,18 @@ class Report:
         fix: str,
     ) -> None:
         """Every item in `expected` must appear, backticked, in `haystack`."""
+        # An empty expected-set is never a pass. "ok 0 Workers documented" is the
+        # exact shape of the silent failure this script exists to prevent: the scan
+        # found nothing, so every item it found was trivially documented.
+        if not expected:
+            self.fail(
+                check,
+                f"the {noun} scan matched nothing — 0 found across "
+                f"{len(source_roots())} module source root(s)."
+                "\n         → this is a broken scan, not a clean result: the code it looks "
+                "for moved, was renamed, or lives outside every source root",
+            )
+            return
         missing = [item for item in expected if f"`{item}`" not in haystack]
         if missing:
             self.fail(
@@ -83,9 +109,85 @@ class Report:
         else:
             self.ok(check, f"{len(expected)} {noun} documented in {doc.relative_to(ROOT)}")
 
+    def expect_floor(self, check: str, actual: int, floor: int, *, noun: str) -> None:
+        """`actual` must be at least `floor`, or the scan has shrunk and lies.
+
+        See MINIMUMS for why these numbers exist and what it takes to lower one.
+        """
+        if actual < floor:
+            self.fail(
+                check,
+                f"only {actual} {noun} found, floor is {floor} — the scan shrank."
+                "\n         → code moved out of every source root, or a pattern stopped "
+                "matching. Fix the scan. Lowering the floor in MINIMUMS is only correct "
+                "when the thing was genuinely deleted, and needs saying so in the commit "
+                "message (see docs/DOCUMENTATION.md §4).",
+            )
+        else:
+            self.floors_met.append(f"{check} {actual} >= {floor} {noun}")
+
 
 def read(path: Path) -> str:
     return path.read_text(encoding="utf-8")
+
+
+def source_roots() -> list[Path]:
+    """Every `…/src/main/{java,kotlin}/com/arshadshah/nimaz` directory in the repo.
+
+    Nimaz is being split into Gradle modules (#551). Before that split every scan
+    in this file was rooted at the single `app/…` path, so the moment a Worker or
+    a widget moved into `feature/…` the scan simply found fewer of them and the
+    "everything is documented" checks passed *because there was less to find*.
+    Rooting at every module makes a move invisible to the checks, which is the
+    point: the inventory is a property of the app, not of one module.
+
+    Walks the tree once with build/VCS directories pruned. Raises if the result is
+    empty — a scan with no roots is a broken checkout, never a clean bill of health.
+    """
+    roots: list[Path] = []
+    for dirpath, dirnames, _ in os.walk(ROOT):
+        dirnames[:] = [d for d in dirnames if d not in PRUNED_DIRS]
+        here = Path(dirpath)
+        for suffix in SOURCE_SET_SUFFIXES:
+            candidate = here / suffix
+            if candidate.is_dir():
+                roots.append(candidate)
+        # Do not descend into a source set we just matched: the package tree below
+        # it cannot contain another module.
+        if any((here / suffix).is_dir() for suffix in SOURCE_SET_SUFFIXES):
+            dirnames[:] = [d for d in dirnames if d != "src"]
+    if not roots:
+        raise SystemExit(
+            "no Kotlin source roots found under "
+            f"{ROOT} — expected at least one */src/main/{{java,kotlin}}/com/arshadshah/nimaz"
+        )
+    return sorted(set(roots))
+
+
+def source_files(pattern: str = "*.kt") -> list[Path]:
+    """Every source file matching `pattern` across every module."""
+    return sorted({path for root in source_roots() for path in root.rglob(pattern)})
+
+
+def find_one(relative: str) -> Path:
+    """The single file at `relative` (a package path or glob) across all modules.
+
+    Fails loudly on 0 matches (the file moved out of the package tree, or was
+    renamed) and on more than 1 (two modules both declare it — an ambiguity the
+    caller must resolve, not something to silently pick a winner for).
+    """
+    matches = sorted({p for root in source_roots() for p in root.glob(relative) if p.is_file()})
+    if not matches:
+        raise SystemExit(
+            f"could not find {relative} in any module source root "
+            f"({', '.join(str(r.relative_to(ROOT)) for r in source_roots())})"
+        )
+    if len(matches) > 1:
+        raise SystemExit(
+            f"{relative} matches {len(matches)} files, expected exactly one: "
+            + ", ".join(str(m.relative_to(ROOT)) for m in matches)
+        )
+    return matches[0]
 
 
 def section(text: str, heading_contains: str, level: str = "## ") -> str:
@@ -137,20 +239,50 @@ def slugify(heading: str) -> str:
 # ──────────────────────────────────────────────────────────────────────────────
 
 def routes() -> list[str]:
-    src = read(NAV_DIR / "Routes.kt")
+    src = read(find_one("core/navigation/Routes.kt"))
     return sorted(set(re.findall(r"^\s+data (?:object|class) (\w+)", src, re.M)))
 
 
 def nav_graph_source() -> str:
-    return read(NAV_DIR / "NavGraph.kt")
+    """Every file that wires a destination, concatenated.
+
+    This used to read the single file `core/navigation/NavGraph.kt`. The migration
+    dissolves that file into per-feature `NavGraphBuilder` extensions living beside
+    their screens, at which point NAV-03 (the destination count) would go red — loud,
+    and tempting to "fix" by editing the documented number — while NAV-04, the
+    bare-`composable` detector, would go **silently vacuous**: nothing to scan means
+    nothing untagged to find. Scanning every file that mentions a destination keeps
+    both checks meaningful wherever the wiring lives.
+
+    Joined with newlines because NAV-04 anchors on the start of a line.
+    """
+    sources = [
+        text
+        for text in (read(path) for path in source_files("*.kt"))
+        if "taggedComposable<Route." in text or "composable<Route." in text
+    ]
+    return "\n".join(sources)
+
+
+def wired_destination_count(graph: str) -> int:
+    """How many destinations the nav graph wires, tagged or not."""
+    return len(re.findall(r"\b(?:tagged)?[Cc]omposable<Route\.", graph))
+
+
+def bare_composable_destinations(graph: str) -> list[str]:
+    """Destinations wired with a bare `composable<Route.X>` — no ScreenTag, untestable."""
+    return sorted(set(re.findall(r"^\s*composable<Route\.(\w+)>", graph, re.M)))
 
 
 def screen_tags() -> set[str]:
-    return set(re.findall(r"const val (\w+)", read(NAV_DIR / "ScreenTags.kt")))
+    return set(re.findall(r"const val (\w+)", read(find_one("core/navigation/ScreenTags.kt"))))
 
 
 def announcement_static_keys() -> list[str]:
-    body = kotlin_block(read(NAV_DIR / "AnnouncementRoutes.kt"), "private fun staticAnnouncementRoute")
+    body = kotlin_block(
+        read(find_one("core/navigation/AnnouncementRoutes.kt")),
+        "private fun staticAnnouncementRoute",
+    )
     keys: list[str] = []
     for line in body.splitlines():
         if "->" not in line:
@@ -160,17 +292,17 @@ def announcement_static_keys() -> list[str]:
 
 
 def announcement_routes_used() -> list[str]:
-    src = read(NAV_DIR / "AnnouncementRoutes.kt")
+    src = read(find_one("core/navigation/AnnouncementRoutes.kt"))
     return sorted(set(re.findall(r"Route\.(\w+)", src)))
 
 
 def help_deeplink_keys() -> list[str]:
-    src = read(NAV_DIR / "HelpDeepLink.kt")
+    src = read(find_one("core/navigation/HelpDeepLink.kt"))
     return sorted(set(re.findall(r'"([^"]+)"\s*->', src)))
 
 
 def database_version() -> int:
-    src = read(APP / "data/local/database/NimazDatabase.kt")
+    src = read(find_one("data/local/database/NimazDatabase.kt"))
     match = re.search(r"const val NIMAZ_DATABASE_VERSION = (\d+)", src)
     if not match:
         raise SystemExit("could not read NIMAZ_DATABASE_VERSION from NimazDatabase.kt")
@@ -179,45 +311,90 @@ def database_version() -> int:
 
 def worker_classes() -> list[str]:
     names: set[str] = set()
-    for path in APP.rglob("*Worker.kt"):
+    for path in source_files("*Worker.kt"):
         names |= set(re.findall(r"class (\w+Worker)", read(path)))
     return sorted(names)
 
 
 def service_classes() -> list[str]:
     names: set[str] = set()
-    for path in APP.rglob("*Service.kt"):
+    for path in source_files("*Service.kt"):
         names |= set(re.findall(r"^class (\w+Service)", read(path), re.M))
     return sorted(names)
 
 
 def widget_packages() -> list[str]:
     return sorted(
-        p.name for p in (APP / "widget").iterdir() if p.is_dir() and p.name != "core"
+        {
+            child.name
+            for root in source_roots()
+            if (root / "widget").is_dir()
+            for child in (root / "widget").iterdir()
+            if child.is_dir() and child.name != "core"
+        }
     )
 
 
 def notification_channel_ids() -> list[str]:
     ids: set[str] = set()
-    for path in APP.rglob("*.kt"):
+    for path in source_files("*.kt"):
         ids |= set(re.findall(r'const val CHANNEL_ID[A-Z_]* = "([^"]+)"', read(path)))
     return sorted(ids)
 
 
-def datastore_names() -> list[str]:
+def preferences_datastore_names() -> list[str]:
+    """The `preferencesDataStore(name = "…")` files — one named file each."""
     names: set[str] = set()
-    for path in APP.rglob("*.kt"):
+    for path in source_files("*.kt"):
         names |= set(re.findall(r'preferencesDataStore\(\s*\n?\s*name = "([^"]+)"', read(path)))
     return sorted(names)
 
 
+def typed_datastore_owners() -> list[str]:
+    """Files that build a DataStore by hand with `DataStoreFactory.create`.
+
+    These have no literal file name to capture — `JsonGlanceStateDefinition` takes
+    its file name as a constructor parameter and creates one store per widget — so
+    the *owner* is what gets documented. Without this the SUB-06 claim that "every
+    DataStore file is documented" was checking three files out of four.
+    """
+    return sorted(
+        {path.stem for path in source_files("*.kt") if "DataStoreFactory.create" in read(path)}
+    )
+
+
+def glance_state_file_names() -> list[str]:
+    """The DataStore file name each widget's Glance state definition writes to.
+
+    `JsonGlanceStateDefinition` takes its file name as a constructor argument, so
+    naming the owner alone leaves the six files on disk as prose no check reads.
+    Scoped to files that subclass it: `fileName = "…"` on its own also matches the
+    bundled adhan audio, which is not a DataStore.
+    """
+    names: set[str] = set()
+    for path in source_files("*.kt"):
+        src = read(path)
+        if "JsonGlanceStateDefinition<" not in src:
+            continue
+        names |= set(re.findall(r'fileName = "([^"]+)"', src))
+    return sorted(names)
+
+
+def datastore_names() -> list[str]:
+    return sorted(
+        set(preferences_datastore_names())
+        | set(typed_datastore_owners())
+        | set(glance_state_file_names())
+    )
+
+
 def announcement_payload_keys() -> list[str]:
-    src = read(APP / "data/announcement/AnnouncementPayloadMapper.kt")
+    src = read(find_one("data/announcement/AnnouncementPayloadMapper.kt"))
     return sorted(set(re.findall(r'const val KEY_\w+ = "([^"]+)"', src)))
 
 
 def announcement_enum_keys(enum_name: str) -> list[str]:
-    src = read(APP / "domain/model/Announcement.kt")
+    src = read(find_one("domain/model/Announcement.kt"))
     body = kotlin_block(src, f"enum class {enum_name}")
     return sorted(set(re.findall(r'\w+\("([^"]+)"\)', body)))
 
@@ -259,6 +436,34 @@ CHECKS: dict[str, str] = {
 # Below this, a reader can scroll. Above it, they need an index. See DOCUMENTATION.md §2.
 CONTENTS_REQUIRED_LINES = 150
 
+# ── Scan floors ───────────────────────────────────────────────────────────────
+# A "documented everything I found" check is only as good as what it found. If a
+# scan silently returns fewer items — because the code moved into a module the
+# scan does not reach, or a pattern stopped matching — the check passes because
+# there is less to find. Each number below is the count measured in the tree at
+# the time it was added; the scan may only ever grow past it.
+#
+# Lowering one is a claim that the thing was genuinely deleted. Say so in the
+# commit message. See docs/DOCUMENTATION.md §4.
+MINIMUMS: dict[str, int] = {
+    "NAV-01": 94,   # Routes in Routes.kt
+    "NAV-03": 94,   # destinations wired across every nav-graph file
+    "NAV-05": 104,  # ScreenTags entries — more than the 94 Routes on purpose: some
+                    #                       screens are tabs inside a parent, so they
+                    #                       carry a tag without owning a Route
+    "NAV-06": 57,   # static announcement route keys
+    "NAV-08": 67,   # Routes reachable from an announcement key
+    "NAV-09": 22,   # help deep-link keys
+    "SUB-02": 7,    # Worker classes
+    "SUB-03": 4,    # Service classes
+    "SUB-04": 6,    # widget packages
+    "SUB-05": 12,   # notification channel ids
+    "SUB-06": 10,   # DataStore files: 3 preferencesDataStore + the Glance state
+                    #                  definition and the 6 widget files it writes
+    "SUB-06-PREFS": 3,   # of which, `preferencesDataStore(name = …)` files
+    "SUB-06-GLANCE": 6,  # of which, per-widget Glance state files
+}
+
 
 def check_nav(report: Report) -> None:
     nav_doc = read(NAVIGATION)
@@ -266,6 +471,8 @@ def check_nav(report: Report) -> None:
     grammar = section(nav_doc, "Announcement route grammar")
     deeplinks = section(nav_doc, "Help deep-link grammar")
     all_routes = routes()
+
+    report.expect_floor("NAV-01", len(all_routes), MINIMUMS["NAV-01"], noun="routes")
 
     # NAV-01 — no undocumented route.
     report.expect_covered(
@@ -296,7 +503,8 @@ def check_nav(report: Report) -> None:
 
     # NAV-03 — the destination count in prose.
     graph = nav_graph_source()
-    wired = len(re.findall(r"\b(?:tagged)?[Cc]omposable<Route\.", graph))
+    wired = wired_destination_count(graph)
+    report.expect_floor("NAV-03", wired, MINIMUMS["NAV-03"], noun="wired destinations")
     claimed = re.search(r"\((\d+) `composable<Route\.X>` destinations\)", nav_doc)
     if not claimed:
         report.fail("NAV-03", "NAVIGATION.md no longer states the destination count "
@@ -311,18 +519,19 @@ def check_nav(report: Report) -> None:
         report.ok("NAV-03", f"{wired} destinations, count matches")
 
     # NAV-04 — every destination carries a test tag.
-    untagged = re.findall(r"^\s*composable<Route\.(\w+)>", graph, re.M)
+    untagged = bare_composable_destinations(graph)
     if untagged:
         report.fail(
             "NAV-04",
-            "wired with bare composable<> (no ScreenTag): " + ", ".join(sorted(set(untagged)))
-            + "\n         → use taggedComposable<Route.X>(ScreenTags.X) in NavGraph.kt",
+            "wired with bare composable<> (no ScreenTag): " + ", ".join(untagged)
+            + "\n         → use taggedComposable<Route.X>(ScreenTags.X) where it is wired",
         )
     else:
         report.ok("NAV-04", "every destination uses taggedComposable")
 
     # NAV-05 — a tag exists for every route.
     tags = screen_tags()
+    report.expect_floor("NAV-05", len(tags), MINIMUMS["NAV-05"], noun="ScreenTags entries")
     tagless = [r for r in all_routes if r not in tags]
     if tagless:
         report.fail(
@@ -335,6 +544,7 @@ def check_nav(report: Report) -> None:
 
     # NAV-06 / NAV-07 — the announcement static allowlist, both directions.
     code_keys = announcement_static_keys()
+    report.expect_floor("NAV-06", len(code_keys), MINIMUMS["NAV-06"], noun="announcement keys")
     report.expect_covered(
         "NAV-06",
         expected=code_keys,
@@ -365,9 +575,13 @@ def check_nav(report: Report) -> None:
         report.ok("NAV-07", f"{len(doc_keys)} documented announcement keys all exist")
 
     # NAV-08 — every route an announcement can reach is named in the grammar section.
+    reachable = announcement_routes_used()
+    report.expect_floor(
+        "NAV-08", len(reachable), MINIMUMS["NAV-08"], noun="announcement-reachable routes"
+    )
     report.expect_covered(
         "NAV-08",
-        expected=announcement_routes_used(),
+        expected=reachable,
         haystack=grammar,
         doc=NAVIGATION,
         noun="announcement-reachable routes",
@@ -376,6 +590,7 @@ def check_nav(report: Report) -> None:
 
     # NAV-09 / NAV-10 — help deep links, both directions.
     code_help = help_deeplink_keys()
+    report.expect_floor("NAV-09", len(code_help), MINIMUMS["NAV-09"], noun="help deep-link keys")
     report.expect_covered(
         "NAV-09",
         expected=code_help,
@@ -422,25 +637,43 @@ def check_sub(report: Report) -> None:
     else:
         report.ok("SUB-01", f"schema version {version} matches")
 
+    workers = worker_classes()
+    report.expect_floor("SUB-02", len(workers), MINIMUMS["SUB-02"], noun="Workers")
     report.expect_covered(
-        "SUB-02", expected=worker_classes(), haystack=sub_doc, doc=SUBSYSTEMS,
+        "SUB-02", expected=workers, haystack=sub_doc, doc=SUBSYSTEMS,
         noun="Workers", fix="add it to the worker list in §3 (Background work)",
     )
+    services = service_classes()
+    report.expect_floor("SUB-03", len(services), MINIMUMS["SUB-03"], noun="Services")
     report.expect_covered(
-        "SUB-03", expected=service_classes(), haystack=sub_doc, doc=SUBSYSTEMS,
+        "SUB-03", expected=services, haystack=sub_doc, doc=SUBSYSTEMS,
         noun="Services", fix="document it in the owning section (§1 audio, §12 announcements, …)",
     )
+    widgets = widget_packages()
+    report.expect_floor("SUB-04", len(widgets), MINIMUMS["SUB-04"], noun="widget packages")
     report.expect_covered(
-        "SUB-04", expected=[f"widget/{p}/" for p in widget_packages()], haystack=sub_doc,
+        "SUB-04", expected=[f"widget/{p}/" for p in widgets], haystack=sub_doc,
         doc=SUBSYSTEMS, noun="widget packages", fix="add a row to the widget table in §2",
     )
+    channels = notification_channel_ids()
+    report.expect_floor("SUB-05", len(channels), MINIMUMS["SUB-05"], noun="notification channels")
     report.expect_covered(
-        "SUB-05", expected=notification_channel_ids(), haystack=sub_doc, doc=SUBSYSTEMS,
+        "SUB-05", expected=channels, haystack=sub_doc, doc=SUBSYSTEMS,
         noun="notification channels", fix="add a row to the channel table in §4",
     )
+    datastores = datastore_names()
+    report.expect_floor("SUB-06", len(datastores), MINIMUMS["SUB-06"], noun="DataStore files")
+    report.expect_floor(
+        "SUB-06-PREFS", len(preferences_datastore_names()), MINIMUMS["SUB-06-PREFS"],
+        noun="preferencesDataStore files",
+    )
+    report.expect_floor(
+        "SUB-06-GLANCE", len(glance_state_file_names()), MINIMUMS["SUB-06-GLANCE"],
+        noun="Glance widget state files",
+    )
     report.expect_covered(
-        "SUB-06", expected=datastore_names(), haystack=sub_doc, doc=SUBSYSTEMS,
-        noun="DataStore files", fix="add a row to the DataStore table in §6",
+        "SUB-06", expected=datastores, haystack=sub_doc, doc=SUBSYSTEMS,
+        noun="DataStore files", fix="add a row to the DataStore table in §0.5",
     )
     announcements = section(sub_doc, "Engagement announcements")
     report.expect_covered(
@@ -584,7 +817,10 @@ def main() -> int:
         print("The docs have drifted from the code. Update the doc named in each failure —")
         print("see docs/DOCUMENTATION.md for which doc owns what.")
         return 1
-    print(f"All {len(report.passes)} documentation checks passed.")
+    print(
+        f"All {len(report.passes)} documentation checks passed"
+        f" ({len(report.floors_met)} scan floors met)."
+    )
     return 0
 
 

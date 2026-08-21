@@ -158,7 +158,7 @@ on every PR via `.github/workflows/docs_check.yml`.
 |---|---|
 | `NAV-01` | every `Route` in `Routes.kt` appears in the `NAVIGATION.md` route reference |
 | `NAV-02` | every route named in `NAVIGATION.md` still exists in `Routes.kt` |
-| `NAV-03` | the destination count claimed in `NAVIGATION.md` matches `NavGraph.kt` |
+| `NAV-03` | the destination count claimed in `NAVIGATION.md` matches the wiring |
 | `NAV-04` | every destination is wired with `taggedComposable` (never a bare `composable`) |
 | `NAV-05` | every `Route` has a matching `ScreenTags` entry |
 | `NAV-06` | every static announcement route key is documented |
@@ -185,6 +185,10 @@ on every PR via `.github/workflows/docs_check.yml`.
 `NAV-09`/`NAV-10`) — that is deliberate. A doc that lists a route deleted three releases ago is
 as misleading as one missing a route added yesterday, and only the second kind gets noticed.
 
+**The checker has its own tests.** `scripts/test_check_docs.py` runs in the same CI lane
+(`python3 -m pytest scripts/ -q`, before the checker itself). A checker nobody tests is a green
+tick nobody has earned.
+
 ### 4.1 Adding a check
 
 Extend `scripts/check_docs.py` whenever a doc makes a **countable, list-shaped claim** about the
@@ -196,11 +200,64 @@ rot invisibly.
    `report.expect_covered(...)` for coverage-shaped checks so the failure message stays uniform.
 3. Register its id and one-line description in the `CHECKS` dict.
 4. Add the row to the table above.
-5. Make the failure message say **which file to edit and what to add** — a checker that only says
+5. If it scans the tree for an inventory, add a floor to `MINIMUMS` and call
+   `report.expect_floor(...)` before the coverage check — see [§4.2](#42-scan-floors--why-a-check-can-fail-without-a-doc-changing).
+6. Add a test to `scripts/test_check_docs.py`, including the negative case: make the scan come
+   back short and assert the check goes red.
+7. Make the failure message say **which file to edit and what to add** — a checker that only says
    "failed" gets suppressed rather than fixed.
 
 **Do not** add a check that greps a doc for prose. Check identifiers, not sentences: prose
 changes for good reasons, and a brittle check is one the next person will delete.
+
+### 4.2 Scan floors — why a check can fail without a doc changing
+
+Most `SUB-*` and half the `NAV-*` checks are **coverage-shaped**: they read an inventory out of
+the code and assert that every item in it is documented. That is only as good as the inventory.
+If a scan silently returns fewer items, the check passes *because there was less to find* — the
+one failure mode a green tick cannot show you. It is not hypothetical: before the module split
+every scan was rooted at `app/src/main/java/com/arshadshah/nimaz`, so moving the widgets into a
+`:feature:widget` module would have taken six of the seven `Worker`s out of reach and left
+`SUB-02` reporting `ok 0 Workers documented`.
+
+Two things stop that now.
+
+- **The scans span every module.** `source_roots()` finds every
+  `*/src/main/{java,kotlin}/com/arshadshah/nimaz` directory in the repo (build output pruned) and
+  raises if there are none. Single-file readers go through `find_one(...)`, which fails on **0
+  matches and on more than 1** rather than quietly picking one. `nav_graph_source()` concatenates
+  every file that wires a destination, so `NAV-03`/`NAV-04` keep working once `NavGraph.kt` is
+  split into per-feature graph extensions.
+- **Every scan has a floor.** The `MINIMUMS` table in `check_docs.py` records the count measured
+  when the floor was added; `report.expect_floor(...)` fails the check if the scan ever comes
+  back with fewer. An empty expected-set fails on its own too, independently of the floor.
+
+Floors are counted separately from checks — a green run prints
+`All 23 documentation checks passed (13 scan floors met)`. The floor *count* is asserted by
+`scripts/test_check_docs.py`, so deleting an `expect_floor(...)` call fails the test suite rather
+than quietly shrinking the guard.
+
+| Floor | Minimum | Counts |
+|---|---|---|
+| `NAV-01` | 94 | `Route` declarations in `Routes.kt` |
+| `NAV-03` | 94 | destinations wired across every nav-graph file |
+| `NAV-05` | 104 | `ScreenTags` entries — more than the 94 `Route`s: tabs inside a parent screen carry a tag without owning a route |
+| `NAV-06` | 57 | static announcement route keys |
+| `NAV-08` | 67 | `Route`s reachable from an announcement key |
+| `NAV-09` | 22 | help deep-link keys |
+| `SUB-02` | 7 | `Worker` classes |
+| `SUB-03` | 4 | `Service` classes |
+| `SUB-04` | 6 | widget packages |
+| `SUB-05` | 12 | notification channel ids |
+| `SUB-06` | 10 | DataStore files: 3 `preferencesDataStore`, the Glance state definition, and the 6 widget files it writes |
+| `SUB-06-PREFS` | 3 | of which, `preferencesDataStore(name = …)` files |
+| `SUB-06-GLANCE` | 6 | of which, per-widget Glance state files (`fileName = "…"` in each `*StateDefinition.kt`) |
+
+**Raising a floor is routine — lower it only with a reason, in the commit message.** A floor going
+down is a claim that the thing was genuinely deleted, not that a scan stopped seeing it; those two
+look identical in the check output and only the commit message can tell them apart. If you are
+lowering a floor to make a refactor go green, the refactor moved code out of the scan's reach and
+the scan is what needs fixing.
 
 ---
 
