@@ -1,9 +1,9 @@
 package com.arshadshah.nimaz.domain.usecase.ai
 
-import com.arshadshah.nimaz.core.navigation.Route
 import com.arshadshah.nimaz.domain.model.AiError
 import com.arshadshah.nimaz.domain.model.AnswerConfidence
 import com.arshadshah.nimaz.domain.model.CitationId
+import com.arshadshah.nimaz.domain.model.ContentTarget
 import com.arshadshah.nimaz.domain.model.HadithRef
 import com.arshadshah.nimaz.domain.model.Proof
 import com.arshadshah.nimaz.domain.repository.AiRepository
@@ -100,7 +100,7 @@ class AskWithProofUseCase @Inject constructor(
             ayahNumber = ref.ayah,
             surahName = surahWithAyahs.surah.nameEnglish,
             displayText = ayah.translation?.takeIf { it.isNotBlank() } ?: ayah.textSimple,
-            route = Route.QuranReader(ref.surah, ref.ayah),
+            target = ContentTarget.Ayah(ref.surah, ref.ayah),
         )
     }
 
@@ -116,7 +116,7 @@ class AskWithProofUseCase @Inject constructor(
             hadithNumber = hadith.hadithNumber,
             bookName = bookName ?: "Hadith",
             displayText = hadith.textEnglish.takeIf { it.isNotBlank() } ?: hadith.textArabic,
-            route = Route.HadithReader(hadith.id),
+            target = ContentTarget.Hadith(hadith.id),
         )
     }
 

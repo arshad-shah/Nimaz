@@ -1,6 +1,5 @@
 package com.arshadshah.nimaz.domain.usecase
 
-import com.arshadshah.nimaz.core.navigation.Route
 import com.arshadshah.nimaz.domain.model.Announcement
 import com.arshadshah.nimaz.domain.model.AnnouncementAction
 import com.arshadshah.nimaz.domain.repository.AnnouncementRepository
@@ -41,21 +40,26 @@ class DismissAnnouncementUseCase(private val repository: AnnouncementRepository)
 
 /**
  * Classifies an announcement's `route` payload value into a validated
- * [AnnouncementAction]. Feature keys are resolved against the navigation
- * allowlist via the injected [resolveFeatureKey] (see `announcementRoute` in
- * `core/navigation`) so old app versions safely no-op on keys they don't know.
+ * [AnnouncementAction]. Feature keys are checked against the navigation
+ * allowlist via the injected [isKnownFeatureKey] predicate (wired to
+ * `announcementRoute(key) != null` in `core/navigation`) so old app versions
+ * safely no-op on keys they don't know.
+ *
+ * The predicate is a `(String) -> Boolean` rather than a resolver returning a
+ * navigation destination: validating the key is a domain concern, naming the
+ * destination is not, and nothing outside domain ever read the resolved value —
+ * the navigation edge resolves the key itself.
  */
 class ResolveAnnouncementRouteUseCase(
-    private val resolveFeatureKey: (String) -> Route?,
+    private val isKnownFeatureKey: (String) -> Boolean,
 ) {
     operator fun invoke(route: String?): AnnouncementAction {
         val value = route?.trim().orEmpty()
         return when {
             value.isEmpty() -> AnnouncementAction.None
             value.startsWith("https://") -> AnnouncementAction.OpenUrl(value)
-            else -> resolveFeatureKey(value)
-                ?.let { AnnouncementAction.NavigateToFeature(value, it) }
-                ?: AnnouncementAction.None
+            isKnownFeatureKey(value) -> AnnouncementAction.NavigateToFeature(value)
+            else -> AnnouncementAction.None
         }
     }
 }

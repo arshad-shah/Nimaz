@@ -1,10 +1,11 @@
 package com.arshadshah.nimaz.domain.usecase.notification
 
-import com.arshadshah.nimaz.core.util.PrayerNotificationScheduler
+import com.arshadshah.nimaz.domain.model.AsrCalculation
 import com.arshadshah.nimaz.domain.model.CalculationMethod
 import com.arshadshah.nimaz.domain.model.HighLatitudeRule
 import com.arshadshah.nimaz.domain.model.PrayerType
 import com.arshadshah.nimaz.domain.model.UserPreferences
+import com.arshadshah.nimaz.domain.repository.PrayerAlarmScheduler
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.google.common.truth.Truth.assertThat
 import io.mockk.every
@@ -28,12 +29,16 @@ import org.junit.Test
  * the Isha adhan.
  *
  * These tests exist to make that unrepresentable: there is no state to pass in any more.
+ *
+ * The scheduler is mocked as the domain port [PrayerAlarmScheduler], not the Android
+ * `PrayerNotificationScheduler` it used to name: the use case no longer knows the concrete
+ * class exists, which is what lets the domain layer compile without Android on its classpath.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class RescheduleNotificationsUseCaseTest {
 
     private lateinit var settings: SettingsRepository
-    private lateinit var scheduler: PrayerNotificationScheduler
+    private lateinit var scheduler: PrayerAlarmScheduler
 
     private val ishaEnabled = MutableStateFlow(true)
     private val notificationsEnabled = MutableStateFlow(true)
@@ -127,6 +132,49 @@ class RescheduleNotificationsUseCaseTest {
         useCase().invoke()
 
         assertThat(capturedRule()).isEqualTo(HighLatitudeRule.SEVENTH_OF_THE_NIGHT)
+    }
+
+    @Test
+    fun `every persisted value reaches the port, none dropped by the inversion`() = runTest {
+        // The scheduler moved behind a domain port with an eleven-argument method. Getting one
+        // argument wrong in that translation is invisible: nothing crashes, nothing logs, the
+        // alarm simply fires at the wrong minute or not at all, and a user finds out by missing
+        // a prayer. So every argument is pinned, not just the prayer set.
+        every { settings.prayerReminderEnabled("fajr") } returns flowOf(true)
+        every { settings.prayerReminderMinutes("fajr") } returns flowOf(15)
+        every { settings.fridayReminderEnabled } returns flowOf(true)
+        every { settings.fridayReminderMinutes } returns flowOf(45)
+
+        useCase().invoke()
+
+        val latitude = slot<Double>()
+        val longitude = slot<Double>()
+        val enabled = slot<Boolean>()
+        val prayers = slot<Set<PrayerType>>()
+        val preReminders = slot<Map<PrayerType, Int>>()
+        val method = slot<CalculationMethod>()
+        val asr = slot<AsrCalculation>()
+        val adjustments = slot<Map<PrayerType, Int>>()
+        val fridayOn = slot<Boolean>()
+        val fridayMinutes = slot<Int>()
+        verify {
+            scheduler.scheduleTodaysPrayerNotifications(
+                capture(latitude), capture(longitude), capture(enabled), capture(prayers),
+                capture(preReminders), capture(method), capture(asr), any(),
+                capture(adjustments), capture(fridayOn), capture(fridayMinutes),
+            )
+        }
+
+        assertThat(latitude.captured).isEqualTo(53.35)
+        assertThat(longitude.captured).isEqualTo(-6.26)
+        assertThat(enabled.captured).isTrue()
+        assertThat(prayers.captured).contains(PrayerType.FAJR)
+        assertThat(preReminders.captured).containsExactly(PrayerType.FAJR, 15)
+        assertThat(method.captured).isEqualTo(CalculationMethod.UMM_AL_QURA)
+        assertThat(asr.captured).isEqualTo(AsrCalculation.HANAFI)
+        assertThat(adjustments.captured[PrayerType.FAJR]).isEqualTo(-5)
+        assertThat(fridayOn.captured).isTrue()
+        assertThat(fridayMinutes.captured).isEqualTo(45)
     }
 
     private fun scheduledPrayers(): Set<PrayerType> {

@@ -31,6 +31,8 @@ import com.arshadshah.nimaz.domain.repository.AdhanDownloader
 import com.arshadshah.nimaz.domain.repository.AppLocale
 import com.arshadshah.nimaz.data.platform.AndroidAppLocale
 import com.arshadshah.nimaz.data.platform.ServiceAdhanDownloader
+import com.arshadshah.nimaz.core.util.PrayerNotificationScheduler
+import com.arshadshah.nimaz.domain.repository.PrayerAlarmScheduler
 import com.arshadshah.nimaz.domain.repository.WidgetRefresher
 import com.arshadshah.nimaz.data.widget.WorkManagerWidgetRefresher
 import com.arshadshah.nimaz.data.text.AndroidStringProvider
@@ -446,6 +448,18 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindWidgetRefresher(impl: WorkManagerWidgetRefresher): WidgetRefresher
+
+    /**
+     * The Android `AlarmManager` scheduler behind the domain's [PrayerAlarmScheduler] port.
+     * Callers that still hold the concrete type (`AppInitializer`, `PrayerRescheduler`, the
+     * instrumented scheduler test) are unaffected — only the domain use case depends on the
+     * interface, which is the point.
+     */
+    @Binds
+    @Singleton
+    abstract fun bindPrayerAlarmScheduler(
+        impl: PrayerNotificationScheduler
+    ): PrayerAlarmScheduler
 
     @Binds
     @Singleton

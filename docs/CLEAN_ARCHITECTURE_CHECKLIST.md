@@ -287,6 +287,16 @@ the package manager, WorkManager, `Service` start. Six held one; **none do now**
 - [x] ~~**Widget refresh** (`Home` called `PrayerTrackerWorker.enqueueImmediateWork(context)`).~~
   **Resolved** — `WidgetRefresher`. What Home wants to say is "the tracker changed, redraw".
 - [x] ~~**Locale and adhan download** (`Settings`).~~ **Resolved** — `AppLocale`, `AdhanDownloader`.
+- [x] ~~**A domain use case constructor-injecting an Android class.**~~ **Resolved** —
+  `PrayerAlarmScheduler`. `RescheduleNotificationsUseCase` injected the concrete
+  `core/util/PrayerNotificationScheduler`, which imports `AlarmManager`, `Context`,
+  `NotificationCompat`, `R` and `@ApplicationContext`. The detection command everyone reaches for
+  — grep `^import android` under `domain/` — reports **clean**, because the dependency is one hop
+  away. Worth remembering as a class of miss: an import census only sees direct edges. The port
+  is a sibling of `WidgetRefresher` / `CompassSensors`; the implementation did not move, only the
+  direction of the arrow. `preReminderMinutesByPrayer` / `enabledPrayerTypes` moved from
+  `core/util/` to `domain/repository/PrayerNotificationPrefs.kt` in the same change — they were
+  always pure `SettingsRepository` extensions over domain types.
 - [x] ~~**`QiblaViewModel` — the last one, and the only hard one.**~~ **Resolved.**
   `CompassSensors` emits finished orientation (azimuth/pitch/roll + accuracy) and `Haptics` the
   confirmation buzz. The low-pass filtering and the `getRotationMatrix`/`getOrientation` fusion

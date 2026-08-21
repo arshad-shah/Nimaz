@@ -46,9 +46,8 @@ enum class MushafLineType {
 
     companion object {
         /**
-         * Maps the DB `line_type` string (see
-         * [com.arshadshah.nimaz.data.local.database.entity.MushafLayoutIndopak16Entity]) to
-         * the typed enum; unknown values fall back to [AYAH].
+         * Maps the DB `line_type` string (as stored on the Indopak-16 mushaf layout table)
+         * to the typed enum; unknown values fall back to [AYAH].
          */
         fun fromString(value: String): MushafLineType = when (value.lowercase()) {
             "surah_header" -> SURAH_HEADER

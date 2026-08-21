@@ -1,7 +1,5 @@
 package com.arshadshah.nimaz.domain.model
 
-import com.arshadshah.nimaz.core.navigation.Route
-
 /** The kind of Islamic source a proof or search result comes from. */
 enum class ProofSource {
     QURAN,
@@ -66,7 +64,9 @@ sealed interface Proof {
 
     /** English text for the snippet — verse translation / hadith English text. */
     val displayText: String
-    val route: Route
+
+    /** Where the proof lives in the app's content. Mapped to a route at the navigation edge. */
+    val target: ContentTarget
 
     data class Quran(
         override val citationId: String,
@@ -75,7 +75,7 @@ sealed interface Proof {
         /** English surah name, e.g. "Al-Furqan" — the keyword result's subtitle. */
         val surahName: String,
         override val displayText: String,
-        override val route: Route,
+        override val target: ContentTarget,
     ) : Proof {
         override val source: ProofSource get() = ProofSource.QURAN
     }
@@ -87,7 +87,7 @@ sealed interface Proof {
         /** English collection name, e.g. "Sahih al-Bukhari" — the subtitle. */
         val bookName: String,
         override val displayText: String,
-        override val route: Route,
+        override val target: ContentTarget,
     ) : Proof {
         override val source: ProofSource get() = ProofSource.HADITH
     }

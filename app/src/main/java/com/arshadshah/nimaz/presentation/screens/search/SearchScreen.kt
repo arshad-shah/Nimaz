@@ -58,8 +58,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.core.navigation.Route
 import com.arshadshah.nimaz.domain.model.CitationId
+import com.arshadshah.nimaz.domain.model.ContentTarget
 import com.arshadshah.nimaz.domain.model.NameCatalog
 import com.arshadshah.nimaz.domain.model.Proof
 import com.arshadshah.nimaz.domain.model.ProofSource
@@ -108,7 +108,7 @@ fun SearchScreen(
     initialFilter: SearchFilter? = null,
     enableAsk: Boolean = false,
     onNavigateToSearchSettings: () -> Unit = {},
-    onNavigateToProof: (Route) -> Unit = {},
+    onNavigateToProof: (ContentTarget) -> Unit = {},
     viewModel: SearchViewModel = hiltViewModel(),
     askViewModel: AskViewModel = hiltViewModel(),
 ) {
@@ -302,7 +302,7 @@ fun SearchScreen(
                         CitedProofCard(
                             proof = proof,
                             query = state.query,
-                            onClick = { onNavigateToProof(proof.route) }
+                            onClick = { onNavigateToProof(proof.target) }
                         )
                     }
 

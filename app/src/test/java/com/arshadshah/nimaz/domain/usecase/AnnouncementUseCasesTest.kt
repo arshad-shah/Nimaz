@@ -1,7 +1,5 @@
 package com.arshadshah.nimaz.domain.usecase
 
-import com.arshadshah.nimaz.core.navigation.Route
-import com.arshadshah.nimaz.core.navigation.announcementRoute
 import com.arshadshah.nimaz.domain.model.Announcement
 import com.arshadshah.nimaz.domain.model.AnnouncementAction
 import com.arshadshah.nimaz.domain.model.AnnouncementType
@@ -110,14 +108,19 @@ class AnnouncementUseCasesTest {
         assertThat(repo.dismissed).contains(announcement.id)
     }
 
-    // helper resolver mirroring the real one
-    private val resolve = ResolveAnnouncementRouteUseCase(resolveFeatureKey = ::announcementRoute)
+    // The use case only ever asks "is this key one we know?", so the test answers with a set
+    // rather than the real allowlist — domain tests stay free of `core.navigation`, and the
+    // agreement between this predicate and the real allowlist is pinned separately, for every
+    // static key, by `core/navigation/AnnouncementCtaJourneyTest`.
+    private val knownKeys = setOf("quran/surah/18", "search/ask", "home")
+    private val resolve =
+        ResolveAnnouncementRouteUseCase(isKnownFeatureKey = { it in knownKeys })
 
     @Test
-    fun `known feature key resolves to NavigateToFeature with route`() {
+    fun `known feature key resolves to NavigateToFeature with the raw key`() {
         val action = resolve("quran/surah/18")
         assertThat(action).isEqualTo(
-            AnnouncementAction.NavigateToFeature("quran/surah/18", Route.QuranReader(18))
+            AnnouncementAction.NavigateToFeature("quran/surah/18")
         )
     }
 
@@ -137,7 +140,7 @@ class AnnouncementUseCasesTest {
     @Test
     fun `resolve route classifies url, known key, unknown key and blank`() {
         assertThat(resolve("search/ask"))
-            .isEqualTo(AnnouncementAction.NavigateToFeature("search/ask", Route.GlobalSearch))
+            .isEqualTo(AnnouncementAction.NavigateToFeature("search/ask"))
         assertThat(resolve("brand/new/key")).isEqualTo(AnnouncementAction.None)
         assertThat(resolve("  ")).isEqualTo(AnnouncementAction.None)
         // http (non-TLS) is not allowlisted
