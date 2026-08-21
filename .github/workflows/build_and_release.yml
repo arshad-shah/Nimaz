@@ -15,6 +15,7 @@ jobs:
   apk:
     name: Generate APK
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       # The content artifact lives in a private repository. Mint a short-lived
       # installation token for it rather than carrying a long-lived PAT: the token
@@ -65,6 +66,7 @@ jobs:
     name: Release APK
     needs: apk
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     permissions:
       contents: write
     steps:

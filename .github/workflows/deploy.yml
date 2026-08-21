@@ -6,8 +6,31 @@ on:
   # happen for unreviewed PR code (and re-using a version code makes the upload
   # fail with "Version code N has already been used"). PRs are validated by the
   # Android PR Checks workflow instead.
+  #
+  # Paths are an allowlist and fail closed. Without one, a merge to dev that touched only
+  # worker/ or docs/ ran a full signed release build, uploaded to the Play Store internal
+  # track, burned a versionCode, pushed a bump commit and cut a git tag and a GitHub Release
+  # — for a change with no effect on the Android app. A new top-level directory ships nothing
+  # until it is added here deliberately, which is the right direction for a lane that
+  # publishes to Play.
   push:
     branches: [ dev ]
+    paths:
+      - 'app/**'
+      - 'baselineprofile/**'
+      - 'gradle/**'
+      - 'gradlew'
+      - 'gradlew.bat'
+      - 'build.gradle.kts'
+      - 'settings.gradle.kts'
+      - 'gradle.properties'
+      # The release is driven by fastlane, so its own tooling ships a release.
+      - 'fastlane/**'
+      - 'Gemfile'
+      - 'Gemfile.lock'
+      # A new content artifact is a user-visible change and does warrant a release.
+      - 'data.lock.json'
+      - '.github/workflows/deploy.yml'
 
 # Never run two deploys at once. Each one bumps the version, uploads, and only
 # then pushes the bump back to dev, so overlapping runs read the same baseline
@@ -21,6 +44,7 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     # Skip the automated version-bump commit so it never re-triggers a
     # build/deploy. That commit carries a [skip ci] marker in its message.
     if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}

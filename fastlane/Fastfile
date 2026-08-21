@@ -2,14 +2,21 @@ default_platform(:android)
 
 platform :android do
   desc "Runs all the tests"
+    # Debug-scoped, not the bare `test`/`lint` lifecycle tasks. `gradle test` aggregates
+    # test<Variant>UnitTest across every build type, and the baseline-profile plugin adds
+    # nonMinifiedRelease and benchmarkRelease on top of debug and release — so the same 212-file
+    # suite ran several times over for one suite's worth of signal. Nothing downstream ever
+    # looked at the extra variants: jacocoTestReport depends on testDebugUnitTest, and
+    # pr_checks.yml uploads lint-results-debug.html. These are the same two tasks CLAUDE.md
+    # tells contributors to run locally.
     lane :test do
-      gradle(task: "test")
-      gradle(task: "lint")
+      gradle(task: ":app:testDebugUnitTest")
+      gradle(task: ":app:lintDebug")
     end
 
     desc "Run lint check"
     lane :lint do
-      gradle(task: "lint")
+      gradle(task: ":app:lintDebug")
     end
 
 
