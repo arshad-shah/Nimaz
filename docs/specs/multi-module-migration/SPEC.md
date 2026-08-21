@@ -169,12 +169,13 @@ That applies to every library module too.
   fetchNimazData, R8 config
    │
    ├─ :feature:quran      quran, khatam, bookmarks
-   ├─ :feature:prayer     prayer times, qibla, adhan audio
+   ├─ :feature:prayer     prayer times, qibla, night worship, adhan audio
    ├─ :feature:tracker    prayer tracker, fasting, tasbih
    ├─ :feature:content    dua, hadith, qaida, asma, asmaunnabi, names, prophets, catalog
    ├─ :feature:settings   18 screens, SettingsViewModel
    ├─ :feature:search     search + AI ask-with-proof
    ├─ :feature:tools      zakat
+   ├─ :feature:calendar   Islamic calendar, events
    ├─ :feature:onboarding
    ├─ :feature:about      about, help, licenses, more
    └─ :feature:widget     6 Glance widgets, receivers, workers
@@ -265,17 +266,17 @@ PR. It is the change that makes Phase 5 possible and it can be reviewed on its o
 1. `:feature:widget` — zero presentation dependencies, self-contained. Proves the pipeline on
    something that cannot break a screen.
 2. `:feature:onboarding`, `:feature:about`
-3. `:feature:tools`
+3. `:feature:tools`, `:feature:calendar`
 4. `:feature:search`
 5. `:feature:content` — dua, hadith, qaida, asma, asmaunnabi, names, prophets and catalog move
    **together**, because their ViewModels are one package.
 6. `:feature:tracker` — prayer tracker, fasting, tasbih, likewise.
 7. `:feature:quran` — quran, khatam, bookmarks. `QuranDao` stays in `:core:database`.
-8. `:feature:prayer`
+8. `:feature:prayer` — prayer times, qibla and night worship
 9. `:feature:settings` — 18 screens and a 1,324-line ViewModel. Largest and most
    cross-referenced; do it last.
 
-`screens/adaptive` and `screens/home` stay in `:app`. The adaptive shell depends on twelve
+All 26 `screens/` directories are accounted for: `screens/adaptive` and `screens/home` stay in `:app`. The adaptive shell depends on twelve
 features because it is the shell; moving it would invert the graph.
 
 Each PR moves: screens, ViewModels, that feature's molecules and organisms, its Hilt module
