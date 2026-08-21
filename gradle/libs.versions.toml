@@ -169,8 +169,20 @@ room-testing = { group = "androidx.room", name = "room-testing", version.ref = "
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4", version.ref = "uiTestJunit4" }
 androidx-work-testing = { group = "androidx.work", name = "work-testing", version.ref = "workManager" }
 
+# ── Gradle plugin artifacts, for the `build-logic` convention plugins ────────
+# A convention plugin needs the plugin's *implementation* on its compile classpath, which a
+# `[plugins]` alias does not provide. These are `compileOnly` in :build-logic:convention — the
+# real versions come from the main build's plugin resolution.
+android-gradle-plugin = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
+kotlin-gradle-plugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
+compose-compiler-gradle-plugin = { group = "org.jetbrains.kotlin", name = "compose-compiler-gradle-plugin", version.ref = "kotlin" }
+ksp-gradle-plugin = { group = "com.google.devtools.ksp", name = "symbol-processing-gradle-plugin", version.ref = "ksp" }
+hilt-gradle-plugin = { group = "com.google.dagger", name = "hilt-android-gradle-plugin", version.ref = "hilt" }
+
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
+android-library = { id = "com.android.library", version.ref = "agp" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 android-test = { id = "com.android.test", version.ref = "agp" }
 baselineprofile = { id = "androidx.baselineprofile", version.ref = "benchmark" }
 # Note: no standalone kotlin-android plugin — AGP 9 provides built-in Kotlin support.

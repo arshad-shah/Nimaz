@@ -43,6 +43,9 @@ on:
       # PR to dev, so it needs this lane too. Without the pattern the `[deploy]`
       # marker commit produces no failure and no build — it just does nothing. (#462)
       - 'epic/**'
+      # Same reasoning for the per-PR branches of the multi-module stack (#551), so any one
+      # of them can be put on a real device before it is merged.
+      - 'mm/**'
 
 # One internal upload at a time — two concurrent runs would race for the next versionCode.
 concurrency:

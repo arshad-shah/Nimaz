@@ -18,6 +18,11 @@ on:
     paths:
       - 'app/**'
       - 'baselineprofile/**'
+      # The multi-module migration (#551) creates these; listing them before they exist is
+      # harmless and stops a later PR in that stack from silently skipping this lane.
+      - 'build-logic/**'
+      - 'core/**'
+      - 'feature/**'
       - 'gradle/**'
       - 'gradlew'
       - 'gradlew.bat'
