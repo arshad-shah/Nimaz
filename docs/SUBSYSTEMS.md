@@ -149,11 +149,23 @@ Every widget also refreshes when a setting it is computed from changes, via
 Each is a separate file on disk; a new one is a new migration surface, so prefer adding keys to
 `nimaz_preferences` unless the slice is genuinely self-contained.
 
+Three are Preferences DataStores created with `preferencesDataStore(name = …)`. The fourth entry
+is a **typed** DataStore built by hand with `DataStoreFactory.create`, which takes its file name
+as a parameter rather than a literal — so it is listed by its owner.
+
 | File name | Owner | Holds | Section |
 |---|---|---|---|
 | `nimaz_preferences` | `data/local/datastore/PreferencesDataStore.kt` | every user setting; the sync payload's `preferences` block | [§6](#6-preferences-datastore) |
 | `nimaz_announcements` | `data/local/datastore/AnnouncementLocalDataSource.kt` | the current announcement (JSON) + permanently dismissed ids | [§12](#12-engagement-announcements-fcm) |
 | `nimaz_ai_device` | `data/ai/DeviceIdProvider.kt` | the rotating pseudonymous device id sent with Ask-with-Proof calls | [`ai-ask-with-proof.md`](ai-ask-with-proof.md) |
+| `<widget>_widget` × 6 | `JsonGlanceStateDefinition` (`widget/core/`) | one JSON-serialized Glance state per widget: `next_prayer_widget`, `prayer_times_widget`, `prayer_tracker_widget`, `hijri_date_widget`, `hijri_calendar_widget`, `khatam_widget` | [§2](#2-glance-widgets) |
+
+The widget stores hold **rendered state, never user data**: each is a cache a worker refills, and
+a corrupt one is replaced with the default rather than migrated ([§2](#2-glance-widgets)). They
+are deliberately outside the sync payload for that reason.
+
+> Not a DataStore, and correctly outside this table: `SharedPreferencesContentArtifactStore`
+> (`data/local/content/ContentArtifactStore.kt`) is a `SharedPreferences` file.
 
 ### 0.6 Notification channels
 
@@ -1052,13 +1064,14 @@ place** whenever you add a migration — the two can no longer drift.
 
 ## 6. Preferences (DataStore)
 
-The app has **three** DataStore files, listed in [§0.5](#05-datastore-files). This section is
-about the main one; the other two are self-contained slices documented where they are used.
+The app has **three** Preferences DataStore files plus the per-widget Glance state stores, all
+listed in [§0.5](#05-datastore-files). This section is about the main one; the others are
+self-contained slices documented where they are used.
 
 `data/local/datastore/PreferencesDataStore.kt` — the app's **single central settings store**,
 backed by a Jetpack Preferences DataStore (`preferencesDataStore(name = "nimaz_preferences")`).
 
-> **Adding a fourth DataStore file is a decision, not a detail.** Each one is an independent
+> **Adding another DataStore file is a decision, not a detail.** Each one is an independent
 > migration and export surface: the sync payload (§10) carries `nimaz_preferences` only, so a
 > setting that lives anywhere else silently does not sync. Add keys to `nimaz_preferences`
 > unless the slice is genuinely not user settings (as announcements and the AI device id are).
