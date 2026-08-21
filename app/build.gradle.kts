@@ -510,7 +510,7 @@ fun coverageExecutionData(): FileCollection =
  *
  * Referenced by directory rather than through `project(":core:domain")`: a live `Project` in a
  * task action is a configuration-cache failure, and this build runs with `problems=fail`.
- * [packageRoot] is what the report must actually contain — see `assertEveryModuleIsMeasured`.
+ * [packageRoot] is what the merged report must actually contain — see `coverageFloor`.
  */
 data class CoverageModule(
     val gradlePath: String,
@@ -548,24 +548,18 @@ val coverageSourceDirs = files(
 )
 
 /**
- * Fails if a module listed in [coverageModules] contributed no classes to the merged report.
+ * What the merged report must contain, as plain strings, for the floor asserted in
+ * `jacocoTestReport`'s `doLast`.
  *
- * The floor #553 established for the doc scans, applied to coverage: an aggregate that quietly
- * drops a module reads exactly like an aggregate that includes it, only with a nicer percentage.
- * Every later extraction PR adds its module here, so forgetting to wire one up is a red build
- * rather than a number nobody questions.
+ * Flattened here rather than read off [coverageModules] inside the task action, and asserted
+ * inline rather than through a helper function. **Both are configuration-cache requirements, not
+ * style**: a lambda that calls a build-script function — or that touches an instance of a
+ * build-script class such as [CoverageModule] — captures the script object, and Gradle cannot
+ * serialize one. This build runs with `configuration-cache=problems=fail`, so that is a failed
+ * build rather than a warning.
  */
-fun assertEveryModuleIsMeasured(reportXml: File) {
-    if (!reportXml.isFile) return
-    val report = reportXml.readText()
-    val missing = coverageModules.filter { """<package name="${it.packageRoot}""" !in report }
-    check(missing.isEmpty()) {
-        "The merged coverage report contains no classes from " +
-            missing.joinToString { it.gradlePath } +
-            ". Its exec data or class directory is not wired into :app:jacocoTestReport, so " +
-            "coverage is being reported over a smaller codebase than the app actually ships."
-    }
-}
+val coverageFloor: List<Pair<String, String>> =
+    coverageModules.map { it.gradlePath to it.packageRoot }
 
 // Module-wide coverage report — satisfies "add code coverage to this app".
 tasks.register<JacocoReport>("jacocoTestReport") {
@@ -589,8 +583,28 @@ tasks.register<JacocoReport>("jacocoTestReport") {
     sourceDirectories.setFrom(coverageSourceDirs)
     executionData.setFrom(coverageExecutionData())
 
+    // The floor #553 established for the doc scans, applied to coverage: an aggregate that
+    // quietly drops a module reads exactly like one that includes it, only with a nicer
+    // percentage. Every later extraction PR adds its module to `coverageModules`, so forgetting
+    // to wire one up is a red build rather than a number nobody questions.
     val reportXml = layout.buildDirectory.file("reports/jacoco/jacocoTestReport.xml")
-    doLast { assertEveryModuleIsMeasured(reportXml.get().asFile) }
+    val floor = coverageFloor
+    doLast {
+        val report = reportXml.get().asFile
+        if (report.isFile) {
+            val text = report.readText()
+            val missing = floor.filter { (_, packageRoot) ->
+                """<package name="$packageRoot""" !in text
+            }
+            check(missing.isEmpty()) {
+                "The merged coverage report contains no classes from " +
+                    missing.joinToString { (gradlePath, _) -> gradlePath } +
+                    ". Its exec data or class directory is not wired into " +
+                    ":app:jacocoTestReport, so coverage is being reported over a smaller " +
+                    "codebase than the app actually ships."
+            }
+        }
+    }
 }
 
 // Focused report for the presentation atoms package.

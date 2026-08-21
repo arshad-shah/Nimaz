@@ -143,6 +143,7 @@ The obligations, in short:
 ./gradlew :app:compileDebugKotlin     # runs KSP → validates Hilt + Room wiring
 ./gradlew :app:testDebugUnitTest
 ./gradlew :core:domain:check          # domain tests + androidFreeClasspath — seconds, no Android
+./gradlew :app:jacocoTestReport --dry-run   # see below — seconds, and catches a whole class of red CI
 ./gradlew :app:lintDebug              # SLOW (~10 min) and CI-blocking — do not skip it
 python3 scripts/check_docs.py         # docs still describe the code (no toolchain needed)
 
@@ -154,6 +155,18 @@ python3 scripts/check_docs.py         # docs still describe the code (no toolcha
 constants directly, so removing or renaming one leaves the instrumented source set broken while
 all four gates stay green — a branch that goes out clean locally and red on the emulator. If you
 touched navigation, build `androidTest` too.
+
+**The configuration cache turns a build-script mistake into a failed build, and `--dry-run`
+is how you find one cheaply.** `gradle.properties` sets `configuration-cache=true` with
+`problems=fail`, so a task action that captures a build-script *function* or an instance of a
+build-script *class* fails the build with *"cannot serialize Gradle script object references"* —
+at cache-**storage** time, which happens whether or not the task's own dependencies can run. That
+matters here because several gates (`jacocoTestReport`, `assembleRelease`) depend on
+`fetchNimazData`, which needs a credential for the private content repo; without one those tasks
+never execute locally and the mistake reaches CI. `--dry-run` still configures the build and
+stores the cache entry, so it catches the problem in seconds with no credential. Inside a
+`doLast`, capture plain values — `String`, `List<Pair<String, String>>`, a `Provider` — and
+inline the logic rather than calling a helper declared in the same script.
 
 **`lintDebug` is a real gate, not an optional extra.** `fastlane/Fastfile`'s `test` lane runs
 `:app:testDebugUnitTest` *and* `:app:lintDebug` — the same two tasks listed above — so every PR
