@@ -16,6 +16,7 @@ import com.arshadshah.nimaz.domain.model.HighLatitudeRule
 import com.arshadshah.nimaz.domain.model.PrayerType
 import com.arshadshah.nimaz.domain.model.WorshipReminderType
 import com.arshadshah.nimaz.domain.model.isLocationSet
+import com.arshadshah.nimaz.domain.repository.PrayerAlarmScheduler
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.time.DayOfWeek
@@ -37,7 +38,7 @@ class PrayerNotificationScheduler @Inject constructor(
     @ApplicationContext private val context: Context,
     private val prayerTimeCalculator: PrayerTimeCalculator,
     private val settingsRepository: SettingsRepository
-) {
+) : PrayerAlarmScheduler {
     private val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
     private val notificationManager =
         context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -233,18 +234,18 @@ class PrayerNotificationScheduler @Inject constructor(
      * @param preReminders Lead time in minutes per prayer. A prayer absent from the map gets
      *   no pre-reminder — that is how "off" is expressed, rather than a zero lead time.
      */
-    fun scheduleTodaysPrayerNotifications(
+    override fun scheduleTodaysPrayerNotifications(
         latitude: Double,
         longitude: Double,
         notificationsEnabled: Boolean,
-        enabledPrayers: Set<PrayerType>? = null,
-        preReminders: Map<PrayerType, Int> = emptyMap(),
-        calculationMethod: CalculationMethod = CalculationMethod.MUSLIM_WORLD_LEAGUE,
-        asrCalculation: AsrCalculation = AsrCalculation.STANDARD,
-        highLatitudeRule: HighLatitudeRule? = null,
-        adjustments: Map<PrayerType, Int> = emptyMap(),
-        fridayReminderEnabled: Boolean = false,
-        fridayReminderMinutes: Int = 60
+        enabledPrayers: Set<PrayerType>?,
+        preReminders: Map<PrayerType, Int>,
+        calculationMethod: CalculationMethod,
+        asrCalculation: AsrCalculation,
+        highLatitudeRule: HighLatitudeRule?,
+        adjustments: Map<PrayerType, Int>,
+        fridayReminderEnabled: Boolean,
+        fridayReminderMinutes: Int
     ) {
         if (!notificationsEnabled) {
             cancelAllPrayerNotifications()

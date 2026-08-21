@@ -27,9 +27,9 @@ enum class TranslationLanguage(
 }
 
 /**
- * Every Quran translation the app ships — the single source of truth, in the spirit of
- * [com.arshadshah.nimaz.presentation.theme.QuranArabicFont]. The settings picker and the
- * reader both derive from this enum; nothing else enumerates translations.
+ * Every Quran translation the app ships — the single source of truth, in the spirit of the
+ * `QuranArabicFont` catalogue in the theme layer. The settings picker and the reader both
+ * derive from this enum; nothing else enumerates translations.
  *
  * ## Adding one
  * 1. In the arshad-shah/nimaz-data repository, add the edition and run the importer.

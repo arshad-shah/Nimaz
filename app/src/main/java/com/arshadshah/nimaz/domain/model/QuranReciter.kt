@@ -16,7 +16,7 @@ enum class RecitationStyle {
 
 /**
  * Every reciter the app can play — the single source of truth, in the spirit of
- * [QuranTranslation] and [com.arshadshah.nimaz.presentation.theme.QuranArabicFont].
+ * [QuranTranslation] and the `QuranArabicFont` catalogue in the theme layer.
  *
  * Before this existed the catalogue was written out three times: a `popularReciters` list in
  * `SelectReciterScreen`, a `RECITER_CDN_MAP` plus a `getReciterDisplayName` `when` in

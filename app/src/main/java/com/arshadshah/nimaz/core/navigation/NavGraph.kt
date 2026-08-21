@@ -1382,7 +1382,7 @@ fun NavGraph(
                         )
                     },
                     onNavigateToSearchSettings = { navController.navigate(Route.SearchSettings) },
-                    onNavigateToProof = { route -> navController.navigate(route) }
+                    onNavigateToProof = { target -> navController.navigate(target.toRoute()) }
                 )
             }
 

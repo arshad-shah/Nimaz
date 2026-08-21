@@ -368,6 +368,15 @@ serialized `Route`, so an old app version safely ignores a key it does not recog
 hides its CTA instead of navigating somewhere unexpected. See
 [`SUBSYSTEMS.md` §12](SUBSYSTEMS.md#12-engagement-announcements-fcm) for the payload itself.
 
+**Who resolves what.** The domain layer only *validates*: `ResolveAnnouncementRouteUseCase` takes
+an `isKnownFeatureKey: (String) -> Boolean` predicate (wired in `AnnouncementModule` as
+`{ announcementRoute(it) != null }`) and yields `AnnouncementAction.NavigateToFeature(routeKey)`
+carrying the raw key. `NavGraph` re-resolves that key with `announcementRoute(key)` and navigates.
+Domain therefore never names a `Route` — but the two halves must agree, or a banner shows a CTA
+that goes nowhere (or hides one that would have worked), so
+`AnnouncementCtaJourneyTest` asserts the predicate and the allowlist agree for **every** static key,
+reading the keys out of `AnnouncementRoutes.kt` rather than from a hand-copied list.
+
 ```mermaid
 flowchart TD
     K["payload route value"] --> N{"blank?"}
@@ -376,7 +385,7 @@ flowchart TD
     U -->|yes| Url["AnnouncementAction.OpenUrl<br/>→ ACTION_VIEW"]
     U -->|no| Norm["trim, strip leading/trailing '/'"]
     Norm --> S{"static allowlist<br/>exact match? §4.1"}
-    S -->|hit| Nav["AnnouncementAction.NavigateToFeature"]
+    S -->|hit| Nav["AnnouncementAction.NavigateToFeature(routeKey)<br/>NavGraph re-resolves the key"]
     S -->|miss| G{"parameterised grammar<br/>match + in range? §4.2"}
     G -->|hit| Nav
     G -->|miss| Rejected["null → CTA hidden<br/>+ analytics announcement_route_rejected"]

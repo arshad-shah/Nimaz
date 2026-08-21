@@ -1,7 +1,5 @@
 package com.arshadshah.nimaz.domain.model
 
-import com.arshadshah.nimaz.core.navigation.Route
-
 /**
  * An engagement announcement delivered via FCM (topic broadcast from the
  * Firebase console). Rendered as a dismissable banner on the Home screen;
@@ -85,8 +83,14 @@ sealed interface AnnouncementAction {
     /** Open an https:// URL in the browser. */
     data class OpenUrl(val url: String) : AnnouncementAction
 
-    /** Navigate to an allowlisted in-app feature (see announcementRoute). */
-    data class NavigateToFeature(val routeKey: String, val route: Route) : AnnouncementAction
+    /**
+     * Navigate to an allowlisted in-app feature.
+     *
+     * Carries the raw route key only. The key is resolved to a navigation destination at the
+     * navigation edge (`announcementRoute` in `core/navigation`); domain validates the key but
+     * never names the destination type, so it stays free of the navigation layer.
+     */
+    data class NavigateToFeature(val routeKey: String) : AnnouncementAction
 
     /** Unknown or missing route — the banner hides its CTA. */
     data object None : AnnouncementAction

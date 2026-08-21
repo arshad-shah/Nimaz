@@ -1,10 +1,10 @@
 package com.arshadshah.nimaz.domain.usecase.ai
 
-import com.arshadshah.nimaz.core.navigation.Route
 import com.arshadshah.nimaz.domain.model.AiError
 import com.arshadshah.nimaz.domain.model.AnswerConfidence
 import com.arshadshah.nimaz.domain.model.Ayah
 import com.arshadshah.nimaz.domain.model.CitationId
+import com.arshadshah.nimaz.domain.model.ContentTarget
 import com.arshadshah.nimaz.domain.model.Hadith
 import com.arshadshah.nimaz.domain.model.HadithBook
 import com.arshadshah.nimaz.domain.model.HadithRef
@@ -78,7 +78,7 @@ class AskWithProofUseCaseTest {
         // The proof carries the same structured fields a keyword result shows:
         // surah:ayah numbers, English surah name and the LOCAL translation.
         val quranProof = answered.proofs.first() as Proof.Quran
-        assertThat(quranProof.route).isEqualTo(Route.QuranReader(2, 153))
+        assertThat(quranProof.target).isEqualTo(ContentTarget.Ayah(2, 153))
         assertThat(quranProof.surahNumber).isEqualTo(2)
         assertThat(quranProof.ayahNumber).isEqualTo(153)
         assertThat(quranProof.surahName).isEqualTo("The Cow")
@@ -133,7 +133,7 @@ class AskWithProofUseCaseTest {
         assertThat(hadithProof.displayText).isEqualTo("Actions are judged by intentions.")
         assertThat(hadithProof.hadithNumber).isEqualTo(1)
         assertThat(hadithProof.bookName).isEqualTo("Sahih al-Bukhari")
-        assertThat(hadithProof.route).isEqualTo(Route.HadithReader("6041"))
+        assertThat(hadithProof.target).isEqualTo(ContentTarget.Hadith("6041"))
     }
 
     @Test

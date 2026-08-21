@@ -60,9 +60,28 @@ Within `presentation/`, the design system is the larger half:
 This matters, because each item below is work a typical modularization has to do *first* and
 that Nimaz has already done. The migration is unusually well-prepared.
 
-1. **The domain layer is genuinely pure.** Across 103 files there is not one `android`,
-   `androidx`, `dagger`, `room` or Firebase import. The only external annotation is
-   `javax.inject.Inject` (28 files) — a plain JVM annotation, fine in a `kotlin-jvm` module.
+1. **The domain layer is pure — after PR 4 (#555), and only *directly* before it.** Across 103
+   files there is not one **direct** `android`, `androidx`, `dagger`, `room` or Firebase import,
+   and the only external annotation is `javax.inject.Inject` (28 files) — a plain JVM annotation,
+   fine in a `kotlin-jvm` module.
+
+   That claim as originally written was false, and in the way that mattered: an import census
+   only sees direct edges. `domain/usecase/notification/RescheduleNotificationsUseCase` **injected
+   the concrete `core/util/PrayerNotificationScheduler`**, which imports `AlarmManager`,
+   `NotificationChannel`, `PendingIntent`, `Context`, `NotificationCompat`, `R` and
+   `@ApplicationContext`. Domain therefore depended on Android *transitively*, and `:core:domain`
+   could not have compiled without Android on its classpath — the very exit criterion of PR 5
+   (#556). Two `SettingsRepository` extensions in `core/util/PrayerNotificationPrefs.kt` were a
+   milder case of the same thing: pure JVM, merely misplaced.
+
+   **PR 4 fixed both**, along with the five `core.navigation.Route` imports of §3.7 (two of which
+   were in domain *tests*, invisible to that section's `src/main`-only grep). The scheduler is now
+   behind the `PrayerAlarmScheduler` port in `domain/repository/`, a sibling of `WidgetRefresher`
+   and `CompassSensors`; the extensions moved to `domain/repository/PrayerNotificationPrefs.kt`.
+   Only the direction of the arrows changed — no behaviour did.
+
+   The lesson generalises past this one file: when a later phase asserts "module X has no
+   dependency on Y", assert it by **resolving the compile classpath**, not by grepping imports.
    `:core:domain` can be a non-Android module on day one.
 2. **Screens are navigation-decoupled.** 84 of 107 screen files take `onNavigate`/`onBack`
    lambdas; only 7 import `NavController` or `NavHostController`. This is the single biggest
@@ -150,15 +169,30 @@ Nothing in it is "core" in the dependency-order sense:
 
 `core/util` has to be triaged file by file before anything can depend on it.
 
-### 3.7 A domain → navigation inversion
+### 3.7 A domain → navigation inversion — done in PR 4 (#555)
 
-Five domain files import `core.navigation.Route`: `UnifiedBookmark.kt`, `AiModels.kt`,
-`Announcement.kt`, `AskWithProofUseCase.kt`, `AnnouncementUseCases.kt`. Domain must not know
-about navigation. Hold a domain-level target type and map it to `Route` at the presentation edge.
+Five domain files imported `core.navigation.Route`: `UnifiedBookmark.kt`, `AiModels.kt`,
+`Announcement.kt`, `AskWithProofUseCase.kt`, `AnnouncementUseCases.kt` — plus two domain **test**
+files, `AnnouncementUseCasesTest.kt` and `AskWithProofUseCaseTest.kt`, which a `src/main`-only
+grep never sees. Domain must not know about navigation.
 
-Three further references are KDoc-only (`QuranReciter.kt`, `MushafLayout.kt`,
-`QuranTranslation.kt` point at `data`/`presentation` symbols in comments). Harmless to the
-compiler, but they read as real dependencies to the next person.
+Only one of the five needed a domain type. The rest were less work than they looked:
+
+| Site | What it actually was | Fix |
+|---|---|---|
+| `UnifiedBookmark.kt` | a **dead import** — the type navigates by `surahNumber`/`hadithBookId`/`duaId` | delete the line |
+| `Announcement.kt` | `NavigateToFeature(routeKey, route)` — the `route` was **dead payload**, read by nothing outside domain | `NavigateToFeature(routeKey: String)` |
+| `AnnouncementUseCases.kt` | needed *validity*, not a destination | `isKnownFeatureKey: (String) -> Boolean`, wired as `{ announcementRoute(it) != null }` |
+| `AiModels.kt` / `AskWithProofUseCase.kt` | the genuine case | `Proof.target: ContentTarget` (`Ayah` \| `Hadith`) + `ContentTarget.toRoute()` in `core/navigation`, called in `NavGraph` |
+
+The lesson worth carrying into later phases: *an outward import is not automatically an outward
+dependency*. Three of the five carried no information the outer layer was using. Check what reads
+a field before designing a type to replace it.
+
+Three further references were KDoc-only (`QuranReciter.kt`, `MushafLayout.kt`,
+`QuranTranslation.kt` pointed at `data`/`presentation` symbols in comments). Harmless to the
+compiler, but they read as real dependencies to the next person — the fully-qualified links are
+gone, the prose stayed.
 
 ### 3.8 No convention-plugin infrastructure
 
@@ -229,8 +263,9 @@ generic `Nimaz*` components stay in `:core:ui`.
 
 ### Phase 1 — Extract `:core:domain` as a pure JVM module
 
-Fix §3.7 first (the five `Route` imports and the three KDoc references), then move `domain/`
-wholesale under the `kotlin-jvm` plugin.
+§3.7's outward references (the five `Route` imports, the three KDoc links, and the transitive
+Android dependency described in §1 above) are fixed in **PR 4 (#555)**, which lands first. Phase 1
+then moves `domain/` wholesale under the `kotlin-jvm` plugin.
 
 Highest-leverage single step: it compiles without AGP or Robolectric, its tests run in seconds,
 and from here a stray `import android.*` in domain is a build failure rather than a review

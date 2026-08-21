@@ -427,6 +427,11 @@ and re-scheduling on midnight rollover and boot.
 
 **Key files.**
 - `core/util/PrayerNotificationScheduler.kt` — `@Singleton`; schedules/cancels alarms, owns the channels.
+  Implements the domain port `PrayerAlarmScheduler` (`domain/repository/`), which is what
+  `RescheduleNotificationsUseCase` injects — the use case must not name an Android class. The
+  method's default argument values live on the interface (Kotlin forbids an override from
+  restating them), so `AppInitializer`, `PrayerRescheduler` and the instrumented test, which all
+  hold the concrete type, are unaffected.
 - `core/util/BootReceiver.kt` — `@AndroidEntryPoint BroadcastReceiver`; fires for **all** alarms and actually posts notifications / triggers adhan.
 - `core/util/NotificationContentHelper.kt` — pure title/message/summary text generator.
 - `data/audio/AdhanPlaybackService.kt` — plays the adhan and posts the merged prayer+adhan notification (§1).
@@ -483,7 +488,7 @@ a snapshot taken at construction, and since `hiltViewModel()` gives each setting
 instance, a prayer switched off on the Notification screen was re-armed by an unrelated change on
 the Prayer screen. The use case exists so there is no state to pass in. Reuse
 `settingsRepository.enabledPrayerTypes()` and `preReminderMinutesByPrayer()`
-(`core/util/PrayerNotificationPrefs.kt`) rather than re-deriving either.
+(`domain/repository/PrayerNotificationPrefs.kt`) rather than re-deriving either.
 
 **Scheduling.** `scheduleTodaysPrayerNotifications(...)` cancels everything then re-arms enabled prayers, using `setExactAndAllowWhileIdle(RTC_WAKEUP, …)` with `PendingIntent.getBroadcast` targeting `BootReceiver` (explicit intent). Request codes: prayer `1000 + ordinal`, pre-reminder `2000 + ordinal`, midnight reschedule `9999` (00:01), daily summary `8889` (23:00), Friday reminder `8890`, Khatam reminder `8891`. Pre-reminders fire at `prayerTime − preReminders[type]` (skipped for Sunrise) — see **per-prayer alert style and reminder** below. The **Friday (Jummah) reminder** (`scheduleFridayReminder`, gated on `fridayReminderEnabled`) is a one-shot at the upcoming Friday's Dhuhr − `fridayReminderMinutes`, re-armed on every reschedule so it always targets the next Friday.
 
@@ -505,7 +510,7 @@ The two are honoured at **different times**, which is the thing to keep straight
 `scheduleTodaysPrayerNotifications` takes `preReminders: Map<PrayerType, Int>` — a prayer absent
 from the map gets no reminder, which is how "off" is expressed rather than a zero offset. The
 three callers (`AppInitializer`, `BootReceiver`, `SettingsViewModel`) build it through
-`SettingsRepository.preReminderMinutesByPrayer()` (`core/util/PrayerNotificationPrefs.kt`) so they
+`SettingsRepository.preReminderMinutesByPrayer()` (`domain/repository/PrayerNotificationPrefs.kt`) so they
 cannot drift. `PrayerAlertStyle.playsAdhan(globalAdhanEnabled, isSunrise)` and `.isMuted(isSunrise)`
 state the fire-time rules once: the global adhan switch stays a **master gate** over the per-prayer
 style, so turning the adhan off in Adhan & sound silences the call everywhere without rewriting

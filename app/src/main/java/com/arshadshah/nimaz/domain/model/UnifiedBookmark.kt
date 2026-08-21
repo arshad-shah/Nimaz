@@ -1,7 +1,5 @@
 package com.arshadshah.nimaz.domain.model
 
-import com.arshadshah.nimaz.core.navigation.Route
-
 /**
  * A Quran, Hadith or Dua bookmark under one type.
  *

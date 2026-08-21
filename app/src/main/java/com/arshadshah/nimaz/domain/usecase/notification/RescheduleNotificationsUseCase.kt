@@ -1,13 +1,13 @@
 package com.arshadshah.nimaz.domain.usecase.notification
 
-import com.arshadshah.nimaz.core.util.PrayerNotificationScheduler
-import com.arshadshah.nimaz.core.util.enabledPrayerTypes
-import com.arshadshah.nimaz.core.util.preReminderMinutesByPrayer
 import com.arshadshah.nimaz.domain.model.AsrCalculation
 import com.arshadshah.nimaz.domain.model.CalculationMethod
 import com.arshadshah.nimaz.domain.model.HighLatitudeRule
 import com.arshadshah.nimaz.domain.model.PrayerType
+import com.arshadshah.nimaz.domain.repository.PrayerAlarmScheduler
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
+import com.arshadshah.nimaz.domain.repository.enabledPrayerTypes
+import com.arshadshah.nimaz.domain.repository.preReminderMinutesByPrayer
 import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 
@@ -37,7 +37,7 @@ import javax.inject.Inject
  */
 class RescheduleNotificationsUseCase @Inject constructor(
     private val settingsRepository: SettingsRepository,
-    private val scheduler: PrayerNotificationScheduler,
+    private val scheduler: PrayerAlarmScheduler,
 ) {
 
     suspend operator fun invoke() {

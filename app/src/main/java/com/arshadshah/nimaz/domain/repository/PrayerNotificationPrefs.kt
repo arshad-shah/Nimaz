@@ -1,7 +1,6 @@
-package com.arshadshah.nimaz.core.util
+package com.arshadshah.nimaz.domain.repository
 
 import com.arshadshah.nimaz.domain.model.PrayerType
-import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import kotlinx.coroutines.flow.first
 
 /**
@@ -10,6 +9,11 @@ import kotlinx.coroutines.flow.first
  * Three places arm today's alarms — app start, boot, and a settings change — and each of
  * them needs the same two answers. Keeping the reads here means the three cannot drift, and
  * that adding a prayer is one edit rather than three.
+ *
+ * They live beside [SettingsRepository] rather than in `core/util` because that is all they
+ * are: pure extensions on a domain interface, reading domain flags into domain types. Sitting
+ * in `core/util` they were an outward import from `RescheduleNotificationsUseCase` for no
+ * reason other than where the file happened to be.
  */
 
 /** The five prayers a user can be reminded about. Sunrise gets no pre-reminder. */
