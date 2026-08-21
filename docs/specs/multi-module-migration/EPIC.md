@@ -122,11 +122,16 @@ rather than passes.
 Revert. This negative test is the point of the PR.
 
 **#3 — Record the baseline and enable configuration cache** · `mm/02-baseline-metrics`
-Add `org.gradle.configuration-cache=true`. Commit a `BASELINE.md` in this spec folder holding
-the pre-migration measurements from SPEC §6.5: clean `assembleDebug`, the four incremental
-scenarios, `testDebugUnitTest` wall time, and configuration time. The known starting point is
-`:app:compileDebugKotlin` = **3m 44s** cold.
-*Exit:* numbers committed. Without them the epic cannot demonstrate it worked.
+Add `org.gradle.configuration-cache=true` (plus `…problems=fail`). Commit a `BASELINE.md` in
+this spec folder holding the pre-migration measurements from SPEC §6.5: clean `assembleDebug`,
+the four incremental scenarios, `testDebugUnitTest` wall time, and configuration time — **with
+the protocol they were taken under**, since a number without one is folklore. Enabling the cache
+means converting `fetchNimazData` into a typed task class in `build-logic`, and fixing two
+untracked configuration-time reads in `app/build.gradle.kts` that would otherwise let a stale
+`CONTENT_ARTIFACT_SHA256` be baked into the APK.
+*Exit:* [`BASELINE.md`](BASELINE.md) committed, and `--configuration-cache` green on two
+consecutive runs — the second reporting reuse — for `:app:assembleDebug` **and**
+`:app:assembleRelease`. Without the numbers the epic cannot demonstrate it worked.
 
 ### Milestone 1 — `:core:domain` (PRs 4–5)
 

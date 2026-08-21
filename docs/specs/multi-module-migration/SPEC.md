@@ -405,8 +405,14 @@ Runtime-only hazards:
 
 ### 6.5 Tier 5 — did it actually pay off?
 
-Baseline all of these in Phase 0 and re-measure at every phase gate. The known starting point is
-`:app:compileDebugKotlin` = 3m 44s cold.
+Baseline all of these in Phase 0 and re-measure at every phase gate.
+
+**The baseline is [`BASELINE.md`](BASELINE.md)** — measured on `mm/02-baseline-metrics`, with the
+protocol it was taken under written down beside it. The `:app:compileDebugKotlin` = 3m 44s figure
+that used to stand here has **no recorded protocol** (no branch, daemon state, `clean` vs
+`--rerun-tasks`, or content-cache state) and is not reproducible as stated; do not compare
+against it. `BASELINE.md` also records which rows are expected *not* to improve, and pins exactly
+which number the stopping rule below is read from.
 
 | Measurement | Expectation |
 |---|---|
@@ -416,7 +422,7 @@ Baseline all of these in Phase 0 and re-measure at every phase gate. The known s
 | Incremental: touch a `domain` model | Will not improve much |
 | Incremental: touch `strings.xml` | Will not improve; deliberately unsplit |
 | `testDebugUnitTest` wall time | Should improve via parallel module execution |
-| `:core:domain:test` alone | Should drop to seconds |
+| `:core:domain:test` alone | Should drop to seconds — no pre-migration value exists; first measured at the PR 5 gate |
 | Configuration time (`--profile`) | Watch it — more modules means more configuration |
 
 **Stopping rule:** if incremental rebuild after touching a leaf screen has not improved by at

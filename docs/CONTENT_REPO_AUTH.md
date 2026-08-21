@@ -12,8 +12,8 @@
 > [`DOCUMENTATION.md`](DOCUMENTATION.md) for the update contract.
 
 The prepackaged database is fetched from **[arshad-shah/nimaz-data](https://github.com/arshad-shah/nimaz-data)**,
-which is private. `fetchNimazData` (see `gradle/nimaz-data.gradle.kts`) needs a credential that
-can read its releases.
+which is private. `fetchNimazData` (registered in `app/build.gradle.kts`, implemented by
+`FetchNimazDataTask` in `build-logic`) needs a credential that can read its releases.
 
 CI uses a **GitHub App**, not a personal access token. The difference matters:
 
@@ -90,6 +90,13 @@ No App involved. The Gradle task resolves, in order:
 3. `gh auth token`
 
 If you already have `gh auth login` with access to the repo, there is nothing to configure.
+
+The chain is a lazy `orElse` of three Gradle providers, so `gh` is only invoked when the first
+two are absent, and a machine without the `gh` CLI produces the "no credential" message rather
+than a stack trace. The credential is an `@Internal` task property and never an `@Input`: input
+values are written into the configuration-cache entry on disk, and a token is not something to
+leave in `.gradle/configuration-cache`. It takes no part in up-to-date checks either, which is
+correct — the artifact's identity is its sha256, not the credential used to fetch it.
 
 ## Rotating
 

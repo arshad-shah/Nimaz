@@ -1682,16 +1682,72 @@ Two rules that are easy to break and expensive to debug:
 1. **No convention plugin may apply `org.jetbrains.kotlin.android`.** AGP 9 compiles Kotlin
    through its built-in Kotlin support; applying the standalone plugin alongside it fails the
    build. `AndroidLibraryConventionPluginTest` asserts this as a negative.
-2. **A convention plugin never depends on a task in another project.** The lint/asset ordering
-   for `fetchNimazData` lives here as `GeneratedAssetOrdering` /
-   `Project.orderAssetConsumersAfter(...)`, but the task itself stays registered in `:app` —
-   a library reaching for `:app:fetchNimazData` would invert the dependency graph.
+2. **A convention plugin never depends on a task in another project.** Both halves of
+   `fetchNimazData` live here — the task type `FetchNimazDataTask` and the lint/asset ordering
+   (`GeneratedAssetOrdering` / `Project.orderAssetConsumersAfter(...)`) — but the task is
+   *registered* in `app/build.gradle.kts`, because it belongs to the project that consumes the
+   generated assets. A library reaching for `:app:fetchNimazData` would invert the dependency
+   graph.
 
 The plugins are covered by Gradle TestKit tests in
 `build-logic/convention/src/test/kotlin/`, run with `./gradlew :build-logic:convention:test`
 (also wired into the `fastlane android test` lane). They assert *effects* — the resolved
 `compileSdk`, `minSdk`, Java level, compiler args, applied plugin set and task graph — rather
 than the plugins' source.
+
+### The configuration cache
+
+`org.gradle.configuration-cache=true`, with `org.gradle.configuration-cache.problems=fail`.
+Enabling it was #503; the numbers, the protocol they were measured under, and the before/after
+comparison are in
+[`specs/multi-module-migration/BASELINE.md`](specs/multi-module-migration/BASELINE.md).
+
+`problems=fail` is the part worth keeping. A configuration-cache problem downgraded to a warning
+is invisible in a green build: the build still works, it is merely slower, and nobody finds out
+until someone wonders why. Failing means the PR that introduces the regression is the PR that
+fixes it.
+
+What that costs you when writing build logic — the four rules that broke it before:
+
+1. **No `project` at execution time.** Inside a `@TaskAction` or a `doLast`, `Task.project` is
+   not available. Use the task's own `logger`, and injected services
+   (`ProviderFactory`, `ExecOperations`, `FileSystemOperations`) for the rest.
+2. **No ad-hoc `doLast` that calls script-level helpers.** The closure captures the script
+   object, which cannot be serialised — *"cannot serialize Gradle script object references"*.
+   That single block is why the cache was off for a year. Write a typed task class.
+3. **Read the outside world through providers**: `providers.gradleProperty(...)`,
+   `providers.environmentVariable(...)`, `providers.fileContents(...)`. Two different reasons,
+   worth keeping apart.
+   *Correctness*, for **file contents**: a raw `File.readText()` or `JsonSlurper().parse(File)`
+   at configuration time is **not** tracked, so a changed file does not invalidate the cached
+   configuration and a stale value is used silently. `:app` reads `data.lock.json` this way for
+   `CONTENT_ARTIFACT_SHA256`, and probes for `google-services.json` this way before applying the
+   Firebase plugins — both decide what ends up in the shipped APK, so both had to move.
+   *Consistency*, for **properties and environment variables**: Gradle already instruments
+   `project.findProperty` and `System.getenv` at configuration time, so those were never broken.
+   The provider form is the house style anyway, so that no reader has to work out which category
+   a given read falls into. There are no remaining `findProperty` calls in `app/build.gradle.kts`.
+   A `ProcessBuilder` is a third case — see the `ValueSource` note below.
+4. **A secret is `@Internal`, never `@Input`.** Input values are written into the cache entry on
+   disk. `FetchNimazDataTask.dataToken` is `@Internal` for this reason.
+
+An external process that build logic genuinely needs — `gh auth token`, here — goes through a
+`ValueSource` (`GhAuthTokenValueSource`), which is the sanctioned form: Gradle re-obtains it when
+deciding whether a cached entry is still usable.
+
+One landmine the provider rewrite very nearly stepped on, kept here because the next such
+rewrite will meet it too. `Provider.orElse` falls through on **absence**, not on emptiness. The
+credential chain (`NimazDataCredentials`) must therefore `filter { it.isNotBlank() }` **each**
+source, not the combined result — a pull request from a fork cannot read repository secrets, so
+`NIMAZ_DATA_TOKEN` there is *set and empty*, and a single trailing `isNotBlank` would
+short-circuit the chain and fail the build with "no credential" without ever trying the other two
+sources. `NimazDataCredentialsTest` holds that behaviour.
+
+Two known non-participants, both deliberate. `signingConfigs` reads `System.getenv` — tracked, so
+rotating a CI secret invalidates the entry, which is correct. And the fastlane deploy lane
+rewrites `versionCode`/`versionName` in `app/build.gradle.kts` during the build, so that lane
+invalidates the configuration cache by construction and never reuses it; there is nothing to fix
+there.
 
 ### The baseline profile
 

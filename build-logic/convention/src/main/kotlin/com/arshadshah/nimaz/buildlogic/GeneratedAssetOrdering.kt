@@ -18,10 +18,10 @@ import org.gradle.api.Project
  * build and both PR check lanes were green while the deploy lane could not build at all. That is
  * the regression this helper exists to make un-repeatable.
  *
- * The task *registration* deliberately stays in the consuming project (today only `:app`, via
- * `gradle/nimaz-data.gradle.kts`). A convention plugin that reached for `:app:fetchNimazData`
- * would point a library at the app, which is exactly the inversion the multi-module epic exists
- * to remove.
+ * The task *registration* deliberately stays in the consuming project — today only `:app`, in
+ * `app/build.gradle.kts`; the task type itself is [FetchNimazDataTask], here. A convention plugin
+ * that reached for `:app:fetchNimazData` would point a library at the app, which is exactly the
+ * inversion the multi-module epic exists to remove.
  */
 object GeneratedAssetOrdering {
 

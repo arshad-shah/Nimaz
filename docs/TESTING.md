@@ -1,9 +1,10 @@
 # Nimaz — Testing
 
-> **Owns:** the instrumented (`androidTest`) suite — how to run it, how it is wired into CI, its
-> module layout, what it covers, and its conventions.
-> **Update when:** you add or restructure an instrumented test module, change the emulator/CI
-> lane, or change a testing convention (screen tags, Hilt test rules, seeding).
+> **Owns:** how the test suites are invoked, and the instrumented (`androidTest`) suite in full —
+> how to run it, how it is wired into CI, its module layout, what it covers, and its conventions.
+> **Update when:** you add or restructure a test source set or module, change how the suites are
+> invoked, change the emulator/CI lane, or change a testing convention (screen tags, Hilt test
+> rules, seeding).
 > **Verified by:** review only — no mechanical check. `NAV-04`/`NAV-05` in
 > `scripts/check_docs.py` guard the screen-tag contract these tests depend on.
 > **Related:** [`NAVIGATION.md` §1](NAVIGATION.md#1-how-navigation-works) for `ScreenTags`,
@@ -18,6 +19,33 @@ Two on-device/JVM test surfaces exist:
 - **Instrumented** (`app/src/androidTest`) — the suite documented here. Runs on an
   emulator/device against the real Hilt graph, Room database, WorkManager, and
   `MainActivity`/`NavGraph`.
+
+## Running the unit tests
+
+```bash
+./gradlew testDebugUnitTest              # every Android module — today that is only :app
+./gradlew :build-logic:convention:test   # the convention plugins and their TestKit fixtures
+```
+
+Two things to know about that pair.
+
+**Prefer `testDebugUnitTest` over `:app:testDebugUnitTest`.** They are the same tests today,
+because `:app` is the only module with a unit-test source set. They stop being the same the
+moment the multi-module split (#551) lands a module, and a habit of naming `:app` explicitly
+would then quietly skip every other module's suite. The all-module form costs nothing now and
+is correct later. The full multi-module story lands with the split itself.
+
+**`build-logic` is an included build, so `./gradlew test` does not reach into it** — an included
+build's tasks only run when asked for by name. A change to a convention plugin, to
+`FetchNimazDataTask` or to `NimazDataCredentials` is therefore **not** covered by
+`testDebugUnitTest`, `lintDebug` or `assembleRelease`; run the second command above when you
+touch `build-logic/`. CI does not rely on you remembering: `fastlane/Fastfile`'s `test` lane runs
+`:build-logic:convention:test` first, before the `:app` tasks, so a broken convention plugin
+fails the PR check rather than surfacing later as an unexplained build failure.
+
+Use `:build-logic:convention:test` — the fully qualified form — everywhere. `-p build-logic test`
+runs the same suite, but it is a second spelling of one command, and `ARCHITECTURE.md` and the
+`Fastfile` both use the qualified one.
 
 ## Running the instrumented suite
 

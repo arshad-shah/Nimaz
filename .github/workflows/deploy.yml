@@ -59,7 +59,8 @@ jobs:
       # The content artifact lives in a private repository. Mint a short-lived
       # installation token for it rather than carrying a long-lived PAT: the token
       # is scoped to nimaz-data, read-only, and expires in an hour. Same pattern as
-      # the version-bump App above. See gradle/nimaz-data.gradle.kts.
+      # the version-bump App above. See FetchNimazDataTask in build-logic (registered in
+      # app/build.gradle.kts) and docs/CONTENT_REPO_AUTH.md.
       - name: Token for the content repository
         id: nimaz-data-token
         # Absent secrets must not fail the job here — let the build fail at
