@@ -8,8 +8,8 @@ import com.arshadshah.nimaz.core.monitoring.RecordingTelemetry
 import android.app.Application
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
-import com.arshadshah.nimaz.core.time.FakeTodayProvider
-import com.arshadshah.nimaz.core.util.NextWorshipResolver
+import com.arshadshah.nimaz.domain.time.FakeTodayProvider
+import com.arshadshah.nimaz.domain.worship.NextWorshipResolver
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.model.PrayerName
 import com.arshadshah.nimaz.domain.model.PrayerStatus

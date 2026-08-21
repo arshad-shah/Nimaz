@@ -162,9 +162,10 @@ fun CurrentTasbihSheet(
                 .padding(bottom = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            if (!preset?.arabicText.isNullOrEmpty()) {
+            val arabicText = preset?.arabicText
+            if (!arabicText.isNullOrEmpty()) {
                 ArabicText(
-                    text = preset.arabicText,
+                    text = arabicText,
                     size = ArabicTextSize.LARGE,
                     color = NimazColors.TasbihColors.Milestone,
                     textAlign = TextAlign.Center,

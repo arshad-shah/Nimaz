@@ -1,7 +1,7 @@
 package com.arshadshah.nimaz.presentation.viewmodel.calendar
 
 import com.arshadshah.nimaz.core.monitoring.RecordingTelemetry
-import com.arshadshah.nimaz.core.time.FakeTodayProvider
+import com.arshadshah.nimaz.domain.time.FakeTodayProvider
 import com.arshadshah.nimaz.domain.model.IslamicEvent
 import com.arshadshah.nimaz.domain.usecase.IslamicEventUseCases
 import com.arshadshah.nimaz.domain.usecase.calendar.BuildCalendarMonthUseCase

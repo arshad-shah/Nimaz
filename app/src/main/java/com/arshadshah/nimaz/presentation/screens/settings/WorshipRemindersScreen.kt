@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.core.util.HijriDateCalculator
+import com.arshadshah.nimaz.domain.calendar.HijriDateCalculator
 import com.arshadshah.nimaz.domain.model.WorshipReminderCategory
 import com.arshadshah.nimaz.domain.model.WorshipReminderType
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
@@ -181,9 +181,9 @@ private fun androidx.compose.foundation.lazy.LazyListScope.worshipSection(
                 val enabled = state.worshipReminders[type.key] ?: false
                 val offset = state.worshipOffsets[type.key] ?: type.defaultOffsetMinutes
                 val mode = state.worshipModes[type.key]
-                    ?: com.arshadshah.nimaz.core.util.WorshipReminderCalculator.WITR_MODE_AFTER_ISHA
+                    ?: com.arshadshah.nimaz.domain.worship.WorshipReminderCalculator.WITR_MODE_AFTER_ISHA
                 val beforeFajr =
-                    mode == com.arshadshah.nimaz.core.util.WorshipReminderCalculator.WITR_MODE_BEFORE_FAJR
+                    mode == com.arshadshah.nimaz.domain.worship.WorshipReminderCalculator.WITR_MODE_BEFORE_FAJR
 
                 NimazAccordion(
                     title = stringResource(worshipNameRes(type)),
@@ -207,8 +207,8 @@ private fun androidx.compose.foundation.lazy.LazyListScope.worshipSection(
                             onClick = {
                                 onMode(
                                     type.key,
-                                    if (beforeFajr) com.arshadshah.nimaz.core.util.WorshipReminderCalculator.WITR_MODE_AFTER_ISHA
-                                    else com.arshadshah.nimaz.core.util.WorshipReminderCalculator.WITR_MODE_BEFORE_FAJR
+                                    if (beforeFajr) com.arshadshah.nimaz.domain.worship.WorshipReminderCalculator.WITR_MODE_AFTER_ISHA
+                                    else com.arshadshah.nimaz.domain.worship.WorshipReminderCalculator.WITR_MODE_BEFORE_FAJR
                                 )
                             },
                             showArrow = true,

@@ -1,6 +1,6 @@
 package com.arshadshah.nimaz.presentation.viewmodel.tracker
 
-import com.arshadshah.nimaz.core.time.FakeTodayProvider
+import com.arshadshah.nimaz.domain.time.FakeTodayProvider
 import com.arshadshah.nimaz.domain.usecase.fasting.CountUnloggedRamadanDaysUseCase
 import com.arshadshah.nimaz.domain.usecase.fasting.GetDaysUntilAyyamAlBeedUseCase
 import com.arshadshah.nimaz.domain.usecase.fasting.GetRamadanCountdownUseCase

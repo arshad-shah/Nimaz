@@ -10,7 +10,7 @@ import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.core.monitoring.launchBestEffort
 import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.core.text.StringProvider
-import com.arshadshah.nimaz.core.time.TodayProvider
+import com.arshadshah.nimaz.domain.time.TodayProvider
 import com.arshadshah.nimaz.data.audio.AudioState
 import com.arshadshah.nimaz.data.audio.QuranAudioManager
 import com.arshadshah.nimaz.domain.model.Khatam

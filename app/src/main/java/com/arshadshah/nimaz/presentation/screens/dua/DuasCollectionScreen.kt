@@ -408,9 +408,10 @@ private fun AdhkarListItem(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
-                if (category.description != null) {
+                val description = category.description
+                if (description != null) {
                     Text(
-                        text = category.description,
+                        text = description,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,

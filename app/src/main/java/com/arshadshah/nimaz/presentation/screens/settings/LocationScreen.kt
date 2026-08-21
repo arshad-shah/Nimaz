@@ -475,8 +475,9 @@ private fun LocationListItem(
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                if (location.flag != null) {
-                    Text(text = location.flag, style = MaterialTheme.typography.titleMedium)
+                val flag = location.flag
+                if (flag != null) {
+                    Text(text = flag, style = MaterialTheme.typography.titleMedium)
                 } else {
                     NimazIcon(
                         imageVector = if (showGlobeIcon) Icons.Default.Public else Icons.Default.LocationOn,

@@ -2,7 +2,7 @@ package com.arshadshah.nimaz.presentation.viewmodel.tracker
 
 import com.arshadshah.nimaz.core.feedback.CounterFeedback
 import com.arshadshah.nimaz.core.monitoring.RecordingTelemetry
-import com.arshadshah.nimaz.core.time.FakeTodayProvider
+import com.arshadshah.nimaz.domain.time.FakeTodayProvider
 import com.arshadshah.nimaz.domain.repository.settings.TasbihSettings
 import com.arshadshah.nimaz.domain.usecase.TasbihUseCases
 import com.google.common.truth.Truth.assertThat

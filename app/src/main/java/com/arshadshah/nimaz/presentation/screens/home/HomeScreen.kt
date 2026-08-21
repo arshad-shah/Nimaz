@@ -529,8 +529,11 @@ private fun HomeTabletContent(
                         // action, matching the Jumu'ah card's height.
                         body = c.body,
                         arabic = c.arabic,
-                        primaryAction = if (c.ctaLabel != null && c.route != null)
-                            EventAction(c.ctaLabel) { onOpenAnnouncementRoute(c.route) } else null,
+                        primaryAction = c.ctaLabel?.let { label ->
+                            c.route?.let { route ->
+                                EventAction(label) { onOpenAnnouncementRoute(route) }
+                            }
+                        },
                         onDismiss = if (c.dismissable && c.announcementId != null) {
                             { viewModel.onEvent(HomeEvent.DismissAnnouncement) }
                         } else null,

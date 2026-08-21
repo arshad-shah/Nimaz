@@ -1,6 +1,6 @@
 package com.arshadshah.nimaz.widget.prayertracker
 
-import com.arshadshah.nimaz.core.time.TodayProvider
+import com.arshadshah.nimaz.domain.time.TodayProvider
 import com.arshadshah.nimaz.data.local.database.dao.PrayerDao
 import com.arshadshah.nimaz.data.local.database.entity.PrayerRecordEntity
 import com.google.common.truth.Truth.assertThat

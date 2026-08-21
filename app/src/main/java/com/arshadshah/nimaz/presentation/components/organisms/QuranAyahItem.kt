@@ -195,14 +195,15 @@ internal fun AyahItem(
             val markerBracketColor = NimazColors.Gold500
             val markerNumberColor = MaterialTheme.colorScheme.primary
 
-            if (showTajweed && ayah.textTajweed != null) {
+            val textTajweed = ayah.textTajweed
+            if (showTajweed && textTajweed != null) {
                 // Render with tajweed colors using BasicText
                 val tajweedAnnotated = remember(
-                    ayah.textTajweed, isDarkTheme, ayah.numberInSurah,
+                    textTajweed, isDarkTheme, ayah.numberInSurah,
                     textColor, markerBracketColor, markerNumberColor, tajweedUnderline
                 ) {
                     val parsed = TajweedParser.parse(
-                        tajweedText = ayah.textTajweed,
+                        tajweedText = textTajweed,
                         isDarkTheme = isDarkTheme,
                         defaultColor = textColor,
                         stripPrefix = if (ayah.hasLeadingBismillah) BISMILLAH_TEXT else null,
@@ -255,12 +256,13 @@ internal fun AyahItem(
             }
 
             // Translation
-            if (showTranslation && ayah.translation != null) {
+            val translation = ayah.translation
+            if (showTranslation && translation != null) {
                 Spacer(modifier = Modifier.height(12.dp))
                 // Plain text, not an outlined box. A box per verse drew 114 borders down a surah
                 // to separate two things that are already separated by script and direction.
                 Text(
-                    text = ayah.translation,
+                    text = translation,
                     // The catalogue ships right-to-left translations (Urdu), so the paragraph
                     // direction has to come from the text itself rather than from the app's
                     // locale — otherwise Urdu renders left-aligned with its punctuation on the
@@ -272,11 +274,12 @@ internal fun AyahItem(
             }
 
             // Transliteration
-            if (showTransliteration && ayah.transliteration != null) {
+            val transliteration = ayah.transliteration
+            if (showTransliteration && transliteration != null) {
                 Spacer(modifier = Modifier.height(8.dp))
                 NimazCard(style = NimazCardStyle.OUTLINED, tone = NimazTone.SUCCESS, elevation = 0.dp) {
                     Text(
-                        text = ayah.transliteration,
+                        text = transliteration,
                         style = MaterialTheme.typography.bodyMedium.copy(
                             fontSize = fontSize.sp,
                             lineHeight = (fontSize * 1.5f).sp
@@ -341,9 +344,10 @@ internal fun AyahItem(
                     // language as the hizb quarter beside it, but on the verse that *closes*
                     // the section: the ʿayn (ع) ends a rukūʿ in a printed Mushaf rather than
                     // announcing it. Al-Fātiḥah is one rukūʿ, so this shows on 1:7, not 1:1.
-                    if (ayah.isRukuEnd && ayah.rukuNumber != null) {
+                    val rukuNumber = ayah.rukuNumber
+                    if (ayah.isRukuEnd && rukuNumber != null) {
                         NimazBadge(
-                            text = stringResource(R.string.ruku_format, ayah.rukuNumber),
+                            text = stringResource(R.string.ruku_format, rukuNumber),
                             tone = NimazTone.ACCENT,
                             emphasis = NimazBadgeEmphasis.SOFT,
                             shape = NimazBadgeShape.ROUNDED,

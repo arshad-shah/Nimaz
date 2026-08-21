@@ -1,7 +1,7 @@
 package com.arshadshah.nimaz.presentation.viewmodel.worship
 
 import com.arshadshah.nimaz.core.monitoring.RecordingTelemetry
-import com.arshadshah.nimaz.core.time.FakeTodayProvider
+import com.arshadshah.nimaz.domain.time.FakeTodayProvider
 import java.time.LocalDate
 import com.arshadshah.nimaz.domain.model.HighLatitudeRule
 import com.arshadshah.nimaz.presentation.viewmodel.prayerCalculationSettings

@@ -591,13 +591,19 @@ private fun UnifiedBookmark.navigate(
     onNavigateToHadith: (String, Int) -> Unit,
     onNavigateToDua: (String) -> Unit
 ) {
+    // Bound to locals: `UnifiedBookmark` lives in :core:domain now, and Kotlin will not smart-cast
+    // a public property declared in another module.
+    val surah = surahNumber
+    val ayah = ayahNumber
+    val bookId = hadithBookId
+    val hadithNo = hadithNumber
     when (type) {
-        BookmarkType.QURAN -> if (surahNumber != null && ayahNumber != null) {
-            onNavigateToQuranAyah(surahNumber, ayahNumber)
+        BookmarkType.QURAN -> if (surah != null && ayah != null) {
+            onNavigateToQuranAyah(surah, ayah)
         }
 
-        BookmarkType.HADITH -> if (hadithBookId != null && hadithNumber != null) {
-            onNavigateToHadith(hadithBookId, hadithNumber)
+        BookmarkType.HADITH -> if (bookId != null && hadithNo != null) {
+            onNavigateToHadith(bookId, hadithNo)
         }
 
         BookmarkType.DUA -> duaId?.let(onNavigateToDua)

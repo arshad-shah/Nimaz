@@ -4,8 +4,8 @@ import com.arshadshah.nimaz.core.monitoring.RecordingTelemetry
 import com.arshadshah.nimaz.domain.model.LibrarySource
 import com.arshadshah.nimaz.domain.model.MatchStrictness
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
+import com.arshadshah.nimaz.domain.repository.settings.FakeSearchSettings
 import com.arshadshah.nimaz.domain.usecase.ObserveSearchPreferencesUseCase
-import com.arshadshah.nimaz.presentation.viewmodel.FakeSearchSettings
 import com.google.common.truth.Truth.assertThat
 import io.mockk.coEvery
 import io.mockk.coVerify

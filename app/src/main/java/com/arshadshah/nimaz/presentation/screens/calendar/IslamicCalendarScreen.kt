@@ -30,9 +30,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.core.util.HijriDateCalculator
-import com.arshadshah.nimaz.core.util.HijriDateCalculator.getHijriMonthName
-import com.arshadshah.nimaz.core.util.HijriDateCalculator.getHijriMonthNameArabic
+import com.arshadshah.nimaz.domain.calendar.HijriDateCalculator
+import com.arshadshah.nimaz.domain.calendar.HijriDateCalculator.getHijriMonthName
+import com.arshadshah.nimaz.domain.calendar.HijriDateCalculator.getHijriMonthNameArabic
 import com.arshadshah.nimaz.domain.model.IslamicEvent
 import com.arshadshah.nimaz.domain.model.IslamicEventType
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText

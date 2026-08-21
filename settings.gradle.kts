@@ -27,4 +27,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "nimaz"
 include(":app")
+include(":core:domain")
 include(":baselineprofile")

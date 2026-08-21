@@ -1,6 +1,6 @@
 package com.arshadshah.nimaz.widget.prayertracker
 
-import com.arshadshah.nimaz.core.time.TodayProvider
+import com.arshadshah.nimaz.domain.time.TodayProvider
 import com.arshadshah.nimaz.core.util.toUtcMidnightMillis
 import com.arshadshah.nimaz.data.local.database.dao.PrayerDao
 import javax.inject.Inject

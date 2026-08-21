@@ -3,7 +3,8 @@
 **Repo:** `arshad-shah/nimaz` · **Integration branch:** `epic/multi-module`
 **Spec:** [`SPEC.md`](SPEC.md) — the assessment and the reasoning. This document is the
 execution plan: the issue tree, the branch topology, and the exit criteria for each PR.
-**Status:** proposal. No issues have been filed and no branches exist yet.
+**Status:** in flight. Issues #552–#573 are filed under epic #551; PRs 1–5 have landed on
+`epic/multi-module`.
 
 ---
 
@@ -145,20 +146,52 @@ from `domain/model` into `data`/`presentation` (`QuranReciter.kt`, `MushafLayout
 still resolve — NAV-06 through NAV-08 green.
 
 **#5 — Extract `:core:domain` as a pure JVM module** · `mm/04-core-domain`
-Move all 103 files under the `kotlin-jvm` plugin. No Android on the classpath.
-*Exit:* `:core:domain:test` runs without AGP or Robolectric and completes in seconds; adding
-`import android.content.Context` to a domain file fails the build. Demonstrate that in the PR
-description — it is the first compile-enforced rule the epic buys.
+Move everything under `domain/` to `core/domain/` under the `kotlin-jvm` plugin. No Android on
+the classpath.
+
+**Also folds in the first slice of the `core/util` triage,** which #6 below used to own. Domain
+imports `HijriDateCalculator`, `TodayProvider`, `NextWorshipResolver` and — transitively through
+the resolver — `PrayerTimeCalculator` and `WorshipReminderCalculator`. They cannot wait for
+`:core:common`: that module depends on `:core:domain`, so parking them there reverses the arrow.
+They move into `:core:domain` as `domain/{calendar,time,worship,prayer}`, which is a repackaging
+and therefore an import rewrite across ~60 files. `SPEC.md` §3.6 ("triage `core/util` first") was
+right and the PR-6 scheduling below was wrong.
+
+**Two things the issue did not anticipate, both of which are the point of the boundary:**
+
+- **Cross-module smart casts stop working.** Kotlin will not smart-cast a `val` declared in
+  another module, so 27 sites of the form `if (x.prop != null) use(x.prop)` over a domain model
+  became compile errors. Each is fixed by binding to a local first. Expect this in every
+  extraction PR that moves a model with nullable fields.
+- **Test resources and shared fakes have to cross the boundary deliberately.**
+  `fold-fixtures.json` moved with the test that reads it, and `FakeTodayProvider` /
+  `FakeSearchSettings` became `src/testFixtures` published to `:app`, rather than being
+  duplicated.
+
+*Exit:* `:core:domain:test` runs without AGP or Robolectric and completes in seconds, and the
+purity is **enforced by a task, not by a demonstration** — `androidFreeClasspath`, registered by
+`nimaz.jvm.library` and wired into `check`, fails on any `com.android` / `androidx` /
+`com.google.android` component on any resolvable classpath. `:core:domain` is also wired into the
+merged coverage report, with `assertEveryModuleIsMeasured` failing the report if a module
+contributes no classes. The screenshot of a failing `import android.content.Context` is PR
+narrative; the task is the criterion.
 
 ### Milestone 2 — Data-side core modules (PRs 6–9)
 
 **#6 — `:core:common`** · `mm/05-core-common`
-`core/util` is 24 files and 5,336 LOC and currently reaches into domain (11 files),
-presentation, data and widget. Triage file by file: genuinely shared helpers go to
-`:core:common`, the rest are pushed down to their real owners. Also moves `core/time`,
-`core/monitoring`, `core/share`, `core/text`, `core/feedback`, `core/init`.
+`core/util` was 24 files and 5,336 LOC reaching into domain (11 files), presentation, data and
+widget. **PR 5 already took the five that domain imports** — they are now `domain/{calendar,
+time,worship,prayer}` in `:core:domain`, and `core/time` no longer exists. Nineteen files are
+left; triage them one by one: genuinely shared helpers go to `:core:common`, the rest are pushed
+down to their real owners. Also moves `core/monitoring`, `core/share`, `core/text`,
+`core/feedback`, `core/init`.
 *Exit:* `:core:common` depends on `:core:domain` and Android only — never on data or
 presentation.
+
+> **Corrected.** This PR used to be described as owning the whole `core/util` triage *and* as
+> depending on `:core:domain`. Both could not hold: `HijriDateCalculator` and friends are
+> imported **by** domain, so putting them in a module that depends on domain is a cycle. Fixed in
+> PR 5, which took exactly those five files.
 
 **#7 — `:core:database`** · `mm/06-core-database`
 Both `@Database` classes, 15 entities, 22 DAOs, all migrations, **and the `schemas/`

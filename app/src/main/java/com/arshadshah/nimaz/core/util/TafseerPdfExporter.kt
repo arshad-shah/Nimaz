@@ -92,13 +92,14 @@ object TafseerPdfExporter {
         writer.divider()
 
         // Translation.
-        if (!ayah.translation.isNullOrBlank()) {
+        val translation = ayah.translation
+        if (!translation.isNullOrBlank()) {
             writer.label(context.getString(R.string.translation))
             val tp = TextPaint().apply {
                 isAntiAlias = true; color = INK; typeface = body; textSize = 11.5f
             }
             writer.flow(
-                layout(ayah.translation, tp, contentWidth, Layout.Alignment.ALIGN_NORMAL, 3f),
+                layout(translation, tp, contentWidth, Layout.Alignment.ALIGN_NORMAL, 3f),
                 spacingAfter = 14f
             )
             writer.divider()

@@ -288,9 +288,10 @@ fun TafseerPageContent(
                             )
                             QuranOrnamentalDivider()
 
-                            if (!ayah.translation.isNullOrBlank()) {
+                            val translation = ayah.translation
+                            if (!translation.isNullOrBlank()) {
                                 Text(
-                                    text = ayah.translation,
+                                    text = translation,
                                     style = MaterialTheme.typography.bodyMedium
                                         .asTranslationText(translationLanguage),
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,

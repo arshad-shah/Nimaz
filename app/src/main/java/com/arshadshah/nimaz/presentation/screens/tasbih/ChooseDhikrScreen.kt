@@ -386,9 +386,10 @@ private fun DhikrRow(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
-                if (!preset.arabicText.isNullOrEmpty()) {
+                val arabicText = preset.arabicText
+                if (!arabicText.isNullOrEmpty()) {
                     ArabicText(
-                        text = preset.arabicText,
+                        text = arabicText,
                         size = ArabicTextSize.SMALL,
                         color = MaterialTheme.colorScheme.primary,
                         maxLines = 1,

@@ -1,6 +1,6 @@
 package com.arshadshah.nimaz.core.di
 
-import com.arshadshah.nimaz.core.util.NextWorshipResolver
+import com.arshadshah.nimaz.domain.worship.NextWorshipResolver
 import com.arshadshah.nimaz.domain.repository.KhatamRepository
 import com.arshadshah.nimaz.domain.repository.QaidaRepository
 import com.arshadshah.nimaz.domain.repository.SettingsRepository

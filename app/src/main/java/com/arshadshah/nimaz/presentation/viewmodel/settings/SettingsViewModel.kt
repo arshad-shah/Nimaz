@@ -6,9 +6,9 @@ import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.core.monitoring.catchAndReport
 import com.arshadshah.nimaz.core.monitoring.launchSafely
-import com.arshadshah.nimaz.core.time.TodayProvider
+import com.arshadshah.nimaz.domain.time.TodayProvider
 import com.arshadshah.nimaz.core.util.PrayerNotificationScheduler
-import com.arshadshah.nimaz.core.util.PrayerTimeCalculator
+import com.arshadshah.nimaz.domain.prayer.PrayerTimeCalculator
 import com.arshadshah.nimaz.data.audio.AdhanAudioManager
 import com.arshadshah.nimaz.data.audio.AdhanSound
 import com.arshadshah.nimaz.data.audio.DownloadState
@@ -1080,7 +1080,7 @@ class SettingsViewModel @Inject constructor(
                     ).first()
                 }
             val witrModeDefault =
-                com.arshadshah.nimaz.core.util.WorshipReminderCalculator.WITR_MODE_AFTER_ISHA
+                com.arshadshah.nimaz.domain.worship.WorshipReminderCalculator.WITR_MODE_AFTER_ISHA
             val worshipModes = mapOf(
                 com.arshadshah.nimaz.domain.model.WorshipReminderType.WITR.key to
                         settingsRepository.worshipReminderMode(

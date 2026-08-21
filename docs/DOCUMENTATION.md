@@ -321,7 +321,8 @@ docs are exempt from `DOC-01`/`DOC-02` and are never sources of truth.
       `node scripts/check_mermaid.mjs` parses it.
 - [ ] Removed anything the change made untrue, including in docs I did not otherwise touch.
 - [ ] `python3 scripts/check_docs.py` passes.
-- [ ] `./gradlew :app:compileDebugKotlin` and `./gradlew :app:testDebugUnitTest` pass.
+- [ ] `./gradlew :app:compileDebugKotlin`, `./gradlew :app:testDebugUnitTest` and
+      `./gradlew :core:domain:check` pass.
 
 ### 7.2 For agents
 

@@ -136,10 +136,11 @@ private fun AnnouncementBannerCard(
                     text = announcement.body,
                     style = MaterialTheme.typography.bodySmall,
                 )
-                if (showCta && announcement.ctaLabel != null) {
+                val ctaLabel = announcement.ctaLabel
+                if (showCta && ctaLabel != null) {
                     Spacer(modifier = Modifier.height(10.dp))
                     NimazButton(
-                        text = announcement.ctaLabel,
+                        text = ctaLabel,
                         onClick = onCtaClick,
                         variant = NimazButtonVariant.TONAL,
                         size = NimazButtonSize.SMALL,

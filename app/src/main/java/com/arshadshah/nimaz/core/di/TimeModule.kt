@@ -1,7 +1,7 @@
 package com.arshadshah.nimaz.core.di
 
-import com.arshadshah.nimaz.core.time.SystemTodayProvider
-import com.arshadshah.nimaz.core.time.TodayProvider
+import com.arshadshah.nimaz.domain.time.SystemTodayProvider
+import com.arshadshah.nimaz.domain.time.TodayProvider
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
