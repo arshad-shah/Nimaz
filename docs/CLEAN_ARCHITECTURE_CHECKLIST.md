@@ -56,8 +56,12 @@ unit-test the domain without Room on the classpath.
 
 **Detect:**
 ```bash
-grep -rlnE "import com.arshadshah.nimaz.data\." app/src/main/java/com/arshadshah/nimaz/domain/
+grep -rlnE "import com.arshadshah.nimaz.data\." core/domain/src/main/kotlin/
 ```
+
+Since #556 this is belt-and-braces: `:core:domain` is a `kotlin-jvm` module and `data/` is not on
+its classpath, so the import would not compile. The grep stays because it also covers
+`src/test` and reads in one second.
 
 - [x] ~~**`PageAyahRange` leak.**~~ **Resolved.** Added `PageAyahRange` to
   `domain/model/QuranModels.kt`; the Room projection was renamed to `PageAyahRangeRow` (kept in
@@ -113,7 +117,7 @@ change.
 ```bash
 # Domain repository interfaces importing a Room entity:
 grep -rlnE "import com.arshadshah.nimaz.data.local.database.entity" \
-  app/src/main/java/com/arshadshah/nimaz/domain/repository/
+  core/domain/src/main/kotlin/com/arshadshah/nimaz/domain/repository/
 ```
 
 - [x] ~~`ZakatRepository` exposed `ZakatHistoryEntity`~~ — **resolved** (now `ZakatHistoryEntry`).
@@ -137,7 +141,8 @@ god-object.
   which used to seed-then-read until the content seeders retired at versionCode 385. Behaviour preserved (identical
   queries/selection math; field mappings verified); full unit suite green.
 - [x] ~~**Prayer-time calculation assembled in five ViewModels.**~~ **Resolved.** Each injected the
-  concrete `core/util/PrayerTimeCalculator` and built its own arguments: three of them ran a
+  concrete `PrayerTimeCalculator` (then in `core/util`, now `domain/prayer`) and built its own
+  arguments: three of them ran a
   near-identical tower of `combine`s over six preference flows and parsed the persisted strings
   themselves, and the fourth — `FastingViewModel` — skipped the block and took the calculator's
   four defaults, so Fast Tracker ignored every calculation preference the user had set. The
@@ -779,7 +784,7 @@ Detect:
 
 ```bash
 # A Get* use case whose Observe* twin also exists
-rg -o -N 'class (Get|Observe)(\w+)UseCase' app/src/main/java/com/arshadshah/nimaz/domain/usecase   | sed -E 's/.*class (Get|Observe)(\w+)UseCase//' | sort | uniq -d
+rg -o -N 'class (Get|Observe)(\w+)UseCase' core/domain/src/main/kotlin/com/arshadshah/nimaz/domain/usecase   | sed -E 's/.*class (Get|Observe)(\w+)UseCase//' | sort | uniq -d
 ```
 
 ### AP-7.3 · Stub implementations that satisfy a signature

@@ -1,6 +1,6 @@
 package com.arshadshah.nimaz.presentation.viewmodel
 
-import com.arshadshah.nimaz.core.util.PrayerTimeCalculator
+import com.arshadshah.nimaz.domain.prayer.PrayerTimeCalculator
 import com.arshadshah.nimaz.domain.model.AsrCalculation
 import com.arshadshah.nimaz.domain.model.CalculationMethod
 import com.arshadshah.nimaz.domain.model.HighLatitudeRule

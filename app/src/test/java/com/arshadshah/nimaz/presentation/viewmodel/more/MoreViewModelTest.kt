@@ -1,7 +1,7 @@
 package com.arshadshah.nimaz.presentation.viewmodel.more
 
 import com.arshadshah.nimaz.core.monitoring.RecordingTelemetry
-import com.arshadshah.nimaz.core.time.FakeTodayProvider
+import com.arshadshah.nimaz.domain.time.FakeTodayProvider
 import com.arshadshah.nimaz.domain.model.FastStatus
 import com.arshadshah.nimaz.domain.model.JuzProgressInfo
 import com.arshadshah.nimaz.domain.model.Khatam
@@ -343,7 +343,7 @@ class MoreViewModelTest {
             )
             )
 
-        val resolver = mockk<com.arshadshah.nimaz.core.util.NextWorshipResolver>()
+        val resolver = mockk<com.arshadshah.nimaz.domain.worship.NextWorshipResolver>()
         io.mockk.coEvery { resolver.nearest(any()) } returns WorshipReminderOccurrence(
             type = WorshipReminderType.TAHAJJUD,
             triggerAt = today.atTime(23, 12),

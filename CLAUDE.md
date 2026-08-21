@@ -4,6 +4,17 @@ Nimaz is an offline-first Android Islamic companion app: **Kotlin + Jetpack Comp
 **Clean Architecture** (`presentation → domain → data`) with **MVVM + UDF**, Hilt DI, Room,
 DataStore, type-safe Navigation Compose.
 
+**Mid-migration to Gradle modules (#551).** `domain/` now lives in **`:core:domain`**, a pure JVM
+module under `core/domain/src/{main,test,testFixtures}/kotlin/` — no Android SDK on its classpath,
+so `import android.*` there is a compile error and `androidFreeClasspath` (wired into `check`)
+fails on any `androidx` artifact someone adds later. Everything else is still `:app` and moves out
+over the remaining PRs. A move does **not** change package names, so imports read the same either
+side of a module boundary. Two consequences worth knowing before you edit:
+
+- **Kotlin will not smart-cast a `val` from another module.** `if (ayah.translation != null)
+  Text(ayah.translation)` no longer compiles across the boundary — bind a local first.
+- **A fake used on both sides goes in `core/domain/src/testFixtures/`**, not copied into each.
+
 ## Read this first
 
 The `docs/` folder is the source of truth. **[`docs/README.md`](docs/README.md) is the index** —
@@ -131,6 +142,7 @@ The obligations, in short:
 ```bash
 ./gradlew :app:compileDebugKotlin     # runs KSP → validates Hilt + Room wiring
 ./gradlew :app:testDebugUnitTest
+./gradlew :core:domain:check          # domain tests + androidFreeClasspath — seconds, no Android
 ./gradlew :app:lintDebug              # SLOW (~10 min) and CI-blocking — do not skip it
 python3 scripts/check_docs.py         # docs still describe the code (no toolchain needed)
 

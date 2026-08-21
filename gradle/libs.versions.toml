@@ -22,6 +22,7 @@ room = "2.8.4"
 navigationCompose = "2.9.8"
 datastore = "1.2.1"
 adhan = "0.0.6"
+javaxInject = "1"
 glance = "1.2.0-rc01"
 workManager = "2.11.2"
 media3 = "1.10.1"
@@ -103,10 +104,17 @@ media3-ui = { group = "androidx.media3", name = "media3-ui", version.ref = "medi
 media3-session = { group = "androidx.media3", name = "media3-session", version.ref = "media3" }
 
 # Coroutines
+# -core is the pure-JVM artifact, for :core:domain. -android adds the Main dispatcher and is
+# only meaningful in an Android module.
+kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "coroutines" }
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
 
 # Serialization
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "serialization" }
+
+# DI annotations only — :core:domain uses @Inject/@Singleton without a DI runtime. In the
+# Android modules the same classes arrive transitively from Hilt.
+javax-inject = { group = "javax.inject", name = "javax.inject", version.ref = "javaxInject" }
 
 # DateTime
 kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version.ref = "datetime" }

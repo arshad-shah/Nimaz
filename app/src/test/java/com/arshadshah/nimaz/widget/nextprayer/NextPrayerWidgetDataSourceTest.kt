@@ -1,6 +1,6 @@
 package com.arshadshah.nimaz.widget.nextprayer
 
-import com.arshadshah.nimaz.core.time.TodayProvider
+import com.arshadshah.nimaz.domain.time.TodayProvider
 import com.arshadshah.nimaz.domain.model.AsrCalculation
 import com.arshadshah.nimaz.domain.model.CalculationMethod
 import com.arshadshah.nimaz.domain.model.PrayerCalculationSettings

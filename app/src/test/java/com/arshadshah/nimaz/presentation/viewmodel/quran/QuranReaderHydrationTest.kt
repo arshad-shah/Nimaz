@@ -1,7 +1,7 @@
 package com.arshadshah.nimaz.presentation.viewmodel.quran
 
 import java.time.LocalDate
-import com.arshadshah.nimaz.core.time.FakeTodayProvider
+import com.arshadshah.nimaz.domain.time.FakeTodayProvider
 import com.arshadshah.nimaz.presentation.viewmodel.FakeStringProvider
 import android.content.Context
 import com.arshadshah.nimaz.core.monitoring.RecordingTelemetry

@@ -39,3 +39,17 @@ internal fun Project.configureAndroidCommon(extension: CommonExtension) {
     extension.compileOptions.sourceCompatibility = NimazBuild.JAVA_VERSION
     extension.compileOptions.targetCompatibility = NimazBuild.JAVA_VERSION
 }
+
+/**
+ * Maven groups that mean "this is Android code". Matched exactly or as a `group.` prefix, so
+ * `androidx.room` is caught by `androidx` without also catching a hypothetical `androidxfoo`.
+ *
+ * Used by [JvmLibraryConventionPlugin]'s `androidFreeClasspath` guard. `com.google.android` rather
+ * than `com.google`, because Truth, Guava and Gson are all `com.google.*` and all fine on a JVM
+ * classpath.
+ */
+val ANDROID_COMPONENT_GROUPS = listOf(
+    "com.android",
+    "androidx",
+    "com.google.android",
+)

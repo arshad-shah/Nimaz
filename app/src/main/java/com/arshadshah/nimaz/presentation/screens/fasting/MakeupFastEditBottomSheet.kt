@@ -22,7 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.core.util.HijriDateCalculator
+import com.arshadshah.nimaz.domain.calendar.HijriDateCalculator
 import com.arshadshah.nimaz.core.util.formatMediumDate
 import com.arshadshah.nimaz.domain.model.MakeupFast
 import com.arshadshah.nimaz.domain.model.MakeupFastStatus

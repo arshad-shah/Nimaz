@@ -1,6 +1,6 @@
 package com.arshadshah.nimaz.widget.hijridate
 
-import com.arshadshah.nimaz.core.time.TodayProvider
+import com.arshadshah.nimaz.domain.time.TodayProvider
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.google.common.truth.Truth.assertThat
 import io.mockk.every

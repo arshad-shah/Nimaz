@@ -1,7 +1,7 @@
 package com.arshadshah.nimaz.presentation.viewmodel.content
 
 import java.time.LocalDate
-import com.arshadshah.nimaz.core.time.FakeTodayProvider
+import com.arshadshah.nimaz.domain.time.FakeTodayProvider
 import com.arshadshah.nimaz.core.monitoring.RecordingTelemetry
 import com.arshadshah.nimaz.domain.model.Dua
 import com.arshadshah.nimaz.domain.model.DuaCategory

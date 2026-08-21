@@ -24,7 +24,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.arshadshah.nimaz.core.util.HijriDateCalculator
+import com.arshadshah.nimaz.domain.calendar.HijriDateCalculator
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSwitch
 import com.arshadshah.nimaz.presentation.foundation.calendar.CalendarDayState
 import com.arshadshah.nimaz.presentation.foundation.calendar.CalendarHeaderAlignment

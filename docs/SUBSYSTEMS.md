@@ -1041,7 +1041,7 @@ The index is **compiled into the content artifact** by `nimaz-data`'s build, nev
 - **One folding, two implementations.** `domain/search/ArabicSearchNormaliser` folds a typed
   query; `nimaz_data/normalise/arabic.py` folded the indexed text. They must agree exactly or
   every query matches nothing *and no test fails*, so both are held to the generated
-  `app/src/test/resources/search/fold-fixtures.json` (`nz search fixtures`, exported by `nz app
+  `core/domain/src/test/resources/search/fold-fixtures.json` (`nz search fixtures`, exported by `nz app
   sync`). `search_meta.fold_version` is checked at runtime; a mismatch makes the app refuse the
   index rather than under-match silently.
 - **Reading it.** `data/local/search/ContentSearchIndex` is the only reader, via `@RawQuery`. The
@@ -1320,7 +1320,7 @@ entry with the same id — `nz import --check` fails if the two catalogues drift
 
 ## 8. Prayer-time calculation
 
-`core/util/PrayerTimeCalculator.kt` — `@Singleton @Inject constructor()` (pure compute,
+`domain/prayer/PrayerTimeCalculator.kt` in `:core:domain` — `@Singleton @Inject constructor()` (pure compute,
 no deps). All third-party usage is isolated here.
 
 **Library.** **Adhan2** by Batoul Apps (`com.batoulapps.adhan:adhan2:0.0.6`, `libs.adhan`). Adhan2 types are import-aliased (e.g. `CalculationMethod as AdhanMethod`) to avoid colliding with the app's own domain enums.
@@ -1332,7 +1332,7 @@ no deps). All third-party usage is isolated here.
 
 **Inputs/outputs.** `getPrayerTimes(lat, lon, date, method, asr, highLat, adjustments)` → `List<PrayerTime>` (raw `Instant`s; supports per-prayer minute `adjustments`). `calculatePrayerTimes(date, location)` / `…ForRange(...)` take a domain `Location` and return `PrayerTimes`/`List<PrayerTimes>` (Adhan `Instant`s converted to `LocalDateTime` in the location's zone). Returns **domain models** (`domain/model/PrayerModels.kt`), never Adhan types. Settings come from `PreferencesDataStore` (string prefs parsed to enums by the caller).
 
-**Hijri conversion** — `core/util/HijriDateCalculator.kt`, a stateless Kotlin `object` (no Hilt). It does **not** use `ummalqura`; it delegates to the platform `java.time.chrono.HijrahChronology.INSTANCE` (OS-updated Umm al-Qura). Provides `toHijri`/`toGregorian`, Ramadan helpers, validity checks, and a hardcoded Islamic-events calendar (`getIslamicEvents`/`getUpcomingEvents`). **Day-offset support:** `today(offsetDays = 0)` returns today's Hijri date adjusted by the user's `hijriDayOffset` preference (§6), used for local event matching and both Hijri widgets. Other `now()` helpers (`isTodayRamadan`, `daysUntilNextRamadan`, …) currently ignore the offset — see deferred follow-up in §9.
+**Hijri conversion** — `domain/calendar/HijriDateCalculator.kt` in `:core:domain`, a stateless Kotlin `object` (no Hilt). It does **not** use `ummalqura`; it delegates to the platform `java.time.chrono.HijrahChronology.INSTANCE` (OS-updated Umm al-Qura). Provides `toHijri`/`toGregorian`, Ramadan helpers, validity checks, and a hardcoded Islamic-events calendar (`getIslamicEvents`/`getUpcomingEvents`). **Day-offset support:** `today(offsetDays = 0)` returns today's Hijri date adjusted by the user's `hijriDayOffset` preference (§6), used for local event matching and both Hijri widgets. Other `now()` helpers (`isTodayRamadan`, `daysUntilNextRamadan`, …) currently ignore the offset — see deferred follow-up in §9.
 
 **Wiring.** No module — both are constructor-injected / static. `PrayerTimeCalculator` is injected into `PrayerRepositoryImpl`, into `PrayerNotificationScheduler`, and (a deviation from the use-case rule) into `WidgetsScreen`. The widget data sources used to take it too and are the one place that has been closed: they go through `PrayerRepository` now, so they honour the user's calculation settings ([§2](#2-glance-widgets)).
 

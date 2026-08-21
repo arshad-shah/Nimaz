@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.core.monitoring.launchSafely
-import com.arshadshah.nimaz.core.time.TodayProvider
+import com.arshadshah.nimaz.domain.time.TodayProvider
 import com.arshadshah.nimaz.core.util.toUtcMidnightMillis
 import com.arshadshah.nimaz.domain.model.PrayerCalculationSettings
 import com.arshadshah.nimaz.domain.model.PrayerName

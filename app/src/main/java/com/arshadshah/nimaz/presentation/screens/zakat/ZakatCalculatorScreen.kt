@@ -56,7 +56,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.share.ContentShareManager
 import com.arshadshah.nimaz.core.share.Shareables
-import com.arshadshah.nimaz.core.util.HijriDateCalculator
+import com.arshadshah.nimaz.domain.calendar.HijriDateCalculator
 import com.arshadshah.nimaz.core.util.currencySymbolOf
 import com.arshadshah.nimaz.core.util.formatCurrency
 import com.arshadshah.nimaz.domain.model.NisabType

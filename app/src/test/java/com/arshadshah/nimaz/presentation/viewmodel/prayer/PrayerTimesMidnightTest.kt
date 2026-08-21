@@ -1,7 +1,7 @@
 package com.arshadshah.nimaz.presentation.viewmodel.prayer
 
 import com.arshadshah.nimaz.core.monitoring.RecordingTelemetry
-import com.arshadshah.nimaz.core.time.FakeTodayProvider
+import com.arshadshah.nimaz.domain.time.FakeTodayProvider
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.presentation.viewmodel.FakePrayerTimetableRepository
 import com.arshadshah.nimaz.presentation.viewmodel.buildPrayerUseCases

@@ -1,7 +1,7 @@
 package com.arshadshah.nimaz.widget.hijricalendar
 
-import com.arshadshah.nimaz.core.time.TodayProvider
-import com.arshadshah.nimaz.core.util.HijriDateCalculator
+import com.arshadshah.nimaz.domain.time.TodayProvider
+import com.arshadshah.nimaz.domain.calendar.HijriDateCalculator
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import kotlinx.coroutines.flow.first
 import java.time.format.TextStyle

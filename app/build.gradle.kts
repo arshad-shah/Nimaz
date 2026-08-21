@@ -268,6 +268,13 @@ dependencies {
     // useful, so this is maintenance rather than a gate.
     baselineProfile(project(":baselineprofile"))
 
+    // The pure layer. `api`-exposed javax.inject and coroutines-core come with it, so nothing
+    // here declares them again.
+    implementation(project(":core:domain"))
+    // FakeTodayProvider / FakeSearchSettings — one definition, used by the ViewModel tests here
+    // and the use-case tests over there.
+    testImplementation(testFixtures(project(":core:domain")))
+
     // Core
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.core.splashscreen)
@@ -483,18 +490,89 @@ fun organismsClassTree(): FileCollection = classTree("**/presentation/components
 
 fun debugClassTree(): FileCollection = classTree()
 
-fun coverageExecutionData(): ConfigurableFileTree =
-    fileTree(buildOutputDir) {
-        include("**/jacoco/testDebugUnitTest.exec", "**/outputs/unit_test_code_coverage/**/*.exec")
-    }
+fun coverageExecutionData(): FileCollection =
+    files(
+        fileTree(buildOutputDir) {
+            include(
+                "**/jacoco/testDebugUnitTest.exec",
+                "**/outputs/unit_test_code_coverage/**/*.exec",
+            )
+        },
+        // Every extracted module's exec data, or the number silently improves as it measures
+        // less. From PR 5 (:core:domain) onward `:app` no longer holds most of the codebase, and
+        // a report scoped to `:app` alone would show a *rising* percentage over a shrinking
+        // tree — a metric that gets better by covering fewer classes is worse than none.
+        files(coverageModules.map { fileTree(it.buildDir) { include("jacoco/test.exec") } }),
+    )
 
-val coverageSourceDirs = files("src/main/java")
+/**
+ * A module whose classes belong in the merged coverage report.
+ *
+ * Referenced by directory rather than through `project(":core:domain")`: a live `Project` in a
+ * task action is a configuration-cache failure, and this build runs with `problems=fail`.
+ * [packageRoot] is what the report must actually contain — see `assertEveryModuleIsMeasured`.
+ */
+data class CoverageModule(
+    val gradlePath: String,
+    val projectDir: Directory,
+    val classesDir: String,
+    val sourceDir: String,
+    val packageRoot: String,
+) {
+    val buildDir: Directory get() = projectDir.dir("build")
+}
+
+val coverageModules = listOf(
+    CoverageModule(
+        gradlePath = ":core:domain",
+        projectDir = rootProject.layout.projectDirectory.dir("core/domain"),
+        classesDir = "classes/kotlin/main",
+        sourceDir = "src/main/kotlin",
+        packageRoot = "com/arshadshah/nimaz/domain",
+    ),
+)
+
+fun coverageClassDirs(): FileCollection =
+    files(
+        debugClassTree(),
+        files(
+            coverageModules.map { module ->
+                fileTree(module.buildDir.dir(module.classesDir)) { exclude(coverageExclusions) }
+            }
+        ),
+    )
+
+val coverageSourceDirs = files(
+    "src/main/java",
+    coverageModules.map { it.projectDir.dir(it.sourceDir) },
+)
+
+/**
+ * Fails if a module listed in [coverageModules] contributed no classes to the merged report.
+ *
+ * The floor #553 established for the doc scans, applied to coverage: an aggregate that quietly
+ * drops a module reads exactly like an aggregate that includes it, only with a nicer percentage.
+ * Every later extraction PR adds its module here, so forgetting to wire one up is a red build
+ * rather than a number nobody questions.
+ */
+fun assertEveryModuleIsMeasured(reportXml: File) {
+    if (!reportXml.isFile) return
+    val report = reportXml.readText()
+    val missing = coverageModules.filter { """<package name="${it.packageRoot}""" !in report }
+    check(missing.isEmpty()) {
+        "The merged coverage report contains no classes from " +
+            missing.joinToString { it.gradlePath } +
+            ". Its exec data or class directory is not wired into :app:jacocoTestReport, so " +
+            "coverage is being reported over a smaller codebase than the app actually ships."
+    }
+}
 
 // Module-wide coverage report — satisfies "add code coverage to this app".
 tasks.register<JacocoReport>("jacocoTestReport") {
     group = "verification"
     description = "Generates a JaCoCo coverage report for the debug unit tests."
     dependsOn("testDebugUnitTest")
+    coverageModules.forEach { dependsOn("${it.gradlePath}:test") }
 
     reports {
         html.required.set(true)
@@ -507,9 +585,12 @@ tasks.register<JacocoReport>("jacocoTestReport") {
         )
     }
 
-    classDirectories.setFrom(debugClassTree())
+    classDirectories.setFrom(coverageClassDirs())
     sourceDirectories.setFrom(coverageSourceDirs)
     executionData.setFrom(coverageExecutionData())
+
+    val reportXml = layout.buildDirectory.file("reports/jacoco/jacocoTestReport.xml")
+    doLast { assertEveryModuleIsMeasured(reportXml.get().asFile) }
 }
 
 // Focused report for the presentation atoms package.

@@ -75,10 +75,11 @@ internal fun BookmarkListItem(
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                if (!bookmark.ayahText.isNullOrBlank()) {
+                val ayahText = bookmark.ayahText
+                if (!ayahText.isNullOrBlank()) {
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = bookmark.ayahText,
+                        text = ayahText,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 2,
@@ -124,10 +125,11 @@ internal fun BookmarkCard(
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-            if (!bookmark.ayahText.isNullOrBlank()) {
+            val ayahText = bookmark.ayahText
+            if (!ayahText.isNullOrBlank()) {
                 Spacer(modifier = Modifier.height(6.dp))
                 Text(
-                    text = bookmark.ayahText,
+                    text = ayahText,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 2,

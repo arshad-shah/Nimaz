@@ -235,7 +235,8 @@ private fun DuaPage(
                 )
             }
 
-            if (state.showTransliteration && !dua.textTransliteration.isNullOrEmpty()) {
+            val textTransliteration = dua.textTransliteration
+            if (state.showTransliteration && !textTransliteration.isNullOrEmpty()) {
                 Spacer(modifier = Modifier.height(20.dp))
                 HorizontalDivider(
                     modifier = Modifier.fillMaxWidth(),
@@ -243,7 +244,7 @@ private fun DuaPage(
                 )
                 Spacer(modifier = Modifier.height(20.dp))
                 Text(
-                    text = dua.textTransliteration,
+                    text = textTransliteration,
                     style = MaterialTheme.typography.bodyLarge.copy(
                         fontSize = state.fontSize.sp,
                         lineHeight = (state.fontSize * 1.6f).sp
@@ -273,9 +274,10 @@ private fun DuaPage(
                 DuaMetaChips(reference = dua.reference, repeatCount = repeatCount)
             }
 
-            if (!dua.benefits.isNullOrEmpty()) {
+            val benefits = dua.benefits
+            if (!benefits.isNullOrEmpty()) {
                 Spacer(modifier = Modifier.height(22.dp))
-                VirtueCard(text = dua.benefits)
+                VirtueCard(text = benefits)
             }
         }
     }

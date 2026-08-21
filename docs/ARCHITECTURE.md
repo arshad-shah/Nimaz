@@ -127,11 +127,15 @@ flowchart TD
 
 **Why these layers exist:**
 
-| Layer | Responsibility | May depend on |
-|-------|----------------|---------------|
-| `presentation` | Render state, capture user intent | `domain` |
-| `domain` | Business rules, contracts, pure models | nothing (Kotlin + coroutines only) |
-| `data` | Implement contracts, talk to Room/DataStore/assets | `domain` |
+| Layer | Module | Responsibility | May depend on |
+|-------|--------|----------------|---------------|
+| `presentation` | `:app` | Render state, capture user intent | `domain` |
+| `domain` | **`:core:domain`** | Business rules, contracts, pure models | nothing (Kotlin + coroutines only) |
+| `data` | `:app` | Implement contracts, talk to Room/DataStore/assets | `domain` |
+
+Since #556 the middle row is a **compile error** rather than a convention: `domain` lives in its
+own `kotlin-jvm` module, so it cannot import `data` or `presentation` even by accident. The other
+two rows are still convention, and move into modules over the rest of #551.
 
 ### Tech stack (authoritative versions live in `gradle/libs.versions.toml`)
 
@@ -143,7 +147,33 @@ WorkManager (background) · Adhan2 (prayer times). Single-activity, Compose-only
 
 ## 2. Package structure
 
+The package tree is one thing; the **module** tree is another, and since #556 they no longer
+match. `domain/` lives in `:core:domain`, everything below is still `:app`, and the rest of the
+tree moves out over #551. A Gradle module boundary is not a package boundary — package names are
+unchanged by a move, so the imports read the same either side of it.
+
 ```text
+core/domain/src/main/kotlin/           #  ← :core:domain — pure JVM, no Android on the classpath
+com.arshadshah.nimaz/
+└── domain/
+    ├── model/               # Domain models (e.g. QuranModels.kt, TasbihModels.kt)
+    ├── repository/          # Repository INTERFACES (one per feature) + the Android-facing ports
+    │                        #   (WidgetRefresher, CompassSensors, PrayerAlarmScheduler)
+    ├── usecase/             # XxxUseCases.kt (wrapper data class + individual use cases)
+    ├── search/              # ArabicSearchNormaliser — the folding the shipped index was built with
+    ├── time/                # TodayProvider — "what day is it", fakeable
+    ├── calendar/            # HijriDateCalculator
+    ├── worship/             # NextWorshipResolver, WorshipReminderCalculator
+    └── prayer/              # PrayerTimeCalculator (adhan2)
+```
+
+Those last four packages were `core/util` and `core/time`. They moved because **domain imports
+them**, and anything domain imports has to be inside `:core:domain` or below it — parking them in
+`:core:common` (PR 6) would have reversed the arrow. The rest of `core/util` is untouched and is
+PR 6's problem.
+
+```text
+app/src/main/java/                     #  ← :app — everything else, for now
 com.arshadshah.nimaz/
 ├── NimazApp.kt              # @HiltAndroidApp, WorkManager config, AppInitializer
 ├── MainActivity.kt          # @AndroidEntryPoint, single activity, setContent { NimazTheme { NavGraph() } }
@@ -158,11 +188,6 @@ com.arshadshah.nimaz/
 │   ├── share/               # ContentShareManager + Shareable/Shareables + branded ShareCardRenderer
 │   ├── init/                # AppInitializer
 │   └── monitoring/          # AppAnalytics, CrashReporter
-│
-├── domain/
-│   ├── model/               # Domain models (e.g. QuranModels.kt, TasbihModels.kt)
-│   ├── repository/          # Repository INTERFACES (one per feature)
-│   └── usecase/             # XxxUseCases.kt (wrapper data class + individual use cases)
 │
 ├── data/
 │   ├── local/
@@ -651,7 +676,7 @@ notion of "the day changed" anywhere in the layer, so a whole family of defects 
 together — a Room query bound to a fixed day range forever, a "daily" hadith frozen at the
 day it loaded, a month grid built at 23:59 still highlighting yesterday.
 
-Inject **`TodayProvider`** (`core/time/TodayProvider.kt`) and use whichever half fits:
+Inject **`TodayProvider`** (`domain/time/TodayProvider.kt`, in `:core:domain`) and use whichever half fits:
 
 ```kotlin
 todayProvider.today()                       // what day is it — fakeable
@@ -1496,6 +1521,7 @@ copy anything listed as Open.
 
 | Area | What was fixed |
 |------|----------------|
+| Layer boundary (`domain` ⇸ everything else) | **The inward-pointing rule was enforced by review alone; it is now a compile error.** `presentation → domain → data` was true in the code and checked by nothing, because a single module cannot check it. `domain/` moved to **`:core:domain`**, a `kotlin-jvm` module: `data`, `presentation` and the Android SDK are simply not on its classpath. Two things that had to be inverted first, both in PR #577: the five `core.navigation.Route` imports, and `RescheduleNotificationsUseCase`'s constructor-injected `PrayerNotificationScheduler` — 910 LOC of `AlarmManager`/`NotificationCompat` behind what looked like a pure use case, which made the "zero Android imports" census true of *direct* edges only. Purity is held after the fact by `androidFreeClasspath` (§11), not by the one-off demonstration the issue originally asked for. `AP-1`, `AP-3`. |
 | Screen states | **Loading, empty and error were improvised per screen.** 25 hand-rolled spinners across 19 screens, 9 hand-rolled error blocks, 11 `UiState`s carrying an error no screen read, and three Qur'an screens that reported a failed load as an empty one. Resolved by the screen-states epic: the four states are now evaluated in one fixed order (§8), a failing `UiState` carries `UiError` (`@StringRes` copy, exception text in `details`), and `ScreenStateConventionTest` holds all three lines with empty backlogs. `AP-7.16`. |
 | Use-case layer | `Hadith`, `Dua`, `Fasting`, `Prayer`, `Tasbih`, `Tafseer`, `Zakat` now have `XxxUseCases` wrappers; `PrayerTimes/PrayerTracker/Home/Settings/Location`, `Search`, `Bookmarks` ViewModels inject use cases instead of repositories. |
 | Coroutine failure paths | **No ViewModel launches a bare coroutine any more.** All 229 raw `viewModelScope.launch` calls are `launchSafely(telemetry, feature, "label")` — `viewModelScope`'s `SupervisorJob` isolates siblings but does not contain a throw inside a child `launch`, so each of those was a potential crash that reported nothing. `KhatamViewModel` and `OnboardingViewModel` were still on the static `AppAnalytics`/`CrashReporter`; both now inject `Telemetry`. Sites that set `isLoading = true` clear it in `onFailure`; the rest are deliberately telemetry-only — see `CLEAN_ARCHITECTURE_CHECKLIST.md` AP-7.12 for the per-site test, which turns on whether a screen renders the error at all. |
@@ -1520,7 +1546,7 @@ copy anything listed as Open.
 | Design system — card separation | Separation is now chosen by **context**, not by fill: page-level `NEUTRAL` + `ELEVATED`; nested-in-a-card/sheet `OUTLINED` + `elevation = 0.dp`; selected-among-peers lets the fill carry state. `NimazSurfaceCard` (`surface` fill + 1.dp outline + 0 elevation) was **deleted** — in light mode `surface` and `background` are within a few percent luminance, so those cards barely read as cards. See §8.1. |
 | Design system — one segmented control | **Three components drew the same inset pill row.** `NimazPillTabs` (organism, filled-primary, `Modifier.clickable`, `Role`-less) switched views on eight screens; `NimazSegmentedControl` (atom, icon per cell, per-cell tone, nullable selection, `Role.RadioButton`) chose a value on two; and the Qur'an redesign's phase 1 added a third, `NimazSegmentedTabs`, for the lifted-pill treatment the redesign wanted. Registry Open #15 had flagged the first two as a real risk of a caller reaching for the wrong one; the third made it worse. All three are now `NimazSegmentedControl`, with the differences that were real expressed as parameters — `purpose` (`VALUE` → `Role.RadioButton`, `VIEW` → `Role.Tab`) and `width` (`FILL` → equal shares, `WRAP` → sized to each label, which is what the Qibla, Tasbih, Themes and Bookmarks call sites needed) — plus the lift the redesign specified. `NimazPillTabs` and `NimazSegmentedTabs` are deleted along with their tests, and all eight call sites migrated. See §8.3. |
 | Design system — badges/pills | `NimazBadge` absorbed the badge/pill/status-label family: `tone` × `NimazBadgeEmphasis` (FILLED/SOFT/OUTLINED/CUTOUT) × `NimazBadgeShape` (PILL/ROUNDED) × `NimazBadgeSize`, with `selected`/`selectedTone` collapsing the tab-pill pattern. `NimazLabelChip` (and its test) was deleted, as were the private duplicates `TabPill`, `CategoryTab`, `ExampleQuestionChip`, `CitedChip` and `CutoutBadge`. `BadgeType`/`StatusBadge` keep the Islamic domain palette as feature art via `NimazBadgeDefaults.feature()`. `NimazChip` and `NimazActionPill` were intentionally left alone — different jobs. See §8.2. |
-| `PrayerTimeCalculator` injected into five ViewModels | `FastingViewModel`, `HomeViewModel`, `MonthlyPrayerTimesViewModel`, `NightWorshipViewModel` and `PrayerTimesViewModel` each injected the concrete `core/util/PrayerTimeCalculator`. It is not a use case and not an interface, so it **cannot be faked** — every prayer-time path in five ViewModels was untestable without the real astronomical library, and the untestability was not theoretical: `FastingViewModel` called `getPrayerTimes(lat, lng)` and took **all four** calculation defaults, so Fast Tracker's suhoor and iftar ignored the user's method, school, high-latitude rule and per-prayer adjustments while Home honoured all four. Every one of those arguments has a default, so forgetting them compiled and produced plausible times for the wrong configuration. The seam is `PrayerRepository.observeCalculationSettings()` + `getDaySchedule(date[, settings])` + `getSunnahNightTimes(date[, settings])`, wrapped as `ObservePrayerCalculationSettingsUseCase`/`GetDayPrayerScheduleUseCase`/`GetSunnahNightTimesUseCase` in `PrayerUseCases`. `PrayerCalculationSettings` carries a **already-resolved** `ResolvedLocation`, so no caller can compute against the unset (0, 0). The four near-identical `combine` towers over six preference flows — and the three copies of `try { CalculationMethod.valueOf(s) } catch { MWL }` that came with them — collapse to one flow parsed once in the data layer. Pinned by `FastingPrayerSettingsTest`, which could not have been written before the seam existed. |
+| `PrayerTimeCalculator` injected into five ViewModels | `FastingViewModel`, `HomeViewModel`, `MonthlyPrayerTimesViewModel`, `NightWorshipViewModel` and `PrayerTimesViewModel` each injected the concrete `PrayerTimeCalculator` (then `core/util`, now `domain/prayer` in `:core:domain`). It is not a use case and not an interface, so it **cannot be faked** — every prayer-time path in five ViewModels was untestable without the real astronomical library, and the untestability was not theoretical: `FastingViewModel` called `getPrayerTimes(lat, lng)` and took **all four** calculation defaults, so Fast Tracker's suhoor and iftar ignored the user's method, school, high-latitude rule and per-prayer adjustments while Home honoured all four. Every one of those arguments has a default, so forgetting them compiled and produced plausible times for the wrong configuration. The seam is `PrayerRepository.observeCalculationSettings()` + `getDaySchedule(date[, settings])` + `getSunnahNightTimes(date[, settings])`, wrapped as `ObservePrayerCalculationSettingsUseCase`/`GetDayPrayerScheduleUseCase`/`GetSunnahNightTimesUseCase` in `PrayerUseCases`. `PrayerCalculationSettings` carries a **already-resolved** `ResolvedLocation`, so no caller can compute against the unset (0, 0). The four near-identical `combine` towers over six preference flows — and the three copies of `try { CalculationMethod.valueOf(s) } catch { MWL }` that came with them — collapse to one flow parsed once in the data layer. Pinned by `FastingPrayerSettingsTest`, which could not have been written before the seam existed. |
 | Device seams — `Geocoder`, `FusedLocationProviderClient`, permissions, battery optimisation | `LocationViewModel` and `OnboardingViewModel` each built a `Geocoder` and a `FusedLocationProviderClient` from an injected `@ApplicationContext`, wrapped both in their own `suspendCancellableCoroutine`, branched on API 33 twice each, and flattened an `Address` into a display name with their own copy of the same four-way fallback. Neither ViewModel could be **constructed** on the JVM as a result — which is why both had zero tests, and why the location-search debounce shipped untested. `domain/repository/DeviceLocationRepository` (`currentCoordinates`/`search`/`reverseGeocode`), `PermissionChecker` and `PowerSettings` are the seams; `data/device/AndroidDeviceLocationRepository` is the single Android implementation, dispatching on the new `@IoDispatcher` so the knowledge that a geocode blocks lives where the geocode does. `LocationViewModel` is now Context-free and pinned by `LocationSearchDebounceTest`. `PowerSettings` also replaces the unchecked `getSystemService(POWER_SERVICE) as PowerManager` cast that both ViewModels ran from `init`. |
 | Preferences abstraction | ViewModels no longer inject the `PreferencesDataStore` data class — they depend on the `domain/repository/SettingsRepository` interface (implemented by `PreferencesDataStore`, bound via `@Binds`). `UserPreferences` moved to `domain/model`. |
 | 16-line Mushaf — dropped basmalah (7/7, #271) | The fidelity pass found `MushafLayoutMapper` collapsed a `line_number` group to its first row's type, so the **81 surahs** whose `surah_header` and `basmalah` ship on one `line_number` rendered header-only — the basmalah vanished. The mapper now emits each structural row as its own `MushafLine` (header then basmalah); ayah segments still concatenate. Pinned by `MushafLayoutFidelityTest` (real-data round-trip = 112 basmalah lines), `MushafLayoutMapperTest`, and `MushafLinePageTest`. |
@@ -1653,12 +1679,45 @@ Requires JDK 21 and an Android SDK (compileSdk 37). Set `sdk.dir` in `local.prop
 
 ### Modules
 
-Two: **`:app`**, which is the whole application, and **`:baselineprofile`**, a
-`com.android.test` module that exists only to generate `app/src/main/baseline-prof.txt`.
-Nothing depends on `:baselineprofile` at runtime and no product code lives there.
+Three, mid-migration (#551):
+
+| Module | Plugin | What it holds |
+|---|---|---|
+| **`:core:domain`** | `nimaz.jvm.library` | The whole domain layer — models, repository *interfaces*, use cases, `domain/search`, and the four pure calculators domain depends on (`domain/time`, `domain/calendar`, `domain/worship`, `domain/prayer`). **Pure JVM: no AGP, no Android SDK on the classpath.** |
+| **`:app`** | `nimaz.android.application` | Everything else, for now — presentation, data, widgets, `core/`. It shrinks with each milestone of #551. |
+| **`:baselineprofile`** | `com.android.test` | Generates `app/src/main/baseline-prof.txt`. Nothing depends on it at runtime and no product code lives there. |
 
 Plus one **included build**, `build-logic`, which is not a module of the app — it produces the
 convention plugins the modules are built with. See below.
+
+**`:core:domain` is enforced, not merely intended.** Two things keep it pure:
+
+1. **The compiler.** `kotlin-jvm` puts no Android SDK on the classpath, so
+   `import android.content.Context` in a use case does not compile. That is the point of the
+   module rather than a side effect of it.
+2. **`androidFreeClasspath`**, registered by `nimaz.jvm.library` and wired into `check`. The
+   compiler only rejects Android *types*; it says nothing about a future
+   `implementation(libs.androidx.…)` line pulling in a JAR-packaged `androidx` artifact, which
+   would resolve and compile perfectly well. The task walks every resolvable `*Classpath`
+   configuration — including the test and test-fixture ones, so Robolectric cannot appear either
+   — and fails on any component under `com.android`, `androidx` or `com.google.android`.
+
+When domain needs something Android can do, invert it behind a domain port rather than reaching
+for the platform: `WidgetRefresher`, `CompassSensors` and `PrayerAlarmScheduler` are the
+existing shapes to copy (§2).
+
+**Shared test fakes cross the boundary through `testFixtures`,** not by duplication.
+`:core:domain` publishes `src/testFixtures` — currently `FakeTodayProvider` and
+`FakeSearchSettings` — and `:app` consumes it with
+`testImplementation(testFixtures(project(":core:domain")))`. Both sides of a seam get one
+definition of the fake for it.
+
+**Coverage is merged, and the merge is asserted.** `:app:jacocoTestReport` aggregates each
+module's classes, sources and `test.exec`; `assertEveryModuleIsMeasured` in
+`app/build.gradle.kts` fails the report if a listed module contributed no classes. Without that
+floor, an extraction that forgot its jacoco wiring would make the reported percentage *rise*
+while measuring less of the app — the exact failure mode #553 guards the doc scans against.
+**Every module extracted from here on adds itself to `coverageModules`.**
 
 ### Convention plugins (`build-logic`)
 
@@ -1670,7 +1729,7 @@ exists so that the build configuration every module shares is stated **once**:
 |---|---|---|
 | `nimaz.android.application` | `com.android.application` | compileSdk 37, minSdk 29, Java 21, the `-Xannotation-default-target=param-property` compiler arg |
 | `nimaz.android.library` | `com.android.library` | the same shared config |
-| `nimaz.jvm.library` | `org.jetbrains.kotlin.jvm` | Java 21 + the JVM toolchain, no Android — for a pure-JVM module such as the domain layer |
+| `nimaz.jvm.library` | `org.jetbrains.kotlin.jvm` | Java 21 + the JVM toolchain, no Android, and the `androidFreeClasspath` guard wired into `check` — applied by `:core:domain` |
 | `nimaz.android.compose` | `org.jetbrains.kotlin.plugin.compose` | `buildFeatures.compose = true`; reacts to whichever of `AppPlugin`/`LibraryPlugin` the module has |
 | `nimaz.android.hilt` | `com.google.devtools.ksp`, `com.google.dagger.hilt.android` | `hilt-android` on `implementation`, `hilt-compiler` on `ksp` |
 | `nimaz.android.feature` | the three above (library + compose + hilt) | the standard shape of a feature module |

@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.core.util
 
+import com.arshadshah.nimaz.domain.worship.DayWorshipTimes
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes

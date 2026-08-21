@@ -107,18 +107,20 @@ fun AyahTranslationContent(
             }
 
             // Sajda indicator
-            if (ayah.sajdaType != null) {
+            val sajdaType = ayah.sajdaType
+            if (sajdaType != null) {
                 Spacer(modifier = Modifier.height(12.dp))
-                SajdaIndicator(sajdaType = ayah.sajdaType, withGlyph = true)
+                SajdaIndicator(sajdaType = sajdaType, withGlyph = true)
             }
 
             // Translation
-            if (showTranslation && !ayah.translation.isNullOrBlank()) {
+            val translation = ayah.translation
+            if (showTranslation && !translation.isNullOrBlank()) {
                 Spacer(modifier = Modifier.height(16.dp))
                 NimazSheetSectionLabel(text = stringResource(R.string.translation))
                 NimazSheetPreviewCard {
                     Text(
-                        text = ayah.translation,
+                        text = translation,
                         // The catalogue ships right-to-left translations (Urdu), so the
                         // paragraph direction has to come from the text itself rather than
                         // from the app's locale — otherwise Urdu renders left-aligned with
@@ -132,7 +134,8 @@ fun AyahTranslationContent(
             }
 
             // Transliteration
-            if (showTransliteration && !ayah.transliteration.isNullOrBlank()) {
+            val transliteration = ayah.transliteration
+            if (showTransliteration && !transliteration.isNullOrBlank()) {
                 Spacer(modifier = Modifier.height(16.dp))
                 NimazSheetSectionLabel(
                     text = stringResource(R.string.transliteration),
@@ -142,7 +145,7 @@ fun AyahTranslationContent(
                     color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.35f)
                 ) {
                     Text(
-                        text = ayah.transliteration,
+                        text = transliteration,
                         style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 22.sp),
                         color = MaterialTheme.colorScheme.onTertiaryContainer
                     )

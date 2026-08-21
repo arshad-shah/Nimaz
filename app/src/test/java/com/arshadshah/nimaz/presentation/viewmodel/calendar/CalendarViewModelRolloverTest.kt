@@ -2,8 +2,8 @@ package com.arshadshah.nimaz.presentation.viewmodel.calendar
 
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.monitoring.RecordingTelemetry
-import com.arshadshah.nimaz.core.time.FakeTodayProvider
-import com.arshadshah.nimaz.core.util.HijriDateCalculator
+import com.arshadshah.nimaz.domain.time.FakeTodayProvider
+import com.arshadshah.nimaz.domain.calendar.HijriDateCalculator
 import com.arshadshah.nimaz.domain.model.IslamicEvent
 import com.arshadshah.nimaz.domain.model.IslamicEventType
 import com.arshadshah.nimaz.domain.usecase.IslamicEventUseCases

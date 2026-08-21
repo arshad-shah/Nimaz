@@ -327,19 +327,21 @@ private fun HadithPage(
                 )
             }
 
-            if (!hadith.reference.isNullOrEmpty()) {
+            val reference = hadith.reference
+            if (!reference.isNullOrEmpty()) {
                 Spacer(modifier = Modifier.height(20.dp))
                 NimazBadge(
-                    text = hadith.reference,
+                    text = reference,
                     icon = Icons.Default.Book,
                     size = NimazBadgeSize.MEDIUM
                 )
             }
 
-            if (state.showChain && !hadith.narratorChain.isNullOrBlank()) {
+            val narratorChain = hadith.narratorChain
+            if (state.showChain && !narratorChain.isNullOrBlank()) {
                 Spacer(modifier = Modifier.height(20.dp))
                 ChainOfNarrationSection(
-                    chain = hadith.narratorChain,
+                    chain = narratorChain,
                     arabicFontFamily = state.arabicFontFamily
                 )
             }

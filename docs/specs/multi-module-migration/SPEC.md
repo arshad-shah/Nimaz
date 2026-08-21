@@ -231,11 +231,14 @@ That applies to every library module too.
         ├─ :core:data        19 repository impls + mappers
         ├─ :core:database    both Room DBs, 15 entities, 22 DAOs, migrations, schemas/
         ├─ :core:datastore   PreferencesDataStore + the 11 SettingsSeams impls
-        ├─ :core:common      util, time, monitoring, share, text
-        └─ :core:domain      models, repository interfaces, 33 use cases   ← pure JVM
+        ├─ :core:common      what is left of core/util after PR 5 took the five
+        │                    files domain imports, plus monitoring, share, text
+        └─ :core:domain      models, repository interfaces, 33 use-case files,
+                             domain/search, and the four pure calculators domain
+                             imports: time, calendar, worship, prayer   ← pure JVM
 ```
 
-Eleven feature modules, seven core modules. Rules: `:core:*` never depends on `:feature:*`;
+Eleven feature modules, eight core modules — `:core:audio` was added during validation (#551); see the epic comment of 2026-08-21. Rules: `:core:*` never depends on `:feature:*`;
 no `:feature:*` depends on another `:feature:*`; only `:app` depends on features.
 
 Feature-specific molecules and organisms (`Home*`, `Mushaf*`, `Qaida*`, `Quran*`, `Prayer*`,
@@ -265,17 +268,39 @@ generic `Nimaz*` components stay in `:core:ui`.
 
 §3.7's outward references (the five `Route` imports, the three KDoc links, and the transitive
 Android dependency described in §1 above) are fixed in **PR 4 (#555)**, which lands first. Phase 1
-then moves `domain/` wholesale under the `kotlin-jvm` plugin.
+then moves `domain/` wholesale under the `kotlin-jvm` plugin, **plus the first slice of the
+`core/util` triage** — `HijriDateCalculator`, `TodayProvider`, `NextWorshipResolver`,
+`PrayerTimeCalculator` and `WorshipReminderCalculator`, which domain imports and which therefore
+cannot wait for `:core:common` without reversing the arrow. They land as
+`domain/{calendar,time,worship,prayer}`.
 
 Highest-leverage single step: it compiles without AGP or Robolectric, its tests run in seconds,
 and from here a stray `import android.*` in domain is a build failure rather than a review
 comment. The sibling repo `arshad-shah/foolscap` ran exactly this step ("Make the pure layer its
 own module") and is the model to copy.
 
+**Three costs worth knowing before the later phases repeat them:**
+
+1. **Cross-module smart casts.** Kotlin refuses to smart-cast a `val` declared in another
+   module, because that module could change it in a later version. Twenty-seven call sites of
+   the shape `if (model.field != null) use(model.field)` over a domain model stopped compiling
+   and were rewritten to bind a local first. Every later module that exports a model with
+   nullable fields pays this again, proportional to how much UI reads those fields.
+2. **Test fixtures need a channel.** Fakes used on both sides of a boundary — `FakeTodayProvider`
+   in 21 `:app` tests and `FakeSearchSettings` in two — go in `src/testFixtures` and are consumed
+   with `testImplementation(testFixtures(project(...)))`. Duplicating them would be the easy
+   wrong answer.
+3. **Test resources do not follow their tests.** `fold-fixtures.json` is written into the repo by
+   `nz app sync` in the *data* repo, so moving it moves a cross-repo contract. It moved with the
+   test that reads it, and `ArabicSearchNormaliserTest` now fails if a copy reappears at the old
+   path — otherwise the sync tool would keep refreshing a file nothing reads while the tests
+   asserted happily against a stale one.
+
 ### Phase 2 — The data-side core modules
 
-Triage `core/util` first (§3.6) — split genuinely shared helpers into `:core:common` and push
-the rest down to their real owners. Then:
+Finish the `core/util` triage (§3.6). Phase 1 already took the five files domain imports; split
+what remains between genuinely shared helpers in `:core:common` and files pushed down to their
+real owners. Then:
 
 - `:core:database` — both `@Database` classes, entities, DAOs, migrations, **and the `schemas/`
   directory**; the `room.schemaLocation` KSP arg and the `androidTest` `assets.srcDir(schemas)`
@@ -341,8 +366,11 @@ Six tiers, cheapest and most automatic first. Every phase gate runs tiers 1–3.
 
 This is the return on the whole exercise, so it is worth stating as the success metric rather
 than a side effect. Today `presentation → domain → data` is enforced by review alone — there is
-no architecture test in the repo. After Phase 1 it is enforced by the absence of the Android SDK
-on `:core:domain`'s classpath.
+no architecture test in the repo. After Phase 1 it is enforced twice: by the absence of the
+Android SDK on `:core:domain`'s classpath, and by `androidFreeClasspath` — a `check`-wired task
+that fails on any `com.android` / `androidx` / `com.google.android` component reaching any of the
+module's resolvable classpaths. The first stops an `import`; only the second stops a `dependencies
+{ }` line, and a rule that only holds on the day of the PR is not enforcement.
 
 **Metric:** count the architectural rules that became compile errors at each phase. If a phase
 adds no enforcement, ask why it is being done.
@@ -457,7 +485,7 @@ which number the stopping rule below is read from.
 | Incremental: touch a `domain` model | Will not improve much |
 | Incremental: touch `strings.xml` | Will not improve; deliberately unsplit |
 | `testDebugUnitTest` wall time | Should improve via parallel module execution |
-| `:core:domain:test` alone | Should drop to seconds — no pre-migration value exists; first measured at the PR 5 gate |
+| `:core:domain:test` alone | **11s for 525 tests** at the PR 5 gate, against ~50s for the whole `:app` suite. No pre-migration value exists; these are not the same set of tests and the figures are not a speedup. |
 | Configuration time (`--profile`) | Watch it — more modules means more configuration |
 
 **Stopping rule:** if incremental rebuild after touching a leaf screen has not improved by at

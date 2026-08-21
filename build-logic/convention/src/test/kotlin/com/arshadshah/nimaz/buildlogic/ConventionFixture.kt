@@ -48,7 +48,29 @@ object ConventionFixture {
         buildScript: String,
         imports: List<String> = emptyList(),
         task: String = "printConventions",
-    ): BuildResult {
+    ): BuildResult = runner(dir, plugins, buildScript, imports, task).build()
+
+    /**
+     * As [run], but asserts the build **fails** and hands back the result to inspect.
+     *
+     * A guard task that has never been seen to fail is not known to work — `androidFreeClasspath`
+     * passing on a module with nothing wrong with it proves only that it runs.
+     */
+    fun runAndFail(
+        dir: File,
+        plugins: List<String>,
+        buildScript: String,
+        imports: List<String> = emptyList(),
+        task: String = "printConventions",
+    ): BuildResult = runner(dir, plugins, buildScript, imports, task).buildAndFail()
+
+    private fun runner(
+        dir: File,
+        plugins: List<String>,
+        buildScript: String,
+        imports: List<String>,
+        task: String,
+    ): GradleRunner {
         dir.mkdirs()
         File(dir, "settings.gradle.kts").writeText(
             """
@@ -106,7 +128,6 @@ object ConventionFixture {
             .withProjectDir(dir)
             .withArguments(task, "--stacktrace")
             .forwardOutput()
-            .build()
     }
 
     /** Reads the `REPORT key=value` lines a fixture printed. */
