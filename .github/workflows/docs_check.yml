@@ -17,6 +17,13 @@ on:
       - 'app/src/main/java/com/arshadshah/nimaz/data/local/**'
       - 'app/src/main/java/com/arshadshah/nimaz/domain/model/Announcement.kt'
       - 'app/src/main/java/com/arshadshah/nimaz/widget/**'
+      # Module-agnostic mirrors of the paths above. The globs are rooted at app/ today,
+      # but the multi-module split (#551) moves navigation, announcements, the DataStore
+      # code and the widgets into core/ and feature/ modules. Without these two entries
+      # this lane would silently stop firing on the very files it guards — a green check
+      # that ran nothing, which is the failure #553 exists to prevent.
+      - 'core/**'
+      - 'feature/**'
       - 'scripts/check_docs.py'
       - '.github/workflows/docs_check.yml'
   pull_request:
@@ -27,6 +34,13 @@ on:
       - 'app/src/main/java/com/arshadshah/nimaz/data/local/**'
       - 'app/src/main/java/com/arshadshah/nimaz/domain/model/Announcement.kt'
       - 'app/src/main/java/com/arshadshah/nimaz/widget/**'
+      # Module-agnostic mirrors of the paths above. The globs are rooted at app/ today,
+      # but the multi-module split (#551) moves navigation, announcements, the DataStore
+      # code and the widgets into core/ and feature/ modules. Without these two entries
+      # this lane would silently stop firing on the very files it guards — a green check
+      # that ran nothing, which is the failure #553 exists to prevent.
+      - 'core/**'
+      - 'feature/**'
       - 'scripts/check_docs.py'
       - '.github/workflows/docs_check.yml'
 

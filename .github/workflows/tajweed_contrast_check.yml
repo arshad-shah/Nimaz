@@ -9,11 +9,17 @@ on:
     paths:
       - 'app/src/main/java/com/arshadshah/nimaz/presentation/theme/Palette.kt'
       - 'app/src/main/java/com/arshadshah/nimaz/presentation/theme/Color.kt'
+      # Palette.kt and Color.kt move to :core:ui in #561. Kept module-agnostic so this
+      # lane does not silently stop firing once they do.
+      - 'core/**'
       - 'scripts/check_tajweed_contrast.py'
   pull_request:
     paths:
       - 'app/src/main/java/com/arshadshah/nimaz/presentation/theme/Palette.kt'
       - 'app/src/main/java/com/arshadshah/nimaz/presentation/theme/Color.kt'
+      # Palette.kt and Color.kt move to :core:ui in #561. Kept module-agnostic so this
+      # lane does not silently stop firing once they do.
+      - 'core/**'
       - 'scripts/check_tajweed_contrast.py'
 
 jobs:

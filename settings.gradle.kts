@@ -10,6 +10,9 @@ pluginManagement {
         mavenCentral()
         gradlePluginPortal()
     }
+    // Convention plugins (`nimaz.android.*`, `nimaz.jvm.library`) live in an included build so
+    // every module shares one definition of compileSdk / minSdk / Java 21 / Compose / Hilt.
+    includeBuild("build-logic")
 }
 plugins {
     id("org.gradle.toolchains.foojay-resolver-convention") version "0.10.0"

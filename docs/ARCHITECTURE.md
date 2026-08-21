@@ -1500,7 +1500,7 @@ copy anything listed as Open.
 | Use-case layer | `Hadith`, `Dua`, `Fasting`, `Prayer`, `Tasbih`, `Tafseer`, `Zakat` now have `XxxUseCases` wrappers; `PrayerTimes/PrayerTracker/Home/Settings/Location`, `Search`, `Bookmarks` ViewModels inject use cases instead of repositories. |
 | Coroutine failure paths | **No ViewModel launches a bare coroutine any more.** All 229 raw `viewModelScope.launch` calls are `launchSafely(telemetry, feature, "label")` — `viewModelScope`'s `SupervisorJob` isolates siblings but does not contain a throw inside a child `launch`, so each of those was a potential crash that reported nothing. `KhatamViewModel` and `OnboardingViewModel` were still on the static `AppAnalytics`/`CrashReporter`; both now inject `Telemetry`. Sites that set `isLoading = true` clear it in `onFailure`; the rest are deliberately telemetry-only — see `CLEAN_ARCHITECTURE_CHECKLIST.md` AP-7.12 for the per-site test, which turns on whether a screen renders the error at all. |
 | Home daily content | **Stale entry removed from Open.** §9 row 1 still claimed `HomeViewModel` injects `FastingDao`/`HadithDao`/`DuaDao`. It does not: it takes `FastingUseCases`/`HadithUseCases`/`DuaUseCases`, and the daily rotation goes through `GetDailyHadithUseCase`/`GetDailyDuaUseCase`. The fix landed with AP-4; only the registry was not updated. |
-| Settings seams | **`SettingsRepository` is no longer injected into feature ViewModels.** It is a flat preference store — 179 members, a `Flow` plus a setter per preference — so wrapping it in per-operation use cases the way `ZakatUseCases` wraps `ZakatRepository` would have meant ~179 one-line classes, the "use case that adds no value" the checklist warns about. Instead `domain/repository/settings/SettingsSeams.kt` declares nine feature-scoped slices — `QuranPreferences`, `HadithDisplaySettings`, `DuaDisplaySettings`, `TasbihSettings`, `ZakatSettings`, `AiSettings`, `LocationSettings`, `MoreSettings`, `AppSettings` — and `SettingsRepository` **extends all nine**. The DataStore implementation is untouched and `RepositoryModule` binds every seam to the same `PreferencesDataStore` singleton; what changes is reach. 13 ViewModels now declare the one feature's preferences they consume, `OnboardingViewModel` takes two, and `PrayerTimesViewModel`/`FastingViewModel` injected `SettingsRepository` without ever reading it — those params are gone. `SettingsViewModel` keeps the full repository: it *is* the settings feature and edits nearly every preference. **When adding a preference, put it on the seam its feature reads, not on `SettingsRepository` directly.** |
+| Settings seams | **`SettingsRepository` is no longer injected into feature ViewModels.** It is a flat preference store — 179 members, a `Flow` plus a setter per preference — so wrapping it in per-operation use cases the way `ZakatUseCases` wraps `ZakatRepository` would have meant ~179 one-line classes, the "use case that adds no value" the checklist warns about. Instead `domain/repository/settings/SettingsSeams.kt` declares eleven feature-scoped slices — `QuranPreferences`, `HadithDisplaySettings`, `DuaDisplaySettings`, `TasbihSettings`, `ZakatSettings`, `HijriSettings`, `SearchSettings`, `AiSettings`, `LocationSettings`, `MoreSettings`, `AppSettings` — and `SettingsRepository` **extends all eleven**. The DataStore implementation is untouched and `RepositoryModule` binds every seam to the same `PreferencesDataStore` singleton; what changes is reach. 13 ViewModels now declare the one feature's preferences they consume, `OnboardingViewModel` takes two, and `PrayerTimesViewModel`/`FastingViewModel` injected `SettingsRepository` without ever reading it — those params are gone. `SettingsViewModel` keeps the full repository: it *is* the settings feature and edits nearly every preference. **When adding a preference, put it on the seam its feature reads, not on `SettingsRepository` directly.** |
 | ViewModel package layout | The layer was one flat package of 32 files, documented as deliberate. It is now `viewmodel/<feature>/` across 14 sub-packages, and §2/§4.1 **prescribe** that shape for new features rather than describing a move. The `HighLatitudeRule` enum that `SettingsViewModel` declared — shadowing the domain one, with different member spellings — is deleted; the domain type and its alias-tolerant `fromString` are used everywhere. |
 | Zakat clean-arch leak | `ZakatRepository` now exposes the `ZakatHistoryEntry` domain model (promoted to `domain/model`); entity↔domain mapping lives in `ZakatRepositoryImpl`. |
 | Calendar layer bypass | New `IslamicEventRepository` (+ impl mapping) and `IslamicEventUseCases`; `CalendarViewModel` no longer touches `IslamicEventDao`. |
@@ -1636,14 +1636,18 @@ copy anything listed as Open.
 # identical copies to five locales.
 ./gradlew :app:lintDebug
 
-# Full CI lane (Gradle tests + lint), as run on PRs
+# Convention-plugin tests (Gradle TestKit). An included build's tasks only run when asked
+# for by name, so this is NOT covered by :app:testDebugUnitTest.
+./gradlew :build-logic:convention:test
+
+# Full CI lane (convention-plugin tests + Gradle tests + lint), as run on PRs
 bundle exec fastlane android test
 
 # Debug APK
 ./gradlew assembleDebug
 ```
 
-Requires JDK 21 and an Android SDK (compileSdk 36). Set `sdk.dir` in `local.properties` or
+Requires JDK 21 and an Android SDK (compileSdk 37). Set `sdk.dir` in `local.properties` or
 `ANDROID_HOME`.
 
 ### Modules
@@ -1651,6 +1655,43 @@ Requires JDK 21 and an Android SDK (compileSdk 36). Set `sdk.dir` in `local.prop
 Two: **`:app`**, which is the whole application, and **`:baselineprofile`**, a
 `com.android.test` module that exists only to generate `app/src/main/baseline-prof.txt`.
 Nothing depends on `:baselineprofile` at runtime and no product code lives there.
+
+Plus one **included build**, `build-logic`, which is not a module of the app — it produces the
+convention plugins the modules are built with. See below.
+
+### Convention plugins (`build-logic`)
+
+`build-logic` is an included build (wired via `includeBuild("build-logic")` inside
+`settings.gradle.kts`'s `pluginManagement` block) holding a single project, `:convention`. It
+exists so that the build configuration every module shares is stated **once**:
+
+| Plugin id | Applies | Carries |
+|---|---|---|
+| `nimaz.android.application` | `com.android.application` | compileSdk 37, minSdk 29, Java 21, the `-Xannotation-default-target=param-property` compiler arg |
+| `nimaz.android.library` | `com.android.library` | the same shared config |
+| `nimaz.jvm.library` | `org.jetbrains.kotlin.jvm` | Java 21 + the JVM toolchain, no Android — for a pure-JVM module such as the domain layer |
+| `nimaz.android.compose` | `org.jetbrains.kotlin.plugin.compose` | `buildFeatures.compose = true`; reacts to whichever of `AppPlugin`/`LibraryPlugin` the module has |
+| `nimaz.android.hilt` | `com.google.devtools.ksp`, `com.google.dagger.hilt.android` | `hilt-android` on `implementation`, `hilt-compiler` on `ksp` |
+| `nimaz.android.feature` | the three above (library + compose + hilt) | the standard shape of a feature module |
+
+`:app` applies `nimaz.android.application` + `.compose` + `.hilt`, so the plugins are exercised
+by the real build rather than only by their tests.
+
+Two rules that are easy to break and expensive to debug:
+
+1. **No convention plugin may apply `org.jetbrains.kotlin.android`.** AGP 9 compiles Kotlin
+   through its built-in Kotlin support; applying the standalone plugin alongside it fails the
+   build. `AndroidLibraryConventionPluginTest` asserts this as a negative.
+2. **A convention plugin never depends on a task in another project.** The lint/asset ordering
+   for `fetchNimazData` lives here as `GeneratedAssetOrdering` /
+   `Project.orderAssetConsumersAfter(...)`, but the task itself stays registered in `:app` —
+   a library reaching for `:app:fetchNimazData` would invert the dependency graph.
+
+The plugins are covered by Gradle TestKit tests in
+`build-logic/convention/src/test/kotlin/`, run with `./gradlew :build-logic:convention:test`
+(also wired into the `fastlane android test` lane). They assert *effects* — the resolved
+`compileSdk`, `minSdk`, Java level, compiler args, applied plugin set and task graph — rather
+than the plugins' source.
 
 ### The baseline profile
 

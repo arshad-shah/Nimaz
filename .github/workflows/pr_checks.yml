@@ -7,10 +7,18 @@ name: Android PR Checks
 # docs_check.yml, and the theme files have tajweed_contrast_check.yml.
 on:
   pull_request:
-    branches: [ master, dev ]
+    # `mm/**` and `epic/**` are here because a stacked PR targets the branch below it, not
+    # dev. With only [ master, dev ] every PR in the 22-PR multi-module stack (#551) would
+    # show green having run no build, no test and no lint at all.
+    branches: [ master, dev, 'mm/**', 'epic/**' ]
     paths:
       - 'app/**'
       - 'baselineprofile/**'
+      # The multi-module migration (#551) creates these; listing them before they exist is
+      # harmless and stops a later PR in that stack from silently skipping this lane.
+      - 'build-logic/**'
+      - 'core/**'
+      - 'feature/**'
       - 'gradle/**'
       - 'gradlew'
       - 'gradlew.bat'
