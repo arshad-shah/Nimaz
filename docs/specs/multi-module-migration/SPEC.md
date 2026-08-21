@@ -4,6 +4,8 @@
 **Scope:** the Gradle module structure only. No behaviour changes, no UI changes, no schema
 changes. Every phase below is a refactor whose success criterion is that nothing observable
 changed.
+**Execution plan:** [`EPIC.md`](EPIC.md) — the issue tree, the 22-PR stack and the
+`epic/multi-module` integration branch that turns this assessment into merged work.
 **Status:** proposal. Nothing here has been implemented.
 
 ---
@@ -65,13 +67,20 @@ that Nimaz has already done. The migration is unusually well-prepared.
 2. **Screens are navigation-decoupled.** 84 of 107 screen files take `onNavigate`/`onBack`
    lambdas; only 7 import `NavController` or `NavHostController`. This is the single biggest
    determinant of feature-extraction difficulty and it is already handled.
-3. **Vertical slices are clean at the data layer.** 22 DAOs map to 20 repository
+3. **Vertical slices are clean at the data layer.** 22 DAOs map to 19 repository
    implementations nearly 1:1. `QuranDao` is the only DAO used by more than one repository
    (four: Quran, Khatam, Tafseer, Library).
 4. **Interface segregation on settings is done.** `domain/repository/settings/SettingsSeams.kt`
-   already splits the 179-member `SettingsRepository` into nine feature-scoped interfaces
-   (`QuranPreferences`, `HadithDisplaySettings`, `TasbihSettings`, …). Each feature module
-   depends on its own seam rather than the whole store. Normally the fiddliest part of a split.
+   already splits the flat preference store into **11** feature-scoped interfaces
+   (`QuranPreferences`, `HadithDisplaySettings`, `DuaDisplaySettings`, `TasbihSettings`,
+   `ZakatSettings`, `HijriSettings`, `SearchSettings`, `AiSettings`, `LocationSettings`,
+   `MoreSettings`, `AppSettings`), and `SettingsRepository` extends all 11 while declaring a
+   further 44 vals and 48 functions of its own. Each feature module depends on its own seam
+   rather than the whole store. Normally the fiddliest part of a split.
+
+   Note that `docs/ARCHITECTURE.md` §9 still records **nine** seams — `HijriSettings` and
+   `SearchSettings` were added without the doc being updated. Correct it in Phase 0; it is a
+   small instance of exactly the drift the module boundaries are meant to make impossible.
 5. **`android.nonTransitiveRClass=true` is already set**, which multi-module R-class
    resolution requires.
 6. **Widgets are isolated** — zero imports from `presentation/`.
@@ -97,7 +106,7 @@ all 22 DAOs one method at a time. Both must dissolve into per-module slices.
 
 ### 3.3 Screens and ViewModels are grouped on different axes
 
-`screens/` has 26 directories organised by feature. `viewmodel/` has 17 organised by *domain
+`screens/` has 26 directories organised by feature. `viewmodel/` has 16 organised by *domain
 area*. The mismatch is the source of essentially all cross-feature coupling:
 
 | Shared ViewModel package | Consumed by |
@@ -185,9 +194,9 @@ That applies to every library module too.
         ├─ :core:navigation  the Route hierarchy, ScreenTags, taggedComposable,
         │                    the announcement and help deep-link grammars.
         │                    No composables from features. No screen imports.
-        ├─ :core:data        20 repository impls + mappers
+        ├─ :core:data        19 repository impls + mappers
         ├─ :core:database    both Room DBs, 15 entities, 22 DAOs, migrations, schemas/
-        ├─ :core:datastore   PreferencesDataStore + the nine SettingsSeams impls
+        ├─ :core:datastore   PreferencesDataStore + the 11 SettingsSeams impls
         ├─ :core:common      util, time, monitoring, share, text
         └─ :core:domain      models, repository interfaces, 33 use cases   ← pure JVM
 ```
@@ -236,8 +245,8 @@ the rest down to their real owners. Then:
 - `:core:database` — both `@Database` classes, entities, DAOs, migrations, **and the `schemas/`
   directory**; the `room.schemaLocation` KSP arg and the `androidTest` `assets.srcDir(schemas)`
   wiring move with it.
-- `:core:datastore` — `PreferencesDataStore` (990 LOC) plus the nine settings seams.
-- `:core:data` — 20 repository impls and mappers.
+- `:core:datastore` — `PreferencesDataStore` (990 LOC) plus the 11 settings seams.
+- `:core:data` — 19 repository impls and mappers.
 
 ### Phase 3 — `:core:ui`
 

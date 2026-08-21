@@ -1,0 +1,299 @@
+# Multi-module migration — epic, issue breakdown and PR stack
+
+**Repo:** `arshad-shah/nimaz` · **Integration branch:** `epic/multi-module`
+**Spec:** [`SPEC.md`](SPEC.md) — the assessment and the reasoning. This document is the
+execution plan: the issue tree, the branch topology, and the exit criteria for each PR.
+**Status:** proposal. No issues have been filed and no branches exist yet.
+
+---
+
+## 0. How this is meant to run
+
+One epic issue, seven milestones, **22 pull requests** stacked onto a single long-lived
+integration branch. Merging that branch into `dev` once gives a fully decoupled Nimaz with
+documentation that matches the code — not a half-migrated tree that someone has to finish
+later under pressure.
+
+The stack exists because these PRs are **not independent**. PR *n* is cut from the branch of
+PR *n−1*, not from `dev`. Reviewing them in isolation would mean reviewing a tree that does
+not compile.
+
+```
+dev
+ └── epic/multi-module                 ← integration branch, never merged into until the end
+      ├── mm/00-build-logic            PR  1
+      ├── mm/01-check-docs-roots       PR  2   ─┐ phase 0
+      ├── mm/02-baseline-metrics       PR  3   ─┘
+      ├── mm/03-domain-route-inversion PR  4   ─┐ phase 1
+      ├── mm/04-core-domain            PR  5   ─┘
+      ├── mm/05-core-common            PR  6   ─┐
+      ├── mm/06-core-database          PR  7    │ phase 2
+      ├── mm/07-core-datastore         PR  8    │
+      ├── mm/08-core-data              PR  9   ─┘
+      ├── mm/09-core-ui                PR 10   ── phase 3
+      ├── mm/10-core-navigation        PR 11   ─┐ phase 4
+      ├── mm/11-navgraph-decompose     PR 12   ─┘
+      ├── mm/12-feature-widget         PR 13   ─┐
+      ├── mm/13-feature-onboarding-about PR 14  │
+      ├── mm/14-feature-tools-calendar PR 15    │
+      ├── mm/15-feature-search         PR 16    │ phase 5
+      ├── mm/16-feature-content        PR 17    │
+      ├── mm/17-feature-tracker        PR 18    │
+      ├── mm/18-feature-quran          PR 19    │
+      ├── mm/19-feature-prayer         PR 20    │
+      ├── mm/20-feature-settings       PR 21   ─┘
+      └── mm/21-di-split-and-guardrails PR 22  ── phase 6
+```
+
+Each retargets to `epic/multi-module` on merge,
+so the integration branch always holds every merged step and nothing else.
+
+**Rebase discipline.** When `dev` moves, rebase `epic/multi-module` onto it once and
+force-push the stack, rather than merging `dev` into each open branch. With 22 branches the
+merge-commit approach produces an unreviewable history.
+
+---
+
+## 1. The epic issue
+
+> **Title:** Split Nimaz into feature and core Gradle modules
+>
+> **Body:**
+>
+> 190,505 lines across 1,121 files sit in one `:app` module. The layering `CLAUDE.md` claims —
+> `presentation → domain → data` — is real in the code but enforced by nothing, because a single
+> module cannot enforce it. This epic converts that convention into compile errors, and takes
+> the build-time improvement as a secondary benefit.
+>
+> Full assessment and reasoning: `docs/specs/multi-module-migration/SPEC.md`.
+> Execution plan and PR stack: `docs/specs/multi-module-migration/EPIC.md`.
+>
+> **Target:** 11 feature modules, 7 core modules, `:app` reduced to a shell.
+>
+> **Integration branch:** `epic/multi-module`. Merged into `dev` once, at the end.
+>
+> **Definition of done**
+> - [ ] `:app` contains only `MainActivity`, `NimazApp`, the NavHost shell, `screens/adaptive`,
+>       `screens/home`, the manifest, Firebase and signing config
+> - [ ] `:core:domain` builds with the `kotlin-jvm` plugin and no Android on its classpath
+> - [ ] No `:feature:*` module depends on another `:feature:*` module, enforced by a `check` task
+> - [ ] All 2,333 unit and 121 instrumented tests green
+> - [ ] `python3 scripts/check_docs.py` green **and** asserting non-zero scan counts
+> - [ ] Release AAB diffed against baseline: manifest, DEX, resources, R8 output
+> - [ ] `ARCHITECTURE.md`, `SUBSYSTEMS.md`, `NAVIGATION.md`, `TESTING.md`,
+>       `CLEAN_ARCHITECTURE_CHECKLIST.md` and `docs/README.md` describe the module structure
+> - [ ] Phase 5 build-time measurements recorded against the Phase 0 baseline
+>
+> **Explicit non-goals:** splitting `strings.xml`; moving `screens/adaptive` out of `:app`;
+> any behaviour, UI or schema change.
+
+---
+
+## 2. Milestones and sub-issues
+
+Each sub-issue below is one PR. "Exit" is what a reviewer checks before approving.
+
+### Milestone 0 — Foundations (PRs 1–3)
+
+Nothing moves. This milestone exists so that the checks which would otherwise silently stop
+working are fixed *before* anything can break them.
+
+**#1 — Add `build-logic` convention plugins** · `mm/00-build-logic`
+Included build with `nimaz.android.library`, `nimaz.android.feature`, `nimaz.jvm.library`,
+`nimaz.android.hilt`, `nimaz.android.compose`. Each carries compileSdk 37 / minSdk 29, Java 21,
+the `-Xannotation-default-target=param-property` arg, and the Hilt/KSP wiring. Add
+`android-library` and `kotlin-jvm` aliases to `libs.versions.toml`. Apply the plugins to `:app`
+itself so they are exercised immediately. Move the `fetchNimazData` lint/asset ordering
+workaround into the convention plugin rather than leaving it inline — every module that
+consumes those generated assets will need it.
+*Exit:* `:app` builds; no change to the produced APK; `./gradlew :app:assembleRelease` green.
+
+**#2 — Make `scripts/check_docs.py` module-aware** · `mm/01-check-docs-roots`
+**This is the highest-priority item in the whole epic and must land before any file moves.**
+The script roots every scan at `APP = ROOT / "app/src/main/java/com/arshadshah/nimaz"`.
+SUB-02 (Workers), SUB-03 (Services), SUB-05 (notification channels) and SUB-06 (DataStore
+files) scan `APP.rglob(...)`. Six of the seven Workers live in `widget/` and three of the four
+Services in `data/audio/` — both of which move in Phase 5. When they do, those globs return a
+smaller set and "every Worker is documented" passes because there are fewer Workers to find.
+Change the roots to scan all modules, and add a floor assertion per scan (`>= 7 Workers`,
+`>= 4 Services`, `>= 12 channels`, `>= 3 DataStore files`) so an empty or shrunken scan fails
+rather than passes.
+*Exit:* deliberately move one Worker to a scratch directory and confirm the check goes **red**.
+Revert. This negative test is the point of the PR.
+
+**#3 — Record the baseline and enable configuration cache** · `mm/02-baseline-metrics`
+Add `org.gradle.configuration-cache=true`. Commit a `BASELINE.md` in this spec folder holding
+the pre-migration measurements from SPEC §6.5: clean `assembleDebug`, the four incremental
+scenarios, `testDebugUnitTest` wall time, and configuration time. The known starting point is
+`:app:compileDebugKotlin` = **3m 44s** cold.
+*Exit:* numbers committed. Without them the epic cannot demonstrate it worked.
+
+### Milestone 1 — `:core:domain` (PRs 4–5)
+
+**#4 — Remove the domain → navigation inversion** · `mm/03-domain-route-inversion`
+Five domain files import `core.navigation.Route`: `UnifiedBookmark.kt`, `AiModels.kt`,
+`Announcement.kt`, `AskWithProofUseCase.kt`, `AnnouncementUseCases.kt`. Introduce a domain-level
+target type and map it to `Route` at the presentation edge. Also fix the three KDoc references
+from `domain/model` into `data`/`presentation` (`QuranReciter.kt`, `MushafLayout.kt`,
+`QuranTranslation.kt`).
+*Exit:* `grep -rl 'core\.navigation\.Route' domain/` returns nothing. Announcement deep links
+still resolve — NAV-06 through NAV-08 green.
+
+**#5 — Extract `:core:domain` as a pure JVM module** · `mm/04-core-domain`
+Move all 103 files under the `kotlin-jvm` plugin. No Android on the classpath.
+*Exit:* `:core:domain:test` runs without AGP or Robolectric and completes in seconds; adding
+`import android.content.Context` to a domain file fails the build. Demonstrate that in the PR
+description — it is the first compile-enforced rule the epic buys.
+
+### Milestone 2 — Data-side core modules (PRs 6–9)
+
+**#6 — `:core:common`** · `mm/05-core-common`
+`core/util` is 24 files and 5,336 LOC and currently reaches into domain (11 files),
+presentation, data and widget. Triage file by file: genuinely shared helpers go to
+`:core:common`, the rest are pushed down to their real owners. Also moves `core/time`,
+`core/monitoring`, `core/share`, `core/text`, `core/feedback`, `core/init`.
+*Exit:* `:core:common` depends on `:core:domain` and Android only — never on data or
+presentation.
+
+**#7 — `:core:database`** · `mm/06-core-database`
+Both `@Database` classes, 15 entities, 22 DAOs, all migrations, **and the `schemas/`
+directory**. The `room.schemaLocation` KSP arg and the `androidTest` `assets.srcDir(schemas)`
+wiring move with it.
+*Exit:* **the exported schema JSON for version 25 is byte-identical to the pre-move file.** If
+Room regenerates it differently the identity hash changed and every install would attempt a
+destructive migration. `MigrationTestHelper` tests green. SUB-01 green.
+
+**#8 — `:core:datastore`** · `mm/07-core-datastore`
+`PreferencesDataStore` (990 LOC) and the 11 `SettingsSeams` implementations.
+*Exit:* SUB-06 green with its new floor assertion; no preference key renamed.
+
+**#9 — `:core:data`** · `mm/08-core-data`
+19 repository implementations and their mappers.
+*Exit:* every repository still returns domain models; no entity type escapes the module.
+
+### Milestone 3 — `:core:ui` (PR 10)
+
+**#10 — Extract the design system** · `mm/09-core-ui`
+52 atoms, the generic `Nimaz*` molecules, `theme/` (18 files), `foundation/` (17 files), and
+**every resource including the full 1,910-entry `strings.xml` and all five translation
+directories**. Fix the three design-system → feature leaks. Feature-specific molecules and
+organisms stay put; they travel with their feature in Milestone 5.
+*Exit:* `:core:ui` has no import from `presentation.screens` or `presentation.viewmodel`.
+Resource resolution verified in a release build — see the R8 note in SPEC §6.4.
+
+### Milestone 4 — Navigation (PRs 11–12) — **the critical path**
+
+**#11 — `:core:navigation`** · `mm/10-core-navigation`
+The `Route` hierarchy, `ScreenTags`, the `taggedComposable` helper, `HelpDeepLink`,
+`AnnouncementRoutes`, `WorshipDestinations`. Nothing that imports a screen.
+*Exit:* NAV-01, NAV-02, NAV-05, NAV-09, NAV-10 green against the new location.
+
+**#12 — Decompose `NavGraph.kt`** · `mm/11-navgraph-decompose`
+1,442 LOC importing 70 screens and registering 94 destinations. Convert each destination into a
+per-feature `fun NavGraphBuilder.quranGraph(onNavigate: (Route) -> Unit)` extension placed
+beside the screens it registers — **still inside `:app`**. `:app` keeps the `NavHost` and
+`NavigationSuiteScaffold` shell and calls each feature's graph function.
+**This PR moves no files between modules.** It is reviewable on its own merits and is the
+change that makes Milestone 5 possible.
+*Exit:* all 94 destinations still registered with `taggedComposable`, never a bare
+`composable` — NAV-03 and NAV-04 green. Every route still reachable; deep links unchanged.
+
+### Milestone 5 — Feature modules (PRs 13–21)
+
+Ordered least-coupled first, so the pipeline is proven on something that cannot break a screen.
+Each PR moves: screens, ViewModels, that feature's molecules and organisms, its Hilt module
+slice, its nav-graph extension, and its tests.
+
+| PR | Issue | Branch | Contents |
+|---:|---|---|---|
+| 13 | **#13** `:feature:widget` | `mm/12-feature-widget` | 6 Glance widgets, 7 receivers, 6 workers. Zero presentation deps — proves the pipeline. **SUB-02/04/05 must stay green with floors.** |
+| 14 | **#14** `:feature:onboarding`, `:feature:about` | `mm/13-feature-onboarding-about` | about, help, licenses, more |
+| 15 | **#15** `:feature:tools`, `:feature:calendar` | `mm/14-feature-tools-calendar` | zakat; Islamic calendar + events |
+| 16 | **#16** `:feature:search` | `mm/15-feature-search` | search + AI ask-with-proof. Touches `worker/` contract — leave it alone. |
+| 17 | **#17** `:feature:content` | `mm/16-feature-content` | dua, hadith, qaida, asma, asmaunnabi, names, prophets, catalog — **moved together**, their ViewModels are one package |
+| 18 | **#18** `:feature:tracker` | `mm/17-feature-tracker` | prayer tracker, fasting, tasbih — likewise |
+| 19 | **#19** `:feature:quran` | `mm/18-feature-quran` | quran, khatam, bookmarks. `QuranDao` stays in `:core:database` (4 repos use it) |
+| 20 | **#20** `:feature:prayer` | `mm/19-feature-prayer` | prayer times, qibla, night worship, adhan audio. **SUB-03 must stay green** — 3 of 4 Services move here |
+| 21 | **#21** `:feature:settings` | `mm/20-feature-settings` | 18 screens, the 1,324-line `SettingsViewModel`. Largest and most cross-referenced — last |
+
+`screens/adaptive` and `screens/home` stay in `:app`. All 26 `screens/` directories are
+accounted for across this table plus those two.
+
+*Exit for every PR in this milestone:* the moved feature's tests compile **without being
+relaxed**. A test that will not compile after the move is a real coupling signal, not migration
+noise — fix the coupling, do not weaken the test.
+
+### Milestone 6 — Guardrails and docs (PR 22)
+
+**#22 — Split the DI god-modules and lock the graph** · `mm/21-di-split-and-guardrails`
+`RepositoryModule.kt` (863 LOC) dissolves; each module owns its `@Binds`/`@Provides`.
+`DatabaseModule`'s DAO providers move to `:core:database`. Add the dependency-graph `check`
+task: fail the build if any `:core:*` depends on a `:feature:*`, or any `:feature:*` depends on
+another `:feature:*`.
+*Exit:* deliberately add a forbidden dependency and confirm the build fails. Revert.
+
+---
+
+## 3. Documentation, and which PR owns each change
+
+`CLAUDE.md` requires docs to be updated **in the same commit** as the change they describe, and
+`scripts/check_docs.py` enforces 23 of those rules on every PR. This epic invalidates a lot of
+prose, so ownership is assigned explicitly rather than left to a cleanup PR at the end.
+
+| Doc | What goes stale | Owning PR |
+|---|---|---|
+| `ARCHITECTURE.md` §DI | "All modules live in `core/di`" becomes false | PR 22 |
+| `ARCHITECTURE.md` §layers | The layer diagram gains module boundaries | PR 5 (`:core:domain`), extended each milestone |
+| `ARCHITECTURE.md` §9 registry | Records **nine** settings seams; there are **11** (`HijriSettings`, `SearchSettings` were added without a doc update) | PR 1 — fix the pre-existing drift up front |
+| `ARCHITECTURE.md` new-feature recipe | "Add it to `NimazDatabase` … bind it in `RepositoryModule`" — both move | PR 7, PR 22 |
+| `NAVIGATION.md` | Route graph gains per-feature graph functions; destination count claim | PR 12 |
+| `SUBSYSTEMS.md` | Worker, Service, widget and DataStore tables gain module columns | PR 7, 13, 20 |
+| `TESTING.md` | Test invocation moves from `:app:testDebugUnitTest` to all-module | PR 3, PR 22 |
+| `CLEAN_ARCHITECTURE_CHECKLIST.md` | Detection commands grep paths that move; several anti-patterns become compile errors and can be ticked | every PR that moves the path a command greps |
+| `docs/README.md` | Index gains this spec folder if any doc here is promoted to top level | PR 22 |
+| `DOCUMENTATION.md` §1 | Ownership matrix gains the module-structure owner | PR 22 |
+
+Two rules for the stack:
+
+1. **A PR that moves a path referenced by a detection command in
+   `CLEAN_ARCHITECTURE_CHECKLIST.md` updates that command in the same PR.** Otherwise the
+   checklist rots into a list of commands that return nothing and therefore "pass".
+2. **A PR that resolves a checklist anti-pattern ticks the box** rather than leaving it for
+   PR 22. Several of them — the layering assertions in particular — stop being assertable
+   because the compiler now enforces them; say so in the checklist instead of deleting the row.
+
+---
+
+## 4. What runs on every PR in the stack
+
+Non-negotiable, in this order. A PR that cannot show all five does not merge into
+`epic/multi-module`.
+
+1. `./gradlew testDebugUnitTest` — all 2,333 unit tests, no test relaxed to compile
+2. `./gradlew lintDebug` across all modules
+3. `python3 scripts/check_docs.py` — 23 checks, **with the floor assertions from PR 2**
+4. `./gradlew :app:assembleRelease` — R8 and resource shrinking exercised, not just debug
+5. The docs listed in §3 for that PR, updated in the same commit
+
+Instrumented tests (121) run per milestone rather than per PR, on the existing
+`android_instrumented_tests.yml` lane.
+
+Artifact diffing (SPEC §6.4 — merged manifest, DEX class list, merged resources, R8 output)
+runs at each **milestone** boundary against the Phase 0 baseline, not per PR. Per PR it is too
+slow to be useful; per milestone it is the thing that catches a stripped font or a dropped
+`values-tr`.
+
+---
+
+## 5. Risks specific to running this as a stack
+
+- **The stack goes stale.** 22 PRs against a moving `dev` is the main practical risk. Rebase
+  `epic/multi-module` onto `dev` weekly and force-push; do not let it drift a month.
+- **Milestone 5 PRs conflict with feature work on `dev`.** A PR touching `screens/settings`
+  while PR 21 is open will conflict badly. Either freeze the feature area for the duration of
+  its PR, or land that PR first. This is worth agreeing before starting Milestone 5.
+- **The integration branch is never itself released.** It merges to `dev` once, at the end,
+  after a full release-build diff. Do not cut a release from `epic/multi-module`.
+- **Reviewer fatigue.** PRs 13–21 are nine mechanically similar moves. The interesting review
+  happens in PRs 2, 5, 7, 12 and 22; the rest should be reviewed for *what did not move* — a
+  file that quietly stayed behind in `:app` is the common failure.
