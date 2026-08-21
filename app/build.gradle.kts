@@ -1,3 +1,6 @@
+import com.arshadshah.nimaz.buildlogic.FetchNimazDataTask
+import com.arshadshah.nimaz.buildlogic.NimazDataCredentials
+import com.arshadshah.nimaz.buildlogic.NimazDataLockParser
 import com.arshadshah.nimaz.buildlogic.orderAssetConsumersAfter
 
 plugins {
@@ -29,7 +32,14 @@ jacoco {
 // Firebase SDK calls in the app are guarded to no-op when Firebase is not
 // initialized, so builds without the config still run correctly (just without
 // crash/analytics reporting).
-if (file("google-services.json").exists()) {
+//
+// Read through `providers.fileContents`, not `file(...).exists()`: the presence of this file
+// decides which plugins are applied, so it has to be a *tracked* configuration input. An
+// untracked filesystem probe would let a cached configuration survive CI dropping the file in,
+// and the cached build would then produce a release APK with no Crashlytics in it.
+val googleServicesConfig =
+    providers.fileContents(layout.projectDirectory.file("google-services.json")).asText
+if (googleServicesConfig.isPresent) {
     apply(plugin = libs.plugins.google.services.get().pluginId)
     apply(plugin = libs.plugins.firebase.crashlytics.get().pluginId)
     apply(plugin = libs.plugins.firebase.perf.get().pluginId)
@@ -98,7 +108,7 @@ android {
         // by the gradle property `playIntegrityCloudProjectNumber` (placeholder 0
         // until the real Google Cloud project is wired up — see gradle.properties).
         val playIntegrityProjectNumber =
-            (project.findProperty("playIntegrityCloudProjectNumber") as String?) ?: "0"
+            providers.gradleProperty("playIntegrityCloudProjectNumber").getOrElse("0")
         buildConfigField(
             "long",
             "PLAY_INTEGRITY_CLOUD_PROJECT_NUMBER",
@@ -109,11 +119,18 @@ android {
         // at runtime whether the database on disk is the one it ships with. Read from the same
         // data.lock.json the fetch task verifies against, so the two cannot disagree — see
         // ContentArtifactInstaller.
-        @Suppress("UNCHECKED_CAST")
-        val contentArtifactSha = (
-            (groovy.json.JsonSlurper().parse(rootProject.file("data.lock.json"))
-                as Map<String, Any>)["artifact"] as Map<String, Any>
-            )["sha256"] as String
+        //
+        // `providers.fileContents`, not `JsonSlurper().parse(File)`: parsing the file directly
+        // is an untracked read, so with the configuration cache on, a changed pin would not
+        // invalidate the cached configuration and a **stale sha would be baked into the APK** —
+        // silent, and wrong in the one place that decides whether the shipped database is
+        // replaced on upgrade. The parser is shared with `fetchNimazData` so the two readers of
+        // this file cannot drift.
+        val contentArtifactSha = NimazDataLockParser.parse(
+            providers.fileContents(
+                rootProject.layout.projectDirectory.file("data.lock.json")
+            ).asText.get()
+        ).artifact.sha256
         buildConfigField("String", "CONTENT_ARTIFACT_SHA256", "\"$contentArtifactSha\"")
     }
 
@@ -139,10 +156,10 @@ android {
     // release reads `nimazAiWorkerUrl`; both fall back to a placeholder (the app
     // then simply surfaces the network-error state — it never crashes).
     val aiWorkerUrlPlaceholder = "https://nimaz-ai.REPLACE_ME.workers.dev"
-    val aiWorkerUrlDebug =
-        (project.findProperty("nimazAiWorkerUrlDebug") as String?) ?: aiWorkerUrlPlaceholder
-    val aiWorkerUrlRelease =
-        (project.findProperty("nimazAiWorkerUrl") as String?) ?: aiWorkerUrlPlaceholder
+    val aiWorkerUrlDebug = providers.gradleProperty("nimazAiWorkerUrlDebug")
+        .getOrElse(aiWorkerUrlPlaceholder)
+    val aiWorkerUrlRelease = providers.gradleProperty("nimazAiWorkerUrl")
+        .getOrElse(aiWorkerUrlPlaceholder)
 
     buildTypes {
         debug {
@@ -201,13 +218,39 @@ android {
     }
 }
 
-// Content data is fetched from arshad-shah/nimaz-data and pinned by sha256 in
-// data.lock.json — see gradle/nimaz-data.gradle.kts for why it is no longer tracked here.
-apply(from = rootProject.file("gradle/nimaz-data.gradle.kts"))
+// Content data is fetched from arshad-shah/nimaz-data and pinned by sha256 in data.lock.json —
+// see FetchNimazDataTask in build-logic for what the task does and why the artifact is no longer
+// tracked in this repository.
+//
+// The task *class* lives in build-logic; the *registration* stays here on purpose. The task
+// belongs to the project that consumes the generated assets, and a convention plugin that
+// registered it centrally — leaving libraries to depend on `:app:fetchNimazData` — would point a
+// library at the app, which is the inversion the multi-module epic exists to remove.
+//
+// This lived in a `gradle/nimaz-data.gradle.kts` script plugin until #503. A script applied with
+// `apply(from = …)` is compiled against its own classpath and cannot see build-logic's types, so
+// that file could not survive the task becoming one; its wiring is the block below.
+tasks.register<FetchNimazDataTask>("fetchNimazData") {
+    description = "Fetches and sha256-verifies the pinned content artifact."
+    group = "build setup"
 
-// AGP 9 refuses a Provider here, and the Variant API's addGeneratedSourceDirectory needs a
-// typed task class — which would mean a buildSrc module for one task. Register the directory
-// statically and hang the ordering off the asset merge instead: same guarantee, no new module.
+    lockFile.set(rootProject.layout.projectDirectory.file("data.lock.json"))
+    generatedAssets.set(layout.buildDirectory.dir("generated/nimazData/assets"))
+    cacheRoot.set(layout.dir(provider { gradle.gradleUserHomeDir.resolve("caches/nimaz-data") }))
+
+    // NIMAZ_DATA_TOKEN, then the nimazDataToken gradle property, then `gh auth token` — entirely
+    // through providers, because `project.findProperty` and a bare `ProcessBuilder` at execution
+    // time were both configuration-cache violations. Each source is tested for blankness
+    // individually (a fork PR gets a *set but empty* NIMAZ_DATA_TOKEN), and the chain is lazy, so
+    // a build that already has a token never spawns `gh`. See NimazDataCredentials.
+    dataToken.set(NimazDataCredentials.of(providers))
+}
+
+// AGP 9 refuses a Provider here. The Variant API's addGeneratedSourceDirectory would take one,
+// and now that fetchNimazData *is* a typed task the option is finally open — but switching to it
+// changes how the directory reaches the variant, which is a behaviour change and belongs in its
+// own change. Registering the directory statically and hanging the ordering off every
+// asset-consuming task gives the same guarantee today.
 android.sourceSets.getByName("main").assets.srcDir(
     layout.buildDirectory.dir("generated/nimazData/assets").get().asFile
 )
