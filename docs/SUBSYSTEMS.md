@@ -155,9 +155,9 @@ as a parameter rather than a literal — so it is listed by its owner.
 
 | File name | Owner | Holds | Section |
 |---|---|---|---|
-| `nimaz_preferences` | `data/local/datastore/PreferencesDataStore.kt` | every user setting; the sync payload's `preferences` block | [§6](#6-preferences-datastore) |
-| `nimaz_announcements` | `data/local/datastore/AnnouncementLocalDataSource.kt` | the current announcement (JSON) + permanently dismissed ids | [§12](#12-engagement-announcements-fcm) |
-| `nimaz_ai_device` | `data/ai/DeviceIdProvider.kt` | the rotating pseudonymous device id sent with Ask-with-Proof calls | [`ai-ask-with-proof.md`](ai-ask-with-proof.md) |
+| `nimaz_preferences` | `core/datastore/PreferencesDataStore.kt` | every user setting; the sync payload's `preferences` block | [§6](#6-preferences-datastore) |
+| `nimaz_announcements` | `core/datastore/AnnouncementLocalDataSource.kt` | the current announcement (JSON) + permanently dismissed ids | [§12](#12-engagement-announcements-fcm) |
+| `nimaz_ai_device` | `core/datastore/DeviceIdProvider.kt` | the rotating pseudonymous device id sent with Ask-with-Proof calls | [`ai-ask-with-proof.md`](ai-ask-with-proof.md) |
 | `<widget>_widget` × 6 | `JsonGlanceStateDefinition` (`widget/core/`) | one JSON-serialized Glance state per widget: `next_prayer_widget`, `prayer_times_widget`, `prayer_tracker_widget`, `hijri_date_widget`, `hijri_calendar_widget`, `khatam_widget` | [§2](#2-glance-widgets) |
 
 The widget stores hold **rendered state, never user data**: each is a cache a worker refills, and
@@ -1094,7 +1094,7 @@ The app has **three** Preferences DataStore files plus the per-widget Glance sta
 listed in [§0.5](#05-datastore-files). This section is about the main one; the others are
 self-contained slices documented where they are used.
 
-`data/local/datastore/PreferencesDataStore.kt` — the app's **single central settings store**,
+`core/datastore/PreferencesDataStore.kt` (in `:core:datastore`) — the app's **single central settings store**,
 backed by a Jetpack Preferences DataStore (`preferencesDataStore(name = "nimaz_preferences")`).
 
 > **Adding another DataStore file is a decision, not a detail.** Each one is an independent
@@ -1206,7 +1206,13 @@ the same trap applies the moment one is added.)
 
 **The wire loses the type, so the type is declared.** The export flattens every value with `toString()`, so the payload is `Map<String,String>`. The import used to *guess* the type back from the shape of the value and substrings of the key name; DataStore keys are typed and reading one at the wrong type throws, so the six keys the heuristic missed — `tasbih_preset_seed_version`, `content_patch_version`, `ai_consent_timestamp`, `tasbih_selected_preset`, `current_location_id` (Long guessed as Int) and `tasbih_favorites` — did not merely import wrong, they **crashed on next read after any sync**. `tasbih_preset_seed_version` is read with `.first()` in `TasbihViewModel`'s init and `current_location_id` resolves the active location for prayer times.
 
-`data/local/datastore/PreferenceCodec.kt` now holds the declared type of every named key plus shape patterns for the runtime-composed ones — `worship_<type>_{enabled,offset,mode}` and the per-prayer `<prayer>_{alert_style,reminder_enabled,reminder_minutes}` ([§4](#4-prayer-time--adhan-notifications)). Sets are joined on the ASCII unit separator rather than `Set.toString()` (`[a, b]` cannot be split back safely), with the bracket form still accepted so payloads from older builds land. An unknown key from a newer sender is kept as a string rather than dropped. `onboarding_completed` is never imported. `PreferenceCodecTest` reads the key declarations straight out of `PreferencesDataStore.kt` and fails if the registry drifts from them, so a new preference cannot be added without registering its type.
+`core/datastore/PreferenceCodec.kt` now holds the declared type of every named key plus shape patterns for the runtime-composed ones — `worship_<type>_{enabled,offset,mode}` and the per-prayer `<prayer>_{alert_style,reminder_enabled,reminder_minutes}` ([§4](#4-prayer-time--adhan-notifications)). Sets are joined on the ASCII unit separator rather than `Set.toString()` (`[a, b]` cannot be split back safely), with the bracket form still accepted so payloads from older builds land. An unknown key from a newer sender is kept as a string rather than dropped. `onboarding_completed` is never imported. `PreferenceCodecTest` reads the key declarations straight out of `PreferencesDataStore.kt` and fails if the registry drifts from them, so a new preference cannot be added without registering its type.
+
+**A renamed key is silent, permanent data loss**, and `PreferenceCodecTest` alone does not catch it: it asserts that two files in this repo agree with each other, and an IDE "rename symbol" updates both in lockstep. Two files agreeing is not evidence that either agrees with what is on a device. So `:core:datastore` also carries **`src/test/resources/preference-keys.golden`** — 106 `name<TAB>type` lines, a third copy that nothing automatic updates — and `PreferenceKeyGoldenTest` compares the whole list rather than checking containment, so a rename surfaces as one removal plus one addition.
+
+The asymmetry is what makes it reviewable: **additions regenerate freely, removals require an entry in `retired-preference-keys.txt`** with a versionCode and a reason. A new key is harmless because nothing has it stored yet; a removed one resets that setting for every existing user on their next launch.
+
+The six runtime-composed keys are stored in their literal `${'$'}{key}` template form, exactly as they appear in source — which is why `PreferencesDataStore.kt` preserves that shape rather than building the strings elsewhere. A golden built from *resolved* keys would churn whenever a worship type was added and would miss a template rename entirely.
 
 **Wiring.** Provided in `core/di/DataStoreModule.kt` via `@Provides @Singleton`. (Minor: it already has an `@Inject constructor(context)`, so the explicit provider is redundant with constructor injection.)
 

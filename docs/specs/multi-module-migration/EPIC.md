@@ -224,8 +224,28 @@ Room regenerates it differently the identity hash changed and every install woul
 destructive migration. `MigrationTestHelper` tests green. SUB-01 green.
 
 **#8 — `:core:datastore`** · `mm/07-core-datastore`
-`PreferencesDataStore` (990 LOC) and the 11 `SettingsSeams` implementations.
-*Exit:* SUB-06 green with its new floor assertion; no preference key renamed.
+`PreferencesDataStore` (990 LOC) and the 11 `SettingsSeams` implementations — plus four files the
+issue does not name and cannot be left behind: `PreferenceCodec` (the type registry
+`PreferenceCodecTest` checks against), `PrayerNotificationPrefsMigration`,
+`AnnouncementLocalDataSource`, and **`data/ai/DeviceIdProvider`**, which owns the
+`nimaz_ai_device` store and would otherwise split SUB-06's subject across two modules.
+
+**One blocker first.** `WidgetsScreen` read its preview location by constructing
+`PreferencesDataStore(context)` inside a composable helper — a second instance of a `@Singleton`,
+built outside Hilt, reading the file the injected one owns. It routes through the ViewModel's
+`LocationSettings` seam instead. That is the only such site.
+
+*Exit:* SUB-06 green with its floor assertion, and **"no preference key renamed" made
+verifiable**: a golden file of all 106 `name<TAB>type` pairs in `:core:datastore`'s test
+resources, compared as a whole list so a rename shows as one removal plus one addition.
+Additions regenerate freely; **removals need an entry in `retired-preference-keys.txt`** with a
+versionCode and a reason, because a removed key silently resets that setting for every existing
+user. The six runtime-composed keys are recorded in their literal `${'$'}{key}` template form.
+
+> **Corrected.** The original exit criterion — "no preference key renamed" — named the right
+> property and no way to check it. `PreferenceCodecTest` looked like half a guard already, but it
+> asserts that two files *in this repo* agree with each other, and an IDE rename updates both in
+> lockstep. The golden file is a third copy that nothing automatic touches.
 
 **#9 — `:core:data`** · `mm/08-core-data`
 19 repository implementations and their mappers.

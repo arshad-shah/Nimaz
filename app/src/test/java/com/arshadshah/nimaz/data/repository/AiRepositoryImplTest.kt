@@ -1,7 +1,7 @@
 package com.arshadshah.nimaz.data.repository
 
 import com.arshadshah.nimaz.data.ai.AiApiClient
-import com.arshadshah.nimaz.data.ai.DeviceIdProvider
+import com.arshadshah.nimaz.core.datastore.DeviceIdProvider
 import com.arshadshah.nimaz.data.ai.IntegrityTokenProvider
 import com.arshadshah.nimaz.domain.model.AiError
 import com.arshadshah.nimaz.domain.model.AnswerConfidence

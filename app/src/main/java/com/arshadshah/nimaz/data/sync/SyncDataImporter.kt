@@ -37,7 +37,7 @@ import com.arshadshah.nimaz.data.local.database.entity.TafseerNoteEntity
 import com.arshadshah.nimaz.data.local.database.entity.TasbihPresetEntity
 import com.arshadshah.nimaz.data.local.database.entity.TasbihSessionEntity
 import com.arshadshah.nimaz.data.local.database.entity.ZakatHistoryEntity
-import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
+import com.arshadshah.nimaz.core.datastore.PreferencesDataStore
 import javax.inject.Inject
 import javax.inject.Singleton
 

@@ -1,4 +1,4 @@
-package com.arshadshah.nimaz.data.local.datastore
+package com.arshadshah.nimaz.core.datastore
 
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey

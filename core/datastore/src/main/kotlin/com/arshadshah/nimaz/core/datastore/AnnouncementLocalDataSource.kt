@@ -1,4 +1,4 @@
-package com.arshadshah.nimaz.data.local.datastore
+package com.arshadshah.nimaz.core.datastore
 
 import android.content.Context
 import androidx.datastore.core.DataStore

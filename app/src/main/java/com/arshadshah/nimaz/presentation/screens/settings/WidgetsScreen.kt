@@ -45,12 +45,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.calendar.HijriDateCalculator
-import com.arshadshah.nimaz.domain.prayer.PrayerTimeCalculator
-import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
 import com.arshadshah.nimaz.domain.model.FallbackLocation
+import com.arshadshah.nimaz.domain.model.UserPreferences
 import com.arshadshah.nimaz.domain.model.resolveLocation
+import com.arshadshah.nimaz.domain.prayer.PrayerTimeCalculator
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCheckbox
@@ -68,12 +69,12 @@ import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.viewmodel.settings.SettingsViewModel
 import com.arshadshah.nimaz.widget.core.formatWidgetTime
 import com.arshadshah.nimaz.widget.core.prayerShortName
-import kotlinx.coroutines.flow.first
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
 import java.time.LocalDate
 import kotlin.time.Clock
 import kotlin.time.Duration
+import kotlinx.coroutines.flow.first
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 
 // Data classes for widget preview
 private data class WidgetPreviewData(
@@ -108,13 +109,16 @@ fun WidgetsScreen(
 ) {
     val context = LocalContext.current
 
-    // State for dynamic widget preview data
-    // The location behind the preview is read once. It cannot change while this
-    // screen is open, and re-reading it on every countdown tick meant constructing
-    // a PreferencesDataStore and doing file I/O once a second.
-    var previewLocation by remember { mutableStateOf<PreviewLocation?>(null) }
-    LaunchedEffect(Unit) {
-        previewLocation = loadPreviewLocation(context)
+    // State for dynamic widget preview data.
+    //
+    // The preferences come from the ViewModel's `LocationSettings` seam. This used to call a
+    // helper that constructed `PreferencesDataStore(context)` itself — a second instance of a
+    // `@Singleton`, built outside Hilt — which since #559 would also be a screen depending on
+    // `:core:datastore`'s implementation rather than on the seam. Same values, same fallback,
+    // one owner.
+    val previewPreferences by viewModel.widgetPreviewPreferences.collectAsStateWithLifecycle()
+    val previewLocation = remember(previewPreferences) {
+        previewPreferences?.let(::previewLocationOf)
     }
 
     // Only the countdown moves per second; derive it from the one shared ticker
@@ -906,13 +910,19 @@ private data class PreviewLocation(
     val name: String,
 )
 
-/** One-off DataStore read of the location backing the widget previews. */
-private suspend fun loadPreviewLocation(context: android.content.Context): PreviewLocation {
+/**
+ * The location backing the widget previews, from the stored preferences.
+ *
+ * Pure, so it can be `remember`ed against the preferences rather than run in a `LaunchedEffect`.
+ * The `try` is kept: `resolveLocation` and the name split are the parts that could throw on
+ * malformed stored values, and a preview is not worth taking the screen down for.
+ */
+private fun previewLocationOf(userPrefs: UserPreferences): PreviewLocation {
     return try {
-        val userPrefs = PreferencesDataStore(context).userPreferences.first()
+        val resolved = resolveLocation(userPrefs.latitude, userPrefs.longitude)
         PreviewLocation(
-            latitude = resolveLocation(userPrefs.latitude, userPrefs.longitude).latitude,
-            longitude = resolveLocation(userPrefs.latitude, userPrefs.longitude).longitude,
+            latitude = resolved.latitude,
+            longitude = resolved.longitude,
             name = userPrefs.locationName.takeIf { it.isNotBlank() }
                 ?.split(",")?.firstOrNull()?.trim() ?: "Dublin",
         )

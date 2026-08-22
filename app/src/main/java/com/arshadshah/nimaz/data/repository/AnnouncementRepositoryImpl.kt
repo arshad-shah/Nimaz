@@ -1,6 +1,6 @@
 package com.arshadshah.nimaz.data.repository
 
-import com.arshadshah.nimaz.data.local.datastore.AnnouncementLocalDataSource
+import com.arshadshah.nimaz.core.datastore.AnnouncementLocalDataSource
 import com.arshadshah.nimaz.domain.model.Announcement
 import com.arshadshah.nimaz.domain.repository.AnnouncementRepository
 import kotlinx.coroutines.flow.Flow

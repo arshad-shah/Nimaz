@@ -1,7 +1,8 @@
-package com.arshadshah.nimaz.data.local.datastore
+package com.arshadshah.nimaz.core.datastore
 
 import androidx.datastore.preferences.core.Preferences
 import com.google.common.truth.Truth.assertThat
+import com.google.common.truth.Truth.assertWithMessage
 import org.junit.Test
 import java.io.File
 
@@ -92,10 +93,12 @@ class PreferenceCodecTest {
         // A new preference must register its type, or it silently reverts to the guessing
         // behaviour this class exists to remove. Reads the declarations straight from source,
         // in the shape of WidgetGlyphGuardTest; runs from the module dir.
-        val source = File(
-            "src/main/java/com/arshadshah/nimaz/data/local/datastore/PreferencesDataStore.kt"
-        )
-        assertThat(source.isFile).isTrue()
+        val source = File(PREFERENCES_SOURCE)
+        assertWithMessage(
+            "PreferencesDataStore.kt not found at $PREFERENCES_SOURCE — this scan reads the " +
+                "declarations straight from source, so a wrong path makes it find zero keys and " +
+                "pass having checked nothing."
+        ).that(source.isFile).isTrue()
 
         val declared = Regex("""(\w+)PreferencesKey\("([^"]+)"\)""")
             .findAll(source.readText())
@@ -120,6 +123,16 @@ class PreferenceCodecTest {
 
     /** The literal Kotlin template that appears in the declaration, e.g. worship_${'$'}{key}_mode. */
     private val TEMPLATE = "${'$'}" + "{key}"
+
+    /**
+     * Where `PreferencesDataStore.kt` lives, relative to the module directory (the CWD for a
+     * module's unit tests). It moved here from
+     * `app/src/main/java/com/arshadshah/nimaz/data/local/datastore/` with the rest of the
+     * DataStore slice, and `src/main/kotlin` rather than `src/main/java` because that is the
+     * source root a `:core:*` module uses.
+     */
+    private val PREFERENCES_SOURCE =
+        "src/main/kotlin/com/arshadshah/nimaz/core/datastore/PreferencesDataStore.kt"
 
     private fun assertRoundTrip(keyName: String, value: Any) {
         val onTheWire = PreferenceCodec.encode(value)

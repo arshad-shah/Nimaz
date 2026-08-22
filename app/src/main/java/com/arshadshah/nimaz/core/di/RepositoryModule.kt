@@ -1,6 +1,6 @@
 package com.arshadshah.nimaz.core.di
 
-import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
+import com.arshadshah.nimaz.core.datastore.PreferencesDataStore
 import com.arshadshah.nimaz.data.audio.AyahAudioDownloader
 import com.arshadshah.nimaz.data.audio.HttpAyahAudioDownloader
 import com.arshadshah.nimaz.data.audio.NextSurahPlaylistSource
