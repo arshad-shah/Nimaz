@@ -1,4 +1,4 @@
-package com.arshadshah.nimaz.presentation.screens.hadith
+package com.arshadshah.nimaz.presentation.components.molecules
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FiberManualRecord

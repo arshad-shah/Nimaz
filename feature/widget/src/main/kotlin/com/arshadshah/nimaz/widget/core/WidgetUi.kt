@@ -170,32 +170,6 @@ fun prayerIconRes(prayerName: String): Int = when (prayerName.trim().lowercase()
     else -> R.drawable.ic_widget_dhuhr
 }
 
-/**
- * The translated short name for a prayer, or null when the string is not one of the five daily
- * prayers (or Sunrise).
- *
- * Widgets render outside the app's own composition, so nothing else catches an English literal
- * here: `PrayerTimesWidget` and `PrayerTrackerWidget` built their rows from `"Fajr"`, `"Dhuhr"`,
- * … while `WidgetsScreen`'s in-app preview of the very same widgets resolved the translated
- * resources. The strings were already translated into all five shipped locales; only the lookup
- * was missing.
- *
- * Null rather than a default prayer: labelling a row "Dhuhr" because the name was unrecognised
- * is worse than showing the raw string.
- */
-fun prayerShortNameRes(prayerName: String): Int? = when (prayerName.trim().lowercase()) {
-    "fajr" -> UiR.string.widget_prayer_short_fajr
-    "sunrise" -> UiR.string.widget_prayer_short_sunrise
-    "dhuhr", "zuhr" -> UiR.string.widget_prayer_short_dhuhr
-    "asr" -> UiR.string.widget_prayer_short_asr
-    "maghrib" -> UiR.string.widget_prayer_short_maghrib
-    "isha" -> UiR.string.widget_prayer_short_isha
-    else -> null
-}
-
-/** The translated short name, falling back to [prayerName] itself when it is not a prayer. */
-fun Context.prayerShortName(prayerName: String): String =
-    prayerShortNameRes(prayerName)?.let { getString(it) } ?: prayerName
 
 /**
  * Weekday initials for a Sunday-first grid, in [locale].

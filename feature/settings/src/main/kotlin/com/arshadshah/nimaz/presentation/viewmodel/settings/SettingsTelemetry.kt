@@ -19,7 +19,8 @@ package com.arshadshah.nimaz.presentation.viewmodel.settings
  * renamed setting reads as a setting nobody changes any more.
  *
  * Returns null for the events that are not setting changes: the two test-notification actions,
- * the adhan preview, and the three destructive actions. Those are logged where they happen.
+ * the adhan and reciter previews, and the three destructive actions. Those are logged where they
+ * happen.
  */
 internal fun SettingsEvent.asSettingChange(): Pair<String, String>? = when (this) {
     // -- General ---------------------------------------------------------------
@@ -110,10 +111,15 @@ internal fun SettingsEvent.asSettingChange(): Pair<String, String>? = when (this
     // -- Not setting changes ---------------------------------------------------
     SettingsEvent.PreviewAdhanSound,
     SettingsEvent.StopAdhanPreview,
+    SettingsEvent.StopReciterPreview,
     SettingsEvent.TestNotification,
     SettingsEvent.TestAllNotifications,
     SettingsEvent.ResetToDefaults,
     SettingsEvent.ResetNotifications,
     SettingsEvent.DeleteAllData,
         -> null
+
+    // Previewing a voice is not choosing one — `SetReciter` is what records the change. Logged
+    // where it happens, as `preview_reciter`.
+    is SettingsEvent.PreviewReciter -> null
 }

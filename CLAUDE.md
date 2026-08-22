@@ -69,11 +69,11 @@ DataStore, type-safe Navigation Compose.
   same rule sends `DuaSettingsScreen` and `HadithSettingsScreen` the other way: they drive
   `SettingsViewModel`, so they stay in `:app` and register in `settingsGraph`.
 - **`:feature:quran`** (`feature/quran/`) — the reader, khatam, bookmarks, the Mushaf stack and
-  `TajweedParser`. **`QuranDao` stays in `:core:database`** (four repositories use it) and
+  the Mushaf stack. **`QuranDao` stays in `:core:database`** (four repositories use it) and
   **`QuranAudioManager` stays in `:app`** behind the `QuranPlayback` port, because `MainActivity`
   holds one too. Four settings screens (`Dua`, `Hadith`, `SelectReciter`, `SelectTranslation`)
   sit in feature directories but drive `SettingsViewModel`, so they stay in `:app` and register
-  in `settingsGraph` — they move together in PR 21.
+  in `settingsGraph` until PR 21, which took them.
 - **`:feature:tracker`** (`feature/tracker/`) — prayer tracking, fasting and tasbih, behind one
   `viewmodel/tracker`. **Six of `screens/prayer`'s nine files live here** (the tracking ones);
   the other three are `:feature:prayer`, and `PrayerGraph.kt` split along the same line.
@@ -87,6 +87,17 @@ DataStore, type-safe Navigation Compose.
   "where its consumers are"** — the same trap as the components rule below, one layer down.
   `PrayerTimeCard` and `PrayerSkyScene` went to `:core:ui`, not here, because `HomeScreen` and
   `HomeHero` read them too. This is the only module with a camera dependency (`ArQiblaView`).
+- **`:feature:settings`** (`feature/settings/`) — the last feature module: 24 screens, the
+  1,324-line `SettingsViewModel`, plus location and sync. **Five screens arrive here from other
+  features' directories** (`DuaSettingsScreen`, `HadithSettingsScreen`, `SelectReciterScreen`,
+  `SelectTranslationScreen`, `LocationScreen`) — every one dispatches `SettingsEvent`, which is
+  the ViewModel axis cutting the other way for the last time. **`data/sync` did *not* come with
+  `SyncViewModel`**: it imports 21 DAOs and 14 entities directly, so it lives in `:core:data`,
+  the only module that can hold it. **`PrayerNotificationScheduler` stayed in `:app`**, pinned by
+  one line — `AppR.drawable.ic_stat_nimaz` — so the three members this module calls became the
+  `PrayerAlarmScheduler` and `PrayerNotificationTester` ports. It is the one module in the epic
+  that generates its **own** `BuildConfig`: `SyncViewModel` reads `DEBUG`, which is a library's
+  own field, unlike the application identity `IntegrityTokenProvider` has to take as a parameter.
 - **`:feature:tools`** (`feature/tools/`) — the zakat calculator and its history.
 - **`:feature:search`** (`feature/search/`) — library search and the opt-in Ask-with-Proof screen.
   Nothing network-facing lives here: the Worker client is `:core:data`, reached through
@@ -262,6 +273,7 @@ The obligations, in short:
 ./gradlew :feature:tracker:check      # prayer tracking, fasting, tasbih
 ./gradlew :feature:quran:check        # reader, khatam, bookmarks
 ./gradlew :feature:prayer:check       # prayer times, qibla, night worship
+./gradlew :feature:settings:check     # settings, location, sync
 ./gradlew :app:jacocoTestReport --dry-run   # see below — seconds, and catches a whole class of red CI
 ./gradlew :app:lintDebug              # SLOW (~10 min) and CI-blocking — do not skip it
 python3 scripts/check_docs.py         # docs still describe the code (no toolchain needed)

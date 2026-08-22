@@ -1,9 +1,16 @@
 package com.arshadshah.nimaz.presentation.viewmodel.settings
 
+import com.arshadshah.nimaz.domain.model.AudioState
+import app.cash.turbine.test
+import io.mockk.verify
+import io.mockk.slot
+import com.arshadshah.nimaz.domain.repository.AyahAudioItem
 import com.arshadshah.nimaz.domain.model.PrayerAlertStyle
 import com.arshadshah.nimaz.core.monitoring.RecordingTelemetry
 import com.arshadshah.nimaz.domain.time.FakeTodayProvider
-import com.arshadshah.nimaz.core.util.PrayerNotificationScheduler
+import com.arshadshah.nimaz.domain.repository.PrayerAlarmScheduler
+import com.arshadshah.nimaz.domain.repository.PrayerNotificationTester
+import com.arshadshah.nimaz.domain.repository.QuranPlayback
 import com.arshadshah.nimaz.domain.prayer.PrayerTimeCalculator
 import com.arshadshah.nimaz.data.audio.AdhanAudioManager
 import com.arshadshah.nimaz.data.audio.AdhanSound
@@ -39,6 +46,18 @@ class SettingsViewModelTest {
     private val telemetry = RecordingTelemetry()
     private val todayProvider = FakeTodayProvider(LocalDate.of(2026, 8, 14))
 
+    /**
+     * A real [MutableStateFlow] behind `audioState`, not a relaxed mock's.
+     *
+     * `reciterPreview` is a `combine` of this and the previewing id, so a mock flow that never
+     * emits leaves the combine with nothing to produce and the assertion below waiting on an item
+     * that cannot arrive. The mock is relaxed for everything else.
+     */
+    private val playbackAudioState = MutableStateFlow(AudioState())
+    private val quranPlayback = mockk<QuranPlayback>(relaxed = true) {
+        every { audioState } returns playbackAudioState
+    }
+
     private lateinit var viewModel: SettingsViewModel
 
     @Before
@@ -50,7 +69,13 @@ class SettingsViewModelTest {
         val adhanDownloader = mockk<AdhanDownloader>(relaxed = true)
         val prayerUseCases = mockk<PrayerUseCases>(relaxed = true)
         val quranUseCases = mockk<QuranUseCases>(relaxed = true)
-        val prayerNotificationScheduler = mockk<PrayerNotificationScheduler>(relaxed = true)
+        // Three seams where there was one concrete class. `PrayerNotificationScheduler` cannot
+        // leave `:app` — one `AppR.drawable` reference pins 917 lines — so PR 21 of #551 split
+        // what this ViewModel actually calls into two `:core:domain` ports, and reciter preview
+        // into a third.
+        val prayerAlarmScheduler = mockk<PrayerAlarmScheduler>(relaxed = true)
+        val prayerNotificationTester = mockk<PrayerNotificationTester>(relaxed = true)
+
         val rescheduleNotificationsUseCase = mockk<RescheduleNotificationsUseCase>(relaxed = true)
         val clearAllUserData = mockk<ClearAllUserDataUseCase>(relaxed = true)
 
@@ -95,10 +120,12 @@ class SettingsViewModelTest {
             prayerUseCases = prayerUseCases,
             settingsRepository = settingsRepository,
             quranUseCases = quranUseCases,
-            prayerNotificationScheduler = prayerNotificationScheduler,
+            prayerAlarmScheduler = prayerAlarmScheduler,
+            prayerNotificationTester = prayerNotificationTester,
             rescheduleNotificationsUseCase = rescheduleNotificationsUseCase,
             telemetry = telemetry,
             adhanAudioManager = adhanAudioManager,
+            quranPlayback = quranPlayback,
             clearAllUserData = clearAllUserData,
             todayProvider = todayProvider,
         )
@@ -106,6 +133,52 @@ class SettingsViewModelTest {
 
     @After
     fun tearDown() = Dispatchers.resetMain()
+
+    @Test
+    fun `previewing a reciter plays an explicit one-ayah playlist`() = runTest {
+        advanceUntilIdle()
+
+        viewModel.onEvent(SettingsEvent.PreviewReciter("mishary"))
+        advanceUntilIdle()
+
+        verify { quranPlayback.setReciter("mishary", restartIfPlaying = false) }
+
+        // The assertion that matters is the *contents* of the playlist, not that a call happened.
+        // The previous implementation called `playFromAyah` too — with a list built from a fresh
+        // `QuranViewModel`'s reader state, which on this destination is empty. `playFromAyah`
+        // does `allAyahs.indexOfFirst { … }` and returns when that is -1, so the preview button
+        // played silence. A `verify { … any() }` would have passed against that bug.
+        val playlist = slot<List<AyahAudioItem>>()
+        verify { quranPlayback.playFromAyah(ayahGlobalId = 1, allAyahs = capture(playlist), title = any()) }
+        assertThat(playlist.captured).hasSize(1)
+        assertThat(playlist.captured.single().ayahGlobalId).isEqualTo(1)
+
+        // Collected rather than read off `.value`: `reciterPreview` is `stateIn(…,
+        // WhileSubscribed(5s), …)`, so with no subscriber it never runs the `combine` and holds
+        // its seed. Reading `.value` here asserted `null` and would have kept asserting `null`
+        // however the ViewModel behaved.
+        viewModel.reciterPreview.test {
+            // `stateIn` replays its seed to a new subscriber before the `combine` runs, so the
+            // first item is always the empty default.
+            assertThat(awaitItem().reciterId).isNull()
+            assertThat(awaitItem().reciterId).isEqualTo("mishary")
+        }
+    }
+
+    @Test
+    fun `stopping a reciter preview clears the previewing id`() = runTest {
+        advanceUntilIdle()
+        viewModel.onEvent(SettingsEvent.PreviewReciter("mishary"))
+        advanceUntilIdle()
+
+        viewModel.onEvent(SettingsEvent.StopReciterPreview)
+        advanceUntilIdle()
+
+        verify { quranPlayback.stop() }
+        viewModel.reciterPreview.test {
+            assertThat(awaitItem().reciterId).isNull()
+        }
+    }
 
     @Test
     fun `ViewModel initialises without throwing`() = runTest {

@@ -46,4 +46,14 @@ interface PrayerAlarmScheduler {
         fridayReminderEnabled: Boolean = false,
         fridayReminderMinutes: Int = 60,
     )
+
+    /**
+     * Tear every armed prayer alarm down.
+     *
+     * Added in PR 21 of #551, when `SettingsScreen` left `:app`: turning notifications off in
+     * settings has to cancel what is already armed, and the concrete scheduler cannot travel — one
+     * `AppR.drawable` reference pins it. Alarm lifecycle, so it belongs on this port; the two
+     * *test*-notification calls the same screen makes do not, and are [PrayerNotificationTester].
+     */
+    fun cancelAllPrayerNotifications()
 }

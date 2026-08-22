@@ -1,11 +1,14 @@
 package com.arshadshah.nimaz.presentation.screens.settings
 
+import android.content.Context
+import kotlin.system.exitProcess
+import android.content.Intent
+import android.app.Activity
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import com.arshadshah.nimaz.core.navigation.Route
 import com.arshadshah.nimaz.core.navigation.ScreenTags
-import com.arshadshah.nimaz.core.navigation.restartApp
 import com.arshadshah.nimaz.core.navigation.taggedComposable
 import com.arshadshah.nimaz.presentation.screens.adaptive.AdaptiveSettingsScreen
 import com.arshadshah.nimaz.presentation.screens.dua.DuaSettingsScreen
@@ -170,4 +173,22 @@ fun NavGraphBuilder.settingsGraph(navController: NavController) {
             onNavigateBack = { navController.popBackStack() }
         )
     }
+}
+
+/**
+ * Relaunch the process, so a language change takes effect everywhere at once.
+ *
+ * Lived in `NavGraph.kt` as an `internal` helper until PR 21 of #551; this graph was always its
+ * only caller, and `internal` meant it could not follow the screen out of `:app` on its own. It
+ * names no `:app` type — it asks the package manager which Activity is the launcher, the same
+ * inversion the widgets use — so it travels as-is.
+ */
+internal fun restartApp(context: Context) {
+    val intent = context.packageManager.getLaunchIntentForPackage(context.packageName)
+    intent?.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
+    context.startActivity(intent)
+    if (context is Activity) {
+        context.finish()
+    }
+    exitProcess(0)
 }

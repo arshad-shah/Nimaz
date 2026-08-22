@@ -69,6 +69,25 @@ sealed interface SettingsEvent {
     data class SetContinuousReading(val enabled: Boolean) : SettingsEvent
     data class SetKeepScreenOn(val enabled: Boolean) : SettingsEvent
     data class SetReciter(val reciterId: String?) : SettingsEvent
+
+    /**
+     * Play a one-ayah sample in [reciterId], so the user can hear a voice before choosing it.
+     *
+     * New in PR 21 of #551, and it replaces a call that never worked. `SelectReciterScreen` used
+     * to do this by taking a second ViewModel — `quranViewModel: QuranViewModel = hiltViewModel()`
+     * — and dispatching `QuranEvent.PreviewReciter`. But `hiltViewModel()` resolves against the
+     * *destination's* `NavBackStackEntry`, so that was a **fresh** `QuranViewModel`, not the
+     * reader's: its `readerState.ayahs` was empty, `playAyahAudio` therefore built an empty
+     * playlist, and `QuranAudioManager.playFromAyah` bails on `indexOfFirst(...) == -1`. The
+     * preview button set its spinner and played silence.
+     *
+     * Handled here against an explicit single-item playlist, so it does not depend on anything
+     * else having been loaded first.
+     */
+    data class PreviewReciter(val reciterId: String) : SettingsEvent
+
+    /** Stop a running reciter preview. */
+    data object StopReciterPreview : SettingsEvent
     data class SetShowTajweed(val enabled: Boolean) : SettingsEvent
     data class SetTajweedUnderline(val enabled: Boolean) : SettingsEvent
     data class SetMushafScript(val script: MushafScript) : SettingsEvent

@@ -1,6 +1,7 @@
 package com.arshadshah.nimaz.widget.core
 
 import com.arshadshah.nimaz.core.ui.R
+import com.arshadshah.nimaz.presentation.foundation.tokens.prayerShortNameRes
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import java.io.File
@@ -17,37 +18,13 @@ import java.io.File
  * English on the actual widget.
  *
  * The translation was never the missing part — the lookup was.
+ *
+ * `prayerShortNameRes` itself is tested in `:core:ui`'s `PrayerShortNamesTest` as of PR 21 of
+ * #551, where the function moved. What is still tested here is what still lives here: the icon
+ * lookup, the weekday initials, and the sweep over the widget sources for English literals. The
+ * one case below reads the name lookup only to check it agrees with the icon lookup.
  */
 class WidgetPrayerNameTest {
-
-    @Test
-    fun `every prayer resolves to its own translated short name`() {
-        assertThat(prayerShortNameRes("Fajr")).isEqualTo(R.string.widget_prayer_short_fajr)
-        assertThat(prayerShortNameRes("Sunrise")).isEqualTo(R.string.widget_prayer_short_sunrise)
-        assertThat(prayerShortNameRes("Dhuhr")).isEqualTo(R.string.widget_prayer_short_dhuhr)
-        assertThat(prayerShortNameRes("Asr")).isEqualTo(R.string.widget_prayer_short_asr)
-        assertThat(prayerShortNameRes("Maghrib")).isEqualTo(R.string.widget_prayer_short_maghrib)
-        assertThat(prayerShortNameRes("Isha")).isEqualTo(R.string.widget_prayer_short_isha)
-    }
-
-    @Test
-    fun `the lookup accepts whatever case and spelling the callers pass`() {
-        // Callers hand it `PrayerType.name` ("ISHA"), `PrayerType.displayName` ("Isha") and
-        // bare literals, and the tracker's toggle round-trips through lowercase.
-        listOf("ISHA", "isha", " Isha ").forEach {
-            assertThat(prayerShortNameRes(it)).isEqualTo(R.string.widget_prayer_short_isha)
-        }
-        // Dhuhr is also written Zuhr, which `prayerIconRes` already accepts.
-        assertThat(prayerShortNameRes("Zuhr")).isEqualTo(R.string.widget_prayer_short_dhuhr)
-    }
-
-    @Test
-    fun `an unrecognised name resolves to nothing rather than a wrong prayer`() {
-        // Falling back to a real prayer would label a row with someone else's name; the caller
-        // shows the raw string instead.
-        assertThat(prayerShortNameRes("Tahajjud")).isNull()
-        assertThat(prayerShortNameRes("")).isNull()
-    }
 
     @Test
     fun `the name and icon lookups agree on which prayers exist`() {

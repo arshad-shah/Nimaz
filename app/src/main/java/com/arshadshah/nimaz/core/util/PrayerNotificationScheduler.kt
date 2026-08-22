@@ -20,6 +20,7 @@ import com.arshadshah.nimaz.domain.model.WorshipReminderType
 import com.arshadshah.nimaz.domain.model.isLocationSet
 import com.arshadshah.nimaz.domain.prayer.PrayerTimeCalculator
 import com.arshadshah.nimaz.domain.repository.PrayerAlarmScheduler
+import com.arshadshah.nimaz.domain.repository.PrayerNotificationTester
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.worship.DayWorshipTimes
 import com.arshadshah.nimaz.domain.worship.HijriDayInfo
@@ -44,7 +45,7 @@ class PrayerNotificationScheduler @Inject constructor(
     @ApplicationContext private val context: Context,
     private val prayerTimeCalculator: PrayerTimeCalculator,
     private val settingsRepository: SettingsRepository
-) : PrayerAlarmScheduler {
+) : PrayerAlarmScheduler, PrayerNotificationTester {
     private val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
     private val notificationManager =
         context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -804,7 +805,7 @@ class PrayerNotificationScheduler @Inject constructor(
     /**
      * Cancel all scheduled prayer notifications.
      */
-    fun cancelAllPrayerNotifications() {
+    override fun cancelAllPrayerNotifications() {
         PrayerType.entries.forEach { prayerType ->
             cancelPrayerNotification(prayerType)
             cancelPreReminderNotification(prayerType)
@@ -818,7 +819,7 @@ class PrayerNotificationScheduler @Inject constructor(
     /**
      * Send an immediate test notification to verify notifications are working.
      */
-    fun sendTestNotification() {
+    override fun sendTestNotification() {
         val notification = NotificationCompat.Builder(context, CHANNEL_ID_PRAYER)
             .setSmallIcon(AppR.drawable.ic_stat_nimaz)
             .setContentTitle(context.getString(R.string.test_notification_title))
@@ -835,7 +836,7 @@ class PrayerNotificationScheduler @Inject constructor(
      * Send test notifications for all prayers to validate the notification system.
      * Uses explicit broadcasts to ensure BootReceiver receives them on Android 8.0+.
      */
-    fun sendAllPrayerTestNotifications() {
+    override fun sendAllPrayerTestNotifications() {
         val prayers = listOf(
             PrayerType.FAJR to "05:30 AM",
             PrayerType.SUNRISE to "06:45 AM",

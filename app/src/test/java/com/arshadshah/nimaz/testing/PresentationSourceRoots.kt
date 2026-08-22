@@ -48,6 +48,7 @@ object PresentationSourceRoots {
         "../feature/tracker/src/main/kotlin/com/arshadshah/nimaz/presentation",
         "../feature/quran/src/main/kotlin/com/arshadshah/nimaz/presentation",
         "../feature/prayer/src/main/kotlin/com/arshadshah/nimaz/presentation",
+        "../feature/settings/src/main/kotlin/com/arshadshah/nimaz/presentation",
     )
 
     /**

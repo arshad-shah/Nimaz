@@ -67,8 +67,8 @@ import com.arshadshah.nimaz.presentation.components.atoms.rememberNow
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.viewmodel.settings.SettingsViewModel
-import com.arshadshah.nimaz.widget.core.formatWidgetTime
-import com.arshadshah.nimaz.widget.core.prayerShortName
+import com.arshadshah.nimaz.core.common.formatWidgetTime
+import com.arshadshah.nimaz.presentation.foundation.tokens.prayerShortName
 import java.time.LocalDate
 import kotlin.time.Clock
 import kotlin.time.Duration

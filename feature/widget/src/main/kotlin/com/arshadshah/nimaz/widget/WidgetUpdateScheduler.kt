@@ -11,7 +11,7 @@ import android.os.SystemClock
 import android.util.Log
 import androidx.glance.appwidget.updateAll
 import com.arshadshah.nimaz.core.monitoring.CrashReporter
-import com.arshadshah.nimaz.widget.core.formatWidgetCountdown
+import com.arshadshah.nimaz.core.common.formatWidgetCountdown
 import com.arshadshah.nimaz.widget.nextprayer.NextPrayerWidget
 import com.arshadshah.nimaz.widget.nextprayer.NextPrayerWidgetReceiver
 import com.arshadshah.nimaz.widget.prayertimes.PrayerTimesWidget

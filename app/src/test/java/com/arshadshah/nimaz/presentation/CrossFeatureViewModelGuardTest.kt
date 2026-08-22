@@ -116,6 +116,8 @@ class CrossFeatureViewModelGuardTest {
             "quran" to "quran",
             "prayer" to "prayer",
             "worship" to "prayer",
+            "settings" to "settings",
+            "location" to "settings",
         )
 
         /** `…/feature/<module>/src/…` — the module a source file lives in. */

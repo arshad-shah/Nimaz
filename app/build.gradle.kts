@@ -324,6 +324,9 @@ dependencies {
     // Prayer times, the monthly table, qibla and the night-worship window (#571) — when each
     // prayer *is*, to `:feature:tracker`'s what the user *did* about it.
     implementation(project(":feature:prayer"))
+    // Settings, location and sync (#572) — the last feature module: 24 screens and the
+    // 1,324-line `SettingsViewModel`.
+    implementation(project(":feature:settings"))
     // FakeTodayProvider / FakeSearchSettings / FakeStringProvider / RecordingWidgetRefresher —
     // one definition each, used by the ViewModel tests here and the tests over there.
     testImplementation(testFixtures(project(":core:domain")))
@@ -507,6 +510,7 @@ tasks.withType<Test>().configureEach {
         "trackerSources" to "feature/tracker/src/main/kotlin/com/arshadshah/nimaz/presentation",
         "quranSources" to "feature/quran/src/main/kotlin/com/arshadshah/nimaz/presentation",
         "prayerSources" to "feature/prayer/src/main/kotlin/com/arshadshah/nimaz/presentation",
+        "settingsSources" to "feature/settings/src/main/kotlin/com/arshadshah/nimaz/presentation",
     ).forEach { (name, path) ->
         inputs.dir(rootProject.layout.projectDirectory.dir(path))
             .withPropertyName(name)
@@ -536,6 +540,7 @@ tasks.withType<Test>().configureEach {
         "trackerModuleSources" to "feature/tracker/src/main",
         "quranModuleSources" to "feature/quran/src/main",
         "prayerModuleSources" to "feature/prayer/src/main",
+        "settingsModuleSources" to "feature/settings/src/main",
     ).forEach { (name, path) ->
         inputs.dir(rootProject.layout.projectDirectory.dir(path))
             .withPropertyName(name)
@@ -779,6 +784,22 @@ val coverageModules = listOf(
     CoverageModule(
         gradlePath = ":feature:onboarding",
         projectDir = rootProject.layout.projectDirectory.dir("feature/onboarding"),
+        testTask = "testDebugUnitTest",
+        classesGlobs = listOf(
+            "intermediates/built_in_kotlinc/debug/**/classes/**",
+            "intermediates/classes/debug/**",
+            "tmp/kotlin-classes/debug/**",
+        ),
+        execGlobs = listOf(
+            "jacoco/testDebugUnitTest.exec",
+            "outputs/unit_test_code_coverage/**/*.exec",
+        ),
+        sourceDir = "src/main/kotlin",
+        packageRoot = "com/arshadshah/nimaz/presentation",
+    ),
+    CoverageModule(
+        gradlePath = ":feature:settings",
+        projectDir = rootProject.layout.projectDirectory.dir("feature/settings"),
         testTask = "testDebugUnitTest",
         classesGlobs = listOf(
             "intermediates/built_in_kotlinc/debug/**/classes/**",

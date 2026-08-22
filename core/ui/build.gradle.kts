@@ -1,6 +1,12 @@
 plugins {
     id("nimaz.android.library")
     id("nimaz.android.compose")
+    // `TajweedParser` decodes the per-letter rule JSON with kotlinx.serialization. Without the
+    // plugin `@Serializable` is an inert annotation: the module compiles and `decodeFromString`
+    // throws at runtime into `CrashReporter`, so every ayah renders with no tajweed colouring and
+    // nothing reports it. It came from `:feature:quran` in PR 21 of #551, plugin and all — see the
+    // dependency note below for why it moved.
+    alias(libs.plugins.kotlin.serialization)
     // Merged into :app:jacocoTestReport via `coverageModules`. A module that leaves :app without
     // this makes the reported coverage rise by measuring less.
     jacoco
@@ -49,7 +55,19 @@ android {
 //                      by the AboutLibraries Gradle plugin into the applying project, so both it
 //                      and the keep rule stay with `:app`. See `LibraryRepositoryImpl`, which
 //                      documents the release-only failure that made the keep rule necessary.
+// `TajweedParser` lives here as of PR 21 of #551, overturning PR 19's placement in
+// `:feature:quran`. It moved because `TajweedLegendSheet` had to: `QuranSettingsScreen` shows the
+// legend and left for `:feature:settings`, while `QuranReaderScreen` shows it too and stayed in
+// `:feature:quran` — two feature modules, so the component goes down rather than across, and the
+// parser it reads goes with it. PR 19 was right on the evidence it had (one consumer); the
+// evidence changed one PR later. **"Used by the feature" is not "used only by the feature", and a
+// module that is the only consumer today may not be next month.**
+//
+// It belongs here on its merits too: it returns an `AnnotatedString` of `SpanStyle`s built from
+// `NimazColors.TajweedColors`, which is a `:core:ui` type. `scripts/check_tajweed_contrast.py`
+// reads the theme files, not the parser, so the CI contrast gate is unaffected.
 dependencies {
+    implementation(libs.kotlinx.serialization.json)
     api(project(":core:domain"))
     implementation(project(":core:common"))
 
