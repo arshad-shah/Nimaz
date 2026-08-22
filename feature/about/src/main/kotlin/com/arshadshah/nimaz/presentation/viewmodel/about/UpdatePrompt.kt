@@ -9,7 +9,7 @@ import androidx.compose.material.icons.filled.InstallMobile
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.arshadshah.nimaz.core.ui.R
-import com.arshadshah.nimaz.core.util.UpdateState
+import com.arshadshah.nimaz.presentation.update.UpdateState
 
 /**
  * How the About screen's "check for updates" row should read, for one [UpdateState].

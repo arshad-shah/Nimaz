@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.core.navigation
 
+import com.arshadshah.nimaz.testing.PresentationSourceRoots
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
 import java.io.File
@@ -47,11 +48,12 @@ class EveryRouteIsRegisteredTest {
         /** `Routes.kt` lives in `:core:navigation` since PR 11 of #551. */
         const val ROUTES = "../core/navigation/src/main/kotlin/com/arshadshah/nimaz/core/navigation/Routes.kt"
 
-        /** Where destinations are wired. Both roots, because the graph now spans modules. */
-        val REGISTRATION_ROOTS = listOf(
-            "src/main/java/com/arshadshah/nimaz",
-            "../core/navigation/src/main/kotlin/com/arshadshah/nimaz",
-        )
+        /**
+         * Where destinations are wired — now six roots, because the graph spans every module that
+         * owns screens. Shared with the other three cross-module scans; see
+         * [PresentationSourceRoots].
+         */
+        val REGISTRATION_ROOTS = PresentationSourceRoots.NAVIGABLE
 
         /**
          * A floor on the routes parsed out of `Routes.kt`. Well below the real count, so ordinary
@@ -112,16 +114,12 @@ class EveryRouteIsRegisteredTest {
     }
 
     /** Every `taggedComposable<Route.X>` in the app, with duplicates kept. */
-    private fun registeredRoutes(): List<String> =
-        REGISTRATION_ROOTS.map(::File).flatMap { root ->
-            assertWithMessage("registration root missing: ${root.absolutePath}")
-                .that(root.isDirectory).isTrue()
-            root.walkTopDown()
-                .filter { it.isFile && it.extension == "kt" }
-                .flatMap { file ->
-                    REGISTERED.findAll(withoutComments(file.readText())).map { it.groupValues[1] }
-                }
+    private fun registeredRoutes(): List<String> {
+        PresentationSourceRoots.assertAllExist(REGISTRATION_ROOTS)
+        return PresentationSourceRoots.sources(REGISTRATION_ROOTS).flatMap { file ->
+            REGISTERED.findAll(withoutComments(file.readText())).map { it.groupValues[1] }
         }
+    }
 
     @Test
     fun `the scan finds the route declarations`() {

@@ -3,8 +3,8 @@
 **Repo:** `arshad-shah/nimaz` · **Integration branch:** `epic/multi-module`
 **Spec:** [`SPEC.md`](SPEC.md) — the assessment and the reasoning. This document is the
 execution plan: the issue tree, the branch topology, and the exit criteria for each PR.
-**Status:** in flight. Issues #552–#573 are filed under epic #551; PRs 1–5 have landed on
-`epic/multi-module`.
+**Status:** in flight. Issues #552–#573 are filed under epic #551; **PRs 1–13 have landed** on
+`epic/multi-module`, and PR 14 is open.
 
 ---
 
@@ -365,8 +365,8 @@ slice, its nav-graph extension, and its tests.
 
 | PR | Issue | Branch | Contents |
 |---:|---|---|---|
-| 13 | **#13** `:feature:widget` | `mm/12-feature-widget` | 6 Glance widgets, 7 receivers, 6 workers. Zero presentation deps — proves the pipeline. **SUB-02/04/05 must stay green with floors.** |
-| 14 | **#14** `:feature:onboarding`, `:feature:about` | `mm/13-feature-onboarding-about` | about, help, licenses, more |
+| 13 | **#13** `:feature:widget` | `mm/12-feature-widget` | **landed.** 6 Glance widgets, 7 receivers, 6 workers. Found two layering violations (a widget injecting `PrayerDao`, a Worker building a `PrayerRecordEntity`) and a `@HiltWorker` failure that only the emulator suite could see. |
+| 14 | **#14** `:feature:onboarding`, `:feature:about` | `mm/13-feature-onboarding-about` | about, help, licenses, more. Onboarding needed **nothing** unpicked; about needed **six** couplings resolved. `AdaptiveMoreScreen` moves here — it composes all three and is the one adaptive screen that is not `:app`'s. |
 | 15 | **#15** `:feature:tools`, `:feature:calendar` | `mm/14-feature-tools-calendar` | zakat; Islamic calendar + events |
 | 16 | **#16** `:feature:search` | `mm/15-feature-search` | search + AI ask-with-proof. Touches `worker/` contract — leave it alone. |
 | 17 | **#17** `:feature:content` | `mm/16-feature-content` | dua, hadith, qaida, asma, asmaunnabi, names, prophets, catalog — **moved together**, their ViewModels are one package |
@@ -375,8 +375,17 @@ slice, its nav-graph extension, and its tests.
 | 20 | **#20** `:feature:prayer` | `mm/19-feature-prayer` | prayer times, qibla, night worship, adhan audio. **SUB-03 must stay green** — 3 of 4 Services move here |
 | 21 | **#21** `:feature:settings` | `mm/20-feature-settings` | 18 screens, the 1,324-line `SettingsViewModel`. Largest and most cross-referenced — last |
 
-`screens/adaptive` and `screens/home` stay in `:app`. All 26 `screens/` directories are
-accounted for across this table plus those two.
+`screens/home` stays in `:app`. `screens/adaptive` **mostly** does: six of its seven files each
+compose screens from a single feature and go with it (`AdaptiveMoreScreen` went in PR 14), so the
+directory empties out rather than staying whole. All 26 `screens/` directories are accounted for
+across this table plus `home`.
+
+**Two things every remaining PR in this milestone must do**, learned in PRs 13–14:
+
+- Add the module's presentation root to `PresentationSourceRoots` (`:app` test sources). Four
+  cross-module scans read it; PR 14 broke three of them at once by not having it.
+- Add the module to `coverageModules` in `app/build.gradle.kts`. A module that leaves `:app`
+  without it makes reported coverage *rise*, by measuring less.
 
 *Exit for every PR in this milestone:* the moved feature's tests compile **without being
 relaxed**. A test that will not compile after the move is a real coupling signal, not migration

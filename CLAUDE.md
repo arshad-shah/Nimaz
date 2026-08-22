@@ -53,6 +53,22 @@ DataStore, type-safe Navigation Compose.
   feature module has no `:core:database` on its classpath: talk to a repository, never a DAO, and
   never name a type in `:app` (the widgets resolve the launcher component rather than naming
   `MainActivity`).
+- **`:feature:onboarding`** (`feature/onboarding/`) — the first-run flow. **Nothing had to be
+  unpicked to extract it**, because its ViewModel already took settings *seams* and domain ports
+  rather than `SettingsRepository` and Android APIs. Copy this one.
+- **`:feature:about`** (`feature/about/`) — About, Help and More, which are one destination
+  (`AdaptiveMoreScreen` shows all three; `aboutGraph` registers all their routes). Six couplings
+  to `:app` had to be unpicked — see its build file. **AboutLibraries stays in `:app`**: the
+  plugin reads the *applying project's* runtime classpath, so applying it in a feature module
+  silently shortens the licence list. `LicenceCatalogueTest` floors the entry count at 200
+  (272 today).
+
+Two rules a feature module makes into compile errors, both worth knowing before you write one:
+**a `@HiltWorker` needs `ksp(libs.hilt.work.compiler)` in its own module** — omitting it compiles
+fine and fails at *runtime* with `NoSuchMethodException`, which is why `HiltWorkerProcessorTest`
+exists — and **`BuildConfig` and the app's `R` cannot travel**, so app identity arrives through
+`LocalAppIdentity` and an `:app`-only implementation moves as a *port* (`AppUpdateController`),
+never as the class.
 
 Everything else is still `:app` and moves out over the remaining PRs. Files in
 `app/…/core/util/` whose destination module does not exist yet are staying there **on purpose** —
@@ -201,6 +217,8 @@ The obligations, in short:
 ./gradlew :core:ui:check              # design-system component tests + moduleBoundary + its lint
 ./gradlew :core:navigation:check      # route vocabulary + the no-presentation-imports guard
 ./gradlew :feature:widget:check       # the widgets + moduleBoundary + its own lint
+./gradlew :feature:onboarding:check   # the first-run flow
+./gradlew :feature:about:check        # about/help/more
 ./gradlew :app:jacocoTestReport --dry-run   # see below — seconds, and catches a whole class of red CI
 ./gradlew :app:lintDebug              # SLOW (~10 min) and CI-blocking — do not skip it
 python3 scripts/check_docs.py         # docs still describe the code (no toolchain needed)

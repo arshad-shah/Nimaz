@@ -298,9 +298,15 @@ dependencies {
     // it is decomposed in PR 12.
     implementation(project(":core:navigation"))
     // The six Glance widgets and their workers — the first feature module (#564). It brings its
-    // own manifest entries, its own widget_colors/drawables/layouts and its own 27 strings, so
-    // nothing widget-shaped is left here.
+    // own manifest entries, its own widget_colors/drawables/layouts and the 17 strings nothing
+    // else uses, so nothing widget-shaped is left here. (The other 16 it references stay in
+    // `:core:ui` because `WidgetsScreen`'s gallery reads them too.)
     implementation(project(":feature:widget"))
+    // The first-run flow (#565). Extracted with no couplings to unpick — see its build file.
+    implementation(project(":feature:onboarding"))
+    // About, Help and More — one destination, so one module (#565). Six couplings to `:app` were
+    // unpicked to get it out; its build file lists them.
+    implementation(project(":feature:about"))
     // FakeTodayProvider / FakeSearchSettings / FakeStringProvider / RecordingWidgetRefresher —
     // one definition each, used by the ViewModel tests here and the tests over there.
     testImplementation(testFixtures(project(":core:domain")))
@@ -472,7 +478,7 @@ tasks.withType<Test>().configureEach {
     // simply does not run. That exact failure hid a broken assertion in `:core:common` through
     // two full local gate sweeps — an assertion only fires if its task runs.
     mapOf(
-        "designSystemSources" to "core/ui/src/main/kotlin/com/arshadshah/nimaz/presentation/components",
+        "designSystemSources" to "core/ui/src/main/kotlin/com/arshadshah/nimaz/presentation",
         "navigationSources" to "core/navigation/src/main/kotlin/com/arshadshah/nimaz/core/navigation",
         "widgetSources" to "feature/widget/src/main/kotlin/com/arshadshah/nimaz/widget",
     ).forEach { (name, path) ->
@@ -480,6 +486,17 @@ tasks.withType<Test>().configureEach {
             .withPropertyName(name)
             .withPathSensitivity(PathSensitivity.RELATIVE)
     }
+
+    // `LicenceCatalogueTest` reads the AboutLibraries catalogue, which is a *build output* of
+    // this module rather than a source file, so nothing put it on the test task's input set.
+    // Without this the task stays UP-TO-DATE and the assertion does not run — verified the hard
+    // way: truncating the catalogue to 40 entries produced a green build, because the test never
+    // executed. `builtBy` is what stops that being an implicit-dependency error.
+    inputs.files(
+        files(layout.buildDirectory.file("generated/aboutLibraries/debug/res/raw/aboutlibraries.json"))
+            .builtBy("prepareLibraryDefinitionsDebug")
+    ).withPropertyName("licenceCatalogue").withPathSensitivity(PathSensitivity.RELATIVE)
+        .optional()
 
     // `HiltWorkerProcessorTest` reads every module's build file. Sources reach the test task
     // through the runtime classpath already; build files do not, and a build file is exactly
@@ -703,6 +720,38 @@ val coverageModules = listOf(
         ),
         sourceDir = "src/main/kotlin",
         packageRoot = "com/arshadshah/nimaz/widget",
+    ),
+    CoverageModule(
+        gradlePath = ":feature:onboarding",
+        projectDir = rootProject.layout.projectDirectory.dir("feature/onboarding"),
+        testTask = "testDebugUnitTest",
+        classesGlobs = listOf(
+            "intermediates/built_in_kotlinc/debug/**/classes/**",
+            "intermediates/classes/debug/**",
+            "tmp/kotlin-classes/debug/**",
+        ),
+        execGlobs = listOf(
+            "jacoco/testDebugUnitTest.exec",
+            "outputs/unit_test_code_coverage/**/*.exec",
+        ),
+        sourceDir = "src/main/kotlin",
+        packageRoot = "com/arshadshah/nimaz/presentation",
+    ),
+    CoverageModule(
+        gradlePath = ":feature:about",
+        projectDir = rootProject.layout.projectDirectory.dir("feature/about"),
+        testTask = "testDebugUnitTest",
+        classesGlobs = listOf(
+            "intermediates/built_in_kotlinc/debug/**/classes/**",
+            "intermediates/classes/debug/**",
+            "tmp/kotlin-classes/debug/**",
+        ),
+        execGlobs = listOf(
+            "jacoco/testDebugUnitTest.exec",
+            "outputs/unit_test_code_coverage/**/*.exec",
+        ),
+        sourceDir = "src/main/kotlin",
+        packageRoot = "com/arshadshah/nimaz/presentation",
     ),
 )
 

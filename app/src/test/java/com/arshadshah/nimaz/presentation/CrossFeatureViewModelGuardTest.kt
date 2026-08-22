@@ -1,8 +1,8 @@
 package com.arshadshah.nimaz.presentation
 
+import com.arshadshah.nimaz.testing.PresentationSourceRoots
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
-import java.io.File
 
 /**
  * A screen in an **extracted feature module** may only `hiltViewModel()` a ViewModel from that
@@ -46,10 +46,9 @@ class CrossFeatureViewModelGuardTest {
 
     @Test
     fun `no screen in an extracted module injects another module's ViewModel`() {
-        val root = File(SCREENS_ROOT)
-        assertThat(root.isDirectory).isTrue()
+        PresentationSourceRoots.assertAllExist(PresentationSourceRoots.NAVIGABLE)
 
-        val files = root.walkTopDown().filter { it.isFile && it.extension == "kt" }.toList()
+        val files = PresentationSourceRoots.sources(PresentationSourceRoots.NAVIGABLE)
         assertThat(files.size).isAtLeast(MINIMUM_FILES)
 
         val offenders = mutableListOf<String>()
@@ -57,7 +56,7 @@ class CrossFeatureViewModelGuardTest {
 
         files.forEach { file ->
             val screenPackage = ADAPTIVE_SCREEN_PACKAGE[file.name]
-                ?: file.parentFile.takeIf { it != root }?.name
+                ?: file.parentFile?.name
                 ?: return@forEach
             val module = MODULE_OF[screenPackage] ?: APP
             if (module == APP) return@forEach
@@ -84,8 +83,6 @@ class CrossFeatureViewModelGuardTest {
     private fun label(module: String) = if (module == APP) ":app" else ":feature:$module"
 
     private companion object {
-        const val SCREENS_ROOT = "src/main/java/com/arshadshah/nimaz/presentation/screens"
-
         /** Not yet extracted — still one module, so unconstrained. */
         const val APP = "app"
 
@@ -107,7 +104,10 @@ class CrossFeatureViewModelGuardTest {
          */
         val ADAPTIVE_SCREEN_PACKAGE = mapOf("AdaptiveMoreScreen.kt" to "more")
 
-        /** `screens/` holds 118 sources. Floored low enough that deletions are not failures. */
+        /**
+         * Presentation sources across every module — several hundred. Floored low enough that
+         * deletions are never failures, high enough that a mis-rooted scan cannot pass.
+         */
         const val MINIMUM_FILES = 100
 
         /**
