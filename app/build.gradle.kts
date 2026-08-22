@@ -1,3 +1,4 @@
+import org.gradle.api.tasks.PathSensitivity
 import com.arshadshah.nimaz.buildlogic.FetchNimazDataTask
 import com.arshadshah.nimaz.buildlogic.NimazDataCredentials
 import com.arshadshah.nimaz.buildlogic.NimazDataLockParser
@@ -460,6 +461,24 @@ tasks.withType<Test>().configureEach {
         // Needed for Robolectric + inline/synthetic classes to be reported.
         isIncludeNoLocationClasses = true
         excludes = listOf("jdk.internal.*")
+    }
+
+    // Source roots in *other* modules that `:app` unit tests read off disk.
+    //
+    // `AnalyticsReachabilityTest` scans every place a UI event can be dispatched from, and since
+    // PRs 10, 11 and 13 of #551 three of those roots live outside this module. Gradle has no way
+    // to know that: a file scan is not a compile dependency, so without these declarations
+    // `testDebugUnitTest` stays UP-TO-DATE when the scanned sources change and the assertion
+    // simply does not run. That exact failure hid a broken assertion in `:core:common` through
+    // two full local gate sweeps — an assertion only fires if its task runs.
+    mapOf(
+        "designSystemSources" to "core/ui/src/main/kotlin/com/arshadshah/nimaz/presentation/components",
+        "navigationSources" to "core/navigation/src/main/kotlin/com/arshadshah/nimaz/core/navigation",
+        "widgetSources" to "feature/widget/src/main/kotlin/com/arshadshah/nimaz/widget",
+    ).forEach { (name, path) ->
+        inputs.dir(rootProject.layout.projectDirectory.dir(path))
+            .withPropertyName(name)
+            .withPathSensitivity(PathSensitivity.RELATIVE)
     }
 }
 

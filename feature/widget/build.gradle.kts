@@ -46,12 +46,20 @@ android {
 // `values/widget_colors.xml` with its `values-night` variant. This is the module that was waiting
 // for them.
 //
-// It keeps only the strings *nothing else* uses. The first attempt moved all 27 the widget code
-// references and broke `:app`: twelve of them — the short prayer names, the khatam labels, the
-// next-prayer caption — are also read by `WidgetsScreen`'s previews, `KhatamCards` and
+// It keeps only the strings *nothing else* uses. The first attempt moved every string the widget
+// code touches and broke `:app`: the short prayer names, the khatam labels and the next-prayer
+// caption are also read by `WidgetsScreen`'s widget gallery, `KhatamCards` and
 // `PrayerTrackerDayCard`. "Used by the widget" is not "used only by the widget", and the compiler
-// is what said so. Those twelve went back to `:core:ui`, which is why this depends on it despite
-// drawing none of the design system.
+// is what said so.
+//
+// The split, counted rather than remembered: this module **references 33** string resources
+// across its Kotlin, its `res/xml` descriptors and its manifest; it **declares 17** — every one of
+// which nothing outside it uses — and resolves the other **16** from `:core:ui`. That is why it
+// depends on `:core:ui` despite drawing none of the design system.
+//
+// Five of those 16 (`widget_*_description`) have no consumer outside this module and could move.
+// They stay deliberately: `khatam_widget_description` is read by `WidgetsScreen` and cannot, so
+// moving the rest would split one set of six provider descriptions across two modules to no end.
 dependencies {
     implementation(project(":core:domain"))
     implementation(project(":core:common"))

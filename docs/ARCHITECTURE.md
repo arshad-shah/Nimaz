@@ -1803,6 +1803,29 @@ A feature must also not name a type in `:app`. The widgets opened the app with
 `actionStartActivity<MainActivity>()`; they now resolve the launcher component from the package
 manager, the same inversion `NavGraph`'s `restartApp` uses.
 
+**A feature module's tests move with it, and a file-scanning test needs two things checked when
+they do.** `:feature:widget` took all 59 of its unit tests out of `app/src/test`. Two of them
+would have gone quietly wrong:
+
+- `PrayerTrackerWidgetDataSourceTest` mocked `PrayerDao`, so it stopped compiling the moment its
+  subject took `PrayerRepository`. Rewriting it against the repository made two assertions
+  stronger for free — `PrayerStatus.entries` now enumerates the five non-prayed statuses the
+  stringly-typed version had listed by hand (and got wrong: `LATE` and `NOT_PRAYED` were missing),
+  and the "unknown prayer name" case became `SUNRISE`, a real sixth `PrayerName` that a careless
+  `PrayerName.entries` in the data source would let the widget count.
+- `WidgetGlyphGuardTest` scanned `src/main/java/com/arshadshah/nimaz/widget` **relative to the
+  module directory**, a path that ceased to exist in `:app`. Its only floor was
+  `dir.isDirectory` — a check that passes on the day the directory is empty and fails only on the
+  day it is gone. It now asserts on files actually read (`MINIMUM_FILES`), which is the rule §9
+  already carries: **assert on what the scan found, not on where it looked.**
+
+**A `:app` test that reads another module's sources must be declared as an input of the test
+task.** `AnalyticsReachabilityTest` scans four modules' UI roots; Gradle cannot infer that from a
+file walk, so `app/build.gradle.kts` names `core/ui`, `core/navigation` and `feature/widget` via
+`inputs.dir(...)`. Without it `testDebugUnitTest` stays `UP-TO-DATE` when the scanned sources
+change and the assertion simply does not run — the failure that hid a broken `:core:common`
+assertion through two full local sweeps.
+
 **The nav graph is per-feature, and `NavGraph.kt` registers nothing.** Since PR 12 of #551 the 94
 destinations live in eleven `NavGraphBuilder.<feature>Graph(navController)` extensions beside their
 screens; `:app` keeps only the `NavHost` and the shell. A new destination goes in its feature's
