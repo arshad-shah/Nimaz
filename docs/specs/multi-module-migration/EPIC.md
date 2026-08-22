@@ -367,7 +367,7 @@ slice, its nav-graph extension, and its tests.
 |---:|---|---|---|
 | 13 | **#13** `:feature:widget` | `mm/12-feature-widget` | **landed.** 6 Glance widgets, 7 receivers, 6 workers. Found two layering violations (a widget injecting `PrayerDao`, a Worker building a `PrayerRecordEntity`) and a `@HiltWorker` failure that only the emulator suite could see. |
 | 14 | **#14** `:feature:onboarding`, `:feature:about` | `mm/13-feature-onboarding-about` | about, help, licenses, more. Onboarding needed **nothing** unpicked; about needed **six** couplings resolved. `AdaptiveMoreScreen` moves here — it composes all three and is the one adaptive screen that is not `:app`'s. |
-| 15 | **#15** `:feature:tools`, `:feature:calendar` | `mm/14-feature-tools-calendar` | zakat; Islamic calendar + events |
+| 15 | **#15** `:feature:tools`, `:feature:calendar` | `mm/14-feature-tools-calendar` | zakat; Islamic calendar + events. Neither had a coupling to unpick; the work was two components finding their right homes and an `api`/`implementation` slip in `:core:ui`. |
 | 16 | **#16** `:feature:search` | `mm/15-feature-search` | search + AI ask-with-proof. Touches `worker/` contract — leave it alone. |
 | 17 | **#17** `:feature:content` | `mm/16-feature-content` | dua, hadith, qaida, asma, asmaunnabi, names, prophets, catalog — **moved together**, their ViewModels are one package |
 | 18 | **#18** `:feature:tracker` | `mm/17-feature-tracker` | prayer tracker, fasting, tasbih — likewise |
@@ -377,8 +377,14 @@ slice, its nav-graph extension, and its tests.
 
 `screens/home` stays in `:app`. `screens/adaptive` **mostly** does: six of its seven files each
 compose screens from a single feature and go with it (`AdaptiveMoreScreen` went in PR 14), so the
-directory empties out rather than staying whole. All 26 `screens/` directories are accounted for
-across this table plus `home`.
+directory empties out rather than staying whole.
+
+**There are 29 `screens/` directories, not 26.** The figure was exactly right when written —
+`git ls-tree` at the commit before PR 12 counts 26 — and PR 12 itself added three more:
+`content/`, `tracker/` and `tools/`, each holding a single `<Feature>Graph.kt`. They read like
+long-standing screen packages because they are named after *ViewModel* packages, which is why the
+count drifted unnoticed. Re-derive it rather than incrementing: the inventory now moves in two
+directions at once, as features leave and graph directories arrive.
 
 **Two things every remaining PR in this milestone must do**, learned in PRs 13–14:
 

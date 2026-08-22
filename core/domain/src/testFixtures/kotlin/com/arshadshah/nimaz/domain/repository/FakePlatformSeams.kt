@@ -1,8 +1,6 @@
-package com.arshadshah.nimaz.presentation.viewmodel
+package com.arshadshah.nimaz.domain.repository
 
 import com.arshadshah.nimaz.domain.model.NisabType
-import com.arshadshah.nimaz.domain.repository.PermissionChecker
-import com.arshadshah.nimaz.domain.repository.PowerSettings
 import com.arshadshah.nimaz.domain.repository.settings.HijriSettings
 import com.arshadshah.nimaz.domain.repository.settings.ZakatSettings
 import kotlinx.coroutines.flow.Flow
@@ -15,6 +13,12 @@ import kotlinx.coroutines.flow.flowOf
  * The point of the extraction is visible here: these fakes are a few lines each, where the
  * alternative was a Robolectric `ApplicationContext` for a ViewModel that wanted four strings
  * and a permission bit.
+ *
+ * Published from `:core:domain`'s `testFixtures` since PR 15 of #551, and moved here from
+ * `:app`'s test sources for the reason `docs/ARCHITECTURE.md` already states: **a fake of a
+ * `:core:domain` port is wanted by whichever module implements the port and by whichever module
+ * drives it**, so it belongs beside the port rather than in either. `:feature:tools` needed
+ * [FakeZakatSettings] the moment it left `:app`, and `:app` still needs all four.
  */
 
 class FakePermissionChecker(

@@ -63,6 +63,12 @@ DataStore, type-safe Navigation Compose.
   silently shortens the licence list. `LicenceCatalogueTest` floors the entry count at 200
   (272 today).
 
+- **`:feature:tools`** (`feature/tools/`) — the zakat calculator and its history.
+- **`:feature:calendar`** (`feature/calendar/`) — the Islamic calendar, plus `IslamicEventCard`
+  (calendar-only; the Zakat hero went to `:core:ui` instead, because `ZakatSettingsScreen` in
+  `:app` reads it too — **"used by the feature" is not "used only by the feature"**, which has now
+  caught three PRs in a row: widget strings, about strings, and these components).
+
 Two rules a feature module makes into compile errors, both worth knowing before you write one:
 **a `@HiltWorker` needs `ksp(libs.hilt.work.compiler)` in its own module** — omitting it compiles
 fine and fails at *runtime* with `NoSuchMethodException`, which is why `HiltWorkerProcessorTest`
@@ -219,6 +225,8 @@ The obligations, in short:
 ./gradlew :feature:widget:check       # the widgets + moduleBoundary + its own lint
 ./gradlew :feature:onboarding:check   # the first-run flow
 ./gradlew :feature:about:check        # about/help/more
+./gradlew :feature:tools:check        # zakat
+./gradlew :feature:calendar:check     # Islamic calendar
 ./gradlew :app:jacocoTestReport --dry-run   # see below — seconds, and catches a whole class of red CI
 ./gradlew :app:lintDebug              # SLOW (~10 min) and CI-blocking — do not skip it
 python3 scripts/check_docs.py         # docs still describe the code (no toolchain needed)

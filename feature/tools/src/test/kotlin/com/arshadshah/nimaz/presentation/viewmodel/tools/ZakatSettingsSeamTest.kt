@@ -2,7 +2,7 @@ package com.arshadshah.nimaz.presentation.viewmodel.tools
 
 import androidx.lifecycle.SavedStateHandle
 import com.arshadshah.nimaz.core.monitoring.RecordingTelemetry
-import com.arshadshah.nimaz.presentation.viewmodel.FakeZakatSettings
+import com.arshadshah.nimaz.domain.repository.FakeZakatSettings
 import com.arshadshah.nimaz.domain.model.NisabType
 import com.arshadshah.nimaz.domain.usecase.ZakatUseCases
 import com.google.common.truth.Truth.assertThat

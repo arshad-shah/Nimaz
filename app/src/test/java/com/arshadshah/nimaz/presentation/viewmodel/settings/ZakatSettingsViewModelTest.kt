@@ -3,7 +3,7 @@ package com.arshadshah.nimaz.presentation.viewmodel.settings
 import com.arshadshah.nimaz.core.monitoring.RecordingTelemetry
 import com.arshadshah.nimaz.domain.model.NisabType
 import com.arshadshah.nimaz.domain.model.ZakatCalculator
-import com.arshadshah.nimaz.presentation.viewmodel.FakeZakatSettings
+import com.arshadshah.nimaz.domain.repository.FakeZakatSettings
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
