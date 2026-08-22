@@ -1,9 +1,17 @@
 package com.arshadshah.nimaz.widget.prayertracker
 
+import com.arshadshah.nimaz.widget.core.launchAppComponent
+
+import com.arshadshah.nimaz.feature.widget.R
+import com.arshadshah.nimaz.domain.model.PrayerStatus
+import com.arshadshah.nimaz.domain.model.PrayerRecord
+import com.arshadshah.nimaz.domain.model.PrayerName
+
 import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.glance.LocalContext
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.GlanceTheme
@@ -28,9 +36,6 @@ import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
-import com.arshadshah.nimaz.MainActivity
-import com.arshadshah.nimaz.core.ui.R
-import com.arshadshah.nimaz.R as AppR
 import com.arshadshah.nimaz.widget.core.WidgetError
 import com.arshadshah.nimaz.widget.core.WidgetLoading
 import com.arshadshah.nimaz.widget.core.WidgetPalette
@@ -83,7 +88,7 @@ private fun PrayerTrackerContent(context: Context, state: PrayerTrackerWidgetSta
 
         is PrayerTrackerWidgetState.Error -> WidgetMessageBox(
             background = palette.background,
-            onClick = actionStartActivity<MainActivity>(),
+            onClick = actionStartActivity(LocalContext.current.launchAppComponent()),
         ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -119,7 +124,7 @@ private fun PrayerTrackerSuccessContent(
 ) {
     WidgetCard(
         background = backgroundColor,
-        onClick = actionStartActivity<MainActivity>(),
+        onClick = actionStartActivity(LocalContext.current.launchAppComponent()),
         padding = 12.dp,
     ) {
         Column(modifier = GlanceModifier.fillMaxSize()) {
@@ -147,16 +152,22 @@ private fun PrayerTrackerSuccessContent(
             }
             Spacer(modifier = GlanceModifier.height(8.dp))
             Row(modifier = GlanceModifier.fillMaxWidth().defaultWeight()) {
+                // Two enums, deliberately both. `PrayerType` carries the label the tile shows;
+                // `PrayerName` is what a prayer record is keyed on. They were bridged by
+                // `type.displayName.lowercase()` until PR 13 of #551 — a string round-trip that
+                // happened to work because the names matched, and would have broken silently the
+                // first time a display name was reworded.
                 val prayers = listOf(
-                    PrayerType.FAJR to data.fajr,
-                    PrayerType.DHUHR to data.dhuhr,
-                    PrayerType.ASR to data.asr,
-                    PrayerType.MAGHRIB to data.maghrib,
-                    PrayerType.ISHA to data.isha,
+                    Triple(PrayerType.FAJR, PrayerName.FAJR, data.fajr),
+                    Triple(PrayerType.DHUHR, PrayerName.DHUHR, data.dhuhr),
+                    Triple(PrayerType.ASR, PrayerName.ASR, data.asr),
+                    Triple(PrayerType.MAGHRIB, PrayerName.MAGHRIB, data.maghrib),
+                    Triple(PrayerType.ISHA, PrayerName.ISHA, data.isha),
                 )
-                prayers.forEach { (type, isPrayed) ->
+                prayers.forEach { (type, prayer, isPrayed) ->
                     PrayerCheckbox(
-                        prayerName = type.displayName,
+                        label = type.displayName,
+                        prayer = prayer,
                         isPrayed = isPrayed,
                         context = context,
                         backgroundColor = backgroundColor,
@@ -173,7 +184,8 @@ private fun PrayerTrackerSuccessContent(
 
 @Composable
 private fun PrayerCheckbox(
-    prayerName: String,
+    label: String,
+    prayer: PrayerName,
     isPrayed: Boolean,
     context: Context,
     backgroundColor: ColorProvider,
@@ -182,10 +194,10 @@ private fun PrayerCheckbox(
     textSecondary: ColorProvider,
     modifier: GlanceModifier = GlanceModifier
 ) {
-    val uncheckedColor = ColorProvider(AppR.color.widget_unchecked)
-    val onPrimary = ColorProvider(AppR.color.widget_on_primary)
+    val uncheckedColor = ColorProvider(R.color.widget_unchecked)
+    val onPrimary = ColorProvider(R.color.widget_on_primary)
     Column(
-        modifier = modifier.clickable { togglePrayerStatus(context, prayerName.lowercase()) },
+        modifier = modifier.clickable { togglePrayerStatus(context, prayer) },
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         if (isPrayed) {
@@ -194,7 +206,7 @@ private fun PrayerCheckbox(
                 modifier = GlanceModifier.size(28.dp).cornerRadius(14.dp).background(primaryColor),
                 contentAlignment = Alignment.Center,
             ) {
-                WidgetIcon(resId = AppR.drawable.ic_widget_check, tint = onPrimary, size = 16.dp)
+                WidgetIcon(resId = R.drawable.ic_widget_check, tint = onPrimary, size = 16.dp)
             }
         } else {
             // Outline ring built from two discs (Glance has no stroke modifier).
@@ -211,7 +223,7 @@ private fun PrayerCheckbox(
         }
         Spacer(modifier = GlanceModifier.height(5.dp))
         Text(
-            text = prayerName,
+            text = label,
             style = TextStyle(
                 color = if (isPrayed) textColor else textSecondary,
                 fontSize = 9.sp,
@@ -222,48 +234,62 @@ private fun PrayerCheckbox(
     }
 }
 
-private fun togglePrayerStatus(context: Context, prayerName: String) {
+/**
+ * Flips today's status for [prayerName] between prayed and not-prayed, then refreshes the tile.
+ *
+ * Went through `PrayerDao` until `widget/` became `:feature:widget` in PR 13 of #551 — reading a
+ * row, comparing `"prayed"` against a `String` status, and constructing a `PrayerRecordEntity` to
+ * insert. A widget writing database entities is the coupling the epic exists to remove, and
+ * nothing objected while both lived in `:app`; the module boundary turned it into an unresolved
+ * reference.
+ *
+ * `PrayerRepository` already declared every operation this needs, typed. The rewrite is a
+ * narrowing: [PrayerName] and [PrayerStatus] replace the string literals, so a typo stops
+ * compiling, and `"not_prayed"` — which the enum spells [PrayerStatus.NOT_PRAYED] — can no longer
+ * drift from whatever the DAO happened to store.
+ */
+private fun togglePrayerStatus(context: Context, prayerName: PrayerName) {
     CoroutineScope(Dispatchers.IO).launch {
         try {
-            val entryPoint = EntryPointAccessors.fromApplication(
+            val prayerRepository = EntryPointAccessors.fromApplication(
                 context.applicationContext,
                 WidgetEntryPoint::class.java
-            )
-            val prayerDao = entryPoint.prayerDao()
+            ).prayerRepository()
 
-            val today = LocalDate.now()
-            val todayEpoch = today.toUtcMidnightMillis()
+            val todayEpoch = LocalDate.now().toUtcMidnightMillis()
+            val current = prayerRepository.getPrayerRecord(todayEpoch, prayerName)
+            val newStatus =
+                if (current?.status == PrayerStatus.PRAYED) PrayerStatus.NOT_PRAYED
+                else PrayerStatus.PRAYED
+            val prayedAt =
+                if (newStatus == PrayerStatus.PRAYED) System.currentTimeMillis() else null
 
-            // Get current record
-            val currentRecord = prayerDao.getPrayerRecord(todayEpoch, prayerName)
-            val currentStatus = currentRecord?.status ?: "not_prayed"
-            val newStatus = if (currentStatus == "prayed") "not_prayed" else "prayed"
-            val prayedAt = if (newStatus == "prayed") System.currentTimeMillis() else null
-
-            if (currentRecord != null) {
-                prayerDao.updatePrayerStatus(
+            if (current != null) {
+                prayerRepository.updatePrayerStatus(
                     date = todayEpoch,
                     prayerName = prayerName,
                     status = newStatus,
                     prayedAt = prayedAt,
-                    isJamaah = false
+                    isJamaah = false,
                 )
             } else {
-                prayerDao.insertPrayerRecord(
-                    com.arshadshah.nimaz.data.local.database.entity.PrayerRecordEntity(
+                prayerRepository.insertPrayerRecord(
+                    PrayerRecord(
+                        id = 0L,
                         date = todayEpoch,
                         prayerName = prayerName,
-                        scheduledTime = System.currentTimeMillis(),
                         status = newStatus,
                         prayedAt = prayedAt,
+                        scheduledTime = System.currentTimeMillis(),
                         isJamaah = false,
                         isQadaFor = null,
-                        note = null
+                        note = null,
+                        createdAt = System.currentTimeMillis(),
+                        updatedAt = System.currentTimeMillis(),
                     )
                 )
             }
 
-            // Trigger widget update
             PrayerTrackerWorker.enqueueImmediateWork(context)
         } catch (e: Exception) {
             CrashReporter.recordException(e)

@@ -1,5 +1,7 @@
 package com.arshadshah.nimaz.widget.nextprayer
 
+import com.arshadshah.nimaz.feature.widget.R
+
 import com.arshadshah.nimaz.domain.time.TodayProvider
 import com.arshadshah.nimaz.domain.model.PrayerTime
 import com.arshadshah.nimaz.domain.model.PrayerType

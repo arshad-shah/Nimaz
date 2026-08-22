@@ -1,9 +1,15 @@
 package com.arshadshah.nimaz.widget.khatam
 
+import com.arshadshah.nimaz.widget.core.launchAppComponent
+
+import com.arshadshah.nimaz.core.ui.R as UiR
+import com.arshadshah.nimaz.feature.widget.R
+
 import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.glance.LocalContext
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.GlanceTheme
@@ -29,9 +35,6 @@ import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
-import com.arshadshah.nimaz.MainActivity
-import com.arshadshah.nimaz.core.ui.R
-import com.arshadshah.nimaz.R as AppR
 import com.arshadshah.nimaz.widget.core.WidgetError
 import com.arshadshah.nimaz.widget.core.WidgetLoading
 import com.arshadshah.nimaz.widget.core.WidgetPalette
@@ -57,9 +60,9 @@ class KhatamWidget : GlanceAppWidget() {
 @Composable
 private fun KhatamContent(context: Context, state: KhatamWidgetState) {
     val palette = WidgetPalette()
-    val gold = ColorProvider(AppR.color.widget_gold)
-    val goldContainer = ColorProvider(AppR.color.widget_gold_container)
-    val onGoldContainer = ColorProvider(AppR.color.widget_on_gold_container)
+    val gold = ColorProvider(R.color.widget_gold)
+    val goldContainer = ColorProvider(R.color.widget_gold_container)
+    val onGoldContainer = ColorProvider(R.color.widget_on_gold_container)
 
     when (state) {
         is KhatamWidgetState.Loading -> WidgetLoading(palette)
@@ -89,7 +92,7 @@ private fun KhatamContent(context: Context, state: KhatamWidgetState) {
 
         is KhatamWidgetState.Error -> WidgetMessageBox(
             background = palette.background,
-            onClick = actionStartActivity<MainActivity>(),
+            onClick = actionStartActivity(LocalContext.current.launchAppComponent()),
         ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -137,7 +140,7 @@ private fun KhatamProgressContent(
 ) {
     WidgetCard(
         background = backgroundColor,
-        onClick = actionStartActivity<MainActivity>(),
+        onClick = actionStartActivity(LocalContext.current.launchAppComponent()),
         padding = 16.dp,
     ) {
         Column(modifier = GlanceModifier.fillMaxSize()) {
@@ -188,7 +191,7 @@ private fun KhatamProgressContent(
                 Column(modifier = GlanceModifier.defaultWeight()) {
                     Text(
                         text = context.resources.getQuantityString(
-                            R.plurals.khatam_ayahs_remaining,
+                            UiR.plurals.khatam_ayahs_remaining,
                             data.remainingAyahs,
                             data.remainingAyahs,
                         ),
@@ -220,7 +223,7 @@ private fun KhatamProgressContent(
                     progress = data.progressPercent / 100f,
                     modifier = GlanceModifier.defaultWeight().height(6.dp),
                     color = primaryColor,
-                    backgroundColor = ColorProvider(AppR.color.widget_primary_dim),
+                    backgroundColor = ColorProvider(R.color.widget_primary_dim),
                 )
                 Spacer(modifier = GlanceModifier.width(10.dp))
                 Text(
@@ -249,7 +252,7 @@ private fun paceLine(context: Context, data: KhatamWidgetData): String {
         if (data.currentStreak > 0) {
             add(
                 context.resources.getQuantityString(
-                    R.plurals.khatam_widget_streak,
+                    UiR.plurals.khatam_widget_streak,
                     data.currentStreak,
                     data.currentStreak,
                 )
@@ -257,7 +260,7 @@ private fun paceLine(context: Context, data: KhatamWidgetData): String {
         }
     }
     return if (parts.isEmpty()) {
-        context.getString(R.string.khatam_juz_position, data.currentJuz)
+        context.getString(UiR.string.khatam_juz_position, data.currentJuz)
     } else {
         parts.joinToString(" · ")
     }
@@ -274,7 +277,7 @@ private fun KhatamEmptyContent(
     // start a khatam, which is the only action worth offering here.
     WidgetMessageBox(
         background = backgroundColor,
-        onClick = actionStartActivity<MainActivity>(),
+        onClick = actionStartActivity(LocalContext.current.launchAppComponent()),
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(

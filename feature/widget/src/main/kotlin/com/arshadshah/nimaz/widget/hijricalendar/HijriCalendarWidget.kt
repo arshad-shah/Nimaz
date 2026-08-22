@@ -1,6 +1,9 @@
-@file:androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
-
 package com.arshadshah.nimaz.widget.hijricalendar
+
+import com.arshadshah.nimaz.widget.core.launchAppComponent
+
+import com.arshadshah.nimaz.core.ui.R as UiR
+import com.arshadshah.nimaz.feature.widget.R
 
 import android.content.Context
 import android.content.Intent
@@ -37,9 +40,6 @@ import androidx.glance.text.Text
 import androidx.glance.text.TextAlign
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
-import com.arshadshah.nimaz.MainActivity
-import com.arshadshah.nimaz.core.ui.R
-import com.arshadshah.nimaz.R as AppR
 import com.arshadshah.nimaz.widget.core.WidgetError
 import com.arshadshah.nimaz.widget.core.WidgetLoading
 import com.arshadshah.nimaz.widget.core.WidgetPalette
@@ -67,7 +67,10 @@ class HijriCalendarWidget : GlanceAppWidget() {
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         // Build the deep-link intent once so every tappable region shares it.
-        val openCalendar = Intent(context, MainActivity::class.java).apply {
+        // `Intent(context, MainActivity::class.java)` until PR 13 of #551: naming the class ties
+        // this module to `:app`. The component is resolved from the launcher intent instead; the
+        // custom action and flags are what actually carry the deep link.
+        val openCalendar = Intent().setComponent(context.launchAppComponent()).apply {
             action = ACTION_OPEN_ISLAMIC_CALENDAR
             flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
         }
@@ -376,7 +379,7 @@ private fun EventsPanel(
 
         if (data.events.isEmpty()) {
             Text(
-                text = context.getString(R.string.widget_no_events),
+                text = context.getString(UiR.string.widget_no_events),
                 style = TextStyle(color = textSecondary, fontSize = 10.sp)
             )
         } else {
@@ -403,7 +406,7 @@ private fun EventRow(
     val iconRes = if (
         event.type.contains("fast", ignoreCase = true) ||
         event.type.contains("recommend", ignoreCase = true)
-    ) AppR.drawable.ic_widget_star else AppR.drawable.ic_widget_event
+    ) R.drawable.ic_widget_star else R.drawable.ic_widget_event
 
     Row(verticalAlignment = Alignment.Top) {
         // Small leading icon marks this as a typed list item, not a paragraph.

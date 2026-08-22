@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  The six widget providers and the tick receiver, moved out of `:app` with their code in PR 13 of
+  #551. Seven of the application's fourteen manifest components.
+
+  `android:name` is fully qualified rather than `.widget.…`: a relative name resolves against the
+  *merged* manifest's package, and a library has no application package of its own — writing it
+  out is what makes the entry mean the same thing on either side of the move.
+
+  #564 flags library manifest merging as where an `exported` attribute changes silently. All six
+  providers keep `android:exported="true"` (the launcher must be able to bind them) and the tick
+  receiver keeps `false`; the merged manifest is diffed against the pre-move output to prove it.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application>
+        <!-- Prayer Times Widget -->
+        <receiver
+            android:name="com.arshadshah.nimaz.widget.prayertimes.PrayerTimesWidgetReceiver"
+            android:exported="true"
+            android:label="@string/widget_prayer_times_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/prayer_times_widget_info" />
+        </receiver>
+        <!-- Next Prayer Widget -->
+        <receiver
+            android:name="com.arshadshah.nimaz.widget.nextprayer.NextPrayerWidgetReceiver"
+            android:exported="true"
+            android:label="@string/widget_next_prayer_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/next_prayer_widget_info" />
+        </receiver>
+        <!-- Hijri Date Widget -->
+        <receiver
+            android:name="com.arshadshah.nimaz.widget.hijridate.HijriDateWidgetReceiver"
+            android:exported="true"
+            android:label="@string/widget_hijri_date_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/hijri_date_widget_info" />
+        </receiver>
+        <!-- Prayer Tracker Widget -->
+        <receiver
+            android:name="com.arshadshah.nimaz.widget.prayertracker.PrayerTrackerWidgetReceiver"
+            android:exported="true"
+            android:label="@string/widget_prayer_tracker_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/prayer_tracker_widget_info" />
+        </receiver>
+        <!-- Hijri Calendar Widget -->
+        <receiver
+            android:name="com.arshadshah.nimaz.widget.hijricalendar.HijriCalendarWidgetReceiver"
+            android:exported="true"
+            android:label="@string/widget_hijri_calendar_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/hijri_calendar_widget_info" />
+        </receiver>
+        <!-- Khatam Widget -->
+        <receiver
+            android:name="com.arshadshah.nimaz.widget.khatam.KhatamWidgetReceiver"
+            android:exported="true"
+            android:label="@string/khatam_widget_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/khatam_widget_info" />
+        </receiver>
+        <!-- Widget per-minute countdown tick receiver -->
+        <receiver
+            android:name="com.arshadshah.nimaz.widget.WidgetTickReceiver"
+            android:exported="false" />
+    </application>
+
+</manifest>

@@ -1,6 +1,9 @@
 package com.arshadshah.nimaz.widget.core
 
+import com.arshadshah.nimaz.feature.widget.R
+
 import android.appwidget.AppWidgetManager
+import android.content.ComponentName
 import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.sp
@@ -10,8 +13,26 @@ import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
-import com.arshadshah.nimaz.MainActivity
-import com.arshadshah.nimaz.core.ui.R
+
+/**
+ * The component that opens the app, resolved rather than named.
+ *
+ * These taps were `actionStartActivity(LocalContext.current.launchAppComponent())` until `widget/` became `:feature:widget`
+ * in PR 13 of #551. `MainActivity` lives in `:app`, and a feature module cannot depend on the
+ * application — that is the direction the epic exists to remove, and `moduleBoundary` fails on it.
+ *
+ * Asking the package manager for the launcher intent inverts it: the widget says *open the app*
+ * and the platform resolves which Activity that is. `NavGraph`'s `restartApp` already does the
+ * same thing for the same reason.
+ *
+ * Glance's `actionStartActivity` takes a [ComponentName], so the component is pulled off the
+ * resolved intent. The fallback spells the class name out as a string only if the launcher intent
+ * is somehow absent — a string that fails at tap time rather than a compile-time dependency that
+ * fails the module boundary.
+ */
+internal fun Context.launchAppComponent(): ComponentName =
+    packageManager.getLaunchIntentForPackage(packageName)?.component
+        ?: ComponentName(packageName, "$packageName.MainActivity")
 
 /**
  * The frame every widget shares, minus the part that differs.
@@ -30,10 +51,11 @@ import com.arshadshah.nimaz.core.ui.R
 /** The "still loading" frame. Tapping it opens the app, like every other widget state. */
 @Composable
 fun WidgetLoading(palette: WidgetPalette) {
+    val context = LocalContext.current
     WidgetLoadingBox(
         background = palette.background,
         textSecondary = palette.textSecondary,
-        onClick = actionStartActivity<MainActivity>(),
+        onClick = actionStartActivity(context.launchAppComponent()),
     )
 }
 
@@ -50,7 +72,7 @@ fun WidgetError(palette: WidgetPalette) {
     val context = LocalContext.current
     WidgetMessageBox(
         background = palette.background,
-        onClick = actionStartActivity<MainActivity>(),
+        onClick = actionStartActivity(context.launchAppComponent()),
     ) {
         Text(
             text = context.getString(R.string.widget_tap_to_refresh),

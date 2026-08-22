@@ -1,9 +1,14 @@
 package com.arshadshah.nimaz.widget.hijridate
 
+import com.arshadshah.nimaz.widget.core.launchAppComponent
+
+import com.arshadshah.nimaz.feature.widget.R
+
 import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.glance.LocalContext
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.GlanceTheme
@@ -23,8 +28,6 @@ import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
-import com.arshadshah.nimaz.MainActivity
-import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.widget.core.WidgetError
 import com.arshadshah.nimaz.widget.core.WidgetLoading
 import com.arshadshah.nimaz.widget.core.WidgetPalette
@@ -79,7 +82,7 @@ private fun HijriDateSuccessContent(
 ) {
     WidgetCard(
         background = backgroundColor,
-        onClick = actionStartActivity<MainActivity>(),
+        onClick = actionStartActivity(LocalContext.current.launchAppComponent()),
         padding = 14.dp,
     ) {
         Column(

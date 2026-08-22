@@ -1,5 +1,9 @@
 package com.arshadshah.nimaz.widget.prayertimes
 
+import com.arshadshah.nimaz.widget.core.launchAppComponent
+
+import com.arshadshah.nimaz.feature.widget.R
+
 import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
@@ -28,9 +32,6 @@ import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
-import com.arshadshah.nimaz.MainActivity
-import com.arshadshah.nimaz.core.ui.R
-import com.arshadshah.nimaz.R as AppR
 import com.arshadshah.nimaz.widget.core.WidgetError
 import com.arshadshah.nimaz.widget.core.WidgetLoading
 import com.arshadshah.nimaz.widget.core.WidgetPalette
@@ -77,7 +78,7 @@ private fun PrayerTimesContent(state: PrayerTimesWidgetState) {
 
         is PrayerTimesWidgetState.Error -> WidgetMessageBox(
             background = palette.background,
-            onClick = actionStartActivity<MainActivity>(),
+            onClick = actionStartActivity(LocalContext.current.launchAppComponent()),
         ) {
             Text(
                 text = context.getString(R.string.widget_tap_to_setup),
@@ -127,7 +128,7 @@ private fun PrayerTimesSuccessContent(
 
     WidgetCard(
         background = backgroundColor,
-        onClick = actionStartActivity<MainActivity>(),
+        onClick = actionStartActivity(LocalContext.current.launchAppComponent()),
         padding = 12.dp,
     ) {
         Column(modifier = GlanceModifier.fillMaxSize()) {
@@ -183,9 +184,9 @@ private fun PrayerPill(
     primaryColor: ColorProvider,
     modifier: GlanceModifier = GlanceModifier,
 ) {
-    val onPrimary = ColorProvider(AppR.color.widget_on_primary)
-    val goldContainer = ColorProvider(AppR.color.widget_gold_container)
-    val onGoldContainer = ColorProvider(AppR.color.widget_on_gold_container)
+    val onPrimary = ColorProvider(R.color.widget_on_primary)
+    val goldContainer = ColorProvider(R.color.widget_gold_container)
+    val onGoldContainer = ColorProvider(R.color.widget_on_gold_container)
 
     // Each state pairs an explicit container with an on-container colour, so the
     // text stays legible in both light and dark mode. Past prayers get a gold

@@ -1,5 +1,8 @@
 package com.arshadshah.nimaz.widget.core
 
+import com.arshadshah.nimaz.core.ui.R as UiR
+import com.arshadshah.nimaz.feature.widget.R
+
 import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.Dp
@@ -28,8 +31,6 @@ import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
-import com.arshadshah.nimaz.core.ui.R
-import com.arshadshah.nimaz.R as AppR
 import java.time.DayOfWeek
 import java.util.Locale
 
@@ -38,10 +39,10 @@ import java.util.Locale
  * widget re-declared these four lines; they now share a single palette.
  */
 data class WidgetPalette(
-    val background: ColorProvider = ColorProvider(AppR.color.widget_background),
-    val text: ColorProvider = ColorProvider(AppR.color.widget_text),
-    val textSecondary: ColorProvider = ColorProvider(AppR.color.widget_text_secondary),
-    val primary: ColorProvider = ColorProvider(AppR.color.widget_primary),
+    val background: ColorProvider = ColorProvider(R.color.widget_background),
+    val text: ColorProvider = ColorProvider(R.color.widget_text),
+    val textSecondary: ColorProvider = ColorProvider(R.color.widget_text_secondary),
+    val primary: ColorProvider = ColorProvider(R.color.widget_primary),
 )
 
 /**
@@ -161,12 +162,12 @@ fun WidgetPill(
 
 /** Maps a prayer name to its celestial drawable. Defaults to the zenith sun. */
 fun prayerIconRes(prayerName: String): Int = when (prayerName.trim().lowercase()) {
-    "fajr" -> AppR.drawable.ic_widget_fajr
-    "dhuhr", "zuhr" -> AppR.drawable.ic_widget_dhuhr
-    "asr" -> AppR.drawable.ic_widget_asr
-    "maghrib" -> AppR.drawable.ic_widget_maghrib
-    "isha" -> AppR.drawable.ic_widget_isha
-    else -> AppR.drawable.ic_widget_dhuhr
+    "fajr" -> R.drawable.ic_widget_fajr
+    "dhuhr", "zuhr" -> R.drawable.ic_widget_dhuhr
+    "asr" -> R.drawable.ic_widget_asr
+    "maghrib" -> R.drawable.ic_widget_maghrib
+    "isha" -> R.drawable.ic_widget_isha
+    else -> R.drawable.ic_widget_dhuhr
 }
 
 /**
@@ -183,12 +184,12 @@ fun prayerIconRes(prayerName: String): Int = when (prayerName.trim().lowercase()
  * is worse than showing the raw string.
  */
 fun prayerShortNameRes(prayerName: String): Int? = when (prayerName.trim().lowercase()) {
-    "fajr" -> R.string.widget_prayer_short_fajr
-    "sunrise" -> R.string.widget_prayer_short_sunrise
-    "dhuhr", "zuhr" -> R.string.widget_prayer_short_dhuhr
-    "asr" -> R.string.widget_prayer_short_asr
-    "maghrib" -> R.string.widget_prayer_short_maghrib
-    "isha" -> R.string.widget_prayer_short_isha
+    "fajr" -> UiR.string.widget_prayer_short_fajr
+    "sunrise" -> UiR.string.widget_prayer_short_sunrise
+    "dhuhr", "zuhr" -> UiR.string.widget_prayer_short_dhuhr
+    "asr" -> UiR.string.widget_prayer_short_asr
+    "maghrib" -> UiR.string.widget_prayer_short_maghrib
+    "isha" -> UiR.string.widget_prayer_short_isha
     else -> null
 }
 

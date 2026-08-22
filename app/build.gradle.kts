@@ -296,6 +296,10 @@ dependencies {
     // deep-link grammars. `api`-exposes navigation-compose. NavGraph.kt itself is still here;
     // it is decomposed in PR 12.
     implementation(project(":core:navigation"))
+    // The six Glance widgets and their workers — the first feature module (#564). It brings its
+    // own manifest entries, its own widget_colors/drawables/layouts and its own 27 strings, so
+    // nothing widget-shaped is left here.
+    implementation(project(":feature:widget"))
     // FakeTodayProvider / FakeSearchSettings / FakeStringProvider / RecordingWidgetRefresher —
     // one definition each, used by the ViewModel tests here and the tests over there.
     testImplementation(testFixtures(project(":core:domain")))
@@ -654,6 +658,22 @@ val coverageModules = listOf(
         ),
         sourceDir = "src/main/kotlin",
         packageRoot = "com/arshadshah/nimaz/core/navigation",
+    ),
+    CoverageModule(
+        gradlePath = ":feature:widget",
+        projectDir = rootProject.layout.projectDirectory.dir("feature/widget"),
+        testTask = "testDebugUnitTest",
+        classesGlobs = listOf(
+            "intermediates/built_in_kotlinc/debug/**/classes/**",
+            "intermediates/classes/debug/**",
+            "tmp/kotlin-classes/debug/**",
+        ),
+        execGlobs = listOf(
+            "jacoco/testDebugUnitTest.exec",
+            "outputs/unit_test_code_coverage/**/*.exec",
+        ),
+        sourceDir = "src/main/kotlin",
+        packageRoot = "com/arshadshah/nimaz/widget",
     ),
 )
 

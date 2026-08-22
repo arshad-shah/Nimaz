@@ -1,5 +1,10 @@
 package com.arshadshah.nimaz.widget.nextprayer
 
+import com.arshadshah.nimaz.widget.core.launchAppComponent
+
+import com.arshadshah.nimaz.core.ui.R as UiR
+import com.arshadshah.nimaz.feature.widget.R
+
 import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
@@ -24,9 +29,6 @@ import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
-import com.arshadshah.nimaz.MainActivity
-import com.arshadshah.nimaz.core.ui.R
-import com.arshadshah.nimaz.R as AppR
 import com.arshadshah.nimaz.widget.core.WidgetError
 import com.arshadshah.nimaz.widget.core.WidgetLoading
 import com.arshadshah.nimaz.widget.core.WidgetPalette
@@ -75,7 +77,7 @@ private fun NextPrayerContent(state: NextPrayerWidgetState) {
 
         is NextPrayerWidgetState.Error -> WidgetMessageBox(
             background = palette.background,
-            onClick = actionStartActivity<MainActivity>(),
+            onClick = actionStartActivity(LocalContext.current.launchAppComponent()),
         ) {
             Text(
                 text = context.getString(R.string.widget_tap_to_setup),
@@ -110,7 +112,7 @@ private fun NextPrayerSuccessContent(
 
     WidgetCard(
         background = backgroundColor,
-        onClick = actionStartActivity<MainActivity>(),
+        onClick = actionStartActivity(LocalContext.current.launchAppComponent()),
         padding = 16.dp,
     ) {
         Column(modifier = GlanceModifier.fillMaxSize()) {
@@ -123,7 +125,7 @@ private fun NextPrayerSuccessContent(
                 )
                 Spacer(modifier = GlanceModifier.width(6.dp))
                 WidgetLabel(
-                    text = context.getString(R.string.widget_next_prayer),
+                    text = context.getString(UiR.string.widget_next_prayer),
                     color = textSecondary,
                 )
             }
@@ -152,7 +154,7 @@ private fun NextPrayerSuccessContent(
                 ),
             )
             Spacer(modifier = GlanceModifier.height(8.dp))
-            WidgetPill(container = ColorProvider(AppR.color.widget_primary_dim)) {
+            WidgetPill(container = ColorProvider(R.color.widget_primary_dim)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         text = if (data.isValid && liveCountdown != "—") "in " else "",
