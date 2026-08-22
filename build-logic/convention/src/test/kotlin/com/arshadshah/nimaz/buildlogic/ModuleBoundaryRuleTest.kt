@@ -63,6 +63,25 @@ class ModuleBoundaryRuleTest {
     }
 
     @Test
+    fun `a module does not depend on itself`() {
+        // Every Android module's own test source sets appear on its compile and runtime
+        // classpaths as a ProjectDependency on itself: `debugUnitTestCompileClasspath ->
+        // :feature:widget`. `:feature:widget` starts with `:feature:`, so a naive
+        // feature-to-feature rule calls that forbidden and the module cannot build at all.
+        //
+        // This lay dormant from PR 1 of #551 until PR 13, because until the first `:feature:*`
+        // module existed there was nothing for the rule to misclassify — the `:core:*` branch
+        // forbids `:app` and `:feature:*`, neither of which a `:core:` path matches. It failed on
+        // `:feature:widget`'s very first `check`.
+        assertThat(isForbiddenModuleDependency(":feature:widget", ":feature:widget")).isFalse()
+        assertThat(isForbiddenModuleDependency(":core:ui", ":core:ui")).isFalse()
+        assertThat(isForbiddenModuleDependency(":app", ":app")).isFalse()
+
+        // …and the sideways case it exists for is still caught.
+        assertThat(isForbiddenModuleDependency(":feature:widget", ":feature:quran")).isTrue()
+    }
+
+    @Test
     fun `the match is on a path segment, not a bare prefix`() {
         // `:coreutils` is not a `:core:` module and `:features` is not a `:feature:` module.
         // A `startsWith(":core")` — one character shorter — would classify both wrongly, and

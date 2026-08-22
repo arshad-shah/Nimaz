@@ -258,7 +258,6 @@
     <string name="khatam_section_in_progress">In Bearbeitung</string>
     <string name="khatam_section_completed">Abgeschlossen</string>
     <string name="khatam_section_archived">Archiviert</string>
-    <string name="khatam_juz_position">Juz %1$d</string>
     <string name="khatam_continue_at">Fortsetzen · %1$s %2$d</string>
     <string name="khatam_started_on">Begonnen am %1$s</string>
     <string name="khatam_finished_on">Abgeschlossen am %1$s</string>
@@ -308,10 +307,6 @@
         <item quantity="one">%1$d Ayah gelesen</item>
         <item quantity="other">%1$d Ayahs gelesen</item>
     </plurals>
-    <plurals name="khatam_ayahs_remaining">
-        <item quantity="one">Noch %1$d Ayah</item>
-        <item quantity="other">Noch %1$d Ayahs</item>
-    </plurals>
     <plurals name="khatam_days_remaining">
         <item quantity="one">Noch ~%1$d Tag</item>
         <item quantity="other">Noch ~%1$d Tage</item>
@@ -329,16 +324,7 @@
     <string name="khatam_ayahs_per_day_label">Ayahs pro Tag</string>
     <string name="time_period_am">AM</string>
     <string name="time_period_pm">PM</string>
-    <string name="khatam_widget_label">Khatam</string>
     <string name="khatam_widget_description">Ihr Fortschritt beim Quran-Abschluss</string>
-    <string name="khatam_widget_no_active">Kein aktiver Khatam</string>
-    <string name="khatam_widget_start">Einen beginnen</string>
-    <string name="khatam_widget_juz_caption">Juz</string>
-    <string name="khatam_widget_daily_target">%1$d/Tag</string>
-    <plurals name="khatam_widget_streak">
-        <item quantity="one">%1$d Tag in Folge</item>
-        <item quantity="other">%1$d Tage in Folge</item>
-    </plurals>
 
     <!-- Khatam: daily reminder notification -->
     <string name="notif_khatam_channel_name">Khatam-Erinnerungen</string>
@@ -361,11 +347,6 @@
     <string name="widget_prayer_times_description">Zeigt alle Gebetszeiten für heute an</string>
     <string name="widget_prayer_tracker_description">Verfolgen Sie Ihre täglichen Gebete mit Antippen-zum-Abhaken-Feldern</string>
     <string name="widget_hijri_calendar_description">Zeigt den vollständigen Hidschri-Monatskalender mit heutigen Ereignissen an</string>
-    <string name="widget_prayer_times_name">Gebetszeiten</string>
-    <string name="widget_next_prayer_name">Nächstes Gebet</string>
-    <string name="widget_hijri_date_name">Hidschri-Datum</string>
-    <string name="widget_prayer_tracker_name">Gebets-Tracker</string>
-    <string name="widget_hijri_calendar_name">Hidschri-Kalender</string>
     <string name="qada">Qada</string>
     <string name="prayer_status_not_recorded">Nicht erfasst</string>
     <string name="prayer_recorded_count_format">%1$d von %2$d erfasst</string>
@@ -864,14 +845,6 @@
     <string name="ayah_copied_to_clipboard">Vers in die Zwischenablage kopiert</string>
     <string name="test_notification_title">Test-Benachrichtigung</string>
     <string name="test_notification_text">Gebetsbenachrichtigungen funktionieren korrekt</string>
-    <string name="widget_loading">Wird geladen…</string>
-    <string name="widget_tap_to_setup">Zum Einrichten tippen</string>
-    <string name="widget_next_prayer">Nächstes Gebet</string>
-    <string name="widget_error_loading">Fehler beim Laden der Daten</string>
-    <string name="widget_tap_to_retry">Zum Wiederholen tippen</string>
-    <string name="widget_tap_to_refresh">Zum Aktualisieren tippen</string>
-    <string name="widget_today">HEUTE</string>
-    <string name="widget_no_events">Keine Termine</string>
     <!-- Accessibility content descriptions -->
     <string name="cd_share">Teilen</string>
     <string name="cd_bookmark">Lesezeichen</string>
@@ -1681,12 +1654,6 @@
     <string name="widget_prayer_initial_asr">A</string>
     <string name="widget_prayer_initial_maghrib">M</string>
     <string name="widget_prayer_initial_isha">I</string>
-    <string name="widget_prayer_short_fajr">Fajr</string>
-    <string name="widget_prayer_short_sunrise">Aufg.</string>
-    <string name="widget_prayer_short_dhuhr">Dhuhr</string>
-    <string name="widget_prayer_short_asr">Asr</string>
-    <string name="widget_prayer_short_maghrib">Mgrb</string>
-    <string name="widget_prayer_short_isha">Isha</string>
     <string name="widget_countdown_hm_format">%1$dh %2$dm</string>
     <string name="widget_countdown_ms_format">%1$dm %2$ds</string>
     <string name="widget_countdown_s_format">%1$ds</string>
@@ -1818,8 +1785,6 @@
     <string name="night_worship_duas_body">Qunut und die Bittgebete der Nacht</string>
     <string name="night_worship_why_title">Warum nachts beten</string>
     <string name="night_worship_why_body">&quot;Unser Herr steigt zum untersten Himmel herab…&quot;</string>
-    <string name="widget_location">Ort</string>
-    <string name="widget_tomorrow">Morgen</string>
 
     <!-- Notifications rework: per-prayer alert style, reminders, diagnostics -->
     <string name="notif_hub_diagnostics_title">Diagnose</string>
@@ -2157,4 +2122,22 @@
     <string name="point_with_camera">Mit der Kamera zielen</string>
     <string name="field_name">Name</string>
     <string name="field_notes">Notizen</string>
+    <string name="khatam_juz_position">Juz %1$d</string>
+    <string name="khatam_widget_label">Khatam</string>
+    <string name="widget_next_prayer">Nächstes Gebet</string>
+    <string name="widget_no_events">Keine Termine</string>
+    <string name="widget_prayer_short_fajr">Fajr</string>
+    <string name="widget_prayer_short_sunrise">Aufg.</string>
+    <string name="widget_prayer_short_dhuhr">Dhuhr</string>
+    <string name="widget_prayer_short_asr">Asr</string>
+    <string name="widget_prayer_short_maghrib">Mgrb</string>
+    <string name="widget_prayer_short_isha">Isha</string>
+    <plurals name="khatam_ayahs_remaining">
+        <item quantity="one">Noch %1$d Ayah</item>
+        <item quantity="other">Noch %1$d Ayahs</item>
+    </plurals>
+    <plurals name="khatam_widget_streak">
+        <item quantity="one">%1$d Tag in Folge</item>
+        <item quantity="other">%1$d Tage in Folge</item>
+    </plurals>
 </resources>

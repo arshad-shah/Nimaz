@@ -277,7 +277,19 @@ only the state update and not the delay. Each tick recomputes `computeTotalPosit
 
 ## 2. Glance widgets
 
-All in `widget/`. Six Jetpack **Glance** AppWidgets, each in its own subpackage, plus a shared
+All in **`:feature:widget`** (`feature/widget/`, package `com.arshadshah.nimaz.widget` — a module
+move does not change package names). It was the first feature module extracted, in PR 13 of #551,
+chosen because `widget/` is the only top-level package with **zero** imports from `presentation/`,
+so it proved the module pipeline without risking a screen. It owns its own manifest entries (the
+six providers plus `WidgetTickReceiver`), its `widget_colors.xml`, the `ic_widget_*` drawables, the
+preview layouts, the six `*_widget_info.xml` provider descriptors, and the seventeen strings
+nothing else uses; the twelve it shares with `WidgetsScreen`'s previews stay in `:core:ui` and are
+read through an aliased `UiR`.
+
+The widgets open the app by resolving the launcher component from the package manager rather than
+naming `MainActivity`, which lives in `:app` — the dependency direction `moduleBoundary` fails on.
+
+Six Jetpack **Glance** AppWidgets, each in its own subpackage, plus a shared
 `widget/core/` package and two top-level helpers (`widget/WidgetEntryPoint.kt`,
 `widget/WidgetUpdateScheduler.kt`). **The widget roster lives in [§0.4](#04-widgets)** — this
 section documents how they work, not which ones exist.
@@ -307,8 +319,8 @@ Doze throttles the worker.
 Each widget = a `GlanceAppWidget` subclass (`provideGlance` → `provideContent { GlanceTheme { … } }`, reads `currentState<T>()`) + a `GlanceAppWidgetReceiver` (the manifest-registered `BroadcastReceiver`; `onEnabled` starts refresh, `onUpdate` re-arms it, `onDisabled` cancels). State is a `@Serializable sealed interface` with `Loading`/`Success(data)`/`Error(message)`. Colors come from `res/color` via `ColorProvider(R.color.widget_*)` — no hardcoded colors.
 
 **Data access — two patterns.**
-1. **`@HiltWorker` injection (main path).** Workers inject an `XxxWidgetDataSource`, which injects the real deps (e.g. `NextPrayerWidgetDataSource` and `PrayerTimesWidgetDataSource` inject `PrayerRepository` + `SettingsRepository`; `PrayerTrackerWidgetDataSource` injects `PrayerDao`; the two Hijri sources inject `SettingsRepository` to read the `hijriDayOffset`). Each `doWork()` returns `Result.success()` early if no widgets are placed, computes fresh data, persists via `setWidgetState(...) → Success`, and on failure retries for the first 3 attempts — see **failure handling** below for what it does and does not publish. This only works because `NimazApp` provides the `HiltWorkerFactory` (§3).
-2. **Hilt `@EntryPoint`** — `widget/WidgetEntryPoint.kt` exposes `prayerDao()` via `EntryPointAccessors.fromApplication(...)`. Used by the **only interactive widget** (Prayer Tracker): its checkbox click handler (`togglePrayerStatus` in `PrayerTrackerWidget.kt`) writes to Room from inside the composable click callback (not a Worker), then re-renders via `PrayerTrackerWorker.enqueueImmediateWork(context)`.
+1. **`@HiltWorker` injection (main path).** Workers inject an `XxxWidgetDataSource`, which injects the real deps — all of them repositories: `NextPrayerWidgetDataSource` and `PrayerTimesWidgetDataSource` take `PrayerRepository` + `SettingsRepository`, `PrayerTrackerWidgetDataSource` takes `PrayerRepository`, and the two Hijri sources take `SettingsRepository` to read the `hijriDayOffset`. (`PrayerTrackerWidgetDataSource` injected `PrayerDao` until PR 13 of #551 made `widget/` its own module and the boundary turned that into an unresolved reference.) Each `doWork()` returns `Result.success()` early if no widgets are placed, computes fresh data, persists via `setWidgetState(...) → Success`, and on failure retries for the first 3 attempts — see **failure handling** below for what it does and does not publish. This only works because `NimazApp` provides the `HiltWorkerFactory` (§3).
+2. **Hilt `@EntryPoint`** — `widget/WidgetEntryPoint.kt` exposes `prayerRepository()` via `EntryPointAccessors.fromApplication(...)`. Used by the **only interactive widget** (Prayer Tracker): its checkbox click handler (`togglePrayerStatus` in `PrayerTrackerWidget.kt`) writes from inside the composable click callback (not a Worker), then re-renders via `PrayerTrackerWorker.enqueueImmediateWork(context)`. It exposed `prayerDao()` and constructed a `PrayerRecordEntity` until PR 13 of #551; it now goes through the same repository seam as every ViewModel, and the statuses it compares are `PrayerStatus` rather than the string literals `"prayed"` / `"not_prayed"`.
 
 **Prayer times come from `PrayerRepository`, not `PrayerTimeCalculator`.** Both prayer widgets
 used to call `getPrayerTimes(latitude, longitude)` and take all four calculation defaults —

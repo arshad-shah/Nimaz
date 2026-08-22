@@ -258,7 +258,6 @@
     <string name="khatam_section_in_progress">Devam eden</string>
     <string name="khatam_section_completed">Tamamlanan</string>
     <string name="khatam_section_archived">Arşivlenen</string>
-    <string name="khatam_juz_position">Cüz %1$d</string>
     <string name="khatam_continue_at">Devam et · %1$s %2$d</string>
     <string name="khatam_started_on">Başlangıç: %1$s</string>
     <string name="khatam_finished_on">Bitiş: %1$s</string>
@@ -310,10 +309,6 @@
         <item quantity="one">%1$d ayet okundu</item>
         <item quantity="other">%1$d ayet okundu</item>
     </plurals>
-    <plurals name="khatam_ayahs_remaining">
-        <item quantity="one">%1$d ayet kaldı</item>
-        <item quantity="other">%1$d ayet kaldı</item>
-    </plurals>
     <plurals name="khatam_days_remaining">
         <item quantity="one">~%1$d gün kaldı</item>
         <item quantity="other">~%1$d gün kaldı</item>
@@ -331,16 +326,7 @@
     <string name="khatam_ayahs_per_day_label">Günlük ayet</string>
     <string name="time_period_am">OO</string>
     <string name="time_period_pm">OS</string>
-    <string name="khatam_widget_label">Hatim</string>
     <string name="khatam_widget_description">Kur\'an hatim ilerlemeniz</string>
-    <string name="khatam_widget_no_active">Aktif Hatim yok</string>
-    <string name="khatam_widget_start">Bir tane başlat</string>
-    <string name="khatam_widget_juz_caption">Cüz</string>
-    <string name="khatam_widget_daily_target">%1$d/gün</string>
-    <plurals name="khatam_widget_streak">
-        <item quantity="one">%1$d günlük seri</item>
-        <item quantity="other">%1$d günlük seri</item>
-    </plurals>
 
     <!-- Khatam: daily reminder notification -->
     <string name="notif_khatam_channel_name">Hatim hatırlatmaları</string>
@@ -363,11 +349,6 @@
     <string name="widget_prayer_times_description">Bugünün tüm namaz vakitlerini gösterir</string>
     <string name="widget_prayer_tracker_description">Dokunarak işaretleme kutuları ile günlük namazlarınızı takip edin</string>
     <string name="widget_hijri_calendar_description">Bugünün etkinlikleriyle birlikte Hicri ay takvimini gösterir</string>
-    <string name="widget_prayer_times_name">Namaz Vakitleri</string>
-    <string name="widget_next_prayer_name">Sonraki Namaz</string>
-    <string name="widget_hijri_date_name">Hicri Tarih</string>
-    <string name="widget_prayer_tracker_name">Namaz Takibi</string>
-    <string name="widget_hijri_calendar_name">Hicri Takvim</string>
     <string name="qada">Kaza</string>
     <string name="prayer_status_not_recorded">Kaydedilmedi</string>
     <string name="prayer_recorded_count_format">%2$d namazdan %1$d kaydedildi</string>
@@ -868,14 +849,6 @@
     <string name="ayah_copied_to_clipboard">Ayet panoya kopyalandı</string>
     <string name="test_notification_title">Test Bildirimi</string>
     <string name="test_notification_text">Namaz bildirimleri düzgün çalışıyor</string>
-    <string name="widget_loading">Yükleniyor…</string>
-    <string name="widget_tap_to_setup">Kurmak için dokunun</string>
-    <string name="widget_next_prayer">Sonraki Namaz</string>
-    <string name="widget_error_loading">Veri yüklenirken hata</string>
-    <string name="widget_tap_to_retry">Yeniden denemek için dokunun</string>
-    <string name="widget_tap_to_refresh">Yenilemek için dokunun</string>
-    <string name="widget_today">BUGÜN</string>
-    <string name="widget_no_events">Etkinlik yok</string>
     <!-- Accessibility content descriptions -->
     <string name="cd_share">Paylaş</string>
     <string name="cd_bookmark">Yer işareti</string>
@@ -1687,12 +1660,6 @@
     <string name="widget_prayer_initial_asr">İ</string>
     <string name="widget_prayer_initial_maghrib">A</string>
     <string name="widget_prayer_initial_isha">Y</string>
-    <string name="widget_prayer_short_fajr">Sabah</string>
-    <string name="widget_prayer_short_sunrise">Doğuş</string>
-    <string name="widget_prayer_short_dhuhr">Öğle</string>
-    <string name="widget_prayer_short_asr">İkin.</string>
-    <string name="widget_prayer_short_maghrib">Akşam</string>
-    <string name="widget_prayer_short_isha">Yatsı</string>
     <string name="widget_countdown_hm_format">%1$dsa %2$ddk</string>
     <string name="widget_countdown_ms_format">%1$ddk %2$dsn</string>
     <string name="widget_countdown_s_format">%1$dsn</string>
@@ -1824,8 +1791,6 @@
     <string name="night_worship_duas_body">Kunut ve gece duaları</string>
     <string name="night_worship_why_title">Neden gece namazı</string>
     <string name="night_worship_why_body">&quot;Rabbimiz dünya semasına iner…&quot;</string>
-    <string name="widget_location">Konum</string>
-    <string name="widget_tomorrow">Yarın</string>
 
     <!-- Notifications rework: per-prayer alert style, reminders, diagnostics -->
     <string name="notif_hub_diagnostics_title">Tanılama</string>
@@ -2163,4 +2128,22 @@
     <string name="point_with_camera">Kamerayla nişan al</string>
     <string name="field_name">Ad</string>
     <string name="field_notes">Notlar</string>
+    <string name="khatam_juz_position">Cüz %1$d</string>
+    <string name="khatam_widget_label">Hatim</string>
+    <string name="widget_next_prayer">Sonraki Namaz</string>
+    <string name="widget_no_events">Etkinlik yok</string>
+    <string name="widget_prayer_short_fajr">Sabah</string>
+    <string name="widget_prayer_short_sunrise">Doğuş</string>
+    <string name="widget_prayer_short_dhuhr">Öğle</string>
+    <string name="widget_prayer_short_asr">İkin.</string>
+    <string name="widget_prayer_short_maghrib">Akşam</string>
+    <string name="widget_prayer_short_isha">Yatsı</string>
+    <plurals name="khatam_ayahs_remaining">
+        <item quantity="one">%1$d ayet kaldı</item>
+        <item quantity="other">%1$d ayet kaldı</item>
+    </plurals>
+    <plurals name="khatam_widget_streak">
+        <item quantity="one">%1$d günlük seri</item>
+        <item quantity="other">%1$d günlük seri</item>
+    </plurals>
 </resources>

@@ -1,3 +1,4 @@
+import org.gradle.api.tasks.PathSensitivity
 import com.arshadshah.nimaz.buildlogic.FetchNimazDataTask
 import com.arshadshah.nimaz.buildlogic.NimazDataCredentials
 import com.arshadshah.nimaz.buildlogic.NimazDataLockParser
@@ -296,6 +297,10 @@ dependencies {
     // deep-link grammars. `api`-exposes navigation-compose. NavGraph.kt itself is still here;
     // it is decomposed in PR 12.
     implementation(project(":core:navigation"))
+    // The six Glance widgets and their workers — the first feature module (#564). It brings its
+    // own manifest entries, its own widget_colors/drawables/layouts and its own 27 strings, so
+    // nothing widget-shaped is left here.
+    implementation(project(":feature:widget"))
     // FakeTodayProvider / FakeSearchSettings / FakeStringProvider / RecordingWidgetRefresher —
     // one definition each, used by the ViewModel tests here and the tests over there.
     testImplementation(testFixtures(project(":core:domain")))
@@ -457,6 +462,34 @@ tasks.withType<Test>().configureEach {
         isIncludeNoLocationClasses = true
         excludes = listOf("jdk.internal.*")
     }
+
+    // Source roots in *other* modules that `:app` unit tests read off disk.
+    //
+    // `AnalyticsReachabilityTest` scans every place a UI event can be dispatched from, and since
+    // PRs 10, 11 and 13 of #551 three of those roots live outside this module. Gradle has no way
+    // to know that: a file scan is not a compile dependency, so without these declarations
+    // `testDebugUnitTest` stays UP-TO-DATE when the scanned sources change and the assertion
+    // simply does not run. That exact failure hid a broken assertion in `:core:common` through
+    // two full local gate sweeps — an assertion only fires if its task runs.
+    mapOf(
+        "designSystemSources" to "core/ui/src/main/kotlin/com/arshadshah/nimaz/presentation/components",
+        "navigationSources" to "core/navigation/src/main/kotlin/com/arshadshah/nimaz/core/navigation",
+        "widgetSources" to "feature/widget/src/main/kotlin/com/arshadshah/nimaz/widget",
+    ).forEach { (name, path) ->
+        inputs.dir(rootProject.layout.projectDirectory.dir(path))
+            .withPropertyName(name)
+            .withPathSensitivity(PathSensitivity.RELATIVE)
+    }
+
+    // `HiltWorkerProcessorTest` reads every module's build file. Sources reach the test task
+    // through the runtime classpath already; build files do not, and a build file is exactly
+    // what that test exists to check.
+    inputs.files(
+        rootProject.layout.projectDirectory.asFileTree.matching {
+            include("*/build.gradle.kts", "*/*/build.gradle.kts")
+            exclude("**/build/**")
+        }
+    ).withPropertyName("moduleBuildFiles").withPathSensitivity(PathSensitivity.RELATIVE)
 }
 
 // Class-file noise that should never count toward coverage (generated code,
@@ -654,6 +687,22 @@ val coverageModules = listOf(
         ),
         sourceDir = "src/main/kotlin",
         packageRoot = "com/arshadshah/nimaz/core/navigation",
+    ),
+    CoverageModule(
+        gradlePath = ":feature:widget",
+        projectDir = rootProject.layout.projectDirectory.dir("feature/widget"),
+        testTask = "testDebugUnitTest",
+        classesGlobs = listOf(
+            "intermediates/built_in_kotlinc/debug/**/classes/**",
+            "intermediates/classes/debug/**",
+            "tmp/kotlin-classes/debug/**",
+        ),
+        execGlobs = listOf(
+            "jacoco/testDebugUnitTest.exec",
+            "outputs/unit_test_code_coverage/**/*.exec",
+        ),
+        sourceDir = "src/main/kotlin",
+        packageRoot = "com/arshadshah/nimaz/widget",
     ),
 )
 

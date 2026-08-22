@@ -258,7 +258,6 @@
     <string name="khatam_section_in_progress">Sedang berlangsung</string>
     <string name="khatam_section_completed">Selesai</string>
     <string name="khatam_section_archived">Diarsipkan</string>
-    <string name="khatam_juz_position">Juz %1$d</string>
     <string name="khatam_continue_at">Lanjutkan · %1$s %2$d</string>
     <string name="khatam_started_on">Dimulai %1$s</string>
     <string name="khatam_finished_on">Selesai %1$s</string>
@@ -306,9 +305,6 @@
     <plurals name="khatam_ayahs_read_plural">
         <item quantity="other">%1$d ayat dibaca</item>
     </plurals>
-    <plurals name="khatam_ayahs_remaining">
-        <item quantity="other">%1$d ayat tersisa</item>
-    </plurals>
     <plurals name="khatam_days_remaining">
         <item quantity="other">~%1$d hari tersisa</item>
     </plurals>
@@ -324,15 +320,7 @@
     <string name="khatam_ayahs_per_day_label">Ayat per hari</string>
     <string name="time_period_am">AM</string>
     <string name="time_period_pm">PM</string>
-    <string name="khatam_widget_label">Khatam</string>
     <string name="khatam_widget_description">Progres khatam Al-Quran Anda</string>
-    <string name="khatam_widget_no_active">Tidak ada Khatam aktif</string>
-    <string name="khatam_widget_start">Mulai satu</string>
-    <string name="khatam_widget_juz_caption">Juz</string>
-    <string name="khatam_widget_daily_target">%1$d/hari</string>
-    <plurals name="khatam_widget_streak">
-        <item quantity="other">%1$d hari beruntun</item>
-    </plurals>
 
     <!-- Khatam: daily reminder notification -->
     <string name="notif_khatam_channel_name">Pengingat khatam</string>
@@ -352,11 +340,6 @@
     <string name="widget_prayer_times_description">Menampilkan semua waktu shalat hari ini</string>
     <string name="widget_prayer_tracker_description">Lacak shalat harian Anda dengan kotak centang</string>
     <string name="widget_hijri_calendar_description">Menampilkan kalender bulan Hijriah lengkap dengan peristiwa hari ini</string>
-    <string name="widget_prayer_times_name">Waktu Shalat</string>
-    <string name="widget_next_prayer_name">Shalat Berikutnya</string>
-    <string name="widget_hijri_date_name">Tanggal Hijriah</string>
-    <string name="widget_prayer_tracker_name">Pelacak Shalat</string>
-    <string name="widget_hijri_calendar_name">Kalender Hijriah</string>
     <string name="qada">Qada</string>
     <string name="prayer_status_not_recorded">Belum dicatat</string>
     <string name="prayer_recorded_count_format">%1$d dari %2$d tercatat</string>
@@ -845,14 +828,6 @@
     <string name="ayah_copied_to_clipboard">Ayat disalin ke papan klip</string>
     <string name="test_notification_title">Notifikasi Uji</string>
     <string name="test_notification_text">Notifikasi salat berfungsi dengan benar</string>
-    <string name="widget_loading">Memuat…</string>
-    <string name="widget_tap_to_setup">Ketuk untuk menyiapkan</string>
-    <string name="widget_next_prayer">Salat Berikutnya</string>
-    <string name="widget_error_loading">Gagal memuat data</string>
-    <string name="widget_tap_to_retry">Ketuk untuk coba lagi</string>
-    <string name="widget_tap_to_refresh">Ketuk untuk menyegarkan</string>
-    <string name="widget_today">HARI INI</string>
-    <string name="widget_no_events">Tidak ada acara</string>
     <!-- Accessibility content descriptions -->
     <string name="cd_share">Bagikan</string>
     <string name="cd_bookmark">Markah</string>
@@ -1649,12 +1624,6 @@
     <string name="widget_prayer_initial_asr">A</string>
     <string name="widget_prayer_initial_maghrib">M</string>
     <string name="widget_prayer_initial_isha">I</string>
-    <string name="widget_prayer_short_fajr">Fajr</string>
-    <string name="widget_prayer_short_sunrise">Terbit</string>
-    <string name="widget_prayer_short_dhuhr">Dhuhr</string>
-    <string name="widget_prayer_short_asr">Asr</string>
-    <string name="widget_prayer_short_maghrib">Mgrb</string>
-    <string name="widget_prayer_short_isha">Isha</string>
     <string name="widget_countdown_hm_format">%1$dj %2$dm</string>
     <string name="widget_countdown_ms_format">%1$dm %2$dd</string>
     <string name="widget_countdown_s_format">%1$dd</string>
@@ -1785,8 +1754,6 @@
     <string name="night_worship_duas_body">Qunut dan doa-doa malam</string>
     <string name="night_worship_why_title">Mengapa salat malam</string>
     <string name="night_worship_why_body">&quot;Rabb kami turun ke langit dunia…&quot;</string>
-    <string name="widget_location">Lokasi</string>
-    <string name="widget_tomorrow">Besok</string>
 
     <!-- Notifications rework: per-prayer alert style, reminders, diagnostics -->
     <string name="notif_hub_diagnostics_title">Diagnostik</string>
@@ -2116,4 +2083,20 @@
     <string name="point_with_camera">Arahkan dengan kamera</string>
     <string name="field_name">Nama</string>
     <string name="field_notes">Catatan</string>
+    <string name="khatam_juz_position">Juz %1$d</string>
+    <string name="khatam_widget_label">Khatam</string>
+    <string name="widget_next_prayer">Salat Berikutnya</string>
+    <string name="widget_no_events">Tidak ada acara</string>
+    <string name="widget_prayer_short_fajr">Fajr</string>
+    <string name="widget_prayer_short_sunrise">Terbit</string>
+    <string name="widget_prayer_short_dhuhr">Dhuhr</string>
+    <string name="widget_prayer_short_asr">Asr</string>
+    <string name="widget_prayer_short_maghrib">Mgrb</string>
+    <string name="widget_prayer_short_isha">Isha</string>
+    <plurals name="khatam_ayahs_remaining">
+        <item quantity="other">%1$d ayat tersisa</item>
+    </plurals>
+    <plurals name="khatam_widget_streak">
+        <item quantity="other">%1$d hari beruntun</item>
+    </plurals>
 </resources>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The widgets' own strings, moved out of the design system with them in PR 13 of #551.
+
+  A Glance widget draws none of :core:ui — no atoms, no theme, its own widget_colors.xml —
+  so depending on that module for 27 strings would have put 1,910 strings and 52 atoms on
+  the classpath of a module that renders a tile. The six manifest labels are here too,
+  because the receivers that reference them live in this module now.
+-->
+<resources>
+    <string name="khatam_widget_no_active">Aktif Hatim yok</string>
+    <string name="khatam_widget_start">Bir tane başlat</string>
+    <string name="khatam_widget_juz_caption">Cüz</string>
+    <string name="khatam_widget_daily_target">%1$d/gün</string>
+    <string name="widget_prayer_times_name">Namaz Vakitleri</string>
+    <string name="widget_next_prayer_name">Sonraki Namaz</string>
+    <string name="widget_hijri_date_name">Hicri Tarih</string>
+    <string name="widget_prayer_tracker_name">Namaz Takibi</string>
+    <string name="widget_hijri_calendar_name">Hicri Takvim</string>
+    <string name="widget_loading">Yükleniyor…</string>
+    <string name="widget_tap_to_setup">Kurmak için dokunun</string>
+    <string name="widget_error_loading">Veri yüklenirken hata</string>
+    <string name="widget_tap_to_retry">Yeniden denemek için dokunun</string>
+    <string name="widget_tap_to_refresh">Yenilemek için dokunun</string>
+    <string name="widget_today">BUGÜN</string>
+    <string name="widget_location">Konum</string>
+    <string name="widget_tomorrow">Yarın</string>
+</resources>

@@ -258,7 +258,6 @@
     <string name="khatam_section_in_progress">En cours</string>
     <string name="khatam_section_completed">Terminés</string>
     <string name="khatam_section_archived">Archivés</string>
-    <string name="khatam_juz_position">Juz %1$d</string>
     <string name="khatam_continue_at">Continuer · %1$s %2$d</string>
     <string name="khatam_started_on">Commencé le %1$s</string>
     <string name="khatam_finished_on">Terminé le %1$s</string>
@@ -312,11 +311,6 @@
         <item quantity="many">%1$d versets lus</item>
         <item quantity="other">%1$d versets lus</item>
     </plurals>
-    <plurals name="khatam_ayahs_remaining">
-        <item quantity="one">%1$d verset restant</item>
-        <item quantity="many">%1$d versets restants</item>
-        <item quantity="other">%1$d versets restants</item>
-    </plurals>
     <plurals name="khatam_days_remaining">
         <item quantity="one">~%1$d jour restant</item>
         <item quantity="many">~%1$d jours restants</item>
@@ -336,17 +330,7 @@
     <string name="khatam_ayahs_per_day_label">Versets par jour</string>
     <string name="time_period_am">AM</string>
     <string name="time_period_pm">PM</string>
-    <string name="khatam_widget_label">Khatam</string>
     <string name="khatam_widget_description">Votre progression vers la lecture complète du Coran</string>
-    <string name="khatam_widget_no_active">Aucun Khatam actif</string>
-    <string name="khatam_widget_start">En commencer un</string>
-    <string name="khatam_widget_juz_caption">Juz</string>
-    <string name="khatam_widget_daily_target">%1$d/jour</string>
-    <plurals name="khatam_widget_streak">
-        <item quantity="one">%1$d jour d\'affilée</item>
-        <item quantity="many">%1$d jours d\'affilée</item>
-        <item quantity="other">%1$d jours d\'affilée</item>
-    </plurals>
 
     <!-- Khatam: daily reminder notification -->
     <string name="notif_khatam_channel_name">Rappels de Khatam</string>
@@ -372,11 +356,6 @@
     <string name="widget_prayer_times_description">Affiche tous les horaires de prière du jour</string>
     <string name="widget_prayer_tracker_description">Suivez vos prières quotidiennes en cochant les cases</string>
     <string name="widget_hijri_calendar_description">Affiche le calendrier hégirien complet du mois avec les événements du jour</string>
-    <string name="widget_prayer_times_name">Horaires de prière</string>
-    <string name="widget_next_prayer_name">Prochaine prière</string>
-    <string name="widget_hijri_date_name">Date hégirienne</string>
-    <string name="widget_prayer_tracker_name">Suivi de prière</string>
-    <string name="widget_hijri_calendar_name">Calendrier hégirien</string>
     <string name="qada">Qada</string>
     <string name="prayer_status_not_recorded">Non enregistrée</string>
     <string name="prayer_recorded_count_format">%1$d sur %2$d enregistrées</string>
@@ -886,14 +865,6 @@
     <string name="ayah_copied_to_clipboard">Verset copié dans le presse-papiers</string>
     <string name="test_notification_title">Notification de test</string>
     <string name="test_notification_text">Les notifications de prière fonctionnent correctement</string>
-    <string name="widget_loading">Chargement…</string>
-    <string name="widget_tap_to_setup">Appuyez pour configurer</string>
-    <string name="widget_next_prayer">Prochaine prière</string>
-    <string name="widget_error_loading">Erreur de chargement des données</string>
-    <string name="widget_tap_to_retry">Appuyez pour réessayer</string>
-    <string name="widget_tap_to_refresh">Appuyez pour actualiser</string>
-    <string name="widget_today">AUJOURD\'HUI</string>
-    <string name="widget_no_events">Aucun événement</string>
     <!-- Accessibility content descriptions -->
     <string name="cd_share">Partager</string>
     <string name="cd_bookmark">Signet</string>
@@ -1716,12 +1687,6 @@
     <string name="widget_prayer_initial_asr">A</string>
     <string name="widget_prayer_initial_maghrib">M</string>
     <string name="widget_prayer_initial_isha">I</string>
-    <string name="widget_prayer_short_fajr">Fajr</string>
-    <string name="widget_prayer_short_sunrise">Lever</string>
-    <string name="widget_prayer_short_dhuhr">Dhuhr</string>
-    <string name="widget_prayer_short_asr">Asr</string>
-    <string name="widget_prayer_short_maghrib">Mgrb</string>
-    <string name="widget_prayer_short_isha">Isha</string>
     <string name="widget_countdown_hm_format">%1$dh %2$dm</string>
     <string name="widget_countdown_ms_format">%1$dm %2$ds</string>
     <string name="widget_countdown_s_format">%1$ds</string>
@@ -1854,8 +1819,6 @@
     <string name="night_worship_duas_body">Le Qunut et les invocations de la nuit</string>
     <string name="night_worship_why_title">Pourquoi prier la nuit</string>
     <string name="night_worship_why_body">&quot;Notre Seigneur descend au ciel le plus proche…&quot;</string>
-    <string name="widget_location">Lieu</string>
-    <string name="widget_tomorrow">Demain</string>
 
     <!-- Notifications rework: per-prayer alert style, reminders, diagnostics -->
     <string name="notif_hub_diagnostics_title">Diagnostic</string>
@@ -2200,4 +2163,24 @@
     <string name="point_with_camera">Viser avec la caméra</string>
     <string name="field_name">Nom</string>
     <string name="field_notes">Notes</string>
+    <string name="khatam_juz_position">Juz %1$d</string>
+    <string name="khatam_widget_label">Khatam</string>
+    <string name="widget_next_prayer">Prochaine prière</string>
+    <string name="widget_no_events">Aucun événement</string>
+    <string name="widget_prayer_short_fajr">Fajr</string>
+    <string name="widget_prayer_short_sunrise">Lever</string>
+    <string name="widget_prayer_short_dhuhr">Dhuhr</string>
+    <string name="widget_prayer_short_asr">Asr</string>
+    <string name="widget_prayer_short_maghrib">Mgrb</string>
+    <string name="widget_prayer_short_isha">Isha</string>
+    <plurals name="khatam_ayahs_remaining">
+        <item quantity="one">%1$d verset restant</item>
+        <item quantity="many">%1$d versets restants</item>
+        <item quantity="other">%1$d versets restants</item>
+    </plurals>
+    <plurals name="khatam_widget_streak">
+        <item quantity="one">%1$d jour d\'affilée</item>
+        <item quantity="many">%1$d jours d\'affilée</item>
+        <item quantity="other">%1$d jours d\'affilée</item>
+    </plurals>
 </resources>

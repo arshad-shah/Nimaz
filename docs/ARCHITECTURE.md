@@ -1749,7 +1749,8 @@ Seven `:core:*` modules so far, mid-migration (#551):
 | **`:core:data`** | `nimaz.android.library` + `nimaz.android.hilt` | Eighteen of the nineteen repository implementations, the `data/device`, `data/text` and `data/ai` slices, and the announcement store's repository. It is the only module that sees both `:core:database` and `:core:datastore`, which is what lets every other module depend on a `:core:domain` interface instead of on a DAO. |
 | **`:core:ui`** | `nimaz.android.library` + `nimaz.android.compose` | The design system — 52 atoms, the generic `Nimaz*` molecules, `theme/`, `foundation/`, `presentation/model` and `core/share` — plus **`strings.xml` and its five translations, `colors.xml` and the eight fonts**. The first module to own `res/`, which is why every other module now spells resources `com.arshadshah.nimaz.core.ui.R`. |
 | **`:core:navigation`** | `nimaz.android.library` + `nimaz.android.compose` | The route vocabulary — `Routes.kt`, `ScreenTags`, `taggedComposable`, `ContentTargetRoutes`, and the announcement and help deep-link grammars. Every feature module needs it to declare its destinations. **It may not import `presentation.screens`, `presentation.viewmodel` or `:core:ui`** — a `Route` carries a destination's identity, never its label. `NavGraph.kt` itself is still in `:app`; it is decomposed in PR 12. |
-| **`:app`** | `nimaz.android.application` | Everything else, for now — screens, ViewModels, feature components, widgets, audio, sync, `NavGraph.kt`, and the rest of `core/`. It shrinks with each milestone of #551. |
+| **`:feature:widget`** | `nimaz.android.library` + `nimaz.android.hilt` + `nimaz.android.compose` | The six Glance widgets, their receivers, the tick receiver and six Workers — plus their manifest entries, `widget_colors.xml`, the `ic_widget_*` drawables, the preview layouts, the provider descriptors and the seventeen strings nothing else uses. **The first feature module**, chosen because it has zero `presentation/` imports. |
+| **`:app`** | `nimaz.android.application` | Everything else, for now — screens, ViewModels, feature components, audio, sync, `NavGraph.kt`, and the rest of `core/`. It shrinks with each milestone of #551. |
 | **`:baselineprofile`** | `com.android.test` | Generates `app/src/main/baseline-prof.txt`. Nothing depends on it at runtime and no product code lives there. |
 
 Plus one **included build**, `build-logic`, which is not a module of the app — it produces the
@@ -1787,6 +1788,43 @@ one that points the wrong way.
 definition of the fake for it, and the pattern is now regular enough to expect rather than
 discover: **a fake of a `:core:domain` port is wanted by whichever module implements the port and
 by whichever module drives it**, so it belongs beside the port rather than in either.
+
+**A feature module talks to repositories, never to DAOs — and the boundary is what proves it.**
+`:feature:widget` was the first one extracted, and the move found a widget injecting `PrayerDao`
+and another constructing a `PrayerRecordEntity` to write a prayer record. Nothing objected while
+both lived in `:app`; `:core:database` simply is not on a feature module's classpath, so the
+compiler turned two silent layering violations into unresolved references. Both now use
+`PrayerRepository`, which `:core:domain` already declared with exactly the operations needed — and
+the rewrite narrowed the types as a side effect, replacing the string literals `"prayed"` /
+`"not_prayed"` with `PrayerStatus`. **Expect one of these per feature module**, and route it
+through the existing domain seam rather than adding `:core:database` as a dependency.
+
+A feature must also not name a type in `:app`. The widgets opened the app with
+`actionStartActivity<MainActivity>()`; they now resolve the launcher component from the package
+manager, the same inversion `NavGraph`'s `restartApp` uses.
+
+**A feature module's tests move with it, and a file-scanning test needs two things checked when
+they do.** `:feature:widget` took all 59 of its unit tests out of `app/src/test`. Two of them
+would have gone quietly wrong:
+
+- `PrayerTrackerWidgetDataSourceTest` mocked `PrayerDao`, so it stopped compiling the moment its
+  subject took `PrayerRepository`. Rewriting it against the repository made two assertions
+  stronger for free — `PrayerStatus.entries` now enumerates the five non-prayed statuses the
+  stringly-typed version had listed by hand (and got wrong: `LATE` and `NOT_PRAYED` were missing),
+  and the "unknown prayer name" case became `SUNRISE`, a real sixth `PrayerName` that a careless
+  `PrayerName.entries` in the data source would let the widget count.
+- `WidgetGlyphGuardTest` scanned `src/main/java/com/arshadshah/nimaz/widget` **relative to the
+  module directory**, a path that ceased to exist in `:app`. Its only floor was
+  `dir.isDirectory` — a check that passes on the day the directory is empty and fails only on the
+  day it is gone. It now asserts on files actually read (`MINIMUM_FILES`), which is the rule §9
+  already carries: **assert on what the scan found, not on where it looked.**
+
+**A `:app` test that reads another module's sources must be declared as an input of the test
+task.** `AnalyticsReachabilityTest` scans four modules' UI roots; Gradle cannot infer that from a
+file walk, so `app/build.gradle.kts` names `core/ui`, `core/navigation` and `feature/widget` via
+`inputs.dir(...)`. Without it `testDebugUnitTest` stays `UP-TO-DATE` when the scanned sources
+change and the assertion simply does not run — the failure that hid a broken `:core:common`
+assertion through two full local sweeps.
 
 **The nav graph is per-feature, and `NavGraph.kt` registers nothing.** Since PR 12 of #551 the 94
 destinations live in eleven `NavGraphBuilder.<feature>Graph(navController)` extensions beside their

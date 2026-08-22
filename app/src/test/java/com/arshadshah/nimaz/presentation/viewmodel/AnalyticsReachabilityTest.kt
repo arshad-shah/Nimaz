@@ -21,7 +21,7 @@ class AnalyticsReachabilityTest {
     private val viewModelDir = File("src/main/java/com/arshadshah/nimaz/presentation/viewmodel")
 
     /**
-     * Everywhere a UI event can be dispatched from — now spanning three modules.
+     * Everywhere a UI event can be dispatched from — now spanning four modules.
      *
      * Two of these were wrong, and both were invisible because the old code did
      * `uiDirs.filter { it.isDirectory }`: a root that does not exist was silently skipped, so the
@@ -29,7 +29,9 @@ class AnalyticsReachabilityTest {
      *
      * - `presentation/widget` **never existed**. The widgets are `com.arshadshah.nimaz.widget`.
      *   A widget dispatching an analytics-bearing event has therefore never counted as a
-     *   producer, for as long as this test has existed.
+     *   producer, for as long as this test has existed. That package then became
+     *   `:feature:widget` in PR 13, which is why its root now reaches across the module — and
+     *   the assertion below is what caught the stale path the same day it went stale.
      * - `presentation/components` and `core/navigation` were emptied by PRs 10 and 11 of #551 —
      *   the design system is `:core:ui` and the route vocabulary is `:core:navigation`. Both
      *   directories still exist in `:app` (screens; `NavGraph.kt`), so nothing would have gone
@@ -41,7 +43,7 @@ class AnalyticsReachabilityTest {
         File("src/main/java/com/arshadshah/nimaz/presentation/screens"),
         File("src/main/java/com/arshadshah/nimaz/presentation/components"),
         File("src/main/java/com/arshadshah/nimaz/core/navigation"),
-        File("src/main/java/com/arshadshah/nimaz/widget"),
+        File("../feature/widget/src/main/kotlin/com/arshadshah/nimaz/widget"),
         File("../core/ui/src/main/kotlin/com/arshadshah/nimaz/presentation/components"),
         File("../core/navigation/src/main/kotlin/com/arshadshah/nimaz/core/navigation"),
     )
