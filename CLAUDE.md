@@ -4,7 +4,8 @@ Nimaz is an offline-first Android Islamic companion app: **Kotlin + Jetpack Comp
 **Clean Architecture** (`presentation → domain → data`) with **MVVM + UDF**, Hilt DI, Room,
 DataStore, type-safe Navigation Compose.
 
-**Mid-migration to Gradle modules (#551).** Seven modules are out of `:app` so far:
+**Mid-migration to Gradle modules (#551).** Eight modules are out of `:app` so far — seven
+`:core:*` and the first `:feature:*`:
 
 - **`:core:domain`** (`core/domain/`) — the whole domain layer, a pure JVM module. No Android SDK
   on its classpath, so `import android.*` there is a compile error, and `androidFreeClasspath`
@@ -44,7 +45,14 @@ DataStore, type-safe Navigation Compose.
   `ContentTargetRoutes`, and the announcement/help deep-link grammars. **Never imports
   `presentation.screens`, `presentation.viewmodel` or `:core:ui`** — a `Route` carries a
   destination's identity, never its label, which is why `NamesTab` moved here while its
-  `@StringRes` stayed in the screen. `NavGraph.kt` is still in `:app` until PR 12.
+  `@StringRes` stayed in the screen. `NavGraph.kt` is still in `:app`, but registers nothing —
+  the 94 destinations live in eleven `<Feature>Graph.kt` extensions beside their screens.
+- **`:feature:widget`** (`feature/widget/`) — the six Glance widgets, their receivers, the tick
+  receiver and six Workers, with their own manifest entries, `widget_colors.xml`, drawables,
+  preview layouts, provider descriptors and seventeen strings. **The first feature module.** A
+  feature module has no `:core:database` on its classpath: talk to a repository, never a DAO, and
+  never name a type in `:app` (the widgets resolve the launcher component rather than naming
+  `MainActivity`).
 
 Everything else is still `:app` and moves out over the remaining PRs. Files in
 `app/…/core/util/` whose destination module does not exist yet are staying there **on purpose** —
@@ -192,6 +200,7 @@ The obligations, in short:
 ./gradlew :core:data:check            # repository tests + public-API leak guard + moduleBoundary
 ./gradlew :core:ui:check              # design-system component tests + moduleBoundary + its lint
 ./gradlew :core:navigation:check      # route vocabulary + the no-presentation-imports guard
+./gradlew :feature:widget:check       # the widgets + moduleBoundary + its own lint
 ./gradlew :app:jacocoTestReport --dry-run   # see below — seconds, and catches a whole class of red CI
 ./gradlew :app:lintDebug              # SLOW (~10 min) and CI-blocking — do not skip it
 python3 scripts/check_docs.py         # docs still describe the code (no toolchain needed)
