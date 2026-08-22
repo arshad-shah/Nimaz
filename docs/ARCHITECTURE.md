@@ -1788,6 +1788,15 @@ definition of the fake for it, and the pattern is now regular enough to expect r
 discover: **a fake of a `:core:domain` port is wanted by whichever module implements the port and
 by whichever module drives it**, so it belongs beside the port rather than in either.
 
+**The nav graph is per-feature, and `NavGraph.kt` registers nothing.** Since PR 12 of #551 the 94
+destinations live in eleven `NavGraphBuilder.<feature>Graph(navController)` extensions beside their
+screens; `:app` keeps only the `NavHost` and the shell. A new destination goes in its feature's
+graph. Two tests hold the line: `NavControllerConfinementTest` (a **screen** may not name a
+`NavController` — `*Graph.kt` is the sole exemption, since a graph function *is* the wiring) and
+`EveryRouteIsRegisteredTest` (the registered set equals the declared set, both directions, no
+duplicates). The second exists because NAV-03 compares *totals*: a route dropped in one graph while
+another is duplicated leaves the count at 94 and surfaces as a blank screen at runtime.
+
 **A route names a destination; it must never reach for what draws it.** `:core:navigation`
 depends on `:core:domain` and nothing above it — deliberately **not** on `:core:ui`. The test case
 is `NamesTab`, which lived inside `NamesScreen.kt` and looked like presentation but whose own KDoc

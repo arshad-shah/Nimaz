@@ -24,12 +24,25 @@ import org.junit.Test
  * classpath of anything that can see a `Route`, so re-adding a `NavController` parameter to a
  * screen compiles perfectly well and un-picks the decomposition quietly, one screen at a time.
  *
- * ## Scope
+ * ## Scope, and the one exemption
  *
- * Only `rememberNavController()` in `NavGraph.kt` is allowed to name the type. When `NavGraph.kt`
- * is split into per-feature graph extensions, the `NavHost` and its controller stay in `:app` —
- * so this test should keep passing unchanged, and if it starts failing during that split, a graph
- * function has taken a controller it should have taken a lambda.
+ * `NavGraph.kt` owns the controller, and since PR 12 of #551 so do the eleven `*Graph.kt` feature
+ * extensions. That exemption was added deliberately and is worth justifying, because I added this
+ * test two commits before needing to widen it.
+ *
+ * The rule that matters is that a **screen** must not navigate arbitrarily — that is what makes it
+ * depend on every destination in the app. A `NavGraphBuilder.quranGraph(...)` extension *is* the
+ * navigation wiring; holding a controller there is its whole job, and `NavController` is an
+ * `androidx` type, so it creates no dependency on `:app` and will travel into `:feature:quran`
+ * unchanged.
+ *
+ * #563 sketches `quranGraph(onNavigate: (Route) -> Unit)` instead. That does not fit: 11 of the
+ * 158 `navigate` calls in those blocks pass a `NavOptionsBuilder` — `popUpTo`, `launchSingleTop` —
+ * which `(Route) -> Unit` cannot express, and flattening them would change back-stack behaviour
+ * with no build error and no test failure, surfacing as a wrong back button several screens later.
+ *
+ * The exemption is keyed on the filename, so a screen cannot acquire it by accident, and
+ * [theGraphItselfStillOwnsOne] stops the whole test passing by the type disappearing.
  */
 class NavControllerConfinementTest {
 
@@ -52,13 +65,21 @@ class NavControllerConfinementTest {
         const val MINIMUM_FILES = 200
 
         val NAV_CONTROLLER = Regex("""\bNav(Host)?Controller\b""")
+
+        /**
+         * The eleven feature graphs of PR 12. A floor rather than an equality, so adding a twelfth
+         * feature does not fail this — but re-merging them into `NavGraph.kt` does.
+         */
+        const val EXPECTED_FEATURE_GRAPHS = 11
     }
 
     private fun screenSources(): List<File> =
         SCREEN_ROOTS.map(::File).flatMap { root ->
             assertWithMessage("screen root missing: ${root.absolutePath}")
                 .that(root.isDirectory).isTrue()
-            root.walkTopDown().filter { it.isFile && it.extension == "kt" }
+            root.walkTopDown()
+                .filter { it.isFile && it.extension == "kt" }
+                .filterNot { it.name.endsWith("Graph.kt") }
         }
 
     @Test
@@ -89,11 +110,19 @@ class NavControllerConfinementTest {
     }
 
     @Test
-    fun `the graph itself still owns one`() {
+    fun theGraphItselfStillOwnsOne() {
         // The complement, so this test cannot pass by the type having vanished entirely — which
         // would mean the app no longer navigates, not that the rule is satisfied.
         val graph = File(GRAPH)
         assertWithMessage("NavGraph.kt not found at ${graph.absolutePath}").that(graph.isFile).isTrue()
         assertThat(graph.readText()).contains("rememberNavController()")
+
+        // And the exemption is not covering an empty set: the feature graphs must exist and must
+        // be the things holding the controller. If they vanished, the check above would still pass
+        // while the decomposition had been undone.
+        val graphFiles = SCREEN_ROOTS.map(::File)
+            .flatMap { it.walkTopDown().filter { f -> f.name.endsWith("Graph.kt") } }
+        assertWithMessage("no *Graph.kt feature extensions found — was NavGraph.kt re-merged?")
+            .that(graphFiles.size).isAtLeast(EXPECTED_FEATURE_GRAPHS)
     }
 }
