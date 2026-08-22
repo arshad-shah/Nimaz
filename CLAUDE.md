@@ -76,7 +76,17 @@ DataStore, type-safe Navigation Compose.
   in `settingsGraph` — they move together in PR 21.
 - **`:feature:tracker`** (`feature/tracker/`) — prayer tracking, fasting and tasbih, behind one
   `viewmodel/tracker`. **Six of `screens/prayer`'s nine files live here** (the tracking ones);
-  prayer *times* stay in `:app` until PR 20, and `PrayerGraph.kt` split along the same line.
+  the other three are `:feature:prayer`, and `PrayerGraph.kt` split along the same line.
+- **`:feature:prayer`** (`feature/prayer/`) — prayer times, the monthly table, qibla and the
+  night-worship window: when each prayer *is*, to `:feature:tracker`'s what the user *did* about
+  it. The two share `PrayerRepository` through `:core:domain`. **The adhan players and the prayer
+  notification machinery stayed in `:app`** — nothing in this module names them, and their real
+  consumers are the settings surface (`SettingsViewModel`, the three notification screens) plus
+  `AppInitializer`, so moving them here would have created a `:feature:settings` →
+  `:feature:prayer` edge in the very next PR. **"Where a file sounds like it belongs" is not
+  "where its consumers are"** — the same trap as the components rule below, one layer down.
+  `PrayerTimeCard` and `PrayerSkyScene` went to `:core:ui`, not here, because `HomeScreen` and
+  `HomeHero` read them too. This is the only module with a camera dependency (`ArQiblaView`).
 - **`:feature:tools`** (`feature/tools/`) — the zakat calculator and its history.
 - **`:feature:search`** (`feature/search/`) — library search and the opt-in Ask-with-Proof screen.
   Nothing network-facing lives here: the Worker client is `:core:data`, reached through
@@ -86,7 +96,8 @@ DataStore, type-safe Navigation Compose.
 - **`:feature:calendar`** (`feature/calendar/`) — the Islamic calendar, plus `IslamicEventCard`
   (calendar-only; the Zakat hero went to `:core:ui` instead, because `ZakatSettingsScreen` in
   `:app` reads it too — **"used by the feature" is not "used only by the feature"**, which has now
-  caught three PRs in a row: widget strings, about strings, and these components).
+  caught five PRs in a row: widget strings, about strings, these components, four content
+  components, and `PrayerTimeCard`/`PrayerSkyScene`).
 
 Two rules a feature module makes into compile errors, both worth knowing before you write one:
 **a `@HiltWorker` needs `ksp(libs.hilt.work.compiler)` in its own module** — omitting it compiles
@@ -250,6 +261,7 @@ The obligations, in short:
 ./gradlew :feature:content:check      # the library — eight screen packages
 ./gradlew :feature:tracker:check      # prayer tracking, fasting, tasbih
 ./gradlew :feature:quran:check        # reader, khatam, bookmarks
+./gradlew :feature:prayer:check       # prayer times, qibla, night worship
 ./gradlew :app:jacocoTestReport --dry-run   # see below — seconds, and catches a whole class of red CI
 ./gradlew :app:lintDebug              # SLOW (~10 min) and CI-blocking — do not skip it
 python3 scripts/check_docs.py         # docs still describe the code (no toolchain needed)

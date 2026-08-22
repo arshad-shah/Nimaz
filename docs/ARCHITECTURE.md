@@ -1758,8 +1758,9 @@ Seven `:core:*` modules so far, mid-migration (#551):
 | **`:feature:calendar`** | `nimaz.android.feature` | The Islamic calendar — one screen, one ViewModel, plus `IslamicEventCard`, which nothing else names. Small enough to question and it still earns a module: folding it into a neighbour would create the coupling the split exists to remove. `IslamicEvent` is a `:core:domain` model, so sharing it with `fasting`/`prayer`/`settings` is not a feature-to-feature edge. |
 | **`:feature:search`** | `nimaz.android.feature` | Local library search and the opt-in Ask-with-Proof screen. **The only feature with a network dependency, and none of it is in the module** — the Worker client, its DTOs and `IntegrityTokenProvider` are `:core:data`, reached through `AiRepository`. Proof resolution reads Quran and Hadith content owned by other features, through repositories; `moduleBoundary` makes the alternative impossible. |
 | **`:feature:content`** | `nimaz.android.feature` | The library — duas, hadith, qaida, the ninety-nine names, the names of the Prophet, the prophets, and the catalog shell they share. **Eight `screens/` packages in one module, because `viewmodel/content` is one package they all drive.** The concrete case behind "the module boundary follows the ViewModel axis, not the `screens/` axis". `QaidaAudioManager` came with it. |
-| **`:feature:tracker`** | `nimaz.android.feature` | What the user *did*: prayer tracking, fasting and the tasbih counter, behind one `viewmodel/tracker`. **Six of `screens/prayer`'s nine files are here** — the ones driving `viewmodel/tracker` — while prayer *times* wait for PR 20; `PrayerGraph.kt` split accordingly. |
+| **`:feature:tracker`** | `nimaz.android.feature` | What the user *did*: prayer tracking, fasting and the tasbih counter, behind one `viewmodel/tracker`. **Six of `screens/prayer`'s nine files are here** — the ones driving `viewmodel/tracker`; the other three went to `:feature:prayer`, and `PrayerGraph.kt` split accordingly. |
 | **`:feature:quran`** | `nimaz.android.feature` | The reader, khatam and bookmarks, plus the whole Mushaf rendering stack and `TajweedParser`. The largest feature. **`QuranDao` stays in `:core:database`** — four repositories use it. **`QuranAudioManager` stays in `:app`**, behind the `QuranPlayback` port, because `MainActivity` holds one too. |
+| **`:feature:prayer`** | `nimaz.android.feature` | When each prayer *is* and which way to face: prayer times, the monthly table, qibla and the night-worship window — the counterpart to `:feature:tracker`. The only module with a camera dependency (`ArQiblaView`). **The adhan players and the prayer notification machinery are *not* here**: nothing in the move set names them, and their consumers are the settings surface plus `:app` init, so sending them here would have created the `:feature:settings -> :feature:prayer` edge #571 forbids. **`PrayerTimeCard` and `PrayerSkyScene` went down to `:core:ui`**, being read by `HomeScreen`/`HomeHero` too. |
 | **`:app`** | `nimaz.android.application` | Everything else, for now — screens, ViewModels, feature components, audio, sync, `NavGraph.kt`, and the rest of `core/`. It shrinks with each milestone of #551. |
 | **`:baselineprofile`** | `com.android.test` | Generates `app/src/main/baseline-prof.txt`. Nothing depends on it at runtime and no product code lives there. |
 
@@ -1856,10 +1857,11 @@ and the answer differs by shape:
 | Another feature's ViewModel | `SettingsViewModel` in `AdaptiveMoreScreen` | Delete it. `hiltViewModel()` scopes to the destination's `NavBackStackEntry`, so this never read the other feature's instance in the first place — see `CrossFeatureViewModelGuardTest`. |
 
 **A shared `internal` test helper is duplicated per module *and* per package, and the count is
-now ten.** `setThemedContent` / `createComponentComposeRule` are ten lines that exist five times
-in `:core:ui`, once in `:app`, once in `:feature:calendar`, twice in `:feature:tracker` and twice
-in `:feature:quran` — the helpers are `internal`, so a module cannot see another's, and they are
-imported by package, so one module needs one per test package. `:feature:prayer` will add more.
+now fourteen.** `setThemedContent` / `createComponentComposeRule` are ten lines that exist five
+times in `:core:ui`, once in `:app`, once in `:feature:calendar`, twice in `:feature:tracker`,
+twice in `:feature:quran` and **four times in `:feature:prayer`** — the helpers are `internal`, so
+a module cannot see another's, and they are imported by package, so one module needs one per test
+package. Four copies in a single module is the point at which this stops being a footnote.
 **Publishing one from `core/ui/src/testFixtures/` collapses all of them**, the way
 `:core:domain`'s fakes already have; it is a guardrail change rather than a feature move, which is
 why it is deferred to the last milestone rather than done in passing.
