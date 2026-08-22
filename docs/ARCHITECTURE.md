@@ -1856,13 +1856,26 @@ and the answer differs by shape:
 | Another feature's ViewModel | `SettingsViewModel` in `AdaptiveMoreScreen` | Delete it. `hiltViewModel()` scopes to the destination's `NavBackStackEntry`, so this never read the other feature's instance in the first place — see `CrossFeatureViewModelGuardTest`. |
 
 **A shared `internal` test helper is duplicated per module *and* per package, and the count is
-now eight.** `setThemedContent` / `createComponentComposeRule` are ten lines that exist five times
-in `:core:ui`, once in `:app`, once in `:feature:calendar` and twice in `:feature:tracker` — the
-helpers are `internal`, so a module cannot see another's, and they are imported by package, so one
-module needs one per test package. `:feature:quran` and `:feature:prayer` will each add more.
+now ten.** `setThemedContent` / `createComponentComposeRule` are ten lines that exist five times
+in `:core:ui`, once in `:app`, once in `:feature:calendar`, twice in `:feature:tracker` and twice
+in `:feature:quran` — the helpers are `internal`, so a module cannot see another's, and they are
+imported by package, so one module needs one per test package. `:feature:prayer` will add more.
 **Publishing one from `core/ui/src/testFixtures/` collapses all of them**, the way
 `:core:domain`'s fakes already have; it is a guardrail change rather than a feature move, which is
 why it is deferred to the last milestone rather than done in passing.
+
+**A component test does not move with its subject on its own, and nothing says so until a member
+turns `internal`.** PR 19 moved the Quran components into `:feature:quran` and left eleven of
+their tests in `app/src/testDebug`. They kept compiling — the subjects were public and `:app`
+depends on the feature — so every local gate was green. CI was not: two of those tests read
+`computeJuzHeaderIndices` and `BottomActions`, which are `internal`, and `internal` does not cross
+a module. The eleven now live beside their subjects.
+
+The same stranding is still open for `:feature:content` (fourteen tests) and `:feature:tracker`
+(one), which merged with the same gap and have not tripped it because nothing they touch is
+`internal` yet. Both are queued with the `testFixtures` consolidation above, because the harness
+copies are what a move needs first. **The general rule: when a subject moves, its test moves in
+the same commit** — a test that merely still compiles is not evidence it is in the right module.
 
 **A screen belongs to the module that owns the ViewModel it drives, not the one its directory
 name suggests.** `DuaSettingsScreen` and `HadithSettingsScreen` sit in `screens/dua` and
