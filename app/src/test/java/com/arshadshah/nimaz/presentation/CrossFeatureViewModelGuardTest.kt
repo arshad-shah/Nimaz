@@ -96,6 +96,9 @@ class CrossFeatureViewModelGuardTest {
             "about" to "about",
             "help" to "about",
             "more" to "about",
+            "zakat" to "tools",
+            "tools" to "tools",
+            "calendar" to "calendar",
         )
 
         /**
@@ -111,10 +114,11 @@ class CrossFeatureViewModelGuardTest {
         const val MINIMUM_FILES = 100
 
         /**
-         * The 12 files across `screens/{onboarding,about,help,more}` plus `AdaptiveMoreScreen.kt`.
-         * Raise this as modules are extracted — it is what proves the rule reached them.
+         * Files in extracted modules that this rule actually reaches. Raise it as modules are
+         * extracted — it is what proves the rule got to them, and `FeatureModuleRegistrationTest`
+         * is what stops a module being extracted without being added to [MODULE_OF] at all.
          */
-        const val MINIMUM_CONSTRAINED = 13
+        const val MINIMUM_CONSTRAINED = 20
 
         /** `import …presentation.viewmodel.<pkg>.Something` — the root (no `<pkg>`) never matches. */
         val VIEWMODEL_IMPORT =
