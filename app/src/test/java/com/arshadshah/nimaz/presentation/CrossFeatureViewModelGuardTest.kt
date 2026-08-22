@@ -96,6 +96,8 @@ class CrossFeatureViewModelGuardTest {
             "about" to "about",
             "help" to "about",
             "more" to "about",
+            "search" to "search",
+            "ai" to "search",
         )
 
         /**
