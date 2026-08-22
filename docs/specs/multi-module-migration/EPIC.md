@@ -3,8 +3,9 @@
 **Repo:** `arshad-shah/nimaz` · **Integration branch:** `epic/multi-module`
 **Spec:** [`SPEC.md`](SPEC.md) — the assessment and the reasoning. This document is the
 execution plan: the issue tree, the branch topology, and the exit criteria for each PR.
-**Status:** in flight. Issues #552–#573 are filed under epic #551; **PRs 1–13 have landed** on
-`epic/multi-module`, and PR 14 is open.
+**Status:** code complete. Issues #552–#573 are all closed and **all 22 PRs have landed** on
+`epic/multi-module`. The integration PR to `dev` is **#596**. Outcome against the definition of
+done, including the two criteria still unmet, is §6.
 
 ---
 
@@ -484,3 +485,51 @@ slow to be useful; per milestone it is the thing that catches a stripped font or
 - **Reviewer fatigue.** PRs 13–21 are nine mechanically similar moves. The interesting review
   happens in PRs 2, 5, 7, 12 and 22; the rest should be reviewed for *what did not move* — a
   file that quietly stayed behind in `:app` is the common failure.
+
+---
+
+## 6. Outcome — the definition of done, checked
+
+Written when the last PR landed, against the eight boxes in §1. Three of them are **not** ticked,
+and two of those cannot be ticked from CI at all. Recorded here rather than quietly dropped,
+because an unmet criterion that nobody writes down is indistinguishable from one that was met.
+
+| # | Criterion | State |
+|---|---|---|
+| 1 | `:app` reduced to a shell | **superseded — see below** |
+| 2 | `:core:domain` on `kotlin-jvm`, no Android on its classpath | met — `androidFreeClasspath`, wired into `check` |
+| 3 | No `:feature:*` → `:feature:*`, enforced by a task | met — `moduleBoundary`, prefix-based, both rules |
+| 4 | All unit and instrumented tests green | met — 2,464 unit (up from 2,333; none deleted), 121 instrumented |
+| 5 | `check_docs.py` green **and** asserting non-zero scan counts | met — 23 checks, 13 floors |
+| 6 | Release AAB diffed against baseline | **not done** |
+| 7 | The six docs describe the module structure | met |
+| 8 | Phase 5 build-time measurements against the Phase 0 baseline | **not done** |
+
+**1 — superseded, not met as written.** The box says `:app` keeps `screens/adaptive`. It does not:
+all seven adaptive screens went with the feature each composes, six in Milestone 5 and
+`AdaptiveMoreScreen` in PR 14, so the directory emptied rather than staying. `:app` also still
+holds `data/audio` (7 files), `core/util` (6), the 20 home-screen components, `core/init` and four
+one-file `data/` slices — each justified in §2 where it was decided, none of them anticipated by
+this box. `:app` ended at **52 files / 11,484 lines, 8%** of ~141,800. The intent was met; the
+enumeration in the box was written before the reasons existed and was never reconciled.
+
+**6 — not done.** SPEC §6.4's artifact diff (merged manifest, DEX class list, merged resources,
+R8 output) needs a signed release build, and `KEYSTORE_FILE` is a CI-only secret. §4 asks for
+`:app:assembleRelease` per PR and the diff per milestone; neither ran locally, and no milestone
+diff was published. The signed release build *does* pass in CI — `internal_testing.yml` built and
+uploaded 3.0.128 from this branch — so the build is exercised; what is missing is the **comparison
+against the pre-migration artifact**, which is what would catch a stripped font or a dropped
+`values-tr`. This is the single highest-value check still outstanding.
+
+**8 — not done, and the stopping rule was therefore never exercised.** [`BASELINE.md`](BASELINE.md)
+§5 defines the gate precisely — the `inc_leaf_screen` row, cache-on column, measured back to back
+with the baseline commit in one sitting, at Milestone 5 half done (PRs 13–16). That measurement was
+never taken, so the epic's secondary benefit is **unverified**: the build-time improvement is
+claimed by no number in this repo. The driver still exists
+(`python3 scripts/measure_build_baseline.py results.json inc_leaf_screen`) and §6 of that document
+warns the row swung 37% between two sessions on an unchanged tree, which is why the protocol insists
+on one sitting. Anyone closing this out should run it before quoting a speedup.
+
+Neither gap blocks the merge on correctness grounds — the boundaries are enforced by tasks, and
+every test and doc check is green. Both are evidence gaps, and they are the two things a device
+pass cannot settle either.
