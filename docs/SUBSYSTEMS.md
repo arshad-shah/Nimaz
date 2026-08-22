@@ -207,12 +207,12 @@ Adhan, Qaida tap-to-hear) plus an Adhan **download** pipeline. They share no pla
 |---|---|
 | `data/audio/QuranAudioManager.kt` | `@Singleton`; one `ExoPlayer`, gapless ayah playlist, exposes `val audioState: StateFlow<AudioState>` |
 | `data/audio/QuranAudioService.kt` | `@AndroidEntryPoint` foreground `mediaPlayback` service; `MediaStyle` notification (channel `quran_audio_channel`, id 1001) over the manager's `ForwardingPlayer` |
-| `data/audio/AdhanAudioManager.kt` | `@Singleton`; legacy `MediaPlayer` for in-app `preview()`, plus adhan **download** logic; exposes `isPlaying`, `currentlyPlaying`, `downloadState` flows |
+| `data/audio/AdhanAudioManager.kt` | **`:core:data`** as of PR 21 of #551. `@Singleton`; legacy `MediaPlayer` for in-app `preview()`, plus adhan **download** logic; exposes `isPlaying`, `currentlyPlaying`, `downloadState` flows. Its two `AdhanPlaybackService` methods — `playAdhanForNotification` and `stopNotificationAdhan` — were deleted in that PR: they were the only thing tying it to `:app`, and neither had a call site anywhere. |
 | `data/audio/AdhanPlaybackService.kt` | foreground `mediaPlayback` service; plays the adhan when a prayer fires (works app-closed) using `ExoPlayer` with `USAGE_ALARM` + wake lock + audio focus |
 | `data/audio/AdhanDownloadService.kt` | foreground `dataSync` service that downloads both adhan variants with a progress notification (channel `adhan_download_channel`, id 7777) |
 | `data/audio/AdhanDownloadWorker.kt` | `@HiltWorker` background fallback for the download (see §3) |
 | `data/audio/QaidaAudioManager.kt` | `@Singleton`; stripped-down `ExoPlayer` for single Qaida tokens — **no service/notification/MediaSession/CDN**; exposes `val state: StateFlow<QaidaAudioState>` and `val completions: SharedFlow<String>` |
-| `data/audio/AdhanSound.kt` | enum of adhans (MISHARY, ABDUL_BASIT, MAKKAH, SIMPLE_BEEP) with per-variant file names + download URLs |
+| `data/audio/AdhanSound.kt` | **`:core:data`** as of PR 21 of #551. Enum of adhans (MISHARY, ABDUL_BASIT, MAKKAH, SIMPLE_BEEP) with per-variant file names + download URLs |
 
 **Wiring.** None of these have a DI module — the managers are `@Singleton @Inject constructor(@ApplicationContext …)` (Hilt provides them automatically) and the services are `@AndroidEntryPoint` field-injecting their manager. Services are declared in `AndroidManifest.xml` with `foregroundServiceType` `mediaPlayback`/`dataSync`; permissions `FOREGROUND_SERVICE`, `FOREGROUND_SERVICE_MEDIA_PLAYBACK`, `FOREGROUND_SERVICE_DATA_SYNC`.
 
@@ -1432,6 +1432,12 @@ formatted strings.
 `data/sync/` — offline peer-to-peer transfer of a user's app data directly between two phones
 over Google's **Nearby Connections** API. No server, no account: one device sends, the other
 receives.
+
+**It lives in `:core:data`, not with the screen that drives it.** `SyncScreen` and `SyncViewModel`
+are the only things that touch the slice, so PR 21 of #551 expected it to move to
+`:feature:settings` with them — and it cannot: `SyncDataExporter` and `SyncDataImporter` import
+**21 DAOs and 14 entities** directly, and `:core:database` is not on a feature module's classpath.
+`SyncViewModel` reaches them the way every other ViewModel reaches persistence.
 
 **Progress totals come from one source each, and logging carries no payload.**
 `SyncDataExporter.export` reports `(step, total, label)` with the total from

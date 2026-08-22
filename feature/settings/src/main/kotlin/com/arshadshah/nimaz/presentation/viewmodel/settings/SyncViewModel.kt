@@ -3,7 +3,7 @@ package com.arshadshah.nimaz.presentation.viewmodel.settings
 import android.os.Build
 import android.util.Log
 import androidx.lifecycle.ViewModel
-import com.arshadshah.nimaz.BuildConfig
+import com.arshadshah.nimaz.feature.settings.BuildConfig
 import com.arshadshah.nimaz.core.ui.R
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.Telemetry

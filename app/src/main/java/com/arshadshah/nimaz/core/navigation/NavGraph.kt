@@ -270,12 +270,3 @@ private val bottomNavItems = listOf(
     BottomNavItem(Route.More, "More", Icons.Default.MoreHoriz)
 )
 
-internal fun restartApp(context: Context) {
-    val intent = context.packageManager.getLaunchIntentForPackage(context.packageName)
-    intent?.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
-    context.startActivity(intent)
-    if (context is Activity) {
-        context.finish()
-    }
-    exitProcess(0)
-}

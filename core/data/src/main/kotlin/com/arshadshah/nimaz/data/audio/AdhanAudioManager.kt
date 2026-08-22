@@ -626,30 +626,4 @@ class AdhanAudioManager @Inject constructor(
         val fajrSize = getDownloadedSize(sound, true) ?: 0L
         return regularSize + fajrSize
     }
-
-    /**
-     * Play adhan for a prayer notification via the foreground service.
-     * This ensures playback works even when the app is closed.
-     * @param isFajr If true, plays the Fajr variant (includes "prayer is better than sleep").
-     * @param prayerName The name of the prayer for the notification.
-     */
-    fun playAdhanForNotification(
-        sound: AdhanSound,
-        isFajr: Boolean = false,
-        prayerName: String = "Prayer"
-    ) {
-        AdhanPlaybackService.playAdhan(
-            context = context,
-            adhanSound = sound,
-            isFajr = isFajr,
-            prayerName = prayerName
-        )
-    }
-
-    /**
-     * Stop any adhan playing from a notification via the foreground service.
-     */
-    fun stopNotificationAdhan() {
-        AdhanPlaybackService.stopAdhan(context)
-    }
 }

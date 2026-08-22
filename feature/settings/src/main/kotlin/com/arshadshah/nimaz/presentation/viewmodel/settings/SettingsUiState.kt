@@ -113,3 +113,16 @@ data class LocationSettingsUiState(
     val favoriteLocations: List<Location> = emptyList(),
     val isLoading: Boolean = true
 )
+
+/**
+ * The reciter-preview row on `SelectReciterScreen`.
+ *
+ * @param reciterId the reciter whose sample this ViewModel last started, or null when none is.
+ * @param isPlaying the sample is audible now — false while it is still buffering.
+ * @param isDownloading the player is fetching the sample.
+ */
+data class ReciterPreviewUiState(
+    val reciterId: String? = null,
+    val isPlaying: Boolean = false,
+    val isDownloading: Boolean = false,
+)

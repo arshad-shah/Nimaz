@@ -1,6 +1,5 @@
-package com.arshadshah.nimaz.widget.core
+package com.arshadshah.nimaz.core.common
 
-import com.arshadshah.nimaz.core.common.formatClockTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 

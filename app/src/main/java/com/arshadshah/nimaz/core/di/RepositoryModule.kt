@@ -35,6 +35,7 @@ import com.arshadshah.nimaz.data.platform.AndroidAppLocale
 import com.arshadshah.nimaz.data.platform.ServiceAdhanDownloader
 import com.arshadshah.nimaz.core.util.PrayerNotificationScheduler
 import com.arshadshah.nimaz.domain.repository.PrayerAlarmScheduler
+import com.arshadshah.nimaz.domain.repository.PrayerNotificationTester
 import com.arshadshah.nimaz.domain.repository.WidgetRefresher
 import com.arshadshah.nimaz.data.widget.WorkManagerWidgetRefresher
 import com.arshadshah.nimaz.data.text.AndroidStringProvider
@@ -476,6 +477,17 @@ abstract class RepositoryModule {
     abstract fun bindPrayerAlarmScheduler(
         impl: PrayerNotificationScheduler
     ): PrayerAlarmScheduler
+
+    /**
+     * The same class behind the domain's [PrayerNotificationTester] port. Two interfaces, one
+     * implementation: `sendTestNotification` posts a notification now, which is not what a
+     * scheduler does, so the seams are separate even though the Android class is not.
+     */
+    @Binds
+    @Singleton
+    abstract fun bindPrayerNotificationTester(
+        scheduler: PrayerNotificationScheduler,
+    ): PrayerNotificationTester
 
     @Binds
     @Singleton

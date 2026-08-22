@@ -46,6 +46,11 @@ dependencies {
     implementation(libs.firebase.messaging)
     implementation(libs.play.integrity)
     implementation(libs.play.services.location)
+    // Nearby Connections, for `data/sync` — device-to-device transfer of the user's own records.
+    // The slice arrives here rather than in `:feature:settings` for a reason no amount of reading
+    // the screen would suggest: it imports **21 DAOs and 14 entities** directly, and
+    // `:core:database` is not on a feature module's classpath.
+    implementation(libs.play.services.nearby)
 
     implementation(libs.ktor.client.core)
     implementation(libs.ktor.client.okhttp)

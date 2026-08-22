@@ -6,7 +6,7 @@ import com.arshadshah.nimaz.domain.model.PrayerTime
 import com.arshadshah.nimaz.domain.model.PrayerType
 import com.arshadshah.nimaz.domain.repository.PrayerRepository
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
-import com.arshadshah.nimaz.widget.core.formatWidgetTime
+import com.arshadshah.nimaz.core.common.formatWidgetTime
 import kotlinx.coroutines.flow.first
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime

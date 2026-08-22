@@ -40,7 +40,7 @@ import com.arshadshah.nimaz.widget.core.WidgetLabel
 import com.arshadshah.nimaz.widget.core.WidgetMessageBox
 import com.arshadshah.nimaz.widget.core.WidgetPill
 import com.arshadshah.nimaz.widget.core.prayerIconRes
-import com.arshadshah.nimaz.widget.core.prayerShortName
+import com.arshadshah.nimaz.presentation.foundation.tokens.prayerShortName
 
 class NextPrayerWidget : GlanceAppWidget() {
 

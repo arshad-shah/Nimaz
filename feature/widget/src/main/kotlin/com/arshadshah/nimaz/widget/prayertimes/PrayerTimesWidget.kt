@@ -41,7 +41,7 @@ import com.arshadshah.nimaz.widget.WidgetUpdateScheduler
 import com.arshadshah.nimaz.widget.core.WidgetCard
 import com.arshadshah.nimaz.widget.core.WidgetMessageBox
 import com.arshadshah.nimaz.widget.core.nextPrayerIndex
-import com.arshadshah.nimaz.widget.core.prayerShortName
+import com.arshadshah.nimaz.presentation.foundation.tokens.prayerShortName
 
 class PrayerTimesWidget : GlanceAppWidget() {
 

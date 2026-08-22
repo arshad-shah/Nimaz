@@ -1,5 +1,3 @@
-@file:androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
-
 package com.arshadshah.nimaz.presentation.screens.quran
 
 import androidx.compose.foundation.background
@@ -54,8 +52,6 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.molecules.VoiceOptionCard
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazSearchBar
-import com.arshadshah.nimaz.presentation.viewmodel.quran.QuranEvent
-import com.arshadshah.nimaz.presentation.viewmodel.quran.QuranViewModel
 import com.arshadshah.nimaz.presentation.viewmodel.settings.SettingsEvent
 import com.arshadshah.nimaz.presentation.viewmodel.settings.SettingsViewModel
 
@@ -73,7 +69,6 @@ internal fun recitationStyleLabel(style: RecitationStyle): String = stringResour
 fun SelectReciterScreen(
     onNavigateBack: () -> Unit,
     viewModel: SettingsViewModel = hiltViewModel(),
-    quranViewModel: QuranViewModel = hiltViewModel()
 ) {
     val quranState by viewModel.quranState.collectAsStateWithLifecycle()
     // Resolves aliases from older builds too, so a stored "alafasy" still highlights Mishary.
@@ -81,9 +76,14 @@ fun SelectReciterScreen(
     var searchQuery by remember { mutableStateOf("") }
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
-    // Track audio state for preview feedback
-    val audioState by quranViewModel.audioState.collectAsStateWithLifecycle()
-    var previewingReciterId by remember { mutableStateOf<String?>(null) }
+    // Preview state comes from `SettingsViewModel` as one value.
+    //
+    // It used to come from two: a `remember`ed id here, and `audioState` off a second
+    // `hiltViewModel<QuranViewModel>()`. That second ViewModel was a *fresh* instance — this
+    // destination has its own `NavBackStackEntry` — so its reader state was empty, the playlist it
+    // built was empty, and `playFromAyah` returned without playing. The button has never made a
+    // sound. See `SettingsEvent.PreviewReciter`.
+    val preview by viewModel.reciterPreview.collectAsStateWithLifecycle()
 
     val filteredReciters = remember(searchQuery) { QuranReciter.search(searchQuery) }
 
@@ -193,15 +193,15 @@ fun SelectReciterScreen(
                 key = { it.id }
             ) { reciter ->
                 val isSelected = reciter == currentReciter
-                val isThisPreviewing = previewingReciterId == reciter.id
+                val isThisPreviewing = preview.reciterId == reciter.id
 
                 VoiceOptionCard(
                     name = reciter.displayName,
                     primaryTag = recitationStyleLabel(reciter.style),
                     secondaryTag = reciter.country,
                     isSelected = isSelected,
-                    isPlaying = isThisPreviewing && audioState.isPlaying,
-                    isDownloading = isThisPreviewing && audioState.isDownloading,
+                    isPlaying = isThisPreviewing && preview.isPlaying,
+                    isDownloading = isThisPreviewing && preview.isDownloading,
                     // Reciter audio streams — no separate download step to gate.
                     isDownloaded = true,
                     previewContentDescription = stringResource(R.string.cd_preview),
@@ -209,12 +209,10 @@ fun SelectReciterScreen(
                         viewModel.onEvent(SettingsEvent.SetReciter(reciter.id))
                     },
                     onPreviewClick = {
-                        if (isThisPreviewing && audioState.isPlaying) {
-                            quranViewModel.onEvent(QuranEvent.StopAudio)
-                            previewingReciterId = null
+                        if (isThisPreviewing && preview.isPlaying) {
+                            viewModel.onEvent(SettingsEvent.StopReciterPreview)
                         } else {
-                            previewingReciterId = reciter.id
-                            quranViewModel.onEvent(QuranEvent.PreviewReciter(reciter.id))
+                            viewModel.onEvent(SettingsEvent.PreviewReciter(reciter.id))
                         }
                     }
                 )

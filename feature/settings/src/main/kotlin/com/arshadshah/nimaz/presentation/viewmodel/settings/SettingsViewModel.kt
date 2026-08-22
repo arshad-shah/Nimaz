@@ -6,7 +6,10 @@ import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.core.monitoring.catchAndReport
 import com.arshadshah.nimaz.core.monitoring.launchSafely
-import com.arshadshah.nimaz.core.util.PrayerNotificationScheduler
+import com.arshadshah.nimaz.domain.repository.PrayerAlarmScheduler
+import com.arshadshah.nimaz.domain.repository.AyahAudioItem
+import com.arshadshah.nimaz.domain.repository.QuranPlayback
+import com.arshadshah.nimaz.domain.repository.PrayerNotificationTester
 import com.arshadshah.nimaz.data.audio.AdhanAudioManager
 import com.arshadshah.nimaz.data.audio.AdhanSound
 import com.arshadshah.nimaz.data.audio.DownloadState
@@ -96,12 +99,14 @@ class SettingsViewModel @Inject constructor(
     private val prayerUseCases: PrayerUseCases,
     private val settingsRepository: SettingsRepository,
     private val quranUseCases: QuranUseCases,
-    private val prayerNotificationScheduler: PrayerNotificationScheduler,
+    private val prayerAlarmScheduler: PrayerAlarmScheduler,
+    private val prayerNotificationTester: PrayerNotificationTester,
     private val rescheduleNotificationsUseCase: RescheduleNotificationsUseCase,
     // Only the new failure paths report through this so far. The ~40 existing AppAnalytics
     // calls in this file are the analytics catalog's job (#355), not this layer's.
     private val telemetry: Telemetry,
     private val adhanAudioManager: AdhanAudioManager,
+    private val quranPlayback: QuranPlayback,
     private val clearAllUserData: ClearAllUserDataUseCase,
     private val todayProvider: TodayProvider,
 ) : ViewModel() {
@@ -117,6 +122,25 @@ class SettingsViewModel @Inject constructor(
 
     private val _quranState = MutableStateFlow(QuranSettingsUiState())
     val quranState: StateFlow<QuranSettingsUiState> = _quranState.asStateFlow()
+
+    private val _previewingReciterId = MutableStateFlow<String?>(null)
+
+    /**
+     * Which reciter is previewing, and whether its sample is actually playing yet.
+     *
+     * Two sources: the id this ViewModel last started, and the player's own state. The screen used
+     * to hold the id in `remember` and read the state off a second ViewModel; both live here now,
+     * which is what makes the pair consistent — the id alone cannot tell a card whether audio has
+     * started, and `audioState` alone cannot tell it *whose*.
+     */
+    val reciterPreview: StateFlow<ReciterPreviewUiState> =
+        combine(_previewingReciterId, quranPlayback.audioState) { id, audio ->
+            ReciterPreviewUiState(
+                reciterId = id,
+                isPlaying = id != null && audio.isPlaying,
+                isDownloading = id != null && audio.isDownloading,
+            )
+        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ReciterPreviewUiState())
 
     private val _duaState = MutableStateFlow(DuaSettingsUiState())
     val duaState: StateFlow<DuaSettingsUiState> = _duaState.asStateFlow()
@@ -781,6 +805,25 @@ class SettingsViewModel @Inject constructor(
                 ) { settingsRepository.setKeepScreenOn(event.enabled) }
             }
 
+            is SettingsEvent.PreviewReciter -> {
+                telemetry.featureUsed(AppAnalytics.Feature.SETTINGS, "preview_reciter")
+                _previewingReciterId.value = event.reciterId
+                quranPlayback.setReciter(event.reciterId, restartIfPlaying = false)
+                // An explicit one-ayah playlist. The old path handed `playFromAyah` whatever the
+                // reader happened to have loaded, which on this destination was nothing at all.
+                quranPlayback.setContinuousPlayback(false)
+                quranPlayback.playFromAyah(
+                    ayahGlobalId = PREVIEW_AYAH.ayahGlobalId,
+                    allAyahs = listOf(PREVIEW_AYAH),
+                    title = PREVIEW_TITLE,
+                )
+            }
+
+            SettingsEvent.StopReciterPreview -> {
+                _previewingReciterId.value = null
+                quranPlayback.stop()
+            }
+
             is SettingsEvent.SetReciter -> {
                 _quranState.update { it.copy(selectedReciterId = event.reciterId) }
                 launchSafely(
@@ -949,19 +992,19 @@ class SettingsViewModel @Inject constructor(
                 // notifications do not work" has been unanswerable.
                 telemetry.featureUsed(AppAnalytics.Feature.SETTINGS, "test_notification")
                 AppAnalytics.logTestNotification(allPrayers = false)
-                prayerNotificationScheduler.sendTestNotification()
+                prayerNotificationTester.sendTestNotification()
             }
 
             SettingsEvent.TestAllNotifications -> {
                 telemetry.featureUsed(AppAnalytics.Feature.SETTINGS, "test_all_notifications")
                 AppAnalytics.logTestNotification(allPrayers = true)
-                prayerNotificationScheduler.sendAllPrayerTestNotifications()
+                prayerNotificationTester.sendAllPrayerTestNotifications()
             }
 
             SettingsEvent.ResetNotifications -> {
                 telemetry.featureUsed(AppAnalytics.Feature.SETTINGS, "reset_notifications")
                 launchSafely(telemetry, AppAnalytics.Feature.SETTINGS, "on_event") {
-                    prayerNotificationScheduler.cancelAllPrayerNotifications()
+                    prayerAlarmScheduler.cancelAllPrayerNotifications()
                     rescheduleNotifications()
                 }
             }
@@ -1342,5 +1385,16 @@ class SettingsViewModel @Inject constructor(
          * translation can never drift apart.
          */
         const val PREVIEW_AYAH_ID = 1
+
+        /**
+         * The same verse, as the one-item playlist a reciter preview plays.
+         *
+         * A fixed ayah rather than "whatever is loaded": `SelectReciterScreen` loads no surah,
+         * which is exactly how the previous preview came to hand `playFromAyah` an empty list.
+         */
+        val PREVIEW_AYAH = AyahAudioItem(ayahGlobalId = 1, surahNumber = 1, ayahNumber = 1)
+
+        /** Shown in the media notification while a preview plays. */
+        const val PREVIEW_TITLE = "Al-Fatiha"
     }
 }
