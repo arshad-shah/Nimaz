@@ -358,7 +358,8 @@ fun NavGraph(
 
             taggedComposable<Route.Quran>(ScreenTags.Quran) {
                 AdaptiveQuranScreen(
-                    navController = navController,
+                    onNavigate = { navController.navigate(it) },
+                    onBack = { navController.popBackStack() },
                     onNavigateToSearch = { navController.navigate(Route.GlobalSearch) },
                     onNavigateToTopics = { navController.navigate(Route.QuranTopics) },
                     onNavigateToBrowse = { navController.navigate(Route.QuranBrowse()) },
@@ -431,7 +432,7 @@ fun NavGraph(
             taggedComposable<Route.More>(ScreenTags.More) {
                 val context = androidx.compose.ui.platform.LocalContext.current
                 AdaptiveMoreScreen(
-                    navController = navController,
+                    onNavigate = { navController.navigate(it) },
                     onRestartApp = { restartApp(context) },
                 )
             }
@@ -647,7 +648,7 @@ fun NavGraph(
             // Hadith screens
             taggedComposable<Route.HadithHome>(ScreenTags.HadithHome) {
                 AdaptiveHadithScreen(
-                    navController = navController,
+                    onNavigate = { navController.navigate(it) },
                     onNavigateBack = { navController.popBackStack() },
                     onNavigateToSearch = { navController.navigate(Route.HadithSearch) },
                     onNavigateToBookmarks = { navController.navigate(Route.HadithBookmarks) },
@@ -761,7 +762,7 @@ fun NavGraph(
             // Dua screens
             taggedComposable<Route.DuaHome>(ScreenTags.DuaHome) {
                 AdaptiveDuaScreen(
-                    navController = navController,
+                    onNavigate = { navController.navigate(it) },
                     onNavigateBack = { navController.popBackStack() },
                     onNavigateToBookmarks = { navController.navigate(Route.AllBookmarks) },
                     onNavigateToSearch = { navController.navigate(Route.DuaSearch) },
@@ -1017,7 +1018,8 @@ fun NavGraph(
             taggedComposable<Route.Settings>(ScreenTags.Settings) {
                 val context = androidx.compose.ui.platform.LocalContext.current
                 AdaptiveSettingsScreen(
-                    navController = navController,
+                    onNavigate = { navController.navigate(it) },
+                    onBack = { navController.popBackStack() },
                     onRestartApp = { restartApp(context) },
                 )
             }
@@ -1203,7 +1205,7 @@ fun NavGraph(
             taggedComposable<Route.Names>(ScreenTags.Names) { backStackEntry ->
                 val args = backStackEntry.toRoute<Route.Names>()
                 AdaptiveNamesScreen(
-                    navController = navController,
+                    onNavigate = { navController.navigate(it) },
                     initialTab = NamesTab.fromOrdinal(args.tab),
                     onNavigateBack = { navController.popBackStack() },
                 )
@@ -1249,7 +1251,7 @@ fun NavGraph(
             // Khatam screens
             taggedComposable<Route.KhatamList>(ScreenTags.KhatamList) {
                 AdaptiveKhatamScreen(
-                    navController = navController,
+                    onNavigate = { navController.navigate(it) },
                     onNavigateBack = { navController.popBackStack() },
                     onNavigateToCreate = { navController.navigate(Route.KhatamCreate) },
                 )

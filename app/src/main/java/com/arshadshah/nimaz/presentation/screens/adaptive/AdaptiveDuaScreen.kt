@@ -7,7 +7,6 @@ import androidx.compose.material3.adaptive.navigation.NavigableListDetailPaneSca
 import androidx.compose.material3.adaptive.navigation.rememberListDetailPaneScaffoldNavigator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.navigation.NavController
 import com.arshadshah.nimaz.core.navigation.Route
 import com.arshadshah.nimaz.presentation.screens.dua.DuaCategoryScreen
 import com.arshadshah.nimaz.presentation.screens.dua.DuaReaderScreen
@@ -19,7 +18,7 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun AdaptiveDuaScreen(
-    navController: NavController,
+    onNavigate: (Route) -> Unit,
     onNavigateBack: () -> Unit,
     onNavigateToBookmarks: () -> Unit,
     onNavigateToSearch: () -> Unit,
@@ -30,7 +29,7 @@ fun AdaptiveDuaScreen(
         DuasCollectionScreen(
             onNavigateBack = onNavigateBack,
             onNavigateToCategory = { categoryId ->
-                navController.navigate(Route.DuaCategory(categoryId))
+                onNavigate(Route.DuaCategory(categoryId))
             },
             onNavigateToBookmarks = onNavigateToBookmarks,
             onNavigateToSearch = onNavigateToSearch,
@@ -66,7 +65,7 @@ fun AdaptiveDuaScreen(
                             DuaReaderScreen(
                                 duaId = args.duaId,
                                 onNavigateBack = { scope.launch { navigator.navigateBack() } },
-                                onNavigateToSettings = { navController.navigate(Route.DuaSettings) },
+                                onNavigateToSettings = { onNavigate(Route.DuaSettings) },
                             )
                         } else {
                             DuaCategoryScreen(

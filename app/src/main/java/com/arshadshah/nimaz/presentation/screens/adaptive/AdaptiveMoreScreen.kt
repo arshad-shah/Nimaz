@@ -19,7 +19,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
 import com.arshadshah.nimaz.core.ui.R
 import com.arshadshah.nimaz.core.navigation.Route
 import com.arshadshah.nimaz.core.share.ContentShareManager
@@ -37,7 +36,7 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun AdaptiveMoreScreen(
-    navController: NavController,
+    onNavigate: (Route) -> Unit,
     onRestartApp: () -> Unit,
 ) {
     val windowSizeClass = currentWindowSizeClass()
@@ -90,26 +89,26 @@ fun AdaptiveMoreScreen(
 
     if (windowSizeClass.isCompact) {
         MoreMenuScreen(
-            onNavigateToSettings = { navController.navigate(Route.Settings) },
-            onNavigateToCalendar = { navController.navigate(Route.IslamicCalendar) },
-            onNavigateToAbout = { navController.navigate(Route.SettingsAbout) },
-            onNavigateToHelp = { navController.navigate(Route.SettingsHelp) },
-            onNavigateToHadith = { navController.navigate(Route.HadithHome) },
-            onNavigateToFasting = { navController.navigate(Route.FastingHome) },
-            onNavigateToZakat = { navController.navigate(Route.ZakatCalculator) },
-            onNavigateToDuas = { navController.navigate(Route.DuaHome) },
+            onNavigateToSettings = { onNavigate(Route.Settings) },
+            onNavigateToCalendar = { onNavigate(Route.IslamicCalendar) },
+            onNavigateToAbout = { onNavigate(Route.SettingsAbout) },
+            onNavigateToHelp = { onNavigate(Route.SettingsHelp) },
+            onNavigateToHadith = { onNavigate(Route.HadithHome) },
+            onNavigateToFasting = { onNavigate(Route.FastingHome) },
+            onNavigateToZakat = { onNavigate(Route.ZakatCalculator) },
+            onNavigateToDuas = { onNavigate(Route.DuaHome) },
             onNavigateToTafseer = {
-                navController.navigate(Route.TafseerChapters)
+                onNavigate(Route.TafseerChapters)
             },
-            onNavigateToPrayerTracker = { navController.navigate(Route.PrayerTracker) },
-            onNavigateToNightWorship = { navController.navigate(Route.NightWorship) },
-            onNavigateToPrayerTimes = { navController.navigate(Route.PrayerTimes) },
-            onNavigateToMonthlyPrayerTimes = { navController.navigate(Route.MonthlyPrayerTimes) },
-            onNavigateToKhatam = { navController.navigate(Route.KhatamList) },
-            onNavigateToNames = { navController.navigate(Route.Names()) },
-            onNavigateToQaida = { navController.navigate(Route.QaidaHome) },
-            onNavigateToTasbih = { navController.navigate(Route.TasbihHome) },
-            onNavigateToQibla = { navController.navigate(Route.Qibla) },
+            onNavigateToPrayerTracker = { onNavigate(Route.PrayerTracker) },
+            onNavigateToNightWorship = { onNavigate(Route.NightWorship) },
+            onNavigateToPrayerTimes = { onNavigate(Route.PrayerTimes) },
+            onNavigateToMonthlyPrayerTimes = { onNavigate(Route.MonthlyPrayerTimes) },
+            onNavigateToKhatam = { onNavigate(Route.KhatamList) },
+            onNavigateToNames = { onNavigate(Route.Names()) },
+            onNavigateToQaida = { onNavigate(Route.QaidaHome) },
+            onNavigateToTasbih = { onNavigate(Route.TasbihHome) },
+            onNavigateToQibla = { onNavigate(Route.Qibla) },
             onShareApp = shareApp,
             onRateApp = rateApp,
         )
@@ -122,8 +121,8 @@ fun AdaptiveMoreScreen(
             listPane = {
                 AnimatedPane {
                     MoreMenuScreen(
-                        onNavigateToSettings = { navController.navigate(Route.Settings) },
-                        onNavigateToCalendar = { navController.navigate(Route.IslamicCalendar) },
+                        onNavigateToSettings = { onNavigate(Route.Settings) },
+                        onNavigateToCalendar = { onNavigate(Route.IslamicCalendar) },
                         onNavigateToAbout = {
                             scope.launch {
                                 navigator.navigateTo(
@@ -140,22 +139,22 @@ fun AdaptiveMoreScreen(
                                 )
                             }
                         },
-                        onNavigateToHadith = { navController.navigate(Route.HadithHome) },
-                        onNavigateToFasting = { navController.navigate(Route.FastingHome) },
-                        onNavigateToZakat = { navController.navigate(Route.ZakatCalculator) },
-                        onNavigateToDuas = { navController.navigate(Route.DuaHome) },
+                        onNavigateToHadith = { onNavigate(Route.HadithHome) },
+                        onNavigateToFasting = { onNavigate(Route.FastingHome) },
+                        onNavigateToZakat = { onNavigate(Route.ZakatCalculator) },
+                        onNavigateToDuas = { onNavigate(Route.DuaHome) },
                         onNavigateToTafseer = {
-                            navController.navigate(Route.Tafseer(surahNumber = 1, ayahNumber = 1))
+                            onNavigate(Route.Tafseer(surahNumber = 1, ayahNumber = 1))
                         },
-                        onNavigateToPrayerTracker = { navController.navigate(Route.PrayerTracker) },
-                        onNavigateToNightWorship = { navController.navigate(Route.NightWorship) },
-                        onNavigateToPrayerTimes = { navController.navigate(Route.PrayerTimes) },
-                        onNavigateToMonthlyPrayerTimes = { navController.navigate(Route.MonthlyPrayerTimes) },
-                        onNavigateToKhatam = { navController.navigate(Route.KhatamList) },
-                        onNavigateToNames = { navController.navigate(Route.Names()) },
-                        onNavigateToQaida = { navController.navigate(Route.QaidaHome) },
-                        onNavigateToTasbih = { navController.navigate(Route.TasbihHome) },
-                        onNavigateToQibla = { navController.navigate(Route.Qibla) },
+                        onNavigateToPrayerTracker = { onNavigate(Route.PrayerTracker) },
+                        onNavigateToNightWorship = { onNavigate(Route.NightWorship) },
+                        onNavigateToPrayerTimes = { onNavigate(Route.PrayerTimes) },
+                        onNavigateToMonthlyPrayerTimes = { onNavigate(Route.MonthlyPrayerTimes) },
+                        onNavigateToKhatam = { onNavigate(Route.KhatamList) },
+                        onNavigateToNames = { onNavigate(Route.Names()) },
+                        onNavigateToQaida = { onNavigate(Route.QaidaHome) },
+                        onNavigateToTasbih = { onNavigate(Route.TasbihHome) },
+                        onNavigateToQibla = { onNavigate(Route.Qibla) },
                         onShareApp = shareApp,
                         onRateApp = rateApp,
                     )
@@ -187,7 +186,7 @@ fun AdaptiveMoreScreen(
                                         context.startActivity(intent)
                                     },
                                     onNavigateToLicenses = {
-                                        navController.navigate(Route.Licenses)
+                                        onNavigate(Route.Licenses)
                                     },
                                     onRateApp = rateApp,
                                     onShareApp = shareApp,
@@ -209,7 +208,7 @@ fun AdaptiveMoreScreen(
                                 HelpScreen(
                                     onNavigateBack = { scope.launch { navigator.navigateBack() } },
                                     onNavigateToTopic = { topicId ->
-                                        navController.navigate(Route.HelpTopicDetail(topicId))
+                                        onNavigate(Route.HelpTopicDetail(topicId))
                                     },
                                     onContact = {
                                         ContentShareManager.sendEmail(
