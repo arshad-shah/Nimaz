@@ -10,10 +10,16 @@ import kotlinx.coroutines.CancellationException
  * it impossible for a test to assert that an action had been logged. Two live
  * defects survived because of exactly that:
  *
- *  - `AppAnalytics.logOnboardingStep` has **never fired in production**, because the
- *    event that triggers it is emitted by no screen. The drop-off funnel is empty.
- *  - `logFeatureUsed("zakat", "calculate")` sits on a branch no screen can reach, so
- *    the dashboard reports that nobody calculates zakat.
+ *  - `AppAnalytics.logOnboardingStep` fired **zero times in production**: the event that
+ *    triggers it was emitted by no screen, so the drop-off funnel was empty.
+ *  - `logFeatureUsed("zakat", "calculate")` sat on a branch no screen could reach, so the
+ *    dashboard reported that nobody calculates zakat.
+ *
+ * Both are fixed — `OnboardingScreen` now drives the funnel from the pager's `snapshotFlow`,
+ * and `ZakatCalculatorScreen` dispatches `Recalculate` — and both are stated in the past tense
+ * deliberately. They are kept as the argument for the seam rather than as a bug list: what let
+ * each of them survive was that a static call cannot be asserted in a test, and that is the
+ * property this interface exists to remove.
  *
  * Depend on this interface from ViewModels and use cases; bind the Firebase-backed
  * implementation in production and `RecordingTelemetry` in tests.
@@ -110,11 +116,11 @@ interface Telemetry {
     /**
      * A step of the first-run flow was reached.
      *
-     * On the seam rather than left on the object for a specific reason: this event is the one
-     * [Telemetry]'s own KDoc names as having **never fired in production**, because the event
-     * that triggers it is emitted by no screen. It stayed invisible for as long as it did
-     * because a static call cannot be asserted in a test. Routing it here is what lets
-     * `OnboardingViewModelTest` prove the funnel actually emits.
+     * On the seam rather than left on the object for a specific reason: this is the event that
+     * once fired zero times in production, because nothing dispatched what triggers it. The
+     * dispatch was repaired in `OnboardingScreen`; what had let it stay broken unnoticed was
+     * that a static call cannot be asserted in a test. Routing it here is what lets
+     * `OnboardingFunnelTest` hold the repair in place.
      */
     fun onboardingStep(page: Int)
 

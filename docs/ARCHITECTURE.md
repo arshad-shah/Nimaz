@@ -711,8 +711,14 @@ function to `UseCaseModule` **in `:core:domain`**, mirroring `provideAsmaUlHusna
 
 `AppAnalytics` and `CrashReporter` are Kotlin `object`s holding a static `Context`. They no-op
 safely when Firebase is absent, so they never *blocked* testing — but a test could never assert
-that an action had been logged, and two live defects survived exactly that gap (a drop-off funnel
-that has never fired, and a `logFeatureUsed` call on a branch no screen can reach).
+that an action had been logged, and two defects survived exactly that gap: a drop-off funnel that
+fired zero times, and a `logFeatureUsed` call on a branch no screen could reach. Both have since
+been repaired; the rule below is what stops the next one lasting as long.
+
+The rule is now enforced by **`MonitoringSeamGuardTest`**, which scans every presentation source
+root for an invocation of either object. It excludes `:feature:widget`, whose Glance surfaces have
+no injection point, and it counts only calls — `AppAnalytics.Feature.QURAN` is a catalog constant
+this section *requires*, not a deviation.
 
 **ViewModels and use cases inject `Telemetry`** (`core/monitoring/Telemetry.kt`, in `:core:common`), bound to
 `FirebaseTelemetry` in `MonitoringModule`. Tests inject `RecordingTelemetry` and assert on its

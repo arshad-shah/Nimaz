@@ -16,8 +16,9 @@ import org.junit.Test
  * It matters for one concrete reason rather than tidiness: those objects hold a static
  * `Context` and no-op when Firebase is absent, so a unit test cannot observe them. Every call
  * that goes around the seam is an event no test can assert was sent — and this codebase has
- * already shipped two analytics defects that survived precisely that blind spot
- * (`logOnboardingStep`, which has never fired, and a `logFeatureUsed` on an unreachable branch).
+ * already shipped two analytics defects that survived precisely that blind spot: an onboarding
+ * funnel that fired zero times, and a `logFeatureUsed` on a branch no screen could reach. Both
+ * are repaired now — the point is how long each lasted while unassertable.
  *
  * ## What is allowed
  *

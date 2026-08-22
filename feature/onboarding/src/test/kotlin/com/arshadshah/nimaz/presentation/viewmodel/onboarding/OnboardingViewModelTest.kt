@@ -1,6 +1,7 @@
 package com.arshadshah.nimaz.presentation.viewmodel.onboarding
 
 import com.arshadshah.nimaz.core.monitoring.RecordingTelemetry
+import com.arshadshah.nimaz.core.monitoring.TelemetryCall
 import com.arshadshah.nimaz.domain.model.SearchLocation
 import com.arshadshah.nimaz.domain.repository.Coordinates
 import com.arshadshah.nimaz.domain.repository.DeviceLocationRepository
@@ -208,4 +209,102 @@ class OnboardingViewModelTest {
 
         assertThat(vm.state.value.error).isNull()
     }
+    // ---------------------------------------------------------------------
+    // The funnel. These could not be written before `Telemetry` carried these
+    // events: `AppAnalytics.logOnboardingStep` was a static call into an object
+    // holding a `Context`, so a JVM test could observe nothing, and the funnel
+    // fired zero times in production for as long as it took someone to notice
+    // by hand.
+    // ---------------------------------------------------------------------
+
+    @Test
+    fun `reaching a page reports that step to the funnel`() = runTest(dispatcher) {
+        val telemetry = RecordingTelemetry()
+        val vm = viewModel(telemetry = telemetry)
+        advanceUntilIdle()
+
+        vm.onEvent(OnboardingEvent.SetCurrentPage(2))
+        advanceUntilIdle()
+
+        assertThat(telemetry.onboardingSteps).containsExactly(2)
+    }
+
+    /**
+     * Every page reached is reported, in order — that is what makes it a funnel rather
+     * than a counter. A drop-off graph is read by comparing consecutive steps, so
+     * collapsing or reordering them makes the whole measurement meaningless.
+     */
+    @Test
+    fun `each step of the walkthrough is reported in the order it was reached`() =
+        runTest(dispatcher) {
+            val telemetry = RecordingTelemetry()
+            val vm = viewModel(telemetry = telemetry)
+            advanceUntilIdle()
+
+            listOf(0, 1, 2, 3).forEach { vm.onEvent(OnboardingEvent.SetCurrentPage(it)) }
+            advanceUntilIdle()
+
+            assertThat(telemetry.onboardingSteps).containsExactly(0, 1, 2, 3).inOrder()
+        }
+
+    /**
+     * Completion carries the permissions the user granted on the way through.
+     *
+     * These three booleans are the whole point of the event: "how many people finish
+     * onboarding" is answerable from the step funnel alone, but "how many finish having
+     * denied notifications" — the question that decides whether prayer alerts work at all —
+     * needs the payload.
+     */
+    @Test
+    fun `completing onboarding reports the permissions granted`() = runTest(dispatcher) {
+        val telemetry = RecordingTelemetry()
+        val vm = viewModel(
+            permissions = FakePermissions(location = true, notification = false),
+            power = FakePower(exempt = true),
+            telemetry = telemetry,
+        )
+        advanceUntilIdle()
+
+        vm.onEvent(OnboardingEvent.CompleteOnboarding)
+        advanceUntilIdle()
+
+        assertThat(telemetry.calls.filterIsInstance<TelemetryCall.OnboardingCompleted>())
+            .containsExactly(
+                TelemetryCall.OnboardingCompleted(
+                    locationGranted = true,
+                    notificationGranted = false,
+                    batteryOptimizationDisabled = true,
+                )
+            )
+    }
+
+    /**
+     * A location fix that throws reaches **both** monitoring channels through one call.
+     *
+     * This site used to be a `CrashReporter.recordException` followed by an
+     * `AppAnalytics.logError`, which is the pairing §6.1 asks for — written out by hand at
+     * every catch site, and therefore only present at some of them. `telemetry.failure`
+     * makes both channels the default; this pins that the migration kept both.
+     *
+     * The neighbouring test covers the *state* this produces (an error the user sees). This
+     * one covers the reporting, which nothing asserted before the seam existed.
+     */
+    @Test
+    fun `a failing location fix reports the stack trace and the frequency`() =
+        runTest(dispatcher) {
+            val telemetry = RecordingTelemetry()
+            val boom = IllegalStateException("location provider is off")
+            val vm = viewModel(
+                deviceLocation = FakeDeviceLocation(failWith = boom),
+                permissions = FakePermissions(location = true),
+                telemetry = telemetry,
+            )
+            advanceUntilIdle()
+
+            vm.onEvent(OnboardingEvent.DetectLocation)
+            advanceUntilIdle()
+
+            assertThat(telemetry.exceptions).contains(boom)
+            assertThat(telemetry.errors.map { it.type }).contains("detect_location")
+        }
 }

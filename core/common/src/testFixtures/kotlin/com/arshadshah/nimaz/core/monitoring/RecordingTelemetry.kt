@@ -5,9 +5,10 @@ package com.arshadshah.nimaz.core.monitoring
  *
  * `AppAnalytics` and `CrashReporter` are Kotlin `object`s with a static context, so
  * before [Telemetry] existed no test could assert that an action had been logged.
- * That is precisely why two live defects went unnoticed: `logOnboardingStep` has
- * never fired in production, and `logFeatureUsed("zakat", "calculate")` sits on a
- * branch no screen can reach.
+ * That is precisely why two defects went unnoticed for as long as they did:
+ * `logOnboardingStep` fired zero times in production, and `logFeatureUsed("zakat",
+ * "calculate")` sat on a branch no screen could reach. Both have since been repaired;
+ * they are recorded here in the past tense as the reason this double exists.
  *
  * Inject this in ViewModel tests and assert against [calls].
  */
