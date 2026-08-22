@@ -43,9 +43,41 @@ destinations, and none of them should need the `NavHost`.
 | File | Owns | Cross-check |
 |---|---|---|
 | `core/navigation/Routes.kt` | the `Route` sealed interface — every destination that exists | `NAV-01`, `NAV-02` |
-| `core/navigation/NavGraph.kt` | the `NavHost` — which routes are actually reachable | `NAV-03`, `NAV-04` |
+| `core/navigation/NavGraph.kt` | the `NavHost` and the app shell — **no destinations since PR 12** | — |
+| `presentation/screens/<feature>/<Feature>Graph.kt` × 11 | the destinations, one extension per feature | `NAV-03`, `NAV-04` |
 | `core/navigation/ScreenTags.kt` | the stable test tag per destination | `NAV-05` |
 | `core/navigation/AnnouncementRoutes.kt` + `HelpDeepLink.kt` | the two **external** entry grammars | `NAV-06` … `NAV-10` |
+
+### The graph is eleven files, not one
+
+`NavGraph.kt` was 1,420 lines: it imported 69 screen composables and registered all 94
+destinations, which meant **every screen in the app was reachable from one file**. No feature could
+move into its own module while that was true, because `:app` would have had to import from all
+eleven feature modules at once. PR 12 of #551 split it; the file is now 281 lines holding the
+`NavHost`, the navigation-suite shell and eleven calls:
+
+| graph | destinations |  | graph | destinations |
+|---|---:|---|---|---:|
+| `quranGraph` | 21 | | `aboutGraph` | 7 |
+| `contentGraph` | 21 | | `searchGraph` | 4 |
+| `settingsGraph` | 16 | | `toolsGraph` | 2 |
+| `trackerGraph` | 11 | | `calendarGraph` | 2 |
+| `prayerGraph` | 8 | | `onboardingGraph` | 1 |
+| | | | `homeGraph` | 1 |
+
+Each takes a `NavController` — not the `onNavigate: (Route) -> Unit` lambda the issue sketched,
+because 11 of the 158 `navigate` calls in those blocks pass a `NavOptionsBuilder` (`popUpTo`,
+`launchSingleTop`) that a `(Route) -> Unit` cannot express; flattening them would change
+back-stack behaviour silently. A graph function *is* navigation wiring, so holding the controller
+is its job. A **screen** must not, and `NavControllerConfinementTest` enforces that — it exempts
+`*Graph.kt` and nothing else.
+
+**Adding a destination now means adding it to its feature's graph**, not to `NavGraph.kt`.
+`EveryRouteIsRegisteredTest` compares the *set* of registered routes against the `Route`
+declarations, in both directions, and fails on a duplicate. NAV-03 compares totals, so it cannot
+see a route dropped in one graph while another is duplicated — which is exactly the shape a
+copy-paste across eleven files produces, and it fails as a blank screen at runtime rather than a
+build error.
 
 **Test hooks.** Every destination is wired via the `taggedComposable<Route.X>` helper — which was
 `private` inside `NavGraph.kt` and now lives in `core/navigation/TaggedComposable.kt`, because a
@@ -184,7 +216,8 @@ flowchart LR
 
 ## 3. Route reference
 
-All routes live in `core/navigation/Routes.kt` and are wired in `core/navigation/NavGraph.kt`
+All routes live in `core/navigation/Routes.kt` and are wired in the eleven feature graph
+extensions (`NavGraph.kt` calls them; it registers nothing itself)
 (94 `composable<Route.X>` destinations). `data object` = no args; `data class` = typed args.
 Every route below also has a `ScreenTags` entry of the same name.
 

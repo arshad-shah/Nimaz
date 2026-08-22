@@ -7,7 +7,6 @@ import androidx.compose.material3.adaptive.navigation.NavigableListDetailPaneSca
 import androidx.compose.material3.adaptive.navigation.rememberListDetailPaneScaffoldNavigator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.navigation.NavController
 import com.arshadshah.nimaz.core.navigation.Route
 import com.arshadshah.nimaz.presentation.screens.settings.AppearanceSettingsScreen
 import com.arshadshah.nimaz.presentation.screens.settings.LanguageScreen
@@ -26,24 +25,25 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun AdaptiveSettingsScreen(
-    navController: NavController,
+    onNavigate: (Route) -> Unit,
+    onBack: () -> Unit,
     onRestartApp: () -> Unit,
 ) {
     val windowSizeClass = currentWindowSizeClass()
 
     if (windowSizeClass.isCompact) {
         SettingsScreen(
-            onNavigateBack = { navController.popBackStack() },
-            onNavigateToPrayerSettings = { navController.navigate(Route.SettingsPrayerCalculation) },
-            onNavigateToNotifications = { navController.navigate(Route.SettingsNotifications) },
-            onNavigateToQuranSettings = { navController.navigate(Route.SettingsQuran) },
-            onNavigateToAppearance = { navController.navigate(Route.SettingsAppearance) },
-            onNavigateToLocation = { navController.navigate(Route.SettingsLocation) },
-            onNavigateToLanguage = { navController.navigate(Route.SettingsLanguage) },
-            onNavigateToWidgets = { navController.navigate(Route.SettingsWidgets) },
-            onNavigateToSync = { navController.navigate(Route.SettingsSync) },
-            onNavigateToSearchSettings = { navController.navigate(Route.SearchSettings) },
-            onNavigateToZakatSettings = { navController.navigate(Route.SettingsZakat) },
+            onNavigateBack = { onBack() },
+            onNavigateToPrayerSettings = { onNavigate(Route.SettingsPrayerCalculation) },
+            onNavigateToNotifications = { onNavigate(Route.SettingsNotifications) },
+            onNavigateToQuranSettings = { onNavigate(Route.SettingsQuran) },
+            onNavigateToAppearance = { onNavigate(Route.SettingsAppearance) },
+            onNavigateToLocation = { onNavigate(Route.SettingsLocation) },
+            onNavigateToLanguage = { onNavigate(Route.SettingsLanguage) },
+            onNavigateToWidgets = { onNavigate(Route.SettingsWidgets) },
+            onNavigateToSync = { onNavigate(Route.SettingsSync) },
+            onNavigateToSearchSettings = { onNavigate(Route.SearchSettings) },
+            onNavigateToZakatSettings = { onNavigate(Route.SettingsZakat) },
             onRestartApp = onRestartApp,
         )
     } else {
@@ -55,7 +55,7 @@ fun AdaptiveSettingsScreen(
             listPane = {
                 AnimatedPane {
                     SettingsScreen(
-                        onNavigateBack = { navController.popBackStack() },
+                        onNavigateBack = { onBack() },
                         onNavigateToPrayerSettings = {
                             scope.launch {
                                 navigator.navigateTo(
@@ -121,7 +121,7 @@ fun AdaptiveSettingsScreen(
                             }
                         },
                         onNavigateToSearchSettings = {
-                            navController.navigate(Route.SearchSettings)
+                            onNavigate(Route.SearchSettings)
                         },
                         onNavigateToZakatSettings = {
                             scope.launch {
@@ -159,10 +159,10 @@ fun AdaptiveSettingsScreen(
                             SettingsDetailPane.QURAN -> QuranSettingsScreen(
                                 onNavigateBack = { scope.launch { navigator.navigateBack() } },
                                 onNavigateToSelectReciter = {
-                                    navController.navigate(Route.SelectReciter)
+                                    onNavigate(Route.SelectReciter)
                                 },
                                 onNavigateToSelectTranslation = {
-                                    navController.navigate(Route.SelectTranslation)
+                                    onNavigate(Route.SelectTranslation)
                                 }
                             )
 

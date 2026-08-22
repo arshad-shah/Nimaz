@@ -160,9 +160,12 @@ The obligations, in short:
 5. DI lives in `core/di`: `@Binds` for interface→impl, `@Provides` for `XxxUseCases`,
    `@Singleton` in `SingletonComponent`.
 6. Navigation is type-safe: add a `@Serializable` `Route`, a `ScreenTags` entry, and a
-   `taggedComposable<Route.X>(ScreenTags.X)` in `NavGraph` — never a bare `composable`, which
-   leaves the screen untestable. (Not every `Route` is a screen — some features are tabs inside
-   a parent screen; validate before wiring.)
+   `taggedComposable<Route.X>(ScreenTags.X)` in **its feature's `<Feature>Graph.kt`** — never in
+   `NavGraph.kt`, which has registered nothing since PR 12 of #551, and never a bare `composable`,
+   which leaves the screen untestable. (Not every `Route` is a screen — some features are tabs
+   inside a parent screen; validate before wiring.) `EveryRouteIsRegisteredTest` compares the
+   registered *set* against the declared one, both directions; a missing registration is a blank
+   screen at runtime, not a build error.
 7. No hardcoded `Color(0xFF…)` in screens — use `MaterialTheme.colorScheme.*` / `NimazColors.*`
    and reuse `presentation/components` (atoms/molecules/organisms).
 8. **Interactive UI comes from the design system — never hand-rolled.** A button is `NimazButton`

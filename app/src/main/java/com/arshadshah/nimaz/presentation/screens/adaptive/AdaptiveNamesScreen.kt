@@ -7,7 +7,6 @@ import androidx.compose.material3.adaptive.navigation.NavigableListDetailPaneSca
 import androidx.compose.material3.adaptive.navigation.rememberListDetailPaneScaffoldNavigator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.navigation.NavController
 import com.arshadshah.nimaz.core.navigation.Route
 import com.arshadshah.nimaz.domain.model.NameCatalog
 import com.arshadshah.nimaz.presentation.screens.asma.AsmaUlHusnaDetailScreen
@@ -30,7 +29,7 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun AdaptiveNamesScreen(
-    navController: NavController,
+    onNavigate: (Route) -> Unit,
     initialTab: NamesTab,
     onNavigateBack: () -> Unit,
 ) {
@@ -40,10 +39,10 @@ fun AdaptiveNamesScreen(
         NamesScreen(
             initialTab = initialTab,
             onNavigateBack = onNavigateBack,
-            onNavigateToFavourites = { navController.navigate(Route.Favourites) },
-            onNavigateToAsmaUlHusna = { navController.navigate(Route.AsmaUlHusnaDetail(it)) },
-            onNavigateToAsmaUnNabi = { navController.navigate(Route.AsmaUnNabiDetail(it)) },
-            onNavigateToProphet = { navController.navigate(Route.ProphetDetail(it)) },
+            onNavigateToFavourites = { onNavigate(Route.Favourites) },
+            onNavigateToAsmaUlHusna = { onNavigate(Route.AsmaUlHusnaDetail(it)) },
+            onNavigateToAsmaUnNabi = { onNavigate(Route.AsmaUnNabiDetail(it)) },
+            onNavigateToProphet = { onNavigate(Route.ProphetDetail(it)) },
         )
         return
     }
@@ -67,7 +66,7 @@ fun AdaptiveNamesScreen(
                 NamesScreen(
                     initialTab = initialTab,
                     onNavigateBack = onNavigateBack,
-                    onNavigateToFavourites = { navController.navigate(Route.Favourites) },
+                    onNavigateToFavourites = { onNavigate(Route.Favourites) },
                     onNavigateToAsmaUlHusna = { openDetail(NameCatalog.ASMA_UL_HUSNA, it) },
                     onNavigateToAsmaUnNabi = { openDetail(NameCatalog.ASMA_UN_NABI, it) },
                     onNavigateToProphet = { openDetail(NameCatalog.PROPHETS, it) },

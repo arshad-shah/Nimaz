@@ -15,7 +15,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import com.arshadshah.nimaz.core.navigation.Route
 import com.arshadshah.nimaz.presentation.screens.quran.QuranBrowseScreen
 import com.arshadshah.nimaz.presentation.screens.quran.QuranHomeScreen
@@ -26,14 +25,15 @@ import kotlinx.coroutines.launch
 
 /**
  * Adaptive Quran screen that shows:
- * - Phone (Compact): QuranHomeScreen only, navigates to QuranReader via NavController
+ * - Phone (Compact): QuranHomeScreen only, navigates to QuranReader through `onNavigate`
  * - Tablet (Medium/Expanded): Two-pane layout with surah list on left, reader on right
  *   - Collapses to single pane when reader is in page/mushaf mode
  */
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun AdaptiveQuranScreen(
-    navController: NavController,
+    onNavigate: (Route) -> Unit,
+    onBack: () -> Unit,
     onNavigateToSearch: () -> Unit,
     onNavigateToTopics: () -> Unit,
     onNavigateToBrowse: () -> Unit,
@@ -49,13 +49,13 @@ fun AdaptiveQuranScreen(
             onNavigateToSearch = onNavigateToSearch,
             onNavigateToTopics = onNavigateToTopics,
             onNavigateToSurah = { surahNumber ->
-                navController.navigate(Route.QuranReader(surahNumber))
+                onNavigate(Route.QuranReader(surahNumber))
             },
             onNavigateToBrowse = onNavigateToBrowse,
             onNavigateToSaved = onNavigateToSaved,
             onNavigateToSettings = onNavigateToSettings,
             onNavigateToQuranAyah = { surahNumber, ayahNumber ->
-                navController.navigate(Route.QuranReader(surahNumber, ayahNumber))
+                onNavigate(Route.QuranReader(surahNumber, ayahNumber))
             },
             onNavigateToKhatam = onNavigateToKhatam,
         )
@@ -96,7 +96,7 @@ fun AdaptiveQuranScreen(
                     // the left, and home stopped being one when its 114-row browse tab became
                     // a destination. Home's other content is a phone-shaped front door.
                     QuranBrowseScreen(
-                        onNavigateBack = { navController.popBackStack() },
+                        onNavigateBack = { onBack() },
                         onNavigateToSurah = { surahNumber ->
                             scope.launch {
                                 navigator.navigateTo(
@@ -140,13 +140,13 @@ fun AdaptiveQuranScreen(
                             },
                             onNavigateToQuranSettings = onNavigateToSettings,
                             onNavigateToTafseer = { surah, ayah ->
-                                navController.navigate(Route.Tafseer(surah, ayah))
+                                onNavigate(Route.Tafseer(surah, ayah))
                             },
                             onNavigateToPassages = { surah, ayah ->
-                                navController.navigate(Route.SurahPassages(surah, ayah))
+                                onNavigate(Route.SurahPassages(surah, ayah))
                             },
                             onNavigateToSubjects = { surah ->
-                                navController.navigate(
+                                onNavigate(
                                     if (surah != null) {
                                         Route.SurahSubjects(surah)
                                     } else {

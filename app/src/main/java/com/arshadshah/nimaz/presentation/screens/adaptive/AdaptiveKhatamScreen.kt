@@ -7,7 +7,6 @@ import androidx.compose.material3.adaptive.navigation.NavigableListDetailPaneSca
 import androidx.compose.material3.adaptive.navigation.rememberListDetailPaneScaffoldNavigator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.navigation.NavController
 import com.arshadshah.nimaz.core.navigation.Route
 import com.arshadshah.nimaz.presentation.screens.khatam.KhatamDetailScreen
 import com.arshadshah.nimaz.presentation.screens.khatam.KhatamListScreen
@@ -18,7 +17,7 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun AdaptiveKhatamScreen(
-    navController: NavController,
+    onNavigate: (Route) -> Unit,
     onNavigateBack: () -> Unit,
     onNavigateToCreate: () -> Unit,
 ) {
@@ -28,11 +27,11 @@ fun AdaptiveKhatamScreen(
         KhatamListScreen(
             onNavigateBack = onNavigateBack,
             onNavigateToDetail = { khatamId ->
-                navController.navigate(Route.KhatamDetail(khatamId))
+                onNavigate(Route.KhatamDetail(khatamId))
             },
             onNavigateToCreate = onNavigateToCreate,
             onNavigateToRead = { surahNumber, ayahNumber ->
-                navController.navigate(Route.QuranReader(surahNumber, ayahNumber))
+                onNavigate(Route.QuranReader(surahNumber, ayahNumber))
             },
         )
     } else {
@@ -55,7 +54,7 @@ fun AdaptiveKhatamScreen(
                         },
                         onNavigateToCreate = onNavigateToCreate,
                         onNavigateToRead = { surahNumber, ayahNumber ->
-                            navController.navigate(Route.QuranReader(surahNumber, ayahNumber))
+                            onNavigate(Route.QuranReader(surahNumber, ayahNumber))
                         },
                     )
                 }
@@ -68,12 +67,12 @@ fun AdaptiveKhatamScreen(
                             khatamId = args.khatamId,
                             onNavigateBack = { scope.launch { navigator.navigateBack() } },
                             onNavigateToRead = { surahNumber, ayahNumber ->
-                                navController.navigate(
+                                onNavigate(
                                     Route.QuranReader(surahNumber, ayahNumber)
                                 )
                             },
                             onNavigateToEdit = { khatamId ->
-                                navController.navigate(Route.KhatamEdit(khatamId))
+                                onNavigate(Route.KhatamEdit(khatamId))
                             },
                         )
                     }

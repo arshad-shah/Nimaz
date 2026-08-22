@@ -7,7 +7,6 @@ import androidx.compose.material3.adaptive.navigation.NavigableListDetailPaneSca
 import androidx.compose.material3.adaptive.navigation.rememberListDetailPaneScaffoldNavigator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.navigation.NavController
 import com.arshadshah.nimaz.core.navigation.Route
 import com.arshadshah.nimaz.domain.model.HadithGrade
 import com.arshadshah.nimaz.presentation.screens.hadith.HadithChaptersScreen
@@ -20,7 +19,7 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun AdaptiveHadithScreen(
-    navController: NavController,
+    onNavigate: (Route) -> Unit,
     onNavigateBack: () -> Unit,
     onNavigateToSearch: () -> Unit,
     onNavigateToBookmarks: () -> Unit,
@@ -32,7 +31,7 @@ fun AdaptiveHadithScreen(
         HadithCollectionScreen(
             onNavigateBack = onNavigateBack,
             onNavigateToBook = { bookId ->
-                navController.navigate(Route.HadithBook(bookId))
+                onNavigate(Route.HadithBook(bookId))
             },
             onNavigateToSearch = onNavigateToSearch,
             onNavigateToBookmarks = onNavigateToBookmarks,
@@ -71,7 +70,7 @@ fun AdaptiveHadithScreen(
                                 bookId = args.bookId,
                                 chapterId = args.chapterId,
                                 onNavigateBack = { scope.launch { navigator.navigateBack() } },
-                                onNavigateToSettings = { navController.navigate(Route.HadithSettings) },
+                                onNavigateToSettings = { onNavigate(Route.HadithSettings) },
                             )
                         } else {
                             HadithChaptersScreen(
