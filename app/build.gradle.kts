@@ -1031,10 +1031,18 @@ tasks.register<JacocoReport>("jacocoTestReport") {
     // `--dry-run` reported it in eight seconds because storage happens whether or not the task's
     // credential-gated dependencies can run.
     //
-    // 1,500 is far below the real figure (several thousand classes across nineteen modules) and
-    // far above anything a broken report produces. It separates "no coverage" from "no report",
-    // which a percentage cannot.
-    val minimumCoveredClasses = 1_500
+    // 200, and the calibration matters more than the number. This started at 1,500 — guessed as
+    // "far below the real figure" — against a codebase with **1,170 top-level declarations in
+    // main sources**, and the merged report covers a subset of those. The guess was above
+    // plausible reality, on the one task in this build that cannot be run locally
+    // (`jacocoTestReport` depends on the credential-gated `fetchNimazData`), so it would have
+    // failed CI and nowhere else.
+    //
+    // The floor's job is only to separate "no coverage" from "no report" — a 237-byte report
+    // describes zero classes, and any real one describes hundreds. 200 does that with no chance
+    // of a false positive, which is the whole value of a floor: it must be impossible to trip
+    // except by the failure it names.
+    val minimumCoveredClasses = 200
     val classElement = "<class name="
 
     doLast {
