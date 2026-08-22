@@ -292,6 +292,10 @@ dependencies {
     // `R.string.*` now: `com.arshadshah.nimaz.R` holds only the widget and notification resources
     // that stayed, so presentation code imports `com.arshadshah.nimaz.core.ui.R`.
     implementation(project(":core:ui"))
+    // The route vocabulary — Routes, ScreenTags, taggedComposable, the announcement and help
+    // deep-link grammars. `api`-exposes navigation-compose. NavGraph.kt itself is still here;
+    // it is decomposed in PR 12.
+    implementation(project(":core:navigation"))
     // FakeTodayProvider / FakeSearchSettings / FakeStringProvider / RecordingWidgetRefresher —
     // one definition each, used by the ViewModel tests here and the tests over there.
     testImplementation(testFixtures(project(":core:domain")))
@@ -634,6 +638,22 @@ val coverageModules = listOf(
         ),
         sourceDir = "src/main/kotlin",
         packageRoot = "com/arshadshah/nimaz/presentation/components/atoms",
+    ),
+    CoverageModule(
+        gradlePath = ":core:navigation",
+        projectDir = rootProject.layout.projectDirectory.dir("core/navigation"),
+        testTask = "testDebugUnitTest",
+        classesGlobs = listOf(
+            "intermediates/built_in_kotlinc/debug/**/classes/**",
+            "intermediates/classes/debug/**",
+            "tmp/kotlin-classes/debug/**",
+        ),
+        execGlobs = listOf(
+            "jacoco/testDebugUnitTest.exec",
+            "outputs/unit_test_code_coverage/**/*.exec",
+        ),
+        sourceDir = "src/main/kotlin",
+        packageRoot = "com/arshadshah/nimaz/core/navigation",
     ),
 )
 

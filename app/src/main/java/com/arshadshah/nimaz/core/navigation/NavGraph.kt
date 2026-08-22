@@ -63,7 +63,7 @@ import com.arshadshah.nimaz.presentation.screens.adaptive.AdaptiveQuranScreen
 import com.arshadshah.nimaz.presentation.screens.adaptive.AdaptiveSettingsScreen
 import com.arshadshah.nimaz.presentation.screens.asma.AsmaUlHusnaDetailScreen
 import com.arshadshah.nimaz.presentation.screens.names.FavouritesScreen
-import com.arshadshah.nimaz.presentation.screens.names.NamesTab
+import com.arshadshah.nimaz.core.navigation.NamesTab
 import com.arshadshah.nimaz.presentation.screens.asmaunnabi.AsmaUnNabiDetailScreen
 import com.arshadshah.nimaz.presentation.screens.bookmarks.SavedScreen
 import com.arshadshah.nimaz.presentation.screens.calendar.IslamicCalendarScreen
@@ -1391,28 +1391,6 @@ fun NavGraph(
                     onNavigateBack = { navController.popBackStack() }
                 )
             }
-        }
-    }
-}
-
-/**
- * Like [composable], but wraps the destination content in a full-size [Box] carrying a
- * stable [testTag] ([ScreenTags]). This gives the instrumented UI tests a locale- and
- * copy-independent way to assert which screen is currently shown. The wrapper is
- * otherwise transparent: it forwards the [AnimatedContentScope] receiver and the
- * [NavBackStackEntry] so existing destination bodies (including `toRoute()` arg
- * extraction and any shared-element usage) behave exactly as before.
- */
-private inline fun <reified T : Any> NavGraphBuilder.taggedComposable(
-    tag: String,
-    crossinline content: @Composable AnimatedContentScope.(NavBackStackEntry) -> Unit,
-) {
-    composable<T> { entry ->
-        val scope = this
-        Box(modifier = Modifier
-            .fillMaxSize()
-            .testTag(tag)) {
-            scope.content(entry)
         }
     }
 }

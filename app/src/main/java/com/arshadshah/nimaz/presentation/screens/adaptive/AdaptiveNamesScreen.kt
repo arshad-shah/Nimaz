@@ -13,7 +13,7 @@ import com.arshadshah.nimaz.domain.model.NameCatalog
 import com.arshadshah.nimaz.presentation.screens.asma.AsmaUlHusnaDetailScreen
 import com.arshadshah.nimaz.presentation.screens.asmaunnabi.AsmaUnNabiDetailScreen
 import com.arshadshah.nimaz.presentation.screens.names.NamesScreen
-import com.arshadshah.nimaz.presentation.screens.names.NamesTab
+import com.arshadshah.nimaz.core.navigation.NamesTab
 import com.arshadshah.nimaz.presentation.screens.prophets.ProphetDetailScreen
 import com.arshadshah.nimaz.presentation.theme.currentWindowSizeClass
 import com.arshadshah.nimaz.presentation.theme.isCompact

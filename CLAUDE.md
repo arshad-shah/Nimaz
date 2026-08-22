@@ -4,7 +4,7 @@ Nimaz is an offline-first Android Islamic companion app: **Kotlin + Jetpack Comp
 **Clean Architecture** (`presentation → domain → data`) with **MVVM + UDF**, Hilt DI, Room,
 DataStore, type-safe Navigation Compose.
 
-**Mid-migration to Gradle modules (#551).** Six modules are out of `:app` so far:
+**Mid-migration to Gradle modules (#551).** Seven modules are out of `:app` so far:
 
 - **`:core:domain`** (`core/domain/`) — the whole domain layer, a pure JVM module. No Android SDK
   on its classpath, so `import android.*` there is a compile error, and `androidFreeClasspath`
@@ -40,6 +40,11 @@ DataStore, type-safe Navigation Compose.
   notification surface (`res/xml`, `res/drawable`, `res/layout`, `res/mipmap-*`, `themes.xml`,
   `widget_colors.xml`). Ten files need both and alias the app's as `AppR`. Component tests live
   in `core/ui/src/testDebug` with their own Robolectric pin.
+- **`:core:navigation`** (`core/navigation/`) — `Routes.kt`, `ScreenTags`, `taggedComposable`,
+  `ContentTargetRoutes`, and the announcement/help deep-link grammars. **Never imports
+  `presentation.screens`, `presentation.viewmodel` or `:core:ui`** — a `Route` carries a
+  destination's identity, never its label, which is why `NamesTab` moved here while its
+  `@StringRes` stayed in the screen. `NavGraph.kt` is still in `:app` until PR 12.
 
 Everything else is still `:app` and moves out over the remaining PRs. Files in
 `app/…/core/util/` whose destination module does not exist yet are staying there **on purpose** —
@@ -183,6 +188,7 @@ The obligations, in short:
 ./gradlew :core:datastore:check       # preference-key golden + moduleBoundary
 ./gradlew :core:data:check            # repository tests + public-API leak guard + moduleBoundary
 ./gradlew :core:ui:check              # design-system component tests + moduleBoundary + its lint
+./gradlew :core:navigation:check      # route vocabulary + the no-presentation-imports guard
 ./gradlew :app:jacocoTestReport --dry-run   # see below — seconds, and catches a whole class of red CI
 ./gradlew :app:lintDebug              # SLOW (~10 min) and CI-blocking — do not skip it
 python3 scripts/check_docs.py         # docs still describe the code (no toolchain needed)

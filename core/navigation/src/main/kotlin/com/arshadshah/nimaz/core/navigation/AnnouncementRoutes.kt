@@ -1,7 +1,6 @@
 package com.arshadshah.nimaz.core.navigation
 
 import com.arshadshah.nimaz.domain.model.MushafScript
-import com.arshadshah.nimaz.presentation.screens.names.NamesTab
 
 /**
  * Maps an announcement payload `route` key to an in-app Route, or null if

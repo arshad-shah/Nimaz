@@ -243,6 +243,70 @@ def routes() -> list[str]:
     return sorted(set(re.findall(r"^\s+data (?:object|class) (\w+)", src, re.M)))
 
 
+def strip_kotlin_comments(src: str) -> str:
+    """Kotlin source with `//` and `/* */` comments blanked out.
+
+    NAV-03 and NAV-04 count occurrences of `taggedComposable<Route.X>` in source. Without this,
+    a file that merely *documents* the pattern is counted as wiring a destination — which is
+    exactly what happened when `taggedComposable` was extracted into its own file in PR 11 of
+    #551 and its KDoc quoted the very call shape the checks look for. NAV-03 went red claiming
+    95 destinations against 94 documented, and the tempting "fix" is to edit the documented
+    number, which would then be wrong.
+
+    The same blanking helps NAV-04 in the other direction, though less dramatically: a
+    *block*-commented `composable<Route.X>` sitting at the start of a line used to be reported as
+    an untagged destination and no longer is. A `//`-commented one never was, because NAV-04's
+    regex anchors on `composable` following only whitespace.
+
+    Line structure is preserved (comments become blank, newlines survive) because NAV-04 anchors
+    its regex on the start of a line.
+    """
+    out = []
+    i, n = 0, len(src)
+    in_line, in_block, in_string = False, False, False
+    while i < n:
+        ch = src[i]
+        nxt = src[i + 1] if i + 1 < n else ""
+        if in_line:
+            if ch == "\n":
+                in_line = False
+                out.append(ch)
+            else:
+                out.append(" ")
+        elif in_block:
+            if ch == "*" and nxt == "/":
+                in_block = False
+                out.append("  ")
+                i += 2
+                continue
+            out.append("\n" if ch == "\n" else " ")
+        elif in_string:
+            out.append(ch)
+            if ch == "\\":
+                if i + 1 < n:
+                    out.append(nxt)
+                    i += 2
+                    continue
+            elif ch == '"':
+                in_string = False
+        elif ch == "/" and nxt == "/":
+            in_line = True
+            out.append("  ")
+            i += 2
+            continue
+        elif ch == "/" and nxt == "*":
+            in_block = True
+            out.append("  ")
+            i += 2
+            continue
+        else:
+            if ch == '"':
+                in_string = True
+            out.append(ch)
+        i += 1
+    return "".join(out)
+
+
 def nav_graph_source() -> str:
     """Every file that wires a destination, concatenated.
 
@@ -258,7 +322,7 @@ def nav_graph_source() -> str:
     """
     sources = [
         text
-        for text in (read(path) for path in source_files("*.kt"))
+        for text in (strip_kotlin_comments(read(path)) for path in source_files("*.kt"))
         if "taggedComposable<Route." in text or "composable<Route." in text
     ]
     return "\n".join(sources)
