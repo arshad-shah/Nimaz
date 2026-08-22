@@ -18,6 +18,11 @@ DataStore, type-safe Navigation Compose.
   the exported `schemas/`. **`room.schemaLocation` lives here**, and the migration/DAO
   instrumented tests deliberately stay in `app/src/androidTest` because CI runs exactly one
   androidTest APK. `ExportedSchemaIdentityTest` pins both identity hashes.
+- **`:core:datastore`** (`core/datastore/`) — all three DataStore files. **A screen or ViewModel
+  must never construct `PreferencesDataStore` itself** — read through the `SettingsSeams`
+  interface for the feature. A renamed preference key is silent, permanent data loss, so
+  `preference-keys.golden` records all 106 and removals need a `retired-preference-keys.txt`
+  entry.
 
 Everything else is still `:app` and moves out over the remaining PRs. Files in
 `app/…/core/util/` whose destination module does not exist yet are staying there **on purpose** —
@@ -158,6 +163,7 @@ The obligations, in short:
 ./gradlew :core:domain:check          # domain tests + androidFreeClasspath — seconds, no Android
 ./gradlew :core:common:check          # module tests + moduleBoundary + its own lint
 ./gradlew :core:database:check        # Room identity hashes + moduleBoundary
+./gradlew :core:datastore:check       # preference-key golden + moduleBoundary
 ./gradlew :app:jacocoTestReport --dry-run   # see below — seconds, and catches a whole class of red CI
 ./gradlew :app:lintDebug              # SLOW (~10 min) and CI-blocking — do not skip it
 python3 scripts/check_docs.py         # docs still describe the code (no toolchain needed)

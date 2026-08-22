@@ -6,9 +6,7 @@ import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.core.monitoring.catchAndReport
 import com.arshadshah.nimaz.core.monitoring.launchSafely
-import com.arshadshah.nimaz.domain.time.TodayProvider
 import com.arshadshah.nimaz.core.util.PrayerNotificationScheduler
-import com.arshadshah.nimaz.domain.prayer.PrayerTimeCalculator
 import com.arshadshah.nimaz.data.audio.AdhanAudioManager
 import com.arshadshah.nimaz.data.audio.AdhanSound
 import com.arshadshah.nimaz.data.audio.DownloadState
@@ -19,15 +17,19 @@ import com.arshadshah.nimaz.domain.model.Location
 import com.arshadshah.nimaz.domain.model.MushafScript
 import com.arshadshah.nimaz.domain.model.PrayerAlertStyle
 import com.arshadshah.nimaz.domain.model.PrayerTimes
+import com.arshadshah.nimaz.domain.model.UserPreferences
+import com.arshadshah.nimaz.domain.prayer.PrayerTimeCalculator
 import com.arshadshah.nimaz.domain.repository.AdhanDownloader
 import com.arshadshah.nimaz.domain.repository.AppLocale
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
+import com.arshadshah.nimaz.domain.time.TodayProvider
 import com.arshadshah.nimaz.domain.usecase.ClearAllUserDataUseCase
 import com.arshadshah.nimaz.domain.usecase.PrayerUseCases
 import com.arshadshah.nimaz.domain.usecase.QuranUseCases
 import com.arshadshah.nimaz.domain.usecase.notification.RescheduleNotificationsUseCase
 import com.arshadshah.nimaz.presentation.theme.NimazPatternStyle
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -41,7 +43,6 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
-import javax.inject.Inject
 
 /** The prayer whose settings stand in for the set on summary rows. */
 private const val FAJR = "fajr"
@@ -125,6 +126,27 @@ class SettingsViewModel @Inject constructor(
 
     private val _locationState = MutableStateFlow(LocationSettingsUiState())
     val locationState: StateFlow<LocationSettingsUiState> = _locationState.asStateFlow()
+
+    /**
+     * The stored preferences the widget previews are rendered against.
+     *
+     * Exposed as state because `WidgetsScreen` used to read them by constructing
+     * `PreferencesDataStore(context)` inside a composable helper — a *second* instance of a
+     * `@Singleton`, built outside Hilt, reading the same file the injected one owns. It worked,
+     * and it was one screen away from two writers disagreeing.
+     *
+     * Since #559 it is also a module-graph violation: `PreferencesDataStore` lives in
+     * `:core:datastore`, and a screen reaching for it is a feature depending on a data
+     * *implementation* rather than on the `LocationSettings` seam that exists for exactly this.
+     *
+     * `WhileSubscribed` rather than `Eagerly`: the previews are one screen, and this reads a file.
+     */
+    val widgetPreviewPreferences: StateFlow<UserPreferences?> =
+        settingsRepository.userPreferences.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = null,
+        )
 
     private val _shouldRestart = MutableStateFlow(false)
     val shouldRestart: StateFlow<Boolean> = _shouldRestart.asStateFlow()

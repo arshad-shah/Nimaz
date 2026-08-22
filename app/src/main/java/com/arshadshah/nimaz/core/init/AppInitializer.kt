@@ -11,7 +11,7 @@ import com.arshadshah.nimaz.data.audio.AdhanAudioManager
 import com.arshadshah.nimaz.data.audio.AdhanDownloadService
 import com.arshadshah.nimaz.data.audio.AdhanSound
 import com.arshadshah.nimaz.data.local.user.UserDataMigrator
-import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
+import com.arshadshah.nimaz.core.datastore.PreferencesDataStore
 import com.arshadshah.nimaz.data.widget.WidgetSettingsWatcher
 import com.arshadshah.nimaz.domain.repository.enabledPrayerTypes
 import com.arshadshah.nimaz.domain.repository.preReminderMinutesByPrayer

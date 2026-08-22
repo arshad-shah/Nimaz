@@ -283,6 +283,8 @@ dependencies {
     implementation(project(":core:common"))
     // Both Room databases. `api`-exposes room-runtime, so nothing here declares it again.
     implementation(project(":core:database"))
+    // PreferencesDataStore and the three DataStore files. `api`-exposes datastore-preferences.
+    implementation(project(":core:datastore"))
     // FakeTodayProvider / FakeSearchSettings / FakeStringProvider — one definition each, used by
     // the ViewModel tests here and the tests over there.
     testImplementation(testFixtures(project(":core:domain")))
@@ -577,6 +579,22 @@ val coverageModules = listOf(
         ),
         sourceDir = "src/main/kotlin",
         packageRoot = "com/arshadshah/nimaz/data/local",
+    ),
+    CoverageModule(
+        gradlePath = ":core:datastore",
+        projectDir = rootProject.layout.projectDirectory.dir("core/datastore"),
+        testTask = "testDebugUnitTest",
+        classesGlobs = listOf(
+            "intermediates/built_in_kotlinc/debug/**/classes/**",
+            "intermediates/classes/debug/**",
+            "tmp/kotlin-classes/debug/**",
+        ),
+        execGlobs = listOf(
+            "jacoco/testDebugUnitTest.exec",
+            "outputs/unit_test_code_coverage/**/*.exec",
+        ),
+        sourceDir = "src/main/kotlin",
+        packageRoot = "com/arshadshah/nimaz/core/datastore",
     ),
 )
 

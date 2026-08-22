@@ -13,7 +13,7 @@ import com.arshadshah.nimaz.data.audio.AdhanAudioManager
 import com.arshadshah.nimaz.data.audio.AdhanDownloadService
 import com.arshadshah.nimaz.data.audio.AdhanPlaybackService
 import com.arshadshah.nimaz.data.audio.AdhanSound
-import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
+import com.arshadshah.nimaz.core.datastore.PreferencesDataStore
 import com.arshadshah.nimaz.domain.model.KhatamProgressCalculator
 import com.arshadshah.nimaz.domain.model.PrayerAlertStyle
 import com.arshadshah.nimaz.domain.model.PrayerName

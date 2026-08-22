@@ -3,7 +3,7 @@ package com.arshadshah.nimaz.data.repository
 import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.data.ai.AiApiClient
 import com.arshadshah.nimaz.data.ai.AiHttpResult
-import com.arshadshah.nimaz.data.ai.DeviceIdProvider
+import com.arshadshah.nimaz.core.datastore.DeviceIdProvider
 import com.arshadshah.nimaz.data.ai.IntegrityTokenProvider
 import com.arshadshah.nimaz.data.ai.dto.AssistInput
 import com.arshadshah.nimaz.data.ai.dto.AssistOutput

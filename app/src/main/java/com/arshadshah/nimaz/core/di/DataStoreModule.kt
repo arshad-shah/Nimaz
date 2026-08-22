@@ -1,7 +1,7 @@
 package com.arshadshah.nimaz.core.di
 
 import android.content.Context
-import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
+import com.arshadshah.nimaz.core.datastore.PreferencesDataStore
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

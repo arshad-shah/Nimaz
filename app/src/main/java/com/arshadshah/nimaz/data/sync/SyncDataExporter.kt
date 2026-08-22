@@ -22,7 +22,7 @@ import com.arshadshah.nimaz.data.local.database.dao.TasbihDao
 import com.arshadshah.nimaz.data.local.user.TafseerUserDao
 import com.arshadshah.nimaz.data.local.user.TasbihSessionDao
 import com.arshadshah.nimaz.data.local.database.dao.ZakatDao
-import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
+import com.arshadshah.nimaz.core.datastore.PreferencesDataStore
 import javax.inject.Inject
 import javax.inject.Singleton
 

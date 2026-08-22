@@ -1,6 +1,6 @@
 package com.arshadshah.nimaz.data.repository
 
-import com.arshadshah.nimaz.data.local.datastore.AnnouncementLocalDataSource
+import com.arshadshah.nimaz.core.datastore.AnnouncementLocalDataSource
 import com.arshadshah.nimaz.domain.model.Announcement
 import com.arshadshah.nimaz.domain.model.AnnouncementType
 import com.google.common.truth.Truth.assertThat
