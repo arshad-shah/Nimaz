@@ -1031,17 +1031,18 @@ tasks.register<JacocoReport>("jacocoTestReport") {
     // `--dry-run` reported it in eight seconds because storage happens whether or not the task's
     // credential-gated dependencies can run.
     //
-    // 200, and the calibration matters more than the number. This started at 1,500 — guessed as
-    // "far below the real figure" — against a codebase with **1,170 top-level declarations in
-    // main sources**, and the merged report covers a subset of those. The guess was above
-    // plausible reality, on the one task in this build that cannot be run locally
-    // (`jacocoTestReport` depends on the credential-gated `fetchNimazData`), so it would have
-    // failed CI and nowhere else.
+    // 200, against a real report of **4,736 classes** — measured by running the task, which is
+    // the only way this number was ever going to be right.
     //
-    // The floor's job is only to separate "no coverage" from "no report" — a 237-byte report
-    // describes zero classes, and any real one describes hundreds. 200 does that with no chance
-    // of a false positive, which is the whole value of a floor: it must be impossible to trip
-    // except by the failure it names.
+    // It was first guessed at 1,500, then "corrected" to 200 on the reasoning that the codebase
+    // has 1,170 top-level declarations so 1,500 must be too high. Both the guess and the
+    // correction were arrived at without running `jacocoTestReport` even once. JaCoCo counts
+    // compiled classes — nested classes, lambdas, Compose synthetics — and this report also
+    // spans `androidx/*`, so 1,170 was never the comparable figure.
+    //
+    // 200 stays, because a floor should be impossible to trip except by the failure it names and
+    // 4,736/200 is ample margin. What changed is that it is now a measurement rather than an
+    // argument.
     val minimumCoveredClasses = 200
     val classElement = "<class name="
 
@@ -1052,7 +1053,7 @@ tasks.register<JacocoReport>("jacocoTestReport") {
         // through. Same shape as `dir.isDirectory` in `WidgetGlyphGuardTest` and the missing-root
         // filter in `AnalyticsReachabilityTest`, both of which this epic had to turn around.
         check(report.isFile) {
-            "No merged coverage report at ${'$'}{report.absolutePath}. jacocoTestReport ran and " +
+            "No merged coverage report at ${report.absolutePath}. jacocoTestReport ran and " +
                 "produced nothing, which reads as 0% rather than as an error."
         }
         val text = report.readText()
@@ -1061,13 +1062,13 @@ tasks.register<JacocoReport>("jacocoTestReport") {
         // difference: a report that parses but describes no class at all.
         val classes = text.split(classElement).size - 1
         check(classes >= minimumCoveredClasses) {
-            "The merged coverage report describes ${'$'}classes classes, below the floor of " +
-                "${'$'}minimumCoveredClasses. A 237-byte report has been shipped before and was " +
+            "The merged coverage report describes $classes classes, below the floor of " +
+                "$minimumCoveredClasses. A 237-byte report has been shipped before and was " +
                 "read as 0% coverage rather than as a broken report."
         }
 
         val missing = floor.filter { (_, packageRoot) ->
-            """<package name="${'$'}packageRoot""" !in text
+            """<package name="$packageRoot""" !in text
         }
         check(missing.isEmpty()) {
             "The merged coverage report contains no classes from " +

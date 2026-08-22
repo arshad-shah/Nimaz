@@ -161,9 +161,10 @@ class FeatureTestsLiveWithSubjectTest {
          * left in PR 21). Both figures fall as modules leave, so the floors sit well below — they
          * exist to catch a scan that reads nothing, not to pin a count.
          *
-         * Measuring matters: the coverage floor added in PR 22 was *guessed* at 1,500 classes
-         * against a codebase with 1,170 top-level declarations, and would have failed CI on the
-         * one task that cannot run locally. A floor above plausible reality is not a floor.
+         * Measuring matters, and the coverage floor added in PR 22 is the cautionary tale: it was
+         * guessed at 1,500, then re-guessed at 200 from a declaration count, and only *measured*
+         * after CI failed for an unrelated reason. The real figure is 4,736. Neither guess was
+         * informed by running the task.
          */
         const val MINIMUM_SYMBOLS = 1_500
         const val MINIMUM_TEST_FILES = 40
