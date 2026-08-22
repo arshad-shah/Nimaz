@@ -4,8 +4,14 @@ Nimaz is an offline-first Android Islamic companion app: **Kotlin + Jetpack Comp
 **Clean Architecture** (`presentation → domain → data`) with **MVVM + UDF**, Hilt DI, Room,
 DataStore, type-safe Navigation Compose.
 
-**Mid-migration to Gradle modules (#551).** Eight modules are out of `:app` so far — seven
-`:core:*` and the first `:feature:*`:
+**The Gradle module split (#551) is complete.** Nineteen modules plus `:baselineprofile` —
+seven `:core:*`, eleven `:feature:*`, and `:app` reduced to 52 files / 11,484 lines, 8% of the
+codebase. What is left in `:app` is what cannot leave: `MainActivity`, `NimazApp`,
+`AppInitializer`, the manifest entry points, the adhan players and prayer-notification
+machinery, `QuranAudioManager`, AboutLibraries, `screens/home`, and the seven Hilt bindings
+pinned to one of those.
+
+The eighteen modules that came out of it, and what each one owns:
 
 - **`:core:domain`** (`core/domain/`) — the whole domain layer, a pure JVM module. No Android SDK
   on its classpath, so `import android.*` there is a compile error, and `androidFreeClasspath`
@@ -88,7 +94,7 @@ DataStore, type-safe Navigation Compose.
   `PrayerTimeCard` and `PrayerSkyScene` went to `:core:ui`, not here, because `HomeScreen` and
   `HomeHero` read them too. This is the only module with a camera dependency (`ArQiblaView`).
 - **`:feature:settings`** (`feature/settings/`) — the last feature module: 24 screens, the
-  1,324-line `SettingsViewModel`, plus location and sync. **Five screens arrive here from other
+  1,400-line `SettingsViewModel`, plus location and sync. **Five screens arrive here from other
   features' directories** (`DuaSettingsScreen`, `HadithSettingsScreen`, `SelectReciterScreen`,
   `SelectTranslationScreen`, `LocationScreen`) — every one dispatches `SettingsEvent`, which is
   the ViewModel axis cutting the other way for the last time. **`data/sync` did *not* come with
@@ -117,9 +123,11 @@ exists — and **`BuildConfig` and the app's `R` cannot travel**, so app identit
 `LocalAppIdentity` and an `:app`-only implementation moves as a *port* (`AppUpdateController`),
 never as the class.
 
-Everything else is still `:app` and moves out over the remaining PRs. Files in
-`app/…/core/util/` whose destination module does not exist yet are staying there **on purpose** —
-see `docs/ARCHITECTURE.md` §2 for which goes where. A move does **not** change package names, so imports read the same either
+What is still in `app/…/core/util/` — `BootReceiver`, `PrayerRescheduler`, `InAppUpdateManager`,
+`PrayerNotificationScheduler`, `PrayerAlarmTimes`, `NotificationContentHelper` — stays there **for
+good**, not until some later PR: each is a manifest entry point or is pinned to `:app` by one, and
+their consumers are the settings surface and `AppInitializer` rather than a feature. See
+`docs/ARCHITECTURE.md` §2. A move does **not** change package names, so imports read the same either
 side of a module boundary. Two consequences worth knowing before you edit:
 
 - **Kotlin will not smart-cast a `val` from another module.** `if (ayah.translation != null)
