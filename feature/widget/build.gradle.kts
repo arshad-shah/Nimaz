@@ -78,7 +78,15 @@ dependencies {
     implementation(libs.glance.appwidget)
     implementation(libs.glance.material3)
     implementation(libs.work.runtime.ktx)
+    // The six refresh Workers are @HiltWorker. `nimaz.android.hilt` deliberately leaves this
+    // processor to the module that needs it, and **omitting it fails at runtime, not at build
+    // time**: without it no `_AssistedFactory` is generated, `HiltWorkerFactory` returns null for
+    // these classes, and WorkManager falls back to reflecting a `(Context, WorkerParameters)`
+    // constructor that an @AssistedInject worker does not have. It compiled, `:feature:widget:check`
+    // was green, and six `WidgetWorkersTest` cases died on the emulator with NoSuchMethodException.
+    // `HiltWorkerProcessorTest` now fails the build instead.
     implementation(libs.hilt.work)
+    ksp(libs.hilt.work.compiler)
 
     testImplementation(libs.junit)
     testImplementation(libs.google.truth)

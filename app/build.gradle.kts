@@ -480,6 +480,16 @@ tasks.withType<Test>().configureEach {
             .withPropertyName(name)
             .withPathSensitivity(PathSensitivity.RELATIVE)
     }
+
+    // `HiltWorkerProcessorTest` reads every module's build file. Sources reach the test task
+    // through the runtime classpath already; build files do not, and a build file is exactly
+    // what that test exists to check.
+    inputs.files(
+        rootProject.layout.projectDirectory.asFileTree.matching {
+            include("*/build.gradle.kts", "*/*/build.gradle.kts")
+            exclude("**/build/**")
+        }
+    ).withPropertyName("moduleBuildFiles").withPathSensitivity(PathSensitivity.RELATIVE)
 }
 
 // Class-file noise that should never count toward coverage (generated code,
