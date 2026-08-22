@@ -262,18 +262,6 @@ fun NavGraphBuilder.quranGraph(navController: NavController) {
         )
     }
 
-    taggedComposable<Route.SelectReciter>(ScreenTags.SelectReciter) {
-        SelectReciterScreen(
-            onNavigateBack = { navController.popBackStack() }
-        )
-    }
-
-    taggedComposable<Route.SelectTranslation>(ScreenTags.SelectTranslation) {
-        SelectTranslationScreen(
-            onNavigateBack = { navController.popBackStack() }
-        )
-    }
-
     // Khatam screens
     taggedComposable<Route.KhatamList>(ScreenTags.KhatamList) {
         AdaptiveKhatamScreen(

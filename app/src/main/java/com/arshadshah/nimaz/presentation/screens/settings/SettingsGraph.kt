@@ -9,6 +9,8 @@ import com.arshadshah.nimaz.core.navigation.restartApp
 import com.arshadshah.nimaz.core.navigation.taggedComposable
 import com.arshadshah.nimaz.presentation.screens.adaptive.AdaptiveSettingsScreen
 import com.arshadshah.nimaz.presentation.screens.dua.DuaSettingsScreen
+import com.arshadshah.nimaz.presentation.screens.quran.SelectReciterScreen
+import com.arshadshah.nimaz.presentation.screens.quran.SelectTranslationScreen
 import com.arshadshah.nimaz.presentation.screens.hadith.HadithSettingsScreen
 
 /**
@@ -37,6 +39,22 @@ fun NavGraphBuilder.settingsGraph(navController: NavController) {
     // to `:feature:settings` with `SettingsViewModel` in PR 21.
     taggedComposable<Route.DuaSettings>(ScreenTags.DuaSettings) {
         DuaSettingsScreen(onNavigateBack = { navController.popBackStack() })
+    }
+
+    // Reciter and translation pickers. Same rule as the dua and hadith settings screens above:
+    // both drive `SettingsViewModel` and dispatch `SettingsEvent`, so they belong to the settings
+    // feature, not to `:feature:quran` whose `screens/quran` directory they sit in. All four move
+    // together in PR 21.
+    taggedComposable<Route.SelectReciter>(ScreenTags.SelectReciter) {
+        SelectReciterScreen(
+            onNavigateBack = { navController.popBackStack() }
+        )
+    }
+
+    taggedComposable<Route.SelectTranslation>(ScreenTags.SelectTranslation) {
+        SelectTranslationScreen(
+            onNavigateBack = { navController.popBackStack() }
+        )
     }
 
     taggedComposable<Route.HadithSettings>(ScreenTags.HadithSettings) {

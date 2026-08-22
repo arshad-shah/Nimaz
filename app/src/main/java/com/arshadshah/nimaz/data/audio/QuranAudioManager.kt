@@ -37,44 +37,12 @@ import java.io.File
 import java.util.concurrent.ConcurrentHashMap
 import com.arshadshah.nimaz.domain.model.RecitationRepeat
 import com.arshadshah.nimaz.domain.model.RecitationSpeed
+import com.arshadshah.nimaz.domain.model.AudioState
+import com.arshadshah.nimaz.domain.repository.AyahAudioItem
+import com.arshadshah.nimaz.domain.repository.QuranPlayback
 import javax.inject.Inject
 import javax.inject.Singleton
 
-data class AudioState(
-    val isPlaying: Boolean = false,
-    val isDownloading: Boolean = false,
-    val downloadProgress: Float = 0f,
-    val currentAyahId: Int = 0,
-    val currentSurahNumber: Int = 0,
-    // Total playlist duration and position (across all ayahs)
-    val duration: Long = 0L,
-    val position: Long = 0L,
-    val currentTitle: String = "",
-    val currentSubtitle: String? = null,
-    val reciterName: String = QuranReciter.DEFAULT.displayName,
-    val isActive: Boolean = false,
-    val error: String? = null,
-    // Playlist progress for surah-level tracking
-    val currentAyahIndex: Int = 0,
-    val totalAyahs: Int = 0,
-    // Download progress for batch downloads
-    val downloadedCount: Int = 0,
-    val totalToDownload: Int = 0,
-    val isPreparing: Boolean = false,
-    /** What to go back and say again — off, a verse N times, a range, or the whole surah. */
-    val repeat: RecitationRepeat = RecitationRepeat.Off,
-    /** Playback rate. Deliberately not persisted — see [QuranAudioManager.setSpeed]. */
-    val speed: RecitationSpeed = RecitationSpeed.DEFAULT,
-    /**
-     * Whether the reader follows the recitation: scrolling the verse list, or turning the
-     * mushaf page, to keep the verse being recited on screen.
-     */
-    val followAlong: Boolean = false,
-) {
-    // Calculate surah progress as percentage (0.0 to 1.0)
-    val surahProgress: Float
-        get() = if (duration > 0) position.toFloat() / duration else 0f
-}
 
 @UnstableApi
 @Singleton
@@ -90,14 +58,14 @@ class QuranAudioManager @Inject constructor(
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
     /** What to play when a surah ends — see [NextSurahPlaylistSource]. */
     private val nextSurah: NextSurahPlaylistSource,
-) {
+) : QuranPlayback {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private var player: ExoPlayer? = null
     private var positionTrackingJob: Job? = null
     private var downloadJob: Job? = null
 
     private val _audioState = MutableStateFlow(AudioState())
-    val audioState: StateFlow<AudioState> = _audioState.asStateFlow()
+    override val audioState: StateFlow<AudioState> = _audioState.asStateFlow()
 
     // Reciter CDN ID and bitrate - dynamically set from preferences
     private var reciterCdnId = DEFAULT_CDN.first
@@ -138,7 +106,7 @@ class QuranAudioManager @Inject constructor(
      * Set whether audio should auto-advance to next ayah when current one ends.
      * When false, playback stops after the current ayah completes.
      */
-    fun setContinuousPlayback(enabled: Boolean) {
+    override fun setContinuousPlayback(enabled: Boolean) {
         continuousPlayback = enabled
     }
 
@@ -204,7 +172,7 @@ class QuranAudioManager @Inject constructor(
      * and a range has to come back to its start rather than loop a single item forever.
      * `REPEAT_MODE_ONE` can express neither.
      */
-    fun setRepeat(repeat: RecitationRepeat) {
+    override fun setRepeat(repeat: RecitationRepeat) {
         ayahRepeatsDone = 0
         player?.repeatMode = if (repeat is RecitationRepeat.Surah) {
             Player.REPEAT_MODE_ALL
@@ -221,13 +189,13 @@ class QuranAudioManager @Inject constructor(
      * madd does not want every session for the next year slowed; the setting belongs to the
      * sitting, not to the person.
      */
-    fun setSpeed(speed: RecitationSpeed) {
+    override fun setSpeed(speed: RecitationSpeed) {
         player?.setPlaybackSpeed(speed.multiplier)
         _audioState.update { it.copy(speed = speed) }
     }
 
     /** Whether the reader scrolls or turns pages to keep the recited verse visible. */
-    fun setFollowAlong(enabled: Boolean) {
+    override fun setFollowAlong(enabled: Boolean) {
         _audioState.update { it.copy(followAlong = enabled) }
     }
 
@@ -306,7 +274,7 @@ class QuranAudioManager @Inject constructor(
      * Seek to a total playlist position by finding the right media item and offset.
      * Uses pre-computed durations for accurate item boundary calculation.
      */
-    fun seekToTotal(totalPositionMs: Long) {
+    override fun seekToTotal(totalPositionMs: Long) {
         val p = player ?: return
         if (precomputedDurations.isEmpty()) {
             p.seekTo(totalPositionMs)
@@ -409,7 +377,7 @@ class QuranAudioManager @Inject constructor(
      *   immediately queues its own one-verse playlist; rebuilding the old one first would
      *   download a whole surah under the new reciter and throw it away a frame later.
      */
-    fun setReciter(reciterId: String?, restartIfPlaying: Boolean = true) {
+    override fun setReciter(reciterId: String?, restartIfPlaying: Boolean) {
         val reciter = QuranReciter.fromId(reciterId)
         val (cdnId, bitrate) = RECITER_CDN_MAP[reciter] ?: DEFAULT_CDN
         val changed = cdnId != reciterCdnId || bitrate != reciterBitrate
@@ -427,12 +395,6 @@ class QuranAudioManager @Inject constructor(
         val resumeIndex = _audioState.value.currentAyahIndex.coerceIn(0, playlist.lastIndex)
         playAyahsSequentially(playlist, startIndex = resumeIndex, title = playlistTitle)
     }
-
-    data class AyahAudioItem(
-        val ayahGlobalId: Int,
-        val surahNumber: Int,
-        val ayahNumber: Int
-    )
 
     @OptIn(UnstableApi::class)
     private fun getOrCreatePlayer(): ExoPlayer {
@@ -790,7 +752,7 @@ class QuranAudioManager @Inject constructor(
         }
     }
 
-    fun playSurah(surahNumber: Int, surahName: String, ayahs: List<AyahAudioItem>) {
+    override fun playSurah(surahNumber: Int, surahName: String, ayahs: List<AyahAudioItem>) {
         val title = surahName
         playAyahsSequentially(ayahs, 0, title)
     }
@@ -848,7 +810,7 @@ class QuranAudioManager @Inject constructor(
     /**
      * Play all ayahs starting from a specific one in the list.
      */
-    fun playFromAyah(ayahGlobalId: Int, allAyahs: List<AyahAudioItem>, title: String) {
+    override fun playFromAyah(ayahGlobalId: Int, allAyahs: List<AyahAudioItem>, title: String) {
         val startIndex = allAyahs.indexOfFirst { it.ayahGlobalId == ayahGlobalId }
         if (startIndex >= 0) {
             playAyahsSequentially(allAyahs, startIndex, title)
@@ -858,7 +820,7 @@ class QuranAudioManager @Inject constructor(
     /**
      * Skip to next ayah in the playlist.
      */
-    fun skipToNext() {
+    override fun skipToNext() {
         val p = player ?: return
         if (p.hasNextMediaItem()) {
             p.seekToNextMediaItem()
@@ -868,7 +830,7 @@ class QuranAudioManager @Inject constructor(
     /**
      * Skip to previous ayah in the playlist.
      */
-    fun skipToPrevious() {
+    override fun skipToPrevious() {
         val p = player ?: return
         if (p.hasPreviousMediaItem()) {
             p.seekToPreviousMediaItem()
@@ -889,7 +851,7 @@ class QuranAudioManager @Inject constructor(
         exoPlayer.play()
     }
 
-    fun togglePlayPause() {
+    override fun togglePlayPause() {
         val p = player ?: return
         if (p.isPlaying) {
             p.pause()
@@ -914,7 +876,7 @@ class QuranAudioManager @Inject constructor(
         }
     }
 
-    fun stop() {
+    override fun stop() {
         downloadJob?.cancel()
         downloadJob = null
         advanceJob?.cancel()

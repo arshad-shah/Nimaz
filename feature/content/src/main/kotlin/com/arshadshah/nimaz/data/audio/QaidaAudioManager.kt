@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.data.audio
 
+import com.arshadshah.nimaz.domain.model.AudioState
 import android.content.Context
 import androidx.annotation.OptIn
 import androidx.media3.common.MediaItem

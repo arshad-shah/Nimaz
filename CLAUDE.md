@@ -68,6 +68,12 @@ DataStore, type-safe Navigation Compose.
   package they all drive** — the module boundary follows the ViewModel axis, not `screens/`. The
   same rule sends `DuaSettingsScreen` and `HadithSettingsScreen` the other way: they drive
   `SettingsViewModel`, so they stay in `:app` and register in `settingsGraph`.
+- **`:feature:quran`** (`feature/quran/`) — the reader, khatam, bookmarks, the Mushaf stack and
+  `TajweedParser`. **`QuranDao` stays in `:core:database`** (four repositories use it) and
+  **`QuranAudioManager` stays in `:app`** behind the `QuranPlayback` port, because `MainActivity`
+  holds one too. Four settings screens (`Dua`, `Hadith`, `SelectReciter`, `SelectTranslation`)
+  sit in feature directories but drive `SettingsViewModel`, so they stay in `:app` and register
+  in `settingsGraph` — they move together in PR 21.
 - **`:feature:tracker`** (`feature/tracker/`) — prayer tracking, fasting and tasbih, behind one
   `viewmodel/tracker`. **Six of `screens/prayer`'s nine files live here** (the tracking ones);
   prayer *times* stay in `:app` until PR 20, and `PrayerGraph.kt` split along the same line.
@@ -243,6 +249,7 @@ The obligations, in short:
 ./gradlew :feature:search:check       # search + Ask with Proof
 ./gradlew :feature:content:check      # the library — eight screen packages
 ./gradlew :feature:tracker:check      # prayer tracking, fasting, tasbih
+./gradlew :feature:quran:check        # reader, khatam, bookmarks
 ./gradlew :app:jacocoTestReport --dry-run   # see below — seconds, and catches a whole class of red CI
 ./gradlew :app:lintDebug              # SLOW (~10 min) and CI-blocking — do not skip it
 python3 scripts/check_docs.py         # docs still describe the code (no toolchain needed)

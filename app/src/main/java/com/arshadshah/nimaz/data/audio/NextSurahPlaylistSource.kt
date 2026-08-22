@@ -4,6 +4,7 @@
 
 package com.arshadshah.nimaz.data.audio
 
+import com.arshadshah.nimaz.domain.repository.AyahAudioItem
 import androidx.media3.common.util.UnstableApi
 import com.arshadshah.nimaz.domain.repository.QuranRepository
 import kotlinx.coroutines.flow.first
@@ -33,7 +34,7 @@ interface NextSurahPlaylistSource {
     /** A surah's recitation, ready to queue: what to call it and which files to fetch. */
     data class SurahPlaylist(
         val title: String,
-        val items: List<QuranAudioManager.AyahAudioItem>,
+        val items: List<AyahAudioItem>,
     )
 
     companion object {
@@ -59,7 +60,7 @@ class QuranNextSurahPlaylistSource @Inject constructor(
         return NextSurahPlaylistSource.SurahPlaylist(
             title = surah?.nameEnglish.orEmpty(),
             items = ayahs.map { ayah ->
-                QuranAudioManager.AyahAudioItem(
+                AyahAudioItem(
                     ayahGlobalId = ayah.id,
                     surahNumber = ayah.surahNumber,
                     ayahNumber = ayah.ayahNumber,

@@ -202,9 +202,11 @@ visible. That is why `StringProvider` exists: a ViewModel that must *compare* re
 every module below `:core:ui`, not just this one.
 
 What is left in `app/…/core/util/` is there deliberately, not by omission. Files whose real home is
-a module that does not exist yet: `TajweedParser` → `:core:ui`, the prayer notification and PDF
-files → `:feature:prayer`, `TafseerPdfExporter` → `:feature:quran`, `NotificationDiagnostics` →
-`:feature:settings`. (`FlowExtensions` was listed here for `:core:data`; it went to `:core:common`
+a module that does not exist yet: the prayer notification files → `:feature:prayer`,
+`NotificationDiagnostics` → `:feature:settings`. (`TajweedParser` was listed here for `:core:ui`
+and went to **`:feature:quran`** instead — every one of its consumers is a Quran surface, and a
+parser only that feature calls does not belong in the design system. `TafseerPdfExporter` went to
+`:feature:quran` as predicted.) (`FlowExtensions` was listed here for `:core:data`; it went to `:core:common`
 instead — `mapItems` is a generic `Flow` extension that knows nothing about data, and a module
 below `:core:data` can want it.) `BootReceiver`,
 `PrayerRescheduler`, `InAppUpdateManager` and `core/init` stay in `:app` permanently — a manifest
@@ -1757,6 +1759,7 @@ Seven `:core:*` modules so far, mid-migration (#551):
 | **`:feature:search`** | `nimaz.android.feature` | Local library search and the opt-in Ask-with-Proof screen. **The only feature with a network dependency, and none of it is in the module** — the Worker client, its DTOs and `IntegrityTokenProvider` are `:core:data`, reached through `AiRepository`. Proof resolution reads Quran and Hadith content owned by other features, through repositories; `moduleBoundary` makes the alternative impossible. |
 | **`:feature:content`** | `nimaz.android.feature` | The library — duas, hadith, qaida, the ninety-nine names, the names of the Prophet, the prophets, and the catalog shell they share. **Eight `screens/` packages in one module, because `viewmodel/content` is one package they all drive.** The concrete case behind "the module boundary follows the ViewModel axis, not the `screens/` axis". `QaidaAudioManager` came with it. |
 | **`:feature:tracker`** | `nimaz.android.feature` | What the user *did*: prayer tracking, fasting and the tasbih counter, behind one `viewmodel/tracker`. **Six of `screens/prayer`'s nine files are here** — the ones driving `viewmodel/tracker` — while prayer *times* wait for PR 20; `PrayerGraph.kt` split accordingly. |
+| **`:feature:quran`** | `nimaz.android.feature` | The reader, khatam and bookmarks, plus the whole Mushaf rendering stack and `TajweedParser`. The largest feature. **`QuranDao` stays in `:core:database`** — four repositories use it. **`QuranAudioManager` stays in `:app`**, behind the `QuranPlayback` port, because `MainActivity` holds one too. |
 | **`:app`** | `nimaz.android.application` | Everything else, for now — screens, ViewModels, feature components, audio, sync, `NavGraph.kt`, and the rest of `core/`. It shrinks with each milestone of #551. |
 | **`:baselineprofile`** | `com.android.test` | Generates `app/src/main/baseline-prof.txt`. Nothing depends on it at runtime and no product code lives there. |
 
@@ -1869,11 +1872,14 @@ name suggests.** `DuaSettingsScreen` and `HadithSettingsScreen` sit in `screens/
 The same axis rule that keeps eight screen packages together in `:feature:content` splits two
 files out of it.
 
-**`data/audio` is three features' audio in one directory.** `QaidaAudioManager` is used only by
-`QaidaReaderViewModel` and moved into `:feature:content`, even though `docs/ARCHITECTURE.md` §2
-assigns the whole of `data/audio` to the prayer milestone — qaida audio does not belong in
-`:feature:prayer`. Expect `QuranAudioManager` and `QuranAudioService` to go the same way, to
-`:feature:quran`, leaving only the adhan players behind.
+**`data/audio` is three features' audio in one directory, and they end up in three places.**
+`QaidaAudioManager` moved into `:feature:content` — only `QaidaReaderViewModel` uses it, and
+qaida audio does not belong in `:feature:prayer`. **Quran audio could not follow it into
+`:feature:quran`**: `QuranAudioService` builds its media notification from
+`R.drawable.ic_stat_nimaz` and a content intent aimed at `MainActivity`, and `MainActivity` holds
+a `QuranAudioManager` of its own — one consumer above the feature and one inside it. The class
+stays in `:app` behind the `QuranPlayback` port (13 of its 39 members), the same split
+`AppUpdateController` and `CounterFeedback` use. Only the adhan players remain for PR 20.
 
 **A public signature must not name a type the module keeps to itself.** `:core:ui` declares
 `currentWindowSizeClass()` public, returning `androidx.window.core.layout.WindowSizeClass`, while

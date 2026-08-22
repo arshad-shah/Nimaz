@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.presentation
 
+import com.arshadshah.nimaz.testing.PresentationSourceRoots
 import org.junit.Test
 import java.io.File
 
@@ -37,10 +38,13 @@ class MaterialTextFieldGuardTest {
          * directory, so `:core:ui` is reached as a sibling. Note the differing source roots:
          * `:app` is still `src/main/java`, the `:core:*` modules are `src/main/kotlin`.
          */
-        val PRESENTATION_ROOTS = listOf(
-            "src/main/java/com/arshadshah/nimaz/presentation",
-            "../core/ui/src/main/kotlin/com/arshadshah/nimaz/presentation",
-        )
+        /**
+         * Every module's presentation sources — the fifth test to need this list, which is why it
+         * lives in [PresentationSourceRoots] rather than here. Two roots were enough until the
+         * feature modules started taking screens: by PR 19 of #551 the `:app` + `:core:ui` pair
+         * had fallen below this test's own floor, which is exactly what the floor is for.
+         */
+        val PRESENTATION_ROOTS = PresentationSourceRoots.ALL
 
         /** Where the field family itself lives, now that the design system is its own module. */
         const val NIMAZ_TEXT_FIELD =
@@ -67,15 +71,9 @@ class MaterialTextFieldGuardTest {
     )
 
     @Test
-    fun `the scan reaches both presentation source roots`() {
-        PRESENTATION_ROOTS.forEach { root ->
-            val dir = File(root)
-            assert(dir.isDirectory) {
-                "Presentation source root not found at ${dir.absolutePath}. The design system " +
-                    "lives in :core:ui and the screens in :app; a guard that can only see one of " +
-                    "them passes while checking half the surface."
-            }
-        }
+    fun `the scan reaches every presentation source root`() {
+        PresentationSourceRoots.assertAllExist(PRESENTATION_ROOTS)
+
         val scanned = presentationSources().size
         assert(scanned >= MINIMUM_FILES) {
             "scanned only $scanned presentation files across $PRESENTATION_ROOTS — expected at " +
@@ -83,11 +81,14 @@ class MaterialTextFieldGuardTest {
         }
     }
 
+    /**
+     * The `.filter { it.isDirectory }` this used to carry was the silent-narrowing bug this epic
+     * has now removed from four scans: a root that stops existing is skipped rather than reported,
+     * so the guard keeps passing over less and less. [PresentationSourceRoots.assertAllExist]
+     * fails instead.
+     */
     private fun presentationSources(): List<File> =
-        PRESENTATION_ROOTS
-            .map(::File)
-            .filter { it.isDirectory }
-            .flatMap { it.walkTopDown().filter { f -> f.isFile && f.extension == "kt" } }
+        PresentationSourceRoots.sources(PRESENTATION_ROOTS)
 
     @Test
     fun `no presentation source uses a Material text field primitive`() {

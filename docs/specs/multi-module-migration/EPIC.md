@@ -371,7 +371,7 @@ slice, its nav-graph extension, and its tests.
 | 16 | **#16** `:feature:search` | `mm/15-feature-search` | search + AI ask-with-proof. `worker/` untouched. The `BuildConfig` trap the issue names was already defused in PR 9 — both fields are read only in `core/di/AiModule`, so it becomes live again at **PR 22**, not here. |
 | 17 | **#17** `:feature:content` | `mm/16-feature-content` | dua, hadith, qaida, asma, asmaunnabi, names, prophets, catalog — **moved together**, their ViewModels are one package. Four components in the issue's list went to `:core:ui` instead, and two *settings* screens stayed in `:app` — the ViewModel axis cuts both ways. `QaidaAudioManager` came too. |
 | 18 | **#18** `:feature:tracker` | `mm/17-feature-tracker` | prayer tracker, fasting, tasbih — likewise. `screens/prayer` split 6/2 by ViewModel; `CounterFeedback` became a `:core:domain` port with its Android half in `:core:data`. The `dua -> tracker` edge was already gone, resolved in PR 17. |
-| 19 | **#19** `:feature:quran` | `mm/18-feature-quran` | quran, khatam, bookmarks. `QuranDao` stays in `:core:database` (4 repos use it) |
+| 19 | **#19** `:feature:quran` | `mm/18-feature-quran` | quran, khatam, bookmarks. `QuranDao` stays in `:core:database` (4 repos use it); `QuranAudioManager` stays in `:app` behind the `QuranPlayback` port, because `MainActivity` holds one too. `TajweedParser` came here, not to `:core:ui` as §2 guessed. |
 | 20 | **#20** `:feature:prayer` | `mm/19-feature-prayer` | prayer times, qibla, night worship, adhan audio. **SUB-03 must stay green** — 3 of 4 Services move here |
 | 21 | **#21** `:feature:settings` | `mm/20-feature-settings` | 18 screens, the 1,324-line `SettingsViewModel`. Largest and most cross-referenced — last |
 
