@@ -8,6 +8,8 @@ import com.arshadshah.nimaz.core.navigation.ScreenTags
 import com.arshadshah.nimaz.core.navigation.restartApp
 import com.arshadshah.nimaz.core.navigation.taggedComposable
 import com.arshadshah.nimaz.presentation.screens.adaptive.AdaptiveSettingsScreen
+import com.arshadshah.nimaz.presentation.screens.dua.DuaSettingsScreen
+import com.arshadshah.nimaz.presentation.screens.hadith.HadithSettingsScreen
 
 /**
  * The 16 Settings destinations — every settings screen, including the notification and worship trees.
@@ -27,6 +29,20 @@ import com.arshadshah.nimaz.presentation.screens.adaptive.AdaptiveSettingsScreen
  * enforces.
  */
 fun NavGraphBuilder.settingsGraph(navController: NavController) {
+    // Dua and hadith *display* settings. Their screens sit in `screens/dua` and `screens/hadith`
+    // but they are settings screens: both drive `SettingsViewModel` and dispatch `SettingsEvent`,
+    // so by the rule this migration follows — **the module boundary follows the ViewModel axis,
+    // not the `screens/` axis** — they belong to the settings feature, not to `:feature:content`.
+    // PR 17 of #551 registered them here rather than in `contentGraph` for that reason; they go
+    // to `:feature:settings` with `SettingsViewModel` in PR 21.
+    taggedComposable<Route.DuaSettings>(ScreenTags.DuaSettings) {
+        DuaSettingsScreen(onNavigateBack = { navController.popBackStack() })
+    }
+
+    taggedComposable<Route.HadithSettings>(ScreenTags.HadithSettings) {
+        HadithSettingsScreen(onNavigateBack = { navController.popBackStack() })
+    }
+
     taggedComposable<Route.SettingsZakat>(ScreenTags.SettingsZakat) {
         ZakatSettingsScreen(
             onNavigateBack = { navController.popBackStack() }

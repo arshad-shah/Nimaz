@@ -51,8 +51,6 @@ import com.arshadshah.nimaz.core.ui.R
 import com.arshadshah.nimaz.core.share.ContentShareManager
 import com.arshadshah.nimaz.core.share.Shareables
 import com.arshadshah.nimaz.domain.model.Dua
-import com.arshadshah.nimaz.domain.model.TasbihCategory
-import com.arshadshah.nimaz.domain.model.TasbihPreset
 import com.arshadshah.nimaz.presentation.components.atoms.DuaArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
@@ -76,8 +74,6 @@ import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.viewmodel.content.DuaEvent
 import com.arshadshah.nimaz.presentation.viewmodel.content.DuaReaderUiState
 import com.arshadshah.nimaz.presentation.viewmodel.content.DuaViewModel
-import com.arshadshah.nimaz.presentation.viewmodel.tracker.TasbihEvent
-import com.arshadshah.nimaz.presentation.viewmodel.tracker.TasbihViewModel
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -87,7 +83,6 @@ fun DuaReaderScreen(
     onNavigateBack: () -> Unit,
     onNavigateToSettings: () -> Unit = {},
     viewModel: DuaViewModel = hiltViewModel(),
-    tasbihViewModel: TasbihViewModel = hiltViewModel()
 ) {
     val state by viewModel.readerState.collectAsStateWithLifecycle()
     val duas = state.duas
@@ -169,7 +164,6 @@ fun DuaReaderScreen(
                             DuaReaderBottomBar(
                                 dua = dua,
                                 viewModel = viewModel,
-                                tasbihViewModel = tasbihViewModel,
                                 currentPage = pagerState.currentPage,
                                 pageCount = duas.size,
                                 onPrev = {
@@ -359,7 +353,6 @@ private fun VirtueCard(
 private fun DuaReaderBottomBar(
     dua: Dua,
     viewModel: DuaViewModel,
-    tasbihViewModel: TasbihViewModel,
     currentPage: Int,
     pageCount: Int,
     onPrev: () -> Unit,
@@ -391,7 +384,7 @@ private fun DuaReaderBottomBar(
             icon = Icons.Default.Add,
             contentDescription = stringResource(R.string.dua_reader_add_tasbih),
             onClick = {
-                tasbihViewModel.onEvent(TasbihEvent.CreateCustomPreset(dua.toTasbihPreset()))
+                viewModel.onEvent(DuaEvent.AddToTasbih(dua))
                 Toast.makeText(context, addedToTasbihMsg, Toast.LENGTH_SHORT).show()
             }
         )
@@ -405,25 +398,4 @@ private fun DuaReaderBottomBar(
             }
         )
     }
-}
-
-private fun Dua.toTasbihPreset(): TasbihPreset {
-    val now = System.currentTimeMillis()
-    val presetName = titleEnglish.trim().let {
-        if (it.length > 40) it.take(40).trimEnd() + "…" else it
-    }
-    return TasbihPreset(
-        id = 0,
-        name = presetName.ifBlank { titleArabic.trim() },
-        arabicText = textArabic.ifBlank { null },
-        transliteration = textTransliteration?.ifBlank { null },
-        translation = textEnglish.ifBlank { null },
-        targetCount = repeatCount?.takeIf { it > 0 } ?: 33,
-        category = TasbihCategory.CUSTOM,
-        reference = reference?.ifBlank { null },
-        isDefault = false,
-        displayOrder = 0,
-        createdAt = now,
-        updatedAt = now
-    )
 }

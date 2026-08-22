@@ -40,7 +40,7 @@ const val NimazPageIndicatorDotTag = "nimaz_page_indicator_dot"
  *
  * This is the single indicator style for the whole app — onboarding and the
  * carousel both render through it. (It is *not* a progress tracker: for
- * "N of M completed" use `QaidaLineProgressDots` instead.)
+ * "N of M completed" use `QaidaLineProgressDots` (`:feature:content`) instead.)
  *
  * This [PagerState] overload is the common case — it tracks `state.currentPage`
  * over `state.pageCount` automatically. Use the (`pageCount`, `currentPage`)

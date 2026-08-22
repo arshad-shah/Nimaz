@@ -56,10 +56,12 @@ class FeatureModuleRegistrationTest {
                 if ("\"feature/$module/src/main/kotlin" !in appBuild) {
                     missing += "$module: no inputs.dir entry in app/build.gradle.kts"
                 }
-                // Its `screens/` packages must each be mapped, or the cross-feature rule skips them.
-                screenPackages(module).forEach { pkg ->
+                // Its `viewmodel/` packages must each be mapped, or an import of one from another
+                // module reads as `:app` and the cross-feature rule waves it through. Screens no
+                // longer need mapping — that guard reads a file's own module from its path.
+                viewModelPackages(module).forEach { pkg ->
                     if ("\"$pkg\" to " !in guard) {
-                        missing += "$module: screens/$pkg not in CrossFeatureViewModelGuardTest.MODULE_OF"
+                        missing += "$module: viewmodel/$pkg not in CrossFeatureViewModelGuardTest.MODULE_OF"
                     }
                 }
             }
@@ -72,12 +74,11 @@ class FeatureModuleRegistrationTest {
         assertThat(missing).isEmpty()
     }
 
-    /** `screens/<pkg>` directories the module ships. */
-    private fun screenPackages(module: String): List<String> =
-        File("../feature/$module/src/main/kotlin/com/arshadshah/nimaz/presentation/screens")
+    /** `viewmodel/<pkg>` directories the module ships. */
+    private fun viewModelPackages(module: String): List<String> =
+        File("../feature/$module/src/main/kotlin/com/arshadshah/nimaz/presentation/viewmodel")
             .listFiles { f: File -> f.isDirectory }
             ?.map { it.name }
-            ?.filterNot { it == "adaptive" }   // mapped by file name, not directory
             ?: emptyList()
 
     /** `include(":feature:x")` lines in settings.gradle.kts, which cannot be forgotten. */
