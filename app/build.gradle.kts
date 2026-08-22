@@ -285,8 +285,10 @@ dependencies {
     implementation(project(":core:database"))
     // PreferencesDataStore and the three DataStore files. `api`-exposes datastore-preferences.
     implementation(project(":core:datastore"))
-    // FakeTodayProvider / FakeSearchSettings / FakeStringProvider — one definition each, used by
-    // the ViewModel tests here and the tests over there.
+    // The 18 repository implementations and the platform adapters behind the domain ports.
+    implementation(project(":core:data"))
+    // FakeTodayProvider / FakeSearchSettings / FakeStringProvider / RecordingWidgetRefresher —
+    // one definition each, used by the ViewModel tests here and the tests over there.
     testImplementation(testFixtures(project(":core:domain")))
     testImplementation(testFixtures(project(":core:common")))
 
@@ -400,7 +402,7 @@ dependencies {
     testImplementation(libs.google.truth)
     testImplementation(libs.robolectric)
     testImplementation(libs.ktor.client.mock)
-    testImplementation("org.json:json:20231013")
+    testImplementation(libs.json)
 
     // Compose UI test harness for the Robolectric atom tests in src/testDebug
     // (createComposeRule, onNodeWithText, performClick, …). Declared here as a
@@ -595,6 +597,22 @@ val coverageModules = listOf(
         ),
         sourceDir = "src/main/kotlin",
         packageRoot = "com/arshadshah/nimaz/core/datastore",
+    ),
+    CoverageModule(
+        gradlePath = ":core:data",
+        projectDir = rootProject.layout.projectDirectory.dir("core/data"),
+        testTask = "testDebugUnitTest",
+        classesGlobs = listOf(
+            "intermediates/built_in_kotlinc/debug/**/classes/**",
+            "intermediates/classes/debug/**",
+            "tmp/kotlin-classes/debug/**",
+        ),
+        execGlobs = listOf(
+            "jacoco/testDebugUnitTest.exec",
+            "outputs/unit_test_code_coverage/**/*.exec",
+        ),
+        sourceDir = "src/main/kotlin",
+        packageRoot = "com/arshadshah/nimaz/data/repository",
     ),
 )
 

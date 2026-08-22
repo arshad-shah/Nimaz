@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!--
+      Declared here because `data/device/AndroidHaptics.kt` calls `Vibrator.vibrate`, which
+      requires it. In the monolith the code and `:app`'s manifest were the same module, so lint
+      could see the declaration; once the code moved, `:core:data:lintDebug` reported
+      `MissingPermission` and failed the build — correctly, since a library that needs a
+      permission should say so rather than assume its consumer does. Same shape as
+      `:core:common`'s manifest, and the second time this milestone has surfaced it, so expect it
+      whenever a module takes code that touches a guarded platform API.
+
+      Behaviour-neutral, and checked rather than assumed: `:app` already declares VIBRATE, and
+      manifest merging unions permissions, so the merged output is byte-identical either way —
+      diffed as part of PR 9 of #551.
+    -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+
+</manifest>

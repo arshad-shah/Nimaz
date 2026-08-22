@@ -10,7 +10,7 @@ import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
-import com.arshadshah.nimaz.core.di.IoDispatcher
+import com.arshadshah.nimaz.core.common.IoDispatcher
 import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.domain.model.QuranReciter
 import dagger.hilt.android.qualifiers.ApplicationContext

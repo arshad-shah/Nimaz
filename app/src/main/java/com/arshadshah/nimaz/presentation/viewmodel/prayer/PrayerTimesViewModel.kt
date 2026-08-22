@@ -1,7 +1,7 @@
 package com.arshadshah.nimaz.presentation.viewmodel.prayer
 
 import androidx.lifecycle.ViewModel
-import com.arshadshah.nimaz.core.di.DefaultDispatcher
+import com.arshadshah.nimaz.core.common.DefaultDispatcher
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.core.monitoring.launchSafely

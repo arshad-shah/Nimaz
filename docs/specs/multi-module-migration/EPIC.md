@@ -191,7 +191,7 @@ repackaged `core.util` → `core.common` so the package is not split across two 
 `:core:domain`.
 
 The other twelve are **pushed down, and stay in `:app` until their module exists** —
-`TajweedParser` → `:core:ui` (PR 10), `FlowExtensions` → `:core:data` (PR 9), the notification
+`TajweedParser` → `:core:ui` (PR 10), the notification
 and PDF files → `:feature:prayer` (PR 20), `TafseerPdfExporter` → `:feature:quran` (PR 19),
 `NotificationDiagnostics` → `:feature:settings` (PR 21). `BootReceiver`, `PrayerRescheduler`,
 `InAppUpdateManager` and `core/init` stay in `:app` for good. `core/share` goes to `:core:ui`
@@ -247,9 +247,54 @@ user. The six runtime-composed keys are recorded in their literal `${'$'}{key}` 
 > asserts that two files *in this repo* agree with each other, and an IDE rename updates both in
 > lockstep. The golden file is a third copy that nothing automatic touches.
 
-**#9 — `:core:data`** · `mm/08-core-data`
-19 repository implementations and their mappers.
-*Exit:* every repository still returns domain models; no entity type escapes the module.
+**#9 — `:core:data`** · `mm/08-core-data` — **landed**
+19 repository implementations and their mappers, plus the `data/{device,text,ai,announcement,
+widget,platform}` slices and `data/local/help`. 221 tests in the new module; `:app` 1707 → the
+totals below.
+*Exit:* no persistence type in the module's public API, checked by
+`PublicApiHasNoPersistenceTypesTest`.
+
+> **Corrected, and this one had teeth.** The issue offered two exit criteria. The first — *every
+> repository still returns domain models* — is **already true and checks nothing**: those
+> repositories implement interfaces declared in `:core:domain`, a `kotlin-jvm` module, so an
+> entity in one of their signatures would not compile. The second — *no `*Entity` in any public
+> API* — was **already false when the issue was written**, at
+> `MushafLayoutMapper.toPageLayout(page, rows: List<MushafLayoutLineRow>)`: a public `object`
+> taking a `QuranDao` projection. That is the shape worth guarding, because it is the quiet one —
+> a repository leaking an entity is loud, a *helper* leaking one involves `:core:domain` not at
+> all, so nothing objects until a feature module reaches for the helper and drags a database type
+> into presentation with it. `MushafLayoutMapper` is now `internal`.
+>
+> The guard took three runs to become true, and each failure is the standing rule earning its
+> keep. **Run 1** reported the very declaration whose fix motivated it — a line-local visibility
+> read cannot see that a member of an `internal object` is internal, and the "fix" it pushed
+> toward was a redundant modifier on every member. **Run 2**, after adding a container stack,
+> reported three *local `val`s inside function bodies* holding Room entities — the ordinary
+> business of a mapping layer. **Run 3** passed the leak check but tripped the scan floor: 16
+> public declarations found where there are 293, because a wrapped constructor closes on
+> `) : SomeInterface {` at the class's own indent and popped the class off the stack, leaving
+> every member below it unchecked. Two of those three would have shipped a green, useless guard;
+> the floor caught the third. It also now joins wrapped signatures, which a first-line-only read
+> would have been blind to — and a signature long enough to wrap is exactly the one most likely
+> to carry a persistence type.
+>
+> `IntegrityTokenProvider` needed the other inversion this milestone teaches: a library's
+> `BuildConfig` carries only its own fields, so its two reads of the app's became constructor
+> parameters passed by `AiModule` in `:app`.
+
+**`internal` is scoped to a module, and that is a finding generator.** `CompassSmoothingTest` lived
+in `:app` under `presentation.viewmodel.prayer` and called `smoothInto`, an `internal` function in
+`AndroidCompassSensors`. The moment its subject moved here the test stopped compiling — not because
+anything broke, but because a boundary finally existed to notice that a *presentation* test was
+reaching into a data-layer implementation detail. Expect this on every remaining extraction: each
+one converts "same module, so `internal` is visible" into a compile error that names a coupling
+nobody had written down. The fix is to move the test with its subject, not to widen the visibility.
+
+**One file was very nearly deleted as dead code and is not.** `HelpJsonDto.kt` declares a
+top-level `val helpJson: Json` that `HelpRepositoryImpl` uses; both #560's validation and my own
+first pass grepped the *file name*, which finds nothing, because nothing is named `HelpJsonDto`.
+Recorded here because it is the second time in this epic that a filename grep has been mistaken
+for a usage search.
 
 ### Milestone 3 — `:core:ui` (PR 10)
 

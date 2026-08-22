@@ -1,5 +1,7 @@
 package com.arshadshah.nimaz.core.di
 
+import com.arshadshah.nimaz.core.common.DefaultDispatcher
+import com.arshadshah.nimaz.core.common.IoDispatcher
 import com.arshadshah.nimaz.domain.time.SystemTodayProvider
 import com.arshadshah.nimaz.domain.time.TodayProvider
 import dagger.Binds
@@ -7,30 +9,9 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import javax.inject.Qualifier
-import javax.inject.Singleton
-
-/**
- * The dispatcher for work that is CPU-bound rather than blocking on I/O.
- *
- * Injected rather than referenced as `Dispatchers.Default` so a test can substitute its own
- * scheduler and stay deterministic — without that, a `withContext(Dispatchers.Default)` runs
- * on real threads and `advanceUntilIdle()` has nothing to wait for.
- */
-@Qualifier
-@Retention(AnnotationRetention.BINARY)
-annotation class DefaultDispatcher
-
-/**
- * The dispatcher for work that blocks on I/O — a geocoder round trip, a location fix.
- *
- * Same reason as [DefaultDispatcher]: injected so a test stays deterministic.
- */
-@Qualifier
-@Retention(AnnotationRetention.BINARY)
-annotation class IoDispatcher
 
 @Module
 @InstallIn(SingletonComponent::class)

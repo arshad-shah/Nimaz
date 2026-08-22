@@ -1,12 +1,15 @@
 package com.arshadshah.nimaz.core.di
 
+import android.content.Context
 import com.arshadshah.nimaz.BuildConfig
 import com.arshadshah.nimaz.data.ai.AiApiClient
+import com.arshadshah.nimaz.data.ai.IntegrityTokenProvider
 import com.arshadshah.nimaz.data.repository.AiRepositoryImpl
 import com.arshadshah.nimaz.domain.repository.AiRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
@@ -15,9 +18,9 @@ import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.serialization.kotlinx.json.json
-import kotlinx.serialization.json.Json
 import javax.inject.Named
 import javax.inject.Singleton
+import kotlinx.serialization.json.Json
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -58,6 +61,23 @@ object AiModule {
         client = client,
         baseUrl = BuildConfig.AI_WORKER_BASE_URL,
         json = json,
+    )
+
+    /**
+     * The two `BuildConfig` values `IntegrityTokenProvider` needs are supplied here, for the same
+     * reason `provideAiApiClient` above supplies `AI_WORKER_BASE_URL`: a library module's
+     * `BuildConfig` carries only its own fields, so `:core:data` cannot read the app's. Defaulting
+     * them there would be worse than a compile error — a wrong project number fails the Worker's
+     * integrity check on every Ask-with-Proof call.
+     */
+    @Provides
+    @Singleton
+    fun provideIntegrityTokenProvider(
+        @ApplicationContext context: Context,
+    ): IntegrityTokenProvider = IntegrityTokenProvider(
+        context = context,
+        cloudProjectNumber = BuildConfig.PLAY_INTEGRITY_CLOUD_PROJECT_NUMBER,
+        isDebugBuild = BuildConfig.DEBUG,
     )
 
     @Provides
