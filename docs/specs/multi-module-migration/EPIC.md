@@ -386,12 +386,21 @@ long-standing screen packages because they are named after *ViewModel* packages,
 count drifted unnoticed. Re-derive it rather than incrementing: the inventory now moves in two
 directions at once, as features leave and graph directories arrive.
 
-**Two things every remaining PR in this milestone must do**, learned in PRs 13–14:
+**Extracting a feature module means registering it in four places**, and
+`FeatureModuleRegistrationTest` fails if you miss one:
 
-- Add the module's presentation root to `PresentationSourceRoots` (`:app` test sources). Four
-  cross-module scans read it; PR 14 broke three of them at once by not having it.
-- Add the module to `coverageModules` in `app/build.gradle.kts`. A module that leaves `:app`
-  without it makes reported coverage *rise*, by measuring less.
+| Register in | Missing it means |
+|---|---|
+| `PresentationSourceRoots` | four cross-module scans stop covering the module |
+| `inputs.dir` in `app/build.gradle.kts` | those scans stay `UP-TO-DATE` and do not run at all |
+| `coverageModules` in `app/build.gradle.kts` | reported coverage *rises*, by measuring less |
+| `CrossFeatureViewModelGuardTest.MODULE_OF` | the module's screens are exempt from the rule |
+
+This was a prose checklist first and **it did not survive two milestones**: PR 14 missed the
+second, PR 15 missed the fourth, and both were found by accident while starting the next module.
+Neither failed anything — a scan that quietly stops covering a module is silent by construction.
+The test reads `settings.gradle.kts` as the source of truth for which modules exist, because that
+is the one registration nobody can forget.
 
 *Exit for every PR in this milestone:* the moved feature's tests compile **without being
 relaxed**. A test that will not compile after the move is a real coupling signal, not migration
