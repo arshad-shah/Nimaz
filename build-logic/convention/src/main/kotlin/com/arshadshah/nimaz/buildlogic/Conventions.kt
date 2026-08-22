@@ -66,8 +66,17 @@ val ANDROID_COMPONENT_GROUPS = listOf(
  * the new module — which is the failure mode this whole epic keeps running into. Kept here rather
  * than inside the plugin so it can be unit-tested as the table of cases it is, without spawning
  * a Gradle build per case.
+ *
+ * **A module never counts as depending on itself.** Every Android module's own test source sets
+ * show up as a `ProjectDependency` on the module itself — `debugUnitTestCompileClasspath ->
+ * :feature:widget` — and without the first branch below, `:feature:widget` matches the
+ * feature-to-feature rule against itself and cannot build at all. That lay dormant from PR 1 of
+ * #551 until PR 13: until the first `:feature:*` module existed there was nothing to
+ * misclassify, because a `:core:` path matches neither `:app` nor `:feature:`. It failed on that
+ * module's very first `check`.
  */
 fun isForbiddenModuleDependency(from: String, to: String): Boolean = when {
+    from == to -> false
     from.startsWith(":core:") -> to == ":app" || to.startsWith(":feature:")
     from.startsWith(":feature:") -> to == ":app" || to.startsWith(":feature:")
     else -> false
