@@ -481,6 +481,8 @@ tasks.withType<Test>().configureEach {
         "designSystemSources" to "core/ui/src/main/kotlin/com/arshadshah/nimaz/presentation",
         "navigationSources" to "core/navigation/src/main/kotlin/com/arshadshah/nimaz/core/navigation",
         "widgetSources" to "feature/widget/src/main/kotlin/com/arshadshah/nimaz/widget",
+        "onboardingSources" to "feature/onboarding/src/main/kotlin/com/arshadshah/nimaz/presentation",
+        "aboutSources" to "feature/about/src/main/kotlin/com/arshadshah/nimaz/presentation",
     ).forEach { (name, path) ->
         inputs.dir(rootProject.layout.projectDirectory.dir(path))
             .withPropertyName(name)
