@@ -13,10 +13,10 @@ import com.arshadshah.nimaz.domain.model.CalculationMethod
 import com.arshadshah.nimaz.domain.model.PrayerType
 import com.arshadshah.nimaz.domain.repository.FastingRepository
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
-import com.arshadshah.nimaz.presentation.viewmodel.FakePrayerTimetableRepository
-import com.arshadshah.nimaz.presentation.viewmodel.buildFastingUseCases
-import com.arshadshah.nimaz.presentation.viewmodel.buildPrayerUseCases
-import com.arshadshah.nimaz.presentation.viewmodel.prayerCalculationSettings
+import com.arshadshah.nimaz.domain.usecase.FakePrayerTimetableRepository
+import com.arshadshah.nimaz.domain.usecase.buildFastingUseCases
+import com.arshadshah.nimaz.domain.usecase.buildPrayerUseCases
+import com.arshadshah.nimaz.domain.usecase.prayerCalculationSettings
 import com.google.common.truth.Truth.assertThat
 import io.mockk.coEvery
 import io.mockk.every

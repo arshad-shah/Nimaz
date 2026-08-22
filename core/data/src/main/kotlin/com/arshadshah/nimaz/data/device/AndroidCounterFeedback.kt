@@ -1,4 +1,4 @@
-package com.arshadshah.nimaz.core.feedback
+package com.arshadshah.nimaz.data.device
 
 import android.content.Context
 import android.media.AudioManager
@@ -8,28 +8,10 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
 import com.arshadshah.nimaz.core.monitoring.CrashReporter
+import com.arshadshah.nimaz.domain.repository.CounterFeedback
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
-
-/**
- * The tick a counter makes when it advances.
- *
- * `TasbihViewModel` used to hold a `Vibrator` and a `ToneGenerator` directly, built
- * from an injected `Context`. `increment()` — the single most-used action in the
- * feature — called both on its first two lines, so it could not run in a JVM test at
- * all. That is why the Tasbih test suite tests a preset filter the screen does not
- * even use, and why the double-tap race that loses a count went unnoticed.
- *
- * Behind this interface the ViewModel says *tick*, and a test says "did it".
- */
-interface CounterFeedback {
-    /** One counter tick. Each channel is skipped when the user has it switched off. */
-    fun tick(vibrate: Boolean, sound: Boolean)
-
-    /** Releases any held audio resources. Call from `onCleared`. */
-    fun release()
-}
 
 /**
  * The Android [CounterFeedback]: a one-shot vibration and a short beep.

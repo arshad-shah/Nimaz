@@ -1,4 +1,4 @@
-package com.arshadshah.nimaz.presentation.viewmodel
+package com.arshadshah.nimaz.domain.usecase
 
 import com.arshadshah.nimaz.domain.repository.AnnouncementRepository
 import com.arshadshah.nimaz.domain.repository.FastingRepository

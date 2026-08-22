@@ -7,7 +7,7 @@ import com.arshadshah.nimaz.domain.repository.DeviceLocationRepository
 import com.arshadshah.nimaz.domain.repository.PermissionChecker
 import com.arshadshah.nimaz.domain.repository.PrayerRepository
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
-import com.arshadshah.nimaz.presentation.viewmodel.buildPrayerUseCases
+import com.arshadshah.nimaz.domain.usecase.buildPrayerUseCases
 import com.google.common.truth.Truth.assertThat
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers

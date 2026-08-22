@@ -1,4 +1,4 @@
-package com.arshadshah.nimaz.presentation.viewmodel
+package com.arshadshah.nimaz.domain.usecase
 
 import com.arshadshah.nimaz.domain.prayer.PrayerTimeCalculator
 import com.arshadshah.nimaz.domain.model.AsrCalculation

@@ -1756,6 +1756,7 @@ Seven `:core:*` modules so far, mid-migration (#551):
 | **`:feature:calendar`** | `nimaz.android.feature` | The Islamic calendar — one screen, one ViewModel, plus `IslamicEventCard`, which nothing else names. Small enough to question and it still earns a module: folding it into a neighbour would create the coupling the split exists to remove. `IslamicEvent` is a `:core:domain` model, so sharing it with `fasting`/`prayer`/`settings` is not a feature-to-feature edge. |
 | **`:feature:search`** | `nimaz.android.feature` | Local library search and the opt-in Ask-with-Proof screen. **The only feature with a network dependency, and none of it is in the module** — the Worker client, its DTOs and `IntegrityTokenProvider` are `:core:data`, reached through `AiRepository`. Proof resolution reads Quran and Hadith content owned by other features, through repositories; `moduleBoundary` makes the alternative impossible. |
 | **`:feature:content`** | `nimaz.android.feature` | The library — duas, hadith, qaida, the ninety-nine names, the names of the Prophet, the prophets, and the catalog shell they share. **Eight `screens/` packages in one module, because `viewmodel/content` is one package they all drive.** The concrete case behind "the module boundary follows the ViewModel axis, not the `screens/` axis". `QaidaAudioManager` came with it. |
+| **`:feature:tracker`** | `nimaz.android.feature` | What the user *did*: prayer tracking, fasting and the tasbih counter, behind one `viewmodel/tracker`. **Six of `screens/prayer`'s nine files are here** — the ones driving `viewmodel/tracker` — while prayer *times* wait for PR 20; `PrayerGraph.kt` split accordingly. |
 | **`:app`** | `nimaz.android.application` | Everything else, for now — screens, ViewModels, feature components, audio, sync, `NavGraph.kt`, and the rest of `core/`. It shrinks with each milestone of #551. |
 | **`:baselineprofile`** | `com.android.test` | Generates `app/src/main/baseline-prof.txt`. Nothing depends on it at runtime and no product code lives there. |
 
@@ -1850,6 +1851,15 @@ and the answer differs by shape:
 | An implementation that must stay in `:app` | `InAppUpdateManager` (holds an `Activity`) | Move the **port**, not the class: `AppUpdateController` in `:core:ui`, three of the class's seven members, implementation left behind. The same split as `WidgetRefresher` and `CompassSensors`, on the UI side. |
 | A shared presentation helper | `SubtitleSpec`, `WorshipReminderContent` | Move it **down** to `:core:ui`, not across. Both were used by `:app` screens too. |
 | Another feature's ViewModel | `SettingsViewModel` in `AdaptiveMoreScreen` | Delete it. `hiltViewModel()` scopes to the destination's `NavBackStackEntry`, so this never read the other feature's instance in the first place — see `CrossFeatureViewModelGuardTest`. |
+
+**A shared `internal` test helper is duplicated per module *and* per package, and the count is
+now eight.** `setThemedContent` / `createComponentComposeRule` are ten lines that exist five times
+in `:core:ui`, once in `:app`, once in `:feature:calendar` and twice in `:feature:tracker` — the
+helpers are `internal`, so a module cannot see another's, and they are imported by package, so one
+module needs one per test package. `:feature:quran` and `:feature:prayer` will each add more.
+**Publishing one from `core/ui/src/testFixtures/` collapses all of them**, the way
+`:core:domain`'s fakes already have; it is a guardrail change rather than a feature move, which is
+why it is deferred to the last milestone rather than done in passing.
 
 **A screen belongs to the module that owns the ViewModel it drives, not the one its directory
 name suggests.** `DuaSettingsScreen` and `HadithSettingsScreen` sit in `screens/dua` and

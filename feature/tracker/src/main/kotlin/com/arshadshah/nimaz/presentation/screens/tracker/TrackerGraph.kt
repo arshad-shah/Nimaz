@@ -6,6 +6,9 @@ import androidx.navigation.toRoute
 import com.arshadshah.nimaz.core.navigation.Route
 import com.arshadshah.nimaz.core.navigation.ScreenTags
 import com.arshadshah.nimaz.core.navigation.taggedComposable
+import com.arshadshah.nimaz.presentation.screens.prayer.PrayerStatsScreen
+import com.arshadshah.nimaz.presentation.screens.prayer.PrayerTrackerScreen
+import com.arshadshah.nimaz.presentation.screens.prayer.QadaPrayersScreen
 import com.arshadshah.nimaz.presentation.screens.fasting.FastTrackerScreen
 import com.arshadshah.nimaz.presentation.screens.fasting.MakeupFastsScreen
 import com.arshadshah.nimaz.presentation.screens.tasbih.TasbihScreen
@@ -28,6 +31,26 @@ import com.arshadshah.nimaz.presentation.screens.tasbih.TasbihScreen
  * enforces.
  */
 fun NavGraphBuilder.trackerGraph(navController: NavController) {
+    // Prayer *tracking*, moved out of `prayerGraph` in PR 18 of #551. Their screens live in
+    // `screens/prayer` but drive `viewmodel/tracker`, and by the axis this migration follows —
+    // a screen belongs to the module owning the ViewModel it drives — they are tracking surfaces,
+    // not prayer-time ones. Prayer *times* (calculation, adhan, qibla) stay behind for PR 20.
+    taggedComposable<Route.PrayerTracker>(ScreenTags.PrayerTracker) {
+        PrayerTrackerScreen(
+            onNavigateBack = { navController.popBackStack() },
+            onNavigateToStats = { navController.navigate(Route.PrayerStats) },
+            onNavigateToQada = { navController.navigate(Route.QadaPrayers) },
+        )
+    }
+
+    taggedComposable<Route.PrayerStats>(ScreenTags.PrayerStats) {
+        PrayerStatsScreen(onNavigateBack = { navController.popBackStack() })
+    }
+
+    taggedComposable<Route.QadaPrayers>(ScreenTags.QadaPrayers) {
+        QadaPrayersScreen(onNavigateBack = { navController.popBackStack() })
+    }
+
     taggedComposable<Route.Tasbih>(ScreenTags.Tasbih) {
         TasbihScreen(
             onNavigateToHistory = { navController.navigate(Route.TasbihHistory) },

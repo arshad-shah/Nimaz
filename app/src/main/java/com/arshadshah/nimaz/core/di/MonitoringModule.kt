@@ -1,7 +1,7 @@
 package com.arshadshah.nimaz.core.di
 
-import com.arshadshah.nimaz.core.feedback.AndroidCounterFeedback
-import com.arshadshah.nimaz.core.feedback.CounterFeedback
+import com.arshadshah.nimaz.data.device.AndroidCounterFeedback
+import com.arshadshah.nimaz.domain.repository.CounterFeedback
 import com.arshadshah.nimaz.core.monitoring.FirebaseTelemetry
 import com.arshadshah.nimaz.core.monitoring.Telemetry
 import dagger.Binds

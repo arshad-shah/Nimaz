@@ -36,9 +36,9 @@ import org.junit.Before
 import org.junit.Test
 import java.time.LocalDate
 import java.time.ZoneOffset
-import com.arshadshah.nimaz.presentation.viewmodel.buildFastingUseCases
-import com.arshadshah.nimaz.presentation.viewmodel.buildPrayerUseCases
-import com.arshadshah.nimaz.presentation.viewmodel.FakePrayerTimetableRepository
+import com.arshadshah.nimaz.domain.usecase.buildFastingUseCases
+import com.arshadshah.nimaz.domain.usecase.buildPrayerUseCases
+import com.arshadshah.nimaz.domain.usecase.FakePrayerTimetableRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 
