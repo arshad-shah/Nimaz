@@ -1,6 +1,7 @@
 package com.arshadshah.nimaz.presentation.screens.names
 
 import androidx.annotation.StringRes
+import com.arshadshah.nimaz.core.navigation.NamesTab
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -37,21 +38,23 @@ import com.arshadshah.nimaz.presentation.viewmodel.content.CatalogEvent
 import com.arshadshah.nimaz.presentation.viewmodel.content.ProphetViewModel
 
 /**
- * The three name catalogues, in the order a reader would name them.
+ * The label for a [NamesTab], which is the half of it that is genuinely presentation.
  *
- * The ordinal is what `Route.Names(tab)` carries, so the order is part of the deep link and
- * reordering these would silently repoint every saved link and every announcement.
+ * The enum itself moved to `:core:navigation` in PR 11 of #551: its ordinal is what
+ * `Route.Names(tab)` carries, so it is a deep-link contract, and `AnnouncementRoutes` needs it.
+ * The `@StringRes` stayed here rather than travelling with it, because a route vocabulary that
+ * knows about `R.string` would force `:core:navigation` to depend on `:core:ui` for three
+ * strings — an edge that is hard to remove once every feature module depends on both.
+ *
+ * A `when` rather than a constructor parameter, so the compiler still fails on a new tab.
  */
-enum class NamesTab(@param:StringRes val label: Int) {
-    ASMA_UL_HUSNA(R.string.names_tab_allah),
-    ASMA_UN_NABI(R.string.names_tab_prophet),
-    PROPHETS(R.string.names_tab_prophets);
-
-    companion object {
-        /** [ordinal] back to a tab, tolerating an index from a build that had more of them. */
-        fun fromOrdinal(index: Int): NamesTab = entries.getOrElse(index) { ASMA_UL_HUSNA }
+@get:StringRes
+internal val NamesTab.label: Int
+    get() = when (this) {
+        NamesTab.ASMA_UL_HUSNA -> R.string.names_tab_allah
+        NamesTab.ASMA_UN_NABI -> R.string.names_tab_prophet
+        NamesTab.PROPHETS -> R.string.names_tab_prophets
     }
-}
 
 /**
  * Names — the ninety-nine Names of Allah, the names of the Prophet ﷺ, and the Prophets.

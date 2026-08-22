@@ -19,12 +19,41 @@ import java.io.File
 class AnalyticsReachabilityTest {
 
     private val viewModelDir = File("src/main/java/com/arshadshah/nimaz/presentation/viewmodel")
+
+    /**
+     * Everywhere a UI event can be dispatched from — now spanning three modules.
+     *
+     * Two of these were wrong, and both were invisible because the old code did
+     * `uiDirs.filter { it.isDirectory }`: a root that does not exist was silently skipped, so the
+     * scan shrank without ever failing.
+     *
+     * - `presentation/widget` **never existed**. The widgets are `com.arshadshah.nimaz.widget`.
+     *   A widget dispatching an analytics-bearing event has therefore never counted as a
+     *   producer, for as long as this test has existed.
+     * - `presentation/components` and `core/navigation` were emptied by PRs 10 and 11 of #551 —
+     *   the design system is `:core:ui` and the route vocabulary is `:core:navigation`. Both
+     *   directories still exist in `:app` (screens; `NavGraph.kt`), so nothing would have gone
+     *   red; the scan would just have stopped seeing most of the UI.
+     *
+     * Missing roots are now an assertion, not a filter, and [MINIMUM_UI_FILES] floors the total.
+     */
     private val uiDirs = listOf(
         File("src/main/java/com/arshadshah/nimaz/presentation/screens"),
         File("src/main/java/com/arshadshah/nimaz/presentation/components"),
         File("src/main/java/com/arshadshah/nimaz/core/navigation"),
-        File("src/main/java/com/arshadshah/nimaz/presentation/widget"),
+        File("src/main/java/com/arshadshah/nimaz/widget"),
+        File("../core/ui/src/main/kotlin/com/arshadshah/nimaz/presentation/components"),
+        File("../core/navigation/src/main/kotlin/com/arshadshah/nimaz/core/navigation"),
     )
+
+    @Test
+    fun `every UI source root exists and the scan is not narrowing`() {
+        val missing = uiDirs.filterNot { it.isDirectory }.map { it.path }
+        assertThat(missing).isEmpty()
+
+        val scanned = uiDirs.flatMap { it.walkTopDown().filter { f -> f.extension == "kt" } }.size
+        assertThat(scanned).isAtLeast(MINIMUM_UI_FILES)
+    }
 
     /**
      * The unreachable-analytics backlog, which is now **empty** — and must stay that way.
@@ -45,7 +74,7 @@ class AnalyticsReachabilityTest {
 
     @Test
     fun `every analytics-bearing event branch has a producer`() {
-        val ui = uiDirs.filter { it.isDirectory }
+        val ui = uiDirs
             .flatMap { it.walkTopDown().filter { f -> f.extension == "kt" } }
             .joinToString("\n") { it.readText() }
 
@@ -98,5 +127,12 @@ class AnalyticsReachabilityTest {
         val NEXT_BRANCH = Regex("""\n {12}(?:is\s+)?\w+Event\.\w+""")
         val LOGGING = Regex("""telemetry\.(featureUsed|search|settingChanged|prayerTracked|fastTracked|aiAnswered)|AppAnalytics\.log""")
         const val BRANCH_WINDOW = 220
+
+        /**
+         * A floor over the *combined* UI roots. They hold well over 400 files; this sits far
+         * enough below that ordinary churn never touches it, and far enough above that losing any
+         * one root fails instead of quietly narrowing the scan.
+         */
+        const val MINIMUM_UI_FILES = 300
     }
 }

@@ -1738,7 +1738,7 @@ Requires JDK 21 and an Android SDK (compileSdk 37). Set `sdk.dir` in `local.prop
 
 ### Modules
 
-Six `:core:*` modules so far, mid-migration (#551):
+Seven `:core:*` modules so far, mid-migration (#551):
 
 | Module | Plugin | What it holds |
 |---|---|---|
@@ -1748,7 +1748,8 @@ Six `:core:*` modules so far, mid-migration (#551):
 | **`:core:datastore`** | `nimaz.android.library` + `nimaz.android.hilt` | All three DataStore files — `PreferencesDataStore` and its `PreferenceCodec` registry, the announcement store, and `DeviceIdProvider`. Implements the eleven `SettingsSeams` interfaces, which live in `:core:domain`, so a feature depends on the seam it needs rather than on this. |
 | **`:core:data`** | `nimaz.android.library` + `nimaz.android.hilt` | Eighteen of the nineteen repository implementations, the `data/device`, `data/text` and `data/ai` slices, and the announcement store's repository. It is the only module that sees both `:core:database` and `:core:datastore`, which is what lets every other module depend on a `:core:domain` interface instead of on a DAO. |
 | **`:core:ui`** | `nimaz.android.library` + `nimaz.android.compose` | The design system — 52 atoms, the generic `Nimaz*` molecules, `theme/`, `foundation/`, `presentation/model` and `core/share` — plus **`strings.xml` and its five translations, `colors.xml` and the eight fonts**. The first module to own `res/`, which is why every other module now spells resources `com.arshadshah.nimaz.core.ui.R`. |
-| **`:app`** | `nimaz.android.application` | Everything else, for now — screens, ViewModels, feature components, widgets, audio, sync, and the rest of `core/`. It shrinks with each milestone of #551. |
+| **`:core:navigation`** | `nimaz.android.library` + `nimaz.android.compose` | The route vocabulary — `Routes.kt`, `ScreenTags`, `taggedComposable`, `ContentTargetRoutes`, and the announcement and help deep-link grammars. Every feature module needs it to declare its destinations. **It may not import `presentation.screens`, `presentation.viewmodel` or `:core:ui`** — a `Route` carries a destination's identity, never its label. `NavGraph.kt` itself is still in `:app`; it is decomposed in PR 12. |
+| **`:app`** | `nimaz.android.application` | Everything else, for now — screens, ViewModels, feature components, widgets, audio, sync, `NavGraph.kt`, and the rest of `core/`. It shrinks with each milestone of #551. |
 | **`:baselineprofile`** | `com.android.test` | Generates `app/src/main/baseline-prof.txt`. Nothing depends on it at runtime and no product code lives there. |
 
 Plus one **included build**, `build-logic`, which is not a module of the app — it produces the
@@ -1786,6 +1787,15 @@ one that points the wrong way.
 definition of the fake for it, and the pattern is now regular enough to expect rather than
 discover: **a fake of a `:core:domain` port is wanted by whichever module implements the port and
 by whichever module drives it**, so it belongs beside the port rather than in either.
+
+**A route names a destination; it must never reach for what draws it.** `:core:navigation`
+depends on `:core:domain` and nothing above it — deliberately **not** on `:core:ui`. The test case
+is `NamesTab`, which lived inside `NamesScreen.kt` and looked like presentation but whose own KDoc
+says the ordinal *is* the deep-link contract: reorder it and every saved link and announcement
+silently repoints. Its identity moved to `:core:navigation`; the `@StringRes label` each constant
+carried stayed behind as a `when` in the screen, because keeping it would have bought a
+navigation → ui edge for three strings — and that edge is very hard to remove once eleven feature
+modules depend on both. `NavigationHasNoPresentationImportsTest` enforces all three exclusions.
 
 **A symbol read across a module boundary is public API, and that is not the same as widening for
 convenience.** `internal` in a single-module app meant "not part of the app's public surface",

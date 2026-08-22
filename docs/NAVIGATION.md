@@ -32,7 +32,13 @@ Navigation is **type-safe**: a `@Serializable sealed interface Route`
 `backStackEntry.toRoute<Route.X>()`; you never build or parse a string path.
 Bottom navigation is the `BottomNavDestination` enum.
 
-**Four files own the whole surface**, and they move together:
+**Four files own the whole surface**, and they move together — but since PR 11 of #551 they no
+longer live in the same Gradle module. The paths below are **package** paths, which a module move
+does not change; on disk, everything except `NavGraph.kt` is now under `core/navigation/`
+(the `:core:navigation` module), while `NavGraph.kt` stays in `app/` until PR 12 decomposes it.
+The split is the point: every feature module needs the route *vocabulary* to declare its
+destinations, and none of them should need the `NavHost`.
+
 
 | File | Owns | Cross-check |
 |---|---|---|
@@ -41,7 +47,9 @@ Bottom navigation is the `BottomNavDestination` enum.
 | `core/navigation/ScreenTags.kt` | the stable test tag per destination | `NAV-05` |
 | `core/navigation/AnnouncementRoutes.kt` + `HelpDeepLink.kt` | the two **external** entry grammars | `NAV-06` … `NAV-10` |
 
-**Test hooks.** Every destination is wired via the local `taggedComposable<Route.X>` helper,
+**Test hooks.** Every destination is wired via the `taggedComposable<Route.X>` helper — which was
+`private` inside `NavGraph.kt` and now lives in `core/navigation/TaggedComposable.kt`, because a
+helper every feature module must call cannot be private to the app —
 which wraps the screen in a full-size container carrying a stable `ScreenTags.X` tag; bottom-nav
 items carry `ScreenTags.bottomNav(label)`. Instrumented UI tests assert *which screen is shown*
 by these tags rather than by on-screen text, so they survive copy and locale changes. A bare
