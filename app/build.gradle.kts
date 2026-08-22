@@ -1037,8 +1037,13 @@ tasks.register<JacocoReport>("jacocoTestReport") {
     // It was first guessed at 1,500, then "corrected" to 200 on the reasoning that the codebase
     // has 1,170 top-level declarations so 1,500 must be too high. Both the guess and the
     // correction were arrived at without running `jacocoTestReport` even once. JaCoCo counts
-    // compiled classes — nested classes, lambdas, Compose synthetics — and this report also
-    // spans `androidx/*`, so 1,170 was never the comparable figure.
+    // compiled classes — nested classes, lambdas and Compose synthetics, of which a Compose
+    // codebase generates a great many — so 1,170 was never the comparable figure.
+    //
+    // A third claim in this comment was also wrong and is now gone: that the report "spans
+    // `androidx/*`". It does not. Every one of the 4,736 classes is under
+    // `com/arshadshah/nimaz`, checked by aggregating the report's own `<package>` elements.
+    // The figure was right; two of the three reasons given for it were not.
     //
     // 200 stays, because a floor should be impossible to trip except by the failure it names and
     // 4,736/200 is ample margin. What changed is that it is now a measurement rather than an
