@@ -2,7 +2,7 @@ package com.arshadshah.nimaz.presentation.viewmodel.home
 
 import com.arshadshah.nimaz.presentation.viewmodel.FakePermissionChecker
 import com.arshadshah.nimaz.presentation.viewmodel.FakePowerSettings
-import com.arshadshah.nimaz.presentation.viewmodel.FakeStringProvider
+import com.arshadshah.nimaz.core.text.FakeStringProvider
 import com.arshadshah.nimaz.presentation.viewmodel.RecordingWidgetRefresher
 import com.arshadshah.nimaz.core.monitoring.RecordingTelemetry
 import android.app.Application
@@ -10,7 +10,7 @@ import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.arshadshah.nimaz.domain.time.FakeTodayProvider
 import com.arshadshah.nimaz.domain.worship.NextWorshipResolver
-import com.arshadshah.nimaz.core.util.toUtcMidnightMillis
+import com.arshadshah.nimaz.core.common.toUtcMidnightMillis
 import com.arshadshah.nimaz.domain.model.FastRecord
 import com.arshadshah.nimaz.domain.model.FastStatus
 import com.arshadshah.nimaz.domain.model.FastType

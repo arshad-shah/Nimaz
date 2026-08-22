@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!--
+      Declared here because `core/monitoring/AppAnalytics.kt` calls
+      `FirebaseAnalytics.getInstance`, which requires all three. In the monolith the code and
+      `:app`'s manifest were the same module, so lint could see them; once the code moved, lint
+      on this module reported `MissingPermission` and failed the build — correctly, since a
+      library that needs a permission should say so rather than assume its consumer does.
+
+      Behaviour-neutral, and checked rather than assumed: the merged manifest already contained
+      all three before this file existed. INTERNET and WAKE_LOCK come from `:app`'s own manifest;
+      ACCESS_NETWORK_STATE arrives transitively from a Firebase AAR and is not declared by `:app`
+      at all. Manifest merging unions these, so the merged output is byte-identical either way —
+      diffed as part of PR 6 of #551.
+    -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+</manifest>

@@ -1,6 +1,6 @@
 package com.arshadshah.nimaz.presentation.viewmodel.quran
 
-import com.arshadshah.nimaz.presentation.viewmodel.FakeStringProvider
+import com.arshadshah.nimaz.core.text.FakeStringProvider
 import android.content.Context
 import com.arshadshah.nimaz.core.monitoring.RecordingTelemetry
 import com.arshadshah.nimaz.domain.model.DuaBookmark

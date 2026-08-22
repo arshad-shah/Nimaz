@@ -1,4 +1,4 @@
-package com.arshadshah.nimaz.core.util
+package com.arshadshah.nimaz.core.common
 
 import android.app.LocaleManager
 import android.content.Context

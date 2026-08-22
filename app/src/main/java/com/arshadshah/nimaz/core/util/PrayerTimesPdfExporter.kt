@@ -10,6 +10,8 @@ import android.graphics.Typeface
 import android.graphics.pdf.PdfDocument
 import androidx.core.content.res.ResourcesCompat
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.common.formatFastLength
+import com.arshadshah.nimaz.core.common.formatMediumDate
 import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.domain.calendar.HijriDateCalculator
 import com.arshadshah.nimaz.domain.model.IslamicEventType

@@ -169,8 +169,32 @@ com.arshadshah.nimaz/
 
 Those last four packages were `core/util` and `core/time`. They moved because **domain imports
 them**, and anything domain imports has to be inside `:core:domain` or below it — parking them in
-`:core:common` (PR 6) would have reversed the arrow. The rest of `core/util` is untouched and is
-PR 6's problem.
+`:core:common` would have reversed the arrow.
+
+```text
+core/common/src/main/kotlin/           #  ← :core:common — an Android library, below :core:ui
+com.arshadshah.nimaz/
+└── core/
+    ├── common/              # Formatting with no feature attached: CountdownFormatting,
+    │                        #   DateTimeExtensions, TimeFormatting, NumberFormatUtils,
+    │                        #   ThematicMarkup, LocaleHelper, PrayerClock
+    ├── monitoring/          # Telemetry + the Firebase wrappers behind it
+    └── text/                # StringProvider — a string without a Context
+```
+
+**Nothing in `:core:common` may reference `R`.** It sits *below* `:core:ui`, which owns every
+resource including the whole of `strings.xml`, so there is no app `R` on its classpath to
+reference — with `nonTransitiveRClass=true` its own `R` is `…core.common.R` and nothing else is
+visible. That is why `StringProvider` exists: a ViewModel that must *compare* resolved strings
+(search, sorting) gets them through the seam rather than through a `Context`. This constrains
+every module below `:core:ui`, not just this one.
+
+What is left in `app/…/core/util/` is there deliberately, not by omission. Twelve files whose real
+home is a module that does not exist yet: `TajweedParser` → `:core:ui`, `FlowExtensions` →
+`:core:data`, the prayer notification and PDF files → `:feature:prayer`, `TafseerPdfExporter` →
+`:feature:quran`, `NotificationDiagnostics` → `:feature:settings`. `BootReceiver`,
+`PrayerRescheduler`, `InAppUpdateManager` and `core/init` stay in `:app` permanently — a manifest
+entry point and a composition root are app concerns.
 
 ```text
 app/src/main/java/                     #  ← :app — everything else, for now
@@ -617,7 +641,7 @@ safely when Firebase is absent, so they never *blocked* testing — but a test c
 that an action had been logged, and two live defects survived exactly that gap (a drop-off funnel
 that has never fired, and a `logFeatureUsed` call on a branch no screen can reach).
 
-**ViewModels and use cases inject `Telemetry`** (`core/monitoring/Telemetry.kt`), bound to
+**ViewModels and use cases inject `Telemetry`** (`core/monitoring/Telemetry.kt`, in `:core:common`), bound to
 `FirebaseTelemetry` in `MonitoringModule`. Tests inject `RecordingTelemetry` and assert on its
 `calls`.
 
@@ -1684,7 +1708,8 @@ Three, mid-migration (#551):
 | Module | Plugin | What it holds |
 |---|---|---|
 | **`:core:domain`** | `nimaz.jvm.library` | The whole domain layer — models, repository *interfaces*, use cases, `domain/search`, and the four pure calculators domain depends on (`domain/time`, `domain/calendar`, `domain/worship`, `domain/prayer`). **Pure JVM: no AGP, no Android SDK on the classpath.** |
-| **`:app`** | `nimaz.android.application` | Everything else, for now — presentation, data, widgets, `core/`. It shrinks with each milestone of #551. |
+| **`:core:common`** | `nimaz.android.library` | `core/common` (formatting helpers with no feature attached), `core/monitoring` (the `Telemetry` seam and its Firebase wrappers) and `core/text` (`StringProvider`). Depends on `:core:domain` and Android. **Below `:core:ui`, so no `R`.** |
+| **`:app`** | `nimaz.android.application` | Everything else, for now — presentation, data, widgets, the rest of `core/`. It shrinks with each milestone of #551. |
 | **`:baselineprofile`** | `com.android.test` | Generates `app/src/main/baseline-prof.txt`. Nothing depends on it at runtime and no product code lives there. |
 
 Plus one **included build**, `build-logic`, which is not a module of the app — it produces the
@@ -1705,6 +1730,15 @@ convention plugins the modules are built with. See below.
 When domain needs something Android can do, invert it behind a domain port rather than reaching
 for the platform: `WidgetRefresher`, `CompassSensors` and `PrayerAlarmScheduler` are the
 existing shapes to copy (§2).
+
+**`moduleBoundary` does the same job for the Android modules,** and is registered by
+`nimaz.android.library` on every one of them. An Android library has Android on its classpath by
+definition, so the rule worth enforcing there is the *direction* one from `SPEC.md` §4 —
+**`:core:*` never depends on `:feature:*` or `:app`, and no `:feature:*` depends on another
+`:feature:*`**. Nothing in the compiler objects to a sideways
+`implementation(project(":feature:quran"))`; it just quietly rebuilds the mesh the epic exists to
+remove. The task reads *declared* project dependencies across every configuration and fails on
+one that points the wrong way.
 
 **Shared test fakes cross the boundary through `testFixtures`,** not by duplication.
 `:core:domain` publishes `src/testFixtures` — currently `FakeTodayProvider` and
@@ -1728,7 +1762,7 @@ exists so that the build configuration every module shares is stated **once**:
 | Plugin id | Applies | Carries |
 |---|---|---|
 | `nimaz.android.application` | `com.android.application` | compileSdk 37, minSdk 29, Java 21, the `-Xannotation-default-target=param-property` compiler arg |
-| `nimaz.android.library` | `com.android.library` | the same shared config |
+| `nimaz.android.library` | `com.android.library` | the same shared config, plus the `moduleBoundary` guard wired into `check` |
 | `nimaz.jvm.library` | `org.jetbrains.kotlin.jvm` | Java 21 + the JVM toolchain, no Android, and the `androidFreeClasspath` guard wired into `check` — applied by `:core:domain` |
 | `nimaz.android.compose` | `org.jetbrains.kotlin.plugin.compose` | `buildFeatures.compose = true`; reacts to whichever of `AppPlugin`/`LibraryPlugin` the module has |
 | `nimaz.android.hilt` | `com.google.devtools.ksp`, `com.google.dagger.hilt.android` | `hilt-android` on `implementation`, `hilt-compiler` on `ksp` |

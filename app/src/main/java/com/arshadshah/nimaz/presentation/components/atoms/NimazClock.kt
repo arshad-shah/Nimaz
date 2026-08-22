@@ -11,9 +11,9 @@ import androidx.compose.runtime.remember
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
-import com.arshadshah.nimaz.core.util.CountdownParts
-import com.arshadshah.nimaz.core.util.EventProximity
-import com.arshadshah.nimaz.core.util.countdownTo
+import com.arshadshah.nimaz.core.common.CountdownParts
+import com.arshadshah.nimaz.core.common.EventProximity
+import com.arshadshah.nimaz.core.common.countdownTo
 import kotlinx.coroutines.delay
 import kotlin.time.Clock
 import kotlin.time.Duration

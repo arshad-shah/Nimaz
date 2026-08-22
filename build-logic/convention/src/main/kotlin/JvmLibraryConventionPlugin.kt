@@ -49,7 +49,7 @@ class JvmLibraryConventionPlugin : Plugin<Project> {
             val classpaths = configurations
                 .matching { it.name.endsWith("Classpath") && it.isCanBeResolved }
                 .associate { it.name to it.incoming.artifacts.resolvedArtifacts }
-            val projectPath = path
+            val projectPath = project.path
 
             doLast {
                 val offenders = classpaths.entries

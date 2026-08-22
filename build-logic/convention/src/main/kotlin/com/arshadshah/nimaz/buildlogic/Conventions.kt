@@ -53,3 +53,22 @@ val ANDROID_COMPONENT_GROUPS = listOf(
     "androidx",
     "com.google.android",
 )
+
+/**
+ * Whether a module at Gradle path [from] is allowed to depend on the module at [to].
+ *
+ * SPEC §4 of the multi-module migration (#551): *":core:* never depends on :feature:*; no
+ * :feature:* depends on another :feature:*; only :app depends on features."* Enforced by
+ * `moduleBoundary`, registered by [AndroidLibraryConventionPlugin].
+ *
+ * Deliberately prefix-based rather than a per-module allowlist. A list has to be edited every
+ * time a module is added, and the one time that is forgotten the rule silently stops applying to
+ * the new module — which is the failure mode this whole epic keeps running into. Kept here rather
+ * than inside the plugin so it can be unit-tested as the table of cases it is, without spawning
+ * a Gradle build per case.
+ */
+fun isForbiddenModuleDependency(from: String, to: String): Boolean = when {
+    from.startsWith(":core:") -> to == ":app" || to.startsWith(":feature:")
+    from.startsWith(":feature:") -> to == ":app" || to.startsWith(":feature:")
+    else -> false
+}

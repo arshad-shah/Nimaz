@@ -1,7 +1,7 @@
 package com.arshadshah.nimaz.data.platform
 
 import android.content.Context
-import com.arshadshah.nimaz.core.util.LocaleHelper
+import com.arshadshah.nimaz.core.common.LocaleHelper
 import com.arshadshah.nimaz.data.audio.AdhanDownloadService
 import com.arshadshah.nimaz.data.audio.AdhanSound
 import com.arshadshah.nimaz.domain.repository.AdhanDownloader

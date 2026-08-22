@@ -1,4 +1,4 @@
-package com.arshadshah.nimaz.core.util
+package com.arshadshah.nimaz.core.common
 
 /**
  * The four-tag markup the thematic layer arrives in, parsed into something Compose can draw.

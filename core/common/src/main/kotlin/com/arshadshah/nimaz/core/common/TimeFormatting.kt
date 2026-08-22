@@ -1,4 +1,4 @@
-package com.arshadshah.nimaz.core.util
+package com.arshadshah.nimaz.core.common
 
 import java.time.LocalDateTime
 import java.time.LocalTime

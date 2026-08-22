@@ -1,4 +1,4 @@
-package com.arshadshah.nimaz.core.util
+package com.arshadshah.nimaz.core.common
 
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test

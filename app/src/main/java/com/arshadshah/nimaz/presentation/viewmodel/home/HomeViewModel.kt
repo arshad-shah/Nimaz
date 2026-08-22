@@ -9,10 +9,10 @@ import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.core.text.StringProvider
 import com.arshadshah.nimaz.domain.time.TodayProvider
 import com.arshadshah.nimaz.domain.calendar.HijriDateCalculator
-import com.arshadshah.nimaz.core.util.MILLIS_PER_DAY
+import com.arshadshah.nimaz.core.common.MILLIS_PER_DAY
 import com.arshadshah.nimaz.domain.worship.NextWorshipResolver
 import com.arshadshah.nimaz.core.util.WorshipReminderContent
-import com.arshadshah.nimaz.core.util.toUtcMidnightMillis
+import com.arshadshah.nimaz.core.common.toUtcMidnightMillis
 import com.arshadshah.nimaz.domain.model.AnnouncementAction
 import com.arshadshah.nimaz.domain.model.AnnouncementType
 import com.arshadshah.nimaz.domain.model.FallbackLocation

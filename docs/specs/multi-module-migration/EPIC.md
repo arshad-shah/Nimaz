@@ -181,17 +181,39 @@ narrative; the task is the criterion.
 **#6 — `:core:common`** · `mm/05-core-common`
 `core/util` was 24 files and 5,336 LOC reaching into domain (11 files), presentation, data and
 widget. **PR 5 already took the five that domain imports** — they are now `domain/{calendar,
-time,worship,prayer}` in `:core:domain`, and `core/time` no longer exists. Nineteen files are
-left; triage them one by one: genuinely shared helpers go to `:core:common`, the rest are pushed
-down to their real owners. Also moves `core/monitoring`, `core/share`, `core/text`,
-`core/feedback`, `core/init`.
-*Exit:* `:core:common` depends on `:core:domain` and Android only — never on data or
-presentation.
+time,worship,prayer}` in `:core:domain`, and `core/time` no longer exists.
 
-> **Corrected.** This PR used to be described as owning the whole `core/util` triage *and* as
-> depending on `:core:domain`. Both could not hold: `HijriDateCalculator` and friends are
-> imported **by** domain, so putting them in a module that depends on domain is a cycle. Fixed in
-> PR 5, which took exactly those five files.
+Of the nineteen left, **seven** move: `CountdownFormatting`, `DateTimeExtensions`,
+`TimeFormatting`, `NumberFormatUtils`, `ThematicMarkup`, `LocaleHelper` and `PrayerClock`,
+repackaged `core.util` → `core.common` so the package is not split across two modules. Plus
+`core/monitoring` (6) and `core/text` (1), both wholesale and unrenamed. About 920 LOC, not the
+~1,400 the triage projected, because two of its `:core:common` rows had already left for
+`:core:domain`.
+
+The other twelve are **pushed down, and stay in `:app` until their module exists** —
+`TajweedParser` → `:core:ui` (PR 10), `FlowExtensions` → `:core:data` (PR 9), the notification
+and PDF files → `:feature:prayer` (PR 20), `TafseerPdfExporter` → `:feature:quran` (PR 19),
+`NotificationDiagnostics` → `:feature:settings` (PR 21). `BootReceiver`, `PrayerRescheduler`,
+`InAppUpdateManager` and `core/init` stay in `:app` for good. `core/share` goes to `:core:ui`
+(it is a Canvas/bitmap renderer that uses `R`) and `core/feedback` to `:feature:tracker`, so
+neither moves here. `SPEC.md` §4's "`:core:common` = util, time, monitoring, share, text" was
+wrong about `share`; `EPIC.md`'s extra `init` and `feedback` were wrong too.
+
+*Exit:* `:core:common` depends on `:core:domain` and Android only — never on data or
+presentation, and never on `R`. Enforced by **`moduleBoundary`**, registered by
+`nimaz.android.library` on every Android module and wired into `check`: it reads declared project
+dependencies and fails when a `:core:*` module points at `:app` or a `:feature:*`, or a
+`:feature:*` points sideways. The `R` half needs no task — the module's namespace is
+`com.arshadshah.nimaz.core.common`, so with `nonTransitiveRClass=true` the app's `R` is not on
+its classpath to import.
+
+> **Corrected twice.** This PR used to be described as owning the whole `core/util` triage *and*
+> as depending on `:core:domain`. Both could not hold: `HijriDateCalculator` and friends are
+> imported **by** domain, so putting them in a module that depends on domain is a cycle — fixed
+> in PR 5. And `PrayerClock` was recorded as *"imported by nothing; confirm it is not dead
+> code"*: it is not dead. All three of its functions are called from `presentation/`. The grep
+> that suggested otherwise looked for the file name, and everything in the file is a top-level
+> function.
 
 **#7 — `:core:database`** · `mm/06-core-database`
 Both `@Database` classes, 15 entities, 22 DAOs, all migrations, **and the `schemas/`

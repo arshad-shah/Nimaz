@@ -1,7 +1,7 @@
 package com.arshadshah.nimaz.presentation.model
 
-import com.arshadshah.nimaz.core.util.currentPrayerIndexAt
-import com.arshadshah.nimaz.core.util.nextPrayerIndexAt
+import com.arshadshah.nimaz.core.common.currentPrayerIndexAt
+import com.arshadshah.nimaz.core.common.nextPrayerIndexAt
 import com.arshadshah.nimaz.domain.model.PrayerStatus
 import com.arshadshah.nimaz.domain.model.PrayerType
 import kotlin.time.Instant

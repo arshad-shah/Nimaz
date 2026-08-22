@@ -1,6 +1,5 @@
 package com.arshadshah.nimaz.presentation.viewmodel
 
-import com.arshadshah.nimaz.core.text.StringProvider
 import com.arshadshah.nimaz.domain.model.NisabType
 import com.arshadshah.nimaz.domain.repository.PermissionChecker
 import com.arshadshah.nimaz.domain.repository.PowerSettings
@@ -18,15 +17,6 @@ import kotlinx.coroutines.flow.flowOf
  * alternative was a Robolectric `ApplicationContext` for a ViewModel that wanted four strings
  * and a permission bit.
  */
-class FakeStringProvider(
-    private val format: (Int, List<Any>) -> String = { id, args ->
-        if (args.isEmpty()) "string:$id" else "string:$id(${args.joinToString()})"
-    }
-) : StringProvider {
-    override fun get(id: Int, vararg args: Any): String = format(id, args.toList())
-    override fun quantity(id: Int, count: Int, vararg args: Any): String =
-        format(id, listOf(count) + args.toList())
-}
 
 class FakePermissionChecker(
     private val location: Boolean = true,

@@ -4,7 +4,7 @@ import android.content.Context
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.core.monitoring.PerfMonitor
-import com.arshadshah.nimaz.core.util.LocaleHelper
+import com.arshadshah.nimaz.core.common.LocaleHelper
 import com.arshadshah.nimaz.core.util.PrayerNotificationScheduler
 import com.arshadshah.nimaz.data.announcement.AnnouncementBootstrap
 import com.arshadshah.nimaz.data.audio.AdhanAudioManager

@@ -20,9 +20,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.core.util.countdownOf
-import com.arshadshah.nimaz.core.util.formatClock
-import com.arshadshah.nimaz.core.util.formatFullDate
+import com.arshadshah.nimaz.core.common.countdownOf
+import com.arshadshah.nimaz.core.common.formatClock
+import com.arshadshah.nimaz.core.common.formatFullDate
 import com.arshadshah.nimaz.domain.model.PrayerName
 import com.arshadshah.nimaz.domain.model.PrayerStatus
 import com.arshadshah.nimaz.domain.model.PrayerTimes

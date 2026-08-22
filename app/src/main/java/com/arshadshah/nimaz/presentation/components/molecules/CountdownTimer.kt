@@ -33,8 +33,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.core.util.CountdownParts
-import com.arshadshah.nimaz.core.util.countdownTo
+import com.arshadshah.nimaz.core.common.CountdownParts
+import com.arshadshah.nimaz.core.common.countdownTo
 import com.arshadshah.nimaz.presentation.components.atoms.TickResolution
 import com.arshadshah.nimaz.presentation.components.atoms.rememberNow
 import com.arshadshah.nimaz.presentation.theme.LocalAnimationsEnabled

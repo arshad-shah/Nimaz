@@ -33,8 +33,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.calendar.HijriDateCalculator
-import com.arshadshah.nimaz.core.util.countdownOf
-import com.arshadshah.nimaz.core.util.formatWeekdayDayMonth
+import com.arshadshah.nimaz.core.common.countdownOf
+import com.arshadshah.nimaz.core.common.formatWeekdayDayMonth
 import com.arshadshah.nimaz.domain.model.FastRecord
 import com.arshadshah.nimaz.domain.model.FastStatus
 import com.arshadshah.nimaz.domain.model.FastType

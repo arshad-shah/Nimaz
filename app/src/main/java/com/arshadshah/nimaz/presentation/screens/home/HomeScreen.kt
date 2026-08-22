@@ -53,7 +53,7 @@ import com.arshadshah.nimaz.LocalInAppUpdateManager
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.navigation.ScreenTags
 import com.arshadshah.nimaz.core.util.UpdateState
-import com.arshadshah.nimaz.core.util.formatFullDate
+import com.arshadshah.nimaz.core.common.formatFullDate
 import com.arshadshah.nimaz.domain.model.AnnouncementType
 import com.arshadshah.nimaz.domain.model.PrayerStatus
 import com.arshadshah.nimaz.domain.model.PrayerType

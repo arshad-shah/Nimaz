@@ -1,6 +1,7 @@
 package com.arshadshah.nimaz.core.monitoring
 
 import androidx.lifecycle.ViewModel
+import com.arshadshah.nimaz.core.monitoring.RecordingTelemetry
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

@@ -70,4 +70,27 @@ class AndroidLibraryConventionPluginTest {
     fun `does not apply the standalone kotlin-android plugin`() {
         assertThat(reportOfLibraryFixture()["hasKotlinAndroidPlugin"]).isEqualTo("false")
     }
+
+    /**
+     * The layering guard has to be *attached*, not merely defined. `check` is what `fastlane
+     * android test` and the PR lane run, so a task nobody depends on enforces nothing.
+     * [ModuleBoundaryRuleTest] covers the rule the task applies.
+     */
+    @Test
+    fun `wires the module boundary guard into check`() {
+        val report = ConventionFixture.run(
+            dir = File(tmp.root, "boundary-wiring"),
+            plugins = listOf("nimaz.android.library"),
+            buildScript = """
+                android { namespace = "com.arshadshah.nimaz.fixture" }
+                tasks.register("printConventions") {
+                    val checkDeps = tasks.named("check").get().taskDependencies
+                        .getDependencies(null).map { it.name }.sorted().joinToString(",")
+                    doLast { println("REPORT checkDependsOn=" + checkDeps) }
+                }
+            """.trimIndent()
+        ).reported()
+
+        assertThat(report["checkDependsOn"]).contains("moduleBoundary")
+    }
 }

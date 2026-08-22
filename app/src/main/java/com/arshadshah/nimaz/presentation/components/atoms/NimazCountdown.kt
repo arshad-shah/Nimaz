@@ -11,10 +11,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.core.util.CountdownParts
-import com.arshadshah.nimaz.core.util.CountdownUnit
-import com.arshadshah.nimaz.core.util.EventProximity
-import com.arshadshah.nimaz.core.util.formatClockTime
+import com.arshadshah.nimaz.core.common.CountdownParts
+import com.arshadshah.nimaz.core.common.CountdownUnit
+import com.arshadshah.nimaz.core.common.EventProximity
+import com.arshadshah.nimaz.core.common.formatClockTime
 import com.arshadshah.nimaz.presentation.theme.LocalUse24HourFormat
 import java.time.LocalDateTime
 import java.time.ZoneId
