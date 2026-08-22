@@ -228,8 +228,15 @@ The obligations, in short:
    `onEvent(event: XxxEvent)` (sealed interface). No exposed `MutableStateFlow`/`LiveData`.
 4. Repositories return **domain models**; map at the data layer (`Entity.toDomain()` /
    `Model.toEntity()`).
-5. DI lives in `core/di`: `@Binds` for interface→impl, `@Provides` for `XxxUseCases`,
-   `@Singleton` in `SingletonComponent`.
+5. **A binding lives in the module that owns the implementation.** `@Binds` for interface→impl,
+   `@Provides` for `XxxUseCases`, `@Singleton` in `SingletonComponent` — but *where*: repository
+   binds in **`:core:data`** (`DataBindingsModule`), settings seams in **`:core:datastore`**
+   (`SettingsBindingsModule`), DAOs in **`:core:database`** (`DatabaseModule`), `XxxUseCases` in
+   **`:core:domain`** (`UseCaseModule`, which is why that module depends on `hilt-core` — the JVM
+   half, so `androidFreeClasspath` still passes). `:app`'s `RepositoryModule` went from 905 lines
+   to 109 and holds only the seven bindings whose implementation is pinned to `:app` by
+   `MainActivity`, a manifest entry point, or the app's `R`. Adding one there because that is
+   where DI used to live is the mistake to avoid.
 6. Navigation is type-safe: add a `@Serializable` `Route`, a `ScreenTags` entry, and a
    `taggedComposable<Route.X>(ScreenTags.X)` in **its feature's `<Feature>Graph.kt`** — never in
    `NavGraph.kt`, which has registered nothing since PR 12 of #551, and never a bare `composable`,
@@ -275,7 +282,7 @@ The obligations, in short:
 ./gradlew :feature:prayer:check       # prayer times, qibla, night worship
 ./gradlew :feature:settings:check     # settings, location, sync
 ./gradlew :app:jacocoTestReport --dry-run   # see below — seconds, and catches a whole class of red CI
-./gradlew :app:lintDebug              # SLOW (~10 min) and CI-blocking — do not skip it
+./gradlew lintDebug                   # SLOW and CI-blocking — every module, not just :app
 python3 scripts/check_docs.py         # docs still describe the code (no toolchain needed)
 
 # Only when a Route, a ScreenTags entry or a screen's signature changed:

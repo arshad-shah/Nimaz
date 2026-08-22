@@ -15,13 +15,22 @@ platform :android do
       # tasks only run when asked for by name — so a broken convention plugin would otherwise
       # only surface as a build failure somewhere downstream.
       gradle(task: ":build-logic:convention:test")
-      gradle(task: ":app:testDebugUnitTest")
-      gradle(task: ":app:lintDebug")
+      # `testDebugUnitTest` and `lintDebug` across *every* module, not just `:app`.
+      #
+      # Until PR 22 of #551 this lane ran `:app:testDebugUnitTest` and `:app:lintDebug`, which was
+      # the whole app when there was one module. It is now a small fraction of it: `:app` holds
+      # 229 of the 2,463 unit tests, and a lint error in `:core:ui` or any feature module would
+      # not have failed a single PR check. `testDebugUnitTest` and `lintDebug` are task *names*
+      # Gradle resolves in every project that has them, so this reaches all nineteen — and picks
+      # up the twentieth automatically the day it is added, which a hand-maintained list would
+      # not.
+      gradle(task: "testDebugUnitTest")
+      gradle(task: "lintDebug")
     end
 
     desc "Run lint check"
     lane :lint do
-      gradle(task: ":app:lintDebug")
+      gradle(task: "lintDebug")
     end
 
 

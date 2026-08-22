@@ -9,6 +9,8 @@ import com.arshadshah.nimaz.presentation.foundation.text.BISMILLAH_TEXT
 import com.arshadshah.nimaz.presentation.foundation.text.formatAyahEndMarker
 import com.arshadshah.nimaz.presentation.foundation.text.formatAyahWithEndMarker
 import com.arshadshah.nimaz.presentation.foundation.text.getDisplayArabicText
+import com.arshadshah.nimaz.testing.compose.createComponentComposeRule
+import com.arshadshah.nimaz.testing.compose.setThemedContent
 import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
 import org.junit.Test

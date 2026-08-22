@@ -3,9 +3,9 @@ package com.arshadshah.nimaz.core.di
 import android.content.Context
 import android.util.Log
 import androidx.room.Room
-import com.arshadshah.nimaz.BuildConfig
 import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.data.local.content.ContentArtifactInstaller
+import com.arshadshah.nimaz.data.local.content.InstalledContentArtifact
 import com.arshadshah.nimaz.data.local.content.ContentArtifactStore
 import com.arshadshah.nimaz.data.local.content.SharedPreferencesContentArtifactStore
 import com.arshadshah.nimaz.data.local.database.NimazDatabase
@@ -67,13 +67,15 @@ object DatabaseModule {
     @Singleton
     fun provideNimazDatabase(
         @ApplicationContext context: Context,
-        contentArtifactStore: ContentArtifactStore
+        contentArtifactStore: ContentArtifactStore,
+        @InstalledContentArtifact installedArtifact: String,
     ): NimazDatabase {
         val outcome = ContentArtifactInstaller(
             context = context,
             store = contentArtifactStore,
-            // :app owns the app-level BuildConfig; :core:database cannot see it.
-            installedArtifact = BuildConfig.CONTENT_ARTIFACT_SHA256,
+            // `:app` owns the app-level `BuildConfig` and this module cannot see it, so the
+            // value arrives through `@InstalledContentArtifact` — see that qualifier's KDoc.
+            installedArtifact = installedArtifact,
         ).installIfChanged()
         Log.i("DatabaseModule", "content artifact: $outcome")
 

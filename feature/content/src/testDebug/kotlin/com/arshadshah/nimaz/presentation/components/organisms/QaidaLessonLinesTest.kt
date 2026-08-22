@@ -9,6 +9,8 @@ import com.arshadshah.nimaz.domain.model.QaidaLessonContent
 import com.arshadshah.nimaz.domain.model.QaidaLine
 import com.arshadshah.nimaz.domain.model.QaidaLineContent
 import com.arshadshah.nimaz.domain.model.TokenType
+import com.arshadshah.nimaz.testing.compose.createComponentComposeRule
+import com.arshadshah.nimaz.testing.compose.setThemedContent
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith

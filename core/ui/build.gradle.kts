@@ -15,6 +15,12 @@ plugins {
 android {
     namespace = "com.arshadshah.nimaz.core.ui"
 
+    // The Compose test harness is published from here rather than copied into every module that
+    // renders a composable under Robolectric. AGP has its own test-fixtures support; applying the
+    // `java-test-fixtures` plugin that `:core:domain` uses fails here with a duplicate
+    // `testFixturesImplementation` configuration.
+    testFixtures.enable = true
+
     testOptions {
         unitTests {
             // The Compose UI tests for the atoms run under Robolectric and read merged
@@ -67,6 +73,15 @@ android {
 // `NimazColors.TajweedColors`, which is a `:core:ui` type. `scripts/check_tajweed_contrast.py`
 // reads the theme files, not the parser, so the CI contrast gate is unaffected.
 dependencies {
+    // `api`, not `implementation`: `createComponentComposeRule()` returns a
+    // `ComposeContentTestRule` and `setThemedContent` takes a `@Composable` lambda, so every
+    // consumer needs both on its own compile classpath. The `implementation`/`api` slip that PR 15
+    // caught on `WindowSizeClass` was this exact shape.
+    testFixturesApi(platform(libs.androidx.compose.bom))
+    testFixturesApi(libs.androidx.compose.ui.test.junit4)
+    testFixturesApi(libs.androidx.compose.ui)
+    testFixturesApi(libs.androidx.compose.material3)
+
     implementation(libs.kotlinx.serialization.json)
     api(project(":core:domain"))
     implementation(project(":core:common"))

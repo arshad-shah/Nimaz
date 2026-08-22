@@ -4,15 +4,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import com.arshadshah.nimaz.presentation.components.molecules.calendar.NimazCalendar
+import com.arshadshah.nimaz.presentation.foundation.calendar.CalendarLegendItem
+import com.arshadshah.nimaz.testing.compose.createComponentComposeRule
+import com.arshadshah.nimaz.testing.compose.setThemedContent
 import com.google.common.truth.Truth.assertThat
+import java.time.LocalDate
+import java.time.YearMonth
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import com.arshadshah.nimaz.presentation.foundation.calendar.CalendarLegendItem
-import com.arshadshah.nimaz.presentation.components.molecules.calendar.NimazCalendar
-import java.time.LocalDate
-import java.time.YearMonth
 
 @RunWith(RobolectricTestRunner::class)
 class NimazCalendarTest {

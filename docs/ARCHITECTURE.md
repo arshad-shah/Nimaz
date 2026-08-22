@@ -243,7 +243,7 @@ com.arshadshah.nimaz/
 │   ├── di/                  # Hilt modules — THE place for DI
 │   │   ├── DatabaseModule.kt        # @Provides DB + every DAO
 │   │   ├── DataStoreModule.kt       # @Provides PreferencesDataStore
-│   │   └── RepositoryModule.kt      # @Binds repos  +  object UseCaseModule { @Provides XxxUseCases }
+│   │   └── RepositoryModule.kt      # @Binds for the 7 impls pinned to :app (see the DI section)
 │   ├── navigation/          # Routes.kt (sealed Route), NavGraph.kt, deep links
 │   ├── util/                # Extensions, date utils, PDF exporters
 │   ├── feedback/            # In-app feedback capture
@@ -660,16 +660,49 @@ flowchart TD
 ```
 
 Conventions:
-- **All modules live in `core/di`** and install into `SingletonComponent` with `@Singleton`.
-- **`@Binds`** (in the `abstract class RepositoryModule`) for interface→impl bindings.
-- **`@Provides`** (in the `object UseCaseModule` at the bottom of `RepositoryModule.kt`) to
-  construct each `XxxUseCases` wrapper from its repository.
-- Individual use cases use `@Inject constructor`, so they need no module entry — only the
-  wrapper is `@Provides`.
-- DAOs are provided one-per-method from the single `NimazDatabase` instance in `DatabaseModule`.
+
+- **A binding lives in the module that owns the implementation**, not in `:app`. That is the rule
+  PR 22 of #551 replaced *"all modules live in `core/di`"* with, and the reason is mechanical: the
+  module that has to recompile when an implementation changes is the one that should declare how
+  it is bound. Everything still installs into `SingletonComponent` with `@Singleton` — the
+  *scoping* did not change, only where the declarations live.
+
+| Module | Declares | Was |
+|---|---|---|
+| `:core:domain` | `UseCaseModule` (16 `XxxUseCases`), `MoreModule`, `TimeBindingsModule` | `:app` |
+| `:core:data` | `DataBindingsModule` — 23 repository `@Binds` — and `MonitoringModule` | `:app` |
+| `:core:datastore` | `SettingsBindingsModule` — the 12 settings seams — and `DataStoreModule` | `:app` |
+| `:core:database` | `DatabaseModule` — both databases and all 24 DAOs | `:app` |
+| `:app` | `RepositoryModule` (7), `AiModule`, `LicensesModule`, `AnnouncementModule`, `TimeModule`, `ContentArtifactModule` | — |
+
+`RepositoryModule` was **905 lines**; it is 109. What is left is the seven bindings whose
+implementation genuinely cannot leave `:app` — `QuranAudioManager` and its two collaborators,
+`ServiceAdhanDownloader`, `WorkManagerWidgetRefresher`, and `PrayerNotificationScheduler` twice.
+Each one is pinned by `MainActivity`, a manifest entry point, or the app's `R`.
+
+**`:core:domain` declares Dagger modules and is still the pure layer.** It depends on `hilt-core`,
+the JVM half of Hilt: `@InstallIn`, `SingletonComponent`, and Dagger's `@Module`/`@Provides`
+transitively, with no Android on the classpath. `androidFreeClasspath` still passes and
+`import android.*` is still a compile error there. A module declaration says *where a binding
+installs*, which is not an Android fact.
+
+Three things stayed in `:app` for reasons worth knowing:
+
+- **`AnnouncementModule`** reads `BuildConfig` *and* `:core:navigation`'s `announcementRoute`.
+  `:core:data` sees neither, and giving it a navigation dependency to tidy a DI file would invert
+  the layering this epic exists to fix.
+- **`TimeModule`**'s three `@Provides` are `Dispatchers.IO`, `Dispatchers.Default` and a `Clock`,
+  qualified by annotations in `:core:common` — which does not apply `nimaz.android.hilt`. Adding a
+  KSP processor to a module for three JVM values costs more build time than the tidiness is worth.
+- **`ContentArtifactModule`** is new, and exists only to pass `BuildConfig.CONTENT_ARTIFACT_SHA256`
+  across the boundary behind `@InstalledContentArtifact`, so `DatabaseModule` could move. The same
+  inversion `IntegrityTokenProvider` uses for the Play Integrity project number.
+
+Unchanged: individual use cases use `@Inject constructor`, so they need no module entry — only the
+wrapper is `@Provides`. DAOs are provided one-per-method from the single `NimazDatabase` instance.
 
 **Adding a use-case wrapper:** add a `provideXxxUseCases(repository: XxxRepository): XxxUseCases`
-function to `UseCaseModule`, mirroring `provideAsmaUlHusnaUseCases`.
+function to `UseCaseModule` **in `:core:domain`**, mirroring `provideAsmaUlHusnaUseCases`.
 
 ### 6.1 Monitoring — inject `Telemetry`, do not call the objects
 
@@ -1690,12 +1723,15 @@ copy anything listed as Open.
 
 1. **Domain models** — `domain/model/XxxModels.kt` (immutable data classes/enums).
 2. **Repository interface** — `domain/repository/XxxRepository.kt` (domain types only).
-3. **Room** — add `XxxEntity` (`entity/`) and `XxxDao` (`dao/`); register the DAO in
-   `NimazDatabase` and provide it in `DatabaseModule`. Add a migration if the schema changes.
-4. **Repository impl** — `data/repository/XxxRepositoryImpl.kt` with `toDomain()/toEntity()`
-   mapping. Bind it with `@Binds` in `RepositoryModule`.
-5. **Use cases** — `domain/usecase/XxxUseCases.kt` (wrapper + per-operation classes). Provide
-   the wrapper with `@Provides` in `UseCaseModule`.
+3. **Room** — add `XxxEntity` (`entity/`) and `XxxDao` (`dao/`) in **`:core:database`**; register
+   the DAO in `NimazDatabase` and provide it in `DatabaseModule`, which lives in that module now.
+   Add a migration if the schema changes.
+4. **Repository impl** — `data/repository/XxxRepositoryImpl.kt` in **`:core:data`** with
+   `toDomain()/toEntity()` mapping. Bind it with `@Binds` in **`DataBindingsModule`**, in the same
+   module — not in `:app`'s `RepositoryModule`, which now holds only bindings whose implementation
+   cannot leave `:app`.
+5. **Use cases** — `domain/usecase/XxxUseCases.kt` in **`:core:domain`** (wrapper + per-operation
+   classes). Provide the wrapper with `@Provides` in `UseCaseModule`, in that module.
 6. **ViewModel** — `presentation/viewmodel/XxxViewModel.kt` (`@HiltViewModel`, inject
    `XxxUseCases`, `StateFlow<XxxUiState>` + sealed `XxxEvent` + `onEvent`).
 7. **Screen** — `presentation/screens/xxx/XxxScreen.kt`, collecting state with
@@ -1762,7 +1798,7 @@ Seven `:core:*` modules so far, mid-migration (#551):
 | **`:feature:quran`** | `nimaz.android.feature` | The reader, khatam and bookmarks, plus the whole Mushaf rendering stack. (`TajweedParser` came here in PR 19 and went on to `:core:ui` in PR 21, when `QuranSettingsScreen` took `TajweedLegendSheet` to a second feature module.) The largest feature. **`QuranDao` stays in `:core:database`** — four repositories use it. **`QuranAudioManager` stays in `:app`**, behind the `QuranPlayback` port, because `MainActivity` holds one too. |
 | **`:feature:prayer`** | `nimaz.android.feature` | When each prayer *is* and which way to face: prayer times, the monthly table, qibla and the night-worship window — the counterpart to `:feature:tracker`. The only module with a camera dependency (`ArQiblaView`). **The adhan players and the prayer notification machinery are *not* here**: nothing in the move set names them, and their consumers are the settings surface plus `:app` init, so sending them here would have created the `:feature:settings -> :feature:prayer` edge #571 forbids. **`PrayerTimeCard` and `PrayerSkyScene` went down to `:core:ui`**, being read by `HomeScreen`/`HomeHero` too. |
 | **`:feature:settings`** | `nimaz.android.feature` | The last feature module: 24 screens, the 1,324-line `SettingsViewModel`, location and sync. **Five screens arrive from other features' directories** — `DuaSettingsScreen`, `HadithSettingsScreen`, `SelectReciterScreen`, `SelectTranslationScreen`, `LocationScreen` — every one dispatching `SettingsEvent`. **`data/sync` did *not* come**: it imports 21 DAOs and 14 entities, so it went to `:core:data`. `PrayerNotificationScheduler` stayed in `:app`, pinned by one `AppR.drawable` line; the three members this module calls became the `PrayerAlarmScheduler` / `PrayerNotificationTester` ports. |
-| **`:app`** | `nimaz.android.application` | What genuinely cannot leave: `MainActivity`, `NimazApp`, `NavGraph.kt`, `core/di`, `core/init`, the home screen and its ViewModel, the notification stack (`PrayerNotificationScheduler`, `BootReceiver`, `PrayerRescheduler`), the two adhan Services, `QuranAudioService` and `LibraryRepositoryImpl`. Most of what is left is pinned by `com.arshadshah.nimaz.R` or by being a manifest entry point. |
+| **`:app`** | `nimaz.android.application` | **52 files, 11,484 lines — 8% of the codebase.** What genuinely cannot leave: `MainActivity`, `NimazApp`, `NavGraph.kt`, six `core/di` modules, `core/init`, the notification stack (`PrayerNotificationScheduler`, `BootReceiver`, `PrayerRescheduler`, `NotificationContentHelper`, `PrayerAlarmTimes`), the two adhan Services, `QuranAudioService` and `LibraryRepositoryImpl` — most pinned by `com.arshadshah.nimaz.R` or by being a manifest entry point. Plus the **home surface**: `HomeScreen`, `HomeGraph`, `viewmodel/home`, and **20 components** (the six `Home*` organisms, `EventsCarousel`, `TodayCarousel`, `TodayInfoCards`, `TodaysProgressCard`, `JumuahCard`, `WorshipEventCard`, `NimazCarousel`, and five molecules). Those components stayed for the inverse of the rule that moved so many others: Home is their *only* consumer, so there is no second module to share them with. |
 | **`:baselineprofile`** | `com.android.test` | Generates `app/src/main/baseline-prof.txt`. Nothing depends on it at runtime and no product code lives there. |
 
 Plus one **included build**, `build-logic`, which is not a module of the app — it produces the
@@ -1857,16 +1893,26 @@ and the answer differs by shape:
 | A shared presentation helper | `SubtitleSpec`, `WorshipReminderContent` | Move it **down** to `:core:ui`, not across. Both were used by `:app` screens too. |
 | Another feature's ViewModel | `SettingsViewModel` in `AdaptiveMoreScreen` | Delete it. `hiltViewModel()` scopes to the destination's `NavBackStackEntry`, so this never read the other feature's instance in the first place — see `CrossFeatureViewModelGuardTest`. |
 
-**A shared `internal` test helper is duplicated per module *and* per package, and the count is
-now seventeen.** `setThemedContent` / `createComponentComposeRule` are ten lines that exist five
-times in `:core:ui`, once in `:app`, once in `:feature:calendar`, twice in `:feature:tracker`,
-twice in `:feature:quran`, four times in `:feature:prayer` and twice more across `:feature:content`
-and `:feature:settings` — the helpers are `internal`, so
-a module cannot see another's, and they are imported by package, so one module needs one per test
-package. Four copies in a single module is the point at which this stops being a footnote.
-**Publishing one from `core/ui/src/testFixtures/` collapses all of them**, the way
-`:core:domain`'s fakes already have; it is a guardrail change rather than a feature move, which is
-why it is deferred to the last milestone rather than done in passing.
+**A shared `internal` test helper multiplies per module *and* per package — this one reached
+twenty copies before it was fixed.** `setThemedContent` / `createComponentComposeRule` are ten
+lines that existed five times in `:core:ui`, three times in `:app`, and twelve times across seven
+feature modules; `:feature:prayer` alone carried four. Two properties compounded: the helpers were
+`internal`, so no module could see another's, **and** they were imported by package, so one module
+needed one per test package.
+
+**PR 22 published them from `core/ui/src/testFixtures/` as public functions and all twenty
+collapsed into one**, consumed by 130 test files through a single import — the way
+`:core:domain`'s fakes already were. `testFixturesApi` rather than `implementation`, because
+`createComponentComposeRule()` returns a `ComposeContentTestRule` and `setThemedContent` takes a
+`@Composable` lambda, so every consumer needs both on its own compile classpath; that is the same
+`api`/`implementation` distinction PR 15 got wrong on `WindowSizeClass`. Test fixtures stay off the
+runtime classpath — verified against the debug APK's dex, which carries 48,809 references to
+`androidx/compose/ui` and none to `androidx/compose/ui/test/junit4`.
+
+The lesson is about *when*, not what. This was identified in PR 15 and deferred to PR 22 as a
+guardrail change rather than a feature move. Deferring it cost fifteen further copies, each one
+written by hand, and every feature module extracted in between paid for it. **A duplication that
+grows once per PR should be fixed in the PR that first notices it.**
 
 **A component test does not move with its subject on its own, and nothing says so until a member
 turns `internal`.** PR 19 moved the Quran components into `:feature:quran` and left eleven of
