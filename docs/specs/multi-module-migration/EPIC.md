@@ -368,7 +368,7 @@ slice, its nav-graph extension, and its tests.
 | 13 | **#13** `:feature:widget` | `mm/12-feature-widget` | **landed.** 6 Glance widgets, 7 receivers, 6 workers. Found two layering violations (a widget injecting `PrayerDao`, a Worker building a `PrayerRecordEntity`) and a `@HiltWorker` failure that only the emulator suite could see. |
 | 14 | **#14** `:feature:onboarding`, `:feature:about` | `mm/13-feature-onboarding-about` | about, help, licenses, more. Onboarding needed **nothing** unpicked; about needed **six** couplings resolved. `AdaptiveMoreScreen` moves here — it composes all three and is the one adaptive screen that is not `:app`'s. |
 | 15 | **#15** `:feature:tools`, `:feature:calendar` | `mm/14-feature-tools-calendar` | zakat; Islamic calendar + events. Neither had a coupling to unpick; the work was two components finding their right homes and an `api`/`implementation` slip in `:core:ui`. |
-| 16 | **#16** `:feature:search` | `mm/15-feature-search` | search + AI ask-with-proof. Touches `worker/` contract — leave it alone. |
+| 16 | **#16** `:feature:search` | `mm/15-feature-search` | search + AI ask-with-proof. `worker/` untouched. The `BuildConfig` trap the issue names was already defused in PR 9 — both fields are read only in `core/di/AiModule`, so it becomes live again at **PR 22**, not here. |
 | 17 | **#17** `:feature:content` | `mm/16-feature-content` | dua, hadith, qaida, asma, asmaunnabi, names, prophets, catalog — **moved together**, their ViewModels are one package |
 | 18 | **#18** `:feature:tracker` | `mm/17-feature-tracker` | prayer tracker, fasting, tasbih — likewise |
 | 19 | **#19** `:feature:quran` | `mm/18-feature-quran` | quran, khatam, bookmarks. `QuranDao` stays in `:core:database` (4 repos use it) |

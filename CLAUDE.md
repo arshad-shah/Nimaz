@@ -64,6 +64,11 @@ DataStore, type-safe Navigation Compose.
   (272 today).
 
 - **`:feature:tools`** (`feature/tools/`) — the zakat calculator and its history.
+- **`:feature:search`** (`feature/search/`) — library search and the opt-in Ask-with-Proof screen.
+  Nothing network-facing lives here: the Worker client is `:core:data`, reached through
+  `AiRepository`. **`AI_WORKER_BASE_URL` and `PLAY_INTEGRITY_CLOUD_PROJECT_NUMBER` are read only
+  in `core/di/AiModule`**, in `:app` — a library's `BuildConfig` has neither. The feature is
+  **off by default** and `AiOptInDefaultsTest` pins that.
 - **`:feature:calendar`** (`feature/calendar/`) — the Islamic calendar, plus `IslamicEventCard`
   (calendar-only; the Zakat hero went to `:core:ui` instead, because `ZakatSettingsScreen` in
   `:app` reads it too — **"used by the feature" is not "used only by the feature"**, which has now
@@ -227,6 +232,7 @@ The obligations, in short:
 ./gradlew :feature:about:check        # about/help/more
 ./gradlew :feature:tools:check        # zakat
 ./gradlew :feature:calendar:check     # Islamic calendar
+./gradlew :feature:search:check       # search + Ask with Proof
 ./gradlew :app:jacocoTestReport --dry-run   # see below — seconds, and catches a whole class of red CI
 ./gradlew :app:lintDebug              # SLOW (~10 min) and CI-blocking — do not skip it
 python3 scripts/check_docs.py         # docs still describe the code (no toolchain needed)

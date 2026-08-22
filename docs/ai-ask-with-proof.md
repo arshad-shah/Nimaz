@@ -154,26 +154,46 @@ The Worker is
 unaffected: `decodeIntegrityToken` decodes classic and standard tokens alike,
 and the verdict fields it checks are identical.
 
-Layers (Android):
+Layers (Android), with the Gradle module each lives in since #551:
 
 ```
-presentation/components/organisms/NimazSearchBar.kt shared bar; optional trailing Ask pill (showAskButton/askEnabled/onAsk; IME action routes to onAsk while live)
-presentation/screens/search/SearchScreen.kt         pinned bar+filter; merges cited proofs + related results into ONE list (dedup, "Cited" cards)
-presentation/screens/search/AskComponents.kt        answer card (no proof list) / loading / error banner (NimazBanner) / AI-off discovery card
-presentation/screens/settings/SearchSettingsScreen  consent + toggles + privacy; clear-history opens a destructive NimazDialog listing the saved questions
-presentation/viewmodel/AskViewModel                 ask state machine (exposes relatedTerms)
-presentation/viewmodel/SearchViewModel              results list (+ ApplyAiTerms event)
-presentation/viewmodel/SearchSettingsViewModel      settings + consent state
-domain/usecase/ai/AskWithProofUseCase               ask → resolve refs → proofs (+ related terms)
-domain/usecase/SearchLibraryUseCase                 smart multi-word local search (also non-AI path)
-domain/model/{AiModels,CitationId,LibrarySearch}    SearchAssist/HadithRef/Proof/AiError/LibrarySearchResults
-domain/repository/AiRepository                      gateway interface (assist)
-data/ai/{AiApiClient,IntegrityTokenProvider,DeviceIdProvider}
-data/ai/dto/AiDtos                                  wire DTOs (mirror the Worker)
-data/repository/AiRepositoryImpl                    error-envelope → AiError mapping
-core/di/AiModule                                    Ktor client + wiring
-worker/src/capabilities/search-assist               the single AI capability
+:core:ui        presentation/components/organisms/NimazSearchBar.kt shared bar; optional trailing Ask pill (showAskButton/askEnabled/onAsk; IME action routes to onAsk while live)
+:feature:search presentation/screens/search/SearchScreen.kt         pinned bar+filter; merges cited proofs + related results into ONE list (dedup, "Cited" cards)
+:feature:search presentation/screens/search/AskComponents.kt        answer card (no proof list) / loading / error banner (NimazBanner) / AI-off discovery card
+:app            presentation/screens/settings/SearchSettingsScreen  consent + toggles + privacy; clear-history opens a destructive NimazDialog listing the saved questions
+:feature:search presentation/viewmodel/ai/AskViewModel              ask state machine (exposes relatedTerms)
+:feature:search presentation/viewmodel/search/SearchViewModel       results list (+ ApplyAiTerms event)
+:app            presentation/viewmodel/settings/SearchSettingsViewModel  settings + consent state
+:core:domain    domain/usecase/ai/AskWithProofUseCase               ask → resolve refs → proofs (+ related terms)
+:core:domain    domain/usecase/SearchLibraryUseCase                 smart multi-word local search (also non-AI path)
+:core:domain    domain/model/{AiModels,CitationId,LibrarySearch}    SearchAssist/HadithRef/Proof/AiError/LibrarySearchResults
+:core:domain    domain/repository/AiRepository                      gateway interface (assist)
+:core:data      data/ai/{AiApiClient,IntegrityTokenProvider,DeviceIdProvider}
+:core:data      data/ai/dto/AiDtos                                  wire DTOs (mirror the Worker)
+:core:data      data/repository/AiRepositoryImpl                    error-envelope → AiError mapping
+:core:datastore PreferencesDataStore (AiSettings)                   the opt-in defaults — see below
+:app            core/di/AiModule                                    Ktor client + wiring
+worker/         worker/src/capabilities/search-assist               the single AI capability
 ```
+
+**Nothing network-facing is in `:feature:search`.** The client, its DTOs and the attestation
+provider are all `:core:data`; the feature module holds the screen and two ViewModels and reaches
+the Worker through `AiRepository`, a `:core:domain` interface. `worker/` is untouched by the module
+split, and the `search-assist` wire format is unchanged by it.
+
+**`AI_WORKER_BASE_URL` and `PLAY_INTEGRITY_CLOUD_PROJECT_NUMBER` are read in exactly one place** —
+`core/di/AiModule.kt`, in `:app`. A library module's `BuildConfig` carries only its own fields, so
+neither value can be read from `:core:data` or `:feature:search`; both are passed in as constructor
+parameters instead. `AiModule` moves in the final milestone of #551, and that is the point at which
+this needs re-reading.
+
+**The opt-in defaults are pinned by a test.** `AiOptInDefaultsTest` (in `:core:datastore`) asserts
+that all five `AiSettings` preferences start off — `aiAskEnabled` false, `aiConsentTimestamp` 0,
+history and hint false, saved questions empty. Before it, the "off by default" guarantee was a
+single literal with nothing under it: every test touching `aiAskEnabled` mocks the seam and
+supplies its own value, and `preference-keys.golden` records each key's type but not its default.
+Since the question text leaves the device, a silent flip is a privacy regression rather than a
+product change.
 
 ## Capability contract
 
