@@ -1752,6 +1752,8 @@ Seven `:core:*` modules so far, mid-migration (#551):
 | **`:feature:widget`** | `nimaz.android.library` + `nimaz.android.hilt` + `nimaz.android.compose` | The six Glance widgets, their receivers, the tick receiver and six Workers — plus their manifest entries, `widget_colors.xml`, the `ic_widget_*` drawables, the preview layouts, the provider descriptors and the seventeen strings nothing else uses. **The first feature module**, chosen because it has zero `presentation/` imports. |
 | **`:feature:onboarding`** | `nimaz.android.feature` | The first-run flow — `screens/onboarding` and `viewmodel/onboarding`. **Extracted with nothing to unpick**, because `OnboardingViewModel` already took two settings *seams* and three domain ports rather than `SettingsRepository` and the Android APIs behind it. The reference shape for the modules still to come. |
 | **`:feature:about`** | `nimaz.android.feature` | About, Help and More — one module, because they are one destination: `AdaptiveMoreScreen` puts all three in a single list-detail scaffold and `aboutGraph` registers every route for all three. Six couplings to `:app` had to be unpicked; its build file lists them. **AboutLibraries stays in `:app`** — the plugin reads the applying project's runtime classpath, so applying it here would silently shorten the licence list. |
+| **`:feature:tools`** | `nimaz.android.feature` | The zakat calculator and its history — `screens/zakat`, `screens/tools` and `viewmodel/tools`. Nothing to unpick: `ZakatViewModel` reads the `ZakatSettings` seam, and its screens draw on `:core:common` and `:core:ui` only. At 1,324 lines it is larger than `:feature:about`'s screens, which needed six couplings resolved — size is not what decides this. |
+| **`:feature:calendar`** | `nimaz.android.feature` | The Islamic calendar — one screen, one ViewModel, plus `IslamicEventCard`, which nothing else names. Small enough to question and it still earns a module: folding it into a neighbour would create the coupling the split exists to remove. `IslamicEvent` is a `:core:domain` model, so sharing it with `fasting`/`prayer`/`settings` is not a feature-to-feature edge. |
 | **`:app`** | `nimaz.android.application` | Everything else, for now — screens, ViewModels, feature components, audio, sync, `NavGraph.kt`, and the rest of `core/`. It shrinks with each milestone of #551. |
 | **`:baselineprofile`** | `com.android.test` | Generates `app/src/main/baseline-prof.txt`. Nothing depends on it at runtime and no product code lives there. |
 
@@ -1846,6 +1848,15 @@ and the answer differs by shape:
 | An implementation that must stay in `:app` | `InAppUpdateManager` (holds an `Activity`) | Move the **port**, not the class: `AppUpdateController` in `:core:ui`, three of the class's seven members, implementation left behind. The same split as `WidgetRefresher` and `CompassSensors`, on the UI side. |
 | A shared presentation helper | `SubtitleSpec`, `WorshipReminderContent` | Move it **down** to `:core:ui`, not across. Both were used by `:app` screens too. |
 | Another feature's ViewModel | `SettingsViewModel` in `AdaptiveMoreScreen` | Delete it. `hiltViewModel()` scopes to the destination's `NavBackStackEntry`, so this never read the other feature's instance in the first place — see `CrossFeatureViewModelGuardTest`. |
+
+**A public signature must not name a type the module keeps to itself.** `:core:ui` declares
+`currentWindowSizeClass()` public, returning `androidx.window.core.layout.WindowSizeClass`, while
+holding the artifact that supplies it as `implementation`. Every caller in a module that did not
+separately declare the adaptive artifacts failed with *"Cannot access class WindowSizeClass"*.
+`:feature:about` masked it by declaring them for its own list-detail scaffold; `:feature:tools` and
+`:feature:calendar` do not, and found it. **A dependency whose types appear in this module's public
+API is `api`, not `implementation`** — and a module that happens to redeclare the dependency will
+hide the mistake, so the absence of complaints is not evidence.
 
 **`@HiltWorker` needs its processor in the module that declares it, and forgetting it fails at
 runtime.** `nimaz.android.hilt` supplies Dagger's compiler and deliberately leaves

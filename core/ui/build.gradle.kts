@@ -63,7 +63,14 @@ dependencies {
     api(libs.androidx.compose.ui.graphics)
     api(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.ui.tooling.preview)
-    implementation(libs.androidx.compose.material3.adaptive)
+    // `api`, not `implementation`: `currentWindowSizeClass()` is public here and returns
+    // `androidx.window.core.layout.WindowSizeClass`, which this artifact brings in. Kept as
+    // `implementation` the type stayed off consumers' compile classpath, so every caller in a
+    // module that did not happen to declare the adaptive artifacts itself failed with
+    // "Cannot access class WindowSizeClass" — a public signature referring to a type the module
+    // does not expose. `:feature:about` masked it by declaring the adaptive deps for its own
+    // list-detail scaffold; `:feature:tools` and `:feature:calendar` do not, and found it.
+    api(libs.androidx.compose.material3.adaptive)
     implementation(libs.androidx.compose.material.icons.extended)
 
     implementation(libs.zxing.core)

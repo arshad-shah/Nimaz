@@ -307,6 +307,9 @@ dependencies {
     // About, Help and More — one destination, so one module (#565). Six couplings to `:app` were
     // unpicked to get it out; its build file lists them.
     implementation(project(":feature:about"))
+    // Zakat, and the Islamic calendar (#566). Both extracted with nothing to unpick.
+    implementation(project(":feature:tools"))
+    implementation(project(":feature:calendar"))
     // FakeTodayProvider / FakeSearchSettings / FakeStringProvider / RecordingWidgetRefresher —
     // one definition each, used by the ViewModel tests here and the tests over there.
     testImplementation(testFixtures(project(":core:domain")))
@@ -483,6 +486,8 @@ tasks.withType<Test>().configureEach {
         "widgetSources" to "feature/widget/src/main/kotlin/com/arshadshah/nimaz/widget",
         "onboardingSources" to "feature/onboarding/src/main/kotlin/com/arshadshah/nimaz/presentation",
         "aboutSources" to "feature/about/src/main/kotlin/com/arshadshah/nimaz/presentation",
+        "toolsSources" to "feature/tools/src/main/kotlin/com/arshadshah/nimaz/presentation",
+        "calendarSources" to "feature/calendar/src/main/kotlin/com/arshadshah/nimaz/presentation",
     ).forEach { (name, path) ->
         inputs.dir(rootProject.layout.projectDirectory.dir(path))
             .withPropertyName(name)
@@ -726,6 +731,38 @@ val coverageModules = listOf(
     CoverageModule(
         gradlePath = ":feature:onboarding",
         projectDir = rootProject.layout.projectDirectory.dir("feature/onboarding"),
+        testTask = "testDebugUnitTest",
+        classesGlobs = listOf(
+            "intermediates/built_in_kotlinc/debug/**/classes/**",
+            "intermediates/classes/debug/**",
+            "tmp/kotlin-classes/debug/**",
+        ),
+        execGlobs = listOf(
+            "jacoco/testDebugUnitTest.exec",
+            "outputs/unit_test_code_coverage/**/*.exec",
+        ),
+        sourceDir = "src/main/kotlin",
+        packageRoot = "com/arshadshah/nimaz/presentation",
+    ),
+    CoverageModule(
+        gradlePath = ":feature:tools",
+        projectDir = rootProject.layout.projectDirectory.dir("feature/tools"),
+        testTask = "testDebugUnitTest",
+        classesGlobs = listOf(
+            "intermediates/built_in_kotlinc/debug/**/classes/**",
+            "intermediates/classes/debug/**",
+            "tmp/kotlin-classes/debug/**",
+        ),
+        execGlobs = listOf(
+            "jacoco/testDebugUnitTest.exec",
+            "outputs/unit_test_code_coverage/**/*.exec",
+        ),
+        sourceDir = "src/main/kotlin",
+        packageRoot = "com/arshadshah/nimaz/presentation",
+    ),
+    CoverageModule(
+        gradlePath = ":feature:calendar",
+        projectDir = rootProject.layout.projectDirectory.dir("feature/calendar"),
         testTask = "testDebugUnitTest",
         classesGlobs = listOf(
             "intermediates/built_in_kotlinc/debug/**/classes/**",

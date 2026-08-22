@@ -5,8 +5,8 @@ import com.arshadshah.nimaz.domain.time.FakeTodayProvider
 import com.arshadshah.nimaz.domain.usecase.fasting.CountUnloggedRamadanDaysUseCase
 import com.arshadshah.nimaz.domain.usecase.fasting.GetDaysUntilAyyamAlBeedUseCase
 import com.arshadshah.nimaz.domain.usecase.fasting.GetRamadanCountdownUseCase
-import com.arshadshah.nimaz.presentation.viewmodel.FakeHijriSettings
-import com.arshadshah.nimaz.presentation.viewmodel.FakeZakatSettings
+import com.arshadshah.nimaz.domain.repository.FakeHijriSettings
+import com.arshadshah.nimaz.domain.repository.FakeZakatSettings
 import com.arshadshah.nimaz.core.monitoring.RecordingTelemetry
 import com.arshadshah.nimaz.domain.model.AsrCalculation
 import com.arshadshah.nimaz.domain.model.CalculationMethod
