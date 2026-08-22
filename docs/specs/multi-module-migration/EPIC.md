@@ -191,10 +191,13 @@ repackaged `core.util` → `core.common` so the package is not split across two 
 `:core:domain`.
 
 The other twelve are **pushed down, and stay in `:app` until their module exists** —
-`TajweedParser` → `:core:ui` (PR 10), the notification
-and PDF files → `:feature:prayer` (PR 20), `TafseerPdfExporter` → `:feature:quran` (PR 19),
-`NotificationDiagnostics` → `:feature:settings` (PR 21). `BootReceiver`, `PrayerRescheduler`,
-`InAppUpdateManager` and `core/init` stay in `:app` for good. `core/share` goes to `:core:ui`
+`TajweedParser` → `:core:ui` (PR 10), `PrayerTimesPdfExporter` → `:feature:prayer` (PR 20),
+`TafseerPdfExporter` → `:feature:quran` (PR 19), `NotificationDiagnostics` → `:feature:settings`
+(PR 21). `BootReceiver`, `PrayerRescheduler`, `InAppUpdateManager` and `core/init` stay in `:app`
+for good — and **PR 20 found that `PrayerNotificationScheduler`, `PrayerAlarmTimes` and
+`NotificationContentHelper` belong on that list too**, not in `:feature:prayer` as this line
+originally read: their consumers are `SettingsViewModel`, `AppInitializer` and `RepositoryModule`,
+none of which is a prayer-times caller. `core/share` goes to `:core:ui`
 (it is a Canvas/bitmap renderer that uses `R`) and `core/feedback` to `:feature:tracker`, so
 neither moves here. `SPEC.md` §4's "`:core:common` = util, time, monitoring, share, text" was
 wrong about `share`; `EPIC.md`'s extra `init` and `feedback` were wrong too.
@@ -372,7 +375,7 @@ slice, its nav-graph extension, and its tests.
 | 17 | **#17** `:feature:content` | `mm/16-feature-content` | dua, hadith, qaida, asma, asmaunnabi, names, prophets, catalog — **moved together**, their ViewModels are one package. Four components in the issue's list went to `:core:ui` instead, and two *settings* screens stayed in `:app` — the ViewModel axis cuts both ways. `QaidaAudioManager` came too. |
 | 18 | **#18** `:feature:tracker` | `mm/17-feature-tracker` | prayer tracker, fasting, tasbih — likewise. `screens/prayer` split 6/2 by ViewModel; `CounterFeedback` became a `:core:domain` port with its Android half in `:core:data`. The `dua -> tracker` edge was already gone, resolved in PR 17. |
 | 19 | **#19** `:feature:quran` | `mm/18-feature-quran` | quran, khatam, bookmarks. `QuranDao` stays in `:core:database` (4 repos use it); `QuranAudioManager` stays in `:app` behind the `QuranPlayback` port, because `MainActivity` holds one too. `TajweedParser` came here, not to `:core:ui` as §2 guessed. |
-| 20 | **#20** `:feature:prayer` | `mm/19-feature-prayer` | prayer times, qibla, night worship, adhan audio. **SUB-03 must stay green** — 3 of 4 Services move here |
+| 20 | **#20** `:feature:prayer` | `mm/19-feature-prayer` | prayer times, qibla, night worship. **No Service moved and SUB-03 is untouched** — the adhan players and the whole prayer notification stack stayed in `:app`, because no file in the move set names them and their consumers are the settings surface plus `:app` init. Sending them here would have created the `:feature:settings -> :feature:prayer` edge #571 itself forbids. `PrayerTimeCard` and `PrayerSkyScene` went down to `:core:ui`. |
 | 21 | **#21** `:feature:settings` | `mm/20-feature-settings` | 18 screens, the 1,324-line `SettingsViewModel`. Largest and most cross-referenced — last |
 
 `screens/home` stays in `:app`. `screens/adaptive` **mostly** does: six of its seven files each
