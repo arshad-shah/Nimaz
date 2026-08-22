@@ -509,6 +509,34 @@ tasks.withType<Test>().configureEach {
             .withPathSensitivity(PathSensitivity.RELATIVE)
     }
 
+    // `FeatureTestsLiveWithSubjectTest` goes further: it indexes **every** top-level declaration
+    // in **every** module's `src/main`, not just the presentation subtree, because a stranded test
+    // can name any symbol the module owns. The roots above cover only `presentation/`, so the
+    // remaining ones are declared here — otherwise the guard is exactly the thing it was written
+    // to prevent: an assertion that does not run.
+    mapOf(
+        "domainSources" to "core/domain/src/main",
+        "commonSources" to "core/common/src/main",
+        "databaseSources" to "core/database/src/main",
+        "datastoreSources" to "core/datastore/src/main",
+        "dataSources" to "core/data/src/main",
+        "uiModuleSources" to "core/ui/src/main",
+        "navigationModuleSources" to "core/navigation/src/main",
+        "widgetModuleSources" to "feature/widget/src/main",
+        "onboardingModuleSources" to "feature/onboarding/src/main",
+        "aboutModuleSources" to "feature/about/src/main",
+        "toolsModuleSources" to "feature/tools/src/main",
+        "calendarModuleSources" to "feature/calendar/src/main",
+        "searchModuleSources" to "feature/search/src/main",
+        "contentModuleSources" to "feature/content/src/main",
+        "trackerModuleSources" to "feature/tracker/src/main",
+        "quranModuleSources" to "feature/quran/src/main",
+    ).forEach { (name, path) ->
+        inputs.dir(rootProject.layout.projectDirectory.dir(path))
+            .withPropertyName(name)
+            .withPathSensitivity(PathSensitivity.RELATIVE)
+    }
+
     // `LicenceCatalogueTest` reads the AboutLibraries catalogue, which is a *build output* of
     // this module rather than a source file, so nothing put it on the test task's input set.
     // Without this the task stays UP-TO-DATE and the assertion does not run — verified the hard

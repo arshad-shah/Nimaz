@@ -1869,13 +1869,31 @@ turns `internal`.** PR 19 moved the Quran components into `:feature:quran` and l
 their tests in `app/src/testDebug`. They kept compiling — the subjects were public and `:app`
 depends on the feature — so every local gate was green. CI was not: two of those tests read
 `computeJuzHeaderIndices` and `BottomActions`, which are `internal`, and `internal` does not cross
-a module. The eleven now live beside their subjects.
+a module.
 
-The same stranding is still open for `:feature:content` (fourteen tests) and `:feature:tracker`
-(one), which merged with the same gap and have not tripped it because nothing they touch is
-`internal` yet. Both are queued with the `testFixtures` consolidation above, because the harness
-copies are what a move needs first. **The general rule: when a subject moves, its test moves in
-the same commit** — a test that merely still compiles is not evidence it is in the right module.
+Two things made that worse than a one-off, and both are worth carrying forward:
+
+- **Kotlin's incremental compiler does not re-check a file whose own module did not change.**
+  `:app:compileDebugUnitTestKotlin` reported BUILD SUCCESSFUL locally against the exact sources CI
+  rejected. Only `--rerun-tasks`, or a clean checkout, surfaced it. *A compile only checks what it
+  recompiles* — the same shape as "an assertion only fires if its task runs", one layer down.
+- **The same stranding was already sitting in two merged PRs**: fifteen files belonging to
+  `:feature:content` and one to `:feature:tracker`, inert only because nothing they touch is
+  `internal`. Nineteen files in total were swept back to their modules.
+
+`FeatureTestsLiveWithSubjectTest` in `:app` now fails on it directly, before any visibility
+narrows. It indexes every top-level declaration in every module's `src/main` and reports an `:app`
+test that names symbols unique to exactly one feature module and none unique to `:app`. It counts
+a symbol as named when the test imports it, writes it fully qualified, or shares its package —
+three forms because two were load-bearing: `MushafLinePageFitTest` reaches `pageFitFontSize`,
+declared in `MushafLineLayout.kt` rather than a file named after the test (**search the symbol,
+not the file name**), and `CompassQiblaViewTest` imports nothing at all. Ambiguous names are
+ignored, which is what keeps `layout`, `fill` and `Map` from attributing a test to a random
+feature, and what leaves `ScreenStateConventionTest` — which reads every screen in the app by
+design — alone.
+
+**The general rule: when a subject moves, its test moves in the same commit.** A test that merely
+still compiles is not evidence it is in the right module.
 
 **A screen belongs to the module that owns the ViewModel it drives, not the one its directory
 name suggests.** `DuaSettingsScreen` and `HadithSettingsScreen` sit in `screens/dua` and
