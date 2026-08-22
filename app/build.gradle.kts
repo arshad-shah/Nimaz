@@ -1038,12 +1038,16 @@ tasks.register<JacocoReport>("jacocoTestReport") {
     // has 1,170 top-level declarations so 1,500 must be too high. Both the guess and the
     // correction were arrived at without running `jacocoTestReport` even once. JaCoCo counts
     // compiled classes — nested classes, lambdas and Compose synthetics, of which a Compose
-    // codebase generates a great many — so 1,170 was never the comparable figure.
+    // codebase generates a great many — and this report does also span `androidx/*`, so 1,170
+    // was never the comparable figure.
     //
-    // A third claim in this comment was also wrong and is now gone: that the report "spans
-    // `androidx/*`". It does not. Every one of the 4,736 classes is under
-    // `com/arshadshah/nimaz`, checked by aggregating the report's own `<package>` elements.
-    // The figure was right; two of the three reasons given for it were not.
+    // Split the 4,736 and the two halves behave differently, which matters when reading a
+    // percentage off this report: **4,335 classes are `com/arshadshah/nimaz` and carry all
+    // 68,569 counted lines; the other 401 are `androidx/*` and friends and carry zero.** They
+    // are resource-merge artefacts — library `R` classes with no executable line — so they
+    // inflate the class count that this floor reads and contribute nothing to the coverage
+    // denominator. A floor on classes is therefore slightly softer than it looks, and the
+    // reported percentage is not diluted by library code at all.
     //
     // 200 stays, because a floor should be impossible to trip except by the failure it names and
     // 4,736/200 is ample margin. What changed is that it is now a measurement rather than an
