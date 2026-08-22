@@ -113,7 +113,7 @@ fun MonthlyPrayerTimesScreen(
 
     fun shareRows(rows: List<DayPrayerTimes>) {
         if (rows.isEmpty()) return
-        AppAnalytics.logFeatureUsed("monthly_prayer_times", "export_pdf")
+        viewModel.onEvent(MonthlyPrayerTimesEvent.ExportStarted)
         runCatching {
             val pdfRows = rows.map {
                 PrayerTimesPdfExporter.Row(
@@ -136,7 +136,7 @@ fun MonthlyPrayerTimesScreen(
                 file,
                 mimeType = "application/pdf",
             )
-        }.onFailure { CrashReporter.recordException(it) }
+        }.onFailure { viewModel.onEvent(MonthlyPrayerTimesEvent.ExportFailed(it)) }
     }
 
     // The Ramadan timetable is computed off the main thread and lands in state; take it, share

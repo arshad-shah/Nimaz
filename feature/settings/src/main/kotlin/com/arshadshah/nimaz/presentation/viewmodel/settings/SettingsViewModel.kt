@@ -392,7 +392,7 @@ class SettingsViewModel @Inject constructor(
                 _generalState.update { it.copy(language = event.language) }
                 // AppAnalytics.UserProperty.APP_LANGUAGE has been declared and never set, so
                 // every segmentation by language has been empty since it was added.
-                AppAnalytics.setUserProperty(
+                telemetry.userProperty(
                     AppAnalytics.UserProperty.APP_LANGUAGE,
                     event.language.code
                 )
@@ -492,7 +492,7 @@ class SettingsViewModel @Inject constructor(
             // Prayer
             is SettingsEvent.SetCalculationMethod -> {
                 _prayerState.update { it.copy(calculationMethod = event.method) }
-                AppAnalytics.setUserProperty(
+                telemetry.userProperty(
                     AppAnalytics.UserProperty.CALC_METHOD,
                     event.method.name
                 )
@@ -529,7 +529,7 @@ class SettingsViewModel @Inject constructor(
             // Notifications
             is SettingsEvent.SetNotificationsEnabled -> {
                 _notificationState.update { it.copy(notificationsEnabled = event.enabled) }
-                AppAnalytics.setUserProperty(
+                telemetry.userProperty(
                     AppAnalytics.UserProperty.NOTIFICATIONS_ENABLED,
                     event.enabled.toString()
                 )
@@ -991,13 +991,13 @@ class SettingsViewModel @Inject constructor(
                 // called, so "did the user try a test notification before reporting that
                 // notifications do not work" has been unanswerable.
                 telemetry.featureUsed(AppAnalytics.Feature.SETTINGS, "test_notification")
-                AppAnalytics.logTestNotification(allPrayers = false)
+                telemetry.testNotification(allPrayers = false)
                 prayerNotificationTester.sendTestNotification()
             }
 
             SettingsEvent.TestAllNotifications -> {
                 telemetry.featureUsed(AppAnalytics.Feature.SETTINGS, "test_all_notifications")
-                AppAnalytics.logTestNotification(allPrayers = true)
+                telemetry.testNotification(allPrayers = true)
                 prayerNotificationTester.sendAllPrayerTestNotifications()
             }
 

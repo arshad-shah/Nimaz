@@ -131,6 +131,11 @@ class TafseerViewModel @Inject constructor(
                 deleteNote(event.noteId)
             }
 
+            is TafseerEvent.ExportFailed ->
+
+                telemetry.failure(AppAnalytics.Feature.TAFSEER, "export_pdf", event.throwable)
+
+
             TafseerEvent.DismissNoteError -> dismissNoteError()
         }
     }

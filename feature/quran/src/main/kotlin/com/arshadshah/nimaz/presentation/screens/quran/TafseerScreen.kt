@@ -106,7 +106,7 @@ fun TafseerScreen(
                         mimeType = "application/pdf",
                     )
                 }
-            }.onFailure { CrashReporter.recordException(it) }
+            }.onFailure { viewModel.onEvent(TafseerEvent.ExportFailed(it)) }
         }
     }
 

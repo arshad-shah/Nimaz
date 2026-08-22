@@ -30,4 +30,7 @@ sealed interface TafseerEvent {
 
     /** Clears a failed note-write message once its snackbar has been shown. */
     data object DismissNoteError : TafseerEvent
+
+    /** A tafseer PDF export threw. Reported, never shown: the commentary is still readable. */
+    data class ExportFailed(val throwable: Throwable) : TafseerEvent
 }

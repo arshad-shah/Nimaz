@@ -73,6 +73,90 @@ interface Telemetry {
     /** A key/value pinned to crash reports, e.g. the active calculation method. */
     fun customKey(key: String, value: String)
 
+    // -- Announcements -----------------------------------------------------
+
+    /**
+     * The announcement funnel: shown -> (cta clicked | dismissed), plus the rejection case.
+     *
+     * All four were static calls in `HomeViewModel`, which made the funnel untestable end to
+     * end — and a funnel nobody can assert is how this codebase already lost one: §6.1 records
+     * `logOnboardingStep` as never having fired.
+     */
+    fun announcementShown(id: String, type: String)
+
+    fun announcementCtaClicked(id: String, route: String?)
+
+    fun announcementDismissed(id: String)
+
+    /** An announcement carried a route the app refused to open. */
+    fun announcementRouteRejected(id: String, route: String?)
+
+    // -- User properties ---------------------------------------------------
+
+    /**
+     * A user property, for segmenting every later event (calculation method, madhab, …).
+     *
+     * A null [value] clears the property, which is how Firebase distinguishes "not set" from
+     * "set to empty" — worth preserving, because a segment that silently becomes the empty
+     * string merges with every other unset user.
+     */
+    fun userProperty(name: String, value: String?)
+
+    /** The user fired a test notification from settings; [allPrayers] distinguishes the two buttons. */
+    fun testNotification(allPrayers: Boolean)
+
+    // -- Onboarding --------------------------------------------------------
+
+    /**
+     * A step of the first-run flow was reached.
+     *
+     * On the seam rather than left on the object for a specific reason: this event is the one
+     * [Telemetry]'s own KDoc names as having **never fired in production**, because the event
+     * that triggers it is emitted by no screen. It stayed invisible for as long as it did
+     * because a static call cannot be asserted in a test. Routing it here is what lets
+     * `OnboardingViewModelTest` prove the funnel actually emits.
+     */
+    fun onboardingStep(page: Int)
+
+    /** The first-run flow finished, with the permissions the user granted on the way through. */
+    fun onboardingCompleted(
+        locationGranted: Boolean,
+        notificationGranted: Boolean,
+        batteryOptimizationDisabled: Boolean,
+    )
+
+    // -- Performance -------------------------------------------------------
+
+    /**
+     * Measures [block] as a Firebase Performance custom trace named [name].
+     *
+     * This exists because performance monitoring was, in practice, unreachable. The
+     * SDK was wired up and paid for, [PerfMonitor] wrapped it correctly, and the
+     * whole thing ran to **two** trace constants at **four** call sites, all in
+     * `:app` — because [PerfMonitor] is an `object` and §6.1 tells every ViewModel
+     * and use case not to call the objects. There was no seam, so a feature module
+     * could not record a trace without committing a documented deviation. The
+     * absence read as "we chose not to instrument the features"; it was really
+     * "the features had no way to".
+     *
+     * Names come from [PerfMonitor.Traces], for the same reason feature and action
+     * strings come from the catalog: a trace whose name drifts between call sites
+     * splits into two graphs that each describe half the traffic. Firebase caps a
+     * trace name at 100 characters and silently drops anything longer.
+     *
+     * Returns whatever [block] returns, and stops the trace on the way out of a
+     * throw as well as a return — an operation that fails is exactly the one whose
+     * duration is worth having.
+     */
+    suspend fun <T> trace(name: String, block: suspend () -> T): T = block()
+
+    /**
+     * Records a single measurement against a trace without wrapping a block —
+     * for a duration already known, such as one measured across a callback
+     * boundary that `trace` cannot span.
+     */
+    fun traceValue(name: String, metric: String, value: Long)
+
     // -- The pairing -------------------------------------------------------
 
     /**

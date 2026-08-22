@@ -39,6 +39,43 @@ class FirebaseTelemetry @Inject constructor() : Telemetry {
     override fun recordException(throwable: Throwable) =
         CrashReporter.recordException(throwable)
 
+    override fun announcementShown(id: String, type: String) =
+        AppAnalytics.logAnnouncementShown(id, type)
+
+    override fun announcementCtaClicked(id: String, route: String?) =
+        AppAnalytics.logAnnouncementCtaClicked(id, route)
+
+    override fun announcementDismissed(id: String) =
+        AppAnalytics.logAnnouncementDismissed(id)
+
+    override fun announcementRouteRejected(id: String, route: String?) =
+        AppAnalytics.logAnnouncementRouteRejected(id, route)
+
+    override fun userProperty(name: String, value: String?) =
+        AppAnalytics.setUserProperty(name, value)
+
+    override fun testNotification(allPrayers: Boolean) =
+        AppAnalytics.logTestNotification(allPrayers)
+
+    override fun onboardingStep(page: Int) =
+        AppAnalytics.logOnboardingStep(page)
+
+    override fun onboardingCompleted(
+        locationGranted: Boolean,
+        notificationGranted: Boolean,
+        batteryOptimizationDisabled: Boolean,
+    ) = AppAnalytics.logOnboardingCompleted(
+        locationGranted, notificationGranted, batteryOptimizationDisabled,
+    )
+
+    override suspend fun <T> trace(name: String, block: suspend () -> T): T =
+        PerfMonitor.traceSuspend(name, block)
+
+    override fun traceValue(name: String, metric: String, value: Long) {
+        val t = PerfMonitor.newTrace(name)
+        PerfMonitor.stop(t, metrics = mapOf(metric to value))
+    }
+
     override fun breadcrumb(message: String) = CrashReporter.log(message)
 
     override fun customKey(key: String, value: String) = CrashReporter.setCustomKey(key, value)

@@ -110,7 +110,7 @@ class HomeViewModel @Inject constructor(
                     active.id != lastRejectedAnnouncementId
                 ) {
                     lastRejectedAnnouncementId = active.id
-                    AppAnalytics.logAnnouncementRouteRejected(active.id, active.route)
+                    telemetry.announcementRouteRejected(active.id, active.route)
                 }
                 AnnouncementUiState(
                     announcement = active,
@@ -121,7 +121,7 @@ class HomeViewModel @Inject constructor(
                 val active = uiState.announcement ?: return@onEach
                 if (active.id != lastShownAnnouncementId) {
                     lastShownAnnouncementId = active.id
-                    AppAnalytics.logAnnouncementShown(active.id, active.type.key)
+                    telemetry.announcementShown(active.id, active.type.key)
                 }
             }
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), AnnouncementUiState())
@@ -346,7 +346,7 @@ class HomeViewModel @Inject constructor(
         val active = announcement.value.announcement ?: return
         launchSafely(telemetry, AppAnalytics.Feature.HOME, "dismiss_announcement") {
             announcementUseCases.dismissAnnouncement(active.id)
-            AppAnalytics.logAnnouncementDismissed(active.id)
+            telemetry.announcementDismissed(active.id)
         }
     }
 
@@ -354,7 +354,7 @@ class HomeViewModel @Inject constructor(
     // callback (NavGraph owns the controller); the VM only records the click.
     private fun logAnnouncementCta() {
         val active = announcement.value.announcement ?: return
-        AppAnalytics.logAnnouncementCtaClicked(active.id, active.route)
+        telemetry.announcementCtaClicked(active.id, active.route)
     }
 
     private fun checkPermissions() {

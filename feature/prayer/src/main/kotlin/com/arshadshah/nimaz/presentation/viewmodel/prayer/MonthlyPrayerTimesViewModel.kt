@@ -99,6 +99,16 @@ class MonthlyPrayerTimesViewModel @Inject constructor(
                 prepareRamadanExport()
             }
 
+            MonthlyPrayerTimesEvent.ExportStarted ->
+
+                telemetry.featureUsed(AppAnalytics.Feature.PRAYER_TIMES, "export_pdf_month")
+
+
+            is MonthlyPrayerTimesEvent.ExportFailed ->
+
+                telemetry.failure(AppAnalytics.Feature.PRAYER_TIMES, "export_pdf_month", event.throwable)
+
+
             MonthlyPrayerTimesEvent.RamadanExportConsumed ->
                 _state.update { it.copy(ramadanExport = null) }
 

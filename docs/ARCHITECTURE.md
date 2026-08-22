@@ -1739,10 +1739,57 @@ copy anything listed as Open.
    `XxxUseCases`, `StateFlow<XxxUiState>` + sealed `XxxEvent` + `onEvent`).
 7. **Screen** — `presentation/screens/xxx/XxxScreen.kt`, collecting state with
    `collectAsStateWithLifecycle()` and reusing shared components + theme.
-8. **Navigation** — add `Route.Xxx` and a `composable<Route.Xxx>` in `NavGraph`.
-9. **Tests** — unit-test the ViewModel (fake use cases) and use cases (fake repository);
-   DAO/repository tests where logic warrants. See `app/src/test/...`.
-10. **Verify** — `./gradlew :app:compileDebugKotlin` then `./gradlew :app:testDebugUnitTest`.
+8. **Navigation** — add a `@Serializable` `Route.Xxx` and a `ScreenTags.XXX` entry in
+   **`:core:navigation`**, then register the destination with
+   `taggedComposable<Route.Xxx>(ScreenTags.XXX)` inside your feature's **`XxxGraph.kt`**, beside
+   the screens it registers. Never in `NavGraph.kt` — that has registered nothing since PR 11 of
+   #551 and only calls each feature's graph function — and never a bare `composable`, which
+   leaves the screen untestable. `EveryRouteIsRegisteredTest` compares the declared and
+   registered sets in both directions, so a missed registration is a red build rather than a
+   blank screen.
+9. **Telemetry** — inject `Telemetry` (never call `AppAnalytics`/`CrashReporter`; §6.1, enforced
+   by `MonitoringSeamGuardTest`). Add `Feature.XXX` / `Action.XXX` constants to the catalog in
+   the same commit as the call site, and wrap any load a user waits on in
+   `telemetry.trace(PerfMonitor.Traces.XXX) { … }`.
+10. **Tests** — unit-test the ViewModel (fake use cases, `RecordingTelemetry`) and the use cases
+    (fake repository); DAO/repository tests where logic warrants. Tests live in the same module
+    as their subject — `internal` is module-scoped, so a test left behind in `:app` stops
+    compiling, which is the boundary telling you the coupling is real.
+11. **Docs** — update the doc that owns the area **in the same commit** (`NAVIGATION.md` §3 for
+    the route; `SUBSYSTEMS.md` §0 for any Service, Worker, widget, channel or DataStore file),
+    then `python3 scripts/check_docs.py`.
+12. **Verify** — `./gradlew :feature:xxx:check`, `./gradlew :app:compileDebugKotlin`,
+    `./gradlew :app:testDebugUnitTest`. If you touched navigation, also
+    `./gradlew :app:assembleDebugAndroidTest` — `FeatureNavigationTest` names `ScreenTags`
+    constants directly, and none of the other gates compile `androidTest`.
+
+### If the feature needs its own module
+
+Steps 1–12 assume the feature lives in an existing `:feature:*`. A genuinely new product area
+gets its own module, and that is **five** files plus four registrations — miss one of the four
+and `FeatureModuleRegistrationTest` fails, which is why it exists:
+
+1. `feature/xxx/build.gradle.kts` — apply `nimaz.android.feature`, set `namespace`, and depend on
+   `:core:{domain,common,ui,navigation}`. Add `:core:data` **only** if you genuinely import from
+   it; three modules currently declare a dependency they never use. A `@HiltWorker` also needs
+   `ksp(libs.hilt.work.compiler)` in its own module — omitting it compiles and fails at *runtime*
+   with `NoSuchMethodException`.
+2. `include(":feature:xxx")` in `settings.gradle.kts` — the source of truth the registration test
+   reads.
+3. `implementation(project(":feature:xxx"))` in `app/build.gradle.kts`, since only `:app` may
+   depend on a feature.
+4. The four registrations: `PresentationSourceRoots.ALL` (or four cross-module scans stop
+   covering it), `inputs.dir` in `app/build.gradle.kts` (or those scans stay `UP-TO-DATE` and
+   never run), `coverageModules` (or reported coverage *rises* by measuring less), and
+   `CrossFeatureViewModelGuardTest.MODULE_OF` (or its screens are exempt from the rule).
+5. `XxxGraph.kt` — the `NavGraphBuilder` extension, called from `NavGraph.kt`.
+
+Two things that cannot travel into a feature module: **`BuildConfig`** (a library's carries only
+its own fields — take app identity as a constructor parameter, or read it via `LocalAppIdentity`)
+and **the app's `R`** (with `nonTransitiveRClass=true`, `R.string.*` lives in `:core:ui`, so
+import `com.arshadshah.nimaz.core.ui.R`). Where an implementation is genuinely pinned to `:app`,
+move a **port** rather than the class — `AppUpdateController`, `QuranPlayback` and
+`PrayerAlarmScheduler` are the three worked examples.
 
 ---
 

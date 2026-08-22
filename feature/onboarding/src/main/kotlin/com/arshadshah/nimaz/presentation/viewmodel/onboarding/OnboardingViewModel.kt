@@ -43,7 +43,7 @@ class OnboardingViewModel @Inject constructor(
             OnboardingEvent.CompleteOnboarding -> completeOnboarding()
             is OnboardingEvent.SetCurrentPage -> {
                 _state.update { it.copy(currentPage = event.page) }
-                AppAnalytics.logOnboardingStep(event.page)
+                telemetry.onboardingStep(event.page)
             }
 
             OnboardingEvent.CheckLocationPermission -> checkLocationPermission()
@@ -81,8 +81,7 @@ class OnboardingViewModel @Inject constructor(
                     )
                 }
             } catch (e: Exception) {
-                CrashReporter.recordException(e)
-                AppAnalytics.logError(AppAnalytics.Feature.ONBOARDING, "check_status", e.message)
+                telemetry.failure(AppAnalytics.Feature.ONBOARDING, "check_status", e)
                 _state.update {
                     it.copy(
                         isLoading = false,
@@ -98,21 +97,21 @@ class OnboardingViewModel @Inject constructor(
             try {
                 appSettings.setOnboardingCompleted(true)
                 val current = _state.value
-                AppAnalytics.logOnboardingCompleted(
+                telemetry.onboardingCompleted(
                     locationGranted = current.locationPermissionGranted,
                     notificationGranted = current.notificationPermissionGranted,
                     batteryOptimizationDisabled = current.batteryOptimizationDisabled,
                 )
                 _state.update { it.copy(onboardingCompleted = true) }
             } catch (e: Exception) {
-                CrashReporter.recordException(e)
+                // Both channels are reached by telemetry.failure() below.
                 _state.update { it.copy(error = e.message) }
                 // The `type` is the operation, as at every other logError site. Passing
                 // `e.javaClass.simpleName` made this one dimension unbounded — a new
                 // exception class is a new value — so onboarding failures never grouped
                 // with anything and could not be counted. The class still reaches
-                // Crashlytics above, where cardinality is the point.
-                AppAnalytics.logError(AppAnalytics.Feature.ONBOARDING, "complete", e.message)
+                // Crashlytics via telemetry.failure(), where cardinality is the point.
+                telemetry.failure(AppAnalytics.Feature.ONBOARDING, "complete", e)
             }
         }
     }
@@ -188,8 +187,7 @@ class OnboardingViewModel @Inject constructor(
                     _state.update { it.copy(error = "Could not detect location") }
                 }
             } catch (e: Exception) {
-                CrashReporter.recordException(e)
-                AppAnalytics.logError(AppAnalytics.Feature.ONBOARDING, "detect_location", e.message)
+                telemetry.failure(AppAnalytics.Feature.ONBOARDING, "detect_location", e)
                 _state.update { it.copy(error = "Failed to detect location: ${e.message}") }
             }
         }

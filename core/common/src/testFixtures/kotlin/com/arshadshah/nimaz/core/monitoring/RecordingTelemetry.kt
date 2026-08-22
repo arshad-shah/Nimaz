@@ -40,6 +40,21 @@ class RecordingTelemetry : Telemetry {
     val aiAnswers: List<TelemetryCall.AiAnswered>
         get() = calls.filterIsInstance<TelemetryCall.AiAnswered>()
 
+    val userProperties: List<TelemetryCall.UserProperty>
+        get() = calls.filterIsInstance<TelemetryCall.UserProperty>()
+
+    val announcementsShown: List<TelemetryCall.AnnouncementShown>
+        get() = calls.filterIsInstance<TelemetryCall.AnnouncementShown>()
+
+    val onboardingSteps: List<Int>
+        get() = calls.filterIsInstance<TelemetryCall.OnboardingStep>().map { it.page }
+
+    val traces: List<TelemetryCall.Trace>
+        get() = calls.filterIsInstance<TelemetryCall.Trace>()
+
+    val traceValues: List<TelemetryCall.TraceValue>
+        get() = calls.filterIsInstance<TelemetryCall.TraceValue>()
+
     fun clear() = calls.clear()
 
     override fun featureUsed(feature: String, action: String?) {
@@ -81,6 +96,61 @@ class RecordingTelemetry : Telemetry {
     override fun customKey(key: String, value: String) {
         calls += TelemetryCall.CustomKey(key, value)
     }
+
+    /**
+     * Records the trace **and runs the block**. Recording without running would make
+     * every test that traces a load see no data, which is the failure mode a fake is
+     * supposed to prevent rather than introduce.
+     *
+     * The call is appended before the block runs, so `calls` reads in the order the
+     * work happened even when a trace wraps other telemetry.
+     */
+    override fun announcementShown(id: String, type: String) {
+        calls += TelemetryCall.AnnouncementShown(id, type)
+    }
+
+    override fun announcementCtaClicked(id: String, route: String?) {
+        calls += TelemetryCall.AnnouncementCtaClicked(id, route)
+    }
+
+    override fun announcementDismissed(id: String) {
+        calls += TelemetryCall.AnnouncementDismissed(id)
+    }
+
+    override fun announcementRouteRejected(id: String, route: String?) {
+        calls += TelemetryCall.AnnouncementRouteRejected(id, route)
+    }
+
+    override fun userProperty(name: String, value: String?) {
+        calls += TelemetryCall.UserProperty(name, value)
+    }
+
+    override fun testNotification(allPrayers: Boolean) {
+        calls += TelemetryCall.TestNotification(allPrayers)
+    }
+
+    override fun onboardingStep(page: Int) {
+        calls += TelemetryCall.OnboardingStep(page)
+    }
+
+    override fun onboardingCompleted(
+        locationGranted: Boolean,
+        notificationGranted: Boolean,
+        batteryOptimizationDisabled: Boolean,
+    ) {
+        calls += TelemetryCall.OnboardingCompleted(
+            locationGranted, notificationGranted, batteryOptimizationDisabled,
+        )
+    }
+
+    override suspend fun <T> trace(name: String, block: suspend () -> T): T {
+        calls += TelemetryCall.Trace(name)
+        return block()
+    }
+
+    override fun traceValue(name: String, metric: String, value: Long) {
+        calls += TelemetryCall.TraceValue(name, metric, value)
+    }
 }
 
 /** One recorded [Telemetry] call. */
@@ -103,6 +173,21 @@ sealed interface TelemetryCall {
     ) : TelemetryCall
 
     data class Exception(val throwable: Throwable) : TelemetryCall
+    data class AnnouncementShown(val id: String, val type: String) : TelemetryCall
+    data class AnnouncementCtaClicked(val id: String, val route: String?) : TelemetryCall
+    data class AnnouncementDismissed(val id: String) : TelemetryCall
+    data class AnnouncementRouteRejected(val id: String, val route: String?) : TelemetryCall
+    data class UserProperty(val name: String, val value: String?) : TelemetryCall
+    data class TestNotification(val allPrayers: Boolean) : TelemetryCall
+    data class OnboardingStep(val page: Int) : TelemetryCall
+    data class OnboardingCompleted(
+        val locationGranted: Boolean,
+        val notificationGranted: Boolean,
+        val batteryOptimizationDisabled: Boolean,
+    ) : TelemetryCall
+
+    data class Trace(val name: String) : TelemetryCall
+    data class TraceValue(val name: String, val metric: String, val value: Long) : TelemetryCall
     data class Breadcrumb(val message: String) : TelemetryCall
     data class CustomKey(val key: String, val value: String) : TelemetryCall
 }
