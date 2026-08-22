@@ -156,9 +156,14 @@ class FeatureTestsLiveWithSubjectTest {
         const val FEATURE_PREFIX = ":feature:"
 
         /**
-         * Floors. Real values at the time of writing: 2,914 symbols and 74 `:app` test files
-         * (92 before this PR's sweep). Both fall as modules leave, so these are set well below —
-         * they exist to catch a scan that reads nothing, not to pin a count.
+         * Floors, measured rather than guessed: **2,920 symbols across 19 modules, and 59
+         * `:app` test files** (92 before PR 19's sweep, 74 after it, 59 once `:feature:settings`
+         * left in PR 21). Both figures fall as modules leave, so the floors sit well below — they
+         * exist to catch a scan that reads nothing, not to pin a count.
+         *
+         * Measuring matters: the coverage floor added in PR 22 was *guessed* at 1,500 classes
+         * against a codebase with 1,170 top-level declarations, and would have failed CI on the
+         * one task that cannot run locally. A floor above plausible reality is not a floor.
          */
         const val MINIMUM_SYMBOLS = 1_500
         const val MINIMUM_TEST_FILES = 40

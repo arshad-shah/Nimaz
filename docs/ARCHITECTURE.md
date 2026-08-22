@@ -1893,16 +1893,26 @@ and the answer differs by shape:
 | A shared presentation helper | `SubtitleSpec`, `WorshipReminderContent` | Move it **down** to `:core:ui`, not across. Both were used by `:app` screens too. |
 | Another feature's ViewModel | `SettingsViewModel` in `AdaptiveMoreScreen` | Delete it. `hiltViewModel()` scopes to the destination's `NavBackStackEntry`, so this never read the other feature's instance in the first place — see `CrossFeatureViewModelGuardTest`. |
 
-**A shared `internal` test helper is duplicated per module *and* per package, and the count is
-now seventeen.** `setThemedContent` / `createComponentComposeRule` are ten lines that exist five
-times in `:core:ui`, once in `:app`, once in `:feature:calendar`, twice in `:feature:tracker`,
-twice in `:feature:quran`, four times in `:feature:prayer` and twice more across `:feature:content`
-and `:feature:settings` — the helpers are `internal`, so
-a module cannot see another's, and they are imported by package, so one module needs one per test
-package. Four copies in a single module is the point at which this stops being a footnote.
-**Publishing one from `core/ui/src/testFixtures/` collapses all of them**, the way
-`:core:domain`'s fakes already have; it is a guardrail change rather than a feature move, which is
-why it is deferred to the last milestone rather than done in passing.
+**A shared `internal` test helper multiplies per module *and* per package — this one reached
+twenty copies before it was fixed.** `setThemedContent` / `createComponentComposeRule` are ten
+lines that existed five times in `:core:ui`, three times in `:app`, and twelve times across seven
+feature modules; `:feature:prayer` alone carried four. Two properties compounded: the helpers were
+`internal`, so no module could see another's, **and** they were imported by package, so one module
+needed one per test package.
+
+**PR 22 published them from `core/ui/src/testFixtures/` as public functions and all twenty
+collapsed into one**, consumed by 130 test files through a single import — the way
+`:core:domain`'s fakes already were. `testFixturesApi` rather than `implementation`, because
+`createComponentComposeRule()` returns a `ComposeContentTestRule` and `setThemedContent` takes a
+`@Composable` lambda, so every consumer needs both on its own compile classpath; that is the same
+`api`/`implementation` distinction PR 15 got wrong on `WindowSizeClass`. Test fixtures stay off the
+runtime classpath — verified against the debug APK's dex, which carries 48,809 references to
+`androidx/compose/ui` and none to `androidx/compose/ui/test/junit4`.
+
+The lesson is about *when*, not what. This was identified in PR 15 and deferred to PR 22 as a
+guardrail change rather than a feature move. Deferring it cost fifteen further copies, each one
+written by hand, and every feature module extracted in between paid for it. **A duplication that
+grows once per PR should be fixed in the PR that first notices it.**
 
 **A component test does not move with its subject on its own, and nothing says so until a member
 turns `internal`.** PR 19 moved the Quran components into `:feature:quran` and left eleven of
