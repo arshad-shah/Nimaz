@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.presentation.viewmodel
 
+import com.arshadshah.nimaz.testing.PresentationSourceRoots
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import java.io.File
@@ -38,23 +39,15 @@ class AnalyticsReachabilityTest {
      *   red; the scan would just have stopped seeing most of the UI.
      *
      * Missing roots are now an assertion, not a filter, and [MINIMUM_UI_FILES] floors the total.
+     * The list itself moved to [PresentationSourceRoots] in PR 14, once a fourth test needed the
+     * same one and moving `screens/{about,help,more,onboarding}` broke three of them at once.
      */
-    private val uiDirs = listOf(
-        File("src/main/java/com/arshadshah/nimaz/presentation/screens"),
-        File("src/main/java/com/arshadshah/nimaz/presentation/components"),
-        File("src/main/java/com/arshadshah/nimaz/core/navigation"),
-        File("../feature/widget/src/main/kotlin/com/arshadshah/nimaz/widget"),
-        File("../core/ui/src/main/kotlin/com/arshadshah/nimaz/presentation/components"),
-        File("../core/navigation/src/main/kotlin/com/arshadshah/nimaz/core/navigation"),
-    )
+    private val uiDirs = PresentationSourceRoots.ALL
 
     @Test
     fun `every UI source root exists and the scan is not narrowing`() {
-        val missing = uiDirs.filterNot { it.isDirectory }.map { it.path }
-        assertThat(missing).isEmpty()
-
-        val scanned = uiDirs.flatMap { it.walkTopDown().filter { f -> f.extension == "kt" } }.size
-        assertThat(scanned).isAtLeast(MINIMUM_UI_FILES)
+        PresentationSourceRoots.assertAllExist(uiDirs)
+        assertThat(PresentationSourceRoots.sources(uiDirs).size).isAtLeast(MINIMUM_UI_FILES)
     }
 
     /**
@@ -76,9 +69,7 @@ class AnalyticsReachabilityTest {
 
     @Test
     fun `every analytics-bearing event branch has a producer`() {
-        val ui = uiDirs
-            .flatMap { it.walkTopDown().filter { f -> f.extension == "kt" } }
-            .joinToString("\n") { it.readText() }
+        val ui = PresentationSourceRoots.sources(uiDirs).joinToString("\n") { it.readText() }
 
         val unreachable = mutableListOf<String>()
 

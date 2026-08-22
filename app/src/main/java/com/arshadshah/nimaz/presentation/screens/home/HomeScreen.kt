@@ -49,10 +49,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.arshadshah.nimaz.LocalInAppUpdateManager
+import com.arshadshah.nimaz.presentation.update.AppUpdateController
+import com.arshadshah.nimaz.presentation.update.LocalAppUpdateController
 import com.arshadshah.nimaz.core.ui.R
 import com.arshadshah.nimaz.core.navigation.ScreenTags
-import com.arshadshah.nimaz.core.util.UpdateState
+import com.arshadshah.nimaz.presentation.update.UpdateState
 import com.arshadshah.nimaz.core.common.formatFullDate
 import com.arshadshah.nimaz.domain.model.AnnouncementType
 import com.arshadshah.nimaz.domain.model.PrayerStatus
@@ -155,7 +156,7 @@ fun HomeScreen(
         viewModel.onEvent(HomeEvent.DismissAnnouncement)
     }
     val homeClock = rememberHomeClock(state)
-    val updateManager = LocalInAppUpdateManager.current
+    val updateManager = LocalAppUpdateController.current
     val updateState =
         updateManager?.updateState?.collectAsStateWithLifecycle()?.value ?: UpdateState.Idle
 
@@ -320,7 +321,7 @@ private fun HomeCompactContent(
     onAnnouncementDismiss: () -> Unit,
     listState: LazyListState,
     updateState: UpdateState,
-    updateManager: com.arshadshah.nimaz.core.util.InAppUpdateManager?,
+    updateManager: AppUpdateController?,
     onNavigateToAlKahf: () -> Unit,
     onNavigateToDua: (duaId: String) -> Unit,
     onNavigateToPrayerSettings: () -> Unit,
@@ -436,7 +437,7 @@ private fun HomeTabletContent(
     onAnnouncementCta: () -> Unit,
     onAnnouncementDismiss: () -> Unit,
     updateState: UpdateState,
-    updateManager: com.arshadshah.nimaz.core.util.InAppUpdateManager?,
+    updateManager: AppUpdateController?,
     onNavigateToSettings: () -> Unit,
     onNavigateToPrayerSettings: () -> Unit,
     onNavigateToPrayerTracker: () -> Unit,
@@ -631,7 +632,7 @@ private fun HomeTabletContent(
 private fun buildHomeBannerItems(
     state: HomeUiState,
     updateState: UpdateState,
-    updateManager: com.arshadshah.nimaz.core.util.InAppUpdateManager?,
+    updateManager: AppUpdateController?,
     notificationPermissionLauncher: androidx.activity.result.ActivityResultLauncher<String>,
     locationPermissionLauncher: androidx.activity.result.ActivityResultLauncher<Array<String>>,
     batteryOptimizationLauncher: androidx.activity.result.ActivityResultLauncher<android.content.Intent>,

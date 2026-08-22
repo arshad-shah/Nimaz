@@ -45,11 +45,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.arshadshah.nimaz.BuildConfig
-import com.arshadshah.nimaz.LocalInAppUpdateManager
+import com.arshadshah.nimaz.presentation.app.LocalAppIdentity
+import com.arshadshah.nimaz.presentation.update.LocalAppUpdateController
 import com.arshadshah.nimaz.core.ui.R
-import com.arshadshah.nimaz.R as AppR
-import com.arshadshah.nimaz.core.util.UpdateState
+import com.arshadshah.nimaz.presentation.update.UpdateState
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeEmphasis
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
@@ -75,7 +74,7 @@ fun AboutScreen(
     onShareApp: () -> Unit,
     onContactUs: () -> Unit
 ) {
-    val updateManager = LocalInAppUpdateManager.current
+    val updateManager = LocalAppUpdateController.current
     val updateState =
         updateManager?.updateState?.collectAsStateWithLifecycle()?.value ?: UpdateState.Idle
     val onUpdateClick = {
@@ -152,6 +151,10 @@ fun AboutScreen(
 
 @Composable
 private fun AppInfoHero(modifier: Modifier = Modifier) {
+    // Version and icon come from the composition root: neither `BuildConfig` nor the launcher
+    // mipmap can follow this screen into `:feature:about`. See `presentation/app/AppIdentity.kt`.
+    val appIdentity = LocalAppIdentity.current
+
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -159,7 +162,7 @@ private fun AppInfoHero(modifier: Modifier = Modifier) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Image(
-            painter = painterResource(AppR.mipmap.ic_launcher_foreground),
+            painter = painterResource(appIdentity.iconRes),
             contentDescription = stringResource(R.string.app_name),
             modifier = Modifier
                 .size(88.dp)
@@ -177,8 +180,8 @@ private fun AppInfoHero(modifier: Modifier = Modifier) {
         NimazBadge(
             text = stringResource(
                 R.string.version_detail_format,
-                BuildConfig.VERSION_NAME,
-                BuildConfig.VERSION_CODE
+                appIdentity.versionName,
+                appIdentity.versionCode
             ),
             tone = NimazTone.ACCENT,
             emphasis = NimazBadgeEmphasis.SOFT,

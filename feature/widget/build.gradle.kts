@@ -1,7 +1,9 @@
 plugins {
-    id("nimaz.android.library")
-    id("nimaz.android.hilt")
-    id("nimaz.android.compose")
+    // library + compose + hilt in one id. This module listed the three separately because it was
+    // the first feature module and `nimaz.android.feature` had no user yet; with a second and
+    // third arriving in PR 14, the point of the shared id — that a feature module's plugin set
+    // cannot drift from its siblings — starts applying.
+    id("nimaz.android.feature")
     alias(libs.plugins.kotlin.serialization)
     jacoco
 }

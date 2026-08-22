@@ -16,7 +16,6 @@ import androidx.navigation.toRoute
 import com.arshadshah.nimaz.core.navigation.Route
 import com.arshadshah.nimaz.core.navigation.ScreenTags
 import com.arshadshah.nimaz.core.navigation.helpDeepLinkRoute
-import com.arshadshah.nimaz.core.navigation.restartApp
 import com.arshadshah.nimaz.core.navigation.taggedComposable
 import com.arshadshah.nimaz.core.share.ContentShareManager
 import com.arshadshah.nimaz.core.share.Shareables
@@ -44,11 +43,7 @@ import kotlinx.coroutines.launch
  */
 fun NavGraphBuilder.aboutGraph(navController: NavController) {
     taggedComposable<Route.More>(ScreenTags.More) {
-        val context = androidx.compose.ui.platform.LocalContext.current
-        AdaptiveMoreScreen(
-            onNavigate = { navController.navigate(it) },
-            onRestartApp = { restartApp(context) },
-        )
+        AdaptiveMoreScreen(onNavigate = { navController.navigate(it) })
     }
 
     taggedComposable<Route.SettingsAbout>(ScreenTags.SettingsAbout) {

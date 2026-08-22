@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.presentation
 
+import com.arshadshah.nimaz.testing.PresentationSourceRoots
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
 import java.io.File
@@ -47,11 +48,12 @@ import org.junit.Test
 class NavControllerConfinementTest {
 
     private companion object {
-        /** Screens live here and in `:core:ui`; both are checked. */
-        val SCREEN_ROOTS = listOf(
-            "src/main/java/com/arshadshah/nimaz/presentation",
-            "../core/ui/src/main/kotlin/com/arshadshah/nimaz/presentation",
-        )
+        /**
+         * Every module's presentation sources. Kept in [PresentationSourceRoots] rather than here
+         * because four tests need the same list, and PR 14 of #551 broke three of them at once by
+         * moving `screens/{about,help,more,onboarding}` into feature modules.
+         */
+        val SCREEN_ROOTS = PresentationSourceRoots.NAVIGABLE
 
         /**
          * The one file allowed to own the controller, relative to `:app`. Named as a *file*, not
@@ -73,14 +75,11 @@ class NavControllerConfinementTest {
         const val EXPECTED_FEATURE_GRAPHS = 11
     }
 
-    private fun screenSources(): List<File> =
-        SCREEN_ROOTS.map(::File).flatMap { root ->
-            assertWithMessage("screen root missing: ${root.absolutePath}")
-                .that(root.isDirectory).isTrue()
-            root.walkTopDown()
-                .filter { it.isFile && it.extension == "kt" }
-                .filterNot { it.name.endsWith("Graph.kt") }
-        }
+    private fun screenSources(): List<File> {
+        PresentationSourceRoots.assertAllExist(SCREEN_ROOTS)
+        return PresentationSourceRoots.sources(SCREEN_ROOTS)
+            .filterNot { it.name.endsWith("Graph.kt") }
+    }
 
     @Test
     fun `the scan reaches every screen root`() {
@@ -120,8 +119,8 @@ class NavControllerConfinementTest {
         // And the exemption is not covering an empty set: the feature graphs must exist and must
         // be the things holding the controller. If they vanished, the check above would still pass
         // while the decomposition had been undone.
-        val graphFiles = SCREEN_ROOTS.map(::File)
-            .flatMap { it.walkTopDown().filter { f -> f.name.endsWith("Graph.kt") } }
+        val graphFiles = PresentationSourceRoots.sources(SCREEN_ROOTS)
+            .filter { it.name.endsWith("Graph.kt") }
         assertWithMessage("no *Graph.kt feature extensions found — was NavGraph.kt re-merged?")
             .that(graphFiles.size).isAtLeast(EXPECTED_FEATURE_GRAPHS)
     }

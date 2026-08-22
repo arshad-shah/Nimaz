@@ -8,7 +8,6 @@ import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
 import androidx.compose.material3.adaptive.navigation.NavigableListDetailPaneScaffold
 import androidx.compose.material3.adaptive.navigation.rememberListDetailPaneScaffoldNavigator
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -17,8 +16,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.core.net.toUri
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.core.ui.R
 import com.arshadshah.nimaz.core.navigation.Route
 import com.arshadshah.nimaz.core.share.ContentShareManager
@@ -29,7 +26,6 @@ import com.arshadshah.nimaz.presentation.screens.help.HelpScreen
 import com.arshadshah.nimaz.presentation.screens.more.MoreMenuScreen
 import com.arshadshah.nimaz.presentation.theme.currentWindowSizeClass
 import com.arshadshah.nimaz.presentation.theme.isCompact
-import com.arshadshah.nimaz.presentation.viewmodel.settings.SettingsViewModel
 import com.google.android.play.core.review.ReviewManagerFactory
 import kotlinx.coroutines.launch
 
@@ -37,16 +33,9 @@ import kotlinx.coroutines.launch
 @Composable
 fun AdaptiveMoreScreen(
     onNavigate: (Route) -> Unit,
-    onRestartApp: () -> Unit,
 ) {
     val windowSizeClass = currentWindowSizeClass()
     val context = LocalContext.current
-    val settingsViewModel: SettingsViewModel = hiltViewModel()
-    val shouldRestart by settingsViewModel.shouldRestart.collectAsStateWithLifecycle()
-
-    LaunchedEffect(shouldRestart) {
-        if (shouldRestart) onRestartApp()
-    }
 
     val shareScope = rememberCoroutineScope()
     var showShareSheet by remember { mutableStateOf(false) }

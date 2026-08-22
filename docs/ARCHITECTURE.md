@@ -1750,6 +1750,8 @@ Seven `:core:*` modules so far, mid-migration (#551):
 | **`:core:ui`** | `nimaz.android.library` + `nimaz.android.compose` | The design system — 52 atoms, the generic `Nimaz*` molecules, `theme/`, `foundation/`, `presentation/model` and `core/share` — plus **`strings.xml` and its five translations, `colors.xml` and the eight fonts**. The first module to own `res/`, which is why every other module now spells resources `com.arshadshah.nimaz.core.ui.R`. |
 | **`:core:navigation`** | `nimaz.android.library` + `nimaz.android.compose` | The route vocabulary — `Routes.kt`, `ScreenTags`, `taggedComposable`, `ContentTargetRoutes`, and the announcement and help deep-link grammars. Every feature module needs it to declare its destinations. **It may not import `presentation.screens`, `presentation.viewmodel` or `:core:ui`** — a `Route` carries a destination's identity, never its label. `NavGraph.kt` itself is still in `:app`; it is decomposed in PR 12. |
 | **`:feature:widget`** | `nimaz.android.library` + `nimaz.android.hilt` + `nimaz.android.compose` | The six Glance widgets, their receivers, the tick receiver and six Workers — plus their manifest entries, `widget_colors.xml`, the `ic_widget_*` drawables, the preview layouts, the provider descriptors and the seventeen strings nothing else uses. **The first feature module**, chosen because it has zero `presentation/` imports. |
+| **`:feature:onboarding`** | `nimaz.android.feature` | The first-run flow — `screens/onboarding` and `viewmodel/onboarding`. **Extracted with nothing to unpick**, because `OnboardingViewModel` already took two settings *seams* and three domain ports rather than `SettingsRepository` and the Android APIs behind it. The reference shape for the modules still to come. |
+| **`:feature:about`** | `nimaz.android.feature` | About, Help and More — one module, because they are one destination: `AdaptiveMoreScreen` puts all three in a single list-detail scaffold and `aboutGraph` registers every route for all three. Six couplings to `:app` had to be unpicked; its build file lists them. **AboutLibraries stays in `:app`** — the plugin reads the applying project's runtime classpath, so applying it here would silently shorten the licence list. |
 | **`:app`** | `nimaz.android.application` | Everything else, for now — screens, ViewModels, feature components, audio, sync, `NavGraph.kt`, and the rest of `core/`. It shrinks with each milestone of #551. |
 | **`:baselineprofile`** | `com.android.test` | Generates `app/src/main/baseline-prof.txt`. Nothing depends on it at runtime and no product code lives there. |
 
@@ -1825,6 +1827,32 @@ file walk, so `app/build.gradle.kts` names `core/ui`, `core/navigation` and `fea
 `inputs.dir(...)`. Without it `testDebugUnitTest` stays `UP-TO-DATE` when the scanned sources
 change and the assertion simply does not run — the failure that hid a broken `:core:common`
 assertion through two full local sweeps.
+
+**Cross-module source scans share one root list.** Four `:app` tests walk presentation sources
+looking for something — a `NavController` outside a graph, a route declared but never registered,
+an unreachable analytics branch, a cross-module `hiltViewModel()` — and each kept its own
+hand-maintained list of roots. PR 14 moved four screen packages into two feature modules and
+**three of the four failed at once**, every one reporting a shrunken scan rather than a real
+problem. They now read `PresentationSourceRoots`, so **extracting a feature module means adding one
+line**. They failed loudly only because each carries a floor; without one, three scans would have
+quietly stopped covering the code they exist to cover.
+
+**What a feature module needs from `:app`, and how to invert it.** Four shapes have now recurred,
+and the answer differs by shape:
+
+| Shape | Example | Resolution |
+|---|---|---|
+| App identity | `BuildConfig.VERSION_NAME`, `R.mipmap.ic_launcher_foreground` | The composition root states it once — `LocalAppIdentity`. A library's `BuildConfig` holds only its own fields and `nonTransitiveRClass` keeps the app's `R` off its classpath, so neither can travel. |
+| An implementation that must stay in `:app` | `InAppUpdateManager` (holds an `Activity`) | Move the **port**, not the class: `AppUpdateController` in `:core:ui`, three of the class's seven members, implementation left behind. The same split as `WidgetRefresher` and `CompassSensors`, on the UI side. |
+| A shared presentation helper | `SubtitleSpec`, `WorshipReminderContent` | Move it **down** to `:core:ui`, not across. Both were used by `:app` screens too. |
+| Another feature's ViewModel | `SettingsViewModel` in `AdaptiveMoreScreen` | Delete it. `hiltViewModel()` scopes to the destination's `NavBackStackEntry`, so this never read the other feature's instance in the first place — see `CrossFeatureViewModelGuardTest`. |
+
+**`@HiltWorker` needs its processor in the module that declares it, and forgetting it fails at
+runtime.** `nimaz.android.hilt` supplies Dagger's compiler and deliberately leaves
+`hilt-work-compiler` to the module that needs it. Without it the module compiles, its `check` is
+green, and then `HiltWorkerFactory` has no entry for the class, so WorkManager reflects a
+`(Context, WorkerParameters)` constructor an `@AssistedInject` worker does not have.
+`HiltWorkerProcessorTest` fails the build for any module that gets this wrong.
 
 **The nav graph is per-feature, and `NavGraph.kt` registers nothing.** Since PR 12 of #551 the 94
 destinations live in eleven `NavGraphBuilder.<feature>Graph(navController)` extensions beside their

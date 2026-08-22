@@ -4,6 +4,8 @@ import android.app.Activity
 import android.util.Log
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.IntentSenderRequest
+import com.arshadshah.nimaz.presentation.update.AppUpdateController
+import com.arshadshah.nimaz.presentation.update.UpdateState
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.google.android.play.core.appupdate.AppUpdateManager
@@ -17,30 +19,20 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-sealed interface UpdateState {
-    data object Idle : UpdateState
-    data object Checking : UpdateState
-    data object UpdateAvailable : UpdateState
-
-    /**
-     * The user requested an update and we're fetching the AppUpdateInfo / bringing
-     * up the Play confirmation dialog. This can take several seconds on slow
-     * connections, so it's surfaced as a distinct loading state to give immediate
-     * feedback that the tap was registered.
-     */
-    data object Starting : UpdateState
-    data object Downloading : UpdateState
-    data class Downloaded(val completeUpdate: () -> Unit) : UpdateState
-    data object NoUpdateAvailable : UpdateState
-    data class Error(val message: String) : UpdateState
-}
-
-class InAppUpdateManager(private val activity: Activity) {
+/**
+ * Play Core's in-app update flow. Stays in `:app` — it holds an `Activity`, and `MainActivity`
+ * drives its lifecycle hooks.
+ *
+ * Implements [AppUpdateController] so the two screens that read it do not have to see this class.
+ * [UpdateState] moved to `:core:ui` with the port in PR 14 of #551; the members below are
+ * unchanged, they merely now satisfy an interface.
+ */
+class InAppUpdateManager(private val activity: Activity) : AppUpdateController {
 
     private val appUpdateManager: AppUpdateManager = AppUpdateManagerFactory.create(activity)
 
     private val _updateState = MutableStateFlow<UpdateState>(UpdateState.Idle)
-    val updateState: StateFlow<UpdateState> = _updateState.asStateFlow()
+    override val updateState: StateFlow<UpdateState> = _updateState.asStateFlow()
 
     // Launcher for the Play update confirmation dialog. Must be registered by the
     // host Activity before it is STARTED (see MainActivity), so it's injected
@@ -77,7 +69,7 @@ class InAppUpdateManager(private val activity: Activity) {
         updateFlowLauncher = launcher
     }
 
-    fun checkForUpdate() {
+    override fun checkForUpdate() {
         _updateState.value = UpdateState.Checking
         appUpdateManager.registerListener(installStateListener)
 
@@ -101,7 +93,7 @@ class InAppUpdateManager(private val activity: Activity) {
         }
     }
 
-    fun startUpdate() {
+    override fun startUpdate() {
         // Reflect the tap immediately. Fetching AppUpdateInfo and showing the Play
         // dialog is asynchronous and can take a few seconds on slow connections;
         // without this the banner/button would appear unresponsive ("nothing

@@ -1,7 +1,7 @@
 package com.arshadshah.nimaz.presentation.viewmodel.about
 
 import com.arshadshah.nimaz.core.ui.R
-import com.arshadshah.nimaz.core.util.UpdateState
+import com.arshadshah.nimaz.presentation.update.UpdateState
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 
