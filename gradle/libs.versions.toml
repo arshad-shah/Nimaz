@@ -13,6 +13,10 @@ mockk = "1.14.11"
 turbine = "1.2.1"
 truth = "1.4.5"
 robolectric = "4.16.1"
+# A real org.json on the unit-test classpath. The stubbed android.jar ships one whose every
+# method returns a default, so a test that parses JSON silently sees empty results instead of
+# failing — see the comment at its use site in core/data/build.gradle.kts.
+json = "20231013"
 lifecycleRuntimeKtx = "2.10.0"
 activityCompose = "1.13.0"
 composeBom = "2026.05.01"
@@ -111,6 +115,7 @@ kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-
 
 # Serialization
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "serialization" }
+json = { group = "org.json", name = "json", version.ref = "json" }
 
 # DI annotations only — :core:domain uses @Inject/@Singleton without a DI runtime. In the
 # Android modules the same classes arrive transitively from Hilt.

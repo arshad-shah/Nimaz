@@ -4,7 +4,7 @@ Nimaz is an offline-first Android Islamic companion app: **Kotlin + Jetpack Comp
 **Clean Architecture** (`presentation → domain → data`) with **MVVM + UDF**, Hilt DI, Room,
 DataStore, type-safe Navigation Compose.
 
-**Mid-migration to Gradle modules (#551).** Two modules are out of `:app` so far:
+**Mid-migration to Gradle modules (#551).** Five modules are out of `:app` so far:
 
 - **`:core:domain`** (`core/domain/`) — the whole domain layer, a pure JVM module. No Android SDK
   on its classpath, so `import android.*` there is a compile error, and `androidFreeClasspath`
@@ -23,6 +23,15 @@ DataStore, type-safe Navigation Compose.
   interface for the feature. A renamed preference key is silent, permanent data loss, so
   `preference-keys.golden` records all 106 and removals need a `retired-preference-keys.txt`
   entry.
+- **`:core:data`** (`core/data/`) — eighteen of the nineteen repository implementations plus the
+  `data/{device,text,ai,announcement,widget,platform}` slices. The only module that sees both
+  `:core:database` and `:core:datastore`, which is what lets everything else depend on a
+  `:core:domain` interface instead of a DAO. **A helper here must not put a `*Entity`, `*Row` or
+  `*Dao` in a public signature** — make it `internal` (as `MushafLayoutMapper` is) or map to a
+  domain model first; `PublicApiHasNoPersistenceTypesTest` fails on it. A class that wants
+  `BuildConfig` cannot have it — a library's `BuildConfig` holds only its own fields — so take the
+  value as a constructor parameter and pass it from a `:app` Hilt module, as `AiModule` does for
+  `IntegrityTokenProvider`.
 
 Everything else is still `:app` and moves out over the remaining PRs. Files in
 `app/…/core/util/` whose destination module does not exist yet are staying there **on purpose** —
@@ -164,6 +173,7 @@ The obligations, in short:
 ./gradlew :core:common:check          # module tests + moduleBoundary + its own lint
 ./gradlew :core:database:check        # Room identity hashes + moduleBoundary
 ./gradlew :core:datastore:check       # preference-key golden + moduleBoundary
+./gradlew :core:data:check            # repository tests + public-API leak guard + moduleBoundary
 ./gradlew :app:jacocoTestReport --dry-run   # see below — seconds, and catches a whole class of red CI
 ./gradlew :app:lintDebug              # SLOW (~10 min) and CI-blocking — do not skip it
 python3 scripts/check_docs.py         # docs still describe the code (no toolchain needed)

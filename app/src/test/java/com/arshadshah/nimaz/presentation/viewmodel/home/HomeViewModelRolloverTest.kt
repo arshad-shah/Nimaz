@@ -3,7 +3,7 @@ package com.arshadshah.nimaz.presentation.viewmodel.home
 import com.arshadshah.nimaz.presentation.viewmodel.FakePermissionChecker
 import com.arshadshah.nimaz.presentation.viewmodel.FakePowerSettings
 import com.arshadshah.nimaz.core.text.FakeStringProvider
-import com.arshadshah.nimaz.presentation.viewmodel.RecordingWidgetRefresher
+import com.arshadshah.nimaz.domain.repository.RecordingWidgetRefresher
 import com.arshadshah.nimaz.core.monitoring.RecordingTelemetry
 import android.app.Application
 import android.content.Context

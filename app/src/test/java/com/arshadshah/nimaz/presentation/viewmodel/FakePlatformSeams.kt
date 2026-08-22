@@ -3,7 +3,6 @@ package com.arshadshah.nimaz.presentation.viewmodel
 import com.arshadshah.nimaz.domain.model.NisabType
 import com.arshadshah.nimaz.domain.repository.PermissionChecker
 import com.arshadshah.nimaz.domain.repository.PowerSettings
-import com.arshadshah.nimaz.domain.repository.WidgetRefresher
 import com.arshadshah.nimaz.domain.repository.settings.HijriSettings
 import com.arshadshah.nimaz.domain.repository.settings.ZakatSettings
 import kotlinx.coroutines.flow.Flow
@@ -28,24 +27,6 @@ class FakePermissionChecker(
 
 class FakePowerSettings(private val exempt: Boolean = true) : PowerSettings {
     override fun isIgnoringBatteryOptimizations() = exempt
-}
-
-class RecordingWidgetRefresher : WidgetRefresher {
-    var refreshCount = 0
-        private set
-
-    /** Counted apart from [refreshCount]: "the tracker changed" and "everything changed" are
-     *  different claims, and a test asserting one should not be satisfied by the other. */
-    var refreshAllCount = 0
-        private set
-
-    override fun refreshPrayerTracker() {
-        refreshCount++
-    }
-
-    override fun refreshAll() {
-        refreshAllCount++
-    }
 }
 
 /**

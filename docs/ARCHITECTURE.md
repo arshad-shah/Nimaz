@@ -189,12 +189,35 @@ visible. That is why `StringProvider` exists: a ViewModel that must *compare* re
 (search, sorting) gets them through the seam rather than through a `Context`. This constrains
 every module below `:core:ui`, not just this one.
 
-What is left in `app/…/core/util/` is there deliberately, not by omission. Twelve files whose real
-home is a module that does not exist yet: `TajweedParser` → `:core:ui`, `FlowExtensions` →
-`:core:data`, the prayer notification and PDF files → `:feature:prayer`, `TafseerPdfExporter` →
-`:feature:quran`, `NotificationDiagnostics` → `:feature:settings`. `BootReceiver`,
+What is left in `app/…/core/util/` is there deliberately, not by omission. Files whose real home is
+a module that does not exist yet: `TajweedParser` → `:core:ui`, the prayer notification and PDF
+files → `:feature:prayer`, `TafseerPdfExporter` → `:feature:quran`, `NotificationDiagnostics` →
+`:feature:settings`. (`FlowExtensions` was listed here for `:core:data`; it went to `:core:common`
+instead — `mapItems` is a generic `Flow` extension that knows nothing about data, and a module
+below `:core:data` can want it.) `BootReceiver`,
 `PrayerRescheduler`, `InAppUpdateManager` and `core/init` stay in `:app` permanently — a manifest
 entry point and a composition root are app concerns.
+
+```text
+core/data/src/main/kotlin/             #  ← :core:data — the only module that sees both stores
+com.arshadshah.nimaz/
+└── data/
+    ├── repository/          # Eighteen XxxRepositoryImpl — the domain interfaces, implemented
+    ├── local/help/          # Help content reader + its content-version store
+    ├── ai/                  # Ask-with-Proof client, dto/, IntegrityTokenProvider
+    ├── announcement/        # AnnouncementRepositoryImpl (the FCM service stays in :app)
+    ├── device/              # Device capability lookups behind domain ports
+    ├── text/                # StringProvider's Android implementation
+    ├── platform/            # AndroidAppLocale
+    └── widget/              # WidgetSettingsWatcher — preference changes → WidgetRefresher
+```
+
+`IntegrityTokenProvider` is the shape to copy when a moved class wants `BuildConfig`. A library's
+`BuildConfig` carries only its **own** fields, never the application's, so the two reads it made
+(`PLAY_INTEGRITY_CLOUD_PROJECT_NUMBER` and `DEBUG`) could not follow it here. Rather than
+duplicating the fields into this module's build file, the class takes them as constructor
+parameters and `AiModule` in `:app` — which does have the app's `BuildConfig` — passes them in.
+Inverting the read costs one `@Provides` and keeps the module free of app identity.
 
 ```text
 app/src/main/java/                     #  ← :app — everything else, for now
@@ -208,19 +231,19 @@ com.arshadshah.nimaz/
 │   │   ├── DataStoreModule.kt       # @Provides PreferencesDataStore
 │   │   └── RepositoryModule.kt      # @Binds repos  +  object UseCaseModule { @Provides XxxUseCases }
 │   ├── navigation/          # Routes.kt (sealed Route), NavGraph.kt, deep links
-│   ├── util/                # Extensions, mappers (e.g. mapItems), date utils, PDF exporters
+│   ├── util/                # Extensions, date utils, PDF exporters
+│   ├── feedback/            # In-app feedback capture
 │   ├── share/               # ContentShareManager + Shareable/Shareables + branded ShareCardRenderer
-│   ├── init/                # AppInitializer
-│   └── monitoring/          # AppAnalytics, CrashReporter
+│   └── init/                # AppInitializer
 │
-├── data/
-│   ├── local/
-│   │   ├── database/        # NimazDatabase.kt, dao/, entity/
-│   │   ├── datastore/       # PreferencesDataStore
-│   │   └── {dua,hadith,help,qaida}/  # Asset readers + content-version stores
-│   ├── repository/          # Repository IMPLEMENTATIONS (XxxRepositoryImpl)
+├── data/                    # What could not leave — see :core:data above for the rest
 │   ├── audio/               # Media3 audio managers/services (Quran, Adhan, Qaida)
-│   └── sync/                # Nearby-connections device-to-device sync
+│   ├── sync/                # Nearby-connections device-to-device sync
+│   ├── announcement/        # NimazMessagingService — a manifest entry point
+│   ├── repository/          # LibraryRepositoryImpl only — R.raw.aboutlibraries is generated
+│   │                        #   from the APPLYING project's classpath, so it must build here
+│   ├── platform/            # ServiceAdhanDownloader — split out of AndroidAppLocale
+│   └── widget/              # WorkManagerWidgetRefresher — the WorkManager side of the port
 │
 ├── presentation/
 │   ├── screens/<feature>/   # Composable screens grouped by feature
@@ -1703,7 +1726,7 @@ Requires JDK 21 and an Android SDK (compileSdk 37). Set `sdk.dir` in `local.prop
 
 ### Modules
 
-Three, mid-migration (#551):
+Five `:core:*` modules so far, mid-migration (#551):
 
 | Module | Plugin | What it holds |
 |---|---|---|
@@ -1711,7 +1734,8 @@ Three, mid-migration (#551):
 | **`:core:common`** | `nimaz.android.library` | `core/common` (formatting helpers with no feature attached), `core/monitoring` (the `Telemetry` seam and its Firebase wrappers) and `core/text` (`StringProvider`). Depends on `:core:domain` and Android. **Below `:core:ui`, so no `R`.** |
 | **`:core:database`** | `nimaz.android.library` + `nimaz.android.hilt` | Both Room `@Database` classes, every entity and DAO, the migrations, the user-data slice, the content-artifact installer, and the exported `schemas/` with the `room.schemaLocation` arg that writes them. |
 | **`:core:datastore`** | `nimaz.android.library` + `nimaz.android.hilt` | All three DataStore files — `PreferencesDataStore` and its `PreferenceCodec` registry, the announcement store, and `DeviceIdProvider`. Implements the eleven `SettingsSeams` interfaces, which live in `:core:domain`, so a feature depends on the seam it needs rather than on this. |
-| **`:app`** | `nimaz.android.application` | Everything else, for now — presentation, the rest of `data/`, widgets, the rest of `core/`. It shrinks with each milestone of #551. |
+| **`:core:data`** | `nimaz.android.library` + `nimaz.android.hilt` | Eighteen of the nineteen repository implementations, the `data/device`, `data/text` and `data/ai` slices, and the announcement store's repository. It is the only module that sees both `:core:database` and `:core:datastore`, which is what lets every other module depend on a `:core:domain` interface instead of on a DAO. |
+| **`:app`** | `nimaz.android.application` | Everything else, for now — presentation, widgets, audio, sync, and the rest of `core/`. It shrinks with each milestone of #551. |
 | **`:baselineprofile`** | `com.android.test` | Generates `app/src/main/baseline-prof.txt`. Nothing depends on it at runtime and no product code lives there. |
 
 Plus one **included build**, `build-logic`, which is not a module of the app — it produces the
@@ -1743,10 +1767,22 @@ remove. The task reads *declared* project dependencies across every configuratio
 one that points the wrong way.
 
 **Shared test fakes cross the boundary through `testFixtures`,** not by duplication.
-`:core:domain` publishes `src/testFixtures` — currently `FakeTodayProvider` and
-`FakeSearchSettings` — and `:app` consumes it with
+`:core:domain` publishes `src/testFixtures` — `FakeTodayProvider`, `FakeSearchSettings`,
+`FakeStringProvider` and `RecordingWidgetRefresher` — and the consuming modules take
 `testImplementation(testFixtures(project(":core:domain")))`. Both sides of a seam get one
-definition of the fake for it.
+definition of the fake for it, and the pattern is now regular enough to expect rather than
+discover: **a fake of a `:core:domain` port is wanted by whichever module implements the port and
+by whichever module drives it**, so it belongs beside the port rather than in either.
+
+**What `:core:data` may hand out is checked.** The obvious rule — *repositories return domain
+models* — needs no test: they implement interfaces declared in `:core:domain`, a `kotlin-jvm`
+module, so an entity in one of those signatures does not compile. The rule that does need a test
+is the quiet one, a *helper* whose signature carries a Room type: nothing in `:core:domain` is
+involved, so nothing objects, and the leak only bites later when a feature module reaches for the
+helper and drags a database type into presentation with it.
+`PublicApiHasNoPersistenceTypesTest` walks `:core:data`'s sources, applies enclosing-container
+visibility, and fails on a public `fun`/`val`/`var` whose signature names a `*Entity`, `*Row` or
+`*Dao`. `MushafLayoutMapper` was such a leak and is now `internal`.
 
 **Coverage is merged, and the merge is asserted.** `:app:jacocoTestReport` aggregates each
 module's classes, sources and `test.exec`; `assertEveryModuleIsMeasured` in
