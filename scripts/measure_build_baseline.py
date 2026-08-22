@@ -32,10 +32,37 @@ ROOT = Path(__file__).resolve().parent.parent
 GRADLEW = str(ROOT / "gradlew")
 SRC = ROOT / "app/src/main/java/com/arshadshah/nimaz"
 
-LEAF = SRC / "presentation/screens/settings/ZakatSettingsScreen.kt"
-BUTTON = SRC / "presentation/components/atoms/NimazButton.kt"
-DOMAIN = SRC / "domain/model/PrayerModels.kt"
-STRINGS = ROOT / "app/src/main/res/values/strings.xml"
+# The four files this script edits are chosen to sit at different depths of the dependency graph,
+# and #551 is moving them out of :app one milestone at a time — the domain model left in PR 5, the
+# button and strings.xml in PR 10. Each is resolved against its possible homes rather than
+# hardcoded, because a stale path here does not fail loudly: the edit would land on a file nobody
+# compiles and the "incremental build" number would be measuring nothing. That is the same shape
+# as the scan floors #553 added, applied to a measurement rather than a check.
+def _resolve(*candidates):
+    for candidate in candidates:
+        if candidate.is_file():
+            return candidate
+    looked = "\n  ".join(str(c) for c in candidates)
+    raise SystemExit(
+        f"None of these exist:\n  {looked}\n"
+        "A file this script edits has moved. Update its candidates — do NOT let the measurement "
+        "run against a path that is not compiled, or the number is meaningless."
+    )
+
+
+LEAF = _resolve(SRC / "presentation/screens/settings/ZakatSettingsScreen.kt")
+BUTTON = _resolve(
+    ROOT / "core/ui/src/main/kotlin/com/arshadshah/nimaz/presentation/components/atoms/NimazButton.kt",
+    SRC / "presentation/components/atoms/NimazButton.kt",
+)
+DOMAIN = _resolve(
+    ROOT / "core/domain/src/main/kotlin/com/arshadshah/nimaz/domain/model/PrayerModels.kt",
+    SRC / "domain/model/PrayerModels.kt",
+)
+STRINGS = _resolve(
+    ROOT / "core/ui/src/main/res/values/strings.xml",
+    ROOT / "app/src/main/res/values/strings.xml",
+)
 
 ORIGINALS = {}
 # Monotonic across the whole session: two runs must never produce byte-identical
