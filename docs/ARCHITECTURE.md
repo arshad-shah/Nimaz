@@ -243,7 +243,7 @@ com.arshadshah.nimaz/
 │   ├── di/                  # Hilt modules — THE place for DI
 │   │   ├── DatabaseModule.kt        # @Provides DB + every DAO
 │   │   ├── DataStoreModule.kt       # @Provides PreferencesDataStore
-│   │   └── RepositoryModule.kt      # @Binds repos  +  object UseCaseModule { @Provides XxxUseCases }
+│   │   └── RepositoryModule.kt      # @Binds for the 7 impls pinned to :app (see the DI section)
 │   ├── navigation/          # Routes.kt (sealed Route), NavGraph.kt, deep links
 │   ├── util/                # Extensions, date utils, PDF exporters
 │   ├── feedback/            # In-app feedback capture
@@ -660,16 +660,49 @@ flowchart TD
 ```
 
 Conventions:
-- **All modules live in `core/di`** and install into `SingletonComponent` with `@Singleton`.
-- **`@Binds`** (in the `abstract class RepositoryModule`) for interface→impl bindings.
-- **`@Provides`** (in the `object UseCaseModule` at the bottom of `RepositoryModule.kt`) to
-  construct each `XxxUseCases` wrapper from its repository.
-- Individual use cases use `@Inject constructor`, so they need no module entry — only the
-  wrapper is `@Provides`.
-- DAOs are provided one-per-method from the single `NimazDatabase` instance in `DatabaseModule`.
+
+- **A binding lives in the module that owns the implementation**, not in `:app`. That is the rule
+  PR 22 of #551 replaced *"all modules live in `core/di`"* with, and the reason is mechanical: the
+  module that has to recompile when an implementation changes is the one that should declare how
+  it is bound. Everything still installs into `SingletonComponent` with `@Singleton` — the
+  *scoping* did not change, only where the declarations live.
+
+| Module | Declares | Was |
+|---|---|---|
+| `:core:domain` | `UseCaseModule` (16 `XxxUseCases`), `MoreModule`, `TimeBindingsModule` | `:app` |
+| `:core:data` | `DataBindingsModule` — 23 repository `@Binds` — and `MonitoringModule` | `:app` |
+| `:core:datastore` | `SettingsBindingsModule` — the 12 settings seams — and `DataStoreModule` | `:app` |
+| `:core:database` | `DatabaseModule` — both databases and all 24 DAOs | `:app` |
+| `:app` | `RepositoryModule` (7), `AiModule`, `LicensesModule`, `AnnouncementModule`, `TimeModule`, `ContentArtifactModule` | — |
+
+`RepositoryModule` was **905 lines**; it is 109. What is left is the seven bindings whose
+implementation genuinely cannot leave `:app` — `QuranAudioManager` and its two collaborators,
+`ServiceAdhanDownloader`, `WorkManagerWidgetRefresher`, and `PrayerNotificationScheduler` twice.
+Each one is pinned by `MainActivity`, a manifest entry point, or the app's `R`.
+
+**`:core:domain` declares Dagger modules and is still the pure layer.** It depends on `hilt-core`,
+the JVM half of Hilt: `@InstallIn`, `SingletonComponent`, and Dagger's `@Module`/`@Provides`
+transitively, with no Android on the classpath. `androidFreeClasspath` still passes and
+`import android.*` is still a compile error there. A module declaration says *where a binding
+installs*, which is not an Android fact.
+
+Three things stayed in `:app` for reasons worth knowing:
+
+- **`AnnouncementModule`** reads `BuildConfig` *and* `:core:navigation`'s `announcementRoute`.
+  `:core:data` sees neither, and giving it a navigation dependency to tidy a DI file would invert
+  the layering this epic exists to fix.
+- **`TimeModule`**'s three `@Provides` are `Dispatchers.IO`, `Dispatchers.Default` and a `Clock`,
+  qualified by annotations in `:core:common` — which does not apply `nimaz.android.hilt`. Adding a
+  KSP processor to a module for three JVM values costs more build time than the tidiness is worth.
+- **`ContentArtifactModule`** is new, and exists only to pass `BuildConfig.CONTENT_ARTIFACT_SHA256`
+  across the boundary behind `@InstalledContentArtifact`, so `DatabaseModule` could move. The same
+  inversion `IntegrityTokenProvider` uses for the Play Integrity project number.
+
+Unchanged: individual use cases use `@Inject constructor`, so they need no module entry — only the
+wrapper is `@Provides`. DAOs are provided one-per-method from the single `NimazDatabase` instance.
 
 **Adding a use-case wrapper:** add a `provideXxxUseCases(repository: XxxRepository): XxxUseCases`
-function to `UseCaseModule`, mirroring `provideAsmaUlHusnaUseCases`.
+function to `UseCaseModule` **in `:core:domain`**, mirroring `provideAsmaUlHusnaUseCases`.
 
 ### 6.1 Monitoring — inject `Telemetry`, do not call the objects
 
@@ -1690,12 +1723,15 @@ copy anything listed as Open.
 
 1. **Domain models** — `domain/model/XxxModels.kt` (immutable data classes/enums).
 2. **Repository interface** — `domain/repository/XxxRepository.kt` (domain types only).
-3. **Room** — add `XxxEntity` (`entity/`) and `XxxDao` (`dao/`); register the DAO in
-   `NimazDatabase` and provide it in `DatabaseModule`. Add a migration if the schema changes.
-4. **Repository impl** — `data/repository/XxxRepositoryImpl.kt` with `toDomain()/toEntity()`
-   mapping. Bind it with `@Binds` in `RepositoryModule`.
-5. **Use cases** — `domain/usecase/XxxUseCases.kt` (wrapper + per-operation classes). Provide
-   the wrapper with `@Provides` in `UseCaseModule`.
+3. **Room** — add `XxxEntity` (`entity/`) and `XxxDao` (`dao/`) in **`:core:database`**; register
+   the DAO in `NimazDatabase` and provide it in `DatabaseModule`, which lives in that module now.
+   Add a migration if the schema changes.
+4. **Repository impl** — `data/repository/XxxRepositoryImpl.kt` in **`:core:data`** with
+   `toDomain()/toEntity()` mapping. Bind it with `@Binds` in **`DataBindingsModule`**, in the same
+   module — not in `:app`'s `RepositoryModule`, which now holds only bindings whose implementation
+   cannot leave `:app`.
+5. **Use cases** — `domain/usecase/XxxUseCases.kt` in **`:core:domain`** (wrapper + per-operation
+   classes). Provide the wrapper with `@Provides` in `UseCaseModule`, in that module.
 6. **ViewModel** — `presentation/viewmodel/XxxViewModel.kt` (`@HiltViewModel`, inject
    `XxxUseCases`, `StateFlow<XxxUiState>` + sealed `XxxEvent` + `onEvent`).
 7. **Screen** — `presentation/screens/xxx/XxxScreen.kt`, collecting state with

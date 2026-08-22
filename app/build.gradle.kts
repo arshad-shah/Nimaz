@@ -330,6 +330,7 @@ dependencies {
     // FakeTodayProvider / FakeSearchSettings / FakeStringProvider / RecordingWidgetRefresher —
     // one definition each, used by the ViewModel tests here and the tests over there.
     testImplementation(testFixtures(project(":core:domain")))
+    testImplementation(testFixtures(project(":core:ui")))
     testImplementation(testFixtures(project(":core:common")))
 
     // Core
@@ -1022,20 +1023,50 @@ tasks.register<JacocoReport>("jacocoTestReport") {
     // to wire one up is a red build rather than a number nobody questions.
     val reportXml = layout.buildDirectory.file("reports/jacoco/jacocoTestReport.xml")
     val floor = coverageFloor
+
+    // Plain `Int` and `String` captured here, not script-level `val`s referenced from inside the
+    // action. A `doLast` that reads a build-script property captures a Gradle script object
+    // reference, which fails configuration-cache **storage** with
+    // "cannot serialize Gradle script object references" — the trap `CLAUDE.md` documents, and
+    // `--dry-run` reported it in eight seconds because storage happens whether or not the task's
+    // credential-gated dependencies can run.
+    //
+    // 1,500 is far below the real figure (several thousand classes across nineteen modules) and
+    // far above anything a broken report produces. It separates "no coverage" from "no report",
+    // which a percentage cannot.
+    val minimumCoveredClasses = 1_500
+    val classElement = "<class name="
+
     doLast {
         val report = reportXml.get().asFile
-        if (report.isFile) {
-            val text = report.readText()
-            val missing = floor.filter { (_, packageRoot) ->
-                """<package name="$packageRoot""" !in text
-            }
-            check(missing.isEmpty()) {
-                "The merged coverage report contains no classes from " +
-                    missing.joinToString { (gradlePath, _) -> gradlePath } +
-                    ". Its exec data or class directory is not wired into " +
-                    ":app:jacocoTestReport, so coverage is being reported over a smaller " +
-                    "codebase than the app actually ships."
-            }
+        // `isFile` is an assertion, not a condition. It used to guard the block, which made the
+        // one failure the floor exists to catch — no report at all — the one case it waved
+        // through. Same shape as `dir.isDirectory` in `WidgetGlyphGuardTest` and the missing-root
+        // filter in `AnalyticsReachabilityTest`, both of which this epic had to turn around.
+        check(report.isFile) {
+            "No merged coverage report at ${'$'}{report.absolutePath}. jacocoTestReport ran and " +
+                "produced nothing, which reads as 0% rather than as an error."
+        }
+        val text = report.readText()
+
+        // An empty report and genuine zero coverage look identical in a summary. This is the
+        // difference: a report that parses but describes no class at all.
+        val classes = text.split(classElement).size - 1
+        check(classes >= minimumCoveredClasses) {
+            "The merged coverage report describes ${'$'}classes classes, below the floor of " +
+                "${'$'}minimumCoveredClasses. A 237-byte report has been shipped before and was " +
+                "read as 0% coverage rather than as a broken report."
+        }
+
+        val missing = floor.filter { (_, packageRoot) ->
+            """<package name="${'$'}packageRoot""" !in text
+        }
+        check(missing.isEmpty()) {
+            "The merged coverage report contains no classes from " +
+                missing.joinToString { (gradlePath, _) -> gradlePath } +
+                ". Its exec data or class directory is not wired into " +
+                ":app:jacocoTestReport, so coverage is being reported over a smaller " +
+                "codebase than the app actually ships."
         }
     }
 }

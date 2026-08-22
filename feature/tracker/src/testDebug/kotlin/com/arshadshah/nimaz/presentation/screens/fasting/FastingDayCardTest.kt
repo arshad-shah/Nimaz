@@ -10,8 +10,9 @@ import com.arshadshah.nimaz.domain.model.ExemptionReason
 import com.arshadshah.nimaz.domain.model.FastRecord
 import com.arshadshah.nimaz.domain.model.FastStatus
 import com.arshadshah.nimaz.domain.model.FastType
-import com.arshadshah.nimaz.presentation.screens.createComponentComposeRule
-import com.arshadshah.nimaz.presentation.screens.setThemedContent
+import com.arshadshah.nimaz.testing.compose.createComponentComposeRule
+import com.arshadshah.nimaz.testing.compose.setThemedContent
+
 import com.arshadshah.nimaz.presentation.viewmodel.tracker.FastingTrackerUiState
 import com.google.common.truth.Truth.assertThat
 import java.time.LocalDate

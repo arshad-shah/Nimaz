@@ -7,6 +7,10 @@ import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import com.arshadshah.nimaz.domain.model.WorshipReminderType
+import com.arshadshah.nimaz.testing.compose.createComponentComposeRule
+import com.arshadshah.nimaz.testing.compose.setThemedContent
+import kotlin.time.Clock
+import kotlin.time.Duration.Companion.hours
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
@@ -14,8 +18,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import kotlin.time.Clock
-import kotlin.time.Duration.Companion.hours
 
 /**
  * The worship card's click wiring.

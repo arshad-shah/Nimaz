@@ -89,6 +89,7 @@ dependencies {
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.turbine)
     testImplementation(testFixtures(project(":core:domain")))
+    testImplementation(testFixtures(project(":core:ui")))
     testImplementation(testFixtures(project(":core:common")))
 
     // Six Compose tests — the qibla molecules and the night-worship content — under Robolectric;

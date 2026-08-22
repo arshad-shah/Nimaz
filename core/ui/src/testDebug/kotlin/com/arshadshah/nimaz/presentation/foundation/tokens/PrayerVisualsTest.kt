@@ -2,6 +2,8 @@ package com.arshadshah.nimaz.presentation.foundation.tokens
 
 import androidx.compose.ui.graphics.Color
 import com.arshadshah.nimaz.domain.model.PrayerType
+import com.arshadshah.nimaz.testing.compose.createComponentComposeRule
+import com.arshadshah.nimaz.testing.compose.setThemedContent
 import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
 import org.junit.Test

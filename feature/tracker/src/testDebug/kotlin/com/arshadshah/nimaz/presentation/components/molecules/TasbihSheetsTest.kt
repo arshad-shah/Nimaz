@@ -6,6 +6,8 @@ import com.arshadshah.nimaz.domain.model.TasbihCategory
 import com.arshadshah.nimaz.domain.model.TasbihPreset
 import com.arshadshah.nimaz.presentation.components.molecules.tasbih.BeadDesignPickerSheet
 import com.arshadshah.nimaz.presentation.components.molecules.tasbih.CurrentTasbihSheet
+import com.arshadshah.nimaz.testing.compose.createComponentComposeRule
+import com.arshadshah.nimaz.testing.compose.setThemedContent
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith

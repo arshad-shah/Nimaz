@@ -5,6 +5,8 @@ import androidx.compose.ui.test.performClick
 import com.arshadshah.nimaz.domain.model.PrayerName
 import com.arshadshah.nimaz.domain.model.PrayerRecord
 import com.arshadshah.nimaz.domain.model.PrayerStatus
+import com.arshadshah.nimaz.testing.compose.createComponentComposeRule
+import com.arshadshah.nimaz.testing.compose.setThemedContent
 import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
 import org.junit.Test

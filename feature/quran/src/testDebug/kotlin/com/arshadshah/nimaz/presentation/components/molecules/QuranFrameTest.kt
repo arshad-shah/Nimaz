@@ -4,6 +4,8 @@ import androidx.compose.material3.Text
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.onNodeWithText
 import com.arshadshah.nimaz.presentation.components.atoms.QuranOrnamentalDivider
+import com.arshadshah.nimaz.testing.compose.createComponentComposeRule
+import com.arshadshah.nimaz.testing.compose.setThemedContent
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith

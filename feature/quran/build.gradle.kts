@@ -71,6 +71,7 @@ dependencies {
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.turbine)
     testImplementation(testFixtures(project(":core:domain")))
+    testImplementation(testFixtures(project(":core:ui")))
     testImplementation(testFixtures(project(":core:common")))
 
     // Thirteen Compose component tests plus two screen tests, all under Robolectric; see

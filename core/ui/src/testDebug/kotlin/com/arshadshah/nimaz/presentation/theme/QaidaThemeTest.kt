@@ -3,6 +3,8 @@ package com.arshadshah.nimaz.presentation.theme
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.test.onRoot
+import com.arshadshah.nimaz.testing.compose.createComponentComposeRule
+import com.arshadshah.nimaz.testing.compose.setThemedContent
 import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
 import org.junit.Test

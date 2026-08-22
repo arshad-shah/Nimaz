@@ -2,6 +2,8 @@ package com.arshadshah.nimaz.presentation.components.atoms
 
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
+import com.arshadshah.nimaz.testing.compose.createComponentComposeRule
+import com.arshadshah.nimaz.testing.compose.setThemedContent
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith

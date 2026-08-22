@@ -1,5 +1,12 @@
 plugins {
     id("nimaz.jvm.library")
+    // `UseCaseModule` and its two siblings live here, and Hilt only aggregates a `@Module` from a
+    // project that runs its processor. Without these two lines `:core:domain` compiles, `:app`
+    // compiles, and `:app:hiltJavaCompileDebug` then fails with sixteen `[Dagger/MissingBinding]`
+    // errors — the same shape as the missing `@HiltWorker` processor in PR 13 and the missing
+    // `kotlin-serialization` plugin in PR 19, and the third time in this epic that a forgotten
+    // plugin has surfaced somewhere other than the module that forgot it.
+    alias(libs.plugins.ksp)
     // Fakes that both sides of the seam need — :core:domain's own use-case tests and :app's
     // ViewModel tests — are published from `src/testFixtures` rather than duplicated.
     `java-test-fixtures`
@@ -14,6 +21,12 @@ plugins {
 // future `implementation(...)` line, which the compiler alone would not.
 dependencies {
     api(libs.javax.inject)
+    // `UseCaseModule` lives beside the use cases it provides, as of PR 22 of #551. `hilt-core` is
+    // the JVM half of Hilt — `@InstallIn`, `SingletonComponent`, and Dagger's `@Module`/`@Provides`
+    // transitively — so it carries no Android, and `androidFreeClasspath` stays green. The domain
+    // layer already depended on `javax.inject`; this only lets it say *where* its bindings install.
+    api(libs.hilt.core)
+    ksp(libs.hilt.compiler)
     api(libs.kotlinx.coroutines.core)
 
     // Prayer-time calculation is domain logic, and adhan2 is a pure-Kotlin library with a JVM
