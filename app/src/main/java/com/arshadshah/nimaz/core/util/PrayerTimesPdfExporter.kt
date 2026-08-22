@@ -9,7 +9,7 @@ import android.graphics.Shader
 import android.graphics.Typeface
 import android.graphics.pdf.PdfDocument
 import androidx.core.content.res.ResourcesCompat
-import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.ui.R
 import com.arshadshah.nimaz.core.common.formatFastLength
 import com.arshadshah.nimaz.core.common.formatMediumDate
 import com.arshadshah.nimaz.core.monitoring.CrashReporter

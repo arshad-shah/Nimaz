@@ -287,6 +287,11 @@ dependencies {
     implementation(project(":core:datastore"))
     // The 18 repository implementations and the platform adapters behind the domain ports.
     implementation(project(":core:data"))
+    // The design system and every string, colour and font. `api`-exposes the Compose BOM,
+    // ui, ui-graphics and material3, so nothing here re-declares them. Note that this module owns
+    // `R.string.*` now: `com.arshadshah.nimaz.R` holds only the widget and notification resources
+    // that stayed, so presentation code imports `com.arshadshah.nimaz.core.ui.R`.
+    implementation(project(":core:ui"))
     // FakeTodayProvider / FakeSearchSettings / FakeStringProvider / RecordingWidgetRefresher —
     // one definition each, used by the ViewModel tests here and the tests over there.
     testImplementation(testFixtures(project(":core:domain")))
@@ -613,6 +618,22 @@ val coverageModules = listOf(
         ),
         sourceDir = "src/main/kotlin",
         packageRoot = "com/arshadshah/nimaz/data/repository",
+    ),
+    CoverageModule(
+        gradlePath = ":core:ui",
+        projectDir = rootProject.layout.projectDirectory.dir("core/ui"),
+        testTask = "testDebugUnitTest",
+        classesGlobs = listOf(
+            "intermediates/built_in_kotlinc/debug/**/classes/**",
+            "intermediates/classes/debug/**",
+            "tmp/kotlin-classes/debug/**",
+        ),
+        execGlobs = listOf(
+            "jacoco/testDebugUnitTest.exec",
+            "outputs/unit_test_code_coverage/**/*.exec",
+        ),
+        sourceDir = "src/main/kotlin",
+        packageRoot = "com/arshadshah/nimaz/presentation/components/atoms",
     ),
 )
 

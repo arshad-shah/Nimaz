@@ -2,7 +2,7 @@ package com.arshadshah.nimaz.core.share
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
-import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.ui.R
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith

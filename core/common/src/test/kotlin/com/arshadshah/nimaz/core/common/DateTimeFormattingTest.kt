@@ -155,13 +155,26 @@ class DateTimeFormattingTest {
         // without extending this list, the new language is not covered by the cases above.
         //
         // The path reaches out of this module on purpose. `SHIPPED_LOCALES` is a fact about what
-        // the *app* ships, and every resource is staying in `:app` until `:core:ui` takes them in
-        // PR 10 of #551 — at which point this path moves again, and the `isNotEmpty` assertion
-        // below is what makes that a red build rather than a check that quietly stops checking.
-        // CWD for a module's unit tests is the module directory.
-        val resourceDirs = java.io.File("../../app/src/main/res")
-            .listFiles { f -> f.isDirectory && f.name.startsWith("values-") }
-            .orEmpty()
+        // the *app* ships. It said `../../app/src/main/res` until PR 10 of #551 moved every
+        // translation into `:core:ui`, and the `isNotEmpty` assertion below is exactly what turned
+        // that into a red build rather than a check that quietly stopped checking — as its own
+        // comment predicted it would.
+        //
+        // What that comment did NOT predict is that the failure would only appear on CI. This
+        // task reads a directory that is not one of its declared Gradle inputs, so moving the
+        // locales did not invalidate it and `:core:common:testDebugUnitTest` stayed UP-TO-DATE
+        // through two full local sweeps. `core/common/build.gradle.kts` now declares the
+        // directory as an input, which is the half of the guard that was missing: an assertion
+        // only fires if the task runs.
+        //
+        // Both roots are searched so this survives the next move as well. CWD for a module's unit
+        // tests is the module directory.
+        val resourceDirs = listOf(
+            java.io.File("../../core/ui/src/main/res"),
+            java.io.File("../../app/src/main/res"),
+        ).flatMap { root ->
+            root.listFiles { f -> f.isDirectory && f.name.startsWith("values-") }.orEmpty().toList()
+        }
             .map { it.name.removePrefix("values-") }
             .filterNot { it == "night" }
             .toSet()

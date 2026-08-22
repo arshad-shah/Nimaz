@@ -11,7 +11,7 @@ import androidx.glance.appwidget.GlanceAppWidgetReceiver
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import com.arshadshah.nimaz.MainActivity
-import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.ui.R
 
 /**
  * The frame every widget shares, minus the part that differs.

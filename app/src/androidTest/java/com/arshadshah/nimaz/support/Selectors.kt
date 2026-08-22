@@ -2,7 +2,7 @@ package com.arshadshah.nimaz.support
 
 import androidx.annotation.StringRes
 import androidx.test.core.app.ApplicationProvider
-import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.ui.R
 
 /**
  * Single source of truth for every UI selector used by the instrumented tests.

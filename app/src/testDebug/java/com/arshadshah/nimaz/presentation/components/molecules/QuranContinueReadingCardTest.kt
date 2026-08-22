@@ -1,5 +1,7 @@
 package com.arshadshah.nimaz.presentation.components.molecules
 
+import com.arshadshah.nimaz.core.ui.R
+
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import com.arshadshah.nimaz.domain.model.RevelationType

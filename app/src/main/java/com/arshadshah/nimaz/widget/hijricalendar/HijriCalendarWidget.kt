@@ -38,7 +38,8 @@ import androidx.glance.text.TextAlign
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import com.arshadshah.nimaz.MainActivity
-import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.ui.R
+import com.arshadshah.nimaz.R as AppR
 import com.arshadshah.nimaz.widget.core.WidgetError
 import com.arshadshah.nimaz.widget.core.WidgetLoading
 import com.arshadshah.nimaz.widget.core.WidgetPalette
@@ -402,7 +403,7 @@ private fun EventRow(
     val iconRes = if (
         event.type.contains("fast", ignoreCase = true) ||
         event.type.contains("recommend", ignoreCase = true)
-    ) R.drawable.ic_widget_star else R.drawable.ic_widget_event
+    ) AppR.drawable.ic_widget_star else AppR.drawable.ic_widget_event
 
     Row(verticalAlignment = Alignment.Top) {
         // Small leading icon marks this as a typed list item, not a paragraph.

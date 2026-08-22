@@ -4,7 +4,7 @@ import android.os.Build
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.arshadshah.nimaz.BuildConfig
-import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.ui.R
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.core.monitoring.launchSafely

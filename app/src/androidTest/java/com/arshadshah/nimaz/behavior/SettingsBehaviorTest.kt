@@ -1,7 +1,7 @@
 package com.arshadshah.nimaz.behavior
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.ui.R
 import com.arshadshah.nimaz.core.navigation.ScreenTags
 import com.arshadshah.nimaz.support.BaseAppTest
 import com.arshadshah.nimaz.support.Selectors

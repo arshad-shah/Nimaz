@@ -1,5 +1,7 @@
 package com.arshadshah.nimaz.presentation.components.organisms
 
+import com.arshadshah.nimaz.core.ui.R
+
 import androidx.compose.ui.test.onNodeWithText
 import com.arshadshah.nimaz.domain.model.PrayerType
 import org.junit.Rule

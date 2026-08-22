@@ -1,5 +1,7 @@
 package com.arshadshah.nimaz.support
 
+import com.arshadshah.nimaz.core.ui.R
+
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.hasTestTag

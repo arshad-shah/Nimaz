@@ -66,7 +66,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.ui.R
 import com.arshadshah.nimaz.presentation.components.atoms.GlassBackdrop
 import com.arshadshah.nimaz.presentation.components.atoms.GlassIconButton
 import com.arshadshah.nimaz.presentation.components.atoms.GlassPill

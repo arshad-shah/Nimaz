@@ -7,7 +7,8 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import androidx.core.app.NotificationCompat
-import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.ui.R
+import com.arshadshah.nimaz.R as AppR
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.PerfMonitor
 import com.arshadshah.nimaz.domain.calendar.HijriDateCalculator
@@ -819,7 +820,7 @@ class PrayerNotificationScheduler @Inject constructor(
      */
     fun sendTestNotification() {
         val notification = NotificationCompat.Builder(context, CHANNEL_ID_PRAYER)
-            .setSmallIcon(R.drawable.ic_stat_nimaz)
+            .setSmallIcon(AppR.drawable.ic_stat_nimaz)
             .setContentTitle(context.getString(R.string.test_notification_title))
             .setContentText(context.getString(R.string.test_notification_text))
             .setPriority(NotificationCompat.PRIORITY_HIGH)
