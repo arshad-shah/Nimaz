@@ -8,6 +8,29 @@ plugins {
 
 android {
     namespace = "com.arshadshah.nimaz.feature.widget"
+
+    lint {
+        // `RestrictedApi`, 18 times, all of them Glance's `ColorProvider(@ColorRes)`:
+        //
+        //   ColorProviderKt.ColorProvider can only be called from within the same library group
+        //   (referenced groupId=androidx.glance from groupId=nimaz.feature)
+        //
+        // Not a change in what the code does. These exact calls produced no lint error while
+        // `widget/` lived in `:app`, because the check compares the *Maven group* of the calling
+        // project and an application module has none to compare — moving the same source into a
+        // library gives it one, and the comparison starts running. Nothing about the API usage
+        // moved with it.
+        //
+        // Disabled rather than worked around because the alternatives are worse. Glance's
+        // unrestricted overloads take a `Color` or a day/night pair, so avoiding the restricted
+        // one means abandoning `widget_colors.xml` — and with it the `values-night` variant that
+        // gives every widget its dark theme. That is a real behaviour change traded for a lint
+        // clean, in a module whose runtime verification cannot be done here.
+        //
+        // Scoped to this module. If Glance ever publishes a public resource-based ColorProvider,
+        // delete this and use it.
+        disable += "RestrictedApi"
+    }
 }
 
 // The six Glance widgets, their receivers, the tick receiver and the six refresh Workers.
