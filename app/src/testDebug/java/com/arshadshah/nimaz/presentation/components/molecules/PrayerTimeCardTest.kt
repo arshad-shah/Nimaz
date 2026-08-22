@@ -1,5 +1,7 @@
 package com.arshadshah.nimaz.presentation.components.molecules
 
+import com.arshadshah.nimaz.core.ui.R
+
 import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText

@@ -30,7 +30,8 @@ import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import com.arshadshah.nimaz.MainActivity
-import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.ui.R
+import com.arshadshah.nimaz.R as AppR
 import com.arshadshah.nimaz.widget.core.WidgetError
 import com.arshadshah.nimaz.widget.core.WidgetLoading
 import com.arshadshah.nimaz.widget.core.WidgetPalette
@@ -56,9 +57,9 @@ class KhatamWidget : GlanceAppWidget() {
 @Composable
 private fun KhatamContent(context: Context, state: KhatamWidgetState) {
     val palette = WidgetPalette()
-    val gold = ColorProvider(R.color.widget_gold)
-    val goldContainer = ColorProvider(R.color.widget_gold_container)
-    val onGoldContainer = ColorProvider(R.color.widget_on_gold_container)
+    val gold = ColorProvider(AppR.color.widget_gold)
+    val goldContainer = ColorProvider(AppR.color.widget_gold_container)
+    val onGoldContainer = ColorProvider(AppR.color.widget_on_gold_container)
 
     when (state) {
         is KhatamWidgetState.Loading -> WidgetLoading(palette)
@@ -219,7 +220,7 @@ private fun KhatamProgressContent(
                     progress = data.progressPercent / 100f,
                     modifier = GlanceModifier.defaultWeight().height(6.dp),
                     color = primaryColor,
-                    backgroundColor = ColorProvider(R.color.widget_primary_dim),
+                    backgroundColor = ColorProvider(AppR.color.widget_primary_dim),
                 )
                 Spacer(modifier = GlanceModifier.width(10.dp))
                 Text(

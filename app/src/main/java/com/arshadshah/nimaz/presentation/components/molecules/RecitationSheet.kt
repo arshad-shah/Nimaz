@@ -15,7 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.ui.R
 import com.arshadshah.nimaz.domain.model.RecitationRepeat
 import com.arshadshah.nimaz.domain.model.RecitationSpeed
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSegmentedControl

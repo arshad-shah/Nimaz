@@ -46,7 +46,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.ui.R
 import com.arshadshah.nimaz.domain.model.LibraryLicense
 import com.arshadshah.nimaz.domain.model.OpenSourceLibrary
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge

@@ -29,7 +29,8 @@ import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import com.arshadshah.nimaz.MainActivity
-import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.ui.R
+import com.arshadshah.nimaz.R as AppR
 import com.arshadshah.nimaz.widget.core.WidgetError
 import com.arshadshah.nimaz.widget.core.WidgetLoading
 import com.arshadshah.nimaz.widget.core.WidgetPalette
@@ -181,8 +182,8 @@ private fun PrayerCheckbox(
     textSecondary: ColorProvider,
     modifier: GlanceModifier = GlanceModifier
 ) {
-    val uncheckedColor = ColorProvider(R.color.widget_unchecked)
-    val onPrimary = ColorProvider(R.color.widget_on_primary)
+    val uncheckedColor = ColorProvider(AppR.color.widget_unchecked)
+    val onPrimary = ColorProvider(AppR.color.widget_on_primary)
     Column(
         modifier = modifier.clickable { togglePrayerStatus(context, prayerName.lowercase()) },
         horizontalAlignment = Alignment.CenterHorizontally
@@ -193,7 +194,7 @@ private fun PrayerCheckbox(
                 modifier = GlanceModifier.size(28.dp).cornerRadius(14.dp).background(primaryColor),
                 contentAlignment = Alignment.Center,
             ) {
-                WidgetIcon(resId = R.drawable.ic_widget_check, tint = onPrimary, size = 16.dp)
+                WidgetIcon(resId = AppR.drawable.ic_widget_check, tint = onPrimary, size = 16.dp)
             }
         } else {
             // Outline ring built from two discs (Glance has no stroke modifier).

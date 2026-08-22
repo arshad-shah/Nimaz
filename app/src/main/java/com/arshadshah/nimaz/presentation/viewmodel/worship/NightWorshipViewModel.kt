@@ -1,7 +1,7 @@
 package com.arshadshah.nimaz.presentation.viewmodel.worship
 
 import androidx.lifecycle.ViewModel
-import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.ui.R
 import com.arshadshah.nimaz.core.common.DefaultDispatcher
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.Telemetry

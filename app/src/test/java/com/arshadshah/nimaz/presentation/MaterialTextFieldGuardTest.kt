@@ -16,11 +16,44 @@ import java.io.File
  * A design system that has the component and still allows the primitive gets the drift back one
  * screen at a time, so the primitive is fenced off here rather than only discouraged in review.
  *
+ * ## Two source roots, and a floor
+ *
+ * The design system moved to `:core:ui` in PR 10 of #551 while the screens stayed here, so the
+ * rule now spans two modules and the scan has to as well. It very nearly did not: the first test
+ * asserts only that its directory *exists*, and `app/.../presentation` still does — it holds the
+ * screens and ViewModels. The guard would have gone on passing while silently checking a fraction
+ * of what it used to, which is the exact failure #553 added scan floors to `check_docs.py` to
+ * prevent. [MINIMUM_FILES] is that floor.
+ *
  * The exceptions below are the field family's own implementations — the components that are
  * *supposed* to own a `BasicTextField`. `TextField` and `OutlinedTextField` have no exceptions
  * at all: nothing in the app should be reaching for Material's decorated fields.
  */
 class MaterialTextFieldGuardTest {
+
+    private companion object {
+        /**
+         * Both halves of the presentation layer. CWD for a module's unit tests is the module
+         * directory, so `:core:ui` is reached as a sibling. Note the differing source roots:
+         * `:app` is still `src/main/java`, the `:core:*` modules are `src/main/kotlin`.
+         */
+        val PRESENTATION_ROOTS = listOf(
+            "src/main/java/com/arshadshah/nimaz/presentation",
+            "../core/ui/src/main/kotlin/com/arshadshah/nimaz/presentation",
+        )
+
+        /** Where the field family itself lives, now that the design system is its own module. */
+        const val NIMAZ_TEXT_FIELD =
+            "../core/ui/src/main/kotlin/com/arshadshah/nimaz/presentation/components/molecules/" +
+                "NimazTextField.kt"
+
+        /**
+         * A floor, so a moved directory fails this test rather than quietly shrinking it. The two
+         * roots hold well over 300 files between them; this sits far enough below that ordinary
+         * churn never touches it, and far enough above that losing either root fails.
+         */
+        const val MINIMUM_FILES = 250
+    }
 
     /** Files allowed to own a raw `BasicTextField` — the family's implementations. */
     private val basicTextFieldOwners = setOf(
@@ -34,9 +67,30 @@ class MaterialTextFieldGuardTest {
     )
 
     @Test
+    fun `the scan reaches both presentation source roots`() {
+        PRESENTATION_ROOTS.forEach { root ->
+            val dir = File(root)
+            assert(dir.isDirectory) {
+                "Presentation source root not found at ${dir.absolutePath}. The design system " +
+                    "lives in :core:ui and the screens in :app; a guard that can only see one of " +
+                    "them passes while checking half the surface."
+            }
+        }
+        val scanned = presentationSources().size
+        assert(scanned >= MINIMUM_FILES) {
+            "scanned only $scanned presentation files across $PRESENTATION_ROOTS — expected at " +
+                "least $MINIMUM_FILES. A scan that finds nothing passes every assertion below."
+        }
+    }
+
+    private fun presentationSources(): List<File> =
+        PRESENTATION_ROOTS
+            .map(::File)
+            .filter { it.isDirectory }
+            .flatMap { it.walkTopDown().filter { f -> f.isFile && f.extension == "kt" } }
+
+    @Test
     fun `no presentation source uses a Material text field primitive`() {
-        val dir = File("src/main/java/com/arshadshah/nimaz/presentation")
-        assert(dir.isDirectory) { "Presentation source dir not found at ${dir.absolutePath}" }
 
         // `(?<![A-Za-z0-9_.])` so `NimazTextField(` and `OutlinedTextFieldDefaults` do not
         // register as the Material primitives they are named after.
@@ -47,7 +101,7 @@ class MaterialTextFieldGuardTest {
         )
 
         val offenders = mutableListOf<String>()
-        dir.walkTopDown().filter { it.isFile && it.extension == "kt" }.forEach { file ->
+        presentationSources().forEach { file ->
             val text = file.readText()
             forbidden.forEach { (name, pattern) ->
                 if (name == "BasicTextField" && file.name in basicTextFieldOwners) return@forEach
@@ -75,10 +129,7 @@ class MaterialTextFieldGuardTest {
      */
     @Test
     fun `NimazTextField exposes no styling escape hatches`() {
-        val source = File(
-            "src/main/java/com/arshadshah/nimaz/presentation/components/molecules/" +
-                "NimazTextField.kt"
-        )
+        val source = File(NIMAZ_TEXT_FIELD)
         assert(source.isFile) { "NimazTextField.kt not found at ${source.absolutePath}" }
 
         val signature = source.readText()

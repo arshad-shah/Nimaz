@@ -1,7 +1,7 @@
 package com.arshadshah.nimaz.presentation.viewmodel.about
 
 import androidx.lifecycle.ViewModel
-import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.ui.R
 import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.domain.model.LicenseFamily

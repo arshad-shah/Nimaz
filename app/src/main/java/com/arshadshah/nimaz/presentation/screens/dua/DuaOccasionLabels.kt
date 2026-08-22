@@ -3,7 +3,7 @@ package com.arshadshah.nimaz.presentation.screens.dua
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
-import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.ui.R
 import com.arshadshah.nimaz.domain.model.DuaOccasion
 
 /**

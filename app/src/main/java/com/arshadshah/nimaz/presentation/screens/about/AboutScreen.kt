@@ -47,7 +47,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.BuildConfig
 import com.arshadshah.nimaz.LocalInAppUpdateManager
-import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.ui.R
+import com.arshadshah.nimaz.R as AppR
 import com.arshadshah.nimaz.core.util.UpdateState
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeEmphasis
@@ -158,7 +159,7 @@ private fun AppInfoHero(modifier: Modifier = Modifier) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Image(
-            painter = painterResource(R.mipmap.ic_launcher_foreground),
+            painter = painterResource(AppR.mipmap.ic_launcher_foreground),
             contentDescription = stringResource(R.string.app_name),
             modifier = Modifier
                 .size(88.dp)

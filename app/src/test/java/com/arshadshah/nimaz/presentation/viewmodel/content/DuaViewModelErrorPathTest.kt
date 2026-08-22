@@ -2,7 +2,7 @@ package com.arshadshah.nimaz.presentation.viewmodel.content
 
 import java.time.LocalDate
 import com.arshadshah.nimaz.domain.time.FakeTodayProvider
-import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.ui.R
 import com.arshadshah.nimaz.presentation.components.molecules.NimazErrorKind
 import com.arshadshah.nimaz.core.monitoring.RecordingTelemetry
 import com.arshadshah.nimaz.domain.model.Dua

@@ -1,6 +1,6 @@
 package com.arshadshah.nimaz.presentation.screens.fasting
 
-import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.ui.R
 import com.arshadshah.nimaz.presentation.screens.SubtitleArg
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test

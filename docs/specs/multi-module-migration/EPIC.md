@@ -298,6 +298,40 @@ for a usage search.
 
 ### Milestone 3 — `:core:ui` (PR 10)
 
+> **The shrink risk this milestone was written around does not exist.** #561 names the eight Quran
+> fonts as "selected at runtime from a settings value" and therefore vulnerable to
+> `isShrinkResources`. The selection is real; selection *by resource name* is not. Every one of the
+> eight has a compile-time `R.font.*` reference in `theme/Type.kt` (16 `R.font.` sites in all), and
+> the settings value picks between already-constructed `FontFamily` objects. A compile-time `R`
+> reference is exactly what the shrinker keeps.
+>
+> The one by-name lookup in the app is AboutLibraries' `getIdentifier("aboutlibraries", "raw", …)`,
+> which **has** already caused a silent release-only failure and is fixed twice over — the code
+> passes `R.raw.aboutlibraries` by id, and `res/raw/keep.xml` names it. Its resource is *generated*
+> by the Gradle plugin into the applying project, so it and the keep rule stay in `:app`.
+>
+> **"Every resource" was also too broad.** `res/xml/` is manifest-referenced app configuration
+> (backup rules, locales config, six widget-provider descriptors); `res/drawable/` and `res/layout/`
+> are entirely widget and notification assets; `values/themes.xml` references the splash-screen
+> theme and the launcher foreground, so it is startup identity — it went to `:core:ui` and had to
+> come straight back when AAPT could not link it. What moved is `strings.xml` + five translations,
+> `colors.xml`, and `font/`.
+>
+> **What the milestone actually costs is the `R` rename.** `nonTransitiveRClass=true` means
+> `com.arshadshah.nimaz.R` loses `R.string.*` the moment strings leave, so 229 files swap their
+> import and 2,431 usages keep their spelling. Ten files need both `R` classes and alias the app's
+> as `AppR`. That is the bulk of the diff, and it is mechanical.
+>
+> **Two things this milestone taught that the remaining PRs will hit.** First, `internal` is
+> module-scoped: 30 compile errors named couplings nobody had written down. Where the consumer
+> legitimately lives elsewhere the symbol becomes public with a comment saying why; where the
+> consumer is a *test*, the test moves — 62 component tests and `UiError` did. Second, a
+> source-scanning guard breaks silently on a move: `MaterialTextFieldGuardTest` asserted only that
+> its directory *existed*, and `app/…/presentation` still does, so it would have gone on passing
+> while scanning a fraction of the surface. It now walks both roots and carries a floor. That is
+> the seventh guard in this epic found green against what it was meant to catch.
+
+
 **#10 — Extract the design system** · `mm/09-core-ui`
 52 atoms, the generic `Nimaz*` molecules, `theme/` (18 files), `foundation/` (17 files), and
 **every resource including the full 1,910-entry `strings.xml` and all five translation

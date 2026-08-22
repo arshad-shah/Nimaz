@@ -51,7 +51,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.ui.R
+import com.arshadshah.nimaz.R as AppR
 import com.arshadshah.nimaz.core.navigation.ScreenTags
 import com.arshadshah.nimaz.core.util.WorshipReminderContent
 import com.arshadshah.nimaz.core.common.formatCurrency
@@ -269,7 +270,7 @@ fun MoreMenuScreen(
                     NimazMenuDivider()
                     NimazMenuItem(
                         title = stringResource(R.string.duas),
-                        icon = ImageVector.vectorResource(R.drawable.ic_dua),
+                        icon = ImageVector.vectorResource(AppR.drawable.ic_dua),
                         onClick = onNavigateToDuas
                     )
                     NimazMenuDivider()

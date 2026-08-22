@@ -1,7 +1,7 @@
 package com.arshadshah.nimaz.presentation.screens.more
 
 import androidx.annotation.StringRes
-import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.ui.R
 import com.arshadshah.nimaz.presentation.screens.SubtitleArg
 import com.arshadshah.nimaz.presentation.screens.SubtitleSpec
 

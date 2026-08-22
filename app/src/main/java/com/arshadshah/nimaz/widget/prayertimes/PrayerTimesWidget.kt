@@ -29,7 +29,8 @@ import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import com.arshadshah.nimaz.MainActivity
-import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.ui.R
+import com.arshadshah.nimaz.R as AppR
 import com.arshadshah.nimaz.widget.core.WidgetError
 import com.arshadshah.nimaz.widget.core.WidgetLoading
 import com.arshadshah.nimaz.widget.core.WidgetPalette
@@ -182,9 +183,9 @@ private fun PrayerPill(
     primaryColor: ColorProvider,
     modifier: GlanceModifier = GlanceModifier,
 ) {
-    val onPrimary = ColorProvider(R.color.widget_on_primary)
-    val goldContainer = ColorProvider(R.color.widget_gold_container)
-    val onGoldContainer = ColorProvider(R.color.widget_on_gold_container)
+    val onPrimary = ColorProvider(AppR.color.widget_on_primary)
+    val goldContainer = ColorProvider(AppR.color.widget_gold_container)
+    val onGoldContainer = ColorProvider(AppR.color.widget_on_gold_container)
 
     // Each state pairs an explicit container with an on-container colour, so the
     // text stays legible in both light and dark mode. Past prayers get a gold

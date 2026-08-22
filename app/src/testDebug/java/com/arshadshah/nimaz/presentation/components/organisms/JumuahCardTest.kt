@@ -1,5 +1,7 @@
 package com.arshadshah.nimaz.presentation.components.organisms
 
+import com.arshadshah.nimaz.core.ui.R
+
 import androidx.compose.ui.test.onNodeWithText
 import org.junit.Rule
 import org.junit.Test

@@ -182,6 +182,18 @@ com.arshadshah.nimaz/
     └── text/                # StringProvider — a string without a Context
 ```
 
+**`R` is not one class any more.** `android.nonTransitiveRClass=true` means a module's `R` holds
+only its *own* resources, so once `strings.xml` moved to `:core:ui` (PR 10) the application's
+`com.arshadshah.nimaz.R` stopped having `R.string.*` in it. Presentation code — in `:app` and in
+`:core:ui` alike — imports **`com.arshadshah.nimaz.core.ui.R`**. What is left in `:app`'s own `R`
+is the widget and notification surface: `res/xml/` (manifest-referenced app config and the six
+widget-provider descriptors), `res/drawable/` and `res/layout/` (widget icons and previews, the
+notification icon), `res/mipmap-*/` (launcher icons), `values/themes.xml` (it references the
+splash-screen theme and the launcher foreground, so it is app startup identity, not design system)
+and `values/widget_colors.xml`. Ten files need **both** and alias the application's as `AppR` —
+every widget, plus `AdhanDownloadService`, `PrayerNotificationScheduler`, `AboutScreen` and
+`MoreMenuScreen`.
+
 **Nothing in `:core:common` may reference `R`.** It sits *below* `:core:ui`, which owns every
 resource including the whole of `strings.xml`, so there is no app `R` on its classpath to
 reference — with `nonTransitiveRClass=true` its own `R` is `…core.common.R` and nothing else is
@@ -1726,7 +1738,7 @@ Requires JDK 21 and an Android SDK (compileSdk 37). Set `sdk.dir` in `local.prop
 
 ### Modules
 
-Five `:core:*` modules so far, mid-migration (#551):
+Six `:core:*` modules so far, mid-migration (#551):
 
 | Module | Plugin | What it holds |
 |---|---|---|
@@ -1735,7 +1747,8 @@ Five `:core:*` modules so far, mid-migration (#551):
 | **`:core:database`** | `nimaz.android.library` + `nimaz.android.hilt` | Both Room `@Database` classes, every entity and DAO, the migrations, the user-data slice, the content-artifact installer, and the exported `schemas/` with the `room.schemaLocation` arg that writes them. |
 | **`:core:datastore`** | `nimaz.android.library` + `nimaz.android.hilt` | All three DataStore files — `PreferencesDataStore` and its `PreferenceCodec` registry, the announcement store, and `DeviceIdProvider`. Implements the eleven `SettingsSeams` interfaces, which live in `:core:domain`, so a feature depends on the seam it needs rather than on this. |
 | **`:core:data`** | `nimaz.android.library` + `nimaz.android.hilt` | Eighteen of the nineteen repository implementations, the `data/device`, `data/text` and `data/ai` slices, and the announcement store's repository. It is the only module that sees both `:core:database` and `:core:datastore`, which is what lets every other module depend on a `:core:domain` interface instead of on a DAO. |
-| **`:app`** | `nimaz.android.application` | Everything else, for now — presentation, widgets, audio, sync, and the rest of `core/`. It shrinks with each milestone of #551. |
+| **`:core:ui`** | `nimaz.android.library` + `nimaz.android.compose` | The design system — 52 atoms, the generic `Nimaz*` molecules, `theme/`, `foundation/`, `presentation/model` and `core/share` — plus **`strings.xml` and its five translations, `colors.xml` and the eight fonts**. The first module to own `res/`, which is why every other module now spells resources `com.arshadshah.nimaz.core.ui.R`. |
+| **`:app`** | `nimaz.android.application` | Everything else, for now — screens, ViewModels, feature components, widgets, audio, sync, and the rest of `core/`. It shrinks with each milestone of #551. |
 | **`:baselineprofile`** | `com.android.test` | Generates `app/src/main/baseline-prof.txt`. Nothing depends on it at runtime and no product code lives there. |
 
 Plus one **included build**, `build-logic`, which is not a module of the app — it produces the
@@ -1773,6 +1786,17 @@ one that points the wrong way.
 definition of the fake for it, and the pattern is now regular enough to expect rather than
 discover: **a fake of a `:core:domain` port is wanted by whichever module implements the port and
 by whichever module drives it**, so it belongs beside the port rather than in either.
+
+**A symbol read across a module boundary is public API, and that is not the same as widening for
+convenience.** `internal` in a single-module app meant "not part of the app's public surface",
+which said nothing, because the app was the top. Splitting turns each such symbol into a compile
+error that names a coupling nobody had written down — 30 of them in PR 10 alone. Where the
+consumer legitimately lives in another module (`NimazToneColors` read by feature molecules, the
+`QuranOrnamentGeometry` path builders drawn with by `SurahHeaderCartouche`, `PageSurahSeparator`
+rendered by `QuranReaderScreen`), the fix is to make the declaration public and say why at the
+declaration. Where the consumer is a **test**, the fix is to move the test to the module that owns
+its subject — never to widen production visibility so a test in the wrong module keeps compiling.
+PR 10 moved 62 component tests and `UiError` itself on that rule.
 
 **What `:core:data` may hand out is checked.** The obvious rule — *repositories return domain
 models* — needs no test: they implement interfaces declared in `:core:domain`, a `kotlin-jvm`

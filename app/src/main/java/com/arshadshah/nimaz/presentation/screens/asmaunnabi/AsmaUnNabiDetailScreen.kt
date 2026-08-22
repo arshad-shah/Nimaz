@@ -6,7 +6,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.ui.R
 import com.arshadshah.nimaz.presentation.components.molecules.NameDetailSectionCard
 import com.arshadshah.nimaz.presentation.components.molecules.NamesAccents
 import com.arshadshah.nimaz.presentation.screens.catalog.CatalogDetailHeader

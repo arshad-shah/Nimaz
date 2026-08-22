@@ -4,7 +4,7 @@ Nimaz is an offline-first Android Islamic companion app: **Kotlin + Jetpack Comp
 **Clean Architecture** (`presentation → domain → data`) with **MVVM + UDF**, Hilt DI, Room,
 DataStore, type-safe Navigation Compose.
 
-**Mid-migration to Gradle modules (#551).** Five modules are out of `:app` so far:
+**Mid-migration to Gradle modules (#551).** Six modules are out of `:app` so far:
 
 - **`:core:domain`** (`core/domain/`) — the whole domain layer, a pure JVM module. No Android SDK
   on its classpath, so `import android.*` there is a compile error, and `androidFreeClasspath`
@@ -32,6 +32,14 @@ DataStore, type-safe Navigation Compose.
   `BuildConfig` cannot have it — a library's `BuildConfig` holds only its own fields — so take the
   value as a constructor parameter and pass it from a `:app` Hilt module, as `AiModule` does for
   `IntegrityTokenProvider`.
+- **`:core:ui`** (`core/ui/`) — the design system: 52 atoms, the generic `Nimaz*` molecules,
+  `theme/`, `foundation/`, `presentation/model`, `core/share`, plus `strings.xml` + its five
+  translations, `colors.xml` and the eight fonts. **It owns `R.string.*` now.** With
+  `nonTransitiveRClass=true` a module's `R` holds only its own resources, so presentation code
+  imports **`com.arshadshah.nimaz.core.ui.R`**; `com.arshadshah.nimaz.R` keeps only the widget and
+  notification surface (`res/xml`, `res/drawable`, `res/layout`, `res/mipmap-*`, `themes.xml`,
+  `widget_colors.xml`). Ten files need both and alias the app's as `AppR`. Component tests live
+  in `core/ui/src/testDebug` with their own Robolectric pin.
 
 Everything else is still `:app` and moves out over the remaining PRs. Files in
 `app/…/core/util/` whose destination module does not exist yet are staying there **on purpose** —
@@ -174,6 +182,7 @@ The obligations, in short:
 ./gradlew :core:database:check        # Room identity hashes + moduleBoundary
 ./gradlew :core:datastore:check       # preference-key golden + moduleBoundary
 ./gradlew :core:data:check            # repository tests + public-API leak guard + moduleBoundary
+./gradlew :core:ui:check              # design-system component tests + moduleBoundary + its lint
 ./gradlew :app:jacocoTestReport --dry-run   # see below — seconds, and catches a whole class of red CI
 ./gradlew :app:lintDebug              # SLOW (~10 min) and CI-blocking — do not skip it
 python3 scripts/check_docs.py         # docs still describe the code (no toolchain needed)

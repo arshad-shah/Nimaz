@@ -1,6 +1,6 @@
 package com.arshadshah.nimaz.widget.core
 
-import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.ui.R
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import java.io.File

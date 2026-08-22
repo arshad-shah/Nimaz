@@ -25,7 +25,8 @@ import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import com.arshadshah.nimaz.MainActivity
-import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.ui.R
+import com.arshadshah.nimaz.R as AppR
 import com.arshadshah.nimaz.widget.core.WidgetError
 import com.arshadshah.nimaz.widget.core.WidgetLoading
 import com.arshadshah.nimaz.widget.core.WidgetPalette
@@ -151,7 +152,7 @@ private fun NextPrayerSuccessContent(
                 ),
             )
             Spacer(modifier = GlanceModifier.height(8.dp))
-            WidgetPill(container = ColorProvider(R.color.widget_primary_dim)) {
+            WidgetPill(container = ColorProvider(AppR.color.widget_primary_dim)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         text = if (data.isValid && liveCountdown != "—") "in " else "",
