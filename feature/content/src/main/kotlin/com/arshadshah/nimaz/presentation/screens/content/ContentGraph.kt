@@ -17,11 +17,9 @@ import com.arshadshah.nimaz.presentation.screens.asmaunnabi.AsmaUnNabiDetailScre
 import com.arshadshah.nimaz.presentation.screens.dua.DuaCategoryScreen
 import com.arshadshah.nimaz.presentation.screens.dua.DuaOccasionScreen
 import com.arshadshah.nimaz.presentation.screens.dua.DuaReaderScreen
-import com.arshadshah.nimaz.presentation.screens.dua.DuaSettingsScreen
 import com.arshadshah.nimaz.presentation.screens.dua.DuasCollectionScreen
 import com.arshadshah.nimaz.presentation.screens.hadith.HadithChaptersScreen
 import com.arshadshah.nimaz.presentation.screens.hadith.HadithReaderScreen
-import com.arshadshah.nimaz.presentation.screens.hadith.HadithSettingsScreen
 import com.arshadshah.nimaz.presentation.screens.names.FavouritesScreen
 import com.arshadshah.nimaz.presentation.screens.prophets.ProphetDetailScreen
 import com.arshadshah.nimaz.presentation.screens.qaida.QaidaHomeScreen
@@ -135,12 +133,6 @@ fun NavGraphBuilder.contentGraph(navController: NavController) {
         )
     }
 
-    taggedComposable<Route.HadithSettings>(ScreenTags.HadithSettings) {
-        HadithSettingsScreen(
-            onNavigateBack = { navController.popBackStack() }
-        )
-    }
-
     // Dua screens
     taggedComposable<Route.DuaHome>(ScreenTags.DuaHome) {
         AdaptiveDuaScreen(
@@ -183,12 +175,6 @@ fun NavGraphBuilder.contentGraph(navController: NavController) {
             duaId = args.duaId,
             onNavigateBack = { navController.popBackStack() },
             onNavigateToSettings = { navController.navigate(Route.DuaSettings) }
-        )
-    }
-
-    taggedComposable<Route.DuaSettings>(ScreenTags.DuaSettings) {
-        DuaSettingsScreen(
-            onNavigateBack = { navController.popBackStack() }
         )
     }
 

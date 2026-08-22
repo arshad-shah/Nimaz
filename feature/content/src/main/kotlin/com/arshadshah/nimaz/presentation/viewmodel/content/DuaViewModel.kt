@@ -8,10 +8,14 @@ import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.domain.time.TodayProvider
 import com.arshadshah.nimaz.core.common.toUtcMidnightMillis
+import com.arshadshah.nimaz.domain.model.Dua
 import com.arshadshah.nimaz.domain.model.DuaCategory
 import com.arshadshah.nimaz.domain.model.DuaOccasion
+import com.arshadshah.nimaz.domain.model.TasbihCategory
+import com.arshadshah.nimaz.domain.model.TasbihPreset
 import com.arshadshah.nimaz.domain.repository.settings.DuaDisplaySettings
 import com.arshadshah.nimaz.domain.usecase.DuaUseCases
+import com.arshadshah.nimaz.domain.usecase.TasbihUseCases
 import com.arshadshah.nimaz.presentation.components.molecules.NimazErrorKind
 import com.arshadshah.nimaz.presentation.theme.QuranArabicFont
 import com.arshadshah.nimaz.presentation.viewmodel.UiError
@@ -27,6 +31,9 @@ import javax.inject.Inject
 @HiltViewModel
 class DuaViewModel @Inject constructor(
     private val duaUseCases: DuaUseCases,
+    // "Add to tasbih" writes a custom preset. The reader screen used to reach for
+    // `TasbihViewModel` directly; see `DuaEvent.AddToTasbih`.
+    private val tasbihUseCases: TasbihUseCases,
     private val duaSettings: DuaDisplaySettings,
     private val todayProvider: TodayProvider,
     private val telemetry: Telemetry
@@ -92,6 +99,11 @@ class DuaViewModel @Inject constructor(
             is DuaEvent.ToggleFavorite -> {
                 telemetry.featureUsed(DOMAIN, "toggle_favorite")
                 toggleFavorite(event.duaId, event.categoryId)
+            }
+
+            is DuaEvent.AddToTasbih -> {
+                telemetry.featureUsed(DOMAIN, "add_to_tasbih")
+                addToTasbih(event.dua)
             }
 
             is DuaEvent.SetFontSize -> _readerState.update { it.copy(fontSize = event.size) }
@@ -341,6 +353,19 @@ class DuaViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Saves a dua as a custom tasbih preset.
+     *
+     * The `Dua -> TasbihPreset` mapping lived in `DuaReaderScreen` as a private extension. It is
+     * a mapping between two domain models with a truncation rule and three fallbacks in it —
+     * decisions a screen should not be making, and ones nothing could test where it was.
+     */
+    private fun addToTasbih(dua: Dua) {
+        launchSafely(telemetry, DOMAIN, "add_to_tasbih") {
+            tasbihUseCases.insertPreset(dua.toTasbihPreset(System.currentTimeMillis()))
+        }
+    }
+
     private fun toggleFavorite(duaId: String, categoryId: String) {
         launchSafely(telemetry, DOMAIN, "toggle_favorite") {
             duaUseCases.toggleFavorite(duaId, categoryId)
@@ -391,4 +416,36 @@ class DuaViewModel @Inject constructor(
     private companion object {
         private const val DOMAIN = AppAnalytics.Feature.DUA
     }
+}
+
+/**
+ * A dua as a custom tasbih preset.
+ *
+ * `targetCount` falls back to 33 — the conventional tasbih count — when the dua carries no repeat
+ * count, and the name falls back to the Arabic title when the English one is blank, so a preset is
+ * never created nameless. The 40-character truncation keeps it readable in the tasbih list.
+ *
+ * `now` is a parameter rather than a `System.currentTimeMillis()` call inside, so the mapping is
+ * testable. The caller still reads the wall clock directly: `TodayProvider` exposes `today()` and
+ * `todayChanges` but no millis accessor, and widening that seam for a `createdAt` stamp is a
+ * change to make deliberately rather than in passing. Same clock the screen used before.
+ */
+internal fun Dua.toTasbihPreset(now: Long): TasbihPreset {
+    val presetName = titleEnglish.trim().let {
+        if (it.length > 40) it.take(40).trimEnd() + "\u2026" else it
+    }
+    return TasbihPreset(
+        id = 0,
+        name = presetName.ifBlank { titleArabic.trim() },
+        arabicText = textArabic.ifBlank { null },
+        transliteration = textTransliteration?.ifBlank { null },
+        translation = textEnglish.ifBlank { null },
+        targetCount = repeatCount?.takeIf { it > 0 } ?: 33,
+        category = TasbihCategory.CUSTOM,
+        reference = reference?.ifBlank { null },
+        isDefault = false,
+        displayOrder = 0,
+        createdAt = now,
+        updatedAt = now,
+    )
 }

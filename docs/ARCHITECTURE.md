@@ -1755,6 +1755,7 @@ Seven `:core:*` modules so far, mid-migration (#551):
 | **`:feature:tools`** | `nimaz.android.feature` | The zakat calculator and its history — `screens/zakat`, `screens/tools` and `viewmodel/tools`. Nothing to unpick: `ZakatViewModel` reads the `ZakatSettings` seam, and its screens draw on `:core:common` and `:core:ui` only. At 1,324 lines it is larger than `:feature:about`'s screens, which needed six couplings resolved — size is not what decides this. |
 | **`:feature:calendar`** | `nimaz.android.feature` | The Islamic calendar — one screen, one ViewModel, plus `IslamicEventCard`, which nothing else names. Small enough to question and it still earns a module: folding it into a neighbour would create the coupling the split exists to remove. `IslamicEvent` is a `:core:domain` model, so sharing it with `fasting`/`prayer`/`settings` is not a feature-to-feature edge. |
 | **`:feature:search`** | `nimaz.android.feature` | Local library search and the opt-in Ask-with-Proof screen. **The only feature with a network dependency, and none of it is in the module** — the Worker client, its DTOs and `IntegrityTokenProvider` are `:core:data`, reached through `AiRepository`. Proof resolution reads Quran and Hadith content owned by other features, through repositories; `moduleBoundary` makes the alternative impossible. |
+| **`:feature:content`** | `nimaz.android.feature` | The library — duas, hadith, qaida, the ninety-nine names, the names of the Prophet, the prophets, and the catalog shell they share. **Eight `screens/` packages in one module, because `viewmodel/content` is one package they all drive.** The concrete case behind "the module boundary follows the ViewModel axis, not the `screens/` axis". `QaidaAudioManager` came with it. |
 | **`:app`** | `nimaz.android.application` | Everything else, for now — screens, ViewModels, feature components, audio, sync, `NavGraph.kt`, and the rest of `core/`. It shrinks with each milestone of #551. |
 | **`:baselineprofile`** | `com.android.test` | Generates `app/src/main/baseline-prof.txt`. Nothing depends on it at runtime and no product code lives there. |
 
@@ -1849,6 +1850,20 @@ and the answer differs by shape:
 | An implementation that must stay in `:app` | `InAppUpdateManager` (holds an `Activity`) | Move the **port**, not the class: `AppUpdateController` in `:core:ui`, three of the class's seven members, implementation left behind. The same split as `WidgetRefresher` and `CompassSensors`, on the UI side. |
 | A shared presentation helper | `SubtitleSpec`, `WorshipReminderContent` | Move it **down** to `:core:ui`, not across. Both were used by `:app` screens too. |
 | Another feature's ViewModel | `SettingsViewModel` in `AdaptiveMoreScreen` | Delete it. `hiltViewModel()` scopes to the destination's `NavBackStackEntry`, so this never read the other feature's instance in the first place — see `CrossFeatureViewModelGuardTest`. |
+
+**A screen belongs to the module that owns the ViewModel it drives, not the one its directory
+name suggests.** `DuaSettingsScreen` and `HadithSettingsScreen` sit in `screens/dua` and
+`screens/hadith`, and both dispatch `SettingsEvent` on `SettingsViewModel` — so they stayed in
+`:app` when the rest of those directories became `:feature:content`, and they register in
+`settingsGraph` rather than `contentGraph`. They go to `:feature:settings` with their ViewModel.
+The same axis rule that keeps eight screen packages together in `:feature:content` splits two
+files out of it.
+
+**`data/audio` is three features' audio in one directory.** `QaidaAudioManager` is used only by
+`QaidaReaderViewModel` and moved into `:feature:content`, even though `docs/ARCHITECTURE.md` §2
+assigns the whole of `data/audio` to the prayer milestone — qaida audio does not belong in
+`:feature:prayer`. Expect `QuranAudioManager` and `QuranAudioService` to go the same way, to
+`:feature:quran`, leaving only the adhan players behind.
 
 **A public signature must not name a type the module keeps to itself.** `:core:ui` declares
 `currentWindowSizeClass()` public, returning `androidx.window.core.layout.WindowSizeClass`, while

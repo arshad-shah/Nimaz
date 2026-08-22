@@ -89,7 +89,13 @@ class DuaViewModelLoadScopeTest {
     @After
     fun tearDown() = Dispatchers.resetMain()
 
-    private fun viewModel() = DuaViewModel(duaUseCases, settingsRepository, FakeTodayProvider(LocalDate.now()), RecordingTelemetry())
+    private fun viewModel() = DuaViewModel(
+        duaUseCases = duaUseCases,
+        tasbihUseCases = mockk(relaxed = true),
+        duaSettings = settingsRepository,
+        todayProvider = FakeTodayProvider(LocalDate.now()),
+        telemetry = RecordingTelemetry(),
+    )
 
     @Test
     fun `a previously opened category cannot overwrite the category on screen`() = runTest {

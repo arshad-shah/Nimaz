@@ -41,7 +41,7 @@ import com.arshadshah.nimaz.presentation.theme.ThemeMode
 
 /**
  * Feature accent for Khatam, in the shape of
- * [com.arshadshah.nimaz.presentation.components.molecules.NamesAccent].
+ * `NamesAccent` (`:feature:content`) — named rather than linked, since `:core:ui` cannot see it.
  *
  * One value threads through the hero card, row cards, journey trail and chips so the
  * feature re-themes correctly in dark mode without every call site repeating colour logic.

@@ -72,7 +72,17 @@ class DuaViewModelErrorPathTest {
     @After
     fun tearDown() = Dispatchers.resetMain()
 
-    private fun viewModel() = DuaViewModel(duaUseCases, settingsRepository, FakeTodayProvider(LocalDate.now()), telemetry)
+    // Named arguments deliberately: this was a positional call, and inserting `tasbihUseCases`
+    // as the second constructor parameter in PR 17 of #551 made it compile-fail in a way that read
+    // as four unrelated type errors. `SettingsRepository` implements the `DuaDisplaySettings`
+    // seam, so a positional slip between the two is not even a type error.
+    private fun viewModel() = DuaViewModel(
+        duaUseCases = duaUseCases,
+        tasbihUseCases = mockk(relaxed = true),
+        duaSettings = settingsRepository,
+        todayProvider = FakeTodayProvider(LocalDate.now()),
+        telemetry = telemetry,
+    )
 
     @Test
     fun `a failing category list clears the spinner instead of hanging on it`() = runTest {
