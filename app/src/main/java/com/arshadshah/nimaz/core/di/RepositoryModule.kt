@@ -1,6 +1,7 @@
 package com.arshadshah.nimaz.core.di
 
 import com.arshadshah.nimaz.core.datastore.PreferencesDataStore
+import com.arshadshah.nimaz.data.audio.QuranAudioManager
 import com.arshadshah.nimaz.data.audio.AyahAudioDownloader
 import com.arshadshah.nimaz.data.audio.HttpAyahAudioDownloader
 import com.arshadshah.nimaz.data.audio.NextSurahPlaylistSource
@@ -23,6 +24,7 @@ import com.arshadshah.nimaz.data.repository.QuranRepositoryImpl
 import com.arshadshah.nimaz.data.repository.TafseerRepositoryImpl
 import com.arshadshah.nimaz.data.repository.TasbihRepositoryImpl
 import com.arshadshah.nimaz.core.text.StringProvider
+import com.arshadshah.nimaz.domain.repository.QuranPlayback
 import com.arshadshah.nimaz.domain.repository.CompassSensors
 import com.arshadshah.nimaz.domain.repository.Haptics
 import com.arshadshah.nimaz.data.device.AndroidCompassSensors
@@ -295,6 +297,20 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class RepositoryModule {
+
+    /**
+     * The Quran playback seam. `QuranAudioManager` stays in `:app` — it is ExoPlayer-backed and
+     * inseparable from `QuranAudioService`, whose notification uses `R.drawable.ic_stat_nimaz`
+     * and a content intent aimed at `MainActivity` — while `QuranViewModel` moved to
+     * `:feature:quran` in PR 19 of #551 and sees only the port.
+     */
+    // `QuranAudioManager` is annotated `@UnstableApi` because it holds an ExoPlayer; naming the
+    // type in a binding is a use of that API even though nothing here touches media3.
+    @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
+    @Binds
+    @Singleton
+    abstract fun bindQuranPlayback(impl: QuranAudioManager): QuranPlayback
+
 
     @Binds
     @Singleton

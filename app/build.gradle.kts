@@ -319,6 +319,8 @@ dependencies {
     // Prayer tracking, fasting and tasbih (#569). Six of `screens/prayer`'s nine files come
     // here — the ones driving `viewmodel/tracker`; prayer *times* follow in PR 20.
     implementation(project(":feature:tracker"))
+    // The reader, khatam and bookmarks, plus the Mushaf rendering stack (#570).
+    implementation(project(":feature:quran"))
     // FakeTodayProvider / FakeSearchSettings / FakeStringProvider / RecordingWidgetRefresher —
     // one definition each, used by the ViewModel tests here and the tests over there.
     testImplementation(testFixtures(project(":core:domain")))
@@ -500,6 +502,35 @@ tasks.withType<Test>().configureEach {
         "searchSources" to "feature/search/src/main/kotlin/com/arshadshah/nimaz/presentation",
         "contentSources" to "feature/content/src/main/kotlin/com/arshadshah/nimaz/presentation",
         "trackerSources" to "feature/tracker/src/main/kotlin/com/arshadshah/nimaz/presentation",
+        "quranSources" to "feature/quran/src/main/kotlin/com/arshadshah/nimaz/presentation",
+    ).forEach { (name, path) ->
+        inputs.dir(rootProject.layout.projectDirectory.dir(path))
+            .withPropertyName(name)
+            .withPathSensitivity(PathSensitivity.RELATIVE)
+    }
+
+    // `FeatureTestsLiveWithSubjectTest` goes further: it indexes **every** top-level declaration
+    // in **every** module's `src/main`, not just the presentation subtree, because a stranded test
+    // can name any symbol the module owns. The roots above cover only `presentation/`, so the
+    // remaining ones are declared here — otherwise the guard is exactly the thing it was written
+    // to prevent: an assertion that does not run.
+    mapOf(
+        "domainSources" to "core/domain/src/main",
+        "commonSources" to "core/common/src/main",
+        "databaseSources" to "core/database/src/main",
+        "datastoreSources" to "core/datastore/src/main",
+        "dataSources" to "core/data/src/main",
+        "uiModuleSources" to "core/ui/src/main",
+        "navigationModuleSources" to "core/navigation/src/main",
+        "widgetModuleSources" to "feature/widget/src/main",
+        "onboardingModuleSources" to "feature/onboarding/src/main",
+        "aboutModuleSources" to "feature/about/src/main",
+        "toolsModuleSources" to "feature/tools/src/main",
+        "calendarModuleSources" to "feature/calendar/src/main",
+        "searchModuleSources" to "feature/search/src/main",
+        "contentModuleSources" to "feature/content/src/main",
+        "trackerModuleSources" to "feature/tracker/src/main",
+        "quranModuleSources" to "feature/quran/src/main",
     ).forEach { (name, path) ->
         inputs.dir(rootProject.layout.projectDirectory.dir(path))
             .withPropertyName(name)
@@ -743,6 +774,22 @@ val coverageModules = listOf(
     CoverageModule(
         gradlePath = ":feature:onboarding",
         projectDir = rootProject.layout.projectDirectory.dir("feature/onboarding"),
+        testTask = "testDebugUnitTest",
+        classesGlobs = listOf(
+            "intermediates/built_in_kotlinc/debug/**/classes/**",
+            "intermediates/classes/debug/**",
+            "tmp/kotlin-classes/debug/**",
+        ),
+        execGlobs = listOf(
+            "jacoco/testDebugUnitTest.exec",
+            "outputs/unit_test_code_coverage/**/*.exec",
+        ),
+        sourceDir = "src/main/kotlin",
+        packageRoot = "com/arshadshah/nimaz/presentation",
+    ),
+    CoverageModule(
+        gradlePath = ":feature:quran",
+        projectDir = rootProject.layout.projectDirectory.dir("feature/quran"),
         testTask = "testDebugUnitTest",
         classesGlobs = listOf(
             "intermediates/built_in_kotlinc/debug/**/classes/**",

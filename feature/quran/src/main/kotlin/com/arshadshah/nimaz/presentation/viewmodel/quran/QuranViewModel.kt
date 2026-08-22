@@ -1,7 +1,6 @@
-@file:androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
-
 package com.arshadshah.nimaz.presentation.viewmodel.quran
 
+import com.arshadshah.nimaz.domain.repository.AyahAudioItem
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.ui.R
@@ -11,8 +10,8 @@ import com.arshadshah.nimaz.core.monitoring.launchBestEffort
 import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.core.text.StringProvider
 import com.arshadshah.nimaz.domain.time.TodayProvider
-import com.arshadshah.nimaz.data.audio.AudioState
-import com.arshadshah.nimaz.data.audio.QuranAudioManager
+import com.arshadshah.nimaz.domain.model.AudioState
+import com.arshadshah.nimaz.domain.repository.QuranPlayback
 import com.arshadshah.nimaz.domain.model.Khatam
 import com.arshadshah.nimaz.domain.model.KhatamDetailSnapshot
 import com.arshadshah.nimaz.domain.model.KhatamStatus
@@ -49,7 +48,9 @@ enum class ReadingMode { SURAH, JUZ, PAGE }
 @HiltViewModel
 class QuranViewModel @Inject constructor(
     private val quranUseCases: QuranUseCases,
-    private val audioManager: QuranAudioManager,
+    // The `:core:domain` port, not `QuranAudioManager` — that class is ExoPlayer- and
+    // notification-bound and stays in `:app`. See `QuranPlayback`.
+    private val audioManager: QuranPlayback,
     private val quranSettings: QuranPreferences,
     private val khatamUseCases: KhatamUseCases,
     private val telemetry: Telemetry,
@@ -527,7 +528,7 @@ class QuranViewModel @Inject constructor(
             quranUseCases.getSurahWithAyahs(surahNumber, translatorId())
                 .first()?.let { surahWithAyahs ->
                     val audioItems = surahWithAyahs.ayahs.map { ayah ->
-                        QuranAudioManager.AyahAudioItem(
+                        AyahAudioItem(
                             ayahGlobalId = ayah.id,
                             surahNumber = ayah.surahNumber,
                             ayahNumber = ayah.ayahNumber
@@ -550,7 +551,7 @@ class QuranViewModel @Inject constructor(
         }
         if (ayahs.isEmpty()) return
         val audioItems = ayahs.map { ayah ->
-            QuranAudioManager.AyahAudioItem(
+            AyahAudioItem(
                 ayahGlobalId = ayah.id,
                 surahNumber = ayah.surahNumber,
                 ayahNumber = ayah.ayahNumber
@@ -566,7 +567,7 @@ class QuranViewModel @Inject constructor(
             _readerState.value.surahWithAyahs?.ayahs ?: emptyList()
         }
         val audioItems = ayahs.map { ayah ->
-            QuranAudioManager.AyahAudioItem(
+            AyahAudioItem(
                 ayahGlobalId = ayah.id,
                 surahNumber = ayah.surahNumber,
                 ayahNumber = ayah.ayahNumber

@@ -82,4 +82,15 @@ dependencies {
     testImplementation(libs.turbine)
     testImplementation(testFixtures(project(":core:domain")))
     testImplementation(testFixtures(project(":core:common")))
+
+    // Fifteen Compose component tests — the Qaida and Names families — under Robolectric. They
+    // were stranded in `app/src/testDebug` when PR 17 moved their subjects here, and kept
+    // compiling because nothing they touch is `internal`; see `FeatureTestsLiveWithSubjectTest`
+    // in `:app` for what now catches that. `src/testDebug/resources/robolectric.properties`
+    // carries the SDK and Application pins.
+    testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.junit)
+    testImplementation(platform(libs.androidx.compose.bom))
+    testImplementation(libs.androidx.compose.ui.test.junit4)
+    debugImplementation(libs.androidx.compose.ui.test.manifest)
 }

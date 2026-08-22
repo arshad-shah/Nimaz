@@ -1,5 +1,7 @@
 package com.arshadshah.nimaz.data.audio
 
+import com.arshadshah.nimaz.domain.model.AudioState
+import com.arshadshah.nimaz.domain.repository.AyahAudioItem
 import android.content.Context
 import androidx.media3.common.util.UnstableApi
 import androidx.test.core.app.ApplicationProvider
@@ -89,8 +91,8 @@ class QuranAudioManagerDownloadTest {
             null
     }
 
-    private fun playlist(count: Int): List<QuranAudioManager.AyahAudioItem> =
-        (1..count).map { QuranAudioManager.AyahAudioItem(ayahGlobalId = it, surahNumber = 1, ayahNumber = it) }
+    private fun playlist(count: Int): List<AyahAudioItem> =
+        (1..count).map { AyahAudioItem(ayahGlobalId = it, surahNumber = 1, ayahNumber = it) }
 
     @Test
     fun `cancelling the download stops further progress writes`() = runTest(dispatcher) {

@@ -202,9 +202,11 @@ visible. That is why `StringProvider` exists: a ViewModel that must *compare* re
 every module below `:core:ui`, not just this one.
 
 What is left in `app/…/core/util/` is there deliberately, not by omission. Files whose real home is
-a module that does not exist yet: `TajweedParser` → `:core:ui`, the prayer notification and PDF
-files → `:feature:prayer`, `TafseerPdfExporter` → `:feature:quran`, `NotificationDiagnostics` →
-`:feature:settings`. (`FlowExtensions` was listed here for `:core:data`; it went to `:core:common`
+a module that does not exist yet: the prayer notification files → `:feature:prayer`,
+`NotificationDiagnostics` → `:feature:settings`. (`TajweedParser` was listed here for `:core:ui`
+and went to **`:feature:quran`** instead — every one of its consumers is a Quran surface, and a
+parser only that feature calls does not belong in the design system. `TafseerPdfExporter` went to
+`:feature:quran` as predicted.) (`FlowExtensions` was listed here for `:core:data`; it went to `:core:common`
 instead — `mapItems` is a generic `Flow` extension that knows nothing about data, and a module
 below `:core:data` can want it.) `BootReceiver`,
 `PrayerRescheduler`, `InAppUpdateManager` and `core/init` stay in `:app` permanently — a manifest
@@ -1757,6 +1759,7 @@ Seven `:core:*` modules so far, mid-migration (#551):
 | **`:feature:search`** | `nimaz.android.feature` | Local library search and the opt-in Ask-with-Proof screen. **The only feature with a network dependency, and none of it is in the module** — the Worker client, its DTOs and `IntegrityTokenProvider` are `:core:data`, reached through `AiRepository`. Proof resolution reads Quran and Hadith content owned by other features, through repositories; `moduleBoundary` makes the alternative impossible. |
 | **`:feature:content`** | `nimaz.android.feature` | The library — duas, hadith, qaida, the ninety-nine names, the names of the Prophet, the prophets, and the catalog shell they share. **Eight `screens/` packages in one module, because `viewmodel/content` is one package they all drive.** The concrete case behind "the module boundary follows the ViewModel axis, not the `screens/` axis". `QaidaAudioManager` came with it. |
 | **`:feature:tracker`** | `nimaz.android.feature` | What the user *did*: prayer tracking, fasting and the tasbih counter, behind one `viewmodel/tracker`. **Six of `screens/prayer`'s nine files are here** — the ones driving `viewmodel/tracker` — while prayer *times* wait for PR 20; `PrayerGraph.kt` split accordingly. |
+| **`:feature:quran`** | `nimaz.android.feature` | The reader, khatam and bookmarks, plus the whole Mushaf rendering stack and `TajweedParser`. The largest feature. **`QuranDao` stays in `:core:database`** — four repositories use it. **`QuranAudioManager` stays in `:app`**, behind the `QuranPlayback` port, because `MainActivity` holds one too. |
 | **`:app`** | `nimaz.android.application` | Everything else, for now — screens, ViewModels, feature components, audio, sync, `NavGraph.kt`, and the rest of `core/`. It shrinks with each milestone of #551. |
 | **`:baselineprofile`** | `com.android.test` | Generates `app/src/main/baseline-prof.txt`. Nothing depends on it at runtime and no product code lives there. |
 
@@ -1853,13 +1856,44 @@ and the answer differs by shape:
 | Another feature's ViewModel | `SettingsViewModel` in `AdaptiveMoreScreen` | Delete it. `hiltViewModel()` scopes to the destination's `NavBackStackEntry`, so this never read the other feature's instance in the first place — see `CrossFeatureViewModelGuardTest`. |
 
 **A shared `internal` test helper is duplicated per module *and* per package, and the count is
-now eight.** `setThemedContent` / `createComponentComposeRule` are ten lines that exist five times
-in `:core:ui`, once in `:app`, once in `:feature:calendar` and twice in `:feature:tracker` — the
-helpers are `internal`, so a module cannot see another's, and they are imported by package, so one
-module needs one per test package. `:feature:quran` and `:feature:prayer` will each add more.
+now ten.** `setThemedContent` / `createComponentComposeRule` are ten lines that exist five times
+in `:core:ui`, once in `:app`, once in `:feature:calendar`, twice in `:feature:tracker` and twice
+in `:feature:quran` — the helpers are `internal`, so a module cannot see another's, and they are
+imported by package, so one module needs one per test package. `:feature:prayer` will add more.
 **Publishing one from `core/ui/src/testFixtures/` collapses all of them**, the way
 `:core:domain`'s fakes already have; it is a guardrail change rather than a feature move, which is
 why it is deferred to the last milestone rather than done in passing.
+
+**A component test does not move with its subject on its own, and nothing says so until a member
+turns `internal`.** PR 19 moved the Quran components into `:feature:quran` and left eleven of
+their tests in `app/src/testDebug`. They kept compiling — the subjects were public and `:app`
+depends on the feature — so every local gate was green. CI was not: two of those tests read
+`computeJuzHeaderIndices` and `BottomActions`, which are `internal`, and `internal` does not cross
+a module.
+
+Two things made that worse than a one-off, and both are worth carrying forward:
+
+- **Kotlin's incremental compiler does not re-check a file whose own module did not change.**
+  `:app:compileDebugUnitTestKotlin` reported BUILD SUCCESSFUL locally against the exact sources CI
+  rejected. Only `--rerun-tasks`, or a clean checkout, surfaced it. *A compile only checks what it
+  recompiles* — the same shape as "an assertion only fires if its task runs", one layer down.
+- **The same stranding was already sitting in two merged PRs**: fifteen files belonging to
+  `:feature:content` and one to `:feature:tracker`, inert only because nothing they touch is
+  `internal`. Nineteen files in total were swept back to their modules.
+
+`FeatureTestsLiveWithSubjectTest` in `:app` now fails on it directly, before any visibility
+narrows. It indexes every top-level declaration in every module's `src/main` and reports an `:app`
+test that names symbols unique to exactly one feature module and none unique to `:app`. It counts
+a symbol as named when the test imports it, writes it fully qualified, or shares its package —
+three forms because two were load-bearing: `MushafLinePageFitTest` reaches `pageFitFontSize`,
+declared in `MushafLineLayout.kt` rather than a file named after the test (**search the symbol,
+not the file name**), and `CompassQiblaViewTest` imports nothing at all. Ambiguous names are
+ignored, which is what keeps `layout`, `fill` and `Map` from attributing a test to a random
+feature, and what leaves `ScreenStateConventionTest` — which reads every screen in the app by
+design — alone.
+
+**The general rule: when a subject moves, its test moves in the same commit.** A test that merely
+still compiles is not evidence it is in the right module.
 
 **A screen belongs to the module that owns the ViewModel it drives, not the one its directory
 name suggests.** `DuaSettingsScreen` and `HadithSettingsScreen` sit in `screens/dua` and
@@ -1869,11 +1903,14 @@ name suggests.** `DuaSettingsScreen` and `HadithSettingsScreen` sit in `screens/
 The same axis rule that keeps eight screen packages together in `:feature:content` splits two
 files out of it.
 
-**`data/audio` is three features' audio in one directory.** `QaidaAudioManager` is used only by
-`QaidaReaderViewModel` and moved into `:feature:content`, even though `docs/ARCHITECTURE.md` §2
-assigns the whole of `data/audio` to the prayer milestone — qaida audio does not belong in
-`:feature:prayer`. Expect `QuranAudioManager` and `QuranAudioService` to go the same way, to
-`:feature:quran`, leaving only the adhan players behind.
+**`data/audio` is three features' audio in one directory, and they end up in three places.**
+`QaidaAudioManager` moved into `:feature:content` — only `QaidaReaderViewModel` uses it, and
+qaida audio does not belong in `:feature:prayer`. **Quran audio could not follow it into
+`:feature:quran`**: `QuranAudioService` builds its media notification from
+`R.drawable.ic_stat_nimaz` and a content intent aimed at `MainActivity`, and `MainActivity` holds
+a `QuranAudioManager` of its own — one consumer above the feature and one inside it. The class
+stays in `:app` behind the `QuranPlayback` port (13 of its 39 members), the same split
+`AppUpdateController` and `CounterFeedback` use. Only the adhan players remain for PR 20.
 
 **A public signature must not name a type the module keeps to itself.** `:core:ui` declares
 `currentWindowSizeClass()` public, returning `androidx.window.core.layout.WindowSizeClass`, while

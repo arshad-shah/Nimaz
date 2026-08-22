@@ -5,7 +5,7 @@ import com.arshadshah.nimaz.domain.time.FakeTodayProvider
 import com.arshadshah.nimaz.core.text.FakeStringProvider
 import android.content.Context
 import com.arshadshah.nimaz.core.monitoring.RecordingTelemetry
-import com.arshadshah.nimaz.data.audio.QuranAudioManager
+import com.arshadshah.nimaz.domain.repository.QuranPlayback
 import com.arshadshah.nimaz.domain.model.RevelationType
 import com.arshadshah.nimaz.domain.model.Surah
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
@@ -45,7 +45,7 @@ class QuranReaderHydrationTest {
     private val dispatcher = StandardTestDispatcher()
 
     private lateinit var useCases: QuranUseCases
-    private lateinit var audioManager: QuranAudioManager
+    private lateinit var audioManager: QuranPlayback
     private lateinit var settingsRepository: SettingsRepository
     private lateinit var khatamUseCases: KhatamUseCases
     private lateinit var context: Context

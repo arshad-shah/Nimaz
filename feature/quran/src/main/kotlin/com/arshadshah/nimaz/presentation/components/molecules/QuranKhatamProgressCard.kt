@@ -1,5 +1,12 @@
 package com.arshadshah.nimaz.presentation.components.molecules
 
+// NOTE (#551 PR 19): nothing in the app calls `KhatamProgressCard` — its only reference is its own
+// test. It moved here with the rest of the khatam UI rather than being deleted, because deciding
+// whether an unused component is dead or merely not wired up yet is the owner's call, not a
+// side effect of a module move. `KhatamCompactRow` and `KhatamStartPromptRow` are only reachable
+// through it, so they are in the same position.
+
+
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
