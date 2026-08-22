@@ -15,6 +15,14 @@ import java.io.File
  * only because both are wired to `announcementRoute`. If the predicate ever drifts from the
  * allowlist the CTA silently disappears — no crash, no log, just a banner with no button — so
  * the agreement is asserted here for every key the allowlist knows, not for a sampled few.
+ *
+ * **Moved here with its subject in PR 11 of #551.** It reads `AnnouncementRoutes.kt` from disk, so
+ * it broke the moment that file left `:app` — loudly, because it asserts the file exists before
+ * parsing it and floors the key count at 40. That is the behaviour to copy: the same milestone
+ * found `MaterialTextFieldGuardTest` checking only that its *directory* existed, which stayed true
+ * after its subject moved, so it would have gone on passing while scanning almost nothing. An
+ * existence check on a directory is not a floor; an existence check on the exact file, plus a
+ * minimum count, is.
  */
 class AnnouncementCtaJourneyTest {
 
@@ -30,7 +38,7 @@ class AnnouncementCtaJourneyTest {
      * list would rot the first time a key is added, which is precisely the drift being guarded.
      */
     private fun staticKeys(): List<String> {
-        val source = File("src/main/java/com/arshadshah/nimaz/core/navigation/AnnouncementRoutes.kt")
+        val source = File("src/main/kotlin/com/arshadshah/nimaz/core/navigation/AnnouncementRoutes.kt")
         assertThat(source.exists()).isTrue()
         val body = source.readText()
             .substringAfter("private fun staticAnnouncementRoute(key: String): Route? = when (key) {")
