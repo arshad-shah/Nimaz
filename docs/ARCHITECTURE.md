@@ -562,7 +562,7 @@ private fun Xxx.toEntity() = XxxEntity(/* ... */)
 
 ### 4.5 Data — Room
 
-- Single database `NimazDatabase` (`data/local/database/`), shipped **pre-populated** from
+- Single database `NimazDatabase` (`data/local/database/`, in `:core:database`), shipped **pre-populated** from
   `app/src/main/assets/database/nimaz_prepopulated.db` via `.createFromAsset(...)`.
 - Entities in `entity/`, DAOs in `dao/`. **Schema changes require a migration** added to the
   `addMigrations(...)` chain in `DatabaseModule` and a bump of the single `NIMAZ_DATABASE_VERSION`
@@ -1709,7 +1709,8 @@ Three, mid-migration (#551):
 |---|---|---|
 | **`:core:domain`** | `nimaz.jvm.library` | The whole domain layer — models, repository *interfaces*, use cases, `domain/search`, and the four pure calculators domain depends on (`domain/time`, `domain/calendar`, `domain/worship`, `domain/prayer`). **Pure JVM: no AGP, no Android SDK on the classpath.** |
 | **`:core:common`** | `nimaz.android.library` | `core/common` (formatting helpers with no feature attached), `core/monitoring` (the `Telemetry` seam and its Firebase wrappers) and `core/text` (`StringProvider`). Depends on `:core:domain` and Android. **Below `:core:ui`, so no `R`.** |
-| **`:app`** | `nimaz.android.application` | Everything else, for now — presentation, data, widgets, the rest of `core/`. It shrinks with each milestone of #551. |
+| **`:core:database`** | `nimaz.android.library` + `nimaz.android.hilt` | Both Room `@Database` classes, every entity and DAO, the migrations, the user-data slice, the content-artifact installer, and the exported `schemas/` with the `room.schemaLocation` arg that writes them. |
+| **`:app`** | `nimaz.android.application` | Everything else, for now — presentation, the rest of `data/`, widgets, the rest of `core/`. It shrinks with each milestone of #551. |
 | **`:baselineprofile`** | `com.android.test` | Generates `app/src/main/baseline-prof.txt`. Nothing depends on it at runtime and no product code lives there. |
 
 Plus one **included build**, `build-logic`, which is not a module of the app — it produces the

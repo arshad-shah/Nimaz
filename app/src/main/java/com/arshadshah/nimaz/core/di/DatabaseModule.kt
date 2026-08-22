@@ -3,18 +3,12 @@ package com.arshadshah.nimaz.core.di
 import android.content.Context
 import android.util.Log
 import androidx.room.Room
+import com.arshadshah.nimaz.BuildConfig
 import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.data.local.content.ContentArtifactInstaller
 import com.arshadshah.nimaz.data.local.content.ContentArtifactStore
 import com.arshadshah.nimaz.data.local.content.SharedPreferencesContentArtifactStore
 import com.arshadshah.nimaz.data.local.database.NimazDatabase
-import com.arshadshah.nimaz.data.local.user.CustomPresetDao
-import com.arshadshah.nimaz.data.local.user.ReadingProgressDao
-import com.arshadshah.nimaz.data.local.user.TafseerUserDao
-import com.arshadshah.nimaz.data.local.user.TasbihSessionDao
-import com.arshadshah.nimaz.data.local.user.BookmarkDao
-import com.arshadshah.nimaz.data.local.user.NimazUserDatabase
-import com.arshadshah.nimaz.data.local.user.ProgressDao
 import com.arshadshah.nimaz.data.local.database.dao.AsmaUlHusnaDao
 import com.arshadshah.nimaz.data.local.database.dao.AsmaUnNabiDao
 import com.arshadshah.nimaz.data.local.database.dao.DuaDao
@@ -32,6 +26,13 @@ import com.arshadshah.nimaz.data.local.database.dao.TafseerDao
 import com.arshadshah.nimaz.data.local.database.dao.TasbihDao
 import com.arshadshah.nimaz.data.local.database.dao.ZakatDao
 import com.arshadshah.nimaz.data.local.search.SearchIndexDao
+import com.arshadshah.nimaz.data.local.user.BookmarkDao
+import com.arshadshah.nimaz.data.local.user.CustomPresetDao
+import com.arshadshah.nimaz.data.local.user.NimazUserDatabase
+import com.arshadshah.nimaz.data.local.user.ProgressDao
+import com.arshadshah.nimaz.data.local.user.ReadingProgressDao
+import com.arshadshah.nimaz.data.local.user.TafseerUserDao
+import com.arshadshah.nimaz.data.local.user.TasbihSessionDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -68,7 +69,12 @@ object DatabaseModule {
         @ApplicationContext context: Context,
         contentArtifactStore: ContentArtifactStore
     ): NimazDatabase {
-        val outcome = ContentArtifactInstaller(context, contentArtifactStore).installIfChanged()
+        val outcome = ContentArtifactInstaller(
+            context = context,
+            store = contentArtifactStore,
+            // :app owns the app-level BuildConfig; :core:database cannot see it.
+            installedArtifact = BuildConfig.CONTENT_ARTIFACT_SHA256,
+        ).installIfChanged()
         Log.i("DatabaseModule", "content artifact: $outcome")
 
         // Also to Crashlytics, not only logcat. Whether a release actually reached a device is

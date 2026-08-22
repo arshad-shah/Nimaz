@@ -14,6 +14,10 @@ DataStore, type-safe Navigation Compose.
   a string resolved outside a composable goes through `StringProvider`. `moduleBoundary` (wired
   into `check` on every Android module) fails if a `:core:*` module depends on `:app` or a
   `:feature:*`.
+- **`:core:database`** (`core/database/`) — both Room databases, entities, DAOs, migrations and
+  the exported `schemas/`. **`room.schemaLocation` lives here**, and the migration/DAO
+  instrumented tests deliberately stay in `app/src/androidTest` because CI runs exactly one
+  androidTest APK. `ExportedSchemaIdentityTest` pins both identity hashes.
 
 Everything else is still `:app` and moves out over the remaining PRs. Files in
 `app/…/core/util/` whose destination module does not exist yet are staying there **on purpose** —
@@ -153,6 +157,7 @@ The obligations, in short:
 ./gradlew :app:testDebugUnitTest
 ./gradlew :core:domain:check          # domain tests + androidFreeClasspath — seconds, no Android
 ./gradlew :core:common:check          # module tests + moduleBoundary + its own lint
+./gradlew :core:database:check        # Room identity hashes + moduleBoundary
 ./gradlew :app:jacocoTestReport --dry-run   # see below — seconds, and catches a whole class of red CI
 ./gradlew :app:lintDebug              # SLOW (~10 min) and CI-blocking — do not skip it
 python3 scripts/check_docs.py         # docs still describe the code (no toolchain needed)

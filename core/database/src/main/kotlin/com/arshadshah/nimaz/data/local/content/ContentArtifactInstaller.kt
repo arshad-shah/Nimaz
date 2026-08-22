@@ -68,7 +68,16 @@ import java.io.File
 class ContentArtifactInstaller(
     private val context: Context,
     private val store: ContentArtifactStore,
-    private val installedArtifact: String = com.arshadshah.nimaz.BuildConfig.CONTENT_ARTIFACT_SHA256,
+    /**
+     * The sha256 of the artifact **this build ships**, from `BuildConfig.CONTENT_ARTIFACT_SHA256`.
+     *
+     * Passed in rather than read here. A library module's `BuildConfig` carries only its own
+     * fields, never the application's, so reading `com.arshadshah.nimaz.BuildConfig` from
+     * `:core:database` does not compile — and defaulting it to something wrong would be worse
+     * than not compiling, since the installer's whole job is comparing this against what is on
+     * disk. `DatabaseModule` in `:app` supplies it, which is the module that has it.
+     */
+    private val installedArtifact: String,
     /**
      * Called once when a device looks stuck rather than merely deferred.
      *
