@@ -2,7 +2,7 @@ package com.arshadshah.nimaz.presentation.viewmodel.tracker
 
 import java.time.LocalDate
 import com.arshadshah.nimaz.domain.time.FakeTodayProvider
-import com.arshadshah.nimaz.core.feedback.CounterFeedback
+import com.arshadshah.nimaz.domain.repository.CounterFeedback
 import com.arshadshah.nimaz.core.monitoring.RecordingTelemetry
 import com.arshadshah.nimaz.domain.model.TasbihSession
 import com.arshadshah.nimaz.domain.repository.SettingsRepository

@@ -1,7 +1,7 @@
 package com.arshadshah.nimaz.presentation.viewmodel.tracker
 
 import androidx.lifecycle.ViewModel
-import com.arshadshah.nimaz.core.feedback.CounterFeedback
+import com.arshadshah.nimaz.domain.repository.CounterFeedback
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.core.monitoring.catchAndReport

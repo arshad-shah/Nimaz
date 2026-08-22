@@ -36,12 +36,12 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import java.time.LocalDate
-import com.arshadshah.nimaz.presentation.viewmodel.buildAnnouncementUseCases
-import com.arshadshah.nimaz.presentation.viewmodel.buildDuaUseCases
-import com.arshadshah.nimaz.presentation.viewmodel.buildFastingUseCases
-import com.arshadshah.nimaz.presentation.viewmodel.buildHadithUseCases
-import com.arshadshah.nimaz.presentation.viewmodel.buildObserveEventCardsUseCase
-import com.arshadshah.nimaz.presentation.viewmodel.buildPrayerUseCases
+import com.arshadshah.nimaz.domain.usecase.buildAnnouncementUseCases
+import com.arshadshah.nimaz.domain.usecase.buildDuaUseCases
+import com.arshadshah.nimaz.domain.usecase.buildFastingUseCases
+import com.arshadshah.nimaz.domain.usecase.buildHadithUseCases
+import com.arshadshah.nimaz.domain.usecase.buildObserveEventCardsUseCase
+import com.arshadshah.nimaz.domain.usecase.buildPrayerUseCases
 
 /**
  * Home across midnight.

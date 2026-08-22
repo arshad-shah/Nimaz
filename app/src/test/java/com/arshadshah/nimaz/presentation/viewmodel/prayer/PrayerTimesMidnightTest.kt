@@ -3,9 +3,9 @@ package com.arshadshah.nimaz.presentation.viewmodel.prayer
 import com.arshadshah.nimaz.core.monitoring.RecordingTelemetry
 import com.arshadshah.nimaz.domain.time.FakeTodayProvider
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
-import com.arshadshah.nimaz.presentation.viewmodel.FakePrayerTimetableRepository
-import com.arshadshah.nimaz.presentation.viewmodel.buildPrayerUseCases
-import com.arshadshah.nimaz.presentation.viewmodel.prayerCalculationSettings
+import com.arshadshah.nimaz.domain.usecase.FakePrayerTimetableRepository
+import com.arshadshah.nimaz.domain.usecase.buildPrayerUseCases
+import com.arshadshah.nimaz.domain.usecase.prayerCalculationSettings
 import com.google.common.truth.Truth.assertThat
 import io.mockk.every
 import io.mockk.mockk

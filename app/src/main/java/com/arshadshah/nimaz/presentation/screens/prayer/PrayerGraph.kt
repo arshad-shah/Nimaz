@@ -40,24 +40,6 @@ fun NavGraphBuilder.prayerGraph(navController: NavController) {
         )
     }
 
-    taggedComposable<Route.PrayerTracker>(ScreenTags.PrayerTracker) {
-        PrayerTrackerScreen(
-            onNavigateBack = { navController.popBackStack() },
-            onNavigateToStats = { navController.navigate(Route.PrayerStats) },
-            onNavigateToQada = { navController.navigate(Route.QadaPrayers) },
-        )
-    }
-
-    taggedComposable<Route.PrayerStats>(ScreenTags.PrayerStats) {
-        PrayerStatsScreen(
-            onNavigateBack = { navController.popBackStack() }
-        )
-    }
-
-    taggedComposable<Route.QadaPrayers>(ScreenTags.QadaPrayers) {
-        QadaPrayersScreen(onNavigateBack = { navController.popBackStack() })
-    }
-
     taggedComposable<Route.MonthlyPrayerTimes>(ScreenTags.MonthlyPrayerTimes) {
         MonthlyPrayerTimesScreen(
             onNavigateBack = { navController.popBackStack() }

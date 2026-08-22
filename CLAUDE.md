@@ -68,6 +68,9 @@ DataStore, type-safe Navigation Compose.
   package they all drive** — the module boundary follows the ViewModel axis, not `screens/`. The
   same rule sends `DuaSettingsScreen` and `HadithSettingsScreen` the other way: they drive
   `SettingsViewModel`, so they stay in `:app` and register in `settingsGraph`.
+- **`:feature:tracker`** (`feature/tracker/`) — prayer tracking, fasting and tasbih, behind one
+  `viewmodel/tracker`. **Six of `screens/prayer`'s nine files live here** (the tracking ones);
+  prayer *times* stay in `:app` until PR 20, and `PrayerGraph.kt` split along the same line.
 - **`:feature:tools`** (`feature/tools/`) — the zakat calculator and its history.
 - **`:feature:search`** (`feature/search/`) — library search and the opt-in Ask-with-Proof screen.
   Nothing network-facing lives here: the Worker client is `:core:data`, reached through
@@ -239,6 +242,7 @@ The obligations, in short:
 ./gradlew :feature:calendar:check     # Islamic calendar
 ./gradlew :feature:search:check       # search + Ask with Proof
 ./gradlew :feature:content:check      # the library — eight screen packages
+./gradlew :feature:tracker:check      # prayer tracking, fasting, tasbih
 ./gradlew :app:jacocoTestReport --dry-run   # see below — seconds, and catches a whole class of red CI
 ./gradlew :app:lintDebug              # SLOW (~10 min) and CI-blocking — do not skip it
 python3 scripts/check_docs.py         # docs still describe the code (no toolchain needed)

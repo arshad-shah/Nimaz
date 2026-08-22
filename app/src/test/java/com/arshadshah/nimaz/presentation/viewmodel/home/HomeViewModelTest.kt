@@ -20,7 +20,7 @@ import com.arshadshah.nimaz.domain.repository.DuaRepository
 import com.arshadshah.nimaz.domain.repository.FastingRepository
 import com.arshadshah.nimaz.domain.repository.HadithRepository
 import com.arshadshah.nimaz.domain.repository.PrayerRepository
-import com.arshadshah.nimaz.presentation.viewmodel.prayerCalculationSettings
+import com.arshadshah.nimaz.domain.usecase.prayerCalculationSettings
 import com.google.common.truth.Truth.assertThat
 import io.mockk.clearMocks
 import io.mockk.coEvery
@@ -47,12 +47,12 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import java.util.concurrent.atomic.AtomicReference
-import com.arshadshah.nimaz.presentation.viewmodel.buildAnnouncementUseCases
-import com.arshadshah.nimaz.presentation.viewmodel.buildDuaUseCases
-import com.arshadshah.nimaz.presentation.viewmodel.buildFastingUseCases
-import com.arshadshah.nimaz.presentation.viewmodel.buildHadithUseCases
-import com.arshadshah.nimaz.presentation.viewmodel.buildObserveEventCardsUseCase
-import com.arshadshah.nimaz.presentation.viewmodel.buildPrayerUseCases
+import com.arshadshah.nimaz.domain.usecase.buildAnnouncementUseCases
+import com.arshadshah.nimaz.domain.usecase.buildDuaUseCases
+import com.arshadshah.nimaz.domain.usecase.buildFastingUseCases
+import com.arshadshah.nimaz.domain.usecase.buildHadithUseCases
+import com.arshadshah.nimaz.domain.usecase.buildObserveEventCardsUseCase
+import com.arshadshah.nimaz.domain.usecase.buildPrayerUseCases
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(RobolectricTestRunner::class)
