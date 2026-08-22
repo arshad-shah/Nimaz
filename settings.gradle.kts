@@ -29,4 +29,5 @@ rootProject.name = "nimaz"
 include(":app")
 include(":core:domain")
 include(":core:common")
+include(":core:database")
 include(":baselineprofile")

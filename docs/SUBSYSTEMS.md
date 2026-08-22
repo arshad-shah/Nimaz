@@ -165,7 +165,7 @@ a corrupt one is replaced with the default rather than migrated ([§2](#2-glance
 are deliberately outside the sync payload for that reason.
 
 > Not a DataStore, and correctly outside this table: `SharedPreferencesContentArtifactStore`
-> (`data/local/content/ContentArtifactStore.kt`) is a `SharedPreferences` file.
+> (`data/local/content/ContentArtifactStore.kt`, in `:core:database`) is a `SharedPreferences` file.
 
 ### 0.6 Notification channels
 
@@ -693,7 +693,28 @@ Ramadan.
 > `data/local/database/NimazDatabase.kt`). Bumping it without updating this section fails
 > `SUB-01`. Every bump needs a `Migration` **and** a line in the migration history below.
 
-Two Room `@Database`es, both provided in `core/di/DatabaseModule.kt`:
+> **Module:** everything in this section lives in **`:core:database`** since #558 — both
+> `@Database` classes, all entities and DAOs, the migrations, the user-data slice, the
+> content-artifact installer, and the exported `schemas/`. Package names are unchanged, so the
+> paths below still read the same; the files are under `core/database/src/main/kotlin/`.
+>
+> Three things follow from that and are easy to get wrong:
+>
+> - **`room.schemaLocation` lives in `core/database/build.gradle.kts`** and writes to
+>   `core/database/schemas`. On `:app` it would be inert, and an un-exported schema is not a build
+>   failure — it is a missing file `MigrationTestHelper` discovers on a device.
+> - **The migration and DAO instrumented tests stay in `app/src/androidTest`**, with `:app`'s
+>   `assets.srcDir` repointed at `core/database/schemas`. `android_instrumented_tests.yml` runs
+>   exactly one APK (`app-debug-androidTest.apk`), so instrumented tests in a library module are
+>   not run by anything and the lane stays green having lost them.
+> - **`ContentArtifactInstaller` takes the installed sha256 as a constructor parameter.** A
+>   library's `BuildConfig` does not carry the application's fields, so it cannot read
+>   `BuildConfig.CONTENT_ARTIFACT_SHA256` itself; `DatabaseModule` in `:app` supplies it.
+>
+> `ExportedSchemaIdentityTest` pins both identity hashes as plain JVM tests — the only per-PR
+> evidence available, since every migration test is instrumented.
+
+Two Room `@Database`es, both provided in `core/di/DatabaseModule.kt` (which stays in `:app`):
 
 - `data/local/database/NimazDatabase.kt` (`nimaz_database`, `NIMAZ_DATABASE_VERSION`) — shipped
   content. Read-only in practice and disposable: it arrives as a fetched artifact (§7) and is

@@ -212,9 +212,12 @@ class AyahWithTextViewTest {
 
     private fun exportedSchema(): JSONObject {
         val name = NimazDatabase::class.java.canonicalName
+        // CWD is the module directory; `schemas/` moved here from `app/schemas` with the
+        // `room.schemaLocation` arg. The repo-root form is kept so the test also works when a
+        // runner sets CWD to the root rather than the module.
         val candidates = listOf(
             File("schemas/$name/$NIMAZ_DATABASE_VERSION.json"),
-            File("app/schemas/$name/$NIMAZ_DATABASE_VERSION.json"),
+            File("core/database/schemas/$name/$NIMAZ_DATABASE_VERSION.json"),
         )
         val file = candidates.firstOrNull { it.exists() }
             ?: error("no exported Room schema for v$NIMAZ_DATABASE_VERSION in $candidates")

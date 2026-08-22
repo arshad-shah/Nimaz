@@ -101,7 +101,8 @@ android {
 
         // Room schema export
         ksp {
-            arg("room.schemaLocation", "$projectDir/schemas")
+            // room.schemaLocation moved to :core:database with the Room compiler — see
+            // core/database/build.gradle.kts. Nothing in :app declares an @Entity any more.
         }
 
         // Cloud project number backing the Play Integrity standard request. Driven
@@ -136,9 +137,16 @@ android {
 
     // Ship the exported Room schemas as androidTest assets so MigrationTestHelper can
     // load them on-device (it looks for `<DatabaseClass>/<version>.json` under assets).
+    //
+    // Repointed at `:core:database`, which owns the schemas and the `room.schemaLocation` arg
+    // that writes them. The migration and DAO tests themselves deliberately stay here:
+    // `android_instrumented_tests.yml` runs exactly one artifact —
+    // `app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk` — so instrumented
+    // tests moved into a library module are not run by anything, and the lane stays green
+    // having lost them. That is 72 tests, 14 of them the migration suite. See #558.
     sourceSets {
         getByName("androidTest") {
-            assets.srcDir(layout.projectDirectory.dir("schemas"))
+            assets.srcDir(rootProject.layout.projectDirectory.dir("core/database/schemas"))
         }
     }
 
@@ -273,6 +281,8 @@ dependencies {
     implementation(project(":core:domain"))
     // Formatting helpers, the telemetry seam and the string seam. `api`-exposes :core:domain.
     implementation(project(":core:common"))
+    // Both Room databases. `api`-exposes room-runtime, so nothing here declares it again.
+    implementation(project(":core:database"))
     // FakeTodayProvider / FakeSearchSettings / FakeStringProvider — one definition each, used by
     // the ViewModel tests here and the tests over there.
     testImplementation(testFixtures(project(":core:domain")))
@@ -306,9 +316,8 @@ dependencies {
     implementation(libs.hilt.navigation.compose)
 
     // Room
-    implementation(libs.room.runtime)
-    implementation(libs.room.ktx)
-    ksp(libs.room.compiler)
+    // Room itself comes from :core:database, which `api`-exposes runtime and ktx. The compiler
+    // is not needed here: nothing in :app declares an @Entity, @Dao or @Database any more.
 
     // DataStore
     implementation(libs.datastore.preferences)
@@ -552,6 +561,22 @@ val coverageModules = listOf(
         ),
         sourceDir = "src/main/kotlin",
         packageRoot = "com/arshadshah/nimaz/core/common",
+    ),
+    CoverageModule(
+        gradlePath = ":core:database",
+        projectDir = rootProject.layout.projectDirectory.dir("core/database"),
+        testTask = "testDebugUnitTest",
+        classesGlobs = listOf(
+            "intermediates/built_in_kotlinc/debug/**/classes/**",
+            "intermediates/classes/debug/**",
+            "tmp/kotlin-classes/debug/**",
+        ),
+        execGlobs = listOf(
+            "jacoco/testDebugUnitTest.exec",
+            "outputs/unit_test_code_coverage/**/*.exec",
+        ),
+        sourceDir = "src/main/kotlin",
+        packageRoot = "com/arshadshah/nimaz/data/local",
     ),
 )
 
