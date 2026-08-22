@@ -310,6 +310,9 @@ dependencies {
     // Zakat, and the Islamic calendar (#566). Both extracted with nothing to unpick.
     implementation(project(":feature:tools"))
     implementation(project(":feature:calendar"))
+    // Library search and the opt-in Ask-with-Proof screen (#567). The Worker client itself is in
+    // `:core:data`; nothing network-facing lives in the feature module.
+    implementation(project(":feature:search"))
     // FakeTodayProvider / FakeSearchSettings / FakeStringProvider / RecordingWidgetRefresher —
     // one definition each, used by the ViewModel tests here and the tests over there.
     testImplementation(testFixtures(project(":core:domain")))
@@ -488,6 +491,7 @@ tasks.withType<Test>().configureEach {
         "aboutSources" to "feature/about/src/main/kotlin/com/arshadshah/nimaz/presentation",
         "toolsSources" to "feature/tools/src/main/kotlin/com/arshadshah/nimaz/presentation",
         "calendarSources" to "feature/calendar/src/main/kotlin/com/arshadshah/nimaz/presentation",
+        "searchSources" to "feature/search/src/main/kotlin/com/arshadshah/nimaz/presentation",
     ).forEach { (name, path) ->
         inputs.dir(rootProject.layout.projectDirectory.dir(path))
             .withPropertyName(name)
@@ -731,6 +735,22 @@ val coverageModules = listOf(
     CoverageModule(
         gradlePath = ":feature:onboarding",
         projectDir = rootProject.layout.projectDirectory.dir("feature/onboarding"),
+        testTask = "testDebugUnitTest",
+        classesGlobs = listOf(
+            "intermediates/built_in_kotlinc/debug/**/classes/**",
+            "intermediates/classes/debug/**",
+            "tmp/kotlin-classes/debug/**",
+        ),
+        execGlobs = listOf(
+            "jacoco/testDebugUnitTest.exec",
+            "outputs/unit_test_code_coverage/**/*.exec",
+        ),
+        sourceDir = "src/main/kotlin",
+        packageRoot = "com/arshadshah/nimaz/presentation",
+    ),
+    CoverageModule(
+        gradlePath = ":feature:search",
+        projectDir = rootProject.layout.projectDirectory.dir("feature/search"),
         testTask = "testDebugUnitTest",
         classesGlobs = listOf(
             "intermediates/built_in_kotlinc/debug/**/classes/**",

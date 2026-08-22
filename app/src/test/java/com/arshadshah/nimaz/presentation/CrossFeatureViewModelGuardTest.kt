@@ -99,6 +99,8 @@ class CrossFeatureViewModelGuardTest {
             "zakat" to "tools",
             "tools" to "tools",
             "calendar" to "calendar",
+            "search" to "search",
+            "ai" to "search",
         )
 
         /**
