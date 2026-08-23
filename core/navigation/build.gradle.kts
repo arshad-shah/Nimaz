@@ -9,6 +9,37 @@ plugins {
 
 android {
     namespace = "com.arshadshah.nimaz.core.navigation"
+
+    testOptions {
+        unitTests {
+            // `taggedComposable` is the one thing here that *runs*, and the only way to see it
+            // apply its tag is to compose a real `NavHost` — so this module has one Robolectric
+            // test. `src/testDebug/resources/robolectric.properties` pins the SDK and the
+            // Application class; a properties file is a resource of its source set and does not
+            // travel with the tests that need it.
+            isIncludeAndroidResources = true
+            isReturnDefaultValues = true
+        }
+    }
+}
+
+/**
+ * Locked. Every feature module declares its destinations through this one, so a regression here
+ * is a blank screen somewhere else; `check` now fails if its coverage slips — see
+ * `COVERAGE_EXCLUSIONS` and `coverageFloor` in `build-logic` for what is measured.
+ *
+ * **80/80, both floors.** The module is Compose-adjacent but draws nothing, so it does not carry
+ * the unreachable `$dirty` branches that make `:feature:quran` soften its branch floor to 60%.
+ *
+ * Two things here can never be covered, and both are worth knowing before someone tries:
+ * `taggedComposable` is `inline`, so its bytecode lands in the *caller's* module and this
+ * module's own copy is never executed however many tests compose it; and the 94 `@Serializable`
+ * route declarations are a vocabulary, not behaviour. Together they are the ceiling, which is
+ * why the floor is the standard 80 rather than the 84 the module reports today.
+ */
+nimazCoverage {
+    lineFloor.set(0.80)
+    branchFloor.set(0.80)
 }
 
 // The route vocabulary, and nothing that renders one.
@@ -42,4 +73,14 @@ dependencies {
 
     testImplementation(libs.junit)
     testImplementation(libs.google.truth)
+
+    // One Robolectric test, for `taggedComposable`. `CLAUDE.md` requires every destination to be
+    // wired with it and `check_docs.py`'s NAV-04 enforces that they are — but nothing checked the
+    // helper itself still applies the tag, and if it stopped, every instrumented navigation test
+    // would fail on an emulator with no JVM test having said a word.
+    testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.junit)
+    testImplementation(platform(libs.androidx.compose.bom))
+    testImplementation(libs.androidx.compose.ui.test.junit4)
+    debugImplementation(libs.androidx.compose.ui.test.manifest)
 }
