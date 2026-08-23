@@ -12,6 +12,9 @@ import com.arshadshah.nimaz.domain.model.MushafScript
 import com.arshadshah.nimaz.domain.model.PageAyahRange
 import com.arshadshah.nimaz.domain.model.RecitationRepeat
 import com.arshadshah.nimaz.domain.model.RecitationSpeed
+import com.arshadshah.nimaz.domain.model.RevelationType
+import com.arshadshah.nimaz.domain.model.Surah
+import com.arshadshah.nimaz.domain.model.SurahWithAyahs
 import com.arshadshah.nimaz.domain.repository.QuranPlayback
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.time.FakeTodayProvider
@@ -23,6 +26,7 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import io.mockk.verifyOrder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -132,6 +136,17 @@ class QuranViewModelEventsTest {
         telemetry,
         FakeTodayProvider(LocalDate.now()),
         FakeStringProvider(),
+    )
+
+    private val cave = Surah(
+        number = 18,
+        nameArabic = "الكهف",
+        nameEnglish = "The Cave",
+        nameTransliteration = "Al-Kahf",
+        revelationType = RevelationType.MECCAN,
+        ayahCount = 110,
+        orderInMushaf = 18,
+        startPage = 293,
     )
 
     private fun ayah(id: Int) = Ayah(
@@ -357,6 +372,82 @@ class QuranViewModelEventsTest {
 
         verify { audioManager.setSpeed(RecitationSpeed.FASTER) }
         verify { audioManager.setFollowAlong(false) }
+    }
+
+    // ---- Starting a recitation ----
+
+    @Test
+    fun `playing a surah from its card fetches the whole surah and plays it continuously`() =
+        runTest {
+            every { useCases.getSurahWithAyahs(any(), any()) } returns MutableStateFlow(
+                SurahWithAyahs(cave, listOf(ayah(1), ayah(2)))
+            )
+            val vm = viewModel()
+            advanceUntilIdle()
+
+            vm.onEvent(QuranEvent.PlaySurahFromInfo(18))
+            advanceUntilIdle()
+
+            // A playlist, not one file: the player needs every verse to be able to roll on.
+            verify { audioManager.setContinuousPlayback(true) }
+            verify { audioManager.playSurah(eq(18), eq("The Cave"), match { it.size == 2 }) }
+        }
+
+    @Test
+    fun `a surah the content database cannot answer for is not played`() = runTest {
+        every { useCases.getSurahWithAyahs(any(), any()) } returns MutableStateFlow(null)
+        val vm = viewModel()
+        advanceUntilIdle()
+
+        vm.onEvent(QuranEvent.PlaySurahFromInfo(18))
+        advanceUntilIdle()
+
+        // An empty playlist starts a session that immediately ends, which on a device is a
+        // notification that appears and vanishes.
+        verify(exactly = 0) { audioManager.playSurah(any(), any(), any()) }
+    }
+
+    @Test
+    fun `playing from a verse starts the playlist at it`() = runTest {
+        val vm = viewModel()
+        advanceUntilIdle()
+        vm.onEvent(QuranEvent.LoadPage(1))
+        advanceUntilIdle()
+
+        vm.onEvent(QuranEvent.PlayAyahAudio(ayahGlobalId = 1, surahNumber = 1, ayahNumber = 1))
+        advanceUntilIdle()
+
+        verify { audioManager.playFromAyah(eq(1), match { it.isNotEmpty() }, any()) }
+    }
+
+    @Test
+    fun `the reader's continuous-reading setting reaches the player before it starts`() =
+        runTest {
+            val vm = viewModel()
+            advanceUntilIdle()
+            vm.onEvent(QuranEvent.LoadPage(1))
+            advanceUntilIdle()
+
+            vm.onEvent(QuranEvent.PlayAyahAudio(1, 1, 1))
+            advanceUntilIdle()
+
+            // Set first, so the session it starts already knows whether to roll on into the
+            // next surah.
+            verifyOrder {
+                audioManager.setContinuousPlayback(any())
+                audioManager.playFromAyah(any(), any(), any())
+            }
+        }
+
+    @Test
+    fun `choosing a reciter previews them`() = runTest {
+        val vm = viewModel()
+        advanceUntilIdle()
+
+        vm.onEvent(QuranEvent.PreviewReciter("mishary"))
+        advanceUntilIdle()
+
+        verify { audioManager.setReciter("mishary", any()) }
     }
 
     // ---- Khatam ----
