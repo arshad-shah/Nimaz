@@ -220,6 +220,55 @@ class FastingDaoTest {
         assertThat(dao.getAllMakeupFastsSync()).isEmpty()
     }
 
+    // ---- The timestamps nobody passes ----
+
+    @Test
+    fun `changing a status without naming a moment stamps it now`() = runTest {
+        dao.insertFastRecord(fast(day1, status = "not_fasted"))
+        val before = System.currentTimeMillis()
+
+        // The app never passes the timestamp; the tests above do, so the default is the branch
+        // nothing exercised.
+        dao.updateFastStatus(day1, status = "fasted")
+
+        assertThat(dao.getFastRecordForDate(day1)?.status).isEqualTo("fasted")
+        assertThat(dao.getFastRecordForDate(day1)?.updatedAt).isAtLeast(before)
+    }
+
+    @Test
+    fun `completing a makeup fast without a moment stamps it now`() = runTest {
+        dao.insertMakeupFast(makeup(originalDate = day1))
+        val id = dao.getAllMakeupFastsSync().single().id
+        val before = System.currentTimeMillis()
+
+        dao.markMakeupFastCompleted(id, completedDate = day3)
+
+        assertThat(dao.getMakeupFastById(id)?.status).isEqualTo("completed")
+        assertThat(dao.getMakeupFastById(id)?.updatedAt).isAtLeast(before)
+    }
+
+    @Test
+    fun `paying fidya without a moment stamps it now`() = runTest {
+        dao.insertMakeupFast(makeup(originalDate = day1))
+        val id = dao.getAllMakeupFastsSync().single().id
+        val before = System.currentTimeMillis()
+
+        dao.markFidyaPaid(id, amount = 5.0)
+
+        assertThat(dao.getMakeupFastById(id)?.updatedAt).isAtLeast(before)
+    }
+
+    @Test
+    fun `editing a record wholesale keeps it a single day`() = runTest {
+        dao.insertFastRecord(fast(day1, status = "not_fasted"))
+        val stored = dao.getFastRecordForDate(day1)!!
+
+        dao.updateFastRecord(stored.copy(status = "exempted", exemptionReason = "travel"))
+
+        assertThat(dao.getAllFastRecords()).hasSize(1)
+        assertThat(dao.getFastRecordForDate(day1)?.exemptionReason).isEqualTo("travel")
+    }
+
     private fun fast(
         date: Long,
         status: String = "fasted",

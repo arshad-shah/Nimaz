@@ -271,6 +271,28 @@ class PrayerDaoTest {
         assertThat(dao.getAllPrayerRecords()).isEmpty()
     }
 
+    @Test
+    fun `logging a prayer without naming a moment stamps it now`() = runTest {
+        dao.insertPrayerRecord(record(day1, "fajr", status = "pending", scheduledTime = 10))
+        val before = System.currentTimeMillis()
+
+        // Production omits the timestamp; the test above passes one so it can assert on it.
+        dao.updatePrayerStatus(day1, "fajr", status = "prayed", prayedAt = 111, isJamaah = false)
+
+        assertThat(dao.getPrayerRecord(day1, "fajr")?.updatedAt).isAtLeast(before)
+    }
+
+    @Test
+    fun `editing a record wholesale keeps one row for the prayer`() = runTest {
+        dao.insertPrayerRecord(record(day1, "fajr", status = "pending", scheduledTime = 10))
+        val stored = dao.getPrayerRecord(day1, "fajr")!!
+
+        dao.updatePrayerRecord(stored.copy(status = "late", note = "overslept"))
+
+        assertThat(dao.getPrayerRecordsForDateSync(day1)).hasSize(1)
+        assertThat(dao.getPrayerRecord(day1, "fajr")?.note).isEqualTo("overslept")
+    }
+
     private fun fullDay(date: Long, status: String) = listOf(
         record(date, "fajr", status = status, scheduledTime = 10),
         record(date, "dhuhr", status = status, scheduledTime = 20),

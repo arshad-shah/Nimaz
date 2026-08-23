@@ -34,6 +34,20 @@ android {
     }
 }
 
+/**
+ * Locked (#597). This module's DAOs, migrations and the two pieces around them are tested, and
+ * `check` now fails if that stops being true — see `COVERAGE_EXCLUSIONS` and `coverageFloor` in
+ * `build-logic` for what is measured and how the ratchet works.
+ *
+ * The floors are set at the agreed 80% rather than at whatever the module happens to report
+ * today. A floor pinned to the current number turns every unrelated refactor into a coverage
+ * failure; a floor at the standard says what the standard is.
+ */
+nimazCoverage {
+    lineFloor.set(0.80)
+    branchFloor.set(0.80)
+}
+
 // Both Room databases, their entities, DAOs and migrations, the exported `schemas/`, and the two
 // pieces that cannot be separated from them: the user-data slice (`UserDataMigrator` reads
 // `ContentArtifactStore`) and the content-artifact installer that replaces the shipped database

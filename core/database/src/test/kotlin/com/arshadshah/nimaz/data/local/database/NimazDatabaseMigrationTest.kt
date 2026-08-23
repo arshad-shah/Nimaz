@@ -613,6 +613,74 @@ class NimazDatabaseMigrationTest {
             "|| ' ' || text FROM tafseer_blocks ORDER BY tafseer_id, ayah_start"
     )
 
+    // ---- The remaining steps ----
+
+    @Test
+    fun `a hadith gains a place for its chain of narration, once`() {
+        db.execSQL("CREATE TABLE hadiths (id INTEGER PRIMARY KEY, text_arabic TEXT)")
+
+        migrate(NimazDatabase.MIGRATION_16_17)
+        migrate(NimazDatabase.MIGRATION_16_17)
+
+        // Nullable, because when it is absent the reader derives the isnād from the Arabic.
+        assertThat(columns("hadiths").count { it == "narrator_chain" }).isEqualTo(1)
+    }
+
+    @Test
+    fun `the step that moved the user's tables leaves them exactly where they were`() {
+        db.execSQL("CREATE TABLE quran_bookmarks (id INTEGER PRIMARY KEY, ayahId INTEGER)")
+        db.execSQL("INSERT INTO quran_bookmarks (id, ayahId) VALUES (1, 262)")
+
+        migrate(NimazDatabase.MIGRATION_22_23)
+
+        // Deliberately empty. Room ignores tables it does not declare, and a bug in the copy out
+        // of here is only survivable while the original rows are still on disk.
+        assertThat(tables()).contains("quran_bookmarks")
+        assertThat(longOf("SELECT COUNT(*) FROM quran_bookmarks")).isEqualTo(1)
+    }
+
+    @Test
+    fun `the prepackaged callback repairs a freshly copied artifact`() {
+        db.execSQL("CREATE TABLE quran_favorites (ayahId INTEGER PRIMARY KEY)")
+        db.execSQL("CREATE TABLE tafseer_texts (id INTEGER PRIMARY KEY, ayah_id INTEGER, tafseer_id TEXT)")
+        db.execSQL(
+            "CREATE UNIQUE INDEX `index_tafseer_texts_ayah_tafseer` " +
+                "ON `tafseer_texts` (`ayah_id`, `tafseer_id`)"
+        )
+
+        // The same repair as MIGRATION_12_13, down the other of the two paths: right after the
+        // asset is copied and *before* Room validates its schema.
+        NimazDatabase.PREPACKAGED_CALLBACK.onOpenPrepackagedDatabase(db)
+
+        assertThat(columns("quran_favorites")).contains("updatedAt")
+        assertThat(indices()).contains("index_tafseer_texts_ayah_id_tafseer_id")
+    }
+
+    @Test
+    fun `the prepackaged callback does not fall over on a current artifact`() {
+        // The shape a fresh install actually gets: none of the tables the repair names, because
+        // they belong to the user's database since schemaVersion 23.
+        db.execSQL("CREATE TABLE surahs (id INTEGER PRIMARY KEY)")
+
+        NimazDatabase.PREPACKAGED_CALLBACK.onOpenPrepackagedDatabase(db)
+
+        assertThat(tables()).contains("surahs")
+    }
+
+    @Test
+    fun `every registered step appears in the chain exactly once`() {
+        val steps = NimazDatabase.ALL_MIGRATIONS.map { it.startVersion to it.endVersion }
+
+        // `DatabaseModule` registers this array and `MigrationChainTest` replays it, so a
+        // migration that is written but not listed is registered nowhere. It has happened: the
+        // chain failed with "A migration from 7 to 20 was required but not found" while the app
+        // itself was fine, because the two kept separate hand-maintained copies.
+        assertThat(steps).containsNoDuplicates()
+        assertThat(steps.map { it.first }.sorted())
+            .isEqualTo((7 until NIMAZ_DATABASE_VERSION).toList())
+        steps.forEach { (start, end) -> assertThat(end).isEqualTo(start + 1) }
+    }
+
     // ---- Reading the schema back ----
 
     private fun migrate(migration: Migration) = migration.migrate(db)

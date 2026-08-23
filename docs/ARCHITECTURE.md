@@ -2103,14 +2103,37 @@ exists so that the build configuration every module shares is stated **once**:
 | Plugin id | Applies | Carries |
 |---|---|---|
 | `nimaz.android.application` | `com.android.application` | compileSdk 37, minSdk 29, Java 21, the `-Xannotation-default-target=param-property` compiler arg |
-| `nimaz.android.library` | `com.android.library` | the same shared config, plus the `moduleBoundary` guard wired into `check` |
-| `nimaz.jvm.library` | `org.jetbrains.kotlin.jvm` | Java 21 + the JVM toolchain, no Android, and the `androidFreeClasspath` guard wired into `check` — applied by `:core:domain` |
+| `nimaz.android.library` | `com.android.library` | the same shared config, plus the `moduleBoundary` and `coverageFloor` guards wired into `check` |
+| `nimaz.jvm.library` | `org.jetbrains.kotlin.jvm` | Java 21 + the JVM toolchain, no Android, and the `androidFreeClasspath` and `coverageFloor` guards wired into `check` — applied by `:core:domain` |
 | `nimaz.android.compose` | `org.jetbrains.kotlin.plugin.compose` | `buildFeatures.compose = true`; reacts to whichever of `AppPlugin`/`LibraryPlugin` the module has |
 | `nimaz.android.hilt` | `com.google.devtools.ksp`, `com.google.dagger.hilt.android` | `hilt-android` on `implementation`, `hilt-compiler` on `ksp` |
 | `nimaz.android.feature` | the three above (library + compose + hilt) | the standard shape of a feature module |
 
 `:app` applies `nimaz.android.application` + `.compose` + `.hilt`, so the plugins are exercised
 by the real build rather than only by their tests.
+
+They also carry the **coverage ratchet**. Every module that applies `jacoco` gets two tasks from
+`Coverage.kt`:
+
+- **`moduleCoverage`** — a JaCoCo report over that module's own classes, measured against the
+  shared `COVERAGE_EXCLUSIONS`. The same list `:app:jacocoTestReport` uses, so a module's own
+  number and the merged one describe the same classes.
+- **`coverageFloor`** — reads that report back and fails when the module has slipped below what it
+  was locked at. Wired into `check`, and run in CI by `fastlane android test` as an unqualified
+  `coverageFloor`, which Gradle resolves in every project that has it.
+
+A module joins the gate by declaring a floor in its own build file, and nothing central changes:
+
+```kotlin
+nimazCoverage {
+    lineFloor.set(0.80)
+    branchFloor.set(0.80)
+}
+```
+
+A module with no floor still gets the report and no gate — which is what makes bringing the
+modules up one at a time possible. The floor is a **ratchet**: it is raised when a module is
+brought up to standard and never lowered to make a build green.
 
 Two rules that are easy to break and expensive to debug:
 

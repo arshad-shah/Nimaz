@@ -254,7 +254,23 @@ class ContentArtifactInstallerTest {
         assertThat(reported).isEmpty()
     }
 
+    @Test
+    fun `the default report path is the one production uses`() {
+        // Every other test here injects its own `reportStuck` so it can assert the message. That
+        // leaves the lambda the app actually runs with — the one that reaches CrashReporter —
+        // never executed, which is how a crash in the reporting of a stuck device would ship.
+        writeContentDatabase("v7 content")
+        addLegacyUserTable("quran_bookmarks", rows = 1)
+        store.setInstalledArtifact("sha-v7")
+        val installer = ContentArtifactInstaller(context, store, installedArtifact = "sha-v8")
+
+        repeat(5) { installer.installIfChanged() }
+
+        assertThat(store.consecutiveDeferrals()).isEqualTo(5)
+    }
+
     private class FakeStore : ContentArtifactStore {
+
         private var value: String? = null
         private var legacyDone = false
         override fun installedArtifact(): String? = value

@@ -310,6 +310,59 @@ class KhatamDaoTest {
         assertThat(dao.getDailyLogsSync(id)).isEmpty()
     }
 
+    // ---- The timestamps nobody passes ----
+
+    @Test
+    fun `finishing a khatam without naming a moment stamps it now`() = runTest {
+        val id = dao.insertKhatam(khatam("First"))
+        val before = System.currentTimeMillis()
+
+        // Every caller in the app omits the timestamp and takes the default. The tests above
+        // pass one so they can assert on it, which means the argument production actually uses
+        // is the one nothing exercised.
+        dao.completeKhatam(id)
+
+        val completed = dao.getKhatamById(id)
+        assertThat(completed?.completedAt).isAtLeast(before)
+        assertThat(completed?.updatedAt).isAtLeast(before)
+    }
+
+    @Test
+    fun `abandoning and reactivating without a moment stamp themselves too`() = runTest {
+        val id = dao.insertKhatam(khatam("First"))
+        val before = System.currentTimeMillis()
+
+        dao.abandonKhatam(id)
+        assertThat(dao.getKhatamById(id)?.updatedAt).isAtLeast(before)
+
+        dao.reactivateKhatam(id)
+        assertThat(dao.getKhatamById(id)?.status).isEqualTo("active")
+        assertThat(dao.getKhatamById(id)?.updatedAt).isAtLeast(before)
+    }
+
+    @Test
+    fun `recalculating without a moment still corrects the total`() = runTest {
+        val id = dao.insertKhatam(khatam("First"))
+        dao.markAyahsRead(id, listOf(1, 2, 3))
+        dao.unmarkAyahRead(id, ayahId = 2)
+        val before = System.currentTimeMillis()
+
+        dao.recalculateTotalAyahsRead(id)
+
+        assertThat(dao.getKhatamById(id)?.totalAyahsRead).isEqualTo(2)
+        assertThat(dao.getKhatamById(id)?.updatedAt).isAtLeast(before)
+    }
+
+    @Test
+    fun `marking a whole surah read counts every verse in it`() = runTest {
+        val id = dao.insertKhatam(khatam("First"))
+
+        dao.markSurahAsRead(id, (1..7).toList())
+
+        assertThat(dao.getReadAyahCount(id)).isEqualTo(7)
+        assertThat(dao.getKhatamById(id)?.totalAyahsRead).isEqualTo(7)
+    }
+
     private fun khatam(
         name: String,
         updatedAt: Long = 0,

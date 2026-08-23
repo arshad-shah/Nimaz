@@ -253,6 +253,17 @@ class ProgressDaoTest {
         assertThat(dao.all().map { it.date }).containsExactly(tomorrow)
     }
 
+    @Test
+    fun `deleting a row counted once per target needs no day`() = runTest {
+        dao.increment(ProgressKind.QAIDA_CELL, targetId = 7, date = 0, target = null)
+
+        // `date` defaults to 0 — the value the kinds that are not per-day use — so the caller
+        // does not have to know that a cell has no day.
+        dao.delete(ProgressKind.QAIDA_CELL, targetId = 7)
+
+        assertThat(dao.all()).isEmpty()
+    }
+
     private fun progress(
         kind: String = ProgressKind.DUA,
         targetId: Int,
