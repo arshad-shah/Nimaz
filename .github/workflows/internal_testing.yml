@@ -57,8 +57,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     # workflow_dispatch always runs. A push only runs when it explicitly opts in with [deploy],
-    # so ordinary commits on a feature branch never burn a Play version code. [skip ci] (used by
-    # the bump commit below) is always excluded, so this cannot re-trigger itself.
+    # so ordinary commits on a feature branch never burn a Play version code — the bump commit
+    # below included, since it carries no marker. The [skip ci] exclusion is kept as a second
+    # lock for a hand-written commit that carries both markers.
     if: >-
       github.event_name == 'workflow_dispatch' ||
       (contains(github.event.head_commit.message, '[deploy]') &&
@@ -185,6 +186,21 @@ jobs:
           if-no-files-found: warn
 
       # Keep the committed versionCode in step with what the store has now seen — see the header.
+      #
+      # **No `[skip ci]` on this commit, deliberately.** It used to carry one, and on a branch
+      # with an open PR that is actively harmful: GitHub honours the marker for `pull_request`
+      # events as well as `push`, so the bump landed as the PR's head commit with *zero* check
+      # runs against it. A reviewer opening the PR saw no CI at all, and the green run they were
+      # relying on had been against the commit underneath.
+      #
+      # Nothing needs the marker here. This job only runs on a push carrying `[deploy]` (see the
+      # `if` at the top), which the bump commit does not, so it cannot re-trigger itself with or
+      # without it. `deploy.yml` is `push: [dev]` only and this lane never runs on `dev`. The
+      # sole thing `[skip ci]` suppressed was `pr_checks.yml` — the one workflow that has to run.
+      #
+      # It is not even an extra run: `pr_checks.yml` sets `cancel-in-progress`, so the run started
+      # by the `[deploy]` commit is cancelled by this push anyway. The difference is only whether
+      # the replacement run happens, and therefore whether the PR head is verified.
       - name: Commit and push version bump
         run: |
           git add app/build.gradle.kts
@@ -192,7 +208,7 @@ jobs:
             echo "No version change to commit; skipping."
             exit 0
           fi
-          git commit -m "chore(release): bump version for internal build [skip ci]"
+          git commit -m "chore(release): bump version for internal build"
           for attempt in 1 2 3; do
             if git push origin "HEAD:${{ github.ref_name }}"; then
               exit 0
