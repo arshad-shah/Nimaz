@@ -15,6 +15,32 @@ android {
     // Same source set, same consumption from :app — a fake needed on both sides of the seam is
     // published, not copied.
     testFixtures.enable = true
+
+    testOptions {
+        unitTests {
+            // The Firebase wrappers are exercised under Robolectric, which needs real Android
+            // resources and a real `Context` to hand them.
+            isIncludeAndroidResources = true
+            isReturnDefaultValues = true
+        }
+    }
+}
+
+/**
+ * Locked. See `COVERAGE_EXCLUSIONS` and `coverageFloor` in `build-logic` for what is measured and
+ * how the ratchet works.
+ *
+ * **80/80, both floors.** Nothing here draws, so the module does not carry the unreachable
+ * `$dirty` branches that make `:feature:quran` soften its branch floor to 60%.
+ *
+ * Most of the climb here was the three Firebase wrappers, which were at 0% between them — not
+ * because they are hard to test but because "it only no-ops" reads like nothing to assert. It is
+ * the opposite: a missing `runCatching` in `AppAnalytics` is an exception thrown from
+ * `BootReceiver` on a device that has never opened the app.
+ */
+nimazCoverage {
+    lineFloor.set(0.80)
+    branchFloor.set(0.80)
 }
 
 // The genuinely shared, feature-agnostic half of the old `core/` grab bag: formatting helpers,
@@ -51,4 +77,12 @@ dependencies {
     testImplementation(libs.mockk)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.turbine)
+
+    // `AppAnalytics`, `CrashReporter` and `PerfMonitor` are Firebase wrappers whose entire
+    // contract is that they no-op safely when Firebase is absent — which is the state of every
+    // build without `google-services.json`, and of every test. Robolectric is what makes that
+    // testable: a real `Context` and a real `Bundle`, with Firebase genuinely not initialised.
+    // See `src/test/resources/robolectric.properties` for the SDK and Application pins.
+    testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.junit)
 }
