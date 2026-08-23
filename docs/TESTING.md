@@ -33,6 +33,7 @@ Two on-device/JVM test surfaces exist:
   - [Two things that silently do not count](#two-things-that-silently-do-not-count)
   - [Reading the number](#reading-the-number)
 - [Coverage audit (what's validated)](#coverage-audit-whats-validated)
+  - [The same ground, on the JVM (`:core:database/src/test`)](#the-same-ground-on-the-jvm-coredatabasesrctest)
 - [Conventions](#conventions)
 
 ## Running the unit tests
@@ -213,6 +214,35 @@ on the layer that owns them.
 **Known UI-test exclusion:** the Qibla compass screen recomposes continuously from the
 sensor listener and never reaches Compose idle, so it is not driven by idling-based UI
 tests (its tab presence is asserted in `AppLaunchTest`).
+
+### The same ground, on the JVM (`:core:database/src/test`)
+
+The instrumented `db/*DaoTest` classes above are on-device smoke — a row goes in, the same
+row comes back. What is asserted on the JVM instead is everything about a table that only
+shows up as a *wrong row count*: a transaction half-applied, an ordering nobody pinned, a
+statistic with the wrong `WHERE`. None of it is visible from a ViewModel and none of it
+raises an error, so it needs a real database and an explicit assertion.
+
+It is also the half that runs on **every** pull request. The emulator lane needs
+`EW_API_TOKEN` and skips with a warning without it, and instrumented runs contribute
+nothing to the merged coverage report (see [above](#two-things-that-silently-do-not-count)).
+
+| Area | Covered by | What it pins |
+|---|---|---|
+| Khatam progress | `dao/KhatamDaoTest` | exactly one active khatam; re-marking a verse does not inflate the total; `started_at` survives re-activation; the cascade behind "delete all my data" |
+| Prayer tracking | `dao/PrayerDaoTest` | the review banner never overwrites a logged prayer, never marks sunrise, and stops at the range's ends; perfect days; per-prayer statistics |
+| Fasting and the debt a missed fast leaves | `dao/FastingDaoTest` | one record per day; a makeup fast leaving `pending` by both doors (completed / fidya paid); the streak read stopping at today |
+| Zakat history | `dao/ZakatDaoTest` | `getTotalPaid()` is null, not zero, on an empty table; a repeat calculation is a new row |
+| The one bookmark table that replaced seven | `user/BookmarkDaoTest` | un-favouriting a bookmarked verse keeps the bookmark; `pruneEmpty` takes only the rows with neither flag; `kind` isolation |
+| The one progress table that replaced three | `user/ProgressDaoTest` | `increment`/`decrement` as read-modify-writes: per-day keys, a floor at zero, and the fields a count must not clear |
+| Counting sessions | `user/TasbihSessionDaoTest` | `currentCount + (totalLaps * targetCount)` across all four statistics; the ranked preset list |
+| Commentary annotations | `user/TafseerUserDaoTest` | the `IN (:ayahIds)` range reads that replaced the cross-database join |
+| Custom presets, reading position | `user/CustomPresetDaoTest`, `user/ReadingProgressDaoTest` | stable ordering under equal `display_order`; the single `id = 1` row |
+| **Migration idempotence** | `NimazDatabaseMigrationTest` | every step run twice, and run against an artifact that arrived without the tables it names — the shape that crashes a *fresh* install, since Room runs migrations after `createFromAsset` too |
+| Migration data repair | `NimazDatabaseMigrationTest` | translations de-duplicated to the lowest id; commentary folded into blocks without bridging a gap; juz/hizb/page derived from the columns that carried them |
+| The legacy-import completion flag | `user/UserDataMigratorTest` | it is set when there is nothing to copy, and **never** on a run that failed — `ContentArtifactInstaller` deletes the source file once it is set |
+| The content-artifact record | `content/SharedPreferencesContentArtifactStoreTest` | the defaults a fresh install reads, and that all three values survive a new store over the same file |
+| FTS query assembly | `search/ContentSearchIndexQueryTest` | placeholders and bound arguments staying in step when the optional `source` filter is present; the two paths that must never reach a `MATCH` |
 
 ## Conventions
 
