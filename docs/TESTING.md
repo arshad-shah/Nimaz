@@ -156,7 +156,7 @@ no execution data is indistinguishable from a class no test ever touched. The re
 `configureRobolectricCoverage()` in `build-logic`'s `Conventions.kt` sets
 `isIncludeNoLocationClasses` (with the mandatory `jdk.internal.*` exclusion) on every `Test` task
 in any module that applies `jacoco`, and all three convention plugins call it. That single change
-moved the merged report from **22.8% to 38.8%** of lines and **9.0% to 22.2%** of branches,
+moved the merged report from **22.8% to 39.3%** of lines and **9.0% to 22.2%** of branches,
 without a test being written. `AndroidLibraryConventionPluginTest` asserts the flag is set, and
 asserts a module without the `jacoco` plugin still configures cleanly.
 
@@ -168,7 +168,8 @@ exercised, just not measured. Wiring it is tracked separately.
 ### Reading the number
 
 Compose UI is 41,138 of the 67,970 counted lines. The layer split is what the percentage is
-actually made of:
+actually made of — measured with `:app`'s own suite excluded, because it needs the private content
+artifact, so it accounts for 26,383 of CI's 26,739 covered lines:
 
 | Layer | Covered / total | % |
 |---|---|---|
@@ -181,8 +182,8 @@ actually made of:
 | `widget` | 364 / 1,598 | 22.8% |
 | `presentation/screens` | 597 / 20,385 | 2.9% |
 
-Measured on the integration branch with `:app`'s own suite excluded (it needs the private
-content artifact), so the real figure is a little higher.
+CI's comment on the pull request is the authoritative headline; the table above is that same run
+without `:app`, which is the part that cannot be reproduced locally.
 
 ## Coverage audit (what's validated)
 

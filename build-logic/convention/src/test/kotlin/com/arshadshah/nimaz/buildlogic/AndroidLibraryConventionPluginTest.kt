@@ -107,7 +107,7 @@ class AndroidLibraryConventionPluginTest {
      * `LegacyUserDataImport` — 94 lines, twelve passing Robolectric tests — appeared in it zero
      * times and reported **0%**. With the flag the same run records 181 classes and the class
      * reports **94/94**. Across the repository the correction moved the merged report from
-     * 22.8% to 38.8% of lines without a single new test being written.
+     * 22.8% to 39.3% of lines without a single new test being written.
      *
      * Asserted here rather than trusted because the failure mode is silence in both directions:
      * losing the flag does not break a build, does not fail a test, and shows up only as a
