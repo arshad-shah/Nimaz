@@ -1,6 +1,7 @@
 import com.android.build.api.dsl.ApplicationExtension
 import com.arshadshah.nimaz.buildlogic.NimazBuild
 import com.arshadshah.nimaz.buildlogic.configureAndroidCommon
+import com.arshadshah.nimaz.buildlogic.configureRobolectricCoverage
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure
@@ -18,6 +19,7 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
         pluginManager.apply("com.android.application")
 
         extensions.configure<ApplicationExtension> { configureAndroidCommon(this) }
+        configureRobolectricCoverage()
         extensions.configure<KotlinAndroidProjectExtension> {
             compilerOptions.freeCompilerArgs.add(NimazBuild.ANNOTATION_DEFAULT_TARGET_ARG)
         }

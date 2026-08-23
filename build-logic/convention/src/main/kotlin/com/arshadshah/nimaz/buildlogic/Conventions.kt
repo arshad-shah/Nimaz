@@ -5,7 +5,9 @@ import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.gradle.api.artifacts.VersionCatalog
 import org.gradle.api.artifacts.VersionCatalogsExtension
+import org.gradle.api.tasks.testing.Test
 import org.gradle.kotlin.dsl.getByType
+import org.gradle.testing.jacoco.plugins.JacocoTaskExtension
 
 /**
  * The single definition of the values every Nimaz module shares. Before `build-logic` existed
@@ -80,4 +82,39 @@ fun isForbiddenModuleDependency(from: String, to: String): Boolean = when {
     from.startsWith(":core:") -> to == ":app" || to.startsWith(":feature:")
     from.startsWith(":feature:") -> to == ":app" || to.startsWith(":feature:")
     else -> false
+}
+
+/**
+ * Makes Robolectric-executed code count toward coverage.
+ *
+ * Robolectric loads the classes under test through its own instrumenting classloader, and the
+ * classes it hands back carry no source location. JaCoCo's agent skips those by default, so a
+ * Robolectric test runs, passes, and contributes **nothing** to the report — silently, because
+ * a class with no execution data is indistinguishable from a class no test touched.
+ *
+ * This was not theoretical here. Before this function existed, `:core:database`'s exec file held
+ * **42** `com/arshadshah/nimaz` class records; `LegacyUserDataImport` (94 lines, twelve passing
+ * Robolectric tests that build a legacy database and run the import) and `ContentArtifactInstaller`
+ * (64 lines, thirteen tests) appeared in it **zero times** and reported 0% in the merged report.
+ * With `isIncludeNoLocationClasses` the same run records **181** classes and both appear. The
+ * repository has 936 `@Test` methods in 154 Robolectric files across nine modules, so this is not
+ * a rounding correction to the headline number.
+ *
+ * `jdk.internal.*` has to be excluded alongside it: those classes also have no location, and
+ * instrumenting them fails on a sealed JDK module with `IllegalAccessError` at class-load time.
+ * The exclusion is the standard companion to the flag, not an optimisation.
+ *
+ * Applied through `pluginManager.withPlugin` because the `jacoco` plugin is applied by each
+ * module's own `plugins {}` block, which runs *after* the convention plugin — configuring the
+ * extension eagerly here would find nothing to configure.
+ */
+internal fun Project.configureRobolectricCoverage() {
+    pluginManager.withPlugin("jacoco") {
+        tasks.withType(Test::class.java).configureEach {
+            extensions.configure(JacocoTaskExtension::class.java) {
+                isIncludeNoLocationClasses = true
+                excludes = listOf("jdk.internal.*")
+            }
+        }
+    }
 }

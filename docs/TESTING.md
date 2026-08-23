@@ -13,27 +13,43 @@
 
 Two on-device/JVM test surfaces exist:
 
-- **Unit / Robolectric** (`app/src/test`, `app/src/testDebug`) — ViewModel logic and
-  Compose "atom/molecule/organism" component tests run off-device under Robolectric.
-  Coverage is reported via the `jacoco*Report` Gradle tasks (see `app/build.gradle.kts`).
+- **Unit / Robolectric** (`src/test` and `src/testDebug` in every module) — ViewModel logic and
+  Compose "atom/molecule/organism" component tests run off-device under Robolectric. Since the
+  module split (#551) these live beside their subject: the design-system component tests are in
+  `core/ui/src/testDebug`, each feature's ViewModel tests in that feature's module. Coverage is
+  reported via the `jacoco*Report` Gradle tasks — see [§ How coverage is measured](#how-coverage-is-measured).
 - **Instrumented** (`app/src/androidTest`) — the suite documented here. Runs on an
   emulator/device against the real Hilt graph, Room database, WorkManager, and
   `MainActivity`/`NavGraph`.
 
+## Contents
+
+- [Running the unit tests](#running-the-unit-tests)
+- [Running the instrumented suite](#running-the-instrumented-suite)
+- [CI (emulator.wtf)](#ci-emulatorwtf)
+- [How it's wired](#how-its-wired)
+- [Module layout (`app/src/androidTest/java/com/arshadshah/nimaz`)](#module-layout-appsrcandroidtestjavacomarshadshahnimaz)
+- [How coverage is measured](#how-coverage-is-measured)
+  - [Two things that silently do not count](#two-things-that-silently-do-not-count)
+  - [Reading the number](#reading-the-number)
+- [Coverage audit (what's validated)](#coverage-audit-whats-validated)
+- [Conventions](#conventions)
+
 ## Running the unit tests
 
 ```bash
-./gradlew testDebugUnitTest              # every Android module — today that is only :app
+./gradlew testDebugUnitTest              # every Android module — nineteen of them
+./gradlew :core:domain:test              # :core:domain is a pure JVM module, so `test`, not `testDebugUnitTest`
 ./gradlew :build-logic:convention:test   # the convention plugins and their TestKit fixtures
 ```
 
-Two things to know about that pair.
+Two things to know about that set.
 
-**Prefer `testDebugUnitTest` over `:app:testDebugUnitTest`.** They are the same tests today,
-because `:app` is the only module with a unit-test source set. They stop being the same the
-moment the multi-module split (#551) lands a module, and a habit of naming `:app` explicitly
-would then quietly skip every other module's suite. The all-module form costs nothing now and
-is correct later. The full multi-module story lands with the split itself.
+**Never `:app:testDebugUnitTest` on its own.** Since #551, `:app` holds 52 files — 8% of the
+codebase — so naming it explicitly runs a small fraction of the suite and reports success. The
+unqualified `testDebugUnitTest` reaches every Android module. `:core:domain` needs its own line
+because a `kotlin-jvm` module has no build variants and therefore no `testDebugUnitTest` task at
+all; asking for the unqualified task silently does not run it.
 
 **`build-logic` is an included build, so `./gradlew test` does not reach into it** — an included
 build's tasks only run when asked for by name. A change to a convention plugin, to
@@ -107,6 +123,66 @@ run with a warning — it never hard-fails for a missing token.
 | `work/`          | Every `@HiltWorker` widget/adhan worker executed via the real factory. |
 | `navigation/`    | Launches `MainActivity` and asserts navigation **by `ScreenTags`**: all 5 bottom-nav tabs (`BottomNavigationTest`), every More-menu feature — daily practice, learning, tools, support (`FeatureNavigationTest`), every Settings sub-screen (`SettingsNavigationTest`), and back-navigation round-trips (`MoreMenuNavigationTest`). |
 | (root)           | `MigrationTest` (per-step) and `MigrationChainTest` (v7→current). |
+
+## How coverage is measured
+
+`:app:jacocoTestReport` is the one merged report. It is **reported, not gated** (#464): CI
+publishes the number, nothing fails on it.
+
+It spans all nineteen modules because `coverageModules` in `app/build.gradle.kts` lists them
+one by one, each with the globs for that module's class output and its `.exec` file. Two
+assertions in the task's `doLast` keep it honest, and both exist because the failure they catch
+reads as *low coverage* rather than as an error:
+
+- a **class-count floor** (200, against a real 4,226) — a report that parses but describes
+  nothing looks identical to 0%;
+- a **per-module presence check** — every entry in `coverageModules` must contribute at least
+  one package, so a module whose output path moved cannot quietly drop out and *raise* the
+  percentage by measuring less.
+
+**Add a module, add it to `coverageModules`.** There is no discovery step.
+
+### Two things that silently do not count
+
+**Robolectric used to contribute nothing.** Robolectric loads the classes under test through its
+own instrumenting classloader, and the classes it hands back carry no source location, so
+JaCoCo's agent skips them by default. The tests run, pass, and record nothing — and a class with
+no execution data is indistinguishable from a class no test ever touched. The repository has 936
+`@Test` methods in 154 Robolectric files across nine modules, so this was not a rounding error:
+`LegacyUserDataImport` (94 lines, twelve passing Robolectric tests) reported **0%**, and
+`presentation/components` — the design system, tested by 69 Robolectric files — reported
+**13.2%**.
+
+`configureRobolectricCoverage()` in `build-logic`'s `Conventions.kt` sets
+`isIncludeNoLocationClasses` (with the mandatory `jdk.internal.*` exclusion) on every `Test` task
+in any module that applies `jacoco`, and all three convention plugins call it. That single change
+moved the merged report from **22.8% to 38.8%** of lines and **9.0% to 22.2%** of branches,
+without a test being written. `AndroidLibraryConventionPluginTest` asserts the flag is set, and
+asserts a module without the `jacoco` plugin still configures cleanly.
+
+**Instrumented tests still contribute nothing.** `enableAndroidTestCoverage` is set nowhere and
+the emulator.wtf lane collects no coverage, so the 121 instrumented tests documented below are
+absent from the merged report. That is why `presentation/screens` reads ~3%: the screens are
+exercised, just not measured. Wiring it is tracked separately.
+
+### Reading the number
+
+Compose UI is 41,138 of the 67,970 counted lines. The layer split is what the percentage is
+actually made of:
+
+| Layer | Covered / total | % |
+|---|---|---|
+| `domain` | 3,294 / 4,181 | 78.8% |
+| `presentation/viewmodel` | 5,497 / 8,251 | 66.6% |
+| `presentation/other` (foundation, model) | 1,077 / 1,778 | 60.6% |
+| `presentation/components` | 11,798 / 20,753 | 56.8% |
+| `data` | 2,477 / 6,578 | 37.7% |
+| `core` | 1,279 / 4,326 | 29.6% |
+| `widget` | 364 / 1,598 | 22.8% |
+| `presentation/screens` | 597 / 20,385 | 2.9% |
+
+Measured on the integration branch with `:app`'s own suite excluded (it needs the private
+content artifact), so the real figure is a little higher.
 
 ## Coverage audit (what's validated)
 

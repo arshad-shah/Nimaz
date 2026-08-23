@@ -1,5 +1,6 @@
 import com.arshadshah.nimaz.buildlogic.ANDROID_COMPONENT_GROUPS
 import com.arshadshah.nimaz.buildlogic.NimazBuild
+import com.arshadshah.nimaz.buildlogic.configureRobolectricCoverage
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.component.ModuleComponentIdentifier
@@ -25,6 +26,7 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 class JvmLibraryConventionPlugin : Plugin<Project> {
     override fun apply(target: Project): Unit = with(target) {
         pluginManager.apply("org.jetbrains.kotlin.jvm")
+        configureRobolectricCoverage()
 
         extensions.configure<JavaPluginExtension> {
             sourceCompatibility = NimazBuild.JAVA_VERSION

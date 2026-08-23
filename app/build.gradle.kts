@@ -594,16 +594,28 @@ val coverageExclusions = listOf(
 
 // Where the debug classes live, which is not where it used to be.
 //
-// These tasks pointed at `tmp/kotlin-classes/debug` alone. AGP 9 does not write there
-// — compiled classes land under `intermediates/classes/debug/…` — so the directory
-// simply did not exist, `classDirectories` resolved to nothing, and every one of the
-// four jacoco reports came out as a 237-byte file containing a `sessioninfo` and no
-// classes at all. Coverage was not merely unreported (#464); it was not being measured.
+// These tasks pointed at `tmp/kotlin-classes/debug` alone. AGP 9 does not write there, so the
+// directory simply did not exist, `classDirectories` resolved to nothing, and every one of the
+// four jacoco reports came out as a 237-byte file containing a `sessioninfo` and no classes at
+// all. Coverage was not merely unreported (#464); it was not being measured.
 //
-// Both paths are listed so the report is correct on either AGP, and so this cannot
-// fail silently again: an empty report is indistinguishable from 0% at a glance.
+// **Compiler output only — never `intermediates/classes/debug`.** AGP 9 writes the *same*
+// classes twice: `built_in_kotlinc/debug/compileDebugKotlin` is what the Kotlin compiler
+// produced, and `intermediates/classes/debug/transformDebugClassesWithAsm` is that output after
+// AGP's ASM transform, alongside `hiltJavaCompileDebug` for the generated Java. Listing both
+// roots hands JaCoCo two class files per class, and it aborts the whole report with
+// *"Can't add different class with same name"* the moment the two copies differ — which for
+// Kotlin they usually do not, so the union survived until `:app`'s Java `NimazApp_GeneratedInjector`
+// was transformed and it did. Analysing the compiler output alone loses nothing measurable:
+// on `:core:database` the two roots report identical line coverage (2,832 covered), differing
+// only in the 29 generated Hilt classes that `coverageExclusions` is trying to drop anyway.
+//
+// `tmp/kotlin-classes/debug` stays listed for older AGP; it does not exist on AGP 9, so the two
+// entries never overlap in practice. If a future AGP writes both, JaCoCo will say so loudly
+// rather than silently — and `coverageFloor` catches the opposite failure, a root that has moved
+// and now resolves to nothing, because an empty report is indistinguishable from 0% at a glance.
 val debugClassRoots = listOf(
-    layout.buildDirectory.dir("intermediates/classes/debug").get().asFile,
+    layout.buildDirectory.dir("intermediates/built_in_kotlinc/debug").get().asFile,
     layout.buildDirectory.dir("tmp/kotlin-classes/debug").get().asFile,
 )
 val buildOutputDir = layout.buildDirectory.get().asFile
@@ -641,10 +653,14 @@ fun debugClassTree(): FileCollection = classTree()
  * | `kotlin-jvm` (`:core:domain`) | `classes/kotlin/main` | `jacoco/test.exec` |
  * | `com.android.library` (`:core:common`) | `intermediates/built_in_kotlinc/debug/**/classes` | `jacoco/testDebugUnitTest.exec` |
  *
- * Note that an Android **library** has no `intermediates/classes` at all — that is an
- * application-module output. Pointing at one anyway is precisely the #464 failure: the directory
- * does not exist, the tree resolves to nothing, and the report is a valid file describing zero
- * classes. `coverageFloor` is the assertion that catches it.
+ * [classesGlobs] name **compiler output only**. AGP 9 also writes an ASM-transformed copy of the
+ * same classes under `intermediates/classes/debug/transformDebugClassesWithAsm`, in library
+ * modules as well as in `:app`; including both roots gives JaCoCo two class files per class and
+ * aborts the report. See the `debugClassRoots` comment above for the measurement behind that.
+ *
+ * A glob that names a directory AGP no longer writes is precisely the #464 failure: it resolves
+ * to nothing, and the report is a valid file describing zero classes. `coverageFloor` is the
+ * assertion that catches it.
  */
 data class CoverageModule(
     val gradlePath: String,
@@ -672,11 +688,11 @@ val coverageModules = listOf(
         gradlePath = ":core:common",
         projectDir = rootProject.layout.projectDirectory.dir("core/common"),
         testTask = "testDebugUnitTest",
-        // Both spellings, so this keeps working whichever one a future AGP writes — the same
-        // belt-and-braces the `:app` roots above use, and for the same reason.
+        // Both compiler-output spellings, so this keeps working whichever one a future AGP
+        // writes — the same pair the `:app` roots above use, and for the same reason. The
+        // ASM-transformed copy is deliberately absent; see `debugClassRoots`.
         classesGlobs = listOf(
             "intermediates/built_in_kotlinc/debug/**/classes/**",
-            "intermediates/classes/debug/**",
             "tmp/kotlin-classes/debug/**",
         ),
         execGlobs = listOf(
@@ -692,7 +708,6 @@ val coverageModules = listOf(
         testTask = "testDebugUnitTest",
         classesGlobs = listOf(
             "intermediates/built_in_kotlinc/debug/**/classes/**",
-            "intermediates/classes/debug/**",
             "tmp/kotlin-classes/debug/**",
         ),
         execGlobs = listOf(
@@ -708,7 +723,6 @@ val coverageModules = listOf(
         testTask = "testDebugUnitTest",
         classesGlobs = listOf(
             "intermediates/built_in_kotlinc/debug/**/classes/**",
-            "intermediates/classes/debug/**",
             "tmp/kotlin-classes/debug/**",
         ),
         execGlobs = listOf(
@@ -724,7 +738,6 @@ val coverageModules = listOf(
         testTask = "testDebugUnitTest",
         classesGlobs = listOf(
             "intermediates/built_in_kotlinc/debug/**/classes/**",
-            "intermediates/classes/debug/**",
             "tmp/kotlin-classes/debug/**",
         ),
         execGlobs = listOf(
@@ -740,7 +753,6 @@ val coverageModules = listOf(
         testTask = "testDebugUnitTest",
         classesGlobs = listOf(
             "intermediates/built_in_kotlinc/debug/**/classes/**",
-            "intermediates/classes/debug/**",
             "tmp/kotlin-classes/debug/**",
         ),
         execGlobs = listOf(
@@ -756,7 +768,6 @@ val coverageModules = listOf(
         testTask = "testDebugUnitTest",
         classesGlobs = listOf(
             "intermediates/built_in_kotlinc/debug/**/classes/**",
-            "intermediates/classes/debug/**",
             "tmp/kotlin-classes/debug/**",
         ),
         execGlobs = listOf(
@@ -772,7 +783,6 @@ val coverageModules = listOf(
         testTask = "testDebugUnitTest",
         classesGlobs = listOf(
             "intermediates/built_in_kotlinc/debug/**/classes/**",
-            "intermediates/classes/debug/**",
             "tmp/kotlin-classes/debug/**",
         ),
         execGlobs = listOf(
@@ -788,7 +798,6 @@ val coverageModules = listOf(
         testTask = "testDebugUnitTest",
         classesGlobs = listOf(
             "intermediates/built_in_kotlinc/debug/**/classes/**",
-            "intermediates/classes/debug/**",
             "tmp/kotlin-classes/debug/**",
         ),
         execGlobs = listOf(
@@ -804,7 +813,6 @@ val coverageModules = listOf(
         testTask = "testDebugUnitTest",
         classesGlobs = listOf(
             "intermediates/built_in_kotlinc/debug/**/classes/**",
-            "intermediates/classes/debug/**",
             "tmp/kotlin-classes/debug/**",
         ),
         execGlobs = listOf(
@@ -820,7 +828,6 @@ val coverageModules = listOf(
         testTask = "testDebugUnitTest",
         classesGlobs = listOf(
             "intermediates/built_in_kotlinc/debug/**/classes/**",
-            "intermediates/classes/debug/**",
             "tmp/kotlin-classes/debug/**",
         ),
         execGlobs = listOf(
@@ -836,7 +843,6 @@ val coverageModules = listOf(
         testTask = "testDebugUnitTest",
         classesGlobs = listOf(
             "intermediates/built_in_kotlinc/debug/**/classes/**",
-            "intermediates/classes/debug/**",
             "tmp/kotlin-classes/debug/**",
         ),
         execGlobs = listOf(
@@ -852,7 +858,6 @@ val coverageModules = listOf(
         testTask = "testDebugUnitTest",
         classesGlobs = listOf(
             "intermediates/built_in_kotlinc/debug/**/classes/**",
-            "intermediates/classes/debug/**",
             "tmp/kotlin-classes/debug/**",
         ),
         execGlobs = listOf(
@@ -868,7 +873,6 @@ val coverageModules = listOf(
         testTask = "testDebugUnitTest",
         classesGlobs = listOf(
             "intermediates/built_in_kotlinc/debug/**/classes/**",
-            "intermediates/classes/debug/**",
             "tmp/kotlin-classes/debug/**",
         ),
         execGlobs = listOf(
@@ -884,7 +888,6 @@ val coverageModules = listOf(
         testTask = "testDebugUnitTest",
         classesGlobs = listOf(
             "intermediates/built_in_kotlinc/debug/**/classes/**",
-            "intermediates/classes/debug/**",
             "tmp/kotlin-classes/debug/**",
         ),
         execGlobs = listOf(
@@ -900,7 +903,6 @@ val coverageModules = listOf(
         testTask = "testDebugUnitTest",
         classesGlobs = listOf(
             "intermediates/built_in_kotlinc/debug/**/classes/**",
-            "intermediates/classes/debug/**",
             "tmp/kotlin-classes/debug/**",
         ),
         execGlobs = listOf(
@@ -916,7 +918,6 @@ val coverageModules = listOf(
         testTask = "testDebugUnitTest",
         classesGlobs = listOf(
             "intermediates/built_in_kotlinc/debug/**/classes/**",
-            "intermediates/classes/debug/**",
             "tmp/kotlin-classes/debug/**",
         ),
         execGlobs = listOf(
@@ -932,7 +933,6 @@ val coverageModules = listOf(
         testTask = "testDebugUnitTest",
         classesGlobs = listOf(
             "intermediates/built_in_kotlinc/debug/**/classes/**",
-            "intermediates/classes/debug/**",
             "tmp/kotlin-classes/debug/**",
         ),
         execGlobs = listOf(
@@ -1031,26 +1031,23 @@ tasks.register<JacocoReport>("jacocoTestReport") {
     // `--dry-run` reported it in eight seconds because storage happens whether or not the task's
     // credential-gated dependencies can run.
     //
-    // 200, against a real report of **4,736 classes** — measured by running the task, which is
+    // 200, against a real report of **4,226 classes** — measured by running the task, which is
     // the only way this number was ever going to be right.
     //
     // It was first guessed at 1,500, then "corrected" to 200 on the reasoning that the codebase
     // has 1,170 top-level declarations so 1,500 must be too high. Both the guess and the
     // correction were arrived at without running `jacocoTestReport` even once. JaCoCo counts
     // compiled classes — nested classes, lambdas and Compose synthetics, of which a Compose
-    // codebase generates a great many — and this report does also span `androidx/*`, so 1,170
-    // was never the comparable figure.
+    // codebase generates a great many — so 1,170 was never the comparable figure.
     //
-    // Split the 4,736 and the two halves behave differently, which matters when reading a
-    // percentage off this report: **4,335 classes are `com/arshadshah/nimaz` and carry all
-    // 68,569 counted lines; the other 401 are `androidx/*` and friends and carry zero.** They
-    // are resource-merge artefacts — library `R` classes with no executable line — so they
-    // inflate the class count that this floor reads and contribute nothing to the coverage
-    // denominator. A floor on classes is therefore slightly softer than it looks, and the
-    // reported percentage is not diluted by library code at all.
+    // Every one of the 4,226 is `com/arshadshah/nimaz`, and they carry all 67,970 counted lines.
+    // An earlier revision of this comment recorded 4,736, of which 401 were `androidx/*` library
+    // `R` classes carrying zero lines: resource-merge artefacts that inflated the count this
+    // floor reads while contributing nothing to the coverage denominator. They arrived with
+    // `intermediates/classes/debug`, which `debugClassRoots` no longer names, so they are gone.
     //
     // 200 stays, because a floor should be impossible to trip except by the failure it names and
-    // 4,736/200 is ample margin. What changed is that it is now a measurement rather than an
+    // 4,226/200 is ample margin. What changed is that it is now a measurement rather than an
     // argument.
     val minimumCoveredClasses = 200
     val classElement = "<class name="

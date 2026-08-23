@@ -93,4 +93,72 @@ class AndroidLibraryConventionPluginTest {
 
         assertThat(report["checkDependsOn"]).contains("moduleBoundary")
     }
+
+    /**
+     * Robolectric-executed code has to reach the coverage report.
+     *
+     * Robolectric loads the classes under test through its own instrumenting classloader and the
+     * classes it hands back carry no source location, so JaCoCo's agent skips them by default.
+     * The test still runs and still passes; it simply contributes nothing — and a class with no
+     * execution data is indistinguishable from a class no test ever touched.
+     *
+     * That is not hypothetical. Before `configureRobolectricCoverage` existed,
+     * `:core:database`'s exec file held 42 `com/arshadshah/nimaz` class records;
+     * `LegacyUserDataImport` — 94 lines, twelve passing Robolectric tests — appeared in it zero
+     * times and reported **0%**. With the flag the same run records 181 classes and the class
+     * reports **94/94**. Across the repository the correction moved the merged report from
+     * 22.8% to 38.8% of lines without a single new test being written.
+     *
+     * Asserted here rather than trusted because the failure mode is silence in both directions:
+     * losing the flag does not break a build, does not fail a test, and shows up only as a
+     * coverage number that quietly drops — the same shape as #464.
+     */
+    @Test
+    fun `configures jacoco to record Robolectric-executed classes`() {
+        val report = ConventionFixture.run(
+            dir = File(tmp.root, "robolectric-coverage"),
+            plugins = listOf("nimaz.android.library", "jacoco"),
+            buildScript = """
+                android { namespace = "com.arshadshah.nimaz.fixture" }
+                tasks.register("printConventions") {
+                    val jacoco = tasks.named("testDebugUnitTest").get()
+                        .extensions.getByType(org.gradle.testing.jacoco.plugins.JacocoTaskExtension::class.java)
+                    val includeNoLocation = jacoco.isIncludeNoLocationClasses
+                    val excludes = jacoco.excludes?.joinToString(",") ?: ""
+                    doLast {
+                        println("REPORT includeNoLocationClasses=" + includeNoLocation)
+                        println("REPORT jacocoExcludes=" + excludes)
+                    }
+                }
+            """.trimIndent()
+        ).reported()
+
+        assertThat(report["includeNoLocationClasses"]).isEqualTo("true")
+        // `jdk.internal.*` is the mandatory companion, not an optimisation: those classes also
+        // have no location, and instrumenting them fails at class-load time on a sealed JDK
+        // module with `IllegalAccessError`.
+        assertThat(report["jacocoExcludes"]).contains("jdk.internal.*")
+    }
+
+    /**
+     * And it must not require the `jacoco` plugin. Only the nineteen production modules apply it;
+     * a convention plugin that configured the extension eagerly would fail every module that
+     * does not, which is the cheapest way to make a future module opt out of coverage entirely.
+     */
+    @Test
+    fun `does not require the jacoco plugin`() {
+        val report = ConventionFixture.run(
+            dir = File(tmp.root, "no-jacoco"),
+            plugins = listOf("nimaz.android.library"),
+            buildScript = """
+                android { namespace = "com.arshadshah.nimaz.fixture" }
+                tasks.register("printConventions") {
+                    val hasJacoco = project.pluginManager.hasPlugin("jacoco")
+                    doLast { println("REPORT hasJacoco=" + hasJacoco) }
+                }
+            """.trimIndent()
+        ).reported()
+
+        assertThat(report["hasJacoco"]).isEqualTo("false")
+    }
 }
