@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import com.arshadshah.nimaz.core.common.DefaultDispatcher
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.Telemetry
+import com.arshadshah.nimaz.core.monitoring.PerfMonitor
 import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.domain.time.TodayProvider
 import com.arshadshah.nimaz.domain.model.PrayerCalculationSettings
@@ -174,18 +175,20 @@ class PrayerTimesViewModel @Inject constructor(
     }
 
     private suspend fun recompute(date: LocalDate, resolved: PrayerCalculationSettings) {
-        val computed = withContext(defaultDispatcher) {
-            val day = prayerUseCases.getDaySchedule(date, resolved)
-            // Tomorrow's Fajr is only needed for today's after-Isha wrap, and it is computed
-            // **here** rather than in `publishDisplays`. It used to run there, which meant a
-            // second full day of astronomy on every publish — including every Room re-emission
-            // of the tracker statuses, so toggling one prayer recomputed a whole day's solar
-            // geometry on the UI thread.
-            val tomorrow = if (date == todayProvider.today()) {
-                prayerUseCases.getDaySchedule(date.plusDays(1), resolved)
-                    .firstOrNull { it.type == PrayerType.FAJR }?.time
-            } else null
-            day to tomorrow
+        val computed = telemetry.trace(PerfMonitor.Traces.PRAYER_TIMES_CALCULATE) {
+            withContext(defaultDispatcher) {
+                val day = prayerUseCases.getDaySchedule(date, resolved)
+                // Tomorrow's Fajr is only needed for today's after-Isha wrap, and it is
+                // computed **here** rather than in `publishDisplays`. It used to run there,
+                // which meant a second full day of astronomy on every publish — including
+                // every Room re-emission of the tracker statuses, so toggling one prayer
+                // recomputed a whole day's solar geometry on the UI thread.
+                val tomorrow = if (date == todayProvider.today()) {
+                    prayerUseCases.getDaySchedule(date.plusDays(1), resolved)
+                        .firstOrNull { it.type == PrayerType.FAJR }?.time
+                } else null
+                day to tomorrow
+            }
         }
         dayTimes = computed.first
         tomorrowFajr = computed.second

@@ -90,6 +90,7 @@ fun TafseerScreen(
         val sourceLabel = state.selectedSource.displayName
         val highlights = state.highlights
         scope.launch(Dispatchers.Default) {
+            val startedAt = System.nanoTime()
             runCatching {
                 val file = TafseerPdfExporter.export(
                     context = context,
@@ -106,6 +107,10 @@ fun TafseerScreen(
                         mimeType = "application/pdf",
                     )
                 }
+            }.onSuccess {
+                viewModel.onEvent(
+                    TafseerEvent.ExportCompleted((System.nanoTime() - startedAt) / 1_000_000)
+                )
             }.onFailure { viewModel.onEvent(TafseerEvent.ExportFailed(it)) }
         }
     }

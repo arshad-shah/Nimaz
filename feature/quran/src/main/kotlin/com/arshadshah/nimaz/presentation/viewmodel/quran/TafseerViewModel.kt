@@ -5,6 +5,8 @@ import androidx.lifecycle.ViewModel
 import com.arshadshah.nimaz.core.ui.R
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.Telemetry
+import com.arshadshah.nimaz.core.monitoring.DURATION_METRIC
+import com.arshadshah.nimaz.core.monitoring.PerfMonitor
 import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.domain.model.TafseerNote
 import com.arshadshah.nimaz.domain.model.TafseerSource
@@ -135,6 +137,13 @@ class TafseerViewModel @Inject constructor(
 
                 telemetry.failure(AppAnalytics.Feature.TAFSEER, "export_pdf", event.throwable)
 
+            is TafseerEvent.ExportCompleted ->
+                telemetry.traceValue(
+                    name = PerfMonitor.Traces.PDF_EXPORT,
+                    metric = DURATION_METRIC,
+                    value = event.durationMs,
+                )
+
 
             TafseerEvent.DismissNoteError -> dismissNoteError()
         }
@@ -191,8 +200,9 @@ class TafseerViewModel @Inject constructor(
         ayahAnnotationsJob?.cancel()
         ayahAnnotationsJob =
             launchSafely(telemetry, AppAnalytics.Feature.TAFSEER, "load_tafseer_for_current_ayah") {
-                val tafseer =
+                val tafseer = telemetry.trace(PerfMonitor.Traces.TAFSEER_LOAD) {
                     tafseerUseCases.getTafseerForAyah(ayah.surahNumber, ayah.ayahNumber, tafseerId)
+                }
 
                 // Probed **only when the selected source came back empty**, which is the one time
                 // the answer is used: `availableSources` reaches exactly one consumer,

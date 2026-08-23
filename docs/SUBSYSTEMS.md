@@ -1398,7 +1398,70 @@ formatted strings.
 **`core/monitoring/`** (in `:core:common`) — three thin Kotlin `object` wrappers over Firebase, each guarded so **every call is wrapped in `runCatching` and no-ops if Firebase isn't initialized** (debug/PR-check builds without `google-services.json` run unchanged). They are static singletons, never Hilt-injected.
 - `AppAnalytics.kt` → Firebase **Analytics**. The only one with `init(context)` (called from `NimazApp`) — it caches `applicationContext` so any caller can log without a `Context`. Provides semantic helpers + name catalogs (`Event`/`Param`/`UserProperty`), notably the notification pipeline (`notification_scheduled`/`_displayed`/`_suppressed`/`_opened`) and `logDiagnostics()` (records OS-level notification/exact-alarm/battery state as durable user properties).
 - `CrashReporter.kt` → Firebase **Crashlytics**. `recordException`, `log` (breadcrumb), `setCustomKey`. Pairs with `AppAnalytics.logError` (frequency) for the stack trace.
-- `PerfMonitor.kt` → Firebase **Performance**. Custom traces via `newTrace`/`stop` + inline `trace { }` / `traceSuspend { }`; catalog `Traces` (`app_initialize`, `notification_schedule`).
+- `PerfMonitor.kt` → Firebase **Performance**. Custom traces via `newTrace`/`stop` + inline `trace { }` / `traceSuspend { }`; catalog `Traces`, 16 entries — see [§9.1](#91-performance-tracing) below.
+
+### 9.1 Performance tracing
+
+Firebase Performance had been wired and paid for since the SDK went in, and the app started
+**two** traces: `app_initialize` and `notification_schedule`, both from `:app`. Nothing else could
+— `PerfMonitor` is an `object`, §6.1 of `ARCHITECTURE.md` forbids presentation code from calling
+the monitoring objects directly, and the `Telemetry` seam that replaced them had no performance
+method at all. The rule and the API together made the feature unreachable from every module that
+had anything worth measuring.
+
+The seam now carries it, and the catalogue is instrumented end to end.
+
+**Three shapes, and the choice between them is not stylistic:**
+
+| Shape | Use when | API |
+|---|---|---|
+| Block | a `suspend` call whose return is the answer | `telemetry.trace(Traces.X) { … }` |
+| First emission | a `Flow` collected for the life of a screen | `flow.traceFirstEmission(telemetry, Traces.X)` |
+| Known duration | work that runs where neither can wrap it | `telemetry.traceValue(Traces.X, DURATION_METRIC, ms)` |
+
+Nearly every load in this app is a Room `Flow`. Wrapping the *collection* in a block trace would
+measure how long the user looked at the screen, not how long they waited for it — the trace would
+stop when they navigated away. `traceFirstEmission` (in `:core:common`) times the gap to the
+**first** value, which is the moment the spinner can stop, files it as `first_emission_ms`, and
+reports once however many re-emissions follow. A flow that never emits reports nothing rather
+than reporting zero: a screen closed before its data arrived should be absent from the numbers,
+not recorded as instant.
+
+The known-duration shape exists for the PDF exports, which render on the caller's thread inside a
+click handler. The screen measures and dispatches `ExportCompleted(durationMs)`; the ViewModel
+records it. Monitoring stays out of the composable either way.
+
+**What is traced, and where it is started:**
+
+| Trace | Started in | Shape |
+|---|---|---|
+| `app_initialize` | `AppInitializer` (`:app`) | block |
+| `notification_schedule` | `PrayerNotificationScheduler` (`:app`) | block |
+| `content_artifact_install` | `ContentArtifactInstaller` (`:core:database`) | block |
+| `quran_page_load` | `QuranViewModel` | first emission |
+| `quran_surah_load` | `QuranViewModel` | first emission |
+| `mushaf_layout_build` | `QuranViewModel` | block |
+| `tafseer_load` | `TafseerViewModel` | block |
+| `hadith_chapter_load` | `HadithViewModel` | first emission |
+| `dua_chapter_load` | `DuaViewModel` | first emission |
+| `prayer_times_calculate` | `PrayerTimesViewModel` | block |
+| `prayer_month_calculate` | `MonthlyPrayerTimesViewModel` | block |
+| `qibla_resolve` | `QiblaViewModel` | block |
+| `library_search` | `SearchViewModel` | block |
+| `sync_export` | `SyncViewModel` | block |
+| `sync_import` | `SyncViewModel` | block |
+| `pdf_export` | `MonthlyPrayerTimesViewModel`, `TafseerViewModel` | known duration |
+
+`content_artifact_install` is traced from the *replace* rather than from the top of
+`installIfChanged()`. The three early returns above it are a flag read apiece and are the
+overwhelming majority of launches; including them would drag the median of "what does a content
+release cost a user" to nearly zero.
+
+**`TraceCatalogueReachabilityTest`** (in `:app`) scans every module's `src/main` and fails if a
+declared trace has no call site, if a call site names a trace that is not declared, if two traces
+share a wire name, or if a name exceeds the 100 characters Firebase silently truncates at. An
+uncalled trace is the one kind of constant whose absence is invisible: no warning, no failing
+build, and a dashboard with no card for it — which looks exactly like a code path nobody takes.
 
 **Instrumentation conventions (apply these as you write code):**
 - **Error-swallowing `catch`/`runCatching`** that hides a real failure (data load, IO, parse,

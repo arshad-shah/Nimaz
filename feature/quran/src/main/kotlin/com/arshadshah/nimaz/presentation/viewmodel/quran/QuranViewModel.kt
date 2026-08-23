@@ -7,7 +7,9 @@ import com.arshadshah.nimaz.core.ui.R
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.core.monitoring.launchBestEffort
+import com.arshadshah.nimaz.core.monitoring.PerfMonitor
 import com.arshadshah.nimaz.core.monitoring.launchSafely
+import com.arshadshah.nimaz.core.monitoring.traceFirstEmission
 import com.arshadshah.nimaz.core.text.StringProvider
 import com.arshadshah.nimaz.domain.time.TodayProvider
 import com.arshadshah.nimaz.domain.model.AudioState
@@ -707,6 +709,7 @@ class QuranViewModel @Inject constructor(
             onFailure = { _readerState.update { it.copy(isLoading = false) } },
         ) {
             quranUseCases.getSurahWithAyahs(surahNumber, translatorId())
+                .traceFirstEmission(telemetry, PerfMonitor.Traces.QURAN_SURAH_LOAD)
                 .collect { surahWithAyahs ->
                     _readerState.update {
                         it.copy(
@@ -823,6 +826,7 @@ class QuranViewModel @Inject constructor(
                 translatorId = translatorId(),
                 script = mushafScript()
             )
+                .traceFirstEmission(telemetry, PerfMonitor.Traces.QURAN_PAGE_LOAD)
                 .collect { ayahs ->
                     // Re-read at emission time: a prefetch started while the user was on this
                     // page may only land after they have swiped on, and vice versa.
@@ -876,7 +880,9 @@ class QuranViewModel @Inject constructor(
         // Already cached (e.g. a neighbouring pager page pre-loaded it) — nothing to do.
         if (_readerState.value.mushafPageLayoutCache.containsKey(pageNumber)) return
         launchSafely(telemetry, AppAnalytics.Feature.QURAN, "load_mushaf_page_layout") {
-            val layout = quranUseCases.getMushafPageLayout(pageNumber, mushafScript())
+            val layout = telemetry.trace(PerfMonitor.Traces.MUSHAF_LAYOUT_BUILD) {
+                quranUseCases.getMushafPageLayout(pageNumber, mushafScript())
+            }
             _readerState.update {
                 it.copy(
                     mushafPageLayoutCache = it.mushafPageLayoutCache + (pageNumber to layout)

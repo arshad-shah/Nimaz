@@ -5,7 +5,9 @@ import androidx.lifecycle.ViewModel
 import com.arshadshah.nimaz.core.ui.R
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.Telemetry
+import com.arshadshah.nimaz.core.monitoring.PerfMonitor
 import com.arshadshah.nimaz.core.monitoring.launchSafely
+import com.arshadshah.nimaz.core.monitoring.traceFirstEmission
 import com.arshadshah.nimaz.domain.time.TodayProvider
 import com.arshadshah.nimaz.core.common.toUtcMidnightMillis
 import com.arshadshah.nimaz.domain.model.Dua
@@ -239,11 +241,13 @@ class DuaViewModel @Inject constructor(
             val category = duaUseCases.getCategoryById(categoryId)
             _categoryState.update { it.copy(category = category) }
 
-            duaUseCases.getDuasByCategory(categoryId).collect { duas ->
-                _categoryState.update {
-                    it.copy(duas = duas, isLoading = false)
+            duaUseCases.getDuasByCategory(categoryId)
+                .traceFirstEmission(telemetry, PerfMonitor.Traces.DUA_CHAPTER_LOAD)
+                .collect { duas ->
+                    _categoryState.update {
+                        it.copy(duas = duas, isLoading = false)
+                    }
                 }
-            }
         }
     }
 

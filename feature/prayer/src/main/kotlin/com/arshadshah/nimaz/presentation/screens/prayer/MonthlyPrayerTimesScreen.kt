@@ -114,6 +114,7 @@ fun MonthlyPrayerTimesScreen(
     fun shareRows(rows: List<DayPrayerTimes>) {
         if (rows.isEmpty()) return
         viewModel.onEvent(MonthlyPrayerTimesEvent.ExportStarted)
+        val startedAt = System.nanoTime()
         runCatching {
             val pdfRows = rows.map {
                 PrayerTimesPdfExporter.Row(
@@ -135,6 +136,10 @@ fun MonthlyPrayerTimesScreen(
                 context,
                 file,
                 mimeType = "application/pdf",
+            )
+        }.onSuccess {
+            viewModel.onEvent(
+                MonthlyPrayerTimesEvent.ExportCompleted((System.nanoTime() - startedAt) / 1_000_000)
             )
         }.onFailure { viewModel.onEvent(MonthlyPrayerTimesEvent.ExportFailed(it)) }
     }

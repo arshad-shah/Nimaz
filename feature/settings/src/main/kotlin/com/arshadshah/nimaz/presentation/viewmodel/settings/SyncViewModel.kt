@@ -7,6 +7,7 @@ import com.arshadshah.nimaz.feature.settings.BuildConfig
 import com.arshadshah.nimaz.core.ui.R
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.Telemetry
+import com.arshadshah.nimaz.core.monitoring.PerfMonitor
 import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.data.sync.CancelReason
 import com.arshadshah.nimaz.data.sync.ConnectionState
@@ -295,7 +296,7 @@ class SyncViewModel @Inject constructor(
                     _uiState.update { it.copy(dataSummary = summary) }
 
                     debugLog("Starting import with progress...")
-                    importWithProgress(payload)
+                    telemetry.trace(PerfMonitor.Traces.SYNC_IMPORT) { importWithProgress(payload) }
 
                     debugLog("Import complete! Setting Completed state.")
                     telemetry.featureUsed(AppAnalytics.Feature.SYNC, "receive_completed")
@@ -330,10 +331,12 @@ class SyncViewModel @Inject constructor(
         debugLog("sendData: starting export")
         launchSafely(telemetry, AppAnalytics.Feature.SYNC, "send_data") {
             try {
-                val payload = exporter.export { completed, _, step ->
-                    addLogEntry(step)
-                    _uiState.update { it.copy(currentStep = step, stepsCompleted = completed) }
-                    yield()
+                val payload = telemetry.trace(PerfMonitor.Traces.SYNC_EXPORT) {
+                    exporter.export { completed, _, step ->
+                        addLogEntry(step)
+                        _uiState.update { it.copy(currentStep = step, stepsCompleted = completed) }
+                        yield()
+                    }
                 }
 
                 debugLog(

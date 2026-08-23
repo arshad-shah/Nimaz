@@ -5,6 +5,7 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteException
 import android.util.Log
 import com.arshadshah.nimaz.core.monitoring.CrashReporter
+import com.arshadshah.nimaz.core.monitoring.PerfMonitor
 import com.arshadshah.nimaz.data.local.database.NimazDatabase
 import java.io.File
 
@@ -129,16 +130,24 @@ class ContentArtifactInstaller(
             }
         }
 
+        // Traced from here, not from the top of the method. The three early returns above are a
+        // flag read apiece and would land in the same histogram as a real replace, dragging the
+        // reported median of "how long does a content release cost a user" to nearly zero — the
+        // three cheap paths are the overwhelming majority of launches. This is the path that
+        // deletes a database and makes Room copy a new one out of the APK, and it runs before the
+        // splash lifts, so it is the one worth a number.
         return try {
-            // deleteDatabase, not File.delete: the journal, -wal and -shm files are part of the
-            // database and a half-deleted family is worse than either whole state.
-            val deleted = context.deleteDatabase(NimazDatabase.DATABASE_NAME)
-            if (!deleted && database.exists()) {
-                Outcome.Failed("deleteDatabase returned false and the file is still there")
-            } else {
-                store.clearDeferrals()
-                store.setInstalledArtifact(installedArtifact)
-                Outcome.Replaced
+            PerfMonitor.trace(PerfMonitor.Traces.CONTENT_ARTIFACT_INSTALL) {
+                // deleteDatabase, not File.delete: the journal, -wal and -shm files are part of
+                // the database and a half-deleted family is worse than either whole state.
+                val deleted = context.deleteDatabase(NimazDatabase.DATABASE_NAME)
+                if (!deleted && database.exists()) {
+                    Outcome.Failed("deleteDatabase returned false and the file is still there")
+                } else {
+                    store.clearDeferrals()
+                    store.setInstalledArtifact(installedArtifact)
+                    Outcome.Replaced
+                }
             }
         } catch (e: Exception) {
             // The old database is still openable if the delete failed part-way, and the app is

@@ -33,4 +33,10 @@ sealed interface TafseerEvent {
 
     /** A tafseer PDF export threw. Reported, never shown: the commentary is still readable. */
     data class ExportFailed(val throwable: Throwable) : TafseerEvent
+
+    /**
+     * A tafseer PDF finished rendering, in [durationMs]. Measured by the screen, which is where
+     * the render runs, and reported through the ViewModel, which is where the seam is.
+     */
+    data class ExportCompleted(val durationMs: Long) : TafseerEvent
 }

@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import com.arshadshah.nimaz.core.common.DefaultDispatcher
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.Telemetry
+import com.arshadshah.nimaz.core.monitoring.DURATION_METRIC
+import com.arshadshah.nimaz.core.monitoring.PerfMonitor
 import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.domain.time.TodayProvider
 import com.arshadshah.nimaz.domain.calendar.HijriDateCalculator
@@ -108,6 +110,13 @@ class MonthlyPrayerTimesViewModel @Inject constructor(
 
                 telemetry.failure(AppAnalytics.Feature.PRAYER_TIMES, "export_pdf_month", event.throwable)
 
+            is MonthlyPrayerTimesEvent.ExportCompleted ->
+                telemetry.traceValue(
+                    name = PerfMonitor.Traces.PDF_EXPORT,
+                    metric = DURATION_METRIC,
+                    value = event.durationMs,
+                )
+
 
             MonthlyPrayerTimesEvent.RamadanExportConsumed ->
                 _state.update { it.copy(ramadanExport = null) }
@@ -175,13 +184,17 @@ class MonthlyPrayerTimesViewModel @Inject constructor(
             onFailure = { _state.update { it.copy(isLoading = false) } },
         ) {
             _state.update { it.copy(isLoading = true) }
-            val (days, ramadanYear) = withContext(defaultDispatcher) {
-                val computed = (1..month.lengthOfMonth()).map { dayTimesFor(month.atDay(it)) }
-                computed to computed
-                    .map { HijriDateCalculator.toHijri(it.date) }
-                    .firstOrNull { it.month == 9 }
-                    ?.year
-            }
+            val (days, ramadanYear) =
+                telemetry.trace(PerfMonitor.Traces.PRAYER_MONTH_CALCULATE) {
+                    withContext(defaultDispatcher) {
+                        val computed =
+                            (1..month.lengthOfMonth()).map { dayTimesFor(month.atDay(it)) }
+                        computed to computed
+                            .map { HijriDateCalculator.toHijri(it.date) }
+                            .firstOrNull { it.month == 9 }
+                            ?.year
+                    }
+                }
             _state.update {
                 it.copy(dayPrayerTimes = days, ramadanHijriYear = ramadanYear, isLoading = false)
             }

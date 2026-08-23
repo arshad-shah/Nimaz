@@ -25,4 +25,13 @@ sealed interface MonthlyPrayerTimesEvent {
 
     /** A PDF export threw. Reported, never shown: the timetable on screen is still correct. */
     data class ExportFailed(val throwable: Throwable) : MonthlyPrayerTimesEvent
+
+    /**
+     * A month's PDF finished rendering, in [durationMs].
+     *
+     * Measured by the screen because that is where the work runs — a click handler rendering
+     * thirty rows of a PDF on the caller's thread — and reported through the ViewModel because
+     * that is where the [Telemetry] seam is. The screen never touches monitoring itself.
+     */
+    data class ExportCompleted(val durationMs: Long) : MonthlyPrayerTimesEvent
 }

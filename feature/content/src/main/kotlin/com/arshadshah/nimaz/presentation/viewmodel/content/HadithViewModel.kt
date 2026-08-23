@@ -5,7 +5,9 @@ import com.arshadshah.nimaz.core.ui.R
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.core.monitoring.launchBestEffort
+import com.arshadshah.nimaz.core.monitoring.PerfMonitor
 import com.arshadshah.nimaz.core.monitoring.launchSafely
+import com.arshadshah.nimaz.core.monitoring.traceFirstEmission
 import com.arshadshah.nimaz.domain.model.HadithGrade
 import com.arshadshah.nimaz.domain.repository.settings.HadithDisplaySettings
 import com.arshadshah.nimaz.domain.usecase.HadithUseCases
@@ -321,20 +323,22 @@ class HadithViewModel @Inject constructor(
             val chapter = hadithUseCases.getChapterById(chapterId)
             _readerState.update { it.copy(chapter = chapter) }
 
-            hadithUseCases.getHadithsByChapter(chapterId).collect { hadiths ->
-                // Re-resolved against the list that just arrived. On the first emission the
-                // anchor is the requested hadith (or absent, meaning the top); on a later
-                // one it is wherever the reader already is — a content refresh re-emits, and
-                // must not move it.
-                val index = anchorHadithId
-                    ?.let { id -> hadiths.indexOfFirst { it.id == id } }
-                    ?.takeIf { it >= 0 }
-                    ?: 0
-                anchorHadithId = hadiths.getOrNull(index)?.id
-                _readerState.update {
-                    it.copy(hadiths = hadiths, isLoading = false, currentHadithIndex = index)
+            hadithUseCases.getHadithsByChapter(chapterId)
+                .traceFirstEmission(telemetry, PerfMonitor.Traces.HADITH_CHAPTER_LOAD)
+                .collect { hadiths ->
+                    // Re-resolved against the list that just arrived. On the first emission the
+                    // anchor is the requested hadith (or absent, meaning the top); on a later
+                    // one it is wherever the reader already is — a content refresh re-emits, and
+                    // must not move it.
+                    val index = anchorHadithId
+                        ?.let { id -> hadiths.indexOfFirst { it.id == id } }
+                        ?.takeIf { it >= 0 }
+                        ?: 0
+                    anchorHadithId = hadiths.getOrNull(index)?.id
+                    _readerState.update {
+                        it.copy(hadiths = hadiths, isLoading = false, currentHadithIndex = index)
+                    }
                 }
-            }
         }
     }
 

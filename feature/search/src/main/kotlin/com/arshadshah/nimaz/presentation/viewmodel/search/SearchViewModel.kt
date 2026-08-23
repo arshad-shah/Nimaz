@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.ui.R
 import com.arshadshah.nimaz.core.monitoring.Telemetry
+import com.arshadshah.nimaz.core.monitoring.PerfMonitor
 import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.domain.model.LibrarySearchResults
 import com.arshadshah.nimaz.domain.model.LibrarySource
@@ -199,7 +200,9 @@ class SearchViewModel @Inject constructor(
                 filter = _searchState.value.selectedFilter.name,
                 queryLength = _searchState.value.query.trim().length,
             )
-            val results = runCatching { lookup() }.getOrElse { e ->
+            val results = runCatching {
+                telemetry.trace(PerfMonitor.Traces.LIBRARY_SEARCH) { lookup() }
+            }.getOrElse { e ->
                 if (e is kotlinx.coroutines.CancellationException) throw e
                 _searchState.update {
                     it.copy(

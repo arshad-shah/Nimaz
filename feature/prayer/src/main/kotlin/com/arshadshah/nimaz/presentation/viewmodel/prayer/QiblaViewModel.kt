@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import com.arshadshah.nimaz.core.ui.R
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.Telemetry
+import com.arshadshah.nimaz.core.monitoring.PerfMonitor
 import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.domain.model.CompassAccuracy
 import com.arshadshah.nimaz.domain.model.CompassData
@@ -192,15 +193,25 @@ class QiblaViewModel @Inject constructor(
     private fun setLocationFromCoords(latitude: Double, longitude: Double, locationName: String) {
         launchSafely(telemetry, AppAnalytics.Feature.QIBLA, "set_location_from_coords") {
             try {
-                val qiblaDirection = QiblaCalculator.calculateQiblaDirection(latitude, longitude)
-                val declination = declinationAt(latitude, longitude)
-                val qiblaInfo = QiblaInfo(
-                    direction = qiblaDirection,
-                    locationName = locationName,
-                    latitude = latitude,
-                    longitude = longitude,
-                    distanceToMecca = QiblaCalculator.calculateDistanceToMecca(latitude, longitude)
-                )
+                // Bearing, declination and great-circle distance together — the whole resolve,
+                // because a compass that shows the wrong distance is as wrong as one that points
+                // the wrong way, and the three are never useful apart.
+                val (qiblaDirection, declination, qiblaInfo) =
+                    telemetry.trace(PerfMonitor.Traces.QIBLA_RESOLVE) {
+                        val direction = QiblaCalculator.calculateQiblaDirection(latitude, longitude)
+                        Triple(
+                            direction,
+                            declinationAt(latitude, longitude),
+                            QiblaInfo(
+                                direction = direction,
+                                locationName = locationName,
+                                latitude = latitude,
+                                longitude = longitude,
+                                distanceToMecca =
+                                    QiblaCalculator.calculateDistanceToMecca(latitude, longitude),
+                            ),
+                        )
+                    }
                 _qiblaState.update {
                     it.copy(
                         qiblaDirection = qiblaDirection,

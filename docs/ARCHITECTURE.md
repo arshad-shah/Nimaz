@@ -744,6 +744,15 @@ channels — the stack trace to Crashlytics, the frequency to analytics — and 
 only as the production binding and for callers with no injection point (`NimazApp`, `BootReceiver`,
 workers).
 
+**Performance is on the seam too.** It was not, and the omission made the whole channel
+unreachable: `PerfMonitor` is a third object, this section forbids calling it, and `Telemetry`
+had no performance method — so for every module outside `:app` the rule and the API together
+ruled out the only route to a feature the app already pays for. `Telemetry` now carries
+`trace(name) { … }` and `traceValue(name, metric, value)`, and `:core:common` adds
+`Flow.traceFirstEmission(telemetry, name)` for the load shape this codebase actually has.
+`SUBSYSTEMS.md` §9.1 covers which shape to reach for and what each of the sixteen traces
+measures; `TraceCatalogueReachabilityTest` fails on a trace nothing starts.
+
 #### Analytics values come from the catalog, never a string literal
 
 `AppAnalytics` names its *events* and *parameters* in `object Event` and `object Param`. It did
@@ -1755,8 +1764,12 @@ copy anything listed as Open.
    blank screen.
 9. **Telemetry** — inject `Telemetry` (never call `AppAnalytics`/`CrashReporter`; §6.1, enforced
    by `MonitoringSeamGuardTest`). Add `Feature.XXX` / `Action.XXX` constants to the catalog in
-   the same commit as the call site, and wrap any load a user waits on in
-   `telemetry.trace(PerfMonitor.Traces.XXX) { … }`.
+   the same commit as the call site. For anything a user waits on, add a `PerfMonitor.Traces`
+   constant and start it in the same commit — `TraceCatalogueReachabilityTest` fails on a
+   declared trace nothing calls. Pick the shape by what you are measuring: a `suspend` call is
+   `telemetry.trace(Traces.XXX) { … }`; a `Flow` the screen collects for its lifetime is
+   `flow.traceFirstEmission(telemetry, Traces.XXX)`, because a block trace around the collection
+   measures how long the user *looked* at the screen. `SUBSYSTEMS.md` §9.1 has the full table.
 10. **Tests** — unit-test the ViewModel (fake use cases, `RecordingTelemetry`) and the use cases
     (fake repository); DAO/repository tests where logic warrants. Tests live in the same module
     as their subject — `internal` is module-scoped, so a test left behind in `:app` stops
