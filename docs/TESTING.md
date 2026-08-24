@@ -45,6 +45,7 @@ Two on-device/JVM test surfaces exist:
   - [The first run, drawn and driven (`:feature:onboarding/src/test` and `src/testDebug`)](#the-first-run-drawn-and-driven-featureonboardingsrctest-and-srctestdebug)
   - [The zakat calculator and its history (`:feature:tools/src/test` and `src/testDebug`)](#the-zakat-calculator-and-its-history-featuretoolssrctest-and-srctestdebug)
   - [Search, and the question that leaves the device (`:feature:search/src/test` and `src/testDebug`)](#search-and-the-question-that-leaves-the-device-featuresearchsrctest-and-srctestdebug)
+  - [The six widgets, composed for real (`:feature:widget/src/test`)](#the-six-widgets-composed-for-real-featurewidgetsrctest)
 - [Conventions](#conventions)
 
 ## Running the unit tests
@@ -165,7 +166,7 @@ floor is a ratchet — raised when a module is brought up to it, never lowered t
 green. The branch floor is set per module, at 80% where branches are reachable and lower where
 the Compose compiler's `$dirty` checks make them not (see
 [Where each module stands](#where-each-module-stands)). `:core:database` is the first module
-locked (#597); then `:feature:quran`, `:core:domain`, `:core:navigation`, `:core:common`, `:feature:calendar`, `:core:datastore`, `:feature:onboarding`, `:feature:tools` and `:feature:search`.
+locked (#597); then `:feature:quran`, `:core:domain`, `:core:navigation`, `:core:common`, `:feature:calendar`, `:core:datastore`, `:feature:onboarding`, `:feature:tools`, `:feature:search` and `:feature:widget`.
 
 ### What is not counted, and why
 
@@ -260,11 +261,13 @@ floors in its own `build.gradle.kts`.
 **The line floor is 80% everywhere; the branch floor is not.** `:core:database`, `:core:domain`,
 `:core:navigation`, `:core:common` and `:core:datastore` are locked at 80/80 — none of them draws
 anything, so every branch is one somebody wrote and a test can take both sides of. So are `:feature:calendar`,
-`:feature:onboarding`, `:feature:tools` and `:feature:search`, which *are* Compose modules: the
+`:feature:onboarding`, `:feature:tools`, `:feature:search` and `:feature:widget`, which *are* Compose modules: the
 unreachable branch below is emitted **per parameter of every restartable composable**, so its
 weight scales with how many composables a module has, and six files — or eight, or the two screens
 in `:feature:tools`, or the one screen and four cards in `:feature:search` — never accumulate
 enough of them to move the number.
+`:feature:widget` is Compose of a different kind — six **Glance** widgets — and holds **89.3%**
+branches, which settles the question for the widget surface too.
 `:feature:onboarding` reports **90.3%** branches, the highest of any Compose module here. Only `:feature:quran` is softened, to
 80% lines and **60%** branches, because the Compose compiler
 emits a `$dirty` bitmask branch per parameter of every restartable composable — the skippability
@@ -287,13 +290,13 @@ split, and should say so where it sets its floors.
 | `:feature:onboarding` | 94.3% | 90.3% | **locked** at 80/80 (#605) |
 | `:feature:tools` | 97.5% | 83.6% | **locked** at 80/80 (#606) |
 | `:feature:search` | 91.4% | 87.0% | **locked** at 80/80 (#607) |
+| `:feature:widget` | 97.6% | 89.3% | **locked** at 80/80 (#608) |
 | `:core:ui` | 50.3% | 47.8% | |
 | `:core:data` | 39.0% | 31.2% | |
 | `:feature:prayer` | 38.1% | 23.7% | |
 | `:feature:tracker` | 30.4% | 24.4% | |
 | `:feature:content` | 28.8% | 19.5% | |
 | `:feature:about` | 17.8% | 23.0% | |
-| `:feature:widget` | 16.8% | 28.1% | |
 | `:feature:settings` | 11.3% | 14.9% | |
 
 `:app` is absent because its own suite needs the private content artifact and cannot be measured
@@ -696,6 +699,68 @@ off, which is the failure that actually ships. The remainder is the two `hiltVie
 arguments, the `null ->` arm of `LibrarySource?.asFilter()` (unreachable — its only call site is
 already inside a `defaultScope != null` check), and a few `when`-merge lines with no statement of
 their own.
+
+
+### The six widgets, composed for real (`:feature:widget/src/test`)
+
+The eleventh module locked: **16.8% lines to 97.6%**, from 268 covered lines to 1,557, and 28.1%
+to **89.3%** branches. 96 tests, 82 of them new. The six Glance widget files alone were 764 of the
+1,327 missing lines, and nothing had ever composed one.
+
+**Read this before adding a widget test: Glance is not ordinary Compose, and the campaign's usual
+pattern does not reach it.** A Glance composable renders to `RemoteViews`, not to a semantics
+tree, so `createComponentComposeRule()` / `onNodeWithText` finds nothing. What was tried, and what
+came of it:
+
+- **`GlanceAppWidget.compose(context, state = …)` — this is the answer.** It runs the widget's
+  real `provideGlance` against a state you hand it and returns the `RemoteViews` the launcher
+  would be given; `remoteViews.apply(context, null)` inflates those under Robolectric into an
+  ordinary Android view tree, and the text a reader would see is on its `TextView`s. No DataStore
+  file is written, so the tests stay hermetic. `WidgetRenderer` / `RenderedWidget` in the test
+  source set wrap it, and every widget test in the module goes through them. This covers
+  `provideGlance`, the `stateDefinition`, the state `when` and every **private** content
+  composable behind it — none of which needs to be made visible.
+- **`androidx.glance:glance-appwidget-testing` — assertion-only, and not used here.** Its
+  `runGlanceAppWidgetUnitTest` DSL exposes `provideComposable`/`setState` and a
+  `GlanceNodeAssertion` with `assertExists`, `assertDoesNotExist` and `assert`. There is **no
+  `performClick`**, so a Glance `clickable { }` cannot be fired from a JVM test — the lambda
+  action is resolved by the AppWidget host. It also cannot reach a private composable, which
+  `compose()` can. The module does not depend on it.
+- **The consequence.** `togglePrayerStatus` — the one widget action that writes user data — is
+  `internal` rather than `private` and is called directly by `TogglePrayerStatusTest`. The tile
+  that invokes it is covered by the render test. That visibility change is the only production
+  edit in the module.
+
+**Why any of this is worth testing: a throw inside a widget is not a crash anyone reports.** The
+launcher keeps drawing the last frame, so the failure looks like prayer times that quietly stopped
+being right. Every render test below is a guard against exactly that silence.
+
+| Area | Covered by | What it pins |
+|---|---|---|
+| The Hijri date, in every state | `HijriDateWidgetRenderTest` | day, month-with-year and both gregorian lines; an empty payload — the frame every install shows before its first worker run — falls back to em dashes rather than blank lines |
+| Which prayer is "next" | `NextPrayerWidgetRenderTest` | chosen from the wall clock at render time, **not** from what the worker stored: a payload whose stored answer has already passed names the following prayer instead. This is the whole reason the widget persists a schedule |
+| State from an older release | same | a payload with no `schedule` still renders, off the flat fields; tomorrow's first prayer is captioned rather than given a clock time; an invalid payload drops the "in " prefix instead of writing "in —" |
+| The five-prayer strip | `PrayerTimesWidgetRenderTest` | all five times and the **short** names — Maghrib is `Mgrb`, not a truncation — and the header naming the next prayer beside the Hijri date. After Isha the countdown clause is dropped, and with no Hijri date there is no dangling separator |
+| The tick-boxes | `PrayerTrackerWidgetRenderTest` | exactly one check vector is drawn per prayed prayer, counted against the unprayed baseline — the tiles carry no text that tells the two branches apart, and a tile that renders the wrong one tells a reader they have not prayed something they have |
+| The khatam card's two layouts | `KhatamWidgetRenderTest` | an active khatam draws name, juz medallion and percentage; no active khatam draws the start prompt instead. The pace line joins target and streak, shows either alone with no separator, and falls back to the juz position when there is neither; the ayah count is pluralised |
+| The month grid | `HijriCalendarWidgetRenderTest` | every day of the month appears and nothing past it, a month spilling into a sixth week keeps its last days, today appears twice (grid disc and right rail), and the weekday strip is Sunday-first and **localised** — it was a hardcoded English `listOf("Su", …)` |
+| The events rail | same | events are listed with their type spelled as a phrase rather than `RELIGIOUS_OBSERVANCE`; a month with none says so; a fast *or* a recommended observance earns the star icon, and the two conditions are independent |
+| Loading and error frames | all six render tests | each state draws its own frame and none of the data — including the two widgets whose error frame carries a second retry line |
+| `hasData`, per widget | all six render tests | which payloads are worth keeping on screen through a failed refresh. Every widget's default state is `Success` with an empty payload, so "is it Success" is not the question — and getting this wrong wipes a correct widget on one transient throw |
+| The refresh body all six workers share | `RefreshWidgetTest` | a widget on no home screen succeeds **without loading**; a success publishes to every placed instance; a failure over real data redraws and keeps it; a failure over nothing publishes the error frame carrying the throw's own message; retries stop after the third attempt; an unreachable AppWidget host retries instead of failing outright; and the failure handler failing is swallowed |
+| Each worker's own wiring | `WidgetWorkerRefreshTest` | every worker publishes **its own** state type loaded from **its own** data source — six near-identical bodies is the shape a copy-paste mistake hides in, and one pointed at another widget's state definition would compile and then overwrite the wrong widget |
+| Refresh scheduling | `WidgetWorkSchedulingTest` | each widget enqueues periodic and one-shot work under its own unique names; re-arming without force keeps the schedule already running (`onUpdate` fires on every boot and package update, so it must be idempotent); forcing replaces it; cancelling clears both |
+| Receiver lifecycle | `WidgetWorkReceiverTest` | `onEnabled` forces and refreshes, `onUpdate` re-arms **without** forcing and still refreshes, `onDisabled` cancels — and the two optional hooks stay optional. `onUpdate` is the recovery channel for a schedule the app lost: a force-stop drops WorkManager jobs and alarms never survive a reboot |
+| Which receiver drives what | `WidgetReceiverWiringTest` | each of the six arms its own worker and cancels its own; **only** the two countdown widgets arm the per-minute alarm, and removing one of them while the other is placed leaves the shared tick running |
+| The per-minute tick | `WidgetUpdateSchedulerTest` | arming is idempotent, `cancelIfUnused` stops the tick only once no countdown widget is left, `ensureScheduled` arms nothing when none is placed, and `computeCountdown` returns an em dash for an unset target rather than a negative duration |
+| The tick's two redraws | `WidgetTickReceiverTest` | both countdown widgets are redrawn, one failing does not cost the other its redraw, and both failing does not take the receiver down |
+| Widget state on disk | `JsonGlanceStateDefinitionTest` | a round-trip, one store per file name process-wide, and the two forward-compatibility guards: a field written by a newer release is ignored, and a **truncated** file falls back to the default and stays usable. Without those, the first release to rename a field left every widget stuck on its error frame permanently — only clearing app data brought it back |
+| The one write | `TogglePrayerStatusTest` | unprayed flips to prayed with a timestamp and back again without one; the first tap of a day inserts rather than doing nothing; the tile is refreshed after the write; and a repository failure is reported rather than crashing the **launcher**, which is the process a widget tap runs in |
+
+**Nothing is excluded, and the 38 uncovered lines are recorded in the module's build file.** Most
+are the `$dirty` bitmask branch the Compose compiler emits per composable parameter, which no test
+can take both sides of; the rest are a handful of `when`-merge lines with no statement of their
+own. No `COVERAGE_EXCLUSIONS` entry was added or widened.
 
 
 ## Conventions
