@@ -37,6 +37,7 @@ Two on-device/JVM test surfaces exist:
 - [Coverage audit (what's validated)](#coverage-audit-whats-validated)
   - [The same ground, on the JVM (`:core:database/src/test`)](#the-same-ground-on-the-jvm-coredatabasesrctest)
   - [The reader, on the JVM (`:feature:quran/src/test` and `src/testDebug`)](#the-reader-on-the-jvm-featurequransrctest-and-srctestdebug)
+  - [The layer everything compiles against (`:core:domain/src/test`)](#the-layer-everything-compiles-against-coredomainsrctest)
 - [Conventions](#conventions)
 
 ## Running the unit tests
@@ -157,7 +158,7 @@ floor is a ratchet — raised when a module is brought up to it, never lowered t
 green. The branch floor is set per module, at 80% where branches are reachable and lower where
 the Compose compiler's `$dirty` checks make them not (see
 [Where each module stands](#where-each-module-stands)). `:core:database` is the first module
-locked (#597); `:feature:quran` is the second.
+locked (#597); `:feature:quran` is the second and `:core:domain` the third.
 
 ### What is not counted, and why
 
@@ -249,8 +250,10 @@ companion objects it did not count are in it. CI's next run is the one to read.
 module-by-module pass; a module is **locked** once it clears the 80% line floor and declares its
 floors in its own `build.gradle.kts`.
 
-**The line floor is 80% everywhere; the branch floor is not.** `:core:database` is locked at
-80/80. `:feature:quran` is locked at 80% lines and **60%** branches, because the Compose compiler
+**The line floor is 80% everywhere; the branch floor is not.** `:core:database` and
+`:core:domain` are locked at 80/80 — neither has any Compose in it, so every branch is one
+somebody wrote and a test can take both sides of. `:feature:quran` is locked at 80% lines and
+**60%** branches, because the Compose compiler
 emits a `$dirty` bitmask branch per parameter of every restartable composable — the skippability
 check — and neither side of one is reachable from a test: which side runs depends on what the
 *caller* changed between recompositions. A Compose-heavy module therefore carries thousands of
@@ -263,7 +266,7 @@ split, and should say so where it sets its floors.
 |---|---|---|---|
 | `:core:database` | 97.3% | 86.8% | **locked** at 80/80 (#597) |
 | `:feature:quran` | 81.2% | 64.6% | **locked** at 80 line / 60 branch |
-| `:core:domain` | 71.7% | 72.8% | |
+| `:core:domain` | 82.3% | 83.9% | **locked** at 80/80 |
 | `:feature:calendar` | 55.1% | 45.3% | |
 | `:core:navigation` | 54.3% | 44.0% | |
 | `:core:ui` | 50.3% | 47.8% | |
@@ -376,6 +379,38 @@ under Robolectric — its `PdfDocument` shadow throws *"document is closed!"* on
 screens, so composing them needs Hilt. `QuranGraph`'s destination lambdas are bodies that only
 run when a destination is actually navigated to. The `@Preview` and `*Showcase` functions across
 the module are tooling, not behaviour, and are deliberately not driven.
+
+### The layer everything compiles against (`:core:domain/src/test`)
+
+`:core:domain` is the third module locked, and the one whose tests are cheapest to run: a pure
+JVM module, no Android SDK, no Robolectric, the whole suite in about a minute.
+
+| Area | Covered by | What it pins |
+|---|---|---|
+| Every stored-value parser | `model/StoredEnumParserTest` | a round trip per entry, and the documented fallback for input a newer build wrote |
+| Every hand-written enum label | `model/EnumLabelTest` | present, distinct and not the constant's own name — the copy-paste that puts two identical rows in a picker |
+| The curated city catalogue | `model/CityCatalogTest` | no two cities sharing a lazy-list key (a repeat is a crash, not a duplicate row); every city carrying the region and flag its row is drawn with |
+| Subject roll-up | `usecase/quran/RollUpTopicCountsTest` | a branch reporting its whole subtree, and a cycle in regenerated content costing a wrong number rather than a hung browser |
+| Prayer and location use cases | `usecase/PrayerUseCasesTest` | each delegation reaching its own repository call; a saved location composed here, with `id = 0`, rather than by the caller |
+| Qur'an use cases | `usecase/QuranUseCasesTest` | the same, plus the verse of the day surviving a negative `epochDay`, and a bulk translation read short-circuiting an empty `IN ()` |
+| The day's dua, and notes on a commentary | `usecase/DailySelectionAndNotesTest` | the hour→category bands; an empty category yielding nothing rather than dividing by zero; a note whose verse cannot be read dropped rather than shown blank |
+| The Hijri month grid | `usecase/calendar/BuildHijriMonthUseCaseTest` | a grid as long as the month actually is — 29 or 30, decided per month per year |
+| The calculator's "today" questions | `calendar/HijriDateCalculatorTodayTest` | a Ramadan countdown inside one year, and "is it Ramadan" never disagreeing with "days remaining" |
+| The night window and a location's own settings | `prayer/PrayerTimeCalculatorSunnahTest` | middle-of-the-night before the last third; the method, madhab and high-latitude rule on a saved `Location` reaching the calculation |
+
+**Tests that were in the wrong module.** `LocationCatalogTest` lived in `:app/src/test` while the
+code it exercised had moved to `:core:domain` — so the merged report counted it and this module's
+own report did not. Its catalogue half is now `CityCatalogTest` here; the `formatCoordinates` half
+stayed in `:app`, next to the settings screen that owns it. Worth checking for when a module is
+brought up: a per-module number can be low because the tests are elsewhere, not because they are
+missing.
+
+**What is left uncovered, and why.** The `*UseCases` aggregators (`QuranUseCases` at 41 lines,
+`PrayerUseCases` at 23, and six more) are `data class`es whose entire body is injected `val`s.
+Nothing constructs one outside Hilt, so no behavioural test reaches them; they are not excluded
+from the measurement, just left at zero. The rest is domain-model constructors and accessors,
+which the tests above reach only where a behaviour actually returns one — deliberately, since a
+test that asserts on a generated `copy()` measures nothing.
 
 ## Conventions
 

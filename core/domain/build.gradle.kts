@@ -15,6 +15,22 @@ plugins {
     jacoco
 }
 
+/**
+ * Locked. The domain layer is the one every other module compiles against, so a regression here
+ * is a regression everywhere; `check` now fails if its coverage slips — see `COVERAGE_EXCLUSIONS`
+ * and `coverageFloor` in `build-logic` for what is measured and how the ratchet works.
+ *
+ * **80/80, both floors, unlike `:feature:quran`.** That module sets its branch floor at 60%
+ * because the Compose compiler emits an unreachable `$dirty` bitmask branch per parameter of
+ * every restartable composable. There is no Compose here — no AGP at all — so every branch in
+ * this module is one somebody wrote and a test can take both sides of. The standard applies
+ * unmodified.
+ */
+nimazCoverage {
+    lineFloor.set(0.80)
+    branchFloor.set(0.80)
+}
+
 // The pure layer. No AGP, no Android SDK on the classpath — `import android.content.Context` in a
 // use case is a compile error here, which is the whole reason this module exists. The
 // `domainDependencyGuard` task the convention plugin wires into `check` keeps that true after a
