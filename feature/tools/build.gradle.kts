@@ -21,6 +21,36 @@ android {
     }
 }
 
+/**
+ * Locked. See `COVERAGE_EXCLUSIONS` and `coverageFloor` in `build-logic` for what is measured and
+ * how the ratchet works.
+ *
+ * **80/80, at 97.5% lines and 83.6% branches** — the third Compose module in a row to hold the
+ * full branch floor, after `:feature:calendar` (82.4%) and `:feature:onboarding` (90.3%). The
+ * unreachable `$dirty` bitmask branch the Compose compiler emits is one per parameter of every
+ * restartable composable, so its weight scales with how many composables a module has rather than
+ * with how much Compose is in it: there are two screens here, and the ratio never becomes the
+ * number. `:feature:quran`, with ninety-odd files, is still the only module softened to 0.60.
+ *
+ * **Nothing is excluded.** Twenty-five lines are uncovered and they fall into three groups, none
+ * of which is worth a production change to reach:
+ *
+ *  - the eleven lambda bodies inside `toolsGraph` (`popBackStack`, three `navigate` calls), which
+ *    only a composed `NavHost` reaches — and composing one means giving both screens a Hilt
+ *    ViewModel. `ToolsGraphTest` covers the registrations, which is where the crash-on-tap lives;
+ *  - each screen's `viewModel: ZakatViewModel = hiltViewModel()` default argument, evaluated only
+ *    when the graph omits it;
+ *  - `ZakatViewModel.calculate`'s `catch`. `ZakatCalculator.calculate` is arithmetic over
+ *    `Double`s with no division by a user-supplied figure, so no input reaches it. The handler is
+ *    still right to exist — it is what keeps a future arithmetic fault an inline error beside the
+ *    form rather than a crash mid-calculation — and `ZakatPersistenceTest` covers the identical
+ *    shape on all four write paths, where failures do happen.
+ */
+nimazCoverage {
+    lineFloor.set(0.80)
+    branchFloor.set(0.80)
+}
+
 // The zakat calculator and its history — `screens/zakat`, `screens/tools` (the graph) and
 // `viewmodel/tools`.
 //
@@ -55,4 +85,16 @@ dependencies {
     testImplementation(libs.turbine)
     testImplementation(testFixtures(project(":core:domain")))
     testImplementation(testFixtures(project(":core:common")))
+
+    // The two zakat screens and the graph are exercised under Robolectric, the same harness
+    // `:feature:calendar` and `:feature:onboarding` use — including
+    // `src/testDebug/resources/robolectric.properties`, which pins the SDK and the Application
+    // class. A properties file is a resource of its source set and does not travel with the
+    // tests that need it.
+    testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.junit)
+    testImplementation(platform(libs.androidx.compose.bom))
+    testImplementation(libs.androidx.compose.ui.test.junit4)
+    testImplementation(testFixtures(project(":core:ui")))
+    debugImplementation(libs.androidx.compose.ui.test.manifest)
 }

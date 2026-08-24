@@ -43,6 +43,7 @@ Two on-device/JVM test surfaces exist:
   - [The Islamic calendar (`:feature:calendar/src/test`)](#the-islamic-calendar-featurecalendarsrctest)
   - [Every preference, read back (`:core:datastore/src/test`)](#every-preference-read-back-coredatastoresrctest)
   - [The first run, drawn and driven (`:feature:onboarding/src/test` and `src/testDebug`)](#the-first-run-drawn-and-driven-featureonboardingsrctest-and-srctestdebug)
+  - [The zakat calculator and its history (`:feature:tools/src/test` and `src/testDebug`)](#the-zakat-calculator-and-its-history-featuretoolssrctest-and-srctestdebug)
 - [Conventions](#conventions)
 
 ## Running the unit tests
@@ -257,10 +258,11 @@ floors in its own `build.gradle.kts`.
 
 **The line floor is 80% everywhere; the branch floor is not.** `:core:database`, `:core:domain`,
 `:core:navigation`, `:core:common` and `:core:datastore` are locked at 80/80 — none of them draws
-anything, so every branch is one somebody wrote and a test can take both sides of. So are `:feature:calendar` and
-`:feature:onboarding`, which *are* Compose modules: the unreachable branch below is emitted **per
-parameter of every restartable composable**, so its weight scales with how many composables a
-module has, and six files — or eight — never accumulate enough of them to move the number.
+anything, so every branch is one somebody wrote and a test can take both sides of. So are `:feature:calendar`,
+`:feature:onboarding` and `:feature:tools`, which *are* Compose modules: the unreachable branch
+below is emitted **per parameter of every restartable composable**, so its weight scales with how
+many composables a module has, and six files — or eight, or the two screens in `:feature:tools` —
+never accumulate enough of them to move the number.
 `:feature:onboarding` reports **90.3%** branches, the highest of any Compose module here. Only `:feature:quran` is softened, to
 80% lines and **60%** branches, because the Compose compiler
 emits a `$dirty` bitmask branch per parameter of every restartable composable — the skippability
@@ -281,13 +283,13 @@ split, and should say so where it sets its floors.
 | `:feature:calendar` | 94.0% | 82.4% | **locked** at 80/80 |
 | `:core:datastore` | 96.1% | 84.3% | **locked** at 80/80 |
 | `:feature:onboarding` | 94.3% | 90.3% | **locked** at 80/80 (#605) |
+| `:feature:tools` | 97.5% | 83.6% | **locked** at 80/80 (#606) |
 | `:core:ui` | 50.3% | 47.8% | |
 | `:core:data` | 39.0% | 31.2% | |
 | `:feature:prayer` | 38.1% | 23.7% | |
 | `:feature:tracker` | 30.4% | 24.4% | |
 | `:feature:content` | 28.8% | 19.5% | |
 | `:feature:search` | 18.8% | 13.9% | |
-| `:feature:tools` | 18.0% | 29.3% | |
 | `:feature:about` | 17.8% | 23.0% | |
 | `:feature:widget` | 16.8% | 28.1% | |
 | `:feature:settings` | 11.3% | 14.9% | |
@@ -571,6 +573,65 @@ on a real window and hangs under Robolectric.
 | A completion that cannot be persisted | same | reported as a failure, and **not** counted in the funnel — a completion the user will be shown again next launch makes the first-run denominator disagree with the step funnel above it |
 | Permission results | same | each updates only the field it answered for; granting location detects a location without waiting to be asked again |
 | The graph | `OnboardingGraphTest` | `Route.Onboarding` registers, and the graph builds with it as the start destination — the failure here is thrown on the first frame of the first launch |
+
+### The zakat calculator and its history (`:feature:tools/src/test` and `src/testDebug`)
+
+The ninth module locked: **18.0% lines to 97.5%**, from 181 covered lines to 981, and 29.3% to
+83.6% branches. Two screens were 727 of the 825 that were missing. The ViewModel was already the
+best-covered part, so nothing here was a matter of finding tests filed in the wrong module — the
+gap was that nothing had ever composed either screen.
+
+Zakat is the one feature in the app where a wrong number has a religious and financial consequence,
+and **the arithmetic was never the exposed part**. `ZakatCalculator` has had its own tests in
+`:core:domain` since it was written, and neither screen does a sum. What had no coverage at all was
+everything between the user and that calculation: which asset a typed figure is filed against,
+whether the symbol on the fields is the one beside the total, whether the threshold that decides
+"you owe this" from "you owe nothing" is even reported on the form, and whether a write that failed
+says so. The calculator is thirteen near-identical `InputCard` call sites; a copy-paste between any
+two of them takes input in the right box, files it against the wrong asset, and looks correct.
+
+Two component contracts shaped the tests rather than the other way round. `ZakatSummaryHero` puts
+`clearAndSetSemantics` over its plinth and over each stat tile, so that TalkBack reads "Zakat Due,
+$450.00, Above nisab" as one phrase instead of three fragments — which means the hero is
+addressable *only* by that content description, and the assertions here are on the accessibility
+contract itself. And the hero's collapse-on-scroll can only be exercised on a phone-height
+`@Config`: the rest of the class runs at `w411dp-h2200dp` so the `LazyColumn` composes every row,
+and on a viewport that tall the whole form fits and there is nothing to scroll.
+
+| Area | Covered by | What it pins |
+|---|---|---|
+| Every asset row | `ZakatCalculatorScreenTest` | each of the nine files its figure against **its own** asset — distinct values per row, so any two crossed shows |
+| Every liability row | same | the same for the four deducted rows, and that none of them lands on the asset side — the sign error that doubles someone's zakat |
+| Weight versus money | same | gold and silver take **grams**; the money rows lead with the currency symbol and the weight rows follow with `g`. The field these replaced chose between the two by comparing its suffix against `"$"`, so every non-dollar currency rendered a dollar sign |
+| The chosen currency | same | the symbol on the fields and the figure beside the total come from the same code, and no dollar total survives on a euro form |
+| The nisab basis | same | reported on the form before anything is typed, follows a basis change, and opens the settings screen rather than being editable mid-entry — a reader who cannot see the threshold cannot tell why the total says zero |
+| The verdict | same | above the nisab the hero says so and states the amount; below it, the *other* verdict is asserted absent — "Above nisab" over a zero reads as a calculation that failed rather than an answer |
+| The hero's tiles | same | the net wealth and the threshold it was measured against, without which the headline figure has to be taken on trust |
+| The collapsing hero | same | collapses on scroll, re-expands **only at a true top**, and never takes the amount with it. The asymmetry is the fix: the hero sits above the list and the list takes the height the hero leaves, so one symmetric threshold is a loop that presented as a hero which never collapsed |
+| The breakdown | same | shows the working, renders liabilities as a subtraction, keeps its header when collapsed, and is absent entirely over an empty form — the defect where clearing the last field left a zakat figure over a blank form |
+| A failed calculation | same | reported **inline**, with every typed figure still on the form, and its retry re-runs the sum rather than asking the user to retype anything |
+| The action bar | same | save and share are disabled until there is a calculation — an enabled share over a null one is what produces a card of zeroes — and enabled together once there is |
+| The top bar | same | reset goes through the ViewModel; history and settings **navigate**, keeping the destination decision out of the ViewModel |
+| The wide layout | same | assets and liabilities side by side with no accordion to open, the same action bar, the same basis row, and input still reaching the right event |
+| The three history states, in order | `ZakatHistoryScreenTest` | the error branch is checked **before** the empty one: a failed read also leaves the list empty, so the other order tells someone with years of records that they have none |
+| A saved calculation | same | renders its own stored figures and its own basis — recomputing would silently restate last year's zakat at today's gold price |
+| Paid versus unpaid | same | the badge tracks `isPaid`, "mark as paid" is **not** offered on something already paid, the paid date comes from `paidAt` rather than `calculatedAt`, and an entry with no recorded date does not invent one |
+| Which entry was acted on | same | mark-paid and delete carry the id of the row that was tapped, not of the first row |
+| The list's identity | same | one card per recorded calculation — a key collision collapses several years into one, and the only symptom is a history shorter than it should be |
+| Saving | `ZakatPersistenceTest` | writes the calculation **on screen** rather than recomputing at save time, which would re-read the metal prices and file a figure the user never saw; an empty form writes nothing |
+| A write that fails | same | reported on the screen the user is actually on — a save failure never touches the history state and never clears the form, a mark-paid or delete failure never touches the calculator |
+| Marking paid | same | stamps the time of payment, not the time of calculation — for zakat those can be a lunar year apart |
+| Reading the history back | same | the running total is the repository's paid total, not a client-side sum over the list, which would report the whole history as paid |
+| A history stream that fails first | same | **ends the spinner** and sets an error: `isLoading` used to be cleared only inside the collect, so a missing table left the screen spinning for the life of the ViewModel |
+| The form's lifecycle | same | the thirteen typed figures survive process death and recompute on restore; clearing reaches the saved state too; a reset keeps the persisted basis and prices, which decide whether anything is owed at all |
+| The graph | `ToolsGraphTest` | both zakat destinations register and either can be a start destination — the two navigate to each other, so a missing registration is a crash on a tap the user made deliberately |
+
+**Nothing is excluded, and the twenty-five uncovered lines are recorded in the module's build
+file**: the lambda bodies inside `toolsGraph` (reachable only from a composed `NavHost`, which
+would need Hilt ViewModels for both screens), each screen's `hiltViewModel()` default argument, and
+`ZakatViewModel.calculate`'s `catch` — arithmetic over `Double`s with no user-supplied divisor, so
+no input reaches it. `ZakatPersistenceTest` covers the identical handler shape on all four write
+paths, where failures do happen.
 
 ## Conventions
 
