@@ -38,6 +38,7 @@ Two on-device/JVM test surfaces exist:
   - [The same ground, on the JVM (`:core:database/src/test`)](#the-same-ground-on-the-jvm-coredatabasesrctest)
   - [The reader, on the JVM (`:feature:quran/src/test` and `src/testDebug`)](#the-reader-on-the-jvm-featurequransrctest-and-srctestdebug)
   - [The layer everything compiles against (`:core:domain/src/test`)](#the-layer-everything-compiles-against-coredomainsrctest)
+  - [The route vocabulary (`:core:navigation/src/test`)](#the-route-vocabulary-corenavigationsrctest)
 - [Conventions](#conventions)
 
 ## Running the unit tests
@@ -158,7 +159,7 @@ floor is a ratchet — raised when a module is brought up to it, never lowered t
 green. The branch floor is set per module, at 80% where branches are reachable and lower where
 the Compose compiler's `$dirty` checks make them not (see
 [Where each module stands](#where-each-module-stands)). `:core:database` is the first module
-locked (#597); `:feature:quran` is the second and `:core:domain` the third.
+locked (#597); then `:feature:quran`, `:core:domain` and `:core:navigation`.
 
 ### What is not counted, and why
 
@@ -250,8 +251,8 @@ companion objects it did not count are in it. CI's next run is the one to read.
 module-by-module pass; a module is **locked** once it clears the 80% line floor and declares its
 floors in its own `build.gradle.kts`.
 
-**The line floor is 80% everywhere; the branch floor is not.** `:core:database` and
-`:core:domain` are locked at 80/80 — neither has any Compose in it, so every branch is one
+**The line floor is 80% everywhere; the branch floor is not.** `:core:database`, `:core:domain`
+and `:core:navigation` are locked at 80/80 — none of them draws anything, so every branch is one
 somebody wrote and a test can take both sides of. `:feature:quran` is locked at 80% lines and
 **60%** branches, because the Compose compiler
 emits a `$dirty` bitmask branch per parameter of every restartable composable — the skippability
@@ -267,8 +268,8 @@ split, and should say so where it sets its floors.
 | `:core:database` | 97.3% | 86.8% | **locked** at 80/80 (#597) |
 | `:feature:quran` | 81.2% | 64.6% | **locked** at 80 line / 60 branch |
 | `:core:domain` | 82.3% | 83.9% | **locked** at 80/80 |
+| `:core:navigation` | 84.2% | 85.3% | **locked** at 80/80 |
 | `:feature:calendar` | 55.1% | 45.3% | |
-| `:core:navigation` | 54.3% | 44.0% | |
 | `:core:ui` | 50.3% | 47.8% | |
 | `:core:common` | 42.1% | 49.8% | |
 | `:core:data` | 39.0% | 31.2% | |
@@ -411,6 +412,40 @@ Nothing constructs one outside Hilt, so no behavioural test reaches them; they a
 from the measurement, just left at zero. The rest is domain-model constructors and accessors,
 which the tests above reach only where a behaviour actually returns one — deliberately, since a
 test that asserts on a generated `copy()` measures nothing.
+
+### The route vocabulary (`:core:navigation/src/test`)
+
+The fourth module locked, and the one whose number moved most for the least work: **21 of the 30
+points came from moving five test files out of `:app/src/test`**, where they were exercising this
+module's code (see below).
+
+| Area | Covered by | What it pins |
+|---|---|---|
+| The announcement route grammar | `AnnouncementRoutesTest` | every published key resolving, and the arguments a targeted announcement carries |
+| The help deep-link grammar | `HelpDeepLinkTest` | all 22 keys resolving, and **no two leading to the same screen** — a working button that goes somewhere else is worse than no button |
+| Content and proof targets | `ContentTargetRoutesTest`, `SearchProofNavigationTest` | a citation resolving to the destination that can show it |
+| Worship destinations | `WorshipDestinationsTest` | each reminder type opening its own screen |
+| The five bottom-nav tabs | `BottomNavDestinationTest` | no two sharing a title — the test tag is derived from it, so a duplicate collapses two tabs onto one tag and every instrumented tap becomes a coin flip |
+| `taggedComposable` | `TaggedComposableTest` | the wrapper still applies its tag, still forwards the back-stack entry, and still lets a route's arguments through |
+
+**`taggedComposable` had no test at all.** `CLAUDE.md` requires every destination to be wired with
+it and `check_docs.py`'s NAV-04 fails one that is not — so the *usage* was enforced from two
+directions while the helper itself was unchecked. If it stopped tagging, the failure would surface
+as a wall of red on an emulator, in instrumented tests that are about something else. It is now a
+single Robolectric test in `src/testDebug`, which is the only reason this module has a Robolectric
+dependency at all.
+
+**Tests that were in the wrong module, again.** `AnnouncementRoutesTest`, `HelpDeepLinkTest`,
+`ContentTargetRoutesTest`, `SearchProofNavigationTest` and `WorshipDestinationsTest` all lived in
+`:app/src/test` and imported nothing outside `:core:navigation` and `:core:domain`. They moved
+wholesale. `EveryRouteIsRegisteredTest` stays in `:app`, because comparing the registered set
+against the declared one needs to see every feature's graph.
+
+**What is left uncovered, and why.** `taggedComposable` is `inline`, so its bytecode is emitted
+into the *caller's* module — this module's own copy is never executed however many tests compose
+it, and it reads as 10 permanently uncovered lines. The other residue is the 94 `@Serializable`
+`Route` declarations, which are a vocabulary rather than behaviour. Together they are the
+module's ceiling, which is why the floor is the standard 80 rather than the 84 it reports today.
 
 ## Conventions
 
