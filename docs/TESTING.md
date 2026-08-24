@@ -40,6 +40,7 @@ Two on-device/JVM test surfaces exist:
   - [The layer everything compiles against (`:core:domain/src/test`)](#the-layer-everything-compiles-against-coredomainsrctest)
   - [The route vocabulary (`:core:navigation/src/test`)](#the-route-vocabulary-corenavigationsrctest)
   - [The Firebase wrappers and the formatters (`:core:common/src/test`)](#the-firebase-wrappers-and-the-formatters-corecommonsrctest)
+  - [The Islamic calendar (`:feature:calendar/src/test`)](#the-islamic-calendar-featurecalendarsrctest)
 - [Conventions](#conventions)
 
 ## Running the unit tests
@@ -160,7 +161,7 @@ floor is a ratchet — raised when a module is brought up to it, never lowered t
 green. The branch floor is set per module, at 80% where branches are reachable and lower where
 the Compose compiler's `$dirty` checks make them not (see
 [Where each module stands](#where-each-module-stands)). `:core:database` is the first module
-locked (#597); then `:feature:quran`, `:core:domain`, `:core:navigation` and `:core:common`.
+locked (#597); then `:feature:quran`, `:core:domain`, `:core:navigation`, `:core:common` and `:feature:calendar`.
 
 ### What is not counted, and why
 
@@ -254,8 +255,11 @@ floors in its own `build.gradle.kts`.
 
 **The line floor is 80% everywhere; the branch floor is not.** `:core:database`, `:core:domain`,
 `:core:navigation` and `:core:common` are locked at 80/80 — none of them draws anything, so every
-branch is one somebody wrote and a test can take both sides of. `:feature:quran` is locked at 80% lines and
-**60%** branches, because the Compose compiler
+branch is one somebody wrote and a test can take both sides of. So is `:feature:calendar`, which
+*is* a Compose module: the unreachable branch below is emitted **per parameter of every
+restartable composable**, so its weight scales with how many composables a module has, and six
+files never accumulate enough of them to move the number. Only `:feature:quran` is softened, to
+80% lines and **60%** branches, because the Compose compiler
 emits a `$dirty` bitmask branch per parameter of every restartable composable — the skippability
 check — and neither side of one is reachable from a test: which side runs depends on what the
 *caller* changed between recompositions. A Compose-heavy module therefore carries thousands of
@@ -271,7 +275,7 @@ split, and should say so where it sets its floors.
 | `:core:domain` | 82.3% | 83.9% | **locked** at 80/80 |
 | `:core:navigation` | 84.2% | 85.3% | **locked** at 80/80 |
 | `:core:common` | 92.7% | 82.3% | **locked** at 80/80 |
-| `:feature:calendar` | 55.1% | 45.3% | |
+| `:feature:calendar` | 94.0% | 82.4% | **locked** at 80/80 |
 | `:core:ui` | 50.3% | 47.8% | |
 | `:core:data` | 39.0% | 31.2% | |
 | `:feature:prayer` | 38.1% | 23.7% | |
@@ -476,6 +480,28 @@ absent. That is the module's only reason for a Robolectric dependency.
 **What is left uncovered, and why.** `LocaleHelper` (10 lines) switches the process locale through
 `resources.updateConfiguration`, which is a global side effect on the test JVM; it is left at zero
 rather than made to run in a way that leaks into every test after it.
+
+### The Islamic calendar (`:feature:calendar/src/test`)
+
+The sixth module locked. Its screen was **140 lines at 0%** — the module's whole gap, in one file
+— and what the screen holds is an arrangement decision no ViewModel test can see.
+
+| Area | Covered by | What it pins |
+|---|---|---|
+| The screen's error handling | `screens/calendar/IslamicCalendarScreenTest` | a failed event read reported **above a grid that still draws**, not in place of it |
+| The two event sections | same | neither heading appearing with nothing under it, and the upcoming list capped at five |
+| The wide layout | same, `@Config(qualifiers = "w1000dp-h1200dp")` | grid and events side by side, and the third arm the compact layout does not have — an empty events column still carries its heading |
+| The day markers | same | every `IslamicEventType` reaching an arm of `getEventDotColor`; a type with no arm is an exception on the grid, not a missing dot |
+| The Hijri grid, year overview and upcoming list | `viewmodel/calendar/CalendarNavigationTest` | each loaded by its own cancellable job, so a second navigation wins; a hijri month as long as the month actually is |
+| Stepping a month | same | the guards that stop a step relative to a grid that does not exist yet |
+| The route graph | `screens/calendar/CalendarGraphTest` | both destinations registered — including `Route.IslamicMonth`, which nothing in the app's own UI opens, only an announcement deep link |
+
+**The invariant worth the most** is the first one. `CalendarSection`'s KDoc records that
+`loadToday()` used to run inside the events `try`, so a content-database fault left `currentMonth`
+null and the screen rendered *nothing*. The fix made the error a section above a grid that still
+draws — which only holds if the screen keeps drawing the grid, and that is a rendering fact.
+`CalendarNavigationTest` pins the ViewModel half (the state still carries a month); the screen
+test pins that the month is actually on screen beside the error.
 
 ## Conventions
 

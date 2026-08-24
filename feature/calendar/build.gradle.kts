@@ -21,6 +21,21 @@ android {
     }
 }
 
+/**
+ * Locked. See `COVERAGE_EXCLUSIONS` and `coverageFloor` in `build-logic` for what is measured and
+ * how the ratchet works.
+ *
+ * **80/80 — a Compose module holding the full branch floor, unlike `:feature:quran`.** The
+ * unreachable `$dirty` bitmask branch the Compose compiler emits is one *per parameter of every
+ * restartable composable*, so its weight scales with how many composables a module has. Six files
+ * here against 90-odd there: the ratio never becomes the number, and the module reports 82%
+ * branches. A softened floor would have to be justified by the code, and here it cannot be.
+ */
+nimazCoverage {
+    lineFloor.set(0.80)
+    branchFloor.set(0.80)
+}
+
 // The Islamic calendar — one screen, one ViewModel.
 //
 // Small enough to question, and it still earns its own module: it owns a distinct ViewModel
