@@ -44,6 +44,7 @@ Two on-device/JVM test surfaces exist:
   - [Every preference, read back (`:core:datastore/src/test`)](#every-preference-read-back-coredatastoresrctest)
   - [The first run, drawn and driven (`:feature:onboarding/src/test` and `src/testDebug`)](#the-first-run-drawn-and-driven-featureonboardingsrctest-and-srctestdebug)
   - [The zakat calculator and its history (`:feature:tools/src/test` and `src/testDebug`)](#the-zakat-calculator-and-its-history-featuretoolssrctest-and-srctestdebug)
+  - [Search, and the question that leaves the device (`:feature:search/src/test` and `src/testDebug`)](#search-and-the-question-that-leaves-the-device-featuresearchsrctest-and-srctestdebug)
 - [Conventions](#conventions)
 
 ## Running the unit tests
@@ -164,7 +165,7 @@ floor is a ratchet — raised when a module is brought up to it, never lowered t
 green. The branch floor is set per module, at 80% where branches are reachable and lower where
 the Compose compiler's `$dirty` checks make them not (see
 [Where each module stands](#where-each-module-stands)). `:core:database` is the first module
-locked (#597); then `:feature:quran`, `:core:domain`, `:core:navigation`, `:core:common`, `:feature:calendar` and `:core:datastore`.
+locked (#597); then `:feature:quran`, `:core:domain`, `:core:navigation`, `:core:common`, `:feature:calendar`, `:core:datastore`, `:feature:onboarding`, `:feature:tools` and `:feature:search`.
 
 ### What is not counted, and why
 
@@ -259,10 +260,11 @@ floors in its own `build.gradle.kts`.
 **The line floor is 80% everywhere; the branch floor is not.** `:core:database`, `:core:domain`,
 `:core:navigation`, `:core:common` and `:core:datastore` are locked at 80/80 — none of them draws
 anything, so every branch is one somebody wrote and a test can take both sides of. So are `:feature:calendar`,
-`:feature:onboarding` and `:feature:tools`, which *are* Compose modules: the unreachable branch
-below is emitted **per parameter of every restartable composable**, so its weight scales with how
-many composables a module has, and six files — or eight, or the two screens in `:feature:tools` —
-never accumulate enough of them to move the number.
+`:feature:onboarding`, `:feature:tools` and `:feature:search`, which *are* Compose modules: the
+unreachable branch below is emitted **per parameter of every restartable composable**, so its
+weight scales with how many composables a module has, and six files — or eight, or the two screens
+in `:feature:tools`, or the one screen and four cards in `:feature:search` — never accumulate
+enough of them to move the number.
 `:feature:onboarding` reports **90.3%** branches, the highest of any Compose module here. Only `:feature:quran` is softened, to
 80% lines and **60%** branches, because the Compose compiler
 emits a `$dirty` bitmask branch per parameter of every restartable composable — the skippability
@@ -284,12 +286,12 @@ split, and should say so where it sets its floors.
 | `:core:datastore` | 96.1% | 84.3% | **locked** at 80/80 |
 | `:feature:onboarding` | 94.3% | 90.3% | **locked** at 80/80 (#605) |
 | `:feature:tools` | 97.5% | 83.6% | **locked** at 80/80 (#606) |
+| `:feature:search` | 91.4% | 87.0% | **locked** at 80/80 (#607) |
 | `:core:ui` | 50.3% | 47.8% | |
 | `:core:data` | 39.0% | 31.2% | |
 | `:feature:prayer` | 38.1% | 23.7% | |
 | `:feature:tracker` | 30.4% | 24.4% | |
 | `:feature:content` | 28.8% | 19.5% | |
-| `:feature:search` | 18.8% | 13.9% | |
 | `:feature:about` | 17.8% | 23.0% | |
 | `:feature:widget` | 16.8% | 28.1% | |
 | `:feature:settings` | 11.3% | 14.9% | |
@@ -632,6 +634,69 @@ would need Hilt ViewModels for both screens), each screen's `hiltViewModel()` de
 `ZakatViewModel.calculate`'s `catch` — arithmetic over `Double`s with no user-supplied divisor, so
 no input reaches it. `ZakatPersistenceTest` covers the identical handler shape on all four write
 paths, where failures do happen.
+
+### Search, and the question that leaves the device (`:feature:search/src/test` and `src/testDebug`)
+
+The tenth module locked: **18.8% lines to 91.4%**, from 233 covered lines to 1,130, and 13.9% to
+**87.0%** branches. 130 tests, 111 of them new. Both ViewModels were already reasonably covered —
+the two screen files were 843 of the 1,004 lines that were missing, and nothing had ever composed
+either of them.
+
+**This is the app's only surface where a bug sends user text off the device.** "Ask with Proof" is
+opt-in, and until #607 that promise was pinned in two places a user never sees: `AiOptInDefaultsTest`
+(in `:core:datastore`) on the stored default, and `AskWithProofConsentTest` (in `:core:domain`) on
+the use case's refusal. Neither says anything about the screen, and the screen is where consent is
+offered — or bypassed. The assertion that the Ask affordance is *absent*, not merely disabled,
+while the feature is off is a privacy assertion, not a layout one.
+
+The other half is the ordinary keyword search, where the load-bearing property is that three
+different situations must not look alike. A search in flight, a search that found nothing and a
+search that failed all render a list with nothing in it, and no ViewModel test can tell them apart:
+the difference is entirely which branch the screen takes and in what order. "No results for X" over
+a lookup that never ran reads as a fact about the reader's library rather than as a failure.
+
+| Area | Covered by | What it pins |
+|---|---|---|
+| A search still running | `SearchScreenTest` | shows progress and **never** the no-results sentence — the screen half of the contract the ViewModel keeps by flipping `isSearching` synchronously |
+| A search that found nothing | same | names the query it found nothing for; "No results" alone reads as an empty library |
+| A search that failed | same | the failure is reported **before** the no-results branch, with the typed query still in the bar and a retry that re-runs the search — the ordering is what stops a failed lookup being reported as an empty library |
+| Every result row | same | each of the five kinds dispatches its own callback with its own identifiers: the verse, the surah (not a verse inside it), the hadith's **book then record id** in that order, the dua, and the name **with its catalogue** — three catalogues share one id space each, so a dropped catalogue opens the wrong record silently |
+| Name catalogue labels | same | each of the three is tagged distinctly, and a name with no transliteration still has a title |
+| The filter chips | same | appear only once there is something to scope, count from the *unfiltered* results with the same predicate the list filters by (a surah hit counts under Qur'an), show a bare label at zero, and dispatch the filter that was tapped |
+| An initially scoped search | same | opening search from Duas scopes it on first composition; opening it plainly scopes nothing |
+| The resting screen | same | recent searches are offered, tapping one runs it, removing one is not wired to clear-all, and no header is drawn over an empty history |
+| The consent boundary | `SearchScreenAskTest` | with AI off there is **no control that sends a question anywhere**, on Global Search or on any scoped search — even with the feature switched on in settings, a scoped search offers nothing to ask |
+| The opt-in offer | same | states what leaves the device, sends "turn it on" to Search settings rather than flipping the switch itself, remembers a decline, and stays out of the way mid-search |
+| One bar, two jobs | same | what is typed reaches the question as well as the search, so Ask sends what is on screen; emptying the bar clears the answer with it |
+| The answer | same | its text, its confidence and the note saying it is not a ruling — the trust note is the only thing on screen that says so |
+| Cited sources | same | marked "Cited", and each opens the record it cites (`ContentTarget.Ayah` / `.Hadith`, resolved to a route in `:core:navigation`) |
+| The dedup | same | a verse the AI cited and the keyword search also matched appears **once** — twice would read as two independent sources agreeing. A surah or a name has no citation form and therefore survives beside the cited rows |
+| Filtering an answer | same | narrowing to Qur'an keeps the cited verses, to Hadith the cited hadiths, and to Duas or Names hides the cited strip rather than filtering it to nothing |
+| The list under an answer | same | the keyword rows stay on screen while the related-terms lookup runs, and the count line is held back until it lands; rows render with no query to highlight, which is the state the `indexOf("")` guard exists for |
+| Failures on the AI side | same | a retry is offered for a dropped connection and nothing else; keyword results carry on under a failed ask, because the library is local |
+| The AI's related terms | same | drive the local search on Global Search, and are ignored entirely on a search that never asked |
+| Every error card | `AskComponentsTest` | seven `AiError` cases, each with its own copy, and retry offered **only** where retrying can help — a retry beside a daily cap invites taps against a limit only time lifts, and on the retryable ones each tap is one billed Worker call |
+| "You can ask again in …" | same | seconds round **up** into minutes and minutes into hours; rounding down promises a limit that has not lifted. No retry-after means no invented number |
+| A failed lookup, in the ViewModel | `SearchSessionTest` | surfaces as an error with the resource message and the exception text kept for a bug report — and the next search clears it, so no error banner is left standing over fresh results |
+| A superseded search | same | a slow first lookup landing after a faster second one is discarded — results for a query the box no longer holds |
+| The recent list | same | written on submit and never on a keystroke, de-duplicated to the top, capped at ten, removable one at a time, and **kept** when the query is cleared |
+| Telemetry | same, `AskHistoryTest` | the query length and filter are recorded, the words never are; an empty submit counts as no search at all |
+| Every stored default scope | `SearchSessionTest` | each `LibrarySource` opens search on its own chip, and a scope this build does not recognise falls back to everything rather than crashing |
+| The filter predicate | same | every branch, including `SurahResult` under QURAN — the case the deleted per-corpus counters got wrong in both directions |
+| The question history | `AskHistoryTest` | written only while "remember my questions" is on — the switch gates the **write**, not the display — de-duplicated, capped at ten, and unreadable stored JSON degrades to no history rather than throwing while the resting screen composes |
+| Every failure slug | same | seven distinct names, so a budget cap and a failing integrity check are not one undifferentiated error rate; a thrown failure still takes the screen out of Loading |
+| The graph | `SearchGraphTest` | all four destinations register and each resolves as a start destination in its own right — every one is reached directly, three from a section screen and Global Search from home |
+
+**Nothing is excluded, and the 107 uncovered lines are recorded in the module's build file.**
+Ninety of them are the four destination bodies inside `searchGraph`: each calls `SearchScreen(...)`
+with seven navigation lambdas, and none of it runs until a composed `NavHost` reaches the
+destination — which builds both ViewModels through `hiltViewModel()` and so needs a Hilt-injected
+activity this module cannot construct. `SearchGraphTest` covers the registration those bodies hang
+off, which is the failure that actually ships. The remainder is the two `hiltViewModel()` default
+arguments, the `null ->` arm of `LibrarySource?.asFilter()` (unreachable — its only call site is
+already inside a `defaultScope != null` check), and a few `when`-merge lines with no statement of
+their own.
+
 
 ## Conventions
 
