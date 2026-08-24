@@ -1,4 +1,5 @@
 import org.gradle.api.tasks.PathSensitivity
+import com.arshadshah.nimaz.buildlogic.COVERAGE_EXCLUSIONS
 import com.arshadshah.nimaz.buildlogic.FetchNimazDataTask
 import com.arshadshah.nimaz.buildlogic.NimazDataCredentials
 import com.arshadshah.nimaz.buildlogic.NimazDataLockParser
@@ -570,27 +571,14 @@ tasks.withType<Test>().configureEach {
     ).withPropertyName("moduleBuildFiles").withPathSensitivity(PathSensitivity.RELATIVE)
 }
 
-// Class-file noise that should never count toward coverage (generated code,
-// Compose compiler artifacts, DI, framework stubs, and @Preview singletons).
-val coverageExclusions = listOf(
-    "**/R.class",
-    "**/R$*.class",
-    "**/BuildConfig.*",
-    "**/Manifest*.*",
-    "**/*Test*.*",
-    "**/*\$Companion*.*",
-    // Compose compiler generates a ComposableSingletons class per file that
-    // holds the lambdas used only by the @Preview functions — exclude it.
-    "**/*ComposableSingletons*.*",
-    // Hilt / Dagger generated code
-    "**/di/**",
-    "**/*_Factory*.*",
-    "**/*_HiltModules*.*",
-    "**/*_Impl*.*",
-    "**/hilt_aggregated_deps/**",
-    "**/dagger/hilt/**",
-    "**/*Hilt_*.*",
-)
+// Class-file noise that should never count toward coverage (generated code, Compose compiler
+// artifacts, DI, framework stubs, @Preview singletons, Room entities and the dead `$DefaultImpls`
+// bridge).
+//
+// The list itself lives in `build-logic` so that this merged report and every module's own
+// `coverageFloor` gate measure the same classes — see [COVERAGE_EXCLUSIONS] for what is on it and,
+// more importantly, for the one pattern that was taken off.
+val coverageExclusions = COVERAGE_EXCLUSIONS
 
 // Where the debug classes live, which is not where it used to be.
 //

@@ -117,6 +117,76 @@ class LocationDaoTest {
             .containsExactly("Amsterdam", "Berlin").inOrder()
     }
 
+    // ---- Favourites and per-location calculation settings ----
+
+    @Test
+    fun `favouriting a place flips it, and flips it back`() = runTest {
+        val id = dao.saveCurrentLocation(location("London", 51.507, -0.128), now = 1_000)
+        val before = System.currentTimeMillis()
+
+        // The timestamp defaults to now, and every caller in the app takes that default.
+        dao.toggleFavorite(id)
+
+        assertThat(dao.getAllLocationsSync().single().isFavorite).isTrue()
+        assertThat(dao.getAllLocationsSync().single().updatedAt).isAtLeast(before)
+
+        dao.toggleFavorite(id)
+
+        assertThat(dao.getAllLocationsSync().single().isFavorite).isFalse()
+    }
+
+    @Test
+    fun `favouriting one place leaves the others alone`() = runTest {
+        val london = dao.saveCurrentLocation(location("London", 51.507, -0.128), now = 1_000)
+        dao.saveCurrentLocation(location("Cairo", 30.044, 31.236), now = 2_000)
+
+        dao.toggleFavorite(london)
+
+        assertThat(dao.getAllLocationsSync().filter { it.isFavorite }.map { it.name })
+            .containsExactly("London")
+    }
+
+    @Test
+    fun `a place carries its own calculation settings`() = runTest {
+        val id = dao.saveCurrentLocation(location("Reykjavik", 64.147, -21.942), now = 1_000)
+
+        // High latitudes are exactly why this is per-location rather than global.
+        dao.updateCalculationSettings(
+            id = id,
+            method = "MOON_SIGHTING_COMMITTEE",
+            asrMethod = "HANAFI",
+            fajrAngle = 12.0,
+            ishaAngle = 12.0,
+        )
+
+        val saved = dao.getAllLocationsSync().single()
+        assertThat(saved.calculationMethod).isEqualTo("MOON_SIGHTING_COMMITTEE")
+        assertThat(saved.asrCalculation).isEqualTo("HANAFI")
+        assertThat(saved.fajrAngle).isEqualTo(12.0)
+        assertThat(saved.ishaAngle).isEqualTo(12.0)
+    }
+
+    @Test
+    fun `angles can be cleared back to the method's own`() = runTest {
+        val id = dao.saveCurrentLocation(location("London", 51.507, -0.128), now = 1_000)
+        dao.updateCalculationSettings(id, "KARACHI", "SHAFI", fajrAngle = 18.0, ishaAngle = 18.0)
+
+        dao.updateCalculationSettings(id, "KARACHI", "SHAFI", fajrAngle = null, ishaAngle = null)
+
+        assertThat(dao.getAllLocationsSync().single().fajrAngle).isNull()
+        assertThat(dao.getAllLocationsSync().single().ishaAngle).isNull()
+    }
+
+    @Test
+    fun `deleting all user data empties the table`() = runTest {
+        dao.saveCurrentLocation(location("London", 51.507, -0.128), now = 1_000)
+
+        dao.deleteAllUserData()
+
+        assertThat(dao.getAllLocationsSync()).isEmpty()
+        assertThat(dao.getCurrentLocationSync()).isNull()
+    }
+
     private fun location(name: String, latitude: Double, longitude: Double) = LocationEntity(
         id = 0,
         name = name,

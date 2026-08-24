@@ -25,6 +25,16 @@ platform :android do
       # up the twentieth automatically the day it is added, which a hand-maintained list would
       # not.
       gradle(task: "testDebugUnitTest")
+      # The per-module coverage floor, for every module that has been brought up to it and
+      # locked. Unqualified for the same reason as the two around it: `coverageFloor` is a task
+      # name Gradle resolves in every project that applies `jacoco`, so a module joins the gate by
+      # setting `nimazCoverage { lineFloor.set(...) }` in its own build file and nothing here has
+      # to be edited. A module without a floor runs the task and does nothing, which is what makes
+      # bringing the modules up one at a time possible.
+      #
+      # After `testDebugUnitTest`, not before: `moduleCoverage` needs the execution data that task
+      # writes, and running it first would measure the previous build's.
+      gradle(task: "coverageFloor")
       gradle(task: "lintDebug")
     end
 
