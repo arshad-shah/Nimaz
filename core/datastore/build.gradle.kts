@@ -8,6 +8,29 @@ plugins {
 
 android {
     namespace = "com.arshadshah.nimaz.core.datastore"
+
+    testOptions {
+        unitTests {
+            // The DataStore round-trip tests run against a real Context under Robolectric.
+            isIncludeAndroidResources = true
+            isReturnDefaultValues = true
+        }
+    }
+}
+
+/**
+ * Locked. See `COVERAGE_EXCLUSIONS` and `coverageFloor` in `build-logic` for what is measured.
+ *
+ * **80/80, both floors** — nothing here draws.
+ *
+ * `PreferencesDataStore` was 329 lines at 0%, for a structural reason worth remembering: no
+ * screen constructs it (they read through a `SettingsSeams` interface, by design), so nothing in
+ * a test did either. "Nothing constructs it" is a design success and a coverage blind spot at the
+ * same time.
+ */
+nimazCoverage {
+    lineFloor.set(0.80)
+    branchFloor.set(0.80)
 }
 
 // The three DataStore files and everything that reads or writes them: `PreferencesDataStore`
@@ -28,4 +51,10 @@ dependencies {
     testImplementation(libs.google.truth)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.turbine)
+
+    // `PreferencesDataStore` reaches its file through a `Context` extension delegate, so the only
+    // way to exercise it is against a real one. Robolectric gives a sandboxed files directory per
+    // test class, which is what lets a fresh store assert a first-run default.
+    testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.junit)
 }

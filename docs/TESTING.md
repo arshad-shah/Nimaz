@@ -41,6 +41,7 @@ Two on-device/JVM test surfaces exist:
   - [The route vocabulary (`:core:navigation/src/test`)](#the-route-vocabulary-corenavigationsrctest)
   - [The Firebase wrappers and the formatters (`:core:common/src/test`)](#the-firebase-wrappers-and-the-formatters-corecommonsrctest)
   - [The Islamic calendar (`:feature:calendar/src/test`)](#the-islamic-calendar-featurecalendarsrctest)
+  - [Every preference, read back (`:core:datastore/src/test`)](#every-preference-read-back-coredatastoresrctest)
 - [Conventions](#conventions)
 
 ## Running the unit tests
@@ -161,7 +162,7 @@ floor is a ratchet — raised when a module is brought up to it, never lowered t
 green. The branch floor is set per module, at 80% where branches are reachable and lower where
 the Compose compiler's `$dirty` checks make them not (see
 [Where each module stands](#where-each-module-stands)). `:core:database` is the first module
-locked (#597); then `:feature:quran`, `:core:domain`, `:core:navigation`, `:core:common` and `:feature:calendar`.
+locked (#597); then `:feature:quran`, `:core:domain`, `:core:navigation`, `:core:common`, `:feature:calendar` and `:core:datastore`.
 
 ### What is not counted, and why
 
@@ -254,8 +255,8 @@ module-by-module pass; a module is **locked** once it clears the 80% line floor 
 floors in its own `build.gradle.kts`.
 
 **The line floor is 80% everywhere; the branch floor is not.** `:core:database`, `:core:domain`,
-`:core:navigation` and `:core:common` are locked at 80/80 — none of them draws anything, so every
-branch is one somebody wrote and a test can take both sides of. So is `:feature:calendar`, which
+`:core:navigation`, `:core:common` and `:core:datastore` are locked at 80/80 — none of them draws
+anything, so every branch is one somebody wrote and a test can take both sides of. So is `:feature:calendar`, which
 *is* a Compose module: the unreachable branch below is emitted **per parameter of every
 restartable composable**, so its weight scales with how many composables a module has, and six
 files never accumulate enough of them to move the number. Only `:feature:quran` is softened, to
@@ -276,12 +277,12 @@ split, and should say so where it sets its floors.
 | `:core:navigation` | 84.2% | 85.3% | **locked** at 80/80 |
 | `:core:common` | 92.7% | 82.3% | **locked** at 80/80 |
 | `:feature:calendar` | 94.0% | 82.4% | **locked** at 80/80 |
+| `:core:datastore` | 96.1% | 84.3% | **locked** at 80/80 |
 | `:core:ui` | 50.3% | 47.8% | |
 | `:core:data` | 39.0% | 31.2% | |
 | `:feature:prayer` | 38.1% | 23.7% | |
 | `:feature:tracker` | 30.4% | 24.4% | |
 | `:feature:content` | 28.8% | 19.5% | |
-| `:core:datastore` | 21.2% | 31.4% | |
 | `:feature:search` | 18.8% | 13.9% | |
 | `:feature:tools` | 18.0% | 29.3% | |
 | `:feature:about` | 17.8% | 23.0% | |
@@ -502,6 +503,31 @@ null and the screen rendered *nothing*. The fix made the error a section above a
 draws — which only holds if the screen keeps drawing the grid, and that is a rendering fact.
 `CalendarNavigationTest` pins the ViewModel half (the state still carries a month); the screen
 test pins that the month is actually on screen beside the error.
+
+### Every preference, read back (`:core:datastore/src/test`)
+
+The seventh module locked. `PreferencesDataStore` was **329 lines at 0%**, for a structural reason
+worth remembering: **no screen constructs it** — they read through a `SettingsSeams` interface, by
+design, and `CLAUDE.md` requires it — so nothing in a test did either. "Nothing constructs it" is a
+design success and a coverage blind spot at the same time.
+
+What that left uncovered is a specific bug. `PreferenceKeyGoldenTest` pins the key *strings*, so a
+renamed key fails loudly. Nothing pinned **which key a getter reads**: `showTranslation` returning
+`SHOW_TRANSLITERATION` compiles, persists, round-trips, and passes the golden — and the setting the
+reader toggles changes a different one. With 96 getters declared in blocks of near-identical lines,
+that is the failure the round-trip table is for.
+
+| Area | Covered by | What it pins |
+|---|---|---|
+| All 74 plain preferences | `PreferencesDataStoreTest` | the documented default on a fresh install, the written value coming back, and — the cross-wiring check — **nothing else moving** when one is written |
+| The Hijri day offset | same | the one setter that does not store what it is given: clamped to the two days either side that a moon-sighting difference can actually be |
+| The three per-prayer families | `PreferencesDataStoreKeyedTest` | isolation. A `when (prayer.lowercase())` over six arms, written three times; a crossed arm is invisible in the settings screen *and* in the key golden, because both keys exist and both are spelled right |
+| Sunrise | same | a notification that defaults off, and an adhan that cannot be turned on at all — there is no key for it, and the reader answers false outright |
+| Alert style and pre-reminders | same | every style round-tripping, and one prayer's choice not reaching another's |
+| Export / import | same | a payload round-tripping across all five type families, and a key from a newer build skipped rather than guessed at — DataStore keys are typed, so guessing is how an import ends in a `ClassCastException` on read |
+| The one-shot migration | same | it runs once, and **never resets a choice the reader has since made** |
+| The announcement store | `AnnouncementLocalDataSourceTest` | an FCM payload surviving JSON and a later build; an unknown type resolving to no banner rather than a half-built one; an unknown *occasion* falling back to the generic treatment rather than costing the banner; dismissal being permanent |
+| The AI install id | `DeviceIdProviderTest` | stable across process restarts, and a generated UUID — **never** a hardware identifier |
 
 ## Conventions
 
