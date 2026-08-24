@@ -2,7 +2,9 @@ package com.arshadshah.nimaz.behavior
 
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performSemanticsAction
@@ -43,11 +45,19 @@ class QuranSurahInfoSheetTest : BaseAppTest() {
         clickText(Selectors.str(Selectors.Quran.browseTab))
         waitForTag(ScreenTags.QuranSurahList)
 
+        // Every interaction below goes through `OnClick` on the **merged** tree rather than a
+        // synthetic tap, which is the same choice `BaseAppTest.scrollListToAndTap` documents: a
+        // row scrolled just into view can sit at the viewport edge or under the gesture-nav
+        // inset, where a tap is rejected with "Failed to inject touch input". The merged tree
+        // matters too — the unmerged one yields the inner `Text`/`Icon`, which carries no click
+        // action at all.
+        val infoDescription = Selectors.str(R.string.quran_home_surah_info)
+
         // The info affordance sits on the surah's own row, so scroll it into view first.
         compose.onNodeWithTag(ScreenTags.QuranSurahList)
-            .performScrollToNode(hasContentDescription(Selectors.str(R.string.quran_home_surah_info)))
+            .performScrollToNode(hasContentDescription(infoDescription))
         compose.waitForIdle()
-        compose.onAllNodes(hasContentDescription(Selectors.str(R.string.quran_home_surah_info)))
+        compose.onAllNodesWithContentDescription(infoDescription, useUnmergedTree = false)
             .onFirst()
             .performSemanticsAction(SemanticsActions.OnClick)
         compose.waitForIdle()
@@ -56,7 +66,11 @@ class QuranSurahInfoSheetTest : BaseAppTest() {
         // assertion that the ViewModels answered.
         waitForRes(R.string.surah_info_read_surah)
 
-        onRes(R.string.surah_info_read_surah).performSemanticsAction(SemanticsActions.OnClick)
+        compose.onNodeWithText(
+            Selectors.str(R.string.surah_info_read_surah),
+            substring = true,
+            useUnmergedTree = false,
+        ).performSemanticsAction(SemanticsActions.OnClick)
         assertScreen(ScreenTags.QuranReader)
     }
 }
