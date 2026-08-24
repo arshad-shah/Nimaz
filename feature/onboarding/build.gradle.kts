@@ -25,6 +25,30 @@ android {
     }
 }
 
+/**
+ * Locked. See `COVERAGE_EXCLUSIONS` and `coverageFloor` in `build-logic` for what is measured and
+ * how the ratchet works.
+ *
+ * **80/80, at 94.3% lines and 90.3% branches** — a Compose module holding the full branch floor,
+ * like `:feature:calendar` and unlike `:feature:quran`. The unreachable `$dirty` bitmask branch
+ * the Compose compiler emits is one per parameter of every restartable composable, so its weight
+ * scales with how many composables a module has; there are eight here, and the ratio never
+ * becomes the number.
+ *
+ * **Nothing is excluded, and nothing is left at zero.** The 226 lines of `OnboardingArt.kt` are
+ * pure `Canvas` geometry, which #605 flagged as possibly uncoverable — and would be, if a test
+ * only composed the tree: `Canvas(modifier)` runs, its `DrawScope` lambda does not.
+ * `OnboardingArtTest` asks the `ComposeView` to draw itself into a software
+ * `android.graphics.Canvas` under `@GraphicsMode(NATIVE)` and reads the pixels back, which runs
+ * the draw blocks for real and makes the art assertable rather than merely covered. What remains
+ * uncovered is the two `@Preview` functions in each file — private, so no test can call them —
+ * and the `onComplete` lambda inside `onboardingGraph`, which only a composed `NavHost` reaches.
+ */
+nimazCoverage {
+    lineFloor.set(0.80)
+    branchFloor.set(0.80)
+}
+
 // The first-run flow: three screens and the ViewModel behind them.
 //
 // **The cleanest extraction in the epic so far — zero couplings to resolve.** Not luck: it is what
@@ -66,4 +90,16 @@ dependencies {
     // RecordingTelemetry — the Telemetry seam's recording fake, beside its port.
     testImplementation(testFixtures(project(":core:common")))
     testImplementation(libs.turbine)
+
+    // The screen, the art and the graph are all exercised under Robolectric, so this module needs
+    // the same harness `:feature:calendar` and `:feature:quran` use — including
+    // `src/testDebug/resources/robolectric.properties`, which pins the SDK and the Application
+    // class. A properties file is a resource of its source set and does not travel with the tests
+    // that need it.
+    testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.junit)
+    testImplementation(platform(libs.androidx.compose.bom))
+    testImplementation(libs.androidx.compose.ui.test.junit4)
+    testImplementation(testFixtures(project(":core:ui")))
+    debugImplementation(libs.androidx.compose.ui.test.manifest)
 }

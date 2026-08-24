@@ -16,6 +16,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -64,10 +65,17 @@ class OnboardingViewModelTest {
         override fun isIgnoringBatteryOptimizations() = exempt
     }
 
-    private class FakeAppSettings(completed: Boolean = false) : AppSettings {
+    private class FakeAppSettings(
+        completed: Boolean = false,
+        private val readFailsWith: Throwable? = null,
+        private val writeFailsWith: Throwable? = null,
+    ) : AppSettings {
         val completedFlow = MutableStateFlow(completed)
-        override val onboardingCompleted: Flow<Boolean> = completedFlow
+        override val onboardingCompleted: Flow<Boolean> =
+            readFailsWith?.let { failure -> flow<Boolean> { throw failure } } ?: completedFlow
+
         override suspend fun setOnboardingCompleted(completed: Boolean) {
+            writeFailsWith?.let { throw it }
             completedFlow.value = completed
         }
 
@@ -306,5 +314,181 @@ class OnboardingViewModelTest {
 
             assertThat(telemetry.exceptions).contains(boom)
             assertThat(telemetry.errors.map { it.type }).contains("detect_location")
+        }
+
+    // ---------------------------------------------------------------------
+    // Reading the flag back. This is the state `NavGraph` consults exactly
+    // once, to pick a start destination, so both outcomes matter and the
+    // failure has to end the loading state — a screen stuck on `isLoading`
+    // is a first run that never renders.
+    // ---------------------------------------------------------------------
+
+    @Test
+    fun `a stored completion flag is read back at construction`() = runTest(dispatcher) {
+        val vm = viewModel(appSettings = FakeAppSettings(completed = true))
+        advanceUntilIdle()
+
+        assertThat(vm.state.value.onboardingCompleted).isTrue()
+        assertThat(vm.state.value.isLoading).isFalse()
+    }
+
+    @Test
+    fun `a flag that cannot be read still lets the screen render`() = runTest(dispatcher) {
+        val telemetry = RecordingTelemetry()
+        val boom = IllegalStateException("datastore corrupt")
+        val vm = viewModel(
+            appSettings = FakeAppSettings(readFailsWith = boom),
+            telemetry = telemetry,
+        )
+        advanceUntilIdle()
+
+        // Not "onboarding is complete" — a read that failed says nothing about the flag, and
+        // guessing `true` would skip the first run entirely.
+        assertThat(vm.state.value.onboardingCompleted).isFalse()
+        assertThat(vm.state.value.isLoading).isFalse()
+        assertThat(vm.state.value.error).isEqualTo("datastore corrupt")
+        assertThat(telemetry.exceptions).contains(boom)
+    }
+
+    @Test
+    fun `re-checking the status after a failure picks up a flag that now reads`() =
+        runTest(dispatcher) {
+            val appSettings = FakeAppSettings(completed = true)
+            val vm = viewModel(appSettings = appSettings)
+            advanceUntilIdle()
+
+            vm.onEvent(OnboardingEvent.CheckOnboardingStatus)
+            advanceUntilIdle()
+
+            assertThat(vm.state.value.onboardingCompleted).isTrue()
+        }
+
+    /**
+     * A write that fails must not report the funnel's completion event.
+     *
+     * The two are read together: `onboarding_completed` is the denominator for every
+     * first-run question, and counting a user who will be shown onboarding again on the
+     * next launch makes it disagree with the step funnel that precedes it.
+     */
+    @Test
+    fun `a completion that cannot be persisted is reported as a failure, not a completion`() =
+        runTest(dispatcher) {
+            val telemetry = RecordingTelemetry()
+            val vm = viewModel(
+                appSettings = FakeAppSettings(writeFailsWith = IllegalStateException("disk full")),
+                telemetry = telemetry,
+            )
+            advanceUntilIdle()
+
+            vm.onEvent(OnboardingEvent.CompleteOnboarding)
+            advanceUntilIdle()
+
+            assertThat(vm.state.value.onboardingCompleted).isFalse()
+            assertThat(vm.state.value.error).isEqualTo("disk full")
+            assertThat(telemetry.calls.filterIsInstance<TelemetryCall.OnboardingCompleted>())
+                .isEmpty()
+            assertThat(telemetry.errors.map { it.type }).contains("complete")
+        }
+
+    // ---------------------------------------------------------------------
+    // The permission round trip. The screen's launchers report their result
+    // through `UpdatePermissionStatus`, one field at a time — the other two
+    // are null and must be left alone, because the launcher that answers has
+    // no knowledge of the two permissions it was not asked about.
+    // ---------------------------------------------------------------------
+
+    @Test
+    fun `a permission result updates only the permission it answered for`() =
+        runTest(dispatcher) {
+            val vm = viewModel(
+                permissions = FakePermissions(location = false, notification = false),
+                power = FakePower(exempt = true),
+            )
+            advanceUntilIdle()
+
+            vm.onEvent(OnboardingEvent.UpdatePermissionStatus(notification = true))
+            advanceUntilIdle()
+
+            assertThat(vm.state.value.notificationPermissionGranted).isTrue()
+            assertThat(vm.state.value.locationPermissionGranted).isFalse()
+            // Left as it was rather than reset to the null the event carried.
+            assertThat(vm.state.value.batteryOptimizationDisabled).isTrue()
+        }
+
+    @Test
+    fun `granting location detects the location without waiting to be asked again`() =
+        runTest(dispatcher) {
+            // The user has just come back from the system dialog. Nothing else prompts a fix,
+            // so without this the permissions page shows "granted" and no place name, and the
+            // first prayer times are computed for wherever the app last thought it was.
+            val settings = RecordingLocationSettings()
+            val vm = viewModel(locationSettings = settings)
+            advanceUntilIdle()
+
+            vm.onEvent(OnboardingEvent.UpdatePermissionStatus(location = true))
+            advanceUntilIdle()
+
+            assertThat(settings.saved).isEqualTo(Triple(51.5074, -0.1278, "London"))
+            assertThat(vm.state.value.locationDetected).isTrue()
+        }
+
+    @Test
+    fun `a denied location result does not go looking for a fix`() = runTest(dispatcher) {
+        val settings = RecordingLocationSettings()
+        val vm = viewModel(locationSettings = settings)
+        advanceUntilIdle()
+
+        vm.onEvent(OnboardingEvent.UpdatePermissionStatus(location = false))
+        advanceUntilIdle()
+
+        assertThat(settings.saved).isNull()
+        assertThat(vm.state.value.locationDetected).isFalse()
+    }
+
+    @Test
+    fun `each re-check reads the seam again rather than a cached answer`() = runTest(dispatcher) {
+        // `checkAllPermissions` runs once, at construction. Everything after it — returning from
+        // a system dialog, coming back from Settings with battery optimisation turned off — is
+        // one of these three events, and each has to consult the seam a second time.
+        val permissions = object : PermissionChecker {
+            var location = false
+            var notification = false
+            override fun hasLocationPermission() = location
+            override fun hasNotificationPermission() = notification
+        }
+        val power = object : PowerSettings {
+            var exempt = false
+            override fun isIgnoringBatteryOptimizations() = exempt
+        }
+        val vm = viewModel(permissions = permissions, power = power)
+        advanceUntilIdle()
+        assertThat(vm.state.value.locationPermissionGranted).isFalse()
+
+        permissions.location = true
+        permissions.notification = true
+        power.exempt = true
+        vm.onEvent(OnboardingEvent.CheckLocationPermission)
+        vm.onEvent(OnboardingEvent.CheckNotificationPermission)
+        vm.onEvent(OnboardingEvent.CheckBatteryOptimization)
+        advanceUntilIdle()
+
+        assertThat(vm.state.value.locationPermissionGranted).isTrue()
+        assertThat(vm.state.value.notificationPermissionGranted).isTrue()
+        assertThat(vm.state.value.batteryOptimizationDisabled).isTrue()
+    }
+
+    @Test
+    fun `the permission queries the screen calls directly answer from the seam`() =
+        runTest(dispatcher) {
+            // `hasLocationPermission` / `hasNotificationPermission` are public because the
+            // screen's launcher callbacks consult them; they must not answer from state that
+            // was read at construction.
+            val vm = viewModel(
+                permissions = FakePermissions(location = true, notification = false),
+            )
+            advanceUntilIdle()
+
+            assertThat(vm.hasLocationPermission()).isTrue()
+            assertThat(vm.hasNotificationPermission()).isFalse()
         }
 }
