@@ -24,6 +24,29 @@ android {
     }
 }
 
+/**
+ * Locked. The reader, khatam, tafseer and bookmarks — screens, components and ViewModels — are
+ * tested, and `check` now fails if that stops being true. See `COVERAGE_EXCLUSIONS` and
+ * `coverageFloor` in `build-logic` for what is measured and how the ratchet works.
+ *
+ * The line floor is the agreed 80%, set at the standard rather than at whatever the module
+ * reports today: a floor pinned to the current number turns every unrelated refactor into a
+ * coverage failure.
+ *
+ * **The branch floor is 60% here and 80% on `:core:database`, and that is deliberate.** The
+ * Compose compiler emits a `$dirty` bitmask branch per parameter of every restartable composable
+ * — the skippability check — and no test can take both sides of one: they depend on which
+ * arguments the *caller* changed between recompositions, not on anything the component does. A
+ * Compose-heavy module therefore carries thousands of branches that are unreachable by
+ * construction, which is why this module reports ~65% branches while covering 81% of its lines.
+ * Setting 80% here would not measure more testing; it would measure how many composables the
+ * module has. 60% is above where it sits, so the ratchet still catches a real regression.
+ */
+nimazCoverage {
+    lineFloor.set(0.80)
+    branchFloor.set(0.60)
+}
+
 // The reader, khatam and bookmarks — the largest feature, and the one with the most machinery
 // under it: the whole Mushaf rendering stack comes too.
 //

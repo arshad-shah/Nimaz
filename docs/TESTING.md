@@ -36,6 +36,7 @@ Two on-device/JVM test surfaces exist:
   - [Where each module stands](#where-each-module-stands)
 - [Coverage audit (what's validated)](#coverage-audit-whats-validated)
   - [The same ground, on the JVM (`:core:database/src/test`)](#the-same-ground-on-the-jvm-coredatabasesrctest)
+  - [The reader, on the JVM (`:feature:quran/src/test` and `src/testDebug`)](#the-reader-on-the-jvm-featurequransrctest-and-srctestdebug)
 - [Conventions](#conventions)
 
 ## Running the unit tests
@@ -151,9 +152,12 @@ has slipped below the coverage it is locked at:
 ```
 
 A module joins by declaring a floor in its own build file; a module that has not been reached yet
-declares none, still gets a report, and has no gate. The standard is **80% of lines and 80% of
-branches**, and the floor is a ratchet — raised when a module is brought up to it, never lowered
-to make a build green. `:core:database` is the first module locked (#597).
+declares none, still gets a report, and has no gate. The standard is **80% of lines**, and the
+floor is a ratchet — raised when a module is brought up to it, never lowered to make a build
+green. The branch floor is set per module, at 80% where branches are reachable and lower where
+the Compose compiler's `$dirty` checks make them not (see
+[Where each module stands](#where-each-module-stands)). `:core:database` is the first module
+locked (#597); `:feature:quran` is the second.
 
 ### What is not counted, and why
 
@@ -242,17 +246,28 @@ companion objects it did not count are in it. CI's next run is the one to read.
 ### Where each module stands
 
 `./gradlew moduleCoverage` prints all of them. The snapshot below is the starting line for the
-module-by-module pass; a module is **locked** once it clears 80/80 and declares its floor.
+module-by-module pass; a module is **locked** once it clears the 80% line floor and declares its
+floors in its own `build.gradle.kts`.
+
+**The line floor is 80% everywhere; the branch floor is not.** `:core:database` is locked at
+80/80. `:feature:quran` is locked at 80% lines and **60%** branches, because the Compose compiler
+emits a `$dirty` bitmask branch per parameter of every restartable composable — the skippability
+check — and neither side of one is reachable from a test: which side runs depends on what the
+*caller* changed between recompositions. A Compose-heavy module therefore carries thousands of
+branches that are unreachable by construction, and reports ~65% branches while covering 81% of
+its lines. An 80% branch floor there would measure how many composables the module has, not how
+well it is tested. Every Compose-heavy module reached after this one should expect the same
+split, and should say so where it sets its floors.
 
 | Module | Line | Branch | |
 |---|---|---|---|
-| `:core:database` | 97.3% | 86.8% | **locked** (#597) |
+| `:core:database` | 97.3% | 86.8% | **locked** at 80/80 (#597) |
+| `:feature:quran` | 81.2% | 64.6% | **locked** at 80 line / 60 branch |
 | `:core:domain` | 71.7% | 72.8% | |
 | `:feature:calendar` | 55.1% | 45.3% | |
 | `:core:navigation` | 54.3% | 44.0% | |
 | `:core:ui` | 50.3% | 47.8% | |
 | `:core:common` | 42.1% | 49.8% | |
-| `:feature:quran` | 40.7% | 29.0% | |
 | `:core:data` | 39.0% | 31.2% | |
 | `:feature:prayer` | 38.1% | 23.7% | |
 | `:feature:tracker` | 30.4% | 24.4% | |
@@ -286,6 +301,7 @@ locally; CI's merged report covers it.
 | **First-run / onboarding completes + persists** | `behavior/OnboardingFlowTest` | drives the real screen |
 | **Settings toggles actually work** (UI switch → DataStore) | `behavior/SettingsBehaviorTest` | Appearance haptic/24h/animations + notification vibration |
 | **Tasbih counter increments on tap** | `behavior/TasbihCounterTest` | tag-driven interaction |
+| **A surah's card, against the real content database** | `behavior/QuranSurahInfoSheetTest` | the sheet's facts and its opening page read from the shipped artifact's pagination, and "Read surah" reaching the reader through the real `NavGraph` |
 
 **Deliberately validated at the data/VM layer, not via UI** (UI input is brittle and the
 logic is unit-tested): Zakat calculation math (`ZakatDaoTest` + the Zakat ViewModel unit
@@ -328,6 +344,38 @@ nothing to the merged coverage report (see [above](#two-things-that-silently-do-
 | The same release sequence, as logic | `ContentReleaseIntegrationTest` | which component runs when, and what the flag between them means — the ordering that decides whether the installer deletes rows the migrator has not copied yet |
 | Swapping a content collection | `dao/ContentReplacementTest` | delete-children-first / insert-parents-first across the foreign keys; `is_custom` being the only thing that separates a shipped preset from a user's |
 | FTS query assembly | `search/ContentSearchIndexQueryTest` | placeholders and bound arguments staying in step when the optional `source` filter is present; the two paths that must never reach a `MATCH` |
+
+### The reader, on the JVM (`:feature:quran/src/test` and `src/testDebug`)
+
+`:feature:quran` is the second module locked. It is 11,402 measurable lines — the largest feature
+in the app — and almost all of it is Compose, so the tests are Robolectric: the screen or the
+component is composed for real, driven through its own semantics, and asserted on what a reader
+would see. `src/test` holds the ViewModel and screen tests, `src/testDebug` the component ones
+(`@Preview` tooling is a debug-only dependency).
+
+| Area | Covered by | What it pins |
+|---|---|---|
+| The reader's event table | `viewmodel/QuranViewModelEventsTest` | every event reaching its own handler, and `PrefetchPage` not retitling the reader |
+| Notes, bookmarks, the page layout | `viewmodel/QuranViewModelAnnotationTest` | a note on an unmarked verse *creates* the mark, a note on a marked one updates that row; the optimistic bookmark flip reaching both copies of the verse; the line layout fetched once |
+| A khatam's "today" line | `viewmodel/KhatamDetailPortionTest` | surah/ayah and global ayah id translated between without drift; a portion inside one surah named once and one that crosses named at both ends; a portion past the end left unlabelled |
+| The subject browser | `viewmodel/QuranTopicsSurahSubjectsTest`, `QuranTopicsViewModelDescentTest` | "this install has no index" versus "this surah has none"; a tree switch dropping children keyed by the other tree's parent ids |
+| The bookmarks screen's axes | `viewmodel/BookmarksViewModelAxesTest` | corpus and kind as independent filters |
+| The tafseer notes dialog | `screens/quran/TafseerNotesDialogTest` | one field doing two jobs — the dialog leaving edit mode after a save, so the next note does not overwrite the one just edited |
+| The surah card's seam | `screens/quran/SurahInfoSheetHostTest` | nothing drawn until the surah is known; the opening page taken from the pagination, not from the Madani `startPage` |
+| The reader screens | `screens/quran/QuranReaderScreenRenderTest`, `QuranReaderPageModeTest`, `QuranReaderActionsTest` | what renders in each reading mode, and which event each action emits |
+| The route graph | `screens/quran/QuranGraphTest` | all 19 destinations registered |
+| Tajweed colouring | `components/organisms/QuranAyahItemTajweedTest` | the second renderer; tap-to-explain resolving a coloured word to its rule; a surah-opening verse not printing the bismillah the header already prints |
+| Selecting commentary | `components/molecules/TafseerHighlightableTextGesturesTest` | a long press seeding a whole word, a tap inside a highlight reopening it, a tap outside one clearing the selection |
+| The saved-item card | `components/organisms/SwipeableSavedCardTest` | the overflow menu closing *before* its action fires; a card opted out of swiping not deleting itself |
+| The note editor | `components/molecules/NoteEditorSheetTest` | an emptied field saving `null` rather than `""`; the draft keyed on the subject so a different verse starts blank |
+| The running head over a long document | `components/organisms/NimazScrollSpyIndexTest` | two sections with the same heading both surviving the lazy row's key; scrolling through a long section still naming it |
+
+**What is left uncovered, and why.** `TafseerPdfExporter` and `PageWriter` (209 lines) cannot run
+under Robolectric — its `PdfDocument` shadow throws *"document is closed!"* on the first
+`startPage`. `AdaptiveQuranScreen`/`AdaptiveKhatamScreen` (134 lines) embed `hiltViewModel()`
+screens, so composing them needs Hilt. `QuranGraph`'s destination lambdas are bodies that only
+run when a destination is actually navigated to. The `@Preview` and `*Showcase` functions across
+the module are tooling, not behaviour, and are deliberately not driven.
 
 ## Conventions
 
