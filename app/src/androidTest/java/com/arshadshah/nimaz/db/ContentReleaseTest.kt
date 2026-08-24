@@ -132,6 +132,11 @@ class ContentReleaseTest {
         assertThat(install()).isEqualTo(ContentArtifactInstaller.Outcome.FreshInstall)
         assertThat(store.installedArtifact()).isEqualTo(shipped)
 
+        // …and then it does, which is the step that turns the *next* launch into a comparison.
+        // Without it the file is still absent and the installer is entitled to say `FreshInstall`
+        // again — it is answering "there is nothing here", which would still be true.
+        createFromAssetHappens()
+
         assertThat(install()).isEqualTo(ContentArtifactInstaller.Outcome.AlreadyCurrent)
     }
 
@@ -183,6 +188,18 @@ class ContentReleaseTest {
             }
         }
         store.setInstalledArtifact(installed)
+    }
+
+    /**
+     * Stands in for Room's `createFromAsset`, which runs *after* the installer and is what
+     * actually puts the file on disk. The installer only ever looks at whether it exists.
+     */
+    private fun createFromAssetHappens() {
+        SQLiteDatabase.openOrCreateDatabase(
+            contentDatabase().also { it.parentFile?.mkdirs() }, null
+        ).use { db ->
+            db.execSQL("CREATE TABLE surahs (id INTEGER PRIMARY KEY, name TEXT)")
+        }
     }
 
     private fun contentDatabase(): File = context.getDatabasePath(NimazDatabase.DATABASE_NAME)
