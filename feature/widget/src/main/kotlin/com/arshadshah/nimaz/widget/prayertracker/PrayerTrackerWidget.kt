@@ -247,8 +247,13 @@ private fun PrayerCheckbox(
  * narrowing: [PrayerName] and [PrayerStatus] replace the string literals, so a typo stops
  * compiling, and `"not_prayed"` — which the enum spells [PrayerStatus.NOT_PRAYED] — can no longer
  * drift from whatever the DAO happened to store.
+ *
+ * `internal` rather than `private` so `TogglePrayerStatusTest` can call it. A Glance lambda action
+ * cannot be fired from a JVM test — `glance-appwidget-testing`'s unit-test API is assertion-only,
+ * with no `performClick` — so reaching this through the tile tap is not possible off-device, and
+ * this is the only widget action that writes user data. Visibility only; nothing else changed.
  */
-private fun togglePrayerStatus(context: Context, prayerName: PrayerName) {
+internal fun togglePrayerStatus(context: Context, prayerName: PrayerName) {
     CoroutineScope(Dispatchers.IO).launch {
         try {
             val prayerRepository = EntryPointAccessors.fromApplication(

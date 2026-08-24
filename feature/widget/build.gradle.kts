@@ -11,6 +11,13 @@ plugins {
 android {
     namespace = "com.arshadshah.nimaz.feature.widget"
 
+    testOptions {
+        unitTests {
+            isReturnDefaultValues = true
+            isIncludeAndroidResources = true
+        }
+    }
+
     lint {
         // `RestrictedApi`, 18 times, all of them Glance's `ColorProvider(@ColorRes)`:
         //
@@ -33,6 +40,28 @@ android {
         // delete this and use it.
         disable += "RestrictedApi"
     }
+}
+
+/**
+ * Locked. See `COVERAGE_EXCLUSIONS` and `coverageFloor` in `build-logic` for what is measured and
+ * how the ratchet works.
+ *
+ * **80/80, and nothing here is permanently uncoverable.** That was not obvious going in: a Glance
+ * composable renders to `RemoteViews`, not to a semantics tree, so none of the campaign's
+ * `onNodeWithText` machinery reaches it, and `androidx.glance:glance-appwidget-testing` is
+ * assertion-only — its unit-test DSL has no `performClick`. What does work is
+ * `GlanceAppWidget.compose(context, state = …)`: it runs the widget's real `provideGlance` against
+ * a supplied state and hands back the `RemoteViews` the launcher would get, which inflate under
+ * Robolectric into an ordinary view tree. See `WidgetRenderer` in the test source set and
+ * `docs/TESTING.md`.
+ *
+ * The one thing that route cannot do is fire a tap: a Glance `clickable { }` is a lambda action
+ * resolved by the AppWidget host. `togglePrayerStatus` — the only widget action that writes user
+ * data — is therefore `internal` rather than `private` and called directly by its test.
+ */
+nimazCoverage {
+    lineFloor.set(0.80)
+    branchFloor.set(0.80)
 }
 
 // The six Glance widgets, their receivers, the tick receiver and the six refresh Workers.
@@ -94,4 +123,7 @@ dependencies {
     testImplementation(libs.google.truth)
     testImplementation(libs.mockk)
     testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.junit)
+    testImplementation(libs.androidx.work.testing)
 }
