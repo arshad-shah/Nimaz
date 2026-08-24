@@ -42,6 +42,7 @@ Two on-device/JVM test surfaces exist:
   - [The Firebase wrappers and the formatters (`:core:common/src/test`)](#the-firebase-wrappers-and-the-formatters-corecommonsrctest)
   - [The Islamic calendar (`:feature:calendar/src/test`)](#the-islamic-calendar-featurecalendarsrctest)
   - [Every preference, read back (`:core:datastore/src/test`)](#every-preference-read-back-coredatastoresrctest)
+  - [The first run, drawn and driven (`:feature:onboarding/src/test` and `src/testDebug`)](#the-first-run-drawn-and-driven-featureonboardingsrctest-and-srctestdebug)
 - [Conventions](#conventions)
 
 ## Running the unit tests
@@ -256,10 +257,11 @@ floors in its own `build.gradle.kts`.
 
 **The line floor is 80% everywhere; the branch floor is not.** `:core:database`, `:core:domain`,
 `:core:navigation`, `:core:common` and `:core:datastore` are locked at 80/80 — none of them draws
-anything, so every branch is one somebody wrote and a test can take both sides of. So is `:feature:calendar`, which
-*is* a Compose module: the unreachable branch below is emitted **per parameter of every
-restartable composable**, so its weight scales with how many composables a module has, and six
-files never accumulate enough of them to move the number. Only `:feature:quran` is softened, to
+anything, so every branch is one somebody wrote and a test can take both sides of. So are `:feature:calendar` and
+`:feature:onboarding`, which *are* Compose modules: the unreachable branch below is emitted **per
+parameter of every restartable composable**, so its weight scales with how many composables a
+module has, and six files — or eight — never accumulate enough of them to move the number.
+`:feature:onboarding` reports **90.3%** branches, the highest of any Compose module here. Only `:feature:quran` is softened, to
 80% lines and **60%** branches, because the Compose compiler
 emits a `$dirty` bitmask branch per parameter of every restartable composable — the skippability
 check — and neither side of one is reachable from a test: which side runs depends on what the
@@ -278,6 +280,7 @@ split, and should say so where it sets its floors.
 | `:core:common` | 92.7% | 82.3% | **locked** at 80/80 |
 | `:feature:calendar` | 94.0% | 82.4% | **locked** at 80/80 |
 | `:core:datastore` | 96.1% | 84.3% | **locked** at 80/80 |
+| `:feature:onboarding` | 94.3% | 90.3% | **locked** at 80/80 (#605) |
 | `:core:ui` | 50.3% | 47.8% | |
 | `:core:data` | 39.0% | 31.2% | |
 | `:feature:prayer` | 38.1% | 23.7% | |
@@ -287,7 +290,6 @@ split, and should say so where it sets its floors.
 | `:feature:tools` | 18.0% | 29.3% | |
 | `:feature:about` | 17.8% | 23.0% | |
 | `:feature:widget` | 16.8% | 28.1% | |
-| `:feature:onboarding` | 12.9% | 12.3% | |
 | `:feature:settings` | 11.3% | 14.9% | |
 
 `:app` is absent because its own suite needs the private content artifact and cannot be measured
@@ -528,6 +530,47 @@ that is the failure the round-trip table is for.
 | The one-shot migration | same | it runs once, and **never resets a choice the reader has since made** |
 | The announcement store | `AnnouncementLocalDataSourceTest` | an FCM payload surviving JSON and a later build; an unknown type resolving to no banner rather than a half-built one; an unknown *occasion* falling back to the generic treatment rather than costing the banner; dismissal being permanent |
 | The AI install id | `DeviceIdProviderTest` | stable across process restarts, and a generated UUID — **never** a hardware identifier |
+
+### The first run, drawn and driven (`:feature:onboarding/src/test` and `src/testDebug`)
+
+The eighth module locked, and the one with the furthest to travel: **12.9% lines to 94.3%**, from
+97 covered lines to 711. Two files were 600 of the 657 that were missing, and both were missing for
+the same reason — nothing had ever composed the screen, and nothing had ever *drawn* it.
+
+The stakes are unlike any other screen's. `NavGraph` reads `onboardingCompleted` **once**, when it
+builds the graph, to choose a start destination. A walkthrough that fails to emit
+`CompleteOnboarding` does not cost the user a screen; it puts them back in onboarding on every
+launch, for ever. The two halves of finishing — the event and the navigation — are dispatched from
+two different buttons on two different pages, each behind a page comparison, and no ViewModel test
+can see whether the right button is on the right page.
+
+**The art is covered by drawing it, not by declaring it uncoverable.** #605 flagged
+`OnboardingArt.kt` (226 lines of `Canvas` geometry) as possibly unreachable, and left at zero the
+module could not have passed 80% at all — 528 coverable lines out of 754 is 70% with everything
+else perfect. Composing the tree is not enough: `Canvas(modifier)` runs, its `DrawScope` lambda —
+which is the whole file — does not. `OnboardingArtTest` asks the `ComposeView` to draw itself into
+a software `android.graphics.Canvas` under `@GraphicsMode(NATIVE)`, which makes Compose's
+`RenderNodeLayer` invoke the draw block directly instead of replaying a render node, and reads the
+pixels back. `captureToImage()` is the route it does **not** take — that goes through `PixelCopy`
+on a real window and hangs under Robolectric.
+
+| Area | Covered by | What it pins |
+|---|---|---|
+| The way out of onboarding | `OnboardingScreenTest` | `CompleteOnboarding` and the navigation fire together, **once**, and only from the last page or Skip; Skip is gone from the last page, so there are never two buttons that both end the flow |
+| Paging | same | each page carries its own copy, Back returns to the previous one, and the last page swaps Next for Get Started |
+| The funnel | same | every page reached is reported in order — the analytic that fired zero times in production while the pager drove itself locally |
+| The permission cards | same | a granted permission says so and stops asking; a detected location is **named** rather than shown the generic granted label; a permission granted while the page is open updates in place |
+| The notification permission, both platforms | same | it asks the system from Tiramisu, and grants itself below it — where there is no `POST_NOTIFICATIONS` to request and a launcher would leave the card stuck |
+| The location dialog's answer | same | **coarse alone counts as granted**: an AND across the two results would tell a user who picked "approximate" that they had refused |
+| Short screens | same | both pages switch to a compact layout below 500dp of usable height, and the way forward stays on screen |
+| The four emblems | `OnboardingArtTest` | each paints something, and each paints *its own* artwork — a `when` arm that fell through, or the shield's lost `return@Canvas`, ships the wrong drawing and compiles fine |
+| The mihrab's geometry | same | letterboxed rather than stretched when its box is the wrong shape, and centred in it — the `min(w/116, h/150)` scale and the halved offsets |
+| The khatam band | same | it tiles the full measured width, and fades downwards instead of reading as a solid gold bar over the title |
+| The illuminated field | same | three gradient stops, not a flat teal fill |
+| The first-run flag | `OnboardingViewModelTest` | read back at construction; a read that fails **ends the loading state** and does not guess `true`, which would skip the first run outright |
+| A completion that cannot be persisted | same | reported as a failure, and **not** counted in the funnel — a completion the user will be shown again next launch makes the first-run denominator disagree with the step funnel above it |
+| Permission results | same | each updates only the field it answered for; granting location detects a location without waiting to be asked again |
+| The graph | `OnboardingGraphTest` | `Route.Onboarding` registers, and the graph builds with it as the start destination — the failure here is thrown on the first frame of the first launch |
 
 ## Conventions
 
