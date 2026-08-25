@@ -49,6 +49,7 @@ Two on-device/JVM test surfaces exist:
   - [Prayer times, the month table and the qibla (`:feature:prayer/src/test` and `src/testDebug`)](#prayer-times-the-month-table-and-the-qibla-featureprayersrctest-and-srctestdebug)
   - [About, Help and the More menu (`:feature:about/src/test`)](#about-help-and-the-more-menu-featureaboutsrctest)
   - [The repositories, the sync and the adhan store (`:core:data/src/test`)](#the-repositories-the-sync-and-the-adhan-store-coredatasrctest)
+  - [The hadith and dua corpora, rendered (`:feature:content/src/test`)](#the-hadith-and-dua-corpora-rendered-featurecontentsrctest)
 - [Conventions](#conventions)
 
 ## Running the unit tests
@@ -308,7 +309,7 @@ split, and should say so where it sets its floors.
 | `:core:data` | 88.1% | 84.6% | **locked** at 80/80 (#611) |
 | `:core:ui` | 50.3% | 47.8% | |
 | `:feature:tracker` | 30.4% | 24.4% | |
-| `:feature:content` | 28.8% | 19.5% | |
+| `:feature:content` | 61.6% | 49.6% | hadith + dua done (#624); not locked yet |
 | `:feature:settings` | 11.3% | 14.9% | |
 
 `:app` is absent because its own suite needs the private content artifact and cannot be measured
@@ -1028,6 +1029,74 @@ in the way #620 documents. Everything the manager does *around* the transfer is 
 `PrayerRepositoryImpl`, `TafseerRepositoryImpl` and `KhatamRepositoryImpl`, which were already
 past the floor. **No `COVERAGE_EXCLUSIONS` entry was added or widened** — the list is shared with
 every locked module, so widening it would move their numbers too.
+
+
+### The hadith and dua corpora, rendered (`:feature:content/src/test`)
+
+The fifteenth module, taken in two passes because 2,448 lines is more than one review should
+carry. **This is the first pass: hadith and dua.** It moves the module from **28.8% lines to
+61.6%** — 1,380 covered lines to 2,949 — and from 19.5% to **49.6%** branches, with 108 tests in
+ten new classes. The module is **not locked yet**; the second pass takes the prophets, the names,
+qaida, the catalog and `contentGraph`, and declares the floors.
+
+Seven screens were at **0%** between them — `HadithReaderScreen` (302 lines),
+`DuasCollectionScreen` (259), `HadithCollectionScreen` (251), `DuaReaderScreen` (216),
+`DuaCategoryScreen` (183), `HadithChaptersScreen` (160) and `DuaOccasionScreen` (58) — plus the
+two adaptive wrappers over them (96). Nothing had ever composed one.
+
+**What makes this module worth testing is that its failures are silent.** Every screen here
+renders *shipped* content — narrations and supplications this build did not write, arriving as a
+fetched artifact from `arshad-shah/nimaz-data` — and the way that goes wrong is never a crash. A
+field the artifact does not carry renders as a blank line; an optional grade or reference
+vanishes; a load failure reports itself as "no chapters found" and tells a reader to give up on a
+collection that is fine. The `when` ordering that separates *loading*, *failed* and *genuinely
+empty* is load-bearing on five of these screens, and `chapters.isEmpty()` is true in all three
+states.
+
+**The display settings were pinned at the persistence layer and nowhere else.**
+`hadithShowArabic`, `hadithShowChain`, `duaShowTransliteration` and the rest were covered by
+`:core:datastore` (#603) — that they round-trip. What no test asserted is that the screens
+*honour* them: that turning the chain off actually removes the chain. Each is a separate `if` in
+a reader, and a reader who hides the Arabic and gets it anyway can only report "the setting does
+nothing".
+
+**Two things here are worth knowing before adding a test to this module.**
+
+- **`hiltViewModel()` does not need Hilt on the adaptive screens.** `AdaptiveHadithScreen` and
+  `AdaptiveDuaScreen` hand their inner screens no ViewModel, so the default argument runs — and
+  per #604's playbook item 8, an owner whose `ViewModelStore` already holds the mock answers
+  before any factory is consulted. Both classes seed one. This is what makes the phone-vs-tablet
+  branch reachable at all.
+- **A `LazyColumn` at 2,200dp is not always tall enough.** The dua category-icon test renders
+  forty-five rows to cover the emoji→icon lookup and runs at `w411dp-h6000dp`; the rest of the
+  class stays at the usual height.
+
+| Area | Covered by | What it pins |
+|---|---|---|
+| The four ways into the hadith reader | `HadithReaderScreenTest` | one `LaunchedEffect` turns four route shapes into four different loads, and their guards overlap by construction — `bookId` is empty for a search hit *and* for a grade shelf. The order is what keeps a **bookmark** from being looked up as a primary key, which lands the reader on a real narration from an arbitrary book rather than crashing |
+| Each display toggle removing its own element | same, and `DuaReaderScreenTest` | Arabic, translation, grade and chain in the hadith reader; Arabic, transliteration and translation in the dua reader. The transliteration is guarded **twice** — the setting, and whether the artifact carries one — so "off" and "absent" have to produce the same page |
+| A narration with no grade, narrator or reference | `HadithReaderScreenTest` | renders none of the three badges rather than three empty pills. The chain of whitespace is not offered at all |
+| The isnād, expanded | same | collapsed by default; expanding splits the chain on its four separators and lists the narrators. A chain the separators do not match is shown **whole** instead of as a one-dot timeline |
+| "Narrated by" not said twice | same | the dataset carries the prefix inline for some collections and a bare name for others. Prefixing unconditionally yields "Narrated by Narrated by Abu Huraira" |
+| Failure vs emptiness, on five screens | `HadithChaptersScreenTest`, `HadithReaderScreenTest`, `HadithCollectionScreenTest`, `DuaOccasionScreenTest`, `DuaReaderScreenTest` | the error branch sits **before** the empty branch on every one of them, because the list is empty in both cases. Getting it back to front tells a reader their collection is empty when the database could not be read |
+| Retry re-issuing the right load | same five | `HadithEvent.Retry` re-runs only the failing surface; the dua screens re-issue the **route's** id, not whatever the ViewModel loaded last |
+| The hadith of the day's two lives | `HadithCollectionScreenTest` | `getHadithOfTheDay` is best-effort, so `hadithOfTheDay` is null on a healthy screen and the card shows shipped fallback text. Nothing distinguishes the two at a glance, and bookmarking while the fallback is up must dispatch **nothing** rather than the fallback's imaginary id |
+| Which grades are browsable | same | exactly Sahih, Hasan and Ḍaʿīf. Mawḍūʿ (fabricated) is a warning label on a narration, not a shelf to invite anyone onto, and the list it is absent from is a private `val` no compiler check guards |
+| Every collection getting its own cover | same | the six Kutub al-Sittah ids plus the default arm, all seven resolved while the card composes |
+| A bookmark citing the number a reader sees | same | the card dispatches `hadithNumberInBook`, not `hadithNumber`. The two differ wherever numbering restarts per volume, and a bookmark saved under the wrong one reopens on a different narration |
+| The chapter search being derived | `HadithChaptersScreenTest` | rows come from `filteredChapters`, which recomputes from `searchQuery` on every read. Rendering `chapters` instead passes every test that does not search — and the header still renders when the search matches nothing, so a typo does not blank the screen |
+| A chapter opened under its own book | same | `onNavigateToChapter(bookId, chapter.id)` carries both, because the reader keys on the composite `bookId_chapterId`; the id alone resolves the chapter header to null |
+| The dua library's two layouts | `DuasCollectionScreenTest` | curated order splits into a four-card grid and a list below it; alphabetical collapses both into one A–Z list. `take(4)`/`drop(4)` are a partition only while both branches run, and nine categories all have to survive the split |
+| Every category emoji resolving to an icon | same | forty-three mapped keys plus an unknown emoji and a category with none. An emoji the artifact starts using turns silently into a mosque, and they all look alike |
+| The sort control naming where it goes | same | the content description inverts with the state rather than describing it — the only thing a screen-reader user has to go on |
+| The shared dua row, in both of its forms | `DuaCategoryScreenTest`, `DuaOccasionScreenTest` | given `onOccasionClick` the occasion is a badge into that occasion's whole list; without it, plain text. The occasion screen passes nothing, because a chip navigating to the list you are on is a dead end |
+| The occasion label being localised | `DuaCategoryScreenTest`, `DuaOccasionLabelsTest` | `DuaOccasion.displayName()` is hardcoded English — right for a log line, wrong on a chip. All seventeen occasions map to distinct resources, and the mosque and home pairs are opposite rather than interchangeable |
+| A repeat count of zero | `DuaCategoryScreenTest`, `DuaReaderScreenTest` | the artifact stores `0` for "no prescribed count", and an unguarded badge reads "0x" |
+| The occasion screen not borrowing a header | `DuaOccasionScreenTest` | it renders from `categoryState`, the surface `LoadCategory` also fills, so a stale `category` left in it would put another collection's name above these duas |
+| Adding a dua to the tasbih | `DuaReaderScreenTest` | goes through this feature's own ViewModel, not a `hiltViewModel<TasbihViewModel>()` reach across the module boundary — and the toast is the reader's only feedback that it happened |
+| Favouriting citing the category too | same | a `DuaBookmark` is keyed on both ids; the dua's alone files the favourite under no collection |
+| Phone push vs tablet pane | `AdaptiveHadithScreenTest`, `AdaptiveDuaScreenTest` | the same tap must push a route on a phone and move the scaffold's detail pane on a tablet. Backwards, a tablet stacks a full-screen list over a layout built to show both, and a phone's rows do nothing — neither crashes, and the inner screens' own tests cannot see it because the lambda they assert on is the wrapper's choice |
+| The detail pane's second decision | same two | chapters or reader, dua list or dua, from whether the pane's args carry the second id — which the list pane built two taps earlier |
 
 
 ## Conventions
