@@ -211,6 +211,45 @@ class DuaReaderScreenTest {
     }
 
     @Test
+    fun `a reference with no recitation count still gets its own chip`() {
+        // The meta row appears when there is a reference **or** a count, and each chip inside
+        // it is guarded again. Collapsing the two guards into one renders an empty second pill
+        // beside the reference.
+        loaded(dua(reference = "Sahih Muslim 2723", repeatCount = null))
+
+        setContent()
+
+        composeRule.onNodeWithText("Sahih Muslim 2723").assertExists()
+        composeRule.onNodeWithText(
+            context.resources.getQuantityString(R.plurals.dua_reader_recite_count, 3, 3)
+        ).assertDoesNotExist()
+    }
+
+    @Test
+    fun `a recitation count with no reference still gets its own chip`() {
+        // The other half, and the one the content artifact produces more often: a prescribed
+        // count with no citation recorded.
+        loaded(dua(reference = null, repeatCount = 3))
+
+        setContent()
+
+        composeRule.onNodeWithText(
+            context.resources.getQuantityString(R.plurals.dua_reader_recite_count, 3, 3)
+        ).assertExists()
+    }
+
+    @Test
+    fun `an empty reference string counts as no reference`() {
+        // `isNullOrEmpty`, not `== null`: the artifact stores `""` as readily as null, and an
+        // empty chip is a pill with nothing in it.
+        loaded(dua(reference = "", repeatCount = null, textEnglish = "Bare supplication"))
+
+        setContent()
+
+        composeRule.onNodeWithText("Bare supplication").assertExists()
+    }
+
+    @Test
     fun `a dua that ships a virtue shows the virtue card`() {
         loaded(dua(benefits = "Whoever says this is protected until evening"))
 

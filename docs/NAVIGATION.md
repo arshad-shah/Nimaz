@@ -58,12 +58,19 @@ eleven feature modules at once. PR 12 of #551 split it; the file is now 281 line
 
 | graph | destinations |  | graph | destinations |
 |---|---:|---|---|---:|
-| `quranGraph` | 21 | | `aboutGraph` | 7 |
-| `contentGraph` | 21 | | `searchGraph` | 4 |
-| `settingsGraph` | 16 | | `toolsGraph` | 2 |
-| `trackerGraph` | 11 | | `calendarGraph` | 2 |
-| `prayerGraph` | 8 | | `onboardingGraph` | 1 |
+| `quranGraph` | 19 | | `aboutGraph` | 7 |
+| `contentGraph` | 19 | | `searchGraph` | 4 |
+| `settingsGraph` | 20 | | `toolsGraph` | 2 |
+| `trackerGraph` | 14 | | `calendarGraph` | 2 |
+| `prayerGraph` | 5 | | `onboardingGraph` | 1 |
 | | | | `homeGraph` | 1 |
+
+> Five of these rows were wrong until #625 — `quranGraph` and `contentGraph` were listed as 21,
+> `settingsGraph` as 16, `trackerGraph` as 11 and `prayerGraph` as 8. The **total** was right, which
+> is exactly why nothing caught it: NAV-03 checks the 94 against `Routes.kt`, not the split. They
+> were corrected by counting `taggedComposable<Route.` per file with `check_docs.py`'s own
+> comment-stripping helper, after `ContentGraphTest` asserted 19 destinations against a graph
+> documented as holding 21. Recount the same way before editing a row here.
 
 Each takes a `NavController` — not the `onNavigate: (Route) -> Unit` lambda the issue sketched,
 because 11 of the 158 `navigate` calls in those blocks pass a `NavOptionsBuilder` (`popUpTo`,

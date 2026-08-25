@@ -49,7 +49,7 @@ Two on-device/JVM test surfaces exist:
   - [Prayer times, the month table and the qibla (`:feature:prayer/src/test` and `src/testDebug`)](#prayer-times-the-month-table-and-the-qibla-featureprayersrctest-and-srctestdebug)
   - [About, Help and the More menu (`:feature:about/src/test`)](#about-help-and-the-more-menu-featureaboutsrctest)
   - [The repositories, the sync and the adhan store (`:core:data/src/test`)](#the-repositories-the-sync-and-the-adhan-store-coredatasrctest)
-  - [The hadith and dua corpora, rendered (`:feature:content/src/test`)](#the-hadith-and-dua-corpora-rendered-featurecontentsrctest)
+  - [The library, rendered (`:feature:content/src/test`)](#the-library-rendered-featurecontentsrctest)
 - [Conventions](#conventions)
 
 ## Running the unit tests
@@ -265,7 +265,8 @@ floors in its own `build.gradle.kts`.
 **The line floor is 80% everywhere; the branch floor is not.** `:core:database`, `:core:domain`,
 `:core:navigation`, `:core:common`, `:core:datastore` and `:core:data` are locked at 80/80 — none of
 them draws anything, so every branch is one somebody wrote and a test can take both sides of. So are `:feature:calendar`,
-`:feature:onboarding`, `:feature:tools`, `:feature:search`, `:feature:widget` and `:feature:about`, which *are* Compose modules: the
+`:feature:onboarding`, `:feature:tools`, `:feature:search`, `:feature:widget`, `:feature:about` and
+`:feature:content`, which *are* Compose modules: the
 unreachable branch below is emitted **per parameter of every restartable composable**, so its
 weight scales with how many composables a module has, and six files — or eight, or the two screens
 in `:feature:tools`, or the one screen and four cards in `:feature:search`, or the seven screens in
@@ -273,6 +274,12 @@ in `:feature:tools`, or the one screen and four cards in `:feature:search`, or t
 `:feature:widget` is Compose of a different kind — six **Glance** widgets — and holds **89.3%**
 branches, which settles the question for the widget surface too.
 `:feature:onboarding` reports **90.3%** branches, the highest of any Compose module here.
+`:feature:content` is the **lowest** to hold the standard, and the closest any module has come to
+missing it: **80.4%**, four branches above the gate. It is also the largest Compose surface locked
+so far — nineteen screens across five corpora — which is the point: even there, the `$dirty`
+branches below never accumulate enough to force the softened floor. What they do is eat the
+margin, and a module that reports 80.4% is one unrelated refactor from a red gate. That is the
+ratchet working, not a reason to soften it.
 
 **Two modules are softened to 80 line / 60 branch, and for two different reasons.**
 `:feature:prayer` is the second, and its reason is arithmetic rather than Compose:
@@ -309,7 +316,7 @@ split, and should say so where it sets its floors.
 | `:core:data` | 88.1% | 84.6% | **locked** at 80/80 (#611) |
 | `:core:ui` | 50.3% | 47.8% | |
 | `:feature:tracker` | 30.4% | 24.4% | |
-| `:feature:content` | 61.6% | 49.6% | hadith + dua done (#624); not locked yet |
+| `:feature:content` | 85.1% | 80.4% | **locked** at 80/80 (#612) |
 | `:feature:settings` | 11.3% | 14.9% | |
 
 `:app` is absent because its own suite needs the private content artifact and cannot be measured
@@ -872,7 +879,7 @@ largest of them: seven screens, a bottom sheet and two renderer files. The `$dir
 branches are here as everywhere, and at this size they still do not add up to enough to move the
 number.
 
-**Two things here are worth knowing before adding a test to this module.**
+**Four things here are worth knowing before adding a test to this module.**
 
 - **`hiltViewModel()` does not always need Hilt, and that is how `AdaptiveMoreScreen` got
   covered.** `:feature:quran` (#598) and `:feature:search` (#607) both left their adaptive screens
@@ -1031,18 +1038,19 @@ past the floor. **No `COVERAGE_EXCLUSIONS` entry was added or widened** — the 
 every locked module, so widening it would move their numbers too.
 
 
-### The hadith and dua corpora, rendered (`:feature:content/src/test`)
+### The library, rendered (`:feature:content/src/test`)
 
-The fifteenth module, taken in two passes because 2,448 lines is more than one review should
-carry. **This is the first pass: hadith and dua.** It moves the module from **28.8% lines to
-61.6%** — 1,380 covered lines to 2,949 — and from 19.5% to **49.6%** branches, with 108 tests in
-ten new classes. The module is **not locked yet**; the second pass takes the prophets, the names,
-qaida, the catalog and `contentGraph`, and declares the floors.
+The fifteenth module locked: **28.8% lines to 85.1%**, from 1,380 covered lines to 4,072, and
+19.5% to **80.4%** branches. Taken in **two passes** because 2,448 lines is more than one review
+should carry — #624 took the hadith and dua corpora, #625 took the prophets, the names, qaida, the
+catalog and `contentGraph`, and declared the floors.
 
-Seven screens were at **0%** between them — `HadithReaderScreen` (302 lines),
-`DuasCollectionScreen` (259), `HadithCollectionScreen` (251), `DuaReaderScreen` (216),
-`DuaCategoryScreen` (183), `HadithChaptersScreen` (160) and `DuaOccasionScreen` (58) — plus the
-two adaptive wrappers over them (96). Nothing had ever composed one.
+**Nineteen files were at 0%**, which is every screen the module owns: the seven hadith and dua
+screens (1,429 lines), `ProphetDetailScreen` (193), `ContentGraph` (154), `NamesScreen` (133),
+`QaidaReaderScreen` (117), `FavouritesScreen` (96), `AsmaUlHusnaDetailScreen` (76),
+`QaidaHomeScreen` (65), `QaidaAudioManager` (83 across two classes), the three adaptive wrappers
+(137), `AsmaUnNabiDetailScreen` (39), `QaidaLettersScreen` (34) and the two catalog shells (68).
+Nothing in the repository had ever composed one of them.
 
 **What makes this module worth testing is that its failures are silent.** Every screen here
 renders *shipped* content — narrations and supplications this build did not write, arriving as a
@@ -1060,7 +1068,7 @@ states.
 a reader, and a reader who hides the Arabic and gets it anyway can only report "the setting does
 nothing".
 
-**Two things here are worth knowing before adding a test to this module.**
+**Four things here are worth knowing before adding a test to this module.**
 
 - **`hiltViewModel()` does not need Hilt on the adaptive screens.** `AdaptiveHadithScreen` and
   `AdaptiveDuaScreen` hand their inner screens no ViewModel, so the default argument runs — and
@@ -1070,6 +1078,13 @@ nothing".
 - **A `LazyColumn` at 2,200dp is not always tall enough.** The dua category-icon test renders
   forty-five rows to cover the emoji→icon lookup and runs at `w411dp-h6000dp`; the rest of the
   class stays at the usual height.
+- **A `WhileSubscribed` flow's `.value` is null until something collects it**, and three of
+  `QaidaReaderViewModel`'s moves read exactly that. A walk asserted without a subscriber passes
+  for the *wrong reason* — the move is refused rather than performed — so `QaidaCourseWalkTest`
+  has a named `subscribedViewModel()` helper and one test that deliberately does **not** use it.
+- **The Qaida course map is drawn art.** `QaidaCoursePath`'s medallions carry no text, only a
+  content description per lesson — which is the better contract anyway: it carries the number,
+  the title *and* whether the lesson is locked, and that phrase is all a screen-reader user gets.
 
 | Area | Covered by | What it pins |
 |---|---|---|
@@ -1097,7 +1112,43 @@ nothing".
 | Favouriting citing the category too | same | a `DuaBookmark` is keyed on both ids; the dua's alone files the favourite under no collection |
 | Phone push vs tablet pane | `AdaptiveHadithScreenTest`, `AdaptiveDuaScreenTest` | the same tap must push a route on a phone and move the scaffold's detail pane on a tablet. Backwards, a tablet stacks a full-screen list over a layout built to show both, and a phone's rows do nothing — neither crashes, and the inner screens' own tests cannot see it because the lambda they assert on is the wrapper's choice |
 | The detail pane's second decision | same two | chapters or reader, dua list or dua, from whether the pane's args carry the second id — which the list pane built two taps earlier |
+| Nineteen graph destinations, eleven of them argument-carrying | `ContentGraphTest` | the largest graph in the app. An unregistered destination throws only when a **user taps the row** — not at build time, and in none of the four gates `CLAUDE.md` lists. Four hadith routes are the same screen reached four ways, so losing one breaks exactly one entry point and nothing else. **This test is also what caught `docs/NAVIGATION.md` claiming 21** |
+| Which fields each catalogue searches | `CatalogueSearchFieldsTest` | `CatalogViewModel` is generic and `CatalogViewModelTest` drives it with a synthetic source, so the three **real** sources were at 0%. The prophets' search also covers the **title** and the **era** — how you look for a prophet whose name you cannot spell — and dropping an arm quietly returns fewer results with no crash and no empty state |
+| A slower detail read losing to a newer one | same | `requestedItemId` is set synchronously and checked *after* the suspension point, because a coroutine cancelled after its last suspension still runs to the end of its block. All three catalogue screens share one ViewModel per back-stack entry, so this is one fast back-and-forward away |
+| Every optional prophet section | `ProphetDetailScreenTest` | lessons, cited verses and miracles are each guarded; the timeline's four label/value pairs are the shape where two get swapped and the page still reads as a well-formed timeline. The only header in the app rendered with `number = null` |
+| The shared catalogue shell's two guards | `CatalogDetailScreensTest` | the FAB appears only when there is an item, and `isLoading || item == null` is **one** branch — a stale deep link leaves `isLoading = false` with no item, and without the second half the screen renders a header of nulls |
+| Three catalogues behind one search box | `NamesScreenTest` | one query reaches all three ViewModels, which is what makes the per-tab match counts mean anything; a dispatch reaching only the visible tab looks identical from the tab you are on. Clearing sends `ClearSearch`, not `Search("")` — they leave the same list, and only one keeps an empty query out of the debounced analytics flow |
+| A favourites section that is empty rendering nothing | `FavouritesScreenTest` | the check lives in `favouriteSection`, so a fourth kind of favourite cannot forget it. The whole-screen empty state is the screen's, not a section's: a reader with two starred prophets and no starred names must see the prophets |
+| The Qaida course walk, and its guards | `QaidaCourseWalkTest` | next refuses a **locked** lesson — the gate the whole progression rests on, duplicated from the screen where it is only cosmetic — previous stops at the start, and resume falls back to lesson 1 once `nextLessonId` is null. Re-selecting the open lesson is a no-op because `selectLesson` stops audio, and a `LaunchedEffect` re-fires on every recomposition |
+| Which cell is highlighted | same | resolved from the audio key against the **open** lesson's cells. Audio outlives the screen, so a clip still sounding after a lesson change must light nothing rather than a foreign tile |
+| A lesson finished during this visit, once | `QaidaReaderScreenTest` | `openedComplete` is captured from the first non-null status, so re-opening a finished lesson to practise does not put confetti in front of it — and finishing one while reading still celebrates |
+| Where a letter is made | `QaidaLettersScreenTest` | `makhrajLabel` and `makhrajEmoji` are two `when`s over the same five-value enum, and the sheet is the only place either runs. This line is the whole of what the sheet teaches |
+| A clip resolving to the right file | `QaidaAudioManagerTest` | a drop-in under `filesDir/qaida_audio/` beats the bundled asset — the entire on-demand delivery mode, one `if`, reachable through no setting. A **truncated** download is a zero-length file that exists, and trusting `exists()` alone plays silence forever with nothing on screen to say why |
+| A tap that should do nothing | same | a cell whose `audio_key` the artifact does not carry is refused rather than queued: queuing `""` asks for `qaida/audio/.mp3`, which fails asynchronously and surfaces as a *playback error* on a tap that should simply have been ignored. A line filters the same way, and one that filters down to a single clip is played as a tap |
+| The dua collection's sort | `DuaCollectionSortTest` | curated `displayOrder` or A–Z by **lowercased** English name — sorting without lowercasing puts every capitalised name before every lowercase one, which reads as no order at all. The toggle persists the state it is moving *to* |
+| The reader's paging window | same | opening a dua loads its whole category so the pager can page; a dua missing from its own category list opens at the top rather than at index **-1**, and one whose category comes back empty opens alone rather than resolving and then claiming "not found" |
+| The hadith reader's anchor | `HadithReaderAnchorTest` | held **by id, not by index**, so a content refresh that inserts a row above the reader keeps them on the hadith they were reading. An index-based anchor passes "a refresh does not reset the reader" and still moves them. A refresh that removes the anchored hadith falls back to the top rather than indexing at -1 |
+| A retry re-running only what failed | same | a retry tapped in the reader must not also re-fetch the book list behind it, and nothing on screen would say whether it did |
+| What the copy button puts on the clipboard | `HadithReaderScreenTest` | built by a local function nothing else calls, and it is what a reader pastes into a message. Narrator and reference are guarded separately from the page's own guards, so a hadith can render perfectly and paste with "Narrated by " and a trailing blank line |
+| An id with an underscore | same | `bookId.isEmpty() && !chapterId.contains("_")` is the whole classifier, and hadith ids in this dataset **do** contain underscores (`bukhari_1_1`) — the two shapes are one character apart and the rule is a convention, not a proof |
 
+
+**What stays uncovered, and why.** 125 of the 255 missing branches are the Compose compiler's
+`$dirty` bitmask — one per parameter of every restartable composable, on the signature line and
+its closing paren, neither side reachable because which one runs depends on what the *caller*
+changed between recompositions. Discount those and the module stands at **89.4% branches**. Of the
+rest, three pockets account for half: `QaidaAudioManager`'s `Player.Listener` (12 branches —
+Robolectric has no media pipeline, so the player never leaves `STATE_IDLE` and no callback fires;
+reaching them would mean reflecting into ExoPlayer's private listener set, and its *consumer* is
+covered instead); `DuaViewModel.filterAndSortCategories`'s search arms (10 — **genuinely dead**,
+because `searchQuery` is only ever written as `""` and the collection's search action navigates to
+`:feature:search`'s screen instead); and `QaidaPlayLineButton` (4 — behind
+`QAIDA_AUDIO_UI_ENABLED`, `false` while the recordings are regenerated, with the *absence* of the
+control asserted so the test is inverted rather than deleted when the flag flips). Sharing the
+hadith of the day is also uncovered: `shareBranded` hops to `Dispatchers.Default` to render a card
+before it shares anything, and that hop does not complete under the Compose test clock.
+**No `COVERAGE_EXCLUSIONS` entry was added or widened** — the list is shared with every locked
+module, so widening it would move their numbers too.
 
 ## Conventions
 
