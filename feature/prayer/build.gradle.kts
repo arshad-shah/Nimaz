@@ -12,8 +12,70 @@ android {
         unitTests {
             isReturnDefaultValues = true
             isIncludeAndroidResources = true
+
+            /**
+             * **One JVM per test class, only in this module.**
+             *
+             * `ArQiblaView` is the app's only CameraX surface, and `ProcessCameraProvider
+             * .getInstance()` cannot complete on a machine with no camera: it leaves a pending
+             * listener on the main looper and a half-initialised provider behind it. Robolectric
+             * runs a whole module's classes in one JVM, so that state outlives the test that
+             * created it and lands on whichever class launches an activity next — as
+             * `FutureGarbageCollectedException: CameraX initInternal` raised from an unrelated
+             * screen's test, or as `lightZ must be a finite positive, given=Infinity` thrown out
+             * of `ThreadedRenderer.setup` before that class runs a line of its own.
+             *
+             * Both failures name neither CameraX nor the test that caused them, and both depend
+             * on class order and on when a GC happens to run — so they are green locally and red
+             * in CI at a rate no amount of re-running settles. Forking per class is what actually
+             * contains it. Measured cost: this module's `testDebugUnitTest` goes from about one
+             * minute to about four. The alternative is either an intermittently red gate or
+             * leaving the AR qibla — the only camera surface in the app — untested.
+             *
+             * No other module needs this, and none of them has a camera dependency.
+             */
+            all { it.setForkEvery(1) }
         }
     }
+}
+
+/**
+ * Locked at the standard line floor with a **softened branch floor**, measured at **84.1% lines /
+ * 70.5% branches** with the tests added by #609.
+ *
+ * **The softening is one file.** `PrayerTimesPdfExporter` — 296 of the module's 2,853 lines and
+ * 116 of its 760 branches — cannot run under Robolectric at all: `PdfDocument` throws
+ * `"document is closed!"` on the first `startPage`, so every path past that point is unreachable
+ * from a JVM test. `:feature:quran` hit exactly this with `TafseerPdfExporter` (#598) and settled
+ * it the same way: leave it at zero, make the 80% up elsewhere, and say so here. Nothing is
+ * excluded to reach these numbers — `COVERAGE_EXCLUSIONS` is untouched, and the file is counted
+ * in full against both floors.
+ *
+ * The arithmetic is what decides the branch floor. 103 of the 224 branches still missing are in
+ * that one file; discount them and the module stands at **81.6%** branches, over the standard.
+ * Counting them, 80% is arithmetically out of reach — the remaining 121 are spread across six
+ * Compose screens and twelve components, where a large share is the `$dirty` bitmask branch the
+ * Compose compiler emits per parameter of every restartable composable, and no test can take both
+ * sides of those. So: `lineFloor` at the standard, `branchFloor` at 0.60, which the module clears
+ * by more than ten points.
+ *
+ * **What is *actually* uncovered, besides the exporter**, is two things and both are structural.
+ * Twenty-four of `PrayerGraph`'s thirty lines are the five destination bodies: each constructs its
+ * screen through `hiltViewModel()`, which resolves only inside a composed `NavHost` on a
+ * Hilt-injected activity this module has no way to build. `PrayerGraphTest` covers the
+ * registration those bodies hang off — the failure that ships is a destination that throws on tap
+ * — and `:app`'s instrumented suite exercises the bodies. The rest is `@Preview` functions (three
+ * lines each, their contents hoisted into the excluded `ComposableSingletons`), the
+ * `hiltViewModel()` default arguments, and `QiblaCalibrationSheet`'s figure-8 `Canvas`, whose draw
+ * block needs a software canvas the sheet's own popup window is not part of.
+ *
+ * `ArQiblaView`'s camera preview is *not* on that list: the CameraX binding cannot complete with
+ * no camera, but the overlay drawn over it is fully covered, and the provider future's failure
+ * arm is now guarded rather than crashing out of a main-thread listener.
+ */
+nimazCoverage {
+    lineFloor.set(0.80)
+    branchFloor.set(0.60)
 }
 
 // When each prayer *is*, and which way to face: prayer times, the monthly table, qibla and the
