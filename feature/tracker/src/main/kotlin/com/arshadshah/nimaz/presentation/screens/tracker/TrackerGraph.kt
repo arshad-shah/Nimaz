@@ -14,7 +14,12 @@ import com.arshadshah.nimaz.presentation.screens.fasting.MakeupFastsScreen
 import com.arshadshah.nimaz.presentation.screens.tasbih.TasbihScreen
 
 /**
- * The 11 Tracker destinations — the prayer tracker, fasting and tasbih.
+ * The 14 Tracker destinations — the prayer tracker, fasting and tasbih.
+ *
+ * Fourteen, not the eleven this said before #613: `docs/NAVIGATION.md` was corrected to 14 in
+ * #625 (which recounted every graph and found five wrong), and `TrackerGraphTest` now asserts the
+ * number against the graph itself. `check_docs.py`'s NAV-03 cannot catch a drift here — it
+ * compares the 94-destination total against `Routes.kt`, not the per-graph split.
  *
  * Split out of `NavGraph.kt` in PR 12 of #551. That file registered all 94 destinations and
  * imported 69 screen composables, which meant every screen in the app was reachable from one
