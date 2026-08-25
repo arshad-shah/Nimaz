@@ -48,6 +48,7 @@ Two on-device/JVM test surfaces exist:
   - [The six widgets, composed for real (`:feature:widget/src/test`)](#the-six-widgets-composed-for-real-featurewidgetsrctest)
   - [Prayer times, the month table and the qibla (`:feature:prayer/src/test` and `src/testDebug`)](#prayer-times-the-month-table-and-the-qibla-featureprayersrctest-and-srctestdebug)
   - [About, Help and the More menu (`:feature:about/src/test`)](#about-help-and-the-more-menu-featureaboutsrctest)
+  - [The repositories, the sync and the adhan store (`:core:data/src/test`)](#the-repositories-the-sync-and-the-adhan-store-coredatasrctest)
 - [Conventions](#conventions)
 
 ## Running the unit tests
@@ -168,7 +169,7 @@ floor is a ratchet — raised when a module is brought up to it, never lowered t
 green. The branch floor is set per module, at 80% where branches are reachable and lower where
 the Compose compiler's `$dirty` checks make them not (see
 [Where each module stands](#where-each-module-stands)). `:core:database` is the first module
-locked (#597); then `:feature:quran`, `:core:domain`, `:core:navigation`, `:core:common`, `:feature:calendar`, `:core:datastore`, `:feature:onboarding`, `:feature:tools`, `:feature:search`, `:feature:widget`, `:feature:prayer` and `:feature:about`.
+locked (#597); then `:feature:quran`, `:core:domain`, `:core:navigation`, `:core:common`, `:feature:calendar`, `:core:datastore`, `:feature:onboarding`, `:feature:tools`, `:feature:search`, `:feature:widget`, `:feature:prayer`, `:feature:about` and `:core:data`.
 
 ### What is not counted, and why
 
@@ -261,8 +262,8 @@ module-by-module pass; a module is **locked** once it clears the 80% line floor 
 floors in its own `build.gradle.kts`.
 
 **The line floor is 80% everywhere; the branch floor is not.** `:core:database`, `:core:domain`,
-`:core:navigation`, `:core:common` and `:core:datastore` are locked at 80/80 — none of them draws
-anything, so every branch is one somebody wrote and a test can take both sides of. So are `:feature:calendar`,
+`:core:navigation`, `:core:common`, `:core:datastore` and `:core:data` are locked at 80/80 — none of
+them draws anything, so every branch is one somebody wrote and a test can take both sides of. So are `:feature:calendar`,
 `:feature:onboarding`, `:feature:tools`, `:feature:search`, `:feature:widget` and `:feature:about`, which *are* Compose modules: the
 unreachable branch below is emitted **per parameter of every restartable composable**, so its
 weight scales with how many composables a module has, and six files — or eight, or the two screens
@@ -304,8 +305,8 @@ split, and should say so where it sets its floors.
 | `:feature:widget` | 97.6% | 89.3% | **locked** at 80/80 (#608) |
 | `:feature:prayer` | 84.1% | 70.5% | **locked** at 80 line / 60 branch (#609) |
 | `:feature:about` | 94.1% | 83.8% | **locked** at 80/80 (#610) |
+| `:core:data` | 88.1% | 84.6% | **locked** at 80/80 (#611) |
 | `:core:ui` | 50.3% | 47.8% | |
-| `:core:data` | 39.0% | 31.2% | |
 | `:feature:tracker` | 30.4% | 24.4% | |
 | `:feature:content` | 28.8% | 19.5% | |
 | `:feature:settings` | 11.3% | 14.9% | |
@@ -927,6 +928,106 @@ them. The rest is `LicenceCatalogueTest`'s subject staying in `:app` (the AboutL
 reads the *applying* project's classpath, so this module renders a catalogue it cannot produce),
 the `hiltViewModel()` default arguments, and a handful of `when`-merge lines the compiler emits
 with no statement of their own. No `COVERAGE_EXCLUSIONS` entry was added or widened.
+
+
+### The repositories, the sync and the adhan store (`:core:data/src/test`)
+
+The fourteenth module locked: **39.0% lines to 88.1%**, from 1,666 covered lines to 3,762, and
+31.2% to **84.6%** branches. 431 tests added across twenty new classes, taking the module's suite
+from 266 to 697. Five files were at **0%** between them — `AdhanAudioManager` (256 lines),
+`NearbyConnectionsManager` and its two callbacks (334), `IntegrityTokenProvider` (39),
+`AnnouncementBootstrap` (30) and `AdhanSound` (37) — 696 of the 2,602 missing lines.
+
+**Nothing is softened, and nothing was excluded.** There is no Compose here, so the `$dirty`
+bitmask that buys `:feature:quran` and `:feature:prayer` their 60% branch floor does not exist in
+this module: every branch is one somebody wrote.
+
+**Playbook step 1 found nothing owed to this module, which took checking.** `:app/src/test` holds
+`LibraryMappingTest`, `LibraryRepositoryImplTest` and `DeviceStateCorpusTest`, and #611 flagged all
+three as candidates to move. None of them belongs here: `LibraryRepositoryImpl` lives in `:app`
+(the AboutLibraries plugin reads the *applying* project's classpath), and `DeviceStateCorpusTest`
+builds a `NimazDatabase` — a `:core:database` type — and reaches no `:core:data` class at all.
+`NextSurahToPlayTest`, `QuranAudioManagerDownloadTest` and `QuranReciterCdnMapTest` all exercise
+`QuranAudioManager`, which stays in `:app` because `MainActivity` holds one. Every line of the rise
+above is new tests.
+
+**Four things here are worth knowing before adding a test to this module.**
+
+- **The two halves of sync are only worth testing together.** An exporter that drops a column and
+  an importer that never reads it agree perfectly, and the user loses the data with nothing on
+  screen. `SyncRoundTripTest` exports from a populated set of DAOs and imports into an empty one,
+  so a column that goes missing anywhere along the way fails an assertion about the *receiving*
+  device. `SyncFixtures` holds the rows both halves use, once.
+- **A DAO mock that does not persist breaks the bookmark merge.** `importBookmarks` and
+  `importFavorites` both read `bookmarkDao.all()` and both write it, and the whole point of the
+  merge is that the second sees what the first wrote. `SyncRoundTripTest` therefore keeps a real
+  `markStore` list behind the mock rather than a fixed `returns`; with a static stub the round trip
+  "loses" the bookmark half and the test fails for a reason that is not in the production code.
+- **`NearbyConnectionsManager`'s callbacks are private fields, but they are *handed to* the
+  client.** Mock `Nearby.getConnectionsClient` and capture the arguments of `startAdvertising`,
+  `startDiscovery` and `acceptConnection`, and the whole protocol replays without radios. Two
+  further notes: a GMS `Task`'s listeners post to the **main looper**, which under Robolectric is
+  the thread the test is suspended on, so tests that await a result stub a `Task` whose listeners
+  fire inline (the same trick `AndroidDeviceLocationRepositoryTest` and
+  `IntegrityTokenProviderTest` use); and the STREAM branch reads on a background `Thread`, so its
+  assertions poll rather than following the call.
+- **A `Geocoder` constructed inside a private function is unreachable through Robolectric's own
+  shadow**, because `ShadowGeocoder` keeps its answers on the *instance*.
+  `device/StubGeocoder.kt` is a `@Config(shadows = …)` replacement that keeps them statically and
+  implements the blocking overloads as well as the listener ones, so both sides of the API-33
+  split in `AndroidDeviceLocationRepository.geocode` are reachable.
+
+| Area | Covered by | What it pins |
+|---|---|---|
+| Export and import agree | `SyncRoundTripTest` | a populated phone's records arrive on an empty one, category by category. Row **ids never travel** — khatams merge on `createdAt`, prayers on `date`+`prayerName`, fasts on `date`, presets on `name`, sessions on `startedAt`, highlights on the span they cover, locations on coordinates — because `id` is `autoGenerate` and both phones have handed out 1, 2, 3… |
+| A khatam's children | same | re-parented through the sender-id → local-id map the parent import returns. Without it another device's read verses attach to whichever local khatam holds that id and inflate its progress, which no screen can show as wrong |
+| The older side never wins | same | every `local == null \|\| incoming.updatedAt > local.updatedAt` has both arms taken, on all eleven tables. Getting one backwards overwrites a record the user made more recently on *this* phone with a stale copy from the other, and there is no undo |
+| The merge is additive | same | the payload lists what the sending device **has** — there are no tombstones — so a flag set on either side stays set and nothing is deleted for being absent. A name favourite unions both ways; an arriving hadith mark cannot clear a local favourite the wire format has no field for |
+| The current location never travels | same, and `SyncDataExporterTest` | only favourites are exported, the payload type has no `isCurrentLocation` field, and an imported location is never made current. The failure is a sync that moves the receiving phone's prayer times to another city |
+| The seven-table wire format | `SyncDataExporterTest` | one consolidated `bookmarks` row is fanned back out by kind and by flag, because a phone on this version has to sync with one that still has seven tables. A verse that is both bookmarked and favourited appears in **both** lists; a filter reading `bookmarked` where it means `favourite` silently drops one |
+| The shared `progress` table | same | dua counts, qaida lessons and qaida cells all come out of one `progressDao.all()` and are told apart by nothing but `kind` |
+| The progress bar's arithmetic | same, and `SyncDataExporterStepsTest` | eleven callbacks, eleven distinct labels, monotonic and never past the total — the defect that filled the bar to 120%, captioned it "Step 11 of 10" and rewound it to 80% |
+| The signal protocol | `SyncSignalTest` | every signal round-trips, no two encode alike, and **anything that is not a signal decodes to null rather than throwing** — `onPayloadReceived` runs `decode` on every non-gzip BYTES payload, so an exception there takes the transfer down |
+| Which branch a payload takes | `NearbyConnectionsManagerTest` | signals, data and files share one channel and only the leading `0x1F` separates them. A signal routed into the importer tries to import the word "cancel"; data routed into the signal decoder completes the sync having imported nothing |
+| A signal's own transfer updates | same | skipped by payload id. Each signal generates its own IN_PROGRESS/SUCCESS pair, so without the filter the bar jumps to 100% and the screen calls the transfer done while the real payload is still in flight |
+| A disconnect at the end | same | the partner always disconnects when it is finished, so an unguarded `onDisconnected` rewrites every successful sync as "connection lost". Completed, Error and Cancelled all survive it |
+| The `@Singleton`'s handler | same | `stopAll` clears the data and signal callbacks. They capture the `SyncViewModel`, so without this a destroyed ViewModel and its cancelled scope stay reachable for the life of the process |
+| An HTML error page saved as `.mp3` | `AdhanAudioManagerTest` | rejected by magic bytes **and deleted**, so the next attempt re-downloads rather than trusting a file that exists, is named right and plays nothing. ID3, bare MPEG sync and RIFF all count as audio; a bare sync word is common and rejecting it would re-download forever |
+| Repairing an install whose URLs changed | same | the version stamp beside the files, and a bump deleting the recordings. This is the undo for Mishary's *regular* URL serving the Fajr recording — every install that had already downloaded it kept playing the wrong adhan. The generated beep survives, because a URL change cannot have staled a file with no URL |
+| The generated chime | same | `SIMPLE_BEEP` has no URL and is synthesised into a WAV on the device. The round trip is the point: a wrong header means `isDownloaded` rejects the manager's own output and the beep can never finish downloading. Also asserted: real RIFF/WAVE/data chunks whose declared sizes match the file, 44.1 kHz, and samples that are not silence |
+| Deleting one variant of a pair | same | regular and Fajr are separate files, so removing one must not reset the pair's state while the other is on disk |
+| The Fajr flag | `AdhanSoundTest` | every sound resolves a different file and URL for Fajr, no two sounds share a file name, and a stored preference naming a sound that no longer exists falls back rather than crashing |
+| The attestation token | `IntegrityTokenProviderTest` | the provider is prepared **once** and reused — the classic API throttled per app-instance, so a few asks worked and then every fetch failed — and a stale provider is re-prepared once and retried. A debug build that cannot attest sends `"debug-skip"`; a release build sends `""`, because sending the skip token from a release build would be an attestation bypass shipped to users |
+| The announcements channel | `AnnouncementBootstrapTest` | its own low-importance channel, kept apart from the prayer and adhan ones, under the id the manifest hands the OS — a mismatch drops every background announcement with no error anywhere. A build with no `google-services.json` must not reach for messaging, and a messaging call that throws must not take the launch down |
+| An empty console text box | `AnnouncementPayloadExtrasTest` | sends `""`, not nothing. Every optional field is trimmed and emptied to null, or a `cta_label` of `""` draws a button with no words and a `proof_ref` of `""` a citation card citing nothing. Extras and payload map to the same announcement, so a cold start and a running app agree |
+| The three overlapping topic hierarchies | `QuranRepositoryImplThematicTest` | a breadcrumb picks its tree **per topic**, because search spans all three — an ontology result must not come back pathless while the thematic tab is selected. Both cycle guards terminate: the parent columns are content, regenerated per release elsewhere, and a cycle in them hangs a screen rather than erroring |
+| A branch topic's verses | same | the whole **subtree**, not the node. Asking only for a node's own citations is what made "Doctrine" open on "0 verses" |
+| Topic search order | same | index order is relevance order and `getTopics` does not preserve it, so a relevance search that silently comes back in id order looks like it works |
+| A line-accurate mushaf page | `QuranRepositoryImplReadingTest` | resolved through the edition's own layout table, memoised per edition, and an unknown span emits an **empty** page — not the unrelated Madani page, which is the actual failure mode (#325) |
+| Every verse read path | same | stamps `isBookmarked` from the *user's* database, which is a different file from the content. A path that forgets shows a reader with no bookmarks and no error. A stale translator preference resolves to the default rather than querying for rows that cannot exist |
+| One row, two flags | `QuranRepositoryImplMarksTest`, `DuaRepositoryImplMarksTest`, `FavouriteCataloguesTest` | bookmarking and favouriting share a row, so turning one off clears the *flag* when the other is set and removes the row only when nothing is. Three catalogues, three repositories and three copies of the same `when`; this is what keeps them agreeing |
+| The running totals | `QuranRepositoryImplMarksTest` | `updateReadingPosition` rewrites the row and neither `totalAyahsRead` nor `currentKhatmaCount` is an argument. Reading them back off the existing row is the only thing between a page turn and a khatma counter reset to zero |
+| String ids over Int tables | `HadithRepositoryImplIdsTest`, `DuaRepositoryImplMarksTest` | the domain carries strings and every table is keyed by an Int, so every read parses. A lookup of one thing returns **null**; a list query falls back to **0** — an id no book has, so a `LazyColumn` gets a list to be empty of. Getting either wrong is a crash on a deep link, or book 0's hadiths under another book's title. A *write* against an unparseable id must do nothing at all |
+| Chapters, which are not a table | `HadithRepositoryImplIdsTest` | derived from `GROUP BY chapter_id`, keyed `"{bookId}_{chapterId}"`, and the stored id is 0-based while the number a reader sees is 1-based. An off-by-one is every chapter heading in the app being wrong by one |
+| Hadith of the day | same | deterministic from the day of the year, and an install whose content artifact has not landed yet has **none** — the modulo would divide by zero on the home screen |
+| Localised help search | `HelpRepositoryImplSearchTest` | two queries merged, and the localised hit must win: de-duplicating the other way shows an English title to a reader in French. Only questions and titles are searched, or a result's "title" is a paragraph from the middle of a guide |
+| `SUM()` over no rows | `TasbihRepositoryImplStatsTest` | is NULL in SQLite, and every one of those nulls reaches a screen that renders a number. A missing `?: 0` crashes the stats screen for a user who has not counted anything this week |
+| Repairing a lost default preset | same | inserted with `id = 0` so Room assigns a fresh one. Reusing the default's id would **replace** whatever custom preset happens to hold it |
+| The qibla needle's input | `AndroidCompassSensorsTest` | the filter is **seeded** on the first sample — a 0.97 low-pass started from zero needs ~100 samples to converge, which is what made the screen say "ready" and then sweep the needle in from a meaningless heading. Nothing is published until both sensors have reported, accuracy comes from the magnetometer only, and the listener is unregistered when collection ends |
+| The geocoder's fallback chain | `AndroidDeviceLocationRepositoryTest` | locality, then county, then state, then feature name. Reverse-geocoding a point in open country returns an address with no locality, and without the chain the prayer-times header showed nothing. A geocoder that throws on a flaky connection returns empty rather than crashing the search box |
+| What counts as location permission | same | fine **or** coarse. Requiring fine tells a user who granted approximate location that they granted nothing. Notification permission is a runtime grant only from Tiramisu; asking below that returns denied on every device and the app nags forever |
+| The tasbih tick | `AndroidCounterFeedbackTest` | vibration and sound are independent settings, and crossing them buzzes a phone in a mosque. `release()` twice is safe, and a tick after it is a no-op rather than a use-after-free |
+
+**What stays uncovered, and why.** The largest single gap is `AdhanAudioManager.downloadFile` and
+the retry loop above it — about 75 lines and 50 branches. It opens a `HttpURLConnection` against
+the CDN URL baked into `AdhanSound`, and there is no seam: exercising it would need either a real
+network request from a unit test or a JVM-wide `URLStreamHandlerFactory`, which is global,
+one-shot per process, and would make every other Robolectric class in the module order-dependent
+in the way #620 documents. Everything the manager does *around* the transfer is covered.
+`MediaPlayer` playback is the same shape at smaller scale. The rest is spread thinly over
+`PrayerRepositoryImpl`, `TafseerRepositoryImpl` and `KhatamRepositoryImpl`, which were already
+past the floor. **No `COVERAGE_EXCLUSIONS` entry was added or widened** — the list is shared with
+every locked module, so widening it would move their numbers too.
 
 
 ## Conventions
