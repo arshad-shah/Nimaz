@@ -20,6 +20,33 @@ android {
     }
 }
 
+/**
+ * Locked (#611). The repositories, the device-to-device sync, the adhan file store and the
+ * platform adapters are tested, and `check` now fails if that stops being true — see
+ * `COVERAGE_EXCLUSIONS` and `coverageFloor` in `build-logic` for what is measured and how the
+ * ratchet works.
+ *
+ * **Both floors are the agreed 80%**, set at the standard rather than at whatever the module
+ * reports today (88.1% lines / 84.6% branches at the time of locking). A floor pinned to the
+ * current number turns every unrelated refactor into a coverage failure. There is no Compose in
+ * this module, so there is no `$dirty` bitmask to soften the branch floor for: every branch here
+ * is one somebody wrote.
+ *
+ * One thing is permanently at zero and `COVERAGE_EXCLUSIONS` was **not** widened for it. The
+ * exclusion list is shared with every locked module, so widening it moves their numbers too.
+ * `AdhanAudioManager.downloadFile` opens a [java.net.HttpURLConnection] against the CDN URL baked
+ * into `AdhanSound`, and there is no seam: exercising it would need either a real network request
+ * from a unit test or a JVM-wide `URLStreamHandlerFactory`, which is global, one-shot per process
+ * and would make every other Robolectric class in the module order-dependent. The transfer and its
+ * retry loop therefore stay uncovered — about 75 lines and 50 branches — and the 80% is made up
+ * elsewhere. Everything the manager does *around* the transfer is covered, including the generated
+ * chime, the audio-magic-byte validation and the URL-version invalidation. See `docs/TESTING.md`.
+ */
+nimazCoverage {
+    lineFloor.set(0.80)
+    branchFloor.set(0.80)
+}
+
 // The 18 repository implementations that map onto `:core:domain`'s interfaces, plus the platform
 // adapters behind the domain ports: locale, compass, haptics, device location, strings, the AI
 // client and the announcement mapper.
