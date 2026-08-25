@@ -27,7 +27,7 @@ import com.arshadshah.nimaz.presentation.screens.qaida.QaidaLettersScreen
 import com.arshadshah.nimaz.presentation.screens.qaida.QaidaReaderScreen
 
 /**
- * The 21 Content destinations — dua, hadith, qaida, the name catalogues and the prophets.
+ * The 19 Content destinations — dua, hadith, qaida, the name catalogues and the prophets.
  *
  * Split out of `NavGraph.kt` in PR 12 of #551. That file registered all 94 destinations and
  * imported 69 screen composables, which meant every screen in the app was reachable from one

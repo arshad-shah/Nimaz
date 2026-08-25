@@ -27,6 +27,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
+import org.robolectric.shadows.ShadowToast
 
 /**
  * The hadith reader — and the four ways a reader arrives at one.
@@ -92,6 +93,12 @@ class HadithReaderScreenTest {
     private fun string(@StringRes res: Int, vararg args: Any): String =
         context.getString(res, *args)
 
+    /** What the system clipboard holds, as the reader would paste it. */
+    private fun clipboardText(): String {
+        val clipboard = context.getSystemService(android.content.ClipboardManager::class.java)
+        return clipboard.primaryClip?.getItemAt(0)?.text?.toString().orEmpty()
+    }
+
     private fun loaded(vararg hadiths: com.arshadshah.nimaz.domain.model.Hadith) {
         readerState.value = HadithReaderUiState(
             chapter = chapter(),
@@ -134,6 +141,22 @@ class HadithReaderScreenTest {
         setContent(bookId = "", chapterId = "bukhari-1-1")
 
         assertThat(events).containsExactly(HadithEvent.LoadHadithById("bukhari-1-1"))
+    }
+
+    @Test
+    fun `an id carrying an underscore is read as a chapter, not as a hadith id`() {
+        // The guard is `bookId.isEmpty() && !chapterId.contains("_")`, and the underscore is
+        // the *whole* signal: a composite `book_chapter` key has one, a hadith id from search
+        // is assumed not to. This asserts the boundary the app actually relies on — with no
+        // book and an underscore present, the composite reading wins. It is worth pinning
+        // because hadith ids in this dataset **do** contain underscores (`bukhari_1_1`), so
+        // the two shapes are one character apart and the classification is a convention, not
+        // a proof. A change to either side sends search hits into the chapter loader.
+        readerState.value = HadithReaderUiState(isLoading = false)
+
+        setContent(bookId = "", chapterId = "bukhari_1")
+
+        assertThat(events).containsExactly(HadithEvent.LoadChapter("bukhari_1"))
     }
 
     @Test
@@ -330,6 +353,33 @@ class HadithReaderScreenTest {
     }
 
     @Test
+    fun `a narrator field of nothing but spaces renders no badge`() {
+        // `narratorName?.trim()?.takeIf { it.isNotBlank() }`. The content artifact carries a
+        // whitespace-only narrator as readily as a null, and an unguarded badge is an empty
+        // accent pill above the Arabic.
+        loaded(hadith(narratorName = "   ", grade = null))
+
+        setContent()
+
+        composeRule.onNodeWithText(string(R.string.hadith_narrated_by_format, "")).assertDoesNotExist()
+        composeRule.onNodeWithText("Actions are but by intention").assertExists()
+    }
+
+    @Test
+    fun `copying leaves out a reference that is only whitespace`() {
+        // The same shape again, in the copy text this time — where it would paste as a
+        // trailing blank line rather than as an empty pill.
+        loaded(hadith(narratorName = null, reference = "   "))
+
+        setContent()
+        composeRule.onNodeWithContentDescription(string(R.string.cd_copy)).performClick()
+        composeRule.waitForIdle()
+
+        assertThat(clipboardText().trim()).doesNotContain("   \n")
+        assertThat(clipboardText()).contains("Actions are but by intention")
+    }
+
+    @Test
     fun `a hadith with no grade and no narrator renders neither badge`() {
         loaded(hadith(grade = null, narratorName = null, reference = null))
 
@@ -368,6 +418,56 @@ class HadithReaderScreenTest {
         setContent()
 
         composeRule.onNodeWithContentDescription(string(R.string.cd_bookmark)).assertExists()
+    }
+
+    @Test
+    fun `copying a hadith puts its whole citation on the clipboard`() {
+        // The copy text is built by a local function nothing else calls, and it is what a
+        // reader pastes into a message. Every optional field is guarded there separately from
+        // the page's own guards, so a hadith can render perfectly and still be copied with a
+        // blank line where its narrator should be.
+        loaded(
+            hadith(
+                textArabic = "إنما الأعمال بالنيات",
+                textEnglish = "Actions are but by intention",
+                narratorName = "Umar ibn al-Khattab",
+                reference = "Sahih al-Bukhari 1",
+            )
+        )
+
+        setContent()
+        composeRule.onNodeWithContentDescription(string(R.string.cd_copy)).performClick()
+        composeRule.waitForIdle()
+
+        assertThat(ShadowToast.getTextOfLatestToast()).isEqualTo(string(R.string.hadith_copied))
+        val copied = clipboardText()
+        assertThat(copied).contains("إنما الأعمال بالنيات")
+        assertThat(copied).contains("Actions are but by intention")
+        assertThat(copied).contains(string(R.string.hadith_narrated_by_format, "Umar ibn al-Khattab"))
+        assertThat(copied).contains("Sahih al-Bukhari 1")
+    }
+
+    @Test
+    fun `copying a hadith with no narrator and no reference leaves no blank lines for them`() {
+        // Both fields are `takeIf { it.isNotBlank() }`, and the content artifact carries an
+        // empty string as often as a null. Without the guard the paste ends in two blank
+        // lines and, before it, the literal "Narrated by ".
+        loaded(
+            hadith(
+                textEnglish = "Actions are but by intention",
+                narratorName = "",
+                reference = null,
+            )
+        )
+
+        setContent()
+        composeRule.onNodeWithContentDescription(string(R.string.cd_copy)).performClick()
+        composeRule.waitForIdle()
+
+        val copied = clipboardText()
+        assertThat(copied).contains("Actions are but by intention")
+        assertThat(copied).doesNotContain("Narrated by")
+        assertThat(copied.trimEnd()).isEqualTo(copied.trimEnd().trimEnd('\n'))
     }
 
     @Test

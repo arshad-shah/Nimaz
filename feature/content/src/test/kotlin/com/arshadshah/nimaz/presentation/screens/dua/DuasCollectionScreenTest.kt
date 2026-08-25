@@ -260,6 +260,32 @@ class DuasCollectionScreenTest {
     }
 
     @Test
+    @Config(qualifiers = "w411dp-h6000dp")
+    fun `every colour bucket a category id can hash into resolves to a colour`() {
+        // `getCategoryColor` switches on `categoryId.hashCode() % 8` — and Kotlin's `%` keeps
+        // the sign of the dividend, so a category id with a **negative** hash lands on a
+        // negative remainder and falls through to the `else`. The ids here are chosen to hit
+        // all eight buckets plus that one: without the `else`, the first category whose id
+        // happens to hash negative throws `NoWhenBranchException` while the list composes, and
+        // the whole library goes blank. Which ids hash negative is a property of the shipped
+        // content, not of this app.
+        val bucketIds = listOf("h", "a", "b", "c", "d", "e", "f", "g", "aaaaab")
+
+        collectionState.value = DuaCollectionUiState(
+            filteredCategories = bucketIds.mapIndexed { index, id ->
+                category(id = id, nameEnglish = "Bucket $index")
+            },
+            isLoading = false,
+        )
+
+        setContent()
+
+        bucketIds.indices.forEach { index ->
+            composeRule.onNodeWithText("Bucket $index").assertExists()
+        }
+    }
+
+    @Test
     fun `the favourites heading appears only when there are favourites`() {
         loaded(*categories(5))
 
