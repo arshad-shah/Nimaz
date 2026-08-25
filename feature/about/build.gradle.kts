@@ -25,6 +25,35 @@ android {
     }
 }
 
+/**
+ * Locked at the standard floors. Measured at **94.1% lines / 83.8% branches** with the tests added
+ * by #610 — the sixth Compose module in a row to hold 80/80, so nothing is softened here. The
+ * module started this pass at 17.8% lines / 23.0% branches, with nine screen files at zero.
+ *
+ * **What is left uncovered is one thing, and it is structural.** 122 of the 143 uncovered lines
+ * are the seven destination bodies inside `aboutGraph`: each builds a screen with its navigation
+ * lambdas, and none of it runs until a composed `NavHost` reaches the destination — which resolves
+ * `MoreViewModel`, `HelpViewModel` and `LicensesViewModel` through `hiltViewModel()` on a
+ * *`NavBackStackEntry`* owner, and that path constructs a `HiltViewModelFactory` against the
+ * hosting activity before the store is ever consulted. A library module has no Hilt-injected
+ * activity to give it. `AboutGraphTest` covers the registration those bodies hang off — the
+ * failure that actually ships, a destination that throws the moment somebody taps its row — and
+ * `:app`'s instrumented `FeatureNavigationTest` exercises the bodies on a device.
+ *
+ * `AdaptiveMoreScreen` is **not** in that category, which is the one difference from
+ * `:feature:quran` (#598) and `:feature:search` (#607), where the adaptive screens were left at
+ * zero for the same reason. `hiltViewModel()` only reaches for a Hilt factory when the
+ * `ViewModelStoreOwner` supplies a default one, so a plain owner whose `ViewModelStore` is
+ * pre-seeded hands the mock back first — see `AdaptiveMoreScreenTest.seededOwner`. That covers the
+ * phone/tablet split, which is the whole reason About, Help and More are one module.
+ *
+ * Nothing is excluded to reach these numbers; `COVERAGE_EXCLUSIONS` is untouched.
+ */
+nimazCoverage {
+    lineFloor.set(0.80)
+    branchFloor.set(0.80)
+}
+
 // About, Help and More — one module, because they are one destination. `AdaptiveMoreScreen` puts
 // all three in a single list-detail scaffold, and `aboutGraph` registers every route for all
 // three; there is no `HelpGraph.kt` or `MoreGraph.kt` to split along.
@@ -87,4 +116,16 @@ dependencies {
     // RecordingTelemetry — the Telemetry seam's recording fake, beside its port.
     testImplementation(testFixtures(project(":core:common")))
     testImplementation(libs.turbine)
+
+    // The seven screens, the More menu and the graph run under Robolectric — the same harness
+    // `:feature:calendar`, `:feature:onboarding`, `:feature:tools`, `:feature:search` and
+    // `:feature:prayer` use, including `src/test/resources/robolectric.properties`, which pins
+    // the SDK and the Application class. A properties file is a resource of its source set and
+    // does not travel with the tests that need it.
+    testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.junit)
+    testImplementation(platform(libs.androidx.compose.bom))
+    testImplementation(libs.androidx.compose.ui.test.junit4)
+    testImplementation(testFixtures(project(":core:ui")))
+    debugImplementation(libs.androidx.compose.ui.test.manifest)
 }

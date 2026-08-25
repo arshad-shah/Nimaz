@@ -143,6 +143,14 @@ class MoreSubtitlesTest {
             .isEqualTo(R.string.more_khatam_juz)
     }
 
+    @Test
+    fun `a khatam that has not been opened has no juz to report`() {
+        // Null is "the query has not returned", zero is "started but nothing read". Both mean
+        // the row says nothing rather than "Juz 0".
+        assertThat(MoreSubtitles.khatam(juz = null, daysAgainstPace = 3)).isNull()
+        assertThat(MoreSubtitles.khatam(juz = 0, daysAgainstPace = 3)).isNull()
+    }
+
     // ── Qaida ────────────────────────────────────────────────────────────
 
     @Test
@@ -177,6 +185,14 @@ class MoreSubtitlesTest {
         // a real finding and worth saying, but it must not be said before the query returns —
         // otherwise the row accuses someone of not having done it, then corrects itself.
         assertThat(MoreSubtitles.zakat(loaded = false, dueThisYear = null)).isNull()
+    }
+
+    @Test
+    fun `a blank amount is not a figure, and reads as not calculated`() {
+        // `formatCurrency` returning empty is the shape this guards: a row saying "Due: " with
+        // nothing after it is worse than saying the year has not been calculated.
+        assertThat(MoreSubtitles.zakat(loaded = true, dueThisYear = "   ")?.res)
+            .isEqualTo(R.string.more_zakat_not_calculated)
     }
 
     // ── Islamic calendar ─────────────────────────────────────────────────

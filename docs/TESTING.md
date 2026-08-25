@@ -47,6 +47,7 @@ Two on-device/JVM test surfaces exist:
   - [Search, and the question that leaves the device (`:feature:search/src/test` and `src/testDebug`)](#search-and-the-question-that-leaves-the-device-featuresearchsrctest-and-srctestdebug)
   - [The six widgets, composed for real (`:feature:widget/src/test`)](#the-six-widgets-composed-for-real-featurewidgetsrctest)
   - [Prayer times, the month table and the qibla (`:feature:prayer/src/test` and `src/testDebug`)](#prayer-times-the-month-table-and-the-qibla-featureprayersrctest-and-srctestdebug)
+  - [About, Help and the More menu (`:feature:about/src/test`)](#about-help-and-the-more-menu-featureaboutsrctest)
 - [Conventions](#conventions)
 
 ## Running the unit tests
@@ -167,7 +168,7 @@ floor is a ratchet — raised when a module is brought up to it, never lowered t
 green. The branch floor is set per module, at 80% where branches are reachable and lower where
 the Compose compiler's `$dirty` checks make them not (see
 [Where each module stands](#where-each-module-stands)). `:core:database` is the first module
-locked (#597); then `:feature:quran`, `:core:domain`, `:core:navigation`, `:core:common`, `:feature:calendar`, `:core:datastore`, `:feature:onboarding`, `:feature:tools`, `:feature:search`, `:feature:widget` and `:feature:prayer`.
+locked (#597); then `:feature:quran`, `:core:domain`, `:core:navigation`, `:core:common`, `:feature:calendar`, `:core:datastore`, `:feature:onboarding`, `:feature:tools`, `:feature:search`, `:feature:widget`, `:feature:prayer` and `:feature:about`.
 
 ### What is not counted, and why
 
@@ -262,11 +263,11 @@ floors in its own `build.gradle.kts`.
 **The line floor is 80% everywhere; the branch floor is not.** `:core:database`, `:core:domain`,
 `:core:navigation`, `:core:common` and `:core:datastore` are locked at 80/80 — none of them draws
 anything, so every branch is one somebody wrote and a test can take both sides of. So are `:feature:calendar`,
-`:feature:onboarding`, `:feature:tools`, `:feature:search` and `:feature:widget`, which *are* Compose modules: the
+`:feature:onboarding`, `:feature:tools`, `:feature:search`, `:feature:widget` and `:feature:about`, which *are* Compose modules: the
 unreachable branch below is emitted **per parameter of every restartable composable**, so its
 weight scales with how many composables a module has, and six files — or eight, or the two screens
-in `:feature:tools`, or the one screen and four cards in `:feature:search` — never accumulate
-enough of them to move the number.
+in `:feature:tools`, or the one screen and four cards in `:feature:search`, or the seven screens in
+`:feature:about` — never accumulate enough of them to move the number.
 `:feature:widget` is Compose of a different kind — six **Glance** widgets — and holds **89.3%**
 branches, which settles the question for the widget surface too.
 `:feature:onboarding` reports **90.3%** branches, the highest of any Compose module here.
@@ -302,11 +303,11 @@ split, and should say so where it sets its floors.
 | `:feature:search` | 91.4% | 87.0% | **locked** at 80/80 (#607) |
 | `:feature:widget` | 97.6% | 89.3% | **locked** at 80/80 (#608) |
 | `:feature:prayer` | 84.1% | 70.5% | **locked** at 80 line / 60 branch (#609) |
+| `:feature:about` | 94.1% | 83.8% | **locked** at 80/80 (#610) |
 | `:core:ui` | 50.3% | 47.8% | |
 | `:core:data` | 39.0% | 31.2% | |
 | `:feature:tracker` | 30.4% | 24.4% | |
 | `:feature:content` | 28.8% | 19.5% | |
-| `:feature:about` | 17.8% | 23.0% | |
 | `:feature:settings` | 11.3% | 14.9% | |
 
 `:app` is absent because its own suite needs the private content artifact and cannot be measured
@@ -855,6 +856,77 @@ their contents hoisted into the excluded `ComposableSingletons`), the `hiltViewM
 arguments, and `QiblaCalibrationSheet`'s figure-8 `Canvas`, whose draw block needs a software
 canvas the sheet's own popup window is not part of. No `COVERAGE_EXCLUSIONS` entry was added or
 widened.
+
+
+### About, Help and the More menu (`:feature:about/src/test`)
+
+The thirteenth module locked: **17.8% lines to 94.1%**, from 434 covered lines to 2,291, and 23.0%
+to **83.8%** branches. 139 tests added across thirteen new classes, taking the module's suite from
+58 to 197. Nine files — every screen the module owns — were at **0%**, 1,713 of the 2,000 missing
+lines, and nothing had ever composed one.
+
+**Nothing is softened.** This is the sixth Compose module in a row to hold 80/80, and it is the
+largest of them: seven screens, a bottom sheet and two renderer files. The `$dirty` bitmask
+branches are here as everywhere, and at this size they still do not add up to enough to move the
+number.
+
+**Two things here are worth knowing before adding a test to this module.**
+
+- **`hiltViewModel()` does not always need Hilt, and that is how `AdaptiveMoreScreen` got
+  covered.** `:feature:quran` (#598) and `:feature:search` (#607) both left their adaptive screens
+  at zero because the screens they embed resolve their ViewModels through `hiltViewModel()`. But
+  that function only reaches for a `HiltViewModelFactory` when the `ViewModelStoreOwner` it is
+  given supplies a **default factory**; hand it a plain owner whose `ViewModelStore` already holds
+  the ViewModel and the store lookup answers first, with no factory consulted at all.
+  `AdaptiveMoreScreenTest.seededOwner` builds exactly that, keying each mock by asking a real
+  `ViewModelProvider` for it rather than by spelling out the default-key string. It does **not**
+  rescue a destination body inside a `NavHost`: there the owner is a `NavBackStackEntry`, which
+  *is* a `HasDefaultViewModelProviderFactory`, and the Hilt factory is built — and throws — before
+  the store is read.
+- **Section headings are uppercased by the component, not by the string.** `NimazSectionTitle`
+  renders `text.uppercase()` unless told otherwise, so `onNodeWithText(getString(R.string.…))`
+  finds nothing for a heading. Both Help classes carry a `sectionTitle()` helper for it. The pin
+  labels are the mirror-image trap: `more_pin_zakat` and `zakat` are the same single word, so a
+  screen test that leaves the default pins in place finds two nodes for "Zakat" and fails on the
+  count rather than on anything real — the row tests unpin first, and `MoreMenuScreenTest` asserts
+  the collision deliberately in the one test about the defaults.
+
+| Area | Covered by | What it pins |
+|---|---|---|
+| Every More row opens its own destination | `MoreMenuScreenTest` | seventeen rows built from twenty lambdas of one type, tapped in order and asserted as a sequence. A row wired to its neighbour's lambda still opens *something*, so only the order shows it up; `FeatureNavigationTest` on the emulator taps a row and checks a tag, which cannot see a swap between two rows whose screens both exist |
+| What a More subtitle claims | same | the row renders the figure from the field that belongs to it. `MoreSubtitlesTest` pins what each mapper returns; a row passing `khatamJuz` where `qaidaLesson` belongs still resolves to a well-formed string |
+| The loading contract | same | a figure that has not arrived renders as *absent* — never a dash, a zero or a spinner. `MoreUiState`'s defaults are all null, which is the state the screen opens in |
+| The pin row | same | a pill opens the same destination its menu row does (it is a *view* of those lambdas, not a second navigation surface), an empty row says so, and every member of the enum has a pill — asserted at tablet width, because a `LazyRow` composes about four pills at phone width |
+| Coming back to More | same | `LifecycleResumeEffect` dispatches `Refresh`. The worship countdown is a snapshot over a dozen settings, so without it the row reports an hour-old "in 5h 12m" and nothing looks wrong |
+| The pin cap | `PinnedShortcutsSheetTest` | at five pins an unpinned row is disabled **and a pinned one is not** — the exception that makes the cap survivable, since otherwise the row you want gone is the one you cannot reach. Plus: a new pin is appended, never inserted, so adding one does not reshuffle an arrangement |
+| Which pane a tap moves | `AdaptiveMoreScreenTest` | About and Help push destinations on a phone and move the scaffold's detail pane on a tablet — the one difference between the two branches, and silent either way round. The licence list stays a push on both, because it has no pane |
+| The About pane's own links | same | the tablet branch rebuilds About's lambdas rather than reusing the graph's, so privacy, terms, contact and back are a second implementation that can drift from the phone's |
+| The version the app reports | `AboutScreenTest` | what `LocalAppIdentity` supplies. Its default is an em dash and build 0 on purpose; About reporting "—" on a shipped build is a support mail nobody can answer, and no crash or other test surfaces it |
+| Where an update tap goes | same | three states send it three different ways — check, start, and the `completeUpdate` lambda that arrives *inside* `Downloaded` — and three more must send it nowhere, because a tap during a download restarts it. `UpdatePromptTest` pins the labels; the row looks identical whichever method it calls |
+| A build with no update mechanism | same | a null `AppUpdateController` (a debug build, a test, a `@Preview`) renders and absorbs the tap rather than crashing |
+| The licence list's counts | `LicensesScreenTest` | read off the whole catalogue, not the filtered rows. A filter chip whose own number moves when you use it is unreadable, and "1 of 4" is the only thing telling a reader the rest still exist |
+| Three ways to end up with no rows | same | a query with no hits, an empty catalogue and a failed load are distinguishable on screen. "No libraries match" shown for an empty catalogue is a claim about a search nobody ran |
+| The list's three controls | same | search, family filter and grouping toggle dispatch rather than filtering in place; tapping the selected chip clears the filter; the chip row hides itself when everything carries one licence |
+| What a licence detail shows | `LicenseDetailScreenTest` | version, author, website and licence text are each optional in AboutLibraries' output, and each missing one has to leave the layout intact. A library with no licence text loses its **copy** button with it — copying an empty entry looks exactly like a working copy |
+| The licence text control | same | collapsed under a fade by default, and the button says which way it goes. A dual-licensed library shows both texts and is filed under the first, which is what keeps the section counts agreeing with the library count |
+| A library not in the bundled list | same | NOT\_FOUND with a way out and **no retry** — it will not be there next time either, so "try again" would be a lie |
+| The licence family vocabulary | `LicenseVisualsTest` | total and distinct: every family has its own name and tone, because the list groups, filters and colours by family. `OTHER` alone has no plain-terms gloss — a licence the app cannot place it does not paraphrase |
+| Search highlighting | same | every occurrence, case-insensitively, with the original casing intact. The list searches name, author and coordinate at once, so lighting up one of two matches reads as a search that half-worked |
+| Help's three empty-looking states | `HelpScreenTest` | searching-with-no-hits, a failed topic load and the topic grid are the same state shape with different flags. The failure renders as a **section** so the search bar above it stays usable — search is a different query and may well work |
+| A help topic's optional halves | `HelpTopicDetailScreenTest` | help content ships as data, so a topic with no questions, or no guides, or neither, is a shape the renderer meets — the headings have to be absent rather than empty. An answer stays hidden until its question is tapped, and opening one leaves the others shut |
+| Load failure versus genuine absence | same, and `HelpGuideScreenTest` | both leave the detail null, and only the branch order tells them apart. "This topic is unavailable" for a transient failure blames the catalogue, and no retry then appears to contradict it |
+| The near end of a help deep link | `HelpGuideScreenTest` | a step **with** a route renders a tappable breadcrumb and hands that route out verbatim; a step **without** one renders the same breadcrumb inert. `:core:navigation`'s `HelpDeepLinkTest` pins the far end — a screen that never calls `onDeepLink` passes every key assertion there |
+| Retry, serving three surfaces | `HelpViewModelRetryTest` | one event, and it must re-run **only** what is failing: re-running a healthy surface throws its content back into a loading state. The home retry needs `retryTick` at all because `appLanguage` is a `StateFlow` with nothing to re-emit when the language has not changed |
+| Content keys this build does not know | `HelpContentUiTest` | every `iconKey` and `colorKey` the content ships is one this build recognises, and an unknown one degrades rather than throws. A renamed key is silent — nothing logs, the screen still lays out, and every topic just starts looking the same |
+| The seven About destinations | `AboutGraphTest` | all seven register, and each resolves as a start destination in its own right. All seven are reached directly: More from the bottom bar, About and Help from the menu *and* from Settings, and the three argument-carrying ones from a row |
+
+**What stays uncovered, and why.** 122 of the 143 uncovered lines are `aboutGraph`'s seven
+destination bodies, for the structural reason in the second bullet above — the same gap
+`:feature:search` and `:feature:prayer` record, and `:app`'s instrumented suite is what exercises
+them. The rest is `LicenceCatalogueTest`'s subject staying in `:app` (the AboutLibraries plugin
+reads the *applying* project's classpath, so this module renders a catalogue it cannot produce),
+the `hiltViewModel()` default arguments, and a handful of `when`-merge lines the compiler emits
+with no statement of their own. No `COVERAGE_EXCLUSIONS` entry was added or widened.
 
 
 ## Conventions

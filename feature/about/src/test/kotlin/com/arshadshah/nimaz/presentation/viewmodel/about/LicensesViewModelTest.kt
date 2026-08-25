@@ -210,6 +210,55 @@ class LicensesViewModelTest {
     }
 
     @Test
+    fun `search does not trip over a library that published no author`() = runTest(dispatcher) {
+        // AboutLibraries leaves `author` null for a good share of the catalogue, and the search
+        // reads name, author and coordinate at once — so the null has to be a miss rather than
+        // a match or a throw.
+        val anonymous = library(9, "Timber", "com.jakewharton.timber:timber", null, "Apache License 2.0")
+        coEvery { useCases.getLibraries() } returns listOf(compose, anonymous)
+        val vm = LicensesViewModel(useCases, telemetry)
+        vm.onEvent(LicensesEvent.LoadLibraries)
+        advanceUntilIdle()
+
+        vm.onEvent(LicensesEvent.Search("Google"))
+        val matched = vm.listState.value.sections.flatMap { it.libraries }
+
+        assertThat(matched).containsExactly(compose)
+    }
+
+    @Test
+    fun `alphabetical grouping files anything not starting with a letter under a hash`() =
+        runTest(dispatcher) {
+            // Maven names beginning with a digit are real — "2captcha", "4-you" — and an
+            // initial that is not a letter must not become its own one-character section per
+            // digit, nor throw on an empty name.
+            val numeric = library(11, "2Captcha", "com.twocaptcha:client", "Two Captcha", "MIT License")
+            coEvery { useCases.getLibraries() } returns listOf(compose, numeric)
+            val vm = LicensesViewModel(useCases, telemetry)
+            vm.onEvent(LicensesEvent.LoadLibraries)
+            advanceUntilIdle()
+
+            vm.onEvent(LicensesEvent.ToggleGrouping)
+
+            assertThat(vm.listState.value.sections.map { it.letter }).containsExactly("#", "C")
+        }
+
+    @Test
+    fun `toggling the grouping twice comes back to grouping by licence`() = runTest(dispatcher) {
+        coEvery { useCases.getLibraries() } returns listOf(compose, adhan)
+        val vm = LicensesViewModel(useCases, telemetry)
+        vm.onEvent(LicensesEvent.LoadLibraries)
+        advanceUntilIdle()
+
+        vm.onEvent(LicensesEvent.ToggleGrouping)
+        vm.onEvent(LicensesEvent.ToggleGrouping)
+
+        assertThat(vm.listState.value.grouping).isEqualTo(LicenseGrouping.BY_LICENCE)
+        assertThat(vm.listState.value.sections.map { it.family })
+            .containsExactly(LicenseFamily.APACHE_2, LicenseFamily.MIT)
+    }
+
+    @Test
     fun `a library declaring no licence is grouped, not dropped`() = runTest(dispatcher) {
         coEvery { useCases.getLibraries() } returns listOf(
             compose,
@@ -245,6 +294,44 @@ class LicensesViewModelTest {
         // to telemetry, but the reader is still told.
         assertThat(state.error?.kind).isEqualTo(NimazErrorKind.NOT_FOUND)
         assertThat(telemetry.errors).isEmpty()
+    }
+
+    @Test
+    fun `a detail lookup that throws is reported, not swallowed into an empty screen`() =
+        runTest(dispatcher) {
+            // Distinct from "not found": the list is bundled, so a *throw* here means the asset
+            // itself failed to parse, and the detail screen must say the load failed rather
+            // than render a blank library.
+            coEvery { useCases.getLibrary(any()) } throws IllegalStateException("asset missing")
+            val vm = LicensesViewModel(useCases, telemetry)
+
+            vm.onEvent(LicensesEvent.LoadLibrary(1))
+            advanceUntilIdle()
+
+            assertThat(vm.detailState.value.isLoading).isFalse()
+            assertThat(vm.detailState.value.library).isNull()
+            assertThat(vm.detailState.value.error?.message).isEqualTo(R.string.licenses_load_failed)
+            assertThat(vm.detailState.value.error?.kind).isEqualTo(NimazErrorKind.GENERIC)
+        }
+
+    @Test
+    fun `dismissing clears both screens' errors`() = runTest(dispatcher) {
+        // One event for both states: the list and the detail are separate flows, and a dismiss
+        // that cleared only the one on screen would leave the other's stale failure waiting for
+        // whoever opened it next.
+        coEvery { useCases.getLibraries() } throws IllegalStateException("asset missing")
+        coEvery { useCases.getLibrary(any()) } returns null
+        val vm = LicensesViewModel(useCases, telemetry)
+        vm.onEvent(LicensesEvent.LoadLibraries)
+        vm.onEvent(LicensesEvent.LoadLibrary(99))
+        advanceUntilIdle()
+        assertThat(vm.listState.value.error).isNotNull()
+        assertThat(vm.detailState.value.error).isNotNull()
+
+        vm.onEvent(LicensesEvent.DismissError)
+
+        assertThat(vm.listState.value.error).isNull()
+        assertThat(vm.detailState.value.error).isNull()
     }
 
     @Test
