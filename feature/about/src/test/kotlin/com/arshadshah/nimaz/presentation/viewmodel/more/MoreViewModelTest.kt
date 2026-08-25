@@ -154,6 +154,40 @@ class MoreViewModelTest {
         assertThat(vm.state.value.minutesUntilNextWorship).isEqualTo(192)
     }
 
+    @Test
+    fun `nothing upcoming leaves the worship row with nothing to say`() {
+        // Outside Ramadan, with the optional reminders off, the resolver genuinely has no next
+        // occurrence — and the row has to be *absent* rather than reporting "in 0m".
+        val vm = viewModel(noNextWorship = true)
+
+        assertThat(vm.state.value.nextWorship).isNull()
+        assertThat(vm.state.value.minutesUntilNextWorship).isNull()
+    }
+
+    @Test
+    fun `a currency nobody has chosen falls back to the default rather than formatting blank`() {
+        // The Zakat preference is a free-text ISO code and defaults to empty on a fresh install.
+        // Handing "" to `formatCurrency` is what the fallback exists to prevent.
+        val vm = viewModel(zakatCurrency = flowOf(""))
+
+        assertThat(vm.state.value.zakatCurrency)
+            .isEqualTo(com.arshadshah.nimaz.domain.model.ZakatDefaults.CURRENCY)
+    }
+
+    @Test
+    fun `a refresh re-resolves the countdown rather than reusing the one from launch`() {
+        // The countdown is a snapshot, not a flow: it is resolved once at construction and again
+        // only when the screen comes back into view. Coming back to More after an hour has to
+        // ask again, or the row reports an hour-old "in 5h 12m" with nothing looking wrong.
+        val resolved = mutableListOf<LocalDateTime>()
+        val vm = viewModel(recordNextWorshipCalls = resolved)
+        assertThat(resolved).hasSize(1)
+
+        vm.onEvent(MoreEvent.Refresh)
+
+        assertThat(resolved).hasSize(2)
+    }
+
     // ── A failing source costs one subtitle ──────────────────────────────
 
     @Test
@@ -275,6 +309,9 @@ class MoreViewModelTest {
         khatam: Flow<Khatam?>? = null,
         qaidaProgress: Flow<List<QaidaLessonProgress>>? = null,
         zakatHistory: Flow<List<ZakatHistoryEntry>>? = null,
+        zakatCurrency: Flow<String>? = null,
+        noNextWorship: Boolean = false,
+        recordNextWorshipCalls: MutableList<LocalDateTime>? = null,
     ): MoreViewModel {
         val prayerRepository = mockk<com.arshadshah.nimaz.domain.repository.PrayerRepository>()
         every { prayerRepository.getTodayPrayerRecords() } answers {
@@ -344,18 +381,25 @@ class MoreViewModelTest {
             )
 
         val resolver = mockk<com.arshadshah.nimaz.domain.worship.NextWorshipResolver>()
-        io.mockk.coEvery { resolver.nearest(any()) } returns WorshipReminderOccurrence(
-            type = WorshipReminderType.TAHAJJUD,
-            triggerAt = today.atTime(23, 12),
-            eventAt = today.atTime(23, 12),
-        )
+        io.mockk.coEvery { resolver.nearest(any()) } answers {
+            recordNextWorshipCalls?.add(firstArg())
+            if (noNextWorship) {
+                null
+            } else {
+                WorshipReminderOccurrence(
+                    type = WorshipReminderType.TAHAJJUD,
+                    triggerAt = today.atTime(23, 12),
+                    eventAt = today.atTime(23, 12),
+                )
+            }
+        }
 
         val settings = mockk<com.arshadshah.nimaz.domain.repository.SettingsRepository>()
         every { settings.hijriDayOffset } returns flowOf(0)
 
         val zakatSettings =
             mockk<com.arshadshah.nimaz.domain.repository.settings.ZakatSettings>()
-        every { zakatSettings.zakatCurrency } returns flowOf("EUR")
+        every { zakatSettings.zakatCurrency } returns (zakatCurrency ?: flowOf("EUR"))
 
         return MoreViewModel(
             useCases = MoreUseCases(
