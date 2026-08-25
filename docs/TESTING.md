@@ -776,9 +776,9 @@ own. No `COVERAGE_EXCLUSIONS` entry was added or widened.
 ### Prayer times, the month table and the qibla (`:feature:prayer/src/test` and `src/testDebug`)
 
 The twelfth module locked: **38.1% lines to 84.1%**, from 1,086 covered lines to 2,398, and 23.7%
-to **70.5%** branches. 62 tests added across ten new classes. Three screens — the month timetable,
-the day pager and the qibla compass — were at **0%** between them, 855 lines of the 1,767 missing,
-and nothing had ever composed one.
+to **70.5%** branches. 108 tests added across fourteen new classes, taking the module's suite from
+62 to 170. Three screens — the month timetable, the day pager and the qibla compass — were at
+**0%** between them, 855 lines of the 1,767 missing, and nothing had ever composed one.
 
 **This is the second module locked at a softened branch floor, and the first where the reason is
 not Compose.** `PrayerTimesPdfExporter` cannot run under Robolectric — `PdfDocument` throws
