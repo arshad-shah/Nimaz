@@ -50,6 +50,7 @@ Two on-device/JVM test surfaces exist:
   - [About, Help and the More menu (`:feature:about/src/test`)](#about-help-and-the-more-menu-featureaboutsrctest)
   - [The repositories, the sync and the adhan store (`:core:data/src/test`)](#the-repositories-the-sync-and-the-adhan-store-coredatasrctest)
   - [The library, rendered (`:feature:content/src/test`)](#the-library-rendered-featurecontentsrctest)
+  - [What the user did (`:feature:tracker/src/test` and `src/testDebug`)](#what-the-user-did-featuretrackersrctest-and-srctestdebug)
 - [Conventions](#conventions)
 
 ## Running the unit tests
@@ -265,8 +266,8 @@ floors in its own `build.gradle.kts`.
 **The line floor is 80% everywhere; the branch floor is not.** `:core:database`, `:core:domain`,
 `:core:navigation`, `:core:common`, `:core:datastore` and `:core:data` are locked at 80/80 — none of
 them draws anything, so every branch is one somebody wrote and a test can take both sides of. So are `:feature:calendar`,
-`:feature:onboarding`, `:feature:tools`, `:feature:search`, `:feature:widget`, `:feature:about` and
-`:feature:content`, which *are* Compose modules: the
+`:feature:onboarding`, `:feature:tools`, `:feature:search`, `:feature:widget`, `:feature:about`,
+`:feature:content` and `:feature:tracker`, which *are* Compose modules: the
 unreachable branch below is emitted **per parameter of every restartable composable**, so its
 weight scales with how many composables a module has, and six files — or eight, or the two screens
 in `:feature:tools`, or the one screen and four cards in `:feature:search`, or the seven screens in
@@ -280,6 +281,9 @@ so far — nineteen screens across five corpora — which is the point: even the
 branches below never accumulate enough to force the softened floor. What they do is eat the
 margin, and a module that reports 80.4% is one unrelated refactor from a red gate. That is the
 ratchet working, not a reason to soften it.
+`:feature:tracker` is the **eighth** Compose module to hold the standard, at **81.3%** across
+three trackers, twelve screens and two drawn surfaces — with **131 of its 280 missing branches**
+being that same bitmask, and 89.1% once they are discounted.
 
 **Two modules are softened to 80 line / 60 branch, and for two different reasons.**
 `:feature:prayer` is the second, and its reason is arithmetic rather than Compose:
@@ -315,7 +319,7 @@ split, and should say so where it sets its floors.
 | `:feature:about` | 94.1% | 83.8% | **locked** at 80/80 (#610) |
 | `:core:data` | 88.1% | 84.6% | **locked** at 80/80 (#611) |
 | `:core:ui` | 50.3% | 47.8% | |
-| `:feature:tracker` | 30.4% | 24.4% | |
+| `:feature:tracker` | 91.9% | 81.3% | **locked** at 80/80 (#613) |
 | `:feature:content` | 85.1% | 80.4% | **locked** at 80/80 (#612) |
 | `:feature:settings` | 11.3% | 14.9% | |
 
@@ -1147,6 +1151,120 @@ because `searchQuery` is only ever written as `""` and the collection's search a
 control asserted so the test is inverted rather than deleted when the flag flips). Sharing the
 hadith of the day is also uncovered: `shareBranded` hops to `Dispatchers.Default` to render a card
 before it shares anything, and that hop does not complete under the Compose test clock.
+**No `COVERAGE_EXCLUSIONS` entry was added or widened** — the list is shared with every locked
+module, so widening it would move their numbers too.
+
+### What the user did (`:feature:tracker/src/test` and `src/testDebug`)
+
+The sixteenth module locked: **30.4% lines to 91.9%**, from 1,575 covered lines to 4,755, and
+24.4% to **81.3%** branches. 341 tests over 34 classes, 23 of them new. No production code
+changed beyond one stale doc comment (`trackerGraph` said it held 11 destinations; it holds 14).
+
+**Nine files were at 0%** — every screen the module owns and both of its drawn surfaces:
+`TasbihScreen` (463 lines), `FastTrackerScreen` (281), `MakeupFastsScreen` (247),
+`ChooseDhikrScreen` (218), `PrayerStatsScreen` (218), `PrayerTrackerDayCard` (202),
+`TasbihHistoryScreen` (193), `FastingComingUp` (189), `RamadanCards` (161), `AddPresetScreen`
+(149), `TasbihBeads` (163 across four classes), `FastDaySheets` (104),
+`MakeupFastEditBottomSheet` (92), `TrackerGraph` (89) and `QadaPrayerContent` (79).
+`PrayerTrackerScreen` had seven covered lines of 232.
+
+**This is where the app writes the user's own record of worship, and none of it can be undone.**
+`:core:database` (#597) already pins the arithmetic underneath — that confirming a week of
+unrecorded prayers never overwrites a logged one, never marks sunrise and stops at the range's
+ends; that a missed fast leaves a `pending` row clearable by either door; that perfect days and
+per-prayer stats add up. What none of that can see is the **surface**: whether the offer is made
+at the right time, against the right day, and for the right count. A review banner that offered
+to mark a fully-logged week as missed is a one-tap way to fabricate a qada list, and the DAO test
+would still be green.
+
+#### The prayer tracker
+
+`PrayerTrackerScreenTest` (25) composes the tracker against a mocked ViewModel and pins the
+review banner in both directions: **no banner over a complete week**, a count that is the count of
+actually-unrecorded prayers, a `MISSED` row excluded because it is already an assertion, a
+`NOT_PRAYED` row *included* because clearing a status must read back as "nobody has said", and a
+confirmation that asks for the seven days **behind** today rather than today itself. It also pins
+the load window — the displayed month **and** the trailing review window, always, which is what
+stopped paging to another month leaving the banner counting days it had no records for — and that
+`QADA` is offered only once a prayer's time has passed, which used to be reachable by marking a
+prayer prayed early. `PrayerTrackerNavigationTest` (9) takes the day stepper: back one day at a
+time, forward only as far as today.
+
+`PrayerStatsScreenTest` (11) takes the three insights, which are derived in the screen and
+nowhere else: the weakest prayer is named only below 90%, a prayer with **no** record counts as
+100% rather than 0% (or it would be reported as the user's weakest every time), and a fresh
+install with everything at zero is offered no insight at all instead of opening on "Overall
+completion: 0%". `PrayerRadialChartTest` (4) draws the radar chart into a software canvas and
+asserts the polygon's *size follows the record* — three charts side by side in one composition,
+each measured by the pixels in which it differs from an empty one. `QadaPrayersScreenTest` (6)
+pins that an empty list says prayers land there only when the user says so, and that an empty
+list which is still **loading** is not called caught up.
+
+#### Fasting
+
+`FastTrackerScreenTest` (22) pins which Ramadan card shows — banner during, countdown within
+thirty days, neither outside, and the banner winning when both would qualify — the month-paging
+arithmetic across a year boundary in both directions, and that the exemption and note sheets
+write against the **selected** day rather than today. `FastingWindowTest` (7) supplies a fixed
+clock through `ProvideNimazClock`'s `timeSource` seam and walks the suhoor→iftar band through all
+four of its sentences, including the half-a-schedule case a location change can leave behind.
+`FastingComingUpTest` (11) pins the upcoming-fasts list: sorted by date (built unsorted it opened
+with next Monday when today was a Thursday), deduplicated across the two Hijri years it is
+gathered from, and marking a day logged only for a `FASTED` record.
+
+`MakeupFastsScreenTest` (16) is the debt: both ways of settling a fast filed under *Settled* and
+neither under *Owed*, only pending rows offering a way to act, and — the one that matters most —
+choosing fidya in the sheet raising `PayFidya` rather than `UpdateMakeupFast`, because recording
+a payment as a completed fast loses the money and the debt at once.
+`FastingRamadanTest` (6) reaches the arm of `loadRamadan` that runs one month a year, and pins the
+distinction the redesign is built on: **missed** means recorded as not fasted, **unlogged** means
+nobody has said. `FastingStatsAndDebtTest` (12) pins the three statistics windows and that a
+missed Ramadan day creates exactly **one** make-up fast however many times its status is changed.
+
+#### The tasbih
+
+`TasbihScreenTest` (17) and `TasbihSessionTest` (21) split the counter between what it shows and
+what it stores. The count lives in Room, so a lost tap is a permanently wrong total: the session
+test pins the two-taps-during-the-insert race that used to leave an orphan session and a counter
+reading 1, that a lap writes the **within-lap** count (the database sums `currentCount + laps ×
+target`, so writing the running total would double every lap), that switching dhikr mid-count
+completes the old session rather than abandoning it, and that a re-emission of the persisted
+selection does not reset a count in progress.
+
+`TasbihBeadsTest` (10) draws the strand into a software canvas: it paints edge to edge, it
+mirrors for a left-handed user — a setting with no other confirmation anywhere, since the strand
+is a `Canvas` with no text in it — each material paints in its own colours, an unknown design key
+falls back rather than blanking the counter, and one gesture is one bead whether it is a tap or a
+flick. `ChooseDhikrScreenTest` (15) pins that the tab and the search box narrow **together**, and
+that deleting a custom dhikr asks first and keeps it on cancel. `AddPresetScreenTest` (10) pins
+the edit form's seeding rule: the fields are copied from the loaded preset **once**, because the
+presets flow re-emits on any write to that table and re-seeding would discard whatever the user
+had typed. `TasbihHistoryScreenTest` (9) pins the live today total and the `%d:%02d` session
+length that is formatted nowhere else.
+
+`TrackerGraphTest` (6) asserts all **fourteen** destinations register, and register once. Seven of
+them share a screen composable with another route, so a copy-paste that registered the same
+`Route` twice would look right in review and leave the other one throwing at the tap that opens
+it. Fourteen is asserted as a number because #625 recounted every graph and found five documented
+counts wrong, this one among them — `check_docs.py`'s NAV-03 compares the 94-destination total
+against `Routes.kt`, not the per-graph split.
+
+**What stays uncovered, and why.** 131 of the 280 missing branches are the Compose compiler's
+`$dirty` bitmask — one per parameter of every restartable composable, on the signature line, its
+parameter lines and its closing paren, neither side reachable because which one runs depends on
+what the *caller* changed between recompositions. Discount those and the module stands at
+**89.1% branches**. Of the rest, four pockets are unreachable rather than untested:
+`TasbihCounterUiState.autoLap` is never false (~10 branches — no event sets it, so the manual-lap
+arm is dead until a control is wired to it); `TasbihPresetsUiState.selectedCategory` is never set
+(4 — `ChooseDhikrScreen` filters through its own tab state, though `TrackerDerivedStateTest` pins
+the derivation anyway, since it is the guard that stopped a re-emission of the presets flow
+silently dropping an active filter); the `PENDING`/`NOT_PRAYED` arms of the day card's picker
+mappings (3 — `PICKER_STATUSES` holds only the four assertions a user can make, and the `when`
+must still be exhaustive over six); and `PrayerStatsScreen`'s date-parse fallback (4 — neither
+`Long.MIN_VALUE` nor `Long.MAX_VALUE` actually throws on the way to a `LocalDate`, so no stored
+value a test can supply reaches the `catch`). `FastingComingUp`'s Hijri event arms (17) are the
+one date-dependent pocket: which of Ashura, Arafah, Shawwal and mid-Sha'ban fall ahead of "today"
+changes with the day the suite runs.
 **No `COVERAGE_EXCLUSIONS` entry was added or widened** — the list is shared with every locked
 module, so widening it would move their numbers too.
 
