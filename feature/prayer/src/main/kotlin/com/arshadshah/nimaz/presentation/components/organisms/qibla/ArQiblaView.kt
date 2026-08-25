@@ -93,17 +93,27 @@ fun ArQiblaView(
             var cameraProvider: ProcessCameraProvider? = null
 
             cameraProviderFuture.addListener({
-                cameraProvider = cameraProviderFuture.get()
-                val preview = Preview.Builder().build().also {
-                    it.surfaceProvider = previewView.surfaceProvider
-                }
-                val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
-
+                // The `get()` is inside the `try`, not before it.
+                //
+                // It was outside, guarding only `bindToLifecycle`, and a future that completes
+                // *exceptionally* — the provider failing to initialise at all — makes `get()`
+                // throw `ExecutionException` from a listener running on the main executor, with
+                // nothing above it to catch: the app dies as the AR qibla opens, on exactly the
+                // devices whose camera stack is already unhappy. The bind was guarded because
+                // "camera may not be available"; the provider not arriving is the same fact,
+                // one step earlier.
                 try {
+                    cameraProvider = cameraProviderFuture.get()
+                    val preview = Preview.Builder().build().also {
+                        it.surfaceProvider = previewView.surfaceProvider
+                    }
+                    val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
+
                     cameraProvider?.unbindAll()
                     cameraProvider?.bindToLifecycle(lifecycleOwner, cameraSelector, preview)
                 } catch (_: Exception) {
-                    // Camera may not be available
+                    // Camera may not be available: the overlay still draws over a blank frame,
+                    // which is the same thing the reader sees while the preview is starting.
                 }
             }, androidx.core.content.ContextCompat.getMainExecutor(context))
 

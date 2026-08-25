@@ -46,6 +46,7 @@ Two on-device/JVM test surfaces exist:
   - [The zakat calculator and its history (`:feature:tools/src/test` and `src/testDebug`)](#the-zakat-calculator-and-its-history-featuretoolssrctest-and-srctestdebug)
   - [Search, and the question that leaves the device (`:feature:search/src/test` and `src/testDebug`)](#search-and-the-question-that-leaves-the-device-featuresearchsrctest-and-srctestdebug)
   - [The six widgets, composed for real (`:feature:widget/src/test`)](#the-six-widgets-composed-for-real-featurewidgetsrctest)
+  - [Prayer times, the month table and the qibla (`:feature:prayer/src/test` and `src/testDebug`)](#prayer-times-the-month-table-and-the-qibla-featureprayersrctest-and-srctestdebug)
 - [Conventions](#conventions)
 
 ## Running the unit tests
@@ -166,7 +167,7 @@ floor is a ratchet — raised when a module is brought up to it, never lowered t
 green. The branch floor is set per module, at 80% where branches are reachable and lower where
 the Compose compiler's `$dirty` checks make them not (see
 [Where each module stands](#where-each-module-stands)). `:core:database` is the first module
-locked (#597); then `:feature:quran`, `:core:domain`, `:core:navigation`, `:core:common`, `:feature:calendar`, `:core:datastore`, `:feature:onboarding`, `:feature:tools`, `:feature:search` and `:feature:widget`.
+locked (#597); then `:feature:quran`, `:core:domain`, `:core:navigation`, `:core:common`, `:feature:calendar`, `:core:datastore`, `:feature:onboarding`, `:feature:tools`, `:feature:search`, `:feature:widget` and `:feature:prayer`.
 
 ### What is not counted, and why
 
@@ -268,7 +269,16 @@ in `:feature:tools`, or the one screen and four cards in `:feature:search` — n
 enough of them to move the number.
 `:feature:widget` is Compose of a different kind — six **Glance** widgets — and holds **89.3%**
 branches, which settles the question for the widget surface too.
-`:feature:onboarding` reports **90.3%** branches, the highest of any Compose module here. Only `:feature:quran` is softened, to
+`:feature:onboarding` reports **90.3%** branches, the highest of any Compose module here.
+
+**Two modules are softened to 80 line / 60 branch, and for two different reasons.**
+`:feature:prayer` is the second, and its reason is arithmetic rather than Compose:
+`PrayerTimesPdfExporter` cannot execute under Robolectric at all, and it carries **103 of the
+224 branches the module still misses**. Discount that one file and the module stands at 81.6%
+branches, over the standard; count it — which the gate does, because nothing is excluded to
+reach these numbers — and 80% is out of reach whatever else is tested. The remaining 121 are
+spread over six Compose screens and twelve components, where the `$dirty` bitmask below takes
+its usual share. `:feature:quran` is the first, softened to
 80% lines and **60%** branches, because the Compose compiler
 emits a `$dirty` bitmask branch per parameter of every restartable composable — the skippability
 check — and neither side of one is reachable from a test: which side runs depends on what the
@@ -291,9 +301,9 @@ split, and should say so where it sets its floors.
 | `:feature:tools` | 97.5% | 83.6% | **locked** at 80/80 (#606) |
 | `:feature:search` | 91.4% | 87.0% | **locked** at 80/80 (#607) |
 | `:feature:widget` | 97.6% | 89.3% | **locked** at 80/80 (#608) |
+| `:feature:prayer` | 84.1% | 70.5% | **locked** at 80 line / 60 branch (#609) |
 | `:core:ui` | 50.3% | 47.8% | |
 | `:core:data` | 39.0% | 31.2% | |
-| `:feature:prayer` | 38.1% | 23.7% | |
 | `:feature:tracker` | 30.4% | 24.4% | |
 | `:feature:content` | 28.8% | 19.5% | |
 | `:feature:about` | 17.8% | 23.0% | |
@@ -761,6 +771,90 @@ being right. Every render test below is a guard against exactly that silence.
 are the `$dirty` bitmask branch the Compose compiler emits per composable parameter, which no test
 can take both sides of; the rest are a handful of `when`-merge lines with no statement of their
 own. No `COVERAGE_EXCLUSIONS` entry was added or widened.
+
+
+### Prayer times, the month table and the qibla (`:feature:prayer/src/test` and `src/testDebug`)
+
+The twelfth module locked: **38.1% lines to 84.1%**, from 1,086 covered lines to 2,398, and 23.7%
+to **70.5%** branches. 62 tests added across ten new classes. Three screens — the month timetable,
+the day pager and the qibla compass — were at **0%** between them, 855 lines of the 1,767 missing,
+and nothing had ever composed one.
+
+**This is the second module locked at a softened branch floor, and the first where the reason is
+not Compose.** `PrayerTimesPdfExporter` cannot run under Robolectric — `PdfDocument` throws
+`"document is closed!"` on the first `startPage` — and it holds 296 lines and 116 branches, 103 of
+them still missing. `:feature:quran` settled the same problem the same way for `TafseerPdfExporter`
+in #598: leave it at zero, make the 80% up elsewhere, record it. Nothing is excluded to reach these
+numbers; the file is counted in full against both floors.
+
+**Three things here are worth knowing before adding a test to this module.**
+
+- **The PDF export path is still testable — the failure arm is.** `MonthlyPrayerTimesScreen`
+  renders a month's PDF *inside a click handler* and reports start-then-outcome through the
+  ViewModel. Under Robolectric the render always fails, which makes this the one place the
+  `onFailure` arm runs for real: the assertion is that a month whose PDF cannot be produced still
+  reports, still leaves the timetable on screen, and never throws out of composition.
+- **`ArQiblaView` is the app's only camera surface, and CameraX does not clean up after itself.**
+  `ProcessCameraProvider.getInstance()` cannot complete with no camera: it leaves a pending
+  listener on the main looper and a half-initialised provider behind it, and Robolectric runs a
+  module's classes in one JVM, so that state lands on whichever class launches an activity next —
+  as `FutureGarbageCollectedException: CameraX initInternal` raised from an unrelated screen's
+  test, or as `lightZ must be a finite positive, given=Infinity` out of `ThreadedRenderer.setup`
+  before that class runs a line of its own. Neither names CameraX; both depend on class order and
+  on when a GC happens to run. **This module therefore forks a JVM per test class**
+  (`unitTests.all { it.setForkEvery(1) }`), which is the only thing that actually contains it, at
+  a cost of about three minutes. No other module needs it, and none of them has a camera
+  dependency. Every activity-launching class here also pins its **density** in `@Config`, because
+  `lightZ` is a theme dimension resolved against `DisplayMetrics.density`.
+- **The AR overlay's geometry is covered by drawing it, per the campaign's canvas technique.**
+  `QiblaArtTest` asks the `ComposeView` to draw into a software `android.graphics.Canvas` under
+  `@GraphicsMode(NATIVE)` and reads the pixels back; composing the tree alone runs `Canvas(modifier)`
+  and none of its `DrawScope` lambda. Not `captureToImage()`, which hangs.
+
+| Area | Covered by | What it pins |
+|---|---|---|
+| The month header against the month's rows | `MonthlyPrayerTimesScreenTest` | header and grid are two renderings of one fact drawn from different places — `currentMonth` and each row's own date. `:feature:calendar` shipped exactly this bug; a header naming the wrong month over a correct timetable reads as the prayer times being wrong |
+| One row per day, and the right day expanded | same | a row dispatches **its own** date, and only the expanded row draws the six times — a card ignoring `expandedDay` opens every row at once |
+| What the header calls the place | same | `isUsingFallbackLocation` wins over any name still in state, and a blank name reads as "Not set". `FallbackLocation` exists so a surface can say it is using a stand-in rather than caption a timetable with a city the reader has never been to |
+| The export chooser | same | offered only once there is a month to export, counts the days it would produce, and offers the Ramadan row only in Ramadan |
+| A PDF that cannot be rendered | same | start is reported, then exactly one outcome, and the timetable stays on screen. A silent failure here is a share button that does nothing |
+| The Ramadan timetable | same | the row *asks* — a month of astronomy belongs off the click handler — and the result arriving in state is shared once and then acknowledged, or a recomposition re-opens the share sheet |
+| What a single day row claims | `MonthlyPrayerTimesEventRowTest` | "today" compared against the system date inside the row; the highest-priority Islamic event matched by Hijri date; the fast length shown in Ramadan and nowhere else. Dates are derived from `HijriDateCalculator`, not hardcoded, so nothing starts failing the year the Hijri calendar moves past it |
+| A day with no computable times | `MonthlyPrayerTimesScreenTest` | six `--:--` cells rather than six blanks, and the row still present. At high latitudes this is a real day, not a rendering bug |
+| Which day the pager is on, and how it says so | `PrayerTimesScreenTest` | the relative label, the "Today" chip that renders only `if (!isToday)`, and the arrows. A screen that loses the chip strands a reader on a day they browsed to |
+| Tracking toggles on a future day | same | withheld — five toggles today (sunrise is not a prayer), none on a day that has not happened |
+| Swiping between days | same | the gesture, not just the arrows: a drag threshold read with the wrong sign pages backwards, which is indistinguishable from the arrows being swapped |
+| The day-info card and the month picker | same | daylight, sun and method are reported; `--:--` when there is no sunrise at all; picking a date in the sheet reports the choice |
+| Marking a prayer from the pager | `PrayerTimesTrackingTest` | the future is refused, a marked prayer clears (and drops its timestamp), yesterday is keyed to *yesterday*, sunrise is never recorded, and it reports as `prayer_tracked` — #359's third site, the one that made dashboards under-count |
+| The compass lifecycle | `QiblaScreenTest` | `StartCompass` on entry and `StopCompass` on disposal. A screen that never sends stop leaves the magnetometer registered after the reader has left — a drain nobody can see |
+| The qibla error surface | same | shown only when there is no bearing to draw, and carrying both a retry and a route to setting a location. An error replacing a working compass is worse than the stale refresh behind it |
+| The camera gate | same | AR is `state.isArMode && cameraPermissionGranted`, held in local state no ViewModel test can reach. The permission is requested rather than assumed, a denial is explained, and a grant enters AR |
+| Where the compass thinks it is | `QiblaViewModelLocationTest` | a stored location yields bearing, distance and declination; 0,0 is an error rather than a compass pointing north; a nameless location still gets a name to show; an explicitly chosen location recomputes rather than only being stored |
+| The confirmation haptic | same | a rising edge — once on the way in, again only after turning away and back — and silent when vibration is off, without losing the reported alignment |
+| The bearing/status capsule | `QiblaStatusCapsuleTest` | three states from two booleans: the turn hint is withheld until the compass settles, alignment is announced even before it does, and the **sign** of `rotationToQibla` decides the direction. Dropping the sign is confidently wrong half the time |
+| The compass view's two layouts | `CompassQiblaViewLayoutTest` | the tablet branch is a second copy of the same children and must lose none of them; `needsCalibration` is `UNRELIABLE || LOW`, not `UNRELIABLE` alone; with no location the dial draws but claims no bearing |
+| The calibration sheet | `QiblaCalibrationSheetTest` | every accuracy the sensor can report has its own word — the label changing as you wave the phone is the whole point of the sheet — plus the gesture, the three steps and the way out. The frame clock is pinned manually: the figure-8 animation never lets it idle |
+| The AR overlay's words | `ArQiblaViewTest` | outside the 60° field of view the overlay says so in words and names the shorter way round. A beam clamped to the screen edge is indistinguishable from one pointing just off frame, so someone with their back to Mecca is shown an arrow that looks right |
+| The AR overlay's geometry | `QiblaArtTest` | drawn into a bitmap: nothing at all without a location, a beam that lands where the qibla is rather than in the middle of the screen, a sweep arc when it is behind you, and a dimmed — not dropped — beam on an unreliable compass |
+| The night-worship window's other two states | `NightWorshipScreenTest` | loading is guarded on `lastThirdAt == null` too, so a refresh does not blank a live countdown; a failure is reported **inline** so the hub's other cards survive it, with a retry that dispatches |
+| The manual retry and the failed night | `NightWorshipRefreshTest` | `Refresh` is the only way out of a failed hub without leaving the screen, and it is a separate path from the observation `init` starts, with its own error handling. A settings read that throws is reported rather than reaching `viewModelScope`'s uncaught handler |
+| The five prayer destinations | `PrayerGraphTest` | all five register, and each resolves as a start destination in its own right. `Qibla` is registered twice over under two routes — a graph registering only one works from the tools hub and crashes from the bottom bar |
+
+**One production edit, and it is a real fix.** `ArQiblaView` called `cameraProviderFuture.get()`
+*outside* the `try` that guarded `bindToLifecycle`. A future that completes exceptionally — the
+provider failing to initialise at all — then throws `ExecutionException` from a listener running on
+the main executor with nothing above it to catch, and the app dies as the AR qibla opens, on
+exactly the devices whose camera stack is already unhappy. The `get()` is inside the guard now.
+
+**What stays uncovered, and why.** `PrayerTimesPdfExporter` (258 lines) for the reason above.
+Twenty-four of `PrayerGraph`'s thirty lines are the five destination bodies: each builds its screen
+through `hiltViewModel()`, which resolves only inside a composed `NavHost` on a Hilt-injected
+activity this module cannot build — the same structural gap `:feature:search` records, and `:app`'s
+instrumented suite is what exercises them. The rest is `@Preview` functions (three lines each,
+their contents hoisted into the excluded `ComposableSingletons`), the `hiltViewModel()` default
+arguments, and `QiblaCalibrationSheet`'s figure-8 `Canvas`, whose draw block needs a software
+canvas the sheet's own popup window is not part of. No `COVERAGE_EXCLUSIONS` entry was added or
+widened.
 
 
 ## Conventions
