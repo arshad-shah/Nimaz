@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.presentation.components.molecules
 
 import android.content.Context
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.height
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.onNodeWithText
@@ -90,10 +91,14 @@ class HadithOfTheDayCardTest {
             "Sahih", "hasan", "Da'if", "daif", "dai'f", "mawdu", "mawdu'", "fabricated",
             "Unknown grade",
         )
+        // A plain scrolling Column, not a LazyColumn: a lazy list composes a screenful, and the
+        // unmatched spelling — the `else` arm — is the last card (#604).
         composeRule.setThemedContent {
-            androidx.compose.foundation.lazy.LazyColumn {
-                items(spellings.size) { index ->
-                    HadithOfTheDayCard(hadith = "hadith $index", grade = spellings[index])
+            androidx.compose.foundation.layout.Column(
+                Modifier.verticalScroll(androidx.compose.foundation.rememberScrollState())
+            ) {
+                spellings.forEachIndexed { index, spelling ->
+                    HadithOfTheDayCard(hadith = "hadith $index", grade = spelling)
                 }
             }
         }
@@ -134,24 +139,36 @@ class HadithOfTheDayCardTest {
     }
 
     @Test
-    fun `carousel mode fills the page and caps the body`() {
-        // `fillHeight` swaps three modifiers at once — the card, the column and the body's weight.
-        // The reason it exists is that a short hadith on a tall pager page reads as top-clumped;
-        // what is assertable is that the card actually takes the height it is given.
+    fun `carousel mode makes the card take the whole page`() {
+        // `fillHeight` swaps three modifiers at once — the card, the column and the body's weight
+        // — because a short hadith on a tall pager page reads as top-clumped. Asserted by drawing
+        // the same hadith both ways in equally tall boxes: the carousel card fills its box and the
+        // standalone one wraps its content.
         composeRule.setThemedContent {
-            Box(Modifier.height(300.dp)) {
-                HadithOfTheDayCard(
-                    hadith = List(20) { "a long hadith body" }.joinToString(" "),
-                    reference = "Bukhari 1",
-                    grade = "Sahih",
-                    fillHeight = true,
-                    maxLines = 4,
-                    onClick = {},
-                )
+            androidx.compose.foundation.layout.Column {
+                Box(Modifier.height(300.dp)) {
+                    HadithOfTheDayCard(
+                        hadith = "Actions are but by intention",
+                        reference = "filled",
+                        grade = "Sahih",
+                        fillHeight = true,
+                        maxLines = 4,
+                        onClick = {},
+                    )
+                }
+                Box(Modifier.height(300.dp)) {
+                    HadithOfTheDayCard(
+                        hadith = "Actions are but by intention",
+                        reference = "wrapped",
+                        onClick = {},
+                    )
+                }
             }
         }
 
-        val height = composeRule.onNodeWithText("Bukhari 1").fetchSemanticsNode().positionInRoot.y
-        assertThat(height).isGreaterThan(0f)
+        val filled = composeRule.onNodeWithText("filled").fetchSemanticsNode().size.height
+        val wrapped = composeRule.onNodeWithText("wrapped").fetchSemanticsNode().size.height
+
+        assertThat(filled).isGreaterThan(wrapped)
     }
 }

@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.presentation.components.molecules
 
 import android.content.Context
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.height
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.onNodeWithText
@@ -67,13 +68,17 @@ class DuaOfTheMomentCardTest {
             "Sleep at night",
             "Travel",
         )
+        // A plain Column, not a LazyColumn: a lazy list composes a screenful, and the sixth card
+        // — the fallback arm, which is the one most worth reaching — falls off the bottom (#604).
         composeRule.setThemedContent {
-            androidx.compose.foundation.lazy.LazyColumn {
-                items(labels.size) { index ->
+            androidx.compose.foundation.layout.Column(
+                Modifier.verticalScroll(androidx.compose.foundation.rememberScrollState())
+            ) {
+                labels.forEachIndexed { index, label ->
                     DuaOfTheMomentCard(
                         arabic = "دعاء",
                         translation = "translation $index",
-                        categoryLabel = labels[index],
+                        categoryLabel = label,
                     )
                 }
             }
