@@ -94,6 +94,9 @@ dependencies {
     testImplementation(libs.turbine)
     testImplementation(testFixtures(project(":core:domain")))
     testImplementation(testFixtures(project(":core:common")))
+    // `createComponentComposeRule()` / `setThemedContent {}` — the one Compose harness, published
+    // from `:core:ui` rather than copied per module.
+    testImplementation(testFixtures(project(":core:ui")))
 
     testImplementation(libs.robolectric)
     testImplementation(libs.androidx.junit)
