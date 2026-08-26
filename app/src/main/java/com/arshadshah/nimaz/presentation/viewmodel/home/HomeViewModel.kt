@@ -138,6 +138,7 @@ class HomeViewModel @Inject constructor(
     private var prayerRecordsJob: Job? = null
     private var dailyHadithJob: Job? = null
     private var dailyDuaJob: Job? = null
+    private var celebrationCardsJob: Job? = null
 
     // ── Cached heavy results ────────────────────────────────────────────────
     // Today's prayer instants and tomorrow's Fajr, plus the date they were
@@ -197,18 +198,29 @@ class HomeViewModel @Inject constructor(
                 loadPrayerRecords()
                 loadDailyHadith()
                 loadDailyDua()
+                observeCelebrationCards()
                 calculatePrayerTimes()
             }
         }
     }
 
-    /** Local calendar occasions merged with any pushed CELEBRATION announcement. */
+    /**
+     * Local calendar occasions merged with any pushed CELEBRATION announcement.
+     *
+     * Re-armed at rollover like the other day-scoped collectors: `ObserveLocalEventsUseCase`
+     * reads the wall clock inside its `map`, so the flow it returns only re-emits when the Hijri
+     * offset changes. Left open overnight on the eve of Mawlid, Home would still be showing the
+     * previous day's occasions — or, far more often, none at all — well into the day itself.
+     * Cancelling and re-subscribing re-reads the date.
+     */
     private fun observeCelebrationCards() {
-        launchSafely(telemetry, AppAnalytics.Feature.HOME, "observe_celebration_cards") {
-            observeEventCards().collect { cards ->
-                _state.update { it.copy(celebrationCards = cards) }
+        celebrationCardsJob?.cancel()
+        celebrationCardsJob =
+            launchSafely(telemetry, AppAnalytics.Feature.HOME, "observe_celebration_cards") {
+                observeEventCards().collect { cards ->
+                    _state.update { it.copy(celebrationCards = cards) }
+                }
             }
-        }
     }
 
     private fun loadPrayerRecords() {

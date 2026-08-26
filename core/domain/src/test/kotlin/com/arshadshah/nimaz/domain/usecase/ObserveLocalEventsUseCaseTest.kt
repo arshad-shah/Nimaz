@@ -29,6 +29,29 @@ class ObserveLocalEventsUseCaseTest {
     }
 
     @Test
+    fun `emits the mawlid card on 12 Rabi al-Awwal`() = runBlocking<Unit> {
+        // 25 Aug 2026 is 12 Rabi' al-Awwal 1448 — the day Home showed nothing on a phone.
+        // Anchored to the Gregorian date deliberately: it is the reported symptom, and it also
+        // pins the Umm al-Qura conversion the whole occasion path depends on.
+        val mawlidGregorian = java.time.LocalDate.of(2026, 8, 25)
+        assertThat(HijriDateCalculator.toHijri(mawlidGregorian).month).isEqualTo(3)
+        assertThat(HijriDateCalculator.toHijri(mawlidGregorian).day).isEqualTo(12)
+
+        val useCase = ObserveLocalEventsUseCase(repo(0), nowDate = { mawlidGregorian })
+
+        assertThat(useCase().first().map { it.event }).containsExactly(CelebrationEvent.MAWLID)
+    }
+
+    @Test
+    fun `the hijri day offset moves which day the occasion lands on`() = runBlocking<Unit> {
+        // The offset shifts the date the Hijri reading is taken for, so -1 moves every occasion
+        // one Gregorian day later: Mawlid lands on the 26th instead of the 25th.
+        val useCase = ObserveLocalEventsUseCase(repo(-1), nowDate = { java.time.LocalDate.of(2026, 8, 26) })
+
+        assertThat(useCase().first().map { it.event }).containsExactly(CelebrationEvent.MAWLID)
+    }
+
+    @Test
     fun `emits empty list on an ordinary day`() = runBlocking {
         // 5th of month 2 (Safar) — no event in IslamicEvents.events
         val plainDay = com.arshadshah.nimaz.domain.calendar.HijriDateCalculator.toGregorian(5, 2, 1448)

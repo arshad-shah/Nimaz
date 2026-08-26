@@ -51,8 +51,10 @@ data class HomeUiState(
     val hasNotificationPermission: Boolean = true,
     val hasLocationPermission: Boolean = true,
     val isBatteryOptimized: Boolean = false,
-    // Local calendar occasions merged with any pushed CELEBRATION announcement,
-    // rendered as cards in the Home events carousel (after the Jumu'ah card).
+    // Local calendar occasions merged with any pushed CELEBRATION announcement.
+    // Compact Home renders them as `HomeOccasionsSection` above the prayer card; tablet appends
+    // them to its events carousel after the Jumu'ah card. Both go through `occasionEventCards` —
+    // when the mapping lived only in the tablet branch, phones showed no occasion at all.
     val celebrationCards: List<HomeEventCard> = emptyList(),
     // The single nearest upcoming *enabled* extended worship reminder, rendered as the
     // "Next Worship" card in the events carousel. Null when nothing is enabled/near.
