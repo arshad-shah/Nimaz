@@ -39,14 +39,28 @@ import androidx.test.ext.junit.rules.ActivityScenarioRule
  */
 typealias ActivityRule = AndroidComposeTestRule<ActivityScenarioRule<ComponentActivity>, ComponentActivity>
 
-/** Composes [content] over a black field and draws the result into a bitmap. */
-fun ActivityRule.drawToBitmap(content: @Composable () -> Unit): Bitmap {
+/**
+ * Composes [content] over a black field and draws the result into a bitmap.
+ *
+ * [advanceMillis] moves a **pinned** clock on before the draw. An infinite transition sits at its
+ * initial value until the clock turns, so a shimmer or a rotation drawn at t=0 is indistinguishable
+ * from one that never animates — set `mainClock.autoAdvance = false` and advance to the point in
+ * the cycle the assertion is about.
+ */
+fun ActivityRule.drawToBitmap(
+    advanceMillis: Long = 0,
+    content: @Composable () -> Unit,
+): Bitmap {
     setContent {
         MaterialTheme {
             Box(modifier = Modifier.fillMaxSize().background(Color.Black)) { content() }
         }
     }
     waitForIdle()
+    if (advanceMillis > 0) {
+        mainClock.advanceTimeBy(advanceMillis)
+        waitForIdle()
+    }
 
     val root: View = activity.findViewById<ViewGroup>(android.R.id.content).getChildAt(0)
     val bitmap = Bitmap.createBitmap(root.width, root.height, Bitmap.Config.ARGB_8888)
