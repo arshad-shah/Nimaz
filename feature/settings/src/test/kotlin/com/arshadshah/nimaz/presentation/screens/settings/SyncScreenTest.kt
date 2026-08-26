@@ -10,7 +10,11 @@ import androidx.test.core.app.ApplicationProvider
 import com.arshadshah.nimaz.core.ui.R
 import com.arshadshah.nimaz.data.sync.CancelReason
 import com.arshadshah.nimaz.data.sync.ConnectionState
+import androidx.compose.ui.semantics.getOrNull
+import androidx.compose.ui.test.onRoot
 import com.arshadshah.nimaz.data.sync.SyncCategory
+import com.arshadshah.nimaz.data.sync.SyncPayload
+import com.arshadshah.nimaz.data.sync.categories
 import com.arshadshah.nimaz.presentation.viewmodel.UiError
 import com.arshadshah.nimaz.presentation.viewmodel.settings.ActivityLogEntry
 import com.arshadshah.nimaz.presentation.viewmodel.settings.SyncDataSummary
@@ -431,4 +435,247 @@ class SyncScreenTest {
         assertThat(events).containsExactly(SyncEvent.Cancel)
         assertThat(backs).isEqualTo(1)
     }
+
+    // ── The transfer manifest ────────────────────────────────────────────────────────────────
+
+    @Test
+    fun `every category a payload can carry has a label of its own`() {
+        // The card is driven entirely by `SyncPayload.categories()`, and the key→label map is a
+        // `when` with an `else` that renders "No data". A category added to the payload without
+        // a label here therefore shows up as a row reading *No data* beside a real count —
+        // which reads as a bug in the transfer rather than a missing string. `SyncPayloadCoverage
+        // Test` guards the data side; this is the presentation half of the same contract.
+        val everyCategory = SyncPayload().categories().map { it.key }
+        assertThat(everyCategory).isNotEmpty()
+
+        setContent(
+            SyncUiState(
+                mode = SyncMode.RECEIVE,
+                connectionState = ConnectionState.Completed(bytesReceived = 8192),
+                dataSummary = SyncDataSummary(
+                    categories = everyCategory.map { SyncCategory(key = it, count = 3) },
+                    totalBytes = 8192,
+                ),
+            )
+        )
+
+        val rendered = composeRule.onRoot().fetchSemanticsNode().renderedTexts()
+        assertThat(rendered).doesNotContain(string(R.string.sync_no_data))
+        assertThat(rendered).containsAtLeast(
+            string(R.string.sync_item_bookmarks),
+            string(R.string.sync_item_reading_progress),
+            string(R.string.sync_item_qaida_cells),
+            string(R.string.sync_item_locations),
+            string(R.string.sync_item_preferences),
+        )
+    }
+
+    @Test
+    fun `a key the map does not know renders the fallback rather than the raw key`() {
+        // The `else` arm. A raw camelCase key in the manifest is worse than "No data": it looks
+        // like an internal identifier leaking into the UI.
+        setContent(
+            SyncUiState(
+                mode = SyncMode.RECEIVE,
+                connectionState = ConnectionState.Completed(bytesReceived = 1),
+                dataSummary = SyncDataSummary(
+                    categories = listOf(SyncCategory(key = "somethingNew", count = 3)),
+                    totalBytes = 1,
+                ),
+            )
+        )
+
+        composeRule.onNodeWithText(string(R.string.sync_no_data)).assertExists()
+        composeRule.onNodeWithText("somethingNew").assertDoesNotExist()
+    }
+
+    @Test
+    fun `only categories that actually carry something are listed`() {
+        // Every payload reports all twenty-four categories, most of them empty. Listing the
+        // empty ones would bury the two rows that matter under twenty-two zeroes.
+        setContent(
+            SyncUiState(
+                mode = SyncMode.SEND,
+                connectionState = ConnectionState.Completed(bytesReceived = 4096),
+                dataSummary = SyncDataSummary(
+                    categories = listOf(
+                        SyncCategory(key = "bookmarks", count = 12),
+                        SyncCategory(key = "zakatHistory", count = 0),
+                    ),
+                    totalBytes = 4096,
+                ),
+            )
+        )
+
+        composeRule.onNodeWithText(string(R.string.sync_item_bookmarks)).assertExists()
+        composeRule.onNodeWithText(string(R.string.sync_item_zakat)).assertDoesNotExist()
+        composeRule.onNodeWithText("12").assertExists()
+    }
+
+    @Test
+    fun `a manifest with nothing in it says so`() {
+        // A sync that moved nothing is a real outcome — a fresh install syncing to a fresh
+        // install — and an empty card reads as a rendering failure.
+        setContent(
+            SyncUiState(
+                mode = SyncMode.SEND,
+                connectionState = ConnectionState.Completed(bytesReceived = 0),
+                dataSummary = SyncDataSummary(
+                    categories = listOf(SyncCategory(key = "bookmarks", count = 0)),
+                    totalBytes = 0,
+                ),
+            )
+        )
+
+        composeRule.onNodeWithText(string(R.string.sync_no_data)).assertExists()
+    }
+
+    @Test
+    fun `a flag category shows no count, because it has none to show`() {
+        // Reading progress and preferences are present-or-absent, not countable. Rendering "1"
+        // beside them invites the reader to wonder what the other zero was.
+        setContent(
+            SyncUiState(
+                mode = SyncMode.RECEIVE,
+                connectionState = ConnectionState.Completed(bytesReceived = 100),
+                dataSummary = SyncDataSummary(
+                    categories = listOf(
+                        SyncCategory(key = "readingProgress", count = 1, isFlag = true)
+                    ),
+                    totalBytes = 100,
+                ),
+            )
+        )
+
+        composeRule.onNodeWithText(string(R.string.sync_item_reading_progress)).assertExists()
+        composeRule.onNodeWithText("1").assertDoesNotExist()
+    }
+
+    @Test
+    fun `the total size is shown only once there is one`() {
+        setContent(
+            SyncUiState(
+                mode = SyncMode.SEND,
+                connectionState = ConnectionState.Completed(bytesReceived = 0),
+                dataSummary = SyncDataSummary(
+                    categories = listOf(SyncCategory(key = "bookmarks", count = 4)),
+                    totalBytes = 0,
+                ),
+            )
+        )
+
+        composeRule.onNodeWithText(string(R.string.sync_total_size)).assertDoesNotExist()
+    }
+
+    // ── Progress detail ──────────────────────────────────────────────────────────────────────
+
+    @Test
+    fun `the sender sees the partner's import step count while it runs`() {
+        setContent(
+            SyncUiState(
+                mode = SyncMode.SEND,
+                connectionState = ConnectionState.PartnerImporting(
+                    step = 5,
+                    total = 12,
+                    label = "Importing khatam data...",
+                ),
+                stepsCompleted = 11,
+                totalSteps = 13,
+            )
+        )
+
+        composeRule.onNodeWithText("Importing khatam data...", substring = true).assertExists()
+    }
+
+    @Test
+    fun `a partner import with no total yet does not divide by zero`() {
+        // `ImportStarted` carries (0, 0) — the state every import passes through before the
+        // first progress signal arrives.
+        setContent(
+            SyncUiState(
+                mode = SyncMode.SEND,
+                connectionState = ConnectionState.PartnerImporting(0, 0, "Starting..."),
+                stepsCompleted = 11,
+                totalSteps = 13,
+            )
+        )
+
+        composeRule.onNodeWithText("Starting...", substring = true).assertExists()
+    }
+
+    @Test
+    fun `a transfer in flight reports its percentage and the size being moved`() {
+        setContent(
+            SyncUiState(
+                mode = SyncMode.SEND,
+                connectionState = ConnectionState.Transferring(0.4f),
+                stepsCompleted = 6,
+                totalSteps = 13,
+                dataSummary = SyncDataSummary(
+                    categories = listOf(SyncCategory(key = "bookmarks", count = 4)),
+                    totalBytes = 4096,
+                ),
+            )
+        )
+
+        composeRule.onNodeWithText(string(R.string.sync_transfer_progress)).assertExists()
+        composeRule.onNodeWithText(
+            string(R.string.sync_transferred_format, 40) + " (4 KB)"
+        ).assertExists()
+    }
+
+    @Test
+    fun `a transfer whose size is not known yet reports the percentage alone`() {
+        // The sender learns the encoded size only after the export finishes, so the first
+        // frames of the transfer have a percentage and no bytes.
+        setContent(
+            SyncUiState(
+                mode = SyncMode.RECEIVE,
+                connectionState = ConnectionState.Transferring(0.1f),
+                dataSummary = null,
+            )
+        )
+
+        composeRule.onNodeWithText(string(R.string.sync_transferred_format, 10)).assertExists()
+    }
+
+    @Test
+    fun `the in-flight manifest says which way the data is moving`() {
+        // The same card serves both devices, and "being sent" against "being received" is the
+        // only thing on it that says which one you are looking at.
+        setContent(
+            SyncUiState(
+                mode = SyncMode.SEND,
+                connectionState = ConnectionState.Transferring(0.5f),
+                dataSummary = SyncDataSummary(
+                    categories = listOf(SyncCategory(key = "bookmarks", count = 4)),
+                    totalBytes = 4096,
+                ),
+            )
+        )
+
+        composeRule.onNodeWithText(string(R.string.sync_data_being_sent)).assertExists()
+        composeRule.onNodeWithText(string(R.string.sync_data_being_received)).assertDoesNotExist()
+    }
+
+    @Test
+    fun `the receiving device's in-flight manifest says received`() {
+        setContent(
+            SyncUiState(
+                mode = SyncMode.RECEIVE,
+                connectionState = ConnectionState.Transferring(0.5f),
+                dataSummary = SyncDataSummary(
+                    categories = listOf(SyncCategory(key = "bookmarks", count = 4)),
+                    totalBytes = 4096,
+                ),
+            )
+        )
+
+        composeRule.onNodeWithText(string(R.string.sync_data_being_received)).assertExists()
+    }
+
+    /** Every string the tree renders, flattened. */
+    private fun androidx.compose.ui.semantics.SemanticsNode.renderedTexts(): List<String> =
+        config.getOrNull(androidx.compose.ui.semantics.SemanticsProperties.Text).orEmpty()
+            .map { it.text } + children.flatMap { it.renderedTexts() }
 }

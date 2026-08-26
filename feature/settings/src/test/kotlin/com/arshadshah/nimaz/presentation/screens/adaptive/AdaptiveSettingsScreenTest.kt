@@ -18,12 +18,21 @@ import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.test.core.app.ApplicationProvider
 import com.arshadshah.nimaz.core.navigation.Route
 import com.arshadshah.nimaz.core.ui.R
+import com.arshadshah.nimaz.presentation.viewmodel.location.LocationUiState
+import com.arshadshah.nimaz.presentation.viewmodel.location.LocationViewModel
 import com.arshadshah.nimaz.presentation.viewmodel.settings.SettingsViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.settings.SyncUiState
+import com.arshadshah.nimaz.presentation.viewmodel.settings.SyncViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.settings.ZakatSettingsUiState
+import com.arshadshah.nimaz.presentation.viewmodel.settings.ZakatSettingsViewModel
 import com.arshadshah.nimaz.testing.FakeSettingsScreenViewModel
 import com.arshadshah.nimaz.testing.compose.createComponentComposeRule
 import com.arshadshah.nimaz.testing.compose.setThemedContent
 import com.arshadshah.nimaz.testing.settingsRow
 import com.google.common.truth.Truth.assertThat
+import io.mockk.every
+import io.mockk.mockk
+import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -55,6 +64,16 @@ class AdaptiveSettingsScreenTest {
 
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val viewModel = FakeSettingsScreenViewModel()
+
+    private val locationViewModel: LocationViewModel = mockk(relaxed = true) {
+        every { state } returns MutableStateFlow(LocationUiState())
+    }
+    private val zakatViewModel: ZakatSettingsViewModel = mockk(relaxed = true) {
+        every { uiState } returns MutableStateFlow(ZakatSettingsUiState())
+    }
+    private val syncViewModel: SyncViewModel = mockk(relaxed = true) {
+        every { uiState } returns MutableStateFlow(SyncUiState())
+    }
 
     private val navigated = mutableListOf<Route>()
     private var backs = 0
@@ -223,6 +242,34 @@ class AdaptiveSettingsScreenTest {
     }
 
     @Test
+    @Config(qualifiers = "w1000dp-h2600dp")
+    fun `every settings row has a pane behind it`() {
+        // Nine rows against a nine-arm `when` over `SettingsDetailPane`. A row wired to the
+        // wrong arm opens the wrong screen inside a correct-looking layout, and the `when` is
+        // exhaustive over the enum so nothing about it fails to compile.
+        setContent()
+
+        val panes = listOf(
+            R.string.calculation_method to R.string.manual_adjustments,
+            R.string.notifications to R.string.notification_settings_enable,
+            R.string.quran_settings to R.string.tajweed_section,
+            R.string.appearance to R.string.appearance_theme,
+            R.string.location to R.string.location_use_current_location,
+            R.string.language to R.string.app_language_section,
+            R.string.widgets to R.string.widgets_how_to,
+            R.string.sync_data to R.string.sync_device_to_device,
+            R.string.zakat_settings to R.string.zakat_metal_prices,
+        )
+
+        panes.forEach { (row, marker) ->
+            composeRule.settingsRow(string(row)).performClick()
+            composeRule.waitForIdle()
+            composeRule.onAllNodesWithText(string(marker)).onFirst().assertExists()
+        }
+        assertThat(navigated).isEmpty()
+    }
+
+    @Test
     @Config(qualifiers = "w1000dp-h1200dp")
     fun `nothing is shown in the detail pane until a row is chosen`() {
         // `currentDestination?.contentKey` is null on open, and the `if` around it is the only
@@ -233,9 +280,20 @@ class AdaptiveSettingsScreenTest {
         composeRule.onNodeWithText(string(R.string.app_language_section)).assertDoesNotExist()
     }
 
+    /**
+     * Four ViewModels, because four of the nine panes take one of their own.
+     *
+     * Seeding only `SettingsViewModel` works until a test opens the Location, Zakat or Sync
+     * pane, at which point `hiltViewModel()` finds nothing in the store, reaches for a factory
+     * and fails with "Cannot create an instance of …" — a message that names the ViewModel and
+     * says nothing about the store being short one entry.
+     */
     private fun seededOwner(): ViewModelStoreOwner {
         val store = ViewModelStore()
         seed(store, SettingsViewModel::class.java, viewModel.mock)
+        seed(store, LocationViewModel::class.java, locationViewModel)
+        seed(store, ZakatSettingsViewModel::class.java, zakatViewModel)
+        seed(store, SyncViewModel::class.java, syncViewModel)
         return object : ViewModelStoreOwner {
             override val viewModelStore: ViewModelStore = store
         }

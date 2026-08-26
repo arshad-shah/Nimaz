@@ -73,7 +73,9 @@ class LocationScreenTest {
     private fun setContent(uiState: LocationUiState = LocationUiState()) {
         state.value = uiState
         composeRule.setThemedContent {
-            activity = androidx.compose.ui.platform.LocalContext.current as? Activity
+            // `LocalActivity` rather than casting `LocalContext`: a Context is not always an
+            // Activity, and lint rejects the cast.
+            activity = androidx.activity.compose.LocalActivity.current
             LocationScreen(onNavigateBack = { backs++ }, viewModel = viewModel)
         }
     }
