@@ -51,6 +51,7 @@ Two on-device/JVM test surfaces exist:
   - [The repositories, the sync and the adhan store (`:core:data/src/test`)](#the-repositories-the-sync-and-the-adhan-store-coredatasrctest)
   - [The library, rendered (`:feature:content/src/test`)](#the-library-rendered-featurecontentsrctest)
   - [What the user did (`:feature:tracker/src/test` and `src/testDebug`)](#what-the-user-did-featuretrackersrctest-and-srctestdebug)
+  - [The design system itself (`:core:ui/src/test` and `src/testDebug`)](#the-design-system-itself-coreuisrctest-and-srctestdebug)
 - [Conventions](#conventions)
 
 ## Running the unit tests
@@ -284,6 +285,13 @@ ratchet working, not a reason to soften it.
 `:feature:tracker` is the **eighth** Compose module to hold the standard, at **81.3%** across
 three trackers, twelve screens and two drawn surfaces — with **131 of its 280 missing branches**
 being that same bitmask, and 89.1% once they are discounted.
+`:core:ui` is the **ninth**, and settles the question for the largest Compose surface in the repo:
+13,000 measurable lines, 316 classes and 143 files of design system, holding **80.5% lines and
+80.5% branches**. It is also the *thinnest* margin of any module — 61 lines and 24 branches — and
+the reason is arithmetic rather than thoroughness: **1,979 of its lines are `@Preview` and
+`*Showcase` functions**, 15.2% of the module, permanently at 0% because they are `private` tooling
+that would pin the previews rather than the product. Counting them, everything else has to clear
+**94.4%**. See [the design system's audit section](#the-design-system-itself-coreuisrctest-and-srctestdebug).
 
 **Two modules are softened to 80 line / 60 branch, and for two different reasons.**
 `:feature:prayer` is the second, and its reason is arithmetic rather than Compose:
@@ -318,7 +326,7 @@ split, and should say so where it sets its floors.
 | `:feature:prayer` | 84.1% | 70.5% | **locked** at 80 line / 60 branch (#609) |
 | `:feature:about` | 94.1% | 83.8% | **locked** at 80/80 (#610) |
 | `:core:data` | 88.1% | 84.6% | **locked** at 80/80 (#611) |
-| `:core:ui` | 50.3% | 47.8% | |
+| `:core:ui` | 80.5% | 80.5% | **locked** at 80/80 (#614) |
 | `:feature:tracker` | 91.9% | 81.3% | **locked** at 80/80 (#613) |
 | `:feature:content` | 85.1% | 80.4% | **locked** at 80/80 (#612) |
 | `:feature:settings` | 11.3% | 14.9% | |
@@ -1267,6 +1275,96 @@ one date-dependent pocket: which of Ashura, Arafah, Shawwal and mid-Sha'ban fall
 changes with the day the suite runs.
 **No `COVERAGE_EXCLUSIONS` entry was added or widened** — the list is shared with every locked
 module, so widening it would move their numbers too.
+
+### The design system itself (`:core:ui/src/test` and `src/testDebug`)
+
+The largest module in the repo — 13,000 measurable lines, 316 classes, 143 files — and the one
+whose regressions are never local. `CLAUDE.md` rule 8 makes several of these components
+*mandatory* (a button is `NimazButton`, a card tap target is `NimazCard(onClick = …)`, rows are
+separated by `NimazMenuDivider()`, arrows come from `NimazIcons`) precisely because hand-rolled
+equivalents got the ripple, the radius or the target size wrong. A defect here is a defect on every
+screen at once.
+
+**Three tests were living in `:app/src/test` and moved to the module that owns their subject** —
+`ShareablesZakatTest` (`core/share`), `TranslationFontFamilyTest` (`theme/`) and
+`CompassDegreesTest` (`foundation/geometry`). The merged `:app` report counted them either way;
+what changes is the attribution.
+
+**Two techniques account for most of the new coverage, and both are worth reusing.**
+
+`testing/SoftwareCanvas.kt` draws a composable into a **software** `android.graphics.Canvas` under
+`@GraphicsMode(NATIVE)` and reads the pixels back. This module owns the app's drawn surfaces, and
+composing a `Canvas` runs the call while its `DrawScope` lambda never executes — so
+`PrayerSkySceneArtTest` (11) pins that midday is brighter than midnight, that the sun crosses the
+sky rather than sitting still, that a full moon out-shines a new one and that every phase's path
+operations produce something; `CompassPrimitivesArtTest` (10) pins **that the qibla needle points
+where the qibla is** — a sign error there sends somebody to pray facing the opposite way and draws
+a perfectly convincing dial doing it — and that facing turns it green; `NimazErrorStateArtTest` (6)
+pins the fractured shamsa's four layers; `QiblaGeometryTest` (8) pins that the beam rises at the
+`x` it is handed and the off-screen arc hugs the edge it points at; `NimazPatternBackgroundTest`
+(8) pins that the ornament preference actually reaches the drawing rather than only the setting;
+`QaidaArtTest` (6), `KhatamProgressDrawTest` (4), `CompassTurnArcTest` (3), `NimazMarginRuleTest`
+(4), `NimazSkeletonTest` (5), `HarakatColouringTest` (4) and `NimazScreenScaffoldTest` (3) cover
+the rest. `captureToImage()` is *not* the route — it goes through `PixelCopy` and hangs (#604).
+
+The second is that **a component setting `clearAndSetSemantics` is addressable only by its
+announcement**. `ZakatSummaryHeroTest` (8) asserts the plinth reads as one phrase, `KhatamVisuals`
+and `NimazTimeDisplay` the same, and `QaidaCoursePathTest` (10) addresses every lesson medallion by
+what a learner is told — including that a **locked** medallion is not offered as a control at all.
+
+**The rest, by what they pin.** `NimazErrorStateTest` (18): the app's one failure state at three
+scales, and that a stack trace stays behind its toggle. `ShareablesTest` (24) and
+`ShareablesBlankFieldsTest` (5): every share body, with each optional field absent *and* blank —
+the content database is a fetched artifact, so `""` is the shape that actually arrives.
+`ContentShareManagerTest` (6): the intent the app really starts. `WorshipReminderContentTest` (10):
+eleven reminder types across two parallel `when`s, and that the `Context` and `StringProvider`
+overloads never disagree — the file's own KDoc records them doing so once, giving every
+Arafah/Ashura reminder the Arafah body. `HadithGradeChipTest` (7): that no two authenticity grades
+share a colour, which is the most serious thing this app can get wrong. `NimazCalendarDayCellTest`
+(15): the day cell's five marks and the priority between them, including the `NaN` completion
+fraction a day with no scheduled prayers produces. `PrayerDisplayStatusTest` (8): that an unlogged
+prayer whose time has not come reads as *upcoming* rather than missed. `PrayerTimeDisplayTest` (8):
+which row is current at both ends of the day — the two regressions `PrayerClock`'s KDoc records.
+`ExpandableSearchBarTest` (14) and `NimazSearchBarOptionsTest` (5): the search bar's panel state
+machine and its autofocus. `NimazListPickerVariantsTest` (8): that the search corpus includes the
+description, because people remember a calculation method by where it is used.
+`NimazNumberStepperFieldTest` (5): typing into a stepper, its digit filter and its clamp.
+`AdaptiveSpacingTest` (5) at three window widths, `NimazThemeTest` (8) including the deliberate
+`surfaceTint` deviation from Material, `BeadColorsTest` (6), `DesignScaleTest` (5),
+`TranslationTypographyTest` (11) and the option sweeps for the components whose parameters no other
+test supplies.
+
+**160 test classes, 1,072 `@Test` methods.** No production code was changed, and **no
+`COVERAGE_EXCLUSIONS` entry was added or widened** — the list is shared with every locked module,
+so widening it would move their numbers too.
+
+**What stays uncovered, and why 80/80 was still the right pair.** Two groups are counted in full
+against both floors and cannot be driven:
+
+- **`@Preview` and `*Showcase` functions — 1,979 lines, 15.2% of the module, all at 0%.** This is
+  the design system, so previews *are* part of maintaining it: 263 `@Preview` annotations across 86
+  of the 143 files, against zero in `:feature:about` and `:feature:tools`. They are `private` by
+  convention, and driving them would pin the tooling rather than the product. Counting them,
+  everything else has to clear **94.4%** for the module to read 80 — which is what it now does.
+  `NimazCalendarShowcasePreviews.kt` is the extreme case: 145 lines that are nothing but tooling.
+- **183 branches of the Compose compiler's `$dirty` bitmask** — one per parameter of every
+  restartable composable, neither side reachable because which one runs depends on what the
+  *caller* changed between recompositions. With 143 files of composables this is the largest such
+  accumulation in the repo, and it is the pressure that argued `:feature:quran` down to a 0.60
+  branch floor. It does not force one here because the *other* Compose-generated branch — the
+  `$default` parameter mask — **is** reachable, by calling a composable both with its defaults and
+  with explicit arguments. Several tests here are deliberately option sweeps for that reason, and
+  a parameter read into a local and then not passed on is a real defect: the caller's choice is
+  silently ignored, visible only on the one screen that sets it.
+
+Three smaller things are structurally out of reach and are left at zero rather than excluded:
+`SearchResultCard` and its two colour helpers in `NimazSearchBar.kt` are `private` and have no
+caller in the module; `shareFile`'s `FileProvider` lookup needs an authority declared in `:app`'s
+manifest, so a library unit test cannot reach it (`:app`'s instrumented suite does); and the cloud
+band in `PrayerSkyScene` is blitted through `ColorFilter.tint(…, BlendMode.Modulate)`, which does
+not survive Robolectric's canvas — the bake and the wrap-around double blit run, the composite
+does not.
+
 
 ## Conventions
 

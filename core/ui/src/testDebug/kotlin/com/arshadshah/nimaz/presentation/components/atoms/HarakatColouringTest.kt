@@ -39,7 +39,7 @@ import org.robolectric.annotation.GraphicsMode
 @RunWith(RobolectricTestRunner::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(qualifiers = "w411dp-h891dp-mdpi")
-class HarakatArabicTextTest2 {
+class HarakatColouringTest {
 
     @Suppress("DEPRECATION")
     @get:Rule
