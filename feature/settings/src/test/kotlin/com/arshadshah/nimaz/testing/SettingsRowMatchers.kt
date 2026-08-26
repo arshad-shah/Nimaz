@@ -1,9 +1,11 @@
 package com.arshadshah.nimaz.testing
 
 import androidx.compose.ui.test.SemanticsNodeInteraction
+import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
+import androidx.compose.ui.test.onLast
 
 /**
  * The tappable settings **row** carrying [title], as opposed to the `Text` that renders the title.
@@ -35,3 +37,28 @@ fun ComposeContentTestRule.settingsRow(title: String): SemanticsNodeInteraction 
 fun ComposeContentTestRule.assertSettingsRowNotTappable(title: String) {
     onNode(hasText(title) and hasClickAction()).assertDoesNotExist()
 }
+
+/**
+ * The same two, for a row that sits **inside an accordion**.
+ *
+ * An accordion is a clickable card, so it merges everything in its body into one node — a merged
+ * node that carries every row's text *and* the card's own `OnClick`. `settingsRow` therefore
+ * matches the card rather than the row, and its disabled counterpart matches the card too, which
+ * makes "this row is off-limits" unassertable in the merged tree. In the unmerged tree the rows
+ * keep their own nodes and the card's click action stays on the card.
+ */
+fun ComposeContentTestRule.accordionRow(title: String): SemanticsNodeInteraction =
+    onAllNodes(hasAnyDescendant(hasText(title)) and hasClickAction(), useUnmergedTree = true)
+        .onLast()
+
+/**
+ * How many tappable things enclose [title] in the unmerged tree.
+ *
+ * Inside an accordion the answer is the assertion. An **enabled** row gives two — the accordion
+ * card, which collapses the row, and the row itself; a **disabled** one gives only the card,
+ * because `NimazSettingsItem` expresses "disabled" by dropping its `clickable` entirely.
+ */
+fun ComposeContentTestRule.tappableAncestorCount(title: String): Int =
+    onAllNodes(hasAnyDescendant(hasText(title)) and hasClickAction(), useUnmergedTree = true)
+        .fetchSemanticsNodes()
+        .size
