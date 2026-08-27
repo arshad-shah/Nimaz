@@ -443,6 +443,9 @@ dependencies {
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.google.truth)
     testImplementation(libs.robolectric)
+    // TestListenableWorkerBuilder, for AdhanDownloadWorker's retry rule — the background
+    // fallback that runs on the two paths a foreground service cannot take.
+    testImplementation(libs.androidx.work.testing)
     testImplementation(libs.ktor.client.mock)
     testImplementation(libs.json)
 
