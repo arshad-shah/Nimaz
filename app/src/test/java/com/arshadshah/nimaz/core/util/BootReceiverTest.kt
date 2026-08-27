@@ -20,7 +20,7 @@ import com.arshadshah.nimaz.domain.model.UserPreferences
 import com.arshadshah.nimaz.domain.model.WorshipReminderType
 import com.arshadshah.nimaz.domain.repository.KhatamRepository
 import com.arshadshah.nimaz.domain.repository.PrayerRepository
-import com.arshadshah.nimaz.testing.ReceiverInjectingApplication
+import com.arshadshah.nimaz.testing.TestEntryPointApplication
 import com.google.common.truth.Truth.assertThat
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -45,14 +45,14 @@ import org.robolectric.annotation.Config
  * construction: the user simply is not told it is time to pray.
  *
  * It sat at **0% covered** because `@AndroidEntryPoint` makes `onReceive` unreachable without a
- * Hilt application. [ReceiverInjectingApplication] is the smallest thing that satisfies that,
+ * Hilt application. [TestEntryPointApplication] is the smallest thing that satisfies that,
  * so these tests drive the real `onReceive` and read back what Android was asked to do.
  *
  * The receiver launches its work on `Dispatchers.IO`, so each assertion waits for the effect
  * rather than assuming it has already landed — see [awaitNotification] / [awaitNothing].
  */
 @RunWith(RobolectricTestRunner::class)
-@Config(application = ReceiverInjectingApplication::class, sdk = [34])
+@Config(application = TestEntryPointApplication::class, sdk = [34])
 class BootReceiverTest {
 
     private lateinit var context: Context
@@ -131,7 +131,8 @@ class BootReceiverTest {
         rescheduler = mockk(relaxed = true)
         scheduler = mockk(relaxed = true)
 
-        ReceiverInjectingApplication.Injector.inject = { receiver ->
+        TestEntryPointApplication.Injector.reset()
+        TestEntryPointApplication.Injector.bootReceiver = { receiver ->
             receiver.preferencesDataStore = preferences
             receiver.prayerNotificationScheduler = scheduler
             receiver.prayerRepository = prayerRepository
