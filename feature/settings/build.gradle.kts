@@ -27,6 +27,38 @@ android {
     }
 }
 
+nimazCoverage {
+    lineFloor.set(0.80)
+    branchFloor.set(0.80)
+}
+
+// **80/80 — the tenth Compose module in a row to hold the standard**, and the last module in the
+// repo to join the ratchet. It stands at **94.2% lines** and **82.6% branches**, which is the
+// widest line margin of any module locked so far and a branch margin of 41.
+//
+// The branch number is the one that took work. Of the 279 branches still missing, **141 sit on
+// composable signature and parameter lines** — the Compose compiler's `$dirty` skippability check
+// and its `$default` parameter mask, emitted once per parameter of every restartable composable
+// across 24 screens. Discount those and the module stands at **89.9%**.
+//
+// The remaining 138 are spread thin, and the pockets worth naming are unreachable rather than
+// untested:
+//
+//   - **`SyncMode.NONE` inside the two role helpers.** `RoleBadge` and `AuthTokenContent`'s role
+//     line are both reached only from a `when` arm that has already established the mode is SEND
+//     or RECEIVE — the screen shows the mode-selection content while it is NONE. The `NONE` arm
+//     is exhaustiveness, not a state.
+//   - **`check(totalImportSteps == IMPORT_STEP_COUNT)`** in `SyncViewModel.importWithProgress`.
+//     It guards a hand-maintained constant against the list beside it, and both sides are in the
+//     same file: the failing arm exists so a future edit to one and not the other stops the
+//     import rather than reporting "step 13 of 10", which is what shipped before it. Making it
+//     fire from a test would mean changing the constant, which is the thing it guards.
+//   - **`Locale`-dependent `replaceFirstChar` arms** in the widget preview's date formatting (8).
+//     The empty-string branch of `replaceFirstChar` cannot be reached from a `Month` or
+//     `DayOfWeek` name.
+//
+// No `COVERAGE_EXCLUSIONS` entry was added or widened for any of it.
+//
 // The last feature module: 24 screens and the 1,324-line `SettingsViewModel`, plus location and
 // sync. The most cross-referenced module in the app, and the one the epic deliberately left until
 // every other feature had already taken what it owned.
@@ -94,6 +126,13 @@ dependencies {
     testImplementation(libs.turbine)
     testImplementation(testFixtures(project(":core:domain")))
     testImplementation(testFixtures(project(":core:common")))
+    // `createComponentComposeRule()` / `setThemedContent {}` — the one Compose harness, published
+    // from `:core:ui` rather than copied per module.
+    testImplementation(testFixtures(project(":core:ui")))
+    // `LocationScreen` answers a permission launcher, and its test needs the activity that
+    // launcher belongs to. `LocalActivity` rather than casting `LocalContext`, which lint
+    // rejects — a Context is not always an Activity.
+    testImplementation(libs.androidx.activity.compose)
 
     testImplementation(libs.robolectric)
     testImplementation(libs.androidx.junit)

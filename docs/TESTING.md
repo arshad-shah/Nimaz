@@ -52,6 +52,7 @@ Two on-device/JVM test surfaces exist:
   - [The library, rendered (`:feature:content/src/test`)](#the-library-rendered-featurecontentsrctest)
   - [What the user did (`:feature:tracker/src/test` and `src/testDebug`)](#what-the-user-did-featuretrackersrctest-and-srctestdebug)
   - [The design system itself (`:core:ui/src/test` and `src/testDebug`)](#the-design-system-itself-coreuisrctest-and-srctestdebug)
+  - [Every preference the app can change (`:feature:settings/src/test` and `src/testDebug`)](#every-preference-the-app-can-change-featuresettingssrctest-and-srctestdebug)
 - [Conventions](#conventions)
 
 ## Running the unit tests
@@ -268,7 +269,7 @@ floors in its own `build.gradle.kts`.
 `:core:navigation`, `:core:common`, `:core:datastore` and `:core:data` are locked at 80/80 — none of
 them draws anything, so every branch is one somebody wrote and a test can take both sides of. So are `:feature:calendar`,
 `:feature:onboarding`, `:feature:tools`, `:feature:search`, `:feature:widget`, `:feature:about`,
-`:feature:content` and `:feature:tracker`, which *are* Compose modules: the
+`:feature:content`, `:feature:tracker` and `:feature:settings`, which *are* Compose modules: the
 unreachable branch below is emitted **per parameter of every restartable composable**, so its
 weight scales with how many composables a module has, and six files — or eight, or the two screens
 in `:feature:tools`, or the one screen and four cards in `:feature:search`, or the seven screens in
@@ -292,6 +293,14 @@ the reason is arithmetic rather than thoroughness: **1,979 of its lines are `@Pr
 `*Showcase` functions**, 15.2% of the module, permanently at 0% because they are `private` tooling
 that would pin the previews rather than the product. Counting them, everything else has to clear
 **94.4%**. See [the design system's audit section](#the-design-system-itself-coreuisrctest-and-srctestdebug).
+`:feature:settings` is the **tenth** and the last module in the repo to join the ratchet, at
+**94.2% lines and 82.6% branches** across 24 screens, a 1,400-line `SettingsViewModel`, sync and
+location. **141 of its 279 missing branches sit on composable signature and parameter lines** —
+the `$dirty` skippability check and the `$default` parameter mask together — and discounting them
+it stands at **89.9%**. Its line margin is the widest of any locked module and its branch margin
+is 41; what bought both was that the module's *screens* had never been composed at all, so the
+work was breadth rather than the last twenty branches.
+**With this one locked, every module in the repo is on the ratchet.**
 
 **Two modules are softened to 80 line / 60 branch, and for two different reasons.**
 `:feature:prayer` is the second, and its reason is arithmetic rather than Compose:
@@ -329,7 +338,7 @@ split, and should say so where it sets its floors.
 | `:core:ui` | 80.5% | 80.5% | **locked** at 80/80 (#614) |
 | `:feature:tracker` | 91.9% | 81.3% | **locked** at 80/80 (#613) |
 | `:feature:content` | 85.1% | 80.4% | **locked** at 80/80 (#612) |
-| `:feature:settings` | 11.3% | 14.9% | |
+| `:feature:settings` | 94.2% | 82.6% | **locked** at 80/80 (#615) |
 
 `:app` is absent because its own suite needs the private content artifact and cannot be measured
 locally; CI's merged report covers it.
@@ -1364,6 +1373,59 @@ manifest, so a library unit test cannot reach it (`:app`'s instrumented suite do
 band in `PrayerSkyScene` is blitted through `ColorFilter.tint(…, BlendMode.Modulate)`, which does
 not survive Robolectric's canvas — the bake and the wrap-around double blit run, the composite
 does not.
+
+
+### Every preference the app can change (`:feature:settings/src/test` and `src/testDebug`)
+
+The last module to join the ratchet, and the largest by surface: 24 screens, a 1,400-line
+`SettingsViewModel`, device-to-device sync and the location picker. It went from **11.3% lines**
+to **94.2%** over 35 test classes and 521 `@Test` methods, with no production code changed and no
+`COVERAGE_EXCLUSIONS` entry added or widened.
+
+**The loader had never run in a test at all.** `SettingsViewModel.loadSettings()` reads fifty-odd
+preferences with `.first()`, and the module's existing suite built the ViewModel on a
+`mockk(relaxed = true)` `SettingsRepository` — whose flow properties answer with a relaxed `Flow`
+that never emits. `first()` on that throws, `launchSafely` swallows it, and all 152 of the
+loader's lines were dead behind a green test. What that hides is the worst thing a settings screen
+can do: every control renders its **compile-time default** rather than the user's choice, and the
+first toggle they touch writes that default back over the real preference.
+`testing/SettingsRepositoryStub.kt` fixes it by making the *reads* real `MutableStateFlow`s while
+leaving the writes on the mockk, so the loader runs and `coVerify { repo.setHapticFeedback(false) }`
+still works. Reuse it for anything that takes the whole `SettingsRepository`.
+
+| File | Pins |
+|---|---|
+| `SettingsLoadTest` (24) | Every stored preference reaching the state holder that owns it, and the three string-parsed values' fallbacks — an unreadable calculation method silently becomes Muslim World League, which changes every prayer time in the app, so the telemetry error is asserted rather than the fallback alone. Also that the Quran state *collects* DataStore rather than snapshotting it, which is why a reciter picked on one screen shows on the one behind it. |
+| `SettingsEventTableTest` (51) | The whole 78-branch `when`, each event against the exact setter it must write — the crossing this module is most exposed to, since a branch that updates the right field and writes the wrong setter is invisible from the screen. Also which events rearm the alarms and which must not: a preference that changes *when* a notification fires has to reschedule, one that changes only *how* must not. |
+| `SettingsGraphTest` (5) | All twenty destinations registered, exactly once each — including the four that live under `screens/{dua,hadith,quran}` and are registered here because the module boundary follows the ViewModel axis. |
+| `PrayerNotificationsScreenTest` (19) | The highest-stakes screen: that sunrise is not a sixth prayer (no alert style, no reminder, its toggle inside Fajr's row), and that "remind me before every prayer" writes the app-wide pair **and** all five per-prayer events — the pair alone changes no notification, which is what the control did before the per-prayer split. |
+| `NotificationSettingsScreenTest` (16), `NotificationSoundScreenTest` (14), `NotificationWeeklyScreenTest` (11), `WorshipRemindersScreenTest` (15) | The notification tree. Each hub subtitle is handed the settings that belong to it; the master switch *removes* the rows rather than dimming them; closing the voice picker stops whatever it was auditioning, by any of four routes; and the Ramadan reminders stay visible outside Ramadan — a regression to hiding them would be invisible for eleven months a year. |
+| `NotificationDiagnosticsScreenTest` (12), `NotificationDiagnosticsTest` (5) | Each badge against an arranged device state, and each row opening the system screen it reports on rather than a neighbour's. `hasProblem` is an OR, and before Android 12 exact alarms are reported allowed rather than as a fault the device cannot clear. |
+| `SyncScreenTest` (36), `SyncViewModelTest` (23) | Sync is one screen wearing seven faces chosen by an *ordered* `when`, so the ordering is the logic: a cancelled sync must not offer "Accept" for a connection the partner already dropped, and an error must outrank a completed connection, because "Sync Complete!" over a failed import tells the user their data moved when it did not. On the ViewModel side: the sender exporting on connect and the receiver not, each cancellation reason recorded separately, and the Ack that lets the other device stop waiting. Every key `SyncPayload.categories()` can produce has a label, so a new category cannot appear in the manifest as *No data* beside a real count. |
+| `WidgetsScreenTest` (11) | Six live previews built by the real `PrayerTimeCalculator` — pinned by *five formatted clock times*, because an unwired gallery renders an em dash for every one and looks entirely plausible in a screenshot. Plus the fallbacks: a blank stored name, and an unset location computing against Dublin rather than (0, 0) in the Atlantic. |
+| `LocationScreenTest` (22), `LocationViewModelTest` (24) | The GPS button's two paths, with the permission launcher answered from the test — the only way to reach the callback where "fine **or** coarse counts as granted" lives. Selecting a place writes both the preference the calculator reads and the database row the recents list is built from; a save that fails must not leave the card showing a city the calculator has never heard of. |
+| `SearchSettingsScreenTest` (24) | The AI opt-in: enabling must open the disclosure sheet rather than write the preference, and a consent write that fails must say so instead of closing over a switch that quietly stayed off. Also that the last search source on cannot be switched off, since `SearchPreferences.sanitised` reads an empty set straight back as "everything" — a switch that flips itself. |
+| `AdaptiveSettingsScreenTest` (12) | The same rows behaving differently by width: navigating on a phone, opening a detail pane on a tablet, and the two that still navigate on a tablet because they are not panes. Reached without Hilt through a pre-seeded `ViewModelStore` — four ViewModels, because four of the nine panes take one of their own. |
+| `QuranSettingsScreenTest` (19), `DuaSettingsScreenTest` (11), `HadithSettingsScreenTest` (10), `SelectReciterScreenTest` (9), `SelectTranslationScreenTest` (12) | The reading settings and their two pickers. Tajweed is gated on the Madani script and *says why* it is unavailable; the colour-blind underline is gated on tajweed. The reciter preview auditions the reciter whose row it is in — that button previously played silence from a fresh ViewModel's empty playlist. |
+| `AppearanceSettingsScreenTest` (16), `LanguageScreenTest` (7), `SettingsScreenTest` (11), `PrayerSettingsScreenTest` (16), `ZakatSettingsScreenTest` (12) | Theme, language, the hub and the two calculation screens. "Follow device" is a switch above two cards, so three states are expressed through two controls and turning following *off* must land on the theme the device currently resolves to. The hub's two destructive confirmations are asserted apart, because crossing them makes "reset settings" clear every tracked prayer. |
+| `VoiceOptionCardTest` (14, `src/testDebug`) | The shared voice row: its two taps stay separate, so pressing play does not also change the user's reciter. |
+
+**Two matchers were needed and are worth knowing about.** `testing/SettingsRowMatchers.kt` holds
+them. A settings row must be addressed as `hasText(title) and hasClickAction()` rather than by
+text, because a section header repeats its rows' words *and* because `NimazSettingsItem` expresses
+"disabled" by dropping its `clickable` — so a bare `onNodeWithText` lands on the raw `Text`, which
+reports neither enabled nor disabled and makes "this row is off-limits" unassertable. Inside an
+**accordion** even that fails: the accordion is a clickable card and merges its whole body into one
+node carrying every row's text and the card's own `OnClick`. There, `tappableAncestorCount(title)`
+is the assertion — an enabled row has two tappable ancestors, a disabled one has only the card.
+
+Three things are left at zero or partly covered rather than excluded, and the shapes are worth
+recognising: **`SyncMode.NONE` in the two role helpers**, reached only from a `when` arm that has
+already established the mode is SEND or RECEIVE; **the `check()` guarding
+`IMPORT_STEP_COUNT`** against the list beside it, whose failing arm exists so a future edit to one
+and not the other stops the import rather than reporting "step 13 of 10"; and the
+**`Locale`-dependent `replaceFirstChar` arms** in the widget preview's date formatting, whose
+empty-string branch cannot be reached from a `Month` or `DayOfWeek` name.
 
 
 ## Conventions
