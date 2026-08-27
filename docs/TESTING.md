@@ -53,6 +53,7 @@ Two on-device/JVM test surfaces exist:
   - [What the user did (`:feature:tracker/src/test` and `src/testDebug`)](#what-the-user-did-featuretrackersrctest-and-srctestdebug)
   - [The design system itself (`:core:ui/src/test` and `src/testDebug`)](#the-design-system-itself-coreuisrctest-and-srctestdebug)
   - [Every preference the app can change (`:feature:settings/src/test` and `src/testDebug`)](#every-preference-the-app-can-change-featuresettingssrctest-and-srctestdebug)
+  - [What is left in `:app` (`app/src/test` and `src/testDebug`)](#what-is-left-in-app-appsrctest-and-srctestdebug)
 - [Conventions](#conventions)
 
 ## Running the unit tests
@@ -265,7 +266,7 @@ companion objects it did not count are in it. CI's next run is the one to read.
 module-by-module pass; a module is **locked** once it clears the 80% line floor and declares its
 floors in its own `build.gradle.kts`.
 
-**The line floor is 80% everywhere; the branch floor is not.** `:core:database`, `:core:domain`,
+**The line floor is 80% everywhere; the branch floor is not, and in one module there is none.** `:core:database`, `:core:domain`,
 `:core:navigation`, `:core:common`, `:core:datastore` and `:core:data` are locked at 80/80 — none of
 them draws anything, so every branch is one somebody wrote and a test can take both sides of. So are `:feature:calendar`,
 `:feature:onboarding`, `:feature:tools`, `:feature:search`, `:feature:widget`, `:feature:about`,
@@ -339,9 +340,29 @@ split, and should say so where it sets its floors.
 | `:feature:tracker` | 91.9% | 81.3% | **locked** at 80/80 (#613) |
 | `:feature:content` | 85.1% | 80.4% | **locked** at 80/80 (#612) |
 | `:feature:settings` | 94.2% | 82.6% | **locked** at 80/80 (#615) |
+| `:app` | 82.6% | 53.5% | **locked** at 80 line, **no branch floor** (#630) |
 
-`:app` is absent because its own suite needs the private content artifact and cannot be measured
-locally; CI's merged report covers it.
+**`:app` is the one module gated on lines only, and that is the finding rather than an
+omission.** It was outside the campaign because its own suite needs the private content artifact:
+`:app:testDebugUnitTest` depends on `mergeDebugAssets`, which `orderAssetConsumersAfter` makes
+depend on `fetchNimazData`. `-x fetchNimazData` is the local workaround — no JVM unit test reads
+the 180 MB content database, and the one that did (`DeviceStateCorpusTest`) is the only casualty.
+CI has the token and runs the whole thing.
+
+Its branch number cannot support either of the two floors this campaign sanctions. Of 1,790
+missing branches, **786 are composable signature and parameter masks** — `:app`'s composables are
+unusually wide (`HomeScreen` takes 17 parameters and hands 19 to `HomeCompactContent`), so 44% of
+the module's branches are mask against 17% in `:core:ui`. Cover every branch outside them — every
+`when`, every null-check, the whole composition root, the whole player — and the module reads
+**76.1%**, so 80 is arithmetically impossible. Discount the 144 that sit inside `@Preview` bodies
+as well and the reachable ceiling is about **62.6%**, which would leave a 0.60 gate with two
+points of headroom for the next composable anyone adds. A floor that tight measures how many
+parameters the screens happen to have. The number is therefore recorded, not gated, and
+`app/build.gradle.kts` carries the same arithmetic where the floor is set.
+
+**Adding `:app` to the ratchet changes what root `./gradlew coverageFloor` needs.** It now
+includes `:app`, and therefore the content-repo credential. Without one, run it as
+`./gradlew coverageFloor -x fetchNimazData`.
 
 ## Coverage audit (what's validated)
 
@@ -1426,6 +1447,66 @@ already established the mode is SEND or RECEIVE; **the `check()` guarding
 and not the other stops the import rather than reporting "step 13 of 10"; and the
 **`Locale`-dependent `replaceFirstChar` arms** in the widget preview's date formatting, whose
 empty-string branch cannot be reached from a `Month` or `DayOfWeek` name.
+
+
+### What is left in `:app` (`app/src/test` and `src/testDebug`)
+
+The nineteenth and last module, and the smallest surface of the campaign: after #551 `:app` holds
+52 files and ~11,500 lines, and only what genuinely cannot live in a library — the composition
+root, the alarm scheduler, the notification receiver, three foreground services, the Quran audio
+session, the Home screen and its ViewModel. It went from **32.6% lines** to **82.6%**, with no
+production code changed and no `COVERAGE_EXCLUSIONS` entry added or widened.
+
+**Two things had to be built before a single test could run**, and both are reusable.
+
+`testing/TestEntryPointApplication.kt` is the smaller of them. `@AndroidEntryPoint` is not a
+no-op at run time: the Hilt Gradle plugin rewrites `BootReceiver.onReceive` and every
+`Service.onCreate` to inject first, and the generated base class then asks the **application** for
+a component — so an ordinary `android.app.Application` throws *"Hilt BroadcastReceiver must be
+attached to an @HiltAndroidApp Application"* before a line of the subject runs. That is why the
+receiver, both adhan services and the Quran audio service had no unit tests at all despite being
+where every notification and every sound the app makes comes from. `HiltTestApplication` would
+satisfy Hilt and is the wrong tool — it builds the real singleton graph, so a test about an
+`AlarmManager` call ends up opening a Room database from a content artifact this machine cannot
+fetch. The class implements only the two interfaces Hilt actually reaches for
+(`GeneratedComponentManager` for the receiver, a `ServiceComponentBuilder` behind
+`ServiceComponentManager` for the services) and hands back doubles the test chose.
+
+The other is a **measurement** fix, and it is the one worth carrying forward. `:app`'s
+`moduleCoverage` measured `intermediates/built_in_kotlinc/debug` like every other module, while
+the tests load the classes AGP's ASM pipeline rewrote — which for every `@AndroidEntryPoint` class
+is a *different* class file. JaCoCo says so, quietly, in a line nobody reads:
+
+    [ant:jacocoReport] Execution data for class …/BootReceiver does not match.
+
+and then reports that class as **0% however thoroughly it is tested**. Three classes and 509 lines
+were affected, and the signature is a file at 50% whose outer class is at 0% while its nested
+lambdas report normally. `:app` now measures the transformed root instead; no other module has an
+`@AndroidEntryPoint` class a unit test constructs, so the fix is in `app/build.gradle.kts` rather
+than in `build-logic`.
+
+| File | Pins |
+|---|---|
+| `core/util/PrayerNotificationSchedulerTest` (29) | Every alarm the app lives by, read back off `shadowOf(alarmManager).scheduledAlarms` rather than verified as a call. Nothing in the UI shows that an alarm was expected, so this class was at 1% while notifications were the app's headline feature. It pins that the midnight chain — the whole recurrence mechanism, since every other alarm is a one-shot — is armed for 00:01 tomorrow; that turning notifications off *cancels* rather than silently leaving yesterday's alarms armed; that no alarm is ever armed in the past, because Android delivers a past trigger immediately and the notification then re-posts on every reschedule for the rest of the day; and that a malformed stored khatam time falls back to 06:00 rather than throwing and taking every prayer alarm with it. Also the deliberate asymmetry `cancelAllPrayerNotifications` leaves behind: the daily summary is a recap rather than a prayer alert and survives it. |
+| `core/util/BootReceiverTest` (31), `BootReceiverEdgesTest` (16) | Where every prayer notification is actually produced. The alert style decides sound, and the tests assert on the *channel* because that is what Android reads: a silenced prayer lands on the muted channel at low priority, vibration off lands on the no-vibration sibling, and sunrise cannot be silenced at all because it is the end of Fajr's window rather than a prayer. The adhan path pins the rule that matters religiously — a missing variant falls back to the beep and **never** to the other variant, because playing the Fajr adhan at Dhuhr is wrong — and that Do Not Disturb gates the audio only, so a reader in a meeting is still told a prayer came in. Every handler is wrapped in `catch (e: Exception)`, which is right for a receiver with nowhere to propagate to and is also why each arm needs a test to exist at all: a handler that throws on its first line looks exactly like a quiet day. |
+| `core/init/AppInitializerTest` (15) | The five startup tasks and the 5-second budget that lets the UI open regardless. A slow migration must not hold a reader at the splash screen when they opened the app to check Maghrib, and a task that throws must not stop the other four. Also that today's alarms are re-armed on every start — nothing else does it — and that an install which already has the audio does not re-download it on every cold start. |
+| `core/util/InAppUpdateManagerTest` (20) | The update banner's state machine, driven through a stubbed `AppUpdateManagerFactory`. The recoveries are the point: a failed check, a cancelled Play dialog and a flow Play refuses to launch each have to leave the banner interactive, because a banner stuck on a spinner is a dead control with no other route to the update. Play's callbacks post to the main looper, so every assertion idles it first — without that the whole class passes reading `Checking`. |
+| `data/audio/AdhanPlaybackServiceTest` (14), `AdhanDownloadServiceTest` (13), `QuranAudioServiceTest` (15) | The three foreground services, each built with `Robolectric.buildService`. What they produce is a notification, and the endings are what a reader sees when something half-works: a download that fetched one variant is reported as **partial** rather than done, because "downloaded" with no Fajr file means silence at the one prayer nobody is awake to notice. The Quran service's notification has to follow the audio state — Pause while playing, ongoing only while playing, download progress instead of the reciter while preparing — and take itself down when audio ends rather than sitting in the shade. |
+| `data/audio/AdhanDownloadWorkerTest` (8) | The background half, which is the path app-init and a prayer broadcast actually take since a foreground service cannot start from the background on Android 12+. Its retry budget is what stops a permanently broken URL waking the device forever; `setRunAttemptCount` is the only way to reach that fork. |
+| `data/audio/QuranAudioManagerTest` (24), `QuranNextSurahPlaylistSourceTest` (6), `HttpAyahAudioDownloaderTest` (5) | The reader-facing half of the audio session. The rolling rule has four separate refusals and none of them is visible from the player: the setting off, any repeat set (a repeat is a request to *stay*), a single verse played on its own — which is not a reading, so carrying on into a whole surah would be the app deciding to keep going after being asked for one thing — and there being no 115th surah. The downloader is exercised against a real loopback socket rather than a mock, because what is asserted is cancellability, the defect the seam exists for. |
+| `presentation/screens/home/HomeScreenTest` (20), `HomeScreenBannersTest` (11) | 783 lines and two complete layouts that had never been composed. The screen is where state becomes *arrangement*: which of the two layouts a window gets, whether the prayer-times failure takes the screen or stays in a card, and — the one worth stating — that the banner slot is a **queue**, not a stack. Three warnings apply on a fresh install, and rendering all three in place is what used to push the prayer card below the fold; the slot shows one and puts the rest behind a sheet. Four of the five update states had never rendered, including the downloaded one whose action is the only way an update is ever installed. |
+| `presentation/viewmodel/home/HomeViewModelBehaviourTest` (24) | The dashboard's loaders and its two prayer writes. `HomeViewModelTest` beside it is a construction-safety suite; this is the rest. The banner tests subscribe to `announcement` *before* asserting, because it is a `WhileSubscribed` flow and with no collector `announcement.value` is the default — `dismissAnnouncement` then returns at its first line and the test is green over a ViewModel that did nothing. Also that sunrise records nothing at all, which is what stopped the engagement dashboard counting toggles that never happened. |
+| `presentation/components/…` (`src/testDebug`, 9 new classes) | The Home components' remaining forks. The prayer card's **status picker** only appears when a passed, non-sunrise row is expanded, so nothing that merely rendered the card could reach it — and it holds the app's position that a prayer whose time has passed with nothing recorded is not counted as missed until the reader says so. `TodayCarouselPagesTest` scrolls the pager, because `PageSize.Fill` means one page per width whatever the viewport and the hadith and dua branches are otherwise unreachable. The banner variant `when` exists twice, in the carousel and in the slot compact Home actually uses, and three of its four arms had never run. `HijriPrimaryTest` renders both headers with "Hijri first" on — a preference the app offers and neither header had ever been drawn with. |
+
+**What is deliberately left at zero.** `NavGraph` and `MainActivity` (252 lines, 194 branches)
+are the composition root: `MainActivity` is `@AndroidEntryPoint` and its body is
+`setContent { NavGraph(…) }`, and a destination inside a `NavHost` receives a `NavBackStackEntry`
+as its `ViewModelStoreOwner` — which *is* a `HasDefaultViewModelProviderFactory`, so Hilt's factory
+is constructed and throws before any seeded store is read. They are the instrumented suite's job,
+and `app/src/androidTest`'s navigation package drives the real graph on a device.
+`QuranAudioManager`'s player listener (180 branches) fires on ExoPlayer reaching `STATE_ENDED` or
+transitioning items, which needs a player actually decoding audio. And the 35 `@Preview` functions
+are tooling the app never runs.
 
 
 ## Conventions

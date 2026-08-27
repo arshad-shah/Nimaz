@@ -27,6 +27,55 @@ jacoco {
     toolVersion = "0.8.12"
 }
 
+/**
+ * `:app` is on the ratchet — on **lines only**, and the missing branch floor is the finding
+ * rather than an omission.
+ *
+ * Line coverage is the standard 0.80, met at **82.6%** with 142 lines of margin. Branch coverage
+ * is **53.5%**, and neither of the two values the campaign sanctions (#604) is available:
+ *
+ * | where the module's 1,790 missing branches are | count |
+ * |---|---|
+ * | composable signature / parameter masks        |   786 |
+ * | ordinary logic                                |   495 |
+ * | `NavGraph` + `MainActivity`                   |   194 |
+ * | ExoPlayer listener paths                      |   180 |
+ *
+ * **0.80 is arithmetically impossible.** Cover every branch outside the signature masks — every
+ * `when`, every null-check, the whole composition root, the whole player — and the module reads
+ * **76.1%**. The masks are the Compose compiler's `$dirty` skippability check, emitted once per
+ * parameter of every restartable composable; which side runs depends on what the *caller* changed
+ * between recompositions, so no test can take both. `:app`'s composables are unusually wide —
+ * `HomeScreen` takes 17 parameters and hands 19 to `HomeCompactContent` and 18 to
+ * `HomeTabletContent` — so 44% of the module's branches are mask, against 17% in `:core:ui`.
+ *
+ * **0.60 would be a floor with no headroom.** Of the 495 ordinary-logic branches, 144 sit inside
+ * `@Preview` and `*Showcase` bodies, which are tooling and never run. Cover every one of the 351
+ * that remain and the module reads about **62.6%** — two points over a 0.60 gate, which the next
+ * composable added would spend. A floor that tight measures how many parameters the screens
+ * happen to have, not whether they are tested; #604 rule 3 rejects exactly that.
+ *
+ * So this module states its branch number rather than gating it, and `docs/TESTING.md` records
+ * why. Raising it means narrowing the composables, not lowering the bar.
+ *
+ * ### What is left uncovered on purpose
+ *
+ * - **`NavGraph` and `MainActivity`** (252 lines, 194 branches, both at 0%). `MainActivity` is
+ *   `@AndroidEntryPoint` and its body is `setContent { NavGraph(…) }`; a destination inside a
+ *   `NavHost` gets a `NavBackStackEntry` as its `ViewModelStoreOwner`, which *is* a
+ *   `HasDefaultViewModelProviderFactory`, so Hilt's factory is constructed before any seeded
+ *   store is read (#604 playbook item 8). They are the instrumented suite's job — see
+ *   `app/src/androidTest`'s navigation package, which drives the real graph on a device.
+ * - **`QuranAudioManager`'s player listener** (180 branches). Its arms fire on ExoPlayer
+ *   reaching `STATE_ENDED` or transitioning media items, which needs a player actually decoding
+ *   audio rather than one Robolectric has stubbed.
+ * - **`@Preview` bodies.** 35 preview functions across the module, none of which the app runs.
+ */
+nimazCoverage {
+    lineFloor.set(0.80)
+    // No branchFloor: see above. 53.5% today, 76.1% if everything reachable were covered.
+}
+
 // Firebase (Crashlytics + Analytics) is configured via google-services.json,
 // which CI injects from secrets only for the release/deploy build. PR checks and
 // local debug builds run without it, so apply the Google plugins only when the
