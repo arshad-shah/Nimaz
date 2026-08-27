@@ -12,22 +12,34 @@ on:
     branches: [ dev ]
     paths:
       - 'docs/**'
-      - 'app/src/main/java/com/arshadshah/nimaz/core/navigation/**'
-      - 'app/src/main/java/com/arshadshah/nimaz/data/announcement/**'
-      - 'app/src/main/java/com/arshadshah/nimaz/data/local/**'
-      - 'app/src/main/java/com/arshadshah/nimaz/domain/model/Announcement.kt'
-      - 'app/src/main/java/com/arshadshah/nimaz/widget/**'
-      - 'scripts/check_docs.py'
+      # One module-agnostic glob rather than a list of packages. The narrow list it
+      # replaces was both stale and incomplete: it named navigation, announcements,
+      # data/local and widget/, but not data/audio/ (three of the four Services
+      # SUB-03 guards) nor core/util/PrayerNotificationScheduler.kt (which declares
+      # channels SUB-05 guards), so changes there never fired this lane. It would
+      # also have stopped matching entirely once the multi-module split (#551) moves
+      # those packages into core/ and feature/ modules — a green check that ran
+      # nothing, which is the failure #553 exists to prevent. The lane costs seconds;
+      # a gap in it costs a doc nobody can trust.
+      - '**/src/main/java/com/arshadshah/nimaz/**'
+      - '**/src/main/kotlin/com/arshadshah/nimaz/**'
+      - 'scripts/**'
       - '.github/workflows/docs_check.yml'
   pull_request:
     paths:
       - 'docs/**'
-      - 'app/src/main/java/com/arshadshah/nimaz/core/navigation/**'
-      - 'app/src/main/java/com/arshadshah/nimaz/data/announcement/**'
-      - 'app/src/main/java/com/arshadshah/nimaz/data/local/**'
-      - 'app/src/main/java/com/arshadshah/nimaz/domain/model/Announcement.kt'
-      - 'app/src/main/java/com/arshadshah/nimaz/widget/**'
-      - 'scripts/check_docs.py'
+      # One module-agnostic glob rather than a list of packages. The narrow list it
+      # replaces was both stale and incomplete: it named navigation, announcements,
+      # data/local and widget/, but not data/audio/ (three of the four Services
+      # SUB-03 guards) nor core/util/PrayerNotificationScheduler.kt (which declares
+      # channels SUB-05 guards), so changes there never fired this lane. It would
+      # also have stopped matching entirely once the multi-module split (#551) moves
+      # those packages into core/ and feature/ modules — a green check that ran
+      # nothing, which is the failure #553 exists to prevent. The lane costs seconds;
+      # a gap in it costs a doc nobody can trust.
+      - '**/src/main/java/com/arshadshah/nimaz/**'
+      - '**/src/main/kotlin/com/arshadshah/nimaz/**'
+      - 'scripts/**'
       - '.github/workflows/docs_check.yml'
 
 jobs:
@@ -40,6 +52,16 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+      # The checker's own tests. They pin the two properties that stop it failing
+      # silently: the scans span every Gradle module, and each has a floor below
+      # which it goes red instead of reporting that the little it found is all
+      # documented. Run before the checker itself, so a broken checker is named as
+      # a broken checker rather than as doc drift.
+      - name: Test the doc checker
+        run: |
+          python3 -m pip install --quiet pytest
+          python3 -m pytest scripts/ -q
+
       - name: Check the docs for drift
         run: python3 scripts/check_docs.py
 

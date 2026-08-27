@@ -2,6 +2,8 @@ package com.arshadshah.nimaz.core.util
 
 import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
+import com.arshadshah.nimaz.domain.repository.enabledPrayerTypes
+import com.arshadshah.nimaz.domain.repository.preReminderMinutesByPrayer
 import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 import javax.inject.Singleton

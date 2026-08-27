@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.presentation.viewmodel
 
+import com.arshadshah.nimaz.testing.PresentationSourceRoots
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import java.io.File
@@ -19,12 +20,35 @@ import java.io.File
 class AnalyticsReachabilityTest {
 
     private val viewModelDir = File("src/main/java/com/arshadshah/nimaz/presentation/viewmodel")
-    private val uiDirs = listOf(
-        File("src/main/java/com/arshadshah/nimaz/presentation/screens"),
-        File("src/main/java/com/arshadshah/nimaz/presentation/components"),
-        File("src/main/java/com/arshadshah/nimaz/core/navigation"),
-        File("src/main/java/com/arshadshah/nimaz/presentation/widget"),
-    )
+
+    /**
+     * Everywhere a UI event can be dispatched from — now spanning four modules.
+     *
+     * Two of these were wrong, and both were invisible because the old code did
+     * `uiDirs.filter { it.isDirectory }`: a root that does not exist was silently skipped, so the
+     * scan shrank without ever failing.
+     *
+     * - `presentation/widget` **never existed**. The widgets are `com.arshadshah.nimaz.widget`.
+     *   A widget dispatching an analytics-bearing event has therefore never counted as a
+     *   producer, for as long as this test has existed. That package then became
+     *   `:feature:widget` in PR 13, which is why its root now reaches across the module — and
+     *   the assertion below is what caught the stale path the same day it went stale.
+     * - `presentation/components` and `core/navigation` were emptied by PRs 10 and 11 of #551 —
+     *   the design system is `:core:ui` and the route vocabulary is `:core:navigation`. Both
+     *   directories still exist in `:app` (screens; `NavGraph.kt`), so nothing would have gone
+     *   red; the scan would just have stopped seeing most of the UI.
+     *
+     * Missing roots are now an assertion, not a filter, and [MINIMUM_UI_FILES] floors the total.
+     * The list itself moved to [PresentationSourceRoots] in PR 14, once a fourth test needed the
+     * same one and moving `screens/{about,help,more,onboarding}` broke three of them at once.
+     */
+    private val uiDirs = PresentationSourceRoots.ALL
+
+    @Test
+    fun `every UI source root exists and the scan is not narrowing`() {
+        PresentationSourceRoots.assertAllExist(uiDirs)
+        assertThat(PresentationSourceRoots.sources(uiDirs).size).isAtLeast(MINIMUM_UI_FILES)
+    }
 
     /**
      * The unreachable-analytics backlog, which is now **empty** — and must stay that way.
@@ -45,9 +69,7 @@ class AnalyticsReachabilityTest {
 
     @Test
     fun `every analytics-bearing event branch has a producer`() {
-        val ui = uiDirs.filter { it.isDirectory }
-            .flatMap { it.walkTopDown().filter { f -> f.extension == "kt" } }
-            .joinToString("\n") { it.readText() }
+        val ui = PresentationSourceRoots.sources(uiDirs).joinToString("\n") { it.readText() }
 
         val unreachable = mutableListOf<String>()
 
@@ -98,5 +120,12 @@ class AnalyticsReachabilityTest {
         val NEXT_BRANCH = Regex("""\n {12}(?:is\s+)?\w+Event\.\w+""")
         val LOGGING = Regex("""telemetry\.(featureUsed|search|settingChanged|prayerTracked|fastTracked|aiAnswered)|AppAnalytics\.log""")
         const val BRANCH_WINDOW = 220
+
+        /**
+         * A floor over the *combined* UI roots. They hold well over 400 files; this sits far
+         * enough below that ordinary churn never touches it, and far enough above that losing any
+         * one root fails instead of quietly narrowing the scan.
+         */
+        const val MINIMUM_UI_FILES = 300
     }
 }

@@ -5,12 +5,27 @@ name: Android PR Checks
 # existed, a dependabot bump touching only worker/package.json ran the full test + lint +
 # coverage lane (PR #520 is exactly that); worker/ has its own workflow, docs/ has
 # docs_check.yml, and the theme files have tajweed_contrast_check.yml.
+#
+# **The filter is evaluated per push, not against the pull request's accumulated diff.** A
+# `synchronize` event carrying only unlisted paths creates no run at all, so the PR's *head*
+# ends up with no check runs against it even though the PR as a whole changes a thousand files
+# under `app/**`. From the outside that is indistinguishable from checks that have not started
+# yet. It happened on #596: a push touching only `.github/workflows/internal_testing.yml` left
+# the head unverified, which is half of why that file is now on the list below.
 on:
   pull_request:
-    branches: [ master, dev ]
+    # `mm/**` and `epic/**` are here because a stacked PR targets the branch below it, not
+    # dev. With only [ master, dev ] every PR in the 22-PR multi-module stack (#551) would
+    # show green having run no build, no test and no lint at all.
+    branches: [ master, dev, 'mm/**', 'epic/**' ]
     paths:
       - 'app/**'
       - 'baselineprofile/**'
+      # The multi-module migration (#551) creates these; listing them before they exist is
+      # harmless and stops a later PR in that stack from silently skipping this lane.
+      - 'build-logic/**'
+      - 'core/**'
+      - 'feature/**'
       - 'gradle/**'
       - 'gradlew'
       - 'gradlew.bat'
@@ -21,6 +36,13 @@ on:
       - 'fastlane/**'
       - 'Gemfile'
       - 'Gemfile.lock'
+      # And so do the two workflows that drive that same tooling to build and ship this app.
+      # A change to either used to merge with nothing checking it: `internal_testing.yml`
+      # publishes to the Play internal track, `deploy.yml` publishes a release, and both call
+      # the fastlane lanes already listed above. Leaving them off the list is the same gap as
+      # leaving `fastlane/**` off would be.
+      - '.github/workflows/internal_testing.yml'
+      - '.github/workflows/deploy.yml'
       # Invoked by the coverage step below.
       - 'scripts/coverage_summary.py'
       # A new content artifact changes what the app builds against.
@@ -49,7 +71,8 @@ jobs:
       # The content artifact lives in a private repository. Mint a short-lived
       # installation token for it rather than carrying a long-lived PAT: the token
       # is scoped to nimaz-data, read-only, and expires in an hour. Same pattern as
-      # the version-bump App above. See gradle/nimaz-data.gradle.kts.
+      # the version-bump App above. See FetchNimazDataTask in build-logic (registered in
+      # app/build.gradle.kts) and docs/CONTENT_REPO_AUTH.md.
       - name: Token for the content repository
         id: nimaz-data-token
         # Absent secrets must not fail the job here — let the build fail at
@@ -106,21 +129,31 @@ jobs:
 
       # Coverage is reported, never gated. jacocoTestReport already depends on
       # testDebugUnitTest, which the step above has run, so this is close to free.
-      # `always()` on all three: when a test fails is exactly when you want to see
-      # what coverage did.
+      #
+      # `!cancelled()` on all three, not `always()`. Still runs when a test *fails* —
+      # that is exactly when you want to see what coverage did — but not when the run is
+      # **cancelled**, which `always()` also covers and which is where this went wrong.
+      #
+      # The comment is sticky, so it is one comment edited in place rather than a new one
+      # per run. `concurrency.cancel-in-progress` cancels this workflow the moment another
+      # commit is pushed, and a cancelled run has no report: `coverage_summary.py` prints
+      # "_No coverage report was produced for this run._" and the sticky step wrote that
+      # over a perfectly good result from the previous head. Twice in one afternoon, and
+      # both times it read as "coverage is broken" rather than "this run was superseded".
+      # A superseded run should leave the last real number standing.
       - name: Coverage report
-        if: always()
+        if: ${{ !cancelled() }}
         run: ./gradlew :app:jacocoTestReport
 
       - name: Summarise coverage
-        if: always()
+        if: ${{ !cancelled() }}
         run: |
           python3 scripts/coverage_summary.py \
             app/build/reports/jacoco/jacocoTestReport.xml > coverage.md
           cat coverage.md >> "$GITHUB_STEP_SUMMARY"
 
       - name: Comment coverage on the PR
-        if: always()
+        if: ${{ !cancelled() }}
         uses: marocchino/sticky-pull-request-comment@v2
         with:
           header: coverage

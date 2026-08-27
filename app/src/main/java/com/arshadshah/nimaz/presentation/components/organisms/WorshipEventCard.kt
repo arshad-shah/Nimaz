@@ -37,10 +37,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.core.util.EventProximity
-import com.arshadshah.nimaz.core.util.progressToward
-import com.arshadshah.nimaz.core.util.proximityOf
+import com.arshadshah.nimaz.core.ui.R
+import com.arshadshah.nimaz.core.common.EventProximity
+import com.arshadshah.nimaz.core.common.progressToward
+import com.arshadshah.nimaz.core.common.proximityOf
 import com.arshadshah.nimaz.domain.model.WorshipReminderType
 import com.arshadshah.nimaz.presentation.components.atoms.NimazClockText
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCountdownText

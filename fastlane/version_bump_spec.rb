@@ -66,9 +66,11 @@ GRADLE_FILE = File.expand_path("../app/build.gradle.kts", __dir__)
 # Deliberate: the input is this repo's own Fastfile, and evaluating it verbatim is
 # the point — the spec tests the shipped source rather than a copy of its logic
 # that could drift. The third argument makes __dir__ resolve inside the Fastfile.
-eval(File.read(FASTFILE), TOPLEVEL_BINDING, FASTFILE)
+eval(File.read(FASTFILE, encoding: "UTF-8"), TOPLEVEL_BINDING, FASTFILE)
 
-ORIGINAL_GRADLE = File.read(GRADLE_FILE)
+# UTF-8 explicitly, for the reason the lane itself now states: the default is the
+# runner's locale, and this file's comments are not ASCII.
+ORIGINAL_GRADLE = File.read(GRADLE_FILE, encoding: "UTF-8")
 $failures = []
 
 # Tags are read with git, so give each scenario a throwaway repo holding exactly
@@ -106,7 +108,7 @@ def scenario(name, tree_code:, tree_name:, key:, play:, tags:,
       return
     end
 
-    written = File.read(GRADLE_FILE)
+    written = File.read(GRADLE_FILE, encoding: "UTF-8")
     code = written[/versionCode\s*=\s*(\d+)/, 1].to_i
     version_name = written[/versionName\s*=\s*"([^"]+)"/, 1]
 

@@ -149,11 +149,23 @@ Every widget also refreshes when a setting it is computed from changes, via
 Each is a separate file on disk; a new one is a new migration surface, so prefer adding keys to
 `nimaz_preferences` unless the slice is genuinely self-contained.
 
+Three are Preferences DataStores created with `preferencesDataStore(name = …)`. The fourth entry
+is a **typed** DataStore built by hand with `DataStoreFactory.create`, which takes its file name
+as a parameter rather than a literal — so it is listed by its owner.
+
 | File name | Owner | Holds | Section |
 |---|---|---|---|
-| `nimaz_preferences` | `data/local/datastore/PreferencesDataStore.kt` | every user setting; the sync payload's `preferences` block | [§6](#6-preferences-datastore) |
-| `nimaz_announcements` | `data/local/datastore/AnnouncementLocalDataSource.kt` | the current announcement (JSON) + permanently dismissed ids | [§12](#12-engagement-announcements-fcm) |
-| `nimaz_ai_device` | `data/ai/DeviceIdProvider.kt` | the rotating pseudonymous device id sent with Ask-with-Proof calls | [`ai-ask-with-proof.md`](ai-ask-with-proof.md) |
+| `nimaz_preferences` | `core/datastore/PreferencesDataStore.kt` | every user setting; the sync payload's `preferences` block | [§6](#6-preferences-datastore) |
+| `nimaz_announcements` | `core/datastore/AnnouncementLocalDataSource.kt` | the current announcement (JSON) + permanently dismissed ids | [§12](#12-engagement-announcements-fcm) |
+| `nimaz_ai_device` | `core/datastore/DeviceIdProvider.kt` | the rotating pseudonymous device id sent with Ask-with-Proof calls | [`ai-ask-with-proof.md`](ai-ask-with-proof.md) |
+| `<widget>_widget` × 6 | `JsonGlanceStateDefinition` (`widget/core/`) | one JSON-serialized Glance state per widget: `next_prayer_widget`, `prayer_times_widget`, `prayer_tracker_widget`, `hijri_date_widget`, `hijri_calendar_widget`, `khatam_widget` | [§2](#2-glance-widgets) |
+
+The widget stores hold **rendered state, never user data**: each is a cache a worker refills, and
+a corrupt one is replaced with the default rather than migrated ([§2](#2-glance-widgets)). They
+are deliberately outside the sync payload for that reason.
+
+> Not a DataStore, and correctly outside this table: `SharedPreferencesContentArtifactStore`
+> (`data/local/content/ContentArtifactStore.kt`, in `:core:database`) is a `SharedPreferences` file.
 
 ### 0.6 Notification channels
 
@@ -195,12 +207,12 @@ Adhan, Qaida tap-to-hear) plus an Adhan **download** pipeline. They share no pla
 |---|---|
 | `data/audio/QuranAudioManager.kt` | `@Singleton`; one `ExoPlayer`, gapless ayah playlist, exposes `val audioState: StateFlow<AudioState>` |
 | `data/audio/QuranAudioService.kt` | `@AndroidEntryPoint` foreground `mediaPlayback` service; `MediaStyle` notification (channel `quran_audio_channel`, id 1001) over the manager's `ForwardingPlayer` |
-| `data/audio/AdhanAudioManager.kt` | `@Singleton`; legacy `MediaPlayer` for in-app `preview()`, plus adhan **download** logic; exposes `isPlaying`, `currentlyPlaying`, `downloadState` flows |
+| `data/audio/AdhanAudioManager.kt` | **`:core:data`** as of PR 21 of #551. `@Singleton`; legacy `MediaPlayer` for in-app `preview()`, plus adhan **download** logic; exposes `isPlaying`, `currentlyPlaying`, `downloadState` flows. Its two `AdhanPlaybackService` methods — `playAdhanForNotification` and `stopNotificationAdhan` — were deleted in that PR: they were the only thing tying it to `:app`, and neither had a call site anywhere. |
 | `data/audio/AdhanPlaybackService.kt` | foreground `mediaPlayback` service; plays the adhan when a prayer fires (works app-closed) using `ExoPlayer` with `USAGE_ALARM` + wake lock + audio focus |
 | `data/audio/AdhanDownloadService.kt` | foreground `dataSync` service that downloads both adhan variants with a progress notification (channel `adhan_download_channel`, id 7777) |
 | `data/audio/AdhanDownloadWorker.kt` | `@HiltWorker` background fallback for the download (see §3) |
 | `data/audio/QaidaAudioManager.kt` | `@Singleton`; stripped-down `ExoPlayer` for single Qaida tokens — **no service/notification/MediaSession/CDN**; exposes `val state: StateFlow<QaidaAudioState>` and `val completions: SharedFlow<String>` |
-| `data/audio/AdhanSound.kt` | enum of adhans (MISHARY, ABDUL_BASIT, MAKKAH, SIMPLE_BEEP) with per-variant file names + download URLs |
+| `data/audio/AdhanSound.kt` | **`:core:data`** as of PR 21 of #551. Enum of adhans (MISHARY, ABDUL_BASIT, MAKKAH, SIMPLE_BEEP) with per-variant file names + download URLs |
 
 **Wiring.** None of these have a DI module — the managers are `@Singleton @Inject constructor(@ApplicationContext …)` (Hilt provides them automatically) and the services are `@AndroidEntryPoint` field-injecting their manager. Services are declared in `AndroidManifest.xml` with `foregroundServiceType` `mediaPlayback`/`dataSync`; permissions `FOREGROUND_SERVICE`, `FOREGROUND_SERVICE_MEDIA_PLAYBACK`, `FOREGROUND_SERVICE_DATA_SYNC`.
 
@@ -265,7 +277,19 @@ only the state update and not the delay. Each tick recomputes `computeTotalPosit
 
 ## 2. Glance widgets
 
-All in `widget/`. Six Jetpack **Glance** AppWidgets, each in its own subpackage, plus a shared
+All in **`:feature:widget`** (`feature/widget/`, package `com.arshadshah.nimaz.widget` — a module
+move does not change package names). It was the first feature module extracted, in PR 13 of #551,
+chosen because `widget/` is the only top-level package with **zero** imports from `presentation/`,
+so it proved the module pipeline without risking a screen. It owns its own manifest entries (the
+six providers plus `WidgetTickReceiver`), its `widget_colors.xml`, the `ic_widget_*` drawables, the
+preview layouts, the six `*_widget_info.xml` provider descriptors, and the seventeen strings
+nothing else uses; the twelve it shares with `WidgetsScreen`'s previews stay in `:core:ui` and are
+read through an aliased `UiR`.
+
+The widgets open the app by resolving the launcher component from the package manager rather than
+naming `MainActivity`, which lives in `:app` — the dependency direction `moduleBoundary` fails on.
+
+Six Jetpack **Glance** AppWidgets, each in its own subpackage, plus a shared
 `widget/core/` package and two top-level helpers (`widget/WidgetEntryPoint.kt`,
 `widget/WidgetUpdateScheduler.kt`). **The widget roster lives in [§0.4](#04-widgets)** — this
 section documents how they work, not which ones exist.
@@ -295,8 +319,8 @@ Doze throttles the worker.
 Each widget = a `GlanceAppWidget` subclass (`provideGlance` → `provideContent { GlanceTheme { … } }`, reads `currentState<T>()`) + a `GlanceAppWidgetReceiver` (the manifest-registered `BroadcastReceiver`; `onEnabled` starts refresh, `onUpdate` re-arms it, `onDisabled` cancels). State is a `@Serializable sealed interface` with `Loading`/`Success(data)`/`Error(message)`. Colors come from `res/color` via `ColorProvider(R.color.widget_*)` — no hardcoded colors.
 
 **Data access — two patterns.**
-1. **`@HiltWorker` injection (main path).** Workers inject an `XxxWidgetDataSource`, which injects the real deps (e.g. `NextPrayerWidgetDataSource` and `PrayerTimesWidgetDataSource` inject `PrayerRepository` + `SettingsRepository`; `PrayerTrackerWidgetDataSource` injects `PrayerDao`; the two Hijri sources inject `SettingsRepository` to read the `hijriDayOffset`). Each `doWork()` returns `Result.success()` early if no widgets are placed, computes fresh data, persists via `setWidgetState(...) → Success`, and on failure retries for the first 3 attempts — see **failure handling** below for what it does and does not publish. This only works because `NimazApp` provides the `HiltWorkerFactory` (§3).
-2. **Hilt `@EntryPoint`** — `widget/WidgetEntryPoint.kt` exposes `prayerDao()` via `EntryPointAccessors.fromApplication(...)`. Used by the **only interactive widget** (Prayer Tracker): its checkbox click handler (`togglePrayerStatus` in `PrayerTrackerWidget.kt`) writes to Room from inside the composable click callback (not a Worker), then re-renders via `PrayerTrackerWorker.enqueueImmediateWork(context)`.
+1. **`@HiltWorker` injection (main path).** Workers inject an `XxxWidgetDataSource`, which injects the real deps — all of them repositories: `NextPrayerWidgetDataSource` and `PrayerTimesWidgetDataSource` take `PrayerRepository` + `SettingsRepository`, `PrayerTrackerWidgetDataSource` takes `PrayerRepository`, and the two Hijri sources take `SettingsRepository` to read the `hijriDayOffset`. (`PrayerTrackerWidgetDataSource` injected `PrayerDao` until PR 13 of #551 made `widget/` its own module and the boundary turned that into an unresolved reference.) Each `doWork()` returns `Result.success()` early if no widgets are placed, computes fresh data, persists via `setWidgetState(...) → Success`, and on failure retries for the first 3 attempts — see **failure handling** below for what it does and does not publish. This only works because `NimazApp` provides the `HiltWorkerFactory` (§3).
+2. **Hilt `@EntryPoint`** — `widget/WidgetEntryPoint.kt` exposes `prayerRepository()` via `EntryPointAccessors.fromApplication(...)`. Used by the **only interactive widget** (Prayer Tracker): its checkbox click handler (`togglePrayerStatus` in `PrayerTrackerWidget.kt`) writes from inside the composable click callback (not a Worker), then re-renders via `PrayerTrackerWorker.enqueueImmediateWork(context)`. It exposed `prayerDao()` and constructed a `PrayerRecordEntity` until PR 13 of #551; it now goes through the same repository seam as every ViewModel, and the statuses it compares are `PrayerStatus` rather than the string literals `"prayed"` / `"not_prayed"`.
 
 **Prayer times come from `PrayerRepository`, not `PrayerTimeCalculator`.** Both prayer widgets
 used to call `getPrayerTimes(latitude, longitude)` and take all four calculation defaults —
@@ -415,6 +439,11 @@ and re-scheduling on midnight rollover and boot.
 
 **Key files.**
 - `core/util/PrayerNotificationScheduler.kt` — `@Singleton`; schedules/cancels alarms, owns the channels.
+  Implements the domain port `PrayerAlarmScheduler` (`domain/repository/`), which is what
+  `RescheduleNotificationsUseCase` injects — the use case must not name an Android class. The
+  method's default argument values live on the interface (Kotlin forbids an override from
+  restating them), so `AppInitializer`, `PrayerRescheduler` and the instrumented test, which all
+  hold the concrete type, are unaffected.
 - `core/util/BootReceiver.kt` — `@AndroidEntryPoint BroadcastReceiver`; fires for **all** alarms and actually posts notifications / triggers adhan.
 - `core/util/NotificationContentHelper.kt` — pure title/message/summary text generator.
 - `data/audio/AdhanPlaybackService.kt` — plays the adhan and posts the merged prayer+adhan notification (§1).
@@ -471,7 +500,7 @@ a snapshot taken at construction, and since `hiltViewModel()` gives each setting
 instance, a prayer switched off on the Notification screen was re-armed by an unrelated change on
 the Prayer screen. The use case exists so there is no state to pass in. Reuse
 `settingsRepository.enabledPrayerTypes()` and `preReminderMinutesByPrayer()`
-(`core/util/PrayerNotificationPrefs.kt`) rather than re-deriving either.
+(`domain/repository/PrayerNotificationPrefs.kt`) rather than re-deriving either.
 
 **Scheduling.** `scheduleTodaysPrayerNotifications(...)` cancels everything then re-arms enabled prayers, using `setExactAndAllowWhileIdle(RTC_WAKEUP, …)` with `PendingIntent.getBroadcast` targeting `BootReceiver` (explicit intent). Request codes: prayer `1000 + ordinal`, pre-reminder `2000 + ordinal`, midnight reschedule `9999` (00:01), daily summary `8889` (23:00), Friday reminder `8890`, Khatam reminder `8891`. Pre-reminders fire at `prayerTime − preReminders[type]` (skipped for Sunrise) — see **per-prayer alert style and reminder** below. The **Friday (Jummah) reminder** (`scheduleFridayReminder`, gated on `fridayReminderEnabled`) is a one-shot at the upcoming Friday's Dhuhr − `fridayReminderMinutes`, re-armed on every reschedule so it always targets the next Friday.
 
@@ -493,7 +522,7 @@ The two are honoured at **different times**, which is the thing to keep straight
 `scheduleTodaysPrayerNotifications` takes `preReminders: Map<PrayerType, Int>` — a prayer absent
 from the map gets no reminder, which is how "off" is expressed rather than a zero offset. The
 three callers (`AppInitializer`, `BootReceiver`, `SettingsViewModel`) build it through
-`SettingsRepository.preReminderMinutesByPrayer()` (`core/util/PrayerNotificationPrefs.kt`) so they
+`SettingsRepository.preReminderMinutesByPrayer()` (`domain/repository/PrayerNotificationPrefs.kt`) so they
 cannot drift. `PrayerAlertStyle.playsAdhan(globalAdhanEnabled, isSunrise)` and `.isMuted(isSunrise)`
 state the fire-time rules once: the global adhan switch stays a **master gate** over the per-prayer
 style, so turning the adhan off in Adhan & sound silences the call everywhere without rewriting
@@ -543,7 +572,7 @@ live in Notification settings (toggle + 24-hour time picker).
 
 **App Bundle language splits are disabled** (`android { bundle { language { enableSplit = false } } }`
 in `app/build.gradle.kts`). Settings lets the user pick an app language independently of the device
-locale (`core/util/LocaleHelper.kt`), but Play's default language splitting only delivers the
+locale (`core/common/LocaleHelper.kt`, in `:core:common`), but Play's default language splitting only delivers the
 resources matching the *device* locale — so on a Play install every other language would silently
 fall back to English. Disabling the split ships all locales in the base APK. This never reproduces
 on a locally built APK, only on an Play-installed build, so **do not re-enable it** without moving
@@ -638,7 +667,7 @@ Ramadan.
 > recomposition instead of two astronomical passes.
 >
 > `PrayerTimeDisplay` carries `timeAt: Instant`; `List<PrayerTimeDisplay>.withClockState(now)`
-> re-derives `isPassed`/`isCurrent`/`isNext`, and `core/util/PrayerClock.kt` holds the pure
+> re-derives `isPassed`/`isCurrent`/`isNext`, and `core/common/PrayerClock.kt` (in `:core:common`) holds the pure
 > `nextPrayerIndexAt` / `currentPrayerIndexAt` / `prayerTimelineProgressAt`. This also fixed a real
 > bug: the old derivation compared `LocalTime` (dropping the date), so after Isha no row highlighted
 > and before Fajr today's Isha rendered as "current".
@@ -676,7 +705,28 @@ Ramadan.
 > `data/local/database/NimazDatabase.kt`). Bumping it without updating this section fails
 > `SUB-01`. Every bump needs a `Migration` **and** a line in the migration history below.
 
-Two Room `@Database`es, both provided in `core/di/DatabaseModule.kt`:
+> **Module:** everything in this section lives in **`:core:database`** since #558 — both
+> `@Database` classes, all entities and DAOs, the migrations, the user-data slice, the
+> content-artifact installer, and the exported `schemas/`. Package names are unchanged, so the
+> paths below still read the same; the files are under `core/database/src/main/kotlin/`.
+>
+> Three things follow from that and are easy to get wrong:
+>
+> - **`room.schemaLocation` lives in `core/database/build.gradle.kts`** and writes to
+>   `core/database/schemas`. On `:app` it would be inert, and an un-exported schema is not a build
+>   failure — it is a missing file `MigrationTestHelper` discovers on a device.
+> - **The migration and DAO instrumented tests stay in `app/src/androidTest`**, with `:app`'s
+>   `assets.srcDir` repointed at `core/database/schemas`. `android_instrumented_tests.yml` runs
+>   exactly one APK (`app-debug-androidTest.apk`), so instrumented tests in a library module are
+>   not run by anything and the lane stays green having lost them.
+> - **`ContentArtifactInstaller` takes the installed sha256 as a constructor parameter.** A
+>   library's `BuildConfig` does not carry the application's fields, so it cannot read
+>   `BuildConfig.CONTENT_ARTIFACT_SHA256` itself; `DatabaseModule` in `:app` supplies it.
+>
+> `ExportedSchemaIdentityTest` pins both identity hashes as plain JVM tests — the only per-PR
+> evidence available, since every migration test is instrumented.
+
+Two Room `@Database`es, both provided in `core/di/DatabaseModule.kt` (which stays in `:app`):
 
 - `data/local/database/NimazDatabase.kt` (`nimaz_database`, `NIMAZ_DATABASE_VERSION`) — shipped
   content. Read-only in practice and disposable: it arrives as a fetched artifact (§7) and is
@@ -820,7 +870,7 @@ itself the mismatch.
 **One HTML dialect.** `surah_overview_sections.body` and `quran_topics.description` carry markup,
 normalised at import onto four tags — `<p>`, `<strong>`, `<em>`, and `<a href="quran:2:153-251">` /
 `<a href="topic:61">`. A build rule (`thematic.sections-dialect`) refuses to ship a fifth, so
-`core/util/ThematicMarkup` is a 130-line scanner rather than an HTML parser, and the two link
+`core/common/ThematicMarkup` (in `:core:common`) is a 130-line scanner rather than an HTML parser, and the two link
 schemes address screens this app has: 446 cross-references the source writes as prose ("see
 2:153-251") are taps into the reader, and 509 `topic:` links are taps into the subject browser.
 
@@ -1024,7 +1074,7 @@ The index is **compiled into the content artifact** by `nimaz-data`'s build, nev
 - **One folding, two implementations.** `domain/search/ArabicSearchNormaliser` folds a typed
   query; `nimaz_data/normalise/arabic.py` folded the indexed text. They must agree exactly or
   every query matches nothing *and no test fails*, so both are held to the generated
-  `app/src/test/resources/search/fold-fixtures.json` (`nz search fixtures`, exported by `nz app
+  `core/domain/src/test/resources/search/fold-fixtures.json` (`nz search fixtures`, exported by `nz app
   sync`). `search_meta.fold_version` is checked at runtime; a mismatch makes the app refuse the
   index rather than under-match silently.
 - **Reading it.** `data/local/search/ContentSearchIndex` is the only reader, via `@RawQuery`. The
@@ -1052,13 +1102,14 @@ place** whenever you add a migration — the two can no longer drift.
 
 ## 6. Preferences (DataStore)
 
-The app has **three** DataStore files, listed in [§0.5](#05-datastore-files). This section is
-about the main one; the other two are self-contained slices documented where they are used.
+The app has **three** Preferences DataStore files plus the per-widget Glance state stores, all
+listed in [§0.5](#05-datastore-files). This section is about the main one; the others are
+self-contained slices documented where they are used.
 
-`data/local/datastore/PreferencesDataStore.kt` — the app's **single central settings store**,
+`core/datastore/PreferencesDataStore.kt` (in `:core:datastore`) — the app's **single central settings store**,
 backed by a Jetpack Preferences DataStore (`preferencesDataStore(name = "nimaz_preferences")`).
 
-> **Adding a fourth DataStore file is a decision, not a detail.** Each one is an independent
+> **Adding another DataStore file is a decision, not a detail.** Each one is an independent
 > migration and export surface: the sync payload (§10) carries `nimaz_preferences` only, so a
 > setting that lives anywhere else silently does not sync. Add keys to `nimaz_preferences`
 > unless the slice is genuinely not user settings (as announcements and the AI device id are).
@@ -1167,7 +1218,13 @@ the same trap applies the moment one is added.)
 
 **The wire loses the type, so the type is declared.** The export flattens every value with `toString()`, so the payload is `Map<String,String>`. The import used to *guess* the type back from the shape of the value and substrings of the key name; DataStore keys are typed and reading one at the wrong type throws, so the six keys the heuristic missed — `tasbih_preset_seed_version`, `content_patch_version`, `ai_consent_timestamp`, `tasbih_selected_preset`, `current_location_id` (Long guessed as Int) and `tasbih_favorites` — did not merely import wrong, they **crashed on next read after any sync**. `tasbih_preset_seed_version` is read with `.first()` in `TasbihViewModel`'s init and `current_location_id` resolves the active location for prayer times.
 
-`data/local/datastore/PreferenceCodec.kt` now holds the declared type of every named key plus shape patterns for the runtime-composed ones — `worship_<type>_{enabled,offset,mode}` and the per-prayer `<prayer>_{alert_style,reminder_enabled,reminder_minutes}` ([§4](#4-prayer-time--adhan-notifications)). Sets are joined on the ASCII unit separator rather than `Set.toString()` (`[a, b]` cannot be split back safely), with the bracket form still accepted so payloads from older builds land. An unknown key from a newer sender is kept as a string rather than dropped. `onboarding_completed` is never imported. `PreferenceCodecTest` reads the key declarations straight out of `PreferencesDataStore.kt` and fails if the registry drifts from them, so a new preference cannot be added without registering its type.
+`core/datastore/PreferenceCodec.kt` now holds the declared type of every named key plus shape patterns for the runtime-composed ones — `worship_<type>_{enabled,offset,mode}` and the per-prayer `<prayer>_{alert_style,reminder_enabled,reminder_minutes}` ([§4](#4-prayer-time--adhan-notifications)). Sets are joined on the ASCII unit separator rather than `Set.toString()` (`[a, b]` cannot be split back safely), with the bracket form still accepted so payloads from older builds land. An unknown key from a newer sender is kept as a string rather than dropped. `onboarding_completed` is never imported. `PreferenceCodecTest` reads the key declarations straight out of `PreferencesDataStore.kt` and fails if the registry drifts from them, so a new preference cannot be added without registering its type.
+
+**A renamed key is silent, permanent data loss**, and `PreferenceCodecTest` alone does not catch it: it asserts that two files in this repo agree with each other, and an IDE "rename symbol" updates both in lockstep. Two files agreeing is not evidence that either agrees with what is on a device. So `:core:datastore` also carries **`src/test/resources/preference-keys.golden`** — 106 `name<TAB>type` lines, a third copy that nothing automatic updates — and `PreferenceKeyGoldenTest` compares the whole list rather than checking containment, so a rename surfaces as one removal plus one addition.
+
+The asymmetry is what makes it reviewable: **additions regenerate freely, removals require an entry in `retired-preference-keys.txt`** with a versionCode and a reason. A new key is harmless because nothing has it stored yet; a removed one resets that setting for every existing user on their next launch.
+
+The six runtime-composed keys are stored in their literal `${'$'}{key}` template form, exactly as they appear in source — which is why `PreferencesDataStore.kt` preserves that shape rather than building the strings elsewhere. A golden built from *resolved* keys would churn whenever a worship type was added and would miss a template rename entirely.
 
 **Wiring.** Provided in `core/di/DataStoreModule.kt` via `@Provides @Singleton`. (Minor: it already has an `@Inject constructor(context)`, so the explicit provider is redundant with constructor injection.)
 
@@ -1302,7 +1359,7 @@ entry with the same id — `nz import --check` fails if the two catalogues drift
 
 ## 8. Prayer-time calculation
 
-`core/util/PrayerTimeCalculator.kt` — `@Singleton @Inject constructor()` (pure compute,
+`domain/prayer/PrayerTimeCalculator.kt` in `:core:domain` — `@Singleton @Inject constructor()` (pure compute,
 no deps). All third-party usage is isolated here.
 
 **Library.** **Adhan2** by Batoul Apps (`com.batoulapps.adhan:adhan2:0.0.6`, `libs.adhan`). Adhan2 types are import-aliased (e.g. `CalculationMethod as AdhanMethod`) to avoid colliding with the app's own domain enums.
@@ -1314,11 +1371,11 @@ no deps). All third-party usage is isolated here.
 
 **Inputs/outputs.** `getPrayerTimes(lat, lon, date, method, asr, highLat, adjustments)` → `List<PrayerTime>` (raw `Instant`s; supports per-prayer minute `adjustments`). `calculatePrayerTimes(date, location)` / `…ForRange(...)` take a domain `Location` and return `PrayerTimes`/`List<PrayerTimes>` (Adhan `Instant`s converted to `LocalDateTime` in the location's zone). Returns **domain models** (`domain/model/PrayerModels.kt`), never Adhan types. Settings come from `PreferencesDataStore` (string prefs parsed to enums by the caller).
 
-**Hijri conversion** — `core/util/HijriDateCalculator.kt`, a stateless Kotlin `object` (no Hilt). It does **not** use `ummalqura`; it delegates to the platform `java.time.chrono.HijrahChronology.INSTANCE` (OS-updated Umm al-Qura). Provides `toHijri`/`toGregorian`, Ramadan helpers, validity checks, and a hardcoded Islamic-events calendar (`getIslamicEvents`/`getUpcomingEvents`). **Day-offset support:** `today(offsetDays = 0)` returns today's Hijri date adjusted by the user's `hijriDayOffset` preference (§6), used for local event matching and both Hijri widgets. Other `now()` helpers (`isTodayRamadan`, `daysUntilNextRamadan`, …) currently ignore the offset — see deferred follow-up in §9.
+**Hijri conversion** — `domain/calendar/HijriDateCalculator.kt` in `:core:domain`, a stateless Kotlin `object` (no Hilt). It does **not** use `ummalqura`; it delegates to the platform `java.time.chrono.HijrahChronology.INSTANCE` (OS-updated Umm al-Qura). Provides `toHijri`/`toGregorian`, Ramadan helpers, validity checks, and a hardcoded Islamic-events calendar (`getIslamicEvents`/`getUpcomingEvents`). **Day-offset support:** `today(offsetDays = 0)` returns today's Hijri date adjusted by the user's `hijriDayOffset` preference (§6), used for local event matching and both Hijri widgets. Other `now()` helpers (`isTodayRamadan`, `daysUntilNextRamadan`, …) currently ignore the offset — see deferred follow-up in §9.
 
 **Wiring.** No module — both are constructor-injected / static. `PrayerTimeCalculator` is injected into `PrayerRepositoryImpl`, into `PrayerNotificationScheduler`, and (a deviation from the use-case rule) into `WidgetsScreen`. The widget data sources used to take it too and are the one place that has been closed: they go through `PrayerRepository` now, so they honour the user's calculation settings ([§2](#2-glance-widgets)).
 
-**Display formatting.** Wall-clock times are rendered through `core/util/TimeFormatting.kt`
+**Display formatting.** Wall-clock times are rendered through `core/common/TimeFormatting.kt` (in `:core:common`)
 (`formatClockTime(hour, minute, use24Hour)` + `LocalTime`/`LocalDateTime.formatClock(...)`),
 never via ad-hoc `String.format("%d:%02d %s", …, "AM"/"PM")` or `Locale.US`-pinned formatters.
 It uses the **default locale** (localized am/pm marker and digits — Nimaz is worldwide) and
@@ -1338,10 +1395,73 @@ formatted strings.
 
 **`core/init/AppInitializer.kt`** — `@Singleton`. `initialize()` launches an IO coroutine that runs four tasks **in parallel under a 5 s `withTimeout`** (then proceeds to UI regardless): apply saved locale, schedule today's prayer notifications (§4), download the default adhan/beep if missing (§1), and bootstrap FCM announcements (§12 — create the Updates channel + topic subscribe). It exposes `val isReady: StateFlow<Boolean>` (the splash gate). Failures are reported to monitoring but never block startup.
 
-**`core/monitoring/`** — three thin Kotlin `object` wrappers over Firebase, each guarded so **every call is wrapped in `runCatching` and no-ops if Firebase isn't initialized** (debug/PR-check builds without `google-services.json` run unchanged). They are static singletons, never Hilt-injected.
+**`core/monitoring/`** (in `:core:common`) — three thin Kotlin `object` wrappers over Firebase, each guarded so **every call is wrapped in `runCatching` and no-ops if Firebase isn't initialized** (debug/PR-check builds without `google-services.json` run unchanged). They are static singletons, never Hilt-injected.
 - `AppAnalytics.kt` → Firebase **Analytics**. The only one with `init(context)` (called from `NimazApp`) — it caches `applicationContext` so any caller can log without a `Context`. Provides semantic helpers + name catalogs (`Event`/`Param`/`UserProperty`), notably the notification pipeline (`notification_scheduled`/`_displayed`/`_suppressed`/`_opened`) and `logDiagnostics()` (records OS-level notification/exact-alarm/battery state as durable user properties).
 - `CrashReporter.kt` → Firebase **Crashlytics**. `recordException`, `log` (breadcrumb), `setCustomKey`. Pairs with `AppAnalytics.logError` (frequency) for the stack trace.
-- `PerfMonitor.kt` → Firebase **Performance**. Custom traces via `newTrace`/`stop` + inline `trace { }` / `traceSuspend { }`; catalog `Traces` (`app_initialize`, `notification_schedule`).
+- `PerfMonitor.kt` → Firebase **Performance**. Custom traces via `newTrace`/`stop` + inline `trace { }` / `traceSuspend { }`; catalog `Traces`, 16 entries — see [§9.1](#91-performance-tracing) below.
+
+### 9.1 Performance tracing
+
+Firebase Performance had been wired and paid for since the SDK went in, and the app started
+**two** traces: `app_initialize` and `notification_schedule`, both from `:app`. Nothing else could
+— `PerfMonitor` is an `object`, §6.1 of `ARCHITECTURE.md` forbids presentation code from calling
+the monitoring objects directly, and the `Telemetry` seam that replaced them had no performance
+method at all. The rule and the API together made the feature unreachable from every module that
+had anything worth measuring.
+
+The seam now carries it, and the catalogue is instrumented end to end.
+
+**Three shapes, and the choice between them is not stylistic:**
+
+| Shape | Use when | API |
+|---|---|---|
+| Block | a `suspend` call whose return is the answer | `telemetry.trace(Traces.X) { … }` |
+| First emission | a `Flow` collected for the life of a screen | `flow.traceFirstEmission(telemetry, Traces.X)` |
+| Known duration | work that runs where neither can wrap it | `telemetry.traceValue(Traces.X, DURATION_METRIC, ms)` |
+
+Nearly every load in this app is a Room `Flow`. Wrapping the *collection* in a block trace would
+measure how long the user looked at the screen, not how long they waited for it — the trace would
+stop when they navigated away. `traceFirstEmission` (in `:core:common`) times the gap to the
+**first** value, which is the moment the spinner can stop, files it as `first_emission_ms`, and
+reports once however many re-emissions follow. A flow that never emits reports nothing rather
+than reporting zero: a screen closed before its data arrived should be absent from the numbers,
+not recorded as instant.
+
+The known-duration shape exists for the PDF exports, which render on the caller's thread inside a
+click handler. The screen measures and dispatches `ExportCompleted(durationMs)`; the ViewModel
+records it. Monitoring stays out of the composable either way.
+
+**What is traced, and where it is started:**
+
+| Trace | Started in | Shape |
+|---|---|---|
+| `app_initialize` | `AppInitializer` (`:app`) | block |
+| `notification_schedule` | `PrayerNotificationScheduler` (`:app`) | block |
+| `content_artifact_install` | `ContentArtifactInstaller` (`:core:database`) | block |
+| `quran_page_load` | `QuranViewModel` | first emission |
+| `quran_surah_load` | `QuranViewModel` | first emission |
+| `mushaf_layout_build` | `QuranViewModel` | block |
+| `tafseer_load` | `TafseerViewModel` | block |
+| `hadith_chapter_load` | `HadithViewModel` | first emission |
+| `dua_chapter_load` | `DuaViewModel` | first emission |
+| `prayer_times_calculate` | `PrayerTimesViewModel` | block |
+| `prayer_month_calculate` | `MonthlyPrayerTimesViewModel` | block |
+| `qibla_resolve` | `QiblaViewModel` | block |
+| `library_search` | `SearchViewModel` | block |
+| `sync_export` | `SyncViewModel` | block |
+| `sync_import` | `SyncViewModel` | block |
+| `pdf_export` | `MonthlyPrayerTimesViewModel`, `TafseerViewModel` | known duration |
+
+`content_artifact_install` is traced from the *replace* rather than from the top of
+`installIfChanged()`. The three early returns above it are a flag read apiece and are the
+overwhelming majority of launches; including them would drag the median of "what does a content
+release cost a user" to nearly zero.
+
+**`TraceCatalogueReachabilityTest`** (in `:app`) scans every module's `src/main` and fails if a
+declared trace has no call site, if a call site names a trace that is not declared, if two traces
+share a wire name, or if a name exceeds the 100 characters Firebase silently truncates at. An
+uncalled trace is the one kind of constant whose absence is invisible: no warning, no failing
+build, and a dashboard with no card for it — which looks exactly like a code path nobody takes.
 
 **Instrumentation conventions (apply these as you write code):**
 - **Error-swallowing `catch`/`runCatching`** that hides a real failure (data load, IO, parse,
@@ -1375,6 +1495,12 @@ formatted strings.
 `data/sync/` — offline peer-to-peer transfer of a user's app data directly between two phones
 over Google's **Nearby Connections** API. No server, no account: one device sends, the other
 receives.
+
+**It lives in `:core:data`, not with the screen that drives it.** `SyncScreen` and `SyncViewModel`
+are the only things that touch the slice, so PR 21 of #551 expected it to move to
+`:feature:settings` with them — and it cannot: `SyncDataExporter` and `SyncDataImporter` import
+**21 DAOs and 14 entities** directly, and `:core:database` is not on a feature module's classpath.
+`SyncViewModel` reaches them the way every other ViewModel reaches persistence.
 
 **Progress totals come from one source each, and logging carries no payload.**
 `SyncDataExporter.export` reports `(step, total, label)` with the total from

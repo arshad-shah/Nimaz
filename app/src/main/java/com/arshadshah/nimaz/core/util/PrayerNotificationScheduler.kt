@@ -7,16 +7,24 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import androidx.core.app.NotificationCompat
-import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.ui.R
+import com.arshadshah.nimaz.R as AppR
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.PerfMonitor
+import com.arshadshah.nimaz.domain.calendar.HijriDateCalculator
 import com.arshadshah.nimaz.domain.model.AsrCalculation
 import com.arshadshah.nimaz.domain.model.CalculationMethod
 import com.arshadshah.nimaz.domain.model.HighLatitudeRule
 import com.arshadshah.nimaz.domain.model.PrayerType
 import com.arshadshah.nimaz.domain.model.WorshipReminderType
 import com.arshadshah.nimaz.domain.model.isLocationSet
+import com.arshadshah.nimaz.domain.prayer.PrayerTimeCalculator
+import com.arshadshah.nimaz.domain.repository.PrayerAlarmScheduler
+import com.arshadshah.nimaz.domain.repository.PrayerNotificationTester
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
+import com.arshadshah.nimaz.domain.worship.DayWorshipTimes
+import com.arshadshah.nimaz.domain.worship.HijriDayInfo
+import com.arshadshah.nimaz.domain.worship.WorshipReminderCalculator
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -37,7 +45,7 @@ class PrayerNotificationScheduler @Inject constructor(
     @ApplicationContext private val context: Context,
     private val prayerTimeCalculator: PrayerTimeCalculator,
     private val settingsRepository: SettingsRepository
-) {
+) : PrayerAlarmScheduler, PrayerNotificationTester {
     private val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
     private val notificationManager =
         context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -233,18 +241,18 @@ class PrayerNotificationScheduler @Inject constructor(
      * @param preReminders Lead time in minutes per prayer. A prayer absent from the map gets
      *   no pre-reminder — that is how "off" is expressed, rather than a zero lead time.
      */
-    fun scheduleTodaysPrayerNotifications(
+    override fun scheduleTodaysPrayerNotifications(
         latitude: Double,
         longitude: Double,
         notificationsEnabled: Boolean,
-        enabledPrayers: Set<PrayerType>? = null,
-        preReminders: Map<PrayerType, Int> = emptyMap(),
-        calculationMethod: CalculationMethod = CalculationMethod.MUSLIM_WORLD_LEAGUE,
-        asrCalculation: AsrCalculation = AsrCalculation.STANDARD,
-        highLatitudeRule: HighLatitudeRule? = null,
-        adjustments: Map<PrayerType, Int> = emptyMap(),
-        fridayReminderEnabled: Boolean = false,
-        fridayReminderMinutes: Int = 60
+        enabledPrayers: Set<PrayerType>?,
+        preReminders: Map<PrayerType, Int>,
+        calculationMethod: CalculationMethod,
+        asrCalculation: AsrCalculation,
+        highLatitudeRule: HighLatitudeRule?,
+        adjustments: Map<PrayerType, Int>,
+        fridayReminderEnabled: Boolean,
+        fridayReminderMinutes: Int
     ) {
         if (!notificationsEnabled) {
             cancelAllPrayerNotifications()
@@ -797,7 +805,7 @@ class PrayerNotificationScheduler @Inject constructor(
     /**
      * Cancel all scheduled prayer notifications.
      */
-    fun cancelAllPrayerNotifications() {
+    override fun cancelAllPrayerNotifications() {
         PrayerType.entries.forEach { prayerType ->
             cancelPrayerNotification(prayerType)
             cancelPreReminderNotification(prayerType)
@@ -811,9 +819,9 @@ class PrayerNotificationScheduler @Inject constructor(
     /**
      * Send an immediate test notification to verify notifications are working.
      */
-    fun sendTestNotification() {
+    override fun sendTestNotification() {
         val notification = NotificationCompat.Builder(context, CHANNEL_ID_PRAYER)
-            .setSmallIcon(R.drawable.ic_stat_nimaz)
+            .setSmallIcon(AppR.drawable.ic_stat_nimaz)
             .setContentTitle(context.getString(R.string.test_notification_title))
             .setContentText(context.getString(R.string.test_notification_text))
             .setPriority(NotificationCompat.PRIORITY_HIGH)
@@ -828,7 +836,7 @@ class PrayerNotificationScheduler @Inject constructor(
      * Send test notifications for all prayers to validate the notification system.
      * Uses explicit broadcasts to ensure BootReceiver receives them on Android 8.0+.
      */
-    fun sendAllPrayerTestNotifications() {
+    override fun sendAllPrayerTestNotifications() {
         val prayers = listOf(
             PrayerType.FAJR to "05:30 AM",
             PrayerType.SUNRISE to "06:45 AM",

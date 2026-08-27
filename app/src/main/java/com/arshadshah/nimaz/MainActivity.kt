@@ -12,7 +12,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
@@ -33,11 +32,25 @@ import com.arshadshah.nimaz.presentation.theme.NimazPatternStyle
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.theme.ThemeMode
 import com.arshadshah.nimaz.widget.hijricalendar.HijriCalendarWidget
+import com.arshadshah.nimaz.presentation.app.AppIdentity
+import com.arshadshah.nimaz.presentation.app.LocalAppIdentity
+import com.arshadshah.nimaz.presentation.update.LocalAppUpdateController
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-val LocalInAppUpdateManager = staticCompositionLocalOf<InAppUpdateManager?> { null }
+/**
+ * App identity, stated once at the composition root.
+ *
+ * `BuildConfig` and the launcher mipmap are both `:app`-only — a library's `BuildConfig` holds
+ * only its own fields, and `nonTransitiveRClass` keeps the application's `R` off a library's
+ * classpath — so a feature module cannot read either. See `presentation/app/AppIdentity.kt`.
+ */
+private val appIdentity = AppIdentity(
+    versionName = BuildConfig.VERSION_NAME,
+    versionCode = BuildConfig.VERSION_CODE,
+    iconRes = R.mipmap.ic_launcher_foreground,
+)
 
 @AndroidEntryPoint
 @UnstableApi
@@ -127,7 +140,8 @@ class MainActivity : ComponentActivity() {
             }
 
             CompositionLocalProvider(
-                LocalInAppUpdateManager provides inAppUpdateManager
+                LocalAppUpdateController provides inAppUpdateManager,
+                LocalAppIdentity provides appIdentity,
             ) {
                 NimazTheme(
                     themeMode = themeMode,

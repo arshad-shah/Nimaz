@@ -1,37 +1,25 @@
 package com.arshadshah.nimaz.core.di
 
-import com.arshadshah.nimaz.core.time.SystemTodayProvider
-import com.arshadshah.nimaz.core.time.TodayProvider
-import dagger.Binds
+import com.arshadshah.nimaz.core.common.DefaultDispatcher
+import com.arshadshah.nimaz.core.common.IoDispatcher
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import javax.inject.Qualifier
-import javax.inject.Singleton
 
 /**
- * The dispatcher for work that is CPU-bound rather than blocking on I/O.
+ * The three JVM values that stayed in `:app` when PR 22 of #551 dissolved `core/di`.
  *
- * Injected rather than referenced as `Dispatchers.Default` so a test can substitute its own
- * scheduler and stay deterministic — without that, a `withContext(Dispatchers.Default)` runs
- * on real threads and `advanceUntilIdle()` has nothing to wait for.
+ * `@IoDispatcher` and `@DefaultDispatcher` are declared in `:core:common`, and `SingletonComponent`
+ * is what says *where* these install — so the natural home is `:core:common`. It does not apply
+ * `nimaz.android.hilt`, and adding a KSP processor to a module for three `@Provides` of
+ * `Dispatchers.IO`, `Dispatchers.Default` and a `Clock` costs more build time than the tidiness is
+ * worth. `TimeBindingsModule` did move: `SystemTodayProvider` is a `:core:domain` type, so its
+ * binding now sits beside it.
  */
-@Qualifier
-@Retention(AnnotationRetention.BINARY)
-annotation class DefaultDispatcher
-
-/**
- * The dispatcher for work that blocks on I/O — a geocoder round trip, a location fix.
- *
- * Same reason as [DefaultDispatcher]: injected so a test stays deterministic.
- */
-@Qualifier
-@Retention(AnnotationRetention.BINARY)
-annotation class IoDispatcher
-
 @Module
 @InstallIn(SingletonComponent::class)
 object TimeModule {
@@ -47,13 +35,4 @@ object TimeModule {
     @Provides
     @IoDispatcher
     fun provideIoDispatcher(): CoroutineDispatcher = Dispatchers.IO
-}
-
-@Module
-@InstallIn(SingletonComponent::class)
-abstract class TimeBindingsModule {
-
-    @Binds
-    @Singleton
-    abstract fun bindTodayProvider(impl: SystemTodayProvider): TodayProvider
 }

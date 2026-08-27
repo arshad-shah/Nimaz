@@ -4,6 +4,136 @@ Nimaz is an offline-first Android Islamic companion app: **Kotlin + Jetpack Comp
 **Clean Architecture** (`presentation → domain → data`) with **MVVM + UDF**, Hilt DI, Room,
 DataStore, type-safe Navigation Compose.
 
+**The Gradle module split (#551) is complete.** Nineteen modules plus `:baselineprofile` —
+seven `:core:*`, eleven `:feature:*`, and `:app` reduced to 52 files / 11,484 lines, 8% of the
+codebase. What is left in `:app` is what cannot leave: `MainActivity`, `NimazApp`,
+`AppInitializer`, the manifest entry points, the adhan players and prayer-notification
+machinery, `QuranAudioManager`, AboutLibraries, `screens/home`, and the seven Hilt bindings
+pinned to one of those.
+
+The eighteen modules that came out of it, and what each one owns:
+
+- **`:core:domain`** (`core/domain/`) — the whole domain layer, a pure JVM module. No Android SDK
+  on its classpath, so `import android.*` there is a compile error, and `androidFreeClasspath`
+  (wired into `check`) fails on any `androidx` artifact someone adds later.
+- **`:core:common`** (`core/common/`) — `core/common` formatting helpers, `core/monitoring` and
+  `core/text`. An Android library, and **below `:core:ui`, so nothing in it may reference `R`** —
+  a string resolved outside a composable goes through `StringProvider`. `moduleBoundary` (wired
+  into `check` on every Android module) fails if a `:core:*` module depends on `:app` or a
+  `:feature:*`.
+- **`:core:database`** (`core/database/`) — both Room databases, entities, DAOs, migrations and
+  the exported `schemas/`. **`room.schemaLocation` lives here**, and the migration/DAO
+  instrumented tests deliberately stay in `app/src/androidTest` because CI runs exactly one
+  androidTest APK. `ExportedSchemaIdentityTest` pins both identity hashes.
+- **`:core:datastore`** (`core/datastore/`) — all three DataStore files. **A screen or ViewModel
+  must never construct `PreferencesDataStore` itself** — read through the `SettingsSeams`
+  interface for the feature. A renamed preference key is silent, permanent data loss, so
+  `preference-keys.golden` records all 106 and removals need a `retired-preference-keys.txt`
+  entry.
+- **`:core:data`** (`core/data/`) — eighteen of the nineteen repository implementations plus the
+  `data/{device,text,ai,announcement,widget,platform}` slices. The only module that sees both
+  `:core:database` and `:core:datastore`, which is what lets everything else depend on a
+  `:core:domain` interface instead of a DAO. **A helper here must not put a `*Entity`, `*Row` or
+  `*Dao` in a public signature** — make it `internal` (as `MushafLayoutMapper` is) or map to a
+  domain model first; `PublicApiHasNoPersistenceTypesTest` fails on it. A class that wants
+  `BuildConfig` cannot have it — a library's `BuildConfig` holds only its own fields — so take the
+  value as a constructor parameter and pass it from a `:app` Hilt module, as `AiModule` does for
+  `IntegrityTokenProvider`.
+- **`:core:ui`** (`core/ui/`) — the design system: 52 atoms, the generic `Nimaz*` molecules,
+  `theme/`, `foundation/`, `presentation/model`, `core/share`, plus `strings.xml` + its five
+  translations, `colors.xml` and the eight fonts. **It owns `R.string.*` now.** With
+  `nonTransitiveRClass=true` a module's `R` holds only its own resources, so presentation code
+  imports **`com.arshadshah.nimaz.core.ui.R`**; `com.arshadshah.nimaz.R` keeps only the widget and
+  notification surface (`res/xml`, `res/drawable`, `res/layout`, `res/mipmap-*`, `themes.xml`,
+  `widget_colors.xml`). Ten files need both and alias the app's as `AppR`. Component tests live
+  in `core/ui/src/testDebug` with their own Robolectric pin.
+- **`:core:navigation`** (`core/navigation/`) — `Routes.kt`, `ScreenTags`, `taggedComposable`,
+  `ContentTargetRoutes`, and the announcement/help deep-link grammars. **Never imports
+  `presentation.screens`, `presentation.viewmodel` or `:core:ui`** — a `Route` carries a
+  destination's identity, never its label, which is why `NamesTab` moved here while its
+  `@StringRes` stayed in the screen. `NavGraph.kt` is still in `:app`, but registers nothing —
+  the 94 destinations live in eleven `<Feature>Graph.kt` extensions beside their screens.
+- **`:feature:widget`** (`feature/widget/`) — the six Glance widgets, their receivers, the tick
+  receiver and six Workers, with their own manifest entries, `widget_colors.xml`, drawables,
+  preview layouts, provider descriptors and seventeen strings. **The first feature module.** A
+  feature module has no `:core:database` on its classpath: talk to a repository, never a DAO, and
+  never name a type in `:app` (the widgets resolve the launcher component rather than naming
+  `MainActivity`).
+- **`:feature:onboarding`** (`feature/onboarding/`) — the first-run flow. **Nothing had to be
+  unpicked to extract it**, because its ViewModel already took settings *seams* and domain ports
+  rather than `SettingsRepository` and Android APIs. Copy this one.
+- **`:feature:about`** (`feature/about/`) — About, Help and More, which are one destination
+  (`AdaptiveMoreScreen` shows all three; `aboutGraph` registers all their routes). Six couplings
+  to `:app` had to be unpicked — see its build file. **AboutLibraries stays in `:app`**: the
+  plugin reads the *applying project's* runtime classpath, so applying it in a feature module
+  silently shortens the licence list. `LicenceCatalogueTest` floors the entry count at 200
+  (272 today).
+
+- **`:feature:content`** (`feature/content/`) — the library: duas, hadith, qaida, the names, the
+  prophets and the catalog shell. **Eight `screens/` packages, because `viewmodel/content` is one
+  package they all drive** — the module boundary follows the ViewModel axis, not `screens/`. The
+  same rule sends `DuaSettingsScreen` and `HadithSettingsScreen` the other way: they drive
+  `SettingsViewModel`, so they stay in `:app` and register in `settingsGraph`.
+- **`:feature:quran`** (`feature/quran/`) — the reader, khatam, bookmarks, the Mushaf stack and
+  the Mushaf stack. **`QuranDao` stays in `:core:database`** (four repositories use it) and
+  **`QuranAudioManager` stays in `:app`** behind the `QuranPlayback` port, because `MainActivity`
+  holds one too. Four settings screens (`Dua`, `Hadith`, `SelectReciter`, `SelectTranslation`)
+  sit in feature directories but drive `SettingsViewModel`, so they stay in `:app` and register
+  in `settingsGraph` until PR 21, which took them.
+- **`:feature:tracker`** (`feature/tracker/`) — prayer tracking, fasting and tasbih, behind one
+  `viewmodel/tracker`. **Six of `screens/prayer`'s nine files live here** (the tracking ones);
+  the other three are `:feature:prayer`, and `PrayerGraph.kt` split along the same line.
+- **`:feature:prayer`** (`feature/prayer/`) — prayer times, the monthly table, qibla and the
+  night-worship window: when each prayer *is*, to `:feature:tracker`'s what the user *did* about
+  it. The two share `PrayerRepository` through `:core:domain`. **The adhan players and the prayer
+  notification machinery stayed in `:app`** — nothing in this module names them, and their real
+  consumers are the settings surface (`SettingsViewModel`, the three notification screens) plus
+  `AppInitializer`, so moving them here would have created a `:feature:settings` →
+  `:feature:prayer` edge in the very next PR. **"Where a file sounds like it belongs" is not
+  "where its consumers are"** — the same trap as the components rule below, one layer down.
+  `PrayerTimeCard` and `PrayerSkyScene` went to `:core:ui`, not here, because `HomeScreen` and
+  `HomeHero` read them too. This is the only module with a camera dependency (`ArQiblaView`).
+- **`:feature:settings`** (`feature/settings/`) — the last feature module: 24 screens, the
+  1,400-line `SettingsViewModel`, plus location and sync. **Five screens arrive here from other
+  features' directories** (`DuaSettingsScreen`, `HadithSettingsScreen`, `SelectReciterScreen`,
+  `SelectTranslationScreen`, `LocationScreen`) — every one dispatches `SettingsEvent`, which is
+  the ViewModel axis cutting the other way for the last time. **`data/sync` did *not* come with
+  `SyncViewModel`**: it imports 21 DAOs and 14 entities directly, so it lives in `:core:data`,
+  the only module that can hold it. **`PrayerNotificationScheduler` stayed in `:app`**, pinned by
+  one line — `AppR.drawable.ic_stat_nimaz` — so the three members this module calls became the
+  `PrayerAlarmScheduler` and `PrayerNotificationTester` ports. It is the one module in the epic
+  that generates its **own** `BuildConfig`: `SyncViewModel` reads `DEBUG`, which is a library's
+  own field, unlike the application identity `IntegrityTokenProvider` has to take as a parameter.
+- **`:feature:tools`** (`feature/tools/`) — the zakat calculator and its history.
+- **`:feature:search`** (`feature/search/`) — library search and the opt-in Ask-with-Proof screen.
+  Nothing network-facing lives here: the Worker client is `:core:data`, reached through
+  `AiRepository`. **`AI_WORKER_BASE_URL` and `PLAY_INTEGRITY_CLOUD_PROJECT_NUMBER` are read only
+  in `core/di/AiModule`**, in `:app` — a library's `BuildConfig` has neither. The feature is
+  **off by default** and `AiOptInDefaultsTest` pins that.
+- **`:feature:calendar`** (`feature/calendar/`) — the Islamic calendar, plus `IslamicEventCard`
+  (calendar-only; the Zakat hero went to `:core:ui` instead, because `ZakatSettingsScreen` in
+  `:app` reads it too — **"used by the feature" is not "used only by the feature"**, which has now
+  caught five PRs in a row: widget strings, about strings, these components, four content
+  components, and `PrayerTimeCard`/`PrayerSkyScene`).
+
+Two rules a feature module makes into compile errors, both worth knowing before you write one:
+**a `@HiltWorker` needs `ksp(libs.hilt.work.compiler)` in its own module** — omitting it compiles
+fine and fails at *runtime* with `NoSuchMethodException`, which is why `HiltWorkerProcessorTest`
+exists — and **`BuildConfig` and the app's `R` cannot travel**, so app identity arrives through
+`LocalAppIdentity` and an `:app`-only implementation moves as a *port* (`AppUpdateController`),
+never as the class.
+
+What is still in `app/…/core/util/` — `BootReceiver`, `PrayerRescheduler`, `InAppUpdateManager`,
+`PrayerNotificationScheduler`, `PrayerAlarmTimes`, `NotificationContentHelper` — stays there **for
+good**, not until some later PR: each is a manifest entry point or is pinned to `:app` by one, and
+their consumers are the settings surface and `AppInitializer` rather than a feature. See
+`docs/ARCHITECTURE.md` §2. A move does **not** change package names, so imports read the same either
+side of a module boundary. Two consequences worth knowing before you edit:
+
+- **Kotlin will not smart-cast a `val` from another module.** `if (ayah.translation != null)
+  Text(ayah.translation)` no longer compiles across the boundary — bind a local first.
+- **A fake used on both sides goes in `core/domain/src/testFixtures/`**, not copied into each.
+
 ## Read this first
 
 The `docs/` folder is the source of truth. **[`docs/README.md`](docs/README.md) is the index** —
@@ -106,12 +236,22 @@ The obligations, in short:
    `onEvent(event: XxxEvent)` (sealed interface). No exposed `MutableStateFlow`/`LiveData`.
 4. Repositories return **domain models**; map at the data layer (`Entity.toDomain()` /
    `Model.toEntity()`).
-5. DI lives in `core/di`: `@Binds` for interface→impl, `@Provides` for `XxxUseCases`,
-   `@Singleton` in `SingletonComponent`.
+5. **A binding lives in the module that owns the implementation.** `@Binds` for interface→impl,
+   `@Provides` for `XxxUseCases`, `@Singleton` in `SingletonComponent` — but *where*: repository
+   binds in **`:core:data`** (`DataBindingsModule`), settings seams in **`:core:datastore`**
+   (`SettingsBindingsModule`), DAOs in **`:core:database`** (`DatabaseModule`), `XxxUseCases` in
+   **`:core:domain`** (`UseCaseModule`, which is why that module depends on `hilt-core` — the JVM
+   half, so `androidFreeClasspath` still passes). `:app`'s `RepositoryModule` went from 905 lines
+   to 109 and holds only the seven bindings whose implementation is pinned to `:app` by
+   `MainActivity`, a manifest entry point, or the app's `R`. Adding one there because that is
+   where DI used to live is the mistake to avoid.
 6. Navigation is type-safe: add a `@Serializable` `Route`, a `ScreenTags` entry, and a
-   `taggedComposable<Route.X>(ScreenTags.X)` in `NavGraph` — never a bare `composable`, which
-   leaves the screen untestable. (Not every `Route` is a screen — some features are tabs inside
-   a parent screen; validate before wiring.)
+   `taggedComposable<Route.X>(ScreenTags.X)` in **its feature's `<Feature>Graph.kt`** — never in
+   `NavGraph.kt`, which has registered nothing since PR 12 of #551, and never a bare `composable`,
+   which leaves the screen untestable. (Not every `Route` is a screen — some features are tabs
+   inside a parent screen; validate before wiring.) `EveryRouteIsRegisteredTest` compares the
+   registered *set* against the declared one, both directions; a missing registration is a blank
+   screen at runtime, not a build error.
 7. No hardcoded `Color(0xFF…)` in screens — use `MaterialTheme.colorScheme.*` / `NimazColors.*`
    and reuse `presentation/components` (atoms/molecules/organisms).
 8. **Interactive UI comes from the design system — never hand-rolled.** A button is `NimazButton`
@@ -131,7 +271,26 @@ The obligations, in short:
 ```bash
 ./gradlew :app:compileDebugKotlin     # runs KSP → validates Hilt + Room wiring
 ./gradlew :app:testDebugUnitTest
-./gradlew :app:lintDebug              # SLOW (~10 min) and CI-blocking — do not skip it
+./gradlew :core:domain:check          # domain tests + androidFreeClasspath — seconds, no Android
+./gradlew :core:common:check          # module tests + moduleBoundary + its own lint
+./gradlew :core:database:check        # Room identity hashes + moduleBoundary
+./gradlew :core:datastore:check       # preference-key golden + moduleBoundary
+./gradlew :core:data:check            # repository tests + public-API leak guard + moduleBoundary
+./gradlew :core:ui:check              # design-system component tests + moduleBoundary + its lint
+./gradlew :core:navigation:check      # route vocabulary + the no-presentation-imports guard
+./gradlew :feature:widget:check       # the widgets + moduleBoundary + its own lint
+./gradlew :feature:onboarding:check   # the first-run flow
+./gradlew :feature:about:check        # about/help/more
+./gradlew :feature:tools:check        # zakat
+./gradlew :feature:calendar:check     # Islamic calendar
+./gradlew :feature:search:check       # search + Ask with Proof
+./gradlew :feature:content:check      # the library — eight screen packages
+./gradlew :feature:tracker:check      # prayer tracking, fasting, tasbih
+./gradlew :feature:quran:check        # reader, khatam, bookmarks
+./gradlew :feature:prayer:check       # prayer times, qibla, night worship
+./gradlew :feature:settings:check     # settings, location, sync
+./gradlew :app:jacocoTestReport --dry-run   # see below — seconds, and catches a whole class of red CI
+./gradlew lintDebug                   # SLOW and CI-blocking — every module, not just :app
 python3 scripts/check_docs.py         # docs still describe the code (no toolchain needed)
 
 # Only when a Route, a ScreenTags entry or a screen's signature changed:
@@ -142,6 +301,18 @@ python3 scripts/check_docs.py         # docs still describe the code (no toolcha
 constants directly, so removing or renaming one leaves the instrumented source set broken while
 all four gates stay green — a branch that goes out clean locally and red on the emulator. If you
 touched navigation, build `androidTest` too.
+
+**The configuration cache turns a build-script mistake into a failed build, and `--dry-run`
+is how you find one cheaply.** `gradle.properties` sets `configuration-cache=true` with
+`problems=fail`, so a task action that captures a build-script *function* or an instance of a
+build-script *class* fails the build with *"cannot serialize Gradle script object references"* —
+at cache-**storage** time, which happens whether or not the task's own dependencies can run. That
+matters here because several gates (`jacocoTestReport`, `assembleRelease`) depend on
+`fetchNimazData`, which needs a credential for the private content repo; without one those tasks
+never execute locally and the mistake reaches CI. `--dry-run` still configures the build and
+stores the cache entry, so it catches the problem in seconds with no credential. Inside a
+`doLast`, capture plain values — `String`, `List<Pair<String, String>>`, a `Provider` — and
+inline the logic rather than calling a helper declared in the same script.
 
 **`lintDebug` is a real gate, not an optional extra.** `fastlane/Fastfile`'s `test` lane runs
 `:app:testDebugUnitTest` *and* `:app:lintDebug` — the same two tasks listed above — so every PR

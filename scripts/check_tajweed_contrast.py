@@ -23,7 +23,29 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-THEME = ROOT / "app/src/main/java/com/arshadshah/nimaz/presentation/theme"
+
+# The theme moved from :app to :core:ui in PR 10 of #551, and will not be the last thing to move
+# while the module split is under way. Resolve it rather than hardcode it, newest home first, and
+# fail with the list of places looked in — a wrong path here is a crash, not a silent pass, but
+# only if the error says where it looked.
+THEME_CANDIDATES = [
+    ROOT / "core/ui/src/main/kotlin/com/arshadshah/nimaz/presentation/theme",
+    ROOT / "app/src/main/java/com/arshadshah/nimaz/presentation/theme",
+]
+
+
+def _find_theme():
+    for candidate in THEME_CANDIDATES:
+        if (candidate / "Palette.kt").is_file():
+            return candidate
+    looked = "\n  ".join(str(c) for c in THEME_CANDIDATES)
+    raise SystemExit(
+        f"Palette.kt not found. Looked in:\n  {looked}\n"
+        "If the theme moved again, add its new home to THEME_CANDIDATES."
+    )
+
+
+THEME = _find_theme()
 PALETTE = THEME / "Palette.kt"
 COLOR = THEME / "Color.kt"
 

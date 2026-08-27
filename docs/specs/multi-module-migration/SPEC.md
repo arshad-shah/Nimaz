@@ -60,9 +60,28 @@ Within `presentation/`, the design system is the larger half:
 This matters, because each item below is work a typical modularization has to do *first* and
 that Nimaz has already done. The migration is unusually well-prepared.
 
-1. **The domain layer is genuinely pure.** Across 103 files there is not one `android`,
-   `androidx`, `dagger`, `room` or Firebase import. The only external annotation is
-   `javax.inject.Inject` (28 files) — a plain JVM annotation, fine in a `kotlin-jvm` module.
+1. **The domain layer is pure — after PR 4 (#555), and only *directly* before it.** Across 103
+   files there is not one **direct** `android`, `androidx`, `dagger`, `room` or Firebase import,
+   and the only external annotation is `javax.inject.Inject` (28 files) — a plain JVM annotation,
+   fine in a `kotlin-jvm` module.
+
+   That claim as originally written was false, and in the way that mattered: an import census
+   only sees direct edges. `domain/usecase/notification/RescheduleNotificationsUseCase` **injected
+   the concrete `core/util/PrayerNotificationScheduler`**, which imports `AlarmManager`,
+   `NotificationChannel`, `PendingIntent`, `Context`, `NotificationCompat`, `R` and
+   `@ApplicationContext`. Domain therefore depended on Android *transitively*, and `:core:domain`
+   could not have compiled without Android on its classpath — the very exit criterion of PR 5
+   (#556). Two `SettingsRepository` extensions in `core/util/PrayerNotificationPrefs.kt` were a
+   milder case of the same thing: pure JVM, merely misplaced.
+
+   **PR 4 fixed both**, along with the five `core.navigation.Route` imports of §3.7 (two of which
+   were in domain *tests*, invisible to that section's `src/main`-only grep). The scheduler is now
+   behind the `PrayerAlarmScheduler` port in `domain/repository/`, a sibling of `WidgetRefresher`
+   and `CompassSensors`; the extensions moved to `domain/repository/PrayerNotificationPrefs.kt`.
+   Only the direction of the arrows changed — no behaviour did.
+
+   The lesson generalises past this one file: when a later phase asserts "module X has no
+   dependency on Y", assert it by **resolving the compile classpath**, not by grepping imports.
    `:core:domain` can be a non-Android module on day one.
 2. **Screens are navigation-decoupled.** 84 of 107 screen files take `onNavigate`/`onBack`
    lambdas; only 7 import `NavController` or `NavHostController`. This is the single biggest
@@ -150,15 +169,30 @@ Nothing in it is "core" in the dependency-order sense:
 
 `core/util` has to be triaged file by file before anything can depend on it.
 
-### 3.7 A domain → navigation inversion
+### 3.7 A domain → navigation inversion — done in PR 4 (#555)
 
-Five domain files import `core.navigation.Route`: `UnifiedBookmark.kt`, `AiModels.kt`,
-`Announcement.kt`, `AskWithProofUseCase.kt`, `AnnouncementUseCases.kt`. Domain must not know
-about navigation. Hold a domain-level target type and map it to `Route` at the presentation edge.
+Five domain files imported `core.navigation.Route`: `UnifiedBookmark.kt`, `AiModels.kt`,
+`Announcement.kt`, `AskWithProofUseCase.kt`, `AnnouncementUseCases.kt` — plus two domain **test**
+files, `AnnouncementUseCasesTest.kt` and `AskWithProofUseCaseTest.kt`, which a `src/main`-only
+grep never sees. Domain must not know about navigation.
 
-Three further references are KDoc-only (`QuranReciter.kt`, `MushafLayout.kt`,
-`QuranTranslation.kt` point at `data`/`presentation` symbols in comments). Harmless to the
-compiler, but they read as real dependencies to the next person.
+Only one of the five needed a domain type. The rest were less work than they looked:
+
+| Site | What it actually was | Fix |
+|---|---|---|
+| `UnifiedBookmark.kt` | a **dead import** — the type navigates by `surahNumber`/`hadithBookId`/`duaId` | delete the line |
+| `Announcement.kt` | `NavigateToFeature(routeKey, route)` — the `route` was **dead payload**, read by nothing outside domain | `NavigateToFeature(routeKey: String)` |
+| `AnnouncementUseCases.kt` | needed *validity*, not a destination | `isKnownFeatureKey: (String) -> Boolean`, wired as `{ announcementRoute(it) != null }` |
+| `AiModels.kt` / `AskWithProofUseCase.kt` | the genuine case | `Proof.target: ContentTarget` (`Ayah` \| `Hadith`) + `ContentTarget.toRoute()` in `core/navigation`, called in `NavGraph` |
+
+The lesson worth carrying into later phases: *an outward import is not automatically an outward
+dependency*. Three of the five carried no information the outer layer was using. Check what reads
+a field before designing a type to replace it.
+
+Three further references were KDoc-only (`QuranReciter.kt`, `MushafLayout.kt`,
+`QuranTranslation.kt` pointed at `data`/`presentation` symbols in comments). Harmless to the
+compiler, but they read as real dependencies to the next person — the fully-qualified links are
+gone, the prose stayed.
 
 ### 3.8 No convention-plugin infrastructure
 
@@ -197,11 +231,15 @@ That applies to every library module too.
         ├─ :core:data        19 repository impls + mappers
         ├─ :core:database    both Room DBs, 15 entities, 22 DAOs, migrations, schemas/
         ├─ :core:datastore   PreferencesDataStore + the 11 SettingsSeams impls
-        ├─ :core:common      util, time, monitoring, share, text
-        └─ :core:domain      models, repository interfaces, 33 use cases   ← pure JVM
+        ├─ :core:common      seven formatting helpers left from core/util, plus
+        │                    monitoring and text. NOT share — it renders bitmaps
+        │                    and uses R, so it belongs in :core:ui
+        └─ :core:domain      models, repository interfaces, 33 use-case files,
+                             domain/search, and the four pure calculators domain
+                             imports: time, calendar, worship, prayer   ← pure JVM
 ```
 
-Eleven feature modules, seven core modules. Rules: `:core:*` never depends on `:feature:*`;
+Eleven feature modules, eight core modules — `:core:audio` was added during validation (#551); see the epic comment of 2026-08-21. Rules: `:core:*` never depends on `:feature:*`;
 no `:feature:*` depends on another `:feature:*`; only `:app` depends on features.
 
 Feature-specific molecules and organisms (`Home*`, `Mushaf*`, `Qaida*`, `Quran*`, `Prayer*`,
@@ -229,18 +267,51 @@ generic `Nimaz*` components stay in `:core:ui`.
 
 ### Phase 1 — Extract `:core:domain` as a pure JVM module
 
-Fix §3.7 first (the five `Route` imports and the three KDoc references), then move `domain/`
-wholesale under the `kotlin-jvm` plugin.
+§3.7's outward references (the five `Route` imports, the three KDoc links, and the transitive
+Android dependency described in §1 above) are fixed in **PR 4 (#555)**, which lands first. Phase 1
+then moves `domain/` wholesale under the `kotlin-jvm` plugin, **plus the first slice of the
+`core/util` triage** — `HijriDateCalculator`, `TodayProvider`, `NextWorshipResolver`,
+`PrayerTimeCalculator` and `WorshipReminderCalculator`, which domain imports and which therefore
+cannot wait for `:core:common` without reversing the arrow. They land as
+`domain/{calendar,time,worship,prayer}`.
 
 Highest-leverage single step: it compiles without AGP or Robolectric, its tests run in seconds,
 and from here a stray `import android.*` in domain is a build failure rather than a review
 comment. The sibling repo `arshad-shah/foolscap` ran exactly this step ("Make the pure layer its
 own module") and is the model to copy.
 
+**Three costs worth knowing before the later phases repeat them:**
+
+1. **Cross-module smart casts.** Kotlin refuses to smart-cast a `val` declared in another
+   module, because that module could change it in a later version. Twenty-seven call sites of
+   the shape `if (model.field != null) use(model.field)` over a domain model stopped compiling
+   and were rewritten to bind a local first. Every later module that exports a model with
+   nullable fields pays this again, proportional to how much UI reads those fields.
+2. **Test fixtures need a channel.** Fakes used on both sides of a boundary — `FakeTodayProvider`
+   in 21 `:app` tests and `FakeSearchSettings` in two — go in `src/testFixtures` and are consumed
+   with `testImplementation(testFixtures(project(...)))`. Duplicating them would be the easy
+   wrong answer.
+3. **Test resources do not follow their tests.** `fold-fixtures.json` is written into the repo by
+   `nz app sync` in the *data* repo, so moving it moves a cross-repo contract. It moved with the
+   test that reads it, and `ArabicSearchNormaliserTest` now fails if a copy reappears at the old
+   path — otherwise the sync tool would keep refreshing a file nothing reads while the tests
+   asserted happily against a stale one.
+
 ### Phase 2 — The data-side core modules
 
-Triage `core/util` first (§3.6) — split genuinely shared helpers into `:core:common` and push
-the rest down to their real owners. Then:
+Finish the `core/util` triage (§3.6). Phase 1 already took the five files domain imports; split
+what remains between genuinely shared helpers in `:core:common` and files pushed down to their
+real owners.
+
+**Most of the triage resolves to "not yet".** At this point `:core:ui`, `:core:data` and every
+feature module are still hypothetical, so twelve of the nineteen remaining files have a decided
+destination and no module to go to. They stay in `:app` **with the destination recorded**, which
+has to be said loudly in the PR or it reads as exactly the "file that quietly stayed behind"
+failure this document warns about. The same will be true of every triage in later phases.
+
+One constraint that outlives this phase: **anything below `:core:ui` cannot reference `R`**, and
+nine `core/` files did. That is what `core/text/StringProvider` is for, and it is now the only
+way a module below `:core:ui` resolves a string outside a composable. Then:
 
 - `:core:database` — both `@Database` classes, entities, DAOs, migrations, **and the `schemas/`
   directory**; the `room.schemaLocation` KSP arg and the `androidTest` `assets.srcDir(schemas)`
@@ -306,8 +377,11 @@ Six tiers, cheapest and most automatic first. Every phase gate runs tiers 1–3.
 
 This is the return on the whole exercise, so it is worth stating as the success metric rather
 than a side effect. Today `presentation → domain → data` is enforced by review alone — there is
-no architecture test in the repo. After Phase 1 it is enforced by the absence of the Android SDK
-on `:core:domain`'s classpath.
+no architecture test in the repo. After Phase 1 it is enforced twice: by the absence of the
+Android SDK on `:core:domain`'s classpath, and by `androidFreeClasspath` — a `check`-wired task
+that fails on any `com.android` / `androidx` / `com.google.android` component reaching any of the
+module's resolvable classpaths. The first stops an `import`; only the second stops a `dependencies
+{ }` line, and a rule that only holds on the day of the PR is not enforcement.
 
 **Metric:** count the architectural rules that became compile errors at each phase. If a phase
 adds no enforcement, ask why it is being done.
@@ -405,8 +479,14 @@ Runtime-only hazards:
 
 ### 6.5 Tier 5 — did it actually pay off?
 
-Baseline all of these in Phase 0 and re-measure at every phase gate. The known starting point is
-`:app:compileDebugKotlin` = 3m 44s cold.
+Baseline all of these in Phase 0 and re-measure at every phase gate.
+
+**The baseline is [`BASELINE.md`](BASELINE.md)** — measured on `mm/02-baseline-metrics`, with the
+protocol it was taken under written down beside it. The `:app:compileDebugKotlin` = 3m 44s figure
+that used to stand here has **no recorded protocol** (no branch, daemon state, `clean` vs
+`--rerun-tasks`, or content-cache state) and is not reproducible as stated; do not compare
+against it. `BASELINE.md` also records which rows are expected *not* to improve, and pins exactly
+which number the stopping rule below is read from.
 
 | Measurement | Expectation |
 |---|---|
@@ -416,7 +496,7 @@ Baseline all of these in Phase 0 and re-measure at every phase gate. The known s
 | Incremental: touch a `domain` model | Will not improve much |
 | Incremental: touch `strings.xml` | Will not improve; deliberately unsplit |
 | `testDebugUnitTest` wall time | Should improve via parallel module execution |
-| `:core:domain:test` alone | Should drop to seconds |
+| `:core:domain:test` alone | **11s for 525 tests** at the PR 5 gate, against ~50s for the whole `:app` suite. No pre-migration value exists; these are not the same set of tests and the figures are not a speedup. |
 | Configuration time (`--profile`) | Watch it — more modules means more configuration |
 
 **Stopping rule:** if incremental rebuild after touching a leaf screen has not improved by at

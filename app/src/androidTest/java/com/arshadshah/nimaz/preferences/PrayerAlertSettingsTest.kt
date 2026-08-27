@@ -1,10 +1,10 @@
 package com.arshadshah.nimaz.preferences
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.arshadshah.nimaz.core.util.preReminderMinutesByPrayer
 import com.arshadshah.nimaz.domain.model.PrayerAlertStyle
 import com.arshadshah.nimaz.domain.model.PrayerType
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
+import com.arshadshah.nimaz.domain.repository.preReminderMinutesByPrayer
 import com.google.common.truth.Truth.assertThat
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest

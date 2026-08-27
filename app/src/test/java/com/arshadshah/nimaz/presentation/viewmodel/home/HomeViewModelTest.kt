@@ -1,15 +1,15 @@
 package com.arshadshah.nimaz.presentation.viewmodel.home
 
-import com.arshadshah.nimaz.presentation.viewmodel.FakePermissionChecker
-import com.arshadshah.nimaz.presentation.viewmodel.FakePowerSettings
-import com.arshadshah.nimaz.presentation.viewmodel.FakeStringProvider
-import com.arshadshah.nimaz.presentation.viewmodel.RecordingWidgetRefresher
+import com.arshadshah.nimaz.domain.repository.FakePermissionChecker
+import com.arshadshah.nimaz.domain.repository.FakePowerSettings
+import com.arshadshah.nimaz.core.text.FakeStringProvider
+import com.arshadshah.nimaz.domain.repository.RecordingWidgetRefresher
 import com.arshadshah.nimaz.core.monitoring.RecordingTelemetry
 import android.app.Application
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
-import com.arshadshah.nimaz.core.time.FakeTodayProvider
-import com.arshadshah.nimaz.core.util.NextWorshipResolver
+import com.arshadshah.nimaz.domain.time.FakeTodayProvider
+import com.arshadshah.nimaz.domain.worship.NextWorshipResolver
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.model.PrayerName
 import com.arshadshah.nimaz.domain.model.PrayerStatus
@@ -20,7 +20,7 @@ import com.arshadshah.nimaz.domain.repository.DuaRepository
 import com.arshadshah.nimaz.domain.repository.FastingRepository
 import com.arshadshah.nimaz.domain.repository.HadithRepository
 import com.arshadshah.nimaz.domain.repository.PrayerRepository
-import com.arshadshah.nimaz.presentation.viewmodel.prayerCalculationSettings
+import com.arshadshah.nimaz.domain.usecase.prayerCalculationSettings
 import com.google.common.truth.Truth.assertThat
 import io.mockk.clearMocks
 import io.mockk.coEvery
@@ -32,6 +32,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestCoroutineScheduler
@@ -47,12 +48,12 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import java.util.concurrent.atomic.AtomicReference
-import com.arshadshah.nimaz.presentation.viewmodel.buildAnnouncementUseCases
-import com.arshadshah.nimaz.presentation.viewmodel.buildDuaUseCases
-import com.arshadshah.nimaz.presentation.viewmodel.buildFastingUseCases
-import com.arshadshah.nimaz.presentation.viewmodel.buildHadithUseCases
-import com.arshadshah.nimaz.presentation.viewmodel.buildObserveEventCardsUseCase
-import com.arshadshah.nimaz.presentation.viewmodel.buildPrayerUseCases
+import com.arshadshah.nimaz.domain.usecase.buildAnnouncementUseCases
+import com.arshadshah.nimaz.domain.usecase.buildDuaUseCases
+import com.arshadshah.nimaz.domain.usecase.buildFastingUseCases
+import com.arshadshah.nimaz.domain.usecase.buildHadithUseCases
+import com.arshadshah.nimaz.domain.usecase.buildObserveEventCardsUseCase
+import com.arshadshah.nimaz.domain.usecase.buildPrayerUseCases
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(RobolectricTestRunner::class)
@@ -261,5 +262,43 @@ class HomeViewModelTest {
             scheduler.advanceTimeBy(30_000)
 
             coVerify(exactly = 0) { nextWorshipResolver.nearest(any()) }
+        }
+
+    @Test
+    fun `a record arriving after the card is built updates Home without a tap`() =
+        withScheduler { scheduler, _ ->
+            // Home showed every prayer as unrecorded until you tapped one. `loadPrayerRecords()`
+            // collected the records flow into `_prayerRecords`, but `_prayerRecords` is not part
+            // of the exposed state: `publishPrayerDisplays()` snapshots it into
+            // `PrayerTimeDisplay.prayerStatus`, and its only caller was `calculatePrayerTimes()`.
+            // That runs when the day's schedule is computed — normally *before* Room has emitted
+            // — so the card was built from an empty map and nothing republished when the records
+            // landed. Tapping looked like a fix only because the tap handlers patch `_state`
+            // directly.
+            //
+            // The ordering below is the real one, which is why the records flow has to be hot: a
+            // `flowOf(records)` emits during construction and would pass against the broken code.
+            every {
+                prayerRepository.getDaySchedule(any(), any())
+            } returns samplePrayerTimes()
+            coEvery { nextWorshipResolver.nearest(any()) } returns null
+            val records = MutableStateFlow<Map<PrayerName, PrayerStatus>>(emptyMap())
+            every { prayerRepository.getTodayPrayerRecords() } returns records
+
+            val viewModel = createViewModel()
+            viewModel.onEvent(HomeEvent.RefreshPrayerTimes)
+            scheduler.advanceTimeBy(1_000)
+
+            assertThat(viewModel.state.value.prayerTimes).isNotEmpty()
+            assertThat(viewModel.state.value.prayerTimes.map { it.prayerStatus })
+                .doesNotContain(PrayerStatus.PRAYED)
+
+            // Recorded somewhere else entirely: the tracker screen, a widget, or the
+            // notification action. Home must follow it with no interaction of its own.
+            records.value = mapOf(PrayerName.FAJR to PrayerStatus.PRAYED)
+            scheduler.advanceTimeBy(1_000)
+
+            val fajr = viewModel.state.value.prayerTimes.first { it.type == PrayerType.FAJR }
+            assertThat(fajr.prayerStatus).isEqualTo(PrayerStatus.PRAYED)
         }
 }

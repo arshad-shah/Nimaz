@@ -1,0 +1,13 @@
+# Preference keys that were deliberately removed.
+#
+# A key listed here is one whose stored value was abandoned on purpose. Adding a line is the
+# explicit act `PreferenceKeyGoldenTest` requires before it will accept a key disappearing from
+# `PreferencesDataStore.kt` — because the default outcome of a removal is that every existing
+# user's setting silently resets, and that should never be absorbed by regenerating a file.
+#
+# Format:   <key>\t<versionCode>\t<one-line reason>
+#
+# Before adding a line, check it is genuinely a retirement and not a rename. A rename needs the
+# old key to keep being read, or migrated — see PrayerNotificationPrefsMigration for the shape.
+#
+# (Empty. No preference key has been retired.)

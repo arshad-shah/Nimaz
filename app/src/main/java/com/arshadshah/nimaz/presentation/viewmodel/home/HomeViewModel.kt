@@ -2,17 +2,17 @@ package com.arshadshah.nimaz.presentation.viewmodel.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.ui.R
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.core.text.StringProvider
-import com.arshadshah.nimaz.core.time.TodayProvider
-import com.arshadshah.nimaz.core.util.HijriDateCalculator
-import com.arshadshah.nimaz.core.util.MILLIS_PER_DAY
-import com.arshadshah.nimaz.core.util.NextWorshipResolver
+import com.arshadshah.nimaz.domain.time.TodayProvider
+import com.arshadshah.nimaz.domain.calendar.HijriDateCalculator
+import com.arshadshah.nimaz.core.common.MILLIS_PER_DAY
+import com.arshadshah.nimaz.domain.worship.NextWorshipResolver
 import com.arshadshah.nimaz.core.util.WorshipReminderContent
-import com.arshadshah.nimaz.core.util.toUtcMidnightMillis
+import com.arshadshah.nimaz.core.common.toUtcMidnightMillis
 import com.arshadshah.nimaz.domain.model.AnnouncementAction
 import com.arshadshah.nimaz.domain.model.AnnouncementType
 import com.arshadshah.nimaz.domain.model.FallbackLocation
@@ -110,7 +110,7 @@ class HomeViewModel @Inject constructor(
                     active.id != lastRejectedAnnouncementId
                 ) {
                     lastRejectedAnnouncementId = active.id
-                    AppAnalytics.logAnnouncementRouteRejected(active.id, active.route)
+                    telemetry.announcementRouteRejected(active.id, active.route)
                 }
                 AnnouncementUiState(
                     announcement = active,
@@ -121,7 +121,7 @@ class HomeViewModel @Inject constructor(
                 val active = uiState.announcement ?: return@onEach
                 if (active.id != lastShownAnnouncementId) {
                     lastShownAnnouncementId = active.id
-                    AppAnalytics.logAnnouncementShown(active.id, active.type.key)
+                    telemetry.announcementShown(active.id, active.type.key)
                 }
             }
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), AnnouncementUiState())
@@ -138,6 +138,24 @@ class HomeViewModel @Inject constructor(
     private var prayerRecordsJob: Job? = null
     private var dailyHadithJob: Job? = null
     private var dailyDuaJob: Job? = null
+
+    // ── Cached heavy results ────────────────────────────────────────────────
+    // Today's prayer instants and tomorrow's Fajr, plus the date they were
+    // computed for. Recomputed only when their inputs change (location,
+    // calculation settings, time format, date roll-over) — never on a countdown
+    // tick, which re-derives everything below from these cached values.
+    //
+    // **Declared above `init{}` for the same reason `_prayerRecords` is**, and it is the
+    // same hazard one field further on: Kotlin runs property initializers in declaration
+    // order, so anything `init{}` reaches can still be null if it is declared below.
+    // `loadPrayerRecords()` collects a Room flow that emits synchronously on an unconfined
+    // dispatch during construction, and its collector calls `publishPrayerDisplays()`,
+    // which reads all three of these. Declared after `init{}` they are null at that moment,
+    // the NPE is swallowed by `launchSafely`, and the collect job dies silently — so Home
+    // never hears about a prayer record again for the lifetime of the ViewModel.
+    private var dayTimes: List<PrayerTime> = emptyList()
+    private var dayTimesDate: LocalDate? = null
+    private var tomorrowFajr: Instant? = null
 
     init {
         checkPermissions()
@@ -202,6 +220,20 @@ class HomeViewModel @Inject constructor(
             launchSafely(telemetry, AppAnalytics.Feature.HOME, "load_prayer_records") {
                 prayerUseCases.getTodayPrayerRecords().collect { records ->
                     _prayerRecords.update { records }
+                    // `_prayerRecords` is not part of the exposed state, and nothing republished
+                    // when it changed: `publishPrayerDisplays()` snapshots `_prayerRecords.value`
+                    // into `PrayerTimeDisplay.prayerStatus`, and its only caller was
+                    // `calculatePrayerTimes()` — which runs when the day's schedule is computed,
+                    // normally *before* this flow has emitted. Home built its card from an empty
+                    // map and never heard the records arrive, so every prayer read "unrecorded"
+                    // until a tap. Tapping only looked like a fix because the tap handlers patch
+                    // `_state` directly.
+                    //
+                    // Republishing here is what makes the card reactive: a record written on the
+                    // tracker screen, by a widget or by the notification action reaches Home with
+                    // no interaction. Safe to call at any time — it returns immediately while
+                    // `dayTimes` is empty, and StateFlow conflates an identical republish.
+                    publishPrayerDisplays()
                 }
             }
     }
@@ -314,7 +346,7 @@ class HomeViewModel @Inject constructor(
         val active = announcement.value.announcement ?: return
         launchSafely(telemetry, AppAnalytics.Feature.HOME, "dismiss_announcement") {
             announcementUseCases.dismissAnnouncement(active.id)
-            AppAnalytics.logAnnouncementDismissed(active.id)
+            telemetry.announcementDismissed(active.id)
         }
     }
 
@@ -322,7 +354,7 @@ class HomeViewModel @Inject constructor(
     // callback (NavGraph owns the controller); the VM only records the click.
     private fun logAnnouncementCta() {
         val active = announcement.value.announcement ?: return
-        AppAnalytics.logAnnouncementCtaClicked(active.id, active.route)
+        telemetry.announcementCtaClicked(active.id, active.route)
     }
 
     private fun checkPermissions() {
@@ -453,15 +485,6 @@ class HomeViewModel @Inject constructor(
             calculatePrayerTimes()
         }
     }
-
-    // ── Cached heavy results ────────────────────────────────────────────────
-    // Today's prayer instants and tomorrow's Fajr, plus the date they were
-    // computed for. Recomputed only when their inputs change (location,
-    // calculation settings, time format, date roll-over) — never on a countdown
-    // tick, which re-derives everything below from these cached values.
-    private var dayTimes: List<PrayerTime> = emptyList()
-    private var dayTimesDate: LocalDate? = null
-    private var tomorrowFajr: Instant? = null
 
     // Nearest upcoming worship reminder. Resolving one costs ~30 sequential
     // DataStore reads, but `eventAt` is a fixed instant and the card's countdown

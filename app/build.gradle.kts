@@ -1,12 +1,23 @@
+import org.gradle.api.tasks.PathSensitivity
+import com.arshadshah.nimaz.buildlogic.COVERAGE_EXCLUSIONS
+import com.arshadshah.nimaz.buildlogic.FetchNimazDataTask
+import com.arshadshah.nimaz.buildlogic.NimazDataCredentials
+import com.arshadshah.nimaz.buildlogic.NimazDataLockParser
+import com.arshadshah.nimaz.buildlogic.orderAssetConsumersAfter
+
 plugins {
-    alias(libs.plugins.android.application)
-    // AGP 9 compiles Kotlin via built-in support; the standalone kotlin.android
-    // plugin must not be applied.
-    alias(libs.plugins.kotlin.compose)
+    // Convention plugins from the `build-logic` included build. They carry compileSdk 37,
+    // minSdk 29, Java 21, the `-Xannotation-default-target=param-property` compiler arg, the
+    // Compose compiler + `buildFeatures.compose`, and the Hilt/KSP wiring — so this file no
+    // longer states any of it and eighteen future modules will not restate it either.
+    //
+    // AGP 9 compiles Kotlin via built-in support; neither this file nor the convention plugins
+    // apply the standalone org.jetbrains.kotlin.android plugin.
+    id("nimaz.android.application")
+    id("nimaz.android.compose")
+    id("nimaz.android.hilt")
     alias(libs.plugins.kotlin.serialization)
     id("kotlin-parcelize")
-    alias(libs.plugins.ksp)
-    alias(libs.plugins.hilt)
     alias(libs.plugins.about.libs.plugin)
     alias(libs.plugins.baselineprofile)
     jacoco
@@ -16,6 +27,55 @@ jacoco {
     toolVersion = "0.8.12"
 }
 
+/**
+ * `:app` is on the ratchet — on **lines only**, and the missing branch floor is the finding
+ * rather than an omission.
+ *
+ * Line coverage is the standard 0.80, met at **82.6%** with 142 lines of margin. Branch coverage
+ * is **53.5%**, and neither of the two values the campaign sanctions (#604) is available:
+ *
+ * | where the module's 1,790 missing branches are | count |
+ * |---|---|
+ * | composable signature / parameter masks        |   786 |
+ * | ordinary logic                                |   495 |
+ * | `NavGraph` + `MainActivity`                   |   194 |
+ * | ExoPlayer listener paths                      |   180 |
+ *
+ * **0.80 is arithmetically impossible.** Cover every branch outside the signature masks — every
+ * `when`, every null-check, the whole composition root, the whole player — and the module reads
+ * **76.1%**. The masks are the Compose compiler's `$dirty` skippability check, emitted once per
+ * parameter of every restartable composable; which side runs depends on what the *caller* changed
+ * between recompositions, so no test can take both. `:app`'s composables are unusually wide —
+ * `HomeScreen` takes 17 parameters and hands 19 to `HomeCompactContent` and 18 to
+ * `HomeTabletContent` — so 44% of the module's branches are mask, against 17% in `:core:ui`.
+ *
+ * **0.60 would be a floor with no headroom.** Of the 495 ordinary-logic branches, 144 sit inside
+ * `@Preview` and `*Showcase` bodies, which are tooling and never run. Cover every one of the 351
+ * that remain and the module reads about **62.6%** — two points over a 0.60 gate, which the next
+ * composable added would spend. A floor that tight measures how many parameters the screens
+ * happen to have, not whether they are tested; #604 rule 3 rejects exactly that.
+ *
+ * So this module states its branch number rather than gating it, and `docs/TESTING.md` records
+ * why. Raising it means narrowing the composables, not lowering the bar.
+ *
+ * ### What is left uncovered on purpose
+ *
+ * - **`NavGraph` and `MainActivity`** (252 lines, 194 branches, both at 0%). `MainActivity` is
+ *   `@AndroidEntryPoint` and its body is `setContent { NavGraph(…) }`; a destination inside a
+ *   `NavHost` gets a `NavBackStackEntry` as its `ViewModelStoreOwner`, which *is* a
+ *   `HasDefaultViewModelProviderFactory`, so Hilt's factory is constructed before any seeded
+ *   store is read (#604 playbook item 8). They are the instrumented suite's job — see
+ *   `app/src/androidTest`'s navigation package, which drives the real graph on a device.
+ * - **`QuranAudioManager`'s player listener** (180 branches). Its arms fire on ExoPlayer
+ *   reaching `STATE_ENDED` or transitioning media items, which needs a player actually decoding
+ *   audio rather than one Robolectric has stubbed.
+ * - **`@Preview` bodies.** 35 preview functions across the module, none of which the app runs.
+ */
+nimazCoverage {
+    lineFloor.set(0.80)
+    // No branchFloor: see above. 53.5% today, 76.1% if everything reachable were covered.
+}
+
 // Firebase (Crashlytics + Analytics) is configured via google-services.json,
 // which CI injects from secrets only for the release/deploy build. PR checks and
 // local debug builds run without it, so apply the Google plugins only when the
@@ -23,7 +83,14 @@ jacoco {
 // Firebase SDK calls in the app are guarded to no-op when Firebase is not
 // initialized, so builds without the config still run correctly (just without
 // crash/analytics reporting).
-if (file("google-services.json").exists()) {
+//
+// Read through `providers.fileContents`, not `file(...).exists()`: the presence of this file
+// decides which plugins are applied, so it has to be a *tracked* configuration input. An
+// untracked filesystem probe would let a cached configuration survive CI dropping the file in,
+// and the cached build would then produce a release APK with no Crashlytics in it.
+val googleServicesConfig =
+    providers.fileContents(layout.projectDirectory.file("google-services.json")).asText
+if (googleServicesConfig.isPresent) {
     apply(plugin = libs.plugins.google.services.get().pluginId)
     apply(plugin = libs.plugins.firebase.crashlytics.get().pluginId)
     apply(plugin = libs.plugins.firebase.perf.get().pluginId)
@@ -66,18 +133,17 @@ androidComponents.finalizeDsl { extension ->
 
 android {
     namespace = "com.arshadshah.nimaz"
-    compileSdk = 37
+    // compileSdk, minSdk and Java 21 come from `nimaz.android.application`.
 
     defaultConfig {
         applicationId = "com.arshadshah.nimaz"
-        minSdk = 29
         targetSdk = 36
         // Source of truth for the app version. CI bumps these at build time and
         // pushes the change back to dev (with a bypass GitHub App token) after a successful
         // deploy, so the committed baseline stays in sync for the next build.
 
-        versionCode = 428
-        versionName = "3.0.127"
+        versionCode = 432
+        versionName = "3.0.131"
 
         // Custom runner swaps in HiltTestApplication so instrumented tests run on
         // the full Hilt graph without NimazApp's Firebase / AppInitializer / device
@@ -86,14 +152,15 @@ android {
 
         // Room schema export
         ksp {
-            arg("room.schemaLocation", "$projectDir/schemas")
+            // room.schemaLocation moved to :core:database with the Room compiler — see
+            // core/database/build.gradle.kts. Nothing in :app declares an @Entity any more.
         }
 
         // Cloud project number backing the Play Integrity standard request. Driven
         // by the gradle property `playIntegrityCloudProjectNumber` (placeholder 0
         // until the real Google Cloud project is wired up — see gradle.properties).
         val playIntegrityProjectNumber =
-            (project.findProperty("playIntegrityCloudProjectNumber") as String?) ?: "0"
+            providers.gradleProperty("playIntegrityCloudProjectNumber").getOrElse("0")
         buildConfigField(
             "long",
             "PLAY_INTEGRITY_CLOUD_PROJECT_NUMBER",
@@ -104,19 +171,33 @@ android {
         // at runtime whether the database on disk is the one it ships with. Read from the same
         // data.lock.json the fetch task verifies against, so the two cannot disagree — see
         // ContentArtifactInstaller.
-        @Suppress("UNCHECKED_CAST")
-        val contentArtifactSha = (
-            (groovy.json.JsonSlurper().parse(rootProject.file("data.lock.json"))
-                as Map<String, Any>)["artifact"] as Map<String, Any>
-            )["sha256"] as String
+        //
+        // `providers.fileContents`, not `JsonSlurper().parse(File)`: parsing the file directly
+        // is an untracked read, so with the configuration cache on, a changed pin would not
+        // invalidate the cached configuration and a **stale sha would be baked into the APK** —
+        // silent, and wrong in the one place that decides whether the shipped database is
+        // replaced on upgrade. The parser is shared with `fetchNimazData` so the two readers of
+        // this file cannot drift.
+        val contentArtifactSha = NimazDataLockParser.parse(
+            providers.fileContents(
+                rootProject.layout.projectDirectory.file("data.lock.json")
+            ).asText.get()
+        ).artifact.sha256
         buildConfigField("String", "CONTENT_ARTIFACT_SHA256", "\"$contentArtifactSha\"")
     }
 
     // Ship the exported Room schemas as androidTest assets so MigrationTestHelper can
     // load them on-device (it looks for `<DatabaseClass>/<version>.json` under assets).
+    //
+    // Repointed at `:core:database`, which owns the schemas and the `room.schemaLocation` arg
+    // that writes them. The migration and DAO tests themselves deliberately stay here:
+    // `android_instrumented_tests.yml` runs exactly one artifact —
+    // `app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk` — so instrumented
+    // tests moved into a library module are not run by anything, and the lane stays green
+    // having lost them. That is 72 tests, 14 of them the migration suite. See #558.
     sourceSets {
         getByName("androidTest") {
-            assets.srcDir(layout.projectDirectory.dir("schemas"))
+            assets.srcDir(rootProject.layout.projectDirectory.dir("core/database/schemas"))
         }
     }
 
@@ -134,10 +215,10 @@ android {
     // release reads `nimazAiWorkerUrl`; both fall back to a placeholder (the app
     // then simply surfaces the network-error state — it never crashes).
     val aiWorkerUrlPlaceholder = "https://nimaz-ai.REPLACE_ME.workers.dev"
-    val aiWorkerUrlDebug =
-        (project.findProperty("nimazAiWorkerUrlDebug") as String?) ?: aiWorkerUrlPlaceholder
-    val aiWorkerUrlRelease =
-        (project.findProperty("nimazAiWorkerUrl") as String?) ?: aiWorkerUrlPlaceholder
+    val aiWorkerUrlDebug = providers.gradleProperty("nimazAiWorkerUrlDebug")
+        .getOrElse(aiWorkerUrlPlaceholder)
+    val aiWorkerUrlRelease = providers.gradleProperty("nimazAiWorkerUrl")
+        .getOrElse(aiWorkerUrlPlaceholder)
 
     buildTypes {
         debug {
@@ -157,12 +238,8 @@ android {
             buildConfigField("String", "AI_WORKER_BASE_URL", "\"$aiWorkerUrlRelease\"")
         }
     }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
-    }
     buildFeatures {
-        compose = true
+        // compose = true comes from `nimaz.android.compose`.
         buildConfig = true
     }
 
@@ -200,46 +277,48 @@ android {
     }
 }
 
-// Content data is fetched from arshad-shah/nimaz-data and pinned by sha256 in
-// data.lock.json — see gradle/nimaz-data.gradle.kts for why it is no longer tracked here.
-apply(from = rootProject.file("gradle/nimaz-data.gradle.kts"))
+// Content data is fetched from arshad-shah/nimaz-data and pinned by sha256 in data.lock.json —
+// see FetchNimazDataTask in build-logic for what the task does and why the artifact is no longer
+// tracked in this repository.
+//
+// The task *class* lives in build-logic; the *registration* stays here on purpose. The task
+// belongs to the project that consumes the generated assets, and a convention plugin that
+// registered it centrally — leaving libraries to depend on `:app:fetchNimazData` — would point a
+// library at the app, which is the inversion the multi-module epic exists to remove.
+//
+// This lived in a `gradle/nimaz-data.gradle.kts` script plugin until #503. A script applied with
+// `apply(from = …)` is compiled against its own classpath and cannot see build-logic's types, so
+// that file could not survive the task becoming one; its wiring is the block below.
+tasks.register<FetchNimazDataTask>("fetchNimazData") {
+    description = "Fetches and sha256-verifies the pinned content artifact."
+    group = "build setup"
 
-// AGP 9 refuses a Provider here, and the Variant API's addGeneratedSourceDirectory needs a
-// typed task class — which would mean a buildSrc module for one task. Register the directory
-// statically and hang the ordering off the asset merge instead: same guarantee, no new module.
+    lockFile.set(rootProject.layout.projectDirectory.file("data.lock.json"))
+    generatedAssets.set(layout.buildDirectory.dir("generated/nimazData/assets"))
+    cacheRoot.set(layout.dir(provider { gradle.gradleUserHomeDir.resolve("caches/nimaz-data") }))
+
+    // NIMAZ_DATA_TOKEN, then the nimazDataToken gradle property, then `gh auth token` — entirely
+    // through providers, because `project.findProperty` and a bare `ProcessBuilder` at execution
+    // time were both configuration-cache violations. Each source is tested for blankness
+    // individually (a fork PR gets a *set but empty* NIMAZ_DATA_TOKEN), and the chain is lazy, so
+    // a build that already has a token never spawns `gh`. See NimazDataCredentials.
+    dataToken.set(NimazDataCredentials.of(providers))
+}
+
+// AGP 9 refuses a Provider here. The Variant API's addGeneratedSourceDirectory would take one,
+// and now that fetchNimazData *is* a typed task the option is finally open — but switching to it
+// changes how the directory reaches the variant, which is a behaviour change and belongs in its
+// own change. Registering the directory statically and hanging the ordering off every
+// asset-consuming task gives the same guarantee today.
 android.sourceSets.getByName("main").assets.srcDir(
     layout.buildDirectory.dir("generated/nimazData/assets").get().asFile
 )
 
-// Everything that *reads* the generated assets directory has to be ordered after the
-// task that fills it, not just the asset merge. Lint builds a model of every source
-// set — assets included — so `generateReleaseLintVitalReportModel` consumes this
-// directory too, and Gradle fails the build outright rather than racing:
-//
-//   Task ':app:generateReleaseLintVitalReportModel' uses this output of task
-//   ':app:fetchNimazData' without declaring an explicit or implicit dependency.
-//
-// Only release hit it, because lint-vital runs for release and not for debug — so
-// every debug build and both PR check lanes were green while the deploy lane could
-// not build at all.
-tasks.matching {
-    (it.name.startsWith("merge") && it.name.endsWith("Assets")) ||
-        // Case-insensitively: AGP names them both ways — `generateReleaseLintVitalReportModel`
-        // and `lintAnalyzeDebug` — and matching only the capitalised form fixed the release
-        // lane while leaving the debug one to fail on the next PR, which is exactly what
-        // happened.
-        it.name.contains("lint", ignoreCase = true)
-}.configureEach { dependsOn("fetchNimazData") }
-
-kotlin {
-    compilerOptions {
-        // Opt in to applying annotations (e.g. Hilt's @ApplicationContext) to both
-        // the value parameter and the backing field/property. This is the future
-        // default and silences the KT-73255 deprecation warning emitted for
-        // constructor-injected parameters. See https://youtrack.jetbrains.com/issue/KT-73255
-        freeCompilerArgs.add("-Xannotation-default-target=param-property")
-    }
-}
+// The matcher itself lives in build-logic (GeneratedAssetOrdering) so the next module that
+// generates assets cannot get it subtly wrong. The task *registration* stays here on purpose:
+// a library convention plugin reaching for `:app:fetchNimazData` would point a library at the
+// app, which is the inversion the multi-module epic exists to remove.
+orderAssetConsumersAfter("fetchNimazData")
 
 dependencies {
     // Consumes app/src/main/baseline-prof.txt, generated by :baselineprofile.
@@ -247,6 +326,62 @@ dependencies {
     // moves the startup path or the reader — a stale profile is not wrong, just less
     // useful, so this is maintenance rather than a gate.
     baselineProfile(project(":baselineprofile"))
+
+    // The pure layer. `api`-exposed javax.inject and coroutines-core come with it, so nothing
+    // here declares them again.
+    implementation(project(":core:domain"))
+    // Formatting helpers, the telemetry seam and the string seam. `api`-exposes :core:domain.
+    implementation(project(":core:common"))
+    // Both Room databases. `api`-exposes room-runtime, so nothing here declares it again.
+    implementation(project(":core:database"))
+    // PreferencesDataStore and the three DataStore files. `api`-exposes datastore-preferences.
+    implementation(project(":core:datastore"))
+    // The 18 repository implementations and the platform adapters behind the domain ports.
+    implementation(project(":core:data"))
+    // The design system and every string, colour and font. `api`-exposes the Compose BOM,
+    // ui, ui-graphics and material3, so nothing here re-declares them. Note that this module owns
+    // `R.string.*` now: `com.arshadshah.nimaz.R` holds only the widget and notification resources
+    // that stayed, so presentation code imports `com.arshadshah.nimaz.core.ui.R`.
+    implementation(project(":core:ui"))
+    // The route vocabulary — Routes, ScreenTags, taggedComposable, the announcement and help
+    // deep-link grammars. `api`-exposes navigation-compose. NavGraph.kt itself is still here;
+    // it is decomposed in PR 12.
+    implementation(project(":core:navigation"))
+    // The six Glance widgets and their workers — the first feature module (#564). It brings its
+    // own manifest entries, its own widget_colors/drawables/layouts and the 17 strings nothing
+    // else uses, so nothing widget-shaped is left here. (The other 16 it references stay in
+    // `:core:ui` because `WidgetsScreen`'s gallery reads them too.)
+    implementation(project(":feature:widget"))
+    // The first-run flow (#565). Extracted with no couplings to unpick — see its build file.
+    implementation(project(":feature:onboarding"))
+    // About, Help and More — one destination, so one module (#565). Six couplings to `:app` were
+    // unpicked to get it out; its build file lists them.
+    implementation(project(":feature:about"))
+    // Zakat, and the Islamic calendar (#566). Both extracted with nothing to unpick.
+    implementation(project(":feature:tools"))
+    implementation(project(":feature:calendar"))
+    // Library search and the opt-in Ask-with-Proof screen (#567). The Worker client itself is in
+    // `:core:data`; nothing network-facing lives in the feature module.
+    implementation(project(":feature:search"))
+    // The library — duas, hadith, qaida, the names, the prophets and the catalog shell they
+    // share (#568). Eight screen packages behind one ViewModel package.
+    implementation(project(":feature:content"))
+    // Prayer tracking, fasting and tasbih (#569). Six of `screens/prayer`'s nine files come
+    // here — the ones driving `viewmodel/tracker`; prayer *times* follow in PR 20.
+    implementation(project(":feature:tracker"))
+    // The reader, khatam and bookmarks, plus the Mushaf rendering stack (#570).
+    implementation(project(":feature:quran"))
+    // Prayer times, the monthly table, qibla and the night-worship window (#571) — when each
+    // prayer *is*, to `:feature:tracker`'s what the user *did* about it.
+    implementation(project(":feature:prayer"))
+    // Settings, location and sync (#572) — the last feature module: 24 screens and the
+    // 1,324-line `SettingsViewModel`.
+    implementation(project(":feature:settings"))
+    // FakeTodayProvider / FakeSearchSettings / FakeStringProvider / RecordingWidgetRefresher —
+    // one definition each, used by the ViewModel tests here and the tests over there.
+    testImplementation(testFixtures(project(":core:domain")))
+    testImplementation(testFixtures(project(":core:ui")))
+    testImplementation(testFixtures(project(":core:common")))
 
     // Core
     implementation(libs.androidx.core.ktx)
@@ -272,15 +407,12 @@ dependencies {
     // Navigation
     implementation(libs.androidx.navigation.compose)
 
-    // Hilt
-    implementation(libs.hilt.android)
-    ksp(libs.hilt.compiler)
+    // Hilt — the runtime and the compiler come from `nimaz.android.hilt`.
     implementation(libs.hilt.navigation.compose)
 
     // Room
-    implementation(libs.room.runtime)
-    implementation(libs.room.ktx)
-    ksp(libs.room.compiler)
+    // Room itself comes from :core:database, which `api`-exposes runtime and ktx. The compiler
+    // is not needed here: nothing in :app declares an @Entity, @Dao or @Database any more.
 
     // DataStore
     implementation(libs.datastore.preferences)
@@ -360,8 +492,11 @@ dependencies {
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.google.truth)
     testImplementation(libs.robolectric)
+    // TestListenableWorkerBuilder, for AdhanDownloadWorker's retry rule — the background
+    // fallback that runs on the two paths a foreground service cannot take.
+    testImplementation(libs.androidx.work.testing)
     testImplementation(libs.ktor.client.mock)
-    testImplementation("org.json:json:20231013")
+    testImplementation(libs.json)
 
     // Compose UI test harness for the Robolectric atom tests in src/testDebug
     // (createComposeRule, onNodeWithText, performClick, …). Declared here as a
@@ -407,45 +542,169 @@ tasks.withType<Test>().configureEach {
         isIncludeNoLocationClasses = true
         excludes = listOf("jdk.internal.*")
     }
+
+    // Source roots in *other* modules that `:app` unit tests read off disk.
+    //
+    // `AnalyticsReachabilityTest` scans every place a UI event can be dispatched from, and since
+    // PRs 10, 11 and 13 of #551 three of those roots live outside this module. Gradle has no way
+    // to know that: a file scan is not a compile dependency, so without these declarations
+    // `testDebugUnitTest` stays UP-TO-DATE when the scanned sources change and the assertion
+    // simply does not run. That exact failure hid a broken assertion in `:core:common` through
+    // two full local gate sweeps — an assertion only fires if its task runs.
+    mapOf(
+        "designSystemSources" to "core/ui/src/main/kotlin/com/arshadshah/nimaz/presentation",
+        "navigationSources" to "core/navigation/src/main/kotlin/com/arshadshah/nimaz/core/navigation",
+        "widgetSources" to "feature/widget/src/main/kotlin/com/arshadshah/nimaz/widget",
+        "onboardingSources" to "feature/onboarding/src/main/kotlin/com/arshadshah/nimaz/presentation",
+        "aboutSources" to "feature/about/src/main/kotlin/com/arshadshah/nimaz/presentation",
+        "toolsSources" to "feature/tools/src/main/kotlin/com/arshadshah/nimaz/presentation",
+        "calendarSources" to "feature/calendar/src/main/kotlin/com/arshadshah/nimaz/presentation",
+        "searchSources" to "feature/search/src/main/kotlin/com/arshadshah/nimaz/presentation",
+        "contentSources" to "feature/content/src/main/kotlin/com/arshadshah/nimaz/presentation",
+        "trackerSources" to "feature/tracker/src/main/kotlin/com/arshadshah/nimaz/presentation",
+        "quranSources" to "feature/quran/src/main/kotlin/com/arshadshah/nimaz/presentation",
+        "prayerSources" to "feature/prayer/src/main/kotlin/com/arshadshah/nimaz/presentation",
+        "settingsSources" to "feature/settings/src/main/kotlin/com/arshadshah/nimaz/presentation",
+    ).forEach { (name, path) ->
+        inputs.dir(rootProject.layout.projectDirectory.dir(path))
+            .withPropertyName(name)
+            .withPathSensitivity(PathSensitivity.RELATIVE)
+    }
+
+    // `FeatureTestsLiveWithSubjectTest` goes further: it indexes **every** top-level declaration
+    // in **every** module's `src/main`, not just the presentation subtree, because a stranded test
+    // can name any symbol the module owns. The roots above cover only `presentation/`, so the
+    // remaining ones are declared here — otherwise the guard is exactly the thing it was written
+    // to prevent: an assertion that does not run.
+    mapOf(
+        "domainSources" to "core/domain/src/main",
+        "commonSources" to "core/common/src/main",
+        "databaseSources" to "core/database/src/main",
+        "datastoreSources" to "core/datastore/src/main",
+        "dataSources" to "core/data/src/main",
+        "uiModuleSources" to "core/ui/src/main",
+        "navigationModuleSources" to "core/navigation/src/main",
+        "widgetModuleSources" to "feature/widget/src/main",
+        "onboardingModuleSources" to "feature/onboarding/src/main",
+        "aboutModuleSources" to "feature/about/src/main",
+        "toolsModuleSources" to "feature/tools/src/main",
+        "calendarModuleSources" to "feature/calendar/src/main",
+        "searchModuleSources" to "feature/search/src/main",
+        "contentModuleSources" to "feature/content/src/main",
+        "trackerModuleSources" to "feature/tracker/src/main",
+        "quranModuleSources" to "feature/quran/src/main",
+        "prayerModuleSources" to "feature/prayer/src/main",
+        "settingsModuleSources" to "feature/settings/src/main",
+    ).forEach { (name, path) ->
+        inputs.dir(rootProject.layout.projectDirectory.dir(path))
+            .withPropertyName(name)
+            .withPathSensitivity(PathSensitivity.RELATIVE)
+    }
+
+    // `LicenceCatalogueTest` reads the AboutLibraries catalogue, which is a *build output* of
+    // this module rather than a source file, so nothing put it on the test task's input set.
+    // Without this the task stays UP-TO-DATE and the assertion does not run — verified the hard
+    // way: truncating the catalogue to 40 entries produced a green build, because the test never
+    // executed. `builtBy` is what stops that being an implicit-dependency error.
+    inputs.files(
+        files(layout.buildDirectory.file("generated/aboutLibraries/debug/res/raw/aboutlibraries.json"))
+            .builtBy("prepareLibraryDefinitionsDebug")
+    ).withPropertyName("licenceCatalogue").withPathSensitivity(PathSensitivity.RELATIVE)
+        .optional()
+
+    // `HiltWorkerProcessorTest` reads every module's build file. Sources reach the test task
+    // through the runtime classpath already; build files do not, and a build file is exactly
+    // what that test exists to check.
+    inputs.files(
+        rootProject.layout.projectDirectory.asFileTree.matching {
+            include("*/build.gradle.kts", "*/*/build.gradle.kts")
+            exclude("**/build/**")
+        }
+    ).withPropertyName("moduleBuildFiles").withPathSensitivity(PathSensitivity.RELATIVE)
 }
 
-// Class-file noise that should never count toward coverage (generated code,
-// Compose compiler artifacts, DI, framework stubs, and @Preview singletons).
-val coverageExclusions = listOf(
-    "**/R.class",
-    "**/R$*.class",
-    "**/BuildConfig.*",
-    "**/Manifest*.*",
-    "**/*Test*.*",
-    "**/*\$Companion*.*",
-    // Compose compiler generates a ComposableSingletons class per file that
-    // holds the lambdas used only by the @Preview functions — exclude it.
-    "**/*ComposableSingletons*.*",
-    // Hilt / Dagger generated code
-    "**/di/**",
-    "**/*_Factory*.*",
-    "**/*_HiltModules*.*",
-    "**/*_Impl*.*",
-    "**/hilt_aggregated_deps/**",
-    "**/dagger/hilt/**",
-    "**/*Hilt_*.*",
-)
+// Class-file noise that should never count toward coverage (generated code, Compose compiler
+// artifacts, DI, framework stubs, @Preview singletons, Room entities and the dead `$DefaultImpls`
+// bridge).
+//
+// The list itself lives in `build-logic` so that this merged report and every module's own
+// `coverageFloor` gate measure the same classes — see [COVERAGE_EXCLUSIONS] for what is on it and,
+// more importantly, for the one pattern that was taken off.
+val coverageExclusions = COVERAGE_EXCLUSIONS
 
 // Where the debug classes live, which is not where it used to be.
 //
-// These tasks pointed at `tmp/kotlin-classes/debug` alone. AGP 9 does not write there
-// — compiled classes land under `intermediates/classes/debug/…` — so the directory
-// simply did not exist, `classDirectories` resolved to nothing, and every one of the
-// four jacoco reports came out as a 237-byte file containing a `sessioninfo` and no
-// classes at all. Coverage was not merely unreported (#464); it was not being measured.
+// These tasks pointed at `tmp/kotlin-classes/debug` alone. AGP 9 does not write there, so the
+// directory simply did not exist, `classDirectories` resolved to nothing, and every one of the
+// four jacoco reports came out as a 237-byte file containing a `sessioninfo` and no classes at
+// all. Coverage was not merely unreported (#464); it was not being measured.
 //
-// Both paths are listed so the report is correct on either AGP, and so this cannot
-// fail silently again: an empty report is indistinguishable from 0% at a glance.
+// **Compiler output only — never `intermediates/classes/debug`.** AGP 9 writes the *same*
+// classes twice: `built_in_kotlinc/debug/compileDebugKotlin` is what the Kotlin compiler
+// produced, and `intermediates/classes/debug/transformDebugClassesWithAsm` is that output after
+// AGP's ASM transform, alongside `hiltJavaCompileDebug` for the generated Java. Listing both
+// roots hands JaCoCo two class files per class, and it aborts the whole report with
+// *"Can't add different class with same name"* the moment the two copies differ — which for
+// Kotlin they usually do not, so the union survived until `:app`'s Java `NimazApp_GeneratedInjector`
+// was transformed and it did. Analysing the compiler output alone loses nothing measurable:
+// on `:core:database` the two roots report identical line coverage (2,832 covered), differing
+// only in the 29 generated Hilt classes that `coverageExclusions` is trying to drop anyway.
+//
+// `tmp/kotlin-classes/debug` stays listed for older AGP; it does not exist on AGP 9, so the two
+// entries never overlap in practice. If a future AGP writes both, JaCoCo will say so loudly
+// rather than silently — and `coverageFloor` catches the opposite failure, a root that has moved
+// and now resolves to nothing, because an empty report is indistinguishable from 0% at a glance.
 val debugClassRoots = listOf(
-    layout.buildDirectory.dir("intermediates/classes/debug").get().asFile,
+    layout.buildDirectory.dir("intermediates/built_in_kotlinc/debug").get().asFile,
     layout.buildDirectory.dir("tmp/kotlin-classes/debug").get().asFile,
 )
 val buildOutputDir = layout.buildDirectory.get().asFile
+
+/**
+ * `:app`'s own `moduleCoverage` measures the **ASM-transformed** classes, not the compiler output.
+ *
+ * Every other module measures `intermediates/built_in_kotlinc/debug` — see [debugClassRoots] —
+ * and must keep doing so, because naming both roots hands JaCoCo two class files per class and
+ * aborts the report. `:app` is the one module where that choice is *wrong*, and it is wrong in a
+ * way that reads as a coverage failure rather than a configuration one:
+ *
+ *     [ant:jacocoReport] Execution data for class com/arshadshah/nimaz/core/util/BootReceiver
+ *                        does not match.
+ *
+ * The Hilt Gradle plugin rewrites every `@AndroidEntryPoint` class through AGP's ASM pipeline —
+ * `BootReceiver.onReceive` gains a `super.onReceive` call, and the two adhan services likewise.
+ * The unit tests load the **rewritten** class, so its JaCoCo class id does not match the
+ * compiler-output copy, and JaCoCo silently discards that class's execution data and reports it
+ * as 0%. Three classes and 509 lines were affected: `BootReceiver` (194), `AdhanPlaybackService`
+ * (181) and `AdhanDownloadService` (134) all read zero however thoroughly they were tested,
+ * while their *nested* classes — untransformed, so matching — reported normally. A file at
+ * 50% whose outer class is at 0% is the signature.
+ *
+ * `:app` is the only module with `@AndroidEntryPoint` classes that a unit test constructs, which
+ * is why no locked module needed this and why the fix belongs here rather than in `build-logic`.
+ * The transformed root carries the compiler output too, so it is a single complete root and the
+ * duplicate problem does not arise.
+ *
+ * It also carries the Java that KSP and Dagger generate, which the compiler-output root never
+ * did. Nearly all of it is already on [coverageExclusions]: the `_Factory`, `Hilt_` and
+ * `di` package entries between them cover it.
+ * One thing is not, and only because of how it is spelled: `DaggerNimazApp_HiltComponents_*`,
+ * the 623-line generated singleton component, whose name contains `HiltComponents` rather than
+ * `Hilt_`. It is excluded **here** rather than by widening [COVERAGE_EXCLUSIONS], which is shared
+ * with eighteen locked modules and must not move to make one module's number: no library module
+ * generates a Dagger component, and none of them measures this root, so the shared list would be
+ * carrying an entry that exists for `:app` alone.
+ */
+tasks.named<JacocoReport>("moduleCoverage") {
+    classDirectories.setFrom(
+        fileTree(
+            layout.buildDirectory.dir("intermediates/classes/debug/transformDebugClassesWithAsm/dirs")
+        ) {
+            exclude(coverageExclusions)
+            exclude("**/Dagger*_HiltComponents_*.*")
+        }
+    )
+}
 
 fun classTree(vararg includes: String): FileCollection =
     files(
@@ -465,18 +724,369 @@ fun organismsClassTree(): FileCollection = classTree("**/presentation/components
 
 fun debugClassTree(): FileCollection = classTree()
 
-fun coverageExecutionData(): ConfigurableFileTree =
-    fileTree(buildOutputDir) {
-        include("**/jacoco/testDebugUnitTest.exec", "**/outputs/unit_test_code_coverage/**/*.exec")
-    }
+/**
+ * A module whose classes belong in the merged coverage report.
+ *
+ * Referenced by directory rather than through `project(":core:domain")`: a live `Project` in a
+ * task action is a configuration-cache failure, and this build runs with `problems=fail`.
+ * [packageRoot] is what the merged report must actually contain — see `coverageFloor`.
+ *
+ * [classesGlobs] and [execGlobs] are globs under the module's `build/` rather than fixed paths,
+ * and they differ per module because Gradle and AGP do not agree on where anything goes:
+ *
+ * | | classes | exec |
+ * |---|---|---|
+ * | `kotlin-jvm` (`:core:domain`) | `classes/kotlin/main` | `jacoco/test.exec` |
+ * | `com.android.library` (`:core:common`) | `intermediates/built_in_kotlinc/debug/**/classes` | `jacoco/testDebugUnitTest.exec` |
+ *
+ * [classesGlobs] name **compiler output only**. AGP 9 also writes an ASM-transformed copy of the
+ * same classes under `intermediates/classes/debug/transformDebugClassesWithAsm`, in library
+ * modules as well as in `:app`; including both roots gives JaCoCo two class files per class and
+ * aborts the report. See the `debugClassRoots` comment above for the measurement behind that.
+ *
+ * A glob that names a directory AGP no longer writes is precisely the #464 failure: it resolves
+ * to nothing, and the report is a valid file describing zero classes. `coverageFloor` is the
+ * assertion that catches it.
+ */
+data class CoverageModule(
+    val gradlePath: String,
+    val projectDir: Directory,
+    val testTask: String,
+    val classesGlobs: List<String>,
+    val execGlobs: List<String>,
+    val sourceDir: String,
+    val packageRoot: String,
+) {
+    val buildDir: Directory get() = projectDir.dir("build")
+}
 
-val coverageSourceDirs = files("src/main/java")
+val coverageModules = listOf(
+    CoverageModule(
+        gradlePath = ":core:domain",
+        projectDir = rootProject.layout.projectDirectory.dir("core/domain"),
+        testTask = "test",
+        classesGlobs = listOf("classes/kotlin/main/**"),
+        execGlobs = listOf("jacoco/test.exec"),
+        sourceDir = "src/main/kotlin",
+        packageRoot = "com/arshadshah/nimaz/domain",
+    ),
+    CoverageModule(
+        gradlePath = ":core:common",
+        projectDir = rootProject.layout.projectDirectory.dir("core/common"),
+        testTask = "testDebugUnitTest",
+        // Both compiler-output spellings, so this keeps working whichever one a future AGP
+        // writes — the same pair the `:app` roots above use, and for the same reason. The
+        // ASM-transformed copy is deliberately absent; see `debugClassRoots`.
+        classesGlobs = listOf(
+            "intermediates/built_in_kotlinc/debug/**/classes/**",
+            "tmp/kotlin-classes/debug/**",
+        ),
+        execGlobs = listOf(
+            "jacoco/testDebugUnitTest.exec",
+            "outputs/unit_test_code_coverage/**/*.exec",
+        ),
+        sourceDir = "src/main/kotlin",
+        packageRoot = "com/arshadshah/nimaz/core/common",
+    ),
+    CoverageModule(
+        gradlePath = ":core:database",
+        projectDir = rootProject.layout.projectDirectory.dir("core/database"),
+        testTask = "testDebugUnitTest",
+        classesGlobs = listOf(
+            "intermediates/built_in_kotlinc/debug/**/classes/**",
+            "tmp/kotlin-classes/debug/**",
+        ),
+        execGlobs = listOf(
+            "jacoco/testDebugUnitTest.exec",
+            "outputs/unit_test_code_coverage/**/*.exec",
+        ),
+        sourceDir = "src/main/kotlin",
+        packageRoot = "com/arshadshah/nimaz/data/local",
+    ),
+    CoverageModule(
+        gradlePath = ":core:datastore",
+        projectDir = rootProject.layout.projectDirectory.dir("core/datastore"),
+        testTask = "testDebugUnitTest",
+        classesGlobs = listOf(
+            "intermediates/built_in_kotlinc/debug/**/classes/**",
+            "tmp/kotlin-classes/debug/**",
+        ),
+        execGlobs = listOf(
+            "jacoco/testDebugUnitTest.exec",
+            "outputs/unit_test_code_coverage/**/*.exec",
+        ),
+        sourceDir = "src/main/kotlin",
+        packageRoot = "com/arshadshah/nimaz/core/datastore",
+    ),
+    CoverageModule(
+        gradlePath = ":core:data",
+        projectDir = rootProject.layout.projectDirectory.dir("core/data"),
+        testTask = "testDebugUnitTest",
+        classesGlobs = listOf(
+            "intermediates/built_in_kotlinc/debug/**/classes/**",
+            "tmp/kotlin-classes/debug/**",
+        ),
+        execGlobs = listOf(
+            "jacoco/testDebugUnitTest.exec",
+            "outputs/unit_test_code_coverage/**/*.exec",
+        ),
+        sourceDir = "src/main/kotlin",
+        packageRoot = "com/arshadshah/nimaz/data/repository",
+    ),
+    CoverageModule(
+        gradlePath = ":core:ui",
+        projectDir = rootProject.layout.projectDirectory.dir("core/ui"),
+        testTask = "testDebugUnitTest",
+        classesGlobs = listOf(
+            "intermediates/built_in_kotlinc/debug/**/classes/**",
+            "tmp/kotlin-classes/debug/**",
+        ),
+        execGlobs = listOf(
+            "jacoco/testDebugUnitTest.exec",
+            "outputs/unit_test_code_coverage/**/*.exec",
+        ),
+        sourceDir = "src/main/kotlin",
+        packageRoot = "com/arshadshah/nimaz/presentation/components/atoms",
+    ),
+    CoverageModule(
+        gradlePath = ":core:navigation",
+        projectDir = rootProject.layout.projectDirectory.dir("core/navigation"),
+        testTask = "testDebugUnitTest",
+        classesGlobs = listOf(
+            "intermediates/built_in_kotlinc/debug/**/classes/**",
+            "tmp/kotlin-classes/debug/**",
+        ),
+        execGlobs = listOf(
+            "jacoco/testDebugUnitTest.exec",
+            "outputs/unit_test_code_coverage/**/*.exec",
+        ),
+        sourceDir = "src/main/kotlin",
+        packageRoot = "com/arshadshah/nimaz/core/navigation",
+    ),
+    CoverageModule(
+        gradlePath = ":feature:widget",
+        projectDir = rootProject.layout.projectDirectory.dir("feature/widget"),
+        testTask = "testDebugUnitTest",
+        classesGlobs = listOf(
+            "intermediates/built_in_kotlinc/debug/**/classes/**",
+            "tmp/kotlin-classes/debug/**",
+        ),
+        execGlobs = listOf(
+            "jacoco/testDebugUnitTest.exec",
+            "outputs/unit_test_code_coverage/**/*.exec",
+        ),
+        sourceDir = "src/main/kotlin",
+        packageRoot = "com/arshadshah/nimaz/widget",
+    ),
+    CoverageModule(
+        gradlePath = ":feature:onboarding",
+        projectDir = rootProject.layout.projectDirectory.dir("feature/onboarding"),
+        testTask = "testDebugUnitTest",
+        classesGlobs = listOf(
+            "intermediates/built_in_kotlinc/debug/**/classes/**",
+            "tmp/kotlin-classes/debug/**",
+        ),
+        execGlobs = listOf(
+            "jacoco/testDebugUnitTest.exec",
+            "outputs/unit_test_code_coverage/**/*.exec",
+        ),
+        sourceDir = "src/main/kotlin",
+        packageRoot = "com/arshadshah/nimaz/presentation",
+    ),
+    CoverageModule(
+        gradlePath = ":feature:settings",
+        projectDir = rootProject.layout.projectDirectory.dir("feature/settings"),
+        testTask = "testDebugUnitTest",
+        classesGlobs = listOf(
+            "intermediates/built_in_kotlinc/debug/**/classes/**",
+            "tmp/kotlin-classes/debug/**",
+        ),
+        execGlobs = listOf(
+            "jacoco/testDebugUnitTest.exec",
+            "outputs/unit_test_code_coverage/**/*.exec",
+        ),
+        sourceDir = "src/main/kotlin",
+        packageRoot = "com/arshadshah/nimaz/presentation",
+    ),
+    CoverageModule(
+        gradlePath = ":feature:prayer",
+        projectDir = rootProject.layout.projectDirectory.dir("feature/prayer"),
+        testTask = "testDebugUnitTest",
+        classesGlobs = listOf(
+            "intermediates/built_in_kotlinc/debug/**/classes/**",
+            "tmp/kotlin-classes/debug/**",
+        ),
+        execGlobs = listOf(
+            "jacoco/testDebugUnitTest.exec",
+            "outputs/unit_test_code_coverage/**/*.exec",
+        ),
+        sourceDir = "src/main/kotlin",
+        packageRoot = "com/arshadshah/nimaz/presentation",
+    ),
+    CoverageModule(
+        gradlePath = ":feature:quran",
+        projectDir = rootProject.layout.projectDirectory.dir("feature/quran"),
+        testTask = "testDebugUnitTest",
+        classesGlobs = listOf(
+            "intermediates/built_in_kotlinc/debug/**/classes/**",
+            "tmp/kotlin-classes/debug/**",
+        ),
+        execGlobs = listOf(
+            "jacoco/testDebugUnitTest.exec",
+            "outputs/unit_test_code_coverage/**/*.exec",
+        ),
+        sourceDir = "src/main/kotlin",
+        packageRoot = "com/arshadshah/nimaz/presentation",
+    ),
+    CoverageModule(
+        gradlePath = ":feature:tracker",
+        projectDir = rootProject.layout.projectDirectory.dir("feature/tracker"),
+        testTask = "testDebugUnitTest",
+        classesGlobs = listOf(
+            "intermediates/built_in_kotlinc/debug/**/classes/**",
+            "tmp/kotlin-classes/debug/**",
+        ),
+        execGlobs = listOf(
+            "jacoco/testDebugUnitTest.exec",
+            "outputs/unit_test_code_coverage/**/*.exec",
+        ),
+        sourceDir = "src/main/kotlin",
+        packageRoot = "com/arshadshah/nimaz/presentation",
+    ),
+    CoverageModule(
+        gradlePath = ":feature:content",
+        projectDir = rootProject.layout.projectDirectory.dir("feature/content"),
+        testTask = "testDebugUnitTest",
+        classesGlobs = listOf(
+            "intermediates/built_in_kotlinc/debug/**/classes/**",
+            "tmp/kotlin-classes/debug/**",
+        ),
+        execGlobs = listOf(
+            "jacoco/testDebugUnitTest.exec",
+            "outputs/unit_test_code_coverage/**/*.exec",
+        ),
+        sourceDir = "src/main/kotlin",
+        packageRoot = "com/arshadshah/nimaz/presentation",
+    ),
+    CoverageModule(
+        gradlePath = ":feature:search",
+        projectDir = rootProject.layout.projectDirectory.dir("feature/search"),
+        testTask = "testDebugUnitTest",
+        classesGlobs = listOf(
+            "intermediates/built_in_kotlinc/debug/**/classes/**",
+            "tmp/kotlin-classes/debug/**",
+        ),
+        execGlobs = listOf(
+            "jacoco/testDebugUnitTest.exec",
+            "outputs/unit_test_code_coverage/**/*.exec",
+        ),
+        sourceDir = "src/main/kotlin",
+        packageRoot = "com/arshadshah/nimaz/presentation",
+    ),
+    CoverageModule(
+        gradlePath = ":feature:tools",
+        projectDir = rootProject.layout.projectDirectory.dir("feature/tools"),
+        testTask = "testDebugUnitTest",
+        classesGlobs = listOf(
+            "intermediates/built_in_kotlinc/debug/**/classes/**",
+            "tmp/kotlin-classes/debug/**",
+        ),
+        execGlobs = listOf(
+            "jacoco/testDebugUnitTest.exec",
+            "outputs/unit_test_code_coverage/**/*.exec",
+        ),
+        sourceDir = "src/main/kotlin",
+        packageRoot = "com/arshadshah/nimaz/presentation",
+    ),
+    CoverageModule(
+        gradlePath = ":feature:calendar",
+        projectDir = rootProject.layout.projectDirectory.dir("feature/calendar"),
+        testTask = "testDebugUnitTest",
+        classesGlobs = listOf(
+            "intermediates/built_in_kotlinc/debug/**/classes/**",
+            "tmp/kotlin-classes/debug/**",
+        ),
+        execGlobs = listOf(
+            "jacoco/testDebugUnitTest.exec",
+            "outputs/unit_test_code_coverage/**/*.exec",
+        ),
+        sourceDir = "src/main/kotlin",
+        packageRoot = "com/arshadshah/nimaz/presentation",
+    ),
+    CoverageModule(
+        gradlePath = ":feature:about",
+        projectDir = rootProject.layout.projectDirectory.dir("feature/about"),
+        testTask = "testDebugUnitTest",
+        classesGlobs = listOf(
+            "intermediates/built_in_kotlinc/debug/**/classes/**",
+            "tmp/kotlin-classes/debug/**",
+        ),
+        execGlobs = listOf(
+            "jacoco/testDebugUnitTest.exec",
+            "outputs/unit_test_code_coverage/**/*.exec",
+        ),
+        sourceDir = "src/main/kotlin",
+        packageRoot = "com/arshadshah/nimaz/presentation",
+    ),
+)
+
+fun coverageExecutionData(): FileCollection =
+    files(
+        fileTree(buildOutputDir) {
+            include(
+                "**/jacoco/testDebugUnitTest.exec",
+                "**/outputs/unit_test_code_coverage/**/*.exec",
+            )
+        },
+        // Every extracted module's exec data, or the number silently improves as it measures
+        // less. From PR 5 (:core:domain) onward `:app` no longer holds most of the codebase, and
+        // a report scoped to `:app` alone would show a *rising* percentage over a shrinking
+        // tree — a metric that gets better by covering fewer classes is worse than none.
+        files(
+            coverageModules.map { module ->
+                fileTree(module.buildDir) { include(module.execGlobs) }
+            }
+        ),
+    )
+
+fun coverageClassDirs(): FileCollection =
+    files(
+        debugClassTree(),
+        files(
+            coverageModules.map { module ->
+                fileTree(module.buildDir) {
+                    include(module.classesGlobs)
+                    exclude(coverageExclusions)
+                }
+            }
+        ),
+    )
+
+val coverageSourceDirs = files(
+    "src/main/java",
+    coverageModules.map { it.projectDir.dir(it.sourceDir) },
+)
+
+/**
+ * What the merged report must contain, as plain strings, for the floor asserted in
+ * `jacocoTestReport`'s `doLast`.
+ *
+ * Flattened here rather than read off [coverageModules] inside the task action, and asserted
+ * inline rather than through a helper function. **Both are configuration-cache requirements, not
+ * style**: a lambda that calls a build-script function — or that touches an instance of a
+ * build-script class such as [CoverageModule] — captures the script object, and Gradle cannot
+ * serialize one. This build runs with `configuration-cache=problems=fail`, so that is a failed
+ * build rather than a warning.
+ */
+val coverageFloor: List<Pair<String, String>> =
+    coverageModules.map { it.gradlePath to it.packageRoot }
 
 // Module-wide coverage report — satisfies "add code coverage to this app".
 tasks.register<JacocoReport>("jacocoTestReport") {
     group = "verification"
     description = "Generates a JaCoCo coverage report for the debug unit tests."
     dependsOn("testDebugUnitTest")
+    coverageModules.forEach { dependsOn("${it.gradlePath}:${it.testTask}") }
 
     reports {
         html.required.set(true)
@@ -489,9 +1099,77 @@ tasks.register<JacocoReport>("jacocoTestReport") {
         )
     }
 
-    classDirectories.setFrom(debugClassTree())
+    classDirectories.setFrom(coverageClassDirs())
     sourceDirectories.setFrom(coverageSourceDirs)
     executionData.setFrom(coverageExecutionData())
+
+    // The floor #553 established for the doc scans, applied to coverage: an aggregate that
+    // quietly drops a module reads exactly like one that includes it, only with a nicer
+    // percentage. Every later extraction PR adds its module to `coverageModules`, so forgetting
+    // to wire one up is a red build rather than a number nobody questions.
+    val reportXml = layout.buildDirectory.file("reports/jacoco/jacocoTestReport.xml")
+    val floor = coverageFloor
+
+    // Plain `Int` and `String` captured here, not script-level `val`s referenced from inside the
+    // action. A `doLast` that reads a build-script property captures a Gradle script object
+    // reference, which fails configuration-cache **storage** with
+    // "cannot serialize Gradle script object references" — the trap `CLAUDE.md` documents, and
+    // `--dry-run` reported it in eight seconds because storage happens whether or not the task's
+    // credential-gated dependencies can run.
+    //
+    // 200, against a real report of **4,226 classes** — measured by running the task, which is
+    // the only way this number was ever going to be right.
+    //
+    // It was first guessed at 1,500, then "corrected" to 200 on the reasoning that the codebase
+    // has 1,170 top-level declarations so 1,500 must be too high. Both the guess and the
+    // correction were arrived at without running `jacocoTestReport` even once. JaCoCo counts
+    // compiled classes — nested classes, lambdas and Compose synthetics, of which a Compose
+    // codebase generates a great many — so 1,170 was never the comparable figure.
+    //
+    // Every one of the 4,226 is `com/arshadshah/nimaz`, and they carry all 67,970 counted lines.
+    // An earlier revision of this comment recorded 4,736, of which 401 were `androidx/*` library
+    // `R` classes carrying zero lines: resource-merge artefacts that inflated the count this
+    // floor reads while contributing nothing to the coverage denominator. They arrived with
+    // `intermediates/classes/debug`, which `debugClassRoots` no longer names, so they are gone.
+    //
+    // 200 stays, because a floor should be impossible to trip except by the failure it names and
+    // 4,226/200 is ample margin. What changed is that it is now a measurement rather than an
+    // argument.
+    val minimumCoveredClasses = 200
+    val classElement = "<class name="
+
+    doLast {
+        val report = reportXml.get().asFile
+        // `isFile` is an assertion, not a condition. It used to guard the block, which made the
+        // one failure the floor exists to catch — no report at all — the one case it waved
+        // through. Same shape as `dir.isDirectory` in `WidgetGlyphGuardTest` and the missing-root
+        // filter in `AnalyticsReachabilityTest`, both of which this epic had to turn around.
+        check(report.isFile) {
+            "No merged coverage report at ${report.absolutePath}. jacocoTestReport ran and " +
+                "produced nothing, which reads as 0% rather than as an error."
+        }
+        val text = report.readText()
+
+        // An empty report and genuine zero coverage look identical in a summary. This is the
+        // difference: a report that parses but describes no class at all.
+        val classes = text.split(classElement).size - 1
+        check(classes >= minimumCoveredClasses) {
+            "The merged coverage report describes $classes classes, below the floor of " +
+                "$minimumCoveredClasses. A 237-byte report has been shipped before and was " +
+                "read as 0% coverage rather than as a broken report."
+        }
+
+        val missing = floor.filter { (_, packageRoot) ->
+            """<package name="$packageRoot""" !in text
+        }
+        check(missing.isEmpty()) {
+            "The merged coverage report contains no classes from " +
+                missing.joinToString { (gradlePath, _) -> gradlePath } +
+                ". Its exec data or class directory is not wired into " +
+                ":app:jacocoTestReport, so coverage is being reported over a smaller " +
+                "codebase than the app actually ships."
+        }
+    }
 }
 
 // Focused report for the presentation atoms package.

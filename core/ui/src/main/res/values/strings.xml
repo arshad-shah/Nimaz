@@ -1,0 +1,2345 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="app_name">Nimaz</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_welcome_title">Welcome to Nimaz</string>
+    <string name="onboarding_welcome_description">Your complete Islamic companion app for prayer times, Quran, Hadith, and more</string>
+    <string name="onboarding_prayer_title">Prayer Times</string>
+    <string name="onboarding_prayer_description">Never miss a prayer with accurate times based on your location</string>
+    <string name="onboarding_quran_title">Quran &amp; Hadith</string>
+    <string name="onboarding_quran_description">Read and listen to the Quran with translations and explore authentic Hadith</string>
+    <string name="onboarding_location_title">Location Access</string>
+    <string name="onboarding_location_description">Allow location access for accurate prayer times and Qibla direction</string>
+    <string name="onboarding_notification_title">Notifications</string>
+    <string name="onboarding_notification_description">Get reminded for prayers with beautiful Adhan notifications</string>
+    <string name="onboarding_battery_title">Battery Optimization</string>
+    <string name="onboarding_battery_description">Disable battery optimization for reliable prayer notifications</string>
+    <string name="onboarding_feature_prayer_times">Accurate prayer times</string>
+    <string name="onboarding_feature_quran">Complete Quran with audio</string>
+    <string name="onboarding_feature_hadith">Authentic Hadith collections</string>
+    <string name="onboarding_feature_duas">Daily duas and supplications</string>
+    <string name="onboarding_feature_calc_methods">Multiple calculation methods</string>
+    <string name="onboarding_feature_custom_adjustments">Custom adjustments</string>
+    <string name="onboarding_feature_tracking">Prayer tracking</string>
+    <string name="onboarding_feature_statistics">Statistics and streaks</string>
+    <string name="onboarding_feature_translations">Multiple translations</string>
+    <string name="onboarding_feature_audio">Audio recitations</string>
+    <string name="onboarding_feature_bookmarks">Bookmarks and notes</string>
+    <string name="onboarding_feature_search">Search functionality</string>
+    <string name="onboarding_skip">Skip</string>
+    <string name="onboarding_back">Back</string>
+    <string name="onboarding_next">Next</string>
+    <string name="onboarding_get_started">Get Started</string>
+    <string name="onboarding_location_granted">Location Access Granted</string>
+    <string name="onboarding_notification_granted">Notifications Enabled</string>
+    <string name="onboarding_battery_granted">Battery Optimization Disabled</string>
+    <string name="onboarding_grant_location">Grant Location Access</string>
+    <string name="onboarding_enable_notifications">Enable Notifications</string>
+    <string name="onboarding_disable_battery_opt">Disable Battery Optimization</string>
+    <string name="onboarding_permissions_title">Permissions</string>
+    <string name="onboarding_permissions_description">Nimaz needs a few permissions for the best experience</string>
+    <string name="onboarding_grant">Grant</string>
+
+    <!-- Common / Shared -->
+    <string name="all">All</string>
+    <string name="favorites">Favorites</string>
+    <string name="cancel">Cancel</string>
+    <string name="delete">Delete</string>
+    <string name="search">Search</string>
+    <string name="search_failed">That search couldn\'t be completed</string>
+    <string name="search_failed_body">The library is searched on your device. Try again, or try different words.</string>
+    <string name="location">Location</string>
+    <string name="location_set_prompt">Set location</string>
+    <string name="settings">Settings</string>
+    <string name="notifications">Notifications</string>
+    <string name="appearance">Appearance</string>
+    <string name="language">Language</string>
+    <string name="widgets">Widgets</string>
+    <string name="today">Today</string>
+    <string name="prayed">Prayed</string>
+    <!-- Screen-reader state for a prayer's tracker toggle. TalkBack's default for a checkbox is
+         "checked"/"not checked", which does not say what was checked or what it meant. -->
+    <string name="a11y_prayer_state_prayed">%1$s, prayed</string>
+    <string name="a11y_prayer_state_not_recorded">%1$s, not yet recorded</string>
+    <string name="a11y_prayer_state_partial">%1$s, some prayers recorded</string>
+    <string name="a11y_prayer_state_missed">%1$s, prayers missed</string>
+    <string name="no_favorites_yet">No favorites yet</string>
+    <string name="remove_from_favorites">Remove from favorites</string>
+    <string name="add_to_favorites">Add to favorites</string>
+    <string name="version_format">Nimaz v%s</string>
+    <string name="version_detail_format">Version %1$s (Build %2$d)</string>
+    <string name="loading">Loading…</string>
+
+    <!-- Home Screen -->
+    <string name="next_prayer">NEXT PRAYER</string>
+    <string name="at_time">at %s</string>
+    <string name="todays_progress">Today\'s Progress</string>
+    <string name="prayers_count_format" tools:ignore="PluralsCandidate">%1$d of %2$d prayers</string>
+    <string name="fasting">Fasting</string>
+    <string name="today_fasting">Fasting today</string>
+    <string name="no_fast_today">No fast today</string>
+    <string name="fasting_logged">Logged</string>
+    <string name="fasting_not_logged">Not logged</string>
+    <string name="hadith_of_the_day">Hadith of the Day</string>
+    <string name="read">Read</string>
+    <string name="ayah_copied_to_clipboard">Ayah copied to clipboard</string>
+    <string name="test_notification_title">Test Notification</string>
+    <string name="test_notification_text">Prayer notifications are working correctly</string>
+    <!-- Hadith authenticity grades (transliterated Arabic terms) -->
+    <string name="grade_sahih">Sahih</string>
+    <string name="grade_hasan">Hasan</string>
+    <string name="grade_daif">Da\'if</string>
+    <string name="grade_mawdu">Mawdu\'</string>
+    <string name="dua_of_the_moment">Dua of the Moment</string>
+    <string name="prayer_times">Prayer Times</string>
+    <string name="home_prayer_times_failed">Today\'s prayer times couldn\'t be calculated</string>
+    <string name="home_prayer_times_failed_body">Check that a location is set, then try again.</string>
+    <!-- Home compact layout — prayer card and also-today section -->
+    <string name="home_todays_prayers">Today\'s prayers</string>
+    <string name="home_open_tracker">Open the tracker</string>
+    <string name="home_prayer_settings_cd">Prayer settings</string>
+    <string name="home_prayers_done_of_five">%d of 5</string>
+    <string name="home_n_more_banners">%d more to deal with</string>
+    <string name="home_banner_sheet_title">Needs your attention</string>
+    <string name="home_banner_sheet_subtitle">%d things to deal with</string>
+    <string name="home_also_today">Also today</string>
+    <string name="home_worship_subtitle">Witr and Tahajjud tonight</string>
+    <string name="home_read_al_kahf">Read Al-Kahf</string>
+    <string name="home_recommended_on_fridays">Recommended on Fridays</string>
+    <string name="home_find_the_direction">Find the direction</string>
+    <string name="hours">Hours</string>
+    <string name="minutes">Minutes</string>
+    <string name="seconds">Seconds</string>
+
+    <!-- Home Screen - Banners -->
+    <string name="update_available">A new version of Nimaz is available</string>
+    <string name="update_action">Update</string>
+    <string name="starting_update">Starting update…</string>
+    <string name="downloading_update">Downloading update…</string>
+    <string name="update_ready">Update ready to install</string>
+    <string name="restart">Restart</string>
+    <string name="notifications_disabled_title">Notifications Disabled</string>
+    <string name="enable">Enable</string>
+    <string name="location_permission_title">Location Permission Needed</string>
+    <string name="grant">Grant</string>
+    <string name="battery_optimization_title">Battery Optimization Active</string>
+    <string name="fix">Fix</string>
+    <!-- Home banner one-line subtitles -->
+    <string name="notifications_disabled_subtitle">Prayer reminders won\'t show</string>
+    <string name="location_permission_subtitle">Needed for accurate prayer times</string>
+    <string name="battery_optimization_subtitle">Alarms may be delayed</string>
+    <string name="update_available_subtitle">Tap update to get the latest</string>
+    <string name="update_ready_subtitle">Restart to finish installing</string>
+
+    <!-- Home Screen - Jumu'ah -->
+    <string name="jumuah_mubarak">Jumu\'ah Mubarak</string>
+    <string name="khutbah_time">Khutbah time</string>
+    <string name="jumuah_passed">Jumu\'ah prayer time has passed</string>
+    <string name="time_until_jumuah">Time until Jumu\'ah</string>
+
+    <!-- Settings Screen -->
+    <string name="prayer_settings">Prayer Settings</string>
+    <string name="calculation_method">Calculation Method</string>
+    <string name="calculation_method_subtitle">Prayer time calculation settings</string>
+    <string name="location_subtitle">Manage prayer time locations</string>
+    <string name="notifications_subtitle">Adhan &amp; reminders</string>
+    <string name="quran">Quran</string>
+    <string name="quran_settings">Quran Settings</string>
+    <string name="quran_settings_subtitle">Reading and audio preferences</string>
+    <string name="app_settings">App Settings</string>
+    <string name="appearance_subtitle">Theme &amp; display</string>
+    <string name="language_subtitle">App language preferences</string>
+    <string name="widgets_subtitle">Home screen widgets</string>
+    <string name="data">Data</string>
+    <string name="reset_settings">Reset Settings</string>
+    <string name="reset_settings_subtitle">Restore default settings</string>
+    <string name="reset_settings_dialog_title">Reset Settings</string>
+    <string name="reset_settings_dialog_message">This will restore all settings to their defaults. Your prayer tracking data, bookmarks, and other content will not be affected. The app will restart.</string>
+    <string name="reset">Reset</string>
+
+    <!-- More Menu Screen -->
+    <string name="more">More</string>
+    <string name="daily_practice">Daily Practice</string>
+    <string name="prayer_tracker">Prayer Tracker</string>
+    <string name="prayer_tracker_subtitle">Track your daily prayers &amp; qada</string>
+    <string name="fasting_subtitle">Fasting tracker and schedule</string>
+    <string name="khatam_quran">Khatam Quran</string>
+    <string name="khatam_quran_subtitle">Track your Quran completion</string>
+    <string name="learning">Learning</string>
+    <string name="allahs_99_names">Allah\'s 99 Names</string>
+    <string name="allahs_99_names_subtitle">Learn the beautiful names of Allah</string>
+    <string name="prophets_99_names">Prophet\'s 99 Names</string>
+    <string name="prophets_99_names_subtitle">Names and attributes of Prophet Muhammad (PBUH)</string>
+    <string name="prophets_of_islam">Prophets of Islam</string>
+    <string name="prophets_of_islam_subtitle">Stories and lessons from 25 prophets</string>
+    <string name="hadith">Hadith</string>
+    <string name="hadith_subtitle">Authentic hadith collections</string>
+    <string name="hadith_books_load_failed">The hadith collections couldn\'t be loaded</string>
+    <string name="hadith_chapters_load_failed">This collection\'s chapters couldn\'t be loaded</string>
+    <string name="hadith_load_failed">This chapter couldn\'t be loaded</string>
+    <string name="hadith_not_found">That hadith isn\'t in the collection</string>
+    <string name="hadith_load_failed_body">The hadith library is stored on your device, so trying again usually works.</string>
+    <string name="duas">Duas</string>
+    <string name="duas_subtitle">Daily duas and supplications</string>
+    <string name="tafseer">Tafseer</string>
+    <string name="tafseer_load_failed">The commentary list couldn\'t be loaded</string>
+    <string name="tafseer_load_failed_body">Commentary is stored on your device, so trying again usually works.</string>
+    <string name="tafseer_note_save_failed">That note couldn\'t be saved</string>
+    <string name="tafseer_note_delete_failed">That note couldn\'t be deleted</string>
+    <string name="tafseer_subtitle">Quran interpretation and commentary</string>
+    <string name="tools">Tools</string>
+    <string name="calendar">Calendar</string>
+    <string name="calendar_subtitle">Islamic calendar and events</string>
+    <string name="monthly_prayer_times">Monthly Prayer Times</string>
+    <string name="monthly_prayer_times_subtitle">Prayer times for the month</string>
+    <string name="qaida">Qaida</string>
+    <string name="qaida_subtitle">Learn to read the Qur\'an, letter by letter</string>
+    <string name="prayer_times_menu_subtitle">Daily prayer times with a month view</string>
+    <string name="zakat">Zakat</string>
+    <string name="zakat_calculate_failed">That calculation couldn\'t be completed</string>
+    <string name="zakat_save_failed">That calculation couldn\'t be saved</string>
+    <string name="zakat_mark_paid_failed">That couldn\'t be marked as paid</string>
+    <string name="zakat_delete_failed">That calculation couldn\'t be deleted</string>
+    <string name="zakat_history_load_failed">Your past calculations couldn\'t be loaded</string>
+    <string name="zakat_subtitle">Zakat calculator</string>
+    <string name="support">Support</string>
+    <string name="about_nimaz">About Nimaz</string>
+    <string name="about_nimaz_subtitle">Version, credits, and info</string>
+    <string name="help_support">Help &amp; Support</string>
+    <string name="help_support_subtitle">FAQs and contact us</string>
+    <string name="share_app">Share App</string>
+    <string name="share_app_subtitle">Share Nimaz with friends</string>
+    <string name="rate_us">Rate Us</string>
+    <string name="rate_us_subtitle">Rate Nimaz on the store</string>
+    <string name="delete_all_data">Delete All Data</string>
+    <string name="delete_all_data_subtitle">Permanently remove all your data</string>
+    <string name="delete_all_data_dialog_title">Delete All Data</string>
+    <string name="delete_all_data_dialog_message">This will permanently delete all your data including prayer tracking, bookmarks, tasbih history, and settings. This action cannot be undone.</string>
+
+    <!-- About Screen -->
+    <string name="about">About</string>
+    <string name="about_tagline">Your daily Islamic companion — accurate prayer times, Quran, qibla and more.</string>
+    <string name="about_rate">Rate</string>
+    <string name="about_share">Share</string>
+    <string name="links">Links</string>
+    <string name="developer">Developer</string>
+    <string name="data_sources_credits">Data Sources &amp; Credits</string>
+    <string name="contact_support">Contact Support</string>
+    <string name="contact_email">arshad@arshadshah.com</string>
+    <string name="website">Website</string>
+    <string name="website_url_display">nimaz.arshadshah.com</string>
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="privacy_policy_subtitle">How we handle your data</string>
+    <string name="terms_of_service">Terms of Service</string>
+    <string name="terms_of_service_subtitle">Usage terms</string>
+    <string name="open_source_licenses">Open Source Licenses</string>
+    <string name="open_source_licenses_subtitle">Third-party libraries</string>
+    <string name="check_for_updates">Check for Updates</string>
+    <string name="update_new_version">New version available</string>
+    <string name="update_checking">Checking…</string>
+    <string name="update_starting">Starting…</string>
+    <string name="update_downloading">Downloading…</string>
+    <string name="update_downloaded">Ready to install</string>
+    <string name="update_up_to_date">You\'re up to date</string>
+    <string name="update_check_failed">Check failed</string>
+    <string name="update_tap_to_check">Tap to check</string>
+    <string name="developer_name">Arshad Shah</string>
+    <string name="developer_role">Software Engineer at HMH, Dublin</string>
+    <string name="credit_quran_text">Quran Text</string>
+    <string name="credit_tanzil">Tanzil.net</string>
+    <string name="credit_translations">Translations</string>
+    <string name="credit_sahih_international">Sahih International</string>
+    <string name="credit_hadith_data">Hadith Data</string>
+    <string name="credit_sunnah">Sunnah.com</string>
+    <string name="credit_prayer_times">Prayer Times</string>
+    <string name="credit_aladhan">Aladhan API</string>
+    <string name="credit_recitations">Recitations</string>
+    <string name="credit_quran_com">Quran.com</string>
+    <string name="credit_hijri_calendar">Hijri Calendar</string>
+    <string name="credit_islamic_finder">Islamic Finder</string>
+    <string name="made_with">Made with </string>
+    <string name="for_the_ummah"> for the Ummah</string>
+    <string name="copyright_format" tools:ignore="PluralsCandidate">© %d Nimaz. All rights reserved.</string>
+
+    <!-- Help & Support Screen -->
+    <string name="nimaz_support_request">Nimaz Support Request</string>
+
+    <!-- Qibla -->
+    <!-- Prayer Tracking -->
+    <!-- General and Privacy -->
+
+    <string name="guide_qibla_title">Qibla Compass</string>
+
+
+    <!-- Qibla Screen -->
+    <string name="compass">Compass</string>
+    <string name="ar">AR</string>
+    <string name="facing_qibla">Facing Qibla</string>
+    <string name="finding_direction">Finding direction…</string>
+    <string name="hold_this_direction">Hold this direction</string>
+    <string name="you_are_facing_format">You are facing %1$d° %2$s</string>
+    <string name="qibla_bearing_label">Qibla bearing</string>
+    <string name="you_are_facing_label">You are facing</string>
+    <string name="compass_is_unsure_title">The compass is unsure</string>
+    <string name="compass_is_unsure_body">Magnets and metal nearby throw it off. A short calibration fixes it.</string>
+    <string name="turn_right_format">Turn right %d°</string>
+    <string name="turn_left_format">Turn left %d°</string>
+    <string name="compass_accuracy">Compass Accuracy</string>
+    <string name="calibrate">Calibrate</string>
+    <string name="calibrate_compass">Calibrate Compass</string>
+    <string name="current_accuracy_format">Current accuracy: %s</string>
+    <string name="improve_accuracy">To improve compass accuracy:</string>
+    <string name="calibration_step_1">Hold your phone away from metal objects and magnets</string>
+    <string name="calibration_step_2">Slowly move your phone in a figure-8 pattern</string>
+    <string name="calibration_step_3">Rotate the figure-8 in all three axes</string>
+    <string name="calibration_step_4">Repeat until accuracy improves to Medium or High</string>
+    <string name="calibration_tip">Tip: If accuracy remains low, try moving to a different location away from electronic devices.</string>
+    <string name="calibration_sheet_subtitle">Keep this open while you move — the reading updates live</string>
+    <string name="accuracy_now_label">Accuracy now</string>
+    <string name="back_to_compass">Back to the compass</string>
+    <string name="point_with_camera">Point with the camera</string>
+    <string name="got_it">Got it</string>
+    <string name="accuracy_high">High</string>
+    <string name="accuracy_high_hint">Compass is accurate</string>
+    <string name="accuracy_medium">Medium</string>
+    <string name="accuracy_medium_hint">Accuracy is acceptable</string>
+    <string name="accuracy_low">Low</string>
+    <string name="accuracy_low_hint">Calibration recommended</string>
+    <string name="accuracy_unreliable">Unreliable</string>
+    <string name="accuracy_unreliable_hint">Calibration needed</string>
+    <string name="camera_permission_title">Camera Permission Required</string>
+    <string name="camera_permission_message">Camera access is needed to show the AR Qibla view. The camera feed is used to overlay the Qibla direction on the real world. No images are captured or stored.</string>
+    <string name="grant_permission">Grant Permission</string>
+    <string name="not_now">Not Now</string>
+    <string name="unknown_error">Unknown error</string>
+
+    <!-- Prayer Settings Screen -->
+    <string name="prayer_settings_title">Prayer Settings</string>
+    <string name="asr_calculation">Asr Calculation</string>
+    <string name="asr_standard">Standard (Shafi\'i, Maliki, Hanbali)</string>
+    <string name="asr_hanafi">Hanafi</string>
+
+    <!-- Names — the three catalogues as one tabbed screen -->
+    <string name="names_title">Names</string>
+    <string name="names_more_subtitle">Allah, the Prophet ﷺ, and the Prophets</string>
+    <string name="names_search_hint">Search all names…</string>
+    <string name="names_tab_allah">Allah</string>
+    <string name="names_tab_prophet">Prophet ﷺ</string>
+    <string name="names_tab_prophets">Prophets</string>
+    <string name="cd_open_favourites">Open favourites</string>
+    <string name="favourites_empty_message">Tap the heart on a name to keep it here.</string>
+
+    <!-- Asma ul Husna -->
+    <string name="asma_ul_husna_title">Allah\'s 99 Names</string>
+    <string name="asma_ul_husna_search_hint">Search by name or meaning…</string>
+    <string name="asma_ul_husna_no_names_found">No names found</string>
+    <string name="asma_ul_husna_meaning">Meaning</string>
+    <string name="asma_ul_husna_explanation">Explanation</string>
+    <string name="asma_ul_husna_benefits">Benefits</string>
+    <string name="asma_ul_husna_quran_references">Quran References</string>
+    <string name="asma_ul_husna_usage_in_dua">Usage in Dua</string>
+
+    <!-- Asma un Nabi -->
+    <string name="asma_un_nabi_title">Prophet\'s 99 Names</string>
+    <string name="asma_un_nabi_search_hint">Search by name or meaning…</string>
+    <string name="asma_un_nabi_no_names_found">No names found</string>
+    <string name="asma_un_nabi_source">Source</string>
+
+    <!-- Prophets -->
+    <string name="prophets_title">Prophets of Islam</string>
+    <string name="prophets_search_hint">Search prophets…</string>
+    <string name="prophets_no_found">No prophets found</string>
+    <string name="prophets_story">Story</string>
+    <string name="prophets_key_lessons">Key Lessons</string>
+    <string name="prophets_quran_mentions">Quran Mentions</string>
+    <string name="prophets_timeline">Timeline</string>
+    <string name="prophets_miracles">Miracles</string>
+    <string name="prophets_era">Era</string>
+    <string name="prophets_lineage">Lineage</string>
+    <string name="prophets_years_lived">Years Lived</string>
+    <string name="prophets_place">Place of Preaching</string>
+
+    <!-- Khatam -->
+    <string name="khatam_title">Khatam Quran</string>
+    <string name="khatam_active">Active Khatam</string>
+    <string name="khatam_start_new">Start New Khatam</string>
+    <string name="khatam_no_in_progress">No khatams in progress</string>
+    <string name="khatam_no_completed">No completed khatams</string>
+    <string name="khatam_set_active">Set as Active</string>
+    <string name="khatam_delete_title">Delete Khatam</string>
+    <string name="khatam_delete_message">Are you sure you want to delete \"%s\"? This action cannot be undone.</string>
+    <string name="khatam_no_started">No Khatam Started</string>
+    <string name="khatam_start_journey">Start your journey to complete the Quran</string>
+    <string name="khatam_new">New Khatam</string>
+    <string name="khatam_name_label">Khatam Name</string>
+    <string name="khatam_name_placeholder">e.g., Ramadan Khatam 2026</string>
+    <string name="khatam_notes_label">Notes (Optional)</string>
+    <string name="khatam_notes_placeholder">Any personal notes…</string>
+    <string name="khatam_detail">Khatam Detail</string>
+    <string name="khatam_continue_reading">Continue Reading</string>
+    <string name="khatam_of_ayahs_read" tools:ignore="PluralsCandidate">%1$d of %2$d ayahs read</string>
+    <string name="khatam_avg_pace">Avg Pace</string>
+
+    <!-- Khatam: status and pace -->
+    <string name="khatam_archived">Archived</string>
+    <string name="khatam_status_active_badge">Active</string>
+    <string name="khatam_status_completed_badge">Khatam</string>
+    <string name="khatam_pace_on_track">On track</string>
+    <string name="khatam_pace_slightly_behind">Almost on pace</string>
+    <string name="khatam_pace_behind">Behind pace</string>
+    <string name="khatam_pace_not_started">Not started</string>
+
+    <!-- Khatam: list and hero -->
+    <string name="khatam_section_in_progress">In progress</string>
+    <string name="khatam_section_completed">Completed</string>
+    <string name="khatam_section_archived">Archived</string>
+    <string name="khatam_continue_at">Continue · %1$s %2$d</string>
+    <string name="khatam_started_on">Started %1$s</string>
+    <string name="khatam_finished_on">Finished %1$s</string>
+    <string name="khatam_no_archived">No archived khatams</string>
+
+    <!-- Khatam: detail -->
+    <string name="khatam_section_journey">Your journey</string>
+    <string name="khatam_journey_progress">%1$d / %2$d</string>
+    <string name="khatam_stat_streak">Day streak</string>
+    <string name="khatam_stat_juz_done">Juz done</string>
+    <string name="khatam_edit">Edit</string>
+    <string name="khatam_not_found">This khatam is no longer available</string>
+    <string name="khatam_a11y_juz_complete">Juz %1$d, complete</string>
+    <string name="khatam_a11y_juz_current">Juz %1$d, in progress</string>
+    <string name="khatam_a11y_juz_locked">Juz %1$d, not started</string>
+    <string name="khatam_a11y_progress_ring" tools:ignore="PluralsCandidate">%1$d percent complete</string>
+
+    <!-- Khatam: create and edit form -->
+    <string name="khatam_edit_title">Edit Khatam</string>
+    <string name="khatam_field_pace">Pace</string>
+    <string name="khatam_preset_juz_daily">1 juz / day</string>
+    <string name="khatam_preset_half_juz_daily">½ juz / day</string>
+    <string name="khatam_preset_quarter_juz_daily">¼ juz / day</string>
+    <string name="khatam_preset_custom">Custom</string>
+    <plurals name="khatam_ayahs_per_day">
+        <item quantity="one">%1$d ayah / day</item>
+        <item quantity="other">%1$d ayahs / day</item>
+    </plurals>
+    <string name="khatam_projected_finish">Finishes ~%1$s</string>
+    <string name="khatam_field_deadline">Deadline</string>
+    <string name="khatam_field_reminder">Daily reminder</string>
+    <string name="khatam_optional">Optional</string>
+    <string name="khatam_deadline_not_set">Not set</string>
+    <string name="khatam_deadline_clear">Clear deadline</string>
+    <string name="khatam_action_save">Save changes</string>
+    <string name="khatam_action_begin">Begin Khatam</string>
+    <string name="khatam_edit_progress_note">Editing never changes your progress</string>
+    <string name="khatam_action_archive">Archive this Khatam</string>
+    <string name="khatam_action_delete">Delete permanently</string>
+    <string name="khatam_archive_title">Archive Khatam</string>
+    <string name="khatam_archive_message">Archive \"%1$s\"? Your progress is kept and you can restore it later.</string>
+    <string name="khatam_error_name_required">Please enter a name</string>
+    <string name="khatam_error_save_failed">Couldn\'t save. Please try again.</string>
+
+    <!-- Khatam: counted quantities -->
+    <plurals name="khatam_ayahs_read_plural">
+        <item quantity="one">%1$d ayah read</item>
+        <item quantity="other">%1$d ayahs read</item>
+    </plurals>
+    <plurals name="khatam_days_remaining">
+        <item quantity="one">~%1$d day left</item>
+        <item quantity="other">~%1$d days left</item>
+    </plurals>
+
+    <!-- Khatam: widget -->
+    <plurals name="khatam_completed_lifetime">
+        <item quantity="one">%1$d Khatam completed</item>
+        <item quantity="other">%1$d Khatams completed</item>
+    </plurals>
+    <string name="notification_settings_khatam_reminder">Khatam reminder</string>
+    <string name="notification_settings_khatam_subtitle">A daily nudge to keep your Quran completion on pace</string>
+    <string name="notification_settings_reminder_time">Reminder time</string>
+    <string name="khatam_more_actions">More actions</string>
+    <string name="khatam_ayahs_per_day_label">Ayahs per day</string>
+    <string name="time_period_am">AM</string>
+    <string name="time_period_pm">PM</string>
+    <string name="khatam_widget_description">Your Quran completion progress</string>
+
+    <!-- Khatam: daily reminder notification -->
+    <string name="notif_khatam_channel_name">Khatam reminders</string>
+    <string name="notif_khatam_channel_description">Daily nudges to keep your Quran completion on pace</string>
+    <string name="notif_khatam_title">Time for today\'s reading</string>
+
+    <!-- ══ Extended worship reminders (epic #300) — channel, names, notification copy ══ -->
+    <string name="worship_channel_name">Worship Reminders</string>
+    <string name="worship_channel_description">Gentle reminders for Sunnah worship and fasting (Tahajjud, Suhoor, Iftar, adhkar and more)</string>
+
+    <!-- Names (card eyebrow) + Arabic -->
+    <string name="worship_tahajjud_name">Tahajjud</string>
+    <string name="worship_tahajjud_arabic">تَهَجُّد</string>
+    <string name="worship_witr_name">Witr</string>
+    <string name="worship_witr_arabic">وِتْر</string>
+    <string name="worship_suhoor_name">Suhoor</string>
+    <string name="worship_suhoor_arabic">سُحُور</string>
+    <string name="worship_iftar_name">Iftar</string>
+    <string name="worship_iftar_arabic">إفْطار</string>
+    <string name="worship_taraweeh_name">Taraweeh</string>
+    <string name="worship_taraweeh_arabic">تَراويح</string>
+    <string name="worship_laylatul_qadr_name">Laylatul Qadr</string>
+    <string name="worship_laylatul_qadr_arabic">لَيْلَة القَدْر</string>
+    <string name="worship_adhkar_morning_name">Morning Adhkar</string>
+    <string name="worship_adhkar_morning_arabic">أذكار الصباح</string>
+    <string name="worship_adhkar_evening_name">Evening Adhkar</string>
+    <string name="worship_adhkar_evening_arabic">أذكار المساء</string>
+    <string name="worship_mon_thu_name">Sunnah Fast</string>
+    <string name="worship_mon_thu_arabic">صِيام</string>
+    <string name="worship_white_days_name">White Days</string>
+    <string name="worship_white_days_arabic">أيّام البِيض</string>
+    <string name="worship_arafah_ashura_name">Arafah &amp; Ashura</string>
+    <string name="worship_arafah_ashura_arabic">عَرَفة وعاشوراء</string>
+
+    <!-- Notification title/body (authentic hadith/ayah paraphrases) -->
+    <string name="worship_tahajjud_title">Tahajjud — the last third of the night</string>
+    <string name="worship_tahajjud_body">A blessed time for du\'a has begun. \"Our Lord descends to the lowest heaven and says: Who is calling upon Me, that I may answer him?\"</string>
+    <string name="worship_witr_title">Have you prayed Witr?</string>
+    <string name="worship_witr_body">Seal your night with the Witr prayer before Fajr. \"Make Witr the last of your prayers at night.\"</string>
+    <string name="worship_suhoor_title">Suhoor ends soon</string>
+    <string name="worship_suhoor_body">Fajr is approaching. Finish your suhoor and make your intention to fast. \"Take suhoor, for in it there is blessing.\"</string>
+    <string name="worship_iftar_title">Time to break your fast</string>
+    <string name="worship_iftar_body">Maghrib has entered. \"The fasting person has two joys: when he breaks his fast, and when he meets his Lord.\"</string>
+    <string name="worship_taraweeh_title">Taraweeh tonight</string>
+    <string name="worship_taraweeh_body">Isha is complete — stand for the night prayer. \"Whoever prays during the nights of Ramadan with faith and seeking reward, his past sins are forgiven.\"</string>
+    <string name="worship_laylatul_qadr_title">Seek Laylatul Qadr tonight</string>
+    <string name="worship_laylatul_qadr_body">An odd night of the last ten. \"The Night of Decree is better than a thousand months.\" Increase in prayer, Qur\'an and du\'a.</string>
+    <string name="worship_adhkar_morning_title">Morning remembrance</string>
+    <string name="worship_adhkar_morning_body">Begin your day in the remembrance of Allah. A few minutes of adhkar to guard your day.</string>
+    <string name="worship_adhkar_evening_title">Evening remembrance</string>
+    <string name="worship_adhkar_evening_body">Fortify your evening with the adhkar.</string>
+    <string name="worship_mon_thu_title_monday">Fasting tomorrow? It\'s Monday</string>
+    <string name="worship_mon_thu_title_thursday">Fasting tomorrow? It\'s Thursday</string>
+    <string name="worship_mon_thu_body">A Sunnah day to fast. \"Deeds are presented to Allah on Monday and Thursday, and I love that my deeds be presented while I am fasting.\"</string>
+    <string name="worship_white_days_title">The White Days begin tomorrow</string>
+    <string name="worship_white_days_body">Fast the 13th, 14th and 15th — the bright days of the Hijri month. \"Fasting three days of each month is like fasting for a lifetime.\"</string>
+    <string name="worship_arafah_title">Day of Arafah tomorrow</string>
+    <string name="worship_arafah_body">Fasting Arafah is highly rewarded. \"It expiates the sins of the past year and the coming year.\"</string>
+    <string name="worship_ashura_title">Day of Ashura tomorrow</string>
+    <string name="worship_ashura_body">Fasting Ashura expiates the sins of the previous year. Consider also fasting the 9th (Tasu\'a).</string>
+
+    <!-- Worship reminders settings subscreen -->
+    <string name="worship_settings_title">Worship reminders</string>
+    <string name="worship_settings_subtitle">Tahajjud, Suhoor, Iftar, adhkar &amp; more</string>
+    <string name="worship_settings_section_night">Night worship</string>
+    <string name="worship_settings_section_ramadan">Ramadan</string>
+    <string name="worship_settings_section_ramadan_note">Shown during Ramadan</string>
+    <string name="worship_settings_section_fasting">Fasting &amp; Dhikr</string>
+    <string name="worship_settings_timing">Timing</string>
+    <string name="worship_settings_minutes">%d min</string>
+    <string name="worship_settings_intro">Optional Sunnah reminders. All off by default. Notifications only — no adhan.</string>
+    <string name="worship_when_tahajjud">Start of the last third of the night</string>
+    <string name="worship_when_witr">After Isha</string>
+    <string name="worship_when_suhoor">Before Fajr</string>
+    <string name="worship_when_iftar">At Maghrib</string>
+    <string name="worship_when_taraweeh">After Isha</string>
+    <string name="worship_when_laylatul_qadr">Odd nights of the last ten</string>
+    <string name="worship_when_adhkar_morning">After Fajr</string>
+    <string name="worship_when_adhkar_evening">After Asr</string>
+    <string name="worship_when_mon_thu">Night before Monday &amp; Thursday</string>
+    <string name="worship_when_white_days">13th–15th of the Hijri month</string>
+    <string name="worship_when_arafah_ashura">The day before</string>
+    <string name="worship_witr_mode_title">Witr timing</string>
+    <string name="worship_witr_mode_after_isha">After Isha</string>
+    <string name="worship_witr_mode_before_fajr">Before Fajr</string>
+
+    <!-- Notification settings hub (#301). Each row's subtitle reports the live setting
+         rather than describing what the screen contains. -->
+    <string name="notif_hub_prayers_title">Prayers</string>
+    <string name="notif_hub_weekly_title">Weekly</string>
+    <string name="notif_hub_sound_title">Adhan &amp; sound</string>
+    <string name="notif_hub_diagnostics_title">Diagnostics</string>
+    <string name="notif_hub_diagnostics_subtitle">Check what could stop alerts arriving</string>
+    <string name="notif_hub_count_of">%1$d of %2$d</string>
+    <string name="notif_hub_count_on">%1$d on</string>
+    <string name="notif_hub_worship_subtitle">Tahajjud, Witr, Suhoor, Iftar and more</string>
+    <string name="notif_hub_delivery_warning">Alerts may not arrive on time on this device.</string>
+    <string name="notif_hub_weekly_both">Jumu\'ah and khatam on</string>
+    <string name="notif_hub_weekly_jumuah">Jumu\'ah on · khatam off</string>
+    <string name="notif_hub_weekly_khatam">Khatam on · Jumu\'ah off</string>
+    <string name="notif_hub_weekly_none">Both off</string>
+    <string name="notif_hub_sound_dnd">%1$s · Do Not Disturb honoured</string>
+    <string name="notif_hub_sound_vibration">%1$s · vibration on</string>
+    <string name="notif_hub_sound_plain">%1$s</string>
+
+    <!-- Per-prayer alert style and reminder -->
+    <string name="notif_prayers_section">Daily prayers</string>
+    <string name="notif_all_prayers_section">All prayers</string>
+    <string name="notif_all_prayers_reminder_title">Remind me before every prayer</string>
+    <string name="notif_all_prayers_reminder_subtitle">Sets the same reminder on all five prayers. Change one below to override it.</string>
+    <string name="notif_all_prayers_lead_title">Reminder before all prayers</string>
+    <string name="notif_alert_style">Alert style</string>
+    <string name="notif_alert_style_adhan">Adhan</string>
+    <string name="notif_alert_style_adhan_subtitle">The call to prayer plays aloud</string>
+    <string name="notif_alert_style_notification">Notification only</string>
+    <string name="notif_alert_style_notification_subtitle">The standard notification tone</string>
+    <string name="notif_alert_style_silent">Silent</string>
+    <string name="notif_alert_style_silent_subtitle">It appears and waits — no sound, no vibration</string>
+    <string name="notif_reminder_before">Reminder before</string>
+    <string name="notif_reminder_none">No reminder</string>
+    <plurals name="notif_reminder_minutes_before">
+        <item quantity="one">%1$d min before</item>
+        <item quantity="other">%1$d min before</item>
+    </plurals>
+    <!-- Header summary: the alert style, then how far ahead the reminder lands. -->
+    <string name="notif_prayer_summary">%1$s · %2$s</string>
+    <string name="notif_prayer_off">Off</string>
+    <string name="notif_sunrise">Sunrise</string>
+    <string name="notif_sunrise_subtitle">A beep when Fajr\'s window closes</string>
+
+    <string name="notif_sound_voice">Adhan voice</string>
+    <string name="prayer_settings_fajr_reminder">Fajr reminder</string>
+    <string name="worship_settings_ramadan_notice">Ramadan reminders stay quiet until Ramadan begins. Set them up now and they will start on their own.</string>
+
+    <!-- Diagnostics: every row states something read from the device. -->
+    <string name="notif_diag_status_section">Device checks</string>
+    <string name="notif_diag_permission">Notification permission</string>
+    <string name="notif_diag_granted">Granted</string>
+    <string name="notif_diag_blocked">Blocked</string>
+    <string name="notif_diag_exact_alarms">Exact alarms</string>
+    <string name="notif_diag_allowed">Allowed</string>
+    <string name="notif_diag_not_allowed">Not allowed</string>
+    <string name="notif_diag_battery">Battery optimisation</string>
+    <string name="notif_diag_unrestricted">Unrestricted</string>
+    <string name="notif_diag_restricted">Restricted</string>
+    <string name="notif_diag_needs_attention">Needs attention</string>
+    <string name="notif_diag_reset_confirm_title">Reset all notifications?</string>
+    <string name="notif_diag_reset_confirm_body">Every scheduled alarm is cancelled and rebuilt from your current settings. Your choices are kept — only the schedule is redrawn.</string>
+    <string name="notif_diag_reset_confirm_action">Reset</string>
+
+    <!-- Home "Next Worship" card labels -->
+    <string name="worship_card_begins">Begins</string>
+    <string name="worship_card_begins_in">Begins in</string>
+    <string name="worship_card_at">At</string>
+    <string name="worship_card_in">In</string>
+    <string name="worship_card_tonight">Tonight</string>
+    <string name="worship_card_tomorrow">Tomorrow</string>
+    <string name="worship_card_now">Now</string>
+    <!-- Home "Next Worship" card CTAs (per reminder type) -->
+    <string name="worship_action_duas">Open du\'as</string>
+    <string name="worship_action_adhkar">Open adhkar</string>
+    <string name="worship_action_iftar_dua">Iftar du\'a</string>
+    <string name="worship_action_quran">Open Qur\'an</string>
+    <string name="worship_action_fast_tracker">Fast tracker</string>
+    <!-- Localized countdown units — translators may reorder or re-suffix per locale -->
+    <string name="countdown_hms">%1$d h %2$d m %3$d s</string>
+    <string name="countdown_ms">%1$d m %2$d s</string>
+    <string name="countdown_s">%1$d s</string>
+    <string name="countdown_hm">%1$d h %2$d m</string>
+    <string name="countdown_m">%1$d m</string>
+    <string name="countdown_now">Now</string>
+    <string name="prayer_sky_status_format">%1$s in %2$s</string>
+    <plurals name="notif_khatam_body_on_track">
+        <item quantity="one">%1$s · you\'re on pace. %2$d ayah to keep it going.</item>
+        <item quantity="other">%1$s · you\'re on pace. %2$d ayahs to keep it going.</item>
+    </plurals>
+    <plurals name="notif_khatam_body_behind">
+        <item quantity="one">%1$s · %2$d ayah today to get back on pace.</item>
+        <item quantity="other">%1$s · %2$d ayahs today to get back on pace.</item>
+    </plurals>
+    <plurals name="notif_khatam_body_generic">
+        <item quantity="one">%1$s · %2$d ayah to read today.</item>
+        <item quantity="other">%1$s · %2$d ayahs to read today.</item>
+    </plurals>
+
+    <!-- Qibla AR -->
+
+    <!-- Widget Descriptions -->
+    <string name="widget_hijri_date_description">Shows the current Hijri date</string>
+    <string name="widget_next_prayer_description">Shows the next prayer time and countdown</string>
+    <string name="widget_prayer_times_description">Shows all prayer times for today</string>
+    <string name="widget_prayer_tracker_description">Track your daily prayers with tap-to-check boxes</string>
+    <string name="widget_hijri_calendar_description">Shows the full Hijri month calendar with today\'s events</string>
+
+    <!-- Widget Names -->
+
+    <!-- Prayer Tracker Screen -->
+    <string name="qada">Qada</string>
+    <string name="prayer_tracker_title">Prayer Tracker</string>
+    <string name="view_statistics">View Statistics</string>
+    <string name="all_caught_up">All Caught Up!</string>
+    <string name="all_caught_up_message">You have no missed prayers to make up. Prayers only land here once you mark them missed yourself -- nothing is added on your behalf.</string>
+    <string name="prayers_to_make_up">Prayers to Make Up</string>
+    <string name="all_caught_up_short">All caught up!</string>
+    <plurals name="missed_prayers_pending">
+        <item quantity="one">%1$d missed prayer pending</item>
+        <item quantity="other">%1$d missed prayers pending</item>
+    </plurals>
+    <string name="on_time">On time</string>
+    <string name="late">Late</string>
+    <string name="missed">Missed</string>
+    <string name="made_up">Made up</string>
+    <string name="upcoming">Upcoming</string>
+
+    <!-- Tasbih Screen -->
+    <string name="tasbih_mode_beads">Beads</string>
+    <string name="tasbih_mode_classic">Classic</string>
+    <string name="tasbih_bead_design">Bead design</string>
+    <string name="tasbih_choose_dhikr">Choose Dhikr</string>
+    <string name="tasbih_search_dhikr">Search dhikr…</string>
+    <string name="tasbih_category_mine">Mine</string>
+    <string name="tasbih_category_daily">Daily</string>
+    <string name="tasbih_category_custom">Custom</string>
+    <string name="tasbih_category_after_prayer">After Prayer</string>
+    <string name="tasbih_category_morning">Morning</string>
+    <string name="tasbih_category_evening">Evening</string>
+    <string name="tasbih_free_count_subtitle">Count anything · set your own target</string>
+    <string name="tasbih_left_handed">Left-handed</string>
+    <string name="tasbih_beads_advance_ltr">Beads advance left → right</string>
+    <string name="tasbih_beads_advance_rtl">Beads advance right → left</string>
+    <string name="tasbih_stat_target">TARGET</string>
+    <string name="tasbih_stat_today">TODAY</string>
+    <string name="tasbih_stat_laps">LAPS</string>
+    <string name="tasbih_change_dhikr">Change Dhikr</string>
+    <string name="tasbih_bead_wood">Wood</string>
+    <string name="tasbih_bead_marble">Marble</string>
+    <string name="tasbih_bead_amethyst">Amethyst</string>
+    <string name="tasbih_bead_onyx">Onyx</string>
+    <string name="tasbih_bead_pearl">Pearl</string>
+    <string name="tasbih_bead_jade">Jade</string>
+    <string name="tasbih_delete_preset_title">Delete preset?</string>
+    <string name="tasbih_delete_preset_message">This custom dhikr preset will be removed. Your logged counts are kept.</string>
+    <string name="history">History</string>
+    <string name="target_format">Target: %d</string>
+    <string name="tap_to_count">Tap to count</string>
+    <string name="free_count_label">Free Count</string>
+    <string name="reset_action">Reset</string>
+    <string name="toggle_sound">Toggle Sound</string>
+    <string name="toggle_vibration">Toggle Vibration</string>
+
+    <!-- Tasbih History Screen -->
+    <string name="tasbih_history">Tasbih History</string>
+    <string name="this_week">This Week</string>
+    <string name="no_sessions_yet">No sessions yet</string>
+    <string name="start_counting_hint">Start counting to see your history here</string>
+    <string name="sessions">Sessions</string>
+    <string name="custom">Custom</string>
+    <plurals name="laps_format">
+        <item quantity="one">%d lap</item>
+        <item quantity="other">%d laps</item>
+    </plurals>
+    <string name="done">Done</string>
+    <string name="all_time">All Time</string>
+
+    <!-- Add Preset Screen -->
+    <string name="name_required">Name *</string>
+    <string name="name_required_error">Name is required</string>
+    <string name="preset_name_placeholder">e.g., SubhanAllah wa Bihamdihi</string>
+    <string name="arabic_text">Arabic Text</string>
+    <string name="arabic_placeholder">e.g., سُبْحَانَ اللَّهِ</string>
+    <string name="transliteration">Transliteration</string>
+    <string name="transliteration_placeholder">e.g., SubhanAllah wa Bihamdihi</string>
+    <string name="translation">Translation</string>
+    <string name="translation_placeholder">e.g., Glory be to Allah and praise Him</string>
+    <string name="target_count">Target Count</string>
+    <string name="category">Category</string>
+    <string name="new_tasbih">New Tasbih</string>
+    <string name="create_tasbih">Create Tasbih</string>
+
+    <!-- Duas Collection Screen -->
+    <string name="duas_adhkar">Duas &amp; Adhkar</string>
+    <string name="dua_occasion_empty">No duas recorded for this occasion yet.</string>
+    <string name="dua_occasion_morning">Morning</string>
+    <string name="dua_occasion_evening">Evening</string>
+    <string name="dua_occasion_after_prayer">After prayer</string>
+    <string name="dua_occasion_before_sleep">Before sleep</string>
+    <string name="dua_occasion_waking_up">Waking up</string>
+    <string name="dua_occasion_eating">Eating</string>
+    <string name="dua_occasion_traveling">Travelling</string>
+    <string name="dua_occasion_entering_mosque">Entering the mosque</string>
+    <string name="dua_occasion_leaving_mosque">Leaving the mosque</string>
+    <string name="dua_occasion_entering_home">Entering the home</string>
+    <string name="dua_occasion_leaving_home">Leaving the home</string>
+    <string name="dua_occasion_rain">Rain</string>
+    <string name="dua_occasion_distress">Distress</string>
+    <string name="dua_occasion_forgiveness">Forgiveness</string>
+    <string name="dua_occasion_parents">Parents</string>
+    <string name="dua_occasion_gratitude">Gratitude</string>
+    <string name="dua_occasion_general">General</string>
+    <string name="bookmarks">Bookmarks</string>
+    <string name="daily_adhkar">Daily Adhkar</string>
+    <string name="situational_duas">Situational Duas</string>
+    <plurals name="duas_count_format">
+        <item quantity="one">%d dua</item>
+        <item quantity="other">%d duas</item>
+    </plurals>
+    <string name="all_categories_az">All Categories (A–Z)</string>
+    <string name="sort_categories_alphabetically">Sort categories alphabetically</string>
+    <string name="sort_categories_default">Switch to default order</string>
+
+    <!-- Bookmarks Screen -->
+    <string name="bookmarks_title">Bookmarks</string>
+    <string name="bookmarks_load_failed">Your bookmarks couldn\'t be loaded</string>
+    <string name="bookmarks_load_failed_body">Bookmarks are stored on your device, so trying again usually works.</string>
+    <string name="bookmarks_delete_failed">That bookmark couldn\'t be removed</string>
+    <string name="bookmarks_restore_failed">That bookmark couldn\'t be restored</string>
+    <string name="bookmarks_note_failed">That note couldn\'t be saved</string>
+    <string name="bookmarks_clear_failed">Your bookmarks couldn\'t be cleared</string>
+    <string name="no_bookmarks_yet">Nothing saved yet</string>
+    <string name="no_bookmarks_hint">Save ayahs, hadiths, and duas for quick access</string>
+    <string name="share">Share</string>
+    <string name="added_format">Added %s</string>
+    <string name="quran_type">Quran</string>
+    <string name="hadith_type">Hadith</string>
+    <string name="dua_type">Dua</string>
+    <string name="favorite_type">Favorite</string>
+    <string name="bookmarks_count" tools:ignore="PluralsCandidate">%1$d saved</string>
+    <string name="bookmark_removed">Bookmark removed</string>
+    <string name="favorite_removed">Favorite removed</string>
+    <string name="undo">Undo</string>
+    <string name="edit_note">Edit note</string>
+    <string name="note_hint">Add a note…</string>
+    <string name="cd_more_options">More options</string>
+
+    <!-- Islamic Calendar Screen -->
+    <string name="islamic_calendar">Islamic Calendar</string>
+    <string name="eid">Eid</string>
+    <string name="holy_night">Holy Night</string>
+    <string name="month_start">Month start</string>
+    <string name="events">Events</string>
+    <string name="upcoming_events">Upcoming Events</string>
+
+    <!-- Hadith Collection Screen -->
+    <string name="hadith_title">Hadith</string>
+    <string name="read_today">Read Today</string>
+    <string name="bookmarked">Bookmarked</string>
+    <string name="day_streak">Day Streak</string>
+    <string name="kutub_al_sittah">Kutub al-Sittah</string>
+    <string name="bookmark">Bookmark</string>
+    <string name="hadith_count_format">%s hadith</string>
+
+    <!-- Search Screen -->
+    <string name="search_title">Search</string>
+    <string name="search_placeholder">Search the Qur\'an, Hadith &amp; duas</string>
+    <string name="search_or_ask_placeholder">Search or ask about the Qur\'an, Hadith &amp; duas</string>
+    <string name="search_ask_button">Ask</string>
+    <string name="search_try_asking">Try asking</string>
+    <string name="search_recent">Recent</string>
+    <string name="search_typing_hint">Results update as you type · Enter to ask for an answer with sources</string>
+    <plurals name="search_matches_format">
+        <item quantity="one">%d match</item>
+        <item quantity="other">%d matches</item>
+    </plurals>
+    <string name="search_answer_count_format" tools:ignore="PluralsCandidate">%1$d in your library · %2$d cited in the answer</string>
+    <string name="search_cited_chip">Cited</string>
+    <string name="ask_example_1">What does the Qur\'an say about patience?</string>
+    <string name="ask_example_2">Duas for anxiety and worry</string>
+    <string name="ask_example_3">Verses about gratitude</string>
+    <string name="ask_example_4">Why is intention important in worship?</string>
+    <string name="recent_searches">Recent Searches</string>
+    <string name="no_results_format">No results for \"%s\"</string>
+    <string name="no_results_hint">Try different keywords or filters</string>
+    <string name="remove">Remove</string>
+    <plurals name="surah_ayahs_format">
+        <item quantity="one">%1$s • %2$d ayah</item>
+        <item quantity="other">%1$s • %2$d ayahs</item>
+    </plurals>
+
+    <!-- Zakat Calculator Screen -->
+    <string name="zakat_calculator">Zakat Calculator</string>
+    <string name="zakat_due">Zakat Due</string>
+    <string name="assets">Assets</string>
+    <string name="cash_on_hand">Cash on Hand</string>
+    <string name="bank_balance">Bank Balance</string>
+    <string name="gold">Gold</string>
+    <string name="silver">Silver</string>
+    <string name="investments">Investments</string>
+    <string name="business_inventory">Business Inventory</string>
+    <string name="receivables">Receivables</string>
+    <string name="rental_income">Rental Income</string>
+    <string name="other_assets">Other Assets</string>
+    <string name="liabilities">Liabilities</string>
+    <string name="debts_owed">Debts Owed</string>
+    <string name="other_liabilities">Other Liabilities</string>
+    <string name="total_assets">Total Assets</string>
+    <string name="total_liabilities">Total Liabilities</string>
+    <string name="net_zakatable_wealth">Net Zakatable Wealth</string>
+    <string name="nisab_threshold">Nisab Threshold</string>
+    <string name="meets_nisab">Meets Nisab</string>
+    <string name="loans">Loans</string>
+    <string name="bills_due">Bills Due</string>
+    <string name="hint_physical_cash">Physical cash you possess</string>
+    <string name="hint_bank_accounts">All bank accounts combined</string>
+    <string name="hint_weight_in_grams">Weight in grams</string>
+    <string name="hint_stocks_bonds">Stocks, bonds, mutual funds</string>
+    <string name="hint_goods_for_trade">Goods held for trade</string>
+    <string name="hint_money_owed_to_you">Money owed to you</string>
+    <string name="hint_income_from_properties">Income from properties</string>
+    <string name="hint_other_zakatable_assets">Any other zakatable assets</string>
+    <string name="hint_personal_debts">Personal debts</string>
+    <string name="hint_bank_personal_loans">Bank or personal loans</string>
+    <string name="hint_outstanding_bills">Outstanding bills</string>
+    <string name="hint_other_liabilities">Any other liabilities</string>
+    <string name="calculation_breakdown">Calculation Breakdown</string>
+
+    <!-- Detail screen fallbacks -->
+    <string name="name_detail">Name Detail</string>
+    <string name="prophet_detail">Prophet Detail</string>
+
+    <!-- Language Screen -->
+    <string name="language_title">Language</string>
+    <string name="app_language_section">APP LANGUAGE</string>
+    <string name="language_change_info">Changing the language will restart the app and apply the new language to all screens.</string>
+
+    <!-- Hadith fallback -->
+    <string name="hadith_fallback_arabic">مَنْ كَانَ يُؤْمِنُ بِاللَّهِ وَالْيَوْمِ الْآخِرِ فَلْيَقُلْ خَيْرًا أَوْ لِيَصْمُتْ</string>
+    <string name="hadith_fallback_english">"Whoever believes in Allah and the Last Day, let him speak good or remain silent."</string>
+    <string name="hadith_fallback_source">Sahih al-Bukhari 6018</string>
+
+    <!-- Home Screen - Jumu'ah extras -->
+    <string name="jumuah_arabic">\u0627\u0644\u062C\u0645\u0639\u0629</string>
+    <string name="jumuah_hadith_quote">"The best day on which the sun rises is Friday." — Sahih Muslim</string>
+
+
+    <!-- Search Screen -->
+    <string name="surah_result_format">Surah %1$d:%2$d</string>
+    <string name="hadith_result_format">Hadith #%1$d</string>
+
+    <!-- Share -->
+    <string name="share_message">Check out Nimaz - Prayer Times App: https://play.google.com/store/apps/details?id=com.arshadshah.nimaz</string>
+    <string name="share_chooser_title">Share Nimaz</string>
+    <!-- Centralized content-sharing system (ContentShareManager / Shareables) -->
+    <string name="share_text_footer">Shared with Nimaz</string>
+    <string name="share_card_tagline">Islamic Companion</string>
+    <string name="share_card_qr_caption">Scan to install Nimaz</string>
+    <string name="share_app_title">Share Nimaz</string>
+    <string name="share_app_scan_hint">Scan the code to install Nimaz</string>
+    <string name="share_app_link_button">Share link</string>
+    <string name="share_invite_eyebrow">Invite</string>
+    <string name="share_invite_body">Prayer times, Quran, adhan, Qibla and more — your daily Islamic companion.</string>
+    <string name="share_invite_attribution">Free on Google Play</string>
+    <string name="share_eyebrow_quran">Quran</string>
+    <string name="share_eyebrow_hadith">Hadith</string>
+    <string name="share_eyebrow_dua">Dua</string>
+    <string name="share_reference_ayah">Surah %1$s · Ayah %2$d</string>
+    <string name="share_reference_hadith">Hadith #%1$d</string>
+    <string name="share_eyebrow_zakat">Zakat</string>
+    <!-- The shared zakat breakdown. Labels, not sentences: the card reads as a receipt. -->
+    <string name="share_zakat_due">Zakat due</string>
+    <string name="share_zakat_assets">Assets</string>
+    <string name="share_zakat_deducted">Deducted</string>
+    <string name="share_zakat_net">Net zakatable</string>
+    <string name="share_zakat_nisab">Nisab threshold</string>
+    <string name="share_zakat_line_format">%1$s: %2$s</string>
+    <string name="share_zakat_year_format">Lunar year %1$s</string>
+    <string name="contact_email_subject">Nimaz App Feedback</string>
+
+    <!-- Quran Home Screen -->
+    <string name="quran_home_title">Quran</string>
+    <string name="quran_home_search">Search</string>
+    <string name="quran_home_bookmarks">Bookmarks</string>
+    <string name="quran_home_quran_settings">Quran Settings</string>
+    <string name="quran_home_tab_home">Home</string>
+    <string name="quran_home_tab_browse">Browse</string>
+    <string name="quran_home_tab_favorites">Favorites</string>
+    <string name="quran_home_tab_surah">Surah</string>
+    <string name="quran_home_tab_juz">Juz</string>
+    <string name="quran_home_tab_page">Page</string>
+    <string name="quran_home_start_reading">Start Reading</string>
+    <string name="quran_home_begin_journey">Begin your Quran journey with Al-Fatiha</string>
+    <string name="quran_home_see_all">See All</string>
+    <string name="see_more">See more</string>
+    <string name="see_less">See less</string>
+    <string name="quran_home_no_favorite_ayahs">No favorite ayahs yet</string>
+    <string name="quran_home_favorite_hint">Tap the heart icon on any ayah to add it here</string>
+    <string name="quran_home_no_bookmarks">No bookmarks yet</string>
+    <string name="quran_home_bookmark_hint">Tap the bookmark icon on any ayah to add it here</string>
+    <string name="quran_home_jump_to_page">Jump to Page (1–604)</string>
+    <string name="quran_home_enter_page_number">Enter page number</string>
+    <string name="quran_home_go_to_page">Go to page</string>
+    <string name="quran_home_verse_format">Verse %1$d</string>
+    <string name="quran_home_juz_format">Juz %1$d</string>
+    <string name="quran_home_page_format">Page %1$d</string>
+    <string name="quran_home_surah_fallback">Surah %1$d</string>
+    <string name="quran_home_page_range_format">p. %1$d–%2$d</string>
+    <string name="quran_home_juz_indicator">Juz %1$d</string>
+    <string name="quran_home_continue_reading">CONTINUE READING</string>
+    <string name="quran_home_resume">Resume</string>
+    <string name="quran_home_completed">Completed</string>
+    <string name="quran_home_makkah">Makkah</string>
+    <string name="quran_home_madinah">Madinah</string>
+    <plurals name="quran_home_verses_count">
+        <item quantity="one">%1$d Verse</item>
+        <item quantity="other">%1$d Verses</item>
+    </plurals>
+    <plurals name="quran_home_ruku_count">
+        <item quantity="one">%1$d Ruku</item>
+        <item quantity="other">%1$d Ruku</item>
+    </plurals>
+    <string name="quran_home_surah_info">Surah Info</string>
+    <string name="quran_home_verse_of_the_day">VERSE OF THE DAY</string>
+    <string name="quran_home_verse_reference">%1$s · %2$d:%3$d</string>
+    <!-- Recommended surah card metadata: verse count and starting juz, e.g. "110 Verses · Juz 15" -->
+    <string name="quran_home_recommended_meta">%1$s · Juz %2$d</string>
+    <!-- Spoken label for a recommended surah card, e.g. "Al-Kahf, surah 18, Friday Sunnah" -->
+    <string name="quran_home_recommended_a11y">%1$s, surah %2$d, %3$s</string>
+    <string name="quran_home_read_verse">Read</string>
+    <string name="quran_home_recommended">Recommended</string>
+    <string name="quran_home_reason_friday">Friday Sunnah</string>
+    <string name="quran_home_reason_before_sleep">Before sleep</string>
+    <string name="quran_home_reason_heart">Heart of the Quran</string>
+    <string name="quran_home_reason_mercy">The Most Merciful</string>
+    <string name="quran_home_reason_provision">Seeking provision</string>
+    <string name="quran_home_reason_greatest">The greatest surah</string>
+    <string name="quran_home_reason_third">A third of the Quran</string>
+    <string name="quran_home_reason_refuge_evil">Refuge from evil</string>
+    <string name="quran_home_reason_refuge_whispers">Refuge from whispers</string>
+
+    <!-- Dua Reader Screen -->
+    <string name="dua_reader_loading">Loading…</string>
+    <string name="dua_reader_favorite">Favorite</string>
+    <string name="dua_reader_add_tasbih">Add as Tasbih</string>
+    <string name="dua_reader_added_tasbih">Added to Tasbih</string>
+    <string name="dua_reader_prev">Prev</string>
+    <string name="dua_reader_next">Next</string>
+    <plurals name="dua_reader_recite_count">
+        <item quantity="one">Recite %1$d time</item>
+        <item quantity="other">Recite %1$d times</item>
+    </plurals>
+    <string name="dua_reader_virtue">Virtue of this Dua</string>
+    <string name="dua_reader_share">Share</string>
+    <string name="dua_reader_source_label">Source: %1$s</string>
+    <string name="dua_reader_not_found">Dua not found</string>
+    <!-- Dua Settings Screen -->
+    <string name="dua_settings">Dua Settings</string>
+    <string name="translation_font_size">Translation Size</string>
+    <string name="show_arabic">Show Arabic</string>
+    <string name="show_arabic_subtitle">Arabic script</string>
+    <string name="dua_settings_preview_arabic">اللَّهُمَّ إِنِّي أَسْأَلُكَ الْعِلْمَ النَّافِعَ</string>
+    <string name="dua_settings_preview_transliteration">"Allahumma inni as\'aluka al-\'ilm an-nafi\'"</string>
+    <string name="dua_settings_preview_translation">O Allah, I ask You for beneficial knowledge</string>
+
+    <!-- Fasting Tracker Screen -->
+    <string name="fasting_tab_tracker">Tracker</string>
+    <string name="fasting_tab_ramadan">Ramadan</string>
+    <string name="fasting_tab_makeup">Makeup</string>
+    <string name="fasting_title">Fasting</string>
+    <string name="fasting_current">CURRENT</string>
+    <string name="fasting_ramadan_day">Ramadan - Day %1$d</string>
+    <string name="fasting_fasted">Fasted</string>
+    <string name="fasting_missed">Missed</string>
+    <string name="fasting_remaining">Remaining</string>
+    <string name="fasting_ramadan_starts_in">RAMADAN STARTS IN</string>
+    <string name="fasting_day">day</string>
+    <string name="fasting_days">days</string>
+    <string name="fasting_unlogged_day">Unlogged Day</string>
+    <string name="fasting_unlogged_days">Unlogged Days</string>
+    <string name="fasting_log_calendar_hint">Tap on calendar dates to log your fasts</string>
+    <string name="fasting_today">Today</string>
+    <string name="fasting_status_fasting">Fasting</string>
+    <string name="fasting_status_not_fasting">Not Fasting</string>
+    <string name="fasting_status_exempted">Exempted</string>
+    <string name="fasting_status_makeup_due">Makeup Due</string>
+    <string name="fasting_suhoor_ends">Suhoor ends</string>
+    <string name="fasting_iftar">Iftar</string>
+    <string name="fasting_completed">Completed</string>
+    <string name="fasting_waiting">Waiting</string>
+    <string name="fasting_recommended_fasts">Recommended Fasts</string>
+    <string name="fasting_monday">Monday Fasting</string>
+    <string name="fasting_thursday">Thursday Fasting</string>
+    <string name="fasting_sunnah_desc">Sunnah of the Prophet \uFDFA</string>
+    <string name="fasting_ayyam_al_beed">Ayyam al-Beed</string>
+    <string name="fasting_ayyam_desc">13th, 14th, 15th of lunar month</string>
+    <string name="fasting_next_format">Next: %1$s</string>
+    <string name="fasting_tomorrow">Tomorrow</string>
+    <plurals name="fasting_in_days_format">
+        <item quantity="one">In %1$d day</item>
+        <item quantity="other">In %1$d days</item>
+    </plurals>
+    <string name="fasting_log_today">Log today\'s fast</string>
+    <string name="fasting_no_makeup">No Makeup Fasts</string>
+    <string name="fasting_all_up_to_date">All your fasts are up to date!</string>
+    <string name="fasting_fasts_to_makeup">Fasts to Make Up</string>
+    <string name="fasting_remaining_to_complete">remaining to complete</string>
+    <string name="fasting_completed_label">Completed</string>
+    <string name="fasting_pending_label">Pending</string>
+    <string name="fasting_total_label">Total</string>
+    <string name="fasting_makeup_info">Makeup fasts should ideally be completed before the next Ramadan. Fasting on Mondays and Thursdays is recommended.</string>
+    <string name="fasting_pending_count" tools:ignore="PluralsCandidate">%1$d pending</string>
+    <plurals name="fasting_fasts_count">
+        <item quantity="one">%1$d fast</item>
+        <item quantity="other">%1$d fasts</item>
+    </plurals>
+    <string name="fasting_pending">Pending</string>
+    <string name="fasting_edit">Edit</string>
+    <string name="fasting_mark_complete">Mark Complete</string>
+    <string name="fasting_fidya_paid_on">Fidya paid on %1$s</string>
+    <string name="fasting_made_up_on">Made up on %1$s</string>
+    <string name="fasting_fidya_paid">Fidya paid</string>
+    <string name="fasting_originally">Originally: %1$s</string>
+
+    <!-- Fast Management Bottom Sheet -->
+    <string name="fasting_sheet_status">Status</string>
+    <string name="fasting_sheet_type">Fast Type</string>
+    <string name="fasting_sheet_note">Note</string>
+    <string name="fasting_sheet_save">Save</string>
+    <string name="fasting_sheet_delete">Delete</string>
+    <string name="fasting_sheet_exemption_reason">Exemption Reason</string>
+    <string name="fasting_sheet_select_reason">Select reason</string>
+    <string name="fasting_sheet_edit_makeup">Edit Makeup Fast</string>
+    <string name="fasting_sheet_reason">Reason</string>
+    <string name="fasting_sheet_fidya_amount">Fidya Amount</string>
+
+    <!-- License Detail Screen -->
+    <string name="license_detail_title">License Detail</string>
+    <string name="license_detail_library_not_found">Library not found</string>
+    <string name="license_detail_not_found_body">This library isn\'t in the bundled licence list. It may have been removed in a newer version of the app.</string>
+    <string name="licenses_load_failed">The licence list couldn\'t be loaded</string>
+    <string name="licenses_load_failed_body">This list is built from data bundled with the app, so trying again usually works.</string>
+    <string name="licenses_subtitle_format">%1$d libraries · %2$d licences</string>
+    <string name="licenses_search_placeholder">Search libraries or authors</string>
+    <string name="licenses_credit_title">Built on shared work</string>
+    <string name="licenses_credit_body">Nimaz stands on libraries other people wrote and gave away. Every one of them is credited here.</string>
+    <string name="licenses_stat_libraries">Libraries</string>
+    <string name="licenses_stat_licences">Licences</string>
+    <string name="licenses_filter_section">Filter</string>
+    <string name="licenses_filter_all">All</string>
+    <string name="licenses_chip_format">%1$s · %2$d</string>
+    <string name="licenses_grouped_by_licence">Grouped by licence</string>
+    <string name="licenses_grouped_alphabetically">A to Z</string>
+    <string name="licenses_action_sort_alphabetically">Sort A–Z</string>
+    <string name="licenses_action_group_by_licence">Group by licence</string>
+    <string name="licenses_visible_count_format">%1$d of %2$d</string>
+    <string name="licenses_no_matches_title">No libraries match</string>
+    <string name="licenses_no_matches_body">Try the library name, or the author who publishes it.</string>
+    <string name="licenses_generated_note">This list is generated at build time and bundled with the app, so it always matches the version you are running.</string>
+
+    <!-- Licence families: coarse groups the list sorts and colours by, not the declared name -->
+    <string name="license_family_apache">Apache 2.0</string>
+    <string name="license_family_mit">MIT</string>
+    <string name="license_family_bsd">BSD</string>
+    <string name="license_family_ofl">Open Font</string>
+    <string name="license_family_gpl">GPL</string>
+    <string name="license_family_other">Other</string>
+
+    <!-- Plain-language glosses. Never a substitute for the full text; see license_detail_governs_note -->
+    <string name="license_plain_title">In plain terms</string>
+    <string name="license_plain_apache">Free to use and ship, including in a paid app. Keep the notices, and you get an explicit patent grant.</string>
+    <string name="license_plain_mit">Do almost anything with it, as long as the copyright notice travels with the code.</string>
+    <string name="license_plain_bsd">Free to use and redistribute. Keep the notices, and don\'t use the authors\' names to endorse this app.</string>
+    <string name="license_plain_ofl">Free to embed in an app. The font can\'t be sold on its own, and a modified copy can\'t keep the original name.</string>
+    <string name="license_plain_gpl">Free to use, but sharing a modified version means sharing its source under the same terms.</string>
+
+    <string name="license_detail_coordinate">Coordinate</string>
+    <string name="license_detail_published_by">Published by</string>
+    <string name="license_detail_home_page">Home page</string>
+    <string name="license_detail_open_home_page">Open home page</string>
+    <string name="license_detail_full_text_format">%1$s — full text</string>
+    <string name="license_detail_show_full_text">Show full text</string>
+    <string name="license_detail_collapse">Collapse</string>
+    <string name="license_detail_no_text">This library didn\'t publish its licence text. The home page above is the place to read it.</string>
+    <string name="license_detail_governs_note">The licence text above is what governs use of this component — the summary is only there to orient you.</string>
+    <string name="license_text_copied">Licence text copied</string>
+
+    <!-- Notification Settings Screen -->
+    <string name="notification_settings_enable">Enable Notifications</string>
+    <string name="notification_settings_enable_subtitle">Receive prayer time alerts</string>
+    <string name="notification_settings_adhan_section">ADHAN SOUND</string>
+    <string name="notification_settings_enable_adhan">Enable Adhan Sound</string>
+    <string name="notification_settings_enable_adhan_subtitle">Play adhan at prayer times</string>
+
+    <!-- Adhan Download Notifications -->
+    <string name="adhan_download_channel_name">Adhan Downloads</string>
+    <string name="adhan_download_channel_description">Shows progress when downloading adhan audio</string>
+    <string name="adhan_download_preparing">Preparing adhan download…</string>
+    <string name="adhan_download_title">Downloading %1$s</string>
+    <string name="adhan_download_step">Step %1$d of %2$d — %3$s</string>
+    <string name="adhan_variant_regular">Regular adhan</string>
+    <string name="adhan_variant_fajr">Fajr adhan</string>
+    <string name="adhan_download_complete">Adhan ready</string>
+    <string name="adhan_download_complete_subtitle">%1$s is ready for prayer notifications</string>
+    <string name="adhan_download_partial">Adhan partially downloaded</string>
+    <string name="adhan_download_partial_subtitle">Some %1$s files could not be downloaded. Will retry later.</string>
+    <string name="adhan_download_failed">Adhan download failed</string>
+    <string name="adhan_download_failed_subtitle">Check your internet connection and try again</string>
+
+    <string name="notification_settings_friday_reminder">Friday (Jummah) Reminder</string>
+    <string name="notification_settings_friday_subtitle">Weekly reminder before Friday prayer</string>
+    <string name="notification_settings_lead_time">Lead time</string>
+    <string name="notification_settings_minutes_value">%1$d min</string>
+    <string name="notification_settings_vibration">Vibration</string>
+    <string name="notification_settings_vibration_subtitle">Vibrate with notification</string>
+    <string name="notification_settings_dnd">Honor Do Not Disturb</string>
+    <string name="notification_settings_dnd_subtitle">Silence the adhan while DND is active (banner still shows)</string>
+
+    <!-- Friday (Jummah) reminder notification content -->
+    <string name="notif_friday_title">Jummah Mubarak</string>
+    <string name="notif_friday_1">Friday prayer is approaching — prepare for Jummah.</string>
+    <string name="notif_friday_2">It\'s Friday. Make ghusl and head to Jummah early.</string>
+    <string name="notif_friday_3">Don\'t forget to read Surah Al-Kahf this blessed Friday.</string>
+    <string name="notif_friday_bigtext">Prepare for Jummah: perform ghusl, wear your best clothes, apply perfume, read Surah Al-Kahf, and arrive early. \n\n\"O you who believe! When the call is made for prayer on Friday, hasten to the remembrance of Allah.\" — Quran 62:9</string>
+    <string name="notif_diag_actions_section">Check delivery</string>
+    <string name="notification_settings_test">Send a test notification</string>
+    <string name="notification_settings_test_sent">Test notification sent</string>
+    <string name="notification_settings_test_all">Test all five prayers</string>
+    <string name="notification_settings_test_all_sent">Testing all prayer notifications…</string>
+    <string name="notification_settings_reset">Reset and reschedule</string>
+    <string name="notification_settings_reset_success">Notifications reset successfully</string>
+    <string name="notification_settings_battery_section">BATTERY OPTIMIZATION</string>
+    <string name="notification_settings_battery_title">Battery Optimization</string>
+    <string name="notification_settings_battery_disabled">Disabled (recommended)</string>
+    <string name="notification_settings_battery_enabled">Enabled — may delay notifications</string>
+    <string name="notification_settings_battery_exempted">Exempted</string>
+    <string name="notification_settings_battery_explanation">When battery optimization is enabled, Android may delay or skip prayer notifications to save battery. Disabling it ensures notifications arrive on time.</string>
+    <string name="notification_settings_disable_battery">Disable Battery Optimization</string>
+    <string name="notification_settings_preview">Preview</string>
+
+    <!-- Prayer notification copy (non-scripture UI strings) -->
+    <string name="notif_short_fajr">It\'s time to pray. Begin your day with Allah.</string>
+    <string name="notif_short_sunrise">The sun has risen — Ishraq time begins.</string>
+    <string name="notif_short_dhuhr">It\'s time to pray. Pause and turn to Allah.</string>
+    <string name="notif_short_asr">It\'s time to pray. Don\'t let Asr pass by.</string>
+    <string name="notif_short_maghrib">It\'s time to pray as the day draws to a close.</string>
+    <string name="notif_short_isha">It\'s time to pray. Seal your day with Isha.</string>
+    <string name="notif_short_generic">It\'s time for %s prayer.</string>
+
+    <plurals name="notif_pre_reminder_title">
+        <item quantity="one">%1$s in %2$d minute</item>
+        <item quantity="other">%1$s in %2$d minutes</item>
+    </plurals>
+    <string name="notif_pre_reminder_1">Prepare your heart and make wudu.</string>
+    <string name="notif_pre_reminder_2">Time to get ready for prayer.</string>
+    <string name="notif_pre_reminder_3">A reminder to prepare for worship.</string>
+    <string name="notif_pre_reminder_4">Get ready to stand before your Lord.</string>
+
+    <string name="notif_greeting_predawn">May your morning be blessed</string>
+    <string name="notif_greeting_morning">Good morning, may Allah bless your day</string>
+    <string name="notif_greeting_afternoon">Good afternoon, stay mindful of your prayers</string>
+    <string name="notif_greeting_evening">Good evening, may your worship be accepted</string>
+    <string name="notif_greeting_night">May your night be peaceful</string>
+
+    <string name="notif_summary_title_all_complete">Masha\'Allah! All Prayers Complete</string>
+    <string name="notif_summary_title_default">Daily Prayer Summary</string>
+    <string name="notif_summary_count" tools:ignore="PluralsCandidate">%1$d of %2$d prayers completed</string>
+    <!-- Accessibility content descriptions -->
+    <string name="cd_share">Share</string>
+    <string name="cd_bookmark">Bookmark</string>
+    <string name="cd_back">Back</string>
+    <string name="cd_tafseer">Tafseer</string>
+    <string name="cd_stop">Stop</string>
+    <string name="cd_selected">Selected</string>
+    <string name="cd_settings">Settings</string>
+    <string name="cd_previous_month">Previous month</string>
+    <string name="cd_next_month">Next month</string>
+    <string name="cd_filter">Filter</string>
+    <string name="cd_favorite">Favorite</string>
+    <string name="cd_delete">Delete</string>
+    <string name="cd_copy">Copy</string>
+    <string name="cd_translation">Translation</string>
+    <string name="cd_stop_audio">Stop audio</string>
+    <string name="cd_reset">Reset</string>
+    <string name="cd_previous_page">Previous page</string>
+    <string name="cd_preview">Preview</string>
+    <string name="cd_play">Play</string>
+    <string name="cd_pause">Pause</string>
+    <string name="cd_notes">Notes</string>
+    <string name="cd_next_page">Next page</string>
+    <string name="cd_new_calculation">New Calculation</string>
+    <string name="cd_increase">Increase</string>
+    <string name="cd_history">History</string>
+    <string name="cd_edit">Edit</string>
+    <string name="cd_dismiss">Dismiss</string>
+    <string name="cd_decrease">Decrease</string>
+    <string name="cd_close">Close</string>
+    <string name="cd_clear_search">Clear search</string>
+    <string name="cd_clear">Clear</string>
+    <string name="cd_item_selected">%1$s selected</string>
+
+    <!-- Qaida journey reset -->
+    <string name="qaida_reset_journey">Reset journey</string>
+    <string name="qaida_reset_title">Start over?</string>
+    <string name="qaida_reset_message">This clears all stars and progress and starts the Qaida journey again from Lesson 1. This can\'t be undone.</string>
+
+    <!-- Qaida lesson-complete celebration -->
+    <string name="qaida_mashaallah" translatable="false">ما شاء الله</string>
+    <string name="qaida_lesson_complete">Lesson complete!</string>
+    <string name="qaida_lesson_learned">You learned %1$s.</string>
+    <string name="qaida_new_lesson_unlocked">New lesson: %1$s</string>
+    <string name="qaida_map">Map</string>
+    <string name="qaida_next_lesson">Next lesson</string>
+    <string name="qaida_previous_lesson">Previous</string>
+    <string name="qaida_resume_lesson">Continue</string>
+    <string name="qaida_play_line">Play line</string>
+
+    <!-- Quran Settings Screen -->
+    <string name="arabic_font_size">Arabic Font Size</string>
+    <string name="arabic_font_size_value">%1$dpx</string>
+    <string name="arabic_font">Arabic Font</string>
+    <string name="mushaf_layout">Mushaf Script</string>
+    <string name="mushaf_layout_subtitle">Page layout used by the Mushaf (page) reader</string>
+    <string name="mushaf_script_madani">Uthmani (Madani, 604 pages)</string>
+    <string name="mushaf_script_indopak16">IndoPak 16-line (548 pages)</string>
+    <string name="mushaf_script_indopak15">IndoPak 15-line (610 pages)</string>
+    <string name="mushaf_script_indopak13">IndoPak 13-line (847 pages)</string>
+    <string name="display_options">Display Options</string>
+    <!-- A settings row's current value followed by a qualifier, e.g. "Saheeh International · English". -->
+    <string name="settings_value_with_qualifier">%1$s · %2$s</string>
+    <string name="tajweed_section">Tajweed</string>
+    <string name="reading_section">Reading</string>
+    <string name="show_transliteration">Show Transliteration</string>
+    <string name="show_transliteration_subtitle">Roman letters pronunciation</string>
+    <string name="show_translation">Show Translation</string>
+    <string name="show_translation_subtitle">Meaning in your language</string>
+    <string name="continuous_reading">Continuous playback</string>
+    <string name="continuous_reading_subtitle">Play on to the next verse and the next surah instead of stopping at the end of one</string>
+    <string name="keep_screen_on">Keep Screen On</string>
+    <string name="keep_screen_on_subtitle">Prevent screen from turning off</string>
+    <string name="show_tajweed_colors">Show Tajweed Colors</string>
+    <string name="show_tajweed_colors_subtitle">Color-coded pronunciation rules</string>
+    <string name="show_tajweed_colors_unavailable">Available in the Madani layout</string>
+    <string name="tajweed_underline">Colour-blind friendly</string>
+    <string name="tajweed_underline_subtitle">Underline rules so they don\'t rely on colour alone</string>
+    <string name="tajweed_legend_title">Tajweed colour guide</string>
+    <string name="tajweed_legend_subtitle">What each colour means</string>
+    <string name="tajweed_colour_guide">Tajweed colour guide</string>
+    <string name="tajweed_colour_guide_subtitle">Legend for the pronunciation colours</string>
+    <!-- Tajweed rule names & explanations (legend + tap-to-explain, #294) -->
+    <string name="tajweed_rule_g_name">Ghunnah</string>
+    <string name="tajweed_rule_if_name">Ikhfa</string>
+    <string name="tajweed_rule_is_name">Ikhfa Shafawi</string>
+    <string name="tajweed_rule_dg_name">Idgham with Ghunnah</string>
+    <string name="tajweed_rule_dn_name">Idgham without Ghunnah</string>
+    <string name="tajweed_rule_ds_name">Idgham Shafawi</string>
+    <string name="tajweed_rule_dj_name">Idgham Mutajanisayn</string>
+    <string name="tajweed_rule_dk_name">Idgham Mutaqaribayn</string>
+    <string name="tajweed_rule_dm_name">Idgham Mutamathilayn</string>
+    <string name="tajweed_rule_qs_name">Qalqalah Sughra</string>
+    <string name="tajweed_rule_qk_name">Qalqalah Kubra</string>
+    <string name="tajweed_rule_mn_name">Madd Tabee\'i</string>
+    <string name="tajweed_rule_mf_name">Madd Jaiz Munfasil</string>
+    <string name="tajweed_rule_mt_name">Madd Wajib Muttasil</string>
+    <string name="tajweed_rule_ma_name">Madd \'Aarid lis-Sukun</string>
+    <string name="tajweed_rule_ml_name">Madd Lin</string>
+    <string name="tajweed_rule_my_name">Madd Lazim</string>
+    <string name="tajweed_rule_l_name">Iqlab</string>
+    <string name="tajweed_rule_ls_name">Lam Shamsiyyah</string>
+    <string name="tajweed_rule_sl_name">Silent</string>
+    <string name="tajweed_rule_hw_name">Hamza al-Wasl</string>
+    <string name="tajweed_rule_wq_name">Waqf sign</string>
+    <string name="tajweed_rule_tk_name">Tafkhim</string>
+    <string name="tajweed_rule_tq_name">Tarqiq</string>
+    <string name="tajweed_rule_g_desc">Nasal sound held for 2 counts.</string>
+    <string name="tajweed_rule_if_desc">Noon sakinah / tanwin hidden with a light nasal sound.</string>
+    <string name="tajweed_rule_is_desc">Meem sakinah hidden with ghunnah before ba.</string>
+    <string name="tajweed_rule_dg_desc">Noon sakinah / tanwin merged with nasalisation.</string>
+    <string name="tajweed_rule_dn_desc">Noon sakinah / tanwin merged without nasalisation.</string>
+    <string name="tajweed_rule_ds_desc">Meem sakinah merged into a following meem.</string>
+    <string name="tajweed_rule_dj_desc">Two letters of the same articulation point merged.</string>
+    <string name="tajweed_rule_dk_desc">Two letters of close articulation points merged.</string>
+    <string name="tajweed_rule_dm_desc">Two identical letters merged, the first silent.</string>
+    <string name="tajweed_rule_qs_desc">Light echo on a qalqalah letter in the middle of a word.</string>
+    <string name="tajweed_rule_qk_desc">Stronger echo on a qalqalah letter stopped upon.</string>
+    <string name="tajweed_rule_mn_desc">Natural elongation of 2 counts.</string>
+    <string name="tajweed_rule_mf_desc">Elongation across a word break — 2, 4 or 5 counts.</string>
+    <string name="tajweed_rule_mt_desc">Elongation before a hamza in the same word — 4 or 5 counts.</string>
+    <string name="tajweed_rule_ma_desc">Elongation before a stop — 2, 4 or 6 counts.</string>
+    <string name="tajweed_rule_ml_desc">Elongation of a layn letter (و/ي) before a stop — 2, 4 or 6 counts.</string>
+    <string name="tajweed_rule_my_desc">Obligatory elongation of 6 counts.</string>
+    <string name="tajweed_rule_l_desc">Noon sakinah / tanwin turned into a meem before ba.</string>
+    <string name="tajweed_rule_ls_desc">The lam of \'al-\' assimilated into a sun letter.</string>
+    <string name="tajweed_rule_sl_desc">A letter written but not pronounced.</string>
+    <string name="tajweed_rule_hw_desc">Connecting hamza, dropped when continuing from before.</string>
+    <string name="tajweed_rule_wq_desc">A stop mark: guidance on whether to pause here.</string>
+    <string name="tajweed_rule_tk_desc">Heavy: the letter (raa / lam of Allah) is pronounced full.</string>
+    <string name="tajweed_rule_tq_desc">Light: the letter (raa / lam of Allah) is pronounced thin.</string>
+    <string name="audio">Audio</string>
+    <string name="reciter">Reciter</string>
+    <string name="quran_settings_preview">PREVIEW</string>
+    <string name="quran_settings_preview_transliteration">Bismillahir-Rahmanir-Rahim</string>
+    <string name="quran_settings_preview_translation">In the name of Allah, the Most Gracious, the Most Merciful</string>
+    <string name="quran_settings_preview_location">Juz 1 • Page 1</string>
+
+    <!-- Common reusable labels -->
+    <string name="active">Active</string>
+    <string name="al_quran">Al Quran</string>
+
+    <!-- Appearance Settings Screen -->
+    <string name="appearance_theme">Theme</string>
+    <string name="appearance_display">Display</string>
+    <string name="appearance_home_screen">Home Screen</string>
+    <string name="theme_dark">Dark</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_follow_device">Follow device</string>
+    <string name="theme_follow_device_subtitle">Match your device\'s light or dark setting</string>
+    <string name="appearance_pattern">Background pattern</string>
+    <string name="appearance_pattern_subtitle">A subtle Islamic ornament behind every screen. Pick a style, or None to turn it off.</string>
+    <string name="pattern_none">None</string>
+    <string name="pattern_medallion">Medallion</string>
+    <string name="pattern_lattice">Lattice</string>
+    <string name="pattern_star_field">Star field</string>
+    <string name="pattern_atelier">Atelier</string>
+    <string name="appearance_animations">Animations</string>
+    <string name="appearance_animations_subtitle">Enable smooth transitions</string>
+    <string name="appearance_haptic">Haptic Feedback</string>
+    <string name="appearance_haptic_subtitle">Vibration on interactions</string>
+    <string name="appearance_24hour">24-Hour Time</string>
+    <string name="appearance_24hour_subtitle">Use 24-hour format</string>
+    <string name="appearance_show_islamic_date">Show Islamic Date</string>
+    <string name="appearance_show_islamic_date_subtitle">Display Hijri calendar</string>
+    <string name="hijri_day_offset_label">Adjust Hijri date</string>
+
+    <!-- Select Reciter Screen -->
+    <string name="select_reciter_title">Select Reciter</string>
+    <string name="select_reciter_search_hint">Search reciters…</string>
+    <string name="select_reciter_currently_selected">CURRENTLY SELECTED</string>
+    <string name="select_translation_currently_selected">CURRENTLY SELECTED</string>
+    <string name="select_translation_search_hint">Search translations or languages</string>
+    <string name="select_translation_all">All translations</string>
+    <string name="select_reciter_popular">POPULAR RECITERS</string>
+    <string name="recitation_style_murattal">Murattal</string>
+    <string name="recitation_style_mujawwad">Mujawwad</string>
+
+    <!-- Surah Info Screen — the thematic layer (schemaVersion 24) -->
+    <string name="surah_info_go_deeper">Go deeper</string>
+    <string name="surah_info_read_more">Read more</string>
+    <string name="surah_info_read_less">Show less</string>
+    <string name="surah_info_background">Background</string>
+    <string name="surah_info_background_subtitle">%1$d sections</string>
+    <string name="surah_info_passages">Passages</string>
+    <string name="surah_info_passages_subtitle">%1$d passages in this surah</string>
+    <plurals name="surah_info_passages_row_subtitle">
+        <item quantity="one">%1$d passage across %2$d verses</item>
+        <item quantity="other">%1$d passages across %2$d verses</item>
+    </plurals>
+    <string name="surah_info_subjects">Subjects in this surah</string>
+    <string name="surah_info_subjects_subtitle">%1$d subjects, most-cited first</string>
+    <string name="surah_info_section_name">Name</string>
+    <string name="surah_info_section_revelation">Period of Revelation</string>
+    <string name="surah_info_section_theme">Theme and Subject Matter</string>
+    <string name="surah_info_section_background">Historical Background</string>
+    <string name="surah_info_section_note">Note</string>
+    <string name="surah_info_section_other">Other</string>
+    <string name="surah_info_passage_verses">%1$d verses</string>
+    <string name="surah_info_passage_verse">1 verse</string>
+
+    <!-- Surah passages screen -->
+    <string name="surah_thematic_load_failed">This surah\'s notes couldn\'t be loaded</string>
+    <string name="surah_thematic_load_failed_body">The background and passage outline are stored on your device, so trying again usually works.</string>
+    <string name="surah_passages_filter_hint">Filter passages</string>
+    <string name="surah_passages_reading">Reading</string>
+    <string name="surah_passages_none_title">Nothing matched</string>
+    <string name="surah_passages_none">No passage matches that. Clear the filter to see all %1$d.</string>
+    <string name="cd_passage_open">Open %1$s in the reader</string>
+
+    <!-- Subjects in one surah -->
+    <string name="surah_subjects_title">Subjects</string>
+    <string name="surah_subjects_subtitle">Subjects in this surah</string>
+    <string name="surah_subjects_filter_hint">Filter these subjects…</string>
+    <string name="surah_subjects_count">%1$d subjects</string>
+    <string name="surah_subjects_citations">%1$d citations</string>
+    <string name="surah_subjects_only_here">Every verse on this subject is in this surah</string>
+    <string name="surah_subjects_elsewhere">%1$d more verses elsewhere in the Qur\'an</string>
+    <string name="surah_subjects_no_match">No subject here matches “%1$s”. Clear the filter to see all %2$d.</string>
+    <string name="surah_subjects_none_title">Nothing indexed here</string>
+    <string name="surah_subjects_none">The subject index doesn\'t cite any verse of this surah. The rest of the index is still there.</string>
+    <string name="surah_subjects_browse_all">All subjects</string>
+    <string name="surah_subjects_browse_all_subtitle">Browse the whole index, across all 114 surahs</string>
+
+    <!-- Quran topics -->
+    <string name="quran_home_browse_subjects">Subjects in the Qur\'an</string>
+    <string name="quran_home_browse_subjects_subtitle">2,512 subjects, indexed by hand</string>
+    <string name="quran_topics_title">Topics</string>
+    <string name="quran_topics_subtitle">What the Qur\'an speaks about</string>
+    <string name="quran_topics_search_hint">Search subjects…</string>
+    <string name="quran_topics_tree_thematic">Themes</string>
+    <string name="quran_topics_tree_ontology">Kinds</string>
+    <string name="quran_topics_tree_index">Index</string>
+    <string name="quran_topics_verses">%1$d verses</string>
+    <string name="quran_topics_verse">1 verse</string>
+    <string name="quran_topics_no_results_title">Nothing matched</string>
+    <string name="quran_topics_no_results">No subject matches “%1$s”. Try a shorter word — the index matches whole words, not fragments.</string>
+    <string name="quran_topics_unavailable_title">Topics aren\'t here yet</string>
+    <string name="quran_topics_unavailable">This install\'s Qur\'an content predates the topic index. It arrives with the next content update — nothing to do.</string>
+    <string name="quran_topic_verses_section">Verses on this subject</string>
+    <string name="quran_topic_subtopics">Subtopics</string>
+    <string name="quran_topic_related">Related subjects</string>
+    <string name="quran_topic_not_found">This subject isn\'t in the index.</string>
+    <string name="quran_topic_verses_across">%1$d across %2$d surahs</string>
+    <string name="quran_topic_in_surah">%1$d in %2$s</string>
+    <string name="quran_topic_surah_you_came_from">This surah</string>
+    <string name="quran_topics_crumb_home">All subjects</string>
+    <string name="quran_topics_scope_search">Searching all three hierarchies</string>
+    <string name="quran_topics_scope_thematic">A curated outline — doctrine, worship, stories</string>
+    <string name="quran_topics_scope_ontology">By kind of thing — people, places, events</string>
+    <string name="quran_topics_scope_index">The shape of a printed concordance</string>
+    <string name="cd_topic_up">Up one level</string>
+    <string name="cd_topic_focus">Start from %1$s</string>
+    <string name="cd_tree_expand">Show what is under %1$s</string>
+    <string name="cd_tree_collapse">Hide what is under %1$s</string>
+    <string name="quran_ayah_topics">Topics</string>
+
+    <!-- Quran Reader Screen -->
+    <string name="cd_switch_to_list_view">Switch to list view</string>
+    <string name="cd_switch_to_page_view">Switch to page view</string>
+    <string name="quran_continue_next_surah">Continue to next surah</string>
+    <string name="quran_mark_all_read">Mark all ayahs in this surah as read</string>
+
+    <!-- Empty states -->
+    <string name="no_ayahs_found">No ayahs found.</string>
+    <string name="no_chapters_found">No chapters found</string>
+
+    <!-- Canonical prayer names -->
+    <string name="prayer_fajr">Fajr</string>
+    <string name="prayer_dhuhr">Dhuhr</string>
+    <string name="prayer_asr">Asr</string>
+    <string name="prayer_maghrib">Maghrib</string>
+    <string name="prayer_isha">Isha</string>
+
+    <!-- Prayer Stats Screen -->
+    <string name="statistics">Statistics</string>
+    <string name="stats_period_week">Week</string>
+    <string name="stats_period_month">Month</string>
+    <string name="stats_period_year">Year</string>
+    <string name="prayer_completion">Prayer Completion</string>
+    <string name="prayer_breakdown">Prayer Breakdown</string>
+    <string name="insights">Insights</string>
+    <string name="stat_perfect_days">Perfect\nDays</string>
+    <string name="stat_current_streak">Current\nStreak</string>
+    <string name="stat_longest_streak">Longest\nStreak</string>
+    <string name="prayer_insight_needs_attention">%1$s needs attention</string>
+    <string name="prayer_insight_needs_attention_desc">Your %1$s completion is at %2$d%%. Try setting an alarm to improve.</string>
+    <string name="prayer_insight_overall">Overall completion: %1$d%%</string>
+    <string name="prayer_insight_overall_desc" tools:ignore="PluralsCandidate">You\'ve completed %1$d out of %2$d prayers. Keep going!</string>
+    <string name="prayer_insight_best">Best prayer: %1$s</string>
+    <string name="prayer_insight_best_desc">You consistently complete %1$s at %2$d%%.</string>
+
+    <!-- Qada Prayers Screen -->
+    <string name="qada_prayers">Qada Prayers</string>
+    <string name="qada_mark_made_up">Mark made up</string>
+    <string name="qada_summary_subtitle">Missed prayers waiting to be made up</string>
+    <string name="qada_summary_empty">Nothing outstanding</string>
+
+    <!-- Prayer Tracker Screen -->
+    <string name="prayer_status_not_recorded">Not recorded</string>
+    <string name="prayer_recorded_count_format" tools:ignore="PluralsCandidate">%1$d of %2$d recorded</string>
+    <string name="back_to_today">Back to today</string>
+    <string name="prayer_not_recorded_note">This prayer\'s time has passed with nothing recorded. It isn\'t counted as missed until you say so.</string>
+    <string name="prayer_unrecorded_banner_action">Review</string>
+    <string name="prayer_month_section">Your month</string>
+    <plurals name="prayer_complete_days">
+        <item quantity="one">%1$d complete day</item>
+        <item quantity="other">%1$d complete days</item>
+    </plurals>
+    <plurals name="prayer_unrecorded_banner">
+        <item quantity="one">%1$d prayer from the past week has no record. It isn\'t in your qada list until you mark it.</item>
+        <item quantity="other">%1$d prayers from the past week have no record. They aren\'t in your qada list until you mark them.</item>
+    </plurals>
+    <string name="prayer_legend_all_five">All five</string>
+    <string name="prayer_legend_some">Some</string>
+    <string name="prayer_legend_none">None</string>
+    <string name="prayer_legend_not_recorded">Not recorded</string>
+    <string name="prayer_next_in">%1$s in %2$s</string>
+    <string name="prayer_day_complete">Day complete</string>
+    <string name="prayer_day_summary_past" tools:ignore="PluralsCandidate">Day complete · %1$d of %2$d prayed</string>
+    <string name="prayer_day_upcoming">Upcoming day</string>
+    <string name="prayer_day_no_schedule">Prayer times unavailable</string>
+
+    <!-- Settings Screen -->
+    <string name="sync_data">Sync Data</string>
+    <string name="settings_sync_subtitle">Transfer data between devices</string>
+
+    <!-- Location Screen -->
+    <string name="location_search_hint">Search city or address…</string>
+    <string name="location_search_results">Search Results</string>
+    <string name="location_recent">Recent</string>
+    <string name="location_browse_by_region">Browse by Region</string>
+    <string name="location_region_all">All</string>
+    <string name="location_detecting">Detecting…</string>
+    <string name="location_not_set">Not set</string>
+    <string name="location_using_default">Default location</string>
+    <string name="location_current">Current</string>
+
+    <!-- Prayer stats chart -->
+    <string name="completed">Completed</string>
+    <string name="jamaah">Jamaah</string>
+    <string name="stat_in_jamaah">In\nJamaah</string>
+
+    <!-- Quran ayah identifiers (shared) -->
+    <string name="ayah_number_format">Ayah %1$d</string>
+    <string name="juz_page_format">Juz %1$d | P%2$d</string>
+
+    <!-- Search -->
+    <string name="popular_searches">Popular Searches</string>
+
+    <!-- Zakat History Screen -->
+    <string name="zakat_history_title">Zakat History</string>
+    <string name="no_zakat_history">No Zakat History</string>
+    <string name="zakat_history_calculation_history">Calculation History</string>
+    <string name="zakat_history_total_paid">Total Zakat Paid</string>
+    <string name="net_worth">Net Worth</string>
+    <string name="zakat_mark_as_paid">Mark as Paid</string>
+    <string name="zakat_paid">Paid</string>
+    <string name="zakat_unpaid">Unpaid</string>
+    <string name="nisab_label_format">Nisab: %1$s (%2$s)</string>
+    <string name="zakat_paid_on_format">Paid on: %1$s</string>
+    <string name="zakat_history_empty_message">Your saved zakat calculations will appear here. Calculate and save your zakat to start tracking.</string>
+    <string name="zakat_calculate">Calculate Zakat</string>
+    <plurals name="zakat_calculations_recorded">
+        <item quantity="one">%1$d calculation recorded</item>
+        <item quantity="other">%1$d calculations recorded</item>
+    </plurals>
+
+    <!-- Quran ayah actions / identifiers -->
+    <string name="surah_number_format">Surah %1$d</string>
+    <string name="sajdah_wajib">Sajdah (Wajib)</string>
+    <string name="sajdah_recommended">Sajdah (Recommended)</string>
+    <string name="action_play">Play</string>
+    <string name="action_favorite">Favorite</string>
+    <string name="action_copy">Copy</string>
+    <string name="action_tafseer">Tafseer</string>
+    <string name="unread">Unread</string>
+    <string name="listen">Listen</string>
+    <plurals name="days_count_format">
+        <item quantity="one">%1$d day</item>
+        <item quantity="other">%1$d days</item>
+    </plurals>
+
+    <!-- Quran surah info labels -->
+    <string name="quran_order_label">Order</string>
+    <string name="quran_juz_label">Juz</string>
+    <string name="quran_verses_label">Verses</string>
+    <string name="quran_page_label">Page</string>
+    <string name="quran_makki">Makki</string>
+    <string name="quran_madani">Madani</string>
+    <string name="quran_meccan">Meccan</string>
+    <string name="quran_medinan">Medinan</string>
+    <string name="juz_page_dot_format">Juz %1$d • Page %2$d</string>
+    <string name="page_range_format">Pages %1$d–%2$d</string>
+    <string name="page_single_format">Page %1$d</string>
+
+    <!-- Common nav labels -->
+    <string name="previous">Previous</string>
+    <string name="next">Next</string>
+    <string name="today_uppercase">TODAY</string>
+    <string name="unknown_date">Unknown date</string>
+
+    <!-- Hadith Reader Screen -->
+    <string name="hadith_chapter_format">Chapter %1$d</string>
+    <string name="no_hadith_found">No hadith found</string>
+    <string name="hadith_narrated_by_format">Narrated by %1$s</string>
+    <string name="hadith_isnad">Chain of Narration (Isnad)</string>
+    <string name="hadith_copied">Copied to clipboard</string>
+    <string name="hadith_browse_by_grade">Browse by grade</string>
+    <string name="hadith_grade_sahih">Sahih</string>
+    <string name="hadith_grade_hasan">Hasan</string>
+    <string name="hadith_grade_daif">Daʿīf</string>
+    <string name="hadith_grade_mawdu">Mawḍūʿ</string>
+    <!-- Hadith Settings Screen -->
+    <string name="hadith_settings">Hadith Settings</string>
+    <string name="hadith_show_grade">Show grade badge</string>
+    <string name="hadith_show_grade_subtitle">Authenticity (Sahih, Hasan…)</string>
+    <string name="hadith_show_chain">Show chain of narration</string>
+    <string name="hadith_show_chain_subtitle">Isnād timeline</string>
+    <string name="hadith_settings_preview_arabic">إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ</string>
+    <string name="hadith_settings_preview_translation">Actions are but by intentions.</string>
+    <string name="hadith_chapters_title">Chapters</string>
+    <plurals name="hadith_chapters_count_format">
+        <item quantity="one">%1$d chapter</item>
+        <item quantity="other">%1$d chapters</item>
+    </plurals>
+
+    <!-- Monthly Prayer Times Screen -->
+    <string name="export_as_pdf">Export as PDF</string>
+    <string name="monthly_this_month">This month</string>
+    <string name="ramadan_year_format">Ramadan %1$d</string>
+    <string name="monthly_full_month_subtitle">Full month · 1 → last day</string>
+    <string name="ramadan_month_label">RAMADAN MONTH</string>
+
+    <!-- Prayer Times Screen -->
+    <string name="cd_previous_day">Previous day</string>
+    <string name="cd_pick_date">Pick a date</string>
+    <string name="cd_next_day">Next day</string>
+    <string name="prayer_info_daylight">Daylight</string>
+    <string name="prayer_info_sun">Sunrise / Sunset</string>
+    <string name="prayer_info_method">Method</string>
+
+    <!-- Qaida -->
+    <string name="qaida_lesson_progress">Lesson %1$d of %2$d</string>
+
+    <!-- Common actions / content descriptions -->
+    <string name="save">Save</string>
+    <string name="edit_tasbih">Edit tasbih</string>
+    <string name="save_tasbih">Save changes</string>
+    <string name="tasbih_edit_preset">Edit this tasbih</string>
+    <string name="pause">Pause</string>
+    <string name="sajdah">Sajdah</string>
+    <string name="cd_mark_as_read">Mark as read</string>
+    <string name="cd_mark_as_unread">Mark as unread</string>
+
+    <!-- Tafseer page content -->
+    <string name="tafseer_commentary_range_single">Commentary on %1$d:%2$d</string>
+    <string name="tafseer_commentary_range_span">Commentary on %1$d:%2$d-%3$d</string>
+    <string name="tafseer_highlight">Highlight</string>
+    <string name="tafseer_highlight_notes">Highlight Notes</string>
+    <string name="tafseer_no_notes">No notes yet. Long-press the commentary to highlight and add a note.</string>
+    <string name="tafseer_read_in_format">Read in %1$s</string>
+    <string name="tafseer_no_commentary_format">No %1$s commentary for this ayah</string>
+    <string name="tafseer_tab_surahs">Surahs</string>
+    <string name="tafseer_tab_notes">My notes</string>
+    <string name="tafseer_note_location">%1$s · Ayah %2$d</string>
+    <string name="tafseer_add_note">Add a note…</string>
+    <string name="tafseer_highlight_hint">Long-press the commentary to highlight</string>
+    <string name="tafseer_add_highlight">Add highlight</string>
+    <string name="tafseer_selection_active">Text selected</string>
+    <string name="tafseer_clear">Clear</string>
+    <string name="tafseer_colour">Colour</string>
+    <string name="tafseer_note_optional">Note (optional)</string>
+    <string name="tafseer_delete_highlight_title">Delete highlight?</string>
+    <string name="tafseer_delete_highlight_message">This removes the highlight and any note attached to it. This can\'t be undone.</string>
+    <string name="cd_share_tafseer">Share tafseer</string>
+    <string name="tafseer_pdf_header">TAFSEER</string>
+    <string name="tafseer_pdf_commentary">Commentary</string>
+    <string name="tafseer_pdf_notes">My notes</string>
+    <string name="tafseer_pdf_footer">Generated by Nimaz</string>
+    <string name="tafseer_pdf_ayah">Ayah %1$d</string>
+
+    <!-- Prayer Settings Screen -->
+    <string name="prayer_sunrise">Sunrise</string>
+    <string name="high_latitude_method">High Latitude Method</string>
+    <string name="middle_of_night">Middle of the Night</string>
+    <string name="seventh_of_night">Seventh of the Night</string>
+    <string name="twilight_angle">Twilight Angle</string>
+    <string name="manual_adjustments">Manual Adjustments (Minutes)</string>
+    <string name="adhan_notifications">Adhan Notifications</string>
+    <!-- Prayer Settings summary subtitles that mirror the Notification Settings screen -->
+    <string name="prayer_settings_notifications_off">Notifications off</string>
+    <string name="prayer_settings_all_prayers_enabled">All prayers enabled</string>
+    <string name="prayer_settings_prayers_enabled_count" tools:ignore="PluralsCandidate">%1$d of %2$d prayers enabled</string>
+    <string name="prayer_settings_no_prayers_enabled">No prayers enabled</string>
+    <string name="prayer_settings_reminder_off">Off</string>
+    <string name="asr_standard_desc">Shadow equals object length</string>
+    <string name="asr_hanafi_desc">Shadow equals twice object length</string>
+    <string name="high_lat_middle_desc">Split the night in half from sunset to sunrise</string>
+    <string name="high_lat_seventh_desc">Use 1/7th of the night for Fajr and Isha</string>
+    <string name="high_lat_twilight_desc">Use the angle-based method for Fajr and Isha</string>
+
+    <!-- Widgets Screen -->
+    <string name="widgets_intro">Add Nimaz widgets to your home screen for quick access to prayer times without opening the app.</string>
+    <string name="widget_next_prayer_title">Next Prayer Widget (2×2)</string>
+    <string name="widget_prayer_times_title">Prayer Times Widget (4×1)</string>
+    <string name="widget_hijri_date_title">Hijri Date Widget (2×2)</string>
+    <string name="widget_prayer_tracker_title">Prayer Tracker Widget (4×1)</string>
+    <string name="widget_hijri_calendar_title">Hijri Calendar Widget (4×2)</string>
+    <string name="widget_prayer_times">Prayer Times</string>
+    <string name="widget_hijri_date">Hijri Date</string>
+    <string name="widget_prayer_tracker">Prayer Tracker</string>
+    <string name="widget_hijri_calendar">Hijri Calendar</string>
+    <string name="widget_next_prayer_size">2×2 • Shows countdown to next prayer</string>
+    <string name="widget_prayer_times_size">4×1 • All prayers + countdown</string>
+    <string name="widget_hijri_date_size">2×2 • Islamic calendar date</string>
+    <string name="widget_prayer_tracker_size">4×1 • Tap to mark prayers completed</string>
+    <string name="widget_hijri_calendar_size">4×2 • Full month calendar + today\'s events</string>
+    <string name="widgets_how_to">How to Add Widgets</string>
+    <string name="widgets_how_to_step_1">Long press on an empty area of your home screen</string>
+    <string name="widgets_how_to_step_2">Tap \"Widgets\" from the menu that appears</string>
+    <string name="widgets_how_to_step_3">Search for \"Nimaz\" and select your preferred widget</string>
+    <string name="widgets_how_to_step_4">Drag the widget to your desired location</string>
+    <string name="widget_countdown_format">in %1$s</string>
+
+    <!-- Zakat Calculator (percent literals need formatted=false) -->
+    <string name="zakat_rate_subtitle" formatted="false">2.5% of eligible wealth</string>
+    <string name="zakat_due_2_5_percent" formatted="false">Zakat Due (2.5%)</string>
+
+    <!-- Zakat summary hero. These replace English sentences that were previously
+         built by string concatenation in ZakatCalculatorScreen. -->
+    <string name="zakat_status_above_nisab">Above nisab</string>
+    <string name="zakat_status_below_nisab">Below nisab</string>
+    <string name="zakat_below_nisab_subtitle">No zakat is due below the nisab threshold</string>
+    <string name="zakat_stat_net">Net</string>
+    <string name="zakat_stat_rate">Rate</string>
+    <string name="zakat_stat_rate_value" formatted="false">2.5%</string>
+    <!-- %1$s is the nisab basis, e.g. "Gold" or "Silver" -->
+    <string name="zakat_stat_nisab_format">Nisab · %1$s</string>
+
+    <!-- Common -->
+    <string name="close">Close</string>
+    <string name="try_again">Try Again</string>
+
+    <!-- Sync Screen -->
+    <string name="sync_sending">Sending</string>
+    <string name="sync_receiving">Receiving</string>
+    <string name="sync_device_to_device">Device-to-Device Sync</string>
+    <string name="sync_intro">Transfer your data between devices using a direct connection. Both devices must be nearby.</string>
+    <string name="sync_send_data">Send Data</string>
+    <string name="sync_send_subtitle">Send this device\'s data to another device</string>
+    <string name="sync_receive_data">Receive Data</string>
+    <string name="sync_receive_subtitle">Receive data from another device</string>
+    <string name="sync_confirm_connection">Confirm Connection</string>
+    <string name="sync_connecting_to_format">Connecting to: %1$s</string>
+    <string name="sync_role_sending">You are sending data to this device</string>
+    <string name="sync_role_receiving">You are receiving data from this device</string>
+    <string name="sync_verification_code">Verification Code</string>
+    <string name="sync_code_match_hint">Make sure this code matches on both devices</string>
+    <string name="sync_reject">Reject</string>
+    <string name="sync_accept">Accept</string>
+    <string name="sync_waiting_partner">Waiting for partner to accept…</string>
+    <string name="sync_waiting_hint">Make sure the other device also taps Accept</string>
+    <string name="sync_cancelled">Sync Cancelled</string>
+    <string name="sync_cancelled_by_you">You cancelled the sync</string>
+    <string name="sync_cancelled_by_partner">The other device cancelled the sync</string>
+    <string name="sync_connection_lost">Connection Lost</string>
+    <string name="sync_connection_lost_msg">Connection was lost unexpectedly</string>
+    <string name="sync_step_format">Step %1$d of %2$d</string>
+    <string name="sync_data_sent">Data sent!</string>
+    <string name="sync_partner_importing_format">Partner is importing: %1$s</string>
+    <string name="sync_transfer_progress">Transfer Progress</string>
+    <string name="sync_activity">Activity</string>
+    <string name="sync_no_data">No data to sync</string>
+    <string name="sync_total_size">Total size</string>
+    <string name="sync_complete">Sync Complete!</string>
+    <string name="sync_failed">Sync Failed</string>
+    <string name="sync_connection_failed">The connection to the other device failed</string>
+    <string name="sync_import_failed">The data that arrived couldn\'t be imported</string>
+    <string name="sync_export_failed">Your data couldn\'t be sent</string>
+    <string name="sync_failed_body">Both devices need to stay on the same network, with the app open, until the transfer finishes.</string>
+    <string name="sync_data_being_sent">Data Being Sent</string>
+    <string name="sync_data_being_received">Data Being Received</string>
+    <string name="sync_sent_success">Data sent successfully</string>
+    <string name="sync_imported_success">Data imported successfully</string>
+    <string name="sync_data_sent_title">Data Sent</string>
+    <string name="sync_data_imported_title">Data Imported</string>
+    <string name="sync_item_bookmarks">Bookmarks</string>
+    <string name="sync_item_favorites">Favorites</string>
+    <string name="sync_item_reading_progress">Reading progress</string>
+    <string name="sync_item_prayer_records">Prayer records</string>
+    <string name="sync_item_fast_records">Fasting records</string>
+    <string name="sync_item_makeup_fasts">Makeup fasts</string>
+    <string name="sync_item_tasbih_presets">Tasbih presets</string>
+    <string name="sync_item_tasbih_sessions">Tasbih sessions</string>
+    <string name="sync_item_khatams">Khatam plans</string>
+    <string name="sync_item_khatam_ayahs">Khatam ayahs read</string>
+    <string name="sync_item_khatam_daily_logs">Khatam daily logs</string>
+    <string name="sync_item_asma_ul_husna">Asma ul Husna favorites</string>
+    <string name="sync_item_asma_un_nabi">Names of the Prophet favorites</string>
+    <string name="sync_item_prophets">Prophet favorites</string>
+    <string name="sync_item_hadith_bookmarks">Hadith bookmarks</string>
+    <string name="sync_item_dua_bookmarks">Dua bookmarks</string>
+    <string name="sync_item_dua_progress">Dua progress</string>
+    <string name="sync_item_qaida_lessons">Qaida lesson progress</string>
+    <string name="sync_item_qaida_cells">Qaida cell progress</string>
+    <string name="sync_item_locations">Saved locations</string>
+    <string name="sync_item_tafseer_highlights">Tafseer highlights</string>
+    <string name="sync_item_tafseer_notes">Tafseer notes</string>
+    <string name="sync_item_zakat">Zakat calculations</string>
+    <string name="sync_item_preferences">App preferences</string>
+
+    <!-- Help screens -->
+    <string name="help_title">Help</string>
+    <string name="help_topics_load_failed">Help topics couldn\'t be loaded</string>
+    <string name="help_topic_load_failed">This topic couldn\'t be loaded</string>
+    <string name="help_guide_load_failed">This guide couldn\'t be loaded</string>
+    <string name="help_load_failed_body">Help content is stored on your device, so trying again usually works.</string>
+    <string name="help_search_hint">Search help…</string>
+    <string name="help_no_results">No results. Try different words.</string>
+    <string name="help_browse_topics">Browse topics</string>
+    <string name="help_still_need">Still need help?</string>
+    <string name="help_email_us">Email us — we usually reply within a day</string>
+    <string name="help_guide_title">Guide</string>
+    <string name="help_guide_unavailable">This guide is unavailable.</string>
+    <string name="help_thats_it">That\'s it!</string>
+    <string name="help_still_stuck">Still stuck? Contact us from the Help home.</string>
+    <string name="help_topic_unavailable">This topic is unavailable.</string>
+    <string name="help_common_questions">Common questions</string>
+    <string name="help_step_by_step">Step-by-step</string>
+
+    <!-- Qaida screens -->
+    <string name="qaida_letter_explorer">Letter explorer</string>
+    <string name="qaida_toggle_transliteration">Toggle transliteration</string>
+    <string name="qaida_arabic_letters">The Arabic Letters</string>
+    <string name="qaida_made_with_format">Made with %1$s</string>
+    <string name="qaida_play_letter">Play letter</string>
+    <string name="qaida_its_shapes">Its shapes</string>
+    <string name="qaida_where_made">Where it\'s made</string>
+
+    <!-- Quran / Bookmarks view-model titles -->
+    <plurals name="quran_surah_ayahs_format">
+        <item quantity="one">Surah %1$d • %2$d Ayah</item>
+        <item quantity="other">Surah %1$d • %2$d Ayahs</item>
+    </plurals>
+    <string name="bookmark_surah_ayah_format">Surah %1$d, Ayah %2$d</string>
+    <string name="bookmark_hadith_format">Hadith #%1$d</string>
+    <string name="dua_label">Dua</string>
+
+    <!-- About -->
+    <string name="licenses_title">Open Source Licenses</string>
+
+    <!-- Misc components -->
+    <string name="quran_juz_number_format">Juz %1$d</string>
+    <string name="quran_ayah_count">%d Ayahs</string>
+    <!-- Makhraj (articulation) areas -->
+    <string name="makhraj_jawf">the mouth &amp; throat (long sounds)</string>
+    <string name="makhraj_halq">the throat</string>
+    <string name="makhraj_lisan">the tongue</string>
+    <string name="makhraj_shafatain">the two lips</string>
+    <string name="makhraj_khayshum">the nose</string>
+
+    <!-- Relative day labels -->
+    <string name="relative_yesterday">Yesterday</string>
+    <plurals name="relative_in_days_format">
+        <item quantity="one">In %1$d day</item>
+        <item quantity="other">In %1$d days</item>
+    </plurals>
+    <plurals name="relative_days_ago_format">
+        <item quantity="one">%1$d day ago</item>
+        <item quantity="other">%1$d days ago</item>
+    </plurals>
+
+    <!-- Calculation method regions -->
+    <string name="calc_region_mwl">Used in Europe, Far East, parts of the US</string>
+    <string name="calc_region_egyptian">Used in Africa, Syria, Lebanon, Malaysia</string>
+    <string name="calc_region_karachi">Used in Pakistan, Bangladesh, India, Afghanistan</string>
+    <string name="calc_region_umm_al_qura">Used in the Arabian Peninsula</string>
+    <string name="calc_region_dubai">Used in the UAE</string>
+    <string name="calc_region_moon_sighting">Used in the UK, parts of Europe</string>
+    <string name="calc_region_north_america">Used in the US and Canada</string>
+    <string name="calc_region_kuwait">Used in Kuwait</string>
+    <string name="calc_region_qatar">Used in Qatar</string>
+    <string name="calc_region_singapore">Used in Singapore, Malaysia, Indonesia</string>
+    <string name="calc_region_turkey">Used in Turkey and Central Asia</string>
+
+    <!-- Quran audio status (shared) -->
+    <string name="audio_preparing">Preparing Audio</string>
+    <string name="audio_downloading_format" tools:ignore="PluralsCandidate">Downloading %1$d of %2$d ayahs</string>
+    <string name="audio_ayah_progress_format">Ayah %1$d of %2$d</string>
+    <string name="audio_downloading_short_format">Downloading %1$d / %2$d…</string>
+    <string name="audio_position_ayah_format">Ayah %1$d / %2$d</string>
+    <string name="audio_position_page_format">p. %1$d</string>
+    <string name="audio_position_juz_format">Juz %1$d</string>
+
+    <!-- Search & AI (Ask with Proof) -->
+    <string name="search_settings">Search &amp; AI</string>
+    <string name="search_settings_subtitle">Results, sources, AI answers and privacy</string>
+
+    <!-- Local search behaviour -->
+    <string name="search_results_section">Results</string>
+    <string name="search_results_per_source">Results per source</string>
+    <string name="search_results_per_source_subtitle">Up to %1$d results in total across the sources you search.</string>
+    <string name="search_sources_section">Where to search</string>
+    <string name="search_source_quran_desc">Verses, translations and surah names</string>
+    <string name="search_source_hadith_desc">Narrations across the hadith collections</string>
+    <string name="search_source_duas_desc">Supplications and their translations</string>
+    <string name="search_source_names_desc">The Names of Allah, the Prophet ﷺ, and the Prophets</string>
+    <string name="search_source_last_one">Search needs at least one source</string>
+    <string name="search_strictness">How closely to match</string>
+    <string name="search_strictness_exact">Exact</string>
+    <string name="search_strictness_exact_desc">Match the whole phrase you typed and nothing looser</string>
+    <string name="search_strictness_balanced">Balanced</string>
+    <string name="search_strictness_balanced_desc">Also match individual words, ranking results that match more of them higher</string>
+    <string name="search_strictness_broad">Broad</string>
+    <string name="search_strictness_broad_desc">Match as many words as possible. More to look through, and slower on long questions</string>
+    <string name="search_default_scope">Start search in</string>
+    <string name="search_default_scope_subtitle">Which filter search opens on</string>
+    <string name="search_scope_everything">Everything</string>
+    <string name="search_scope_everything_desc">Show results from every source you search</string>
+    <string name="ai_answers">AI answers</string>
+    <string name="ai_answers_enable">Enable AI answers</string>
+    <string name="ai_answers_enable_subtitle">Ask a question and get an answer with verses and hadiths from your library as proof</string>
+    <string name="ai_privacy">Privacy</string>
+    <string name="ai_what_gets_shared">What gets shared</string>
+    <string name="ai_disclosure_full">When you ask a question, only the question text is sent over an encrypted connection to the Nimaz server (hosted on Cloudflare) and to Anthropic\'s Claude API to generate the answer. Nothing else leaves your device — the cited verses, hadiths and search results are looked up in the library on your phone. Your questions are never used for analytics. AI answers can be wrong — always verify them against the cited sources. This is not a religious ruling (fatwa).</string>
+    <string name="ai_history">AI question history</string>
+    <string name="ai_history_subtitle">Keep recent AI questions on this device. When off, they are kept only in memory.</string>
+    <string name="ai_clear_history">Clear AI history</string>
+    <string name="ai_clear_history_subtitle">Remove all saved AI questions</string>
+    <string name="ai_clear_history_dialog_title">Clear AI history?</string>
+    <string name="ai_clear_history_dialog_message">These saved questions will be permanently removed from this device:</string>
+    <string name="ai_consent_title">Enable AI answers?</string>
+    <string name="ai_consent_enable">Enable</string>
+
+    <string name="ai_answer_section">Answer</string>
+    <string name="ai_thinking">Finding an answer…</string>
+    <string name="ai_confidence_high">High confidence</string>
+    <string name="ai_confidence_medium">Medium confidence</string>
+    <string name="ai_confidence_low">Low confidence</string>
+    <string name="ai_trust_note">AI-generated summary — check it against the cited sources below. It describes what the sources say and isn\'t a fatwa.</string>
+    <string name="ai_discover_title">Get answers, backed by your library</string>
+    <string name="ai_discover_body">Ask a question in plain words and get a short answer supported by verses and hadiths from your own library — every citation is a real source you can open and read.</string>
+    <string name="ai_discover_privacy">Only your question is sent. The cited sources and results are matched on your device, and questions are never used for analytics.</string>
+    <string name="ai_discover_enable">Turn on AI answers</string>
+    <string name="ai_discover_dismiss">Not now</string>
+    <string name="ai_try_again">Try again</string>
+    <string name="ai_error_network_title">Couldn\'t reach the answer service</string>
+    <string name="ai_error_network">You\'re offline, or the connection dropped. Keyword search still works offline — or try the answer again.</string>
+    <string name="ai_error_rate_limited_title">You\'ve reached today\'s question limit</string>
+    <string name="ai_error_rate_limited">You can ask again tomorrow. Keyword search across the Qur\'an, Hadith and duas still works offline in the meantime.</string>
+    <string name="ai_error_rate_limited_retry">You can ask again in about %1$s. Keyword search across the Qur\'an, Hadith and duas still works offline in the meantime.</string>
+    <string name="ai_error_budget_title">AI answers are paused for now</string>
+    <string name="ai_error_budget">Answers are temporarily unavailable while shared usage resets. Keyword search still works offline, and your library is fully available.</string>
+    <string name="ai_error_unverified_title">This app copy couldn\'t be verified</string>
+    <string name="ai_error_unverified">AI answers are only available on the official app from Google Play. Keyword search across the Qur\'an, Hadith and duas still works offline.</string>
+    <string name="ai_error_invalid_title">That question couldn\'t be processed</string>
+    <string name="ai_error_invalid">Try rewording the question and ask again.</string>
+    <string name="ai_error_unknown_title">Something went wrong</string>
+    <string name="ai_error_unknown">The answer couldn\'t be generated. Please try again.</string>
+
+
+    <!-- Accessibility join templates. These carry no English of their own — they
+         only decide the order and separator used when joining values that are
+         already localised, which varies by locale. -->
+    <string name="zakat_a11y_stat_format">%1$s, %2$s</string>
+    <string name="zakat_a11y_plinth_status_format">%1$s, %2$s, %3$s</string>
+
+    <!-- Strings extracted from hardcoded literals in the presentation layer -->
+    <string name="cd_edit_time">Edit Time</string>
+    <string name="cd_dismiss_announcement">Dismiss announcement</string>
+    <string name="cd_page_read">Page read</string>
+    <string name="cd_mark_page_as_read">Mark page as read</string>
+    <string name="picker_no_matches">No matches</string>
+    <plurals name="qaida_a11y_stars_format"><item quantity="one">%1$d of %2$d star</item><item quantity="other">%1$d of %2$d stars</item></plurals>
+    <string name="qaida_continue_format">Continue · %1$s</string>
+    <string name="qaida_a11y_cell_format">%1$s, tap to hear</string>
+    <string name="qaida_a11y_cell_done_format">%1$s, tap to hear, done</string>
+    <string name="qaida_a11y_letter_format">Letter %1$s</string>
+    <string name="qaida_a11y_letter_heard_format">Letter %1$s, heard</string>
+    <plurals name="qaida_a11y_lesson_complete_format"><item quantity="one">Lesson %1$d, %2$s, complete, %3$d of 3 star</item><item quantity="other">Lesson %1$d, %2$s, complete, %3$d of 3 stars</item></plurals>
+    <string name="qaida_a11y_lesson_current_format">Lesson %1$d, %2$s, current</string>
+    <string name="qaida_a11y_lesson_locked_format">Lesson %1$d, %2$s, locked</string>
+    <plurals name="prayer_times_upcoming_format"><item quantity="one">%1$d to go</item><item quantity="other">%1$d to go</item></plurals>
+    <string name="prayer_times_all_done_today">all done for today</string>
+    <plurals name="prayer_times_passed_upcoming_format"><item quantity="one">%1$d passed · %2$d to go</item><item quantity="other">%1$d passed · %2$d to go</item></plurals>
+    <string name="hizb_format">Hizb %1$d</string>
+    <string name="hizb_quarter_format">¼ Hizb %1$d</string>
+    <string name="hizb_half_format">½ Hizb %1$d</string>
+    <string name="hizb_three_quarter_format">¾ Hizb %1$d</string>
+    <!-- Rukūʿ marker on the verse that opens a section, numbered within its surah. -->
+    <string name="ruku_format">Ruku %1$d</string>
+    <string name="audio_percent_complete_format">%1$d%% complete</string>
+    <string name="audio_now_playing">Now Playing</string>
+    <string name="audio_paused">Paused</string>
+    <plurals name="surah_ayah_count_format"><item quantity="one">%1$d Ayah</item><item quantity="other">%1$d Ayahs</item></plurals>
+    <string name="calendar_a11y_day_format">%1$s, %2$d %3$s %4$d</string>
+    <string name="calendar_a11y_day_today_format">%1$s, %2$d %3$s %4$d, today</string>
+    <string name="quran_copy_reference_format">- Surah %1$d, Ayah %2$d</string>
+    <string name="quran_clipboard_label">Quran Ayah</string>
+    <string name="sajdah_glyph_format">۩ %1$s</string>
+    <string name="home_next_prayer_in_format">in %1$s</string>
+    <string name="prayer_statistics">Prayer Statistics</string>
+    <string name="chart_legend_format">%1$s: %2$s</string>
+    <string name="tafseer_alternate_has_commentary_format">%1$s has commentary for this ayah.</string>
+    <string name="tafseer_no_commentary_anywhere">Commentary for this ayah isn\'t available in any installed source yet.</string>
+    <string name="calendar_events_load_failed">Islamic events couldn\'t be loaded</string>
+    <string name="dua_collection_load_failed">The dua collections couldn\'t be loaded</string>
+    <string name="dua_category_load_failed">This collection couldn\'t be loaded</string>
+    <string name="dua_load_failed_body">Duas are stored on your device, so trying again usually works.</string>
+    <string name="qibla_no_location">Qibla needs to know where you are</string>
+    <string name="qibla_no_location_body">Set a location in settings, or let Nimaz detect it, and the compass will point.</string>
+    <string name="qibla_failed">The direction couldn\'t be worked out</string>
+    <string name="qibla_turn_right_hint">Turn right\nto find Qibla</string>
+    <string name="qibla_turn_left_hint">Turn left\nto find Qibla</string>
+    <string name="zakat_nisab_gold_subtitle">87.48g @ %1$s/g</string>
+    <string name="zakat_nisab_silver_subtitle">612.36g @ %1$s/g</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="fasting_event_ashura_name">Day of Ashura</string>
+    <string name="fasting_event_ashura_description">10th Muharram - highly recommended fast</string>
+    <string name="fasting_event_arafah_name">Day of Arafah</string>
+    <string name="fasting_event_arafah_description">9th Dhul Hijjah - expiates two years</string>
+    <string name="fasting_event_shawwal_name">6 Days of Shawwal</string>
+    <string name="fasting_event_shawwal_description">Fasting 6 days after Eid al-Fitr</string>
+    <string name="fasting_event_mid_shaban_name">Mid-Sha\'ban</string>
+    <string name="fasting_event_mid_shaban_description">15th Sha\'ban - recommended fast</string>
+    <string name="cd_collapse">Collapse</string>
+    <string name="cd_expand">Expand</string>
+    <string name="monthly_fast_length_format">%1$s fast</string>
+    <string name="stats_this_month">This Month</string>
+    <string name="stats_this_year">This Year</string>
+    <string name="language_english">English</string>
+    <string name="location_detecting_location">Detecting Location…</string>
+    <string name="location_use_current_location">Use Current Location</string>
+    <string name="prayer_settings_your_location">Your location</string>
+    <string name="prayer_settings_high_latitude_notice_format">%1$s may be at a high latitude. Prayer times may vary significantly during summer months. Consider using Angle Based or One Seventh methods.</string>
+    <string name="version_unknown">Unknown</string>
+    <string name="sync_preparing">Preparing…</string>
+    <string name="sync_transferred_format">%1$d%% transferred</string>
+
+    <string name="widget_prayer_initial_fajr">F</string>
+    <string name="widget_prayer_initial_dhuhr">D</string>
+    <string name="widget_prayer_initial_asr">A</string>
+    <string name="widget_prayer_initial_maghrib">M</string>
+    <string name="widget_prayer_initial_isha">I</string>
+    <string name="widget_countdown_hm_format">%1$dh %2$dm</string>
+    <string name="widget_countdown_ms_format">%1$dm %2$ds</string>
+    <string name="widget_countdown_s_format">%1$ds</string>
+    <string name="help_guide_about_minutes_format">About %1$d min</string>
+    <string name="help_guide_about_minutes_lower_format">about %1$d min</string>
+    <string name="help_guide_step_by_step">Step-by-step</string>
+    <plurals name="help_guide_steps_format"><item quantity="one">%1$d step</item><item quantity="other">%1$d steps</item></plurals>
+    <string name="error_generic">An error occurred</string>
+    <string name="dua_repeat_count_format">%1$dx</string>
+    <string name="qaida_journey_title">My Qaida Journey</string>
+    <string name="qaida_lesson">Lesson</string>
+    <string name="ai_retry_minutes_format">%1$d min</string>
+    <string name="ai_retry_hours_format">%1$d h</string>
+
+    <!-- Night worship hub (Tahajjud / Witr destination) -->
+    <string name="night_worship_title">Night Worship</string>
+    <string name="night_worship_subtitle">Tahajjud, Witr and the last third of the night</string>
+    <string name="night_worship_last_third">Last third of the night</string>
+    <string name="night_worship_open_now">Open now</string>
+    <string name="night_worship_opens_in">Opens in</string>
+    <string name="night_worship_closed">Tonight\'s window has passed</string>
+    <string name="night_worship_times_unavailable">Set your location to see tonight\'s times</string>
+    <string name="night_worship_times_failed">Tonight\'s times could not be worked out.</string>
+    <string name="night_worship_rakah_title">Rakahs prayed</string>
+    <string name="night_worship_rakah_body">Night prayer is offered two by two</string>
+    <string name="night_worship_add_pair">+2 rakah</string>
+    <string name="night_worship_reset">Reset</string>
+    <string name="night_worship_witr_title">Witr</string>
+    <string name="night_worship_witr_body">One or three rakah, prayed last</string>
+    <string name="night_worship_recite_title">Recite Surah Al-Mulk</string>
+    <string name="night_worship_recite_body">Thirty verses that intercede for their reader</string>
+    <string name="night_worship_duas_title">Night prayer du\'as</string>
+    <string name="night_worship_duas_body">Qunut and the supplications of the night</string>
+    <string name="night_worship_why_title">Why pray at night</string>
+    <string name="night_worship_why_body">&quot;Our Lord descends to the nearest heaven…&quot;</string>
+    <string name="zakat_gold_price_label">Gold price per gram</string>
+    <string name="zakat_silver_price_label">Silver price per gram</string>
+    <string name="zakat_metal_prices_hint">Estimates — set these to your local rate. The nisab threshold is worked out from them.</string>
+    <!-- The zakat settings screen: the nisab basis, the metal prices it is priced from, and
+         the display currency. Reached from the calculator's top bar and from Settings. -->
+    <string name="zakat_settings">Zakat Settings</string>
+    <string name="zakat_settings_subtitle">Nisab basis, metal prices and currency</string>
+    <string name="zakat_metal_prices">Metal prices</string>
+    <string name="zakat_settings_nisab_hint">Choose the basis your school of thought follows — the silver nisab works out lower than the gold one, so it applies to more people.</string>
+    <string name="fasting_log_on_subtitle">Logged — tap to undo</string>
+    <string name="fasting_log_off_subtitle">Not logged yet</string>
+    <string name="fasting_log_managed_in_sheet">Managed in the day\'s details</string>
+    <string name="bookmarks_search_placeholder">Search saved</string>
+    <string name="bookmarks_sort">Sort</string>
+    <string name="bookmarks_sort_newest">Newest first</string>
+    <string name="bookmarks_sort_oldest">Oldest first</string>
+    <string name="bookmarks_sort_type">By type</string>
+    <string name="bookmarks_sort_alphabetical">A–Z</string>
+    <string name="bookmarks_no_matches">No matches</string>
+    <string name="bookmarks_no_matches_hint">Try a different search, or clear the filter.</string>
+    <string name="bookmarks_clear_all">Clear everything saved</string>
+    <string name="bookmarks_clear_all_title">Clear everything saved?</string>
+    <string name="bookmarks_clear_all_confirm">Clear all</string>
+    <string name="bookmarks_clear_all_body">This removes all %1$d bookmarks — Qur\'an, Hadith and Dua. It cannot be undone.</string>
+    <string name="ai_error_consent_title">Ask with Proof is off</string>
+    <string name="ai_error_consent">Turn it on in Search settings to ask a question. Keyword search across the Qur\'an, Hadith and duas works offline either way.</string>
+    <string name="ai_consent_save_failed">That setting couldn\'t be saved. Please try again.</string>
+    <string name="tafseer_notes">Notes</string>
+    <string name="tafseer_note_add">Add note</string>
+    <string name="tafseer_note_hint">Your reflection on this passage</string>
+    <string name="tafseer_note_edit">Edit</string>
+    <string name="quran_search_surahs">Search surahs</string>
+    <string name="zakat_currency">Currency</string>
+    <!-- Unit suffix on the gold/silver weight fields. Grams, abbreviated. -->
+    <string name="zakat_unit_grams">g</string>
+    <string name="zakat_section_deducted">Deducted</string>
+    <string name="zakat_section_nisab">Nisab threshold</string>
+    <string name="zakat_section_assets_subtitle">What you own that zakat is due on</string>
+    <string name="zakat_section_deducted_subtitle">Debts and bills taken off the total</string>
+    <string name="zakat_section_nisab_subtitle">The minimum wealth zakat applies above</string>
+    <string name="zakat_save_this_year">Save this year\'s zakat</string>
+    <string name="zakat_share">Share this calculation</string>
+
+    <!--
+      More — live subtitles. Titles label, subtitles report: every one of these is a claim about
+      the app right now, which is why none of them restates its own row's title. A row with
+      nothing true to say gets no subtitle at all, so there is deliberately no "—" or "loading"
+      string here to fall back on.
+    -->
+    <string name="more_tracker_logged">%1$d of %2$d logged today</string>
+    <string name="more_tracker_all">All of today logged</string>
+    <string name="more_tracker_none">Nothing logged today yet</string>
+    <plurals name="more_fasting_makeup_pending">
+        <item quantity="one">%1$d makeup fast pending</item>
+        <item quantity="other">%1$d makeup fasts pending</item>
+    </plurals>
+    <string name="more_worship_next_hm">%1$s in %2$dh %3$dm</string>
+    <string name="more_worship_next_m">%1$s in %2$dm</string>
+    <string name="more_worship_now">%1$s now</string>
+    <string name="more_khatam_juz">Juz %1$d</string>
+    <string name="more_khatam_juz_on_pace">Juz %1$d · on pace</string>
+    <plurals name="more_khatam_juz_ahead">
+        <item quantity="one">Juz %1$d · %2$d day ahead of pace</item>
+        <item quantity="other">Juz %1$d · %2$d days ahead of pace</item>
+    </plurals>
+    <plurals name="more_khatam_juz_behind">
+        <item quantity="one">Juz %1$d · %2$d day behind pace</item>
+        <item quantity="other">Juz %1$d · %2$d days behind pace</item>
+    </plurals>
+    <string name="more_qaida_lesson">Lesson %1$d of %2$d</string>
+    <string name="more_zakat_not_calculated">Not calculated this year</string>
+    <string name="more_zakat_due">%1$s due</string>
+    <!--
+      A bare pass-through: the Hijri date arrives already formatted and already localised by
+      HijriDateCalculator, so this exists only because SubtitleSpec identifies its copy by
+      resource id. translatable="false" states that there is nothing here to translate —
+      shipping five identical "%1$s" copies to satisfy the MissingTranslation check would be
+      five files of noise saying the same nothing.
+    -->
+    <string name="more_calendar_hijri" translatable="false">%1$s</string>
+
+    <!--
+      Fasting — the "Go deeper" group. Same rule as More: these report, they do not restate the
+      row's own title, and a row with nothing true to say gets no subtitle at all.
+    -->
+    <string name="fasting_go_deeper">Go deeper</string>
+    <string name="fasting_log_a_fast">Log a fast</string>
+    <string name="fasting_row_calendar">Fasting calendar</string>
+    <plurals name="fasting_row_calendar_fasted">
+        <item quantity="one">%1$d fasted this month</item>
+        <item quantity="other">%1$d fasted this month</item>
+    </plurals>
+    <string name="fasting_row_recommended">Recommended fasts</string>
+    <string name="fasting_row_recommended_today">The next one is today</string>
+    <string name="fasting_row_recommended_tomorrow">The next one is tomorrow</string>
+    <plurals name="fasting_row_recommended_in_days">
+        <item quantity="one">The next one is in %1$d day</item>
+        <item quantity="other">The next one is in %1$d days</item>
+    </plurals>
+    <string name="fasting_row_makeup">Makeup fasts</string>
+    <plurals name="fasting_row_makeup_pending">
+        <item quantity="one">%1$d still to make up</item>
+        <item quantity="other">%1$d still to make up</item>
+    </plurals>
+    <string name="fasting_row_makeup_none">Nothing outstanding</string>
+    <string name="fasting_row_makeup_fidya">Nothing outstanding · %1$s fidya paid</string>
+    <string name="fasting_row_ramadan">Ramadan</string>
+    <string name="fasting_row_ramadan_day">Day %1$d</string>
+    <string name="fasting_row_ramadan_today">Begins today</string>
+    <plurals name="fasting_row_ramadan_in_days">
+        <item quantity="one">Begins in %1$d day</item>
+        <item quantity="other">Begins in %1$d days</item>
+    </plurals>
+
+    <!-- More — the pinned shortcut row. -->
+    <string name="more_pinned_title">Pinned</string>
+    <string name="more_pinned_edit">Edit pinned shortcuts</string>
+    <string name="more_pins_sheet_title">Pinned shortcuts</string>
+    <string name="more_pins_count">%1$d of %2$d pinned</string>
+    <string name="more_pins_full">%1$d of %1$d pinned — unpin one to add another</string>
+    <string name="more_pins_empty">Nothing pinned</string>
+    <string name="more_pin_tasbih">Tasbih</string>
+    <string name="more_pin_prayer_tracker">Prayer tracker</string>
+    <string name="more_pin_khatam">Khatam</string>
+    <string name="more_pin_zakat">Zakat</string>
+    <string name="more_pin_qibla">Qibla</string>
+    <string name="more_pin_fasting">Fasting</string>
+    <string name="more_pin_night_worship">Night worship</string>
+    <string name="more_pin_qaida">Qaida</string>
+    <string name="more_pin_islamic_calendar">Calendar</string>
+    <string name="fasting_makeup_owed">Owed</string>
+    <string name="fasting_makeup_settled">Settled</string>
+    <string name="fasting_this_day">This day</string>
+    <string name="fasting_back_to_today">Back to today</string>
+    <string name="fasting_seg_fasted">Fasted</string>
+    <string name="fasting_seg_not_fasting">Not fasting</string>
+    <string name="fasting_seg_exempt">Exempt</string>
+    <string name="fasting_not_logged_yet">Not logged yet</string>
+    <string name="fasting_owed_make_up_later">Owed — make up later</string>
+    <string name="fasting_add_note">Add a note</string>
+    <string name="fasting_window_suhoor_in">Suhoor ends in %1$s</string>
+    <string name="fasting_window_iftar_in">Iftar in %1$s</string>
+    <string name="fasting_window_closed">Fasting window closed</string>
+    <string name="fasting_window_length">Fasting window · %1$s long</string>
+    <string name="fasting_window_a11y">Fasting window, %1$s until %2$s</string>
+    <string name="fasting_why_exempt">Why exempt?</string>
+    <string name="fasting_note_title">Note</string>
+    <string name="fasting_note_hint">What happened on this day?</string>
+    <string name="fasting_log_this_fast">Log this fast</string>
+    <string name="fasting_coming_up">Coming up</string>
+    <string name="fasting_your_month">Your month</string>
+    <string name="fasting_sunnah_virtuous">Sunnah &amp; virtuous days</string>
+    <string name="fasting_fasted_count">%1$d fasted</string>
+
+    <!-- Qur'an section redesign: Browse, Saved and the surah-info sheet -->
+    <string name="saved">Saved</string>
+    <string name="notes">Notes</string>
+    <string name="saved_show">Show</string>
+    <string name="saved_kind_bookmark">Bookmark</string>
+    <string name="saved_kind_favourite">Favourite</string>
+    <string name="saved_kind_note">Note</string>
+    <string name="khatam">Khatam</string>
+    <string name="quran_browse_search_hint">Surah, juz 15, page 299</string>
+    <string name="quran_browse_page_start">p. %1$d</string>
+    <string name="quran_browse_juz_span">Juz %1$d–%2$d</string>
+    <string name="quran_browse_load_failed">The surah list couldn\'t be loaded</string>
+    <string name="quran_browse_open_juz">Open juz %1$d</string>
+    <string name="quran_browse_open_page">Open page %1$d</string>
+    <string name="quran_browse_no_matches">Nothing matches that</string>
+    <string name="quran_home_destination_browse_subtitle">All 114 surahs, by juz</string>
+    <string name="quran_home_destination_saved_subtitle">Bookmarks, favourites and notes</string>
+    <string name="quran_home_destination_khatam_subtitle">Read the Qur\'an to a plan</string>
+    <string name="quran_home_recently_saved">Recently saved</string>
+    <string name="surah_info_revealed_in">Revealed in</string>
+    <string name="surah_info_read_surah">Read surah</string>
+
+    <!-- Qur'an redesign: the ayah action sheet, the anchor bar, reading modes -->
+    <string name="ayah_action_play_from_here">Play here</string>
+    <string name="ayah_action_repeat">Repeat</string>
+    <string name="ayah_action_bookmark">Bookmark</string>
+    <string name="ayah_action_unbookmark">Unbookmark</string>
+    <string name="ayah_action_favourite">Favourite</string>
+    <string name="ayah_action_unfavourite">Unfavourite</string>
+    <string name="ayah_action_note">Note</string>
+    <string name="ayah_action_tafseer">Tafseer</string>
+    <string name="ayah_action_subjects">Subjects</string>
+    <string name="ayah_action_copy">Copy</string>
+    <string name="ayah_action_share">Share</string>
+    <string name="ayah_action_mark_read">Mark read</string>
+    <string name="reader_go_to">Go to…</string>
+    <string name="reader_go_to_action">Go</string>
+    <string name="reader_go_to_range">%1$d–%2$d</string>
+    <string name="reader_go_to_verse">Verse</string>
+    <string name="reader_mode">Reading mode</string>
+    <string name="reader_mode_translation">Translation</string>
+    <string name="reader_mode_mushaf">Mushaf</string>
+
+    <!-- Qur'an redesign: the recitation player -->
+    <string name="cd_previous_ayah_audio">Previous verse</string>
+    <string name="cd_next_ayah_audio">Next verse</string>
+    <string name="recitation_settings">Recitation</string>
+    <string name="recitation_repeat">Repeat</string>
+    <string name="recitation_repeat_off">Off</string>
+    <string name="recitation_repeat_ayah">Verse</string>
+    <string name="recitation_repeat_range">Range</string>
+    <string name="recitation_repeat_surah">Surah</string>
+    <string name="recitation_repeat_times">Times</string>
+    <string name="recitation_repeat_from">From verse</string>
+    <string name="recitation_repeat_to">To verse</string>
+    <string name="recitation_speed">Speed</string>
+    <string name="recitation_follow_along">Follow along</string>
+    <string name="recitation_follow_along_hint">Scroll and turn the page to keep the verse being recited in view</string>
+    <string name="recitation_done">Done</string>
+    <string name="recitation_stop">Stop</string>
+    <string name="recitation_repeat_summary_ayah">Repeat %1$d×</string>
+    <string name="recitation_repeat_summary_range">Repeat %1$d–%2$d</string>
+    <string name="recitation_repeat_summary_surah">Repeat surah</string>
+    <string name="recitation_speed_label">%1$s×</string>
+    <string name="audio_downloading">Downloading %1$d of %2$d</string>
+
+    <!-- Qur'an redesign: today's khatam portion -->
+    <string name="khatam_portion_within">%1$s %2$d–%3$d</string>
+    <string name="khatam_portion_across">%1$s %2$d → %3$s %4$d</string>
+    <string name="khatam_todays_portion">Today\'s portion</string>
+    <string name="khatam_read_todays_portion">Read today\'s portion</string>
+    <!-- Character counter on a NimazTextField with a maxLength: "12 / 40". -->
+    <string name="field_character_count" translatable="false">%1$d / %2$d</string>
+    <string name="field_name">Name</string>
+    <string name="field_notes">Notes</string>
+    <string name="khatam_juz_position">Juz %1$d</string>
+    <string name="khatam_widget_label">Khatam</string>
+    <string name="widget_next_prayer">Next Prayer</string>
+    <string name="widget_no_events">No events</string>
+    <string name="widget_prayer_short_fajr">Fajr</string>
+    <string name="widget_prayer_short_sunrise">Rise</string>
+    <string name="widget_prayer_short_dhuhr">Dhuhr</string>
+    <string name="widget_prayer_short_asr">Asr</string>
+    <string name="widget_prayer_short_maghrib">Mgrb</string>
+    <string name="widget_prayer_short_isha">Isha</string>
+    <plurals name="khatam_ayahs_remaining">
+        <item quantity="one">%1$d ayah remaining</item>
+        <item quantity="other">%1$d ayahs remaining</item>
+    </plurals>
+    <plurals name="khatam_widget_streak">
+        <item quantity="one">%1$d-day streak</item>
+        <item quantity="other">%1$d-day streak</item>
+    </plurals>
+</resources>

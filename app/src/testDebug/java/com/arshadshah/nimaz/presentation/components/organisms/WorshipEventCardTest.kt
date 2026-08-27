@@ -2,12 +2,14 @@ package com.arshadshah.nimaz.presentation.components.organisms
 
 import androidx.compose.ui.test.onNodeWithText
 import com.arshadshah.nimaz.domain.model.WorshipReminderType
+import com.arshadshah.nimaz.testing.compose.createComponentComposeRule
+import com.arshadshah.nimaz.testing.compose.setThemedContent
+import kotlin.time.Clock
+import kotlin.time.Duration.Companion.hours
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import kotlin.time.Clock
-import kotlin.time.Duration.Companion.hours
 
 /**
  * The card now receives **instants** and derives its own time/countdown/proximity at the leaf, so

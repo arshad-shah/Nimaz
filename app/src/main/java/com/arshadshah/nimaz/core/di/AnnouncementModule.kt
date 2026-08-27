@@ -38,7 +38,7 @@ object AnnouncementModule {
             setAnnouncement = SetAnnouncementUseCase(repository),
             dismissAnnouncement = DismissAnnouncementUseCase(repository),
             resolveAnnouncementRoute = ResolveAnnouncementRouteUseCase(
-                resolveFeatureKey = ::announcementRoute,
+                isKnownFeatureKey = { announcementRoute(it) != null },
             ),
         )
 

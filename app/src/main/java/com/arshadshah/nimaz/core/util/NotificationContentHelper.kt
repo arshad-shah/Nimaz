@@ -1,7 +1,7 @@
 package com.arshadshah.nimaz.core.util
 
 import android.content.Context
-import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.ui.R
 import com.arshadshah.nimaz.domain.model.KhatamPace
 import java.time.LocalTime
 

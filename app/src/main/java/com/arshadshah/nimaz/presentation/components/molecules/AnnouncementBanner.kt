@@ -34,7 +34,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.ui.R
 import com.arshadshah.nimaz.domain.model.Announcement
 import com.arshadshah.nimaz.domain.model.AnnouncementType
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
@@ -136,10 +136,11 @@ private fun AnnouncementBannerCard(
                     text = announcement.body,
                     style = MaterialTheme.typography.bodySmall,
                 )
-                if (showCta && announcement.ctaLabel != null) {
+                val ctaLabel = announcement.ctaLabel
+                if (showCta && ctaLabel != null) {
                     Spacer(modifier = Modifier.height(10.dp))
                     NimazButton(
-                        text = announcement.ctaLabel,
+                        text = ctaLabel,
                         onClick = onCtaClick,
                         variant = NimazButtonVariant.TONAL,
                         size = NimazButtonSize.SMALL,

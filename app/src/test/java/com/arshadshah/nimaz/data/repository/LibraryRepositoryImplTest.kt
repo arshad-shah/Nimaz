@@ -15,6 +15,17 @@ import org.junit.Test
  * JVM unit test.  These tests exercise the repository contract using a simple fake
  * implementation that returns predictable data, and verify the `toDomain()` mapping
  * logic can be exercised through the public API shape.
+ *
+ * **Stays in `:app` with its subject.** Because it references only the interface and its own fake,
+ * it compiled perfectly well inside `:core:data` when the other repository tests moved there in
+ * PR 9 of #551 — which would have left it in a module that contains nothing it tests, while
+ * [LibraryRepositoryImpl] stayed here. The impl cannot follow the others, and unlike the rest of
+ * `:app`'s leftovers it is not waiting for a module either: it reads `R.raw.aboutlibraries`, which
+ * the AboutLibraries plugin generates from the **applying project's runtime classpath**. Built
+ * anywhere but `:app`, that file lists only what *that* module depends on — a silently shorter
+ * licence list, which is a compliance defect no test would catch. (`nonTransitiveRClass=true`
+ * keeps the application's `R` off a library's classpath too, so it would not compile in one
+ * today; that is the lesser of the two reasons and the one that goes away with `:core:ui`.)
  */
 class LibraryRepositoryImplTest {
 

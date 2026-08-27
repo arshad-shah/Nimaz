@@ -26,6 +26,23 @@ snapshot, not gospel. Re-run the detection commands to refresh.
 
 ---
 
+## 0. What the module graph now makes impossible
+
+Several rows below describe anti-patterns you can no longer write, because the compiler or a
+`check` task rejects them. They are kept rather than deleted, so the detection commands still
+document what to look for in a module that has not been split.
+
+| Was a convention | Is now |
+|---|---|
+| domain must not import `data` | **`:core:domain` is a JVM module.** `import android.*` is a compile error; `androidFreeClasspath` fails on an `androidx` artifact |
+| presentation must not import entities or DAOs | **`:core:database` is not on a feature module's classpath.** A screen that reaches for a DAO does not resolve |
+| a feature must not reach into another feature | **`moduleBoundary`**, wired into `check` on every Android module, fails the build. Demonstrated failing on all three of its rules in PR 22 of #551 |
+| a helper must not leak a persistence type | **`PublicApiHasNoPersistenceTypesTest`** in `:core:data` |
+| a test must live with its subject | **`FeatureTestsLiveWithSubjectTest`** in `:app` |
+
+`grep` still finds the shapes; the point is that a PR introducing one now fails before review.
+
+
 ## Contents
 
 | # | Anti-pattern | Detector |
@@ -56,8 +73,12 @@ unit-test the domain without Room on the classpath.
 
 **Detect:**
 ```bash
-grep -rlnE "import com.arshadshah.nimaz.data\." app/src/main/java/com/arshadshah/nimaz/domain/
+grep -rlnE "import com.arshadshah.nimaz.data\." core/domain/src/main/kotlin/
 ```
+
+Since #556 this is belt-and-braces: `:core:domain` is a `kotlin-jvm` module and `data/` is not on
+its classpath, so the import would not compile. The grep stays because it also covers
+`src/test` and reads in one second.
 
 - [x] ~~**`PageAyahRange` leak.**~~ **Resolved.** Added `PageAyahRange` to
   `domain/model/QuranModels.kt`; the Room projection was renamed to `PageAyahRangeRow` (kept in
@@ -113,7 +134,7 @@ change.
 ```bash
 # Domain repository interfaces importing a Room entity:
 grep -rlnE "import com.arshadshah.nimaz.data.local.database.entity" \
-  app/src/main/java/com/arshadshah/nimaz/domain/repository/
+  core/domain/src/main/kotlin/com/arshadshah/nimaz/domain/repository/
 ```
 
 - [x] ~~`ZakatRepository` exposed `ZakatHistoryEntity`~~ — **resolved** (now `ZakatHistoryEntry`).
@@ -137,7 +158,8 @@ god-object.
   which used to seed-then-read until the content seeders retired at versionCode 385. Behaviour preserved (identical
   queries/selection math; field mappings verified); full unit suite green.
 - [x] ~~**Prayer-time calculation assembled in five ViewModels.**~~ **Resolved.** Each injected the
-  concrete `core/util/PrayerTimeCalculator` and built its own arguments: three of them ran a
+  concrete `PrayerTimeCalculator` (then in `core/util`, now `domain/prayer`) and built its own
+  arguments: three of them ran a
   near-identical tower of `combine`s over six preference flows and parsed the persisted strings
   themselves, and the fourth — `FastingViewModel` — skipped the block and took the calculator's
   four defaults, so Fast Tracker ignored every calculation preference the user had set. The
@@ -217,7 +239,7 @@ This one is **pervasive and lower priority** — listed so it's tracked, not bec
 - [x] ~~**`PreferencesDataStore` injected directly** into many ViewModels.~~ **Resolved.**
   Extracted a `domain/repository/SettingsRepository` interface (180 members); `PreferencesDataStore`
   now implements it, and `UserPreferences` moved to `domain/model`. All 13 ViewModels + `MainActivity`
-  inject `SettingsRepository`; bound via `@Binds` in `RepositoryModule`. Data-layer consumers
+  inject `SettingsRepository`; bound via `@Binds` in `SettingsBindingsModule` (`:core:datastore`). Data-layer consumers
   (seeders, sync, workers, `AppInitializer`, `BootReceiver`) keep the concrete class.
 - [x] ~~**`SettingsRepository` itself injected whole into 15 feature ViewModels.**~~ **Resolved.**
   The interface that replaced `PreferencesDataStore` was still the entire preference surface, so a
@@ -287,6 +309,16 @@ the package manager, WorkManager, `Service` start. Six held one; **none do now**
 - [x] ~~**Widget refresh** (`Home` called `PrayerTrackerWorker.enqueueImmediateWork(context)`).~~
   **Resolved** — `WidgetRefresher`. What Home wants to say is "the tracker changed, redraw".
 - [x] ~~**Locale and adhan download** (`Settings`).~~ **Resolved** — `AppLocale`, `AdhanDownloader`.
+- [x] ~~**A domain use case constructor-injecting an Android class.**~~ **Resolved** —
+  `PrayerAlarmScheduler`. `RescheduleNotificationsUseCase` injected the concrete
+  `core/util/PrayerNotificationScheduler`, which imports `AlarmManager`, `Context`,
+  `NotificationCompat`, `R` and `@ApplicationContext`. The detection command everyone reaches for
+  — grep `^import android` under `domain/` — reports **clean**, because the dependency is one hop
+  away. Worth remembering as a class of miss: an import census only sees direct edges. The port
+  is a sibling of `WidgetRefresher` / `CompassSensors`; the implementation did not move, only the
+  direction of the arrow. `preReminderMinutesByPrayer` / `enabledPrayerTypes` moved from
+  `core/util/` to `domain/repository/PrayerNotificationPrefs.kt` in the same change — they were
+  always pure `SettingsRepository` extensions over domain types.
 - [x] ~~**`QiblaViewModel` — the last one, and the only hard one.**~~ **Resolved.**
   `CompassSensors` emits finished orientation (azimuth/pitch/roll + accuracy) and `Haptics` the
   confirmation buzz. The low-pass filtering and the `getRotationMatrix`/`getOrientation` fusion
@@ -769,7 +801,7 @@ Detect:
 
 ```bash
 # A Get* use case whose Observe* twin also exists
-rg -o -N 'class (Get|Observe)(\w+)UseCase' app/src/main/java/com/arshadshah/nimaz/domain/usecase   | sed -E 's/.*class (Get|Observe)(\w+)UseCase//' | sort | uniq -d
+rg -o -N 'class (Get|Observe)(\w+)UseCase' core/domain/src/main/kotlin/com/arshadshah/nimaz/domain/usecase   | sed -E 's/.*class (Get|Observe)(\w+)UseCase//' | sort | uniq -d
 ```
 
 ### AP-7.3 · Stub implementations that satisfy a signature

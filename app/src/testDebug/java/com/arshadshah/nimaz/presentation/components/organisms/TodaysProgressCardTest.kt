@@ -1,5 +1,9 @@
 package com.arshadshah.nimaz.presentation.components.organisms
 
+import com.arshadshah.nimaz.core.ui.R
+import com.arshadshah.nimaz.testing.compose.createComponentComposeRule
+import com.arshadshah.nimaz.testing.compose.setThemedContent
+
 import androidx.compose.ui.test.onNodeWithText
 import com.arshadshah.nimaz.domain.model.PrayerStatus
 import com.arshadshah.nimaz.domain.model.PrayerType

@@ -32,16 +32,63 @@ Navigation is **type-safe**: a `@Serializable sealed interface Route`
 `backStackEntry.toRoute<Route.X>()`; you never build or parse a string path.
 Bottom navigation is the `BottomNavDestination` enum.
 
-**Four files own the whole surface**, and they move together:
+**Four files own the whole surface**, and they move together — but since PR 11 of #551 they no
+longer live in the same Gradle module. The paths below are **package** paths, which a module move
+does not change; on disk, everything except `NavGraph.kt` is now under `core/navigation/`
+(the `:core:navigation` module), while `NavGraph.kt` stays in `app/` until PR 12 decomposes it.
+The split is the point: every feature module needs the route *vocabulary* to declare its
+destinations, and none of them should need the `NavHost`.
+
 
 | File | Owns | Cross-check |
 |---|---|---|
 | `core/navigation/Routes.kt` | the `Route` sealed interface — every destination that exists | `NAV-01`, `NAV-02` |
-| `core/navigation/NavGraph.kt` | the `NavHost` — which routes are actually reachable | `NAV-03`, `NAV-04` |
+| `core/navigation/NavGraph.kt` | the `NavHost` and the app shell — **no destinations since PR 12** | — |
+| `presentation/screens/<feature>/<Feature>Graph.kt` × 11 | the destinations, one extension per feature | `NAV-03`, `NAV-04` |
 | `core/navigation/ScreenTags.kt` | the stable test tag per destination | `NAV-05` |
 | `core/navigation/AnnouncementRoutes.kt` + `HelpDeepLink.kt` | the two **external** entry grammars | `NAV-06` … `NAV-10` |
 
-**Test hooks.** Every destination is wired via the local `taggedComposable<Route.X>` helper,
+### The graph is eleven files, not one
+
+`NavGraph.kt` was 1,420 lines: it imported 69 screen composables and registered all 94
+destinations, which meant **every screen in the app was reachable from one file**. No feature could
+move into its own module while that was true, because `:app` would have had to import from all
+eleven feature modules at once. PR 12 of #551 split it; the file is now 281 lines holding the
+`NavHost`, the navigation-suite shell and eleven calls:
+
+| graph | destinations |  | graph | destinations |
+|---|---:|---|---|---:|
+| `quranGraph` | 19 | | `aboutGraph` | 7 |
+| `contentGraph` | 19 | | `searchGraph` | 4 |
+| `settingsGraph` | 20 | | `toolsGraph` | 2 |
+| `trackerGraph` | 14 | | `calendarGraph` | 2 |
+| `prayerGraph` | 5 | | `onboardingGraph` | 1 |
+| | | | `homeGraph` | 1 |
+
+> Five of these rows were wrong until #625 — `quranGraph` and `contentGraph` were listed as 21,
+> `settingsGraph` as 16, `trackerGraph` as 11 and `prayerGraph` as 8. The **total** was right, which
+> is exactly why nothing caught it: NAV-03 checks the 94 against `Routes.kt`, not the split. They
+> were corrected by counting `taggedComposable<Route.` per file with `check_docs.py`'s own
+> comment-stripping helper, after `ContentGraphTest` asserted 19 destinations against a graph
+> documented as holding 21. Recount the same way before editing a row here.
+
+Each takes a `NavController` — not the `onNavigate: (Route) -> Unit` lambda the issue sketched,
+because 11 of the 158 `navigate` calls in those blocks pass a `NavOptionsBuilder` (`popUpTo`,
+`launchSingleTop`) that a `(Route) -> Unit` cannot express; flattening them would change
+back-stack behaviour silently. A graph function *is* navigation wiring, so holding the controller
+is its job. A **screen** must not, and `NavControllerConfinementTest` enforces that — it exempts
+`*Graph.kt` and nothing else.
+
+**Adding a destination now means adding it to its feature's graph**, not to `NavGraph.kt`.
+`EveryRouteIsRegisteredTest` compares the *set* of registered routes against the `Route`
+declarations, in both directions, and fails on a duplicate. NAV-03 compares totals, so it cannot
+see a route dropped in one graph while another is duplicated — which is exactly the shape a
+copy-paste across eleven files produces, and it fails as a blank screen at runtime rather than a
+build error.
+
+**Test hooks.** Every destination is wired via the `taggedComposable<Route.X>` helper — which was
+`private` inside `NavGraph.kt` and now lives in `core/navigation/TaggedComposable.kt`, because a
+helper every feature module must call cannot be private to the app —
 which wraps the screen in a full-size container carrying a stable `ScreenTags.X` tag; bottom-nav
 items carry `ScreenTags.bottomNav(label)`. Instrumented UI tests assert *which screen is shown*
 by these tags rather than by on-screen text, so they survive copy and locale changes. A bare
@@ -176,7 +223,8 @@ flowchart LR
 
 ## 3. Route reference
 
-All routes live in `core/navigation/Routes.kt` and are wired in `core/navigation/NavGraph.kt`
+All routes live in `core/navigation/Routes.kt` and are wired in the eleven feature graph
+extensions (`NavGraph.kt` calls them; it registers nothing itself)
 (94 `composable<Route.X>` destinations). `data object` = no args; `data class` = typed args.
 Every route below also has a `ScreenTags` entry of the same name.
 
@@ -368,6 +416,15 @@ serialized `Route`, so an old app version safely ignores a key it does not recog
 hides its CTA instead of navigating somewhere unexpected. See
 [`SUBSYSTEMS.md` §12](SUBSYSTEMS.md#12-engagement-announcements-fcm) for the payload itself.
 
+**Who resolves what.** The domain layer only *validates*: `ResolveAnnouncementRouteUseCase` takes
+an `isKnownFeatureKey: (String) -> Boolean` predicate (wired in `AnnouncementModule` as
+`{ announcementRoute(it) != null }`) and yields `AnnouncementAction.NavigateToFeature(routeKey)`
+carrying the raw key. `NavGraph` re-resolves that key with `announcementRoute(key)` and navigates.
+Domain therefore never names a `Route` — but the two halves must agree, or a banner shows a CTA
+that goes nowhere (or hides one that would have worked), so
+`AnnouncementCtaJourneyTest` asserts the predicate and the allowlist agree for **every** static key,
+reading the keys out of `AnnouncementRoutes.kt` rather than from a hand-copied list.
+
 ```mermaid
 flowchart TD
     K["payload route value"] --> N{"blank?"}
@@ -376,7 +433,7 @@ flowchart TD
     U -->|yes| Url["AnnouncementAction.OpenUrl<br/>→ ACTION_VIEW"]
     U -->|no| Norm["trim, strip leading/trailing '/'"]
     Norm --> S{"static allowlist<br/>exact match? §4.1"}
-    S -->|hit| Nav["AnnouncementAction.NavigateToFeature"]
+    S -->|hit| Nav["AnnouncementAction.NavigateToFeature(routeKey)<br/>NavGraph re-resolves the key"]
     S -->|miss| G{"parameterised grammar<br/>match + in range? §4.2"}
     G -->|hit| Nav
     G -->|miss| Rejected["null → CTA hidden<br/>+ analytics announcement_route_rejected"]

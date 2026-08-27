@@ -1,6 +1,8 @@
 package com.arshadshah.nimaz.presentation.components.molecules
 
 import androidx.compose.ui.test.onNodeWithText
+import com.arshadshah.nimaz.testing.compose.createComponentComposeRule
+import com.arshadshah.nimaz.testing.compose.setThemedContent
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith

@@ -1,0 +1,544 @@
+package com.arshadshah.nimaz.presentation.components.organisms
+
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.BasicText
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.EditNote
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.outlined.RadioButtonUnchecked
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextLayoutResult
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDirection
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.arshadshah.nimaz.core.ui.R
+import com.arshadshah.nimaz.core.util.TajweedParser
+import com.arshadshah.nimaz.domain.model.Ayah
+import com.arshadshah.nimaz.domain.model.SajdaType
+import com.arshadshah.nimaz.domain.model.TranslationLanguage
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeEmphasis
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeShape
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
+import com.arshadshah.nimaz.presentation.components.atoms.NimazDivider
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
+import com.arshadshah.nimaz.presentation.components.atoms.QuranVerseText
+import com.arshadshah.nimaz.presentation.foundation.text.BISMILLAH_TEXT
+import com.arshadshah.nimaz.presentation.foundation.text.appendAyahEndMarker
+import com.arshadshah.nimaz.presentation.foundation.text.getDisplayArabicText
+import com.arshadshah.nimaz.presentation.foundation.text.hasLeadingBismillah
+import com.arshadshah.nimaz.presentation.theme.AmiriFontFamily
+import com.arshadshah.nimaz.presentation.theme.NimazColors
+import com.arshadshah.nimaz.presentation.theme.NimazPalette
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
+import com.arshadshah.nimaz.presentation.theme.ThemeMode
+import com.arshadshah.nimaz.presentation.theme.asTranslationText
+
+@Composable
+internal fun AyahItem(
+    ayah: Ayah,
+    showTranslation: Boolean,
+    showTransliteration: Boolean = false,
+    arabicFontSize: Float,
+    arabicFontFamily: FontFamily = AmiriFontFamily,
+    /** Language of the translation prose, which decides the face, direction and leading it
+     *  is drawn with — see [com.arshadshah.nimaz.presentation.theme.asTranslationText]. */
+    translationLanguage: TranslationLanguage = TranslationLanguage.ENGLISH,
+    fontSize: Float,
+    isHighlighted: Boolean = false,
+    isAudioPlaying: Boolean = false,
+    isFavorite: Boolean = false,
+    /** Whether a note has been written on this verse — drawn as a third marker. */
+    hasNote: Boolean = false,
+    isKhatamRead: Boolean = false,
+    isKhatamMode: Boolean = false,
+    showTajweed: Boolean = false,
+    tajweedUnderline: Boolean = false,
+    /** Opens the ayah sheet, which now carries every per-verse action. */
+    onOpenActions: () -> Unit = {},
+    onKhatamToggle: () -> Unit = {},
+    /**
+     * Draws the rule that closes this verse. The reader turns it off for the last verse in the
+     * list, where there is no next verse to divide from and the line would hang over whitespace.
+     */
+    showDivider: Boolean = true,
+    modifier: Modifier = Modifier
+) {
+    val isDarkTheme = isSystemInDarkTheme()
+
+    val bgColor by animateColorAsState(
+        targetValue = if (isHighlighted)
+            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+        else
+            Color.Transparent,
+        animationSpec = tween(300),
+        label = "ayah_highlight"
+    )
+
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(bgColor)
+            // The whole verse is the target. Rule 8's card guidance does not apply — this is a
+            // list row inside a reader, not a card, and wrapping it in a NimazCard would put a
+            // border around every verse of the Qur'an.
+            .clickable(onClick = onOpenActions)
+    ) {
+        Column(
+            // 14dp top and bottom, against 6dp before. Two verses used to sit 12dp apart with a
+            // 0.5dp line at 30% opacity between them — a rule you have to go looking for, on a
+            // screen whose whole job is telling one verse from the next. The gap and the rule do
+            // the work together; neither is enough alone.
+            modifier = Modifier.padding(horizontal = 15.dp, vertical = 14.dp)
+        ) {
+            // Number badge, and — only with a khatam running — the read mark. The permanent
+            // five-icon action pill that used to sit opposite is gone: it drew five icons per
+            // verse, thirty on a screenful, for actions a reader wants on one verse at a time.
+            // Tapping the row opens the sheet that holds all of them, and four more besides.
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(32.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.primaryContainer),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = ayah.numberInSurah.toString(),
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    }
+                    // Tiny marks for what has been done to this verse. The sheet is where you
+                    // bookmark, favourite and annotate, and once it closes there was nothing left
+                    // on the row to say you had — so a reader scrolling back could not find their
+                    // own marks without opening every verse. Not buttons: 14dp glyphs, tapped
+                    // through to the same sheet as the rest of the row.
+                    SavedMarks(
+                        isBookmarked = ayah.isBookmarked,
+                        isFavourite = isFavorite,
+                        hasNote = hasNote,
+                    )
+                    if (isKhatamMode) {
+                        IconButton(
+                            onClick = onKhatamToggle,
+                            modifier = Modifier.size(36.dp)
+                        ) {
+                            NimazIcon(
+                                imageVector = if (isKhatamRead) Icons.Filled.CheckCircle else Icons.Outlined.RadioButtonUnchecked,
+                                contentDescription = if (isKhatamRead) stringResource(R.string.cd_mark_as_unread) else stringResource(
+                                    R.string.cd_mark_as_read
+                                ),
+                                tint = if (isKhatamRead) NimazColors.Success else MaterialTheme.colorScheme.onSurfaceVariant,
+                                size = NimazIconSize.MEDIUM
+                            )
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Arabic text with ayah end marker (with optional tajweed colors)
+            val displayText = ayah.getDisplayArabicText()
+            val textColor = MaterialTheme.colorScheme.onBackground
+            // Ayah end-marker: gold brackets + teal number, matching the ornament language.
+            val markerBracketColor = NimazColors.Gold500
+            val markerNumberColor = MaterialTheme.colorScheme.primary
+
+            val textTajweed = ayah.textTajweed
+            if (showTajweed && textTajweed != null) {
+                // Render with tajweed colors using BasicText
+                val tajweedAnnotated = remember(
+                    textTajweed, isDarkTheme, ayah.numberInSurah,
+                    textColor, markerBracketColor, markerNumberColor, tajweedUnderline
+                ) {
+                    val parsed = TajweedParser.parse(
+                        tajweedText = textTajweed,
+                        isDarkTheme = isDarkTheme,
+                        defaultColor = textColor,
+                        stripPrefix = if (ayah.hasLeadingBismillah) BISMILLAH_TEXT else null,
+                        annotateRules = true,  // enable tap-to-explain (#294)
+                        underlineRules = tajweedUnderline
+                    )
+                    // Append the coloured end marker to the tajweed text
+                    buildAnnotatedString {
+                        append(parsed)
+                        append(" ")
+                        appendAyahEndMarker(ayah.numberInSurah, markerBracketColor, markerNumberColor)
+                    }
+                }
+                // Tap a coloured tajweed word to explain its rule (#294) — mirrors the
+                // continuous mushaf page, so the verse-list reader is no longer dead.
+                var tappedRuleCode by remember { mutableStateOf<String?>(null) }
+                var textLayoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
+                BasicText(
+                    text = tajweedAnnotated,
+                    onTextLayout = { result -> textLayoutResult = result },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .pointerInput(tajweedAnnotated) {
+                            detectTapGestures { position ->
+                                val layout = textLayoutResult ?: return@detectTapGestures
+                                val offset = layout.getOffsetForPosition(position)
+                                tajweedAnnotated.getStringAnnotations(
+                                    tag = TajweedParser.RULE_TAG, start = offset, end = offset
+                                ).firstOrNull()?.let { tappedRuleCode = it.item }
+                            }
+                        },
+                    style = TextStyle(
+                        fontFamily = arabicFontFamily,
+                        fontSize = arabicFontSize.sp,
+                        lineHeight = (arabicFontSize * 2).sp,
+                        textDirection = TextDirection.Rtl,
+                        color = textColor
+                    )
+                )
+                tappedRuleCode?.let { code ->
+                    TajweedRuleSheet(ruleCode = code, onDismiss = { tappedRuleCode = null })
+                }
+            } else {
+                QuranVerseText(
+                    arabicText = displayText,
+                    verseNumber = ayah.numberInSurah,
+                    customFontSize = arabicFontSize.sp.value,
+                    fontFamily = arabicFontFamily
+                )
+            }
+
+            // Translation
+            val translation = ayah.translation
+            if (showTranslation && translation != null) {
+                Spacer(modifier = Modifier.height(12.dp))
+                // Plain text, not an outlined box. A box per verse drew 114 borders down a surah
+                // to separate two things that are already separated by script and direction.
+                Text(
+                    text = translation,
+                    // The catalogue ships right-to-left translations (Urdu), so the paragraph
+                    // direction has to come from the text itself rather than from the app's
+                    // locale — otherwise Urdu renders left-aligned with its punctuation on the
+                    // wrong side. TextAlign.Start then follows the resolved direction.
+                    style = MaterialTheme.typography.bodyMedium
+                        .asTranslationText(translationLanguage, fontSize.sp),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+
+            // Transliteration
+            val transliteration = ayah.transliteration
+            if (showTransliteration && transliteration != null) {
+                Spacer(modifier = Modifier.height(8.dp))
+                NimazCard(style = NimazCardStyle.OUTLINED, tone = NimazTone.SUCCESS, elevation = 0.dp) {
+                    Text(
+                        text = transliteration,
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            fontSize = fontSize.sp,
+                            lineHeight = (fontSize * 1.5f).sp
+                        ),
+                        modifier = Modifier.padding(12.dp)
+                    )
+                }
+            }
+
+            // Indicators row
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    if (ayah.sajdaType != null) {
+                        NimazBadge(
+                            text = if (ayah.sajdaType == SajdaType.OBLIGATORY) stringResource(R.string.sajdah_wajib) else stringResource(
+                                R.string.sajdah
+                            ),
+                            shape = NimazBadgeShape.ROUNDED,
+                            size = NimazBadgeSize.SMALL,
+                            colors = NimazBadgeDefaults.feature(
+                                color = NimazPalette.Red600,
+                                emphasis = NimazBadgeEmphasis.SOFT
+                            )
+                        )
+                    }
+
+                    // Hizb quarter — marked on the verse that *opens* the quarter, the way a
+                    // printed Mushaf marks it. This used to render on every verse that merely fell
+                    // inside a quarter, and read `rubNumber` (a counter over all 240 quarters in
+                    // the book) as though it were the 1..4 position within a hizb — so the four
+                    // quarters at the very start of the Quran got a label and the other 236 got
+                    // an empty string, i.e. no marker at all.
+                    if (ayah.isRubStart) {
+                        val quarterLabel = when (ayah.quarterInHizb) {
+                            1 -> stringResource(R.string.hizb_format, ayah.hizbOfQuarter)
+                            2 -> stringResource(R.string.hizb_quarter_format, ayah.hizbOfQuarter)
+                            3 -> stringResource(R.string.hizb_half_format, ayah.hizbOfQuarter)
+                            4 -> stringResource(R.string.hizb_three_quarter_format, ayah.hizbOfQuarter)
+                            else -> ""
+                        }
+                        if (quarterLabel.isNotEmpty()) {
+                            NimazBadge(
+                                text = quarterLabel,
+                                tone = NimazTone.SUCCESS,
+                                emphasis = NimazBadgeEmphasis.SOFT,
+                                shape = NimazBadgeShape.ROUNDED,
+                                size = NimazBadgeSize.SMALL
+                            )
+                        }
+                    }
+
+                    // Rukūʿ — the surah's own sections, from the `rukus` table. Same badge
+                    // language as the hizb quarter beside it, but on the verse that *closes*
+                    // the section: the ʿayn (ع) ends a rukūʿ in a printed Mushaf rather than
+                    // announcing it. Al-Fātiḥah is one rukūʿ, so this shows on 1:7, not 1:1.
+                    val rukuNumber = ayah.rukuNumber
+                    if (ayah.isRukuEnd && rukuNumber != null) {
+                        NimazBadge(
+                            text = stringResource(R.string.ruku_format, rukuNumber),
+                            tone = NimazTone.ACCENT,
+                            emphasis = NimazBadgeEmphasis.SOFT,
+                            shape = NimazBadgeShape.ROUNDED,
+                            size = NimazBadgeSize.SMALL
+                        )
+                    }
+                }
+
+                // The juz/page badge that used to close this row is gone: it repeated the same
+                // coordinate on every verse for a fact that changes about once a page. It is said
+                // once now, in the reader's anchor bar (`ReaderAnchorBar`).
+            }
+        }
+
+        // Full-bleed, and outside the verse's own padding: a rule that stops 15dp short of
+        // either edge reads as an underline belonging to the verse above it. Running edge to
+        // edge, it reads as the boundary between two rows, which is what it is.
+        if (showDivider) {
+            NimazDivider()
+        }
+    }
+}
+
+/**
+ * Showcase of every [AyahItem] state: plain, active bookmark/favourite, audio
+ * playing + highlighted, transliteration shown, a sajdah verse, a verse opening a
+ * hizb quarter, a verse opening a rukūʿ, and khatam (read-tracking) mode. Rendered
+ * for both themes below.
+ */
+/**
+ * Bookmark, heart, note — whichever of them apply, in the colours the ayah sheet uses.
+ *
+ * Glyphs rather than the filled circles the sheet draws: this sits beside a verse number in a
+ * reading column, and three more tinted circles per row is the permanent action pill coming
+ * back by another route.
+ */
+@Composable
+private fun SavedMarks(
+    isBookmarked: Boolean,
+    isFavourite: Boolean,
+    hasNote: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    if (!isBookmarked && !isFavourite && !hasNote) return
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(3.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        if (isBookmarked) {
+            NimazIcon(
+                imageVector = Icons.Filled.Bookmark,
+                contentDescription = stringResource(R.string.ayah_action_bookmark),
+                tint = NimazColors.QuranColors.BookmarkPrimary,
+                iconSize = 14.dp,
+            )
+        }
+        if (isFavourite) {
+            NimazIcon(
+                imageVector = Icons.Filled.Favorite,
+                contentDescription = stringResource(R.string.ayah_action_favourite),
+                tint = NimazPalette.Red500,
+                iconSize = 14.dp,
+            )
+        }
+        if (hasNote) {
+            NimazIcon(
+                imageVector = Icons.Filled.EditNote,
+                contentDescription = stringResource(R.string.ayah_action_note),
+                tint = NimazPalette.Violet500,
+                iconSize = 14.dp,
+            )
+        }
+    }
+}
+
+@Composable
+private fun AyahItemShowcase() {
+    val baseArabic =
+        "\u0628\u0650\u0633\u0652\u0645\u0650 \u0671\u0644\u0644\u0651\u064E\u0647\u0650 \u0671\u0644\u0631\u0651\u064E\u062D\u0652\u0645\u064E\u0670\u0646\u0650 \u0671\u0644\u0631\u0651\u064E\u062D\u0650\u064A\u0645\u0650"
+
+    fun ayah(
+        n: Int,
+        bookmarked: Boolean = false,
+        hizb: Int = 1,
+        rub: Int = 0,
+        sajda: SajdaType? = null,
+        transliteration: String? = null,
+        ruku: Int? = null,
+    ) = Ayah(
+        id = n,
+        surahNumber = 1,
+        ayahNumber = n,
+        textArabic = baseArabic,
+        textSimple = "bismillah al-rahman al-raheem",
+        juzNumber = 1,
+        hizbNumber = hizb,
+        rubNumber = rub,
+        pageNumber = 1,
+        sajdaType = sajda,
+        sajdaNumber = if (sajda != null) 1 else null,
+        translation = "In the name of Allah, the Most Gracious, the Most Merciful.",
+        isBookmarked = bookmarked,
+        transliteration = transliteration,
+        rukuNumber = ruku,
+        isRukuEnd = ruku != null,
+        isRubStart = rub > 0,
+    )
+
+    Column(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
+        // 1. Plain verse, translation only
+        AyahItem(
+            ayah = ayah(1),
+            showTranslation = true,
+            arabicFontSize = 28f,
+            fontSize = 16f,
+        )
+        // 2. Active states: bookmarked + favourited
+        AyahItem(
+            ayah = ayah(2, bookmarked = true),
+            showTranslation = true,
+            isFavorite = true,
+            arabicFontSize = 28f,
+            fontSize = 16f,
+        )
+        // 3. Audio playing + highlighted row
+        AyahItem(
+            ayah = ayah(3),
+            showTranslation = true,
+            isAudioPlaying = true,
+            isHighlighted = true,
+            arabicFontSize = 28f,
+            fontSize = 16f,
+        )
+        // 4. Transliteration shown
+        AyahItem(
+            ayah = ayah(
+                4,
+                transliteration = "Bismi ll\u0101hi r-ra\u1E25m\u0101ni r-ra\u1E25\u012Bm"
+            ),
+            showTranslation = true,
+            showTransliteration = true,
+            arabicFontSize = 28f,
+            fontSize = 16f,
+        )
+        // 5. Sajdah verse marker
+        AyahItem(
+            ayah = ayah(5, sajda = SajdaType.OBLIGATORY),
+            showTranslation = true,
+            arabicFontSize = 28f,
+            fontSize = 16f,
+        )
+        // 6. Hizb / quarter marker
+        AyahItem(
+            ayah = ayah(6, hizb = 2, rub = 6),
+            showTranslation = true,
+            arabicFontSize = 28f,
+            fontSize = 16f,
+        )
+        // 6b. Rukūʿ marker, alongside a quarter marker on the same verse
+        AyahItem(
+            ayah = ayah(8, hizb = 2, rub = 5, ruku = 3),
+            showTranslation = true,
+            arabicFontSize = 28f,
+            fontSize = 16f,
+        )
+        // 7. Khatam mode (read-tracking), marked read — and, being last, with no closing rule
+        AyahItem(
+            ayah = ayah(7),
+            showTranslation = true,
+            isKhatamMode = true,
+            isKhatamRead = true,
+            arabicFontSize = 28f,
+            fontSize = 16f,
+            showDivider = false,
+        )
+    }
+}
+
+@Preview(name = "Ayah Item \u00B7 Light", showBackground = true, heightDp = 1600)
+@Composable
+private fun AyahItemShowcaseLightPreview() {
+    NimazTheme(themeMode = ThemeMode.LIGHT) {
+        AyahItemShowcase()
+    }
+}
+
+@Preview(name = "Ayah Item \u00B7 Dark", showBackground = true, heightDp = 1600)
+@Composable
+private fun AyahItemShowcaseDarkPreview() {
+    NimazTheme(themeMode = ThemeMode.DARK) {
+        AyahItemShowcase()
+    }
+}

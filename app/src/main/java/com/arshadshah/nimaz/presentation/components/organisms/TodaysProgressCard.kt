@@ -29,8 +29,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.core.util.prayerTimelineProgressAt
+import com.arshadshah.nimaz.core.ui.R
+import com.arshadshah.nimaz.core.common.prayerTimelineProgressAt
 import com.arshadshah.nimaz.domain.model.PrayerStatus
 import com.arshadshah.nimaz.domain.model.PrayerType
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard

@@ -10,13 +10,37 @@ platform :android do
     # pr_checks.yml uploads lint-results-debug.html. These are the same two tasks CLAUDE.md
     # tells contributors to run locally.
     lane :test do
-      gradle(task: ":app:testDebugUnitTest")
-      gradle(task: ":app:lintDebug")
+      # The convention plugins in the `build-logic` included build have their own Gradle
+      # TestKit suite. It is not reachable from :app:testDebugUnitTest — an included build's
+      # tasks only run when asked for by name — so a broken convention plugin would otherwise
+      # only surface as a build failure somewhere downstream.
+      gradle(task: ":build-logic:convention:test")
+      # `testDebugUnitTest` and `lintDebug` across *every* module, not just `:app`.
+      #
+      # Until PR 22 of #551 this lane ran `:app:testDebugUnitTest` and `:app:lintDebug`, which was
+      # the whole app when there was one module. It is now a small fraction of it: `:app` holds
+      # 229 of the 2,463 unit tests, and a lint error in `:core:ui` or any feature module would
+      # not have failed a single PR check. `testDebugUnitTest` and `lintDebug` are task *names*
+      # Gradle resolves in every project that has them, so this reaches all nineteen — and picks
+      # up the twentieth automatically the day it is added, which a hand-maintained list would
+      # not.
+      gradle(task: "testDebugUnitTest")
+      # The per-module coverage floor, for every module that has been brought up to it and
+      # locked. Unqualified for the same reason as the two around it: `coverageFloor` is a task
+      # name Gradle resolves in every project that applies `jacoco`, so a module joins the gate by
+      # setting `nimazCoverage { lineFloor.set(...) }` in its own build file and nothing here has
+      # to be edited. A module without a floor runs the task and does nothing, which is what makes
+      # bringing the modules up one at a time possible.
+      #
+      # After `testDebugUnitTest`, not before: `moduleCoverage` needs the execution data that task
+      # writes, and running it first would measure the previous build's.
+      gradle(task: "coverageFloor")
+      gradle(task: "lintDebug")
     end
 
     desc "Run lint check"
     lane :lint do
-      gradle(task: ":app:lintDebug")
+      gradle(task: "lintDebug")
     end
 
 
@@ -111,7 +135,13 @@ platform :android do
     # The project uses the Kotlin DSL (build.gradle.kts), which the
     # android_versioning plugin does not support, hence the manual approach.
     gradle_file = File.expand_path("../app/build.gradle.kts", __dir__)
-    contents = File.read(gradle_file)
+    # Read as UTF-8 explicitly. `File.read` otherwise tags the string with
+    # `Encoding.default_external`, which is the *runner's locale* — US-ASCII when
+    # LANG is unset — and the first `sub` over a build file whose comments contain
+    # an em dash then raises `invalid byte sequence in US-ASCII`. The lane worked
+    # for years on runners that happened to set a UTF-8 locale and broke the
+    # morning one of them did not.
+    contents = File.read(gradle_file, encoding: "UTF-8")
 
     tree_code = contents[/versionCode\s*=\s*(\d+)/, 1]
     UI.user_error!("Could not find versionCode in #{gradle_file}") if tree_code.nil?
