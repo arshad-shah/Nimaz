@@ -27,6 +27,55 @@ jacoco {
     toolVersion = "0.8.12"
 }
 
+/**
+ * `:app` is on the ratchet — on **lines only**, and the missing branch floor is the finding
+ * rather than an omission.
+ *
+ * Line coverage is the standard 0.80, met at **82.6%** with 142 lines of margin. Branch coverage
+ * is **53.5%**, and neither of the two values the campaign sanctions (#604) is available:
+ *
+ * | where the module's 1,790 missing branches are | count |
+ * |---|---|
+ * | composable signature / parameter masks        |   786 |
+ * | ordinary logic                                |   495 |
+ * | `NavGraph` + `MainActivity`                   |   194 |
+ * | ExoPlayer listener paths                      |   180 |
+ *
+ * **0.80 is arithmetically impossible.** Cover every branch outside the signature masks — every
+ * `when`, every null-check, the whole composition root, the whole player — and the module reads
+ * **76.1%**. The masks are the Compose compiler's `$dirty` skippability check, emitted once per
+ * parameter of every restartable composable; which side runs depends on what the *caller* changed
+ * between recompositions, so no test can take both. `:app`'s composables are unusually wide —
+ * `HomeScreen` takes 17 parameters and hands 19 to `HomeCompactContent` and 18 to
+ * `HomeTabletContent` — so 44% of the module's branches are mask, against 17% in `:core:ui`.
+ *
+ * **0.60 would be a floor with no headroom.** Of the 495 ordinary-logic branches, 144 sit inside
+ * `@Preview` and `*Showcase` bodies, which are tooling and never run. Cover every one of the 351
+ * that remain and the module reads about **62.6%** — two points over a 0.60 gate, which the next
+ * composable added would spend. A floor that tight measures how many parameters the screens
+ * happen to have, not whether they are tested; #604 rule 3 rejects exactly that.
+ *
+ * So this module states its branch number rather than gating it, and `docs/TESTING.md` records
+ * why. Raising it means narrowing the composables, not lowering the bar.
+ *
+ * ### What is left uncovered on purpose
+ *
+ * - **`NavGraph` and `MainActivity`** (252 lines, 194 branches, both at 0%). `MainActivity` is
+ *   `@AndroidEntryPoint` and its body is `setContent { NavGraph(…) }`; a destination inside a
+ *   `NavHost` gets a `NavBackStackEntry` as its `ViewModelStoreOwner`, which *is* a
+ *   `HasDefaultViewModelProviderFactory`, so Hilt's factory is constructed before any seeded
+ *   store is read (#604 playbook item 8). They are the instrumented suite's job — see
+ *   `app/src/androidTest`'s navigation package, which drives the real graph on a device.
+ * - **`QuranAudioManager`'s player listener** (180 branches). Its arms fire on ExoPlayer
+ *   reaching `STATE_ENDED` or transitioning media items, which needs a player actually decoding
+ *   audio rather than one Robolectric has stubbed.
+ * - **`@Preview` bodies.** 35 preview functions across the module, none of which the app runs.
+ */
+nimazCoverage {
+    lineFloor.set(0.80)
+    // No branchFloor: see above. 53.5% today, 76.1% if everything reachable were covered.
+}
+
 // Firebase (Crashlytics + Analytics) is configured via google-services.json,
 // which CI injects from secrets only for the release/deploy build. PR checks and
 // local debug builds run without it, so apply the Google plugins only when the
@@ -443,6 +492,9 @@ dependencies {
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.google.truth)
     testImplementation(libs.robolectric)
+    // TestListenableWorkerBuilder, for AdhanDownloadWorker's retry rule — the background
+    // fallback that runs on the two paths a foreground service cannot take.
+    testImplementation(libs.androidx.work.testing)
     testImplementation(libs.ktor.client.mock)
     testImplementation(libs.json)
 
@@ -607,6 +659,52 @@ val debugClassRoots = listOf(
     layout.buildDirectory.dir("tmp/kotlin-classes/debug").get().asFile,
 )
 val buildOutputDir = layout.buildDirectory.get().asFile
+
+/**
+ * `:app`'s own `moduleCoverage` measures the **ASM-transformed** classes, not the compiler output.
+ *
+ * Every other module measures `intermediates/built_in_kotlinc/debug` — see [debugClassRoots] —
+ * and must keep doing so, because naming both roots hands JaCoCo two class files per class and
+ * aborts the report. `:app` is the one module where that choice is *wrong*, and it is wrong in a
+ * way that reads as a coverage failure rather than a configuration one:
+ *
+ *     [ant:jacocoReport] Execution data for class com/arshadshah/nimaz/core/util/BootReceiver
+ *                        does not match.
+ *
+ * The Hilt Gradle plugin rewrites every `@AndroidEntryPoint` class through AGP's ASM pipeline —
+ * `BootReceiver.onReceive` gains a `super.onReceive` call, and the two adhan services likewise.
+ * The unit tests load the **rewritten** class, so its JaCoCo class id does not match the
+ * compiler-output copy, and JaCoCo silently discards that class's execution data and reports it
+ * as 0%. Three classes and 509 lines were affected: `BootReceiver` (194), `AdhanPlaybackService`
+ * (181) and `AdhanDownloadService` (134) all read zero however thoroughly they were tested,
+ * while their *nested* classes — untransformed, so matching — reported normally. A file at
+ * 50% whose outer class is at 0% is the signature.
+ *
+ * `:app` is the only module with `@AndroidEntryPoint` classes that a unit test constructs, which
+ * is why no locked module needed this and why the fix belongs here rather than in `build-logic`.
+ * The transformed root carries the compiler output too, so it is a single complete root and the
+ * duplicate problem does not arise.
+ *
+ * It also carries the Java that KSP and Dagger generate, which the compiler-output root never
+ * did. Nearly all of it is already on [coverageExclusions]: the `_Factory`, `Hilt_` and
+ * `di` package entries between them cover it.
+ * One thing is not, and only because of how it is spelled: `DaggerNimazApp_HiltComponents_*`,
+ * the 623-line generated singleton component, whose name contains `HiltComponents` rather than
+ * `Hilt_`. It is excluded **here** rather than by widening [COVERAGE_EXCLUSIONS], which is shared
+ * with eighteen locked modules and must not move to make one module's number: no library module
+ * generates a Dagger component, and none of them measures this root, so the shared list would be
+ * carrying an entry that exists for `:app` alone.
+ */
+tasks.named<JacocoReport>("moduleCoverage") {
+    classDirectories.setFrom(
+        fileTree(
+            layout.buildDirectory.dir("intermediates/classes/debug/transformDebugClassesWithAsm/dirs")
+        ) {
+            exclude(coverageExclusions)
+            exclude("**/Dagger*_HiltComponents_*.*")
+        }
+    )
+}
 
 fun classTree(vararg includes: String): FileCollection =
     files(
