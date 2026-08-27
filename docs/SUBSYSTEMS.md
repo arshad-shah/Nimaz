@@ -1769,6 +1769,21 @@ A stored announcement reaches Home through **exactly one** of two paths, decided
 Splitting them this way is what stops the same occasion appearing twice — once as a banner and
 once as a card.
 
+**Both Home layouts render the merged list.** Compact does it through `HomeOccasionsSection`
+(between the banner slot and the prayer card); tablet prepends the worship and Jumu'ah cards and
+renders the lot in one `EventsCarousel`. Both map the domain cards with the *same*
+`occasionEventCards`, which is the point: the mapping used to live inline in the tablet branch
+only, so from #528 until that section existed, **no celebration card ever reached a phone** —
+local occasion or pushed. Mawlid on 12 Rabi' al-Awwal 1448 (25 Aug 2026) was the one that
+surfaced it. Jumu'ah and the next worship reminder stay out of the compact section because
+`HomeAlsoTodaySection` already carries both as rows.
+
+**The occasion collector is day-scoped.** `ObserveLocalEventsUseCase` reads the wall clock inside
+its `map`, so the flow it returns re-emits only when `hijriDayOffset` changes. `HomeViewModel`
+therefore re-arms `observeCelebrationCards()` from `observeDateRollover()`, alongside the fasting,
+prayer-record, hadith and dua collectors — without it, an app left open overnight keeps showing
+the previous day's answer.
+
 ### 12.7 Storage & dismissal
 
 `nimaz_announcements` (its own Preferences DataStore, see [§0.5](#05-datastore-files)) holds the

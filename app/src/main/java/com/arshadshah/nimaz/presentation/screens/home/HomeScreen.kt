@@ -69,7 +69,6 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazErrorState
 import com.arshadshah.nimaz.presentation.components.molecules.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.molecules.PrayerTimeCard
 import com.arshadshah.nimaz.presentation.components.molecules.PrayerTimesSectionHeader
-import com.arshadshah.nimaz.presentation.components.organisms.EventAction
 import com.arshadshah.nimaz.presentation.components.organisms.EventCardUi
 import com.arshadshah.nimaz.presentation.components.organisms.EventsCarousel
 import com.arshadshah.nimaz.presentation.components.organisms.HomeAlsoTodaySection
@@ -80,12 +79,13 @@ import com.arshadshah.nimaz.presentation.components.organisms.HomeBannerVariant
 import com.arshadshah.nimaz.presentation.components.organisms.HomeDynamicTopBar
 import com.arshadshah.nimaz.presentation.components.organisms.HomeHeader
 import com.arshadshah.nimaz.presentation.components.organisms.HomeHero
+import com.arshadshah.nimaz.presentation.components.organisms.HomeOccasionsSection
 import com.arshadshah.nimaz.presentation.components.organisms.HomePrayerCard
+import com.arshadshah.nimaz.presentation.components.organisms.occasionEventCards
 import com.arshadshah.nimaz.presentation.components.organisms.TodayCarousel
 import com.arshadshah.nimaz.presentation.components.organisms.TodayInfoCards
 import com.arshadshah.nimaz.presentation.components.organisms.TodaysProgressCard
 import com.arshadshah.nimaz.presentation.foundation.tokens.EventOccasion
-import com.arshadshah.nimaz.presentation.foundation.tokens.toOccasion
 import com.arshadshah.nimaz.presentation.model.PrayerTimeDisplay
 import com.arshadshah.nimaz.presentation.model.withClockState
 import com.arshadshah.nimaz.presentation.theme.currentWindowSizeClass
@@ -401,6 +401,20 @@ private fun HomeCompactContent(
             }
         }
 
+        // Today's Islamic occasion — Mawlid, Ashura, an Eid, a pushed celebration. Above the
+        // prayer card on purpose: it appears on a handful of days a year, and on one of those
+        // days it is the more important thing on the screen.
+        if (state.celebrationCards.isNotEmpty()) {
+            item(key = "occasions") {
+                HomeOccasionsSection(
+                    cards = state.celebrationCards,
+                    onOpenRoute = onOpenAnnouncementRoute,
+                    onDismiss = { viewModel.onEvent(HomeEvent.DismissAnnouncement) },
+                    modifier = Modifier.padding(top = 12.dp),
+                )
+            }
+        }
+
         item(key = "prayer_section") {
             HomePrayerCard(
                 prayers = homeClock.prayers,
@@ -521,26 +535,15 @@ private fun HomeTabletContent(
                     )
                 )
             }
-            state.celebrationCards.forEach { c ->
-                add(
-                    EventCardUi(
-                        occasion = c.event.toOccasion(),
-                        eyebrow = c.eyebrow,
-                        // Direction A: compact card — name (eyebrow) + arabic + one body line + one
-                        // action, matching the Jumu'ah card's height.
-                        body = c.body,
-                        arabic = c.arabic,
-                        primaryAction = c.ctaLabel?.let { label ->
-                            c.route?.let { route ->
-                                EventAction(label) { onOpenAnnouncementRoute(route) }
-                            }
-                        },
-                        onDismiss = if (c.dismissable && c.announcementId != null) {
-                            { viewModel.onEvent(HomeEvent.DismissAnnouncement) }
-                        } else null,
-                    )
+            // Same mapping the compact layout renders through HomeOccasionsSection — one copy,
+            // so an occasion can never again reach one layout and not the other.
+            addAll(
+                occasionEventCards(
+                    cards = state.celebrationCards,
+                    onOpenRoute = onOpenAnnouncementRoute,
+                    onDismiss = { viewModel.onEvent(HomeEvent.DismissAnnouncement) },
                 )
-            }
+            )
         }
         if (tabletEventCards.isNotEmpty()) {
             EventsCarousel(

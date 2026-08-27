@@ -13,7 +13,9 @@ import com.arshadshah.nimaz.domain.worship.NextWorshipResolver
 import com.arshadshah.nimaz.core.common.toUtcMidnightMillis
 import com.arshadshah.nimaz.domain.model.FastRecord
 import com.arshadshah.nimaz.domain.model.FastStatus
+import com.arshadshah.nimaz.domain.model.CelebrationEvent
 import com.arshadshah.nimaz.domain.model.FastType
+import com.arshadshah.nimaz.domain.model.HomeEventCard
 import com.arshadshah.nimaz.domain.repository.AnnouncementRepository
 import com.arshadshah.nimaz.domain.repository.DuaRepository
 import com.arshadshah.nimaz.domain.repository.FastingRepository
@@ -25,6 +27,8 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -93,6 +97,12 @@ class HomeViewModelRolloverTest {
         announcementRepository = mockk(relaxed = true)
         nextWorshipResolver = mockk(relaxed = true)
 
+        // `ObserveEventCardsUseCase` combines the local occasions with the announcement stream,
+        // and `combine` emits nothing until *both* sides have. A relaxed mock returns a Flow that
+        // never emits, which would leave `celebrationCards` empty whether or not the collector
+        // re-arms — the assertion below would pass for the wrong reason.
+        every { announcementRepository.observeCurrentAnnouncement() } returns flowOf(null)
+
         // Only *yesterday* has a fast recorded. If the collector is still bound to
         // yesterday's range after midnight, Home keeps claiming the user is fasting today.
         every { fastingRepository.getFastRecordsInRange(any(), any()) } answers {
@@ -109,7 +119,18 @@ class HomeViewModelRolloverTest {
     @After
     fun tearDown() = Dispatchers.resetMain()
 
-    private fun viewModel(): HomeViewModel {
+    /**
+     * Stands in for `ObserveLocalEventsUseCase`, which reads the wall clock *inside* its `map`:
+     * the flow it hands back never re-emits on its own when the day turns, so the only way Home
+     * learns about the new day's occasions is the collector being re-subscribed.
+     */
+    private fun localEvents(): Flow<List<HomeEventCard>> = flow {
+        emit(if (todayProvider.now == today) listOf(mawlid) else emptyList())
+    }
+
+    private fun viewModel(
+        local: () -> Flow<List<HomeEventCard>> = { flowOf(emptyList()) },
+    ): HomeViewModel {
         val announcementUseCases = buildAnnouncementUseCases(announcementRepository)
         return HomeViewModel(
             strings = FakeStringProvider(),
@@ -123,7 +144,7 @@ class HomeViewModelRolloverTest {
             duaUseCases = buildDuaUseCases(duaRepository),
             locationSettings = settingsRepository,
             announcementUseCases = announcementUseCases,
-            observeEventCards = buildObserveEventCardsUseCase(announcementUseCases),
+            observeEventCards = buildObserveEventCardsUseCase(announcementUseCases, local),
             nextWorshipResolver = nextWorshipResolver,
             todayProvider = todayProvider,
         )
@@ -152,6 +173,20 @@ class HomeViewModelRolloverTest {
     }
 
     @Test
+    fun `today's Islamic occasion follows the day across midnight`() {
+        val vm = viewModel(local = ::localEvents)
+        // Mawlid is tomorrow's occasion, so nothing shows on the eve.
+        assertThat(vm.state.value.celebrationCards).isEmpty()
+
+        todayProvider.now = today
+
+        // Left open overnight, Home used to keep the eve's answer: the occasion collector was
+        // started once at init and the flow behind it only re-emits when the Hijri offset moves.
+        assertThat(vm.state.value.celebrationCards.map { it.eyebrow })
+            .containsExactly("Mawlid an-Nabi")
+    }
+
+    @Test
     fun `a day that has not changed does not re-issue everything`() {
         viewModel()
         requestedRanges.clear()
@@ -177,4 +212,13 @@ private fun fastRecord(dateEpoch: Long) = FastRecord(
     note = null,
     createdAt = 0L,
     updatedAt = 0L,
+)
+
+private val mawlid = HomeEventCard(
+    event = CelebrationEvent.MAWLID,
+    eyebrow = "Mawlid an-Nabi",
+    headline = "Mawlid an-Nabi",
+    body = "Birth of Prophet Muhammad (PBUH)",
+    arabic = "المولد النبوي",
+    priority = 1,
 )
