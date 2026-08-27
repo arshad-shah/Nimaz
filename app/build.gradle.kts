@@ -608,6 +608,52 @@ val debugClassRoots = listOf(
 )
 val buildOutputDir = layout.buildDirectory.get().asFile
 
+/**
+ * `:app`'s own `moduleCoverage` measures the **ASM-transformed** classes, not the compiler output.
+ *
+ * Every other module measures `intermediates/built_in_kotlinc/debug` — see [debugClassRoots] —
+ * and must keep doing so, because naming both roots hands JaCoCo two class files per class and
+ * aborts the report. `:app` is the one module where that choice is *wrong*, and it is wrong in a
+ * way that reads as a coverage failure rather than a configuration one:
+ *
+ *     [ant:jacocoReport] Execution data for class com/arshadshah/nimaz/core/util/BootReceiver
+ *                        does not match.
+ *
+ * The Hilt Gradle plugin rewrites every `@AndroidEntryPoint` class through AGP's ASM pipeline —
+ * `BootReceiver.onReceive` gains a `super.onReceive` call, and the two adhan services likewise.
+ * The unit tests load the **rewritten** class, so its JaCoCo class id does not match the
+ * compiler-output copy, and JaCoCo silently discards that class's execution data and reports it
+ * as 0%. Three classes and 509 lines were affected: `BootReceiver` (194), `AdhanPlaybackService`
+ * (181) and `AdhanDownloadService` (134) all read zero however thoroughly they were tested,
+ * while their *nested* classes — untransformed, so matching — reported normally. A file at
+ * 50% whose outer class is at 0% is the signature.
+ *
+ * `:app` is the only module with `@AndroidEntryPoint` classes that a unit test constructs, which
+ * is why no locked module needed this and why the fix belongs here rather than in `build-logic`.
+ * The transformed root carries the compiler output too, so it is a single complete root and the
+ * duplicate problem does not arise.
+ *
+ * It also carries the Java that KSP and Dagger generate, which the compiler-output root never
+ * did. Nearly all of it is already on [coverageExclusions]: the `_Factory`, `Hilt_` and
+ * `di` package entries between them cover it.
+ * One thing is not, and only because of how it is spelled: `DaggerNimazApp_HiltComponents_*`,
+ * the 623-line generated singleton component, whose name contains `HiltComponents` rather than
+ * `Hilt_`. It is excluded **here** rather than by widening [COVERAGE_EXCLUSIONS], which is shared
+ * with eighteen locked modules and must not move to make one module's number: no library module
+ * generates a Dagger component, and none of them measures this root, so the shared list would be
+ * carrying an entry that exists for `:app` alone.
+ */
+tasks.named<JacocoReport>("moduleCoverage") {
+    classDirectories.setFrom(
+        fileTree(
+            layout.buildDirectory.dir("intermediates/classes/debug/transformDebugClassesWithAsm/dirs")
+        ) {
+            exclude(coverageExclusions)
+            exclude("**/Dagger*_HiltComponents_*.*")
+        }
+    )
+}
+
 fun classTree(vararg includes: String): FileCollection =
     files(
         debugClassRoots.map { root ->
