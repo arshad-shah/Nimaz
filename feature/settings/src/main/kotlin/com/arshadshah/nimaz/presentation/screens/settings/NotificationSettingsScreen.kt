@@ -39,7 +39,7 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuDivider
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
 import com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsItem
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
-import com.arshadshah.nimaz.presentation.viewmodel.settings.NotificationSettingsUiState
+import com.arshadshah.nimaz.presentation.viewmodel.settings.NotificationSummary
 import com.arshadshah.nimaz.presentation.viewmodel.settings.SettingsEvent
 import com.arshadshah.nimaz.presentation.viewmodel.settings.SettingsViewModel
 
@@ -62,7 +62,9 @@ fun NotificationSettingsScreen(
     onNavigateToDiagnostics: () -> Unit = {},
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
-    val notificationState by viewModel.notificationState.collectAsStateWithLifecycle()
+    // The hub reads the *summary* and nothing else. `notificationState` is loaded once per
+    // ViewModel instance, and every row below is edited on a subscreen that holds a different
+    // instance — see `SettingsViewModel.notificationSummary`.
     val summary by viewModel.notificationSummary.collectAsStateWithLifecycle()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
@@ -104,7 +106,7 @@ fun NotificationSettingsScreen(
                     NimazSettingsItem(
                         title = stringResource(R.string.notification_settings_enable),
                         subtitle = stringResource(R.string.notification_settings_enable_subtitle),
-                        checked = notificationState.notificationsEnabled,
+                        checked = summary.notificationsMasterEnabled,
                         onCheckedChange = {
                             viewModel.onEvent(SettingsEvent.SetNotificationsEnabled(it))
                         }
@@ -112,7 +114,7 @@ fun NotificationSettingsScreen(
                 }
             }
 
-            if (notificationState.notificationsEnabled) {
+            if (summary.notificationsMasterEnabled) {
                 if (diagnostics?.hasProblem == true) {
                     item {
                         NimazBanner(
@@ -144,7 +146,7 @@ fun NotificationSettingsScreen(
                         NimazMenuDivider(inset = false)
                         NimazSettingsItem(
                             title = stringResource(R.string.notif_hub_sound_title),
-                            subtitle = soundSubtitle(notificationState),
+                            subtitle = soundSubtitle(summary),
                             onClick = onNavigateToSound,
                             showArrow = true
                         )
@@ -158,7 +160,7 @@ fun NotificationSettingsScreen(
                             subtitle = stringResource(R.string.notif_hub_worship_subtitle),
                             value = stringResource(
                                 R.string.notif_hub_count_on,
-                                notificationState.worshipReminders.count { it.value }
+                                summary.worshipRemindersOn
                             ),
                             onClick = onNavigateToWorshipReminders,
                             showArrow = true
@@ -166,7 +168,7 @@ fun NotificationSettingsScreen(
                         NimazMenuDivider(inset = false)
                         NimazSettingsItem(
                             title = stringResource(R.string.notif_hub_weekly_title),
-                            subtitle = weeklySubtitle(notificationState),
+                            subtitle = weeklySubtitle(summary),
                             onClick = onNavigateToWeekly,
                             showArrow = true
                         )
@@ -220,13 +222,13 @@ private fun prayersSubtitle(
 }
 
 @Composable
-private fun soundSubtitle(state: NotificationSettingsUiState): String = stringResource(
+private fun soundSubtitle(state: NotificationSummary): String = stringResource(
     NotificationHubSubtitles.sound(state.respectDnd, state.vibrationEnabled),
     AdhanSound.fromName(state.selectedAdhanSound).displayName
 )
 
 @Composable
-private fun weeklySubtitle(state: NotificationSettingsUiState): String = stringResource(
+private fun weeklySubtitle(state: NotificationSummary): String = stringResource(
     NotificationHubSubtitles.weekly(
         jumuahEnabled = state.fridayReminderEnabled,
         khatamEnabled = state.khatamReminderEnabled

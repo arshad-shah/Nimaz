@@ -403,6 +403,31 @@ Rules:
 - Mutate with `_state.update { it.copy(...) }`.
 - All UI intents flow through a single `fun onEvent(event: XxxEvent)` that `when`-dispatches
   to private functions. `XxxEvent` is a `sealed interface`.
+- **A screen that displays a value another destination edits must read it from a flow, not from
+  a loaded-once snapshot.** See below — this one is not a style preference.
+
+#### A snapshot is per-instance, and destinations do not share one
+
+`hiltViewModel()` in a destination body scopes the ViewModel to that destination's
+`NavBackStackEntry`, so a hub screen and each of its subscreens hold **different instances of the
+same ViewModel class**. A `MutableStateFlow` seeded by a one-shot `loadSettings()` is therefore
+private to whichever instance loaded it, and nothing re-reads it when a destination is returned
+to.
+
+That is exactly right for the control the screen *owns*: the optimistic `_state.update` on the
+frame of the tap is what makes a switch feel instant, and it depends on the state being local.
+It is wrong for a value the screen only *reports*. The notifications hub showed the count of
+enabled worship reminders, the weekly summary and the sound subtitle from its own snapshot; each
+is edited on a subscreen holding a different instance, so all three went on reporting the value
+from before the edit until the app restarted (#639). The prayer row was correct throughout,
+because it was the only one already reading `notificationSummary` — a `combine` over the
+repository's flows, `stateIn(WhileSubscribed)`. One row being right is what made it read as a
+rendering fault rather than a stale read.
+
+So: **owned control → snapshot with an optimistic update; reported value → a flow off the
+repository.** DataStore and Room are singletons, so every collector in the process sees the same
+value whichever instance wrote it. A screen may read both, and the notifications hub now reads
+only the flow.
 
 ```kotlin
 data class XxxUiState(

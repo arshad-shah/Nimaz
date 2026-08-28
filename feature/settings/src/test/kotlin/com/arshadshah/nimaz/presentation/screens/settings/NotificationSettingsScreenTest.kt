@@ -10,7 +10,6 @@ import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ApplicationProvider
 import com.arshadshah.nimaz.core.ui.R
 import com.arshadshah.nimaz.domain.model.PrayerAlertStyle
-import com.arshadshah.nimaz.presentation.viewmodel.settings.NotificationSettingsUiState
 import com.arshadshah.nimaz.presentation.viewmodel.settings.NotificationSummary
 import com.arshadshah.nimaz.presentation.viewmodel.settings.SettingsEvent
 import com.arshadshah.nimaz.testing.FakeSettingsScreenViewModel
@@ -37,9 +36,17 @@ import org.robolectric.annotation.Config
  * both compile and both produce a plausible sentence that is false.
  *
  * The master switch is the structural half. Everything below it is inside
- * `if (notificationsEnabled)`, so switching it off must remove the rows rather than dim them —
- * a hub that still offers "Prayers · Adhan · 15 minutes before" while notifications are off is
+ * `if (notificationsMasterEnabled)`, so switching it off must remove the rows rather than dim them
+ * — a hub that still offers "Prayers · Adhan · 15 minutes before" while notifications are off is
  * telling the user alerts are configured when none will arrive.
+ *
+ * **Every value here comes from `notificationSummary`, and that is the fix rather than an
+ * incidental detail.** The rows used to read `notificationState`, which is loaded once per
+ * ViewModel instance — and `hiltViewModel()` gives the hub a different instance from each of the
+ * five subscreens that edit these settings. Switching a worship reminder on and coming back left
+ * the count reporting the value from before the edit. The prayer row was right the whole time,
+ * because it was the only one already reading the summary; that asymmetry is what made it look
+ * like a rendering fault. `NotificationSummaryTest` pins the ViewModel half.
  */
 @RunWith(RobolectricTestRunner::class)
 @Config(qualifiers = "w411dp-h2200dp")
@@ -57,11 +64,15 @@ class NotificationSettingsScreenTest {
     private var sound = 0
     private var diagnostics = 0
 
+    /**
+     * Only the summary. The screen stopped reading `notificationState` when the hub's rows were
+     * found to be stale: that flow is a one-shot snapshot per ViewModel instance, and the hub
+     * holds a different instance from every subscreen that edits these values. A `state`
+     * parameter here would let a test arrange something the screen cannot see.
+     */
     private fun setContent(
-        state: NotificationSettingsUiState = NotificationSettingsUiState(),
         summary: NotificationSummary = NotificationSummary(),
     ) {
-        viewModel.notificationState.value = state
         viewModel.notificationSummary.value = summary
         composeRule.setThemedContent {
             NotificationSettingsScreen(
@@ -81,7 +92,7 @@ class NotificationSettingsScreenTest {
 
     @Test
     fun `the hub offers all five rows when notifications are on`() {
-        setContent(NotificationSettingsUiState(notificationsEnabled = true))
+        setContent(summary = NotificationSummary(notificationsMasterEnabled = true))
 
         composeRule.onNodeWithText(string(R.string.notif_hub_prayers_title)).assertExists()
         composeRule.onNodeWithText(string(R.string.notif_hub_sound_title)).assertExists()
@@ -94,7 +105,7 @@ class NotificationSettingsScreenTest {
     fun `switching notifications off hides every row rather than dimming them`() {
         // A hub that still reports "Prayers · Adhan · 2 of 5" while the master switch is off is
         // telling the user alerts are configured when none can arrive.
-        setContent(NotificationSettingsUiState(notificationsEnabled = false))
+        setContent(summary = NotificationSummary(notificationsMasterEnabled = false))
 
         composeRule.onNodeWithText(string(R.string.notif_hub_prayers_title)).assertDoesNotExist()
         composeRule.onNodeWithText(string(R.string.notif_hub_sound_title)).assertDoesNotExist()
@@ -106,7 +117,7 @@ class NotificationSettingsScreenTest {
 
     @Test
     fun `the master switch stays reachable when it is off, so it can be switched back on`() {
-        setContent(NotificationSettingsUiState(notificationsEnabled = false))
+        setContent(summary = NotificationSummary(notificationsMasterEnabled = false))
 
         composeRule.settingsRow(string(R.string.notification_settings_enable)).performClick()
 
@@ -117,7 +128,7 @@ class NotificationSettingsScreenTest {
     fun `the master switch passes the value the switch reports, not the negation of state`() {
         // This is the one row on the screen wired as `onCheckedChange = { onEvent(Set…(it)) }`
         // rather than `!state`. Rewriting it to match its neighbours would invert it.
-        setContent(NotificationSettingsUiState(notificationsEnabled = true))
+        setContent(summary = NotificationSummary(notificationsMasterEnabled = true))
 
         composeRule.settingsRow(string(R.string.notification_settings_enable)).performClick()
 
@@ -167,7 +178,7 @@ class NotificationSettingsScreenTest {
         // Do Not Disturb outranks vibration in the subtitle because it is the one that stops a
         // sound the user is expecting.
         setContent(
-            NotificationSettingsUiState(
+            summary = NotificationSummary(
                 respectDnd = true,
                 vibrationEnabled = true,
                 selectedAdhanSound = "MISHARY",
@@ -185,32 +196,25 @@ class NotificationSettingsScreenTest {
     @Test
     fun `the sound row falls through to vibration when DnD is not respected`() {
         setContent(
-            NotificationSettingsUiState(respectDnd = false, vibrationEnabled = true)
+            summary = NotificationSummary(respectDnd = false, vibrationEnabled = true)
         )
 
         composeRule.onNodeWithText(
             string(
                 R.string.notif_hub_sound_vibration,
                 com.arshadshah.nimaz.data.audio.AdhanSound
-                    .fromName(NotificationSettingsUiState().selectedAdhanSound).displayName,
+                    .fromName(NotificationSummary().selectedAdhanSound).displayName,
             )
         ).assertExists()
     }
 
     @Test
     fun `the worship row counts the reminders that are on, not the ones that exist`() {
-        // `count { it.value }` against `size`. Eleven reminders exist and default to off, so the
-        // wrong one reads "11 on" for a user who has enabled none.
-        setContent(
-            NotificationSettingsUiState(
-                worshipReminders = mapOf(
-                    "tahajjud" to true,
-                    "witr" to false,
-                    "suhoor" to true,
-                    "iftar" to false,
-                )
-            )
-        )
+        // Eleven reminders exist and default to off, so a row that counted what exists rather
+        // than what is on would read "11 on" for a user who has enabled none. The count is
+        // computed in the ViewModel now (`NotificationSummaryTest` pins that it iterates the
+        // enum); what this pins is that the row renders the count it is handed.
+        setContent(summary = NotificationSummary(worshipRemindersOn = 2))
 
         composeRule.onNodeWithText(string(R.string.notif_hub_count_on, 2)).assertExists()
     }
@@ -218,7 +222,7 @@ class NotificationSettingsScreenTest {
     @Test
     fun `the weekly row names which of the two weekly reminders are on`() {
         setContent(
-            NotificationSettingsUiState(
+            summary = NotificationSummary(
                 fridayReminderEnabled = true,
                 khatamReminderEnabled = false,
             )
@@ -230,13 +234,41 @@ class NotificationSettingsScreenTest {
     @Test
     fun `the weekly row says neither when neither is on`() {
         setContent(
-            NotificationSettingsUiState(
+            summary = NotificationSummary(
                 fridayReminderEnabled = false,
                 khatamReminderEnabled = false,
             )
         )
 
         composeRule.onNodeWithText(string(R.string.notif_hub_weekly_none)).assertExists()
+    }
+
+    @Test
+    fun `a row re-renders when its setting changes underneath the composed screen`() {
+        // The regression, at the level the user saw it. Coming back from a subscreen does not
+        // recompose the hub from scratch — the summary emits and the row has to follow. Every
+        // other test here arranges a value *before* composing, which passes just as well against
+        // a screen that reads a snapshot once.
+        setContent(summary = NotificationSummary(worshipRemindersOn = 0, enabledPrayerCount = 5))
+        composeRule.onNodeWithText(string(R.string.notif_hub_count_on, 0)).assertExists()
+
+        viewModel.notificationSummary.value =
+            NotificationSummary(worshipRemindersOn = 3, enabledPrayerCount = 2)
+
+        composeRule.onNodeWithText(string(R.string.notif_hub_count_on, 3)).assertExists()
+        composeRule.onNodeWithText(string(R.string.notif_hub_count_of, 2, 5)).assertExists()
+        composeRule.onNodeWithText(string(R.string.notif_hub_count_on, 0)).assertDoesNotExist()
+    }
+
+    @Test
+    fun `the master switch turning off underneath the screen takes the rows with it`() {
+        setContent(summary = NotificationSummary(notificationsMasterEnabled = true))
+        composeRule.onNodeWithText(string(R.string.notif_hub_prayers_title)).assertExists()
+
+        viewModel.notificationSummary.value =
+            NotificationSummary(notificationsMasterEnabled = false)
+
+        composeRule.onNodeWithText(string(R.string.notif_hub_prayers_title)).assertDoesNotExist()
     }
 
     @Test
@@ -295,7 +327,7 @@ class NotificationSettingsScreenTest {
         // The banner lives inside the `if (notificationsEnabled)` block. Warning that alerts
         // may be delayed, when the user has switched alerts off, is noise about a setting they
         // have already decided.
-        setContent(NotificationSettingsUiState(notificationsEnabled = false))
+        setContent(summary = NotificationSummary(notificationsMasterEnabled = false))
 
         composeRule.onNodeWithText(string(R.string.notif_hub_delivery_warning))
             .assertDoesNotExist()

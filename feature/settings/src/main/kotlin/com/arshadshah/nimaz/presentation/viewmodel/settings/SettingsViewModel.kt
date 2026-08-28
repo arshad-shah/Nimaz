@@ -21,6 +21,7 @@ import com.arshadshah.nimaz.domain.model.MushafScript
 import com.arshadshah.nimaz.domain.model.PrayerAlertStyle
 import com.arshadshah.nimaz.domain.model.PrayerTimes
 import com.arshadshah.nimaz.domain.model.UserPreferences
+import com.arshadshah.nimaz.domain.model.WorshipReminderType
 import com.arshadshah.nimaz.domain.prayer.PrayerTimeCalculator
 import com.arshadshah.nimaz.domain.repository.AdhanDownloader
 import com.arshadshah.nimaz.domain.repository.AppLocale
@@ -70,9 +71,10 @@ enum class AppLanguage(
 }
 
 /**
- * A small, read-only rollup of the notification settings that other screens (e.g. Prayer
- * Settings) show as summary subtitles. Sourced reactively from DataStore so it stays in sync
- * no matter which screen changed the underlying value — see [SettingsViewModel.notificationSummary].
+ * A read-only rollup of every notification setting the hub and other screens (e.g. Prayer
+ * Settings) show as a count, a value or a summary subtitle. Sourced reactively from DataStore so
+ * it stays in sync no matter which screen changed the underlying value — see
+ * [SettingsViewModel.notificationSummary].
  */
 data class NotificationSummary(
     val notificationsMasterEnabled: Boolean = true,
@@ -80,11 +82,21 @@ data class NotificationSummary(
     /** Fajr's reminder — it stands for the set where one line has to speak for five. */
     val reminderEnabled: Boolean = true,
     val reminderMinutes: Int = PrayerAlertStyle.DEFAULT_REMINDER_MINUTES,
-    val fajrAlertStyle: PrayerAlertStyle = PrayerAlertStyle.NOTIFICATION
+    val fajrAlertStyle: PrayerAlertStyle = PrayerAlertStyle.NOTIFICATION,
+    val vibrationEnabled: Boolean = true,
+    val respectDnd: Boolean = true,
+    val selectedAdhanSound: String = DEFAULT_ADHAN_SOUND,
+    /** How many of the eleven extended worship reminders are switched on. */
+    val worshipRemindersOn: Int = 0,
+    val fridayReminderEnabled: Boolean = false,
+    val khatamReminderEnabled: Boolean = false,
 ) {
     companion object {
         /** The five obligatory prayers the notification screen exposes toggles for. */
         const val TOTAL_PRAYER_COUNT = 5
+
+        /** Matches `NotificationSettingsUiState.selectedAdhanSound`'s default. */
+        const val DEFAULT_ADHAN_SOUND = "MISHARY"
     }
 }
 
@@ -188,34 +200,71 @@ class SettingsViewModel @Inject constructor(
     val currentlyPlayingAdhan: StateFlow<AdhanSound?> = adhanAudioManager.currentlyPlaying
 
     /**
-     * Reactive rollup of the notification settings for summary subtitles on other screens.
+     * Reactive rollup of the notification settings for the hub's rows and for summary
+     * subtitles on other screens.
      *
      * Unlike [notificationState] (a one-shot snapshot loaded in [loadSettings]), this collects
      * DataStore directly, so it reflects edits made from *any* screen — including the
      * Notification Settings screen, which runs on a separate [SettingsViewModel] instance.
      * DataStore is a singleton, so every collector across every instance sees the same live value.
+     *
+     * **It has to carry every value the hub renders, not just the prayer ones.** A
+     * `hiltViewModel()` in a destination body is scoped to that destination's
+     * `NavBackStackEntry`, so the hub and each of its five subscreens hold *different*
+     * `SettingsViewModel` instances. Toggling a worship reminder updates the subscreen's
+     * `_notificationState` optimistically and writes DataStore — but the hub's instance loaded
+     * its snapshot once, on the way in, and nothing re-reads it on the way back. The counts and
+     * subtitles behind that snapshot went on reporting the value from before the edit; the prayer
+     * row was right the whole time, because it was the only one already reading this flow. The
+     * asymmetry is what made it look like a rendering bug rather than a stale read.
      */
     val notificationSummary: StateFlow<NotificationSummary> = combine(
         combine(
-            settingsRepository.fajrNotificationEnabled,
-            settingsRepository.dhuhrNotificationEnabled,
-            settingsRepository.asrNotificationEnabled,
-            settingsRepository.maghribNotificationEnabled,
-            settingsRepository.ishaNotificationEnabled
-        ) { flags -> flags.count { it } },
-        settingsRepository.prayerNotificationsEnabled,
-        // Fajr stands for the set on the hub: it is the prayer people set most deliberately,
-        // and a row cannot show five different offsets in one line.
-        settingsRepository.prayerReminderEnabled(FAJR),
-        settingsRepository.prayerReminderMinutes(FAJR),
-        settingsRepository.prayerAlertStyle(FAJR)
-    ) { enabledPrayerCount, masterEnabled, reminderEnabled, reminderMinutes, alertStyle ->
-        NotificationSummary(
-            notificationsMasterEnabled = masterEnabled,
-            enabledPrayerCount = enabledPrayerCount,
-            reminderEnabled = reminderEnabled,
-            reminderMinutes = reminderMinutes,
-            fajrAlertStyle = alertStyle
+            combine(
+                settingsRepository.fajrNotificationEnabled,
+                settingsRepository.dhuhrNotificationEnabled,
+                settingsRepository.asrNotificationEnabled,
+                settingsRepository.maghribNotificationEnabled,
+                settingsRepository.ishaNotificationEnabled
+            ) { flags -> flags.count { it } },
+            settingsRepository.prayerNotificationsEnabled,
+            // Fajr stands for the set on the hub: it is the prayer people set most deliberately,
+            // and a row cannot show five different offsets in one line.
+            settingsRepository.prayerReminderEnabled(FAJR),
+            settingsRepository.prayerReminderMinutes(FAJR),
+            settingsRepository.prayerAlertStyle(FAJR)
+        ) { enabledPrayerCount, masterEnabled, reminderEnabled, reminderMinutes, alertStyle ->
+            NotificationSummary(
+                notificationsMasterEnabled = masterEnabled,
+                enabledPrayerCount = enabledPrayerCount,
+                reminderEnabled = reminderEnabled,
+                reminderMinutes = reminderMinutes,
+                fajrAlertStyle = alertStyle
+            )
+        },
+        combine(
+            settingsRepository.notificationVibration,
+            settingsRepository.adhanRespectDnd,
+            settingsRepository.selectedAdhanSound
+        ) { vibration, dnd, sound -> Triple(vibration, dnd, sound) },
+        combine(
+            settingsRepository.fridayReminderEnabled,
+            settingsRepository.khatamReminderEnabled
+        ) { friday, khatam -> friday to khatam },
+        // All eleven, counted the same way the Worship Reminders screen counts them. Iterating
+        // the enum rather than listing keys is the rule the whole feature is built on: a
+        // reminder added to `WorshipReminderType` shows up here without a second edit.
+        combine(
+            WorshipReminderType.entries.map { settingsRepository.worshipReminderEnabled(it.key) }
+        ) { flags -> flags.count { it } }
+    ) { prayers, sound, weekly, worshipOn ->
+        prayers.copy(
+            vibrationEnabled = sound.first,
+            respectDnd = sound.second,
+            selectedAdhanSound = sound.third,
+            worshipRemindersOn = worshipOn,
+            fridayReminderEnabled = weekly.first,
+            khatamReminderEnabled = weekly.second,
         )
     }.stateIn(
         scope = viewModelScope,
