@@ -17,8 +17,7 @@ import androidx.core.app.NotificationCompat
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaStyleNotificationHelper
-import com.arshadshah.nimaz.MainActivity
-import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.ui.R
 import com.arshadshah.nimaz.core.common.NimazChannels
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -114,22 +113,36 @@ class QuranAudioService : Service() {
 
         existing?.release()
         return MediaSession.Builder(this, player)
-            .setSessionActivity(buildOpenPlayingSurahPendingIntent())
+            .apply {
+                // Only when the launcher activity resolves. `setSessionActivity` will not take a
+                // null, and a session with no tap target is still better than no session.
+                buildOpenPlayingSurahPendingIntent()?.let { setSessionActivity(it) }
+            }
             .build()
             .also { mediaSession = it }
     }
 
     /**
-     * PendingIntent that opens MainActivity with ACTION_OPEN_PLAYING_SURAH so the
-     * NavGraph can route to the surah currently being played. The surah is read at
-     * the moment of the click from QuranAudioManager.audioState (the singleton),
-     * not encoded in extras — so the intent stays valid as the surah changes.
+     * PendingIntent that opens the launcher activity with [ACTION_OPEN_PLAYING_SURAH] so the
+     * NavGraph can route to the surah currently being played. The surah is read at the moment of
+     * the click from `QuranAudioManager.audioState` (the singleton), not encoded in extras — so
+     * the intent stays valid as the surah changes.
+     *
+     * **The activity is resolved rather than named.** This used to be
+     * `Intent(this, MainActivity::class.java)`, and `MainActivity` is `:app`'s — the one thing a
+     * `:core:*` module cannot see. `getLaunchIntentForPackage` returns an intent whose
+     * *component* is the launcher activity, which is the same class; the action is then set to
+     * ours, exactly as `:feature:widget` resolves its tap target. Same inversion, one layer down.
+     *
+     * Returns null when the package has no launcher activity to resolve, which on a real install
+     * cannot happen — but the notification is still worth posting without a tap target rather
+     * than not at all.
      */
-    private fun buildOpenPlayingSurahPendingIntent(): PendingIntent {
-        val intent = Intent(this, MainActivity::class.java).apply {
+    private fun buildOpenPlayingSurahPendingIntent(): PendingIntent? {
+        val intent = packageManager.getLaunchIntentForPackage(packageName)?.apply {
             action = ACTION_OPEN_PLAYING_SURAH
             flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
-        }
+        } ?: return null
         return PendingIntent.getActivity(
             this,
             0,

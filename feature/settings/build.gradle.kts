@@ -95,9 +95,12 @@ dependencies {
     implementation(project(":core:ui"))
     implementation(project(":core:navigation"))
     // `SyncViewModel` drives `NearbyConnectionsManager`, `SyncDataExporter` and
-    // `SyncDataImporter`; `SettingsViewModel` drives `AdhanAudioManager`. All four are
-    // `:core:data`, for the classpath reasons above.
+    // `SyncDataImporter` — all three `:core:data`, for the classpath reasons above.
     implementation(project(":core:data"))
+    // `SettingsViewModel` drives `AdhanAudioManager` and the adhan settings screens name
+    // `AdhanSound` and `DownloadState`. Those were `:core:data`; they are `:core:audio`'s now,
+    // with the rest of the audio stack.
+    implementation(project(":core:audio"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

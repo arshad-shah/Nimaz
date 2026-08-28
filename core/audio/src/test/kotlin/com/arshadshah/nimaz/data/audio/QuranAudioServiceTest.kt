@@ -3,12 +3,15 @@ package com.arshadshah.nimaz.data.audio
 import android.app.Application
 import android.app.Notification
 import android.app.NotificationManager
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
+import android.content.pm.ActivityInfo
 import androidx.test.core.app.ApplicationProvider
 import com.arshadshah.nimaz.core.common.NimazChannels
 import com.arshadshah.nimaz.domain.model.AudioState
-import com.arshadshah.nimaz.testing.TestEntryPointApplication
+import com.arshadshah.nimaz.testing.AudioEntryPointApplication
 import com.google.common.truth.Truth.assertThat
 import io.mockk.every
 import io.mockk.mockk
@@ -34,7 +37,7 @@ import org.robolectric.shadows.ShadowLooper
  * down when audio ends rather than sitting in the shade forever.
  */
 @RunWith(RobolectricTestRunner::class)
-@Config(application = TestEntryPointApplication::class, sdk = [34])
+@Config(application = AudioEntryPointApplication::class, sdk = [34])
 class QuranAudioServiceTest {
 
     private lateinit var context: Context
@@ -57,8 +60,31 @@ class QuranAudioServiceTest {
             // tests are about is the notification the service builds around one.
             every { getPlayer() } returns null
         }
-        TestEntryPointApplication.Injector.reset()
-        TestEntryPointApplication.Injector.quranAudio = { it.audioManager = audioManager }
+        AudioEntryPointApplication.Injector.reset()
+        AudioEntryPointApplication.Injector.quranAudio = { it.audioManager = audioManager }
+        registerLauncherActivity()
+    }
+
+    /**
+     * Give the test package a launcher activity, so `getLaunchIntentForPackage` resolves one.
+     *
+     * The service builds its content `PendingIntent` by resolving the launcher **component**
+     * rather than naming `MainActivity` — which is `:app`'s, and the one thing this module cannot
+     * see. Robolectric's package manager starts with no activities at all, so without this the
+     * resolve returns null and the notification is built with no tap target: the test would
+     * measure the harness rather than the service.
+     */
+    private fun registerLauncherActivity() {
+        val component = ComponentName(context.packageName, "TestLauncherActivity")
+        val info = ActivityInfo().apply {
+            name = component.className
+            packageName = component.packageName
+        }
+        shadowOf(context.packageManager).addOrUpdateActivity(info)
+        shadowOf(context.packageManager).addIntentFilterForActivity(
+            component,
+            IntentFilter(Intent.ACTION_MAIN).apply { addCategory(Intent.CATEGORY_LAUNCHER) },
+        )
     }
 
     private fun create(): ServiceController<QuranAudioService> =

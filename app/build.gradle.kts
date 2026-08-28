@@ -354,6 +354,13 @@ dependencies {
     // deep-link grammars. `api`-exposes navigation-compose. NavGraph.kt itself is still here;
     // it is decomposed in PR 12.
     implementation(project(":core:navigation"))
+    // Every engine that makes a sound: the Quran recitation session, the adhan player and the
+    // adhan download pipeline, with the three foreground `<service>` entries and the
+    // `FOREGROUND_SERVICE*` permissions declared in its own manifest and merged in from there.
+    // `:app` names nothing in it any more — `MainActivity` reads the `QuranPlayback` port, and
+    // `AdhanPlaybackService.stopAdhan` / `QuranAudioService.ACTION_OPEN_PLAYING_SURAH` are the
+    // two static entry points it still calls.
+    implementation(project(":core:audio"))
     // The six Glance widgets and their workers — the first feature module (#564). It brings its
     // own manifest entries, its own widget_colors/drawables/layouts and the 17 strings nothing
     // else uses, so nothing widget-shaped is left here. (The other 16 it references stay in
@@ -596,6 +603,7 @@ tasks.withType<Test>().configureEach {
         "uiModuleSources" to "core/ui/src/main",
         "navigationModuleSources" to "core/navigation/src/main",
         "shareModuleSources" to "core/share/src/main",
+        "audioModuleSources" to "core/audio/src/main",
         "widgetModuleSources" to "feature/widget/src/main",
         "homeModuleSources" to "feature/home/src/main",
         "onboardingModuleSources" to "feature/onboarding/src/main",
@@ -693,8 +701,11 @@ val buildOutputDir = layout.buildDirectory.get().asFile
  * while their *nested* classes — untransformed, so matching — reported normally. A file at
  * 50% whose outer class is at 0% is the signature.
  *
- * `:app` is the only module with `@AndroidEntryPoint` classes that a unit test constructs, which
- * is why no locked module needed this and why the fix belongs here rather than in `build-logic`.
+ * `:app` was the only module with `@AndroidEntryPoint` classes that a unit test constructs, which
+ * is why the fix started here. `:core:audio` is the second — it took the three foreground
+ * services — so the mechanism is `build-logic`'s now, as
+ * `NimazCoverageExtension.measureTransformedClasses`, and that module sets it. This override
+ * stays because of what follows: the `Dagger*_HiltComponents_*` exclusion is `:app`'s alone.
  * The transformed root carries the compiler output too, so it is a single complete root and the
  * duplicate problem does not arise.
  *
@@ -860,6 +871,25 @@ val coverageModules = listOf(
         ),
         sourceDir = "src/main/kotlin",
         packageRoot = "com/arshadshah/nimaz/presentation/components/atoms",
+    ),
+    CoverageModule(
+        gradlePath = ":core:audio",
+        projectDir = rootProject.layout.projectDirectory.dir("core/audio"),
+        testTask = "testDebugUnitTest",
+        // **The transformed root, not the compiler output** — the one module here that differs,
+        // and for the same reason `:app` does. Its three services are `@AndroidEntryPoint`, so
+        // the Hilt plugin rewrites them and the tests load the rewritten copies; measuring the
+        // compiler output reports all three at 0% and the module at 45%. Naming both roots is
+        // what must not happen: JaCoCo aborts the whole report on two class files per class.
+        classesGlobs = listOf(
+            "intermediates/classes/debug/transformDebugClassesWithAsm/dirs/**",
+        ),
+        execGlobs = listOf(
+            "jacoco/testDebugUnitTest.exec",
+            "outputs/unit_test_code_coverage/**/*.exec",
+        ),
+        sourceDir = "src/main/kotlin",
+        packageRoot = "com/arshadshah/nimaz/data/audio",
     ),
     CoverageModule(
         gradlePath = ":core:share",

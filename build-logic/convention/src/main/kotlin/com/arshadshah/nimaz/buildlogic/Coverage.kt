@@ -91,6 +91,30 @@ abstract class NimazCoverageExtension {
 
     /** Minimum fraction of branches covered, 0.0..1.0. Unset means branches are not gated. */
     abstract val branchFloor: Property<Double>
+
+    /**
+     * Measure the **ASM-transformed** classes rather than the compiler output.
+     *
+     * Set this in a module that has `@AndroidEntryPoint` classes a *unit test constructs*, and
+     * nowhere else. The Hilt Gradle plugin rewrites such a class through AGP's ASM pipeline — an
+     * `@AndroidEntryPoint` service's `onCreate` gains a `super` call — and the test loads the
+     * rewritten copy, whose JaCoCo class id does not match the compiler-output one. JaCoCo then
+     * discards that class's execution data and reports it as **0% however thoroughly it is
+     * tested**, saying so only in a line nobody reads:
+     *
+     *     [ant:jacocoReport] Execution data for class …/AdhanPlaybackService does not match.
+     *
+     * The signature is a file at 50% whose *outer* class is at 0% while its nested lambdas report
+     * normally. On `:core:audio` it was three services and 537 lines, and the module read 45%
+     * against tests that actually cover it.
+     *
+     * `:app` found this first and fixed it inline, when it was the only module with such a class.
+     * `:core:audio` is the second, so the mechanism lives here. It stays **opt-in** rather than
+     * automatic: the transformed root also carries the Java that KSP and Dagger generate, which
+     * the compiler-output root never did, and naming *both* roots hands JaCoCo two class files
+     * per class and aborts the whole report.
+     */
+    abstract val measureTransformedClasses: Property<Boolean>
 }
 
 /** One JaCoCo counter, as a fraction. */
@@ -177,7 +201,13 @@ internal fun Project.configureModuleCoverage() {
                 html.required.set(true)
                 csv.required.set(false)
             }
-            classDirectories.setFrom(moduleClassDirs())
+            classDirectories.setFrom(
+                if (coverage.measureTransformedClasses.getOrElse(false)) {
+                    transformedClassDirs()
+                } else {
+                    moduleClassDirs()
+                }
+            )
             sourceDirectories.setFrom(
                 files("src/main/kotlin", "src/main/java")
             )
@@ -239,6 +269,18 @@ private fun Project.moduleClassDirs(): FileCollection =
             "tmp/kotlin-classes/debug/**",
             "classes/kotlin/main/**",
         )
+        exclude(COVERAGE_EXCLUSIONS)
+    }
+
+/**
+ * This module's classes **after** AGP's ASM transform, minus [COVERAGE_EXCLUSIONS].
+ *
+ * A single complete root — it carries the compiler output too — so the duplicate-class problem
+ * that rules out naming both never arises. See [NimazCoverageExtension.measureTransformedClasses]
+ * for when a module should measure this instead.
+ */
+private fun Project.transformedClassDirs(): FileCollection =
+    fileTree(layout.buildDirectory.dir("intermediates/classes/debug/transformDebugClassesWithAsm/dirs")) {
         exclude(COVERAGE_EXCLUSIONS)
     }
 

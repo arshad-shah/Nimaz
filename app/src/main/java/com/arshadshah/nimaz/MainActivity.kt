@@ -22,7 +22,7 @@ import com.arshadshah.nimaz.core.util.PrayerAlarmReceiver
 import com.arshadshah.nimaz.core.util.InAppUpdateManager
 import com.arshadshah.nimaz.data.announcement.AnnouncementPayloadMapper
 import com.arshadshah.nimaz.data.audio.AdhanPlaybackService
-import com.arshadshah.nimaz.data.audio.QuranAudioManager
+import com.arshadshah.nimaz.domain.repository.QuranPlayback
 import com.arshadshah.nimaz.data.audio.QuranAudioService
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.usecase.AnnouncementUseCases
@@ -59,8 +59,16 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var settingsRepository: SettingsRepository
 
+    /**
+     * Read only for [QuranAudioService.ACTION_OPEN_PLAYING_SURAH] — which surah the notification
+     * was showing when it was tapped.
+     *
+     * The **port**, not `QuranAudioManager`. That class is `:core:audio`'s now, and while `:app`
+     * can see it, naming it here would put an `@UnstableApi` ExoPlayer type on the composition
+     * root for one property read.
+     */
     @Inject
-    lateinit var quranAudioManager: QuranAudioManager
+    lateinit var quranPlayback: QuranPlayback
 
     @Inject
     lateinit var announcementUseCases: AnnouncementUseCases
@@ -234,7 +242,7 @@ class MainActivity : ComponentActivity() {
 
         if (intent?.action == QuranAudioService.ACTION_OPEN_PLAYING_SURAH) {
             AppAnalytics.logNotificationOpened(source = "quran_audio")
-            val surah = quranAudioManager.audioState.value.currentSurahNumber
+            val surah = quranPlayback.audioState.value.currentSurahNumber
             if (surah > 0) {
                 pendingQuranSurah = surah
             }

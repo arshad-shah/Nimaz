@@ -161,13 +161,19 @@ class FeatureTestsLiveWithSubjectTest {
          * left in PR 21). Both figures fall as modules leave, so the floors sit well below — they
          * exist to catch a scan that reads nothing, not to pin a count.
          *
+         * **The test-file floor was 40 and had to come down**, which is worth recording because
+         * it is the *good* failure mode: `:feature:home` and `:core:audio` between them took 45
+         * files out of `:app`, the count reached 33, and the guard said so instead of quietly
+         * passing over a smaller scan. Twenty is well under what remains and still an order of
+         * magnitude above "read nothing".
+         *
          * Measuring matters, and the coverage floor added in PR 22 is the cautionary tale: it was
          * guessed at 1,500, then re-guessed at 200 from a declaration count, and only *measured*
          * after CI failed for an unrelated reason. The real figure is 4,736. Neither guess was
          * informed by running the task.
          */
         const val MINIMUM_SYMBOLS = 1_500
-        const val MINIMUM_TEST_FILES = 40
+        const val MINIMUM_TEST_FILES = 20
 
         val PACKAGE = Regex("""^package\s+([\w.]+)""", RegexOption.MULTILINE)
         val IMPORT = Regex("""^import\s+(?:[\w.]+\.)?(\w+)$""", RegexOption.MULTILINE)

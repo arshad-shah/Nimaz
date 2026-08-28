@@ -8,12 +8,6 @@ import com.arshadshah.nimaz.core.util.PrayerAlarmReceiver
 import com.arshadshah.nimaz.core.util.PrayerAlarmReceiver_GeneratedInjector
 import com.arshadshah.nimaz.data.announcement.NimazMessagingService
 import com.arshadshah.nimaz.data.announcement.NimazMessagingService_GeneratedInjector
-import com.arshadshah.nimaz.data.audio.AdhanDownloadService
-import com.arshadshah.nimaz.data.audio.AdhanDownloadService_GeneratedInjector
-import com.arshadshah.nimaz.data.audio.AdhanPlaybackService
-import com.arshadshah.nimaz.data.audio.AdhanPlaybackService_GeneratedInjector
-import com.arshadshah.nimaz.data.audio.QuranAudioService
-import com.arshadshah.nimaz.data.audio.QuranAudioService_GeneratedInjector
 import dagger.hilt.android.components.ServiceComponent
 import dagger.hilt.android.internal.builders.ServiceComponentBuilder
 import dagger.hilt.android.internal.managers.ServiceComponentManager
@@ -21,7 +15,7 @@ import dagger.hilt.internal.GeneratedComponent
 import dagger.hilt.internal.GeneratedComponentManager
 
 /**
- * The smallest thing that satisfies Hilt for `:app`'s two receivers and its four services.
+ * The smallest thing that satisfies Hilt for `:app`'s two broadcast receivers and its FCM service.
  *
  * `@AndroidEntryPoint` is not a no-op at run time. The Hilt Gradle plugin rewrites
  * `BootReceiver.onReceive` and every `Service.onCreate` to inject first, and the generated base
@@ -30,8 +24,11 @@ import dagger.hilt.internal.GeneratedComponentManager
  *
  *     Hilt BroadcastReceiver must be attached to an @HiltAndroidApp Application
  *
- * which is why the receiver, the two adhan services and the Quran audio service had no unit tests
- * at all despite being where every notification and every sound the app makes comes from.
+ * which is why the receivers had no unit tests at all despite being where every notification the
+ * app posts comes from. The three audio services were here too until they became `:core:audio`;
+ * `AudioEntryPointApplication` in that module is the same class for the same reason, split
+ * because the generated `*_GeneratedInjector` interfaces are generated into whichever module
+ * declares the service.
  *
  * `HiltTestApplication` would satisfy it and is the wrong tool: it builds the **real** singleton
  * graph, so a test about an `AlarmManager` call ends up opening a Room database from a private
@@ -61,25 +58,16 @@ class TestEntryPointApplication : Application(), GeneratedComponentManager<Any> 
         ServiceComponentBuilder,
         BootReceiver_GeneratedInjector,
         PrayerAlarmReceiver_GeneratedInjector,
-        AdhanPlaybackService_GeneratedInjector,
-        AdhanDownloadService_GeneratedInjector,
-        QuranAudioService_GeneratedInjector,
         NimazMessagingService_GeneratedInjector {
 
         var bootReceiver: (BootReceiver) -> Unit = {}
         var prayerAlarmReceiver: (PrayerAlarmReceiver) -> Unit = {}
-        var adhanPlayback: (AdhanPlaybackService) -> Unit = {}
-        var adhanDownload: (AdhanDownloadService) -> Unit = {}
-        var quranAudio: (QuranAudioService) -> Unit = {}
         var messaging: (NimazMessagingService) -> Unit = {}
 
         /** Drop every double, so one test class cannot leak its stubs into the next. */
         fun reset() {
             bootReceiver = {}
             prayerAlarmReceiver = {}
-            adhanPlayback = {}
-            adhanDownload = {}
-            quranAudio = {}
             messaging = {}
         }
 
@@ -91,13 +79,6 @@ class TestEntryPointApplication : Application(), GeneratedComponentManager<Any> 
         override fun injectPrayerAlarmReceiver(instance: PrayerAlarmReceiver) =
             prayerAlarmReceiver(instance)
 
-        override fun injectAdhanPlaybackService(instance: AdhanPlaybackService) =
-            adhanPlayback(instance)
-
-        override fun injectAdhanDownloadService(instance: AdhanDownloadService) =
-            adhanDownload(instance)
-
-        override fun injectQuranAudioService(instance: QuranAudioService) = quranAudio(instance)
         override fun injectNimazMessagingService(instance: NimazMessagingService) =
             messaging(instance)
     }

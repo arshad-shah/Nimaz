@@ -6,7 +6,7 @@ import android.content.Context
 import android.content.Intent
 import androidx.test.core.app.ApplicationProvider
 import com.arshadshah.nimaz.core.common.NimazChannels
-import com.arshadshah.nimaz.testing.TestEntryPointApplication
+import com.arshadshah.nimaz.testing.AudioEntryPointApplication
 import com.google.common.truth.Truth.assertThat
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -33,7 +33,7 @@ import org.robolectric.annotation.Config
  * when only the regular variant arrived means silence at Fajr, and nothing else reports it.
  */
 @RunWith(RobolectricTestRunner::class)
-@Config(application = TestEntryPointApplication::class, sdk = [34])
+@Config(application = AudioEntryPointApplication::class, sdk = [34])
 class AdhanDownloadServiceTest {
 
     private lateinit var context: Context
@@ -66,8 +66,8 @@ class AdhanDownloadServiceTest {
             val key = firstArg<AdhanSound>() to secondArg<Boolean>()
             if (downloadSucceeds(key)) { onDisk += key; true } else false
         }
-        TestEntryPointApplication.Injector.reset()
-        TestEntryPointApplication.Injector.adhanDownload = { it.adhanAudioManager = audioManager }
+        AudioEntryPointApplication.Injector.reset()
+        AudioEntryPointApplication.Injector.adhanDownload = { it.adhanAudioManager = audioManager }
     }
 
     private fun start(intent: Intent?): ServiceController<AdhanDownloadService> =

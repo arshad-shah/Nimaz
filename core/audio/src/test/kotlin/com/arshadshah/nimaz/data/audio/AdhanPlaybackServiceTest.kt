@@ -7,8 +7,7 @@ import android.content.Context
 import android.content.Intent
 import androidx.test.core.app.ApplicationProvider
 import com.arshadshah.nimaz.core.common.NimazChannels
-import com.arshadshah.nimaz.core.util.PrayerNotificationScheduler
-import com.arshadshah.nimaz.testing.TestEntryPointApplication
+import com.arshadshah.nimaz.testing.AudioEntryPointApplication
 import com.google.common.truth.Truth.assertThat
 import io.mockk.mockk
 import java.io.File
@@ -34,7 +33,7 @@ import org.robolectric.annotation.Config
  * the beep or nothing. That rule is one `if` and no test had ever run it.
  */
 @RunWith(RobolectricTestRunner::class)
-@Config(application = TestEntryPointApplication::class, sdk = [34])
+@Config(application = AudioEntryPointApplication::class, sdk = [34])
 class AdhanPlaybackServiceTest {
 
     private lateinit var context: Context
@@ -50,8 +49,8 @@ class AdhanPlaybackServiceTest {
         adhanDir = File(context.filesDir, "adhan").apply { mkdirs() }
         adhanDir.listFiles()?.forEach { it.delete() }
 
-        TestEntryPointApplication.Injector.reset()
-        TestEntryPointApplication.Injector.adhanPlayback = {
+        AudioEntryPointApplication.Injector.reset()
+        AudioEntryPointApplication.Injector.adhanPlayback = {
             it.adhanAudioManager = mockk(relaxed = true)
         }
     }
