@@ -291,10 +291,17 @@ WIDGET_PACKAGES = [
     ("khatam", "khatam_widget"),
 ]
 
-# The channel-id regex is `const val CHANNEL_ID[A-Z_]* = "…"`, so the constant
-# suffixes have to be letters — digits would not match, and a fixture that quietly
-# fails to trip a scan proves nothing.
+# Twelve channels, split across the two ways `notification_channel_ids` finds one:
+# eleven in the `NimazChannels` registry, and one left in the old
+# `const val CHANNEL_ID… = "…"` shape somewhere else in the tree. Both paths have to be
+# exercised, or the union that keeps a stray declaration from escaping the check is
+# only ever asserted in one direction.
+#
+# The old-shape regex is `const val CHANNEL_ID[A-Z_]* = "…"`, so the constant suffixes
+# have to be letters — digits would not match, and a fixture that quietly fails to trip
+# a scan proves nothing.
 CHANNELS = [f"channel_{chr(c)}" for c in range(ord("a"), ord("a") + 12)]
+REGISTRY_CHANNELS, LEGACY_CHANNELS = CHANNELS[:-1], CHANNELS[-1:]
 PREFERENCE_STORES = ["nimaz_preferences", "nimaz_announcements", "nimaz_ai_device"]
 PAYLOAD_KEYS = ["title", "body", "route"]
 ANNOUNCEMENT_TYPES = ["info", "celebration"]
@@ -314,8 +321,12 @@ def _build_tree(check_docs, tmp_path: Path) -> dict[str, Path]:
     for _, relative, name in SERVICES:
         written[name] = _write(app, relative, f"class {name} : Service()\n")
 
+    common = _module_root(tmp_path, "core/common", lang="kotlin")
+    _write(common, "core/common/NimazChannels.kt", "object NimazChannels {\n" + "".join(
+        f'    const val {cid[-1].upper()} = "{cid}"\n' for cid in REGISTRY_CHANNELS
+    ) + "}\n")
     _write(app, "core/util/PrayerNotificationScheduler.kt", "object Channels {\n" + "".join(
-        f'    const val CHANNEL_ID_{cid[-1].upper()} = "{cid}"\n' for cid in CHANNELS
+        f'    const val CHANNEL_ID_{cid[-1].upper()} = "{cid}"\n' for cid in LEGACY_CHANNELS
     ) + "}\n")
 
     for store in PREFERENCE_STORES:
