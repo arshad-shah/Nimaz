@@ -52,6 +52,7 @@ import com.arshadshah.nimaz.presentation.screens.search.searchGraph
 import com.arshadshah.nimaz.presentation.screens.settings.settingsGraph
 import com.arshadshah.nimaz.presentation.screens.tools.toolsGraph
 import com.arshadshah.nimaz.presentation.screens.tracker.trackerGraph
+import com.arshadshah.nimaz.presentation.theme.LocalAnimationsEnabled
 import com.arshadshah.nimaz.presentation.theme.isTablet
 import com.arshadshah.nimaz.presentation.viewmodel.onboarding.OnboardingViewModel
 import kotlin.system.exitProcess
@@ -234,9 +235,20 @@ fun NavGraph(
             }
         }
     ) {
+        // Screen transitions, honouring the Appearance > Animations preference. `NavHost` had no
+        // transition arguments at all, which meant Navigation Compose's 700 ms crossfade for all
+        // 94 destinations — the same in both directions, so forward and back looked identical.
+        // Set here rather than per-destination: a `taggedComposable` that overrides them is then a
+        // deliberate exception, and there are none.
+        val animationsEnabled = LocalAnimationsEnabled.current
+
         NavHost(
             navController = navController,
             startDestination = startDestination,
+            enterTransition = { NimazNavTransitions.enter(animationsEnabled) },
+            exitTransition = { NimazNavTransitions.exit(animationsEnabled) },
+            popEnterTransition = { NimazNavTransitions.popEnter(animationsEnabled) },
+            popExitTransition = { NimazNavTransitions.popExit(animationsEnabled) },
         ) {
             // Every destination lives in its feature's graph extension. See #563: one file
             // registering all 94 of them is what stopped any feature moving into its own

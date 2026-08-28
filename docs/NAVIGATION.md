@@ -44,6 +44,7 @@ destinations, and none of them should need the `NavHost`.
 |---|---|---|
 | `core/navigation/Routes.kt` | the `Route` sealed interface — every destination that exists | `NAV-01`, `NAV-02` |
 | `core/navigation/NavGraph.kt` | the `NavHost` and the app shell — **no destinations since PR 12** | — |
+| `core/navigation/NavTransitions.kt` | the screen transitions, and the animation setting's effect on them | — |
 | `presentation/screens/<feature>/<Feature>Graph.kt` × 11 | the destinations, one extension per feature | `NAV-03`, `NAV-04` |
 | `core/navigation/ScreenTags.kt` | the stable test tag per destination | `NAV-05` |
 | `core/navigation/AnnouncementRoutes.kt` + `HelpDeepLink.kt` | the two **external** entry grammars | `NAV-06` … `NAV-10` |
@@ -88,6 +89,25 @@ declarations, in both directions, and fails on a duplicate. NAV-03 compares tota
 see a route dropped in one graph while another is duplicated — which is exactly the shape a
 copy-paste across eleven files produces, and it fails as a blank screen at runtime rather than a
 build error.
+
+### Screen transitions
+
+All 94 destinations animate with the shared axis in `core/navigation/NavTransitions.kt`
+(`NimazNavTransitions`), set once on the `NavHost` rather than per destination. Going deeper
+slides the arriving screen in from the trailing edge and the departing one a shorter distance the
+other way; coming back reverses both. The difference in travel is the parallax, and it is what
+makes forward and back distinguishable.
+
+Until #639 the `NavHost` took **no transition arguments at all**, so every destination used
+Navigation Compose's fallback: one 700 ms crossfade, identical in both directions. The back stack
+had no visible direction and a settings row read as a pause before the screen changed.
+
+**The transitions honour the Appearance → Animations preference**, and honour it as a hard cut —
+`EnterTransition.None` / `ExitTransition.None`, not a shorter slide. `NimazNavTransitions` takes
+`enabled` as a parameter rather than reading the preference, because the preference lives in
+`:core:datastore` and its `CompositionLocal` (`LocalAnimationsEnabled`) in `:core:ui`, and
+`:core:navigation` depends on neither by design. `NavGraph` reads the local and passes it down;
+it is the one caller, and it sits below both modules.
 
 **Test hooks.** Every destination is wired via the `taggedComposable<Route.X>` helper — which was
 `private` inside `NavGraph.kt` and now lives in `core/navigation/TaggedComposable.kt`, because a

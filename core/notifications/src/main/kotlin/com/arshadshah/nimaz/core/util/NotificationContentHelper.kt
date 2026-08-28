@@ -221,9 +221,16 @@ object NotificationContentHelper {
 
     /**
      * Get a contextual greeting based on time of day.
+     *
+     * [hour] defaults to the wall clock, which is what the one production caller wants, and is a
+     * parameter so a test can reach the other four arms. It was read inside the function, and
+     * that made the module's *coverage* a function of what time CI ran: four of the five branches
+     * are unreachable at any given hour, and which four changes through the day. #638 measured
+     * 80.8% at midday against an 80% floor and 79.2% that evening, on identical code — a red
+     * build with no diff behind it. Passing the hour in is the whole fix; nothing about the
+     * greeting changes.
      */
-    fun getTimeBasedGreeting(context: Context): String {
-        val hour = LocalTime.now().hour
+    fun getTimeBasedGreeting(context: Context, hour: Int = LocalTime.now().hour): String {
         return when {
             hour < 6 -> context.getString(R.string.notif_greeting_predawn)
             hour < 12 -> context.getString(R.string.notif_greeting_morning)

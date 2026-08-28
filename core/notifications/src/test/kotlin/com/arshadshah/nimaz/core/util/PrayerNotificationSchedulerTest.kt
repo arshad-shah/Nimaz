@@ -8,6 +8,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.arshadshah.nimaz.core.common.NimazChannels
 import com.arshadshah.nimaz.domain.model.AsrCalculation
 import com.arshadshah.nimaz.domain.model.CalculationMethod
+import com.arshadshah.nimaz.domain.model.PrayerTime
 import com.arshadshah.nimaz.domain.model.PrayerType
 import com.arshadshah.nimaz.domain.model.WorshipReminderType
 import com.arshadshah.nimaz.domain.prayer.PrayerTimeCalculator
@@ -260,6 +261,100 @@ class PrayerNotificationSchedulerTest {
     }
 
     // ── Pre-reminders ───────────────────────────────────────────────────────────
+
+    /**
+     * A calculator that puts every prayer a fixed number of hours *ahead of now*.
+     *
+     * The class KDoc's reason for a real calculator stands, and the test below this one still
+     * uses it. But a real calculator returns London's times for *today*, so after Isha every one
+     * of them is in the past and the scheduler's `if (prayerLocalDateTime.isAfter(now))` block
+     * never runs. The consequence was not only a coverage number that drifted through the day:
+     * the pre-reminder assertions below iterate the still-future prayers, so in the evening they
+     * iterated an empty list and asserted nothing at all. A test that passes vacuously for a
+     * third of the day is worse than one that fails.
+     */
+    private fun futureCalculator(vararg offsetsHours: Pair<PrayerType, Long>) =
+        mockk<PrayerTimeCalculator> {
+            every {
+                getPrayerTimes(any(), any(), any(), any(), any(), any(), any())
+            } answers {
+                val base = LocalDateTime.now().withSecond(0).withNano(0)
+                offsetsHours.map { (type, hours) ->
+                    PrayerTime(
+                        type = type,
+                        time = base.plusHours(hours)
+                            .atZone(ZoneId.systemDefault())
+                            .toInstant()
+                            .toEpochMilli()
+                            .let { kotlin.time.Instant.fromEpochMilliseconds(it) },
+                    )
+                }
+            }
+        }
+
+    @Test
+    fun `each future prayer is armed with its own pre-reminder, whatever the hour`() {
+        // The deterministic half of the pair below. Prayer times are placed ahead of now rather
+        // than read off the clock, so this exercises the scheduling branch and the per-prayer
+        // pre-reminder inside it at 03:00 and at 23:00 alike.
+        val leads = mapOf(PrayerType.FAJR to 45, PrayerType.ISHA to 10)
+        val base = LocalDateTime.now().withSecond(0).withNano(0)
+
+        schedule(
+            preReminders = leads,
+            target = PrayerNotificationScheduler(
+                context,
+                futureCalculator(PrayerType.FAJR to 2L, PrayerType.ISHA to 5L),
+                settings,
+            ),
+        )
+
+        val triggers = scheduledTriggers().toSet()
+        assertThat(triggers).contains(base.plusHours(2))
+        assertThat(triggers).contains(base.plusHours(5))
+        assertThat(triggers).contains(base.plusHours(2).minusMinutes(45))
+        assertThat(triggers).contains(base.plusHours(5).minusMinutes(10))
+    }
+
+    @Test
+    fun `a prayer with no pre-reminder configured gets an alarm and nothing else`() {
+        // The other arm of `leadMinutes != null`: Fajr has a lead, Isha does not, and Isha must
+        // not inherit Fajr's.
+        val base = LocalDateTime.now().withSecond(0).withNano(0)
+
+        schedule(
+            preReminders = mapOf(PrayerType.FAJR to 45),
+            target = PrayerNotificationScheduler(
+                context,
+                futureCalculator(PrayerType.FAJR to 2L, PrayerType.ISHA to 5L),
+                settings,
+            ),
+        )
+
+        val triggers = scheduledTriggers().toSet()
+        assertThat(triggers).contains(base.plusHours(5))
+        assertThat(triggers).doesNotContain(base.plusHours(5).minusMinutes(45))
+    }
+
+    @Test
+    fun `sunrise never gets a pre-reminder even when one is configured for it`() {
+        // Guarded explicitly in the loop. Sunrise is a plain marker, not a prayer to prepare for.
+        val base = LocalDateTime.now().withSecond(0).withNano(0)
+
+        schedule(
+            enabledPrayers = setOf(PrayerType.SUNRISE),
+            preReminders = mapOf(PrayerType.SUNRISE to 30),
+            target = PrayerNotificationScheduler(
+                context,
+                futureCalculator(PrayerType.SUNRISE to 3L),
+                settings,
+            ),
+        )
+
+        val triggers = scheduledTriggers().toSet()
+        assertThat(triggers).contains(base.plusHours(3))
+        assertThat(triggers).doesNotContain(base.plusHours(3).minusMinutes(30))
+    }
 
     @Test
     fun `a pre-reminder is armed its own lead time before the prayer, per prayer`() {

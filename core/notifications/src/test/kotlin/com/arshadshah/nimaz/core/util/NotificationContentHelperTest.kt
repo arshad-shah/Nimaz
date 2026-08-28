@@ -161,4 +161,47 @@ class NotificationContentHelperTest {
         assertThat(summary.bigText).contains("Fajr")
         assertThat(summary.bigText).contains("Isha")
     }
+
+    // ── getTimeBasedGreeting ────────────────────────────────────────
+
+    /**
+     * All five arms, at a fixed hour each.
+     *
+     * The hour used to be read inside the function, so exactly one arm ran per test run and
+     * *which* one depended on when CI happened to start. That made the module's branch coverage
+     * drift through the day: #638 measured 80.8% against an 80% floor at midday and 79.2% that
+     * evening, on identical code. These pin the boundaries as well as the bands, because the
+     * comparisons are all `<` and an off-by-one at 06:00 or 20:00 is invisible otherwise.
+     */
+    @Test
+    fun `getTimeBasedGreeting picks a greeting per band, at every boundary`() {
+        val predawn = greeting(0)
+        val morning = greeting(6)
+        val afternoon = greeting(12)
+        val evening = greeting(17)
+        val night = greeting(20)
+
+        // Five distinct strings, or the bands are not doing anything.
+        assertThat(setOf(predawn, morning, afternoon, evening, night)).hasSize(5)
+
+        // The last hour of each band still belongs to it — `hour < 6`, not `<= 6`.
+        assertThat(greeting(5)).isEqualTo(predawn)
+        assertThat(greeting(11)).isEqualTo(morning)
+        assertThat(greeting(16)).isEqualTo(afternoon)
+        assertThat(greeting(19)).isEqualTo(evening)
+        assertThat(greeting(23)).isEqualTo(night)
+    }
+
+    @Test
+    fun `getTimeBasedGreeting defaults to the wall clock`() {
+        // The production caller passes no hour. Whatever hour it is, the default has to land in
+        // one of the five bands rather than returning something empty.
+        val now = java.time.LocalTime.now().hour
+
+        assertThat(NotificationContentHelper.getTimeBasedGreeting(context))
+            .isEqualTo(greeting(now))
+    }
+
+    private fun greeting(hour: Int) =
+        NotificationContentHelper.getTimeBasedGreeting(context, hour)
 }
