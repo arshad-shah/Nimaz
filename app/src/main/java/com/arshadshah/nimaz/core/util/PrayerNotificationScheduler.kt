@@ -339,7 +339,7 @@ class PrayerNotificationScheduler @Inject constructor(
      * This shows a summary of prayers completed/missed for the day.
      */
     private fun scheduleDailySummary() {
-        val intent = Intent(context, BootReceiver::class.java).apply {
+        val intent = Intent(context, PrayerAlarmReceiver::class.java).apply {
             action = ACTION_DAILY_SUMMARY
         }
 
@@ -417,7 +417,7 @@ class PrayerNotificationScheduler @Inject constructor(
         }
         val trigger = reminderTime ?: return
 
-        val intent = Intent(context, BootReceiver::class.java).apply {
+        val intent = Intent(context, PrayerAlarmReceiver::class.java).apply {
             action = ACTION_FRIDAY_REMINDER
         }
         val pendingIntent = PendingIntent.getBroadcast(
@@ -465,7 +465,7 @@ class PrayerNotificationScheduler @Inject constructor(
             trigger = LocalDate.now().plusDays(1).atTime(reminderAt)
         }
 
-        val intent = Intent(context, BootReceiver::class.java).apply {
+        val intent = Intent(context, PrayerAlarmReceiver::class.java).apply {
             action = ACTION_KHATAM_REMINDER
         }
         val pendingIntent = PendingIntent.getBroadcast(
@@ -484,7 +484,7 @@ class PrayerNotificationScheduler @Inject constructor(
     }
 
     private fun cancelKhatamReminder() {
-        val intent = Intent(context, BootReceiver::class.java).apply {
+        val intent = Intent(context, PrayerAlarmReceiver::class.java).apply {
             action = ACTION_KHATAM_REMINDER
         }
         val pendingIntent = PendingIntent.getBroadcast(
@@ -591,7 +591,7 @@ class PrayerNotificationScheduler @Inject constructor(
         eventAt: LocalDateTime,
         subKey: String?
     ) {
-        val intent = Intent(context, BootReceiver::class.java).apply {
+        val intent = Intent(context, PrayerAlarmReceiver::class.java).apply {
             action = ACTION_WORSHIP_REMINDER
             putExtra(EXTRA_WORSHIP_TYPE, type.name)
             putExtra(EXTRA_WORSHIP_SUBKEY, subKey)
@@ -608,7 +608,7 @@ class PrayerNotificationScheduler @Inject constructor(
     }
 
     private fun cancelWorshipReminder(type: WorshipReminderType) {
-        val intent = Intent(context, BootReceiver::class.java).apply { action = ACTION_WORSHIP_REMINDER }
+        val intent = Intent(context, PrayerAlarmReceiver::class.java).apply { action = ACTION_WORSHIP_REMINDER }
         val pendingIntent = PendingIntent.getBroadcast(
             context,
             WORSHIP_REQUEST_CODE_BASE + type.ordinal,
@@ -622,7 +622,7 @@ class PrayerNotificationScheduler @Inject constructor(
     }
 
     private fun cancelFridayReminder() {
-        val intent = Intent(context, BootReceiver::class.java).apply {
+        val intent = Intent(context, PrayerAlarmReceiver::class.java).apply {
             action = ACTION_FRIDAY_REMINDER
         }
         val pendingIntent = PendingIntent.getBroadcast(
@@ -641,7 +641,7 @@ class PrayerNotificationScheduler @Inject constructor(
      * Cancel the daily summary notification alarm.
      */
     fun cancelDailySummary() {
-        val intent = Intent(context, BootReceiver::class.java).apply {
+        val intent = Intent(context, PrayerAlarmReceiver::class.java).apply {
             action = ACTION_DAILY_SUMMARY
         }
 
@@ -666,10 +666,10 @@ class PrayerNotificationScheduler @Inject constructor(
         reminderTime: LocalDateTime,
         leadMinutes: Int
     ) {
-        // Use explicit intent for BootReceiver (required for Android 8.0+).
+        // Use explicit intent for PrayerAlarmReceiver (required for Android 8.0+).
         // The lead time travels with the alarm because it is now per prayer: reading a
         // global value back at fire time would put the wrong number in the text.
-        val intent = Intent(context, BootReceiver::class.java).apply {
+        val intent = Intent(context, PrayerAlarmReceiver::class.java).apply {
             action = ACTION_PRAYER_NOTIFICATION
             putExtra(EXTRA_PRAYER_TYPE, prayerType.name)
             putExtra(EXTRA_PRAYER_NAME, prayerType.displayName)
@@ -699,7 +699,7 @@ class PrayerNotificationScheduler @Inject constructor(
      * Cancel pre-reminder notification for a specific prayer.
      */
     private fun cancelPreReminderNotification(prayerType: PrayerType) {
-        val intent = Intent(context, BootReceiver::class.java).apply {
+        val intent = Intent(context, PrayerAlarmReceiver::class.java).apply {
             action = ACTION_PRAYER_NOTIFICATION
         }
 
@@ -724,8 +724,8 @@ class PrayerNotificationScheduler @Inject constructor(
         prayerType: PrayerType,
         prayerTime: LocalDateTime
     ) {
-        // Use explicit intent for BootReceiver (required for Android 8.0+)
-        val intent = Intent(context, BootReceiver::class.java).apply {
+        // Use explicit intent for PrayerAlarmReceiver (required for Android 8.0+)
+        val intent = Intent(context, PrayerAlarmReceiver::class.java).apply {
             action = ACTION_PRAYER_NOTIFICATION
             putExtra(EXTRA_PRAYER_TYPE, prayerType.name)
             putExtra(EXTRA_PRAYER_NAME, prayerType.displayName)
@@ -754,7 +754,7 @@ class PrayerNotificationScheduler @Inject constructor(
      * Cancel notification for a specific prayer.
      */
     fun cancelPrayerNotification(prayerType: PrayerType) {
-        val intent = Intent(context, BootReceiver::class.java).apply {
+        val intent = Intent(context, PrayerAlarmReceiver::class.java).apply {
             action = ACTION_PRAYER_NOTIFICATION
         }
 
@@ -804,7 +804,7 @@ class PrayerNotificationScheduler @Inject constructor(
 
     /**
      * Send test notifications for all prayers to validate the notification system.
-     * Uses explicit broadcasts to ensure BootReceiver receives them on Android 8.0+.
+     * Uses explicit broadcasts to ensure PrayerAlarmReceiver receives them on Android 8.0+.
      */
     override fun sendAllPrayerTestNotifications() {
         val prayers = listOf(
@@ -817,8 +817,8 @@ class PrayerNotificationScheduler @Inject constructor(
         )
 
         prayers.forEach { (prayerType, time) ->
-            // Create explicit intent for BootReceiver (required for Android 8.0+)
-            val intent = Intent(context, BootReceiver::class.java).apply {
+            // Create explicit intent for PrayerAlarmReceiver (required for Android 8.0+)
+            val intent = Intent(context, PrayerAlarmReceiver::class.java).apply {
                 action = ACTION_PRAYER_NOTIFICATION
                 putExtra(EXTRA_PRAYER_TYPE, prayerType.name)
                 putExtra(EXTRA_PRAYER_NAME, prayerType.displayName)
@@ -835,8 +835,8 @@ class PrayerNotificationScheduler @Inject constructor(
      * Schedule a midnight alarm to reschedule tomorrow's prayers.
      */
     private fun scheduleMidnightReschedule() {
-        // Use explicit intent for BootReceiver (required for Android 8.0+)
-        val intent = Intent(context, BootReceiver::class.java).apply {
+        // Use explicit intent for PrayerAlarmReceiver (required for Android 8.0+)
+        val intent = Intent(context, PrayerAlarmReceiver::class.java).apply {
             action = ACTION_MIDNIGHT_RESCHEDULE
         }
 
@@ -862,7 +862,7 @@ class PrayerNotificationScheduler @Inject constructor(
     }
 
     private fun cancelMidnightReschedule() {
-        val intent = Intent(context, BootReceiver::class.java).apply {
+        val intent = Intent(context, PrayerAlarmReceiver::class.java).apply {
             action = ACTION_MIDNIGHT_RESCHEDULE
         }
 

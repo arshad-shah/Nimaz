@@ -4,6 +4,8 @@ import android.app.Application
 import android.app.Service
 import com.arshadshah.nimaz.core.util.BootReceiver
 import com.arshadshah.nimaz.core.util.BootReceiver_GeneratedInjector
+import com.arshadshah.nimaz.core.util.PrayerAlarmReceiver
+import com.arshadshah.nimaz.core.util.PrayerAlarmReceiver_GeneratedInjector
 import com.arshadshah.nimaz.data.announcement.NimazMessagingService
 import com.arshadshah.nimaz.data.announcement.NimazMessagingService_GeneratedInjector
 import com.arshadshah.nimaz.data.audio.AdhanDownloadService
@@ -19,7 +21,7 @@ import dagger.hilt.internal.GeneratedComponent
 import dagger.hilt.internal.GeneratedComponentManager
 
 /**
- * The smallest thing that satisfies Hilt for `:app`'s receiver and its three services.
+ * The smallest thing that satisfies Hilt for `:app`'s two receivers and its four services.
  *
  * `@AndroidEntryPoint` is not a no-op at run time. The Hilt Gradle plugin rewrites
  * `BootReceiver.onReceive` and every `Service.onCreate` to inject first, and the generated base
@@ -58,12 +60,14 @@ class TestEntryPointApplication : Application(), GeneratedComponentManager<Any> 
         ServiceComponentManager.ServiceComponentBuilderEntryPoint,
         ServiceComponentBuilder,
         BootReceiver_GeneratedInjector,
+        PrayerAlarmReceiver_GeneratedInjector,
         AdhanPlaybackService_GeneratedInjector,
         AdhanDownloadService_GeneratedInjector,
         QuranAudioService_GeneratedInjector,
         NimazMessagingService_GeneratedInjector {
 
         var bootReceiver: (BootReceiver) -> Unit = {}
+        var prayerAlarmReceiver: (PrayerAlarmReceiver) -> Unit = {}
         var adhanPlayback: (AdhanPlaybackService) -> Unit = {}
         var adhanDownload: (AdhanDownloadService) -> Unit = {}
         var quranAudio: (QuranAudioService) -> Unit = {}
@@ -72,6 +76,7 @@ class TestEntryPointApplication : Application(), GeneratedComponentManager<Any> 
         /** Drop every double, so one test class cannot leak its stubs into the next. */
         fun reset() {
             bootReceiver = {}
+            prayerAlarmReceiver = {}
             adhanPlayback = {}
             adhanDownload = {}
             quranAudio = {}
@@ -83,6 +88,9 @@ class TestEntryPointApplication : Application(), GeneratedComponentManager<Any> 
         override fun build(): ServiceComponent = this
 
         override fun injectBootReceiver(instance: BootReceiver) = bootReceiver(instance)
+        override fun injectPrayerAlarmReceiver(instance: PrayerAlarmReceiver) =
+            prayerAlarmReceiver(instance)
+
         override fun injectAdhanPlaybackService(instance: AdhanPlaybackService) =
             adhanPlayback(instance)
 

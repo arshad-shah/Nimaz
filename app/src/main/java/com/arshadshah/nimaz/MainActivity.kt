@@ -18,7 +18,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.media3.common.util.UnstableApi
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.navigation.NavGraph
-import com.arshadshah.nimaz.core.util.BootReceiver
+import com.arshadshah.nimaz.core.util.PrayerAlarmReceiver
 import com.arshadshah.nimaz.core.util.InAppUpdateManager
 import com.arshadshah.nimaz.data.announcement.AnnouncementPayloadMapper
 import com.arshadshah.nimaz.data.audio.AdhanPlaybackService
@@ -227,7 +227,7 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        if (intent?.getBooleanExtra(BootReceiver.EXTRA_STOP_ADHAN, false) == true) {
+        if (intent?.getBooleanExtra(PrayerAlarmReceiver.EXTRA_STOP_ADHAN, false) == true) {
             AdhanPlaybackService.stopAdhan(this)
             AppAnalytics.logNotificationOpened(source = "prayer_notification")
         }

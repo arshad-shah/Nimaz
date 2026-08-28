@@ -83,27 +83,41 @@
             </intent-filter>
         </activity>
 
-        <!-- Boot Receiver for rescheduling prayer notifications -->
+        <!-- Recovery only: re-arms the prayer alarms and the widget tick after a restart or
+             an app update. The alarm actions that used to be filtered here are delivered by
+             PrayerAlarmReceiver below, through explicit PendingIntents that need no filter.
+
+             MY_PACKAGE_REPLACED is what carries an existing install across that move: every
+             alarm armed by an older build names BootReceiver, and after the split those alarms
+             resolve a receiver that no longer handles their action. The OS takes the app out of
+             the stopped state to deliver this one, so the re-arm happens within seconds of the
+             update rather than waiting for the user to open the app.
+
+             The two QUICKBOOT_POWERON actions are what some OEM fast-boot implementations send
+             in place of BOOT_COMPLETED. BootReceiver has always had code for them; it had no
+             filter, so it never ran. -->
         <receiver
             android:name=".core.util.BootReceiver"
             android:enabled="true"
             android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+                <action android:name="com.htc.intent.action.QUICKBOOT_POWERON" />
             </intent-filter>
             <intent-filter>
-                <action android:name="com.arshadshah.nimaz.PRAYER_NOTIFICATION" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="com.arshadshah.nimaz.MIDNIGHT_RESCHEDULE" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="com.arshadshah.nimaz.DAILY_SUMMARY" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="com.arshadshah.nimaz.KHATAM_REMINDER" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
             </intent-filter>
         </receiver>
+
+        <!-- Every alarm the app arms: prayer notifications and pre-reminders, the nightly
+             summary, the Friday reminder, the khatam nudge, the worship reminders and the
+             midnight reschedule. All arrive as explicit PendingIntents, so this needs a
+             declaration and no intent-filter. -->
+        <receiver
+            android:name=".core.util.PrayerAlarmReceiver"
+            android:enabled="true"
+            android:exported="false" />
 
         <!-- Adhan Download Service -->
         <service
