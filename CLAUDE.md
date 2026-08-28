@@ -4,15 +4,19 @@ Nimaz is an offline-first Android Islamic companion app: **Kotlin + Jetpack Comp
 **Clean Architecture** (`presentation → domain → data`) with **MVVM + UDF**, Hilt DI, Room,
 DataStore, type-safe Navigation Compose.
 
-**The Gradle module split (#551) is complete, and is being finished off.** Twenty-two modules
-plus `:baselineprofile` — nine `:core:*`, twelve `:feature:*`, and `:app`. The nineteen of #551,
-plus `:core:share` out of `:core:ui`, and `:feature:home` and `:core:audio` out of `:app`.
+**The Gradle module split (#551) is complete, and has been finished off.** Twenty-three modules
+plus `:baselineprofile` — ten `:core:*`, twelve `:feature:*`, and `:app`. The nineteen of #551,
+plus `:core:share` out of `:core:ui`, and `:feature:home`, `:core:audio` and
+`:core:notifications` out of `:app`.
 
-What is left in `:app` is what cannot leave: `MainActivity`, `NimazApp`, `AppInitializer`, the
-manifest entry points, the prayer-notification machinery, AboutLibraries, and the three Hilt
-bindings pinned to one of those. **It has no `presentation/` directory at all.**
+What is left in `:app` is **15 files and 1,454 lines** — 1% of the codebase, down from 11,595
+lines at the end of #551, with **no `presentation/` directory at all**: `MainActivity`,
+`NimazApp`, `AppInitializer`, `NavGraph.kt`, six `core/di` modules, `BootReceiver`,
+`InAppUpdateManager`, `NimazMessagingService`, `WorkManagerWidgetRefresher` and
+`LibraryRepositoryImpl`. Each is a composition root, a manifest entry point, or pinned to the
+application by a tool that reads the applying project. `RepositoryModule` holds **one** binding.
 
-The twenty-one modules outside `:app`, and what each one owns:
+The twenty-two modules outside `:app`, and what each one owns:
 
 - **`:core:domain`** (`core/domain/`) — the whole domain layer, a pure JVM module. No Android SDK
   on its classpath, so `import android.*` there is a compile error, and `androidFreeClasspath`
@@ -65,6 +69,14 @@ The twenty-one modules outside `:app`, and what each one owns:
   catch because both sides are `:core:*`. It is the second module to set
   `nimazCoverage.measureTransformedClasses`, which every module with an `@AndroidEntryPoint` class
   a unit test constructs must do or read 0% for it.
+- **`:core:notifications`** (`core/notifications/`) — the prayer-notification machinery:
+  `PrayerNotificationScheduler` (the `AlarmManager` side and every channel), `PrayerAlarmReceiver`,
+  `PrayerRescheduler`, `PrayerAlarmTimes` and `NotificationContentHelper`, with the `<receiver>`
+  and the alarm permissions in its own manifest. **It reverses a decision `docs/ARCHITECTURE.md`
+  §2 recorded** — the reasoning that kept it out of `:feature:prayer` (the `:feature:settings` →
+  `:feature:prayer` edge) never applied to a `:core:*` module. **`BootReceiver` stays in `:app`**,
+  and not only for being a manifest entry point: it re-arms the widget tick, and a `:core:*`
+  module naming `WidgetUpdateScheduler` is what `moduleBoundary` forbids.
 - **`:core:share`** (`core/share/`) — the branded-card `Canvas` renderer, the
   domain-model-to-`Shareable` builders, the `Intent` wrappers and the QR encoder. **Not one of its
   five files imports Compose**: it sat in `:core:ui` because that is where the strings and the
@@ -152,12 +164,18 @@ exists — and **`BuildConfig` and the app's `R` cannot travel**, so app identit
 `LocalAppIdentity` and an `:app`-only implementation moves as a *port* (`AppUpdateController`),
 never as the class.
 
-What is still in `app/…/core/util/` — `BootReceiver`, `PrayerRescheduler`, `InAppUpdateManager`,
-`PrayerNotificationScheduler`, `PrayerAlarmTimes`, `NotificationContentHelper` — stays there **for
-good**, not until some later PR: each is a manifest entry point or is pinned to `:app` by one, and
-their consumers are the settings surface and `AppInitializer` rather than a feature. See
-`docs/ARCHITECTURE.md` §2. A move does **not** change package names, so imports read the same either
-side of a module boundary. Two consequences worth knowing before you edit:
+What is still in `app/…/core/util/` is `BootReceiver` and `InAppUpdateManager`, and that is the
+whole of it. **This paragraph used to list six files and say they stayed "for good"** — the other
+four are `:core:notifications` now, and the reasoning that kept them here was answering a
+different question: it ruled out `:feature:prayer` (which would have created the
+`:feature:settings` → `:feature:prayer` edge #571 forbids) and never said anything about a
+`:core:*` module, which a feature may depend on freely. `docs/ARCHITECTURE.md` §2 records the
+reversal. The two that remain do stay: `BootReceiver` re-arms the widget tick, and a `:core:*`
+module naming `WidgetUpdateScheduler` is what `moduleBoundary` forbids; `InAppUpdateManager` holds
+an `Activity`.
+
+A move does **not** change package names, so imports read the same either side of a module
+boundary. Two consequences worth knowing before you edit:
 
 - **Kotlin will not smart-cast a `val` from another module.** `if (ayah.translation != null)
   Text(ayah.translation)` no longer compiles across the boundary — bind a local first.
@@ -308,6 +326,7 @@ The obligations, in short:
 ./gradlew :core:ui:check              # design-system component tests + moduleBoundary + its lint
 ./gradlew :core:navigation:check      # route vocabulary + the no-presentation-imports guard
 ./gradlew :core:audio:check           # the three players, the download pipeline, the services
+./gradlew :core:notifications:check   # the alarm scheduler, the receiver, the notification copy
 ./gradlew :core:share:check           # the share builders, the card renderer, the QR encoder
 ./gradlew :feature:home:check         # the home screen, its ViewModel and its 21 components
 ./gradlew :feature:widget:check       # the widgets + moduleBoundary + its own lint

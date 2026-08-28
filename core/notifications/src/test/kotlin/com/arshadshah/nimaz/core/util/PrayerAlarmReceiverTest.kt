@@ -21,7 +21,7 @@ import com.arshadshah.nimaz.domain.model.UserPreferences
 import com.arshadshah.nimaz.domain.model.WorshipReminderType
 import com.arshadshah.nimaz.domain.repository.KhatamRepository
 import com.arshadshah.nimaz.domain.repository.PrayerRepository
-import com.arshadshah.nimaz.testing.TestEntryPointApplication
+import com.arshadshah.nimaz.testing.NotificationEntryPointApplication
 import com.google.common.truth.Truth.assertThat
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -46,14 +46,14 @@ import org.robolectric.annotation.Config
  * construction: the user simply is not told it is time to pray.
  *
  * It sat at **0% covered** because `@AndroidEntryPoint` makes `onReceive` unreachable without a
- * Hilt application. [TestEntryPointApplication] is the smallest thing that satisfies that,
+ * Hilt application. [NotificationEntryPointApplication] is the smallest thing that satisfies that,
  * so these tests drive the real `onReceive` and read back what Android was asked to do.
  *
  * The receiver launches its work on `Dispatchers.IO`, so each assertion waits for the effect
  * rather than assuming it has already landed — see [awaitNotification] / [awaitNothing].
  */
 @RunWith(RobolectricTestRunner::class)
-@Config(application = TestEntryPointApplication::class, sdk = [34])
+@Config(application = NotificationEntryPointApplication::class, sdk = [34])
 class PrayerAlarmReceiverTest {
 
     private lateinit var context: Context
@@ -130,8 +130,8 @@ class PrayerAlarmReceiverTest {
         }
         rescheduler = mockk(relaxed = true)
 
-        TestEntryPointApplication.Injector.reset()
-        TestEntryPointApplication.Injector.prayerAlarmReceiver = { receiver ->
+        NotificationEntryPointApplication.Injector.reset()
+        NotificationEntryPointApplication.Injector.prayerAlarmReceiver = { receiver ->
             receiver.preferencesDataStore = preferences
             receiver.prayerRepository = prayerRepository
             receiver.prayerRescheduler = rescheduler
@@ -194,12 +194,17 @@ class PrayerAlarmReceiverTest {
 
     @Test
     fun `a boot broadcast is not this receivers, and is ignored`() {
-        // The boot spellings moved to `BootReceiver` with the recovery half. Answering one here
+        // The boot spellings belong to `BootReceiver`, with the recovery half. Answering one here
         // too would re-arm everything twice on every restart.
+        //
+        // Written out rather than read off `BootReceiver.ACTION_QUICKBOOT_POWERON`: that class is
+        // `:app`'s and this module is below it. Duplicating the literal is the right side of the
+        // trade — the alternative is a `:core:*` -> `:app` dependency to spell a string this test
+        // asserts is *not* handled.
         listOf(
             Intent.ACTION_BOOT_COMPLETED,
             Intent.ACTION_MY_PACKAGE_REPLACED,
-            BootReceiver.ACTION_QUICKBOOT_POWERON,
+            "android.intent.action.QUICKBOOT_POWERON",
         ).forEach { receive(Intent(it)) }
 
         Thread.sleep(300)

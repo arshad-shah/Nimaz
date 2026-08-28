@@ -15,7 +15,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
-import androidx.media3.common.util.UnstableApi
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.navigation.NavGraph
 import com.arshadshah.nimaz.core.util.PrayerAlarmReceiver
@@ -53,7 +52,6 @@ private val appIdentity = AppIdentity(
 )
 
 @AndroidEntryPoint
-@UnstableApi
 class MainActivity : ComponentActivity() {
 
     @Inject

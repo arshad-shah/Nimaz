@@ -79,7 +79,19 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.crashlytics)
-    implementation(libs.firebase.perf)
+    // `api`, not `implementation`, and the BOM with it. `PerfMonitor.newTrace` returns a
+    // `com.google.firebase.perf.metrics.Trace?` and `PerfMonitor.stop` takes one, so any module
+    // using the start/stop pair — rather than the `trace { }` lambda — needs the type on its own
+    // compile classpath. Kept as `implementation` it was not there, and the caller failed with
+    // *"Cannot access class Trace"*: a public signature referring to a type the module does not
+    // expose. The same slip `:core:ui` records for `WindowSizeClass`, which is why the BOM is
+    // `api` here too — without it the artifact resolves in a consumer with no version.
+    //
+    // `analytics` and `crashlytics` stay `implementation` on purpose: `AppAnalytics`,
+    // `CrashReporter` and `Telemetry` take and return only `String`, `Long` and `Throwable`, so
+    // no Firebase type reaches a consumer's signature and the seam holds.
+    api(platform(libs.firebase.bom))
+    api(libs.firebase.perf)
 
     testImplementation(libs.junit)
     testImplementation(libs.google.truth)

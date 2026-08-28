@@ -465,9 +465,21 @@ Built on **`AlarmManager` exact alarms** (no WorkManager). Per-prayer notificati
 adhan playback, pre-prayer reminders, a nightly daily summary, a **Khatam daily reminder**,
 and re-scheduling on midnight rollover and boot.
 
+> **Module:** everything in this section except `BootReceiver` is **`:core:notifications`**
+> (`core/notifications/…`), which also brings the `<receiver>` entry and the
+> `SCHEDULE_EXACT_ALARM` / `USE_EXACT_ALARM` / `WAKE_LOCK` permissions in its own manifest.
+> `docs/ARCHITECTURE.md` §2 has the reversal: this used to be recorded as staying in `:app`
+> permanently, and the reasoning behind that (the `:feature:settings` → `:feature:prayer` edge
+> #571 forbids) never applied to a `:core:*` module.
+>
+> `BootReceiver` stays in `:app`, and not only because it is a manifest entry point: it re-arms
+> the widget tick as well as the alarms, and a `:core:*` module naming `WidgetUpdateScheduler` is
+> the `:core:*` → `:feature:*` edge `moduleBoundary` fails the build on.
+
 **Key files.**
 - `core/util/PrayerNotificationScheduler.kt` — `@Singleton`; schedules/cancels alarms, owns the channels.
-  Implements the domain port `PrayerAlarmScheduler` (`domain/repository/`), which is what
+  Implements the domain port `PrayerAlarmScheduler` (`domain/repository/`), bound with its
+  implementation in `NotificationBindingsModule`, and which is what
   `RescheduleNotificationsUseCase` injects — the use case must not name an Android class. The
   method's default argument values live on the interface (Kotlin forbids an override from
   restating them), so `AppInitializer`, `PrayerRescheduler` and the instrumented test, which all
@@ -481,8 +493,9 @@ and re-scheduling on midnight rollover and boot.
 - `data/audio/AdhanPlaybackService.kt` — plays the adhan and posts the merged prayer+adhan notification (§1).
 
 **Channels.** The full roster — ids, constants, importance and creator — is in
-[§0.6](#06-notification-channels); seven of the eleven are created here in
-`PrayerNotificationScheduler.init` (API 26+). Two behaviours are worth stating in full:
+[§0.6](#06-notification-channels); **eight of the twelve** are created here in
+`PrayerNotificationScheduler.init` (API 26+) — the line said "seven of the eleven", and both
+numbers had been wrong since the muted channel was added. Two behaviours are worth stating in full:
 
 - **Vibration is a channel property.** Android ignores `enableVibration()` changes after a
   channel exists, so the `notificationVibration` preference is honoured by *posting on the
