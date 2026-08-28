@@ -23,10 +23,22 @@ android {
  * Locked. See `COVERAGE_EXCLUSIONS` and `coverageFloor` in `build-logic` for what is measured and
  * how the ratchet works.
  *
- * **80/80, at 95.5% lines and 80.8% branches** — the highest line coverage of any module in the
+ * **80/80, at 95.3% lines and 82.4% branches** — the highest line coverage of any module in the
  * repo, which is not a coincidence: everything here is invisible when it breaks. A prayer alarm
  * that is never armed produces no crash, no error state and no screen that says one was expected,
  * so the whole surface was brought up to a floor before it was a module.
+ *
+ * **The floor stays at 80 rather than ratcheting to 82, and that is deliberate.** This module's
+ * branch coverage was a function of *what time CI ran*: #638 measured 80.8% at midday and 79.2%
+ * that evening on identical code, and the second one failed the build with no diff behind it.
+ * Two clock reads did it — `NotificationContentHelper.getTimeBasedGreeting`, where four of five
+ * arms are unreachable at any given hour, and the scheduler's `isAfter(now)` guard, which after
+ * Isha skips the whole per-prayer block because the real calculator returns *today's* London
+ * times. Both are pinned now (the greeting takes the hour as a parameter; the pre-reminder tests
+ * use a calculator that places prayers ahead of `now`), and the figure above is the *evening*
+ * measurement, which used to be the low point. A residual swing of a branch or two remains in the
+ * 23:00 summary and Friday roll-forward guards, so the floor keeps a margin rather than sitting
+ * on the measurement. Ratchet it when those two take a clock as well.
  *
  * `PrayerAlarmReceiver` is `@AndroidEntryPoint` and its tests construct it, so this module
  * measures the **ASM-transformed** classes like `:core:audio` and `:app` — see
