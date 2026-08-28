@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- The three foreground services below declare these, so the module is self-describing:
+         a consumer that forgets them is a service that cannot start, and the failure arrives
+         at run time rather than at merge time. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+
+    <application>
+
+        <!-- Fully qualified, not `.data.audio.…`. A leading dot resolves against the
+             *application* package, and a library manifest is merged into whatever application
+             consumes it — so the short form names a class that does not exist there. -->
+        <service
+            android:name="com.arshadshah.nimaz.data.audio.AdhanDownloadService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
+
+        <service
+            android:name="com.arshadshah.nimaz.data.audio.AdhanPlaybackService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="mediaPlayback" />
+
+        <service
+            android:name="com.arshadshah.nimaz.data.audio.QuranAudioService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="mediaPlayback" />
+
+    </application>
+
+</manifest>

@@ -16,11 +16,6 @@
     <!-- Vibration for Tasbih -->
     <uses-permission android:name="android.permission.VIBRATE" />
 
-    <!-- Foreground Service for Audio and Downloads -->
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
-
     <!-- Schedule exact alarms for prayer notifications -->
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
@@ -119,26 +114,8 @@
             android:enabled="true"
             android:exported="false" />
 
-        <!-- Adhan Download Service -->
-        <service
-            android:name=".data.audio.AdhanDownloadService"
-            android:enabled="true"
-            android:exported="false"
-            android:foregroundServiceType="dataSync" />
-
-        <!-- Adhan Playback Service -->
-        <service
-            android:name=".data.audio.AdhanPlaybackService"
-            android:enabled="true"
-            android:exported="false"
-            android:foregroundServiceType="mediaPlayback" />
-
-        <!-- Quran Audio Service -->
-        <service
-            android:name=".data.audio.QuranAudioService"
-            android:enabled="true"
-            android:exported="false"
-            android:foregroundServiceType="mediaPlayback" />
+        <!-- The three audio foreground services, and the FOREGROUND_SERVICE* permissions they
+             need, are declared by :core:audio's own manifest and merged in from there. -->
 
         <!-- FCM engagement announcements: foreground messages are handled by the
              service (Home banner, no tray notification); backgrounded messages are

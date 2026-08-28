@@ -4,16 +4,15 @@ Nimaz is an offline-first Android Islamic companion app: **Kotlin + Jetpack Comp
 **Clean Architecture** (`presentation → domain → data`) with **MVVM + UDF**, Hilt DI, Room,
 DataStore, type-safe Navigation Compose.
 
-**The Gradle module split (#551) is complete, and is being finished off.** Twenty-one modules
-plus `:baselineprofile` — eight `:core:*`, twelve `:feature:*`, and `:app`. The nineteen of #551,
-plus `:core:share` out of `:core:ui` and `:feature:home` out of `:app`.
+**The Gradle module split (#551) is complete, and is being finished off.** Twenty-two modules
+plus `:baselineprofile` — nine `:core:*`, twelve `:feature:*`, and `:app`. The nineteen of #551,
+plus `:core:share` out of `:core:ui`, and `:feature:home` and `:core:audio` out of `:app`.
 
 What is left in `:app` is what cannot leave: `MainActivity`, `NimazApp`, `AppInitializer`, the
-manifest entry points, the adhan players and prayer-notification machinery, `QuranAudioManager`,
-AboutLibraries, and the seven Hilt bindings pinned to one of those. **It has no `presentation/`
-directory at all.**
+manifest entry points, the prayer-notification machinery, AboutLibraries, and the three Hilt
+bindings pinned to one of those. **It has no `presentation/` directory at all.**
 
-The twenty modules outside `:app`, and what each one owns:
+The twenty-one modules outside `:app`, and what each one owns:
 
 - **`:core:domain`** (`core/domain/`) — the whole domain layer, a pure JVM module. No Android SDK
   on its classpath, so `import android.*` there is a compile error, and `androidFreeClasspath`
@@ -55,6 +54,17 @@ The twenty modules outside `:app`, and what each one owns:
   destination's identity, never its label, which is why `NamesTab` moved here while its
   `@StringRes` stayed in the screen. `NavGraph.kt` is still in `:app`, but registers nothing —
   the 94 destinations live in twelve `<Feature>Graph.kt` extensions beside their screens.
+- **`:core:audio`** (`core/audio/`) — every engine that makes a sound: the Quran recitation
+  session and its `MediaSession` service, the adhan player, the adhan download pipeline (a
+  foreground service plus a WorkManager fallback), and `AdhanAudioManager`/`AdhanSound`, brought
+  over from `:core:data`. It carries its own manifest — three `<service>` entries and the
+  `FOREGROUND_SERVICE*` permissions, declared **fully qualified**, because a leading dot resolves
+  against the *application* package. **It could not have existed before the channel ids moved**:
+  `AdhanPlaybackService` read `PrayerNotificationScheduler.CHANNEL_ID_ADHAN` while `BootReceiver`
+  started two of these services — a circular project dependency, and one `moduleBoundary` cannot
+  catch because both sides are `:core:*`. It is the second module to set
+  `nimazCoverage.measureTransformedClasses`, which every module with an `@AndroidEntryPoint` class
+  a unit test constructs must do or read 0% for it.
 - **`:core:share`** (`core/share/`) — the branded-card `Canvas` renderer, the
   domain-model-to-`Shareable` builders, the `Intent` wrappers and the QR encoder. **Not one of its
   five files imports Compose**: it sat in `:core:ui` because that is where the strings and the
@@ -297,6 +307,7 @@ The obligations, in short:
 ./gradlew :core:data:check            # repository tests + public-API leak guard + moduleBoundary
 ./gradlew :core:ui:check              # design-system component tests + moduleBoundary + its lint
 ./gradlew :core:navigation:check      # route vocabulary + the no-presentation-imports guard
+./gradlew :core:audio:check           # the three players, the download pipeline, the services
 ./gradlew :core:share:check           # the share builders, the card renderer, the QR encoder
 ./gradlew :feature:home:check         # the home screen, its ViewModel and its 21 components
 ./gradlew :feature:widget:check       # the widgets + moduleBoundary + its own lint

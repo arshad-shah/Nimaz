@@ -13,7 +13,6 @@ import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.arshadshah.nimaz.core.ui.R
-import com.arshadshah.nimaz.R as AppR
 import com.arshadshah.nimaz.core.common.NimazChannels
 import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import dagger.hilt.android.AndroidEntryPoint
@@ -325,7 +324,7 @@ class AdhanDownloadService : Service() {
         ongoing: Boolean = true
     ): Notification {
         val builder = NotificationCompat.Builder(this, NimazChannels.ADHAN_DOWNLOAD)
-            .setSmallIcon(AppR.drawable.ic_stat_nimaz)
+            .setSmallIcon(R.drawable.ic_stat_nimaz)
             .setContentTitle(title)
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .setOngoing(ongoing)
