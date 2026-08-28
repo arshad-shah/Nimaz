@@ -1,7 +1,8 @@
 package com.arshadshah.nimaz.presentation
 
+import com.arshadshah.nimaz.testing.PresentationSourceRoots
+import com.google.common.truth.Truth.assertThat
 import org.junit.Test
-import java.io.File
 
 /**
  * Regression guard: composables collect ViewModel state **lifecycle-aware**.
@@ -23,7 +24,11 @@ import java.io.File
  * does not fit it — an event emitted while stopped would be dropped. Collect those in a
  * `repeatOnLifecycle` block instead, and add the file to [ALLOWED] with a note saying why.
  *
- * Runs from the module dir, so source paths are relative to `app/`.
+ * **It scans every module's presentation sources, not `:app`'s.** It used to name
+ * `app/src/main/java/...presentation` directly, so from PR 10 of #551 onwards it was checking a
+ * shrinking fraction of the app without saying so - and when `:feature:home` took the last of
+ * that directory it failed outright, which is the only reason anybody noticed. Reading
+ * [PresentationSourceRoots] is what stops the next module move quietly narrowing it again.
  */
 class StateCollectionGuardTest {
 
@@ -32,11 +37,13 @@ class StateCollectionGuardTest {
 
     @Test
     fun `presentation sources collect state lifecycle-aware`() {
-        val dir = File("src/main/java/com/arshadshah/nimaz/presentation")
-        assert(dir.isDirectory) { "Presentation source dir not found at ${dir.absolutePath}" }
+        PresentationSourceRoots.assertAllExist()
+        val files = PresentationSourceRoots.sources()
+        // A floor, not a filter: a mis-rooted scan finds nothing and would otherwise pass.
+        assertThat(files.size).isAtLeast(MINIMUM_FILES)
 
         val offenders = mutableListOf<String>()
-        dir.walkTopDown().filter { it.isFile && it.extension == "kt" }.forEach { file ->
+        files.forEach { file ->
             if (file.name in ALLOWED) return@forEach
             file.readLines().forEachIndexed { i, line ->
                 // `collectAsStateWithLifecycle(` shares the prefix, so match the call form
@@ -51,5 +58,10 @@ class StateCollectionGuardTest {
             "Use collectAsStateWithLifecycle() instead of collectAsState() " +
                 "(${offenders.size} site(s)):\n" + offenders.joinToString("\n")
         }
+    }
+
+    private companion object {
+        /** Presentation sources across every module - several hundred. See the class KDoc. */
+        const val MINIMUM_FILES = 100
     }
 }

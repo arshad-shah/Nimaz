@@ -249,7 +249,7 @@ parameters and `AiModule` in `:app` — which does have the app's `BuildConfig` 
 Inverting the read costs one `@Provides` and keeps the module free of app identity.
 
 ```text
-app/src/main/java/                     #  ← :app — everything else, for now
+app/src/main/java/                     #  ← :app — what cannot leave
 com.arshadshah.nimaz/
 ├── NimazApp.kt              # @HiltAndroidApp, WorkManager config, AppInitializer
 ├── MainActivity.kt          # @AndroidEntryPoint, single activity, setContent { NimazTheme { NavGraph() } }
@@ -274,19 +274,9 @@ com.arshadshah.nimaz/
 │   ├── platform/            # ServiceAdhanDownloader — split out of AndroidAppLocale
 │   └── widget/              # WorkManagerWidgetRefresher — the WorkManager side of the port
 │
-├── presentation/
-│   ├── screens/<feature>/   # Composable screens grouped by feature
-│   ├── viewmodel/<feature>/ # {XxxViewModel, XxxUiState, XxxEvent}.kt per feature
-│   │                        #   quran/ prayer/ tracker/ worship/ calendar/
-│   │                        #   settings/ help/ content/ search/ ai/
-│   │                        #   location/ home/ onboarding/ tools/
-│   ├── components/
-│   │   ├── atoms/           # Smallest reusable UI (NimazCard, NimazBadge, ArabicText…)
-│   │   ├── molecules/       # Composed (PrayerTimeCard, NimazDialog, NimazCalendar…)
-│   │   └── organisms/       # Complex (TopAppBar, MushafPage, HomeHero…)
-│   └── theme/               # NimazTheme, Palette.kt (NimazPalette) → Color.kt (NimazColors), Type, Shape
-│
-└── widget/                  # Glance home-screen widgets (nextprayer, prayertracker, hijridate)
+└── (no presentation/)       # Home was the last of it; `screens/`, `viewmodel/` and
+                             #   `components/` live in the twelve :feature:* modules,
+                             #   the design system in :core:ui, and `theme/` with it
 ```
 
 > **Note on the older `docs/nimaz-pro-technical-foundation.md`:** that document uses an
@@ -1857,8 +1847,9 @@ Requires JDK 21 and an Android SDK (compileSdk 37). Set `sdk.dir` in `local.prop
 
 ### Modules
 
-Twenty modules plus `:baselineprofile` — eight `:core:*`, eleven `:feature:*`, and `:app`.
-Nineteen of them are the finished state of #551; `:core:share` came out of `:core:ui` afterwards:
+Twenty-one modules plus `:baselineprofile` — eight `:core:*`, twelve `:feature:*`, and `:app`.
+Nineteen of them are the finished state of #551; `:core:share` came out of `:core:ui` and
+`:feature:home` out of `:app` afterwards:
 
 | Module | Plugin | What it holds |
 |---|---|---|
@@ -1881,7 +1872,8 @@ Nineteen of them are the finished state of #551; `:core:share` came out of `:cor
 | **`:feature:quran`** | `nimaz.android.feature` | The reader, khatam and bookmarks, plus the whole Mushaf rendering stack. (`TajweedParser` came here in PR 19 and went on to `:core:ui` in PR 21, when `QuranSettingsScreen` took `TajweedLegendSheet` to a second feature module.) The largest feature. **`QuranDao` stays in `:core:database`** — four repositories use it. **`QuranAudioManager` stays in `:app`**, behind the `QuranPlayback` port, because `MainActivity` holds one too. |
 | **`:feature:prayer`** | `nimaz.android.feature` | When each prayer *is* and which way to face: prayer times, the monthly table, qibla and the night-worship window — the counterpart to `:feature:tracker`. The only module with a camera dependency (`ArQiblaView`). **The adhan players and the prayer notification machinery are *not* here**: nothing in the move set names them, and their consumers are the settings surface plus `:app` init, so sending them here would have created the `:feature:settings -> :feature:prayer` edge #571 forbids. **`PrayerTimeCard` and `PrayerSkyScene` went down to `:core:ui`**, being read by `HomeScreen`/`HomeHero` too. |
 | **`:feature:settings`** | `nimaz.android.feature` | The last feature module: 24 screens, the 1,400-line `SettingsViewModel`, location and sync. **Five screens arrive from other features' directories** — `DuaSettingsScreen`, `HadithSettingsScreen`, `SelectReciterScreen`, `SelectTranslationScreen`, `LocationScreen` — every one dispatching `SettingsEvent`. **`data/sync` did *not* come**: it imports 21 DAOs and 14 entities, so it went to `:core:data`. `PrayerNotificationScheduler` stayed in `:app`, pinned by one `AppR.drawable` line; the three members this module calls became the `PrayerAlarmScheduler` / `PrayerNotificationTester` ports. |
-| **`:app`** | `nimaz.android.application` | **54 files, 11,711 lines — 8% of the codebase.** What genuinely cannot leave: `MainActivity`, `NimazApp`, `NavGraph.kt`, six `core/di` modules, `core/init`, the notification stack (`PrayerNotificationScheduler`, `PrayerAlarmReceiver`, `PrayerRescheduler`, `NotificationContentHelper`, `PrayerAlarmTimes`) and `BootReceiver`, which was split out of it, the two adhan Services, `QuranAudioService` and `LibraryRepositoryImpl` — most pinned by `com.arshadshah.nimaz.R` or by being a manifest entry point. Plus the **home surface**: `HomeScreen`, `HomeGraph`, `viewmodel/home`, and **21 components** (the eight `Home*` organisms — `HomeOccasionsSection`, which puts today's Islamic occasion on compact Home, is the newest, `EventsCarousel`, `TodayCarousel`, `TodayInfoCards`, `TodaysProgressCard`, `JumuahCard`, `WorshipEventCard`, `NimazCarousel`, and five molecules). Those components stayed for the inverse of the rule that moved so many others: Home is their *only* consumer, so there is no second module to share them with. |
+| **`:feature:home`** | `nimaz.android.feature` | The screen the app opens on, and the last surface to leave `:app`: `HomeScreen`, `HomeGraph`, `viewmodel/home`, and the **21 components** only Home renders — the `Home*` organisms, `EventsCarousel`, `TodayCarousel`, `TodayInfoCards`, `TodaysProgressCard`, `JumuahCard`, `WorshipEventCard`, `NimazCarousel` and four molecules. **Nothing had to be unpicked**: every `:app` symbol the group imported was declared inside the group. `PrayerVisuals` did *not* come — `:core:ui`'s own `PrayerTimeCard` reads it, so moving it would point `:core:ui` at a feature; `EventCard`, `EventCardVisuals` and `DuaOfTheMomentCard` did not either, being decisions to take on their own evidence rather than as riders on a module move. |
+| **`:app`** | `nimaz.android.application` | **30 files, ~6,000 lines — under 5% of the codebase, and no `presentation/` directory at all.** What genuinely cannot leave: `MainActivity`, `NimazApp`, `NavGraph.kt`, six `core/di` modules, `core/init`, the notification stack (`PrayerNotificationScheduler`, `PrayerAlarmReceiver`, `PrayerRescheduler`, `NotificationContentHelper`, `PrayerAlarmTimes`) and `BootReceiver`, which was split out of it, the two adhan Services, `QuranAudioService` and `LibraryRepositoryImpl` — most pinned by `com.arshadshah.nimaz.R` or by being a manifest entry point. |
 | **`:baselineprofile`** | `com.android.test` | Generates `app/src/main/baseline-prof.txt`. Nothing depends on it at runtime and no product code lives there. |
 
 Plus one **included build**, `build-logic`, which is not a module of the app — it produces the

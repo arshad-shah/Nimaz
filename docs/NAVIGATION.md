@@ -53,8 +53,8 @@ destinations, and none of them should need the `NavHost`.
 `NavGraph.kt` was 1,420 lines: it imported 69 screen composables and registered all 94
 destinations, which meant **every screen in the app was reachable from one file**. No feature could
 move into its own module while that was true, because `:app` would have had to import from all
-eleven feature modules at once. PR 12 of #551 split it; the file is now 281 lines holding the
-`NavHost`, the navigation-suite shell and eleven calls:
+twelve feature modules at once. PR 12 of #551 split it; the file is now 281 lines holding the
+`NavHost`, the navigation-suite shell and twelve calls:
 
 | graph | destinations |  | graph | destinations |
 |---|---:|---|---|---:|
@@ -64,6 +64,9 @@ eleven feature modules at once. PR 12 of #551 split it; the file is now 281 line
 | `trackerGraph` | 14 | | `calendarGraph` | 2 |
 | `prayerGraph` | 5 | | `onboardingGraph` | 1 |
 | | | | `homeGraph` | 1 |
+
+> `homeGraph` was the one graph still living in `:app` after PR 12. It is `:feature:home`'s now,
+> beside `HomeScreen`, like the other eleven.
 
 > Five of these rows were wrong until #625 — `quranGraph` and `contentGraph` were listed as 21,
 > `settingsGraph` as 16, `trackerGraph` as 11 and `prayerGraph` as 8. The **total** was right, which
@@ -223,7 +226,7 @@ flowchart LR
 
 ## 3. Route reference
 
-All routes live in `core/navigation/Routes.kt` and are wired in the eleven feature graph
+All routes live in `core/navigation/Routes.kt` and are wired in the twelve feature graph
 extensions (`NavGraph.kt` calls them; it registers nothing itself)
 (94 `composable<Route.X>` destinations). `data object` = no args; `data class` = typed args.
 Every route below also has a `ScreenTags` entry of the same name.

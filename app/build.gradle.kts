@@ -31,8 +31,15 @@ jacoco {
  * `:app` is on the ratchet — on **lines only**, and the missing branch floor is the finding
  * rather than an omission.
  *
- * Line coverage is the standard 0.80, met at **82.6%** with 142 lines of margin. Branch coverage
- * is **53.5%**, and neither of the two values the campaign sanctions (#604) is available:
+ * **The line floor is 0.75, down from 0.80, and the module did not get worse.** Home left for
+ * `:feature:home` and took 205 tests with it, and what it left behind is proportionally more
+ * composition root: `:app` reads 77.6% now against 82.6% before, with the same tests passing in
+ * a module where they are gated at **80/80**. Total measured coverage across the repo went up.
+ * This is the shape a floor takes on a module that is being emptied, and it is why the number is
+ * re-measured at each extraction rather than assumed — see `docs/TESTING.md`.
+ *
+ * Branch coverage is **51.1%**, and neither of the two values the campaign sanctions (#604) is
+ * available:
  *
  * | where the module's 1,790 missing branches are | count |
  * |---|---|
@@ -72,8 +79,8 @@ jacoco {
  * - **`@Preview` bodies.** 35 preview functions across the module, none of which the app runs.
  */
 nimazCoverage {
-    lineFloor.set(0.80)
-    // No branchFloor: see above. 53.5% today, 76.1% if everything reachable were covered.
+    lineFloor.set(0.75)
+    // No branchFloor: see above. 51.1% today, 76.1% if everything reachable were covered.
 }
 
 // Firebase (Crashlytics + Analytics) is configured via google-services.json,
@@ -352,6 +359,10 @@ dependencies {
     // else uses, so nothing widget-shaped is left here. (The other 16 it references stay in
     // `:core:ui` because `WidgetsScreen`'s gallery reads them too.)
     implementation(project(":feature:widget"))
+    // Home — the screen the app opens on, and the last surface to leave `:app`. `NavGraph.kt`
+    // calls `homeGraph(...)` exactly as it calls the other eleven; nothing else here names a
+    // symbol from it. After this, `:app` has no `presentation/` directory.
+    implementation(project(":feature:home"))
     // The first-run flow (#565). Extracted with no couplings to unpick — see its build file.
     implementation(project(":feature:onboarding"))
     // About, Help and More — one destination, so one module (#565). Six couplings to `:app` were
@@ -554,6 +565,7 @@ tasks.withType<Test>().configureEach {
         "designSystemSources" to "core/ui/src/main/kotlin/com/arshadshah/nimaz/presentation",
         "navigationSources" to "core/navigation/src/main/kotlin/com/arshadshah/nimaz/core/navigation",
         "widgetSources" to "feature/widget/src/main/kotlin/com/arshadshah/nimaz/widget",
+        "homeSources" to "feature/home/src/main/kotlin/com/arshadshah/nimaz/presentation",
         "onboardingSources" to "feature/onboarding/src/main/kotlin/com/arshadshah/nimaz/presentation",
         "aboutSources" to "feature/about/src/main/kotlin/com/arshadshah/nimaz/presentation",
         "toolsSources" to "feature/tools/src/main/kotlin/com/arshadshah/nimaz/presentation",
@@ -585,6 +597,7 @@ tasks.withType<Test>().configureEach {
         "navigationModuleSources" to "core/navigation/src/main",
         "shareModuleSources" to "core/share/src/main",
         "widgetModuleSources" to "feature/widget/src/main",
+        "homeModuleSources" to "feature/home/src/main",
         "onboardingModuleSources" to "feature/onboarding/src/main",
         "aboutModuleSources" to "feature/about/src/main",
         "toolsModuleSources" to "feature/tools/src/main",
@@ -877,6 +890,21 @@ val coverageModules = listOf(
         ),
         sourceDir = "src/main/kotlin",
         packageRoot = "com/arshadshah/nimaz/core/navigation",
+    ),
+    CoverageModule(
+        gradlePath = ":feature:home",
+        projectDir = rootProject.layout.projectDirectory.dir("feature/home"),
+        testTask = "testDebugUnitTest",
+        classesGlobs = listOf(
+            "intermediates/built_in_kotlinc/debug/**/classes/**",
+            "tmp/kotlin-classes/debug/**",
+        ),
+        execGlobs = listOf(
+            "jacoco/testDebugUnitTest.exec",
+            "outputs/unit_test_code_coverage/**/*.exec",
+        ),
+        sourceDir = "src/main/kotlin",
+        packageRoot = "com/arshadshah/nimaz/presentation",
     ),
     CoverageModule(
         gradlePath = ":feature:widget",
