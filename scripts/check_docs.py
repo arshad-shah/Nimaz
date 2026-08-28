@@ -42,6 +42,13 @@ SOURCE_SET_SUFFIXES = (
     Path("src/main/kotlin/com/arshadshah/nimaz"),
 )
 
+# The single registry of notification channel ids. Read directly rather than
+# discovered, so that a rename of the file is a loud failure here rather than a
+# quiet return to checking nothing.
+NIMAZ_CHANNELS = (
+    ROOT / "core/common/src/main/kotlin/com/arshadshah/nimaz/core/common/NimazChannels.kt"
+)
+
 ARCHITECTURE = DOCS / "ARCHITECTURE.md"
 NAVIGATION = DOCS / "NAVIGATION.md"
 SUBSYSTEMS = DOCS / "SUBSYSTEMS.md"
@@ -400,7 +407,18 @@ def widget_packages() -> list[str]:
 
 
 def notification_channel_ids() -> list[str]:
-    ids: set[str] = set()
+    """Every channel id the app ships.
+
+    Two sources, deliberately. `NimazChannels` is the registry every channel id is
+    supposed to live in, and reading it is what keeps this check working now that the
+    ids no longer sit beside the code that creates them. The old `const val CHANNEL_ID*`
+    pattern is kept alongside it as a net: a channel declared the old way, anywhere in
+    the tree, is still found and still has to be documented rather than quietly
+    escaping both the registry and this check.
+    """
+    ids: set[str] = set(
+        re.findall(r'const val [A-Z][A-Z0-9_]* = "([^"]+)"', read(NIMAZ_CHANNELS))
+    )
     for path in source_files("*.kt"):
         ids |= set(re.findall(r'const val CHANNEL_ID[A-Z_]* = "([^"]+)"', read(path)))
     return sorted(ids)

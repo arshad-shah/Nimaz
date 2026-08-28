@@ -3,6 +3,7 @@ package com.arshadshah.nimaz.data.announcement
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import com.arshadshah.nimaz.core.common.NimazChannels
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.google.firebase.FirebaseApp
 import com.google.firebase.messaging.FirebaseMessaging
@@ -29,7 +30,7 @@ class AnnouncementBootstrap @Inject constructor(
         runCatching {
             val manager = context.getSystemService(NotificationManager::class.java)
             val channel = NotificationChannel(
-                CHANNEL_ID,
+                NimazChannels.ANNOUNCEMENTS,
                 "Updates & Announcements",
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
@@ -55,8 +56,6 @@ class AnnouncementBootstrap @Inject constructor(
     }
 
     companion object {
-        /** Must match the manifest's default_notification_channel_id meta-data. */
-        const val CHANNEL_ID = "nimaz_announcements"
         const val TOPIC = "announcements"
     }
 }

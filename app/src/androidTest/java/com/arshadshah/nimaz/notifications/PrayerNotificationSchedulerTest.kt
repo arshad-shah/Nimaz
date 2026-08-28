@@ -4,6 +4,7 @@ import android.app.NotificationManager
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.arshadshah.nimaz.core.common.NimazChannels
 import com.arshadshah.nimaz.core.util.PrayerNotificationScheduler
 import com.arshadshah.nimaz.domain.model.PrayerType
 import com.google.common.truth.Truth.assertThat
@@ -48,12 +49,12 @@ class PrayerNotificationSchedulerTest {
 
         val channelIds = notificationManager.notificationChannels.map { it.id }
         assertThat(channelIds).containsAtLeast(
-            PrayerNotificationScheduler.CHANNEL_ID_PRAYER,
-            PrayerNotificationScheduler.CHANNEL_ID_ADHAN,
-            PrayerNotificationScheduler.CHANNEL_ID_DAILY_SUMMARY,
+            NimazChannels.PRAYER,
+            NimazChannels.ADHAN,
+            NimazChannels.DAILY_SUMMARY,
             // The silent alert style needs a channel of its own — the *_SILENT channels are
             // no-vibration siblings that still carry a sound.
-            PrayerNotificationScheduler.CHANNEL_ID_PRAYER_MUTED,
+            NimazChannels.PRAYER_MUTED,
         )
     }
 

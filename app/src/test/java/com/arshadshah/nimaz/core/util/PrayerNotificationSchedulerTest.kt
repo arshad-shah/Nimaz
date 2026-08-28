@@ -5,6 +5,7 @@ import android.app.Application
 import android.app.NotificationManager
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
+import com.arshadshah.nimaz.core.common.NimazChannels
 import com.arshadshah.nimaz.domain.model.AsrCalculation
 import com.arshadshah.nimaz.domain.model.CalculationMethod
 import com.arshadshah.nimaz.domain.model.PrayerType
@@ -134,14 +135,14 @@ class PrayerNotificationSchedulerTest {
 
         val ids = notificationManager.notificationChannels.map { it.id }
         assertThat(ids).containsAtLeast(
-            PrayerNotificationScheduler.CHANNEL_ID_PRAYER,
-            PrayerNotificationScheduler.CHANNEL_ID_PRAYER_SILENT,
-            PrayerNotificationScheduler.CHANNEL_ID_PRAYER_MUTED,
-            PrayerNotificationScheduler.CHANNEL_ID_ADHAN,
-            PrayerNotificationScheduler.CHANNEL_ID_ADHAN_SILENT,
-            PrayerNotificationScheduler.CHANNEL_ID_DAILY_SUMMARY,
-            PrayerNotificationScheduler.CHANNEL_ID_KHATAM,
-            PrayerNotificationScheduler.CHANNEL_ID_WORSHIP,
+            NimazChannels.PRAYER,
+            NimazChannels.PRAYER_SILENT,
+            NimazChannels.PRAYER_MUTED,
+            NimazChannels.ADHAN,
+            NimazChannels.ADHAN_SILENT,
+            NimazChannels.DAILY_SUMMARY,
+            NimazChannels.KHATAM,
+            NimazChannels.WORSHIP,
         )
     }
 
@@ -152,11 +153,11 @@ class PrayerNotificationSchedulerTest {
         scheduler()
         val byId = notificationManager.notificationChannels.associateBy { it.id }
 
-        assertThat(byId.getValue(PrayerNotificationScheduler.CHANNEL_ID_PRAYER).importance)
+        assertThat(byId.getValue(NimazChannels.PRAYER).importance)
             .isEqualTo(NotificationManager.IMPORTANCE_HIGH)
-        assertThat(byId.getValue(PrayerNotificationScheduler.CHANNEL_ID_PRAYER_SILENT).importance)
+        assertThat(byId.getValue(NimazChannels.PRAYER_SILENT).importance)
             .isEqualTo(NotificationManager.IMPORTANCE_HIGH)
-        assertThat(byId.getValue(PrayerNotificationScheduler.CHANNEL_ID_PRAYER_MUTED).importance)
+        assertThat(byId.getValue(NimazChannels.PRAYER_MUTED).importance)
             .isLessThan(NotificationManager.IMPORTANCE_HIGH)
     }
 
@@ -165,15 +166,15 @@ class PrayerNotificationSchedulerTest {
         scheduler()
         val byId = notificationManager.notificationChannels.associateBy { it.id }
 
-        assertThat(byId.getValue(PrayerNotificationScheduler.CHANNEL_ID_PRAYER).shouldVibrate())
+        assertThat(byId.getValue(NimazChannels.PRAYER).shouldVibrate())
             .isTrue()
         assertThat(
-            byId.getValue(PrayerNotificationScheduler.CHANNEL_ID_PRAYER_SILENT).shouldVibrate()
+            byId.getValue(NimazChannels.PRAYER_SILENT).shouldVibrate()
         ).isFalse()
-        assertThat(byId.getValue(PrayerNotificationScheduler.CHANNEL_ID_ADHAN).shouldVibrate())
+        assertThat(byId.getValue(NimazChannels.ADHAN).shouldVibrate())
             .isTrue()
         assertThat(
-            byId.getValue(PrayerNotificationScheduler.CHANNEL_ID_ADHAN_SILENT).shouldVibrate()
+            byId.getValue(NimazChannels.ADHAN_SILENT).shouldVibrate()
         ).isFalse()
     }
 

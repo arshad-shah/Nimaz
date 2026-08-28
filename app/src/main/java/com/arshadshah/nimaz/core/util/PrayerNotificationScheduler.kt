@@ -7,6 +7,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import androidx.core.app.NotificationCompat
+import com.arshadshah.nimaz.core.common.NimazChannels
 import com.arshadshah.nimaz.core.ui.R
 import com.arshadshah.nimaz.R as AppR
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
@@ -54,26 +55,10 @@ class PrayerNotificationScheduler @Inject constructor(
     private val worshipCalculator = WorshipReminderCalculator()
 
     companion object {
-        const val CHANNEL_ID_PRAYER = "prayer_notifications"
-        const val CHANNEL_ID_ADHAN = "adhan_notifications"
-        const val CHANNEL_ID_DAILY_SUMMARY = "daily_summary_notifications"
-        const val CHANNEL_ID_KHATAM = "khatam_notifications"
-
-        // Extended worship reminders (Tahajjud, Suhoor, Iftar, …) — a gentle DEFAULT-importance
-        // nudge like the khatam channel, never an alarm. See spec §2 (epic #300).
-        const val CHANNEL_ID_WORSHIP = "worship_reminders"
-
-        // Silent (no-vibration) siblings — Android ignores enableVibration() changes
-        // after a channel exists, so the vibration preference is honoured by posting
-        // on the matching channel instead. See channelForPrayer/channelForAdhan.
-        const val CHANNEL_ID_PRAYER_SILENT = "prayer_notifications_silent"
-        const val CHANNEL_ID_ADHAN_SILENT = "adhan_notifications_silent"
-
-        // A prayer set to the SILENT alert style posts here: no sound, no vibration, no
-        // heads-up. The two channels above are only *no-vibration* siblings — they still
-        // carry the channel's sound at IMPORTANCE_HIGH — and Android will not let an
-        // existing channel's importance be lowered from code, so silence needs its own.
-        const val CHANNEL_ID_PRAYER_MUTED = "prayer_notifications_muted"
+        // The channel ids this scheduler creates live in `NimazChannels`, in `:core:common`.
+        // They were here, and `AdhanPlaybackService` reached across for `NimazChannels.ADHAN` —
+        // the one reference that would make `:core:audio` depend on `:core:notifications` while
+        // `BootReceiver` starting that service points the other way. See `NimazChannels`.
 
         const val ACTION_PRAYER_NOTIFICATION = "com.arshadshah.nimaz.PRAYER_NOTIFICATION"
         const val ACTION_DAILY_SUMMARY = "com.arshadshah.nimaz.DAILY_SUMMARY"
@@ -107,21 +92,6 @@ class PrayerNotificationScheduler @Inject constructor(
         const val ACTION_MIDNIGHT_RESCHEDULE = "com.arshadshah.nimaz.MIDNIGHT_RESCHEDULE"
         private const val MIDNIGHT_REQUEST_CODE = 9999
 
-        /**
-         * Channel id for a standalone prayer notification honouring the vibration pref.
-         *
-         * [muted] wins over [vibrate]: a prayer the user has silenced posts on the muted
-         * channel whatever the vibration preference says.
-         */
-        fun channelForPrayer(vibrate: Boolean, muted: Boolean = false): String = when {
-            muted -> CHANNEL_ID_PRAYER_MUTED
-            vibrate -> CHANNEL_ID_PRAYER
-            else -> CHANNEL_ID_PRAYER_SILENT
-        }
-
-        /** Channel id for an adhan notification honouring the vibration pref. */
-        fun channelForAdhan(vibrate: Boolean): String =
-            if (vibrate) CHANNEL_ID_ADHAN else CHANNEL_ID_ADHAN_SILENT
     }
 
     init {
@@ -131,7 +101,7 @@ class PrayerNotificationScheduler @Inject constructor(
     private fun createNotificationChannels() {
         // Prayer time notification channel
         val prayerChannel = NotificationChannel(
-            CHANNEL_ID_PRAYER,
+            NimazChannels.PRAYER,
             "Prayer Time Notifications",
             NotificationManager.IMPORTANCE_HIGH
         ).apply {
@@ -142,7 +112,7 @@ class PrayerNotificationScheduler @Inject constructor(
 
         // Adhan notification channel (higher priority)
         val adhanChannel = NotificationChannel(
-            CHANNEL_ID_ADHAN,
+            NimazChannels.ADHAN,
             "Adhan Notifications",
             NotificationManager.IMPORTANCE_HIGH
         ).apply {
@@ -153,7 +123,7 @@ class PrayerNotificationScheduler @Inject constructor(
 
         // Daily summary notification channel
         val dailySummaryChannel = NotificationChannel(
-            CHANNEL_ID_DAILY_SUMMARY,
+            NimazChannels.DAILY_SUMMARY,
             "Daily Prayer Summary",
             NotificationManager.IMPORTANCE_DEFAULT
         ).apply {
@@ -164,7 +134,7 @@ class PrayerNotificationScheduler @Inject constructor(
 
         // Silent (no-vibration) siblings for when the vibration preference is off.
         val prayerChannelSilent = NotificationChannel(
-            CHANNEL_ID_PRAYER_SILENT,
+            NimazChannels.PRAYER_SILENT,
             "Prayer Time Notifications (No Vibration)",
             NotificationManager.IMPORTANCE_HIGH
         ).apply {
@@ -174,7 +144,7 @@ class PrayerNotificationScheduler @Inject constructor(
         }
 
         val adhanChannelSilent = NotificationChannel(
-            CHANNEL_ID_ADHAN_SILENT,
+            NimazChannels.ADHAN_SILENT,
             "Adhan Notifications (No Vibration)",
             NotificationManager.IMPORTANCE_HIGH
         ).apply {
@@ -186,7 +156,7 @@ class PrayerNotificationScheduler @Inject constructor(
         // Prayers set to the silent alert style: it appears and waits. LOW importance keeps
         // it out of the heads-up path; the null sound keeps it quiet even so.
         val prayerChannelMuted = NotificationChannel(
-            CHANNEL_ID_PRAYER_MUTED,
+            NimazChannels.PRAYER_MUTED,
             "Prayer Time Notifications (Silent)",
             NotificationManager.IMPORTANCE_LOW
         ).apply {
@@ -199,7 +169,7 @@ class PrayerNotificationScheduler @Inject constructor(
         // Khatam reminder channel — a gentle nudge to read, not an alarm, so it
         // stays at DEFAULT importance and never interrupts.
         val khatamChannel = NotificationChannel(
-            CHANNEL_ID_KHATAM,
+            NimazChannels.KHATAM,
             context.getString(R.string.notif_khatam_channel_name),
             NotificationManager.IMPORTANCE_DEFAULT
         ).apply {
@@ -210,7 +180,7 @@ class PrayerNotificationScheduler @Inject constructor(
 
         // Extended worship reminders — a gentle nudge, DEFAULT importance like khatam.
         val worshipChannel = NotificationChannel(
-            CHANNEL_ID_WORSHIP,
+            NimazChannels.WORSHIP,
             context.getString(R.string.worship_channel_name),
             NotificationManager.IMPORTANCE_DEFAULT
         ).apply {
@@ -820,7 +790,7 @@ class PrayerNotificationScheduler @Inject constructor(
      * Send an immediate test notification to verify notifications are working.
      */
     override fun sendTestNotification() {
-        val notification = NotificationCompat.Builder(context, CHANNEL_ID_PRAYER)
+        val notification = NotificationCompat.Builder(context, NimazChannels.PRAYER)
             .setSmallIcon(AppR.drawable.ic_stat_nimaz)
             .setContentTitle(context.getString(R.string.test_notification_title))
             .setContentText(context.getString(R.string.test_notification_text))

@@ -58,6 +58,15 @@ tasks.withType<Test>().configureEach {
     inputs.dir(rootProject.layout.projectDirectory.dir("core/ui/src/main/res"))
         .withPropertyName("shippedLocaleResources")
         .withPathSensitivity(PathSensitivity.RELATIVE)
+
+    // Same reasoning, one file rather than a tree: `PrayerAlertChannelTest` reads `:app`'s
+    // manifest to check that the FCM `default_notification_channel_id` meta-data still names
+    // `NimazChannels.ANNOUNCEMENTS`. A manifest cannot reference a Kotlin constant, so that
+    // literal is the one unavoidable duplicate of a channel id — and an undeclared input is an
+    // assertion that stops running the moment the file it reads is the only thing that changed.
+    inputs.file(rootProject.layout.projectDirectory.file("app/src/main/AndroidManifest.xml"))
+        .withPropertyName("appManifest")
+        .withPathSensitivity(PathSensitivity.RELATIVE)
 }
 
 dependencies {

@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.Intent
 import androidx.core.app.NotificationCompat
 import androidx.test.core.app.ApplicationProvider
+import com.arshadshah.nimaz.core.common.NimazChannels
 import com.arshadshah.nimaz.core.datastore.PreferencesDataStore
 import com.arshadshah.nimaz.data.audio.AdhanAudioManager
 import com.arshadshah.nimaz.data.audio.AdhanPlaybackService
@@ -268,7 +269,7 @@ class BootReceiverTest {
         val notification = awaitNotification("Asr".hashCode())
         assertThat(notification.priority).isEqualTo(NotificationCompat.PRIORITY_LOW)
         assertThat(notification.channelId)
-            .isEqualTo(PrayerNotificationScheduler.CHANNEL_ID_PRAYER_MUTED)
+            .isEqualTo(NimazChannels.PRAYER_MUTED)
     }
 
     @Test
@@ -293,7 +294,7 @@ class BootReceiverTest {
 
         val notification = awaitNotification("Sunrise".hashCode())
         assertThat(notification.channelId)
-            .isNotEqualTo(PrayerNotificationScheduler.CHANNEL_ID_PRAYER_MUTED)
+            .isNotEqualTo(NimazChannels.PRAYER_MUTED)
     }
 
     @Test
@@ -307,7 +308,7 @@ class BootReceiverTest {
 
         val notification = awaitNotification("Isha".hashCode())
         assertThat(notification.channelId)
-            .isEqualTo(PrayerNotificationScheduler.CHANNEL_ID_PRAYER_SILENT)
+            .isEqualTo(NimazChannels.PRAYER_SILENT)
     }
 
     // ── The adhan ───────────────────────────────────────────────────────────────
@@ -514,7 +515,7 @@ class BootReceiverTest {
         val body = notification.extras.getString(Notification.EXTRA_TEXT).orEmpty()
         assertThat(body).isNotEmpty()
         assertThat(notification.channelId)
-            .isEqualTo(PrayerNotificationScheduler.CHANNEL_ID_KHATAM)
+            .isEqualTo(NimazChannels.KHATAM)
     }
 
     @Test
@@ -546,7 +547,7 @@ class BootReceiverTest {
 
         val notification = awaitNotification(("worship_tahajjud").hashCode())
         assertThat(notification.channelId)
-            .isEqualTo(PrayerNotificationScheduler.CHANNEL_ID_WORSHIP)
+            .isEqualTo(NimazChannels.WORSHIP)
         assertThat(notification.priority).isEqualTo(NotificationCompat.PRIORITY_DEFAULT)
     }
 

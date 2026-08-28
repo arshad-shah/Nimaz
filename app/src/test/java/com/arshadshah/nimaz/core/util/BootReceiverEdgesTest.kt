@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.Intent
 import androidx.core.app.NotificationCompat
 import androidx.test.core.app.ApplicationProvider
+import com.arshadshah.nimaz.core.common.NimazChannels
 import com.arshadshah.nimaz.core.datastore.PreferencesDataStore
 import com.arshadshah.nimaz.data.audio.AdhanAudioManager
 import com.arshadshah.nimaz.data.audio.AdhanPlaybackService
@@ -209,7 +210,7 @@ class BootReceiverEdgesTest {
 
         val notification = awaitNotification("Dhuhr".hashCode())
         assertThat(notification.channelId)
-            .isEqualTo(PrayerNotificationScheduler.CHANNEL_ID_PRAYER_SILENT)
+            .isEqualTo(NimazChannels.PRAYER_SILENT)
     }
 
     // ── The failure arms ────────────────────────────────────────────────────────

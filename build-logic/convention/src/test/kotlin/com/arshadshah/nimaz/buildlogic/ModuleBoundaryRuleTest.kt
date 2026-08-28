@@ -33,9 +33,11 @@ class ModuleBoundaryRuleTest {
 
     @Test
     fun `a core module may not reach up to a feature`() {
-        // The concrete case this was written for: `:core:audio` reads
+        // The concrete case this was written for: `:core:audio` read
         // `PrayerNotificationScheduler.CHANNEL_ID_ADHAN`, and if that scheduler's Android impl
-        // lands in `:feature:prayer` the edge points the wrong way. Recorded on #551.
+        // lands in `:feature:prayer` the edge points the wrong way. Recorded on #551. That
+        // particular reference is gone — the id moved to `NimazChannels` in `:core:common`,
+        // below both — but the rule it motivated is the one every later module relies on.
         assertThat(isForbiddenModuleDependency(":core:audio", ":feature:prayer")).isTrue()
     }
 

@@ -3,6 +3,7 @@ package com.arshadshah.nimaz.data.announcement
 import android.app.NotificationManager
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
+import com.arshadshah.nimaz.core.common.NimazChannels
 import com.google.common.truth.Truth.assertThat
 import io.mockk.every
 import io.mockk.mockk
@@ -51,7 +52,7 @@ class AnnouncementBootstrapTest {
         bootstrap.initialize()
 
         val channel = notificationManager()
-            .getNotificationChannel(AnnouncementBootstrap.CHANNEL_ID)!!
+            .getNotificationChannel(NimazChannels.ANNOUNCEMENTS)!!
 
         assertThat(channel.importance).isEqualTo(NotificationManager.IMPORTANCE_LOW)
         assertThat(channel.name.toString()).isEqualTo("Updates & Announcements")
@@ -65,7 +66,7 @@ class AnnouncementBootstrapTest {
     fun `the channel id is the one the manifest hands the OS`() {
         // The OS looks this up by id when it posts the tray notification itself; a mismatch
         // drops every background announcement with no error anywhere.
-        assertThat(AnnouncementBootstrap.CHANNEL_ID).isEqualTo("nimaz_announcements")
+        assertThat(NimazChannels.ANNOUNCEMENTS).isEqualTo("nimaz_announcements")
         assertThat(AnnouncementBootstrap.TOPIC).isEqualTo("announcements")
     }
 
@@ -76,7 +77,7 @@ class AnnouncementBootstrapTest {
 
         assertThat(
             shadowOf(notificationManager()).notificationChannels
-                .count { (it as android.app.NotificationChannel).id == AnnouncementBootstrap.CHANNEL_ID }
+                .count { (it as android.app.NotificationChannel).id == NimazChannels.ANNOUNCEMENTS }
         ).isEqualTo(1)
     }
 
@@ -91,7 +92,7 @@ class AnnouncementBootstrapTest {
         bootstrap.initialize()
 
         verify(exactly = 0) { com.google.firebase.messaging.FirebaseMessaging.getInstance() }
-        assertThat(notificationManager().getNotificationChannel(AnnouncementBootstrap.CHANNEL_ID))
+        assertThat(notificationManager().getNotificationChannel(NimazChannels.ANNOUNCEMENTS))
             .isNotNull()
     }
 
@@ -121,7 +122,7 @@ class AnnouncementBootstrapTest {
         // Logged, never thrown: this runs on the path that opens the app.
         bootstrap.initialize()
 
-        assertThat(notificationManager().getNotificationChannel(AnnouncementBootstrap.CHANNEL_ID))
+        assertThat(notificationManager().getNotificationChannel(NimazChannels.ANNOUNCEMENTS))
             .isNotNull()
     }
 

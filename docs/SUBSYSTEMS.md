@@ -173,20 +173,32 @@ Channels are created eagerly (`PrayerNotificationScheduler.init`, `AnnouncementB
 owning service's `onCreate`). **Android ignores property changes after a channel exists** — that
 is why vibration is modelled as a *pair* of channels rather than a per-notification flag.
 
+**Every id below is declared once, in `NimazChannels`** (`core/common/…/core/common/NimazChannels.kt`).
+They used to be spread across four files, and `AdhanPlaybackService` reached across for
+`PrayerNotificationScheduler.CHANNEL_ID_ADHAN` — the one reference that pointed the audio code at
+the notification code while `BootReceiver` starting that service pointed back, which is a Gradle
+circular dependency waiting for those two to become modules. A channel id is a plain `String`, so
+the vocabulary sits in `:core:common`, below both.
+
+An id is also **user data**: it is the key Android files a user's per-channel sound, importance
+and vibration choices under, and renaming one orphans those choices rather than migrating them.
+`PrayerAlertChannelTest` pins each literal for that reason, and the announcements id a second time
+against the manifest, which repeats it because a manifest cannot reference a Kotlin constant.
+
 | Channel id | Constant | Importance | Created by | Section |
 |---|---|---|---|---|
-| `prayer_notifications` | `CHANNEL_ID_PRAYER` | HIGH | `PrayerNotificationScheduler` | [§4](#4-prayer-time--adhan-notifications) |
-| `prayer_notifications_silent` | `CHANNEL_ID_PRAYER_SILENT` | HIGH, no vibration | `PrayerNotificationScheduler` | [§4](#4-prayer-time--adhan-notifications) |
-| `prayer_notifications_muted` | `CHANNEL_ID_PRAYER_MUTED` | LOW, no sound, no vibration | `PrayerNotificationScheduler` | [§4](#4-prayer-time--adhan-notifications) |
-| `adhan_notifications` | `CHANNEL_ID_ADHAN` | HIGH | `PrayerNotificationScheduler` | [§4](#4-prayer-time--adhan-notifications) |
-| `adhan_notifications_silent` | `CHANNEL_ID_ADHAN_SILENT` | HIGH, no vibration | `PrayerNotificationScheduler` | [§4](#4-prayer-time--adhan-notifications) |
-| `daily_summary_notifications` | `CHANNEL_ID_DAILY_SUMMARY` | DEFAULT | `PrayerNotificationScheduler` | [§4](#4-prayer-time--adhan-notifications) |
-| `khatam_notifications` | `CHANNEL_ID_KHATAM` | DEFAULT | `PrayerNotificationScheduler` | [§4](#4-prayer-time--adhan-notifications) |
-| `worship_reminders` | `CHANNEL_ID_WORSHIP` | DEFAULT | `PrayerNotificationScheduler` | [§4](#4-prayer-time--adhan-notifications) |
-| `adhan_playback_channel` | `AdhanPlaybackService.CHANNEL_ID` | LOW | `AdhanPlaybackService` | [§1](#1-audio-playback) |
-| `adhan_download_channel` | `AdhanDownloadService.CHANNEL_ID` | LOW | `AdhanDownloadService` | [§1](#1-audio-playback) |
-| `quran_audio_channel` | `QuranAudioService.CHANNEL_ID` | LOW | `QuranAudioService` | [§1](#1-audio-playback) |
-| `nimaz_announcements` | `AnnouncementBootstrap.CHANNEL_ID` | LOW | `AnnouncementBootstrap` | [§12](#12-engagement-announcements-fcm) |
+| `prayer_notifications` | `NimazChannels.PRAYER` | HIGH | `PrayerNotificationScheduler` | [§4](#4-prayer-time--adhan-notifications) |
+| `prayer_notifications_silent` | `NimazChannels.PRAYER_SILENT` | HIGH, no vibration | `PrayerNotificationScheduler` | [§4](#4-prayer-time--adhan-notifications) |
+| `prayer_notifications_muted` | `NimazChannels.PRAYER_MUTED` | LOW, no sound, no vibration | `PrayerNotificationScheduler` | [§4](#4-prayer-time--adhan-notifications) |
+| `adhan_notifications` | `NimazChannels.ADHAN` | HIGH | `PrayerNotificationScheduler` | [§4](#4-prayer-time--adhan-notifications) |
+| `adhan_notifications_silent` | `NimazChannels.ADHAN_SILENT` | HIGH, no vibration | `PrayerNotificationScheduler` | [§4](#4-prayer-time--adhan-notifications) |
+| `daily_summary_notifications` | `NimazChannels.DAILY_SUMMARY` | DEFAULT | `PrayerNotificationScheduler` | [§4](#4-prayer-time--adhan-notifications) |
+| `khatam_notifications` | `NimazChannels.KHATAM` | DEFAULT | `PrayerNotificationScheduler` | [§4](#4-prayer-time--adhan-notifications) |
+| `worship_reminders` | `NimazChannels.WORSHIP` | DEFAULT | `PrayerNotificationScheduler` | [§4](#4-prayer-time--adhan-notifications) |
+| `adhan_playback_channel` | `NimazChannels.ADHAN_PLAYBACK` | LOW | `AdhanPlaybackService` | [§1](#1-audio-playback) |
+| `adhan_download_channel` | `NimazChannels.ADHAN_DOWNLOAD` | LOW | `AdhanDownloadService` | [§1](#1-audio-playback) |
+| `quran_audio_channel` | `NimazChannels.QURAN_AUDIO` | LOW | `QuranAudioService` | [§1](#1-audio-playback) |
+| `nimaz_announcements` | `NimazChannels.ANNOUNCEMENTS` | LOW | `AnnouncementBootstrap` | [§12](#12-engagement-announcements-fcm) |
 
 > `adhan_playback_channel` is created but the visible notification is posted on
 > `adhan_notifications` — see §4. It is kept because the foreground service must declare *some*
@@ -466,7 +478,7 @@ and re-scheduling on midnight rollover and boot.
   than English literals, because they are the ones a user is most likely to meet in a
   non-English locale from a cold alarm process.
 
-`AdhanPlaybackService` also creates `adhan_playback_channel` but **posts on `CHANNEL_ID_ADHAN`**,
+`AdhanPlaybackService` also creates `adhan_playback_channel` but **posts on `NimazChannels.ADHAN`**,
 so the playback channel is effectively unused for the visible notification.
 
 ```mermaid
@@ -588,7 +600,7 @@ prayers). The pure `WorshipReminderCalculator` (`core/util/`, JVM-tested) comput
 `scheduleWorshipReminders(...)` loops all enabled types and arms one alarm each
 (`ACTION_WORSHIP_REMINDER`, request-code block **9000+ordinal**), **inside
 `scheduleTodaysPrayerNotifications`** so the midnight/boot chain re-arms them daily. They post on
-the DEFAULT-importance `worship_reminders` channel (`CHANNEL_ID_WORSHIP`) via
+the DEFAULT-importance `worship_reminders` channel (`NimazChannels.WORSHIP`) via
 `BootReceiver.handleWorshipReminder` (re-checks the per-type pref + re-applies the saved locale),
 with copy from `WorshipReminderContent`. Prefs are generic dynamic keys
 (`worship_<key>_enabled` / `_offset` / `_mode`) on `SettingsRepository`/`PreferencesDataStore`. The
