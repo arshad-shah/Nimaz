@@ -42,6 +42,13 @@ android {
 
 // The design system, and the resources it draws from.
 //
+// `core/share/` used to be in here, and is `:core:share` now. It was never part of the design
+// system: not one of its five files imports Compose. It lived here because that is where the
+// strings and the fonts are, which is a dependency rather than a membership — so it now depends
+// on this module from outside, and `:core:ui` stops carrying a 461-line `Canvas` engine. The
+// `zxing` dependency left with it; `NimazQrCode` and `ShareAppSheet`, its only consumers here,
+// went to `:feature:about`.
+//
 // This is the first module in the epic that owns `res/`, which changes how every other module
 // spells `R`. With `android.nonTransitiveRClass=true` a module's `R` holds only its *own*
 // resources, so once `strings.xml` lives here, `com.arshadshah.nimaz.R` no longer has
@@ -106,8 +113,6 @@ dependencies {
     api(libs.androidx.compose.material3.adaptive)
     implementation(libs.androidx.compose.material.icons.extended)
 
-    implementation(libs.zxing.core)
-
     debugImplementation(libs.androidx.compose.ui.tooling)
 
     testImplementation(libs.junit)
@@ -125,9 +130,9 @@ dependencies {
 }
 
 // **80/80 — the ninth Compose module in a row to hold the standard branch floor, and the largest
-// Compose surface in the repo by an order of magnitude.** 13,000 measurable lines, 316 classes,
-// 143 files: the whole design system, every atom, molecule and organism, plus the theme, the type
-// scale, the share builders and the drawn surfaces.
+// Compose surface in the repo by an order of magnitude.** The whole design system: every atom,
+// molecule and organism, plus the theme, the type scale and the drawn surfaces. (The share
+// builders were counted here until they became `:core:share`, which carries its own 80/80.)
 //
 // **It clears both floors with the thinnest margin of any module so far**: 80.5% lines (61 above)
 // and 80.5% branches (24 above). That is deliberate rather than lucky — the arithmetic below is

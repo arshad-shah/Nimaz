@@ -1604,7 +1604,14 @@ available. All of this is pinned by `SyncDataImporterBookmarkMergeTest` and
 `core/share/` — the **single, branded path** every feature uses to share content through the
 system share sheet. Before this existed, ~13 call sites each hand-rolled their own
 `Intent(ACTION_SEND)`, rebuilt the share-body string, and passed a hardcoded chooser title;
-now no screen constructs a share `Intent` directly (enforceable: `grep -rn "ACTION_SEND\|createChooser\|ACTION_SENDTO" app/src/main/java` should only hit `core/share/`).
+now no screen constructs a share `Intent` directly (enforceable: `grep -rn "ACTION_SEND\|createChooser\|ACTION_SENDTO" --include=*.kt app core feature` should only hit `core/share/`).
+
+> **Module:** this is **`:core:share`** (`core/share/…`). It was inside `:core:ui` until it came
+> out on its own — not one of its five files imports Compose, so it was never part of the design
+> system; it lived there because that is where the strings and the fonts are. It still depends on
+> `:core:ui` for `R`, and `:core:ui` never depends on it. The package name did not change, so
+> every call site's import reads exactly as it did. `:feature:quran`, `:feature:content`,
+> `:feature:about`, `:feature:tools` and `:feature:prayer` consume it.
 
 | File | Role |
 |---|---|

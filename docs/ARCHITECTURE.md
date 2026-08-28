@@ -262,8 +262,8 @@ com.arshadshah.nimaz/
 │   ├── navigation/          # Routes.kt (sealed Route), NavGraph.kt, deep links
 │   ├── util/                # Extensions, date utils, PDF exporters
 │   ├── feedback/            # In-app feedback capture
-│   ├── share/               # ContentShareManager + Shareable/Shareables + branded ShareCardRenderer
 │   └── init/                # AppInitializer
+│                            #   (core/share/ is :core:share — it was here, then :core:ui)
 │
 ├── data/                    # What could not leave — see :core:data above for the rest
 │   ├── audio/               # Media3 audio managers/services (Quran, Adhan, Qaida)
@@ -1857,8 +1857,8 @@ Requires JDK 21 and an Android SDK (compileSdk 37). Set `sdk.dir` in `local.prop
 
 ### Modules
 
-Nineteen modules plus `:baselineprofile`, the finished state of #551 — seven `:core:*`,
-eleven `:feature:*`, and `:app`:
+Twenty modules plus `:baselineprofile` — eight `:core:*`, eleven `:feature:*`, and `:app`.
+Nineteen of them are the finished state of #551; `:core:share` came out of `:core:ui` afterwards:
 
 | Module | Plugin | What it holds |
 |---|---|---|
@@ -1867,7 +1867,8 @@ eleven `:feature:*`, and `:app`:
 | **`:core:database`** | `nimaz.android.library` + `nimaz.android.hilt` | Both Room `@Database` classes, every entity and DAO, the migrations, the user-data slice, the content-artifact installer, and the exported `schemas/` with the `room.schemaLocation` arg that writes them. |
 | **`:core:datastore`** | `nimaz.android.library` + `nimaz.android.hilt` | All three DataStore files — `PreferencesDataStore` and its `PreferenceCodec` registry, the announcement store, and `DeviceIdProvider`. Implements the eleven `SettingsSeams` interfaces, which live in `:core:domain`, so a feature depends on the seam it needs rather than on this. |
 | **`:core:data`** | `nimaz.android.library` + `nimaz.android.hilt` | Eighteen of the nineteen repository implementations, the `data/device`, `data/text` and `data/ai` slices, and the announcement store's repository. It is the only module that sees both `:core:database` and `:core:datastore`, which is what lets every other module depend on a `:core:domain` interface instead of on a DAO. |
-| **`:core:ui`** | `nimaz.android.library` + `nimaz.android.compose` | The design system — 52 atoms, the generic `Nimaz*` molecules, `theme/`, `foundation/`, `presentation/model` and `core/share` — plus **`strings.xml` and its five translations, `colors.xml` and the eight fonts**. The first module to own `res/`, which is why every other module now spells resources `com.arshadshah.nimaz.core.ui.R`. |
+| **`:core:ui`** | `nimaz.android.library` + `nimaz.android.compose` | The design system — 52 atoms, the generic `Nimaz*` molecules, `theme/`, `foundation/` and `presentation/model` — plus **`strings.xml` and its five translations, `colors.xml` and the eight fonts**. The first module to own `res/`, which is why every other module now spells resources `com.arshadshah.nimaz.core.ui.R`. (`core/share` was here and is `:core:share` now; `zxing` left with it.) |
+| **`:core:share`** | `nimaz.android.library` | Sharing: the branded-card `Canvas` renderer, the domain-model-to-`Shareable` builders, the `Intent` wrappers and the QR encoder. **Not one of its five files imports Compose** — it lived in `:core:ui` because that is where the strings and the fonts are, which is a dependency rather than a membership. It still depends on `:core:ui` for `R`: six of the 36 strings it draws are shared with feature screens, and duplicating copy across five translations, or three font files, is worse than a Compose classpath it never calls. Five feature modules consume it. |
 | **`:core:navigation`** | `nimaz.android.library` + `nimaz.android.compose` | The route vocabulary — `Routes.kt`, `ScreenTags`, `taggedComposable`, `ContentTargetRoutes`, and the announcement and help deep-link grammars. Every feature module needs it to declare its destinations. **It may not import `presentation.screens`, `presentation.viewmodel` or `:core:ui`** — a `Route` carries a destination's identity, never its label. `NavGraph.kt` itself is still in `:app`; it is decomposed in PR 12. |
 | **`:feature:widget`** | `nimaz.android.library` + `nimaz.android.hilt` + `nimaz.android.compose` | The six Glance widgets, their receivers, the tick receiver and six Workers — plus their manifest entries, `widget_colors.xml`, the `ic_widget_*` drawables, the preview layouts, the provider descriptors and the seventeen strings nothing else uses. **The first feature module**, chosen because it has zero `presentation/` imports. |
 | **`:feature:onboarding`** | `nimaz.android.feature` | The first-run flow — `screens/onboarding` and `viewmodel/onboarding`. **Extracted with nothing to unpick**, because `OnboardingViewModel` already took two settings *seams* and three domain ports rather than `SettingsRepository` and the Android APIs behind it. The reference shape for the modules still to come. |

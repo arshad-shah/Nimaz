@@ -78,26 +78,6 @@ import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
- * Search result data.
- */
-data class SearchResult(
-    val id: String,
-    val title: String,
-    val subtitle: String?,
-    val type: SearchResultType,
-    val highlightedText: String? = null
-)
-
-enum class SearchResultType {
-    QURAN,
-    HADITH,
-    DUA,
-    SURAH,
-    CHAPTER,
-    CATEGORY
-}
-
-/**
  * Pinned height for the search bar. Matches Material 3's standard
  * single-line input height so the bar lines up visually with text fields
  * elsewhere in the app and stays consistent whether or not the trailing
@@ -611,95 +591,6 @@ fun ExpandableSearchBar(
         if (isExpanded) {
             focusRequester.requestFocus()
         }
-    }
-}
-
-@Composable
-private fun SearchResultCard(
-    result: SearchResult,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    NimazCard(
-        style = NimazCardStyle.FILLED,
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        onClick = onClick
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Type indicator
-            Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(CircleShape)
-                    .background(getSearchResultTypeColor(result.type).copy(alpha = 0.15f)),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = getSearchResultTypeLabel(result.type),
-                    style = MaterialTheme.typography.labelMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = getSearchResultTypeColor(result.type)
-                )
-            }
-
-            Spacer(modifier = Modifier.width(12.dp))
-
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = result.title,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Medium,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                if (result.subtitle != null) {
-                    Text(
-                        text = result.subtitle,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-                if (result.highlightedText != null) {
-                    Text(
-                        text = result.highlightedText,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-            }
-        }
-    }
-}
-
-private fun getSearchResultTypeColor(type: SearchResultType): Color {
-    return when (type) {
-        SearchResultType.QURAN -> NimazColors.QuranColors.Meccan
-        SearchResultType.HADITH -> NimazColors.QuranColors.Medinan
-        SearchResultType.DUA -> NimazColors.Tertiary
-        SearchResultType.SURAH -> NimazColors.QuranColors.Meccan
-        SearchResultType.CHAPTER -> NimazColors.QuranColors.Medinan
-        SearchResultType.CATEGORY -> NimazColors.Tertiary
-    }
-}
-
-private fun getSearchResultTypeLabel(type: SearchResultType): String {
-    return when (type) {
-        SearchResultType.QURAN -> "Q"
-        SearchResultType.HADITH -> "H"
-        SearchResultType.DUA -> "D"
-        SearchResultType.SURAH -> "S"
-        SearchResultType.CHAPTER -> "C"
-        SearchResultType.CATEGORY -> "C"
     }
 }
 

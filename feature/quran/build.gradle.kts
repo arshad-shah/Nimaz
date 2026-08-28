@@ -67,6 +67,9 @@ dependencies {
     implementation(project(":core:common"))
     implementation(project(":core:ui"))
     implementation(project(":core:navigation"))
+    // Sharing — ayah actions, the saved list, tafseer and the reader all build a branded card,
+    // and `TafseerPdfExporter` hands its PDF to `ContentShareManager.shareFile`.
+    implementation(project(":core:share"))
     // `QuranViewModel` drives playback through `QuranAudioManager`, which lives here rather than
     // in this module because `MainActivity` holds one too — see the module's PR.
     implementation(project(":core:data"))
