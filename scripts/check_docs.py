@@ -42,6 +42,10 @@ SOURCE_SET_SUFFIXES = (
     Path("src/main/kotlin/com/arshadshah/nimaz"),
 )
 
+# The single registry of notification channel ids, as a path relative to a module's
+# `…/com/arshadshah/nimaz` source root — see notification_channel_ids().
+NIMAZ_CHANNELS = "core/common/NimazChannels.kt"
+
 ARCHITECTURE = DOCS / "ARCHITECTURE.md"
 NAVIGATION = DOCS / "NAVIGATION.md"
 SUBSYSTEMS = DOCS / "SUBSYSTEMS.md"
@@ -400,7 +404,23 @@ def widget_packages() -> list[str]:
 
 
 def notification_channel_ids() -> list[str]:
-    ids: set[str] = set()
+    """Every channel id the app ships.
+
+    Two sources, deliberately. `NimazChannels` is the registry every channel id is
+    supposed to live in, and reading it is what keeps this check working now that the
+    ids no longer sit beside the code that creates them. The old `const val CHANNEL_ID*`
+    pattern is kept alongside it as a net: a channel declared the old way, anywhere in
+    the tree, is still found and still has to be documented rather than quietly
+    escaping both the registry and this check.
+
+    The registry is resolved with `find_one` rather than named as a path from `ROOT`.
+    That is what makes a rename of the file a loud failure instead of a quiet return to
+    checking nothing — and it is also the only spelling this file's own test suite can
+    rebase onto its fixture tree, since `find_one` searches the module source roots.
+    """
+    ids: set[str] = set(
+        re.findall(r'const val [A-Z][A-Z0-9_]* = "([^"]+)"', read(find_one(NIMAZ_CHANNELS)))
+    )
     for path in source_files("*.kt"):
         ids |= set(re.findall(r'const val CHANNEL_ID[A-Z_]* = "([^"]+)"', read(path)))
     return sorted(ids)

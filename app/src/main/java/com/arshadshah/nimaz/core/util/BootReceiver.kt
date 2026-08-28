@@ -7,6 +7,7 @@ import android.content.Intent
 import androidx.core.app.NotificationCompat
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.common.LocaleHelper
+import com.arshadshah.nimaz.core.common.NimazChannels
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.data.audio.AdhanAudioManager
@@ -361,7 +362,7 @@ class BootReceiver : BroadcastReceiver() {
         val notification =
             NotificationCompat.Builder(
                 context,
-                PrayerNotificationScheduler.channelForPrayer(vibrationEnabled)
+                NimazChannels.forPrayer(vibrationEnabled)
             )
                 .setSmallIcon(R.drawable.ic_stat_nimaz)
                 .setContentTitle(title)
@@ -431,9 +432,9 @@ class BootReceiver : BroadcastReceiver() {
         val bigText = "$shortMessage\n\n$reflection"
 
         val channelId = if (adhanEnabled) {
-            PrayerNotificationScheduler.channelForAdhan(vibrationEnabled)
+            NimazChannels.forAdhan(vibrationEnabled)
         } else {
-            PrayerNotificationScheduler.channelForPrayer(vibrationEnabled, muted = muted)
+            NimazChannels.forPrayer(vibrationEnabled, muted = muted)
         }
 
         val notification = NotificationCompat.Builder(context, channelId)
@@ -553,7 +554,7 @@ class BootReceiver : BroadcastReceiver() {
 
         val notification = NotificationCompat.Builder(
             context,
-            PrayerNotificationScheduler.CHANNEL_ID_DAILY_SUMMARY
+            NimazChannels.DAILY_SUMMARY
         )
             .setSmallIcon(R.drawable.ic_stat_nimaz)
             .setContentTitle(content.title)
@@ -609,7 +610,7 @@ class BootReceiver : BroadcastReceiver() {
 
                 val notification = NotificationCompat.Builder(
                     context,
-                    PrayerNotificationScheduler.channelForPrayer(vibrationEnabled)
+                    NimazChannels.forPrayer(vibrationEnabled)
                 )
                     .setSmallIcon(R.drawable.ic_stat_nimaz)
                     .setContentTitle(title)
@@ -697,7 +698,7 @@ class BootReceiver : BroadcastReceiver() {
 
                 val notification = NotificationCompat.Builder(
                     context,
-                    PrayerNotificationScheduler.CHANNEL_ID_KHATAM
+                    NimazChannels.KHATAM
                 )
                     .setSmallIcon(R.drawable.ic_stat_nimaz)
                     .setContentTitle(title)
@@ -762,7 +763,7 @@ class BootReceiver : BroadcastReceiver() {
 
                 val notification = NotificationCompat.Builder(
                     context,
-                    PrayerNotificationScheduler.CHANNEL_ID_WORSHIP
+                    NimazChannels.WORSHIP
                 )
                     .setSmallIcon(R.drawable.ic_stat_nimaz)
                     .setContentTitle(title)

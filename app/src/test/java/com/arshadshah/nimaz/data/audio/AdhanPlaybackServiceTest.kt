@@ -6,6 +6,7 @@ import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
 import androidx.test.core.app.ApplicationProvider
+import com.arshadshah.nimaz.core.common.NimazChannels
 import com.arshadshah.nimaz.core.util.PrayerNotificationScheduler
 import com.arshadshah.nimaz.testing.TestEntryPointApplication
 import com.google.common.truth.Truth.assertThat
@@ -98,7 +99,7 @@ class AdhanPlaybackServiceTest {
         Robolectric.buildService(AdhanPlaybackService::class.java).create()
 
         val channel = notificationManager.notificationChannels
-            .single { it.id == AdhanPlaybackService.CHANNEL_ID }
+            .single { it.id == NimazChannels.ADHAN_PLAYBACK }
         assertThat(channel.sound).isNull()
         assertThat(channel.importance).isEqualTo(NotificationManager.IMPORTANCE_LOW)
     }
@@ -182,7 +183,7 @@ class AdhanPlaybackServiceTest {
         play(prayerName = "Asr")
 
         assertThat(notificationFor("Asr")!!.channelId)
-            .isEqualTo(PrayerNotificationScheduler.CHANNEL_ID_ADHAN)
+            .isEqualTo(NimazChannels.ADHAN)
     }
 
     @Test

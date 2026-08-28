@@ -14,6 +14,7 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.arshadshah.nimaz.core.ui.R
 import com.arshadshah.nimaz.R as AppR
+import com.arshadshah.nimaz.core.common.NimazChannels
 import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -38,7 +39,6 @@ class AdhanDownloadService : Service() {
 
     companion object {
         private const val TAG = "AdhanDownloadService"
-        const val CHANNEL_ID = "adhan_download_channel"
         const val NOTIFICATION_ID = 7777
         const val EXTRA_ADHAN_SOUND = "adhan_sound"
         const val ACTION_DOWNLOAD_DEFAULT = "com.arshadshah.nimaz.DOWNLOAD_DEFAULT_ADHAN"
@@ -324,7 +324,7 @@ class AdhanDownloadService : Service() {
         progress: Int,
         ongoing: Boolean = true
     ): Notification {
-        val builder = NotificationCompat.Builder(this, CHANNEL_ID)
+        val builder = NotificationCompat.Builder(this, NimazChannels.ADHAN_DOWNLOAD)
             .setSmallIcon(AppR.drawable.ic_stat_nimaz)
             .setContentTitle(title)
             .setPriority(NotificationCompat.PRIORITY_LOW)
@@ -361,7 +361,7 @@ class AdhanDownloadService : Service() {
 
     private fun createNotificationChannel() {
         val channel = NotificationChannel(
-            CHANNEL_ID,
+            NimazChannels.ADHAN_DOWNLOAD,
             getString(R.string.adhan_download_channel_name),
             NotificationManager.IMPORTANCE_LOW
         ).apply {

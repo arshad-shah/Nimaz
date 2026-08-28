@@ -19,6 +19,7 @@ import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaStyleNotificationHelper
 import com.arshadshah.nimaz.MainActivity
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.common.NimazChannels
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -44,7 +45,6 @@ class QuranAudioService : Service() {
     private var mediaSession: MediaSession? = null
 
     companion object {
-        const val CHANNEL_ID = "quran_audio_channel"
         const val NOTIFICATION_ID = 1001
 
         const val ACTION_PLAY = "com.arshadshah.nimaz.ACTION_QURAN_PLAY"
@@ -196,7 +196,7 @@ class QuranAudioService : Service() {
             state.reciterName
         }
 
-        val builder = NotificationCompat.Builder(this, CHANNEL_ID)
+        val builder = NotificationCompat.Builder(this, NimazChannels.QURAN_AUDIO)
             .setSmallIcon(R.drawable.ic_stat_nimaz)
             .setContentTitle(state.currentTitle)
             .setContentText(subtitle)
@@ -249,7 +249,7 @@ class QuranAudioService : Service() {
 
     private fun createNotificationChannel() {
         val channel = NotificationChannel(
-            CHANNEL_ID,
+            NimazChannels.QURAN_AUDIO,
             "Quran Audio",
             NotificationManager.IMPORTANCE_LOW
         ).apply {

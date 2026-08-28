@@ -5,6 +5,7 @@ import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
 import androidx.test.core.app.ApplicationProvider
+import com.arshadshah.nimaz.core.common.NimazChannels
 import com.arshadshah.nimaz.testing.TestEntryPointApplication
 import com.google.common.truth.Truth.assertThat
 import io.mockk.coEvery
@@ -96,7 +97,7 @@ class AdhanDownloadServiceTest {
         Robolectric.buildService(AdhanDownloadService::class.java).create()
 
         assertThat(notificationManager.notificationChannels.map { it.id })
-            .contains(AdhanDownloadService.CHANNEL_ID)
+            .contains(NimazChannels.ADHAN_DOWNLOAD)
     }
 
     @Test

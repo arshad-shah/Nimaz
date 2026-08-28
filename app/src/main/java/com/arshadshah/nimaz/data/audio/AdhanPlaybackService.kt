@@ -21,6 +21,7 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.common.NimazChannels
 import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import dagger.hilt.android.AndroidEntryPoint
 import java.io.File
@@ -48,7 +49,6 @@ class AdhanPlaybackService : Service() {
     private var currentPrayerName: String = "Prayer"
 
     companion object {
-        const val CHANNEL_ID = "adhan_playback_channel"
         const val NOTIFICATION_ID = 6666
 
         const val ACTION_PLAY = "com.arshadshah.nimaz.ACTION_PLAY_ADHAN"
@@ -316,7 +316,7 @@ class AdhanPlaybackService : Service() {
 
     private fun createNotificationChannel() {
         val channel = NotificationChannel(
-            CHANNEL_ID,
+            NimazChannels.ADHAN_PLAYBACK,
             "Adhan Playback",
             NotificationManager.IMPORTANCE_LOW
         ).apply {
@@ -372,8 +372,10 @@ class AdhanPlaybackService : Service() {
             setSpan(ForegroundColorSpan(0xFFE53935.toInt()), 0, length, 0)
         }
 
-        // Use the adhan channel for sound-related notifications
-        val channelId = com.arshadshah.nimaz.core.util.PrayerNotificationScheduler.CHANNEL_ID_ADHAN
+        // Use the adhan channel for sound-related notifications. It is created by
+        // `PrayerNotificationScheduler`, not here — this service only posts on it — but the id
+        // itself comes from `NimazChannels` so the reference does not cross a module boundary.
+        val channelId = NimazChannels.ADHAN
 
         val builder = NotificationCompat.Builder(this, channelId)
             .setSmallIcon(R.drawable.ic_stat_nimaz)

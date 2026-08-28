@@ -6,6 +6,7 @@ import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
 import androidx.test.core.app.ApplicationProvider
+import com.arshadshah.nimaz.core.common.NimazChannels
 import com.arshadshah.nimaz.domain.model.AudioState
 import com.arshadshah.nimaz.testing.TestEntryPointApplication
 import com.google.common.truth.Truth.assertThat
@@ -86,7 +87,7 @@ class QuranAudioServiceTest {
         create()
 
         val channel = notificationManager.notificationChannels
-            .single { it.id == QuranAudioService.CHANNEL_ID }
+            .single { it.id == NimazChannels.QURAN_AUDIO }
         assertThat(channel.sound).isNull()
         assertThat(channel.importance).isEqualTo(NotificationManager.IMPORTANCE_LOW)
     }
