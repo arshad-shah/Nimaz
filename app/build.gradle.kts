@@ -142,8 +142,8 @@ android {
         // pushes the change back to dev (with a bypass GitHub App token) after a successful
         // deploy, so the committed baseline stays in sync for the next build.
 
-        versionCode = 435
-        versionName = "3.0.134"
+        versionCode = 436
+        versionName = "3.0.135"
 
         // Custom runner swaps in HiltTestApplication so instrumented tests run on
         // the full Hilt graph without NimazApp's Firebase / AppInitializer / device
