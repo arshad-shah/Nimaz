@@ -4,15 +4,16 @@ Nimaz is an offline-first Android Islamic companion app: **Kotlin + Jetpack Comp
 **Clean Architecture** (`presentation → domain → data`) with **MVVM + UDF**, Hilt DI, Room,
 DataStore, type-safe Navigation Compose.
 
-**The Gradle module split (#551) is complete, and is being finished off.** Twenty modules plus
-`:baselineprofile` — eight `:core:*`, eleven `:feature:*`, and `:app` at 8% of the codebase. The
-nineteen of #551, plus `:core:share`, which came out of `:core:ui` afterwards.
+**The Gradle module split (#551) is complete, and is being finished off.** Twenty-one modules
+plus `:baselineprofile` — eight `:core:*`, twelve `:feature:*`, and `:app`. The nineteen of #551,
+plus `:core:share` out of `:core:ui` and `:feature:home` out of `:app`.
 
 What is left in `:app` is what cannot leave: `MainActivity`, `NimazApp`, `AppInitializer`, the
 manifest entry points, the adhan players and prayer-notification machinery, `QuranAudioManager`,
-AboutLibraries, `screens/home`, and the seven Hilt bindings pinned to one of those.
+AboutLibraries, and the seven Hilt bindings pinned to one of those. **It has no `presentation/`
+directory at all.**
 
-The nineteen modules outside `:app`, and what each one owns:
+The twenty modules outside `:app`, and what each one owns:
 
 - **`:core:domain`** (`core/domain/`) — the whole domain layer, a pure JVM module. No Android SDK
   on its classpath, so `import android.*` there is a compile error, and `androidFreeClasspath`
@@ -53,7 +54,7 @@ The nineteen modules outside `:app`, and what each one owns:
   `presentation.screens`, `presentation.viewmodel` or `:core:ui`** — a `Route` carries a
   destination's identity, never its label, which is why `NamesTab` moved here while its
   `@StringRes` stayed in the screen. `NavGraph.kt` is still in `:app`, but registers nothing —
-  the 94 destinations live in eleven `<Feature>Graph.kt` extensions beside their screens.
+  the 94 destinations live in twelve `<Feature>Graph.kt` extensions beside their screens.
 - **`:core:share`** (`core/share/`) — the branded-card `Canvas` renderer, the
   domain-model-to-`Shareable` builders, the `Intent` wrappers and the QR encoder. **Not one of its
   five files imports Compose**: it sat in `:core:ui` because that is where the strings and the
@@ -61,6 +62,16 @@ The nineteen modules outside `:app`, and what each one owns:
   six of the 36 strings it draws are shared with feature screens, and duplicating copy across five
   translations, or three font files, is worse than a Compose classpath it never calls. Five
   feature modules consume it, and **`:core:ui` must never depend on it**.
+- **`:feature:home`** (`feature/home/`) — the screen the app opens on: `HomeScreen`, `HomeGraph`,
+  `viewmodel/home`, and the 21 components only Home renders. **Nothing had to be unpicked** —
+  every `:app` symbol the group imported was declared inside the group. Four `:core:ui` files that
+  look like they belong here stayed there, and one of them *cannot* move: `PrayerVisuals` is read
+  by `:core:ui`'s own `PrayerTimeCard`, so moving it would point `:core:ui` at a feature and
+  `moduleBoundary` fails the build. `EventCard`, `EventCardVisuals` and `DuaOfTheMomentCard` are
+  Home's only consumers *today* — which is the sentence this epic has recorded getting wrong five
+  times. **`:app` has no `presentation/` directory after this**, so `PresentationSourceRoots.ALL`
+  had a root *removed* rather than only added to; `assertAllExist` fails on a listed root that is
+  no longer a directory.
 - **`:feature:widget`** (`feature/widget/`) — the six Glance widgets, their receivers, the tick
   receiver and six Workers, with their own manifest entries, `widget_colors.xml`, drawables,
   preview layouts, provider descriptors and seventeen strings. **The first feature module.** A
@@ -287,6 +298,7 @@ The obligations, in short:
 ./gradlew :core:ui:check              # design-system component tests + moduleBoundary + its lint
 ./gradlew :core:navigation:check      # route vocabulary + the no-presentation-imports guard
 ./gradlew :core:share:check           # the share builders, the card renderer, the QR encoder
+./gradlew :feature:home:check         # the home screen, its ViewModel and its 21 components
 ./gradlew :feature:widget:check       # the widgets + moduleBoundary + its own lint
 ./gradlew :feature:onboarding:check   # the first-run flow
 ./gradlew :feature:about:check        # about/help/more

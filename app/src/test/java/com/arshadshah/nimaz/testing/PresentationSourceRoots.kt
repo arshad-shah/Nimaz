@@ -31,14 +31,19 @@ object PresentationSourceRoots {
      * unit tests. `..` reaches the repository root.
      */
     val ALL: List<String> = listOf(
-        // Everything not yet extracted: screens, ViewModels, feature components, NavGraph.
-        "src/main/java/com/arshadshah/nimaz/presentation",
+        // `:app` has no `presentation/` directory at all since `:feature:home` left, and this
+        // entry was **removed** rather than left in place beside the new one. [assertAllExist]
+        // fails on a listed root that is no longer a directory, which is the correct behaviour
+        // and the reason it is an assertion rather than a filter — but it means a module move
+        // that empties a root has to delete the line, not only add one.
+        //
         // The design system, `presentation/model`, `theme/`, and the shared screen helpers.
         "../core/ui/src/main/kotlin/com/arshadshah/nimaz/presentation",
         // The route vocabulary. No screen, but `taggedComposable` and every `Route` live here.
         "../core/navigation/src/main/kotlin/com/arshadshah/nimaz/core/navigation",
         // Feature modules, in extraction order.
         "../feature/widget/src/main/kotlin/com/arshadshah/nimaz/widget",
+        "../feature/home/src/main/kotlin/com/arshadshah/nimaz/presentation",
         "../feature/onboarding/src/main/kotlin/com/arshadshah/nimaz/presentation",
         "../feature/about/src/main/kotlin/com/arshadshah/nimaz/presentation",
         "../feature/tools/src/main/kotlin/com/arshadshah/nimaz/presentation",

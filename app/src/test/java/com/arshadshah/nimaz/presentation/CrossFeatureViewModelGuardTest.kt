@@ -103,6 +103,7 @@ class CrossFeatureViewModelGuardTest {
          * appear; add each module's ViewModel packages in the PR that extracts it.
          */
         val MODULE_OF = mapOf(
+            "home" to "home",
             "onboarding" to "onboarding",
             "about" to "about",
             "help" to "about",

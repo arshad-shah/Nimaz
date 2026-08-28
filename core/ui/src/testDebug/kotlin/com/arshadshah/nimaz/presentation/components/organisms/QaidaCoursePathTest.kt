@@ -5,7 +5,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertHasNoClickAction
+import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.dp
@@ -186,6 +188,17 @@ class QaidaCoursePathTest {
         )
 
         composeRule.onNodeWithContentDescription(lockedLabel(1, "Lesson 1")).assertExists()
+    }
+
+    @Test
+    fun `a course with no lessons at all renders nothing rather than falling over`() {
+        // The zero case, one step below the single-lesson one: `indexOfLast` returns -1, the
+        // trail is skipped, and `maxOf` over an empty list would throw. This is what a content
+        // artifact that has not finished installing looks like, and the screen composes before
+        // it finishes.
+        showCourse(lessons = emptyList(), currentLessonId = null)
+
+        composeRule.onAllNodesWithContentDescription(lockedLabel(1, "Lesson 1")).assertCountEquals(0)
     }
 
     @Test
