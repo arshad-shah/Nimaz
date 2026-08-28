@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- The exact alarms every prayer notification is armed on, and the wake lock that lets one
+         fire with the screen off. Declared here so the module is self-describing: a consumer that
+         forgets them is an app whose notifications silently never arrive. -->
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <application>
+
+        <!-- Every alarm the app arms: prayer notifications and pre-reminders, the nightly
+             summary, the Friday reminder, the khatam nudge, the worship reminders and the
+             midnight reschedule. All arrive as explicit PendingIntents, so this needs a
+             declaration and no intent-filter.
+
+             Fully qualified, not `.core.util.…`. A leading dot resolves against the *application*
+             package, and a library manifest is merged into whatever application consumes it — so
+             the short form names a class that does not exist there. -->
+        <receiver
+            android:name="com.arshadshah.nimaz.core.util.PrayerAlarmReceiver"
+            android:enabled="true"
+            android:exported="false" />
+
+    </application>
+
+</manifest>

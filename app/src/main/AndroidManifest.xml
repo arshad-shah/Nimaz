@@ -16,18 +16,11 @@
     <!-- Vibration for Tasbih -->
     <uses-permission android:name="android.permission.VIBRATE" />
 
-    <!-- Schedule exact alarms for prayer notifications -->
-    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
-    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
-
     <!-- Boot receiver for rescheduling alarms -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <!-- Battery optimization exemption for reliable notifications -->
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
-
-    <!-- Wake lock for alarms -->
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <!-- Internet for fetching Quran audio (optional) -->
     <uses-permission android:name="android.permission.INTERNET" />
@@ -105,14 +98,11 @@
             </intent-filter>
         </receiver>
 
-        <!-- Every alarm the app arms: prayer notifications and pre-reminders, the nightly
-             summary, the Friday reminder, the khatam nudge, the worship reminders and the
-             midnight reschedule. All arrive as explicit PendingIntents, so this needs a
-             declaration and no intent-filter. -->
-        <receiver
-            android:name=".core.util.PrayerAlarmReceiver"
-            android:enabled="true"
-            android:exported="false" />
+        <!-- PrayerAlarmReceiver, and the SCHEDULE_EXACT_ALARM / USE_EXACT_ALARM / WAKE_LOCK
+             permissions it needs, are declared by :core:notifications' own manifest and merged
+             in from there. BootReceiver stays here: it re-arms the widget tick as well as the
+             alarms, and naming :feature:widget from a :core:* module is what moduleBoundary
+             forbids. -->
 
         <!-- The three audio foreground services, and the FOREGROUND_SERVICE* permissions they
              need, are declared by :core:audio's own manifest and merged in from there. -->

@@ -201,31 +201,49 @@ visible. That is why `StringProvider` exists: a ViewModel that must *compare* re
 (search, sorting) gets them through the seam rather than through a `Context`. This constrains
 every module below `:core:ui`, not just this one.
 
-What is left in `app/…/core/util/` is there deliberately, not by omission — and now permanently,
-since every module #551 planned exists. `NotificationDiagnostics` did go to `:feature:settings`.
-The prayer notification files did **not** go to `:feature:prayer`: nothing in that module names
-them, their consumers are `SettingsViewModel` and `AppInitializer`, and moving them would have
-created the `:feature:settings` → `:feature:prayer` edge #571 forbids — so `:feature:settings`
-reaches them through the `PrayerAlarmScheduler` and `PrayerNotificationTester` ports instead. (`TajweedParser` was listed here for `:core:ui`
-and went to **`:feature:quran`** instead — every one of its consumers is a Quran surface, and a
-parser only that feature calls does not belong in the design system. `TafseerPdfExporter` went to
-`:feature:quran` as predicted.) (`FlowExtensions` was listed here for `:core:data`; it went to `:core:common`
-instead — `mapItems` is a generic `Flow` extension that knows nothing about data, and a module
-below `:core:data` can want it.) `BootReceiver`,
-`PrayerRescheduler`, `InAppUpdateManager` and `core/init` stay in `:app` permanently — a manifest
-entry point and a composition root are app concerns.
+What is left in `app/…/core/util/` is `BootReceiver` and `InAppUpdateManager`, and that is now the
+whole of it. (`TajweedParser` was listed here for `:core:ui` and went to **`:feature:quran`**
+instead — every one of its consumers is a Quran surface, and a parser only that feature calls does
+not belong in the design system. `TafseerPdfExporter` went to `:feature:quran` as predicted.)
+(`FlowExtensions` was listed here for `:core:data`; it went to `:core:common` instead — `mapItems`
+is a generic `Flow` extension that knows nothing about data, and a module below `:core:data` can
+want it.) `NotificationDiagnostics` did go to `:feature:settings`.
 
-**`BootReceiver` is now only the first of those.** It was 812 lines doing two unrelated jobs: boot
-recovery, and delivering five kinds of alarm. Alarm delivery is `core/util/PrayerAlarmReceiver.kt`
-now; what is left is ~110 lines of recovery, and it is pinned to `:app` by more than being a
-manifest entry point — it calls `WidgetUpdateScheduler.ensureScheduled`, and a `:core:*` module
-naming that is a `:core:*` → `:feature:*` edge `moduleBoundary` fails the build on. Splitting them
-is what makes the notification stack movable at all; `PrayerAlarmReceiver` names nothing in
-`:feature:widget`.
+### The prayer notification stack, and a decision that was reversed
 
-Both receivers do their work inside `goAsync()`. Neither did before, and every branch of both
-starts work that outlives `onReceive` — so the process could be killed mid-reschedule, most likely
-right after a reboot, which is exactly when nothing else will do that work.
+This section used to say the notification files stayed in `:app` **permanently**. They are
+`:core:notifications` now, and the reversal is worth recording, because the original reasoning was
+not wrong — it was answering a different question.
+
+What it said was: they did not go to `:feature:prayer`, because nothing in that module names them,
+their consumers are `SettingsViewModel` and `AppInitializer`, and moving them would have created
+the `:feature:settings` → `:feature:prayer` edge #571 forbids. All true, and still true. **What
+does not follow is that `:app` was where they belonged.** A `:feature:*` module may depend on a
+`:core:*` one freely, so the edge that ruled out `:feature:prayer` says nothing about a core
+module; `:app` was simply the place they had not been moved out of yet. `:feature:settings` still
+reaches them through the `PrayerAlarmScheduler` and `PrayerNotificationTester` ports, which is
+unchanged and is the point — the ports were never about which module the implementation sat in.
+
+Three things had to happen before the move was possible, and each is a PR of its own:
+
+1. **The channel ids left for `:core:common`.** `AdhanPlaybackService` read
+   `PrayerNotificationScheduler.CHANNEL_ID_ADHAN` while `BootReceiver` started that service: a
+   cycle between `:core:notifications` and `:core:audio`, and one `moduleBoundary` cannot catch,
+   because both sides are `:core:*` and Gradle only reports it as a circular project dependency.
+2. **`BootReceiver` was split.** It was 812 lines doing two unrelated jobs — boot recovery, and
+   delivering five kinds of alarm — and it calls `WidgetUpdateScheduler.ensureScheduled`. A
+   `:core:*` module naming that *is* the `:core:*` → `:feature:*` edge `moduleBoundary` fails the
+   build on. Alarm delivery is `PrayerAlarmReceiver`, which names nothing in `:feature:widget`;
+   recovery stayed behind with the call. Both receivers do their work inside `goAsync()` now:
+   neither did before, and every branch of both starts work that outlives `onReceive`, so the
+   process could be killed mid-reschedule — most likely right after a reboot, which is exactly
+   when nothing else will do that work.
+3. **The notification icon left for `:core:ui`.** `ic_stat_nimaz` was the only drawable `:app`
+   had, and both this module and `:core:audio` draw it.
+
+`BootReceiver`, `InAppUpdateManager` and `core/init` **do** stay in `:app`: a manifest entry point
+that reaches into a feature module, an `Activity`-holding Play update flow, and a composition
+root. That part of the original claim held.
 
 ```text
 core/data/src/main/kotlin/             #  ← :core:data — the only module that sees both stores
@@ -260,7 +278,8 @@ com.arshadshah.nimaz/
 │   │   ├── DataStoreModule.kt       # @Provides PreferencesDataStore
 │   │   └── RepositoryModule.kt      # @Binds for the 7 impls pinned to :app (see the DI section)
 │   ├── navigation/          # Routes.kt (sealed Route), NavGraph.kt, deep links
-│   ├── util/                # Extensions, date utils, PDF exporters
+│   ├── util/                # BootReceiver, InAppUpdateManager — and nothing else; the
+│   │                        #   prayer-notification files are :core:notifications
 │   ├── feedback/            # In-app feedback capture
 │   └── init/                # AppInitializer
 │                            #   (core/share/ is :core:share — it was here, then :core:ui)
@@ -1846,9 +1865,9 @@ Requires JDK 21 and an Android SDK (compileSdk 37). Set `sdk.dir` in `local.prop
 
 ### Modules
 
-Twenty-two modules plus `:baselineprofile` — nine `:core:*`, twelve `:feature:*`, and `:app`.
+Twenty-three modules plus `:baselineprofile` — ten `:core:*`, twelve `:feature:*`, and `:app`.
 Nineteen of them are the finished state of #551; `:core:share` came out of `:core:ui`, and
-`:feature:home` and `:core:audio` out of `:app`, afterwards:
+`:feature:home`, `:core:audio` and `:core:notifications` out of `:app`, afterwards:
 
 | Module | Plugin | What it holds |
 |---|---|---|
@@ -1860,6 +1879,7 @@ Nineteen of them are the finished state of #551; `:core:share` came out of `:cor
 | **`:core:ui`** | `nimaz.android.library` + `nimaz.android.compose` | The design system — 52 atoms, the generic `Nimaz*` molecules, `theme/`, `foundation/` and `presentation/model` — plus **`strings.xml` and its five translations, `colors.xml` and the eight fonts**. The first module to own `res/`, which is why every other module now spells resources `com.arshadshah.nimaz.core.ui.R`. (`core/share` was here and is `:core:share` now; `zxing` left with it.) |
 | **`:core:share`** | `nimaz.android.library` | Sharing: the branded-card `Canvas` renderer, the domain-model-to-`Shareable` builders, the `Intent` wrappers and the QR encoder. **Not one of its five files imports Compose** — it lived in `:core:ui` because that is where the strings and the fonts are, which is a dependency rather than a membership. It still depends on `:core:ui` for `R`: six of the 36 strings it draws are shared with feature screens, and duplicating copy across five translations, or three font files, is worse than a Compose classpath it never calls. Five feature modules consume it. |
 | **`:core:audio`** | `nimaz.android.library` + `nimaz.android.hilt` | Every engine that makes a sound: the Quran recitation session and its `MediaSession` service, the adhan player, and the adhan download pipeline (foreground service + WorkManager fallback), plus `AdhanAudioManager`/`AdhanSound`, which came from `:core:data` so that none of it is split by an accident of extraction order. Brings its own manifest — three `<service>` entries and the `FOREGROUND_SERVICE*` permissions. **It could not have existed before the channel ids moved to `:core:common`**: `AdhanPlaybackService` read `PrayerNotificationScheduler.CHANNEL_ID_ADHAN` while `BootReceiver` started two of these services, which is a circular project dependency `moduleBoundary` cannot catch, both sides being `:core:*`. It is also the second module to measure the **ASM-transformed** classes for coverage; see `NimazCoverageExtension.measureTransformedClasses`. |
+| **`:core:notifications`** | `nimaz.android.library` + `nimaz.android.hilt` | The prayer-notification machinery: `PrayerNotificationScheduler` (the `AlarmManager` side and every channel), `PrayerAlarmReceiver` (which answers one when it fires), `PrayerRescheduler`, `PrayerAlarmTimes` and `NotificationContentHelper`. Brings its own manifest — the receiver, plus `SCHEDULE_EXACT_ALARM` / `USE_EXACT_ALARM` / `WAKE_LOCK`. **This reverses a decision §2 recorded**; the reasoning is there. Highest line coverage in the repo at 95.5%, which is not a coincidence: everything here is invisible when it breaks. |
 | **`:core:navigation`** | `nimaz.android.library` + `nimaz.android.compose` | The route vocabulary — `Routes.kt`, `ScreenTags`, `taggedComposable`, `ContentTargetRoutes`, and the announcement and help deep-link grammars. Every feature module needs it to declare its destinations. **It may not import `presentation.screens`, `presentation.viewmodel` or `:core:ui`** — a `Route` carries a destination's identity, never its label. `NavGraph.kt` itself is still in `:app`; it is decomposed in PR 12. |
 | **`:feature:widget`** | `nimaz.android.library` + `nimaz.android.hilt` + `nimaz.android.compose` | The six Glance widgets, their receivers, the tick receiver and six Workers — plus their manifest entries, `widget_colors.xml`, the `ic_widget_*` drawables, the preview layouts, the provider descriptors and the seventeen strings nothing else uses. **The first feature module**, chosen because it has zero `presentation/` imports. |
 | **`:feature:onboarding`** | `nimaz.android.feature` | The first-run flow — `screens/onboarding` and `viewmodel/onboarding`. **Extracted with nothing to unpick**, because `OnboardingViewModel` already took two settings *seams* and three domain ports rather than `SettingsRepository` and the Android APIs behind it. The reference shape for the modules still to come. |
@@ -1873,7 +1893,7 @@ Nineteen of them are the finished state of #551; `:core:share` came out of `:cor
 | **`:feature:prayer`** | `nimaz.android.feature` | When each prayer *is* and which way to face: prayer times, the monthly table, qibla and the night-worship window — the counterpart to `:feature:tracker`. The only module with a camera dependency (`ArQiblaView`). **The adhan players and the prayer notification machinery are *not* here**: nothing in the move set names them, and their consumers are the settings surface plus `:app` init, so sending them here would have created the `:feature:settings -> :feature:prayer` edge #571 forbids. **`PrayerTimeCard` and `PrayerSkyScene` went down to `:core:ui`**, being read by `HomeScreen`/`HomeHero` too. |
 | **`:feature:settings`** | `nimaz.android.feature` | The last feature module: 24 screens, the 1,400-line `SettingsViewModel`, location and sync. **Five screens arrive from other features' directories** — `DuaSettingsScreen`, `HadithSettingsScreen`, `SelectReciterScreen`, `SelectTranslationScreen`, `LocationScreen` — every one dispatching `SettingsEvent`. **`data/sync` did *not* come**: it imports 21 DAOs and 14 entities, so it went to `:core:data`. `PrayerNotificationScheduler` stayed in `:app`, pinned by one `AppR.drawable` line; the three members this module calls became the `PrayerAlarmScheduler` / `PrayerNotificationTester` ports. |
 | **`:feature:home`** | `nimaz.android.feature` | The screen the app opens on, and the last surface to leave `:app`: `HomeScreen`, `HomeGraph`, `viewmodel/home`, and the **21 components** only Home renders — the `Home*` organisms, `EventsCarousel`, `TodayCarousel`, `TodayInfoCards`, `TodaysProgressCard`, `JumuahCard`, `WorshipEventCard`, `NimazCarousel` and four molecules. **Nothing had to be unpicked**: every `:app` symbol the group imported was declared inside the group. `PrayerVisuals` did *not* come — `:core:ui`'s own `PrayerTimeCard` reads it, so moving it would point `:core:ui` at a feature; `EventCard`, `EventCardVisuals` and `DuaOfTheMomentCard` did not either, being decisions to take on their own evidence rather than as riders on a module move. |
-| **`:app`** | `nimaz.android.application` | **~20 files — under 4% of the codebase, and no `presentation/` directory at all.** What genuinely cannot leave: `MainActivity`, `NimazApp`, `NavGraph.kt`, the `core/di` modules, `core/init`, the notification stack (`PrayerNotificationScheduler`, `PrayerAlarmReceiver`, `PrayerRescheduler`, `NotificationContentHelper`, `PrayerAlarmTimes`) and `BootReceiver`, which was split out of it, `NimazMessagingService`, `InAppUpdateManager`, `data/sync`'s Worker side and `LibraryRepositoryImpl` — each a manifest entry point, a composition root, or pinned by AboutLibraries reading the *applying* project's classpath. |
+| **`:app`** | `nimaz.android.application` | **15 files, 1,454 lines — 1% of the codebase, and no `presentation/` directory at all.** It was 11,595 lines at the end of #551. Everything that is left is a composition root, a manifest entry point, or pinned to the application by a tool that reads the *applying* project: `MainActivity`, `NimazApp`, `NavGraph.kt`, six `core/di` modules, `AppInitializer`, `BootReceiver` (it re-arms the widget tick, and a `:core:*` module may not name `:feature:widget`), `InAppUpdateManager` (it holds an `Activity`), `NimazMessagingService`, `WorkManagerWidgetRefresher` and `LibraryRepositoryImpl` (AboutLibraries generates its catalogue from the applying project's classpath). |
 | **`:baselineprofile`** | `com.android.test` | Generates `app/src/main/baseline-prof.txt`. Nothing depends on it at runtime and no product code lives there. |
 
 Plus one **included build**, `build-logic`, which is not a module of the app — it produces the

@@ -20,7 +20,7 @@ import com.arshadshah.nimaz.domain.model.UserPreferences
 import com.arshadshah.nimaz.domain.model.WorshipReminderType
 import com.arshadshah.nimaz.domain.repository.KhatamRepository
 import com.arshadshah.nimaz.domain.repository.PrayerRepository
-import com.arshadshah.nimaz.testing.TestEntryPointApplication
+import com.arshadshah.nimaz.testing.NotificationEntryPointApplication
 import com.google.common.truth.Truth.assertThat
 import io.mockk.every
 import io.mockk.mockk
@@ -46,7 +46,7 @@ import org.robolectric.annotation.Config
  * takes a style, so its audio path is reached from nowhere else.
  */
 @RunWith(RobolectricTestRunner::class)
-@Config(application = TestEntryPointApplication::class, sdk = [34])
+@Config(application = NotificationEntryPointApplication::class, sdk = [34])
 class PrayerAlarmReceiverEdgesTest {
 
     private lateinit var context: Context
@@ -113,8 +113,8 @@ class PrayerAlarmReceiverEdgesTest {
             every { isDownloaded(any(), any()) } returns true
         }
 
-        TestEntryPointApplication.Injector.reset()
-        TestEntryPointApplication.Injector.prayerAlarmReceiver = { receiver ->
+        NotificationEntryPointApplication.Injector.reset()
+        NotificationEntryPointApplication.Injector.prayerAlarmReceiver = { receiver ->
             receiver.preferencesDataStore = preferences
             receiver.prayerRepository = prayerRepository
             receiver.prayerRescheduler = mockk(relaxed = true)

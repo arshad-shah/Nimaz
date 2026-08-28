@@ -28,60 +28,53 @@ jacoco {
 }
 
 /**
- * `:app` is on the ratchet — on **lines only**, and the missing branch floor is the finding
- * rather than an omission.
+ * `:app` is on the ratchet — on **lines only**, and both numbers now measure something quite
+ * different from what they measured before the module was emptied.
  *
- * **The line floor is 0.75, down from 0.80, and the module did not get worse.** Home left for
- * `:feature:home` and took 205 tests with it, and what it left behind is proportionally more
- * composition root: `:app` reads 77.6% now against 82.6% before, with the same tests passing in
- * a module where they are gated at **80/80**. Total measured coverage across the repo went up.
- * This is the shape a floor takes on a module that is being emptied, and it is why the number is
- * re-measured at each extraction rather than assumed — see `docs/TESTING.md`.
+ * **The line floor is 0.35, and that is not a module that got worse.** It read 82.6% when it held
+ * the Home surface, the audio stack and the notification stack. Every one of those left, with
+ * every test that covered them, for modules gated at **80/80** (`:feature:home`),
+ * **70/50** (`:core:audio`) and **80/80** (`:core:notifications`). Total measured coverage across
+ * the repo went *up* at each step. What is left here is twelve files, and 296 of the 318 lines
+ * they still miss are the composition root and the entry points that were always documented as
+ * the instrumented suite's job:
  *
- * Branch coverage is **51.1%**, and neither of the two values the campaign sanctions (#604) is
- * available:
- *
- * | where the module's 1,790 missing branches are | count |
+ * | what remains, and what covers it | lines |
  * |---|---|
- * | composable signature / parameter masks        |   786 |
- * | ordinary logic                                |   495 |
- * | `NavGraph` + `MainActivity`                   |   194 |
- * | ExoPlayer listener paths                      |   180 |
+ * | `AppInitializer` — 86/90, `AppInitializerTest` (15)               |  90 |
+ * | `InAppUpdateManager` — 64/70, `InAppUpdateManagerTest` (20)       |  70 |
+ * | `BootReceiver` — 22/22, `BootReceiverTest` (8)                    |  22 |
+ * | `LibraryRepositoryImpl` — 9/20                                    |  20 |
+ * | `NavGraph` + `MainActivity` — 0, **on purpose** (see below)       | 252 |
+ * | `NimazApp`, `NimazMessagingService`, `WorkManagerWidgetRefresher`, generated Hilt Java | 45 |
  *
- * **0.80 is arithmetically impossible.** Cover every branch outside the signature masks — every
- * `when`, every null-check, the whole composition root, the whole player — and the module reads
- * **76.1%**. The masks are the Compose compiler's `$dirty` skippability check, emitted once per
- * parameter of every restartable composable; which side runs depends on what the *caller* changed
- * between recompositions, so no test can take both. `:app`'s composables are unusually wide —
- * `HomeScreen` takes 17 parameters and hands 19 to `HomeCompactContent` and 18 to
- * `HomeTabletContent` — so 44% of the module's branches are mask, against 17% in `:core:ui`.
+ * So the three classes that *can* be unit-tested are at 96%, 91% and 100%, and the module reads
+ * 36.3% because the other 60% of it is a `setContent { NavGraph(…) }` and an
+ * `@HiltAndroidApp`. A floor of 0.35 still catches a real regression: losing `AppInitializer`'s
+ * 86 lines alone takes the module to 19%.
  *
- * **0.60 would be a floor with no headroom.** Of the 495 ordinary-logic branches, 144 sit inside
- * `@Preview` and `*Showcase` bodies, which are tooling and never run. Cover every one of the 351
- * that remain and the module reads about **62.6%** — two points over a 0.60 gate, which the next
- * composable added would spend. A floor that tight measures how many parameters the screens
- * happen to have, not whether they are tested; #604 rule 3 rejects exactly that.
- *
- * So this module states its branch number rather than gating it, and `docs/TESTING.md` records
- * why. Raising it means narrowing the composables, not lowering the bar.
+ * **The branch floor stays absent, and for a new reason.** It used to be absent because 44% of
+ * the module's 1,790 missing branches were the Compose compiler's `$dirty` parameter masks, which
+ * no test can take both sides of. There are no composables here any more except `MainActivity`
+ * and `NavGraph`, and 242 of the 265 missing branches are theirs. Gating on that would gate on
+ * the instrumented suite, which is a different lane.
  *
  * ### What is left uncovered on purpose
  *
- * - **`NavGraph` and `MainActivity`** (252 lines, 194 branches, both at 0%). `MainActivity` is
+ * - **`NavGraph` and `MainActivity`** (252 lines, 242 branches, both at 0%). `MainActivity` is
  *   `@AndroidEntryPoint` and its body is `setContent { NavGraph(…) }`; a destination inside a
  *   `NavHost` gets a `NavBackStackEntry` as its `ViewModelStoreOwner`, which *is* a
  *   `HasDefaultViewModelProviderFactory`, so Hilt's factory is constructed before any seeded
  *   store is read (#604 playbook item 8). They are the instrumented suite's job — see
  *   `app/src/androidTest`'s navigation package, which drives the real graph on a device.
- * - **`QuranAudioManager`'s player listener** (180 branches). Its arms fire on ExoPlayer
- *   reaching `STATE_ENDED` or transitioning media items, which needs a player actually decoding
- *   audio rather than one Robolectric has stubbed.
- * - **`@Preview` bodies.** 35 preview functions across the module, none of which the app runs.
+ * - **`NimazApp`** (12 lines). `@HiltAndroidApp`; the same problem one layer up.
  */
 nimazCoverage {
-    lineFloor.set(0.75)
-    // No branchFloor: see above. 51.1% today, 76.1% if everything reachable were covered.
+    lineFloor.set(0.35)
+    // No branchFloor: see above. 22.5% today, and 242 of the 265 missing branches are the
+    // composition root the instrumented suite covers.
 }
+
 
 // Firebase (Crashlytics + Analytics) is configured via google-services.json,
 // which CI injects from secrets only for the release/deploy build. PR checks and
@@ -361,6 +354,10 @@ dependencies {
     // `AdhanPlaybackService.stopAdhan` / `QuranAudioService.ACTION_OPEN_PLAYING_SURAH` are the
     // two static entry points it still calls.
     implementation(project(":core:audio"))
+    // The prayer-notification machinery: the `AlarmManager` scheduler, the receiver that answers
+    // an alarm, the rescheduler and the notification copy. `BootReceiver` stays here because it
+    // re-arms the widget tick as well, and `AppInitializer` still holds the concrete scheduler.
+    implementation(project(":core:notifications"))
     // The six Glance widgets and their workers — the first feature module (#564). It brings its
     // own manifest entries, its own widget_colors/drawables/layouts and the 17 strings nothing
     // else uses, so nothing widget-shaped is left here. (The other 16 it references stay in
@@ -446,10 +443,10 @@ dependencies {
     implementation(libs.hilt.work)
     ksp(libs.hilt.work.compiler)
 
-    // Media3 ExoPlayer
-    implementation(libs.media3.exoplayer)
-    implementation(libs.media3.ui)
-    implementation(libs.media3.session)
+    // No media3 here. Every player the app has is `:core:audio`'s, and `MainActivity` reads the
+    // `QuranPlayback` port rather than `QuranAudioManager` — which is also why it no longer
+    // carries `@UnstableApi`. `media3.ui` had been declared and imported by nothing for longer
+    // than that.
 
     // Coroutines
     implementation(libs.kotlinx.coroutines.android)
@@ -604,6 +601,7 @@ tasks.withType<Test>().configureEach {
         "navigationModuleSources" to "core/navigation/src/main",
         "shareModuleSources" to "core/share/src/main",
         "audioModuleSources" to "core/audio/src/main",
+        "notificationsModuleSources" to "core/notifications/src/main",
         "widgetModuleSources" to "feature/widget/src/main",
         "homeModuleSources" to "feature/home/src/main",
         "onboardingModuleSources" to "feature/onboarding/src/main",
@@ -871,6 +869,23 @@ val coverageModules = listOf(
         ),
         sourceDir = "src/main/kotlin",
         packageRoot = "com/arshadshah/nimaz/presentation/components/atoms",
+    ),
+    CoverageModule(
+        gradlePath = ":core:notifications",
+        projectDir = rootProject.layout.projectDirectory.dir("core/notifications"),
+        testTask = "testDebugUnitTest",
+        // The transformed root, for the same reason `:core:audio` uses it: `PrayerAlarmReceiver`
+        // is `@AndroidEntryPoint`, so the Hilt plugin rewrites it and the tests load the
+        // rewritten copy. Measuring the compiler output reports it at 0%.
+        classesGlobs = listOf(
+            "intermediates/classes/debug/transformDebugClassesWithAsm/dirs/**",
+        ),
+        execGlobs = listOf(
+            "jacoco/testDebugUnitTest.exec",
+            "outputs/unit_test_code_coverage/**/*.exec",
+        ),
+        sourceDir = "src/main/kotlin",
+        packageRoot = "com/arshadshah/nimaz/core/util",
     ),
     CoverageModule(
         gradlePath = ":core:audio",

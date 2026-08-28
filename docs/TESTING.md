@@ -200,8 +200,13 @@ codebase keeps its Room migrations in `NimazDatabase.Companion`, so it was hidin
 them — 210 lines of the code where a mistake is a crash on launch rather than a wrong screen.
 A companion object is somewhere people put code.
 
-It spans all nineteen modules because `coverageModules` in `app/build.gradle.kts` lists them
-one by one, each with the globs for that module's class output and its `.exec` file. Two
+It spans `:app` and the twenty-two other modules, because `coverageModules` in
+`app/build.gradle.kts` lists them one by one, each with the globs for that module's class output
+and its `.exec` file. **`:core:audio` and `:core:notifications` name a different class root** —
+`intermediates/classes/debug/transformDebugClassesWithAsm`, as `:app` does — because their
+`@AndroidEntryPoint` receivers and services are rewritten by the Hilt plugin and the tests load
+the rewritten copies. Naming *both* roots is what must not happen: JaCoCo aborts the whole report
+on two class files per class. Two
 assertions in the task's `doLast` keep it honest, and both exist because the failure they catch
 reads as *low coverage* rather than as an error:
 
@@ -1465,18 +1470,20 @@ production code changed and no `COVERAGE_EXCLUSIONS` entry added or widened.
 > between them, moved intact. `:app` has no `presentation/` directory at all now. The rows are
 > kept because what they pin is unchanged and the reasoning is where it was written.
 >
-> **`:app`'s own line floor came down to 0.75 with them, and the module did not get worse.** The
-> same tests pass in the modules that took them, where they are gated at 80/80 and 70/50; what is
-> left in `:app` is proportionally more composition root, so the *ratio* falls while total
-> measured coverage across the repo rises. A floor on a module that is being emptied has to be
-> re-measured at each extraction rather than assumed — which is also why `:app:coverageFloor`
-> being absent from the PR lane (`fastlane android test` runs `testDebugUnitTest` and
-> `lintDebug`, not `check`) is worth knowing: `./gradlew check` is where this shows up.
+> **`:app`'s own line floor came down with them — 0.80 to 0.75 when Home left, and 0.75 to 0.35
+> once the notification stack did — and the module did not get worse.** The same tests pass in
+> the modules that took them, gated at 80/80, 70/50 and 80/80; what is left in `:app` is almost
+> entirely composition root, so the *ratio* falls while total measured coverage across the repo
+> rises. A floor on a module that is being emptied has to be re-measured at each extraction
+> rather than assumed — which is also why `:app:coverageFloor` being absent from the PR lane
+> (`fastlane android test` runs `testDebugUnitTest` and `lintDebug`, not `check`) is worth
+> knowing: `./gradlew check` is where this shows up.
 >
-> `TestEntryPointApplication` had to be **split** rather than shared: it names the generated
-> `*_GeneratedInjector` interfaces, and those are generated into whichever module declares the
-> service. `AudioEntryPointApplication` in `:core:audio` is the same class for the three audio
-> services; this one keeps the two broadcast receivers and the FCM service.
+> `TestEntryPointApplication` had to be **split three ways** rather than shared: it names the
+> generated `*_GeneratedInjector` interfaces, and those are generated into whichever module
+> declares the subject. `AudioEntryPointApplication` in `:core:audio` covers the three audio
+> services, `NotificationEntryPointApplication` in `:core:notifications` covers
+> `PrayerAlarmReceiver`, and this one keeps `BootReceiver` and the FCM service.
 >
 > The **measurement** fix below travelled with them, and is `build-logic`'s now rather than
 > `:app`'s: `:core:audio` took three `@AndroidEntryPoint` services and read **45.1% lines** until
@@ -1514,8 +1521,8 @@ than in `build-logic`.
 
 | File | Pins |
 |---|---|
-| `core/util/PrayerNotificationSchedulerTest` (29) | Every alarm the app lives by, read back off `shadowOf(alarmManager).scheduledAlarms` rather than verified as a call. Nothing in the UI shows that an alarm was expected, so this class was at 1% while notifications were the app's headline feature. It pins that the midnight chain — the whole recurrence mechanism, since every other alarm is a one-shot — is armed for 00:01 tomorrow; that turning notifications off *cancels* rather than silently leaving yesterday's alarms armed; that no alarm is ever armed in the past, because Android delivers a past trigger immediately and the notification then re-posts on every reschedule for the rest of the day; and that a malformed stored khatam time falls back to 06:00 rather than throwing and taking every prayer alarm with it. Also the deliberate asymmetry `cancelAllPrayerNotifications` leaves behind: the daily summary is a recap rather than a prayer alert and survives it. |
-| `core/util/PrayerAlarmReceiverTest` (30), `PrayerAlarmReceiverEdgesTest` (13), `BootReceiverTest` (8), `BootReceiverManifestTest` (4) | Where every prayer notification is actually produced. The alert style decides sound, and the tests assert on the *channel* because that is what Android reads: a silenced prayer lands on the muted channel at low priority, vibration off lands on the no-vibration sibling, and sunrise cannot be silenced at all because it is the end of Fajr's window rather than a prayer. The adhan path pins the rule that matters religiously — a missing variant falls back to the beep and **never** to the other variant, because playing the Fajr adhan at Dhuhr is wrong — and that Do Not Disturb gates the audio only, so a reader in a meeting is still told a prayer came in. Every handler is wrapped in `catch (e: Exception)`, which is right for a receiver with nowhere to propagate to and is also why each arm needs a test to exist at all: a handler that throws on its first line looks exactly like a quiet day. The recovery half is its own receiver and its own two files: `BootReceiverTest` covers the four actions that re-arm the alarms — including `MY_PACKAGE_REPLACED`, which is what carries an install across the rename of a `PendingIntent`'s target — and `BootReceiverManifestTest` checks the half of a receiver's contract that lives in XML. That second one exists because three branches of the old receiver read as supported, were covered by a unit test calling `onReceive` directly, and on a device never arrived once: there was no `<intent-filter>` behind them. |
+| `core/util/PrayerNotificationSchedulerTest` (29) *(now `:core:notifications`)* | Every alarm the app lives by, read back off `shadowOf(alarmManager).scheduledAlarms` rather than verified as a call. Nothing in the UI shows that an alarm was expected, so this class was at 1% while notifications were the app's headline feature. It pins that the midnight chain — the whole recurrence mechanism, since every other alarm is a one-shot — is armed for 00:01 tomorrow; that turning notifications off *cancels* rather than silently leaving yesterday's alarms armed; that no alarm is ever armed in the past, because Android delivers a past trigger immediately and the notification then re-posts on every reschedule for the rest of the day; and that a malformed stored khatam time falls back to 06:00 rather than throwing and taking every prayer alarm with it. Also the deliberate asymmetry `cancelAllPrayerNotifications` leaves behind: the daily summary is a recap rather than a prayer alert and survives it. |
+| `core/util/PrayerAlarmReceiverTest` (30), `PrayerAlarmReceiverEdgesTest` (13) *(now `:core:notifications`)*, `BootReceiverTest` (8), `BootReceiverManifestTest` (5) | Where every prayer notification is actually produced. The alert style decides sound, and the tests assert on the *channel* because that is what Android reads: a silenced prayer lands on the muted channel at low priority, vibration off lands on the no-vibration sibling, and sunrise cannot be silenced at all because it is the end of Fajr's window rather than a prayer. The adhan path pins the rule that matters religiously — a missing variant falls back to the beep and **never** to the other variant, because playing the Fajr adhan at Dhuhr is wrong — and that Do Not Disturb gates the audio only, so a reader in a meeting is still told a prayer came in. Every handler is wrapped in `catch (e: Exception)`, which is right for a receiver with nowhere to propagate to and is also why each arm needs a test to exist at all: a handler that throws on its first line looks exactly like a quiet day. The recovery half is its own receiver and its own two files: `BootReceiverTest` covers the four actions that re-arm the alarms — including `MY_PACKAGE_REPLACED`, which is what carries an install across the rename of a `PendingIntent`'s target — and `BootReceiverManifestTest` checks the half of a receiver's contract that lives in XML. That second one exists because three branches of the old receiver read as supported, were covered by a unit test calling `onReceive` directly, and on a device never arrived once: there was no `<intent-filter>` behind them. It reads the **merged** manifest — the path AGP records in `com/android/tools/test_config.properties`, the same one Robolectric uses — which stopped being a nicety when the two receivers ended up declared in two different modules. |
 | `core/init/AppInitializerTest` (15) | The five startup tasks and the 5-second budget that lets the UI open regardless. A slow migration must not hold a reader at the splash screen when they opened the app to check Maghrib, and a task that throws must not stop the other four. Also that today's alarms are re-armed on every start — nothing else does it — and that an install which already has the audio does not re-download it on every cold start. |
 | `core/util/InAppUpdateManagerTest` (20) | The update banner's state machine, driven through a stubbed `AppUpdateManagerFactory`. The recoveries are the point: a failed check, a cancelled Play dialog and a flow Play refuses to launch each have to leave the banner interactive, because a banner stuck on a spinner is a dead control with no other route to the update. Play's callbacks post to the main looper, so every assertion idles it first — without that the whole class passes reading `Checking`. |
 | `data/audio/AdhanPlaybackServiceTest` (14), `AdhanDownloadServiceTest` (13), `QuranAudioServiceTest` (15) *(now `:core:audio`)* | The three foreground services, each built with `Robolectric.buildService`. What they produce is a notification, and the endings are what a reader sees when something half-works: a download that fetched one variant is reported as **partial** rather than done, because "downloaded" with no Fajr file means silence at the one prayer nobody is awake to notice. The Quran service's notification has to follow the audio state — Pause while playing, ongoing only while playing, download progress instead of the reciter while preparing — and take itself down when audio ends rather than sitting in the shade. |
