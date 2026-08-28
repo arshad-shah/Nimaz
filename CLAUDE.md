@@ -4,14 +4,15 @@ Nimaz is an offline-first Android Islamic companion app: **Kotlin + Jetpack Comp
 **Clean Architecture** (`presentation → domain → data`) with **MVVM + UDF**, Hilt DI, Room,
 DataStore, type-safe Navigation Compose.
 
-**The Gradle module split (#551) is complete.** Nineteen modules plus `:baselineprofile` —
-seven `:core:*`, eleven `:feature:*`, and `:app` reduced to 52 files / 11,484 lines, 8% of the
-codebase. What is left in `:app` is what cannot leave: `MainActivity`, `NimazApp`,
-`AppInitializer`, the manifest entry points, the adhan players and prayer-notification
-machinery, `QuranAudioManager`, AboutLibraries, `screens/home`, and the seven Hilt bindings
-pinned to one of those.
+**The Gradle module split (#551) is complete, and is being finished off.** Twenty modules plus
+`:baselineprofile` — eight `:core:*`, eleven `:feature:*`, and `:app` at 8% of the codebase. The
+nineteen of #551, plus `:core:share`, which came out of `:core:ui` afterwards.
 
-The eighteen modules that came out of it, and what each one owns:
+What is left in `:app` is what cannot leave: `MainActivity`, `NimazApp`, `AppInitializer`, the
+manifest entry points, the adhan players and prayer-notification machinery, `QuranAudioManager`,
+AboutLibraries, `screens/home`, and the seven Hilt bindings pinned to one of those.
+
+The nineteen modules outside `:app`, and what each one owns:
 
 - **`:core:domain`** (`core/domain/`) — the whole domain layer, a pure JVM module. No Android SDK
   on its classpath, so `import android.*` there is a compile error, and `androidFreeClasspath`
@@ -40,7 +41,7 @@ The eighteen modules that came out of it, and what each one owns:
   value as a constructor parameter and pass it from a `:app` Hilt module, as `AiModule` does for
   `IntegrityTokenProvider`.
 - **`:core:ui`** (`core/ui/`) — the design system: 52 atoms, the generic `Nimaz*` molecules,
-  `theme/`, `foundation/`, `presentation/model`, `core/share`, plus `strings.xml` + its five
+  `theme/`, `foundation/`, `presentation/model`, plus `strings.xml` + its five
   translations, `colors.xml` and the eight fonts. **It owns `R.string.*` now.** With
   `nonTransitiveRClass=true` a module's `R` holds only its own resources, so presentation code
   imports **`com.arshadshah.nimaz.core.ui.R`**; `com.arshadshah.nimaz.R` keeps only the widget and
@@ -53,6 +54,13 @@ The eighteen modules that came out of it, and what each one owns:
   destination's identity, never its label, which is why `NamesTab` moved here while its
   `@StringRes` stayed in the screen. `NavGraph.kt` is still in `:app`, but registers nothing —
   the 94 destinations live in eleven `<Feature>Graph.kt` extensions beside their screens.
+- **`:core:share`** (`core/share/`) — the branded-card `Canvas` renderer, the
+  domain-model-to-`Shareable` builders, the `Intent` wrappers and the QR encoder. **Not one of its
+  five files imports Compose**: it sat in `:core:ui` because that is where the strings and the
+  fonts are, which is a dependency and not a membership. It still depends on `:core:ui` for `R` —
+  six of the 36 strings it draws are shared with feature screens, and duplicating copy across five
+  translations, or three font files, is worse than a Compose classpath it never calls. Five
+  feature modules consume it, and **`:core:ui` must never depend on it**.
 - **`:feature:widget`** (`feature/widget/`) — the six Glance widgets, their receivers, the tick
   receiver and six Workers, with their own manifest entries, `widget_colors.xml`, drawables,
   preview layouts, provider descriptors and seventeen strings. **The first feature module.** A
@@ -278,6 +286,7 @@ The obligations, in short:
 ./gradlew :core:data:check            # repository tests + public-API leak guard + moduleBoundary
 ./gradlew :core:ui:check              # design-system component tests + moduleBoundary + its lint
 ./gradlew :core:navigation:check      # route vocabulary + the no-presentation-imports guard
+./gradlew :core:share:check           # the share builders, the card renderer, the QR encoder
 ./gradlew :feature:widget:check       # the widgets + moduleBoundary + its own lint
 ./gradlew :feature:onboarding:check   # the first-run flow
 ./gradlew :feature:about:check        # about/help/more

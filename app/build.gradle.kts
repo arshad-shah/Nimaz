@@ -386,7 +386,6 @@ dependencies {
     // Core
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.core.splashscreen)
-    implementation(libs.zxing.core)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
@@ -584,6 +583,7 @@ tasks.withType<Test>().configureEach {
         "dataSources" to "core/data/src/main",
         "uiModuleSources" to "core/ui/src/main",
         "navigationModuleSources" to "core/navigation/src/main",
+        "shareModuleSources" to "core/share/src/main",
         "widgetModuleSources" to "feature/widget/src/main",
         "onboardingModuleSources" to "feature/onboarding/src/main",
         "aboutModuleSources" to "feature/about/src/main",
@@ -847,6 +847,21 @@ val coverageModules = listOf(
         ),
         sourceDir = "src/main/kotlin",
         packageRoot = "com/arshadshah/nimaz/presentation/components/atoms",
+    ),
+    CoverageModule(
+        gradlePath = ":core:share",
+        projectDir = rootProject.layout.projectDirectory.dir("core/share"),
+        testTask = "testDebugUnitTest",
+        classesGlobs = listOf(
+            "intermediates/built_in_kotlinc/debug/**/classes/**",
+            "tmp/kotlin-classes/debug/**",
+        ),
+        execGlobs = listOf(
+            "jacoco/testDebugUnitTest.exec",
+            "outputs/unit_test_code_coverage/**/*.exec",
+        ),
+        sourceDir = "src/main/kotlin",
+        packageRoot = "com/arshadshah/nimaz/core/share",
     ),
     CoverageModule(
         gradlePath = ":core:navigation",

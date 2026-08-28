@@ -1318,7 +1318,8 @@ screen at once.
 **Three tests were living in `:app/src/test` and moved to the module that owns their subject** —
 `ShareablesZakatTest` (`core/share`), `TranslationFontFamilyTest` (`theme/`) and
 `CompassDegreesTest` (`foundation/geometry`). The merged `:app` report counted them either way;
-what changes is the attribution.
+what changes is the attribution. The first of those has since moved once more, with the other five
+share tests, into **`:core:share`** — same reason, one module further out.
 
 **Two techniques account for most of the new coverage, and both are worth reusing.**
 
@@ -1346,7 +1347,9 @@ what a learner is told — including that a **locked** medallion is not offered 
 scales, and that a stack trace stays behind its toggle. `ShareablesTest` (24) and
 `ShareablesBlankFieldsTest` (5): every share body, with each optional field absent *and* blank —
 the content database is a fetched artifact, so `""` is the shape that actually arrives.
-`ContentShareManagerTest` (6): the intent the app really starts. `WorshipReminderContentTest` (10):
+`ContentShareManagerTest` (6): the intent the app really starts. (Those three, and the two
+`ShareCardRenderer` tests, are `:core:share`'s now — listed here because the module they describe
+came out of this one.) `WorshipReminderContentTest` (10):
 eleven reminder types across two parallel `when`s, and that the `Context` and `StringProvider`
 overloads never disagree — the file's own KDoc records them doing so once, giving every
 Arafah/Ashura reminder the Arafah body. `HadithGradeChipTest` (7): that no two authenticity grades

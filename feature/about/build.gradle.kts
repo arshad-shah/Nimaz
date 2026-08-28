@@ -86,6 +86,10 @@ dependencies {
     implementation(project(":core:common"))
     implementation(project(":core:ui"))
     implementation(project(":core:navigation"))
+    // Sharing — `ContentShareManager.sendEmail`/`shareBranded` from the More menu, and `QrCodes`
+    // for the share sheet's QR. `:core:ui` used to carry both; `ShareAppSheet` and `NimazQrCode`
+    // arrived here in the same change, which is what let `:core:ui` drop `zxing` entirely.
+    implementation(project(":core:share"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

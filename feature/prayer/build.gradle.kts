@@ -113,6 +113,9 @@ dependencies {
     implementation(project(":core:common"))
     implementation(project(":core:ui"))
     implementation(project(":core:navigation"))
+    // Sharing — `MonthlyPrayerTimesScreen` exports the table and hands the file to
+    // `ContentShareManager.shareFile`.
+    implementation(project(":core:share"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

@@ -83,6 +83,8 @@ dependencies {
     implementation(project(":core:common"))
     implementation(project(":core:ui"))
     implementation(project(":core:navigation"))
+    // Sharing — the hadith and dua readers build a branded card through `Shareables`.
+    implementation(project(":core:share"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

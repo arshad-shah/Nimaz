@@ -65,6 +65,8 @@ dependencies {
     implementation(project(":core:common"))
     implementation(project(":core:ui"))
     implementation(project(":core:navigation"))
+    // Sharing — the zakat calculator shares its result as a branded card.
+    implementation(project(":core:share"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
