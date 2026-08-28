@@ -35,7 +35,7 @@ import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 
 /**
- * `BootReceiver`'s recovery arms and its two remaining audio paths.
+ * `PrayerAlarmReceiver`'s recovery arms and its two remaining audio paths.
  *
  * Every handler in the receiver is wrapped in `catch (e: Exception)`, which is right — a
  * receiver has nowhere to propagate to and crashing on boot is worse than one missed
@@ -47,7 +47,7 @@ import org.robolectric.annotation.Config
  */
 @RunWith(RobolectricTestRunner::class)
 @Config(application = TestEntryPointApplication::class, sdk = [34])
-class BootReceiverEdgesTest {
+class PrayerAlarmReceiverEdgesTest {
 
     private lateinit var context: Context
     private lateinit var notificationManager: NotificationManager
@@ -84,11 +84,11 @@ class BootReceiverEdgesTest {
 
         preferences = mockk(relaxed = true) {
             every { userPreferences } returns prefsFlow
-            every { adhanRespectDnd } returns this@BootReceiverEdgesTest.adhanRespectDnd
-            every { notificationVibration } returns this@BootReceiverEdgesTest.notificationVibration
+            every { adhanRespectDnd } returns this@PrayerAlarmReceiverEdgesTest.adhanRespectDnd
+            every { notificationVibration } returns this@PrayerAlarmReceiverEdgesTest.notificationVibration
             every { notificationReminderMinutes } returns reminderMinutes
-            every { adhanEnabled } returns this@BootReceiverEdgesTest.adhanEnabled
-            every { selectedAdhanSound } returns this@BootReceiverEdgesTest.selectedAdhanSound
+            every { adhanEnabled } returns this@PrayerAlarmReceiverEdgesTest.adhanEnabled
+            every { selectedAdhanSound } returns this@PrayerAlarmReceiverEdgesTest.selectedAdhanSound
             every { prayerAlertStyle(any()) } answers {
                 alertStyles.getValue(firstArg<String>().uppercase())
             }
@@ -98,9 +98,9 @@ class BootReceiverEdgesTest {
             every { asrNotificationEnabled } returns perPrayerEnabled.getValue("ASR")
             every { maghribNotificationEnabled } returns perPrayerEnabled.getValue("MAGHRIB")
             every { ishaNotificationEnabled } returns perPrayerEnabled.getValue("ISHA")
-            every { fridayReminderEnabled } returns this@BootReceiverEdgesTest.fridayReminderEnabled
-            every { khatamReminderEnabled } returns this@BootReceiverEdgesTest.khatamReminderEnabled
-            every { appLanguage } returns this@BootReceiverEdgesTest.appLanguage
+            every { fridayReminderEnabled } returns this@PrayerAlarmReceiverEdgesTest.fridayReminderEnabled
+            every { khatamReminderEnabled } returns this@PrayerAlarmReceiverEdgesTest.khatamReminderEnabled
+            every { appLanguage } returns this@PrayerAlarmReceiverEdgesTest.appLanguage
             every { worshipReminderEnabled(any()) } answers { worshipEnabled.getValue(firstArg()) }
         }
         prayerRepository = mockk(relaxed = true) {
@@ -114,9 +114,8 @@ class BootReceiverEdgesTest {
         }
 
         TestEntryPointApplication.Injector.reset()
-        TestEntryPointApplication.Injector.bootReceiver = { receiver ->
+        TestEntryPointApplication.Injector.prayerAlarmReceiver = { receiver ->
             receiver.preferencesDataStore = preferences
-            receiver.prayerNotificationScheduler = mockk(relaxed = true)
             receiver.prayerRepository = prayerRepository
             receiver.prayerRescheduler = mockk(relaxed = true)
             receiver.khatamRepository = khatamRepository
@@ -124,10 +123,10 @@ class BootReceiverEdgesTest {
         }
     }
 
-    private fun receive(intent: Intent) = BootReceiver().onReceive(context, intent)
+    private fun receive(intent: Intent) = PrayerAlarmReceiver().onReceive(context, intent)
 
     private fun prayerIntent(type: String, name: String, time: String = LocalDateTime.now().toString()) =
-        Intent(context, BootReceiver::class.java).apply {
+        Intent(context, PrayerAlarmReceiver::class.java).apply {
             action = PrayerNotificationScheduler.ACTION_PRAYER_NOTIFICATION
             putExtra(PrayerNotificationScheduler.EXTRA_PRAYER_TYPE, type)
             putExtra(PrayerNotificationScheduler.EXTRA_PRAYER_NAME, name)
@@ -261,7 +260,7 @@ class BootReceiverEdgesTest {
             IllegalStateException("datastore gone")
 
         receive(
-            Intent(context, BootReceiver::class.java).apply {
+            Intent(context, PrayerAlarmReceiver::class.java).apply {
                 action = PrayerNotificationScheduler.ACTION_WORSHIP_REMINDER
                 putExtra(
                     PrayerNotificationScheduler.EXTRA_WORSHIP_TYPE,

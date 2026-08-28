@@ -554,7 +554,7 @@ class PrayerNotificationSchedulerTest {
         assertThat(broadcasts.map { it.getStringExtra(PrayerNotificationScheduler.EXTRA_PRAYER_TYPE) })
             .containsExactly("FAJR", "SUNRISE", "DHUHR", "ASR", "MAGHRIB", "ISHA")
         assertThat(broadcasts.map { it.component?.className }.distinct())
-            .containsExactly(BootReceiver::class.java.name)
+            .containsExactly(PrayerAlarmReceiver::class.java.name)
     }
 
     /** 11 PM today, or tomorrow if this test runs after it. */

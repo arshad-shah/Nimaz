@@ -411,7 +411,7 @@ scans `widget/` for English prayer/weekday literals outside comments.
 - Default state is `Success(emptyData)`, not `Loading` → widgets show em-dash skeletons, not a spinner, before the first worker run. That is why retention asks `hasData` rather than "is it `Success`".
 - The 1-min tick only recomposes. The *values* — prayer times, the Hijri date, the tracker's ticks — only refresh on the worker; what the tick advances is the selection and countdown derived from stored instants.
 - NextPrayer and PrayerTimes share one AlarmManager request code (`9876`), so they share one alarm. `cancelIfUnused` is what keeps removing one from cancelling the other's tick: it checks `AppWidgetManager.getAppWidgetIds` for both providers and only cancels when neither is placed. `WidgetUpdateScheduler.schedule` is idempotent (`FLAG_UPDATE_CURRENT`), so the shared code is safe to re-arm from either side.
-- The alarm does not survive a reboot. `BootReceiver` calls `WidgetUpdateScheduler.ensureScheduled` on `BOOT_COMPLETED`, and `onUpdate` re-arms it as well; periodic work needs neither, because WorkManager persists it itself.
+- The alarm does not survive a reboot. `BootReceiver` calls `WidgetUpdateScheduler.ensureScheduled` on `BOOT_COMPLETED` (and on `MY_PACKAGE_REPLACED`), and `onUpdate` re-arms it as well; periodic work needs neither, because WorkManager persists it itself.
 - `togglePrayerStatus` writes a Room `PrayerRecordEntity` directly from the widget layer via the EntryPoint — a layering deviation, noted but intentional for interactivity.
 - `PrayerTimesWidgetDataSource` still calls `HijriDateCalculator.today()` with **no** offset, so it ignores `hijriDayOffset` — the inverse of the Hijri-date widget, which applies it to too much (#509). Two widgets on one home screen can disagree about the Hijri date.
 
@@ -439,7 +439,7 @@ download fallback. What is worth knowing beyond the list:
 
 **Note: prayer notifications do NOT use WorkManager** — they use `AlarmManager` exact alarms (§4). WorkManager here is widgets + the adhan-download fallback.
 
-**Boot.** `core/util/BootReceiver.kt` re-runs scheduling on `BOOT_COMPLETED` (§4); widget periodic work survives reboots via WorkManager's own persistence. The widgets' per-minute **AlarmManager** tick does not, so the same branch calls `WidgetUpdateScheduler.ensureScheduled` (§2).
+**Boot.** `core/util/BootReceiver.kt` re-runs scheduling on `BOOT_COMPLETED`, on either `QUICKBOOT_POWERON` spelling, and on `MY_PACKAGE_REPLACED` (§4); widget periodic work survives reboots via WorkManager's own persistence. The widgets' per-minute **AlarmManager** tick does not, so the same branch calls `WidgetUpdateScheduler.ensureScheduled` (§2). Both receivers do their work inside `goAsync()`: everything they start outlives `onReceive`, and without it the process may be killed mid-reschedule — most likely at boot, which is when it matters most.
 
 ---
 
@@ -456,7 +456,11 @@ and re-scheduling on midnight rollover and boot.
   method's default argument values live on the interface (Kotlin forbids an override from
   restating them), so `AppInitializer`, `PrayerRescheduler` and the instrumented test, which all
   hold the concrete type, are unaffected.
-- `core/util/BootReceiver.kt` — `@AndroidEntryPoint BroadcastReceiver`; fires for **all** alarms and actually posts notifications / triggers adhan.
+- `core/util/PrayerAlarmReceiver.kt` — `@AndroidEntryPoint BroadcastReceiver`; fires for **all**
+  alarms and actually posts notifications / triggers adhan. Declared in the manifest with **no**
+  `<intent-filter>`: every action reaches it through an explicit `PendingIntent`.
+- `core/util/BootReceiver.kt` — the recovery half, ~110 lines. Re-arms the alarms and the widget
+  tick on `BOOT_COMPLETED`, the two `QUICKBOOT_POWERON` spellings, and `MY_PACKAGE_REPLACED`.
 - `core/util/NotificationContentHelper.kt` — pure title/message/summary text generator.
 - `data/audio/AdhanPlaybackService.kt` — plays the adhan and posts the merged prayer+adhan notification (§1).
 
@@ -466,7 +470,7 @@ and re-scheduling on midnight rollover and boot.
 
 - **Vibration is a channel property.** Android ignores `enableVibration()` changes after a
   channel exists, so the `notificationVibration` preference is honoured by *posting on the
-  matching channel* via `channelForPrayer(vibrate, muted)` / `channelForAdhan(vibrate)`, **not**
+  matching channel* via `NimazChannels.forPrayer(vibrate, muted)` / `forAdhan(vibrate)`, **not**
   by per-notification `setVibrate` (kept only as the pre-O fallback). That is why the silent
   siblings exist at all.
 - **Silence is a third channel, not a flag.** The `*_SILENT` channels above are *no-vibration*
@@ -485,7 +489,7 @@ so the playback channel is effectively unused for the visible notification.
 sequenceDiagram
     participant Sched as PrayerNotificationScheduler
     participant AM as AlarmManager
-    participant BR as BootReceiver
+    participant BR as PrayerAlarmReceiver
     participant Svc as AdhanPlaybackService
     participant User
 
@@ -505,7 +509,7 @@ sequenceDiagram
 ```
 
 **Who calls it, and with what.** Every caller builds its arguments from **DataStore**, never from
-ViewModel state: `BootReceiver` reads `PreferencesDataStore` directly, and the settings screens go
+ViewModel state: `PrayerAlarmReceiver` reads `PreferencesDataStore` directly, and the settings screens go
 through `RescheduleNotificationsUseCase` (`domain/usecase/notification/`). That is a rule with a
 scar behind it — `SettingsViewModel` used to build the alarm set from `_notificationState.value`,
 a snapshot taken at construction, and since `hiltViewModel()` gives each settings screen its own
@@ -514,9 +518,9 @@ the Prayer screen. The use case exists so there is no state to pass in. Reuse
 `settingsRepository.enabledPrayerTypes()` and `preReminderMinutesByPrayer()`
 (`domain/repository/PrayerNotificationPrefs.kt`) rather than re-deriving either.
 
-**Scheduling.** `scheduleTodaysPrayerNotifications(...)` cancels everything then re-arms enabled prayers, using `setExactAndAllowWhileIdle(RTC_WAKEUP, …)` with `PendingIntent.getBroadcast` targeting `BootReceiver` (explicit intent). Request codes: prayer `1000 + ordinal`, pre-reminder `2000 + ordinal`, midnight reschedule `9999` (00:01), daily summary `8889` (23:00), Friday reminder `8890`, Khatam reminder `8891`. Pre-reminders fire at `prayerTime − preReminders[type]` (skipped for Sunrise) — see **per-prayer alert style and reminder** below. The **Friday (Jummah) reminder** (`scheduleFridayReminder`, gated on `fridayReminderEnabled`) is a one-shot at the upcoming Friday's Dhuhr − `fridayReminderMinutes`, re-armed on every reschedule so it always targets the next Friday.
+**Scheduling.** `scheduleTodaysPrayerNotifications(...)` cancels everything then re-arms enabled prayers, using `setExactAndAllowWhileIdle(RTC_WAKEUP, …)` with `PendingIntent.getBroadcast` targeting `PrayerAlarmReceiver` (explicit intent). Request codes: prayer `1000 + ordinal`, pre-reminder `2000 + ordinal`, midnight reschedule `9999` (00:01), daily summary `8889` (23:00), Friday reminder `8890`, Khatam reminder `8891`. Pre-reminders fire at `prayerTime − preReminders[type]` (skipped for Sunrise) — see **per-prayer alert style and reminder** below. The **Friday (Jummah) reminder** (`scheduleFridayReminder`, gated on `fridayReminderEnabled`) is a one-shot at the upcoming Friday's Dhuhr − `fridayReminderMinutes`, re-armed on every reschedule so it always targets the next Friday.
 
-**Firing.** `BootReceiver.onReceive` dispatches on action: boot → reschedule; `ACTION_MIDNIGHT_RESCHEDULE` → reschedule (self-perpetuating daily chain); `ACTION_PRAYER_NOTIFICATION` → post notification &/or play adhan; `ACTION_DAILY_SUMMARY` → summary; `ACTION_FRIDAY_REMINDER` → post the Jummah reminder; `ACTION_KHATAM_REMINDER` → post the Khatam nudge. The midnight chain used to also rewrite every unlogged past prayer to `missed`. It no longer does: a prayer nobody logged is not a prayer the user missed, and those rows fed the qada list. Confirming them is an explicit action in the prayer tracker. If adhan should play and the file exists, it calls `AdhanPlaybackService.playAdhan(...)` and the service's foreground notification **doubles as** the prayer notification (shared id `prayerName.hashCode()`); if the file is missing it triggers a download for next time and falls back to beep. **Do Not Disturb:** when `adhanRespectDnd` is on and the system is in a DND mode, `dndBlocksAdhan` gates only the **adhan audio** (`shouldPlayAdhan`/`shouldPlayBeep`) — the visual prayer notification is still posted, and the OS silences its channel sound under DND. The `SILENT` alert style is different in kind: it is the user's own choice, so it silences the visual notification too. The Friday reminder (no adhan audio) always posts and is likewise silenced by the OS under DND.
+**Firing.** `PrayerAlarmReceiver.onReceive` dispatches on action: `ACTION_MIDNIGHT_RESCHEDULE` → reschedule (self-perpetuating daily chain); `ACTION_PRAYER_NOTIFICATION` → post notification &/or play adhan; `ACTION_DAILY_SUMMARY` → summary; `ACTION_FRIDAY_REMINDER` → post the Jummah reminder; `ACTION_KHATAM_REMINDER` → post the Khatam nudge. The midnight chain used to also rewrite every unlogged past prayer to `missed`. It no longer does: a prayer nobody logged is not a prayer the user missed, and those rows fed the qada list. Confirming them is an explicit action in the prayer tracker. If adhan should play and the file exists, it calls `AdhanPlaybackService.playAdhan(...)` and the service's foreground notification **doubles as** the prayer notification (shared id `prayerName.hashCode()`); if the file is missing it triggers a download for next time and falls back to beep. **Do Not Disturb:** when `adhanRespectDnd` is on and the system is in a DND mode, `dndBlocksAdhan` gates only the **adhan audio** (`shouldPlayAdhan`/`shouldPlayBeep`) — the visual prayer notification is still posted, and the OS silences its channel sound under DND. The `SILENT` alert style is different in kind: it is the user's own choice, so it silences the visual notification too. The Friday reminder (no adhan audio) always posts and is likewise silenced by the OS under DND.
 
 **Per-prayer alert style and reminder.** Each of the five prayers carries its own
 `PrayerAlertStyle` (`ADHAN` | `NOTIFICATION` | `SILENT`, `domain/model/PrayerAlertStyle.kt`) and
@@ -527,13 +531,13 @@ The two are honoured at **different times**, which is the thing to keep straight
 
 | Setting | Stored as | Read at | Consequence |
 |---|---|---|---|
-| Alert style | `<prayer>_alert_style` (String) | **fire time**, `BootReceiver.handlePrayerNotification` | changing it needs no rescheduling |
+| Alert style | `<prayer>_alert_style` (String) | **fire time**, `PrayerAlarmReceiver.handlePrayerNotification` | changing it needs no rescheduling |
 | Reminder on/off | `<prayer>_reminder_enabled` (Boolean) | **schedule time** | changing it re-arms alarms |
 | Reminder lead time | `<prayer>_reminder_minutes` (Int) | **schedule time**, and rides on the alarm intent as `EXTRA_REMINDER_MINUTES` | the fired notification states the right number |
 
 `scheduleTodaysPrayerNotifications` takes `preReminders: Map<PrayerType, Int>` — a prayer absent
 from the map gets no reminder, which is how "off" is expressed rather than a zero offset. The
-three callers (`AppInitializer`, `BootReceiver`, `SettingsViewModel`) build it through
+three callers (`AppInitializer`, `PrayerAlarmReceiver`, `SettingsViewModel`) build it through
 `SettingsRepository.preReminderMinutesByPrayer()` (`domain/repository/PrayerNotificationPrefs.kt`) so they
 cannot drift. `PrayerAlertStyle.playsAdhan(globalAdhanEnabled, isSunrise)` and `.isMuted(isSunrise)`
 state the fire-time rules once: the global adhan switch stays a **master gate** over the per-prayer
@@ -542,7 +546,7 @@ five styles.
 
 **The app-wide pre-reminder pair is not a sixth setting.** `notification_reminder_minutes` and
 `show_reminder_before` predate the split and are **not read when alarms are scheduled** — only
-`BootReceiver` still reads the former, as the lead time a fired pre-reminder states when its alarm
+`PrayerAlarmReceiver` still reads the former, as the lead time a fired pre-reminder states when its alarm
 carries no `EXTRA_REMINDER_MINUTES` (an alarm armed before the split). They survive as the
 remembered bulk choice behind the **All prayers** group at the top of `PrayerNotificationsScreen`,
 which writes them *and* fans the same value out to all five per-prayer settings. Writing only the
@@ -575,7 +579,7 @@ cannot be read from the OS is listed.
 `khatamReminderTime` ("HH:mm", default 06:00), gated on `khatamReminderEnabled`. Like every
 other alarm here it is armed **inside `scheduleTodaysPrayerNotifications`**, which is what keeps
 the midnight chain and the boot path re-arming it — a reminder scheduled outside that call would
-fire once and never again. `BootReceiver.handleKhatamReminder` re-checks the preference at fire
+fire once and never again. `PrayerAlarmReceiver.handleKhatamReminder` re-checks the preference at fire
 time, **returns without posting when no khatam is active**, and derives the day's target from
 `KhatamProgressCalculator`. It **re-applies the saved locale as its first statement**: below API
 33 the per-app locale is process-local and applied asynchronously by `AppInitializer`, so an
@@ -601,7 +605,7 @@ prayers). The pure `WorshipReminderCalculator` (`core/util/`, JVM-tested) comput
 (`ACTION_WORSHIP_REMINDER`, request-code block **9000+ordinal**), **inside
 `scheduleTodaysPrayerNotifications`** so the midnight/boot chain re-arms them daily. They post on
 the DEFAULT-importance `worship_reminders` channel (`NimazChannels.WORSHIP`) via
-`BootReceiver.handleWorshipReminder` (re-checks the per-type pref + re-applies the saved locale),
+`PrayerAlarmReceiver.handleWorshipReminder` (re-checks the per-type pref + re-applies the saved locale),
 with copy from `WorshipReminderContent`. Prefs are generic dynamic keys
 (`worship_<key>_enabled` / `_offset` / `_mode`) on `SettingsRepository`/`PreferencesDataStore`. The
 notification settings screen is now a **hub** (`NotificationSettingsScreen`, #301) linking to focused
@@ -707,7 +711,16 @@ Ramadan.
 - **Doze / battery optimization** is the main "fired late" failure mode; the code measures `deliveryLatencySeconds` for telemetry but doesn't request the battery exemption itself.
 - `POST_NOTIFICATIONS` (API 33+) isn't checked before `notify()` — denied → silent no-op.
 - Channels exist only once the scheduler singleton is first instantiated by DI.
-- `BootReceiver` handles `LOCKED_BOOT_COMPLETED`/QUICKBOOT in code but only `BOOT_COMPLETED` has a manifest intent-filter.
+- **Fixed.** `BootReceiver` used to handle `LOCKED_BOOT_COMPLETED` and both `QUICKBOOT_POWERON`
+  spellings in code with only `BOOT_COMPLETED` filtered, so three of its four branches could
+  never run. The QUICKBOOT actions are declared now; `LOCKED_BOOT_COMPLETED` is removed, because
+  making it arrive needs `directBootAware="true"` and the reschedule reaches DataStore and Room,
+  both unreadable before first unlock. `BootReceiverManifestTest` checks both directions — every
+  handled action has a filter, and no filter names an action nothing handles.
+- **Alarms armed before the `BootReceiver` split name a component that no longer answers them.**
+  A `PendingIntent` names a class; the alarm actions moved to `PrayerAlarmReceiver`. `AppInitializer`
+  re-arms everything on launch, and `MY_PACKAGE_REPLACED` re-arms it seconds after the update for
+  an install nobody opens.
 
 ---
 
@@ -1130,7 +1143,7 @@ backed by a Jetpack Preferences DataStore (`preferencesDataStore(name = "nimaz_p
 (ViewModels, `MainActivity`) injects **`SettingsRepository`**, not the concrete class (bound via
 `@Binds` in `RepositoryModule`); the combined snapshot model `UserPreferences` lives in
 `domain/model`. Data-layer consumers (both sync classes, all content seeders, `AppInitializer`,
-`BootReceiver`) inject the concrete `PreferencesDataStore` directly — that's fine,
+`PrayerAlarmReceiver`) inject the concrete `PreferencesDataStore` directly — that's fine,
 they're in the data layer. When you add a new setting, add it to **both** the class and the
 `SettingsRepository` interface.
 
@@ -1224,7 +1237,7 @@ add it to the observer** — `loadSettings()` no longer reads the Quran block at
 Hadith, general and prayer blocks are still one-shot; they have no cross-screen picker today, but
 the same trap applies the moment one is added.)
 
-**Aggregate.** `val userPreferences: Flow<UserPreferences>` maps a curated subset of keys into a top-level `data class UserPreferences(...)` for one-shot reads of the common cross-cutting settings (used by `SettingsViewModel`, `LocationViewModel`, `AppInitializer`, `BootReceiver`, `WidgetsScreen`).
+**Aggregate.** `val userPreferences: Flow<UserPreferences>` maps a curated subset of keys into a top-level `data class UserPreferences(...)` for one-shot reads of the common cross-cutting settings (used by `SettingsViewModel`, `LocationViewModel`, `AppInitializer`, `PrayerAlarmReceiver`, `WidgetsScreen`).
 
 **Bulk ops.** `clearAllData()`, `exportAllPreferences(): Map<String,String>`, `importPreferences(map)` — used by the sync subsystem (§10).
 
