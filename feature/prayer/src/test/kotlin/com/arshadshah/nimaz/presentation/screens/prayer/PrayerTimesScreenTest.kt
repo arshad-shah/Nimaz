@@ -194,37 +194,6 @@ class PrayerTimesScreenTest {
     }
 
     @Test
-    fun `tapping a prayer row toggles that prayer`() {
-        show()
-        render()
-
-        composeRule.onAllNodesWithText("Asr").onFirst().performClick()
-
-        // The row carries its own type: a card wired to a captured loop variable toggles the
-        // wrong prayer, and the reader's record is then quietly wrong.
-        assertThat(events).containsExactly(PrayerTimesEvent.TogglePrayer(PrayerType.ASR))
-    }
-
-    @Test
-    fun `a future day offers no tracking toggles`() {
-        show(date = today.plusDays(2))
-        render()
-
-        // `showToggle = !isFuture`: a prayer that has not happened cannot have been prayed, and
-        // a checkbox that says otherwise writes a record for a day that has not arrived.
-        composeRule.onAllNodesWithContentDescription(str(R.string.prayed)).assertCountEquals(0)
-    }
-
-    @Test
-    fun `today's rows do offer them`() {
-        show()
-        render()
-
-        // Five, not six: sunrise is not a prayer and never carries a toggle.
-        composeRule.onAllNodesWithContentDescription(str(R.string.prayed)).assertCountEquals(5)
-    }
-
-    @Test
     fun `the day info card reports the sun, the daylight and the method`() {
         show()
         render()

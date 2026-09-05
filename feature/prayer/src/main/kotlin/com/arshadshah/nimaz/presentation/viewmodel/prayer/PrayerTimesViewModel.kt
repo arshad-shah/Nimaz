@@ -8,8 +8,6 @@ import com.arshadshah.nimaz.core.monitoring.PerfMonitor
 import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.domain.time.TodayProvider
 import com.arshadshah.nimaz.domain.model.PrayerCalculationSettings
-import com.arshadshah.nimaz.domain.model.PrayerName
-import com.arshadshah.nimaz.domain.model.PrayerStatus
 import com.arshadshah.nimaz.domain.model.PrayerTime
 import com.arshadshah.nimaz.domain.model.PrayerType
 import com.arshadshah.nimaz.domain.usecase.PrayerUseCases
@@ -45,10 +43,8 @@ class PrayerTimesViewModel @Inject constructor(
     /** The user's calculation settings, mirrored so a recompute never has to suspend. */
     private var settings: PrayerCalculationSettings? = null
 
-    // Cached prayer instants for the selected day, and the tracking statuses.
+    // Cached prayer instants for the selected day.
     private var dayTimes: List<PrayerTime> = emptyList()
-    private var statuses: Map<PrayerName, PrayerStatus> = emptyMap()
-    private var statusJob: Job? = null
 
     /** The in-flight day recompute, cancelled and replaced so a fast pager cannot stack them. */
     private var dayJob: Job? = null
@@ -112,10 +108,6 @@ class PrayerTimesViewModel @Inject constructor(
                 telemetry.featureUsed(AppAnalytics.Feature.PRAYER_TIMES, "select_date")
                 selectDate(event.date)
             }
-            // The `toggle_prayer` feature event moved into `togglePrayer`, past its two
-            // guards, and became `prayerTracked`. Logged here it counted taps on Sunrise and
-            // on future days, neither of which changes anything.
-            is PrayerTimesEvent.TogglePrayer -> togglePrayer(event.type)
         }
     }
 
@@ -180,9 +172,9 @@ class PrayerTimesViewModel @Inject constructor(
                 val day = prayerUseCases.getDaySchedule(date, resolved)
                 // Tomorrow's Fajr is only needed for today's after-Isha wrap, and it is
                 // computed **here** rather than in `publishDisplays`. It used to run there,
-                // which meant a second full day of astronomy on every publish — including
-                // every Room re-emission of the tracker statuses, so toggling one prayer
-                // recomputed a whole day's solar geometry on the UI thread.
+                // which meant a second full day of astronomy on every publish — and publishes
+                // were frequent, because the tracker's records were observed and every write
+                // from anywhere in the app re-emitted them. That subscription is now gone too.
                 val tomorrow = if (date == todayProvider.today()) {
                     prayerUseCases.getDaySchedule(date.plusDays(1), resolved)
                         .firstOrNull { it.type == PrayerType.FAJR }?.time
@@ -226,19 +218,7 @@ class PrayerTimesViewModel @Inject constructor(
             )
         }
 
-        observeStatuses(date)
         publishDisplays()
-    }
-
-    private fun observeStatuses(date: LocalDate) {
-        statusJob?.cancel()
-        val dateKey = date.toEpochDay() * 86_400_000L
-        statusJob = launchSafely(telemetry, AppAnalytics.Feature.PRAYER_TIMES, "observe_statuses") {
-            prayerUseCases.getPrayerRecordsForDate(dateKey).collect { records ->
-                statuses = records.associate { it.prayerName to it.status }
-                publishDisplays()
-            }
-        }
     }
 
     /**
@@ -255,12 +235,14 @@ class PrayerTimesViewModel @Inject constructor(
         val displays = dayTimes
             .sortedBy { it.time }
             .map { pt ->
+                // No `prayerStatus`: this screen is a reference surface and never reads one, so
+                // subscribing to the tracker's records would re-emit — and recompute the day —
+                // on every write made from the tracker or Home. The field stays on the shared
+                // model for `HomeScreen`, which does show it.
                 PrayerTimeDisplay(
                     type = pt.type,
                     name = pt.type.displayName,
                     timeAt = pt.time,
-                    prayerStatus = statuses[PrayerName.valueOf(pt.type.name)]
-                        ?: PrayerStatus.NOT_PRAYED,
                 )
             }
 
@@ -273,27 +255,6 @@ class PrayerTimesViewModel @Inject constructor(
         }
     }
 
-    private fun togglePrayer(type: PrayerType) {
-        if (type == PrayerType.SUNRISE) return
-        val date = _state.value.selectedDate ?: return
-        if (date.isAfter(todayProvider.today())) return // can't track future prayers
-        launchSafely(telemetry, AppAnalytics.Feature.PRAYER_TIMES, "toggle_prayer") {
-            val dateKey = date.toEpochDay() * 86_400_000L
-            val name = PrayerName.valueOf(type.name)
-            val current = statuses[name] ?: PrayerStatus.NOT_PRAYED
-            val newStatus =
-                if (current == PrayerStatus.PRAYED) PrayerStatus.NOT_PRAYED else PrayerStatus.PRAYED
-            val prayedAt =
-                if (newStatus == PrayerStatus.PRAYED) Instant.now().toEpochMilli() else null
-            prayerUseCases.updatePrayerStatus(dateKey, name, newStatus, prayedAt, false)
-            // The third place a prayer is tracked, alongside the tracker and Home. #359 names
-            // only two; this one recorded a generic `toggle_prayer` and is the reason a
-            // dashboard built on `prayer_tracked` would still have under-counted after fixing
-            // the other two.
-            telemetry.prayerTracked(name.name, newStatus.name, isJamaah = false)
-            // getPrayerRecordsForDate re-emits → applyTick refreshes the UI.
-        }
-    }
 
     // No `use24HourFormat` mirror: times are formatted at the leaf from LocalUse24HourFormat, so
     // toggling the preference no longer forces a full day recompute.

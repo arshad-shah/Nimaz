@@ -289,7 +289,6 @@ fun PrayerTimesScreen(
                     sunsetAt = state.sunsetAt,
                     daylight = state.daylight,
                     method = state.methodLabel,
-                    onToggle = { viewModel.onEvent(PrayerTimesEvent.TogglePrayer(it)) },
                 )
             }
         }
@@ -397,7 +396,7 @@ private fun DayList(
     sunsetAt: kotlin.time.Instant?,
     daylight: String,
     method: String,
-    onToggle: (PrayerType) -> Unit,
+    // Task 6 replaces this composable wholesale; the screen is reference-only from here.
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -408,9 +407,9 @@ private fun DayList(
             PrayerTimeCard(
                 prayer = prayer,
                 isActive = prayer.isNext,
-                onClick = { onToggle(prayer.type) },
-                onToggle = { onToggle(prayer.type) },
-                showToggle = !isFuture,
+                onClick = {},
+                onToggle = {},
+                showToggle = false,
             )
         }
         item {

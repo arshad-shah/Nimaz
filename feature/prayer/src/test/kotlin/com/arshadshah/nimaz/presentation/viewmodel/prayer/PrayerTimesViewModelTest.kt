@@ -9,6 +9,7 @@ import com.arshadshah.nimaz.domain.model.PrayerType
 import com.arshadshah.nimaz.domain.model.ResolvedLocation
 import com.arshadshah.nimaz.domain.usecase.PrayerUseCases
 import com.google.common.truth.Truth.assertThat
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
@@ -121,13 +122,32 @@ class PrayerTimesViewModelTest {
         assertThat(viewModel.state.value.selectedDate).isEqualTo(target)
     }
 
+    /**
+     * Prayer Times answers *when*. The prayer tracker answers what the reader did about it.
+     *
+     * This screen used to be the third place in the app a prayer could be written — its own source
+     * said so — and it wrote a binary `PRAYED`/`NOT_PRAYED`, a vocabulary the tracker redesign
+     * retired. Against `NOT_RECORDED`, `LATE` and `QADA` that toggle was destructive: tapping a
+     * prayer logged as `LATE` flattened it to `PRAYED`, and tapping again wrote `NOT_PRAYED`,
+     * which the tracker reads back as *nobody has said*.
+     *
+     * Asserted over **every** event rather than over the removed one, so an event that writes
+     * fails here rather than shipping.
+     */
     @Test
-    fun `TogglePrayer for SUNRISE does nothing`() = runTest {
+    fun `no event writes a prayer record`() = runTest {
         advanceUntilIdle()
-        viewModel.onEvent(PrayerTimesEvent.TogglePrayer(PrayerType.SUNRISE))
+
+        viewModel.onEvent(PrayerTimesEvent.NextDay)
+        viewModel.onEvent(PrayerTimesEvent.PreviousDay)
+        viewModel.onEvent(PrayerTimesEvent.GoToToday)
+        viewModel.onEvent(PrayerTimesEvent.SelectDate(today.plusDays(3)))
         advanceUntilIdle()
-        // No update prayer status call for SUNRISE — verified by no exception and state stable
-        assertThat(viewModel.state.value.selectedDate).isEqualTo(today)
+
+        coVerify(exactly = 0) {
+            prayerUseCases.updatePrayerStatus(any(), any(), any(), any(), any())
+        }
+        assertThat(telemetry.prayersTracked).isEmpty()
     }
 
     @Test
