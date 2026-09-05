@@ -12,7 +12,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -48,7 +48,7 @@ import com.arshadshah.nimaz.presentation.viewmodel.quran.KhatamViewModel
 /** Which status bucket the list is filtered to. */
 private enum class KhatamTab { IN_PROGRESS, COMPLETED, ARCHIVED }
 
-/** Vertical room reserved so the extended FAB never covers the last card. */
+/** Vertical room reserved so the FAB never covers the last card. */
 private val FabClearance = 88.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -73,11 +73,20 @@ fun KhatamListScreen(
             )
         },
         floatingActionButton = {
-            ExtendedFloatingActionButton(
-                onClick = onNavigateToCreate,
-                icon = { Icon(Icons.Default.Add, contentDescription = null) },
-                text = { Text(stringResource(R.string.khatam_start_new)) },
-            )
+            // Only once there is a khatam to sit beside, and only a `+`.
+            //
+            // The empty state already carries a "Start new" action, so an extended FAB saying the
+            // same words floated over it — two controls, one job, a thumb's width apart. And with
+            // a list on screen the label is redundant anyway: a `+` above a list of khatams reads
+            // as "another one" without being told.
+            if (state.hasAnyKhatam) {
+                FloatingActionButton(onClick = onNavigateToCreate) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = stringResource(R.string.khatam_start_new),
+                    )
+                }
+            }
         },
     ) { padding ->
         when {
