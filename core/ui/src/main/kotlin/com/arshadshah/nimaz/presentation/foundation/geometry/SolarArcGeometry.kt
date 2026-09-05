@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.presentation.foundation.geometry
 
 import kotlin.math.PI
 import kotlin.math.cos
+import kotlin.math.sqrt
 
 /**
  * The shape of the sun's day, from sunrise and sunset alone.
@@ -27,9 +28,15 @@ private const val Epsilon = 1e-6f
  * A drawing decision, not astronomy. The apex is normalised to 1 in every season, so a short day
  * troughs *much* deeper than a long one — Dublin in December reaches -2.64 against June's -0.23.
  * Drawn at full depth a December night would be more than twice the visual weight of the day and
- * would leave the card, so night is compressed and then clamped to -1.
+ * would leave the card.
+ *
+ * Applied to the **square root** of the depth rather than to the depth itself, because a linear
+ * multiplier cannot serve both ends: any constant small enough to keep December inside the band
+ * (k <= 0.34) flattens June to -0.08, which is invisible. The root is a soft knee — it pulls the
+ * extremes in hard and leaves shallow nights legible, while preserving the ordering that makes
+ * winter read as the longer night.
  */
-const val NightCompression = 0.45f
+const val NightCompression = 0.55f
 
 /**
  * Normalised solar altitude at day-fraction [t] (0f = 00:00, 1f = 24:00).
@@ -63,5 +70,6 @@ fun solarAltitude(t: Float, sunriseFraction: Float, sunsetFraction: Float): Floa
  */
 fun drawnAltitude(t: Float, sunriseFraction: Float, sunsetFraction: Float): Float {
     val raw = solarAltitude(t, sunriseFraction, sunsetFraction)
-    return if (raw >= 0f) raw.coerceAtMost(1f) else (raw * NightCompression).coerceAtLeast(-1f)
+    if (raw >= 0f) return raw.coerceAtMost(1f)
+    return (-sqrt(-raw) * NightCompression).coerceAtLeast(-1f)
 }

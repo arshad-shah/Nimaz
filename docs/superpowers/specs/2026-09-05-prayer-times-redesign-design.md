@@ -179,17 +179,30 @@ midnight trough much deeper. Dublin in June (`0.20`, `0.90`) gives `h(0) = −0.
 December (`0.35`, `0.70`) gives `h(0) = −2.64` — an order of magnitude, and **a drawing hazard**:
 uncompressed, a December trough is 2.6× the day limb and leaves the card.
 
-So negative values are both **scaled** by `NightCompression` (`0.45f`) **and clamped** to `−1f`,
-giving a drawn range of `−1f..1f` in every season:
+**A constant multiplier cannot do this.** It is one knob against two opposing constraints: any `k`
+small enough to keep December's `−2.64` inside the band (`k ≤ 0.34`) flattens June's `−0.23` to
+`−0.08`, which is invisible. Rendering the first draft made that concrete — at `k = 0.45` December
+clamped flat against the card's bottom edge while June's night barely left the horizon.
+
+So the compression is applied to the **square root** of the depth — a soft knee that pulls the
+extremes in hard and leaves shallow nights legible:
 
 ```kotlin
-fun drawnAltitude(t, sunriseFraction, sunsetFraction): Float =
-    solarAltitude(t, sunriseFraction, sunsetFraction)
-        .let { if (it >= 0f) it else (it * NightCompression).coerceAtLeast(-1f) }
+fun drawnAltitude(t, sunriseFraction, sunsetFraction): Float {
+    val raw = solarAltitude(t, sunriseFraction, sunsetFraction)
+    if (raw >= 0f) return raw.coerceAtMost(1f)
+    return (-sqrt(-raw) * NightCompression).coerceAtLeast(-1f)   // NightCompression = 0.55f
+}
 ```
 
-Both the compression and the clamp are drawing decisions, not astronomy, and say so at the
-constant. Polar cases fall out correctly: 24-hour daylight (`halfDay = 0.5`) gives `A = B = 0.5`
+June then draws at `−0.26` and December at `−0.89`: both inside the band, both visible, and
+winter still the deeper night — which is the seasonal signal worth keeping. The clamp stays for
+the polar cases the knee does not reach.
+
+The knee, the constant and the clamp are all drawing decisions rather than astronomy, and say so
+at the constant. **The tests pin the three properties, not the formula** — winter deeper than
+summer, summer not flattened, winter not clamped — so a later retune is told which constraint it
+broke instead of merely which number changed. Polar cases fall out correctly: 24-hour daylight (`halfDay = 0.5`) gives `A = B = 0.5`
 and a curve that never goes negative; a vanishing day drives the denominator to zero and hits the
 degenerate guard below.
 

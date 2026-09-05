@@ -62,8 +62,21 @@ private const val LabelDropOutFontScale = 1.5f
 private const val CurveSamples = 96
 
 private val CurveStroke = 3.dp
+
+/**
+ * The current window is drawn **thicker**, not merely recoloured.
+ *
+ * The day limb already runs a dawn-to-dusk gradient, so an afternoon window painted in the dusk
+ * tone lands on a stretch that is nearly that colour anyway — the emphasis vanished exactly where
+ * it was needed. Weight reads as emphasis wherever the gradient happens to be.
+ */
+private val LitStroke = 5.dp
+
 private val NodeRadius = 3.6.dp
 private val SunRadius = 5.5.dp
+
+/** Leaves the deepest night clear of whatever the card puts under the arc. */
+private const val NightBandFraction = 0.9f
 
 /**
  * The sun's day as a curve, with the prayers marked where the sun actually puts them.
@@ -93,7 +106,11 @@ fun NimazSolarArc(
     val dayColor = NimazToneColors.foreground(NimazTone.ACCENT)
     val duskColor = NimazToneColors.foreground(NimazTone.WARNING)
     val mutedColor = NimazToneColors.foreground(NimazTone.MUTED)
-    val trackColor = MaterialTheme.colorScheme.surfaceVariant
+    // The night limb is a *stroke*, so it takes an `on`-tone knocked back — not `surfaceVariant`.
+    // A container token here is light-grey on a light-grey card: the dashed curve disappears and
+    // Fajr and Isha read as two orphaned dots near the horizon rather than as points on the sun's
+    // path, which is the whole reason the arc shows 24 hours instead of just daylight.
+    val nightColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.55f)
     val horizonColor = MaterialTheme.colorScheme.outlineVariant
 
     val showLabels = LocalDensity.current.fontScale <= LabelDropOutFontScale
@@ -121,7 +138,7 @@ fun NimazSolarArc(
         val horizonY = size.height * 0.62f
         val labelBand = if (showLabels) size.height * 0.16f else 0f
         val dayHeight = (horizonY - labelBand).coerceAtLeast(1f)
-        val nightHeight = (size.height - horizonY).coerceAtLeast(1f)
+        val nightHeight = ((size.height - horizonY) * NightBandFraction).coerceAtLeast(1f)
 
         fun pointAt(t: Float): Offset {
             val h = drawnAltitude(t, sunriseFraction, sunsetFraction)
@@ -171,7 +188,7 @@ fun NimazSolarArc(
 
         drawPath(
             path = nightPath,
-            color = trackColor,
+            color = nightColor,
             style = Stroke(
                 width = CurveStroke.toPx(),
                 pathEffect = PathEffect.dashPathEffect(floatArrayOf(4.dp.toPx(), 4.dp.toPx())),
@@ -199,7 +216,13 @@ fun NimazSolarArc(
                     }
                 }
             }
-            if (started) drawPath(path = spanPath, color = duskColor, style = solidStroke)
+            if (started) {
+                drawPath(
+                    path = spanPath,
+                    color = duskColor,
+                    style = Stroke(width = LitStroke.toPx(), cap = StrokeCap.Round),
+                )
+            }
         }
 
         nodes.forEach { node ->
@@ -213,12 +236,21 @@ fun NimazSolarArc(
             val label = node.label
             if (showLabels && label != null) {
                 val measured = measurer.measure(label, labelStyle)
+                // A night label hangs *below* its node, a day label sits above it. Both sit on
+                // the outside of the curve, so the label never crosses the line it belongs to —
+                // which is what put Isha on top of a steep December descent when every label
+                // went above.
+                val belowHorizon = drawnAltitude(t, sunriseFraction, sunsetFraction) < 0f
                 drawText(
                     textLayoutResult = measured,
                     topLeft = Offset(
                         x = (p.x - measured.size.width / 2f)
                             .coerceIn(0f, (size.width - measured.size.width).coerceAtLeast(0f)),
-                        y = p.y - measured.size.height - 6.dp.toPx(),
+                        y = if (belowHorizon) {
+                            p.y + 6.dp.toPx()
+                        } else {
+                            p.y - measured.size.height - 6.dp.toPx()
+                        },
                     ),
                 )
             }

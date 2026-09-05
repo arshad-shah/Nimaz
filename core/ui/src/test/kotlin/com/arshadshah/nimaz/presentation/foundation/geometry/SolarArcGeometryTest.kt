@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.presentation.foundation.geometry
 
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
+import kotlin.math.sqrt
 
 /**
  * The arc's shape is a closed form, not a hand-drawn curve, so it can be pinned exactly: solar
@@ -70,7 +71,25 @@ class SolarArcGeometryTest {
     fun `night is compressed rather than drawn at full depth`() {
         val raw = solarAltitude(0f, sunrise, sunset)
         val drawn = drawnAltitude(0f, sunrise, sunset)
-        assertThat(drawn).isWithin(1e-4f).of(raw * NightCompression)
+        assertThat(drawn).isGreaterThan(raw)
+        assertThat(drawn).isLessThan(0f)
+        // A soft knee: the root of the depth, not the depth.
+        assertThat(drawn).isWithin(1e-4f).of(-sqrt(-raw) * NightCompression)
+    }
+
+    /**
+     * Why the knee is a root rather than a constant multiplier. A linear compression cannot serve
+     * both ends of the year: any k that keeps December's -2.64 inside the band flattens June's
+     * -0.23 to nothing. Both must stay visible, and winter must stay the deeper of the two.
+     */
+    @Test
+    fun `both a shallow summer night and a deep winter one stay legible`() {
+        val summer = drawnAltitude(0f, sunriseFraction = 0.20f, sunsetFraction = 0.90f)
+        val winter = drawnAltitude(0f, sunriseFraction = 0.35f, sunsetFraction = 0.70f)
+
+        assertThat(winter).isLessThan(summer)   // winter is still the deeper night
+        assertThat(summer).isLessThan(-0.15f)   // and summer has not been flattened away
+        assertThat(winter).isGreaterThan(-1f)   // while winter no longer bottoms out at the clamp
     }
 
     @Test
