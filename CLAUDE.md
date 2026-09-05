@@ -4,12 +4,26 @@ Nimaz is an offline-first Android Islamic companion app: **Kotlin + Jetpack Comp
 **Clean Architecture** (`presentation → domain → data`) with **MVVM + UDF**, Hilt DI, Room,
 DataStore, type-safe Navigation Compose.
 
-**The Gradle module split (#551) is complete.** Nineteen modules plus `:baselineprofile` —
-seven `:core:*`, eleven `:feature:*`, and `:app` reduced to 52 files / 11,484 lines, 8% of the
-codebase. What is left in `:app` is what cannot leave: `MainActivity`, `NimazApp`,
-`AppInitializer`, the manifest entry points, the adhan players and prayer-notification
-machinery, `QuranAudioManager`, AboutLibraries, `screens/home`, and the seven Hilt bindings
-pinned to one of those.
+**The Gradle module split (#551) is complete.** Twenty modules plus `:baselineprofile` —
+seven `:core:*`, twelve `:feature:*`, and `:app` reduced to **27 files / 5,881 lines**, 4% of the
+codebase. What is left in `:app` is `MainActivity`, `NimazApp`, `AppInitializer`, `NavGraph.kt`,
+the adhan players and prayer-notification machinery, `QuranAudioManager`, AboutLibraries, and the
+seven Hilt bindings pinned to one of those.
+
+**Exactly two things pin code to `:app`**, and it is worth knowing which, because only these two
+are real:
+
+- **`BuildConfig`** — a library module gets its *own* `BuildConfig` carrying `DEBUG`, but never the
+  application identity or fields like `AI_WORKER_BASE_URL`. Four files: `AiModule`,
+  `AnnouncementModule`, `ContentArtifactModule`, `MainActivity`.
+- **The app's `R`** (`res/drawable`, `res/xml`, `res/layout`, `themes.xml`) — travels only if the
+  resources travel with it. Seven files, including `BootReceiver` and
+  `PrayerNotificationScheduler`.
+
+**A manifest entry point is *not* one of them.** An Android library module has its own
+`AndroidManifest.xml`, merged into the app's at build time — `feature/widget/src/main/AndroidManifest.xml`
+declares six `<receiver>` entries and has since PR 9. A `Service` or `BroadcastReceiver` can live
+in a feature module; what keeps the ones in `:app` there is the app's `R`, not the manifest.
 
 The eighteen modules that came out of it, and what each one owns:
 
@@ -116,6 +130,17 @@ The eighteen modules that came out of it, and what each one owns:
   caught five PRs in a row: widget strings, about strings, these components, four content
   components, and `PrayerTimeCard`/`PrayerSkyScene`).
 
+- **`:feature:home`** (`feature/home/`) — the Home screen: `HomeScreen`, `HomeGraph`, the
+  `HomeViewModel` trio and twelve Home organisms. **The twelfth feature module, and the one #551
+  stopped short of** — nothing pinned it to `:app`, so extracting it needed no unpicking at all,
+  like `:feature:onboarding`. Four components did *not* come with it and went to `:core:ui`
+  instead, because their names or families already claimed design-system membership:
+  `NimazCarousel` (a `Nimaz*` prefix in a module nothing can import), `WorshipEventCard` (sibling
+  of `EventCard`, named beside it in rule 8), `JumuahCard` and `CountdownTimer`. **Registering a
+  new feature module means four registries, not one** — `PresentationSourceRoots`, the two
+  `inputs.dir` blocks in `app/build.gradle.kts`, `CrossFeatureViewModelGuardTest.MODULE_OF`, and
+  `coverageModules`; `FeatureModuleRegistrationTest` names any you miss.
+
 Two rules a feature module makes into compile errors, both worth knowing before you write one:
 **a `@HiltWorker` needs `ksp(libs.hilt.work.compiler)` in its own module** — omitting it compiles
 fine and fails at *runtime* with `NoSuchMethodException`, which is why `HiltWorkerProcessorTest`
@@ -124,10 +149,11 @@ exists — and **`BuildConfig` and the app's `R` cannot travel**, so app identit
 never as the class.
 
 What is still in `app/…/core/util/` — `BootReceiver`, `PrayerRescheduler`, `InAppUpdateManager`,
-`PrayerNotificationScheduler`, `PrayerAlarmTimes`, `NotificationContentHelper` — stays there **for
-good**, not until some later PR: each is a manifest entry point or is pinned to `:app` by one, and
-their consumers are the settings surface and `AppInitializer` rather than a feature. See
-`docs/ARCHITECTURE.md` §2. A move does **not** change package names, so imports read the same either
+`PrayerNotificationScheduler`, `PrayerAlarmTimes`, `NotificationContentHelper` — is held there by
+the app's **`R`** (`BootReceiver` and `PrayerNotificationScheduler` name `AppR.drawable`), and the
+rest by being their consumers. **Not by the manifest**: a library module declares its own, as
+`:feature:widget` does. Moving this cluster is a real option for a later epic, and it means moving
+the drawables and `res/xml` with it. See `docs/ARCHITECTURE.md` §2. A move does **not** change package names, so imports read the same either
 side of a module boundary. Two consequences worth knowing before you edit:
 
 - **Kotlin will not smart-cast a `val` from another module.** `if (ayah.translation != null)
@@ -289,6 +315,7 @@ The obligations, in short:
 ./gradlew :feature:quran:check        # reader, khatam, bookmarks
 ./gradlew :feature:prayer:check       # prayer times, qibla, night worship
 ./gradlew :feature:settings:check     # settings, location, sync
+./gradlew :feature:home:check         # the Home screen
 ./gradlew :app:jacocoTestReport --dry-run   # see below — seconds, and catches a whole class of red CI
 ./gradlew lintDebug                   # SLOW and CI-blocking — every module, not just :app
 python3 scripts/check_docs.py         # docs still describe the code (no toolchain needed)

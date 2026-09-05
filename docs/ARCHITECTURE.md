@@ -152,6 +152,31 @@ match: one package can span two modules, and one module can hold several package
 boundary is not a package boundary — package names are unchanged by a move, so the imports read the
 same either side of it.
 
+### 2.1 What actually pins code to `:app`
+
+Two things, and only two:
+
+- **`BuildConfig`.** A library module gets its *own* `BuildConfig`, carrying `DEBUG` and its own
+  fields — but never the application identity, and never `AI_WORKER_BASE_URL` or
+  `PLAY_INTEGRITY_CLOUD_PROJECT_NUMBER`. Four files: `AiModule`, `AnnouncementModule`,
+  `ContentArtifactModule`, `MainActivity`. App identity reaches other modules through
+  `LocalAppIdentity` or a constructor parameter passed from an `:app` Hilt module.
+- **`com.arshadshah.nimaz.R`** — `res/drawable`, `res/xml`, `res/layout`, `res/mipmap-*`,
+  `themes.xml`. Seven files, including `BootReceiver` and `PrayerNotificationScheduler`
+  (`AppR.drawable.ic_stat_nimaz`). Code holding one of these travels only if its resources travel
+  with it.
+
+**Being a manifest entry point pins nothing.** An Android library module has its own
+`AndroidManifest.xml`, merged into the application's at build time, and
+`feature/widget/src/main/AndroidManifest.xml` has declared six `<receiver>` entries since PR 9 of
+#551. A `Service`, `BroadcastReceiver` or `ContentProvider` can live in a feature module; the
+declaration just needs a fully-qualified `android:name`, because a relative one resolves against
+the *merged* manifest's package.
+
+This distinction is load-bearing rather than pedantic: it is the difference between the adhan and
+notification clusters being permanently stuck in `:app` and being a later epic that moves the
+drawables with the code.
+
 ```text
 core/domain/src/main/kotlin/           #  ← :core:domain — pure JVM, no Android on the classpath
 com.arshadshah.nimaz/
@@ -681,7 +706,8 @@ Conventions:
 `RepositoryModule` was **905 lines**; it is 109. What is left is the seven bindings whose
 implementation genuinely cannot leave `:app` — `QuranAudioManager` and its two collaborators,
 `ServiceAdhanDownloader`, `WorkManagerWidgetRefresher`, and `PrayerNotificationScheduler` twice.
-Each one is pinned by `MainActivity`, a manifest entry point, or the app's `R`.
+Each one is pinned by `MainActivity`, the app's `R`, or `BuildConfig` — **not** by being a manifest
+entry point, which pins nothing (§2.1).
 
 **`:core:domain` declares Dagger modules and is still the pure layer.** It depends on `hilt-core`,
 the JVM half of Hilt: `@InstallIn`, `SingletonComponent`, and Dagger's `@Module`/`@Provides`
@@ -1650,6 +1676,7 @@ copy anything listed as Open.
 
 | Area | What was fixed |
 |------|----------------|
+| Home stranded in `:app` | **`:feature:home` extracted; `:app` is 27 files and 5,881 lines.** About half of `:app` was the Home screen, and nothing pinned it: no manifest entry, no `BuildConfig` field, no reference to the app's `R`, and not one import of `:app`-only code. It was there because #551's 22-PR stack ran out, not because it belonged — the `:feature:onboarding` case, extracted with no unpicking at all. Four of its components went to **`:core:ui`** rather than with it, because their names or families already claimed design-system membership while `:app` made them unreachable: `NimazCarousel` (a `Nimaz*` prefix), `WorshipEventCard` (sibling of `EventCard`, named beside it in §8), `JumuahCard`, `CountdownTimer`. Three pieces of #551 residue were deleted in the same branch: `QuranSurahBanner` (referenced by nothing), `TafseerNoteCard` (orphaned when `TafseerChaptersScreen` moved to `:feature:quran` and re-declared it privately — and still looking alive because it kept its test), and three `:app` tests that duplicated larger `:core:ui` ones. **Registering a feature module means four registries** — `PresentationSourceRoots`, two `inputs.dir` blocks in `app/build.gradle.kts`, `CrossFeatureViewModelGuardTest.MODULE_OF`, `coverageModules` — and `FeatureModuleRegistrationTest` names the ones you miss. §2.1 records the correction this made necessary: a manifest entry point pins nothing. |
 | Layer boundary (`domain` ⇸ everything else) | **The inward-pointing rule was enforced by review alone; it is now a compile error.** `presentation → domain → data` was true in the code and checked by nothing, because a single module cannot check it. `domain/` moved to **`:core:domain`**, a `kotlin-jvm` module: `data`, `presentation` and the Android SDK are simply not on its classpath. Two things that had to be inverted first, both in PR #577: the five `core.navigation.Route` imports, and `RescheduleNotificationsUseCase`'s constructor-injected `PrayerNotificationScheduler` — 910 LOC of `AlarmManager`/`NotificationCompat` behind what looked like a pure use case, which made the "zero Android imports" census true of *direct* edges only. Purity is held after the fact by `androidFreeClasspath` (§11), not by the one-off demonstration the issue originally asked for. `AP-1`, `AP-3`. |
 | Prayer tracking had three write surfaces | **Prayer Times stopped writing.** The screen offered a tap-to-toggle that wrote `PRAYED ⇄ NOT_PRAYED` — and `PrayerTimesViewModel`'s own comment named it as the *third* place a prayer could be tracked, noting that a dashboard built on `prayer_tracked` would under-count even after the two sites #359 lists were fixed. Against the vocabulary the prayer-tracker redesign established (`NOT_RECORDED` is not `MISSED`; `LATE` and `QADA` are first-class) a binary toggle is destructive: tapping a prayer logged as `LATE` flattened it to `PRAYED` with no notice, and a second tap wrote `NOT_PRAYED`, which the tracker reads back as *nobody has said*. **Prayer Times answers *when*; the tracker answers what the reader did about it.** `TogglePrayer`, `togglePrayer()`, the `statuses` map and its `getPrayerRecordsForDate` subscription are gone — the last of those also stopped the screen recomputing a day's solar geometry on every prayer written anywhere in the app. Held by `PrayerTimesViewModelTest.no event writes a prayer record`, asserted over *every* event rather than the removed one. No Room migration, no `PrayerStatus` change, no sync or widget change; `PrayerTimeDisplay.prayerStatus` stays on the shared model because `HomeScreen` shows it. |
 | Screen states | **Loading, empty and error were improvised per screen.** 25 hand-rolled spinners across 19 screens, 9 hand-rolled error blocks, 11 `UiState`s carrying an error no screen read, and three Qur'an screens that reported a failed load as an empty one. Resolved by the screen-states epic: the four states are now evaluated in one fixed order (§8), a failing `UiState` carries `UiError` (`@StringRes` copy, exception text in `details`), and `ScreenStateConventionTest` holds all three lines with empty backlogs. `AP-7.16`. |
@@ -1886,7 +1913,7 @@ eleven `:feature:*`, and `:app`:
 | **`:feature:quran`** | `nimaz.android.feature` | The reader, khatam and bookmarks, plus the whole Mushaf rendering stack. (`TajweedParser` came here in PR 19 and went on to `:core:ui` in PR 21, when `QuranSettingsScreen` took `TajweedLegendSheet` to a second feature module.) The largest feature. **`QuranDao` stays in `:core:database`** — four repositories use it. **`QuranAudioManager` stays in `:app`**, behind the `QuranPlayback` port, because `MainActivity` holds one too. |
 | **`:feature:prayer`** | `nimaz.android.feature` | When each prayer *is* and which way to face: prayer times, the monthly table, qibla and the night-worship window — the counterpart to `:feature:tracker`. The only module with a camera dependency (`ArQiblaView`). **The adhan players and the prayer notification machinery are *not* here**: nothing in the move set names them, and their consumers are the settings surface plus `:app` init, so sending them here would have created the `:feature:settings -> :feature:prayer` edge #571 forbids. **`PrayerTimeCard` and `PrayerSkyScene` went down to `:core:ui`**, being read by `HomeScreen`/`HomeHero` too. |
 | **`:feature:settings`** | `nimaz.android.feature` | The last feature module: 24 screens, the 1,400-line `SettingsViewModel`, location and sync. **Five screens arrive from other features' directories** — `DuaSettingsScreen`, `HadithSettingsScreen`, `SelectReciterScreen`, `SelectTranslationScreen`, `LocationScreen` — every one dispatching `SettingsEvent`. **`data/sync` did *not* come**: it imports 21 DAOs and 14 entities, so it went to `:core:data`. `PrayerNotificationScheduler` stayed in `:app`, pinned by one `AppR.drawable` line; the three members this module calls became the `PrayerAlarmScheduler` / `PrayerNotificationTester` ports. |
-| **`:app`** | `nimaz.android.application` | **53 files, 11,595 lines — 8% of the codebase.** What genuinely cannot leave: `MainActivity`, `NimazApp`, `NavGraph.kt`, six `core/di` modules, `core/init`, the notification stack (`PrayerNotificationScheduler`, `BootReceiver`, `PrayerRescheduler`, `NotificationContentHelper`, `PrayerAlarmTimes`), the two adhan Services, `QuranAudioService` and `LibraryRepositoryImpl` — most pinned by `com.arshadshah.nimaz.R` or by being a manifest entry point. Plus the **home surface**: `HomeScreen`, `HomeGraph`, `viewmodel/home`, and **21 components** (the eight `Home*` organisms — `HomeOccasionsSection`, which puts today's Islamic occasion on compact Home, is the newest, `EventsCarousel`, `TodayCarousel`, `TodayInfoCards`, `TodaysProgressCard`, `JumuahCard`, `WorshipEventCard`, `NimazCarousel`, and five molecules). Those components stayed for the inverse of the rule that moved so many others: Home is their *only* consumer, so there is no second module to share them with. |
+| **`:app`** | `nimaz.android.application` | **27 files, 5,881 lines — 4% of the codebase.** `MainActivity`, `NimazApp`, `NavGraph.kt`, six `core/di` modules, `core/init`, the notification stack (`PrayerNotificationScheduler`, `BootReceiver`, `PrayerRescheduler`, `NotificationContentHelper`, `PrayerAlarmTimes`), the two adhan Services, `QuranAudioService` and `LibraryRepositoryImpl`. **Exactly two things pin any of it**: `BuildConfig` (4 files — a library gets its own, carrying `DEBUG` but never the application identity or `AI_WORKER_BASE_URL`) and `com.arshadshah.nimaz.R` (7 files). **Being a manifest entry point is not one of them** — see §2.1. The home surface left in the `:feature:home` extraction; the four of its components whose names or families already claimed design-system membership (`NimazCarousel`, `WorshipEventCard`, `JumuahCard`, `CountdownTimer`) went to `:core:ui` rather than with it. |
 | **`:baselineprofile`** | `com.android.test` | Generates `app/src/main/baseline-prof.txt`. Nothing depends on it at runtime and no product code lives there. |
 
 Plus one **included build**, `build-logic`, which is not a module of the app — it produces the

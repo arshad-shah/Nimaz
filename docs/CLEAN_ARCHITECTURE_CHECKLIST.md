@@ -855,6 +855,23 @@ rg -n 'Card\(|Surface\(|Box\(.*\.background\(' app/src/main/java/com/arshadshah/
   A card that should read as a card takes `MUTED` (`surfaceContainer`) or `NEUTRAL` +
   `NimazCardLevel.RAISED`. Detect by eye, not by grep: it type-checks, it passes every semantics
   assertion, and only a render shows it — see `PrayerTimesScreenRenderTest`.
+- [x] ~~**Residue left when a consumer changes module and its producer does not.**~~ **Resolved
+  for #551's leftovers, and worth a detection pass after any future extraction.** When a screen
+  moves to a feature module, it can no longer import from `:app` — so someone re-declares the
+  component it needed as a private copy, and the original is orphaned. It keeps its test, so it
+  still looks alive. `TafseerNoteCard` was exactly this; `QuranSurahBanner` was referenced by
+  nothing at all; and three `:app` tests duplicated larger `:core:ui` ones, testing components
+  that had moved without them — so `:core:ui`'s own coverage floor never measured them.
+
+  **Detect** — a component whose only references are its own file and its own test:
+  ```bash
+  # For each component, count references outside its own definition and test:
+  for f in $(find . -path '*/components/*' -name '*.kt' -not -path '*/build/*' -not -name '*Test.kt'); do
+    n=$(basename "$f" .kt)
+    c=$(grep -rl "\b$n\b" --include='*.kt' app core feature | grep -v "/$n.kt\|/${n}Test.kt" | wc -l)
+    [ "$c" -eq 0 ] && echo "ORPHAN: $f"
+  done
+  ```
 - [ ] **Cards that need a border still bypass `tone`.** A `NimazTone` resolves container + content
   but **not** a stroke, so any bordered card falls back to an explicit
   `NimazCardDefaults.colors(container = …, border = …)`. 10 files today. Fix by teaching the tone
