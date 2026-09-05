@@ -126,10 +126,17 @@ private fun variantPalette(variant: NimazBannerVariant): BannerPalette = when (v
     }
 
     NimazBannerVariant.EVENT -> {
-        val teal800 = Color(0xFF115E59)
-        val teal950 = Color(0xFF042F2E)
-        val teal700 = Color(0xFF0F766E)
-        val lightTeal = Color(0xFFEAF7F5)
+        // Three of these were hand-copied hex that already had names — 0xFF115E59 is Primary800,
+        // 0xFF0F766E is Primary700, 0xFF042F2E is Primary950. Not wrong colours; the same
+        // colours with the link back to the palette severed, so a palette change would have left
+        // them behind. The line below them was already using a token, which is how it was found.
+        val teal800 = NimazColors.Primary800
+        val teal950 = NimazColors.Primary950
+        val teal700 = NimazColors.Primary700
+        // This one is genuinely its own: 0xFFEAF7F5 is not Primary50 (0xFFF0FDFA). It is the
+        // text colour on the event banner's deep fill, tuned against it rather than picked off
+        // the ramp, so it becomes a named token instead of being forced onto a shade it is not.
+        val lightTeal = NimazColors.EventBannerOnFill
         val gold = NimazColors.Gold500
         BannerPalette(
             fill = teal800,

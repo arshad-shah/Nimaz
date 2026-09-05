@@ -92,7 +92,10 @@ fun FavouritesScreen(
             verticalArrangement = Arrangement.spacedBy(NimazSpacing.Small),
         ) {
             if (isEmpty) {
-                item {
+                // Spans both columns. Without this it lays out as a grid *cell* — a half-width
+                // empty state hugging the left edge with dead space beside it, which reads as a
+                // missing card rather than as "you have not starred anything".
+                item(span = { GridItemSpan(maxLineSpan) }) {
                     NimazEmptyState(
                         title = stringResource(R.string.no_favorites_yet),
                         message = stringResource(R.string.favourites_empty_message),

@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.core.ui.R
 import com.arshadshah.nimaz.domain.model.PrayerStatus
 import com.arshadshah.nimaz.domain.model.PrayerType
+import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonSize
@@ -232,8 +233,8 @@ private fun StatusPicker(
                 label = stringResource(R.string.on_time),
                 status = PrayerStatus.PRAYED,
                 current = prayer.prayerStatus,
-                selectedColor = Color(0xFF3B8E3F),
-                selectedBg = Color(0xFF4CAF50).copy(alpha = 0.1f),
+                selectedColor = NimazColors.StatusColors.PrayedInk,
+                selectedBg = NimazColors.StatusColors.Prayed.copy(alpha = StatusTintAlpha),
                 modifier = Modifier.weight(1f),
                 onClick = { onSetPrayerStatus(prayer.type, PrayerStatus.PRAYED) },
             )
@@ -241,8 +242,8 @@ private fun StatusPicker(
                 label = stringResource(R.string.late),
                 status = PrayerStatus.LATE,
                 current = prayer.prayerStatus,
-                selectedColor = Color(0xFF1976D2),
-                selectedBg = Color(0xFF2196F3).copy(alpha = 0.1f),
+                selectedColor = NimazColors.StatusColors.JamaahInk,
+                selectedBg = NimazColors.StatusColors.Jamaah.copy(alpha = StatusTintAlpha),
                 modifier = Modifier.weight(1f),
                 onClick = { onSetPrayerStatus(prayer.type, PrayerStatus.LATE) },
             )
@@ -250,8 +251,8 @@ private fun StatusPicker(
                 label = stringResource(R.string.missed),
                 status = PrayerStatus.MISSED,
                 current = prayer.prayerStatus,
-                selectedColor = Color(0xFFD3392C),
-                selectedBg = Color(0xFFF44336).copy(alpha = 0.1f),
+                selectedColor = NimazColors.StatusColors.MissedInk,
+                selectedBg = NimazColors.StatusColors.Missed.copy(alpha = StatusTintAlpha),
                 modifier = Modifier.weight(1f),
                 onClick = { onSetPrayerStatus(prayer.type, PrayerStatus.MISSED) },
             )
@@ -259,8 +260,8 @@ private fun StatusPicker(
                 label = stringResource(R.string.made_up),
                 status = PrayerStatus.QADA,
                 current = prayer.prayerStatus,
-                selectedColor = Color(0xFF8E24AA),
-                selectedBg = Color(0xFF9C27B0).copy(alpha = 0.1f),
+                selectedColor = NimazColors.StatusColors.QadaInk,
+                selectedBg = NimazColors.StatusColors.Qada.copy(alpha = StatusTintAlpha),
                 modifier = Modifier.weight(1f),
                 onClick = { onSetPrayerStatus(prayer.type, PrayerStatus.QADA) },
             )
@@ -312,3 +313,6 @@ private fun StatusChip(
         )
     }
 }
+
+/** How strongly a status chip's own colour tints its background behind the ink. */
+private const val StatusTintAlpha = 0.1f
