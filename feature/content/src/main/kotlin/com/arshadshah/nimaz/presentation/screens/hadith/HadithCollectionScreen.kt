@@ -62,6 +62,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeDefaults
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeEmphasis
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazPillActionButton
@@ -366,6 +367,7 @@ private fun BookCard(
     val bookGradient = getBookGradient(book.id)
 
     NimazCard(
+        tone = NimazTone.MUTED,
         modifier = modifier,
         style = NimazCardStyle.FILLED,
         onClick = onClick,

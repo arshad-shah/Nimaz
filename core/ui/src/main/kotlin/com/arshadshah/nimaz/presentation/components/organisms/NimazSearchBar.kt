@@ -68,6 +68,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.core.ui.R
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazChip
 import com.arshadshah.nimaz.presentation.components.atoms.NimazChipVariant
@@ -458,6 +459,7 @@ fun ExpandableSearchBar(
             exit = shrinkVertically() + fadeOut()
         ) {
             NimazCard(
+                tone = NimazTone.MUTED,
                 style = NimazCardStyle.FILLED,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -567,6 +569,7 @@ fun ExpandableSearchBar(
             exit = shrinkVertically() + fadeOut()
         ) {
             NimazCard(
+                tone = NimazTone.MUTED,
                 style = NimazCardStyle.FILLED,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -621,6 +624,7 @@ private fun SearchResultCard(
     modifier: Modifier = Modifier
 ) {
     NimazCard(
+        tone = NimazTone.MUTED,
         style = NimazCardStyle.FILLED,
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
