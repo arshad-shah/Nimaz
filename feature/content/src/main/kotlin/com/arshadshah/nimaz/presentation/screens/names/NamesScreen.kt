@@ -26,7 +26,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSegmentedControl
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSegmentedPurpose
 import com.arshadshah.nimaz.presentation.components.atoms.asSegments
-import com.arshadshah.nimaz.presentation.components.molecules.NameCard
+import com.arshadshah.nimaz.presentation.components.molecules.NameMedallionCard
 import com.arshadshah.nimaz.presentation.components.molecules.NamesAccents
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazSearchBar
@@ -185,8 +185,9 @@ fun NamesScreen(
                         emptyMessage = stringResource(R.string.asma_ul_husna_no_names_found),
                         accent = accent,
                         itemKey = { it.id },
+                        columns = NamesGridColumns,
                     ) { name ->
-                        NameCard(
+                        NameMedallionCard(
                             number = name.id,
                             arabicName = name.nameArabic,
                             primaryLabel = name.nameTransliteration,
@@ -208,8 +209,9 @@ fun NamesScreen(
                         emptyMessage = stringResource(R.string.asma_un_nabi_no_names_found),
                         accent = accent,
                         itemKey = { it.id },
+                        columns = NamesGridColumns,
                     ) { name ->
-                        NameCard(
+                        NameMedallionCard(
                             number = name.id,
                             arabicName = name.nameArabic,
                             primaryLabel = name.nameTransliteration,
@@ -231,10 +233,11 @@ fun NamesScreen(
                         emptyMessage = stringResource(R.string.prophets_no_found),
                         accent = accent,
                         itemKey = { it.id },
+                        columns = NamesGridColumns,
                     ) { prophet ->
                         // The one card that differs: the English name leads, and a title and
                         // era chip ride along.
-                        NameCard(
+                        NameMedallionCard(
                             number = prophet.id,
                             arabicName = prophet.nameArabic,
                             primaryLabel = prophet.nameEnglish,
@@ -254,3 +257,12 @@ fun NamesScreen(
         }
     }
 }
+
+/**
+ * Two columns for every names catalogue.
+ *
+ * The Arabic is the subject of these screens and on the row card it was the smallest element on
+ * the row — so the grid gives it the width instead, and ninety-nine names become about twenty-five
+ * screens of scroll rather than fifty.
+ */
+private const val NamesGridColumns = 2

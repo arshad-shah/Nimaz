@@ -5,8 +5,10 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.runtime.Composable
@@ -35,7 +37,7 @@ import com.arshadshah.nimaz.presentation.viewmodel.content.CatalogListState
  *
  * The card is a slot rather than a config field because it is the one difference that is not a
  * value: the Prophets list puts the English name first and adds a title and an era chip, and a
- * `NameCard(...)` call expresses that better than five more parameters would.
+ * `NameMedallionCard(...)` call expresses that better than five more parameters would.
  */
 @Composable
 fun <T : Any> CatalogList(
@@ -44,6 +46,7 @@ fun <T : Any> CatalogList(
     accent: NamesAccent,
     itemKey: (T) -> Any,
     modifier: Modifier = Modifier,
+    columns: Int = 1,
     card: @Composable (T) -> Unit,
 ) {
     if (state.isLoading) {
@@ -53,18 +56,25 @@ fun <T : Any> CatalogList(
 
     val displayList = state.filteredItems
 
-    LazyColumn(
+    // One list type for both shapes. A `LazyVerticalGrid` of one column lays out the same as a
+    // `LazyColumn`, so the row and grid catalogues share every other behaviour — padding,
+    // spacing, keys — rather than being two lists that drift apart.
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(columns),
         modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(
             horizontal = NimazSpacing.Large,
             vertical = NimazSpacing.Small,
         ),
         verticalArrangement = Arrangement.spacedBy(NimazSpacing.Small),
+        horizontalArrangement = Arrangement.spacedBy(NimazSpacing.Small),
     ) {
         items(items = displayList, key = itemKey) { item -> card(item) }
 
         if (displayList.isEmpty()) {
-            item {
+            // Spans every column: an empty state indented into one half of a two-column grid
+            // reads as a cell rather than as the answer to "there is nothing here".
+            item(span = { GridItemSpan(maxLineSpan) }) {
                 NimazEmptyState(
                     title = emptyMessage,
                     message = "",
