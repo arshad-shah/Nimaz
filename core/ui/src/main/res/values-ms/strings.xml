@@ -2100,4 +2100,13 @@
     <plurals name="khatam_widget_streak">
         <item quantity="other">%1$d hari berturut-turut</item>
     </plurals>
+    <!-- Prayer Times: the solar day card -->
+    <string name="prayer_arc_cd">Laluan matahari: terbit %1$s, terbenam %2$s</string>
+    <string name="prayer_window_lede">Anda berada dalam waktu</string>
+    <string name="prayer_window_until">hingga %1$s</string>
+    <string name="prayer_daylight_lede">Lengkung hari</string>
+    <string name="prayer_daylight_amount">%1$s siang hari</string>
+    <string name="prayer_jumuah">Jumaat</string>
+    <string name="prayer_about_this_day">Tentang hari ini</string>
+    <string name="cd_pick_month">Pilih bulan</string>
 </resources>

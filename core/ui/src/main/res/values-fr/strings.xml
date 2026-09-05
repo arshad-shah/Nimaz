@@ -2183,4 +2183,13 @@
         <item quantity="many">%1$d jours d\'affilée</item>
         <item quantity="other">%1$d jours d\'affilée</item>
     </plurals>
+    <!-- Prayer Times: the solar day card -->
+    <string name="prayer_arc_cd">La course du soleil : lever %1$s, coucher %2$s</string>
+    <string name="prayer_window_lede">Vous êtes dans la période de</string>
+    <string name="prayer_window_until">jusqu\'à %1$s</string>
+    <string name="prayer_daylight_lede">L\'arc du jour</string>
+    <string name="prayer_daylight_amount">%1$s de clarté</string>
+    <string name="prayer_jumuah">Joumou\'a</string>
+    <string name="prayer_about_this_day">À propos de ce jour</string>
+    <string name="cd_pick_month">Choisir un mois</string>
 </resources>

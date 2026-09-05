@@ -238,6 +238,18 @@ fun PrayerSkyScene(
     locationName: String? = null,
     onBack: (() -> Unit)? = null,
     onSettings: (() -> Unit)? = null,
+    /**
+     * An optional third pill in the glass bar, drawn just before the settings action.
+     *
+     * Prayer Times' "Today" shortcut used to be a `NimazBadge` positioned by hand at
+     * `statusBarTop + 60.dp`, with a comment about having to dodge these very actions. A slot
+     * costs nothing and removes the magic offset.
+     *
+     * Belongs to the top bar, so it renders only when there *is* one — a scene without a
+     * location or navigation callbacks (the Home hero) does not grow a bar because an action was
+     * passed to it.
+     */
+    trailingAction: (@Composable () -> Unit)? = null,
 ) {
     val backdrop = rememberGlassBackdrop()
     val showTopBar = locationName != null && onBack != null && onSettings != null
@@ -272,6 +284,7 @@ fun PrayerSkyScene(
                     onBackClick = onBack!!,
                     onSettingsClick = onSettings!!,
                     backdrop = backdrop,
+                    trailingAction = trailingAction,
                     modifier = Modifier.fillMaxWidth(),
                 )
                 Spacer(modifier = Modifier.height(4.dp))
@@ -307,6 +320,7 @@ private fun PrayerSkyTopBar(
     onSettingsClick: () -> Unit,
     backdrop: GlassBackdrop,
     modifier: Modifier = Modifier,
+    trailingAction: (@Composable () -> Unit)? = null,
 ) {
     Column(modifier = modifier) {
         // Navigation actions at the two edges.
@@ -321,12 +335,20 @@ private fun PrayerSkyTopBar(
                 onClick = onBackClick,
                 backdrop = backdrop,
             )
-            GlassIconButton(
-                icon = Icons.Default.Settings,
-                contentDescription = stringResource(R.string.settings),
-                onClick = onSettingsClick,
-                backdrop = backdrop,
-            )
+            // The optional action shares the trailing edge with settings rather than taking the
+            // centre, which the location pill occupies on the row below.
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                trailingAction?.invoke()
+                GlassIconButton(
+                    icon = Icons.Default.Settings,
+                    contentDescription = stringResource(R.string.settings),
+                    onClick = onSettingsClick,
+                    backdrop = backdrop,
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(NimazSpacing.Medium))

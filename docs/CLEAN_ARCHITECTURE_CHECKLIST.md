@@ -842,6 +842,19 @@ rg -n 'Card\(|Surface\(|Box\(.*\.background\(' app/src/main/java/com/arshadshah/
   tracker's row drew its own 24dp `Box` with `.background()` / `.border()` and a raw `Check` icon.
   Replaced by `NimazAccordion(style = FLAT)` with a `NimazBadge` status and a
   `NimazSegmentedControl` picker, so the row's tap target and ripple come from the design system.
+- [x] ~~**`PrayerTimesScreen`'s `DayNavBar` wrapped a `.clickable` around a card's contents.**~~
+  **Resolved.** The date row inside the nav card was a `Row` with `.clip().clickable()`, which
+  paints a sharp-cornered ripple ignoring the card radius (CLAUDE.md rule 8). The whole nav bar is
+  gone: date selection is a `NimazDayRail` plus a `NimazIconButton` month jump, both of which carry
+  their own tap targets.
+- [x] ~~**Cards toned to the background they sit on.**~~ **Resolved, and worth knowing before
+  writing a new screen.** `NimazTone.NEUTRAL` at `NimazCardLevel.BASE` resolves to
+  `colorScheme.surface` — the same colour a screen's own background usually is — so a
+  `NimazCard(style = FILLED)` taking the default tone renders an *invisible container*. All three
+  cards on the rebuilt Prayer Times screen did this at once, and the screen read as a flat list.
+  A card that should read as a card takes `MUTED` (`surfaceContainer`) or `NEUTRAL` +
+  `NimazCardLevel.RAISED`. Detect by eye, not by grep: it type-checks, it passes every semantics
+  assertion, and only a render shows it — see `PrayerTimesScreenRenderTest`.
 - [ ] **Cards that need a border still bypass `tone`.** A `NimazTone` resolves container + content
   but **not** a stroke, so any bordered card falls back to an explicit
   `NimazCardDefaults.colors(container = …, border = …)`. 10 files today. Fix by teaching the tone

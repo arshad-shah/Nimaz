@@ -2146,4 +2146,13 @@
         <item quantity="one">%1$d günlük seri</item>
         <item quantity="other">%1$d günlük seri</item>
     </plurals>
+    <!-- Prayer Times: the solar day card -->
+    <string name="prayer_arc_cd">Güneşin günü: doğuş %1$s, batış %2$s</string>
+    <string name="prayer_window_lede">Şu an şu vaktin içindesiniz</string>
+    <string name="prayer_window_until">%1$s\'e kadar</string>
+    <string name="prayer_daylight_lede">Günün yayı</string>
+    <string name="prayer_daylight_amount">%1$s gün ışığı</string>
+    <string name="prayer_jumuah">Cuma</string>
+    <string name="prayer_about_this_day">Bu gün hakkında</string>
+    <string name="cd_pick_month">Ay seç</string>
 </resources>
