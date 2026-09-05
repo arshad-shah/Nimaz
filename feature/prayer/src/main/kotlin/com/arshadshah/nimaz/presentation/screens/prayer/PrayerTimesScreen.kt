@@ -413,7 +413,7 @@ private fun SolarDayCard(
         modifier = modifier,
         style = NimazCardStyle.FILLED,
         shape = RoundedCornerShape(20.dp),
-        tone = NimazTone.MUTED,
+        tone = NimazTone.NEUTRAL,
     ) {
         Column(modifier = Modifier.padding(14.dp)) {
             if (isToday && current != null) {
@@ -513,7 +513,7 @@ private fun PrayerRowsCard(
     NimazCard(
         style = NimazCardStyle.FILLED,
         shape = RoundedCornerShape(20.dp),
-        tone = NimazTone.MUTED,
+        tone = NimazTone.NEUTRAL,
     ) {
         Column(modifier = Modifier.padding(horizontal = 14.dp, vertical = 4.dp)) {
             prayers.forEachIndexed { index, prayer ->
@@ -547,7 +547,7 @@ private fun DayInfoCard(sunrise: String, sunset: String, daylight: String, metho
         modifier = Modifier.fillMaxWidth(),
         style = NimazCardStyle.FILLED,
         shape = RoundedCornerShape(20.dp),
-        tone = NimazTone.MUTED,
+        tone = NimazTone.NEUTRAL,
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             InfoRow(stringResource(R.string.prayer_info_daylight), daylight)

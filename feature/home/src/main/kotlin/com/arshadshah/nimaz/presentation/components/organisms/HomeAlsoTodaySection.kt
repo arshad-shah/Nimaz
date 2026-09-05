@@ -21,7 +21,6 @@ import com.arshadshah.nimaz.domain.model.WorshipReminderType
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
-import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuItem
@@ -61,7 +60,6 @@ fun HomeAlsoTodaySection(
         )
 
         NimazCard(
-            tone = NimazTone.MUTED,
             style = NimazCardStyle.FILLED,
             shape = RoundedCornerShape(20.dp),
             modifier = Modifier.fillMaxWidth(),

@@ -312,7 +312,6 @@ private fun CategoryGridCard(
     val iconColor = getCategoryColor(category.id)
 
     NimazCard(
-        tone = NimazTone.MUTED,
         style = NimazCardStyle.FILLED,
         onClick = onClick,
         modifier = modifier.fillMaxWidth(),
@@ -371,7 +370,6 @@ private fun AdhkarListItem(
     modifier: Modifier = Modifier
 ) {
     NimazCard(
-        tone = NimazTone.MUTED,
         style = NimazCardStyle.FILLED,
         onClick = onClick,
         modifier = modifier.fillMaxWidth(),

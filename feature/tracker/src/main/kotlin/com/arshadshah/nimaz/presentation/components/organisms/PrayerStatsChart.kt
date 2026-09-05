@@ -44,7 +44,6 @@ import com.arshadshah.nimaz.core.ui.R
 import com.arshadshah.nimaz.domain.model.PrayerName
 import com.arshadshah.nimaz.domain.model.PrayerStats
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
-import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazPalette
@@ -85,7 +84,6 @@ fun PrayerStatsChart(
     summaryItems: List<ChartStatItem>? = null
 ) {
     NimazCard(
-        tone = NimazTone.MUTED,
         style = NimazCardStyle.FILLED,
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp)

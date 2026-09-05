@@ -66,9 +66,10 @@ fun NameMedallionCard(
     NimazCard(
         modifier = modifier.fillMaxWidth(),
         style = NimazCardStyle.FILLED,
-        // MUTED, not NEUTRAL: at BASE, NEUTRAL resolves to `colorScheme.surface` — the screen's
-        // own background — and the card disappears.
-        tone = NimazTone.MUTED,
+        // NEUTRAL — the default, and a white card. `colorScheme.surface` is White while the page
+        // is `background` (GrayBg, 0xFFFAFAFA), so a NEUTRAL card reads against it exactly as
+        // intended. It is not the invisible case; the two are different colours.
+        tone = NimazTone.NEUTRAL,
         shape = RoundedCornerShape(20.dp),
         onClick = onClick,
     ) {

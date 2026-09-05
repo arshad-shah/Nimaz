@@ -283,7 +283,6 @@ private fun MakeupPendingFastCard(
     val displayDate = makeupFast.originalHijriDate ?: missedDate
 
     NimazCard(
-        tone = NimazTone.MUTED,
         style = NimazCardStyle.FILLED,
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(14.dp)
@@ -418,7 +417,6 @@ private fun MakeupCompletedFastItem(
     } ?: stringResource(R.string.fasting_originally, missedDate)
 
     NimazCard(
-        tone = NimazTone.MUTED,
         style = NimazCardStyle.FILLED,
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(14.dp)

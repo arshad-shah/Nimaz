@@ -88,11 +88,7 @@ fun PrayerTrackerDayCard(
     val isToday = selectedDate == now.toLocalDate()
     val doneCount = TRACKED_PRAYERS.count { statuses[it]?.isDone() == true }
 
-    NimazCard(
-        style = NimazCardStyle.FILLED,
-        tone = NimazTone.MUTED,
-        modifier = modifier.fillMaxWidth(),
-    ) {
+    NimazCard(style = NimazCardStyle.FILLED, modifier = modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(top = 18.dp)) {
             Row(
                 modifier = Modifier

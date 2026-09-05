@@ -59,7 +59,6 @@ import com.arshadshah.nimaz.core.util.WorshipReminderContent
 import com.arshadshah.nimaz.core.common.formatCurrency
 import com.arshadshah.nimaz.domain.model.PinnedShortcut
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
-import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconButtonSize
@@ -399,7 +398,7 @@ private fun PinnedShortcutRow(
             // only happen if the enum gains a member and this map does not, and a pill that does
             // nothing when tapped is worse than one that is not there.
             if (onClick != null) {
-                NimazCard(onClick = onClick, tone = NimazTone.MUTED) {
+                NimazCard(onClick = onClick) {
                     Row(
                         modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
                         verticalAlignment = Alignment.CenterVertically,

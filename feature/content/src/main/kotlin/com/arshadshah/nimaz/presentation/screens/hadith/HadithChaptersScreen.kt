@@ -41,7 +41,6 @@ import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
-import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
@@ -207,7 +206,6 @@ private fun ChapterItem(
     modifier: Modifier = Modifier
 ) {
     NimazCard(
-        tone = NimazTone.MUTED,
         modifier = modifier.fillMaxWidth(),
         style = NimazCardStyle.FILLED,
         onClick = onClick,
