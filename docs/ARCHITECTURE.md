@@ -1069,6 +1069,23 @@ with no label and a touch target under 48dp fail the lane we already run. It can
       bordered chevron, `primary` when enabled and dimmed to `outlineVariant` at range ends);
       `direction` is *visual* (which chevron is drawn, auto-mirrored) so RTL surfaces wire the
       left arrow to advance. Default `size` is 48dp; steppers use 44dp. (Issue #227.)
+    - a prayer in a list is **`NimazPrayerRow`** (`components/molecules/NimazPrayerRow.kt`) on a
+      reference surface, and **`PrayerTimeCard`** on Home. They are not variants of each other:
+      the card is one card *per* prayer carrying a tracking checkbox, which Home's two-column
+      layout is built around; the row has no `onClick` and no toggle at all, because Prayer Times
+      answers *when* and the prayer tracker answers what the reader did about it (§9). A row that
+      looked tappable would promise logging the screen does not perform, and a test asserts it
+      never gains one.
+    - the sun's day is **`NimazSolarArc`** (`components/atoms/NimazSolarArc.kt`), with its
+      geometry in `foundation/geometry/SolarArcGeometry.kt` as a **pure function** rather than
+      inline in the `Canvas` — solar altitude is sinusoidal and solar noon is midway between
+      sunrise and sunset, so the curve has a closed form that plain JVM tests can pin exactly.
+      Two rules it exists to encode: **a container token is not a stroke colour** (`surfaceVariant`
+      on a container-coloured card is invisible), and **`NimazTone.NEUTRAL` at `BASE` is
+      `colorScheme.surface`** — the screen's own background, so a card that wants to read as a
+      card takes `MUTED` or `RAISED`. Both were shipped-looking bugs that passed every assertion;
+      see `PrayerTimesScreenRenderTest` and `NimazSolarArcPreviewRenderTest`, which draw for real
+      and write PNGs to `build/reports/`.
     - a button is `NimazButton(text, onClick, variant = …, size = …, type = …)`
       (`components/atoms/NimazButton.kt`), **not** a raw Material `Button`/`OutlinedButton`/
       `TextButton` and **never** a `Text`/`Box`/`Surface` carrying a `Modifier.clickable`. `variant`
@@ -1634,6 +1651,7 @@ copy anything listed as Open.
 | Area | What was fixed |
 |------|----------------|
 | Layer boundary (`domain` ⇸ everything else) | **The inward-pointing rule was enforced by review alone; it is now a compile error.** `presentation → domain → data` was true in the code and checked by nothing, because a single module cannot check it. `domain/` moved to **`:core:domain`**, a `kotlin-jvm` module: `data`, `presentation` and the Android SDK are simply not on its classpath. Two things that had to be inverted first, both in PR #577: the five `core.navigation.Route` imports, and `RescheduleNotificationsUseCase`'s constructor-injected `PrayerNotificationScheduler` — 910 LOC of `AlarmManager`/`NotificationCompat` behind what looked like a pure use case, which made the "zero Android imports" census true of *direct* edges only. Purity is held after the fact by `androidFreeClasspath` (§11), not by the one-off demonstration the issue originally asked for. `AP-1`, `AP-3`. |
+| Prayer tracking had three write surfaces | **Prayer Times stopped writing.** The screen offered a tap-to-toggle that wrote `PRAYED ⇄ NOT_PRAYED` — and `PrayerTimesViewModel`'s own comment named it as the *third* place a prayer could be tracked, noting that a dashboard built on `prayer_tracked` would under-count even after the two sites #359 lists were fixed. Against the vocabulary the prayer-tracker redesign established (`NOT_RECORDED` is not `MISSED`; `LATE` and `QADA` are first-class) a binary toggle is destructive: tapping a prayer logged as `LATE` flattened it to `PRAYED` with no notice, and a second tap wrote `NOT_PRAYED`, which the tracker reads back as *nobody has said*. **Prayer Times answers *when*; the tracker answers what the reader did about it.** `TogglePrayer`, `togglePrayer()`, the `statuses` map and its `getPrayerRecordsForDate` subscription are gone — the last of those also stopped the screen recomputing a day's solar geometry on every prayer written anywhere in the app. Held by `PrayerTimesViewModelTest.no event writes a prayer record`, asserted over *every* event rather than the removed one. No Room migration, no `PrayerStatus` change, no sync or widget change; `PrayerTimeDisplay.prayerStatus` stays on the shared model because `HomeScreen` shows it. |
 | Screen states | **Loading, empty and error were improvised per screen.** 25 hand-rolled spinners across 19 screens, 9 hand-rolled error blocks, 11 `UiState`s carrying an error no screen read, and three Qur'an screens that reported a failed load as an empty one. Resolved by the screen-states epic: the four states are now evaluated in one fixed order (§8), a failing `UiState` carries `UiError` (`@StringRes` copy, exception text in `details`), and `ScreenStateConventionTest` holds all three lines with empty backlogs. `AP-7.16`. |
 | Use-case layer | `Hadith`, `Dua`, `Fasting`, `Prayer`, `Tasbih`, `Tafseer`, `Zakat` now have `XxxUseCases` wrappers; `PrayerTimes/PrayerTracker/Home/Settings/Location`, `Search`, `Bookmarks` ViewModels inject use cases instead of repositories. |
 | Coroutine failure paths | **No ViewModel launches a bare coroutine any more.** All 229 raw `viewModelScope.launch` calls are `launchSafely(telemetry, feature, "label")` — `viewModelScope`'s `SupervisorJob` isolates siblings but does not contain a throw inside a child `launch`, so each of those was a potential crash that reported nothing. `KhatamViewModel` and `OnboardingViewModel` were still on the static `AppAnalytics`/`CrashReporter`; both now inject `Telemetry`. Sites that set `isLoading = true` clear it in `onFailure`; the rest are deliberately telemetry-only — see `CLEAN_ARCHITECTURE_CHECKLIST.md` AP-7.12 for the per-site test, which turns on whether a screen renders the error at all. |

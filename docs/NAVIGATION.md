@@ -183,7 +183,9 @@ flowchart LR
 ```mermaid
 flowchart LR
     subgraph P["Prayer"]
-        PrayerTimes --> PrayerTracker & PrayerStats & QadaPrayers & MonthlyPrayerTimes
+        PrayerTracker --> PrayerStats & QadaPrayers
+        PrayerTimes
+        MonthlyPrayerTimes
     end
 
     subgraph F["Fasting"]
