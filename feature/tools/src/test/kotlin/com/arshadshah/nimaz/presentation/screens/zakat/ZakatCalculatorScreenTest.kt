@@ -322,59 +322,125 @@ class ZakatCalculatorScreenTest {
     }
 
     // ------------------------------------------------------------------
-    // The nisab threshold
+    // Where the nisab basis is set
     // ------------------------------------------------------------------
 
+    /**
+     * The basis used to be *reported* on the form as a row that also opened settings — a second
+     * route to a screen the top bar already reaches. The threshold it stated is on the result
+     * hero anyway (`nisabValue`, `nisabType`), so the row said nothing the reader could not
+     * already see, one action bar away from thirteen input fields.
+     */
     @Test
-    fun `the basis is reported on the form before anything is typed`() {
-        // `nisabValue` is derived on the state even with an empty form, precisely so this row can
-        // say what the threshold is. Someone who cannot see it cannot tell why their total is 0.
+    fun `the form does not report the nisab basis as a row`() {
         state.value = ZakatCalculatorUiState(nisabType = NisabType.GOLD, currency = "USD")
         render()
 
-        composeRule.onNodeWithText(str(R.string.zakat_section_nisab)).assertIsDisplayed()
-        val expected = str(
-            R.string.settings_value_with_qualifier,
-            str(R.string.gold),
-            formatCurrency(state.value.nisabValue, "USD"),
-        )
-        composeRule.onNodeWithText(expected).assertIsDisplayed()
+        composeRule.onAllNodesWithText(str(R.string.zakat_section_nisab)).assertCountEquals(0)
     }
 
     @Test
-    fun `switching the basis to silver changes the threshold the form reports`() {
-        // The silver nisab works out roughly an order of magnitude lower than the gold one, so it
-        // applies to far more people. A basis change that did not reach this row would leave the
-        // screen quoting a threshold the calculation is not using.
+    fun `settings is reached from the top bar and nowhere else`() {
         state.value = ZakatCalculatorUiState(nisabType = NisabType.GOLD)
         render()
-        val goldThreshold = state.value.nisabValue
 
-        state.value = ZakatCalculatorUiState(nisabType = NisabType.SILVER)
+        composeRule.onNodeWithContentDescription(str(R.string.zakat_settings)).performClick()
         composeRule.waitForIdle()
 
-        val silverThreshold = state.value.nisabValue
-        assertThat(silverThreshold).isNotEqualTo(goldThreshold)
-        composeRule.onNodeWithText(
+        assertThat(settingsOpens).isEqualTo(1)
+    }
+
+    /**
+     * The threshold did not stop being reported when the row went — it moved to where it was
+     * already being shown. The hero's middle tile carries the value and the basis, which is what
+     * makes the row redundant rather than merely removed.
+     */
+    @Test
+    fun `the result hero reports the threshold and the basis it comes from`() {
+        state.value = ZakatCalculatorUiState(nisabType = NisabType.GOLD, currency = "USD")
+        render()
+
+        // The hero's tiles use `clearAndSetSemantics`, so each reads as one announcement
+        // rather than as a value and a label — assert the sentence, not the fragments.
+        composeRule.onNodeWithContentDescription(
             str(
-                R.string.settings_value_with_qualifier,
-                str(R.string.silver),
-                formatCurrency(silverThreshold, "USD"),
+                R.string.zakat_a11y_stat_format,
+                str(R.string.zakat_stat_nisab_format, str(R.string.gold)),
+                formatCurrency(state.value.nisabValue, "USD"),
             )
         ).assertIsDisplayed()
     }
 
     @Test
-    fun `the basis row opens the settings screen rather than editing in place`() {
-        // Deliberate: the basis and the metal prices are persisted preferences, not figures typed
-        // per calculation, and they used to be an accordion in the middle of thirteen inputs.
+    fun `switching the basis to silver changes the threshold the hero reports`() {
+        // The silver nisab works out roughly an order of magnitude lower than the gold one, so it
+        // applies to far more people. A basis change that did not reach the hero would leave the
+        // screen quoting a threshold the calculation is not using.
+        state.value = ZakatCalculatorUiState(nisabType = NisabType.GOLD, currency = "USD")
         render()
+        val goldThreshold = state.value.nisabValue
 
-        composeRule.onNodeWithText(str(R.string.zakat_section_nisab)).performClick()
+        state.value = ZakatCalculatorUiState(nisabType = NisabType.SILVER, currency = "USD")
         composeRule.waitForIdle()
 
-        assertThat(settingsOpens).isEqualTo(1)
+        val silverThreshold = state.value.nisabValue
+        assertThat(silverThreshold).isNotEqualTo(goldThreshold)
+        composeRule.onNodeWithContentDescription(
+            str(
+                R.string.zakat_a11y_stat_format,
+                str(R.string.zakat_stat_nisab_format, str(R.string.silver)),
+                formatCurrency(silverThreshold, "USD"),
+            )
+        ).assertIsDisplayed()
     }
+
+    /**
+     * Below the threshold nothing is owed, and the hero has to say so rather than showing a
+     * zero that reads as "not calculated yet". This is the state most first-time users are in.
+     */
+    @Test
+    fun `a calculation below the nisab reports that nothing is due`() {
+        state.value = ZakatCalculatorUiState(
+            assets = ZakatAssets(cashOnHand = 500.0),
+            currency = "USD",
+            calculation = ZakatCalculation(
+                totalAssets = 500.0,
+                totalLiabilities = 0.0,
+                netWorth = 500.0,
+                nisabType = NisabType.GOLD,
+                nisabValue = 5_686.20,
+                isAboveNisab = false,
+                zakatDue = 0.0,
+            ),
+        )
+        render()
+
+        // The plinth reads as one announcement, so assert the sentence rather than the subtitle.
+        composeRule.onNodeWithContentDescription(
+            str(
+                R.string.zakat_a11y_plinth_status_format,
+                str(R.string.zakat_due),
+                formatCurrency(0.0, "USD"),
+                str(R.string.zakat_status_below_nisab),
+            )
+        ).assertIsDisplayed()
+    }
+
+    /** An untouched form still has a threshold to state, and no due figure to state yet. */
+    @Test
+    fun `an empty form still reports the threshold`() {
+        state.value = ZakatCalculatorUiState(nisabType = NisabType.SILVER, currency = "USD")
+        render()
+
+        composeRule.onNodeWithContentDescription(
+            str(
+                R.string.zakat_a11y_stat_format,
+                str(R.string.zakat_stat_nisab_format, str(R.string.silver)),
+                formatCurrency(state.value.nisabValue, "USD"),
+            )
+        ).assertIsDisplayed()
+    }
+
 
     // ------------------------------------------------------------------
     // The result the user is reading
@@ -500,7 +566,6 @@ class ZakatCalculatorScreenTest {
         // The form is still a form. An error state that replaced the screen would take an
         // afternoon of asset entry with it, and no button brings that back.
         composeRule.onNodeWithText(str(R.string.cash_on_hand)).assertIsDisplayed()
-        composeRule.onNodeWithText(str(R.string.zakat_section_nisab)).assertIsDisplayed()
     }
 
     @Test
@@ -723,17 +788,12 @@ class ZakatCalculatorScreenTest {
 
     @Test
     @Config(qualifiers = "w1000dp-h1200dp")
-    fun `the tablet layout reports the nisab basis and opens settings from it`() {
+    fun `the tablet layout does not report the nisab basis as a row either`() {
         state.value = ZakatCalculatorUiState(nisabType = NisabType.SILVER)
         render()
 
-        composeRule.onNodeWithText(str(R.string.zakat_section_nisab)).assertIsDisplayed()
-        composeRule.onNodeWithText(str(R.string.zakat_section_nisab)).performClick()
-        composeRule.waitForIdle()
-
-        assertThat(settingsOpens).isEqualTo(1)
+        composeRule.onAllNodesWithText(str(R.string.zakat_section_nisab)).assertCountEquals(0)
     }
-
     @Test
     @Config(qualifiers = "w1000dp-h1200dp")
     fun `the tablet layout still draws the breakdown and takes input`() {
