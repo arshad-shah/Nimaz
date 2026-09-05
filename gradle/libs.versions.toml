@@ -21,7 +21,13 @@ lifecycleRuntimeKtx = "2.11.0"
 activityCompose = "1.13.0"
 composeBom = "2026.06.01"
 hilt = "2.60.1"
-hiltNavigationCompose = "1.4.0"
+# Held at 1.3.0. 1.4.0 breaks every Compose test that composes a screen reaching `hiltViewModel()`
+# under `createComposeRule` — they throw "ComponentActivity does not implement
+# dagger.hilt.internal.GeneratedComponent". It took out AdaptiveMoreScreenTest,
+# AdaptiveSettingsScreenTest and the content suites at once. `hilt` itself is fine at 2.60.1;
+# bisecting the two showed the navigation artifact is the one that breaks. Raise it again with a
+# test-harness change, not on its own.
+hiltNavigationCompose = "1.3.0"
 room = "2.8.4"
 navigationCompose = "2.9.8"
 datastore = "1.2.1"

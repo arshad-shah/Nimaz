@@ -42,6 +42,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.testTag
@@ -52,6 +53,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.core.ui.R
+import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.core.navigation.ScreenTags
 import com.arshadshah.nimaz.core.util.WorshipReminderContent
 import com.arshadshah.nimaz.core.common.formatCurrency
@@ -201,6 +203,7 @@ fun MoreMenuScreen(
                             total = state.prayersTrackable ?: 0,
                         ).resolve(),
                         icon = Icons.Default.Schedule,
+                        iconTint = MoreSectionTints.dailyPractice,
                         onClick = onNavigateToPrayerTracker
                     )
                     NimazMenuDivider()
@@ -208,6 +211,7 @@ fun MoreMenuScreen(
                         title = stringResource(R.string.fasting),
                         subtitle = MoreSubtitles.fasting(state.pendingMakeupFasts).resolve(),
                         icon = Icons.Default.Fastfood,
+                        iconTint = MoreSectionTints.dailyPractice,
                         onClick = onNavigateToFasting
                     )
                     NimazMenuDivider()
@@ -218,6 +222,7 @@ fun MoreMenuScreen(
                             minutesUntil = state.minutesUntilNextWorship,
                         ).resolve(),
                         icon = Icons.Default.Bedtime,
+                        iconTint = MoreSectionTints.dailyPractice,
                         onClick = onNavigateToNightWorship
                     )
                     NimazMenuDivider()
@@ -228,6 +233,7 @@ fun MoreMenuScreen(
                             daysAgainstPace = state.khatamDaysAgainstPace,
                         ).resolve(),
                         icon = Icons.AutoMirrored.Filled.MenuBook,
+                        iconTint = MoreSectionTints.dailyPractice,
                         onClick = onNavigateToKhatam
                     )
                 }
@@ -246,6 +252,7 @@ fun MoreMenuScreen(
                             totalLessons = state.qaidaTotalLessons ?: 0,
                         ).resolve(),
                         icon = Icons.Default.Abc,
+                        iconTint = MoreSectionTints.learning,
                         onClick = onNavigateToQaida
                     )
                     NimazMenuDivider()
@@ -258,24 +265,28 @@ fun MoreMenuScreen(
                         title = stringResource(R.string.names_title),
                         subtitle = stringResource(R.string.names_more_subtitle),
                         icon = Icons.Default.AutoAwesome,
+                        iconTint = MoreSectionTints.learning,
                         onClick = onNavigateToNames
                     )
                     NimazMenuDivider()
                     NimazMenuItem(
                         title = stringResource(R.string.hadith),
                         icon = Icons.Default.FormatQuote,
+                        iconTint = MoreSectionTints.learning,
                         onClick = onNavigateToHadith
                     )
                     NimazMenuDivider()
                     NimazMenuItem(
                         title = stringResource(R.string.duas),
                         icon = ImageVector.vectorResource(R.drawable.ic_dua),
+                        iconTint = MoreSectionTints.learning,
                         onClick = onNavigateToDuas
                     )
                     NimazMenuDivider()
                     NimazMenuItem(
                         title = stringResource(R.string.tafseer),
                         icon = Icons.AutoMirrored.Filled.Article,
+                        iconTint = MoreSectionTints.learning,
                         onClick = onNavigateToTafseer
                     )
                 }
@@ -291,18 +302,21 @@ fun MoreMenuScreen(
                         title = stringResource(R.string.calendar),
                         subtitle = MoreSubtitles.islamicCalendar(state.hijriToday).resolve(),
                         icon = Icons.Default.CalendarMonth,
+                        iconTint = MoreSectionTints.tools,
                         onClick = onNavigateToCalendar
                     )
                     NimazMenuDivider()
                     NimazMenuItem(
                         title = stringResource(R.string.prayer_times),
                         icon = Icons.Default.Mosque,
+                        iconTint = MoreSectionTints.tools,
                         onClick = onNavigateToPrayerTimes
                     )
                     NimazMenuDivider()
                     NimazMenuItem(
                         title = stringResource(R.string.monthly_prayer_times),
                         icon = Icons.Default.CalendarViewMonth,
+                        iconTint = MoreSectionTints.tools,
                         onClick = onNavigateToMonthlyPrayerTimes
                     )
                     NimazMenuDivider()
@@ -310,6 +324,7 @@ fun MoreMenuScreen(
                         title = stringResource(R.string.zakat),
                         subtitle = state.zakatSubtitle(),
                         icon = Icons.Default.Calculate,
+                        iconTint = MoreSectionTints.tools,
                         onClick = onNavigateToZakat
                     )
                 }
@@ -426,3 +441,29 @@ private fun MoreUiState.zakatSubtitle(): String? = MoreSubtitles.zakat(
     loaded = zakatHistoryLoaded,
     dueThisYear = zakatDueThisYear?.let { formatCurrency(it, zakatCurrency) },
 ).resolve()
+
+/**
+ * One tint per section of the More menu.
+ *
+ * Every one of the seventeen icon wells used to be `onPrimaryContainer` — the same grey on a
+ * screen whose whole job is to distinguish seventeen destinations. The colour now says which
+ * group a row is in, reinforcing the section header rather than repeating it.
+ *
+ * **Per section, not per feature.** Colour as identity — a hue per destination, matching the
+ * accent of the screen it opens — was the alternative, and it is a seventeen-colour palette that
+ * needs a decision every time a feature is added. Grouping needs none: a new row inherits its
+ * section's tint.
+ *
+ * All four come from tokens the theme already defines, so a theme change still reaches them.
+ * Support keeps the neutral: it is not a feature, and colouring it would say it were.
+ */
+private object MoreSectionTints {
+    val dailyPractice: Color
+        @Composable get() = MaterialTheme.colorScheme.primary
+
+    val learning: Color
+        @Composable get() = MaterialTheme.colorScheme.tertiary
+
+    val tools: Color
+        @Composable get() = NimazColors.Success
+}
