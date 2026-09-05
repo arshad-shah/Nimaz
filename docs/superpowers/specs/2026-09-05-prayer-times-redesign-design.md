@@ -168,17 +168,30 @@ B = −c / (1 − c)
 ```
 
 `h(t)` is then **1 at Dhuhr, exactly 0 at sunrise and sunset, and negative at night** — with no
-latitude, declination or date arithmetic. It has a property worth having: the arc's height is a
-function of daylight length, so a short December day renders as a genuinely flatter curve than a
-June one, for free.
+latitude, declination or date arithmetic.
 
 Worked check with `tSunrise = 0.27`, `tSunset = 0.80`: `tDhuhr = 0.535`, `c = −0.0943`,
 `A = 0.9138`, `B = 0.0862`; `h(0) = −0.803` (deep night), `h(0.535) = 1.0`, `h(0.27) = 0.0`.
 
-**Night is compressed for drawing.** Raw `h` reaches ≈ −0.8, which would give the trough almost
-the visual weight of the day. Negative values are scaled by a `NightCompression` constant
-(`0.45f`) before mapping to pixels. This is a drawing decision and is documented as such at the
-constant.
+**The apex is normalised, so what varies with the season is the night, not the day.** The daylight
+limb always peaks at 1; a shorter day pushes the horizon crossings closer together and drives the
+midnight trough much deeper. Dublin in June (`0.20`, `0.90`) gives `h(0) = −0.23`; Dublin in
+December (`0.35`, `0.70`) gives `h(0) = −2.64` — an order of magnitude, and **a drawing hazard**:
+uncompressed, a December trough is 2.6× the day limb and leaves the card.
+
+So negative values are both **scaled** by `NightCompression` (`0.45f`) **and clamped** to `−1f`,
+giving a drawn range of `−1f..1f` in every season:
+
+```kotlin
+fun drawnAltitude(t, sunriseFraction, sunsetFraction): Float =
+    solarAltitude(t, sunriseFraction, sunsetFraction)
+        .let { if (it >= 0f) it else (it * NightCompression).coerceAtLeast(-1f) }
+```
+
+Both the compression and the clamp are drawing decisions, not astronomy, and say so at the
+constant. Polar cases fall out correctly: 24-hour daylight (`halfDay = 0.5`) gives `A = B = 0.5`
+and a curve that never goes negative; a vanishing day drives the denominator to zero and hits the
+degenerate guard below.
 
 **The curve is suggestive, not simulated.** True Fajr and Isha depend on twilight angle, and the
 real solar path changes shape with latitude and season in ways this does not model. The atom's
@@ -316,9 +329,11 @@ one caller uses the localised one. Its `@StringRes` needs are already satisfied.
 ### 5.1 The atom
 
 - **Plain JVM** (`core/ui/src/test/`): `solarAltitude` — apex is exactly 1 at `tDhuhr`; zero at
-  both crossings within 1e-4; negative across midnight; a short winter day yields a lower apex-to-
-  crossing spread than a long summer day; degenerate inputs (`sunrise == sunset`, out of range,
-  `NaN`) return a flat curve and do not throw.
+  both crossings within 1e-4; negative across midnight; **a short winter day gives a deeper
+  midnight trough than a long summer one** (the real seasonal property, §2.2); 24-hour daylight
+  never goes negative; degenerate inputs (`sunset <= sunrise`, out of range, `NaN`, infinities)
+  return a flat zero curve and do not throw. `drawnAltitude` — never leaves `−1f..1f`, for a
+  December day whose raw trough is `−2.64`.
 - **Robolectric** (`core/ui/src/testDebug/`): renders with six nodes; `sunPosition = null` draws no
   sun dot; `litSpan` brightens only between its bounds; one merged accessibility node with the
   supplied sentence; labels drop out at `fontScale = 2.0`; light and dark previews.
