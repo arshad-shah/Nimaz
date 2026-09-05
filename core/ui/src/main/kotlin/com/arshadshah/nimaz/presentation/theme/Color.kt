@@ -34,6 +34,8 @@ object NimazColors {
     // ── Secondary — Gold / Amber ──────────────────────────────────────────────
     val Gold400 = P.Yellow400
     val Gold500 = P.Gold500
+    /** Text on the event banner’s deep teal fill. See [P.TealOnDeepFill]. */
+    val EventBannerOnFill = P.TealOnDeepFill
     val Secondary = Gold500
     val SecondaryLight = Gold400
     val SecondaryDark = P.AmberDeep
@@ -173,6 +175,12 @@ object NimazColors {
         val Jamaah = P.MatBlue
         val Active = P.MatGreen          // green for active state
         val Partial = P.MatOrange400     // some prayers prayed
+
+        // Foregrounds for a status chip whose background is its own colour at 10%.
+        val PrayedInk = P.MatGreenInk
+        val JamaahInk = P.MatBlueInk
+        val MissedInk = P.MatRedInk
+        val QadaInk = P.MatPurpleInk
     }
 
     // ── Fasting ───────────────────────────────────────────────────────────────

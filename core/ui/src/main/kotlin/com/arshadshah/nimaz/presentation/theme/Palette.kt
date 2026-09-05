@@ -59,6 +59,14 @@ object NimazPalette {
     val Teal900 = Color(0xFF134E4A)
     val Teal950 = Color(0xFF042F2E)
 
+    /**
+     * Text on the event banner’s deep teal fill — between Teal50 and white.
+     *
+     * Tuned against that fill rather than picked off this ramp, which is why it is its own
+     * entry: it lived as a literal in `NimazBanner` beside three that *were* ramp shades.
+     */
+    val TealOnDeepFill = Color(0xFFEAF7F5)
+
     // ── Amber / Gold (secondary) ──────────────────────────────────────────────
     val Yellow400 = Color(0xFFFACC15)
     val Gold500 = Color(0xFFEAB308)      // brand gold accent
@@ -136,6 +144,14 @@ object NimazPalette {
     val PurpleSoft = Color(0xFFE8DAFF)   // tertiary-container
     val PurpleDeep = Color(0xFF2E1065)   // on-tertiary-container
     val MatPurple = Color(0xFF9C27B0)    // Material purple — ramadan/qada
+
+    // Darker companions to the Material hues above, for a foreground sitting on a 10% tint of
+    // its own colour — the Material shade itself is too light to read as text at that size.
+    // These four were literals inside `HomePrayerCard`; naming them is what links them back.
+    val MatGreenInk = Color(0xFF3B8E3F)
+    val MatBlueInk = Color(0xFF1976D2)
+    val MatRedInk = Color(0xFFD3392C)
+    val MatPurpleInk = Color(0xFF8E24AA)
 
     // ── Pink / Rose ───────────────────────────────────────────────────────────
     val Pink300 = Color(0xFFF9A8D4)

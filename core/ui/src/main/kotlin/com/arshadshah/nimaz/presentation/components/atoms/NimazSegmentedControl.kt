@@ -29,6 +29,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -211,7 +212,20 @@ fun NimazSegmentedControl(
                     }
                     Text(
                         text = option.label,
-                        style = MaterialTheme.typography.labelLarge,
+                        // The line box is pinned to the style's own `lineHeight` and centred.
+                        //
+                        // `maxLines = 1` stops a long label wrapping; it does nothing about a
+                        // *tall* one. `ﷺ` (U+FDFA) is a full-phrase ligature whose ascent and
+                        // descent are far larger than the Latin glyphs beside it, so the Names
+                        // screen's "Prophet ﷺ" tab grew its own line box — and with it the whole
+                        // tray, and the container the tray sits in. Trimming both ends and
+                        // centring keeps every segment one line tall whatever script is in it.
+                        style = MaterialTheme.typography.labelLarge.copy(
+                            lineHeightStyle = LineHeightStyle(
+                                alignment = LineHeightStyle.Alignment.Center,
+                                trim = LineHeightStyle.Trim.Both,
+                            ),
+                        ),
                         fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium,
                         color = resolvedContent,
                         textAlign = TextAlign.Center,
