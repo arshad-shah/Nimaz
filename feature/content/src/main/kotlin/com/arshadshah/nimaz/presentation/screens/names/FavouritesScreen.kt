@@ -5,9 +5,11 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListScope
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyGridScope
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -21,7 +23,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.core.ui.R
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
-import com.arshadshah.nimaz.presentation.components.molecules.NameCard
+import com.arshadshah.nimaz.presentation.components.molecules.NameMedallionCard
 import com.arshadshah.nimaz.presentation.components.molecules.NamesAccents
 import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
@@ -78,7 +80,8 @@ fun FavouritesScreen(
             )
         },
     ) { paddingValues ->
-        LazyColumn(
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(FavouritesGridColumns),
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues),
@@ -99,7 +102,7 @@ fun FavouritesScreen(
                             .padding(vertical = 48.dp),
                     )
                 }
-                return@LazyColumn
+                return@LazyVerticalGrid
             }
 
             favouriteSection(
@@ -108,7 +111,7 @@ fun FavouritesScreen(
                 key = { "allah:${it.id}" },
             ) { name ->
                 val accent = NamesAccents.allah()
-                NameCard(
+                NameMedallionCard(
                     number = name.id,
                     arabicName = name.nameArabic,
                     primaryLabel = name.nameTransliteration,
@@ -128,7 +131,7 @@ fun FavouritesScreen(
                 key = { "prophet-name:${it.id}" },
             ) { name ->
                 val accent = NamesAccents.prophetNames()
-                NameCard(
+                NameMedallionCard(
                     number = name.id,
                     arabicName = name.nameArabic,
                     primaryLabel = name.nameTransliteration,
@@ -148,7 +151,7 @@ fun FavouritesScreen(
                 key = { "prophet:${it.id}" },
             ) { prophet ->
                 val accent = NamesAccents.prophets()
-                NameCard(
+                NameMedallionCard(
                     number = prophet.id,
                     arabicName = prophet.nameArabic,
                     primaryLabel = prophet.nameEnglish,
@@ -173,13 +176,24 @@ fun FavouritesScreen(
  * A section that renders an empty header is what turns a consolidated favourites screen into a
  * wall of headings, so the emptiness check lives here rather than at each call site.
  */
-private fun <T> LazyListScope.favouriteSection(
+private fun <T> LazyGridScope.favouriteSection(
     title: String,
     items: List<T>,
     key: (T) -> Any,
     card: @Composable (T) -> Unit,
 ) {
     if (items.isEmpty()) return
-    item(key = "header:$title") { NimazSectionHeader(title = title) }
+    // The header spans both columns; indented into one it reads as a cell, not a heading.
+    item(key = "header:$title", span = { GridItemSpan(maxLineSpan) }) {
+        NimazSectionHeader(title = title)
+    }
     items(items = items, key = key) { item -> card(item) }
 }
+
+/**
+ * Two columns, matching the catalogue tabs.
+ *
+ * Favourites is reached from the heart on the names screen itself, so the same name rendering two
+ * different ways one tap apart is the thing to avoid — not the row card in itself.
+ */
+private const val FavouritesGridColumns = 2
