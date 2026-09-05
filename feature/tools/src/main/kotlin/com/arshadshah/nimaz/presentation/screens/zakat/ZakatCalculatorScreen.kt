@@ -393,7 +393,7 @@ private fun ZakatActionBar(
     NimazCard(
         modifier = Modifier.fillMaxWidth(),
         style = NimazCardStyle.FILLED,
-        tone = NimazTone.MUTED,
+        tone = NimazTone.NEUTRAL,
         shape = RoundedCornerShape(topStart = 18.dp, topEnd = 18.dp),
     ) {
         Row(
@@ -736,7 +736,7 @@ private fun InputCard(
     NimazCard(
         modifier = modifier.fillMaxWidth(),
         // Each input row is a card on the page background → elevated.
-        tone = NimazTone.MUTED,
+        tone = NimazTone.NEUTRAL,
         style = NimazCardStyle.ELEVATED,
         shape = RoundedCornerShape(14.dp)
     ) {
@@ -813,7 +813,7 @@ private fun BreakdownCard(
             onClick = onToggleExpanded,
             modifier = Modifier.fillMaxWidth(),
             style = NimazCardStyle.FILLED,
-            tone = NimazTone.MUTED,
+            tone = NimazTone.NEUTRAL,
             shape = RoundedCornerShape(14.dp)
         ) {
             Row(
@@ -845,9 +845,7 @@ private fun BreakdownCard(
         if (expanded) {
             NimazCard(
                 modifier = Modifier.fillMaxWidth(),
-                // Matches the header card above it — a body in `surface` under a header in
-                // `surfaceContainer` reads as two different cards.
-                tone = NimazTone.MUTED,
+                tone = NimazTone.NEUTRAL,
                 style = NimazCardStyle.ELEVATED,
                 shape = RoundedCornerShape(14.dp)
             ) {

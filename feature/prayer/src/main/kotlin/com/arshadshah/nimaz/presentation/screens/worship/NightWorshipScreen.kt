@@ -36,7 +36,6 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
-import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazClockText
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCountdownText
@@ -206,7 +205,6 @@ private fun NightWindowCard(
     onRetry: () -> Unit,
 ) {
     NimazCard(
-        tone = NimazTone.MUTED,
         modifier = Modifier
             .fillMaxWidth()
             .testTag(NightWorshipWindowTestTag),
@@ -332,7 +330,6 @@ private fun NightWindowCard(
 @Composable
 private fun RakahCounterCard(count: Int, onAddPair: () -> Unit, onReset: () -> Unit) {
     NimazCard(
-        tone = NimazTone.MUTED,
         modifier = Modifier
             .fillMaxWidth()
             .testTag(NightWorshipCounterTestTag),
@@ -392,7 +389,6 @@ private fun NightWorshipRow(
     onClick: () -> Unit,
 ) {
     NimazCard(
-        tone = NimazTone.MUTED,
         modifier = Modifier
             .fillMaxWidth()
             .testTag(testTag),

@@ -35,7 +35,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.core.ui.R
 import com.arshadshah.nimaz.domain.model.TafseerNoteItem
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
-import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSegmentedControl
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSegmentedPurpose
@@ -167,7 +166,7 @@ private fun TafseerNoteCard(
     surahName: String,
     onClick: () -> Unit
 ) {
-    NimazCard(onClick = onClick, tone = NimazTone.MUTED) {
+    NimazCard(onClick = onClick) {
         Row(
             modifier = Modifier.padding(14.dp),
             verticalAlignment = Alignment.Top

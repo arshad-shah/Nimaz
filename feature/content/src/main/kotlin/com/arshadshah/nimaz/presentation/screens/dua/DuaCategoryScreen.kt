@@ -212,7 +212,6 @@ internal fun DuaListItem(
     onOccasionClick: ((DuaOccasion) -> Unit)? = null,
 ) {
     NimazCard(
-        tone = NimazTone.MUTED,
         style = NimazCardStyle.FILLED,
         onClick = onClick,
         modifier = modifier.fillMaxWidth(),

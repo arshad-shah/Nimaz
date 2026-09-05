@@ -44,7 +44,6 @@ import com.arshadshah.nimaz.domain.model.TafseerNote
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
-import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazPager
@@ -329,7 +328,6 @@ private fun TafseerNotesDialog(
 
         notes.forEach { note ->
             NimazCard(
-                tone = NimazTone.MUTED,
                 style = NimazCardStyle.FILLED,
                 modifier = Modifier
                     .fillMaxWidth()
