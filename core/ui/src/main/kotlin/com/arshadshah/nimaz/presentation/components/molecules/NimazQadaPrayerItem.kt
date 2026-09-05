@@ -32,6 +32,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
@@ -58,6 +59,7 @@ fun NimazQadaPrayerItem(
     val prayerColor = prayer.prayerName.color()
 
     NimazCard(
+        tone = NimazTone.MUTED,
         style = NimazCardStyle.FILLED,
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp)
