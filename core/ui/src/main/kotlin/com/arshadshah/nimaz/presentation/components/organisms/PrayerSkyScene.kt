@@ -271,14 +271,17 @@ fun PrayerSkyScene(
             sunriseFraction = sunriseFraction,
             sunsetFraction = sunsetFraction,
         )
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = statusBarTop)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            if (showTopBar) {
+        // The navigation chrome sits at the top, under the status-bar band; the labels are
+        // centred in the *visible* sky beneath it. Everything used to be one top-packed Column,
+        // which filled the top band with chrome — so the scene never showed the clean strip of
+        // sky behind the status bar that `HomeHero` gets, and read as a header rather than a sky.
+        if (showTopBar) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = statusBarTop)
+                    .padding(16.dp),
+            ) {
                 PrayerSkyTopBar(
                     locationName = locationName!!,
                     onBackClick = onBack!!,
@@ -287,8 +290,19 @@ fun PrayerSkyScene(
                     trailingAction = trailingAction,
                     modifier = Modifier.fillMaxWidth(),
                 )
-                Spacer(modifier = Modifier.height(4.dp))
             }
+        }
+
+        Column(
+            // Centred within the visible sky rather than the full box, so the status-bar band
+            // stays empty — the same correction `HomeHero` makes for the same reason.
+            modifier = Modifier
+                .align(Alignment.Center)
+                .padding(top = statusBarTop)
+                .padding(horizontal = 16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
             GlassPill(
                 text = timeLabel,
                 style = MaterialTheme.typography.titleLarge.copy(
