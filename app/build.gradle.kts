@@ -377,6 +377,10 @@ dependencies {
     // Settings, location and sync (#572) — the last feature module: 24 screens and the
     // 1,324-line `SettingsViewModel`.
     implementation(project(":feature:settings"))
+    // The Home screen — the twelfth feature module, and the one #551 stopped short of. Nothing
+    // pinned it to `:app`: no manifest entry, no `BuildConfig` field, no reference to the app's
+    // `R`, and not one import of `:app`-only code.
+    implementation(project(":feature:home"))
     // FakeTodayProvider / FakeSearchSettings / FakeStringProvider / RecordingWidgetRefresher —
     // one definition each, used by the ViewModel tests here and the tests over there.
     testImplementation(testFixtures(project(":core:domain")))
@@ -565,6 +569,7 @@ tasks.withType<Test>().configureEach {
         "quranSources" to "feature/quran/src/main/kotlin/com/arshadshah/nimaz/presentation",
         "prayerSources" to "feature/prayer/src/main/kotlin/com/arshadshah/nimaz/presentation",
         "settingsSources" to "feature/settings/src/main/kotlin/com/arshadshah/nimaz/presentation",
+        "homeSources" to "feature/home/src/main/kotlin/com/arshadshah/nimaz/presentation",
     ).forEach { (name, path) ->
         inputs.dir(rootProject.layout.projectDirectory.dir(path))
             .withPropertyName(name)
@@ -595,6 +600,7 @@ tasks.withType<Test>().configureEach {
         "quranModuleSources" to "feature/quran/src/main",
         "prayerModuleSources" to "feature/prayer/src/main",
         "settingsModuleSources" to "feature/settings/src/main",
+        "homeModuleSources" to "feature/home/src/main",
     ).forEach { (name, path) ->
         inputs.dir(rootProject.layout.projectDirectory.dir(path))
             .withPropertyName(name)
@@ -896,6 +902,21 @@ val coverageModules = listOf(
     CoverageModule(
         gradlePath = ":feature:settings",
         projectDir = rootProject.layout.projectDirectory.dir("feature/settings"),
+        testTask = "testDebugUnitTest",
+        classesGlobs = listOf(
+            "intermediates/built_in_kotlinc/debug/**/classes/**",
+            "tmp/kotlin-classes/debug/**",
+        ),
+        execGlobs = listOf(
+            "jacoco/testDebugUnitTest.exec",
+            "outputs/unit_test_code_coverage/**/*.exec",
+        ),
+        sourceDir = "src/main/kotlin",
+        packageRoot = "com/arshadshah/nimaz/presentation",
+    ),
+    CoverageModule(
+        gradlePath = ":feature:home",
+        projectDir = rootProject.layout.projectDirectory.dir("feature/home"),
         testTask = "testDebugUnitTest",
         classesGlobs = listOf(
             "intermediates/built_in_kotlinc/debug/**/classes/**",

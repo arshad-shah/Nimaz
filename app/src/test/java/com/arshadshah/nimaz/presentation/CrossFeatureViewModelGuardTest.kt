@@ -118,6 +118,7 @@ class CrossFeatureViewModelGuardTest {
             "worship" to "prayer",
             "settings" to "settings",
             "location" to "settings",
+            "home" to "home",
         )
 
         /** `…/feature/<module>/src/…` — the module a source file lives in. */
