@@ -141,7 +141,7 @@ fun ZakatCalculatorScreen(
             ZakatCompactContent(
                 state = state,
                 viewModel = viewModel,
-                onNavigateToSettings = onNavigateToSettings,
+
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
@@ -150,7 +150,7 @@ fun ZakatCalculatorScreen(
             ZakatTabletContent(
                 state = state,
                 viewModel = viewModel,
-                onNavigateToSettings = onNavigateToSettings,
+
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
@@ -163,7 +163,6 @@ fun ZakatCalculatorScreen(
 private fun ZakatCompactContent(
     state: ZakatCalculatorUiState,
     viewModel: ZakatViewModel,
-    onNavigateToSettings: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val listState = rememberLazyListState()
@@ -203,7 +202,11 @@ private fun ZakatCompactContent(
         // hero that scrolls away loses it exactly when the numbers being typed are changing it.
         ZakatResultSummaryCard(
             zakatDue = state.calculation?.zakatDue ?: 0.0,
-            nisabValue = state.calculation?.nisabValue ?: 0.0,
+            // Falls back to the derived threshold, not zero: `nisabValue` is computed on the
+            // state even with an empty form, and "Nisab · Gold — 0.00" tells the reader nothing
+            // about why their total is zero. This fallback came from the basis row that used to
+            // sit on the form; it moved here rather than being dropped with it.
+            nisabValue = state.calculation?.nisabValue ?: state.nisabValue,
             netWealth = state.calculation?.netWorth ?: 0.0,
             isAboveNisab = state.calculation?.isAboveNisab ?: false,
             nisabType = state.nisabType,
@@ -250,18 +253,6 @@ private fun ZakatCompactContent(
                 ) {
                     LiabilityInputCards(state = state, viewModel = viewModel)
                 }
-            }
-            // The basis is *reported* here and *set* in settings. It stays on the form
-            // because the threshold is what decides whether anything is owed at all — a
-            // reader who cannot see it cannot tell why the total says zero — but nothing
-            // about it is editable in the middle of typing thirteen figures.
-            item {
-                NisabBasisRow(
-                    nisabType = state.nisabType,
-                    nisabValue = state.calculation?.nisabValue ?: state.nisabValue,
-                    currency = state.currency,
-                    onClick = onNavigateToSettings,
-                )
             }
 
             // INLINE, and above the result rather than in place of the form: every figure the
@@ -402,7 +393,7 @@ private fun ZakatActionBar(
     NimazCard(
         modifier = Modifier.fillMaxWidth(),
         style = NimazCardStyle.FILLED,
-        tone = NimazTone.NEUTRAL,
+        tone = NimazTone.MUTED,
         shape = RoundedCornerShape(topStart = 18.dp, topEnd = 18.dp),
     ) {
         Row(
@@ -433,7 +424,6 @@ private fun ZakatActionBar(
 private fun ZakatTabletContent(
     state: ZakatCalculatorUiState,
     viewModel: ZakatViewModel,
-    onNavigateToSettings: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val onShareCalculation = rememberZakatShareAction(state)
@@ -447,19 +437,15 @@ private fun ZakatTabletContent(
         // Result card spans full width
         ZakatResultSummaryCard(
             zakatDue = state.calculation?.zakatDue ?: 0.0,
-            nisabValue = state.calculation?.nisabValue ?: 0.0,
+            // Falls back to the derived threshold, not zero: `nisabValue` is computed on the
+            // state even with an empty form, and "Nisab · Gold — 0.00" tells the reader nothing
+            // about why their total is zero. This fallback came from the basis row that used to
+            // sit on the form; it moved here rather than being dropped with it.
+            nisabValue = state.calculation?.nisabValue ?: state.nisabValue,
             netWealth = state.calculation?.netWorth ?: 0.0,
             isAboveNisab = state.calculation?.isAboveNisab ?: false,
             nisabType = state.nisabType,
             currency = state.currency
-        )
-
-        // Reported, not editable — the basis is set on the zakat settings screen.
-        NisabBasisRow(
-            nisabType = state.nisabType,
-            nisabValue = state.calculation?.nisabValue ?: state.nisabValue,
-            currency = state.currency,
-            onClick = onNavigateToSettings,
         )
 
         // Two columns: Assets left, Liabilities right
@@ -530,40 +516,6 @@ private fun ZakatTabletContent(
 
         Spacer(modifier = Modifier.height(24.dp))
     }
-}
-
-/**
- * The nisab basis and the threshold it prices out to, as a row into the settings screen.
- *
- * A `NimazMenuItem`, not a card wrapped in `Modifier.clickable` — a wrapping clickable paints a
- * sharp-cornered ripple that ignores the card radius.
- */
-@Composable
-private fun NisabBasisRow(
-    nisabType: NisabType,
-    nisabValue: Double,
-    currency: String,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val basis = stringResource(
-        when (nisabType) {
-            NisabType.GOLD -> R.string.gold
-            NisabType.SILVER -> R.string.silver
-        }
-    )
-    NimazMenuItem(
-        modifier = modifier,
-        title = stringResource(R.string.zakat_section_nisab),
-        // "Gold · €5,687.10" — the basis and what it comes to, which together are the whole
-        // of what this row has to say.
-        subtitle = stringResource(
-            R.string.settings_value_with_qualifier,
-            basis,
-            formatCurrency(nisabValue, currency),
-        ),
-        onClick = onClick,
-    )
 }
 
 @Composable
@@ -784,7 +736,7 @@ private fun InputCard(
     NimazCard(
         modifier = modifier.fillMaxWidth(),
         // Each input row is a card on the page background → elevated.
-        tone = NimazTone.NEUTRAL,
+        tone = NimazTone.MUTED,
         style = NimazCardStyle.ELEVATED,
         shape = RoundedCornerShape(14.dp)
     ) {
@@ -861,7 +813,7 @@ private fun BreakdownCard(
             onClick = onToggleExpanded,
             modifier = Modifier.fillMaxWidth(),
             style = NimazCardStyle.FILLED,
-            tone = NimazTone.NEUTRAL,
+            tone = NimazTone.MUTED,
             shape = RoundedCornerShape(14.dp)
         ) {
             Row(
@@ -893,8 +845,9 @@ private fun BreakdownCard(
         if (expanded) {
             NimazCard(
                 modifier = Modifier.fillMaxWidth(),
-                // A section card on the page background → elevated.
-                tone = NimazTone.NEUTRAL,
+                // Matches the header card above it — a body in `surface` under a header in
+                // `surfaceContainer` reads as two different cards.
+                tone = NimazTone.MUTED,
                 style = NimazCardStyle.ELEVATED,
                 shape = RoundedCornerShape(14.dp)
             ) {

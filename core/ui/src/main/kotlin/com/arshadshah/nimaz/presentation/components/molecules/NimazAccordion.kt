@@ -175,8 +175,13 @@ fun NimazAccordion(
     }
 
     when (style) {
+        // MUTED, not the default NEUTRAL. `NimazCardDefaults.tone(NEUTRAL, BASE)` resolves to
+        // `colorScheme.surface` — the same colour a screen's own background usually is — so a
+        // CARD accordion painted an invisible container and its contents floated on the page.
+        // MUTED is `surfaceContainer`: the card reads as a card in both themes.
         NimazAccordionStyle.CARD -> NimazCard(
             style = NimazCardStyle.FILLED,
+            tone = NimazTone.MUTED,
             onClick = { onExpandedChange(!expanded) },
             modifier = modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
