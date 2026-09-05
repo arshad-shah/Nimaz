@@ -1,6 +1,7 @@
 package com.arshadshah.nimaz.presentation
 
 import org.junit.Test
+import com.arshadshah.nimaz.testing.PresentationSourceRoots
 import java.io.File
 
 /**
@@ -32,11 +33,14 @@ class StateCollectionGuardTest {
 
     @Test
     fun `presentation sources collect state lifecycle-aware`() {
-        val dir = File("src/main/java/com/arshadshah/nimaz/presentation")
-        assert(dir.isDirectory) { "Presentation source dir not found at ${dir.absolutePath}" }
+        // Scans every presentation root, not just `:app`'s — which no longer has one. The code
+        // this guards moved into the feature modules with #551 and the `:feature:home`
+        // extraction; a guard still pointing at `:app` would pass by scanning nothing.
+        PresentationSourceRoots.assertAllExist(PresentationSourceRoots.ALL)
+        val roots = PresentationSourceRoots.ALL.map { File(it) }
 
         val offenders = mutableListOf<String>()
-        dir.walkTopDown().filter { it.isFile && it.extension == "kt" }.forEach { file ->
+        roots.asSequence().flatMap { it.walkTopDown() }.filter { it.isFile && it.extension == "kt" }.forEach { file ->
             if (file.name in ALLOWED) return@forEach
             file.readLines().forEachIndexed { i, line ->
                 // `collectAsStateWithLifecycle(` shares the prefix, so match the call form

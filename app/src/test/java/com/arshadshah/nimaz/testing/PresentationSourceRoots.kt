@@ -31,8 +31,11 @@ object PresentationSourceRoots {
      * unit tests. `..` reaches the repository root.
      */
     val ALL: List<String> = listOf(
-        // Everything not yet extracted: screens, ViewModels, feature components, NavGraph.
-        "src/main/java/com/arshadshah/nimaz/presentation",
+        // `:app` has no presentation package any more. It held `screens/home`, `viewmodel/home`
+        // and 21 components until the `:feature:home` extraction; `NavGraph.kt` is under
+        // `core/navigation/`, which is scanned below. The directory itself is gone — git does not
+        // track an empty one — so listing it here fails `assertAllExist` on a fresh checkout
+        // while passing in the working tree that did the move, which is exactly how it was found.
         // The design system, `presentation/model`, `theme/`, and the shared screen helpers.
         "../core/ui/src/main/kotlin/com/arshadshah/nimaz/presentation",
         // The route vocabulary. No screen, but `taggedComposable` and every `Route` live here.

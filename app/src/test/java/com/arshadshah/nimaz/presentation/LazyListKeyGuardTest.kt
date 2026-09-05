@@ -1,6 +1,7 @@
 package com.arshadshah.nimaz.presentation
 
 import org.junit.Test
+import com.arshadshah.nimaz.testing.PresentationSourceRoots
 import java.io.File
 
 /**
@@ -26,15 +27,18 @@ class LazyListKeyGuardTest {
 
     @Test
     fun `lazy list items and itemsIndexed declare a stable key`() {
-        val dir = File("src/main/java/com/arshadshah/nimaz/presentation")
-        assert(dir.isDirectory) { "Presentation source dir not found at ${dir.absolutePath}" }
+        // Scans every presentation root, not just `:app`'s — which no longer has one. The code
+        // this guards moved into the feature modules with #551 and the `:feature:home`
+        // extraction; a guard still pointing at `:app` would pass by scanning nothing.
+        PresentationSourceRoots.assertAllExist(PresentationSourceRoots.ALL)
+        val roots = PresentationSourceRoots.ALL.map { File(it) }
 
         val callStart = Regex("""(?<![A-Za-z0-9_])items(?:Indexed)?\s*\(""")
         val hasKey = Regex("""\bkey\s*=""")
         val countOverload = Regex("""^\d+$|^[\w.]+\.size$""")
 
         val offenders = mutableListOf<String>()
-        dir.walkTopDown().filter { it.isFile && it.extension == "kt" }.forEach { file ->
+        roots.asSequence().flatMap { it.walkTopDown() }.filter { it.isFile && it.extension == "kt" }.forEach { file ->
             val text = file.readText()
             callStart.findAll(text).forEach { match ->
                 val args = argumentsOf(text, match.range.last) ?: return@forEach
