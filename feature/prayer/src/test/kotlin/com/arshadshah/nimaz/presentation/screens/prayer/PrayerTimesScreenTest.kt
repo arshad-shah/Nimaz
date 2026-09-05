@@ -3,6 +3,7 @@ package com.arshadshah.nimaz.presentation.screens.prayer
 import android.content.Context
 import androidx.annotation.StringRes
 import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.assertHasNoClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
@@ -15,6 +16,7 @@ import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeLeft
 import androidx.compose.ui.test.swipeRight
 import androidx.test.core.app.ApplicationProvider
+import com.arshadshah.nimaz.core.common.formatWeekdayDayMonth
 import com.arshadshah.nimaz.core.ui.R
 import com.arshadshah.nimaz.domain.model.PrayerType
 import com.arshadshah.nimaz.presentation.model.PrayerTimeDisplay
@@ -141,27 +143,28 @@ class PrayerTimesScreenTest {
         composeRule.onNodeWithText(str(R.string.location_using_default)).assertIsDisplayed()
     }
 
+    /**
+     * The week rail replaced the prev/next arrows. It reaches three days either side of the
+     * selection, so the cell after the middle one is tomorrow.
+     */
     @Test
-    fun `the day arrows page in both directions`() {
+    fun `the rail selects another day`() {
         show()
         render()
 
-        composeRule.onNodeWithContentDescription(str(R.string.cd_next_day)).performClick()
-        composeRule.onNodeWithContentDescription(str(R.string.cd_previous_day)).performClick()
+        composeRule
+            .onNodeWithContentDescription(today.plusDays(1).formatWeekdayDayMonth())
+            .performClick()
 
-        assertThat(events).containsExactly(
-            PrayerTimesEvent.NextDay,
-            PrayerTimesEvent.PreviousDay,
-        ).inOrder()
+        assertThat(events).containsExactly(PrayerTimesEvent.SelectDate(today.plusDays(1)))
     }
 
     @Test
-    fun `on today the nav bar says TODAY and offers no way back to it`() {
+    fun `on today there is no way back to it offered`() {
         show()
         render()
 
-        composeRule.onNodeWithText(str(R.string.today_uppercase)).assertIsDisplayed()
-        // The chip renders only `if (!state.isToday)` — offering "Today" while on today is a
+        // The pill renders only `if (!state.isToday)` — offering "Today" while on today is a
         // control that does nothing.
         composeRule.onAllNodesWithText(str(R.string.today)).assertCountEquals(0)
     }
@@ -171,7 +174,8 @@ class PrayerTimesScreenTest {
         show(date = today.plusDays(1))
         render()
 
-        composeRule.onNodeWithText(str(R.string.fasting_tomorrow).uppercase()).assertIsDisplayed()
+        // The sky's status line carries the relative label now that the card owns the window.
+        composeRule.onNodeWithText(str(R.string.fasting_tomorrow)).assertIsDisplayed()
 
         composeRule.onNodeWithText(str(R.string.today)).performClick()
         assertThat(events).containsExactly(PrayerTimesEvent.GoToToday)
@@ -181,16 +185,51 @@ class PrayerTimesScreenTest {
     fun `yesterday and a distant day both get a relative label`() {
         show(date = today.minusDays(1))
         render()
-        composeRule.onNodeWithText(str(R.string.relative_yesterday).uppercase())
-            .assertIsDisplayed()
+        composeRule.onNodeWithText(str(R.string.relative_yesterday)).assertIsDisplayed()
 
         show(date = today.plusDays(4))
         composeRule.waitForIdle()
-        composeRule.onNodeWithText("IN 4 DAYS").assertIsDisplayed()
+        composeRule.onNodeWithText("In 4 days").assertIsDisplayed()
 
         show(date = today.minusDays(3))
         composeRule.waitForIdle()
-        composeRule.onNodeWithText("3 DAYS AGO").assertIsDisplayed()
+        composeRule.onNodeWithText("3 days ago").assertIsDisplayed()
+    }
+
+    /** On today the card names the window the reader is inside, rather than the daylight. */
+    @Test
+    fun `on today the card states the window you are inside`() {
+        show()
+        render()
+
+        composeRule.onNodeWithText(str(R.string.prayer_window_lede)).assertIsDisplayed()
+    }
+
+    /**
+     * On any other day there is no "now", so "you are in the window of Dhuhr" is a sentence that
+     * does not exist. The card leads with the day's daylight instead.
+     */
+    @Test
+    fun `on another day the card states the daylight instead`() {
+        show(date = today.plusDays(2))
+        render()
+
+        composeRule.onNodeWithText(str(R.string.prayer_daylight_lede)).assertIsDisplayed()
+        composeRule.onAllNodesWithText(str(R.string.prayer_window_lede)).assertCountEquals(0)
+    }
+
+    /**
+     * The reframe, asserted at the screen as well as at the ViewModel: Prayer Times answers
+     * *when*, so no row invites a tap that would record anything.
+     */
+    @Test
+    fun `no prayer row is clickable`() {
+        show()
+        render()
+
+        listOf("Fajr", "Dhuhr", "Asr", "Maghrib", "Isha").forEach {
+            composeRule.onAllNodesWithText(it).onFirst().assertHasNoClickAction()
+        }
     }
 
     @Test
@@ -199,17 +238,17 @@ class PrayerTimesScreenTest {
         render()
 
         composeRule.onNodeWithText(str(R.string.prayer_info_daylight)).assertIsDisplayed()
-        composeRule.onNodeWithText("10h 36m").assertIsDisplayed()
+        composeRule.onAllNodesWithText("10h 36m").onFirst().assertIsDisplayed()
         composeRule.onNodeWithText(str(R.string.prayer_info_method)).assertIsDisplayed()
         composeRule.onNodeWithText("MWL · Standard").assertIsDisplayed()
     }
 
     @Test
-    fun `the date opens a month picker and picking a day selects it`() {
+    fun `the month button opens a picker and picking a day selects it`() {
         show()
         render()
 
-        composeRule.onNodeWithContentDescription(str(R.string.cd_pick_date)).performClick()
+        composeRule.onNodeWithContentDescription(str(R.string.cd_pick_month)).performClick()
         composeRule.waitForIdle()
 
         // The calendar is the only way to reach a day more than a few taps away; a sheet that

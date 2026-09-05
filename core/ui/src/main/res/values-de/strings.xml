@@ -2140,4 +2140,13 @@
         <item quantity="one">%1$d Tag in Folge</item>
         <item quantity="other">%1$d Tage in Folge</item>
     </plurals>
+    <!-- Prayer Times: the solar day card -->
+    <string name="prayer_arc_cd">Der Sonnenlauf: Sonnenaufgang %1$s, Sonnenuntergang %2$s</string>
+    <string name="prayer_window_lede">Du befindest dich im Zeitfenster von</string>
+    <string name="prayer_window_until">bis %1$s</string>
+    <string name="prayer_daylight_lede">Der Tagesbogen</string>
+    <string name="prayer_daylight_amount">%1$s Tageslicht</string>
+    <string name="prayer_jumuah">Dschumu\'a</string>
+    <string name="prayer_about_this_day">Über diesen Tag</string>
+    <string name="cd_pick_month">Monat auswählen</string>
 </resources>

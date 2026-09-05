@@ -2342,4 +2342,13 @@
         <item quantity="one">%1$d-day streak</item>
         <item quantity="other">%1$d-day streak</item>
     </plurals>
+    <!-- Prayer Times: the solar day card -->
+    <string name="prayer_arc_cd">The sun\'s day: sunrise %1$s, sunset %2$s</string>
+    <string name="prayer_window_lede">You are in the window of</string>
+    <string name="prayer_window_until">until %1$s</string>
+    <string name="prayer_daylight_lede">The day\'s arc</string>
+    <string name="prayer_daylight_amount">%1$s of daylight</string>
+    <string name="prayer_jumuah">Jumu\'ah</string>
+    <string name="prayer_about_this_day">About this day</string>
+    <string name="cd_pick_month">Pick a month</string>
 </resources>
