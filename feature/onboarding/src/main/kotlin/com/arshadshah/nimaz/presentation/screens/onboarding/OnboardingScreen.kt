@@ -370,9 +370,9 @@ private fun InfoPageContent(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            OnboardingEmblem(
+            OnboardingScene(
                 kind = page.emblem,
-                modifier = Modifier.size(width = emblemHeight * 0.8f, height = emblemHeight)
+                modifier = Modifier.size(width = emblemHeight * 1.2f, height = emblemHeight)
             )
 
             Spacer(modifier = Modifier.height(sectionSpacing))
@@ -448,10 +448,10 @@ private fun PermissionsPageContent(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            // Header emblem — shield enclosing a khatam star
-            OnboardingEmblem(
+            // Header scene — shield plus three connected permission points.
+            OnboardingScene(
                 kind = OnboardingEmblem.SHIELD,
-                modifier = Modifier.size(width = emblemHeight * 0.78f, height = emblemHeight)
+                modifier = Modifier.size(width = emblemHeight * 1.2f, height = emblemHeight)
             )
 
             Spacer(modifier = Modifier.height(sectionSpacing))
