@@ -114,6 +114,20 @@ class OnboardingArtTest {
     }
 
     @Test
+    fun `every onboarding page paints a complete scene`() {
+        OnboardingEmblem.entries.forEach { kind ->
+            val bitmap = draw {
+                OnboardingScene(kind = kind, modifier = Modifier.fillMaxSize())
+            }
+
+            assertThat(bitmap.rows(top = bitmap.height / 2, count = 1).ink()).isGreaterThan(0)
+            assertThat(
+                bitmap.rows(top = bitmap.height * 7 / 8, count = bitmap.height / 8).ink()
+            ).isGreaterThan(0)
+        }
+    }
+
+    @Test
     fun `each emblem draws its own artwork`() {
         // The four kinds share one Canvas and are told apart by a `when`. If a branch fell
         // through — or the shield's `return@Canvas` were dropped, which would leave it drawing
