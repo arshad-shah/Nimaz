@@ -2,8 +2,12 @@ package com.arshadshah.nimaz.presentation.screens.onboarding
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.weight
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
@@ -46,6 +50,141 @@ val illuminatedBackground: Brush = Brush.verticalGradient(
 
 /** Which emblem fills the mihrab niche on a given page. SHIELD draws on its own. */
 enum class OnboardingEmblem { MOSQUE, PRAYER_TIMES, QURAN, SHIELD }
+
+/**
+ * A complete illustration stage for an onboarding page.
+ *
+ * The earlier implementation placed the emblem on an otherwise empty field. This stage gives
+ * every one of the four real onboarding pages its own scene while keeping the detailed emblem as
+ * the focal point. The scenery deliberately stays quiet behind the title and feature card: stars
+ * and orbit lines live in the upper half, while the plinth anchors the artwork at the bottom.
+ */
+@Composable
+fun OnboardingScene(
+    kind: OnboardingEmblem,
+    modifier: Modifier = Modifier,
+) {
+    Box(modifier = modifier) {
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val gold = IllumGold
+            val softGold = gold.copy(alpha = 0.22f)
+            val faintGold = gold.copy(alpha = 0.10f)
+            val cx = size.width / 2f
+            val baseline = size.height * 0.88f
+
+            // Halo and orbit lines give the four illustrations a shared visual rhythm.
+            drawCircle(
+                brush = Brush.radialGradient(
+                    colors = listOf(gold.copy(alpha = 0.14f), Color.Transparent),
+                    center = Offset(cx, size.height * 0.46f),
+                    radius = size.minDimension * 0.47f,
+                ),
+                radius = size.minDimension * 0.47f,
+                center = Offset(cx, size.height * 0.46f),
+            )
+            drawOval(
+                color = faintGold,
+                topLeft = Offset(size.width * 0.09f, size.height * 0.19f),
+                size = Size(size.width * 0.82f, size.height * 0.57f),
+                style = Stroke(width = 1.dp.toPx()),
+            )
+
+            // Small eight-point stars echo the khatam band without turning the scene into noise.
+            listOf(
+                Offset(size.width * 0.18f, size.height * 0.30f),
+                Offset(size.width * 0.81f, size.height * 0.25f),
+                Offset(size.width * 0.86f, size.height * 0.58f),
+            ).forEachIndexed { index, centre ->
+                val r = (if (index == 1) 4.5f else 3f).dp.toPx()
+                drawLine(softGold, centre - Offset(r, 0f), centre + Offset(r, 0f), 1.dp.toPx())
+                drawLine(softGold, centre - Offset(0f, r), centre + Offset(0f, r), 1.dp.toPx())
+                drawLine(
+                    softGold,
+                    centre - Offset(r * 0.7f, r * 0.7f),
+                    centre + Offset(r * 0.7f, r * 0.7f),
+                    1.dp.toPx(),
+                )
+                drawLine(
+                    softGold,
+                    centre + Offset(r * 0.7f, -r * 0.7f),
+                    centre + Offset(-r * 0.7f, r * 0.7f),
+                    1.dp.toPx(),
+                )
+            }
+
+            // A subtly different base identifies each page even before the emblem is read.
+            when (kind) {
+                OnboardingEmblem.MOSQUE -> {
+                    drawPath(
+                        Path().apply {
+                            moveTo(size.width * 0.08f, baseline)
+                            quadraticTo(cx, size.height * 0.78f, size.width * 0.92f, baseline)
+                            lineTo(size.width * 0.92f, size.height)
+                            lineTo(size.width * 0.08f, size.height)
+                            close()
+                        },
+                        color = IllumNiche.copy(alpha = 0.42f),
+                    )
+                }
+
+                OnboardingEmblem.PRAYER_TIMES -> {
+                    drawLine(
+                        color = softGold,
+                        start = Offset(size.width * 0.12f, baseline),
+                        end = Offset(size.width * 0.88f, baseline),
+                        strokeWidth = 1.5.dp.toPx(),
+                    )
+                    repeat(5) { index ->
+                        val x = size.width * (0.22f + index * 0.14f)
+                        drawCircle(
+                            color = if (index == 0) gold else softGold,
+                            radius = if (index == 0) 3.dp.toPx() else 2.dp.toPx(),
+                            center = Offset(x, baseline),
+                        )
+                    }
+                }
+
+                OnboardingEmblem.QURAN -> {
+                    drawPath(
+                        Path().apply {
+                            moveTo(size.width * 0.22f, baseline)
+                            lineTo(size.width * 0.78f, baseline)
+                            lineTo(size.width * 0.70f, size.height * 0.95f)
+                            lineTo(size.width * 0.30f, size.height * 0.95f)
+                            close()
+                        },
+                        color = IllumNiche.copy(alpha = 0.48f),
+                    )
+                    drawLine(
+                        softGold,
+                        Offset(size.width * 0.30f, size.height * 0.95f),
+                        Offset(size.width * 0.70f, size.height * 0.95f),
+                        1.dp.toPx(),
+                    )
+                }
+
+                OnboardingEmblem.SHIELD -> {
+                    // Three connected permission points: location, notifications and battery.
+                    val points = listOf(
+                        Offset(size.width * 0.28f, baseline),
+                        Offset(cx, size.height * 0.94f),
+                        Offset(size.width * 0.72f, baseline),
+                    )
+                    drawLine(softGold, points[0], points[1], 1.5.dp.toPx())
+                    drawLine(softGold, points[1], points[2], 1.5.dp.toPx())
+                    points.forEach { drawCircle(gold, 3.dp.toPx(), it) }
+                }
+            }
+        }
+
+        OnboardingEmblem(
+            kind = kind,
+            modifier = Modifier
+                .align(Alignment.Center)
+                .fillMaxSize(0.82f),
+        )
+    }
+}
 
 /**
  * A khatam (rub-el-hizb) geometric band, faded into the background. Drawn as a
@@ -319,6 +458,20 @@ private fun OnboardingEmblemsPreview() {
         OnboardingEmblem(OnboardingEmblem.PRAYER_TIMES, Modifier.size(90.dp, 220.dp))
         OnboardingEmblem(OnboardingEmblem.QURAN, Modifier.size(90.dp, 220.dp))
         OnboardingEmblem(OnboardingEmblem.SHIELD, Modifier.size(90.dp, 220.dp))
+    }
+}
+
+@Preview(name = "Onboarding scenes", widthDp = 360, heightDp = 760)
+@Composable
+private fun OnboardingScenesPreview() {
+    androidx.compose.foundation.layout.Column(
+        modifier = Modifier
+            .background(illuminatedBackground)
+            .size(360.dp, 760.dp)
+    ) {
+        OnboardingEmblem.entries.forEach { kind ->
+            OnboardingScene(kind, Modifier.weight(1f))
+        }
     }
 }
 
