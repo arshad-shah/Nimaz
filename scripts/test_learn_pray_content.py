@@ -62,6 +62,18 @@ class LearnPrayContentTest(unittest.TestCase):
         self.assertIn("review", self.strings["learn_pray_review"])
         self.assertIn("does not record", self.strings["learn_pray_complete_body"])
 
+    def test_female_artwork_is_full_resolution_lossless_not_contact_sheet_crops(self):
+        assets = list((FEATURE / "res/drawable-nodpi").glob("learn_pray_female_*.webp"))
+        self.assertEqual(len(assets), 9)
+        for asset in assets:
+            data = asset.read_bytes()
+            # VP8L lossless image header (width and height are 14-bit values minus one).
+            offset = data.index(b"VP8L") + 8
+            self.assertEqual(data[offset], 0x2f, asset.name)
+            bits = int.from_bytes(data[offset + 1:offset + 5], "little")
+            size = ((bits & 0x3fff) + 1, ((bits >> 14) & 0x3fff) + 1)
+            self.assertEqual(size, (1536, 1024), asset.name)
+
     def test_pose_copy_is_complete_in_every_supported_locale(self):
         base = {e.attrib["name"] for e in ET.parse(STRINGS.parent / "learn_pray_pose_strings.xml").getroot()}
         for locale in ("de", "fr", "id", "ms", "tr"):

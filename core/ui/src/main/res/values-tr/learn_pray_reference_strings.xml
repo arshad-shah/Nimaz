@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="learn_pray_reference_quran">Kur’an %1$s</string>
+    <string name="learn_pray_reference_bukhari">Sahih-i Buhârî %1$s</string>
+    <string name="learn_pray_reference_muslim">Sahih-i Müslim %1$s</string>
+    <string name="learn_pray_reference_abudawud">Sünen-i Ebû Dâvûd %1$s</string>
+    <string name="learn_pray_reference_seekers">Haricî açıklama: SeekersGuidance</string>
+    <string name="learn_pray_reference_askimam">Haricî açıklama: Askimam</string>
+</resources>

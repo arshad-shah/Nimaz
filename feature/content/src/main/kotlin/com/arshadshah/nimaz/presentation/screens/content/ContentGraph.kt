@@ -1,5 +1,7 @@
 package com.arshadshah.nimaz.presentation.screens.content
 
+import com.arshadshah.nimaz.core.navigation.toRoute
+
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.toRoute
@@ -48,6 +50,7 @@ fun NavGraphBuilder.contentGraph(navController: NavController) {
     taggedComposable<Route.LearnToPray>(ScreenTags.LearnToPray) {
         com.arshadshah.nimaz.presentation.screens.learnpray.LearnToPrayScreen(
             onNavigateBack = { navController.popBackStack() },
+            onOpenReference = { target -> navController.navigate(target.toRoute()) },
         )
     }
     taggedComposable<Route.QaidaHome>(ScreenTags.QaidaHome) {

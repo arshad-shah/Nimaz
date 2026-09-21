@@ -14,6 +14,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.arshadshah.nimaz.domain.model.PrayerAudio
 import com.arshadshah.nimaz.domain.model.PrayerAudioState
+import com.arshadshah.nimaz.domain.model.ContentTarget
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -40,6 +41,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun LearnToPrayScreen(
     onNavigateBack: () -> Unit,
+    onOpenReference: (ContentTarget) -> Unit,
     viewModel: LearnPrayViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -55,7 +57,10 @@ fun LearnToPrayScreen(
             viewModel.onEvent(LearnPrayEvent.StopAudio)
         }
     }
-    LearnToPrayContent(state, viewModel::onEvent, onNavigateBack, audioState)
+    LearnToPrayContent(state, viewModel::onEvent, onNavigateBack, audioState) { target ->
+        viewModel.onEvent(LearnPrayEvent.StopAudio)
+        onOpenReference(target)
+    }
 }
 
 /** Text is native Compose, never painted into artwork. No timers, auto-advance or tracker writes. */
@@ -66,6 +71,7 @@ internal fun LearnToPrayContent(
     onEvent: (LearnPrayEvent) -> Unit,
     onNavigateBack: () -> Unit,
     audioState: PrayerAudioState = PrayerAudioState(),
+    onOpenReference: (ContentTarget) -> Unit = {},
 ) {
     val inset = AdaptiveSpacing.screenPadding()
     val gap = AdaptiveSpacing.sectionSpacing()
@@ -174,6 +180,7 @@ internal fun LearnToPrayContent(
                                     "https://sunnah.com/bukhari:631", "https://sunnah.com/bukhari:365",
                                     "https://sunnah.com/abudawud:641", "https://sunnah.com/abudawud:640"),
                                 openSource,
+                                onOpenReference,
                             )
                         }
                         state.complete -> {
@@ -206,7 +213,7 @@ internal fun LearnToPrayContent(
                             step.recitations.forEach { recitation ->
                                 RecitationCard(recitation, audioState, onEvent, openSource)
                             }
-                            SourceNotes(step.referencesFor(state.figure), openSource)
+                            SourceNotes(step.referencesFor(state.figure), openSource, onOpenReference)
                         }
                     }
                 }
@@ -277,7 +284,11 @@ private fun RecitationCard(recitation: PrayerRecitation, audioState: PrayerAudio
 }
 
 @Composable
-private fun SourceNotes(references: List<String>, onOpen: (String) -> Unit) {
+private fun SourceNotes(
+    references: List<String>,
+    onOpenExternal: (String) -> Unit,
+    onOpenReference: (ContentTarget) -> Unit,
+) {
     var expanded by rememberSaveable { mutableStateOf(false) }
     NimazButton(
         text = stringResource(if (expanded) R.string.learn_pray_sources_hide else R.string.learn_pray_sources),
@@ -289,9 +300,12 @@ private fun SourceNotes(references: List<String>, onOpen: (String) -> Unit) {
     if (expanded) {
         Text(stringResource(R.string.learn_pray_source_intro), style = MaterialTheme.typography.bodyMedium)
         references.forEach { url ->
+            val reference = PrayerReference.fromUrl(url)
             NimazButton(
-                text = url.removePrefix("https://"),
-                onClick = { onOpen(url) },
+                text = stringResource(reference.label, reference.number),
+                onClick = {
+                    reference.target?.let(onOpenReference) ?: onOpenExternal(url)
+                },
                 variant = NimazButtonVariant.QUIET,
                 fullWidth = true,
             )

@@ -1252,6 +1252,13 @@ It also stores the **content-version flags** that drive seeding — see §7.
 and separate local illustrations so it works without a network or content download. It does not
 seed or modify either database and never records prayer-tracker completion. Its position lives in
 `LearnPrayViewModel` through `SavedStateHandle`, not a preference or synced completion record.
+Its Qur’an/hadith citations use the existing readers through `ContentTarget.toRoute()`;
+audio stops before navigation and Back restores the lesson. `PrayerReference` maps cited
+references to verified stable corpus record ids, not printed numbers. In particular, Muslim
+402a/580b/588a/772/582 correspond to local records 8486/8899/8913/9403/8904. The crosswalk
+was checked against the report text and is pinned by `scripts/test_learn_pray_references.py`.
+Only the two scholarly commentaries absent from the corpus and audio-provider attribution
+remain external, labelled accordingly; canonical citations never fall back to a browser.
 This is a review-stage exception: reviewed canonical recitations should move to the content
 artifact before expanding the course; see the release gates in `ARCHITECTURE.md` §9.
 

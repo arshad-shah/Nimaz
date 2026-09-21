@@ -20,6 +20,20 @@ class LearnToPrayScreenTest {
     @get:Rule val composeRule = createComponentComposeRule()
     private fun string(id: Int) = ApplicationProvider.getApplicationContext<Context>().getString(id)
 
+    @Test fun preparationReferenceOpensTheInternalVerseWithoutAdvancing() {
+        val targets = mutableListOf<com.arshadshah.nimaz.domain.model.ContentTarget>()
+        val events = mutableListOf<LearnPrayEvent>()
+        composeRule.setThemedContent {
+            LearnToPrayContent(LearnPrayUiState(), events::add, {}, onOpenReference = targets::add)
+        }
+        composeRule.onNodeWithText(string(R.string.learn_pray_sources)).performScrollTo().performClick()
+        val label = ApplicationProvider.getApplicationContext<Context>()
+            .getString(R.string.learn_pray_reference_quran, "5:6")
+        composeRule.onNodeWithText(label).performScrollTo().performClick()
+        assertThat(targets).containsExactly(com.arshadshah.nimaz.domain.model.ContentTarget.Ayah(5, 6))
+        assertThat(events).isEmpty()
+    }
+
     @Test fun femaleIllustrationControlDispatchesAnExplicitChoice() {
         val events = mutableListOf<LearnPrayEvent>()
         composeRule.setThemedContent {

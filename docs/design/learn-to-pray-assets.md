@@ -11,10 +11,11 @@ Male filenames: `learn_pray_<pose>.webp`. Female: `learn_pray_female_<pose>.webp
 Poses in both sets: takbir, standing, bowing, rise, prostration, sitting, tashahhud, right, left.
 Repeated movements reuse assets. Salam means the worshipper's own right/left: never mirror for RTL.
 
-Generated with the built-in image-generation tool. Male WebP quality is 82. Eight female
-assets are cropped without labels from the owner-approved revision-3 sheet (444×295,
-WebP quality 90), preserving the approved drawings rather than regenerating them. The
-separately approved final sujud edit is encoded at 1200×800, quality 88.
+Generated with the built-in image-generation tool. Male WebP quality is 82. All nine female
+assets are now 1536×1024 lossless WebP. Eight were individually reconstructed from the
+owner-approved poses; the earlier 444×295 approval-sheet crops were unsuitable for phone
+rendering and have been replaced. Sujud uses the separately approved original at its native
+1536×1024 resolution. No resize or sharpening is substituted for the reconstructed detail.
 No stock images, embedded UI text or unreviewed recordings are bundled.
 
 ## Prompt set
@@ -58,6 +59,13 @@ deeper dal-like ruku with palms on thighs; natural uncompressed sujud with toes 
 heels raised, palms closer beside face and elbows just above mat; smooth opaque ivory
 sock fabric; sitting mat's long axis aligned with forward prayer direction. Other poses
 were preserved from the approved review sheet. No new generation happened at extraction.
+
+Production-resolution repair prompt (each of the eight non-sujud poses, one call per pose):
+preserve the supplied approved pose, joint/hand positions, head direction, mat orientation,
+costume, framing and teal/ivory/sage palette; reconstruct clean face, hands, fabric folds and
+mat detail as a standalone 1536×1024 illustration, without labels or annotations. Generated
+with the built-in tool and encoded losslessly. `test_learn_pray_content.py` now rejects
+low-resolution female assets. Pose/wardrobe review remains separate from resolution checks.
 
 Reference checks (not a universal ruling):
 - [SeekersGuidance](https://seekersguidance.org/answers/hanafi-fiqh/what-is-the-proper-method-for-women-to-bow-and-prostrate-in-the-prayer/): compact prostration and shallower bow, but **hands on knees**, not thighs.
