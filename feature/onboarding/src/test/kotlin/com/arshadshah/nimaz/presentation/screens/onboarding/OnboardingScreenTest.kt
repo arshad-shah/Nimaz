@@ -241,9 +241,9 @@ class OnboardingScreenTest {
         launch()
         openSetup()
 
-        composeRule.onNodeWithText(str(R.string.onboarding_location_title)).assertIsDisplayed()
-        composeRule.onNodeWithText(str(R.string.onboarding_notification_title)).assertIsDisplayed()
-        composeRule.onNodeWithText(str(R.string.onboarding_battery_title)).assertIsDisplayed()
+        composeRule.onNodeWithText(str(R.string.onboarding_location_title)).performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithText(str(R.string.onboarding_notification_title)).performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithText(str(R.string.onboarding_battery_title)).performScrollTo().assertIsDisplayed()
         composeRule.onAllNodesWithText(str(R.string.onboarding_grant)).assertCountEquals(3)
     }
 
@@ -257,10 +257,10 @@ class OnboardingScreenTest {
         launch()
         openSetup()
 
-        composeRule.onNodeWithText(str(R.string.onboarding_location_granted)).assertIsDisplayed()
+        composeRule.onNodeWithText(str(R.string.onboarding_location_granted)).performScrollTo().assertIsDisplayed()
         composeRule.onNodeWithText(str(R.string.onboarding_notification_granted))
-            .assertIsDisplayed()
-        composeRule.onNodeWithText(str(R.string.onboarding_battery_granted)).assertIsDisplayed()
+            .performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithText(str(R.string.onboarding_battery_granted)).performScrollTo().assertIsDisplayed()
         // A Grant button beside "Granted" is the state the card is designed to rule out.
         composeRule.onAllNodesWithText(str(R.string.onboarding_grant)).assertCountEquals(0)
     }
@@ -295,7 +295,7 @@ class OnboardingScreenTest {
         composeRule.waitForIdle()
 
         composeRule.onNodeWithText(str(R.string.onboarding_notification_granted))
-            .assertIsDisplayed()
+            .performScrollTo().assertIsDisplayed()
         composeRule.onAllNodesWithText(str(R.string.onboarding_grant)).assertCountEquals(2)
     }
 
@@ -312,7 +312,7 @@ class OnboardingScreenTest {
         launch()
         openSetup()
 
-        composeRule.onNodeWithText(str(R.string.onboarding_grant)).performClick()
+        composeRule.onNodeWithText(str(R.string.onboarding_grant)).performScrollTo().performClick()
         composeRule.waitForIdle()
 
         assertThat(events).contains(OnboardingEvent.UpdatePermissionStatus(notification = true))
@@ -330,7 +330,7 @@ class OnboardingScreenTest {
         launch()
         openSetup()
 
-        composeRule.onNodeWithText(str(R.string.onboarding_grant)).performClick()
+        composeRule.onNodeWithText(str(R.string.onboarding_grant)).performScrollTo().performClick()
         composeRule.waitForIdle()
 
         assertThat(events.filterIsInstance<OnboardingEvent.UpdatePermissionStatus>()).isEmpty()
@@ -343,7 +343,7 @@ class OnboardingScreenTest {
         // and an AND here would tell them the permission was refused and never detect a location.
         launch()
         openSetup()
-        composeRule.onAllNodesWithText(str(R.string.onboarding_grant)).onFirst().performClick()
+        composeRule.onAllNodesWithText(str(R.string.onboarding_grant)).onFirst().performScrollTo().performClick()
         composeRule.waitForIdle()
 
         answerPermissionRequest(
@@ -360,7 +360,7 @@ class OnboardingScreenTest {
     fun `a refused location dialog is reported as refused`() {
         launch()
         openSetup()
-        composeRule.onAllNodesWithText(str(R.string.onboarding_grant)).onFirst().performClick()
+        composeRule.onAllNodesWithText(str(R.string.onboarding_grant)).onFirst().performScrollTo().performClick()
         composeRule.waitForIdle()
 
         answerPermissionRequest(
