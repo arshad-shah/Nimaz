@@ -32,6 +32,7 @@ import androidx.compose.material.icons.filled.BatteryChargingFull
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -51,7 +52,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -73,6 +73,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazPageIndicator
 import com.arshadshah.nimaz.presentation.components.atoms.NimazPager
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.rememberNimazPagerState
+import com.arshadshah.nimaz.presentation.theme.AdaptiveSpacing
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.viewmodel.onboarding.OnboardingEvent
@@ -83,7 +84,7 @@ import kotlinx.coroutines.launch
 private data class InfoPage(
     val title: String,
     val description: String,
-    val emblem: OnboardingEmblem,
+    val illustration: OnboardingIllustration,
     val features: List<String>
 )
 
@@ -142,12 +143,12 @@ fun OnboardingScreen(
         }
     }
 
-    // 3 info pages + 1 permissions page = 4 pages total
+    // Five illustrated introductions plus the existing unified permissions page.
     val infoPages = listOf(
         InfoPage(
             title = stringResource(R.string.onboarding_welcome_title),
             description = stringResource(R.string.onboarding_welcome_description),
-            emblem = OnboardingEmblem.MOSQUE,
+            illustration = OnboardingIllustration.WELCOME,
             features = listOf(
                 stringResource(R.string.onboarding_feature_prayer_times),
                 stringResource(R.string.onboarding_feature_quran),
@@ -158,7 +159,7 @@ fun OnboardingScreen(
         InfoPage(
             title = stringResource(R.string.onboarding_prayer_title),
             description = stringResource(R.string.onboarding_prayer_description),
-            emblem = OnboardingEmblem.PRAYER_TIMES,
+            illustration = OnboardingIllustration.PRAYER,
             features = listOf(
                 stringResource(R.string.onboarding_feature_calc_methods),
                 stringResource(R.string.onboarding_feature_custom_adjustments),
@@ -167,14 +168,33 @@ fun OnboardingScreen(
             )
         ),
         InfoPage(
+            title = stringResource(R.string.learning),
+            description = stringResource(R.string.qaida_subtitle),
+            illustration = OnboardingIllustration.LEARNING,
+            features = listOf(
+                stringResource(R.string.qaida),
+                stringResource(R.string.onboarding_feature_hadith),
+                stringResource(R.string.onboarding_feature_duas)
+            )
+        ),
+        InfoPage(
             title = stringResource(R.string.onboarding_quran_title),
             description = stringResource(R.string.onboarding_quran_description),
-            emblem = OnboardingEmblem.QURAN,
+            illustration = OnboardingIllustration.QURAN,
             features = listOf(
                 stringResource(R.string.onboarding_feature_translations),
                 stringResource(R.string.onboarding_feature_audio),
                 stringResource(R.string.onboarding_feature_bookmarks),
                 stringResource(R.string.onboarding_feature_search)
+            )
+        ),
+        InfoPage(
+            title = stringResource(R.string.onboarding_feature_tracking),
+            description = stringResource(R.string.onboarding_feature_statistics),
+            illustration = OnboardingIllustration.PROGRESS,
+            features = listOf(
+                stringResource(R.string.onboarding_feature_tracking),
+                stringResource(R.string.onboarding_feature_statistics)
             )
         )
     )
@@ -205,11 +225,10 @@ fun OnboardingScreen(
                 .fillMaxSize()
                 .background(illuminatedBackground)
         ) {
-            KhatamBand(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(96.dp)
-                    .align(Alignment.TopCenter)
+            IllustratedOnboardingBackground(
+                illustration = infoPages.getOrNull(pagerState.currentPage)?.illustration
+                    ?: OnboardingIllustration.PERMISSIONS,
+                modifier = Modifier.fillMaxSize(),
             )
             Column(
                 modifier = Modifier
@@ -230,7 +249,8 @@ fun OnboardingScreen(
                                 viewModel.onEvent(OnboardingEvent.CompleteOnboarding)
                                 onComplete()
                             },
-                            variant = NimazButtonVariant.DESTRUCTIVE
+                            variant = NimazButtonVariant.TEXT,
+                            colors = ButtonDefaults.textButtonColors(contentColor = IllumCream)
                         )
                     }
                 }
@@ -284,7 +304,7 @@ fun OnboardingScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 24.dp, vertical = 16.dp),
+                        .padding(horizontal = AdaptiveSpacing.screenPadding(), vertical = AdaptiveSpacing.sectionSpacing()),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     // Page Indicators — canonical pill indicator tinted to the
@@ -314,7 +334,8 @@ fun OnboardingScreen(
                                         pagerState.animateScrollToPage(pagerState.currentPage - 1)
                                     }
                                 },
-                                variant = NimazButtonVariant.OUTLINED
+                                variant = NimazButtonVariant.TEXT,
+                                colors = ButtonDefaults.textButtonColors(contentColor = IllumCream)
                             )
                         }
 
@@ -337,7 +358,12 @@ fun OnboardingScreen(
                                     }
                                 }
                             },
-                            variant = NimazButtonVariant.TONAL,
+                            modifier = Modifier.weight(1f).padding(start = 12.dp),
+                            variant = NimazButtonVariant.PRIMARY,
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = NimazColors.Primary700,
+                                contentColor = NimazColors.OnPrimary,
+                            ),
                             leadingIcon = if (pagerState.currentPage == totalPages - 1)
                                 Icons.Default.Check
                             else NimazIcons.Next
@@ -358,31 +384,23 @@ private fun InfoPageContent(
 ) {
     BoxWithConstraints(modifier = modifier.fillMaxSize()) {
         val isCompact = maxHeight < 500.dp
-        val sectionSpacing = if (isCompact) 16.dp else 32.dp
+        val sectionSpacing = AdaptiveSpacing.sectionSpacing()
         val smallSpacing = if (isCompact) 6.dp else 12.dp
-        val emblemHeight = if (isCompact) 150.dp else 196.dp
+        val artworkHeight = (maxHeight * 0.38f).coerceIn(100.dp, 300.dp)
 
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 28.dp, vertical = if (isCompact) 8.dp else 16.dp),
+                .padding(horizontal = AdaptiveSpacing.screenPadding(), vertical = AdaptiveSpacing.sectionSpacing()),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            OnboardingScene(
-                kind = page.emblem,
-                modifier = Modifier.size(width = emblemHeight * 1.2f, height = emblemHeight)
-            )
-
-            Spacer(modifier = Modifier.height(sectionSpacing))
-
             Text(
                 text = page.title,
                 style = if (isCompact) MaterialTheme.typography.titleLarge
-                else MaterialTheme.typography.headlineSmall,
+                else MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
-                fontFamily = FontFamily.Serif,
                 textAlign = TextAlign.Center,
                 color = IllumCream
             )
@@ -398,13 +416,15 @@ private fun InfoPageContent(
 
             Spacer(modifier = Modifier.height(sectionSpacing))
 
+            Spacer(modifier = Modifier.height(artworkHeight))
+
             NimazCard(
                 style = NimazCardStyle.FILLED,
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(18.dp),
+                shape = RoundedCornerShape(AdaptiveSpacing.cardCornerRadius()),
                 colors = NimazCardDefaults.colors(
-                    container = Color.White.copy(alpha = 0.05f),
-                    border = IllumGold.copy(alpha = 0.18f)
+                    container = NimazColors.OnboardingBgTop.copy(alpha = 0.94f),
+                    border = NimazColors.Primary400.copy(alpha = 0.35f)
                 )
             ) {
                 Column(
@@ -437,31 +457,23 @@ private fun PermissionsPageContent(
 ) {
     BoxWithConstraints(modifier = modifier.fillMaxSize()) {
         val isCompact = maxHeight < 500.dp
-        val sectionSpacing = if (isCompact) 12.dp else 20.dp
-        val emblemHeight = if (isCompact) 110.dp else 140.dp
+        val sectionSpacing = AdaptiveSpacing.sectionSpacing()
+        val artworkHeight = if (isCompact) 48.dp else 100.dp
 
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 24.dp, vertical = if (isCompact) 8.dp else 16.dp),
+                .padding(horizontal = AdaptiveSpacing.screenPadding(), vertical = AdaptiveSpacing.sectionSpacing()),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            // Header scene — shield plus three connected permission points.
-            OnboardingScene(
-                kind = OnboardingEmblem.SHIELD,
-                modifier = Modifier.size(width = emblemHeight * 1.2f, height = emblemHeight)
-            )
-
-            Spacer(modifier = Modifier.height(sectionSpacing))
 
             Text(
                 text = stringResource(R.string.onboarding_permissions_title),
                 style = if (isCompact) MaterialTheme.typography.titleLarge
                 else MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
-                fontFamily = FontFamily.Serif,
                 textAlign = TextAlign.Center,
                 color = IllumCream
             )
@@ -476,6 +488,8 @@ private fun PermissionsPageContent(
             )
 
             Spacer(modifier = Modifier.height(sectionSpacing))
+
+            Spacer(modifier = Modifier.height(artworkHeight))
 
             // Permission cards
             PermissionCard(
@@ -533,11 +547,12 @@ private fun PermissionCard(
     val green = NimazColors.StatusColors.Active
 
     NimazCard(
+        modifier = modifier,
         style = NimazCardStyle.OUTLINED,
         colors = NimazCardDefaults.colors(
-            container = Color.Transparent,
-            content = MaterialTheme.colorScheme.onSurface,
-            border = if (isGranted) green else MaterialTheme.colorScheme.secondary
+            container = NimazColors.OnboardingBgTop.copy(alpha = 0.94f),
+            content = IllumCream,
+            border = if (isGranted) green else NimazColors.Primary400
         )
     ) {
         Row(
@@ -580,7 +595,6 @@ private fun PermissionCard(
                     text = if (isGranted) grantedLabel else description,
                     style = MaterialTheme.typography.bodySmall,
                     color = if (isGranted) green else IllumTextSoft,
-                    maxLines = 2
                 )
             }
 
@@ -640,7 +654,7 @@ private fun InfoPagePreview() {
                 page = InfoPage(
                     title = "Welcome to Nimaz",
                     description = "Your complete Islamic companion app",
-                    emblem = OnboardingEmblem.MOSQUE,
+                    illustration = OnboardingIllustration.WELCOME,
                     features = listOf(
                         "Accurate prayer times",
                         "Complete Quran with audio",

@@ -31,7 +31,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
 /**
- * The first-run walkthrough: three info pages, a permissions page, and exactly one way out.
+ * The first-run walkthrough: five info pages, a permissions page, and exactly one way out.
  *
  * **The stakes are asymmetric here in a way no other screen's are.** `NavGraph` reads
  * `onboardingCompleted` once, when the graph is built, to choose its start destination — so a
@@ -105,7 +105,7 @@ class OnboardingScreenTest {
 
     @Test
     fun `each page carries its own copy`() {
-        // Three pages built from one `InfoPage` list. An off-by-one in the pager's
+        // Five pages built from one `InfoPage` list. An off-by-one in the pager's
         // `if (page < infoPages.size)` shows up as the wrong page's title, or the permissions
         // page appearing one step early.
         launch()
@@ -114,9 +114,12 @@ class OnboardingScreenTest {
         composeRule.onNodeWithText(str(R.string.onboarding_prayer_title)).assertIsDisplayed()
 
         tapNext()
-        composeRule.onNodeWithText(str(R.string.onboarding_quran_title)).assertIsDisplayed()
+        composeRule.onNodeWithText(str(R.string.learning)).assertIsDisplayed()
 
         tapNext()
+        composeRule.onNodeWithText(str(R.string.onboarding_quran_title)).assertIsDisplayed()
+
+        tapNext(2)
         composeRule.onNodeWithText(str(R.string.onboarding_permissions_title)).assertIsDisplayed()
     }
 
@@ -126,9 +129,9 @@ class OnboardingScreenTest {
         // reported twice makes the whole measurement unreadable.
         launch()
 
-        tapNext(3)
+        tapNext(5)
 
-        assertThat(pagesReached()).containsExactly(0, 1, 2, 3).inOrder()
+        assertThat(pagesReached()).containsExactly(0, 1, 2, 3, 4, 5).inOrder()
     }
 
     @Test
@@ -151,7 +154,7 @@ class OnboardingScreenTest {
     fun `the last page swaps Next for Get Started`() {
         launch()
 
-        tapNext(3)
+        tapNext(5)
 
         composeRule.onNodeWithText(str(R.string.onboarding_get_started)).assertIsDisplayed()
         composeRule.onAllNodesWithText(str(R.string.onboarding_next)).assertCountEquals(0)
@@ -160,7 +163,7 @@ class OnboardingScreenTest {
     @Test
     fun `finishing persists completion and navigates away exactly once`() {
         launch()
-        tapNext(3)
+        tapNext(5)
 
         composeRule.onNodeWithText(str(R.string.onboarding_get_started)).performClick()
         composeRule.waitForIdle()
@@ -176,7 +179,7 @@ class OnboardingScreenTest {
         // never ends at all.
         launch()
 
-        tapNext(3)
+        tapNext(5)
 
         assertThat(events.filterIsInstance<OnboardingEvent.CompleteOnboarding>()).isEmpty()
         assertThat(completed).isEqualTo(0)
@@ -199,7 +202,7 @@ class OnboardingScreenTest {
         // dispatching completion twice and navigating twice.
         launch()
 
-        tapNext(3)
+        tapNext(5)
 
         composeRule.onAllNodesWithText(str(R.string.onboarding_skip)).assertCountEquals(0)
     }
@@ -211,7 +214,7 @@ class OnboardingScreenTest {
     @Test
     fun `an ungranted permission offers a way to grant it`() {
         launch()
-        tapNext(3)
+        tapNext(5)
 
         composeRule.onNodeWithText(str(R.string.onboarding_location_title)).assertIsDisplayed()
         composeRule.onNodeWithText(str(R.string.onboarding_notification_title)).assertIsDisplayed()
@@ -227,7 +230,7 @@ class OnboardingScreenTest {
             batteryOptimizationDisabled = true,
         )
         launch()
-        tapNext(3)
+        tapNext(5)
 
         composeRule.onNodeWithText(str(R.string.onboarding_location_granted)).assertIsDisplayed()
         composeRule.onNodeWithText(str(R.string.onboarding_notification_granted))
@@ -248,7 +251,7 @@ class OnboardingScreenTest {
             locationName = "Dublin, Ireland",
         )
         launch()
-        tapNext(3)
+        tapNext(5)
 
         composeRule.onNodeWithText("Dublin, Ireland").assertIsDisplayed()
         composeRule.onAllNodesWithText(str(R.string.onboarding_location_granted))
@@ -258,7 +261,7 @@ class OnboardingScreenTest {
     @Test
     fun `a permission granted while the page is open updates the card in place`() {
         launch()
-        tapNext(3)
+        tapNext(5)
         composeRule.onAllNodesWithText(str(R.string.onboarding_grant)).assertCountEquals(3)
 
         // What the permission launchers' callbacks do: dispatch UpdatePermissionStatus, which
@@ -282,7 +285,7 @@ class OnboardingScreenTest {
             batteryOptimizationDisabled = true,
         )
         launch()
-        tapNext(3)
+        tapNext(5)
 
         composeRule.onNodeWithText(str(R.string.onboarding_grant)).performClick()
         composeRule.waitForIdle()
@@ -300,7 +303,7 @@ class OnboardingScreenTest {
             batteryOptimizationDisabled = true,
         )
         launch()
-        tapNext(3)
+        tapNext(5)
 
         composeRule.onNodeWithText(str(R.string.onboarding_grant)).performClick()
         composeRule.waitForIdle()
@@ -314,7 +317,7 @@ class OnboardingScreenTest {
         // system dialog — the default on the modern dialog — grants only ACCESS_COARSE_LOCATION,
         // and an AND here would tell them the permission was refused and never detect a location.
         launch()
-        tapNext(3)
+        tapNext(5)
         composeRule.onAllNodesWithText(str(R.string.onboarding_grant)).onFirst().performClick()
         composeRule.waitForIdle()
 
@@ -331,7 +334,7 @@ class OnboardingScreenTest {
     @Test
     fun `a refused location dialog is reported as refused`() {
         launch()
-        tapNext(3)
+        tapNext(5)
         composeRule.onAllNodesWithText(str(R.string.onboarding_grant)).onFirst().performClick()
         composeRule.waitForIdle()
 
@@ -393,7 +396,7 @@ class OnboardingScreenTest {
     fun `a short screen still offers all three permissions and the way out`() {
         launch()
 
-        tapNext(3)
+        tapNext(5)
 
         composeRule.onAllNodesWithText(str(R.string.onboarding_grant)).assertCountEquals(3)
         composeRule.onNodeWithText(str(R.string.onboarding_get_started)).assertIsDisplayed()

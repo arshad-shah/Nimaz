@@ -1030,6 +1030,16 @@ with no label and a touch target under 48dp fail the lane we already run. It can
   `compositionLocalOf` default that nothing ever provided, so every screen was stuck on one
   corner-only medallion at ~5% alpha and toggling looked dead — the picker + a raised alpha
   fixed it.)
+- **Illustrated onboarding** keeps its fixed dark brand treatment while using the shared
+  `MaterialTheme.typography` (Outfit / Plus Jakarta Sans), `AdaptiveSpacing` screen margins,
+  section gaps and card radii, and `NimazButton` / `NimazCard` controls. Its six pages are
+  Welcome, Prayer Times, Learning, Quran & Hadith, Prayer Tracking, and Permissions. Learning
+  describes the existing Qaida/content library, not an unimplemented Salah tutorial. Decorative
+  offline WebP resources belong to `:feature:onboarding` (`drawable-nodpi`); localized text,
+  buttons and permission states are never baked into artwork. A semantic teal scrim protects
+  copy over the images, and the body scrolls independently from the persistent navigation.
+  The original vector emblems remain available as standalone artwork, but are no longer the
+  onboarding hero. Funnel step indices now run from 0 through 5; permissions stay on the last page.
 - **Components follow Atomic Design** (`atoms` → `molecules` → `organisms`). Reuse shared
   components (e.g. `NimazCard`, `PrayerTimeCard`, `NimazBackTopAppBar`,
   `NimazEmptyState`, `NimazLoadingState`, `NimazCalendar`) rather than re-rolling generic UI.

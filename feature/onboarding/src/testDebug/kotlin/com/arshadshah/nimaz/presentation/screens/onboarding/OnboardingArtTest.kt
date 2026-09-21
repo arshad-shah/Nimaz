@@ -114,17 +114,23 @@ class OnboardingArtTest {
     }
 
     @Test
-    fun `every onboarding page paints a complete scene`() {
-        OnboardingEmblem.entries.forEach { kind ->
-            val bitmap = draw {
-                OnboardingScene(kind = kind, modifier = Modifier.fillMaxSize())
+    fun `every illustrated background decodes and paints`() {
+        val kinds = OnboardingIllustration.entries
+        val bitmap = draw {
+            Column(modifier = Modifier.fillMaxSize()) {
+                kinds.forEach { kind ->
+                    IllustratedOnboardingBackground(
+                        illustration = kind,
+                        modifier = Modifier.fillMaxWidth().weight(1f),
+                    )
+                }
             }
-
-            assertThat(bitmap.rows(top = bitmap.height / 2, count = 1).ink()).isGreaterThan(0)
-            assertThat(
-                bitmap.rows(top = bitmap.height * 7 / 8, count = bitmap.height / 8).ink()
-            ).isGreaterThan(0)
         }
+        val band = bitmap.height / kinds.size
+        kinds.indices.forEach { index ->
+            assertThat(bitmap.rows(top = index * band, count = band).ink()).isGreaterThan(0)
+        }
+        assertThat(kinds.map { it.resource }.distinct()).hasSize(kinds.size)
     }
 
     @Test
