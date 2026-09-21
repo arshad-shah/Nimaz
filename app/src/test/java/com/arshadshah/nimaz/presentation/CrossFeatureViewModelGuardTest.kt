@@ -112,6 +112,7 @@ class CrossFeatureViewModelGuardTest {
             "search" to "search",
             "ai" to "search",
             "content" to "content",
+            "learnpray" to "content",
             "tracker" to "tracker",
             "quran" to "quran",
             "prayer" to "prayer",

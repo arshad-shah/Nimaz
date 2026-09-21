@@ -1252,6 +1252,7 @@ It also stores the **content-version flags** that drive seeding — see §7.
 and separate local illustrations so it works without a network or content download. It does not
 seed or modify either database and never records prayer-tracker completion. Its position lives in
 `LearnPrayViewModel` through `SavedStateHandle`, not a preference or synced completion record.
+The `learnpray` ViewModel package is registered to `:feature:content` in the cross-feature guard.
 Its Qur’an/hadith citations use the existing readers through `ContentTarget.toRoute()`;
 audio stops before navigation and Back restores the lesson. `PrayerReference` maps cited
 references to verified stable corpus record ids, not printed numbers. In particular, Muslim
