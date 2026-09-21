@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_intro_welcome_title">Nimaz</string>
+    <string name="onboarding_intro_welcome_body">A calmer, closer you.</string>
+    <string name="onboarding_intro_welcome_caption">Guidance. Reminders. Progress.\nFor a more meaningful Salah.</string>
+    <string name="onboarding_intro_prayer_title">Make time for prayer</string>
+    <string name="onboarding_intro_prayer_body">Prayer times for your location. Gentle reminders for your day.</string>
+    <string name="onboarding_intro_prayer_caption">Your location is only requested when you choose to set it up.</string>
+    <string name="onboarding_intro_learning_title">Learn with confidence</string>
+    <string name="onboarding_intro_learning_body">Follow each movement and recitation, one clear step at a time.</string>
+    <string name="onboarding_intro_learning_caption">Male and female illustrations. Learn at your own pace.</string>
+    <string name="onboarding_intro_progress_title">Build a habit. Find your rhythm.</string>
+    <string name="onboarding_intro_progress_body">Keep track of your prayers and return to your daily practice.</string>
+    <string name="onboarding_intro_progress_caption">A small step. A meaningful beginning.</string>
+    <string name="onboarding_intro_begin">Let’s begin</string>
+    <string name="onboarding_intro_not_now">Not now</string>
+    <string name="onboarding_intro_setup_body">Choose what to enable. You can change these later in Settings.</string>
+    <string name="onboarding_intro_reminder">Nimaz · example reminder</string>
+    <string name="onboarding_intro_fajr">It’s time for Fajr</string>
+    <string name="onboarding_intro_new_day">A new day, a new opportunity.</string>
+    <string name="onboarding_intro_standing">Standing</string>
+    <string name="onboarding_intro_bowing">Bowing</string>
+    <string name="onboarding_intro_prostration">Prostration</string>
+    <string name="onboarding_intro_sitting">Sitting</string>
+    <string name="onboarding_intro_salam">Salam</string>
+    <string name="onboarding_intro_your_progress">Your progress</string>
+    <string name="onboarding_intro_example_week">Example week</string>
+    <string name="onboarding_intro_recorded">Prayer recorded</string>
+    <string name="onboarding_intro_unrecorded">No prayer recorded</string>
+</resources>

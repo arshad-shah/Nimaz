@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_intro_welcome_title">Nimaz</string>
+    <string name="onboarding_intro_welcome_body">Daha huzurlu, daha yakın.</string>
+    <string name="onboarding_intro_welcome_caption">Rehberlik. Hatırlatmalar. İlerleme.\nDaha anlamlı bir namaz için.</string>
+    <string name="onboarding_intro_prayer_title">Namaza zaman ayırın</string>
+    <string name="onboarding_intro_prayer_body">Konumunuza göre namaz vakitleri. Gününüz için nazik hatırlatmalar.</string>
+    <string name="onboarding_intro_prayer_caption">Konumunuz yalnızca ayarlamayı seçtiğinizde istenir.</string>
+    <string name="onboarding_intro_learning_title">Güvenle öğrenin</string>
+    <string name="onboarding_intro_learning_body">Her hareketi ve okumayı, açık ve anlaşılır adımlarla izleyin.</string>
+    <string name="onboarding_intro_learning_caption">Erkek ve kadın görselleri. Kendi hızınızda öğrenin.</string>
+    <string name="onboarding_intro_progress_title">Alışkanlık kazanın. Ritminizi bulun.</string>
+    <string name="onboarding_intro_progress_body">Namazlarınızı takip edin ve günlük ibadetinize dönün.</string>
+    <string name="onboarding_intro_progress_caption">Küçük bir adım. Anlamlı bir başlangıç.</string>
+    <string name="onboarding_intro_begin">Başlayalım</string>
+    <string name="onboarding_intro_not_now">Şimdi değil</string>
+    <string name="onboarding_intro_setup_body">Neleri etkinleştireceğinizi seçin. Bunları daha sonra Ayarlar’dan değiştirebilirsiniz.</string>
+    <string name="onboarding_intro_reminder">Nimaz · örnek hatırlatma</string>
+    <string name="onboarding_intro_fajr">Sabah namazı vakti</string>
+    <string name="onboarding_intro_new_day">Yeni bir gün, yeni bir fırsat.</string>
+    <string name="onboarding_intro_standing">Ayakta duruş</string>
+    <string name="onboarding_intro_bowing">Rükû</string>
+    <string name="onboarding_intro_prostration">Secde</string>
+    <string name="onboarding_intro_sitting">Oturuş</string>
+    <string name="onboarding_intro_salam">Selam</string>
+    <string name="onboarding_intro_your_progress">İlerlemeniz</string>
+    <string name="onboarding_intro_example_week">Örnek hafta</string>
+    <string name="onboarding_intro_recorded">Namaz kaydedildi</string>
+    <string name="onboarding_intro_unrecorded">Namaz kaydedilmedi</string>
+</resources>

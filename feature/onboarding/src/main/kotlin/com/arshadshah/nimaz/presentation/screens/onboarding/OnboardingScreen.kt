@@ -5,9 +5,13 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Build
 import android.provider.Settings
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
@@ -15,46 +19,51 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BatteryChargingFull
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Circle
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.RadioButtonUnchecked
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.core.view.WindowCompat
@@ -62,629 +71,301 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.core.ui.R
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
-import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcons
 import com.arshadshah.nimaz.presentation.components.atoms.NimazPageIndicator
 import com.arshadshah.nimaz.presentation.components.atoms.NimazPager
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.rememberNimazPagerState
+import com.arshadshah.nimaz.presentation.components.molecules.NimazBottomSheet
 import com.arshadshah.nimaz.presentation.theme.AdaptiveSpacing
 import com.arshadshah.nimaz.presentation.theme.NimazColors
-import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.viewmodel.onboarding.OnboardingEvent
 import com.arshadshah.nimaz.presentation.viewmodel.onboarding.OnboardingViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
+import kotlin.math.abs
 
-private data class InfoPage(
-    val title: String,
-    val description: String,
-    val illustration: OnboardingIllustration,
-    val features: List<String>
+internal const val ONBOARDING_PAGE_COUNT = 4
+internal const val ONBOARDING_MOTION_MS = 420
+
+private data class IntroPage(val title: Int, val description: Int, val caption: Int, val art: OnboardingIllustration)
+
+private val introPages = listOf(
+    IntroPage(R.string.onboarding_intro_welcome_title, R.string.onboarding_intro_welcome_body,
+        R.string.onboarding_intro_welcome_caption, OnboardingIllustration.WELCOME),
+    IntroPage(R.string.onboarding_intro_prayer_title, R.string.onboarding_intro_prayer_body,
+        R.string.onboarding_intro_prayer_caption, OnboardingIllustration.PRAYER),
+    IntroPage(R.string.onboarding_intro_learning_title, R.string.onboarding_intro_learning_body,
+        R.string.onboarding_intro_learning_caption, OnboardingIllustration.LEARNING),
+    IntroPage(R.string.onboarding_intro_progress_title, R.string.onboarding_intro_progress_body,
+        R.string.onboarding_intro_progress_caption, OnboardingIllustration.PROGRESS),
 )
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun OnboardingScreen(
-    onComplete: () -> Unit,
-    viewModel: OnboardingViewModel = hiltViewModel()
-) {
+fun OnboardingScreen(onComplete: () -> Unit, viewModel: OnboardingViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
-    val snackbarHostState = remember { SnackbarHostState() }
-
-    // Onboarding always uses a dark, illuminated background, so the status-bar
-    // icons must be light regardless of the app theme — otherwise dark icons
-    // disappear into the dark background. Restore the previous setting on exit.
+    val snackbar = remember { SnackbarHostState() }
+    val pager = rememberNimazPagerState(pageCount = { ONBOARDING_PAGE_COUNT })
+    var navigationJob by remember { mutableStateOf<Job?>(null) }
+    var setupOpen by rememberSaveable { mutableStateOf(false) }
+    var completing by remember { mutableStateOf(false) }
+    val context = LocalContext.current
     val view = LocalView.current
     if (!view.isInEditMode) {
-        DisposableEffect(Unit) {
-            val window = (view.context as Activity).window
-            val controller = WindowCompat.getInsetsController(window, view)
-            val previousLightStatus = controller.isAppearanceLightStatusBars
+        DisposableEffect(view) {
+            val controller = WindowCompat.getInsetsController((view.context as Activity).window, view)
+            val previous = controller.isAppearanceLightStatusBars
             controller.isAppearanceLightStatusBars = false
-            onDispose {
-                controller.isAppearanceLightStatusBars = previousLightStatus
-            }
+            onDispose { controller.isAppearanceLightStatusBars = previous }
         }
     }
-
-    // Permission launchers
-    val locationPermissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestMultiplePermissions()
-    ) { permissions ->
-        val granted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true ||
-                permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
-        viewModel.onEvent(OnboardingEvent.UpdatePermissionStatus(location = granted))
+    val locationLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
+        viewModel.onEvent(OnboardingEvent.UpdatePermissionStatus(location =
+            it[Manifest.permission.ACCESS_FINE_LOCATION] == true || it[Manifest.permission.ACCESS_COARSE_LOCATION] == true))
     }
-
-    val notificationPermissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission()
-    ) { granted ->
-        viewModel.onEvent(OnboardingEvent.UpdatePermissionStatus(notification = granted))
+    val notificationLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
+        viewModel.onEvent(OnboardingEvent.UpdatePermissionStatus(notification = it))
     }
-
-    val context = LocalContext.current
-
-    val batteryOptimizationLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult()
-    ) {
+    val batteryLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
         viewModel.onEvent(OnboardingEvent.CheckBatteryOptimization)
     }
-
     LaunchedEffect(state.error) {
-        state.error?.let {
-            snackbarHostState.showSnackbar(it)
-            viewModel.onEvent(OnboardingEvent.DismissError)
-        }
+        state.error?.let { snackbar.showSnackbar(it); viewModel.onEvent(OnboardingEvent.DismissError) }
     }
-
-    // Five illustrated introductions plus the existing unified permissions page.
-    val infoPages = listOf(
-        InfoPage(
-            title = stringResource(R.string.onboarding_welcome_title),
-            description = stringResource(R.string.onboarding_welcome_description),
-            illustration = OnboardingIllustration.WELCOME,
-            features = listOf(
-                stringResource(R.string.onboarding_feature_prayer_times),
-                stringResource(R.string.onboarding_feature_quran),
-                stringResource(R.string.onboarding_feature_hadith),
-                stringResource(R.string.onboarding_feature_duas)
-            )
-        ),
-        InfoPage(
-            title = stringResource(R.string.onboarding_prayer_title),
-            description = stringResource(R.string.onboarding_prayer_description),
-            illustration = OnboardingIllustration.PRAYER,
-            features = listOf(
-                stringResource(R.string.onboarding_feature_calc_methods),
-                stringResource(R.string.onboarding_feature_custom_adjustments),
-                stringResource(R.string.onboarding_feature_tracking),
-                stringResource(R.string.onboarding_feature_statistics)
-            )
-        ),
-        InfoPage(
-            title = stringResource(R.string.learning),
-            description = stringResource(R.string.qaida_subtitle),
-            illustration = OnboardingIllustration.LEARNING,
-            features = listOf(
-                stringResource(R.string.qaida),
-                stringResource(R.string.onboarding_feature_hadith),
-                stringResource(R.string.onboarding_feature_duas)
-            )
-        ),
-        InfoPage(
-            title = stringResource(R.string.onboarding_quran_title),
-            description = stringResource(R.string.onboarding_quran_description),
-            illustration = OnboardingIllustration.QURAN,
-            features = listOf(
-                stringResource(R.string.onboarding_feature_translations),
-                stringResource(R.string.onboarding_feature_audio),
-                stringResource(R.string.onboarding_feature_bookmarks),
-                stringResource(R.string.onboarding_feature_search)
-            )
-        ),
-        InfoPage(
-            title = stringResource(R.string.onboarding_feature_tracking),
-            description = stringResource(R.string.onboarding_feature_statistics),
-            illustration = OnboardingIllustration.PROGRESS,
-            features = listOf(
-                stringResource(R.string.onboarding_feature_tracking),
-                stringResource(R.string.onboarding_feature_statistics)
-            )
-        )
-    )
-
-    val totalPages = infoPages.size + 1 // +1 for permissions page
-    val pagerState = rememberNimazPagerState(pageCount = { totalPages })
-
-    // The onboarding funnel's only producer. `OnboardingEvent.SetCurrentPage` was emitted by
-    // nothing — the pager drove itself from `pagerState.currentPage` locally — so
-    // `AppAnalytics.Event.ONBOARDING_STEP`, documented as the event that "reveals where people
-    // drop off", had fired **zero times in production**. `snapshotFlow` reports settled pages
-    // only, so a swipe that is released half way does not count as reaching the next step.
-    LaunchedEffect(pagerState) {
-        snapshotFlow { pagerState.currentPage }
-            .distinctUntilChanged()
+    // Report settled pages only. Swiping through a partial page is not a completed funnel step.
+    LaunchedEffect(pager) {
+        snapshotFlow { pager.settledPage }.distinctUntilChanged()
             .collect { viewModel.onEvent(OnboardingEvent.SetCurrentPage(it)) }
     }
-
+    val complete: () -> Unit = {
+        if (!completing) {
+            completing = true
+            viewModel.onEvent(OnboardingEvent.CompleteOnboarding)
+            onComplete()
+        }
+    }
+    val move: (Int) -> Unit = { delta ->
+        if (navigationJob?.isActive != true && !pager.isScrollInProgress) {
+            navigationJob = scope.launch {
+                pager.animateScrollToPage(
+                    (pager.settledPage + delta).coerceIn(0, ONBOARDING_PAGE_COUNT - 1),
+                    animationSpec = tween(ONBOARDING_MOTION_MS, easing = FastOutSlowInEasing),
+                )
+            }
+        }
+    }
+    BackHandler(enabled = !setupOpen && pager.settledPage > 0) { move(-1) }
+    val busy = pager.isScrollInProgress || navigationJob?.isActive == true || completing
     NimazScreenScaffold(
-        // Opts out of the app ornament: onboarding owns its own gradient backdrop.
         containerColor = NimazColors.OnboardingBgTop,
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
-    ) { paddingValues ->
-        // Let the illuminated background bleed all the way up behind the status
-        // bar (edge-to-edge); only the interactive content respects the insets.
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(illuminatedBackground)
-        ) {
-            IllustratedOnboardingBackground(
-                illustration = infoPages.getOrNull(pagerState.currentPage)?.illustration
-                    ?: OnboardingIllustration.PERMISSIONS,
-                modifier = Modifier.fillMaxSize(),
-            )
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
+        snackbarHost = { SnackbarHost(snackbar) },
+    ) { insets ->
+        Box(Modifier.fillMaxSize()) {
+            // Each page owns its artwork: foreground and background now move together,
+            // rather than swapping the full-screen image halfway through a swipe.
+            NimazPager(state = pager, modifier = Modifier.fillMaxSize(), beyondViewportPageCount = 1) { index ->
+                Box(Modifier.fillMaxSize().graphicsLayer {
+                    val distance = abs((pager.currentPage - index) + pager.currentPageOffsetFraction)
+                    alpha = 1f - distance.coerceIn(0f, 1f) * 0.18f
+                }) {
+                    IllustratedOnboardingBackground(introPages[index].art, Modifier.fillMaxSize())
+                    IntroContent(introPages[index], index, insets)
+                }
+            }
+            Row(
+                Modifier.align(Alignment.TopCenter).widthIn(max = 700.dp).fillMaxWidth()
+                    .padding(top = insets.calculateTopPadding(), start = AdaptiveSpacing.screenPadding(),
+                        end = AdaptiveSpacing.screenPadding()),
+                horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                // Skip Button
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
-                    contentAlignment = Alignment.CenterEnd
-                ) {
-                    if (pagerState.currentPage < totalPages - 1) {
-                        NimazButton(
-                            text = stringResource(R.string.onboarding_skip),
-                            onClick = {
-                                viewModel.onEvent(OnboardingEvent.CompleteOnboarding)
-                                onComplete()
-                            },
-                            variant = NimazButtonVariant.TEXT,
-                            colors = ButtonDefaults.textButtonColors(contentColor = IllumCream)
-                        )
-                    }
-                }
-
-                // Pager
-                NimazPager(
-                    state = pagerState,
-                    modifier = Modifier.weight(1f)
-                ) { page ->
-                    if (page < infoPages.size) {
-                        InfoPageContent(page = infoPages[page])
-                    } else {
-                        PermissionsPageContent(
-                            locationGranted = state.locationPermissionGranted,
-                            notificationGranted = state.notificationPermissionGranted,
-                            batteryOptDisabled = state.batteryOptimizationDisabled,
-                            locationName = if (state.locationDetected) state.locationName else null,
-                            onRequestLocation = {
-                                locationPermissionLauncher.launch(
-                                    arrayOf(
-                                        Manifest.permission.ACCESS_FINE_LOCATION,
-                                        Manifest.permission.ACCESS_COARSE_LOCATION
-                                    )
-                                )
-                            },
-                            onRequestNotification = {
-                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                                    notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                                } else {
-                                    viewModel.onEvent(
-                                        OnboardingEvent.UpdatePermissionStatus(
-                                            notification = true
-                                        )
-                                    )
-                                }
-                            },
-                            onRequestBattery = {
-                                // The Intent is built here rather than handed out by the
-                                // ViewModel: a ViewModel returning an android.content.Intent
-                                // points the dependency arrow the wrong way (see PowerSettings).
-                                batteryOptimizationLauncher.launch(
-                                    Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
-                                        .apply { data = "package:${context.packageName}".toUri() }
-                                )
-                            }
-                        )
-                    }
-                }
-
-                // Bottom Section
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = AdaptiveSpacing.screenPadding(), vertical = AdaptiveSpacing.sectionSpacing()),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    // Page Indicators — canonical pill indicator tinted to the
-                    // illuminated palette (gold active dot on the dark background).
-                    NimazPageIndicator(
-                        state = pagerState,
-                        activeColor = IllumGold,
-                        inactiveColor = Color.White.copy(alpha = 0.28f),
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    // Navigation Buttons
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
+                // Keep this slot even on page zero so controls never jump sideways.
+                Box(Modifier.weight(1f).height(48.dp)) {
+                    AnimatedVisibility(
+                        visible = pager.settledPage > 0,
+                        enter = fadeIn(tween(220)), exit = fadeOut(tween(180)),
                     ) {
-                        AnimatedVisibility(
-                            visible = pagerState.currentPage > 0,
-                            enter = fadeIn(),
-                            exit = fadeOut()
-                        ) {
-                            NimazButton(
-                                text = stringResource(R.string.onboarding_back),
-                                onClick = {
-                                    scope.launch {
-                                        pagerState.animateScrollToPage(pagerState.currentPage - 1)
-                                    }
-                                },
-                                variant = NimazButtonVariant.TEXT,
-                                colors = ButtonDefaults.textButtonColors(contentColor = IllumCream)
-                            )
-                        }
+                        NimazButton(stringResource(R.string.onboarding_back), { move(-1) },
+                            variant = NimazButtonVariant.TEXT, leadingIcon = NimazIcons.Previous,
+                            enabled = !busy, colors = ButtonDefaults.textButtonColors(contentColor = IllumCream))
+                    }
+                }
+                Box(Modifier.weight(1f).height(48.dp), contentAlignment = Alignment.CenterEnd) {
+                    AnimatedVisibility(pager.settledPage < ONBOARDING_PAGE_COUNT - 1,
+                        enter = fadeIn(tween(220)), exit = fadeOut(tween(180))) {
+                        NimazButton(stringResource(R.string.onboarding_skip), complete,
+                            variant = NimazButtonVariant.TEXT, enabled = !busy,
+                            colors = ButtonDefaults.textButtonColors(contentColor = IllumCream))
+                    }
+                }
+            }
+            Column(
+                Modifier.align(Alignment.BottomCenter).fillMaxWidth()
+                    .background(Brush.verticalGradient(listOf(NimazColors.OnboardingBgTop.copy(alpha = 0f),
+                        NimazColors.OnboardingBgTop)))
+                    .padding(bottom = insets.calculateBottomPadding() + 16.dp, top = 16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                NimazPageIndicator(pager, activeColor = IllumGold,
+                    inactiveColor = IllumTextSoft.copy(alpha = 0.3f))
+                Spacer(Modifier.height(16.dp))
+                Crossfade(
+                    targetState = pager.settledPage == ONBOARDING_PAGE_COUNT - 1,
+                    animationSpec = tween(220), label = "onboarding-primary-action",
+                    modifier = Modifier.widthIn(max = 600.dp).fillMaxWidth()
+                        .padding(horizontal = AdaptiveSpacing.screenPadding()),
+                ) { last ->
+                    NimazButton(
+                        text = stringResource(if (last) R.string.onboarding_intro_begin else R.string.onboarding_next),
+                        onClick = { if (last) setupOpen = true else move(1) },
+                        fullWidth = true, leadingIcon = if (last) Icons.Default.Check else NimazIcons.Next,
+                        enabled = !busy && !setupOpen,
+                    )
+                }
+            }
+        }
+    }
+    if (setupOpen) {
+        NimazBottomSheet(
+            onDismissRequest = { setupOpen = false },
+            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+            containerColor = NimazColors.OnboardingBgTop, contentColor = IllumCream,
+            footer = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    NimazButton(stringResource(R.string.onboarding_get_started), complete,
+                        fullWidth = true, enabled = !completing)
+                    NimazButton(stringResource(R.string.onboarding_intro_not_now), complete,
+                        fullWidth = true, variant = NimazButtonVariant.TEXT,
+                        colors = ButtonDefaults.textButtonColors(contentColor = IllumCream), enabled = !completing)
+                }
+            },
+        ) {
+            Text(stringResource(R.string.onboarding_permissions_title),
+                style = MaterialTheme.typography.headlineSmall, modifier = Modifier.semantics { heading() })
+            Text(stringResource(R.string.onboarding_intro_setup_body),
+                style = MaterialTheme.typography.bodyMedium, color = IllumTextSoft,
+                modifier = Modifier.padding(vertical = 12.dp))
+            PermissionCard(Icons.Default.LocationOn, stringResource(R.string.onboarding_location_title),
+                stringResource(R.string.onboarding_location_description), state.locationPermissionGranted,
+                if (state.locationDetected) state.locationName else stringResource(R.string.onboarding_location_granted)) {
+                locationLauncher.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION))
+            }
+            PermissionCard(Icons.Default.Notifications, stringResource(R.string.onboarding_notification_title),
+                stringResource(R.string.onboarding_notification_description), state.notificationPermissionGranted,
+                stringResource(R.string.onboarding_notification_granted)) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+                    notificationLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                else viewModel.onEvent(OnboardingEvent.UpdatePermissionStatus(notification = true))
+            }
+            PermissionCard(Icons.Default.BatteryChargingFull, stringResource(R.string.onboarding_battery_title),
+                stringResource(R.string.onboarding_battery_description), state.batteryOptimizationDisabled,
+                stringResource(R.string.onboarding_battery_granted)) {
+                batteryLauncher.launch(Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
+                    .apply { data = "package:${context.packageName}".toUri() })
+            }
+        }
+    }
+}
 
-                        if (pagerState.currentPage == 0) {
-                            Spacer(modifier = Modifier.width(1.dp))
+@Composable
+private fun IntroContent(page: IntroPage, index: Int, insets: PaddingValues) {
+    BoxWithConstraints(Modifier.fillMaxSize()) {
+        val compact = maxHeight < 600.dp
+        Column(
+            Modifier.fillMaxSize().verticalScroll(rememberScrollState())
+                .padding(top = insets.calculateTopPadding() + 64.dp,
+                    bottom = insets.calculateBottomPadding() + 128.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Column(Modifier.widthIn(max = 600.dp).fillMaxWidth().padding(horizontal = AdaptiveSpacing.screenPadding()),
+                horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(stringResource(page.title),
+                    style = if (index == 0) MaterialTheme.typography.displaySmall else MaterialTheme.typography.headlineMedium,
+                    textAlign = TextAlign.Center, color = IllumCream, modifier = Modifier.semantics { heading() })
+                Spacer(Modifier.height(12.dp))
+                Text(stringResource(page.description), style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Center, color = IllumTextSoft)
+            }
+            Spacer(Modifier.height(if (compact) 48.dp else maxHeight * 0.28f))
+            Box(Modifier.widthIn(max = 600.dp).fillMaxWidth().padding(horizontal = AdaptiveSpacing.screenPadding())) {
+                when (index) {
+                    1 -> IntroCard {
+                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                            NimazIcon(Icons.Default.Notifications, contentDescription = null, tint = IllumCream)
+                            Column {
+                                Text(stringResource(R.string.onboarding_intro_reminder), style = MaterialTheme.typography.labelSmall)
+                                Text(stringResource(R.string.onboarding_intro_fajr), style = MaterialTheme.typography.titleMedium)
+                                Text(stringResource(R.string.onboarding_intro_new_day), style = MaterialTheme.typography.bodySmall)
+                            }
                         }
-
-                        NimazButton(
-                            text = if (pagerState.currentPage == totalPages - 1)
-                                stringResource(R.string.onboarding_get_started)
-                            else
-                                stringResource(R.string.onboarding_next),
-                            onClick = {
-                                if (pagerState.currentPage == totalPages - 1) {
-                                    viewModel.onEvent(OnboardingEvent.CompleteOnboarding)
-                                    onComplete()
-                                } else {
-                                    scope.launch {
-                                        pagerState.animateScrollToPage(pagerState.currentPage + 1)
-                                    }
+                    }
+                    2 -> Box(Modifier.align(Alignment.CenterEnd).fillMaxWidth(0.5f)) {
+                        IntroCard {
+                            listOf(R.string.onboarding_intro_standing, R.string.onboarding_intro_bowing,
+                                R.string.onboarding_intro_prostration, R.string.onboarding_intro_sitting,
+                                R.string.onboarding_intro_salam).forEachIndexed { step, label ->
+                                Row(Modifier.padding(vertical = 6.dp), horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    verticalAlignment = Alignment.CenterVertically) {
+                                    NimazIcon(if (step == 0) Icons.Default.Circle else Icons.Default.RadioButtonUnchecked,
+                                        contentDescription = null, tint = if (step == 0) IllumGold else IllumTextSoft, iconSize = 12.dp)
+                                    Text(stringResource(label), style = MaterialTheme.typography.bodySmall)
                                 }
-                            },
-                            modifier = Modifier.weight(1f).padding(start = 12.dp),
-                            variant = NimazButtonVariant.PRIMARY,
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = NimazColors.Primary700,
-                                contentColor = NimazColors.OnPrimary,
-                            ),
-                            leadingIcon = if (pagerState.currentPage == totalPages - 1)
-                                Icons.Default.Check
-                            else NimazIcons.Next
-                        )
+                            }
+                        }
                     }
+                    3 -> IntroCard {
+                        Text(stringResource(R.string.onboarding_intro_your_progress), style = MaterialTheme.typography.titleMedium)
+                        Text(stringResource(R.string.onboarding_intro_example_week), style = MaterialTheme.typography.labelSmall)
+                        Row(Modifier.fillMaxWidth().padding(top = 16.dp), horizontalArrangement = Arrangement.SpaceEvenly) {
+                            repeat(7) { day ->
+                                NimazIcon(if (day in listOf(0, 1, 2, 4)) Icons.Default.Check else Icons.Default.RadioButtonUnchecked,
+                                    contentDescription = stringResource(if (day in listOf(0, 1, 2, 4))
+                                        R.string.onboarding_intro_recorded else R.string.onboarding_intro_unrecorded),
+                                    tint = if (day in listOf(0, 1, 2, 4)) NimazColors.Primary400 else IllumTextSoft,
+                                    iconSize = 20.dp)
+                            }
+                        }
+                    }
+                    else -> Spacer(Modifier.height(72.dp))
                 }
             }
+            Text(stringResource(page.caption), style = MaterialTheme.typography.bodySmall, color = IllumTextSoft,
+                textAlign = TextAlign.Center, modifier = Modifier.padding(horizontal = AdaptiveSpacing.screenPadding(), vertical = 20.dp))
         }
     }
 }
 
-// --- Info page (Welcome, Prayer Times, Quran) ---
+@Composable
+private fun IntroCard(content: @Composable androidx.compose.foundation.layout.ColumnScope.() -> Unit) {
+    NimazCard(colors = NimazCardDefaults.colors(
+        container = NimazColors.OnboardingBgTop.copy(alpha = 0.96f), content = IllumCream,
+        border = IllumTextSoft.copy(alpha = 0.25f)), modifier = Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(16.dp), content = content)
+    }
+}
 
 @Composable
-private fun InfoPageContent(
-    page: InfoPage,
-    modifier: Modifier = Modifier
-) {
-    BoxWithConstraints(modifier = modifier.fillMaxSize()) {
-        val isCompact = maxHeight < 500.dp
-        val sectionSpacing = AdaptiveSpacing.sectionSpacing()
-        val smallSpacing = if (isCompact) 6.dp else 12.dp
-        val artworkHeight = (maxHeight * 0.38f).coerceIn(100.dp, 300.dp)
-
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = AdaptiveSpacing.screenPadding(), vertical = AdaptiveSpacing.sectionSpacing()),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Text(
-                text = page.title,
-                style = if (isCompact) MaterialTheme.typography.titleLarge
-                else MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center,
-                color = IllumCream
-            )
-
-            Spacer(modifier = Modifier.height(smallSpacing))
-
-            Text(
-                text = page.description,
-                style = MaterialTheme.typography.bodyMedium,
-                textAlign = TextAlign.Center,
-                color = IllumTextSoft
-            )
-
-            Spacer(modifier = Modifier.height(sectionSpacing))
-
-            Spacer(modifier = Modifier.height(artworkHeight))
-
-            NimazCard(
-                style = NimazCardStyle.FILLED,
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(AdaptiveSpacing.cardCornerRadius()),
-                colors = NimazCardDefaults.colors(
-                    container = NimazColors.OnboardingBgTop.copy(alpha = 0.94f),
-                    border = NimazColors.Primary400.copy(alpha = 0.35f)
-                )
-            ) {
-                Column(
-                    modifier = Modifier.padding(
-                        horizontal = 18.dp,
-                        vertical = if (isCompact) 10.dp else 16.dp
-                    )
-                ) {
-                    page.features.forEach { feature ->
-                        FeatureRow(text = feature, compact = isCompact)
-                    }
+private fun PermissionCard(icon: ImageVector, title: String, description: String, granted: Boolean,
+    grantedLabel: String, onRequest: () -> Unit) {
+    NimazCard(modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
+        colors = NimazCardDefaults.colors(container = NimazColors.OnboardingBgBottom, content = IllumCream)) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                NimazIcon(if (granted) Icons.Default.Check else icon, contentDescription = null, tint = IllumCream)
+                Column(Modifier.weight(1f)) {
+                    Text(title, style = MaterialTheme.typography.titleSmall)
+                    Text(if (granted) grantedLabel else description,
+                        style = MaterialTheme.typography.bodySmall, color = IllumTextSoft)
                 }
             }
-        }
-    }
-}
-
-// --- Unified permissions page ---
-
-@Composable
-private fun PermissionsPageContent(
-    locationGranted: Boolean,
-    notificationGranted: Boolean,
-    batteryOptDisabled: Boolean,
-    locationName: String?,
-    onRequestLocation: () -> Unit,
-    onRequestNotification: () -> Unit,
-    onRequestBattery: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    BoxWithConstraints(modifier = modifier.fillMaxSize()) {
-        val isCompact = maxHeight < 500.dp
-        val sectionSpacing = AdaptiveSpacing.sectionSpacing()
-        val artworkHeight = if (isCompact) 48.dp else 100.dp
-
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = AdaptiveSpacing.screenPadding(), vertical = AdaptiveSpacing.sectionSpacing()),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-
-            Text(
-                text = stringResource(R.string.onboarding_permissions_title),
-                style = if (isCompact) MaterialTheme.typography.titleLarge
-                else MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center,
-                color = IllumCream
-            )
-
-            Spacer(modifier = Modifier.height(if (isCompact) 4.dp else 8.dp))
-
-            Text(
-                text = stringResource(R.string.onboarding_permissions_description),
-                style = MaterialTheme.typography.bodyMedium,
-                textAlign = TextAlign.Center,
-                color = IllumTextSoft
-            )
-
-            Spacer(modifier = Modifier.height(sectionSpacing))
-
-            Spacer(modifier = Modifier.height(artworkHeight))
-
-            // Permission cards
-            PermissionCard(
-                icon = Icons.Default.LocationOn,
-                title = stringResource(R.string.onboarding_location_title),
-                description = stringResource(R.string.onboarding_location_description),
-                isGranted = locationGranted,
-                grantedLabel = locationName ?: stringResource(R.string.onboarding_location_granted),
-                buttonLabel = stringResource(R.string.onboarding_grant_location),
-                onRequest = onRequestLocation,
-                compact = isCompact
-            )
-
-            Spacer(modifier = Modifier.height(if (isCompact) 8.dp else 12.dp))
-
-            PermissionCard(
-                icon = Icons.Default.Notifications,
-                title = stringResource(R.string.onboarding_notification_title),
-                description = stringResource(R.string.onboarding_notification_description),
-                isGranted = notificationGranted,
-                grantedLabel = stringResource(R.string.onboarding_notification_granted),
-                buttonLabel = stringResource(R.string.onboarding_enable_notifications),
-                onRequest = onRequestNotification,
-                compact = isCompact
-            )
-
-            Spacer(modifier = Modifier.height(if (isCompact) 8.dp else 12.dp))
-
-            PermissionCard(
-                icon = Icons.Default.BatteryChargingFull,
-                title = stringResource(R.string.onboarding_battery_title),
-                description = stringResource(R.string.onboarding_battery_description),
-                isGranted = batteryOptDisabled,
-                grantedLabel = stringResource(R.string.onboarding_battery_granted),
-                buttonLabel = stringResource(R.string.onboarding_disable_battery_opt),
-                onRequest = onRequestBattery,
-                compact = isCompact
-            )
-        }
-    }
-}
-
-@Composable
-private fun PermissionCard(
-    icon: ImageVector,
-    title: String,
-    description: String,
-    isGranted: Boolean,
-    grantedLabel: String,
-    buttonLabel: String,
-    onRequest: () -> Unit,
-    compact: Boolean,
-    modifier: Modifier = Modifier
-) {
-    val green = NimazColors.StatusColors.Active
-
-    NimazCard(
-        modifier = modifier,
-        style = NimazCardStyle.OUTLINED,
-        colors = NimazCardDefaults.colors(
-            container = NimazColors.OnboardingBgTop.copy(alpha = 0.94f),
-            content = IllumCream,
-            border = if (isGranted) green else NimazColors.Primary400
-        )
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(if (compact) 12.dp else 16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Icon
-            Box(
-                modifier = Modifier
-                    .size(if (compact) 40.dp else 48.dp)
-                    .clip(CircleShape)
-                    .background(
-                        if (isGranted) green.copy(alpha = 0.2f)
-                        else IllumGold.copy(alpha = 0.16f)
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                NimazIcon(
-                    imageVector = if (isGranted) Icons.Default.Check else icon,
-                    contentDescription = null,
-                    tint = if (isGranted) green else IllumGold,
-                    iconSize = if (compact) 20.dp else 24.dp
-                )
-            }
-
-            Spacer(modifier = Modifier.width(12.dp))
-
-            // Text content
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = title,
-                    style = if (compact) MaterialTheme.typography.bodyMedium
-                    else MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.SemiBold,
-                    color = Color.White
-                )
-                Text(
-                    text = if (isGranted) grantedLabel else description,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = if (isGranted) green else IllumTextSoft,
-                )
-            }
-
-            // Action
-            if (!isGranted) {
-                Spacer(modifier = Modifier.width(8.dp))
-                NimazButton(
-                    text = stringResource(R.string.onboarding_grant),
-                    onClick = onRequest,
-                    variant = NimazButtonVariant.TONAL,
-                    size = NimazButtonSize.SMALL
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun FeatureRow(
-    text: String,
-    compact: Boolean = false,
-    modifier: Modifier = Modifier
-) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(vertical = if (compact) 5.dp else 7.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = "✦", // ✦ gold star bullet
-            color = IllumGold,
-            style = MaterialTheme.typography.titleMedium
-        )
-
-        Spacer(modifier = Modifier.width(12.dp))
-
-        Text(
-            text = text,
-            style = if (compact) MaterialTheme.typography.bodySmall
-            else MaterialTheme.typography.bodyMedium,
-            color = Color.White.copy(alpha = 0.92f)
-        )
-    }
-}
-
-@Preview(showBackground = true, widthDp = 400, heightDp = 740, name = "Info Page")
-@Composable
-private fun InfoPagePreview() {
-    NimazTheme {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(illuminatedBackground)
-        ) {
-            InfoPageContent(
-                page = InfoPage(
-                    title = "Welcome to Nimaz",
-                    description = "Your complete Islamic companion app",
-                    illustration = OnboardingIllustration.WELCOME,
-                    features = listOf(
-                        "Accurate prayer times",
-                        "Complete Quran with audio",
-                        "Authentic Hadith collections",
-                        "Daily duas and supplications"
-                    )
-                )
-            )
-        }
-    }
-}
-
-@Preview(showBackground = true, widthDp = 400, heightDp = 740, name = "Permissions Page")
-@Composable
-private fun PermissionsPagePreview() {
-    NimazTheme {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(illuminatedBackground)
-        ) {
-            PermissionsPageContent(
-                locationGranted = true,
-                notificationGranted = false,
-                batteryOptDisabled = false,
-                locationName = "Dublin, Ireland",
-                onRequestLocation = {},
-                onRequestNotification = {},
-                onRequestBattery = {}
-            )
+            if (!granted) NimazButton(stringResource(R.string.onboarding_grant), onRequest,
+                variant = NimazButtonVariant.QUIET, fullWidth = true)
         }
     }
 }

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_intro_welcome_title">Nimaz</string>
+    <string name="onboarding_intro_welcome_body">Ruhiger werden. Nähe finden.</string>
+    <string name="onboarding_intro_welcome_caption">Begleitung. Erinnerungen. Fortschritt.\nFür ein bewussteres Gebet.</string>
+    <string name="onboarding_intro_prayer_title">Zeit fürs Gebet</string>
+    <string name="onboarding_intro_prayer_body">Gebetszeiten für deinen Standort. Sanfte Erinnerungen für deinen Tag.</string>
+    <string name="onboarding_intro_prayer_caption">Dein Standort wird erst abgefragt, wenn du die Einrichtung auswählst.</string>
+    <string name="onboarding_intro_learning_title">Mit Vertrauen lernen</string>
+    <string name="onboarding_intro_learning_body">Folge jeder Bewegung und Rezitation, Schritt für Schritt.</string>
+    <string name="onboarding_intro_learning_caption">Abbildungen für Männer und Frauen. Lerne in deinem Tempo.</string>
+    <string name="onboarding_intro_progress_title">Gewohnheiten stärken. Deinen Rhythmus finden.</string>
+    <string name="onboarding_intro_progress_body">Halte deine Gebete fest und kehre zu deiner täglichen Praxis zurück.</string>
+    <string name="onboarding_intro_progress_caption">Ein kleiner Schritt. Ein bedeutsamer Anfang.</string>
+    <string name="onboarding_intro_begin">Los geht’s</string>
+    <string name="onboarding_intro_not_now">Nicht jetzt</string>
+    <string name="onboarding_intro_setup_body">Wähle, was du aktivieren möchtest. Du kannst dies später in den Einstellungen ändern.</string>
+    <string name="onboarding_intro_reminder">Nimaz · Beispielerinnerung</string>
+    <string name="onboarding_intro_fajr">Es ist Zeit für Fadschr</string>
+    <string name="onboarding_intro_new_day">Ein neuer Tag, eine neue Gelegenheit.</string>
+    <string name="onboarding_intro_standing">Stehen</string>
+    <string name="onboarding_intro_bowing">Verbeugung</string>
+    <string name="onboarding_intro_prostration">Niederwerfung</string>
+    <string name="onboarding_intro_sitting">Sitzen</string>
+    <string name="onboarding_intro_salam">Salam</string>
+    <string name="onboarding_intro_your_progress">Dein Fortschritt</string>
+    <string name="onboarding_intro_example_week">Beispielwoche</string>
+    <string name="onboarding_intro_recorded">Gebet erfasst</string>
+    <string name="onboarding_intro_unrecorded">Kein Gebet erfasst</string>
+</resources>

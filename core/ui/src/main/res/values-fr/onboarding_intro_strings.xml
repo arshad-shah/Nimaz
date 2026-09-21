@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_intro_welcome_title">Nimaz</string>
+    <string name="onboarding_intro_welcome_body">Plus de sérénité, plus de proximité.</string>
+    <string name="onboarding_intro_welcome_caption">Conseils. Rappels. Progrès.\nPour une prière pleine de sens.</string>
+    <string name="onboarding_intro_prayer_title">Du temps pour la prière</string>
+    <string name="onboarding_intro_prayer_body">Les horaires de prière de votre lieu. Des rappels tout au long du jour.</string>
+    <string name="onboarding_intro_prayer_caption">Votre position est demandée uniquement si vous choisissez de la configurer.</string>
+    <string name="onboarding_intro_learning_title">Apprenez en confiance</string>
+    <string name="onboarding_intro_learning_body">Suivez chaque mouvement et chaque récitation, une étape à la fois.</string>
+    <string name="onboarding_intro_learning_caption">Illustrations masculines et féminines. Apprenez à votre rythme.</string>
+    <string name="onboarding_intro_progress_title">Créez une habitude. Trouvez votre rythme.</string>
+    <string name="onboarding_intro_progress_body">Suivez vos prières et retrouvez votre pratique quotidienne.</string>
+    <string name="onboarding_intro_progress_caption">Un petit pas. Un début qui compte.</string>
+    <string name="onboarding_intro_begin">Commençons</string>
+    <string name="onboarding_intro_not_now">Pas maintenant</string>
+    <string name="onboarding_intro_setup_body">Choisissez ce que vous souhaitez activer. Vous pourrez modifier ces choix dans les paramètres.</string>
+    <string name="onboarding_intro_reminder">Nimaz · exemple de rappel</string>
+    <string name="onboarding_intro_fajr">C’est l’heure du Fajr</string>
+    <string name="onboarding_intro_new_day">Un nouveau jour, une nouvelle occasion.</string>
+    <string name="onboarding_intro_standing">Debout</string>
+    <string name="onboarding_intro_bowing">Inclinaison</string>
+    <string name="onboarding_intro_prostration">Prosternation</string>
+    <string name="onboarding_intro_sitting">Assise</string>
+    <string name="onboarding_intro_salam">Salam</string>
+    <string name="onboarding_intro_your_progress">Vos progrès</string>
+    <string name="onboarding_intro_example_week">Semaine d’exemple</string>
+    <string name="onboarding_intro_recorded">Prière enregistrée</string>
+    <string name="onboarding_intro_unrecorded">Aucune prière enregistrée</string>
+</resources>

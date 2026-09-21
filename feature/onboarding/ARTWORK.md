@@ -17,13 +17,18 @@ footer regions; full bleed; no text, UI, buttons, logos or phone frame.
 | `onboarding_progress.webp` | Sunrise mountain view through an arch, mosque silhouette, leafy plants, dark lower region for native content. |
 | `onboarding_permissions.webp` | Open mosque arch, sunrise and plants, lower dark region for three permission cards. |
 
-The reference's visual direction is adapted to shipped functionality: Learning describes Qaida
-and the content library. There is no claim of a step-by-step Salah tutor or fabricated user
-progress. Existing localized strings are reused across all shipped locales.
+The four-page flow uses welcome, prayer, learning and progress art; Quran and permissions
+art remain unused resources. The learning message accompanies Learn to Pray PR #643.
+Permission setup is an optional shared bottom sheet after page four. Reminder/progress
+overlays are native controls and explicitly labeled examples, not fabricated personal data.
+All intro copy is translated into en/de/fr/id/ms/tr without exceptions.
 
 ## Review on device before merge
 
-- Walk all six pages, Back, Skip and Get Started; confirm permission prompts remain on the last page.
+- Walk all four pages, Back, Skip and Let's Begin; grant/deny permissions in the optional
+  setup sheet, dismiss it, and test Get Started and Not Now. Completion must fire once.
+- Confirm artwork travels with each page, eased Next/Back motion, Back fading without
+  a layout jump, stable primary-button width, and no double advance on rapid taps.
 - Check 320dp width, compact landscape, tablet and 200% font scale; body content must scroll and
   navigation remain reachable. Text must not collide with artwork highlights.
 - Check light/dark app preferences: the onboarding art intentionally retains the fixed dark
