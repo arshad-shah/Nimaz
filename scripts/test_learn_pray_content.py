@@ -13,7 +13,8 @@ STRINGS = ROOT / "core/ui/src/main/res/values/learn_pray_strings.xml"
 class LearnPrayContentTest(unittest.TestCase):
     def setUp(self):
         self.source = SOURCE.read_text()
-        self.entries = ET.parse(STRINGS).getroot().findall("string")
+        self.entries = [entry for path in STRINGS.parent.glob("learn_pray*strings.xml")
+                        for entry in ET.parse(path).getroot().findall("string")]
         self.strings = {entry.attrib["name"]: entry.text for entry in self.entries}
 
     def test_all_native_text_references_resolve(self):
@@ -51,10 +52,18 @@ class LearnPrayContentTest(unittest.TestCase):
     def test_sources_are_https_and_preview_scope_is_explicit(self):
         urls = re.findall(r'"(https?://[^"]+)"', self.source)
         self.assertTrue(urls)
-        self.assertTrue(all(url.startswith(("https://sunnah.com/", "https://quran.com/")) for url in urls))
+        self.assertTrue(all(url.startswith(("https://sunnah.com/", "https://quran.com/",
+                                           "https://seekersguidance.org/", "https://islamqa.org/")) for url in urls))
         self.assertIn("two rak‘ahs", self.strings["learn_pray_prepare_body"])
         self.assertIn("review", self.strings["learn_pray_review"])
         self.assertIn("does not record", self.strings["learn_pray_complete_body"])
+
+    def test_pose_copy_is_complete_in_every_supported_locale(self):
+        base = {e.attrib["name"] for e in ET.parse(STRINGS.parent / "learn_pray_pose_strings.xml").getroot()}
+        for locale in ("de", "fr", "id", "ms", "tr"):
+            entries = ET.parse(STRINGS.parent.parent / f"values-{locale}" / "learn_pray_pose_strings.xml").getroot()
+            self.assertEqual(base, {e.attrib["name"] for e in entries}, locale)
+            self.assertTrue(all(e.text and e.text.strip() for e in entries), locale)
 
 
 if __name__ == "__main__":

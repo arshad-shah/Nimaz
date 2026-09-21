@@ -2,10 +2,29 @@ package com.arshadshah.nimaz.presentation.screens.learnpray
 
 import com.arshadshah.nimaz.presentation.viewmodel.learnpray.LearnPrayUiState
 import com.arshadshah.nimaz.presentation.model.PrayerFigure
+import com.arshadshah.nimaz.core.ui.R
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 
 class PrayerLessonTest {
+    @Test fun femalePostureCopyAndSourcesFollowTheSelectedFigure() {
+        PrayerLesson.steps.forEach { step ->
+            assertThat(step.instructionFor(PrayerFigure.MAN)).isEqualTo(step.instruction)
+            assertThat(step.referencesFor(PrayerFigure.MAN)).isEqualTo(step.references)
+            assertThat(step.instructionFor(PrayerFigure.WOMAN)).isNotEqualTo(0)
+            assertThat(step.referencesFor(PrayerFigure.WOMAN)).isNotEmpty()
+        }
+        listOf("bow_1", "bow_2").forEach { id ->
+            val step = PrayerLesson.steps.single { it.id == id }
+            assertThat(step.instructionFor(PrayerFigure.WOMAN)).isEqualTo(R.string.learn_pray_female_bowing_action)
+            assertThat(step.referencesFor(PrayerFigure.WOMAN)).doesNotContain("https://sunnah.com/bukhari:828")
+        }
+        listOf("sit_1", "sit_2").forEach { id ->
+            assertThat(PrayerLesson.steps.single { it.id == id }.instructionFor(PrayerFigure.WOMAN))
+                .isEqualTo(R.string.learn_pray_female_sitting_action)
+        }
+    }
+
     @Test fun completeSequenceIncludesAllRepeatedMovements() {
         assertThat(PrayerLesson.steps.map { it.id }).containsExactly(
             "opening_takbir", "recitation_1", "bow_1", "rise_1", "prostrate_1a",

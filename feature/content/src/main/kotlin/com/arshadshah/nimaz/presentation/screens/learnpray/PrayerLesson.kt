@@ -27,6 +27,34 @@ internal data class PrayerLessonStep(
     @DrawableRes
     fun artworkFor(figure: PrayerFigure): Int =
         if (figure == PrayerFigure.WOMAN) femaleArtwork else artwork
+
+    @StringRes
+    fun instructionFor(figure: PrayerFigure): Int {
+        if (figure != PrayerFigure.WOMAN) return instruction
+        return when (id) {
+            "bow_1", "bow_2" -> R.string.learn_pray_female_bowing_action
+            "prostrate_1a", "prostrate_2a" -> R.string.learn_pray_female_prostration_action
+            "prostrate_1b", "prostrate_2b" -> R.string.learn_pray_female_second_action
+            "sit_1", "sit_2" -> R.string.learn_pray_female_sitting_action
+            "tashahhud" -> R.string.learn_pray_female_tashahhud_action
+            else -> instruction
+        }
+    }
+
+    // A recitation source must not be presented as proof of an uncited posture variant.
+    fun referencesFor(figure: PrayerFigure): List<String> {
+        if (figure != PrayerFigure.WOMAN) return references
+        return when (id) {
+            "bow_1", "bow_2" -> listOf("https://sunnah.com/muslim:772")
+            "prostrate_1a", "prostrate_2a", "prostrate_1b", "prostrate_2b" -> listOf(
+                "https://sunnah.com/muslim:772",
+                "https://seekersguidance.org/answers/hanafi-fiqh/what-is-the-proper-method-for-women-to-bow-and-prostrate-in-the-prayer/",
+            )
+            "sit_1", "sit_2", "tashahhud" -> references.filterNot { it == "https://sunnah.com/bukhari:828" } +
+                "https://islamqa.org/hanafi/askimam/126663/womans-sitting-posture-in-salah/"
+            else -> references
+        }
+    }
 }
 
 internal object PrayerLesson {

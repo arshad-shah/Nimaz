@@ -1749,6 +1749,14 @@ review (especially knees, feet, the tashahhud hand, and left/right orientation).
 must cover TalkBack, 200% font scale, light/dark modes, rotation, tablet layout and back navigation.
 Do not treat the preview disclaimer as a substitute for these release gates.
 
+The female figure has figure-specific posture text and source selection, including compact
+prostration and side-sitting. Its shallow, hands-on-thighs bow is an explicitly requested editorial
+variant: the checked references describe hands on knees, so a supporting source and qualified
+sign-off remain outstanding. Do not cite the male ruku narration as evidence for this variant.
+`learn_pray_pose_strings.xml` contains these posture instructions in en/de/fr/id/ms/tr; this does
+not complete localization of the rest of the lesson. Generated art still needs garment/contact
+review, especially the sock toe outlines. Religious review is not implied by a successful test.
+
 | # | Area | Deviation | Canonical fix |
 |---|------|-----------|---------------|
 | 2 | Design system | `EventCard` (organism) and `IslamicEventCard` (molecule) both render occasion cards. `IslamicEventCard` migration onto `EventCard` and reconciling `HijriDateCalculator.EventType` with `EventOccasion` is deferred. | See `docs/superpowers/specs/2026-07-24-event-cards-and-celebration-routing-design.md` §8 for the spec. Migrate `IslamicEventCard` onto `EventCard` and unify event-type enums. |

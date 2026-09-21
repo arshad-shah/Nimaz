@@ -181,11 +181,11 @@ internal fun LearnToPrayContent(
                                 modifier = Modifier.fillMaxWidth().aspectRatio(1.5f)
                                     .clip(MaterialTheme.shapes.large),
                             )
-                            Text(stringResource(step.instruction), style = MaterialTheme.typography.bodyLarge)
+                            Text(stringResource(step.instructionFor(state.figure)), style = MaterialTheme.typography.bodyLarge)
                             step.recitations.forEach { recitation ->
                                 RecitationCard(recitation)
                             }
-                            SourceNotes(step.references, openSource)
+                            SourceNotes(step.referencesFor(state.figure), openSource)
                         }
                     }
                 }

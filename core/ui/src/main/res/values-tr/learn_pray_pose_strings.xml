@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="learn_pray_female_bowing_action">Gösterilen farklı duruş: Allahu ekber deyip hafifçe eğilin. Kollarınızı gövdenize yakın tutun ve ellerinizi parmaklar bitişik olarak dizlerinizin üst kısmındaki uyluklarınıza koyun. Sakince duraklayın. Bu el konumu için destekleyici kaynak beklenmektedir; aşağıdaki zikir kaynağı duruşu doğrulamaz.</string>
+    <string name="learn_pray_female_prostration_action">Allahu ekber deyip secdeye inin. Bu toplu duruşta uzuvlarınızı gövdenize, karnınızı uyluklarınıza yakın tutun. Alnınız, burnunuz ve avuçlarınız seccadeye temas etsin. Zikre başlamadan önce duraklayın.</string>
+    <string name="learn_pray_female_second_action">Allahu ekber deyip aynı toplu duruşla ikinci secdeyi yapın. Alnınızı, burnunuzu ve avuçlarınızı seccadeye koyup zikre başlamadan önce duraklayın.</string>
+    <string name="learn_pray_female_sitting_action">Allahu ekber deyip iki ayağınızı sağ tarafınıza katlayarak seccadeye dik oturun. Ellerinizi uyluklarınıza koyun, parmaklarınız bitişik ve ileri dönük olsun. Duraklayın, ardından Allah’tan bağışlanma dileyin.</string>
+    <string name="learn_pray_female_tashahhud_action">İki ayağınızı sağ tarafınıza katlayıp dik oturun. Sol elinizi uyluğunuza koyun ve teşehhüd için sağ işaret parmağınızı uzatın. Sakince okuyun.</string>
+</resources>

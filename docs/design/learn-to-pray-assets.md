@@ -37,25 +37,31 @@ All female variants use the female standing reference for character/clothing con
 Additional instruction: keep ivory khimar, sage prayer dress and opaque socks in every pose.
 
 - **takbir:** Stand upright front view with both hands raised beside shoulders, palms forward. Sleeves stay at wrists; no forearms exposed.
-- **bowing:** Bow in ruku side view, torso horizontal, hands resting ON knee joints not shins, head aligned with back. Khimar stays covering neck and chest and hangs naturally downward without exposing torso. Dress opaque and loose.
+- **bowing:** User-selected review variant: shallow bow, hands on lower thighs above knees, fingers together, arms close. Preserve khimar coverage and opaque loose dress. This hand placement is not established by the checked source and needs a supporting reference before release.
 - **rise:** Stand upright front view after bowing, arms relaxed down at sides.
-- **prostration:** Side view prostrating: forehead and nose against mat, palms beside head, elbows clear of mat, knees on mat, feet behind with sock-covered toes flexed on mat. Khimar remains in place and robe covers every leg and ankle, no bare toes.
-- **sitting:** Side three-quarter view sitting upright on folded legs, hands resting flat on thighs. Full hair neck chest arms legs and feet covered, only face and hands visible.
-- **tashahhud:** Three-quarter view sitting upright on folded legs. Left hand flat on left thigh, right hand on right thigh with right index finger extended forward and thumb/middle finger a ring. Show right hand in foreground.
-- **right:** Front view seated on folded legs, torso faces camera, ONLY head turned to HER RIGHT (toward LEFT edge of image), nose points toward image LEFT. Hands on thighs.
-- **left:** Front view seated on folded legs, torso faces camera, ONLY head turned to HER LEFT (toward RIGHT edge of image), nose points toward image RIGHT. Hands on thighs.
+- **prostration:** Compact side-view variant: lower hips, abdomen near thighs, limbs close, forehead/nose and palms supported by mat. Khimar and loose dress cover hair, neck, chest, arms, legs and ankles.
+- **sitting:** Front view, upright on mat, both lower legs folded to her right (image left), hands flat on thighs, fingers together.
+- **tashahhud:** Same side-sitting base, left hand flat, right index finger extended. Right hand is on image left; never mirror the artwork for RTL.
+- **right:** Same side-sitting base, ONLY head turns to HER RIGHT (image left). Hands on thighs.
+- **left:** Same side-sitting base, ONLY head turns to HER LEFT (image right). Hands on thighs.
 - **standing:** Stand quietly three-quarter view with right hand over left forearm in front of torso. Same as reference but feet wear smooth opaque ivory fabric socks with NO individual toe outlines.
 
-Ruku/sujud refinement prompts use the male posture as the pose reference and the female standing
-asset as the costume/identity reference: preserve hand-knee position and level back for ruku;
-forehead/nose and palms contact the mat with forearms raised for sujud. Fully cover hair, ears,
-neck, chest, arms, legs and feet, leaving face and hands visible.
+Refinements preserve each female edit target as the costume/identity reference; the male pose
+is no longer the female pose template. Takbir sleeve cuffs extend to the hands. Feet are requested
+as smooth opaque ivory fabric socks. Some toe outlines remain ambiguous and require visual review.
+Standing was inspected and retained; eight other female assets were replaced.
+
+Reference checks (not a universal ruling):
+- [SeekersGuidance](https://seekersguidance.org/answers/hanafi-fiqh/what-is-the-proper-method-for-women-to-bow-and-prostrate-in-the-prayer/): compact prostration and shallower bow, but **hands on knees**, not thighs.
+- [Askimam guidance](https://islamqa.org/hanafi/askimam/126663/womans-sitting-posture-in-salah/): seated feet to the woman's right.
+- The hands-on-thighs override comes from the product owner's explicit request. Do not attribute
+  it to either checked source or call it a verified prophetic instruction.
 
 ## Required visual review
 
 - [ ] Qualified review of Arabic, transliteration, meaning and cited evidence.
-- [ ] Ruku: inspect hand/knee placement and back/head alignment through the loose garment.
-- [ ] Sujud: inspect forehead/nose, palm, knee and toe contact; forearms must not rest on the mat.
+- [ ] Ruku: inspect each selected variant's hand placement and head/back alignment; obtain a source for the female override.
+- [ ] Sujud: inspect forehead/nose, palm, knee and toe contact and the selected variant's arm placement.
 - [ ] Sitting/tashahhud: inspect foot arrangement and the right-hand gesture.
 - [ ] Wardrobe: loose opaque cream thobe/white kufi throughout the male set; loose opaque sage
       dress/long ivory khimar and covered feet throughout the female set.
@@ -64,6 +70,6 @@ neck, chest, arms, legs and feet, leaving face and hands visible.
 - [ ] Verify salam direction from the worshipper's perspective.
 - [ ] Render on device: dark/light, 200% font scale, TalkBack, rotation and tablet.
 
-Both sets share the lesson sequence/words. The app does not invent gender-specific movement
-rules. The clothing notes cite Abu Dawud 641 and distinguish the disputed prophetic attribution
+Both sets share the lesson sequence/recitations; posture text and sources follow the selected
+figure. Female ruku explicitly remains an unverified editorial variant. The clothing notes cite Abu Dawud 641 and distinguish the disputed prophetic attribution
 of Abu Dawud 640. Covered feet in art are not evidence of an undisputed ruling.
