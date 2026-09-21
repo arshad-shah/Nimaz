@@ -1043,6 +1043,8 @@ with no label and a touch target under 48dp fail the lane we already run. It can
   Each page owns its full-screen background, so artwork moves with content. Next/Back use
   a 420ms eased pager transition, Back fades inside a fixed slot, and the fixed-width primary
   action crossfades into Let's Begin. Repeated taps cannot skip pages during motion.
+  Controls inside Box slots use the top-level AnimatedVisibility overload; artwork spacing
+  is captured in BoxWithConstraints before entering Column scopes, respecting Compose DSL receivers.
   Let's Begin opens the existing NimazBottomSheet for optional permissions; this is not a
   fifth pager page. Get Started or Not Now completes once; dismissing the sheet returns to
   the final intro. Skip retains direct completion. All intro strings exist in all six locales

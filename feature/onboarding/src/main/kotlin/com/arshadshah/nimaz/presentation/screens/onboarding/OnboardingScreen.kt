@@ -8,7 +8,6 @@ import android.provider.Settings
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
@@ -187,7 +186,7 @@ fun OnboardingScreen(onComplete: () -> Unit, viewModel: OnboardingViewModel = hi
             ) {
                 // Keep this slot even on page zero so controls never jump sideways.
                 Box(Modifier.weight(1f).height(48.dp)) {
-                    AnimatedVisibility(
+                    androidx.compose.animation.AnimatedVisibility(
                         visible = pager.settledPage > 0,
                         enter = fadeIn(tween(220)), exit = fadeOut(tween(180)),
                     ) {
@@ -197,7 +196,7 @@ fun OnboardingScreen(onComplete: () -> Unit, viewModel: OnboardingViewModel = hi
                     }
                 }
                 Box(Modifier.weight(1f).height(48.dp), contentAlignment = Alignment.CenterEnd) {
-                    AnimatedVisibility(pager.settledPage < ONBOARDING_PAGE_COUNT - 1,
+                    androidx.compose.animation.AnimatedVisibility(pager.settledPage < ONBOARDING_PAGE_COUNT - 1,
                         enter = fadeIn(tween(220)), exit = fadeOut(tween(180))) {
                         NimazButton(stringResource(R.string.onboarding_skip), complete,
                             variant = NimazButtonVariant.TEXT, enabled = !busy,
@@ -277,6 +276,7 @@ fun OnboardingScreen(onComplete: () -> Unit, viewModel: OnboardingViewModel = hi
 private fun IntroContent(page: IntroPage, index: Int, insets: PaddingValues) {
     BoxWithConstraints(Modifier.fillMaxSize()) {
         val compact = maxHeight < 600.dp
+        val illustrationSpace = if (compact) 48.dp else maxHeight * 0.28f
         Column(
             Modifier.fillMaxSize().verticalScroll(rememberScrollState())
                 .padding(top = insets.calculateTopPadding() + 64.dp,
@@ -292,7 +292,7 @@ private fun IntroContent(page: IntroPage, index: Int, insets: PaddingValues) {
                 Text(stringResource(page.description), style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.Center, color = IllumTextSoft)
             }
-            Spacer(Modifier.height(if (compact) 48.dp else maxHeight * 0.28f))
+            Spacer(Modifier.height(illustrationSpace))
             Box(Modifier.widthIn(max = 600.dp).fillMaxWidth().padding(horizontal = AdaptiveSpacing.screenPadding())) {
                 when (index) {
                     1 -> IntroCard {
