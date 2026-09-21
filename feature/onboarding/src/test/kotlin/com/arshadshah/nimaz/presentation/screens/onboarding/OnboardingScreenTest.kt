@@ -31,7 +31,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
 /**
- * The first-run walkthrough: four info pages, an optional setup sheet, and exactly one way out.
+ * The first-run walkthrough: four info pages, a fifth permission page, and exactly one way out.
  *
  * **The stakes are asymmetric here in a way no other screen's are.** `NavGraph` reads
  * `onboardingCompleted` once, when the graph is built, to choose its start destination — so a
@@ -86,20 +86,18 @@ class OnboardingScreenTest {
     }
 
     private fun openSetup() {
-        tapNext(3)
-        composeRule.onNodeWithText(str(R.string.onboarding_intro_begin)).performClick()
-        composeRule.waitForIdle()
+        tapNext(4)
     }
 
     private fun pagesReached(): List<Int> =
         events.filterIsInstance<OnboardingEvent.SetCurrentPage>().map { it.page }
 
     @Test
-    fun `setup is optional and never a fifth analytics page`() {
+    fun `setup is optional on the fifth analytics page`() {
         launch()
         openSetup()
-        assertThat(ONBOARDING_PAGE_COUNT).isEqualTo(4)
-        assertThat(pagesReached()).containsExactly(0, 1, 2, 3).inOrder()
+        assertThat(ONBOARDING_PAGE_COUNT).isEqualTo(5)
+        assertThat(pagesReached()).containsExactly(0, 1, 2, 3, 4).inOrder()
         assertThat(completed).isEqualTo(0)
         composeRule.onNodeWithText(str(R.string.onboarding_intro_not_now)).performClick()
         composeRule.waitForIdle()
@@ -137,7 +135,7 @@ class OnboardingScreenTest {
 
     @Test
     fun `each page carries its own copy`() {
-        // Exactly four introductions; setup is a sheet, not a fifth pager page.
+        // Four introductions followed by a dedicated permission page.
         launch()
 
         tapNext()
@@ -156,9 +154,9 @@ class OnboardingScreenTest {
         // reported twice makes the whole measurement unreadable.
         launch()
 
-        tapNext(3)
+        tapNext(4)
 
-        assertThat(pagesReached()).containsExactly(0, 1, 2, 3).inOrder()
+        assertThat(pagesReached()).containsExactly(0, 1, 2, 3, 4).inOrder()
     }
 
     @Test
@@ -178,22 +176,20 @@ class OnboardingScreenTest {
     // ------------------------------------------------------------------
 
     @Test
-    fun `the last page swaps Next for Lets Begin`() {
+    fun `the last page swaps Next for Get Started`() {
         launch()
 
-        tapNext(3)
+        tapNext(4)
 
-        composeRule.onNodeWithText(str(R.string.onboarding_intro_begin)).assertIsDisplayed()
+        composeRule.onNodeWithText(str(R.string.onboarding_get_started)).assertIsDisplayed()
         composeRule.onAllNodesWithText(str(R.string.onboarding_next)).assertCountEquals(0)
     }
 
     @Test
     fun `finishing persists completion and navigates away exactly once`() {
         launch()
-        tapNext(3)
+        tapNext(4)
 
-        composeRule.onNodeWithText(str(R.string.onboarding_intro_begin)).performClick()
-        composeRule.waitForIdle()
         composeRule.onNodeWithText(str(R.string.onboarding_get_started)).performClick()
         composeRule.waitForIdle()
 
@@ -208,7 +204,7 @@ class OnboardingScreenTest {
         // never ends at all.
         launch()
 
-        tapNext(3)
+        tapNext(4)
 
         assertThat(events.filterIsInstance<OnboardingEvent.CompleteOnboarding>()).isEmpty()
         assertThat(completed).isEqualTo(0)
@@ -231,13 +227,13 @@ class OnboardingScreenTest {
         // dispatching completion twice and navigating twice.
         launch()
 
-        tapNext(3)
+        tapNext(4)
 
         composeRule.onAllNodesWithText(str(R.string.onboarding_skip)).assertCountEquals(0)
     }
 
     // ------------------------------------------------------------------
-    // Optional permission setup sheet
+    // Optional fifth permission page
     // ------------------------------------------------------------------
 
     @Test

@@ -1,4 +1,4 @@
-"""Structural guard for the four-page intro; Compose tests cover runtime behavior."""
+"""Structural guard for the five-page onboarding; Compose tests cover runtime behavior."""
 from pathlib import Path
 import re
 import unittest
@@ -8,11 +8,12 @@ SOURCE = ROOT / "feature/onboarding/src/main/kotlin/com/arshadshah/nimaz/present
 
 
 class OnboardingContractTest(unittest.TestCase):
-    def test_four_pages_and_optional_shared_setup_sheet(self):
+    def test_five_pages_with_dedicated_permissions(self):
         source = SOURCE.read_text()
-        self.assertIn("ONBOARDING_PAGE_COUNT = 4", source)
+        self.assertIn("ONBOARDING_PAGE_COUNT = 5", source)
         self.assertEqual(len(re.findall(r"IntroPage\(R.string", source)), 4)
-        self.assertIn("NimazBottomSheet(", source)
+        self.assertNotIn("NimazBottomSheet(", source)
+        self.assertIn("PermissionContent(insets, permissionCards)", source)
         self.assertIn("pager.settledPage", source)
 
     def test_motion_and_native_icons(self):

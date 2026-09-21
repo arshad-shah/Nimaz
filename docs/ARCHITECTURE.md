@@ -1032,22 +1032,22 @@ with no label and a touch target under 48dp fail the lane we already run. It can
   fixed it.)
 - **Illustrated onboarding** keeps its fixed dark brand treatment while using the shared
   `MaterialTheme.typography` (Outfit / Plus Jakarta Sans), `AdaptiveSpacing` screen margins,
-  section gaps and card radii, and `NimazButton` / `NimazCard` controls. Its four pages are
-  Welcome, Prayer Times, Learn to Pray, and Progress. The learning message requires the
+  section gaps and card radii, and `NimazButton` / `NimazCard` controls. Its five pages are
+  Welcome, Prayer Times, Learn to Pray, Progress, and Permissions. The learning message requires the
   companion Learn to Pray feature (#643) before release. Decorative
   offline WebP resources belong to `:feature:onboarding` (`drawable-nodpi`); localized text,
   buttons and permission states are never baked into artwork. A semantic teal scrim protects
   copy over the images, and the body scrolls independently from the persistent navigation.
   The original vector emblems remain available as standalone artwork, but are no longer the
-  onboarding hero. Funnel indices run from 0 through 3 and report settled pages only.
+  onboarding hero. Funnel indices run from 0 through 4 and report settled pages only.
   Each page owns its full-screen background, so artwork moves with content. Next/Back use
   a 420ms eased pager transition, Back fades inside a fixed slot, and the fixed-width primary
-  action crossfades into Let's Begin. Repeated taps cannot skip pages during motion.
+  action crossfades into Get Started on page five. Repeated taps cannot skip pages during motion.
   Controls inside Box slots use the top-level AnimatedVisibility overload; artwork spacing
   is captured in BoxWithConstraints before entering Column scopes, respecting Compose DSL receivers.
-  Let's Begin opens the existing NimazBottomSheet for optional permissions; this is not a
-  fifth pager page. Get Started or Not Now completes once; dismissing the sheet returns to
-  the final intro. Skip retains direct completion. All intro strings exist in all six locales
+  Page five displays the approved globe/location/reminder artwork above the existing permission
+  cards. It is part of the pager, not a sheet. Get Started or Not Now completes once; Back
+  returns to Progress. Skip retains direct completion. All intro strings exist in all six locales
   without translation exceptions. Native icons replace text glyphs; progress is labeled example.
 - **Components follow Atomic Design** (`atoms` → `molecules` → `organisms`). Reuse shared
   components (e.g. `NimazCard`, `PrayerTimeCard`, `NimazBackTopAppBar`,

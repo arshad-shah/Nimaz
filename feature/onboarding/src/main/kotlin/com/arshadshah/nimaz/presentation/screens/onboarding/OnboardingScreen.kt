@@ -41,7 +41,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -49,7 +48,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -79,7 +77,6 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazPageIndicator
 import com.arshadshah.nimaz.presentation.components.atoms.NimazPager
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.rememberNimazPagerState
-import com.arshadshah.nimaz.presentation.components.molecules.NimazBottomSheet
 import com.arshadshah.nimaz.presentation.theme.AdaptiveSpacing
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.viewmodel.onboarding.OnboardingEvent
@@ -89,7 +86,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 
-internal const val ONBOARDING_PAGE_COUNT = 4
+internal const val ONBOARDING_PAGE_COUNT = 5
 internal const val ONBOARDING_MOTION_MS = 420
 
 private data class IntroPage(val title: Int, val description: Int, val caption: Int, val art: OnboardingIllustration)
@@ -113,7 +110,6 @@ fun OnboardingScreen(onComplete: () -> Unit, viewModel: OnboardingViewModel = hi
     val snackbar = remember { SnackbarHostState() }
     val pager = rememberNimazPagerState(pageCount = { ONBOARDING_PAGE_COUNT })
     var navigationJob by remember { mutableStateOf<Job?>(null) }
-    var setupOpen by rememberSaveable { mutableStateOf(false) }
     var completing by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val view = LocalView.current
@@ -160,7 +156,27 @@ fun OnboardingScreen(onComplete: () -> Unit, viewModel: OnboardingViewModel = hi
             }
         }
     }
-    BackHandler(enabled = !setupOpen && pager.settledPage > 0) { move(-1) }
+    val permissionCards: @Composable () -> Unit = {
+            PermissionCard(Icons.Default.LocationOn, stringResource(R.string.onboarding_location_title),
+                stringResource(R.string.onboarding_location_description), state.locationPermissionGranted,
+                if (state.locationDetected) state.locationName else stringResource(R.string.onboarding_location_granted)) {
+                locationLauncher.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION))
+            }
+            PermissionCard(Icons.Default.Notifications, stringResource(R.string.onboarding_notification_title),
+                stringResource(R.string.onboarding_notification_description), state.notificationPermissionGranted,
+                stringResource(R.string.onboarding_notification_granted)) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+                    notificationLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                else viewModel.onEvent(OnboardingEvent.UpdatePermissionStatus(notification = true))
+            }
+            PermissionCard(Icons.Default.BatteryChargingFull, stringResource(R.string.onboarding_battery_title),
+                stringResource(R.string.onboarding_battery_description), state.batteryOptimizationDisabled,
+                stringResource(R.string.onboarding_battery_granted)) {
+                batteryLauncher.launch(Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
+                    .apply { data = "package:${context.packageName}".toUri() })
+            }
+    }
+    BackHandler(enabled = pager.settledPage > 0) { move(-1) }
     val busy = pager.isScrollInProgress || navigationJob?.isActive == true || completing
     NimazScreenScaffold(
         containerColor = NimazColors.OnboardingBgTop,
@@ -174,8 +190,12 @@ fun OnboardingScreen(onComplete: () -> Unit, viewModel: OnboardingViewModel = hi
                     val distance = abs((pager.currentPage - index) + pager.currentPageOffsetFraction)
                     alpha = 1f - distance.coerceIn(0f, 1f) * 0.18f
                 }) {
-                    IllustratedOnboardingBackground(introPages[index].art, Modifier.fillMaxSize())
-                    IntroContent(introPages[index], index, insets)
+                    if (index == ONBOARDING_PAGE_COUNT - 1) {
+                        PermissionContent(insets, permissionCards)
+                    } else {
+                        IllustratedOnboardingBackground(introPages[index].art, Modifier.fillMaxSize())
+                        IntroContent(introPages[index], index, insets)
+                    }
                 }
             }
             Row(
@@ -221,53 +241,54 @@ fun OnboardingScreen(onComplete: () -> Unit, viewModel: OnboardingViewModel = hi
                         .padding(horizontal = AdaptiveSpacing.screenPadding()),
                 ) { last ->
                     NimazButton(
-                        text = stringResource(if (last) R.string.onboarding_intro_begin else R.string.onboarding_next),
-                        onClick = { if (last) setupOpen = true else move(1) },
+                        text = stringResource(if (last) R.string.onboarding_get_started else R.string.onboarding_next),
+                        onClick = { if (last) complete() else move(1) },
                         fullWidth = true, leadingIcon = if (last) Icons.Default.Check else NimazIcons.Next,
-                        enabled = !busy && !setupOpen,
+                        enabled = !busy,
                     )
+                }
+                // Keep footer height stable while the optional exit fades in on page five.
+                Box(Modifier.height(48.dp)) {
+                    androidx.compose.animation.AnimatedVisibility(
+                        pager.settledPage == ONBOARDING_PAGE_COUNT - 1,
+                        enter = fadeIn(tween(220)), exit = fadeOut(tween(180)),
+                    ) {
+                        NimazButton(stringResource(R.string.onboarding_intro_not_now), complete,
+                            variant = NimazButtonVariant.TEXT, enabled = !busy,
+                            colors = ButtonDefaults.textButtonColors(contentColor = IllumCream))
+                    }
                 }
             }
         }
     }
-    if (setupOpen) {
-        NimazBottomSheet(
-            onDismissRequest = { setupOpen = false },
-            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-            containerColor = NimazColors.OnboardingBgTop, contentColor = IllumCream,
-            footer = {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    NimazButton(stringResource(R.string.onboarding_get_started), complete,
-                        fullWidth = true, enabled = !completing)
-                    NimazButton(stringResource(R.string.onboarding_intro_not_now), complete,
-                        fullWidth = true, variant = NimazButtonVariant.TEXT,
-                        colors = ButtonDefaults.textButtonColors(contentColor = IllumCream), enabled = !completing)
-                }
-            },
-        ) {
+}
+
+@Composable
+private fun PermissionContent(insets: PaddingValues, cards: @Composable () -> Unit) {
+    Column(
+        Modifier.fillMaxSize().verticalScroll(rememberScrollState())
+            .padding(top = insets.calculateTopPadding() + 64.dp,
+                bottom = insets.calculateBottomPadding() + 184.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Column(Modifier.widthIn(max = 600.dp).fillMaxWidth()
+            .padding(horizontal = AdaptiveSpacing.screenPadding()),
+            horizontalAlignment = Alignment.CenterHorizontally) {
             Text(stringResource(R.string.onboarding_permissions_title),
-                style = MaterialTheme.typography.headlineSmall, modifier = Modifier.semantics { heading() })
+                style = MaterialTheme.typography.headlineMedium, color = IllumCream,
+                modifier = Modifier.semantics { heading() })
+            Spacer(Modifier.height(12.dp))
             Text(stringResource(R.string.onboarding_intro_setup_body),
                 style = MaterialTheme.typography.bodyMedium, color = IllumTextSoft,
-                modifier = Modifier.padding(vertical = 12.dp))
-            PermissionCard(Icons.Default.LocationOn, stringResource(R.string.onboarding_location_title),
-                stringResource(R.string.onboarding_location_description), state.locationPermissionGranted,
-                if (state.locationDetected) state.locationName else stringResource(R.string.onboarding_location_granted)) {
-                locationLauncher.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION))
-            }
-            PermissionCard(Icons.Default.Notifications, stringResource(R.string.onboarding_notification_title),
-                stringResource(R.string.onboarding_notification_description), state.notificationPermissionGranted,
-                stringResource(R.string.onboarding_notification_granted)) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
-                    notificationLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                else viewModel.onEvent(OnboardingEvent.UpdatePermissionStatus(notification = true))
-            }
-            PermissionCard(Icons.Default.BatteryChargingFull, stringResource(R.string.onboarding_battery_title),
-                stringResource(R.string.onboarding_battery_description), state.batteryOptimizationDisabled,
-                stringResource(R.string.onboarding_battery_granted)) {
-                batteryLauncher.launch(Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
-                    .apply { data = "package:${context.packageName}".toUri() })
-            }
+                textAlign = TextAlign.Center)
+            androidx.compose.foundation.Image(
+                painter = androidx.compose.ui.res.painterResource(OnboardingIllustration.PERMISSIONS.resource),
+                contentDescription = null,
+                modifier = Modifier.fillMaxWidth().height(240.dp),
+                contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+                alignment = androidx.compose.ui.BiasAlignment(0f, -0.3f),
+            )
+            cards()
         }
     }
 }
@@ -280,7 +301,7 @@ private fun IntroContent(page: IntroPage, index: Int, insets: PaddingValues) {
         Column(
             Modifier.fillMaxSize().verticalScroll(rememberScrollState())
                 .padding(top = insets.calculateTopPadding() + 64.dp,
-                    bottom = insets.calculateBottomPadding() + 128.dp),
+                    bottom = insets.calculateBottomPadding() + 184.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Column(Modifier.widthIn(max = 600.dp).fillMaxWidth().padding(horizontal = AdaptiveSpacing.screenPadding()),
@@ -363,9 +384,9 @@ private fun PermissionCard(icon: ImageVector, title: String, description: String
                     Text(if (granted) grantedLabel else description,
                         style = MaterialTheme.typography.bodySmall, color = IllumTextSoft)
                 }
+                if (!granted) NimazButton(stringResource(R.string.onboarding_grant), onRequest,
+                    variant = NimazButtonVariant.QUIET)
             }
-            if (!granted) NimazButton(stringResource(R.string.onboarding_grant), onRequest,
-                variant = NimazButtonVariant.QUIET, fullWidth = true)
         }
     }
 }
