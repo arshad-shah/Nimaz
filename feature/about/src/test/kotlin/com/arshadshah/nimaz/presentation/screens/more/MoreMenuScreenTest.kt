@@ -86,6 +86,7 @@ class MoreMenuScreenTest {
                 onNavigateToKhatam = { opened += "khatam" },
                 onNavigateToNames = { opened += "names" },
                 onNavigateToQaida = { opened += "qaida" },
+                onNavigateToLearnToPray = { opened += "learn_pray" },
                 onNavigateToTasbih = { opened += "tasbih" },
                 onNavigateToQibla = { opened += "qibla" },
                 viewModel = viewModel,
@@ -135,6 +136,7 @@ class MoreMenuScreenTest {
             R.string.fasting to "fasting",
             R.string.night_worship_title to "worship",
             R.string.khatam_quran to "khatam",
+            R.string.learn_pray_title to "learn_pray",
             R.string.qaida to "qaida",
             R.string.names_title to "names",
             R.string.hadith to "hadith",
@@ -151,7 +153,7 @@ class MoreMenuScreenTest {
         ).forEach { (res, _) -> composeRule.onNodeWithText(string(res)).performClick() }
 
         assertThat(opened).containsExactly(
-            "tracker", "fasting", "worship", "khatam", "qaida", "names", "hadith", "duas",
+            "tracker", "fasting", "worship", "khatam", "learn_pray", "qaida", "names", "hadith", "duas",
             "tafseer", "calendar", "times", "monthly", "zakat", "about", "help", "share", "rate",
         ).inOrder()
     }

@@ -913,6 +913,16 @@ typed route object.
 
 ## 8. Theming & components
 
+`LearnToPrayScreen` reuses `NimazScreenScaffold`, `NimazBackTopAppBar`, `NimazCard`,
+`NimazButton`, `ArabicText`, `NimazIcons`, theme typography and adaptive insets. The illustration
+is a separate decorative WebP, not a screenshot containing text. Each step has a native-text
+instruction; the body scrolls independently of the navigation controls. The screen follows the
+selected app theme rather than forcing the dark mockup palette onto light-mode users.
+The existing `NimazSegmentedControl` switches between male and female illustration sets without
+changing the lesson position, recitations or sequence. `SavedStateHandle` restores the explicit
+illustration choice; it is not a gender inference or a synced profile field. Clothing notes
+separate illustration choices from sourced requirements and disputed posture/coverage details.
+
 ### 8.0 Accessibility — the obligation
 
 Three rules, and they are obligations rather than suggestions: the app shipped **373
@@ -1729,6 +1739,15 @@ copy anything listed as Open.
 | Search result counts that disagreed with the results | `SearchStatsUiState` carried `quranCount`/`hadithCount`/`duaCount`/`surahCount` beside `totalResults`. `totalResults` counted `filteredResults`; the four counted the **unfiltered** per-corpus lists, so a HADITH filter over 3 hadith and 40 Qur'an matches reported `totalResults = 3` next to `quranCount = 40`. No screen read them, which is the only reason it never showed. Deleted rather than corrected — the filter chips already say which corpus is on screen. |
 
 ### Open (still to do — do not copy)
+
+**Learn to Pray release gates:** the two-rak‘ah lesson is an English review edition. Its app-owned
+lesson copy/recitations are in `core/ui/src/main/res/values/learn_pray_strings.xml`, marked
+non-translatable until qualified religious and language review. Move reviewed canonical content
+into the content artifact rather than growing a second religious-content catalogue in Android
+resources. No audio control is exposed without reviewed recordings. Artwork must receive posture
+review (especially knees, feet, the tashahhud hand, and left/right orientation). Device validation
+must cover TalkBack, 200% font scale, light/dark modes, rotation, tablet layout and back navigation.
+Do not treat the preview disclaimer as a substitute for these release gates.
 
 | # | Area | Deviation | Canonical fix |
 |---|------|-----------|---------------|

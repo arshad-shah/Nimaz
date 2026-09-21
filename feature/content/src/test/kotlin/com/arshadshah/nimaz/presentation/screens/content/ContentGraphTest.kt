@@ -19,7 +19,7 @@ import org.robolectric.RobolectricTestRunner
 /**
  * The Content feature's slice of the route graph — the largest single graph in the app.
  *
- * Nineteen destinations across five surfaces (qaida, hadith, dua, the name catalogues, the
+ * Twenty destinations across six surfaces (qaida, hadith, dua, the name catalogues, the
  * prophets), and **eleven of them carry arguments**, which is what makes a graph test worth
  * more here than in most modules: an unregistered destination throws
  * `IllegalArgumentException: navigation destination … is not a direct child of this NavGraph`
@@ -52,11 +52,12 @@ class ContentGraphTest {
         }.toList()
 
     @Test
-    fun `all nineteen content destinations are registered`() {
+    fun `all twenty content destinations are registered`() {
         val routes = destinations().mapNotNull { it.route }
 
-        assertThat(routes).hasSize(19)
+        assertThat(routes).hasSize(20)
         listOf(
+            Route.LearnToPray::class,
             Route.QaidaHome::class,
             Route.QaidaReader::class,
             Route.QaidaLetters::class,

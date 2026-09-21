@@ -45,6 +45,11 @@ import com.arshadshah.nimaz.presentation.screens.qaida.QaidaReaderScreen
  */
 fun NavGraphBuilder.contentGraph(navController: NavController) {
     // Qaida (children's Arabic reader) screens
+    taggedComposable<Route.LearnToPray>(ScreenTags.LearnToPray) {
+        com.arshadshah.nimaz.presentation.screens.learnpray.LearnToPrayScreen(
+            onNavigateBack = { navController.popBackStack() },
+        )
+    }
     taggedComposable<Route.QaidaHome>(ScreenTags.QaidaHome) {
         QaidaHomeScreen(
             onNavigateBack = { navController.popBackStack() },

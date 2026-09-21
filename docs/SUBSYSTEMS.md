@@ -1234,6 +1234,13 @@ It also stores the **content-version flags** that drive seeding — see §7.
 
 ## 7. Content seeding & versioning
 
+**Learn to Pray review edition:** the app-owned two-rak‘ah practice lesson uses Android resources
+and separate local illustrations so it works without a network or content download. It does not
+seed or modify either database and never records prayer-tracker completion. Its position lives in
+`LearnPrayViewModel` through `SavedStateHandle`, not a preference or synced completion record.
+This is a review-stage exception: reviewed canonical recitations should move to the content
+artifact before expanding the course; see the release gates in `ARCHITECTURE.md` §9.
+
 **Why this exists.** `createFromAsset` copies the prepopulated DB (§5) **only when the file is
 absent**, and schema migrations only create empty tables. So without help, content that changes in
 a release would never reach anyone who already has the app. There is now exactly **one** mechanism

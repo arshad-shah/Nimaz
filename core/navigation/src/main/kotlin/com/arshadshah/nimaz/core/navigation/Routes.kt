@@ -220,6 +220,9 @@ sealed interface Route {
     @Serializable
     data object Qibla : Route
 
+    @Serializable
+    data object LearnToPray : Route
+
     // Qaida (children's Arabic reader) screens
     @Serializable
     data object QaidaHome : Route

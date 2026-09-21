@@ -22,6 +22,7 @@ object ScreenTags {
     const val Quran = "screen_quran"
     const val Tasbih = "screen_tasbih"
     const val QiblaNav = "screen_qibla_nav"
+    const val LearnToPray = "screen_learn_to_pray"
     const val QaidaHome = "screen_qaida_home"
     const val QaidaReader = "screen_qaida_reader"
     const val QaidaLetters = "screen_qaida_letters"

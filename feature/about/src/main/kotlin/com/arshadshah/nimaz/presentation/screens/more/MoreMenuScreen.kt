@@ -94,6 +94,7 @@ fun MoreMenuScreen(
     onNavigateToKhatam: () -> Unit,
     onNavigateToNames: () -> Unit,
     onNavigateToQaida: () -> Unit,
+    onNavigateToLearnToPray: () -> Unit,
     onNavigateToTasbih: () -> Unit,
     onNavigateToQibla: () -> Unit,
     viewModel: MoreViewModel = hiltViewModel(),
@@ -245,6 +246,14 @@ fun MoreMenuScreen(
             }
             item {
                 NimazMenuGroup {
+                    NimazMenuItem(
+                        title = stringResource(R.string.learn_pray_title),
+                        subtitle = stringResource(R.string.learn_pray_subtitle),
+                        icon = Icons.AutoMirrored.Filled.MenuBook,
+                        iconTint = MoreSectionTints.learning,
+                        onClick = onNavigateToLearnToPray,
+                    )
+                    NimazMenuDivider()
                     NimazMenuItem(
                         title = stringResource(R.string.qaida),
                         subtitle = MoreSubtitles.qaida(
