@@ -11,6 +11,10 @@ STRINGS = ROOT / "core/ui/src/main/res/values/learn_pray_strings.xml"
 
 
 class LearnPrayContentTest(unittest.TestCase):
+    def test_lesson_icons_are_not_text_glyphs(self):
+        for path in SOURCE.parent.glob("*.kt"):
+            self.assertFalse(re.search(r'Text\("[✦✓✕→←★☆✅❌🔔]', path.read_text()), str(path))
+
     def setUp(self):
         self.source = SOURCE.read_text()
         self.entries = [entry for path in STRINGS.parent.glob("learn_pray*strings.xml")

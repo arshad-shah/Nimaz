@@ -196,8 +196,22 @@ is why vibration is modelled as a *pair* of channels rather than a per-notificat
 
 ## 1. Audio playback
 
-All in `data/audio/`. There are **three independent playback engines** (Quran recitation,
-Adhan, Qaida tap-to-hear) plus an Adhan **download** pipeline. They share no player instance.
+All in `data/audio/` across their owning modules. Quran recitation, Adhan, Qaida tap-to-hear
+and Learn to Pray have independent engines, plus an Adhan download pipeline.
+
+**Learn to Pray audio:** `PrayerAudioManager` in `:feature:content` is owned by
+`LearnPrayViewModel`, not a singleton or background service. It streams Al-Husary from
+EveryAyah (Al-Fatihah 1–7; basmalah then Al-Ikhlas 1–4), and Hisn al-Muslim clips 33, 41,
+48, 52 and 53 (ruku, sujud, sitting, tashahhud, salawat). Published Arabic metadata was
+matched to the lesson. The short Hisn phrases may repeat; the localized source note says so.
+Listen/Stop uses shared Nimaz buttons and Material icons, with loading/error/retry states and
+provider attribution. Audio focus and unplugged-output handling are enabled. Navigation,
+figure changes, backgrounding and leaving the screen stop playback; clearing the ViewModel
+releases the player. Finishing audio never changes lesson position or prayer tracking.
+These streams require internet; the rest of the lesson is offline. No recordings are bundled
+or redistributed. Opening, refuge, Amin, takbir, rise, final dua and salam have no exact
+approved clip yet and show a localized unavailable message, not a misleading Listen button.
+Listening QA, provider availability and usage terms remain release checks.
 
 **Manager / service split.** The *manager* owns the player + playback logic and exposes a
 `StateFlow`; the *service* is a foreground `Service` that only owns the notification /

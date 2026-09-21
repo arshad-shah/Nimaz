@@ -4,6 +4,7 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import com.arshadshah.nimaz.core.ui.R
 import com.arshadshah.nimaz.presentation.model.PrayerFigure
+import com.arshadshah.nimaz.domain.model.PrayerAudio
 import com.arshadshah.nimaz.feature.content.R as ContentR
 
 /** Versioned, app-owned lesson presentation. No prayer-tracker writes or network dependency. */
@@ -12,7 +13,18 @@ internal data class PrayerRecitation(
     @param:StringRes val arabic: Int,
     @param:StringRes val transliteration: Int,
     @param:StringRes val meaning: Int,
-)
+) {
+    val audio: PrayerAudio? get() = when (arabic) {
+        R.string.learn_pray_fatihah_ar -> PrayerAudio.FATIHAH
+        R.string.learn_pray_ikhlas_ar -> PrayerAudio.IKHLAS
+        R.string.learn_pray_ruku_ar -> PrayerAudio.RUKU
+        R.string.learn_pray_sujud_ar -> PrayerAudio.SUJUD
+        R.string.learn_pray_sit_ar -> PrayerAudio.SITTING
+        R.string.learn_pray_tashahhud_ar -> PrayerAudio.TASHAHHUD
+        R.string.learn_pray_salawat_ar -> PrayerAudio.SALAWAT
+        else -> null
+    }
+}
 
 internal data class PrayerLessonStep(
     val id: String,
@@ -32,6 +44,9 @@ internal data class PrayerLessonStep(
     fun instructionFor(figure: PrayerFigure): Int {
         if (figure != PrayerFigure.WOMAN) return instruction
         return when (id) {
+            "opening_takbir" -> R.string.learn_pray_female_takbir_action
+            "recitation_1" -> R.string.learn_pray_female_standing_action
+            "recitation_2" -> R.string.learn_pray_female_second_rakah_action
             "bow_1", "bow_2" -> R.string.learn_pray_female_bowing_action
             "prostrate_1a", "prostrate_2a" -> R.string.learn_pray_female_prostration_action
             "prostrate_1b", "prostrate_2b" -> R.string.learn_pray_female_second_action

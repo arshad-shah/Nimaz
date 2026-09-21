@@ -6,6 +6,14 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Stop
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.arshadshah.nimaz.domain.model.PrayerAudio
+import com.arshadshah.nimaz.domain.model.PrayerAudioState
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -35,7 +43,19 @@ fun LearnToPrayScreen(
     viewModel: LearnPrayViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    LearnToPrayContent(state, viewModel::onEvent, onNavigateBack)
+    val audioState by viewModel.audioState.collectAsStateWithLifecycle()
+    val owner = LocalLifecycleOwner.current
+    DisposableEffect(owner, viewModel) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_STOP) viewModel.onEvent(LearnPrayEvent.StopAudio)
+        }
+        owner.lifecycle.addObserver(observer)
+        onDispose {
+            owner.lifecycle.removeObserver(observer)
+            viewModel.onEvent(LearnPrayEvent.StopAudio)
+        }
+    }
+    LearnToPrayContent(state, viewModel::onEvent, onNavigateBack, audioState)
 }
 
 /** Text is native Compose, never painted into artwork. No timers, auto-advance or tracker writes. */
@@ -45,6 +65,7 @@ internal fun LearnToPrayContent(
     state: LearnPrayUiState,
     onEvent: (LearnPrayEvent) -> Unit,
     onNavigateBack: () -> Unit,
+    audioState: PrayerAudioState = PrayerAudioState(),
 ) {
     val inset = AdaptiveSpacing.screenPadding()
     val gap = AdaptiveSpacing.sectionSpacing()
@@ -183,7 +204,7 @@ internal fun LearnToPrayContent(
                             )
                             Text(stringResource(step.instructionFor(state.figure)), style = MaterialTheme.typography.bodyLarge)
                             step.recitations.forEach { recitation ->
-                                RecitationCard(recitation)
+                                RecitationCard(recitation, audioState, onEvent, openSource)
                             }
                             SourceNotes(step.referencesFor(state.figure), openSource)
                         }
@@ -209,7 +230,8 @@ private fun LessonNotice(text: String) {
 }
 
 @Composable
-private fun RecitationCard(recitation: PrayerRecitation) {
+private fun RecitationCard(recitation: PrayerRecitation, audioState: PrayerAudioState,
+    onEvent: (LearnPrayEvent) -> Unit, openSource: (String) -> Unit) {
     NimazCard(modifier = Modifier.fillMaxWidth()) {
         Column(
             Modifier.padding(AdaptiveSpacing.sectionSpacing()),
@@ -229,6 +251,27 @@ private fun RecitationCard(recitation: PrayerRecitation) {
             Text(stringResource(R.string.learn_pray_meaning),
                 style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
             Text(stringResource(recitation.meaning), style = MaterialTheme.typography.bodyMedium)
+            val clip = recitation.audio
+            if (clip != null) {
+                val active = audioState.current == clip
+                NimazButton(
+                    text = stringResource(if (active) R.string.learn_pray_audio_stop else R.string.learn_pray_audio_listen),
+                    onClick = { onEvent(LearnPrayEvent.ToggleAudio(clip)) },
+                    leadingIcon = if (active) Icons.Default.Stop else Icons.Default.PlayArrow,
+                    variant = NimazButtonVariant.QUIET, fullWidth = true,
+                )
+                if (active && audioState.loading) LinearProgressIndicator(Modifier.fillMaxWidth())
+                if (audioState.failed) Text(stringResource(R.string.learn_pray_audio_error),
+                    style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
+                val quran = clip == PrayerAudio.FATIHAH || clip == PrayerAudio.IKHLAS
+                Text(stringResource(if (quran) R.string.learn_pray_audio_quran else R.string.learn_pray_audio_hisn),
+                    style = MaterialTheme.typography.bodySmall)
+                NimazButton(stringResource(R.string.learn_pray_audio_source), {
+                    openSource(if (quran) "https://everyayah.com/data/Husary_128kbps/" else "https://www.hisnmuslim.com/")
+                }, variant = NimazButtonVariant.TEXT)
+            } else {
+                Text(stringResource(R.string.learn_pray_audio_pending), style = MaterialTheme.typography.bodySmall)
+            }
         }
     }
 }

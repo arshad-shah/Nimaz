@@ -11,7 +11,10 @@ Male filenames: `learn_pray_<pose>.webp`. Female: `learn_pray_female_<pose>.webp
 Poses in both sets: takbir, standing, bowing, rise, prostration, sitting, tashahhud, right, left.
 Repeated movements reuse assets. Salam means the worshipper's own right/left: never mirror for RTL.
 
-Generated with the built-in image-generation tool, then encoded as WebP at quality 82.
+Generated with the built-in image-generation tool. Male WebP quality is 82. Eight female
+assets are cropped without labels from the owner-approved revision-3 sheet (444×295,
+WebP quality 90), preserving the approved drawings rather than regenerating them. The
+separately approved final sujud edit is encoded at 1200×800, quality 88.
 No stock images, embedded UI text or unreviewed recordings are bundled.
 
 ## Prompt set
@@ -49,7 +52,12 @@ Additional instruction: keep ivory khimar, sage prayer dress and opaque socks in
 Refinements preserve each female edit target as the costume/identity reference; the male pose
 is no longer the female pose template. Takbir sleeve cuffs extend to the hands. Feet are requested
 as smooth opaque ivory fabric socks. Some toe outlines remain ambiguous and require visual review.
-Standing was inspected and retained; eight other female assets were replaced.
+All nine female assets were replaced after explicit owner approval. Final revision prompts:
+takbir hands closer to head; qiyam right palm over left high on chest without X wrists;
+deeper dal-like ruku with palms on thighs; natural uncompressed sujud with toes tucked,
+heels raised, palms closer beside face and elbows just above mat; smooth opaque ivory
+sock fabric; sitting mat's long axis aligned with forward prayer direction. Other poses
+were preserved from the approved review sheet. No new generation happened at extraction.
 
 Reference checks (not a universal ruling):
 - [SeekersGuidance](https://seekersguidance.org/answers/hanafi-fiqh/what-is-the-proper-method-for-women-to-bow-and-prostrate-in-the-prayer/): compact prostration and shallower bow, but **hands on knees**, not thighs.

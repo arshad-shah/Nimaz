@@ -1740,22 +1740,21 @@ copy anything listed as Open.
 
 ### Open (still to do — do not copy)
 
-**Learn to Pray release gates:** the two-rak‘ah lesson is an English review edition. Its app-owned
-lesson copy/recitations are in `core/ui/src/main/res/values/learn_pray_strings.xml`, marked
-non-translatable until qualified religious and language review. Move reviewed canonical content
-into the content artifact rather than growing a second religious-content catalogue in Android
-resources. No audio control is exposed without reviewed recordings. Artwork must receive posture
-review (especially knees, feet, the tashahhud hand, and left/right orientation). Device validation
-must cover TalkBack, 200% font scale, light/dark modes, rotation, tablet layout and back navigation.
-Do not treat the preview disclaimer as a substitute for these release gates.
+**Learn to Pray release gates:** all lesson UI, meanings, posture and audio strings have
+complete keys in en/de/fr/id/ms/tr, without translation suppressions or non-translatable
+declarations. Canonical Arabic and transliteration are explicitly present in every locale.
+Human language review and qualified religious review remain required; resource coverage alone
+does not validate either. Reviewed canonical recitations should move into the content artifact
+before expanding this app-owned course.
 
-The female figure has figure-specific posture text and source selection, including compact
-prostration and side-sitting. Its shallow, hands-on-thighs bow is an explicitly requested editorial
-variant: the checked references describe hands on knees, so a supporting source and qualified
-sign-off remain outstanding. Do not cite the male ruku narration as evidence for this variant.
-`learn_pray_pose_strings.xml` contains these posture instructions in en/de/fr/id/ms/tr; this does
-not complete localization of the rest of the lesson. Generated art still needs garment/contact
-review, especially the sock toe outlines. Religious review is not implied by a successful test.
+The owner approved the female visual set: upper-chest stacked hands, hands-on-thighs bow,
+natural compact sujud with tucked toes and slightly lifted elbows, and aligned sitting mat.
+The bow's hand placement remains an editorial variant without a supporting reference; do not
+attribute it to the male ruku narration. Product approval is not scholarly/anatomical sign-off.
+Seven recitations have sourced streaming audio; seven unmatched passages are explicitly
+unavailable pending exact recordings. See SUBSYSTEMS.md §1 for playback and source mapping.
+Device review must cover playback, TalkBack, 200% fonts, rotation, light/dark and tablet.
+
 
 | # | Area | Deviation | Canonical fix |
 |---|------|-----------|---------------|

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="learn_pray_audio_listen">Dengarkan</string>
+    <string name="learn_pray_audio_stop">Hentikan audio</string>
+    <string name="learn_pray_audio_error">Audio tidak dapat dimuat. Periksa koneksi dan coba lagi.</string>
+    <string name="learn_pray_audio_quran">Al-Husary · EveryAyah. Memerlukan internet.</string>
+    <string name="learn_pray_audio_hisn">Hisn al-Muslim · Rekaman bahasa Arab. Memerlukan internet; bacaan pendek dapat diulang.</string>
+    <string name="learn_pray_audio_source">Sumber audio</string>
+    <string name="learn_pray_audio_pending">Rekaman yang sesuai belum tersedia dalam versi uji ini.</string>
+</resources>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="learn_pray_audio_listen">Dinle</string>
+    <string name="learn_pray_audio_stop">Sesi durdur</string>
+    <string name="learn_pray_audio_error">Ses yüklenemedi. Bağlantınızı kontrol edip tekrar deneyin.</string>
+    <string name="learn_pray_audio_quran">Al-Husary · EveryAyah. İnternet gerekir.</string>
+    <string name="learn_pray_audio_hisn">Hisn al-Muslim · Arapça kayıt. İnternet gerekir; kısa ifadeler tekrarlanabilir.</string>
+    <string name="learn_pray_audio_source">Ses kaynağı</string>
+    <string name="learn_pray_audio_pending">Bu deneme sürümünde eşleşen bir kayıt henüz yok.</string>
+</resources>
