@@ -12,7 +12,7 @@ import org.robolectric.RobolectricTestRunner
 class QaidaJourneyStoreTest {
     private val context: Context = ApplicationProvider.getApplicationContext()
     private lateinit var store: QaidaJourneyStore
-    @Before fun clean() { store = QaidaJourneyStore(context); store.reset() }
+    @Before fun clean() { store = QaidaJourneyStore(context); store.reset(); store.updateSettings(QaidaLearningSettings()) }
     @Test fun `needs practice becomes due after ten minutes and survives recreation`() {
         store.record(4, 42, false, 1000)
         val restored = QaidaJourneyStore(context)
@@ -42,6 +42,17 @@ class QaidaJourneyStoreTest {
         assertThat(store.todayCount(2 * 86400000L)).isEqualTo(0)
         store.recordActivity(3, 2 * 86400000L)
         assertThat(store.todayCount(2 * 86400000L)).isEqualTo(1)
+    }
+
+    @Test fun `learning preferences survive recreation and progress reset`() {
+        store.updateSettings(QaidaLearningSettings(showTransliteration = false, slowPlayback = true))
+        store.record(4, 42, false, 0)
+        val restored = QaidaJourneyStore(context)
+        assertThat(restored.settings.value).isEqualTo(QaidaLearningSettings(false, true))
+        restored.reset()
+        assertThat(restored.settings.value).isEqualTo(QaidaLearningSettings(false, true))
+        assertThat(QaidaJourneyStore(context).settings.value).isEqualTo(QaidaLearningSettings(false, true))
+        assertThat(restored.dueLessonIds(Long.MAX_VALUE)).isEmpty()
     }
 
 }

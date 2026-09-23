@@ -7,7 +7,12 @@ palette or raw colour values. Reuse the bundled Amiri font and book illustration
 and dark modes; Arabic is rendered as text, never baked into artwork. The chapter grouping follows the
 real 17 lessons: 1–5 letters and sounds, 6–12 building reading, 13–17 confidence.
 
-[Actual Compose screen previews](PREVIEWS.md)
+[All screens and states in light and dark](PREVIEWS.md)
+
+Every Qaida destination uses the unified `NimazBackTopAppBar` with the page name **Qaida**.
+The transparent `NimazScreenScaffold` allows the app-wide pattern and frosted top-bar effects
+to remain visible, respecting global appearance preferences. The settings action is available
+from the journey, reader and letter explorer; no independent theme is introduced.
 
 ## Pages and states
 
@@ -22,6 +27,7 @@ real 17 lessons: 1–5 letters and sounds, 6–12 building reading, 13–17 conf
 | Practise | Read first, reveal the reminder, then record “Feeling confident” or “Needs practice”. This is explicitly a self-check, never speech recognition or a pronunciation score. |
 | All cards | Scrollable lesson overview; selecting a card returns to focused listening. |
 | Completion | Existing book illustration, unique heard or self-practised cards this visit, honest activity checklist, encouragement and quick review of those cards (the lesson if none were practised), or return. Browsing alone does not fabricate a practice count. |
+| Settings | Existing settings sections and switch rows control persistent transliteration reminders and slower audio. Confirmed audio removal and progress reset are separate. Reset preserves learning preferences and audio; resetting from a reader exits that session. |
 | Letter explorer | Existing 29-letter grid, positional forms and articulation sheet; playback appears only when the lesson-one pack verifies. |
 
 Download states: preparing with per-clip progress, saved/offline, unavailable recordings,

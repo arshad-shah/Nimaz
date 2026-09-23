@@ -59,8 +59,10 @@ fun QaidaReaderScreen(
     var reviewIds by rememberSaveable(activeId) { mutableStateOf(listOf<Int>()) }
     var practised by rememberSaveable(activeId) { mutableStateOf(listOf<Int>()) }
     var reveal by rememberSaveable(activeId, index) { mutableStateOf(false) }
-    var showHint by rememberSaveable { mutableStateOf(true) }
-    var slow by rememberSaveable { mutableStateOf(false) }
+    val settings by viewModel.settings.collectAsStateWithLifecycle()
+    val showHint = settings.showTransliteration
+    val slow = settings.slowPlayback
+    var settingsOpen by rememberSaveable { mutableStateOf(false) }
     val cells = if (reviewIds.isEmpty()) all else all.filter { it.id in reviewIds }
     val cell = cells.getOrNull(index.coerceAtLeast(0))
     val listState = rememberLazyListState()
@@ -69,29 +71,24 @@ fun QaidaReaderScreen(
         if (index < 0 && all.isNotEmpty()) index = all.indexOfFirst { it.id == viewModel.resumeCell(activeId) }.coerceAtLeast(0)
     }
     LaunchedEffect(cell?.id) { cell?.let(viewModel::savePosition); reveal = false; viewModel.onEvent(QaidaReaderEvent.StopAudio) }
-    LaunchedEffect(slow) { viewModel.onEvent(QaidaReaderEvent.SetSlow(slow)) }
     fun finish() { viewModel.onEvent(QaidaReaderEvent.StopAudio); page = 2 }
     fun next() { if (index < cells.lastIndex) index++ else finish() }
     fun back() { if (page == 0) onNavigateBack() else { viewModel.onEvent(QaidaReaderEvent.StopAudio); page = 0 } }
+    if (settingsOpen) {
+        QaidaSettingsScreen(onNavigateBack = { settingsOpen = false }, viewModel = viewModel, onJourneyReset = onNavigateBack)
+        return
+    }
     BackHandler(page != 0) { back() }
-    NimazScreenScaffold(containerColor = MaterialTheme.colorScheme.background,
+    NimazScreenScaffold(
         topBar = {
-            Row(Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = 16.dp, vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically) {
-                if (page == 2) {
-                    Column(Modifier.weight(1f)) {
-                        Text(stringResource(R.string.qaida_brand), style = MaterialTheme.typography.headlineSmall.copy(fontFamily = AmiriFontFamily),
-                            color = MaterialTheme.colorScheme.primary)
-                        Text(stringResource(R.string.qaida_brand_caption), style = MaterialTheme.typography.labelSmall)
-                    }
-                    NimazIconButton(Icons.Default.Close, onNavigateBack, contentDescription = stringResource(R.string.qaida_back_journey))
-                } else {
-                    NimazIconButton(Icons.AutoMirrored.Filled.ArrowBack, { back() }, contentDescription = stringResource(R.string.qaida_back_lessons))
-                    Text(stringResource(R.string.qaida_back_lessons), Modifier.weight(1f), style = MaterialTheme.typography.bodySmall)
-                    c?.let { Text(stringResource(CoreR.string.qaida_lesson_progress, it.lesson.lessonNumber, course?.totalLessons ?: 0),
-                        style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
-                }
-            }
+            NimazBackTopAppBar(title = stringResource(CoreR.string.qaida),
+                subtitle = c?.let { stringResource(CoreR.string.qaida_lesson_progress, it.lesson.lessonNumber, course?.totalLessons ?: 0) },
+                onBackClick = { if (page == 2) onNavigateBack() else back() },
+                actions = {
+                    NimazIconButton(Icons.Default.Settings, {
+                        viewModel.onEvent(QaidaReaderEvent.StopAudio); settingsOpen = true
+                    }, contentDescription = stringResource(R.string.qaida_settings))
+                })
         }) { padding ->
         LazyColumn(Modifier.fillMaxSize().padding(padding), state = listState, contentPadding = PaddingValues(24.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
@@ -170,7 +167,7 @@ fun QaidaReaderScreen(
                                             contentDescription = stringResource(if (audio.isPlaying) R.string.qaida_stop_sound else R.string.qaida_play_sound))
                                         if (download.ready) {
                                             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                                NimazButton(stringResource(if (slow) R.string.qaida_normal_sound else R.string.qaida_slow_sound), { slow = !slow },
+                                                NimazButton(stringResource(if (slow) R.string.qaida_normal_sound else R.string.qaida_slow_sound), { viewModel.onEvent(QaidaReaderEvent.SetSlow(!slow)) },
                                                     modifier = Modifier.weight(1f), variant = NimazButtonVariant.QUIET, size = NimazButtonSize.SMALL,
                                                     leadingIcon = Icons.Default.Speed)
                                                 NimazButton(stringResource(R.string.qaida_repeat_sound), { viewModel.onEvent(QaidaReaderEvent.RepeatCell(cell, 3)) },
@@ -204,7 +201,7 @@ fun QaidaReaderScreen(
                                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                                     NimazButton(stringResource(R.string.qaida_all_cells), { mode = 2 }, variant = NimazButtonVariant.TEXT)
                                     if (mode != 1) NimazButton(stringResource(if (showHint) R.string.qaida_hide_hint else R.string.qaida_show_hint),
-                                    { showHint = !showHint }, variant = NimazButtonVariant.TEXT)
+                                    { viewModel.onEvent(QaidaReaderEvent.SetTransliteration(!showHint)) }, variant = NimazButtonVariant.TEXT)
                                 }
                                 if (mode == 1 && reveal) {
                                     Text(stringResource(R.string.qaida_self_check), style = MaterialTheme.typography.bodySmall)

@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.presentation.screens.qaida
 
+import com.arshadshah.nimaz.data.qaida.QaidaLearningSettings
 import android.content.Context
 import androidx.annotation.StringRes
 import androidx.compose.ui.test.assertIsDisplayed
@@ -56,7 +57,9 @@ class QaidaHomeScreenTest {
     private val courseProgress = MutableStateFlow<QaidaCourseProgress?>(null)
     private val events = mutableListOf<QaidaReaderEvent>()
 
+    private val preferences = MutableStateFlow(QaidaLearningSettings())
     private val viewModel: QaidaReaderViewModel = mockk(relaxed = true) {
+        every { settings } returns preferences
         every { this@mockk.courseProgress } returns this@QaidaHomeScreenTest.courseProgress
         every { this@mockk.dueLessons } returns MutableStateFlow(emptySet())
         every { this@mockk.todayCount } returns MutableStateFlow(0)
@@ -206,7 +209,8 @@ class QaidaHomeScreenTest {
         )
 
         setContent()
-        composeRule.onNodeWithContentDescription(string(R.string.qaida_reset_journey)).performClick()
+        composeRule.onNodeWithContentDescription(string(FeatureR.string.qaida_settings)).performClick()
+        composeRule.onNodeWithText(string(R.string.qaida_reset_journey)).performClick()
 
         // The menu row opens the dialog and dispatches nothing.
         assertThat(events).isEmpty()
@@ -225,7 +229,8 @@ class QaidaHomeScreenTest {
         )
 
         setContent()
-        composeRule.onNodeWithContentDescription(string(R.string.qaida_reset_journey)).performClick()
+        composeRule.onNodeWithContentDescription(string(FeatureR.string.qaida_settings)).performClick()
+        composeRule.onNodeWithText(string(R.string.qaida_reset_journey)).performClick()
         composeRule.onNodeWithText(string(R.string.cancel)).performClick()
 
         assertThat(events).isEmpty()

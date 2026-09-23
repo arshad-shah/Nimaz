@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.presentation.screens.qaida
 
+import com.arshadshah.nimaz.data.qaida.QaidaLearningSettings
 import android.content.Context
 import androidx.compose.ui.test.*
 import androidx.test.core.app.ApplicationProvider
@@ -30,7 +31,9 @@ class QaidaReaderScreenTest {
     private val audio = MutableStateFlow(QaidaAudioState())
     private val events = mutableListOf<QaidaReaderEvent>()
     private var backs = 0
+    private val preferences = MutableStateFlow(QaidaLearningSettings())
     private val vm: QaidaReaderViewModel = mockk(relaxed = true) {
+        every { settings } returns preferences
         every { lessonContent } returns content
         every { selectedLessonId } returns MutableStateFlow<Int?>(1)
         every { courseProgress } returns MutableStateFlow(qaidaCourse())
@@ -40,7 +43,14 @@ class QaidaReaderScreenTest {
         every { completedCellIds } returns MutableStateFlow(emptySet())
         every { resumeCell(any()) } returns null
         every { dueCells(any()) } returns emptySet()
-        every { onEvent(any()) } answers { events += firstArg<QaidaReaderEvent>() }
+        every { onEvent(any()) } answers {
+            val event = firstArg<QaidaReaderEvent>(); events += event
+            when (event) {
+                is QaidaReaderEvent.SetTransliteration -> preferences.value = preferences.value.copy(showTransliteration = event.enabled)
+                is QaidaReaderEvent.SetSlow -> preferences.value = preferences.value.copy(slowPlayback = event.enabled)
+                else -> Unit
+            }
+        }
     }
     private fun text(id: Int) = composeRule.onNodeWithText(context.getString(id))
     private fun show() = composeRule.setThemedContent { QaidaReaderScreen(1, { backs++ }, vm) }

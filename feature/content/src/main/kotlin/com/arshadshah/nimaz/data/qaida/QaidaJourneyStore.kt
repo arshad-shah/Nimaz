@@ -14,6 +14,16 @@ import org.json.JSONObject
 @Singleton
 class QaidaJourneyStore @Inject constructor(@ApplicationContext context: Context) {
     private val preferences = context.getSharedPreferences("qaida_journey_v2", Context.MODE_PRIVATE)
+    private val _settings = MutableStateFlow(QaidaLearningSettings(
+        showTransliteration = preferences.getBoolean("setting_transliteration", true),
+        slowPlayback = preferences.getBoolean("setting_slow", false),
+    ))
+    val settings = _settings.asStateFlow()
+    fun updateSettings(value: QaidaLearningSettings) {
+        preferences.edit().putBoolean("setting_transliteration", value.showTransliteration)
+            .putBoolean("setting_slow", value.slowPlayback).apply()
+        _settings.value = value
+    }
     private val _revision = MutableStateFlow(0)
     val revision = _revision.asStateFlow()
     fun dueLessonIds(now: Long = System.currentTimeMillis()): Set<Int> = preferences.all
@@ -49,7 +59,12 @@ class QaidaJourneyStore @Inject constructor(@ApplicationContext context: Context
     fun resumeCell(lessonId: Int): Int? = preferences.getInt("resume_$lessonId", -1).takeIf { it >= 0 }
     fun setResume(lessonId: Int, cellId: Int) { preferences.edit().putInt("resume_$lessonId",cellId).apply() }
     fun refresh() { _revision.value++ }
-    fun reset() { preferences.edit().clear().apply(); _revision.value++ }
+    fun reset() {
+        val edit = preferences.edit()
+        preferences.all.keys.filterNot { it.startsWith("setting_") }.forEach(edit::remove)
+        edit.apply()
+        _revision.value++
+    }
 }
 
 object QaidaReviewSchedule {
@@ -62,3 +77,6 @@ object QaidaReviewSchedule {
         else -> 14 * 86_400_000L
     }
 }
+
+/** Learning preferences are independent of progress and survive a journey reset. */
+data class QaidaLearningSettings(val showTransliteration: Boolean = true, val slowPlayback: Boolean = false)

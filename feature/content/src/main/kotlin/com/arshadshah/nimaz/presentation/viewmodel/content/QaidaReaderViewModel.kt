@@ -11,6 +11,7 @@ import com.arshadshah.nimaz.data.audio.QaidaAudioManager
 import com.arshadshah.nimaz.data.audio.QaidaAudioState
 import com.arshadshah.nimaz.data.audio.QaidaLessonAudioStore
 import com.arshadshah.nimaz.data.qaida.QaidaJourneyStore
+import com.arshadshah.nimaz.data.qaida.QaidaLearningSettings
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -55,6 +56,12 @@ class QaidaReaderViewModel @Inject constructor(
     private val journey: QaidaJourneyStore? = null,
 ) : ViewModel() {
 
+    private val fallbackSettings = MutableStateFlow(QaidaLearningSettings())
+    val settings: StateFlow<QaidaLearningSettings> = journey?.settings ?: fallbackSettings
+    private fun updateSettings(value: QaidaLearningSettings) {
+        if (journey != null) journey.updateSettings(value) else fallbackSettings.value = value
+        audioManager.setSlow(value.slowPlayback)
+    }
     private val _sessionHeard = MutableStateFlow<Set<Int>>(emptySet())
     val sessionHeard: StateFlow<Set<Int>> = _sessionHeard.asStateFlow()
     private val _download = MutableStateFlow(QaidaDownloadState())
@@ -137,6 +144,7 @@ class QaidaReaderViewModel @Inject constructor(
     private var loadedCells: List<QaidaCell> = emptyList()
 
     init {
+        audioManager.setSlow(settings.value.slowPlayback)
         observeLoadedCells()
         observeHeardCells()
     }
@@ -198,7 +206,8 @@ class QaidaReaderViewModel @Inject constructor(
                 }
             }
             is QaidaReaderEvent.RepeatCell -> audioManager.playSequence(List(event.times.coerceIn(1,3)) { event.cell.audioKey })
-            is QaidaReaderEvent.SetSlow -> audioManager.setSlow(event.enabled)
+            is QaidaReaderEvent.SetSlow -> updateSettings(settings.value.copy(slowPlayback = event.enabled))
+            is QaidaReaderEvent.SetTransliteration -> updateSettings(settings.value.copy(showTransliteration = event.enabled))
             QaidaReaderEvent.RetryAudio -> lessonContent.value?.let { prepareAudio(it, refresh = true) }
             QaidaReaderEvent.StopAudio -> audioManager.stop()
             QaidaReaderEvent.ClearAudio -> {

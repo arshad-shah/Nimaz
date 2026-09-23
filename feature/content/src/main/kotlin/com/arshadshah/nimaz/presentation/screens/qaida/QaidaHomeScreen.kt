@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.presentation.screens.qaida
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -54,30 +55,26 @@ fun QaidaHomeScreen(
     var tab by rememberSaveable { mutableIntStateOf(0) }
     val listState = rememberLazyListState()
     var chapter by rememberSaveable { mutableIntStateOf(-1) }
-    var reset by remember { mutableStateOf(false) }
+    var settingsOpen by rememberSaveable { mutableStateOf(false) }
     var clearAudio by remember { mutableStateOf(false) }
     LifecycleResumeEffect(Unit) {
         viewModel.refreshReview(); viewModel.refreshCacheSize()
         onPauseOrDispose { }
     }
     LaunchedEffect(tab) { viewModel.refreshCacheSize(); viewModel.refreshReview(); listState.scrollToItem(0) }
+    if (settingsOpen) {
+        QaidaSettingsScreen(onNavigateBack = { settingsOpen = false }, viewModel = viewModel)
+        return
+    }
     NimazScreenScaffold(
-        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            Row(Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = 12.dp), verticalAlignment = Alignment.CenterVertically) {
-                NimazIconButton(Icons.AutoMirrored.Filled.ArrowBack, onNavigateBack,
-                    contentDescription = stringResource(FeatureR.string.qaida_back_lessons))
-                Column(Modifier.weight(1f).padding(vertical = 8.dp)) {
-                    Text(stringResource(FeatureR.string.qaida_brand), style = MaterialTheme.typography.headlineSmall.copy(fontFamily = AmiriFontFamily),
-                        color = MaterialTheme.colorScheme.primary)
-                    Text(stringResource(FeatureR.string.qaida_brand_caption), style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
-                NimazIconButton(Icons.Default.Translate, onOpenLetters,
-                    contentDescription = stringResource(R.string.qaida_letter_explorer))
-                NimazIconButton(Icons.Default.RestartAlt, { reset = true },
-                    contentDescription = stringResource(R.string.qaida_reset_journey))
-            }
+            NimazBackTopAppBar(title = stringResource(R.string.qaida), onBackClick = onNavigateBack,
+                actions = {
+                    NimazIconButton(Icons.Default.Translate, onOpenLetters,
+                        contentDescription = stringResource(R.string.qaida_letter_explorer))
+                    NimazIconButton(Icons.Default.Settings, { settingsOpen = true },
+                        contentDescription = stringResource(FeatureR.string.qaida_settings))
+                })
         },
         bottomBar = {
             NimazSegmentedControl(
@@ -220,13 +217,13 @@ fun QaidaHomeScreen(
             }
         }
     }
-    if (reset || clearAudio) NimazConfirmDialog(
-        title = stringResource(if (reset) R.string.qaida_reset_title else FeatureR.string.qaida_clear_audio),
-        message = stringResource(if (reset) R.string.qaida_reset_message else FeatureR.string.qaida_clear_audio_message),
-        confirmText = stringResource(if (reset) R.string.reset else FeatureR.string.qaida_clear_audio),
+    if (clearAudio) NimazConfirmDialog(
+        title = stringResource(FeatureR.string.qaida_clear_audio),
+        message = stringResource(FeatureR.string.qaida_clear_audio_message),
+        confirmText = stringResource(FeatureR.string.qaida_clear_audio),
         cancelText = stringResource(R.string.cancel), titleIcon = Icons.Default.RestartAlt, isDestructive = true,
         onConfirm = {
-            viewModel.onEvent(if (reset) QaidaReaderEvent.ResetJourney else QaidaReaderEvent.ClearAudio)
-            reset = false; clearAudio = false
-        }, onDismiss = { reset = false; clearAudio = false })
+            viewModel.onEvent(QaidaReaderEvent.ClearAudio)
+            clearAudio = false
+        }, onDismiss = { clearAudio = false })
 }

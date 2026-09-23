@@ -79,4 +79,14 @@
     <string name="qaida_practised_pending">Make time to practise the sounds</string>
     <string name="qaida_review_ready">Ready for a short review</string>
     <string name="qaida_footer">Little steps. A brighter tomorrow.</string>
+    <string name="qaida_settings">Qaida settings</string>
+    <string name="qaida_settings_learning">Learning preferences</string>
+    <string name="qaida_settings_transliteration">Transliteration reminders</string>
+    <string name="qaida_settings_transliteration_hint">Show reading reminders while listening. Practice still asks you to read first.</string>
+    <string name="qaida_settings_slow">Slower audio</string>
+    <string name="qaida_settings_slow_hint">Play at 75% speed. You can change this while learning.</string>
+    <string name="qaida_settings_storage">Audio and storage</string>
+    <string name="qaida_settings_progress">Learning history</string>
+    <string name="qaida_settings_local">Your preferences and learning history stay on this device. App appearance follows your existing Nimaz settings.</string>
+    <string name="qaida_settings_reset_hint">Clear lesson progress and review history. Keep your preferences and downloaded audio.</string>
 </resources>

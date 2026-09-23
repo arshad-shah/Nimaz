@@ -10,6 +10,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Settings
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconButton
+import com.arshadshah.nimaz.feature.content.R as FeatureR
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -45,10 +50,19 @@ fun QaidaLettersScreen(
     val letters by viewModel.letters.collectAsStateWithLifecycle()
     var selected by remember { mutableStateOf<QaidaLetter?>(null) }
 
+    var settingsOpen by rememberSaveable { mutableStateOf(false) }
+    if (settingsOpen) {
+        QaidaSettingsScreen(onNavigateBack = { settingsOpen = false }, viewModel = viewModel)
+        return
+    }
     NimazScreenScaffold(
         topBar = {
             NimazBackTopAppBar(
-                title = stringResource(R.string.qaida_arabic_letters),
+                title = stringResource(R.string.qaida),
+                subtitle = stringResource(R.string.qaida_arabic_letters),
+                actions = { NimazIconButton(Icons.Default.Settings, {
+                    viewModel.onEvent(QaidaReaderEvent.StopAudio); settingsOpen = true
+                }, contentDescription = stringResource(FeatureR.string.qaida_settings)) },
                 onBackClick = onNavigateBack,
             )
         },
