@@ -29,6 +29,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlin.math.abs
+import kotlin.math.sign
 import com.arshadshah.nimaz.presentation.foundation.geometry.drawnAltitude
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.theme.NimazToneColors
@@ -42,17 +44,26 @@ import com.arshadshah.nimaz.presentation.theme.ThemeMode
  *   the card states anyway).
  * @param contentDescription required, not optional: the arc speaks as one sentence, and an
  *   unnamed dot contributes nothing a reader could act on.
+ * @param time drawn under [label] as a second line, so the arc can carry the timetable itself
+ *   rather than sit above a separate one. Ignored when [label] is `null`.
+ * @param highlighted marks a point that just moved — a larger dot with a halo, and its label in
+ *   the accent colour — for a screen that recomputes the day as the reader changes a setting.
  */
 data class NimazSolarNode(
     val position: Float,
     val label: String? = null,
     val tone: NimazTone = NimazTone.ACCENT,
     val contentDescription: String,
+    val time: String? = null,
+    val highlighted: Boolean = false,
 )
 
 object NimazSolarArcDefaults {
     /** Tall enough for the day limb, the night troughs and one row of labels. */
     val Height: Dp = 108.dp
+
+    /** With a time under each label: two lines above the day limb and below the night troughs. */
+    val HeightWithTimes: Dp = 164.dp
 }
 
 /** Above this scale six labels collide in the width available, so they drop out. */
@@ -73,6 +84,9 @@ private val CurveStroke = 3.dp
 private val LitStroke = 5.dp
 
 private val NodeRadius = 3.6.dp
+
+/** Within this day fraction of solar noon a label sits squarely over its dot. */
+private const val ApexBand = 0.04f
 private val SunRadius = 5.5.dp
 
 /** Leaves the deepest night clear of whatever the card puts under the arc. */
@@ -121,6 +135,14 @@ fun NimazSolarArc(
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         textAlign = TextAlign.Center,
     )
+    val withTimes = nodes.any { it.label != null && it.time != null }
+    val timeStyle = MaterialTheme.typography.labelMedium.copy(
+        fontSize = 12.sp,
+        fontWeight = FontWeight.SemiBold,
+        color = MaterialTheme.colorScheme.onSurface,
+        textAlign = TextAlign.Center,
+    )
+    val highlightColor = MaterialTheme.colorScheme.primary
 
     val safeSun = sunPosition?.takeIf { it.isFinite() }?.coerceIn(0f, 1f)
     val safeSpan = litSpan
@@ -135,10 +157,13 @@ fun NimazSolarArc(
             // otherwise read as a pile of unlabelled nodes.
             .clearAndSetSemantics { this.contentDescription = contentDescription }
     ) {
-        val horizonY = size.height * 0.62f
-        val labelBand = if (showLabels) size.height * 0.16f else 0f
+        // Times add a second label line on both sides of the horizon, so the band for them grows
+        // and the horizon sits nearer the middle to leave room under the night troughs too.
+        val horizonY = size.height * if (withTimes) 0.60f else 0.62f
+        val labelBand = if (showLabels) size.height * (if (withTimes) 0.22f else 0.16f) else 0f
         val dayHeight = (horizonY - labelBand).coerceAtLeast(1f)
-        val nightHeight = ((size.height - horizonY) * NightBandFraction).coerceAtLeast(1f)
+        val nightHeight = ((size.height - horizonY) * if (withTimes) 0.55f else NightBandFraction)
+            .coerceAtLeast(1f)
 
         fun pointAt(t: Float): Offset {
             val h = drawnAltitude(t, sunriseFraction, sunsetFraction)
@@ -228,31 +253,51 @@ fun NimazSolarArc(
         nodes.forEach { node ->
             val t = node.position.takeIf { it.isFinite() }?.coerceIn(0f, 1f) ?: return@forEach
             val p = pointAt(t)
+            val nodeColor = if (node.highlighted) highlightColor
+                else toneColorFor(node.tone, dayColor, duskColor, mutedColor)
+            if (node.highlighted) {
+                drawCircle(color = highlightColor.copy(alpha = 0.22f), radius = NodeRadius.toPx() * 2.6f, center = p)
+            }
             drawCircle(
-                color = toneColorFor(node.tone, dayColor, duskColor, mutedColor),
-                radius = NodeRadius.toPx(),
+                color = nodeColor,
+                radius = NodeRadius.toPx() * if (node.highlighted) 1.35f else 1f,
                 center = p,
             )
             val label = node.label
             if (showLabels && label != null) {
-                val measured = measurer.measure(label, labelStyle)
+                val name = measurer.measure(
+                    label,
+                    if (node.highlighted) labelStyle.copy(color = highlightColor) else labelStyle,
+                )
+                val time = node.time?.let {
+                    measurer.measure(it, if (node.highlighted) timeStyle.copy(color = highlightColor) else timeStyle)
+                }
+                val blockWidth = maxOf(name.size.width, time?.size?.width ?: 0)
+                val blockHeight = name.size.height + (time?.size?.height ?: 0)
                 // A night label hangs *below* its node, a day label sits above it. Both sit on
                 // the outside of the curve, so the label never crosses the line it belongs to —
                 // which is what put Isha on top of a steep December descent when every label
                 // went above.
                 val belowHorizon = drawnAltitude(t, sunriseFraction, sunsetFraction) < 0f
+                // Centred over its dot, a day label on the rising or falling limb sits on the
+                // curve itself (Asr's did). Away from the apex it leans outward — left before
+                // noon, right after — so it clears the line; Dhuhr at the apex stays centred.
+                val noon = (sunriseFraction + sunsetFraction) / 2f
+                val lean = if (belowHorizon || abs(t - noon) < ApexBand) 0f
+                    else sign(t - noon) * (blockWidth / 2f + 2.dp.toPx())
+                val left = (p.x - blockWidth / 2f + lean)
+                    .coerceIn(0f, (size.width - blockWidth).coerceAtLeast(0f))
+                val top = if (belowHorizon) p.y + 6.dp.toPx() else p.y - blockHeight - 6.dp.toPx()
                 drawText(
-                    textLayoutResult = measured,
-                    topLeft = Offset(
-                        x = (p.x - measured.size.width / 2f)
-                            .coerceIn(0f, (size.width - measured.size.width).coerceAtLeast(0f)),
-                        y = if (belowHorizon) {
-                            p.y + 6.dp.toPx()
-                        } else {
-                            p.y - measured.size.height - 6.dp.toPx()
-                        },
-                    ),
+                    textLayoutResult = name,
+                    topLeft = Offset(left + (blockWidth - name.size.width) / 2f, top),
                 )
+                if (time != null) {
+                    drawText(
+                        textLayoutResult = time,
+                        topLeft = Offset(left + (blockWidth - time.size.width) / 2f, top + name.size.height),
+                    )
+                }
             }
         }
 

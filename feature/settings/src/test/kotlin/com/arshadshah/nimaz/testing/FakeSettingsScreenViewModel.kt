@@ -10,6 +10,7 @@ import com.arshadshah.nimaz.presentation.viewmodel.settings.HadithSettingsUiStat
 import com.arshadshah.nimaz.presentation.viewmodel.settings.LocationSettingsUiState
 import com.arshadshah.nimaz.presentation.viewmodel.settings.NotificationSettingsUiState
 import com.arshadshah.nimaz.presentation.viewmodel.settings.NotificationSummary
+import com.arshadshah.nimaz.presentation.viewmodel.settings.PrayerPreviewUiState
 import com.arshadshah.nimaz.presentation.viewmodel.settings.PrayerSettingsUiState
 import com.arshadshah.nimaz.presentation.viewmodel.settings.QuranSettingsUiState
 import com.arshadshah.nimaz.presentation.viewmodel.settings.ReciterPreviewUiState
@@ -36,6 +37,7 @@ class FakeSettingsScreenViewModel {
 
     val generalState = MutableStateFlow(GeneralSettingsUiState())
     val prayerState = MutableStateFlow(PrayerSettingsUiState())
+    val prayerPreview = MutableStateFlow(PrayerPreviewUiState())
     val notificationState = MutableStateFlow(NotificationSettingsUiState())
     val quranState = MutableStateFlow(QuranSettingsUiState())
     val duaState = MutableStateFlow(DuaSettingsUiState())
@@ -57,6 +59,7 @@ class FakeSettingsScreenViewModel {
     val mock: SettingsViewModel = mockk(relaxed = true) {
         every { generalState } returns this@FakeSettingsScreenViewModel.generalState
         every { prayerState } returns this@FakeSettingsScreenViewModel.prayerState
+        every { prayerPreview } returns this@FakeSettingsScreenViewModel.prayerPreview
         every { notificationState } returns this@FakeSettingsScreenViewModel.notificationState
         every { quranState } returns this@FakeSettingsScreenViewModel.quranState
         every { duaState } returns this@FakeSettingsScreenViewModel.duaState

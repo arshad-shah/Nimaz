@@ -102,7 +102,7 @@ fun SettingsScreen(
             item {
                 NimazMenuGroup {
                     NimazMenuItem(
-                        title = stringResource(R.string.calculation_method),
+                        title = stringResource(R.string.prayer_settings_row_title),
                         subtitle = stringResource(R.string.calculation_method_subtitle),
                         icon = Icons.Default.Calculate,
                         onClick = onNavigateToPrayerSettings

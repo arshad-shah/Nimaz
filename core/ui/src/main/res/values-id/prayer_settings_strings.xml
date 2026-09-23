@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The redesigned prayer settings: live preview, sections, pickers and the adjust sheet. -->
+<resources>
+    <string name="prayer_settings_row_title">Waktu salat</string>
+    <string name="prayer_preview_today">Hari ini · %1$s</string>
+    <string name="prayer_preview_today_plain">Hari ini</string>
+    <string name="prayer_preview_note_default">Waktu inilah yang dipakai pengingat Anda</string>
+    <string name="prayer_preview_note_changed">Diperbarui sesuai perubahan Anda</string>
+    <string name="prayer_preview_cd">Waktu salat hari ini sesuai pengaturan Anda: %1$s</string>
+    <string name="prayer_settings_section_calculation">Cara waktu dihitung</string>
+    <string name="prayer_settings_section_finetune">Penyesuaian</string>
+    <string name="prayer_settings_section_reminders">Pengingat</string>
+    <string name="prayer_settings_adjust_title">Sesuaikan per menit</string>
+    <string name="prayer_settings_adjust_hint">Samakan dengan jadwal masjid setempat</string>
+    <string name="prayer_settings_adjust_body">Geser waktu agar sesuai masjid setempat. Hasilnya tampil di samping setiap salat.</string>
+    <string name="prayer_settings_reminders_title">Azan dan pengingat</string>
+    <string name="prayer_settings_high_lat_notice">%1$s berada di %2$d° %3$s. Pada musim panas langit di sana mungkin tidak benar-benar gelap, jadi Subuh dan Isya mengikuti aturan %4$s.</string>
+    <string name="prayer_latitude_north">LU</string>
+    <string name="prayer_latitude_south">LS</string>
+    <string name="prayer_method_picker_body">Pilih otoritas yang diikuti komunitas Anda; kebanyakan orang memilih menurut wilayah. Metode berbeda dalam seberapa gelap langit untuk Subuh dan Isya.</string>
+    <string name="prayer_asr_picker_body">Kapan salat Asar dimulai, diukur dari panjang bayangan.</string>
+    <string name="prayer_high_lat_picker_body">Jauh dari khatulistiwa, langit musim panas mungkin tidak cukup gelap untuk Subuh dan Isya. Aturan ini menentukan penempatannya.</string>
+    <string name="prayer_picker_fajr_at">Subuh %1$s</string>
+    <plurals name="prayer_settings_adjusted_count">
+        <item quantity="other">%1$d waktu disesuaikan</item>
+    </plurals>
+</resources>

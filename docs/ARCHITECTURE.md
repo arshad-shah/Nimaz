@@ -1167,6 +1167,13 @@ with no label and a touch target under 48dp fail the lane we already run. It can
       card takes `MUTED` or `RAISED`. Both were shipped-looking bugs that passed every assertion;
       see `PrayerTimesScreenRenderTest` and `NimazSolarArcPreviewRenderTest`, which draw for real
       and write PNGs to `build/reports/`.
+      A node can carry a **`time`** (drawn under its name, so the arc *is* the timetable) and be
+      **`highlighted`** (a larger dot, a halo, an accent label — for a time that just moved). A
+      day label away from solar noon leans outward so it never sits on the limb it labels. A
+      whole day is **`NimazPrayerDayArc`** (`components/molecules/NimazPrayerDayArc.kt`): points
+      from a day's times, sunrise and Maghrib as bare horizon dots with their times in a row under
+      the arc. The Prayer Times card uses it with `showTimes = false` (its list carries the
+      times); the prayer settings' live preview uses it with times on the curve — one component.
     - a button is `NimazButton(text, onClick, variant = …, size = …, type = …)`
       (`components/atoms/NimazButton.kt`), **not** a raw Material `Button`/`OutlinedButton`/
       `TextButton` and **never** a `Text`/`Box`/`Surface` carrying a `Modifier.clickable`. `variant`
@@ -1208,6 +1215,9 @@ with no label and a touch target under 48dp fail the lane we already run. It can
       edge buttons, large centred value — the tasbih target-dial look; `label` is ignored).
       `size` (`SMALL`/`MEDIUM`/`LARGE`) scales the buttons and value typography; `type`
       (`DEFAULT`/`ACCENT`) sets the value colour (`ACCENT` = `NimazColors.TasbihColors.Milestone`).
+      `labelContent` replaces the text label with composed content (a name over a supporting line)
+      that takes the width the controls leave — wrapping an `INLINE` stepper in your own `Row`
+      squeezes the label to nothing, because the stepper fills its width.
       `minValue`/`maxValue`/`step`/`formatValue` clamp and format. It absorbed the old tasbih
       `TargetStepper`/`TargetCountStepper`.
     - a boolean check-toggle is `NimazCheckbox(checked, onCheckedChange, variant = …, size = …,
@@ -1273,6 +1283,10 @@ with no label and a touch target under 48dp fail the lane we already run. It can
       - **long / searchable / grouped list** → the modal `NimazListPicker(title, items, selected,
         onSelected, onDismiss, searchable = …)` (`components/molecules/NimazListPicker.kt`), opened
         from a `NimazSettingsItem` that shows the current value (the prayer-settings pattern).
+        `header` puts content above the options (the prayer pickers' illustrations), and a picker
+        with a header or without `autoDismiss` opens fully expanded so its footer is on-screen.
+        With `autoDismiss = false` every tap applies at once, so pass `onCancel` to restore the
+        value the sheet opened with — a Cancel that only closes it keeps the choice.
       - **action / overflow menu** (icon-triggered commands, not a value) → `NimazDropdownMenu(expanded,
         onDismissRequest) { … }`.
       Both `NimazDropdownField` and `NimazDropdownMenu` are built from the **single**

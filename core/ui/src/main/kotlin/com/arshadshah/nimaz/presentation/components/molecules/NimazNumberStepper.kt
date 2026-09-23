@@ -138,6 +138,8 @@ enum class NimazNumberStepperType {
  * @param size Control + typography size preset
  * @param type Value colour emphasis
  * @param label Text label shown on the left in [NimazNumberStepperVariant.INLINE]
+ * @param labelContent Replaces [label] with composed content — a name and a supporting line, say.
+ *   It takes the width the controls leave. INLINE only.
  * @param editable Whether tapping the value opens the keyboard for direct entry
  * @param formatValue Custom formatter for the displayed (resting) value. Defaults to a "+"
  *   prefix for positive values in INLINE, and the plain number in SPREAD.
@@ -154,6 +156,7 @@ fun NimazNumberStepper(
     size: NimazNumberStepperSize = NimazNumberStepperSize.SMALL,
     type: NimazNumberStepperType = NimazNumberStepperType.DEFAULT,
     label: String? = null,
+    labelContent: (@Composable () -> Unit)? = null,
     editable: Boolean = true,
     formatValue: ((Int) -> String)? = null,
     minValue: Int = Int.MIN_VALUE,
@@ -202,7 +205,10 @@ fun NimazNumberStepper(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            if (label != null) {
+            if (labelContent != null) {
+                // Takes the space the controls leave, so a two-line label never gets squeezed.
+                Box(Modifier.weight(1f)) { labelContent() }
+            } else if (label != null) {
                 Text(
                     text = label,
                     style = MaterialTheme.typography.bodyMedium,

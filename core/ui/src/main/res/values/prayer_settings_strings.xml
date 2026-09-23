@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The redesigned prayer settings: live preview, sections, pickers and the adjust sheet. -->
+<resources>
+    <string name="prayer_settings_row_title">Prayer times</string>
+    <string name="prayer_preview_today">Today · %1$s</string>
+    <string name="prayer_preview_today_plain">Today</string>
+    <string name="prayer_preview_note_default">These are the times your reminders use</string>
+    <string name="prayer_preview_note_changed">Updated with your change</string>
+    <string name="prayer_preview_cd">Today’s prayer times under your settings: %1$s</string>
+    <string name="prayer_settings_section_calculation">How times are calculated</string>
+    <string name="prayer_settings_section_finetune">Fine-tune</string>
+    <string name="prayer_settings_section_reminders">Reminders</string>
+    <string name="prayer_settings_adjust_title">Adjust by minutes</string>
+    <string name="prayer_settings_adjust_hint">Match your local mosque’s timetable</string>
+    <string name="prayer_settings_adjust_body">Shift a time to match your local mosque. The result shows beside each prayer.</string>
+    <string name="prayer_settings_reminders_title">Adhan and reminders</string>
+    <string name="prayer_settings_high_lat_notice">%1$s is at %2$d° %3$s. In summer the sky may not get fully dark there, so Fajr and Isha follow the %4$s rule.</string>
+    <string name="prayer_latitude_north">N</string>
+    <string name="prayer_latitude_south">S</string>
+    <string name="prayer_method_picker_body">Choose the authority your community follows; most people choose by region. Methods differ in how dark the sky must be for Fajr and Isha.</string>
+    <string name="prayer_asr_picker_body">When the afternoon prayer begins, measured by the length of a shadow.</string>
+    <string name="prayer_high_lat_picker_body">Far from the equator the summer sky may not get dark enough for Fajr and Isha. This rule decides how they are placed.</string>
+    <string name="prayer_picker_fajr_at">Fajr %1$s</string>
+    <plurals name="prayer_settings_adjusted_count">
+        <item quantity="one">%1$d time adjusted</item>
+        <item quantity="other">%1$d times adjusted</item>
+    </plurals>
+</resources>

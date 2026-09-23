@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The redesigned prayer settings: live preview, sections, pickers and the adjust sheet. -->
+<resources>
+    <string name="prayer_settings_row_title">Waktu solat</string>
+    <string name="prayer_preview_today">Hari ini · %1$s</string>
+    <string name="prayer_preview_today_plain">Hari ini</string>
+    <string name="prayer_preview_note_default">Inilah waktu yang digunakan peringatan anda</string>
+    <string name="prayer_preview_note_changed">Dikemas kini dengan perubahan anda</string>
+    <string name="prayer_preview_cd">Waktu solat hari ini mengikut tetapan anda: %1$s</string>
+    <string name="prayer_settings_section_calculation">Cara waktu dikira</string>
+    <string name="prayer_settings_section_finetune">Penalaan halus</string>
+    <string name="prayer_settings_section_reminders">Peringatan</string>
+    <string name="prayer_settings_adjust_title">Laraskan mengikut minit</string>
+    <string name="prayer_settings_adjust_hint">Ikut jadual masjid tempatan anda</string>
+    <string name="prayer_settings_adjust_body">Anjakkan waktu mengikut masjid tempatan. Hasilnya dipaparkan di sebelah setiap solat.</string>
+    <string name="prayer_settings_reminders_title">Azan dan peringatan</string>
+    <string name="prayer_settings_high_lat_notice">%1$s berada pada %2$d° %3$s. Pada musim panas langit di sana mungkin tidak gelap sepenuhnya, jadi Subuh dan Isyak mengikut peraturan %4$s.</string>
+    <string name="prayer_latitude_north">U</string>
+    <string name="prayer_latitude_south">S</string>
+    <string name="prayer_method_picker_body">Pilih badan berautoriti yang diikuti komuniti anda; kebanyakan orang memilih mengikut wilayah. Kaedah berbeza pada tahap gelap langit untuk Subuh dan Isyak.</string>
+    <string name="prayer_asr_picker_body">Bila solat Asar bermula, diukur daripada panjang bayang-bayang.</string>
+    <string name="prayer_high_lat_picker_body">Jauh dari khatulistiwa, langit musim panas mungkin tidak cukup gelap untuk Subuh dan Isyak. Peraturan ini menentukan kedudukannya.</string>
+    <string name="prayer_picker_fajr_at">Subuh %1$s</string>
+    <plurals name="prayer_settings_adjusted_count">
+        <item quantity="other">%1$d waktu dilaraskan</item>
+    </plurals>
+</resources>

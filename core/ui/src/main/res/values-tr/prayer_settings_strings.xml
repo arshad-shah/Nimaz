@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The redesigned prayer settings: live preview, sections, pickers and the adjust sheet. -->
+<resources>
+    <string name="prayer_settings_row_title">Namaz vakitleri</string>
+    <string name="prayer_preview_today">Bugün · %1$s</string>
+    <string name="prayer_preview_today_plain">Bugün</string>
+    <string name="prayer_preview_note_default">Hatırlatıcılarınız bu vakitleri kullanır</string>
+    <string name="prayer_preview_note_changed">Değişikliğinize göre güncellendi</string>
+    <string name="prayer_preview_cd">Ayarlarınıza göre bugünün namaz vakitleri: %1$s</string>
+    <string name="prayer_settings_section_calculation">Vakitler nasıl hesaplanır</string>
+    <string name="prayer_settings_section_finetune">İnce ayar</string>
+    <string name="prayer_settings_section_reminders">Hatırlatıcılar</string>
+    <string name="prayer_settings_adjust_title">Dakika ile ayarla</string>
+    <string name="prayer_settings_adjust_hint">Mahallenizdeki caminin takvimine uyun</string>
+    <string name="prayer_settings_adjust_body">Bir vakti caminize göre kaydırın. Sonuç her namazın yanında görünür.</string>
+    <string name="prayer_settings_reminders_title">Ezan ve hatırlatıcılar</string>
+    <string name="prayer_settings_high_lat_notice">%1$s, %2$d° %3$s enlemindedir. Yazın gökyüzü orada tam kararmayabilir, bu yüzden sabah ve yatsı „%4$s“ kuralına göre belirlenir.</string>
+    <string name="prayer_latitude_north">K</string>
+    <string name="prayer_latitude_south">G</string>
+    <string name="prayer_method_picker_body">Topluluğunuzun izlediği kurumu seçin; çoğu kişi bölgesine göre seçer. Yöntemler, sabah ve yatsı için gökyüzünün ne kadar kararması gerektiğinde ayrılır.</string>
+    <string name="prayer_asr_picker_body">İkindi namazının başladığı an, bir gölgenin boyuyla ölçülür.</string>
+    <string name="prayer_high_lat_picker_body">Ekvatordan uzakta yaz göğü sabah ve yatsı için yeterince kararmayabilir. Bu kural vakitlerin nasıl belirleneceğini seçer.</string>
+    <string name="prayer_picker_fajr_at">Sabah %1$s</string>
+    <plurals name="prayer_settings_adjusted_count">
+        <item quantity="one">%1$d vakit ayarlandı</item>
+        <item quantity="other">%1$d vakit ayarlandı</item>
+    </plurals>
+</resources>

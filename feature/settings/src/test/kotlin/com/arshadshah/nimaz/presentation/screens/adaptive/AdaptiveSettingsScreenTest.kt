@@ -111,7 +111,7 @@ class AdaptiveSettingsScreenTest {
         // invisible in review and obvious to a user exactly once.
         setContent()
 
-        composeRule.settingsRow(string(R.string.calculation_method)).performClick()
+        composeRule.settingsRow(string(R.string.prayer_settings_row_title)).performClick()
         composeRule.settingsRow(string(R.string.notifications)).performClick()
         composeRule.settingsRow(string(R.string.quran_settings)).performClick()
         composeRule.settingsRow(string(R.string.appearance)).performClick()
@@ -162,7 +162,7 @@ class AdaptiveSettingsScreenTest {
         setContent()
 
         composeRule.onAllNodesWithText(string(R.string.settings)).onFirst().assertExists()
-        composeRule.onAllNodesWithText(string(R.string.calculation_method)).onFirst()
+        composeRule.onAllNodesWithText(string(R.string.prayer_settings_row_title)).onFirst()
             .assertExists()
     }
 
@@ -216,9 +216,9 @@ class AdaptiveSettingsScreenTest {
         // the scaffold rather than out of it.
         setContent()
 
-        composeRule.settingsRow(string(R.string.calculation_method)).performClick()
+        composeRule.settingsRow(string(R.string.prayer_settings_row_title)).performClick()
         composeRule.waitForIdle()
-        composeRule.settingsRow(string(R.string.adhan_notifications)).performClick()
+        composeRule.settingsRow(string(R.string.prayer_settings_reminders_title)).performClick()
         composeRule.waitForIdle()
 
         assertThat(navigated).isEmpty()
@@ -250,7 +250,7 @@ class AdaptiveSettingsScreenTest {
         setContent()
 
         val panes = listOf(
-            R.string.calculation_method to R.string.manual_adjustments,
+            R.string.prayer_settings_row_title to R.string.prayer_settings_section_calculation,
             R.string.notifications to R.string.notification_settings_enable,
             R.string.quran_settings to R.string.tajweed_section,
             R.string.appearance to R.string.appearance_theme,

@@ -1,5 +1,10 @@
 package com.arshadshah.nimaz.presentation.viewmodel.settings
 
+import java.time.LocalDateTime
+import com.arshadshah.nimaz.domain.model.PrayerType
+import com.arshadshah.nimaz.domain.model.PrayerCalculationSettings
+import kotlinx.coroutines.flow.runningReduce
+import kotlinx.coroutines.flow.map
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
@@ -116,6 +121,43 @@ class SettingsViewModel @Inject constructor(
 
     private val _prayerState = MutableStateFlow(PrayerSettingsUiState())
     val prayerState: StateFlow<PrayerSettingsUiState> = _prayerState.asStateFlow()
+
+    /**
+     * The prayer settings' live preview: today's times under the settings as they stand, recomputed
+     * whenever any of them — method, Asr rule, high-latitude rule, an adjustment, the location — or
+     * the date changes. It reads [PrayerUseCases.observeCalculationSettings], the stream reminders
+     * and the Prayer Times screen already use, so a preview can never disagree with them.
+     */
+    val prayerPreview: StateFlow<PrayerPreviewUiState> =
+        combine(prayerUseCases.observeCalculationSettings(), todayProvider.todayChanges) { settings, today ->
+            settings to today
+        }
+            // DataStore re-emits every key on any write, so one change arrives as several equal
+            // emissions; recomputing for each would clear the highlight a moment after it appeared.
+            .distinctUntilChanged()
+            .map { (settings, today) ->
+                fun timesUnder(s: PrayerCalculationSettings) =
+                    prayerUseCases.getPrayerTimesForDate(today, s).byType()
+                PrayerPreviewUiState(
+                    times = timesUnder(settings),
+                    methodFajr = CalculationMethod.entries.associateWith { method ->
+                        prayerUseCases.getPrayerTimesForDate(today, settings.copy(calculationMethod = method)).fajr
+                    },
+                    asrTimes = AsrCalculation.entries.associateWith { rule ->
+                        prayerUseCases.getPrayerTimesForDate(today, settings.copy(asrCalculation = rule)).asr
+                    },
+                    locationName = settings.location.name.takeUnless { settings.location.isFallback },
+                    latitude = settings.location.latitude,
+                    isFallbackLocation = settings.location.isFallback,
+                )
+            }
+            // Mark what the latest change moved. The first emission has nothing to compare with.
+            .runningReduce { previous, next ->
+                val moved = next.times.filter { (type, at) -> previous.times[type] != at }.keys
+                // Something that moved no time (a location rename, say) keeps the last highlight.
+                next.copy(changed = moved.ifEmpty { previous.changed })
+            }
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), PrayerPreviewUiState())
 
     private val _notificationState = MutableStateFlow(NotificationSettingsUiState())
     val notificationState: StateFlow<NotificationSettingsUiState> = _notificationState.asStateFlow()
@@ -1398,3 +1440,12 @@ class SettingsViewModel @Inject constructor(
         const val PREVIEW_TITLE = "Al-Fatiha"
     }
 }
+
+private fun PrayerTimes.byType(): Map<PrayerType, LocalDateTime> = mapOf(
+    PrayerType.FAJR to fajr,
+    PrayerType.SUNRISE to sunrise,
+    PrayerType.DHUHR to dhuhr,
+    PrayerType.ASR to asr,
+    PrayerType.MAGHRIB to maghrib,
+    PrayerType.ISHA to isha,
+)
