@@ -1,5 +1,8 @@
 package com.arshadshah.nimaz.presentation.screens.qaida
 
+import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.onFirst
+import androidx.compose.ui.test.onAllNodesWithText
 import android.content.Context
 import androidx.annotation.StringRes
 import androidx.compose.ui.test.assertIsDisplayed
@@ -357,5 +360,43 @@ class QaidaReaderScreenTest {
         composeRule.onNodeWithContentDescription(string(R.string.cd_back)).performClick()
 
         assertThat(backs).isEqualTo(1)
+    }
+
+    private fun finishLessonOneWhileOpen() {
+        lessonContent.value = qaidaLessonContent(lessonId = 1, titleEnglish = "The Arabic Letters")
+        lessonProgress.value = qaidaLessonState(1, status = LessonStatus.IN_PROGRESS)
+        setContent(lessonId = 1)
+        lessonProgress.value = qaidaLessonState(1, status = LessonStatus.COMPLETED, stars = 3, completedCells = 10)
+        composeRule.waitForIdle()
+    }
+
+    @Test
+    fun `the celebration names the lesson it unlocked`() {
+        threeLessonCourse(open = 1, nextLessonId = 2)
+        finishLessonOneWhileOpen()
+
+        composeRule.onNodeWithText(string(R.string.qaida_mashaallah)).assertExists()
+        composeRule.onAllNodesWithText("Fatha", substring = true).onFirst().assertExists()
+    }
+
+    @Test
+    fun `a next lesson the course does not list is not named`() {
+        // The pointer can run ahead of the loaded list; naming nothing beats naming the wrong one.
+        threeLessonCourse(open = 1, nextLessonId = 9)
+        finishLessonOneWhileOpen()
+
+        composeRule.onNodeWithText(string(R.string.qaida_mashaallah)).assertExists()
+        composeRule.onAllNodesWithText("Fatha", substring = true).assertCountEquals(0)
+    }
+
+    @Test
+    fun `the cell being played stays on the page`() {
+        val alif = qaidaCell(1, textArabic = "ا", transliteration = "alif")
+        lessonContent.value = qaidaLessonContent(lessonId = 1, cells = listOf(alif))
+        playingCell.value = alif
+
+        setContent()
+
+        composeRule.onNodeWithText("ا").assertIsDisplayed()
     }
 }

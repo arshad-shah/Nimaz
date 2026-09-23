@@ -48,6 +48,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.core.ui.R
 import com.arshadshah.nimaz.presentation.components.atoms.*
 import com.arshadshah.nimaz.presentation.components.molecules.NimazBottomSheet
+import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.AdaptiveSpacing
 import com.arshadshah.nimaz.presentation.theme.LearnPrayArtColors
 import com.arshadshah.nimaz.presentation.theme.LightStatusBarIcons
@@ -205,6 +206,7 @@ internal fun LearnToPrayContent(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun PostureStage(
     @DrawableRes artwork: Int,
@@ -214,7 +216,7 @@ private fun PostureStage(
 ) {
     val onStage = LearnPrayArtColors.OnStage
     BoxWithConstraints(Modifier.fillMaxWidth()) {
-        val stageHeight = (maxWidth * 1.08f).coerceIn(300.dp, 440.dp)
+        val stageHeight = (maxWidth * 1.2f).coerceIn(340.dp, 480.dp)
         Box(
             Modifier.fillMaxWidth().height(stageHeight)
                 .clip(RoundedCornerShape(bottomStart = 30.dp, bottomEnd = 30.dp))
@@ -226,41 +228,43 @@ private fun PostureStage(
                     1f to LearnPrayArtColors.StageEdge,
                 )),
         ) {
-            Column(Modifier.fillMaxSize().statusBarsPadding().padding(horizontal = 16.dp).padding(top = 6.dp)) {
-                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                    NimazIconButton(
-                        icon = NimazIcons.Back,
-                        onClick = onNavigateBack,
-                        contentDescription = stringResource(R.string.cd_back),
-                        style = NimazIconButtonStyle.FILLED_TONAL,
-                        colors = IconButtonDefaults.filledTonalIconButtonColors(
-                            containerColor = onStage.copy(alpha = 0.14f), contentColor = onStage),
-                    )
-                    Spacer(Modifier.weight(1f))
-                    if (!state.complete) {
-                        NimazSegmentedControl(
-                            options = listOf(
-                                NimazSegmentedOption(stringResource(R.string.learn_pray_man)),
-                                NimazSegmentedOption(stringResource(R.string.learn_pray_woman)),
-                            ),
-                            selectedIndex = state.figure.ordinal,
-                            onSelect = { onEvent(LearnPrayEvent.SelectFigure(PrayerFigure.entries[it])) },
-                            size = NimazSegmentedSize.SMALL,
-                            width = NimazSegmentedWidth.WRAP,
-                            purpose = NimazSegmentedPurpose.VIEW,
-                        )
+            Column(Modifier.fillMaxSize()) {
+                // The app's own top bar, frosted pills and all — the stage is just what it sits on.
+                NimazBackTopAppBar(
+                    title = stringResource(R.string.learn_pray_title),
+                    subtitle = stringResource(R.string.learn_pray_practice),
+                    onBackClick = onNavigateBack,
+                )
+                Column(Modifier.padding(horizontal = 16.dp)) {
+                    val step = PrayerLesson.steps.getOrNull(state.page)
+                    Row(Modifier.fillMaxWidth().padding(top = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Box(Modifier.weight(1f)) {
+                            if (step != null) {
+                                Text(
+                                    stringResource(R.string.learn_pray_progress, state.page + 1, LearnPrayUiState.STEP_COUNT, step.rakah),
+                                    style = MaterialTheme.typography.labelLarge, color = onStage,
+                                    modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+                                )
+                            }
+                        }
+                        if (!state.complete) {
+                            NimazSegmentedControl(
+                                options = listOf(
+                                    NimazSegmentedOption(stringResource(R.string.learn_pray_man)),
+                                    NimazSegmentedOption(stringResource(R.string.learn_pray_woman)),
+                                ),
+                                selectedIndex = state.figure.ordinal,
+                                onSelect = { onEvent(LearnPrayEvent.SelectFigure(PrayerFigure.entries[it])) },
+                                size = NimazSegmentedSize.SMALL,
+                                width = NimazSegmentedWidth.WRAP,
+                                purpose = NimazSegmentedPurpose.VIEW,
+                            )
+                        }
                     }
-                }
-                if (!state.preparing && !state.complete) {
-                    val step = PrayerLesson.steps[state.page]
-                    Spacer(Modifier.height(14.dp))
-                    Text(
-                        stringResource(R.string.learn_pray_progress, state.page + 1, LearnPrayUiState.STEP_COUNT, step.rakah),
-                        style = MaterialTheme.typography.labelLarge, color = onStage,
-                        modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
-                    )
-                    Spacer(Modifier.height(8.dp))
-                    RakahProgress(state.page)
+                    if (step != null) {
+                        Spacer(Modifier.height(10.dp))
+                        RakahProgress(state.page)
+                    }
                 }
                 Box(Modifier.weight(1f).fillMaxWidth().padding(top = 8.dp), contentAlignment = Alignment.Center) {
                     // Sized to the artwork's own 3:2, so the fade reaches the painted edge rather
@@ -282,29 +286,31 @@ private fun PostureStage(
 private const val ARTWORK_ASPECT = 1.5f
 
 /**
- * The illustrations are rectangles on a flat teal ground; fading their edges into the stage's own
- * gradient removes the seam, so the figure stands on the stage rather than in a picture of one.
+ * The illustrations are rectangles on a flat teal ground that matches the stage. Only their
+ * border needs dissolving: a thin feather on each edge removes the seam and leaves the whole
+ * picture — figure, mat and all — in view. (An oval mask hid a large share of it.)
  */
 private fun Modifier.softEdges(): Modifier = graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
     .drawWithContent {
         drawContent()
-        // DstIn keeps the artwork only where the mask is opaque, so the mask has to cover every
-        // pixel: an oval alone would leave the corners, and the picture's hard edge, untouched.
-        // A circular gradient over a square, stretched to the artwork's width, is an oval that
-        // fades to nothing before the edges and stays transparent in the corners.
-        val side = size.height
-        scale(scaleX = size.width / side, scaleY = 1f, pivot = center) {
-            drawRect(
-                brush = Brush.radialGradient(
-                    0f to Color.Black, 0.45f to Color.Black, 0.92f to Color.Transparent,
-                    center = center, radius = side / 2f,
-                ),
-                topLeft = Offset(center.x - side / 2f, 0f),
-                size = Size(side, side),
-                blendMode = BlendMode.DstIn,
-            )
-        }
+        drawRect(
+            brush = Brush.horizontalGradient(
+                0f to Color.Transparent, EdgeFeather to Color.Black,
+                1f - EdgeFeather to Color.Black, 1f to Color.Transparent,
+            ),
+            blendMode = BlendMode.DstIn,
+        )
+        drawRect(
+            brush = Brush.verticalGradient(
+                0f to Color.Transparent, EdgeFeather to Color.Black,
+                1f - EdgeFeather to Color.Black, 1f to Color.Transparent,
+            ),
+            blendMode = BlendMode.DstIn,
+        )
     }
+
+/** How much of each edge fades into the stage. */
+private const val EdgeFeather = 0.08f
 
 /** Two rak‘ahs as two halves: the steps passed, the step you are on (in the accent), the rest. */
 @Composable

@@ -1,5 +1,8 @@
 package com.arshadshah.nimaz.presentation.screens.quran
 
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.getValue
+import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import android.content.res.Configuration
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
@@ -16,7 +19,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.automirrored.filled.ViewList
@@ -31,21 +33,17 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
@@ -53,8 +51,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -84,7 +80,6 @@ import com.arshadshah.nimaz.presentation.components.molecules.MushafPageBar
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownMenu
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownRow
 import com.arshadshah.nimaz.presentation.components.molecules.NimazLoadingState
-import com.arshadshah.nimaz.presentation.components.molecules.NimazLoadingVariant
 import com.arshadshah.nimaz.presentation.components.molecules.NoteEditorSheet
 import com.arshadshah.nimaz.presentation.components.molecules.ReaderAnchorBar
 import com.arshadshah.nimaz.presentation.components.molecules.ReaderGoToSheet
@@ -407,32 +402,12 @@ fun QuranReaderScreen(
 
     NimazScreenScaffold(
         topBar = {
-            TopAppBar(
-                title = {
-                    Column {
-                        if (headerLoading) {
-                            NimazLoadingState(variant = NimazLoadingVariant.INLINE)
-                        } else {
-                            Text(
-                                text = headerTitle,
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.SemiBold,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                            // No subtitle here: where you are is said once, in the anchor
-                            // bar below, which is also the control for changing it.
-                        }
-                    }
-                },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        NimazIcon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.cd_back)
-                        )
-                    }
-                },
+            NimazBackTopAppBar(
+                title = headerTitle,
+                // Where you are is said once, in the anchor bar below, which is also the control
+                // for changing it — so no subtitle here.
+                titleLoading = headerLoading,
+                onBackClick = onNavigateBack,
                 actions = {
                     // Khatam progress indicator
                     if (state.activeKhatamId != null) {
@@ -578,12 +553,6 @@ fun QuranReaderScreen(
                         )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onSurface,
-                    actionIconContentColor = MaterialTheme.colorScheme.onSurface
-                )
             )
         },
         bottomBar = {

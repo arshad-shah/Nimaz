@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.SearchOff
@@ -40,14 +39,13 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcons
 import com.arshadshah.nimaz.presentation.components.molecules.NimazErrorState
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
-import com.arshadshah.nimaz.presentation.components.atoms.NimazIconButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.components.molecules.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
 import com.arshadshah.nimaz.presentation.components.molecules.SurahListItem
 import com.arshadshah.nimaz.presentation.components.organisms.NimazSearchBar
-import com.arshadshah.nimaz.presentation.components.organisms.NimazTopAppBar
+import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.getJuzName
 import com.arshadshah.nimaz.presentation.viewmodel.quran.QuranBrowseEvent
 import com.arshadshah.nimaz.presentation.viewmodel.quran.QuranBrowseUiState
@@ -123,15 +121,9 @@ internal fun QuranBrowseContent(
     NimazScreenScaffold(
         modifier = modifier,
         topBar = {
-            NimazTopAppBar(
+            NimazBackTopAppBar(
                 title = stringResource(R.string.quran_home_tab_browse),
-                navigationIcon = {
-                    NimazIconButton(
-                        icon = Icons.AutoMirrored.Filled.ArrowBack,
-                        onClick = onNavigateBack,
-                        contentDescription = stringResource(R.string.cd_back)
-                    )
-                }
+                onBackClick = onNavigateBack,
             )
         }
     ) { paddingValues ->

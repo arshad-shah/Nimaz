@@ -202,4 +202,39 @@ class LearnToPrayScreenTest {
         composeRule.onNodeWithText(string(R.string.learn_pray_clothing)).performScrollTo().performClick()
         composeRule.onAllNodesWithText(string(R.string.learn_pray_female_clothing)).assertCountEquals(0)
     }
+
+    private class RecordingUriHandler(private val fail: Boolean) : androidx.compose.ui.platform.UriHandler {
+        val opened = mutableListOf<String>()
+        override fun openUri(uri: String) {
+            if (fail) throw IllegalStateException("no browser")
+            opened += uri
+        }
+    }
+
+    private fun openSheetAt(stepIndex: Int, handler: androidx.compose.ui.platform.UriHandler) {
+        composeRule.setThemedContent {
+            androidx.compose.runtime.CompositionLocalProvider(androidx.compose.ui.platform.LocalUriHandler provides handler) {
+                LearnToPrayContent(LearnPrayUiState(stepIndex), {}, {})
+            }
+        }
+        composeRule.onNodeWithText(string(R.string.learn_pray_recite)).performClick()
+        composeRule.waitForIdle()
+    }
+
+    @Test fun aRecordingsSourceOpensWhereItCameFrom() {
+        // Qur'an recitations and supplications come from different, credited sources.
+        val bowing = PrayerLesson.steps.indexOfFirst { step -> step.recitations.any { it.audio == PrayerAudio.RUKU } }
+        val handler = RecordingUriHandler(fail = false)
+        openSheetAt(bowing, handler)
+        composeRule.onNodeWithText(string(R.string.learn_pray_audio_source)).performScrollTo().performClick()
+        assertThat(handler.opened).containsExactly("https://www.hisnmuslim.com/")
+    }
+
+    @Test fun aSourceThatCannotOpenSaysSoInsteadOfCrashing() {
+        val standing = PrayerLesson.steps.indexOfFirst { it.recitations.size > 1 }
+        openSheetAt(standing, RecordingUriHandler(fail = true))
+        composeRule.onAllNodesWithText(string(R.string.learn_pray_audio_source)).onFirst().performScrollTo().performClick()
+        composeRule.waitForIdle()
+        composeRule.onNodeWithText(string(R.string.learn_pray_source_unavailable)).assertExists()
+    }
 }

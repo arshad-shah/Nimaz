@@ -1082,6 +1082,14 @@ with no label and a touch target under 48dp fail the lane we already run. It can
   `NimazTheme` resets icon contrast in one on every recomposition, and a remembered effect runs
   before side effects in the same pass — a one-off override loses as soon as the theme
   recomposes (switching theme with the screen open), and the icons go dark on a dark surface.
+- **Every screen's top bar is `NimazTopAppBar` / `NimazBackTopAppBar`** (`organisms/TopAppBar.kt`):
+  frosted pills — a round back pill, a title pill (optional subtitle, or `titleLoading` while the
+  heading arrives with the content), and an actions pill for anything else. That includes the
+  readers (Quran, Tafseer, Qaida), which used Material's raw opaque `TopAppBar`, and screens that
+  draw artwork under the status bar (Learn to Pray's stage): the pills sit on whatever is beneath.
+  Never pass your own back arrow into `navigationIcon` — that is `NimazBackTopAppBar` written out
+  by hand, and six Quran screens had done it. `TopBarConsistencyGuardTest` fails on both. The one
+  exception is the Prayer Times sky hero, whose glass pills frost the live sky behind them.
 - **Components follow Atomic Design** (`atoms` → `molecules` → `organisms`). Reuse shared
   components (e.g. `NimazCard`, `PrayerTimeCard`, `NimazBackTopAppBar`,
   `NimazEmptyState`, `NimazLoadingState`, `NimazCalendar`) rather than re-rolling generic UI.

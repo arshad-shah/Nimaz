@@ -11,7 +11,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.Link
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -34,7 +33,6 @@ import com.arshadshah.nimaz.domain.model.TopicTree
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
 import com.arshadshah.nimaz.presentation.components.atoms.NimazChip
 import com.arshadshah.nimaz.presentation.components.atoms.NimazChipVariant
-import com.arshadshah.nimaz.presentation.components.atoms.NimazIconButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
@@ -45,7 +43,7 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
 import com.arshadshah.nimaz.presentation.components.molecules.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.molecules.NimazTreeRow
 import com.arshadshah.nimaz.presentation.components.molecules.ThematicText
-import com.arshadshah.nimaz.presentation.components.organisms.NimazTopAppBar
+import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.viewmodel.quran.QuranTopicsEvent
 import com.arshadshah.nimaz.presentation.viewmodel.quran.QuranTopicsViewModel
 
@@ -84,16 +82,10 @@ fun QuranTopicDetailScreen(
 
     NimazScreenScaffold(
         topBar = {
-            NimazTopAppBar(
+            NimazBackTopAppBar(
                 title = detail?.topic?.name ?: stringResource(R.string.quran_topics_title),
                 subtitle = detail?.topic?.arabicName?.takeIf { it.isNotBlank() },
-                navigationIcon = {
-                    NimazIconButton(
-                        icon = Icons.AutoMirrored.Filled.ArrowBack,
-                        onClick = onNavigateBack,
-                        contentDescription = stringResource(R.string.cd_back),
-                    )
-                },
+                onBackClick = onNavigateBack,
             )
         },
     ) { padding ->

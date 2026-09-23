@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccountTree
 import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.CenterFocusStrong
@@ -48,7 +47,7 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
 import com.arshadshah.nimaz.presentation.components.molecules.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.molecules.NimazTreeRow
 import com.arshadshah.nimaz.presentation.components.organisms.NimazSearchBar
-import com.arshadshah.nimaz.presentation.components.organisms.NimazTopAppBar
+import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.viewmodel.quran.QuranTopicsEvent
 import com.arshadshah.nimaz.presentation.viewmodel.quran.QuranTopicsViewModel
 import com.arshadshah.nimaz.presentation.viewmodel.quran.TopicBrowseState
@@ -86,16 +85,10 @@ fun QuranTopicsScreen(
 
     NimazScreenScaffold(
         topBar = {
-            NimazTopAppBar(
+            NimazBackTopAppBar(
                 title = stringResource(R.string.quran_topics_title),
                 subtitle = stringResource(R.string.quran_topics_subtitle),
-                navigationIcon = {
-                    NimazIconButton(
-                        icon = Icons.AutoMirrored.Filled.ArrowBack,
-                        onClick = onNavigateBack,
-                        contentDescription = stringResource(R.string.cd_back),
-                    )
-                },
+                onBackClick = onNavigateBack,
             )
         },
     ) { padding ->
