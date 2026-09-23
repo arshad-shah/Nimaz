@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="learn_pray_female_bowing_action">Allahu ekber diyerek öne eğilin. Kollarınızı vücudunuza yakın, avuçlarınızı dizlerin hemen üzerindeki uyluklarda, parmaklarınızı bitişik tutun. Sakince bekleyin. Görseldeki bu el konumu için kaynak doğrulaması beklenmektedir; zikir kaynağı duruşu doğrulamaz.</string>
+    <string name="learn_pray_female_prostration_action">Allahu ekber diyerek secdeye inin. Uzuvlarınızı yakın tutun; alın, burun ve avuçlar seccadede, ayak parmakları öne kıvrılmış ve topuklar kalkık olsun. Dirseklerinizi seccadeden hafifçe kaldırın; vücudunuzu zorlamadan veya sıkıştırmadan sırtınızı rahatça kavisli tutun. Zikre başlamadan önce duraklayın.</string>
+    <string name="learn_pray_female_second_action">Allahu ekber deyip aynı toplu duruşla ikinci secdeyi yapın. Alnınızı, burnunuzu ve avuçlarınızı seccadeye koyup zikre başlamadan önce duraklayın.</string>
+    <string name="learn_pray_female_sitting_action">Allahu ekber deyip iki ayağınızı sağ tarafınıza katlayarak seccadeye dik oturun. Ellerinizi uyluklarınıza koyun, parmaklarınız bitişik ve ileri dönük olsun. Duraklayın, ardından Allah’tan bağışlanma dileyin.</string>
+    <string name="learn_pray_female_tashahhud_action">İki ayağınızı sağ tarafınıza katlayıp dik oturun. Sol elinizi uyluğunuza koyun ve teşehhüd için sağ işaret parmağınızı uzatın. Sakince okuyun.</string>
+    <string name="learn_pray_female_takbir_action">Kıbleye dönerek ayakta durun. Ellerinizi başınızın iki yanına yakın kaldırıp Allahu ekber deyin. Sağ elinizi sol elinizin üzerine, göğsünüzün üst kısmına koyun. Sakince başlayın.</string>
+    <string name="learn_pray_female_standing_action">Sağ eliniz sol elinizin üzerinde, göğsünüzün üst kısmında olacak şekilde ayakta durun. Fâtiha’yı okuyun, Âmin deyin, sonra Kur’an’dan başka bir bölüm okuyun. İhlâs bir örnektir, zorunlu bir seçim değildir.</string>
+    <string name="learn_pray_female_second_rakah_action">Ayağa kalkarken Allahu ekber deyin. Sağ elinizi sol elinizin üzerine, göğsünüzün üst kısmına koyun. Fâtiha’yı yeniden okuyun, Âmin deyin ve başka bir bölüm okuyun. Kalan hareketleri tek tek izleyin.</string>
+</resources>

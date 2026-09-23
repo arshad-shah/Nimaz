@@ -196,8 +196,22 @@ is why vibration is modelled as a *pair* of channels rather than a per-notificat
 
 ## 1. Audio playback
 
-All in `data/audio/`. There are **three independent playback engines** (Quran recitation,
-Adhan, Qaida tap-to-hear) plus an Adhan **download** pipeline. They share no player instance.
+All in `data/audio/` across their owning modules. Quran recitation, Adhan, Qaida tap-to-hear
+and Learn to Pray have independent engines, plus an Adhan download pipeline.
+
+**Learn to Pray audio:** `PrayerAudioManager` in `:feature:content` is owned by
+`LearnPrayViewModel`, not a singleton or background service. It streams Al-Husary from
+EveryAyah (Al-Fatihah 1–7; basmalah then Al-Ikhlas 1–4), and Hisn al-Muslim clips 33, 41,
+48, 52 and 53 (ruku, sujud, sitting, tashahhud, salawat). Published Arabic metadata was
+matched to the lesson. The short Hisn phrases may repeat; the localized source note says so.
+Listen/Stop uses shared Nimaz buttons and Material icons, with loading/error/retry states and
+provider attribution. Audio focus and unplugged-output handling are enabled. Navigation,
+figure changes, backgrounding and leaving the screen stop playback; clearing the ViewModel
+releases the player. Finishing audio never changes lesson position or prayer tracking.
+These streams require internet; the rest of the lesson is offline. No recordings are bundled
+or redistributed. Opening, refuge, Amin, takbir, rise, final dua and salam have no exact
+approved clip yet and show a localized unavailable message, not a misleading Listen button.
+Listening QA, provider availability and usage terms remain release checks.
 
 **Manager / service split.** The *manager* owns the player + playback logic and exposes a
 `StateFlow`; the *service* is a foreground `Service` that only owns the notification /
@@ -1233,6 +1247,21 @@ It also stores the **content-version flags** that drive seeding — see §7.
 ---
 
 ## 7. Content seeding & versioning
+
+**Learn to Pray review edition:** the app-owned two-rak‘ah practice lesson uses Android resources
+and separate local illustrations so it works without a network or content download. It does not
+seed or modify either database and never records prayer-tracker completion. Its position lives in
+`LearnPrayViewModel` through `SavedStateHandle`, not a preference or synced completion record.
+The `learnpray` ViewModel package is registered to `:feature:content` in the cross-feature guard.
+Its Qur’an/hadith citations use the existing readers through `ContentTarget.toRoute()`;
+audio stops before navigation and Back restores the lesson. `PrayerReference` maps cited
+references to verified stable corpus record ids, not printed numbers. In particular, Muslim
+402a/580b/588a/772/582 correspond to local records 8486/8899/8913/9403/8904. The crosswalk
+was checked against the report text and is pinned by `scripts/test_learn_pray_references.py`.
+Only the two scholarly commentaries absent from the corpus and audio-provider attribution
+remain external, labelled accordingly; canonical citations never fall back to a browser.
+This is a review-stage exception: reviewed canonical recitations should move to the content
+artifact before expanding the course; see the release gates in `ARCHITECTURE.md` §9.
 
 **Why this exists.** `createFromAsset` copies the prepopulated DB (§5) **only when the file is
 absent**, and schema migrations only create empty tables. So without help, content that changes in

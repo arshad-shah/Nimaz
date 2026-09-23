@@ -1,7 +1,6 @@
 package com.arshadshah.nimaz.presentation.screens.onboarding
 
 import android.Manifest
-import android.app.Activity
 import android.content.Intent
 import android.os.Build
 import android.provider.Settings
@@ -44,7 +43,6 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -61,7 +59,6 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
@@ -70,7 +67,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
-import androidx.core.view.WindowCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.core.ui.R
@@ -85,6 +81,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.rememberNimazPagerState
 import com.arshadshah.nimaz.presentation.theme.AdaptiveSpacing
 import com.arshadshah.nimaz.presentation.theme.AmiriFontFamily
+import com.arshadshah.nimaz.presentation.theme.LightStatusBarIcons
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.OnboardingArtColors
 import com.arshadshah.nimaz.presentation.viewmodel.onboarding.OnboardingEvent
@@ -142,15 +139,8 @@ fun OnboardingScreen(onComplete: () -> Unit, viewModel: OnboardingViewModel = hi
     var navigationJob by remember { mutableStateOf<Job?>(null) }
     var completing by remember { mutableStateOf(false) }
     val context = LocalContext.current
-    val view = LocalView.current
-    if (!view.isInEditMode) {
-        DisposableEffect(view) {
-            val controller = WindowCompat.getInsetsController((view.context as Activity).window, view)
-            val previous = controller.isAppearanceLightStatusBars
-            controller.isAppearanceLightStatusBars = false
-            onDispose { controller.isAppearanceLightStatusBars = previous }
-        }
-    }
+    // The illustrations are dark in both themes.
+    LightStatusBarIcons()
     val locationLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
         viewModel.onEvent(OnboardingEvent.UpdatePermissionStatus(location =
             it[Manifest.permission.ACCESS_FINE_LOCATION] == true || it[Manifest.permission.ACCESS_COARSE_LOCATION] == true))

@@ -59,7 +59,7 @@ eleven feature modules at once. PR 12 of #551 split it; the file is now 281 line
 | graph | destinations |  | graph | destinations |
 |---|---:|---|---|---:|
 | `quranGraph` | 19 | | `aboutGraph` | 7 |
-| `contentGraph` | 19 | | `searchGraph` | 4 |
+| `contentGraph` | 20 | | `searchGraph` | 4 |
 | `settingsGraph` | 20 | | `toolsGraph` | 2 |
 | `trackerGraph` | 14 | | `calendarGraph` | 2 |
 | `prayerGraph` | 5 | | `onboardingGraph` | 1 |
@@ -125,6 +125,7 @@ flowchart LR
     More --> Z["Zakat / Calendar"] & Names["Names & Prophets"] & Kh["Khatam"] & Qaida["Qaida"]
     More --> Misc["Bookmarks · Global search · Night worship"]
     More --> S["Settings §2.3"]
+    More --> LearnToPray["Learn to Pray"]
 ```
 
 ### 2.2 Content clusters
@@ -227,7 +228,7 @@ flowchart LR
 
 All routes live in `core/navigation/Routes.kt` and are wired in the eleven feature graph
 extensions (`NavGraph.kt` calls them; it registers nothing itself)
-(94 `composable<Route.X>` destinations). `data object` = no args; `data class` = typed args.
+(95 `composable<Route.X>` destinations). `data object` = no args; `data class` = typed args.
 Every route below also has a `ScreenTags` entry of the same name.
 
 ### 3.1 Bottom navigation (`BottomNavDestination`)
@@ -341,6 +342,7 @@ Every route below also has a `ScreenTags` entry of the same name.
 ### 3.10 Qaida (children's Arabic reader)
 | Route | Args | Screen |
 |-------|------|--------|
+| `LearnToPray` | — | LearnToPrayScreen — More → Learning; preparation, an explicit two-rak‘ah walkthrough, and lesson completion. Each step's recitations, audio notes and sources open in a sheet from the pinned *What to say* card. Citations emit `ContentTarget` to the graph, which uses `toRoute()` to open the existing Qur’an/hadith reader; Back retains the lesson position and figure. It never records a performed prayer. |
 | `QaidaHome` | — | QaidaHomeScreen |
 | `QaidaReader` | `lessonId: Int` | QaidaReaderScreen |
 | `QaidaLetters` | — | QaidaLettersScreen |

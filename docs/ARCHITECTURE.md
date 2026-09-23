@@ -913,6 +913,24 @@ typed route object.
 
 ## 8. Theming & components
 
+`LearnToPrayScreen` reuses `NimazScreenScaffold`, `NimazCard`, `NimazButton`, `NimazIconButton`,
+`NimazBottomSheet`, `ArabicText`, `NimazIcons`, theme typography and adaptive insets. The
+illustration is a separate decorative WebP, not a screenshot containing text. **The posture is the
+hero:** a teal stage (`LearnPrayArtColors` — the illustrations' own painted ground, so it is teal in
+both themes) runs under the status bar and carries back, the Man / Woman choice and the rak‘ah
+progress (two halves, the current step in `colorScheme.secondary`). The artwork is sized to its
+own 3:2 and its edges faded into the stage with a `DstIn` mask that covers the whole image — an
+oval alone leaves the corners and hard edge untouched. The stage needs light status-bar icons in
+both themes — see `LightStatusBarIcons` below. **Everything below the stage follows the selected app theme.** On a step, *What
+to say* is pinned above one row of controls (an outlined back icon beside the primary action), so
+the words are never scrolled out of reach: it previews the step's main recitation — the first
+with audio, so the standing step leads with Al-Fatihah rather than the optional opening — with
+Listen, and opens every recitation, audio notes and sources in a `NimazBottomSheet`.
+The existing `NimazSegmentedControl` switches between male and female illustration sets without
+changing the lesson position, recitations or sequence. `SavedStateHandle` restores the explicit
+illustration choice; it is not a gender inference or a synced profile field. Clothing notes
+separate illustration choices from sourced requirements and disputed posture/coverage details.
+
 ### 8.0 Accessibility — the obligation
 
 Three rules, and they are obligations rather than suggestions: the app shipped **373
@@ -1058,6 +1076,12 @@ with no label and a touch target under 48dp fail the lane we already run. It can
   once granted; a granted row names its result (the detected city when there is one). It is part
   of the pager, not a sheet. **Skip jumps to Setup rather than completing** — setup is what makes
   prayer times and reminders work — and Let's begin is the one way out, whatever was granted.
+- **A screen that paints something dark under the status bar in both themes** (the onboarding's
+  illustrations, Learn to Pray's posture stage) calls `LightStatusBarIcons()` (`theme/SystemBars.kt`)
+  rather than setting the insets controller itself. It re-applies in a `SideEffect` because
+  `NimazTheme` resets icon contrast in one on every recomposition, and a remembered effect runs
+  before side effects in the same pass — a one-off override loses as soon as the theme
+  recomposes (switching theme with the screen open), and the icons go dark on a dark surface.
 - **Components follow Atomic Design** (`atoms` → `molecules` → `organisms`). Reuse shared
   components (e.g. `NimazCard`, `PrayerTimeCard`, `NimazBackTopAppBar`,
   `NimazEmptyState`, `NimazLoadingState`, `NimazCalendar`) rather than re-rolling generic UI.
@@ -1760,6 +1784,22 @@ copy anything listed as Open.
 | Search result counts that disagreed with the results | `SearchStatsUiState` carried `quranCount`/`hadithCount`/`duaCount`/`surahCount` beside `totalResults`. `totalResults` counted `filteredResults`; the four counted the **unfiltered** per-corpus lists, so a HADITH filter over 3 hadith and 40 Qur'an matches reported `totalResults = 3` next to `quranCount = 40`. No screen read them, which is the only reason it never showed. Deleted rather than corrected — the filter chips already say which corpus is on screen. |
 
 ### Open (still to do — do not copy)
+
+**Learn to Pray release gates:** all lesson UI, meanings, posture and audio strings have
+complete keys in en/de/fr/id/ms/tr, without translation suppressions or non-translatable
+declarations. Canonical Arabic and transliteration are explicitly present in every locale.
+Human language review and qualified religious review remain required; resource coverage alone
+does not validate either. Reviewed canonical recitations should move into the content artifact
+before expanding this app-owned course.
+
+The owner approved the female visual set: upper-chest stacked hands, hands-on-thighs bow,
+natural compact sujud with tucked toes and slightly lifted elbows, and aligned sitting mat.
+The bow's hand placement remains an editorial variant without a supporting reference; do not
+attribute it to the male ruku narration. Product approval is not scholarly/anatomical sign-off.
+Seven recitations have sourced streaming audio; seven unmatched passages are explicitly
+unavailable pending exact recordings. See SUBSYSTEMS.md §1 for playback and source mapping.
+Device review must cover playback, TalkBack, 200% fonts, rotation, light/dark and tablet.
+
 
 | # | Area | Deviation | Canonical fix |
 |---|------|-----------|---------------|

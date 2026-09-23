@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="learn_pray_female_bowing_action">Say Allahu akbar and bow forward, keeping your arms close and your palms on your thighs just above your knees, fingers together. Pause calmly. This illustrated hand placement awaits a supporting reference; the recitation source does not verify the pose.</string>
+    <string name="learn_pray_female_prostration_action">Say Allahu akbar and lower into prostration. Keep your limbs close, forehead, nose and palms on the mat, toes tucked forward and heels raised. Keep your elbows slightly above the mat and your back comfortably curved, without forcing or compressing your body. Pause before reciting.</string>
+    <string name="learn_pray_female_second_action">Say Allahu akbar and make the second prostration in the same compact posture. Rest your forehead, nose and palms on the mat and pause before reciting.</string>
+    <string name="learn_pray_female_sitting_action">Say Allahu akbar and sit upright on the mat, with both feet folded to your right. Rest your hands on your thighs, fingers together and pointing forward. Pause, then ask Allah for forgiveness.</string>
+    <string name="learn_pray_female_tashahhud_action">Sit upright with both feet folded to your right. Rest your left hand on your thigh and extend your right index finger for the tashahhud. Recite calmly.</string>
+    <string name="learn_pray_female_takbir_action">Stand facing the qibla. Raise your hands close beside your head and say Allahu akbar. Place your right hand over your left high on your chest. Begin calmly.</string>
+    <string name="learn_pray_female_standing_action">Remain standing with your right hand over your left high on your chest. Recite Al-Fatihah, say Amin, then another passage of the Qur’an. Al-Ikhlas is one example, not a required choice.</string>
+    <string name="learn_pray_female_second_rakah_action">Say Allahu akbar as you stand. Place your right hand over your left high on your chest. Recite Al-Fatihah again, say Amin, then another passage. Follow the remaining movements one by one.</string>
+</resources>

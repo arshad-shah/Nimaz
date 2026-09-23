@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="learn_pray_audio_listen">Listen</string>
+    <string name="learn_pray_audio_stop">Stop audio</string>
+    <string name="learn_pray_audio_error">Audio could not be loaded. Check your connection and try again.</string>
+    <string name="learn_pray_audio_quran">Al-Husary · EveryAyah. Internet required.</string>
+    <string name="learn_pray_audio_hisn">Hisn al-Muslim · Arabic recording. Internet required; short phrases may repeat.</string>
+    <string name="learn_pray_audio_source">Audio source</string>
+    <string name="learn_pray_audio_pending">A matching recording is not available in this review build.</string>
+</resources>

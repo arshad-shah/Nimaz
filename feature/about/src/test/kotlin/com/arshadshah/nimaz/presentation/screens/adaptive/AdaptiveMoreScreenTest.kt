@@ -135,14 +135,14 @@ class AdaptiveMoreScreenTest {
 
         listOf(
             R.string.prayer_tracker, R.string.fasting, R.string.night_worship_title,
-            R.string.khatam_quran, R.string.qaida, R.string.names_title, R.string.hadith,
+            R.string.khatam_quran, R.string.learn_pray_title, R.string.qaida, R.string.names_title, R.string.hadith,
             R.string.duas, R.string.tafseer, R.string.calendar, R.string.prayer_times,
             R.string.monthly_prayer_times, R.string.zakat,
         ).forEach { composeRule.onNodeWithText(string(it)).performClick() }
 
         assertThat(navigated).containsExactly(
             Route.PrayerTracker, Route.FastingHome, Route.NightWorship, Route.KhatamList,
-            Route.QaidaHome, Route.Names(), Route.HadithHome, Route.DuaHome,
+            Route.LearnToPray, Route.QaidaHome, Route.Names(), Route.HadithHome, Route.DuaHome,
             Route.TafseerChapters, Route.IslamicCalendar, Route.PrayerTimes,
             Route.MonthlyPrayerTimes, Route.ZakatCalculator,
         ).inOrder()

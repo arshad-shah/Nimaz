@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="learn_pray_reference_quran">Al-Quran %1$s</string>
+    <string name="learn_pray_reference_bukhari">Sahih al-Bukhari %1$s</string>
+    <string name="learn_pray_reference_muslim">Sahih Muslim %1$s</string>
+    <string name="learn_pray_reference_abudawud">Sunan Abu Dawud %1$s</string>
+    <string name="learn_pray_reference_seekers">Huraian luaran: SeekersGuidance</string>
+    <string name="learn_pray_reference_askimam">Huraian luaran: Askimam</string>
+</resources>
