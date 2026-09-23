@@ -1,9 +1,13 @@
 package com.arshadshah.nimaz.presentation.components.atoms
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
@@ -21,10 +25,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.core.ui.R
@@ -174,6 +181,11 @@ fun NimazFilterChip(
 
 /**
  * Assist chip for actions.
+ *
+ * [trailingText] is a figure the chip carries beside its label — the verse count on a Topics
+ * branch chip — set in the brand colour so a row of chips reads as names *and* sizes.
+ * [swatch] replaces the leading icon with a small colour dot, for chips that key into a chart
+ * drawn above them (the Themes card's proportion bar).
  */
 @Composable
 fun NimazAssistChip(
@@ -183,22 +195,44 @@ fun NimazAssistChip(
     enabled: Boolean = true,
     leadingIcon: ImageVector? = null,
     elevated: Boolean = false,
-    shape: Shape = RoundedCornerShape(8.dp)
+    shape: Shape = RoundedCornerShape(8.dp),
+    trailingText: String? = null,
+    swatch: Color? = null,
 ) {
-    val leadingIconContent: (@Composable () -> Unit)? = leadingIcon?.let { icon ->
-        {
-            NimazIcon(
-                imageVector = icon,
-                contentDescription = null,
-                size = NimazIconSize.SMALL
-            )
+    val leadingIconContent: (@Composable () -> Unit)? = when {
+        swatch != null -> {
+            { Box(Modifier.size(8.dp).background(swatch, CircleShape)) }
+        }
+        leadingIcon != null -> {
+            {
+                NimazIcon(
+                    imageVector = leadingIcon,
+                    contentDescription = null,
+                    size = NimazIconSize.SMALL
+                )
+            }
+        }
+        else -> null
+    }
+    val labelContent: @Composable () -> Unit = {
+        if (trailingText == null) {
+            Text(label)
+        } else {
+            Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
+                Text(label)
+                Text(
+                    text = trailingText,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.SemiBold,
+                )
+            }
         }
     }
 
     if (elevated) {
         ElevatedAssistChip(
             onClick = onClick,
-            label = { Text(label) },
+            label = labelContent,
             modifier = modifier,
             enabled = enabled,
             leadingIcon = leadingIconContent,
@@ -207,7 +241,7 @@ fun NimazAssistChip(
     } else {
         AssistChip(
             onClick = onClick,
-            label = { Text(label) },
+            label = labelContent,
             modifier = modifier,
             enabled = enabled,
             leadingIcon = leadingIconContent,

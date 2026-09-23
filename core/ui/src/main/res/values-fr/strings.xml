@@ -1114,10 +1114,8 @@
     <string name="quran_topics_tree_thematic">Thèmes</string>
     <string name="quran_topics_tree_ontology">Catégories</string>
     <string name="quran_topics_tree_index">Index</string>
-    <string name="quran_topics_verses">%1$d versets</string>
     <string name="quran_topics_verse">1 verset</string>
     <string name="quran_topics_no_results_title">Aucun résultat</string>
-    <string name="quran_topics_no_results">Aucun sujet ne correspond à «\u00A0%1$s\u00A0». Essayez un mot plus court — l\'index cherche des mots entiers, pas des fragments.</string>
     <string name="quran_topics_unavailable_title">Les thèmes ne sont pas encore là</string>
     <string name="quran_topics_unavailable">Le contenu coranique de cette installation est antérieur à l\'index thématique. Il arrivera avec la prochaine mise à jour du contenu — rien à faire.</string>
     <string name="quran_topic_verses_section">Versets sur ce sujet</string>
@@ -1127,13 +1125,11 @@
     <string name="quran_topic_verses_across">%1$d dans %2$d sourates</string>
     <string name="quran_topic_surah_you_came_from">Cette sourate</string>
     <string name="quran_topic_in_surah">%1$d dans %2$s</string>
-    <string name="quran_topics_crumb_home">Tous les sujets</string>
     <string name="quran_topics_scope_search">Recherche dans les trois hiérarchies</string>
     <string name="quran_topics_scope_thematic">Un plan raisonné — doctrine, adoration, récits</string>
     <string name="quran_topics_scope_ontology">Par type de chose — personnes, lieux, événements</string>
     <string name="quran_topics_scope_index">La forme d\'un index imprimé</string>
     <string name="cd_topic_up">Remonter d\'un niveau</string>
-    <string name="cd_topic_focus">Commencer à %1$s</string>
     <string name="cd_tree_expand">Afficher ce qui se trouve sous %1$s</string>
     <string name="cd_tree_collapse">Masquer ce qui se trouve sous %1$s</string>
     <string name="quran_ayah_topics">Thèmes</string>

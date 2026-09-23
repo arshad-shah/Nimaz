@@ -920,26 +920,35 @@ schemes address screens this app has: 446 cross-references the source writes as 
   detail in `QuranTopic.homeTree`, the hierarchy that actually places that subject, since the
   thematic outline carries only 695 of the 2,512. The whole index stays one tap away at the
   bottom.
-- **`Route.QuranTopics`** browses all three hierarchies as **one tree that opens in place**: a
-  node's children insert beneath it, the breadcrumb is a bar of tappable crumbs rather than a
-  truncating top-bar string, and past three levels of indent a row offers to re-root the tree on
-  itself. `getBranchTopicIds(tree)` is one query per tree telling every row whether it is a branch,
-  which is what lets a leaf carry no disclosure control and open on its label instead. Reachable
-  from a labelled card on the Qur'an home (gated on `hasThematicContent()`), from `SurahSubjects`,
-  and from the reader's overflow in page/juz mode before a surah has resolved.
-- **`Route.QuranTopicDetail`** gives its four kinds of content four shapes: description as body
-  prose, subtopics as tree rows, related subjects as chips, and the citations grouped by surah
-  under sticky headers with a line of each verse — resolved for the whole list in one
-  `getTranslationsForAyahs` call, so a subject citing 153 verses costs two reads. Its `fromSurah`
-  argument is the surah the reader arrived from: it filters nothing, but that surah's group is
-  lifted to the front of an otherwise Qur'anic ordering and badged as such, a badge beside the
-  verse count gives its share, and the argument rides every lateral move — subtopic, related
-  subject, `topic:` cross-link — so the context survives more than one hop.
+- **`Route.QuranTopics`** is a front page with a shape per hierarchy: **Themes** as chapter
+  cards (a proportion bar of the chapter's branches, keyed to chips that open them), **Kinds** as a
+  two-column grid of tiles, and **Index** as a concordance — A–Z under letter headings with a
+  letter rail, or its 120 most-cited entries. Every tap opens a subject; nothing expands in place.
+  All three tabs are built from one **`TopicCatalog`** (`core/domain/model`), made by
+  `GetAllTopicsUseCase.catalog()` from two queries — every topic, and every citation as a bare
+  `(topic_id, ayah_id)` pair (`QuranDao.getAllTopicAyahPairs`, 30,687 rows) — so switching tabs
+  runs no query, and every count is **distinct verses through the whole branch**: the same set the
+  subject screen lists, where summing children double-counted verses cited under two siblings.
+  Search runs over the same catalogue in memory (name or Arabic name; prefix matches first, then
+  subtree size), and each result carries its path in the hierarchy it opens in. Reachable from a
+  labelled card on the Qur'an home (gated on `hasThematicContent()`), from `SurahSubjects`, and
+  from the reader's overflow in page/juz mode before a surah has resolved.
+- **`Route.QuranTopicDetail`** reads top to bottom: a hero with the branch's verse, surah and
+  subtopic counts; the path back up the hierarchy as links; the description as a gold-ruled note,
+  clamped with "Read more"; subtopics as swipeable cards counted through their own branches (from
+  the catalogue, arriving just after the detail); related subjects as chips; "Where it appears",
+  the five busiest surahs as bars; and the citations grouped by surah as folding cards — the first
+  open, three verses each until "Show all" — with a line of each verse, resolved for the whole
+  list in one `getTranslationsForAyahs` call. Its `fromSurah` argument is the surah the reader
+  arrived from: it filters nothing, but that surah's group is lifted to the front of an otherwise
+  Qur'anic ordering and badged as such, a badge under the hero gives its share, and the argument
+  rides every lateral move — subtopic, related subject, `topic:` cross-link — so the context
+  survives more than one hop.
 - The **Tafseer** screen shows the verse's subjects as chips, capped at six.
 
-Two new search kinds — `theme` and `topic` — ride the shipped FTS index, and topic search results
-carry their ancestor path, resolved for the whole result set by
-`QuranRepository.getTopicBreadcrumbs` at one query per level of depth rather than one per result.
+Two new search kinds — `theme` and `topic` — ride the shipped FTS index for library search. The
+Topics browser's own search does not: it runs over the in-memory `TopicCatalog`, which already
+holds every path.
 
 **Tafseer range blocks (`v21`, #329).** Tafseer is range-based, not ayah-based — a single commentary passage (e.g. Ibn Kathir discussing 43:81-89) is one block, not nine identical rows. `tafseer_texts` (one row per ayah, `ayah_id`/`surah_number`/`ayah_number`) is replaced by `tafseer_blocks` (`tafseer_id`, `surah_number`, `ayah_start`, `ayah_end`, `text`), indexed on `(tafseer_id, surah_number, ayah_start, ayah_end)`. `MIGRATION_20_21` drops the old table outright — it is shipped content, not user data, replaced wholesale by the schemaVersion 21 artifact (`nimaz-data` issue #1) — and creates the new one empty; the block rows arrive with that artifact. `TafseerDao.getTafseerForAyah(surahNumber, ayahNumber, tafseerId)` now matches by containment (`ayah_start <= ? AND ayah_end >= ?`) instead of equality. `tafseer_highlights`/`tafseer_notes` (user data) are untouched: they stay keyed by the single `ayah_id` they were made on — the offsets they store index into the block text, which is unchanged for that ayah — but the reader now gathers every highlight/note whose ayah falls inside the *displayed block's* range (`TafseerDao.getHighlightsForRange`/`getNotesForRange`, joined against `ayahs`) so an annotation shows whenever its block is on screen, not only on the exact ayah it was created on. `TafseerPageContent` renders a "Commentary on 43:81-89" header from the block's own range, and `TafseerViewModel` hoists the reader's content-page index into `TafseerUiState.currentTafseerPage` so swiping to the next ayah of the same block holds reading position instead of reopening the block from page 1.
 

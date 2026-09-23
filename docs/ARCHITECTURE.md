@@ -1682,12 +1682,17 @@ treatment. Verse-of-the-Day and continue-reading previously both carried
   (`FILL` / `WRAP`) for the intrinsic sizing its call sites in a shared row depended on, and the
   lift from `NimazSegmentedTabs`. Migrating the eight `NimazPillTabs` call sites is what makes the
   Qur'an redesign's "one control for all of them" true rather than aspirational.
-- **`NimazTreeRow`** (molecule, `components/molecules/NimazTreeRow.kt`) is the tree component for
-  the subject browser: a row with depth-based indent ruling, RTL handling, an optional `NimazBadge`
-  count, secondary/supporting text, trailing content, and a 48dp `NimazIconButton` chevron for
-  expand/collapse. It already existed before this redesign and is already the tree row consumed by
-  `QuranTopicsScreen`, `QuranTopicDetailScreen` and `SurahSubjectsScreen` — the three screens later
-  phases of this redesign rewrite — so it is the tree component to build on, not to duplicate.
+- **`NimazTreeRow`** (molecule, `components/molecules/NimazTreeRow.kt`) is the tree row: depth-based
+  indent ruling, RTL handling, an optional `NimazBadge` count, secondary/supporting text, trailing
+  content, and a 48dp `NimazIconButton` chevron for expand/collapse. `SurahSubjectsScreen` uses
+  it. The Topics browser and subject screen **stopped** using it in the 2026-09 redesign, which
+  replaced the one indented tree with a shape per hierarchy (chapter cards, kind tiles, an A–Z
+  concordance) and moved "what is under this" onto the subject screen as subtopic cards — the
+  pieces are `components/organisms/TopicCards.kt` in `:feature:quran`, built on `NimazCard`,
+  `NimazIconWell`, `NimazAssistChip`, `NimazProgressTrack`, `NimazAccordion` and `CitationRow`.
+  `NimazAssistChip` grew `trailingText` (a count set in the brand colour) and `swatch` (a colour
+  dot keyed to a chart above it) for the Themes card's branch chips, rather than the card
+  hand-rolling a chip.
 - **`QuranFrame`'s two variants have parted company.** `READER` — the mushaf page — takes the
   paper register: a `paper` ground inside a 16dp rounded card, a second `paperLine` keyline drawn
   **inside** it at 12dp, and the page number as a small `paper`-filled pill straddling that

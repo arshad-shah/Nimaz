@@ -4,13 +4,15 @@ import androidx.lifecycle.ViewModel
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.core.monitoring.launchSafely
+import com.arshadshah.nimaz.core.common.DefaultDispatcher
 import com.arshadshah.nimaz.domain.model.QuranTopic
+import com.arshadshah.nimaz.domain.model.TopicCatalog
 import com.arshadshah.nimaz.domain.model.TopicCitation
 import com.arshadshah.nimaz.domain.model.TopicTree
 import com.arshadshah.nimaz.domain.repository.settings.QuranPreferences
 import com.arshadshah.nimaz.domain.usecase.QuranUseCases
-import com.arshadshah.nimaz.domain.usecase.quran.RollUpTopicCounts
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,10 +22,8 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
-
-/** One visible row of the tree: a subject, and how far in it sits. */
-data class TopicRowItem(val topic: QuranTopic, val depth: Int)
 
 /**
  * One surah's worth of a topic's citations, under the surah's own name.
@@ -36,6 +36,7 @@ data class CitationGroup(
     val surahName: String,
     val citations: List<TopicCitation>,
     val isFromSurah: Boolean = false,
+    val surahArabicName: String = "",
 )
 
 /** The surah a subject was opened from, and how much of this subject sits in it. */
@@ -48,9 +49,9 @@ data class TopicSurahContext(
 @HiltViewModel
 class QuranTopicsViewModel @Inject constructor(
     private val quranUseCases: QuranUseCases,
-    private val rollUpTopicCounts: RollUpTopicCounts,
     private val quranSettings: QuranPreferences,
     private val telemetry: Telemetry,
+    @DefaultDispatcher private val computeDispatcher: CoroutineDispatcher,
 ) : ViewModel() {
 
     private val _browseState = MutableStateFlow(TopicBrowseState())
@@ -65,14 +66,10 @@ class QuranTopicsViewModel @Inject constructor(
     private val queries = MutableStateFlow("")
 
     /**
-     * The in-flight browse navigation — a focus or a crumb rebase.
-     *
-     * One handle, because the browser is at one place at a time. Without it, tapping crumb 0
-     * and then crumb 2 left both `getTopicChildren` calls racing, and each ends in a whole-state
-     * update setting `focus` *and* `level` together: whichever query was slower wrote last, so
-     * a reader who tapped crumb 2 landed on crumb 0.
+     * The subject index, once loaded. Kept so a search is a lookup rather than a query, and so
+     * the detail screen's subtopic counts come from the same numbers the browser's cards showed.
      */
-    private var browseJob: Job? = null
+    private var catalog: TopicCatalog? = null
 
     /** The in-flight topic-detail load. See [requestedTopicId]. */
     private var detailJob: Job? = null
@@ -101,24 +98,20 @@ class QuranTopicsViewModel @Inject constructor(
     fun onEvent(event: QuranTopicsEvent) {
         when (event) {
             QuranTopicsEvent.OpenBrowser -> {
-                if (_browseState.value.level.isEmpty()) loadRoots(_browseState.value.tree)
+                if (catalog == null) loadCatalog()
             }
 
             is QuranTopicsEvent.SelectTree -> {
-                telemetry.featureUsed(AppAnalytics.Feature.QURAN_TOPICS, "select_tree")
-                selectTree(event.tree)
+                if (event.tree != _browseState.value.tree) {
+                    telemetry.featureUsed(AppAnalytics.Feature.QURAN_TOPICS, "select_tree")
+                    _browseState.update { it.copy(tree = event.tree) }
+                }
             }
 
-            is QuranTopicsEvent.Toggle -> toggle(event.topic)
-
-            is QuranTopicsEvent.Focus -> {
-                telemetry.featureUsed(AppAnalytics.Feature.QURAN_TOPICS, "focus_branch")
-                focus(event.topic)
+            is QuranTopicsEvent.SetIndexSort -> {
+                telemetry.featureUsed(AppAnalytics.Feature.QURAN_TOPICS, "index_sort")
+                _browseState.update { it.copy(indexSort = event.sort) }
             }
-
-            is QuranTopicsEvent.RebaseTo -> rebaseTo(event.index)
-
-            QuranTopicsEvent.Back -> back()
 
             is QuranTopicsEvent.Search -> {
                 _browseState.update { it.copy(searchQuery = event.query) }
@@ -130,7 +123,6 @@ class QuranTopicsViewModel @Inject constructor(
                     it.copy(
                         searchQuery = "",
                         searchResults = emptyList(),
-                        searchPaths = emptyMap(),
                         isSearching = false,
                     )
                 }
@@ -158,9 +150,9 @@ class QuranTopicsViewModel @Inject constructor(
     }
 
     /**
-     * Debounced so a query is run once the typing settles, not once per keystroke. Each search
-     * is an FTS walk plus an `IN (…)` over up to 60 ids; at one per character a fast typist
-     * would queue a dozen of them to display the last.
+     * Debounced so a query is run once the typing settles, not once per keystroke. The search
+     * itself is in memory, but it walks 2,512 names and ranks the matches by subtree size — at
+     * one per character a fast typist would queue a dozen of those to display the last.
      */
     @OptIn(FlowPreview::class)
     private fun observeQueries() {
@@ -173,210 +165,98 @@ class QuranTopicsViewModel @Inject constructor(
                         _browseState.update {
                             it.copy(
                                 searchResults = emptyList(),
-                                searchPaths = emptyMap(),
                                 isSearching = false,
                             )
                         }
                         return@collect
                     }
                     _browseState.update { it.copy(isSearching = true) }
-                    // Logged post-debounce, where the FTS walk actually happens. The topic
-                    // search ran the most expensive query in the feature and logged nothing,
-                    // so its usage read as zero next to `select_tree` and `focus_branch`.
+                    // Logged post-debounce, where the search actually runs, so its usage reads
+                    // beside `select_tree` rather than as zero.
                     telemetry.search(AppAnalytics.Feature.QURAN_TOPICS, query.trim().length)
-                    val tree = _browseState.value.tree
-                    val results = quranUseCases.searchTopics(query)
-                    val paths = quranUseCases.searchTopics.pathsFor(results, tree)
+                    val index = catalog ?: catalogOrNull()
+                    val hits = if (index == null) emptyList() else withContext(computeDispatcher) {
+                        index.search(query).map { topic ->
+                            val tree = topic.homeTree
+                            TopicSearchHit(
+                                topic = topic,
+                                tree = tree,
+                                path = index.path(topic.id, tree),
+                                verseCount = index.verseCount(topic.id, tree),
+                            )
+                        }
+                    }
                     _browseState.update { state ->
                         // The query may have been cleared while this was in flight; dropping the
                         // stale result is what keeps a cleared box from repopulating itself.
                         if (state.searchQuery.isBlank()) state
-                        else state.copy(
-                            searchResults = results,
-                            searchPaths = paths,
-                            isSearching = false,
-                        )
+                        else state.copy(searchResults = hits, isSearching = false)
                     }
                 }
         }
     }
 
-    private fun selectTree(tree: TopicTree) {
-        if (tree == _browseState.value.tree) return
-        // A different hierarchy is a different set of parents, so nothing carries over: not the
-        // focus, not what was open, and not the cached children keyed by a parent id that means
-        // something else here.
-        _browseState.update {
-            it.copy(
-                tree = tree,
-                focus = emptyList(),
-                expanded = emptySet(),
-                children = emptyMap(),
-                isLoading = true,
+    /**
+     * The whole subject index, counted once for all three tabs.
+     *
+     * Two queries and one fold, whatever tab is showing — so switching tabs never waits, and
+     * every number on every card is the same distinct-verse count the subject screen lists.
+     */
+    private fun loadCatalog() {
+        launchSafely(
+            telemetry, AppAnalytics.Feature.QURAN_TOPICS, "load_catalog",
+            // The browse screen has no error surface of its own — `isAvailable` already
+            // distinguishes "this install has no thematic content" from an empty tab, and a
+            // failed read is a third thing. Clearing the spinner resolves it to the unavailable
+            // copy, which is at least true of what is on screen.
+            onFailure = { _browseState.update { it.copy(isLoading = false, isAvailable = false) } },
+        ) {
+            val index = catalogOrNull()
+            if (index == null) {
+                _browseState.update { it.copy(isLoading = false, isAvailable = false) }
+                return@launchSafely
+            }
+            val tabs = withContext(computeDispatcher) { browseTabs(index) }
+            _browseState.update {
+                it.copy(
+                    themes = tabs.themes,
+                    kinds = tabs.kinds,
+                    index = tabs.index,
+                    isLoading = false,
+                    isAvailable = true,
+                )
+            }
+        }
+    }
+
+    /** The catalogue, loading it on first use. Null when this install has no subject index. */
+    private suspend fun catalogOrNull(): TopicCatalog? {
+        catalog?.let { return it }
+        if (!quranUseCases.hasThematicContent()) return null
+        return quranUseCases.getAllTopics.catalog().takeUnless { it.isEmpty }?.also { catalog = it }
+    }
+
+    private fun browseTabs(index: TopicCatalog): TopicBrowseState {
+        fun tally(tree: TopicTree) = { topic: QuranTopic ->
+            TopicTally(
+                topic = topic,
+                verseCount = index.verseCount(topic.id, tree),
+                childCount = index.childCount(topic.id, tree),
             )
         }
-        loadRoots(tree)
-    }
-
-    private fun loadRoots(tree: TopicTree) {
-        launchSafely(
-            telemetry, AppAnalytics.Feature.QURAN_TOPICS, "load_roots",
-            // The browse screen has no error surface of its own — `isAvailable` already
-            // distinguishes "this install has no thematic content" from "this branch is
-            // empty", and a failed read is a third thing. Clearing the spinner resolves it
-            // to the unavailable copy, which is at least true of what is on screen.
-            onFailure = { _browseState.update { it.copy(isLoading = false) } },
-        ) {
-            val available = quranUseCases.hasThematicContent()
-            val roots = if (available) quranUseCases.getTopicTreeRoots(tree) else emptyList()
-            val branches =
-                if (available) quranUseCases.getTopicChildren.branchesIn(tree) else emptySet()
-            // Once per tree load, here — not per composition, and not per row. A branch's own
-            // citation count is usually zero, so without this the three roots opened reading
-            // "0 verses" under a home screen advertising 2,512 subjects.
-            val counts = if (available) {
-                rollUpTopicCounts(quranUseCases.getAllTopics(), tree)
-            } else {
-                emptyMap()
-            }
-            _browseState.update {
-                it.copy(
-                    level = roots,
-                    branchIds = branches,
-                    rolledUpCounts = counts,
-                    isLoading = false,
-                    isAvailable = available,
+        val thematic = tally(TopicTree.THEMATIC)
+        return TopicBrowseState(
+            themes = index.roots(TopicTree.THEMATIC).map { root ->
+                TopicThemeCard(
+                    root = thematic(root),
+                    branches = index.children(root.id, TopicTree.THEMATIC).map(thematic),
                 )
-            }
-        }
-    }
-
-    /**
-     * Open or close a node.
-     *
-     * Closing keeps the descendants' open state — reopening restores the shape the reader had
-     * rather than making them walk back down. Opening loads the children once; after that the
-     * map answers and there is no query at all.
-     */
-    private fun toggle(topic: QuranTopic) {
-        val state = _browseState.value
-        if (topic.id in state.expanded) {
-            _browseState.update { it.copy(expanded = it.expanded - topic.id) }
-            return
-        }
-        if (state.children.containsKey(topic.id)) {
-            _browseState.update { it.copy(expanded = it.expanded + topic.id) }
-            return
-        }
-        val focusWhenAsked = state.focus
-        launchSafely(telemetry, AppAnalytics.Feature.QURAN_TOPICS, "toggle") {
-            val loaded = quranUseCases.getTopicChildren(topic.id, state.tree)
-            _browseState.update {
-                // An empty result means the branch set and the corpus disagree. Cache it anyway
-                // so the row stops asking, and leave it closed rather than opening onto nothing.
-                //
-                // Caching is always safe — a node's children do not depend on where the browser
-                // is. *Expanding* does: a focus or rebase landing while this was in flight reset
-                // `expanded` and moved to a different level, where this row is not on screen, so
-                // opening it would re-open a node the reader had just navigated away from.
-                //
-                // Deliberately not sharing `browseJob`: two toggles on two rows are both
-                // legitimate and must not cancel each other.
-                it.copy(
-                    children = it.children + (topic.id to loaded),
-                    expanded = when {
-                        loaded.isEmpty() -> it.expanded
-                        it.focus != focusWhenAsked -> it.expanded
-                        else -> it.expanded + topic.id
-                    },
-                )
-            }
-        }
-    }
-
-    /** Re-root on [topic], with everything between the current root and it becoming crumbs. */
-    private fun focus(topic: QuranTopic) {
-        val state = _browseState.value
-        val trail = state.focus + ancestorsWithin(state, topic) + topic
-        browseJob?.cancel()
-        browseJob = launchSafely(telemetry, AppAnalytics.Feature.QURAN_TOPICS, "focus") {
-            val level = state.children[topic.id]
-                ?: quranUseCases.getTopicChildren(topic.id, state.tree)
-            _browseState.update {
-                it.copy(
-                    focus = trail,
-                    level = level,
-                    expanded = emptySet(),
-                    children = it.children + (topic.id to level),
-                    searchQuery = "",
-                    searchResults = emptyList(),
-                    searchPaths = emptyMap(),
-                )
-            }
-        }
-    }
-
-    private fun rebaseTo(index: Int) {
-        val state = _browseState.value
-        if (index >= state.focus.lastIndex) return
-        if (index < 0) {
-            _browseState.update {
-                it.copy(focus = emptyList(), expanded = emptySet(), isLoading = true)
-            }
-            loadRoots(state.tree)
-            return
-        }
-        val trail = state.focus.take(index + 1)
-        val target = trail.last()
-        browseJob?.cancel()
-        browseJob = launchSafely(
-            telemetry,
-            AppAnalytics.Feature.QURAN_TOPICS,
-            "rebase_to",
-            onFailure = { _browseState.update { it.copy(isLoading = false) } },
-        ) {
-            val level = state.children[target.id]
-                ?: quranUseCases.getTopicChildren(target.id, state.tree)
-            _browseState.update {
-                it.copy(focus = trail, level = level, expanded = emptySet())
-            }
-        }
-    }
-
-    /**
-     * Close the innermost open node, else step out of one focus.
-     *
-     * Innermost, not outermost: a reader who opened three levels expects back to undo the last
-     * of them, the way it undoes the last of anything else.
-     */
-    private fun back() {
-        val state = _browseState.value
-        val deepest = state.rows.lastOrNull { it.topic.id in state.expanded }
-        if (deepest != null) {
-            _browseState.update { it.copy(expanded = it.expanded - deepest.topic.id) }
-            return
-        }
-        if (state.focus.isNotEmpty()) rebaseTo(state.focus.lastIndex - 1)
-    }
-
-    /**
-     * [topic]'s ancestors inside what is currently on screen, root-first.
-     *
-     * Walked with the parent ids the model already carries rather than a query, against an
-     * index of the nodes this browser has loaded. The visited set is the same guard the
-     * repository's breadcrumb walk uses: the corpus's parents are not guaranteed acyclic.
-     */
-    private fun ancestorsWithin(state: TopicBrowseState, topic: QuranTopic): List<QuranTopic> {
-        val loaded = (state.level + state.children.values.flatten()).associateBy { it.id }
-        val trail = ArrayDeque<QuranTopic>()
-        val seen = mutableSetOf(topic.id)
-        var parentId = topic.parentIn(state.tree)
-        while (parentId != null && seen.add(parentId)) {
-            val parent = loaded[parentId] ?: break
-            trail.addFirst(parent)
-            parentId = parent.parentIn(state.tree)
-        }
-        return trail.toList()
+            },
+            kinds = index.roots(TopicTree.ONTOLOGY).map(tally(TopicTree.ONTOLOGY)),
+            index = index.roots(TopicTree.INDEX)
+                .map(tally(TopicTree.INDEX))
+                .sortedBy { it.topic.name.lowercase() },
+        )
     }
 
     /**
@@ -448,17 +328,16 @@ class QuranTopicsViewModel @Inject constructor(
                 return@launchSafely
             }
 
-            val names = quranUseCases.getSurahList().first().associate {
-                it.number to it.nameEnglish
-            }
+            val surahs = quranUseCases.getSurahList().first().associateBy { it.number }
             val groups = detail.citations
                 .groupBy { it.surahNumber }
                 .map { (surah, citations) ->
                     CitationGroup(
                         surahNumber = surah,
-                        surahName = names[surah].orEmpty(),
+                        surahName = surahs[surah]?.nameEnglish.orEmpty(),
                         citations = citations,
                         isFromSurah = surah == fromSurah,
+                        surahArabicName = surahs[surah]?.nameArabic.orEmpty(),
                     )
                 }
                 .sortedByDescending { it.isFromSurah }
@@ -482,6 +361,23 @@ class QuranTopicsViewModel @Inject constructor(
                 },
                 isLoading = false,
             )
+
+            // The children's subtree counts. A branch's own count is usually zero, so without the
+            // catalogue "Prophets" listed twenty-five subtopics reading "0 verses" each.
+            if (detail.children.isNotEmpty()) {
+                val index = catalogOrNull()
+                if (index != null && requestedTopicId == topicId) {
+                    val subtopics = withContext(computeDispatcher) {
+                        index.children(topicId, detail.tree).map {
+                            TopicTally(it, index.verseCount(it.id, detail.tree), index.childCount(it.id, detail.tree))
+                        }
+                    }
+                    _detailState.update { state ->
+                        if (state.detail?.topic?.id != topicId) state
+                        else state.copy(subtopics = subtopics)
+                    }
+                }
+            }
 
             val previews = previewsFor(detail.citations.map { it.ayahId })
             if (previews.isNotEmpty()) {

@@ -16,6 +16,7 @@ import com.arshadshah.nimaz.domain.model.QuranTopic
 import com.arshadshah.nimaz.domain.model.SurahInfo
 import com.arshadshah.nimaz.domain.model.SurahOverview
 import com.arshadshah.nimaz.domain.model.SurahTopic
+import com.arshadshah.nimaz.domain.model.TopicCatalog
 import com.arshadshah.nimaz.domain.model.TopicDetail
 import com.arshadshah.nimaz.domain.model.TopicTree
 import com.arshadshah.nimaz.domain.model.SurahWithAyahs
@@ -242,6 +243,13 @@ class GetAllTopicsUseCase @Inject constructor(
     private val repository: QuranRepository
 ) {
     suspend operator fun invoke(): List<QuranTopic> = repository.getAllTopics()
+
+    /**
+     * The whole subject index with its citations, for the browser's cards and counts. Two
+     * queries, whatever is on screen — see [TopicCatalog].
+     */
+    suspend fun catalog(): TopicCatalog =
+        TopicCatalog(repository.getAllTopics(), repository.getTopicAyahIds())
 }
 
 class GetTopicChildrenUseCase @Inject constructor(

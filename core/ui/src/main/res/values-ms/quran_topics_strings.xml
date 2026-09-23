@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The Topics browser and subject screen (the 2026-09 redesign). -->
+<resources>
+    <!-- The count pre-formatted with grouping ("1,041"), which %d does not do. -->
+    <string name="quran_topics_verse_count">%1$s ayat</string>
+    <string name="quran_topics_branches">%1$d cabang</string>
+    <string name="quran_topics_sub_entries">%1$d sub-entri</string>
+    <string name="quran_topics_sort_az">A–Z</string>
+    <string name="quran_topics_sort_most_cited">Paling banyak dipetik</string>
+    <string name="quran_topics_most_cited_footer">%1$d teratas daripada %2$s — selebihnya dalam A–Z</string>
+    <string name="quran_topics_no_match">Tiada subjek sepadan dengan “%1$s”. Cuba perkataan yang lebih pendek, atau bahasa Arabnya.</string>
+    <string name="cd_topics_jump_to_letter">Lompat ke %1$s</string>
+    <string name="quran_topic_stat_verses">ayat</string>
+    <string name="quran_topic_stat_surahs">surah</string>
+    <string name="quran_topic_stat_subtopics">subtopik</string>
+    <string name="quran_topic_path_prefix">Dalam</string>
+    <string name="quran_topic_read_more">Baca lagi</string>
+    <string name="quran_topic_read_less">Tunjuk kurang</string>
+    <string name="quran_topic_where_it_appears">Di mana ia muncul</string>
+    <string name="quran_topic_top_of">%1$d teratas daripada %2$d</string>
+    <string name="quran_topic_show_all">Tunjuk semua %1$d</string>
+    <string name="quran_topic_no_verses">Belum ada ayat dikaitkan dengan subjek ini.</string>
+</resources>

@@ -589,6 +589,9 @@ class QuranRepositoryImpl @Inject constructor(
     override suspend fun getAllTopics(): List<QuranTopic> =
         quranDao.getAllTopics().map { it.toDomain() }
 
+    override suspend fun getTopicAyahIds(): Map<Int, List<Int>> =
+        quranDao.getAllTopicAyahPairs().groupBy({ it.topicId }, { it.ayahId })
+
     override suspend fun getTopicBreadcrumbs(
         topicIds: List<Int>,
         tree: TopicTree

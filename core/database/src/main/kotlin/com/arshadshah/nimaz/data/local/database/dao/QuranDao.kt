@@ -29,6 +29,7 @@ import com.arshadshah.nimaz.data.local.database.entity.SurahEntity
 import com.arshadshah.nimaz.data.local.database.entity.SurahInfoEntity
 import com.arshadshah.nimaz.data.local.database.entity.SurahOverviewEntity
 import com.arshadshah.nimaz.data.local.database.entity.SurahOverviewSectionEntity
+import com.arshadshah.nimaz.data.local.database.entity.TopicAyahPair
 import com.arshadshah.nimaz.data.local.database.entity.TopicWithSurahCount
 import com.arshadshah.nimaz.data.local.database.entity.TranslationEntity
 import kotlinx.coroutines.flow.Flow
@@ -587,10 +588,18 @@ interface QuranDao {
      * per node would be 2,512 queries to label one list, and asking only for what is expanded
      * would report a collapsed branch as its own citation count, which is the "0 verses" a root
      * used to show. One query over a table of a few thousand rows, folded once per tree load
-     * and cached; see `RollUpTopicCounts`.
+     * and cached; see `TopicCatalog`.
      */
     @Query("SELECT * FROM quran_topics")
     suspend fun getAllTopics(): List<QuranTopicEntity>
+
+    /**
+     * Every citation as a bare (topic, verse) pair — 30,687 of them — for the in-memory catalogue
+     * the subject browser counts over. Two integer columns rather than the entity, because the
+     * surah and ayah numbers ride along on every row and nothing here reads them.
+     */
+    @Query("SELECT topic_id, ayah_id FROM quran_topic_ayahs")
+    suspend fun getAllTopicAyahPairs(): List<TopicAyahPair>
 
     @Query("SELECT COUNT(*) FROM quran_topics")
     suspend fun countTopics(): Int

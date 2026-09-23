@@ -1093,10 +1093,8 @@
     <string name="quran_topics_tree_thematic">Themen</string>
     <string name="quran_topics_tree_ontology">Arten</string>
     <string name="quran_topics_tree_index">Register</string>
-    <string name="quran_topics_verses">%1$d Verse</string>
     <string name="quran_topics_verse">1 Vers</string>
     <string name="quran_topics_no_results_title">Keine Treffer</string>
-    <string name="quran_topics_no_results">Kein Thema passt zu „%1$s“. Versuchen Sie ein kürzeres Wort — das Register findet ganze Wörter, keine Wortteile.</string>
     <string name="quran_topics_unavailable_title">Themen sind noch nicht verfügbar</string>
     <string name="quran_topics_unavailable">Die Koran-Inhalte dieser Installation sind älter als das Themenregister. Es kommt mit der nächsten Inhaltsaktualisierung — Sie müssen nichts tun.</string>
     <string name="quran_topic_verses_section">Verse zu diesem Thema</string>
@@ -1106,13 +1104,11 @@
     <string name="quran_topic_verses_across">%1$d in %2$d Suren</string>
     <string name="quran_topic_surah_you_came_from">Diese Sure</string>
     <string name="quran_topic_in_surah">%1$d in %2$s</string>
-    <string name="quran_topics_crumb_home">Alle Themen</string>
     <string name="quran_topics_scope_search">Durchsucht alle drei Gliederungen</string>
     <string name="quran_topics_scope_thematic">Eine kuratierte Gliederung — Glaube, Gottesdienst, Geschichten</string>
     <string name="quran_topics_scope_ontology">Nach Art der Sache — Personen, Orte, Ereignisse</string>
     <string name="quran_topics_scope_index">Der Aufbau eines gedruckten Registers</string>
     <string name="cd_topic_up">Eine Ebene höher</string>
-    <string name="cd_topic_focus">Bei %1$s beginnen</string>
     <string name="cd_tree_expand">Anzeigen, was unter %1$s liegt</string>
     <string name="cd_tree_collapse">Ausblenden, was unter %1$s liegt</string>
     <string name="quran_ayah_topics">Themen</string>

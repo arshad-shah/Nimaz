@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The Topics browser and subject screen (the 2026-09 redesign). -->
+<resources>
+    <!-- The count pre-formatted with grouping ("1,041"), which %d does not do. -->
+    <string name="quran_topics_verse_count">%1$s versets</string>
+    <string name="quran_topics_branches">%1$d branches</string>
+    <string name="quran_topics_sub_entries">%1$d sous-entrées</string>
+    <string name="quran_topics_sort_az">A–Z</string>
+    <string name="quran_topics_sort_most_cited">Les plus cités</string>
+    <string name="quran_topics_most_cited_footer">Top %1$d sur %2$s — les autres sont dans A–Z</string>
+    <string name="quran_topics_no_match">Aucun sujet ne correspond à « %1$s ». Essayez un mot plus court, ou son arabe.</string>
+    <string name="cd_topics_jump_to_letter">Aller à %1$s</string>
+    <string name="quran_topic_stat_verses">versets</string>
+    <string name="quran_topic_stat_surahs">sourates</string>
+    <string name="quran_topic_stat_subtopics">sous-thèmes</string>
+    <string name="quran_topic_path_prefix">Dans</string>
+    <string name="quran_topic_read_more">Lire la suite</string>
+    <string name="quran_topic_read_less">Réduire</string>
+    <string name="quran_topic_where_it_appears">Où il apparaît</string>
+    <string name="quran_topic_top_of">Top %1$d sur %2$d</string>
+    <string name="quran_topic_show_all">Tout afficher (%1$d)</string>
+    <string name="quran_topic_no_verses">Aucun verset n\'est encore lié à ce sujet.</string>
+</resources>

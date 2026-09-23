@@ -142,6 +142,12 @@ interface QuranRepository {
     suspend fun getAllTopics(): List<QuranTopic>
 
     /**
+     * Every citation, as verse ids keyed by topic id. With [getAllTopics] this is the whole
+     * subject index, which [com.arshadshah.nimaz.domain.model.TopicCatalog] counts over.
+     */
+    suspend fun getTopicAyahIds(): Map<Int, List<Int>>
+
+    /**
      * Where each of [topicIds] sits, root-first and excluding the topic itself.
      *
      * For a *set* of topics at once, because the caller is a search result list: resolving one

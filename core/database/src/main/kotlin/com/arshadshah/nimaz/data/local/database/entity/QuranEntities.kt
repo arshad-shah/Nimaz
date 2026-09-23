@@ -460,3 +460,9 @@ data class TopicWithSurahCount(
     @Embedded val topic: QuranTopicEntity,
     @ColumnInfo(name = "verses_here") val versesHere: Int,
 )
+
+/** One citation reduced to its two keys. See `QuranDao.getAllTopicAyahPairs`. */
+data class TopicAyahPair(
+    @ColumnInfo(name = "topic_id") val topicId: Int,
+    @ColumnInfo(name = "ayah_id") val ayahId: Int,
+)
