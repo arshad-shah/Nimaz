@@ -1693,6 +1693,13 @@ treatment. Verse-of-the-Day and continue-reading previously both carried
   `NimazAssistChip` grew `trailingText` (a count set in the brand colour) and `swatch` (a colour
   dot keyed to a chart above it) for the Themes card's branch chips, rather than the card
   hand-rolling a chip.
+- **`NimazIndexRail`** (molecule) is the A–Z strip beside a long alphabetical list. It follows the
+  list (the `current` letter is filled, its neighbours swell) and scrubs: a drag hands each letter
+  passed to `onSelect` with a haptic tick, skipping letters not in `available`, while a teardrop
+  bubble whose tip sits on the letter's centre line shows the letter and a label. The bubble is
+  laid out unbounded and zero-sized outside the rail — inheriting the 28dp rail's constraints is
+  what crushed it — and every letter is its own "Jump to M" accessibility node. The Topics Index
+  pairs it with `stickyHeader` letter headings that turn solid while pinned.
 - **`QuranFrame`'s two variants have parted company.** `READER` — the mushaf page — takes the
   paper register: a `paper` ground inside a 16dp rounded card, a second `paperLine` keyline drawn
   **inside** it at 12dp, and the page number as a small `paper`-filled pill straddling that

@@ -9,7 +9,7 @@
     <string name="quran_topics_sort_most_cited">Paling banyak dikutip</string>
     <string name="quran_topics_most_cited_footer">%1$d teratas dari %2$s — sisanya ada di A–Z</string>
     <string name="quran_topics_no_match">Tidak ada subjek yang cocok dengan “%1$s”. Coba kata yang lebih pendek, atau bahasa Arabnya.</string>
-    <string name="cd_topics_jump_to_letter">Lompat ke %1$s</string>
+    <string name="cd_index_rail_jump">Lompat ke %1$s</string>
     <string name="quran_topic_stat_verses">ayat</string>
     <string name="quran_topic_stat_surahs">surah</string>
     <string name="quran_topic_stat_subtopics">subtopik</string>
@@ -20,4 +20,9 @@
     <string name="quran_topic_top_of">%1$d teratas dari %2$d</string>
     <string name="quran_topic_show_all">Tampilkan semua %1$d</string>
     <string name="quran_topic_no_verses">Belum ada ayat yang terhubung ke subjek ini.</string>
+    <string name="quran_topics_entry">1 entri</string>
+    <string name="quran_topics_entries">%1$s entri</string>
+    <!-- "M · 992 of 1,780": the letter you are in, where it starts, and the index's size. -->
+    <string name="quran_topics_index_position">%1$s · %2$s dari %3$s</string>
+    <string name="quran_topics_sub_entry">1 sub-entri</string>
 </resources>

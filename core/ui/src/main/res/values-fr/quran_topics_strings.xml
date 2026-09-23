@@ -9,7 +9,7 @@
     <string name="quran_topics_sort_most_cited">Les plus cités</string>
     <string name="quran_topics_most_cited_footer">Top %1$d sur %2$s — les autres sont dans A–Z</string>
     <string name="quran_topics_no_match">Aucun sujet ne correspond à « %1$s ». Essayez un mot plus court, ou son arabe.</string>
-    <string name="cd_topics_jump_to_letter">Aller à %1$s</string>
+    <string name="cd_index_rail_jump">Aller à %1$s</string>
     <string name="quran_topic_stat_verses">versets</string>
     <string name="quran_topic_stat_surahs">sourates</string>
     <string name="quran_topic_stat_subtopics">sous-thèmes</string>
@@ -20,4 +20,9 @@
     <string name="quran_topic_top_of">Top %1$d sur %2$d</string>
     <string name="quran_topic_show_all">Tout afficher (%1$d)</string>
     <string name="quran_topic_no_verses">Aucun verset n\'est encore lié à ce sujet.</string>
+    <string name="quran_topics_entry">1 entrée</string>
+    <string name="quran_topics_entries">%1$s entrées</string>
+    <!-- "M · 992 of 1,780": the letter you are in, where it starts, and the index's size. -->
+    <string name="quran_topics_index_position">%1$s · %2$s sur %3$s</string>
+    <string name="quran_topics_sub_entry">1 sous-entrée</string>
 </resources>

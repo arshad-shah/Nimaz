@@ -1,6 +1,11 @@
 package com.arshadshah.nimaz.presentation.screens.quran
 
+import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -181,9 +186,30 @@ class QuranTopicsScreenTest {
         browseState.value = loaded.copy(tree = TopicTree.INDEX)
         render()
 
-        composeRule.onNodeWithContentDescription(str(R.string.cd_topics_jump_to_letter, "M"))
+        composeRule.onNodeWithContentDescription(str(R.string.cd_index_rail_jump, "M"))
             .assertIsDisplayed()
             .performClick()
+    }
+
+    @Test
+    fun `each letter heading says how many entries it holds, and the sort row where you are`() {
+        browseState.value = loaded.copy(tree = TopicTree.INDEX)
+        render()
+
+        // M and P hold one entry each.
+        composeRule.onAllNodesWithText(str(R.string.quran_topics_entry)).assertCountEquals(2)
+        composeRule.onNodeWithText(str(R.string.quran_topics_index_position, "M", "1", "2"))
+            .assertIsDisplayed()
+    }
+
+    @Test
+    fun `a letter the index has nothing under is on the rail but offers no jump`() {
+        browseState.value = loaded.copy(tree = TopicTree.INDEX)
+        render()
+
+        composeRule.onNodeWithContentDescription(str(R.string.cd_index_rail_jump, "X"))
+            .assertExists()
+            .assert(SemanticsMatcher.keyNotDefined(SemanticsActions.OnClick))
     }
 
     @Test

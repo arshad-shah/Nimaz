@@ -1,7 +1,13 @@
 package com.arshadshah.nimaz.presentation.screens.quran
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.clickable
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.size
+import androidx.compose.runtime.derivedStateOf
+import com.arshadshah.nimaz.presentation.components.atoms.NimazDivider
+import com.arshadshah.nimaz.presentation.components.molecules.NimazIndexRail
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -37,8 +43,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -223,9 +227,15 @@ private fun KindsTab(state: TopicBrowseState, onOpen: (QuranTopic, TopicTree) ->
 }
 
 /**
- * The concordance: A–Z under letter headings with a rail to jump between them, or the most-cited
- * entries. Two ways into 1,780 entries, because nobody scrolls a list that long from the top.
+ * The concordance: A–Z under letter headings, or the most-cited entries. Two ways into 1,780
+ * entries, because nobody scrolls a list that long from the top.
+ *
+ * The heading of the section on screen **sticks** to the top of the list, solid while it is
+ * pinned, and the rail beside it **follows** — the same letter filled on both — so "where am I"
+ * is answered twice without looking for anything. Dragging the rail scrubs the list, a bubble
+ * showing the letter and how many entries it holds.
  */
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun IndexTab(
     state: TopicBrowseState,
@@ -235,20 +245,43 @@ private fun IndexTab(
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
     val alphabetical = state.indexSort == TopicIndexSort.A_TO_Z
-    // Where each letter's heading sits in the list, so the rail can jump straight to it.
-    val headingIndex = remember(state.indexSections) {
+    val sections = state.indexSections
+    // Where each letter's heading sits in the list, and where its first entry sits in the index.
+    val headingIndex = remember(sections) {
         var position = 0
-        state.indexSections.associate { section ->
+        sections.associate { section ->
             val at = position
             position += 1 + section.entries.size
             section.letter to at
         }
     }
+    val entryOffset = remember(sections) {
+        var before = 0
+        sections.associate { section -> section.letter to before.also { before += section.entries.size } }
+    }
+    val current by remember(sections) {
+        derivedStateOf {
+            val first = listState.firstVisibleItemIndex
+            sections.lastOrNull { (headingIndex[it.letter] ?: 0) <= first }?.letter
+        }
+    }
+    // The current heading is pinned whenever the list is off its very top — including right
+    // after a rail jump, which lands the heading exactly at the top edge, stuck.
+    val pinned by remember(sections) {
+        derivedStateOf {
+            current.takeIf {
+                listState.firstVisibleItemIndex > 0 || listState.firstVisibleItemScrollOffset > 0
+            }
+        }
+    }
     LaunchedEffect(state.indexSort) { listState.scrollToItem(0) }
 
     Row(
-        modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 4.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         NimazFilterChip(
             selected = alphabetical,
@@ -262,6 +295,23 @@ private fun IndexTab(
             label = stringResource(R.string.quran_topics_sort_most_cited),
             showSelectedIcon = false,
         )
+        if (alphabetical) {
+            val letter = current
+            if (letter != null) {
+                Text(
+                    text = stringResource(
+                        R.string.quran_topics_index_position,
+                        letter.toString(),
+                        formatCount((entryOffset[letter] ?: 0) + 1),
+                        formatCount(state.index.size),
+                    ),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.End,
+                    modifier = Modifier.weight(1f),
+                )
+            }
+        }
     }
 
     Box(Modifier.fillMaxSize()) {
@@ -270,22 +320,18 @@ private fun IndexTab(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(
                 start = 16.dp,
-                end = if (alphabetical) 28.dp else 16.dp,
-                top = 4.dp,
+                end = if (alphabetical) 40.dp else 16.dp,
+                top = 0.dp,
                 bottom = 24.dp,
             ),
         ) {
             if (alphabetical) {
-                state.indexSections.forEach { section ->
-                    item(key = "letter-${section.letter}") {
-                        Text(
-                            text = section.letter.toString(),
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier
-                                .padding(start = 6.dp, top = 12.dp, bottom = 4.dp)
-                                .semantics { heading() },
+                sections.forEach { section ->
+                    stickyHeader(key = "letter-${section.letter}") {
+                        LetterHeading(
+                            letter = section.letter,
+                            count = section.entries.size,
+                            pinned = pinned == section.letter,
                         )
                     }
                     indexRows(section.entries, onOpen)
@@ -311,18 +357,77 @@ private fun IndexTab(
         }
 
         if (alphabetical) {
-            LetterRail(
-                letters = state.indexSections.map { it.letter },
-                onLetter = { letter ->
+            val counts = remember(sections) { sections.associate { it.letter to it.entries.size } }
+            NimazIndexRail(
+                letters = RAIL_LETTERS,
+                available = counts.keys,
+                current = current,
+                onSelect = { letter ->
                     headingIndex[letter]?.let { scope.launch { listState.scrollToItem(it) } }
                 },
+                bubbleLabel = { letter -> counts[letter]?.let { entriesLabel(it) } },
                 modifier = Modifier
                     .align(Alignment.CenterEnd)
-                    .padding(end = 4.dp),
+                    .fillMaxHeight()
+                    .padding(end = 6.dp, top = 4.dp, bottom = 16.dp),
             )
         }
     }
 }
+
+/**
+ * A letter's heading: the letter in a well, its entry count, a rule. Solid while it is the one
+ * pinned to the top, so the stuck heading reads as "you are here" rather than as a stray row.
+ */
+@Composable
+private fun LetterHeading(letter: Char, count: Int, pinned: Boolean) {
+    val well by animateColorAsState(
+        if (pinned) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primaryContainer,
+        label = "letter_well",
+    )
+    val ink by animateColorAsState(
+        if (pinned) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.primary,
+        label = "letter_ink",
+    )
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.background)
+            .padding(start = 4.dp, top = 10.dp, bottom = 6.dp)
+            .semantics(mergeDescendants = true) { heading() },
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        Box(
+            modifier = Modifier
+                .size(32.dp)
+                .clip(RoundedCornerShape(10.dp))
+                .background(well),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                text = letter.toString(),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = ink,
+            )
+        }
+        Text(
+            text = entriesLabel(count),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        NimazDivider(modifier = Modifier.weight(1f))
+    }
+}
+
+@Composable
+private fun entriesLabel(count: Int): String =
+    if (count == 1) stringResource(R.string.quran_topics_entry)
+    else stringResource(R.string.quran_topics_entries, formatCount(count))
+
+/** The rail always shows the whole alphabet, greying letters the index has nothing under. */
+private val RAIL_LETTERS = ('A'..'Z').toList() + TopicBrowseState.OTHER_LETTER
 
 private fun LazyListScope.indexRows(
     entries: List<TopicTally>,
@@ -336,7 +441,10 @@ private fun LazyListScope.indexRows(
                     append(verseCountLabel(entry.verseCount))
                     if (entry.childCount > 0) {
                         append(" · ")
-                        append(stringResource(R.string.quran_topics_sub_entries, entry.childCount))
+                        append(
+                            if (entry.childCount == 1) stringResource(R.string.quran_topics_sub_entry)
+                            else stringResource(R.string.quran_topics_sub_entries, entry.childCount)
+                        )
                     }
                 },
                 trailingIcon = null,
@@ -378,38 +486,6 @@ private fun GroupedRow(isFirst: Boolean, isLast: Boolean, content: @Composable (
     ) {
         content()
         if (!isLast) NimazMenuDivider(inset = false)
-    }
-}
-
-/**
- * The index's letters down the right edge. A tap jumps to that heading; TalkBack reads each as
- * "Jump to M".
- */
-@Composable
-private fun LetterRail(
-    letters: List<Char>,
-    onLetter: (Char) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Column(
-        modifier = modifier.fillMaxHeight(),
-        verticalArrangement = Arrangement.SpaceEvenly,
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        letters.forEach { letter ->
-            val description = stringResource(R.string.cd_topics_jump_to_letter, letter.toString())
-            Text(
-                text = letter.toString(),
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier
-                    .clip(RoundedCornerShape(4.dp))
-                    .clickable(role = Role.Button) { onLetter(letter) }
-                    .semantics { contentDescription = description }
-                    .padding(horizontal = 4.dp),
-            )
-        }
     }
 }
 
