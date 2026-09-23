@@ -89,4 +89,18 @@
     <string name="qaida_settings_progress">Learning history</string>
     <string name="qaida_settings_local">Your preferences and learning history stay on this device. App appearance follows your existing Nimaz settings.</string>
     <string name="qaida_settings_reset_hint">Clear lesson progress and review history. Keep your preferences and downloaded audio.</string>
+    <string name="qaida_anatomy_front">Lips · front view</string>
+    <string name="qaida_anatomy_top">Tongue and upper molars · top view</string>
+    <string name="qaida_anatomy_side">Mouth and throat · side view</string>
+    <string name="qaida_anatomy_description">Articulation guide for %1$s. %2$s. %3$s</string>
+    <string name="qaida_anatomy_key">The highlighted area shows where to focus. This simplified location guide accompanies your teacher’s demonstration.</string>
+    <string name="qaida_anatomy_consonant">This view shows the consonant. As a long vowel, the sound extends through the open mouth and throat.</string>
+    <string name="qaida_anatomy_nasal">This letter also has nasal resonance (ghunnah); its duration depends on the recitation rule.</string>
+    <string name="qaida_anatomy_upper_lip">Upper lip</string>
+    <string name="qaida_anatomy_lower_lip">Lower lip</string>
+    <string name="qaida_anatomy_tongue">Tongue</string>
+    <string name="qaida_anatomy_teeth">Teeth</string>
+    <string name="qaida_anatomy_throat">Throat</string>
+    <string name="qaida_anatomy_nose">Nasal cavity</string>
+    <string name="qaida_anatomy_molars">Upper molars</string>
 </resources>

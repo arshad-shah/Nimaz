@@ -40,12 +40,12 @@ class QaidaVisualCheckTest(private val screen: String, private val theme: ThemeM
     companion object {
         @JvmStatic
         @ParameterizedRobolectricTestRunner.Parameters(name = "{0}-{1}")
-        fun screens(): List<Array<Any>> = listOf(
+        fun screens(): List<Array<Any>> = (listOf(
             "journey", "chapters", "review", "review-empty", "audio", "audio-empty",
             "clear-audio", "reset", "settings", "intro", "focus", "repeat", "practise", "self-check",
             "all-cards", "due-review", "reward", "letters", "letter-detail", "loading",
             "downloading", "audio-unavailable", "audio-error", "playback-error", "lesson-empty"
-        ).flatMap { name -> listOf(ThemeMode.LIGHT, ThemeMode.DARK).map { arrayOf<Any>(name, it) } }
+        ) + (1..29).map { "articulation-%02d".format(it) }).flatMap { name -> listOf(ThemeMode.LIGHT, ThemeMode.DARK).map { arrayOf<Any>(name, it) } }
     }
 
     @get:Rule val rule = createComponentComposeRule()
@@ -122,6 +122,13 @@ class QaidaVisualCheckTest(private val screen: String, private val theme: ThemeM
         rule.setContent { root = LocalView.current; PreviewTheme { QaidaReaderScreen(4, {}, vm) } }
     }
     @Test fun render() {
+        if (screen.startsWith("articulation-")) {
+            val letter = previewLetters().first { it.id == screen.substringAfter("articulation-").toInt() }
+            rule.setContent { root = LocalView.current; PreviewTheme { QaidaLettersScreen({}, vm) } }
+            rule.onNodeWithText(letter.letterArabic).performScrollTo().performClick()
+            capture()
+            return
+        }
         when (screen) {
             "journey", "chapters", "review", "review-empty", "audio", "audio-empty", "clear-audio", "reset", "settings" -> {
                 if (screen == "review") every { vm.dueLessons } returns MutableStateFlow(setOf(1, 4))

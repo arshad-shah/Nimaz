@@ -34,6 +34,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.molecules.QaidaLetterForms
 import com.arshadshah.nimaz.presentation.components.molecules.QaidaMakhrajHelper
+import com.arshadshah.nimaz.presentation.components.molecules.QaidaArticulationDiagram
 import com.arshadshah.nimaz.presentation.theme.NimazCornerRadius
 import com.arshadshah.nimaz.presentation.theme.NimazSpacing
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
@@ -126,6 +127,7 @@ fun QaidaLetterDetailSheet(
         QaidaLetterForms(letter)
 
         SectionLabel(stringResource(R.string.qaida_where_made))
+        QaidaArticulationDiagram(glyph = letter.letterArabic, detail = letter.makhrajDetail)
         QaidaMakhrajHelper(area = letter.makhrajArea, detail = letter.makhrajDetail)
     }
 }

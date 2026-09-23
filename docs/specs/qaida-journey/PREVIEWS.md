@@ -1,5 +1,7 @@
 # Qaida screen previews
 
+[Mouth anatomy: all 29 letters, light and dark](ARTICULATION.md)
+
 Every Qaida destination and its important states, rendered from the actual Compose UI at
 411 × 900 dp in both Nimaz themes. The unified **Qaida** top bar, frosted pills and app-wide
 pattern are included. All colours and effects come from the existing app theme.
@@ -63,7 +65,7 @@ status panel. Device, TalkBack, RTL and large-text testing remain release valida
 | Audio download failed | ![Audio download failed, light](previews/audio-error.png) | ![Audio download failed, dark](previews/audio-error-dark.png) |
 | Playback failed | ![Playback failed, light](previews/playback-error.png) | ![Playback failed, dark](previews/playback-error-dark.png) |
 
-Validation: 172 Qaida behavioural/component tests and all 50 native capture cases passed.
+Validation: 177 Qaida behavioural/component tests and all 108 native capture cases passed.
 
 ## Regenerating
 
