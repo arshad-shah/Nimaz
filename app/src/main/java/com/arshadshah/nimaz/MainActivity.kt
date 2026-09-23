@@ -16,17 +16,13 @@ import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import androidx.media3.common.util.UnstableApi
-import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.navigation.NavGraph
-import com.arshadshah.nimaz.core.util.BootReceiver
-import com.arshadshah.nimaz.domain.model.WorshipReminderType
-import com.arshadshah.nimaz.core.navigation.worshipCardDestination
+import com.arshadshah.nimaz.core.navigation.LaunchEntries
 import com.arshadshah.nimaz.core.navigation.Route
 import com.arshadshah.nimaz.core.util.InAppUpdateManager
 import com.arshadshah.nimaz.data.announcement.AnnouncementPayloadMapper
 import com.arshadshah.nimaz.data.audio.AdhanPlaybackService
 import com.arshadshah.nimaz.data.audio.QuranAudioManager
-import com.arshadshah.nimaz.data.audio.QuranAudioService
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.usecase.AnnouncementUseCases
 import com.arshadshah.nimaz.presentation.components.atoms.NimazPatternBackground
@@ -34,7 +30,6 @@ import com.arshadshah.nimaz.presentation.components.atoms.ProvideNimazClock
 import com.arshadshah.nimaz.presentation.theme.NimazPatternStyle
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.theme.ThemeMode
-import com.arshadshah.nimaz.widget.hijricalendar.HijriCalendarWidget
 import com.arshadshah.nimaz.presentation.app.AppIdentity
 import com.arshadshah.nimaz.presentation.app.LocalAppIdentity
 import com.arshadshah.nimaz.presentation.update.LocalAppUpdateController
@@ -224,43 +219,20 @@ class MainActivity : ComponentActivity() {
      *   Home banner shows, and deep-link to its route if it names one.
      */
     private fun handleIntent(intent: Intent?) {
-        // Backgrounded FCM notification tap: the OS copies the message's custom
-        // data onto the launcher intent as string extras. The mapper returning
-        // non-null is what identifies the intent as ours.
-        announcementPayloadMapper.fromIntentExtras(intent?.extras)?.let { announcement ->
-            AppAnalytics.logNotificationOpened(source = "announcement")
+        val entries = LaunchEntries.read(intent, announcementPayloadMapper)
+
+        entries.announcement?.let { announcement ->
             lifecycleScope.launch { announcementUseCases.setAnnouncement(announcement) }
-            // Tapping the notification implies intent to act — navigate when a
-            // route is present; otherwise land on Home with the banner showing.
-            if (announcement.route != null) {
-                pendingAnnouncementRoute = announcement.route
-            }
+            // Tapping the notification implies intent to act — navigate when a route is
+            // present; otherwise land on Home with the banner showing.
+            announcement.route?.let { pendingAnnouncementRoute = it }
         }
-
-        if (intent?.getBooleanExtra(BootReceiver.EXTRA_STOP_ADHAN, false) == true) {
-            AdhanPlaybackService.stopAdhan(this)
-            AppAnalytics.logNotificationOpened(source = "prayer_notification")
-        }
-
-        if (intent?.action == QuranAudioService.ACTION_OPEN_PLAYING_SURAH) {
-            AppAnalytics.logNotificationOpened(source = "quran_audio")
+        if (entries.stopAdhan) AdhanPlaybackService.stopAdhan(this)
+        if (entries.openPlayingSurah) {
             val surah = quranAudioManager.audioState.value.currentSurahNumber
-            if (surah > 0) {
-                pendingQuranSurah = surah
-            }
+            if (surah > 0) pendingQuranSurah = surah
         }
-
-        WorshipReminderType.fromKey(intent?.getStringExtra(BootReceiver.EXTRA_OPEN_WORSHIP))?.let { type ->
-            AppAnalytics.logNotificationOpened(source = "worship_reminder")
-            pendingRoute = worshipCardDestination(type)
-            // Consumed, so a configuration change re-delivering this intent does not navigate
-            // a second time over wherever the reader has gone since.
-            intent?.removeExtra(BootReceiver.EXTRA_OPEN_WORSHIP)
-        }
-
-        if (intent?.action == HijriCalendarWidget.ACTION_OPEN_ISLAMIC_CALENDAR) {
-            AppAnalytics.logNotificationOpened(source = "hijri_calendar_widget")
-            pendingIslamicCalendar = true
-        }
+        entries.worshipDestination?.let { pendingRoute = it }
+        if (entries.openIslamicCalendar) pendingIslamicCalendar = true
     }
 }

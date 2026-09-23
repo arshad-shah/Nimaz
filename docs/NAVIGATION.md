@@ -47,6 +47,8 @@ destinations, and none of them should need the `NavHost`.
 | `presentation/screens/<feature>/<Feature>Graph.kt` × 11 | the destinations, one extension per feature | `NAV-03`, `NAV-04` |
 | `core/navigation/ScreenTags.kt` | the stable test tag per destination | `NAV-05` |
 | `core/navigation/AnnouncementRoutes.kt` + `HelpDeepLink.kt` | the two **external** entry grammars | `NAV-06` … `NAV-10` |
+| `core/navigation/TopLevelNavigation.kt` | `asTab` / `navigateFromOutside` / `navigateInApp` — a link to a tab switches tabs | `TopLevelNavigation*Test` |
+| `app/…/core/navigation/LaunchEntries.kt` + `PendingEntryEffects.kt` | what an opening intent asks for, and where each entry lands | `LaunchEntriesTest`, `PendingEntryEffectsTest` |
 
 ### The graph is eleven files, not one
 
