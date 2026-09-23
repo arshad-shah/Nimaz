@@ -1083,7 +1083,7 @@
     <string name="quran_topic_subtopics">Subtopik</string>
     <string name="quran_topic_related">Topik terkait</string>
     <string name="quran_topic_not_found">Topik ini tidak ada dalam indeks.</string>
-    <string name="quran_topic_verses_across">%1$d di %2$d surah</string>
+    <string name="quran_topic_verses_across">%1$s di %2$d surah</string>
     <string name="quran_topic_surah_you_came_from">Surah ini</string>
     <string name="quran_topic_in_surah">%1$d di %2$s</string>
     <string name="quran_topics_scope_search">Mencari di ketiga hierarki</string>

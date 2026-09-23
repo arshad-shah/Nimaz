@@ -166,6 +166,7 @@ fun ThemeChapterCard(
                 elevation = 0.dp,
                 shape = RoundedCornerShape(14.dp),
                 onClick = { onOpenTopic(card.root.topic.id) },
+                modifier = Modifier.fillMaxWidth(),
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     NimazIconWell(
@@ -242,25 +243,32 @@ fun KindTile(
             modifier = Modifier.padding(12.dp),
             verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
-            NimazIconWell(
-                icon = TopicIcons.forRoot(tally.topic.id, TopicTree.ONTOLOGY),
-                color = MaterialTheme.colorScheme.primary,
-            )
+            // The Arabic name sits beside the icon rather than under the English one: only some
+            // kinds have one, and a line that comes and goes made the two tiles of a row differ
+            // in height.
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                NimazIconWell(
+                    icon = TopicIcons.forRoot(tally.topic.id, TopicTree.ONTOLOGY),
+                    color = MaterialTheme.colorScheme.primary,
+                )
+                Spacer(Modifier.weight(1f))
+                if (tally.topic.hasArabicName) {
+                    ArabicText(
+                        text = tally.topic.arabicName,
+                        size = ArabicTextSize.SMALL,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                    )
+                }
+            }
             Text(
                 text = tally.topic.name,
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.SemiBold,
                 maxLines = 2,
+                minLines = 2,
                 overflow = TextOverflow.Ellipsis,
             )
-            if (tally.topic.hasArabicName) {
-                ArabicText(
-                    text = tally.topic.arabicName,
-                    size = ArabicTextSize.SMALL,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                )
-            }
             Text(
                 text = verseCountLabel(tally.verseCount),
                 style = MaterialTheme.typography.labelMedium,

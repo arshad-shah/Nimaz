@@ -273,7 +273,7 @@ private fun SubjectBody(
                     title = stringResource(R.string.quran_topic_verses_section),
                     trailing = stringResource(
                         R.string.quran_topic_verses_across,
-                        detail.citations.size,
+                        formatCount(detail.citations.size),
                         state.citationGroups.size,
                     ),
                 )

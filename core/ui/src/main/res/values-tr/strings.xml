@@ -1107,7 +1107,7 @@
     <string name="quran_topic_subtopics">Alt konular</string>
     <string name="quran_topic_related">İlgili konular</string>
     <string name="quran_topic_not_found">Bu konu dizinde yok.</string>
-    <string name="quran_topic_verses_across">%2$d surede %1$d ayet</string>
+    <string name="quran_topic_verses_across">%2$d surede %1$s ayet</string>
     <string name="quran_topic_surah_you_came_from">Bu sure</string>
     <string name="quran_topic_in_surah">%2$s içinde %1$d</string>
     <string name="quran_topics_scope_search">Üç dizinin tümünde aranıyor</string>

@@ -1455,7 +1455,7 @@
     <string name="quran_topic_subtopics">Subtopics</string>
     <string name="quran_topic_related">Related subjects</string>
     <string name="quran_topic_not_found">This subject isn\'t in the index.</string>
-    <string name="quran_topic_verses_across">%1$d across %2$d surahs</string>
+    <string name="quran_topic_verses_across">%1$s across %2$d surahs</string>
     <string name="quran_topic_in_surah">%1$d in %2$s</string>
     <string name="quran_topic_surah_you_came_from">This surah</string>
     <string name="quran_topics_scope_search">Searching all three hierarchies</string>

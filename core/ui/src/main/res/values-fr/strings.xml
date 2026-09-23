@@ -1122,7 +1122,7 @@
     <string name="quran_topic_subtopics">Sous-thèmes</string>
     <string name="quran_topic_related">Sujets liés</string>
     <string name="quran_topic_not_found">Ce sujet ne figure pas dans l\'index.</string>
-    <string name="quran_topic_verses_across">%1$d dans %2$d sourates</string>
+    <string name="quran_topic_verses_across">%1$s dans %2$d sourates</string>
     <string name="quran_topic_surah_you_came_from">Cette sourate</string>
     <string name="quran_topic_in_surah">%1$d dans %2$s</string>
     <string name="quran_topics_scope_search">Recherche dans les trois hiérarchies</string>

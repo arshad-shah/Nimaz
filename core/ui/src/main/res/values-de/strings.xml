@@ -1101,7 +1101,7 @@
     <string name="quran_topic_subtopics">Unterthemen</string>
     <string name="quran_topic_related">Verwandte Themen</string>
     <string name="quran_topic_not_found">Dieses Thema steht nicht im Register.</string>
-    <string name="quran_topic_verses_across">%1$d in %2$d Suren</string>
+    <string name="quran_topic_verses_across">%1$s in %2$d Suren</string>
     <string name="quran_topic_surah_you_came_from">Diese Sure</string>
     <string name="quran_topic_in_surah">%1$d in %2$s</string>
     <string name="quran_topics_scope_search">Durchsucht alle drei Gliederungen</string>
