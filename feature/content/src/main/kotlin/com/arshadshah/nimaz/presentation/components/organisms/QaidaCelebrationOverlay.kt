@@ -50,7 +50,9 @@ import com.arshadshah.nimaz.presentation.theme.NimazTheme
  *
  * Uses a dedicated teal-and-gold illustration so the completion state feels like
  * a real reward while staying consistent with Nimaz's dark surfaces and Qaida
- * palette. The earned stars remain dynamic and sit over the lower edge of the
+ * palette. The hero is rendered with ContentScale.Fit so the approved square
+ * artwork is never cropped or stretched; Android only scales it down for the
+ * device. The earned stars remain dynamic and sit over the lower edge of the
  * artwork, followed by the completion copy, unlock chip, and Map / Next actions.
  */
 @Composable
@@ -97,7 +99,7 @@ fun QaidaCelebrationOverlay(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(230.dp)
+                            .height(260.dp)
                             .clip(RoundedCornerShape(24.dp)),
                         contentAlignment = Alignment.BottomCenter,
                     ) {
@@ -105,7 +107,7 @@ fun QaidaCelebrationOverlay(
                             painter = painterResource(ContentR.drawable.qaida_lesson_complete_hero),
                             contentDescription = null,
                             modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Crop,
+                            contentScale = ContentScale.Fit,
                         )
 
                         Surface(
