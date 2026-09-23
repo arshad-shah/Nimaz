@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_intro_welcome_title">Nimaz</string>
+    <string name="onboarding_intro_welcome_body">A calmer, closer you.</string>
+    <string name="onboarding_intro_welcome_caption">Guidance. Reminders. Progress.\nFor a more meaningful Salah.</string>
+    <string name="onboarding_intro_prayer_title">Make time for prayer</string>
+    <string name="onboarding_intro_prayer_body">Prayer times for your location. Gentle reminders for your day.</string>
+    <string name="onboarding_intro_learning_title">Learn with confidence</string>
+    <string name="onboarding_intro_learning_body">Follow each movement and recitation, one clear step at a time.</string>
+    <string name="onboarding_intro_progress_title">Build a habit. Find your rhythm.</string>
+    <string name="onboarding_intro_progress_body">Keep track of your prayers and return to your daily practice.</string>
+    <string name="onboarding_intro_begin">Let’s begin</string>
+    <string name="onboarding_intro_setup_body">Choose what to enable. You can change these later in Settings.</string>
+    <string name="onboarding_continue">Continue</string>
+    <string name="onboarding_allow">Allow</string>
+    <string name="onboarding_setup_title">Almost ready</string>
+    <string name="onboarding_location_reason">Accurate prayer times and Qibla</string>
+    <string name="onboarding_notification_reason">A call for every prayer</string>
+    <string name="onboarding_battery_reason">So reminders arrive on time</string>
+    <!-- One Arabic word per intro page. Every locale repeats it unchanged, as learn_pray_*_ar does. -->
+    <string name="onboarding_intro_welcome_arabic">بسم الله</string>
+    <string name="onboarding_intro_prayer_arabic">الصلاة</string>
+    <string name="onboarding_intro_learning_arabic">تعلّم</string>
+    <string name="onboarding_intro_progress_arabic">استقامة</string>
+</resources>

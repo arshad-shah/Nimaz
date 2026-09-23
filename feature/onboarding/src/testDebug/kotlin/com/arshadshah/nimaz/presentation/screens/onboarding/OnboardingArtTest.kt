@@ -114,6 +114,26 @@ class OnboardingArtTest {
     }
 
     @Test
+    fun `every illustrated background decodes and paints`() {
+        val kinds = OnboardingIllustration.entries
+        val bitmap = draw {
+            Column(modifier = Modifier.fillMaxSize()) {
+                kinds.forEach { kind ->
+                    IllustratedOnboardingBackground(
+                        illustration = kind,
+                        modifier = Modifier.fillMaxWidth().weight(1f),
+                    )
+                }
+            }
+        }
+        val band = bitmap.height / kinds.size
+        kinds.indices.forEach { index ->
+            assertThat(bitmap.rows(top = index * band, count = band).ink()).isGreaterThan(0)
+        }
+        assertThat(kinds.map { it.resource }.distinct()).hasSize(kinds.size)
+    }
+
+    @Test
     fun `each emblem draws its own artwork`() {
         // The four kinds share one Canvas and are told apart by a `when`. If a branch fell
         // through — or the shield's `return@Canvas` were dropped, which would leave it drawing

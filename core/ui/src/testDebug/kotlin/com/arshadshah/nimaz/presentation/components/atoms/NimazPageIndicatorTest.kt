@@ -84,4 +84,28 @@ class NimazPageIndicatorTest {
         dots().assertCountEquals(3)
         composeRule.onAllNodesWithTag(NimazPageIndicatorDotTag)[1].assert(selectedDots())
     }
+
+    @Test
+    fun `follow-drag keeps one dot per page and selects the current one`() {
+        // The continuous rendering shares the pill between two dots mid-swipe, but a screen
+        // reader should still hear exactly one position.
+        composeRule.setThemedContent {
+            val state = rememberNimazPagerState(initialPage = 2) { 5 }
+            NimazPageIndicator(state = state, followDrag = true, glowColor = androidx.compose.ui.graphics.Color.Yellow)
+        }
+
+        dots().assertCountEquals(5)
+        composeRule.onAllNodesWithTag(NimazPageIndicatorDotTag).filter(selectedDots()).assertCountEquals(1)
+        composeRule.onAllNodesWithTag(NimazPageIndicatorDotTag)[2].assert(selectedDots())
+    }
+
+    @Test
+    fun `follow-drag draws nothing for a single page`() {
+        composeRule.setThemedContent {
+            val state = rememberNimazPagerState { 1 }
+            NimazPageIndicator(state = state, followDrag = true)
+        }
+
+        dots().assertCountEquals(0)
+    }
 }

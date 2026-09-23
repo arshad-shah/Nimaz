@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.LocalActivity
 import androidx.annotation.StringRes
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
@@ -11,7 +12,8 @@ import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.test.performScrollTo
+
 import androidx.test.core.app.ApplicationProvider
 import com.arshadshah.nimaz.core.ui.R
 import com.arshadshah.nimaz.presentation.viewmodel.onboarding.OnboardingEvent
@@ -31,7 +33,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
 /**
- * The first-run walkthrough: three info pages, a permissions page, and exactly one way out.
+ * The first-run walkthrough: four info pages, a fifth permission page, and exactly one way out.
  *
  * **The stakes are asymmetric here in a way no other screen's are.** `NavGraph` reads
  * `onboardingCompleted` once, when the graph is built, to choose its start destination — so a
@@ -73,51 +75,94 @@ class OnboardingScreenTest {
 
     private fun launch() {
         composeRule.setThemedContent {
-            activity = LocalContext.current as ComponentActivity
+            activity = LocalActivity.current as ComponentActivity
             OnboardingScreen(onComplete = { completed++ }, viewModel = viewModel)
         }
         composeRule.waitForIdle()
     }
 
-    /** Advances the pager the way a user does — the Next button, one page at a time. */
+    /** Advances the pager the way a user does — the Continue button, one page at a time. */
     private fun tapNext(times: Int = 1) = repeat(times) {
-        composeRule.onNodeWithText(str(R.string.onboarding_next)).performClick()
+        composeRule.onNodeWithText(str(R.string.onboarding_continue)).performClick()
         composeRule.waitForIdle()
+    }
+
+    private fun openSetup() {
+        tapNext(4)
     }
 
     private fun pagesReached(): List<Int> =
         events.filterIsInstance<OnboardingEvent.SetCurrentPage>().map { it.page }
+
+    @Test
+    fun `setup is optional on the fifth analytics page`() {
+        // Every permission can be left unanswered: Begin completes with nothing granted.
+        launch()
+        openSetup()
+        assertThat(ONBOARDING_PAGE_COUNT).isEqualTo(5)
+        assertThat(pagesReached()).containsExactly(0, 1, 2, 3, 4).inOrder()
+        assertThat(completed).isEqualTo(0)
+        composeRule.onNodeWithText(str(R.string.onboarding_intro_begin)).performClick()
+        composeRule.waitForIdle()
+        assertThat(completed).isEqualTo(1)
+        assertThat(events.filterIsInstance<OnboardingEvent.CompleteOnboarding>()).hasSize(1)
+    }
+
+    @Test
+    fun `next reports destination only once motion settles`() {
+        launch()
+        composeRule.mainClock.autoAdvance = false
+        composeRule.onNodeWithText(str(R.string.onboarding_continue)).performClick()
+        composeRule.mainClock.advanceTimeBy(64)
+        assertThat(pagesReached()).containsExactly(0)
+        composeRule.mainClock.advanceTimeBy(ONBOARDING_MOTION_MS.toLong() + 300)
+        composeRule.mainClock.autoAdvance = true
+        composeRule.waitForIdle()
+        assertThat(pagesReached()).containsExactly(0, 1).inOrder()
+    }
 
     // ------------------------------------------------------------------
     // Paging
     // ------------------------------------------------------------------
 
     @Test
-    fun `the walkthrough opens on the welcome page with nothing to go back to`() {
+    fun `the walkthrough opens on the welcome page with no back button anywhere`() {
+        // Going back is the system gesture's job; the page carries only Skip and Continue.
         launch()
 
-        composeRule.onNodeWithText(str(R.string.onboarding_welcome_title)).assertIsDisplayed()
-        composeRule.onNodeWithText(str(R.string.onboarding_feature_quran)).assertIsDisplayed()
-        // Back is hidden rather than disabled on the first page: a Back that did nothing would
-        // read as a flow that has already broken.
+        composeRule.onNodeWithText(str(R.string.onboarding_intro_welcome_title)).assertIsDisplayed()
+        // The welcome body carries its caption in the same paragraph — one line alone left the
+        // first page thin.
+        composeRule.onNodeWithText(str(R.string.onboarding_intro_welcome_body), substring = true).assertIsDisplayed()
+        composeRule.onNodeWithText(str(R.string.onboarding_intro_welcome_caption).replace('\n', ' '), substring = true)
+            .assertIsDisplayed()
+        composeRule.onAllNodesWithText(str(R.string.onboarding_back)).assertCountEquals(0)
+        tapNext(2)
         composeRule.onAllNodesWithText(str(R.string.onboarding_back)).assertCountEquals(0)
     }
 
     @Test
+    fun `each intro page carries its Arabic accent word`() {
+        launch()
+
+        composeRule.onNodeWithText(str(R.string.onboarding_intro_welcome_arabic)).assertIsDisplayed()
+        tapNext()
+        composeRule.onNodeWithText(str(R.string.onboarding_intro_prayer_arabic)).assertIsDisplayed()
+    }
+
+    @Test
     fun `each page carries its own copy`() {
-        // Three pages built from one `InfoPage` list. An off-by-one in the pager's
-        // `if (page < infoPages.size)` shows up as the wrong page's title, or the permissions
-        // page appearing one step early.
+        // Four introductions followed by a dedicated permission page.
         launch()
 
         tapNext()
-        composeRule.onNodeWithText(str(R.string.onboarding_prayer_title)).assertIsDisplayed()
+        composeRule.onNodeWithText(str(R.string.onboarding_intro_prayer_title)).assertIsDisplayed()
 
         tapNext()
-        composeRule.onNodeWithText(str(R.string.onboarding_quran_title)).assertIsDisplayed()
+        composeRule.onNodeWithText(str(R.string.onboarding_intro_learning_title)).assertIsDisplayed()
 
         tapNext()
-        composeRule.onNodeWithText(str(R.string.onboarding_permissions_title)).assertIsDisplayed()
+        composeRule.onNodeWithText(str(R.string.onboarding_intro_progress_title)).assertIsDisplayed()
     }
 
     @Test
@@ -126,20 +171,20 @@ class OnboardingScreenTest {
         // reported twice makes the whole measurement unreadable.
         launch()
 
-        tapNext(3)
+        tapNext(4)
 
-        assertThat(pagesReached()).containsExactly(0, 1, 2, 3).inOrder()
+        assertThat(pagesReached()).containsExactly(0, 1, 2, 3, 4).inOrder()
     }
 
     @Test
-    fun `back returns to the previous page and reports it`() {
+    fun `system back returns to the previous page and reports it`() {
         launch()
         tapNext(2)
 
-        composeRule.onNodeWithText(str(R.string.onboarding_back)).performClick()
+        composeRule.runOnUiThread { activity.onBackPressedDispatcher.onBackPressed() }
         composeRule.waitForIdle()
 
-        composeRule.onNodeWithText(str(R.string.onboarding_prayer_title)).assertIsDisplayed()
+        composeRule.onNodeWithText(str(R.string.onboarding_intro_prayer_title)).assertIsDisplayed()
         assertThat(pagesReached()).containsExactly(0, 1, 2, 1).inOrder()
     }
 
@@ -148,21 +193,21 @@ class OnboardingScreenTest {
     // ------------------------------------------------------------------
 
     @Test
-    fun `the last page swaps Next for Get Started`() {
+    fun `the last page swaps Continue for Begin`() {
         launch()
 
-        tapNext(3)
+        tapNext(4)
 
-        composeRule.onNodeWithText(str(R.string.onboarding_get_started)).assertIsDisplayed()
-        composeRule.onAllNodesWithText(str(R.string.onboarding_next)).assertCountEquals(0)
+        composeRule.onNodeWithText(str(R.string.onboarding_intro_begin)).assertIsDisplayed()
+        composeRule.onAllNodesWithText(str(R.string.onboarding_continue)).assertCountEquals(0)
     }
 
     @Test
     fun `finishing persists completion and navigates away exactly once`() {
         launch()
-        tapNext(3)
+        tapNext(4)
 
-        composeRule.onNodeWithText(str(R.string.onboarding_get_started)).performClick()
+        composeRule.onNodeWithText(str(R.string.onboarding_intro_begin)).performClick()
         composeRule.waitForIdle()
 
         assertThat(events.filterIsInstance<OnboardingEvent.CompleteOnboarding>()).hasSize(1)
@@ -171,52 +216,55 @@ class OnboardingScreenTest {
 
     @Test
     fun `no page before the last one completes onboarding`() {
-        // `Next` and `Get Started` are the same button under a page comparison. Get that
+        // `Continue` and `Begin` are the same button under a page comparison. Get that
         // comparison wrong and the walkthrough ends on page one — or, the other way round,
         // never ends at all.
         launch()
 
-        tapNext(3)
+        tapNext(4)
 
         assertThat(events.filterIsInstance<OnboardingEvent.CompleteOnboarding>()).isEmpty()
         assertThat(completed).isEqualTo(0)
     }
 
     @Test
-    fun `skip finishes the flow from an early page`() {
+    fun `skip jumps to setup instead of leaving`() {
+        // Setup is what makes prayer times and reminders work, so skipping the introductions
+        // must not skip it too. Only Begin, on that page, completes.
         launch()
 
         composeRule.onNodeWithText(str(R.string.onboarding_skip)).performClick()
         composeRule.waitForIdle()
 
-        assertThat(events.filterIsInstance<OnboardingEvent.CompleteOnboarding>()).hasSize(1)
-        assertThat(completed).isEqualTo(1)
+        composeRule.onNodeWithText(str(R.string.onboarding_setup_title)).assertIsDisplayed()
+        assertThat(pagesReached()).containsExactly(0, 4).inOrder()
+        assertThat(events.filterIsInstance<OnboardingEvent.CompleteOnboarding>()).isEmpty()
+        assertThat(completed).isEqualTo(0)
     }
 
     @Test
     fun `skip is gone from the last page`() {
-        // Two buttons that both complete onboarding, side by side, is how a flow ends up
-        // dispatching completion twice and navigating twice.
+        // There is nowhere left to skip to, and the page keeps exactly one way out: Begin.
         launch()
 
-        tapNext(3)
+        tapNext(4)
 
         composeRule.onAllNodesWithText(str(R.string.onboarding_skip)).assertCountEquals(0)
     }
 
     // ------------------------------------------------------------------
-    // The permissions page
+    // Optional fifth permission page
     // ------------------------------------------------------------------
 
     @Test
     fun `an ungranted permission offers a way to grant it`() {
         launch()
-        tapNext(3)
+        openSetup()
 
-        composeRule.onNodeWithText(str(R.string.onboarding_location_title)).assertIsDisplayed()
-        composeRule.onNodeWithText(str(R.string.onboarding_notification_title)).assertIsDisplayed()
-        composeRule.onNodeWithText(str(R.string.onboarding_battery_title)).assertIsDisplayed()
-        composeRule.onAllNodesWithText(str(R.string.onboarding_grant)).assertCountEquals(3)
+        composeRule.onNodeWithText(str(R.string.onboarding_location_title)).performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithText(str(R.string.onboarding_notification_title)).performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithText(str(R.string.onboarding_battery_title)).performScrollTo().assertIsDisplayed()
+        composeRule.onAllNodesWithText(str(R.string.onboarding_allow)).assertCountEquals(3)
     }
 
     @Test
@@ -227,14 +275,14 @@ class OnboardingScreenTest {
             batteryOptimizationDisabled = true,
         )
         launch()
-        tapNext(3)
+        openSetup()
 
-        composeRule.onNodeWithText(str(R.string.onboarding_location_granted)).assertIsDisplayed()
+        composeRule.onNodeWithText(str(R.string.onboarding_location_granted)).performScrollTo().assertIsDisplayed()
         composeRule.onNodeWithText(str(R.string.onboarding_notification_granted))
-            .assertIsDisplayed()
-        composeRule.onNodeWithText(str(R.string.onboarding_battery_granted)).assertIsDisplayed()
+            .performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithText(str(R.string.onboarding_battery_granted)).performScrollTo().assertIsDisplayed()
         // A Grant button beside "Granted" is the state the card is designed to rule out.
-        composeRule.onAllNodesWithText(str(R.string.onboarding_grant)).assertCountEquals(0)
+        composeRule.onAllNodesWithText(str(R.string.onboarding_allow)).assertCountEquals(0)
     }
 
     @Test
@@ -248,7 +296,7 @@ class OnboardingScreenTest {
             locationName = "Dublin, Ireland",
         )
         launch()
-        tapNext(3)
+        openSetup()
 
         composeRule.onNodeWithText("Dublin, Ireland").assertIsDisplayed()
         composeRule.onAllNodesWithText(str(R.string.onboarding_location_granted))
@@ -258,8 +306,8 @@ class OnboardingScreenTest {
     @Test
     fun `a permission granted while the page is open updates the card in place`() {
         launch()
-        tapNext(3)
-        composeRule.onAllNodesWithText(str(R.string.onboarding_grant)).assertCountEquals(3)
+        openSetup()
+        composeRule.onAllNodesWithText(str(R.string.onboarding_allow)).assertCountEquals(3)
 
         // What the permission launchers' callbacks do: dispatch UpdatePermissionStatus, which
         // moves the state. The user comes back from the system dialog to this page.
@@ -267,8 +315,8 @@ class OnboardingScreenTest {
         composeRule.waitForIdle()
 
         composeRule.onNodeWithText(str(R.string.onboarding_notification_granted))
-            .assertIsDisplayed()
-        composeRule.onAllNodesWithText(str(R.string.onboarding_grant)).assertCountEquals(2)
+            .performScrollTo().assertIsDisplayed()
+        composeRule.onAllNodesWithText(str(R.string.onboarding_allow)).assertCountEquals(2)
     }
 
     @Test
@@ -282,9 +330,9 @@ class OnboardingScreenTest {
             batteryOptimizationDisabled = true,
         )
         launch()
-        tapNext(3)
+        openSetup()
 
-        composeRule.onNodeWithText(str(R.string.onboarding_grant)).performClick()
+        composeRule.onNodeWithText(str(R.string.onboarding_allow)).performScrollTo().performClick()
         composeRule.waitForIdle()
 
         assertThat(events).contains(OnboardingEvent.UpdatePermissionStatus(notification = true))
@@ -300,9 +348,9 @@ class OnboardingScreenTest {
             batteryOptimizationDisabled = true,
         )
         launch()
-        tapNext(3)
+        openSetup()
 
-        composeRule.onNodeWithText(str(R.string.onboarding_grant)).performClick()
+        composeRule.onNodeWithText(str(R.string.onboarding_allow)).performScrollTo().performClick()
         composeRule.waitForIdle()
 
         assertThat(events.filterIsInstance<OnboardingEvent.UpdatePermissionStatus>()).isEmpty()
@@ -314,8 +362,8 @@ class OnboardingScreenTest {
         // system dialog — the default on the modern dialog — grants only ACCESS_COARSE_LOCATION,
         // and an AND here would tell them the permission was refused and never detect a location.
         launch()
-        tapNext(3)
-        composeRule.onAllNodesWithText(str(R.string.onboarding_grant)).onFirst().performClick()
+        openSetup()
+        composeRule.onAllNodesWithText(str(R.string.onboarding_allow)).onFirst().performScrollTo().performClick()
         composeRule.waitForIdle()
 
         answerPermissionRequest(
@@ -331,8 +379,8 @@ class OnboardingScreenTest {
     @Test
     fun `a refused location dialog is reported as refused`() {
         launch()
-        tapNext(3)
-        composeRule.onAllNodesWithText(str(R.string.onboarding_grant)).onFirst().performClick()
+        openSetup()
+        composeRule.onAllNodesWithText(str(R.string.onboarding_allow)).onFirst().performScrollTo().performClick()
         composeRule.waitForIdle()
 
         answerPermissionRequest(
@@ -381,11 +429,10 @@ class OnboardingScreenTest {
     fun `a short screen keeps the whole walkthrough usable`() {
         launch()
 
-        composeRule.onNodeWithText(str(R.string.onboarding_welcome_title)).assertIsDisplayed()
-        composeRule.onNodeWithText(str(R.string.onboarding_feature_duas)).assertExists()
+        composeRule.onNodeWithText(str(R.string.onboarding_intro_welcome_title)).assertIsDisplayed()
         // The way forward has to survive the squeeze — it is the only control on the page that
         // the user cannot scroll to, because the nav row sits outside the scrolling column.
-        composeRule.onNodeWithText(str(R.string.onboarding_next)).assertIsDisplayed()
+        composeRule.onNodeWithText(str(R.string.onboarding_continue)).assertIsDisplayed()
     }
 
     @Test
@@ -393,10 +440,10 @@ class OnboardingScreenTest {
     fun `a short screen still offers all three permissions and the way out`() {
         launch()
 
-        tapNext(3)
+        openSetup()
 
-        composeRule.onAllNodesWithText(str(R.string.onboarding_grant)).assertCountEquals(3)
-        composeRule.onNodeWithText(str(R.string.onboarding_get_started)).assertIsDisplayed()
+        composeRule.onAllNodesWithText(str(R.string.onboarding_allow)).assertCountEquals(3)
+        composeRule.onNodeWithText(str(R.string.onboarding_intro_begin)).assertIsDisplayed()
     }
 
     // ------------------------------------------------------------------
