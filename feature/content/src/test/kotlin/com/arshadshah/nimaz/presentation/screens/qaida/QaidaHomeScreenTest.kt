@@ -104,6 +104,7 @@ class QaidaHomeScreenTest {
         )
 
         setContent()
+        composeRule.onNodeWithText(string(FeatureR.string.qaida_see_all)).performClick()
 
         composeRule.onNodeWithContentDescription(
             string(R.string.qaida_a11y_lesson_current_format, 1, "The Arabic Letters")
@@ -124,6 +125,7 @@ class QaidaHomeScreenTest {
         )
 
         setContent()
+        composeRule.onNodeWithText(string(FeatureR.string.qaida_see_all)).performClick()
         composeRule.onNodeWithContentDescription(
             string(R.string.qaida_a11y_lesson_current_format, 2, "Fatha")
         ).performClick()

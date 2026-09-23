@@ -7,7 +7,14 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.RestartAlt
-import androidx.compose.material.icons.filled.Translate
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import com.arshadshah.nimaz.presentation.theme.AmiriFontFamily
+import com.arshadshah.nimaz.presentation.theme.QaidaMedallionState
+import com.arshadshah.nimaz.presentation.theme.rememberQaidaPalette
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -46,6 +53,7 @@ fun QaidaHomeScreen(
     val cacheBytes by viewModel.cacheBytes.collectAsStateWithLifecycle()
     var tab by rememberSaveable { mutableIntStateOf(0) }
     val listState = rememberLazyListState()
+    var chapter by rememberSaveable { mutableIntStateOf(-1) }
     var reset by remember { mutableStateOf(false) }
     var clearAudio by remember { mutableStateOf(false) }
     LifecycleResumeEffect(Unit) {
@@ -56,26 +64,31 @@ fun QaidaHomeScreen(
     NimazScreenScaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            NimazBackTopAppBar(title = stringResource(R.string.qaida), onBackClick = onNavigateBack,
-                actions = {
-                    IconButton(onClick = onOpenLetters) {
-                        NimazIcon(Icons.Default.Translate, contentDescription = stringResource(R.string.qaida_letter_explorer))
-                    }
-                    IconButton(onClick = { reset = true }) {
-                        NimazIcon(Icons.Default.RestartAlt, contentDescription = stringResource(R.string.qaida_reset_journey))
-                    }
-                })
+            Row(Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+                NimazIconButton(Icons.AutoMirrored.Filled.ArrowBack, onNavigateBack,
+                    contentDescription = stringResource(FeatureR.string.qaida_back_lessons))
+                Column(Modifier.weight(1f).padding(vertical = 8.dp)) {
+                    Text(stringResource(FeatureR.string.qaida_brand), style = MaterialTheme.typography.headlineSmall.copy(fontFamily = AmiriFontFamily),
+                        color = MaterialTheme.colorScheme.primary)
+                    Text(stringResource(FeatureR.string.qaida_brand_caption), style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+                NimazIconButton(Icons.Default.Translate, onOpenLetters,
+                    contentDescription = stringResource(R.string.qaida_letter_explorer))
+                NimazIconButton(Icons.Default.RestartAlt, { reset = true },
+                    contentDescription = stringResource(R.string.qaida_reset_journey))
+            }
+        },
+        bottomBar = {
+            NimazSegmentedControl(
+                options = listOf(FeatureR.string.qaida_tab_journey, FeatureR.string.qaida_tab_review,
+                    FeatureR.string.qaida_tab_downloads).map { NimazSegmentedOption(stringResource(it)) },
+                selectedIndex = tab, onSelect = { tab = it }, purpose = NimazSegmentedPurpose.VIEW,
+                modifier = Modifier.navigationBarsPadding().padding(horizontal = 20.dp, vertical = 8.dp))
         },
     ) { padding ->
         LazyColumn(modifier = Modifier.fillMaxSize().padding(padding), state = listState,
-            contentPadding = PaddingValues(bottom = 32.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            item {
-                NimazSegmentedControl(
-                    options = listOf(FeatureR.string.qaida_tab_journey, FeatureR.string.qaida_tab_review,
-                        FeatureR.string.qaida_tab_downloads).map { NimazSegmentedOption(stringResource(it)) },
-                    selectedIndex = tab, onSelect = { tab = it }, purpose = NimazSegmentedPurpose.VIEW,
-                    modifier = Modifier.padding(horizontal = 20.dp))
-            }
+            contentPadding = PaddingValues(bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             when (tab) {
                 0 -> {
                     item {
@@ -86,27 +99,40 @@ fun QaidaHomeScreen(
                             totalLessons = cp?.totalLessons ?: 0, totalStars = cp?.totalStars ?: 0,
                             overallFraction = cp?.overallFraction ?: 0f,
                             continueLabel = cp?.lessons?.firstOrNull { it.lesson.id == cp.nextLessonId }?.lesson?.titleEnglish,
-                            onContinue = { cp?.nextLessonId?.let(onOpenLesson) })
+                            onContinue = { cp?.nextLessonId?.let(onOpenLesson) }, showContinue = false)
                     }
                     item {
-                        NimazCard(Modifier.padding(horizontal = 20.dp).fillMaxWidth(), tone = NimazTone.ACCENT) {
-                            Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                Text(stringResource(FeatureR.string.qaida_today_count, today), style = MaterialTheme.typography.titleMedium)
-                                Text(stringResource(FeatureR.string.qaida_today_goal), style = MaterialTheme.typography.bodySmall)
-                                NimazProgressTrack((today / 5f).coerceIn(0f, 1f), Modifier.fillMaxWidth())
-                            }
+                        Row(Modifier.fillMaxWidth().padding(horizontal = 24.dp), horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically) {
+                            Text(stringResource(FeatureR.string.qaida_chapters_title), style = MaterialTheme.typography.titleLarge.copy(fontFamily = AmiriFontFamily))
+                            NimazButton(stringResource(FeatureR.string.qaida_see_all), { chapter = if (chapter == 3) -1 else 3 },
+                                variant = NimazButtonVariant.TEXT, size = NimazButtonSize.SMALL)
                         }
                     }
                     val groups = listOf(1..5 to FeatureR.string.qaida_chapter_letters,
                         6..12 to FeatureR.string.qaida_chapter_build, 13..17 to FeatureR.string.qaida_chapter_confidence)
-                    groups.forEach { (range, title) ->
+                    groups.forEachIndexed { groupIndex, (range, title) ->
                         item {
-                            Column(Modifier.padding(horizontal = 24.dp)) {
-                                Text(stringResource(title), style = MaterialTheme.typography.titleLarge)
-                                Text(stringResource(FeatureR.string.qaida_chapter_range, range.first, range.last),
-                                    style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            NimazCard(Modifier.padding(horizontal = 20.dp).fillMaxWidth(),
+                                colors = NimazCardDefaults.colors(
+                                    container = when (groupIndex) { 0 -> MaterialTheme.colorScheme.primaryContainer; 1 -> MaterialTheme.colorScheme.secondaryContainer; else -> MaterialTheme.colorScheme.tertiaryContainer },
+                                    content = when (groupIndex) { 0 -> MaterialTheme.colorScheme.onPrimaryContainer; 1 -> MaterialTheme.colorScheme.onSecondaryContainer; else -> MaterialTheme.colorScheme.onTertiaryContainer }),
+                                onClick = { chapter = if (chapter == groupIndex) -1 else groupIndex }) {
+                                Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                                    NimazIcon(listOf(Icons.Default.MenuBook, Icons.Default.ViewInAr, Icons.Default.Mosque)[groupIndex],
+                                        contentDescription = null, iconSize = 32.dp, tint = MaterialTheme.colorScheme.primary)
+                                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                        Text(stringResource(title), style = MaterialTheme.typography.titleMedium.copy(fontFamily = AmiriFontFamily))
+                                        Text(stringResource(listOf(FeatureR.string.qaida_chapter_letters_hint,
+                                            FeatureR.string.qaida_chapter_build_hint, FeatureR.string.qaida_chapter_confidence_hint)[groupIndex]),
+                                            style = MaterialTheme.typography.bodySmall)
+                                    }
+                                    NimazIcon(if (chapter == groupIndex || chapter == 3) Icons.Default.ExpandLess else Icons.Default.ChevronRight, contentDescription = null)
+                                }
                             }
                         }
+                        if (chapter == groupIndex || chapter == 3)
                         items(course?.lessons.orEmpty().filter { it.lesson.lessonNumber in range }, key = { it.lesson.id }) { state ->
                             val announcement = if (state.status == LessonStatus.COMPLETED)
                                 pluralStringResource(R.plurals.qaida_a11y_lesson_complete_format, state.stars,
@@ -129,6 +155,41 @@ fun QaidaHomeScreen(
                             }
                         }
                     }
+                    item {
+                        Column(Modifier.padding(horizontal = 24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                            Text(stringResource(FeatureR.string.qaida_path_title), style = MaterialTheme.typography.titleMedium.copy(fontFamily = AmiriFontFamily))
+                            val lessons = course?.lessons.orEmpty()
+                            val current = lessons.indexOfFirst { it.lesson.id == course?.nextLessonId }.coerceAtLeast(0)
+                            val start = (current - 1).coerceAtLeast(0).coerceAtMost((lessons.size - 4).coerceAtLeast(0))
+                            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                lessons.drop(start).take(4).forEach { state ->
+                                    Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally,
+                                        verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                                        val pathLabel = stringResource(FeatureR.string.qaida_lesson_row, state.lesson.lessonNumber, state.lesson.titleEnglish)
+                                        val lockedHint = stringResource(FeatureR.string.qaida_locked_hint)
+                                        QaidaMedallion(label = state.lesson.lessonNumber.toString(),
+                                            state = when (state.status) {
+                                                LessonStatus.COMPLETED -> QaidaMedallionState.DONE
+                                                LessonStatus.LOCKED -> QaidaMedallionState.LOCKED
+                                                else -> QaidaMedallionState.CURRENT
+                                            },
+                                            contentDescription = if (state.status == LessonStatus.LOCKED) "$pathLabel. $lockedHint" else pathLabel,
+                                            palette = rememberQaidaPalette(), size = 48.dp,
+                                            onClick = { onOpenLesson(state.lesson.id) })
+                                        Text(state.lesson.titleEnglish, style = MaterialTheme.typography.labelSmall,
+                                            maxLines = 2, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center)
+                                    }
+                                }
+                            }
+                            course?.let { cp -> cp.lessons.firstOrNull { it.lesson.id == cp.nextLessonId }?.let { state ->
+                                NimazButton(stringResource(R.string.qaida_continue_format, state.lesson.titleEnglish),
+                                    { onOpenLesson(state.lesson.id) }, fullWidth = true)
+                            } }
+                            Text(stringResource(FeatureR.string.qaida_today_count, today), style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                    }
+
                 }
                 1 -> {
                     item {

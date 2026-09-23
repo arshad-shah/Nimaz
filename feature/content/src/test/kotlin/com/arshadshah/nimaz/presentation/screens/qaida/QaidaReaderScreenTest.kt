@@ -53,7 +53,7 @@ class QaidaReaderScreenTest {
     }
     @Test fun `practice is available without audio and play is disabled`() {
         show(); begin()
-        text(R.string.qaida_play_sound).assertIsNotEnabled()
+        composeRule.onNodeWithContentDescription(context.getString(R.string.qaida_play_sound)).assertIsNotEnabled()
         text(R.string.qaida_audio_unavailable).assertExists()
         text(R.string.qaida_practise).performClick()
         text(R.string.qaida_reveal).performClick()
@@ -63,7 +63,7 @@ class QaidaReaderScreenTest {
     }
     @Test fun `verified audio enables playback and repeat`() {
         download.value = QaidaDownloadState(ready = true)
-        show(); begin(); text(R.string.qaida_play_sound).performClick()
+        show(); begin(); composeRule.onNodeWithContentDescription(context.getString(R.string.qaida_play_sound)).performClick()
         text(R.string.qaida_repeat_sound).performClick()
         assertThat(events.filterIsInstance<QaidaReaderEvent.CellTapped>()).hasSize(1)
         assertThat(events.filterIsInstance<QaidaReaderEvent.RepeatCell>().single().times).isEqualTo(3)
@@ -114,9 +114,9 @@ class QaidaReaderScreenTest {
     @Test fun `transliteration can be hidden without hiding the Arabic`() {
         show(); begin(); text(R.string.qaida_hide_hint).performClick()
         composeRule.onNodeWithText("alif").assertDoesNotExist()
-        composeRule.onNodeWithText("ا").assertExists()
+        composeRule.onAllNodesWithText("ا").assertCountEquals(2)
         text(R.string.qaida_show_hint).performClick()
-        composeRule.onNodeWithText("alif").assertExists()
+        composeRule.onAllNodesWithText("alif").assertCountEquals(2)
     }
 
 }

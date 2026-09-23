@@ -36,10 +36,8 @@ import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.theme.ThemeMode
 
 /**
- * Pinned header for the Qaida course map: the Arabic journey title, an overall
- * progress bar, "Lesson X of N" with the running star total, and a "Continue"
- * button that resumes the next lesson. Lives on the app surface so it adapts to
- * light/dark; gold (secondary) marks the stars and progress accent.
+ * Illustrated course welcome with theme-backed progress and an optional resume action.
+ * Reuses the bundled serif face; no feature-specific palette is introduced.
  */
 @Composable
 fun QaidaCourseHeader(
@@ -52,59 +50,36 @@ fun QaidaCourseHeader(
     continueLabel: String?,
     onContinue: () -> Unit,
     modifier: Modifier = Modifier,
+    showContinue: Boolean = true,
 ) {
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = NimazSpacing.Large, vertical = NimazSpacing.Medium),
+            .padding(horizontal = NimazSpacing.Large, vertical = NimazSpacing.Small),
         verticalArrangement = Arrangement.spacedBy(NimazSpacing.Small),
     ) {
-        Image(painterResource(FeatureR.drawable.qaida_journey_book), contentDescription = null,
-            modifier = Modifier.fillMaxWidth().height(190.dp))
-        ArabicText(
-            text = titleArabic,
-            size = ArabicTextSize.MEDIUM,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.fillMaxWidth(),
-        )
-        Text(
-            text = titleEnglish,
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.SemiBold,
-            color = MaterialTheme.colorScheme.onSurface,
-        )
-
+        Text(titleEnglish, style = MaterialTheme.typography.headlineMedium.copy(
+            fontFamily = com.arshadshah.nimaz.presentation.theme.AmiriFontFamily),
+            color = MaterialTheme.colorScheme.onSurface)
         Text(stringResource(FeatureR.string.qaida_gentle_intro), style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant)
-        NimazProgressTrack(progress = overallFraction.coerceIn(0f, 1f), modifier = Modifier.fillMaxWidth())
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = stringResource(R.string.qaida_lesson_progress, lessonIndex, totalLessons),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                NimazIcon(
-                    imageVector = Icons.Filled.Star,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.secondary,
-                    iconSize = 18.dp,
-                )
-                Text(
-                    text = " $totalStars",
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
+        Image(painterResource(FeatureR.drawable.qaida_journey_book), contentDescription = null,
+            modifier = Modifier.fillMaxWidth().height(140.dp))
+        com.arshadshah.nimaz.presentation.components.atoms.NimazCard(Modifier.fillMaxWidth()) {
+            Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(stringResource(FeatureR.string.qaida_daily_title), style = MaterialTheme.typography.titleMedium.copy(
+                    fontFamily = com.arshadshah.nimaz.presentation.theme.AmiriFontFamily))
+                NimazProgressTrack(progress = overallFraction.coerceIn(0f, 1f), modifier = Modifier.fillMaxWidth())
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                    Text(stringResource(R.string.qaida_lesson_progress, lessonIndex, totalLessons),
+                        style = MaterialTheme.typography.bodySmall)
+                    Text(java.text.NumberFormat.getPercentInstance().format(overallFraction.coerceIn(0f, 1f)),
+                        style = MaterialTheme.typography.bodySmall)
+                }
             }
         }
 
-        if (continueLabel != null) {
+        if (continueLabel != null && showContinue) {
             NimazButton(
                 text = stringResource(R.string.qaida_continue_format, continueLabel),
                 onClick = onContinue,

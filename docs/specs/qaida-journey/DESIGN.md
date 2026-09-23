@@ -1,8 +1,10 @@
 # Qaida journey
 
-Approved direction: a calm ivory surface, teal learning actions, gold achievement accents,
-rounded cards and sculpted book illustrations. Use the current Nimaz theme in light and dark
-modes; Arabic is rendered as text, never baked into artwork. The chapter grouping follows the
+Approved direction: follow the supplied three-screen reference through serif headings,
+compact chapter cards, a horizontal lesson path, circular playback, related sound tiles and
+a fuller completion checklist. All UI colours come from the existing Nimaz theme: no custom
+palette or raw colour values. Reuse the bundled Amiri font and book illustrations in light
+and dark modes; Arabic is rendered as text, never baked into artwork. The chapter grouping follows the
 real 17 lessons: 1–5 letters and sounds, 6–12 building reading, 13–17 confidence.
 
 [Actual Compose screen previews](PREVIEWS.md)
@@ -11,14 +13,15 @@ real 17 lessons: 1–5 letters and sounds, 6–12 building reading, 13–17 conf
 
 | Page | Purpose and behaviour |
 | --- | --- |
-| Journey | Illustrated welcome, a gentle five-sound daily goal from actual listening/practice, persisted progress, continue pointer and three chapter groups. Locked lessons explain how to unlock. |
+| Journey | Illustrated welcome, actual daily activity, persisted progress, continue pointer, three expandable chapter cards and a four-lesson window around the current lesson. See all expands the curriculum. Locked lessons explain how to unlock. |
 | Review | On-device queue from the learner’s confidence checks; an encouraging empty state. Open a lesson and choose its review action for due cards only. |
 | Audio | Download explanation, actual disk use, confirmed removal without resetting learning. |
 | Lesson introduction | Existing curriculum description and Arabic title, teacher guidance, begin/resume and due review. Opens only this lesson’s audio download. |
 | Listen | Large vowel-highlighted Arabic, optional transliteration, preserved line instructions and notes, verified playback, repeat three times and pitch-preserving slower playback. |
+| Repeat | The same focused sound, with the large play button repeating three times; normal playback and slower playback remain available. |
 | Practise | Read first, reveal the reminder, then record “Feeling confident” or “Needs practice”. This is explicitly a self-check, never speech recognition or a pronunciation score. |
 | All cards | Scrollable lesson overview; selecting a card returns to focused listening. |
-| Completion | Gold book illustration, unique heard or self-practised cards this visit, practise again or return. Browsing alone does not fabricate a practice count. |
+| Completion | Existing book illustration, unique heard or self-practised cards this visit, honest activity checklist, encouragement and quick review of those cards (the lesson if none were practised), or return. Browsing alone does not fabricate a practice count. |
 | Letter explorer | Existing 29-letter grid, positional forms and articulation sheet; playback appears only when the lesson-one pack verifies. |
 
 Download states: preparing with per-clip progress, saved/offline, unavailable recordings,
@@ -28,7 +31,7 @@ returns from a lesson subpage to its introduction; leaving the reader stops play
 ## Existing components
 
 Reuse NimazScreenScaffold, NimazBackTopAppBar, NimazCard, NimazButton,
-NimazSegmentedControl, NimazProgressTrack, NimazConfirmDialog, NimazBottomSheet,
+NimazIconButton, NimazSegmentedControl, NimazProgressTrack, NimazConfirmDialog, NimazBottomSheet,
 ArabicText, HarakatArabicText, QaidaCourseHeader, QaidaLetterBoard and QaidaLetterDetailSheet.
 Extend ArabicTextSize with DISPLAY for the focus card. Keep the shared QaidaCoursePath and
 its Khatam consumer unchanged. No new general-purpose design system is introduced.

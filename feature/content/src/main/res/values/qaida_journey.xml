@@ -1,5 +1,5 @@
 <resources>
-    <string name="qaida_gentle_intro">A little practice, a little more confidence. Learn at your own pace.</string>
+    <string name="qaida_gentle_intro">Small steps. A lifelong blessing.</string>
     <string name="qaida_tab_journey">Journey</string>
     <string name="qaida_tab_review">Review</string>
     <string name="qaida_tab_downloads">Audio</string>
@@ -35,8 +35,8 @@
     <string name="qaida_cell_position">Sound %1$d of %2$d</string>
     <string name="qaida_play_sound">Play sound</string>
     <string name="qaida_stop_sound">Stop audio</string>
-    <string name="qaida_repeat_sound">Repeat 3 times</string>
-    <string name="qaida_slow_sound">Slower playback</string>
+    <string name="qaida_repeat_sound">Repeat 3×</string>
+    <string name="qaida_slow_sound">Slow</string>
     <string name="qaida_normal_sound">Normal speed</string>
     <string name="qaida_slow_hint">Slower playback is a learning aid. Listen at normal speed for natural timing.</string>
     <string name="qaida_read_prompt">Read aloud, then check the reminder.</string>
@@ -58,4 +58,25 @@
     <string name="qaida_playback_failed">This recording couldn’t play. Try downloading the lesson again.</string>
     <string name="qaida_today_count">%1$d sounds explored today</string>
     <string name="qaida_today_goal">A gentle goal: 5 sounds. A little is always welcome.</string>
+    <string name="qaida_brand">Nimaz</string>
+    <string name="qaida_brand_caption">Learn · Read · Grow</string>
+    <string name="qaida_daily_title">A little practice, every day</string>
+    <string name="qaida_chapters_title">Your chapters</string>
+    <string name="qaida_see_all">See all</string>
+    <string name="qaida_path_title">Your current lesson path</string>
+    <string name="qaida_chapter_letters_hint">Learn the Arabic letters and their sounds.</string>
+    <string name="qaida_chapter_build_hint">Join sounds and build your reading.</string>
+    <string name="qaida_chapter_confidence_hint">Practise and grow, step by step.</string>
+    <string name="qaida_back_lessons">Back to lessons</string>
+    <string name="qaida_repeat_tab">Repeat</string>
+    <string name="qaida_ready_practise">Ready to practise</string>
+    <string name="qaida_keep_growing">Keep growing</string>
+    <string name="qaida_keep_growing_hint">A quick review will help these sounds stick.</string>
+    <string name="qaida_quick_review">Try a quick review</string>
+    <string name="qaida_listened_done">Listened carefully</string>
+    <string name="qaida_listened_pending">Make time to listen</string>
+    <string name="qaida_practised_done">Practised the sounds</string>
+    <string name="qaida_practised_pending">Make time to practise the sounds</string>
+    <string name="qaida_review_ready">Ready for a short review</string>
+    <string name="qaida_footer">Little steps. A brighter tomorrow.</string>
 </resources>
