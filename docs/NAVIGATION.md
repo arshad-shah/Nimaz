@@ -342,7 +342,7 @@ Every route below also has a `ScreenTags` entry of the same name.
 ### 3.10 Qaida (children's Arabic reader)
 | Route | Args | Screen |
 |-------|------|--------|
-| `LearnToPray` | — | LearnToPrayScreen — More → Learning; preparation, an explicit two-rak‘ah walkthrough, and lesson completion. Citations emit `ContentTarget` to the graph, which uses `toRoute()` to open the existing Qur’an/hadith reader; Back retains the lesson position and figure. It never records a performed prayer. |
+| `LearnToPray` | — | LearnToPrayScreen — More → Learning; preparation, an explicit two-rak‘ah walkthrough, and lesson completion. Each step's recitations, audio notes and sources open in a sheet from the pinned *What to say* card. Citations emit `ContentTarget` to the graph, which uses `toRoute()` to open the existing Qur’an/hadith reader; Back retains the lesson position and figure. It never records a performed prayer. |
 | `QaidaHome` | — | QaidaHomeScreen |
 | `QaidaReader` | `lessonId: Int` | QaidaReaderScreen |
 | `QaidaLetters` | — | QaidaLettersScreen |

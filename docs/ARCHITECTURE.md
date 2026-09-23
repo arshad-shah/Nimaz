@@ -913,11 +913,20 @@ typed route object.
 
 ## 8. Theming & components
 
-`LearnToPrayScreen` reuses `NimazScreenScaffold`, `NimazBackTopAppBar`, `NimazCard`,
-`NimazButton`, `ArabicText`, `NimazIcons`, theme typography and adaptive insets. The illustration
-is a separate decorative WebP, not a screenshot containing text. Each step has a native-text
-instruction; the body scrolls independently of the navigation controls. The screen follows the
-selected app theme rather than forcing the dark mockup palette onto light-mode users.
+`LearnToPrayScreen` reuses `NimazScreenScaffold`, `NimazCard`, `NimazButton`, `NimazIconButton`,
+`NimazBottomSheet`, `ArabicText`, `NimazIcons`, theme typography and adaptive insets. The
+illustration is a separate decorative WebP, not a screenshot containing text. **The posture is the
+hero:** a teal stage (`LearnPrayArtColors` — the illustrations' own painted ground, so it is teal in
+both themes) runs under the status bar and carries back, the Man / Woman choice and the rak‘ah
+progress (two halves, the current step in `colorScheme.secondary`). The artwork is sized to its
+own 3:2 and its edges faded into the stage with a `DstIn` mask that covers the whole image — an
+oval alone leaves the corners and hard edge untouched. The stage needs light status-bar icons in
+both themes, re-applied in a `SideEffect` because `NimazTheme` resets them in one on every
+recomposition. **Everything below the stage follows the selected app theme.** On a step, *What
+to say* is pinned above one row of controls (an outlined back icon beside the primary action), so
+the words are never scrolled out of reach: it previews the step's main recitation — the first
+with audio, so the standing step leads with Al-Fatihah rather than the optional opening — with
+Listen, and opens every recitation, audio notes and sources in a `NimazBottomSheet`.
 The existing `NimazSegmentedControl` switches between male and female illustration sets without
 changing the lesson position, recitations or sequence. `SavedStateHandle` restores the explicit
 illustration choice; it is not a gender inference or a synced profile field. Clothing notes

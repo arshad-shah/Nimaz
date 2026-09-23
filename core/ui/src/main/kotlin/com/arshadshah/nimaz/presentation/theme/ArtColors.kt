@@ -46,6 +46,16 @@ object OnboardingArtColors {
     val TealTop = Color(0xFF14463F)
 }
 
+/**
+ * Learn to Pray's posture stage. Every lesson illustration is painted on one teal ground, so the
+ * stage is that teal in both themes; the rest of the screen follows the colour scheme.
+ */
+object LearnPrayArtColors {
+    val Stage = Color(0xFF10444A)       // the illustrations' own ground
+    val StageEdge = Color(0xFF0B3438)
+    val OnStage = Color(0xFFF4F1EA)
+}
+
 /** Loose one-off decorative accents, each owned by a single component. */
 object MiscArtColors {
     val TopBarBlue = Color(0xFF3E86C9)         // HomeDynamicTopBar
