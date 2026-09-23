@@ -1049,6 +1049,34 @@ with no label and a touch target under 48dp fail the lane we already run. It can
   `compositionLocalOf` default that nothing ever provided, so every screen was stuck on one
   corner-only medallion at ~5% alpha and toggling looked dead — the picker + a raised alpha
   fixed it.)
+- **Illustrated onboarding** keeps its fixed dark brand treatment (`NimazColors.OnboardingBgTop`
+  floor, `OnboardingArtColors.Ivory` / `Champagne` accents) over the shared
+  `MaterialTheme.typography` (Outfit Light titles, Plus Jakarta Sans body, an Amiri Arabic accent
+  word per intro page), `AdaptiveSpacing` margins, and `NimazButton` / `NimazIcon` /
+  `NimazDivider` controls. Its five pages are Welcome, Prayer Times, Learn to Pray, Progress, and
+  Setup. The learning message requires the companion Learn to Pray feature (#643) before release.
+  Decorative offline WebP resources belong to `:feature:onboarding` (`drawable-nodpi`); localized
+  text, buttons and permission states are never baked into artwork. The four Arabic words are
+  repeated unchanged in every locale rather than marked `translatable="false"` —
+  `scripts/test_feature_localization.py` requires every `onboarding_` key in all six, as it does
+  for the `learn_pray_*_ar` recitations.
+  **Layout:** each intro page's art is full-bleed, framed by a per-page horizontal bias so the
+  scene's focal point survives the crop, and fades into the floor where the copy sits, anchored
+  to the bottom: Arabic word, title, body. No page numbers, labels, example cards or captions.
+  One pinned footer holds a `NimazPageIndicator(followDrag = true, glowColor = …)` and a single
+  ivory primary action — Continue, crossfading to Let's begin on Setup. The only top control is
+  Skip; there is no Back button — the system back gesture steps back a page (and leaves the app
+  from the first).
+  **Motion:** swipes and Continue share a 420ms eased transition; each page's artwork moves at
+  40% of the page's speed (`ART_PARALLAX`), so every page is `clipToBounds()` — unclipped, the
+  shifted art paints over its neighbour. The indicator's pill follows the finger continuously.
+  A page's copy rises in a 70ms stagger once it settles. Repeated taps cannot skip pages during
+  motion. Funnel indices run from 0 through 4 and report settled pages only.
+  **Setup (page five)** shows the globe artwork above three hairline rows (location,
+  notifications, battery), each with a one-line reason and a text Allow action that disappears
+  once granted; a granted row names its result (the detected city when there is one). It is part
+  of the pager, not a sheet. **Skip jumps to Setup rather than completing** — setup is what makes
+  prayer times and reminders work — and Let's begin is the one way out, whatever was granted.
 - **Components follow Atomic Design** (`atoms` → `molecules` → `organisms`). Reuse shared
   components (e.g. `NimazCard`, `PrayerTimeCard`, `NimazBackTopAppBar`,
   `NimazEmptyState`, `NimazLoadingState`, `NimazCalendar`) rather than re-rolling generic UI.
@@ -1099,6 +1127,9 @@ with no label and a touch target under 48dp fail the lane we already run. It can
       caller still owns any page⇄ViewModel sync. Paired with it, page dots are the canonical pill
       `NimazPageIndicator(state)` (`components/atoms/NimazPageIndicator.kt`); it is a *page*
       indicator, **not** a progress tracker (for "N of M completed" use `QaidaLineProgressDots`).
+      `followDrag = true` makes the pill track the pager's live offset instead of jumping per page
+      (read in layout/draw, so a drag does not recompose), and `glowColor` adds a soft halo —
+      onboarding uses both.
     - an icon is `NimazIcon(imageVector, variant = …, size = …)` (`components/atoms/NimazIcon.kt`),
       **not** a raw Material 3 `Icon(...)`. `variant` is a semantic tint role
       (`DEFAULT`=inherits `LocalContentColor`, `MUTED`, `PRIMARY`, `ON_ACCENT`, `ERROR`, `SUCCESS`);

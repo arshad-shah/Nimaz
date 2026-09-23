@@ -408,7 +408,7 @@ archive/delete, which previously lived behind an undiscoverable long-press on th
 | `GlobalSearch` | — | SearchScreen — the unified library search, and the entry point for "Ask with Proof" |
 | `SearchSettings` | — | SearchSettingsScreen — consent + configuration for the opt-in AI search (see [`ai-ask-with-proof.md`](ai-ask-with-proof.md)) |
 | `AllBookmarks` | — | BookmarksScreen |
-| `Onboarding` | — | OnboardingScreen |
+| `Onboarding` | — | OnboardingScreen — five pages: Welcome, Prayer Times, Learn to Pray, Progress, Setup. The system back gesture returns to the previous page; Skip jumps to Setup; Let's begin on Setup completes once. |
 
 ---
 

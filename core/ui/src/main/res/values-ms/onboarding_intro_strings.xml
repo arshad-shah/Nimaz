@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_intro_welcome_title">Nimaz</string>
+    <string name="onboarding_intro_welcome_body">Lebih tenang, lebih dekat.</string>
+    <string name="onboarding_intro_welcome_caption">Panduan. Peringatan. Kemajuan.\nUntuk solat yang lebih bermakna.</string>
+    <string name="onboarding_intro_prayer_title">Luangkan masa untuk solat</string>
+    <string name="onboarding_intro_prayer_body">Waktu solat mengikut lokasi anda. Peringatan lembut sepanjang hari.</string>
+    <string name="onboarding_intro_learning_title">Belajar dengan yakin</string>
+    <string name="onboarding_intro_learning_body">Ikuti setiap pergerakan dan bacaan, satu langkah yang jelas pada satu masa.</string>
+    <string name="onboarding_intro_progress_title">Bina tabiat. Temui rentak anda.</string>
+    <string name="onboarding_intro_progress_body">Jejaki solat anda dan kembali kepada amalan harian.</string>
+    <string name="onboarding_intro_begin">Mari bermula</string>
+    <string name="onboarding_intro_setup_body">Pilih perkara yang ingin diaktifkan. Anda boleh mengubahnya kemudian dalam Tetapan.</string>
+    <string name="onboarding_continue">Teruskan</string>
+    <string name="onboarding_allow">Benarkan</string>
+    <string name="onboarding_setup_title">Hampir siap</string>
+    <string name="onboarding_location_reason">Waktu solat dan kiblat yang tepat</string>
+    <string name="onboarding_notification_reason">Seruan untuk setiap solat</string>
+    <string name="onboarding_battery_reason">Supaya peringatan tiba tepat pada masanya</string>
+    <string name="onboarding_intro_welcome_arabic">بسم الله</string>
+    <string name="onboarding_intro_prayer_arabic">الصلاة</string>
+    <string name="onboarding_intro_learning_arabic">تعلّم</string>
+    <string name="onboarding_intro_progress_arabic">استقامة</string>
+</resources>

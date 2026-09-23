@@ -625,7 +625,7 @@ on a real window and hangs under Robolectric.
 
 | Area | Covered by | What it pins |
 |---|---|---|
-| The way out of onboarding | `OnboardingScreenTest` | `CompleteOnboarding` and the navigation fire together, **once**, and only from the last page or Skip; Skip is gone from the last page, so there are never two buttons that both end the flow |
+| The way out of onboarding | `OnboardingScreenTest` | Five settled analytics pages. `CompleteOnboarding` and navigation fire together, **once**, from Get Started or Not Now on the permissions page, or early Skip. Permission cards remain scroll-accessible on short screens. |
 | Paging | same | each page carries its own copy, Back returns to the previous one, and the last page swaps Next for Get Started |
 | The funnel | same | every page reached is reported in order — the analytic that fired zero times in production while the pager drove itself locally |
 | The permission cards | same | a granted permission says so and stops asking; a detected location is **named** rather than shown the generic granted label; a permission granted while the page is open updates in place |

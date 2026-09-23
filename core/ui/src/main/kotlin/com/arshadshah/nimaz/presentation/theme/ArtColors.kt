@@ -44,6 +44,8 @@ object OnboardingArtColors {
     val TextSoft = Color(0xFFCFE3DF)
     val Niche = Color(0xFF0C2F2C)
     val TealTop = Color(0xFF14463F)
+    val Ivory = Color(0xFFF3EBDD)      // primary action + titles over the illustrated pages
+    val Champagne = Color(0xFFD9B26A)  // Arabic accent word, page indicator, setup actions
 }
 
 /**

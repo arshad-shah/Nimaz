@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_intro_welcome_title">Nimaz</string>
+    <string name="onboarding_intro_welcome_body">Ruhiger werden. Nähe finden.</string>
+    <string name="onboarding_intro_welcome_caption">Begleitung. Erinnerungen. Fortschritt.\nFür ein bewussteres Gebet.</string>
+    <string name="onboarding_intro_prayer_title">Zeit fürs Gebet</string>
+    <string name="onboarding_intro_prayer_body">Gebetszeiten für deinen Standort. Sanfte Erinnerungen für deinen Tag.</string>
+    <string name="onboarding_intro_learning_title">Mit Vertrauen lernen</string>
+    <string name="onboarding_intro_learning_body">Folge jeder Bewegung und Rezitation, Schritt für Schritt.</string>
+    <string name="onboarding_intro_progress_title">Gewohnheiten stärken. Deinen Rhythmus finden.</string>
+    <string name="onboarding_intro_progress_body">Halte deine Gebete fest und kehre zu deiner täglichen Praxis zurück.</string>
+    <string name="onboarding_intro_begin">Los geht’s</string>
+    <string name="onboarding_intro_setup_body">Wähle, was du aktivieren möchtest. Du kannst dies später in den Einstellungen ändern.</string>
+    <string name="onboarding_continue">Weiter</string>
+    <string name="onboarding_allow">Erlauben</string>
+    <string name="onboarding_setup_title">Fast geschafft</string>
+    <string name="onboarding_location_reason">Genaue Gebetszeiten und Qibla</string>
+    <string name="onboarding_notification_reason">Ein Ruf zu jedem Gebet</string>
+    <string name="onboarding_battery_reason">Damit Erinnerungen pünktlich kommen</string>
+    <string name="onboarding_intro_welcome_arabic">بسم الله</string>
+    <string name="onboarding_intro_prayer_arabic">الصلاة</string>
+    <string name="onboarding_intro_learning_arabic">تعلّم</string>
+    <string name="onboarding_intro_progress_arabic">استقامة</string>
+</resources>
