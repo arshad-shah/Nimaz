@@ -38,7 +38,7 @@ class SettingsNavigationTest : BaseAppTest() {
     fun settingsHub_opensEverySubScreen() {
         openSettings()
 
-        visit(Selectors.Settings.calculationMethod, ScreenTags.SettingsPrayerCalculation)
+        visit(Selectors.Settings.prayerTimes, ScreenTags.SettingsPrayerCalculation)
         visit(Selectors.Settings.location, ScreenTags.SettingsLocation)
         visit(Selectors.Settings.notifications, ScreenTags.SettingsNotifications)
         visit(Selectors.Settings.quranSettings, ScreenTags.SettingsQuran)
