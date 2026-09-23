@@ -2,6 +2,7 @@
 <resources>
     <string name="onboarding_intro_welcome_title">Nimaz</string>
     <string name="onboarding_intro_welcome_body">Ruhiger werden. Nähe finden.</string>
+    <string name="onboarding_intro_welcome_caption">Begleitung. Erinnerungen. Fortschritt.\nFür ein bewussteres Gebet.</string>
     <string name="onboarding_intro_prayer_title">Zeit fürs Gebet</string>
     <string name="onboarding_intro_prayer_body">Gebetszeiten für deinen Standort. Sanfte Erinnerungen für deinen Tag.</string>
     <string name="onboarding_intro_learning_title">Mit Vertrauen lernen</string>

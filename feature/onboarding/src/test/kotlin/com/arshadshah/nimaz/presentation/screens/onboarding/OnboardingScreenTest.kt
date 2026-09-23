@@ -131,7 +131,11 @@ class OnboardingScreenTest {
         launch()
 
         composeRule.onNodeWithText(str(R.string.onboarding_intro_welcome_title)).assertIsDisplayed()
-        composeRule.onNodeWithText(str(R.string.onboarding_intro_welcome_body)).assertIsDisplayed()
+        // The welcome body carries its caption in the same paragraph — one line alone left the
+        // first page thin.
+        composeRule.onNodeWithText(str(R.string.onboarding_intro_welcome_body), substring = true).assertIsDisplayed()
+        composeRule.onNodeWithText(str(R.string.onboarding_intro_welcome_caption).replace('\n', ' '), substring = true)
+            .assertIsDisplayed()
         composeRule.onAllNodesWithText(str(R.string.onboarding_back)).assertCountEquals(0)
         tapNext(2)
         composeRule.onAllNodesWithText(str(R.string.onboarding_back)).assertCountEquals(0)

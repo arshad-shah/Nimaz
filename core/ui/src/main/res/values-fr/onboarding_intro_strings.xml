@@ -2,6 +2,7 @@
 <resources>
     <string name="onboarding_intro_welcome_title">Nimaz</string>
     <string name="onboarding_intro_welcome_body">Plus de sérénité, plus de proximité.</string>
+    <string name="onboarding_intro_welcome_caption">Conseils. Rappels. Progrès.\nPour une prière pleine de sens.</string>
     <string name="onboarding_intro_prayer_title">Du temps pour la prière</string>
     <string name="onboarding_intro_prayer_body">Les horaires de prière de votre lieu. Des rappels tout au long du jour.</string>
     <string name="onboarding_intro_learning_title">Apprenez en confiance</string>

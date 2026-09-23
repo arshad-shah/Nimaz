@@ -108,7 +108,8 @@ private val FooterHeight = 136.dp
 
 /**
  * One intro page. [focus] frames the 2:3 artwork on a tall screen — the horizontal bias keeps
- * each scene's focal point (arch, figure, sun) in view once the sides are cropped.
+ * each scene's focal point (arch, figure, sun) in view once the sides are cropped. [detail]
+ * continues the body in the same paragraph, for a page whose body alone is a single line.
  */
 private data class IntroPage(
     val arabic: Int,
@@ -116,11 +117,13 @@ private data class IntroPage(
     val body: Int,
     val art: OnboardingIllustration,
     val focus: Float,
+    val detail: Int? = null,
 )
 
 private val introPages = listOf(
     IntroPage(R.string.onboarding_intro_welcome_arabic, R.string.onboarding_intro_welcome_title,
-        R.string.onboarding_intro_welcome_body, OnboardingIllustration.WELCOME, focus = 0f),
+        R.string.onboarding_intro_welcome_body, OnboardingIllustration.WELCOME, focus = 0f,
+        detail = R.string.onboarding_intro_welcome_caption),
     IntroPage(R.string.onboarding_intro_prayer_arabic, R.string.onboarding_intro_prayer_title,
         R.string.onboarding_intro_prayer_body, OnboardingIllustration.PRAYER, focus = 0.28f),
     IntroPage(R.string.onboarding_intro_learning_arabic, R.string.onboarding_intro_learning_title,
@@ -319,8 +322,10 @@ private fun IntroPageContent(page: IntroPage, insets: PaddingValues, offset: () 
                     color = Ivory, modifier = Modifier.semantics { heading() })
             }
             Spacer(Modifier.height(12.dp))
+            val body = stringResource(page.body)
+            val detail = page.detail?.let { stringResource(it).replace('\n', ' ') }
             Reveal(revealed, 2) {
-                Text(stringResource(page.body), style = MaterialTheme.typography.bodyLarge,
+                Text(if (detail == null) body else "$body $detail", style = MaterialTheme.typography.bodyLarge,
                     color = OnboardingArtColors.TextSoft.copy(alpha = 0.78f))
             }
         }

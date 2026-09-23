@@ -2,6 +2,7 @@
 <resources>
     <string name="onboarding_intro_welcome_title">Nimaz</string>
     <string name="onboarding_intro_welcome_body">A calmer, closer you.</string>
+    <string name="onboarding_intro_welcome_caption">Guidance. Reminders. Progress.\nFor a more meaningful Salah.</string>
     <string name="onboarding_intro_prayer_title">Make time for prayer</string>
     <string name="onboarding_intro_prayer_body">Prayer times for your location. Gentle reminders for your day.</string>
     <string name="onboarding_intro_learning_title">Learn with confidence</string>

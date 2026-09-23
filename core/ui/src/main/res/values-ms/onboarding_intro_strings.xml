@@ -2,6 +2,7 @@
 <resources>
     <string name="onboarding_intro_welcome_title">Nimaz</string>
     <string name="onboarding_intro_welcome_body">Lebih tenang, lebih dekat.</string>
+    <string name="onboarding_intro_welcome_caption">Panduan. Peringatan. Kemajuan.\nUntuk solat yang lebih bermakna.</string>
     <string name="onboarding_intro_prayer_title">Luangkan masa untuk solat</string>
     <string name="onboarding_intro_prayer_body">Waktu solat mengikut lokasi anda. Peringatan lembut sepanjang hari.</string>
     <string name="onboarding_intro_learning_title">Belajar dengan yakin</string>

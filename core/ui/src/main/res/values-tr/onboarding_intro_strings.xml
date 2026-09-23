@@ -2,6 +2,7 @@
 <resources>
     <string name="onboarding_intro_welcome_title">Nimaz</string>
     <string name="onboarding_intro_welcome_body">Daha huzurlu, daha yakın.</string>
+    <string name="onboarding_intro_welcome_caption">Rehberlik. Hatırlatmalar. İlerleme.\nDaha anlamlı bir namaz için.</string>
     <string name="onboarding_intro_prayer_title">Namaza zaman ayırın</string>
     <string name="onboarding_intro_prayer_body">Konumunuza göre namaz vakitleri. Gününüz için nazik hatırlatmalar.</string>
     <string name="onboarding_intro_learning_title">Güvenle öğrenin</string>
