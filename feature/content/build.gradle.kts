@@ -10,6 +10,12 @@ plugins {
 
 android {
     namespace = "com.arshadshah.nimaz.feature.content"
+    buildFeatures { resValues = true }
+    defaultConfig {
+        // Set to the deployed read-only Cloudflare Worker root. Empty means audio
+        // is not published yet; reading/practice remain available on-device.
+        resValue("string", "qaida_audio_base_url", providers.gradleProperty("qaidaAudioBaseUrl").orElse("").get())
+    }
 
     testOptions {
         unitTests {
@@ -131,6 +137,7 @@ dependencies {
     // compiling because nothing they touch is `internal`; see `FeatureTestsLiveWithSubjectTest`
     // in `:app` for what now catches that. `src/testDebug/resources/robolectric.properties`
     // carries the SDK and Application pins.
+    testImplementation(libs.json)
     testImplementation(libs.robolectric)
     testImplementation(libs.androidx.junit)
     testImplementation(platform(libs.androidx.compose.bom))

@@ -1,5 +1,10 @@
 package com.arshadshah.nimaz.presentation.components.molecules
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.height
+import androidx.compose.ui.res.painterResource
+import com.arshadshah.nimaz.feature.content.R as FeatureR
+import com.arshadshah.nimaz.presentation.components.atoms.NimazProgressTrack
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -54,6 +59,8 @@ fun QaidaCourseHeader(
             .padding(horizontal = NimazSpacing.Large, vertical = NimazSpacing.Medium),
         verticalArrangement = Arrangement.spacedBy(NimazSpacing.Small),
     ) {
+        Image(painterResource(FeatureR.drawable.qaida_journey_book), contentDescription = null,
+            modifier = Modifier.fillMaxWidth().height(190.dp))
         ArabicText(
             text = titleArabic,
             size = ArabicTextSize.MEDIUM,
@@ -62,19 +69,14 @@ fun QaidaCourseHeader(
         )
         Text(
             text = titleEnglish,
-            style = MaterialTheme.typography.titleMedium,
+            style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.SemiBold,
             color = MaterialTheme.colorScheme.onSurface,
         )
 
-        LinearProgressIndicator(
-            progress = { overallFraction.coerceIn(0f, 1f) },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = NimazSpacing.ExtraSmall),
-            color = MaterialTheme.colorScheme.secondary,
-            trackColor = MaterialTheme.colorScheme.surfaceVariant,
-        )
+        Text(stringResource(FeatureR.string.qaida_gentle_intro), style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant)
+        NimazProgressTrack(progress = overallFraction.coerceIn(0f, 1f), modifier = Modifier.fillMaxWidth())
 
         Row(
             modifier = Modifier.fillMaxWidth(),

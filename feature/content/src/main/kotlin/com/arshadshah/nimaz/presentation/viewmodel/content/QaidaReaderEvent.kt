@@ -13,5 +13,11 @@ sealed interface QaidaReaderEvent {
     data object NextLesson : QaidaReaderEvent
     data object PreviousLesson : QaidaReaderEvent
     data object Resume : QaidaReaderEvent
+    data class PractisedCell(val cell: QaidaCell, val confident: Boolean) : QaidaReaderEvent
+    data class RepeatCell(val cell: QaidaCell, val times: Int) : QaidaReaderEvent
+    data class SetSlow(val enabled: Boolean) : QaidaReaderEvent
+    data object RetryAudio : QaidaReaderEvent
+    data object StopAudio : QaidaReaderEvent
+    data object ClearAudio : QaidaReaderEvent
     data object ResetJourney : QaidaReaderEvent
 }

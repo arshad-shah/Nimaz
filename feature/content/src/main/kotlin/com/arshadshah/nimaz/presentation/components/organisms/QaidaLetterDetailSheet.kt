@@ -32,7 +32,6 @@ import com.arshadshah.nimaz.domain.model.QaidaLetter
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
-import com.arshadshah.nimaz.presentation.components.molecules.QAIDA_AUDIO_UI_ENABLED
 import com.arshadshah.nimaz.presentation.components.molecules.QaidaLetterForms
 import com.arshadshah.nimaz.presentation.components.molecules.QaidaMakhrajHelper
 import com.arshadshah.nimaz.presentation.theme.NimazCornerRadius
@@ -49,6 +48,7 @@ fun QaidaLetterDetailSheet(
     letter: QaidaLetter,
     onPlay: (QaidaLetter) -> Unit,
     modifier: Modifier = Modifier,
+    audioAvailable: Boolean = false,
 ) {
     Column(
         modifier = modifier
@@ -101,7 +101,7 @@ fun QaidaLetterDetailSheet(
                 }
             }
             // Hidden while audio is being regenerated (text-only mode).
-            if (QAIDA_AUDIO_UI_ENABLED) {
+            if (audioAvailable) {
                 val playLetterCd = stringResource(R.string.qaida_play_letter)
                 Box(
                     modifier = Modifier

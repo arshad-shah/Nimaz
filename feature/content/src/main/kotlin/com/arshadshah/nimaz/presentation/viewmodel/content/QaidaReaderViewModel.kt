@@ -9,6 +9,12 @@ import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.data.audio.QaidaAudioManager
 import com.arshadshah.nimaz.data.audio.QaidaAudioState
+import com.arshadshah.nimaz.data.audio.QaidaLessonAudioStore
+import com.arshadshah.nimaz.data.qaida.QaidaJourneyStore
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.map
 import com.arshadshah.nimaz.domain.model.LessonStatus
 import com.arshadshah.nimaz.domain.model.QaidaCell
 import com.arshadshah.nimaz.domain.model.QaidaCourseProgress
@@ -36,8 +42,8 @@ import javax.inject.Inject
  * (later) Compose screen needs as reactive [StateFlow]s. There is no UI here —
  * just playback orchestration and reactive state.
  *
- * Tapping a cell both plays its clip and advances progress (`MarkCellHeard`,
- * sub-issue E). Playback is stopped on lesson change and on [onCleared].
+ * Completed playback credits listening; explicit self-checks credit practice.
+ * Playback is stopped on lesson change and on [onCleared].
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
@@ -45,7 +51,22 @@ class QaidaReaderViewModel @Inject constructor(
     private val qaidaUseCases: QaidaUseCases,
     private val audioManager: QaidaAudioManager,
     private val telemetry: Telemetry,
+    private val lessonAudio: QaidaLessonAudioStore? = null,
+    private val journey: QaidaJourneyStore? = null,
 ) : ViewModel() {
+
+    private val _download = MutableStateFlow(QaidaDownloadState())
+    val download: StateFlow<QaidaDownloadState> = _download.asStateFlow()
+    private var downloadJob: Job? = null
+    private val _cacheBytes = MutableStateFlow(0L)
+    val cacheBytes: StateFlow<Long> = _cacheBytes.asStateFlow()
+    val dueLessons: StateFlow<Set<Int>> = (journey?.revision?.map { journey.dueLessonIds() }
+        ?: flowOf(emptySet())).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptySet())
+    fun refreshReview() { journey?.refresh() }
+    fun dueCells(lessonId: Int): Set<Int> = journey?.dueCellIds(lessonId).orEmpty()
+    fun resumeCell(lessonId: Int): Int? = journey?.resumeCell(lessonId)
+    fun savePosition(cell: QaidaCell) { journey?.setResume(cell.lessonId,cell.id) }
+    fun refreshCacheSize() { viewModelScope.launch { _cacheBytes.value = lessonAudio?.sizeBytes() ?: 0L } }
 
     private val sharing = SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS)
 
@@ -120,6 +141,7 @@ class QaidaReaderViewModel @Inject constructor(
         launchSafely(telemetry, AppAnalytics.Feature.QAIDA, "observe_loaded_cells") {
             lessonContent.collect { content ->
                 loadedCells = content?.lines?.flatMap { it.cells }.orEmpty()
+                if (content != null) prepareAudio(content)
             }
         }
     }
@@ -164,6 +186,26 @@ class QaidaReaderViewModel @Inject constructor(
                 resume()
             }
 
+            is QaidaReaderEvent.PractisedCell -> {
+                if (event.cell.lessonId != _selectedLessonId.value) return
+                launchSafely(telemetry, AppAnalytics.Feature.QAIDA, "practice_cell") {
+                    journey?.record(event.cell.lessonId, event.cell.id, event.confident)
+                    qaidaUseCases.markCellHeard.markPractised(event.cell.lessonId, event.cell.id)
+                }
+            }
+            is QaidaReaderEvent.RepeatCell -> audioManager.playSequence(List(event.times.coerceIn(1,3)) { event.cell.audioKey })
+            is QaidaReaderEvent.SetSlow -> audioManager.setSlow(event.enabled)
+            QaidaReaderEvent.RetryAudio -> lessonContent.value?.let { prepareAudio(it, refresh = true) }
+            QaidaReaderEvent.StopAudio -> audioManager.stop()
+            QaidaReaderEvent.ClearAudio -> {
+                downloadJob?.cancel()
+                audioManager.stop()
+                viewModelScope.launch {
+                    lessonAudio?.clear()
+                    _download.value = QaidaDownloadState()
+                    refreshCacheSize()
+                }
+            }
             QaidaReaderEvent.ResetJourney -> {
                 telemetry.featureUsed(AppAnalytics.Feature.QAIDA, "reset_journey")
                 resetJourney()
@@ -175,6 +217,8 @@ class QaidaReaderViewModel @Inject constructor(
     private fun selectLesson(lessonId: Int) {
         if (_selectedLessonId.value == lessonId) return
         audioManager.stop()
+        downloadJob?.cancel()
+        _download.value = QaidaDownloadState()
         _selectedLessonId.value = lessonId
     }
 
@@ -184,9 +228,8 @@ class QaidaReaderViewModel @Inject constructor(
      */
     private fun onCellTapped(cell: QaidaCell) {
         audioManager.play(cell.audioKey)
-        launchSafely(telemetry, AppAnalytics.Feature.QAIDA, "on_cell_tapped") {
-            qaidaUseCases.markCellHeard(cell.lessonId, cell.id)
-        }
+        savePosition(cell)
+        // Only actual playback completion credits listening. A tap can fail or be cancelled.
     }
 
     /**
@@ -267,6 +310,22 @@ class QaidaReaderViewModel @Inject constructor(
         _selectedLessonId.value = null
         launchSafely(telemetry, AppAnalytics.Feature.QAIDA, "reset_journey") {
             qaidaUseCases.resetProgress()
+            journey?.reset()
+        }
+    }
+
+    private fun prepareAudio(content: QaidaLessonContent, refresh: Boolean = false) {
+        downloadJob?.cancel()
+        downloadJob = viewModelScope.launch {
+            _download.value = QaidaDownloadState(loading = true)
+            try {
+                val ready = lessonAudio?.prepare(content, refresh) { done, total ->
+                    _download.value = QaidaDownloadState(loading = true, completed = done, total = total)
+                } ?: false
+                _download.value = QaidaDownloadState(ready = ready)
+            } catch (cancelled: CancellationException) { throw cancelled }
+            catch (_: Exception) { _download.value = QaidaDownloadState(failed = true) }
+            refreshCacheSize()
         }
     }
 
@@ -279,3 +338,12 @@ class QaidaReaderViewModel @Inject constructor(
         const val STOP_TIMEOUT_MS = 5_000L
     }
 }
+
+/** User-facing status contains no server details or raw exceptions. */
+data class QaidaDownloadState(
+    val loading: Boolean = false,
+    val ready: Boolean = false,
+    val failed: Boolean = false,
+    val completed: Int = 0,
+    val total: Int = 0,
+)

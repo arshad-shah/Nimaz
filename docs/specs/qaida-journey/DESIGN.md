@@ -1,0 +1,78 @@
+# Qaida journey
+
+Approved direction: a calm ivory surface, teal learning actions, gold achievement accents,
+rounded cards and sculpted book illustrations. Use the current Nimaz theme in light and dark
+modes; Arabic is rendered as text, never baked into artwork. The chapter grouping follows the
+real 17 lessons: 1–5 letters and sounds, 6–12 building reading, 13–17 confidence.
+
+## Pages and states
+
+| Page | Purpose and behaviour |
+| --- | --- |
+| Journey | Illustrated welcome, persisted progress, continue pointer and three chapter groups. Locked lessons explain how to unlock. |
+| Review | On-device queue from the learner’s confidence checks; an encouraging empty state. Open a lesson and choose its review action for due cards only. |
+| Audio | Download explanation, actual disk use, confirmed removal without resetting learning. |
+| Lesson introduction | Existing curriculum description and Arabic title, teacher guidance, begin/resume and due review. Opens only this lesson’s audio download. |
+| Listen | Large vowel-highlighted Arabic, optional transliteration, preserved line instructions and notes, verified playback, repeat three times and pitch-preserving slower playback. |
+| Practise | Read first, reveal the reminder, then record “Feeling confident” or “Needs practice”. This is explicitly a self-check, never speech recognition or a pronunciation score. |
+| All cards | Scrollable lesson overview; selecting a card returns to focused listening. |
+| Completion | Gold book illustration, unique self-practised cards this visit, practise again or return. Browsing alone does not fabricate a practice count. |
+| Letter explorer | Existing 29-letter grid, positional forms and articulation sheet; playback appears only when the lesson-one pack verifies. |
+
+Download states: preparing with per-clip progress, saved/offline, unavailable recordings,
+failed/retry. Reading and explicit practice remain available in every state. Back navigation
+returns from a lesson subpage to its introduction; leaving the reader stops playback.
+
+## Existing components
+
+Reuse NimazScreenScaffold, NimazBackTopAppBar, NimazCard, NimazButton,
+NimazSegmentedControl, NimazProgressTrack, NimazConfirmDialog, NimazBottomSheet,
+ArabicText, HarakatArabicText, QaidaCourseHeader, QaidaLetterBoard and QaidaLetterDetailSheet.
+Extend ArabicTextSize with DISPLAY for the focus card. Keep the shared QaidaCoursePath and
+its Khatam consumer unchanged. No new general-purpose design system is introduced.
+
+Two decorative, text-free PNG assets provide the journey and reward illustrations. They
+have no accessibility description; the adjacent headings communicate the information.
+Controls use standard semantics and labels, and lesson cards announce number, name and state.
+Scroll containers accommodate compact screens and larger text. Manual device validation in
+light/dark, RTL, TalkBack and 200% text remains a release gate.
+
+## Local learning and remote recordings
+
+Learning progress remains in the existing Room repository; resume and confidence-based review
+intervals use private preferences. “Needs practice” returns in ten minutes. Successive
+confidence checks schedule one, three, seven and fourteen days. No microphone permission,
+recording upload, account or remote learner profile is introduced. Review preferences and
+media cache are excluded from Android cloud backup; existing app database backup policy is
+unchanged.
+
+Audio is never bundled. Configure `-PqaidaAudioBaseUrl=https://YOUR-ACTUAL-WORKER-ROOT` when
+building. With no endpoint, the UI accurately reports unavailable recordings. The base URL is
+public and contains no credential. The data repository owns the Worker and upload procedure:
+`audio-worker/AGENT_UPLOAD.md` and `scripts/qaida_audio_pack.py`.
+
+The app requests `/lessons/{id}/manifest.json` only for the opened lesson (letter explorer uses
+lesson 1), verifies the lesson ID, exact content fingerprint, keys, Arabic text, byte sizes and
+SHA-256 hashes, then downloads `/clips/{sha256}.mp3`. Full verified packs commit atomically to
+private storage. Incomplete downloads never become playable; old editions retire only after a
+successful replacement. Disk limits are 512 KiB per manifest, 2 MiB per clip and 16 MiB per lesson.
+
+Fingerprint v1 is SHA-256 of UTF-8 concatenation, sorted by numeric cell ID:
+`cellId + "\n" + audioKey + "\n" + textArabic + "\n"` for every cell.
+
+Recordings must match the content version actually shipped in `data.lock.json`. Merge and
+release the corrected nimaz-data artifact through its normal pipeline, then update the app’s
+lock through the existing sync task. Never guess release hashes or bypass the pinned artifact.
+Teacher-reviewed recordings and a deployed Cloudflare endpoint are still required before
+listening can be enabled in a release build.
+
+## Verification
+
+Data PR #21 has eight focused Python checks and seven Worker tests passing locally. GitHub
+Actions currently fails before assigning a runner (no steps or logs), including a retry. It
+must go green before merge; the UI PR follows that merge, as requested.
+
+App tests cover missing/corrupt/stale audio, disk clearing, cache recreation, review intervals,
+self-practice vs actual heard counts, and reader download/practice/review flows. Run the module
+unit suite and the repository PR gates without lowering existing coverage requirements. An
+Android build and manual rendered-screen review are required before calling this ready.

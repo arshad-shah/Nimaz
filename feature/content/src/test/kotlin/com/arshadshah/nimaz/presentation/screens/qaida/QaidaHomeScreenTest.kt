@@ -57,6 +57,8 @@ class QaidaHomeScreenTest {
 
     private val viewModel: QaidaReaderViewModel = mockk(relaxed = true) {
         every { this@mockk.courseProgress } returns this@QaidaHomeScreenTest.courseProgress
+        every { this@mockk.dueLessons } returns MutableStateFlow(emptySet())
+        every { this@mockk.cacheBytes } returns MutableStateFlow(0L)
         every { onEvent(any()) } answers { events += firstArg<QaidaReaderEvent>() }
     }
 
@@ -200,8 +202,7 @@ class QaidaHomeScreenTest {
         )
 
         setContent()
-        composeRule.onNodeWithContentDescription(string(R.string.more)).performClick()
-        composeRule.onNodeWithText(string(R.string.qaida_reset_journey)).performClick()
+        composeRule.onNodeWithContentDescription(string(R.string.qaida_reset_journey)).performClick()
 
         // The menu row opens the dialog and dispatches nothing.
         assertThat(events).isEmpty()
@@ -220,8 +221,7 @@ class QaidaHomeScreenTest {
         )
 
         setContent()
-        composeRule.onNodeWithContentDescription(string(R.string.more)).performClick()
-        composeRule.onNodeWithText(string(R.string.qaida_reset_journey)).performClick()
+        composeRule.onNodeWithContentDescription(string(R.string.qaida_reset_journey)).performClick()
         composeRule.onNodeWithText(string(R.string.cancel)).performClick()
 
         assertThat(events).isEmpty()

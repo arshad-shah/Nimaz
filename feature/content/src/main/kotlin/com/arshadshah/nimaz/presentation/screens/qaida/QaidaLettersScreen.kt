@@ -35,6 +35,9 @@ fun QaidaLettersScreen(
     onNavigateBack: () -> Unit,
     viewModel: QaidaReaderViewModel = hiltViewModel(),
 ) {
+    androidx.compose.runtime.LaunchedEffect(Unit) { viewModel.onEvent(QaidaReaderEvent.SelectLesson(1)) }
+    androidx.compose.runtime.DisposableEffect(Unit) { onDispose { viewModel.onEvent(QaidaReaderEvent.StopAudio) } }
+    val download by viewModel.download.collectAsStateWithLifecycle()
     val letters by viewModel.letters.collectAsStateWithLifecycle()
     var selected by remember { mutableStateOf<QaidaLetter?>(null) }
 
@@ -66,6 +69,7 @@ fun QaidaLettersScreen(
             ) {
                 QaidaLetterDetailSheet(
                     letter = letter,
+                    audioAvailable = download.ready,
                     onPlay = { viewModel.onEvent(QaidaReaderEvent.PlayLetter(it)) },
                 )
             }
