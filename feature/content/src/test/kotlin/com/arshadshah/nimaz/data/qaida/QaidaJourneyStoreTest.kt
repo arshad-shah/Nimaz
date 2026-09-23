@@ -35,4 +35,13 @@ class QaidaJourneyStoreTest {
         assertThat(store.resumeCell(4)).isNull()
         assertThat(store.dueLessonIds(Long.MAX_VALUE)).isEmpty()
     }
+    @Test fun `daily encouragement counts unique activity and starts fresh on a new day`() {
+        store.recordActivity(1, 0); store.recordActivity(1, 0); store.recordActivity(2, 0)
+        assertThat(store.todayCount(0)).isEqualTo(2)
+        assertThat(QaidaJourneyStore(context).todayCount(0)).isEqualTo(2)
+        assertThat(store.todayCount(2 * 86400000L)).isEqualTo(0)
+        store.recordActivity(3, 2 * 86400000L)
+        assertThat(store.todayCount(2 * 86400000L)).isEqualTo(1)
+    }
+
 }

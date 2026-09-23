@@ -15,6 +15,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import com.arshadshah.nimaz.core.ui.R
 import com.arshadshah.nimaz.domain.model.QaidaLetter
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
@@ -38,6 +39,9 @@ fun QaidaLettersScreen(
     androidx.compose.runtime.LaunchedEffect(Unit) { viewModel.onEvent(QaidaReaderEvent.SelectLesson(1)) }
     androidx.compose.runtime.DisposableEffect(Unit) { onDispose { viewModel.onEvent(QaidaReaderEvent.StopAudio) } }
     val download by viewModel.download.collectAsStateWithLifecycle()
+    LifecycleResumeEffect(Unit) {
+        onPauseOrDispose { viewModel.onEvent(QaidaReaderEvent.StopAudio) }
+    }
     val letters by viewModel.letters.collectAsStateWithLifecycle()
     var selected by remember { mutableStateOf<QaidaLetter?>(null) }
 

@@ -72,7 +72,11 @@ class QaidaLessonAudioStore @Inject constructor(
             if (configured.isBlank()) return@withLock useCached()
             val uri = URI(configured)
             require(uri.scheme == "https" && !uri.host.isNullOrBlank() && uri.userInfo == null && uri.query == null && uri.fragment == null)
-            val manifestBytes = fetch("$configured/lessons/${content.lesson.id}/manifest.json", MAX_MANIFEST_BYTES)
+            val manifestBytes = try {
+                fetch("$configured/lessons/${content.lesson.id}/manifest.json", MAX_MANIFEST_BYTES)
+            } catch (missing: AudioObjectMissing) {
+                return@withLock useCached()
+            }
             val manifest = JSONObject(manifestBytes.toString(Charsets.UTF_8))
             val clips = validate(manifest)
             root.mkdirs()
@@ -125,6 +129,7 @@ class QaidaLessonAudioStore @Inject constructor(
             connection.connectTimeout = 15_000
             connection.readTimeout = 15_000
             connection.setRequestProperty("Accept", "application/json, audio/mpeg")
+            if (connection.responseCode == 404) throw AudioObjectMissing()
             if (connection.responseCode != 200) throw IOException("http_${connection.responseCode}")
             if (connection.contentLengthLong > limit) throw IOException("too_large")
             return connection.inputStream.use { input ->
@@ -145,6 +150,7 @@ class QaidaLessonAudioStore @Inject constructor(
     private fun verified(file: File, clip: AudioClip): Boolean =
         file.isFile && file.length() == clip.bytes && sha256(file.readBytes()) == clip.sha
 
+    private class AudioObjectMissing : IOException("not_published")
     private data class AudioClip(val key: String, val sha: String, val bytes: Long)
     companion object {
         private val SHA = Regex("[a-f0-9]{64}")

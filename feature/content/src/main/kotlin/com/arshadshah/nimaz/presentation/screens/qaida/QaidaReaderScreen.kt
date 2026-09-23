@@ -4,6 +4,7 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -15,6 +16,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import com.arshadshah.nimaz.domain.model.LessonStatus
 import com.arshadshah.nimaz.feature.content.R
 import com.arshadshah.nimaz.core.ui.R as CoreR
@@ -36,9 +38,13 @@ fun QaidaReaderScreen(
     val selectedId by viewModel.selectedLessonId.collectAsStateWithLifecycle()
     val course by viewModel.courseProgress.collectAsStateWithLifecycle()
     val activeId = selectedId ?: lessonId
+    LifecycleResumeEffect(Unit) {
+        onPauseOrDispose { viewModel.onEvent(QaidaReaderEvent.StopAudio) }
+    }
     val content by viewModel.lessonContent.collectAsStateWithLifecycle()
     val download by viewModel.download.collectAsStateWithLifecycle()
     val audio by viewModel.audioState.collectAsStateWithLifecycle()
+    val sessionHeard by viewModel.sessionHeard.collectAsStateWithLifecycle()
     val completed by viewModel.completedCellIds.collectAsStateWithLifecycle()
     val c = content?.takeIf { it.lesson.id == activeId }
     val all = c?.lines?.flatMap { it.cells }.orEmpty()
@@ -52,6 +58,8 @@ fun QaidaReaderScreen(
     var slow by rememberSaveable { mutableStateOf(false) }
     val cells = if (reviewIds.isEmpty()) all else all.filter { it.id in reviewIds }
     val cell = cells.getOrNull(index.coerceAtLeast(0))
+    val listState = rememberLazyListState()
+    LaunchedEffect(page, mode, index, activeId) { listState.scrollToItem(0) }
     LaunchedEffect(all) {
         if (index < 0 && all.isNotEmpty()) index = all.indexOfFirst { it.id == viewModel.resumeCell(activeId) }.coerceAtLeast(0)
     }
@@ -63,7 +71,7 @@ fun QaidaReaderScreen(
     BackHandler(page != 0) { back() }
     NimazScreenScaffold(containerColor = MaterialTheme.colorScheme.background,
         topBar = { NimazBackTopAppBar(title = c?.lesson?.titleEnglish ?: stringResource(CoreR.string.qaida_lesson), onBackClick = { back() }) }) { padding ->
-        LazyColumn(Modifier.fillMaxSize().padding(padding), contentPadding = PaddingValues(24.dp),
+        LazyColumn(Modifier.fillMaxSize().padding(padding), state = listState, contentPadding = PaddingValues(24.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp), horizontalAlignment = Alignment.CenterHorizontally) {
             if (c == null) item { Text(stringResource(R.string.qaida_getting_ready)) }
             else when (page) {
@@ -150,7 +158,7 @@ fun QaidaReaderScreen(
                                 NimazButton(stringResource(R.string.qaida_previous_sound), { index-- }, enabled = index > 0,
                                     variant = NimazButtonVariant.TEXT, fullWidth = true)
                                 NimazButton(stringResource(if (index == cells.lastIndex) R.string.qaida_finish_session else R.string.qaida_next_sound), { next() },
-                                    variant = NimazButtonVariant.OUTLINED, fullWidth = true)
+                                    variant = NimazButtonVariant.FILLED, fullWidth = true)
                             }
                         }
                     }
@@ -160,7 +168,7 @@ fun QaidaReaderScreen(
                         Image(painterResource(R.drawable.qaida_reward_book), null, Modifier.fillMaxWidth().height(220.dp))
                         Text(stringResource(R.string.qaida_reward_title), style = MaterialTheme.typography.headlineMedium)
                         Text(stringResource(R.string.qaida_reward_description))
-                        Text(stringResource(R.string.qaida_session_count, practised.size), style = MaterialTheme.typography.titleMedium)
+                        Text(stringResource(R.string.qaida_session_count, (practised + sessionHeard).distinct().size), style = MaterialTheme.typography.titleMedium)
                         val lessons = course?.lessons.orEmpty()
                         val current = lessons.indexOfFirst { it.lesson.id == activeId }
                         val following = lessons.getOrNull(current + 1)?.takeIf { current >= 0 && it.status != LessonStatus.LOCKED }

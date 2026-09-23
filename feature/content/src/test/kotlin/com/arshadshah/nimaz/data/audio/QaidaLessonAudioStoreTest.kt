@@ -81,6 +81,8 @@ class QaidaLessonAudioStoreTest {
         assertThat(store.resolve(cells.first().audioKey)).isNull()
     }
     @Test fun `fingerprint is independent of input order but sensitive to exact text`() {
+        // Shared v1 wire-format fixture, calculated independently of the Android helper.
+        assertThat(fingerprint).isEqualTo("7b88aeb4dfea4a46280260d3051f7c861dcf1705c8c653cf9ebe2594b6bcc452")
         val values = cells.map { Triple(it.id, it.audioKey, it.textArabic) }
         assertThat(QaidaLessonAudioStore.fingerprint(values.reversed())).isEqualTo(fingerprint)
         assertThat(QaidaLessonAudioStore.fingerprint(values.map { Triple(it.first, it.second, it.third + "َ") })).isNotEqualTo(fingerprint)

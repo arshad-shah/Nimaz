@@ -36,6 +36,7 @@ class QaidaReaderScreenTest {
         every { courseProgress } returns MutableStateFlow(qaidaCourse())
         every { this@mockk.download } returns this@QaidaReaderScreenTest.download
         every { audioState } returns audio
+        every { sessionHeard } returns MutableStateFlow(emptySet())
         every { completedCellIds } returns MutableStateFlow(emptySet())
         every { resumeCell(any()) } returns null
         every { dueCells(any()) } returns emptySet()
@@ -92,4 +93,30 @@ class QaidaReaderScreenTest {
         composeRule.onNodeWithText("ba").performClick()
         composeRule.onNodeWithText(context.getString(R.string.qaida_cell_position, 2, 2)).assertExists()
     }
+    @Test fun `loading content does not display the previous lesson`() {
+        content.value = qaidaLessonContent(lessonId = 2)
+        show()
+        text(R.string.qaida_getting_ready).assertExists()
+        text(R.string.qaida_begin_lesson).assertDoesNotExist()
+    }
+    @Test fun `downloads announce real per clip progress`() {
+        download.value = QaidaDownloadState(loading = true, completed = 1, total = 2)
+        show()
+        composeRule.onNodeWithText(context.getString(R.string.qaida_download_progress, 1, 2)).assertExists()
+        text(R.string.qaida_retry_audio).assertDoesNotExist()
+    }
+    @Test fun `another attempt records low confidence and moves forward`() {
+        show(); begin(); text(R.string.qaida_practise).performClick(); text(R.string.qaida_reveal).performClick()
+        text(R.string.qaida_again).performClick()
+        assertThat(events.filterIsInstance<QaidaReaderEvent.PractisedCell>().single().confident).isFalse()
+        composeRule.onNodeWithText(context.getString(R.string.qaida_cell_position, 2, 2)).assertExists()
+    }
+    @Test fun `transliteration can be hidden without hiding the Arabic`() {
+        show(); begin(); text(R.string.qaida_hide_hint).performClick()
+        composeRule.onNodeWithText("alif").assertDoesNotExist()
+        composeRule.onNodeWithText("ا").assertExists()
+        text(R.string.qaida_show_hint).performClick()
+        composeRule.onNodeWithText("alif").assertExists()
+    }
+
 }

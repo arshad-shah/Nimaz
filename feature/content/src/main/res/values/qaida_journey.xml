@@ -49,11 +49,13 @@
     <string name="qaida_finish_session">Finish practice</string>
     <string name="qaida_reward_title">A lovely step forward</string>
     <string name="qaida_reward_description">You made time to learn. Every thoughtful repetition matters.</string>
-    <string name="qaida_session_count">%1$d sounds practised this visit</string>
+    <string name="qaida_session_count">%1$d sounds explored this visit</string>
     <string name="qaida_back_journey">Back to your journey</string>
     <string name="qaida_practice_more">Practise a little more</string>
     <string name="qaida_show_hint">Show transliteration</string>
     <string name="qaida_hide_hint">Hide transliteration</string>
     <string name="qaida_empty_lesson">This lesson has no learning cards available yet.</string>
     <string name="qaida_playback_failed">This recording couldn’t play. Try downloading the lesson again.</string>
+    <string name="qaida_today_count">%1$d sounds explored today</string>
+    <string name="qaida_today_goal">A gentle goal: 5 sounds. A little is always welcome.</string>
 </resources>

@@ -55,13 +55,17 @@ class QaidaReaderViewModel @Inject constructor(
     private val journey: QaidaJourneyStore? = null,
 ) : ViewModel() {
 
+    private val _sessionHeard = MutableStateFlow<Set<Int>>(emptySet())
+    val sessionHeard: StateFlow<Set<Int>> = _sessionHeard.asStateFlow()
     private val _download = MutableStateFlow(QaidaDownloadState())
     val download: StateFlow<QaidaDownloadState> = _download.asStateFlow()
     private var downloadJob: Job? = null
     private val _cacheBytes = MutableStateFlow(0L)
     val cacheBytes: StateFlow<Long> = _cacheBytes.asStateFlow()
-    val dueLessons: StateFlow<Set<Int>> = (journey?.revision?.map { journey.dueLessonIds() }
+    val dueLessons: StateFlow<Set<Int>> = (journey?.let { store -> store.revision.map { store.dueLessonIds() } }
         ?: flowOf(emptySet())).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptySet())
+    val todayCount: StateFlow<Int> = (journey?.let { store -> store.revision.map { store.todayCount() } }
+        ?: flowOf(0)).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
     fun refreshReview() { journey?.refresh() }
     fun dueCells(lessonId: Int): Set<Int> = journey?.dueCellIds(lessonId).orEmpty()
     fun resumeCell(lessonId: Int): Int? = journey?.resumeCell(lessonId)
@@ -219,6 +223,7 @@ class QaidaReaderViewModel @Inject constructor(
         audioManager.stop()
         downloadJob?.cancel()
         _download.value = QaidaDownloadState()
+        _sessionHeard.value = emptySet()
         _selectedLessonId.value = lessonId
     }
 
@@ -264,6 +269,8 @@ class QaidaReaderViewModel @Inject constructor(
             audioManager.completions.collect { key ->
                 val cell = loadedCells.firstOrNull { it.audioKey == key } ?: return@collect
                 qaidaUseCases.markCellHeard(cell.lessonId, cell.id)
+                _sessionHeard.value += cell.id
+                journey?.recordActivity(cell.id)
             }
         }
     }

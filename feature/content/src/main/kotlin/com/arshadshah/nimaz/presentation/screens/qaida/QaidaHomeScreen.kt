@@ -3,6 +3,7 @@ package com.arshadshah.nimaz.presentation.screens.qaida
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.RestartAlt
@@ -15,6 +16,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -40,30 +42,32 @@ fun QaidaHomeScreen(
 ) {
     val course by viewModel.courseProgress.collectAsStateWithLifecycle()
     val due by viewModel.dueLessons.collectAsStateWithLifecycle()
+    val today by viewModel.todayCount.collectAsStateWithLifecycle()
     val cacheBytes by viewModel.cacheBytes.collectAsStateWithLifecycle()
     var tab by rememberSaveable { mutableIntStateOf(0) }
+    val listState = rememberLazyListState()
     var reset by remember { mutableStateOf(false) }
     var clearAudio by remember { mutableStateOf(false) }
     LifecycleResumeEffect(Unit) {
         viewModel.refreshReview(); viewModel.refreshCacheSize()
         onPauseOrDispose { }
     }
-    LaunchedEffect(tab) { viewModel.refreshCacheSize(); viewModel.refreshReview() }
+    LaunchedEffect(tab) { viewModel.refreshCacheSize(); viewModel.refreshReview(); listState.scrollToItem(0) }
     NimazScreenScaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             NimazBackTopAppBar(title = stringResource(R.string.qaida), onBackClick = onNavigateBack,
                 actions = {
                     IconButton(onClick = onOpenLetters) {
-                        NimazIcon(Icons.Default.Translate, stringResource(R.string.qaida_letter_explorer))
+                        NimazIcon(Icons.Default.Translate, contentDescription = stringResource(R.string.qaida_letter_explorer))
                     }
                     IconButton(onClick = { reset = true }) {
-                        NimazIcon(Icons.Default.RestartAlt, stringResource(R.string.qaida_reset_journey))
+                        NimazIcon(Icons.Default.RestartAlt, contentDescription = stringResource(R.string.qaida_reset_journey))
                     }
                 })
         },
     ) { padding ->
-        LazyColumn(modifier = Modifier.fillMaxSize().padding(padding),
+        LazyColumn(modifier = Modifier.fillMaxSize().padding(padding), state = listState,
             contentPadding = PaddingValues(bottom = 32.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
             item {
                 NimazSegmentedControl(
@@ -84,6 +88,15 @@ fun QaidaHomeScreen(
                             continueLabel = cp?.lessons?.firstOrNull { it.lesson.id == cp.nextLessonId }?.lesson?.titleEnglish,
                             onContinue = { cp?.nextLessonId?.let(onOpenLesson) })
                     }
+                    item {
+                        NimazCard(Modifier.padding(horizontal = 20.dp).fillMaxWidth(), tone = NimazTone.ACCENT) {
+                            Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Text(stringResource(FeatureR.string.qaida_today_count, today), style = MaterialTheme.typography.titleMedium)
+                                Text(stringResource(FeatureR.string.qaida_today_goal), style = MaterialTheme.typography.bodySmall)
+                                NimazProgressTrack((today / 5f).coerceIn(0f, 1f), Modifier.fillMaxWidth())
+                            }
+                        }
+                    }
                     val groups = listOf(1..5 to FeatureR.string.qaida_chapter_letters,
                         6..12 to FeatureR.string.qaida_chapter_build, 13..17 to FeatureR.string.qaida_chapter_confidence)
                     groups.forEach { (range, title) ->
@@ -95,7 +108,10 @@ fun QaidaHomeScreen(
                             }
                         }
                         items(course?.lessons.orEmpty().filter { it.lesson.lessonNumber in range }, key = { it.lesson.id }) { state ->
-                            val announcement = stringResource(if (state.status == LessonStatus.LOCKED)
+                            val announcement = if (state.status == LessonStatus.COMPLETED)
+                                pluralStringResource(R.plurals.qaida_a11y_lesson_complete_format, state.stars,
+                                    state.lesson.lessonNumber, state.lesson.titleEnglish, state.stars)
+                            else stringResource(if (state.status == LessonStatus.LOCKED)
                                 R.string.qaida_a11y_lesson_locked_format else R.string.qaida_a11y_lesson_current_format,
                                 state.lesson.lessonNumber, state.lesson.titleEnglish)
                             NimazCard(modifier = Modifier.padding(horizontal = 20.dp).fillMaxWidth().semantics { contentDescription = announcement },

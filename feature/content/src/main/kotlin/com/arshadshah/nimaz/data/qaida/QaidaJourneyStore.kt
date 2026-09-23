@@ -1,6 +1,8 @@
 package com.arshadshah.nimaz.data.qaida
 
 import android.content.Context
+import java.time.Instant
+import java.time.ZoneId
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -17,7 +19,7 @@ class QaidaJourneyStore @Inject constructor(@ApplicationContext context: Context
     fun dueLessonIds(now: Long = System.currentTimeMillis()): Set<Int> = preferences.all
         .filterKeys { it.startsWith("cell_") }.values.mapNotNull { raw ->
             runCatching { JSONObject(raw as String) }.getOrNull()
-        }.filter { it.optLong("due") <= now }.map { it.getInt("lesson") }.toSet()
+        }.filter { it.has("due") && it.optLong("due") <= now }.mapNotNull { it.optInt("lesson").takeIf { id -> id > 0 } }.toSet()
     fun dueCellIds(lessonId: Int, now: Long = System.currentTimeMillis()): Set<Int> = preferences.all
         .filterKeys { it.startsWith("cell_") }.mapNotNull { (key, raw) ->
             runCatching { JSONObject(raw as String) }.getOrNull()?.takeIf {
@@ -31,6 +33,17 @@ class QaidaJourneyStore @Inject constructor(@ApplicationContext context: Context
         val delay = QaidaReviewSchedule.delayMillis(stage)
         val value = JSONObject().put("lesson", lessonId).put("stage", stage).put("due", now + delay)
         preferences.edit().putString(key, value.toString()).putInt("resume_$lessonId",cellId).apply()
+        recordActivity(cellId, now)
+    }
+    private fun day(now: Long) = Instant.ofEpochMilli(now).atZone(ZoneId.systemDefault()).toLocalDate().toEpochDay()
+    fun todayCount(now: Long = System.currentTimeMillis()): Int =
+        if (preferences.getLong("today_day", Long.MIN_VALUE) == day(now))
+            preferences.getStringSet("today_cells", emptySet()).orEmpty().size else 0
+    fun recordActivity(cellId: Int, now: Long = System.currentTimeMillis()) {
+        val ids = if (preferences.getLong("today_day", Long.MIN_VALUE) == day(now))
+            preferences.getStringSet("today_cells", emptySet()).orEmpty().toMutableSet() else mutableSetOf()
+        ids.add(cellId.toString())
+        preferences.edit().putLong("today_day", day(now)).putStringSet("today_cells", ids).apply()
         _revision.value++
     }
     fun resumeCell(lessonId: Int): Int? = preferences.getInt("resume_$lessonId", -1).takeIf { it >= 0 }

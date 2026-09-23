@@ -5,18 +5,20 @@ rounded cards and sculpted book illustrations. Use the current Nimaz theme in li
 modes; Arabic is rendered as text, never baked into artwork. The chapter grouping follows the
 real 17 lessons: 1–5 letters and sounds, 6–12 building reading, 13–17 confidence.
 
+[Actual Compose screen previews](PREVIEWS.md)
+
 ## Pages and states
 
 | Page | Purpose and behaviour |
 | --- | --- |
-| Journey | Illustrated welcome, persisted progress, continue pointer and three chapter groups. Locked lessons explain how to unlock. |
+| Journey | Illustrated welcome, a gentle five-sound daily goal from actual listening/practice, persisted progress, continue pointer and three chapter groups. Locked lessons explain how to unlock. |
 | Review | On-device queue from the learner’s confidence checks; an encouraging empty state. Open a lesson and choose its review action for due cards only. |
 | Audio | Download explanation, actual disk use, confirmed removal without resetting learning. |
 | Lesson introduction | Existing curriculum description and Arabic title, teacher guidance, begin/resume and due review. Opens only this lesson’s audio download. |
 | Listen | Large vowel-highlighted Arabic, optional transliteration, preserved line instructions and notes, verified playback, repeat three times and pitch-preserving slower playback. |
 | Practise | Read first, reveal the reminder, then record “Feeling confident” or “Needs practice”. This is explicitly a self-check, never speech recognition or a pronunciation score. |
 | All cards | Scrollable lesson overview; selecting a card returns to focused listening. |
-| Completion | Gold book illustration, unique self-practised cards this visit, practise again or return. Browsing alone does not fabricate a practice count. |
+| Completion | Gold book illustration, unique heard or self-practised cards this visit, practise again or return. Browsing alone does not fabricate a practice count. |
 | Letter explorer | Existing 29-letter grid, positional forms and articulation sheet; playback appears only when the lesson-one pack verifies. |
 
 Download states: preparing with per-clip progress, saved/offline, unavailable recordings,
@@ -72,7 +74,15 @@ Data PR #21 has eight focused Python checks and seven Worker tests passing local
 Actions currently fails before assigning a runner (no steps or logs), including a retry. It
 must go green before merge; the UI PR follows that merge, as requested.
 
-App tests cover missing/corrupt/stale audio, disk clearing, cache recreation, review intervals,
-self-practice vs actual heard counts, and reader download/practice/review flows. Run the module
-unit suite and the repository PR gates without lowering existing coverage requirements. An
-Android build and manual rendered-screen review are required before calling this ready.
+Local Android verification passed: 125 Qaida feature tests, 11 domain progress tests and
+32 Arabic text component tests (168 total). The feature compiles with Java 21 / Gradle 9.5.1.
+Four additional native Robolectric renders were inspected in light/dark themes; the temporary
+render harness is not part of the production test suite. These checks cover missing/corrupt/
+stale audio, cache recreation and removal, review timing, daily activity, actual heard counts,
+explicit practice, and the reader/download/review flows.
+
+The local test JVM required ByteBuddy's agent at startup because dynamic self-attachment was
+unavailable in the sandbox. No repository test gates or coverage floors were weakened.
+Full repository PR gates, coverage verification, APK/device testing, TalkBack and 200% text
+checks remain required before release. The data CI startup failure prevents the requested
+merge-then-UI-PR sequence from completing yet.
