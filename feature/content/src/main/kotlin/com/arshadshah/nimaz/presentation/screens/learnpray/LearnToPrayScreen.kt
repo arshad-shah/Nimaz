@@ -1,6 +1,5 @@
 package com.arshadshah.nimaz.presentation.screens.learnpray
 
-import android.app.Activity
 import androidx.activity.compose.BackHandler
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
@@ -35,7 +34,6 @@ import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
@@ -45,7 +43,6 @@ import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.core.view.WindowCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.core.ui.R
@@ -53,6 +50,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.*
 import com.arshadshah.nimaz.presentation.components.molecules.NimazBottomSheet
 import com.arshadshah.nimaz.presentation.theme.AdaptiveSpacing
 import com.arshadshah.nimaz.presentation.theme.LearnPrayArtColors
+import com.arshadshah.nimaz.presentation.theme.LightStatusBarIcons
 import com.arshadshah.nimaz.presentation.model.PrayerFigure
 import com.arshadshah.nimaz.presentation.viewmodel.learnpray.*
 import kotlinx.coroutines.launch
@@ -113,7 +111,8 @@ internal fun LearnToPrayContent(
     }
     var showRecitations by rememberSaveable(state.page) { mutableStateOf(false) }
     BackHandler(enabled = !state.preparing) { onEvent(LearnPrayEvent.Previous) }
-    LightStatusBarIconsOverStage()
+    // The stage is dark teal in both themes.
+    LightStatusBarIcons()
 
     val step = PrayerLesson.steps.getOrNull(state.page)
     NimazScreenScaffold(
@@ -204,27 +203,6 @@ internal fun LearnToPrayContent(
             }
         }
     }
-}
-
-/**
- * The stage is dark teal in both themes, so the status bar over it always needs light icons.
- *
- * `NimazTheme` sets the icon contrast from the theme in a `SideEffect` on every recomposition, and
- * a remembered effect runs *before* side effects in the same pass — so a one-off override loses as
- * soon as the theme recomposes (switching to light mode with this screen open, for one). This
- * screen's own `SideEffect` is registered after the theme's and so applies last.
- */
-@Composable
-private fun LightStatusBarIconsOverStage() {
-    val view = LocalView.current
-    if (view.isInEditMode) return
-    val window = (view.context as? Activity)?.window ?: return
-    val controller = remember(window, view) { WindowCompat.getInsetsController(window, view) }
-    DisposableEffect(controller) {
-        val previous = controller.isAppearanceLightStatusBars
-        onDispose { controller.isAppearanceLightStatusBars = previous }
-    }
-    SideEffect { controller.isAppearanceLightStatusBars = false }
 }
 
 @Composable

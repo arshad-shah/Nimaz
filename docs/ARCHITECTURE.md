@@ -921,8 +921,7 @@ both themes) runs under the status bar and carries back, the Man / Woman choice 
 progress (two halves, the current step in `colorScheme.secondary`). The artwork is sized to its
 own 3:2 and its edges faded into the stage with a `DstIn` mask that covers the whole image — an
 oval alone leaves the corners and hard edge untouched. The stage needs light status-bar icons in
-both themes, re-applied in a `SideEffect` because `NimazTheme` resets them in one on every
-recomposition. **Everything below the stage follows the selected app theme.** On a step, *What
+both themes — see `LightStatusBarIcons` below. **Everything below the stage follows the selected app theme.** On a step, *What
 to say* is pinned above one row of controls (an outlined back icon beside the primary action), so
 the words are never scrolled out of reach: it previews the step's main recitation — the first
 with audio, so the standing step leads with Al-Fatihah rather than the optional opening — with
@@ -1077,6 +1076,12 @@ with no label and a touch target under 48dp fail the lane we already run. It can
   once granted; a granted row names its result (the detected city when there is one). It is part
   of the pager, not a sheet. **Skip jumps to Setup rather than completing** — setup is what makes
   prayer times and reminders work — and Let's begin is the one way out, whatever was granted.
+- **A screen that paints something dark under the status bar in both themes** (the onboarding's
+  illustrations, Learn to Pray's posture stage) calls `LightStatusBarIcons()` (`theme/SystemBars.kt`)
+  rather than setting the insets controller itself. It re-applies in a `SideEffect` because
+  `NimazTheme` resets icon contrast in one on every recomposition, and a remembered effect runs
+  before side effects in the same pass — a one-off override loses as soon as the theme
+  recomposes (switching theme with the screen open), and the icons go dark on a dark surface.
 - **Components follow Atomic Design** (`atoms` → `molecules` → `organisms`). Reuse shared
   components (e.g. `NimazCard`, `PrayerTimeCard`, `NimazBackTopAppBar`,
   `NimazEmptyState`, `NimazLoadingState`, `NimazCalendar`) rather than re-rolling generic UI.
