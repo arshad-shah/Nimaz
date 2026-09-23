@@ -42,6 +42,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -99,8 +100,13 @@ fun TasbihScreen(
     onNavigateToChooseDhikr: () -> Unit = {},
     onNavigateToAddPreset: () -> Unit = {},
     onNavigateToSettings: () -> Unit = {},
-    viewModel: TasbihViewModel = hiltViewModel()
+    viewModel: TasbihViewModel = hiltViewModel(),
+    /** A preset to start counting, from `Route.TasbihCounter(presetId)`; null keeps the current one. */
+    openPresetId: Long? = null,
 ) {
+    LaunchedEffect(openPresetId) {
+        openPresetId?.let { viewModel.onEvent(TasbihEvent.OpenPreset(it)) }
+    }
     val counterState by viewModel.counterState.collectAsStateWithLifecycle()
     val statsState by viewModel.statsState.collectAsStateWithLifecycle()
 

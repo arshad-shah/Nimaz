@@ -141,6 +141,7 @@ class CalendarViewModel @Inject constructor(
 
             is CalendarEvent.NavigateToMonth -> navigateToMonth(event.month, event.year)
             is CalendarEvent.NavigateToHijriMonth -> navigateToHijriMonth(event.month, event.year)
+            is CalendarEvent.OpenHijriMonth -> openHijriMonth(event.month, event.year)
             // No producer — see `NavigateToPreviousMonth`/`NavigateToNextMonth` below, which are
             // what the screen dispatches and were the only calendar actions with no analytics.
             is CalendarEvent.SetViewMode -> {
@@ -227,6 +228,20 @@ class CalendarViewModel @Inject constructor(
                 it.copy(eventsThisMonth = eventsThisMonth)
             }
         }
+    }
+
+    /**
+     * The Gregorian month holding the 1st of Hijri [month] [year], with that day selected.
+     *
+     * `IslamicMonth(9, 1447)` used to render the calendar with its arguments read and thrown
+     * away, so a link to Ramadan opened on whatever month today is. A Hijri year outside what
+     * the calendar can convert leaves the screen on today rather than failing — the link is
+     * content, and a typo in it must not cost the user the calendar.
+     */
+    private fun openHijriMonth(month: Int, year: Int) {
+        val first = runCatching { HijriDateCalculator.toGregorian(1, month, year) }.getOrNull() ?: return
+        selectDate(first)
+        navigateToMonth(first.monthValue, first.year)
     }
 
     private fun navigateToHijriMonth(month: Int, year: Int) {

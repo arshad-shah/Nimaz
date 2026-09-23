@@ -31,6 +31,7 @@ fun NavGraphBuilder.searchGraph(navController: NavController) {
     taggedComposable<Route.QuranSearch>(ScreenTags.QuranSearch) {
         SearchScreen(
             onNavigateBack = { navController.popBackStack() },
+            initialFilter = SearchFilter.QURAN,
             onNavigateToQuranAyah = { surah, ayah ->
                 navController.navigate(Route.QuranReader(surah, ayah))
             },
@@ -58,6 +59,7 @@ fun NavGraphBuilder.searchGraph(navController: NavController) {
     taggedComposable<Route.HadithSearch>(ScreenTags.HadithSearch) {
         SearchScreen(
             onNavigateBack = { navController.popBackStack() },
+            initialFilter = SearchFilter.HADITH,
             onNavigateToQuranAyah = { surah, ayah ->
                 navController.navigate(Route.QuranReader(surah, ayah))
             },

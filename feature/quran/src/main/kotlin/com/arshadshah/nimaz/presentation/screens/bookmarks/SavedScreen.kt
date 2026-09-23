@@ -94,8 +94,16 @@ fun SavedScreen(
     onNavigateToQuranAyah: (Int, Int) -> Unit,
     onNavigateToHadith: (String, Int) -> Unit,
     onNavigateToDua: (String) -> Unit,
-    viewModel: BookmarksViewModel = hiltViewModel()
+    viewModel: BookmarksViewModel = hiltViewModel(),
+    /**
+     * The source to open filtered to — `QuranSaved` opens on the Qur'an, `HadithBookmarks` on
+     * hadith. Null is `AllBookmarks`: everything. The reader can change it like any other filter.
+     */
+    initialFilter: BookmarkType? = null,
 ) {
+    LaunchedEffect(initialFilter) {
+        if (initialFilter != null) viewModel.onEvent(BookmarksEvent.SetFilter(initialFilter))
+    }
     val state by viewModel.bookmarksState.collectAsStateWithLifecycle()
     val statsState by viewModel.statsState.collectAsStateWithLifecycle()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()

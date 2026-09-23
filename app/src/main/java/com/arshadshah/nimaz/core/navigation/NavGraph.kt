@@ -65,6 +65,8 @@ fun NavGraph(
     onPendingIslamicCalendarConsumed: () -> Unit = {},
     pendingAnnouncementRoute: String? = null,
     onPendingAnnouncementRouteConsumed: () -> Unit = {},
+    pendingRoute: Route? = null,
+    onPendingRouteConsumed: () -> Unit = {},
 ) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -117,6 +119,14 @@ fun NavGraph(
         onPendingIslamicCalendarConsumed()
     }
 
+    // A destination MainActivity has already resolved — a tapped worship reminder. Lands on
+    // top of Home like the other deep links, so Back returns there rather than out of the app.
+    LaunchedEffect(pendingRoute) {
+        val route = pendingRoute ?: return@LaunchedEffect
+        navController.navigateFromOutside(route)
+        onPendingRouteConsumed()
+    }
+
     // Deep-link from a tapped FCM announcement notification. Allowlist-resolved;
     // unknown keys just land on Home (where the banner shows) and https URLs
     // open in the browser.
@@ -129,12 +139,9 @@ fun NavGraph(
                 )
             }
         } else {
-            announcementRoute(key)?.let { route ->
-                navController.navigate(route) {
-                    popUpTo(Route.Home) { inclusive = false }
-                    launchSingleTop = true
-                }
-            }
+            // A tab (`tasbih`, `qibla`, …) switches tabs so the bottom bar stays; see
+            // `navigateFromOutside`.
+            announcementRoute(key)?.let { route -> navController.navigateFromOutside(route) }
         }
         onPendingAnnouncementRouteConsumed()
     }

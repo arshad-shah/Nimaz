@@ -107,11 +107,13 @@ fun NavGraphBuilder.trackerGraph(navController: NavController) {
     }
 
     taggedComposable<Route.TasbihCounter>(ScreenTags.TasbihCounterScreen) { backStackEntry ->
-        backStackEntry.toRoute<Route.TasbihCounter>()
+        val route = backStackEntry.toRoute<Route.TasbihCounter>()
         TasbihScreen(
-            onNavigateToHistory = { navController.navigate(Route.TasbihStats) },
+            onNavigateToHistory = { navController.navigate(Route.TasbihHistory) },
             onNavigateToChooseDhikr = { navController.navigate(Route.TasbihPresets) },
-            onNavigateToSettings = { navController.navigate(Route.Settings) }
+            onNavigateToAddPreset = { navController.navigate(Route.TasbihAddPreset()) },
+            onNavigateToSettings = { navController.navigate(Route.Settings) },
+            openPresetId = route.presetId,
         )
     }
 
@@ -125,10 +127,12 @@ fun NavGraphBuilder.trackerGraph(navController: NavController) {
         )
     }
 
+    // The stats live on the history screen (today, sessions, streak, then the log). This used
+    // to render the counter a second time, with a history button wired to nothing — and it was
+    // where the counter's own history button went.
     taggedComposable<Route.TasbihStats>(ScreenTags.TasbihStats) {
-        TasbihScreen(
-            onNavigateToHistory = { },
-            onNavigateToSettings = { navController.navigate(Route.Settings) }
+        com.arshadshah.nimaz.presentation.screens.tasbih.TasbihHistoryScreen(
+            onNavigateBack = { navController.popBackStack() }
         )
     }
 

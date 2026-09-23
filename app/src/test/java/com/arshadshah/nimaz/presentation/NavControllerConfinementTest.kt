@@ -63,6 +63,17 @@ class NavControllerConfinementTest {
          */
         const val GRAPH = "src/main/java/com/arshadshah/nimaz/core/navigation/NavGraph.kt"
 
+        /**
+         * The one helper file allowed to name the controller besides the graphs:
+         * `core/navigation/TopLevelNavigation.kt` — `navigateToTab`, `navigateInApp` and
+         * `navigateFromOutside`, the rule that a link to a tab (or a tab's duplicate) switches
+         * tabs instead of hiding the bottom bar. It is navigation wiring called only *from* the
+         * graphs and `NavGraph.kt`, and a rule every graph must apply the same way belongs in
+         * one place rather than copied into eleven. Named as a file, like [GRAPH], so a screen
+         * cannot acquire the exemption.
+         */
+        const val TOP_LEVEL_NAVIGATION = "TopLevelNavigation.kt"
+
         /** A floor, so a wrong root cannot make this pass having read nothing. */
         const val MINIMUM_FILES = 200
 
@@ -79,6 +90,7 @@ class NavControllerConfinementTest {
         PresentationSourceRoots.assertAllExist(SCREEN_ROOTS)
         return PresentationSourceRoots.sources(SCREEN_ROOTS)
             .filterNot { it.name.endsWith("Graph.kt") }
+            .filterNot { it.name == TOP_LEVEL_NAVIGATION && it.path.contains("core/navigation") }
     }
 
     @Test

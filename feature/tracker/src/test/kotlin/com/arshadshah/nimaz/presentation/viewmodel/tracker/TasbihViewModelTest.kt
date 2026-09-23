@@ -6,6 +6,9 @@ import com.arshadshah.nimaz.domain.time.FakeTodayProvider
 import com.arshadshah.nimaz.domain.repository.settings.TasbihSettings
 import com.arshadshah.nimaz.domain.usecase.TasbihUseCases
 import com.google.common.truth.Truth.assertThat
+import io.mockk.coEvery
+import io.mockk.coVerify
+import com.arshadshah.nimaz.domain.model.TasbihPreset
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
@@ -109,5 +112,63 @@ class TasbihViewModelTest {
     fun `no selected preset on init`() = runTest {
         advanceUntilIdle()
         assertThat(viewModel.counterState.value.selectedPreset).isNull()
+    }
+
+    // ---- Opening a preset by id (Route.TasbihCounter(presetId)) ----
+
+    private fun preset(id: Long, name: String) = TasbihPreset(
+        id = id,
+        name = name,
+        arabicText = "",
+        transliteration = "",
+        translation = "",
+        targetCount = 33,
+        category = null,
+        reference = null,
+        isDefault = true,
+        displayOrder = id.toInt(),
+        createdAt = 0L,
+        updatedAt = 0L,
+    )
+
+    @Test
+    fun `opening a preset by id saves it as the selection`() = runTest {
+        coEvery { tasbihUseCases.getPresetById(5L) } returns preset(5L, "Astaghfirullah")
+        advanceUntilIdle()
+
+        viewModel.onEvent(TasbihEvent.OpenPreset(5L))
+        advanceUntilIdle()
+
+        coVerify { tasbihSettings.setTasbihSelectedPresetId(5L) }
+    }
+
+    @Test
+    fun `an id with no preset changes nothing`() = runTest {
+        coEvery { tasbihUseCases.getPresetById(404L) } returns null
+        advanceUntilIdle()
+
+        viewModel.onEvent(TasbihEvent.OpenPreset(404L))
+        advanceUntilIdle()
+
+        coVerify(exactly = 0) { tasbihSettings.setTasbihSelectedPresetId(404L) }
+    }
+
+    @Test
+    fun `a selection arriving from the persisted id is applied but never written back`() = runTest {
+        // Writing it back was a feedback loop between two live Tasbih screens, each answering
+        // the other's write with its own until one happened to stop.
+        every { tasbihSettings.tasbihSelectedPresetId } returns flowOf(3L)
+        coEvery { tasbihUseCases.getPresetById(3L) } returns preset(3L, "Allahu Akbar")
+        val restored = TasbihViewModel(
+            tasbihUseCases = tasbihUseCases,
+            tasbihSettings = tasbihSettings,
+            feedback = feedback,
+            todayProvider = todayProvider,
+            telemetry = telemetry,
+        )
+        advanceUntilIdle()
+
+        assertThat(restored.counterState.value.selectedPreset?.id).isEqualTo(3L)
+        coVerify(exactly = 0) { tasbihSettings.setTasbihSelectedPresetId(3L) }
     }
 }

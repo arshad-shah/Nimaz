@@ -6,6 +6,7 @@ import androidx.navigation.toRoute
 import com.arshadshah.nimaz.core.navigation.Route
 import com.arshadshah.nimaz.core.navigation.ScreenTags
 import com.arshadshah.nimaz.core.navigation.taggedComposable
+import com.arshadshah.nimaz.domain.model.BookmarkType
 import com.arshadshah.nimaz.domain.model.TopicTree
 import com.arshadshah.nimaz.presentation.screens.adaptive.AdaptiveKhatamScreen
 import com.arshadshah.nimaz.presentation.screens.adaptive.AdaptiveQuranScreen
@@ -235,6 +236,7 @@ fun NavGraphBuilder.quranGraph(navController: NavController) {
     taggedComposable<Route.QuranSaved>(ScreenTags.QuranSaved) {
         SavedScreen(
             onNavigateBack = { navController.popBackStack() },
+            initialFilter = BookmarkType.QURAN,
             onNavigateToQuranAyah = { surah, ayah ->
                 navController.navigate(Route.QuranReader(surah, ayah))
             },
@@ -250,6 +252,7 @@ fun NavGraphBuilder.quranGraph(navController: NavController) {
     taggedComposable<Route.HadithBookmarks>(ScreenTags.HadithBookmarks) {
         SavedScreen(
             onNavigateBack = { navController.popBackStack() },
+            initialFilter = BookmarkType.HADITH,
             onNavigateToQuranAyah = { surah, ayah ->
                 navController.navigate(Route.QuranReader(surah, ayah))
             },

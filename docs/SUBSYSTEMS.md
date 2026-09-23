@@ -604,7 +604,10 @@ prayers). The pure `WorshipReminderCalculator` (`core/util/`, JVM-tested) comput
 `scheduleTodaysPrayerNotifications`** so the midnight/boot chain re-arms them daily. They post on
 the DEFAULT-importance `worship_reminders` channel (`CHANNEL_ID_WORSHIP`) via
 `BootReceiver.handleWorshipReminder` (re-checks the per-type pref + re-applies the saved locale),
-with copy from `WorshipReminderContent`. Prefs are generic dynamic keys
+with copy from `WorshipReminderContent`. **Tapping one opens what it is about**: the launch intent
+carries `BootReceiver.EXTRA_OPEN_WORSHIP` (the type's key), `MainActivity` resolves it with
+`worshipCardDestination` — the same map the Home card uses (NAVIGATION.md §6) — and `NavGraph`
+navigates with `popUpTo(Home)`. It used to open Home whatever the reminder was. Prefs are generic dynamic keys
 (`worship_<key>_enabled` / `_offset` / `_mode`) on `SettingsRepository`/`PreferencesDataStore`. The
 notification settings screen is now a **hub** (`NotificationSettingsScreen`, #301) linking to focused
 subscreens — `PrayerNotificationsScreen`, `WorshipRemindersScreen`, `NotificationWeeklyScreen`,

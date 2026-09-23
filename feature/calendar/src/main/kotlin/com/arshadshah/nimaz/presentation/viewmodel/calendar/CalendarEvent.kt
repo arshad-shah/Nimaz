@@ -6,6 +6,13 @@ sealed interface CalendarEvent {
     data class SelectDate(val date: LocalDate) : CalendarEvent
     data class NavigateToMonth(val month: Int, val year: Int) : CalendarEvent
     data class NavigateToHijriMonth(val month: Int, val year: Int) : CalendarEvent
+
+    /**
+     * Open the calendar on a Hijri month — `Route.IslamicMonth`, reached from an announcement
+     * (`calendar/{month}/{year}`) or an event. The grid is Gregorian, so this shows the month
+     * that month's first day falls in, with that day selected.
+     */
+    data class OpenHijriMonth(val month: Int, val year: Int) : CalendarEvent
     data class SetViewMode(val mode: CalendarViewMode) : CalendarEvent
     data class NavigateToYear(val year: Int, val isHijri: Boolean) : CalendarEvent
     data object LoadToday : CalendarEvent

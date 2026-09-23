@@ -19,6 +19,9 @@ import androidx.media3.common.util.UnstableApi
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.navigation.NavGraph
 import com.arshadshah.nimaz.core.util.BootReceiver
+import com.arshadshah.nimaz.domain.model.WorshipReminderType
+import com.arshadshah.nimaz.core.navigation.worshipCardDestination
+import com.arshadshah.nimaz.core.navigation.Route
 import com.arshadshah.nimaz.core.util.InAppUpdateManager
 import com.arshadshah.nimaz.data.announcement.AnnouncementPayloadMapper
 import com.arshadshah.nimaz.data.audio.AdhanPlaybackService
@@ -92,6 +95,10 @@ class MainActivity : ComponentActivity() {
     // Pending announcement route from a tapped FCM tray notification (cold or
     // warm start). NavGraph resolves it against the allowlist and consumes it.
     private var pendingAnnouncementRoute by mutableStateOf<String?>(null)
+
+    // A destination resolved here from an intent, rather than by NavGraph from a key — today a
+    // tapped worship reminder, which opens the screen its Home card opens.
+    private var pendingRoute by mutableStateOf<Route?>(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()
@@ -177,6 +184,8 @@ class MainActivity : ComponentActivity() {
                                 onPendingAnnouncementRouteConsumed = {
                                     pendingAnnouncementRoute = null
                                 },
+                                pendingRoute = pendingRoute,
+                                onPendingRouteConsumed = { pendingRoute = null },
                             )
                         }
                     }
@@ -210,6 +219,7 @@ class MainActivity : ComponentActivity() {
      * - Prayer notification → stop adhan playback.
      * - Quran audio notification → deep-link to the playing surah.
      * - Hijri calendar widget → deep-link to the Islamic Calendar screen.
+     * - Worship reminder notification → the screen that reminder is about.
      * - FCM announcement notification tap → persist the announcement so the
      *   Home banner shows, and deep-link to its route if it names one.
      */
@@ -238,6 +248,14 @@ class MainActivity : ComponentActivity() {
             if (surah > 0) {
                 pendingQuranSurah = surah
             }
+        }
+
+        WorshipReminderType.fromKey(intent?.getStringExtra(BootReceiver.EXTRA_OPEN_WORSHIP))?.let { type ->
+            AppAnalytics.logNotificationOpened(source = "worship_reminder")
+            pendingRoute = worshipCardDestination(type)
+            // Consumed, so a configuration change re-delivering this intent does not navigate
+            // a second time over wherever the reader has gone since.
+            intent?.removeExtra(BootReceiver.EXTRA_OPEN_WORSHIP)
         }
 
         if (intent?.action == HijriCalendarWidget.ACTION_OPEN_ISLAMIC_CALENDAR) {
