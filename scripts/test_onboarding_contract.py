@@ -13,15 +13,15 @@ class OnboardingContractTest(unittest.TestCase):
         self.assertIn("ONBOARDING_PAGE_COUNT = 5", source)
         self.assertEqual(len(re.findall(r"IntroPage\(R.string", source)), 4)
         self.assertNotIn("NimazBottomSheet(", source)
-        self.assertIn("PermissionContent(insets, permissionCards)", source)
+        self.assertIn("SetupPage(insets, offset, revealed, permissionRows)", source)
         self.assertIn("pager.settledPage", source)
 
     def test_motion_and_native_icons(self):
         source = SOURCE.read_text()
         self.assertIn("FastOutSlowInEasing", source)
         self.assertIn("Crossfade(", source)
-        self.assertIn("NimazIcons.Previous", source)
-        self.assertIn("NimazIcons.Next", source)
+        self.assertIn("followDrag = true", source)
+        self.assertIn("clipToBounds()", source)
         self.assertFalse(re.search(r'Text\("[✦✓✕→←★☆✅❌🔔]', source))
 
 

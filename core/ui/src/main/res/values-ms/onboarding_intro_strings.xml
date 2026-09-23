@@ -2,29 +2,18 @@
 <resources>
     <string name="onboarding_intro_welcome_title">Nimaz</string>
     <string name="onboarding_intro_welcome_body">Lebih tenang, lebih dekat.</string>
-    <string name="onboarding_intro_welcome_caption">Panduan. Peringatan. Kemajuan.\nUntuk solat yang lebih bermakna.</string>
     <string name="onboarding_intro_prayer_title">Luangkan masa untuk solat</string>
     <string name="onboarding_intro_prayer_body">Waktu solat mengikut lokasi anda. Peringatan lembut sepanjang hari.</string>
-    <string name="onboarding_intro_prayer_caption">Lokasi hanya diminta apabila anda memilih untuk menetapkannya.</string>
     <string name="onboarding_intro_learning_title">Belajar dengan yakin</string>
     <string name="onboarding_intro_learning_body">Ikuti setiap pergerakan dan bacaan, satu langkah yang jelas pada satu masa.</string>
-    <string name="onboarding_intro_learning_caption">Ilustrasi lelaki dan wanita. Belajar mengikut rentak anda.</string>
     <string name="onboarding_intro_progress_title">Bina tabiat. Temui rentak anda.</string>
     <string name="onboarding_intro_progress_body">Jejaki solat anda dan kembali kepada amalan harian.</string>
-    <string name="onboarding_intro_progress_caption">Langkah kecil. Permulaan yang bermakna.</string>
     <string name="onboarding_intro_begin">Mari bermula</string>
-    <string name="onboarding_intro_not_now">Bukan sekarang</string>
     <string name="onboarding_intro_setup_body">Pilih perkara yang ingin diaktifkan. Anda boleh mengubahnya kemudian dalam Tetapan.</string>
-    <string name="onboarding_intro_reminder">Nimaz · contoh peringatan</string>
-    <string name="onboarding_intro_fajr">Sudah masuk waktu Subuh</string>
-    <string name="onboarding_intro_new_day">Hari baharu, peluang baharu.</string>
-    <string name="onboarding_intro_standing">Berdiri</string>
-    <string name="onboarding_intro_bowing">Rukuk</string>
-    <string name="onboarding_intro_prostration">Sujud</string>
-    <string name="onboarding_intro_sitting">Duduk</string>
-    <string name="onboarding_intro_salam">Salam</string>
-    <string name="onboarding_intro_your_progress">Kemajuan anda</string>
-    <string name="onboarding_intro_example_week">Contoh minggu</string>
-    <string name="onboarding_intro_recorded">Solat direkodkan</string>
-    <string name="onboarding_intro_unrecorded">Tiada solat direkodkan</string>
+    <string name="onboarding_continue">Teruskan</string>
+    <string name="onboarding_allow">Benarkan</string>
+    <string name="onboarding_setup_title">Hampir siap</string>
+    <string name="onboarding_location_reason">Waktu solat dan kiblat yang tepat</string>
+    <string name="onboarding_notification_reason">Seruan untuk setiap solat</string>
+    <string name="onboarding_battery_reason">Supaya peringatan tiba tepat pada masanya</string>
 </resources>

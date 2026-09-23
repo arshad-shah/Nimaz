@@ -14,9 +14,9 @@ import org.junit.runner.RunWith
 
 /**
  * First-run experience: with onboarding NOT yet completed, the app must open on the
- * onboarding screen, and completing it (here via "Skip", which fires
- * `OnboardingEvent.CompleteOnboarding`) must navigate to Home *and* persist completion
- * so it never shows again.
+ * onboarding screen, and completing it (here via "Skip", which jumps to the setup page, then
+ * "Let's begin", which fires `OnboardingEvent.CompleteOnboarding`) must navigate to Home *and*
+ * persist completion so it never shows again.
  */
 @HiltAndroidTest
 @RunWith(AndroidJUnit4::class)
@@ -27,11 +27,12 @@ class OnboardingFlowTest : BaseAppTest() {
     }
 
     @Test
-    fun freshLaunch_showsOnboarding_thenSkipCompletesToHome() {
+    fun freshLaunch_showsOnboarding_thenSkipAndBeginCompletesToHome() {
         launchApp()
         assertScreen(ScreenTags.Onboarding)
 
         tapText(Selectors.str(R.string.onboarding_skip))
+        tapText(Selectors.str(R.string.onboarding_intro_begin))
 
         assertScreen(ScreenTags.Home)
         assertThat(runBlocking { settings.onboardingCompleted.first() }).isTrue()
