@@ -1,5 +1,7 @@
 package com.arshadshah.nimaz.presentation.viewmodel.settings
 
+import java.time.LocalDateTime
+import com.arshadshah.nimaz.domain.model.PrayerType
 import com.arshadshah.nimaz.domain.model.AsrCalculation
 import com.arshadshah.nimaz.domain.model.CalculationMethod
 import com.arshadshah.nimaz.domain.model.HighLatitudeRule
@@ -32,6 +34,24 @@ data class PrayerSettingsUiState(
     val asrAdjustment: Int = 0,
     val maghribAdjustment: Int = 0,
     val ishaAdjustment: Int = 0
+)
+
+/**
+ * Today's times under the settings the reader has now, for the prayer settings' live preview.
+ *
+ * Built from the same use cases reminders and the Prayer Times screen read, so what the preview
+ * shows is what the app will do. [changed] names the times the most recent settings change moved,
+ * so the screen can mark them; it is empty on first load. [methodFajr] and [asrTimes] are today's
+ * Fajr under every method and Asr under both rules, for the pickers to show beside each option.
+ */
+data class PrayerPreviewUiState(
+    val times: Map<PrayerType, LocalDateTime> = emptyMap(),
+    val changed: Set<PrayerType> = emptySet(),
+    val methodFajr: Map<CalculationMethod, LocalDateTime> = emptyMap(),
+    val asrTimes: Map<AsrCalculation, LocalDateTime> = emptyMap(),
+    val locationName: String? = null,
+    val latitude: Double? = null,
+    val isFallbackLocation: Boolean = false,
 )
 
 data class NotificationSettingsUiState(

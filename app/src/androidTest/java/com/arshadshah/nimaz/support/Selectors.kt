@@ -80,7 +80,7 @@ object Selectors {
 
     /** Row labels on the Settings hub (each opens a settings sub-screen). */
     object Settings {
-        @StringRes val calculationMethod = R.string.calculation_method
+        @StringRes val prayerTimes = R.string.prayer_settings_row_title
         @StringRes val location = R.string.location
         @StringRes val notifications = R.string.notifications
         @StringRes val quranSettings = R.string.quran_settings

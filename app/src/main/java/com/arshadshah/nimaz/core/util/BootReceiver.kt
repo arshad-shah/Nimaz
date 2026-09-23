@@ -749,8 +749,12 @@ class BootReceiver : BroadcastReceiver() {
                 val body = WorshipReminderContent.body(context, type, subKey)
                 val vibrationEnabled = preferencesDataStore.notificationVibration.first()
 
+                // Carries the reminder's type so a tap opens what it is about — the morning
+                // adhkar, the night-worship hub, the fasting tracker — rather than Home. The
+                // Home card has always gone there; the notification only ever opened the app.
                 val mainIntent =
                     context.packageManager.getLaunchIntentForPackage(context.packageName)
+                        ?.putExtra(EXTRA_OPEN_WORSHIP, type.key)
                 val openPendingIntent = mainIntent?.let {
                     PendingIntent.getActivity(
                         context,
@@ -808,5 +812,8 @@ class BootReceiver : BroadcastReceiver() {
 
     companion object {
         const val EXTRA_STOP_ADHAN = "stop_adhan"
+
+        /** A worship reminder's `WorshipReminderType.key`, on the intent its notification opens. */
+        const val EXTRA_OPEN_WORSHIP = "open_worship"
     }
 }

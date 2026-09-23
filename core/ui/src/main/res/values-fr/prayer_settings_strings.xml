@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The redesigned prayer settings: live preview, sections, pickers and the adjust sheet. -->
+<resources>
+    <string name="prayer_settings_row_title">Heures de prière</string>
+    <string name="prayer_preview_today">Aujourd’hui · %1$s</string>
+    <string name="prayer_preview_today_plain">Aujourd’hui</string>
+    <string name="prayer_preview_note_default">Ce sont les heures utilisées par vos rappels</string>
+    <string name="prayer_preview_note_changed">Mis à jour avec votre modification</string>
+    <string name="prayer_preview_cd">Heures de prière du jour selon vos réglages : %1$s</string>
+    <string name="prayer_settings_section_calculation">Calcul des heures</string>
+    <string name="prayer_settings_section_finetune">Ajustement fin</string>
+    <string name="prayer_settings_section_reminders">Rappels</string>
+    <string name="prayer_settings_adjust_title">Ajuster en minutes</string>
+    <string name="prayer_settings_adjust_hint">Suivre l’horaire de votre mosquée</string>
+    <string name="prayer_settings_adjust_body">Décalez une heure pour suivre votre mosquée. Le résultat s’affiche à côté de chaque prière.</string>
+    <string name="prayer_settings_reminders_title">Adhan et rappels</string>
+    <string name="prayer_settings_high_lat_notice">%1$s est à %2$d° %3$s. En été, le ciel peut ne pas devenir totalement noir ; Fajr et Isha suivent donc la règle « %4$s ».</string>
+    <string name="prayer_latitude_north">N</string>
+    <string name="prayer_latitude_south">S</string>
+    <string name="prayer_method_picker_body">Choisissez l’autorité que suit votre communauté, le plus souvent selon la région. Les méthodes diffèrent par l’obscurité requise pour Fajr et Isha.</string>
+    <string name="prayer_asr_picker_body">Le début de la prière de l’après-midi, mesuré par la longueur d’une ombre.</string>
+    <string name="prayer_high_lat_picker_body">Loin de l’équateur, le ciel d’été peut ne pas s’assombrir assez pour Fajr et Isha. Cette règle décide de leur placement.</string>
+    <string name="prayer_picker_fajr_at">Fajr %1$s</string>
+    <plurals name="prayer_settings_adjusted_count">
+        <item quantity="one">%1$d heure ajustée</item>
+        <item quantity="other">%1$d heures ajustées</item>
+    </plurals>
+</resources>

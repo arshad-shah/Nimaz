@@ -1,5 +1,7 @@
 package com.arshadshah.nimaz.presentation.components.organisms
 
+import com.arshadshah.nimaz.presentation.components.molecules.NimazLoadingVariant
+import com.arshadshah.nimaz.presentation.components.molecules.NimazLoadingState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -49,6 +51,8 @@ import com.arshadshah.nimaz.presentation.theme.NimazTheme
  * @param navigationIcon optional leading content, shown inside a circular pill.
  * @param actions optional trailing content; when null (the default) no actions pill
  *   is drawn, so a plain title screen shows just back + title with no empty nub.
+ * @param titleLoading shows an inline loading indicator in the title pill instead of [title] —
+ *   for a screen whose heading arrives with its content (the Quran reader's surah name).
  * @param scrollBehavior accepted for source compatibility with the callers that pass
  *   a `pinnedScrollBehavior()`. The pill bar does not collapse or recolour on scroll
  *   (the pills carry their own surface), so it is intentionally not consumed here.
@@ -62,6 +66,7 @@ fun NimazTopAppBar(
     navigationIcon: @Composable (() -> Unit)? = null,
     actions: (@Composable RowScope.() -> Unit)? = null,
     scrollBehavior: TopAppBarScrollBehavior? = null,
+    titleLoading: Boolean = false,
 ) {
     Row(
         modifier = modifier
@@ -91,6 +96,10 @@ fun NimazTopAppBar(
                     modifier = Modifier.padding(horizontal = 18.dp, vertical = 6.dp),
                     verticalArrangement = Arrangement.Center,
                 ) {
+                    if (titleLoading) {
+                        NimazLoadingState(variant = NimazLoadingVariant.INLINE)
+                        return@Column
+                    }
                     Text(
                         text = title,
                         style = MaterialTheme.typography.titleMedium,
@@ -138,6 +147,7 @@ fun NimazBackTopAppBar(
     subtitle: String? = null,
     actions: (@Composable RowScope.() -> Unit)? = null,
     scrollBehavior: TopAppBarScrollBehavior? = null,
+    titleLoading: Boolean = false,
 ) {
     NimazTopAppBar(
         title = title,
@@ -153,6 +163,7 @@ fun NimazBackTopAppBar(
         },
         actions = actions,
         scrollBehavior = scrollBehavior,
+        titleLoading = titleLoading,
     )
 }
 

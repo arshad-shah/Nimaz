@@ -8,7 +8,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.SearchOff
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
@@ -22,7 +21,6 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.core.ui.R
 import com.arshadshah.nimaz.domain.model.AyahTheme
-import com.arshadshah.nimaz.presentation.components.atoms.NimazIconButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
 import com.arshadshah.nimaz.presentation.components.molecules.NimazErrorDefaults
@@ -30,7 +28,7 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazErrorState
 import com.arshadshah.nimaz.presentation.components.molecules.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.molecules.NimazRangeRow
 import com.arshadshah.nimaz.presentation.components.organisms.NimazSearchBar
-import com.arshadshah.nimaz.presentation.components.organisms.NimazTopAppBar
+import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.viewmodel.quran.SurahThematicEvent
 import com.arshadshah.nimaz.presentation.viewmodel.quran.SurahThematicViewModel
 
@@ -71,7 +69,7 @@ fun SurahPassagesScreen(
 
     NimazScreenScaffold(
         topBar = {
-            NimazTopAppBar(
+            NimazBackTopAppBar(
                 title = stringResource(R.string.surah_info_passages),
                 subtitle = state.surah?.let { surah ->
                     // A plural, because a surah with one passage read "1 passages across 7
@@ -84,13 +82,7 @@ fun SurahPassagesScreen(
                         surah.ayahCount,
                     )
                 },
-                navigationIcon = {
-                    NimazIconButton(
-                        icon = Icons.AutoMirrored.Filled.ArrowBack,
-                        onClick = onNavigateBack,
-                        contentDescription = stringResource(R.string.cd_back),
-                    )
-                },
+                onBackClick = onNavigateBack,
             )
         },
     ) { padding ->

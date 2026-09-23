@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The Topics browser and subject screen (the 2026-09 redesign). -->
+<resources>
+    <!-- The count pre-formatted with grouping ("1,041"), which %d does not do. -->
+    <string name="quran_topics_verse_count">%1$s verses</string>
+    <string name="quran_topics_branches">%1$d branches</string>
+    <string name="quran_topics_sub_entries">%1$d sub-entries</string>
+    <string name="quran_topics_sort_az">A–Z</string>
+    <string name="quran_topics_sort_most_cited">Most cited</string>
+    <string name="quran_topics_most_cited_footer">Top %1$d of %2$s — the rest are in A–Z</string>
+    <string name="quran_topics_no_match">No subject matches “%1$s”. Try a shorter word, or its Arabic.</string>
+    <string name="cd_index_rail_jump">Jump to %1$s</string>
+    <string name="quran_topic_stat_verses">verses</string>
+    <string name="quran_topic_stat_surahs">surahs</string>
+    <string name="quran_topic_stat_subtopics">subtopics</string>
+    <string name="quran_topic_path_prefix">In</string>
+    <string name="quran_topic_read_more">Read more</string>
+    <string name="quran_topic_read_less">Show less</string>
+    <string name="quran_topic_where_it_appears">Where it appears</string>
+    <string name="quran_topic_top_of">Top %1$d of %2$d</string>
+    <string name="quran_topic_show_all">Show all %1$d</string>
+    <string name="quran_topic_no_verses">No verses are linked to this subject yet.</string>
+    <string name="quran_topics_entry">1 entry</string>
+    <string name="quran_topics_entries">%1$s entries</string>
+    <!-- "M · 992 of 1,780": the letter you are in, where it starts, and the index's size. -->
+    <string name="quran_topics_index_position">%1$s · %2$s of %3$s</string>
+    <string name="quran_topics_sub_entry">1 sub-entry</string>
+</resources>

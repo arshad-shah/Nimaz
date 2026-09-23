@@ -4,68 +4,43 @@ import com.arshadshah.nimaz.domain.model.QuranTopic
 import com.arshadshah.nimaz.domain.model.SurahTopic
 import com.arshadshah.nimaz.domain.model.TopicDetail
 import com.arshadshah.nimaz.domain.model.TopicTree
-import com.arshadshah.nimaz.presentation.viewmodel.quran.TopicBrowseState.Companion.MAX_DEPTH
 
 /**
  * Browsing and searching the Qur'an's subject hierarchies.
  *
- * The browser is **one tree that expands in place**, not a stack of levels. Descending used to
- * replace the list with the children, so walking from "Stories" to "Musa" to "the parting of the
- * sea" discarded every sibling on the way and left a breadcrumb that had truncated by level
- * three of a hierarchy that goes five deep. Now a node's children insert beneath it and the
- * context stays on screen.
+ * The browser is a **front page, not a tree**. Each hierarchy gets the shape that suits it:
+ * Themes is three chapter cards whose branches are chips, sized by how much of the Qur'an sits
+ * under each; Kinds is a grid of fourteen tiles; Index is a concordance — A–Z with a letter
+ * rail, or its most-cited entries. Every tap opens a subject, and the subject screen is where
+ * its subtopics, verses and place in the tree live.
  *
- * What replaces the descent stack is [TopicBrowseState.focus]: a *rebase*, taken deliberately
- * from a row too deep to indent further, and shown as a bar of tappable crumbs. Still one route
- * for the whole thing — the ontology is five levels and a route per level would mean five
- * back-stack entries for one act of browsing, and a tree switch would strand the reader halfway
- * down a tree that no longer exists.
+ * It used to be one indented tree that opened in place, with a crumb bar and a "focus this
+ * branch" control for the depth where indenting ran out. That kept the context, but a list of
+ * nouns and numbers is the same list whichever hierarchy it came from, and all three read the
+ * same: bland. The counts on every card come from one [com.arshadshah.nimaz.domain.model.TopicCatalog]
+ * built once per load, so they are distinct verses and switching tabs costs no query.
  *
- * Search is a separate mode over the same list rather than a separate screen, because a query
- * that matches nothing should fall back to *where you were*, not to an empty screen.
+ * Search is a mode over the same screen rather than another screen, because a query that
+ * matches nothing should fall back to *where you were*, not to an empty page.
  */
 data class TopicBrowseState(
     val tree: TopicTree = TopicTree.THEMATIC,
 
-    /**
-     * The branch the tree is currently rooted at, from the hierarchy's own root down. Empty
-     * means the whole tree is showing. Only ever grown by an explicit "focus this branch".
-     */
-    val focus: List<QuranTopic> = emptyList(),
+    /** Themes: one card per root of the curated outline, with its branches. */
+    val themes: List<TopicThemeCard> = emptyList(),
 
-    /** The top level of what is showing — the tree's roots, or [focus]'s last node's children. */
-    val level: List<QuranTopic> = emptyList(),
+    /** Kinds: the ontology's roots, biggest first. */
+    val kinds: List<TopicTally> = emptyList(),
 
-    /** Which nodes are open. Kept when an ancestor closes, so reopening it restores the shape. */
-    val expanded: Set<Int> = emptySet(),
+    /** Index: every top-level entry of the concordance, alphabetically. */
+    val index: List<TopicTally> = emptyList(),
 
-    /** Children by parent id, loaded on first expand and kept for the session. */
-    val children: Map<Int, List<QuranTopic>> = emptyMap(),
-
-    /**
-     * Which ids in [tree] have children.
-     *
-     * A row has to know it is a branch *before* it is tapped, because that is what decides
-     * whether it gets a disclosure control at all — and a leaf that offers one is the dead tap
-     * this state exists to remove. Loaded once per tree.
-     */
-    val branchIds: Set<Int> = emptySet(),
-
-    /**
-     * Verses beneath each subject, its whole subtree included, keyed by topic id.
-     *
-     * Rolled up **once per tree load** and kept here, not recomputed per composition: a fold
-     * over 2,512 nodes to draw ten rows would be waste, and asking per node would be 2,512
-     * queries. The rows carried each topic's own citation count before this, which for a branch
-     * is usually zero — so the browser opened on three roots reading "0 verses".
-     */
-    val rolledUpCounts: Map<Int, Int> = emptyMap(),
+    val indexSort: TopicIndexSort = TopicIndexSort.A_TO_Z,
 
     val searchQuery: String = "",
-    val searchResults: List<QuranTopic> = emptyList(),
 
-    /** Each result's ancestors, root-first, so a flat match is not a free-floating word. */
-    val searchPaths: Map<Int, List<QuranTopic>> = emptyMap(),
+    /** Matches across all three hierarchies, each placed in the one it would open in. */
+    val searchResults: List<TopicSearchHit> = emptyList(),
 
     val isSearching: Boolean = false,
     val isLoading: Boolean = true,
@@ -80,48 +55,66 @@ data class TopicBrowseState(
     val isSearchMode: Boolean get() = searchQuery.isNotBlank()
 
     /**
-     * The tree, flattened to what is actually on screen.
+     * The index under its initial letters, for the A–Z list and its rail.
      *
-     * Recursion stops at [MAX_DEPTH] whatever the expanded set says: past four levels of indent
-     * a 390dp screen has no text column left, which is what "focus this branch" is for.
-     *
-     * `lazy` rather than a getter — the state is immutable, the list is read on every
-     * recomposition, and walking a few hundred nodes each time to draw ten rows is waste.
+     * Keyed on the first Latin letter of the name with its accents stripped, so "ʿĀd" files
+     * under A beside "Aaron" rather than under a section of its own. A name with no Latin
+     * letter at all files under `#`, last.
      */
-    val rows: List<TopicRowItem> by lazy {
-        buildList {
-            fun walk(items: List<QuranTopic>, depth: Int) {
-                items.forEach { topic ->
-                    add(TopicRowItem(topic, depth))
-                    if (depth < MAX_DEPTH && topic.id in expanded) {
-                        walk(children[topic.id].orEmpty(), depth + 1)
-                    }
-                }
-            }
-            walk(level, 0)
+    val indexSections: List<TopicIndexSection> by lazy {
+        index.groupBy { indexLetter(it.topic.name) }
+            .toSortedMap(compareBy<Char> { it == OTHER_LETTER }.thenBy { it })
+            .map { (letter, entries) -> TopicIndexSection(letter, entries) }
+    }
+
+    /** The concordance's most-cited entries — the other way into 1,780 of them. */
+    val mostCited: List<TopicTally> by lazy {
+        index.sortedWith(compareByDescending<TopicTally> { it.verseCount }.thenBy { it.topic.name })
+            .take(MOST_CITED_LIMIT)
+    }
+
+    companion object {
+        const val MOST_CITED_LIMIT = 120
+        const val OTHER_LETTER = '#'
+
+        fun indexLetter(name: String): Char {
+            val folded = java.text.Normalizer.normalize(name, java.text.Normalizer.Form.NFD)
+            return folded.firstOrNull { it in 'A'..'Z' || it in 'a'..'z' }?.uppercaseChar()
+                ?: OTHER_LETTER
         }
     }
-
-    /** Whether [topic] can be opened up. Never in search: a result is an answer, not a level. */
-    fun isBranch(topic: QuranTopic): Boolean = !isSearchMode && topic.id in branchIds
-
-    /**
-     * Whether a branch at [depth] is opened in place or taken as a new root.
-     *
-     * At the cap there is no room to indent again, so the row offers to rebase the tree on
-     * itself instead — which is the same act, just paid for with a crumb rather than 20dp.
-     */
-    fun isAtIndentCap(depth: Int): Boolean = depth >= MAX_DEPTH
-
-    /** Back has somewhere to go while anything is open or the tree is rooted somewhere. */
-    val canGoBack: Boolean
-        get() = expanded.any { id -> rows.any { it.topic.id == id } } ||
-                focus.isNotEmpty()
-
-    private companion object {
-        const val MAX_DEPTH = 3
-    }
 }
+
+/** A subject and how many distinct verses sit beneath it in the hierarchy being shown. */
+data class TopicTally(
+    val topic: QuranTopic,
+    val verseCount: Int,
+    val childCount: Int = 0,
+)
+
+/** One root of the curated outline and its branches, biggest first. */
+data class TopicThemeCard(
+    val root: TopicTally,
+    val branches: List<TopicTally>,
+)
+
+data class TopicIndexSection(val letter: Char, val entries: List<TopicTally>)
+
+enum class TopicIndexSort { A_TO_Z, MOST_CITED }
+
+/**
+ * A search match, with where it sits.
+ *
+ * [tree] is the hierarchy the match opens in — the curated outline if it is there, else the
+ * ontology, else the index — and [path] is its ancestors in that tree, so sixty matched words
+ * are not sixty free-floating words.
+ */
+data class TopicSearchHit(
+    val topic: QuranTopic,
+    val tree: TopicTree,
+    val path: List<QuranTopic>,
+    val verseCount: Int,
+)
 
 /**
  * The subjects one surah speaks about.
@@ -199,5 +192,29 @@ data class TopicDetailState(
      */
     val surahContext: TopicSurahContext? = null,
 
+    /**
+     * The subtopics with their own subtrees counted, biggest first.
+     *
+     * [TopicDetail.children] carries each child's *own* citations, which for a branch is
+     * usually zero — the "0 verses" the old detail screen showed under "Prophets". Empty until
+     * the catalogue has been counted; the screen shows the children without numbers meanwhile.
+     */
+    val subtopics: List<TopicTally> = emptyList(),
+
     val isLoading: Boolean = true,
-)
+) {
+    /**
+     * The surahs this subject is most concentrated in, for the "where it appears" chart.
+     *
+     * Only when there is more than one surah — a chart of one bar says nothing the verse list
+     * does not.
+     */
+    val topSurahs: List<CitationGroup> by lazy {
+        if (citationGroups.size < 2) emptyList()
+        else citationGroups.sortedByDescending { it.citations.size }.take(TOP_SURAHS)
+    }
+
+    private companion object {
+        const val TOP_SURAHS = 5
+    }
+}

@@ -479,4 +479,43 @@ class QuranAudioManagerTest {
         assertThat(manager.audioState.value.repeat).isEqualTo(RecitationRepeat.Surah)
         assertThat(Player.REPEAT_MODE_ALL).isNotEqualTo(Player.REPEAT_MODE_OFF)
     }
+
+    // ── The handover itself ─────────────────────────────────────────────────────
+
+    @Test
+    fun `a finished surah hands over to the next one's playlist`() = runTest(dispatcher) {
+        val next = FixedNextSurah(
+            NextSurahPlaylistSource.SurahPlaylist(title = "Maryam", items = playlist(3, surah = 19))
+        )
+        val manager = manager(next = next)
+        manager.playSurah(18, "Al-Kahf", playlist(10, surah = 18))
+
+        assertThat(manager.advanceToNextSurah()).isTrue()
+        advanceUntilIdle()
+
+        assertThat(next.askedFor).isEqualTo(19)
+        assertThat(manager.audioState.value.currentTitle).isEqualTo("Maryam")
+        assertThat(manager.audioState.value.currentSurahNumber).isEqualTo(19)
+    }
+
+    @Test
+    fun `a next surah with nothing in it finishes the session instead`() = runTest(dispatcher) {
+        val manager = manager(next = FixedNextSurah(null))
+        manager.playSurah(18, "Al-Kahf", playlist(10, surah = 18))
+
+        assertThat(manager.advanceToNextSurah()).isTrue()
+        advanceUntilIdle()
+
+        assertThat(manager.audioState.value.isPlaying).isFalse()
+        assertThat(manager.audioState.value.currentSurahNumber).isNotEqualTo(19)
+    }
+
+    @Test
+    fun `with continuous playback off there is no handover to make`() {
+        val manager = manager(next = FixedNextSurah(null))
+        manager.setContinuousPlayback(false)
+        manager.playSurah(18, "Al-Kahf", playlist(10, surah = 18))
+
+        assertThat(manager.advanceToNextSurah()).isFalse()
+    }
 }

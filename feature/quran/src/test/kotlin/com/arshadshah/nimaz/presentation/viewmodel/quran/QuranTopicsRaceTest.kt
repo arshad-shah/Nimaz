@@ -14,7 +14,6 @@ import com.arshadshah.nimaz.domain.usecase.GetTopicDetailUseCase
 import com.arshadshah.nimaz.domain.usecase.GetTopicTreeRootsUseCase
 import com.arshadshah.nimaz.domain.usecase.HasThematicContentUseCase
 import com.arshadshah.nimaz.domain.usecase.QuranUseCases
-import com.arshadshah.nimaz.domain.usecase.quran.RollUpTopicCounts
 import com.arshadshah.nimaz.domain.usecase.SearchTopicsUseCase
 import com.google.common.truth.Truth.assertThat
 import io.mockk.coEvery
@@ -141,77 +140,6 @@ class QuranTopicsRaceTest {
     fun tearDown() = Dispatchers.resetMain()
 
     @Test
-    fun `a slower crumb tap cannot land on top of a later one`() = runTest {
-        val vm = openedBrowser()
-
-        // Descend twice so there are crumbs to tap: Doctrine › God › The names of God.
-        vm.onEvent(QuranTopicsEvent.Focus(god))
-        advanceUntilIdle()
-        vm.onEvent(QuranTopicsEvent.Focus(names))
-        advanceUntilIdle()
-
-        // Crumb 0 (Doctrine) is on an uncached branch and slow; crumb 1 (God) answers at once.
-        val slow = CompletableDeferred<Unit>()
-        childGates[1] = slow
-
-        vm.onEvent(QuranTopicsEvent.RebaseTo(0))
-        advanceUntilIdle()
-        vm.onEvent(QuranTopicsEvent.RebaseTo(1))
-        advanceUntilIdle()
-
-        slow.complete(Unit)
-        advanceUntilIdle()
-
-        // Each of these ends in a whole-state update setting `focus` *and* `level` together, so
-        // the slower one landing second put the reader on the crumb they did not tap.
-        assertThat(vm.browseState.value.focus.map { it.id }).containsExactly(1, 11).inOrder()
-    }
-
-    @Test
-    fun `a toggle that resolves after a rebase does not reopen its node`() = runTest {
-        val vm = openedBrowser()
-
-        val slow = CompletableDeferred<Unit>()
-        childGates[13] = slow
-
-        vm.onEvent(QuranTopicsEvent.Toggle(mercy))
-        advanceUntilIdle()
-
-        // The reader gives up waiting and descends instead. `focus` resets `expanded`.
-        vm.onEvent(QuranTopicsEvent.Focus(god))
-        advanceUntilIdle()
-
-        slow.complete(Unit)
-        advanceUntilIdle()
-
-        // Mercy is not on screen at this level, so re-opening it would restore a node the
-        // reader had navigated away from. The children are still cached, because caching them
-        // is valid wherever the browser happens to be.
-        assertThat(vm.browseState.value.expanded).doesNotContain(13)
-        assertThat(vm.browseState.value.children).containsKey(13)
-    }
-
-    @Test
-    fun `two toggles do not cancel each other`() = runTest {
-        val vm = openedBrowser()
-
-        val slow = CompletableDeferred<Unit>()
-        childGates[11] = slow
-
-        vm.onEvent(QuranTopicsEvent.Toggle(god))
-        advanceUntilIdle()
-        vm.onEvent(QuranTopicsEvent.Toggle(mercy))
-        advanceUntilIdle()
-
-        slow.complete(Unit)
-        advanceUntilIdle()
-
-        // Opening two rows is two independent intentions — a shared cancel-and-replace handle
-        // here would have thrown away the first row's children.
-        assertThat(vm.browseState.value.expanded).containsAtLeast(11, 13)
-    }
-
-    @Test
     fun `a slower detail load cannot replace a later one`() = runTest {
         val vm = openedBrowser()
 
@@ -244,7 +172,7 @@ class QuranTopicsRaceTest {
     }
 
     private fun openedBrowser(): QuranTopicsViewModel {
-        val vm = QuranTopicsViewModel(useCases, RollUpTopicCounts(), settings, RecordingTelemetry())
+        val vm = QuranTopicsViewModel(useCases, settings, RecordingTelemetry(), dispatcher)
         vm.onEvent(QuranTopicsEvent.OpenBrowser)
         dispatcher.scheduler.advanceUntilIdle()
         return vm

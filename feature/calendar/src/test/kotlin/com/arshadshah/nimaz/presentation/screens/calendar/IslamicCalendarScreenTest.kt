@@ -121,11 +121,12 @@ class IslamicCalendarScreenTest {
         )
     }
 
-    private fun render() {
+    private fun render(openOnHijriMonth: Pair<Int, Int>? = null) {
         composeRule.setThemedContent {
             IslamicCalendarScreen(
                 onNavigateBack = { backPressed++ },
                 viewModel = viewModel,
+                openOnHijriMonth = openOnHijriMonth,
             )
         }
     }
@@ -383,5 +384,23 @@ class IslamicCalendarScreenTest {
 
         composeRule.onNodeWithText("Event 5").assertIsDisplayed()
         composeRule.onNodeWithText("Event 6").assertDoesNotExist()
+    }
+
+    // ---- Route.IslamicMonth ----
+
+    @Test
+    fun `opened on a hijri month, the screen asks for that month`() {
+        render(openOnHijriMonth = 9 to 1447)
+        composeRule.waitForIdle()
+
+        assertThat(events).contains(CalendarEvent.OpenHijriMonth(9, 1447))
+    }
+
+    @Test
+    fun `opened without one, the screen stays on today`() {
+        render()
+        composeRule.waitForIdle()
+
+        assertThat(events.filterIsInstance<CalendarEvent.OpenHijriMonth>()).isEmpty()
     }
 }

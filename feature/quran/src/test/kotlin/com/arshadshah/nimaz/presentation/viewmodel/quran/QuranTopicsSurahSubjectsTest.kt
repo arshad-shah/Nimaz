@@ -14,7 +14,6 @@ import com.arshadshah.nimaz.domain.usecase.GetTopicsForSurahUseCase
 import com.arshadshah.nimaz.domain.usecase.HasThematicContentUseCase
 import com.arshadshah.nimaz.domain.usecase.QuranUseCases
 import com.arshadshah.nimaz.domain.usecase.SearchTopicsUseCase
-import com.arshadshah.nimaz.domain.usecase.quran.RollUpTopicCounts
 import com.google.common.truth.Truth.assertThat
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -34,17 +33,12 @@ import org.junit.Before
 import org.junit.Test
 
 /**
- * The subject browser's other three jobs: the tree switch, the search box, and one surah's
- * subject list.
+ * One surah's subject list — the subject browser's job that is not the browser.
  *
  * The distinction the whole feature turns on is "this install has no subject index" versus "this
  * surah has no subjects". They are one empty list and two completely different sentences, and
  * the ViewModel only asks the expensive question when the list comes back empty — so the answer
  * has to be right in both directions.
- *
- * Switching trees is the other one. A different hierarchy is a different set of parents, so
- * nothing may carry over: not the focus, not what was open, and above all not the cached
- * children, which are keyed by a parent id that means something else in the other tree.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class QuranTopicsSurahSubjectsTest {
@@ -117,103 +111,11 @@ class QuranTopicsSurahSubjectsTest {
     fun tearDown() = Dispatchers.resetMain()
 
     private fun viewModel() =
-        QuranTopicsViewModel(useCases, RollUpTopicCounts(), settings, telemetry)
+        QuranTopicsViewModel(useCases, settings, telemetry, dispatcher)
 
     private fun opened(): QuranTopicsViewModel = viewModel().also {
         it.onEvent(QuranTopicsEvent.OpenBrowser)
         dispatcher.scheduler.advanceUntilIdle()
-    }
-
-    // ---- Opening the browser ----
-
-    @Test
-    fun `an install with no subject index says so rather than showing an empty tree`() = runTest {
-        coEvery { hasContent.invoke() } returns false
-
-        val vm = opened()
-
-        assertThat(vm.browseState.value.isAvailable).isFalse()
-        assertThat(vm.browseState.value.isLoading).isFalse()
-        coVerify(exactly = 0) { getRoots.invoke(any()) }
-    }
-
-    @Test
-    fun `a read that fails clears the spinner instead of leaving it turning`() = runTest {
-        coEvery { hasContent.invoke() } throws IllegalStateException("content database missing")
-
-        val vm = opened()
-
-        assertThat(vm.browseState.value.isLoading).isFalse()
-    }
-
-    @Test
-    fun `reopening the browser does not reload a tree that is already there`() = runTest {
-        val vm = opened()
-
-        vm.onEvent(QuranTopicsEvent.OpenBrowser)
-        advanceUntilIdle()
-
-        coVerify(exactly = 1) { getRoots.invoke(TopicTree.THEMATIC) }
-    }
-
-    // ---- Switching hierarchy ----
-
-    @Test
-    fun `switching tree loads the other hierarchy's roots`() = runTest {
-        val vm = opened()
-
-        vm.onEvent(QuranTopicsEvent.SelectTree(TopicTree.ONTOLOGY))
-        advanceUntilIdle()
-
-        assertThat(vm.browseState.value.tree).isEqualTo(TopicTree.ONTOLOGY)
-        assertThat(vm.browseState.value.rows.map { it.topic.id }).containsExactly(2)
-    }
-
-    @Test
-    fun `switching tree drops the cached children keyed by the old tree's ids`() = runTest {
-        coEvery { getChildren.invoke(1, TopicTree.THEMATIC) } returns listOf(topic(11, "God", 1))
-        coEvery { getChildren.branchesIn(TopicTree.THEMATIC) } returns setOf(1)
-        val vm = opened()
-        vm.onEvent(QuranTopicsEvent.Toggle(doctrine))
-        advanceUntilIdle()
-        assertThat(vm.browseState.value.children).isNotEmpty()
-
-        vm.onEvent(QuranTopicsEvent.SelectTree(TopicTree.ONTOLOGY))
-        advanceUntilIdle()
-
-        val state = vm.browseState.value
-        assertThat(state.children).isEmpty()
-        assertThat(state.expanded).isEmpty()
-        assertThat(state.focus).isEmpty()
-    }
-
-    @Test
-    fun `selecting the tree already showing does nothing`() = runTest {
-        val vm = opened()
-
-        vm.onEvent(QuranTopicsEvent.SelectTree(TopicTree.THEMATIC))
-        advanceUntilIdle()
-
-        coVerify(exactly = 1) { getRoots.invoke(TopicTree.THEMATIC) }
-    }
-
-    // ---- The search box ----
-
-    @Test
-    fun `clearing the search empties the results as well as the box`() = runTest {
-        val vm = opened()
-        vm.onEvent(QuranTopicsEvent.Search("god"))
-        advanceUntilIdle()
-        assertThat(vm.browseState.value.searchResults).isNotEmpty()
-
-        vm.onEvent(QuranTopicsEvent.ClearSearch)
-        advanceUntilIdle()
-
-        val state = vm.browseState.value
-        assertThat(state.searchQuery).isEmpty()
-        assertThat(state.searchResults).isEmpty()
-        assertThat(state.isSearching).isFalse()
-        assertThat(state.isSearchMode).isFalse()
     }
 
     // ---- One surah's subjects ----

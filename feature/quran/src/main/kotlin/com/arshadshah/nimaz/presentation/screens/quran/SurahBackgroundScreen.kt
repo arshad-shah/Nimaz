@@ -13,7 +13,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -35,7 +34,6 @@ import com.arshadshah.nimaz.core.ui.R
 import com.arshadshah.nimaz.core.common.ThematicLink
 import com.arshadshah.nimaz.domain.model.SurahOverviewSection
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
-import com.arshadshah.nimaz.presentation.components.atoms.NimazIconButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
@@ -44,7 +42,7 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazErrorState
 import com.arshadshah.nimaz.presentation.components.molecules.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.molecules.ThematicText
 import com.arshadshah.nimaz.presentation.components.organisms.NimazScrollSpyIndex
-import com.arshadshah.nimaz.presentation.components.organisms.NimazTopAppBar
+import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.rememberScrollSpyIndex
 import com.arshadshah.nimaz.presentation.foundation.tokens.icon
 import com.arshadshah.nimaz.presentation.foundation.tokens.labelRes
@@ -107,16 +105,10 @@ fun SurahBackgroundScreen(
 
     NimazScreenScaffold(
         topBar = {
-            NimazTopAppBar(
+            NimazBackTopAppBar(
                 title = stringResource(R.string.surah_info_background),
                 subtitle = state.surah?.nameEnglish,
-                navigationIcon = {
-                    NimazIconButton(
-                        icon = Icons.AutoMirrored.Filled.ArrowBack,
-                        onClick = onNavigateBack,
-                        contentDescription = stringResource(R.string.cd_back),
-                    )
-                },
+                onBackClick = onNavigateBack,
             )
         },
     ) { padding ->

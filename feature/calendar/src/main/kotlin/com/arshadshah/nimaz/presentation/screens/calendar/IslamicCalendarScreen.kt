@@ -18,6 +18,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -59,8 +60,15 @@ import java.time.YearMonth
 @Composable
 fun IslamicCalendarScreen(
     onNavigateBack: () -> Unit,
-    viewModel: CalendarViewModel = hiltViewModel()
+    viewModel: CalendarViewModel = hiltViewModel(),
+    /** The Hijri month and year to open on, from `Route.IslamicMonth`; null opens on today. */
+    openOnHijriMonth: Pair<Int, Int>? = null,
 ) {
+    LaunchedEffect(openOnHijriMonth) {
+        openOnHijriMonth?.let { (month, year) ->
+            viewModel.onEvent(CalendarEvent.OpenHijriMonth(month, year))
+        }
+    }
     val state by viewModel.calendarState.collectAsStateWithLifecycle()
     val eventsState by viewModel.eventsState.collectAsStateWithLifecycle()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()

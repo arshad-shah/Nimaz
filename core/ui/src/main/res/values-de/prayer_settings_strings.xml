@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The redesigned prayer settings: live preview, sections, pickers and the adjust sheet. -->
+<resources>
+    <string name="prayer_settings_row_title">Gebetszeiten</string>
+    <string name="prayer_preview_today">Heute · %1$s</string>
+    <string name="prayer_preview_today_plain">Heute</string>
+    <string name="prayer_preview_note_default">Diese Zeiten nutzen deine Erinnerungen</string>
+    <string name="prayer_preview_note_changed">Mit deiner Änderung aktualisiert</string>
+    <string name="prayer_preview_cd">Heutige Gebetszeiten mit deinen Einstellungen: %1$s</string>
+    <string name="prayer_settings_section_calculation">Wie die Zeiten berechnet werden</string>
+    <string name="prayer_settings_section_finetune">Feinabstimmung</string>
+    <string name="prayer_settings_section_reminders">Erinnerungen</string>
+    <string name="prayer_settings_adjust_title">In Minuten anpassen</string>
+    <string name="prayer_settings_adjust_hint">An den Plan deiner Moschee anpassen</string>
+    <string name="prayer_settings_adjust_body">Verschiebe eine Zeit passend zu deiner Moschee. Das Ergebnis steht neben jedem Gebet.</string>
+    <string name="prayer_settings_reminders_title">Adhan und Erinnerungen</string>
+    <string name="prayer_settings_high_lat_notice">%1$s liegt auf %2$d° %3$s. Im Sommer wird der Himmel dort womöglich nicht ganz dunkel, daher folgen Fadschr und Ischa der Regel „%4$s“.</string>
+    <string name="prayer_latitude_north">N</string>
+    <string name="prayer_latitude_south">S</string>
+    <string name="prayer_method_picker_body">Wähle die Autorität, der deine Gemeinde folgt – meist nach Region. Die Methoden unterscheiden sich darin, wie dunkel der Himmel für Fadschr und Ischa sein muss.</string>
+    <string name="prayer_asr_picker_body">Wann das Nachmittagsgebet beginnt, gemessen an der Länge eines Schattens.</string>
+    <string name="prayer_high_lat_picker_body">Fern vom Äquator wird der Sommerhimmel für Fadschr und Ischa womöglich nicht dunkel genug. Diese Regel legt fest, wie sie bestimmt werden.</string>
+    <string name="prayer_picker_fajr_at">Fadschr %1$s</string>
+    <plurals name="prayer_settings_adjusted_count">
+        <item quantity="one">%1$d Zeit angepasst</item>
+        <item quantity="other">%1$d Zeiten angepasst</item>
+    </plurals>
+</resources>

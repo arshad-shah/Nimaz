@@ -4,6 +4,12 @@ import com.arshadshah.nimaz.domain.model.TasbihPreset
 
 sealed interface TasbihEvent {
     data class SelectPreset(val preset: TasbihPreset) : TasbihEvent
+
+    /**
+     * Start counting a preset known only by id — `Route.TasbihCounter(presetId)`, reached from an
+     * announcement (`tasbih/counter/{presetId}`). An id with no preset leaves the counter as it is.
+     */
+    data class OpenPreset(val presetId: Long) : TasbihEvent
     data class SetTargetCount(val count: Int) : TasbihEvent
     data class CreateCustomPreset(val preset: TasbihPreset) : TasbihEvent
     data class UpdateCustomPreset(val preset: TasbihPreset) : TasbihEvent

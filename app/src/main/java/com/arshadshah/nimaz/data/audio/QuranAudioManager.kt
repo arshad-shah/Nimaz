@@ -123,7 +123,8 @@ class QuranAudioManager @Inject constructor(
      * [nextSurahToPlay]'s decision; the one thing only this can know is whether the surah it
      * names has any verses.
      */
-    private fun advanceToNextSurah(): Boolean {
+    @androidx.annotation.VisibleForTesting
+    internal fun advanceToNextSurah(): Boolean {
         val nextNumber = nextSurahToPlay(
             continuousPlayback = continuousPlayback,
             playlistIsAReading = playlistIsAReading,

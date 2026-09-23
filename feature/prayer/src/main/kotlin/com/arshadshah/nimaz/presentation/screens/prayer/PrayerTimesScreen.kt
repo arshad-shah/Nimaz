@@ -1,5 +1,7 @@
 package com.arshadshah.nimaz.presentation.screens.prayer
 
+import com.arshadshah.nimaz.presentation.components.molecules.NimazPrayerDayArc
+import com.arshadshah.nimaz.presentation.components.molecules.NimazPrayerDayPoint
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -49,8 +51,6 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazDivider
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
-import com.arshadshah.nimaz.presentation.components.atoms.NimazSolarArc
-import com.arshadshah.nimaz.presentation.components.atoms.NimazSolarNode
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.atoms.TickResolution
 import com.arshadshah.nimaz.presentation.components.atoms.clockTimeText
@@ -389,21 +389,17 @@ private fun SolarDayCard(
     val current = prayers.lastOrNull { it.isPassed }
     val next = prayers.firstOrNull { it.isNext }
 
-    val nodes = remember(prayers) {
-        prayers.mapNotNull { prayer ->
-            val at = prayer.timeAt ?: return@mapNotNull null
-            NimazSolarNode(
-                position = at.dayFraction(),
-                // Sunrise and Maghrib are the horizon crossings and the card states their times
-                // below, so they are drawn as bare dots — six labels do not fit.
-                label = when (prayer.type) {
-                    PrayerType.SUNRISE, PrayerType.MAGHRIB -> null
-                    else -> prayer.type.displayName
-                },
-                tone = if (prayer.isNext) NimazTone.WARNING else NimazTone.MUTED,
-                contentDescription = prayer.type.displayName,
-            )
-        }
+    val points = prayers.mapNotNull { prayer ->
+        val at = prayer.timeAt ?: return@mapNotNull null
+        NimazPrayerDayPoint(
+            position = at.dayFraction(),
+            name = prayer.type.displayName,
+            time = clockTimeText(at),
+            // Sunrise and Maghrib are the horizon crossings; the component draws them as bare
+            // dots and states their times under the arc — six labels do not fit.
+            isHorizon = prayer.type == PrayerType.SUNRISE || prayer.type == PrayerType.MAGHRIB,
+            tone = if (prayer.isNext) NimazTone.WARNING else NimazTone.MUTED,
+        )
     }
 
     // NEUTRAL, not ACCENT. An accent card fills with the primary hue in dark, and the arc's
@@ -459,8 +455,8 @@ private fun SolarDayCard(
             val sunriseText = state.sunriseAt?.let { clockTimeText(it) } ?: Placeholder
             val sunsetText = state.sunsetAt?.let { clockTimeText(it) } ?: Placeholder
 
-            NimazSolarArc(
-                nodes = nodes,
+            NimazPrayerDayArc(
+                points = points,
                 sunriseFraction = state.sunriseFraction,
                 sunsetFraction = state.sunsetFraction,
                 contentDescription = stringResource(
@@ -468,6 +464,8 @@ private fun SolarDayCard(
                     sunriseText,
                     sunsetText,
                 ),
+                // The rows below list every time, so the arc carries names only.
+                showTimes = false,
                 sunPosition = if (isToday) now.dayFraction() else null,
                 // Kotlin will not smart-cast a `val` from another module, so both ends are bound
                 // locally before the range is built.
@@ -484,22 +482,6 @@ private fun SolarDayCard(
                 },
                 modifier = Modifier.padding(top = 8.dp),
             )
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-            ) {
-                Text(
-                    text = sunriseText,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                Text(
-                    text = sunsetText,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
         }
     }
 }

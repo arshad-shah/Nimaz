@@ -124,6 +124,20 @@ class TasbihViewModel @Inject constructor(
                 selectPreset(event.preset)
             }
 
+            is TasbihEvent.OpenPreset -> {
+                telemetry.featureUsed(DOMAIN, "open_preset")
+                // Through the persisted selection, not around it. Selecting directly raced the
+                // restore of the *previous* selection that starts with this ViewModel: two
+                // lookups in flight, and whichever finished last won — so a link to preset 5
+                // opened on preset 1 about half the time. Persisting makes the collector below
+                // the only thing that applies a selection, and it keeps only the latest.
+                launchSafely(telemetry, DOMAIN, "open_preset") {
+                    if (tasbihUseCases.getPresetById(event.presetId) != null) {
+                        tasbihSettings.setTasbihSelectedPresetId(event.presetId)
+                    }
+                }
+            }
+
             TasbihEvent.ClearPreset -> clearPreset()
             is TasbihEvent.SetTargetCount -> setTargetCount(event.count)
             is TasbihEvent.CreateCustomPreset -> {
@@ -222,7 +236,8 @@ class TasbihViewModel @Inject constructor(
         }
     }
 
-    private fun clearPreset() {
+    /** [persist] as in [selectPreset]: false when the clear came from the persisted id itself. */
+    private fun clearPreset(persist: Boolean = true) {
         val currentSession = _counterState.value.currentSession
         val currentCount =
             _counterState.value.count + (_counterState.value.laps * _counterState.value.targetCount)
@@ -248,11 +263,13 @@ class TasbihViewModel @Inject constructor(
                 isActive = false,
             )
         }
-        launchSafely(
-            telemetry,
-            DOMAIN,
-            "clear_preset"
-        ) { tasbihSettings.setTasbihSelectedPresetId(-1L) }
+        if (persist) {
+            launchSafely(
+                telemetry,
+                DOMAIN,
+                "clear_preset"
+            ) { tasbihSettings.setTasbihSelectedPresetId(-1L) }
+        }
     }
 
     private fun toggleFavorite(id: Long) {
@@ -268,14 +285,18 @@ class TasbihViewModel @Inject constructor(
     private fun applyPersistedSelection(id: Long) {
         val current = _counterState.value.selectedPreset?.id
         if (id <= 0L) {
-            if (current != null) clearPreset()
+            if (current != null) clearPreset(persist = false)
             return
         }
         if (current == id) return
-        launchSafely(telemetry, DOMAIN, "apply_persisted_selection") {
-            tasbihUseCases.getPresetById(id)?.let { selectPreset(it) }
+        // Latest wins: a newer persisted id cancels the lookup for an older one still in flight.
+        persistedSelectionJob?.cancel()
+        persistedSelectionJob = launchSafely(telemetry, DOMAIN, "apply_persisted_selection") {
+            tasbihUseCases.getPresetById(id)?.let { selectPreset(it, persist = false) }
         }
     }
+
+    private var persistedSelectionJob: Job? = null
 
     private fun setTargetCount(newTarget: Int) {
         val safeTarget = newTarget.coerceAtLeast(1)
@@ -309,7 +330,17 @@ class TasbihViewModel @Inject constructor(
         }
     }
 
-    private fun selectPreset(preset: TasbihPreset) {
+    /**
+     * Switch the counter to [preset].
+     *
+     * [persist] is false when the selection *came from* the persisted id — another screen's
+     * choice arriving through [applyPersistedSelection]. Writing it back from there was a
+     * feedback loop: with two Tasbih ViewModels alive, one still finishing an older lookup wrote
+     * its preset, the other answered with its own, and the two flipped the selection back and
+     * forth until one happened to stop — which could undo the reader's own choice. Only an
+     * explicit selection writes.
+     */
+    private fun selectPreset(preset: TasbihPreset, persist: Boolean = true) {
         // Auto-complete the current session if switching to a different preset with some count
         val currentSession = _counterState.value.currentSession
         val currentCount =
@@ -337,10 +368,12 @@ class TasbihViewModel @Inject constructor(
                 isActive = false,
             )
         }
-        launchSafely(telemetry, DOMAIN, "select_preset") {
-            tasbihSettings.setTasbihSelectedPresetId(
-                preset.id
-            )
+        if (persist) {
+            launchSafely(telemetry, DOMAIN, "select_preset") {
+                tasbihSettings.setTasbihSelectedPresetId(
+                    preset.id
+                )
+            }
         }
     }
 

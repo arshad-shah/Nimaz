@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The Topics browser and subject screen (the 2026-09 redesign). -->
+<resources>
+    <!-- The count pre-formatted with grouping ("1,041"), which %d does not do. -->
+    <string name="quran_topics_verse_count">%1$s ayet</string>
+    <string name="quran_topics_branches">%1$d dal</string>
+    <string name="quran_topics_sub_entries">%1$d alt başlık</string>
+    <string name="quran_topics_sort_az">A–Z</string>
+    <string name="quran_topics_sort_most_cited">En çok geçen</string>
+    <string name="quran_topics_most_cited_footer">%2$s içinden ilk %1$d — geri kalanı A–Z\'de</string>
+    <string name="quran_topics_no_match">“%1$s” ile eşleşen konu yok. Daha kısa bir kelime ya da Arapçasını deneyin.</string>
+    <string name="cd_index_rail_jump">%1$s harfine git</string>
+    <string name="quran_topic_stat_verses">ayet</string>
+    <string name="quran_topic_stat_surahs">sure</string>
+    <string name="quran_topic_stat_subtopics">alt konu</string>
+    <string name="quran_topic_path_prefix">Konum:</string>
+    <string name="quran_topic_read_more">Devamını oku</string>
+    <string name="quran_topic_read_less">Daha az göster</string>
+    <string name="quran_topic_where_it_appears">Nerede geçiyor</string>
+    <string name="quran_topic_top_of">%2$d içinden ilk %1$d</string>
+    <string name="quran_topic_show_all">%1$d ayetin tümünü göster</string>
+    <string name="quran_topic_no_verses">Bu konuya henüz bağlı ayet yok.</string>
+    <string name="quran_topics_entry">1 başlık</string>
+    <string name="quran_topics_entries">%1$s başlık</string>
+    <!-- "M · 992 of 1,780": the letter you are in, where it starts, and the index's size. -->
+    <string name="quran_topics_index_position">%1$s · %3$s içinde %2$s</string>
+    <string name="quran_topics_sub_entry">1 alt başlık</string>
+</resources>

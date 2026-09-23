@@ -1082,6 +1082,14 @@ with no label and a touch target under 48dp fail the lane we already run. It can
   `NimazTheme` resets icon contrast in one on every recomposition, and a remembered effect runs
   before side effects in the same pass — a one-off override loses as soon as the theme
   recomposes (switching theme with the screen open), and the icons go dark on a dark surface.
+- **Every screen's top bar is `NimazTopAppBar` / `NimazBackTopAppBar`** (`organisms/TopAppBar.kt`):
+  frosted pills — a round back pill, a title pill (optional subtitle, or `titleLoading` while the
+  heading arrives with the content), and an actions pill for anything else. That includes the
+  readers (Quran, Tafseer, Qaida), which used Material's raw opaque `TopAppBar`, and screens that
+  draw artwork under the status bar (Learn to Pray's stage): the pills sit on whatever is beneath.
+  Never pass your own back arrow into `navigationIcon` — that is `NimazBackTopAppBar` written out
+  by hand, and six Quran screens had done it. `TopBarConsistencyGuardTest` fails on both. The one
+  exception is the Prayer Times sky hero, whose glass pills frost the live sky behind them.
 - **Components follow Atomic Design** (`atoms` → `molecules` → `organisms`). Reuse shared
   components (e.g. `NimazCard`, `PrayerTimeCard`, `NimazBackTopAppBar`,
   `NimazEmptyState`, `NimazLoadingState`, `NimazCalendar`) rather than re-rolling generic UI.
@@ -1167,6 +1175,13 @@ with no label and a touch target under 48dp fail the lane we already run. It can
       card takes `MUTED` or `RAISED`. Both were shipped-looking bugs that passed every assertion;
       see `PrayerTimesScreenRenderTest` and `NimazSolarArcPreviewRenderTest`, which draw for real
       and write PNGs to `build/reports/`.
+      A node can carry a **`time`** (drawn under its name, so the arc *is* the timetable) and be
+      **`highlighted`** (a larger dot, a halo, an accent label — for a time that just moved). A
+      day label away from solar noon leans outward so it never sits on the limb it labels. A
+      whole day is **`NimazPrayerDayArc`** (`components/molecules/NimazPrayerDayArc.kt`): points
+      from a day's times, sunrise and Maghrib as bare horizon dots with their times in a row under
+      the arc. The Prayer Times card uses it with `showTimes = false` (its list carries the
+      times); the prayer settings' live preview uses it with times on the curve — one component.
     - a button is `NimazButton(text, onClick, variant = …, size = …, type = …)`
       (`components/atoms/NimazButton.kt`), **not** a raw Material `Button`/`OutlinedButton`/
       `TextButton` and **never** a `Text`/`Box`/`Surface` carrying a `Modifier.clickable`. `variant`
@@ -1208,6 +1223,9 @@ with no label and a touch target under 48dp fail the lane we already run. It can
       edge buttons, large centred value — the tasbih target-dial look; `label` is ignored).
       `size` (`SMALL`/`MEDIUM`/`LARGE`) scales the buttons and value typography; `type`
       (`DEFAULT`/`ACCENT`) sets the value colour (`ACCENT` = `NimazColors.TasbihColors.Milestone`).
+      `labelContent` replaces the text label with composed content (a name over a supporting line)
+      that takes the width the controls leave — wrapping an `INLINE` stepper in your own `Row`
+      squeezes the label to nothing, because the stepper fills its width.
       `minValue`/`maxValue`/`step`/`formatValue` clamp and format. It absorbed the old tasbih
       `TargetStepper`/`TargetCountStepper`.
     - a boolean check-toggle is `NimazCheckbox(checked, onCheckedChange, variant = …, size = …,
@@ -1273,6 +1291,10 @@ with no label and a touch target under 48dp fail the lane we already run. It can
       - **long / searchable / grouped list** → the modal `NimazListPicker(title, items, selected,
         onSelected, onDismiss, searchable = …)` (`components/molecules/NimazListPicker.kt`), opened
         from a `NimazSettingsItem` that shows the current value (the prayer-settings pattern).
+        `header` puts content above the options (the prayer pickers' illustrations), and a picker
+        with a header or without `autoDismiss` opens fully expanded so its footer is on-screen.
+        With `autoDismiss = false` every tap applies at once, so pass `onCancel` to restore the
+        value the sheet opened with — a Cancel that only closes it keeps the choice.
       - **action / overflow menu** (icon-triggered commands, not a value) → `NimazDropdownMenu(expanded,
         onDismissRequest) { … }`.
       Both `NimazDropdownField` and `NimazDropdownMenu` are built from the **single**
@@ -1660,12 +1682,24 @@ treatment. Verse-of-the-Day and continue-reading previously both carried
   (`FILL` / `WRAP`) for the intrinsic sizing its call sites in a shared row depended on, and the
   lift from `NimazSegmentedTabs`. Migrating the eight `NimazPillTabs` call sites is what makes the
   Qur'an redesign's "one control for all of them" true rather than aspirational.
-- **`NimazTreeRow`** (molecule, `components/molecules/NimazTreeRow.kt`) is the tree component for
-  the subject browser: a row with depth-based indent ruling, RTL handling, an optional `NimazBadge`
-  count, secondary/supporting text, trailing content, and a 48dp `NimazIconButton` chevron for
-  expand/collapse. It already existed before this redesign and is already the tree row consumed by
-  `QuranTopicsScreen`, `QuranTopicDetailScreen` and `SurahSubjectsScreen` — the three screens later
-  phases of this redesign rewrite — so it is the tree component to build on, not to duplicate.
+- **`NimazTreeRow`** (molecule, `components/molecules/NimazTreeRow.kt`) is the tree row: depth-based
+  indent ruling, RTL handling, an optional `NimazBadge` count, secondary/supporting text, trailing
+  content, and a 48dp `NimazIconButton` chevron for expand/collapse. `SurahSubjectsScreen` uses
+  it. The Topics browser and subject screen **stopped** using it in the 2026-09 redesign, which
+  replaced the one indented tree with a shape per hierarchy (chapter cards, kind tiles, an A–Z
+  concordance) and moved "what is under this" onto the subject screen as subtopic cards — the
+  pieces are `components/organisms/TopicCards.kt` in `:feature:quran`, built on `NimazCard`,
+  `NimazIconWell`, `NimazAssistChip`, `NimazProgressTrack`, `NimazAccordion` and `CitationRow`.
+  `NimazAssistChip` grew `trailingText` (a count set in the brand colour) and `swatch` (a colour
+  dot keyed to a chart above it) for the Themes card's branch chips, rather than the card
+  hand-rolling a chip.
+- **`NimazIndexRail`** (molecule) is the A–Z strip beside a long alphabetical list. It follows the
+  list (the `current` letter is filled, its neighbours swell) and scrubs: a drag hands each letter
+  passed to `onSelect` with a haptic tick, skipping letters not in `available`, while a teardrop
+  bubble whose tip sits on the letter's centre line shows the letter and a label. The bubble is
+  laid out unbounded and zero-sized outside the rail — inheriting the 28dp rail's constraints is
+  what crushed it — and every letter is its own "Jump to M" accessibility node. The Topics Index
+  pairs it with `stickyHeader` letter headings that turn solid while pinned.
 - **`QuranFrame`'s two variants have parted company.** `READER` — the mushaf page — takes the
   paper register: a `paper` ground inside a 16dp rounded card, a second `paperLine` keyline drawn
   **inside** it at 12dp, and the page number as a small `paper`-filled pill straddling that

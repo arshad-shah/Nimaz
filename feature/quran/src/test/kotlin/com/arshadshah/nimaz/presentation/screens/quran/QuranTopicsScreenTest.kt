@@ -1,6 +1,11 @@
 package com.arshadshah.nimaz.presentation.screens.quran
 
+import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -12,6 +17,10 @@ import com.arshadshah.nimaz.presentation.screens.str
 import com.arshadshah.nimaz.presentation.viewmodel.quran.QuranTopicsEvent
 import com.arshadshah.nimaz.presentation.viewmodel.quran.QuranTopicsViewModel
 import com.arshadshah.nimaz.presentation.viewmodel.quran.TopicBrowseState
+import com.arshadshah.nimaz.presentation.viewmodel.quran.TopicIndexSort
+import com.arshadshah.nimaz.presentation.viewmodel.quran.TopicSearchHit
+import com.arshadshah.nimaz.presentation.viewmodel.quran.TopicTally
+import com.arshadshah.nimaz.presentation.viewmodel.quran.TopicThemeCard
 import com.arshadshah.nimaz.testing.compose.createComponentComposeRule
 import com.arshadshah.nimaz.testing.compose.setThemedContent
 import com.google.common.truth.Truth.assertThat
@@ -25,14 +34,12 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
 /**
- * The subject browser: one tree that expands in place.
+ * The Topics front page: each hierarchy in its own shape, and every tap opening a subject.
  *
- * Descending used to replace the list with the children, so walking from "Stories" to "Musa" to
- * "the parting of the sea" discarded every sibling on the way. What is asserted here is the
- * shape that replaced it — a node's children appear beneath it, the row knows it is a branch
- * *before* it is tapped (a leaf offering a disclosure control is a dead tap), and past the indent
- * cap the offer changes from "open" to "re-root here" because a 390dp screen has no text column
- * left after four levels.
+ * What is asserted is what the redesign changed. Themes are chapter cards whose chips open
+ * their branches and whose header opens the chapter; Kinds are tiles; Index is a concordance
+ * with a letter rail and a most-cited view. Every tap hands the caller a subject *and the
+ * hierarchy it was reached through*, because the same subject has a different place in each.
  *
  * And the two empty states that are not the same sentence: "your content predates the subject
  * index" and "nothing matches that".
@@ -53,115 +60,185 @@ class QuranTopicsScreenTest {
         every { onEvent(any()) } answers { events += firstArg<QuranTopicsEvent>() }
     }
 
-    private fun render() {
+    private fun render(onBack: () -> Unit = {}) {
         composeRule.setThemedContent {
             QuranTopicsScreen(
-                onNavigateBack = {},
+                onNavigateBack = onBack,
                 onOpenTopic = { id, tree -> openedTopic = id to tree },
                 viewModel = viewModel,
             )
         }
     }
 
-    private fun topic(id: Int, name: String, ayahs: Int = 12, parent: Int? = null) = QuranTopic(
+    private fun topic(id: Int, name: String, arabic: String = "") = QuranTopic(
         id = id,
         name = name,
-        arabicName = "موضوع",
+        arabicName = arabic,
         description = "",
         wikiLink = "",
-        ayahCount = ayahs,
-        parentId = parent,
-        thematicParentId = parent,
-        ontologyParentId = parent,
+        ayahCount = 0,
+        parentId = null,
+        thematicParentId = null,
+        ontologyParentId = null,
         isThematic = true,
         isOntology = true,
         relatedTopicIds = emptyList(),
     )
 
-    private val stories = topic(1, "Stories")
-    private val musa = topic(2, "Musa", parent = 1)
+    private val stories = topic(1883, "Stories")
+    private val prophets = topic(20, "Prophets")
+    private val nations = topic(21, "Nations")
+    private val living = topic(257, "Living Creation")
+    private val patience = topic(30, "Patience", arabic = "الصبر")
+    private val moses = topic(40, "Moses")
+
     private val loaded = TopicBrowseState(
         isLoading = false,
-        level = listOf(stories, topic(9, "Prayer")),
-        branchIds = setOf(1),
-        children = mapOf(1 to listOf(musa)),
-        rolledUpCounts = mapOf(1 to 340, 9 to 88),
+        themes = listOf(
+            TopicThemeCard(
+                root = TopicTally(stories, verseCount = 1310),
+                branches = listOf(TopicTally(prophets, 1042), TopicTally(nations, 311)),
+            )
+        ),
+        kinds = listOf(TopicTally(living, verseCount = 812)),
+        index = listOf(TopicTally(moses, 431, childCount = 13), TopicTally(patience, 87)),
     )
 
-    // ---- Asking for the level ----
-
     @Test
-    fun `arriving asks for the current level`() {
+    fun `arriving asks for the catalogue`() {
         render()
 
         // Idempotent by design, so the screen can send it on every composition.
         assertThat(events).contains(QuranTopicsEvent.OpenBrowser)
     }
 
-    // ---- The tree ----
+    // ---- Themes ----
 
     @Test
-    fun `the top level is listed`() {
+    fun `a theme card shows its size and its branches with theirs`() {
         browseState.value = loaded
-
         render()
 
         composeRule.onNodeWithText("Stories").assertIsDisplayed()
-        composeRule.onNodeWithText("Prayer").assertIsDisplayed()
+        composeRule.onNodeWithText("1,310", substring = true).assertIsDisplayed()
+        composeRule.onNodeWithText("Prophets").assertIsDisplayed()
+        composeRule.onNodeWithText("1,042").assertIsDisplayed()
     }
 
     @Test
-    fun `a branch's children appear beneath it, with its siblings still there`() {
-        browseState.value = loaded.copy(expanded = setOf(1))
-
-        render()
-
-        composeRule.onNodeWithText("Musa").assertIsDisplayed()
-        // The whole point of expanding in place: the context on the way down is not discarded.
-        composeRule.onNodeWithText("Prayer").assertIsDisplayed()
-    }
-
-    @Test
-    fun `a row carries the count of everything beneath it, not its own citations`() {
-        browseState.value = loaded
-
-        render()
-
-        // A branch's own citation count is usually zero, so the browser used to open on three
-        // roots each reading "0 verses".
-        composeRule.onNodeWithText("340", substring = true).assertIsDisplayed()
-    }
-
-    @Test
-    fun `opening a subject is the caller's business, and carries the tree it came from`() {
+    fun `a branch chip opens that branch in the outline`() {
         browseState.value = loaded
         render()
 
-        composeRule.onNodeWithText("Prayer").performClick()
+        composeRule.onNodeWithText("Prophets").performClick()
 
-        assertThat(openedTopic).isEqualTo(9 to TopicTree.THEMATIC)
-    }
-
-    // ---- Focus and crumbs ----
-
-    @Test
-    fun `a focused branch is shown as crumbs above the list`() {
-        browseState.value = loaded.copy(focus = listOf(stories, musa))
-
-        render()
-
-        composeRule.onNodeWithText("Musa").assertIsDisplayed()
-        composeRule.onNodeWithText(str(R.string.quran_topics_crumb_home)).assertIsDisplayed()
+        assertThat(openedTopic).isEqualTo(20 to TopicTree.THEMATIC)
     }
 
     @Test
-    fun `tapping the home crumb re-roots on the whole tree`() {
-        browseState.value = loaded.copy(focus = listOf(stories))
+    fun `the card's header opens the chapter itself`() {
+        browseState.value = loaded
         render()
 
-        composeRule.onNodeWithText(str(R.string.quran_topics_crumb_home)).performClick()
+        composeRule.onNodeWithText("Stories").performClick()
 
-        assertThat(events).contains(QuranTopicsEvent.RebaseTo(QuranTopicsEvent.RebaseTo.ROOT))
+        assertThat(openedTopic).isEqualTo(1883 to TopicTree.THEMATIC)
+    }
+
+    // ---- Kinds ----
+
+    @Test
+    fun `a kind tile opens in the ontology`() {
+        browseState.value = loaded.copy(tree = TopicTree.ONTOLOGY)
+        render()
+
+        composeRule.onNodeWithText("812", substring = true).assertIsDisplayed()
+        composeRule.onNodeWithText("Living Creation").performClick()
+
+        assertThat(openedTopic).isEqualTo(257 to TopicTree.ONTOLOGY)
+    }
+
+    @Test
+    fun `choosing a tab is handed to the view model`() {
+        browseState.value = loaded
+        render()
+
+        composeRule.onNodeWithText(str(R.string.quran_topics_tree_ontology)).performClick()
+
+        assertThat(events).contains(QuranTopicsEvent.SelectTree(TopicTree.ONTOLOGY))
+    }
+
+    // ---- Index ----
+
+    @Test
+    fun `the index lists entries under their letters, with sub-entries and Arabic`() {
+        browseState.value = loaded.copy(tree = TopicTree.INDEX)
+        render()
+
+        composeRule.onNodeWithText("Moses").assertIsDisplayed()
+        composeRule.onNodeWithText(str(R.string.quran_topics_sub_entries, 13), substring = true)
+            .assertIsDisplayed()
+        composeRule.onNodeWithText("الصبر").assertIsDisplayed()
+    }
+
+    @Test
+    fun `the letter rail offers each letter to TalkBack by name`() {
+        browseState.value = loaded.copy(tree = TopicTree.INDEX)
+        render()
+
+        composeRule.onNodeWithContentDescription(str(R.string.cd_index_rail_jump, "M"))
+            .assertIsDisplayed()
+            .performClick()
+    }
+
+    @Test
+    fun `each letter heading says how many entries it holds, and the sort row where you are`() {
+        browseState.value = loaded.copy(tree = TopicTree.INDEX)
+        render()
+
+        // M and P hold one entry each.
+        composeRule.onAllNodesWithText(str(R.string.quran_topics_entry)).assertCountEquals(2)
+        composeRule.onNodeWithText(str(R.string.quran_topics_index_position, "M", "1", "2"))
+            .assertIsDisplayed()
+    }
+
+    @Test
+    fun `a letter the index has nothing under is on the rail but offers no jump`() {
+        browseState.value = loaded.copy(tree = TopicTree.INDEX)
+        render()
+
+        composeRule.onNodeWithContentDescription(str(R.string.cd_index_rail_jump, "X"))
+            .assertExists()
+            .assert(SemanticsMatcher.keyNotDefined(SemanticsActions.OnClick))
+    }
+
+    @Test
+    fun `most cited is a sort the view model is asked for`() {
+        browseState.value = loaded.copy(tree = TopicTree.INDEX)
+        render()
+
+        composeRule.onNodeWithText(str(R.string.quran_topics_sort_most_cited)).performClick()
+
+        assertThat(events).contains(QuranTopicsEvent.SetIndexSort(TopicIndexSort.MOST_CITED))
+    }
+
+    @Test
+    fun `most cited says how many of the index it is showing`() {
+        browseState.value = loaded.copy(tree = TopicTree.INDEX, indexSort = TopicIndexSort.MOST_CITED)
+        render()
+
+        composeRule.onNodeWithText(str(R.string.quran_topics_most_cited_footer, 2, "2"))
+            .assertIsDisplayed()
+    }
+
+    @Test
+    fun `an index entry opens in the index`() {
+        browseState.value = loaded.copy(tree = TopicTree.INDEX)
+        render()
+
+        composeRule.onNodeWithText("Patience").performClick()
+
+        assertThat(openedTopic).isEqualTo(30 to TopicTree.INDEX)
     }
 
     // ---- Search ----
@@ -171,72 +248,60 @@ class QuranTopicsScreenTest {
         browseState.value = loaded
         render()
 
-        composeRule.onNodeWithText(str(R.string.quran_topics_search_hint)).performTextInput("musa")
+        composeRule.onNodeWithText(str(R.string.quran_topics_search_hint)).performTextInput("pat")
 
-        assertThat(events.filterIsInstance<QuranTopicsEvent.Search>().map { it.query })
-            .contains("musa")
+        assertThat(events).contains(QuranTopicsEvent.Search("pat"))
+    }
+
+    @Test
+    fun `a result shows where it sits and opens in its own hierarchy`() {
+        browseState.value = loaded.copy(
+            searchQuery = "moses",
+            searchResults = listOf(
+                TopicSearchHit(moses, TopicTree.THEMATIC, path = listOf(stories, prophets), verseCount = 431)
+            ),
+        )
+        render()
+
+        composeRule.onNodeWithText("Stories › Prophets", substring = true).assertIsDisplayed()
+        composeRule.onNodeWithText("431").assertIsDisplayed()
+        composeRule.onNodeWithText("Moses").performClick()
+
+        assertThat(openedTopic).isEqualTo(40 to TopicTree.THEMATIC)
     }
 
     @Test
     fun `a search that matches nothing says so, naming what was searched for`() {
-        browseState.value = loaded.copy(
-            searchQuery = "zzz",
-            searchResults = emptyList(),
-            isSearching = false,
-        )
-
+        browseState.value = loaded.copy(searchQuery = "zzz", searchResults = emptyList())
         render()
 
-        composeRule.onNodeWithText(str(R.string.quran_topics_no_results_title)).assertIsDisplayed()
+        composeRule.onNodeWithText(str(R.string.quran_topics_no_match, "zzz")).assertIsDisplayed()
     }
 
-    @Test
-    fun `results replace the tree while a query stands`() {
-        browseState.value = loaded.copy(
-            searchQuery = "musa",
-            searchResults = listOf(musa),
-            searchPaths = mapOf(2 to listOf(stories)),
-        )
-
-        render()
-
-        composeRule.onNodeWithText("Musa").assertIsDisplayed()
-    }
-
-    // ---- The state that is not an error ----
+    // ---- States ----
 
     @Test
-    fun `an install whose content predates the index is told so, not shown an empty tree`() {
+    fun `an install whose content predates the index is told so, not shown empty cards`() {
         browseState.value = TopicBrowseState(isLoading = false, isAvailable = false)
-
         render()
 
-        // The migration runs before the artifact that fills the tables arrives. That is an
-        // explainable state, and "no subjects" is the wrong sentence for it.
         composeRule.onNodeWithText(str(R.string.quran_topics_unavailable_title)).assertIsDisplayed()
-        composeRule.onNodeWithText(str(R.string.quran_topics_search_hint)).assertDoesNotExist()
     }
 
     @Test
-    fun `a first load shows neither the tree nor an empty state`() {
+    fun `a first load shows neither cards nor an empty state`() {
         browseState.value = TopicBrowseState(isLoading = true)
-
         render()
 
-        composeRule.onNodeWithText(str(R.string.quran_topics_no_results_title)).assertDoesNotExist()
+        composeRule.onNodeWithText(str(R.string.quran_topics_unavailable_title)).assertDoesNotExist()
+        composeRule.onNodeWithText("Stories").assertDoesNotExist()
     }
 
     @Test
     fun `going back is the caller's business`() {
         var back = false
         browseState.value = loaded
-        composeRule.setThemedContent {
-            QuranTopicsScreen(
-                onNavigateBack = { back = true },
-                onOpenTopic = { _, _ -> },
-                viewModel = viewModel,
-            )
-        }
+        render(onBack = { back = true })
 
         composeRule.onNodeWithContentDescription(str(R.string.cd_back)).performClick()
 

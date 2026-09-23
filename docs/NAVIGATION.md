@@ -47,6 +47,8 @@ destinations, and none of them should need the `NavHost`.
 | `presentation/screens/<feature>/<Feature>Graph.kt` × 11 | the destinations, one extension per feature | `NAV-03`, `NAV-04` |
 | `core/navigation/ScreenTags.kt` | the stable test tag per destination | `NAV-05` |
 | `core/navigation/AnnouncementRoutes.kt` + `HelpDeepLink.kt` | the two **external** entry grammars | `NAV-06` … `NAV-10` |
+| `core/navigation/TopLevelNavigation.kt` | `asTab` / `navigateFromOutside` / `navigateInApp` — a link to a tab switches tabs | `TopLevelNavigation*Test` |
+| `app/…/core/navigation/LaunchEntries.kt` + `PendingEntryEffects.kt` | what an opening intent asks for, and where each entry lands | `LaunchEntriesTest`, `PendingEntryEffectsTest` |
 
 ### The graph is eleven files, not one
 
@@ -325,7 +327,7 @@ Every route below also has a `ScreenTags` entry of the same name.
 | `TasbihHome` | — | TasbihHomeScreen |
 | `TasbihCounter` | `presetId: Long? = null` | TasbihCounterScreen |
 | `TasbihPresets` | — | TasbihPresetsScreen |
-| `TasbihStats` | — | TasbihStatsScreen |
+| `TasbihStats` | — | TasbihHistoryScreen (its stats header) |
 | `TasbihHistory` | — | TasbihHistoryScreen |
 | `TasbihAddPreset` | `presetId: Long? = null` | AddPresetScreen — creates a custom dhikr when `presetId` is null, edits that one when it is set. One destination rather than two near-identical forms |
 
@@ -442,6 +444,14 @@ flowchart TD
     G -->|hit| Nav
     G -->|miss| Rejected["null → CTA hidden<br/>+ analytics announcement_route_rejected"]
 ```
+
+**Tabs stay tabs.** A key that resolves to a bottom-bar tab — or to a route that duplicates one,
+`TasbihHome` (`tasbih`) and `Qibla` (`qibla`) — is opened as a **tab switch**
+(`navigateFromOutside` → `Route.asTab()`, `core/navigation/TopLevelNavigation.kt`), exactly as
+tapping the tab does. Pushed as ordinary screens they hid the bottom bar, which shows only on the
+five `BottomNavDestination` routes, and Tasbih has no back button of its own. Every other key lands
+on top of Home. Help deep links, the Home Tasbih shortcut and the More screen go through the same
+rule (`navigateInApp`).
 
 **Normalisation.** The key is trimmed and stripped of leading/trailing `/`, then matched
 **case-sensitively**. An empty key, a malformed key, or an integer outside its documented range
@@ -591,7 +601,8 @@ without its jump button.
 ## 6. Worship reminder destinations
 
 `core/navigation/WorshipDestinations.kt` is the single source of truth mapping each
-`WorshipReminderType` onto the screen its Home card and its notification open, and is asserted
+`WorshipReminderType` onto the screen its Home card and its notification open (the notification
+via `BootReceiver.EXTRA_OPEN_WORSHIP` → `MainActivity` → `NavGraph`'s `pendingRoute`), and is asserted
 exhaustively by `WorshipDestinationsTest` — so a new reminder type cannot ship without a
 destination. Only `NightWorship` was added for it (§3.7); the other types route to screens that
 already existed. See [`SUBSYSTEMS.md` §4](SUBSYSTEMS.md#4-prayer-time--adhan-notifications) for

@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.presentation.components.organisms
 
+import androidx.compose.material3.rememberModalBottomSheetState
 import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -106,6 +107,11 @@ data class NimazPickerItem<T>(
  *   changes while the sheet is open — which voice is currently playing — stays
  *   with the caller. The row itself is the selection target, so the action
  *   handles its own taps.
+ * - [header]: optional content above the search and list — an illustration that explains the
+ *   choice, for instance. It stays put while the list scrolls.
+ * - [onCancel]: with [autoDismiss] off every tap already applies, so a Cancel that only closes the
+ *   sheet would keep a choice the reader backed out of. Pass this to restore the original value;
+ *   it defaults to [onDismiss].
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -123,6 +129,8 @@ fun <T> NimazListPicker(
     searchPlaceholder: String = stringResource(R.string.search),
     emptySearchText: String = stringResource(R.string.picker_no_matches),
     trailingContent: (@Composable (NimazPickerItem<T>) -> Unit)? = null,
+    header: (@Composable () -> Unit)? = null,
+    onCancel: () -> Unit = onDismiss,
 ) {
     var query by remember { mutableStateOf("") }
 
@@ -166,6 +174,9 @@ fun <T> NimazListPicker(
     NimazBottomSheet(
         onDismissRequest = onDismiss,
         modifier = modifier,
+        // A header or an explicit Done/Cancel makes the sheet taller than its half-open height;
+        // opening half-way would leave the footer, or the options under the header, off-screen.
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = header != null || !autoDismiss),
         title = title,
         onClose = onDismiss,
         scrollable = false,
@@ -176,11 +187,15 @@ fun <T> NimazListPicker(
                     primaryText = confirmText,
                     onPrimary = onDismiss,
                     secondaryText = cancelText,
-                    onSecondary = onDismiss
+                    onSecondary = onCancel
                 )
             }
         }
     ) {
+        header?.let {
+            it()
+            Spacer(modifier = Modifier.height(12.dp))
+        }
         if (searchable) {
             NimazSearchBar(
                 query = query,

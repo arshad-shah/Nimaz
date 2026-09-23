@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.presentation.components.organisms
 
+import androidx.test.core.app.ApplicationProvider
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -177,5 +178,43 @@ class NimazListPickerTest {
         composeRule.onNodeWithText("SOUTH ASIA").assertExists()
         composeRule.onNodeWithText("Egyptian").assertExists()
         composeRule.onNodeWithText("Karachi").assertExists()
+    }
+
+    @Test
+    fun `a header renders above the options`() {
+        composeRule.setThemedContent {
+            NimazListPicker(
+                title = "Asr Calculation",
+                items = shortItems,
+                selected = "standard",
+                onSelected = {},
+                onDismiss = {},
+                header = { androidx.compose.material3.Text("When the afternoon prayer begins") },
+            )
+        }
+        composeRule.onNodeWithText("When the afternoon prayer begins").assertExists()
+        composeRule.onNodeWithText("Hanafi").assertExists()
+    }
+
+    @Test
+    fun `without auto-dismiss, Cancel reaches onCancel rather than a plain dismiss`() {
+        // Every tap has already applied, so Cancel is the caller's chance to put the value back.
+        var cancelled = 0
+        var dismissed = 0
+        composeRule.setThemedContent {
+            NimazListPicker(
+                title = "Asr Calculation",
+                items = shortItems,
+                selected = "standard",
+                onSelected = {},
+                onDismiss = { dismissed++ },
+                autoDismiss = false,
+                onCancel = { cancelled++ },
+            )
+        }
+        composeRule.onNodeWithText(ApplicationProvider.getApplicationContext<android.content.Context>()
+            .getString(com.arshadshah.nimaz.core.ui.R.string.cancel)).performClick()
+        assertThat(cancelled).isEqualTo(1)
+        assertThat(dismissed).isEqualTo(0)
     }
 }

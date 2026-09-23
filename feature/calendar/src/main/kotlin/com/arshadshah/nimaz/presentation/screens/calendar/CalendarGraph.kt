@@ -33,9 +33,10 @@ fun NavGraphBuilder.calendarGraph(navController: NavController) {
     }
 
     taggedComposable<Route.IslamicMonth>(ScreenTags.IslamicMonth) { backStackEntry ->
-        backStackEntry.toRoute<Route.IslamicMonth>()
+        val route = backStackEntry.toRoute<Route.IslamicMonth>()
         IslamicCalendarScreen(
-            onNavigateBack = { navController.popBackStack() }
+            onNavigateBack = { navController.popBackStack() },
+            openOnHijriMonth = route.month to route.year,
         )
     }
 }

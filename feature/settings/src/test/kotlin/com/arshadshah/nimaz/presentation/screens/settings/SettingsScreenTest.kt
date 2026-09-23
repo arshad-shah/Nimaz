@@ -94,7 +94,7 @@ class SettingsScreenTest {
         // than as "something was opened".
         setContent()
 
-        composeRule.settingsRow(string(R.string.calculation_method)).performClick()
+        composeRule.settingsRow(string(R.string.prayer_settings_row_title)).performClick()
         composeRule.settingsRow(string(R.string.location)).performClick()
         composeRule.settingsRow(string(R.string.notifications)).performClick()
         composeRule.settingsRow(string(R.string.quran_settings)).performClick()

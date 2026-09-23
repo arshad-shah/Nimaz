@@ -439,7 +439,7 @@ would see. `src/test` holds the ViewModel and screen tests, `src/testDebug` the 
 | The reader's event table | `viewmodel/QuranViewModelEventsTest` | every event reaching its own handler, and `PrefetchPage` not retitling the reader |
 | Notes, bookmarks, the page layout | `viewmodel/QuranViewModelAnnotationTest` | a note on an unmarked verse *creates* the mark, a note on a marked one updates that row; the optimistic bookmark flip reaching both copies of the verse; the line layout fetched once |
 | A khatam's "today" line | `viewmodel/KhatamDetailPortionTest` | surah/ayah and global ayah id translated between without drift; a portion inside one surah named once and one that crosses named at both ends; a portion past the end left unlabelled |
-| The subject browser | `viewmodel/QuranTopicsSurahSubjectsTest`, `QuranTopicsViewModelDescentTest` | "this install has no index" versus "this surah has none"; a tree switch dropping children keyed by the other tree's parent ids |
+| The subject browser | `viewmodel/QuranTopicsBrowseTest`, `QuranTopicsSurahSubjectsTest` | every tab built from one catalogue, so a tab switch runs no query; distinct-verse counts on every card; search results placed in the hierarchy they open in; "this install has no index" versus "this surah has none" |
 | The bookmarks screen's axes | `viewmodel/BookmarksViewModelAxesTest` | corpus and kind as independent filters |
 | The tafseer notes dialog | `screens/quran/TafseerNotesDialogTest` | one field doing two jobs — the dialog leaving edit mode after a save, so the next note does not overwrite the one just edited |
 | The surah card's seam | `screens/quran/SurahInfoSheetHostTest` | nothing drawn until the surah is known; the opening page taken from the pagination, not from the Madani `startPage` |
@@ -468,7 +468,7 @@ JVM module, no Android SDK, no Robolectric, the whole suite in about a minute.
 | Every stored-value parser | `model/StoredEnumParserTest` | a round trip per entry, and the documented fallback for input a newer build wrote |
 | Every hand-written enum label | `model/EnumLabelTest` | present, distinct and not the constant's own name — the copy-paste that puts two identical rows in a picker |
 | The curated city catalogue | `model/CityCatalogTest` | no two cities sharing a lazy-list key (a repeat is a crash, not a duplicate row); every city carrying the region and flag its row is drawn with |
-| Subject roll-up | `usecase/quran/RollUpTopicCountsTest` | a branch reporting its whole subtree, and a cycle in regenerated content costing a wrong number rather than a hung browser |
+| Subject catalogue | `model/TopicCatalogTest` (`:core:domain`) | a branch reporting its whole subtree in **distinct** verses — a verse under two siblings counted once — and a cycle or dangling parent in regenerated content costing a wrong number rather than a hung browser |
 | Prayer and location use cases | `usecase/PrayerUseCasesTest` | each delegation reaching its own repository call; a saved location composed here, with `id = 0`, rather than by the caller |
 | Qur'an use cases | `usecase/QuranUseCasesTest` | the same, plus the verse of the day surviving a negative `epochDay`, and a bulk translation read short-circuiting an empty `IN ()` |
 | The day's dua, and notes on a commentary | `usecase/DailySelectionAndNotesTest` | the hour→category bands; an empty category yielding nothing rather than dividing by zero; a note whose verse cannot be read dropped rather than shown blank |

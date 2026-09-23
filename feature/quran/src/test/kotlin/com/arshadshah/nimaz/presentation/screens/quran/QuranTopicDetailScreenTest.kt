@@ -13,6 +13,7 @@ import com.arshadshah.nimaz.presentation.viewmodel.quran.CitationGroup
 import com.arshadshah.nimaz.presentation.viewmodel.quran.QuranTopicsEvent
 import com.arshadshah.nimaz.presentation.viewmodel.quran.QuranTopicsViewModel
 import com.arshadshah.nimaz.presentation.viewmodel.quran.TopicDetailState
+import com.arshadshah.nimaz.presentation.viewmodel.quran.TopicTally
 import com.arshadshah.nimaz.presentation.viewmodel.quran.TopicSurahContext
 import com.arshadshah.nimaz.testing.compose.createComponentComposeRule
 import com.arshadshah.nimaz.testing.compose.setThemedContent
@@ -242,5 +243,108 @@ class QuranTopicDetailScreenTest {
         render()
 
         composeRule.onNodeWithText(str(R.string.quran_topic_not_found)).assertDoesNotExist()
+    }
+
+    // ---- The redesign: hero, path, subtopics, folded surahs ----
+
+    @Test
+    fun `the hero counts the verses listed, not the subject's own citations`() {
+        // The subject's own ayahCount is 3; the branch beneath it lists 12. The old screen led
+        // with the 3 — for most branches, 0.
+        val twelve = (1..12).map { TopicCitation(ayahId = 300 + it, surahNumber = 2, ayahNumber = it) }
+        detailState.value = TopicDetailState(
+            isLoading = false,
+            detail = detail().copy(citations = twelve),
+            citationGroups = listOf(group.copy(citations = twelve)),
+        )
+
+        render()
+
+        composeRule.onNodeWithText(str(R.string.quran_topic_stat_verses)).assertIsDisplayed()
+        composeRule.onNodeWithText("12").assertIsDisplayed()
+    }
+
+    @Test
+    fun `the subject says where it sits`() {
+        detailState.value = TopicDetailState(isLoading = false, detail = detail())
+        render()
+
+        composeRule.onNodeWithText("Character", substring = true).assertIsDisplayed()
+    }
+
+    @Test
+    fun `subtopics carry their branch's own count once it is known`() {
+        val perseverance = topic(8, "Perseverance")
+        detailState.value = TopicDetailState(
+            isLoading = false,
+            detail = detail(children = listOf(perseverance)),
+            subtopics = listOf(TopicTally(perseverance, verseCount = 41)),
+        )
+
+        render()
+
+        composeRule.onNodeWithText("41", substring = true).assertIsDisplayed()
+        composeRule.onNodeWithText("Perseverance").performClick()
+        assertThat(openedTopic).isEqualTo(8 to TopicTree.THEMATIC)
+    }
+
+    @Test
+    fun `a busy surah shows three verses until asked for the rest`() {
+        val many = (1..5).map { TopicCitation(ayahId = 200 + it, surahNumber = 2, ayahNumber = it) }
+        detailState.value = TopicDetailState(
+            isLoading = false,
+            detail = detail().copy(citations = many),
+            citationGroups = listOf(group.copy(citations = many)),
+        )
+        render()
+
+        composeRule.onNodeWithText("2:4").assertDoesNotExist()
+        composeRule.onNodeWithText(str(R.string.quran_topic_show_all, 5)).performClick()
+        composeRule.onNodeWithText("2:5").assertIsDisplayed()
+    }
+
+    @Test
+    fun `only the first surah opens folded out, and a header toggles its group`() {
+        val second = CitationGroup(
+            surahNumber = 3,
+            surahName = "The Family of Imran",
+            citations = listOf(TopicCitation(ayahId = 400, surahNumber = 3, ayahNumber = 200)),
+        )
+        detailState.value = TopicDetailState(
+            isLoading = false,
+            detail = detail(),
+            citationGroups = listOf(group, second),
+        )
+        render()
+
+        composeRule.onNodeWithText("2:153").assertIsDisplayed()
+        composeRule.onNodeWithText("3:200").assertDoesNotExist()
+
+        composeRule.onNodeWithText("3. The Family of Imran").performClick()
+        composeRule.onNodeWithText("3:200").assertIsDisplayed()
+    }
+
+    @Test
+    fun `where it appears charts the busiest surahs when there is more than one`() {
+        val second = CitationGroup(3, "The Family of Imran", listOf(TopicCitation(400, 3, 200)))
+        detailState.value = TopicDetailState(
+            isLoading = false,
+            detail = detail(),
+            citationGroups = listOf(group, second),
+        )
+        render()
+
+        composeRule.onNodeWithText(str(R.string.quran_topic_where_it_appears)).assertIsDisplayed()
+    }
+
+    @Test
+    fun `a subject with no verses says so`() {
+        detailState.value = TopicDetailState(
+            isLoading = false,
+            detail = detail().copy(citations = emptyList()),
+        )
+        render()
+
+        composeRule.onNodeWithText(str(R.string.quran_topic_no_verses)).assertIsDisplayed()
     }
 }

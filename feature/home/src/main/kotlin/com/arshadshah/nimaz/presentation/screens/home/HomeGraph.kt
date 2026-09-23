@@ -10,6 +10,7 @@ import com.arshadshah.nimaz.core.navigation.Route
 import com.arshadshah.nimaz.core.navigation.ScreenTags
 import com.arshadshah.nimaz.core.navigation.announcementRoute
 import com.arshadshah.nimaz.core.navigation.taggedComposable
+import com.arshadshah.nimaz.core.navigation.navigateToTab
 import com.arshadshah.nimaz.core.navigation.worshipCardDestination
 
 /**
@@ -36,7 +37,7 @@ fun NavGraphBuilder.homeGraph(navController: NavController, analyticsContext: Co
             onNavigateToAlKahf = { navController.navigate(Route.QuranReader(surahNumber = 18)) },
             onNavigateToHadith = { navController.navigate(Route.HadithHome) },
             onNavigateToDua = { duaId -> navController.navigate(Route.DuaReader(duaId)) },
-            onNavigateToTasbih = { navController.navigate(Route.TasbihHome) },
+            onNavigateToTasbih = { navController.navigateToTab(Route.Tasbih) },
             onNavigateToCalendar = { navController.navigate(Route.IslamicCalendar) },
             onNavigateToFasting = { navController.navigate(Route.FastingHome) },
             onNavigateToZakat = { navController.navigate(Route.ZakatCalculator) },

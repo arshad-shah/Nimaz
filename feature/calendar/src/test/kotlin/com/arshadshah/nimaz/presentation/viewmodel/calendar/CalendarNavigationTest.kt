@@ -331,4 +331,34 @@ class CalendarNavigationTest {
         assertThat(state.error).isNotNull()
         assertThat(state.isLoading).isFalse()
     }
+
+    // ---- Opening on a Hijri month (Route.IslamicMonth) ----
+
+    @Test
+    fun `opening on a hijri month shows the month its first day falls in, with that day selected`() =
+        runTest(dispatcher) {
+            advanceUntilIdle()
+
+            viewModel.onEvent(CalendarEvent.OpenHijriMonth(month = 9, year = 1447))
+            advanceUntilIdle()
+
+            val state = viewModel.calendarState.value
+            val selected = state.selectedDate!!
+            assertThat(state.selectedHijriDate?.month).isEqualTo(9)
+            assertThat(state.selectedHijriDate?.day).isEqualTo(1)
+            assertThat(state.selectedHijriDate?.year).isEqualTo(1447)
+            // The grid is the Gregorian month that day is in — not today's (March 2026).
+            assertThat(state.currentMonth!!.days.any { it.gregorianDate == selected }).isTrue()
+            assertThat(selected).isNotEqualTo(today)
+        }
+
+    @Test
+    fun `a hijri year the calendar cannot convert leaves the screen on today`() = runTest(dispatcher) {
+        advanceUntilIdle()
+
+        viewModel.onEvent(CalendarEvent.OpenHijriMonth(month = 9, year = 99999))
+        advanceUntilIdle()
+
+        assertThat(viewModel.calendarState.value.selectedDate).isEqualTo(today)
+    }
 }

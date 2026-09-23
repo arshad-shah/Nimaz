@@ -65,6 +65,8 @@ fun NavGraph(
     onPendingIslamicCalendarConsumed: () -> Unit = {},
     pendingAnnouncementRoute: String? = null,
     onPendingAnnouncementRouteConsumed: () -> Unit = {},
+    pendingRoute: Route? = null,
+    onPendingRouteConsumed: () -> Unit = {},
 ) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -93,51 +95,20 @@ fun NavGraph(
         previousScreen = screenName
     }
 
-    // Deep-link from the Quran audio notification / lock-screen player.
-    // Per UX choice: clear the back stack to Home so Back returns to the Quran
-    // home screen rather than wherever the user happened to be.
-    LaunchedEffect(pendingQuranSurah) {
-        val surah = pendingQuranSurah ?: return@LaunchedEffect
-        navController.navigate(Route.QuranReader(surahNumber = surah)) {
-            popUpTo(Route.Home) { inclusive = false }
-            launchSingleTop = true
-        }
-        onPendingQuranSurahConsumed()
-    }
-
-    // Deep-link from the Hijri calendar home-screen widget. popUpTo(Home) so
-    // system Back returns the user to the home screen — never strands them
-    // mid-stack on a cold launch from the widget tap.
-    LaunchedEffect(pendingIslamicCalendar) {
-        if (!pendingIslamicCalendar) return@LaunchedEffect
-        navController.navigate(Route.IslamicCalendar) {
-            popUpTo(Route.Home) { inclusive = false }
-            launchSingleTop = true
-        }
-        onPendingIslamicCalendarConsumed()
-    }
-
-    // Deep-link from a tapped FCM announcement notification. Allowlist-resolved;
-    // unknown keys just land on Home (where the banner shows) and https URLs
-    // open in the browser.
-    LaunchedEffect(pendingAnnouncementRoute) {
-        val key = pendingAnnouncementRoute ?: return@LaunchedEffect
-        if (key.startsWith("https://")) {
-            runCatching {
-                analyticsContext.startActivity(
-                    Intent(Intent.ACTION_VIEW, key.toUri())
-                )
-            }
-        } else {
-            announcementRoute(key)?.let { route ->
-                navController.navigate(route) {
-                    popUpTo(Route.Home) { inclusive = false }
-                    launchSingleTop = true
-                }
-            }
-        }
-        onPendingAnnouncementRouteConsumed()
-    }
+    PendingEntryEffects(
+        navController = navController,
+        pendingQuranSurah = pendingQuranSurah,
+        onPendingQuranSurahConsumed = onPendingQuranSurahConsumed,
+        pendingIslamicCalendar = pendingIslamicCalendar,
+        onPendingIslamicCalendarConsumed = onPendingIslamicCalendarConsumed,
+        pendingAnnouncementRoute = pendingAnnouncementRoute,
+        onPendingAnnouncementRouteConsumed = onPendingAnnouncementRouteConsumed,
+        pendingRoute = pendingRoute,
+        onPendingRouteConsumed = onPendingRouteConsumed,
+        openUrl = { url ->
+            runCatching { analyticsContext.startActivity(Intent(Intent.ACTION_VIEW, url.toUri())) }
+        },
+    )
 
     // Onboarding ViewModel to check status
     val onboardingViewModel: OnboardingViewModel = hiltViewModel()
