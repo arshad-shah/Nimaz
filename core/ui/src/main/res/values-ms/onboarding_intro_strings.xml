@@ -17,4 +17,8 @@
     <string name="onboarding_location_reason">Waktu solat dan kiblat yang tepat</string>
     <string name="onboarding_notification_reason">Seruan untuk setiap solat</string>
     <string name="onboarding_battery_reason">Supaya peringatan tiba tepat pada masanya</string>
+    <string name="onboarding_intro_welcome_arabic">بسم الله</string>
+    <string name="onboarding_intro_prayer_arabic">الصلاة</string>
+    <string name="onboarding_intro_learning_arabic">تعلّم</string>
+    <string name="onboarding_intro_progress_arabic">استقامة</string>
 </resources>

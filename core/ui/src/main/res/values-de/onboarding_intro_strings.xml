@@ -17,4 +17,8 @@
     <string name="onboarding_location_reason">Genaue Gebetszeiten und Qibla</string>
     <string name="onboarding_notification_reason">Ein Ruf zu jedem Gebet</string>
     <string name="onboarding_battery_reason">Damit Erinnerungen pünktlich kommen</string>
+    <string name="onboarding_intro_welcome_arabic">بسم الله</string>
+    <string name="onboarding_intro_prayer_arabic">الصلاة</string>
+    <string name="onboarding_intro_learning_arabic">تعلّم</string>
+    <string name="onboarding_intro_progress_arabic">استقامة</string>
 </resources>

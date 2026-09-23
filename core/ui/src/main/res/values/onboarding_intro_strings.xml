@@ -17,9 +17,9 @@
     <string name="onboarding_location_reason">Accurate prayer times and Qibla</string>
     <string name="onboarding_notification_reason">A call for every prayer</string>
     <string name="onboarding_battery_reason">So reminders arrive on time</string>
-    <!-- One Arabic word per intro page; identical in every locale, so never translated. -->
-    <string name="onboarding_intro_welcome_arabic" translatable="false">بسم الله</string>
-    <string name="onboarding_intro_prayer_arabic" translatable="false">الصلاة</string>
-    <string name="onboarding_intro_learning_arabic" translatable="false">تعلّم</string>
-    <string name="onboarding_intro_progress_arabic" translatable="false">استقامة</string>
+    <!-- One Arabic word per intro page. Every locale repeats it unchanged, as learn_pray_*_ar does. -->
+    <string name="onboarding_intro_welcome_arabic">بسم الله</string>
+    <string name="onboarding_intro_prayer_arabic">الصلاة</string>
+    <string name="onboarding_intro_learning_arabic">تعلّم</string>
+    <string name="onboarding_intro_progress_arabic">استقامة</string>
 </resources>

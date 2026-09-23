@@ -17,4 +17,8 @@
     <string name="onboarding_location_reason">Heures de prière précises et Qibla</string>
     <string name="onboarding_notification_reason">Un appel pour chaque prière</string>
     <string name="onboarding_battery_reason">Pour des rappels à l\'heure</string>
+    <string name="onboarding_intro_welcome_arabic">بسم الله</string>
+    <string name="onboarding_intro_prayer_arabic">الصلاة</string>
+    <string name="onboarding_intro_learning_arabic">تعلّم</string>
+    <string name="onboarding_intro_progress_arabic">استقامة</string>
 </resources>

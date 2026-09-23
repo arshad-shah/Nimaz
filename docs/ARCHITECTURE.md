@@ -1038,7 +1038,9 @@ with no label and a touch target under 48dp fail the lane we already run. It can
   Setup. The learning message requires the companion Learn to Pray feature (#643) before release.
   Decorative offline WebP resources belong to `:feature:onboarding` (`drawable-nodpi`); localized
   text, buttons and permission states are never baked into artwork. The four Arabic words are
-  `translatable="false"` — the same in every locale.
+  repeated unchanged in every locale rather than marked `translatable="false"` —
+  `scripts/test_feature_localization.py` requires every `onboarding_` key in all six, as it does
+  for the `learn_pray_*_ar` recitations.
   **Layout:** each intro page's art is full-bleed, framed by a per-page horizontal bias so the
   scene's focal point survives the crop, and fades into the floor where the copy sits, anchored
   to the bottom: Arabic word, title, body. No page numbers, labels, example cards or captions.
