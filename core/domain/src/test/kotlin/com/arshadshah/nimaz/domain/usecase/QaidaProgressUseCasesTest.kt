@@ -51,6 +51,20 @@ class QaidaProgressUseCasesTest {
         displayOrder = order
     )
 
+    @Test
+    fun `confirmed offline practice advances completion without inventing heard audio`() = runTest {
+        coEvery { repository.getCellProgress(1, 5) } returns null
+        coEvery { repository.getCellCountForLesson(1) } returns 10
+        coEvery { repository.getCompletedCellCount(1) } returns 3
+        coEvery { repository.getLessonProgress(1) } returns null
+        val saved = slot<QaidaCellProgress>()
+        coEvery { repository.upsertCellProgress(capture(saved)) } just Runs
+        markCellHeard.markPractised(1, 5, now)
+        assertThat(saved.captured.heardCount).isEqualTo(0)
+        assertThat(saved.captured.isCompleted).isTrue()
+        assertThat(saved.captured.lastPracticedAt).isEqualTo(now)
+    }
+
     // ── MarkCellHeardUseCase ────────────────────────────────────────
 
     @Test
