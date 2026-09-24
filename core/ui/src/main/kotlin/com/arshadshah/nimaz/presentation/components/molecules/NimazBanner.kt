@@ -188,6 +188,7 @@ fun NimazBanner(
     isLoading: Boolean = false,
     onClick: (() -> Unit)? = null,
     density: NimazBannerDensity = NimazBannerDensity.STANDALONE,
+    maxTitleLines: Int = 2,
     leadingContent: (@Composable () -> Unit)? = null,
 ) {
     val palette = variantPalette(variant)
@@ -239,7 +240,7 @@ fun NimazBanner(
                 text = title,
                 style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
                 color = palette.onContent,
-                maxLines = 2,
+                maxLines = maxTitleLines,
                 overflow = TextOverflow.Ellipsis,
             )
             if (message != null) {
