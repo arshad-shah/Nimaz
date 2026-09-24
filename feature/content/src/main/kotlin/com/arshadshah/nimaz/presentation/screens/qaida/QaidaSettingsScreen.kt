@@ -1,6 +1,8 @@
 package com.arshadshah.nimaz.presentation.screens.qaida
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.Image
+import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
@@ -42,6 +44,10 @@ fun QaidaSettingsScreen(onNavigateBack: () -> Unit, viewModel: QaidaReaderViewMo
     }) { padding ->
         LazyColumn(Modifier.fillMaxSize().padding(padding), contentPadding = PaddingValues(20.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp)) {
+            item {
+                Image(painterResource(R.drawable.qaida_letters_art), null,
+                    Modifier.fillMaxWidth().height(130.dp))
+            }
             item {
                 NimazSettingsSection(stringResource(R.string.qaida_settings_learning)) {
                     NimazSettingsItem(title = stringResource(R.string.qaida_settings_transliteration),

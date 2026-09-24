@@ -26,6 +26,8 @@ import com.arshadshah.nimaz.domain.model.LessonStatus
 import com.arshadshah.nimaz.feature.content.R
 import com.arshadshah.nimaz.core.ui.R as CoreR
 import com.arshadshah.nimaz.presentation.components.atoms.*
+import com.arshadshah.nimaz.presentation.components.molecules.NimazBanner
+import com.arshadshah.nimaz.presentation.components.molecules.NimazBannerVariant
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.viewmodel.content.QaidaReaderEvent
 import com.arshadshah.nimaz.presentation.viewmodel.content.QaidaReaderViewModel
@@ -92,7 +94,13 @@ fun QaidaReaderScreen(
         }) { padding ->
         LazyColumn(Modifier.fillMaxSize().padding(padding), state = listState, contentPadding = PaddingValues(24.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-            if (c == null) item { Text(stringResource(R.string.qaida_getting_ready)) }
+            if (c == null) item {
+                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    Image(painterResource(R.drawable.qaida_journey_book), null, Modifier.fillMaxWidth().height(170.dp))
+                    NimazBanner(title = stringResource(R.string.qaida_getting_ready),
+                        variant = NimazBannerVariant.INFO, isLoading = true)
+                }
+            }
             else when (page) {
                 0 -> item {
                     Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
@@ -101,7 +109,8 @@ fun QaidaReaderScreen(
                         ArabicText(c.lesson.titleArabic, modifier = Modifier.fillMaxWidth(), size = ArabicTextSize.LARGE)
                         Text(c.lesson.description, style = MaterialTheme.typography.bodyLarge)
                         Text(stringResource(R.string.qaida_teacher_hint), color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        if (all.isEmpty()) Text(stringResource(R.string.qaida_empty_lesson))
+                        if (all.isEmpty()) NimazBanner(title = stringResource(R.string.qaida_empty_lesson),
+                            variant = NimazBannerVariant.INFO)
                         else {
                             NimazButton(stringResource(if (completed.isEmpty()) R.string.qaida_begin_lesson else R.string.qaida_continue_practice),
                                 { reviewIds = emptyList(); page = 1 }, fullWidth = true)
@@ -269,14 +278,19 @@ fun QaidaReaderScreen(
             if (c != null && page != 2) item {
                 NimazCard(Modifier.fillMaxWidth()) {
                     Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text(stringResource(when {
+                        Image(painterResource(R.drawable.qaida_audio_art), null,
+                            Modifier.fillMaxWidth().height(100.dp))
+                        NimazBanner(title = stringResource(when {
                             download.loading -> R.string.qaida_download_progress
                             download.ready -> R.string.qaida_audio_ready
                             download.failed -> R.string.qaida_audio_failed
                             else -> R.string.qaida_audio_unavailable
-                        }, download.completed, download.total), style = MaterialTheme.typography.bodySmall)
+                        }, download.completed, download.total),
+                            variant = if (download.failed) NimazBannerVariant.ERROR else NimazBannerVariant.INFO,
+                            isLoading = download.loading)
                         if (download.loading) NimazProgressTrack(if (download.total == 0) 0f else download.completed.toFloat() / download.total, Modifier.fillMaxWidth())
-                        if (audio.error != null) Text(stringResource(R.string.qaida_playback_failed), color = MaterialTheme.colorScheme.error)
+                        if (audio.error != null) NimazBanner(title = stringResource(R.string.qaida_playback_failed),
+                            variant = NimazBannerVariant.ERROR)
                         if (!download.loading && !download.ready) NimazButton(stringResource(R.string.qaida_retry_audio),
                             { viewModel.onEvent(QaidaReaderEvent.RetryAudio) }, variant = NimazButtonVariant.TEXT, fullWidth = true)
                     }

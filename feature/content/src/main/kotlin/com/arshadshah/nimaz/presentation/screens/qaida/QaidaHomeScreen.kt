@@ -192,10 +192,12 @@ fun QaidaHomeScreen(
                 1 -> {
                     item {
                         Column(Modifier.padding(horizontal = 24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                            Image(painterResource(FeatureR.drawable.qaida_reward_book), null, Modifier.fillMaxWidth().height(180.dp))
+                            Image(painterResource(FeatureR.drawable.qaida_review_art), null, Modifier.fillMaxWidth().height(180.dp))
                             Text(stringResource(FeatureR.string.qaida_review_title), style = MaterialTheme.typography.headlineSmall)
                             Text(stringResource(FeatureR.string.qaida_review_description))
-                            if (due.isEmpty()) Text(stringResource(FeatureR.string.qaida_review_empty), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            if (due.isEmpty()) NimazBanner(
+                                title = stringResource(FeatureR.string.qaida_review_empty),
+                                variant = NimazBannerVariant.INFO, icon = Icons.Default.CheckCircle)
                         }
                     }
                     items(course?.lessons.orEmpty().filter { it.lesson.id in due }, key = { it.lesson.id }) { state ->
@@ -207,6 +209,8 @@ fun QaidaHomeScreen(
                 else -> item {
                     NimazCard(Modifier.padding(horizontal = 20.dp).fillMaxWidth()) {
                         Column(Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                            Image(painterResource(FeatureR.drawable.qaida_audio_art), null,
+                                Modifier.fillMaxWidth().height(180.dp))
                             Text(stringResource(FeatureR.string.qaida_downloads_title), style = MaterialTheme.typography.headlineSmall)
                             Text(stringResource(FeatureR.string.qaida_downloads_description))
                             Text(stringResource(FeatureR.string.qaida_cache_size, "%.1f".format(cacheBytes / 1048576.0)))

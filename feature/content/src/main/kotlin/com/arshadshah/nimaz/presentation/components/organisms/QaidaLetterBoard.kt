@@ -1,5 +1,10 @@
 package com.arshadshah.nimaz.presentation.components.organisms
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.ui.res.painterResource
+import com.arshadshah.nimaz.feature.content.R
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -42,6 +47,10 @@ fun QaidaLetterBoard(
             verticalArrangement = Arrangement.spacedBy(NimazSpacing.Small),
             contentPadding = androidx.compose.foundation.layout.PaddingValues(vertical = NimazSpacing.Medium),
         ) {
+            item(span = { GridItemSpan(maxLineSpan) }) {
+                Image(painterResource(R.drawable.qaida_letters_art), null,
+                    Modifier.fillMaxWidth().height(150.dp))
+            }
             items(letters, key = { it.id }) { letter ->
                 QaidaLetterTile(
                     letter = letter,
