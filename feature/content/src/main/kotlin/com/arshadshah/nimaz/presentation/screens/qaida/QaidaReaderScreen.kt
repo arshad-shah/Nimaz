@@ -93,7 +93,8 @@ fun QaidaReaderScreen(
                 })
         }) { padding ->
         LazyColumn(Modifier.fillMaxSize().padding(padding), state = listState, contentPadding = PaddingValues(24.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+            verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
+            horizontalAlignment = Alignment.CenterHorizontally) {
             if (c == null) item {
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                     Image(painterResource(R.drawable.qaida_empty_art), null, Modifier.fillMaxWidth().height(170.dp))
@@ -276,24 +277,24 @@ fun QaidaReaderScreen(
                 }
             }
             if (c != null && page != 2) item {
-                NimazCard(Modifier.fillMaxWidth()) {
-                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Image(painterResource(R.drawable.qaida_audio_art), null,
-                            Modifier.fillMaxWidth().height(100.dp))
-                        NimazBanner(title = stringResource(when {
-                            download.loading -> R.string.qaida_download_progress
-                            download.ready -> R.string.qaida_audio_ready
-                            download.failed -> R.string.qaida_audio_failed
-                            else -> R.string.qaida_audio_unavailable
-                        }, download.completed, download.total),
-                            variant = if (download.failed) NimazBannerVariant.ERROR else NimazBannerVariant.INFO,
-                            isLoading = download.loading)
-                        if (download.loading) NimazProgressTrack(if (download.total == 0) 0f else download.completed.toFloat() / download.total, Modifier.fillMaxWidth())
-                        if (audio.error != null) NimazBanner(title = stringResource(R.string.qaida_playback_failed),
-                            variant = NimazBannerVariant.ERROR)
-                        if (!download.loading && !download.ready) NimazButton(stringResource(R.string.qaida_retry_audio),
-                            { viewModel.onEvent(QaidaReaderEvent.RetryAudio) }, variant = NimazButtonVariant.TEXT, fullWidth = true)
-                    }
+                Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    NimazBanner(title = stringResource(when {
+                        download.loading -> R.string.qaida_download_progress
+                        download.ready -> R.string.qaida_audio_ready
+                        download.failed -> R.string.qaida_audio_failed
+                        else -> R.string.qaida_audio_unavailable
+                    }, download.completed, download.total),
+                        variant = if (download.failed) NimazBannerVariant.ERROR else NimazBannerVariant.INFO,
+                        density = NimazBannerDensity.INLINE,
+                        icon = if (download.ready) Icons.Default.CheckCircle else Icons.Default.Headphones,
+                        isLoading = download.loading)
+                    if (download.loading) NimazProgressTrack(
+                        if (download.total == 0) 0f else download.completed.toFloat() / download.total,
+                        Modifier.fillMaxWidth())
+                    if (audio.error != null) NimazBanner(title = stringResource(R.string.qaida_playback_failed),
+                        variant = NimazBannerVariant.ERROR, density = NimazBannerDensity.INLINE)
+                    if (!download.loading && !download.ready) NimazButton(stringResource(R.string.qaida_retry_audio),
+                        { viewModel.onEvent(QaidaReaderEvent.RetryAudio) }, variant = NimazButtonVariant.QUIET, fullWidth = true)
                 }
             }
         }

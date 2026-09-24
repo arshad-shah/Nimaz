@@ -86,7 +86,8 @@ fun QaidaHomeScreen(
         },
     ) { padding ->
         LazyColumn(modifier = Modifier.fillMaxSize().padding(padding), state = listState,
-            contentPadding = PaddingValues(bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            contentPadding = PaddingValues(vertical = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically)) {
             when (tab) {
                 0 -> {
                     item {
@@ -213,11 +214,17 @@ fun QaidaHomeScreen(
                 else -> item {
                     NimazCard(Modifier.padding(horizontal = 20.dp).fillMaxWidth()) {
                         Column(Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                            Image(painterResource(FeatureR.drawable.qaida_audio_art), null,
-                                Modifier.fillMaxWidth().height(180.dp))
                             Text(stringResource(FeatureR.string.qaida_downloads_title), style = MaterialTheme.typography.headlineSmall)
                             Text(stringResource(FeatureR.string.qaida_downloads_description))
-                            Text(stringResource(FeatureR.string.qaida_cache_size, "%.1f".format(cacheBytes / 1048576.0)))
+                            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                            Row(Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                                verticalAlignment = Alignment.CenterVertically) {
+                                NimazIcon(Icons.Default.Headphones, contentDescription = null,
+                                    iconSize = 32.dp, tint = MaterialTheme.colorScheme.primary)
+                                Text(stringResource(FeatureR.string.qaida_cache_size, "%.1f".format(cacheBytes / 1048576.0)),
+                                    modifier = Modifier.weight(1f), style = MaterialTheme.typography.titleMedium)
+                            }
                             if (cacheBytes == 0L) NimazBanner(
                                 title = stringResource(FeatureR.string.qaida_downloads_empty), variant = NimazBannerVariant.INFO)
                             NimazButton(stringResource(FeatureR.string.qaida_clear_audio), { clearAudio = true },

@@ -10,6 +10,7 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
@@ -43,7 +44,7 @@ fun QaidaSettingsScreen(onNavigateBack: () -> Unit, viewModel: QaidaReaderViewMo
             subtitle = stringResource(R.string.qaida_settings), onBackClick = onNavigateBack)
     }) { padding ->
         LazyColumn(Modifier.fillMaxSize().padding(padding), contentPadding = PaddingValues(20.dp),
-            verticalArrangement = Arrangement.spacedBy(24.dp)) {
+            verticalArrangement = Arrangement.spacedBy(24.dp, Alignment.CenterVertically)) {
             item {
                 Image(painterResource(R.drawable.qaida_settings_art), null,
                     Modifier.fillMaxWidth().height(130.dp))
