@@ -1,7 +1,7 @@
 # Qaida screen previews
 
 Native Compose screens captured with Roborazzi on Robolectric.
-Source commit: `73c6732776e1dd05ce159db3f0be5bb5f0d78473`. 358 captures: 25 flows in six languages and both themes, plus 29 letter details in both themes.
+Source commit: `ab88c1dbd44444193ec874b97d523c205b845741`. 358 captures: 25 flows in six languages and both themes, plus 29 letter details in both themes.
 
 Progress and audio availability are test fixtures; these are actual app layouts, not browser reconstructions.
 
