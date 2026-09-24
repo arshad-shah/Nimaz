@@ -1,0 +1,25 @@
+{
+  "generator": "built-in image_gen",
+  "assets": [
+    {
+      "name": "anatomy_side",
+      "prompt": "An original anatomically accurate sagittal cutaway illustration of the human mouth and upper throat for Arabic pronunciation learning. Head faces RIGHT. Crop nasal bridge to lower larynx, no eyes. Clearly separate nasal cavity ABOVE hard palate, oral cavity BELOW hard palate, upper/lower incisors at right, one fleshy tongue resting on mouth floor, tongue root, soft palate and uvula, pharyngeal airway BEHIND tongue on left, epiglottis and larynx below. Real anatomical proportions, neutral open mouth at rest, NOT a phoneme posture simulation. Premium gently sculpted 3D textbook medical raster illustration, natural muted pink tissue, ivory teeth, neutral skin, clear structures, family friendly no gore. Landscape 3:2, all anatomy inside margins. Truly transparent background, no haze. No text, arrows, markers, labels or decorative objects.",
+      "path": "feature/content/src/main/res/drawable-nodpi/qaida_anatomy_side_art.webp"
+    },
+    {
+      "name": "letters",
+      "prompt": "Premium 3D raster still life for Nimaz Qaida Arabic letter explorer. Three BLANK ivory ceramic learning tablets in a curved walnut stand, carved reed calligraphy pen in front, small olive sprig, teal woven ribbon and restrained brushed gold edges. Exquisite tactile warm wood grain, soft ceramics, gentle studio lighting. Compact balanced landscape 3:2, all objects in frame. Truly transparent background, no haze or glow. No text, Arabic, lettering, UI or watermark.",
+      "path": "feature/content/src/main/res/drawable-nodpi/qaida_letters_art.webp"
+    },
+    {
+      "name": "review",
+      "prompt": "Premium 3D raster still life for the Nimaz Qaida learning review page. Open small walnut box with five BLANK ivory flashcards edged in teal fabric, delicate growing olive sprig beside it, small brushed gold return-arrow sculpture. Luxurious yet gentle natural wood, ceramic, textile materials with warm studio light. Compact landscape 3:2 all objects inside frame. Truly transparent background without haze or glow. No text, letters, UI or watermark.",
+      "path": "feature/content/src/main/res/drawable-nodpi/qaida_review_art.webp"
+    },
+    {
+      "name": "audio",
+      "prompt": "Premium 3D raster still life for Nimaz Qaida lesson audio library. Ivory and teal fabric over-ear headphones resting on elegantly curved walnut stand, three subtle gold sound bars on low wooden plinth, small olive sprig. Sophisticated warm wood grain, matte ivory leather, teal fabric weave and restrained brushed gold. Compact landscape 3:2, all objects inside frame. Truly transparent background with no haze or glow. No text, UI, lettering or watermark.",
+      "path": "feature/content/src/main/res/drawable-nodpi/qaida_audio_art.webp"
+    }
+  ]
+}
