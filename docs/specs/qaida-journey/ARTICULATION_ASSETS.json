@@ -1,0 +1,126 @@
+{
+  "renderer": "scripts/render_qaida_articulation.py (Matplotlib Agg; original raster schematics)",
+  "review_status": "Specialist tajweed/anatomy review required before release; schematic positions, not a motion simulation.",
+  "poses": [
+    {
+      "name": "cavity",
+      "glyphs": "ا",
+      "path": "feature/content/src/main/res/drawable-nodpi/qaida_pose_cavity.webp"
+    },
+    {
+      "name": "bilabial",
+      "glyphs": "ب",
+      "path": "feature/content/src/main/res/drawable-nodpi/qaida_pose_bilabial.webp"
+    },
+    {
+      "name": "dental_stop",
+      "glyphs": "تد",
+      "path": "feature/content/src/main/res/drawable-nodpi/qaida_pose_dental_stop.webp"
+    },
+    {
+      "name": "interdental",
+      "glyphs": "ثذ",
+      "path": "feature/content/src/main/res/drawable-nodpi/qaida_pose_interdental.webp"
+    },
+    {
+      "name": "postalveolar_stop",
+      "glyphs": "ج",
+      "path": "feature/content/src/main/res/drawable-nodpi/qaida_pose_postalveolar_stop.webp"
+    },
+    {
+      "name": "pharyngeal",
+      "glyphs": "حع",
+      "path": "feature/content/src/main/res/drawable-nodpi/qaida_pose_pharyngeal.webp"
+    },
+    {
+      "name": "uvular_fricative",
+      "glyphs": "خغ",
+      "path": "feature/content/src/main/res/drawable-nodpi/qaida_pose_uvular_fricative.webp"
+    },
+    {
+      "name": "tap",
+      "glyphs": "ر",
+      "path": "feature/content/src/main/res/drawable-nodpi/qaida_pose_tap.webp"
+    },
+    {
+      "name": "sibilant",
+      "glyphs": "زس",
+      "path": "feature/content/src/main/res/drawable-nodpi/qaida_pose_sibilant.webp"
+    },
+    {
+      "name": "postalveolar_fricative",
+      "glyphs": "ش",
+      "path": "feature/content/src/main/res/drawable-nodpi/qaida_pose_postalveolar_fricative.webp"
+    },
+    {
+      "name": "emphatic_sibilant",
+      "glyphs": "ص",
+      "path": "feature/content/src/main/res/drawable-nodpi/qaida_pose_emphatic_sibilant.webp"
+    },
+    {
+      "name": "lateral_emphatic",
+      "glyphs": "ض",
+      "path": "feature/content/src/main/res/drawable-nodpi/qaida_pose_lateral_emphatic.webp"
+    },
+    {
+      "name": "emphatic_stop",
+      "glyphs": "ط",
+      "path": "feature/content/src/main/res/drawable-nodpi/qaida_pose_emphatic_stop.webp"
+    },
+    {
+      "name": "emphatic_interdental",
+      "glyphs": "ظ",
+      "path": "feature/content/src/main/res/drawable-nodpi/qaida_pose_emphatic_interdental.webp"
+    },
+    {
+      "name": "labiodental",
+      "glyphs": "ف",
+      "path": "feature/content/src/main/res/drawable-nodpi/qaida_pose_labiodental.webp"
+    },
+    {
+      "name": "uvular_stop",
+      "glyphs": "ق",
+      "path": "feature/content/src/main/res/drawable-nodpi/qaida_pose_uvular_stop.webp"
+    },
+    {
+      "name": "velar_stop",
+      "glyphs": "ك",
+      "path": "feature/content/src/main/res/drawable-nodpi/qaida_pose_velar_stop.webp"
+    },
+    {
+      "name": "lateral",
+      "glyphs": "ل",
+      "path": "feature/content/src/main/res/drawable-nodpi/qaida_pose_lateral.webp"
+    },
+    {
+      "name": "bilabial_nasal",
+      "glyphs": "م",
+      "path": "feature/content/src/main/res/drawable-nodpi/qaida_pose_bilabial_nasal.webp"
+    },
+    {
+      "name": "alveolar_nasal",
+      "glyphs": "ن",
+      "path": "feature/content/src/main/res/drawable-nodpi/qaida_pose_alveolar_nasal.webp"
+    },
+    {
+      "name": "glottal_open",
+      "glyphs": "ه",
+      "path": "feature/content/src/main/res/drawable-nodpi/qaida_pose_glottal_open.webp"
+    },
+    {
+      "name": "labial_velar",
+      "glyphs": "و",
+      "path": "feature/content/src/main/res/drawable-nodpi/qaida_pose_labial_velar.webp"
+    },
+    {
+      "name": "palatal",
+      "glyphs": "ي",
+      "path": "feature/content/src/main/res/drawable-nodpi/qaida_pose_palatal.webp"
+    },
+    {
+      "name": "glottal_closed",
+      "glyphs": "ءأإؤئ",
+      "path": "feature/content/src/main/res/drawable-nodpi/qaida_pose_glottal_closed.webp"
+    }
+  ]
+}
