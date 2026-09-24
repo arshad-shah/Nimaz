@@ -32,5 +32,5 @@
       "path": "feature/content/src/main/res/drawable-nodpi/qaida_empty_art.webp"
     }
   ],
-  "anatomy_review": "AI-generated neutral reference. Revised soft palate and uvula. Not a phoneme posture; qualified anatomy and tajweed review remains required before release."
+  "anatomy_review": "The original neutral AI anatomy reference is superseded in the letter explorer by the deterministic raster pose set in ARTICULATION_ASSETS.json. Specialist anatomy/tajweed review remains required before release."
 }

@@ -93,7 +93,7 @@
     <string name="qaida_anatomy_top">Langue et molaires supérieures · vue de dessus</string>
     <string name="qaida_anatomy_side">Bouche et gorge · vue de profil</string>
     <string name="qaida_anatomy_description">Guide d’articulation de %1$s. %2$s. %3$s</string>
-    <string name="qaida_anatomy_key">Cette bouche est une référence anatomique, pas une démonstration du son. Suivez les indications et votre enseignant.</string>
+    <string name="qaida_anatomy_key">Les cercles dorés indiquent la zone d’articulation ; les flèches turquoise, le flux d’air. Positions schématiques : suivez votre enseignant.</string>
     <string name="qaida_anatomy_consonant">Les indications concernent la consonne. Comme voyelle longue, le son se prolonge dans la bouche et la gorge ouvertes.</string>
     <string name="qaida_anatomy_nasal">Cette lettre comporte aussi une résonance nasale (ghounna), dont la durée dépend de la règle de récitation.</string>
     <string name="qaida_anatomy_upper_lip">Lèvre supérieure</string>
@@ -104,4 +104,5 @@
     <string name="qaida_anatomy_nose">Cavité nasale</string>
     <string name="qaida_anatomy_molars">Molaires supérieures</string>
     <string name="qaida_downloads_empty">Aucun audio enregistré. Ouvrez une leçon pour sauvegarder les enregistrements disponibles.</string>
+    <string name="qaida_anatomy_side_front">Bouche · vue de profil et lèvres · vue de face</string>
 </resources>

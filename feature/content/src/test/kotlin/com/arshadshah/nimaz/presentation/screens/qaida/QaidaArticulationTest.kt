@@ -2,6 +2,8 @@ package com.arshadshah.nimaz.presentation.screens.qaida
 
 import com.arshadshah.nimaz.presentation.components.molecules.ArticulationSite
 import com.arshadshah.nimaz.presentation.components.molecules.articulationSite
+import com.arshadshah.nimaz.presentation.components.molecules.articulationPose
+import com.arshadshah.nimaz.presentation.components.molecules.ArticulationPose
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 
@@ -25,5 +27,21 @@ class QaidaArticulationTest {
         assertThat(articulationSite("ف")).isEqualTo(ArticulationSite.LOWER_LIP)
         assertThat(articulationSite("ض")).isEqualTo(ArticulationSite.TONGUE_SIDE)
         assertThat(articulationSite("ب")).isEqualTo(ArticulationSite.CLOSED_LIPS)
+    }
+    @Test fun `all letters have raster poses and the explorer cannot regress to a single reference`() {
+        val poses = "ابتثجحخدذرزسشصضطظعغفقكلمنهويء".map { articulationPose(it.toString()) }
+        assertThat(poses).doesNotContain(null)
+        assertThat(poses.map { it!!.image }.distinct()).hasSize(24)
+        assertThat(articulationPose("unknown")).isNull()
+    }
+    @Test fun `nasal glottal and emphatic distinctions survive shared articulation sites`() {
+        listOf("ب" to "م", "ه" to "ء", "س" to "ص", "ت" to "ط", "ذ" to "ظ", "ق" to "ك").forEach { (a, b) ->
+            assertThat(articulationPose(a)!!.image).isNotEqualTo(articulationPose(b)!!.image)
+        }
+    }
+    @Test fun `diacritics and hamza carriers select the same consonant pose`() {
+        assertThat(articulationPose("مَ")).isEqualTo(ArticulationPose.BILABIAL_NASAL)
+        assertThat(articulationPose("أَ")).isEqualTo(ArticulationPose.GLOTTAL_CLOSED)
+        assertThat(articulationPose("أَ")).isNotEqualTo(articulationPose("ا"))
     }
 }

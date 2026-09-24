@@ -19,7 +19,7 @@ for locale in ['values-tr', 'values-in', 'values-ms', 'values-fr', 'values-de']:
         assert value.strip(), f'Empty translation: {locale}/{name}'
         pattern = r'%\d+\$[ds]'
         assert sorted(re.findall(pattern, value)) == sorted(re.findall(pattern, base[name])), f'Placeholder mismatch: {locale}/{name}'
-for asset in (root / 'drawable-nodpi').glob('qaida_*_art.webp'):
+for asset in (root / 'drawable-nodpi').glob('qaida_*.webp'):
     data = asset.read_bytes()
     assert len(data) > 1024 and data[:4] == b'RIFF' and data[8:12] == b'WEBP', f'Invalid raster: {asset}'
 print(f'Qaida: {len(base)} keys in all six locales; placeholders and raster headers valid.')

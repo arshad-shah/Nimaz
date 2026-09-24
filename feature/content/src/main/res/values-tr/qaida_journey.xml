@@ -93,7 +93,7 @@
     <string name="qaida_anatomy_top">Dil ve üst azılar · üstten görünüm</string>
     <string name="qaida_anatomy_side">Ağız ve boğaz · yandan görünüm</string>
     <string name="qaida_anatomy_description">%1$s için mahreç rehberi. %2$s. %3$s</string>
-    <string name="qaida_anatomy_key">Bu ağız, anatomi referansıdır; sesin çıkarılışını göstermez. Mahreç açıklamasını ve öğretmeninin örneğini izle.</string>
+    <string name="qaida_anatomy_key">Altın halkalar mahreç bölgesini, turkuaz oklar hava akışını gösterir. Konumlar şematiktir; öğretmeninin örneğini izle.</string>
     <string name="qaida_anatomy_consonant">Açıklama ünsüz içindir. Uzun ünlüde ses açık ağız ve boğaz boyunca uzar.</string>
     <string name="qaida_anatomy_nasal">Bu harfte geniz sesi (gunne) de vardır; süresi tilavet kuralına bağlıdır.</string>
     <string name="qaida_anatomy_upper_lip">Üst dudak</string>
@@ -104,4 +104,5 @@
     <string name="qaida_anatomy_nose">Burun boşluğu</string>
     <string name="qaida_anatomy_molars">Üst azı dişleri</string>
     <string name="qaida_downloads_empty">Henüz kaydedilmiş ses yok. Mevcut kayıtları kaydetmek için bir ders aç.</string>
+    <string name="qaida_anatomy_side_front">Ağız · yandan ve dudaklar · önden</string>
 </resources>

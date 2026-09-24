@@ -93,7 +93,7 @@
     <string name="qaida_anatomy_top">Zunge und obere Backenzähne · Draufsicht</string>
     <string name="qaida_anatomy_side">Mund und Rachen · Seitenansicht</string>
     <string name="qaida_anatomy_description">Artikulationshilfe für %1$s. %2$s. %3$s</string>
-    <string name="qaida_anatomy_key">Dieser Mund dient als anatomische Referenz, nicht als Lautdemonstration. Beachte die Artikulationshinweise und deine Lehrkraft.</string>
+    <string name="qaida_anatomy_key">Goldene Ringe markieren den Artikulationsbereich, türkise Pfeile den Luftstrom. Schematische Stellungen: Folge dem Vorbild deiner Lehrkraft.</string>
     <string name="qaida_anatomy_consonant">Die Hinweise gelten für den Konsonanten. Als langer Vokal klingt der Laut durch den offenen Mund und Rachen.</string>
     <string name="qaida_anatomy_nasal">Dieser Buchstabe hat auch Nasenresonanz (Ghunna); ihre Dauer hängt von der Rezitationsregel ab.</string>
     <string name="qaida_anatomy_upper_lip">Oberlippe</string>
@@ -104,4 +104,5 @@
     <string name="qaida_anatomy_nose">Nasenhöhle</string>
     <string name="qaida_anatomy_molars">Obere Backenzähne</string>
     <string name="qaida_downloads_empty">Noch kein Audio gespeichert. Öffne eine Lektion, um verfügbare Aufnahmen zu speichern.</string>
+    <string name="qaida_anatomy_side_front">Mund · Seitenansicht und Lippen · Vorderansicht</string>
 </resources>

@@ -1,16 +1,27 @@
-# Letter anatomy reference
+# Letter articulation previews
 
-The explorer now uses a bundled raster WebP cutaway, with native text and accessible descriptions.
-The image is a neutral open-mouth reference. It does **not** simulate individual phoneme postures,
-show contact markers, or claim to demonstrate the position of the tongue for every letter.
-The existing letter-specific corpus guidance and makhraj label remain below it. Consonant waw/ya
-and nasal-resonance explanations remain present.
+The explorer uses **24 distinct raster teaching schematics for the 29 letters**, with native,
+localized captions. Gold rings identify the articulation area; teal arrows indicate airflow.
+Tongue profiles, lip contact, glottal closure and nasal routing change with the selected letter.
+Emphatic consonants have additional tongue-root highlighting. Dad uses a superior schematic
+of lateral tongue contact with the upper molars; waw includes a frontal lip-rounding inset.
+Shared visible positions may share an asset; voicing and dynamic timing are explained by the
+existing letter guidance and audio, not by a static image.
 
-The generated artwork was revised for the palate/uvula and inspected visually, but has not been
-certified by an anatomist or tajweed teacher. That educational review remains a release requirement.
-Speech structures and speech-specific articulation must be distinguished; see
-[ASHA articulation guidance](https://www.asha.org/practice-portal/clinical-topics/articulation-and-phonology/).
-Artwork prompts and provenance are recorded in `ILLUSTRATIONS.json`.
+These are simplified position diagrams, not scans, motion simulations or certified teaching
+material. Qualified tajweed/anatomy review remains required before release, particularly for
+pharyngeal/epiglottal distinctions, lateral dad, and emphatic secondary articulation. The view
+for dad does not depict its secondary pharyngeal constriction. Consonant waw/ya and the
+nasal-resonance explanations remain present. Arrows describe a route, not timing or airflow rate.
+
+The assets are drawn directly to WebP with Matplotlib Agg; no SVG or generative-image anatomy
+is used in the current explorer. Their editable geometry is in `scripts/render_qaida_articulation.py`;
+the glyph-to-asset inventory is [ARTICULATION_ASSETS.json](ARTICULATION_ASSETS.json).
+
+Reference checks (not endorsements or copied artwork):
+- [LMU Arabic place-of-articulation teaching notes](https://www.phonetik.uni-muenchen.de/~hoole/kurse/artikul/arabic.pdf): velar/uvular and pharyngeal/glottal distinctions, including limitations of broad pharyngeal labels.
+- [LMU secondary articulation notes](https://www.phonetik.uni-muenchen.de/~hoole/kurse/artikul/secondary_articulations_n.pdf): Arabic emphatic secondary articulation.
+- The app’s existing `nimaz-pro-data/json/qaida_letters.json`: letter-specific makhraj descriptions.
 
 ## Roborazzi captures
 

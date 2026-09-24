@@ -93,7 +93,7 @@
     <string name="qaida_anatomy_top">Lidah dan geraham atas · pandangan atas</string>
     <string name="qaida_anatomy_side">Mulut dan tekak · pandangan sisi</string>
     <string name="qaida_anatomy_description">Panduan artikulasi %1$s. %2$s. %3$s</string>
-    <string name="qaida_anatomy_key">Mulut ini ialah rujukan anatomi, bukan demonstrasi bunyi. Ikuti panduan artikulasi dan demonstrasi guru.</string>
+    <string name="qaida_anatomy_key">Lingkaran emas menandakan kawasan artikulasi; anak panah biru kehijauan menunjukkan aliran udara. Kedudukan berbentuk skema; ikuti contoh guru.</string>
     <string name="qaida_anatomy_consonant">Panduan ini untuk konsonan. Sebagai vokal panjang, bunyi memanjang melalui mulut dan tekak yang terbuka.</string>
     <string name="qaida_anatomy_nasal">Huruf ini juga mempunyai dengung (ghunnah); tempohnya mengikut hukum bacaan.</string>
     <string name="qaida_anatomy_upper_lip">Bibir atas</string>
@@ -104,4 +104,5 @@
     <string name="qaida_anatomy_nose">Rongga hidung</string>
     <string name="qaida_anatomy_molars">Geraham atas</string>
     <string name="qaida_downloads_empty">Belum ada audio disimpan. Buka pelajaran untuk menyimpan rakaman yang tersedia.</string>
+    <string name="qaida_anatomy_side_front">Mulut · pandangan sisi dan bibir · pandangan hadapan</string>
 </resources>
