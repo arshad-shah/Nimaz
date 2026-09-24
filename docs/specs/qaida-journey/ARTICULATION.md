@@ -1,29 +1,21 @@
-# Letter articulation previews
+# Letter anatomy reference
 
-Original, theme-aware anatomical location guides for the 29-letter explorer. The selected
-letter determines the highlighted region; letters sharing a makhraj share a location.
+The explorer now uses a bundled raster WebP cutaway, with native text and accessible descriptions.
+The image is a neutral open-mouth reference. It does **not** simulate individual phoneme postures,
+show contact markers, or claim to demonstrate the position of the tongue for every letter.
+The existing letter-specific corpus guidance and makhraj label remain below it. Consonant waw/ya
+and nasal-resonance explanations remain present.
 
-Three views are used: a side cutaway for the tongue, palate and throat; a front view for lip
-closure, rounding and lip–tooth contact; and a top view for the tongue-side contact of ض.
-Labels and the contact marker remain legible in both app themes. The letter sheet opens
-fully expanded and scrolls on smaller screens. Its existing corpus explanation and audio
-control remain alongside the diagram. Generic mouth emojis have been removed.
+The generated artwork was revised for the palate/uvula and inspected visually, but has not been
+certified by an anatomist or tajweed teacher. That educational review remains a release requirement.
+Speech structures and speech-specific articulation must be distinguished; see
+[ASHA articulation guidance](https://www.asha.org/practice-portal/clinical-topics/articulation-and-phonology/).
+Artwork prompts and provenance are recorded in `ILLUSTRATIONS.json`.
 
-These are simplified location schematics, not medical models or full pronunciation/motion
-simulations. They do not encode every sifah, such as voicing or emphasis. Consonant و and ي
-are distinguished from their long-vowel use; م and ن retain a nasal-resonance reminder.
-A qualified tajweed teacher should review the educational diagrams before release, together
-with the outstanding curriculum audit. This implementation does not certify the old corpus
-wording or substitute for the pending data correction/release.
+## Historical native captures
 
-Mapping checked against the repository’s `qaida_letters.json` and the articulation discussion
-in [Umm Muhammad, An Introduction to Tajweed](https://d1.islamhouse.com/data/en/ih_books/single2/en-tajweed-sahih-international.pdf),
-printed pages 5–9. Geometry is original: no published diagram was copied or traced.
-The 17 rendering variants are a UI grouping, not a new count of the traditional makharij
-(the lip-contact group has separate closed and rounded views; nasal resonance is explanatory).
-
-The earlier decorative concepts were not added to the app. These anatomical guides are
-native Compose drawings: no downloaded artwork or additional image package is required.
+The captures below predate the raster replacement and must not be used to review the current UI.
+Regenerate with `QaidaVisualCheckTest` once Android dependencies are available.
 
 | Letter | Light | Dark |
 | --- | --- | --- |

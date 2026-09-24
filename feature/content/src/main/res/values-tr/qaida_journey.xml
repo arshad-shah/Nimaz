@@ -103,4 +103,5 @@
     <string name="qaida_anatomy_throat">Boğaz</string>
     <string name="qaida_anatomy_nose">Burun boşluğu</string>
     <string name="qaida_anatomy_molars">Üst azı dişleri</string>
+    <string name="qaida_downloads_empty">Henüz kaydedilmiş ses yok. Mevcut kayıtları kaydetmek için bir ders aç.</string>
 </resources>

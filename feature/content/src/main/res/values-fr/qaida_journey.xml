@@ -103,4 +103,5 @@
     <string name="qaida_anatomy_throat">Gorge</string>
     <string name="qaida_anatomy_nose">Cavité nasale</string>
     <string name="qaida_anatomy_molars">Molaires supérieures</string>
+    <string name="qaida_downloads_empty">Aucun audio enregistré. Ouvrez une leçon pour sauvegarder les enregistrements disponibles.</string>
 </resources>

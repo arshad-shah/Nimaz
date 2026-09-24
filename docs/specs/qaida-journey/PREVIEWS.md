@@ -1,5 +1,14 @@
 # Qaida screen previews
 
+**Current review:** [interactive browser review](qaida-review.html), built from the current artwork
+and six-locale string resources. It is a reconstruction, not a native Android capture.
+
+**Historical screenshots below:** these predate the latest raster artwork, banners and navigation.
+The current native suite contains 358 cases (25 flows × 6 locales × 2 themes, plus 29 letter
+details × 2 themes). It has not run successfully in this environment: Gradle cannot resolve
+`org.gradle.kotlin.kotlin-dsl:6.5.7`. Do not treat the old images or results as current validation.
+
+
 [Mouth anatomy: all 29 letters, light and dark](ARTICULATION.md)
 
 Every Qaida destination and its important states, rendered from the actual Compose UI at
@@ -65,7 +74,13 @@ status panel. Device, TalkBack, RTL and large-text testing remain release valida
 | Audio download failed | ![Audio download failed, light](previews/audio-error.png) | ![Audio download failed, dark](previews/audio-error-dark.png) |
 | Playback failed | ![Playback failed, light](previews/playback-error.png) | ![Playback failed, dark](previews/playback-error-dark.png) |
 
-Validation: 177 Qaida behavioural/component tests and all 108 native capture cases passed.
+Historical validation reported 177 behavioural/component tests and 108 native captures.
+Current browser review has passed JavaScript syntax checks, but visual browser verification
+was blocked by the cloud browser file-URL security policy. It remains a review aid, not a
+validated native screenshot.
+
+Current changes: resource compilation with AAPT2, six-locale key/placeholder parity and raster
+file integrity pass. Kotlin compilation and the expanded native suite remain unverified.
 
 ## Regenerating
 

@@ -103,4 +103,5 @@
     <string name="qaida_anatomy_throat">Throat</string>
     <string name="qaida_anatomy_nose">Nasal cavity</string>
     <string name="qaida_anatomy_molars">Upper molars</string>
+    <string name="qaida_downloads_empty">No audio saved yet. Open a lesson to save its available recordings.</string>
 </resources>

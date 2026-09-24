@@ -218,6 +218,8 @@ fun QaidaHomeScreen(
                             Text(stringResource(FeatureR.string.qaida_downloads_title), style = MaterialTheme.typography.headlineSmall)
                             Text(stringResource(FeatureR.string.qaida_downloads_description))
                             Text(stringResource(FeatureR.string.qaida_cache_size, "%.1f".format(cacheBytes / 1048576.0)))
+                            if (cacheBytes == 0L) NimazBanner(
+                                title = stringResource(FeatureR.string.qaida_downloads_empty), variant = NimazBannerVariant.INFO)
                             NimazButton(stringResource(FeatureR.string.qaida_clear_audio), { clearAudio = true },
                                 enabled = cacheBytes > 0, variant = NimazButtonVariant.OUTLINED, fullWidth = true)
                         }

@@ -103,4 +103,5 @@
     <string name="qaida_anatomy_throat">Tenggorokan</string>
     <string name="qaida_anatomy_nose">Rongga hidung</string>
     <string name="qaida_anatomy_molars">Geraham atas</string>
+    <string name="qaida_downloads_empty">Belum ada audio tersimpan. Buka pelajaran untuk menyimpan rekaman yang tersedia.</string>
 </resources>
