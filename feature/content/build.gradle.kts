@@ -139,6 +139,7 @@ dependencies {
     // carries the SDK and Application pins.
     testImplementation(libs.json)
     testImplementation(libs.robolectric)
+    testImplementation("io.github.takahirom.roborazzi:roborazzi:1.50.0")
     testImplementation(libs.androidx.junit)
     testImplementation(platform(libs.androidx.compose.bom))
     testImplementation(libs.androidx.compose.ui.test.junit4)

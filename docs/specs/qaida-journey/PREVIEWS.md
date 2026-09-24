@@ -1,7 +1,8 @@
 # Qaida screen previews
 
-**Current review:** [interactive browser review](qaida-review.html), built from the current artwork
-and six-locale string resources. It is a reconstruction, not a native Android capture.
+The requested previews are **native Roborazzi captures embedded in this document**.
+The browser reconstruction is not the preview deliverable. A fresh capture run is pending;
+the images below must not be presented as the updated UI.
 
 **Historical screenshots below:** these predate the latest raster artwork, banners and navigation.
 The current native suite contains 358 cases (25 flows × 6 locales × 2 themes, plus 29 letter
@@ -87,10 +88,19 @@ file integrity pass. Kotlin compilation and the expanded native suite remain unv
 Run the native capture suite with the project Android SDK and JDK configured:
 
 ```sh
-./gradlew :feature:content:testDebugUnitTest --tests '*QaidaVisualCheckTest' --rerun-tasks
+bash scripts/record_qaida_previews.sh
 ```
 
 It writes PNGs to `feature/content/build/qaida-previews`. Set `QAIDA_PREVIEW_DIR` to override
 the output directory. Inspect all captures before copying them into this document’s
 `previews/` directory. The suite navigates the actual screens, including dialogs, and uses
 `NimazPatternBackground` exactly as the app root does.
+
+## Roborazzi capture pipeline
+
+`QaidaVisualCheckTest` records the actual composed Android view (including separate dialog
+windows) through Roborazzi. The capture script writes to a fresh temporary directory, then
+validates all 358 expected PNGs before updating this document, `ARTICULATION.md`, and the
+tracked `previews/` images. A capture manifest records the source commit and image hashes.
+The Qaida Roborazzi previews workflow uploads and commits the complete output back to this
+branch only if the branch still points to the captured commit.

@@ -1,0 +1,55 @@
+name: Qaida Roborazzi previews
+on:
+  push:
+    branches: [feat/qaida-journey]
+    paths:
+      - 'feature/content/**'
+      - 'core/ui/**'
+      - 'gradle/**'
+      - 'build-logic/**'
+      - 'scripts/*qaida*'
+      - '.github/workflows/qaida_previews.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: qaida-previews-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Record all Qaida screens and update documents
+        run: |
+          chmod +x gradlew
+          bash scripts/record_qaida_previews.sh
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: qaida-roborazzi-${{ github.sha }}
+          path: |
+            docs/specs/qaida-journey/PREVIEWS.md
+            docs/specs/qaida-journey/ARTICULATION.md
+            docs/specs/qaida-journey/previews/
+          if-no-files-found: error
+      - name: Push generated preview documents and images
+        env:
+          QAIDA_BRANCH: ${{ github.ref_name }}
+          QAIDA_SOURCE_SHA: ${{ github.sha }}
+        run: |
+          git fetch origin "$QAIDA_BRANCH"
+          if [ "$(git rev-parse FETCH_HEAD)" != "$QAIDA_SOURCE_SHA" ]; then
+            echo 'Branch advanced; leaving these captures in the artifact.'
+            exit 0
+          fi
+          git add docs/specs/qaida-journey/PREVIEWS.md docs/specs/qaida-journey/ARTICULATION.md docs/specs/qaida-journey/previews
+          if git diff --cached --quiet; then exit 0; fi
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'docs(qaida): refresh Roborazzi preview images'
+          git push origin "HEAD:$QAIDA_BRANCH"

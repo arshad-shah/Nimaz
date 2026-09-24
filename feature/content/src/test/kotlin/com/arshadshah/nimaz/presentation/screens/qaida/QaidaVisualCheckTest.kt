@@ -31,7 +31,12 @@ import org.robolectric.ParameterizedRobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 import java.io.File
+import com.github.takahirom.roborazzi.captureRoboImage
+import com.github.takahirom.roborazzi.RoborazziOptions
+import com.github.takahirom.roborazzi.RoborazziTaskType
+import com.github.takahirom.roborazzi.ExperimentalRoborazziApi
 
+@OptIn(ExperimentalRoborazziApi::class)
 @RunWith(ParameterizedRobolectricTestRunner::class)
 @Config(qualifiers = "w411dp-h900dp-mdpi")
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
@@ -112,8 +117,15 @@ class QaidaVisualCheckTest(private val screen: String, private val theme: ThemeM
             val directory = File(System.getenv("QAIDA_PREVIEW_DIR") ?: "build/qaida-previews")
             directory.mkdirs()
             val suffix = (if (locale == "en") "" else "-$locale") + (if (theme == ThemeMode.DARK) "-dark" else "")
-            File(directory, "$screen$suffix.png").outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
+            bitmap.captureRoboImage(
+                file = File(directory, "$screen$suffix.png"),
+                roborazziOptions = RoborazziOptions(
+                    taskType = RoborazziTaskType.Record,
+                    captureType = RoborazziOptions.CaptureType.Screenshot(),
+                ),
+            )
             check(bitmap.width > 0 && bitmap.height > 0)
+            bitmap.recycle()
         }
     }
     private fun local(text: String): String {
