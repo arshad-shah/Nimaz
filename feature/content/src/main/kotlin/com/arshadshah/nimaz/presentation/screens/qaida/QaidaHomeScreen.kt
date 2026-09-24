@@ -34,7 +34,7 @@ import com.arshadshah.nimaz.feature.content.R as FeatureR
 import com.arshadshah.nimaz.domain.model.LessonStatus
 import com.arshadshah.nimaz.presentation.components.atoms.*
 import com.arshadshah.nimaz.presentation.components.molecules.NimazConfirmDialog
-import com.arshadshah.nimaz.presentation.components.molecules.QaidaCourseHeader
+import com.arshadshah.nimaz.presentation.components.molecules.*
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.viewmodel.content.QaidaReaderEvent
 import com.arshadshah.nimaz.presentation.viewmodel.content.QaidaReaderViewModel
@@ -77,11 +77,12 @@ fun QaidaHomeScreen(
                 })
         },
         bottomBar = {
-            NimazSegmentedControl(
-                options = listOf(FeatureR.string.qaida_tab_journey, FeatureR.string.qaida_tab_review,
-                    FeatureR.string.qaida_tab_downloads).map { NimazSegmentedOption(stringResource(it)) },
-                selectedIndex = tab, onSelect = { tab = it }, purpose = NimazSegmentedPurpose.VIEW,
-                modifier = Modifier.navigationBarsPadding().padding(horizontal = 20.dp, vertical = 8.dp))
+            NimazSecondaryNavigation(
+                destinations = listOf(
+                    NimazSecondaryDestination(stringResource(FeatureR.string.qaida_tab_journey), Icons.Default.Route),
+                    NimazSecondaryDestination(stringResource(FeatureR.string.qaida_tab_review), Icons.Default.AutoStories),
+                    NimazSecondaryDestination(stringResource(FeatureR.string.qaida_tab_downloads), Icons.Default.Headphones)),
+                selectedIndex = tab, onSelect = { tab = it })
         },
     ) { padding ->
         LazyColumn(modifier = Modifier.fillMaxSize().padding(padding), state = listState,
