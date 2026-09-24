@@ -96,7 +96,7 @@ fun QaidaReaderScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
             if (c == null) item {
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                    Image(painterResource(R.drawable.qaida_journey_book), null, Modifier.fillMaxWidth().height(170.dp))
+                    Image(painterResource(R.drawable.qaida_empty_art), null, Modifier.fillMaxWidth().height(170.dp))
                     NimazBanner(title = stringResource(R.string.qaida_getting_ready),
                         variant = NimazBannerVariant.INFO, isLoading = true)
                 }
@@ -104,7 +104,7 @@ fun QaidaReaderScreen(
             else when (page) {
                 0 -> item {
                     Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
-                        Image(painterResource(R.drawable.qaida_journey_book), null, Modifier.fillMaxWidth().height(190.dp))
+                        Image(painterResource(if (all.isEmpty()) R.drawable.qaida_empty_art else R.drawable.qaida_journey_book), null, Modifier.fillMaxWidth().height(190.dp))
                         Text(stringResource(R.string.qaida_lesson_intro), style = MaterialTheme.typography.headlineMedium.copy(fontFamily = AmiriFontFamily))
                         ArabicText(c.lesson.titleArabic, modifier = Modifier.fillMaxWidth(), size = ArabicTextSize.LARGE)
                         Text(c.lesson.description, style = MaterialTheme.typography.bodyLarge)

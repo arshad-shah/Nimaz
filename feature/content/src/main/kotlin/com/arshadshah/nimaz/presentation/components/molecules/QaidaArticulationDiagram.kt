@@ -52,8 +52,6 @@ fun QaidaArticulationDiagram(glyph: String, detail: String, modifier: Modifier =
             modifier = Modifier.fillMaxWidth().aspectRatio(1.5f))
         Text(stringResource(R.string.qaida_anatomy_key), style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant)
-        // The text identifies the target; the resting anatomy does not pretend to demonstrate it.
-        Text(detail, style = MaterialTheme.typography.bodyMedium)
         if (site == ArticulationSite.ROUNDED_LIPS || glyph == "ي")
             Text(stringResource(R.string.qaida_anatomy_consonant), style = MaterialTheme.typography.bodySmall)
         if (glyph == "م" || glyph == "ن")

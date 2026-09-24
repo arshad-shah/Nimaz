@@ -45,7 +45,7 @@ fun QaidaSettingsScreen(onNavigateBack: () -> Unit, viewModel: QaidaReaderViewMo
         LazyColumn(Modifier.fillMaxSize().padding(padding), contentPadding = PaddingValues(20.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp)) {
             item {
-                Image(painterResource(R.drawable.qaida_letters_art), null,
+                Image(painterResource(R.drawable.qaida_settings_art), null,
                     Modifier.fillMaxWidth().height(130.dp))
             }
             item {

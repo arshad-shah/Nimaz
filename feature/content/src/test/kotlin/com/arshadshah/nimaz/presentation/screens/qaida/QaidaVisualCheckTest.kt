@@ -36,16 +36,18 @@ import java.io.File
 @Config(qualifiers = "w411dp-h900dp-mdpi")
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 /** Native previews of every Qaida destination and important state, in both app themes. */
-class QaidaVisualCheckTest(private val screen: String, private val theme: ThemeMode) {
+class QaidaVisualCheckTest(private val screen: String, private val theme: ThemeMode, private val locale: String) {
     companion object {
         @JvmStatic
-        @ParameterizedRobolectricTestRunner.Parameters(name = "{0}-{1}")
+        @ParameterizedRobolectricTestRunner.Parameters(name = "{0}-{1}-{2}")
         fun screens(): List<Array<Any>> = (listOf(
             "journey", "chapters", "review", "review-empty", "audio", "audio-empty",
             "clear-audio", "reset", "settings", "intro", "focus", "repeat", "practise", "self-check",
             "all-cards", "due-review", "reward", "letters", "letter-detail", "loading",
             "downloading", "audio-unavailable", "audio-error", "playback-error", "lesson-empty"
-        ) + (1..29).map { "articulation-%02d".format(it) }).flatMap { name -> listOf(ThemeMode.LIGHT, ThemeMode.DARK).map { arrayOf<Any>(name, it) } }
+        ) + (1..29).map { "articulation-%02d".format(it) }).flatMap { name -> (if (name.startsWith("articulation-")) listOf("en") else listOf("en", "tr", "id", "ms", "fr", "de")).flatMap { locale ->
+            listOf(ThemeMode.LIGHT, ThemeMode.DARK).map { arrayOf<Any>(name, it, locale) }
+        } }
     }
 
     @get:Rule val rule = createComponentComposeRule()
@@ -109,12 +111,22 @@ class QaidaVisualCheckTest(private val screen: String, private val theme: ThemeM
             }
             val directory = File(System.getenv("QAIDA_PREVIEW_DIR") ?: "build/qaida-previews")
             directory.mkdirs()
-            val suffix = if (theme == ThemeMode.DARK) "-dark" else ""
+            val suffix = (if (locale == "en") "" else "-$locale") + (if (theme == ThemeMode.DARK) "-dark" else "")
             File(directory, "$screen$suffix.png").outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
             check(bitmap.width > 0 && bitmap.height > 0)
         }
     }
-    private fun tap(text: String) = rule.onNodeWithText(text).performScrollTo().performClick()
+    private fun local(text: String): String {
+        val context = org.robolectric.RuntimeEnvironment.getApplication()
+        val english = context.createConfigurationContext(android.content.res.Configuration(context.resources.configuration).apply {
+            setLocale(java.util.Locale.ENGLISH)
+        })
+        val fields = com.arshadshah.nimaz.feature.content.R.string::class.java.fields.toList() +
+            com.arshadshah.nimaz.core.ui.R.string::class.java.fields.toList()
+        val id = fields.firstOrNull { runCatching { english.getString(it.getInt(null)) == text }.getOrDefault(false) }?.getInt(null)
+        return if (id == null) text else context.getString(id)
+    }
+    private fun tap(text: String) = rule.onNodeWithText(local(text)).performScrollTo().performClick()
     private fun home() {
         rule.setContent { root = LocalView.current; PreviewTheme { QaidaHomeScreen({}, {}, {}, vm) } }
     }
@@ -122,6 +134,7 @@ class QaidaVisualCheckTest(private val screen: String, private val theme: ThemeM
         rule.setContent { root = LocalView.current; PreviewTheme { QaidaReaderScreen(4, {}, vm) } }
     }
     @Test fun render() {
+        org.robolectric.RuntimeEnvironment.setQualifiers("$locale-w411dp-h900dp-mdpi")
         if (screen.startsWith("articulation-")) {
             val letter = previewLetters().first { it.id == screen.substringAfter("articulation-").toInt() }
             rule.setContent { root = LocalView.current; PreviewTheme { QaidaLettersScreen({}, vm) } }
@@ -136,13 +149,13 @@ class QaidaVisualCheckTest(private val screen: String, private val theme: ThemeM
                 home()
                 when (screen) {
                     "chapters" -> { tap("Letters & sounds"); rule.onNodeWithText("1 · The Letters").performScrollTo() }
-                    "review", "review-empty" -> rule.onNodeWithText("Review").performClick()
+                    "review", "review-empty" -> rule.onNodeWithText(local("Review")).performClick()
                     "audio", "audio-empty", "clear-audio" -> {
-                        rule.onNodeWithText("Audio").performClick()
+                        rule.onNodeWithText(local("Audio")).performClick()
                         if (screen == "clear-audio") tap("Remove downloaded audio")
                     }
                     "settings", "reset" -> {
-                        rule.onNodeWithContentDescription("Qaida settings").performClick()
+                        rule.onNodeWithContentDescription(local("Qaida settings")).performClick()
                         if (screen == "reset") tap("Reset journey")
                     }
                 }
@@ -165,12 +178,12 @@ class QaidaVisualCheckTest(private val screen: String, private val theme: ThemeM
                 when (screen) {
                     "intro", "loading", "lesson-empty" -> Unit
                     "downloading", "audio-unavailable", "audio-error", "playback-error" -> {
-                        rule.onNodeWithText(when (screen) {
-                            "downloading" -> "Saving audio · 1 of 3"
+                        rule.onNodeWithText(local(when (screen) {
+                            "downloading" -> org.robolectric.RuntimeEnvironment.getApplication().getString(com.arshadshah.nimaz.feature.content.R.string.qaida_download_progress, 1, 3)
                             "audio-unavailable" -> "Recordings are not available yet. You can still read and practise with your teacher."
                             "audio-error" -> "Couldn’t save this lesson’s audio. Check your connection and try again, or keep practising."
                             else -> "This recording couldn’t play. Try downloading the lesson again."
-                        }).performScrollTo()
+                        })).performScrollTo()
                     }
                     "due-review" -> tap("Review this lesson")
                     else -> {

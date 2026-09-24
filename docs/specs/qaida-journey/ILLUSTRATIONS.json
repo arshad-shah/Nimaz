@@ -20,6 +20,17 @@
       "name": "audio",
       "prompt": "Premium 3D raster still life for Nimaz Qaida lesson audio library. Ivory and teal fabric over-ear headphones resting on elegantly curved walnut stand, three subtle gold sound bars on low wooden plinth, small olive sprig. Sophisticated warm wood grain, matte ivory leather, teal fabric weave and restrained brushed gold. Compact landscape 3:2, all objects inside frame. Truly transparent background with no haze or glow. No text, UI, lettering or watermark.",
       "path": "feature/content/src/main/res/drawable-nodpi/qaida_audio_art.webp"
+    },
+    {
+      "name": "settings",
+      "prompt": "Premium 3D ivory tray with walnut and teal sliders, gold tuning fork, fabric and olive sprig. Transparent, no text.",
+      "path": "feature/content/src/main/res/drawable-nodpi/qaida_settings_art.webp"
+    },
+    {
+      "name": "empty",
+      "prompt": "Premium 3D walnut stand with blank ivory cards, teal bookmark, olive sapling and gold hourglass. Transparent, no text.",
+      "path": "feature/content/src/main/res/drawable-nodpi/qaida_empty_art.webp"
     }
-  ]
+  ],
+  "anatomy_review": "AI-generated neutral reference. Revised soft palate and uvula. Not a phoneme posture; qualified anatomy and tajweed review remains required before release."
 }
