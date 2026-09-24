@@ -196,7 +196,7 @@ fun QaidaHomeScreen(
                             Image(painterResource(if (due.isEmpty()) FeatureR.drawable.qaida_empty_art else FeatureR.drawable.qaida_review_art), null, Modifier.fillMaxWidth().height(180.dp))
                             Text(stringResource(FeatureR.string.qaida_review_title), style = MaterialTheme.typography.headlineSmall)
                             Text(stringResource(FeatureR.string.qaida_review_description))
-                            if (due.isEmpty()) NimazBanner(maxTitleLines = Int.MAX_VALUE, 
+                            if (due.isEmpty()) NimazBanner(maxTitleLines = Int.MAX_VALUE,
                                 title = stringResource(FeatureR.string.qaida_review_empty),
                                 variant = NimazBannerVariant.INFO, icon = Icons.Default.CheckCircle)
                             course?.nextLessonId?.let { nextId ->
@@ -225,7 +225,7 @@ fun QaidaHomeScreen(
                                 Text(stringResource(FeatureR.string.qaida_cache_size, "%.1f".format(cacheBytes / 1048576.0)),
                                     modifier = Modifier.weight(1f), style = MaterialTheme.typography.titleMedium)
                             }
-                            if (cacheBytes == 0L) NimazBanner(maxTitleLines = Int.MAX_VALUE, 
+                            if (cacheBytes == 0L) NimazBanner(maxTitleLines = Int.MAX_VALUE,
                                 title = stringResource(FeatureR.string.qaida_downloads_empty), variant = NimazBannerVariant.INFO)
                             NimazButton(stringResource(FeatureR.string.qaida_clear_audio), { clearAudio = true },
                                 enabled = cacheBytes > 0, variant = NimazButtonVariant.OUTLINED, fullWidth = true)
