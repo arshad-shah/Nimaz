@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
@@ -41,6 +42,7 @@ fun QaidaLetterBoard(
         LazyVerticalGrid(
             columns = GridCells.Fixed(4),
             modifier = modifier
+                .testTag("qaida-letter-board")
                 .fillMaxSize()
                 .padding(horizontal = NimazSpacing.Large),
             horizontalArrangement = Arrangement.spacedBy(NimazSpacing.Small),

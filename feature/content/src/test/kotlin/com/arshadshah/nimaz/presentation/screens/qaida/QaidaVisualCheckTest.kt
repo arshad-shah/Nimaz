@@ -150,7 +150,10 @@ class QaidaVisualCheckTest(private val screen: String, private val theme: ThemeM
         if (screen.startsWith("articulation-")) {
             val letter = previewLetters().first { it.id == screen.substringAfter("articulation-").toInt() }
             rule.setContent { root = LocalView.current; PreviewTheme { QaidaLettersScreen({}, vm) } }
-            rule.onNodeWithText(letter.letterArabic).performScrollTo().performClick()
+            // The illustrated header is grid item zero. Scroll by index before looking up
+            // a letter whose row may not have been composed yet (notably the final hamza).
+            rule.onNodeWithTag("qaida-letter-board").performScrollToIndex(previewLetters().indexOf(letter) + 1)
+            rule.onNodeWithText(letter.letterArabic).performClick()
             capture()
             return
         }

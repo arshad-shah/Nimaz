@@ -34,7 +34,7 @@ def publish(source, source_sha):
         header += '\n'
     header += '## Regeneration\n\nRun `bash scripts/record_qaida_previews.sh` with JDK 21 and the project Android SDK available. Only a complete successful capture run replaces these documents.\n\n[All 29 letter details](ARTICULATION.md)\n'
     (doc/'PREVIEWS.md').write_text(header)
-    anatomy = (doc/'ARTICULATION.md').read_text().split('## Historical native captures')[0]
+    anatomy = (doc/'ARTICULATION.md').read_text().split('## Historical native captures')[0].split('## Roborazzi captures')[0]
     anatomy += f'## Roborazzi captures\n\nSource commit: `{source_sha}`.\n\n| Letter | Light | Dark |\n| --- | --- | --- |\n'
     for i,glyph in enumerate('ابتثجحخدذرزسشصضطظعغفقكلمنهويء',1):
         f=f'articulation-{i:02}'
