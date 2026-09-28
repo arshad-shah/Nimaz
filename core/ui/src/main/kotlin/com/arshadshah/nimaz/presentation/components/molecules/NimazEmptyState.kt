@@ -40,7 +40,8 @@ fun NimazEmptyState(
     icon: ImageVector = Icons.Default.CheckCircle,
     iconTint: Color = NimazColors.StatusColors.Prayed,
     actionLabel: String? = null,
-    onAction: (() -> Unit)? = null
+    onAction: (() -> Unit)? = null,
+    illustration: (@Composable () -> Unit)? = null,
 ) {
     NimazCard(
         style = NimazCardStyle.FILLED,
@@ -53,7 +54,7 @@ fun NimazEmptyState(
                 .padding(32.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Box(
+            if (illustration != null) illustration() else Box(
                 modifier = Modifier
                     .size(64.dp)
                     .clip(CircleShape)

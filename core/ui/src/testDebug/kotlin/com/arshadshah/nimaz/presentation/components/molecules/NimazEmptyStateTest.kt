@@ -54,4 +54,16 @@ class NimazEmptyStateTest {
         composeRule.onNodeWithText("Browse Quran").performClick()
         assertThat(clicked).isTrue()
     }
+    @Test
+    fun `illustration slot preserves the shared empty state action`() {
+        var clicked = false
+        composeRule.setThemedContent {
+            NimazEmptyState("Start", "Your reading journey", actionLabel = "Begin", onAction = { clicked = true },
+                illustration = { androidx.compose.material3.Text("Book artwork") })
+        }
+        composeRule.onNodeWithText("Book artwork").assertExists()
+        composeRule.onNodeWithText("Begin").performClick()
+        assertThat(clicked).isTrue()
+    }
+
 }

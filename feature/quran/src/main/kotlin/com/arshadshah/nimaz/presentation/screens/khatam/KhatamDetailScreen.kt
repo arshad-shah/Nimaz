@@ -36,6 +36,7 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownMenu
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownRow
 import com.arshadshah.nimaz.presentation.components.molecules.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuItem
+import com.arshadshah.nimaz.presentation.components.organisms.KhatamReadingActivity
 import com.arshadshah.nimaz.presentation.components.organisms.KhatamJourneyTrail
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazStatData
@@ -68,6 +69,8 @@ fun KhatamDetailScreen(
         if (state.notFound) onNavigateBack()
     }
 
+    KhatamReadingDayEffect(viewModel)
+
     val khatam = state.khatam
 
     NimazScreenScaffold(
@@ -77,14 +80,7 @@ fun KhatamDetailScreen(
                 onBackClick = onNavigateBack,
                 actions = {
                     if (khatam != null) {
-                        NimazIconButton(
-                            icon = Icons.Default.Edit,
-                            onClick = { onNavigateToEdit(khatam.id) },
-                            contentDescription = stringResource(R.string.khatam_edit),
-                        )
-                        // Making a khatam active from here is the only quick path when
-                        // another one is already running.
-                        if (!khatam.isActive && khatam.status == KhatamStatus.ACTIVE) {
+                        run {
                             Box {
                                 NimazIconButton(
                                     icon = Icons.Default.MoreVert,
@@ -96,6 +92,15 @@ fun KhatamDetailScreen(
                                     expanded = menuExpanded,
                                     onDismissRequest = { menuExpanded = false },
                                 ) {
+                                    NimazDropdownRow(
+                                        text = stringResource(R.string.khatam_edit),
+                                        leadingIcon = Icons.Default.Edit,
+                                        onClick = {
+                                            menuExpanded = false
+                                            onNavigateToEdit(khatam.id)
+                                        },
+                                    )
+                                    if (!khatam.isActive && khatam.status == KhatamStatus.ACTIVE)
                                     NimazDropdownRow(
                                         text = stringResource(R.string.khatam_set_active),
                                         leadingIcon = Icons.Default.Star,
@@ -137,7 +142,11 @@ fun KhatamDetailScreen(
                 onContinue = {
                     val surah = state.nextUnreadSurah
                     val ayah = state.nextUnreadAyah
-                    if (surah != null && ayah != null) onNavigateToRead(surah, ayah)
+                    if (!khatam.isActive && khatam.status == KhatamStatus.ACTIVE) {
+                        viewModel.onEvent(KhatamEvent.SetActiveKhatam(khatam.id))
+                    } else if (khatam.isActive && surah != null && ayah != null) {
+                        onNavigateToRead(surah, ayah)
+                    }
                 },
             )
         }
@@ -172,10 +181,6 @@ private fun KhatamDetailContent(
             value = insights.averagePace.roundToInt().toString(),
             label = stringResource(R.string.khatam_avg_pace),
         ),
-        NimazStatData(
-            value = insights.juzCompleted.toString(),
-            label = stringResource(R.string.khatam_stat_juz_done),
-        ),
     )
 
     LazyColumn(
@@ -196,32 +201,14 @@ private fun KhatamDetailContent(
                 // The top bar already names the khatam.
                 showName = false,
                 showActiveBadge = khatam.isActive,
-                // The plan's own instruction leads. A khatam exists to assign a daily portion;
-                // where you happened to stop is the fallback, and it was the headline here
-                // because it was the only thing the screen knew how to say.
-                continueLabel = state.todaysPortionLabel?.let {
-                    stringResource(R.string.khatam_read_todays_portion)
-                } ?: continueText,
-                onContinue = onContinue.takeIf { hasNextPosition },
+                dailyReading = state.dailyReading,
+                continueLabel = when {
+                    !khatam.isActive -> stringResource(R.string.khatam_switch_plan)
+                    state.dailyReading?.isComplete == false -> stringResource(R.string.khatam_read_todays_portion)
+                    else -> continueText
+                },
+                onContinue = onContinue.takeIf { hasNextPosition || !khatam.isActive },
             )
-        }
-
-        // What today asks for, named. Only where there is a portion — a finished plan should
-        // stop giving orders.
-        state.todaysPortionLabel?.let { portion ->
-            item(key = "todays-portion") {
-                NimazMenuItem(
-                    title = stringResource(R.string.khatam_todays_portion),
-                    subtitle = portion,
-                    icon = Icons.AutoMirrored.Filled.MenuBook,
-                    onClick = onContinue,
-                    trailingIcon = null,
-                )
-            }
-        }
-
-        item(key = "stats") {
-            NimazStatsGrid(stats = stats)
         }
 
         item(key = "journey-header") {
@@ -241,5 +228,11 @@ private fun KhatamDetailContent(
                 accent = accent,
             )
         }
+        item(key = "stats") { NimazStatsGrid(stats = stats) }
+        item(key = "activity-header") {
+            NimazSectionHeader(title = stringResource(R.string.khatam_reading_activity))
+        }
+        item(key = "activity") { KhatamReadingActivity(logs = state.dailyLogs) }
+
     }
 }

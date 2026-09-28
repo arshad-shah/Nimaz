@@ -465,4 +465,32 @@ class KhatamProgressCalculatorTest {
             KhatamProgressCalculator.daysAgainstPace(6236, daysActive = 1, dailyTarget = 1)
         ).isEqualTo(6235)
     }
+    @Test
+    fun `reading week fills missing dates and excludes older and future logs`() {
+        val today = java.time.LocalDate.of(2026, 9, 28)
+        val zone = java.time.ZoneId.systemDefault()
+        fun stamp(offset: Long) = today.plusDays(offset).atStartOfDay(zone).toInstant().toEpochMilli()
+        val week = KhatamProgressCalculator.readingWeek(listOf(
+            DailyLogEntry(stamp(-7), 99), DailyLogEntry(stamp(-2), 7),
+            DailyLogEntry(stamp(0), 20), DailyLogEntry(stamp(1), 99),
+        ), stamp(0))
+        assertThat(week.map { it.ayahsRead }).containsExactly(0, 0, 0, 0, 7, 0, 20).inOrder()
+        assertThat(week.first().date).isEqualTo(stamp(-6))
+        assertThat(KhatamProgressCalculator.readingWeek(emptyList(), stamp(0)).sumOf { it.ayahsRead }).isEqualTo(0)
+    }
+
+    @Test
+    fun `reading week keeps all seven local dates over autumn clock change`() {
+        val original = java.util.TimeZone.getDefault()
+        try {
+            java.util.TimeZone.setDefault(java.util.TimeZone.getTimeZone("Europe/Dublin"))
+            val now = java.time.Instant.parse("2026-10-27T12:00:00Z").toEpochMilli()
+            val week = KhatamProgressCalculator.readingWeek(emptyList(), now)
+            assertThat(week.map { java.time.Instant.ofEpochMilli(it.date).atZone(java.time.ZoneId.systemDefault()).dayOfMonth })
+                .containsExactly(21, 22, 23, 24, 25, 26, 27).inOrder()
+        } finally {
+            java.util.TimeZone.setDefault(original)
+        }
+    }
+
 }

@@ -377,8 +377,13 @@ hadiths all carry an `isFavorite`) adds a section rather than a screen.
 | `KhatamEdit` | `khatamId: Long` | KhatamFormScreen (`khatamId = id`) |
 
 `KhatamCreate` and `KhatamEdit` render the same `KhatamFormScreen`; a null id means create.
-`KhatamEdit` is reached from the edit action in the detail screen's top bar, and also hosts
+`KhatamEdit` is reached from the edit row in the detail screen's top-bar menu, and also hosts
 archive/delete, which previously lived behind an undiscoverable long-press on the list.
+
+The overview's top-bar add action opens create; its active card exposes separate reading and
+view-plan actions. Only the active plan can enter the reader from its detail. An inactive plan
+first offers an explicit activation action, and reading becomes available after the observed
+active state updates, so marks are not accidentally attributed to a different plan.
 
 ### 3.13 Settings
 | Route | Args | Screen |
