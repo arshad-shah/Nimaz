@@ -50,5 +50,30 @@ data class TafseerNoteItem(
     val ayahNumber: Int,
     val sourceLabel: String,
     val color: String,
-    val note: String
+    val note: String,
+    val tafseerId: String = TafseerSource.IBN_KATHIR.id,
+    val createdAt: Long = 0,
+    val quote: String? = null,
+    val reflection: TafseerNote? = null,
+    val highlight: TafseerHighlight? = null,
+) {
+    // The two tables have independent ids. Never key a mixed list by the numeric id alone.
+    val key: String get() = if (reflection != null) "note:${reflection.id}" else "highlight:$highlightId"
+}
+
+fun TafseerNote.toNoteItem(surah: Int, ayah: Int) = TafseerNoteItem(
+    highlightId = id, surahNumber = surah, ayahNumber = ayah,
+    sourceLabel = TafseerSource.entries.firstOrNull { it.id == tafseerId }?.displayName ?: tafseerId,
+    color = "", note = text, tafseerId = tafseerId, createdAt = createdAt, reflection = this,
+)
+
+fun TafseerHighlight.toNoteItem(surah: Int, ayah: Int, commentary: String?) = TafseerNoteItem(
+    highlightId = id, surahNumber = surah, ayahNumber = ayah,
+    sourceLabel = TafseerSource.entries.firstOrNull { it.id == tafseerId }?.displayName ?: tafseerId,
+    color = color, note = note.orEmpty(), tafseerId = tafseerId, createdAt = createdAt,
+    quote = commentary?.let { text ->
+        val start = startOffset.coerceIn(0, text.length)
+        val end = endOffset.coerceIn(start, text.length)
+        text.substring(start, end).takeIf { it.isNotBlank() }
+    }, highlight = this,
 )

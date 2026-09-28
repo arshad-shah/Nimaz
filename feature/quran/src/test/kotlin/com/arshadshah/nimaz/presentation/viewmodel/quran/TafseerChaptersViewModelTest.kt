@@ -48,7 +48,7 @@ class TafseerChaptersViewModelTest {
     @After
     fun tearDown() = Dispatchers.resetMain()
 
-    private fun viewModel() = TafseerChaptersViewModel(quranUseCases, tafseerUseCases, telemetry)
+    private fun viewModel() = TafseerChaptersViewModel(quranUseCases, tafseerUseCases, telemetry, mockk(relaxed = true))
 
     @Test
     fun `a failing surah list surfaces an error instead of an empty screen`() = runTest {

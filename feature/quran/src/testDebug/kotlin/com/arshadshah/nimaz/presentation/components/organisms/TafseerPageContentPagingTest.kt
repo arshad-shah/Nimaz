@@ -41,6 +41,7 @@ class TafseerPageContentPagingTest {
 
     private var contentPage: Int? = null
     private var shared = false
+    private var notesOpened = false
 
     private fun ayah(number: Int = 81, surah: Int = 43, translation: String? = "a translation") =
         Ayah(
@@ -88,6 +89,7 @@ class TafseerPageContentPagingTest {
                 onHighlightUpdated = { _, _, _ -> },
                 onHighlightDeleted = {},
                 onShare = { shared = true },
+                onNotesClick = { notesOpened = true },
                 topics = topics,
             )
         }
@@ -197,7 +199,7 @@ class TafseerPageContentPagingTest {
 
         composeRule.onNodeWithContentDescription(str(R.string.cd_notes)).performClick()
 
-        composeRule.onNodeWithText(str(R.string.tafseer_highlight_notes)).assertIsDisplayed()
+        assertThat(notesOpened).isTrue()
     }
 
     @Test

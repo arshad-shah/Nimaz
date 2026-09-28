@@ -4,7 +4,7 @@ import com.arshadshah.nimaz.domain.model.TafseerNote
 import com.arshadshah.nimaz.domain.model.TafseerSource
 
 sealed interface TafseerEvent {
-    data class LoadSurah(val surahNumber: Int, val ayahNumber: Int = 1) : TafseerEvent
+    data class LoadSurah(val surahNumber: Int, val ayahNumber: Int = 1, val source: TafseerSource? = null, val highlightOffset: Int? = null) : TafseerEvent
     data class NavigateToAyah(val index: Int) : TafseerEvent
     data class NavigateToTafseerPage(val page: Int) : TafseerEvent
     data class SwitchSource(val source: TafseerSource) : TafseerEvent

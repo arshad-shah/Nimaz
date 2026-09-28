@@ -18,4 +18,8 @@ data class TafseerChaptersUiState(
      * from "you have no notes yet".
      */
     val error: UiError? = null,
+    val editing: TafseerNoteItem? = null,
+    val writing: Boolean = false,
+    val writeError: UiError? = null,
+    val deleted: TafseerNoteItem? = null,
 )

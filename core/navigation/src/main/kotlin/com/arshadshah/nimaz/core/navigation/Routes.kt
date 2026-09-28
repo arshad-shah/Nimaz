@@ -318,7 +318,7 @@ sealed interface Route {
     data object TafseerChapters : Route
 
     @Serializable
-    data class Tafseer(val surahNumber: Int, val ayahNumber: Int = 1) : Route
+    data class Tafseer(val surahNumber: Int, val ayahNumber: Int = 1, val sourceId: String? = null, val highlightOffset: Int? = null) : Route
 
     /**
      * A surah's long-form background — the source's own sections, read continuously.

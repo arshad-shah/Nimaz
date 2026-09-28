@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.presentation.screens.quran
 
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -175,4 +176,36 @@ class TafseerChaptersScreenTest {
 
         composeRule.onNodeWithText(str(R.string.tafseer_load_failed)).assertDoesNotExist()
     }
+    @Test
+    fun `notes actions are hidden on surahs and shown only on populated notes tab`() {
+        state.value = TafseerChaptersUiState(isLoading = false, notes = listOf(note))
+        render()
+        composeRule.onNodeWithContentDescription(str(R.string.cd_filter)).assertDoesNotExist()
+        composeRule.onNodeWithText(str(R.string.tafseer_tab_notes) + " · 1").performClick()
+        composeRule.onNodeWithContentDescription(str(R.string.cd_filter)).assertIsDisplayed()
+        composeRule.onNodeWithContentDescription(str(R.string.bookmarks_sort)).assertIsDisplayed()
+        composeRule.onNodeWithText(str(R.string.tafseer_note_add)).assertDoesNotExist()
+        composeRule.onNodeWithText(str(R.string.tafseer_tab_surahs)).performClick()
+        composeRule.onNodeWithContentDescription(str(R.string.cd_filter)).assertDoesNotExist()
+    }
+
+    @Test
+    fun `empty notes do not expose filter or sort`() {
+        state.value = TafseerChaptersUiState(isLoading = false)
+        render()
+        composeRule.onNodeWithText(str(R.string.tafseer_tab_notes)).performClick()
+        composeRule.onNodeWithContentDescription(str(R.string.cd_filter)).assertDoesNotExist()
+        composeRule.onNodeWithContentDescription(str(R.string.bookmarks_sort)).assertDoesNotExist()
+    }
+
+    @Test
+    fun `overflow edit delegates to shared note controller`() {
+        state.value = TafseerChaptersUiState(isLoading = false, notes = listOf(note))
+        render()
+        composeRule.onNodeWithText(str(R.string.tafseer_tab_notes) + " · 1").performClick()
+        composeRule.onNodeWithContentDescription(str(R.string.cd_more_options)).performClick()
+        composeRule.onNodeWithText(str(R.string.edit_note)).performClick()
+        io.mockk.verify { viewModel.edit(note) }
+    }
+
 }

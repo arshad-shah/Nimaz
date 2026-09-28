@@ -2145,4 +2145,11 @@
     <string name="prayer_jumuah">Dschumu\'a</string>
     <string name="prayer_about_this_day">Über diesen Tag</string>
     <string name="cd_pick_month">Monat auswählen</string>
+    <string name="tafseer_note_deleted">Notiz gelöscht</string>
+    <string name="tafseer_reflection">Gedanke</string>
+    <string name="tafseer_highlight_note">Notiz zur Markierung</string>
+    <string name="tafseer_text_size">Textgröße</string>
+    <string name="tafseer_open_passage">Textstelle öffnen</string>
+    <string name="note_discard_title">Änderungen verwerfen?</string>
+    <string name="note_discard_message">Deine ungespeicherten Änderungen gehen verloren.</string>
 </resources>

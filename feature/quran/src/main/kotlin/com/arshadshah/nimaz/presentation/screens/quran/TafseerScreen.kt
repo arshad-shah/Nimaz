@@ -1,5 +1,11 @@
 package com.arshadshah.nimaz.presentation.screens.quran
 
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.material.icons.filled.TextFields
+import com.arshadshah.nimaz.presentation.components.molecules.NimazBottomSheet
+import com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsSlider
+import com.arshadshah.nimaz.presentation.components.organisms.TafseerNotesSheet
+import com.arshadshah.nimaz.domain.model.TafseerSource
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
@@ -63,16 +69,22 @@ fun TafseerScreen(
     ayahNumber: Int = 1,
     onNavigateBack: () -> Unit,
     onNavigateToTopic: (topicId: Int) -> Unit = {},
-    viewModel: TafseerViewModel = hiltViewModel()
+    viewModel: TafseerViewModel = hiltViewModel(),
+    sourceId: String? = null,
+    highlightOffset: Int? = null,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     var showNotes by remember { mutableStateOf(false) }
+    var showTypography by remember { mutableStateOf(false) }
+    var textSize by rememberSaveable { androidx.compose.runtime.mutableFloatStateOf(16f) }
+    var selecting by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
-    LaunchedEffect(surahNumber, ayahNumber) {
-        viewModel.onEvent(TafseerEvent.LoadSurah(surahNumber, ayahNumber))
+    LaunchedEffect(surahNumber, ayahNumber, sourceId, highlightOffset) {
+        viewModel.onEvent(TafseerEvent.LoadSurah(surahNumber, ayahNumber,
+            TafseerSource.entries.firstOrNull { it.id == sourceId }, highlightOffset))
     }
 
     // Build a branded, print/share-ready PDF of the current ayah's tafseer and
@@ -135,15 +147,13 @@ fun TafseerScreen(
                     ?.let { stringResource(R.string.audio_position_ayah_format, it, state.ayahs.size) },
                 onBackClick = onNavigateBack,
                 actions = {
-                    // The affordance that makes AddNote/UpdateNote/DeleteNote reachable at
-                    // all. The handlers and the Room collector behind them have been in the
-                    // ViewModel the whole time; nothing emitted the events, so the notes list
-                    // on TafseerChaptersScreen was permanently empty.
-                    IconButton(onClick = { showNotes = true }) {
-                        NimazIcon(
-                            imageVector = Icons.Outlined.EditNote,
-                            contentDescription = stringResource(R.string.tafseer_notes)
-                        )
+                    if (!state.isLoading && state.currentTafseer != null) {
+                        IconButton(onClick = { showTypography = true }) {
+                            NimazIcon(
+                                imageVector = Icons.Default.TextFields,
+                                contentDescription = stringResource(R.string.tafseer_text_size),
+                            )
+                        }
                     }
                 },
             )
@@ -173,7 +183,8 @@ fun TafseerScreen(
 
                 NimazPager(
                     state = pagerState,
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.fillMaxSize(),
+                    userScrollEnabled = !selecting,
                 ) { page ->
                     val ayah = state.ayahs[page]
                     val isCurrentPage = page == state.currentAyahIndex
@@ -204,6 +215,9 @@ fun TafseerScreen(
                         topics = if (isCurrentPage) state.topics else emptyList(),
                         onTopicClick = onNavigateToTopic,
                         translationLanguage = state.translationLanguage,
+                        textSize = textSize,
+                        onNotesClick = { showNotes = true },
+                        onSelectionActive = { selecting = it },
                     )
                 }
             } else {
@@ -221,97 +235,32 @@ fun TafseerScreen(
         }
     }
 
-    if (showNotes) {
-        TafseerNotesDialog(
-            notes = state.notes,
-            onAdd = { viewModel.onEvent(TafseerEvent.AddNote(it)) },
-            onUpdate = { viewModel.onEvent(TafseerEvent.UpdateNote(it)) },
-            onDelete = { viewModel.onEvent(TafseerEvent.DeleteNote(it)) },
-            onDismiss = { showNotes = false },
-        )
-    }
-}
-
-/**
- * The notes for the commentary block on screen: read them, write one, edit or delete one.
- *
- * `TafseerEvent.AddNote`, `UpdateNote` and `DeleteNote` had handlers, a use case, a repository
- * method and a Room collector — and no producer, so none of them had ever run and the notes
- * list on `TafseerChaptersScreen` was permanently empty. This is the missing producer.
- */
-@Composable
-private fun TafseerNotesDialog(
-    notes: List<TafseerNote>,
-    onAdd: (String) -> Unit,
-    onUpdate: (TafseerNote) -> Unit,
-    onDelete: (Long) -> Unit,
-    onDismiss: () -> Unit,
-) {
-    // Non-null while editing an existing note; null while composing a new one.
-    var editing by remember { mutableStateOf<TafseerNote?>(null) }
-    var draft by remember { mutableStateOf("") }
-
-    NimazDialog(
-        title = stringResource(R.string.tafseer_notes),
-        titleIcon = Icons.Outlined.EditNote,
-        onDismiss = onDismiss,
-        wrapContent = false,
-        actions = {
-            NimazDialogCancelButton(
-                text = stringResource(R.string.close),
-                onClick = onDismiss,
-            )
-            NimazButton(
-                text = stringResource(
-                    if (editing == null) R.string.tafseer_note_add else R.string.save
-                ),
-                onClick = {
-                    val current = editing
-                    if (current == null) onAdd(draft) else onUpdate(current.copy(text = draft))
-                    draft = ""
-                    editing = null
-                },
-                enabled = draft.isNotBlank(),
-                variant = NimazButtonVariant.FILLED,
-            )
+    val ayah = state.ayahs.getOrNull(state.currentAyahIndex)
+    if (showNotes && ayah != null) TafseerNotesSheet(
+        surahNumber = surahNumber,
+        ayahId = ayah.id,
+        ayahNumber = ayah.ayahNumber,
+        ayahStart = state.currentTafseer?.ayahStart ?: ayah.ayahNumber,
+        ayahEnd = state.currentTafseer?.ayahEnd ?: ayah.ayahNumber,
+        source = state.selectedSource,
+        onDismiss = { showNotes = false },
+        onOpen = { note ->
+            viewModel.onEvent(TafseerEvent.LoadSurah(note.surahNumber, note.ayahNumber,
+                TafseerSource.entries.firstOrNull { it.id == note.tafseerId }, note.highlight?.startOffset))
         },
+    )
+    if (showTypography) NimazBottomSheet(
+        onDismissRequest = { showTypography = false },
+        title = stringResource(R.string.tafseer_text_size),
+        onClose = { showTypography = false },
     ) {
-        NimazTextField(
-            value = draft,
-            onValueChange = { draft = it },
-            label = stringResource(R.string.tafseer_note_hint),
-            variant = NimazFieldVariant.NOTE,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp),
+        NimazSettingsSlider(
+            title = stringResource(R.string.tafseer_text_size),
+            valueLabel = textSize.toInt().toString(),
+            value = textSize,
+            onValueChange = { textSize = it },
+            valueRange = 14f..24f,
+            steps = 9,
         )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        notes.forEach { note ->
-            NimazCard(
-                style = NimazCardStyle.FILLED,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp, vertical = 4.dp),
-            ) {
-                Column(modifier = Modifier.padding(12.dp)) {
-                    Text(text = note.text, style = MaterialTheme.typography.bodyMedium)
-                    Row {
-                        TextButton(onClick = {
-                            editing = note
-                            draft = note.text
-                        }) { Text(stringResource(R.string.tafseer_note_edit)) }
-                        TextButton(onClick = {
-                            if (editing?.id == note.id) {
-                                editing = null
-                                draft = ""
-                            }
-                            onDelete(note.id)
-                        }) { Text(stringResource(R.string.delete)) }
-                    }
-                }
-            }
-        }
     }
 }

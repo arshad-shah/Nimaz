@@ -10,6 +10,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
+import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -35,37 +45,88 @@ fun NoteEditorSheet(
     onDismiss: () -> Unit,
     onSave: (String?) -> Unit,
     modifier: Modifier = Modifier,
+    fullScreen: Boolean = false,
+    saving: Boolean = false,
+    error: String? = null,
+    allowEmpty: Boolean = true,
 ) {
     // Keyed on the subject: reopening the sheet for a different verse must not carry the
     // previous one's draft across.
-    var text by remember(subject) { mutableStateOf(initialNote.orEmpty()) }
-    NimazBottomSheet(
-        onDismissRequest = onDismiss,
-        modifier = modifier,
-        title = stringResource(R.string.edit_note),
-        subtitle = subject,
-        icon = Icons.Default.Edit,
-        onClose = onDismiss,
-        footer = {
-            NimazSheetFooterButtons(
-                primaryText = stringResource(R.string.save),
-                onPrimary = { onSave(text.trim().takeIf { it.isNotEmpty() }) },
-                // The one place a field's state reaches outside itself: an empty note is not a
-                // note, so Save has nothing to do until there is something in the field.
-                primaryEnabled = text.isNotBlank() || !initialNote.isNullOrBlank(),
-                secondaryText = stringResource(R.string.cancel),
-                onSecondary = onDismiss,
-            )
+    var text by rememberSaveable(subject) { mutableStateOf(initialNote.orEmpty()) }
+    var discard by remember { mutableStateOf(false) }
+    val dismiss = {
+        if (!saving) {
+            if (text != initialNote.orEmpty()) discard = true else onDismiss()
         }
-    ) {
+    }
+    val canSave = !saving && (text.isNotBlank() || (allowEmpty && !initialNote.isNullOrBlank()))
+    val editor: @Composable () -> Unit = {
         NimazTextField(
             value = text,
-            onValueChange = { text = it },
+            onValueChange = { if (!saving) text = it },
             label = stringResource(R.string.edit_note),
             variant = NimazFieldVariant.NOTE,
             placeholder = stringResource(R.string.note_hint),
             modifier = Modifier.fillMaxWidth(),
+            minLines = if (fullScreen) 8 else 3,
+            maxLines = if (fullScreen) Int.MAX_VALUE else 8,
         )
-        Spacer(modifier = Modifier.height(8.dp))
+        error?.let {
+            Text(it, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(top = 12.dp))
+        }
     }
+    if (fullScreen) {
+        Dialog(onDismissRequest = dismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
+            BackHandler(onBack = dismiss)
+            NimazScreenScaffold(
+                modifier = Modifier.fillMaxSize().imePadding(),
+                topBar = {
+                    NimazBackTopAppBar(
+                        title = stringResource(R.string.edit_note),
+                        subtitle = subject,
+                        onBackClick = dismiss,
+                        actions = {
+                            NimazButton(
+                                text = stringResource(R.string.save),
+                                onClick = { onSave(text.trim().takeIf(String::isNotEmpty)) },
+                                enabled = canSave,
+                                variant = NimazButtonVariant.TEXT,
+                            )
+                        },
+                    )
+                },
+            ) { padding ->
+                Column(Modifier.fillMaxSize().padding(padding).padding(20.dp)) { editor() }
+            }
+        }
+    } else {
+        NimazBottomSheet(
+            onDismissRequest = dismiss,
+            modifier = modifier,
+            title = stringResource(R.string.edit_note),
+            subtitle = subject,
+            icon = Icons.Default.Edit,
+            onClose = dismiss,
+            footer = {
+                NimazSheetFooterButtons(
+                    primaryText = stringResource(R.string.save),
+                    onPrimary = { onSave(text.trim().takeIf(String::isNotEmpty)) },
+                    primaryEnabled = canSave,
+                    secondaryText = stringResource(R.string.cancel),
+                    onSecondary = dismiss,
+                )
+            }
+        ) {
+            editor()
+            Spacer(modifier = Modifier.height(8.dp))
+        }
+    }
+    if (discard) NimazConfirmDialog(
+        title = stringResource(R.string.note_discard_title),
+        message = stringResource(R.string.note_discard_message),
+        confirmText = stringResource(R.string.yes),
+        cancelText = stringResource(R.string.cancel),
+        onConfirm = { discard = false; onDismiss() },
+        onDismiss = { discard = false },
+    )
 }

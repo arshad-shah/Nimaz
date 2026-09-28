@@ -2104,4 +2104,11 @@
     <string name="prayer_jumuah">Jumat</string>
     <string name="prayer_about_this_day">Tentang hari ini</string>
     <string name="cd_pick_month">Pilih bulan</string>
+    <string name="tafseer_note_deleted">Catatan dihapus</string>
+    <string name="tafseer_reflection">Renungan</string>
+    <string name="tafseer_highlight_note">Catatan sorotan</string>
+    <string name="tafseer_text_size">Ukuran teks</string>
+    <string name="tafseer_open_passage">Buka bagian</string>
+    <string name="note_discard_title">Buang perubahan?</string>
+    <string name="note_discard_message">Perubahan yang belum disimpan akan hilang.</string>
 </resources>

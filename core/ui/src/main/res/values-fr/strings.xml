@@ -2188,4 +2188,11 @@
     <string name="prayer_jumuah">Joumou\'a</string>
     <string name="prayer_about_this_day">À propos de ce jour</string>
     <string name="cd_pick_month">Choisir un mois</string>
+    <string name="tafseer_note_deleted">Note supprimée</string>
+    <string name="tafseer_reflection">Réflexion</string>
+    <string name="tafseer_highlight_note">Note de surlignage</string>
+    <string name="tafseer_text_size">Taille du texte</string>
+    <string name="tafseer_open_passage">Ouvrir le passage</string>
+    <string name="note_discard_title">Abandonner les modifications ?</string>
+    <string name="note_discard_message">Vos modifications non enregistrées seront perdues.</string>
 </resources>
