@@ -16,8 +16,13 @@ into Global Search's **single search bar** — the same text drives both keyword
 search (as-you-type) and the AI ask (there is no separate "ask" field). While
 AI is enabled and there is text, the shared `NimazSearchBar` shows a trailing
 **Ask** pill; tapping it — or pressing Enter — submits the question. The
-source filter (All / Qur'an / Hadith / Duas / Names) is **pinned under the
-search bar** and scopes everything below it.
+source filter (All / Qur'an / Hadith / Duas / Names) opens from a **filter icon
+in the top bar**, beside search settings, and scopes the results list. It reuses
+`NimazIconButton`, `NimazDropdownMenu` and `NimazDropdownRow`; the selected
+option is marked, existing source counts are retained, and choosing an option
+closes the menu. A non-All scope gives the icon a tonal fill and is announced
+as its accessibility state. As before, filtering is offered when there is a
+query or an answer. The search input and result cards are unchanged.
 
 When AI is enabled, each submit makes **one** Worker call (`search-assist`):
 
@@ -46,7 +51,7 @@ The answer card itself is deliberately slim — badge, confidence chip, the
 answer text and a trust note. Its grounding lives in the **one merged,
 filterable results list** below it: cited verses and hadiths first, then
 related results (any related result that duplicates a cited record is
-dropped). The pinned filter scopes the whole merged list, cited cards
+dropped). The top-bar filter scopes the whole merged list, cited cards
 included. The list never blanks into a separate loading stage: while the
 AI-terms lookup runs, the keyword results the user was already looking at
 stay on screen below the cited rows and are swapped in place when it lands.
@@ -158,7 +163,7 @@ Layers (Android), with the Gradle module each lives in since #551:
 
 ```
 :core:ui        presentation/components/organisms/NimazSearchBar.kt shared bar; optional trailing Ask pill (showAskButton/askEnabled/onAsk; IME action routes to onAsk while live)
-:feature:search presentation/screens/search/SearchScreen.kt         pinned bar+filter; merges cited proofs + related results into ONE list (dedup, "Cited" cards)
+:feature:search presentation/screens/search/SearchScreen.kt         pinned search bar + top-bar filter menu; merges cited proofs + related results into ONE list (dedup, "Cited" cards)
 :feature:search presentation/screens/search/AskComponents.kt        answer card (no proof list) / loading / error banner (NimazBanner) / AI-off discovery card
 :app            presentation/screens/settings/SearchSettingsScreen  consent + toggles + privacy; clear-history opens a destructive NimazDialog listing the saved questions
 :feature:search presentation/viewmodel/ai/AskViewModel              ask state machine (exposes relatedTerms)
@@ -289,13 +294,13 @@ changed mid-query cannot leave half the passes on the old settings):
 | `resultsPerSource` | `MAX_PER_SOURCE = 60` | 10–200, stepped by 10 |
 | `sources` | all, always | any non-empty subset of `LibrarySource`; a source that is off is **not queried**, so narrowing is faster as well as narrower |
 | `strictness` | `MAX_WORD_QUERIES = 8` | `MatchStrictness` — `EXACT` (0 word passes), `BALANCED` (8, the old behaviour), `BROAD` (20) |
-| `defaultScope` | always "All" | which filter chip `SearchScreen` opens on; `null` is everything |
+| `defaultScope` | always "All" | which source filter `SearchScreen` opens on; `null` is everything |
 
 `LibrarySource` is `QURAN` (ayat, translations **and** surah names), `HADITH`, `DUAS` and
 `NAMES`. Surah names are not a separate source — "search the Qur'an but not its surah names" is
 not a distinction anyone wants — and for the same reason `NAMES` is one source covering all
 three name catalogues rather than three: they are one destination (`Route.Names`), one search
-box and one favourites area, so they are one switch and one filter chip too.
+box and one favourites area, so they are one switch and one source filter option too.
 
 `NAMES` is the one source that is **not** a database query. `SearchNamesUseCase` filters the
 catalogues in memory: they are 99 + 99 + 25 rows, already loaded by whatever screen is showing
