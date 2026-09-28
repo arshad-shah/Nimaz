@@ -12,7 +12,9 @@ Poses in both sets: takbir, standing, bowing, rise, prostration, sitting, tashah
 Repeated movements reuse assets. Salam means the worshipper's own right/left: never mirror for RTL.
 
 Generated with the built-in image-generation tool. Male WebP quality is 82. All nine female
-assets are now 1536×1024 lossless WebP. Eight were individually reconstructed from the
+assets are 1536×1024 WebP at quality 90 — re-encoded from the approved lossless masters without
+resizing (≈9.1 MB → ≈0.7 MB; composite PSNR 37.8–40.3 dB, no visible change to face, hands,
+khimar or mat at 1:1). The lossless files are in git history before that commit. Eight were individually reconstructed from the
 owner-approved poses; the earlier 444×295 approval-sheet crops were unsuitable for phone
 rendering and have been replaced. Sujud uses the separately approved original at its native
 1536×1024 resolution. No resize or sharpening is substituted for the reconstructed detail.
@@ -64,8 +66,8 @@ Production-resolution repair prompt (each of the eight non-sujud poses, one call
 preserve the supplied approved pose, joint/hand positions, head direction, mat orientation,
 costume, framing and teal/ivory/sage palette; reconstruct clean face, hands, fabric folds and
 mat detail as a standalone 1536×1024 illustration, without labels or annotations. Generated
-with the built-in tool and encoded losslessly. `test_learn_pray_content.py` now rejects
-low-resolution female assets. Pose/wardrobe review remains separate from resolution checks.
+with the built-in tool and encoded losslessly, later re-encoded at quality 90 as above.
+`test_learn_pray_content.py` rejects low-resolution female assets in either WebP encoding. Pose/wardrobe review remains separate from resolution checks.
 
 Reference checks (not a universal ruling):
 - [SeekersGuidance](https://seekersguidance.org/answers/hanafi-fiqh/what-is-the-proper-method-for-women-to-bow-and-prostrate-in-the-prayer/): compact prostration and shallower bow, but **hands on knees**, not thighs.

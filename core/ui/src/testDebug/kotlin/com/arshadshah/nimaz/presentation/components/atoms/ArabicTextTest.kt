@@ -65,7 +65,7 @@ class ArabicTextTest {
             assertThat(size.fontSize.value).isGreaterThan(0f)
             assertThat(size.lineHeight.value).isGreaterThan(0f)
         }
-        assertThat(ArabicTextSize.entries).hasSize(5)
+        assertThat(ArabicTextSize.DISPLAY.fontSize.value).isEqualTo(64f)
     }
 
     // ── QuranVerseText ──────────────────────────────────────────────────────

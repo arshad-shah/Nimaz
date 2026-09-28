@@ -54,6 +54,7 @@ class QaidaLettersScreenTest {
 
     private val viewModel: QaidaReaderViewModel = mockk(relaxed = true) {
         every { this@mockk.letters } returns this@QaidaLettersScreenTest.letters
+        every { this@mockk.download } returns MutableStateFlow(com.arshadshah.nimaz.presentation.viewmodel.content.QaidaDownloadState())
         every { onEvent(any()) } answers { events += firstArg<QaidaReaderEvent>() }
     }
 
@@ -207,6 +208,6 @@ class QaidaLettersScreenTest {
 
         composeRule.onNodeWithContentDescription(string(R.string.qaida_play_letter))
             .assertDoesNotExist()
-        assertThat(events).isEmpty()
+        assertThat(events.filterNot { it is QaidaReaderEvent.SelectLesson }).isEmpty()
     }
 }

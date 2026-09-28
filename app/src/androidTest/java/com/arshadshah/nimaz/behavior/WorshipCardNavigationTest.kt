@@ -107,6 +107,16 @@ class WorshipCardNavigationTest : BaseAppTest() {
     private companion object {
         const val LONDON_LAT = 51.5074
         const val LONDON_LON = -0.1278
-        const val WORSHIP_CARD_TIMEOUT_MS = 15_000L
+
+        /**
+         * 30 s, not 15. On launch the card is resolved **twice** before it can show: once from
+         * `HomeViewModel.init`, then again when the prayer-settings pass marks it stale and
+         * cancel-and-replaces that first job — each ~30 sequential DataStore reads plus an
+         * astronomical pass per candidate day. On a cold API 30 emulator that chain overran 15 s:
+         * PR #647's run failed at 15.8 s on one attempt and passed on the retry at the same
+         * hour, so the card was late, not absent. A slow first resolve is the designed behaviour
+         * (the card "arrives a beat after Home"); what this test asserts is where it leads.
+         */
+        const val WORSHIP_CARD_TIMEOUT_MS = 30_000L
     }
 }

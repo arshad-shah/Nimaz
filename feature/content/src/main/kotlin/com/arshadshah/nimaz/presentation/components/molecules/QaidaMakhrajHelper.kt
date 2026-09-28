@@ -34,17 +34,9 @@ fun makhrajLabel(area: MakhrajArea): String = when (area) {
     MakhrajArea.KHAYSHUM -> stringResource(R.string.makhraj_khayshum)
 }
 
-private fun makhrajEmoji(area: MakhrajArea): String = when (area) {
-    MakhrajArea.JAWF -> "🗣️"
-    MakhrajArea.HALQ -> "🗣️"
-    MakhrajArea.LISAN -> "👅"
-    MakhrajArea.SHAFATAIN -> "👄"
-    MakhrajArea.KHAYSHUM -> "👃"
-}
-
 /**
  * "Where it's made" helper in the letter detail sheet — a friendly line about
- * the makhraj (articulation point), with an emoji cue and the specific detail.
+ * the makhraj (articulation point), with the specific detail beside its separate anatomical diagram.
  */
 @Composable
 fun QaidaMakhrajHelper(
@@ -54,7 +46,7 @@ fun QaidaMakhrajHelper(
 ) {
     NimazCard(
         modifier = modifier.fillMaxWidth(),
-        tone = NimazTone.WARNING,
+        tone = NimazTone.ACCENT,
         shape = RoundedCornerShape(NimazCornerRadius.Medium),
     ) {
         Row(
@@ -62,10 +54,6 @@ fun QaidaMakhrajHelper(
             horizontalArrangement = Arrangement.spacedBy(NimazSpacing.Medium),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(
-                text = makhrajEmoji(area),
-                style = MaterialTheme.typography.headlineSmall,
-            )
             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(
                     text = stringResource(R.string.qaida_made_with_format, makhrajLabel(area)),

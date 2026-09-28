@@ -43,6 +43,7 @@ enum class ArabicTextSize(val fontSize: TextUnit, val lineHeight: TextUnit) {
     MEDIUM(24.sp, 44.sp),
     LARGE(28.sp, 52.sp),
     EXTRA_LARGE(32.sp, 56.sp),
+    DISPLAY(64.sp, 104.sp),
     QURAN(28.sp, 56.sp)
 }
 

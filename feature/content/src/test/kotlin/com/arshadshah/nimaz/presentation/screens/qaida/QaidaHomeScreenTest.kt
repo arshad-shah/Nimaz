@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.presentation.screens.qaida
 
+import com.arshadshah.nimaz.data.qaida.QaidaLearningSettings
 import android.content.Context
 import androidx.annotation.StringRes
 import androidx.compose.ui.test.assertIsDisplayed
@@ -8,6 +9,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ApplicationProvider
 import com.arshadshah.nimaz.core.ui.R
+import com.arshadshah.nimaz.feature.content.R as FeatureR
 import com.arshadshah.nimaz.domain.model.LessonStatus
 import com.arshadshah.nimaz.domain.model.QaidaCourseProgress
 import com.arshadshah.nimaz.presentation.viewmodel.content.QaidaReaderEvent
@@ -55,8 +57,13 @@ class QaidaHomeScreenTest {
     private val courseProgress = MutableStateFlow<QaidaCourseProgress?>(null)
     private val events = mutableListOf<QaidaReaderEvent>()
 
+    private val preferences = MutableStateFlow(QaidaLearningSettings())
     private val viewModel: QaidaReaderViewModel = mockk(relaxed = true) {
+        every { settings } returns preferences
         every { this@mockk.courseProgress } returns this@QaidaHomeScreenTest.courseProgress
+        every { this@mockk.dueLessons } returns MutableStateFlow(emptySet())
+        every { this@mockk.todayCount } returns MutableStateFlow(0)
+        every { this@mockk.cacheBytes } returns MutableStateFlow(0L)
         every { onEvent(any()) } answers { events += firstArg<QaidaReaderEvent>() }
     }
 
@@ -100,6 +107,7 @@ class QaidaHomeScreenTest {
         )
 
         setContent()
+        composeRule.onNodeWithText(string(FeatureR.string.qaida_see_all)).performClick()
 
         composeRule.onNodeWithContentDescription(
             string(R.string.qaida_a11y_lesson_current_format, 1, "The Arabic Letters")
@@ -120,6 +128,7 @@ class QaidaHomeScreenTest {
         )
 
         setContent()
+        composeRule.onNodeWithText(string(FeatureR.string.qaida_see_all)).performClick()
         composeRule.onNodeWithContentDescription(
             string(R.string.qaida_a11y_lesson_current_format, 2, "Fatha")
         ).performClick()
@@ -200,7 +209,7 @@ class QaidaHomeScreenTest {
         )
 
         setContent()
-        composeRule.onNodeWithContentDescription(string(R.string.more)).performClick()
+        composeRule.onNodeWithContentDescription(string(FeatureR.string.qaida_settings)).performClick()
         composeRule.onNodeWithText(string(R.string.qaida_reset_journey)).performClick()
 
         // The menu row opens the dialog and dispatches nothing.
@@ -220,11 +229,41 @@ class QaidaHomeScreenTest {
         )
 
         setContent()
-        composeRule.onNodeWithContentDescription(string(R.string.more)).performClick()
+        composeRule.onNodeWithContentDescription(string(FeatureR.string.qaida_settings)).performClick()
         composeRule.onNodeWithText(string(R.string.qaida_reset_journey)).performClick()
         composeRule.onNodeWithText(string(R.string.cancel)).performClick()
 
         assertThat(events).isEmpty()
         composeRule.onNodeWithText(string(R.string.qaida_reset_title)).assertDoesNotExist()
     }
+    @Test
+    fun `review contains only due lessons and opens the selected one`() {
+        courseProgress.value = qaidaCourse(listOf(qaidaLessonState(1, "Letters"), qaidaLessonState(2, "Joined letters")))
+        every { viewModel.dueLessons } returns MutableStateFlow(setOf(2))
+        setContent()
+        composeRule.onNodeWithText(string(FeatureR.string.qaida_tab_review)).performClick()
+        composeRule.onNodeWithText("Letters").assertDoesNotExist()
+        composeRule.onNodeWithText("Joined letters").performClick()
+        assertThat(openedLessons).containsExactly(2)
+    }
+
+    @Test
+    fun `empty review explains how to build a practice queue`() {
+        setContent()
+        composeRule.onNodeWithText(string(FeatureR.string.qaida_tab_review)).performClick()
+        composeRule.onNodeWithText(string(FeatureR.string.qaida_review_empty)).assertExists()
+    }
+
+    @Test
+    fun `removing audio asks for confirmation and never resets learning`() {
+        every { viewModel.cacheBytes } returns MutableStateFlow(1048576L)
+        setContent()
+        composeRule.onNodeWithText(string(FeatureR.string.qaida_tab_downloads)).performClick()
+        composeRule.onNodeWithText(string(FeatureR.string.qaida_clear_audio)).performClick()
+        assertThat(events).isEmpty()
+        composeRule.onNodeWithText(string(FeatureR.string.qaida_clear_audio_message)).assertExists()
+        composeRule.onNodeWithText(string(R.string.cancel)).performClick()
+        assertThat(events).isEmpty()
+    }
+
 }

@@ -10,6 +10,12 @@ plugins {
 
 android {
     namespace = "com.arshadshah.nimaz.feature.content"
+    buildFeatures { resValues = true }
+    defaultConfig {
+        // Set to the deployed read-only Cloudflare Worker root. Empty means audio
+        // is not published yet; reading/practice remain available on-device.
+        resValue("string", "qaida_audio_base_url", providers.gradleProperty("qaidaAudioBaseUrl").orElse("").get())
+    }
 
     testOptions {
         unitTests {
@@ -17,6 +23,19 @@ android {
             isIncludeAndroidResources = true
         }
     }
+}
+
+// **2 GB for this module's unit-test JVM, where every other module keeps Gradle's 512 MB default.**
+// `QaidaVisualCheckTest` renders 358 full-screen captures under `GraphicsMode.NATIVE` — each an
+// ARGB bitmap plus Roborazzi's AWT copy of it — and the Qaida screens decode two 1536×1024
+// raster illustrations. On its own (`scripts/record_qaida_previews.sh`) that fits in 512 MB; in
+// the same JVM as the rest of the module's Robolectric suite it does not. PR #647's `check` died
+// with `OutOfMemoryError at DataBufferInt` in `QaidaReaderScreenTest`, every later class in the
+// fork failed the same way, and the JVM then thrashed in GC until the job's 45-minute timeout.
+// The captures stay in the suite on purpose: they are what drives the Qaida states the screen
+// tests no longer enumerate, so taking them out would move this module's coverage, not its heap.
+tasks.withType<Test>().configureEach {
+    maxHeapSize = "2g"
 }
 
 nimazCoverage {
@@ -131,7 +150,9 @@ dependencies {
     // compiling because nothing they touch is `internal`; see `FeatureTestsLiveWithSubjectTest`
     // in `:app` for what now catches that. `src/testDebug/resources/robolectric.properties`
     // carries the SDK and Application pins.
+    testImplementation(libs.json)
     testImplementation(libs.robolectric)
+    testImplementation("io.github.takahirom.roborazzi:roborazzi:1.50.0")
     testImplementation(libs.androidx.junit)
     testImplementation(platform(libs.androidx.compose.bom))
     testImplementation(libs.androidx.compose.ui.test.junit4)

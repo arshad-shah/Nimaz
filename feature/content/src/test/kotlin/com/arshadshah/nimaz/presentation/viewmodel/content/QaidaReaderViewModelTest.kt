@@ -105,7 +105,7 @@ class QaidaReaderViewModelTest {
     private fun createViewModel() = QaidaReaderViewModel(useCases, audioManager, RecordingTelemetry())
 
     @Test
-    fun `tapping a cell plays its clip and marks it heard`() = runTest {
+    fun `tapping a cell plays but does not credit unheard audio`() = runTest {
         val vm = createViewModel()
         val cell = cell(id = 11, lessonId = 1, audioKey = "l1_alif")
 
@@ -113,7 +113,7 @@ class QaidaReaderViewModelTest {
         advanceUntilIdle()
 
         verify { audioManager.play("l1_alif") }
-        coVerify { markCellHeard.invoke(1, 11, any()) }
+        coVerify(exactly = 0) { markCellHeard.invoke(1, 11, any()) }
     }
 
     @Test

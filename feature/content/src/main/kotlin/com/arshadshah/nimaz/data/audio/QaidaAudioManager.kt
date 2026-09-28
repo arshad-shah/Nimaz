@@ -15,8 +15,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import java.io.File
-import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -43,31 +41,22 @@ data class QaidaAudioState(
  * playlist position tracking, no foreground service, no notification/MediaSession,
  * no CDN streaming. The clips are sub-second taps, not background listening.
  *
- * Source resolution honours sub-issue B's delivery decision: the 2 MB clip pack
- * ships **bundled** in `assets/qaida/audio/`, so a key resolves directly to an
- * `android_asset` URI (which Media3's `DefaultDataSource` routes to its
- * `AssetDataSource`). A downloaded/drop-in override under
- * `filesDir/qaida_audio/` is honoured first, so the same engine also serves the
- * on-demand delivery mode without code changes — and works fully offline once a
- * clip is on disk either way.
- *
- * A single reused [ExoPlayer] means rapid taps cancel/replace cleanly: each
- * [play] simply swaps the current [MediaItem], and resolved items are cached so
- * repeat taps are instant.
+ * Only complete, content-matched lessons verified by QaidaLessonAudioStore are playable.
  */
 @UnstableApi
 @Singleton
 class QaidaAudioManager @Inject constructor(
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
+    private val lessonAudio: QaidaLessonAudioStore = QaidaLessonAudioStore(context),
 ) {
     private var player: ExoPlayer? = null
+    private var playbackSpeed = 1f
 
     private val _state = MutableStateFlow(QaidaAudioState())
     val state: StateFlow<QaidaAudioState> = _state.asStateFlow()
 
     // Resolved MediaItems keyed by audio_key, so repeated taps never rebuild
     // them — the whole point is instant replay.
-    private val mediaItemCache = ConcurrentHashMap<String, MediaItem>()
 
     // The ordered keys currently queued, so media-item transitions can report
     // the right currentKey when playing a whole line via playSequence().
@@ -90,6 +79,7 @@ class QaidaAudioManager @Inject constructor(
     private fun getOrCreatePlayer(): ExoPlayer {
         return player ?: ExoPlayer.Builder(context).build().also { newPlayer ->
             player = newPlayer
+            newPlayer.setPlaybackSpeed(playbackSpeed)
             newPlayer.addListener(object : Player.Listener {
                 override fun onPlaybackStateChanged(playbackState: Int) {
                     when (playbackState) {
@@ -150,7 +140,11 @@ class QaidaAudioManager @Inject constructor(
     fun play(audioKey: String) {
         if (audioKey.isBlank()) return
         sequenceKeys = listOf(audioKey)
-        val item = mediaItemFor(audioKey)
+        val item = mediaItemFor(audioKey) ?: run {
+            stop()
+            _state.value = QaidaAudioState(error = "audio_not_downloaded")
+            return
+        }
         val p = getOrCreatePlayer()
         _state.update { it.copy(currentKey = audioKey, isLoading = true, error = null) }
         p.setMediaItem(item)
@@ -172,7 +166,13 @@ class QaidaAudioManager @Inject constructor(
             }
         }
         sequenceKeys = clean
-        val items = clean.map { mediaItemFor(it) }
+        val items = clean.map { key ->
+            mediaItemFor(key) ?: run {
+                stop()
+                _state.value = QaidaAudioState(error = "audio_not_downloaded")
+                return
+            }
+        }
         val p = getOrCreatePlayer()
         _state.update { it.copy(currentKey = clean.first(), isLoading = true, error = null) }
         p.setMediaItems(items)
@@ -195,35 +195,18 @@ class QaidaAudioManager @Inject constructor(
         sequenceKeys = emptyList()
         player?.release()
         player = null
-        mediaItemCache.clear()
         _state.update { QaidaAudioState() }
     }
 
-    private fun mediaItemFor(audioKey: String): MediaItem =
-        mediaItemCache.getOrPut(audioKey) {
-            MediaItem.Builder()
-                .setMediaId(audioKey)
-                .setUri(resolveUri(audioKey))
-                .build()
-        }
-
-    /**
-     * Resolve a token's `audio_key` to a playable URI. A downloaded/drop-in clip
-     * under `filesDir/qaida_audio/` wins (the on-demand delivery mode), otherwise
-     * the bundled asset is used (the shipped default). Both are local, so either
-     * way playback is offline and instant.
-     */
-    private fun resolveUri(audioKey: String): String {
-        val downloaded = File(File(context.filesDir, DOWNLOAD_DIR), "$audioKey.mp3")
-        return if (downloaded.exists() && downloaded.length() > 0) {
-            downloaded.toURI().toString()
-        } else {
-            "$ASSET_AUDIO_URI_PREFIX$audioKey.mp3"
-        }
+    /** Pitch-preserving slower playback; repeats use the same reviewed source clip. */
+    fun setSlow(slow: Boolean) {
+        playbackSpeed = if (slow) 0.75f else 1f
+        player?.setPlaybackSpeed(playbackSpeed)
     }
 
-    companion object {
-        private const val ASSET_AUDIO_URI_PREFIX = "file:///android_asset/qaida/audio/"
-        private const val DOWNLOAD_DIR = "qaida_audio"
+    private fun mediaItemFor(audioKey: String): MediaItem? {
+        val file = lessonAudio.resolve(audioKey) ?: return null
+        // Resolve each time: a refreshed lesson can replace the clip for the same key.
+        return MediaItem.Builder().setMediaId(audioKey).setUri(file.toURI().toString()).build()
     }
 }

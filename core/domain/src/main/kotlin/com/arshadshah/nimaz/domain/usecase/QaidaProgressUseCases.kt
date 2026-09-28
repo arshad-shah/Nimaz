@@ -35,14 +35,20 @@ class MarkCellHeardUseCase @Inject constructor(
         lessonId: Int,
         cellId: Int,
         now: Long = System.currentTimeMillis()
-    ) {
-        // 1. Mark the individual cell as heard (incrementing replay count).
+    ) = record(lessonId, cellId, now, heard = true)
+
+    /** Explicit learner confirmation advances study without inventing an audio play. */
+    suspend fun markPractised(lessonId: Int, cellId: Int, now: Long = System.currentTimeMillis()) =
+        record(lessonId, cellId, now, heard = false)
+
+    private suspend fun record(lessonId: Int, cellId: Int, now: Long, heard: Boolean) {
+        // Keep actual audio plays separate from learner-confirmed practice.
         val existingCell = repository.getCellProgress(lessonId, cellId)
         repository.upsertCellProgress(
             QaidaCellProgress(
                 lessonId = lessonId,
                 cellId = cellId,
-                heardCount = (existingCell?.heardCount ?: 0) + 1,
+                heardCount = (existingCell?.heardCount ?: 0) + if (heard) 1 else 0,
                 isCompleted = true,
                 lastPracticedAt = now
             )
