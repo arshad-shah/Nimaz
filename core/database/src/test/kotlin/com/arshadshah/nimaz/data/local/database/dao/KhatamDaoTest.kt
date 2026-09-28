@@ -385,4 +385,16 @@ class KhatamDaoTest {
         date = date,
         ayahsRead = ayahsRead,
     )
+    @Test
+    fun `read marks preserve original timestamps and are isolated by plan`() = runTest {
+        val first = dao.insertKhatam(khatam("First"))
+        val second = dao.insertKhatam(khatam("Second"))
+        dao.insertAyahs(listOf(KhatamAyahEntity(first, 1, readAt = 100), KhatamAyahEntity(second, 2, readAt = 200)))
+        dao.markAyahsRead(first, listOf(1))
+        assertThat(dao.observeReadMarks(first).first().map { it.ayahId to it.readAt }).containsExactly(1 to 100L)
+        dao.unmarkAyahRead(first, 1)
+        assertThat(dao.observeReadMarks(first).first()).isEmpty()
+        assertThat(dao.observeReadMarks(second).first().single().readAt).isEqualTo(200L)
+    }
+
 }

@@ -931,6 +931,20 @@ changing the lesson position, recitations or sequence. `SavedStateHandle` restor
 illustration choice; it is not a gender inference or a synced profile field. Clothing notes
 separate illustration choices from sourced requirements and disputed posture/coverage details.
 
+The khatam list and detail share `KhatamHeroCard` and `KhatamDailyReading`: a single
+progress bar, the fixed daily range and one reading action. The active plan is excluded from
+secondary list rows and from completed/archived tabs. `KhatamJourneyTrail` now renders a
+compact ordered grid, reducing columns at large font scales; it keeps its existing API and
+per-juz accessibility labels. `KhatamReadingActivity` renders the domain's seven-day log.
+Create/edit continue to share `KhatamFormScreen`, the standard field family, `NimazAccordion`
+for notes, and a scaffold bottom-bar save action. `NimazEmptyState.illustration` is an optional
+slot; khatam supplies its own artwork without forking the empty-state component.
+
+Khatam's decorative `khatam_book.webp` is a transparent, generated ivory/teal/gold book,
+shared between card (64dp) and empty-state (112dp) sizes. It contains no text and has no
+accessibility announcement. Source: built-in image generation, 28 September 2026; optimized
+to 384px for Android. No remote image dependency or per-theme duplicate is needed.
+
 ### 8.0 Accessibility — the obligation
 
 Three rules, and they are obligations rather than suggestions: the app shipped **373

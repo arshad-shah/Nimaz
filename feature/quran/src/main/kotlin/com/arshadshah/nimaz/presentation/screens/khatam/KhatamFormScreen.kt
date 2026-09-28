@@ -1,5 +1,10 @@
 package com.arshadshah.nimaz.presentation.screens.khatam
 
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.material3.Surface
+import com.arshadshah.nimaz.presentation.components.molecules.NimazAccordion
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -168,6 +173,19 @@ fun KhatamFormScreen(
                 },
             )
         },
+        bottomBar = {
+            if (!state.isLoading) Surface(color = MaterialTheme.colorScheme.surface) {
+                NimazButton(
+                    text = stringResource(if (state.isEdit) R.string.khatam_action_save else R.string.khatam_action_begin),
+                    onClick = { viewModel.onEvent(KhatamEvent.SaveKhatam) },
+                    modifier = Modifier.fillMaxWidth().navigationBarsPadding().imePadding().padding(NimazSpacing.Large),
+                    type = NimazButtonType.PILL,
+                    loading = state.isSaving,
+                    enabled = !state.isSaving,
+                    fullWidth = true,
+                )
+            }
+        },
     ) { padding ->
         if (state.isLoading) {
             NimazLoadingState(modifier = Modifier.padding(padding))
@@ -218,6 +236,7 @@ private fun KhatamFormContent(
     contentPadding: PaddingValues,
     onEvent: (KhatamEvent) -> Unit,
 ) {
+    var notesExpanded by rememberSaveable { mutableStateOf(false) }
     var showDatePicker by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
     val formatter = rememberKhatamDateFormatter()
@@ -242,6 +261,14 @@ private fun KhatamFormContent(
         ),
         verticalArrangement = Arrangement.spacedBy(NimazSpacing.Small),
     ) {
+        if (!state.isEdit) {
+            item(key = "introduction") {
+                Column(verticalArrangement = Arrangement.spacedBy(NimazSpacing.Small)) {
+                    Text(stringResource(R.string.khatam_form_intro), style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.khatam_form_intro_detail), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            }
+        }
         // On edit, lead with progress and state plainly that editing won't touch it.
         if (state.isEdit) {
             item(key = "progress-note") {
@@ -421,32 +448,23 @@ private fun KhatamFormContent(
         }
 
         item(key = "notes") {
-            NimazTextField(
-                value = state.notes,
-                onValueChange = { onEvent(KhatamEvent.UpdateNotes(it)) },
-                label = stringResource(R.string.field_notes),
-                optionalLabel = stringResource(R.string.khatam_optional),
-                variant = NimazFieldVariant.NOTE,
-                placeholder = stringResource(R.string.khatam_notes_placeholder),
-                modifier = Modifier.fillMaxWidth(),
-            )
+            NimazAccordion(
+                title = stringResource(R.string.field_notes),
+                subtitle = if (state.notes.isBlank()) stringResource(R.string.khatam_optional) else state.notes,
+                expanded = notesExpanded,
+                onExpandedChange = { notesExpanded = it },
+            ) {
+                NimazTextField(
+                    value = state.notes,
+                    onValueChange = { onEvent(KhatamEvent.UpdateNotes(it)) },
+                    label = stringResource(R.string.field_notes),
+                    variant = NimazFieldVariant.NOTE,
+                    placeholder = stringResource(R.string.khatam_notes_placeholder),
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
         }
 
-        item(key = "save") {
-            Spacer(Modifier.height(NimazSpacing.Small))
-            NimazButton(
-                text = stringResource(
-                    if (state.isEdit) R.string.khatam_action_save
-                    else R.string.khatam_action_begin
-                ),
-                onClick = { onEvent(KhatamEvent.SaveKhatam) },
-                modifier = Modifier.fillMaxWidth(),
-                type = NimazButtonType.PILL,
-                loading = state.isSaving,
-                enabled = !state.isSaving,
-                fullWidth = true,
-            )
-        }
     }
 
     if (showDatePicker) {

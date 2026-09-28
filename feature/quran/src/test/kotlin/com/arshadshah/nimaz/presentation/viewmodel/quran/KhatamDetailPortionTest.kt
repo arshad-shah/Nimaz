@@ -232,4 +232,58 @@ class KhatamDetailPortionTest {
             assertThat(viewModel.detailState.value.todaysPortionLabel).isNull()
             assertThat(viewModel.detailState.value.notFound).isFalse()
         }
+    private fun realPortionViewModel() = KhatamViewModel(
+        khatamUseCases, quranUseCases, GetTodaysPortion(), FakeStringProvider(), telemetry,
+    )
+
+    @Test
+    fun `overview and detail share a stable assignment as read marks change`() = runTest {
+        every { khatamUseCases.observeActiveKhatam() } returns flowOf(khatam.copy(isActive = true))
+        val marks = (1..100).associateWith { System.currentTimeMillis() - 172_800_000L }
+        detail.value = snapshot.copy(khatam = khatam.copy(totalAyahsRead = 100, isActive = true), readAyahIds = marks.keys, readAtByAyah = marks)
+        coEvery { khatamUseCases.getNextUnreadPosition(7) } returns (2 to 94)
+        val vm = realPortionViewModel()
+        vm.onEvent(KhatamEvent.LoadKhatamDetail(7))
+        advanceUntilIdle()
+        val initial = vm.detailState.value.dailyReading!!
+        assertThat(initial.portion.fromAyahId).isEqualTo(101)
+        assertThat(vm.listState.value.dailyReading).isEqualTo(initial)
+        val updated = marks + (101..110).associateWith { System.currentTimeMillis() }
+        coEvery { khatamUseCases.getNextUnreadPosition(7) } returns (2 to 104)
+        detail.value = detail.value!!.copy(readAyahIds = updated.keys, readAtByAyah = updated)
+        advanceUntilIdle()
+        assertThat(vm.detailState.value.dailyReading!!.portion).isEqualTo(initial.portion)
+        assertThat(vm.detailState.value.dailyReading!!.readCount).isEqualTo(10)
+        assertThat(vm.listState.value.dailyReading).isEqualTo(vm.detailState.value.dailyReading)
+        vm.onEvent(KhatamEvent.RefreshReadingDay)
+        advanceUntilIdle()
+        assertThat(vm.detailState.value.dailyReading!!.portion).isEqualTo(initial.portion)
+    }
+
+    @Test
+    fun `removed active plan clears the old resume target and assignment`() = runTest {
+        val active = MutableStateFlow<Khatam?>(khatam.copy(isActive = true))
+        every { khatamUseCases.observeActiveKhatam() } returns active
+        detail.value = snapshot.copy(readAtByAyah = emptyMap())
+        coEvery { khatamUseCases.getNextUnreadPosition(7) } returns (1 to 1)
+        val vm = realPortionViewModel()
+        advanceUntilIdle()
+        assertThat(vm.listState.value.nextUnreadSurah).isEqualTo(1)
+        active.value = null
+        advanceUntilIdle()
+        assertThat(vm.listState.value.nextUnreadSurah).isNull()
+        assertThat(vm.listState.value.nextUnreadAyah).isNull()
+        assertThat(vm.listState.value.dailyReading).isNull()
+    }
+
+    @Test
+    fun `fully read snapshot with null next position cannot restart from verse one`() = runTest {
+        detail.value = snapshot.copy(khatam = khatam.copy(totalAyahsRead = 6236), readAtByAyah = emptyMap())
+        coEvery { khatamUseCases.getNextUnreadPosition(7) } returns null
+        val vm = realPortionViewModel()
+        vm.onEvent(KhatamEvent.LoadKhatamDetail(7))
+        advanceUntilIdle()
+        assertThat(vm.detailState.value.dailyReading).isNull()
+    }
+
 }
