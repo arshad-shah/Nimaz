@@ -25,7 +25,7 @@ Reference checks (not endorsements or copied artwork):
 
 ## Roborazzi captures
 
-Source commit: `ab88c1dbd44444193ec874b97d523c205b845741`.
+Source commit: `9a51a9c34a957bbaeaf4c2c46016b8901a647aeb`.
 
 | Letter | Light | Dark |
 | --- | --- | --- |
