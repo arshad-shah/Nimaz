@@ -7,6 +7,7 @@ import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.core.text.StringProvider
 import com.arshadshah.nimaz.domain.model.Khatam
+import com.arshadshah.nimaz.domain.model.KhatamDetailSnapshot
 import com.arshadshah.nimaz.domain.model.KhatamStatus
 import com.arshadshah.nimaz.domain.model.Surah
 import com.arshadshah.nimaz.domain.usecase.KhatamUseCases
@@ -23,6 +24,8 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.combine
 import javax.inject.Inject
 
 /** Whether the shared form is creating a new khatam or editing an existing one. */
@@ -86,6 +89,8 @@ class KhatamViewModel @Inject constructor(
      * coroutine so switching khatams cancels the previous observation via [flatMapLatest]
      * instead of stacking a second, never-cancelled collector onto the same state.
      */
+    private val readingDay = MutableStateFlow(0)
+
     private val detailKhatamId = MutableStateFlow<Long?>(null)
 
     init {
@@ -96,6 +101,7 @@ class KhatamViewModel @Inject constructor(
     fun onEvent(event: KhatamEvent) {
         logAnalytics(event)
         when (event) {
+            KhatamEvent.RefreshReadingDay -> readingDay.update { it + 1 }
             is KhatamEvent.SetActiveKhatam -> setActiveKhatam(event.khatamId)
             is KhatamEvent.DeleteKhatam -> launchAction { khatamUseCases.deleteKhatam(event.khatamId) }
             is KhatamEvent.AbandonKhatam -> launchAction { khatamUseCases.abandonKhatam(event.khatamId) }
@@ -146,6 +152,7 @@ class KhatamViewModel @Inject constructor(
         action?.let { telemetry.featureUsed(AppAnalytics.Feature.KHATAM, it) }
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     private fun observeKhatams() {
         launchSafely(telemetry, AppAnalytics.Feature.KHATAM, "observe_khatams") {
             khatamUseCases.observeInProgressKhatams().collect { list ->
@@ -179,14 +186,19 @@ class KhatamViewModel @Inject constructor(
                         khatamUseCases.observeKhatamDetail(active.id)
                     }
                 }
-                .collect { snapshot ->
+                .combine(readingDay) { snapshot, _ -> snapshot }
+                .mapLatest { snapshot -> snapshot to snapshot?.let { resolveReading(it) } }
+                .collect { (snapshot, reading) ->
                     _listState.update {
                         it.copy(
                             activeKhatam = snapshot?.khatam,
-                            activeInsights = snapshot?.insights
+                            activeInsights = snapshot?.insights,
+                            nextUnreadSurah = reading?.next?.first,
+                            nextUnreadAyah = reading?.next?.second,
+                            nextUnreadSurahName = reading?.name,
+                            dailyReading = reading?.daily,
                         )
                     }
-                    snapshot?.khatam?.let { refreshListNextUnread(it.id) }
                 }
         }
     }
@@ -202,69 +214,48 @@ class KhatamViewModel @Inject constructor(
             detailKhatamId
                 .filterNotNull()
                 .flatMapLatest { id -> khatamUseCases.observeKhatamDetail(id) }
-                .collect { snapshot ->
-                    if (snapshot == null) {
-                        _detailState.update {
-                            it.copy(isLoading = false, notFound = true, khatam = null)
-                        }
+                .combine(readingDay) { snapshot, _ -> snapshot }
+                .mapLatest { snapshot -> snapshot to snapshot?.let { resolveReading(it) } }
+                .collect { (snapshot, reading) ->
+                    _detailState.value = if (snapshot == null) {
+                        KhatamDetailUiState(isLoading = false, notFound = true)
                     } else {
-                        _detailState.update {
-                            it.copy(
-                                khatam = snapshot.khatam,
-                                juzProgress = snapshot.juzProgress,
-                                dailyLogs = snapshot.dailyLogs,
-                                insights = snapshot.insights,
-                                isLoading = false,
-                                notFound = false
-                            )
-                        }
-                        refreshDetailNextUnread(snapshot.khatam.id)
+                        KhatamDetailUiState(
+                            khatam = snapshot.khatam,
+                            juzProgress = snapshot.juzProgress,
+                            dailyLogs = snapshot.dailyLogs,
+                            insights = snapshot.insights,
+                            isLoading = false,
+                            nextUnreadSurah = reading?.next?.first,
+                            nextUnreadAyah = reading?.next?.second,
+                            nextUnreadSurahName = reading?.name,
+                            dailyReading = reading?.daily,
+                        )
                     }
                 }
         }
     }
 
-    /**
-     * The next unread position needs a join against the ayah table, so it stays a
-     * one-shot query refreshed whenever the khatam's progress changes.
-     */
-    private fun refreshDetailNextUnread(khatamId: Long) {
-        launchSafely(telemetry, AppAnalytics.Feature.KHATAM, "refresh_detail_next_unread") {
-            val next = khatamUseCases.getNextUnreadPosition(khatamId)
-            val name = next?.first?.let { surahName(it) }
-            val surahs = runCatching { quranUseCases.getSurahList().first() }.getOrDefault(
-                emptyList()
-            )
-            val startId = next?.let { globalAyahId(surahs, it.first, it.second) }
-            _detailState.update { state ->
-                if (state.khatam?.id != khatamId) state
-                else {
-                    val portion = state.khatam.let { getTodaysPortion(it, startId) }
-                    state.copy(
-                        nextUnreadSurah = next?.first,
-                        nextUnreadAyah = next?.second,
-                        nextUnreadSurahName = name,
-                        todaysPortion = portion,
-                        todaysPortionLabel = portion?.let { portionLabel(surahs, it) },
-                    )
-                }
-            }
-        }
-    }
+    private data class Reading(
+        val next: Pair<Int, Int>?,
+        val name: String?,
+        val daily: KhatamDailyReading?,
+    )
 
-    private fun refreshListNextUnread(khatamId: Long) {
-        launchSafely(telemetry, AppAnalytics.Feature.KHATAM, "refresh_list_next_unread") {
-            val next = khatamUseCases.getNextUnreadPosition(khatamId)
-            val name = next?.first?.let { surahName(it) }
-            _listState.update {
-                if (it.activeKhatam?.id != khatamId) it
-                else it.copy(
-                    nextUnreadSurah = next?.first,
-                    nextUnreadAyah = next?.second,
-                    nextUnreadSurahName = name,
-                )
-            }
-        }
+    /** A single resolver keeps list/detail ranges, counts and fallback labels identical. */
+    private suspend fun resolveReading(snapshot: KhatamDetailSnapshot): Reading {
+        val next = khatamUseCases.getNextUnreadPosition(snapshot.khatam.id)
+        val surahs = runCatching { quranUseCases.getSurahList().first() }.getOrDefault(emptyList())
+        val startId = next?.let { globalAyahId(surahs, it.first, it.second) }
+        val portion = snapshot.readAtByAyah?.let { getTodaysPortion.forDay(snapshot.khatam, it) }
+            ?: if (snapshot.readAtByAyah == null) getTodaysPortion(snapshot.khatam, startId) else null
+        return Reading(
+            next = next,
+            name = next?.first?.let { surahName(it) },
+            daily = portion?.let {
+                KhatamDailyReading(it, portionLabel(surahs, it), it.readCount(snapshot.readAyahIds))
+            },
+        )
     }
 
     private suspend fun surahName(surahNumber: Int): String? =

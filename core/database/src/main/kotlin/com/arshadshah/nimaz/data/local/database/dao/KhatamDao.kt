@@ -162,6 +162,10 @@ interface KhatamDao {
     @Query("SELECT read_at FROM khatam_ayahs WHERE khatam_id = :khatamId ORDER BY read_at")
     fun observeReadTimestamps(khatamId: Long): Flow<List<Long>>
 
+    /** Read marks and their original timestamps, for a stable local-day portion. */
+    @Query("SELECT * FROM khatam_ayahs WHERE khatam_id = :khatamId")
+    fun observeReadMarks(khatamId: Long): Flow<List<KhatamAyahEntity>>
+
     // ---- Completion ----
 
     @Query("UPDATE khatams SET status = 'completed', completed_at = :timestamp, updated_at = :timestamp, is_active = 0 WHERE id = :khatamId")

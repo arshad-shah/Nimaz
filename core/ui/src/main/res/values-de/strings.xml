@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">Nimaz</string>
     <string name="all">Alle</string>
     <string name="favorites">Favoriten</string>
@@ -2152,4 +2152,16 @@
     <string name="tafseer_open_passage">Textstelle öffnen</string>
     <string name="note_discard_title">Änderungen verwerfen?</string>
     <string name="note_discard_message">Deine ungespeicherten Änderungen gehen verloren.</string>
+
+    <!-- Reading-first khatam flow; shared by list and detail. -->
+    <string name="khatam_progress_percent" tools:ignore="PluralsCandidate">%1$d%% abgeschlossen</string>
+    <string name="khatam_today_complete">Heutiger Abschnitt abgeschlossen</string>
+    <string name="khatam_portion_progress" tools:ignore="PluralsCandidate">%1$d / %2$d zugeteilte Verse gelesen</string>
+    <string name="khatam_view_plan">Plan ansehen</string>
+    <string name="khatam_other_plans">Weitere Pläne</string>
+    <string name="khatam_marking_hint">Dein Fortschritt wird gespeichert, wenn du Verse als gelesen markierst.</string>
+    <string name="khatam_switch_plan">Diesen Plan aktivieren</string>
+    <string name="khatam_reading_activity">Leseaktivität</string>
+    <string name="khatam_form_intro">Ein wenig, jeden Tag.</string>
+    <string name="khatam_form_intro_detail">Wähle ein Tempo, das zu dir passt.</string>
 </resources>

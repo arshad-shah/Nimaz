@@ -30,6 +30,11 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.core.ui.R
 import com.arshadshah.nimaz.domain.model.Khatam
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconButton
+import com.arshadshah.nimaz.presentation.components.molecules.KhatamBookIllustration
+import com.arshadshah.nimaz.presentation.components.molecules.NimazBanner
+import com.arshadshah.nimaz.presentation.components.molecules.NimazBannerVariant
+import androidx.compose.foundation.layout.size
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSegmentedControl
@@ -48,8 +53,6 @@ import com.arshadshah.nimaz.presentation.viewmodel.quran.KhatamViewModel
 /** Which status bucket the list is filtered to. */
 private enum class KhatamTab { IN_PROGRESS, COMPLETED, ARCHIVED }
 
-/** Vertical room reserved so the FAB never covers the last card. */
-private val FabClearance = 88.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -65,28 +68,21 @@ fun KhatamListScreen(
     val state by viewModel.listState.collectAsStateWithLifecycle()
     var selectedTab by rememberSaveable { mutableStateOf(KhatamTab.IN_PROGRESS) }
 
+    KhatamReadingDayEffect(viewModel)
+
     NimazScreenScaffold(
         topBar = {
             NimazBackTopAppBar(
                 title = stringResource(R.string.khatam_title),
                 onBackClick = onNavigateBack,
-            )
-        },
-        floatingActionButton = {
-            // Only once there is a khatam to sit beside, and only a `+`.
-            //
-            // The empty state already carries a "Start new" action, so an extended FAB saying the
-            // same words floated over it — two controls, one job, a thumb's width apart. And with
-            // a list on screen the label is redundant anyway: a `+` above a list of khatams reads
-            // as "another one" without being told.
-            if (state.hasAnyKhatam) {
-                FloatingActionButton(onClick = onNavigateToCreate) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
+                actions = {
+                    if (state.hasAnyKhatam) NimazIconButton(
+                        icon = Icons.Default.Add,
+                        onClick = onNavigateToCreate,
                         contentDescription = stringResource(R.string.khatam_start_new),
                     )
-                }
-            }
+                },
+            )
         },
     ) { padding ->
         when {
@@ -106,6 +102,7 @@ fun KhatamListScreen(
                     iconTint = MaterialTheme.colorScheme.primary,
                     actionLabel = stringResource(R.string.khatam_start_new),
                     onAction = onNavigateToCreate,
+                    illustration = { KhatamBookIllustration(Modifier.size(112.dp)) },
                 )
             }
 
@@ -142,7 +139,7 @@ private fun KhatamListContent(
     )
 
     val visible = when (selectedTab) {
-        KhatamTab.IN_PROGRESS -> state.inProgressKhatams
+        KhatamTab.IN_PROGRESS -> state.inProgressKhatams.filterNot { it.id == state.activeKhatam?.id && state.activeInsights != null }
         KhatamTab.COMPLETED -> state.completedKhatams
         KhatamTab.ARCHIVED -> state.abandonedKhatams
     }
@@ -158,23 +155,10 @@ private fun KhatamListContent(
             start = NimazSpacing.Large,
             end = NimazSpacing.Large,
             top = contentPadding.calculateTopPadding() + NimazSpacing.Small,
-            bottom = contentPadding.calculateBottomPadding() + FabClearance,
+            bottom = contentPadding.calculateBottomPadding() + NimazSpacing.ExtraLarge,
         ),
         verticalArrangement = Arrangement.spacedBy(NimazSpacing.Small),
     ) {
-        if (active != null && activeInsights != null) {
-            item(key = "hero-${active.id}") {
-                KhatamHeroCard(
-                    khatam = active,
-                    insights = activeInsights,
-                    accent = accent,
-                    continueLabel = continueText,
-                    onContinue = onContinue.takeIf { hasNextPosition },
-                    onClick = { onKhatamClick(active.id) },
-                )
-            }
-        }
-
         item(key = "tabs") {
             NimazSegmentedControl(
                 options = tabs.asSegments(),
@@ -187,7 +171,21 @@ private fun KhatamListContent(
             )
         }
 
-        if (visible.isEmpty()) {
+        if (selectedTab == KhatamTab.IN_PROGRESS && active != null && activeInsights != null) {
+            item(key = "hero-${active.id}") {
+                KhatamHeroCard(
+                    khatam = active,
+                    insights = activeInsights,
+                    accent = accent,
+                    dailyReading = state.dailyReading,
+                    continueLabel = if (state.dailyReading?.isComplete == false) stringResource(R.string.khatam_read_todays_portion) else continueText,
+                    onContinue = onContinue.takeIf { hasNextPosition },
+                    onClick = { onKhatamClick(active.id) },
+                )
+            }
+        }
+
+        if (visible.isEmpty() && !(selectedTab == KhatamTab.IN_PROGRESS && active != null)) {
             item(key = "empty-${selectedTab.name}") {
                 NimazEmptyState(
                     title = stringResource(emptyTitleRes(selectedTab)),
@@ -197,10 +195,10 @@ private fun KhatamListContent(
                     modifier = Modifier.padding(vertical = NimazSpacing.Medium),
                 )
             }
-        } else {
+        } else if (visible.isNotEmpty()) {
             item(key = "header-${selectedTab.name}") {
                 NimazSectionHeader(
-                    title = tabs[selectedTab.ordinal],
+                    title = if (selectedTab == KhatamTab.IN_PROGRESS && active != null) stringResource(R.string.khatam_other_plans) else tabs[selectedTab.ordinal],
                     trailingText = visible.size.toString(),
                 )
             }
@@ -210,6 +208,15 @@ private fun KhatamListContent(
                     accent = accent,
                     subtitle = rowSubtitle(khatam),
                     onClick = { onKhatamClick(khatam.id) },
+                )
+            }
+        }
+        if (selectedTab == KhatamTab.IN_PROGRESS) {
+            item(key = "marking-hint") {
+                NimazBanner(
+                    title = stringResource(R.string.khatam_marking_hint),
+                    variant = NimazBannerVariant.INFO,
+                    icon = Icons.Default.MenuBook,
                 )
             }
         }

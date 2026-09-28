@@ -7,6 +7,8 @@ sealed interface KhatamEvent {
     data class AbandonKhatam(val khatamId: Long) : KhatamEvent
     data class ReactivateKhatam(val khatamId: Long) : KhatamEvent
 
+    data object RefreshReadingDay : KhatamEvent
+
     // Detail
     data class LoadKhatamDetail(val khatamId: Long) : KhatamEvent
 

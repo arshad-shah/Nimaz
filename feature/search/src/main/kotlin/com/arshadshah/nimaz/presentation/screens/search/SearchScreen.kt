@@ -26,13 +26,13 @@ import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.FormatQuote
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Mosque
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -41,6 +41,9 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -49,6 +52,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -74,12 +79,16 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconButton
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconButtonStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconWell
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconWellSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
+import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownMenu
+import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownRow
 import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
 import com.arshadshah.nimaz.presentation.components.molecules.NimazErrorDefaults
 import com.arshadshah.nimaz.presentation.components.molecules.NimazErrorState
@@ -135,6 +144,14 @@ fun SearchScreen(
 
     val askEnabled = enableAsk && askState.aiEnabled
     val answerPhase = if (enableAsk) askState.phase as? AskPhase.Answer else null
+    var filterMenuExpanded by remember { mutableStateOf(false) }
+    val filterLabels = mapOf(
+        SearchFilter.ALL to stringResource(R.string.all),
+        SearchFilter.QURAN to stringResource(R.string.quran),
+        SearchFilter.HADITH to stringResource(R.string.hadith),
+        SearchFilter.DUA to stringResource(R.string.duas),
+        SearchFilter.NAMES to stringResource(R.string.names_title),
+    )
 
     NimazScreenScaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -144,6 +161,40 @@ fun SearchScreen(
                 onBackClick = onNavigateBack,
                 scrollBehavior = scrollBehavior,
                 actions = {
+                    if (state.query.isNotEmpty() || answerPhase != null) {
+                        Box {
+                            NimazIconButton(
+                                icon = Icons.Default.FilterList,
+                                onClick = { filterMenuExpanded = true },
+                                contentDescription = stringResource(R.string.cd_filter),
+                                style = if (state.selectedFilter != SearchFilter.ALL) {
+                                    NimazIconButtonStyle.FILLED_TONAL
+                                } else {
+                                    NimazIconButtonStyle.STANDARD
+                                },
+                                modifier = Modifier.semantics {
+                                    stateDescription = filterLabels.getValue(state.selectedFilter)
+                                },
+                            )
+                            NimazDropdownMenu(
+                                expanded = filterMenuExpanded,
+                                onDismissRequest = { filterMenuExpanded = false },
+                            ) {
+                                SearchFilter.entries.forEach { filter ->
+                                    val count = state.allResults.count { filter.accepts(it) }
+                                    val name = filterLabels.getValue(filter)
+                                    NimazDropdownRow(
+                                        text = if (count > 0) "$name  $count" else name,
+                                        selected = state.selectedFilter == filter,
+                                        onClick = {
+                                            filterMenuExpanded = false
+                                            viewModel.onEvent(SearchEvent.SetFilter(filter))
+                                        },
+                                    )
+                                }
+                            }
+                        }
+                    }
                     IconButton(onClick = onNavigateToSearchSettings) {
                         NimazIcon(
                             imageVector = Icons.Default.Tune,
@@ -160,9 +211,9 @@ fun SearchScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // Pinned controls: the single search bar and the source filter live
-            // above the list and never scroll away, so the filter always scopes
-            // whatever is on screen. A single bar drives both keyword search and
+            // The search bar stays pinned above the list; the source filter is
+            // available from the top bar without taking a row of result space.
+            // A single bar drives both keyword search and
             // — when the user has opted into AI answers on global search — the
             // "Ask with Proof" question: keyword results update as-you-type, the
             // AI ask fires only from the Ask pill / IME action.
@@ -197,39 +248,6 @@ fun SearchScreen(
                     askEnabled = askState.aiEnabled,
                     onAsk = { askViewModel.onEvent(AskEvent.Submit) },
                 )
-
-                // The filter appears only when there is a list to scope — while
-                // typing or once an answer (with its merged list) is on screen.
-                if (state.query.isNotEmpty() || answerPhase != null) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 10.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        SearchFilter.entries.forEach { filter ->
-                            // The count is the point: it says where the matches *are* before
-                            // you filter, so narrowing to Hadith and finding nothing is a
-                            // decision you never have to make. Counted with the same predicate
-                            // the list filters by, so the number and the rows agree.
-                            val count = state.allResults.count { filter.accepts(it) }
-                            FilterChip(
-                                selected = state.selectedFilter == filter,
-                                onClick = { viewModel.onEvent(SearchEvent.SetFilter(filter)) },
-                                label = {
-                                    val name = when (filter) {
-                                        SearchFilter.ALL -> stringResource(R.string.all)
-                                        SearchFilter.QURAN -> stringResource(R.string.quran)
-                                        SearchFilter.HADITH -> stringResource(R.string.hadith)
-                                        SearchFilter.DUA -> stringResource(R.string.duas)
-                                        SearchFilter.NAMES -> stringResource(R.string.names_title)
-                                    }
-                                    Text(if (count > 0) "$name  $count" else name)
-                                }
-                            )
-                        }
-                    }
-                }
             }
 
             LazyColumn(
@@ -270,7 +288,7 @@ fun SearchScreen(
                 }
 
                 if (answerPhase != null) {
-                    // Answer state: ONE merged list under the pinned filter —
+                    // Answer state: ONE merged list scoped by the top-bar filter —
                     // cited proofs first (marked "Cited"), then the related
                     // results driven by the AI's terms. A related result that is
                     // also cited is dropped so nothing appears twice. While the

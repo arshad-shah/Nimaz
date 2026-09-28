@@ -130,7 +130,9 @@ data class KhatamDetailSnapshot(
      * The raw read-ayah set, carried here so the Quran reader's per-ayah ticks and the
      * home card's progress come from one subscription rather than two.
      */
-    val readAyahIds: Set<Int>
+    val readAyahIds: Set<Int>,
+    /** Original read timestamps survive process restarts and sync; null for legacy callers. */
+    val readAtByAyah: Map<Int, Long>? = null,
 )
 
 /**
@@ -318,6 +320,17 @@ object KhatamProgressCalculator {
             projectedCompletionAt = estDays?.let { now + it * DAY_MILLIS },
             paceStatus = paceStatus(pace, khatam.dailyTarget, days)
         )
+    }
+
+    /** Seven local calendar days, oldest first, including zero-reading days and DST changes. */
+    fun readingWeek(logs: List<DailyLogEntry>, now: Long = System.currentTimeMillis()): List<DailyLogEntry> {
+        val zone = java.time.ZoneId.systemDefault()
+        val today = java.time.Instant.ofEpochMilli(now).atZone(zone).toLocalDate()
+        val byDay = dailyLogsFrom(emptyList(), logs).associate { it.date to it.ayahsRead }
+        return (6 downTo 0).map { offset ->
+            val midnight = today.minusDays(offset.toLong()).atStartOfDay(zone).toInstant().toEpochMilli()
+            DailyLogEntry(midnight, (byDay[midnight] ?: 0).coerceAtLeast(0))
+        }
     }
 
     /**

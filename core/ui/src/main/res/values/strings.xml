@@ -2354,4 +2354,16 @@
     <string name="tafseer_open_passage">Open passage</string>
     <string name="note_discard_title">Discard changes?</string>
     <string name="note_discard_message">Your unsaved changes will be lost.</string>
+
+    <!-- Reading-first khatam flow; shared by list and detail. -->
+    <string name="khatam_progress_percent" tools:ignore="PluralsCandidate">%1$d%% complete</string>
+    <string name="khatam_today_complete">Today’s portion complete</string>
+    <string name="khatam_portion_progress" tools:ignore="PluralsCandidate">%1$d / %2$d assigned ayahs read</string>
+    <string name="khatam_view_plan">View plan</string>
+    <string name="khatam_other_plans">Other plans</string>
+    <string name="khatam_marking_hint">Progress is saved when you mark ayahs as read.</string>
+    <string name="khatam_switch_plan">Make this my active plan</string>
+    <string name="khatam_reading_activity">Reading activity</string>
+    <string name="khatam_form_intro">A little, every day.</string>
+    <string name="khatam_form_intro_detail">Choose a pace that works for you.</string>
 </resources>

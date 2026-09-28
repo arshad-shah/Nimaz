@@ -1,5 +1,12 @@
 package com.arshadshah.nimaz.presentation.components.molecules
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.res.painterResource
+import com.arshadshah.nimaz.feature.quran.R as QuranR
+import com.arshadshah.nimaz.presentation.viewmodel.quran.KhatamDailyReading
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcons
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -67,103 +74,92 @@ fun KhatamHeroCard(
     continueLabel: String? = null,
     onContinue: (() -> Unit)? = null,
     onClick: (() -> Unit)? = null,
+    dailyReading: KhatamDailyReading? = null,
 ) {
     val isComplete = khatam.status == KhatamStatus.COMPLETED
 
     NimazCard(
         modifier = modifier.fillMaxWidth(),
         style = NimazCardStyle.ELEVATED,
-        onClick = onClick,
         tone = NimazTone.NEUTRAL,
     ) {
-        Column(Modifier.padding(NimazSpacing.Large)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                if (showActiveBadge) {
-                    NimazBadge(
-                        text = stringResource(
-                            if (isComplete) R.string.khatam_status_completed_badge
-                            else R.string.khatam_active
-                        ),
-                        tone = NimazTone.ACCENT,
-                        size = NimazBadgeSize.MEDIUM,
-                    )
-                } else {
-                    Spacer(Modifier.width(0.dp))
+        Column(
+            Modifier.padding(NimazSpacing.Large),
+            verticalArrangement = Arrangement.spacedBy(NimazSpacing.Medium),
+        ) {
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(NimazSpacing.Small)) {
+                    if (showActiveBadge) {
+                        NimazBadge(
+                            text = stringResource(if (isComplete) R.string.khatam_status_completed_badge else R.string.khatam_active),
+                            tone = NimazTone.ACCENT,
+                        )
+                    }
+                    if (showName) {
+                        Text(khatam.name, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                    }
+                    if (!isComplete && khatam.status == KhatamStatus.ACTIVE) {
+                        Text(paceLabel(insights.paceStatus), color = paceColor(insights.paceStatus), style = MaterialTheme.typography.labelMedium)
+                    }
                 }
-                Text(
-                    text = paceLabel(insights.paceStatus),
-                    style = MaterialTheme.typography.labelSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = paceColor(insights.paceStatus),
-                )
+                KhatamBookIllustration(Modifier.size(64.dp))
             }
-
-            if (showName) {
-                Spacer(Modifier.height(NimazSpacing.Small))
+            Column(verticalArrangement = Arrangement.spacedBy(NimazSpacing.Small)) {
                 Text(
-                    text = khatam.name,
-                    style = MaterialTheme.typography.titleMedium,
+                    stringResource(R.string.khatam_progress_percent, (khatam.progressPercent * 100).toInt()),
+                    style = MaterialTheme.typography.headlineMedium,
                     fontWeight = FontWeight.Bold,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
                 )
+                Text(
+                    stringResource(R.string.khatam_of_ayahs_read, khatam.totalAyahsRead, Khatam.TOTAL_QURAN_AYAHS),
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+                KhatamProgressBar(khatam.progressPercent, accent = accent, isComplete = isComplete)
+                Text(heroSubtitle(khatam, insights), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
-
-            Spacer(Modifier.height(NimazSpacing.Medium))
-
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                KhatamProgressRing(
-                    progress = khatam.progressPercent,
-                    size = 56.dp,
-                    strokeWidth = 6.dp,
-                    accent = accent,
-                    isComplete = isComplete,
-                    textStyle = MaterialTheme.typography.labelLarge,
-                )
-                Spacer(Modifier.width(NimazSpacing.Medium))
-                Column(Modifier.weight(1f)) {
+            if (dailyReading != null && !isComplete) {
+                Column(verticalArrangement = Arrangement.spacedBy(NimazSpacing.Small)) {
                     Text(
-                        text = stringResource(
-                            R.string.khatam_of_ayahs_read,
-                            khatam.totalAyahsRead,
-                            Khatam.TOTAL_QURAN_AYAHS
-                        ),
+                        stringResource(if (dailyReading.isComplete) R.string.khatam_today_complete else R.string.khatam_todays_portion),
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.primary,
+                    )
+                    dailyReading.label?.let {
+                        Text(it, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                    }
+                    Text(
+                        stringResource(R.string.khatam_portion_progress, dailyReading.readCount, dailyReading.portion.ayahCount),
                         style = MaterialTheme.typography.bodyMedium,
-                    )
-                    Spacer(Modifier.height(NimazSpacing.ExtraSmall))
-                    KhatamProgressBar(
-                        progress = khatam.progressPercent,
-                        accent = accent,
-                        isComplete = isComplete,
-                    )
-                    Spacer(Modifier.height(NimazSpacing.ExtraSmall))
-                    Text(
-                        text = heroSubtitle(khatam, insights),
-                        style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
                     )
                 }
             }
-
-            if (onContinue != null && continueLabel != null && !isComplete) {
-                Spacer(Modifier.height(NimazSpacing.Medium))
+            if (onContinue != null && continueLabel != null && !isComplete && khatam.status == KhatamStatus.ACTIVE) {
                 NimazButton(
                     text = continueLabel,
                     onClick = onContinue,
                     modifier = Modifier.fillMaxWidth(),
                     type = NimazButtonType.PILL,
-                    leadingIcon = Icons.Default.PlayArrow,
+                    leadingIcon = Icons.AutoMirrored.Filled.MenuBook,
                     fullWidth = true,
+                )
+            }
+            if (onClick != null) {
+                NimazButton(
+                    text = stringResource(R.string.khatam_view_plan),
+                    onClick = onClick,
+                    variant = NimazButtonVariant.TEXT,
+                    modifier = Modifier.fillMaxWidth(),
                 )
             }
         }
     }
+}
+
+/** The same bundled artwork is used at card and empty-state sizes, with no text baked in. */
+@Composable
+fun KhatamBookIllustration(modifier: Modifier = Modifier) {
+    Image(painterResource(QuranR.drawable.khatam_book), contentDescription = null, modifier = modifier)
 }
 
 /**

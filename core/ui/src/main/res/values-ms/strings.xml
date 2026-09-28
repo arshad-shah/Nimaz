@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">Nimaz</string>
     <string name="all">Semua</string>
     <string name="favorites">Kegemaran</string>
@@ -2112,4 +2112,16 @@
     <string name="tafseer_open_passage">Buka petikan</string>
     <string name="note_discard_title">Buang perubahan?</string>
     <string name="note_discard_message">Perubahan yang belum disimpan akan hilang.</string>
+
+    <!-- Reading-first khatam flow; shared by list and detail. -->
+    <string name="khatam_progress_percent" tools:ignore="PluralsCandidate">%1$d%% selesai</string>
+    <string name="khatam_today_complete">Bacaan hari ini selesai</string>
+    <string name="khatam_portion_progress" tools:ignore="PluralsCandidate">%1$d / %2$d ayat yang ditetapkan telah dibaca</string>
+    <string name="khatam_view_plan">Lihat rancangan</string>
+    <string name="khatam_other_plans">Rancangan lain</string>
+    <string name="khatam_marking_hint">Kemajuan disimpan apabila anda menandakan ayat sebagai telah dibaca.</string>
+    <string name="khatam_switch_plan">Aktifkan rancangan ini</string>
+    <string name="khatam_reading_activity">Aktiviti membaca</string>
+    <string name="khatam_form_intro">Sedikit, setiap hari.</string>
+    <string name="khatam_form_intro_detail">Pilih kadar bacaan yang sesuai untuk anda.</string>
 </resources>

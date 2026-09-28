@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">Nimaz</string>
     <string name="all">Tümü</string>
     <string name="favorites">Favoriler</string>
@@ -2158,4 +2158,16 @@
     <string name="tafseer_open_passage">Bölümü aç</string>
     <string name="note_discard_title">Değişiklikler silinsin mi?</string>
     <string name="note_discard_message">Kaydedilmemiş değişiklikleriniz kaybolacak.</string>
+
+    <!-- Reading-first khatam flow; shared by list and detail. -->
+    <string name="khatam_progress_percent" tools:ignore="PluralsCandidate">%1$d%% tamamlandı</string>
+    <string name="khatam_today_complete">Bugünkü okuma tamamlandı</string>
+    <string name="khatam_portion_progress" tools:ignore="PluralsCandidate">Belirlenen %2$d ayetin %1$d tanesi okundu</string>
+    <string name="khatam_view_plan">Planı görüntüle</string>
+    <string name="khatam_other_plans">Diğer planlar</string>
+    <string name="khatam_marking_hint">Ayetleri okundu olarak işaretlediğinizde ilerlemeniz kaydedilir.</string>
+    <string name="khatam_switch_plan">Bu planı etkinleştir</string>
+    <string name="khatam_reading_activity">Okuma etkinliği</string>
+    <string name="khatam_form_intro">Her gün, biraz.</string>
+    <string name="khatam_form_intro_detail">Size uygun bir okuma hızı seçin.</string>
 </resources>
