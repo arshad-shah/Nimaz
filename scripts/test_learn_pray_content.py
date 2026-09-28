@@ -62,16 +62,28 @@ class LearnPrayContentTest(unittest.TestCase):
         self.assertIn("review", self.strings["learn_pray_review"])
         self.assertIn("does not record", self.strings["learn_pray_complete_body"])
 
-    def test_female_artwork_is_full_resolution_lossless_not_contact_sheet_crops(self):
+    def test_female_artwork_is_full_resolution_not_contact_sheet_crops(self):
+        # The guard is on *resolution*: the 444×295 approval-sheet crops were unsuitable for phone
+        # rendering. The encoding is not the guarded property — the set shipped lossless until it
+        # was re-encoded as lossy quality-90 WebP at the same 1536×1024 (≈9 MB → ≈0.7 MB) — so
+        # both simple WebP formats are read here.
         assets = list((FEATURE / "res/drawable-nodpi").glob("learn_pray_female_*.webp"))
         self.assertEqual(len(assets), 9)
         for asset in assets:
             data = asset.read_bytes()
-            # VP8L lossless image header (width and height are 14-bit values minus one).
-            offset = data.index(b"VP8L") + 8
-            self.assertEqual(data[offset], 0x2f, asset.name)
-            bits = int.from_bytes(data[offset + 1:offset + 5], "little")
-            size = ((bits & 0x3fff) + 1, ((bits >> 14) & 0x3fff) + 1)
+            chunk = data[12:16]
+            if chunk == b"VP8L":
+                # Lossless: signature byte, then width and height as 14-bit values minus one.
+                self.assertEqual(data[20], 0x2f, asset.name)
+                bits = int.from_bytes(data[21:25], "little")
+                size = ((bits & 0x3fff) + 1, ((bits >> 14) & 0x3fff) + 1)
+            elif chunk == b"VP8 ":
+                # Lossy: 3-byte frame tag, the 9d 01 2a start code, then 14-bit width and height.
+                self.assertEqual(data[23:26], b"\x9d\x01\x2a", asset.name)
+                size = (int.from_bytes(data[26:28], "little") & 0x3fff,
+                        int.from_bytes(data[28:30], "little") & 0x3fff)
+            else:
+                self.fail(f"{asset.name}: unexpected WebP chunk {chunk!r}")
             self.assertEqual(size, (1536, 1024), asset.name)
 
     def test_pose_copy_is_complete_in_every_supported_locale(self):
