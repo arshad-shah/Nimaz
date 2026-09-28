@@ -311,27 +311,30 @@ class SearchScreenTest {
         composeRule.onNodeWithText("The Chosen One").assertIsDisplayed()
     }
 
-    // ── the filter row ───────────────────────────────────────────────────────
+    // ── the filter menu ───────────────────────────────────────────────────────
 
-    /** Nothing to scope while the box is empty, so the chips stay out of the way. */
+    /** Nothing to scope while the box is empty, so the filter button stays out of the way. */
     @Test
-    fun `the filter row appears only once there is something to scope`() {
+    fun `the filter button appears only once there is something to scope`() {
         state.value = SearchUiState(query = "")
         render()
-        composeRule.onNodeWithText(str(R.string.all)).assertDoesNotExist()
+        composeRule.onNodeWithContentDescription(str(R.string.cd_filter)).assertDoesNotExist()
 
         state.value = SearchUiState(query = "noor")
         composeRule.waitForIdle()
+        composeRule.onNodeWithContentDescription(str(R.string.cd_filter)).assertIsDisplayed()
+        composeRule.onNodeWithText(str(R.string.all)).assertDoesNotExist()
+        composeRule.onNodeWithContentDescription(str(R.string.cd_filter)).performClick()
         composeRule.onNodeWithText(str(R.string.all)).assertIsDisplayed()
     }
 
     /**
-     * The count on a chip says where the matches are *before* you narrow to it — so narrowing to
+     * The count on a menu option says where the matches are *before* you narrow to it — so narrowing to
      * Hadith and finding nothing is never a decision anyone has to make blind. It is counted from
      * `allResults` with the same predicate the list filters by, so the number and the rows agree.
      */
     @Test
-    fun `each chip counts the unfiltered matches for its own source`() {
+    fun `each menu option counts the unfiltered matches for its own source`() {
         val all = listOf(
             quranResult(surah = 2, ayah = 153),
             surahResult(number = 18),
@@ -346,6 +349,8 @@ class SearchScreenTest {
         )
         render()
 
+        composeRule.onNodeWithContentDescription(str(R.string.cd_filter)).performClick()
+
         // A surah hit counts under Qur'an alongside the verse — two, not one.
         composeRule.onNodeWithText("${str(R.string.quran)}  2").assertIsDisplayed()
         composeRule.onNodeWithText("${str(R.string.hadith)}  1").assertIsDisplayed()
@@ -355,13 +360,15 @@ class SearchScreenTest {
     }
 
     @Test
-    fun `tapping a chip asks for that filter`() {
+    fun `selecting a menu option asks for that filter and closes the menu`() {
         state.value = SearchUiState(query = "noor", allResults = listOf(quranResult()))
         render()
 
+        composeRule.onNodeWithContentDescription(str(R.string.cd_filter)).performClick()
         composeRule.onNodeWithText("${str(R.string.quran)}  1").performClick()
 
         assertThat(events).contains(SearchEvent.SetFilter(SearchFilter.QURAN))
+        composeRule.onNodeWithText("${str(R.string.quran)}  1").assertDoesNotExist()
     }
 
     /** Opening search *from* duas scopes it to duas — the screen says so on first composition. */
