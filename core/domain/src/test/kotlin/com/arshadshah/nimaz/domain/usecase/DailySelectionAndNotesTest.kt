@@ -201,7 +201,11 @@ class DailySelectionAndNotesTest {
         sajdaNumber = null,
     )
 
-    private fun notes() = GetTafseerNotesUseCase(tafseerRepository, quranRepository)
+    private fun notes(): GetTafseerNotesUseCase {
+        every { tafseerRepository.getAllNotes() } returns flowOf(emptyList())
+        coEvery { tafseerRepository.getTafseerForAyah(any(), any(), any()) } returns null
+        return GetTafseerNotesUseCase(tafseerRepository, quranRepository)
+    }
 
     @Test
     fun `a note is reported against the verse it was written on`() = runTest {

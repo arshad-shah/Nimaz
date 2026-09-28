@@ -2151,6 +2151,13 @@
     <string name="prayer_jumuah">Cuma</string>
     <string name="prayer_about_this_day">Bu gün hakkında</string>
     <string name="cd_pick_month">Ay seç</string>
+    <string name="tafseer_note_deleted">Not silindi</string>
+    <string name="tafseer_reflection">Düşünce</string>
+    <string name="tafseer_highlight_note">Vurgulama notu</string>
+    <string name="tafseer_text_size">Metin boyutu</string>
+    <string name="tafseer_open_passage">Bölümü aç</string>
+    <string name="note_discard_title">Değişiklikler silinsin mi?</string>
+    <string name="note_discard_message">Kaydedilmemiş değişiklikleriniz kaybolacak.</string>
 
     <!-- Reading-first khatam flow; shared by list and detail. -->
     <string name="khatam_progress_percent" tools:ignore="PluralsCandidate">%1$d%% tamamlandı</string>

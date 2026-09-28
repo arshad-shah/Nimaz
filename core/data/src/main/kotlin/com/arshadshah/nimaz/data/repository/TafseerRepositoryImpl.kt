@@ -127,6 +127,16 @@ class TafseerRepositoryImpl @Inject constructor(
         }
     }
 
+    override fun getAllNotes(): Flow<List<TafseerNote>> =
+        tafseerUserDao.getAllNotes().mapItems { it.toDomain() }
+
+    override suspend fun restoreNote(note: TafseerNote) {
+        tafseerUserDao.insertNote(TafseerNoteEntity(
+            id = note.id, ayahId = note.ayahId, tafseerId = note.tafseerId,
+            text = note.text, createdAt = note.createdAt, updatedAt = note.updatedAt,
+        ))
+    }
+
     override suspend fun addNote(ayahId: Int, tafseerId: String, text: String): Long {
         val now = System.currentTimeMillis()
         return tafseerUserDao.insertNote(

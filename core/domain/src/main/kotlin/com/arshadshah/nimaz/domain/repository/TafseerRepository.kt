@@ -33,6 +33,8 @@ interface TafseerRepository {
     suspend fun deleteHighlight(highlightId: Long)
 
     // Notes
+    fun getAllNotes(): Flow<List<TafseerNote>>
+    suspend fun restoreNote(note: TafseerNote)
     fun getNotesForRange(
         surahNumber: Int,
         ayahStart: Int,

@@ -8,7 +8,8 @@ import com.arshadshah.nimaz.domain.model.TafseerText
 import com.arshadshah.nimaz.domain.repository.QuranRepository
 import com.arshadshah.nimaz.domain.repository.TafseerRepository
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.combine
+import com.arshadshah.nimaz.domain.model.toNoteItem
 import javax.inject.Inject
 
 data class TafseerUseCases(
@@ -24,34 +25,55 @@ data class TafseerUseCases(
     val getTafseerNotes: GetTafseerNotesUseCase
 )
 
-/**
- * All saved tafseer notes (highlights that have a note), resolved to their
- * surah/ayah so the list can deep-link into the reader. Newest first (the DAO
- * orders by created_at DESC).
- */
+/** One index for both standalone reflections and notes attached to highlighted text. */
 class GetTafseerNotesUseCase @Inject constructor(
     private val tafseerRepository: TafseerRepository,
     private val quranRepository: QuranRepository
 ) {
-    operator fun invoke(): Flow<List<TafseerNoteItem>> =
-        tafseerRepository.getAllHighlights().map { highlights ->
-            highlights
-                .filter { !it.note.isNullOrBlank() }
-                .mapNotNull { highlight ->
-                    val ayah = quranRepository.getAyahById(highlight.ayahId)
-                        ?: return@mapNotNull null
-                    TafseerNoteItem(
-                        highlightId = highlight.id,
-                        surahNumber = ayah.surahNumber,
-                        ayahNumber = ayah.ayahNumber,
-                        sourceLabel = TafseerSource.entries
-                            .firstOrNull { it.id == highlight.tafseerId }?.displayName
-                            ?: highlight.tafseerId,
-                        color = highlight.color,
-                        note = highlight.note.orEmpty()
-                    )
-                }
+    operator fun invoke(): Flow<List<TafseerNoteItem>> = combine(
+        tafseerRepository.getAllHighlights(), tafseerRepository.getAllNotes(),
+    ) { highlights, notes ->
+        val result = mutableListOf<TafseerNoteItem>()
+        val ayahs = (highlights.map { it.ayahId } + notes.map { it.ayahId }).distinct()
+            .associateWith { quranRepository.getAyahById(it) }
+        // Resolve once per source/verse per emission, including when several notes share it.
+        val texts = mutableMapOf<Pair<Int, String>, String?>()
+        for (highlight in highlights.filter { !it.note.isNullOrBlank() }) {
+            val ayah = ayahs[highlight.ayahId] ?: continue
+            val key = highlight.ayahId to highlight.tafseerId
+            if (!texts.containsKey(key)) texts[key] = tafseerRepository.getTafseerForAyah(
+                ayah.surahNumber, ayah.ayahNumber, highlight.tafseerId,
+            )?.text
+            result += highlight.toNoteItem(ayah.surahNumber, ayah.ayahNumber, texts[key])
         }
+        for (note in notes) {
+            val ayah = ayahs[note.ayahId] ?: continue
+            result += note.toNoteItem(ayah.surahNumber, ayah.ayahNumber)
+        }
+        result.sortedByDescending { it.createdAt }
+    }
+}
+
+/** Shared mutation semantics for the reader and the notes index. */
+class TafseerNoteActions @Inject constructor(private val repository: TafseerRepository) {
+    suspend fun save(item: TafseerNoteItem, text: String) {
+        require(text.isNotBlank())
+        item.reflection?.let {
+            if (it.id == 0L) repository.addNote(it.ayahId, it.tafseerId, text.trim())
+            else repository.updateNote(it.copy(text = text.trim()))
+        }
+            ?: item.highlight?.let { repository.updateHighlight(it.copy(note = text.trim())) }
+    }
+
+    suspend fun delete(item: TafseerNoteItem) {
+        item.reflection?.let { repository.deleteNote(it.id) }
+            ?: item.highlight?.let { repository.updateHighlight(it.copy(note = null)) }
+    }
+
+    suspend fun restore(item: TafseerNoteItem) {
+        item.reflection?.let { repository.restoreNote(it) }
+            ?: item.highlight?.let { repository.updateHighlight(it) }
+    }
 }
 
 class GetTafseerForAyahUseCase @Inject constructor(private val repository: TafseerRepository) {

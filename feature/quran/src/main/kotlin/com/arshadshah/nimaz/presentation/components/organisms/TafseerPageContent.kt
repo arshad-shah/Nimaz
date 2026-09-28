@@ -1,5 +1,7 @@
 package com.arshadshah.nimaz.presentation.components.organisms
 
+import com.arshadshah.nimaz.domain.model.TafseerPage
+import com.arshadshah.nimaz.domain.model.splitTafseerIntoPages
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
@@ -95,71 +97,12 @@ import com.arshadshah.nimaz.presentation.theme.ThemeMode
 import com.arshadshah.nimaz.presentation.theme.asTranslationText
 
 /**
- * Represents a page of tafseer content with its character range in the full text.
- */
-private data class TafseerPage(
-    val text: String,
-    val globalStartOffset: Int,
-    val globalEndOffset: Int
-)
-
-/**
  * What the highlight editor sheet is currently working on: a brand-new highlight
  * from a fresh text selection, or an existing highlight being edited.
  */
 private sealed interface EditorTarget {
     data class New(val globalStart: Int, val globalEnd: Int, val snippet: String) : EditorTarget
     data class Existing(val highlight: TafseerHighlight, val snippet: String) : EditorTarget
-}
-
-private const val MAX_CHARS_PER_PAGE = 800
-
-private fun splitTafseerIntoPages(fullText: String): List<TafseerPage> {
-    if (fullText.length <= MAX_CHARS_PER_PAGE) {
-        return listOf(TafseerPage(fullText, 0, fullText.length))
-    }
-
-    val pages = mutableListOf<TafseerPage>()
-    var currentStart = 0
-
-    while (currentStart < fullText.length) {
-        val remaining = fullText.length - currentStart
-        if (remaining <= MAX_CHARS_PER_PAGE) {
-            pages.add(TafseerPage(fullText.substring(currentStart), currentStart, fullText.length))
-            break
-        }
-
-        val searchEnd = (currentStart + MAX_CHARS_PER_PAGE).coerceAtMost(fullText.length)
-        val chunk = fullText.substring(currentStart, searchEnd)
-
-        val paragraphBreak = chunk.lastIndexOf("\n\n")
-        val splitPoint = if (paragraphBreak > MAX_CHARS_PER_PAGE / 4) {
-            paragraphBreak + 2
-        } else {
-            val sentenceBreak = chunk.lastIndexOf(". ")
-            val lineBreak = chunk.lastIndexOf('\n')
-            val bestBreak = maxOf(sentenceBreak, lineBreak)
-            if (bestBreak > MAX_CHARS_PER_PAGE / 4) {
-                bestBreak + 1
-            } else {
-                val spaceBreak = chunk.lastIndexOf(' ')
-                if (spaceBreak > MAX_CHARS_PER_PAGE / 4) spaceBreak + 1 else MAX_CHARS_PER_PAGE
-            }
-        }
-
-        val pageEnd = currentStart + splitPoint
-        pages.add(
-            TafseerPage(
-                fullText.substring(currentStart, pageEnd).trimEnd(),
-                currentStart,
-                pageEnd
-            )
-        )
-        currentStart = pageEnd
-        while (currentStart < fullText.length && fullText[currentStart].isWhitespace()) currentStart++
-    }
-
-    return pages
 }
 
 private fun highlightsForPage(
@@ -208,9 +151,11 @@ fun TafseerPageContent(
      * Arabic-script glyphs at all and the system substitutes a Naskh fallback.
      */
     translationLanguage: TranslationLanguage = TranslationLanguage.ENGLISH,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onNotesClick: () -> Unit = {},
+    onSelectionActive: (Boolean) -> Unit = {},
+    textSize: Float = 16f,
 ) {
-    var showNotesSheet by remember { mutableStateOf(false) }
     var editorTarget by remember { mutableStateOf<EditorTarget?>(null) }
 
     // Live text selection (page-local to [currentContentPage]); -1 means none.
@@ -237,10 +182,9 @@ fun TafseerPageContent(
     // Dismiss any in-progress selection when the page or ayah changes.
     LaunchedEffect(safeContentPage, tafseer?.id) { clearSelection() }
 
-    val highlightsWithNotes =
-        remember(highlights) { highlights.filter { !it.note.isNullOrBlank() } }
 
     val hasSelection = selStart in 0..tafseerFullText.length && selEnd > selStart
+    LaunchedEffect(hasSelection) { onSelectionActive(hasSelection) }
 
     val sources = TafseerSource.entries
 
@@ -268,13 +212,12 @@ fun TafseerPageContent(
             ) {
                 Spacer(modifier = Modifier.height(8.dp))
 
-                QuranFrame(
-                    variant = QuranFrameVariant.STUDY,
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 12.dp)
                 ) {
-                    Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+                    Column(modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp)) {
                         // Arabic ayah text on first content page
                         if (safeContentPage == 0) {
                             ArabicText(
@@ -309,6 +252,16 @@ fun TafseerPageContent(
                                     modifier = Modifier.padding(bottom = 8.dp)
                                 )
                             }
+                        }
+
+                        if (safeContentPage > 0 && topics.isNotEmpty()) {
+                            var expanded by remember { mutableStateOf(false) }
+                            NimazButton(
+                                text = stringResource(R.string.quran_ayah_topics),
+                                onClick = { expanded = !expanded },
+                                variant = NimazButtonVariant.TEXT,
+                            )
+                            if (expanded) AyahTopicChips(topics, onTopicClick)
                         }
 
                         // Tafseer text
@@ -352,13 +305,10 @@ fun TafseerPageContent(
                                 val animPage =
                                     tafseerPages[pageIndex.coerceIn(0, tafseerPages.lastIndex)]
                                 val animHighlights = highlightsForPage(highlights, animPage)
-                                val isActivePage = pageIndex == safeContentPage
 
                                 TafseerHighlightableText(
                                     text = animPage.text,
                                     highlights = animHighlights,
-                                    selectionStart = if (isActivePage) selStart else -1,
-                                    selectionEnd = if (isActivePage) selEnd else -1,
                                     onSelectionChange = { start, end ->
                                         if (start < 0) {
                                             selStart = -1; selEnd = -1
@@ -381,7 +331,17 @@ fun TafseerPageContent(
                                             clearSelection()
                                         }
                                     },
-                                    clearSelectionToken = clearSelectionToken
+                                    clearSelectionToken = clearSelectionToken,
+                                    textSize = textSize,
+                                    onHighlightSelection = { start, end ->
+                                        val s = start.coerceIn(0, animPage.text.length)
+                                        val e = end.coerceIn(s, animPage.text.length)
+                                        if (s < e) editorTarget = EditorTarget.New(
+                                            animPage.globalStartOffset + s,
+                                            animPage.globalStartOffset + e,
+                                            animPage.text.substring(s, e),
+                                        )
+                                    },
                                 )
                             }
                         } else {
@@ -403,31 +363,6 @@ fun TafseerPageContent(
             }
         }
 
-        // ── Contextual selection action (replaces the old colour rail) ──
-        AnimatedVisibility(
-            visible = hasSelection,
-            enter = expandVertically() + fadeIn(),
-            exit = shrinkVertically() + fadeOut()
-        ) {
-            SelectionActionBar(
-                onAddHighlight = {
-                    val page = tafseerPages.getOrNull(safeContentPage)
-                    if (page != null) {
-                        val localStart = selStart.coerceIn(0, page.text.length)
-                        val localEnd = selEnd.coerceIn(localStart, page.text.length)
-                        if (localStart < localEnd) {
-                            editorTarget = EditorTarget.New(
-                                globalStart = localStart + page.globalStartOffset,
-                                globalEnd = localEnd + page.globalStartOffset,
-                                snippet = page.text.substring(localStart, localEnd)
-                            )
-                        }
-                    }
-                },
-                onClear = { clearSelection() }
-            )
-        }
-
         // ── Bottom bar (page nav + actions) — matches the Dua/Hadith readers ──
         NimazReaderBottomBar(
             currentPage = safeContentPage,
@@ -442,7 +377,7 @@ fun TafseerPageContent(
             NimazPillActionButton(
                 icon = Icons.Outlined.EditNote,
                 contentDescription = stringResource(R.string.cd_notes),
-                onClick = { showNotesSheet = true }
+                onClick = onNotesClick
             )
             NimazPillActionButton(
                 icon = Icons.Default.Share,
@@ -511,32 +446,6 @@ fun TafseerPageContent(
         }
     }
 
-    // ── Notes list bottom sheet ──
-    if (showNotesSheet) {
-        val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-        NimazBottomSheet(
-            onDismissRequest = { showNotesSheet = false },
-            sheetState = sheetState,
-            title = stringResource(R.string.tafseer_highlight_notes),
-            icon = Icons.Outlined.EditNote,
-            onClose = { showNotesSheet = false },
-            scrollable = true
-        ) {
-            HighlightNotesListContent(
-                highlights = highlightsWithNotes,
-                tafseerText = tafseerFullText,
-                onHighlightTapped = { highlight ->
-                    showNotesSheet = false
-                    val s = highlight.startOffset.coerceIn(0, tafseerFullText.length)
-                    val e = highlight.endOffset.coerceIn(s, tafseerFullText.length)
-                    editorTarget = EditorTarget.Existing(
-                        highlight = highlight,
-                        snippet = tafseerFullText.substring(s, e)
-                    )
-                }
-            )
-        }
-    }
 }
 
 // ── Long-press discoverability hint ───────────────────────────────────────────
@@ -564,50 +473,10 @@ private fun TafseerHighlightHint() {
     }
 }
 
-// ── Contextual selection action bar ───────────────────────────────────────────
-
-@Composable
-private fun SelectionActionBar(
-    onAddHighlight: () -> Unit,
-    onClear: () -> Unit
-) {
-    Surface(
-        color = MaterialTheme.colorScheme.surfaceContainer,
-        tonalElevation = 2.dp,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 10.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = stringResource(R.string.tafseer_selection_active),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.weight(1f)
-            )
-            NimazButton(
-                text = stringResource(R.string.tafseer_clear),
-                onClick = onClear,
-                variant = NimazButtonVariant.TEXT
-            )
-            NimazButton(
-                text = stringResource(R.string.tafseer_add_highlight),
-                onClick = onAddHighlight,
-                variant = NimazButtonVariant.FILLED,
-                type = NimazButtonType.PILL
-            )
-        }
-    }
-}
-
 // ── Highlight editor (one-step colour + note) ─────────────────────────────────
 
 @Composable
-private fun HighlightEditorSheetContent(
+internal fun HighlightEditorSheetContent(
     snippet: String,
     initialColor: String,
     initialNote: String,
@@ -672,7 +541,7 @@ private fun HighlightEditorSheetContent(
                         NimazIcon(
                             imageVector = Icons.Default.Check,
                             contentDescription = stringResource(R.string.cd_item_selected, name),
-                            tint = MaterialTheme.colorScheme.onSurface,
+                            tint = com.arshadshah.nimaz.presentation.theme.NimazColors.OnSurfaceLight,
                             iconSize = 20.dp
                         )
                     }
@@ -740,77 +609,6 @@ private fun HighlightEditorSheetContent(
             onConfirm = onDelete,
             onDismiss = { showDeleteConfirm = false }
         )
-    }
-}
-
-@Composable
-private fun HighlightNotesListContent(
-    highlights: List<TafseerHighlight>,
-    tafseerText: String,
-    onHighlightTapped: (TafseerHighlight) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(bottom = 12.dp)
-    ) {
-        if (highlights.isEmpty()) {
-            Text(
-                text = stringResource(R.string.tafseer_no_notes),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(vertical = 16.dp)
-            )
-        } else {
-            highlights.forEach { highlight ->
-                val start = highlight.startOffset.coerceIn(0, tafseerText.length)
-                val end = highlight.endOffset.coerceIn(start, tafseerText.length)
-                val snippet = if (start < end) tafseerText.substring(start, end) else ""
-
-                NimazCard(
-                    onClick = { onHighlightTapped(highlight) },
-                    style = NimazCardStyle.OUTLINED,
-                    tone = NimazTone.NEUTRAL,
-                    elevation = 0.dp,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Column(modifier = Modifier.padding(12.dp)) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Box(
-                                modifier = Modifier
-                                    .size(10.dp)
-                                    .clip(CircleShape)
-                                    .background(parseColor(highlight.color))
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = if (snippet.length > 80) snippet.take(80) + "…" else snippet,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                maxLines = 2,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.height(6.dp))
-                        HorizontalDivider(
-                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
-                        )
-                        Spacer(modifier = Modifier.height(6.dp))
-
-                        Text(
-                            text = highlight.note ?: "",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            maxLines = 3,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
-                }
-                Spacer(modifier = Modifier.height(8.dp))
-            }
-        }
     }
 }
 

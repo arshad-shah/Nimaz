@@ -16,6 +16,19 @@ import com.arshadshah.nimaz.domain.model.Hadith
  * text and — where it reads well — a [ShareCard] for the branded image path.
  */
 object Shareables {
+    fun tafseerNote(context: Context, note: com.arshadshah.nimaz.domain.model.TafseerNoteItem, surahName: String): Shareable {
+        val reference = context.getString(R.string.tafseer_note_location, surahName, note.ayahNumber)
+        return Shareable(
+            plainText = buildString {
+                appendLine(reference).appendLine(note.sourceLabel).appendLine()
+                note.quote?.let { appendLine(it).appendLine() }
+                append(note.note)
+                appendBranding(context)
+            },
+            subject = reference,
+        )
+    }
+
 
     /** A single ayah. [surahName] is used when known, otherwise the surah number. */
     fun ayah(context: Context, ayah: Ayah, surahName: String? = null): Shareable {

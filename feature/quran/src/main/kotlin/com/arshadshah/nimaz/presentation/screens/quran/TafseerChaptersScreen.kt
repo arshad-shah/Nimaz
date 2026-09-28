@@ -19,6 +19,23 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.automirrored.filled.Sort
+import com.arshadshah.nimaz.domain.model.TafseerSource
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
+import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownMenu
+import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownRow
+import com.arshadshah.nimaz.presentation.components.organisms.NimazSearchBar
+import com.arshadshah.nimaz.presentation.components.organisms.TafseerSavedNoteCard
+import com.arshadshah.nimaz.presentation.components.organisms.TafseerNotesEditor
+import com.arshadshah.nimaz.presentation.components.organisms.TafseerNotesFeedback
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
@@ -57,19 +74,65 @@ import com.arshadshah.nimaz.presentation.viewmodel.quran.TafseerChaptersViewMode
 fun TafseerChaptersScreen(
     onNavigateBack: () -> Unit,
     onOpenTafseer: (surahNumber: Int, ayahNumber: Int) -> Unit,
-    viewModel: TafseerChaptersViewModel = hiltViewModel()
+    viewModel: TafseerChaptersViewModel = hiltViewModel(),
+    onOpenNote: (TafseerNoteItem) -> Unit = { onOpenTafseer(it.surahNumber, it.ayahNumber) },
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    var selectedTab by remember { mutableIntStateOf(0) }
+    var selectedTab by rememberSaveable { mutableIntStateOf(0) }
+
+    var query by rememberSaveable { mutableStateOf("") }
+    var sourceId by rememberSaveable { mutableStateOf<String?>(null) }
+    var oldestFirst by rememberSaveable { mutableStateOf(false) }
+    var filterExpanded by remember { mutableStateOf(false) }
+    var sortExpanded by remember { mutableStateOf(false) }
+    val snackbar = remember { SnackbarHostState() }
+    TafseerNotesFeedback(viewModel, snackbar)
+    TafseerNotesEditor(viewModel)
+    val names = remember(state.surahs) { state.surahs.associate { it.number to it.nameEnglish } }
+    val notes = remember(state.notes, query, sourceId, oldestFirst, names) {
+        filterTafseerNotes(state.notes, query, sourceId, oldestFirst, names)
+    }
 
     val notesTabLabel = stringResource(R.string.tafseer_tab_notes) +
             if (state.notes.isNotEmpty()) " · ${state.notes.size}" else ""
 
     NimazScreenScaffold(
+        snackbarHost = { SnackbarHost(snackbar) },
         topBar = {
             NimazBackTopAppBar(
                 title = stringResource(R.string.tafseer),
-                onBackClick = onNavigateBack
+                onBackClick = onNavigateBack,
+                actions = {
+                    // Scope menus to the notes tab. Keep them during a zero-result filter
+                    // so the user can clear it, but hide them for empty/loading/error states.
+                    if (selectedTab == 1 && !state.isLoading && state.error == null && state.notes.isNotEmpty()) {
+                        Box {
+                            IconButton(onClick = { filterExpanded = true }) {
+                                NimazIcon(Icons.Default.FilterList, contentDescription = stringResource(R.string.cd_filter),
+                                    variant = if (sourceId != null) NimazIconVariant.PRIMARY else NimazIconVariant.DEFAULT)
+                            }
+                            NimazDropdownMenu(filterExpanded, { filterExpanded = false }) {
+                                NimazDropdownRow(stringResource(R.string.all), selected = sourceId == null,
+                                    onClick = { sourceId = null; filterExpanded = false })
+                                TafseerSource.entries.forEach { source ->
+                                    NimazDropdownRow(source.displayName, selected = sourceId == source.id,
+                                        onClick = { sourceId = source.id; filterExpanded = false })
+                                }
+                            }
+                        }
+                        Box {
+                            IconButton(onClick = { sortExpanded = true }) {
+                                NimazIcon(Icons.AutoMirrored.Filled.Sort, contentDescription = stringResource(R.string.bookmarks_sort))
+                            }
+                            NimazDropdownMenu(sortExpanded, { sortExpanded = false }) {
+                                listOf(false, true).forEach { oldest ->
+                                    NimazDropdownRow(stringResource(if (oldest) R.string.bookmarks_sort_oldest else R.string.bookmarks_sort_newest),
+                                        selected = oldestFirst == oldest, onClick = { oldestFirst = oldest; sortExpanded = false })
+                                }
+                            }
+                        }
+                    }
+                },
             )
         },
     ) { paddingValues ->
@@ -84,7 +147,7 @@ fun TafseerChaptersScreen(
                     notesTabLabel
                 ).asSegments(),
                 selectedIndex = selectedTab,
-                onSelect = { selectedTab = it },
+                onSelect = { selectedTab = it; filterExpanded = false; sortExpanded = false },
                 purpose = NimazSegmentedPurpose.VIEW,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -142,15 +205,20 @@ fun TafseerChaptersScreen(
                         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        items(state.notes, key = { it.highlightId }) { note ->
-                            TafseerNoteCard(
+                        item {
+                            NimazSearchBar(query = query, onQueryChange = { query = it },
+                                onClear = { query = "" }, placeholder = stringResource(R.string.bookmarks_search_placeholder))
+                        }
+                        if (notes.isEmpty()) item {
+                            Text(stringResource(R.string.no_results_hint), modifier = Modifier.padding(20.dp))
+                        }
+                        items(notes, key = { it.key }) { note ->
+                            TafseerSavedNoteCard(
                                 note = note,
-                                surahName = nameBySurah[note.surahNumber]
-                                    ?: stringResource(
-                                        R.string.surah_number_format,
-                                        note.surahNumber
-                                    ),
-                                onClick = { onOpenTafseer(note.surahNumber, note.ayahNumber) }
+                                surahName = nameBySurah[note.surahNumber] ?: note.surahNumber.toString(),
+                                onOpen = { onOpenNote(note) },
+                                onEdit = { viewModel.edit(note) },
+                                onDelete = { viewModel.delete(note) },
                             )
                         }
                     }
@@ -160,56 +228,16 @@ fun TafseerChaptersScreen(
     }
 }
 
-@Composable
-private fun TafseerNoteCard(
-    note: TafseerNoteItem,
-    surahName: String,
-    onClick: () -> Unit
-) {
-    NimazCard(onClick = onClick) {
-        Row(
-            modifier = Modifier.padding(14.dp),
-            verticalAlignment = Alignment.Top
-        ) {
-            Box(
-                modifier = Modifier
-                    .padding(top = 3.dp)
-                    .size(12.dp)
-                    .clip(CircleShape)
-                    .background(parseColor(note.color))
-            )
-            Spacer(modifier = Modifier.width(10.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = stringResource(
-                            R.string.tafseer_note_location,
-                            surahName,
-                            note.ayahNumber
-                        ),
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                    Text(
-                        text = note.sourceLabel,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-                Spacer(modifier = Modifier.size(4.dp))
-                Text(
-                    text = note.note,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 3,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-        }
+/** Search and ordering shared with tests; stable keys distinguish the two note stores. */
+internal fun filterTafseerNotes(
+    notes: List<TafseerNoteItem>, query: String, sourceId: String?, oldestFirst: Boolean,
+    names: Map<Int, String>,
+): List<TafseerNoteItem> {
+    val term = query.trim()
+    val filtered = notes.filter { note ->
+        (sourceId == null || note.tafseerId == sourceId) &&
+            listOf(note.note, note.quote.orEmpty(), note.sourceLabel, names[note.surahNumber].orEmpty(),
+                "${note.surahNumber}:${note.ayahNumber}").any { it.contains(term, ignoreCase = true) }
     }
+    return if (oldestFirst) filtered.sortedBy { it.createdAt } else filtered.sortedByDescending { it.createdAt }
 }

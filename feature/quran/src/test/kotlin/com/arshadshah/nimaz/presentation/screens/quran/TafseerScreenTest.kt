@@ -120,8 +120,7 @@ class TafseerScreenTest {
 
         render()
 
-        composeRule.onNodeWithText("The commentary on this passage.", substring = true)
-            .assertIsDisplayed()
+        composeRule.onNodeWithText("The commentary on this passage.").assertExists()
     }
 
     @Test

@@ -195,6 +195,7 @@ fun SwipeableSavedCard(
     subtitle: String? = null,
     arabicText: String? = null,
     note: String? = null,
+    quote: String? = null,
     /**
      * The kind's colour, drawn as a spine down the left edge and used for [kindLabel]. Null
      * leaves the card unmarked.
@@ -295,6 +296,17 @@ fun SwipeableSavedCard(
                             maxLines = 2,
                             overflow = TextOverflow.Ellipsis,
                             modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+
+                    if (!quote.isNullOrBlank()) {
+                        Text(
+                            text = quote,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            maxLines = 3,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.padding(top = 8.dp),
                         )
                     }
 

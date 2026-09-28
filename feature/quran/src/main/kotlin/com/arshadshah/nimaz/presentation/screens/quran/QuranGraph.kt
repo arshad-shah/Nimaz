@@ -98,6 +98,9 @@ fun NavGraphBuilder.quranGraph(navController: NavController) {
     taggedComposable<Route.TafseerChapters>(ScreenTags.TafseerChapters) {
         TafseerChaptersScreen(
             onNavigateBack = { navController.popBackStack() },
+            onOpenNote = { note ->
+                navController.navigate(Route.Tafseer(note.surahNumber, note.ayahNumber, note.tafseerId, note.highlight?.startOffset))
+            },
             onOpenTafseer = { surah, ayah ->
                 navController.navigate(
                     Route.Tafseer(
@@ -114,6 +117,8 @@ fun NavGraphBuilder.quranGraph(navController: NavController) {
         TafseerScreen(
             surahNumber = args.surahNumber,
             ayahNumber = args.ayahNumber,
+            sourceId = args.sourceId,
+            highlightOffset = args.highlightOffset,
             onNavigateBack = { navController.popBackStack() },
             onNavigateToTopic = { topicId ->
                 navController.navigate(Route.QuranTopicDetail(topicId))

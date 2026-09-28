@@ -69,11 +69,14 @@ class TafseerViewModel @Inject constructor(
      * pager, which holds several pages live and needs one handle per page).
      */
     private var ayahAnnotationsJob: Job? = null
+    private var pendingHighlightOffset: Int? = null
 
     fun onEvent(event: TafseerEvent) {
         when (event) {
             is TafseerEvent.LoadSurah -> {
                 telemetry.featureUsed(AppAnalytics.Feature.TAFSEER, "open_surah")
+                pendingHighlightOffset = event.highlightOffset
+                event.source?.let { source -> _state.update { it.copy(selectedSource = source) } }
                 loadSurah(event.surahNumber, event.ayahNumber)
             }
             // Swiping between ayahs and turning a commentary page are how this screen is read;
@@ -231,7 +234,11 @@ class TafseerViewModel @Inject constructor(
                     val sameBlock = tafseer != null && tafseer.id == it.currentTafseer?.id
                     it.copy(
                         currentTafseer = tafseer,
-                        currentTafseerPage = if (sameBlock) it.currentTafseerPage else 0,
+                        currentTafseerPage = pendingHighlightOffset?.let { offset ->
+                            com.arshadshah.nimaz.domain.model.splitTafseerIntoPages(tafseer?.text.orEmpty())
+                                .indexOfFirst { page -> offset in page.globalStartOffset until page.globalEndOffset }
+                                .coerceAtLeast(0)
+                        } ?: if (sameBlock) it.currentTafseerPage else 0,
                         availableSources = available,
                         // Keyed on the verse, not the block: a block can span nine verses and the
                         // subjects the corpus files 43:81 under are not the ones it files 43:89
@@ -240,6 +247,7 @@ class TafseerViewModel @Inject constructor(
                     )
                 }
 
+                pendingHighlightOffset = null
                 if (tafseer != null) {
                     launch {
                         tafseerUseCases.getHighlightsForRange(

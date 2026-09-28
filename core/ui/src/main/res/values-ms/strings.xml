@@ -2105,6 +2105,13 @@
     <string name="prayer_jumuah">Jumaat</string>
     <string name="prayer_about_this_day">Tentang hari ini</string>
     <string name="cd_pick_month">Pilih bulan</string>
+    <string name="tafseer_note_deleted">Nota dipadam</string>
+    <string name="tafseer_reflection">Renungan</string>
+    <string name="tafseer_highlight_note">Nota sorotan</string>
+    <string name="tafseer_text_size">Saiz teks</string>
+    <string name="tafseer_open_passage">Buka petikan</string>
+    <string name="note_discard_title">Buang perubahan?</string>
+    <string name="note_discard_message">Perubahan yang belum disimpan akan hilang.</string>
 
     <!-- Reading-first khatam flow; shared by list and detail. -->
     <string name="khatam_progress_percent" tools:ignore="PluralsCandidate">%1$d%% selesai</string>
