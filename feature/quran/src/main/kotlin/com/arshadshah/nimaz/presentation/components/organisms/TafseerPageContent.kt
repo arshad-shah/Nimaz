@@ -305,13 +305,10 @@ fun TafseerPageContent(
                                 val animPage =
                                     tafseerPages[pageIndex.coerceIn(0, tafseerPages.lastIndex)]
                                 val animHighlights = highlightsForPage(highlights, animPage)
-                                val isActivePage = pageIndex == safeContentPage
 
                                 TafseerHighlightableText(
                                     text = animPage.text,
                                     highlights = animHighlights,
-                                    selectionStart = if (isActivePage) selStart else -1,
-                                    selectionEnd = if (isActivePage) selEnd else -1,
                                     onSelectionChange = { start, end ->
                                         if (start < 0) {
                                             selStart = -1; selEnd = -1

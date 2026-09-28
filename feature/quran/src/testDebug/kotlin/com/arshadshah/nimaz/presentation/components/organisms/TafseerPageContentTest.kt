@@ -1,9 +1,5 @@
 package com.arshadshah.nimaz.presentation.components.organisms
 
-import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.matcher.ViewMatchers.withText
-import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -124,7 +120,7 @@ class TafseerPageContentTest {
             )
         }
 
-        onView(withText("This is the commentary body.")).check(matches(isDisplayed()))
+        composeRule.onNodeWithText("This is the commentary body.").assertExists()
     }
 
     @Test

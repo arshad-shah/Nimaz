@@ -1,17 +1,14 @@
 package com.arshadshah.nimaz.presentation.components.molecules
 
-import android.text.Selection
-import android.text.Spannable
-import android.view.ActionMode
-import android.view.Menu
-import android.view.MenuItem
-import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.matcher.ViewMatchers.isAssignableFrom
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.*
+import androidx.compose.ui.text.TextRange
 import com.arshadshah.nimaz.domain.model.TafseerHighlight
 import com.arshadshah.nimaz.testing.compose.createComponentComposeRule
 import com.arshadshah.nimaz.testing.compose.setThemedContent
 import com.google.common.truth.Truth.assertThat
-import io.mockk.*
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -20,42 +17,70 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class TafseerHighlightableTextGesturesTest {
     @get:Rule val composeRule = createComponentComposeRule()
+    private val text = "Mercy بسم الله Mercy and peace."
     private var created: Pair<Int, Int>? = null
     private var edited: Long? = null
+    private var selected = -1 to -1
+    private val clearToken = mutableStateOf(0)
+    private val size = mutableStateOf(16f)
+
     private fun render(highlights: List<TafseerHighlight> = emptyList()) {
         composeRule.setThemedContent {
-            TafseerHighlightableText("Mercy بسم الله and peace.", highlights, -1, -1, { _, _ -> },
-                { edited = it.id }, 0, onHighlightSelection = { start, end -> created = start to end })
+            TafseerHighlightableText(
+                text = text, highlights = highlights,
+                onSelectionChange = { start, end -> selected = start to end },
+                onHighlightTapped = { edited = it.id },
+                clearSelectionToken = clearToken.value,
+                onHighlightSelection = { start, end -> created = start to end },
+                textSize = size.value,
+            )
         }
     }
-    @Test fun `native selection exposes highlight without replacing platform menu`() {
+    private fun select(start: Int, end: Int) {
+        composeRule.onNodeWithText(text).performSemanticsAction(SemanticsActions.SetSelection) {
+            assertThat(it(start, end, false)).isTrue()
+        }
+        composeRule.waitForIdle()
+    }
+    private fun highlight() {
+        val action = composeRule.onNodeWithText(text).fetchSemanticsNode()
+            .config[SemanticsActions.CustomActions].single()
+        composeRule.runOnIdle { assertThat(action.action()).isTrue() }
+    }
+
+    @Test fun `repeated phrase and reversed selection retain exact offsets`() {
         render()
-        onView(isAssignableFrom(NativeTafseerTextView::class.java)).check { view, _ ->
-            val text = view as NativeTafseerTextView
-            assertThat(text.isTextSelectable).isTrue()
-            val menu = mockk<Menu>(relaxed = true)
-            val mode = mockk<ActionMode>(relaxed = true)
-            assertThat(text.customSelectionActionModeCallback.onCreateActionMode(mode, menu)).isTrue()
-            verify(exactly = 0) { menu.clear() }
-            Selection.setSelection(text.text as Spannable, 6, 13)
-            val action = mockk<MenuItem> { every { itemId } returns HIGHLIGHT_ACTION }
-            assertThat(text.customSelectionActionModeCallback.onActionItemClicked(mode, action)).isTrue()
-            assertThat(created).isEqualTo(6 to 13)
-            verify { mode.finish() }
-        }
+        val start = text.lastIndexOf("Mercy")
+        select(start + 5, start)
+        assertThat(selected).isEqualTo(start to start + 5)
+        highlight()
+        assertThat(created).isEqualTo(start to start + 5)
+        composeRule.waitForIdle()
+        assertThat(selected).isEqualTo(-1 to -1)
     }
-    @Test fun `native copy is not intercepted and existing highlight opens editor`() {
+
+    @Test fun `existing highlight opens shared editor and copy stays available`() {
         render(listOf(TafseerHighlight(7, 1, "ibn_kathir_en", 0, 5, "#FDE68A", null, 0, 0)))
-        onView(isAssignableFrom(NativeTafseerTextView::class.java)).check { view, _ ->
-            val text = view as NativeTafseerTextView
-            val mode = mockk<ActionMode>(relaxed = true)
-            val copy = mockk<MenuItem> { every { itemId } returns android.R.id.copy }
-            assertThat(text.customSelectionActionModeCallback.onActionItemClicked(mode, copy)).isFalse()
-            Selection.setSelection(text.text as Spannable, 0, 5)
-            val action = mockk<MenuItem> { every { itemId } returns HIGHLIGHT_ACTION }
-            text.customSelectionActionModeCallback.onActionItemClicked(mode, action)
-            assertThat(edited).isEqualTo(7L)
-            assertThat(created).isNull()
-        }
+        select(0, 5)
+        val config = composeRule.onNodeWithText(text).fetchSemanticsNode().config
+        assertThat(config.contains(SemanticsActions.CopyText)).isTrue()
+        assertThat(config.contains(SemanticsActions.SetText)).isFalse()
+        highlight()
+        assertThat(edited).isEqualTo(7L)
+        assertThat(created).isNull()
+    }
+
+    @Test fun `mixed Arabic selection survives typography changes and clears explicitly`() {
+        render()
+        val start = text.indexOf("بسم")
+        val end = text.indexOf(" Mercy")
+        select(start, end)
+        composeRule.runOnIdle { size.value = 22f }
+        composeRule.onNodeWithText(text).assert(
+            SemanticsMatcher.expectValue(SemanticsProperties.TextSelectionRange, TextRange(start, end)))
+        composeRule.runOnIdle { clearToken.value++ }
+        composeRule.onNodeWithText(text).assert(
+            SemanticsMatcher.expectValue(SemanticsProperties.TextSelectionRange, TextRange.Zero))
+        assertThat(selected).isEqualTo(-1 to -1)
     }
 }

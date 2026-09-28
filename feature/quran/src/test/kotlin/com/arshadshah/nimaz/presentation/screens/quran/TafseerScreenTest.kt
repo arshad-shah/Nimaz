@@ -120,10 +120,7 @@ class TafseerScreenTest {
 
         render()
 
-        androidx.test.espresso.Espresso.onView(
-            androidx.test.espresso.matcher.ViewMatchers.withText("The commentary on this passage.")
-        ).check(androidx.test.espresso.assertion.ViewAssertions.matches(
-            androidx.test.espresso.matcher.ViewMatchers.isDisplayed()))
+        composeRule.onNodeWithText("The commentary on this passage.").assertExists()
     }
 
     @Test
