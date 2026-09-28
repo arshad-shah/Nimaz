@@ -54,7 +54,7 @@ class TafseerHighlightableTextGesturesTest {
             Selection.setSelection(text.text as Spannable, 0, 5)
             val action = mockk<MenuItem> { every { itemId } returns HIGHLIGHT_ACTION }
             text.customSelectionActionModeCallback.onActionItemClicked(mode, action)
-            assertThat(edited).isEqualTo(7)
+            assertThat(edited).isEqualTo(7L)
             assertThat(created).isNull()
         }
     }

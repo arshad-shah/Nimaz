@@ -56,7 +56,7 @@ fun NoteEditorSheet(
     var discard by remember { mutableStateOf(false) }
     val dismiss = {
         if (!saving) {
-            if (text != initialNote.orEmpty()) discard = true else onDismiss()
+            if (fullScreen && text != initialNote.orEmpty()) discard = true else onDismiss()
         }
     }
     val canSave = !saving && (text.isNotBlank() || (allowEmpty && !initialNote.isNullOrBlank()))

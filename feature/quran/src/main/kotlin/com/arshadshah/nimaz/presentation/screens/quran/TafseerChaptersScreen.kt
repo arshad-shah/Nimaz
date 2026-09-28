@@ -32,7 +32,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownMenu
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownRow
-import com.arshadshah.nimaz.presentation.components.molecules.NimazSearchBar
+import com.arshadshah.nimaz.presentation.components.organisms.NimazSearchBar
 import com.arshadshah.nimaz.presentation.components.organisms.TafseerSavedNoteCard
 import com.arshadshah.nimaz.presentation.components.organisms.TafseerNotesEditor
 import com.arshadshah.nimaz.presentation.components.organisms.TafseerNotesFeedback
