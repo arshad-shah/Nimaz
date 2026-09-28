@@ -8,9 +8,19 @@ import com.arshadshah.nimaz.domain.model.KhatamInsights
 import com.arshadshah.nimaz.domain.model.KhatamStats
 import com.arshadshah.nimaz.domain.usecase.khatam.KhatamPortion
 
+/** One portion presentation shared by the overview and detail. */
+data class KhatamDailyReading(
+    val portion: KhatamPortion,
+    val label: String?,
+    val readCount: Int,
+) {
+    val isComplete: Boolean get() = readCount >= portion.ayahCount
+}
+
 data class KhatamListUiState(
     val activeKhatam: Khatam? = null,
     val activeInsights: KhatamInsights? = null,
+    val dailyReading: KhatamDailyReading? = null,
     val inProgressKhatams: List<Khatam> = emptyList(),
     val completedKhatams: List<Khatam> = emptyList(),
     val abandonedKhatams: List<Khatam> = emptyList(),
@@ -41,12 +51,14 @@ data class KhatamDetailUiState(
      * The screen led with "resume", which answers a question about the past — the plan's actual
      * instruction was nowhere on it.
      */
-    val todaysPortion: KhatamPortion? = null,
-    val todaysPortionLabel: String? = null,
+    val dailyReading: KhatamDailyReading? = null,
     val isLoading: Boolean = true,
     /** True once the khatam is known to be gone, so the screen can pop instead of spinning. */
-    val notFound: Boolean = false
-)
+    val notFound: Boolean = false,
+) {
+    val todaysPortion: KhatamPortion? get() = dailyReading?.portion
+    val todaysPortionLabel: String? get() = dailyReading?.label
+}
 
 data class KhatamFormUiState(
     val mode: KhatamFormMode = KhatamFormMode.Create,

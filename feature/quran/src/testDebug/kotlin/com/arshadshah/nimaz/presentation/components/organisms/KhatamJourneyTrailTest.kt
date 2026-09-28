@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.presentation.components.organisms
 
+import androidx.compose.ui.test.assertHasNoClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performClick
@@ -122,7 +123,7 @@ class KhatamJourneyTrailTest {
     fun `a trail with no handler is a picture, not a control`() {
         render(trail(done = 3), onJuzClick = null)
 
-        composeRule.onNodeWithContentDescription(current(4)).performClick()
+        composeRule.onNodeWithContentDescription(current(4)).assertHasNoClickAction()
 
         assertThat(clicked).isNull()
     }

@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">Nimaz</string>
     <string name="all">Tout</string>
     <string name="favorites">Favoris</string>
@@ -2188,4 +2188,16 @@
     <string name="prayer_jumuah">Joumou\'a</string>
     <string name="prayer_about_this_day">À propos de ce jour</string>
     <string name="cd_pick_month">Choisir un mois</string>
+
+    <!-- Reading-first khatam flow; shared by list and detail. -->
+    <string name="khatam_progress_percent" tools:ignore="PluralsCandidate">%1$d%% terminé</string>
+    <string name="khatam_today_complete">Lecture du jour terminée</string>
+    <string name="khatam_portion_progress" tools:ignore="PluralsCandidate">%1$d / %2$d versets prévus lus</string>
+    <string name="khatam_view_plan">Voir le programme</string>
+    <string name="khatam_other_plans">Autres programmes</string>
+    <string name="khatam_marking_hint">Votre progression est enregistrée lorsque vous marquez des versets comme lus.</string>
+    <string name="khatam_switch_plan">Activer ce programme</string>
+    <string name="khatam_reading_activity">Activité de lecture</string>
+    <string name="khatam_form_intro">Un peu, chaque jour.</string>
+    <string name="khatam_form_intro_detail">Choisissez un rythme qui vous convient.</string>
 </resources>

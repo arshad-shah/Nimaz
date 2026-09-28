@@ -129,4 +129,27 @@ class KhatamRepositoryImplTest {
 
         assertThat(result!!.status).isEqualTo(KhatamStatus.COMPLETED)
     }
+    @Test
+    fun `detail carries original read timestamps without exposing database entities`() = runTest {
+        every { khatamDao.observeKhatamById(1) } returns flowOf(makeEntity())
+        every { khatamDao.observeReadMarks(1) } returns flowOf(listOf(
+            com.arshadshah.nimaz.data.local.database.entity.KhatamAyahEntity(1, 3, readAt = 100),
+            com.arshadshah.nimaz.data.local.database.entity.KhatamAyahEntity(1, 4, readAt = 200),
+        ))
+        every { khatamDao.observeReadAyahIds(1) } returns flowOf(listOf(3, 4))
+        every { khatamDao.observeReadTimestamps(1) } returns flowOf(listOf(100L, 200L))
+        every { khatamDao.observeDailyLogs(1) } returns flowOf(emptyList())
+        coEvery { quranDao.getJuzAyahTotals() } returns emptyList()
+        every { quranDao.getJuzs() } returns flowOf(emptyList())
+        val detail = repository.observeKhatamDetail(1).first()!!
+        assertThat(detail.readAyahIds).containsExactly(3, 4)
+        assertThat(detail.readAtByAyah).containsExactly(3, 100L, 4, 200L)
+    }
+
+    @Test
+    fun `deleted plan detail emits null`() = runTest {
+        every { khatamDao.observeKhatamById(1) } returns flowOf(null)
+        assertThat(repository.observeKhatamDetail(1).first()).isNull()
+    }
+
 }

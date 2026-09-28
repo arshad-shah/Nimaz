@@ -1126,6 +1126,21 @@ place** whenever you add a migration — the two can no longer drift.
 
 ---
 
+### Khatam daily assignments
+
+`KhatamDao.observeReadMarks` exposes the existing ayah rows to the repository, which maps
+only IDs and original `read_at` timestamps into `KhatamDetailSnapshot.readAtByAyah`.
+`GetTodaysPortion.forDay` reconstructs the unread set at local midnight, chooses up to the
+plan's daily target, and skips verses read on earlier days. Today's newly marked verses fill
+that same assignment rather than extending its end. It survives process restart and synced
+read marks without a schema change or a second source of saved progress. Undoing an older
+mark makes that verse eligible again; editing the target intentionally resizes the assignment.
+A complete/archived plan has no assignment. Calendar boundaries use the device zone and DST.
+The list/detail share one resolver, cancel stale content lookups with `mapLatest`, and refresh
+on resume as well as read-mark emissions. `KhatamProgressCalculator.readingWeek` supplies seven
+local calendar dates, including days with zero reading, for the accessible activity chart.
+
+
 ## 6. Preferences (DataStore)
 
 The app has **three** Preferences DataStore files plus the per-widget Glance state stores, all

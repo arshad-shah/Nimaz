@@ -160,17 +160,18 @@ class KhatamRepositoryImpl @Inject constructor(
                 kotlinx.coroutines.flow.flowOf(null)
             } else {
                 combine(
-                    observeReadAyahIds(khatamId),
+                    khatamDao.observeReadMarks(khatamId),
                     observeDailyLogs(khatamId),
                     observeJuzProgress(khatamId)
-                ) { readIds, logs, juz ->
+                ) { marks, logs, juz ->
                     val khatam = entity.toDomain()
                     KhatamDetailSnapshot(
                         khatam = khatam,
                         juzProgress = juz,
                         dailyLogs = logs,
                         insights = KhatamProgressCalculator.insights(khatam, logs, juz),
-                        readAyahIds = readIds
+                        readAyahIds = marks.map { it.ayahId }.toSet(),
+                        readAtByAyah = marks.associate { it.ayahId to it.readAt },
                     )
                 }
             }

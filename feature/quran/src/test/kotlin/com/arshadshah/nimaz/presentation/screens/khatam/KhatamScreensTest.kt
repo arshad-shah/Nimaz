@@ -1,5 +1,10 @@
 package com.arshadshah.nimaz.presentation.screens.khatam
 
+import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.performScrollTo
+import com.arshadshah.nimaz.presentation.viewmodel.quran.KhatamDailyReading
+import com.arshadshah.nimaz.domain.usecase.khatam.KhatamPortion
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -228,7 +233,7 @@ class KhatamScreensTest {
             nextUnreadSurah = 18,
             nextUnreadAyah = 10,
             nextUnreadSurahName = "The Cave",
-            todaysPortionLabel = "Al-Kahf 18:1 → An-Nur 24:12",
+            dailyReading = KhatamDailyReading(KhatamPortion(1, 20), "Al-Kahf 18:1 → An-Nur 24:12", 0),
         )
 
         renderDetail()
@@ -258,7 +263,8 @@ class KhatamScreensTest {
         var edited: Long? = null
         renderDetail(khatamId = 7, onEdit = { edited = it })
 
-        composeRule.onNodeWithContentDescription(str(R.string.khatam_edit)).performClick()
+        composeRule.onNodeWithContentDescription(str(R.string.khatam_more_actions)).performClick()
+        composeRule.onNodeWithText(str(R.string.khatam_edit)).performClick()
 
         assertThat(edited).isEqualTo(7)
     }
@@ -408,4 +414,75 @@ class KhatamScreensTest {
 
         composeRule.onNodeWithText("1000", substring = true).assertIsDisplayed()
     }
+    @Test
+    fun `active plan is shown once and stays out of completed history`() {
+        val active = khatam(1, "My daily khatam", active = true)
+        listState.value = KhatamListUiState(
+            isLoading = false, activeKhatam = active, activeInsights = KhatamInsights(),
+            inProgressKhatams = listOf(active, khatam(2, "Weekend")),
+            completedKhatams = listOf(khatam(3, "Finished", status = KhatamStatus.COMPLETED)),
+        )
+        renderList()
+        composeRule.onAllNodesWithText("My daily khatam").assertCountEquals(1)
+        composeRule.onNodeWithText(str(R.string.khatam_other_plans)).assertIsDisplayed()
+        composeRule.onNodeWithText(str(R.string.khatam_section_completed)).performClick()
+        composeRule.onNodeWithText("My daily khatam").assertDoesNotExist()
+        composeRule.onNodeWithText("Finished").assertIsDisplayed()
+    }
+
+    @Test
+    fun `view plan opens detail without starting the reader`() {
+        val active = khatam(7, "Daily", active = true)
+        listState.value = KhatamListUiState(isLoading = false, activeKhatam = active,
+            activeInsights = KhatamInsights(), inProgressKhatams = listOf(active))
+        var id: Long? = null
+        renderList(onDetail = { id = it })
+        composeRule.onNodeWithText(str(R.string.khatam_view_plan)).performClick()
+        assertThat(id).isEqualTo(7)
+    }
+
+    @Test
+    fun `inactive plan asks to switch before it can open the reader`() {
+        detailState.value = KhatamDetailUiState(isLoading = false,
+            khatam = khatam(7, "Weekend"), nextUnreadSurah = 2, nextUnreadAyah = 10,
+            dailyReading = KhatamDailyReading(KhatamPortion(17, 36), "Al-Baqarah 10–29", 0))
+        var read = false
+        renderDetail(khatamId = 7, onRead = { _, _ -> read = true })
+        composeRule.onNodeWithText(str(R.string.khatam_switch_plan)).performClick()
+        assertThat(events).contains(KhatamEvent.SetActiveKhatam(7))
+        assertThat(read).isFalse()
+        composeRule.runOnIdle { detailState.value = detailState.value.copy(khatam = detailState.value.khatam!!.copy(isActive = true)) }
+        composeRule.onNodeWithText(str(R.string.khatam_read_todays_portion)).performClick()
+        assertThat(read).isTrue()
+    }
+
+    @Test
+    fun `completed daily goal offers optional continued reading`() {
+        detailState.value = KhatamDetailUiState(isLoading = false,
+            khatam = khatam(1, active = true), nextUnreadSurah = 2, nextUnreadAyah = 14,
+            dailyReading = KhatamDailyReading(KhatamPortion(1, 20), "Al-Fatihah to Al-Baqarah", 20))
+        renderDetail()
+        composeRule.onNodeWithText(str(R.string.khatam_today_complete)).assertIsDisplayed()
+        composeRule.onNodeWithText(str(R.string.khatam_read_todays_portion)).assertDoesNotExist()
+    }
+
+    @Test
+    fun `completed and archived plans do not offer reading`() {
+        detailState.value = KhatamDetailUiState(isLoading = false,
+            khatam = khatam(1, status = KhatamStatus.ABANDONED), nextUnreadSurah = 1, nextUnreadAyah = 1)
+        renderDetail()
+        composeRule.onNodeWithText(str(R.string.khatam_switch_plan)).assertDoesNotExist()
+        composeRule.runOnIdle { detailState.value = detailState.value.copy(khatam = khatam(1, status = KhatamStatus.COMPLETED)) }
+        composeRule.onNodeWithText(str(R.string.khatam_continue_reading)).assertDoesNotExist()
+    }
+
+    @Test
+    fun `notes expand using the shared accordion and existing text survives`() {
+        formState.value = KhatamFormUiState(name = "Daily", notes = "After Fajr")
+        renderForm()
+        composeRule.onNodeWithText(str(R.string.field_notes)).performScrollTo().performClick()
+        composeRule.onNodeWithText(str(R.string.khatam_notes_placeholder)).assertDoesNotExist()
+        composeRule.onAllNodesWithText("After Fajr").assertCountEquals(2)
+    }
+
 }
