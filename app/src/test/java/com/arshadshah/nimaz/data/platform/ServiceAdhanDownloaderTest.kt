@@ -15,9 +15,11 @@ import com.arshadshah.nimaz.data.audio.AdhanSound
 import com.google.common.truth.Truth.assertThat
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mockk.slot
 import io.mockk.spyk
+import io.mockk.unmockkObject
 import io.mockk.unmockkStatic
 import io.mockk.verify
 import org.junit.After
@@ -40,7 +42,7 @@ class ServiceAdhanDownloaderTest {
     fun setUp() {
         context = spyk(ApplicationProvider.getApplicationContext<Context>())
         workManager = mockk(relaxed = true)
-        mockkStatic(WorkManager::class)
+        mockkObject(WorkManager.Companion)
         every { WorkManager.getInstance(any<Context>()) } returns workManager
         every {
             workManager.enqueueUniqueWork(
@@ -60,7 +62,7 @@ class ServiceAdhanDownloaderTest {
     @After
     fun tearDown() {
         unmockkStatic(ActivityManager::class)
-        unmockkStatic(WorkManager::class)
+        unmockkObject(WorkManager.Companion)
     }
 
     @Test
