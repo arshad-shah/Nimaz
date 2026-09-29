@@ -19,6 +19,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.arshadshah.nimaz.core.common.formatWeekdayDayMonth
 import com.arshadshah.nimaz.core.ui.R
 import com.arshadshah.nimaz.domain.model.PrayerType
+import com.arshadshah.nimaz.presentation.components.atoms.ProvideNimazClock
 import com.arshadshah.nimaz.presentation.model.PrayerTimeDisplay
 import com.arshadshah.nimaz.presentation.viewmodel.prayer.PrayerTimesEvent
 import com.arshadshah.nimaz.presentation.viewmodel.prayer.PrayerTimesUiState
@@ -90,11 +91,14 @@ class PrayerTimesScreenTest {
 
     private fun render() {
         composeRule.setThemedContent {
-            PrayerTimesScreen(
-                onNavigateBack = { backs++ },
-                onNavigateToSettings = { settingsOpens++ },
-                viewModel = viewModel,
-            )
+            // A known Dhuhr window; CI may run before Fajr when no current prayer exists.
+            ProvideNimazClock(timeSource = { at(today, 13, 0) }) {
+                PrayerTimesScreen(
+                    onNavigateBack = { backs++ },
+                    onNavigateToSettings = { settingsOpens++ },
+                    viewModel = viewModel,
+                )
+            }
         }
         composeRule.waitForIdle()
     }
