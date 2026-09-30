@@ -2,7 +2,7 @@ package com.arshadshah.nimaz.data.audio
 
 import android.content.Context
 import androidx.media3.common.MediaItem
-import androidx.media3.common.PlaybackException
+import androidx.media3.exoplayer.ExoPlaybackException
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
@@ -101,7 +101,9 @@ class QaidaPlaybackCallbacksTest {
         listener.captured.onPlaybackStateChanged(Player.STATE_IDLE)
         assertThat(manager.state.value.error).isNull()
         for (message in listOf("broken clip", null)) {
-            every { player.playerError } returns PlaybackException(message, null, PlaybackException.ERROR_CODE_UNSPECIFIED)
+            val failure = mockk<ExoPlaybackException>()
+            every { failure.message } returns message
+            every { player.playerError } returns failure
             listener.captured.onPlaybackStateChanged(Player.STATE_IDLE)
             assertThat(manager.state.value.error).isEqualTo(message ?: "Playback error")
             assertThat(manager.state.value.isLoading).isFalse()

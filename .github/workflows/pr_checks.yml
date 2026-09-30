@@ -124,6 +124,10 @@ jobs:
       - name: Check the release version bump
         run: ruby fastlane/version_bump_spec.rb
 
+      # Fail early on the module whose locked coverage is being repaired.
+      - name: Content tests and coverage
+        run: ./gradlew :feature:content:testDebugUnitTest :feature:content:coverageFloor
+
       - name: Run Tests and Lint
         run: bundle exec fastlane android test
 
