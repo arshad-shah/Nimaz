@@ -167,6 +167,7 @@ jobs:
           path: |
             **/build/reports/tests/
             **/build/test-results/
+            **/build/reports/jacoco/
 
       - name: Upload Lint Results
         if: ${{ !cancelled() }}

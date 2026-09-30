@@ -28,7 +28,16 @@ import com.arshadshah.nimaz.domain.usecase.QaidaUseCases
 import com.arshadshah.nimaz.domain.usecase.ResetQaidaProgressUseCase
 import com.arshadshah.nimaz.domain.usecase.UnlockNextLessonUseCase
 import com.google.common.truth.Truth.assertThat
+import io.mockk.coEvery
 import io.mockk.coVerify
+import com.arshadshah.nimaz.data.audio.QaidaLessonAudioStore
+import com.arshadshah.nimaz.data.qaida.QaidaJourneyStore
+import com.arshadshah.nimaz.data.qaida.QaidaLearningSettings
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -216,6 +225,180 @@ class QaidaReaderViewModelTest {
         advanceUntilIdle()
 
         assertThat(vm.selectedLessonId.value).isEqualTo(1)
+    }
+
+    @Test fun `navigation handles no course no selection and both ends without leaving bounds`() = runTest {
+        val vm = createViewModel()
+        vm.onEvent(QaidaReaderEvent.NextLesson)
+        vm.onEvent(QaidaReaderEvent.PreviousLesson)
+        vm.onEvent(QaidaReaderEvent.Resume)
+        assertThat(vm.selectedLessonId.value).isNull()
+        vm.courseProgress.test {
+            awaitItem(); awaitItem()
+            vm.onEvent(QaidaReaderEvent.NextLesson)
+            vm.onEvent(QaidaReaderEvent.PreviousLesson)
+            assertThat(vm.selectedLessonId.value).isNull()
+            vm.onEvent(QaidaReaderEvent.SelectLesson(1))
+            vm.onEvent(QaidaReaderEvent.PreviousLesson)
+            assertThat(vm.selectedLessonId.value).isEqualTo(1)
+            vm.onEvent(QaidaReaderEvent.NextLesson)
+            assertThat(vm.selectedLessonId.value).isEqualTo(2)
+            vm.onEvent(QaidaReaderEvent.NextLesson)
+            assertThat(vm.selectedLessonId.value).isEqualTo(2)
+            vm.onEvent(QaidaReaderEvent.PreviousLesson)
+            assertThat(vm.selectedLessonId.value).isEqualTo(1)
+        }
+    }
+
+    @Test fun `resume falls back to first lesson and leaves an empty course unselected`() = runTest {
+        for (course in listOf(courseProgress(nextLessonId = null), courseProgress(nextLessonId = null).copy(lessons = emptyList()))) {
+            every { getCourseProgress() } returns flowOf(course)
+            val vm = createViewModel()
+            vm.courseProgress.test {
+                awaitItem(); awaitItem()
+                vm.onEvent(QaidaReaderEvent.Resume)
+                assertThat(vm.selectedLessonId.value).isEqualTo(course.lessons.firstOrNull()?.lesson?.id)
+            }
+        }
+    }
+
+    @Test fun `practice only credits selected lesson and repeats clamp to one through three`() = runTest {
+        val vm = createViewModel()
+        val selected = cell(11, 1, "alif")
+        vm.onEvent(QaidaReaderEvent.PractisedCell(selected, true))
+        vm.onEvent(QaidaReaderEvent.SelectLesson(1))
+        vm.onEvent(QaidaReaderEvent.PractisedCell(cell(22, 2, "baa"), false))
+        vm.onEvent(QaidaReaderEvent.PractisedCell(selected, false))
+        advanceUntilIdle()
+        coVerify(exactly = 1) { markCellHeard.markPractised(1, 11) }
+        coVerify(exactly = 0) { markCellHeard.markPractised(2, any()) }
+        vm.onEvent(QaidaReaderEvent.RepeatCell(selected, 0))
+        vm.onEvent(QaidaReaderEvent.RepeatCell(selected, 2))
+        vm.onEvent(QaidaReaderEvent.RepeatCell(selected, 99))
+        verify { audioManager.playSequence(listOf("alif")) }
+        verify { audioManager.playSequence(listOf("alif", "alif")) }
+        verify { audioManager.playSequence(listOf("alif", "alif", "alif")) }
+    }
+
+    @Test fun `fallback settings review and cache work without optional stores`() = runTest {
+        val vm = createViewModel()
+        vm.onEvent(QaidaReaderEvent.SetSlow(true))
+        vm.onEvent(QaidaReaderEvent.SetTransliteration(false))
+        assertThat(vm.settings.value).isEqualTo(QaidaLearningSettings(false, true))
+        vm.onEvent(QaidaReaderEvent.SetSlow(false))
+        vm.onEvent(QaidaReaderEvent.SetTransliteration(true))
+        assertThat(vm.settings.value).isEqualTo(QaidaLearningSettings())
+        vm.refreshReview(); vm.refreshCacheSize()
+        vm.onEvent(QaidaReaderEvent.RetryAudio)
+        vm.onEvent(QaidaReaderEvent.ClearAudio)
+        vm.onEvent(QaidaReaderEvent.StopAudio)
+        advanceUntilIdle()
+        assertThat(vm.cacheBytes.value).isEqualTo(0L)
+        assertThat(vm.dueCells(1)).isEmpty()
+        assertThat(vm.resumeCell(1)).isNull()
+        assertThat(vm.download.value.ready).isFalse()
+        vm.dueLessons.test { assertThat(awaitItem()).isEmpty() }
+        vm.todayCount.test { assertThat(awaitItem()).isEqualTo(0) }
+    }
+
+    @Test fun `download reports progress failure retry and clear through the existing store`() = runTest {
+        val store = mockk<QaidaLessonAudioStore>(relaxed = true)
+        coEvery { store.sizeBytes() } returns 512L
+        coEvery { store.prepare(any(), any(), any()) } coAnswers {
+            thirdArg<(Int, Int) -> Unit>()(1, 2)
+            awaitCancellation()
+        }
+        val vm = QaidaReaderViewModel(useCases, audioManager, RecordingTelemetry(), store)
+        vm.onEvent(QaidaReaderEvent.SelectLesson(1)); runCurrent()
+        assertThat(vm.download.value).isEqualTo(QaidaDownloadState(loading = true, completed = 1, total = 2))
+        coEvery { store.prepare(any(), true, any()) } throws java.io.IOException("private server detail")
+        vm.onEvent(QaidaReaderEvent.RetryAudio); runCurrent()
+        assertThat(vm.download.value).isEqualTo(QaidaDownloadState(failed = true))
+        assertThat(vm.cacheBytes.value).isEqualTo(512L)
+        coEvery { store.prepare(any(), true, any()) } returns true
+        vm.onEvent(QaidaReaderEvent.RetryAudio); runCurrent()
+        assertThat(vm.download.value).isEqualTo(QaidaDownloadState(ready = true))
+        coEvery { store.sizeBytes() } returns 0L
+        vm.onEvent(QaidaReaderEvent.ClearAudio); runCurrent()
+        coVerify { store.clear() }
+        assertThat(vm.download.value).isEqualTo(QaidaDownloadState())
+        assertThat(vm.cacheBytes.value).isEqualTo(0L)
+    }
+
+    @Test fun `lesson change cancels an in-flight download without showing an error`() = runTest {
+        val store = mockk<QaidaLessonAudioStore>(relaxed = true)
+        var cancelled = false
+        coEvery { store.prepare(any(), any(), any()) } coAnswers {
+            if (firstArg<QaidaLessonContent>().lesson.id == 1) {
+                try { awaitCancellation() } finally { cancelled = true }
+            } else false
+        }
+        val vm = QaidaReaderViewModel(useCases, audioManager, RecordingTelemetry(), store)
+        vm.onEvent(QaidaReaderEvent.SelectLesson(1)); runCurrent()
+        assertThat(vm.download.value.loading).isTrue()
+        vm.onEvent(QaidaReaderEvent.SelectLesson(2)); runCurrent()
+        assertThat(cancelled).isTrue()
+        assertThat(vm.download.value).isEqualTo(QaidaDownloadState())
+    }
+
+    @Test fun `persistent journey receives settings practice listening resume and reset`() = runTest {
+        val journey = mockk<QaidaJourneyStore>(relaxed = true)
+        val preferences = MutableStateFlow(QaidaLearningSettings())
+        val revision = MutableStateFlow(0)
+        every { journey.settings } returns preferences
+        every { journey.revision } returns revision
+        every { journey.updateSettings(any()) } answers { preferences.value = firstArg() }
+        every { journey.dueLessonIds(any()) } returns setOf(1)
+        every { journey.todayCount(any()) } returns 3
+        every { journey.dueCellIds(1, any()) } returns setOf(11)
+        every { journey.resumeCell(1) } returns 12
+        val vm = QaidaReaderViewModel(useCases, audioManager, RecordingTelemetry(), journey = journey)
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { vm.dueLessons.collect() }
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { vm.todayCount.collect() }
+        runCurrent()
+        assertThat(vm.dueLessons.value).containsExactly(1)
+        assertThat(vm.todayCount.value).isEqualTo(3)
+        assertThat(vm.dueCells(1)).containsExactly(11)
+        assertThat(vm.resumeCell(1)).isEqualTo(12)
+        vm.refreshReview(); verify { journey.refresh() }
+        every { journey.todayCount(any()) } returns 4
+        revision.value++; runCurrent()
+        assertThat(vm.todayCount.value).isEqualTo(4)
+        vm.onEvent(QaidaReaderEvent.SetSlow(true))
+        vm.onEvent(QaidaReaderEvent.SetTransliteration(false))
+        assertThat(preferences.value).isEqualTo(QaidaLearningSettings(false, true))
+        vm.onEvent(QaidaReaderEvent.SelectLesson(1)); runCurrent()
+        val token = lessonContent(1).lines.first().cells.first()
+        vm.onEvent(QaidaReaderEvent.CellTapped(token))
+        verify { journey.setResume(1, token.id) }
+        vm.onEvent(QaidaReaderEvent.PractisedCell(token, true)); runCurrent()
+        verify { journey.record(1, token.id, true, any()) }
+        completionsFlow.emit(token.audioKey); runCurrent()
+        verify { journey.recordActivity(token.id, any()) }
+        assertThat(vm.sessionHeard.value).containsExactly(token.id)
+        vm.onEvent(QaidaReaderEvent.SelectLesson(1)); runCurrent()
+        assertThat(vm.sessionHeard.value).containsExactly(token.id)
+        vm.onEvent(QaidaReaderEvent.SelectLesson(2)); runCurrent()
+        assertThat(vm.sessionHeard.value).isEmpty()
+        completionsFlow.emit("unknown"); runCurrent()
+        assertThat(vm.sessionHeard.value).isEmpty()
+        vm.onEvent(QaidaReaderEvent.ResetJourney); runCurrent()
+        coVerify { useCases.resetProgress() }
+        verify { journey.reset() }
+        assertThat(vm.selectedLessonId.value).isNull()
+    }
+
+    @Test fun `missing and empty lines never start playback and reset works without journey store`() = runTest {
+        val vm = createViewModel()
+        vm.onEvent(QaidaReaderEvent.PlayLine(100))
+        every { getLessonContent(1) } returns flowOf(lessonContent(1).let { it.copy(lines = it.lines.map { line -> line.copy(cells = emptyList()) }) })
+        vm.onEvent(QaidaReaderEvent.SelectLesson(1)); runCurrent()
+        vm.onEvent(QaidaReaderEvent.PlayLine(999))
+        vm.onEvent(QaidaReaderEvent.PlayLine(100))
+        verify(exactly = 0) { audioManager.playSequence(any()) }
+        vm.onEvent(QaidaReaderEvent.ResetJourney); runCurrent()
+        coVerify { useCases.resetProgress() }
+        assertThat(vm.selectedLessonId.value).isNull()
     }
 
     // ── Fixtures ─────────────────────────────────────────────────────────────

@@ -55,4 +55,48 @@ class QaidaJourneyStoreTest {
         assertThat(restored.dueLessonIds(Long.MAX_VALUE)).isEmpty()
     }
 
+    @Test fun `review history ignores malformed entries unrelated preferences and future lessons`() {
+        val prefs = context.getSharedPreferences("qaida_journey_v2", Context.MODE_PRIVATE)
+        prefs.edit()
+            .putString("cell_1", "not json")
+            .putInt("cell_2", 42)
+            .putString("cell_3", "{\"lesson\":0,\"due\":1}")
+            .putString("cell_4", "{\"lesson\":2,\"due\":100}")
+            .putString("cell_5", "{\"lesson\":1,\"due\":200}")
+            .putString("cell_invalid", "{\"lesson\":1,\"due\":1}")
+            .putString("cell_6", "{\"lesson\":3}")
+            .putString("other", "{\"lesson\":4,\"due\":1}").commit()
+        assertThat(store.dueLessonIds(100)).containsExactly(1, 2)
+        assertThat(store.dueCellIds(1, 100)).isEmpty()
+        assertThat(store.dueCellIds(2, 100)).containsExactly(4)
+    }
+
+    @Test fun `confidence caps at fourteen days and corrupt history can be practised again`() {
+        val prefs = context.getSharedPreferences("qaida_journey_v2", Context.MODE_PRIVATE)
+        prefs.edit().putString("cell_42", "corrupt").commit()
+        val delays = listOf(1L, 3L, 7L, 14L, 14L)
+        delays.forEach { days ->
+            store.record(4, 42, true, 0)
+            val due = days * 86400000L
+            assertThat(store.dueCellIds(4, due - 1)).isEmpty()
+            assertThat(store.dueCellIds(4, due)).containsExactly(42)
+        }
+        assertThat(QaidaReviewSchedule.delayMillis(-1)).isEqualTo(600000L)
+        assertThat(QaidaReviewSchedule.delayMillis(99)).isEqualTo(14 * 86400000L)
+    }
+
+    @Test fun `resume and refresh publish changes while reset preserves learning settings`() {
+        val initial = store.revision.value
+        store.setResume(4, 0)
+        assertThat(store.resumeCell(4)).isEqualTo(0)
+        assertThat(store.resumeCell(5)).isNull()
+        store.refresh()
+        assertThat(store.revision.value).isEqualTo(initial + 1)
+        store.updateSettings(QaidaLearningSettings(false, true))
+        store.reset()
+        assertThat(store.revision.value).isEqualTo(initial + 2)
+        assertThat(QaidaJourneyStore(context).settings.value).isEqualTo(QaidaLearningSettings(false, true))
+        assertThat(store.resumeCell(4)).isNull()
+    }
+
 }
