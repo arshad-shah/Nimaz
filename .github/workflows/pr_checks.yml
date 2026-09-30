@@ -160,13 +160,17 @@ jobs:
           path: coverage.md
 
       - name: Upload Test Results
+        if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
           name: test-results
-          path: app/build/reports/tests/
+          path: |
+            **/build/reports/tests/
+            **/build/test-results/
 
       - name: Upload Lint Results
+        if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
           name: lint-results
-          path: app/build/reports/lint-results-debug.html
+          path: '**/build/reports/lint-results-*.html'

@@ -89,7 +89,7 @@ class KhatamDetailPortionTest {
 
         khatamUseCases = mockk(relaxed = true)
         quranUseCases = mockk(relaxed = true)
-        getTodaysPortion = mockk(relaxed = true)
+        getTodaysPortion = mockk()
 
         every { khatamUseCases.observeInProgressKhatams() } returns flowOf(emptyList())
         every { khatamUseCases.observeCompletedKhatams() } returns flowOf(emptyList())
@@ -97,6 +97,9 @@ class KhatamDetailPortionTest {
         every { khatamUseCases.observeKhatamStats() } returns flowOf(KhatamStats(0, 0, 0, 0, 0))
         every { khatamUseCases.observeActiveKhatam() } returns flowOf(null)
         every { khatamUseCases.observeKhatamDetail(7) } returns detail
+        // A relaxed Pair<Int, Int> can contain mocked generic values, not verse numbers.
+        coEvery { khatamUseCases.getNextUnreadPosition(7) } returns null
+        every { getTodaysPortion(any(), any()) } returns null
         every { quranUseCases.getSurahList() } returns flowOf(surahs)
         coEvery { quranUseCases.getSurahByNumber(any()) } answers {
             surahs.firstOrNull { it.number == firstArg<Int>() }
@@ -136,7 +139,10 @@ class KhatamDetailPortionTest {
         advanceUntilIdle()
 
         val state = viewModel.detailState.value
-        assertThat(state.khatam?.id).isEqualTo(7)
+        assertThat(telemetry.exceptions).isEmpty()
+        assertThat(state.khatam).isEqualTo(snapshot.khatam)
+        assertThat(state.nextUnreadSurah).isNull()
+        assertThat(state.todaysPortion).isNull()
         assertThat(state.notFound).isFalse()
         assertThat(state.isLoading).isFalse()
     }
