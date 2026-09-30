@@ -68,6 +68,10 @@ class MaterialTextFieldGuardTest {
         "NimazSearchBar.kt",
         // The stepper's editable value — a field inside a +/- control rather than a form field.
         "NimazNumberStepper.kt",
+        // Read-only commentary, not a form field: native selection needs annotated text
+        // and exact UTF-16 ranges. NimazTextField accepts plain editable Strings.
+        // TafseerHighlightableTextGesturesTest verifies Copy exists and SetText does not.
+        "TafseerHighlightableText.kt",
     )
 
     @Test

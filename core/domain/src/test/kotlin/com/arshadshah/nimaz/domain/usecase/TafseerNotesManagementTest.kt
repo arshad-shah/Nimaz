@@ -26,13 +26,14 @@ class TafseerNotesManagementTest {
         assertThat(notes[1].quote).isEqualTo("234567")
         assertThat(notes[1].tafseerId).isEqualTo("maariful_quran_en")
     }
-    @Test fun `deleting highlight note preserves highlight range and colour and supports undo`() = runTest {
+    @Test fun `deleting highlight note removes its record and undo restores the full highlight`() = runTest {
         val item = highlight.toNoteItem(1, 1, "0123456789")
         actions.delete(item)
-        coVerify { repo.updateHighlight(highlight.copy(note = null)) }
-        coVerify(exactly = 0) { repo.deleteHighlight(any()) }
+        coVerify { repo.deleteHighlight(highlight.id) }
+        coVerify(exactly = 0) { repo.updateHighlight(any()) }
+        coVerify(exactly = 0) { repo.deleteNote(any()) }
         actions.restore(item)
-        coVerify { repo.updateHighlight(highlight) }
+        coVerify { repo.restoreHighlight(highlight) }
     }
     @Test fun `reflection undo restores original identity and timestamps`() = runTest {
         val item = reflection.toNoteItem(1, 1)

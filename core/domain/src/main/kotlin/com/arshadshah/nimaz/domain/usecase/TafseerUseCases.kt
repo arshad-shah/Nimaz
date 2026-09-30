@@ -67,12 +67,12 @@ class TafseerNoteActions @Inject constructor(private val repository: TafseerRepo
 
     suspend fun delete(item: TafseerNoteItem) {
         item.reflection?.let { repository.deleteNote(it.id) }
-            ?: item.highlight?.let { repository.updateHighlight(it.copy(note = null)) }
+            ?: item.highlight?.let { repository.deleteHighlight(it.id) }
     }
 
     suspend fun restore(item: TafseerNoteItem) {
         item.reflection?.let { repository.restoreNote(it) }
-            ?: item.highlight?.let { repository.updateHighlight(it) }
+            ?: item.highlight?.let { repository.restoreHighlight(it) }
     }
 }
 

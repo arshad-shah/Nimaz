@@ -8,6 +8,9 @@ import java.io.File
 import kotlinx.coroutines.test.runTest
 import org.json.JSONArray
 import org.json.JSONObject
+import io.mockk.every
+import io.mockk.mockk
+import com.arshadshah.nimaz.feature.content.R
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -87,4 +90,77 @@ class QaidaLessonAudioStoreTest {
         assertThat(QaidaLessonAudioStore.fingerprint(values.reversed())).isEqualTo(fingerprint)
         assertThat(QaidaLessonAudioStore.fingerprint(values.map { Triple(it.first, it.second, it.third + "َ") })).isNotEqualTo(fingerprint)
     }
+    @Test fun `empty content fails before publishing any playable keys`() = runTest {
+        val result = runCatching { store.prepare(content.copy(lines = emptyList())) }
+        assertThat(result.exceptionOrNull()).isInstanceOf(java.io.IOException::class.java)
+        assertThat(result.exceptionOrNull()?.message).isEqualTo("empty_content")
+    }
+
+    @Test fun `refresh without configured server retains a complete verified lesson`() = runTest {
+        cached()
+        assertThat(store.prepare(content, refresh = true)).isTrue()
+        val file = store.resolve(cells.first().audioKey)!!
+        file.delete()
+        assertThat(store.resolve(cells.first().audioKey)).isNull()
+        assertThat(store.prepare(content, refresh = true)).isFalse()
+        assertThat(store.resolve(cells.last().audioKey)).isNull()
+    }
+
+    @Test fun `manifest rejects incompatible versions lesson ids keys hashes and byte counts`() = runTest {
+        val changes: List<(JSONObject) -> Unit> = listOf(
+            { it.put("version", 2) },
+            { it.put("lesson_id", 999) },
+            { it.getJSONArray("clips").getJSONObject(0).put("audio_key", "unknown") },
+            { it.getJSONArray("clips").getJSONObject(0).put("sha256", "INVALID") },
+            { it.getJSONArray("clips").getJSONObject(0).put("bytes", 0) },
+            { it.getJSONArray("clips").getJSONObject(0).put("bytes", -1) },
+        )
+        changes.forEach { change ->
+            cached(change)
+            assertThat(store.prepare(content)).isFalse()
+            assertThat(store.resolve(cells.first().audioKey)).isNull()
+        }
+    }
+
+    @Test fun `same length corruption fails digest validation`() = runTest {
+        cached()
+        val clip = directory.listFiles()!!.first { it.extension == "mp3" }
+        clip.writeBytes(ByteArray(clip.length().toInt()) { 0 })
+        assertThat(store.prepare(content)).isFalse()
+        assertThat(store.resolve(cells.first().audioKey)).isNull()
+    }
+
+    @Test fun `lesson byte budget is enforced even if every individual clip is permitted`() = runTest {
+        val token = cells.first()
+        val large = content.copy(lines = listOf(content.lines.first().copy(
+            cells = (1..9).map { token.copy(id = it, audioKey = "key_$it") },
+        )))
+        val fingerprint = QaidaLessonAudioStore.fingerprint(large.lines.first().cells.map { Triple(it.id, it.audioKey, it.textArabic) })
+        val target = File(root, "1/$fingerprint").apply { mkdirs() }
+        val sha = "a".repeat(64)
+        val clips = JSONArray()
+        large.lines.first().cells.forEach { cell -> clips.put(JSONObject()
+            .put("audio_key", cell.audioKey).put("text_arabic", cell.textArabic)
+            .put("sha256", sha).put("bytes", 2 * 1024 * 1024).put("path", "clips/$sha.mp3")) }
+        File(target, "manifest.json").writeText(JSONObject().put("version", 1).put("lesson_id", 1)
+            .put("content_sha256", fingerprint).put("clips", clips).toString())
+        assertThat(store.prepare(large)).isFalse()
+        assertThat(store.resolve("key_1")).isNull()
+    }
+
+    @Test fun `invalid download endpoints are rejected before fetching remote objects`() = runTest {
+        for (endpoint in listOf(
+            "http://example.com/audio", "https:/audio", "https://user@example.com/audio",
+            "https://example.com/audio?token=value", "https://example.com/audio#fragment",
+        )) {
+            val configuredContext = mockk<Context>()
+            every { configuredContext.filesDir } returns context.filesDir
+            every { configuredContext.getString(R.string.qaida_audio_base_url) } returns endpoint
+            val configured = QaidaLessonAudioStore(configuredContext)
+            val result = runCatching { configured.prepare(content) }
+            assertThat(result.exceptionOrNull()).isInstanceOf(IllegalArgumentException::class.java)
+            assertThat(configured.resolve(cells.first().audioKey)).isNull()
+        }
+    }
+
 }

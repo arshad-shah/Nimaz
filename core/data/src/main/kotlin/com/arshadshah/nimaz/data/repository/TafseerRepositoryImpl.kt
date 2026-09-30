@@ -104,6 +104,15 @@ class TafseerRepositoryImpl @Inject constructor(
         )
     }
 
+    override suspend fun restoreHighlight(highlight: TafseerHighlight) {
+        tafseerUserDao.insertHighlight(TafseerHighlightEntity(
+            id = highlight.id, ayahId = highlight.ayahId, tafseerId = highlight.tafseerId,
+            startOffset = highlight.startOffset, endOffset = highlight.endOffset,
+            color = highlight.color, note = highlight.note,
+            createdAt = highlight.createdAt, updatedAt = highlight.updatedAt,
+        ))
+    }
+
     override suspend fun deleteHighlight(highlightId: Long) {
         tafseerUserDao.deleteHighlightById(highlightId)
     }

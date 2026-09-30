@@ -21,7 +21,7 @@ import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.core.ui.R
 import com.arshadshah.nimaz.domain.model.TafseerHighlight
-import com.arshadshah.nimaz.presentation.theme.AmiriFontFamily
+import com.arshadshah.nimaz.presentation.theme.ArabicTextStyles
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.PlusJakartaSansFontFamily
 
@@ -108,13 +108,25 @@ internal fun styledTafseerText(
     text: String, highlights: List<TafseerHighlight>, size: Float,
 ): AnnotatedString = buildAnnotatedString {
     append(text)
-    val arabic = Regex("[\\p{IsArabic}]+(?:[ \\t،؛؟]+[\\p{IsArabic}]+)*")
+    // Harakat and shadda have Unicode script INHERITED, not ARABIC. Keep attached
+    // marks in the same shaping run as their letters instead of changing font per letter.
+    val arabic = Regex("\\p{IsArabic}[\\p{IsArabic}\\p{M}]*(?:[ \\t،؛؟]+\\p{IsArabic}[\\p{IsArabic}\\p{M}]*)*")
+    val arabicStyle = ArabicTextStyles.quranMedium.let { base ->
+        base.copy(
+            fontSize = (size + 8f).sp,
+            lineHeight = base.lineHeight * ((size + 8f) / base.fontSize.value),
+            textDirection = TextDirection.Content,
+        )
+    }
     for (match in arabic.findAll(text)) {
-        addStyle(SpanStyle(fontFamily = AmiriFontFamily, fontSize = (size + 8f).sp),
-            match.range.first, match.range.last + 1)
+        addStyle(arabicStyle.toSpanStyle(), match.range.first, match.range.last + 1)
     }
     var offset = 0
     text.split('\n').forEach { line ->
+        if (arabic.containsMatchIn(line)) {
+            // Wrapped Arabic lines need room for stacked marks at the actual Arabic size.
+            addStyle(arabicStyle.toParagraphStyle(), offset, offset + line.length)
+        }
         if (line.isNotBlank() && line.length <= 100 &&
             line.none { Character.UnicodeScript.of(it.code) == Character.UnicodeScript.ARABIC } &&
             !line.endsWith('.') && !line.endsWith(',') && !line.startsWith('-')

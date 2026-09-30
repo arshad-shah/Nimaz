@@ -31,6 +31,7 @@ interface TafseerRepository {
 
     suspend fun updateHighlight(highlight: TafseerHighlight)
     suspend fun deleteHighlight(highlightId: Long)
+    suspend fun restoreHighlight(highlight: TafseerHighlight)
 
     // Notes
     fun getAllNotes(): Flow<List<TafseerNote>>

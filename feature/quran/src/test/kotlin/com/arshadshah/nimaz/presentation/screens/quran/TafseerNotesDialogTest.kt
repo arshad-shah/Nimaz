@@ -25,7 +25,10 @@ class TafseerNotesDialogTest {
     private val state = MutableStateFlow(TafseerChaptersUiState(isLoading = false, notes = listOf(note)))
     private val vm = mockk<TafseerChaptersViewModel>(relaxed = true) {
         every { this@mockk.state } returns this@TafseerNotesDialogTest.state
-        every { edit(any()) } answers { state.value = state.value.copy(editing = firstArg()) }
+        every { edit(any()) } answers {
+            this@TafseerNotesDialogTest.state.value =
+                this@TafseerNotesDialogTest.state.value.copy(editing = firstArg())
+        }
     }
     private fun render() {
         composeRule.setThemedContent {
