@@ -126,7 +126,18 @@ jobs:
 
       # Fail early on the module whose locked coverage is being repaired.
       - name: Content tests and coverage
+        id: content
         run: ./gradlew :feature:content:testDebugUnitTest :feature:content:coverageFloor
+
+      - name: Upload Content Reports
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: content-reports
+          path: |
+            feature/content/build/reports/tests/
+            feature/content/build/test-results/
+            feature/content/build/reports/jacoco/
 
       - name: Run Tests and Lint
         run: bundle exec fastlane android test
@@ -146,18 +157,18 @@ jobs:
       # both times it read as "coverage is broken" rather than "this run was superseded".
       # A superseded run should leave the last real number standing.
       - name: Coverage report
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && steps.content.outcome == 'success' }}
         run: ./gradlew :app:jacocoTestReport
 
       - name: Summarise coverage
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && steps.content.outcome == 'success' }}
         run: |
           python3 scripts/coverage_summary.py \
             app/build/reports/jacoco/jacocoTestReport.xml > coverage.md
           cat coverage.md >> "$GITHUB_STEP_SUMMARY"
 
       - name: Comment coverage on the PR
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && steps.content.outcome == 'success' }}
         uses: marocchino/sticky-pull-request-comment@v2
         with:
           header: coverage

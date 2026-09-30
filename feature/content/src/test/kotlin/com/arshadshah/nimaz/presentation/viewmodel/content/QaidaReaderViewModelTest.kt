@@ -270,8 +270,8 @@ class QaidaReaderViewModelTest {
         vm.onEvent(QaidaReaderEvent.PractisedCell(cell(22, 2, "baa"), false))
         vm.onEvent(QaidaReaderEvent.PractisedCell(selected, false))
         advanceUntilIdle()
-        coVerify(exactly = 1) { markCellHeard.markPractised(1, 11) }
-        coVerify(exactly = 0) { markCellHeard.markPractised(2, any()) }
+        coVerify(exactly = 1) { markCellHeard.markPractised(1, 11, any()) }
+        coVerify(exactly = 0) { markCellHeard.markPractised(2, any(), any()) }
         vm.onEvent(QaidaReaderEvent.RepeatCell(selected, 0))
         vm.onEvent(QaidaReaderEvent.RepeatCell(selected, 2))
         vm.onEvent(QaidaReaderEvent.RepeatCell(selected, 99))
